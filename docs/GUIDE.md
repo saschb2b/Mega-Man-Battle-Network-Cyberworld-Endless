@@ -1,3 +1,11 @@
+---
+type: Player Guide
+title: "The player's guide"
+description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
+tags: [player]
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+---
+
 # The player's guide
 
 The [README](../README.md) shows the game on one page. This guide holds the
@@ -1145,7 +1153,7 @@ G-Sync), needs neither.
 The music and sounds are BN6's own, played by its own sound engine as a
 GBA plays them: in a run by the game itself, and on the title and the
 screens around it by the same engine's rules, followed note for note
-(docs/EMULATION.md, The engine's own sound). The Legacy Collection's are not: it plays recordings from
+([The engine's own sound](engine/emulation/engine-sound.md)). The Legacy Collection's are not: it plays recordings from
 the soundtrack CDs in their place, mixed its own way, BN6's more muffled
 than the cartridge (The Rockman EXE Zone's wiki). So the same song can
 sound brighter here. BN6 mixes its music 10512 times a second, and what
@@ -1308,10 +1316,10 @@ tag such as `v1.0.0` publishes a release with all three archives.
 tests, `build.py atlas` draws every area's layers and `build.py tour` has the
 game show every room of them. In the game, Select+R opens a dev menu (no
 random battles, can't die, one-hit enemies, speed, skip to the next layer or
-guardian). See [docs/DEVTOOLS.md](DEVTOOLS.md) for the tools,
+guardian). See [Dev tools](devtools/overview.md) for the tools,
 [AGENTS.md](../AGENTS.md) for the development workflow,
-[docs/LEVEL_DESIGN.md](LEVEL_DESIGN.md) for how layers are laid out and
-[docs/ROM_DATA.md](ROM_DATA.md) for where the ROM data comes from.
+[Level design](world/level-design/overview.md) for how layers are laid out and
+[ROM data](rom/overview.md) for where the ROM data comes from.
 
 ## Follow updates
 

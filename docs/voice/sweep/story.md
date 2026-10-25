@@ -1,10 +1,17 @@
+---
+type: Review Log
+title: "Voice sweep: the story and its people"
+description: "Log of the 19 October 2026 voice sweep of the story and its people (guardians, super bosses, Chaud's duel, story beats, title, PET text): 379 lines read, 8 cut, 31 noted."
+tags: [voice]
+generated: { by: claude-code/unrecorded, at: 2026-10-19T16:49:09Z }
+---
 # Voice sweep: the story and its people
 
 Group: the story and its people (`src/layer/guardian_lines.c`,
 `src/layer/super_lines.c`, `src/director/duel_words.c`,
 `src/director/story_words.c`, `src/scenes/title_lines.c`,
 `src/director/pet_text.c`). Swept 19 October 2026 by the rules of
-[docs/VOICE.md](../../VOICE.md), What nobody says, after the owner's
+[Voice](../rules.md), What nobody says, after the owner's
 direction of that day: a line that does not need to be said is cut, not
 rewritten. Ids are the catalog's as they were before the sweep
 (`docs/voice/catalog.json` at 93568943); a cut inside a function moves the

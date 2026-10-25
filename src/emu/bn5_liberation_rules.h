@@ -1,5 +1,5 @@
 /* Battle Network 5: Team Colonel (USA): its Liberation Missions' rules a
- * panel follows as it is liberated (docs/LIBERATION.md): a liberation
+ * panel follows as it is liberated (docs/game/liberation/): a liberation
  * battle, the battle a panel's dark chooses, and a BonusPanel. Split from
  * bn5_liberation.h, which includes it. */
 #ifndef CW_BN5_LIBERATION_RULES_H
@@ -19,7 +19,7 @@
 #define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a battle of type 1 (no liberation battle's) from its eleventh turn: */
 #define BN5_LIB_DOUBLE_HIT   0x0800C7CCu /* ... an object's hits this frame summed (its collision data's five) and doubled */
 
-/* A BonusPanel (docs/LIBERATION.md, BonusPanels as BN5's; traced in play, a panel of mission 1 made one):
+/* A BonusPanel (docs/game/liberation/bn5/bonus-panels.md; traced in play, a panel of mission 1 made one):
  * liberated by the Liberation command, no battle, the Navi's action not spent; its roulette on the
  * phase banner's band, stopped by A, the slot stopped on given */
 #define BN5_LIB_PTR_BONUS    8           /* the record's BonusPanels: 24 bytes each (x, y, u16 the frames a slot, five */
@@ -63,7 +63,7 @@
                                          /* ... 2 frames white, then 14/16 down by 2/16 a frame; the second 26 frames after */
                                          /* ... the first, the third 10 after that; the band opens 30 after the third */
 
-/* A liberation battle's choice (docs/LIBERATION.md, Stage 2): the dark round the faced panel weighed by where the Navi
+/* A liberation battle's choice (docs/game/liberation/building/stage-2-battle.md): the dark round the faced panel weighed by where the Navi
  * stands, its level choosing the battle, and so the battle's field (its record's +6, bn6_panels.h's BN6_SIDES_*) */
 #define BN5_LIB_LEVEL        0x08051D9Eu /* r0 the faced panel's id, r1 the Navi's: the eight round it each add their weight (BN5_LIB_WEIGHTS) */
                                          /* ... where BN5_LIB_DARK_COUNTS has their kind, into BN5_LIB_STATE +0x0D: 0 none, 1 to 9, 2 to 19, */

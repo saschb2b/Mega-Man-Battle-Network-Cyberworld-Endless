@@ -20,7 +20,7 @@ static bool made;
 int soulkinds_bn5(int bn6_kind) {
 	/* (BN6's 0-10 by bn6f's CHIP_ELEM_*: Fire, Aqua, Elec, Wood, Plus, Sword, Cursor, Obstacle, Wind, Break, none;
 	 * BN5's 0-12, BN5_CHIP_KIND: Fire, Aqua, Elec, Wood, Recovery, Plus, Sword, Invisible, Cursor, Obstacle, Wind,
-	 * Break, none; read from both games' records of the chips both have, docs/ROM_DATA.md) */
+	 * Break, none; read from both games' records of the chips both have, docs/rom/) */
 	static const uint8_t as5[] = { 0, 1, 2, 3, 5, 6, 8, 9, 10, 11, SOULKIND_NONE };
 	return bn6_kind >= 0 && bn6_kind < (int)sizeof as5 ? as5[bn6_kind] : SOULKIND_NONE;
 }

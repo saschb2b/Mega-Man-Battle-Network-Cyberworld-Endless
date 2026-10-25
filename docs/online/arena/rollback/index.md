@@ -1,0 +1,12 @@
+# Rollback
+
+* [Rollback](overview.md) - Rollback in every NetBattle (issue #128): the other player's missing keys guessed as his last held, the pair's snapshot kept, frames run again after a wrong guess, the input delay down to 2 frames.
+* [The battle (arena.c)](battle.md) - How `arena.c` runs a battle with rollback: each frame at its tick on the other's last keys held, a ring of snapshots (`ArenaPairSnap`), a wrong guess rolled back and rerun, hashes settled on known keys.
+* [Measured](measured.md) - Rollback measured through a local relay against the smoothed delay (delay 2 against 8 to 11, no tick past a 60th, every hash agreed) and on the Nova, where a 7-frame rollback fits a tick.
+* [The measurement: --dev rollbench](rollbench.md) - `--dev rollbench` (`src/dev/rollbench.c`): what a rollback costs where the game runs, the pair's 797 KB snapshot, frame and rollback times here and on the Nova, the window a tick holds, whole battles rolled back exactly.
+* [Quicker on the wire](quicker-on-the-wire.md) - Issue #167's netcode quick wins: BN6's link battle's own three frames of input delay measured, the delay's floor at 1, no Nagle or worker sleep, sounds through a rollback, the time sync's waits split evenly.
+* [What a rollback puts back](what-it-puts-back.md) - Everything a rollback restores, table by table: both cores' mGBA states, registers and SIO words outside them, the cable and its nodes, the pair's scheduling, carried Souls, BN5's hook slots, keys, the sound ring.
+* [The window and the delay, per system](window-and-delay.md) - How the rollback window and input delay are set per system: `arena_window_for` from the pair frame's cost kept in `arena.ini`, the latency asked for less the window (`arena_ask_ms`), the server's `delay_for`, overrides.
+* [The New 3DS](new-3ds.md) - Why the New 3DS builds the Arena but offers no NetBattle: a pair frame takes 25.8 ms on one ARM11 core; the shared ROM copy that fits memory, and the two-core cable driver still needed.
+* [In the browser](browser.md) - The Arena in the browser build since 20 October 2026: the pair run without threads under `emscripten_set_main_loop`, its window from the page's frame cost, battles against browsers and a native game, the ping fix, watching.
+* [A cheaper pair frame](cheaper-pair-frame.md) - How the pair frame got cheap enough for rollback: whole run loops under mGBA's lockstep credits (`arena_pair_step`) and both cores halted at BN6's frame wait, the Nova's frame from 3.7 to 1.05 ms.

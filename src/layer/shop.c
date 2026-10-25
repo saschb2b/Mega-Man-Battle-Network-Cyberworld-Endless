@@ -1,5 +1,5 @@
 /* Shops, the layers' and home's (bn6f shop data; addresses in bn6.h and
- * docs/ROM_DATA.md).
+ * docs/rom/).
  *
  * Each shop has a 16-byte descriptor (currency, keeper's text, offset into
  * the shop data, entries); the shop data itself lives in EWRAM, copied from
@@ -45,7 +45,7 @@ static void read_item(uint32_t a, ShopItem *it) {
  * him beside her chat's GirlNavi (0x45) and her sprite on the map (a
  * playtester asked twice, sessions 1 and 2 of a first-time player). One
  * literal byte of the keeper's compressed text, which its other six faces
- * copy, in the core's copy of the ROM (docs/ROM_DATA.md). */
+ * copy, in the core's copy of the ROM (docs/rom/). */
 static void vendor_face(void) {
 	uint32_t o = BN6_VENDOR_FACE - 0x08000000u;
 	if (R.data[o - 2] == 0xF5 && R.data[o - 1] == 0x00 && R.data[o] == 0x42) emu_write8(BN6_VENDOR_FACE, FACE_TECH);
@@ -331,7 +331,7 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	hp.price = (uint16_t)(8 + 4 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 	out[n++] = hp;
 	n = add_subs(out, n, depth);
-	/* (threat 3, docs/META.md: half again for everything) */
+	/* (threat 3, docs/game/meta/: half again for everything) */
 	if (run.threat >= 3)
 		for (int i = 0; i < n; ++i) out[i].price = (uint16_t)(out[i].price + out[i].price / 2);
 	return n;
@@ -390,7 +390,7 @@ static uint16_t program_price(int id, int base, int depth) {
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	/* first, two at most of the programs MegaMan has had in earlier runs
-	 * that the act may offer (docs/NAVICUST.md, 7: the draft finds, the
+	 * that the act may offer (docs/game/navicust.md, 7: the draft finds, the
 	 * vendor keeps), but those he has now (run.programs, kept with the
 	 * run as the layer is made) */
 	int found[64], nfound = 0;
@@ -416,7 +416,7 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	for (uint32_t a = BN6_SHOP_INIT; a < end && noffer < (int)(sizeof offer / sizeof *offer); a += 8) {
 		ShopItem it;
 		read_item(a, &it);
-		/* (the NaviCust's pool and its tiers, docs/NAVICUST.md: HP+400 at
+		/* (the NaviCust's pool and its tiers, docs/game/navicust.md: HP+400 at
 		 * 2300 zenny in act 2 beside the dealer's 20-HP HPMemory at 1200;
 		 * SneakRun judged the game's battles, not the engine's) */
 		if (it.kind != 3 || !navicust_offerable(it.id / 4, depth)) continue;
@@ -434,7 +434,7 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	return n;
 }
 
-/* ---- home's (docs/HOME.md, piece 6) ---- */
+/* ---- home's (docs/world/home/home-shop.md) ---- */
 
 int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	/* the keys the act ahead's locks want, then the energy and the rest of

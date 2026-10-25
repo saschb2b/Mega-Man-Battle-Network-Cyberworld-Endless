@@ -1,4 +1,4 @@
-/* A liberation battle's field, as BN5 picks it (docs/LIBERATION.md, Stage
+/* A liberation battle's field, as BN5 picks it (docs/game/liberation/building/stage-2-battle.md, Stage
  * 2): the dark round the faced panel, weighed by where MegaMan stands, sets
  * a level, and the level whose each column is: MegaMan's four, the usual
  * three, his two, or Surrounded, foes on both sides of him and L or R to

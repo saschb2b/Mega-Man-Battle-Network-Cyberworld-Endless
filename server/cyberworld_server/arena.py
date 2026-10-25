@@ -45,7 +45,7 @@ def delay_for(latency_a, latency_b):
     """Frames of input delay fitted to the pair (issue #128): the lockstep's
     frame, then the longer of the two latencies the games report: each its
     round trip with its jitter, less what its rollback window covers but a
-    frame (protocol v8; docs/ONLINE_ARENA.md, Smoothed delay and Rollback).
+    frame (protocol v8; docs/online/arena/smoothed-delay.md and Rollback).
     A key goes through the server, half a round trip of each game's; the
     games' time sync holds each one's keys' lag at its own round trip, so
     the delay covers the longer of the two, and a game that rolls back W
@@ -97,7 +97,7 @@ class Arena:
         self.next = 1
         # the cable's first of the last battle each pair of players started
         # (v13): a rematch keeps the sides, so that both games go into it
-        # from the pair they kept (docs/ONLINE_ARENA.md, A rematch in a second)
+        # from the pair they kept (docs/online/arena/from-square/rematch-in-a-second.md)
         self.sides = {}
 
     def send(self, player_id, match, stage, side=0, delay=0):

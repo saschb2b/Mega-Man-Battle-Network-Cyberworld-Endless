@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """xchiprecipe.py [--check] [--report] [--unit NAME ...]: the code of BN5's chips moved into BN6's battle engine, as recipes
-made from the two ROMs (issue #82's C3; docs/MULTIROM.md, The chips' code; docs/DEVTOOLS.md, The chip recipe generator).
+made from the two ROMs (issue #82's C3; docs/multirom/chips-code.md; docs/devtools/chip-recipe-generator.md).
 
 A chip of BN5's runs by its record's family (its attack family's routine, the CurAction its user takes) or, for a support or
 a Navi chip, by a routine its family calls by its subfamily. Where BN6 has no code of a chip's, this moves BN5's: a unit is
@@ -40,7 +40,7 @@ OUT_PAS = os.path.join(ROOT, 'src', 'core', 'xchips_pas.c')
 WORK = os.path.join(ROOT, '.build', 'xchiprecipe')
 REGISTRY = os.path.join(ROOT, 'src', 'core', 'xchips_registry.c')
 
-# ---- each game's chip tables (src/emu/bn5.h, bn6_chips.h; docs/ROM_DATA.md, The chips' code) ----
+# ---- each game's chip tables (src/emu/bn5.h, bn6_chips.h; docs/rom/chips-code.md, The chips' code) ----
 
 BN5_FAMILY_TABLE, BN5_FAMILY_COUNT = 0x080EB514, 73           # its attack families 0x10-0x58 (RunAIAttack's, 0x0801857A)
 BN5_SUPPORT_TABLE, BN5_NAVI_TABLE = 0x080297BC, 0x080298C8     # its support and Navi chips' routines by subfamily (0x080EC450, 0x080E1AC0's)
@@ -116,7 +116,7 @@ FORCE_MOVED = {
 # the battle's type not 1, 6, 7 or 9, its settings without 0x200000, and either the link's state 0x0200AD04 set (written
 # only by the link routines with what the cable answered, 0x0803F4F8) or its settings' bit 8 with event flag 0x1722 (the
 # Beast Link Gate). No run's battle is one (no link, the director sets neither); BN5 sets its own bit in one place too,
-# 0x0802D594 (from 0x08006D2A), where the battle's type is not 1 and MegaMan's +0x2A is 1 or more (docs/MULTIROM.md,
+# 0x0802D594 (from 0x08006D2A), where the battle's type is not 1 and MegaMan's +0x2A is 1 or more (docs/multirom/chips-code.md,
 # The chips' code)
 STUB_ZERO = 0                             # (XC_STUBS + 0: movs r0,#0; mov pc,lr)
 STUBS = {
@@ -265,7 +265,7 @@ TABLE_PANELS = {
     0x080CEEE0: (0x080CEEB8, 1, 0, 4),     # the seeds' panels by kind (0x080CEE8A: r2, on as r5): ice, sea, grass, lava
     0x080E2CBC: (0x080E2A34, 20, 0, 20),   # the panel changer's kinds (the fourth kind's 0x1F, by its +4): ElemRage's 0xB plain
 }
-# BN5's panel types BN6 has none of: its 5 the magnet panel (MagPanl's, its flags 0x10210: docs/ROM_DATA.md, Battlefields;
+# BN5's panel types BN6 has none of: its 5 the magnet panel (MagPanl's, its flags 0x10210: docs/rom/battle.md, Battlefields;
 # ElemRage's Elec), which xpanels.c brings in no more than BN6 has it. A table's row of it left as BN5's where no moved unit
 # reads that row (TABLE_PANELS: the panel changer's kind 4, MagPanl's alone), or given ABSENT_PANEL where a moved unit
 # compares a panel's type with it (PANEL_LOOKUPS)
@@ -309,7 +309,7 @@ FLASH_NUMBERS = {
 }
 
 # Object types BN6's own serves though its code is not BN5's to its depth: the engine's objects every attack of both games
-# spawns, their differences the engine's (each audited; docs/ROM_DATA.md, The chips' code)
+# spawns, their differences the engine's (each audited; docs/rom/chips-code.md, The chips' code)
 TYPE_AUDITS = {
     (3, 0x03): "the engine's hit area (an attack's damage on a panel for its frames; spawned by BN5 0x080C4EAE, BN6 0x080C6C16): "
                "the same states, its collision data's hit word read at each game's own place (BN5 +0x68 at 0x080C4E42, BN6 +0x70 "
@@ -398,7 +398,7 @@ UNITS = (
     ('support', 0x3B, 'DarkInvs'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
-# chips' differential's finding where a spec ran it (docs/MULTIROM.md, The chips' code: what remains)
+# chips' differential's finding where a spec ran it (docs/multirom/chips-code.md: what remains)
 CANDIDATES = ()
 
 
@@ -1211,7 +1211,7 @@ def chip_panels(u):
 # The engine's hit area's spawners (r7: its hit's words, a byte each: +0x60, +0x64, +0x68 the hit's effect, +0x6C its
 # parameter, the effect and parameter set into the hit's collision data +0x12, +0x13 by 0x080172CE, BN6 0x0801A4D0)
 HIT_SPAWNERS = (0x080C4E72, 0x080C4EAE)
-# The hit effects that change a stat of the struck, each game its own rule (docs/ROM_DATA.md): 0x18 and 0x19, BN5's
+# The hit effects that change a stat of the struck, each game its own rule (docs/rom/): 0x18 and 0x19, BN5's
 # 0x08011036 (a Navi's NaviStats +0x18 and +0x19, its bugs: the parameter's low nibble added where its 0x10 is set,
 # taken away where its 0x20 is, else raised to where lower) and nothing for a virus; BN6's 0x080139F6 (the Navi's stat
 # plus the parameter, at most 7) and 0x08013B20 (0x18 on a virus: its AI data +0x12 plus the parameter, at most 7, from
@@ -1221,7 +1221,7 @@ HIT_STATS = (0x18, 0x19)
 
 def chip_hit_stats(u):
     """the hit words a unit's code gives the hit area: a stat effect's parameter in BN6's terms (BN5's add as the amount;
-    its raise-to as 0, a virus untouched as BN5 leaves it, a Navi's stat no longer raised: docs/MULTIROM.md; its subtract a
+    its raise-to as 0, a virus untouched as BN5 leaves it, a Navi's stat no longer raised: docs/multirom/; its subtract a
     decision)"""
     f = u.f
     for w in f.walks.values():
@@ -1878,7 +1878,7 @@ def c_unit(u, slot):
 
 HEADER_C = '''/* xchips_bn5.c: BN5's chips' code as units for BN6's battle engine, written by tools/xchiprecipe.py from the two ROMs
  * (python3 tools/xchiprecipe.py; --check says whether this is what it writes). Do not edit: change the generator (or
- * tools/bn5_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/MULTIROM.md, The chips' code):
+ * tools/bn5_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/multirom/chips-code.md):
  * addresses in BN5 Team Colonel (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies
  * from the player's ROM; nothing of either game's. The units are the generator's, whole (no decision open), in install
  * order; src/emu/xchips_code.c installs them and src/core/xchips_moved.c names the chips that run them. */
@@ -1934,7 +1934,7 @@ BN5_PA_LIST, BN5_PA_LIST_REF = 0x08028020, 0x08025260   # BN5's Custom screen's 
 PA_KIND_SAME, PA_KIND_IDS = 0, 4                       # a recipe's kind: n of one chip, codes in a row (0x080295C8); these ids (0x0802961A)
 # Recipes of BN5's that BN6's list holds but its codes, or a recipe of BN6's before it, never let form (kept: BN5's recipe whole,
 # which a deck of BN5's codes would form; they stay unformed, BN6's codes and recipes first: the decision of issue #82's last
-# integration round, docs/MULTIROM.md)
+# integration round, docs/multirom/)
 PA_UNFORMED = {
     324: "three Vulcan2 of codes in a row, BN6's Vulcan2 D, F and L (BN6's record), none three in a row",
     325: "three Vulcan3, BN6's A, G and R, none three in a row",

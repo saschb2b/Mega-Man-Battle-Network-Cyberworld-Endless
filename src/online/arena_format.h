@@ -1,4 +1,4 @@
-/* The MegaMan a NetBattle from the Net Square carries (docs/ONLINE_ARENA.md,
+/* The MegaMan a NetBattle from the Net Square carries (docs/online/arena/from-square/one-rule.md,
  * The folder). Every NetBattle is fought by full rules since protocol v9
  * (issue #131): both games hold the full NetPass (netpass.h), so BN5's
  * chips and Souls go in both pair cores (arena_pair.h). The player picks

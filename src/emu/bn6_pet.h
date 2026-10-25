@@ -1,11 +1,11 @@
 /* The PET in BN6 Cybeast Gregar (USA), part of bn6.h's addresses (it
  * includes this): its menu, the words KeyItem and E-Mail read, and the
  * state its screens share, each screen's fields in it. Names follow the
- * bn6f disassembly; see docs/ROM_DATA.md. */
+ * bn6f disassembly; see docs/rom/. */
 #ifndef CW_BN6_PET_H
 #define CW_BN6_PET_H
 
-/* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
+/* The PET menu (docs/rom/pet-and-second-screen.md, the PET): ePETMenuData, +0 its state, +4
  * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the entry the engine's
  * hook on its input took (6 Comm, the run's Options; 7 Save); the state
  * table's pointer to its input handler, and that handler; the grey's
@@ -20,7 +20,7 @@
 #define BN6_PET_INPUT         0x08120B91u /* that handler (Thumb) */
 #define BN6_PET_GREY_SAVE     0x08120F26u /* the grey's store to Save's colour */
 #define BN6_PET_GREY_COMM     0x08120F2Au /* ... and to Comm's */
-/* The menu's labels (docs/ROM_DATA.md, the PET menu's labels): their
+/* The menu's labels (docs/rom/pet-and-second-screen.md, the PET menu's labels): their
  * tiles, uncompressed, and the PET's load list's entry that copies them
  * to VRAM (source, destination, size: bn6f off_811ECB4's second); the
  * table of each entry's label, 9 x 2 tile entries each (bn6f
@@ -43,7 +43,7 @@
 #define BN6_PET_ENTRY_COMM    6           /* the menu's entries as BN6_PET_CURSOR counts them: Comm, the run's Options */
 #define BN6_PET_ENTRY_SAVE    7           /* ... Save */
 #define BN6_PET_ENTRY_STATUS  8           /* ... BN6_PET_LABEL_MAPS' ninth, Status: MegaMan's row for another Navi */
-/* The KeyItem screen's words (docs/ROM_DATA.md, the PET): the names'
+/* The KeyItem screen's words (docs/rom/pet-and-second-screen.md, the PET): the names'
  * archive (uncompressed, an entry per id) and the literals that point at
  * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the
  * descriptions' (LZ77) and the literal the screen runs them through */
@@ -51,7 +51,7 @@
 #define BN6_KEY_NAMES_PTRS    { 0x08042034u, 0x0804761Cu, 0x081265FCu, 0x0812A870u } /* the literals that point at it: the KeyItem screen's, the text scripts', the shop's, SubChip's */
 #define BN6_KEY_DESCS         0x0873BD88u /* their descriptions' archive (LZ77) */
 #define BN6_KEY_DESC_PTR      0x0812A9C4u /* the literal the screen runs them through */
-/* The E-Mail screen's (docs/ROM_DATA.md, the PET): senders (script 2n) and
+/* The E-Mail screen's (docs/rom/pet-and-second-screen.md, the PET): senders (script 2n) and
  * subjects (2n + 1), and bodies (n), both LZ77, each read through a literal
  * holding its unpacked buffer; a row of 4 bytes a mail (its icon, bit 7 Lan's
  * HP, its places in the sorts); the list of mail ids, newest first, and its

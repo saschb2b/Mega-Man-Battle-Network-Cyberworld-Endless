@@ -34,7 +34,8 @@ def main():
     page = os.path.join(ROOT, 'docs', 'releases', tag + '.md')
     if os.path.exists(page):
         with open(page, encoding='utf-8') as f:
-            print(at_tag(f.read().strip(), tag))
+            # the notes' frontmatter is the knowledge base's (docs/index.md), not the release's
+            print(at_tag(re.sub(r'\A---\n.*?\n---\n', '', f.read(), flags=re.S).strip(), tag))
         return
     with open(os.path.join(ROOT, 'CHANGELOG.md'), encoding='utf-8') as f:
         text = f.read()

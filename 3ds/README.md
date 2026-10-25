@@ -117,7 +117,7 @@ What differs from the other builds:
   they filled the heap in long runs. An area a run comes back to is
   learned again, a few seconds more on that layer's making (`log.txt`:
   "area N learned again"). What play takes, and what a long run leaves,
-  is measured in docs/EMULATION.md, The 3DS's memory. mGBA draws 32-bit
+  is measured in docs/engine/emulation/3ds-memory.md. mGBA draws 32-bit
   pictures as on every other target.
 - **The picture** (`src/core/present_3ds.c`): the software renderer draws a
   240 x 160 canvas into memory the GPU reads; the GPU's copy engine moves it
@@ -144,7 +144,7 @@ What differs from the other builds:
   system) and puts mGBA's own threads on the main core. The emulation
   alone took about 16 ms of a 16.7 ms frame on the 804 MHz ARM11; with
   its picture, on one core, 20. Half of that was BN6 waiting for VBlank
-  in a loop, which a hook now halts the CPU through (docs/EMULATION.md,
+  in a loop, which a hook now halts the CPU through (docs/engine/emulation/time.md,
   The core's time): 11 ms a frame now. With the core on its own thread
   the present waits for the screen's refresh, which paces the frames
   evenly (`C3D_FRAME_SYNCDRAW`); on the main core, as where the third
@@ -158,7 +158,7 @@ What differs from the other builds:
   the NetPass says why the ring stays closed. The Arena's code is built
   (its two cores share one ROM copy, 16 MB of the heap), so `--dev
   rollbench` and `--dev arena` measure it on the device
-  (docs/ONLINE_ARENA.md, The New 3DS).
+  (docs/online/arena/rollback/new-3ds.md).
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.

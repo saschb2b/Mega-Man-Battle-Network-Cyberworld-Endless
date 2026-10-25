@@ -1,4 +1,4 @@
-/* The net's rumors (docs/META.md, Rumors): what a bystander navi whispers,
+/* The net's rumors (docs/game/meta/rumors.md): what a bystander navi whispers,
  * where a layer has one to pass on. Every one is true of this game. */
 #ifndef CW_RUMOR_LINES_H
 #define CW_RUMOR_LINES_H

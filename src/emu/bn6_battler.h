@@ -3,8 +3,8 @@
  * data it holds, the battle mode in which two of them fight a Battler's
  * pair on their own, and the five Battler Mr.Progs' series of records,
  * which a run's Battler Mr.Prog fights by BN6's own code
- * (src/director/director_battler.c; docs/LEVEL_DESIGN.md, The Virus
- * Battler; docs/ROM_DATA.md, The Virus Battler; docs/SOURCES.md). */
+ * (src/director/director_battler.c; docs/world/level-design/virus-battler.md, The Virus
+ * Battler; docs/rom/virus-battler.md, The Virus Battler; docs/research/sources.md). */
 #ifndef CW_BN6_BATTLER_H
 #define CW_BN6_BATTLER_H
 

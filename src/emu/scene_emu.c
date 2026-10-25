@@ -63,7 +63,7 @@ static void enter(void) {
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
 	/* (other games' virus families in BN6's battle engine first: the ROM
-	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
+	 * copy's patches, the same at every boot; docs/multirom/) */
 	xinstall_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
 		dev.xnavicontrol ? XNAVI_CONTROL : dev.nonavis ? XNAVI_NONE : XNAVI_BN5);
 #ifdef __3DS__
@@ -100,7 +100,7 @@ static void leave(void) {
 
 static uint32_t frame_keys(void) {
 	uint32_t keys = autopilot_on() ? autopilot_keys() : keys_from_buttons();
-	/* (in the Net Square the run's own keys rest: docs/ONLINE.md) */
+	/* (in the Net Square the run's own keys rest: docs/online/) */
 	if (online_visit_away()) return online_visit_keys(keys);
 	return director_keys(pet_keys(devtools_keys(online_visit_keys(keys))));
 }
@@ -184,7 +184,7 @@ static void update(void) {
 	if (revealed || director_arrived()) ++revealed;
 }
 
-/* The town's hour on its picture (docs/HOME.md, piece 8): each colour
+/* The town's hour on its picture (docs/world/home/time-of-day.md): each colour
  * channel of the map's layers and of the sprites over it times the hour's
  * (in 256ths: afternoon a touch warm, evening orange, night a dim blue).
  * mGBA's top byte names a pixel's layer: a background's has 0x08 and its
@@ -223,7 +223,7 @@ static void draw(void) {
 	bool box = false;
 	int hour = online_visit_away() ? 0 : director_town_tint(&box);
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
-	/* (a liberation's dark panels, docs/LIBERATION.md) */
+	/* (a liberation's dark panels, docs/game/liberation/) */
 	director_tint_board(px);
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];

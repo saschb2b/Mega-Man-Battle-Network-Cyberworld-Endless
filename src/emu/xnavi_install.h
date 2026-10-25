@@ -1,5 +1,5 @@
-/* Navis moved into BN6's own battle engine (issue #82; docs/MULTIROM.md,
- * Transplanted Navis; docs/EMULATION.md, the free space): a Navi's own
+/* Navis moved into BN6's own battle engine (issue #82; docs/multirom/navis.md,
+ * Transplanted Navis; docs/engine/emulation/memory.md, the free space): a Navi's own
  * code copied from its game's ROM by the families' code mover
  * (xvirus_move.h), its state table laid out BN6's way, its entries in
  * BN6's Navi tables grown for them (xnavi_room.h), its ids, names, reward

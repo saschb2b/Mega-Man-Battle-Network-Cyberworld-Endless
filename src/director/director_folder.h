@@ -21,7 +21,7 @@ void dev_folder(void);
 /* The pack's ids: BN6's pack holds 0-319 (eToolkit +0x4C, 12 bytes an id;
  * past it lie the key items' counts: a BblStar2 bought once read as no
  * change), its extension 320-511 (BN6_PACK_EXT, which the engine points
- * BN6's pack routines at: docs/EMULATION.md, src/emu/xchips_install.c). */
+ * BN6's pack routines at: docs/engine/emulation/, src/emu/xchips_install.c). */
 #define PACK_CHIPS 512
 /* Chip `id`'s pack entry, a bus address (12 bytes: a count per code of its
  * record's four, then four u16 order stamps), 0 where the pack cannot be

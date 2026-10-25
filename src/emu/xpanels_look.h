@@ -12,7 +12,7 @@
 #include "emu.h"
 
 /* Where it all goes, at fixed addresses: the plan's FREE_PANELS
- * (free_space.h; docs/EMULATION.md) */
+ * (free_space.h; docs/engine/emulation/) */
 #define XP_AT        FREE_PANELS
 #define XP_FLAGS     XP_AT                 /* BN6's panel flags table grown to 16 words (xpanels.c) */
 #define XP_STUB      (XP_AT + 0x40u)       /* the lava's cooling, Thumb, and its veneers on to BN6's routines (xpanels.c) */

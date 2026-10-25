@@ -10,7 +10,7 @@
 /* Elements: BN6's first wheel (Aqua beats Fire, Elec Aqua, Wood Elec, Fire
  * Wood), an enemy's HP word and a chip's attack element; then its second
  * (Sword beats Wind, Wind Cursor, Cursor Breaker, Breaker Sword), an
- * enemy's traits and a chip's icon (docs/ROM_DATA.md). Either doubles a
+ * enemy's traits and a chip's icon (docs/rom/). Either doubles a
  * hit on the element it beats. */
 enum { ELEM_NULL, ELEM_FIRE, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_SWORD, ELEM_WIND, ELEM_CURSOR, ELEM_BREAK, ELEM_COUNT };
 /* An element by BN6's name for it ("Breaker" as its Cross lessons say), "" for none. */
@@ -80,7 +80,7 @@ void item_name(int id, char *out, size_t outlen);
  * them in fours): "Custom1" */
 void program_name(int program, char *out, size_t outlen);
 
-/* The All * helper's chips (docs/META.md), in BN6's own layouts: a folder
+/* The All * helper's chips (docs/game/meta/), in BN6's own layouts: a folder
  * entry (chip | code << 9) in *, an empty one as it is; and a pack entry
  * (a count per code of the record's four, then four u16 order stamps), its
  * counts in the first code's, 99 at most: with * the record's one code,
@@ -104,7 +104,7 @@ bool chip_melee(int rom_id);
  * the panel it aimed at a moment later; 36 TankCan1-3 (chips 12-14), which
  * fire after a wind-up. */
 #define CHIP_FAMILY_TANKCAN 36
-#define CHIP_FAMILY_NAVI 27   /* the Navi chips (docs/ROM_DATA.md, chip records) */
+#define CHIP_FAMILY_NAVI 27   /* the Navi chips (docs/rom/chips.md, chip records) */
 int chip_family(int rom_id);
 /* A Standard chip, by the record's library type (0x7; 1 Mega, 2 Giga, 3
  * Secret): a folder takes several of one (a Mega or Giga chip, one). */
@@ -143,7 +143,7 @@ bool enemy_stats(int id, int *hp, int *damage);
 const uint8_t *enemy_triple(int id);
 
 /* An enemy id another game's virus family took in BN6's battle engine
- * (src/emu/xvirus.c, issue #82; docs/MULTIROM.md, Transplanted families),
+ * (src/emu/xvirus.c, issue #82; docs/multirom/families.md),
  * as the engine reads it there once the family is installed: the readers
  * above answer for it from this, not from the player's ROM, where BN6
  * gives no such id (the families' are from 0x200, past BN6's 0x1C4). */

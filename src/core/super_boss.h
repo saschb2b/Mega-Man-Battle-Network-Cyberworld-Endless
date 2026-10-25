@@ -1,4 +1,4 @@
-/* The super bosses (docs/BOSSES.md, Super bosses): Bass and the Cybeast
+/* The super bosses (docs/game/bosses/super-bosses.md): Bass and the Cybeast
  * Gregar, BN6's own battles at places of their own. Who they are, where
  * each waits, the form each comes in, what BN6's records give their
  * battles and what they pay. Numbers and rules only, as pacing.c: the

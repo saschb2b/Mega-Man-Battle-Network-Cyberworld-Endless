@@ -1,9 +1,9 @@
-/* The week's net (issue #127, docs/ONLINE.md, The week's net; docs/SAVES.md,
+/* The week's net (issue #127, docs/online/weekly-net.md; docs/engine/saves.md,
  * The weekly slot): a dive on the seed a Net Square server gives for its
  * week, played in a save slot of its own beside the normal run, which
  * waits untouched in its files and is the title's CONTINUE again when the
  * dive ends. A dive starts from the standard setup and a standard profile
- * (docs/ONLINE.md, its design): the player's settings and what he has been
+ * (docs/online/weekly-net.md, its design): the player's settings and what he has been
  * told carry over, nothing a run is stronger or different for. Its end is
  * kept (weekly.sav) until a visit to the Square posts it. */
 #ifndef CW_WEEKLY_H

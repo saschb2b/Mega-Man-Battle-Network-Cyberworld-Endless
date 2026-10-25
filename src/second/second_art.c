@@ -1,6 +1,6 @@
 /* second_art.h. A chip's record (RomLayout.chip_data): its icon's tiles at
  * BN6_CHIP_ICON_PTR in the icons' palette, its element and its rank; the
- * element icons in their own palette (docs/ROM_DATA.md, the second
+ * element icons in their own palette (docs/rom/pet-and-second-screen.md, the second
  * screen's chip pictures). */
 #include "second_art.h"
 

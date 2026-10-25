@@ -187,7 +187,7 @@ word on ScrtData, SpoutMan's whirl (all 4e970e6). AREA CLEAR's count is
 left out after a CONTINUE by design (the next notes say so).
 
 Meanwhile the user asked for a substantial NaviCust: designed with the
-game-design skill (docs/NAVICUST.md) and built its first part (6c69ed6).
+game-design skill (docs/game/navicust.md) and built its first part (6c69ed6).
 
 Loop change: **sweep the persona's exact next layers** with the run's
 seed, and resume a stalled persona by message.
@@ -235,7 +235,7 @@ on a run-through, an A beside a Mystery Data (both left: BN6's own pads,
 and the talk cone). The patch note on the gift was wrong (see above).
 
 Meanwhile the user asked for the originals' props: the Net Dealer now
-stands behind a counter cut from the ROM (f2a2cb4, docs/LEVEL_DESIGN.md).
+stands behind a counter cut from the ROM (f2a2cb4, docs/world/level-design/).
 
 Loop change: **check patch notes against the code**, and **re-watch every
 guardian against its warning**.
@@ -426,7 +426,7 @@ mark gone, L's briefing after the arrival's words.
 
 Raised: a restart repeats (the same town, comp, guardian and chats in the
 first twenty minutes, a chore after a long run), which the owner answered
-with the meta layer (docs/META.md); act 1's Server hitting for most of
+with the meta layer (docs/game/meta/); act 1's Server hitting for most of
 MegaMan's HP, and asking without saying how strong it is. Left: the town's
 arrow through a house, landing shadows read by row (vanilla).
 
@@ -469,7 +469,7 @@ the footer line, true warnings, the kept early R at 65-70 frames.
 
 Raised, fixed before the next pin: a Guardian Data program never installed
 (major: the draft said how only on a profile's first; the board's RAM is
-now read, docs/ROM_DATA.md, and L names a program left off it), a Net
+now read, docs/rom/, and L names a program left off it), a Net
 Dealer's counter beside a heal Prog taking the A (placement now keeps
 talkers apart, a test counts them), the dealer's greeting on every layer
 of an act, the act card naming a deleted guardian after a CONTINUE.
@@ -1126,7 +1126,7 @@ chip" (6bc80ad: "It pays DolThdr3 B"). Caused by the loop: the patch
 notes said the gate stood "beside" ProtoMan, which the build did not do;
 now it does. Kept: walkway corners stop MegaMan as in BN6 (the owner's
 choice, c33d2e0), though they cost about a dozen calls again;
-FIDELITY.md still described the removed assist and now does not.
+docs/game/fidelity.md still described the removed assist and now does not.
 Vanilla: the enemy side's AreaGrab (replayed: the engine gives viruses
 no chips), the Armadill's rolls. Misreads into persona.md: EraseCross's
 beam needs about 115 frames (two sessions), an A after a chat's last box
@@ -1309,7 +1309,7 @@ screen. EraseCross's slow drain on a 700-HP Navi: BN6's rule.
 Beside the loop: 0.5.2 and 0.5.3 released (the 3DS's smooth net and
 faster layers; issues #20 and #21, a player's: a duel counted again after
 a CONTINUE, the BugFrag Trader trading at 0), and Battle Network 5's maps
-read through the map reader (docs/MULTIROM.md).
+read through the map reader (docs/multirom/).
 
 Cost: 312 calls (260, the guardian's 40 and a few to finish the fight);
 CircusMan's fight 105 s of game time.
@@ -1779,7 +1779,7 @@ Loop change: **a recurring wish goes to the owner as a design question.**
 Walkway mouths topped four reports running; the loop kept treating it as
 the persona's input skill. The owner's answer: MegaMan's walk never
 changes (BN6's own, AGENTS.md); the mouths are the generator's to fix,
-by Capcom's map design (docs/LEVEL_DESIGN.md, Navigation). A movement
+by Capcom's map design (docs/world/level-design/generator.md, Navigation). A movement
 assist is never a fix to propose.
 
 ## Session 59: 7/10 (keep playing: yes; recommend: yes)

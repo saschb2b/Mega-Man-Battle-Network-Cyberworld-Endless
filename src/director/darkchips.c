@@ -48,7 +48,7 @@ void dark_give(int k) {
 }
 
 /* BN6's five by DarkChipID, as BN5's kinds (DrkSword 188, DarkThnd 193,
- * DrkRecov 194, DarkInvs 189, DarkPlus 190: paired by name, docs/ROM_DATA.md) */
+ * DrkRecov 194, DarkInvs 189, DarkPlus 190: paired by name, docs/rom/) */
 static const int8_t bn6_kinds[DARK_BN6_COUNT] = { 1, 6, 7, 2, 3 };
 
 int dark_bn6_kind(int id) { return id >= DARK_BN6_FIRST && id < DARK_BN6_FIRST + DARK_BN6_COUNT ? bn6_kinds[id - DARK_BN6_FIRST] : -1; }

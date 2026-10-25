@@ -1,5 +1,5 @@
 /* BN6's own indoor maps of the real world taken over as home's places
- * (indoors.c, docs/HOME.md): Lan's house and room, AsterLand, the Cyber
+ * (indoors.c, docs/world/home/): Lan's house and room, AsterLand, the Cyber
  * Academy. */
 #ifndef CW_INDOORS_H
 #define CW_INDOORS_H

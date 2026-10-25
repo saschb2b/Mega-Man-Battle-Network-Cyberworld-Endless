@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """bn5_songs.py [SONG ...]: where Battle Network 5 Team Colonel (USA) starts each
-of its music player's songs, read from the player's own ROM (docs/ROM_DATA.md,
-Where BN5 plays its songs; the Jukebox's names, docs/PET.md). Prints numbers
+of its music player's songs, read from the player's own ROM (docs/rom/bn5-world.md,
+Where BN5 plays its songs; the Jukebox's names, docs/game/pet.md). Prints numbers
 and addresses only: nothing of the ROM is written anywhere.
 
 What starts a song, each found as the ROM has it:

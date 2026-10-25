@@ -1,4 +1,4 @@
-/* A layer's landmarks and props (docs/LEVEL_DESIGN.md, Props): the
+/* A layer's landmarks and props (docs/world/level-design/props.md): the
  * area's emblems, a shop's counter, the landmark in its best room, the rows
  * of trees, braziers and graves, the signs, as the originals stand them. */
 #include "net_landmarks.h"
@@ -9,7 +9,7 @@
 #include "net_gen.h"
 #include "net_signature.h"
 
-/* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
+/* ---- Props (docs/world/level-design/props.md) ---- */
 
 /* An emblem on (x, y): ground floor all round, nothing standing there. */
 static void emblem_at(int x, int y) {
@@ -291,7 +291,7 @@ static bool sig_takes(int set) {
 }
 
 /* The rooms' back rims the set may stand at, best first: the layer's
- * signature where it holds the set (docs/LEVEL_DESIGN.md, Identity), then
+ * signature where it holds the set (docs/world/level-design/identity.md), then
  * big rooms, long rims, far from the way, but a signature that does not;
  * an avenue at the signature alone. How many. */
 static int landmark_spots(int set, Spot *cand) {
@@ -326,7 +326,7 @@ static int landmark_spots(int set, Spot *cand) {
  * walled hole in its back third, one or two panels in from a back edge,
  * the braziers in holes two panels to either side where they fit, as most
  * of BN6's statues stand in holes inside their platforms (docs/
- * LEVEL_DESIGN.md, Props); a court the catwalks or the lattice run close
+ * docs/world/level-design/props.md); a court the catwalks or the lattice run close
  * round has no rim with the void two deep past it. */
 static bool statue_in_floor(const LayerKit *kit, const Room *m) {
 	for (int s = 0; s < 2; ++s)

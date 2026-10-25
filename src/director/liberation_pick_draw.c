@@ -1,5 +1,5 @@
 /* The team pick's picture (liberation_pick.h), as the JACK-IN SETUP is
- * drawn (title_setup.c; docs/UI.md, Ours): BN6's screen frame over the
+ * drawn (title_setup.c; docs/engine/ui.md, Ours): BN6's screen frame over the
  * board, its band TEAM with the count of places filled as FOLDER EDIT's
  * 30/30, the held Navis in the window, the picked marked by the ChipFolder's
  * EQUIP corners, GO! under it as NaviCust's RUN!; at the right what the

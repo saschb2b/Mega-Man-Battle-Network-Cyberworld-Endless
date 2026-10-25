@@ -1,5 +1,5 @@
 /* The chips whose code moved from BN5's into BN6's battle engine (issue
- * #82's C3; docs/MULTIROM.md, The chips' code): the registry's XREG_MOVED
+ * #82's C3; docs/multirom/chips-code.md): the registry's XREG_MOVED
  * rows, each with the family and subfamily its record takes in BN6's
  * tables (a moved attack family's number, src/emu/xattack_grow.h, its
  * subfamily BN5's; or the support or Navi family with the moved routine's

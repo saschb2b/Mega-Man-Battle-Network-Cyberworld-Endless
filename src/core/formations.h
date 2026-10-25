@@ -1,4 +1,4 @@
-/* The original random battles of each area's maps (docs/ROM_DATA.md): which
+/* The original random battles of each area's maps (docs/rom/): which
  * viruses come together, where they stand, rocks and cubes on the field,
  * and the battlefield's panels. */
 #ifndef CW_FORMATIONS_H

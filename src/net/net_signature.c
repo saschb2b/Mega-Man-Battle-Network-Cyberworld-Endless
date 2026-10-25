@@ -1,4 +1,4 @@
-/* A layer's signature room (net_signature.h; docs/LEVEL_DESIGN.md,
+/* A layer's signature room (net_signature.h; docs/world/level-design/identity.md,
  * Identity): which one a layer holds, and its shape carved. */
 #include "net_signature.h"
 

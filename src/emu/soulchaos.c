@@ -344,7 +344,7 @@ static bool hooks(void) {
 }
 
 bool soulchaos_install(int brk) {
-	hook_keep_slots(dues, sizeof *dues);   /* (a rollback's: docs/ONLINE_ARENA.md) */
+	hook_keep_slots(dues, sizeof *dues);   /* (a rollback's: docs/online/arena/) */
 	if (done) return true;
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	if (!R.data || !emu_ready() || !b5 || !expected(b5)) return false;

@@ -1,4 +1,4 @@
-/* A NetBattle watched from the stands (issue #128, docs/ONLINE_ARENA.md,
+/* A NetBattle watched from the stands (issue #128, docs/online/arena/stands.md,
  * The stands). The spectator's game builds the same pair as the two
  * players' games (the way in from the ROM with both carried MegaMen, by
  * the battle's rules, BN5's installs under full rules), and runs it from

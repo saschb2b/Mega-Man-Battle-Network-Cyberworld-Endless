@@ -1,5 +1,5 @@
-/* BN5's sea's submerge in BN6's battle engine (issue #82; docs/MULTIROM.md,
- * The sea's submerge; docs/ROM_DATA.md): an object whose AI's traits hold
+/* BN5's sea's submerge in BN6's battle engine (issue #82; docs/multirom/one-net.md,
+ * The sea's submerge; docs/rom/): an object whose AI's traits hold
  * BN6_TRAIT_SUBMERGES (ToadMan's, ToadSoul's) standing on BN5's sea
  * (XPANEL_SEA) goes under, as BN5's status step of MegaMan and the Navis
  * has it (bn5.h: BN5_SEA_SUBMERGE, BN5_HIDE_STEP, BN5_HIT_HIDDEN): it is

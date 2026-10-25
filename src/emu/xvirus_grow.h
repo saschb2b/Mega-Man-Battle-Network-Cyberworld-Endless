@@ -1,6 +1,6 @@
 /* BN6's battle engine given the room other games' virus families take
- * (issue #82, the engine's capacity; docs/ROM_DATA.md, The engine's room
- * for moved families; docs/EMULATION.md, the free-space map): its tables by
+ * (issue #82, the engine's capacity; docs/rom/virus-families.md, The engine's room
+ * for moved families; docs/engine/emulation/memory.md, the free-space map): its tables by
  * AI index, sprite lists, effects, the kinds' types, enemy ids and reward
  * rows grown past BN6's own, at fixed places past EMU_FREE (XV_*), the one
  * word that names each pointed at its copy; the names of the ids from

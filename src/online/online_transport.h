@@ -12,7 +12,7 @@
  * true after a refusal, until end, so the online square cannot
  * accidentally become a normal run.
  *
- * A dropped link (issue #153, docs/ONLINE.md, A dropped link): once the
+ * A dropped link (issue #153, docs/online/square/dropped-link.md): once the
  * server has welcomed this game, a link quiet for ONLINE_QUIET_MS shows as
  * `quiet` in the snapshot; one dead (quiet past its limit, closed or
  * broken) without the server's ERROR is tried again with backoff, a

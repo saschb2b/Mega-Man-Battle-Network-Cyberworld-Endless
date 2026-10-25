@@ -248,7 +248,7 @@ static void check_approach(uint32_t seed, int wx, int wy) {
 	CHECK(!arena_approach(a->ax, a->ay), "seed %u: the arena's middle is on its approach", seed);
 }
 
-/* MegaMan's place to meet the guardian (guardian_stand; docs/BOSSES.md, the
+/* MegaMan's place to meet the guardian (guardian_stand; docs/game/bosses/sequence.md, the
  * sequence): at his height on the screen and turned to him, on the arena's
  * floor under his feet, on the side the bridge comes in from (nearer the
  * antechamber than the place across the guardian), whichever way the
@@ -721,7 +721,7 @@ static void test_generation(void) {
 			memcpy(layer.cell, save, sizeof save);
 		}
 		gaps_bridge(false);
-		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
+		/* every act's second layer holds the rival's duel (docs/game/rival.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
 			int official = 0, gates = 0, px = -99, py = -99, gx = 99, gy = 99;
@@ -984,7 +984,7 @@ static uint32_t set_pieces_hash(uint32_t h) {
 	return h;
 }
 
-/* The Virus Battler's layers (net_pieces.c, docs/LEVEL_DESIGN.md): an act's
+/* The Virus Battler's layers (net_pieces.c, docs/world/level-design/): an act's
  * first layer, at most one an act, from the second act to the last before
  * the Nest, about half of those acts, at least one a run, the Battlers in
  * BN6's order by act; and each one placed stands on the layer, its
@@ -1121,7 +1121,7 @@ static void test_depth_plan(void) {
 	CHECK(!is_boss_depth(1) && !is_boss_depth(2) && is_boss_depth(3), "every third layer has a boss");
 	CHECK(biome_for_depth(19) == BIOME_NEST && is_boss_depth(19), "layer 19 is the Cybeast Nest");
 	CHECK(biome_for_depth(20) == run.biome_order[0], "the cycle restarts after the Nest");
-	/* the short net: three acts, then the Nest on layer 10 (docs/META.md) */
+	/* the short net: three acts, then the Nest on layer 10 (docs/game/meta/) */
 	run.mode = RUN_SHORT;
 	CHECK(is_boss_depth(3) && is_boss_depth(6) && is_boss_depth(9) && !is_boss_depth(8), "the short net's acts end in guardians");
 	CHECK(biome_for_depth(9) == run.biome_order[2], "the short net's third act is the run's third area");
@@ -1215,7 +1215,7 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
-	/* BN5's guardians (docs/BOSSES.md, BN5's Navis): the lowest version
+	/* BN5's guardians (docs/game/bosses/bn5-navis.md): the lowest version
 	 * whose HP reaches their band, BN6's guardians' since they fight in
 	 * BN6's engine (400-600 in act 1; the three-quarters discount stood for
 	 * the Cross that never came into BN5's), V2 at least from act 4, and
@@ -1240,7 +1240,7 @@ static void test_pacing(void) {
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
 		!pacing_heal_certain(19) && !pacing_heal_certain(1 + CYCLE_LAYERS), "a heal on each act's middle layer and the first");
 	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
-	/* the Net's clock (docs/HOME.md, going back): a tenth more a notch on a
+	/* the Net's clock (docs/world/home/going-back.md): a tenth more a notch on a
 	 * guardian's HP, the stats rows' top kept */
 	CHECK(pacing_clock_hp(400, 0) == 400 && pacing_clock_hp(400, 3) == 520 && pacing_clock_hp(4000, 2) == PACING_HP_MOST &&
 		pacing_clock_hp(-1, 2) == -1, "the clock's notches on a guardian's HP");
@@ -1443,7 +1443,7 @@ static void test_talk(void) {
 			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s guards this area!", area, guardian(navi)->name);
 			check_talk(what, line);
 		}
-		/* (MegaMan at a port at home, docs/HOME.md: the way's area, its
+		/* (MegaMan at a port at home, docs/world/home/: the way's area, its
 		 * guardian battled or never, the dark way's and its seal) */
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
@@ -1456,7 +1456,7 @@ static void test_talk(void) {
 	}
 }
 
-/* Coming home (docs/HOME.md): MegaMan and Lan's words in Lan's HP after
+/* Coming home (docs/world/home/): MegaMan and Lan's words in Lan's HP after
  * each act of either net, its portals named (every name, the longest ones
  * together), a dark way sealed or open; and what Lan's HP is, the run's
  * first time there. */
@@ -1496,7 +1496,7 @@ static void test_home_words(void) {
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true, "to the lower left"));
 	check_talk("AsterLand's counter", home_aster_words("@M The way out's to the lower right,Lan!|@M Your PC's back home,remember?"));
 	check_talk("the house's front door", home_door_words("@M Your room's to the upper left,Lan!|@M The PC's up there!", "to the lower left"));
-	/* (going back, docs/HOME.md: the older portals, the way home, L there) */
+	/* (going back, docs/world/home/: the older portals, the way home, L there) */
 	for (int clock = 0; clock <= 6; ++clock) {
 		char what[80];
 		snprintf(what, sizeof what, "home again at clock %d", clock);
@@ -2146,7 +2146,7 @@ static void test_walks(void) {
 	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
 }
 
-/* The way across (docs/LEVEL_DESIGN.md, Navigation): from the arrival to
+/* The way across (docs/world/level-design/generator.md, Navigation): from the arrival to
  * the guardian's antechamber or the exit, a layer crosses no more one-wide
  * walkways than its area's originals do, each a lining up for MegaMan. */
 static void test_way_links(void) {
@@ -2193,7 +2193,7 @@ static void test_way_links(void) {
 	printf("  ways: %d of %d past their area's cap of one-wide walkways (the most in area %d, %.0f%%)\n", over_all, all, worst_area, 100 * worst);
 }
 
-/* The NaviCust's draft (docs/NAVICUST.md): three programs of three builds,
+/* The NaviCust's draft (docs/game/navicust.md): three programs of three builds,
  * each of a tier its act has reached, none of the left-out ones; and
  * MegaMan's words for the bugs. */
 static void test_navicust(void) {
@@ -2388,7 +2388,7 @@ static int room_floor(int r, bool *way) {
 	return n;
 }
 
-/* Identity (docs/LEVEL_DESIGN.md, issue #98): each of a run's layers is
+/* Identity (docs/world/level-design/identity.md, issue #98): each of a run's layers is
  * built round its signature, the room with the most floor, the way through
  * it; never two layers in a row in one layout and one signature both, where
  * the area has another of either, nor an act's first and third where it
@@ -2468,7 +2468,7 @@ static int arrival_side(bool *into) {
 	return d[side] > 0.25 ? SIDE_COUNT : side;
 }
 
-/* Arrivals (docs/LEVEL_DESIGN.md, Arrivals, issue #106): over the runs of
+/* Arrivals (docs/world/level-design/arrivals.md, issue #106): over the runs of
  * test_identity, MegaMan arrives at every side of the screen (BN6's own maps
  * at each about as often), facing along one of the world's axes into the
  * layer; an act's three layers at three sides, and the act after it not
@@ -3010,7 +3010,7 @@ static void test_xsong(void) {
 }
 
 /* Both games' RNG step and a seed's word (battle_rng.c): the guest's
- * battles' words as docs/ROM_DATA.md has them for seed 1 (BN5's random
+ * battles' words as docs/rom/ has them for seed 1 (BN5's random
  * numbers), a fixed point of the step, and one step of the differential's
  * (BN5's word on the frame its buster draws once more: tests/xdiff) */
 static void test_battle_rng(void) {
@@ -3521,7 +3521,7 @@ static void test_xvirus_static(void) {
 	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
 }
 
-/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/MULTIROM.md,
+/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/multirom/navis.md,
  * Transplanted Navis), each whole and apart from the others and from the
  * families: its AI index, ids, home and code its own; a sprite two Navis
  * draw at one place and number in both (the shared art), no other sprite's
@@ -3594,7 +3594,7 @@ static void test_xnavi_static(void) {
 	CHECK(xnavi_bn5_count < 1 || navi_clashes(&xnavi_bn5[0]->code, &xnavi_bn5[0]->code, true) > 0, "xnavi: one Navi's room twice not seen");
 }
 
-/* The free space's plan (free_space.h; docs/EMULATION.md, Memory the
+/* The free space's plan (free_space.h; docs/engine/emulation/memory.md, Memory the
  * engine writes and BN6's RAM): every writer's region in order and apart,
  * inside the ROM copy past the game's 8 MB; each of issue #82's installers'
  * own layout inside its region (the families' room and the families, the
@@ -4084,7 +4084,7 @@ static void test_enemy_moved(void) {
 	CHECK(!name[0] && !enemy_triple(0x201), "data: an id from 0x200 no family took (%s)", name);
 }
 
-/* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
+/* The All * helper (docs/game/meta/all-star-helper.md, issue #18): every chip in *. The engine's
  * view of a record (chip_info, which every reward, stock and prize takes
  * its code from) holds * alone while the helper is on, and the record's own
  * codes otherwise; a folder entry goes to *; a pack entry's four counts go
@@ -4130,7 +4130,7 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
-/* The BeastOut helper (issue #99, docs/META.md): shut until the endless
+/* The BeastOut helper (issue #99, docs/game/meta/): shut until the endless
  * net's own Nest has fallen, a short net's Nest opening none; announced
  * once, on the summary of the run that opened it and NEW on the setup's
  * Help row, NEW too where a run given up for a NEW GAME opened it; in a
@@ -4217,7 +4217,7 @@ static void test_beast(void) {
 		char what[64];
 		snprintf(what, sizeof what, "a run's start with BeastOut, %s, %s", k & 1 ? "taught" : "first", k & 2 ? "Dad's call before" : "alone");
 		check_talk(what, words);
-		/* (told once, by Dad who unlocked it: docs/VOICE.md, What nobody says) */
+		/* (told once, by Dad who unlocked it: docs/voice/rules.md, What nobody says) */
 		CHECK(!strstr(words, "CybeastButton") == !!(k & 1), "%s: %s word of it: \"%s\"", what, k & 1 ? "a" : "no", words);
 		CHECK(!!strstr(words, "@D Lan,it's Dad. I've unlocked") == (k == 0), "%s: Dad's call: \"%s\"", what, words);
 	}
@@ -4227,7 +4227,7 @@ static void test_beast(void) {
 	run = run_was;
 }
 
-/* Another game's chips as BN6's (src/core/xchips.c; docs/MULTIROM.md,
+/* Another game's chips as BN6's (src/core/xchips.c; docs/multirom/guest-battles.md,
  * Guest battles), on made-up tables: paired by name each way (a name the
  * other game gives two chips comes back from either; a chip it lacks, or
  * a nameless one, pairs none); a code re-read as the other game's chip of
@@ -4287,7 +4287,7 @@ static void test_xchips(void) {
 		xchips_reward_bn6(0xFFFF) == 0xFFFF, "xchips: BN5's rewards as BN6's without a pairing");
 }
 
-/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/ROM_DATA.md,
+/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/rom/bn5-world.md,
  * BN5's text): BN6 put its five version marks at 0x40-0x44, so BN5's codes
  * from 0x40 are five on, its marks and punctuation where BN6 has their
  * glyphs, its DS mark as the letters D and S, a glyph BN6 lacks left out;
@@ -4320,7 +4320,7 @@ static void test_xtext(void) {
 	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
 }
 
-/* BN5's chips' code (issue #82's C3; docs/MULTIROM.md, The chips' code):
+/* BN5's chips' code (issue #82's C3; docs/multirom/chips-code.md):
  * the generated units (src/emu/xchips_bn5.c) each a recipe the installer
  * takes in the chips' region, numbered by BN5's own number and homed in
  * order; the moved chips (src/core/xchips_moved.c) each a registry row of
@@ -4393,7 +4393,7 @@ static void test_chip_code(void) {
 		"chips' code: CrakOut BN5's family 0x1B as 0x6B, NrthWind its support routine 0x15 as 0x3F, Cannon none");
 }
 
-/* The chip registry (src/core/xchips_registry.c; docs/MULTIROM.md, The
+/* The chip registry (src/core/xchips_registry.c; docs/multirom/chip-registry.md, The
  * chip registry, issue #82): the table as decided (Team Colonel's chips a
  * run can meet, one chip per name, the rest in BN6's free ids), its checks
  * failing on made-up rows that break each rule, and its lookups both ways. */
@@ -4574,7 +4574,7 @@ static void test_soulkinds(void) {
 	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
 }
 
-/* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
+/* The run's DarkChips (src/director/darkchips.c; docs/game/meta/bn6-darkchips.md, BN6's own
  * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
  * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
  * among the four its battles play and never one held; the flame a layer
@@ -4686,7 +4686,7 @@ static void test_darkchips(void) {
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,
- * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/META.md): its
+ * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/game/meta/): its
  * BBS positioning left out, its characters, breaks, waits and clears kept to
  * its hold; anything else, or no hold, refused. A made-up archive. */
 /* The intro's QR code (scene_intro.c): the project's address in version 4,
@@ -4751,9 +4751,9 @@ static double filtered_rms(SoundFilter mode, double hz) {
 	return sqrt(out / in);
 }
 
-/* The Jukebox's songs (docs/PET.md, The Jukebox): every song of each
+/* The Jukebox's songs (docs/game/pet.md, The Jukebox): every song of each
  * game's music player once (BN6's 0x01-0x25; BN5's 0x01-0x24 but its
- * empty 0x0A: docs/ROM_DATA.md), each in a section, each name a row's */
+ * empty 0x0A: docs/rom/), each in a section, each name a row's */
 static void test_jukebox_songs(void) {
 	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
 	for (int i = 0; i < jukebox_song_count; ++i) {
@@ -4920,7 +4920,7 @@ static void test_rom_pages(void) {
 	CHECK(!ta_rom_pages(face, (int)sizeof face, 1, out, (int)sizeof out), "rom pages: a command it does not know refused");
 }
 
-/* The super bosses (docs/BOSSES.md, Super bosses): their forms by record
+/* The super bosses (docs/game/bosses/super-bosses.md): their forms by record
  * and by Net; BN6's records' themes, names and Gigas; never at random,
  * the Servers' SP Navis without them */
 static void super_records(void) {
@@ -5039,7 +5039,7 @@ static void test_super_bosses(void) {
 	run = run_was;
 }
 
-/* The economy's plans (economy.c, docs/ECONOMY.md, issue #154): a curve
+/* The economy's plans (economy.c, docs/game/economy/, issue #154): a curve
  * starts at its floor, ends at 1 and rises ever more slowly between (a
  * logarithm's: the run opens fastest early); no plan hands out more than
  * today's anywhere (no power creep); today's leaves every roll as it was
@@ -5135,7 +5135,7 @@ static void test_economy(void) {
 	run = run_was;
 }
 
-/* Requests at home (jobs.c, docs/HOME.md piece 5): the visit's three, a
+/* Requests at home (jobs.c, docs/world/home/jobs.md): the visit's three, a
  * kind each asker posts and none twice, the same at a CONTINUE; pay by
  * the act; each kind's course, and when one is due. */
 static void test_jobs(void) {
@@ -5475,7 +5475,7 @@ static void test_analytics_online(void) {
 	rmdir(base);
 }
 
-/* The nets' meeting (issue #82, docs/MULTIROM.md, One net): a family's
+/* The nets' meeting (issue #82, docs/multirom/one-net.md): a family's
  * role by its placements; the visitors' gate, one battle in each four, the
  * same at every reroll; the rules that keep visitors out; a visitor's
  * place, family and version against the band; the deep's coin between the
@@ -5642,7 +5642,7 @@ static void test_pad_art(void) {
 	CHECK(!pad_art_on(&ring, -18, -18, 0) && pad_art_on(&ring, -18, -18, 4), "a reach takes in more");
 }
 
-/* A dark layer's board (docs/LIBERATION.md, stage 1 and The quality bar):
+/* A dark layer's board (docs/game/liberation/building/stage-1.md and The quality bar):
  * the same from its seed, its kinds where BN5's rules put them (the
  * Darkloid's 3x3 whole, a ring of dark round each DarkHole with its
  * guardian, the start clean, no guardian within three of it nor reaching
@@ -5753,7 +5753,7 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
-/* A board cleared over par pays zenny (docs/LIBERATION.md, The par's prize,
+/* A board cleared over par pays zenny (docs/game/liberation/building/par-prize.md, The par's prize,
  * as built): BN5's first mission's 1000 at act 2, 250 more an act, dearer on
  * later cycles, by the zenny curve */
 static void test_liberation_prize(void) {
@@ -5778,7 +5778,7 @@ static void test_liberation_prize(void) {
 	run = before;
 }
 
-/* Boards made for a team of BN5's (docs/LIBERATION.md, The team): BN5's
+/* Boards made for a team of BN5's (docs/game/liberation/decision.md, The team): BN5's
  * own teams by act, their HP its table's (BN5_LIB_NAVI_HP: missions 1, 3,
  * 5, 7 and 9), every Navi on a clean panel by the start and none in a
  * unit's reach, each command taken, the measures printed beside the lone

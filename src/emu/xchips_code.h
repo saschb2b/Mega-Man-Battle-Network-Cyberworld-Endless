@@ -1,5 +1,5 @@
-/* BN5's chips' code in BN6's battle engine (issue #82's C3; docs/MULTIROM.md,
- * The chips' code; docs/EMULATION.md, its free space): the units of
+/* BN5's chips' code in BN6's battle engine (issue #82's C3; docs/multirom/chips-code.md,
+ * The chips' code; docs/engine/emulation/memory.md, its free space): the units of
  * xchips_bn5.h installed into the core's copy as the core starts, where
  * BN5's ROM is read, on xvirus's machinery (their blocks copied, their calls
  * through veneers, their objects through the second-level dispatch, each

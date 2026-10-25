@@ -1,5 +1,5 @@
 /* liberation_state.h: the Darkloid of a dark board as BN5's own where its
- * ROM brought him into BN6's engine (docs/LIBERATION.md, stage 4). */
+ * ROM brought him into BN6's engine (docs/game/liberation/building/stage-4-darkloids.md). */
 #include "liberation_state.h"
 
 #include <stdio.h>

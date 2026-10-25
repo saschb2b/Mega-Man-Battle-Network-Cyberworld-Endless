@@ -1,5 +1,5 @@
 """What the itch.io page holds, kept in step with the repository
-(docs/ITCH.md, Keeping it in step): docs/itch/state.json records the page's
+(docs/project/itch.md, Keeping it in step): docs/itch/state.json records the page's
 files as last applied on itch (each one's SHA-1), itch's address for each
 picture the description shows (uploaded through itch's editor, which takes
 no picture from another site), and the devlog post of every release since
@@ -112,7 +112,7 @@ def problems(newest_too=False):
                    "it in itch's editor, then `python3 tools/itch.py record --image NAME URL`")
     for name in APPLIED:
         if state['page'].get(name) != sha1(name):
-            out.append(f'docs/itch/{name} is not what the itch page holds: apply it there (docs/ITCH.md), '
+            out.append(f'docs/itch/{name} is not what the itch page holds: apply it there (docs/project/itch.md), '
                        'then `python3 tools/itch.py record --page`')
     posted = {p['version'] for p in state['devlog']['posts']}
     since = site_versions.version_key(state['devlog']['since'])

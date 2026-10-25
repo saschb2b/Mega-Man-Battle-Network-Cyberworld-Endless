@@ -672,7 +672,7 @@ static void songs_set(const XVirusFamily *f) {
 		const XvSong *s = &f->songs[i];
 		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot;
 		/* (the slot BN6's empty song, a header of no tracks, in the player's ROM: copied where the core's copy still
-		 * holds it; where another install of the shared slot (docs/MULTIROM.md) copied BN5's same song there first,
+		 * holds it; where another install of the shared slot (docs/multirom/) copied BN5's same song there first,
 		 * found there) */
 		uint32_t empty = table && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
 		if (!in_rom(empty, 1) || R.data[empty - BUS] != 0) { xv_fail("its song's slot %#x", s->slot); return; }

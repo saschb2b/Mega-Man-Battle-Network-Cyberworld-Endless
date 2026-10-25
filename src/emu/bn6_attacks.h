@@ -4,7 +4,7 @@
  * attacks MegaMan's loadout names, and their charge times; each the one
  * word or words that name it, as the engine grows them (issue #82: the
  * families grown for BN5's chips and Souls, xattack_grow.c; the power
- * attacks and charge times for BN5's Souls, soulpower.c; docs/ROM_DATA.md,
+ * attacks and charge times for BN5's Souls, soulpower.c; docs/rom/souls.md,
  * BN6's attack tables grown). */
 #ifndef CW_BN6_ATTACKS_H
 #define CW_BN6_ATTACKS_H

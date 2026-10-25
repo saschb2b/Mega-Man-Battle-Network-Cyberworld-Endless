@@ -1,3 +1,10 @@
+---
+type: Review Log
+title: "Voice sweep: the net and the run"
+description: "Log of the 19 October 2026 voice sweep of L's briefing, lessons, NaviCust words, services, rewards, bystanders, rumors and DarkChips: 434 lines read, 109 cut, 16 noted, and the hint systems removed with them."
+tags: [voice]
+generated: { by: claude-code/unrecorded, at: 2026-10-19T16:59:55Z }
+---
 # Voice sweep: the net and the run
 
 Group: L's briefing, MegaMan's lessons and his NaviCust words, the
@@ -7,7 +14,7 @@ DarkChips, Crosses and where the nets meet (`briefing_words.c`,
 `reward_words.c`, `layer_words.c`, `lock_words.c`, `npc_lines.c`,
 `rumor_lines.c`, `dark_words.c`, `powers_words.c`, `nets_words.c`).
 19 October 2026, on the owner's direction of that day. The rules are
-docs/VOICE.md's What nobody says, by number: 1 nobody knows the game is a
+[Voice](../rules.md#what-nobody-says)'s What nobody says, by number: 1 nobody knows the game is a
 game, 2 a button is named once, 3 nobody explains BN6, 4 what the run adds
 is taught where BN6 teaches, 5 MegaMan never coaches, 6 the goal line
 explains nothing, 7 bystanders never tutor. Ids are the catalog's as of

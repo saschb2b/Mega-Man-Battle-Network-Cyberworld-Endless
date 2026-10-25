@@ -10,7 +10,7 @@
  * BN6 finds an object's arm points by its struct1's list and number
  * (BN6_ARM_POINTS), so the Navis' table of records is grown to every
  * number of list 2 and pointed at, and each sprite's record is BN5's 30
- * points with BN6's four more (docs/ROM_DATA.md, The Navis' battle
+ * points with BN6's four more (docs/rom/navis.md, The Navis' battle
  * sprites). */
 #ifndef CW_XNAVI_SPRITES_H
 #define CW_XNAVI_SPRITES_H

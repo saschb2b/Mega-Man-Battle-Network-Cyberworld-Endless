@@ -1,4 +1,4 @@
-/* How hard a run is at each depth (docs/PROGRESSION.md): the act a depth
+/* How hard a run is at each depth (docs/game/progression/): the act a depth
  * belongs to, what a battle there may hold, which areas and guardians each
  * act draws from. Numbers only; the ROM's HP values reach it through the
  * callers, so it builds and tests without a ROM. */
@@ -56,13 +56,13 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
                          bool always_sp, int (*hp)(int navi, int version));
 
 /* The version (0 V1, 1 V2, 2 V3, 3 SP) another game's Navi guards act
- * `act` at (docs/BOSSES.md, BN5's Navis), from his HP at each (hp[v], -1
+ * `act` at (docs/game/bosses/bn5-navis.md), from his HP at each (hp[v], -1
  * none): the lowest of V1-V3 whose HP reaches the act's band (its floor),
  * else the strongest; at least V2 from act 4, as BN6's guardians fight EX
  * there, and from act 2 where `ex_early` (threat 4); SP on later cycles
  * and in the Nest. BN6's guardians' band (pacing_guardian_band): the
  * three-quarters discount went with his own engine, which no Cross could
- * come into (docs/MULTIROM.md, One net: the finer calls). */
+ * come into (docs/multirom/one-net.md: the finer calls). */
 int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early);
 /* ... and the HP he is fought at: his own, capped at the act's band's top
  * (as he spawns), never raised; his own on later cycles and in the Nest */
@@ -73,12 +73,12 @@ int pacing_xguardian_hp(int hp, int act, int loop);
 bool pacing_heal_certain(int depth);
 
 /* The acts a trip back from home may go to before the layer at `depth`
- * (docs/HOME.md, going back): the last two the run has won, newest first,
+ * (docs/world/home/going-back.md): the last two the run has won, newest first,
  * the Nest's never; each as the depth of its second layer, whose band and
  * area its trip takes. How many. */
 #define PACING_OLDER 2
 int pacing_older_acts(int depth, int out[PACING_OLDER]);
-/* A guardian's HP with the Net's clock at `clock` notches (docs/HOME.md,
+/* A guardian's HP with the Net's clock at `clock` notches (docs/world/home/going-back.md,
  * going back): RUN_CLOCK_PERCENT more a notch, at most PACING_HP_MOST (the
  * 12 bits the games' stats rows hold). */
 #define PACING_HP_MOST 4095

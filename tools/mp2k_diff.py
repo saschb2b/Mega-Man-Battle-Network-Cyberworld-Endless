@@ -5,7 +5,7 @@ frame START (the song's first engine frame) and ours' 0: the music player
 and its tracks, the DirectSound and PSG channels, and the mix each frame
 writes, byte for byte. Prints each part's first difference and how many
 frames differ; exits 1 where any does. Numbers only; reads no ROM.
-docs/ROM_DATA.md, BN6's sound engine, has the layout; docs/EMULATION.md, The
+docs/rom/sound.md, BN6's sound engine, has the layout; docs/engine/emulation/engine-sound.md, The
 engine's own sound, how it is run."""
 import struct
 import sys

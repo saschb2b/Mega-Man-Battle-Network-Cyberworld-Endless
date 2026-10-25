@@ -1,4 +1,4 @@
-/* The run's economy, measured and planned (docs/ECONOMY.md, issue #154).
+/* The run's economy, measured and planned (docs/game/economy/, issue #154).
  *
  * A plan is five curves, each the share of the flat economy (the rolls as
  * they were before issue #154) a layer hands out on one lever, by how far
@@ -19,7 +19,7 @@
 
 #define ECON_ACTS 7              /* the report's: six acts and the Nest */
 #define ECON_BUST_S 11           /* BN6's busting levels 1-10, and S */
-#define ECON_BATTLES_LEAST 1     /* random battles a layer, as playtesters' run logs fight them (docs/ECONOMY.md) */
+#define ECON_BATTLES_LEAST 1     /* random battles a layer, as playtesters' run logs fight them (docs/game/economy/) */
 #define ECON_BATTLES_MOST 3
 #define ECON_GOOD_TIER 2         /* a good chip: chip_pool.h's tier 2 or more (BN6's 3 stars up, every Mega and Giga) */
 #define ECON_STRONG_POWER 100    /* a strong chip: a straight hit of 100 or more */

@@ -1,6 +1,6 @@
 /* BN6's battlefield panels as its engine keeps, updates, draws and acts on
  * them, where BN5's lava and sea come into its free panel types (src/emu/
- * xpanels.c; docs/ROM_DATA.md, BN5's lava and sea in BN6's engine; issue
+ * xpanels.c; docs/rom/bn5-world.md, BN5's lava and sea in BN6's engine; issue
  * #82). The panels themselves are bn6.h's (BN6_FIELD_PANELS, BN6_PANEL_*);
  * Gregar's addresses, found by the panels' routines in the ROM. */
 #ifndef CW_BN6_PANELS_H

@@ -1,4 +1,4 @@
-/* The tour (docs/DEVTOOLS.md): the game itself shows each area's layer,
+/* The tour (docs/devtools/): the game itself shows each area's layer,
  * room by room, without walking. For each area a layer is built and
  * entered, MegaMan is warped onto every room in turn, and once the map has
  * settled the frame is saved. Random battles are off and MegaMan cannot be

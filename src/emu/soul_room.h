@@ -1,5 +1,5 @@
 /* The Souls' room in the core's ROM copy (free_space.h's FREE_SOULS to
- * FREE_PANELS, docs/EMULATION.md), laid out by what each part of the
+ * FREE_PANELS, docs/engine/emulation/), laid out by what each part of the
  * Souls' install writes there once a core (issue #82, the Souls track):
  * fixed places, the same at every boot with the same ROMs, so a state's
  * pointers into them stay good; and the numbers the Souls take in BN6's

@@ -1,9 +1,9 @@
-/* The Arena's inputs (issue #120, docs/ONLINE_ARENA.md): both players'
+/* The Arena's inputs (issue #120, docs/online/arena/): both players'
  * GBA keys by frame, the only thing that crosses the link. Each client
  * runs both linked BN6 cores; a frame of the pair needs both players' keys
  * for it and the frame after it, since one linked core crosses into its
  * next frame a little before its partner and takes the keys of its own
- * frame clock (docs/ONLINE_ARENA.md, Rollback: the two cores within a few
+ * frame clock (docs/online/arena/rollback/overview.md: the two cores within a few
  * thousand cycles of each other). With a rollback window (issue #128) a
  * frame may run before the other player's keys for it have come, each one
  * missing guessed as his last held; a key that comes otherwise than

@@ -303,7 +303,7 @@ bool npc_need_sprite(NpcList *npcs, int category, int index) {
 	return true;
 }
 
-#define OW_MAP_OBJECTS 0x0A4F24u   /* OverworldMapObjects, 16 bytes an id (docs/ROM_DATA.md, Props' map objects) */
+#define OW_MAP_OBJECTS 0x0A4F24u   /* OverworldMapObjects, 16 bytes an id (docs/rom/net-maps.md, Props' map objects) */
 #define OW_MAP_OBJECT_IDS 244
 
 void npc_objects_sprites(NpcList *npcs) {

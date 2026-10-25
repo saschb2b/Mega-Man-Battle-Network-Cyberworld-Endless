@@ -1,4 +1,4 @@
-/* A dark layer's prizes and finds (layer_objs.h; docs/LIBERATION.md): the
+/* A dark layer's prizes and finds (layer_objs.h; docs/game/liberation/): the
  * par's prizes, BN5's tiers (two under par a chip a Server's win would
  * pay, at par one a tier lower, over par zenny: lib_par_zenny), the chips
  * and zenny its board's item panels hold and the chips its BonusPanels

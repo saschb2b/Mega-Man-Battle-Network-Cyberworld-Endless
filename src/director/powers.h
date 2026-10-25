@@ -27,7 +27,7 @@ bool powers_cross_held(int navi);
 /* MegaMan's Crosses off CROSSSELECT for a battle (a liberation's
  * teammate's, who fights in his own form: liberation_battle.h), and back */
 void powers_crosses_hide(bool hide);
-/* A run's start: what it brought of MegaMan's powers (docs/META.md), in
+/* A run's start: what it brought of MegaMan's powers (docs/game/meta/), in
  * the Custom screen from the first battle: the Cross of run.cross, and
  * BeastOut with the BeastOut helper (issue #99). */
 void powers_bring(void);

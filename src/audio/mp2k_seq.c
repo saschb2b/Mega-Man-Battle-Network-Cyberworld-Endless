@@ -1,6 +1,6 @@
 /* MP2K's sequencer (mp2k_state.h): a frame of each music player, its
  * tracks' commands, its fade, as BN6's MPlayMain and its jump table run them
- * (bn6f asm/libs.s; Gregar's addresses in docs/ROM_DATA.md, BN6's sound
+ * (bn6f asm/libs.s; Gregar's addresses in docs/rom/sound.md, BN6's sound
  * engine). */
 #include "mp2k_state.h"
 

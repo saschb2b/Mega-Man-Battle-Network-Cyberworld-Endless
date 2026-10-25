@@ -1,4 +1,4 @@
-/* The Net Square's life (square_life.c, docs/ONLINE.md, The Square): two
+/* The Net Square's life (square_life.c, docs/online/square/dropped-link.md, The Square): two
  * Navis walking their routes by the wall clock, so every client whose
  * clock agrees sees them in the same place; BN6's log-in beam where a
  * Navi logs in or out, and the greeter's word on it; the greeter's and the

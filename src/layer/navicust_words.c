@@ -1,4 +1,4 @@
-/* What MegaMan says of the NaviCust (docs/NAVICUST.md, docs/VOICE.md):
+/* What MegaMan says of the NaviCust (docs/game/navicust.md, docs/voice/rules.md):
  * what each program does, the board's bugs and why they came (the second
  * screen's). The NaviCust itself, navicust.c. */
 #include <stdio.h>

@@ -1,4 +1,4 @@
-/* Another Battle Network game's backgrounds in BN6 (docs/MULTIROM.md): a
+/* Another Battle Network game's backgrounds in BN6 (docs/multirom/): a
  * battle background's record, tiles, map, palette and animation scripts
  * copied from that game's ROM into BN6's free space, and entered after
  * BN6's 22 in copies of BN6's three background tables, which the game's

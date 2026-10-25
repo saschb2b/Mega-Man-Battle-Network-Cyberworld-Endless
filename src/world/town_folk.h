@@ -1,4 +1,4 @@
-/* The townsfolk at a visit home (town_folk.c, docs/HOME.md: crowds that
+/* The townsfolk at a visit home (town_folk.c, docs/world/home/town-remembers.md: crowds that
  * move), for town.c. */
 #ifndef CW_TOWN_FOLK_H
 #define CW_TOWN_FOLK_H

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The agents' tools for the game (docs/DEVTOOLS.md, Agents' tools): build,
+"""The agents' tools for the game (docs/devtools/agents-tools.md): build,
 play, capture and compare it in one call each, with short answers. The MCP
 server (tools/cw_mcp.py, the repository's .mcp.json) serves these as its
 tools; the same from a shell:

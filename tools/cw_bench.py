@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The agents' tools' benchmark (docs/DEVTOOLS.md, Agents' tools): five
+"""The agents' tools' benchmark (docs/devtools/agents-tools.md): five
 tasks agents do all the time, each the way it was done before the tools
 (build.py shot, PIL by hand, play.py and a Read of each picture) and
 through the MCP server, as an agent's calls: each call's wall time, the

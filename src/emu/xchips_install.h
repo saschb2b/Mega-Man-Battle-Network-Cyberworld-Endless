@@ -1,5 +1,5 @@
 /* BN6's chip tables grown and moved in the core's ROM copy (issue #82;
- * docs/MULTIROM.md, The chip registry; docs/EMULATION.md): the chips'
+ * docs/multirom/chip-registry.md; docs/engine/emulation/): the chips'
  * image (src/core/chips.h: 512 records, names and descriptions to 511,
  * BN5's art) at CHIPS_FREE, the word naming the records and the 23 naming
  * the archives pointed at it; BN6's pack routines split so ids 320-511

@@ -1,4 +1,4 @@
-/* The wait for a dropped link drawn (issue #153, docs/ONLINE.md, A dropped
+/* The wait for a dropped link drawn (issue #153, docs/online/square/dropped-link.md, A dropped
  * link): a PET panel over the Square held still, in the NetPass's colours
  * and parts (netpass_draw.h): the link's state with a searching signal, what
  * the wait keeps, the time left to try (past a few seconds) and B to go

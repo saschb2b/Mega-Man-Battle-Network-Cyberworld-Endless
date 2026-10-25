@@ -1,4 +1,4 @@
-/* netpass.h. The NetPass (issue #131, docs/ONLINE.md, The NetPass): what a
+/* netpass.h. The NetPass (issue #131, docs/online/netpass.md): what a
  * game's ROMs open online, as stamps. The Net Square is every game's; the
  * Arena, Trade Central and the week's DeepNet dive need the full set, every
  * game this build supports for online play: netpass.c's table, BN6's and

@@ -1,4 +1,4 @@
-/* The Dark Soul in BN6's engine (issue #82; docs/MULTIROM.md, Transplanted
+/* The Dark Soul in BN6's engine (issue #82; docs/multirom/navis.md, Transplanted
  * Navis, The Dark Soul): what BN5's engine does for it by its id, the
  * chip records its chip AI reads, and its lists. BN5's chip AI, moved
  * with the Dark Soul (BN5_CHIP_AI_DARK), plays the chips of its foe's

@@ -1,6 +1,6 @@
 /* The screen a player is on, in a word: a headless run's state says it, so
  * an agent reads where a batch of input left the game without a picture
- * (tools/cw.py, docs/DEVTOOLS.md, Agents' tools). */
+ * (tools/cw.py, docs/devtools/agents-tools.md). */
 #include "screen_name.h"
 
 #include "devtools.h"

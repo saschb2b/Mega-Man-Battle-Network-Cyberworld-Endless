@@ -1,5 +1,5 @@
 /* --dev arena2v2: a partner's own Custom screen, BN6's own (epic #167,
- * docs/ONLINE_ARENA.md, A partner's own Custom screen). A partner has no
+ * docs/online/arena/two-a-side/custom-screen.md). A partner has no
  * GBA in the pair, so his own client runs his screen outside it: never
  * hashed, never part of the battle's determinism, never on a spectator's
  * client. A lone core taken from his side's GBA at a Custom screen ends

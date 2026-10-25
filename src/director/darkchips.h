@@ -1,4 +1,4 @@
-/* The run's DarkChips (docs/META.md, DarkChips; issues #64, #70, #82):
+/* The run's DarkChips (docs/game/meta/darkchips.md; issues #64, #70, #82):
  * which of BN5's twelve kinds it holds, kept beside the run's checkpoint,
  * and the price of one used: one HPMemory of max HP for the rest of the
  * run, for every battle a DarkChip's dark power ran in. A new run holds

@@ -1,5 +1,5 @@
 /* Trade Central's two screens' PET text (trade_screen_text.c, issue #145;
- * docs/ONLINE.md, Trade Central; docs/VOICE.md): the spares list's and
+ * docs/online/trade-central.md; docs/voice/rules.md): the spares list's and
  * the chip trade's headings, notes and keys. What the clerk and MegaMan
  * say around them is trade_words.c's. */
 #ifndef CW_TRADE_SCREEN_TEXT_H

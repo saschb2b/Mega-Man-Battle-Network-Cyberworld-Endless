@@ -1,4 +1,4 @@
-/* --dev arena (issue #120, docs/ONLINE_ARENA.md): the Arena's engine on
+/* --dev arena (issue #120, docs/online/arena/): the Arena's engine on
  * this machine. The player is the cable's first GBA, from the keyboard or
  * pad; the second is a script over the local link (arena_link_local),
  * its keys held back `arenalag` ticks as a network would hold them. The

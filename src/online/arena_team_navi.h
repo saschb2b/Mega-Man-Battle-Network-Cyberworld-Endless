@@ -1,5 +1,5 @@
 /* --dev arena2v2: each partner's own battle NaviStats and hand (epic
- * #167, docs/ONLINE_ARENA.md, The partners' own NaviStats and hands). BN6
+ * #167, docs/online/arena/two-a-side/navistats.md and hands). BN6
  * keeps one battle NaviStats a side (BN6_BATTLE_NAVI) and one hand
  * (BN6_BATTLE_HAND), every reader and writer going through one routine
  * with a side (BN6_NAVI_STATS_ADDR, BN6_HAND_ADDR). Where the side is

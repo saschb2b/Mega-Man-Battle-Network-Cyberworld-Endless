@@ -1,5 +1,5 @@
-/* What the Net Square's life says (square_life_words.c, docs/ONLINE.md,
- * The Square; docs/VOICE.md): the greeter and the referee Mr.Progs, the
+/* What the Net Square's life says (square_life_words.c, docs/online/square/dropped-link.md,
+ * The Square; docs/voice/rules.md): the greeter and the referee Mr.Progs, the
  * two walking Navis' talk, the Board's posts, and what MegaMan finds
  * checking the props, each composed from the facts the client has. */
 #ifndef CW_SQUARE_LIFE_WORDS_H

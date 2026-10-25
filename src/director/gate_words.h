@@ -1,5 +1,5 @@
 /* What is said at the Net Square's gate in Lan's HP (gate_words.c,
- * docs/HOME.md piece 11, docs/ONLINE.md, docs/VOICE.md): its keeper, a
+ * docs/world/home/square-gate.md, docs/online/, docs/voice/rules.md): its keeper, a
  * Mr.Prog, and MegaMan. */
 #ifndef CW_GATE_WORDS_H
 #define CW_GATE_WORDS_H
@@ -38,7 +38,7 @@ const char *gate_keeper_privacy_question(void);
 /* MegaMan's question on the gate, the way known. */
 const char *gate_question(void);
 /* The checkpoint before a visit not written: MegaMan stays (the game's
- * own note says why, never a character: docs/VOICE.md, What nobody
+ * own note says why, never a character: docs/voice/rules.md, What nobody
  * says). */
 const char *gate_save_failed(void);
 /* How a visit ended (online_visit.h), said at the gate after it, and

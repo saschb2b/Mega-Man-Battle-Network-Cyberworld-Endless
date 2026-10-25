@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """virus_battler.py [report] | lab [--record N] [--team A,B] [--time-up] [--mash] [--state FILE]:
 BN6 Cybeast Gregar's Virus Battler read from the player's own ROM and played
-in romlab (docs/LEVEL_DESIGN.md, The Virus Battler; docs/ROM_DATA.md, The
+in romlab (docs/world/level-design/virus-battler.md; docs/rom/virus-battler.md, The
 Virus Battler; the names in src/emu/bn6_battler.h).
 
 report (the default) prints what the card holds (each family's HP, attack and
 MB, the numbers the VIRUS LIST shows) and the five Battlers' series (each
 round's record, battlefield and the pair it fields), and fails where the ROM
-is not as docs/ROM_DATA.md says: 33 records of mode 6 from list 0's 0x1A,
+is not as docs/rom/ says: 33 records of mode 6 from list 0's 0x1A,
 their rounds counting up, a series' last with music 0x16.
 
 lab plays one of those records in romlab on the plain ROM, from an engine
@@ -127,7 +127,7 @@ def report(rom):
                 bad.append(f'record {n + r:#x}: mode {mode}, round {rnd}, music {music:#x}')
         n += rounds
     for b in bad:
-        print('  not as docs/ROM_DATA.md says:', b)
+        print('  not as docs/rom/ says:', b)
     return not bad
 
 

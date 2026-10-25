@@ -3,7 +3,7 @@ tools/xdiff.py: each event's place in BN5's numbers (a family's code through wha
 compared by their call sites (its spawns, sounds, effects, setAttack, a panel reserved, its draws), the draws the replay
 could not match, the objects each spawn made, and the engine's own bits of an object read in BN6's terms from BN5's
 records: a panel reserved (BN6 marks the object, BN5 does not) and the blink's phase (the two hide a flashing object on
-opposite frames). Each translation is the family's own record read as BN6 has it, never a mask (docs/DEVTOOLS.md, The
+opposite frames). Each translation is the family's own record read as BN6 has it, never a mask (docs/devtools/differential.md, The
 differential)."""
 from xdiff_snap import (BLINK, DRAW, KEPT, MOOD, NODE, PLAYER_NAVI, REPLAYED, RESERVE, SPAWN, SPRITE_SET, SOUND, EFFECT, ATTACK, UNMAPPED,
                         UNMATCHED, Diff)

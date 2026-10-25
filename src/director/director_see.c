@@ -198,7 +198,7 @@ void director_draw_tent(void) {
 	fill_rect(x + 38, y + 2, 2, 20, c);
 }
 
-/* The duel's clock (docs/RIVAL.md): while its battle runs, the time so far
+/* The duel's clock (docs/game/rival.md): while its battle runs, the time so far
  * against ProtoMan's, as BN6's results screen counts them, in the picture's
  * top right, under the Custom gauge; on the second rung whether MegaMan has
  * been hit. Hidden while the clock holds (BATTLE START!, the Custom screen,

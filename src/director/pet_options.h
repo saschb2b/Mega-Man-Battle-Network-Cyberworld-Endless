@@ -1,4 +1,4 @@
-/* The PET's Options (docs/PET.md, Options): BN6's Comm row, which a run
+/* The PET's Options (docs/game/pet.md, Options): BN6's Comm row, which a run
  * greys, lit and named Options in the menu's own lettering, and A on it
  * opening the game's Options (options.h) over the PET, which waits under
  * it. */

@@ -5,7 +5,7 @@
  * in its colour, its name, what kind of part it is and where that may go,
  * whether it fits the board's free cells and whether L and R turn it, and
  * what it does in MegaMan's words. Under it, the board as it stands: what
- * RUN would bring (docs/NAVICUST.md's rules, the bug's cause MegaMan
+ * RUN would bring (docs/game/navicust.md's rules, the bug's cause MegaMan
  * names after RUN, a step sooner) and the rules in a line. */
 #include "second_navicust.h"
 

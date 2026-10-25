@@ -1,5 +1,5 @@
 /* ColonelSoul's own in BN6's engine (issue #82, the Souls track's S5;
- * docs/MULTIROM.md, Transplanted Souls; docs/ROM_DATA.md, ColonelSoul's
+ * docs/multirom/souls.md; docs/rom/souls.md, ColonelSoul's
  * button, chip shot and obstacle strike): the Custom screen's button under
  * the picks (BN5's elements 8 and 9, which Gregar keeps for DustCross: its
  * set-up and its A the same, BN5's rule that lights it, BN5's mode 0x38

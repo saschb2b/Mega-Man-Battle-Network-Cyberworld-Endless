@@ -1,5 +1,5 @@
 /* The town: one of BN6's towns cut into pieces and set out again, where
- * Lan starts a run and jacks MegaMan in (docs/OVERWORLD.md). */
+ * Lan starts a run and jacks MegaMan in (docs/world/overworld.md). */
 #ifndef CW_TOWN_H
 #define CW_TOWN_H
 
@@ -33,7 +33,7 @@ static inline uint32_t town_seed(uint32_t run_seed) { return run_seed ^ 0x70776E
 bool town_plan(uint32_t seed);
 const TownInfo *town_info(void);
 /* Whether the planned town is home: Central Town with Lan's house, his PC
- * the jack-in (docs/HOME.md), its port his front door. */
+ * the jack-in (docs/world/home/), its port his front door. */
 bool town_is_home(void);
 /* Where the planned town's tiles matched no source tile. */
 const uint8_t *town_misses(void);
@@ -60,7 +60,7 @@ bool town_moved(int sx, int sy, int *x, int *y);
 /* The town's map objects (id) and people (id -1), in world units. */
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 
-/* The ports (docs/HOME.md): the landmark's (0), then one for each of the
+/* The ports (docs/world/home/): the landmark's (0), then one for each of the
  * act's other ways where the town has one (town_ports.c). */
 #define TOWN_PORTS 3
 /* How many of the act's ways a visit opens (1 to TOWN_PORTS), before

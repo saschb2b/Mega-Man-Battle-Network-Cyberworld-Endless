@@ -290,7 +290,7 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		/* (chips or Souls of BN5's, BN5's ROM not read: they wait for it,
-		 * and MegaMan says so, docs/MULTIROM.md) */
+		 * and MegaMan says so, docs/multirom/) */
 		D.resumed = true;
 		if (home) return resume_home();
 		spins_sync();

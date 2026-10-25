@@ -20,7 +20,7 @@
 #define BUS 0x08000000u
 
 /* The engine's own Thumb routines, at CHIPS_CODE (numbers: written for
- * this, assembled with devkitARM's as for the ARM7TDMI; docs/EMULATION.md):
+ * this, assembled with devkitARM's as for the ARM7TDMI; docs/engine/emulation/):
  * +0x00 getOffsetToQuantityOfChipCode's tail (r2 the chip, r3 its code's
  * place: the count's address in BN6's pack below 320, in its extension
  * from 320, as if those ids followed on; pop {r4,r7,pc}); +0x16
@@ -81,13 +81,13 @@ static const Change code_changes[] = {
 	{ BN6_PSEUDO_TEST_NAVI, 3, { 0x429A, 0xDB00, 0x2101 }, { MOV_LR_PC, 0x4718, NOP } },
 	{ BN6_PSEUDO_POOL_NAVI, 2, { 0x0170, 0 }, { LO(ROUTINE(CODE_PSEUDO)), HI(ROUTINE(CODE_PSEUDO)) } },
 	/* (the Library's P.A. tab's builder to 349: the registry's 350 on are Program Advances of library type 4 and no library
-	 * number, which it would list at the slot before its buffer once formed: docs/ROM_DATA.md, BN5's Program Advances) */
+	 * number, which it would list at the slot before its buffer once formed: docs/rom/chips-code.md, BN5's Program Advances) */
 	{ BN6_PA_LIBRARY_BOUND, 2, { 0x001E, 0 }, { 0x001D, 0 } },
 };
 #define NCODE (int)(sizeof code_changes / sizeof *code_changes)
 
 /* The words that name the chip records and the names' and descriptions'
- * archives (each found by a scan of Gregar for the word; docs/ROM_DATA.md,
+ * archives (each found by a scan of Gregar for the word; docs/rom/chips-code.md,
  * The chip registry): which (0 the records, 1-2 the names' archives, 3-4
  * the descriptions'), where */
 static const struct { uint8_t which; uint32_t at; } refs[] = {

@@ -1,5 +1,5 @@
 /* Battle Network 5: Team Colonel (USA): the addresses the differential's
- * second core reads (guest.c, src/dev/xdiff.c; docs/ROM_DATA.md, BN5 guest
+ * second core reads (guest.c, src/dev/xdiff.c; docs/rom/bn5-battles.md, BN5 guest
  * battles) and what is moved from it into BN6's engine. BN5 shares BN6's engine:
  * its toolkit, game state and battle records are laid out as BN6's are. */
 #ifndef CW_BN5_H
@@ -31,7 +31,7 @@
 #define BN5_ENTITY_FIND   2           /* a BattleSettings entity's kind (byte 0 >> 4): a green Mystery Data, there where its byte 2 beats RNG % 15 (0x08006874) */
 #define BN5_RNG_PRIMARY   0x02001D40u /* u32, its random numbers (bn6f ePrimaryRngSeed, BN6's 0x020013F0): GetRNG 0x08001490 steps it, once a frame on a map
                                        * and in battle (0x08004CA8); a battle keeps it as it begins (0x080098D8) and puts it back after its opening (0x08009A0A),
-                                       * its rolls from there: the Mystery Data and its find, the reward, the viruses (docs/ROM_DATA.md, BN5's random numbers) */
+                                       * its rolls from there: the Mystery Data and its find, the reward, the viruses (docs/rom/bn5-battles.md, BN5's random numbers) */
 #define BN5_RNG_SECONDARY 0x02001C94u /* u32, its second ones (bn6f eSecondaryRngSeed, BN6's 0x02001120): GetRNGSecondary 0x080014C0 steps it twice a
                                        * frame (0x0800031C, 0x08004CAC); a battle's folder is shuffled from it as the battle begins (0x08008D82): the first hand */
 #define BN5_RNG_XOR       0x873CA9E5u /* both words' step: x = ((x rotl 1) + 1) ^ this; SeedRNG 0x08001488 sets the first to 0xA338244F at the start */
@@ -87,7 +87,7 @@
 #define BN5_CHIP_POWERS_COUNT 76          /* ... its entries (1000-1075), BN6 growing its own table with those a helper moves */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
 #define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */
-/* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
+/* its DarkChips (docs/rom/bn5-battles.md, BN5 guest battles; .build research):
  * ids 187-198, folder chips as any, at most three in a folder (one of each) */
 #define BN5_DARK_FIRST    187
 #define BN5_COMPACT       0x080250EAu /* the deck's compaction at each Custom screen, after the worried rule (0x08025118): replaced by the shelf (its deck BN5_BATTLE_DECK) */
@@ -108,7 +108,7 @@
 #define BN5_BATTLE_HP     (BN5_BATTLE_STATE + 0x34) /* u16: MegaMan's HP as the battle ends, to copy back (0 deleted) */
 #define BN5_FIGHT_HP      0x0203B224u /* u16: MegaMan's HP while the battle runs (his battle object's), then +2 its max (the worried rule reads them) */
 
-/* Its battle as the autopilot and the dev switches read it (docs/ROM_DATA.md,
+/* Its battle as the autopilot and the dev switches read it (docs/rom/bn5-battles.md,
  * BN5's battle for the autopilot): BN6's structures (bn6.h's fields), at its
  * own addresses, but where named here */
 #define BN5_BATTLE_TIMER  (BN5_BATTLE_STATE + 0x40) /* u32, the frames fought: held on the Custom screen, through BATTLE START! and the results (BN6_BATTLE_TIMER) */
@@ -128,7 +128,7 @@
 #define BN5_MEGAMAN_READY 0x06        /* MegaMan's action (BN6_T1_ACTION) when he can act, BN6's 0x08 (0x10 a step, 0x14 a chip, 0x03 hit); his chip (BN6_T1_CHIP) is 0xFFFF as its use begins */
 #define BN5_FIELDS        0x0800BD64u /* its battlefields, laid out as BN6's (BN6_FIELDS: 12 bytes each, a nibble a panel), its own
                                        * numbers (its records' byte 0), read through the literal at 0x0800AF84; its panel types numbered
-                                       * as BN6's but for 5, 9 and 0xA (BN5_PANEL_FLAGS_OF; docs/ROM_DATA.md, Battlefields) */
+                                       * as BN6's but for 5, 9 and 0xA (BN5_PANEL_FLAGS_OF; docs/rom/battle.md, Battlefields) */
 #define BN5_PANEL_FLAGS_OF 0x0800BCE8u /* the flags each panel type gives (+0x18), a u32 a type, 11 of them (BN6_PANEL_FLAGS_OF's) */
 #define BN5_PANEL_HOLY    9           /* its panel type: holy (BN6_PANEL_HOLY's flag; damage halved, 0x0800C80C) */
 #define BN5_PANEL_LAVA    8           /* its panel type: lava (none in BN6: a non-Fire object on it takes 50 and it cools plain, 0x08016DA2;
@@ -151,7 +151,7 @@
 #define BN5_PANEL_LAVA_TIMER 0x10     /* ... lava's frames left, u16, counted down on lava, 0x3C0 written while the panel is another (BN6 keeps one timer, */
 #define BN5_PANEL_SEA_TIMER  0x14     /* ... BN6_PANEL_TIMER); and the sea's, the same */
 /* Its lava and sea, as src/emu/xpanels.c brings them into BN6's engine
- * (docs/ROM_DATA.md, BN5's lava and sea in BN6's engine): what they do,
+ * (docs/rom/bn5-world.md, BN5's lava and sea in BN6's engine): what they do,
  * BN6's routines' twins, and how they are drawn */
 #define BN5_PANEL_STEP    0x08016C76u /* what the panel under an actor does to it (BN6_PANEL_STEP): poison, and a Fire object on sea the same (0x08016C9E) */
 #define BN5_LAVA_STEP     0x08016D78u /* an object on lava, from the actors' pre-steps before their status step and four obstacles': 50 damage << the
@@ -175,8 +175,8 @@
 #define BN5_WINDOW_OPEN   0x78        /* BN5_CUSTOM_WINDOW: open */
 #define BN5_BATTLE_DECK   0x0203C830u /* the battle's folder as it is drawn, u16 chip | code << 9 (BN6_BATTLE_DECK) */
 
-/* Its Navis as a territory's guardians (docs/BOSSES.md, BN5's Navis;
- * docs/ROM_DATA.md, BN5's Navis): a Navi is type BN5_NAVI_TYPE in the ids
+/* Its Navis as a territory's guardians (docs/game/bosses/bn5-navis.md;
+ * docs/rom/navis.md, BN5's Navis): a Navi is type BN5_NAVI_TYPE in the ids
  * table, his AI index a family of six versions (V1, V2, V3, SP, DS, a
  * sixth), each with its 6-byte stats row (BN5_ENEMY_STATS) */
 #define BN5_NAVI_TYPE     1           /* a Navi's type in the ids table */
@@ -193,7 +193,7 @@
 #define BN5_DARK_AFTER_END 0x0802CA68u /* ... the end of its routines and their table, the bytes the port reads */
 #define BN5_DARK_AFTER_CRC 0x25D4DB46u /* ... their CRC32, the port's source */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
-/* Its Souls (docs/META.md, Souls; docs/ROM_DATA.md, BN5's
+/* Its Souls (docs/game/meta/souls.md; docs/rom/bn5-battles.md, BN5's
  * Souls): the Custom screen's UNITE command, its Double Soul */
 #define BN5_UNITE_CHECK   0x08024B2Cu /* the check of the last chip picked: its kind (BN5_CHIP_KIND) a Soul's, that Soul's flag set, not used this battle */
 #define BN5_SOUL_FLAGS    0x08024BF4u /* a byte per Soul 1-12: its event flag, 0xFF none (Team ProtoMan's six in this version) */
@@ -209,7 +209,7 @@
                                        * unites, +6 1 for Chaos Unison, +7 0 ready, 1 grey, 2 chosen */
 #define BN5_BATTLE_SOUL   (BN5_BATTLE_NAVI + 0x2C) /* u8, MegaMan's side's: the Soul he is united with (its Navi's AI index), 0 none */
 /* UNITE as BN6's engine takes it over (src/emu/soulunite.c, the Souls track's
- * S2; docs/ROM_DATA.md, UNITE on BN6's Custom screen): its rule, read here and
+ * S2; docs/rom/souls.md, UNITE on BN6's Custom screen): its rule, read here and
  * done there, and what of it is copied from the player's ROM */
 #define BN5_UNITE_STAND   0x08023C8Cu /* the rule it stands by as the Custom screen opens: its Navi 0, neither worried (BN5_MOOD_WORRIED) nor
                                        * dark (0), Double Soul learned; then grey (+7 1) until a pick lights it */
@@ -230,7 +230,7 @@
 #define BN5_SOUL_PICTURES 0x08023358u /* mode 0x24's word naming the Souls' pictures: 0x0874B2BC, 0x80 bytes by Soul 1-12, 0xD Chaos Unison */
 #define BN5_SOUL_PICTURE_PAL 0x08023350u /* ... and their palette: 0x0874BDBC, 0x20 bytes */
 /* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan unites with (BN5_SOUL_FLAGS); then the Darkloids
- * its Liberation Missions end in (docs/LIBERATION.md, stage 4: V1 ids ShadeMan 0x149, BlizzardMan 0x14F, CloudMan 0x155, CosmoMan 0x15B) */
+ * its Liberation Missions end in (docs/game/liberation/building/stage-4-darkloids.md: V1 ids ShadeMan 0x149, BlizzardMan 0x14F, CloudMan 0x155, CosmoMan 0x15B) */
 enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN, BN5_NAVI_SHADEMAN, BN5_NAVI_BLIZZARDMAN, BN5_NAVI_CLOUDMAN, BN5_NAVI_COSMOMAN };
 #define BN5_COLONEL_ID    0x125       /* Colonel's enemy ids, V1, V2, V3 and SP, from here (the differential's colonel_v1: 0x125) */
 
@@ -241,7 +241,7 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_SUB_BATTLE     0x0C   /* BN5_GAMESTATE: in battle */
 
 /* Its virus families as src/emu/xvirus.c moves them into BN6's engine
- * (issue #82; docs/MULTIROM.md, Transplanted families): the tables they
+ * (issue #82; docs/multirom/families.md): the tables they
  * are found through, laid out as BN6's (src/emu/bn6_families.h) */
 #define BN5_FAMILY_TABLES 0x081045D4u /* nine per-family tables, BN5_FAMILY_STEP apart, BN5_FAMILIES words each, by AI index: 0 the state
                                        * tables (generic states 0-5, the family's own from 6), 1 struct1, 2 struct2, 3 each frame, then the
@@ -268,7 +268,7 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_SPAWN_4       0x080031CCu /* the fourth kind's, after the object running (BN6_SPAWN_4); BN5 has no other of the kind */
 #define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
 #define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
-/* What its families' code asks of the engine that BN6's families' never does (issue #82's A2b; docs/ROM_DATA.md, The
+/* What its families' code asks of the engine that BN6's families' never does (issue #82's A2b; docs/rom/virus-families.md, The
  * families' shims and pre-steps) */
 #define BN5_BY_NAME_RANGE 0x0800CE54u /* object_getEnemyByNameRange (BN6_BY_NAME_RANGE: the same arguments, BN5's NameIDs) */
 #define BN5_COUNT_BY_NAME 0x08104B1Cu /* the shared virus code's count of the enemies of a NameID range (r1, r2, handed on to
@@ -290,7 +290,7 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_PRESTEP_TAKE_CRC 0x0D9E4CF8u /* ... its CRC32, the port's source */
 
 /* Its Navis as src/emu/xnavi_install.c moves them into BN6's engine
- * (issue #82; docs/MULTIROM.md, Transplanted Navis; docs/ROM_DATA.md, The
+ * (issue #82; docs/multirom/navis.md; docs/rom/navis.md, The
  * Navis' tables): the tables they are found through by AI index, laid out
  * as BN6's (src/emu/bn6_navis.h) but for the three BN6 added (hook A,
  * frozen, bubbled) */
@@ -395,6 +395,6 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_COLONEL_NAME_PAL 0x08024650u /* ... and its name line's (0x0802460A): 0x086FC1E8, 0x20 bytes */
 #define BN5_COLONEL_STRIKE_SPAWN 0x080CABCAu /* the obstacle strike's spawn: the third kind's 0x30 at r0, r1, its side r3 (0x08018026) */
 #include "bn5_expression.h"   /* what BN5 has to show a mood where BN6 has the like or lacks it */
-#include "bn5_liberation.h"   /* its Liberation Missions' records and board (docs/LIBERATION.md) */
+#include "bn5_liberation.h"   /* its Liberation Missions' records and board (docs/game/liberation/) */
 #include "bn5_music.h"        /* what starts its songs, and where the ones runs play */
 #endif

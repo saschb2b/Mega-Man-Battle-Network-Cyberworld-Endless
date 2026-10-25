@@ -27,7 +27,7 @@ ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
 OFFER = struct.Struct("!BHBB")
 BOARD_ENTRY = struct.Struct("!IHBB")
-# (the stands, protocol v7: docs/ONLINE_ARENA.md, The stands)
+# (the stands, protocol v7: docs/online/arena/stands.md)
 ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
 STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBBB")
 # (Team NetBattles, protocol v12: teams.py)
@@ -98,7 +98,7 @@ def full_set(roms):
     the full set: every bit of protocol.json's roms_full, BN5 Team Colonel's
     today (BN6's identity every session has). The Square is every game's;
     the Arena, Trade Central and the week's posts take the full set, and
-    refuse a session without it with NOTICE notice_pass (docs/ONLINE.md,
+    refuse a session without it with NOTICE notice_pass (docs/online/netpass.md,
     The NetPass)."""
     return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
 

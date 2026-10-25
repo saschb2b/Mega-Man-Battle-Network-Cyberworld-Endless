@@ -56,7 +56,8 @@ def releases():
         m = re.fullmatch(r'v(\d+\.\d+\.\d+)\.md', name)
         if m:
             with open(os.path.join(folder, name), encoding='utf-8') as f:
-                notes[m.group(1)] = f.read().strip()
+                # past the frontmatter every concept of the knowledge base opens with (docs/index.md)
+                notes[m.group(1)] = re.sub(r'\A---\n.*?\n---\n', '', f.read(), flags=re.S).strip()
     out = []
     for v in sorted(set(notes) | set(dated), key=version_key, reverse=True):
         if v in notes:

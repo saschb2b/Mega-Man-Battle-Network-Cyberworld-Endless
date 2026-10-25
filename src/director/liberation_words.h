@@ -23,7 +23,7 @@ const char *lib_bonus_words(int slot, int op);
 const char *lib_key_words(bool sealed);
 /* A trap panel liberated: its harm, `hp`. */
 const char *lib_trap_words(int hp);
-/* The sealed region's route found (docs/LIBERATION.md, Special routes). */
+/* The sealed region's route found (docs/game/liberation/special-routes.md). */
 const char *lib_route_words(void);
 /* A rest (BN5's Pass). */
 const char *lib_rest_words(void);

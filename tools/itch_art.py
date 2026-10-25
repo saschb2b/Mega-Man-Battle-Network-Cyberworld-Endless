@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The itch.io page's pictures (docs/ITCH.md): the cover in listings and
+"""The itch.io page's pictures (docs/project/itch.md): the cover in listings and
 search, the banner over the page, the picture behind the player's Run game
 button, the theme's background tile, and the screenshots at a whole scale.
 

@@ -1,4 +1,4 @@
-/* The Net Square's palette on the second screen (issue #178; docs/ONLINE.md,
+/* The Net Square's palette on the second screen (issue #178; docs/online/square/emotes.md,
  * Emotes): on the 3DS's bottom screen and Android's second display, every
  * emote and phrase as a button of the PET's, one tap each, as the DS games
  * kept their touch screen for the PET; the favourites on L marked with

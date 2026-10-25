@@ -16,7 +16,7 @@ import xrecipe_thumb as T
 BUS = T.BUS
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ---- each game's tables (src/emu/bn5.h, bn6.h and bn6_families.h name them; docs/ROM_DATA.md says how each was found) ----
+# ---- each game's tables (src/emu/bn5.h, bn6.h and bn6_families.h name them; docs/rom/ says how each was found) ----
 
 BN5 = dict(
     fam=0x081045D4, step=0x8C, nfam=35,              # BN5_FAMILY_TABLES, BN5_FAMILY_STEP, BN5_FAMILIES

@@ -1,5 +1,5 @@
 /* The pair a NetBattle from the Net Square builds, and what of it is a
- * 2v2's (protocol v15, issue #181, docs/ONLINE_ARENA.md, Over the
+ * 2v2's (protocol v15, issue #181, docs/online/arena/two-a-side/over-the-server.md, Over the
  * server): the four seats as START names them, the MegaMen built into
  * the pair (seats 0 and 1's as the GBAs', seats 2 and 3's as the
  * partners', arena_seats.h), my seat's own stream and screen (a partner's

@@ -1,4 +1,4 @@
-/* The Arena from the Net Square (issue #120, docs/ONLINE_ARENA.md): a
+/* The Arena from the Net Square (issue #120, docs/online/arena/): a
  * Practice NetBattle asked of another player's MegaMan in BN6's chat boxes
  * (online_chat.c's Battle), his player asked in one ("... wants a Practice
  * NetBattle! Take it?", the cursor on No), and both games then off the

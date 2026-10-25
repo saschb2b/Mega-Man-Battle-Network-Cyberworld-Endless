@@ -1,5 +1,5 @@
 /* --dev arena2v2: the leads wait for their partners (epic #167, the
- * owner's call of 22 October 2026; docs/ONLINE_ARENA.md, The leads wait).
+ * owner's call of 22 October 2026; docs/online/arena/two-a-side/leads-wait.md).
  * BN6's link battle closes its Custom screen once both GBAs' packets have
  * come over the cable (each GBA sends its own as its lead's OK has slid
  * the window out, BN6_LINK_SEND, and waits in mode 0x14 until it holds

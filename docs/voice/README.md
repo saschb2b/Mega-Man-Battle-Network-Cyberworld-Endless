@@ -1,8 +1,15 @@
+---
+type: Process
+title: "The voice review"
+description: "The voice review (issue #135): `tools/voice_catalog.py` reads every line of the words files into `docs/voice/catalog.json`, the owner judges them on the review dashboard, whose db keeps verdicts and directions, and a voice pass applies them."
+tags: [voice]
+generated: { by: claude-code/unrecorded, at: 2026-10-19T17:34:11Z }
+---
 # The voice review
 
 Every line the game says, in one place the owner can read, judge and
 direct (issue #135). The words files stay the source of truth
-(docs/VOICE.md, Where the lines live); this folder holds what is read out
+([Voice](rules.md#where-the-lines-live), Where the lines live); this folder holds what is read out
 of them, and the page that shows it.
 
 | Part | What it is |
@@ -45,11 +52,11 @@ line is one line of the diff. A line holds:
   counts as a typical value (8 for `%s`, 3 for `%d`).
 - **`domain`** (the area of the game the page groups it under) and
   **`kind`**: `speech`, or `screen` for a screen's own words (menus,
-  labels, the second screen's panels, the act's cards), which VOICE.md
+  labels, the second screen's panels, the act's cards), which [Voice](rules.md)
   leaves to their plain style: catalogued, not flagged.
 - **`text_hash`**: the first 12 hex digits of the text's SHA-1. A review
   keeps the hash it was given on.
-- **`flags`**: VOICE.md's checks a machine can make, by code. The boxes
+- **`flags`**: [Voice](rules.md)'s checks a machine can make, by code. The boxes
   carry each flag with what tripped it; `flags` in the catalog's head
   says what each code means: `pages`, `line-long`, `word-long`,
   `box-words`, `beats`, `long-speech`, `prog-caps`, `comma-space`,
@@ -67,7 +74,7 @@ comment and **`shows`**, pictures of where its lines show in
 docs/screenshots or docs/clips), **`containers`** (each function's or
 table's comment in the `.c` and in its header) and **`summary`**: counts
 by domain and flag, and per speaker our numbers (`numbers`; `groups` as
-VOICE.md's table groups them) beside BN6's (`bn6`, read from VOICE.md's
+[Voice](rules.md)'s table groups them) beside BN6's (`bn6`, read from [Voice](rules.md)'s
 table, The numbers: numbers only, never BN6's text).
 
 Two lists put the lines in the order the review reads them:
@@ -128,7 +135,7 @@ nothing of the review is kept there).
 - **The views**: **To review** (speech without a verdict), **Re-check**
   (lines whose words changed since their review, and reviews a voice pass
   applied: old words against new, where the review kept them), **Open**
-  (Change and Cut not yet applied), **Flagged** (VOICE.md's machine
+  (Change and Cut not yet applied), **Flagged** ([Voice](rules.md)'s machine
   checks), **Sweep** (below), **All**, **Directions**, **Summary** (the
   areas' progress and our numbers against BN6's per speaker); and the
   search over words, ids and comments.
@@ -218,14 +225,14 @@ When the owner asks for one, or before a release that changed lines:
    sweep mark's id is a row of the catalog's `sweep`: its `text` is the
    line as it was (`**` around what went), its `live` what is left today,
    and the log in `docs/voice/sweep/` says where it stood.
-3. **Rewrite** in the words file, by docs/VOICE.md and the directions:
+3. **Rewrite** in the words file, by [Voice](rules.md) and the directions:
    a `change` toward the note and the suggestion (a suggestion is the
    owner's wording: keep it unless it breaks the box, and say so if it
    does), a `cut` by removing the line, or the code that says it, where the
    game does not need it; a line the owner brought back is put back as
    the log has it, or as the mark's note asks, and its row leaves the
    log's Cut table (a note under the table says it came back, and when).
-   Look at it in the game (`--talk`, docs/DEVTOOLS.md).
+   Look at it in the game (`--talk`, [Dev tools](../devtools/overview.md)).
 4. **Regenerate**: `python3 tools/voice_catalog.py`, then `build.py lint`
    and `build.py test`; the flags of the lines touched read over.
 5. **Republish** the dashboard to its link with the new catalog
@@ -235,7 +242,7 @@ When the owner asks for one, or before a release that changed lines:
    ArtifactData's `update` (`batch` for many); each direction acted on
    gets `status: "applied"` and its `applied_note`, and each sweep mark
    acted on the same.
-7. **Fold standing directions** into docs/VOICE.md, Directions from the
+7. **Fold standing directions** into [Voice](rules.md#directions-from-the-owner), Directions from the
    owner: the owner's words, quoted, with the date given, and the rule
    they make where it changes one above. A one-off direction (one line,
    one pass) is marked applied and not folded.

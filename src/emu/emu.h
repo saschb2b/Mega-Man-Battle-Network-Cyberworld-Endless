@@ -1,4 +1,4 @@
-/* The embedded GBA core that runs the game's own code (docs/EMULATION.md). */
+/* The embedded GBA core that runs the game's own code (docs/engine/emulation/). */
 #ifndef CW_EMU_H
 #define CW_EMU_H
 
@@ -79,7 +79,7 @@ void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
 
-/* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
+/* A hook on the game's code (hook.h; docs/engine/emulation/hooks.md), set
  * between frames: on the Thumb instruction at addr, an answer hook or an
  * event hook queuing `kind` (its instruction claimed: claims.h); and taken
  * off. */

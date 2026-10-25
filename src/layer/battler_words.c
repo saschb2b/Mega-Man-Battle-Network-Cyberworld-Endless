@@ -1,5 +1,5 @@
 /* A Virus Battler Mr.Prog's words (battler_words.h): BN6's minigame in his
- * voice, ALL CAPITALS (docs/VOICE.md, Mr.Prog). His rules are said once a
+ * voice, ALL CAPITALS (docs/voice/rules.md, Mr.Prog). His rules are said once a
  * profile, with the BtlrCard; after that he names the pair and the price. */
 #include "battler_words.h"
 

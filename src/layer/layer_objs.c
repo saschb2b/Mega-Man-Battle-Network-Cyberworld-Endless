@@ -66,7 +66,7 @@ bool layer_objs_dark_first;
 #define SPECIAL_CHANCE  40   /* % of those */
 
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
- * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md), as
+ * 4 item, 5 BugFrags (tested in the game; see docs/rom/), as
  * loot_mystery_roll rolls it (loot.h). True for an HPMemory, which the
  * game keeps in blue Mystery Data. */
 static bool mystery_content(const NetObj *o, uint8_t out[8]) {
@@ -139,7 +139,7 @@ static void vault_chip(ScriptsVault *v, int k, int id, char code) {
 	chip_desc(id, v->desc[k], sizeof v->desc[k]);
 }
 
-/* An official gate's three chips (docs/RIVAL.md): at level 1 an official
+/* An official gate's three chips (docs/game/rival.md): at level 1 an official
  * Chip Order, standard chips the Library holds (held in any run), as BN6's
  * Chip Order orders them, in the folder's codes; at level 2 Mega chips. */
 static void official_picks(int level, ScriptsVault *v) {
@@ -354,7 +354,7 @@ static bool skull_here(void) {
 
 /* The first bystander on an act's first layer passes on the net's word
  * about its guardian, where MegaMan has never battled him: who he is and a
- * rumor, no moves (docs/META.md, what MegaMan knows; MegaMan himself had
+ * rumor, no moves (docs/game/meta/what-megaman-knows.md; MegaMan himself had
  * said it, and how could he know?). His script, -1 none. */
 static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	int navi = run_layer_guardian();
@@ -362,7 +362,7 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || out->nchoices >= LAYER_MAX_CHOICES)
 		return -1;
 	/* (a super boss's: what the net feels of him, and nothing heard, as he
-	 * goes unnamed till met: docs/BOSSES.md, Super bosses) */
+	 * goes unnamed till met: docs/game/bosses/super-bosses.md) */
 	if (super_boss(navi)) return rumor_words(navi) ? ta_say(text, face, rumor_words(navi)) : -1;
 	if (!guardian_rumor(navi)) return -1;
 	/* (heard, MegaMan names him for the rest of the act: the director
@@ -386,7 +386,7 @@ static int last_bystander(void) {
 
 static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who);
 
-/* Where the flame of darkness stands (docs/META.md): in the last
+/* Where the flame of darkness stands (docs/game/meta/): in the last
  * bystander's place, else, where the services and data took all the map's
  * talkers, in its last green Mystery Data's (never the best, the Spin's): a
  * playtester walked a layer of ACDC Area whose flame had nowhere to stand
@@ -529,12 +529,12 @@ static void install_begin(Install *in) {
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
 	in->counter = counter_element(run.depth, run.biome, run_layer_guardian());
 	/* ScrtData lie in deep layers until three are out there (none on a
-	 * trip back, docs/HOME.md) */
+	 * trip back, docs/world/home/) */
 	rolls_of(0x100);
 	bool fragment = !run.secret_cleared && run.fragments < 3 && run.side_kind != LAYER_BACK &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
-	 * META.md: one a run, a colour the profile lacks, kept for good) */
+	 * docs/game/meta/spins.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
 	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
 	in->spin_first = meta_spins() == 0;
@@ -594,7 +594,7 @@ static void install_dealer(Install *in, Talker *tk) {
 	 * first keeps the mystery of a guardian never battled, but for
 	 * a bystander's rumor, sought out; a playtester's dealer named
 	 * one two minutes into the act. A super boss has no word on the
-	 * net till met: docs/BOSSES.md, Super bosses) */
+	 * net till met: docs/game/bosses/super-bosses.md) */
 	bool tells = navi > 0 && (guardian_known(navi) || (layer_in_act(run.depth) > 0 && !super_boss(navi)));
 	layer_objs_dealer_named = tells;
 	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
@@ -692,7 +692,7 @@ static void install_gift(Install *in, Talker *tk) {
 	flag_clear(LAYER_GIFT_FLAG);
 }
 
-/* The real ProtoMan (docs/RIVAL.md), in his own body: the Nest's copies
+/* The real ProtoMan (docs/game/rival.md), in his own body: the Nest's copies
  * are the guardians; a netbattle not yet due, he names where it will be.
  * True where his duel is a choice. */
 static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
@@ -704,7 +704,7 @@ static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	return !layer_objs_duel_later;
 }
 
-/* A Navi gate, sealed until his code is earned (docs/META.md, gates): its
+/* A Navi gate, sealed until his code is earned (docs/game/meta/phase-two.md, gates): its
  * talk then says how, else it asks for his SP and pays his SP chip. True
  * where it asks. */
 static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
@@ -726,7 +726,7 @@ static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
 	return asks;
 }
 
-/* An official gate (docs/RIVAL.md): sealed until Chaud's clearance reaches
+/* An official gate (docs/game/rival.md): sealed until Chaud's clearance reaches
  * its level; open, three chips to take one: at level 1 an official Chip
  * Order, standard chips the Library holds (held in any run), as BN6's Chip
  * Order orders them; at level 2 Mega chips */
@@ -739,7 +739,7 @@ static void install_official(Install *in, const NetObj *o, Talker *tk) {
 	tk->script = ta_official(in->text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, official_duel_prize(level), &v);
 }
 
-/* A collector's vault (docs/META.md, gates): sealed until the profile's
+/* A collector's vault (docs/game/meta/phase-two.md, gates): sealed until the profile's
  * Library holds enough chips, its talk then says how many; open, three
  * rare chips, one to take, in the folder's codes where they come in them */
 static void install_vault(Install *in, Talker *tk) {
@@ -787,7 +787,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk, const char 
 	flag_clear(flag);
 }
 
-/* A dark layer's unit (docs/LIBERATION.md): its sprite standing on its
+/* A dark layer's unit (docs/game/liberation/): its sprite standing on its
  * panel, nothing to walk into or talk to; the director moves its object */
 static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
 	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 15;

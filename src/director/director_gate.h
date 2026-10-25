@@ -1,11 +1,11 @@
-/* The Net Square's gate in Lan's HP (director_gate.c; docs/HOME.md piece
- * 11, docs/ONLINE.md). */
+/* The Net Square's gate in Lan's HP (director_gate.c; docs/world/home/ piece
+ * 11, docs/online/). */
 #ifndef CW_DIRECTOR_GATE_H
 #define CW_DIRECTOR_GATE_H
 
 #include <stdbool.h>
 
-/* Event flags of the gate's chats (free in BN6, docs/EMULATION.md): the
+/* Event flags of the gate's chats (free in BN6, docs/engine/emulation/): the
  * Yes of its questions, and the keeper's three options. */
 #define GATE_YES_FLAG      0x1473
 #define GATE_OFFICIAL_FLAG 0x1474

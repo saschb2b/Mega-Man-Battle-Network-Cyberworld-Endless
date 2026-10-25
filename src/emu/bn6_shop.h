@@ -2,7 +2,7 @@
  * (it includes this): the state the screen keeps (bn6f ShopControl's), the
  * list it shows and what it shows it from, which the Order Service's sort
  * takes up (issue #124; BN6's sorts in bn6_chips.h). Names follow the bn6f
- * disassembly; see docs/ROM_DATA.md. */
+ * disassembly; see docs/rom/. */
 #ifndef CW_BN6_SHOP_H
 #define CW_BN6_SHOP_H
 

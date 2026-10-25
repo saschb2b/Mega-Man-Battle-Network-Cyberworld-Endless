@@ -1,5 +1,5 @@
 /* director_home.h's trip home and the ways (the home's frame:
- * director_town.c). Home after an act (docs/HOME.md): the exit pad of an
+ * director_town.c). Home after an act (docs/world/home/): the exit pad of an
  * act's last layer takes MegaMan to Lan's HP, BN6's own homepage
  * (lanhp.c), where the next act's ways are portals; the next act's first
  * layer is built for the first way as he leaves, and again for another
@@ -203,7 +203,7 @@ bool home_order_open(void) { return !flag_get(HOME_ORDER_FLAG) && emu_read32(BN6
 bool home_run_start(bool abandoned) {
 	town_after_abandon = abandoned;
 	work_out_ways();
-	town_ways(1);   /* (the town's ports are no ways: docs/HOME.md) */
+	town_ways(1);   /* (the town's ports are no ways: docs/world/home/) */
 	if (!home_install()) return false;
 	flag_clear(HOME_ORDER_FLAG);
 	/* R jacks in at his PC; the PET's own Save stays off */

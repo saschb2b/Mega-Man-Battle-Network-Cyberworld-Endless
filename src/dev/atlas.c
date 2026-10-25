@@ -1,4 +1,4 @@
-/* The atlas (docs/DEVTOOLS.md): every area's layers built and drawn without
+/* The atlas (docs/devtools/): every area's layers built and drawn without
  * running the game, for looking over many at once. Each area in each of
  * its layouts, on a normal layer and a guardian's, drawn with the area's
  * own tiles and colours, with its objects marked; a report line per layer
@@ -280,7 +280,7 @@ static void world_sources(const char *dir) {
 		}
 }
 
-/* Every map of an extra game (docs/MULTIROM.md) as it draws them, its real
+/* Every map of an extra game (docs/multirom/) as it draws them, its real
  * world's groups and its internet's, read from beside the BN6 ROM: what
  * its areas could lend a run. */
 static void xrom_sources(const char *dir, int xrom) {
@@ -309,7 +309,7 @@ static void xrom_sources(const char *dir, int xrom) {
 static void stair_layers(const char *dir, FILE *report, int biome, int area, int seeds);
 
 /* An area's layers, a BN6 biome's or another game's (laid out by the rules
- * of the BN6 area it is like, docs/MULTIROM.md): every layout at depth 2,
+ * of the BN6 area it is like, docs/multirom/): every layout at depth 2,
  * its guardian's layer in the layout its act plans and layers that climb a
  * stair where it has one, its original maps beside them. */
 static void area_layers(const char *dir, FILE *report, int area, int seeds) {
@@ -343,7 +343,7 @@ static void town_dot(int id, int x, int y, void *ctx) {
 	dot(d->px, d->W, d->H, area_px(d->tw, x, y), area_py(d->th, x, y), 2, id < 0 ? 0xFFFFE020u : id == 0x7D || id == 0x7E ? 0xFF20C020u : 0xFF3060FFu);
 }
 
-/* The town's ports (docs/HOME.md): how many cells each, and how many Lan
+/* The town's ports (docs/world/home/): how many cells each, and how many Lan
  * reaches on foot from the landmark's */
 static void port_feet(char *out, size_t size) {
 	const CoordCell *trig;
@@ -443,7 +443,7 @@ int atlas_run(const char *spec) {
 	for (int b = 0; b < BIOME_COUNT; ++b)
 		if (want[b]) area_layers(dir, report, b, seeds);
 	/* (and every area another game beside BN6's lends a run, numbered after
-	 * BN6's: docs/MULTIROM.md) */
+	 * BN6's: docs/multirom/) */
 	for (int k = 0; k < XAREAS_MAX && !strcmp(biomes, "all"); ++k)
 		if (net_area_def(NET_AREAS + k)) area_layers(dir, report, NET_AREAS + k, seeds);
 	fclose(report);

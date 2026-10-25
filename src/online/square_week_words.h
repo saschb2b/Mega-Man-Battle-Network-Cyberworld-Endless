@@ -1,5 +1,5 @@
 /* What is said of the week's net in the Square (square_week_words.c,
- * docs/ONLINE.md, The week's net; docs/VOICE.md): the greeter Mr.Prog's
+ * docs/online/weekly-net.md; docs/voice/rules.md): the greeter Mr.Prog's
  * post and question beside the Board, and the Board's dives. Nobody says
  * seed, run or ranking: the net shifted, Navis dive it, the Board lists
  * how deep they say they got. */

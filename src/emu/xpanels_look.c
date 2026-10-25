@@ -3,7 +3,7 @@
  * Their tiles are BN5's own (its panel tile set, BN5_PANEL_TILESET),
  * written into VRAM after BN6's 498 panel tiles, at tiles 0x295 on, which
  * no battle draws from (every battle background of BN6's and BN5's copied
- * ones takes its tiles below 0x51; docs/ROM_DATA.md), by the panels' draw
+ * ones takes its tiles below 0x51; docs/rom/), by the panels' draw
  * on a battle's first frame with them; a battle without them loads and
  * runs as it did, BN6's tile set its own (a larger set, decompressed by
  * the game, would cost every battle's start its cycles). BN6's tile table

@@ -1,4 +1,4 @@
-/* The way across a layer (docs/LEVEL_DESIGN.md, Navigation). MegaMan walks
+/* The way across a layer (docs/world/level-design/generator.md, Navigation). MegaMan walks
  * as in BN6: a one-wide walkway is entered only from its own lane, so each
  * one the way from the arrival to the goal crosses costs a lining up.
  * Capcom's net maps carry their way across over wide floor, their one-wide
@@ -113,7 +113,7 @@ int ng_far_from_way(int x, int y) { return rdist[y][x] < 0 ? 99 : rdist[y][x]; }
 
 /* Each floor cell's walk from room 0's anchor, -1 where none reaches it,
  * plus SIG_PAST where every shortest walk there runs through the
- * signature's room (docs/LEVEL_DESIGN.md, Identity): where the way's goal
+ * signature's room (docs/world/level-design/identity.md): where the way's goal
  * is chosen, the farthest of those first, so the way runs through it. */
 void ng_walk_past_signature(int16_t d[MAP_H][MAP_W]) {
 	static int16_t from_sig[MAP_H][MAP_W];

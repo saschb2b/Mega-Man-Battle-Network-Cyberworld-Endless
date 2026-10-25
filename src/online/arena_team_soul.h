@@ -1,4 +1,4 @@
-/* Two MegaMen a side: a partner's UNITE (issue #181; docs/ONLINE_ARENA.md,
+/* Two MegaMen a side: a partner's UNITE (issue #181; docs/online/arena/two-a-side/unite.md,
  * A partner's UNITE). His own Custom screen offers UNITE and ColonelSoul's
  * button as his lead's does (BN5's installs' hooks on his side's GBA of
  * his copy, his own Souls held: arena_team_screen.h); what his OK

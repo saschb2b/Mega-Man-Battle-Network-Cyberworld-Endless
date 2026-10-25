@@ -1,5 +1,5 @@
 /* Trade Central's board as the game holds it (online_board.c, docs/
- * ONLINE.md, Trade Central: the board): the channel's offers as the
+ * docs/online/trade-central.md: the board): the channel's offers as the
  * server last said (BOARD), each a chip its poster has and the kind of
  * chip he wants for it, one a player; MegaMan's own posted and taken
  * down (OFFER); and whether a chip meets a want, read from its record. */

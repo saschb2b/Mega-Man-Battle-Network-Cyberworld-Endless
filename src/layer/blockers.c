@@ -1,4 +1,4 @@
-/* The Link Navi obstacles on a layer (issue #42; docs/ROM_DATA.md, Link
+/* The Link Navi obstacles on a layer (issue #42; docs/rom/net-maps.md, Link
  * Navi obstacles).
  *
  * BN6 runs them as map objects of handler 3, one 16-byte record per id: a
@@ -35,14 +35,14 @@
 #define H3_LITERAL   0x080A66D4u   /* handler 3's records' literal (Gregar) */
 #define H3_TABLE     0x080A6144u   /* ... BN6's 86 (ids 0x00-0x55) */
 #define H3_ORIGINALS 86
-#define BLOCKERS_AT  FREE_BLOCKERS         /* BN6's records, then the engine's (docs/EMULATION.md) */
+#define BLOCKERS_AT  FREE_BLOCKERS         /* BN6's records, then the engine's (docs/engine/emulation/) */
 #define BLOCK_ID0    0x56          /* the engine's: + variant x 8 + slot */
 #define BLOCK_SLOTS  8
 #define NET_CHECKS   0x08034728u   /* per internet group from 0x80, per map: the 16 checks' scripts */
 #define NET_ARCHIVES 0x08040798u   /* per internet group from 0x80, per map: its LZ77 text archive */
 
 /* The variants: the cube looking each of four ways (issue #45), then the
- * five obstacles, then another game's looks for them (docs/MULTIROM.md):
+ * five obstacles, then another game's looks for them (docs/multirom/):
  * BN5's Security Cube, its wall of dark flames across a walkway along
  * world Y and along X, and its dark hole, a prop that never opens; bytes
  * 6-15 of their records as BN6's own (sprite list, sprite, idle and open

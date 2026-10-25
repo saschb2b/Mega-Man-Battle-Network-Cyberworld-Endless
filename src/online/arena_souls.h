@@ -1,5 +1,5 @@
 /* The Souls across the Arena's cable under full rules (issue #120,
- * docs/ONLINE_ARENA.md, Full rules). UNITE keeps the Soul a player commits
+ * docs/online/arena/from-square/full-rules.md). UNITE keeps the Soul a player commits
  * in the Souls' block of his own GBA (src/emu/soulunite.c: BN6_SOULS, his
  * side's fields, his side the cable's, the same on both GBAs), and BN6's
  * link carries his turn's form (the proxy, BN6_FORM_PROXY) and not the

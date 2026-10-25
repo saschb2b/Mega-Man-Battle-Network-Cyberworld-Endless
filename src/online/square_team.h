@@ -1,4 +1,4 @@
-/* Team NetBattles in the Net Square (epic #167, docs/ONLINE_ARENA.md,
+/* Team NetBattles in the Net Square (epic #167, docs/online/arena/teams.md,
  * Team NetBattles): a relay of today's NetBattle between two teams of two.
  * "Team up" on another player's card asks him (his MegaMan asks Lan, the
  * cursor on No); on a partner's card it reads "Split up". A Battle between

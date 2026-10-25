@@ -1,4 +1,4 @@
-/* A liberation on a dark layer (docs/LIBERATION.md, Building it: stage 1):
+/* A liberation on a dark layer (docs/game/liberation/building/overview.md: stage 1):
  * the layer's floor a board of BN5's dark panels (liberation_board.h),
  * MegaMan moving over it panel by panel as BN5's board moves its units,
  * liberating a panel beside him in a battle of BN6's, resting, spending
@@ -33,7 +33,7 @@ bool lib_layer_made(void);
 void lib_begin(void);
 /* The board is under way on this layer: MegaMan moves as its units do. */
 bool lib_on(void);
-/* The board's sealed region opened and its route taken (docs/LIBERATION.md,
+/* The board's sealed region opened and its route taken (docs/game/liberation/special-routes.md,
  * Routes that matter): the hook the act's next route reads. */
 bool lib_route_found(void);
 /* The exit stays shut: the Darkloid stands. */
@@ -55,7 +55,7 @@ void lib_song(int bn5_song);
 void lib_sound(int bn5_sound);
 
 /* (liberation_cues.c) BN5's songs at a liberation's moments where BN5 plays
- * them (docs/MULTIROM.md, BN5's music in a run), where the board is in
+ * them (docs/multirom/music.md), where the board is in
  * BN5's look: the next battle a liberation's whose turns are counted
  * (`counted`; false none armed), its win in the first turn BN5's own
  * jingle in place of BN6's fanfare; the board won, BN5's song for it as
@@ -98,7 +98,7 @@ void lib_look_update(void);
 /* ... the Liberation Mission (1-9) a dark layer of BN6's area `biome` takes
  * in act `act` (from 0): the mission BN5 set on the net area that dresses
  * that area (NetAreaDef.like), its later one where it has several and the
- * act is later (docs/LIBERATION.md, Each mission's own look) */
+ * act is later (docs/game/liberation/building/mission-look.md) */
 int lib_look_mission(int biome, int act);
 /* ... the net area of mission `mission`'s map (group 0x86), -1 where BN5's
  * ROM is not there */

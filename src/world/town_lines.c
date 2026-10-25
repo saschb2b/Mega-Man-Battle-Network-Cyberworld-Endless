@@ -1,4 +1,4 @@
-/* The towns' people and what is said there (docs/VOICE.md): each town's
+/* The towns' people and what is said there (docs/voice/rules.md): each town's
  * folk, where they stand and what they say, its checks' words and
  * MegaMan's on arriving, and Lan's and MegaMan's as a run begins. Its plan
  * and map, town.c. */
@@ -135,7 +135,7 @@ static const char *const green_checks[16] = {
  * CybeastButton is unlocked from the start, as the Cybeast's fall would
  * have had him unlock it (issue #109), the first time a profile brings it
  * (`called`: Dad on the line already); a power is told once, by whoever
- * gave it (docs/VOICE.md, What nobody says) */
+ * gave it (docs/voice/rules.md, What nobody says) */
 static const char *beast_words(bool called) {
 	static char words[240];
 	snprintf(words, sizeof words, "|@D %s I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|"

@@ -22,7 +22,7 @@ extern const PlaceFolk place_folk[];
 extern const int place_nfolk;
 
 /* What A at AsterLand's Number Trader reads: it is off in a run (docs/
- * HOME.md, piece 10). */
+ * docs/world/home/asterland-and-academy.md). */
 extern const char *const place_number_trader;
 /* What AsterLand's clerk says once this visit's order is made. */
 extern const char *const place_order_closed;

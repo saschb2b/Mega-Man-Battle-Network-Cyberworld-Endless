@@ -4,7 +4,7 @@
  * first D frames are released keys on both sides, on every client. Frame
  * N of the pair is due at tick N and needs both players' keys for N and
  * the frame after it (arena_input.h), each core taking those of its own
- * frame clock. With a rollback window W (issue #128, docs/ONLINE_ARENA.md,
+ * frame clock. With a rollback window W (issue #128, docs/online/arena/rollback/overview.md,
  * Rollback) frame N runs at its tick with up to W frames on a guess: the
  * other player's keys not yet come are his last held, the pair's snapshot
  * kept before each frame that ran on one, and a key that comes otherwise

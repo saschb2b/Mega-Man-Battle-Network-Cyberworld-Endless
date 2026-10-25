@@ -1,7 +1,7 @@
 /* Options' words (options_text.c): its lines, their notes, the Display
  * and Audio sections' choices, settings.ini's notes for
  * the display's lines, the sound, the music, the effects and fast forward,
- * in the plain style of the game's menus (docs/VOICE.md), apart from the
+ * in the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. */
 #ifndef CW_OPTIONS_TEXT_H
 #define CW_OPTIONS_TEXT_H

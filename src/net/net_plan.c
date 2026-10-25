@@ -16,7 +16,7 @@ static uint32_t act_seed(int depth) {
 
 /* The sides an act's layers arrive at, the four in an order drawn from its
  * seed `s` (BN6's own maps arrive at each about as often: docs/
- * LEVEL_DESIGN.md, Arrivals), so an act's three arrive at three. */
+ * docs/world/level-design/arrivals.md), so an act's three arrive at three. */
 static int side_in_act(uint32_t s, int index) {
 	int order[SIDE_COUNT] = { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT };
 	uint32_t r = (s ^ 0xA771E5u) | 1;

@@ -1,4 +1,4 @@
-/* Chaud's lines (docs/RIVAL.md, docs/VOICE.md): his call on a duel layer
+/* Chaud's lines (docs/game/rival.md, docs/voice/rules.md): his call on a duel layer
  * and his verdict after it. */
 #include "duel_words.h"
 
@@ -24,7 +24,7 @@ static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, in
 	return snprintf(out, n, "@C %s. ProtoMan's was %s.|@C Too slow,Lan.|", a, b);
 }
 
-/* Chaud's call on a duel layer (docs/RIVAL.md): the record, ProtoMan's time
+/* Chaud's call on a duel layer (docs/game/rival.md): the record, ProtoMan's time
  * and the term, what a win opens, and Lan's answer. */
 const char *duel_call_words(void) {
 	int f = layer_objs_duel_frames, sec = f / 60;
@@ -82,11 +82,11 @@ const char *duel_call_words(void) {
 void verdict_words(char *out, int size, const DuelVerdict *v) {
 	int k = verdict_result(out, (size_t)size, v->won, v->beat, v->rung, v->mine, v->his);
 	#define ADD(...) (k += snprintf(out + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	/* (what his respect opens: docs/RIVAL.md) */
+	/* (what his respect opens: docs/game/rival.md) */
 	if (v->after > v->before && v->after == 1) {
 		ADD("@C You've earned my first clearance,Lan.|@C The official Chip Orders are open to you now.|");
 		/* (and the TagChip system, for good: issue #51; BN6's own, so
-		 * named and not explained, its button with it, docs/VOICE.md, What
+		 * named and not explained, its button with it, docs/voice/rules.md, What
 		 * nobody says) */
 		ADD("@C And a NetBattler's trick. The TagChip system.|");
 	}

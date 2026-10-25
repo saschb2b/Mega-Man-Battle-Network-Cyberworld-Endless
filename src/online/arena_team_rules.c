@@ -22,7 +22,7 @@ uint32_t arena_team_rules_stats(uint32_t obj) {
 
 void arena_team_rules_begin(void) {
 	soul_navi_stats_by(arena_team_rules_stats);
-	/* (the audit's mutations, DEVTOOLS.md: chipaibreak=N a core's rooms of BN5's chip AI refused, partnerbreak=N its partners
+	/* (the audit's mutations, docs/devtools/: chipaibreak=N a core's rooms of BN5's chip AI refused, partnerbreak=N its partners
 	 * taken for their sides' players) */
 	darkinvs_room_break(dev.chipai_break > 0 ? dev.chipai_break : -1);
 	soul_partner_break(dev.partner_break > 0 ? dev.partner_break : -1);

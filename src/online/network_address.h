@@ -1,4 +1,4 @@
-/* A server's address as a player types it at the gate's keeper (docs/ONLINE.md,
+/* A server's address as a player types it at the gate's keeper (docs/online/square/overview.md,
  * The gate): "host", "host:port" or a whole ws(s):// URL, made the URL the
  * transport opens. A host that can only be on the player's own network (a
  * private address, localhost, a .local or .lan name, a name with no dot) is

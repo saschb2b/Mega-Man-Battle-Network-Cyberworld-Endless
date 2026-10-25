@@ -1,5 +1,5 @@
 /* The battle engine's random numbers, BN5's and BN6's alike (docs/
- * ROM_DATA.md, BN5's random numbers): both games keep two u32 words
+ * docs/rom/bn5-battles.md, BN5's random numbers): both games keep two u32 words
  * (BN5_RNG_PRIMARY and BN5_RNG_SECONDARY, BN6_RNG_PRIMARY and
  * BN6_RNG_SECONDARY) and step them the same way. */
 #ifndef CW_BATTLE_RNG_H

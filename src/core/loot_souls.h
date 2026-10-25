@@ -1,5 +1,5 @@
 /* The finds and the Net Dealers' chips leaned to the run's Souls
- * (docs/META.md, Souls: the key with the lock; the owner's call of 25
+ * (docs/game/meta/souls.md: the key with the lock; the owner's call of 25
  * October 2026). A Soul unites with a chip of its kind (soulkinds.h), and
  * a run that cannot farm, its starting folder holding almost none of them,
  * won Souls it had nothing to unite with. So a share of the Mystery Data's

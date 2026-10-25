@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-#include "liberation.h"   /* (a dark layer's board, made with the layer: docs/LIBERATION.md) */
+#include "liberation.h"   /* (a dark layer's board, made with the layer: docs/game/liberation/) */
 #include "runlog.h"
 
 void begin_area(bool new_act);

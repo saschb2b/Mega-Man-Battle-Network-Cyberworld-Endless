@@ -105,7 +105,7 @@
 					<p>持っていれば使えます。北米版『Mega Man Battle Network 5: Team Colonel』（ロックマンエグゼ5 チーム オブ カーネルの北米版）の、改造していないROMを、BN6のROMと同じフォルダに置いてください（SHA-1 <code>5f472f78d8de2df01d5039e045c043cb40969a39</code>）。するとエグゼ5のネットのエリアのうち6つが、似ているエグゼ6のエリアの代わりに、それぞれ約半分のランで現れます：セントラルエリアの代わりに秋原エリア、グリーンエリアの代わりにオラン島エリア、スカイエリアの代わりに科学省エリア、シーサイドエリアの代わりにエンドエリア、ウラインターネットの代わりにエグゼ5のウラインターネット、グレイブヤードの代わりにネビュラホールエリア。タイル、音楽、通りすがりの人々もエグゼ5のものです。バトルはエグゼ5のものを、エグゼ6のエンジンで戦い、ランのクロスやチップはすべて使えます。2つ目のアクトからは2つのネットのウイルスとチップが出会い、エグゼ5のダークチップも見つかります。約半分のランでは、エグゼ5のナビがそのエリアのガーディアンに。倒すとそのナビのソウルが手に入り、それからのすべてのバトルでソウルユニゾンできます。</p>
 					<p>オンラインでは、<a href="#netpass">NetPass</a>がそろいます：ネットバトル、トレード、今週のディープネット。</p>
 					<p>見つかると、起動時にタイトル画面の右上に<q>BN5 found</q>と出ます。PC、Mac、スマホ、タブレットでは、タイトルでRを押すとROMの画面が開き、BN5のスロットから選べます。ブラウザでは<a href="../play/">プレイのページ</a>でBN6と一緒に選びます。携帯ゲーム機とNew 3DSでは、BN6のROMの横に置いてください。</p>
-					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#what-you-need">ガイド：必要なもの（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/MULTIROM.md">MULTIROM：ほかのゲームのROM（英語）</a></p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#what-you-need">ガイド：必要なもの（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/multirom/overview.md">MULTIROM：ほかのゲームのROM（英語）</a></p>
 				</div>
 			</article>
 
@@ -178,7 +178,7 @@
 					<h2>なぜゲームが入っていないの？</h2>
 					<p>ROMこそがゲームだからです。エグゼ6のバトル、チップ、ウイルス、PET、ショップ、音楽は、すべて組み込みのmGBAコアの上でROMから動いています。Cyberworld Endlessはそのまわりにネットを組み立て、ランを進めます。ダウンロードにもページにもカプコンのデータは入っていないので、ROMがなければゲームはありません。</p>
 					<p>これは非公式のファンプロジェクトで、カプコンとは関係がなく、承認も受けていません。</p>
-					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md">FIDELITY：どの部分が誰のものか（英語）</a></p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/game/fidelity.md">FIDELITY：どの部分が誰のものか（英語）</a></p>
 				</div>
 			</article>
 
@@ -299,7 +299,7 @@
 					<h2>エグゼ6のものと、新しいものは？</h2>
 					<p><b>エグゼ6そのもの</b>（あなたのROMから動くもの）：バトルとウイルス、チップとバスティングレベル、PET、ショップとトレーダー、ガーディアンのボス戦、スプライト、顔グラフィック、テキストの表示、音楽。</p>
 					<p><b>エンジンが組み立てるもの</b>（ゲームのデータ形式で）：各レイヤーのレイアウト、床（そのエリアの元のマップから学んだタイル）、壁、どこに何が立つか。<b>ランのために書かれたもの</b>：エンドレスネットの物語、人々のセリフ、ランのまとめ。どれも英語です。<b>オンライン</b>：同じようにエグゼ6のネットから組み立てるネットスクエアと、ゲームを動かすことのないそのサーバー。</p>
-					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md">FIDELITY：どの部分が誰のものか（英語）</a></p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/game/fidelity.md">FIDELITY：どの部分が誰のものか（英語）</a></p>
 				</div>
 			</article>
 
@@ -309,7 +309,7 @@
 					<h2>どうやってエグゼ6を動かしている？</h2>
 					<p>組み込みのmGBAコアが、あなたのROMにあるゲーム自身のコードを動かします。Cyberworld Endlessは、そのまわりの「監督」です：各レイヤーをゲームのマップ形式で組み立て、コアのメモリ上にあるROMのコピーのマップテーブルをそこへ向け（あなたのファイルは一切書き換えません）、ゲームのメモリを見ながらランを進めます。</p>
 					<p>なぜネイティブ移植にしないのか（『時のオカリナ』のShip of Harkinianのように）？ エグゼ6にはC言語への逆コンパイルがなく、画面と音はどのみちエミュレートが必要で、ネイティブ版はカプコンのコードを配ることになるからです。エミュレーターはあなたのROMを動かすだけで、その一部も配りません。</p>
-					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md">EMULATION：書き換えるメモリ（英語）</a></p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/engine/emulation/overview.md">EMULATION：書き換えるメモリ（英語）</a></p>
 				</div>
 			</article>
 

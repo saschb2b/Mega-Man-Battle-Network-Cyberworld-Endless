@@ -60,7 +60,7 @@ int xguardian_hp(int navi, int version) {
 int xguardian_version(int navi, int depth) {
 	int hp[4];
 	for (int v = 0; v < 4; ++v) hp[v] = xguardian_hp(navi, v);
-	/* (threat 4, docs/META.md: as BN6's guardians come at EX from act 2) */
+	/* (threat 4, docs/game/meta/: as BN6's guardians come at EX from act 2) */
 	return pacing_xguardian_version(hp, pacing_act(depth), pacing_loop(depth), run.threat >= 4);
 }
 

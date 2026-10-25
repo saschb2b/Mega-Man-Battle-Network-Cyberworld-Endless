@@ -61,7 +61,7 @@ bool title_summary_update(void) {
 /* ---- the run ---- */
 
 /* a helped run's helpers on the band's right, by name where they fit
- * (docs/META.md: the summary names a helped run) */
+ * (docs/game/meta/: the summary names a helped run) */
 static void helpers_draw(int x0, int y0) {
 	if (!(run.helpers & ((1 << HELPERS) - 1))) return;
 	char names[64] = "", s[80];
@@ -131,7 +131,7 @@ static void records_rows(SDL_Rect f) {
 	if (title_new_best && !title_dive) look_new(f.x + ROW_IN + look_text_width(best) + 5, f.y + 1 + ROW_H + 3, summary_text(SM_NEW));
 }
 
-/* what the run opened for the next (docs/META.md), each NEW as the setup
+/* what the run opened for the next (docs/game/meta/), each NEW as the setup
  * marks it, and under them in the information box the closest goal */
 static void opened_draw(int x0, int y0, SDL_Rect f) {
 	const char *open[OPENED_ROWS];

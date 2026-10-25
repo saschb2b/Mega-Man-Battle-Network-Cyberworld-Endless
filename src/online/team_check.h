@@ -1,6 +1,6 @@
 /* Two MegaMen a side: a partner's messages checked on every GBA by the
  * rules his own Custom screen keeps (issue #181's review; docs/
- * ONLINE_ARENA.md, His messages checked). His screen is BN6's own, on his
+ * docs/online/arena/two-a-side/messages-checked.md). His screen is BN6's own, on his
  * own client, so a message it makes passes; one no screen of his could
  * make (a pick past the hand dealt, two picks of neither one code nor one
  * chip, a Cross his MegaMan lacks, a Soul he does not hold or has united

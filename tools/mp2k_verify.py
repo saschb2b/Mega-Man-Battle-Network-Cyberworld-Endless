@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """mp2k_verify.py [SONG...] [--frames N]: the engine's MP2K (src/audio/mp2k*.c)
-against BN6's own, song by song (docs/EMULATION.md, The engine's own sound).
+against BN6's own, song by song (docs/engine/emulation/engine-sound.md).
 
 For each song (hex; the title's 0x01, the credits' 0x1D, the net's 0x13 and
 the menus' sounds by default): the plain ROM in romlab (tools/romlab, mGBA
@@ -17,7 +17,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROMS = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
-SONG_TABLE = 0x08159F48       # RomLayout.song_table (docs/ROM_DATA.md)
+SONG_TABLE = 0x08159F48       # RomLayout.song_table (docs/rom/)
 START, C15, COUNTER = 294, 3, 7   # the title's song's first engine frame, and the phases the frame before
 DEFAULT = [0x01, 0x1D, 0x13, 0x66, 0x67, 0x68, 0x81]
 

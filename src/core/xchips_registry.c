@@ -1,5 +1,5 @@
 /* The chip registry (xchips_registry.h): Team Colonel's chips a run can
- * meet (docs/MULTIROM.md, the finer calls: its standard chips, Megas and
+ * meet (docs/multirom/one-net.md, the finer calls: its standard chips, Megas and
  * DarkChips, Team Colonel's Gigas, the Navi chips of the six Navis who
  * guard runs, V1, SP and DS, and its Program Advances whose parts are
  * registered; not Team ProtoMan's version chips, the Darkloids' and
@@ -323,7 +323,7 @@ const XChipReg *xreg_named(int bn6) {
 }
 
 bool xreg_free_id(int id) {
-	/* (BN6's blank records: docs/ROM_DATA.md, The chip registry; 365-367
+	/* (BN6's blank records: docs/rom/chips-code.md, The chip registry; 365-367
 	 * too, the end of 350-368, whose 368 is BN6's pseudo-chips' bound) */
 	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS);
 }

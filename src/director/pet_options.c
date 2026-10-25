@@ -2,7 +2,7 @@
  * each, and none says Options: the word is set from their own letters
  * (letters.h), read from the player's ROM as the core starts, into a copy
  * of the labels' tiles that the PET's load list points at, one tile
- * column more than Comm's after them (docs/ROM_DATA.md, the PET menu's
+ * column more than Comm's after them (docs/rom/pet-and-second-screen.md, the PET menu's
  * labels). */
 #include "pet_options.h"
 
@@ -22,7 +22,7 @@
 #define COLS 5                     /* the label's tile columns the word takes, from its second (its first the edge) */
 #define ADDED 2                    /* the tiles past BN6's: the word's fifth column */
 #define VRAM_LABELS 0x0600D340u    /* where the load list puts them: BN6_PET_LABEL_FIRST in BG character block 2 */
-#define VRAM_FREE_END 0x0600E000u  /* BG0's map from here; 0x0600DE80 on, zero in the PET and on the map (ROM_DATA.md) */
+#define VRAM_FREE_END 0x0600E000u  /* BG0's map from here; 0x0600DE80 on, zero in the PET and on the map (docs/rom/) */
 #define BLOCK ((BN6_PET_LABEL_COUNT + ADDED) * TILE)
 #define CHIPFOLDER 0
 #define MEGAMAN 3

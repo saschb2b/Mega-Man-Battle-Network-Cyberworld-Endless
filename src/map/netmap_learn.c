@@ -33,7 +33,7 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
 	return false;
 }
 
-/* A map of the area's own game, BN6's or another's (docs/MULTIROM.md). */
+/* A map of the area's own game, BN6's or another's (docs/multirom/). */
 static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 	return area_src_load_as(na->xrom, group, number, na->recolour, a);
 }

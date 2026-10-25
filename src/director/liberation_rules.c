@@ -79,7 +79,7 @@ int lib_command_of(int navi) {
 	case MATE_NUMBERMAN: return LIB_DO_NUMBER;
 	case MATE_SHADOWMAN: return LIB_DO_SNEAK;
 	case MATE_TOADMAN: return LIB_DO_MELODY;
-	/* (the Cross Navis: Team ProtoMan's, by element, docs/LIBERATION.md) */
+	/* (the Cross Navis: Team ProtoMan's, by element, docs/game/liberation/) */
 	case MATE_HEATMAN: return LIB_DO_NAPALM;
 	case MATE_ELECMAN: return LIB_DO_MAGNET;
 	case MATE_SLASHMAN: return LIB_DO_WIDESWRD;
@@ -100,7 +100,7 @@ bool lib_flown(const LibBoard *b, int x, int y) {
 	return k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP;
 }
 
-/* The shapes of the commands, from the panel faced (docs/LIBERATION.md,
+/* The shapes of the commands, from the panel faced (docs/game/liberation/bn5/navis.md,
  * The Navis: BN5's shapes table BN5_LIB_SHAPES, read for LongSwrd,
  * ScrenDiv, TomahawkSwing and the Cross Navis' five; the guides' for the
  * rest): LongSwrd two in a line; ScrenDiv and WideSwrd three across;

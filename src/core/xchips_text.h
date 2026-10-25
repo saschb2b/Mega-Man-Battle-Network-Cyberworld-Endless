@@ -1,5 +1,5 @@
 /* The PET's words for a chip of Battle Network 5's where its ROM is not
- * read (docs/MULTIROM.md, One net: the design, call 4): the placeholder a
+ * read (docs/multirom/one-net.md, call 4): the placeholder a
  * saved folder, pack and Library keep it as, which sits out of battles. */
 #ifndef CW_XCHIPS_TEXT_H
 #define CW_XCHIPS_TEXT_H

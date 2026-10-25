@@ -1,5 +1,5 @@
 /* The chips' data as the core's ROM copy holds it (issue #82; docs/
- * MULTIROM.md, The chip registry): the one place the run's code reads a
+ * docs/multirom/chip-registry.md): the one place the run's code reads a
  * chip's record, name, description and art from, not the player's file.
  *
  * BN6's chip tables, grown from 411 records to 512 and their names and
@@ -9,7 +9,7 @@
  * descriptions in BN6's text codes, its icons and pictures copied; where
  * BN5's ROM is not read, each of them a placeholder that keeps its codes,
  * type and MB. The same bytes go into the core's copy at fixed places
- * past EMU_FREE (src/emu/xchips_install.c; docs/EMULATION.md), the same at
+ * past EMU_FREE (src/emu/xchips_install.c; docs/engine/emulation/), the same at
  * every boot with the same ROMs, so a saved folder never names garbage. */
 #ifndef CW_CHIPS_H
 #define CW_CHIPS_H
@@ -23,7 +23,7 @@
 
 #define CHIPS_IDS 512                          /* the records: ids 0-511 (nine bits) */
 #define CHIPS_BN6_RECORDS 411                  /* BN6's own, 0-410 */
-#define CHIPS_FREE FREE_CHIPS                  /* the chips' place in the core's copy (free_space.h; docs/EMULATION.md), to: */
+#define CHIPS_FREE FREE_CHIPS                  /* the chips' place in the core's copy (free_space.h; docs/engine/emulation/), to: */
 #define CHIPS_FREE_END FREE_SOULS
 #define CHIPS_RECORDS (CHIPS_FREE + 0x0000u)   /* 512 records, 0x2C each */
 #define CHIPS_NAMES0 (CHIPS_FREE + 0x6000u)    /* the names' text archives: ids 0-255, */

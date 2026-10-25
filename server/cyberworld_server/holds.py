@@ -11,7 +11,7 @@ NetBattle ends without a result, a spectator's watching stops. A goodbye,
 a refusal or a moderator's removal frees the place at once; so does a
 HELLO without the resume bit (a new visit from the gate), as a new arrival.
 
-docs/ONLINE.md, A dropped link."""
+docs/online/square/dropped-link.md."""
 
 import time
 

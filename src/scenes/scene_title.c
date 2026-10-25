@@ -1,4 +1,4 @@
-/* The title screen. The logo is the original's (docs/ROM_DATA.md), taken
+/* The title screen. The logo is the original's (docs/rom/), taken
  * from its 256-colour picture without the 6, the CYBEAST GREGAR plate and
  * the Cybeast; in the 6's place the engine draws an infinity mark in the
  * 6's colours, and under BATTLE NETWORK the subtitle CYBERWORLD ENDLESS in
@@ -369,9 +369,9 @@ static void press_start(void) {
  * first run deleted ElecMan, and the setup with his Cross never came) */
 static bool setup_wanted(void) { return profile.runs > 0 || meta_setup_has_choice(); }
 
-/* ---- the title's marks (docs/META.md): BN6's own sprites, where its title
+/* ---- the title's marks (docs/game/meta/): BN6's own sprites, where its title
  * draws them, loaded with the copyright line (tiles from OBJ tile 0x180,
- * palettes from OBJ bank 5: docs/ROM_DATA.md) ---- */
+ * palettes from OBJ bank 5: docs/rom/) ---- */
 
 static const struct { int bit, x, y, tile, w, h, bank; } mark_parts[] = {
 	{ MARK_WIN, 4, 2, 0x280, 4, 2, 9 }, { MARK_WIN, 4, 18, 0x288, 2, 1, 9 },
@@ -545,7 +545,7 @@ static void found_draw(int x0, int y0) {
 	if (t <= 0 || t >= FOUND_LEN || !s[0]) return;
 	/* (and what it lends: "BN5 found" told a playtester nothing of his
 	 * run, session 62; its areas, towns, songs and Navis join the net's,
-	 * docs/MULTIROM.md) */
+	 * docs/multirom/) */
 	size_t m = strlen(s);
 	snprintf(s + m, sizeof s - m, n > 1 ? " found: their Nets join ours" : " found: its Net joins ours");
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);

@@ -1,4 +1,4 @@
-/* Lan's HP taken over (lanhp.c, docs/HOME.md): MegaMan's homepage, where
+/* Lan's HP taken over (lanhp.c, docs/world/home/): MegaMan's homepage, where
  * every jack-in of a run arrives and the run's portals stand. */
 #ifndef CW_LANHP_H
 #define CW_LANHP_H
@@ -11,7 +11,7 @@
 #define LANHP_PORTALS 5     /* its warp spots but the arrival pad */
 
 /* Set while the town holds nothing for this visit: the courier stays away
- * (the director keeps it, docs/HOME.md piece 2). */
+ * (the director keeps it, docs/world/home/lans-hp.md piece 2). */
 #define LANHP_COURIER_GONE_FLAG 0x146C
 /* Set once the player has talked to him: his "!!" goes, as a BN6 person's
  * does once heard (his words set it; the director clears it as they
@@ -29,7 +29,7 @@ bool lanhp_install(void);
 /* The courier's words: a text archive's bytes (ta_build, his talk its
  * script 0), written over his last; false where they do not fit. */
 bool lanhp_courier_say(const uint8_t *archive, int n);
-/* The Net Square's gate (docs/HOME.md, piece 11): its keeper's words, a
+/* The Net Square's gate (docs/world/home/square-gate.md): its keeper's words, a
  * text archive's bytes (his talk its script 0), written over his last;
  * false where they do not fit. */
 bool lanhp_keeper_say(const uint8_t *archive, int n);

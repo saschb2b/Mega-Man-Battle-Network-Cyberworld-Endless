@@ -49,7 +49,7 @@ static uint32_t weekly_hash(uint32_t seed, int depth, int act, bool won, unsigne
 	return h ? h : 1;
 }
 
-/* The profile a dive starts from (docs/ONLINE.md, The week's net: its
+/* The profile a dive starts from (docs/online/weekly-net.md: its
  * design): the player's settings and what he has been told, so nothing is
  * explained again; none of what the normal runs earned, which would make
  * one dive stronger or another net than the next player's (the Secret

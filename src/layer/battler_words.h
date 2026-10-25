@@ -1,4 +1,4 @@
-/* What a Virus Battler Mr.Prog says (battler_words.c; docs/VOICE.md):
+/* What a Virus Battler Mr.Prog says (battler_words.c; docs/voice/rules.md):
  * his offer on the layer, and his word after each round of his series. */
 #ifndef CW_BATTLER_WORDS_H
 #define CW_BATTLER_WORDS_H

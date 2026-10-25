@@ -1,3 +1,10 @@
+---
+type: Process
+title: "Reverse-engineering work"
+description: "How the reverse-engineering work is tracked: `ledger.json` written out by `tools/re_status.py` as STATUS.md and the dashboard, where ROM facts and claims live instead, the BN6 Gregar target's SHA-1, and the skill's provenance."
+tags: [re]
+generated: { by: claude-code/unrecorded, at: 2026-10-18T12:08:07Z }
+---
 # Reverse-engineering work
 
 New investigations follow the project's
@@ -26,13 +33,13 @@ fails while any of them is out of step with the ledger. Dates are written
 
 | Record | Location |
 | --- | --- |
-| ROM offsets, their names and how to re-check them | [ROM_DATA.md](../ROM_DATA.md), `RomLayout`, `src/emu/bn6*.h` |
-| Claims about the games: verified, assumed, refuted, and their sources | [SOURCES.md](../SOURCES.md) |
-| What is original, generated or adapted | [FIDELITY.md](../FIDELITY.md) |
-| Free space and write claims | [EMULATION.md](../EMULATION.md), `src/emu/free_space.h`, `claims.h` |
-| The virus differential | `tests/xdiff/`, `tools/xdiff.py`, [DEVTOOLS.md](../DEVTOOLS.md) |
-| The link cable and the Arena | [ONLINE_LINK.md](../ONLINE_LINK.md) |
-| The Net Square, its server and transports | [ONLINE.md](../ONLINE.md) |
+| ROM offsets, their names and how to re-check them | [ROM data](../rom/overview.md), `RomLayout`, `src/emu/bn6*.h` |
+| Claims about the games: verified, assumed, refuted, and their sources | [Sources](../research/sources.md) |
+| What is original, generated or adapted | [Fidelity](../game/fidelity.md) |
+| Free space and write claims | [Running the game's own logic](../engine/emulation/overview.md), `src/emu/free_space.h`, `claims.h` |
+| The virus differential | `tests/xdiff/`, `tools/xdiff.py`, [Dev tools](../devtools/overview.md) |
+| The link cable and the Arena | [The link cable and the Arena](../online/link.md) |
+| The Net Square, its server and transports | [Online: the Net Square](../online/overview.md) |
 
 docs/re/ holds the status, not a second address map: an offset or a claim
 goes in the records above, and the ledger's lines link to them.

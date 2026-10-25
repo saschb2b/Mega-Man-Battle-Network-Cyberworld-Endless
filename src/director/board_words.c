@@ -1,4 +1,4 @@
-/* MegaMan on the NaviCust (docs/NAVICUST.md, docs/VOICE.md): a program
+/* MegaMan on the NaviCust (docs/game/navicust.md, docs/voice/rules.md): a program
  * off the board, Reg memory, compression codes, a board run clean. */
 #include "board_words.h"
 

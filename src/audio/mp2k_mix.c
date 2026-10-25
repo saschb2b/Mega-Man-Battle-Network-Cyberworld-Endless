@@ -1,5 +1,5 @@
 /* MP2K's mixer (mp2k_state.h): a frame of the DirectSound channels into the
- * ring, as BN6's SoundMainRAM does it (bn6f asm/libs.s; docs/ROM_DATA.md,
+ * ring, as BN6's SoundMainRAM does it (bn6f asm/libs.s; docs/rom/sound.md,
  * BN6's sound engine): the reverb from the ring's next part, each channel's
  * envelope stepped once a frame, its samples added into 8-bit bytes that
  * wrap and never clip, at the mix's rate. */

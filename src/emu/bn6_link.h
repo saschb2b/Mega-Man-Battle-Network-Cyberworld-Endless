@@ -1,5 +1,5 @@
 /* BN6's link battle as a second MegaMan a side meets it (epic #167's 2v2
- * spike; docs/ROM_DATA.md, Two MegaMen a side): where a side's keys reach
+ * spike; docs/rom/online.md, Two MegaMen a side): where a side's keys reach
  * its player each iteration of the battle's loop, and the list the
  * Practice NetBattle spawns its field from. */
 #ifndef CW_BN6_LINK_H
@@ -22,7 +22,7 @@
 #define BN6_AI_UP             0x26        /* ... let go this iteration, */
 #define BN6_AI_LAST           0x28        /* ... and the last iteration's held (bn6f's JoypadReleased) */
 #define BN6_KEYS_VALID        0xFC00u
-/* A link battle's packet, one a frame each way (docs/ONLINE_ARENA.md, The partners' words in BN6's packet; bn6f sub_801FF18,
+/* A link battle's packet, one a frame each way (docs/online/arena/two-a-side/partners-words.md; bn6f sub_801FF18,
  * sub_803EE98) */
 #define BN6_LINK_OUT          0x02036780u /* this GBA's packet, eight u16 the battle writes each frame (bn6f eStruct2036780): +0 the
                                              mark (the pad's high byte, 0xFC) and +1 its sequence (the link's frame, 0x0803EE6C), +2 the
@@ -72,7 +72,7 @@
 #define BN6_T4_ACTIVE         0x02036710u /* u32 the fourth kind's slots in play (BN6_T4_OBJECTS), slot i bit 31 - i: a spawn takes the
                                              first clear one, an object let go clears its own, the battle's setup clears them all with the
                                              pool (bn6f eActiveT4BattleObjectsBitfield, the kind's record at 0x08003310) */
-/* A partner's whole MegaMan (docs/ONLINE_ARENA.md, His NaviCust, compiled by BN6; His Cross) */
+/* A partner's whole MegaMan (docs/online/arena/two-a-side/navicust.md; His Cross) */
 #define BN6_NAVICUST_RELOAD   0x0813E18Cu /* the PET's MegaMan's stats made again from the NaviCust's board (bn6f
                                              reloadCurNaviStatBoosts_813c3ac, Falzar 0x0813C3AC): his NaviStats (BN6_NAVI_STATS) put back to
                                              his own, each program's routine run over them (0x0813E464), the bugs, his HP by the map; no

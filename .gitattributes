@@ -1,0 +1,2 @@
+# The knowledge base's log is append-only, one line an entry: both sides of a merge keep theirs (the okf skill)
+docs/log.md merge=union

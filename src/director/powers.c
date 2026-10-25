@@ -1,5 +1,5 @@
 /* Flags found by setting them in a battle and opening CROSSSELECT (see
- * docs/ROM_DATA.md). */
+ * docs/rom/). */
 #include "powers.h"
 
 #include <stdio.h>
@@ -88,7 +88,7 @@ void powers_bring(void) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);
 	/* (BN6's own BeastOut: the emblem under OK, its three turns a battle,
-	 * as the Cybeast's fall gives it, docs/ROM_DATA.md; a headless start
+	 * as the Cybeast's fall gives it, docs/rom/; a headless start
 	 * past the first Net's Nest has it too, as a run has it there) */
 	if (run_beast_start() || run.depth > CYCLE_LAYERS) flag_set(BN6_FLAG_BEAST_OUT);
 }
@@ -110,7 +110,7 @@ const char *powers_den_text(int depth) {
 bool powers_after_boss(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
-	/* BN5's guardians their Soul, for every battle of the run (docs/META.md,
+	/* BN5's guardians their Soul, for every battle of the run (docs/game/meta/souls.md,
 	 * Souls) */
 	bool soul = guardian_older(navi) && !soul_held(navi);
 	soul_give(navi);

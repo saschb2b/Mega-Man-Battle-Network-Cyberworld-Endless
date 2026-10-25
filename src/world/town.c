@@ -1,4 +1,4 @@
-/* The town (docs/OVERWORLD.md): Central Town or ACDC Town as Capcom built
+/* The town (docs/world/overworld.md): Central Town or ACDC Town as Capcom built
  * them, cut into pieces and set out again for each run.
  *
  * A plan is a list of pieces over 8-unit world cells. A copied piece is a
@@ -218,7 +218,7 @@ struct TownStyle {
 	int port_src[2];                    /* the act's second and third ways' ports: the original's
 	                                     * jack-in point (0x40 + n) or check (0xF0 + n) made one */
 	int door;                           /* the original's warp trigger into Lan's house, home's front door
-	                                     * (docs/HOME.md: Lan jacks in from his PC there); 0 none */
+	                                     * (docs/world/home/: Lan jacks in from his PC there); 0 none */
 	unsigned doors;                     /* its other doors kept open, bit n its warp trigger n:
 	                                     * home's AsterLand and Cyber Academy (indoors.c) */
 };
@@ -358,7 +358,7 @@ static const Style styles[] = {
 	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
-#define HOME_STYLE 0   /* Central Town, every run's (docs/HOME.md) */
+#define HOME_STYLE 0   /* Central Town, every run's (docs/world/home/) */
 _Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_lines.c)");
 
 /* ---- what the copied pieces bring ---- */
@@ -682,7 +682,7 @@ static bool folk_spot_ok(int cx, int cy, int x, int y, bool port) {
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
 	T.seed = seed;
-	/* the style (home's, docs/HOME.md), its source learned once */
+	/* the style (home's, docs/world/home/), its source learned once */
 	int si = env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];

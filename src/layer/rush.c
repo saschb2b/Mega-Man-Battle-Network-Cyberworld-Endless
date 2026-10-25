@@ -1,4 +1,4 @@
-/* Rush's gaps on a layer (issue #14; docs/ROM_DATA.md, Rush).
+/* Rush's gaps on a layer (issue #14; docs/rom/net-maps.md, Rush).
  *
  * BN6 runs Rush itself: a check each frame (bn6f sub_809C968) answers A at
  * a gap's trigger strip (section-3 values 0x30-0x33) with the gap's
@@ -20,7 +20,7 @@
 #include "net_shapes.h"
 #include "netmap.h"
 
-#define RUSH_AT FREE_RUSH                /* the engine's tables (docs/EMULATION.md) */
+#define RUSH_AT FREE_RUSH                /* the engine's tables (docs/engine/emulation/) */
 #define RUSH_GROUPS     (RUSH_AT)         /* a per-map array for each group 0x80-0x96 */
 #define RUSH_NO_MAPS    (RUSH_AT + 0x60)  /* every map of a group: none */
 #define RUSH_HOST_MAPS  (RUSH_AT + 0xA0)  /* the layer's group's maps */

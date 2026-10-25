@@ -2,7 +2,7 @@
  * (0x01:02) as BN6 has them (indoors.c): the house's front door to Central
  * Town and its stairs up (warp entries 1 and 3; 2 the bathroom's), the
  * room's stairs down (1) and the PC before the desk, jack-in point 0x40,
- * which BN6's own table sends to Lan's HP (docs/ROM_DATA.md, Lan's HP),
+ * which BN6's own table sends to Lan's HP (docs/rom/world.md, Lan's HP),
  * with a line of its story's. */
 #include "lan_house.h"
 
