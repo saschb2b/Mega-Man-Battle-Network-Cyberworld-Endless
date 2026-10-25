@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- **Fast forward, outside the fight.** A press of its button runs the
+  game faster (Tab or Space, a controller's right trigger or right stick
+  press, ▶▶ on the touch controls; held, only while held): walking a
+  layer and the town, chats, fades and warps, a battle's opening and its
+  results. From a battle's first Custom screen to its last deletion it is
+  BN6's speed, always, and so are BN6's menus and online play: nothing you
+  decide against the clock changes, and there its button does nothing and
+  the touch controls' ▶▶ steps aside. Two of the PET's orange arrows show in
+  the corner while it runs. Options' new **Fast forward** line sets 2x, 3x
+  (the default), 4x or off; the music keeps its pitch, and a machine that
+  cannot go that fast goes as fast as it can. The controls screen has a
+  **FAST** row for its button. A controller's right trigger was R as well
+  before; a `pad.ini` from before keeps it so. The run's minutes count the
+  game's own time now, so the week's DeepNet ranks a dive alike with fast
+  forward or without.
+
 ## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,

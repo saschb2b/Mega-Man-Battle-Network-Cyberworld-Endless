@@ -11,6 +11,7 @@
 #include "buttons.h"
 #include "controls.h"
 #include "display.h"
+#include "fast_forward.h"
 #include "game.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -37,6 +38,7 @@ int options_lines(int kinds[LINES_MAX]) {
 #endif
 		kinds[n++] = LINE_DISPLAY;
 		kinds[n++] = LINE_AUDIO;
+		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 	}
 	/* (no Done: B leaves, as everywhere in BN6) */
@@ -94,6 +96,15 @@ static void heard_keep(int kind) {
 	platform_persist();
 }
 
+/* fast forward's speed turned (`dir`) and kept */
+static void fast_keep(int dir) {
+	char path[600];
+	fast_speed_set(fast_speed_next(fast_speed(), dir));
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	settings_line_write(path, "fast_forward", fast_speed_word(fast_speed()), options_fast_note());
+	platform_persist();
+}
+
 #ifdef __EMSCRIPTEN__
 /* The page's Sound button (web/play/app.js): set here as Options sets it. */
 void cw_set_sound(int soft);
@@ -108,6 +119,7 @@ static void turn(int kind, int dir) {
 	case LINE_SMOOTH: display_smooth_keep(!P.blend, true); break;
 	case LINE_MUSIC:
 	case LINE_EFFECTS: heard_keep(kind); break;
+	case LINE_FAST: fast_keep(dir); break;
 	default: options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true); break;
 	}
 	audio_sfx(SFX_CURSOR);

@@ -60,6 +60,7 @@
 #include "townmath.h"
 #include "touch_layout.h"
 #include "padmap.h"
+#include "fast_forward.h"
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
@@ -2679,6 +2680,63 @@ static bool mapping_fields_ok(const char *m, char *bad, size_t n) {
 /* The controllers' map (issue #37): the defaults, SDL's names both ways,
  * a binding's swap, the presets, pad.ini written and read back (and its
  * mistakes said), the labels, Android's Joy-Con mappings. */
+/* Fast forward's rules (fast_forward.h): its button, where it runs, its speed */
+static void test_fast_forward(void) {
+	FastButton b = { 0 };
+	/* a press turns it on, the next off */
+	fast_button(&b, true);
+	fast_button(&b, false);
+	CHECK(b.on, "a press did not turn fast forward on");
+	fast_button(&b, true);
+	fast_button(&b, false);
+	CHECK(!b.on, "a second press did not turn it off");
+	/* held, it is on while held and off again as it is let go; from on, the other way */
+	for (int i = 0; i < FAST_HOLD + 5; ++i) fast_button(&b, true);
+	CHECK(b.on, "held, fast forward is not on");
+	fast_button(&b, false);
+	CHECK(!b.on, "let go after a hold, fast forward stayed on");
+	fast_button(&b, true);
+	fast_button(&b, false);
+	for (int i = 0; i < FAST_HOLD + 5; ++i) fast_button(&b, true);
+	CHECK(!b.on, "held while on, fast forward did not stop");
+	fast_button(&b, false);
+	CHECK(b.on, "let go, fast forward did not come back on");
+	/* where it runs: the map, chats and fades, a battle's opening and close; not the fight, menus, online */
+	FastScene s = { .run = true, .toolkit = BN6_MODE_GAME, .sub = BN6_SUB_MAP };
+	CHECK(fast_scene_allows(&s), "fast forward stopped on the map");
+	s.sub = BN6_SUB_ENTER;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a map's fade");
+	s.sub = BN6_SUB_BATTLE_INIT;
+	CHECK(fast_scene_allows(&s), "fast forward stopped as a battle begins");
+	s.sub = BN6_SUB_BATTLE;
+	s.phase = 0x04;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a battle's opening");
+	s.phase = BN6_PHASE_RESULTS;
+	CHECK(fast_scene_allows(&s), "fast forward stopped on a battle's results");
+	s.phase = BN6_PHASE_CUSTOM;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the Custom screen");
+	s.phase = BN6_PHASE_FIGHT;
+	CHECK(!fast_scene_allows(&s), "fast forward ran in the fight");
+	s.sub = BN6_SUB_PET;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the PET's menu");
+	s.sub = BN6_SUB_MAP;
+	s.toolkit = BN6_MODE_SHOP;
+	CHECK(!fast_scene_allows(&s), "fast forward ran in a shop");
+	s.toolkit = BN6_MODE_GAME;
+	s.apart = true;
+	CHECK(!fast_scene_allows(&s), "fast forward ran online");
+	s.apart = false;
+	s.run = false;
+	CHECK(!fast_scene_allows(&s), "fast forward ran outside the run");
+	/* the speed, settings.ini's words both ways, Options' turn round */
+	for (int v = FAST_OFF; v <= FAST_MOST; ++v) CHECK(fast_speed_read(fast_speed_word(v)) == v, "%s does not read back", fast_speed_word(v));
+	CHECK(fast_speed_read("3") == 3 && fast_speed_read("no") == FAST_OFF && fast_speed_read("9x") == FAST_DEFAULT, "fast_forward's words read wrong");
+	CHECK(fast_speed_next(FAST_MOST, 1) == FAST_OFF && fast_speed_next(FAST_OFF, -1) == FAST_MOST && fast_speed_next(2, 1) == 3, "Options' turn is off");
+	/* a batch: up to the speed, while the last frame's time still fits */
+	CHECK(fast_batch_more(3, 1, 2, 1, 10) && fast_batch_more(3, 2, 2, 1, 10) && !fast_batch_more(3, 3, 2, 1, 10), "a batch ran past its speed");
+	CHECK(!fast_batch_more(3, 1, 8, 4, 10), "a batch ran past the frame's time");
+}
+
 static void test_padmap(void) {
 	PadMap m, back;
 	padmap_default(&m);
@@ -2758,6 +2816,25 @@ static void test_padmap(void) {
 	CHECK(padmap_same(&m, &back), "the presets there and back left the map changed");
 	padmap_bind(&m, PAD_FAMILY_NINTENDO, 5, PAD_Y);
 	CHECK(padmap_preset_of(&m, PAD_FAMILY_NINTENDO) == -1 && !strcmp(padmap_preset_name(PAD_FAMILY_NINTENDO, PAD_STYLE_NINTENDO, -1), "Custom"), "a hand-set B told as a preset");
+	/* fast forward: the right trigger and the right stick's press, R on its
+	 * shoulder alone; it may have none, and never takes a GBA button's last */
+	padmap_default(&back);
+	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTTRIGGER) == BTN_FAST && padmap_bits(&back, PAD_FAMILY_NINTENDO, PAD_RIGHTSTICK) == BTN_FAST &&
+		padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTSHOULDER) == BTN_R && padmap_count(&back, PAD_FAMILY_RAW, PAD_FAST) == 0, "fast forward's defaults are off");
+	CHECK(padmap_gba("fast") == PAD_FAST && !strcmp(padmap_gba_name(PAD_FAST), "FAST"), "fast forward is misnamed");
+	CHECK(padmap_clear_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 1) && padmap_clear_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 0) &&
+		padmap_count(&back, PAD_FAMILY_XBOX, PAD_FAST) == 0, "fast forward's last input not cleared");
+	CHECK(padmap_set_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 0, PAD_A) == PAD_SLOT_REFUSED && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_A) == BTN_A,
+		"fast forward took A's only button");
+	padmap_bind(&back, PAD_FAMILY_XBOX, PAD_FAST, PAD_START);
+	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_START) == BTN_START, "fast forward, with none to give, took START's only button");
+	CHECK(padmap_set_slot(&back, PAD_FAMILY_XBOX, 7, 1, PAD_RIGHTSTICK) == PAD_SLOT_ALONE, "an input fast forward no longer has told as taken");
+	/* a pad.ini from before it: R keeps the right trigger, fast forward the stick's press */
+	char said[256];
+	CHECK(padmap_parse("[pad]\nR = rightshoulder, righttrigger\n", &back, said, sizeof said) == 0 &&
+		padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTTRIGGER) == BTN_R && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTSTICK) == BTN_FAST,
+		"an older pad.ini's right trigger went to fast forward");
+	CHECK(padmap_parse("[pad]\nFAST =\n", &back, said, sizeof said) == 0 && padmap_count(&back, PAD_FAMILY_XBOX, PAD_FAST) == 0, "FAST = with none not read");
 	/* pad.ini: written, read back the same, nothing said */
 	static char text[8192], errors[1024];
 	padmap_bind(&m, PAD_FAMILY_XBOX, 6, PAD_AXIS(3, false));
@@ -5676,6 +5753,7 @@ int main(void) {
 	test_talk();
 	test_touch();
 	test_padmap();
+	test_fast_forward();
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();

@@ -147,15 +147,44 @@ void emu_audio_rate(int rate) {
 	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), rate);
 }
 
+/* Fast forward's sound (emu_frame_as): the frame running's EMU_FRAME_*;
+ * the first samples of the first frame not heard after one heard, which
+ * carry on where that one stopped, and the next heard frame's first faded
+ * in over them */
+#define XFADE 240   /* stereo samples: 5 ms at 48 kHz, a third of a frame's */
+static unsigned frame_how;
+static int16_t tail[XFADE * 2];
+static int tail_n, tail_at;
+static bool tail_wanted;
+
+/* `got` samples of an unheard frame: the tail taken from them where one is wanted */
+static void tail_take(const int16_t *tmp, int got) {
+	if (!tail_wanted) return;
+	int n = got < XFADE - tail_n ? got : XFADE - tail_n;
+	memcpy(tail + tail_n * 2, tmp, (size_t)n * 4);
+	tail_n += n;
+	if (tail_n == XFADE) tail_wanted = false;
+}
+
+/* ... and of a heard one: the tail faded out under its first */
+static void tail_join(int16_t *tmp, int got) {
+	for (int i = 0; i < got && tail_at < tail_n; ++i, ++tail_at)
+		for (int ch = 0; ch < 2; ++ch)
+			tmp[i * 2 + ch] = (int16_t)((tail[tail_at * 2 + ch] * (tail_n - tail_at) + tmp[i * 2 + ch] * tail_at) / tail_n);
+}
+
 /* (a core's sound into the ring: BN6's, or the differential's second core's) */
 static void pull_audio_from(struct mCore *c) {
 	blip_t *l = c->getAudioChannel(c, 0), *r = c->getAudioChannel(c, 1);
 	int16_t tmp[1024 * 2];
 	int got;
+	bool own = c == core, unheard = own && (frame_how & EMU_FRAME_UNHEARD);
 	while ((got = blip_samples_avail(l)) > 0) {
 		if (got > 1024) got = 1024;
 		blip_read_samples(l, tmp, got, 1);
 		blip_read_samples(r, tmp + 1, got, 1);
+		if (unheard) { tail_take(tmp, got); continue; }
+		if (own) tail_join(tmp, got);
 		SDL_LockMutex(ring_lock);
 		for (int i = 0; i < got; ++i) {
 			if (ring_debt) { --ring_debt; continue; }   /* (heard already, before a rollback: emu_audio_rewind) */
@@ -177,6 +206,11 @@ static void pull_audio_from(struct mCore *c) {
 		audio_pace_reset(&pace, fill);
 	}
 	SDL_UnlockMutex(ring_lock);
+	/* (a frame heard: the next unheard one's first samples are its tail) */
+	if (own && !unheard) {
+		tail_n = tail_at = 0;
+		tail_wanted = true;
+	}
 	double adj = audio_pace(&pace, fill, LAT_TARGET);
 	blip_set_rates(l, c->frequency(c), out_rate * adj);
 	blip_set_rates(r, c->frequency(c), out_rate * adj);
@@ -316,9 +350,12 @@ void emu_quit(void) {
 	core = NULL;
 }
 
-void emu_frame(uint32_t keys) {
+void emu_frame(uint32_t keys) { emu_frame_as(keys, 0); }
+
+void emu_frame_as(uint32_t keys, unsigned how) {
 	if (!core) return;
 	wait_frame();
+	frame_how = how;
 	/* (the music or effects turned off or on: Options' Audio, sound_quiet.h) */
 	sound_quiet_frame();
 	core->setKeys(core, keys);
@@ -329,8 +366,8 @@ void emu_frame(uint32_t keys) {
 	}
 	/* (a frame the loop plays to catch up is not shown: the core draws no
 	 * picture for it, a fifth of its time on a 3DS. Smooth motion mixes
-	 * every frame.) */
-	bool unshown = P.skip_present && !P.blend && layout_ok;
+	 * every frame shown; of fast forward's batch only its last is.) */
+	bool unshown = ((P.skip_present && !P.blend) || (how & EMU_FRAME_UNSHOWN)) && layout_ok;
 	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 	run_frame(unshown);
 }

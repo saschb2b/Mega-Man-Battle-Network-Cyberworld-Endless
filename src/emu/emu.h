@@ -34,6 +34,12 @@ void emu_reset(void);
  * its own (emu_threaded), starts it: the next access to the core waits for
  * it, and emu_video shows the frame before until then. */
 void emu_frame(uint32_t keys);
+/* ... a frame of fast forward's batch (fast_forward.h): its picture not
+ * drawn, as none shows it, and its sound not heard, but for the first of
+ * its batch, joined to the last heard by a short crossfade, so the music
+ * keeps its pitch as it plays faster */
+enum { EMU_FRAME_UNSHOWN = 1, EMU_FRAME_UNHEARD = 2 };
+void emu_frame_as(uint32_t keys, unsigned how);
 bool emu_threaded(void);
 /* Waits for a frame the core runs on its own thread: what its hooks left
  * is the main thread's to read after it. */
