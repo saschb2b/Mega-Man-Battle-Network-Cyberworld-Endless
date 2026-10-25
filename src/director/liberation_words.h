@@ -14,9 +14,11 @@ const char *lib_briefing_words(int holes, int par);
 const char *lib_battle_words(int fight, bool won, bool one_turn, int panels, int holes_left, bool guardian_back);
 /* An item panel liberated: Order Points (now `op`), or a heart. */
 const char *lib_item_words(bool heart, int op);
-/* A BonusPanel's roulette (0 full HP, 1 Order Points, 2 a guardian
- * deleted, 3 no harm this phase). */
-const char *lib_bonus_words(int outcome);
+/* A BonusPanel faced and liberated (BN5's line), and its roulette's slot
+ * given (liberation_bonus.h's LIB_BONUS_*: no harm this phase, HP full,
+ * five Order Points (now `op`), a chip, Major Hit). */
+const char *lib_bonus_found_words(void);
+const char *lib_bonus_words(int slot, int op);
 /* A barrier's key found: the sealed region's, or one across the way. */
 const char *lib_key_words(bool sealed);
 /* A trap panel liberated: its harm, `hp`. */

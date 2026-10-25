@@ -290,29 +290,13 @@ static void say_more(const char *words) {
 	snprintf(LB.words + k, sizeof LB.words - k, "%s%s", k ? "|" : "", words);
 }
 
-/* A BonusPanel stepped on: BN5's roulette, its slot by the board's seed
- * and the phase */
-static void bonus(int x, int y) {
-	LB.b.kind[y][x] = LIB_CLEAN;
-	int outcome = (int)((run.layer_seed >> 3) + (uint32_t)(LB.phase * 7 + x * 3 + y)) % 4, near = -1, nd = 1 << 30;
-	for (int u = 1; u < LB.b.nunits; ++u) {
-		int d = abs(LB.b.unit[u].x - x) + abs(LB.b.unit[u].y - y);
-		if (!LB.b.unit[u].gone && d < nd) { nd = d; near = u; }
-	}
-	if (outcome == 2 && near < 0) outcome = 1;
-	if (outcome == 0) hp_set(hp_max());
-	else if (outcome == 1) LB.op = LB.op + 5 > LIB_OP_MAX ? LIB_OP_MAX : LB.op + 5;
-	else if (outcome == 2) LB.b.unit[near].gone = true;
-	else LB.shield = true;
-	say(lib_bonus_words(outcome), LIB_STEP_MOVE);
-}
-
 static void open_menu(void) {
 	int fx, fy;
 	lib_faced(&fx, &fy);
 	int u = lib_unit_at(fx, fy);
 	bool darkloid = u == 0 && !lib_holes_left(&LB.b);
-	LB.can[LIB_CMD_LIBERATE] = (u > 0) || darkloid || (u < 0 && lib_liberable(&LB.b, fx, fy));
+	/* (a BonusPanel too: BN5's frees it without a battle, liberation_bonus.c) */
+	LB.can[LIB_CMD_LIBERATE] = (u > 0) || darkloid || (u < 0 && (lib_liberable(&LB.b, fx, fy) || LB.b.kind[fy][fx] == LIB_BONUS));
 	LB.can[LIB_CMD_LONGSWRD] = LB.op > 0 && u < 0 && lib_liberable(&LB.b, fx, fy) && LB.b.kind[fy][fx] != LIB_HOLE;
 	LB.can[LIB_CMD_PASS] = true;
 	LB.menu = LB.can[LIB_CMD_LIBERATE] ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
@@ -535,15 +519,13 @@ bool lib_quiet(void) { return quiet(); }
 
 /* Where MegaMan stands and what he faces, as BN6 walks him: his panel (a
  * walked one: the fence keeps him to them), and the panel beside it his
- * facing points at, a little ahead of him (a diagonal one is none);
- * a BonusPanel stepped on spins its roulette */
+ * facing points at, a little ahead of him (a diagonal one is none) */
 static const int fwx[8] = { 7, 10, 7, 0, -7, -10, -7, 0 }, fwy[8] = { -7, 0, 7, 10, 7, 0, -7, -10 };
 
 static void track_update(void) {
 	int px = bn6_player_x(), py = bn6_player_y(), x, y;
 	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && lib_walkable(&LB.b, x, y) && (x != LB.mx || y != LB.my)) {
 		LB.mx = x; LB.my = y;
-		if (LB.b.kind[y][x] == LIB_BONUS && LB.step == LIB_STEP_MOVE) bonus(x, y);
 	}
 	int f = emu_read8(BN6_PLAYER_FACING) & 7;
 	LB.tx = LB.ty = -1;
@@ -640,6 +622,7 @@ static void steps_update(void) {
 		break;
 	case LIB_STEP_TALK: talk_update_lib(); break;
 	case LIB_STEP_PRIZE: prize_update(); break;
+	case LIB_STEP_BONUS: lib_bonus_update(); break;
 	default: break;
 	}
 }
@@ -674,6 +657,9 @@ static void menu_keys(uint32_t pressed) {
 		LB.enemy_banner = true;
 		return;
 	}
+	int fx, fy;
+	lib_faced(&fx, &fy);
+	if (LB.menu == LIB_CMD_LIBERATE && lib_unit_at(fx, fy) < 0 && LB.b.kind[fy][fx] == LIB_BONUS) { lib_bonus_begin(fx, fy); return; }
 	fight(LB.menu);
 }
 
@@ -682,7 +668,7 @@ static void menu_keys(uint32_t pressed) {
 bool lib_faced_takes(void) {
 	if (LB.tx < 0) return false;
 	int u = lib_unit_at(LB.tx, LB.ty);
-	return u > 0 || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && lib_liberable(&LB.b, LB.tx, LB.ty));
+	return u > 0 || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && (lib_liberable(&LB.b, LB.tx, LB.ty) || LB.b.kind[LB.ty][LB.tx] == LIB_BONUS));
 }
 
 uint32_t lib_keys(uint32_t keys) {
@@ -707,5 +693,6 @@ uint32_t lib_keys(uint32_t keys) {
 	}
 	viewing = false;
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
+	if (LB.step == LIB_STEP_BONUS) lib_bonus_keys(pressed);
 	return keys & (KEY_START | KEY_SELECT);
 }

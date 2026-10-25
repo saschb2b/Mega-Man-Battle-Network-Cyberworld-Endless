@@ -267,4 +267,48 @@
 #define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a liberation battle from its eleventh turn: */
 #define BN5_LIB_DOUBLE_HIT   0x0800C7CCu /* ... an object's hits this frame summed (its collision data's five) and doubled */
 
+/* A BonusPanel (docs/LIBERATION.md, BonusPanels as BN5's; traced in play, a panel of mission 1 made one):
+ * liberated by the Liberation command, no battle, the Navi's action not spent; its roulette on the
+ * phase banner's band, stopped by A, the slot stopped on given */
+#define BN5_LIB_PTR_BONUS    8           /* the record's BonusPanels: 24 bytes each (x, y, u16 the frames a slot, five */
+                                         /* ... outcomes' pointers, a slot each), 0 ends; an outcome a list of 8 bytes */
+                                         /* ... (kind, code, u16 chip, u16 amount, u8 weight; 0xFF ends) */
+#define BN5_LIB_BONUS_FIND   0x08052D4Eu /* a panel's id (y << 8 | x) to its BonusPanel's index and record */
+#define BN5_LIB_BONUS_PICK   0x08052D74u /* ... slot r1's outcome: one of its list by their weights (the chips' 0x20 each) */
+#define BN5_LIB_BONUS_STATE  0x0200ABB0u /* the roulette: +0 its routine (BN5_LIB_BONUS_STEPS), +1 the icon's place (8 */
+                                         /* ... pixels a unit from the middle), +2 a wait, +4 frames on the slot, +6 the slot */
+                                         /* ... (BN5_LIB_BONUS_ROLL's first), +7 the frames a slot (0 once stopped) */
+#define BN5_LIB_BONUS_STEPS  0x08054EF4u /* its ten routines: the band opened, the icon in, the spin, A, held, out, closed */
+#define BN5_LIB_BONUS_FRAME  0x08055110u /* each frame: the slot one on every +7 frames (the record's u16, 4), mod 5 */
+#define BN5_LIB_BONUS_GIVEN  0x0804C754u /* the slot stopped on: the player's phase's step (its table 0x0804BF5C, routine 2) */
+#define BN5_LIB_BONUS_SLOTS  5           /* ... in this order: */
+#define BN5_LIB_BONUS_SHIELD 0           /* ... "1PHS INVIN": every Navi's unit +0x0E |= 0x80 (0x08054620), sound 0x93, cleared */
+                                         /* ... at the next player's phase (0x08054648): no harm on the board for a phase */
+#define BN5_LIB_BONUS_HP     1           /* ... "HP Rec!": item kind 0, 100 (x 10): the acting Navi's HP full, his alone */
+#define BN5_LIB_BONUS_OP     2           /* ... "Order Pt!": item kind 2, 5 Order Points */
+#define BN5_LIB_BONUS_CHIP   3           /* ... "BattleChip!": item kind 5, one of the mission's four (equal weights) */
+#define BN5_LIB_BONUS_HIT    4           /* ... "Major Hit!": the nearest guardian (kinds 0x11-0x13, 0x08055276) deleted; */
+                                         /* ... none, the nearest Darkloid (0x0805527A) a fifth of his max HP off */
+#define BN5_LIB_BONUS_NEAREST 0x08054290u /* the unit nearest the acting Navi of a kind list (r0: 1 guardians, 2 Darkloids) */
+#define BN5_LIB_BONUS_ICONS  0x08126D4Cu /* the icon a slot shows (object 0x23, 0x08126CA8): 4 bytes a slot, its sprite of */
+#define BN5_LIB_BONUS_ICON_LIST 9        /* ... this list, its animation, its palette; at x (+1 + 15) x 8, y 72 */
+#define BN5_LIB_BONUS_ICON_Y 72        /* ... the icon's origin's y */
+#define BN5_LIB_BONUS_WORDS  25          /* the words under it (object 0x24, 0x08126D68): list 9's 25 (BN5_LIB_PHASE_WORDS' */
+#define BN5_LIB_BONUS_PRESS  4           /* ... sprite), animation 4 "PRESS A BUTTON" while it spins, 6 + the slot its name */
+#define BN5_LIB_BONUS_NAMES  6           /* ... once stopped, */
+#define BN5_LIB_BONUS_WORDS_X 120        /* ... its origin here */
+#define BN5_LIB_BONUS_WORDS_Y 98       /* ... and its y */
+#define BN5_LIB_BONUS_FAR    30          /* the icon's place as the band opens (+1, offscreen right), */
+#define BN5_LIB_BONUS_STEP   4           /* ... in by this a frame once BN5_LIB_BONUS_IN_AT frames on (32 pixels), */
+#define BN5_LIB_BONUS_IN_AT  16          /* ... then BN5_LIB_BONUS_LIVE_AT frames more before A stops it; */
+#define BN5_LIB_BONUS_LIVE_AT 8          /* ... out the same way to -30 after the hold, the band shut 4 later */
+#define BN5_LIB_BONUS_HOLD   88          /* frames the slot stopped on shows, its name under it */
+#define BN5_LIB_BONUS_FRAMES 4           /* frames a slot (every record's BonusPanel's u16) */
+#define BN5_LIB_BONUS_TICK   0x80        /* the sound at each slot's turn while the icon is in place */
+#define BN5_LIB_BONUS_STOP   0x92        /* ... as A stops it */
+#define BN5_LIB_BONUS_GUARD  0x93        /* ... "1PHS INVIN" given */
+#define BN5_LIB_BONUS_FLASH  0xD7        /* before it, three white flashes over the board, this sound each (steps 0x16-0x18): */
+                                         /* ... 2 frames white, then 14/16 down by 2/16 a frame; the second 26 frames after */
+                                         /* ... the first, the third 10 after that; the band opens 30 after the third */
+
 #endif

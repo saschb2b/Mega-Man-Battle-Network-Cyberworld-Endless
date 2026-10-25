@@ -524,6 +524,7 @@ The owner said yes to every decision as proposed:
 | Battle rewards (BN6's rows, the lean) | `src/director/encounter.c` (`lean_row`) |
 | Dealer stock, prices | `src/layer/shop.c`, `src/core/loot.c` (`chip_price`) |
 | Traders: their pools as BN6 has them, its code pick | `src/layer/trader.c` |
+| A dark layer's chips (docs/LIBERATION.md): its par's prizes, its item panels' and its BonusPanels' (one of four, the item panels' band, as BN5's are its mission's standard chips) | `src/layer/lib_prizes.c` |
 | Requests' pay | `src/core/jobs.c` |
 | The report | `src/dev/economy_report.c` |
 | The run's counts, sent at its end | `src/director/runlog.c` (kept, saved as `run.tally`, a battle's reward and a Guardian Data's chip counted), `src/director/director_jobs.c` (the Mystery Data opened, as a layer is left), `src/analytics/analytics.c` (`analytics_count_*`, `analytics_run_end`) |

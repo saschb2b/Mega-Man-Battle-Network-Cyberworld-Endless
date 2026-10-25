@@ -13,6 +13,7 @@
 #include "bn6_fields.h"
 #include "emu.h"
 #include "netmap.h"
+#include "liberation_bonus.h"
 #include "liberation_state.h"
 
 static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
@@ -45,10 +46,12 @@ static bool plan(int *face, int *step) {
 			int nx = x + dirs[d][0], ny = y + dirs[d][1];
 			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
 			int u = lib_unit_at(nx, ny);
-			bool unit = u >= 0, take = (u > 0) || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && lib_liberable(&LB.b, nx, ny));
-			int score = take ? cost[ny][nx] * 64 + walk[y][x] : 1 << 30;
+			bool bonus = u < 0 && LB.b.kind[ny][nx] == LIB_BONUS;
+			bool unit = u >= 0, take = (u > 0) || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && lib_liberable(&LB.b, nx, ny)) || bonus;
+			/* (a BonusPanel first where it is near: BN5's, free and no action spent) */
+			int score = bonus && walk[y][x] < 8 ? walk[y][x] : take ? cost[ny][nx] * 64 + walk[y][x] : 1 << 30;
 			if (score < best) { best = score; bx = x; by = y; bf = d; }
-			if (walk[ny][nx] >= 0 || !lib_walkable(&LB.b, nx, ny) || unit) continue;
+			if (walk[ny][nx] >= 0 || !lib_walkable(&LB.b, nx, ny) || unit || bonus) continue;
 			walk[ny][nx] = (int16_t)(walk[y][x] + 1);
 			first[ny][nx] = first[y][x] < 0 ? (int16_t)d : first[y][x];
 			q[tail++] = (uint16_t)(ny * MAP_W + nx);
@@ -79,6 +82,8 @@ static uint32_t toward(int x, int y, int near) {
 }
 
 uint32_t lib_auto_keys(int frame) {
+	/* (a BonusPanel's roulette: A as soon as it is heard) */
+	if (lib_bonus_spinning()) return frame & 1 ? 0 : KEY_A;
 	if (LB.step == LIB_STEP_MENU) {
 		if (frame & 1) return 0;   /* (a press, then a frame up) */
 		int want = LB.can[LIB_CMD_LIBERATE] && emu_read16(BN6_NAVI_HP) * 5 > emu_read16(BN6_NAVI_MAX_HP) * 2 ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
