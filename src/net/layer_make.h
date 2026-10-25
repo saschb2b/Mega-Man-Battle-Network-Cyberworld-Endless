@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 100   /* (100: a guardian's draft offers no program that adds nothing to those held, docs/NAVICUST.md) */
+#define LAYER_MAKE 101   /* (101: a deleted guardian back as BN5 brings him, the planner's par after it, docs/LIBERATION.md) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif
