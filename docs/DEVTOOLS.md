@@ -2181,9 +2181,9 @@ python3 tools/play.py start NAME -- --pad playstation
 python3 tools/play.py do NAME "press pad.back; press key.J"
 ```
 
-`--pad KIND` (xbox, playstation, nintendo or generic) attaches one of
+`--pad KIND` (xbox, playstation, ps5, nintendo or generic) attaches one of
 SDL's virtual controllers, named and numbered as that kind is (an Xbox 360
-pad, a PS4 pad, a Switch Pro Controller), so the game opens and reads it
+pad, a PS4 pad, a DualSense, a Switch Pro Controller), so the game opens and reads it
 as a player's (`pads.c`): its family and labels, the controls screen,
 `pad.ini`, which the data folder then holds headless too (written with
 the defaults where missing, and when the controls screen keeps a map).
@@ -2196,6 +2196,30 @@ SDL's events as a player's, past any map; the GBA's own names (`A`,
 reads no `settings.ini`; docs/GUIDE.md, Fast forward). It needs SDL 2.24 (every
 build but the handhelds' PortMaster binary, linked against 2.0.14, where
 `--pad` says it has none).
+
+## The controller's feel: what was sent
+
+```bash
+CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --run-depth 1 --pad ps5 --dev feel --frames 6000 --input "0:battle"
+python3 tools/cw.py shot "options/audio --pad ps5"   # Options' Vibration and Trigger effects
+```
+
+Nobody can feel a controller headless, so `--dev feel` says what the
+game's rumble and a DualSense's triggers were sent (docs/GUIDE.md, Rumble
+and triggers; `src/core/feel_out.c`), a line each on stdout: a beat as
+BN6's state raised it, its strength 0-255 (`feel: frame 2340: delete
+208`), each change of the motors, the heavy one first (`feel: frame 2341:
+rumble 27756 15934`), and each trigger effect (`feel: frame 2792:
+triggers L2 gauge, R2 off`, "not taken" where SDL refused it: an SDL
+before 2.0.16, or Steam Input's pad in a DualSense's place). The virtual
+pads (`--pad`) say what reached SDL as well: `virtual pad: rumble 27756
+15934`, and a DualSense's 47 bytes of effects, the right trigger's mode
+and numbers (byte 10 on) and the left's (21 on), `25 24 00 05` the
+gauge's click (mode 0x25, zones 2 and 5, strength 6). The rules (which
+change raises which beat, each beat's shape, the strengths, the
+triggers' bytes) are `test_feel` in `tests/test_core.c`. A device is the
+owner's: `build.py run` with a DualSense on USB or Bluetooth, Steam Input
+off for it (docs/GUIDE.md).
 
 ## How the switches work
 

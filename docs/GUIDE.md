@@ -522,6 +522,43 @@ as often per step, every reward is the same, and the run's minutes count
 the game's own time, so the week's DeepNet ranks a dive alike with it or
 without.
 
+### Rumble and triggers
+
+A controller rumbles on the beats of a fight: when MegaMan is hit (harder
+the more of his HP it takes), when his buster's charge is full and when
+the charged shot fires, on a counter's Full Synchro, when a virus is
+deleted (a Navi longer), as he takes Beast Out or a Cross, at his own
+deletion, and as he jacks in. Each one comes with what the screen and the
+sound already show, so turning it off loses nothing. Chips used and the
+Custom gauge filling do not rumble, because they come every few seconds.
+Nothing rumbles while fast forward runs or online.
+
+On a PS5 DualSense the adaptive triggers click where a pull does
+something. Once the Custom gauge is full, the trigger that is L or R
+resists and gives way halfway, as the press opens the Custom screen.
+Where fast forward can run, FAST's trigger has a lighter click like a
+switch. Elsewhere both triggers pull free. By default L2 is L and R2 is
+FAST; the controls screen moves them, and the clicks follow.
+
+Options' **Audio** sets them: **Vibration** (**Strong**, **Medium**, the
+default, **Weak** or **Off**; `vibration` in `settings.ini`) and, while
+a DualSense is the controller in use, **Trigger effects** (**On** or
+**Off**; `trigger_effects`).
+
+- **Where:** the Linux builds (a Steam Deck's own controls too), Windows,
+  macOS and iOS rumble a controller, iOS without the trigger effects. A
+  PortMaster handheld rumbles where its firmware's SDL drives its motor
+  (untested). Android, the browser and the 3DS don't yet.
+- **Bluetooth or USB:** a DualSense rumbles and clicks either way. Over
+  Bluetooth the game asks SDL for the controller's full reports, which it
+  keeps until it is turned off. On Windows, a game reading it through
+  DirectInput afterwards may need the controller turned off and on again.
+- **Steam:** with Steam Input on for the game's shortcut, the game sees
+  Steam's own controller in the DualSense's place. Rumble still gets
+  through, but the trigger effects don't. Turn Steam Input off for the
+  shortcut (its Properties, Controller) or start the game outside Steam
+  to feel the triggers.
+
 ### A run
 
 A new stretch of net has opened under the town: the Endless Net. Its

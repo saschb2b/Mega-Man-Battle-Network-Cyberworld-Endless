@@ -15,6 +15,8 @@ void fast_forward_update(void);
  * unheard past the first) */
 bool fast_forward_goes_on(int i);
 unsigned fast_forward_how(int i);
+/* Whether this update's batch runs fast (its mark shows) */
+bool fast_forward_running(void);
 /* Whether it could run where the game is now, turned on or not (the
  * place allows it, Options' speed not off): elsewhere its button does
  * nothing and the touch controls hide theirs */

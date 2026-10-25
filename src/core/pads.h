@@ -47,6 +47,15 @@ bool pads_any_held(void);
 bool pads_last(int *family, int *style, const char **name);
 /* This frame's presses, at most `most`. */
 int pads_presses(PadPress *out, int most);
+/* The feel's way to the pad played on (the one used last, else the
+ * first; feel_out.h): its rumble, each motor 0-65535 for `ms` at most;
+ * the pad, an id (0 none), whether it is a DualSense and the GBA buttons
+ * its L2 and R2 give through the map; and a DualSense's effects report
+ * (SDL_GameControllerSendEffect, SDL 2.0.16 on; false where it did not
+ * take it: an older SDL, Steam Input's pad in its place) */
+void pads_rumble(uint16_t low, uint16_t high, uint32_t ms);
+int pads_feel_pad(bool *dualsense, uint32_t *l2, uint32_t *r2);
+bool pads_send_effect(const void *data, int size);
 /* The map in play, and a new one put in play (pads_save writes it). */
 const PadMap *pads_map(void);
 void pads_set_map(const PadMap *m);
@@ -56,8 +65,9 @@ void pads_load(const char *path);
 bool pads_save(void);
 
 /* Tests (--pad KIND, main.c): a virtual controller of a kind (xbox,
- * playstation, nintendo, generic), its inputs held as a step says (bit n
- * input n). False where SDL (before 2.24) has none. */
+ * playstation, ps5, nintendo, generic, raw), its inputs held as a step
+ * says (bit n input n), what it is sent told (rumble, a DualSense's
+ * effects). False where SDL (before 2.24) has none. */
 bool pads_virtual(const char *kind);
 void pads_virtual_hold(uint64_t inputs);
 

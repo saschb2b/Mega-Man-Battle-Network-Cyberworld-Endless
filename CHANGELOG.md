@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Rumble, and a DualSense's adaptive triggers.** A controller now
+  rumbles on a fight's beats: MegaMan hit (harder the more HP it takes),
+  the charged shot ready and fired, a counter's Full Synchro, a virus or
+  a Navi deleted, Beast Out and a Cross, his defeat, and a jack-in.
+  Nothing rumbles for every chip or while fast forward runs. On a PS5
+  DualSense, over USB or Bluetooth, the trigger that is L clicks once the
+  Custom gauge is full, and pulling through it opens the Custom screen;
+  FAST's trigger clicks lightly where fast forward can run and pulls free
+  in the fight. Options' Audio has **Vibration** (Strong, Medium, Weak,
+  Off) and **Trigger effects**. With Steam Input on for the game's
+  shortcut, the triggers don't reach the pad: turn it off for them
+  ([Rumble and triggers](docs/GUIDE.md#rumble-and-triggers)).
+
 - **Host your own Net Square, with nothing to set.** The server, started
   bare (a double-click on Windows), now opens a Square every computer on
   the network can reach, and says on its console the address players

@@ -61,6 +61,7 @@
 #include "touch_layout.h"
 #include "padmap.h"
 #include "fast_forward.h"
+#include "feel.h"
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
@@ -2688,6 +2689,93 @@ static bool mapping_fields_ok(const char *m, char *bad, size_t n) {
 /* The controllers' map (issue #37): the defaults, SDL's names both ways,
  * a binding's swap, the presets, pad.ini written and read back (and its
  * mistakes said), the labels, Android's Joy-Con mappings. */
+/* The controller's feel (feel.h): the beats a frame's change raises, their
+ * mix by Options' strength, the words, a DualSense's trigger bytes */
+static void test_feel(void) {
+	FeelGame was = { .fight = true, .hp = 200, .max_hp = 200, .viruses = 3 }, now = was;
+	FeelBeat b[FEEL_BEATS_MOST];
+	CHECK(feel_beats(&was, &now, b) == 0, "a still frame raised a beat");
+	/* a hit by its damage: a scratch soft, a quarter of his HP and more full */
+	now.hp = 195;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_HIT, "a hit raised no hit");
+	uint8_t scratch = b[0].amount;
+	now.hp = 150;
+	feel_beats(&was, &now, b);
+	CHECK(b[0].amount == 255 && scratch < 128, "a hit's strength by its damage is off (%u, %u)", scratch, b[0].amount);
+	now.hp = 0;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_DEFEAT, "MegaMan's deletion was not his defeat");
+	/* the buster's charge full, then fired; a counter; two viruses at once; a Navi; a Cross */
+	now = was;
+	was.charge = 1;
+	now.charge = 2;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_CHARGED, "the charge's full was not felt");
+	was.charge = 2;
+	now.charge = 0;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_SHOT, "the charged shot was not felt");
+	was.charge = 1;
+	CHECK(feel_beats(&was, &now, b) == 0, "a plain shot was felt as a charged one");
+	was.charge = 0;
+	now.synchro = true;
+	now.viruses = 1;
+	int n = feel_beats(&was, &now, b);
+	CHECK(n == 2 && b[0].cue == FEEL_COUNTER && b[1].cue == FEEL_DELETE && b[1].amount == 255, "a counter and two deletions were not felt so");
+	now = was;
+	was.navis = 1;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_NAVI_DELETE, "a Navi's deletion was felt as a virus's");
+	was.navis = 0;
+	now.form = 1;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_FORM, "a Cross was not felt");
+	was.form = 1;
+	now.form = 0;
+	CHECK(feel_beats(&was, &now, b) == 0, "a Cross's end was felt");
+	/* nothing across a battle's start or end, its objects cleared; a jack-in */
+	now = (FeelGame){ .real = true };
+	CHECK(feel_beats(&was, &now, b) == 0, "a battle's end raised a beat");
+	was = now;
+	now = (FeelGame){ .net = true };
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_JACK_IN, "a jack-in was not felt");
+	CHECK(feel_beats(&now, &now, b) == 0, "the net felt as a jack-in again");
+	/* the mix: a beat's shape played out, the strength scaling it, nothing at Off */
+	FeelMix m = { 0 };
+	uint16_t lo, hi, strong = 0, weak = 0;
+	CHECK(!feel_mix_frame(&m, FEEL_STRONG, &lo, &hi) && !lo && !hi, "an empty mix rumbled");
+	feel_mix_start(&m, FEEL_HIT, 255);
+	CHECK(feel_mix_frame(&m, FEEL_STRONG, &strong, &hi) && strong == 65535, "a full hit did not rumble the heavy motor full (%u)", strong);
+	FeelMix w = { 0 };
+	feel_mix_start(&w, FEEL_HIT, 255);
+	feel_mix_frame(&w, FEEL_WEAK, &weak, &hi);
+	CHECK(weak > 0 && weak < strong / 2, "Weak is not weaker (%u against %u)", weak, strong);
+	FeelMix off = { 0 };
+	feel_mix_start(&off, FEEL_DEFEAT, 255);
+	feel_mix_frame(&off, FEEL_OFF, &lo, &hi);
+	CHECK(!lo && !hi, "Off rumbled");
+	int frames = 1;
+	while (feel_mix_frame(&m, FEEL_STRONG, &lo, &hi) && frames < 600) ++frames;
+	CHECK(frames > 5 && frames < 30 && !lo && !hi, "a hit's shape lasted %d frames", frames);
+	/* more beats than voices: the newest is felt */
+	for (int i = 0; i < FEEL_VOICES + 2; ++i) feel_mix_start(&m, FEEL_DELETE, 200);
+	feel_mix_start(&m, FEEL_DEFEAT, 255);
+	feel_mix_frame(&m, FEEL_STRONG, &lo, &hi);
+	CHECK(lo == 65535, "the newest beat went unfelt in a full mix");
+	/* settings.ini's words, Options' turn round */
+	for (int v = FEEL_OFF; v < FEEL_LEVELS; ++v) CHECK(feel_level_read(feel_level_word(v)) == v, "%s does not read back", feel_level_word(v));
+	CHECK(feel_level_read("no") == FEEL_OFF && feel_level_read("loud") == FEEL_DEFAULT, "vibration's words read wrong");
+	CHECK(feel_level_next(FEEL_STRONG, 1) == FEEL_OFF && feel_level_next(FEEL_OFF, -1) == FEEL_STRONG && feel_level_next(FEEL_WEAK, 1) == FEEL_MEDIUM,
+		"Options' turn of the vibration is off");
+	/* the triggers: off free, the clicks Weapon's (0x25) giving way at half the pull, the gauge's firmer */
+	uint8_t t[TRIGGER_BYTES], r[TRIGGER_REPORT];
+	feel_trigger_bytes(TRIGGER_OFF, t);
+	CHECK(t[0] == 0x05 && !t[1] && !t[3], "a free trigger is not Off");
+	feel_trigger_bytes(TRIGGER_GAUGE, t);
+	CHECK(t[0] == 0x25 && (t[1] | t[2] << 8) == (1 << 2 | 1 << 5), "the gauge's click is not Weapon's from zone 2 to 5");
+	uint8_t firm = t[3];
+	feel_trigger_bytes(TRIGGER_FAST, t);
+	CHECK(t[0] == 0x25 && t[3] < firm, "FAST's click is not lighter than the gauge's");
+	feel_trigger_report(TRIGGER_GAUGE, TRIGGER_FAST, r);
+	CHECK(r[0] == 0x0C && r[21] == 0x25 && r[24] == firm && r[10] == 0x25 && r[13] < firm && !r[2] && !r[3],
+		"the effects' report does not set both triggers, the left at 21 and the right at 10, nor leave the rumble be");
+}
+
 /* Fast forward's rules (fast_forward.h): its button, where it runs, its speed */
 static void test_fast_forward(void) {
 	FastButton b = { 0 };
@@ -5920,6 +6008,7 @@ int main(void) {
 	test_touch();
 	test_padmap();
 	test_fast_forward();
+	test_feel();
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();

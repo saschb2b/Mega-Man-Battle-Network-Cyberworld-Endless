@@ -215,7 +215,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/core/settings_line.c src/gfx/letters.c \
-	src/jukebox/jukebox_text.c src/core/fast_forward.c
+	src/jukebox/jukebox_text.c src/core/fast_forward.c src/core/feel.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)

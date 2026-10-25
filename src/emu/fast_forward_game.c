@@ -67,6 +67,8 @@ bool fast_forward_goes_on(int i) {
 	return true;
 }
 
+bool fast_forward_running(void) { return running && updated_at == P.frame; }
+
 /* (the touch controls draw after a frame or two of smooth motion's) */
 bool fast_forward_available(void) { return can && updated_at + 2 >= P.frame; }
 
