@@ -12,9 +12,10 @@
 /* The keyboard, after Capcom's own PC layout for Battle Network (the Legacy
  * Collection): WASD moves, J and K are A and B, Q and E are L and R, Enter
  * is Start and R is Select. The arrows with X and Z also work, as on most
- * GBA emulators. Keys are positions (scancodes), not letters, so an AZERTY
- * keyboard moves with ZQSD. keys.ini in the data folder changes them. */
-static const struct { const char *name; uint32_t bit; const char *keys; } key_defaults[] = {
+ * GBA emulators, and fast forward is on Tab, as mGBA has it, and Space.
+ * Keys are positions (scancodes), not letters, so an AZERTY keyboard moves
+ * with ZQSD. keys.ini in the data folder changes them. */
+static const struct { const char *name; uint32_t bit; const char *keys; } key_defaults[KEYS_ROWS] = {
 	{ "UP", BTN_UP, "W, Up" },
 	{ "DOWN", BTN_DOWN, "S, Down" },
 	{ "LEFT", BTN_LEFT, "A, Left" },
@@ -25,6 +26,7 @@ static const struct { const char *name; uint32_t bit; const char *keys; } key_de
 	{ "R", BTN_R, "E" },
 	{ "START", BTN_START, "Return, Keypad Enter" },
 	{ "SELECT", BTN_SELECT, "R, Backspace" },
+	{ "FAST", BTN_FAST, "Tab, Space" },
 };
 static KeyMap in_play;                         /* each button's keys in order, the first its MAIN */
 static uint32_t key_map[SDL_NUM_SCANCODES];    /* (per key its buttons, made from in_play) */
@@ -32,7 +34,7 @@ static char keys_path[600];
 
 static void rebuild(void) {
 	memset(key_map, 0, sizeof key_map);
-	for (int g = 0; g < 10; ++g)
+	for (int g = 0; g < KEYS_ROWS; ++g)
 		for (int i = 0; i < KEYS_PER && in_play.slot[g][i]; ++i) key_map[in_play.slot[g][i]] |= 1u << g;
 }
 
@@ -92,13 +94,13 @@ bool platform_key_free(int sc) {
 
 int platform_keys_slot(const KeyMap *k, int gba, int slot) {
 	if (!k) k = &in_play;
-	return gba >= 0 && gba < 10 && slot >= 0 && slot < KEYS_PER ? k->slot[gba][slot] : 0;
+	return gba >= 0 && gba < KEYS_ROWS && slot >= 0 && slot < KEYS_PER ? k->slot[gba][slot] : 0;
 }
 
 void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n) {
 	if (!k) k = &in_play;
 	out[0] = 0;
-	for (int i = 0; gba >= 0 && gba < 10 && i < KEYS_PER && k->slot[gba][i]; ++i) {
+	for (int i = 0; gba >= 0 && gba < KEYS_ROWS && i < KEYS_PER && k->slot[gba][i]; ++i) {
 		size_t m = strlen(out);
 		snprintf(out + m, n - m, "%s%s", m ? ", " : "", SDL_GetScancodeName((SDL_Scancode)k->slot[gba][i]));
 	}
@@ -117,7 +119,7 @@ static bool take_key(uint16_t *row, int sc) {
 }
 
 int platform_keys_set_slot(KeyMap *k, int gba, int slot, int sc) {
-	if (gba < 0 || gba >= 10 || slot < 0 || slot >= KEYS_PER || !platform_key_free(sc)) return KEYS_REFUSED;
+	if (gba < 0 || gba >= KEYS_ROWS || slot < 0 || slot >= KEYS_PER || !platform_key_free(sc)) return KEYS_REFUSED;
 	uint16_t *row = k->slot[gba];
 	int n = count_of(k, gba);
 	for (int i = 0; i < n; ++i)
@@ -127,12 +129,12 @@ int platform_keys_set_slot(KeyMap *k, int gba, int slot, int sc) {
 			return KEYS_ALONE;
 		}
 	int old = slot < n ? row[slot] : 0;
-	/* a button whose only key it is gives it up for the one replaced, or,
-	 * with none replaced, keeps it */
-	for (int g = 0; g < 10; ++g)
+	/* a GBA button whose only key it is gives it up for the one replaced,
+	 * or, with none replaced, keeps it (fast forward's may go) */
+	for (int g = 0; g < KEYS_FAST; ++g)
 		if (g != gba && count_of(k, g) == 1 && k->slot[g][0] == sc && !old) return KEYS_REFUSED;
 	int from = KEYS_ALONE;
-	for (int g = 0; g < 10; ++g) {
+	for (int g = 0; g < KEYS_ROWS; ++g) {
 		if (g == gba || !take_key(k->slot[g], sc)) continue;
 		from = g;
 		if (!k->slot[g][0]) k->slot[g][0] = (uint16_t)old;
@@ -142,14 +144,15 @@ int platform_keys_set_slot(KeyMap *k, int gba, int slot, int sc) {
 }
 
 bool platform_keys_clear_slot(KeyMap *k, int gba, int slot) {
-	if (gba < 0 || gba >= 10 || slot < 0 || slot >= count_of(k, gba) || count_of(k, gba) < 2) return false;
+	if (gba < 0 || gba >= KEYS_ROWS || slot < 0 || slot >= count_of(k, gba) || (count_of(k, gba) < 2 && gba != KEYS_FAST)) return false;
 	take_key(k->slot[gba], k->slot[gba][slot]);
 	return true;
 }
 
 static const char keys_header[] =
 	"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
-	"# button its keys, separated by commas, the first its main one. Keys are\n"
+	"# button its keys, separated by commas, the first its main one; FAST is\n"
+	"# fast forward's, which may have none. Keys are\n"
 	"# named as on a US keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return,\n"
 	"# Backspace, Tab, Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad\n"
 	"# Enter...) and mean that position: on an AZERTY keyboard W is the key\n"
@@ -207,6 +210,10 @@ void platform_load_keys(const char *path) {
 		bind_keys(&in_play, (int)i, eq + 1, where);
 	}
 	fclose(f);
+	/* (a file from before fast forward, or one that gave its keys to a GBA
+	 * button: they stay the GBA button's) */
+	for (int g = 0; g < KEYS_FAST; ++g)
+		for (int i = 0; i < KEYS_PER && in_play.slot[g][i]; ++i) take_key(in_play.slot[KEYS_FAST], in_play.slot[g][i]);
 	rebuild();
 }
 

@@ -60,6 +60,7 @@
 #include "townmath.h"
 #include "touch_layout.h"
 #include "padmap.h"
+#include "fast_forward.h"
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
@@ -1403,11 +1404,11 @@ static void test_talk(void) {
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
 			snprintf(what, sizeof what, "the port's words to area %d (guardian %d)", biome, navi);
-			check_talk(what, home_port_words(biome, navi, false, false, false));
-			check_talk(what, home_port_words(biome, navi, true, false, false));
-			check_talk(what, home_port_words(biome, navi, false, false, true));
+			check_talk(what, home_port_words(biome, navi, false, false, false, false));
+			check_talk(what, home_port_words(biome, navi, true, false, false, false));
+			check_talk(what, home_port_words(biome, navi, false, false, true, false));
 		}
-		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false));
+		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false, false));
 	}
 }
 
@@ -1467,12 +1468,19 @@ static void test_home_words(void) {
 			for (int ways = 1; ways <= 3; ++ways) {
 				char what[80];
 				snprintf(what, sizeof what, "home's words at layer %d (net %d, %d ways)", depth, mode, ways);
-				check_talk(what, home_words("TomahawkMan", ways, ports, ways == 2 ? ports[2] : NULL));
-				check_talk(what, home_words(NULL, ways, ports, NULL));
+				check_talk(what, home_words("TomahawkMan", ways, ports, ways == 2 ? ports[2] : NULL, -1));
+				check_talk(what, home_words(NULL, ways, ports, NULL, -1));
+				/* (a special route's way: the fork's third, the Nest's second) */
+				if (ways >= 2) check_talk(what, home_words("TomahawkMan", ways, ports, NULL, ways - 1));
 			}
 		}
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		check_talk("a special route's portal", home_port_words(b, 0, b == BIOME_UNDERNET, false, false, true));
+		check_talk("a special route's portal, a guardian known", home_port_words(b, 3, false, false, false, true));
+	}
 	run.depth = 1;
 }
+
 
 /* Following the arrow gets MegaMan there: from the arrival and from each
  * room, walking the way it shows at a run's pace (a look every 5 frames, a
@@ -2679,6 +2687,63 @@ static bool mapping_fields_ok(const char *m, char *bad, size_t n) {
 /* The controllers' map (issue #37): the defaults, SDL's names both ways,
  * a binding's swap, the presets, pad.ini written and read back (and its
  * mistakes said), the labels, Android's Joy-Con mappings. */
+/* Fast forward's rules (fast_forward.h): its button, where it runs, its speed */
+static void test_fast_forward(void) {
+	FastButton b = { 0 };
+	/* a press turns it on, the next off */
+	fast_button(&b, true);
+	fast_button(&b, false);
+	CHECK(b.on, "a press did not turn fast forward on");
+	fast_button(&b, true);
+	fast_button(&b, false);
+	CHECK(!b.on, "a second press did not turn it off");
+	/* held, it is on while held and off again as it is let go; from on, the other way */
+	for (int i = 0; i < FAST_HOLD + 5; ++i) fast_button(&b, true);
+	CHECK(b.on, "held, fast forward is not on");
+	fast_button(&b, false);
+	CHECK(!b.on, "let go after a hold, fast forward stayed on");
+	fast_button(&b, true);
+	fast_button(&b, false);
+	for (int i = 0; i < FAST_HOLD + 5; ++i) fast_button(&b, true);
+	CHECK(!b.on, "held while on, fast forward did not stop");
+	fast_button(&b, false);
+	CHECK(b.on, "let go, fast forward did not come back on");
+	/* where it runs: the map, chats and fades, a battle's opening and close; not the fight, menus, online */
+	FastScene s = { .run = true, .toolkit = BN6_MODE_GAME, .sub = BN6_SUB_MAP };
+	CHECK(fast_scene_allows(&s), "fast forward stopped on the map");
+	s.sub = BN6_SUB_ENTER;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a map's fade");
+	s.sub = BN6_SUB_BATTLE_INIT;
+	CHECK(fast_scene_allows(&s), "fast forward stopped as a battle begins");
+	s.sub = BN6_SUB_BATTLE;
+	s.phase = 0x04;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a battle's opening");
+	s.phase = BN6_PHASE_RESULTS;
+	CHECK(fast_scene_allows(&s), "fast forward stopped on a battle's results");
+	s.phase = BN6_PHASE_CUSTOM;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the Custom screen");
+	s.phase = BN6_PHASE_FIGHT;
+	CHECK(!fast_scene_allows(&s), "fast forward ran in the fight");
+	s.sub = BN6_SUB_PET;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the PET's menu");
+	s.sub = BN6_SUB_MAP;
+	s.toolkit = BN6_MODE_SHOP;
+	CHECK(!fast_scene_allows(&s), "fast forward ran in a shop");
+	s.toolkit = BN6_MODE_GAME;
+	s.apart = true;
+	CHECK(!fast_scene_allows(&s), "fast forward ran online");
+	s.apart = false;
+	s.run = false;
+	CHECK(!fast_scene_allows(&s), "fast forward ran outside the run");
+	/* the speed, settings.ini's words both ways, Options' turn round */
+	for (int v = FAST_OFF; v <= FAST_MOST; ++v) CHECK(fast_speed_read(fast_speed_word(v)) == v, "%s does not read back", fast_speed_word(v));
+	CHECK(fast_speed_read("3") == 3 && fast_speed_read("no") == FAST_OFF && fast_speed_read("9x") == FAST_DEFAULT, "fast_forward's words read wrong");
+	CHECK(fast_speed_next(FAST_MOST, 1) == FAST_OFF && fast_speed_next(FAST_OFF, -1) == FAST_MOST && fast_speed_next(2, 1) == 3, "Options' turn is off");
+	/* a batch: up to the speed, while the last frame's time still fits */
+	CHECK(fast_batch_more(3, 1, 2, 1, 10) && fast_batch_more(3, 2, 2, 1, 10) && !fast_batch_more(3, 3, 2, 1, 10), "a batch ran past its speed");
+	CHECK(!fast_batch_more(3, 1, 8, 4, 10), "a batch ran past the frame's time");
+}
+
 static void test_padmap(void) {
 	PadMap m, back;
 	padmap_default(&m);
@@ -2758,6 +2823,25 @@ static void test_padmap(void) {
 	CHECK(padmap_same(&m, &back), "the presets there and back left the map changed");
 	padmap_bind(&m, PAD_FAMILY_NINTENDO, 5, PAD_Y);
 	CHECK(padmap_preset_of(&m, PAD_FAMILY_NINTENDO) == -1 && !strcmp(padmap_preset_name(PAD_FAMILY_NINTENDO, PAD_STYLE_NINTENDO, -1), "Custom"), "a hand-set B told as a preset");
+	/* fast forward: the right trigger and the right stick's press, R on its
+	 * shoulder alone; it may have none, and never takes a GBA button's last */
+	padmap_default(&back);
+	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTTRIGGER) == BTN_FAST && padmap_bits(&back, PAD_FAMILY_NINTENDO, PAD_RIGHTSTICK) == BTN_FAST &&
+		padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTSHOULDER) == BTN_R && padmap_count(&back, PAD_FAMILY_RAW, PAD_FAST) == 0, "fast forward's defaults are off");
+	CHECK(padmap_gba("fast") == PAD_FAST && !strcmp(padmap_gba_name(PAD_FAST), "FAST"), "fast forward is misnamed");
+	CHECK(padmap_clear_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 1) && padmap_clear_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 0) &&
+		padmap_count(&back, PAD_FAMILY_XBOX, PAD_FAST) == 0, "fast forward's last input not cleared");
+	CHECK(padmap_set_slot(&back, PAD_FAMILY_XBOX, PAD_FAST, 0, PAD_A) == PAD_SLOT_REFUSED && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_A) == BTN_A,
+		"fast forward took A's only button");
+	padmap_bind(&back, PAD_FAMILY_XBOX, PAD_FAST, PAD_START);
+	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_START) == BTN_START, "fast forward, with none to give, took START's only button");
+	CHECK(padmap_set_slot(&back, PAD_FAMILY_XBOX, 7, 1, PAD_RIGHTSTICK) == PAD_SLOT_ALONE, "an input fast forward no longer has told as taken");
+	/* a pad.ini from before it: R keeps the right trigger, fast forward the stick's press */
+	char said[256];
+	CHECK(padmap_parse("[pad]\nR = rightshoulder, righttrigger\n", &back, said, sizeof said) == 0 &&
+		padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTTRIGGER) == BTN_R && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_RIGHTSTICK) == BTN_FAST,
+		"an older pad.ini's right trigger went to fast forward");
+	CHECK(padmap_parse("[pad]\nFAST =\n", &back, said, sizeof said) == 0 && padmap_count(&back, PAD_FAMILY_XBOX, PAD_FAST) == 0, "FAST = with none not read");
 	/* pad.ini: written, read back the same, nothing said */
 	static char text[8192], errors[1024];
 	padmap_bind(&m, PAD_FAMILY_XBOX, 6, PAD_AXIS(3, false));
@@ -3428,11 +3512,12 @@ static void test_xnavi_static(void) {
 	char why[160] = "";
 	const XVirusFamily *o = &xnavi_objects_bn5;
 	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
-		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
-		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Dark Soul's records)");
+		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
+		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 7, "xnavi: BN5's Navis listed (%d: the six and the Dark Soul)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 9, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan and ShadeMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -3499,8 +3584,10 @@ static void test_free_space(void) {
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
+		{ "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
+	CHECK(FREE_TAIL <= FREE_LIB_TEAM, "free space: the teammates' room before the free tail");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
@@ -4876,7 +4963,7 @@ static void super_words(void) {
 		CHECK(strlen(super_reward_head(navi)) < 48, "super: %d's data's head is long", navi);
 		/* (the net's word on him, and the Nest's port at home, before they
 		 * have met: never his name) */
-		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false);
+		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false, false);
 		snprintf(what, sizeof what, "super_rumor(%d)", navi);
 		check_talk(what, rumor);
 		snprintf(what, sizeof what, "the Nest's port with %d unmet", navi);
@@ -4888,7 +4975,7 @@ static void super_words(void) {
 	}
 	rival_met(SUPER_CYBEAST);
 	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON);
-	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false));
+	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false));
 }
 
 static void test_super_bosses(void) {
@@ -5570,11 +5657,11 @@ static void test_liberation_board(void) {
 			/* (a run meets dark layers in acts 2 to 4, run_dark_area; acts 5
 			 * and 6 with --dev dark and the separate mode to come) */
 			++*(act <= 3 ? &tried : &late_tried);
-			bool ok = lib_board_make(&a, s, act, 1, NULL);
+			bool ok = lib_board_make(&a, s, act, NULL, NULL);
 			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
 			if (!ok) continue;
 			++*(act <= 3 ? &made : &late_made);
-			CHECK(lib_board_make(&b, s, act, 1, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
+			CHECK(lib_board_make(&b, s, act, NULL, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
 			CHECK(a.kind[a.boss_y][a.boss_x] == LIB_BOSS && a.unit[0].kind == UNIT_DARKLOID, "board %u: no Darkloid", s);
 			for (int d = 0; d < 9; ++d)
 				CHECK(d == 4 || a.kind[a.boss_y - 1 + d / 3][a.boss_x - 1 + d % 3] == LIB_RING, "board %u: the Darkloid's ring broken", s);
@@ -5615,6 +5702,98 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
+/* A board cleared over par pays zenny (docs/LIBERATION.md, The par's prize,
+ * as built): BN5's first mission's 1000 at act 2, 250 more an act, dearer on
+ * later cycles, by the zenny curve */
+static void test_liberation_prize(void) {
+	const EconPlan *was = econ_plan;
+	Run before = run;
+	run.mode = RUN_ENDLESS;
+	econ_plan = &econ_flat;
+	static const int bn5[6] = { 1000, 1000, 1250, 1500, 1750, 2000 };
+	for (int act = 1; act < 6; ++act)
+		for (int d = 3 * act + 1; d <= 3 * act + 3; ++d)
+			CHECK(lib_par_zenny(d) == bn5[act], "over par in act %d (layer %d): %d (got %d)", act + 1, d, bn5[act], lib_par_zenny(d));
+	CHECK(lib_par_zenny(CYCLE_LAYERS + 5) == 1500, "over par on the second cycle: half as much again, as a chip's price");
+	econ_plan = &econ_opening;
+	int last = 0;
+	for (int d = 4; d <= 18; ++d) {
+		int z = lib_par_zenny(d);
+		CHECK(z > 0 && z <= bn5[(d - 1) / 3] && z >= last, "over par under the opening plan: the curve's share, never less deeper (layer %d: %d)", d, z);
+		last = z;
+	}
+	CHECK(lib_par_zenny(16) == 2000, "over par in act 6: the curve all the way");
+	econ_plan = was;
+	run = before;
+}
+
+/* Boards made for a team of BN5's (docs/LIBERATION.md, The team): BN5's
+ * own teams by act, their HP its table's (BN5_LIB_NAVI_HP: missions 1, 3,
+ * 5, 7 and 9), every Navi on a clean panel by the start and none in a
+ * unit's reach, each command taken, the measures printed beside the lone
+ * MegaMan's */
+static void test_liberation_team(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x11BE;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static const LibTeam teams[6] = {
+		{ 2, { MATE_MEGAMAN, MATE_COLONEL }, { 0, 200 } },
+		{ 2, { MATE_MEGAMAN, MATE_COLONEL }, { 0, 200 } },
+		{ 3, { MATE_MEGAMAN, MATE_COLONEL, MATE_KNIGHTMAN }, { 0, 350, 500 } },
+		{ 4, { MATE_MEGAMAN, MATE_COLONEL, MATE_SHADOWMAN, MATE_TOMAHAWKMAN }, { 0, 450, 350, 350 } },
+		{ 5, { MATE_MEGAMAN, MATE_TOMAHAWKMAN, MATE_NUMBERMAN, MATE_TOADMAN, MATE_SHADOWMAN }, { 0, 500, 450, 400, 500 } },
+		{ 5, { MATE_MEGAMAN, MATE_COLONEL, MATE_KNIGHTMAN, MATE_SHADOWMAN, MATE_TOADMAN }, { 0, 800, 900, 700, 600 } },
+	};
+	static LibBoard a, b;
+	int made = 0, tried = 0;
+	for (int act = 1; act <= 5; ++act) {
+		int n = 0, par = 0, dark = 0, dead = 0, way = 0, cmds = 0, plays = 0, out = 0, why[LIB_WHYS] = { 0 };
+		/* (a run meets dark layers in acts 2 to 4: those held to the bar) */
+		if (act == 4) made = tried = 0;
+		for (uint32_t s = 1; s <= 16; ++s) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			++tried;
+			bool lone = getenv("LIB_TEAM_DEBUG") && lib_board_make(&a, s, act, NULL, NULL);
+			bool ok = lib_board_make(&a, s, act, &teams[act], NULL);
+			if (getenv("LIB_TEAM_DEBUG")) printf("team act %d seed %u: lone %d team %d (why %d, holes %d)\n", act + 1, s, lone, ok, a.why, a.nholes);
+			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
+			if (!ok) continue;
+			++made;
+			CHECK(lib_board_make(&b, s, act, &teams[act], NULL) && !memcmp(&a, &b, sizeof a), "team board %u act %d: not the same twice", s, act);
+			CHECK(a.team.n == teams[act].n, "team board %u act %d: %d Navis of %d", s, act, a.team.n, teams[act].n);
+			for (int k = 0; k < a.team.n; ++k) {
+				CHECK(a.kind[a.mate[k].y][a.mate[k].x] == LIB_CLEAN && !lib_threat(&a, a.mate[k].x, a.mate[k].y), "team board %u act %d: Navi %d not on a clean, safe panel", s, act, k);
+				CHECK(lib_mate_at(&a, a.mate[k].x, a.mate[k].y) == k, "team board %u act %d: two Navis on one panel", s, act);
+			}
+			CHECK(a.mate[0].x == a.start_x && a.mate[0].y == a.start_y, "team board %u act %d: MegaMan not on the start", s, act);
+			++n; par += a.par; dark += a.dark * 100 / a.panels; dead += a.m.dead; way += a.m.phases - a.m.strikes; cmds += a.m.longswrd; plays += a.m.plays; out += a.m.out;
+		}
+		if (act == 3) CHECK(made * 10 >= tried * 9, "liberation: %d team boards of %d layers in acts 2 to 4", made, tried);
+		printf("liberation team act %d (%d Navis): %d boards, %d%% dark, par %d, dead %d%%, commands %d.%d a play, teammates out %d.%d a play;", act + 1, teams[act].n, n, n ? dark / n : 0,
+			n ? par / n : 0, dead * 100 / (way ? way : 1), cmds / (plays ? plays : 1), cmds * 10 / (plays ? plays : 1) % 10, out / (plays ? plays : 1), out * 10 / (plays ? plays : 1) % 10);
+		for (int w = 1; w < LIB_WHYS; ++w) if (why[w]) printf(" %d:%d", w, why[w]);
+		printf("\n");
+	}
+	/* (acts 5 and 6, --dev dark's alone, a smaller team where the whole one
+	 * finds no board: liberation.c's lib_layer_made) */
+	printf("liberation: %d team boards of %d layers in acts 5 and 6\n", made, tried);
+	/* (the commands' shapes, BN5's guides': facing +x from (5, 5)) */
+	memset(&a, 0, sizeof a);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) a.kind[y][x] = LIB_DARK;
+	int xs[6], ys[6];
+	CHECK(lib_command_panels(&a, LIB_DO_LONGSWRD, 5, 5, 0, xs, ys) == 2 && xs[1] == 6 && ys[1] == 5, "LongSwrd: two in a line");
+	CHECK(lib_command_panels(&a, LIB_DO_SCRENDIV, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && xs[2] == 5 && ys[0] + ys[2] == 10, "ScrenDiv: three across");
+	CHECK(lib_command_panels(&a, LIB_DO_TOMAHAWK, 5, 5, 0, xs, ys) == 6, "TomahawkSwing: two deep and three wide");
+	CHECK(lib_command_panels(&a, LIB_DO_MELODY, 5, 5, 0, xs, ys) == 5 && xs[4] == 9, "LifeMelody: five ahead");
+	run = before;
+}
+
 /* A map's floor as its build leaves it, made up: the layer's flat floor
  * with a panel in 29 gone, as legal.c drops a few to draw the rest */
 static bool lib_test_floor(int x, int y) {
@@ -5636,9 +5815,9 @@ static void test_liberation_floor(void) {
 			layer_make_dark = true;
 			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
 			layer_make_dark = false;
-			if (!lib_board_make(&a, s, act, 1, lib_test_floor)) continue;
+			if (!lib_board_make(&a, s, act, NULL, lib_test_floor)) continue;
 			++made;
-			CHECK(lib_board_make(&b, s, act, 1, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
+			CHECK(lib_board_make(&b, s, act, NULL, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
 			for (int y = 0; y < MAP_H; ++y)
 				for (int x = 0; x < MAP_W; ++x)
 					CHECK(a.kind[y][x] == LIB_VOID || lib_test_floor(x, y), "board %u act %d: panel %d,%d off the map's floor", s, act, x, y);
@@ -5647,10 +5826,32 @@ static void test_liberation_floor(void) {
 	run = before;
 }
 
+/* The Darkloid's heal in his phase, BN5's (BN5_LIB_HEAL): a tenth of his
+ * max for each dark panel round him (dark, an item's, a DarkHole, his
+ * ring), his max at most, none at full HP or with none dark round him */
+static void test_liberation_heal(void) {
+	static LibBoard b;
+	memset(&b, 0, sizeof b);
+	b.boss_x = b.boss_y = 10;
+	for (int y = 9; y <= 11; ++y)
+		for (int x = 9; x <= 11; ++x) b.kind[y][x] = LIB_CLEAN;
+	b.kind[10][10] = LIB_BOSS;
+	CHECK(lib_darkloid_heal(&b, 100, 700) == 100, "heal with none dark round him: %d", lib_darkloid_heal(&b, 100, 700));
+	b.kind[9][9] = LIB_RING; b.kind[9][10] = LIB_DARK; b.kind[11][11] = LIB_ITEM; b.kind[10][9] = LIB_BONUS; b.kind[10][11] = LIB_BAR;
+	CHECK(lib_darkloid_heal(&b, 100, 700) == 310, "heal with three dark round him: %d, not 310", lib_darkloid_heal(&b, 100, 700));
+	b.kind[11][9] = LIB_HOLE;
+	CHECK(lib_darkloid_heal(&b, 400, 700) == 680, "heal with four dark round him: %d, not 680", lib_darkloid_heal(&b, 400, 700));
+	CHECK(lib_darkloid_heal(&b, 650, 700) == 700, "heal past his max: %d", lib_darkloid_heal(&b, 650, 700));
+	CHECK(lib_darkloid_heal(&b, 700, 700) == 700, "heal at full HP: %d", lib_darkloid_heal(&b, 700, 700));
+}
+
 int main(void) {
 	test_sha1();
 	test_liberation_board();
+	test_liberation_prize();
+	test_liberation_team();
 	test_liberation_floor();
+	test_liberation_heal();
 	test_jobs();
 	test_economy();
 	test_home_words();
@@ -5676,6 +5877,7 @@ int main(void) {
 	test_talk();
 	test_touch();
 	test_padmap();
+	test_fast_forward();
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();

@@ -70,7 +70,7 @@ const W = JA ? {
 	backedUp: (file) => 'バックアップを保存しました：' + file + '。',
 	forget: 'このブラウザから ROM とすべてのセーブを消しますか？',
 	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
-	move: '移動', menu: 'メニュー',
+	move: '移動', menu: 'メニュー', fast: '早送り',
 	smooth: (on) => 'なめらか表示：' + (on ? 'オン' : 'オフ'),
 	sound: (soft) => 'サウンド：' + (soft ? 'ソフト' : 'GBA'),
 } : {
@@ -94,7 +94,7 @@ const W = JA ? {
 	backedUp: (file) => 'Backup saved: ' + file + '.',
 	forget: 'Remove your ROMs and all saves from this browser?',
 	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
-	move: 'Move', menu: 'Menu',
+	move: 'Move', menu: 'Menu', fast: 'Fast',
 	smooth: (on) => 'Smooth motion: ' + (on ? 'on' : 'off'),
 	sound: (soft) => 'Sound: ' + (soft ? 'soft' : 'GBA'),
 };
@@ -556,8 +556,8 @@ document.addEventListener('keydown', (e) => {
 function showHints() {
 	const pad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(Boolean);
 	const keys = pad
-		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['F1', W.menu]]
-		: [['WASD', W.move], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['F1', W.menu]];
+		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['RT', W.fast], ['F1', W.menu]]
+		: [['WASD', W.move], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['Tab', W.fast], ['F1', W.menu]];
 	$('hints').innerHTML = keys.map(([k, what]) => '<span>' + k.split(' ').map((c) => '<kbd>' + c + '</kbd>').join('') + what + '</span>').join('');
 	fit();
 }

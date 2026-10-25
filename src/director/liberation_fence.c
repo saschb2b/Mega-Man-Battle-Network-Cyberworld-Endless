@@ -34,7 +34,7 @@
 #define FENCE_WALLS   4096     /* nm_extra's room for a section's cells */
 #define COORD_MAX     16384    /* coords.c's walls a section at most */
 
-static bool blocking(int k) { return k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_BOSS || k == LIB_BAR || k == LIB_TRAP; }
+static bool blocking(int k) { return k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_BOSS || k == LIB_BAR || k == LIB_TRAP || k == LIB_BONUS; }
 
 /* The fence's walls as written, and where BN6's coordinate data holds each
  * once the map is entered (found: the walls' section's count and every
@@ -149,7 +149,7 @@ void lib_fence_update(void) {
 	/* (on the board's map only: elsewhere the buffer holds another's) */
 	if (!on_map() || (!fence_there() && !fence_find())) return;
 	/* (the board won: every wall off, the way to the exit open) */
-	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE;
+	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE || (LB.step == LIB_STEP_TALK && LB.after == LIB_STEP_DONE);
 	uint32_t shapes = BN6_COORD_ENTRIES + F.count * BN6_COORD_ENTRY;
 	for (int i = 0; i < F.n; ++i) {
 		int x = F.px[i], y = F.py[i];

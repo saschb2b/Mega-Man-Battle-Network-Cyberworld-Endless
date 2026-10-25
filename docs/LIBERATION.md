@@ -13,9 +13,12 @@ to try him.
 Where it stands: the dissection (from BN5's ROM, its own text, and the
 players' guides), the design decision, which the owner approved on 23
 October 2026 (The owner's decisions, at the end), a ROM-free prototype
-of the generator with its measures, and stages 1 and 2 in the engine: the
-dark layer and its board, MegaMan alone (Stage 1, as built, below), and
-BN5's liberation battle on BN6's own battle loop (Stage 2, as built).
+of the generator with its measures, and stages 1 to 3 in the engine: the
+dark layer and its board (Stage 1, as built, below), BN5's liberation
+battle on BN6's own battle loop (Stage 2, as built), the team, the run's
+Soul Navis beside MegaMan, each fought as MegaMan in his Soul (Stage 3,
+as built), and a sealed region's route kept for the run, a third way at
+the next fork (Special routes).
 
 ## Summary
 
@@ -34,6 +37,12 @@ BN5's liberation battle on BN6's own battle loop (Stage 2, as built).
   BN5's kinds by BN5's rules, rejects what breaks a guarantee, and sets the
   par from a planner that plays it by BN5's rules, scaled by the planner's
   own result on BN5's nine.
+- **The team, as built:** MegaMan and the Navis whose BN5 Souls the run
+  holds, as many as BN5's team of the stage, each with BN5's HP for it,
+  his command and his turn a phase, play passing on as BN5's board passes
+  it (romlab, mission 2); the Navi in play walks as BN6's player in his own
+  BN5 body; a teammate's battle is MegaMan in his Soul from the first turn
+  with his HP, and deleted there he leaves the board, not the run.
 - **The prototype** (`tools/liberation.py`; `tools/liberation_bn5.py` for
   BN5's own boards) makes 144 missions over acts 2-6 and measures them
   against BN5's nine: the boards keep to BN5's bands of shape and dark,
@@ -92,6 +101,36 @@ better, another for within par, zenny after (**ROM**; the guides agree).
 Every mission starts with 3 Order Points (the record's +0xB). The record's
 +9 (13-22) is read into the state's +0xA; what it does is not traced.
 
+### The par's prize (ROM, play)
+
+The Darkloid deleted, the mission's end (the state's routine 0x18) shows
+SUCCESS!, then its step 2 picks the rewards' row whose phases hold the
+phase taken (`BN5_LIB_REWARD_PICK`) and opens the end's message for its
+tier (`BN5_LIB_END_TEXT`, docs/ROM_DATA.md's BN5's Liberation Missions'
+rewards). The team's leader speaks (Colonel in Team Colonel): the target
+and the actual phases, then the Officials' reward, then the chip or the
+zenny given by the message's own command. Played in romlab on mission 1
+(par 7) at 5, 7 and 8 phases: BlizMan SP B ("Good job,everyone!"), BlizMan
+B ("Good Job."), 1000 Zennys ("Too bad you couldn't make it."; the zenny
+`0x0200299C` 0 before, 1000 after).
+
+| Mission | Two under par or better | Within par | Over par |
+| --- | --- | --- | --- |
+| 1 | BlizMan SP B | BlizMan B | 1000 z |
+| 2 | ShadeMn SP S | ShadeMan S | 2000 z |
+| 3 | CloudMn SP C | CloudMan C | 3000 z |
+| 4 | FullCust * | AntiNavi M | 4000 z |
+| 5 | CosmoMn SP C | CosmoMan C | 5000 z |
+| 6 | Z Saver Z | Colonel C | 5000 z |
+| 7 | BlakWing W | ShadeMn DS S | 5000 z |
+| 8 | Muramasa M | CloudMn DS C | 5000 z |
+| 9 | Anubis A | CosmoMn DS C | 5000 z |
+
+The two chips are a better one and a lesser one: the Darkloid's SP chip
+and his plain one, from mission 7 a Mega chip and his DS chip. The zenny
+is 1000 a mission, 5000 at most. No row holds a phase: 100 zenny (the
+lookup's default; every mission's last row runs to 99).
+
 ### The board (ROM, play)
 
 A board is a set of panels on a square lattice, following the map's floor:
@@ -101,7 +140,9 @@ kinds (`BN5_PANEL_*`):
 - **Clean** (0): the team walks it.
 - **Dark** (1): liberated by a battle. Guardians walk dark panels.
 - **Item** (3): looks dark and holds an item or a trap.
-- **BonusPanel** (9, "?"): a roulette (below), at the ends of stubs.
+- **BonusPanel** (9, "?"): a roulette (below), at the ends of stubs;
+  freed by the Liberation command without a battle or the Navi's action
+  (**ROM**, **play**: BonusPanels as BN5's, below).
 - **DarkHole** (0x0A): in a ring of dark panels, its guardian beside it;
   every one must fall before the Darkloid can be fought (**text**).
 - **The Darkloid's ring** (0x0B): the eight panels around him.
@@ -123,9 +164,11 @@ on the ends of stubs; barriers across walkways.
 The player's phase, then the Darkloids' phase. In the player's phase each
 Navi acts once: he moves over clean panels, then liberates a dark panel
 beside him, uses his command for one Order Point, or rests ("Pass": he
-skips his turn and regains some HP, **text**; half his max HP, **guides**).
-The more dark panels around a Navi, the harder his battle (**text**). R
-switches Navis, L moves the camera over the board, START offers to retreat.
+skips his turn and regains some HP, **text**; a fifth of his max HP,
+**play**, where the guides say half: Stage 3, as built). The more dark
+panels around a Navi, the harder his battle (**text**). R switches Navis
+(**play**: to the next yet to act), L moves the camera over the board,
+START offers to retreat.
 
 ### Liberating a panel (ROM, text)
 
@@ -148,7 +191,7 @@ turns meets: assumed to be the Darkloid's.
 
 One pool for the team: 3 at the start, 8 at most (`BN5_LIB_OP_ADD` caps
 it), 1 for every command (**text**), found in item panels (2 or 3, **ROM**)
-and from the BonusPanel's roulette (5, **guides**).
+and from the BonusPanel's roulette (5, **ROM**, **play**).
 
 ### Items, traps and BonusPanels (ROM)
 
@@ -158,10 +201,12 @@ with the missions), a BarrierPanel's key, Order Points (2-3), zenny (its
 amount times 100), BugFrags, a chip. Traps (`BN5_LIB_PTR_TRAPS`) from
 mission 5: damage (50 in missions 5 and 6, 100 later) or paralysis. A
 BonusPanel's roulette (`BN5_LIB_BONUS_ROLL`) starts on one of five slots
-from the random number; its five outcomes are each mission's records (full
-HP, Order Points, one of the mission's chips, damage to the nearest enemy,
-the team untouchable for a phase, **guides**; the slots' order in the
-records is not traced).
+from the random number and is stopped by A; its five slots are each
+mission's records in this order (**ROM**, **play**): the team untouchable
+for a phase, the acting Navi's HP full, five Order Points, one of the
+mission's four chips, the nearest guardian deleted (none: the Darkloid a
+fifth of his max HP down). The guides' list was right; its order and what
+each does exactly are traced below (BonusPanels as BN5's).
 
 ### The Navis (ROM, text, guides)
 
@@ -197,7 +242,8 @@ Guardians "attack closer enemies first" (**text**), and one is best
 deleted before the Darkloids' phase or its DarkHole liberated in one shot.
 A DarkHole's liberation is a fight with its guardian; won, it frees the
 eight panels around it; while the hole stands, a deleted guardian comes
-back (**guides**). The kinds (`0x11`-`0x13` in the records): BigBrute
+back (**guides**; when and where read in BN5's code: The Darkloids' phase
+as BN5 shows it, below). The kinds (`0x11`-`0x13` in the records): BigBrute
 moves two and hits every Navi beside it; TinHawk hits one within three;
 Bladia teleports, darkening the clean panel it lands on (**guides**, with
 HP and damage by mission). The Darkloid attacks Navis in his reach and
@@ -245,6 +291,41 @@ caller (docs/ROM_DATA.md, BN5's Liberation board: the Darkloids' phase):
   two or four frames looped), facing down-left on the board; their
   strikes their own animations (BigBrute's 33-40, TinHawk's 25-26,
   Bladia's 25-28).
+- **Every warp the small pair.** A unit's move, TinHawk's attack and a
+  guardian's return all spawn list 7's 59 in its animations 4 (out) and
+  5 (in), read in each caller's r1 (missions 1, 2 and 4).
+- **Bladia's DarkSlash** (mission 4, Colonel beside it): its pose (25 + its
+  eighth / 2) 22 frames after the box closed, sound 0x10A at 33, the blow
+  at 34: BN5's burst (list 7's 58, 16 pixels over the Navi, 13 frames;
+  the board event 0x08051904) with 0x6B, the board shaken (BG1's scroll,
+  up to 4 pixels for 10 frames), the harm at 35, its pose back at 69, the
+  red out at 123 as BigBrute's.
+- **TinHawk's HawkAttack** (mission 2, MegaMan two from it): it warps out
+  where it stands (22), the camera pans to MegaMan, it warps in beside him
+  already in its strike (97), 20 world units up (25, facing right) or right
+  (26, facing left) of him by the RNG, shows four frames on with 0x94;
+  BN5's burst and the shake at 105, the harm at 106, 0x10A at 110; it warps
+  out with the harm's digits at 140, the camera back to its panel, in there
+  at 216 (0x94 at 220), the red out at 284.
+- **A Darkloid's strike** is his own pose and, for two of BN5's Darkloids
+  (kinds 0x15, 0x16) as for Bladia, BN5's burst (the same event); the
+  others' own effects (BlizzardMan's Snowball, 0x080517F4; 0x0F's
+  0x08051874; 0x10's 0x08051914), one (0x0D) warps beside the Navi as
+  TinHawk does.
+- **A deleted guardian's return** (0x0804E700-0x0804E858; romlab, mission
+  2, a BigBrute poked deleted beside its DarkHole): at the Darkloids'
+  phase's end, after every unit's turn, while fewer than eight enemies
+  stand, each DarkHole in its order still standing with a Navi within
+  three panels of it on both axes (the 7 x 7 round it) sends back one of
+  its deleted guardians (at random, while fewer than three of its own
+  stand) to the free dark panel (dark or an item's, no unit) of the eight
+  round it nearest the Navi nearest the hole, with full HP. The camera
+  pans to the hole; 20 frames on the guardian rises on the hole in OBJ
+  mosaic, 15 down to 0 as it fades in over 16 frames, with 0x94; 40 frames
+  after the rise began it warps out of the hole, 22 later in on its panel
+  (0xB4 each, 0x94 as it shows); 20 frames, the next hole. Deleted in a
+  player's phase, a guardian is back for the next one where a Navi stayed
+  near its hole, and strikes from the Darkloids' phase after.
 
 ### How the board looks and moves (play, ROM)
 
@@ -366,11 +447,12 @@ liberation and an item's find; the recordings are in the pull request):
   move and strike: The Darkloids' phase as BN5 shows it, above.
 
 Still to trace: the window's font, when an item's pop shows and goes,
-the sounds of a DarkHole closing and of LIBERATE SUCCESS, the mission's
-end (BN5's Navi reads the target and the actual phases and the Officials'
-chip reward follows, its text in BN5's ROM from `0x087E8854`), the
-Navis' own board sprites beside MegaMan, and whether the other eight
-missions' maps carry other sets.
+the sounds of a DarkHole closing and of LIBERATE SUCCESS, the Navis' own
+board sprites beside MegaMan. (The other eight missions' maps carry the
+same sets, but for their backdrops and colours: Each mission's own look,
+as built, below.) The mission's end, the L view's keys and the Darkloid's
+first word are traced below (The board's words and banners as BN5's, as
+built).
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and
 palettes read from BN5's ROM at run time (never kept), its pulse, its
@@ -379,13 +461,67 @@ the mission maps' panel grid where BN5's ROM is read. The dark layer's
 first build (stage 1) tints BN6's floor instead and has none of the
 animations; its rework follows this section.
 
+### BonusPanels as BN5's (ROM, play)
+
+Traced in BN5's own board (`tools/romlab`'s BN5 lab, mission 1 from its
+board's state, the faced dark panel made a BonusPanel in RAM and the
+mission's first BonusPanel record moved to it; each slot forced by its
+byte and played to its end; `src/emu/bn5_liberation.h`'s
+`BN5_LIB_BONUS_*`):
+
+- **Freed by command.** A BonusPanel is not walked (the walk mask of
+  MegaMan's unit, 0x1001, is clean and start alone); facing it, the
+  command window offers Liberation, which frees it **without a battle**:
+  the player's phase's step `0x0804C468` sends kind 9 to the roulette's
+  steps, and the Navi's actions left (his unit's +2) are untouched: the
+  same Navi's menu opens again after it.
+- **The lead-in:** MegaMan's line ("A BonusPanel!"); the panel dissolves
+  (19 frames) and shines (31); three white flashes over the whole picture,
+  sound 0xD7 each, two frames white then down by 2/16 a frame, the second
+  26 frames after the first, the third 10 after that; the band opens 30
+  frames after the third.
+- **The roulette** (its state `0x0200ABB0`, ten routines from
+  `0x08054EF4`): the phase banner's band (BG0 filled with one tile of the
+  phase words' palette, WIN1, blended over the board at half) opens in two
+  frames to rows 56-87; 16 frames on, sound 0xD6, the slot's icon slides
+  in from the right, 32 pixels a frame, to the middle (x 120, y 72); 8
+  frames later "PRESS A BUTTON" shows under it (y 98) and A is heard. The
+  slot steps every 4 frames (each BonusPanel record's u16) from a random
+  first one, sound 0x80 at each step once the icon is in place; the icon
+  shown is the slot's, one frame behind it, so the slot stopped on is the
+  one on screen as A is pressed (sound 0x92). Its name replaces the prompt
+  for 88 frames, then the icon slides out to the left, the band shuts in
+  two frames, and the slot is given (`0x0804C754`'s five handlers).
+- **The icons and words** are BN5's sprites of list 9: the icons
+  0x3F, 0x3C, 0x3D, 0x3E and 0x40 (`BN5_LIB_BONUS_ICONS`: a flexing
+  green Navi, a heart, an Order Point, a chip, a skull), the words list
+  9's 25 (`BN5_LIB_PHASE_WORDS`' sprite): animation 4 "PRESS A BUTTON",
+  6-10 the names "1PHS INVIN", "HP Rec!", "Order Pt!", "BattleChip!",
+  "Major Hit!".
+- **The slots, in BN5's order** (each mission's BonusPanel records,
+  `BN5_LIB_PTR_BONUS`, the same five in all nine):
+  0. no harm on the board for the rest of the phase: every Navi's unit
+     flagged 0x80 (sound 0x93, the team tinted green), cleared at the
+     next player's phase;
+  1. the acting Navi's HP full: an item find of a heart of 100 (x 10),
+     his alone (30 of 100 to 100; Colonel's 50 of 200 untouched);
+  2. five Order Points (3 to 8), an item find;
+  3. a chip, an item find: one of the mission's four (mission 1: four
+     standard chips, one of them a "*" code), their weights alike (0x20);
+  4. "Damages the closest enemy the most!": the nearest guardian (BigBrute,
+     TinHawk or Bladia, by squared distance from the Navi) deleted, the
+     camera on it ("Gyaaaaahh!!", its explosion); with no guardian left,
+     the nearest Darkloid loses a fifth of his max HP (400 to 320, 1000 to
+     800, 300 of 400 to 220: his max's, not his HP's).
+
 ### Not found, and assumed
 
 - The commands' shapes in the ROM: the board's command code
   (`0x0804B000`-`0x0805D000`) was located, not read through; the shapes
   are the guides'.
-- The BonusPanel's five slots' order, the record's +9, what the Darkloid's
-  battle does past three turns: not traced.
+- (Traced since: the BonusPanel's slots, BonusPanels as BN5's; the
+  record's +9 is the Darkloid's kind, and his battle times up at three
+  turns as every liberation battle does, The battle's field, as BN5's.)
 - A hard phase limit: none found in the state's readers or the guides; a
   mission runs on past par for the lesser reward.
 
@@ -431,7 +567,8 @@ TomahawkMan and ToadMan: the six BN5 Navis whose Souls a run already wins
 with his BN5 command; the team grows as BN5's does, mission by mission,
 run by run (act 2: MegaMan and one at most). Without BN5's ROM, or for
 BN6's Navis, a held Cross could lend its Navi with a command of BN5's kinds
-(a line, a wide, an area, mobility, defence, support): the owner's call.
+(a line, a wide, an area, mobility, defence, support): not chosen (the
+owner's decision 4, 25 October 2026: BN5's Souls only).
 
 In battle, a teammate's liberation is fought as MegaMan in that Navi's Soul
 (or Cross) from the first turn, with the teammate's own HP pool: BN5's own
@@ -439,6 +576,9 @@ fiction for a Soul, and the forms already in BN6's engine. MegaMan alone
 brings the NaviCust and DarkChips, as in BN5. A teammate as a playable Navi
 of his own (ProtoMan's or Colonel's player code moved into BN6's engine) is
 the larger alternative.
+
+Built so in stage 3 (Stage 3, as built, below), each teammate in his own
+BN5 body on the board and his HP his own.
 
 The owner's standing rules hold: MegaMan walks as BN6 walks him on the
 overworld (the board is BN5's own mode, where units move as BN5 moves
@@ -521,9 +661,9 @@ hundreds of boards.
    than the par's player, else the board is rejected (cheaper is a gift,
    dearer a wall). Its reward is variety, not power: the act's next route
    (Special routes, below).
-7. **Rewards feed the run, failure is graduated.** The par's tiers stay
-   stage 1's: a Server's prize two under par, one tier lower at par, one
-   lower still over it (assumed until the owner's open decision 5); item
+7. **Rewards feed the run, failure is graduated.** The par's tiers are
+   BN5's (the owner's decision 6): a Server's prize two under par, one
+   tier lower at par, zenny over it (The par's prize, as built); item
    panels add a chip of the layer's band (one at act 2, two later) and the
    act's zenny (BN5's amounts, 300 at act 2 to 700 at act 6), off the way:
    a detour's worth. Over par is a lesser prize, never a lost run. The dark
@@ -660,16 +800,83 @@ teams): an act 2 board's par is 8 to 19, act 4's 12 to 31.
 
 A sealed route is the region behind the sealed barrier (The quality bar,
 6): its key off the way, its region a detour of 2 to 10 phases, the route
-at its far end an item panel the player liberates. Found, it is the hook
-the act's next route reads (`lib_route_found`). The design it feeds: the
-route turns the act's next fork (docs/META.md, 7) toward a third way, the
-deep's (the Undernet, as the short net's dark way goes) or another area's
-guardian; after the endless net's act 4, whose next act has no fork, the
-Nest's second guardian, a different last boss; in the separate mode,
-another last Darkloid. **Not built:** keeping the route found for the run
-(a bit in `Run`, saved: the board's save is stage 1's open item, and
-`RUN_MAGIC` bumps with it) and `run_ways` offering the third way; the
-board places it, prices it and finds it.
+at its far end an item panel the player liberates. Found, it is kept for
+the run and turns the act's next fork (docs/META.md, 7) toward a third way;
+the owner decided so on 25 October 2026. In the separate mode it would
+lead to another last Darkloid.
+
+BN5 has nothing like it: its item kinds are six (a heart, a key, Order
+Points, zenny, BugFrags, a chip) and its nine boards hold no other item or
+panel (docs/SOURCES.md, verified in the ROM). The route is the player's
+request the design began with ("special routes to other bosses"), told in
+BN5's own way of telling a find: the panel liberated, MegaMan's line over
+it ("A way out of here nobody's used..."), Lan's answer.
+
+**The design** (the game-design skill):
+
+- **The dialectic** is the board's, *prepare or press on*, priced in
+  phases: the route costs its player 2 to 10 phases over the par, about a
+  tier of the par's prize, and pays in the run's shape, not its power. At
+  the fork it is restated as *the known or the found*: the two ways MegaMan
+  reads like any other, or the one he and Lan found themselves.
+- **The loop layers:** the session (one board) feeds the run (the next
+  fork's shape); nothing reaches the meta. A route not found, or found and
+  left at its fork, costs nothing but the phases spent.
+- **The patterns:** a branching map whose extra branch only a detour
+  opens (Slay the Spire's keys, taken off the path at a price, open its
+  fourth act), its cost paid up front and its reward variety
+  (meta-as-variety-not-power: the way's guardian fits the act's band like
+  the others').
+
+**What it opens:**
+
+| The board's act | The fork it turns | The third way |
+| --- | --- | --- |
+| 3 (the endless net's) | act 4's | another area of the act's tier the run has not taken, nor the other way's, its guardian fit for the act and none of the run's six acts' nor the other way's |
+| 4 (the endless net's) | the Nest's, past the deep's acts 5 and 6, which have no fork | the Nest again, a second way: its second guardian (`run_nest_second`) instead of the Cybeast, at the Nest's strongest version and the Cybeast's HP at least (`run_nest_hp`: 2500 on the first Net, 4000 after), a different last boss and never an easier one; the net rebuilds past him as past the Cybeast, and its den is the Cybeast's again |
+| 3 (the short net's) | the Nest's | the Nest's second guardian first (on threat 10 the second below him is drawn again, never him) |
+| 2, where a board has one | act 3's | in the short net, its dark way to the Undernet where the Secret Area has not opened it; else another area's |
+
+Act 2's boards hold no sealed region (the staircase's rules), so the last
+row waits for a board that does; it is built so that no route is ever
+wasted: a fork with no room for a third way (the short net's act 3 with
+its dark way open) passes the route on to the Nest's.
+
+**How it is told:** at home the fork's words name it where it comes out
+("And the link on the right! The route we found in the dark!"; at the
+Nest "It comes out at the link up top. Way down,too!"), checked or stepped
+on its portal MegaMan knows it ("Lan,look! Our route from the dark!")
+before what he reads through it, as for any way (its data, a guardian's
+signal, named only where he has battled him), and the act's card says
+"By the route found in the dark" in a liberated panel's green, in the
+motto's place, as a dark layer's says its own in Nebula's purple; at the
+endless Nest by the route MegaMan feels the signal is not the beast's.
+
+**As built** (25 October 2026): `run.route_found`, the act whose board's
+route was found (1-based, 0 none), set as MegaMan leaves the dark layer
+with the route found (`run_route_keep`) and kept until the fork it turns
+is passed (`home_route_passed`), and `run.route_way`, the act that came by
+the route, for its words and card; both in `Run`'s padding, saved as
+"CWEA" (`RUN_MAGIC`; a "CWE9" save reads them as 0). `run_route_turns`
+names the fork, `run_ways` offers the way (`RunWay.route`), the third
+area's from the seed as the other way's is (`route_third`), so a CONTINUE
+at home offers the same. Its portal is the dark way's link on the right;
+the Nest's second way the link up top.
+
+**Checked:** `build.py pacing`'s Special routes over 500 runs, 0 past its
+band or clashing (act 4's third way's guardians all in 1000-1300, none
+another way's or act's, the same twice; the Nest's second guardians SP at
+the endless Nest, fought at the Cybeast's 2500, EX in the short net's
+band). Their own SP, 1500 to 2000, would have made the route an easier
+last boss than the Cybeast's 2500: a gift, which the report showed and
+`run_nest_hp` closes; the autopilot from seed
+1's act 3 dark layer (`CYBERWORLD_AUTOPILOT=1 CYBERWORLD_AUTOPILOT_ROUTE=1
+--scene emu --run-depth 8 --seed 1 --dev dark,god,onehit`): the sealed
+key, the route, the Darkloid, the act's guardian, home with three ways,
+the route's taken to CopyBot's Comp; `--dev route` at home before act 4
+and before the Nest (seed 7): the fork's words, the portal's, its
+question, the way taken, the card; a CONTINUE at home (the same three
+ways) and on the route's act (its card).
 
 ### How it reads as BN5's own
 
@@ -857,23 +1064,23 @@ band with three to six, the next act's band one version up with seven or
 eight, a DarkHole or its guardian; won, the panel is liberated, and the
 eight round it where no second Custom screen opened, BN5's one-turn win),
 **LongSwrd** (an Order Point: two panels in a line, one battle) or
-**Pass** (half his max HP back, BN5's guides). Item panels give Order
-Points (3 to 8) or a heart (30% of max HP); a BonusPanel stepped on spins
-BN5's roulette's four we can give (HP full, five Order Points, the nearest
-guardian deleted, no harm for a phase). Then DARKLOID PHASE: each guardian
+**Pass** (half his max HP back, BN5's guides; a fifth since stage 3,
+BN5's as played). Item panels give Order
+Points (3 to 8) or a heart (30% of max HP); a BonusPanel stepped on spun
+four of BN5's roulette's slots (since BN5's own: BonusPanels as BN5's, as
+built, below). Then DARKLOID PHASE: each guardian
 steps toward him over the dark (BigBrute two and hits all in one,
 TinHawk three and one in three, Bladia two, darkening what it lands on),
 the Darkloid hits him within his reach (two or three); the board's harm
 never takes his last HP (alone, a deletion off a battle would end the run
-unfought). A DarkHole sends its deleted guardian back the Darkloids' phase
-after next (BN5's the next: with a team another Navi strikes the hole
-meanwhile). Every DarkHole down, the Darkloid's ring can be liberated, and
+unfought). A DarkHole sends its deleted guardian back as BN5 does, at the
+Darkloids' phase's end while MegaMan stands within three panels of it
+(`lib_guardian_return`; The Darkloids' phase as BN5 shows it). Every DarkHole down, the Darkloid's ring can be liberated, and
 the Darkloid fought from it: a Navi of BN6's whose HP fits the act's band,
 no act's guardian (`run_darkloid`), in his own battle. Deleted, the exit
-opens where he stood and the par's prize is given: two under par a chip a
-Server's win pays, at par one a tier lower, over par one lower still
-(`install_lib_prizes`, `src/layer/layer_objs.c`); the board's battles pay
-BN6's own rewards beside it. No random battles on the board.
+opens where he stood and the par's prize is given, BN5's tiers (The par's
+prize, as built, below); the board's battles pay BN6's own rewards beside
+it. No random battles on the board.
 
 **On the map, first look.** The units are the layer's own map objects (`OBJ_UNIT`:
 HeelNavis for the guardians, the Darkloid in his own overworld sprite),
@@ -890,13 +1097,14 @@ corner, the banners and the command menu in BN6's PET look
 (`src/director/liberation_words.c`).
 
 **On the map: BN5's own look** (`src/director/liberation_look.c`, with
-BN5's ROM). A dark layer is drawn in BN5's Liberation map 0x86:00, as an
+BN5's ROM). A dark layer is drawn in a BN5 Liberation map (0x86:00 at
+first; its own mission's since: Each mission's own look, below), as an
 older net's area is (a held area of BN5's, never a run's dressing): its
 floor learned from the board's own panels, which the mission's record lists
 (`area_src_board`: the map's walls cover its walkways alone, the board
 moving its units itself), at the record's origin (`+6`, `+7`, the panels'
 edges at X = -o6 and Y = -o7, mod 32), not its pads' look; its tiles and
-its board's colours (`BN5_LIB_PALETTE`, loaded over the map's as BN5's
+its board's colours (`BN5_LIB_BOARD_PAL_ACDC`, loaded over the map's as BN5's
 board loads them: the frames grey) copied in. Each panel's kind lies over
 it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`,
 picked by the kind as `BN5_LIB_LOOK_OF` picks it: clean cyan, the dark
@@ -1000,11 +1208,8 @@ the menu closed. Checked: the autopilot's board quit at PLAYER PHASE
 board, phase 4, the panels it had freed clean and its Order Points as
 they were, the banner shown again once the act's card was gone.
 
-**Left for later:** the L view's keys' help, the Darkloid's words at his
-entrance, each unit's HP under it (our guardians have none on the board
-yet), the mission's end in BN5's words (the target and the phases
-taken), the other eight missions' maps (stage 1 draws every dark layer in
-mission 1's); the BonusPanel's chip; the economy report and pacing for
+**Left for later:** a guardian's HP under it (the Darkloid's came with
+The board's HP as BN5's); the economy report and pacing for
 dark layers; the second screen's board; stages 2 to 5. (Barriers, keys,
 the sealed region, traps, chips and zenny in item panels and the
 planner's par came with the quality bar, below.)
@@ -1039,13 +1244,15 @@ taken), no code moved:
 - each turn's fight starts with BN5's banner in BN6's own message engine
   (the fight's BATTLE START! answered: TURN 1 START!, TURN 2 START!,
   FINAL TURN!);
-- the final turn's gauge full, the loop goes to BN6's own draw (a
-  NetBattle's judge's end): the battle stops, its banner TIME UP!, the
-  draw run again for LIBERATE FAILED!, then result 3, which ends the
-  battle with no results screen and no reward, MegaMan's HP as it stands.
-  BN5 asks it as the Custom screen is asked for; BN6 opens that on L or R
-  alone, so here the gauge's filling ends the turn, or the final turn
-  could be held forever;
+- the gauge full, BN5 asks for the Custom screen by itself (its
+  liberation's ask tests the gauge-full flag where every other battle's
+  tests L or R: played, the screen opened the frame the gauge filled, no
+  key held), so here too: below the final turn BN6's own way to the
+  Custom screen from L or R is taken (`BN6_FIGHT_CUSTOM`); in the final
+  turn the loop goes to BN6's own draw (a NetBattle's judge's end): the
+  battle stops, its banner TIME UP!, the draw run again for LIBERATE
+  FAILED!, then result 3, which ends the battle with no results screen
+  and no reward, MegaMan's HP as it stands;
 - a win shows 1 TURN LIBERATE! or LIBERATE SUCCESS! in the win's place
   (ENEMY DELETED!), so the board no longer shows its own banner after the
   battle (stage 1's);
@@ -1059,23 +1266,25 @@ taken), no code moved:
 | LongSwrd (an Order Point) | the panel and the one behind it | and the dark around the first | as above, the Order Point spent |
 | A guardian | deleted (back from its DarkHole while the hole stands), its panel freed | and the dark around it | the guardian stays |
 | A DarkHole | closed: its guardians gone for good, the eight around freed | the same | the hole stays |
-| The Darkloid | deleted, the board won | | (no turns to count) |
+| The Darkloid | deleted, the board won | | he stays, the phase spent |
 
 The battle's viruses are the act's own, BN5's on BN5 territory, from the
 run's encounter tables, harder with the dark around the panel (stage 1's
-bands). **The Darkloid's battle** is the run's guardian Navi of the act's
-band in his own battle (stage 1), with no turns to count, and from its
-eleventh turn every hit does double (`BN5_LIB_LATE_DOUBLE`: BN5 doubles an
-object's hits of the frame, `BN5_LIB_DOUBLE_HIT`; here BN6's
-object_subtractHP, every HP taken, while his battle runs).
+bands), set out on BN5's field for the panel (below, The battle's field).
+**The Darkloid's battle** is the run's guardian Navi of the act's band in
+his own battle (stage 1), three turns like every other: BN5's battle reads
+nothing of its board but a unit's HP (below), and his own record played in
+romlab timed up in its third turn. (Stage 2 first took his battle as
+untimed with every hit doubled from its eleventh turn, `BN5_LIB_LATE_DOUBLE`;
+that rule is a type 1 battle's, and every liberation battle is type 6.)
 
 **The stakes, before the battle.** With the command menu open, a box above
 BN5's window (under the PET look's menu without BN5's ROM) says what the
 command under the cursor stakes: "3 TURNS: FREES 1" and "1 TURN: 5 MORE"
 (the dark around that a first-turn win frees too), "3 TURNS: DELETES IT"
-for a guardian, "3 TURNS: CLOSES IT" and "FREES 9" for a DarkHole, "NO
-TURN LIMIT" and "TURN 11 ON: HITS X2" for the Darkloid
-(`liberation_battle_words.c`).
+for a guardian, "3 TURNS: CLOSES IT" and "FREES 9" for a DarkHole, "3
+TURNS: DELETES HIM" for the Darkloid, and "SURROUNDED: L/R TURNS" under
+them where the battle will be (`liberation_battle_words.c`).
 
 **The design** (the game-design skill): the battle restates the board's
 *press on or prepare*. The dark around a panel makes its battle harder
@@ -1100,12 +1309,72 @@ frames, and without `god` (seed 2) MegaMan was deleted in its third
 battle: the autopilot's battles are weak, and a dark layer asks a folder
 that deletes in three turns.
 
-**Left:** BN5's Surrounded battle (dark on both sides of the Navi, L and R
-to turn round: its text is BN5's battle archive's "Surrounded! Press L or
-R Button to turn around!"): BN6's own fields hold no field of enemies on
-both sides that we know of; whether BN5's own Custom screen opens by
-itself as a liberation turn's gauge fills; the Darkloid's intro and BN5's Darkloids (stage 4);
-the team (stage 3).
+**Left:** the Darkloid's intro and BN5's Darkloids (stage 4); the team
+(stage 3); a unit's HP carried from the board into its battle and back
+(below); BN5's "Surrounded!" line in the battle (below).
+
+### The battle's field, as BN5's (25 October 2026)
+
+**BN5's rule, read in its code and played** (`src/emu/bn5_liberation.h`,
+docs/ROM_DATA.md, A liberation battle's field). As a Navi liberates a
+panel, BN5 weighs the dark round it by where he stands (`BN5_LIB_LEVEL`):
+the panel beyond it 20, its two sides 10 each, the two diagonals beside
+him 2 each, the far diagonals and his own panel nothing; dark, an item's
+or trap's panel and a DarkHole count, the Darkloid's ring not. The sum's
+level (0 none, 1 to 9, 2 to 19, 3 to 30, 4 above) picks the battle from
+the mission's lists (`BN5_LIB_BATTLE_OF`: a DarkHole's and each unit's
+five, a dark panel's eight a level by weight), and every battle of a level
+has one field, its record's column pattern (+6 of BN5's 860 liberation
+records, `BN5_LIB_BATTLES`):
+
+| Level | Pattern | Field |
+| --- | --- | --- |
+| 0 | 0x30 | MegaMan's four columns, his foes in 5-6 |
+| 1 | 0x38 | three and three |
+| 2 | 0x3C | MegaMan's two, his foes in 3-6 |
+| 3, 4 | 0x33 | Surrounded: MegaMan's two in the middle (he at column 3, row 2), his foes in 1-2 and 5-6 |
+
+The Darkloid's battle is never Surrounded (his lists 0x30, 0x38, 0x3C,
+0x3C, 0x3C). In a Surrounded battle L or R turns MegaMan round, and the
+first one a save meets opens on the operator's line from BN5's battle
+archive, "Surrounded! Press L or R Button to turn around!" (the opening's
+phase 0x28, then flag 3:0x0E). The Custom screen opens by itself as the
+gauge fills in every liberation battle (above), so a Surrounded battle
+never needs L or R for it.
+
+**In BN6's engine, no code moved.** BN6 reads the same byte of a
+BattleSettings (bn6f GetBattlePanelColumnPattern, `BN6_SIDES_OF`) and kept
+BN5's Surrounded whole, though none of its battles asks it: each column's
+owner from the pattern's bits (`BN6_SIDES_SET`), an object's facing taken
+from its own where the pattern is none of the plain three
+(`BN6_SIDES_FACING`), and MegaMan given his turn (`BN6_SIDES_TURNER`,
+`BN6_AI_TURNS`) so that L or R turns him instead of asking for the Custom
+screen (`BN6_SIDES_KEYS`). The `foes` step's `sides@33` shows it: the
+viruses on the left face MegaMan and strike to the right, L turns him and
+his buster hits them. So the run's battle for a panel keeps its foes and is
+set out on BN5's field for the level (`src/director/liberation_field.c`):
+its record's +6 (the Encounter's `sides`), MegaMan at column 3 where
+Surrounded, every other foe mirrored to the left-hand pair (BN5's records
+share them so), the foes in columns 5-6 where his side is four wide, the
+field's objects left out where they would stand on someone. The foes'
+strength still follows stage 1's bands of the unweighted dark.
+
+**What is not BN5's yet.** The "Surrounded!" line: BN6 dropped the opening
+phase that says it (no reader of the pattern at its battle's start), and
+its chat would need driving over the battle's opening; for now the
+stakes' box says "SURROUNDED: L/R TURNS" before the battle instead. A
+unit's HP: BN5's battle reads its board for that alone, a guardian's or
+the Darkloid's HP from the board as its enemy spawns (`BN5_LIB_UNIT_HP_IN`)
+and the HP left back to the unit at the end (`BN5_LIB_UNIT_HP_OUT`), so a
+time up leaves him hurt; the units' HP on the board are their own piece of
+work.
+
+**Checked:** in romlab, BN5's own Surrounded battle (mission 1, its record
+24 handed out by the board's getter patched in the loaded copy) and its
+gauge opening the Custom screen; ours on seed 1's act 2 board
+(`place 76 -124 5`, Liberation: `dark level 3, sides 33`), the Custom
+screen opening by itself in turns 1 and 2 and TIME UP in the third, the
+recordings side by side in the pull request.
 
 ### The quality bar, as built (23 October 2026)
 
@@ -1166,8 +1435,7 @@ What they say:
   Started at depth 11 directly, MegaMan was deleted in a liberation's
   battle on dev's build as on this one: not this change's.
 
-**Left for later:** the route kept for the run and offered at the next fork
-(Special routes); the guardians' reach drawn (the L view); the board's
+**Left for later:** the board's
 make on the 3DS timed (about 55 ms a board on the desktop, the planner's
 plays the most of it: a dark layer's make on the New 3DS may take a second
 or two); acts 5 and 6 tuned for a lone MegaMan (their BN5 harm wants a
@@ -1273,18 +1541,587 @@ was clipped. The phase is now BN5's as traced above
   picture's middle; the BG scroll's wrap read it a half turn off away
   from MegaMan.
 
-Not done: the Darkloid's heal (his HP is not kept on the board: each
-battle with him is whole, so there is nothing to heal; its effect 0x78
-and sound are traced); the HP digits under every unit; TinHawk's and
-Bladia's strike effects and the BN6 Darkloids' (not traced: their
-strikes are their animations and the harm); a deleted guardian's return
-through BN5's warp. Teammates stay stage 3's.
+(The Darkloid's heal and the units' HP digits: The board's HP as BN5's,
+below. TinHawk's and Bladia's strikes, the Darkloid's blow and a deleted
+guardian's return: below. The team: Stage 3, as built, below.)
 
 **Checked:** an autopilot run through seed 1's act 2 board from its
 opening to its exit (`--run-depth 5 --seed 1 --dev dark,god,onehit`,
 11-12 phases on its par of 12, the exit taken to depth 6); seed 2's
 board for a BigBrute's warp and strike (frame 5409 on), seed 1's for
 the Darkloid's (frame 13667 on).
+
+### The par's prize, as built (25 October 2026)
+
+BN5's tiers exactly, the owner's decision 6: the board won two phases
+under par or better pays a chip, within par a chip, over par zenny, the
+same three rows and bounds as every BN5 mission's (The par's prize, above;
+`LB.prize` from the phase and par as the Darkloid falls,
+`src/director/liberation.c`). What each pays, reasoned with the
+game-design skill (`src/layer/lib_prizes.c`, `lib_par_zenny` in
+`src/director/liberation_board.c`):
+
+- **The chips:** BN5's two are a better chip and a lesser one of the same
+  kind (the Darkloid's SP and plain chips, later a Mega chip and his DS
+  one). The run's are a chip a Server's win pays two under par (two
+  layers deeper, the rarer tiers weighted) and one a tier lower at par,
+  as stage 1 had them: our Darkloid is a BN6 Navi whose own battle pays
+  BN6's rows for him beside the prize, so his chip again would be a
+  second copy, not a better one.
+- **The zenny:** BN5 pays 1000 a mission, 5000 from the fifth. The run
+  pays BN5's first mission's 1000 at the second act, where a board first
+  stands, and a quarter of it more each act, to 2000 at the sixth; dearer
+  on later cycles as a chip's price is, and the zenny curve's share as
+  every zenny the engine sets (653, 959, 1,288, 1,636, 2,000 under the
+  opening plan). BN5's own climb would pay 3,435 to 5,000 from the fourth
+  act, more than the chip at par is worth at a dealer's (2,345 to 2,430,
+  `build.py economy`'s dark table), and racing the par would lose to
+  dawdling: over par stays the lesser prize, never a lost run, as BN5's.
+- **How it is told:** the mission won's tally, in BN5's own words (The
+  board's words and banners as BN5's, below: SUCCESS! and MegaMan's
+  "Target" and "Actual"), then the chip or the zenny given in BN6's own
+  box at once, as BN5's "You got a battle chip for:" and "You got:"
+  follow its tally (`ta_lib_prize`, `ta_lib_prize_zenny`,
+  `src/layer/service_words.c`). Without BN5's ROM, Lan's words say the
+  phases and the tier (`lib_won_words`). (This pull request first had
+  MegaMan say what the Darkloid left before the give; merged with the
+  board's words, BN5's tally says it, and the give follows bare.) BN5's
+  Officials stay out: no one on our board stands for them.
+- **Checked:** `build.py test` (the zenny by act and cycle, under either
+  plan), `build.py economy` (0 outside the bands; the dark table flags an
+  act whose zenny over par reaches the chip at par's price), and seed 3's
+  act 2 board played by the autopilot at each tier with `--dev
+  libpar=N` (its 8 phases two under a par of 10, at a par of 8, over one
+  of 6), beside BN5's mission 1 at 5, 7 and 8 phases in romlab (the
+  pictures in the pull request).
+
+### The board's HP as BN5's, as built (25 October 2026)
+
+**BN5's rules, read in its ROM and played in romlab** (mission 1;
+`src/emu/bn5_liberation.h`, docs/ROM_DATA.md's row): each board unit
+keeps its HP, its max and the HP its digits show. The digits stand under
+every unit in play but the Navi in play (his HP is the HP box's): white,
+8x16 (BN5's HP digits), centred on the unit's place on the floor, their
+top there; the HP shown steps 4 a frame toward the HP. A unit fought
+lends its battle's marked enemy its HP and max as the enemy spawns, and
+takes back the HP that enemy has as the battle ends, so one not deleted
+keeps on the board what its battle left (one left at none by a battle
+not won gets a quarter of its max). The Darkloid heals as his turn
+begins, as DARKLOID PHASE's band closes, where his HP is below his max
+and dark panels stand round him: a tenth of his max for each (dark, an
+item's, a DarkHole, his ring: BN5's weights), his max at most, the
+digits with it at once; rising lines over him (list 7's 120, in the
+palette its variant names) with sound 0x8A, then 20 frames before his
+turn goes on. (The guides' "100 a panel" is a tenth of a 1000 HP
+Darkloid's.) A Navi's rest heals by BN5's story's progress, a fifth of
+his max on mission 1 to a half (its ROM); ours is the guides' half.
+
+**On our board** (`liberation.c`, `liberation_battle.c`,
+`liberation_turn.c`, `liberation_pieces.c`, `liberation_draw.c`):
+
+- **The Darkloid's HP is the board's**: his own battle's (the version
+  make_boss gives him) as the board begins, kept across a CONTINUE
+  (`run.lib`, its note `CLB3`), shown under him in BN5's digits, rolled
+  as BN5 rolls them, hidden under a chat box. His battle begins from it:
+  the director gives his object the board's HP as it is first in play,
+  his max his own (BN6's MaxHP, as BN5 gives the board's max), and
+  reads his HP each frame of it; a battle that leaves him standing
+  leaves the board that HP.
+- **His heal** is BN5's, at the start of his turn in the Darkloids'
+  phase, its effect and sound BN5's, read from its ROM, then BN5's wait.
+- **The guardians show no HP**: our guardians' battles are the act's
+  viruses, not one foe of theirs, so they have none to keep.
+
+His battle times up at three turns as every liberation battle does (The
+battle's field, as BN5's), so a battle that leaves him standing leaves
+the board his HP, his heal comes into play, and the next battle with him
+begins from what he has; so do the team's strikes (stage 3: ShadowMan's
+SneakAttack) and the BonusPanel's Major Hit, a fifth of his max.
+`--dev libhp=N` begins him at N HP to see them.
+
+**Checked:** BN5 and ours side by side (the pull request's pictures):
+the digits under BlizzardMan and a guardian in BN5, under the Darkloid
+on our board; the heal with `--dev dark,god,onehit,libhp=100` (seed 1,
+depth 5): 100 to 660 at once (his ring's eight dark, 70 each, frame
+2266), BN5's lines over him in its purple, 700 the next phase;
+`test_liberation_heal` (the weights, the cap, none at full HP or with
+none dark round him); the autopilot through seed 1's board to its exit.
+
+**Left:** a guardian's own HP (BN5's guardian battles' marked enemy not
+traced: which of its battle's enemies the record marks); the rest's heal
+by BN5's table (a game-design call: ours is the guides' half); the HP
+box and the team's digits with stage 3.
+
+### BonusPanels as BN5's, as built (25 October 2026)
+
+A BonusPanel is BN5's (traced: BonusPanels as BN5's, above), drawn from
+BN5's ROM as the game runs, nothing of it kept:
+
+- **The rule** (`src/director/liberation_bonus.c`): fenced like a dark
+  panel, so MegaMan no longer steps on it; facing it, A opens the menu
+  with Liberation (LongSwrd not offered), which frees it without a battle,
+  and his action is not spent: the board goes back to his move. A CONTINUE
+  saved during it resumes at his move with the panel freed.
+- **The picture** (`src/director/liberation_roulette.c`): "A BonusPanel!",
+  the panel freed as BN5's dissolve, the three flashes and their sound,
+  the band, the slot's icon sliding in, "PRESS A BUTTON", the slot every
+  4 frames from a random first one with BN5's tick, A to stop it with
+  BN5's sound, its name held 88 frames, out and shut: BN5's sprites
+  (list 9's icons and words) and frames.
+- **The slots, BN5's order:** no harm on the board this phase
+  (`LB.shield`, BN5's sound); HP full; five Order Points; a chip; Major
+  Hit (the camera on the nearest guardian, deleted, its DarkHole sending
+  it back as ever; with none left, the Darkloid: `LB.darkloid_cut` counts
+  the fifths of his max HP BN5 takes, for his battle's HP once the board
+  keeps it). HP, Order Points and the chip pop over the freed panel in
+  BN5's icons with their words, as an item panel's do.
+- **The chip:** BN5's are a mission's standard chips, picked among four
+  alike, as its item panels' are; a board's BonusPanels give one of four
+  chips rolled in its item panels' band (`lib_prizes.c`, the layer's
+  seed's rolls of their own), so a chip from a BonusPanel is worth what an
+  item panel's is (docs/ECONOMY.md, Where it is decided). The economy
+  report does not play dark layers yet (Stage 1's left for later).
+- **The placement** (`place_bonus`): a board without a sealed region got
+  none (its test read every panel as the sealed region's), and the floor
+  of a layer's map has few stubs; BonusPanels now go to stubs' ends, else
+  to a clean corner (two neighbours), never by a DarkHole: every board has
+  its act's two or three.
+- **The planner** frees a BonusPanel for nothing as before and stops the
+  roulette as a player does, where it helps most (HP when below half, a
+  guardian within three, else Order Points, else no harm), one in five
+  missed; boards made in acts 5 and 6 stay above half (43 of 80).
+  `LAYER_MAKE` 101. Without BN5's ROM, the roulette is not shown: its
+  first slot is given at once.
+
+Reasoned with the game-design skill: the BonusPanel stays a lure at a
+stub's end, the detour its only price (*prepare or press on*); BN5's
+stop by A makes it a small act of timing in a turn-based board, and its
+five a choice by need (no harm before a risky phase, HP when low, Order
+Points for a LongSwrd, a chip for the run, a guardian off the way).
+
+### Each mission's own look, as built (25 October 2026)
+
+Every dark layer stood in BN5 mission 1's map. Each now takes the BN5
+mission that matches its area, its map, backdrop and colours read from
+BN5's ROM as the layer is made (`src/director/liberation_look.c`,
+`lib_look_mission`; docs/ROM_DATA.md, Each Liberation Mission's own look).
+
+**What differs between BN5's nine boards** (each opened in romlab on the
+plain ROM, as mission 1 was: the mission set, BN5's own warp into its map,
+A tapped through its opening to the board): less than their maps suggest.
+The nine maps (0x86:00-08) share one tile set and BN5's board one overlay
+and its twelve looks, so the framed panels, the swirl and the looks are the
+same in all nine. A mission's own is:
+
+- **its map**: the board's shape, and the pieces round its panels where
+  the map draws them (End 2's walkway joins, Nebula's stone slabs);
+- **its backdrop**, one of five: ACDC 3's purple diamonds (mission 1),
+  Oran 3's with green specks (2), SciLab's purple binary digits (3),
+  End's magenta diamonds (4 and 5), the Undernet's and Nebula Area's purple
+  static (6-9), each the map's own backdrop in a mission's colours
+  (`BN5_LIB_MISSION_BACKDROPS`), and the map's own tile animation;
+- **its board's colours**, two sets: the mission's GFXAnim list
+  (`BN5_LIB_MISSION_ANIMS`, the lists group 0x86 takes while a mission is
+  on) loads banks 1-12 over the map's as it is entered, missions 1-5 from
+  `BN5_LIB_BOARD_PAL_ACDC`, 6-9 from `BN5_LIB_BOARD_PAL_NEBULA` (the two
+  differ in banks 1 and 3, the frames' and pieces' shades; the panels'
+  banks 8-12 are the same).
+
+The music is the same in all nine: the board's song 0x22, started by an
+immediate in the board's code and read on the music player in missions 2,
+3, 5, 7 and 9 (1 before).
+
+**Which mission an area takes.** A BN6 area takes the missions of the BN5
+net area that dresses it in a run (rom.c's `like`; docs/MULTIROM.md): each
+mission's map is one of its areas' maps by BN5's own labels and by the
+maps BN5's random battles name for that area (`NetAreaDef.xbattles`:
+0x86:00 ACDC Area's, 0x86:01 Oran's, 0x86:02 SciLab's, 0x86:03 End's,
+0x86:05 the Undernet's, 0x86:06 and 07 Nebula's).
+
+| BN6 area | Dressed by | Missions |
+| --- | --- | --- |
+| Central Area, ACDC HP | ACDC Area | 1 (ACDC 3) |
+| Green Area, Green HP | Oran Area | 2 (Oran 3) |
+| Sky Area, Sky HP | SciLab Area | 3 (SciLab) |
+| Seaside Area | End Area | 4 (End 2) in act 2, 5 (End 5) from act 3 |
+| Undernet | Undernet | 6 |
+| Graveyard | Nebula Area | 7 (Nebula 1) in act 2, 8 (Nebula 3) in act 3, 9 (Nebula 5) from act 4 |
+| Undernet Zero, the Cybeast Nest | none: deeper than BN5's net | 9, BN5's last |
+| the comps and homepages | none | 1, BN5's first |
+
+An area with several takes a later one in a later act, as BN5 meets them
+(the homepages named for an area take that area's by their name alone).
+
+**How.** Each of the nine maps is a held net area of BN5's (`rom.c`,
+`XAREAS_MAX` 16 for them), so what an area brings comes with it: its floor
+learned from its own board's panels (`area_src_board`, already per
+record), its backdrop and animations copied by `xbackdrop_map` (the
+mission's lists and records, as BN5's group 0x86 takes them on a board),
+its colours over the map's (`area_src.c`'s `board_colours`: the list's
+script that writes bank 1's copy, 0x180 bytes, its frame's source).
+`xbackdrop` copies each script and record once however many maps share it
+(the nine share five backdrops and their scripts; each its own filled the
+64 KB range by the fifth): the nine take 14 KB beside the six areas' 37.
+Nothing is kept: every byte is read from the player's ROM.
+
+**The boards.** A mission's map draws more of a layer's generated floor
+than mission 1's did (End 2's and Nebula's maps learn joins 0x86:00 never
+shows), so the boards on them are bigger (a tenth to a fifth more panels; the planner's par within three phases of before, either way), and in acts 3
+and 4 the generator's barriers fail a few more of them in all 16 tries.
+Where none fits on its mission's map, the layer is made again on mission
+1's map, where every dark layer stood before, and only then plain
+(`dark_again`, `src/director/director_layer.c`). The debug log of 8 seeds
+each, `--dev dark` (kept boards; before, every one on mission 1's map):
+
+| Mission | Area, act | Kept, before | Now (on mission 1's map) | Panels, before / now | Par, before / now |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Central, 2 | 8 of 8 | 8 (0) | 160 / 160 | 12.5 / 12.5 |
+| 2 | Green, 2 | 8 of 8 | 8 (1) | 166 / 178 | 12.2 / 12.5 |
+| 3 | Sky, 2 | 8 of 8 | 8 (0) | 159 / 182 | 13.1 / 11.5 |
+| 4 | Seaside, 2 | 8 of 8 | 8 (0) | 185 / 223 | 13.1 / 11.8 |
+| 5 | Seaside, 3 | 8 of 8 | 8 (1) | 194 / 221 | 13.5 / 11.1 |
+| 6 | Undernet, 2 | 8 of 8 | 8 (0) | 177 / 195 | 14.2 / 12.2 |
+| 7 | Graveyard, 2 | 8 of 8 | 8 (0) | 168 / 176 | 11.2 / 13.8 |
+| 8 | Graveyard, 3 | 5 of 8 | 5 (2) | 189 / 193 | 12.6 / 14.0 |
+| 9 | Graveyard, 4 | 8 of 8 | 8 (3) | 195 / 206 | 21.1 / 19.1 |
+| 9 | Undernet Zero, 2 | 8 of 8 | 8 (0) | 171 / 197 | 11.4 / 11.4 |
+| all | | 77 of 80 | 77 (7) | | |
+
+`LAYER_MAKE` 101.
+
+**Checked:** BN5's nine boards beside ours, one mission an area (the
+pull request's contact sheet); mission 1's boards the same as before on
+every seed measured (the control); autopilot runs from depth 5, seed 1
+(`--dev dark,god,onehit`, 36000 frames), each through its area's first
+dark board to the exit and on: Central (mission 1) to depth 8, Seaside
+(4, then 5 in act 3) to 10, the Graveyard (7; its act 3 board plain on
+this seed, as before) to 11, SciLab dressing Sky (`x1`, 3) to 9, Oran
+dressing Green (`x4`, 2) to 8, the Undernet (6) with `hp=2000` to 8
+(without it MegaMan was deleted in a board's battle at 100 HP, as stage
+2's runs found).
+
+### The board's words and banners as BN5's, as built (25 October 2026)
+
+Traced in romlab on the plain ROM (docs/ROM_DATA.md, BN5's Liberation
+board: the L view's keys, the Darkloid's first word, the mission won and
+its tally) and drawn or read from BN5's ROM as the game runs, its text
+and tiles never kept:
+
+- **The Darkloid's entrance.** BN5's opening tour passes the Darkloid in
+  silence (mission 1 recorded: the tour, then Colonel's tutorial; missions
+  2-9 open on the team's words). He speaks at his first turn of the first
+  DARKLOID PHASE, after the banner and before anything of his phase, with
+  his mugshot, once (his archive's entry 0, through a flag: BlizzardMan
+  claims the area for a ski resort). Ours the same: at the first
+  Darkloids' phase, before the DarkHoles send anyone back and before his
+  turn, the run's Darkloid says his line with his face, in his own habit
+  of speech (`lib_entrance_words`, `src/director/liberation_words.c`; the
+  run's Darkloids are BN6's Navis and BN5's six, none a Darkloid of
+  BN5's, so the lines are ours, docs/VOICE.md's guardians). Not kept
+  across a CONTINUE: a board continued in its first phase hears it again.
+- **The L view's keys.** BN5's help at the top right, its eight OBJs
+  ("+ MoveCam", "B+ + MoveCam(F)", "L Back") from its tiles on the band's
+  fill in WIN0, drawn with the view's phases and arrows
+  (`lib_piece_phases`).
+- **The guardians' reach in the L view.** BN5's L view shows no reach: the
+  camera taken onto a BigBrute in it, A, R and SELECT pressed, nothing
+  changes (its help names the D-pad, B and L alone). The quality bar's
+  honest telegraph (rule 4) puts it there, in the one look BN5 gives a
+  reach, the red it lights a strike's in (look 0x0D): while L is held, every
+  panel where the units would strike a Navi in their next phase
+  (`lib_threat`, the planner's own reading) lies in BN5's red, steady, and
+  goes as L is let go (`src/director/liberation_look.c`). Reasoned with the
+  game-design skill: the dialectic is the board's *press on or prepare*,
+  and the reach is what a phase's choice costs; an honest telegraph shown
+  on demand (BN5's own map view, which a player opens to plan) keeps the
+  board as BN5 draws it the rest of the time; steady, not BN5's blink and
+  sound, which say a strike is coming now.
+- **The mission won.** BN5's routine 6 after the Darkloid's battle:
+  BN5's song for it (0x18) at once, SUCCESS! in the phases' band 22
+  frames on (its words BN5's, PLAYER PHASE's palette, their sound), the
+  band's 104 frames, then 20 more, and the team's leader's tally:
+  "Target" and "Actual" phases, then the Officials' reward (a chip two
+  under par or better, another at par, zenny over it), BN6's give after.
+  Ours the same from the Darkloid's deletion (`LIB_STEP_CLEAR`,
+  `src/director/liberation.c`): the song, SUCCESS!, then MegaMan's tally
+  in BN5's own words, MegaMan's three (the leader of a lone MegaMan's
+  team), read from BN5's ROM as it is said with the par and the phases
+  ours (`lib_piece_tally`), then the prize given by BN6's own give alone
+  (`ta_lib_prize`; the Server's "The signal left a chip!" no longer
+  before it). Over par the prize is zenny, as BN5's (the owner's decision
+  6, The par's prize, as built), the tally's first page BN5's and the
+  zenny given after it. Then "The exit's open,Lan!", the fence open
+  through it.
+
+**Checked:** side by side with BN5 in the pull request (the entrance,
+the L view, the clear); an autopilot run through seed 1's act 2 board
+(`--run-depth 5 --seed 1 --dev dark,god,onehit`).
+
+### Guardians' strikes and returns as BN5's, as built (25 October 2026)
+
+BN5 as the hard reference (the owner's direction), traced in romlab on
+missions 2 and 4 (The Darkloids' phase as BN5 shows it, above;
+docs/ROM_DATA.md, BN5's Liberation board: the guardians' and Darkloids'
+strikes) and played on the board (`src/director/liberation_turn.c`):
+
+- **Every warp the small pair** (list 7's 59, animations 4 and 5), as
+  BN5's every caller passes; the board's had shown the medium pair.
+- **Bladia's DarkSlash:** its pose at 22 from the box's closing, 0x10A at
+  33, BN5's blow at 34 (list 7's 58 16 pixels over MegaMan, 13 frames,
+  0x6B, the board and the board's sprites shaken: `cinema_shake`, 10
+  frames up to 4 pixels), the harm at 35, its pose back at 69, the red out
+  at 123.
+- **TinHawk's HawkAttack:** its warp out at 22, the camera's pan to
+  MegaMan, its warp in beside him in its strike at 97 (BN5's two places,
+  20 world units up-left or down-right of him on the screen; BN5's RNG
+  picks, ours the phase), shown at 101, the blow at 105, the harm at 106,
+  0x10A at 110, its warp out with the digits at 140, the camera back, its
+  warp in at home at 216, the red out at 284; it no longer stands where it
+  struck from. TinHawk's two strike animations were read the wrong way
+  round (25 faces right, as BN5 lands it up-left of its Navi).
+- **The Darkloid's blow:** BN6's Navis have no BN5 attack, so his strike is
+  his pose where list 6 has one and BN5's own blow, as BN5's Darkloids
+  0x15 and 0x16 strike: the burst, 0x6B and the shake at 52, the harm with
+  it at 53 (BlizzardMan's Snowball delayed his to 73).
+- **A deleted guardian's return as BN5's** (`lib_guardian_return`,
+  `src/director/liberation_board.c`, the planner's and the board's): at
+  the Darkloids' phase's end, each DarkHole in its order still standing
+  with MegaMan within three panels of it on both axes sends its deleted
+  guardian to the free dark panel of the eight round it nearest him; the
+  camera pans to the hole, the guardian rises on it in BN5's OBJ mosaic
+  fading in (ours over the frame's pixels about him, a sprite's told by
+  its colours: BN6 draws the object, so its mosaic is approximated, the
+  floor under a block its first floor pixel's), with 0x94, then warps to
+  its panel. Before, he came back silently beside the hole at the start of
+  the Darkloids' phase after next, wherever MegaMan stood, on one of the
+  four panels beside it. **The game-design check:** the guardian deleted
+  in a player's phase strikes again from the Darkloids' phase after the
+  next one, in BN5 as before (the next player's phase is his to strike the
+  hole); what changes is that he stands beside the hole in that phase, so
+  MegaMan meets him again if he does not take the hole, and that walking
+  away from the hole keeps him gone. The planner plays the same rule, so
+  the par follows it: `LAYER_MAKE` 101.
+
+**Checked:** BN5 and ours side by side in the pull request (TinHawk's
+HawkAttack: seed 1's act 4 board, `--run-depth 11 --seed 1 --dev
+dark,god,onehit`, frame 5808 on; the return: frame 2678 on, a TinHawk
+rising on its hole and warping beside it); `build.py test`, `build.py
+lint`.
+
+### Stage 4, as built: BN5's Darkloids (25 October 2026)
+
+**Which Darkloids BN5's missions use (ROM).** The nine records' Darkloid
+(their units' first, `[4]` +5 the kind, +0x12 the enemy id, read with the
+names archive and the ids table): mission 1 BlizzardMan V1 (`0x14F`, AI
+14), 2 ShadeMan V1 (`0x149`, AI 13), 3 CloudMan V1 (`0x155`, AI 15), 4
+DarkMegaMan (`0x18F`, a MegaMan of the ids table's type 2, AI 23), 5
+CosmoMan V1 (`0x15B`, AI 16), 6 DarkColonel (`0x126`: Colonel's V2,
+already moved), 7-9 ShadeMan, CloudMan and CosmoMan in their third
+versions (`0x14B`, `0x157`, `0x15D`). LarkMan (AI 17) and GridMan (18)
+are BN5's but no mission's.
+
+**In BN6's engine** (docs/MULTIROM.md, Transplanted Navis, The Darkloids):
+BlizzardMan and ShadeMan, each proven against BN5's own battle frame by
+frame (`blizzardman_v1`, `_v1_keys`, `_sp`; `shademan_v1`, `_v1_keys`,
+`_sp`: PASS). CloudMan and CosmoMan are derived but not yet moved (their
+object types, a RAM table of CloudMan's and a sprite loaded by a number
+made otherwise are open decisions); DarkMegaMan, a MegaMan on BN5's chip
+AI as the Dark Soul is, is left.
+
+**On the board.** A dark layer's Darkloid (`run_darkloid`, the guardians'
+navis 30-33 here: ShadeMan, BlizzardMan, CloudMan, CosmoMan) is BN5's own
+where its ROM brought him into BN6's engine: BN5's missions' order makes
+the act's own the likeliest (act 2 BlizzardMan, act 3 ShadeMan, act 4
+CloudMan, then CosmoMan), each other one moved half as likely, by a coin
+of the run's seed and the act; where none is moved, a Navi of BN6's as
+before. He stands in his own overworld sprite and speaks with his own
+mugshot, BN5's lists 6 and 8 copied in as BN5's guardians' are
+(`xnavi_guardian`): BlizzardMan's 76, traced on BN5's own board (mission
+1 in romlab, his OBJs' tiles found in his sprite), ShadeMan's 70 (by its
+palette beside the six's, then seen on our board). His strike says his
+line in his habit (`lib_strike_words`). His battle is his moved id at the
+version the act's band takes (`xguardian_version`, the pacing's band for
+BN5's Navis), his HP held to the band as BN5's guardians' are (the board's
+HP is the board session's), with BN5's rules of the Darkloid's battle as
+before (no turns to count, the late double).
+
+**The design** (the game-design skill): the Darkloid is the dark layer's
+climax and the board's identity; BN5's own order is a staircase a BN5
+player knows (BlizzardMan's 400 HP at the first mission, ShadeMan's 600
+the next), and the act's band picks the version, so strength follows the
+run, not the story. Variety stays: a second Darkloid moved means half the
+boards meet the other one.
+
+**Checked:** the six specs above PASS, and all 32 of the Navis' specs
+with the comparator's change (only the spec's own Navis' code is the
+foe's); `build.py test`, `build.py lint`, `build.py pacing` (0 past their
+band); the autopilot (`--dev dark,god,onehit`) through seed 1's act 2
+board (BlizzardMan V2, deleted at par 12, the exit taken) and seed 2's
+act 3 board (ShadeMan V2, deleted two under par), each meeting his strike
+in DARKLOID PHASE.
+
+**Left:** CloudMan, CosmoMan and DarkMegaMan in BN6's engine; the
+Darkloids' poses (their strike animations: BlizzardMan's in BN5 19-52
+frames after the box) and BN5's own strike effects (his Snowball over the
+Navi); his entrance's words.
+
+### Stage 3, as built: the team (25 October 2026)
+
+**BN5's team, played** (romlab on the plain ROM, mission 2: MegaMan,
+Colonel and KnightMan; docs/ROM_DATA.md, BN5's Liberation board: the
+team's turns and HP). Each Navi acts once a phase. R moves play to the
+next Navi yet to act (the liberation state's +6, `BN5_LIB_IN_PLAY`), the
+camera panning to him; a Navi's action moves it on by itself, and a Navi
+who has acted (his unit's +2, `BN5_LIB_UNIT_TO_ACT`, at 0) stands darker.
+The Navi in play walks the board as freely as MegaMan does, through his
+teammates. His HP shows in a box at the top left, every other Navi's
+under him. Pass ("End without doing anything?") gives a fifth of his max
+HP back, not the guides' half: MegaMan's 32 came back 52 of 100, Colonel's
+72 of 200. Colonel's window holds Liberation, ScrenDiv, Save and Pass;
+KnightMan's Liberation and Pass.
+
+**Who comes** (`src/director/liberation_team.c`). MegaMan and the Navis
+whose BN5 Souls the run holds, as many as BN5's team of the stage the act
+stands for: two at act 2, three at act 3, four at act 4, five from act 5.
+Where more Souls are held than there are places, the layer's seed leaves
+some out, so a run's boards bring different teams. Each teammate's HP is
+BN5's for that stage (`BN5_LIB_NAVI_HP`, missions 1, 3, 5, 7 and 9 for
+acts 2 to 6: Colonel 200 at act 2, KnightMan 500 at act 3, ShadowMan 350
+and TomahawkMan 350 at act 4). Without BN5's ROM or a Soul, MegaMan goes
+alone as before. The board is made for the team; where none fits the
+whole team, it is made for one Navi fewer, MegaMan alone at the last.
+
+**On the board.** The team starts on the clean panels nearest the
+arrival, out of every unit's reach. The Navi in play is BN6's player
+object in his own BN5 overworld sprite: the player's spawn loads the
+sprite `BN6_PLAYER_SPRITE_LOAD` is answered with, and the spawn runs
+again where he stands (`src/emu/player_body.c`), so he walks as BN6
+walks MegaMan, with no movement of ours (AGENTS.md). His sprite and
+mugshot are copied from BN5's ROM to one of five list-6 numbers both
+versions of BN6 leave empty (`xnavi_mate`, `FREE_LIB_TEAM`). The others
+stand as the layer's objects, those who have acted in BN6's own shade
+(`BN6_SHADE_DARK` on their sprite's colour shader). BN5's HP box stands
+at the top left (`BN5_LIB_HP_BOX`, read from its ROM) and each other
+Navi's HP under him in BN5's white digits. Each phase begins with MegaMan
+in play; play passes on after each action as BN5's does, BN5's camera
+panning to the next Navi, and R passes it by hand. A teammate says a word
+in his own habit the first time he comes into play, and after his
+battles (`liberation_team_words.c`; docs/VOICE.md, The guardians).
+
+**The commands**, BN5's, an Order Point each, their shapes the players'
+guides' (`lib_command_panels`):
+
+| Navi | Command | In the engine |
+| --- | --- | --- |
+| MegaMan | LongSwrd | two panels in a line, one battle (stage 1's) |
+| Colonel | ScrenDiv | three across the panel faced, one battle (BN5's Save not done) |
+| TomahawkMan | TomahawkSwing | two deep and three wide, one battle |
+| NumberMan | NumberCheck | the two by three ahead: its items taken and its traps disarmed with no battle, the panels left dark |
+| ShadowMan | SneakAttack | a guardian one or two ahead struck: its next battle one band easier (our guardians have no HP on the board; on the Darkloid not done) |
+| ToadMan | LifeMelody | each teammate beside him yet to act sung for: his Liberation this phase frees five ahead in one battle |
+| KnightMan | none | his StoneBody: no harm on the board to him or a Navi beside him |
+
+**A teammate's battle** is MegaMan in that Navi's Soul from the first
+turn, with that Navi's HP, written into MegaMan's NaviStats for the
+battle and his own put back after it. At the first Custom screen's OK
+(`BN6_CUSTOM_OK_HAND`) the Soul is committed as BN5's UNITE commits one
+(soulunite.c): the cross record the proxy form's, no chip given, and turns
+that never count down (0xFF, which soullife.c leaves alone), so BN6
+crosses him as TURN 1 START! shows and he stays in the Soul the whole
+battle; no UNITE is offered in it. His HP after it is the battle's as
+last seen (BN6's return to the map works MegaMan's NaviStats afresh,
+his max among them). A blow that would delete MegaMan in a teammate's
+Soul leaves him 1 HP and ends the battle LIBERATE FAILED!: the teammate
+is out for the board, as BN5's deleted Navis are, and MegaMan and Lan go
+on without him (`--dev matehp=N` tests it). MegaMan's own deletion ends
+the run, as in every battle.
+
+**The Darkloids' phase** (`liberation_turn.c`): each unit goes for the
+Navi of the team nearest it (BN5's text: closer enemies first) and
+strikes him; BigBrute hits every Navi in its reach. KnightMan and the
+Navis beside him take no harm, as under a BonusPanel's shield, and the
+harm shows over each Navi it hurt.
+
+**The design** (the game-design skill). The experience: "I command a
+small team across the dark: who goes where, who spends the Order Point,
+who rests." The dialectic stays the run's, *press on or prepare*, now
+decided Navi by Navi each phase, and the team adds one of its own:
+spread out to work several fronts, or stay together for KnightMan's
+shield and ToadMan's song, against the guardians that go for the nearest.
+The loop layers: the board's session feeds the run (its prize, its
+route), and the run's Souls, won from BN5's guardians earlier, pay a
+second time on the board: variety, never power carried between runs
+(the Souls are the run's own). The patterns: per-character subsystems
+over one chassis (each Navi's one command, sayable in a sentence, over
+the shared move, Liberation, Pass and the one pool of Order Points);
+loadout as budget (who spends the pool's point); give the defender a
+verb (KnightMan, Pass); an honest telegraph (each Navi's HP shown, the
+acted ones darker, the stakes box naming the command's panels).
+
+**The generator and the planner for a team.** The planner
+(`liberation_plan.c`) plays the team: each phase every Navi in turn,
+support first (ToadMan, ShadowMan, NumberMan), each with Liberation, his
+command, Pass and fights; the units go for the nearest Navi; a teammate
+deleted leaves the play, MegaMan's deletion loses it. The board grows with
+its team (`liberation_board.c`): its dark beyond the DarkHoles' rings the
+lone board's times two less two for each Navi past MegaMan (a team of
+two twice it, of four six times it), set by BN5's pars for its teams (7
+for two at mission 1, 9 for three, 9 or 10 for four); BN5's count of
+DarkHoles where the floor has room, a lone board's in the last half of its
+tries; 60% of a team's decisions dead at most against a lone board's 55%
+(each Navi's turn a decision, a support Navi's often his one sensible
+move while the rest of his phase decides); a team's sealed route a phase
+over the par at least (one Navi's detour while the others press on).
+Pass a fifth of the HP for a lone MegaMan too. `LAYER_MAKE` 101.
+
+**The measures** (`tests/test_core.c`, `test_liberation_team`: 16 layers
+an act, BN5's own teams of the stage, their HP its table's; and
+`test_liberation_board`'s lone boards, 40 an act, before and after Pass
+became a fifth):
+
+| Act | Team | Boards | Dark (BN5's) | Par (BN5's) | Dead decisions | Commands a play |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2 | MegaMan, Colonel | 16 of 16 | 27% (33%) | 6 (7) | 44% | 4.3 |
+| 3 | + KnightMan | 15 of 16 | 53% (43-48%) | 8 (9) | 51% | 5.8 |
+| 4 | MegaMan, Colonel, ShadowMan, TomahawkMan | 16 of 16 | 60% (51-61%) | 7 (9-10) | 47% | 7.2 |
+| 5 | MegaMan, TomahawkMan, NumberMan, ToadMan, ShadowMan | 4 of 16 | 64% (59-60%) | 9 (10-12) | 58% | 11.8 |
+| 6 | MegaMan, Colonel, KnightMan, ShadowMan, ToadMan | 2 of 16 | 67% (50-64%) | 7 (14-16) | 55% | 7.2 |
+
+| Lone MegaMan | Boards | Par | Pass the best move |
+| --- | --- | --- | --- |
+| Act 2, Pass a half / a fifth | 40 / 38 of 40 | 12 / 11 | 7% / 3% |
+| Act 3 | 38 / 38 | 14 / 13 | 9% / 1% |
+| Act 4 | 39 / 39 | 17 / 14 | 14% / 4% |
+
+What they say: a team's boards read as BN5's of their stage, their dark
+thick and their par near BN5's for teams of that size; teammates are
+seldom deleted (0.1 a play at act 4), their HP pools being BN5's; each
+command is taken several times a board. Acts 5 and 6, which a run does
+not meet, rarely fit five Navis on a layer's floor: their boards fall to a
+smaller team. A lone MegaMan rests less with BN5's fifth, and his boards
+are a phase or three shorter.
+
+**Checked:** the unit tests above; the autopilot through dark boards with
+teams (`--dev dark,souls=1`, `0x14` and `0x2B`, `god,onehit`, seed 1):
+act 2's board with Colonel won in 7 phases against its par of 8 and the
+exit taken, act 3's with NumberMan and KnightMan and act 4's with
+Colonel, ShadowMan and ToadMan played on, each teammate in play in his
+own body, each of his battles in his Soul (ColonelSoul, ShadowSoul,
+ToadSoul) with his HP kept after it, play passing on and the acted
+Navis darker; with `matehp=81` Colonel deleted in his battle and the run
+going on with MegaMan; over six seeds of act 3 with two Souls held, four
+boards for the whole team, one for MegaMan and one teammate, one plain
+(its barrier finds no place even alone).
+
+**Left for later:** acts 5 and 6 tuned for their teams with `build.py
+pacing` (the owner's decision 5: their boards rarely fit five Navis on a
+layer's floor and fall to a smaller team); Colonel's Save; SneakAttack on
+the Darkloid (his HP is whole each battle); BN5's own special chip each teammate brings to his
+Custom screen (Colonel's C-Cannon), and his own folder; the command
+rule's situations (tools/liberation.py: a board kept only where every
+teammate's command earns its point); the second screen's board; the time
+a team's board takes to make on the New 3DS (the planner plays every
+Navi); co-op over the server, each battle its own player's (stage 5).
 
 ## The owner's decisions
 
@@ -1302,17 +2139,21 @@ as MegaMan in their Soul, co-op later over the server."
    from the first turn, with the teammate's own HP. (Not chosen: a
    teammate as a playable Navi of his own.)
 
-Still open:
+Decided on 25 October 2026, as recommended:
 
-4. **BN6's Crosses as teammates** (commands of BN5's kinds for BN6's
-   Navis), for runs without BN5's ROM or beside the Souls: not decided;
-   until then a run without BN5's ROM meets no dark layer, or meets it with
-   MegaMan alone.
-5. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
-   zenny after) in the run's economy (docs/ECONOMY.md), or the route a
-   sealed region opens as the only special reward. Stage 1 gives BN5's
-   tiers as chips, a Server's prize two under par down to a lesser one
-   over it (Stage 1, as built), reasoned with the game-design skill: the
-   dark way is a costed choice (the second layer's dealer, heal and
-   Mystery Data given up for the board's battles and its prize), and the
-   par's tiers make pressing on pay. The owner's call stands open.
+4. **BN6's Crosses as teammates:** not lent; the team is BN5's Souls only,
+   and a run without BN5's ROM meets no dark layer. Revisited only if act
+   2's team (MegaMan and one teammate at most) feels thin once the team has
+   landed (Stage 3, as built).
+5. **Acts 5 and 6:** their dark layers (`--dev dark`'s alone: a run meets
+   acts 2 to 4) are tuned after the team, with `build.py pacing` over boards
+   with their teams, not for a lone MegaMan: a follow-up of stage 3's
+   (Stage 3, as built, Left for later).
+6. **The rewards:** BN5's tiers exactly, a chip two under par, a chip at
+   par, zenny over par (The par's prize, as built). (Not chosen: the route
+   a sealed region opens as the only special reward; the route stays a
+   reward of its own.)
+7. **Special routes:** a route found is kept for the run and opens a third
+   way at the act's next fork (Special routes).
+8. **Every remaining alignment with BN5** is built in its own branch,
+   BN5 in romlab the hard reference, side by side in its pull request.

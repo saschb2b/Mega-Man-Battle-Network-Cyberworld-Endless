@@ -87,6 +87,29 @@ void lib_piece_harm(int harm, int x, int y) {
 		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - 4 * n + 8 * i, P.core_y + y - HARM_UP, 1, 2, 0);
 }
 
+/* ---- the units' and the team's HP ---- */
+
+void lib_piece_hp(int hp, int x, int top) {
+	const uint8_t *digits = bn5(BN5_LIB_DIGITS, 10 * 0x40), *pal = bn5(BN5_LIB_DIGITS_PAL, 32);
+	if (!digits || !pal) return;
+	char s[8];
+	int n = snprintf(s, sizeof s, "%d", hp < 0 ? 0 : hp > 9999 ? 9999 : hp);
+	for (int i = 0; i < n; ++i)
+		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - BN5_LIB_HP_STEP * n / 2 + BN5_LIB_HP_STEP * i, P.core_y + top, 1, 2, 0);
+}
+
+void lib_piece_hp_box(int hp) {
+	const uint8_t *cap = bn5(BN5_LIB_HP_BOX, 0x40), *digits = bn5(BN5_LIB_HP_BOX_DIGITS, 10 * 0x40), *blank = bn5(BN5_LIB_HP_BOX_BLANK, 0x40);
+	const uint8_t *pal = bn5(BN5_LIB_HUD_PAL, 32);
+	if (!cap || !digits || !blank || !pal) return;
+	char s[8];
+	snprintf(s, sizeof s, "%4d", hp < 0 ? 0 : hp > 9999 ? 9999 : hp);
+	xtiles_draw(cap, pal, P.core_x, P.core_y, 1, 2, 0);
+	for (int i = 0; i < 4; ++i)
+		xtiles_draw(s[i] == ' ' ? blank : digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + 8 + 8 * i, P.core_y, 1, 2, 0);
+	xtiles_draw(cap, pal, P.core_x + 40, P.core_y, 1, 2, 1);
+}
+
 /* ---- the L view ---- */
 
 static void phase_number(int n, int x, int y) {
@@ -113,12 +136,28 @@ static void lview_arrows(int t) {
 	xtiles_draw(cross, pal, P.core_x + 112, P.core_y + 72, 2, 2, 0);
 }
 
+/* The L view's keys' help at the top right, BN5's eight OBJs (traced: its
+ * OAM): x, y, width in tiles (8 high), the first of BN5_LIB_LVIEW_HELP's tiles */
+static const struct { uint8_t x, y, w, tile; } help_objs[] = {
+	{ 140, 16, 4, 0 }, { 172, 16, 4, 15 },
+	{ 124, 24, 2, 19 }, { 140, 24, 4, 0 }, { 172, 24, 2, 13 }, { 188, 24, 4, 9 },
+	{ 140, 32, 4, 5 }, { 172, 32, 1, 4 },
+};
+
+static void lview_help(const uint8_t *pal) {
+	for (size_t i = 0; i < sizeof help_objs / sizeof *help_objs; ++i)
+		xtiles_draw(bn5(BN5_LIB_LVIEW_HELP + 32u * help_objs[i].tile, 32u * help_objs[i].w), pal, P.core_x + help_objs[i].x, P.core_y + help_objs[i].y,
+			help_objs[i].w, 1, 0);
+}
+
 void lib_piece_phases(int phase, int par, int t) {
 	const uint8_t *words = bn5(BN5_LIB_PHASE_TILES, 9 * 32), *pal = bn5(BN5_LIB_PHASE_PAL, 32), *band = bn5(BN5_LIB_PHASE_WORDS_PAL, 32);
-	if (!words || !pal || !band) return;
-	/* (the panel behind them: BG0 in WIN1, blended as the banners' band) */
-	xtiles_blend_rect(P.core_x + BN5_LIB_LVIEW_PANEL_X, P.core_y + BN5_LIB_LVIEW_PANEL_Y, BN5_LIB_LVIEW_PANEL_W, BN5_LIB_LVIEW_PANEL_H,
-		(uint16_t)(band[2 * BN5_LIB_BAND_COLOUR] | band[2 * BN5_LIB_BAND_COLOUR + 1] << 8), 16, 8);
+	if (!words || !pal || !band || !bn5(BN5_LIB_LVIEW_HELP, 21 * 32)) return;
+	/* (the panels behind them: BG0 in WIN1 and WIN0, blended as the banners' band) */
+	uint16_t fill = (uint16_t)(band[2 * BN5_LIB_BAND_COLOUR] | band[2 * BN5_LIB_BAND_COLOUR + 1] << 8);
+	xtiles_blend_rect(P.core_x + BN5_LIB_LVIEW_PANEL_X, P.core_y + BN5_LIB_LVIEW_PANEL_Y, BN5_LIB_LVIEW_PANEL_W, BN5_LIB_LVIEW_PANEL_H, fill, 16, 8);
+	xtiles_blend_rect(P.core_x + BN5_LIB_HELP_PANEL_X, P.core_y + BN5_LIB_HELP_PANEL_Y, BN5_LIB_HELP_PANEL_W, BN5_LIB_HELP_PANEL_H, fill, 16, 8);
+	lview_help(pal);
 	lview_arrows(t);
 	/* "PHASE" its five tiles, "TRGT" the four after them */
 	xtiles_draw(words, pal, P.core_x + 54, P.core_y + 124, 5, 1, 0);
@@ -235,6 +274,17 @@ static const WordObj player_phase[] = {
 	{ 162, 0, 2, 2, 26, 0 },
 	{ 178, 0, 2, 2, 13, 0 },
 };
+/* SUCCESS! as the mission won shows it (BN5_LIB_CLEAR: the same banner's kind 2, PLAYER PHASE's palette) */
+static const WordObj success[] = {
+	{ 60, 0, 2, 2, 26, 0 },
+	{ 76, 0, 1, 2, 46, 0 }, { 84, 0, 1, 2, 46, 1 },
+	{ 92, 0, 1, 2, 42, 1 }, { 100, 0, 1, 1, 48, 0 }, { 100, 8, 1, 1, 49, 0 },
+	{ 108, 0, 1, 2, 42, 1 }, { 116, 0, 1, 1, 48, 0 }, { 116, 8, 1, 1, 49, 0 },
+	{ 124, 0, 2, 2, 13, 0 },
+	{ 140, 0, 2, 2, 26, 0 },
+	{ 156, 0, 2, 2, 26, 0 },
+	{ 174, 0, 1, 1, 44, 0 }, { 173, 8, 1, 1, 50, 0 },
+};
 #define WORDS_Y      64
 #define DIGITS_X     200    /* PLAYER PHASE's two digits, 16 apart */
 #define WORD_TILES   165
@@ -288,8 +338,10 @@ static void word_obj(const uint8_t *tiles, const uint8_t *pal, const WordObj *o,
 	xtiles_draw(tiles + o->tile * 32, pal, P.core_x + x, P.core_y + WORDS_Y + o->dy, o->w, o->h, o->flip);
 }
 
-void lib_piece_phase_banner(bool darkloid, int phase, int t) {
-	const uint8_t *tiles = word_tiles(), *pal = bn5(BN5_LIB_PHASE_WORDS_PAL + (darkloid ? 32u : 0u), 32);
+/* The band and its words `w` (`n` of them, on palette `pal_at`), `t`
+ * frames since the band opened; PLAYER PHASE's number where `phase` is 0 or more */
+static void banner(const WordObj *w, int n, uint32_t pal_at, int phase, int t) {
+	const uint8_t *tiles = word_tiles(), *pal = bn5(pal_at, 32);
 	if (!tiles || !pal || t < 0 || t >= BN5_LIB_BANNER_END) return;
 	int top, rows, dx;
 	band_rows(t, &top, &rows);
@@ -298,11 +350,8 @@ void lib_piece_phase_banner(bool darkloid, int phase, int t) {
 	/* (a letter half past the picture's left edge cut there, as the GBA's screen cuts it) */
 	SDL_Rect core = { P.core_x, P.core_y, 240, 160 };
 	gfx_clip(&core);
-	const WordObj *w = darkloid ? darkloid_phase : player_phase;
-	int n = darkloid ? (int)(sizeof darkloid_phase / sizeof *darkloid_phase) : (int)(sizeof player_phase / sizeof *player_phase);
 	for (int i = 0; i < n; ++i) word_obj(tiles, pal, &w[i], dx);
-	if (!darkloid) {
-		if (phase < 0) phase = 0;
+	if (phase >= 0) {
 		if (phase > 99) phase = 99;
 		WordObj d = { DIGITS_X, 0, 2, 2, (uint8_t)(BN5_LIB_PHASE_DIGIT + 4 * (phase / 10)), 0 };
 		word_obj(tiles, pal, &d, dx);
@@ -311,4 +360,57 @@ void lib_piece_phase_banner(bool darkloid, int phase, int t) {
 		word_obj(tiles, pal, &d, dx);
 	}
 	gfx_clip(NULL);
+}
+
+void lib_piece_phase_banner(bool darkloid, int phase, int t) {
+	if (darkloid) banner(darkloid_phase, (int)(sizeof darkloid_phase / sizeof *darkloid_phase), BN5_LIB_PHASE_WORDS_PAL + 32u, -1, t);
+	else banner(player_phase, (int)(sizeof player_phase / sizeof *player_phase), BN5_LIB_PHASE_WORDS_PAL, phase < 0 ? 0 : phase, t);
+}
+
+void lib_piece_clear_banner(int t) { banner(success, (int)(sizeof success / sizeof *success), BN5_LIB_PHASE_WORDS_PAL, -1, t); }
+
+/* ---- the tally ---- */
+
+/* `n` of BN5's text's bytes as words in BN6's charmap, onto `out` */
+static void tally_text(const uint8_t *s, size_t n, char *out, size_t size) {
+	uint8_t codes[96];
+	char words[96];
+	rom_text_bytes(codes, xrom_text_bn6(XROM_BN5_COLONEL_US, s, n, codes, sizeof codes), words, sizeof words);
+	size_t k = strlen(out);
+	snprintf(out + k, size - k, "%s", words);
+}
+
+bool lib_piece_tally(int tier, int phases, int par, int pages, char *out, size_t size) {
+	out[0] = 0;
+	const uint8_t *a = bn5(BN5_LIB_TEXT, 0x100);
+	if (!a || tier < 0 || tier > 2) return false;
+	int e = BN5_LIB_TALLY_MEGAMAN + tier;
+	uint32_t at = BN5_LIB_TEXT + (uint32_t)(a[2 * e] | a[2 * e + 1] << 8);
+	const uint8_t *s = bn5(at, 0x100);
+	if (!s) return false;
+	/* (its pages as chat boxes, split by '|': its text, its line breaks
+	 * and its numbers ours; its mugshot, box and waits BN5's commands, left
+	 * out; the give ends it) */
+	for (size_t i = 0; i < 0x100;) {
+		size_t run = i;
+		while (run < 0x100 && s[run] < 0xE5) ++run;
+		if (run > i) { tally_text(s + i, run - i, out, size); i = run; continue; }
+		size_t k = strlen(out);
+		if (s[i] == 0xE9) { snprintf(out + k, size - k, "\n"); ++i; }
+		else if (s[i] == 0xE8) i += 2;
+		else if (s[i] == 0xF5) i += 3;
+		else if (s[i] == 0xF2) ++i;
+		else if (s[i] == 0xE7) {
+			if (--pages <= 0) return true;
+			snprintf(out + k, size - k, "|");
+			i += 2;
+		} else if (s[i] == BN5_LIB_TALLY_NUMBER && i + 3 < 0x100 && (s[i + 3] == BN5_LIB_TALLY_TARGET || s[i + 3] == BN5_LIB_TALLY_ACTUAL)) {
+			snprintf(out + k, size - k, "%d", s[i + 3] == BN5_LIB_TALLY_TARGET ? par : phases);
+			i += 4;
+		} else break;
+	}
+	/* (cut short at a page's end: what it has said stands) */
+	size_t k = strlen(out);
+	if (k >= 2 && out[k - 1] == '|') { out[k - 1] = 0; return true; }
+	return false;
 }

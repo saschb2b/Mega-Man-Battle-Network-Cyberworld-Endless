@@ -16,9 +16,10 @@
  * run's seed darkened (run_dark_area); every act's second from the second
  * with --dev dark. */
 bool lib_layer_dark(void);
-/* The net area a dark layer is drawn in: BN5's Liberation Missions' maps
- * (group 0x86) where BN5's ROM is there, else `tiles`, the act's own. */
-int lib_layer_tiles(int tiles);
+/* The net area a dark layer of area `biome` is drawn in: the map of BN5's
+ * Liberation Mission that area takes (lib_look_mission) where BN5's ROM is
+ * there, else `tiles`, the act's own. */
+int lib_layer_tiles(int tiles, int biome);
 /* ... whether act `act`'s way into area `biome` holds its dark layer (the
  * fork's words and the act's card say so) */
 bool lib_way_dark(int act, int biome);
@@ -94,6 +95,14 @@ void lib_fence_update(void);
  * a panel freed dissolves as BN5's do. */
 void lib_look_begin(void);
 void lib_look_update(void);
+/* ... the Liberation Mission (1-9) a dark layer of BN6's area `biome` takes
+ * in act `act` (from 0): the mission BN5 set on the net area that dresses
+ * that area (NetAreaDef.like), its later one where it has several and the
+ * act is later (docs/LIBERATION.md, Each mission's own look) */
+int lib_look_mission(int biome, int act);
+/* ... the net area of mission `mission`'s map (group 0x86), -1 where BN5's
+ * ROM is not there */
+int lib_look_area(int mission);
 void lib_look_freed(int x, int y);
 bool lib_look_on(void);
 /* ... a guardian of kind `kind` (UNIT_*) in BN5's own sprite where its ROM

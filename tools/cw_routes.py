@@ -8,7 +8,7 @@ one is lost (docs/DEVTOOLS.md, Agents' tools).
 """
 
 # (Options from the title: SELECT; its hub's lines Controls, Display,
-# Audio, Statistics)
+# Audio, Fast forward, Statistics)
 TITLE = ['--scene', 'title']
 OPTIONS = 'wait 60; press SELECT; wait 40'
 # (Lan's room at a new run: Dad's call paged, Lan free from about frame 530)

@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "foes.h"
 #include "liberation_board.h"
 
 /* The board's course */
@@ -19,8 +20,15 @@ enum {
 	LIB_STEP_TALK,     /* words said, then `after` */
 	LIB_STEP_PRIZE,    /* the par's prize given */
 	LIB_STEP_DONE,     /* liberated: the exit open, MegaMan walks as ever */
+	LIB_STEP_BONUS,    /* a BonusPanel's flashes and roulette (liberation_bonus.c) */
+	LIB_STEP_CLEAR,    /* the Darkloid deleted: BN5's SUCCESS! and its song, then the tally (its value after the
+	                    * others', as a CONTINUE's note keeps the step) */
+	LIB_STEP_SWITCH,   /* play passing to another Navi of the team (liberation_team.c), then `after` */
 };
-/* The commands (BN5's names) */
+/* The board's objects: its units, then the team's Navis (liberation_team.c) */
+#define LIB_OBJS (LIB_UNITS + LIB_TEAM)
+/* The commands: Liberation, the Navi's own (MegaMan's LongSwrd, a
+ * teammate's: liberation_board.h's LIB_DO_*), Pass */
 enum { LIB_CMD_LIBERATE, LIB_CMD_LONGSWRD, LIB_CMD_PASS, LIB_CMDS };
 /* The banners after a liberation's battle (liberation_pieces.c), and the
  * frames from its end: the board faded back in first (BN5's 27), then the
@@ -55,23 +63,36 @@ typedef struct {
 	 * and the step of the one acting (liberation_turn.c) and its frames */
 	int enemy_unit, enemy_t, enemy_steps;
 	bool shield;           /* a BonusPanel's: no harm on the board this phase */
+	int darkloid_cut;      /* ... Major Hit's on the Darkloid with no guardian left: fifths of his max HP off (BN5's) */
 	/* ... as BN5 shows it, not kept: */
 	bool hidden[LIB_UNITS];        /* a guardian between its warp out and in */
-	uint8_t anim[LIB_UNITS];       /* each unit's animation (its object's byte, LayerObjs.lib_anim) */
+	uint8_t anim[LIB_OBJS];        /* each object's animation (its object's byte, LayerObjs.lib_anim) */
 	uint8_t reach[MAP_H][MAP_W];   /* 1: in the acting unit's reach, */
 	bool reach_lit;                /* ... lit in BN5's red (liberation_look.c) */
-	struct { int sprite, anim, x, y, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none) and its animation
-	                                             * at world (x, y), the n-th begun */
-	int harm, harm_t;              /* a blow's harm in BN5's digits over MegaMan (0 none), frames shown */
+	struct { int sprite, anim, pal, x, y, up, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none), its
+	                                                      * animation and palette at world (x, y), `up` pixels over it,
+	                                                      * the n-th begun */
+	int harm, harm_t;              /* a blow's harm in BN5's digits over its Navis (0 none), frames shown */
+	uint8_t harm_mates;            /* ... bit k over Navi k */
+	/* each unit's HP on the board, as BN5 keeps it (its battle begins
+	 * from it and leaves it what it took; the Darkloid's heal raises it):
+	 * its max (0 none: our guardians', whose battles are the act's
+	 * viruses), and the HP its digits show, stepped toward it */
+	int hp[LIB_UNITS], hp_max[LIB_UNITS], hp_shown[LIB_UNITS];
 	/* where each unit's sprite is (its object), and where it shows */
 	uint8_t fence[MAP_H][MAP_W];   /* 1: the panel has walls of its own (liberation_fence.c), shut or open as it is walked */
-	int slot[LIB_UNITS];
-	int back_in[LIB_UNITS];  /* a deleted guardian's Darkloids' phases till his DarkHole sends him back */
-	int ux[LIB_UNITS], uy[LIB_UNITS];   /* world units, gliding */
-	int from_x[LIB_UNITS], from_y[LIB_UNITS];   /* ... and where the map puts its object */
+	int slot[LIB_OBJS];
+	int back_in[LIB_UNITS];  /* (unused since BN5's return, lib_guardian_return: kept for the note's layout) */
+	/* a deleted guardian's return at the phase's end (liberation_turn.c's lib_return):
+	 * the DarkHole looked at next, the guardian returning (-1 none), its step and frames */
+	int ret_hole, ret_unit, ret_step, ret_t;
+	int rise_unit, rise_mosaic;    /* ... the unit rising on its hole, drawn in BN5's OBJ mosaic this size (0 none) */
+	int ux[LIB_OBJS], uy[LIB_OBJS];   /* world units, gliding */
+	int from_x[LIB_OBJS], from_y[LIB_OBJS];   /* ... and where the map puts its object */
 	int darkloid;          /* the Darkloid's navi (guardians.h) */
 	int tour, tour_t;      /* the opening's look at the Darkloid (1 there, 2 back) and its frames there */
 	bool briefed;          /* MegaMan's word on the board, said */
+	bool met;              /* the Darkloid's word at his first turn, said (not kept: phase 1's alone) */
 	bool holes_told;       /* ... that every DarkHole is gone */
 	char words[512];       /* words due ("" none) */
 	int cheer, cheer_t;    /* the banner after a won battle (LIB_CHEER_*), frames since */
@@ -82,22 +103,52 @@ typedef struct {
 	int finds[LIB_FINDS];  /* chips' and zenny's finds due: their scripts (layer_objs.c's) */
 	int nfinds;
 	bool route_found;      /* the sealed region's route taken (lib_route_found) */
+	/* the team (liberation_team.c): the Navi in play, play passing to
+	 * another and what follows, each Navi's own */
+	int in_play, switch_to, switch_t, switch_after;
+	struct {
+		int hp, max;       /* a teammate's HP (MegaMan's are NaviStats') */
+		int wx, wy, face;  /* where he stands and the eighth he faces, out of play */
+		int sprite;        /* his body: list 6's number (MegaMan's own), his face the same */
+		bool acted;        /* this phase */
+		bool melody;       /* a LifeMelody sung for him this phase */
+		bool spoke;        /* his word as he first came into play, said */
+	} mate[LIB_TEAM];
+	bool weak[LIB_UNITS];  /* a unit SneakAttack struck: its next battle the easier */
+	bool mate_down;        /* the battle under way: its Navi deleted in it */
 } LibState;
 
 extern LibState LB;
 
 /* (liberation.c) The panel MegaMan faces, and the unit on panel (x, y), -1 none */
 void lib_faced(int *x, int *y);
-/* ... nothing else showing (no chat box, card or scene); MegaMan's HP,
- * and set (1 at least, his max at most) */
+/* ... nothing else showing (no chat box, card or scene) */
 bool lib_quiet(void);
-int lib_hp(void);
-void lib_hp_set(int hp);
+/* ... whether no Navi is in play and each shows his HP under him, as
+ * BN5 shows them: the Darkloids' phase (its banner's too) */
+bool lib_megaman_hp_shown(void);
 /* (liberation_turn.c) Unit u's turn in the Darkloids' phase as BN5 plays
  * it, a frame at a time: true once over */
 bool lib_turn(int u);
+/* ... and after every unit's, the DarkHoles' deleted guardians back as BN5
+ * brings them, a frame at a time: true once over */
+bool lib_return(void);
 /* ... and whether A there takes a command */
 bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);
+/* (liberation_bonus.c, liberation_bonus.h) The Liberation command taken on
+ * the BonusPanel at (x, y); each frame of LIB_STEP_BONUS; its keys */
+void lib_bonus_begin(int x, int y);
+void lib_bonus_update(void);
+void lib_bonus_keys(uint32_t pressed);
+
+/* (liberation_darkloid.c) The Darkloid in his own sprite and face where
+ * he is BN5's (guardians.h's 30-33), before his unit's object is made; his
+ * battle: BN5's at the act's version and band, else make_boss's */
+void lib_darkloid_dress(void);
+Encounter lib_darkloid_battle(void);
+/* ... and his HP on the board as it begins: his battle's, `hp` lowered by
+ * --dev libhp=N */
+void lib_darkloid_hp(int *hp, int *max);
 
 #endif

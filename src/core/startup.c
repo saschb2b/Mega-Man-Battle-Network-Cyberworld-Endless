@@ -13,6 +13,7 @@
 #include "compat.h"
 #include "desktop.h"
 #include "display.h"
+#include "fast_forward.h"
 #include "game.h"
 #include "pads.h"
 #include "platform.h"
@@ -227,15 +228,17 @@ bool startup_fullscreen(bool big) {
 
 /* settings.ini in the data folder, made with the defaults where it is
  * missing: the display's lines (display.h), the sound, the music and
- * the effects heard (sound_heard.h), the frame log */
+ * the effects heard (sound_heard.h), fast forward's speed (fast_forward.h),
+ * the frame log */
 static void settings_load(const char *path) {
 	FILE *f = fopen(path, "r");
 	if (!f) {
 		f = fopen(path, "w");
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
-			"%smusic = on\n%seffects = on\n",
-			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note());
+			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n",
+			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note(),
+			options_fast_note(), fast_speed_word(FAST_DEFAULT));
 		fclose(f);
 		platform_persist();
 		return;
@@ -248,6 +251,7 @@ static void settings_load(const char *path) {
 		bool on = strcmp(val, "off") && strcmp(val, "no") && strcmp(val, "0");
 		if (!strcmp(key, "music")) sound_heard_set(on, sound_heard_effects());
 		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), on);
+		if (!strcmp(key, "fast_forward")) fast_speed_set(fast_speed_read(val));
 		/* (not written by default: for a report of a machine's pacing) */
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}

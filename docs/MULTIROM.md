@@ -1249,6 +1249,44 @@ into the battle engine).
   `BN6_SPAWN_ENEMY_1` (`0x08007696`, the same body with its two entries
   in the other order), for the Souls track.
 
+- **The Darkloids** (docs/LIBERATION.md, Stage 4, as built): BN5's AI
+  13-16, ShadeMan, BlizzardMan, CloudMan and CosmoMan, the Liberation
+  Missions' bosses, seats 7-10 past the Dark Soul's (`XN_SEAT`): AI 39-42,
+  ids 0x1E0-0x1EF (V1, V2, V3, SP), overlay kinds past the Dark Soul's,
+  battle sprites at list 2's 0x27-0x2A (`xnavi_sprites.c`, in the sprites'
+  room after the Dark Soul's), homes 8-11 past the control's, and their code
+  and art in a room of their own past the shared art (`XN_MORE`,
+  `XN_MORE_ART`: four slots of each; the shared art ends there). Moved:
+  BlizzardMan and ShadeMan (`blizzardman_*`, `shademan_*`: PASS), with
+  four rules the generator learned from them: a moved object's compare of
+  its parent's CurAction (`ldr rP,[r5,#0x4C]; ldrb rX,[rP,#9]`) with one
+  of the Navi's own states gets BN6's number, two up (BlizzardMan's slide's
+  hit, the third kind's 0x2F, at 0x080CA8B8); a Navi's state or hook in
+  another Navi's code of BN5's, with no BN6 twin, is walked and copied
+  with him (ShadeMan's 9 and 12, in AI 21's, his last form's); a write of 0
+  to an object's DirectionFlip is no flip (`no_flip`'s pair); and
+  setPanelType's sites whose type the back walk does not reach are read by
+  hand (`bn5_navi_twins.py`'s PANEL_SITES: BlizzardMan's ice, 7 in both).
+  Two engine pairs audited: the HP lowered (BN5's also tallies a Navi's
+  harm in a side record BN6 lacks) and an attack's end showing its user
+  (BN5's hidden is 0x80000004, which xsea.c's hook makes BN6's see).
+  Their sounds: BlizzardMan's 0xE3 copied at slot 0x40, the Darkloids'
+  from the first slot up (the chips' go down from 0x4B). The differential
+  watches only the spec's own Navis' code now (`xd_log_navis`): the Dark
+  Soul's copy of BN5's chip AI's region (0x08012C30) is the engine's in
+  another Navi's battle, as the families' copies are, and a draw in it
+  keyed alike in both games (ShadeMan's bats' panel, BN6's twin
+  0x08015E46). A word a moved object's spawn takes from a register its
+  caller never set, which nothing reads, is a layout's rule
+  (`spawn_leftovers`: the 0x2F's Z, each engine's leftover r3). Each SP
+  spec has MegaMan at (1,2): from (2,2) BlizzardMan's Snowball lands on
+  his ice, which BN6's engine answers with its own freeze, and two of
+  ShadeMan's bats strike in one frame, which the two engines' hit passes
+  take in their own order; the battle the same otherwise. CloudMan and
+  CosmoMan are derived (`--report --ai 15 16`) with decisions open: their
+  object types, CloudMan's RAM table at 0x0203CA30 and a sprite loaded by a
+  number made otherwise (0x080C5EEC).
+
 ## The chip registry
 
 Issue #82's C1, the ground call 4 stands on: Team Colonel's chips in

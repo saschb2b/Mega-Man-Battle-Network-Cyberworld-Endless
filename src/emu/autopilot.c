@@ -14,6 +14,8 @@
 
 #include "bn6.h"
 #include "bn6_fields.h"
+#include "bn6_forms.h"
+#include "bn6_panels.h"
 #include "darkchips.h"
 #include "data.h"
 #include "director.h"
@@ -443,6 +445,25 @@ static uint32_t step_on(int col, int row, int tx, int ty, bool ready, bool pulse
 	return pulse ? step : 0;
 }
 
+/* Surrounded (a liberation's battle, liberation_field.c): where every foe
+ * left stands behind him, L turns MegaMan round to them, once he can act */
+static bool turn_round(uint32_t me) {
+	uint32_t ai = B->r32(me + BN6_T1_AI_DATA);
+	int col = B->r8(me + BN6_T1_PANEL_X);
+	if (!ai || !(B->r32(ai + BN6_AI_MODES) & BN6_AI_TURNS) || B->r8(me + BN6_T1_ACTION) != B->ready) return false;
+	bool left = B->r8(me + BN6_T1_FLIP) != 0;
+	int ahead = 0, behind = 0;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (!alive(o) || B->r8(o + BN6_T1_ALLIANCE) == 0) continue;
+		int c = B->r8(o + BN6_T1_PANEL_X);
+		if (c == col) continue;
+		if ((c < col) == left) ++ahead;
+		else ++behind;
+	}
+	return behind && !ahead;
+}
+
 /* A frame of the fight, MegaMan's object `me`: B held without a chip, the
  * charged shot let go where a shot hits */
 static uint32_t charge;   /* frames B has been held */
@@ -483,6 +504,7 @@ static uint32_t fight_keys(uint32_t frame) {
 	uint32_t was = clock, me = megaman();
 	clock = B->r32(B->timer);
 	if (clock == was || !me) { charge = 0; return frame % 20 < PRESS ? KEY_A : 0; }
+	if (turn_round(me)) { charge = 0; return frame % (2 * PRESS) < PRESS ? KEY_L : 0; }
 	return fight_frame(me, frame);
 }
 
@@ -535,11 +557,21 @@ static int trips_wanted(void) {
 	return v ? atoi(v) : 0;
 }
 
+/* (CYBERWORLD_AUTOPILOT_ROUTE: a dark layer's special route sought on its
+ * board, liberation_auto.c, and its way taken at home: docs/LIBERATION.md,
+ * Special routes) */
+static bool route_wanted(void) {
+	static int want = -1;
+	if (want < 0) want = getenv("CYBERWORLD_AUTOPILOT_ROUTE") != NULL;
+	return want;
+}
+
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	/* (a liberation's board, docs/LIBERATION.md: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
+		if (k < 0 && route_wanted()) k = director_route_portal();
 		lanhp_portal_spot(k < 0 ? 0 : k, wx, wy);
 		/* (an older portal: out of the blue pad's alcove first, along +X,
 		 * as its walls stand between the pad and the links) */
@@ -560,6 +592,16 @@ static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t 
 	return HOME_WALK;
 }
 
+/* A chat paged with A; the route's link's question, the cursor on No: one
+ * press across to Yes first, as LEFT goes round the two */
+static uint32_t chat_keys(uint32_t frame) {
+	static int asked;
+	if (route_wanted() && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
+		if (++asked < 20) return asked >= 8 && asked < 10 ? KEY_LEFT : 0;
+	} else asked = 0;
+	return (frame / 4) & 1 ? KEY_A : 0;
+}
+
 uint32_t autopilot_keys(void) {
 	static uint32_t frame;
 	++frame;
@@ -570,7 +612,7 @@ uint32_t autopilot_keys(void) {
 		return custom_guard(rhythm_keys(frame));
 	}
 	battle_frames = 0;
-	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
+	if (emu_read8(BN6_CHATBOX)) return chat_keys(frame);
 	int px = bn6_player_x(), py = bn6_player_y();
 	int cx, cy, ex, ey, nx, ny;
 	bool talk = false;

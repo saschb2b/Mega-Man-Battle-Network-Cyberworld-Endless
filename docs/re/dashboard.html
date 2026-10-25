@@ -81,7 +81,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-23",
+  "updated": "2026-10-25",
   "previous": "2026-10-18",
   "features": [
     {
@@ -132,15 +132,52 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "BN5's Liberation Missions",
       "state": "designed",
-      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84). Its Darkloids' phase traced and played on the board as BN5's: the Darkloid first, a guardian's move one warp (list 7's 59), the reach lit red, each unit's line, its strike animation, BigBrute's flame and the harm in BN5's yellow digits, BN5's sounds.",
-      "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns (taken as unlimited, its hits doubled from turn 11), whether BN5's Custom screen opens by itself as a liberation turn's gauge fills, the Surrounded field by the dark on both sides, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
+      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84). Its Darkloids' phase traced and played on the board as BN5's: the Darkloid first, a guardian's move one warp (list 7's 59), the reach lit red, each unit's line, its strike animation, BigBrute's flame and the harm in BN5's yellow digits, BN5's sounds; TinHawk's HawkAttack, Bladia's DarkSlash and the Darkloid's blow (list 7's 58, the board shaken) and a deleted guardian's return (rising on its DarkHole in OBJ mosaic, warping beside it) traced and played as BN5's. Its par's prize traced (0x08052DD0, the end's step 0x0804EA2E, the text 0x087E866C) and played at each tier in romlab; the run pays its tiers. The board's HP traced and played as BN5's: each unit's HP under it in BN5's white digits (0x080533A0, 0x0805341A, 0x08053482), stepped 4 a frame; a fought unit's battle from its board HP and back (0x08053B9E, 0x08009050); the Darkloid's heal in his phase, a tenth of his max per dark panel round him (0x080560AC, 0x08053D04, weights 0x08050334), its effect list 7's 120 in its third palette. Its BonusPanel traced in play and built as BN5's: freed by Liberation without a battle or the Navi's action, three flashes, the roulette on the phase banner's band (state 0x0200ABB0, list 9's icons and words), its five slots in the records' order (no harm for a phase, HP full, five Order Points, one of four chips, the nearest guardian deleted or a fifth of the Darkloid's max HP). Each mission's own look traced and drawn: the nine maps share one tile set and BN5's overlay; a mission brings its map, one of five backdrops (BN5_LIB_MISSION_BACKDROPS 0x0807416C) and one of two board palettes, loaded over the map's by the mission's GFXAnim list (BN5_LIB_MISSION_ANIMS 0x08073E70: missions 1-5 0x08614DD4, 6-9 0x08615100); every dark layer takes the mission of the BN5 area that dresses its area (lib_look_mission). Its mission's opening, L view and clear traced: the Darkloid's first word at his first turn, the L view's keys, SUCCESS! and the leader's tally read from BN5's text at run time. The team in the engine: the run's Soul Navis on the board, each his turn (R and each action passing play on, as BN5's mission 2 plays), his command, his HP (BN5's table), his battle MegaMan in his Soul from the first turn (the record written at OK, 0x08029110), the Navi in play BN6's player in his own BN5 body (0x0809E7EA).",
+      "left": "The commands' shapes in BN5's code (taken from the players' guides), which of a guardian's battle's enemies its record marks (its board HP's), BN5's \"Surrounded!\" line in BN6's battle, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
       "link": "../LIBERATION.md",
-      "updated": "2026-10-23",
+      "updated": "2026-10-25",
       "state_text": "Designed, not built"
+    },
+    {
+      "name": "BN5's Darkloids",
+      "state": "works",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan and ShadeMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; both on the dark boards in BN5's own sprites and faces, their battles at the act's version.",
+      "left": "CloudMan and CosmoMan (decisions open in the generator: their object types, a RAM table, a sprite loaded by a number made otherwise), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "link": "../LIBERATION.md",
+      "updated": "2026-10-25",
+      "state_text": "Works"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-10-25",
+      "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "BN5's board HP mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the units' HP +0x14, max +0x16 and shown +0x18 (stepped 4 a frame toward it, 0x080533D8), the digits under the team (0x080533A0, not the Navi in play) and the enemies (0x0805341A) drawn by 0x08053482 (OBJ tile 664 + 2d, palette 14, centred, 8 apart, their top at the unit's place); a fought unit's HP and max for its battle's marked enemy (0x08053B9E from 0x08006862) and its HP back as the battle ends (0x08009050, 0x08053BF4); the Darkloid's heal 0x080560AC / 0x08053D04 (max / 10 per dark panel round him by 0x08050334's weights, 20 frames' wait), its effect list 7's 120 in palette 2 (0x08300268); a rest's heal 0x08053CBE (max / 10 times 2-5 by flags 0x300-0x308)"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "Each Liberation Mission's own look mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): group 0x86's GFXAnim lists while a mission is on 0x08073E70 (BN5_LIB_MISSION_ANIMS), the board's colours each loads over its map's to 0x03003980, 0x180 bytes (missions 1-5 0x08614DD4 by script 0x08073AA0, 6-9 0x08615100 by 0x08073D10), the BGAnimData records while a mission is on 0x0807416C (BN5_LIB_MISSION_BACKDROPS: five backdrops); BN5_LIB_PALETTE's 0x08614DB4 replaced by the loader's own source; the nine maps' shared tile set 0x085A7DE4"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "BN5's board words and banners mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the L view's keys' help 0x087E4294 and its WIN0 panel, the board's text archives 0x0804FB04 (the Darkloids' 13-15, entry 0 his first turn's), the common archive 0x087E866C (the tally 32-40, MegaMan's 38-40), the clear's routine 0x0804E9F4 (SUCCESS! as the phases' banner's kind 2, song 0x18, its frames), the tier 0x08052DD0"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/ROM_DATA.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "BN5's Liberation Missions hold no special route (docs/LIBERATION.md, Special routes; docs/SOURCES.md): the item kinds' table 0x08051924 ends after six records (BN5_LIB_ITEM_KIND_COUNT; its seventh, 0x08051954, is Thumb code), the nine missions' item lists hold kinds 0-5 alone and their panel lists kinds 0, 1, 3, 5-7 and 9-0x0C alone; the route a sealed region holds is ours, kept for the run and opening a third way at the next fork"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "BN5's Liberation team mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the Navi in play at the liberation state's +6, a team unit's +2 its turn yet to come, the HP box's cap 0x086D5964, digits 0x086D59A4 and blank 0x086D5C64 on palette 12, the others' HP under them, Pass a fifth of max HP; BN6's player spawn's sprite load 0x0809E7EA and OK's hand 0x08029110 named (src/emu/bn6.h, bn6_forms.h), Gregar's list-6 numbers 0x07, 0x28, 0x29, 0x31 and 0x35 found empty in both versions"
+    },
     {
       "date": "2026-10-23",
       "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
@@ -215,6 +252,78 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A BonusPanel liberated, each slot forced",
+      "result": "In the BN5 lab on mission 1, the faced dark panel (0x7C,0x80) made kind 9 in RAM and the first BonusPanel record's place moved to it in the ROM copy: Liberation runs no battle; 'A BonusPanel!', the panel's dissolve and shine, three white flashes (0xD7), the band, the icon in from the right (0xD6), PRESS A BUTTON, the slot every 4 frames (0x80), A (0x92), the name 88 frames, out, shut; the slot's byte (0x0200ABB6) forced to 0-4 before A: 0 sets 0x80 on both Navis' units (sound 0x93, 'Team becomes invincible for 1 phase!!'), 1 MegaMan 30 to 100 HP (Colonel's 50 untouched), 2 Order Points 3 to 8, 3 a chip find (Boomer V), 4 the nearer BigBrute deleted, and with both guardians cleared BlizzardMan 400 to 320 (1000 to 800, 300 of 400 to 220). The Navi's actions left (+2) stayed 1 each time; his menu opened again.",
+      "meaning": "The guides' five outcomes are BN5's, in the records' order; the stop is the player's A, the icon shown the slot given; Major Hit deletes a guardian outright and takes a fifth of a Darkloid's max HP; the BonusPanel costs no action. Built in liberation_bonus.c and liberation_roulette.c.",
+      "link": "../LIBERATION.md#bonuspanels-as-bn5s-rom-play"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "All nine missions' boards opened in romlab",
+      "result": "Each mission set (poke8 020022F4 n) and BN5's warp 0x0800552E into map 0x86:n-1 from a state after the intro, A tapped until BN5_LIB_STATE +0 read 8: all nine boards in the same framed panels and looks; five backdrops (ACDC 3's purple diamonds, Oran 3's with green specks, SciLab's purple binary digits, End's magenta diamonds for 4 and 5, the Undernet's and Nebula's purple static for 6-9); the BGM's song header 0x08175178 (song 0x22) at 0x02011470 on missions 2, 3, 5, 7 and 9, 0x1C (0x0816EB50) during the openings.",
+      "meaning": "A mission's look is its map, its backdrop and its board's colours; the overlay, the looks and the music are the same in all nine, so a dark layer takes its mission's map as one of BN5's net areas and nothing else changes (liberation_look.c, lib_look_mission).",
+      "link": "../LIBERATION.md#each-missions-own-look-as-built-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A mission's opening, its L view and its clear",
+      "result": "In romlab: missions 1-9 opened from a state after the intro with the chats' starts logged: mission 1's tour passes BlizzardMan in silence and its only chat is the tutorial; missions 2-9 open on the team's words. BlizzardMan's line (his archive's entry 0, through a once-only flag to entry 15) comes at his first turn of the first DARKLOID PHASE, after the banner. The L view over a BigBrute with A, R and SELECT pressed shows nothing new: no reach; its keys' help is eight OBJs of one uncompressed block (0x087E4294) on the band's fill in WIN0. The board's routine 6 set from a board state: PlayMusic 0x18 at once, the band 22 frames on with SUCCESS! (the phases' words' tiles, PLAYER PHASE's palette) and 0xD6 18 frames into it, 104 frames, then 20, then the leader's tally from the common archive's entry 0x20 + the tier, its numbers 0xFA 3 0 n.",
+      "meaning": "The board's words around a mission are BN5's to read at run time (the tally, its numbers ours), its SUCCESS! the same banner engine as the phases', and the Darkloid speaks once at his first turn, not at the tour; BN5 has no reach in its L view, so the telegraph there is ours in BN5's red.",
+      "link": "../LIBERATION.md#the-boards-words-and-banners-as-bn5s-as-built-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "TinHawk's and Bladia's strikes and a guardian's return",
+      "result": "In romlab, missions 2 and 4 started by setting the mission byte and warping into their maps (0x86:01, 0x86:03), every Navi's Pass taken: a TinHawk two from MegaMan warps out (sprite list 7's 59, animations 4 and 5, as every unit's warp), lands 20 world units beside him in its strike (0x080AFFD0's two places by the RNG), BN5's blow (event list 0x08051904: list 7's 58 16 up, 0x6B, the board shaken 10 frames) and 0x10A, then warps home; a Bladia beside Colonel strikes in its pose 25-28 with the same blow and 0x10A, the red out 123 frames after the line, as BigBrute's. A BigBrute poked deleted beside its DarkHole rises on the hole at the phase's end (OBJ mosaic 15 to 0, sound 0x94) and warps to the free dark panel beside it nearest the Navi; the rule read in 0x0804E700-0x0804E858.",
+      "meaning": "Each strike and the return are BN5's, frame for frame, on the board; BN6's Darkloids strike with BN5's own blow, as two of BN5's Darkloids do.",
+      "link": "../LIBERATION.md"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A liberation turn's gauge left to fill",
+      "result": "In romlab, mission 1's first liberation battle, OK on the Custom screen and no key after: the gauge rose 0x3C0 a 30-frame step to 0x4000 and the next frame the Custom screen's phase (BattleState +1 8), +7 from 1 to 2.",
+      "meaning": "BN5 opens a liberation turn's Custom screen by itself as the gauge fills (its ask 0x08008BD2 tests the gauge-full flag 2, the other battles' 0x08008BB0 the L or R request 0x10); ours does the same through BN6's own way to the screen (liberation_battle.c).",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "BN5's Surrounded battle, and the same field in BN6's engine",
+      "result": "In romlab, the board's record getter 0x08008EEA patched in the loaded copy to hand out record 24: the field blue, red, blue two columns each, MegaMan at column 3, Lan's \"Surrounded! Press L or R Button to turn around!\", L turning MegaMan, the Mettaur on the left striking right, TURN 1 START!, the Custom screen opening at a full gauge. In BN6 (the foes step's sides@33): the same field, the left Mettaur facing MegaMan, L turning him, his buster hitting it; on seed 1's act 2 board a dark panel faced from 25,29: dark level 3, sides 33.",
+      "meaning": "BN6 kept BN5's Surrounded code whole; a liberation battle needs only its record's +6 and its foes set out as BN5's records set theirs.",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "The Darkloid's battle past three turns",
+      "result": "In romlab, record 40 (BlizzardMan's, mission 1) handed out by the patched getter, MegaMan held at 9999 HP (0x0203B224 each 20 frames): turns 1 and 2 opened their Custom screens, the gauge full in turn 3 ended the battle (loop phase 0x14), the board said \"Oh, no! Liberation failed!\". The battle reads the board only through 0x08053B9E and 0x08053BF4 (a unit's HP in and out).",
+      "meaning": "Every liberation battle runs three turns, the Darkloid's included; the stage 2 assumption (untimed, hits doubled from turn 11) is refuted: that double is a type 1 battle's, and liberation records are type 6.",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A team's turns on mission 2",
+      "result": "In romlab from mission 2's board (MegaMan, Colonel, KnightMan): R moved the liberation state's +6 0, 1, 2, the camera panning to each and the top left box showing his HP (100, 200, 400), every other Navi's HP under him in white; MegaMan's Pass asked \"End without doing anything?\", and on Yes his unit's +2 went from 1 to 0, MegaMan drawn darker, and +6 to 1 by itself, Colonel in play; Colonel walked freely on the pad, through MegaMan's panel. HP poked to 32 came back 52 of 100 (MegaMan) and 72 of 200 (Colonel) after a Pass. Colonel's menu Liberation, ScrenDiv, Save, Pass; KnightMan's Liberation, Pass.",
+      "meaning": "BN5's team plays each Navi once a phase, the Navi in play chosen by R and moved on by each action, his HP his own, his rest a fifth of it: the engine's team (liberation_team.c) plays the same, the Navi in play BN6's player in his own body; the players' guides' half a max HP for Pass is refuted.",
+      "link": "../LIBERATION.md#the-team-as-built"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A teammate's battle as MegaMan in his Soul",
+      "result": "On a dark board in the engine (--dev dark,souls=1 and 0x2B, BN5's ROM): the teammate's battle, his Soul's record written at OK's start (0x08029110) as UNITE's commit writes it with turns 0xFF, crossed MegaMan into ColonelSoul, ShadowSoul and ToadSoul as TURN 1 START! showed, his HP the teammate's (200, 350, 300) and kept after the battle; with --dev matehp=81 Colonel's deleting blow left 1 HP and ended the battle, Colonel off the board and MegaMan in play, the run going on.",
+      "meaning": "BN6's own cross at a turn's start carries a teammate's Soul from the first turn with no chip given; the Soul's life (soullife.c) keeps it for the whole battle where its turns are 0xFF.",
+      "link": "../LIBERATION.md#the-team-as-built"
+    },
     {
       "feature": "BN6's sound engine",
       "date": "2026-10-23",

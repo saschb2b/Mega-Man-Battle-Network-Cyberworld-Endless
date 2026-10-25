@@ -25,6 +25,9 @@ const char *director_place_name(void);
 /* The first older portal open in Lan's HP (docs/HOME.md, going back): its
  * number (lanhp.h), -1 none. */
 int director_older_portal(void);
+/* The portal of a special route's way open in Lan's HP (docs/LIBERATION.md,
+ * Special routes), -1 none. */
+int director_route_portal(void);
 /* The town's hour at this visit (docs/HOME.md, piece 8): 0 morning, 1
  * afternoon, 2 evening, 3 night; and the hour its picture is tinted by
  * while Lan stands on its map (0 none), `box` whether a chat box is open
@@ -60,6 +63,8 @@ void director_see(void);
 void director_draw_map(void);
 /* The layer's Mystery Data counters over the picture, a few seconds after L. */
 void director_draw_counts(void);
+/* ... the picture's row under them while they show, else 0 */
+int director_counts_bottom(void);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
 /* The layer's map in w x h from (x, y), for the second screen (issue #73),

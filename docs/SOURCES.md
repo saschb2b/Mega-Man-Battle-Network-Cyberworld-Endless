@@ -185,6 +185,22 @@ the two bytes of `byte_804B068`, `C0 40`. In Gregar the routine stands at
 four a code the pack lacks. The project's traders follow it since issue
 #154 (docs/ECONOMY.md, docs/ROM_DATA.md's Chip Traders).
 
+## BN5's Liberation Missions have no special routes
+
+**Verified in the ROM** (25 October 2026, for docs/LIBERATION.md's
+Special routes): nothing on BN5's boards leads anywhere but the mission's
+own Darkloid. Its item kinds' table (`0x08051924`, 8 bytes a kind) holds
+six records, a heart, a key, Order Points, zenny, BugFrags and a chip; its
+seventh, `0x08051954`, is Thumb code (`push {r0-r3,lr}`). The nine
+missions' item lists (record pointer 10) hold only those six kinds, 172
+panels in all, and their panel lists (pointer 1) only the kinds docs/
+ROM_DATA.md names (clean, dark, item, BarrierPanels 1-3, BonusPanel,
+DarkHole, the Darkloid's ring, the start): read with a script over the
+records, as `tools/liberation_bn5.py` reads them. A sealed region's route
+to another way is ours, from the player's request the design began with
+(docs/LIBERATION.md); BN5's own detours are its BarrierPanels and their
+keys, which ours keep.
+
 ## The trailers' music
 
 What Battle Network's music does is read from the ROMs: the songs'
@@ -260,6 +276,7 @@ how it is known:
 
 | What | Who, where | Verified |
 | --- | --- | --- |
+| A fast forward, as emulators have: "it just felt so slow" | a player's comment, 25 October 2026 (a request) | Read as a pain, not a fix: time between decisions. Our own playtests said it first (the walking in town, comp mazes and End Area's walkways, .claude/skills/playtest-loop/lessons.md, sessions 70 to 75), and a frame-by-frame trace of BN6's battles puts about five and a half seconds of fixed opening and results on each (docs/EMULATION.md, Fast forward). BN6 has no speed setting: its PET's menu has no options (Folder to Save, `BN6_SUBMENU_*`), its text speed set by the scripts alone (`ts_text_speed`). Assumed from reviews and patch notes, not seen in the game: the Legacy Collection has none either, nor did its updates add one (Technovore's PC review, <https://thetechnovore.com/2023/05/31/mega-man-battle-network-legacy-collection-pc-reviewed/>; Rockman Corner on the July 2023 update, <https://www.rockman-corner.com/2023/07/quality-of-life-mega-man-battle-network.html>), and its players asked for one (<https://steamcommunity.com/app/1798010/discussions/0/3818531444656924512/>) or shortened battles instead, with Buster MAX, Escape and SneakRun (<https://steamcommunity.com/app/1798010/discussions/0/3830917450436262111/>). Capcom's Star Force Legacy Collection (2026) speeds its field and leaves its battles (RPGSite's review, <https://www.rpgsite.net/review/19941-mega-man-star-force-legacy-collection-review>). The engine's fast forward does the same: never in the fight (docs/GUIDE.md, Fast forward) |
 | The title's melody much brighter in mGBA with the plain ROM than in the engine | the owner, 23 October 2026 | Yes: the title's music was not BN6's sound engine at all but the engine's own player, an approximation (float mixing at 48 kHz, its own envelopes, no reverb, 32 channels). BN6's MP2K read from bn6f (asm/libs.s) and written again (docs/EMULATION.md, The engine's own sound) is now the same as the game's, byte for byte, frame by frame (`tools/mp2k_verify.py`) |
 | The sound is a bit off from the Legacy Collection's | a player's comment, 23 October 2026 | Yes, as a difference of source: the Legacy Collection plays no GBA sound engine for its music. The Rockman EXE Zone wiki's "Changes in Mega Man Battle Network Legacy Collection" (read in the in-app browser, 23 October 2026): music, sound and text load from separate files; the music is taken from the official soundtrack CDs (the Rockman EXE Sound Box, for one), mixed so that it does not sound exactly like the games, BN6's more muffled; sound effects' fades are set on the clips. Ours is BN6's own MP2K engine in mGBA, mixing at 10512 Hz (docs/ROM_DATA.md, The sound's mix), whose images above 5256 Hz are the brightness a CD recording lacks. Measured, from the owner's reference, a recording of the Legacy Collection's BN6 on YouTube (Rockmanslayer 00, "Every Request in the BBS!", <https://www.youtube.com/watch?v=NLjO7IwsC6Q>, its first 45 minutes, YouTube's Opus at 112 kbps, analysed locally and not kept in git): its net theme at six places and its virus battle theme at two, found by their notes against our captures, its third-octave balance against ours on the same bars is flat from 300 Hz to 5 kHz, -4.5 dB at 8 kHz, -10 at 10, -18 at 13, -29 at 16, -3.5 from 80 to 160 Hz and -12 at 40, the two songs within a dB; its dynamics are not squeezed (crest factor 16.9 dB to our 14.3). `sound = soft` (docs/GUIDE.md, Sound) is fitted to that curve. Not verified: what of it is the Legacy Collection's and what the recording's (the capture, YouTube's encoder at the very top). Found with it: our own rate control moved the pitch from frame to frame (CHANGELOG, Unreleased) |
 | The chip folders sort by options that AsterLand's Order Service lacks | whitt-e, issue #124, 16 October 2026 (a request) | Yes, by the code and in play: BN6's folder editor and Chip Trader give each entry eight sort keys (bn6f `sub_811FE7C`, the Pack's list, and `sub_811FCB8`, a folder's) and sort by one (`sub_8120018`, up or down, ties by ID); START opens the Chip Trader's SORT window (`sub_804AAD0`, `sub_804AE04`): ID, ABCDE, Code, Attack, Element, No., MB, seen at AsterLand's trader in a run. The Order Service has none: its list's input (`sub_8047950`) answers A, B, L, R and the pad only, its entries are placed by ID (`sub_8048DF8`), and none of `sub_8120018`'s callers (the Chip Trader's `sub_804A360` and `sub_804AE04`, the folder editor's `sub_8133228` and `sub_81347A4`, E-Mail's `sub_81283A0` and `sub_8128500`, `sub_812D3A8` and `sub_812D7A4`) is among ShopControl's routines. Sorted in a run since (docs/HOME.md, piece 6) |

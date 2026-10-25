@@ -172,6 +172,21 @@ static bool act_on_choices(void) {
 	return false;
 }
 
+/* What the run keeps as MegaMan leaves a layer by its exit: past the short
+ * net's first Nest guardian the second's (threat 10); past the endless
+ * net's, the net rebuilt (the next arrival says so; counted with the next
+ * checkpoint, which a CONTINUE cannot undo) and its den the Cybeast's
+ * again; a dark layer's special route found, kept for its fork's third way
+ * (docs/LIBERATION.md, Special routes) */
+static void run_left(void) {
+	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) run.boss_order[BIOME_NEST] = (uint8_t)run_nest_second();
+	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) {
+		D.nest_cleared = true;
+		run_nest_rebuilt();
+	}
+	if (run.side_kind == LAYER_NORMAL && lib_route_found()) run_route_keep(run.depth);
+}
+
 /* MegaMan stepped on the exit pad: the game plays its warp (jack out, fade,
  * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
  * pointed at its start; nothing else happens until MegaMan has arrived. */
@@ -187,15 +202,11 @@ static bool follow_exit_warp(void) {
 	/* the short net's Nest fallen: the run is won (on threat 10, its first
 	 * guardian's exit leads down to the second's, docs/META.md) */
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
-	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) run.boss_order[BIOME_NEST] = (uint8_t)run_nest_second();
+	run_left();
 	if (boss_beaten()) clear_card();
 	/* (an act's last layer: home, docs/HOME.md) */
 	bool home = home_due();
 	const char *beaten = D.act_guardian;
-	/* past the endless net's Nest guardian: the net rebuilds (the next
-	 * arrival says so; counted with the next checkpoint, which a CONTINUE
-	 * cannot undo) */
-	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) D.nest_cleared = true;
 	/* a side layer's exit leads one area deeper too; a trip back's home
 	 * (docs/HOME.md), the run's own layer made again for it */
 	bool back = run.side_kind == LAYER_BACK;
@@ -523,6 +534,9 @@ static bool astray_update(void) {
 }
 
 void director_update(void) {
+	/* (the run's time, a game frame at a time, so fast forward leaves the
+	 * statistics' minutes and the week's Board as they were: save.h) */
+	profile_played_frame();
 	take_events();
 	if (!D.active) return;
 	if (D.town) { home_update(); return; }

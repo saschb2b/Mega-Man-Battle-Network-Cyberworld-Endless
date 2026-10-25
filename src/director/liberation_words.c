@@ -41,14 +41,22 @@ const char *lib_item_words(bool heart, int op) {
 	return words;
 }
 
-const char *lib_bonus_words(int outcome) {
-	static const char *const said[4] = {
-		"@M A BonusPanel! HP full!",
-		"@M A BonusPanel! Five Order Points!",
-		"@M A BonusPanel! It deleted a guardian!",
-		"@M A BonusPanel! Nothing can hit us this phase!",
+const char *lib_bonus_found_words(void) { return "@M A BonusPanel!"; }
+
+const char *lib_bonus_words(int slot, int op) {
+	static char words[80];
+	static const char *const said[5] = {
+		"@M Nothing can hit us this phase!",
+		"@M HP full! That's better.",
+		"",
+		"@M A BattleChip!",
+		"@M That hits the nearest enemy hard!",
 	};
-	return said[outcome & 3];
+	if (slot == 2) {
+		snprintf(words, sizeof words, "@M Five Order Points! We've got %d now.", op);
+		return words;
+	}
+	return said[slot >= 0 && slot < 5 ? slot : 0];
 }
 
 const char *lib_key_words(bool sealed) {
@@ -66,6 +74,19 @@ const char *lib_route_words(void) {
 }
 
 const char *lib_rest_words(void) { return "@M Phew... Resting helps."; }
+
+const char *lib_team_words(const char *names) {
+	static char words[160];
+	if (!names || !names[0]) return "";
+	snprintf(words, sizeof words, "@M But we're not alone this time!|@L Yeah! %s came along!", names);
+	return words;
+}
+
+const char *lib_mate_down_words(const char *name) {
+	static char words[120];
+	snprintf(words, sizeof words, "@M %s!!|@L He's down... We'll have to go on without him.", name);
+	return words;
+}
 
 const char *lib_strike_words(int kind, const char *darkloid) {
 	/* (the guardians' as BN5's speak theirs: a cry and their attack's name;
@@ -92,6 +113,8 @@ const char *lib_strike_words(int kind, const char *darkloid) {
 		{ "ShadowMan", "...Too close." },
 		{ "NumberMan", "Your number's up!" },
 		{ "ToadMan", "Ribbit! Take this!" },
+		{ "ShadeMan", "Kukuku... Let me have a taste of you!" },
+		{ "BlizzardMan", "Brrr-hahaha! Snowball!" },
 	};
 	if (kind != UNIT_DARKLOID) return guardians[kind & 3];
 	for (size_t i = 0; darkloid && i < sizeof darkloids / sizeof *darkloids; ++i)
@@ -99,11 +122,50 @@ const char *lib_strike_words(int kind, const char *darkloid) {
 	return "You're in my reach!";
 }
 
-const char *lib_won_words(int phases, int par) {
-	static char words[200];
+const char *lib_won_words(const char *tally, int tier, int phases, int par) {
+	static char words[400];
+	/* (BN5's own tally where its ROM is there, read as the board is won, its
+	 * boxes MegaMan's; the prize follows it, a chip or over par zenny, as
+	 * BN5's tiers) */
+	if (tally && tally[0]) {
+		snprintf(words, sizeof words, "@M %s", tally);
+		return words;
+	}
 	const char *how = phases <= par - 2 ? "@L Two under par! Way to go!" : phases <= par ? "@L Right on par!" : "@L Over par... But we did it!";
-	snprintf(words, sizeof words, "@M The Darkloid's deleted!|@L %d phases...|%s|@M The exit's open,Lan!", phases, how);
+	snprintf(words, sizeof words, "@M The Darkloid's deleted!|@L %d phases...|%s", phases, how);
 	return words;
+}
+
+const char *lib_exit_words(void) { return "@M The exit's open,Lan!"; }
+
+const char *lib_entrance_words(const char *darkloid) {
+	/* (said once, at his first turn, as BN5's Darkloids claim their area:
+	 * each in his own habit of speech, docs/VOICE.md, The guardians) */
+	static const struct { const char *name, *line; } darkloids[] = {
+		{ "HeatMan", "This whole area's my furnace now! C'mon!" },
+		{ "ElecMan", "...tzz. This area runs on my current." },
+		{ "SlashMan", "Slaaash! This turf's mine now!" },
+		{ "EraseMan", "Hyahaha! This dark is my hunting ground!" },
+		{ "ChargeMan", "Choo,choo! All aboard the dark line!" },
+		{ "SpoutMan", "Th-This dark is mine,drip! Stay out!" },
+		{ "TomahawkMan", "There's a saying... The dark keeps what it takes!" },
+		{ "TenguMan", "Hmph! Cross my dark if you can,grasshopper!" },
+		{ "GroundMan", "Whiiir! I've dug in deep down here!" },
+		{ "DustMan", "Gahaha! This whole place is my dump now!" },
+		{ "BlastMan", "Kwohohoho... This area will burn for me." },
+		{ "DiveMan", "Awooga! These dark waters are mine!" },
+		{ "CircusMan", "Ahoo,hoo,hoo! Welcome to my dark big top!" },
+		{ "JudgeMan", "Order! This area is under my rule now!" },
+		{ "ElementMan", "PIKIRARA...|...This area belongs to the dark." },
+		{ "Colonel", "This area is under my command. Turn back." },
+		{ "KnightMan", "I hold this land now. Come,if you dare!" },
+		{ "ShadowMan", "...This darkness is mine." },
+		{ "NumberMan", "Your odds in my area? Zero point zero!" },
+		{ "ToadMan", "Ribbit! This whole swamp of dark is mine!" },
+	};
+	for (size_t i = 0; darkloid && i < sizeof darkloids / sizeof *darkloids; ++i)
+		if (!strcmp(darkloids[i].name, darkloid)) return darkloids[i].line;
+	return "This area's mine now!";
 }
 
 const char *lib_unit_name(int kind) {
@@ -111,8 +173,14 @@ const char *lib_unit_name(int kind) {
 	return names[kind & 3];
 }
 
-const char *lib_command_label(int cmd) {
+const char *lib_command_label(int cmd, int command) {
 	static const char *const labels[LIB_CMDS] = { "Liberation", "LongSwrd", "Pass" };
+	/* (BN5's own names for its Navis' commands) */
+	static const char *const commands[] = {
+		[LIB_DO_NONE] = "", [LIB_DO_LONGSWRD] = "LongSwrd", [LIB_DO_SCRENDIV] = "ScrenDiv", [LIB_DO_TOMAHAWK] = "TomahawkSwing",
+		[LIB_DO_NUMBER] = "NumberCheck", [LIB_DO_SNEAK] = "SneakAttack", [LIB_DO_MELODY] = "LifeMelody",
+	};
+	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command <= LIB_DO_MELODY) return commands[command];
 	return cmd >= 0 && cmd < LIB_CMDS ? labels[cmd] : "";
 }
 

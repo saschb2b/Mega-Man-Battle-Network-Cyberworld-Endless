@@ -41,6 +41,9 @@ static const char *const words[] = {
 	"Effects",   /* OW_EFFECTS */
 	"The sounds of menus, chips and battles play",   /* OW_EFFECTS_ON_NOTE */
 	"No sounds from menus, chips or battles",   /* OW_EFFECTS_OFF_NOTE */
+	"Fast forward",   /* OW_FAST */
+	"FAST's button speeds up walks, talk and fades. Every fight stays at BN6's pace",   /* OW_FAST_ON_NOTE */
+	"The game always at the GBA's pace: FAST's button does nothing",   /* OW_FAST_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
@@ -80,6 +83,15 @@ const char *options_smooth_note(void) {
 		"# every refresh, so motion is even, a little blurred and a frame later;\n"
 		"# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n"
 		"# Display changes it too.\n";
+}
+
+const char *options_fast_note(void) {
+	return "\n# fast_forward: how much faster the game runs while fast forward is on:\n"
+		"# 2x, 3x or 4x, or off. It runs on the net and in town, in chats, fades\n"
+		"# and a battle's opening and close; never in the fight, on BN6's menus or\n"
+		"# online. Its button, FAST in keys.ini and pad.ini (Tab or Space, a\n"
+		"# controller's right trigger), turns it on and off; held, it is the other\n"
+		"# way while held. Options changes it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

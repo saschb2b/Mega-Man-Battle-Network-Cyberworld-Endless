@@ -35,6 +35,16 @@ int xnavi_slot(int xrom, int navi, int fallback);
  * Each call copies him anew: one guardian at a time. */
 int xnavi_guardian(int xrom, int navi);
 
+/* A teammate on a liberation's board (docs/LIBERATION.md, The team): BN5's
+ * Navi `navi` (his number in its list 6, his mugshot the same in its
+ * list 8) copied into place `k` (0 to XNAVI_MATES - 1) of the teammates'
+ * own room and listed at one of Gregar's list-6 and mugshot numbers that
+ * both versions leave on a white dot and a black mugshot; that number (his
+ * sprite's and his face's), -1 where it cannot be. Each call copies him
+ * anew, so a board's team is the places 0 to its size. */
+#define XNAVI_MATES 5
+int xnavi_mate(int k, int navi);
+
 /* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list
  * 7 (or 6), each listed at one of Gregar's list-7 numbers that point at a
  * placeholder no layer lists (docs/ROM_DATA.md). */

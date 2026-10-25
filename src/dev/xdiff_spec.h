@@ -31,12 +31,16 @@ typedef struct { uint32_t keys; int n; } ScriptStep;
 typedef struct { int game, screen, nsteps; ScriptStep steps[MAX_SCRIPT_STEPS]; } CustomScript;
 /* A picture of a Custom screen (shot=): game 5 or 6's screen n, its frame f from the frame its window first reads open */
 typedef struct { int game, screen, frame; char path[160]; } Shot;
+/* Pictures of the fight (film=): each game's at the battle's timer values from `from` to `to`, `step` apart, into
+ * PREFIX_bn5_tNNNN.bmp and PREFIX_bn6_tNNNN.bmp, side by side by the same clock the comparison keeps */
+typedef struct { int from, to, step; char prefix[160]; } Film;
 
 typedef struct {
 	int nfoes;
 	struct { int id, panel; } foes[MAX_FOES];
 	int mm, hp, frames;
 	int field, field6;   /* the battlefield, BN5's number, and BN6's (-1: as xfields.h installs it), 0 plain */
+	int sides;           /* whose each column is, both records' +6 (bn6_panels.h's BN6_SIDES_*): 0 the plain three and three */
 	int mm_element;      /* MegaMan's element as the fight begins, in both (-1 his own) */
 	int flags[2][MAX_FLAGS], nflags[2];        /* event flags set before the battle: [0] BN5's, [1] BN6's */
 	uint16_t folder[2][BN6_FOLDER_ENTRIES];    /* its first folder, each game's (0 none given) */
@@ -59,6 +63,7 @@ typedef struct {
 	int nscripts;
 	Shot shots[MAX_SHOTS];
 	int nshots;
+	Film film;           /* (step 0: none) */
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];

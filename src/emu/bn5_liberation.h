@@ -28,6 +28,17 @@
 #define BN5_LIB_PANEL_PLACE  0x08051BA8u /* a panel's id (y << 8 | x) to world units: 32 a panel from 0x80, less the record's +6, +7 */
 #define BN5_LIB_ITEM_FIND    0x08051F20u /* the item panel at r0's id: r1 its kind, r2 its amount, r3 its chip and code (0 none) */
 #define BN5_LIB_BONUS_ROLL   0x08054F78u /* a BonusPanel's roulette set going: its first slot (RNG & 0xF) % 5 of five */
+#define BN5_LIB_PHASES       0x080519EEu /* the phase in r0 (BN5_LIB_PHASE), the par in r1 (BN5_LIB_PAR) */
+#define BN5_LIB_MODE_END     0x18        /* BN5_LIB_STATE +0 at the mission's end (BN5_LIB_BOARD_STEPS' seventh: 0x0804E9A8), +1 its step */
+#define BN5_LIB_END_STEPS    0x0804E9BCu /* ... its fourteen steps: 0 the SUCCESS! banner, 2 the reward (0x0804EA2E: BN5_LIB_REWARD_PICK, */
+                                         /* ... its row's chip or zenny and code with the phases and par as the script's four values */
+                                         /* ... (0x080459B4: toolkit +0x4C-+0x58), message BN5_LIB_END_TEXT 0x20 + the row's index) */
+#define BN5_LIB_REWARD_PICK  0x08052DD0u /* the rewards' row (BN5_LIB_PTR_REWARDS) whose phases from-to hold the phase: r0 its */
+                                         /* ... index (0 two under par or better, 1 within par, 2 after), r1 its kind, r2 the chip or */
+                                         /* ... zenny, r3 the code; no row: index 2, 100 zenny */
+#define BN5_LIB_END_TEXT     0x087E866Cu /* the mission's end's text archive: 0x20 + the row's index the reward's message, going on */
+                                         /* ... to 0x23 + it in Team Colonel (Colonel's: "Target:" and "Actual:" phases, the Officials' */
+                                         /* ... reward, then "You got a battle chip for:" the chip (its F4) or "You got:" the Zennys (EF 0E)) */
 
 /* The board's look (docs/LIBERATION.md, How the board looks and moves): the map on BG1, each panel's
  * kind laid over it on BG2 as an isometric diamond of tiles. Located by their bytes in a capture of
@@ -52,8 +63,13 @@
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the looks' pointers (BN5_LIB_LOOKS; past the twelve the start's, 0x0C, all blank, */
                                          /* ... then two on palette 7 no record's kind takes) */
-#define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
-#define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
+#define BN5_LIB_MISSION_ANIMS 0x08073E70u /* the mission maps' GFXAnim lists while a mission is on (group 0x86's LoadGFXAnims takes */
+                                         /* ... them where BN5_LIB_ON_MAP, else BN5_LIB_ANIMS): a u32 a map; each loads its board's */
+#define BN5_LIB_BOARD_PAL_RAM 0x03003980u /* ... colours over the map's by a script to bank 1's working copy (BN5_LIB_BOARD_PAL_FIRST), */
+#define BN5_LIB_BOARD_PAL_FIRST 1        /* ... BN5_LIB_BOARD_PAL_SIZE bytes, its one frame held: the frames grey, bank 8 */
+#define BN5_LIB_BOARD_PAL_SIZE 0x180     /* ... BN5_LIB_PAL_CLEAN; banks 1-12 */
+#define BN5_LIB_BOARD_PAL_ACDC 0x08614DD4u /* missions 1-5's (their lists' script 0x08073AA0) */
+#define BN5_LIB_BOARD_PAL_NEBULA 0x08615100u /* missions 6-9's (0x08073D10): banks 1 and 3 other than 1-5's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
 #define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 at rest: the dark panels' swirl, held 120 frames; then BN5_LIB_DARK_FRAMES' three */
 #define BN5_LIB_DARK_FRAMES  0x08614B24u /* ... below it (0x20 apart, from here), down and up: 0x08614B64 16 frames, 0x08614B44 16, */
@@ -64,8 +80,9 @@
 #define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
 #define BN5_LIB_BREATH       0x08614CF0u /* palette 12 (the BonusPanel's): six palettes 0x20 apart stepped there and back, 12 frames */
                                          /* ... each (8 at the last); a palette's working copy at 0x03003960 + 0x20 n, then 0x03003B60 + 0x20 n */
-#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists (group 0x86's, a u32 a map; LoadGFXAnims' table 0x08031468 */
-                                         /* ... entry 6, its literal at 0x08073E44): 0x86:00's at 0x08073E94 runs palettes 9-12 */
+#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists out of a mission (group 0x86's, a u32 a map; LoadGFXAnims' */
+                                         /* ... table 0x08031468 entry 6, its literal at 0x08073E44); in both these and a mission's */
+                                         /* ... (BN5_LIB_MISSION_ANIMS) the same four scripts run palettes 9-12 */
 #define BN5_LIB_ANIM_DARK    0x08073B20u /* ... palette 9's script (to 0x03003A80, 0x20 bytes; then palette and delay pairs, 1 loops) */
 #define BN5_LIB_ANIM_HOLE    0x08073B60u /* ... palette 10's (to 0x03003AA0) */
 #define BN5_LIB_ANIM_PULSE   0x08073BA0u /* ... palette 11's (to 0x03003AC0) */
@@ -139,7 +156,7 @@
 #define BN5_LIB_GUARD_ANIM   0           /* ... the animations they stand in on the board: 0-7 by the eighth faced (1 up-right, */
                                          /* ... 3 down-right, 5 down-left, 7 up-left), a loop of 2 or 4 frames; */
 #define BN5_LIB_BRUTE_STRIKE 33          /* ... BigBrute's strike (BeastBreath) 33 + the eighth, a loop of 2 frames, 3 each; */
-#define BN5_LIB_HAWK_STRIKE  25          /* ... TinHawk's (HawkAttack) 25 facing left, 26 right, 10 frames a frame; */
+#define BN5_LIB_HAWK_STRIKE  25          /* ... TinHawk's (HawkAttack) 25 facing right, 26 left, 10 frames a frame (BN5_LIB_HAWK_PLACES); */
 #define BN5_LIB_BLADIA_STRIKE 25         /* ... Bladia's (DarkSlash) 25-28 by the eighth, 1 then clockwise, 10, 3, 3, 10 frames */
 
 /* The Darkloids' phase (mission 1 in romlab: MegaMan's place poked beside a BigBrute and beside BlizzardMan): each unit's
@@ -149,8 +166,8 @@
 #define BN5_LIB_WARP_FX      0x080AF3F8u /* a guardian's move, all its steps at once: a warp effect spawned (0x08004508) and */
 #define BN5_LIB_WARP_SOUND   0xB4        /* ... this sound, at the panel it leaves and 46 frames on at the one it takes */
 #define BN5_LIB_WARP_SPRITE  59          /* ... the effect: sprite list 7's 59 (0x08389E68), a puff and a beam's lines, 2 frames */
-#define BN5_LIB_WARP_OUT     2           /* ... each: the guardian's out (puff, lines; animation 0 the large, 4 the small) and */
-#define BN5_LIB_WARP_IN      3           /* ... in (lines, puff; 1 and 5), the camera's pan between; the guardian shows 4 frames */
+#define BN5_LIB_WARP_OUT     4           /* ... each: the unit's out (puff, lines; animations 0 and 2 larger, unused on the board) and */
+#define BN5_LIB_WARP_IN      5           /* ... in (lines, puff), the camera's pan between (every unit's, 0x080AF3F8's callers' r1); shows 4 frames */
 #define BN5_LIB_WARP_SHOWS   4           /* ... into the warp in, */
 #define BN5_LIB_APPEAR_SOUND 0x94        /* ... with this sound (0x080B051E) */
 #define BN5_LIB_HEAL_FX      0x08055208u /* the Darkloid's heal: effect 0x78 (rising lines) over him, sound 0x8A, his HP up at */
@@ -167,15 +184,100 @@
 #define BN5_LIB_NO_HIT_SOUND 0x6E        /* ... where nothing does (a BonusPanel's shield) */
 #define BN5_LIB_FLAME_SPRITE 56          /* BigBrute's BeastBreath on its Navi: sprite list 7's 56 (0x0833A1B4), animation 0 */
                                          /* ... rising (3 x 2 frames), 1 burning (looped), 2 falling (3 x 1) */
+#define BN5_LIB_BLOW_EVENT   0x08051904u /* a blow's board event (BN5_LIB_EVENT: kind 0x19, its object 0x080B3204 spawned at the */
+#define BN5_LIB_BLOW_SPRITE  58          /* ... Navi's place 16 up): sprite list 7's 58 (0x0837CBF8), animation 0, a burst 13 frames, */
+#define BN5_LIB_BLOW_UP      16          /* ... and BN5_LIB_HARM; queued by Bladia's DarkSlash, TinHawk's HawkAttack and Darkloids */
+#define BN5_LIB_BLOW_SHAKE   10          /* ... the board shaken with it (BG1's scroll read): this many frames, */
+#define BN5_LIB_BLOW_JOLT    4           /* ... up to this many pixels */
+#define BN5_LIB_SLASH_SOUND  0x10A       /* the cry of TinHawk's HawkAttack (0x080B0002) and Bladia's DarkSlash (0x080B034A) */
+#define BN5_LIB_UNIT_TABLES  0x080AE964u /* each unit kind's routines (a u32 a kind, 0x00-0x16), a table of 29: 14 its turn to face, */
+                                         /* ... 15 its strike (BigBrute 0x080AF831, TinHawk's warp out 0x080AFED9, Bladia 0x080B0301), */
+                                         /* ... TinHawk's 16-18 its attack and way home, 23-24 the warp of a move, 25-28 a guardian's */
+#define BN5_LIB_UNIT_ROUTINE 0x080AE850u /* ... return; a unit's +3 to its entry: a byte table of entry x 4 */
+#define BN5_LIB_HAWK_ATTACK  0x080AFF4Cu /* TinHawk's HawkAttack: beside its Navi by the RNG (& 4) at BN5_LIB_HAWK_PLACES: */
+#define BN5_LIB_HAWK_PLACES  0x080AFFD0u /* ... two of 4 bytes (its animation, world dx, dy): 25 at (0, -20), 26 at (+20, 0) */
+#define BN5_LIB_HAWK_NEAR    20          /* ... world units off its Navi */
+
+/* A deleted guardian's return (0x0804E700-0x0804E858, the Darkloids' phase's steps 0x0A-0x11, after every unit's turn) */
+#define BN5_LIB_RETURN       0x0804E71Au /* each DarkHole in its order, while fewer than BN5_LIB_RETURN_ALL enemies stand: */
+#define BN5_LIB_RETURN_ALL   8           /* ... standing, a Navi within BN5_LIB_RETURN_NEAR panels on both axes (the shape */
+#define BN5_LIB_RETURN_NEAR  3           /* ... 0x08051734, 7 x 7), one of its deleted guardians at random (0x08054806) while */
+#define BN5_LIB_RETURN_MAX   3           /* ... fewer than this many of them stand (0x080547DE), on the free dark panel of the eight */
+#define BN5_LIB_RETURN_SPOT  0x08052B3Au /* ... round it (no unit; dark or item, 0x080502F4) nearest the Navi nearest the hole; */
+#define BN5_LIB_RETURN_RISE  0x080B055Cu /* ... the camera to the hole, 20 frames, it rises on it (its +3 0x16: OBJ mosaic 15 */
+#define BN5_LIB_RISE_FRAMES  16          /* ... down to 0 over 16 frames, sound 0x94), 20 frames, its warp out of the hole and in */
+#define BN5_LIB_RETURN_WAIT  20          /* ... on its panel (+3 0x17, 0x18; BN5_LIB_WARP_*), 20 frames, the next hole */
 #define BN5_LIB_DIGITS       0x086F7DECu /* the units' HP under them and a blow's harm over its Navi: digits 8x16, 0x40 bytes each */
 #define BN5_LIB_DIGITS_PAL   0x086CCD24u /* ... white (an HP, OBJ palette 14), */
 #define BN5_LIB_HARM_PAL     0x087E4678u /* ... yellow (a harm, OBJ palette 15), its top 29 pixels over the Navi's feet, centred */
+#define BN5_LIB_HP_DOWN      1           /* ... a teammate's HP out of play: its top this far over his feet, centred (romlab, mission 2) */
+#define BN5_LIB_HP_BOX       0x086D5964u /* the Navi in play's HP at the top left: six 8x16 OBJs at x 0-40, y 0, OBJ palette 12 (BN5_LIB_HUD_PAL): */
+#define BN5_LIB_HP_BOX_DIGITS 0x086D59A4u /* ... its cap (mirrored on the right), the HP's four places between (digits 0-9 from here, */
+#define BN5_LIB_HP_BOX_BLANK 0x086D5C64u /* ... 0x40 bytes each, this blank padding them on the left); found by their tiles in romlab's OAM */
+
+/* The units' HP on the board (BN5_LIB_UNITS +0x14 its HP, +0x16 its max, +0x18 the HP shown), drawn each frame after the
+ * board's (0x08004FF0) for every unit in play with HP shown: the team's but the Navi in play's (his in the HP box) while
+ * BN5_LIB_STATE +0x18 lacks 0x100, the Darkloid's and guardians' while it lacks 0x80 (a command's animation sets both) */
+#define BN5_LIB_TEAM_HP      0x080533A0u /* the team's digits under them, */
+#define BN5_LIB_ENEMY_HP     0x0805341Au /* ... the Darkloid's and the guardians', */
+#define BN5_LIB_HP_DIGITS    0x08053482u /* ... each drawn: BN5_LIB_DIGITS' digit d at OBJ tile 664 + 2d, an 8x16 OBJ (priority 2) a */
+#define BN5_LIB_HP_STEP      8           /* ... digit, this far apart, the number centred on the unit's place on the picture, */
+                                         /* ... its top there (0x08003498: x + y + 120 across, (y - x) / 2 - z + 82 down) */
+#define BN5_LIB_HP_ROLL      4           /* ... the HP shown stepped this much a frame toward its HP (0x080533D8) */
+#define BN5_LIB_HP_TILE      664         /* ... (OBJ palette 14, BN5_LIB_DIGITS_PAL) */
+#define BN5_LIB_DARKLOID_HEAL 0x080560ACu /* the Darkloid's turn's heal, as DARKLOID PHASE's band closes: where his HP is below */
+#define BN5_LIB_HEAL         0x08053D04u /* ... his max and dark panels stand round him, his max / 10 for each (weighed by */
+#define BN5_LIB_DARK_WEIGHT  0x08050334u /* ... this table, a byte per panel kind: 1 for dark, an item's, a DarkHole and his */
+                                         /* ... ring, 0 else; 0x08051E7C sums his eight), his HP and the HP shown up at once, */
+                                         /* ... his max at most; then BN5_LIB_HEAL_FX (variant 2) and its sound, */
+#define BN5_LIB_HEAL_WAIT    20          /* ... and this many frames before his turn goes on (his reach lit 21 frames later) */
+#define BN5_LIB_HEAL_SPRITE  120         /* ... the effect: sprite list 7's 120 (0x082FF3AC), rising lines, 15 frames, at his place, */
+#define BN5_LIB_HEAL_ANIM    0           /* ... this animation (its first frame's 32x32 OBJ 16 left of and 24 over his place), */
+#define BN5_LIB_HEAL_PAL     2           /* ... in the palette its variant names, 2 (a Navi's rest's 0): the frame's palette block's */
+                                         /* ... third, past the one it counts (0x08300268, loaded in OBJ palette 2) */
+#define BN5_LIB_PASS_HEAL    0x08053CBEu /* a Navi's rest (Pass) and the like: his max / 10 times a byte of 0x08053CF8 (2, 2, 3, 3, */
+                                         /* ... 4, 4, 5, 5, 5) by the event flags 0x300-0x308 set from the first (0x08052EE8), */
+                                         /* ... his max at most: a fifth on mission 1's state, none of them set */
+/* A board unit's HP through its battle: as the battle's enemy marked by its record (bit 2 of its entry's first byte) spawns
+ * (0x08006862) it takes the HP and max of the unit fought (BN5_LIB_STATE +8 = 2, +9 its index; 0x08053B9E); as the battle
+ * ends (0x08007120) each such enemy's HP is written back into it (0x08009050, 0x08053BF4), so a unit not deleted keeps on the
+ * board what its battle left (one left at 0 by a battle not won given back a quarter of its max, 0x0804D2EC) */
+#define BN5_LIB_FOE_HP       0x08053B9Eu /* the fought unit's HP and max for its battle's marked enemy, */
+#define BN5_LIB_FOE_HP_BACK  0x08009050u /* ... and its HP back into the unit as the battle ends */
 
 /* The L view's arrows and cross (OBJ palette 12, BN5_LIB_HUD_PAL; read in its OAM) */
 #define BN5_LIB_LVIEW_ARROWS 0x087E4B64u /* eight 8x8 tiles, up, up-right, right, down-right, down, down-left, left, up-left, */
 #define BN5_LIB_LVIEW_BLINK  0x100       /* ... and their second look this far on, shown 8 frames of every 32 */
 #define BN5_LIB_LVIEW_CROSS  0x087E4F24u /* the cross at the camera's middle, a 16x16 OBJ at (112, 72) */
 #define BN5_LIB_UNIT_HOLD    15          /* frames the camera rests on a unit in the Darkloids' phase before its move, after its pan */
+/* The L view's keys' help: eight OBJs at the picture's top right (OBJ palette 13, BN5_LIB_PHASE_PAL; read in its OAM), "+ MoveCam",
+ * "B+ + MoveCam(F)", "L Back", on the band's fill in WIN0 */
+#define BN5_LIB_LVIEW_HELP   0x087E4294u /* ... their 21 tiles, uncompressed, OBJ tiles 960-980 */
+#define BN5_LIB_HELP_PANEL_X 123         /* ... WIN0: x 123-219 */
+#define BN5_LIB_HELP_PANEL_Y 12          /* ... y 12-42 */
+#define BN5_LIB_HELP_PANEL_W 97          /* ... its width */
+#define BN5_LIB_HELP_PANEL_H 31          /* ... its height */
+/* The Darkloids' own words on the board: per Darkloid an archive in the board's table (BN5_LIB_ARCHIVES' 13-15; BlizzardMan's
+ * 14, its mugshot 0x4C), shown by the unit's text (0x0805200C: the acting unit's entry r0; 0x08052026: unit r0's entry r1) */
+#define BN5_LIB_ARCHIVES     0x0804FB04u /* the board's text archives, a u32 a unit (0-12 the Navis', 13-15 the Darkloids') */
+#define BN5_LIB_DARKLOID_MEET 0          /* ... entry 0, his first turn's: once (its script's flag), at his first turn of the first */
+                                         /* ... DARKLOID PHASE, after the banner and before any reach is lit (entry 15's words, the */
+                                         /* ... area his: BlizzardMan's a ski resort); 7 his strike, 11 he survives his battle, 12 */
+                                         /* ... his deletion, 14 the team's retreat */
+/* The mission won (the board's routine 6, 0x0804E9F4; entered from 0x0804DA2C after the Darkloid's battle) */
+#define BN5_LIB_CLEAR        0x0804E9F4u /* step 0: the phases' banner of kind 2 (0x08054C28: SUCCESS!), BN5_SONG_LIB_WON at once */
+#define BN5_LIB_CLEAR_BAND   22          /* ... frames from its song to the band's opening (then the phases' banner's 104 frames, */
+                                         /* ... its words 18 on with BN5_LIB_PHASE_SOUND, on PLAYER PHASE's palette) */
+#define BN5_LIB_CLEAR_TALK   20          /* ... frames from the band's end to the leader's tally (0x0804F3B0's wait) */
+#define BN5_LIB_TIER         0x08052DD0u /* ... the reward's tier: the first of BN5_LIB_PTR_REWARDS' rows whose phases hold the phase */
+#define BN5_LIB_TEXT         0x087E866Cu /* the board's common text archive (0x0805204A shows its entry r0): the commands' names */
+                                         /* ... 0-15, the tally 32-40 */
+#define BN5_LIB_TALLY        0x20        /* ... the tally: entry 0x20 + the tier, which jumps by the team to its leader's three: */
+#define BN5_LIB_TALLY_MEGAMAN 38         /* ... MegaMan's (mugshot 0x30): "Target" and "Actual" phases, a word, then the */
+                                         /* ... Officials' reward (two under par or better, at par) or zenny (over), its give */
+#define BN5_LIB_TALLY_NUMBER 0xFA        /* ... a number in its text: 0xFA, 3, 0, the buffer (2 the target, 1 the phases taken) */
+#define BN5_LIB_TALLY_TARGET 2           /* ... the target's buffer */
+#define BN5_LIB_TALLY_ACTUAL 1           /* ... the phases taken's */
 
 /* The board's music (BN5's song table 0x08155BF4, the BGM's player 31 at 0x02011470: +0 the song's header) */
 #define BN5_SONG_LIBERATION  0x22        /* the board's own, through both phases (its clock runs on), BN5_LIB_STATE +0 = 8 */
@@ -205,20 +307,26 @@
 #define BN5_LIB_CURSOR_PAL   0x086CCD24u /* ... OBJ palette 14 */
 #define BN5_LIB_BACKDROP_PAL 0x0861BF20u /* BG palette 0 in a mission: the map's own animated backdrop (its tiles rebuilt in RAM at */
                                          /* ... 0x0200E960) in purple; map 0x86:00's own palette 0 otherwise 0x086203CC */
-#define BN5_LIB_BACKDROP     0x080741B8u /* ... the mission's BGAnimData record that loads it (0x0861BF1C: a size word, then these), */
+#define BN5_LIB_MISSION_BACKDROPS 0x0807416Cu /* the mission maps' BGAnimData records while a mission is on, a u32 a map: their own */
+                                         /* ... backdrops' tiles and maps in a mission's colours (ACDC's, Oran's, SciLab's, End's for 4 */
+                                         /* ... and 5, the Undernet and Nebula Area's one for 6-9), each map's out of one at 0x08074194 */
+#define BN5_LIB_BACKDROP     0x080741B8u /* ... mission 1's, which loads it (0x0861BF1C: a size word, then these), */
                                          /* ... map 0x86:00's own tiles and map: group 0x86's LoadBGAnim (0x08074098) takes its records */
                                          /* ... from 0x0807416C while BN5_LIB_ON_MAP, else 0x08074194 (0x080741D4, palette 0x086203C8), */
                                          /* ... and its LoadGFXAnims (0x08073E2A) its lists from 0x08073E70, else 0x08073E48 */
 
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
-#define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +0xA the par, +0xB the Order Points at the start, */
+#define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +9 the Darkloid's kind (BN5_LIB_DARKLOID), +0xA the par, +0xB the Order Points at the start, */
 #define BN5_LIB_MISSION_COUNT 9          /* ... +0xC twenty pointers (BN5_LIB_PTR_*) */
 #define BN5_LIB_MAP_GROUP    0x86        /* the missions' maps' group (each record's +0: mission n's map 0x86:n-1) */
 #define BN5_LIB_PTR_PANELS   1           /* the panels: u16 kind (BN5_PANEL_*), u8 x, u8 y; a kind's low byte 0xFF ends them */
 #define BN5_LIB_PTR_HOLES    2           /* the DarkHoles' panels in their order, x and y a byte each */
 #define BN5_LIB_PTR_TEAM     3           /* the team: 20 bytes a Navi (+5 its id, BN5_NAVI_*; +8, +0xA its place in world units) */
 #define BN5_LIB_PTR_ENEMIES  4           /* the Darkloid, then the guardians: 20 bytes each (+0 its DarkHole, 0xFF none; +5 its kind; +8 x, +9 y) */
+#define BN5_LIB_PTR_HOLE_BATTLES 5       /* per DarkHole a pointer to its five battles, a u16 each by the dark's level (BN5_LIB_LEVEL) */
+#define BN5_LIB_PTR_UNIT_BATTLES 6       /* per unit (the Darkloid first) the same */
+#define BN5_LIB_PTR_PANEL_BATTLES 7      /* per level a list of a dark panel's battles: u16 battle, u16 weight (32 each), a weight 0 ends it */
 #define BN5_LIB_PTR_BONUS    8           /* the BonusPanels: x, y, u16, five outcomes' records; a u16 0 ends them */
 #define BN5_LIB_PTR_TRAPS    9           /* the traps: kind (0 damage, its amount times 10; 1 paralysis), amount, x, y; 0xFFFFFFFF ends them */
 #define BN5_LIB_PTR_ITEMS    10          /* the item panels: kind (BN5_ITEM_*), code, u16 chip, u16 amount, x, y; 0xFFFFFFFF ends them */
@@ -226,6 +334,8 @@
 #define BN5_LIB_NAVI_HP      0x0804F968u /* per team Navi: u16 his id, then his HP in each of the nine missions */
 #define BN5_LIB_ITEM_KINDS   0x08051924u /* per item kind 8 bytes: +2 the amount's multiplier (hearts 10, zenny 100), +5 its icon */
                                          /* ... (BN5_LIB_ICON_OF); handlers 0x0804D8B4 */
+#define BN5_LIB_ITEM_KIND_COUNT 6        /* ... six kinds (BN5_ITEM_*): the table's seventh entry, 0x08051954, is code (Thumb's */
+                                         /* ... push {r0-r3,lr}); no route among them (docs/LIBERATION.md, Special routes) */
 
 /* A panel's kind */
 #define BN5_LIB_PANEL_FREE       0x00        /* clean: the team walks it */
@@ -254,17 +364,12 @@
 #define BN5_LIB_NAVI_KNIGHTMAN   0x0B  /* KnightMan: no command of his own */
 #define BN5_LIB_NAVI_TOADMAN     0x0C  /* ToadMan: LifeMelody */
 
-/* A liberation battle */
-#define BN5_BATTLE_TYPE      0x0802B3E0u /* the battle's record's +3 (BattleSettings' BattleType): */
-#define BN5_BATTLE_LIBERATION 1          /* ... 1 a liberation battle */
-#define BN5_BATTLE_TURN      0x08009016u /* BattleState +7: the turn, one more as each Custom screen opens (1 at the first) */
-#define BN5_LIB_TURNS_UP     0x08009190u /* true once BattleState +7 reaches 3, read by BN5_LIB_TURN_BANNER alone */
-#define BN5_LIB_TURN_BANNER  0x08007954u /* as each turn's fight starts: FINAL TURN! (message 0x10) where BN5_LIB_TURNS_UP, else TURN n START! (0x0C, n the turn) */
-#define BN5_LIB_TIME_ASK     0x08008BD2u /* the Custom screen asked for (BattleState +0x32 bit 2): below the third turn it opens, from it (+7 >= 3) */
-#define BN5_LIB_TIME_UP      0x08007C24u /* ... the loop's phase 0x18: TIME UP! (0x54), 30 frames, LIBERATE FAILED! (0x5C), the battle over */
-#define BN5_LIB_WIN_BANNER   0x08007A50u /* the win's first step: 1 TURN LIBERATE! (0x90, number 1) where +7 is 1, else LIBERATE SUCCESS! (0x58) */
-#define BN5_BATTLE_MESSAGES  0x0801B80Cu /* the battle messages' table, a word each (a message's number is its offset), read by 0x0801B02A */
-#define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a liberation battle from its eleventh turn: */
-#define BN5_LIB_DOUBLE_HIT   0x0800C7CCu /* ... an object's hits this frame summed (its collision data's five) and doubled */
+/* The team's turns (romlab, mission 2: MegaMan, Colonel, KnightMan) */
+#define BN5_LIB_IN_PLAY      (BN5_LIB_STATE + 0x06) /* u8: the Navi in play, his place in the team (0 MegaMan); R moves it to the next yet to act */
+#define BN5_LIB_UNIT_TO_ACT  0x02        /* a team unit's u8 (BN5_LIB_UNITS): 1 till he acts this phase, 0 after (Pass, then the next in play) */
+#define BN5_LIB_REST_PART    5           /* Pass ("End without doing anything?") gives a fifth of his max HP back (MegaMan 32 to 52 of 100,
+                                            Colonel 32 to 72 of 200); the routine not traced */
+
+#include "bn5_liberation_rules.h"   /* a liberation battle, the battle a panel's dark chooses, a BonusPanel */
 
 #endif

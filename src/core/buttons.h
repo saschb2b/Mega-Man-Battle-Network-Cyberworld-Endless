@@ -13,6 +13,8 @@ enum {
 	BTN_R = 1 << 7,
 	BTN_START = 1 << 8,
 	BTN_SELECT = 1 << 9,
+	/* (the engine's own, never the GBA's: fast forward, fast_forward.h) */
+	BTN_FAST = 1 << 10,
 };
 
 #endif

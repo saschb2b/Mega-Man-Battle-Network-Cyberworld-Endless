@@ -9,13 +9,13 @@
 #include "pet.h"
 #include "director.h"
 #include "emu.h"
+#include "fast_forward_game.h"
 #include "game.h"
 #include "game_hooks.h"
 #include "gfx.h"
 #include "online_visit.h"
 #include "platform.h"
 #include "rom.h"
-#include "save.h"
 #include "second.h"
 #include "tour.h"
 #include "xinstall.h"
@@ -154,19 +154,21 @@ static void update(void) {
 	if (online_visit_waiting()) { online_visit_wait_frame(); return; }
 	/* (the PET's Jukebox up: the game's core, its music with it, holds still under it) */
 	if (pet_holds()) return;
-	/* (the run's time: the statistics' minutes, save.h) */
-	if (!online_visit_away()) profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();
+	/* (several of the game's frames to one shown: the dev menu's speed, or
+	 * fast forward where it may run, fast_forward_game.h) */
+	bool dev_fast = dev.speed > 1;
 	/* the core on a thread of its own (emu.c): the frame done taken in,
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */
 	if (emu_threaded()) {
 		if (devtools_open()) { frame_keys(); return; }
-		for (int i = 0; i < dev.speed; ++i) {
+		if (!dev_fast) fast_forward_update();
+		for (int i = 0; dev_fast ? i < dev.speed : fast_forward_goes_on(i); ++i) {
 			if (started) after_frame();
-			emu_frame(cinema_keys(frame_keys()));
+			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
 			started = true;
 		}
 		if (revealed || director_arrived()) ++revealed;
@@ -174,9 +176,9 @@ static void update(void) {
 	}
 	uint32_t keys = frame_keys();
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
-	/* (fast-forwarded: several game frames to one shown) */
-	for (int i = 0; i < dev.speed; ++i) {
-		emu_frame(cinema_keys(keys));
+	if (!dev_fast) fast_forward_update();
+	for (int i = 0; dev_fast ? i < dev.speed : fast_forward_goes_on(i); ++i) {
+		emu_frame_as(cinema_keys(keys), dev_fast ? 0 : fast_forward_how(i));
 		after_frame();
 	}
 	if (revealed || director_arrived()) ++revealed;
@@ -242,6 +244,7 @@ static void draw(void) {
 	cinema_draw();
 	director_draw_map();
 	director_draw_counts();
+	fast_forward_draw();
 	director_draw_bug_note();
 	director_draw_duel();
 	director_draw_board();

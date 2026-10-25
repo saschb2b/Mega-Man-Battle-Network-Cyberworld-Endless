@@ -53,6 +53,10 @@ void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx);
 #define SPRITE_ROM_PAL 0x1000000
 /* A plain white silhouette, as the game flashes hit and deleted sprites. */
 #define SPRITE_WHITE 0x2000000
+/* pal = SPRITE_PAL_PAST + n draws every object in the n-th palette from
+ * the frame's own, past what its block counts (BN5's effects choose
+ * theirs so, by their variant: BN5_LIB_HEAL_PAL). */
+#define SPRITE_PAL_PAST 0x3000000
 /* OBJ mosaic block size (0/1 off) and alpha (255 opaque) for sprite draws,
  * as the GBA's MOSAIC and BLDALPHA registers; callers restore them. */
 extern int gfx_obj_mosaic;

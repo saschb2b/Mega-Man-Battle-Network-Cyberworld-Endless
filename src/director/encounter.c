@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_panels.h"
 #include "bytes.h"
 #include "darkbn6.h"
 #include "data.h"
@@ -155,7 +156,7 @@ void emu_encounter_set(const Encounter *e) {
 	 * as his story record has them, docs/BOSSES.md) */
 	if (e->map_backdrop) bg = BG_MAP_OWN;
 	int song = e->song ? e->song : encounter_song[e->boss];
-	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)song, 0x00, (uint8_t)bg, 0x00, 0x38, 0x00 };
+	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)song, 0x00, (uint8_t)bg, 0x00, (uint8_t)(e->sides ? e->sides : BN6_SIDES_PLAIN), 0x00 };
 	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
 	 * story's bosses clear it, the random battles and BN6's roaming SP
 	 * Navis set it; docs/ROM_DATA.md) */
@@ -176,7 +177,10 @@ uint32_t emu_battle_souls(void) { return soulunite_ready() ? emu_read32(BN6_SOUL
 void emu_encounter_started(uint32_t settings) {
 	int s = emu_encounter_record(settings);
 	boss_on = s >= 0 && boss_record[s];
-	soulunite_held(souls_held());   /* (the run's Souls for UNITE, where the Souls stand in BN6's engine: soulunite.h) */
+	/* (the run's Souls for UNITE, where the Souls stand in BN6's engine:
+	 * soulunite.h; none in a liberation's teammate's battle, MegaMan in his
+	 * Soul already: liberation_battle.h) */
+	soulunite_held(lib_battle_soul_armed() ? 0 : souls_held());
 }
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,

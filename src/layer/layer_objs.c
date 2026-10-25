@@ -594,6 +594,7 @@ static void install_begin(Install *in) {
 	out->lib_prize[0] = out->lib_prize[1] = out->lib_prize[2] = -1;
 	for (int k = 0; k < (int)(sizeof out->lib_loot / sizeof out->lib_loot[0]); ++k) out->lib_loot[k] = -1;
 	out->lib_zenny = -1;
+	for (int k = 0; k < (int)(sizeof out->lib_bonus / sizeof out->lib_bonus[0]); ++k) out->lib_bonus[k] = -1;
 	memset(out->lib_anim, 0, sizeof out->lib_anim);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
@@ -862,7 +863,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk, const char 
 /* A dark layer's unit (docs/LIBERATION.md): its sprite standing on its
  * panel, nothing to walk into or talk to; the director moves its object */
 static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
-	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 7;
+	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 15;
 	if (!npc_need_sprite(&in->npcs, list, sprite) || in->npcs.n >= 32) return;
 	/* (its animation the board's: standing, its strike; liberation_turn.c) */
 	in->npcs.script[in->npcs.n++] = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);

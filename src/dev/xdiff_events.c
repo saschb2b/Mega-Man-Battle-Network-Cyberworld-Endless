@@ -471,6 +471,30 @@ static bool spec_code(const XvMoved *m, const XVirusFamily *const *fams, int nfa
 	return false;
 }
 
+/* the spec's foes' BN5 ids (xd_log_navis): a moved Navi's code is a foe's where its Navi is one of them */
+static int spec_ids[XD_NAVI_IDS_MAX], nspec_ids;
+
+void xd_log_navis(const int *ids5, int n) {
+	nspec_ids = n < XD_NAVI_IDS_MAX ? n : XD_NAVI_IDS_MAX;
+	memcpy(spec_ids, ids5, (size_t)nspec_ids * sizeof *spec_ids);
+}
+
+/* whether a moved range is a block or clone of a Navi among the spec's foes (another Navi's copy of BN5's engine code, the
+ * Dark Soul's of its chip AI's region, is its engine's there, as the families' are in spec_code) */
+static bool navi_code(const XvMoved *m) {
+	for (int k = 0; k < xnavi_bn5_count; ++k) {
+		const XNavi *n = xnavi_bn5[k];
+		bool mine = false;
+		for (int v = 0; v < n->versions && !mine; ++v)
+			for (int i = 0; i < nspec_ids && !mine; ++i) mine = n->code.names[v] == spec_ids[i];
+		for (int i = 0; mine && i < n->code.nblocks; ++i)
+			if (n->code.blocks[i].start == m->from && n->code.blocks[i].at == m->to) return true;
+		for (int i = 0; mine && i < n->code.nclones; ++i)
+			if (n->code.clones[i].start == m->from && n->code.clones[i].at == m->to) return true;
+	}
+	return false;
+}
+
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {
 	XdLog *log = log_of(game);
 	if (!log) return NULL;
@@ -484,7 +508,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
 	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams, navis)) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART) ||
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams, navis)) || (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
 		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to))) {
 			if (log->nfam < FAMILY_MAX) log->fam[log->nfam++] = m[i];
 			else fprintf(stderr, "xdiff: the families' and Navis' code past %d blocks: %08x not watched\n", FAMILY_MAX, (unsigned)m[i].from);

@@ -215,7 +215,7 @@ static void cell_draw(int x, int y, const char *words, bool focus) {
 }
 
 static void rows_draw(int x0, int y0) {
-	static const char *const names[ROWS] = { "A and B", "D-PAD", "A", "B", "L", "R", "START", "SELECT" };
+	static const char *const names[ROWS] = { "A and B", "D-PAD", "A", "B", "L", "R", "START", "SELECT", "FAST" };
 	bool idle = !C.ask && !C.confirm;
 	/* (the cursor's slot under every row's words, so none is covered) */
 	if (idle && C.row < ROWS && C.row != ROW_PRESET)
@@ -256,6 +256,7 @@ static void note_words(char *s, size_t n) {
 	if (C.said_t > 0) snprintf(s, n, "%s", C.said);
 	else if (C.row == ROW_PRESET) snprintf(s, n, "%s", padmap_preset_about(C.family, C.style, padmap_preset_of(&C.pads, C.family)));
 	else if (C.row == ROW_DPAD) snprintf(s, n, "%s: the D-pad's %s, way by way", a, C.col == SLOT_MAIN ? "MAIN" : "ALSO");
+	else if (gba == PAD_FAST) snprintf(s, n, "%s: fast forward's %s %s", a, C.col == SLOT_MAIN ? "MAIN" : "ALSO", C.tab == TAB_PAD ? "button" : "key");
 	else if (gba >= 0) snprintf(s, n, "%s: give %s its %s %s", a, padmap_gba_name(gba), C.col == SLOT_MAIN ? "MAIN" : "ALSO", C.tab == TAB_PAD ? "button" : "key");
 	else if (C.item == ITEM_SETALL) snprintf(s, n, "Asks for every button in turn");
 	else if (C.item == ITEM_DEFAULTS) snprintf(s, n, "The %s as it came", C.tab == TAB_PAD ? "controller" : "keyboard");
@@ -299,7 +300,7 @@ static void ask_draw(int x0, int y0) {
 		snprintf(sub, sizeof sub, "%d of 4", C.ask_step + 1);
 	} else {
 		snprintf(line, sizeof line, "Press the %s for %s", what, padmap_gba_name(C.ask_step));
-		snprintf(sub, sizeof sub, "%d of %d", C.ask_step + 1, PAD_GBA);
+		snprintf(sub, sizeof sub, "%d of %d", C.ask_step + 1, PAD_ROWS);
 	}
 	int secs = (C.ask_left + 59) / 60;
 	/* (Set all: waiting skips the one button, Escape stops the rest) */

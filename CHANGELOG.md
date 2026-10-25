@@ -1,5 +1,55 @@
 # Changelog
 
+## Unreleased
+
+- **Fast forward, outside the fight.** A press of its button runs the
+  game faster (Tab or Space, a controller's right trigger or right stick
+  press, ▶▶ on the touch controls; held, only while held): walking a
+  layer and the town, chats, fades and warps, a battle's opening and its
+  results. From a battle's first Custom screen to its last deletion it is
+  BN6's speed, always, and so are BN6's menus and online play: nothing you
+  decide against the clock changes, and there its button does nothing and
+  the touch controls' ▶▶ steps aside. Two of the PET's orange arrows show in
+  the corner while it runs. Options' new **Fast forward** line sets 2x, 3x
+  (the default), 4x or off; the music keeps its pitch, and a machine that
+  cannot go that fast goes as fast as it can. The controls screen has a
+  **FAST** row for its button. A controller's right trigger was R as well
+  before; a `pad.ini` from before keeps it so. The run's minutes count the
+  game's own time now, so the week's DeepNet ranks a dive alike with fast
+  forward or without.
+
+- **Special routes: a dark layer's secret opens a third way.** The sealed
+  route behind a Liberation board's locked barrier (acts 3 and 4) now
+  leads somewhere. Free its key and the route, and at the next fork in
+  Lan's HP a third portal lights at the link on the right ("And the link
+  on the right! The route we found in the dark!"): another area of the
+  act's tier and a guardian the act's other ways do not have. Found on
+  act 4's board in the endless net, or act 3's in the short net, it opens
+  a second way into the Nest instead, to a different last boss (in the
+  endless net, a Navi in the Cybeast's place, with its HP). The act's card says "By the route found
+  in the dark". A route not taken at its fork is spent; a CONTINUE keeps
+  it. Saves from 0.15.0 carry on.
+
+- **Liberation Missions with a team.** On a dark layer, the Navis whose
+  BN5 Souls the run holds now join MegaMan on the board, as many as BN5's
+  team of that stage holds (two at act 2, three at act 3, four at act 4),
+  each in his own BN5 body with BN5's HP for him. Each takes his turn a
+  phase as BN5's team does: play passes on after each Navi acts, R hands
+  it to the next yet to act, and those who have acted stand darker. Each
+  brings his own command for an Order Point: Colonel's ScrenDiv frees
+  three across, TomahawkMan's TomahawkSwing two deep and three wide,
+  NumberMan's NumberCheck takes the items of the dark ahead with no battle,
+  ShadowMan's SneakAttack weakens a guardian, ToadMan's LifeMelody lets a
+  teammate beside him free five in a line, and KnightMan's StoneBody keeps
+  harm off him and whoever stands beside him. A teammate's battle is
+  MegaMan in that Navi's Soul from the first turn, on that Navi's HP;
+  deleted there, he leaves the board and the run goes on. The guardians
+  and the Darkloid go for the nearest Navi. BN5's HP box shows the Navi in
+  play's HP and each other Navi's stands under him. The boards are made
+  for their team, as thick with dark as BN5's own of that stage, and a
+  Pass now gives back a fifth of a Navi's HP, as BN5's does. A CONTINUE
+  goes on with the same team where it stood.
+
 ## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,

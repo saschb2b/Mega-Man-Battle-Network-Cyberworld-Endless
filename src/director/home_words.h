@@ -7,14 +7,17 @@
 
 /* Their words on arriving in Lan's HP, `beaten` the guardian just deleted
  * (NULL unknown), the run at the next act's first layer; its ways open,
- * `ports[0..ways)` the portals' names ("pink pad"), and `sealed` where a
- * dark way's stands shut (NULL none). */
-const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed);
+ * `ports[0..ways)` the portals' names ("pink pad"), `sealed` where a
+ * dark way's stands shut (NULL none), and `route` the portal of a special
+ * route's way (docs/LIBERATION.md, Special routes; -1 none). */
+const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed, int route);
 /* MegaMan at a portal (docs/HOME.md): what he reads through the link of
  * area `biome` (its data, never its name: he has not been there) and of
  * `navi` its guardian (his signal named where MegaMan has battled him);
- * `dark` the dark way into the Undernet, `sealed` that way still shut. */
-const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board);
+ * `dark` the dark way into the Undernet, `sealed` that way still shut;
+ * `board` its act's dark layer that way, `route` the way a special route
+ * found on a dark layer opened. */
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route);
 /* Lan's HP's portal `k` (lanhp.h) as MegaMan names it, after "the". */
 const char *home_portal_name(int k);
 /* MegaMan in Lan's HP the run's first time there: what it is, or, to a
