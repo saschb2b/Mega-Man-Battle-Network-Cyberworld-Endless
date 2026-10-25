@@ -14,6 +14,8 @@
 
 #include "bn6.h"
 #include "bn6_fields.h"
+#include "bn6_forms.h"
+#include "bn6_panels.h"
 #include "darkchips.h"
 #include "data.h"
 #include "director.h"
@@ -443,6 +445,25 @@ static uint32_t step_on(int col, int row, int tx, int ty, bool ready, bool pulse
 	return pulse ? step : 0;
 }
 
+/* Surrounded (a liberation's battle, liberation_field.c): where every foe
+ * left stands behind him, L turns MegaMan round to them, once he can act */
+static bool turn_round(uint32_t me) {
+	uint32_t ai = B->r32(me + BN6_T1_AI_DATA);
+	int col = B->r8(me + BN6_T1_PANEL_X);
+	if (!ai || !(B->r32(ai + BN6_AI_MODES) & BN6_AI_TURNS) || B->r8(me + BN6_T1_ACTION) != B->ready) return false;
+	bool left = B->r8(me + BN6_T1_FLIP) != 0;
+	int ahead = 0, behind = 0;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (!alive(o) || B->r8(o + BN6_T1_ALLIANCE) == 0) continue;
+		int c = B->r8(o + BN6_T1_PANEL_X);
+		if (c == col) continue;
+		if ((c < col) == left) ++ahead;
+		else ++behind;
+	}
+	return behind && !ahead;
+}
+
 /* A frame of the fight, MegaMan's object `me`: B held without a chip, the
  * charged shot let go where a shot hits */
 static uint32_t charge;   /* frames B has been held */
@@ -483,6 +504,7 @@ static uint32_t fight_keys(uint32_t frame) {
 	uint32_t was = clock, me = megaman();
 	clock = B->r32(B->timer);
 	if (clock == was || !me) { charge = 0; return frame % 20 < PRESS ? KEY_A : 0; }
+	if (turn_round(me)) { charge = 0; return frame % (2 * PRESS) < PRESS ? KEY_L : 0; }
 	return fight_frame(me, frame);
 }
 

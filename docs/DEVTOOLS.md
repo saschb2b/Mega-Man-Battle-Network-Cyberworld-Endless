@@ -948,9 +948,13 @@ quiet` too).
 The `foes` step (`--input`'s `0:foes 200@52/01@43`, play.py's `foes
 200@52 01@43`) starts a battle of the foes it names, at the same first
 free moment: each an enemy id in hex at its panel, column 1-6 then row
-1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without),
+1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without; columns 1-4),
 on a plain field with nothing else on it (`field@66` on BN6's field 0x66
-instead: BN5's sea field 0x42 as `src/emu/xfields.c` installs it), in
+instead: BN5's sea field 0x42 as `src/emu/xfields.c` installs it; `sides@33`
+with its columns shared as BN5's Surrounded liberation battles share
+them, the enemy's 1-2 and 5-6, `mm@32` putting MegaMan between, and
+`sides@30` or `sides@3C` MegaMan's four or two: docs/LIBERATION.md, The
+battle's field), in
 BN6's engine whatever the layer. It names the families moved into the
 engine (docs/MULTIROM.md, Transplanted families) beside BN6's own: with
 BN5's ROM read, BN5's CanGard is AI 32 with ids 0x200-0x205 (its six
