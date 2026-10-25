@@ -2800,6 +2800,16 @@ static void test_feel(void) {
 	feel_mix_start(&m, FEEL_DEFEAT, 255);
 	feel_mix_frame(&m, FEEL_STRONG, &lo, &hi);
 	CHECK(lo == 65535, "the newest beat went unfelt in a full mix");
+	/* his sounds under the beats: three quarters of a motor at most, a full hit above, nothing at Off */
+	uint16_t sl = 0, sh = 0;
+	feel_mix_sound(FEEL_STRONG, 255, 40, &sl, &sh);
+	CHECK(sl == feel_motor(FEEL_STRONG, FEEL_SOUND_SHARE * 255 / 256) && sl < 65535 && sh > 0 && sh < sl, "a sound's level is not under a hit (%u, %u)", sl, sh);
+	uint16_t hit_low = 65535;
+	feel_mix_sound(FEEL_STRONG, 255, 255, &hit_low, &sh);
+	CHECK(hit_low == 65535, "a sound took a hit's motor down");
+	sl = sh = 0;
+	feel_mix_sound(FEEL_OFF, 255, 255, &sl, &sh);
+	CHECK(!sl && !sh, "a sound rumbled at Off");
 	/* settings.ini's words, Options' turn round */
 	for (int v = FEEL_OFF; v < FEEL_LEVELS; ++v) CHECK(feel_level_read(feel_level_word(v)) == v, "%s does not read back", feel_level_word(v));
 	CHECK(feel_level_read("no") == FEEL_OFF && feel_level_read("loud") == FEEL_DEFAULT, "vibration's words read wrong");

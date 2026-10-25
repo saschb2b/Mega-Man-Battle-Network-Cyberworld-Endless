@@ -48,7 +48,7 @@ static const char *const words[] = {
 	"Weak",   /* OW_WEAK */
 	"Medium",   /* OW_MEDIUM */
 	"Strong",   /* OW_STRONG */
-	"The controller rumbles on hits, charged shots, counters and deletes",   /* OW_VIBRATION_ON_NOTE */
+	"The controller rumbles on hits, your attacks, counters and deletes",   /* OW_VIBRATION_ON_NOTE */
 	"No rumble: the controller stays still",   /* OW_VIBRATION_OFF_NOTE */
 	"Trigger effects",   /* OW_TRIGGERS */
 	"L's trigger clicks at a full Custom gauge, FAST's where it can run",   /* OW_TRIGGERS_ON_NOTE */
@@ -106,9 +106,9 @@ const char *options_fast_note(void) {
 const char *options_vibration_note(void) {
 	return "\n# vibration: how strongly the controller rumbles on a fight's beats (a hit,\n"
 		"# by its damage; the charged shot ready and fired; a counter; a deletion;\n"
-		"# Beast Out and a Cross; MegaMan's defeat) and on a jack-in: strong,\n"
-		"# medium, weak or off. Never while fast forward runs. Options' Audio\n"
-		"# changes it too.\n";
+		"# Beast Out and a Cross; MegaMan's defeat), on his attacks as each sounds\n"
+		"# and on a jack-in: strong, medium, weak or off. Never while fast forward\n"
+		"# runs. Options' Audio changes it too.\n";
 }
 
 const char *options_triggers_note(void) {

@@ -110,10 +110,21 @@ bool feel_mix_frame(FeelMix *m, int level, uint16_t *low, uint16_t *high) {
 			if (!shapes[m->voice[i].cue][++m->voice[i].step].frames) m->voice[i].amount = 0;
 		}
 	}
-	int scale = level >= 0 && level < FEEL_LEVELS ? level_scale[level] : 0;
-	*low = (uint16_t)(lo * scale / 256 * 257);
-	*high = (uint16_t)(hi * scale / 256 * 257);
+	*low = feel_motor(level, lo);
+	*high = feel_motor(level, hi);
 	return any;
+}
+
+uint16_t feel_motor(int level, int v) {
+	int scale = level >= 0 && level < FEEL_LEVELS ? level_scale[level] : 0;
+	v = v < 0 ? 0 : v > 255 ? 255 : v;
+	return (uint16_t)(v * scale / 256 * 257);
+}
+
+void feel_mix_sound(int level, uint8_t sound_low, uint8_t sound_high, uint16_t *low, uint16_t *high) {
+	uint16_t l = feel_motor(level, sound_low * FEEL_SOUND_SHARE / 256), h = feel_motor(level, sound_high * FEEL_SOUND_SHARE / 256);
+	if (l > *low) *low = l;
+	if (h > *high) *high = h;
 }
 
 /* ---- the triggers ---- */

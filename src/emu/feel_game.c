@@ -7,6 +7,7 @@
 #include "emu.h"
 #include "fast_forward_game.h"
 #include "feel_out.h"
+#include "feel_sound.h"
 
 /* the first of the battle's objects in play on a side with HP: MegaMan's (0) */
 static uint32_t megaman(void) {
@@ -69,5 +70,9 @@ void feel_game_frame(void) {
 	if (!fast_forward_running())
 		for (int i = 0; i < n; ++i) feel_beat(beats[i].cue, beats[i].amount);
 	was = now;
+	/* (and his sounds as they play: each shot, swing and blast its own) */
+	uint8_t lo, hi;
+	feel_sound_frame(now.fight, &lo, &hi);
+	if (!fast_forward_running()) feel_sound_level(lo, hi);
 	feel_want_triggers(now.fight && gauge_full(phase), fast_forward_available());
 }

@@ -5,8 +5,10 @@
 - **Rumble, and a DualSense's adaptive triggers.** A controller now
   rumbles on a fight's beats: MegaMan hit (harder the more HP it takes),
   the charged shot ready and fired, a counter's Full Synchro, a virus or
-  a Navi deleted, Beast Out and a Cross, his defeat, and a jack-in.
-  Nothing rumbles for every chip or while fast forward runs. On a PS5
+  a Navi deleted, Beast Out and a Cross, his defeat, and a jack-in. His
+  own attacks rumble as they sound: each buster shot a tick, every
+  Vulcan bullet its own, a sword's swing, a Cannon's blast and its tail,
+  each hit he lands a knock. Nothing rumbles while fast forward runs. On a PS5
   DualSense, over USB or Bluetooth, the trigger that is L clicks once the
   Custom gauge is full, and pulling through it opens the Custom screen;
   FAST's trigger clicks lightly where fast forward can run and pulls free

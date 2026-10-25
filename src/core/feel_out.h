@@ -20,6 +20,9 @@ bool feel_triggers(void);
 
 /* A beat raised by the game (feel_game.c), felt from the next frame */
 void feel_beat(FeelCue cue, uint8_t amount);
+/* This frame's level of MegaMan's own sounds (feel_sound.h), each motor
+ * 0-255; unset, none */
+void feel_sound_level(uint8_t low, uint8_t high);
 /* This frame's triggers, asked by the game: the click of the trigger
  * that is L or R (the Custom gauge full), and of FAST's (fast forward
  * can run); unasked, both are free */
@@ -38,5 +41,6 @@ bool feel_here(void);
 bool feel_dualsense(void);
 /* --dev feel: each beat, each rumble and each trigger effect sent */
 void feel_trace(bool on);
+bool feel_tracing(void);
 
 #endif
