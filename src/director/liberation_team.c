@@ -23,13 +23,17 @@
 #include "debug.h"
 #include "devtools.h"
 #include "emu.h"
+#include "gfx.h"
 #include "guardians.h"
 #include "liberation.h"
 #include "liberation_battle.h"
 #include "liberation_state.h"
 #include "liberation_team_words.h"
+#include "director_state.h"
 #include "netmap.h"
+#include "text.h"
 #include "player_body.h"
+#include "powers.h"
 #include "rom.h"
 #include "run.h"
 #include "souls.h"
@@ -60,17 +64,93 @@ static int bn5_hp(int navi, int mission) {
 	return 0;
 }
 
+int lib_team_places(int act) { return room_of[clamp_act(act)] - 1; }
+
+int lib_team_held(uint8_t navi[LIB_HELD]) {
+	int n = 0;
+	if (XR[XROM_BN5_COLONEL_US].data && soulunite_ready())
+		for (int k = 0; k < SOULS; ++k)
+			if (souls_held() >> k & 1) navi[n++] = (uint8_t)(MATE_COLONEL + k);
+	for (int c = 1; c <= MATE_CHARGEMAN - MATE_HEATMAN + 1; ++c)
+		if (powers_cross_held(c)) navi[n++] = (uint8_t)(MATE_HEATMAN + c - 1);
+	return n;
+}
+
+static bool soul_navi(int navi) { return navi >= MATE_COLONEL && navi <= MATE_TOADMAN; }
+
+const char *lib_navi_name(int navi) {
+	int c = lib_mate_cross(navi);
+	if (c) return guardian(c)->name;
+	return soul_navi(navi) ? guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name : "MegaMan";
+}
+
+int lib_navi_hp(int navi, int act) {
+	int m = mission_of[clamp_act(act)];
+	if (!lib_mate_cross(navi)) return bn5_hp(navi, m);
+	/* (a Cross Navi, whom BN5 never sends: the median of its six at the
+	 * stage, the mean of the middle two) */
+	int hp[SOULS], n = 0;
+	for (int k = 0; k < SOULS; ++k) {
+		int h = bn5_hp(MATE_COLONEL + k, m), j = n++;
+		for (; j > 0 && hp[j - 1] > h; --j) hp[j] = hp[j - 1];
+		hp[j] = h;
+	}
+	return (hp[SOULS / 2 - 1] + hp[SOULS / 2]) / 2;
+}
+
+const char *lib_navi_form(int navi) {
+	int c = lib_mate_cross(navi);
+	return c ? powers_cross_name(c) : soul_navi(navi) ? lib_soul_form_name(navi) : "MegaMan";
+}
+
+const char *lib_navi_weakness(int navi) {
+	int c = lib_mate_cross(navi);
+	/* (a Soul's element its Navi's in BN5: TomahawkSoul's Wood, ToadSoul's
+	 * Aqua, docs/MULTIROM.md; the others none) */
+	if (!c) return navi == MATE_TOMAHAWKMAN ? "Fire" : navi == MATE_TOADMAN ? "Elec" : NULL;
+	return powers_cross_weakness(c);
+}
+
+struct Sprite *lib_navi_face(int navi) {
+	int c = lib_mate_cross(navi);
+	if (!soul_navi(navi)) return sprite_get(SPR_MUGSHOT, c ? guardian_face(c) : FACE_MEGAMAN);
+	const XRom *x = &XR[XROM_BN5_COLONEL_US];
+	if (!x->data || !x->layout || !x->layout->sprite_lists) return NULL;
+	return sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
+}
+
+/* Navi `navi`'s body as place k of the team stands on the board: a Cross
+ * Navi's BN6's own overworld sprite (as BN6's guardians stand on layers),
+ * a Soul Navi's BN5's copied into the teammates' k-th list-6 number */
+static int body_of(int navi, int k) {
+	int c = lib_mate_cross(navi);
+	if (c) return guardian_sprite(c);
+	return xnavi_mate(k - 1, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
+}
+
+/* Navi `navi` into the team's next place, his body and HP; false where he
+ * has none */
+static bool join(LibTeam *t, int navi, int act) {
+	int body = body_of(navi, t->n), hp = lib_navi_hp(navi, act);
+	if (body < 0 || hp <= 0) return false;
+	bodies[t->n] = body;
+	t->navi[t->n] = (uint8_t)navi;
+	t->hp[t->n] = (int16_t)hp;
+	++t->n;
+	return true;
+}
+
 void lib_team_make(LibTeam *t, int act) {
 	memset(t, 0, sizeof *t);
 	t->n = 1;
 	t->navi[0] = MATE_MEGAMAN;
 	bodies[0] = BN6_OW_MEGAMAN;
-	if (!XR[XROM_BN5_COLONEL_US].data || !soulunite_ready()) return;
-	int a = clamp_act(act), cand[SOULS], n = 0;
-	for (int k = 0; k < SOULS; ++k)
-		if (souls_held() >> k & 1) cand[n++] = MATE_COLONEL + k;
+	if (!XR[XROM_BN5_COLONEL_US].data) return;
+	int a = clamp_act(act), cand[LIB_HELD], n = 0;
+	t->nheld = lib_team_held(t->held);
+	for (int i = 0; i < t->nheld; ++i) cand[n++] = t->held[i];
 	/* (more held than BN5's team has room for: the layer's seed leaves some
-	 * out, a different team a board) */
+	 * out, a different team a board, till the player picks on arrival) */
 	uint32_t r = run.layer_seed ^ 0x7EA3u;
 	while (n > room_of[a] - 1) {
 		r = r * 1103515245u + 12345u;
@@ -78,16 +158,30 @@ void lib_team_make(LibTeam *t, int act) {
 		memmove(cand + drop, cand + drop + 1, sizeof *cand * (size_t)(n - drop - 1));
 		--n;
 	}
-	for (int i = 0; i < n; ++i) {
-		int body = xnavi_mate(t->n - 1, guardian_older_sprite(GUARDIAN_OLDER_FIRST + cand[i] - MATE_COLONEL));
-		int hp = bn5_hp(cand[i], mission_of[a]);
-		if (body < 0 || hp <= 0) continue;
-		bodies[t->n] = body;
-		t->navi[t->n] = (uint8_t)cand[i];
-		t->hp[t->n] = (int16_t)hp;
-		++t->n;
+	for (int i = 0; i < n; ++i) join(t, cand[i], a);
+	if (emu_debug_on()) fprintf(stderr, "liberation team: %d Navis for act %d, %d held\n", t->n, a + 1, t->nheld);
+}
+
+void lib_team_pick(const uint8_t *navi, int n) {
+	LibTeam *t = &LB.b.team;
+	int places = t->n;
+	t->n = 1;
+	for (int i = 0; i < n && t->n < places; ++i) join(t, navi[i], LB.b.act);
+	for (int k = 1; k < t->n; ++k) {
+		LB.mate[k].max = LB.mate[k].hp = t->hp[k];
+		LB.mate[k].sprite = bodies[k];
+		LB.mate[k].spoke = false;
 	}
-	if (emu_debug_on()) fprintf(stderr, "liberation team: %d Navis for act %d\n", t->n, a + 1);
+	if (emu_debug_on()) fprintf(stderr, "liberation team: picked, %d Navis\n", t->n);
+}
+
+void lib_team_dress(void) {
+	for (int k = 1; k < LB.b.team.n; ++k) {
+		bodies[k] = body_of(LB.b.team.navi[k], k);
+		LB.mate[k].sprite = bodies[k];
+		uint32_t at = D.objs.lib_body[LIB_UNITS + k];
+		if (at && bodies[k] >= 0) emu_write8(at, (uint8_t)bodies[k]);
+	}
 }
 
 bool lib_team_shrink(LibTeam *t) {
@@ -127,13 +221,14 @@ void lib_team_begin(void) {
 
 int lib_in_play(void) { return LB.in_play; }
 
-const char *lib_mate_name(int k) {
-	int navi = k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN;
-	return navi == MATE_MEGAMAN ? "MegaMan" : guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name;
-}
+const char *lib_mate_name(int k) { return lib_navi_name(k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN); }
 
-/* (a Navi's mugshot is at his list-6 number: BN6_OW_MEGAMAN is MegaMan's face too) */
-int lib_mate_face(int k) { return k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN; }
+/* (a Soul Navi's mugshot is at his list-6 number, as BN6_OW_MEGAMAN is
+ * MegaMan's face too; a Cross Navi's his own of BN6's) */
+int lib_mate_face(int k) {
+	int c = k > 0 && k < LB.b.team.n ? lib_mate_cross(LB.b.team.navi[k]) : 0;
+	return c ? guardian_face(c) : k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN;
+}
 
 const char *lib_mate_says(int k, int what, int n) {
 	int navi = k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN;
@@ -249,7 +344,11 @@ void lib_team_fight_begin(void) {
 	saved_max = emu_read16(BN6_NAVI_MAX_HP);
 	uint16_t v[2] = { (uint16_t)LB.mate[k].hp, (uint16_t)LB.mate[k].max };
 	emu_write(BN6_NAVI_HP, v, sizeof v);
-	lib_battle_soul(LB.b.team.navi[k]);
+	int navi = LB.b.team.navi[k], c = lib_mate_cross(navi);
+	if (c) lib_battle_cross(c);
+	else lib_battle_soul(navi);
+	/* (in his own form the whole battle: no other Cross offered) */
+	powers_crosses_hide(true);
 }
 
 bool lib_team_fight_end(void) {
@@ -261,6 +360,7 @@ bool lib_team_fight_end(void) {
 	int hp = lib_battle_hp() ? lib_battle_hp() : emu_read16(BN6_NAVI_HP);
 	uint16_t v[2] = { (uint16_t)saved_hp, (uint16_t)saved_max };
 	emu_write(BN6_NAVI_HP, v, sizeof v);
+	powers_crosses_hide(false);
 	LB.mate[k].hp = down ? 0 : hp < 1 ? 1 : hp;
 	if (down) LB.b.mate[k].out = true;
 	if (emu_debug_on()) fprintf(stderr, "liberation team: %s's battle over, HP %d%s\n", lib_mate_name(k), LB.mate[k].hp, down ? ", deleted" : "");

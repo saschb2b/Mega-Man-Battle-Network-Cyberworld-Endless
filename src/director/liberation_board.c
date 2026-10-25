@@ -923,6 +923,7 @@ bool lib_board_make(LibBoard *b, uint32_t seed, int act, const LibTeam *team, Li
 		for (int k = 0; k < 4; ++k) rnext();
 		uint32_t plan_seed = rnext();
 		int why = make_once(b, act, team, floor, t >= MAKE_TRIES / 2);
+		b->plan_seed = plan_seed;
 		if (why == LIB_WHY_NONE) why = lib_plan(b, plan_seed);
 		b->why = why;
 		b->tries = t + 1;

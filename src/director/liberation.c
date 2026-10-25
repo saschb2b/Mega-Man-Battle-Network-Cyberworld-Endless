@@ -30,11 +30,14 @@
 #include "cinema.h"
 #include "debug.h"
 #include "devtools.h"
+#include "director_save.h"
 #include "director_state.h"
 #include "encounter.h"
 #include "flags.h"
 #include "guardians.h"
 #include "liberation_battle.h"
+#include "liberation_pick.h"
+#include "liberation_plan.h"
 #include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_team.h"
@@ -728,8 +731,38 @@ static bool darkloid_framed(void) {
 	return LB.b.unit[0].gone || lib_camera_at(wx, wy);
 }
 
+/* The opening's words: L's briefing, the par the team's, the team named
+ * ("Colonel and KnightMan") */
+static void brief(void) {
+	say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
+	char names[96] = "";
+	for (int k = 1; k < LB.b.team.n; ++k) {
+		size_t n = strlen(names);
+		snprintf(names + n, sizeof names - n, "%s%s", k == 1 ? "" : k == LB.b.team.n - 1 ? " and " : ",", lib_mate_name(k));
+	}
+	say_more(lib_team_words(names));
+}
+
+/* The team picked (liberation_pick.c): where it differs from the board's
+ * own, its Navis' bodies on the board's objects, the map entered again
+ * for them, the par the planner's for it; then the opening's words */
+static void team_picked(const uint8_t *navi, int n) {
+	bool same = n == LB.b.team.n - 1;
+	for (int k = 1; same && k < LB.b.team.n; ++k) same = LB.b.team.navi[k] == navi[k - 1];
+	LB.step = LIB_STEP_WAIT;
+	LB.tour = 3;
+	if (same) return;
+	lib_team_pick(navi, n);
+	lib_plan_par(&LB.b);
+	if (dev.lib_par > 0) LB.b.par = dev.lib_par;
+	lib_team_dress();
+	layer_reenter(true);
+	lib_camera_mend();
+}
+
 /* The board's opening: MegaMan on the start, BN5's mission song, BN5's
- * camera to the Darkloid and back (his entrance), then the briefing */
+ * camera to the Darkloid and back (his entrance), the team picked where
+ * more Navis are held than it has places, then the briefing */
 static void opening_update(void) {
 	if (!LB.tour) {
 		if (!quiet() || D.frame < 60) return;
@@ -745,15 +778,19 @@ static void opening_update(void) {
 		if (lib_camera_at(wx, wy) && ++LB.tour_t >= TOUR_HOLD) LB.tour = 2;
 		return;
 	}
-	if (!lib_camera_home()) return;
-	say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
-	/* (the team named: "Colonel and KnightMan") */
-	char names[96] = "";
-	for (int k = 1; k < LB.b.team.n; ++k) {
-		size_t n = strlen(names);
-		snprintf(names + n, sizeof names - n, "%s%s", k == 1 ? "" : k == LB.b.team.n - 1 ? " and " : ",", lib_mate_name(k));
+	if (LB.tour == 2) {
+		if (!lib_camera_home()) return;
+		if (!LB.picked && lib_pick_needed()) {
+			LB.picked = true;
+			lib_pick_open();
+			LB.step = LIB_STEP_PICK;
+			return;
+		}
+		LB.tour = 3;
 	}
-	say_more(lib_team_words(names));
+	/* (after the pick: the map entered again where it changed the team) */
+	if (!quiet() || !lib_camera_home()) return;
+	brief();
 }
 
 /* A phase's banner: BN5's where its ROM is there (its length, its sound
@@ -897,6 +934,12 @@ uint32_t lib_keys(uint32_t keys) {
 		return keys;
 	}
 	viewing = false;
+	if (LB.step == LIB_STEP_PICK) {
+		uint8_t navi[LIB_TEAM];
+		int n = 0;
+		if (lib_pick_keys(pressed, navi, &n)) team_picked(navi, n);
+		return 0;
+	}
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
 	if (LB.step == LIB_STEP_BONUS) lib_bonus_keys(pressed);
 	return keys & (KEY_START | KEY_SELECT);

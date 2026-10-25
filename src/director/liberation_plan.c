@@ -724,3 +724,11 @@ int lib_plan(LibBoard *b, uint32_t seed) {
 	if (m->longswrd * 100 < m->plays * LONGSWRD_LEAST || m->best[CMD_LONG] * 100 > m->phases * LONGSWRD_MOST) return LIB_WHY_LONGSWRD;
 	return LIB_WHY_NONE;
 }
+
+void lib_plan_par(LibBoard *b) {
+	LibMeasure kept = b->m;
+	index_board(b);
+	plays(b, b->plan_seed);
+	if (b->m.wins) b->par = b->m.median;
+	b->m = kept;
+}

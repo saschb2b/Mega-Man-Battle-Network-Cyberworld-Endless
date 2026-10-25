@@ -52,15 +52,24 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 #define LIB_REST_PART 5
 
 /* The team (docs/LIBERATION.md, The team): MegaMan first, then the Navis
- * whose BN5 Souls the run holds, at most BN5's team of five. Each by BN5's
- * id (a team record's +5, bn5_liberation.h's BN5_LIB_NAVI_*), which is his
- * Soul's number too (souls.h: bit k the Soul of id 7 + k) */
+ * the run holds, at most BN5's team of five: those whose BN5 Souls it
+ * holds, each by BN5's id (a team record's +5, bn5_liberation.h's
+ * BN5_LIB_NAVI_*), which is his Soul's number too (souls.h: bit k the Soul
+ * of id 7 + k), and Gregar's Cross Navis it holds (the Cross brought, or
+ * those found), each by BN6's navi index (powers.c: HeatMan 1 .. ChargeMan
+ * 5) past 0x20 */
 #define LIB_TEAM 5
-enum { MATE_MEGAMAN = 0, MATE_COLONEL = 7, MATE_SHADOWMAN, MATE_NUMBERMAN, MATE_TOMAHAWKMAN, MATE_KNIGHTMAN, MATE_TOADMAN };
+#define LIB_HELD 11      /* the Navis a run can hold: BN5's six Souls, Gregar's five Crosses */
+enum { MATE_MEGAMAN = 0, MATE_COLONEL = 7, MATE_SHADOWMAN, MATE_NUMBERMAN, MATE_TOMAHAWKMAN, MATE_KNIGHTMAN, MATE_TOADMAN,
+	MATE_HEATMAN = 0x21, MATE_ELECMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_CHARGEMAN };
+/* ... a Cross Navi's BN6 navi index (1-5), 0 another */
+static inline int lib_mate_cross(int navi) { return navi >= MATE_HEATMAN && navi <= MATE_CHARGEMAN ? navi - MATE_HEATMAN + 1 : 0; }
 typedef struct {
 	int n;                      /* 1 to LIB_TEAM: MegaMan and his teammates */
 	uint8_t navi[LIB_TEAM];     /* MATE_*, MegaMan first */
 	int16_t hp[LIB_TEAM];       /* each one's max HP on the board (MegaMan's 0: the act's, liberation_plan.c's) */
+	int nheld;                  /* every Navi the run holds (MegaMan not among them), on the team or not: the */
+	uint8_t held[LIB_HELD];     /* ... command rule gives each one's command its spot */
 } LibTeam;
 /* A Navi of the team where the board stands: his panel, and whether he
  * is out (deleted in a battle: BN5's Navi leaves the mission) */
@@ -109,6 +118,7 @@ typedef struct {
 	int traps;
 	int panels, dark;               /* the board's panels, and those dark as it begins (items and rings among them) */
 	int par;                        /* phases: the planner's (lib_plan) */
+	uint32_t plan_seed;             /* ... its plays' seed (a pick's par plays them again: lib_plan_par) */
 	int tries;                      /* the seeds it took (a board rejected tries the next) */
 	int why;                        /* the last try's rejection (LIB_WHY_*) */
 	uint8_t rejected[16];           /* ... each kind's tries rejected (LIB_WHY_*: the measures') */
@@ -162,7 +172,9 @@ int lib_mate_at(const LibBoard *b, int x, int y);
 /* A Navi's command (BN5's: a team record's command by his id), and its
  * panels: those a command taken on panel (x, y), facing grid way `dir`
  * from (sx, sy), frees or searches, into xs/ys (at most 6); how many */
-enum { LIB_DO_NONE, LIB_DO_LONGSWRD, LIB_DO_SCRENDIV, LIB_DO_TOMAHAWK, LIB_DO_NUMBER, LIB_DO_SNEAK, LIB_DO_MELODY };
+enum { LIB_DO_NONE, LIB_DO_LONGSWRD, LIB_DO_SCRENDIV, LIB_DO_TOMAHAWK, LIB_DO_NUMBER, LIB_DO_SNEAK, LIB_DO_MELODY,
+	/* Team ProtoMan's, the Cross Navis' (docs/LIBERATION.md, The Cross Navis) */
+	LIB_DO_NAPALM, LIB_DO_WIDESWRD, LIB_DO_MAGNET, LIB_DO_SEARCH, LIB_DO_BOMB, LIB_DOS };
 int lib_command_of(int navi);
 int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]);
 /* The shield of KnightMan's StoneBody: no harm on the board to him or a

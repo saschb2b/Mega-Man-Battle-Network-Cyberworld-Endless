@@ -47,7 +47,13 @@ void lib_battle_disarm(void);
  * him leaves him 1 HP and ends the battle LIBERATE FAILED! (the teammate
  * leaves the board, not the run). Disarmed with the battle. */
 void lib_battle_soul(int soul);
-/* ... whether one is armed (no UNITE offered in it), and whether its blow
+/* ... or a Cross Navi's: MegaMan in BN6's Cross `cross` (1-5, HeatCross
+ * to ChargeCross) from the first turn, committed at the first Custom
+ * screen's OK as CROSSSELECT commits one, BN6's rules after (his
+ * weakness's hit breaks it, and he fights on as MegaMan); his deleting
+ * blow as a Soul's */
+void lib_battle_cross(int cross);
+/* ... whether either is armed (no UNITE offered in it), and whether its blow
  * that would have deleted him came */
 bool lib_battle_soul_armed(void);
 bool lib_battle_down(void);

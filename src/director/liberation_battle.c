@@ -45,6 +45,7 @@ static struct {
 	volatile bool on;
 	volatile int turns;
 	volatile int soul;     /* a teammate's battle: his Soul (7-12), 0 MegaMan's own */
+	volatile int cross;    /* ... or his Cross, BN6's form (1-5, a Cross Navi's) */
 } arm;
 static volatile bool down;     /* (the hooks') the teammate's deleting blow came */
 static int draw_pass;          /* (the hooks') the draw's banner shown: 0 TIME UP!, 1 LIBERATE FAILED! */
@@ -130,12 +131,12 @@ static HookAct draw_shown(HookRegs *r, void *user) {
 }
 
 /* object_subtractHP: in a teammate's battle, the blow that would delete
- * MegaMan in his Soul leaves him 1 HP, and the battle ends at the fight's
- * next frame */
+ * MegaMan in his Soul or Cross leaves him 1 HP, and the battle ends at the
+ * fight's next frame */
 static HookAct soul_guard(HookRegs *r, void *user) {
 	(void)user;
 	if (!arm.on || !r->r[0]) return HOOK_CONTINUE;
-	if (arm.soul && r->r[5] == hook_read32(BN6_BATTLE_PLAYERS)) {
+	if ((arm.soul || arm.cross) && r->r[5] == hook_read32(BN6_BATTLE_PLAYERS)) {
 		uint32_t hp = hook_read16(r->r[5] + BN6_T1_HP);
 		if (r->r[0] >= hp) { r->r[0] = hp > 1 ? hp - 1 : 0; down = true; }
 	}
@@ -149,6 +150,15 @@ static HookAct soul_guard(HookRegs *r, void *user) {
 static HookAct soul_ok(HookRegs *r, void *user) {
 	(void)r;
 	(void)user;
+	/* (a Cross Navi's: his Cross committed as CROSSSELECT's commit writes
+	 * it, BN6_CROSS_COMMIT: the form, 0 for its chaos, its used bit; from
+	 * then BN6's own rules, his weakness's hit breaking it) */
+	if (arm.on && arm.cross && hook_read8(BN6_BATTLE_SCREENS) <= 1) {
+		hook_write8(BN6_CROSS_RECORD, (uint8_t)arm.cross);
+		hook_write8(BN6_CROSS_RECORD + BN6_RECORD_CHAOS, 0);
+		hook_write32(BN6_CROSSES_USED, hook_read32(BN6_CROSSES_USED) | 1u << (arm.cross - 1));
+		return HOOK_CONTINUE;
+	}
 	if (!arm.on || !arm.soul || hook_read8(BN6_BATTLE_SCREENS) > 1 || hook_read8(BN6_SOULS + BN6_SOUL_ID)) return HOOK_CONTINUE;
 	hook_write8(BN6_CROSS_RECORD, BN6_FORM_PROXY);
 	hook_write8(BN6_CROSS_RECORD + BN6_RECORD_CHAOS, 0);
@@ -180,7 +190,7 @@ void lib_battle_arm(int turns) {
 	down = false;
 	/* (a teammate's: the hook on the HP taken while it runs; the duel's
 	 * watch holds the same instruction, never on a dark layer) */
-	if (arm.soul && !soul_guarded) soul_guarded = emu_hook(BN6_SUBTRACT_HP, soul_guard, NULL);
+	if ((arm.soul || arm.cross) && !soul_guarded) soul_guarded = emu_hook(BN6_SUBTRACT_HP, soul_guard, NULL);
 }
 
 int lib_battle_field(Encounter *e, int x, int y, bool darkloid) {
@@ -189,9 +199,11 @@ int lib_battle_field(Encounter *e, int x, int y, bool darkloid) {
 	return level;
 }
 
-void lib_battle_soul(int soul) { arm.soul = soul >= 7 && soul <= 12 ? soul : 0; }
+void lib_battle_soul(int soul) { arm.soul = soul >= 7 && soul <= 12 ? soul : 0; arm.cross = 0; }
 
-bool lib_battle_soul_armed(void) { return arm.on && arm.soul; }
+void lib_battle_cross(int cross) { arm.cross = cross >= 1 && cross <= 5 ? cross : 0; arm.soul = 0; }
+
+bool lib_battle_soul_armed(void) { return arm.on && (arm.soul || arm.cross); }
 
 bool lib_battle_down(void) { return down; }
 
@@ -200,7 +212,7 @@ int lib_battle_hp(void) { return hp_seen; }
 void lib_battle_disarm(void) {
 	arm.on = false;
 	arm.turns = 0;
-	arm.soul = 0;
+	arm.soul = arm.cross = 0;
 	if (soul_guarded) emu_unhook(BN6_SUBTRACT_HP);
 	soul_guarded = false;
 	lib_cue_battle(false);
