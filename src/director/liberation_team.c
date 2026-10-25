@@ -23,15 +23,12 @@
 #include "debug.h"
 #include "devtools.h"
 #include "emu.h"
-#include "gfx.h"
 #include "guardians.h"
 #include "liberation.h"
 #include "liberation_battle.h"
 #include "liberation_state.h"
 #include "liberation_team_words.h"
-#include "director_state.h"
 #include "netmap.h"
-#include "text.h"
 #include "player_body.h"
 #include "powers.h"
 #include "rom.h"
@@ -63,8 +60,6 @@ static int bn5_hp(int navi, int mission) {
 		if ((t[0] | t[1] << 8) == navi) return t[2 * mission] | t[2 * mission + 1] << 8;
 	return 0;
 }
-
-int lib_team_places(int act) { return room_of[clamp_act(act)] - 1; }
 
 int lib_team_held(uint8_t navi[LIB_HELD]) {
 	int n = 0;
@@ -111,14 +106,6 @@ const char *lib_navi_weakness(int navi) {
 	return powers_cross_weakness(c);
 }
 
-struct Sprite *lib_navi_face(int navi) {
-	int c = lib_mate_cross(navi);
-	if (!soul_navi(navi)) return sprite_get(SPR_MUGSHOT, c ? guardian_face(c) : FACE_MEGAMAN);
-	const XRom *x = &XR[XROM_BN5_COLONEL_US];
-	if (!x->data || !x->layout || !x->layout->sprite_lists) return NULL;
-	return sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
-}
-
 /* Navi `navi`'s body as place k of the team stands on the board: a Cross
  * Navi's BN6's own overworld sprite (as BN6's guardians stand on layers),
  * a Soul Navi's BN5's copied into the teammates' k-th list-6 number */
@@ -131,6 +118,7 @@ static int body_of(int navi, int k) {
 /* Navi `navi` into the team's next place, his body and HP; false where he
  * has none */
 static bool join(LibTeam *t, int navi, int act) {
+	if (t->n < 1 || t->n >= LIB_TEAM) return false;
 	int body = body_of(navi, t->n), hp = lib_navi_hp(navi, act);
 	if (body < 0 || hp <= 0) return false;
 	bodies[t->n] = body;
@@ -167,7 +155,7 @@ void lib_team_pick(const uint8_t *navi, int n) {
 	int places = t->n;
 	t->n = 1;
 	for (int i = 0; i < n && t->n < places; ++i) join(t, navi[i], LB.b.act);
-	for (int k = 1; k < t->n; ++k) {
+	for (int k = 1; k < t->n && k < LIB_TEAM; ++k) {
 		LB.mate[k].max = LB.mate[k].hp = t->hp[k];
 		LB.mate[k].sprite = bodies[k];
 		LB.mate[k].spoke = false;
@@ -175,11 +163,11 @@ void lib_team_pick(const uint8_t *navi, int n) {
 	if (emu_debug_on()) fprintf(stderr, "liberation team: picked, %d Navis\n", t->n);
 }
 
-void lib_team_dress(void) {
-	for (int k = 1; k < LB.b.team.n; ++k) {
+void lib_team_dress(const uint32_t *scripts) {
+	for (int k = 1; k < LB.b.team.n && k < LIB_TEAM; ++k) {
 		bodies[k] = body_of(LB.b.team.navi[k], k);
 		LB.mate[k].sprite = bodies[k];
-		uint32_t at = D.objs.lib_body[LIB_UNITS + k];
+		uint32_t at = scripts[LIB_UNITS + k];
 		if (at && bodies[k] >= 0) emu_write8(at, (uint8_t)bodies[k]);
 	}
 }

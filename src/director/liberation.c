@@ -30,14 +30,11 @@
 #include "cinema.h"
 #include "debug.h"
 #include "devtools.h"
-#include "director_save.h"
 #include "director_state.h"
 #include "encounter.h"
 #include "flags.h"
 #include "guardians.h"
 #include "liberation_battle.h"
-#include "liberation_pick.h"
-#include "liberation_plan.h"
 #include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_team.h"
@@ -338,14 +335,23 @@ static int sneak_target(int fx, int fy) {
  * SneakAttack where it reaches a guardian, LifeMelody beside a teammate yet
  * to act, MagnetBarrier where the team stands unshielded, BombLiberation
  * hovering over a dark panel */
+/* ... the Cross Navis' with no battle or their own rule */
+static bool cross_can(int command, int fx, int fy) {
+	int xs[6], ys[6];
+	switch (command) {
+	case LIB_DO_SEARCH: return fx >= 0 && lib_command_panels(&LB.b, LIB_DO_SEARCH, fx, fy, LB.face, xs, ys) > 0;
+	case LIB_DO_MAGNET: return !LB.shield;
+	case LIB_DO_BOMB: return lib_command_panels(&LB.b, LIB_DO_BOMB, LB.mx, LB.my, LB.face, xs, ys) > 0;
+	default: return false;
+	}
+}
+
 static bool command_can(int fx, int fy) {
 	int command = lib_mate_command(LB.in_play), xs[6], ys[6], n;
 	switch (command) {
 	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK: case LIB_DO_NAPALM: case LIB_DO_WIDESWRD:
 		return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_liberable(&LB.b, fx, fy) && LB.b.kind[fy][fx] != LIB_HOLE;
-	case LIB_DO_SEARCH: return fx >= 0 && lib_command_panels(&LB.b, LIB_DO_SEARCH, fx, fy, LB.face, xs, ys) > 0;
-	case LIB_DO_MAGNET: return !LB.shield;
-	case LIB_DO_BOMB: return lib_command_panels(&LB.b, LIB_DO_BOMB, LB.mx, LB.my, LB.face, xs, ys) > 0;
+	case LIB_DO_SEARCH: case LIB_DO_MAGNET: case LIB_DO_BOMB: return cross_can(command, fx, fy);
 	case LIB_DO_NUMBER:
 		n = fx >= 0 ? lib_command_panels(&LB.b, LIB_DO_NUMBER, fx, fy, LB.face, xs, ys) : 0;
 		for (int i = 0; i < n; ++i) if (LB.b.kind[ys[i]][xs[i]] == LIB_ITEM || LB.b.kind[ys[i]][xs[i]] == LIB_TRAP) return true;
@@ -426,6 +432,7 @@ static void fight(int cmd) {
 	lib_faced(&fx, &fy);
 	int u = lib_unit_at(fx, fy);
 	int command = cmd == LIB_CMD_LONGSWRD ? lib_mate_command(LB.in_play) : LIB_DO_NONE;
+	if (emu_debug_on()) fprintf(stderr, "liberation: %s takes %s at %d,%d\n", lib_mate_name(LB.in_play), lib_command_label(cmd, command), fx, fy);
 	if (command != LIB_DO_NONE && !lib_command_battles(command)) { command_done(command, fx, fy); return; }
 	LB.fight_cmd = cmd;
 	LB.fight_unit = u;
@@ -763,23 +770,6 @@ static void brief(void) {
 	say_more(lib_team_words(names));
 }
 
-/* The team picked (liberation_pick.c): where it differs from the board's
- * own, its Navis' bodies on the board's objects, the map entered again
- * for them, the par the planner's for it; then the opening's words */
-static void team_picked(const uint8_t *navi, int n) {
-	bool same = n == LB.b.team.n - 1;
-	for (int k = 1; same && k < LB.b.team.n; ++k) same = LB.b.team.navi[k] == navi[k - 1];
-	LB.step = LIB_STEP_WAIT;
-	LB.tour = 3;
-	if (same) return;
-	lib_team_pick(navi, n);
-	lib_plan_par(&LB.b);
-	if (dev.lib_par > 0) LB.b.par = dev.lib_par;
-	lib_team_dress();
-	layer_reenter(true);
-	lib_camera_mend();
-}
-
 /* The board's opening: MegaMan on the start, BN5's mission song, BN5's
  * camera to the Darkloid and back (his entrance), the team picked where
  * more Navis are held than it has places, then the briefing */
@@ -955,9 +945,7 @@ uint32_t lib_keys(uint32_t keys) {
 	}
 	viewing = false;
 	if (LB.step == LIB_STEP_PICK) {
-		uint8_t navi[LIB_TEAM];
-		int n = 0;
-		if (lib_pick_keys(pressed, navi, &n)) team_picked(navi, n);
+		lib_pick_step(pressed);
 		return 0;
 	}
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);

@@ -24,12 +24,11 @@ typedef struct {
 } LibPickMemory;
 extern LibPickMemory lib_pick_memory;
 
-/* Whether the board's arrival asks: more Navis held (LB.b.team.held) than
- * the board has places beside MegaMan (LB.b.team.n - 1) */
-bool lib_pick_needed(void);
-/* The screen opened: the last pick marked where its Navis are held, the
- * board's own team filling the places left */
-void lib_pick_open(void);
+/* (whether the board's arrival asks: more Navis held, LB.b.team.held,
+ * than the board has places beside MegaMan, LB.b.team.n - 1; the screen
+ * opened on the last pick where its Navis are held, the board's own team
+ * filling the places left; its keys' frame: liberation_state.h's
+ * lib_pick_needed, lib_pick_open, lib_pick_step) */
 /* A frame of its keys (the pad's new presses): true once the pick is made,
  * its Navis into navi in the order picked, how many into *n (the board's
  * places, LB.b.team.n - 1) */

@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "gfx.h"
+#include "guardians.h"
 #include "liberation_pick_state.h"
 #include "liberation_pick_text.h"
 #include "liberation_state.h"
@@ -22,6 +23,8 @@
 #include "pet_look.h"
 #include "pet_panel.h"
 #include "platform.h"
+#include "rom.h"
+#include "text.h"
 
 /* where it draws, from the picture's corner: the list's window on the
  * left, wide enough for TomahawkMan in the chat font, its rows the font's
@@ -93,6 +96,16 @@ static void go_draw(int x0, int y0) {
 
 /* ---- the Navi ---- */
 
+/* His face: his game's mugshot (a Soul Navi's read from BN5's ROM, as the
+ * launcher reads its cartridge's) */
+static Sprite *face_of(int navi) {
+	int c = lib_mate_cross(navi);
+	if (navi < MATE_COLONEL || navi > MATE_TOADMAN) return sprite_get(SPR_MUGSHOT, c ? guardian_face(c) : FACE_MEGAMAN);
+	const XRom *x = &XR[XROM_BN5_COLONEL_US];
+	if (!x->data || !x->layout || !x->layout->sprite_lists) return NULL;
+	return sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
+}
+
 /* The NAVIGATOR box's shape: his name for its label, his face on the left,
  * the white page with his HP and the element his battle form is weak to */
 static void navi_draw(int x0, int y0, int navi) {
@@ -104,7 +117,7 @@ static void navi_draw(int x0, int y0, int navi) {
 	SDL_Rect page = { x + 43, y + 8, SIDE_W - 45, 48 };
 	fill_rect(page.x, page.y, page.w, page.h, LOOK_PAGE);
 	fill_rect(x + 3, y + 8, 40, 48, LOOK_SLOT);
-	Sprite *mug = lib_navi_face(navi);
+	Sprite *mug = face_of(navi);
 	if (mug) sprite_draw_frame(mug, 0, 0, x + 3 + 20, y + 8 + 24, false, 0, 0);
 	const char *weak = lib_navi_weakness(navi);
 	const char *lines[3] = { lib_pick_hp(hp, sizeof hp, lib_navi_hp(navi, LB.b.act)), lib_pick_word(PW_WEAKNESS),

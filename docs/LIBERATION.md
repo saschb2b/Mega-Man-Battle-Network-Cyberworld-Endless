@@ -216,20 +216,25 @@ Colonel 200 to 800, KnightMan 400 to 900, ShadowMan 250 to 700, TomahawkMan
 The commands are BN5's own list (**text**): Liberation, LongSwrd, WideSwrd,
 ScrenDiv, TwinLiberation (twice), LifeMelody, BombLiberation, SneakAttack,
 PanelSearch, NumberCheck, Napalm, TomahawkSwing, MagnetBarrier, Save, Pass.
-Their shapes are the guides' (the routines that apply them are not traced):
+Their shapes are the guides'; Team ProtoMan's five (WideSwrd, Napalm,
+MagnetBarrier, PanelSearch, BombLiberation) are read in Team Colonel's
+ROM, which runs one code for both versions and keeps their routines and
+shapes (**ROM, play**: The Cross Navis and the team picked, as built,
+below), and LongSwrd's, ScrenDiv's and TomahawkSwing's there match the
+guides':
 
 | Navi | Command | What it does |
 | --- | --- | --- |
 | MegaMan | LongSwrd | Two panels in a line, one battle |
-| Colonel (ProtoMan) | ScrenDiv (WideSwrd) | Three across, one battle; can save |
+| Colonel (ProtoMan) | ScrenDiv (WideSwrd) | Three across, one battle; can save (**ROM**: one shape and routine for both) |
 | TomahawkMan | TomahawkSwing | Two deep and three wide, one battle |
-| NapalmMan | Napalm | Four ahead and both sides of the third |
+| NapalmMan | Napalm | Four ahead and both sides of the third, one battle (**ROM**) |
 | NumberMan | NumberCheck | Two by three ahead, no battle: takes the items, disarms traps, liberates nothing |
-| SearchMan | PanelSearch | A line of dark panels: items shown, then liberated after one battle |
+| SearchMan | PanelSearch | The line of dark and item panels from the one faced, ten at most: its item and trap panels alone liberated after one battle; none, no battle and the Order Point spent (**ROM**) |
 | ShadowMan | SneakAttack | Passes over dark panels; strikes a guardian or the Darkloid one or two ahead (never below 1 HP) |
-| GyroMan | BombLiberation | Flies over dark panels; liberates the one beneath him without a battle |
+| GyroMan | BombLiberation | Flies over dark, item and BonusPanels; liberates the plain dark panel beneath him without a battle, an item's not (**ROM**) |
 | KnightMan | (none) | Takes no damage on the board; shields a Navi beside him |
-| MagnetMan | MagnetBarrier | The team takes no damage on the board until the next phase |
+| MagnetMan | MagnetBarrier | The team takes no damage on the board until the next phase (**ROM**: every teammate's flag 0x40, cleared at the Darkloids' phase's end) |
 | ToadMan | LifeMelody | A teammate beside him liberates five ahead this phase |
 | Meddy | TwinLiberation | Battles at both ends of a line; a second Navi finishes it from the far end |
 
@@ -565,10 +570,11 @@ BN5's Team Colonel liberates with Colonel, KnightMan, ShadowMan, NumberMan,
 TomahawkMan and ToadMan: the six BN5 Navis whose Souls a run already wins
 (docs/BOSSES.md, BN5's Navis). So a held Soul lends that Navi to the board,
 with his BN5 command; the team grows as BN5's does, mission by mission,
-run by run (act 2: MegaMan and one at most). Without BN5's ROM, or for
-BN6's Navis, a held Cross could lend its Navi with a command of BN5's kinds
-(a line, a wide, an area, mobility, defence, support): not chosen (the
-owner's decision 4, 25 October 2026: BN5's Souls only).
+run by run (act 2: MegaMan and one at most). A held Cross lends its Navi
+too, with Team ProtoMan's command of his element (the owner's decisions 9
+and 10, 25 October 2026, which turn decision 4 round: The Cross Navis and
+the team picked, as built), and where the run holds more Navis than the
+team has places, the player picks who comes.
 
 In battle, a teammate's liberation is fought as MegaMan in that Navi's Soul
 (or Cross) from the first turn, with the teammate's own HP pool: BN5's own

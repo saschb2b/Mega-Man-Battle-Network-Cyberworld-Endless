@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "director_state.h"
 #include "liberation_pick.h"
 #include "liberation_state.h"
 #include "liberation_team.h"
@@ -118,7 +119,7 @@ bool lib_resume(void) {
 	for (int k = 1; k < n.nteam; ++k) picked |= n.team[k] != LB.b.team.navi[k];
 	if (picked) {
 		lib_team_pick(n.team + 1, n.nteam - 1);
-		lib_team_dress();
+		lib_team_dress(D.objs.lib_body);
 	}
 	if (n.par > 0) LB.b.par = n.par;
 	memcpy(LB.b.kind, n.kind, sizeof LB.b.kind);

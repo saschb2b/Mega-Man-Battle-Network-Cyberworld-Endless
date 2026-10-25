@@ -9,8 +9,14 @@
 #include <string.h>
 
 #include "emu.h"
+#include "devtools.h"
+#include "director_save.h"
+#include "director_state.h"
+#include "liberation.h"
 #include "liberation_pick_state.h"
+#include "liberation_plan.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "run.h"
 
 LibPickMemory lib_pick_memory;
@@ -94,4 +100,27 @@ bool lib_pick_keys(uint32_t pressed, uint8_t navi[LIB_TEAM], int *n) {
 	if ((pressed & KEY_A) && LP.cursor < LP.n) toggle(LP.cursor);
 	if ((pressed & KEY_START) || ((pressed & KEY_A) && LP.cursor == LP.n)) return go(navi, n);
 	return false;
+}
+
+/* The team picked: where it differs from the board's own, its Navis'
+ * bodies on the board's objects, the map entered again for them, the par
+ * the planner's for it; then the opening's words */
+static void apply(const uint8_t *navi, int n) {
+	bool same = n == LB.b.team.n - 1;
+	for (int k = 1; same && k < LB.b.team.n && k < LIB_TEAM; ++k) same = LB.b.team.navi[k] == navi[k - 1];
+	LB.step = LIB_STEP_WAIT;
+	LB.tour = 3;
+	if (same) return;
+	lib_team_pick(navi, n);
+	lib_plan_par(&LB.b);
+	if (dev.lib_par > 0) LB.b.par = dev.lib_par;
+	lib_team_dress(D.objs.lib_body);
+	layer_reenter(true);
+	lib_camera_mend();
+}
+
+void lib_pick_step(uint32_t pressed) {
+	uint8_t navi[LIB_TEAM];
+	int n = 0;
+	if (lib_pick_keys(pressed, navi, &n)) apply(navi, n);
 }
