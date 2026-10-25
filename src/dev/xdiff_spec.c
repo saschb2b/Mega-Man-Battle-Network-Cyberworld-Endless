@@ -106,6 +106,13 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 	return -1;
 }
 
+/* film=FROM:TO:STEP:PREFIX: 1 taken, 0 refused, -1 another item */
+static int film_parse(Spec *s, const char *name, const char *v) {
+	if (strcmp(name, "film")) return -1;
+	Film *m = &s->film;
+	return sscanf(v, "%d:%d:%d:%159s", &m->from, &m->to, &m->step, m->prefix) == 4 && m->step > 0 && m->to >= m->from;
+}
+
 /* the Souls BN6's MegaMan holds, and the rule or parts of them broken (the comparator's own test); -1 where `name` is
  * none of them */
 static int souls_parse(Spec *s, const char *name, const char *v) {
@@ -187,6 +194,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (r < 0) r = megaman_parse(s, name, v);
 	if (r < 0) r = dark_parse(s, name, v);
 	if (r < 0) r = souls_parse(s, name, v);
+	if (r < 0) r = film_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);

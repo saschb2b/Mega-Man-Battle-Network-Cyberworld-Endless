@@ -244,11 +244,29 @@ int run_dark_area(int act) {
 	return h >> 20 & 1 ? alt : own;
 }
 
+/* BN5's own Darkloid of the act's dark layer, where its ROM brought them
+ * into BN6's engine (xnavi_bn5.c): BN5's missions meet BlizzardMan first,
+ * then ShadeMan, CloudMan, CosmoMan (docs/LIBERATION.md, stage 4), so the
+ * act's own of that order twice as likely as each other one moved; 0 none.
+ * His strength is his version the act's band takes (xguardian_version). */
+static bool bn5_darkloid_is(int g) { return g && guardian_darkloid(g); }
+
+static int bn5_darkloid(int act) {
+	static const uint8_t order[] = { 31, 30, 32, 33 };   /* BlizzardMan, ShadeMan, CloudMan, CosmoMan */
+	int own = order[act <= 1 ? 0 : act >= 4 ? 3 : act - 1], fit[8], n = 0;
+	for (unsigned i = 0; i < sizeof order; ++i)
+		if (xguardian_fightable(order[i])) {
+			fit[n++] = order[i];
+			if (order[i] == own) fit[n++] = own;
+		}
+	return n ? fit[rng_range(0, n - 1)] : 0;
+}
+
 int run_darkloid(int act, int biome) {
 	uint32_t keep = rng_state();
 	rng_seed(run.seed ^ 0x444C4F44u ^ (uint32_t)act * 2654435761u);   /* "DLOD" */
-	int g = 0;
-	for (int tries = 0; tries < 8; ++tries) {
+	int g = bn5_darkloid(act);
+	for (int tries = 0; !bn5_darkloid_is(g) && tries < 8; ++tries) {
 		g = pacing_guardian_pick(pools[biome >= 0 && biome < BIOME_COUNT ? biome : 0], navis, (int)sizeof navis, act, 0, false, navi_hp);
 		if (!guardian_taken(g)) break;
 	}

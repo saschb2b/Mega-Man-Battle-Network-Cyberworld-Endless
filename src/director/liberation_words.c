@@ -100,6 +100,8 @@ const char *lib_strike_words(int kind, const char *darkloid) {
 		{ "ShadowMan", "...Too close." },
 		{ "NumberMan", "Your number's up!" },
 		{ "ToadMan", "Ribbit! Take this!" },
+		{ "ShadeMan", "Kukuku... Let me have a taste of you!" },
+		{ "BlizzardMan", "Brrr-hahaha! Snowball!" },
 	};
 	if (kind != UNIT_DARKLOID) return guardians[kind & 3];
 	for (size_t i = 0; darkloid && i < sizeof darkloids / sizeof *darkloids; ++i)

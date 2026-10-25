@@ -1,0 +1,11 @@
+{
+ "about": "BlizzardMan V1 (BN5's 0x14F, BN6's 0x1E4) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Darkloid in BN6's engine, his own states (BN6's 8-12), his snowballs and ice (the third kind's 0x26, 0x27, 0x29, 0x2F) through the dispatch, the ice panels (type 7 in both), his sound copied in (0xE3)",
+ "kind": "differential",
+ "foes": "14F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

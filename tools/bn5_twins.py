@@ -382,6 +382,14 @@ TYPES = {
     (3, 0x81): ('moved', None, 'navis', "ToadMan's: no BN6 type runs the same code (tools/xrecipe_family.py, type_twin: "
                                         "each type of the kind's table compared deep); the Navi chip's too (chips's, "
                                         "tools/xchiprecipe.py): the Navis' copy, installed before the chips', run for it"),
+    (1, 0x0B): ('moved', None, 'navis', "ShadeMan's: " + NO_TWIN),
+    (3, 0x0E): ('moved', None, 'navis', "ShadeMan's: " + NO_TWIN),
+    (3, 0x10): ('moved', None, 'navis', "ShadeMan's: " + NO_TWIN),
+    (4, 0x1A): ('moved', None, 'navis', "ShadeMan's: " + NO_TWIN),
+    (3, 0x26): ('moved', None, 'navis', "BlizzardMan's: " + NO_TWIN),
+    (3, 0x27): ('moved', None, 'navis', "BlizzardMan's: " + NO_TWIN),
+    (3, 0x29): ('moved', None, 'navis', "BlizzardMan's: " + NO_TWIN),
+    (3, 0x2F): ('moved', None, 'navis', "BlizzardMan's: " + NO_TWIN),
     (3, 0x8B): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (3, 0x8C): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (3, 0x93): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),

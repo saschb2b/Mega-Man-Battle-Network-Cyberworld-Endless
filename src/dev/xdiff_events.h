@@ -81,6 +81,10 @@ typedef struct XdLog XdLog;
  * copies hold engine routines BN5 runs for MegaMan too, a Soul's companion,
  * which are no foe's code in a spec without one). */
 XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis);
+/* The spec's foes' BN5 ids, for the logs started after: a Navi's code is a foe's where `navis` and its Navi is one of them
+ * (another Navi's copy of BN5's engine code is its engine's there) */
+#define XD_NAVI_IDS_MAX 8
+void xd_log_navis(const int *ids5, int n);
 /* The chips' units whose moved code is the family's in the logs started after: those BN6's folder `folder` (its `n`
  * chips, as the spec gives them: code << 9 | id) plays */
 void xd_log_units(const uint16_t *folder, int n);

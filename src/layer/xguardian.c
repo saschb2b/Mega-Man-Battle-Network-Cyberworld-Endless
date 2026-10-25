@@ -25,7 +25,7 @@
 /* (his BN6 enemy id at `version`, 0 V1 .. 3 SP; -1 none) */
 static int xguardian_id(int navi, int version) {
 	const uint8_t *d = XR[XROM].data;
-	int bn5 = d && guardian_older(navi) ? xrecords_navi_id(d, guardian_older_ai(navi), version) : 0;
+	int bn5 = d && guardian_bn5_ai(navi) >= 0 ? xrecords_navi_id(d, guardian_bn5_ai(navi), version) : 0;
 	return bn5 ? xnavi_bn6_id(bn5) : -1;
 }
 
@@ -54,7 +54,7 @@ Encounter xguardian_encounter(int navi, int version) {
 }
 
 int xguardian_hp(int navi, int version) {
-	return guardian_older(navi) ? xrecords_navi_hp(XROM, guardian_older_ai(navi), version, NULL) : -1;
+	return guardian_bn5_ai(navi) >= 0 ? xrecords_navi_hp(XROM, guardian_bn5_ai(navi), version, NULL) : -1;
 }
 
 int xguardian_version(int navi, int depth) {

@@ -61,6 +61,7 @@
 020356F2 BN5_CUSTOM_WINDOW
 02035700 BN5_CUSTOM_GAUGE
 02035760 pool_other_state
+02036770 tallies_navi_harm
 02036B10 BN5_CUSTOM_SCREEN
 02036B16 BN5_CUSTOM_HAND
 02036B17 BN5_CUSTOM_CURSOR
@@ -187,6 +188,7 @@
 0800BCE8 BN5_PANEL_FLAGS_OF
 0800BD64 BN5_FIELDS
 0800C6CE has_it
+0800C6D8 object_hp_lowered
 0800C7CC BN5_LIB_DOUBLE_HIT
 0800CCD2 object_counter_time
 0800CD1E BN5_PRESTEP_TAKE
@@ -518,6 +520,7 @@
 0802CCA4 bn5_darkinvs_bn6_2
 0802CE3A bn5_darkinvs_bn6_3
 0802D028 bn5_darkinvs_bn6_4
+0802D4C4 bn5_darkloids.by
 0802D510 battle_bit_0x40
 0802D594 one_setter
 0802E920 panel_claim_pool
@@ -719,6 +722,11 @@
 080C6C08 souls_code_bn6.6_bytes_entry
 080C9518 reticle_code
 080C9519 type_0x25
+080C9A8C kept_by_push_pop
+080C9AA8 blizzardman_ice_set
+080C9AD6 blizzardman_ice_set_0x080c9aa8
+080CA838 bn5_darkloids
+080CA8B8 comparing_parent_curaction_with_his_state
 080CABCA BN5_COLONEL_STRIKE_SPAWN
 080CABEA BN5_DARK_HOLE_TEST
 080CAC42 colonelsoul_button_chip.searches
@@ -789,6 +797,8 @@
 080FAA88 bn5_navis_3
 080FB678 bn5_navis_4
 080FC2AC bn5_navis_5
+08103928 shademan_states_9_12
+08103D62 shademan_states_9_12_0x08103928
 0810436C chaos_unison_5
 08104550 BN5_VIRUS_DISPATCH
 0810455C BN5_PRESTEP_APPLEY
