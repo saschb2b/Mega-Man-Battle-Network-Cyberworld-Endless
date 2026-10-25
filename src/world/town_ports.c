@@ -1,4 +1,4 @@
-/* town_ports.h, and the ports of town.h (docs/HOME.md, issue #86). After an
+/* town_ports.h, and the ports of town.h (docs/world/home/, issue #86). After an
  * act the next act's ways are the town's ports: the landmark's the first,
  * then one of the original's own jack-in points or a check made a port for
  * each other way. Their cells, middles and names, and which one Lan stands

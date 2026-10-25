@@ -1,5 +1,5 @@
 /* second_read.h. Each panel's facts from BN6's memory and the run's, into
- * S2 (docs/ROM_DATA.md, the second screen's rows): read after the game's
+ * S2 (docs/rom/pet-and-second-screen.md, the second screen's rows): read after the game's
  * frame, where the draw never reads the game. */
 #include "second_read.h"
 
@@ -162,7 +162,7 @@ static void read_custom(void) {
 	S2.cross_under = crossing ? cross_at(emu_read8(BN6_CUSTOM_CROSS_ROW), S2.form) : 0;
 	S2.cursor = emu_read8(BN6_CUSTOM_CURSOR);
 	/* (the emblem's place is UNITE's while the last chip picked lights a
-	 * held Soul, docs/MULTIROM.md; ColonelSoul's button the two places
+	 * held Soul, docs/multirom/; ColonelSoul's button the two places
 	 * under the picks DustCross keeps, soulcolonel.h) */
 	bool unite = soulunite_ready() && emu_read8(BN6_SOULS + BN6_SOUL_SLOT) == BN6_SLOT_UNITE;
 	S2.unite_soul = unite ? emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_SOUL) : 0;

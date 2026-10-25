@@ -19,7 +19,7 @@ void second_beast_lines(int turns, char *out, size_t n);
 
 /* A Soul's name by BN5's number (7-12: "KnightSoul"), "" none */
 const char *second_soul_name(int soul);
-/* UNITE's card where the emblem stands (docs/MULTIROM.md, One net): the
+/* UNITE's card where the emblem stands (docs/multirom/one-net.md): the
  * Soul the last pick lights, its turns, the chip it takes, a Soul or a
  * Cross; grey, what lights it; chosen, when it comes (s->unite_*); lines
  * apart by '|', into `out`, its name into `name` */
@@ -48,7 +48,7 @@ const char *second_run_line(bool bug);
 /* The board's rules, in a line */
 const char *second_board_rules(void);
 
-/* Home's next step where Lan or MegaMan stands (docs/HOME.md): in Lan's
+/* Home's next step where Lan or MegaMan stands (docs/world/home/): in Lan's
  * HP the pink pad, in his room his PC, in his house and home's town the PC
  * up in his room, in a town not home its port (`landmark_at`, "bird statue
  * on the plaza"); into `out` */
@@ -57,7 +57,7 @@ void second_home_next(int where, const char *landmark_at, char *out, size_t n);
 /* The run's setup in lines ("Short net, threat 2|Standard folder,
  * HeatCross"), into `out` */
 void second_home_setup(char *out, size_t n);
-/* The Net's clock (docs/HOME.md, going back): its notches and what they
+/* The Net's clock (docs/world/home/going-back.md): its notches and what they
  * cost, empty before the first trip back; into `out` */
 void second_home_clock(char *out, size_t n);
 /* The ways lit at home (director_home_ways), a line each: the pink pad's
@@ -86,7 +86,7 @@ int second_library(SecondRow *out, int most);
 const char *second_library_line(void);
 /* The older net's own chips the Library holds, named after a heading,
  * into `out` ("" none): the second screen lists them under the older net
- * (docs/MULTIROM.md, One net: the Library) */
+ * (docs/multirom/one-net.md: the Library) */
 void second_library_older(char *out, size_t n);
 /* What the run holds of a chip in any code, the Library's card's: its
  * copies in the folder and in the pack, as rows; how many of `most` */

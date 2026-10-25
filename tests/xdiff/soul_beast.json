@@ -228,5 +228,5 @@
    "0x69"
   ]
  },
- "expect_why": "The design's call (docs/MULTIROM.md: no Beast Out while united): the emblem's lit test answers grey while a Soul is united (src/emu/soulunite.c at 0x0802A57A), so A on it is refused (0x08028DB2: sound 0x69) and no Beast Out is committed; the slot is the emblem with no pick (Beast Out stands), UNITE's only while the last pick lights a held Soul."
+ "expect_why": "The design's call (docs/multirom/: no Beast Out while united): the emblem's lit test answers grey while a Soul is united (src/emu/soulunite.c at 0x0802A57A), so A on it is refused (0x08028DB2: sound 0x69) and no Beast Out is committed; the slot is the emblem with no pick (Beast Out stands), UNITE's only while the last pick lights a held Soul."
 }

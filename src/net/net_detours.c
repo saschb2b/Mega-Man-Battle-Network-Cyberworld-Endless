@@ -1,4 +1,4 @@
-/* A layer's detours (docs/LEVEL_DESIGN.md): the branches off the way
+/* A layer's detours (docs/world/level-design/): the branches off the way
  * measured, what each ends in, blue data where a long one ends, and the
  * empty ones given a reason to walk them. */
 #include "net_detours.h"
@@ -7,7 +7,7 @@
 
 #include "net_gen.h"
 
-/* ---- Detours (docs/LEVEL_DESIGN.md, Set pieces) ----
+/* ---- Detours (docs/world/level-design/set-pieces.md) ----
  * How far each floor cell lies off the way, in panels walked (0 on it, -1
  * where no walk reaches), and the way's cell its walk leaves from: the
  * cells of a spur, a room off the way and what lies past them share it, a

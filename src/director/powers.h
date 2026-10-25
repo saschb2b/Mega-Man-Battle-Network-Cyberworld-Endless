@@ -19,7 +19,7 @@ const char *powers_cross_strength(int navi);
 const char *powers_cross_on_navis(int navi);
 /* Whether MegaMan has `navi`'s Cross: its CROSSSELECT entry on. */
 bool powers_cross_owned(int navi);
-/* A run's start: what it brought of MegaMan's powers (docs/META.md), in
+/* A run's start: what it brought of MegaMan's powers (docs/game/meta/), in
  * the Custom screen from the first battle: the Cross of run.cross, and
  * BeastOut with the BeastOut helper (issue #99). */
 void powers_bring(void);

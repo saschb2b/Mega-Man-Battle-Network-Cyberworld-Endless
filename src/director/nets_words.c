@@ -1,5 +1,5 @@
-/* MegaMan and Lan where the nets meet (docs/MULTIROM.md, One net: the
- * telegraph; docs/VOICE.md): an older net's area fought our way, the first
+/* MegaMan and Lan where the nets meet (docs/multirom/one-net.md: the
+ * telegraph; docs/voice/rules.md): an older net's area fought our way, the first
  * visitor of the other net, the deep's both nets; and, a run continued
  * without BN5's ROM, the chips and Souls of BN5's that wait for it. */
 #include "nets_words.h"
@@ -51,7 +51,7 @@ void nets_battle_note(const Encounter *e) {
 static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
 
 /* MegaMan on the first visitor a profile met: one of the older net's in
- * a battle of ours, or one of ours in the older net's (docs/MULTIROM.md,
+ * a battle of ours, or one of ours in the older net's (docs/multirom/one-net.md,
  * One net: the telegraph), named by its family */
 static void visitor_words(void) {
 	if (!D.visitor_due || !quiet()) return;
@@ -76,7 +76,7 @@ static void resumed(void) {
 	D.old_souls_due = souls_held() && !chips_from_bn5();
 }
 
-/* After a CONTINUE without BN5's ROM (docs/MULTIROM.md, One net: the
+/* After a CONTINUE without BN5's ROM (docs/multirom/one-net.md, One net: the
  * design, call 4): the run's folder holding chips of BN5's, they sit out of
  * battles until it is back; the run holding Souls, they sleep till then.
  * MegaMan says so, on the map, once. */

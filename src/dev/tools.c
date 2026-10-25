@@ -32,7 +32,7 @@ bool tools_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--mp2k-trace")) mp2k_spec = v;
 	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	/* (a game under the flat plan, the rolls before issue #154, beside
-	 * the opening one in play: docs/ECONOMY.md) */
+	 * the opening one in play: docs/game/economy/) */
 	else if (!strcmp(a, "--economy-plan")) econ_plan = !strcmp(v, "flat") ? &econ_flat : &econ_opening;
 	else return false;
 	return true;
@@ -45,7 +45,7 @@ int tools_run(void) {
 	if (render_spec) {
 		int song = 0, secs = 20, rom = 0;
 		char out[256] = "song.wav";
-		/* (xN/ first: extra ROM N's song, docs/MULTIROM.md) */
+		/* (xN/ first: extra ROM N's song, docs/multirom/) */
 		const char *spec = render_spec;
 		if (spec[0] == 'x' && sscanf(spec, "x%d/", &rom) == 1) { spec = strchr(spec, '/') + 1; ++rom; }
 		sscanf(spec, "%i:%d:%255s", &song, &secs, out);

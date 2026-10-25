@@ -1,4 +1,4 @@
-/* The emote strip (issue #178; docs/ONLINE.md, Emotes): SELECT in the Net
+/* The emote strip (issue #178; docs/online/square/emotes.md): SELECT in the Net
  * Square opens a PET screen of the project's own over the bottom of BN6's
  * picture, laid out as the Custom screen lays out its chips (BN6 has no
  * screen for emotes; its art is not copied): the twelve emotes as icons in

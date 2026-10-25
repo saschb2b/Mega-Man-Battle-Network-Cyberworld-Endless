@@ -1,5 +1,5 @@
 /* Calls into the game's own routines (gamecall.h), through two standing
- * hooks (docs/EMULATION.md, Hooks; issue #33): at cbGameState, the game
+ * hooks (docs/engine/emulation/hooks.md; issue #33): at cbGameState, the game
  * mode's state update the main loop runs once a frame, a queued routine
  * runs in the update's place; where it returns, in the free ROM space, a
  * second hook keeps its r0 and r1 and goes back to the main loop, as the

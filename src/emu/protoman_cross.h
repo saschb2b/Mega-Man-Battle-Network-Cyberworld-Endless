@@ -1,4 +1,4 @@
-/* ProtoMan's cross, mended (issue #55; docs/FIDELITY.md): BN6 can end it
+/* ProtoMan's cross, mended (issue #55; docs/game/fidelity.md): BN6 can end it
  * with nothing able to touch him for the rest of the battle; a hook gives
  * him his panel back as he lands on it. */
 #ifndef CW_PROTOMAN_CROSS_H

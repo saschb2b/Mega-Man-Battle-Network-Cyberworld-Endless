@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The itch.io page's files (docs/ITCH.md): a release's own files from GitHub,
+"""The itch.io page's files (docs/project/itch.md): a release's own files from GitHub,
 one butler channel each, and the browser player made into the zip itch
 plays in its page.
 

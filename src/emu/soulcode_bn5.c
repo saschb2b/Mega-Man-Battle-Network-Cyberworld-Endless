@@ -1,6 +1,6 @@
 /* soulcode_bn5.c: the code BN5's Team Colonel Souls run, moved into BN6's battle engine, written by tools/xsoul.py from
  * the two ROMs (python3 tools/xsoul.py; --check says whether this is what it writes). Do not edit: change the generator
- * and write it again. Numbers alone (docs/MULTIROM.md, Transplanted Souls): addresses in BN5 Team Colonel (USA) and BN6
+ * and write it again. Numbers alone (docs/multirom/souls.md): addresses in BN5 Team Colonel (USA) and BN6
  * Cybeast Gregar (USA), counts and the CRC32s of the ranges src/emu/soulcode.c copies from the player's ROM. */
 #include "soulcode.h"
 

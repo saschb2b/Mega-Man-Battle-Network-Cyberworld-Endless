@@ -1,5 +1,5 @@
 /* A BonusPanel as BN5's (liberation_bonus.h), traced in BN5's own board
- * (docs/ROM_DATA.md, BN5's Liberation Missions; bn5_liberation.h's
+ * (docs/rom/liberation.md, BN5's Liberation Missions; bn5_liberation.h's
  * BN5_LIB_BONUS_*): its frames counted from the moment MegaMan's line of
  * it has closed, as BN5's routine counts them. */
 #include "liberation_bonus.h"
@@ -133,7 +133,7 @@ static void strike(void) {
 			LB.b.unit[S.target].gone = true;
 		} else {
 			/* (a fifth of his max off his board HP, BN5's; never to none, his
-			 * deletion his battle's: docs/LIBERATION.md, The board's HP) */
+			 * deletion his battle's: docs/game/liberation/bn5/board.md's HP) */
 			LB.darkloid_cut += 1;
 			if (LB.hp_max[0] > 0) LB.hp[0] = LB.hp[0] - LB.hp_max[0] / 5 > 1 ? LB.hp[0] - LB.hp_max[0] / 5 : 1;
 		}

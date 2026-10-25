@@ -1,4 +1,4 @@
-/* The pacing report (docs/DEVTOOLS.md): for every act of the first cycles
+/* The pacing report (docs/devtools/): for every act of the first cycles
  * and every area it can visit, the random battles the engine rolls (virus
  * HP together, the strongest hit, versions) against the act's band, and the
  * guardians runs draw, from the ROM without the game. */
@@ -126,7 +126,7 @@ static int territories(FILE *out, int act, int loop, int biome) {
 static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
 	int flagged = 0, first = loop * CYCLE_LAYERS + act * 3 + 1, last = act == 6 ? first : first + 2;
 	/* (the deep's acts draw on both nets, a coin a battle, where BN5's
-	 * ROM is read: docs/MULTIROM.md, One net) */
+	 * ROM is read: docs/multirom/one-net.md) */
 	bool deep = loot_layer_nets(b, b) && loot_deep[0] >= 0;
 	fprintf(out, "\nact %d cycle %d  %s%s\n", act + 1, loop + 1, guardian_area_name(b), deep ? " (the deep: both nets' battles, the older net's counted)" : "");
 	rng_seed(seed);
@@ -138,7 +138,7 @@ static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
 	return flagged + territories(out, act, loop, b);
 }
 
-/* ---- visitors (visitors.h; docs/MULTIROM.md, One net): each net's
+/* ---- visitors (visitors.h; docs/multirom/one-net.md): each net's
  * families as their own records set them, then every act's random battles
  * from the second on, each given a visitor where one fits, against the
  * act's band ---- */
@@ -225,7 +225,7 @@ static int variant_of(int program, int color) {
 	return 0;
 }
 
-/* The NaviCust's drafts by the Spins held (docs/META.md, the Spins found in
+/* The NaviCust's drafts by the Spins held (docs/game/meta/spins.md, the Spins found in
  * the net): runs of a gift program, then each guardian's draft over the
  * first cycle, one of its options taken at random; how many options each
  * draft had. The draft offers only programs that fit, turned only where
@@ -386,7 +386,7 @@ static int route_fork(FILE *out, const RouteFork *f) {
 	return outside + clash + none;
 }
 
-/* A special route's ways (docs/LIBERATION.md, Special routes) over 500
+/* A special route's ways (docs/game/liberation/special-routes.md) over 500
  * runs: the third way it opens at the endless net's act 4 fork (from act
  * 3's board), the Nest's second way after either net's last fork; each
  * guardian, version and HP, how often, past the act's band (not the
@@ -404,7 +404,7 @@ static int routes_report(FILE *out) {
 	return flagged;
 }
 
-/* The super bosses (docs/BOSSES.md, Super bosses): BN6's own battles,
+/* The super bosses (docs/game/bosses/super-bosses.md): BN6's own battles,
  * above the bands by design, each form's HP where it stands, the last
  * act's band beside */
 static void super_report(FILE *out) {
@@ -417,7 +417,7 @@ static void super_report(FILE *out) {
 		navi_hp(SUPER_BASS, super_bass_form(0, false)), navi_hp(SUPER_BASS, super_bass_form(1, false)), navi_hp(SUPER_BASS, super_bass_form(2, true)));
 }
 
-/* The Net's clock (docs/HOME.md, going back): each act's guardians as the
+/* The Net's clock (docs/world/home/going-back.md): each act's guardians as the
  * first cycle draws them, their median HP, at 0 to 6 notches (a trip back
  * each), beside the next act's band: how many trips back make an act's
  * guardian a next act's */
@@ -441,7 +441,7 @@ static void clock_report(FILE *out) {
 	}
 }
 
-/* Requests at home (docs/HOME.md, piece 5): each kind's terms and pay by
+/* Requests at home (docs/world/home/jobs.md): each kind's terms and pay by
  * act, beside the act's guardian's zenny and the Net Dealer's HPMemory
  * price (shop.c), the prices they are measured by */
 static void jobs_report(FILE *out) {
@@ -464,7 +464,7 @@ static void jobs_report(FILE *out) {
 	}
 }
 
-/* Home's shops (docs/HOME.md, piece 6): the SubChip seller's stock by act
+/* Home's shops (docs/world/home/home-shop.md): the SubChip seller's stock by act
  * (the act ahead's keys first), and the Order Service's price beside a
  * Net Dealer's, by the chips' tiers */
 static void home_shop_report(FILE *out) {
@@ -510,7 +510,7 @@ static int older_guardian_act(FILE *out, int navi, int act, const char *where) {
 	return outside;
 }
 
-/* BN5's guardians (docs/BOSSES.md, BN5's Navis), fought in BN6's engine:
+/* BN5's guardians (docs/game/bosses/bn5-navis.md), fought in BN6's engine:
  * each in every act his area's BN6 area can come in, and every one in the
  * deep's acts, where both nets' Navis share a pool by band (those whose
  * HP falls short of an act's band are not in its pool: none past it, by
@@ -562,7 +562,7 @@ int pacing_report_run(const char *path) {
 		{ 1, { BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP, -1 } },
 		{ 2, { BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP, BIOME_ROBOT_COMP } },
 		{ 2, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
-		{ 2, { BIOME_UNDERNET, -1 } },   /* (the short net's dark way, docs/META.md) */
+		{ 2, { BIOME_UNDERNET, -1 } },   /* (the short net's dark way, docs/game/meta/) */
 		{ 3, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
 		{ 4, { BIOME_UNDERNET, -1 } },
 		{ 5, { BIOME_GRAVEYARD, -1 } },

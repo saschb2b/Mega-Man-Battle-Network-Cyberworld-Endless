@@ -2,7 +2,7 @@
  * posts kinds that fit them (the board's NetBattler a chip of an element
  * or a vow, the club a busting style, the lab its readings: every Mystery
  * Data of a layer, or clean wins), and each kind pays by what it costs
- * (docs/HOME.md, piece 5): the effort of a busting style or a layer
+ * (docs/world/home/jobs.md): the effort of a busting style or a layer
  * searched through, zenny or BugFrags about half a layer's worth; a chip
  * given up, a chip a tier up in the folder's codes; a vow's risk, two
  * HPMemory. */

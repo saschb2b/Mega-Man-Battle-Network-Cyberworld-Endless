@@ -2,7 +2,7 @@
  * none (pet_look.c): the screen's rails and header band, the framed navy
  * window, the information box, the cursor, and the letters each part
  * takes, measured from Gregar's own KeyItem, E-Mail, ChipFolder and
- * SubChip screens (docs/FIDELITY.md, The PET's look). Everything is drawn
+ * SubChip screens (docs/game/fidelity.md, The PET's look). Everything is drawn
  * with fill_rects, so it draws into memory too (the second screen). */
 #ifndef CW_PET_LOOK_H
 #define CW_PET_LOOK_H
@@ -70,7 +70,7 @@ SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill);
  * with `bar`, `top` as it had): `shown` of `n` lines from `first` */
 void look_scroll(SDL_Rect win, int top, int first, int shown, int n);
 /* BN6 keeps the window above for a screen's one list. What else a screen
- * holds takes the kind BN6 gives it (docs/UI.md, A screen's parts): */
+ * holds takes the kind BN6 gives it (docs/engine/ui.md, A screen's parts): */
 /* ... a chip: the Library's and the folder editor's card, grey with its
  * top left corner cut, outlined, the contacts' gold along its foot: the
  * card's face above the contacts */

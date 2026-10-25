@@ -9,6 +9,6 @@ RUN embuilder build sdl2 \
  && printf 'int main(void) { return 0; }\n' > /tmp/t.c \
  && emcc /tmp/t.c -O2 -sUSE_SDL=2 -lidbfs.js -sALLOW_MEMORY_GROWTH=1 -o /tmp/t.js \
  && rm -f /tmp/t.* && chmod -R a+rwX /emsdk/upstream/emscripten/cache
-# The embedded GBA core (docs/EMULATION.md), without threads
+# The embedded GBA core (docs/engine/emulation/), without threads
 COPY mgba.sh /tmp/mgba.sh
 RUN sh /tmp/mgba.sh web && chmod -R a+rwX /emsdk/upstream/emscripten/cache

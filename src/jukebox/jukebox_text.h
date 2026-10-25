@@ -1,4 +1,4 @@
-/* The Jukebox's words (docs/PET.md, The Jukebox): every song of the music
+/* The Jukebox's words (docs/game/pet.md, The Jukebox): every song of the music
  * player of the games in use (BN6's, BN5's where its ROM is beside it),
  * by game and section, in our own names for where each plays, and the
  * screen's labels. */

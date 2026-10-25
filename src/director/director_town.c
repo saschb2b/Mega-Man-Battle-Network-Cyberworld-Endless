@@ -1,6 +1,6 @@
 /* director_home.h's home frame (the trip home and the ways:
  * director_home.c). Lan's HP after each act and at every jack-in, and the
- * town at a run's start and whenever Lan jacks out (docs/HOME.md): Lan's
+ * town at a run's start and whenever Lan jacks out (docs/world/home/): Lan's
  * and MegaMan's words, the act's card held over Lan's HP, the run saved
  * there, MegaMan at each portal, the portal taken, and the next layer's
  * arrival. */

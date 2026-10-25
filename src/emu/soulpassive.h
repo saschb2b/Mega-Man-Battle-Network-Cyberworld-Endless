@@ -1,5 +1,5 @@
 /* A Soul's passives in BN6's engine (issue #82, the Souls track's S5;
- * docs/MULTIROM.md, Transplanted Souls; docs/ROM_DATA.md, A Soul's
+ * docs/multirom/souls.md; docs/rom/souls.md, A Soul's
  * passives): what BN5's engine does for a Soul at the places BN6's engine
  * descends from, each a hook there where MegaMan stands in the proxy form
  * with a Soul (BN6's engine reads the proxy as HeatCross's otherwise):

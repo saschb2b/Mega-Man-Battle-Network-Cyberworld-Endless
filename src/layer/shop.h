@@ -22,7 +22,7 @@ typedef struct {
 #define SHOP_ORDER    0x12    /* ... and AsterLand's counter, the Order Service */
 #define SHOP_MAX_ITEMS 8
 /* An order made at AsterLand's counter this visit: one a visit (docs/
- * HOME.md, piece 6), its keeper's script checks it. */
+ * docs/world/home/home-shop.md), its keeper's script checks it. */
 #define HOME_ORDER_FLAG 0x146B
 #define ORDER_LEAST 1000   /* the Order Service's least price: a 500-zenny chip at twice a Net Dealer's (shop_order_install) */
 
@@ -64,7 +64,7 @@ const char *shop_pick_gift_program(ShopItem *out);
 /* Home's SubChip seller's stock at the visit before layer `depth`: the
  * keys the act ahead's locks want, then the useful SubChips. */
 int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]);
-/* BN6's Order Service as a run has it (docs/HOME.md, piece 6): each
+/* BN6's Order Service as a run has it (docs/world/home/home-shop.md): each
  * chip's code the folder's where it comes in one, its price twice the Net
  * Dealers', the Library's chips owned as BN6 marks a chip it gives; and
  * the copies left to order, -1 before the game has set up its data. */

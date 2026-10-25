@@ -1,6 +1,6 @@
 /* jukebox_text.h. Each song is named for where it plays: its maps' music
  * lists, its battles' records, the scripts and code that start it
- * (docs/PET.md, The Jukebox, says which are verified and how); BN5's songs
+ * (docs/game/pet.md, The Jukebox, says which are verified and how); BN5's songs
  * that nothing in its game starts carry their number. */
 #include "jukebox_text.h"
 

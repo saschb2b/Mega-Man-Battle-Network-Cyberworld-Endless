@@ -50,13 +50,13 @@ static void append(const char *line) {
 
 void runlog_battle_start(const Encounter *e, const char *kind) {
 	/* (the zenny and BugFrags on hand: the economy's course over a run,
-	 * docs/ECONOMY.md) */
+	 * docs/game/economy/) */
 	int n = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d %s hp %d/%d z %u bf %u", (unsigned)run.seed, run.depth,
 		run.biome, kind, megaman_hp(), megaman_max(), (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	L.guardian = 0;
 	L.duel = !strcmp(kind, "duel");
 	/* (an older net's record fought in BN6's engine: "x" and its address
-	 * there, docs/MULTIROM.md; a visitor of the other net "+" before it) */
+	 * there, docs/multirom/; a visitor of the other net "+" before it) */
 	if (e && e->xrecord) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " x%07X", (unsigned)(e->xrecord & 0xFFFFFFFu));
 	int total = 0;
 	for (int i = 0; e && i < e->nfoes && n < (int)sizeof L.line - 16; ++i) {
@@ -76,7 +76,7 @@ void runlog_guardian_start(int navi, const Encounter *e, int hp) {
 	runlog_battle_start(NULL, "guardian");
 	L.guardian = navi;
 	/* (his number here, and his foe as the engine has it: BN5's by its
-	 * family moved in, docs/MULTIROM.md) */
+	 * family moved in, docs/multirom/) */
 	if (e && e->nfoes > 0)
 		L.len += snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " g%d n%d.%d foehp %d", navi, e->foes[0].family, e->foes[0].version, hp);
 	if (L.len >= (int)sizeof L.line) L.len = (int)sizeof L.line - 1;
@@ -143,7 +143,7 @@ void runlog_battle_end(bool won, int frames) {
 	if (won) count_reward(L.guardian != 0);
 	L.open = false;
 	/* (a win's busting level and the reward it picked, BN6's encoding:
-	 * docs/ECONOMY.md's battle drops) */
+	 * the battle drops in docs/game/economy/) */
 	if (won)
 		snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> won hp %d bust %d reward %04x", megaman_hp(), emu_read8(BN6_BATTLE_BUSTING),
 			emu_read16(BN6_BATTLE_REWARD));

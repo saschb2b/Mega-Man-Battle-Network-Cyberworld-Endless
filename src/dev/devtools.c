@@ -99,7 +99,7 @@ void devtools_parse(const char *spec) {
 void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (the super bosses' records made N: their forms and words, docs/
-	 * BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	for (int k = 0; k < 2; ++k) {
 		int navi = k ? SUPER_CYBEAST : SUPER_BASS, wins = k ? dev.beast : dev.bass;
 		while (rival(navi)->megaman_won < wins) {

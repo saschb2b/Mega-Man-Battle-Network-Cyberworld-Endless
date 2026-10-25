@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """xdiff.py [SPEC ...] [--story] [--survey] [--poke A:V[:N]] [--call F:T]
 [--mutations] [--expect-fail] [--no-run]: the differential of a virus
-family moved into BN6's battle engine (issue #82; docs/MULTIROM.md,
-Transplanted families; docs/DEVTOOLS.md, The differential).
+family moved into BN6's battle engine (issue #82; docs/multirom/families.md,
+Transplanted families; docs/devtools/differential.md).
 
 BN5's CanGard and Handi run in BN6's battle engine by their own code,
 moved from the player's ROM (src/emu/xvirus.c). Each spec
@@ -84,7 +84,7 @@ the game copied there): the comparator's own test, which --mutations
 runs from tests/xdiff/mutations.json, each break required to FAIL its
 spec. A spec may record the verdict the differential gave it ("verdict":
 {"is", "at", "why"}: the chips' differential's on a chip BN6's code plays
-otherwise than BN5's, docs/MULTIROM.md, The chips' code), which holds
+otherwise than BN5's, docs/multirom/chips-code.md), which holds
 where the run ends the same at the same frame. Needs both ROMs (local
 only), copied into .build/xdiff/rom; the traces go to .build/xdiff/runs.
 Exits 0 when every spec passes (a smoke spec may end inconclusive, a

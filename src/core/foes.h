@@ -18,7 +18,7 @@ typedef struct {
 #define MAX_FOES 6
 #define MAX_FIELD_OBJS 4
 
-/* A field object's kind, the entity list's high nibble (docs/ROM_DATA.md) */
+/* A field object's kind, the entity list's high nibble (docs/rom/) */
 enum { FIELD_GEM = 2, FIELD_ROCK = 3, FIELD_CUBE = 8, FIELD_STATUE = 9, FIELD_METAL = 10 };
 
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 	unsigned from_viruses;
 	/* another game's battle fought in BN6's engine (xbattles.h, issue #82):
 	 * its record there (0: BN6's own), and the foe that came from the
-	 * other net into it (1 + its index, 0 none: docs/MULTIROM.md, One net) */
+	 * other net into it (1 + its index, 0 none: docs/multirom/one-net.md) */
 	uint32_t xrecord;
 	int visitor;
 	/* its Mystery Data's finds its own (its game's rows, as BN6's names

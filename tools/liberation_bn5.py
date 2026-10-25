@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """liberation_bn5.py [--runs N] [--show] [--draw DIR]: Battle Network 5's own nine
 Liberation Missions, read from the player's ROM, measured as tools/liberation.py
-measures its generated ones (docs/LIBERATION.md).
+measures its generated ones (docs/game/liberation/).
 
-Reads Team Colonel (USA)'s mission records (docs/ROM_DATA.md, BN5's Liberation
+Reads Team Colonel (USA)'s mission records (docs/rom/liberation.md, BN5's Liberation
 Missions): each mission's panels and their kinds, its DarkHoles, its team, its
 Darkloid and guardians, its item panels and traps, its par and its rewards;
 prints each board's numbers (panels, dark share, holes, items, traps, bonus
@@ -28,7 +28,7 @@ BN5_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'
 MISSIONS = 0x04F628       # 9 records of 0x5C: map, offsets, par, Order Points, 20 pointers
 MISSION_SIZE = 0x5C
 NAVI_HP = 0x04F968        # per team Navi: its id, then his HP in each mission
-# A panel's kind in BN5's lists (docs/LIBERATION.md, The board) and ours.
+# A panel's kind in BN5's lists (docs/game/liberation/bn5/board.md) and ours.
 KINDS = {0x00: L.FREE, 0x01: L.DARK, 0x03: L.ITEM, 0x05: L.BAR1, 0x06: L.BAR2, 0x07: L.BAR3,
          0x09: L.BONUS, 0x0A: L.HOLE, 0x0B: L.RING, 0x0C: L.START}
 NAVIS = {0x00: 'MegaMan', 0x07: 'Colonel', 0x08: 'ShadowMan', 0x09: 'NumberMan', 0x0A: 'TomahawkMan',

@@ -1,13 +1,13 @@
 /* The Arena's pair (arena_pair.h): two BN6 cores on mGBA's cable.
  *
  * The cable is mGBA's local lockstep, its scheduling in our hands as mGBA's
- * own frontend has it with a thread a core (issue #128, docs/ONLINE_ARENA.md,
+ * own frontend has it with a thread a core (issue #128, docs/online/arena/rollback/overview.md,
  * Rollback): each core runs whole run loops (its instructions up to its next
  * event), the first posting the cycles it ran to the second, which runs
  * until it has used them and then sleeps until the first posts more; the
  * first waits while a transfer needs the second. So the two keep within a
  * few thousand cycles of each other (the research harness, docs/
- * ONLINE_LINK.md, stepped them an instruction at a time in turn, and a
+ * docs/online/link.md, stepped them an instruction at a time in turn, and a
  * core could run two frames ahead of its partner). Both halt at BN6's wait
  * for a frame as the game's own core does (idle.h), which skips the cycles
  * the game would have spun through. A frame of the pair ends once both
@@ -50,7 +50,7 @@
 #define STEP_LIMIT 100000u
 #define STATE_FLAGS (SAVESTATE_SAVEDATA | SAVESTATE_RTC)
 /* the sound's fields in mGBA's state: the PSG's and the FIFOs', and the samples rendered, which its lazy PSG leaves
- * otherwise after a load than run straight (docs/ONLINE_ARENA.md, Rollback) */
+ * otherwise after a load than run straight (docs/online/arena/rollback/overview.md) */
 #define SOUND_AT    offsetof(struct GBASerializedState, audio)
 #define SOUND_END   (SOUND_AT + sizeof ((struct GBASerializedState *)0)->audio)
 #define SAMPLES_AT  offsetof(struct GBASerializedState, samples)
@@ -91,7 +91,7 @@ static uint8_t *rom_copy(const uint8_t *rom, size_t size, bool bn5) {
 /* (on the 3DS the core maps its ROM as it is and patches it in place,
  * mGBA's FIXED_ROM_BUFFER (emu.c): the Arena's cores, whose ROMs are the
  * same bytes with the same hooks at the same places, share one copy, 16 MB
- * of a 96 MB heap where two would be 32 (docs/ONLINE_ARENA.md, The New
+ * of a 96 MB heap where two would be 32 (docs/online/arena/rollback/new-3ds.md, The New
  * 3DS). The boot core takes it first and lets it go before the pair's are
  * made, so its own hooks and writes leave with it.) */
 static struct {

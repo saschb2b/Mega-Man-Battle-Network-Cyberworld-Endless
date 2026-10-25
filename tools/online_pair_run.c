@@ -1,5 +1,5 @@
 /* BN6's Practice NetBattle on one linked pair of cores, as each client of the
- * Arena will run it (docs/ONLINE_LINK.md): the cable stays inside the pair,
+ * Arena will run it (docs/online/link.md): the cable stays inside the pair,
  * and only the two players' inputs drive it. At SNAPSHOT_FRAME it takes a
  * complete snapshot of the pair, plays HORIZON frames, restores and plays
  * them again, and checks the replay's every frame against the first. The

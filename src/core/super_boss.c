@@ -1,5 +1,5 @@
 /* super_boss.h. Every number here is BN6 Gregar's own, read and checked
- * as docs/BOSSES.md (Super bosses, What the ROMs hold) says: the enemy
+ * as docs/game/bosses/super-bosses.md (Super bosses, What the ROMs hold) says: the enemy
  * table's versions, the music of the story's battle records, the Gigas
  * Gregar pays for Bass SP and Bass BX. */
 #include "super_boss.h"

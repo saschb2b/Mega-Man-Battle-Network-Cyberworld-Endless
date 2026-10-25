@@ -1,7 +1,7 @@
-/* The JACK-IN SETUP after NEW GAME (docs/META.md, The run's setup): the
+/* The JACK-IN SETUP after NEW GAME (docs/game/meta/, The run's setup): the
  * net's length, the starting folder, a Cross, the threat rung and the
  * helpers, the last run's choices to start from, in BN6's PET look as
- * Options (docs/UI.md): the rows in a window, JACK IN! as NaviCust's RUN!
+ * Options (docs/engine/ui.md): the rows in a window, JACK IN! as NaviCust's RUN!
  * at its foot, the row under the cursor in the information box, and the
  * helpers on a page of their own as Options' sections. */
 #ifndef CW_TITLE_SETUP_H

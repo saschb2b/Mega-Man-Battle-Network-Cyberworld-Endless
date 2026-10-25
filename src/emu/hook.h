@@ -1,6 +1,6 @@
 /* Hooks: a BKPT written over one instruction of the game's code calls the
  * engine's C right there, mid-frame, with the CPU's registers (docs/
- * EMULATION.md, Hooks; issue #27). The game's code stays the player's ROM's;
+ * docs/engine/emulation/hooks.md; issue #27). The game's code stays the player's ROM's;
  * only the core's copy is patched.
  *
  * Two kinds, and neither touches the director's state, since a hook runs on
@@ -103,7 +103,7 @@ int hook_slot_of(struct mCore *core);
 /* What hooks keep between two of their calls, one a core: an array of
  * HOOK_CORES entries of `each` bytes indexed by hook_slot, named once as
  * its hooks are installed (the same array again is no second), so that a
- * rollback puts a core's back with its state (docs/ONLINE_ARENA.md,
+ * rollback puts a core's back with its state (docs/online/arena/rollback/overview.md,
  * Rollback); false where the table of them is full */
 bool hook_keep_slots(void *array, size_t each);
 /* the bytes a core's entries take in all, and them copied out or back */

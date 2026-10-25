@@ -9,7 +9,7 @@
 #include "text.h"
 
 /* The obstacles' present flags, one a slot (layer.block[]): set, the
- * obstacle stands; cleared, it opens and stays open (docs/ROM_DATA.md).
+ * obstacle stands; cleared, it opens and stays open (docs/rom/).
  * The last slot's (+7) another game's prop's, set while it stands. */
 #define BLOCK_PRESENT_FLAG 0x1458
 
@@ -34,7 +34,7 @@ const char *blockers_pcode(void);
  * most; the new count. */
 int blockers_objects(uint8_t *recs, int n, int max);
 /* ... and another game's prop standing at world (x, y) as one of handler
- * 3's objects that never opens (BN5's dark hole, docs/MULTIROM.md: its
+ * 3's objects that never opens (BN5's dark hole, docs/multirom/: its
  * present flag the last slot's, set here), where it was copied in. */
 int blockers_xprop(uint8_t *recs, int n, int max, int x, int y);
 

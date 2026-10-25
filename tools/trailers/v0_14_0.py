@@ -238,7 +238,7 @@ def duel_scene(work, scene, port, roms):
 def teams(work, scene, port, roms, extra=None, watcher=False):
     """Four games in the Square, two teams: Kei asks Rio, Mira asks Dex,
     each answered Yes; the captains then stand apart (as drive.py's
-    four-game proofs, docs/ONLINE_ARENA.md)."""
+    four-game proofs, docs/online/arena/)."""
     t0 = time.time()
     extra = extra or {}
     g = {}

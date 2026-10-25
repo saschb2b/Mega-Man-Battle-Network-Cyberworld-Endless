@@ -2,7 +2,7 @@
  * as the engine runs it on the title and the PET's screens: its state,
  * shared by the sequencer (mp2k_seq.c, mp2k_note.c), the PSG's driver
  * (mp2k_cgb.c) and the mixer (mp2k_mix.c). Each field is the library's own,
- * at the place BN6's RAM keeps it (docs/ROM_DATA.md, BN6's sound engine:
+ * at the place BN6's RAM keeps it (docs/rom/sound.md, BN6's sound engine:
  * SoundInfo, its channels, a music player and its tracks), so a frame of
  * ours can be laid beside a frame of the game's (tools/mp2k_diff.py). */
 #ifndef CW_MP2K_STATE_H
@@ -111,7 +111,7 @@ typedef struct {
 	int slice;                /* the ring's part this frame mixed */
 	const uint8_t *data;      /* (ours) the ROM the part running reads: a player's, a channel's (mp2k_read) */
 	uint32_t quiet;           /* (ours) the players silenced (mp2k_quiet_set) */
-	/* the library's tables in BN6's ROM (docs/ROM_DATA.md) */
+	/* the library's tables in BN6's ROM (docs/rom/) */
 	uint32_t song_table, clock_table, scale_table, freq_table, cgb_scale_table, cgb_freq_table, noise_table, cgb3_vol_table;
 } Mp2k;
 extern Mp2k M;
@@ -124,7 +124,7 @@ extern Mp2k M;
  * song's, its voices', its samples'; mp2k_read picks the ROM (0 BN6's, 1 +
  * XRomId another's), BN6's where it is not there. BN5's library is BN6's,
  * byte for byte but for its literals' addresses, and its tables BN6's
- * (docs/ROM_DATA.md, Another game's songs), so another game's song plays
+ * (docs/rom/bn5-world.md, Another game's songs), so another game's song plays
  * on BN6's code and tables: the library's tables are read from BN6's ROM,
  * whichever is being read (mp2k_lib_u8) */
 uint8_t mp2k_u8(uint32_t addr);

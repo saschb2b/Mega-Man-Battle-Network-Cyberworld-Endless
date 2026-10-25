@@ -1,5 +1,5 @@
-/* director_gate.h. The Net Square's gate in Lan's HP (docs/HOME.md, piece
- * 11; docs/ONLINE.md): BN6's great teleporter on the room's front floor,
+/* director_gate.h. The Net Square's gate in Lan's HP (docs/world/home/square-gate.md, piece
+ * 11; docs/online/): BN6's great teleporter on the room's front floor,
  * the way out to other players, and its keeper, a Mr.Prog. Stepped on, the
  * gate asks first, in BN6's own chat boxes: the keeper the first time a
  * server is used (what its server sees, the cursor on No), then MegaMan

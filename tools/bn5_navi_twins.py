@@ -1,5 +1,5 @@
 """bn5_navi_twins.py: the Navis' own pairs of BN5 Team Colonel's routines with their twins in BN6 Cybeast Gregar (USA),
-and their audits, beside tools/bn5_twins.py's (the families'), read by tools/xnavirecipe.py (issue #82; docs/ROM_DATA.md,
+and their audits, beside tools/bn5_twins.py's (the families'), read by tools/xnavirecipe.py (issue #82; docs/rom/navis.md,
 The Navis' engine twins). Numbers only: each pair's two bodies compared by tools/xrecipe_thumb.py, each DIFF judged for
 what a Navi's moved code asks of it."""
 
@@ -261,7 +261,7 @@ TWINS = (
     (0x0800DC0C, 0x0800FE52, 'navis'), (0x0801A410, 0x0801DACC, 'navis'),
 )
 
-# Each DIFF pair's audit (verdict, why, conditions), as tools/bn5_twins.py's AUDITS; the record is docs/ROM_DATA.md's
+# Each DIFF pair's audit (verdict, why, conditions), as tools/bn5_twins.py's AUDITS; the record is docs/rom/navis.md's
 # (The Navis' engine twins)
 AUDITS = {
     # (ShadeMan's: the engine's routines his drain and his bats' end call)
@@ -272,7 +272,7 @@ AUDITS = {
                                      "no such record and lowers the HP alone: the same HP in both (shademan_v1_keys)", ()),
     (0x080E1534, 0x080E2718): ('ok', "an attack's end showing its user (BN6_SHOW_AFTER_HIDDEN's routine): BN5 tests the user's flags against "
                                      "0x80000004 (invisible or submerged), BN6 against 4, which src/emu/xsea.c makes see the submerged too "
-                                     "(docs/ROM_DATA.md, BN5's sea's submerge and hold); the rest the same, its calls their twins", ()),
+                                     "(docs/rom/bn5-world.md, BN5's sea's submerge and hold); the rest the same, its calls their twins", ()),
     (0x0800E0B6, 0x08010332): ('ok', "a step's style by its side's battle NaviStats (the r2 of 0x0800F280's move): BN5's 4 where its +0x29 "
                                      "is 0, unless +0x2C is 8 (then 0), else a table's by +0x29 and +0x2B; BN6's 1 in the battle mode 9 "
                                      "(BattleSettings +3, 0x0802D234), else 4 where +0x29 is 0, else its table's: the Dark Soul's side is "

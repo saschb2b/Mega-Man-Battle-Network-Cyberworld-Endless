@@ -9,7 +9,7 @@
  * Silence's music, which blinds him every few frames, or MegaMan standing
  * where a stroke ends. With no region he is on no panel, and every attack
  * passes through him until his next cross. Seen on BN6 alone
- * (docs/ROM_DATA.md, ProtoMan's cross). BN6's own reset for an attack cut
+ * (docs/rom/battle.md, ProtoMan's cross). BN6's own reset for an attack cut
  * short (bn6f sub_80FBCA2) sets his region to his panel, and the Cybeast's
  * charge sets its own as it ends; this hook does the same as the cross
  * ends, and nothing where the region is already there. */

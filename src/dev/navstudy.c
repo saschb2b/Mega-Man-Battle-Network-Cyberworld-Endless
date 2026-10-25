@@ -1,5 +1,5 @@
 /* BN6's own net maps measured for the layers' navigation (docs/
- * LEVEL_DESIGN.md; docs/DEVTOOLS.md): the way across, counted as a layer's
+ * docs/world/level-design/; docs/devtools/): the way across, counted as a layer's
  * is (each area's original maps, the floor their walls give a panel at a
  * time, and the one-wide walkways the walk between their two farthest
  * panels crosses: grid_way_narrows, net_way.c; Navigation), and where
@@ -60,10 +60,10 @@ int navstudy_run(void) {
 	return 0;
 }
 
-/* ---- Where MegaMan arrives (docs/LEVEL_DESIGN.md, Arrivals; issue #106) ---- */
+/* ---- Where MegaMan arrives (docs/world/level-design/arrivals.md; issue #106) ---- */
 
 /* BN6's eight facings, UP first (the player's facing probes' order, docs/
- * ROM_DATA.md, Talking reach), as steps in u = A + B (across the screen,
+ * docs/rom/scripts-and-shops.md, Talking reach), as steps in u = A + B (across the screen,
  * 16 pixels a unit) and v = B - A (down it, 8 pixels): the diagonals are
  * the world's axes. */
 static const char *const face_names[8] = { "up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left" };

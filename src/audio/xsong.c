@@ -17,9 +17,9 @@
 #include "emu.h"
 #include "rom.h"
 
-#define XSONG_AT    FREE_SONGS              /* (docs/EMULATION.md) */
+#define XSONG_AT    FREE_SONGS              /* (docs/engine/emulation/) */
 #define XSONG_END   FREE_XNAVIS
-#define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/ROM_DATA.md), */
+#define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/rom/), */
 #define SLOT_LAST   0x3F    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each BN5
                                sound at a fixed slot whichever track copies it, BN5_SOUNDS; a moved family's packed into its own
                                room, xvirus.c's XvSong, the Navis' copied here) */
@@ -283,10 +283,10 @@ int xsong_install(int xrom, int song, int fallback) {
 				if (theme && slot_of(i, theme) < 0) copy_in(i, theme, false, SLOT_FIRST + X.nsongs);
 			}
 		/* then BN5's Liberation Missions' songs, a dark layer's board's
-		 * (docs/LIBERATION.md), after the rest, which keep their places:
+		 * (docs/game/liberation/), after the rest, which keep their places:
 		 * its own, its opening (BN5's before a fight, a guardian's prelude
 		 * on its areas too), its win and a battle's won in one turn
-		 * (docs/MULTIROM.md, BN5's music in a run) */
+		 * (docs/multirom/music.md) */
 		static const uint8_t board_songs[] = { BN5_SONG_LIBERATION, BN5_SONG_MISSION_OPEN, BN5_SONG_LIB_WON, BN5_SONG_ONE_TURN_WIN };
 		for (size_t k = 0; XR[XROM_BN5_COLONEL_US].data && k < sizeof board_songs; ++k)
 			if (slot_of(XROM_BN5_COLONEL_US, board_songs[k]) < 0) copy_in(XROM_BN5_COLONEL_US, board_songs[k], false, SLOT_FIRST + X.nsongs);
@@ -331,7 +331,7 @@ int xsong_copy_of(int slot, int *xrom) {
 
 /* BN5's sounds that are no BN6 song, each at a slot of its own whichever
  * track's code plays it (issue #82's plan for its tracks and its
- * amendments; docs/ROM_DATA.md, BN6's empty song slots): copied by the
+ * amendments; docs/rom/sound.md, BN6's empty song slots): copied by the
  * first install that needs it, found there by the others */
 static const struct { uint16_t song; uint8_t slot; } BN5_SOUNDS[] = {
 	{ 0xC0, 0x62 }, { 0xB7, 0x61 }, { 0xBA, 0x60 }, { 0x70, 0x5F }, { 0x117, 0x5E }, { 0x129, 0x5D }, { 0x16B, 0x5C }, { 0xE1, 0x5B },

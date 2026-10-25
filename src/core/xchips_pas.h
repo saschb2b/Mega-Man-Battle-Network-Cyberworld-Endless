@@ -1,5 +1,5 @@
 /* BN5's Program Advances in BN6's list (issue #82's final engine round;
- * docs/MULTIROM.md, The chip registry; docs/ROM_DATA.md, BN5's Program
+ * docs/multirom/chip-registry.md; docs/rom/chips-code.md, BN5's Program
  * Advances): the recipes BN5's Custom screen forms its registered ones by
  * (its list 0x08028020), in BN6's chip ids, which the chips' code appends
  * to BN6's own 43 in a list of its own (src/emu/xchips_code.c), BN6's first

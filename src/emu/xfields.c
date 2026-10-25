@@ -13,7 +13,7 @@
 #include "rom.h"
 #include "xpanels.h"
 
-/* BN5's panel types as BN6's (docs/ROM_DATA.md, Battlefields): both games'
+/* BN5's panel types as BN6's (docs/rom/battle.md, Battlefields): both games'
  * flags by type (BN5_PANEL_FLAGS_OF, BN6_PANEL_FLAGS_OF) agree for 0-4 and
  * 6-8, their code checks those numbers alike, and the differential fights
  * poison, grass and ice alike in both (tests/xdiff/field_*); BN5's holy is
@@ -31,7 +31,7 @@ int xfield_type(int type) {
 /* The fields BN5's areas' records name (rom.c, NetAreaDef.xbattles), each
  * BN6's own of the same panels (`own`), or written over a field of BN6's
  * that no BattleSettings of BN6's names (its random battles' four tables,
- * its two lists of fixed battles, any record in the ROM: docs/ROM_DATA.md).
+ * its two lists of fixed battles, any record in the ROM: docs/rom/).
  * End Area's 0x42-0x45 (sea and grass) and the Undernet's and Nebula
  * Area's 0x73-0x76 (lava) where xpanels.c brought their panels in. */
 static const struct { uint8_t bn5, bn6; bool own; } fields[] = {

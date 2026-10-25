@@ -1,6 +1,6 @@
 /* Battle Network 5: Team Colonel (USA): what BN6's engine stands on of
  * BN5's chips' and Souls' code where its own C and Thumb answer a part of
- * it (issue #82's final engine round; docs/ROM_DATA.md, DarkPlus's flash
+ * it (issue #82's final engine round; docs/rom/chips-code.md, DarkPlus's flash
  * and Chaos Unison), beside bn5.h's addresses: each range the port follows
  * checked by its CRC32 as the core starts. */
 #ifndef CW_BN5_CHIPS_H

@@ -1,4 +1,4 @@
-/* Dev tools for testing a run quickly (devtools.c, docs/DEVTOOLS.md): a
+/* Dev tools for testing a run quickly (devtools.c, docs/devtools/): a
  * menu over the game (hold SELECT, press R) and the same switches from the
  * command line (--dev). */
 #ifndef CW_DEVTOOLS_H
@@ -16,12 +16,12 @@ typedef struct {
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
 	bool gem;       /* every random battle with a Mystery Data on the field */
 	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
-	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/LIBERATION.md) */
+	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/game/liberation/) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
 
-	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/LIBERATION.md) */
+	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/game/liberation/) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
-	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
+	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/game/rival.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
 	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a battle begun hurt); 0 the max */
 	bool worried;   /* MegaMan held worried by BN5's mood in BN6's battles, so its DarkChips come (soulmood.h; a capture of one offered) */
@@ -30,14 +30,14 @@ typedef struct {
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
 	int pack;       /* pack=N: a copy of each of the first N chips in the pack, in its first code (the folder editor's pack, issue #75) */
 	int programs;   /* programs=N: a copy of each of the first N NaviCust programs, in a colour the ROM draws (the NaviCustomizer, issue #76) */
-	int program;    /* program=P: a copy of program P too, in the first colour the ROM draws (a draft's held count, docs/NAVICUST.md) */
-	int codes;      /* codes=N: the profile knows the compression codes of the first N programs that have one, as if entered in an earlier run (docs/META.md) */
-	int clock;      /* clock=N: the Net's clock at N notches from the run's start (docs/HOME.md: its guardians' HP) */
+	int program;    /* program=P: a copy of program P too, in the first colour the ROM draws (a draft's held count, docs/game/navicust.md) */
+	int codes;      /* codes=N: the profile knows the compression codes of the first N programs that have one, as if entered in an earlier run (docs/game/meta/) */
+	int clock;      /* clock=N: the Net's clock at N notches from the run's start (docs/world/home/: its guardians' HP) */
 	int job;        /* job=K: the run holding a request of kind K (jobs.h), taken; at --scene home one from the act before */
 	int job_state;  /* jobstate=S: ... in state S (2 done, 3 failed) */
-	int zenny;      /* zenny=N: N zenny given as the run starts (BN6's GiveZenny: home's shops, docs/HOME.md piece 6) */
-	int lib_par;    /* libpar=N: a dark layer's par made N (each tier of its prize, docs/LIBERATION.md); 0 the planner's */
-	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/BOSSES.md) */
+	int zenny;      /* zenny=N: N zenny given as the run starts (BN6's GiveZenny: home's shops, docs/world/home/home-shop.md) */
+	int lib_par;    /* libpar=N: a dark layer's par made N (each tier of its prize, docs/game/liberation/); 0 the planner's */
+	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/game/bosses/) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
 	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0x200-0x205
@@ -50,7 +50,7 @@ typedef struct {
 	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
 	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
 	int unitebreak; /* unitebreak=N: UNITE's rule broken, the differential's own test (soulunite.h, SOULUNITE_BREAK_*) */
-	const char *online;     /* online=URL: Lan's HP's gate goes to this server, the keeper's questions skipped (docs/ONLINE.md) */
+	const char *online;     /* online=URL: Lan's HP's gate goes to this server, the keeper's questions skipped (docs/online/) */
 	const char *online_name; /* onlinename=NAME: ... as NAME */
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
 	bool rollbench; /* the start is the rollback's measurement: the game's core, then the Arena's pair (src/dev/rollbench.h, issue #128) */
@@ -72,7 +72,7 @@ typedef struct {
 	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
 	                   from iteration N */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
-	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/LIBERATION.md, The team) */
+	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
 	                   GBA alone, a mutation that must part the two */
 	int team_seat;  /* teamseat=N: under arena2v2 --dev arena shows seat N's screen: 0 and 1 the GBAs' players, 2 and 3 side 0's and
@@ -138,7 +138,7 @@ void devtools_draw(void);
 extern char devtools_shot[512];
 
 /* Trade Central's screens opened in a run, out of the Net Square, for a
- * scripted capture (trade_preview.c, issue #145; docs/DEVTOOLS.md): the
+ * scripted capture (trade_preview.c, issue #145; docs/devtools/): the
  * dev step "trade list [WANT]" lists the run's spares (the `chip` step
  * gives some), "trade deal ID CODE ID CODE" shows the chip trade of the
  * two (MegaMan's first) and "trade swap" swaps its cards as a done trade

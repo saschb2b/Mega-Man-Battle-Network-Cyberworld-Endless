@@ -1,4 +1,4 @@
-/* A liberation board's planner (liberation_plan.h; docs/LIBERATION.md, The
+/* A liberation board's planner (liberation_plan.h; docs/game/liberation/quality-bar.md, The
  * quality bar). It plays the board as a fair player would, with the team
  * it was made for: each phase every Navi in turn (support first: ToadMan's
  * LifeMelody, ShadowMan's SneakAttack, NumberMan's NumberCheck, then the
@@ -35,7 +35,7 @@ bool lib_plan_lax;
 #define ROUTE_MOST   10      /* ... and at most (a choice, not a wall) */
 
 /* MegaMan's HP on the board by act (a run's: about a hundred more an act,
- * its HPMemory, docs/ECONOMY.md) and a virus battle's harm (BN5's numbers
+ * its HPMemory, docs/game/economy/) and a virus battle's harm (BN5's numbers
  * for its missions, tools/liberation.py's ACTS) */
 static const int mm_hp[6] = { 300, 300, 400, 500, 600, 700 };
 static const int virus[6] = { 14, 14, 20, 28, 34, 40 };

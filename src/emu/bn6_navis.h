@@ -4,8 +4,8 @@
  * the engine's routines those tables name, and what a Navi draws by (its
  * arm points, its companion's overlay); what src/emu/xnavi_room.c grows
  * and points elsewhere and src/emu/xnavi_install.c fills, to move another
- * game's Navis into BN6's own battles (issue #82; docs/MULTIROM.md,
- * Transplanted Navis; docs/ROM_DATA.md, The Navis' tables). */
+ * game's Navis into BN6's own battles (issue #82; docs/multirom/navis.md,
+ * Transplanted Navis; docs/rom/navis.md, The Navis' tables). */
 #ifndef CW_BN6_NAVIS_H
 #define CW_BN6_NAVIS_H
 

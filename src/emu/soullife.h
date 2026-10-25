@@ -1,5 +1,5 @@
-/* A Soul's life on the proxy form (the Souls track's S2; docs/MULTIROM.md,
- * Transplanted Souls), by BN5's rule (docs/ROM_DATA.md, UNITE on BN6's
+/* A Soul's life on the proxy form (the Souls track's S2; docs/multirom/souls.md,
+ * Transplanted Souls), by BN5's rule (docs/rom/souls.md, UNITE on BN6's
  * Custom screen, and a Soul's life on the proxy form): its state per side
  * in BN6_SOULS (zeroed with the battle's RAM as each battle is set up),
  * taken up as MegaMan enters form 8 with a Soul committed on the Custom
@@ -22,7 +22,7 @@ bool soul_united(int side);
 /* (from a hook) whether the battle object `obj` is a side's partner, --dev
  * arena2v2's second MegaMan of a side (BN6_BATTLE_PLAYERS + BN6_SIDE_PARTNER):
  * a Navi of his own whom his side's Soul, mood and NaviStats are not (the
- * full-rules audit, docs/ONLINE_ARENA.md); false in every other battle */
+ * full-rules audit, docs/online/arena/); false in every other battle */
 bool soul_partner(uint32_t obj);
 /* (from a hook) the Soul the Navi `obj` is united with (BN5's number, 0
  * none), by his own Souls state (soul_field_of) */

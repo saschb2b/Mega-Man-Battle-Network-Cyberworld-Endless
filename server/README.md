@@ -178,7 +178,7 @@ for online play, BN6 and BN5 Team Colonel today, as each HELLO's ROM
 identities say (`roms_full` in `shared/online/protocol.json`). The
 server refuses those to a game without the full set, and a challenge or
 a trade aimed at one, with NOTICE 28 before anything changes; the game
-tells its player through its NetPass (docs/ONLINE.md, The NetPass).
+tells its player through its NetPass (docs/online/netpass.md).
 Between two games of the full set there are no per-pair rules: every
 chip trades and every battle is by full rules.
 
@@ -210,7 +210,7 @@ keeps no rules per battle. The server pairs a challenge with its answer,
 gives each player its side of the cable and an input delay fitted to
 both games' latencies (2 to 30 frames: the lockstep's frame, a tick, the
 longer latency, each a round trip with its jitter less what its rollback
-window covers; docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then
+window covers; docs/online/arena/smoothed-delay.md and Rollback), then
 relays their loadouts, keys and state hashes to each other alone, in a
 rate bucket of their own (120 a second). A player leaving ends the
 battle for the other. Since protocol v13 (epic #167) a pair of players'
@@ -245,7 +245,7 @@ team wins; a leave or a drop of any of the four breaks it off for both
 teams. The server relays a partner's sixteen-bit stream as it relays a
 lead's keys and reads none of it: his chips, Cross and Program Advance
 ride in it, and each game's linked GBAs take them from their own link
-packets (docs/ONLINE_ARENA.md, The partners' words in BN6's packet).
+packets (docs/online/arena/two-a-side/partners-words.md).
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first
@@ -395,7 +395,7 @@ published:
    today's archive. The `cyberworld` container's **Logs** show the join
    and the leave without a name or a public identity, and `/data/logs`
    holds no players' log (`log_days = 0`).
-10. Write the result down: docs/ONLINE.md's line on the official server
+10. Write the result down: docs/online/overview.md's line on the official server
     (it follows `main`, the protocol it speaks) and this section's dates.
 
 Where a step fails, **Deployments** has the last good deployment to
@@ -439,7 +439,7 @@ emotes, while movement and Inspect remain available. An optional
 `whitelist` is a space-separated list of public IDs allowed to connect.
 Profiles remain anonymous: resetting a private key can evade a ban.
 An allowlist is available where a host needs stricter admission.
-`hide` takes a profile's entry off the week's Board (docs/ONLINE.md, The
+`hide` takes a profile's entry off the week's Board (docs/online/weekly-net.md, The
 week's net) for the week `--week` names, this week where none, and
 refuses that profile's posts for that week; `unhide` puts it back.
 `forget` answers a player's request to be removed: it takes the public
@@ -511,7 +511,7 @@ Each UTC day the server counts, with no personal data (`stats.py`):
 | `passes` | joins by the NetPass: `full` (BN6's and BN5's ROMs) or `square` (BN6's alone) |
 
 HELLO names no system, so the server counts none by system; the game's
-own statistics do, where the player said yes ([GUIDE.md, Anonymous
+own statistics do, where the player said yes ([Anonymous
 statistics](../docs/GUIDE.md#anonymous-statistics)). A day is written once,
 as a line of `stats.jsonl` in the state directory, when the next begins or
 as the server stops; a restart the same day takes that line up again and
@@ -685,7 +685,7 @@ platform tests must cover the remaining targets. The 3DS's bundled roots
 support the documented Let's Encrypt deployment; other certificate
 authorities require an explicit root-bundle update, never a validation bypass.
 
-See [online play](../docs/ONLINE.md) and
+See [online play](../docs/online/overview.md) and
 [the wire format](../shared/online/README.md).
 
 ## Release packaging

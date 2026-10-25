@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """voice_catalog.py [--check]: every line the game's characters say, and
-every word its own screens show, read from the words files (docs/VOICE.md,
+every word its own screens show, read from the words files (docs/voice/rules.md,
 Where the lines live) into docs/voice/catalog.json, which the voice review's
 dashboard shows (docs/voice/README.md).
 
@@ -23,15 +23,15 @@ smell) as C, and writes for each line
     paged as src/layer/text.c's wrap() does: twenty characters a line,
     three lines a page;
   - the domain (DOMAINS), the kind (speech, or a screen's words, which
-    VOICE.md leaves to their own plain style), the comments that say what
+    docs/voice/rules.md leaves to their own plain style), the comments that say what
     it is (the function's or table's own, in the .c and its header, and
     the nearest one above the line) and a picture of where it shows
     (SHOWS: a file in docs/screenshots or docs/clips, where one fits);
   - a hash of its text, which a review keeps to tell a line changed since;
-  - flags: the checks of docs/VOICE.md a machine can make (FLAGS).
+  - flags: the checks of docs/voice/rules.md a machine can make (FLAGS).
 
 and a summary: per file, domain and speaker the counts, and per speaker
-our numbers beside BN6's from VOICE.md's table (The numbers): words a box,
+our numbers beside BN6's from docs/voice/rules.md's table (The numbers): words a box,
 "!!" and "..." a box, stutters, openers. Numbers only of BN6.
 
 For the review's page it writes the lines' order too: `conversations`, a
@@ -56,15 +56,15 @@ from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = 'docs/voice/catalog.json'
-VOICE = 'docs/VOICE.md'
+VOICE = 'docs/voice/rules.md'
 WORDS_FILES = ('_words.c', '_lines.c', '_text.c')   # (build.py's)
 VERSION = 1
 
 # ---- what each file is: its domain, its speaker, its kind, where it shows ----
 
 # file stem -> (domain, default speaker, kind). The domains follow
-# VOICE.md's table (Where the lines live); `screen` is a screen's own words
-# (menus, labels, the second screen's panels), which VOICE.md leaves to
+# docs/voice/rules.md's table (Where the lines live); `screen` is a screen's own words
+# (menus, labels, the second screen's panels), which docs/voice/rules.md leaves to
 # their plain style: catalogued, not flagged.
 DOMAINS = {
     'briefing_words': ('Briefing', 'MegaMan', 'speech'),
@@ -159,7 +159,7 @@ MARKS = {'L': 'Lan', 'M': 'MegaMan', 'D': 'Dad', 'P': 'Mr.Prog', 'B': 'MegaMan',
 FACES = {'FACE_NONE': 'Narration', 'FACE_LAN': 'Lan', 'FACE_MAYL': 'Mayl', 'FACE_CHAUD': 'Chaud',
          'FACE_DAD': 'Dad', 'FACE_MEGAMAN': 'MegaMan', 'FACE_CLERK': 'Shop Navi', 'FACE_PROG': 'Mr.Prog',
          'FACE_NAVI': 'Shop Navi', 'FACE_TECH': 'Shop Navi', 'FACE_HEEL': 'HeelNavi', 'FACE_BEAST': 'MegaMan'}
-# Our speakers in VOICE.md's table of numbers (The numbers).
+# Our speakers in docs/voice/rules.md's table of numbers (The numbers).
 NUMBERS_GROUP = {'Lan': 'Lan', 'MegaMan': 'MegaMan', 'Mr.Prog': 'Mr.Prog', 'Dad': 'Dad', 'Chaud': 'Chaud',
                  'Guardian': 'Navis (bosses, bystanders)', 'Bystander': 'Navis (bosses, bystanders)',
                  'HeelNavi': 'Navis (bosses, bystanders)', 'Shop Navi': 'Navis (bosses, bystanders)',
@@ -199,7 +199,7 @@ SHOWS = {
     'second_text': ['screenshots/second-screen.png', 'screenshots/second-status.png'],
 }
 
-# ---- the checks (docs/VOICE.md) ----
+# ---- the checks (docs/voice/rules.md) ----
 
 LINE_CHARS = 20      # src/layer/text.c's LINE_CHARS
 PAGE_LINES = 3
@@ -865,7 +865,7 @@ def box_speaker(box, default, kind, row_face):
 
 
 def flag_box(speaker, text, widths, wrapped):
-    """The flags of one box (VOICE.md's checks)."""
+    """The flags of one box (docs/voice/rules.md's checks)."""
     out = []
     bare = PLACEHOLDER.sub('X', text)
     if len(wrapped) > PAGE_LINES:
@@ -994,7 +994,7 @@ def make_entry(reader, e, ids):
 # ---- the numbers ----
 
 def bn6_numbers():
-    """VOICE.md's table (The numbers): speaker -> its columns, numbers and
+    """docs/voice/rules.md's table (The numbers): speaker -> its columns, numbers and
     openers as the page writes them."""
     with open(os.path.join(ROOT, VOICE)) as f:
         text = f.read()

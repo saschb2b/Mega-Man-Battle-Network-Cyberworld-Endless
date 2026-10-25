@@ -1,4 +1,4 @@
-/* The stands in the Net Square (issue #128, docs/ONLINE.md, The stands):
+/* The stands in the Net Square (issue #128, docs/online/arena-in-brief.md, The stands):
  * the referee Mr.Prog by the ring calls the channel's NetBattle from the
  * server's report (STANDS) on every game, and where this game can watch it
  * (the Arena built here, and BN5's ROM for a battle by full rules) asks

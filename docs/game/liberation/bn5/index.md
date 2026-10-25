@@ -1,0 +1,11 @@
+# BN5's missions, dissected
+
+* [BN5's missions, dissected](overview.md) - BN5's nine Liberation Missions dissected from its ROM, play in romlab and guides: where a mission lives (sub-mode 0x18, `BN5_LIB_STATE`), each mission's map, Darkloid, par, team, panels and rewards, and how they rise.
+* [The board](board.md) - A BN5 Liberation board's panel kinds (`BN5_PANEL_*`: clean, dark, item, BonusPanel, DarkHole, the Darkloid's ring, BarrierPanels, start) and how BN5 places them, read off its nine boards.
+* [The par's prize](par-prize.md) - How a BN5 Liberation Mission pays at its end (`BN5_LIB_REWARD_PICK`): the Darkloid's SP chip two under par or better, his plain chip within par, 1000 zenny a mission (5000 at most) over par.
+* [BonusPanels as BN5's](bonus-panels.md) - BN5's BonusPanel traced in romlab (`BN5_LIB_BONUS_*`): freed by the Liberation command without a battle, its lead-in flashes, the roulette's timing, sounds and sprites, and its five slots from phase invincibility to Major Hit.
+* [How the board looks and moves](look-and-motion.md) - How BN5's Liberation board looks and moves, recorded in romlab: the overlay diamonds and palettes (`BN5_LIB_LOOKS`, `BN5_LIB_ANIMS`), faced-panel outline, item pops, banners, HUD and command window, phase bands, music and camera.
+* [The Darkloids' phase in BN5](darkloids-phase.md) - BN5's Darkloids' phase, from text, guides and romlab recordings: guardian kinds (BigBrute, TinHawk, Bladia), the Darkloid's heal by dark panels, warp moves, five-beat strikes, and a deleted guardian's return from its DarkHole.
+* [Not found, and assumed](not-found.md) - What the BN5 Liberation dissection did not find: the commands' shapes in BN5's board code (taken from the guides), and any hard phase limit; a mission runs past par for the lesser reward.
+* [The Navis](navis.md) - The Navis of BN5's Liberation Missions: each one's board HP by mission (`BN5_LIB_NAVI_HP`) and the commands BN5 lists, with each command's shape from the guides (LongSwrd, ScrenDiv, SneakAttack, NumberCheck, LifeMelody).
+* [A phase, a panel liberated, Order Points, items](phase.md) - BN5's Liberation phase: each Navi moves then liberates, commands or passes; a liberation battle is won within three turns, a one-turn win frees the panels around; Order Points 3 to 8; items and traps.

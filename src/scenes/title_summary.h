@@ -1,4 +1,4 @@
-/* The finished run's summary over the title (docs/META.md), as BN6's
+/* The finished run's summary over the title (docs/game/meta/), as BN6's
  * battle's RESULT in two beats: the run (how it ended, how far, MegaMan's
  * word, title_lines.h), then the records (the Library, the best, what it
  * opened and the closest goal); a helped run's helpers on the band. */

@@ -1,5 +1,5 @@
 /* The PET's KeyItem and E-Mail screens with the run's own words
- * (docs/PET.md): BN6's text archives rebuilt from the player's ROM with our
+ * (docs/game/pet.md): BN6's text archives rebuilt from the player's ROM with our
  * scripts in place of some, in the free ROM space, their pointers turned to
  * them; the items a run gives from the profile, and Dad's mail with the
  * battle data MegaMan has on each guardian. */
@@ -8,10 +8,10 @@
 
 #include <stdbool.h>
 
-/* The NetPass's key item (docs/PET.md): one of the ids BN6 leaves
+/* The NetPass's key item (docs/game/pet.md): one of the ids BN6 leaves
  * nameless; A on it opens the pass (pet.h) */
 #define PET_ITEM_NETPASS 0x4A
-/* The Jukebox's (docs/PET.md, The Jukebox): A on it opens it (pet.h) */
+/* The Jukebox's (docs/game/pet.md, The Jukebox): A on it opens it (pet.h) */
 #define PET_ITEM_JUKEBOX 0x4B
 
 /* The archives, once on the core's ROM copy (the key items' names and

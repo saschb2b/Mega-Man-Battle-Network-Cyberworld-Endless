@@ -39,7 +39,7 @@
 #define MATE_FACE   3      /* the eighth the team faces as the board begins (MegaMan's, down-right) */
 #define SPAWN_WAIT  2      /* frames the player's spawn takes in its new body, then his interaction let go */
 
-/* BN5's teams by the stage an act stands for (docs/LIBERATION.md, What a
+/* BN5's teams by the stage an act stands for (docs/game/liberation/generator.md, What a
  * mission is made of): two at mission 1, three at 2-3, four at 4-5, five
  * on; and the mission whose HP its Navis have */
 static const int room_of[6] = { 2, 2, 3, 4, 5, 5 };

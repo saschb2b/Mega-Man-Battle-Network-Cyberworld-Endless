@@ -191,7 +191,7 @@ static void describe_pos(FILE *f) {
 		fprintf(f, "seen %d floor %d\n", ns, nf);
 		fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
 			D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
-		/* (the room the layer is remembered by, its anchor: docs/LEVEL_DESIGN.md, Identity) */
+		/* (the room the layer is remembered by, its anchor: docs/world/level-design/identity.md) */
 		if (layer.sig_room >= 0 && layer.sig > SIG_NONE && layer.sig < SIG_COUNT) {
 			const Room *r = &layer.rooms[layer.sig_room];
 			int sx, sy;
@@ -249,10 +249,10 @@ void director_describe(FILE *f) {
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
-	/* (a trip back, and the Net's clock: docs/HOME.md) */
+	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);
-	/* (a dark layer's sealed region's route, found: docs/LIBERATION.md, Special routes) */
+	/* (a dark layer's sealed region's route, found: docs/game/liberation/special-routes.md) */
 	if (lib_route_found()) fprintf(f, "route found\n");
 	/* (named as the game shows him: a playtester reads this; a dev's
 	 * state, CYBERWORLD_STATE_POS, names him always, as the scripts that

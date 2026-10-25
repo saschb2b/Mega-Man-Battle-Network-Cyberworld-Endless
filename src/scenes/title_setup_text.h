@@ -1,6 +1,6 @@
 /* The JACK-IN SETUP's words (title_setup_text.c): its rows, their values,
  * the information on the row under the cursor and what is still shut, in
- * the plain style of the game's menus (docs/VOICE.md), apart from the
+ * the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. The folders', helpers' and threat rungs' own
  * names and lines are meta.c's, the Crosses' powers_words.c's. */
 #ifndef CW_TITLE_SETUP_TEXT_H

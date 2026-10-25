@@ -1,4 +1,4 @@
-/* The differential's hooks on both cores (issue #82; docs/DEVTOOLS.md, The
+/* The differential's hooks on both cores (issue #82; docs/devtools/differential.md, The
  * differential): each core's random draws, the battle objects it spawns
  * (every spawner of the first, third and fourth kinds), the sounds it
  * starts, its effects, setAttack, a panel reserved, an object's blink and

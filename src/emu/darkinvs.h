@@ -1,4 +1,4 @@
-/* BN5's DarkInvs in BN6's engine (issue #82; docs/MULTIROM.md, The chips'
+/* BN5's DarkInvs in BN6's engine (issue #82; docs/multirom/chips-code.md, The chips'
  * code, DarkInvs, moved; the owner's call of 13 October 2026: BN5's rule
  * wherever its ROM is read). BN5's DarkInvs puts MegaMan under its chip
  * AI for the player (BN5_CHIP_AI_PLAYER) for 600 frames, invisible, the

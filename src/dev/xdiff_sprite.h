@@ -1,4 +1,4 @@
-/* A sprite by its bytes, for the differential (issue #82; docs/DEVTOOLS.md,
+/* A sprite by its bytes, for the differential (issue #82; docs/devtools/differential.md,
  * The differential): the two games number their sprites otherwise (a moved
  * attack's copy in BN6's grown lists, a twin at another number of BN6's),
  * so an object's sprite is compared by what it draws, never by its number.

@@ -1,5 +1,5 @@
 /* The emote strip's and the palette's PET text (emote_strip_text.c;
- * docs/ONLINE.md, Emotes): the pages' names, the keys' hints, whom an
+ * docs/online/square/emotes.md): the pages' names, the keys' hints, whom an
  * emote is aimed at. The emotes' and phrases' own names are the
  * protocol's (online_text.h). */
 #ifndef CW_EMOTE_STRIP_TEXT_H

@@ -1,12 +1,12 @@
 /* A liberation's board from the dark layer's floor, its map's as built
  * (liberation_board.h):
  * BN5's kinds placed by BN5's rules, as tools/liberation.py's `generate`
- * places them on its own floors (docs/LIBERATION.md, The generator): the
+ * places them on its own floors (docs/game/liberation/generator.md): the
  * arrival's start zone kept clean, the Darkloid's 3x3 on the far side,
  * DarkHoles in rings of dark panels each with its guardian, dark panels
  * thickening with the walk from the start and gathered by one majority
  * pass, BonusPanels at dead ends, items in the dark's corners first; then
- * the act's rules of the staircase (docs/LIBERATION.md, The quality bar):
+ * the act's rules of the staircase (docs/game/liberation/quality-bar.md):
  * barriers and their keys with the sealed region's route behind one,
  * roaming guardians, trap panels on the way with a way round them, the
  * barriers' chain. The planner (liberation_plan.c) then plays it, sets the
@@ -24,7 +24,7 @@
 #include "pacing.h"
 
 /* Per act from the second (0-based 1-5), BN5's mission it stands for
- * (docs/LIBERATION.md, What a mission is made of): its team, DarkHoles,
+ * (docs/game/liberation/generator.md, What a mission is made of): its team, DarkHoles,
  * roaming guardians, the guardians' kinds, the dark share's range
  * (percent), item panels, BonusPanels, the staircase's rules, chip and
  * zenny items, traps. A smaller team than BN5's meets a DarkHole less for
@@ -71,7 +71,7 @@ int lib_zenny(int act) { return (2 + (act < 1 ? 1 : act)) * 100; }
 /* Over par, zenny as BN5 pays (its rewards' last row): its first
  * mission's 1000 at the second act, where a board first stands, and a
  * quarter of it more each act to 2000 (BN5's 1000 more a mission, to
- * 5000, would outpay the par's chips from the fourth act: docs/ECONOMY.md,
+ * 5000, would outpay the par's chips from the fourth act: docs/game/economy/dark-layer-prize.md,
  * A dark layer's prize); dearer on later cycles as a chip's price is, and
  * the plan's zenny curve's share, as every zenny the engine sets */
 int lib_par_zenny(int depth) {
@@ -153,7 +153,7 @@ int lib_command_of(int navi) {
 	}
 }
 
-/* The shapes BN5's guides give the commands (docs/LIBERATION.md, The
+/* The shapes BN5's guides give the commands (docs/game/liberation/bn5/navis.md, The
  * Navis), from the panel faced: LongSwrd two in a line; ScrenDiv three
  * across; TomahawkSwing and NumberCheck two deep and three wide;
  * SneakAttack one or two ahead; LifeMelody's five ahead */
@@ -803,7 +803,7 @@ static void place_roamers(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far, int
 	}
 }
 
-/* BN5's guarantees (docs/LIBERATION.md, Guarantees): something to
+/* BN5's guarantees (docs/game/liberation/generator.md, Guarantees): something to
  * liberate in the first phase, no guardian within three of the start nor
  * threatening it */
 static bool fair(const LibBoard *b, int16_t reach[MAP_H][MAP_W]) {

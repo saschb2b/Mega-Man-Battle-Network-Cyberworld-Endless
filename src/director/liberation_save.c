@@ -1,4 +1,4 @@
-/* A liberation's board across a CONTINUE (liberation.h; docs/SAVES.md):
+/* A liberation's board across a CONTINUE (liberation.h; docs/engine/saves.md):
  * what its course has changed since the layer's seed made it, saved beside
  * the run's checkpoint as `run.lib` and taken back once the checkpoint's
  * state has loaded on the layer the seed made again. The board's panels,
@@ -18,7 +18,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define LIB_NOTE_MAGIC 0x434C4234u   /* "CLB4": the units' HP on the board and the team (docs/LIBERATION.md, The team) */
+#define LIB_NOTE_MAGIC 0x434C4234u   /* "CLB4": the units' HP on the board and the team (docs/game/liberation/decision.md, The team) */
 
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */

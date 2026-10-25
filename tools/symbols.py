@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """symbols.py [--check | --full]: what this project has mapped of Mega Man
 Battle Network 6: Cybeast Gregar (USA) and Battle Network 5: Team Colonel
-(USA), written for others to use (docs/SYMBOLS.md): per ROM a symbol file
+(USA), written for others to use (docs/rom/symbols.md): per ROM a symbol file
 that mGBA's and no$gba's debuggers load, and the same symbols as JSON and
 CSV.
 
@@ -10,17 +10,17 @@ src/emu/bn6.h (with the PET's bn6_pet.h, which it includes) and bn5.h
 (RAM and code addresses, the fields of the game's structures, event
 flags and values, each with its comment), the ROM
 offsets of RomLayout and XRomLayout in src/core/rom.c (rom.h's comments
-say what each is) and docs/ROM_DATA.md (each table: where, how it was
+say what each is) and docs/rom/ (each table: where, how it was
 found, how to verify it). Needs no ROM.
 
 With --full, also the full map, for this machine only: the same files with
 the bn6f disassembly's functions and labels that tools/bn6f_match.py
 located in the ROMs (its tables in .build/symbols/match), written to
-.build/symbols with a report of what was located; and SYMBOLS.md's numbers
+.build/symbols with a report of what was located; and docs/rom/symbols.md's numbers
 of it, numbers only. bn6f states no license, so nothing of its names goes
-into git (docs/SYMBOLS.md).
+into git (docs/rom/symbols.md).
 
-  python3 tools/symbols.py           write docs/symbols/ and SYMBOLS.md's numbers
+  python3 tools/symbols.py           write docs/symbols/ and docs/rom/symbols.md's numbers
   python3 tools/symbols.py --check   write nothing: fail where a name in bn6.h or
                                      bn5.h has no description, or a file in
                                      docs/symbols differs from what it would write
@@ -41,8 +41,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = 'docs/symbols'
 FULL = '.build/symbols'           # the full map: never committed
 MATCH = '.build/symbols/match'    # tools/bn6f_match.py's tables
-DOC = 'docs/SYMBOLS.md'
-ROM_DATA = 'docs/ROM_DATA.md'
+DOC = 'docs/rom/symbols.md'
+ROM_DATA = 'docs/rom'      # its tables, one per subsystem (docs/rom/*.md with a Data column)
 
 # The two ROMs: the header with their addresses, rom.c's layout and its
 # entry, the files' stem, the game as the tables name it and its short
@@ -396,7 +396,7 @@ def layout_symbols(game):
     return info, syms
 
 
-# ---- docs/ROM_DATA.md ----
+# ---- docs/rom/ ----
 
 def sentences(text):
     return [s.strip() for s in re.split(r'(?<=[.!?])\s+(?=[A-Z`(])', text) if s.strip()]
@@ -415,19 +415,34 @@ def how_verified(text):
 
 
 def rom_data_rows():
-    """docs/ROM_DATA.md's rows: line, title, the addresses the Offset cell
-    gives (game, address, what it says of it) and the names the row puts in
-    code spans."""
+    """docs/rom/'s rows: where (its table and line, `docs/rom/chips.md:14`),
+    title, the addresses the Offset cell gives (game, address, what it says of
+    it) and the names the row puts in code spans."""
     rows = []
-    for no, line in enumerate(read(ROM_DATA).split('\n'), 1):
+    # the tables in the order the ROM data's overview lists them (a symbol two rows name takes the first's
+    # name), then any it does not list
+    listed = re.findall(r'^- \[[^\]]*\]\(([\w-]+\.md)\)', read(f'{ROM_DATA}/overview.md'), re.M)
+    names = listed + sorted(n for n in os.listdir(os.path.join(ROOT, ROM_DATA)) if n.endswith('.md') and n not in listed)
+    for name in names:
+        text = read(f'{ROM_DATA}/{name}')
+        if '\n| Data | Offset |' in text:
+            rows += table_rows(f'{ROM_DATA}/{name}', text)
+    return rows
+
+
+def table_rows(path, text):
+    """One table's rows (rom_data_rows)."""
+    rows = []
+    for no, line in enumerate(text.split('\n'), 1):
         if not line.startswith('|') or line.startswith('| ---') or line.startswith('| Data |'):
             continue
-        cells = [c.strip() for c in re.split(r'(?<!\\)\|', line)[1:-1]]
+        # a link's words alone (the tables link their concepts: [Transplanted Souls](../multirom/souls.md))
+        cells = [re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', c.strip()) for c in re.split(r'(?<!\\)\|', line)[1:-1]]
         if len(cells) < 3:
             continue
         title = re.sub(r'\s*\([^()]*(`|issue #)[^()]*\)\s*$', '', cells[0]).strip()
         title = re.sub(r'`', '', re.sub(r':? Battle Network 5 Team Colonel \(USA\)', '', title))
-        rows.append(dict(line=no, title=title, entries=offset_entries(cells[1]),
+        rows.append(dict(line=f'{path}:{no}', title=title, entries=offset_entries(cells[1]),
                          names=set(re.findall(r'`(BN[56]_\w+)`', line)), how=how_verified(cells[2]), text=line))
     return rows
 
@@ -543,8 +558,8 @@ def is_name(label, address=None):
     return bool(IDENT.match(label)) and bool(re.search(r'[A-Z_0-9]', label[1:]) or label[0].isupper())
 
 
-# Our own names for addresses docs/ROM_DATA.md cites by another project's
-# label (dism-exe/bn6f's, which carries no licence: docs/SYMBOLS.md) or by a
+# Our own names for addresses docs/rom/ cites by another project's
+# label (dism-exe/bn6f's, which carries no licence: docs/rom/symbols.md) or by a
 # chip's name (the owner's call, 5 October 2026). A label of that kind not
 # listed here is never a name: the row's words and the address are.
 OWN_NAMES = {
@@ -591,7 +606,7 @@ OWN_NAMES = {
 
 
 def rom_data_symbols(game, rows, taken):
-    """The addresses docs/ROM_DATA.md gives that the header and RomLayout do
+    """The addresses docs/rom/ gives that the header and RomLayout do
     not: named by the word the row gives one where it is a name (EnterMap,
     eToolkit) or the name in code beside it, else by its words (the BugFrag
     spent: bugfrag_spent); a word alone, or words another address has too,
@@ -634,7 +649,7 @@ def rom_data_symbols(game, rows, taken):
         kind = next((kd for a, b, kd in REGIONS if a <= address < b), 'constant')
         syms[name] = dict(name=name, kind=kind, address=address, written=e['written'],
                           description=f"{row['title']}: {label}" if label and label != name and not foreign_label else row['title'],
-                          source=f"{ROM_DATA}:{row['line']}", origin='rom_data', given=given(e))
+                          source=row['line'], origin='rom_data', given=given(e))
     return syms
 
 
@@ -704,7 +719,7 @@ CONFIDENCE = (
 def bn6f_names(s):
     """The bn6f names a symbol's source gives it: "bn6f NAME", a name its
     description opens with (GiveChips (chip, ...), eToolkit: ...), the name
-    beside it in ROM_DATA.md. A define's own comment only: the words it
+    beside it in docs/rom/. A define's own comment only: the words it
     shares with the defines its "..." continues name what they are."""
     desc = (s.get('own') or '') if s['origin'] == 'header' else s.get('description') or ''
     names = re.findall(r'bn6f `?([A-Za-z_]\w*)`?', desc)
@@ -789,8 +804,8 @@ DATA_WORDS = (r'\b(tables?|archives?|records?|rows?|lists?|literals?|pointers?|f
 
 def build(game, rows):
     """A ROM's symbols from this project's own sources: the header's,
-    RomLayout's and ROM_DATA.md's; each address once, the header's name
-    first; each with the rows of docs/ROM_DATA.md that verify it. A ROM
+    RomLayout's and docs/rom/'s; each address once, the header's name
+    first; each with the rows of docs/rom/ that verify it. A ROM
     address whose source does not say what it is stays 'rom' (finish)."""
     header, missing = header_symbols(game)
     info, layout = layout_symbols(game)
@@ -831,7 +846,7 @@ def build(game, rows):
             if r['line'] not in seen:
                 seen.add(r['line'])
                 refs.append(r)
-        s['verified'] = '; '.join(f"{ROM_DATA}:{r['line']} ({r['title']})" for r in refs)
+        s['verified'] = '; '.join(f"{r['line']} ({r['title']})" for r in refs)
         s['how'] = next((r['how'] for r in refs if r['how']), '')
         s['rows'] = [r['line'] for r in refs]
     # the structures' sizes and counts; an array's stride
@@ -900,7 +915,7 @@ def finish(syms, matches=()):
 ADDRESS_KINDS = ('function', 'code', 'data', 'rom', 'ram', 'io', 'field')
 
 # what part of the game a symbol belongs to: by the header's name, the
-# description of another's (ROM_DATA.md's row, rom.h's comment); first match
+# description of another's (docs/rom/'s row, rom.h's comment); first match
 SYSTEMS = (
     ('PET, mail and key items', r'PET|MAIL|KEY_ITEM|KEYS_|KEY_NAMES|KEY_DESC|KeyItem|E-Mail|key item'),
     ('Shops and traders', r'SHOP|TRADER|VENDOR|[Ss]hop|[Tt]rader'),
@@ -985,7 +1000,7 @@ def tree(syms):
 
 
 def entry(s):
-    """A symbol as the JSON writes it: the rows of docs/ROM_DATA.md that
+    """A symbol as the JSON writes it: the rows of docs/rom/ that
     verify it by their lines (the file's rom_data_rows says what each is);
     in the full map, what bn6f calls it, its Falzar address, how it was
     located and how many references agree."""
@@ -1015,7 +1030,7 @@ def entry(s):
 
 
 def as_json(game, info, syms, rows, about):
-    """The JSON: the ROM, the rows of docs/ROM_DATA.md its symbols cite
+    """The JSON: the ROM, the rows of docs/rom/ its symbols cite
     (each row's title and its words on how to verify it, once), then a
     symbol a line (its fields within it), no spaces between the parts of a
     line."""
@@ -1024,7 +1039,7 @@ def as_json(game, info, syms, rows, about):
     by_line = {r['line']: r for r in rows}
     head = dict(game=info['name'], code=info['code'], sha1=info['sha1'], written_by='tools/symbols.py', about=about,
                 counts=counts(syms),
-                rom_data_rows={str(n): dict(title=by_line[n]['title'], how=by_line[n]['how']) for n in cited})
+                rom_data_rows={n: dict(title=by_line[n]['title'], how=by_line[n]['how']) for n in cited})
 
     def dump(v):
         return json.dumps(v, ensure_ascii=False, separators=(',', ':'))
@@ -1040,12 +1055,12 @@ def as_json(game, info, syms, rows, about):
 
 
 ABOUT = ('Addresses, names and descriptions only: facts about the ROM, read from Cyberworld Endless\'s own sources '
-         '(src/emu/*.h, src/core/rom.c, docs/ROM_DATA.md). No graphics, text, sound or code of the game. '
-         'See docs/SYMBOLS.md.')
+         '(src/emu/*.h, src/core/rom.c, docs/rom/). No graphics, text, sound or code of the game. '
+         'See docs/rom/symbols.md.')
 FULL_ABOUT = ('The full map, written on this machine by tools/symbols.py --full: Cyberworld Endless\'s own symbols '
               '(docs/symbols) and the functions and labels of the bn6f disassembly (github.com/dism-exe/bn6f, commit {}) '
               'that tools/bn6f_match.py located in this ROM, under bn6f\'s names. bn6f states no license, so its names '
-              'are not redistributed: this file is for use here, not for sharing (docs/SYMBOLS.md). Addresses, names '
+              'are not redistributed: this file is for use here, not for sharing (docs/rom/symbols.md). Addresses, names '
               'and descriptions only; no graphics, text, sound or code of the game.')
 
 
@@ -1066,12 +1081,12 @@ def as_csv(game, info, syms, columns=COLUMNS):
 
 
 SYM_HEAD = ('; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):',
-            '; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:',
+            '; addresses, names and descriptions only. docs/rom/symbols.md says what is here and how to load it:',
             '; beside the ROM with its name (game.gba, game.sym), or mGBA\'s debugger command load-symbols FILE.')
 FULL_SYM_HEAD = ('; The full map, written on this machine by tools/symbols.py --full: Cyberworld Endless\'s own symbols and the',
                  '; bn6f disassembly\'s functions and labels located in this ROM (tools/bn6f_match.py, bn6f commit {}), bn6f\'s',
                  '; name after ours where both name one address. bn6f states no license: for use here, not for sharing',
-                 '; (docs/SYMBOLS.md). Beside the ROM with its name (game.gba, game.sym), or mGBA\'s load-symbols FILE.')
+                 '; (docs/rom/symbols.md). Beside the ROM with its name (game.gba, game.sym), or mGBA\'s load-symbols FILE.')
 
 
 def as_sym(game, info, syms, head=SYM_HEAD):
@@ -1105,7 +1120,7 @@ def counts(syms):
     return dict(sorted(c.items()))
 
 
-# ---- docs/SYMBOLS.md's numbers ----
+# ---- docs/rom/symbols.md's numbers ----
 
 MARK = '<!-- tools/symbols.py writes this part: {} -->'
 END = '<!-- end of what tools/symbols.py writes -->'
@@ -1218,7 +1233,7 @@ def crosschecks(located, named=False):
 
 
 def located_block(located):
-    """SYMBOLS.md's numbers of the full map: what was located, and the checks."""
+    """docs/rom/symbols.md's numbers of the full map: what was located, and the checks."""
     commits = {commit for *_, commit in located if commit}
     made = f'Made from bn6f at commit `{min(commits)[:7]}`.' if len(commits) == 1 else 'Made from bn6f.'
     return made + '\n\n' + coverage(located) + '\n\n' + crosschecks(located)
@@ -1230,7 +1245,7 @@ def report(located):
     commits = sorted({commit for *_, commit in located if commit})
     return ('# The full map: what tools/bn6f_match.py located\n\n'
             'Written by `tools/symbols.py --full` from bn6f ' + (', '.join(commits) or '(commit not known)') + '. '
-            'It names bn6f\'s functions and labels, so it stays on this machine (docs/SYMBOLS.md).\n\n'
+            'It names bn6f\'s functions and labels, so it stays on this machine (docs/rom/symbols.md).\n\n'
             + coverage(located, by_file=True) + '\n\n' + crosschecks(located, named=True) + '\n')
 
 
@@ -1249,7 +1264,7 @@ def doc_with(text, blocks):
 def full_map(results, rows, files, problems):
     """The full map into files (.build/symbols): each ROM's symbols with
     tools/bn6f_match.py's table merged in, and the report. Returns
-    SYMBOLS.md's block of its numbers, or None where Gregar's table is
+    docs/rom/symbols.md's block of its numbers, or None where Gregar's table is
     missing."""
     located = []
     for g, info, raw, syms in results:

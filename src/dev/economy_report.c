@@ -1,4 +1,4 @@
-/* The economy report (docs/ECONOMY.md, docs/DEVTOOLS.md, issue #154): what
+/* The economy report (docs/game/economy/, docs/devtools/, issue #154): what
  * a run hands out, layer by layer and act by act, over many runs' seeds,
  * from the ROM without the game, under the flat plan (the rolls before
  * the issue) and the opening one in play (economy.h). Two kinds of
@@ -11,7 +11,7 @@
  *   Data, the requests' pay (jobs_offers);
  * - the game's, read from the ROM: each random battle (loot_random_battle)
  *   pays as BN6 picks a reward, from its enemies' reward rows by its
- *   busting table (bn6f sub_80AA910, sub_80AAA98; docs/ROM_DATA.md,
+ *   busting table (bn6f sub_80AA910, sub_80AAA98; docs/rom/battle.md,
  *   Battle rewards), at an assumed mix of busting levels and battles a
  *   layer (econ_bust_weight, econ_battles_roll), leaned to the folder's
  *   codes as encounter.c's hook leans them.
@@ -49,8 +49,8 @@
 
 #define RUNS_MAX 1000
 #define LAYERS CYCLE_LAYERS
-#define START_FOLDER 0x0213ACu   /* BN6's starting folder (docs/ROM_DATA.md, Starting state) */
-#define BUSTING_TABLE 0x020B9Cu  /* BN6's busting table, 12 rows of 16 pairs' offsets (docs/ROM_DATA.md, Battle rewards) */
+#define START_FOLDER 0x0213ACu   /* BN6's starting folder (docs/rom/game-state.md, Starting state) */
+#define BUSTING_TABLE 0x020B9Cu  /* BN6's busting table, 12 rows of 16 pairs' offsets (docs/rom/battle.md, Battle rewards) */
 #define LOW_HP_SHARE 10          /* % of battles won at 3/8 of MegaMan's HP or less: the rows' second half (assumed) */
 #define GEM_KEPT 50              /* % of a battle's Mystery Data still there at its end (assumed) */
 #define CODES 27                 /* A-Z and * */
@@ -194,7 +194,7 @@ static void layer_battles(LayerTally *t, int depth, int biome) {
 }
 
 /* The guardian's battle and his Guardian Data: the game's reward (his Navi
- * chip's entries zenny), his chip and five HPMemory (docs/PROGRESSION.md,
+ * chip's entries zenny), his chip and five HPMemory (docs/game/progression/structure.md,
  * Growth) */
 static void layer_guardian(LayerTally *t, int depth, int biome) {
 	int navi = run_guardian(biome);
@@ -535,7 +535,7 @@ static void skill_table(FILE *out) {
 	runs = keep;
 }
 
-/* A dark layer's par prize (docs/LIBERATION.md, lib_prizes.c), act by act
+/* A dark layer's par prize (docs/game/liberation/, lib_prizes.c), act by act
  * at its middle layer, where the dark way stands: its two chips (their good
  * share and their price at a dealer's, chip_price) and the zenny over par,
  * both plans. Not in the acts' sums or bands: a run takes the dark way by
@@ -597,7 +597,7 @@ int economy_report_run(const char *spec) {
 		measure(&S[p], plans[p], SHORT_LAYERS);
 	}
 	start_folder();
-	fprintf(out, "Economy report (docs/ECONOMY.md): %d runs of the endless net's first cycle, BN6's areas, threat 0, BN6's starting\n"
+	fprintf(out, "Economy report (docs/game/economy/): %d runs of the endless net's first cycle, BN6's areas, threat 0, BN6's starting\n"
 		"folder (codes %c %c %c: the finds lean to them), every Mystery Data opened, %d-%d random battles a layer won at busting\n"
 		"levels by an assumed mix (econ_bust_weight), %d%% of them at low HP, a battle's Mystery Data kept %d%% of the time.\n"
 		"The plan in play: %s.\n", runs, run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',

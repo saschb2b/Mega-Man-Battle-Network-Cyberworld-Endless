@@ -1,5 +1,5 @@
 /* --dev arena2v2: a partner's NaviCust compiled by BN6's own code (epic
- * #167, docs/ONLINE_ARENA.md, His NaviCust, compiled by BN6). BN6 makes a
+ * #167, docs/online/arena/two-a-side/navicust.md). BN6 makes a
  * NaviStats' abilities from the NaviCust's board in its menus
  * (BN6_NAVICUST_RELOAD: the stats put back to the Navi's own, then each
  * program's routine run over them, then the bugs), and in a NetBattle

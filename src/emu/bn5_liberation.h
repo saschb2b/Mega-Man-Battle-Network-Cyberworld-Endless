@@ -1,5 +1,5 @@
 /* Battle Network 5: Team Colonel (USA): its Liberation Missions, as its ROM keeps
- * them (docs/LIBERATION.md, docs/ROM_DATA.md's BN5's Liberation Missions). No
+ * them (docs/game/liberation/, docs/rom/liberation.md's BN5's Liberation Missions). No
  * engine code reads them yet: the names stand for the generator's design and
  * for tools/liberation_bn5.py, which reads the same records. */
 #ifndef CW_BN5_LIBERATION_H
@@ -40,7 +40,7 @@
                                          /* ... to 0x23 + it in Team Colonel (Colonel's: "Target:" and "Actual:" phases, the Officials' */
                                          /* ... reward, then "You got a battle chip for:" the chip (its F4) or "You got:" the Zennys (EF 0E)) */
 
-/* The board's look (docs/LIBERATION.md, How the board looks and moves): the map on BG1, each panel's
+/* The board's look (docs/game/liberation/bn5/look-and-motion.md): the map on BG1, each panel's
  * kind laid over it on BG2 as an isometric diamond of tiles. Located by their bytes in a capture of
  * mission 1 (map 0x86:00); the drawing routine and the other maps' sets are still to be traced. */
 #define BN5_LIB_MAP_CHARS    0x0861C510u /* map 0x86:00's tiles, uncompressed: tile t at this + 32 t */
@@ -93,7 +93,7 @@
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
 
-/* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
+/* The board's sprites (BN5's sprite lists, docs/rom/navis.md, BN5's Navis: list, index) */
 #define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2), */
                                          /* ... anim 0's five frames held 20, 2, 2, 2, 8; shown only while the command window is */
                                          /* ... open over a dark panel faced, from 6 frames after A */
@@ -126,7 +126,7 @@
 #define BN5_LIB_MESSAGES     0x0801B8D4u /* the messages' letters' graphics (their pointers) */
 
 /* The phases' banners ("DARKLOID PHASE", "PLAYER PHASE 02"): a band of BG0 across the board under OBJs of letters'
- * pieces on OBJ palette 15, the words sliding in from the right and out to the left (docs/LIBERATION.md) */
+ * pieces on OBJ palette 15, the words sliding in from the right and out to the left (docs/game/liberation/) */
 #define BN5_LIB_PHASE_WORDS  0x087E5A10u /* their tiles, LZ77 (a u32 size, then 165 tiles), decompressed to RAM 0x0203E400 by */
 #define BN5_LIB_PHASE_LOAD   0x08052FF4u /* ... this load list's entry (0x887E5A10: compressed), copied to OBJ tile 719 on */
 #define BN5_LIB_PHASE_WORDS_PAL 0x087E5500u /* ... OBJ palette 15 and BG palette 14 for the band: PLAYER PHASE's (its digits'
@@ -283,7 +283,7 @@
 #define BN5_SONG_LIBERATION  0x22        /* the board's own, through both phases (its clock runs on), BN5_LIB_STATE +0 = 8 */
 #define BN5_SONG_MISSION_OPEN 0x1C       /* the mission's opening (the board's routine 1, 0x0804BEE0, its tour of the board) */
 
-/* The board's HUD and window (docs/LIBERATION.md, How the board looks and moves) */
+/* The board's HUD and window (docs/game/liberation/bn5/look-and-motion.md) */
 #define BN5_LIB_HUD_OAM      0x080531F4u /* the Order Points gauge: six OAM entries (u32 attributes 0 and 1, u16 attribute 2, u32 1): */
                                          /* ... 32x16 at (162,0) and (194,0), 16x16 at (224,0), the bar 32x8 at (170,4) and 16x8 at */
                                          /* ... (202,4), the count 16x8 at (216,4); OBJ palette 12 (BN5_LIB_HUD_PAL), tiles 624 on */
@@ -335,7 +335,7 @@
 #define BN5_LIB_ITEM_KINDS   0x08051924u /* per item kind 8 bytes: +2 the amount's multiplier (hearts 10, zenny 100), +5 its icon */
                                          /* ... (BN5_LIB_ICON_OF); handlers 0x0804D8B4 */
 #define BN5_LIB_ITEM_KIND_COUNT 6        /* ... six kinds (BN5_ITEM_*): the table's seventh entry, 0x08051954, is code (Thumb's */
-                                         /* ... push {r0-r3,lr}); no route among them (docs/LIBERATION.md, Special routes) */
+                                         /* ... push {r0-r3,lr}); no route among them (docs/game/liberation/special-routes.md) */
 
 /* A panel's kind */
 #define BN5_LIB_PANEL_FREE       0x00        /* clean: the team walks it */

@@ -1,5 +1,5 @@
 /* The wait for a dropped link's PET text (reconnect_text.c, issue #153;
- * docs/ONLINE.md, A dropped link; docs/VOICE.md): its heading, its state,
+ * docs/online/square/dropped-link.md; docs/voice/rules.md): its heading, its state,
  * the time left and its key. Drawn by reconnect_draw.c. */
 #ifndef CW_RECONNECT_TEXT_H
 #define CW_RECONNECT_TEXT_H

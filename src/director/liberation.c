@@ -1,4 +1,4 @@
-/* A liberation on a dark layer (liberation.h; docs/LIBERATION.md, stage 1).
+/* A liberation on a dark layer (liberation.h; docs/game/liberation/building/stage-1.md).
  *
  * The board is the layer's floor (liberation_board.c). On it MegaMan
  * walks as BN6 walks him, as BN5's Navis walk theirs, over the clean
@@ -486,7 +486,7 @@ static void take_item(int x, int y, char *held, size_t n) {
 	case LIB_GOT_ZENNY: find_due(D.objs.lib_zenny); pop(x, y, BN5_ITEM_ZENNY); break;
 	case LIB_GOT_CHIP: find_due((it >> 4) < LIB_LOOT ? D.objs.lib_loot[it >> 4] : -1); pop(x, y, BN5_ITEM_CHIP); break;
 	default:
-		/* (the sealed region's route: its hook, docs/LIBERATION.md, Routes) */
+		/* (the sealed region's route: its hook, docs/game/liberation/special-routes.md, Routes) */
 		LB.route_found = true;
 		held_more(held, n, lib_route_words());
 		break;

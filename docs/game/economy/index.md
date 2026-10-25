@@ -1,0 +1,12 @@
+# Economy
+
+* [Economy](overview.md) - What a run hands out (chips, their codes, zenny, Mystery Data) measured act by act, and issue #154's opening plan in `src/core/economy.c` that makes act 1 scarcer, opens up deeper and is guarded against drift.
+* [What BN6 does (docs/SOURCES.md)](bn6.md) - BN6's economy in its ROM and bn6f: the busting level picks the reward row's pair, the Chip Trader gives a code the pack lacks three times in four, codes scatter by virus version.
+* [Measuring it](measuring.md) - How `build.py economy` and `src/dev/economy_report.c` measure a run's handouts without running the game: layers and Mystery Data simulated by the engine's code, battle rewards from BN6's ROM rows, the assumptions, definitions and autopilot check.
+* [A dark layer's prize](dark-layer-prize.md) - A dark layer's par prize as BN5's Liberation Missions pay it: a Server's prize two under par, one a tier lower within par, zenny over par by the zenny curve (`src/layer/lib_prizes.c`, `lib_par_zenny`).
+* [Where it is decided](where-decided.md) - Where the economy is decided in code: plans and bands in `src/core/economy.c`, Mystery Data and chip rolls in `src/core/loot.c`, data placement, battle rewards, dealers, traders, dark-layer prizes, requests' pay, the report, run counts.
+* [The opening plan](opening-plan.md) - The opening plan: five levers (green Mystery Data, their chips, good chips, zenny, the folder-code lean) rising on a logarithm from act 1's floor to the flat plan's, with its reasoning, before-and-after numbers and costs.
+* [Research: how other games pace it](other-games.md) - Research on how other games pace loot and money (Slay the Spire, Balatro, Dead Cells, Diablo 3, Path of Exile): floors against droughts, rising sinks, stepped power curves, and what keeps traded things worth trading.
+* [Decided](decided.md) - The owner's yes (21 October 2026) to every economy decision: the opening plan's floors, traders picking codes as BN6 does, BN6's drops untouched, statistics' counts, bands a fifth either side, and the checks at switch-on.
+* [Before: what a run handed out (the flat plan)](flat-plan.md) - The flat plan, before issue #154, measured over 300 runs act by act: act 1 gave 12 chips, 3,550 zenny and 15 Mystery Data, with 63% of finds fitting the starting folder's codes.
+* [The guard](guard.md) - The guard against economy drift: `build.py economy` holding the plan in play to bands a fifth either side (`econ_band`), `test_economy`'s curve tests, the run log's counts, the run-end statistics event and AGENTS.md's checks row.

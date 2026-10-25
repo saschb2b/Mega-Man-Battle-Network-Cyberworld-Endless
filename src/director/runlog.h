@@ -2,7 +2,7 @@
  * (runlog.txt): depth, area, the viruses and their HP, MegaMan's HP before
  * and after, and where each run ended; for a battle of another game's
  * its record there, and the Souls MegaMan united with. It shows where runs are
- * lost (docs/PROGRESSION.md). The same moments give the anonymous
+ * lost (docs/game/progression/). The same moments give the anonymous
  * statistics their guardians' battles and runs' ends (analytics.h), sent
  * where the player said yes. */
 #ifndef CW_RUNLOG_H
@@ -31,7 +31,7 @@ void runlog_battle_end(bool won, int frames);
 void runlog_run_end(bool won);
 
 /* The run's economy's counts (analytics.h's AnalyticsEconomy, docs/
- * ECONOMY.md): begun with a new run (or where they were another run's),
+ * docs/game/economy/): begun with a new run (or where they were another run's),
  * a won battle's reward and a Guardian Data's chip counted as the battle
  * ends, each Mystery Data opened by its content (layer_objs.h's md_find:
  * kind 1 a chip, 3 zenny), kept beside the run's checkpoint (run.tally) */

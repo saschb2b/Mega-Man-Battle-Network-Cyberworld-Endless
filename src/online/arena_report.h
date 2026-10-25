@@ -1,4 +1,4 @@
-/* The report of a NetBattle for the stands (issue #128, docs/ONLINE.md,
+/* The report of a NetBattle for the stands (issue #128, docs/online/arena-in-brief.md,
  * The stands): the cable's first game reads both MegaMen of its pair's
  * first core (each side's player object, BN6_BATTLE_PLAYERS: HP, max HP,
  * and a chip as he starts using it) at the last frame whose keys are all

@@ -1,4 +1,4 @@
-/* A liberation board's planner (docs/LIBERATION.md, The quality bar): it
+/* A liberation board's planner (docs/game/liberation/quality-bar.md): it
  * plays a board made (liberation_board.h) many times by BN5's rules,
  * abstracted, as a fair player would (MegaMan alone for now: Liberation,
  * LongSwrd, Pass, fights), counts each phase's sensible moves, and sets

@@ -22,19 +22,19 @@ bool director_in_town(void);
 bool director_in_hp(void);
 /* Where Lan or MegaMan is at home: "Lan's HP", or the town's name. */
 const char *director_place_name(void);
-/* The first older portal open in Lan's HP (docs/HOME.md, going back): its
+/* The first older portal open in Lan's HP (docs/world/home/going-back.md): its
  * number (lanhp.h), -1 none. */
 int director_older_portal(void);
-/* The portal of a special route's way open in Lan's HP (docs/LIBERATION.md,
+/* The portal of a special route's way open in Lan's HP (docs/game/liberation/special-routes.md,
  * Special routes), -1 none. */
 int director_route_portal(void);
-/* The town's hour at this visit (docs/HOME.md, piece 8): 0 morning, 1
+/* The town's hour at this visit (docs/world/home/time-of-day.md): 0 morning, 1
  * afternoon, 2 evening, 3 night; and the hour its picture is tinted by
  * while Lan stands on its map (0 none), `box` whether a chat box is open
  * over it (the drawing reads them: draws change nothing). */
 int director_town_hour(void);
 int director_town_tint(bool *box);
-/* The ways lit at home (Lan's HP's portals, docs/HOME.md): each one's area,
+/* The ways lit at home (Lan's HP's portals, docs/world/home/): each one's area,
  * its guardian (0 none: a trip back), and whether it goes back to an area
  * won; at most `most`, how many. */
 typedef struct { int biome, navi; bool back; } DirectorWay;
@@ -79,12 +79,12 @@ int director_pack_now(uint16_t *entry, uint8_t *count, int most);
 /* MegaMan's HP as the top screen shows it: the Navi's on the map, his
  * battle object's in a battle */
 void director_megaman_hp(int *hp, int *max);
-/* A liberation's board (docs/LIBERATION.md): its dark panels recoloured
+/* A liberation's board (docs/game/liberation/): its dark panels recoloured
  * in the core's frame `px` (240 x 160, the core's own pixels), and its
  * phase, par, banner and command menu over the picture. */
 void director_tint_board(uint32_t *px);
 void director_draw_board(void);
-/* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
+/* The rival's duel: its clock against ProtoMan's time, in battle (docs/game/rival.md). */
 void director_draw_duel(void);
 /* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it
  * drops, marked over his sprite while a step can still clear it. */
@@ -114,9 +114,9 @@ void director_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
 /* ... in the layer's signature, on the free panel nearest its anchor (the
- * "sig" step: docs/LEVEL_DESIGN.md, Identity); false on a layer without. */
+ * "sig" step: docs/world/level-design/identity.md); false on a layer without. */
 bool director_dev_signature(void);
-/* A test's start at home (--scene home, docs/HOME.md): the next act's
+/* A test's start at home (--scene home, docs/world/home/): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */
 void director_dev_home(void);
@@ -145,7 +145,7 @@ bool director_dev_foes(const char *spec);
 bool director_dev_xrecord(const char *spec);
 /* Dev (the status step, issue #82): the battle's enemies struck at once
  * with a status as a hit gives it, BN6's engine left to act on it as their
- * next frame starts (docs/MULTIROM.md, Transplanted families): "freeze
+ * next frame starts (docs/multirom/families.md): "freeze
  * 90", "paralysis 60 200" (only enemy id 0x200), "bubble", "drag", "slide";
  * the frames it lasts (60 where none) for the three that last. The
  * enemies struck, how many; 0 where it names none or no battle is on. */
@@ -160,7 +160,7 @@ int director_dev_chip(const char *spec);
 /* The folder step ("0:folder 2"): MegaMan's first folder copied into
  * folder K (2 Folder 2 with its Regular and TagChips, 3 the Extra folder),
  * as a run that held more folders would (the Net Square's folder choice,
- * docs/ONLINE_ARENA.md). False where K is neither or the folders are not
+ * docs/online/arena/). False where K is neither or the folders are not
  * there yet. */
 bool director_dev_folder(int k);
 /* The run saved with BN6 holding MegaMan by the mask's holds (director_hold.h's
@@ -190,7 +190,7 @@ void director_stop(void);
 /* Test hook (--net-biome): every layer in this biome. */
 extern int director_debug_biome;
 /* Test hook (--net-biome xN): every layer in another game's net area N
- * (docs/MULTIROM.md), as NET_AREAS + N, where its ROM is beside BN6's. */
+ * (docs/multirom/), as NET_AREAS + N, where its ROM is beside BN6's. */
 extern int director_debug_area;
 /* --net-biome's value: a biome, or xN another game's area N. */
 void director_net_biome_arg(const char *v);

@@ -1,4 +1,4 @@
-/* Battle backgrounds from the ROM (docs/ROM_DATA.md): the game's own table
+/* Battle backgrounds from the ROM (docs/rom/): the game's own table
  * of BGAnimData records (tiles, map, palette) and of the tile and palette
  * animation scripts that bring each to life. */
 #include "backdrop.h"

@@ -25,7 +25,7 @@ static void raise_box(SquarePlan *p, int x0, int y0, int x1, int y1) {
 }
 
 /* A prop on (x, y): in a walled hole where that is floor, else in the void
- * past a rim (docs/LEVEL_DESIGN.md, Props: edge or hole); its index. */
+ * past a rim (docs/world/level-design/props.md: edge or hole); its index. */
 static int prop(SquarePlan *p, int look, int x, int y) {
 	if (p->nprops >= SQUARE_PROPS) return -1;
 	p->props[p->nprops] = (NetProp){ .kind = PROP_SPRITE, .x = CX + x, .y = CY + y, .look = look };

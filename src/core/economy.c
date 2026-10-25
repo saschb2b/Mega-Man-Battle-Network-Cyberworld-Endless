@@ -1,4 +1,4 @@
-/* The run's economy, measured and planned (economy.h, docs/ECONOMY.md). */
+/* The run's economy, measured and planned (economy.h, docs/game/economy/). */
 #include "economy.h"
 
 #include <math.h>
@@ -14,7 +14,7 @@ const EconPlan econ_flat = { "flat", {
 	[ECON_LEVER_ZENNY] = { 1, 2 }, [ECON_LEVER_LEAN] = { 1, 2 },
 } };
 /* The opening plan, in play (the owner's yes of 21 October 2026,
- * docs/ECONOMY.md): the first act's green Mystery Data at half, their
+ * docs/game/economy/): the first act's green Mystery Data at half, their
  * chips kept at 60%, the good chips' weight in its plain finds at a
  * quarter, its zenny at half and none of its finds leaned to the folder's
  * codes, each opening on the same bend to the flat plan's by the net's
@@ -62,7 +62,7 @@ bool econ_keep_by(int lever, int depth, uint32_t hash) {
 }
 
 /* Each plan's numbers as the economy report measures them (300 runs of
- * the endless net: docs/ECONOMY.md's tables), each band a fifth either
+ * the endless net: the tables in docs/game/economy/), each band a fifth either
  * side of its centre: a change to the drops, the Mystery Data, the
  * dealers or the report's assumptions that moves an act past it is
  * flagged, as the pacing report flags a battle past its band. Per act
@@ -113,7 +113,7 @@ EconBand econ_band(const EconPlan *plan, bool short_net, int metric, int act) {
 }
 
 int econ_bust_weight(int bust) {
-	/* (a fair player's: mostly 7 to S, some slower or hit; docs/ECONOMY.md
+	/* (a fair player's: mostly 7 to S, some slower or hit; docs/game/economy/
 	 * sets it beside the autopilot's and BN6's own table) */
 	static const int weight[ECON_BUST_S + 1] = { 0, 0, 0, 0, 5, 5, 10, 15, 15, 15, 15, 20 };
 	return bust >= 1 && bust <= ECON_BUST_S ? weight[bust] : 0;

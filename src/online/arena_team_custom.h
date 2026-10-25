@@ -1,5 +1,5 @@
 /* --dev arena2v2: a partner's own folder, deck and picks in the pair
- * (epic #167, docs/ONLINE_ARENA.md, A partner's own Custom screen). His
+ * (epic #167, docs/online/arena/two-a-side/custom-screen.md). His
  * folder is his own (a carried MegaMan's, or his side's lead's as his
  * side's GBA holds it), dealt into a deck of his own as BN6 deals a
  * side's (the Regular chip first, the TagChips after it, the rest

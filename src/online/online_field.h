@@ -1,4 +1,4 @@
-/* The set-once text fields of going online (docs/ONLINE.md): the player's
+/* The set-once text fields of going online (docs/online/): the player's
  * name in the Net Square and a server's address, typed once at the gate's
  * keeper in Lan's HP. The one screen of its own the Square needs, over the
  * game: a keyboard on the pad and by touch, the system's own keyboard and

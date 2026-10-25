@@ -1,6 +1,6 @@
 /* The statistics' words (analytics_text.c): the question at the first
  * start, the controls screen's row and its notes, settings.ini's lines,
- * in the plain style of the game's menus (docs/VOICE.md), apart from the
+ * in the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. */
 #ifndef CW_ANALYTICS_TEXT_H
 #define CW_ANALYTICS_TEXT_H

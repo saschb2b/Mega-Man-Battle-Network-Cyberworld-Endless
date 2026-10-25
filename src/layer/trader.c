@@ -1,12 +1,12 @@
 /* The trade screen looks the current map up in two tables, both keyed by
- * map group << 8 | number (docs/ROM_DATA.md): the prizes (a chip list and
+ * map group << 8 | number (docs/rom/): the prizes (a chip list and
  * weights per rarity) and the trader's kind (the script of the trader
  * archive whose lines it shows). A map in neither, as every generated
  * layer is, got no prize list at all (garbage names and pictures, and a
  * long roll over whatever memory it read) and lines picked by its map
  * number. Their second entries, Sky Town's (0x501), a map the run never
  * visits, become the layer's; the first stay AsterLand's own, whose Chip
- * Trader stands at home (docs/HOME.md, piece 10). */
+ * Trader stands at home (docs/world/home/asterland-and-academy.md). */
 #include "trader.h"
 
 #include <stdio.h>
@@ -44,7 +44,7 @@ static int pool_for(TraderKind kind, int depth) {
  * keeps its record's codes: BN6's own pick (bn6f sub_804BF18, Gregar
  * 0x0804CCDC, its weights 0xC0 and 0x40 at 0x0804BE2C) gives a code the
  * pack holds none of three times in four, which spreads a run's codes
- * as BN6 spreads them (docs/ECONOMY.md: the folder's codes, which the
+ * as BN6 spreads them (docs/game/economy/: the folder's codes, which the
  * traders gave until issue #154, made every run's finds alike) */
 static bool both_nets(uint32_t from);
 
@@ -56,7 +56,7 @@ void trader_install(int group, int number, TraderKind kind, int depth) {
 	put32(pool + 4, rom_u32(from + 4));   /* chip list and weights, from the ROM file */
 	put32(pool + 8, rom_u32(from + 8));
 	/* (on the older net's areas and in the deep, half its prizes the older
-	 * net's: docs/MULTIROM.md, One net) */
+	 * net's: docs/multirom/one-net.md) */
 	if (loot_older_share > 0 && both_nets(from)) put32(pool + 4, FREE_TRADER_LIST);
 	emu_write(BN6_TRADER_POOLS + 12u * LAYER_ENTRY, pool, sizeof pool);
 	uint8_t kinds[8] = { 0 };

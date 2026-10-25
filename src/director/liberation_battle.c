@@ -3,7 +3,7 @@
  * BN5 counts a liberation's turns in BattleState +7, one more as each
  * Custom screen opens, and BN6 keeps that count (BN6_BATTLE_SCREENS) and
  * BN5's banners in its battle messages, though not BN5's rules: so four
- * hooks answer its loop as BN5's loop decides (docs/ROM_DATA.md, BN6's
+ * hooks answer its loop as BN5's loop decides (docs/rom/battle.md, BN6's
  * battle loop and banners). As each turn's fight starts, BN5's banner for
  * it (0x08007954: TURN n START! below the third, FINAL TURN! from it). In
  * the fight, BN5 asks for the Custom screen as the gauge fills, no key

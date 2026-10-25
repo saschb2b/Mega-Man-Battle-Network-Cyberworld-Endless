@@ -1,5 +1,5 @@
 /* The game's map, flag and key item events, by hook (events.h; docs/
- * EMULATION.md, Hooks; issue #31): a map entered, a layer's choice taken,
+ * docs/engine/emulation/hooks.md; issue #31): a map entered, a layer's choice taken,
  * a key item given, each queued for director_update as it happens. */
 #include "events.h"
 

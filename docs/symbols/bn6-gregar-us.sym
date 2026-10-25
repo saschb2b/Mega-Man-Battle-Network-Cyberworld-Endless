@@ -1,6 +1,6 @@
 ; Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6 (header code BR5E)
 ; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):
-; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:
+; addresses, names and descriptions only. docs/rom/symbols.md says what is here and how to load it:
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
 02000000 BN6_EWRAM

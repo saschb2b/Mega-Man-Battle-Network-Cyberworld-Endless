@@ -1,5 +1,5 @@
 /* place_lines.h. Who is in home's indoor places on a day without class
- * (docs/HOME.md, pieces 6 and 10; docs/VOICE.md): AsterLand's clerk,
+ * (docs/world/home/, pieces 6 and 10; docs/voice/rules.md): AsterLand's clerk,
  * BN6's own, behind the counter where BN6 stands him, the Order Service's,
  * and the SubChip seller beside him, a NetBattler at the request board and
  * a shopper at the rare chips; the Academy's NetBattle club in

@@ -1,4 +1,4 @@
-/* The Souls' proxy form (issue #82, the Souls track's S1; docs/MULTIROM.md,
+/* The Souls' proxy form (issue #82, the Souls track's S1; docs/multirom/souls.md,
  * Transplanted Souls): BN6's form 8, Falzar's TenguCross, which Gregar keeps
  * in every table by form and never offers, made an exact copy of HeatCross
  * (--dev soulproxy), so BN5's Souls can later stand behind one form of

@@ -365,9 +365,9 @@ static void start_run(const Options *o, bool home, int net, int folder, int thre
 	run_setup(net, folder, threat, helpers, cross);
 	if (o->run_depth > 0) run.depth = o->run_depth;
 	else if (home) run.depth = 4;
-	run.clock = (uint8_t)dev.clock;   /* (--dev clock=N, docs/HOME.md) */
+	run.clock = (uint8_t)dev.clock;   /* (--dev clock=N, docs/world/home/) */
 	/* (--dev route: a special route found, at home on the act before's
-	 * board, on a layer on its own act's: docs/LIBERATION.md) */
+	 * board, on a layer on its own act's: docs/game/liberation/) */
 	if (dev.route) run.route_found = (uint8_t)((run.depth - 1) % CYCLE_LAYERS / 3 + !home);
 	jobs_dev(&run.job, run.seed, run.depth, home, dev.job, dev.job_state);   /* (--dev job=K,jobstate=S) */
 	/* (the area its act's in the run too, whose draws read it, and every
@@ -386,7 +386,7 @@ static void start_scene(const Options *o) {
 	/* "town": a new run from the town, as NEW GAME starts one */
 	bool town = !strcmp(o->start_scene, "town");
 	/* "home": a run at home before the act at --run-depth (4), as an act's
-	 * exit takes it (docs/HOME.md) */
+	 * exit takes it (docs/world/home/) */
 	bool home = !strcmp(o->start_scene, "home");
 	const Scene *s = town || home ? &scene_emu : scene_by_name(o->start_scene);
 	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;

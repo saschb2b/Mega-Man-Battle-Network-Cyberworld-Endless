@@ -1,5 +1,5 @@
 /* Another Battle Network game's Navis on its areas' layers
- * (docs/MULTIROM.md): a Navi's overworld sprite and its mugshot, copied
+ * (docs/multirom/): a Navi's overworld sprite and its mugshot, copied
  * from that game's ROM into BN6's free space and listed at a number Gregar
  * leaves empty in both its list 6 and its mugshots (Falzar's Navis'), so
  * the sprite's number is its face's, as BN6 has it. */
@@ -28,14 +28,14 @@ uint8_t *xnavi_sprite_bytes(const uint8_t *rom, uint32_t lists, int list, int in
  * made anew. */
 int xnavi_slot(int xrom, int navi, int fallback);
 
-/* A guardian of another game (docs/BOSSES.md, BN5's Navis): Navi `navi`
+/* A guardian of another game (docs/game/bosses/bn5-navis.md): Navi `navi`
  * of ROM `xrom` (list 6 and its mugshot) copied into a place of its own,
  * past the other Navis and objects, and listed at a number Gregar leaves
  * empty that no area's Navi takes; that number, -1 where it cannot be.
  * Each call copies him anew: one guardian at a time. */
 int xnavi_guardian(int xrom, int navi);
 
-/* A teammate on a liberation's board (docs/LIBERATION.md, The team): BN5's
+/* A teammate on a liberation's board (docs/game/liberation/decision.md, The team): BN5's
  * Navi `navi` (his number in its list 6, his mugshot the same in its
  * list 8) copied into place `k` (0 to XNAVI_MATES - 1) of the teammates'
  * own room and listed at one of Gregar's list-6 and mugshot numbers that
@@ -45,17 +45,17 @@ int xnavi_guardian(int xrom, int navi);
 #define XNAVI_MATES 5
 int xnavi_mate(int k, int navi);
 
-/* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list
+/* Another game's map objects in BN6 (docs/multirom/): sprites of its list
  * 7 (or 6), each listed at one of Gregar's list-7 numbers that point at a
- * placeholder no layer lists (docs/ROM_DATA.md). */
+ * placeholder no layer lists (docs/rom/). */
 enum {
-	XOBJ_DARK_FLAME,   /* BN5's flame of darkness, its palette turned purple: the DarkChips' (docs/META.md) */
+	XOBJ_DARK_FLAME,   /* BN5's flame of darkness, its palette turned purple: the DarkChips' (docs/game/meta/) */
 	XOBJ_CUBE,         /* BN5's Security Cube, its P-Codes' lock: standing (animation 0), opening (1) */
 	XOBJ_DARK_WALL,    /* BN5's wall of dark flames, across a walkway along world Y or X (0, 1), burning out (2, 3) */
 	XOBJ_DARK_HOLE,    /* BN5's dark hole, a vortex standing past a platform's edge */
 	XOBJ_BRUTE,        /* BN5's Liberation Missions' guardians on their board, from its list 6: BigBrute, */
 	XOBJ_HAWK,         /* ... TinHawk */
-	XOBJ_BLADIA,       /* ... and Bladia (docs/LIBERATION.md) */
+	XOBJ_BLADIA,       /* ... and Bladia (docs/game/liberation/) */
 	XOBJ_COUNT
 };
 
@@ -65,7 +65,7 @@ enum {
  * Navis; again where the core's ROM copy was made anew. */
 int xnavi_object(int which);
 
-/* BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue
+/* BN6's own flame of darkness (docs/game/meta/bn6-darkchips.md): its blue
  * flame of sprite list 7 copied into a place of its own, its palette turned
  * purple as BN5's flame is, and listed at a list-7 number Gregar leaves on
  * its placeholder; that number, -1 where it cannot be. No other game's ROM

@@ -1,5 +1,5 @@
-/* What the guardians say, and MegaMan and Lan of them (docs/VOICE.md,
- * docs/BOSSES.md): each one's lines meeting MegaMan, again, after a win or
+/* What the guardians say, and MegaMan and Lan of them (docs/voice/rules.md,
+ * docs/game/bosses/): each one's lines meeting MegaMan, again, after a win or
  * a loss, stronger, deleted; the net's rumor of him and MegaMan's battle
  * data on him; ProtoMan's netbattle terms; the split's question. Who they
  * are, guardians.c. */
@@ -102,7 +102,7 @@ const char *guardian_tip(int navi) {
 }
 
 /* (MegaMan's battle data on him is Dad's mail's: recited here before the
- * choice, it was MegaMan coaching, docs/VOICE.md, What nobody says) */
+ * choice, it was MegaMan coaching, docs/voice/rules.md, What nobody says) */
 int guardian_netbattle_terms(char *out, size_t n) {
 	return snprintf(out, n, "Enough,MegaMan. No more racing.|Chaud says you're ready. Face me.|"
 		"@M If he deletes us,our dive's over!|@L We can still run if it goes bad.");
@@ -144,10 +144,10 @@ const char *guardian_rumor(int navi) {
 
 /* What each says: meeting MegaMan the first time, again after losing to
  * him, after beating him, as a stronger version, and when deleted. They
- * are the Nest's copies (docs/BOSSES.md), built from every battle the net
+ * are the Nest's copies (docs/game/bosses/), built from every battle the net
  * has seen: they remember. */
 static const struct { const char *first, *rematch, *revenge, *stronger, *defeat; } lines[] = {
-	/* (each in his habit of speech, docs/VOICE.md; DiveMan's "Awooga!",
+	/* (each in his habit of speech, docs/voice/rules.md; DiveMan's "Awooga!",
 	 * JudgeMan's "thou" and ElementMan's beeps as BN6's script gives them
 	 * in their own boxes, faces 0x52, 0x55 and 0x56: verified there, where
 	 * the guide's table has Capt'n Blackbeard's "matey" for DiveMan) */
@@ -352,7 +352,7 @@ const char *guardian_intro(int navi, int version, int biome) {
 	ADD("%s", greeting(navi, version, r));
 	ADD("%s", answer(r, name));
 	/* (no word on when to strike: MegaMan never coaches, and his battle
-	 * data is Dad's mail's, docs/VOICE.md, What nobody says) */
+	 * data is Dad's mail's, docs/voice/rules.md, What nobody says) */
 	ADD("|@L Battle routine,set!|@M Execute!!");
 	#undef ADD
 	return buf;
@@ -362,7 +362,7 @@ const char *guardian_defeat(int navi) {
 	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
-/* MegaMan on an older net guardian's Soul (docs/META.md, Souls), won from
+/* MegaMan on an older net guardian's Soul (docs/game/meta/souls.md), won from
  * `navi`, of chip kind `kind` (BN5_CHIP_KIND, 0-11): one held already
  * (`held`); else that it serves every battle, the whole of it the first
  * time, `chip` one of the run's chips of its kind ("" none); and, where
@@ -378,7 +378,7 @@ const char *guardian_soul_words(int navi, int kind, bool held, const char *chip,
 		return s;
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
-	/* (BN5's Soul Unison in BN6's battles, every one of them, docs/MULTIROM.md,
+	/* (BN5's Soul Unison in BN6's battles, every one of them, docs/multirom/one-net.md,
 	 * One net: the last chip picked of its kind given up for UNITE), said
 	 * the first time; after it, the narration alone */
 	if (!profile.soul_taught) {

@@ -1,7 +1,7 @@
 /* CYBERWORLD_BTRACE=1: each frame of a battle, the game's memory (EWRAM and
  * IWRAM) into the data folder's btrace.bin, as what changed since the frame
  * before, for tools/xcontrol.py: the control family's differential (issue
- * #82; --dev xcontrol, docs/MULTIROM.md, Transplanted families).
+ * #82; --dev xcontrol, docs/multirom/families.md).
  *
  * The file: "BTRC", a version (1), the count of ranges moved (xvirus.h,
  * XvMoved: from, to, len, three u32 each) and the ranges; then a record a

@@ -198,7 +198,7 @@ void run_new_varied(uint32_t seed) {
 	/* (one retry left the same guardian a time in three: DiveMan guarded
 	 * two new runs running; and the same area: a playtester began in the
 	 * RoboDog Comp four runs running) */
-	/* (the town is home, the same every run since docs/HOME.md: no longer
+	/* (the town is home, the same every run since docs/world/home/: no longer
 	 * one of them) */
 	/* (and, the first tries, not the run before's either: avoiding the last
 	 * alone let two of the three opening areas take turns, and a
@@ -223,7 +223,7 @@ void run_new_varied(uint32_t seed) {
 void profile_record_run(void) {
 	profile.runs++;
 	profile.run_open = 0;
-	/* (a run ended on a trip back reached its own layer: docs/HOME.md) */
+	/* (a run ended on a trip back reached its own layer: docs/world/home/) */
 	profile.last_depth = run_reached();
 	if (run_reached() > profile.best_depth) profile.best_depth = run_reached();
 	profile.bosses += run.bosses_beaten;

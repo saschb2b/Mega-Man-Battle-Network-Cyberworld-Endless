@@ -1,5 +1,5 @@
 /* The dev tour: the game shows every room of each area's layer, warped to
- * in turn and saved (tour.c, docs/DEVTOOLS.md). */
+ * in turn and saved (tour.c, docs/devtools/). */
 #ifndef CW_TOUR_H
 #define CW_TOUR_H
 

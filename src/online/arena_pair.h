@@ -1,4 +1,4 @@
-/* The Arena's pair (issue #120, docs/ONLINE_ARENA.md): two BN6 cores
+/* The Arena's pair (issue #120, docs/online/arena/): two BN6 cores
  * linked by mGBA's own cable (its GBASIOLockstep) in one process, each
  * client running both. Under BN6's rules the cores are the player's ROM
  * as it is: no hook, no install, no other game's data, so that every
@@ -21,7 +21,7 @@
  * watching are offered where a frame of the pair fits a 60th of a second:
  * every system but the New 3DS, where one takes 25.8 ms with my GBA's
  * picture and 20.7 with none, two GBAs on one ARM11 core (--dev
- * rollbench; docs/ONLINE_ARENA.md, The New 3DS). There the pair's two
+ * rollbench; docs/online/arena/rollback/new-3ds.md). There the pair's two
  * cores share one ROM copy, and --dev rollbench and --dev arena run.) */
 #ifdef __3DS__
 #define CW_ARENA 0
@@ -91,7 +91,7 @@ void arena_pair_draw(ArenaPair *pair, unsigned sides);
  * (and a spectator) whose pairs agree have the same, whether either rolled
  * back or not; 0 where it failed. It leaves out the sound's fields, which
  * a state loaded leaves otherwise than run straight (arena_pair_snap_diff;
- * docs/ONLINE_ARENA.md, Rollback) */
+ * docs/online/arena/rollback/overview.md) */
 uint64_t arena_pair_hash(ArenaPair *pair);
 /* ... with the sound's fields too: the whole state (--dev rollbench) */
 uint64_t arena_pair_hash_whole(ArenaPair *pair);
@@ -104,7 +104,7 @@ const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side);
 /* the cable's transfers so far */
 unsigned arena_pair_transfers(const ArenaPair *pair);
 
-/* A snapshot of the pair, all a rollback puts back (docs/ONLINE_ARENA.md,
+/* A snapshot of the pair, all a rollback puts back (docs/online/arena/rollback/overview.md,
  * Rollback): both cores' raw states and what no core's state holds, the
  * cable's lockstep (its numbers, each node's own and its event's place in
  * its core's timing), each GBA's registers as they read and what else it

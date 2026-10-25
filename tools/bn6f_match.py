@@ -2,7 +2,7 @@
 """bn6f_match.py --bn6f DIR [--roms DIR] [--out DIR] [--report FUNCTION]:
 the functions of the bn6f disassembly (github.com/dism-exe/bn6f, built from
 Cybeast Falzar) located in Cybeast Gregar (USA), and those BN5 Team
-Colonel (USA) shares with it (docs/SYMBOLS.md).
+Colonel (USA) shares with it (docs/rom/symbols.md).
 
 Each function's bytes are made from bn6f's own source, as its assembler
 (GNU as with agbasm's extensions, divided syntax) would make them at its
@@ -30,7 +30,7 @@ RAM labels the references locate. Reads the ROMs (found in --roms by their
 SHA-1) and the disassembly, and keeps nothing of either but names and
 addresses. bn6f states no license, so its names stay on this machine:
 .build is not in git, and nothing this writes is committed
-(docs/SYMBOLS.md). tools/symbols.py --full reads the tables; build.py
+(docs/rom/symbols.md). tools/symbols.py --full reads the tables; build.py
 symbols --bn6f DIR runs both.
 
   python3 tools/bn6f_match.py --bn6f DIR                     # the ROMs from ~/.cache/mmbn-ref/roms
@@ -1525,7 +1525,7 @@ COLUMNS = ('kind', 'name', 'falzar', 'address', 'size', 'mode', 'scope', 'source
 def twins(fns, gregar, where):
     """BN5's routines that this project paired with their twins in Gregar,
     each pair's bodies compared and the differing ones audited
-    (tools/bn5_twins.py; docs/SYMBOLS.md, Twins of the project's): the
+    (tools/bn5_twins.py; docs/rom/symbols.md, Twins of the project's): the
     function located at the twin in Gregar (gregar, its where) goes to the
     BN5 routine, as 'twin', where BN5's search placed it nowhere and placed
     nothing else there, or where it placed another function of another

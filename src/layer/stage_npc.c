@@ -14,13 +14,13 @@
 #include "npc.h"
 
 /* BN6's own on the net: its beam's sound, a Navi's log-in and log-out
- * alike (bn6f's npcscript_809F86C and byte_809F880; docs/ROM_DATA.md,
+ * alike (bn6f's npcscript_809F86C and byte_809F880; docs/rom/battle.md,
  * Guardians); the beam, map object sprite list 7's 0, rises in 8 frames */
 #define SOUND_BEAM     0x76
 #define BEAM_SPRITE    0x00
 #define BEAM_RISE      8
 #define SOUND_APPEAR   0x94
-#define SOUND_SEAL     0xFE   /* Bass's stone cracking, BN6's own (docs/BOSSES.md, Super bosses) */
+#define SOUND_SEAL     0xFE   /* Bass's stone cracking, BN6's own (docs/game/bosses/super-bosses.md) */
 
 /* A script under construction, with jumps to labels resolved once its
  * address is known. */

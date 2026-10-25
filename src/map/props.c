@@ -1,4 +1,4 @@
-/* A counter in the original maps (docs/LEVEL_DESIGN.md, Props): its art is
+/* A counter in the original maps (docs/world/level-design/props.md): its art is
  * a clean block of second-layer tiles over an untouched floor, and a ring
  * of wall cells (section 0) keeps MegaMan off it. The ring's back row lies
  * on a panel edge, the counter reaching half a panel or more towards its

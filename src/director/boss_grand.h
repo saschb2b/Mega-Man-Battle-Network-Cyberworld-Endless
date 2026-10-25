@@ -1,4 +1,4 @@
-/* The super bosses' staging (boss_grand.c; docs/BOSSES.md, Super bosses):
+/* The super bosses' staging (boss_grand.c; docs/game/bosses/super-bosses.md):
  * what boss.c's sequence does in their place, frame by frame. */
 #ifndef CW_BOSS_GRAND_H
 #define CW_BOSS_GRAND_H

@@ -1,4 +1,4 @@
-/* online_chat.h. The Net Square's chats (docs/ONLINE.md), all in BN6's own
+/* online_chat.h. The Net Square's chats (docs/online/), all in BN6's own
  * chat boxes: L asks to look around or to quiet everyone else's phrases
  * and emotes, L held with a direction sends one of four favourites at
  * once (square_emote.h), SELECT opens the emote strip (emote_strip.h),

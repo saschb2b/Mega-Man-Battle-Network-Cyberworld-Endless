@@ -134,7 +134,14 @@ def link(text, href):
 
 
 def markdown(state):
-    out = [f'# Research status: {state["project"]}', '',
+    # frontmatter, as every concept of the knowledge base opens (docs/index.md); dated by the ledger
+    title = f'Research status: {state["project"]}'
+    out = ['---', 'type: Status', f'title: {json.dumps(title, ensure_ascii=False)}',
+           'description: "Where each reverse-engineering feature stands, written by tools/re_status.py from '
+           'docs/re/ledger.json: its state, what is done and left, the changes since, experiments and decisions '
+           'needed."',
+           'tags: [re]', f'generated: {{ by: process:re_status, at: {state["updated"]}T00:00:00Z }}', '---', '',
+           f'# {title}', '',
            f'Updated {human(state["updated"])}. Written by `tools/re_status.py` from '
            '[ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.', '',
            '| Feature | Status | Now | What is left | Updated |', '| --- | --- | --- | --- | --- |']

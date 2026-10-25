@@ -1,4 +1,4 @@
-/* --dev arena2v2: a partner's own Cross (epic #167, docs/ONLINE_ARENA.md,
+/* --dev arena2v2: a partner's own Cross (epic #167, docs/online/arena/two-a-side/cross.md,
  * His Cross). BN6's crossing controller (BN6_CROSS_SIDES) keeps a record
  * a side, copied from the turn's link packets, and crosses those records'
  * objects alone: each side's player. A partner chooses his Cross on his

@@ -1,4 +1,4 @@
-/* The NetPass on the game's screen (issue #131, docs/ONLINE.md, The
+/* The NetPass on the game's screen (issue #131, docs/online/netpass.md, The
  * NetPass): over BN6's own picture, its 240 x 160, the game held under it
  * (no key reaches the core while it is up). Opened from the PET's NetPass
  * key item in a run (pet.c), by START in the Net Square (online_chat.c,
@@ -22,7 +22,7 @@ bool netpass_screen_update(void);
 /* ... drawn over the game's picture (P.core_x, P.core_y) while it is up */
 void netpass_screen_draw(void);
 /* The pass's strip as it stands, over the top of the game's picture (the
- * gate's question under it, docs/HOME.md piece 11) */
+ * gate's question under it, docs/world/home/square-gate.md) */
 void netpass_screen_strip(void);
 
 /* The stamp moment: due where the pass is full and fewer of its stamps

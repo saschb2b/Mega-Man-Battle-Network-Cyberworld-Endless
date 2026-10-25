@@ -1,4 +1,4 @@
-/* The chip registry (issue #82, docs/MULTIROM.md, One net: the design):
+/* The chip registry (issue #82, docs/multirom/one-net.md):
  * the chips of Battle Network 5: Team Colonel a run can meet, each with
  * its id in BN6's tables, fixed here so a saved folder, pack or Library
  * names the same chip at every boot, with BN5's ROM or without it.
@@ -53,7 +53,7 @@ const XChipReg *xreg_at(int bn6);
 const XChipReg *xreg_named(int bn6);
 
 /* The ids a row of its own may take: BN6's records no chip of the game
- * uses (blank-named, named by none of its tables, docs/ROM_DATA.md) and
+ * uses (blank-named, named by none of its tables, docs/rom/) and
  * 411-511, past its 411 records. */
 bool xreg_free_id(int bn6);
 

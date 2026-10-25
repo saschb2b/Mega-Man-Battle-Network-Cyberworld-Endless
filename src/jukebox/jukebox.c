@@ -104,7 +104,7 @@ static void kept_write(void) {
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "w");
 	if (!f) return;
-	fprintf(f, "# The Jukebox's last song (its game: 0 BN6, 1 BN5; its number) and play mode (docs/PET.md, The Jukebox).\n"
+	fprintf(f, "# The Jukebox's last song (its game: 0 BN6, 1 BN5; its number) and play mode (docs/game/pet.md, The Jukebox).\n"
 		"song = %d %02X\nmode = %d\n", s->game, s->song, J.mode);
 	bool ok = !ferror(f) && cw_fsync_file(f);
 	if (fclose(f)) ok = false;

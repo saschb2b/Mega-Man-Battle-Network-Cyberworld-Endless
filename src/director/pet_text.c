@@ -1,5 +1,5 @@
 /* The PET's KeyItem and E-Mail screens with the run's own words
- * (docs/PET.md, docs/ROM_DATA.md). */
+ * (docs/game/pet.md, docs/rom/). */
 #include "pet_text.h"
 
 #include <stdio.h>
@@ -273,7 +273,7 @@ static const char *cross_words(void) {
 }
 
 /* The report's where: the layer and the act's area, or a trip back
- * (docs/HOME.md); the new length */
+ * (docs/world/home/); the new length */
 static int where_text(char *s, int k, int size, const char *area) {
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	if (run.side_kind == LAYER_BACK) return ADD("You went back to %s.", area);
@@ -333,7 +333,7 @@ static void records_text(char *s, int size) {
 	/* (what ", code" means, once one is held) */
 	for (unsigned i = 0; i < sizeof navis; ++i)
 		if (rival(navis[i])->megaman_won >= GATE_CODE) { ADD("\"code\" means we hold his NaviCode.\n"); break; }
-	/* (the rival's duels: docs/RIVAL.md) */
+	/* (the rival's duels: docs/game/rival.md) */
 	if (profile.duel_won + profile.duel_lost) ADD("ProtoMan duels %d-%d\n", profile.duel_won, profile.duel_lost);
 	ADD("\f%d of %d guardians met. Your best dive reached layer %d", met, (int)sizeof navis, profile.best_depth);
 	if (profile.nest_clears) ADD(",and you beat the Nest %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
@@ -342,11 +342,11 @@ static void records_text(char *s, int size) {
 }
 
 /* The compression codes entered in any run (issue #50), three a page: the
- * programs Dad's lab compresses before every dive (docs/META.md), each as
+ * programs Dad's lab compresses before every dive (docs/game/meta/), each as
  * the NaviCust lists it (SuprArmr, as eight letters allow), its code five
  * and five, a line of twenty. (Not how to enter one, nor that entered
  * again it undoes itself: BN6's own, its button named, and the mail comes
- * only after one was entered, docs/VOICE.md, What nobody says) */
+ * only after one was entered, docs/voice/rules.md, What nobody says) */
 static void codes_text(char *s, int size) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
@@ -362,7 +362,7 @@ static void codes_text(char *s, int size) {
 	#undef ADD
 }
 
-/* The Endless Net BBS (docs/META.md, Rumors): netizens' threads, a post
+/* The Endless Net BBS (docs/game/meta/rumors.md): netizens' threads, a post
  * a page or two, each with its poster's face (the townsfolk's for the
  * kids: a person's face is its sprite less 0x20, town.c), more as the
  * profile goes deeper; each true, or a joke that says so. */
@@ -388,7 +388,7 @@ static int bbs_posts(Post *out) {
 	if (profile.spins) POST(FACE_TECH, "SpinCollector", "Found a Spin in a blue Mystery Data. Now my programs turn!");
 	if (profile.duel_won) POST(0x19, "ChaudFan", "Beat ProtoMan's time,and Chaud shows you TagChips. Worth it!");
 	if (profile.best_depth >= 10 || profile.nest_clears) POST(FACE_NAVI, "DeepDiver", "I reached the Nest. Something down there copies everything... Spooky.");
-	/* (Bass waits in the Secret Area once it has been cleared: docs/BOSSES.md,
+	/* (Bass waits in the Secret Area once it has been cleared: docs/game/bosses/super-bosses.md,
 	 * Super bosses) */
 	if (profile.marks & MARK_SECRET) POST(FACE_HEEL, "Lurker", "A cloaked Navi in the Secret Area! It deleted a copy in one blow... then went still as stone.");
 	#undef POST

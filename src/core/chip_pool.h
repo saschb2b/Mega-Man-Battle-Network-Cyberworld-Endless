@@ -1,7 +1,7 @@
 /* The chips a run can find or buy: every standard, Mega and Giga chip of
  * the ROM's chip data, in tiers by rarity and class; and, where BN5's ROM
  * is read, the older net's own catalogue beside them (issue #82, docs/
- * MULTIROM.md, One net: the design): every chip of the registry that
+ * docs/multirom/one-net.md): every chip of the registry that
  * plays in BN6's battles, those both games name by BN6's id. */
 #ifndef CW_CHIP_POOL_H
 #define CW_CHIP_POOL_H
@@ -26,7 +26,7 @@ int chip_pool_pick(int tier);
 int chip_pool_pick_net(int tier, int net);
 /* Chip `rom_id`'s Library class (0 standard, 1 Mega, 2 Giga), or -1 when a
  * run cannot hold it; and how many chips of a class a run can hold. BN6's
- * chips alone: the classes' marks are BN6's (docs/META.md). */
+ * chips alone: the classes' marks are BN6's (docs/game/meta/). */
 int chip_pool_class(int rom_id);
 int chip_pool_class_count(int cls);
 /* Whether chip `rom_id` is one of the older net's own a run can hold (an

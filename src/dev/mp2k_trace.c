@@ -1,5 +1,5 @@
 /* --mp2k-trace (mp2k_trace.h): the engine's MP2K frame by frame, laid out
- * as BN6 keeps it (docs/ROM_DATA.md, BN6's sound engine). */
+ * as BN6 keeps it (docs/rom/sound.md, BN6's sound engine). */
 #include "mp2k_trace.h"
 
 #include <stdio.h>

@@ -1,5 +1,5 @@
 /* What a liberation's teammates say (liberation_team_words.c), each in
- * his own habit (docs/VOICE.md, The guardians: BN5's Navis), said with
+ * his own habit (docs/voice/rules.md, The guardians: BN5's Navis), said with
  * his own face: as the board begins, after his battle, at a rest, his
  * command. */
 #ifndef CW_LIBERATION_TEAM_WORDS_H

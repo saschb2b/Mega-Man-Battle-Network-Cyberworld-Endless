@@ -1,4 +1,4 @@
-/* The NetPass drawn (issue #131, docs/ONLINE.md, The NetPass): a PET
+/* The NetPass drawn (issue #131, docs/online/netpass.md): a PET
  * screen of the project's own, in the colours of Gregar's PET
  * (second_frame.h, tools/site_art.py) and with the cartridges as the ROMs
  * screen draws them (launcher_art.c): the header with the pass's level,

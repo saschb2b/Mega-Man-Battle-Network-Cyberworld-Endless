@@ -1,5 +1,5 @@
-/* The askers' talk at home (job_words.c, docs/HOME.md piece 5; docs/
- * VOICE.md): a request offered, taken, waited on and settled, and what
+/* The askers' talk at home (job_words.c, docs/world/home/jobs.md; docs/
+ * docs/voice/rules.md): a request offered, taken, waited on and settled, and what
  * MegaMan says of one in the Net. */
 #ifndef CW_JOB_WORDS_H
 #define CW_JOB_WORDS_H

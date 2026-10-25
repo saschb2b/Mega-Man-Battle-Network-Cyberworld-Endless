@@ -1,5 +1,5 @@
 /* A Soul's abilities in BN6's engine (issue #82, the Souls track's S4;
- * docs/MULTIROM.md, Transplanted Souls; docs/ROM_DATA.md, A Soul's
+ * docs/multirom/souls.md; docs/rom/souls.md, A Soul's
  * abilities): the proxy form fights as BN5's Soul. BN6's power attacks and
  * their charge times grown with the Souls' (their routines BN5's, moved:
  * soulcode.h), MegaMan's loadout in the proxy the Soul's own row of BN5's

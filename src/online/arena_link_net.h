@@ -1,4 +1,4 @@
-/* The network's ArenaLink (issue #120, docs/ONLINE_ARENA.md): the Arena's
+/* The network's ArenaLink (issue #120, docs/online/arena/): the Arena's
  * keys and hashes over the presence server, which relays them to the
  * other player (arena_wire.h). My keys go as each frame's are sampled
  * (ARENA_NET_FLUSH: two frames a message cost a delay of 6 half its

@@ -9,7 +9,7 @@
 #include "emote_palette.h"
 #include "navicust.h"
 
-/* The screen the player is on, as BN6's state tells it (docs/ROM_DATA.md,
+/* The screen the player is on, as BN6's state tells it (docs/rom/pet-and-second-screen.md,
  * the second screen's contexts) */
 typedef enum {
 	SECOND_DARK,         /* no game: the title, the start's screens */
@@ -30,7 +30,7 @@ typedef enum {
 	SECOND_SHOP,         /* a shop */
 	SECOND_TRADER,       /* the Chip Trader */
 	SECOND_OTHER,        /* a screen of BN6's not named here */
-	SECOND_SQUARE,       /* the Net Square: the emotes' palette, the NetPass (docs/ONLINE.md, Emotes, The NetPass) */
+	SECOND_SQUARE,       /* the Net Square: the emotes' palette, the NetPass (docs/online/square/emotes.md, The NetPass) */
 	SECOND_CONTEXTS
 } SecondContext;
 
@@ -50,8 +50,8 @@ typedef struct {
 	bool town;                    /* in the real world (else on a layer) */
 	char home_next[96];           /* ... the run's next step there (issue #79) */
 	char home_setup[96];          /* ... and its setup */
-	char home_clock[48];          /* ... and the Net's clock, empty before a trip back (docs/HOME.md) */
-	char home_ways[160];          /* ... the ways lit at home, a line each (docs/HOME.md, piece 9) */
+	char home_clock[48];          /* ... and the Net's clock, empty before a trip back (docs/world/home/) */
+	char home_ways[160];          /* ... the ways lit at home, a line each (docs/world/home/second-screen.md) */
 	char home_job[96];            /* ... the request held, empty none */
 	char home_hour[16];           /* ... the town's hour at this visit ("Evening"), empty on a layer */
 	/* a shop (issue #78): the entry under its cursor, what the run holds of it */

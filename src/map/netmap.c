@@ -45,7 +45,7 @@
  * edges and 5 E, 6 S, 7 N, 8 W outer corners. */
 
 #define TILEMAP_AT  FREE_TILE_MAP        /* generated tile map (LZ77) */
-#define XGFX_AT     FREE_XAREA              /* another game's area: its tile set and palette (docs/EMULATION.md) */
+#define XGFX_AT     FREE_XAREA              /* another game's area: its tile set and palette (docs/engine/emulation/) */
 #define XGFX_SIZE   0x30000
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */
@@ -57,7 +57,7 @@ static Learned learned[NET_AREAS + XAREAS_MAX];
  * layer's own alone on the 3DS. Each area keeps 2 to 7 MB once learned,
  * and in a long run the areas kept, with a new one's learning, filled the
  * 3DS's 96 MB heap: allocations refused in most long runs; with two kept,
- * still in most where BN5's ROM was read (docs/EMULATION.md, The 3DS's
+ * still in most where BN5's ROM was read (docs/engine/emulation/3ds-memory.md, The 3DS's
  * memory; CW_HEAP_3DS builds the host so, for tools/heap3ds.py, and
  * AREAS_KEPT sets another number there). An area left behind is learned
  * again, the same, where a run comes back to it: the endless net's acts

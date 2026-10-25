@@ -1,4 +1,4 @@
-/* The run's story beats (docs/VOICE.md): what MegaMan, Lan and Dad say on
+/* The run's story beats (docs/voice/rules.md): what MegaMan, Lan and Dad say on
  * arriving somewhere new, and the cards an act begins and ends with. */
 #include "story_words.h"
 
@@ -26,7 +26,7 @@
 static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
 
 /* Whether the act MegaMan is in came by a special route's way (its fork's
- * third, or the Nest's second: docs/LIBERATION.md, Special routes) */
+ * third, or the Nest's second: docs/game/liberation/special-routes.md) */
 static bool by_route(void) {
 	return run.side_kind == LAYER_NORMAL && run.route_way && run.route_way == (run.depth - 1) % CYCLE_LAYERS / 3 + 1;
 }
@@ -42,9 +42,9 @@ void beat_said(void) {
 	if (D.beat_deep) { profile.deep_taught = 1; profile_save(); }
 }
 
-/* Arriving where super boss `navi` waits (docs/BOSSES.md, Super bosses),
+/* Arriving where super boss `navi` waits (docs/game/bosses/super-bosses.md),
  * in his `version`: before a first battle MegaMan senses him, never names
- * him (docs/META.md, what MegaMan knows); the Cybeast a growl the beast in
+ * him (docs/game/meta/what-megaman-knows.md); the Cybeast a growl the beast in
  * him answers, Bass a dark signal he has felt somewhere before */
 static const char *super_arrival(int navi, int version, bool known) {
 	if (navi == SUPER_CYBEAST)
@@ -58,7 +58,7 @@ static const char *super_arrival(int navi, int version, bool known) {
 	return "@M He's here,Lan. Bass.|@M I can feel him waiting.|@L Then let's show him how strong we got!";
 }
 
-/* The super boss waiting on this layer where one does (docs/BOSSES.md,
+/* The super boss waiting on this layer where one does (docs/game/bosses/super-bosses.md,
  * Super bosses): the endless Nest's Cybeast, the Secret Area's Bass; 0 for
  * none */
 static int super_here(void) {
@@ -69,7 +69,7 @@ static int super_here(void) {
 
 /* Arriving in the Nest where no super boss waits: the short net's (on
  * threat 10 its first of two, said before it, and the second below it,
- * docs/META.md), the endless net's by a special route (its second
+ * docs/game/meta/), the endless net's by a special route (its second
  * guardian, not the Cybeast), or the Nest's own words */
 static const char *nest_arrival(void) {
 	if (run_short_nest(run.depth) && !run_short_last(run.depth))
@@ -101,7 +101,7 @@ void arrival_words(void) {
 			"@M Right. Back to the main path!");
 	else if (run.side_kind == LAYER_SECRET)
 		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Secret Area.|@M Something strong is in here. I can feel it...|@L *gulp* Let's go,MegaMan!");
-	/* (a trip back from home, docs/HOME.md: an area already won) */
+	/* (a trip back from home, docs/world/home/: an area already won) */
 	else if (run.side_kind == LAYER_BACK)
 		snprintf(D.beat, sizeof D.beat, "@M We're back in %s,Lan!|@M It feels easier now...|@L 'Cause we got stronger! Let's stock up!", area);
 	else if (run.depth == 1 && profile.runs >= 2)
@@ -120,7 +120,7 @@ void arrival_words(void) {
 	else if (first_of_act && run.depth > 1) {
 		/* a new act: where they are now, and whose copy waits at its end,
 		 * named where they have battled him: else a signal MegaMan does
-		 * not know (docs/META.md, what MegaMan knows) */
+		 * not know (docs/game/meta/what-megaman-knows.md) */
 		int navi = run_guardian(run.biome);
 		if (guardian_known(navi))
 			snprintf(D.beat, sizeof D.beat, "@M We're through to %s,Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
@@ -132,7 +132,7 @@ void arrival_words(void) {
 	nets_arrival_words();
 }
 
-/* What the act's card says of the nets, where they meet (docs/MULTIROM.md,
+/* What the act's card says of the nets, where they meet (docs/multirom/one-net.md,
  * One net: the telegraph): an older net's area, the deep's both nets, and
  * from the second act a BN6 area its visitors come to */
 static const char *nets_card(int biome) {
@@ -143,7 +143,7 @@ static const char *nets_card(int biome) {
 
 /* The act card's line under the area's name, its motto, and its colour;
  * an act whose way holds a dark layer says so in the motto's place, in
- * Nebula's purple (docs/LIBERATION.md), and an act a special route led to
+ * Nebula's purple (docs/game/liberation/), and an act a special route led to
  * says that, in a liberated panel's green */
 static const char *card_motto(int biome, SDL_Color *accent) {
 	if (by_route()) {
@@ -170,7 +170,7 @@ void area_card(void) {
 	 * (as Slay the Spire shows each act's boss), where MegaMan has battled
 	 * him, with a "?" where only a Navi on the net has named him (a
 	 * playtester's card said "???" after a CONTINUE past the rumor,
-	 * session 63): else "???", as nothing yet says who (docs/META.md, what
+	 * session 63): else "???", as nothing yet says who (docs/game/meta/what-megaman-knows.md, what
 	 * MegaMan knows; his element alone gave SpoutMan away) */
 	char ahead[48] = "";
 	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
@@ -182,7 +182,7 @@ void area_card(void) {
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
 		snprintf(ahead, sizeof ahead, "%s deleted", guardian(D.objs.guardian.navi)->name);
-	/* (a trip back: what it has cost, docs/HOME.md) */
+	/* (a trip back: what it has cost, docs/world/home/) */
 	if (run.side_kind == LAYER_BACK) snprintf(ahead, sizeof ahead, "The Net's clock: %d", run.clock);
 	size_t k = strlen(act);
 	snprintf(act + k, sizeof act - k, "%s", nets_card(biome));
@@ -225,7 +225,7 @@ const char *mail_words(int navi) {
 
 /* Chaud's call once the Secret Area's guardian is done: after ProtoMan's
  * copy (and at its first clear, the signal that brings Bass there); after
- * Bass, who he is (docs/BOSSES.md, Super bosses) */
+ * Bass, who he is (docs/game/bosses/super-bosses.md) */
 const char *secret_call_words(void) {
 	if (run.boss_order[BIOME_SECRET] == SUPER_BASS)
 		return rival(SUPER_BASS)->megaman_won == 1
@@ -240,7 +240,7 @@ const char *secret_call_words(void) {
 }
 
 /* Dad's call once the Cybeast's data is taken: it is deleted, and the Net
- * rebuilds itself (docs/BOSSES.md, Super bosses); where its fall gave the
+ * rebuilds itself (docs/game/bosses/super-bosses.md); where its fall gave the
  * run BeastOut, the CybeastButton unlocked (powers_den_text, issue #109) */
 const char *den_call_words(void) {
 	static char words[640];

@@ -8,7 +8,7 @@ The release pictures' runs (build.py screenshots) are single games in the
 build image; a visit to the Square needs a server and other players, so
 these run the Linux build (build/linux/cyberworld, `build.py linux`) on
 this machine against the ROM-free server (build/server, `build.py
-server`), as docs/DEVTOOLS.md's two games at once do. Never the official
+server`), as docs/devtools/net-square.md's two games at once do. Never the official
 server: each scene starts its own on 127.0.0.1, its port its own, its
 state in WORK (the week's Board seeded there where a scene asks).
 

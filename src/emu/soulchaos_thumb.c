@@ -5,7 +5,7 @@
 
 #include "bytes.h"
 
-/* The project's own Thumb (issue #82, the Souls track's S6; docs/ROM_DATA.md, Chaos Unison), each part beside the BN5 code
+/* The project's own Thumb (issue #82, the Souls track's S6; docs/rom/souls.md, Chaos Unison), each part beside the BN5 code
  * it is the twin of, its calls through a register to each BN5 routine's BN6 twin (BN6's own where BN6's leave of a form
  * does a step BN5's failure does inline); its literal words the routines' addresses, those soulchaos.c fills 0 here.
  * Written by hand, each instruction's encoding as the CPU reads it. */

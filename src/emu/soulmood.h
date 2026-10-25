@@ -1,6 +1,6 @@
 /* BN5's mood and its DarkChip rule in BN6's battles (issue #82, the Souls
- * track's S7; docs/MULTIROM.md, One net: the design's finer calls, and
- * Transplanted Souls; docs/ROM_DATA.md, BN5's mood in BN6's battles): a
+ * track's S7; docs/multirom/one-net.md's finer calls, and
+ * Transplanted Souls; docs/rom/souls.md, BN5's mood in BN6's battles): a
  * mood of BN5's per side in the Souls' block (BN6_SOUL_MOOD), kept by
  * BN5's rules beside BN6's own: a hit taken lowers it by the hit's own
  * (BN5 0x08012818, never under 1), a hit landed that is no counter raises

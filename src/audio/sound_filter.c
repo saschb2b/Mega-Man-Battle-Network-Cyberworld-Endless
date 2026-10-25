@@ -1,12 +1,12 @@
 /* The sound's shape on its way to the device (sound_filter.h).
  *
- * BN6 mixes its music at 10512 Hz (MP2K's rate 3: docs/ROM_DATA.md, the
+ * BN6 mixes its music at 10512 Hz (MP2K's rate 3: docs/rom/sound.md, the
  * sound's mix) and the GBA holds each sample until the next, so above
  * 5256 Hz the mix holds only its own images: a flat hiss some 20 dB under
  * the music, up to 22 kHz. The Legacy Collection plays CD recordings in
  * the game's place, and against ours on the same music (its net and virus
  * battle themes, aligned by their notes in 35 chunks of 6 s of a video of
- * it, docs/SOURCES.md) it is flat from 300 Hz to 5 kHz and falls away on
+ * it, docs/research/sources.md) it is flat from 300 Hz to 5 kHz and falls away on
  * either side: -4.5 dB at 8 kHz, -10 at 10, -18 at 13, -29 at 16, and
  * -3.5 from 80 to 160 Hz, -12 at 40. Soft is three sections fitted to that
  * curve, within 0.8 dB of it from 35 Hz to 17 kHz: a low-pass at 6750 Hz

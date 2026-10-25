@@ -24,11 +24,11 @@
  * way out and stops at its end (arena_view.h). It ends on a result card:
  * vs whom, the time, the HP left, the chips used, the set's score; a
  * stop's on the card too, in the PET's words, and a bout broken off is
- * counted neither won nor lost (docs/ONLINE_ARENA.md, The way in and the
+ * counted neither won nor lost (docs/online/arena/from-square/way-in.md and the
  * result). A challenge the server refuses MegaMan says no to in the chat
  * box, the corner's notice left unshown.
  *
- * A battle with a result is offered again on its card (docs/ONLINE_ARENA.md,
+ * A battle with a result is offered again on its card (docs/online/arena/from-square/rematches.md,
  * Rematches), the cursor on No. A Yes sends the same challenge again,
  * quietly, the card kept up ("Waiting for NAME..."); the other game, its
  * card still up, holds a challenge from that player and shows it ("NAME
@@ -704,7 +704,7 @@ static void ready(void) {
 		return;
 	}
 	if (apart()) return;
-	/* (the frames from START: a rematch from the kept pair's about a second, docs/ONLINE_ARENA.md) */
+	/* (the frames from START: a rematch from the kept pair's about a second, docs/online/arena/) */
 	printf("arena: both ready, the battle begins %u frames after START%s\n", (unsigned)SA.t,
 		arena_again(SA.arena) ? ", the way in again from the kept pair" : "");
 	SA.stage = SA_BATTLE;

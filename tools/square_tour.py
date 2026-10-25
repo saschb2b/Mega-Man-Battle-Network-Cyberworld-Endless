@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Net Square's tour (docs/ONLINE.md, The layout): the Square at a few
+"""The Net Square's tour (docs/online/square/layout.md): the Square at a few
 seeds, one of each area it wears, on a local server with three games in
 it. Mira waits in the Arena and Dex at Trade Central, so the warps' labels
 and signs name them; Kei arrives and walks, as a player walks him (the

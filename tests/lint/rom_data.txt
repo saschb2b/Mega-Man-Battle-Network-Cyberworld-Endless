@@ -1,4 +1,4 @@
-# ROM offsets docs/ROM_DATA.md does not name (AGENTS.md: a new one needs its note);
+# ROM offsets docs/rom/ does not name (AGENTS.md: a new one needs its note);
 # this list only shrinks: build.py lint --update after naming one
 RomLayout arrow_pal
 RomLayout bg_map

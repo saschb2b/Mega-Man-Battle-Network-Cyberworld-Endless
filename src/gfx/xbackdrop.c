@@ -1,5 +1,5 @@
 /* Another game's backgrounds: BN5 keeps them as BN6 does (bn6f
- * sub_8080DA0, docs/ROM_DATA.md), a BGAnimData record (tiles, their VRAM,
+ * sub_8080DA0, docs/rom/), a BGAnimData record (tiles, their VRAM,
  * map, its offset, palette, its RAM, its size), a list of GFXAnim scripts
  * and an entry of scroll callbacks per number. Tiles and map are LZ77,
  * decoded and encoded again as literal blocks; a palette is a size word,
@@ -22,9 +22,9 @@
 #include "lz.h"
 #include "rom.h"
 
-#define XBG_AT   FREE_BACKDROPS          /* (docs/EMULATION.md) */
+#define XBG_AT   FREE_BACKDROPS          /* (docs/engine/emulation/) */
 #define XBG_END  FREE_FLAME
-#define XMAP_AT  FREE_MAP_BACKDROPS      /* the net maps' (docs/EMULATION.md) */
+#define XMAP_AT  FREE_MAP_BACKDROPS      /* the net maps' (docs/engine/emulation/) */
 #define XMAP_END FREE_INDOORS
 #define BUS      0x08000000u
 #define BN6_BGS  22                      /* BN6's own, 0x00-0x15 */
@@ -317,7 +317,7 @@ int xbackdrop_install(int xrom, int bg, int fallback) {
  * backdrop its EnterMapGroup loads first, through its LoadBGAnim (a
  * BGAnimData record; 16 bytes of two scroll callbacks, the HBlank's and
  * the display bits). BN5's groups keep them so, and its maps move by them:
- * palette banks cycling, the backdrop's tiles turning (docs/ROM_DATA.md).
+ * palette banks cycling, the backdrop's tiles turning (docs/rom/).
  * A layer in another game's tiles has its learned map's three, copied, in
  * the BN6 map it takes over; every other layer BN6's own there. */
 
@@ -403,7 +403,7 @@ static bool map_tables(const uint8_t *rom, uint32_t enters, uint32_t anims, int 
 /* The map whose descriptor lies at ROM offset `desc`, in its game's own
  * numbers: in the group whose list of descriptors starts nearest before
  * it (BN5's internet groups' lists follow each other, and the engine's
- * numbers 0x90:n run on into the next groups': docs/ROM_DATA.md). */
+ * numbers 0x90:n run on into the next groups': docs/rom/). */
 static bool own_map(const XRomLayout *l, uint32_t desc, int *group, int *number) {
 	uint32_t best = UINT32_MAX;
 	for (int g = 0; g < l->net_groups; ++g) {

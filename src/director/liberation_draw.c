@@ -6,7 +6,7 @@
  * pixel in one of the sprites' colours, or under an open chat box, is not
  * the floor's. Where the floor lies comes from the map layer's scroll,
  * which follows MegaMan (BG1's: x + y and (y - x) / 2 of the world, as
- * docs/ROM_DATA.md's row for BN6's camera says). With BN5's ROM the board
+ * docs/rom/liberation.md's row for BN6's camera says). With BN5's ROM the board
  * is BN5's own look (liberation_look.c), and the panel MegaMan faces is
  * outlined by BN5's own sprite, read from its ROM. The corner's phase, par
  * and Order Points, the banner and the command menu in BN6's PET look

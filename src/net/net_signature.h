@@ -1,4 +1,4 @@
-/* A layer's signature room (docs/LEVEL_DESIGN.md, Identity; issue #98):
+/* A layer's signature room (docs/world/level-design/identity.md; issue #98):
  * the one room a layer is remembered by, as each of BN6's net maps has one
  * landmark. Each area draws its layers' signatures from a small pool after
  * its own maps; a layout sets the signature where its shape has a heart (a

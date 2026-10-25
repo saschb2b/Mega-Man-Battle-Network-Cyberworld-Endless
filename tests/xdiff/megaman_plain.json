@@ -1,5 +1,5 @@
 {
- "about": "MegaMan the subject, both games' own (the Souls track's S0): BN5's CanGard V1 at (6,2), the same in both engines (spec cangard_v1), against MegaMan at (2,2) with 2000 HP, his buster at levels 1-1-1 in both, a folder of Cannon * in both (BN5's chip 1 and BN6's, one behaviour), the first Custom screen's Cannon picked and OK; buster shots, the Cannon fired while CanGard's guard is down, steps between the rows and columns. No charged shot: BN5's fires at once where BN6's waits five frames (docs/DEVTOOLS.md, The differential: MegaMan as the subject). Every difference of MegaMan's own (his object, what he owns, his player block) fails it.",
+ "about": "MegaMan the subject, both games' own (the Souls track's S0): BN5's CanGard V1 at (6,2), the same in both engines (spec cangard_v1), against MegaMan at (2,2) with 2000 HP, his buster at levels 1-1-1 in both, a folder of Cannon * in both (BN5's chip 1 and BN6's, one behaviour), the first Custom screen's Cannon picked and OK; buster shots, the Cannon fired while CanGard's guard is down, steps between the rows and columns. No charged shot: BN5's fires at once where BN6's waits five frames (docs/devtools/differential.md: MegaMan as the subject). Every difference of MegaMan's own (his object, what he owns, his player block) fails it.",
  "kind": "differential",
  "subject": "megaman",
  "foes": "4F@62",

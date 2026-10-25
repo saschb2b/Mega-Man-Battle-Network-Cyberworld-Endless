@@ -1,4 +1,4 @@
-/* --dev rollbench (issue #128, docs/ONLINE_ARENA.md, Rollback): what a
+/* --dev rollbench (issue #128, docs/online/arena/rollback/overview.md): what a
  * rollback of the Arena would cost on this machine, measured on the
  * player's ROM. The game's core alone first, then the pair at a Practice
  * NetBattle's battle by full rules, scripted keys on both sides: the snapshot's size,

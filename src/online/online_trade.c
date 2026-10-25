@@ -107,7 +107,7 @@ bool online_trade_cancel(void) {
 /* ---- the Pack ---- */
 
 /* (ids from BN6_PACK_IDS in the pack's extension, where a game with BN5's
- * ROM counts its chips: docs/EMULATION.md) */
+ * ROM counts its chips: docs/engine/emulation/) */
 static uint32_t pack_entry(unsigned id) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY || id > ONLINE_CHIP_LAST) return 0;
@@ -212,7 +212,7 @@ const char *online_trade_settle(void) {
 	int got_had = pack_count(get);
 	game_call_ret(BN6_TAKE_CHIPS, give.id, give.code, 1, NULL);
 	game_call_ret(BN6_GIVE_CHIPS, get.id, get.code, 1, NULL);
-	/* (ids from 320 count in the pack's extension: BN6's routines patched to, docs/EMULATION.md) */
+	/* (ids from 320 count in the pack's extension: BN6's routines patched to, docs/engine/emulation/) */
 	fprintf(stderr, "online: trade settled: %u %u given, %u %u got (the Pack's %d to %d of the one, %d to %d of the other)\n",
 		give.id, give.code, get.id, get.code, had, pack_count(give), got_had, pack_count(get));
 	char gave[32], got[32];

@@ -1,4 +1,4 @@
-/* director_courier.h. The courier in Lan's HP (docs/HOME.md, piece 2;
+/* director_courier.h. The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2;
  * issue #108): a Mr.Prog who stands there while the town holds something
  * for this visit, BN6's "!!" over his head, and says where it waits, the
  * most valuable first: a finished request's pay with its asker, else the

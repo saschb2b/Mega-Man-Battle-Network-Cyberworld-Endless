@@ -1,5 +1,5 @@
-/* BN6's attack families grown (issue #82; docs/ROM_DATA.md, The attack
- * families and chip routines grown; docs/EMULATION.md, its free space):
+/* BN6's attack families grown (issue #82; docs/rom/chips-code.md, The attack
+ * families and chip routines grown; docs/engine/emulation/memory.md, its free space):
  * the battle runs an attack by its CurAction from the families' table
  * (BN6_ATTACK_FAMILIES, a word per family 0x10-0x5E), and CurAction is a
  * byte, so the table grows to every family a byte can name, 0x10-0xFF, at

@@ -1,6 +1,6 @@
 /* The SAVES screen's words (saves_text.c): its labels, the panels' rows,
  * the copy's line and what the comparison and the result say, in the
- * plain style of the game's menus (docs/VOICE.md), apart from the logic
+ * plain style of the game's menus (docs/voice/rules.md), apart from the logic
  * that says when. */
 #ifndef CW_SAVES_TEXT_H
 #define CW_SAVES_TEXT_H

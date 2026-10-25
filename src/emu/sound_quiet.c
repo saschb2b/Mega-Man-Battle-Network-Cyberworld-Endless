@@ -1,5 +1,5 @@
 /* The game's music or effects silenced in the core (sound_quiet.h;
- * docs/EMULATION.md, The core's sound). */
+ * docs/engine/emulation/core-sound.md). */
 #include "sound_quiet.h"
 
 #include <stdbool.h>

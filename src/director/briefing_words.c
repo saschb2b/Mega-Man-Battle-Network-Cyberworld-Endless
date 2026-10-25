@@ -1,4 +1,4 @@
-/* L's briefing (docs/VOICE.md): where MegaMan and Lan are, what guards the
+/* L's briefing (docs/voice/rules.md): where MegaMan and Lan are, what guards the
  * layer, what else it holds, the heal while he is hurt and the way on; and
  * his word on the last stop before a guardian's arena. */
 #include "briefing_words.h"
@@ -61,7 +61,7 @@ static int guardian_words(char *buf, int k, int size) {
 	int navi = D.objs.guardian.navi;
 	const char *tip = guardian_tip(navi);
 	/* (what a Navi on the net said, as hearsay; a super boss sensed,
-	 * docs/BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	if (guardian_known(navi)) {
 		ADD("|@M %s waits at the end!|", guardian(navi)->name);
 		if (tip) ADD("@M We've got battle data on him!|@M %s|", tip);
@@ -69,7 +69,7 @@ static int guardian_words(char *buf, int k, int size) {
 	else if (navi == SUPER_BASS) ADD("|@M A dark signal waits at the end...|@M It doesn't feel like a copy,Lan.|");
 	else if (guardian_heard()) ADD("|@M Word is,%s waits at the end!|", guardian(navi)->name);
 	else ADD("|@M A strong Navi's signal waits at the end...|");
-	/* (the Net's clock: his copy a tenth stronger a notch, docs/HOME.md) */
+	/* (the Net's clock: his copy a tenth stronger a notch, docs/world/home/) */
 	if (run.clock) ADD("@M The Net kept copying while we went back...|@M %s tougher for it,Lan!|", guardian_known(navi) ? "He's" : "It's");
 	#undef ADD
 	return k;
@@ -102,7 +102,7 @@ static int heal_note(char *buf, int k, int size, bool heal) {
 }
 
 /* What MegaMan senses on the layer (`here`, n of them), appended to `buf`
- * at `k`, then the rival, whose call has said why (docs/RIVAL.md), apart:
+ * at `k`, then the rival, whose call has said why (docs/game/rival.md), apart:
  * in the list, "ProtoMan, waiting for our duel and an official gate" read
  * as waiting for the gate too (a playtester's). His race named a race, as
  * Chaud's call does: "our duel" read as a fight a playtester skipped
@@ -276,7 +276,7 @@ typedef struct {
 	bool any;   /* anything L's second words would name */
 } Here;
 
-/* The flame of darkness still burning on the layer (docs/META.md): L
+/* The flame of darkness still burning on the layer (docs/game/meta/): L
  * names it and where, and the map marks it, an Event; a playtester walked
  * two layers of ACDC Area past one, L naming every service but it, the
  * map marking only ProtoMan (session 66). */
@@ -321,10 +321,10 @@ static void here_scan(Here *h) {
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	/* (a trip back: its way home, docs/HOME.md) */
+	/* (a trip back: its way home, docs/world/home/) */
 	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.", area);
 	else ADD("@M Layer %d,Lan. We're in %s!", run.depth, area);
-	/* (where the nets meet: docs/MULTIROM.md, One net) */
+	/* (where the nets meet: docs/multirom/one-net.md) */
 	if (D.deep) ADD("|@M Both Nets' viruses come down here!");
 	else if (D.territory_native) ADD("|@M Its viruses come from the older Net!");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
@@ -407,7 +407,7 @@ const char *status_words(void) {
 	static char buf[1400];
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
-	/* (home's own way on, docs/HOME.md: no landmark's port there) */
+	/* (home's own way on, docs/world/home/: no landmark's port there) */
 	if (D.town && town_is_home()) return home_status();
 	if (D.town) {
 		int far;
@@ -469,7 +469,7 @@ static const char *service_where(int wx, int wy, char *buf, size_t n) {
 }
 
 /* The last stop's first box: whose arena is just ahead (a super boss's
- * sensed until they have met: docs/BOSSES.md, Super bosses); its length */
+ * sensed until they have met: docs/game/bosses/super-bosses.md); its length */
 static int arena_ahead(char *buf, size_t n) {
 	int navi = D.objs.guardian.navi;
 	bool known = guardian_known(navi);

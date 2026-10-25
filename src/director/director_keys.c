@@ -434,7 +434,7 @@ uint32_t director_keys(uint32_t keys) {
 	if (!lib_on()) keys = a_keys(keys, a_pressed);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
-	/* (a liberation's board: its own moves and menu, docs/LIBERATION.md) */
+	/* (a liberation's board: its own moves and menu, docs/game/liberation/) */
 	if (lib_on()) return lib_keys(keys);
 	if (director_in_town() && r_pressed && home_r(&keys)) return keys;
 	/* on the map L is MegaMan's word on where they are: the game's own

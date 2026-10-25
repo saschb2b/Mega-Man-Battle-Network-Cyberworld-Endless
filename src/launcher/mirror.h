@@ -1,4 +1,4 @@
-/* The automatic copy (docs/SAVES.md, The automatic copy): after the saves
+/* The automatic copy (docs/engine/saves.md, The automatic copy): after the saves
  * rest a few seconds, one .cwsave in the transfer place (pick.h: a
  * phone's ROM folder by default, a folder chosen in SAVES, a desktop's
  * Downloads, the data folder where there is no other). It writes only

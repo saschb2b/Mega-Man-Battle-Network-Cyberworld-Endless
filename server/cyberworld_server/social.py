@@ -1,4 +1,4 @@
-"""The Square's phrases and emotes (protocol v14, issue #176; docs/ONLINE.md,
+"""The Square's phrases and emotes (protocol v14, issue #176; docs/online/square/emotes.md,
 Emotes): a burst, then one a second; an emote aimed at a MegaMan, its cap
 on one target unanswered (past it only the sender sees his), an answer
 within five seconds flagged for every screen; and the server's beat, which

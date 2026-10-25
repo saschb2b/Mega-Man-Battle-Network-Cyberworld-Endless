@@ -5,7 +5,7 @@
  * used from a panel where it reaches an enemy, attacks stepped away from,
  * the buster charged in between; never a DarkChip (either net's: their
  * price is the run's max HP), never UNITE (a Soul costs a chip it would
- * have used: docs/MULTIROM.md). In text it taps A. Testing only. */
+ * have used: docs/multirom/). In text it taps A. Testing only. */
 #include "autopilot.h"
 
 #include <stdio.h>
@@ -164,7 +164,7 @@ static uint32_t rhythm_keys(uint32_t frame) {
 	return (t % 12) < 4 ? KEY_B : 0;
 }
 
-/* The fight otherwise, read from the battle's state (docs/ROM_DATA.md, the
+/* The fight otherwise, read from the battle's state (docs/rom/battle.md, the
  * autopilot's fight). The rhythm lost the first battles of every run: its
  * A took the hand's first chip alone (an Atk+10, say) and its B on the
  * Custom screen took that back, its START paused the fight 480 frames at a
@@ -351,7 +351,7 @@ static int chip_worth(int id, int hurt) {
  * column), the Atk+ after them, a recovery last */
 /* The hand's chip i (chip | code << 9), 0xFFFF for none, and for a
  * DarkChip of either net's (BN6's own, the registry's of BN5's: every kind,
- * darkchips.h), never picked, as it costs the run max HP (docs/META.md) */
+ * darkchips.h), never picked, as it costs the run max HP (docs/game/meta/) */
 static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0; }
 
 static int hand_chip(int i) {
@@ -551,14 +551,14 @@ static bool heal_panel(bool guardian, int *x, int *y) {
  * door), R at a jack-in; in Lan's HP onto the first way's portal */
 enum { AWAY, HOME_WALK, HOME_KEYS };
 /* (CYBERWORLD_AUTOPILOT_BACK=N: N trips back first, through the older
- * portals, docs/HOME.md) */
+ * portals, docs/world/home/) */
 static int trips_wanted(void) {
 	const char *v = getenv("CYBERWORLD_AUTOPILOT_BACK");
 	return v ? atoi(v) : 0;
 }
 
 /* (CYBERWORLD_AUTOPILOT_ROUTE: a dark layer's special route sought on its
- * board, liberation_auto.c, and its way taken at home: docs/LIBERATION.md,
+ * board, liberation_auto.c, and its way taken at home: docs/game/liberation/special-routes.md,
  * Special routes) */
 static bool route_wanted(void) {
 	static int want = -1;
@@ -567,7 +567,7 @@ static bool route_wanted(void) {
 }
 
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
-	/* (a liberation's board, docs/LIBERATION.md: its own play) */
+	/* (a liberation's board, docs/game/liberation/: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;

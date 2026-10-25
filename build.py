@@ -39,12 +39,12 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py shot ...     run the host binary headlessly (options below)
   python3 build.py tour [BIOMES] the game itself warped through every room of
                                 each area's layer, one sheet per area in
-                                .build/tour (docs/DEVTOOLS.md)
+                                .build/tour (docs/devtools/)
   python3 build.py atlas [BIOMES] [SEEDS] [--baseline]
                                 every area's layers drawn, one sheet per area
                                 in .build/atlas, compared with (or written to,
                                 --baseline) tests/atlas_baseline.txt
-                                (docs/DEVTOOLS.md)
+                                (docs/devtools/)
   python3 build.py tiles [SEEDS] [--baseline]
                                 the tile test: the atlas of every area and
                                 layout (SEEDS each, 2 by default), a table of
@@ -52,7 +52,7 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 than they show and seams, close-ups of them
                                 in .build/atlas/defects_bNN.png; fails where a
                                 layer got worse than tests/atlas_baseline.txt
-                                (docs/DEVTOOLS.md)
+                                (docs/devtools/)
   python3 build.py pacing       every act's battles and guardians against
                                 their bands, in .build/pacing.txt
   python3 build.py economy [RUNS]  what a run hands out by act (chips, good
@@ -64,14 +64,14 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 battle, frame by frame (tools/xdiff.py, the
                                 specs and masks in tests/xdiff); local only,
                                 both ROMs
-                                (docs/DEVTOOLS.md)
+                                (docs/devtools/)
   python3 build.py screenshots  the game captured headlessly for the site and
                                 the README, into docs/screenshots
   python3 build.py clips [NAMES] short videos of the game for the site
                                 (WebM, MP4 and a poster), into docs/clips
   python3 build.py town [SEEDS] the run's town drawn for a few seeds, and
                                 the game shown around it, in .build/town
-                                (docs/OVERWORLD.md)
+                                (docs/world/overworld.md)
   python3 build.py world        the real world's original maps drawn with
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
@@ -82,13 +82,13 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py online-pair --rom PATH --state PATH
                                 BN6's Practice NetBattle on one linked pair of
                                 cores, a snapshot of the pair restored and
-                                replayed midway (docs/ONLINE_LINK.md; the ROM
+                                replayed midway (docs/online/link.md; the ROM
                                 and a boot-3.state, both read-only)
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
                                 file for mGBA and no$gba, JSON and CSV per ROM;
-                                docs/SYMBOLS.md), from the sources
+                                docs/rom/symbols.md), from the sources
                                 (tools/symbols.py); with a bn6f checkout, the
                                 full map with bn6f's functions located in the
                                 ROMs too, in .build/symbols, never committed
@@ -96,7 +96,7 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py lint [--update]
                                 the code's checks (issue #19): GCC's analyzer,
                                 the functions no build reaches, lizard's
-                                complexity, the ROM offsets docs/ROM_DATA.md
+                                complexity, the ROM offsets docs/rom/
                                 names, the files git tracks, each against its
                                 baseline in tests/lint (--update writes them
                                 anew), and docs/symbols as tools/symbols.py
@@ -158,7 +158,7 @@ def default_rom_dir():
 
 
 BN6_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
-BN5_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'   # Team Colonel (USA), optional beside it (docs/MULTIROM.md)
+BN5_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'   # Team Colonel (USA), optional beside it (docs/multirom/)
 
 
 def docs_rom_mounts(bn5=False):
@@ -893,7 +893,7 @@ BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10, 'off': 1.10}
 AREAS = ['Central', 'Seaside', 'Sky', 'Green', 'Graveyard', 'Undernet', 'Secret', 'Nest', 'Comp', 'Homepage', 'Comp B',
          'Robot Comp', 'Aquarium Comp', 'Judge Comp', 'Weather Comp', 'CopyBot Comp', 'ACDC HP', 'Green HP', 'Sky HP',   # src/core/run.h
-         # (then another game's areas, where its ROM is beside BN6's: src/core/rom.c's bn5_areas, docs/MULTIROM.md)
+         # (then another game's areas, where its ROM is beside BN6's: src/core/rom.c's bn5_areas, docs/multirom/)
          'BN5 ACDC', 'BN5 SciLab', 'BN5 End', 'BN5 Nebula', 'BN5 Oran', 'BN5 Undernet']
 
 
@@ -1091,7 +1091,7 @@ FIT_INSTALL = ('6:START,54:,6:DOWN,14:,6:DOWN,14:,6:DOWN,24:,6:A,60:,6:A,60:,6:A
 FIT_NEXT = '10:SELECT,6:SELECT+R,4:SELECT,20:,' + '6:DOWN,6:,' * 8 + '10:,6:A,6:,'
 FIT_PAGES = '300:,' + '6:A,134:,' * 4 + '2230:,' + '6:A,174:,' * 12
 
-# 0.15.0's liberation (docs/LIBERATION.md), with BN5's ROM beside BN6's: an
+# 0.15.0's liberation (docs/game/liberation/), with BN5's ROM beside BN6's: an
 # act 2 dark layer (seed 1's, --dev dark) played by the autopilot, its
 # battles won in one hit (onehit, god); and seed 7's fork at home before act
 # 2, its pink pad the dark way: the welcome's pages, MegaMan away from the
@@ -1172,7 +1172,7 @@ GATE_KEEPER = HP_PAGED + '0:place 16 80 3,20:,8:UP,40:,6:A,60:,6:A,60:,' + GATE_
 # the sorts)
 TRADE_SPARES = ('250:,' + ''.join(f'0:chip {c} 1,' for c in ('1 A', '20 F', '72 S', '89 G', '121 D', '154 L', '227 H', '411 M', '413 E')) +
                 '0:trade list,50:,' + '4:DOWN,36:,' * 4 + '4:START,56:,' * 2 + '4:DOWN,46:,' + '4:DOWN,30:,' * 5 + '4:START,60:')
-# (the Jukebox, docs/PET.md: Dad's call paged in Lan's room, the PET's
+# (the Jukebox, docs/game/pet.md: Dad's call paged in Lan's room, the PET's
 # KeyItem, A on the Jukebox; BN6's Central Town played, then R to BN5's
 # The Net and its Undernet; the sound rendered frame by frame, so the
 # lights and the time are the song's)
@@ -1205,7 +1205,7 @@ SCREENSHOTS = [
     # (Chaud's first call on an act's duel layer, its second box)
     ('rival', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '0', '--dev', 'quiet', '--input', '700:,6:A,60:'],
      [(840, 'rival')], {}),
-    # (home, docs/HOME.md: a run's start in Lan's room, Dad's call; his PC's
+    # (home, docs/world/home/: a run's start in Lan's room, Dad's call; his PC's
     # jack-in; down the stairs and out of the front door into Central Town;
     # the plaza's fountain as the run begins and at night before the Nest
     # (the short net's layer 10); Lan's HP after act 2 (issues #108, #110):
@@ -1250,7 +1250,7 @@ SCREENSHOTS = [
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], [(420, 'undernet')], {}),
     ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '18', '--seed', '3', '--dev', 'quiet'], [(420, 'graveyard')], {}),
     ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
-    # (issue #98: each area's layer in its signature, docs/LEVEL_DESIGN.md,
+    # (issue #98: each area's layer in its signature, docs/world/level-design/identity.md,
     # Identity: Central's crater framed by an avenue of cybertrees, Seaside's
     # great field round its pool, Sky's ring road round its pad, Green's
     # grove at its giant cybertree, the Graveyard's slab round its hole below
@@ -1685,7 +1685,7 @@ CLIPS = [
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
     # (the areas walked, layer 1 by the weak autopilot past MegaMan's words;
-    # on BN6's ROM alone, but acdc-bn5, with BN5's beside it: docs/MULTIROM.md)
+    # on BN6's ROM alone, but acdc-bn5, with BN5's beside it: docs/multirom/)
     ('sky', AREA_WALK + ['--net-biome', '2', '--seed', '2'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 620),
     ('weather', AREA_WALK + ['--net-biome', '14', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
     ('central', AREA_WALK + ['--net-biome', '0', '--seed', '11'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
@@ -2052,10 +2052,13 @@ BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_p
 
 
 def lint_rom_data(update):
-    """Every address of src/emu/bn6.h (and bn6_pet.h) and every RomLayout field named in docs/ROM_DATA.md."""
+    """Every address of src/emu/bn6.h (and bn6_pet.h) and every RomLayout field named in docs/rom/."""
     from collections import Counter
-    with open(os.path.join(ROOT, 'docs', 'ROM_DATA.md')) as f:
-        doc = f.read().lower()
+    doc = ''
+    for name in sorted(os.listdir(os.path.join(ROOT, 'docs', 'rom'))):
+        if name.endswith('.md'):
+            with open(os.path.join(ROOT, 'docs', 'rom', name)) as f:
+                doc += f.read().lower()
     bn6 = ''
     for name in BN6_HEADERS:
         with open(os.path.join(ROOT, 'src', 'emu', name)) as f:
@@ -2075,9 +2078,62 @@ def lint_rom_data(update):
         for field in (f.strip() for f in group.split(',')):
             if field.lower() not in doc:
                 missing.append(f'RomLayout {field}')
-    return lint_compare('ROM offsets without their note in docs/ROM_DATA.md', 'rom_data.txt',
-                        'ROM offsets docs/ROM_DATA.md does not name (AGENTS.md: a new one needs its note);\n'
+    return lint_compare('ROM offsets without their note in docs/rom/', 'rom_data.txt',
+                        'ROM offsets docs/rom/ does not name (AGENTS.md: a new one needs its note);\n'
                         'this list only shrinks: build.py lint --update after naming one', Counter(missing), update)
+
+
+# the knowledge base (AGENTS.md, The knowledge base): the okf skill's validator, and every docs/ path the tree names
+DOC_PATH = re.compile(r'(?<![\w/.\-])docs/[\w./\-]*[\w/]')
+DOC_PATH_SKIP = ('docs/project/moved.md', 'docs/releases/v', 'docs/symbols/', 'docs/voice/catalog.json', 'docs/re/state.json',
+                 'docs/re/dashboard.html', '.claude/skills/okf/', '.claude/skills/reverse-engineering/',
+                 '.claude/skills/game-design/', 'CHANGELOG.md')
+
+
+def lint_docs():
+    """docs/ as an OKF bundle (okf-validate.mjs --strict: every concept typed, none orphaned, no broken
+    link inside it; a link leaving it for a file of the repository is not broken), and every docs/ path
+    named in the tree there (a path pinned to a commit, `at 7b4b8ef`, or a placeholder, NAME, TAG, X.Y.Z,
+    excepted)."""
+    bad = []
+    node = shutil.which('node')
+    if node is None:
+        print('docs: node not found (the okf validator needs it)')
+        return False
+    out = subprocess.run([node, os.path.join(ROOT, '.claude', 'skills', 'okf', 'okf-validate.mjs'), 'docs', '--strict'],
+                         cwd=ROOT, capture_output=True, text=True)
+    for line in (out.stdout + out.stderr).splitlines():
+        m = re.match(r'(error|gate)\s+(\S+): (.*)$', line)
+        if not m:
+            continue
+        b = re.match(r'broken concept link -> (\S+) \(no such concept\)', m.group(3))
+        if b:
+            target = os.path.normpath(os.path.join('docs', os.path.dirname(m.group(2)), b.group(1).split('#')[0]))
+            if not target.startswith('docs' + os.sep) and os.path.isfile(os.path.join(ROOT, target)):
+                continue
+        bad.append(f'{m.group(2)}: {m.group(3)}')
+    names = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, capture_output=True, check=True).stdout.decode().split('\0')
+    for n in filter(None, names):
+        if n.startswith(DOC_PATH_SKIP) or not os.path.isfile(os.path.join(ROOT, n)):
+            continue
+        try:
+            with open(os.path.join(ROOT, n), encoding='utf-8') as f:
+                text = f.read()
+        except (UnicodeDecodeError, OSError):
+            continue
+        for m in DOC_PATH.finditer(text):
+            p = m.group(0).rstrip('.')
+            if re.search(r'[A-Z]{3,}|X\.Y\.Z|\bvX', p.split('/')[-1]) and not p.endswith('.md'):
+                continue
+            if re.search(r'/(NAME|TAG|vX\.Y\.Z|vX_Y_Z)', p) or re.match(r'\s+at\s+`?[0-9a-f]{7}', text[m.end():]):
+                continue
+            if not os.path.exists(os.path.join(ROOT, p)):
+                if p.endswith('.md') or p.endswith('/'):
+                    bad.append(f'{n}: names {p}, which is not there')
+    for b in bad:
+        print(f'  docs: {b}')
+    print(f'docs: {len(bad)} problems')
+    return not bad
 
 
 def lizard(*args):
@@ -2239,9 +2295,9 @@ def lint_offsets(update):
 
 
 def lint_symbols():
-    """docs/symbols and SYMBOLS.md's numbers as tools/symbols.py writes them from
-    the headers, rom.c and ROM_DATA.md, and every name in bn6.h and bn5.h
-    described (docs/SYMBOLS.md); needs no bn6f."""
+    """docs/symbols and docs/rom/symbols.md's numbers as tools/symbols.py writes them from
+    the headers, rom.c and docs/rom/, and every name in bn6.h and bn5.h
+    described (docs/rom/symbols.md); needs no bn6f."""
     sys.stdout.flush()
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
@@ -2261,7 +2317,7 @@ SMELL_INCLUDES = 20     # a .c file including more of src/'s headers reaches int
 SMELL_PARAMS = 7        # a function taking more parameters wants a struct
 SMELL_NESTING = 5       # a function's body indented deeper than this many levels wants a function of its own
 SMELL_DUPLICATE = 10    # lines of a block repeated elsewhere (lizard -Eduplicate) want one function
-# what characters say lives in its own files, apart from what decides when (docs/VOICE.md)
+# what characters say lives in its own files, apart from what decides when (docs/voice/rules.md)
 WORDS_FILES = ('_words.c', '_lines.c', '_text.c')
 SMELLS = {
     'size': f'a file past {SMELL_LINES[".c"]} lines (.c) or {SMELL_LINES[".h"]} (.h): split it by what it does',
@@ -2431,8 +2487,8 @@ def symbols(rest=()):
     checkout of the bn6f disassembly, the full map too: tools/bn6f_match.py
     locates its functions in the ROMs (--roms DIR, else the usual ROM
     folder; a few minutes, on the host), then tools/symbols.py --full writes
-    .build/symbols and SYMBOLS.md's counts. bn6f's names stay out of git
-    (docs/SYMBOLS.md)."""
+    .build/symbols and docs/rom/symbols.md's counts. bn6f's names stay out of git
+    (docs/rom/symbols.md)."""
     ap = argparse.ArgumentParser(prog='build.py symbols')
     ap.add_argument('--bn6f', metavar='DIR', help='a checkout of github.com/dism-exe/bn6f: the full map in .build/symbols too')
     ap.add_argument('--roms', metavar='DIR', default=default_rom_dir(), help='the ROMs, told by their SHA-1')
@@ -2450,6 +2506,7 @@ def lint(update=False):
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
     ok = lint_voice() and ok
+    ok = lint_docs() and ok
     ok = lint_complexity(update) and ok
     ok = lint_smells(update) and ok
     ok = lint_headers() and ok
@@ -2460,7 +2517,7 @@ def lint(update=False):
 
 def online_pair(rest):
     """BN6's Practice on one linked pair of cores, with a snapshot restored
-    and replayed midway (tools/online_pair_run.c, docs/ONLINE_LINK.md)."""
+    and replayed midway (tools/online_pair_run.c, docs/online/link.md)."""
     ap = argparse.ArgumentParser(prog='build.py online-pair')
     ap.add_argument('--rom', required=True, help="the player's BN6 Gregar USA ROM")
     ap.add_argument('--state', required=True, help='a boot-3.state from a data folder')
@@ -2594,7 +2651,7 @@ def main():
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
                         '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'economy':
-        # (local only: the ROM; what a run hands out by act against its bands, docs/ECONOMY.md; RUNS after the action)
+        # (local only: the ROM; what a run hands out by act against its bands, docs/game/economy/; RUNS after the action)
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
         os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)

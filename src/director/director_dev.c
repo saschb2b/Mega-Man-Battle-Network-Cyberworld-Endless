@@ -29,7 +29,7 @@ const char *director_dev_talks;
 
 bool director_dev_next_layer(void) {
 	if (!director_on_map()) return false;
-	/* (from a trip back, the run's own next: docs/HOME.md) */
+	/* (from a trip back, the run's own next: docs/world/home/) */
 	if (run.home_depth) run.depth = run.home_depth - 1;
 	run.home_depth = 0;
 	run.depth++;
@@ -122,7 +122,7 @@ static bool dev_gift(const char *name) {
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
 	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
 	else if (!strcmp(name, "regup")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_REG_UP1 + 2, 1);
-	/* (the three a golden gate wants: docs/BOSSES.md, Super bosses) */
+	/* (the three a golden gate wants: docs/game/bosses/super-bosses.md) */
 	else if (!strcmp(name, "scrtdata")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_SECRET_DATA, 3);
 	else return false;
 	return true;
@@ -314,7 +314,7 @@ bool director_dev_folder(int k) {
  * its map (no chat, talk, scene or warp, no guardian's staging, challenge
  * or forced battle under way): BN6's own, forced past its roll as the
  * guardians' are (an older net's area's its own records in BN6's engine,
- * docs/MULTIROM.md, One net). */
+ * docs/multirom/one-net.md). */
 void director_dev_battle(void) {
 	if (D.active && !D.town) D.battle_due = true;
 	else printf("battle: only on a layer\n");

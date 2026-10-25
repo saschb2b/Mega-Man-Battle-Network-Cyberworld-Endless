@@ -1,4 +1,4 @@
-/* SAVES on the title (docs/SAVES.md, issue #114): the saves exported to
+/* SAVES on the title (docs/engine/saves.md, issue #114): the saves exported to
  * one file and imported from one, compared first; Undo; the automatic
  * copy's place. Three views: home, the comparison and the result. */
 #ifndef CW_SAVES_H

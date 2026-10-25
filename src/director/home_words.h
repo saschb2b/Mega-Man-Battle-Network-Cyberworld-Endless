@@ -1,5 +1,5 @@
 /* What MegaMan and Lan say coming home after an act, and of Lan's HP's
- * portals (home_words.c, docs/HOME.md, docs/VOICE.md). */
+ * portals (home_words.c, docs/world/home/, docs/voice/rules.md). */
 #ifndef CW_HOME_WORDS_H
 #define CW_HOME_WORDS_H
 
@@ -9,9 +9,9 @@
  * (NULL unknown), the run at the next act's first layer; its ways open,
  * `ports[0..ways)` the portals' names ("pink pad"), `sealed` where a
  * dark way's stands shut (NULL none), and `route` the portal of a special
- * route's way (docs/LIBERATION.md, Special routes; -1 none). */
+ * route's way (docs/game/liberation/special-routes.md; -1 none). */
 const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed, int route);
-/* MegaMan at a portal (docs/HOME.md): what he reads through the link of
+/* MegaMan at a portal (docs/world/home/): what he reads through the link of
  * area `biome` (its data, never its name: he has not been there) and of
  * `navi` its guardian (his signal named where MegaMan has battled him);
  * `dark` the dark way into the Undernet, `sealed` that way still shut;
@@ -36,9 +36,9 @@ const char *home_aster_words(const char *words);
 const char *home_door_words(const char *words, const char *door);
 /* L in Lan's HP: the pink pad `way` from MegaMan, and how far the Net's
  * clock has run (`clock` its notches); R, BN6's jack-out, unsaid
- * (docs/VOICE.md, What nobody says). */
+ * (docs/voice/rules.md, What nobody says). */
 const char *home_hp_status(const char *way, int clock);
-/* MegaMan beside an older portal (docs/HOME.md, going back): where it
+/* MegaMan beside an older portal (docs/world/home/going-back.md): where it
  * leads (an area won, so named) and its price on the Net's clock, all of
  * it until `taught`. */
 const char *home_back_portal_words(int biome, bool taught, int clock);
@@ -48,7 +48,7 @@ const char *home_back_words(int clock);
 const char *home_back_question(void);
 /* ... and before a way on through a link. */
 const char *home_on_question(void);
-/* The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable
+/* The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable
  * first, a box each: the pay waiting with asker `reward` (jobs.h, -1
  * none), else the places of the requests posted (bit k asker k), new
  * after an act, simply up at the run's first visit (`first`), and what

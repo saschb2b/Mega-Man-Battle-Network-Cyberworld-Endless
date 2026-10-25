@@ -343,7 +343,7 @@ static int weigh(const Formation *list, int n, int depth, int target, PacingBand
 
 /* A formation from the area's original random battles, at the highest
  * version up to the act's that keeps it inside the act's band
- * (docs/PROGRESSION.md). False when the ROM has none for the area. */
+ * (docs/game/progression/). False when the ROM has none for the area. */
 /* The area whose battles an area with few of its own shares, and in how
  * many thirds of them: the Sky and Green homepages' random battles are one
  * formation each (every act 2 battle on Sky HP was Gunner and FgtrPlne),
@@ -422,7 +422,7 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 }
 
 /* Whether formation `f` is one of BN6's own random battles a Server never
- * holds: a super boss's (Bass BX, the beast's copy; docs/BOSSES.md: they
+ * holds: a super boss's (Bass BX, the beast's copy; docs/game/bosses/: they
  * come at their places, never at random) or the place of the Navi the US
  * version cut, drawn as MegaMan */
 static bool navi_reserved(const Formation *f) {
@@ -459,7 +459,7 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	bool rare = pacing_rare(depth, rng_range(0, 99));
 	/* from the fourth act a challenge may meet one of the area's SP navis,
 	 * who keeps his own strength */
-	/* (threat 5, docs/META.md: from the first act) */
+	/* (threat 5, docs/game/meta/: from the first act) */
 	if (challenge && (pacing_act(depth) >= 3 || run.threat >= 5) && rng_range(0, 99) < NAVI_CHALLENGE && navi_challenge(list, n, depth, target, e))
 		return true;
 	static int8_t fit[MAX_FIT];
@@ -610,7 +610,7 @@ Encounter make_boss(int depth, int biome, int navi) {
 	e.foes[0].family = navi;
 	e.foes[0].col = 4;
 	e.foes[0].row = 1;
-	/* a super boss in his form (docs/BOSSES.md, Super bosses), in BN6's own
+	/* a super boss in his form (docs/game/bosses/super-bosses.md), in BN6's own
 	 * record's music and on the background of the map he stands on, as
 	 * BN6's records give his battles */
 	if (super_boss(navi)) {
@@ -619,10 +619,10 @@ Encounter make_boss(int depth, int biome, int navi) {
 		e.map_backdrop = true;
 		return e;
 	}
-	/* the version whose HP suits the act (docs/PROGRESSION.md) */
+	/* the version whose HP suits the act (docs/game/progression/) */
 	e.foes[0].version = pacing_guardian_version(navi, pacing_act(depth), pacing_loop(depth),
 		(biome == BIOME_NEST && !run_short_nest(depth)) || biome == BIOME_SECRET, navi_hp);
-	/* (threat 4, docs/META.md: EX from act 2) */
+	/* (threat 4, docs/game/meta/: EX from act 2) */
 	if (run.threat >= 4 && pacing_act(depth) >= 1 && e.foes[0].version < 1) e.foes[0].version = 1;
 	return e;
 }
@@ -676,13 +676,13 @@ LootFind loot_mystery_roll(int param, int depth) {
 	int roll = rng_range(0, 99);
 	LootFind f = { LOOT_FIND_ZENNY, 100, '*' };
 	/* (none on a trip back: the run's HPMemory lie where it goes on,
-	 * docs/HOME.md) */
+	 * docs/world/home/) */
 	if (param == 2 && depth >= 4 && run.side_kind != LAYER_BACK && rng_range(0, 99) < HP_MEMORY_CHANCE) {
 		f.kind = LOOT_FIND_HP_MEMORY;
 		f.value = 1;
 		return f;
 	}
-	/* (threat 6, docs/META.md: a chip where zenny would be) */
+	/* (threat 6, docs/game/meta/: a chip where zenny would be) */
 	bool chips_only = run.threat >= 6;
 	int bonus = -1;   /* a chip's bonus tier (roll_chip), -1 for none */
 	if (param == 0) {
@@ -706,7 +706,7 @@ LootFind loot_mystery_roll(int param, int depth) {
 		 * them: rolled again, eight times at most, for one (smart loot, as
 		 * Diablo 3 leans a drop to its finder); the other half as it rolls.
 		 * Leaning only the code, where the chip had one, a Blade folder's
-		 * (S, L) finds came in its codes two times in seven (docs/META.md) */
+		 * (S, L) finds came in its codes two times in seven (docs/game/meta/) */
 		if (run.codes[0] && rng_range(0, 1) && econ_keep(ECON_LEVER_LEAN, depth)) {
 			for (int t = 0; t < 8 && !loot_folder_code(f.value, false); ++t) f.value = roll_chip(depth, bonus, &f.code);
 			char c = loot_folder_code(f.value, false);

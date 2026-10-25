@@ -10,6 +10,6 @@ RUN apt-get update \
 COPY mingw.cmake /opt/mingw.cmake
 COPY sdl2.sh /tmp/sdl2.sh
 RUN sh /tmp/sdl2.sh windows
-# The embedded GBA core (docs/EMULATION.md)
+# The embedded GBA core (docs/engine/emulation/)
 COPY mgba.sh /tmp/mgba.sh
 RUN sh /tmp/mgba.sh windows

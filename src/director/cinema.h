@@ -1,4 +1,4 @@
-/* Staging over the running game (docs/BOSSES.md): letterbox bars, title
+/* Staging over the running game (docs/game/bosses/): letterbox bars, title
  * and area cards, flashes and shakes drawn over the game's frame, and how
  * much of the player's input reaches MegaMan. */
 #ifndef CW_CINEMA_H
@@ -48,7 +48,7 @@ void cinema_arrow_heal(bool heal);
 int cinema_arrow_age(void);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames);
-/* A super boss's title card (docs/BOSSES.md, Super bosses): the picture
+/* A super boss's title card (docs/game/bosses/super-bosses.md): the picture
  * darkened, a taller band with double edges in his colour, `top` over his
  * name, larger and heavier, `sub` under it (his form, the Net's bottom)
  * and `epithet`; held longer than a guardian's. */

@@ -1,5 +1,5 @@
 /* The virus families of each net as their own game sets them, for the
- * visitors (visitors.h; issue #82, docs/MULTIROM.md, One net: the design):
+ * visitors (visitors.h; issue #82, docs/multirom/one-net.md):
  * BN6's from its areas' random battles, BN5's from the records of the
  * areas it lends a run (NetAreaDef.xbattles), fought in BN6's engine.
  * Each family's role (where its game sets it: the back, the front, or

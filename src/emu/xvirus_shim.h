@@ -1,4 +1,4 @@
-/* A moved family's shims (issue #82's A2b; docs/ROM_DATA.md, The families'
+/* A moved family's shims (issue #82's A2b; docs/rom/virus-families.md, The families'
  * shims and pre-steps): what its game's code asks of the engine that a
  * changed immediate cannot give BN6's way, made as a few instructions of
  * the project's own Thumb in its home (XV_HOME_SHIMS), each from the

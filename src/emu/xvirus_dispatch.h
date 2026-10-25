@@ -1,5 +1,5 @@
-/* The second-level dispatch (issue #82; docs/EMULATION.md, its free space
- * and the RAM plan; docs/MULTIROM.md, Transplanted families): BN6's battle
+/* The second-level dispatch (issue #82; docs/engine/emulation/memory.md, its free space
+ * and the RAM plan; docs/multirom/families.md): BN6's battle
  * runs an object by the routine of its type, a byte, from its kind's table
  * (the first, third and fourth kinds'), and BN5's moved families, Navis and
  * chips bring more types than those tables have room for. So one type of

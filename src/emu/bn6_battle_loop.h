@@ -3,7 +3,7 @@
  * what it came to), and the banners it shows over the field (BN6's battle
  * messages: BN5's table kept whole, its Liberation Missions' among them).
  * Read and answered by a liberation's battle (src/director/
- * liberation_battle.c; docs/ROM_DATA.md, BN6's battle loop and banners). */
+ * liberation_battle.c; docs/rom/battle.md, BN6's battle loop and banners). */
 #ifndef CW_BN6_BATTLE_LOOP_H
 #define CW_BN6_BATTLE_LOOP_H
 

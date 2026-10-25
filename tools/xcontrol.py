@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """xcontrol.py [--navi] [--spec fight|status|delete|all] [--seed S] [--story] [--quiet]:
 the control family's differential, or the control Navi's (issue #82;
-docs/MULTIROM.md, Transplanted families and Transplanted Navis).
+docs/multirom/families.md and Transplanted Navis).
 
 The installer that moves another game's virus families into BN6's battle
 engine (src/emu/xvirus.c) is proven first on BN6's own Mettaur: --dev

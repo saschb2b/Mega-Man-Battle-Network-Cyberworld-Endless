@@ -41,7 +41,7 @@ startButton.onclick = async () => {
         if (bn5) Module.FS.writeFile('/rom/bn5.gba', new Uint8Array(await bn5.arrayBuffer()));
         statusLine.textContent = 'In the Net Square once the gate connects. Reload to start another visit.';
         // (a run at home, through the gate's questions onto the gate, the
-        // server and name given by --dev: docs/ONLINE.md, Two games at once)
+        // server and name given by --dev: docs/online/two-games.md)
         const dev = 'quiet,online=' + document.getElementById('endpoint').value + ',onlinename=' + document.getElementById('name').value;
         Module.callMain(['--rom-dir', '/rom', '--data-dir', '/visit', '--window', '--size', '720x480',
             '--scene', 'home', '--run-depth', '7', '--seed', '3', '--dev', dev,

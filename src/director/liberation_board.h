@@ -1,4 +1,4 @@
-/* A liberation's board (docs/LIBERATION.md, Building it: stage 1): the
+/* A liberation's board (docs/game/liberation/building/overview.md: stage 1): the
  * dark layer's own floor taken at 32 world units a panel, one layer cell a
  * panel (the map's, as built), its kinds placed by BN5's rules as
  * tools/liberation.py prototypes them, from the layer's seed and floor
@@ -6,7 +6,7 @@
  * layer and its map). Each act brings one
  * rule of BN5's more (the staircase), and the board is kept only where the
  * planner (liberation_plan.h) finds it a set of real decisions
- * (docs/LIBERATION.md, The quality bar). */
+ * (docs/game/liberation/quality-bar.md). */
 #ifndef CW_LIBERATION_BOARD_H
 #define CW_LIBERATION_BOARD_H
 
@@ -27,7 +27,7 @@ enum { LIB_VOID, LIB_CLEAN, LIB_DARK, LIB_ITEM, LIB_BONUS, LIB_HOLE, LIB_RING, L
  * sealed region's route */
 enum { LIB_GOT_OP, LIB_GOT_HEART, LIB_GOT_KEY, LIB_GOT_ZENNY, LIB_GOT_CHIP, LIB_GOT_ROUTE };
 /* The staircase: the rules an act's board asks about, one more an act
- * (docs/LIBERATION.md, The quality bar, 3). Act 2 has the basics (dark
+ * (docs/game/liberation/quality-bar.md, 3). Act 2 has the basics (dark
  * panels, DarkHoles, the Darkloid, Order Points and hearts). */
 enum {
 	LIB_RULE_BARRIERS = 1,   /* act 3: a BarrierPanel and its key, the sealed region's route behind it */
@@ -37,7 +37,7 @@ enum {
 };
 /* The units BN5 sets on a board: the Darkloid, and the guardians of its
  * DarkHoles (BN5's BigBrute, TinHawk and Bladia: their rules, not their
- * looks, docs/LIBERATION.md) */
+ * looks, docs/game/liberation/) */
 enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 #define LIB_UNITS 8
 #define LIB_HOLES 5
@@ -51,7 +51,7 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
  * MegaMan 32 to 52 of 100, Colonel 32 to 72 of 200) */
 #define LIB_REST_PART 5
 
-/* The team (docs/LIBERATION.md, The team): MegaMan first, then the Navis
+/* The team (docs/game/liberation/decision.md, The team): MegaMan first, then the Navis
  * whose BN5 Souls the run holds, at most BN5's team of five. Each by BN5's
  * id (a team record's +5, bn5_liberation.h's BN5_LIB_NAVI_*), which is his
  * Soul's number too (souls.h: bit k the Soul of id 7 + k) */
@@ -194,7 +194,7 @@ int lib_open_barrier(LibBoard *b, int n);
 void lib_cost_map(const LibBoard *b, int16_t cost[MAP_H][MAP_W], bool keys);
 /* The HP the board's units would take off a Navi standing on (x, y) in the
  * Darkloids' phase next, as their rules move them (the telegraph: their
- * reach and next step, docs/LIBERATION.md, The quality bar, 4) */
+ * reach and next step, docs/game/liberation/quality-bar.md, 4) */
 int lib_threat(const LibBoard *b, int x, int y);
 
 #endif

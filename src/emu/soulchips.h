@@ -1,6 +1,6 @@
 /* What a Soul does to the chips MegaMan uses in BN6's engine (issue #82,
- * the Souls track's S5; docs/MULTIROM.md, Transplanted Souls; docs/
- * ROM_DATA.md, A Soul's chips), by BN5's rule where BN6's engine reads the
+ * the Souls track's S5; docs/multirom/souls.md; docs/
+ * docs/rom/souls.md, A Soul's chips), by BN5's rule where BN6's engine reads the
  * form for its Crosses: the chip charge (A held) of a chip of the Soul's
  * kind (BN5 0x08010902: ShadowSoul's swords, KnightSoul's Break chips,
  * ToadSoul's Aqua chips), a charged chip doubled for KnightSoul and ToadSoul

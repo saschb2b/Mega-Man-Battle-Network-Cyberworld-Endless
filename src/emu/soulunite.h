@@ -1,11 +1,11 @@
 /* UNITE on BN6's Custom screen (issue #82, the Souls track's S2; docs/
- * MULTIROM.md, Transplanted Souls): BN5's Souls unite in BN6's battles by
+ * docs/multirom/souls.md): BN5's Souls unite in BN6's battles by
  * BN5's rule, each behind the proxy form (soulproxy.h) with BN5's look,
  * abilities and passives (soullook.h, soulpower.h, soulpassive.h; the
  * track's S3-S5), its Chaos Unison's charge and BN5's DarkChip rule the
  * track's next milestones.
  * Element 0xB under OK is BN6's Beast Out emblem and BN5's UNITE button
- * in one place (docs/ROM_DATA.md, UNITE on BN6's Custom screen): it is
+ * in one place (docs/rom/souls.md, UNITE on BN6's Custom screen): it is
  * UNITE while the last chip picked lights a held Soul (BN5's check: the
  * chip of the Soul's kind as BN5 has it, soulkinds.h; a DarkChip of it
  * for its Chaos Unison; each once a battle), the emblem otherwise where

@@ -1,7 +1,7 @@
 /* MegaMan's forms in BN6's battle engine (bn6.h includes it): the tables
  * the engine reads by his form (BN6_BATTLE_FORM), the places Gregar's code
  * reads the form itself, and a Cross's pending record and used bits; at
- * Gregar's addresses (docs/ROM_DATA.md, MegaMan's forms; issue #82). A
+ * Gregar's addresses (docs/rom/souls.md, MegaMan's forms; issue #82). A
  * table holds BN6_FORMS entries: 0 none, 1-10 the Crosses (Gregar's five,
  * then Falzar's SpoutCross to DustCross, 6-10, which Gregar keeps and never
  * offers), 0xB-0x16 Beast Out (BN6_FORM_BEAST, a Cross's from
@@ -14,7 +14,7 @@
 #define BN6_FORM_HEAT_CROSS   1           /* BN6_BATTLE_FORM: HeatCross (BN6_FLAG_HEAT_CROSS's) */
 #define BN6_FORM_PROXY        8           /* BN6_BATTLE_FORM: Falzar's TenguCross, which no Gregar CROSSSELECT offers: the Souls' proxy form */
 #define BN6_FORM_NAME_BASE    0x1AB       /* MegaMan's NameID in a form: this + the form (0x08015B22 writes it; 0x1A0 in none), the object id table's entry */
-/* The tables by form (each a pointer word's in the code names it, docs/ROM_DATA.md) */
+/* The tables by form (each a pointer word's in the code names it, docs/rom/) */
 #define BN6_FORM_SPRITES      0x0800FCBCu /* u8 a form: MegaMan's sprite, its number in his category (0x0800FC9E reads it; Crosses 0, his own) */
 #define BN6_FORM_OVERLAYS     0x0801127Cu /* u32 a form: the routine that spawns a Cross's overlay as he crosses (0x08011268 calls it) */
 #define BN6_FORM_OVERLAYS_END 0x08011398u /* u32 a form: the routine that takes it away as he leaves the form (0x08011384) */
@@ -48,11 +48,11 @@
 #define BN6_CROSSES_USED      0x020349A0u /* u32: bit i as CROSSSELECT's Cross i is chosen (HeatCross bit 0), cleared as a battle begins */
 
 /* BN5's Souls on the proxy form (src/emu/soulunite.c, soullife.c; the Souls
- * track's S2, docs/MULTIROM.md, Transplanted Souls): their state in RAM, the
+ * track's S2, docs/multirom/souls.md): their state in RAM, the
  * Custom screen's element 0xB they share with Beast Out (BN6's emblem is
  * BN5's UNITE button), and the places Gregar's code is hooked or pointed
  * elsewhere for them */
-#define BN6_SOULS             0x0203FF70u /* the Souls' state, BN6_SOULS_SIDE bytes a side (the RAM plan's 0x0203FF70-0x0203FFEF, docs/EMULATION.md):
+#define BN6_SOULS             0x0203FF70u /* the Souls' state, BN6_SOULS_SIDE bytes a side (the RAM plan's 0x0203FF70-0x0203FFEF, docs/engine/emulation/):
                                              zeroed with the battle's RAM as each battle is set up (0x080071F2), read and written by our hooks alone */
 #define BN6_SOULS_SIZE        0x80        /* BN6_SOULS: its bytes, both sides' and room for what the track's later milestones keep */
 #define BN6_SOULS_PARTNERS    (BN6_SOULS + 2 * BN6_SOULS_SIDE) /* --dev arena2v2: each side's partner's own block after the sides', laid
@@ -105,7 +105,7 @@
 #define BN6_MODE_UNITE        0x24        /* BN6_CUSTOM_MODE: BN5's UNITE chosen (0x08027044 from the mode table 0x08026AA4), which no Gregar code sets */
 #define BN6_BATTLE_PLAYERS    (BN6_BATTLE_STATE + 0xD0) /* each side's player object, a word every BN6_BATTLE_PLAYER_STEP bytes (0x080103BC) */
 #define BN6_BATTLE_SIDE_NAVIS (BN6_BATTLE_STATE + 0x80) /* each side's four Navis' objects (0 none), 0x10 bytes a side (BN5's the same: 0x0810436C) */
-#define BN6_BATTLE_MODE       (BN6_BATTLE_STATE + 0x00) /* u8: BN6_BATTLE_ON while a battle runs, its Custom screen and its fight; BN6_BATTLE_GONE once a NetBattle has ended and left (the Arena, docs/ROM_DATA.md) */
+#define BN6_BATTLE_MODE       (BN6_BATTLE_STATE + 0x00) /* u8: BN6_BATTLE_ON while a battle runs, its Custom screen and its fight; BN6_BATTLE_GONE once a NetBattle has ended and left (the Arena, docs/rom/) */
 #define BN6_BATTLE_ON         0x04
 #define BN6_BATTLE_GONE       0x08
 #define BN6_T1_ANIM           0x10        /* an object's animation (CurAnim, u8: 0x0800F2B6 sets it) */
@@ -146,7 +146,7 @@
 #define BN6_AI_CHARGE         0x1D        /* u8 his charge: 0 none, 1 charging, 2 full (both games' 0x08012F30 / 0x080105B0) */
 #define BN6_AI_CHARGE_BUTTON  0x1E        /* u8 ... its button: 1 A, 2 B (0x08012EEC, 0x08012F02) */
 #define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */
-/* The hooks (soulunite.c, soullife.c; docs/EMULATION.md, Hooks) */
+/* The hooks (soulunite.c, soullife.c; docs/engine/emulation/hooks.md) */
 #define BN6_UNITE_STAND       0x08027EC6u /* tst r0,r0 after Beast Out's test (0x08029FB0, r0) in the Custom screen's set-up: element 0xB stands */
 #define BN6_EMBLEM_LIT        0x0802A57Au /* the emblem's lit test (push {r4,lr}; r0 1 lit): the set-up's (0x08027ECC) and the picks' (0x08028F64) */
 #define BN6_UNITE_LIT         0x08028F48u /* element 0xB lit or grey after each pick (push {r4,r6,r7,lr}; from 0x08028E3C) */

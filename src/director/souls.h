@@ -1,7 +1,7 @@
-/* The run's Souls (docs/META.md, Souls; issues #69, #82): which of BN5's
- * Team Colonel Navis the run has beaten as a guardian (docs/BOSSES.md,
+/* The run's Souls (docs/game/meta/souls.md; issues #69, #82): which of BN5's
+ * Team Colonel Navis the run has beaten as a guardian (docs/game/bosses/bn5-navis.md,
  * BN5's Navis) and holds the Soul of, for every battle of the run, the
- * Souls standing in BN6's engine (docs/MULTIROM.md, Transplanted Souls);
+ * Souls standing in BN6's engine (docs/multirom/souls.md);
  * kept beside the run's checkpoint. A new run holds none. */
 #ifndef CW_SOULS_H
 #define CW_SOULS_H

@@ -1,4 +1,4 @@
-/* The Arena's two PET screens (issue #167, docs/ONLINE_ARENA.md, The way
+/* The Arena's two PET screens (issue #167, docs/online/arena/from-square/way-in.md, The way
  * in and the result): the way in as a Network panel (both players, each
  * MegaMan as carried, the set's score, whose PET is still on its way),
  * and the result as a card (vs whom, how long, the HP left and chips

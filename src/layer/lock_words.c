@@ -1,4 +1,4 @@
-/* The set pieces' locks' chats (docs/VOICE.md): a security cube's P-Code
+/* The set pieces' locks' chats (docs/voice/rules.md): a security cube's P-Code
  * or toll, a skull door, a number door, and the navi who tells the
  * P-Code. */
 

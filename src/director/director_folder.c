@@ -143,7 +143,7 @@ static uint32_t pack_count_at(int entry) {
 	return at ? at + (uint32_t)slot : 0;
 }
 
-/* The run's starting folder in the game's first folder (docs/META.md): the
+/* The run's starting folder in the game's first folder (docs/game/meta/): the
  * chosen one's 30 chips over the game's own (Standard keeps those), as
  * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
 void set_start_folder(void) {
@@ -172,7 +172,7 @@ void set_start_folder(void) {
 	own_folder_chips();
 }
 
-/* The All * helper in the game (docs/META.md, issue #18): every chip's
+/* The All * helper in the game (docs/game/meta/all-star-helper.md, issue #18): every chip's
  * record holds * alone in the core's ROM copy, so the pack keeps a chip in
  * * whatever code it was given in (bn6f getOffsetToQuantityOfChipCode
  * counts a code the record lacks as its first), the folder's EDIT moves it
@@ -221,7 +221,7 @@ void star_folder_pack(void) {
 	}
 }
 
-/* The profile's Library (docs/META.md) in the run's game: the PET's Library
+/* The profile's Library (docs/game/meta/) in the run's game: the PET's Library
  * shows every chip held in any run, and a Chip Trader's prize, new to the
  * Library first, is new across runs. */
 void library_to_game(void) {
@@ -261,7 +261,7 @@ void library_from_game(void) {
 }
 
 /* ... and the programs MegaMan has, into the programs found, which later
- * runs' NaviCust vendors keep (docs/NAVICUST.md, 7). */
+ * runs' NaviCust vendors keep (docs/game/navicust.md, 7). */
 void programs_from_game(void) {
 	uint8_t now[10];
 	int n = board_programs(now, (int)sizeof now);

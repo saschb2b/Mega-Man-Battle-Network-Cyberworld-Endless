@@ -1,4 +1,4 @@
-/* Visitors: where the nets meet (issue #82, docs/MULTIROM.md, One net: the
+/* Visitors: where the nets meet (issue #82, docs/multirom/one-net.md, One net: the
  * design). From the run's second act on, where BN5's ROM is read and its
  * families are in BN6's engine, one random battle in four takes one virus
  * of the other net in place of one of its own: BN6's areas meet BN5's
@@ -49,7 +49,7 @@ bool visitors_here(int depth, int biome);
  * none fits. */
 bool visitor_apply(Encounter *e, int depth);
 
-/* The deep converges (docs/MULTIROM.md, One net): the older net's area
+/* The deep converges (docs/multirom/one-net.md): the older net's area
  * whose records a random battle takes, -1 BN6's area's own: a territory's
  * (`territory`, -1 none) always; in the deep (`deep`, loot.h's loot_deep:
  * its older net's areas, -1 none), a coin between the nets, and between

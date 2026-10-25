@@ -1,5 +1,5 @@
 /* What the layer's navis say of what stands on it, and MegaMan at what he
- * finds there (docs/VOICE.md): the Net Dealer, the NaviCust vendor,
+ * finds there (docs/voice/rules.md): the Net Dealer, the NaviCust vendor,
  * ProtoMan's terms, a bystander's rumor and an invisible path's hint, a
  * ScrtData and a Spin. Their scripts are layer_objs.c's. */
 #include "layer_words.h"
@@ -113,7 +113,7 @@ ShopWords dealer_words(const DealerTalk *d) {
 	/* (nor does he deny the bystanders' rumor: a playtester heard it
 	 * two platforms before his "No word yet") */
 	/* (a super boss never met: no word on the net, only its fear; docs/
-	 * BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	if (super_boss(navi) && !d->tells)
 		snprintf(word, sizeof word, "|Something's waiting at the end of %s...|Even I don't go near it!",
 			guardian_area_in_text(run.biome, run.side_kind));
@@ -149,7 +149,7 @@ ShopWords vendor_words(char names[][16], int n) {
 	return (ShopWords){ hello, "More programs? Take a look!", "Sold out!|Every program I brought is yours!" };
 }
 
-/* ProtoMan's terms for a race (docs/RIVAL.md), into `terms`: the time to
+/* ProtoMan's terms for a race (docs/game/rival.md), into `terms`: the time to
  * beat (`frames`), as the results screen shows a DeleteTime (seconds and
  * hundredths, cut), and the rung's rule; the squad (`foes` viruses) and the
  * stake said before the choice (a playtester took it at 100 HP, nothing

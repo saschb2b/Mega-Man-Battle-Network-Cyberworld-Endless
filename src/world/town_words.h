@@ -1,5 +1,5 @@
 /* What Central Town's people say of the run and the runs (town_words.c,
- * docs/HOME.md, a town that remembers), for town.c. */
+ * docs/world/home/town-remembers.md), for town.c. */
 #ifndef CW_TOWN_WORDS_H
 #define CW_TOWN_WORDS_H
 
