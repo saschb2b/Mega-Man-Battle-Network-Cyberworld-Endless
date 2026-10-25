@@ -3,6 +3,7 @@
 ; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
+02000C20 board_copy
 02001120 bn5_step
 02001440 BN5_CHIP_KEYS
 02001AB0 BN5_LIB_EVENT
@@ -11,6 +12,7 @@
 020022F0 BN5_LIB_STATE
 020022F4 BN5_LIB_MISSION
 020022F7 BN5_LIB_ORDER_POINTS
+020022FD BN5_LIB_LEVEL_STATE
 020022FE BN5_LIB_PANEL_COUNT
 02002306 BN5_LIB_PAR
 02002307 BN5_LIB_PHASE
@@ -141,6 +143,7 @@
 080054F6 battle_start
 08005CD0 sine_table
 08005D50 cosine_table
+08006862 liberation_battle_field.from
 08006874 mystery_data_set_on_field
 08006AAE BN5_CHAOS_FAIL_SPAWN
 08006D2A bn5_chips_code.from
@@ -148,10 +151,16 @@
 08007A50 BN5_LIB_WIN_BANNER
 08007A82 BN5_WIN_SONG
 08007C24 BN5_LIB_TIME_UP
+0800819A fight_way_to_custom_screen
+080086FC liberation_battle_field.from_2
+08008960 BN5_LIB_SURROUNDED_SAY
+08008BB0 other_battles
 08008BD2 BN5_LIB_TIME_ASK
 08008D82 folder_shuffle
+08008EEA BN5_LIB_BATTLE
 08009016 BN5_BATTLE_TURN
 0800901E BN5_LIB_LATE_DOUBLE
+0800906A liberation_battle_field.from_3
 080090E8 bn5_chips_code.gate
 08009190 BN5_LIB_TURNS_UP
 08009326 side_battle_counter_raised
@@ -288,6 +297,9 @@
 080128E8 soul_chips.modifier_sound_end_before_darkchip_step
 080128EE soul_chips.modifier_sound_end_before_darkchip_step_2
 080128F0 soul_chips.on
+08013044 his_l_r
+0801306A custom_screen_request
+08013072 liberation_battle_field.turn
 080131A0 generic_state_0
 08013394 BN5_DARK_PLATE
 080133C4 on_to_decide_state
@@ -299,11 +311,13 @@
 080137A8 BN5_BLINK_FLASHING
 08013824 generic_state_4
 080138AE engine_differing_twins.object_end
+080138CA liberation_battle_field.from_4
 080138EA engine_differing_twins.object_end_2
 08013944 generic_state_5
 08013B04 object_sprite_animated
 08013C64 BN5_DARK_REGION
 08013C70 twin_bn5
+080141F4 megaman_given_his_turn
 08014326 after_invisibility_timer
 08014374 anger_start
 0801438E anger_end_bn6_mood_from_chip
@@ -537,17 +551,24 @@
 0804F628 BN5_LIB_MISSIONS
 0804F968 BN5_LIB_NAVI_HP
 0804FB94 BN5_LIB_EDGE_TABLES
+080502F4 BN5_LIB_DARK_COUNTS
 08051924 BN5_LIB_ITEM_KINDS
 0805198A BN5_LIB_ON_MAP
 080519D0 BN5_LIB_OP_ADD
 080519E0 BN5_LIB_OP_SPEND
+08051A1E BN5_LIB_DARKLOID
 08051BA8 BN5_LIB_PANEL_PLACE
+08051D9E BN5_LIB_LEVEL
+08051E58 BN5_LIB_WEIGHTS
 08051F20 BN5_LIB_ITEM_FIND
+08051F7A BN5_LIB_BATTLE_OF
 080529F0 BN5_LIB_REACH_BLINK
 08052FF4 BN5_LIB_PHASE_LOAD
 080531C8 BN5_LIB_HUD_LOADS
 080531F4 BN5_LIB_HUD_OAM
 08053240 BN5_LIB_HUD_MASKS
+08053B9E BN5_LIB_UNIT_HP_IN
+08053BF4 BN5_LIB_UNIT_HP_OUT
 08053EBA BN5_LIB_HARM
 08053EFC bn5_liberation_board.plays
 08054DA2 routine_whose
@@ -722,6 +743,7 @@
 08113C78 BN5_NAVI_HELD
 08113CD8 BN5_STORY_BATTLES
 08114000 families_code_end
+0811488C BN5_LIB_BATTLES
 0814C9FC mp2k_library
 08155A74 BN5_MPLAYS
 08155BF4 XRomLayout.song_table
@@ -787,6 +809,7 @@
 0874BDBC BN5_CHIP_ICON_PAL
 087508BC colonelsoul_button_chip.palette
 08750E1C colonelsoul_button_chip.name_line_palette_2
+0875351C surrounded_from_archive
 08759B0C key_item_names
 087E4534 BN5_LIB_PHASE_TILES
 087E4658 BN5_LIB_PHASE_PAL

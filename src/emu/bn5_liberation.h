@@ -212,13 +212,16 @@
 
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
-#define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +0xA the par, +0xB the Order Points at the start, */
+#define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +9 the Darkloid's kind (BN5_LIB_DARKLOID), +0xA the par, +0xB the Order Points at the start, */
 #define BN5_LIB_MISSION_COUNT 9          /* ... +0xC twenty pointers (BN5_LIB_PTR_*) */
 #define BN5_LIB_MAP_GROUP    0x86        /* the missions' maps' group (each record's +0: mission n's map 0x86:n-1) */
 #define BN5_LIB_PTR_PANELS   1           /* the panels: u16 kind (BN5_PANEL_*), u8 x, u8 y; a kind's low byte 0xFF ends them */
 #define BN5_LIB_PTR_HOLES    2           /* the DarkHoles' panels in their order, x and y a byte each */
 #define BN5_LIB_PTR_TEAM     3           /* the team: 20 bytes a Navi (+5 its id, BN5_NAVI_*; +8, +0xA its place in world units) */
 #define BN5_LIB_PTR_ENEMIES  4           /* the Darkloid, then the guardians: 20 bytes each (+0 its DarkHole, 0xFF none; +5 its kind; +8 x, +9 y) */
+#define BN5_LIB_PTR_HOLE_BATTLES 5       /* per DarkHole a pointer to its five battles, a u16 each by the dark's level (BN5_LIB_LEVEL) */
+#define BN5_LIB_PTR_UNIT_BATTLES 6       /* per unit (the Darkloid first) the same */
+#define BN5_LIB_PTR_PANEL_BATTLES 7      /* per level a list of a dark panel's battles: u16 battle, u16 weight (32 each), a weight 0 ends it */
 #define BN5_LIB_PTR_BONUS    8           /* the BonusPanels: x, y, u16, five outcomes' records; a u16 0 ends them */
 #define BN5_LIB_PTR_TRAPS    9           /* the traps: kind (0 damage, its amount times 10; 1 paralysis), amount, x, y; 0xFFFFFFFF ends them */
 #define BN5_LIB_PTR_ITEMS    10          /* the item panels: kind (BN5_ITEM_*), code, u16 chip, u16 amount, x, y; 0xFFFFFFFF ends them */
@@ -256,15 +259,41 @@
 
 /* A liberation battle */
 #define BN5_BATTLE_TYPE      0x0802B3E0u /* the battle's record's +3 (BattleSettings' BattleType): */
-#define BN5_BATTLE_LIBERATION 1          /* ... 1 a liberation battle */
+#define BN5_BATTLE_LIBERATION 6          /* ... 6 a liberation battle (all 860 of BN5_LIB_BATTLES) */
 #define BN5_BATTLE_TURN      0x08009016u /* BattleState +7: the turn, one more as each Custom screen opens (1 at the first) */
 #define BN5_LIB_TURNS_UP     0x08009190u /* true once BattleState +7 reaches 3, read by BN5_LIB_TURN_BANNER alone */
 #define BN5_LIB_TURN_BANNER  0x08007954u /* as each turn's fight starts: FINAL TURN! (message 0x10) where BN5_LIB_TURNS_UP, else TURN n START! (0x0C, n the turn) */
-#define BN5_LIB_TIME_ASK     0x08008BD2u /* the Custom screen asked for (BattleState +0x32 bit 2): below the third turn it opens, from it (+7 >= 3) */
+#define BN5_LIB_TIME_ASK     0x08008BD2u /* the Custom screen asked for as the gauge is full (BattleState +0x32 bit 2, not the L or R request */
+                                         /* ... 0x10 of the other battles' 0x08008BB0): below the third turn it opens by itself, from it (+7 >= 3) */
 #define BN5_LIB_TIME_UP      0x08007C24u /* ... the loop's phase 0x18: TIME UP! (0x54), 30 frames, LIBERATE FAILED! (0x5C), the battle over */
 #define BN5_LIB_WIN_BANNER   0x08007A50u /* the win's first step: 1 TURN LIBERATE! (0x90, number 1) where +7 is 1, else LIBERATE SUCCESS! (0x58) */
 #define BN5_BATTLE_MESSAGES  0x0801B80Cu /* the battle messages' table, a word each (a message's number is its offset), read by 0x0801B02A */
-#define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a liberation battle from its eleventh turn: */
+#define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a battle of type 1 (no liberation battle's) from its eleventh turn: */
 #define BN5_LIB_DOUBLE_HIT   0x0800C7CCu /* ... an object's hits this frame summed (its collision data's five) and doubled */
+
+/* A liberation battle's choice (docs/LIBERATION.md, Stage 2): the dark round the faced panel weighed by where the Navi
+ * stands, its level choosing the battle, and so the battle's field (its record's +6, bn6_panels.h's BN6_SIDES_*) */
+#define BN5_LIB_LEVEL        0x08051D9Eu /* r0 the faced panel's id, r1 the Navi's: the eight round it each add their weight (BN5_LIB_WEIGHTS) */
+                                         /* ... where BN5_LIB_DARK_COUNTS has their kind, into BN5_LIB_STATE +0x0D: 0 none, 1 to 9, 2 to 19, */
+                                         /* ... 3 to 30, 4 above */
+#define BN5_LIB_WEIGHTS      0x08051E58u /* ... 8 bytes by the way he faces it (+0 to y+1, +8 to x-1, +0x10 to y-1, +0x18 to x+1), the eight round it */
+                                         /* ... from (x, y-1) on to (x+1, y-1) and round: beyond it 20, its two sides 10, the diagonals beside */
+                                         /* ... the Navi 2, the far ones and his own 0 */
+#define BN5_LIB_DARK_COUNTS  0x080502F4u /* ... a byte per panel kind, not 0 where it counts: 1 dark, 3 an item's or trap's, 0x0A a DarkHole */
+#define BN5_LIB_LEVEL_STATE  (BN5_LIB_STATE + 0x0D) /* u8: that level */
+#define BN5_LIB_BATTLE_OF    0x08051F7Au /* the faced panel's battle: a DarkHole's by its level (r1 3), a unit's (r1 2, r2 the unit), else a */
+                                         /* ... dark panel's by weight from its level's list (r1 1); r1 and r2 to BN5_LIB_STATE +8, +9 */
+#define BN5_LIB_BATTLE       0x08008EEAu /* battle r0's record: BN5_LIB_BATTLES + 16 r0 */
+#define BN5_LIB_BATTLES      0x0811488Cu /* the liberations' 860 BattleSettings: type 6, field 0, +6 the column pattern by the level */
+                                         /* ... (0 0x30, 1 0x38, 2 0x3C, 3 and 4 0x33 Surrounded; a Darkloid's never Surrounded, 0x3C from 2) */
+#define BN5_LIB_SURROUNDED_AT 0x23       /* MegaMan's panel in a Surrounded battle (row 2, column 3), its foes in columns 1-2 and 5-6 */
+#define BN5_LIB_SURROUNDED_SAY 0x08008960u /* the battle's opening phase 0x28 (from 0x080086FC, the pattern 0x31, 0x23 or 0x33 and flag 3:0x0E */
+                                         /* ... clear): the Navi's "Surrounded!" line, archive 0x0875351C script 0x0B + the Navi, then the flag */
+                                         /* ... set: once a save. BN6 keeps neither the phase nor the line */
+#define BN5_LIB_DARKLOID     0x08051A1Eu /* the mission's record +8, +9 and the par (BN5_LIB_STATE +5, +0x0A, +0x16): +9 the Darkloid's */
+                                         /* ... kind (the units' first, all nine), read to know his unit (0x0805528E), his phase and his line */
+#define BN5_LIB_UNIT_HP_IN   0x08053B9Eu /* a unit's battle (BN5_LIB_STATE +8 == 2): its HP from the board's copy 0x02000C20 (0x28 each, */
+#define BN5_LIB_UNIT_HP_OUT  0x08053BF4u /* ... +9 the unit, +0x14 HP) as its enemy spawns (0x08006862); the HP left written back at the end */
+                                         /* ... (0x0800906A, 0x080138CA). The battle reads nothing else of the board */
 
 #endif

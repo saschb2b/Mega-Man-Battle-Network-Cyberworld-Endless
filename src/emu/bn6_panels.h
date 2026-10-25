@@ -133,4 +133,21 @@
 #define BN6_PANEL_ANIM_FRAMES 0x02036740u /* ... each one's frame (+2, +4 .. +0xC) and the frames to its next (+3, +5 .. +0xD), reset at a battle's start */
 #define BN6_FRAME_COUNT       0x0200A210u /* u16, one more each frame of the main loop (0x08000300, through eToolkit +0x24; bn6f iCurrFrame) */
 
+/* Whose each column is: a battle's column pattern, its BattleSettings' +6
+ * (BN5's the same, 0x0802B416, and BN5's liberation battles' fields by the
+ * dark round a panel, bn5_liberation.h's BN5_LIB_LEVEL_FIELD). BN6 keeps
+ * BN5's Surrounded whole, though no battle of its own asks it: the field,
+ * an object's facing and MegaMan's turn round on L or R */
+#define BN6_SIDES_OF          0x0802D26Au /* the battle's pattern (bn6f GetBattlePanelColumnPattern): bit (column - 1) set, the enemy's column, */
+#define BN6_SIDES_SET         0x0800C4BCu /* ... as the field is made (bn6f sub_800C4BC, from 0x080079F0): each column's owner, every row */
+#define BN6_SIDES_PLAIN       0x38        /* ... columns 1-3 MegaMan's, 4-6 the enemy's (every random battle's and boss's) */
+#define BN6_SIDES_WIDE        0x30        /* ... MegaMan's four, 1-4 */
+#define BN6_SIDES_NARROW      0x3C        /* ... MegaMan's two, 1-2 */
+#define BN6_SIDES_SURROUNDED  0x33        /* ... the enemy's 1-2 and 5-6, MegaMan's 3-4 between (BN5's liberation battles' Surrounded; */
+                                          /* ... BN5's code takes 0x31 and 0x23 for it too) */
+#define BN6_SIDES_FACING      0x0800F46Eu /* an object's facing, its +0x17 (BN6_T1_FLIP) where the pattern is none of the three plain ones, else 0 */
+#define BN6_SIDES_TURNER      0x080141F4u /* MegaMan given his turn (BN6_AI_MODES' BN6_AI_TURNS) where the pattern is none of them and the mode not 9 */
+#define BN6_AI_TURNS          0x400       /* ... the bit: L or R turns him round (0x08013072: BN6_AI_FLAGS 0x1000 or 0x2000 by his facing), */
+#define BN6_SIDES_KEYS        0x08013044u /* ... where else, the gauge full, L or R asks the Custom screen (0x0801306A: the battle's flags 0x10) */
+
 #endif

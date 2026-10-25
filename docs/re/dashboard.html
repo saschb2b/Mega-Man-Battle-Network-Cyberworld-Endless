@@ -81,7 +81,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-23",
+  "updated": "2026-10-25",
   "previous": "2026-10-18",
   "features": [
     {
@@ -133,14 +133,18 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "BN5's Liberation Missions",
       "state": "designed",
       "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84). Its Darkloids' phase traced and played on the board as BN5's: the Darkloid first, a guardian's move one warp (list 7's 59), the reach lit red, each unit's line, its strike animation, BigBrute's flame and the harm in BN5's yellow digits, BN5's sounds.",
-      "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns (taken as unlimited, its hits doubled from turn 11), whether BN5's Custom screen opens by itself as a liberation turn's gauge fills, the Surrounded field by the dark on both sides, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
+      "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, BN5's \"Surrounded!\" line in BN6's battle, a unit's HP carried into its battle and back (0x08053B9E, 0x08053BF4), BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
       "link": "../LIBERATION.md",
-      "updated": "2026-10-23",
+      "updated": "2026-10-25",
       "state_text": "Designed, not built"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-10-25",
+      "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/ROM_DATA.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
+    },
     {
       "date": "2026-10-23",
       "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
@@ -215,6 +219,30 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "A liberation turn's gauge left to fill",
+      "result": "In romlab, mission 1's first liberation battle, OK on the Custom screen and no key after: the gauge rose 0x3C0 a 30-frame step to 0x4000 and the next frame the Custom screen's phase (BattleState +1 8), +7 from 1 to 2.",
+      "meaning": "BN5 opens a liberation turn's Custom screen by itself as the gauge fills (its ask 0x08008BD2 tests the gauge-full flag 2, the other battles' 0x08008BB0 the L or R request 0x10); ours does the same through BN6's own way to the screen (liberation_battle.c).",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "BN5's Surrounded battle, and the same field in BN6's engine",
+      "result": "In romlab, the board's record getter 0x08008EEA patched in the loaded copy to hand out record 24: the field blue, red, blue two columns each, MegaMan at column 3, Lan's \"Surrounded! Press L or R Button to turn around!\", L turning MegaMan, the Mettaur on the left striking right, TURN 1 START!, the Custom screen opening at a full gauge. In BN6 (the foes step's sides@33): the same field, the left Mettaur facing MegaMan, L turning him, his buster hitting it; on seed 1's act 2 board a dark panel faced from 25,29: dark level 3, sides 33.",
+      "meaning": "BN6 kept BN5's Surrounded code whole; a liberation battle needs only its record's +6 and its foes set out as BN5's records set theirs.",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "The Darkloid's battle past three turns",
+      "result": "In romlab, record 40 (BlizzardMan's, mission 1) handed out by the patched getter, MegaMan held at 9999 HP (0x0203B224 each 20 frames): turns 1 and 2 opened their Custom screens, the gauge full in turn 3 ended the battle (loop phase 0x14), the board said \"Oh, no! Liberation failed!\". The battle reads the board only through 0x08053B9E and 0x08053BF4 (a unit's HP in and out).",
+      "meaning": "Every liberation battle runs three turns, the Darkloid's included; the stage 2 assumption (untimed, hits doubled from turn 11) is refuted: that double is a type 1 battle's, and liberation records are type 6.",
+      "link": "../LIBERATION.md#the-battles-field-as-bn5s-25-october-2026"
+    },
     {
       "feature": "BN6's sound engine",
       "date": "2026-10-23",
