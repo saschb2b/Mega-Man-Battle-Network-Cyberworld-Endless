@@ -36,6 +36,8 @@
 #include "game.h"
 #include "guardians.h"
 #include "jobs.h"
+#include "layer_objs.h"
+#include "liberation_board.h"
 #include "loot.h"
 #include "net.h"
 #include "netmap.h"
@@ -533,6 +535,54 @@ static void skill_table(FILE *out) {
 	runs = keep;
 }
 
+/* A dark layer's par prize (docs/LIBERATION.md, lib_prizes.c), act by act
+ * at its middle layer, where the dark way stands: its two chips (their good
+ * share and their price at a dealer's, chip_price) and the zenny over par,
+ * both plans. Not in the acts' sums or bands: a run takes the dark way by
+ * its choice at a fork, in place of a layer's finds. Counted outside where
+ * over par would pay as much as the chip at par is worth. */
+static int dark_table(FILE *out) {
+	fprintf(out, "\nA dark layer's par prize (BN5's tiers: a chip two under par, a chip at par, zenny over par), before (flat) -> now\n"
+		"(opening), per board: each chip's good %%, mean tier and price at a dealer's (chip_price), the zenny over par (!: as much\n"
+		"as the chip at par is worth, or more)\n"
+		"act   two under: good%%  tier  price      at par: good%%  tier  price      over par zenny\n");
+	int flagged = 0;
+	for (int a = 1; a < 6; ++a) {
+		int depth = 3 * a + 2;
+		double good[PLANS][2] = { { 0 } }, tier[PLANS][2] = { { 0 } }, price[PLANS][2] = { { 0 } };
+		int zenny[PLANS];
+		for (int p = 0; p < PLANS; ++p) {
+			const EconPlan *was = econ_plan;
+			econ_plan = plans[p];
+			for (int r = 0; r < runs; ++r) {
+				run_new(0xEC0A0000u + (uint32_t)r * 7919u);
+				run.mode = RUN_ENDLESS;
+				start_folder();
+				run.depth = depth;
+				run.layer_seed = run.seed ^ (uint32_t)(depth * 2654435761u);
+				for (int k = 0; k < 2; ++k) {
+					int code, chip = lib_prize_chip(k, depth, &code), t = chip_pool_tier(chip);
+					good[p][k] += econ_chip_good(t);
+					tier[p][k] += t;
+					price[p][k] += chip_price(chip);
+				}
+			}
+			zenny[p] = lib_par_zenny(depth);
+			econ_plan = was;
+		}
+		/* (the guard: over par pays less than the chip at par is worth) */
+		int now = plans[0] == econ_plan ? 0 : 1;
+		bool over = zenny[now] >= price[now][1] / runs;
+		flagged += over;
+		fprintf(out, "%-4d ", a + 1);
+		for (int k = 0; k < 2; ++k)
+			fprintf(out, "  %3.0f -> %3.0f  %3.1f -> %3.1f  %4.0f -> %4.0f", 100 * good[0][k] / runs, 100 * good[1][k] / runs, tier[0][k] / runs,
+				tier[1][k] / runs, price[0][k] / runs, price[1][k] / runs);
+		fprintf(out, "   %4d -> %4d%s\n", zenny[0], zenny[1], over ? "!" : "");
+	}
+	return flagged;
+}
+
 int economy_report_run(const char *spec) {
 	char path[256] = "economy.txt";
 	runs = 300;
@@ -559,6 +609,7 @@ int economy_report_run(const char *spec) {
 	layers_table(out);
 	curves_table(out);
 	skill_table(out);
+	flagged += dark_table(out);
 	fclose(out);
 	printf("economy report in %s: %d numbers of the plan in play (%s) outside their band\n", path, flagged, econ_plan->name);
 	return 0;

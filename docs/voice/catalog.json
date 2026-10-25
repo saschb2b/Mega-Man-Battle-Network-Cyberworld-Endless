@@ -1306,7 +1306,7 @@
    "line": 126
   },
   "service_words:ta_challenge_reward": {
-   "line": 341
+   "line": 370
   },
   "service_words:ta_dark_flame": {
    "line": 151
@@ -1327,7 +1327,14 @@
    "line": 316
   },
   "service_words:ta_lib_find_zenny": {
-   "line": 327
+   "line": 333
+  },
+  "service_words:ta_lib_prize_chip": {
+   "comment": "(BN5 tells its prize as the team's leader reads the phases out, then \"You got a battle chip for:\" or \"You got:\" and the Zennys: Lan and MegaMan have said the phases, so MegaMan finds what the Darkloid left)",
+   "line": 348
+  },
+  "service_words:ta_lib_prize_zenny": {
+   "line": 358
   },
   "service_words:ta_secret_gate": {
    "line": 278
@@ -2140,7 +2147,7 @@
    "comment": "The services' chats (docs/VOICE.md): a Recovery Mr.Prog, a shop, a Server's challenge and its prize, a flame of darkness and the rumor of one, ProtoMan's duel, the Undernet's dark warp, the Secret Area's gate.",
    "domain": "Layers: services",
    "kind": "speech",
-   "lines": 46,
+   "lines": 49,
    "shows": [
     "screenshots/heal-once.png",
     "screenshots/heal-spent.png",
@@ -2448,7 +2455,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2092,
+  "boxes": 2095,
   "domains": {
    "Arena": {
     "files": [
@@ -2548,8 +2555,8 @@
      "src/layer/service_words.c"
     ],
     "flagged": 5,
-    "lines": 46,
-    "speech": 46
+    "lines": 49,
+    "speech": 49
    },
    "Lessons": {
     "files": [
@@ -2794,7 +2801,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 757,
+    "boxes": 759,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.56,
@@ -2807,7 +2814,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 151",
+    "stutters": "1 box in 152",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -2849,7 +2856,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1761,
+  "lines": 1764,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2984,7 +2991,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 757,
+    "boxes": 759,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.56,
@@ -2997,7 +3004,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 151",
+    "stutters": "1 box in 152",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3096,7 +3103,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1285
+  "speech": 1288
  },
  "version": 1,
  "conversations": [
@@ -3236,8 +3243,10 @@
   {"container":"service_words:gate_beyond","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:gate_beyond","line":272,"lines":["service_words:gate_beyond:0","service_words:gate_beyond:1","service_words:gate_beyond:2","service_words:gate_beyond:3"],"speakers":["MegaMan"],"title":"What MegaMan senses behind the golden gate where Bass waits","when":"What MegaMan senses behind the golden gate where Bass waits (docs/ BOSSES.md, Super bosses): a dark signal, unnamed until they have met, then Bass and his form; NULL for ProtoMan's copy"},
   {"container":"service_words:ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_secret_gate","line":280,"lines":["service_words:ta_secret_gate:0","service_words:ta_secret_gate:1","service_words:ta_secret_gate:2","service_words:ta_secret_gate:3"],"speakers":["MegaMan"],"title":"Secret gate","when":""},
   {"container":"service_words:ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_chip","line":319,"lines":["service_words:ta_lib_find_chip:0"],"speakers":["MegaMan"],"title":"Lib find chip","when":""},
-  {"container":"service_words:ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_zenny","line":331,"lines":["service_words:ta_lib_find_zenny:0","service_words:ta_lib_find_zenny:1"],"speakers":["MegaMan"],"title":"Lib find zenny","when":""},
-  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":344,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
+  {"container":"service_words:ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_zenny","line":337,"lines":["service_words:ta_lib_find_zenny:0","service_words:ta_lib_find_zenny:1"],"speakers":["MegaMan"],"title":"Lib find zenny","when":""},
+  {"container":"service_words:ta_lib_prize_chip","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_prize_chip","line":351,"lines":["service_words:ta_lib_prize_chip:0"],"speakers":["MegaMan"],"title":"Lib prize chip","when":"(BN5 tells its prize as the team's leader reads the phases out, then \"You got a battle chip for:\" or \"You got:\" and the Zennys: Lan and MegaMan have said the phases, so MegaMan finds what the Darkloid left)"},
+  {"container":"service_words:ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_prize_zenny","line":362,"lines":["service_words:ta_lib_prize_zenny:0","service_words:ta_lib_prize_zenny:1"],"speakers":["MegaMan"],"title":"Lib prize zenny","when":""},
+  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":373,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
   {"container":"reward_words:draft_take","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_take","line":25,"lines":["reward_words:draft_take:0","reward_words:draft_take:1","reward_words:draft_take:2"],"speakers":["MegaMan","Narration"],"title":"The draft's branches","when":"the draft's branches: a program given, or BugFrags for none; each sets `taken_flag` and ends, or goes on to the way on (`next`). A program that fits the board as it stands (its `fit_flag` set) is installed as it comes; else MegaMan says one moves first (the draft offers only programs that fit once they move): said after the pick, a plan, where three boxes before the menu said it of each (the owner, 6 October 2026: the reward's words were far too many)"},
   {"container":"reward_words:draft_menu","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_menu","line":63,"lines":["reward_words:draft_menu:0","reward_words:draft_menu:1"],"speakers":["MegaMan"],"title":"The draft","when":"The draft: one box, the BugFrags of none in it, then the programs in a column with their colours and the copies held (ts_option: its number and those above and below it), each to its branch (`take`), B to `skip`. Its script. A box each said what BN6's programs do: seventeen boxes from the data to the pick, which the owner found far too many (6 October 2026)."},
   {"container":"reward_words:draft_skip","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_skip","line":98,"lines":["reward_words:draft_skip:0"],"speakers":["MegaMan"],"title":"Draft skip","when":""},
@@ -4819,9 +4828,12 @@
   {"boxes":[{"pages":[["Whoa! Our two","ScrtData are","glowing!"]],"speaker":"MegaMan","text":"Whoa! Our two ScrtData are glowing!"},{"pages":[["One more should open","it!"]],"speaker":"MegaMan","text":"One more should open it!"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:2","kind":"speech","line":282,"note":"how many ScrtData MegaMan holds, said at a closed gate","speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! Our two ScrtData are glowing!|One more should open it!","text_hash":"6a6bd79b4e15"},
   {"boxes":[{"pages":[["The ScrtData glows!","Open the gate?"]],"speaker":"MegaMan","text":"The ScrtData glows!\nOpen the gate?\n"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:3","kind":"speech","line":300,"note":"(Bass behind it: said first, and the question starts on No, as a risky choice's does)","speaker":"MegaMan","speakers":["MegaMan"],"text":"The ScrtData glows!\nOpen the gate?\n","text_hash":"33a113aeb112"},
   {"boxes":[{"pages":[["Lan! There was a","chip in that panel!"]],"speaker":"MegaMan","text":"Lan! There was a chip in that panel!"}],"container":"ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_chip:0","kind":"speech","line":319,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! There was a chip in that panel!","text_hash":"82b6edcf5e5f"},
-  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_find_zenny:0","kind":"speech","line":331,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
-  {"boxes":[{"pages":[["Lan! Zenny in that","panel!"]],"speaker":"MegaMan","text":"Lan! Zenny in that panel!"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_zenny:1","kind":"speech","line":332,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! Zenny in that panel!","text_hash":"03f56be3a004"},
-  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":344,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_find_zenny:0","kind":"speech","line":337,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["Lan! Zenny in that","panel!"]],"speaker":"MegaMan","text":"Lan! Zenny in that panel!"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_zenny:1","kind":"speech","line":338,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! Zenny in that panel!","text_hash":"03f56be3a004"},
+  {"boxes":[{"pages":[["Lan,look! The","Darkloid left a","chip!"]],"speaker":"MegaMan","text":"Lan,look! The Darkloid left a chip!"}],"container":"ta_lib_prize_chip","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_prize_chip:0","kind":"speech","line":351,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,look! The Darkloid left a chip!","text_hash":"b66a2f229253"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_prize_zenny:0","kind":"speech","line":362,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["The Darkloid only","left Zenny..."]],"speaker":"MegaMan","text":"The Darkloid only left Zenny..."}],"container":"ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_prize_zenny:1","kind":"speech","line":363,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Darkloid only left Zenny...","text_hash":"36c96d60f4bf"},
+  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":373,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
   {"boxes":[{"pages":[["...Hmph. You again."]],"speaker":"Bass","text":"...Hmph. You again."},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"fragment":true,"id":"super_lines:bass_meeting:0","kind":"speech","line":20,"speaker":"Bass","speakers":["Bass"],"text":"...Hmph. You again.|Copy or not... I delete the strong.","text_hash":"ba3c9161b59c"},
   {"boxes":[{"pages":[["W-Whoa! Someone was","in that stone!?"]],"speaker":"Lan","text":"W-Whoa! Someone was in that stone!?"},{"pages":[["That's... Bass!!"]],"speaker":"MegaMan","text":"That's... Bass!!"},{"pages":[["...Hmph."]],"speaker":"Bass","text":"...Hmph."},{"pages":[["Another copy,come to","be deleted?"]],"speaker":"Bass","text":"Another copy,come to be deleted?"},{"pages":[["I'm no copy! I'm","MegaMan!"]],"speaker":"MegaMan","text":"I'm no copy! I'm MegaMan!"},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:1","kind":"speech","line":21,"speaker":"Lan","speakers":["Lan","MegaMan","Bass"],"text":"@L W-Whoa! Someone was in that stone!?|@M That's... Bass!!|...Hmph.|Another copy,come to be deleted?|@M I'm no copy! I'm MegaMan!|Copy or not... I delete the strong.","text_hash":"94f0f8349cd3"},
   {"boxes":[{"pages":[["Hmph. Back again?"]],"speaker":"Bass","text":"Hmph. Back again?"},{"pages":[["Then be deleted","again."]],"speaker":"Bass","text":"Then be deleted again."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:2","kind":"speech","line":23,"speaker":"Bass","speakers":["Bass"],"text":"Hmph. Back again?|Then be deleted again.","text_hash":"d717d7ce4a1b"},

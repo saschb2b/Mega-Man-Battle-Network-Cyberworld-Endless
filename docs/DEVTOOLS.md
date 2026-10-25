@@ -837,7 +837,8 @@ docs/MULTIROM.md, One net; `CYBERWORLD_EMU_DEBUG` prints each roll's foes,
 the visitor's family among them, and the run log marks it `+`), `dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, docs/LIBERATION.md; `CYBERWORLD_EMU_DEBUG` prints the board as
-text, and `CYBERWORLD_AUTOPILOT=1` plays it), `veteran` (a profile that has met seven
+text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
+N, for each tier of its prize), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his

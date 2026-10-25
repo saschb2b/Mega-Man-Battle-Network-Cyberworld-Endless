@@ -74,7 +74,7 @@ typedef struct {
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
 	uint8_t md_colour[16], md_obj[16];
 	uint32_t md_find[16];      /* ... and what each holds: its content's kind << 16 | its value (a chip's id, zenny), for the run's counts */
-	int lib_prize[3];          /* a dark layer's prizes by its par (docs/LIBERATION.md): two under, at par, over; their scripts, -1 none */
+	int lib_prize[3];          /* a dark layer's prizes by its par (docs/LIBERATION.md): two under and at par a chip, over zenny; their scripts, -1 none */
 	int lib_loot[6];           /* ... its board's chips found in item panels (liberation_board.h's LIB_LOOT, by their loot index), -1 none */
 	int lib_zenny;             /* ... and its zenny found (lib_zenny's), -1 none */
 	uint32_t lib_anim[8];      /* ... each unit's animation byte (npc_live; liberation_board.h's LIB_UNITS), 0 none */
@@ -83,6 +83,10 @@ typedef struct {
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny
  * its board's item panels hold: their scripts into `out` (docs/LIBERATION.md) */
 void lib_prizes_install(LayerObjs *out, TextArchive *text);
+/* ... the chip of par tier `tier` (0 two under par, 1 at par: a Server's
+ * prize and a tier lower) at `depth` from the layer's seed, its code
+ * (0-25, 26 '*'); over par is zenny, liberation_board.h's lib_par_zenny */
+int lib_prize_chip(int tier, int depth, int *code);
 
 /* The layer's shop stock written (again after a state load, whose RAM
  * holds the shop data as it was saved: `saved`, what was bought there

@@ -108,6 +108,9 @@ int lib_darkloid_reach(int act);
 int lib_trap_harm(int act);
 /* A zenny item's zenny in act `act` (BN5's amount times 100, the act's more) */
 int lib_zenny(int act);
+/* A board cleared over par: its zenny at `depth` (BN5's 1000 at the
+ * second act, 250 more an act, by the plan's zenny curve) */
+int lib_par_zenny(int depth);
 /* Guardian u's step toward (x, y) in the Darkloids' phase (Bladia's
  * darkening the clean panel it lands on): false where none brings it
  * nearer */
