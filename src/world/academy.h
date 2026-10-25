@@ -1,4 +1,4 @@
-/* The Cyber Academy (academy.c, docs/HOME.md piece 10): BN6's own maps of
+/* The Cyber Academy (academy.c, docs/world/home/asterland-and-academy.md): BN6's own maps of
  * Lan's school as a place of home, open for the clubs. */
 #ifndef CW_ACADEMY_H
 #define CW_ACADEMY_H

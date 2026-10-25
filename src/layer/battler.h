@@ -1,4 +1,4 @@
-/* BN6's Virus Battlers in a run (docs/LEVEL_DESIGN.md, The Virus Battler):
+/* BN6's Virus Battlers in a run (docs/world/level-design/virus-battler.md):
  * each one's series of BN6's own records, his stake, his pairs as the ROM
  * names them and his first prize; the flags his chats set on a layer. */
 #ifndef CW_BATTLER_H

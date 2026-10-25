@@ -1,5 +1,5 @@
 /* game_hooks.h. Each hook's own file says what it hooks and why
- * (docs/EMULATION.md); this one keeps their order. */
+ * (docs/engine/emulation/); this one keeps their order. */
 #include "game_hooks.h"
 
 #include "claims.h"
@@ -26,7 +26,7 @@ void game_hooks_install(void) {
 	/* (BN6's chip tables grown, BN5's chips in them or their placeholders,
 	 * and the hook on the deck's deal: before the boot, whose NEW GAME
 	 * counts its folder by the records; the same at every boot,
-	 * docs/MULTIROM.md, The chip registry), BN5's chips' moved code with
+	 * docs/multirom/chip-registry.md), BN5's chips' moved code with
 	 * them where its ROM is read (xchips_code.h) */
 	xchips_install();
 	gamecall_install();
@@ -40,7 +40,7 @@ void game_hooks_install(void) {
 	pet_text_install();
 	/* (BN5's Souls on the proxy form in BN6's battles wherever BN5's Navis
 	 * are, every battle of a run: the run's Souls reach them as each battle
-	 * begins, encounter.c; docs/MULTIROM.md, Transplanted Souls. And the
+	 * begins, encounter.c; docs/multirom/souls.md. And the
 	 * proxy form for its own test, --dev soulproxy) */
 	bool souls = soulproxy_bn5_read() && !dev.nonavis && !dev.xnavicontrol;
 	if (dev.soulproxy || souls) {
@@ -50,7 +50,7 @@ void game_hooks_install(void) {
 		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
 		xlog_end();
 	}
-	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/MULTIROM.md) */
+	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
 	if (emu_debug_on()) claims_report();
 }

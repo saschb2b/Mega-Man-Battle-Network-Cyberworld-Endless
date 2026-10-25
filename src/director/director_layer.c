@@ -67,7 +67,7 @@ void begin_area(bool new_act) {
  * label routine is pointed at an archive of ours whose every name is it. */
 #define LABEL_AT    FREE_LABEL
 #define LABEL_SIZE  0x1000
-#define PET_LABEL_AT FREE_PET_LABEL          /* the PET's PLACE: the area and the layer (docs/EMULATION.md) */
+#define PET_LABEL_AT FREE_PET_LABEL          /* the PET's PLACE: the area and the layer (docs/engine/emulation/) */
 
 /* The archive holds more than names: the PET prints its HP, zenny and
  * BugFrags by scripts 0xF0-0xF2, and others are placeholders. A copy of the
@@ -138,7 +138,7 @@ void director_map_label(const char *name, const char *place) {
 
 /* A Navi on the net has named the act's guardian this session: the first
  * bystander on its first layer, or the Net Dealer's word from its second
- * (docs/META.md, what MegaMan knows). */
+ * (docs/game/meta/what-megaman-knows.md). */
 bool guardian_heard(void) {
 	return D.layer_act && (D.heard_act == D.layer_act || D.dealer_act == D.layer_act ||
 		(flag_get(LAYER_DEALER_TOLD_FLAG) && layer_objs_dealer_named));
@@ -182,8 +182,8 @@ void lock_run(void) {
 
 /* The next random battle: the run's first two and every one on the first
  * layer after a guardian from the lower half of the act's band
- * (docs/PROGRESSION.md); from the second act one in four with a visitor of
- * the other net (visitors.h, docs/MULTIROM.md). */
+ * (docs/game/progression/); from the second act one in four with a visitor of
+ * the other net (visitors.h, docs/multirom/). */
 void roll_encounter(void) {
 	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
 		(run.depth == 1 ? D.battles < 2 : true);
@@ -249,7 +249,7 @@ static void building_word(void) {
 
 /* The net area a layer is drawn in: the biome's own, another game's that
  * dresses it in this run (run_dress), or the test hook's area of another
- * game (docs/MULTIROM.md), laid out as the BN6 area it is like, which then
+ * game (docs/multirom/), laid out as the BN6 area it is like, which then
  * is the layer's biome. */
 void director_net_biome_arg(const char *v) {
 	if (v[0] == 'x') director_debug_area = run_debug_area = NET_AREAS + atoi(v + 1);
@@ -265,7 +265,7 @@ static int layer_area(int *biome) {
 }
 
 /* The song an area's layers play: another game's area its own theme,
- * copied into BN6 (docs/MULTIROM.md), where it can be; else `song`, the
+ * copied into BN6 (docs/multirom/), where it can be; else `song`, the
  * BN6 area's. Its battles' themes (encounter_song) and its guardian's
  * prelude (guardian_prelude_song) the same way: that game's virus battle,
  * boss and before-the-boss music, else BN6's. */
@@ -294,7 +294,7 @@ static void layer_flags_clear(void) {
  * (layer_objs_bystander), the map objects it lends them (layer_objs_xlooks),
  * their battles' background (encounter_backdrop) and the map's backdrop and
  * animations: another game's area its own, copied into BN6
- * (docs/MULTIROM.md), where they can be. */
+ * (docs/multirom/), where they can be. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
@@ -320,7 +320,7 @@ static void layer_host(int tiles, int *group, int *number) {
 
 /* A dark layer no board fits on its mission's map (`*tiles`): made again on
  * the first mission's, where every dark layer stood before each took its
- * own (docs/LIBERATION.md, Each mission's own look), else plain; false
+ * own (docs/game/liberation/building/mission-look.md), else plain; false
  * where a map cannot be built */
 static bool dark_again(int *tiles, int biome, LayerKit *kit) {
 	int first = lib_look_area(1);
@@ -347,7 +347,7 @@ static bool build_layer(void) {
 	if (run.side_kind == LAYER_BACK) run.layer_seed ^= (uint32_t)run.clock * 0x9E3779B9u;
 	LayerKit kit;
 	netmap_kit(tiles, &kit);
-	/* (a dark layer: its map's floor a liberation's board, docs/LIBERATION.md;
+	/* (a dark layer: its map's floor a liberation's board, docs/game/liberation/;
 	 * a plain one where no board fits it, its map built again) */
 	layer_make_dark = lib_layer_dark();
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);

@@ -1,5 +1,5 @@
 /* A unit's turn in the Darkloids' phase as BN5 plays it (liberation.h;
- * docs/LIBERATION.md, The Darkloids' phase as BN5 shows it), traced in
+ * docs/game/liberation/bn5/darkloids-phase.md, The Darkloids' phase as BN5 shows it), traced in
  * romlab on BN5's missions 1, 2 and 4: the camera's pan to the unit and
  * its rest; a guardian that moves warps there, all its steps at once (a
  * puff and a beam's lines where it stands, the camera's pan to the panel

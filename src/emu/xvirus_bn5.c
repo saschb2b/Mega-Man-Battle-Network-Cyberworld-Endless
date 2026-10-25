@@ -1,6 +1,6 @@
 /* xvirus_bn5.c: BN5's virus families' recipes, written by tools/xrecipe.py from the two ROMs (python3 tools/xrecipe.py;
  * --check says whether this is what it writes). Do not edit: change the generator (or tools/bn5_twins.py, its pairs and
- * their audits) and write it again. Numbers alone (docs/MULTIROM.md, Transplanted families): addresses in BN5 Team
+ * their audits) and write it again. Numbers alone (docs/multirom/families.md): addresses in BN5 Team
  * Colonel (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies from the player's
  * ROM; nothing of either game's. The families here are the generator's, whole (no decision open), in install order
  * (each its AI index, ids, home, code and art places by its slot): the ones installed wherever BN5's ROM is read

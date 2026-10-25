@@ -1,5 +1,5 @@
 /* A BonusPanel's flashes and roulette drawn as BN5 draws them
- * (liberation_roulette.h), traced in BN5 (docs/ROM_DATA.md, BN5's
+ * (liberation_roulette.h), traced in BN5 (docs/rom/liberation.md, BN5's
  * Liberation Missions: the roulette's objects 0x23 and 0x24). Positions
  * are the GBA picture's. Its sprites are list 9's, each drawn as BN5's
  * objects set them: the first frame's sub-animation the object names (the

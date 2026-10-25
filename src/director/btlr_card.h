@@ -1,4 +1,4 @@
-/* The BtlrCard across runs (docs/LEVEL_DESIGN.md, The Virus Battler): the
+/* The BtlrCard across runs (docs/world/level-design/virus-battler.md): the
  * profile's card and the virus data on it, kept like the Library, in each
  * run's game as BN6's own flags. */
 #ifndef CW_BTLR_CARD_H

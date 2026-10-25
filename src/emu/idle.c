@@ -5,7 +5,7 @@
  * changes with no interrupt to wake a halted CPU), so a hook halts the CPU
  * there instead, while the VBlank interrupt is on to end the halt where the
  * flag would have ended the loop: the game's state each frame is the same,
- * at a third less of the core's time (docs/EMULATION.md). */
+ * at a third less of the core's time (docs/engine/emulation/). */
 #include "idle.h"
 
 #include <stdbool.h>

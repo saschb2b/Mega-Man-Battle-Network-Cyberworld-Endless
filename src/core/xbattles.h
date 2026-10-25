@@ -1,5 +1,5 @@
 /* Another game's battle records fought in BN6's own engine (xbattles.c;
- * issue #82, docs/MULTIROM.md, One net): a BN5 record as an Encounter of
+ * issue #82, docs/multirom/one-net.md): a BN5 record as an Encounter of
  * BN6's ids, its field and its objects, and a territory's random battle
  * picked from its own maps' records as BN6's are from its areas'. Read
  * from the ROM files and the families installed in the core (xvirus.h):
@@ -69,7 +69,7 @@ bool xterritory_native(int area);
 int xterritory_like(int biome);
 /* A random battle on a layer of territory `area` at `depth`, of `kind`
  * (loot.h's ENC_*), from its own records as BN6's are from its areas'
- * (docs/PROGRESSION.md): the act's band (the lower half for the run's
+ * (docs/game/progression/): the act's band (the lower half for the run's
  * opening battles, the Gentle helper's and a challenge's the next act's),
  * the pool its game's records fit in (xrecords_pool: its layer's map, else
  * its other maps, else its game's other areas, its viruses taken up to the

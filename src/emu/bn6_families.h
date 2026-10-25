@@ -2,13 +2,13 @@
  * Cybeast Gregar (USA), part of bn6.h's addresses (it includes this): what
  * src/emu/xvirus_grow.c grows and points elsewhere, and src/emu/xvirus.c
  * fills, to move another game's families into BN6's own battles (issue #82;
- * docs/MULTIROM.md, Transplanted families; docs/ROM_DATA.md, Virus families
+ * docs/multirom/families.md; docs/rom/virus-families.md, Virus families
  * moved into the battle engine, and The engine's room for them). */
 #ifndef CW_BN6_FAMILIES_H
 #define CW_BN6_FAMILIES_H
 
 /* Virus families moved into the battle engine (src/emu/xvirus.c, issue #82;
- * docs/ROM_DATA.md, Transplanted virus families). The engine finds a
+ * docs/rom/virus-families.md, Transplanted virus families). The engine finds a
  * virus's code and records in eleven per-family tables by its AI index
  * (AIData +1, the third byte of its enemy id's triple, RomLayout.enemy_ids) */
 #define BN6_FAMILY_TABLES     0x0810A378u /* the first of the eleven, BN6_FAMILY_STEP apart, BN6_FAMILIES words each: 0 the state tables
@@ -94,7 +94,7 @@
 #define BN6_SPRITES_LIST5_COUNT 32        /* ... its numbers (0x08032114 on, list 6's after them) */
 #define BN6_SPRITES_LIST5_THROUGH 0x80    /* ... read past them into list 6's table, the real world's people (5:0x20-0x7F: Lan's
                                              family, the town's folk, src/world/town_lines.c; sprite_load called from 0x0809FB58):
-                                             a grown list 5 keeps BN6's words to 0x7F, measured (docs/ROM_DATA.md) */
+                                             a grown list 5 keeps BN6's words to 0x7F, measured (docs/rom/) */
 #define BN6_EFFECTS           0x080E16D4u /* the effects a battle draws (the fourth kind of object's type 0, by the effect id at its +4), 4 bytes
                                              each: a sprite list's offset (as BN6_TRAITS_LIST), its number, the animation, a palette added */
 #define BN6_EFFECTS_REF       0x080E1970u /* ... the one literal that names them (read at 0x080E18AA) */
@@ -128,14 +128,14 @@
 #define BN6_SPAWN_4           0x080033ACu /* the fourth kind's, after the object running (0x080033C8 and 0x080033E4 its two others) */
 #define BN6_OBJECT_FREE       0x08003458u /* object_freeMemory: r5 the object let go, its slot freed and its node out of the run order (as
                                              an object ends itself) */
-#define BN6_DISPATCH_SIDE     0x0203FF00u /* the second-level dispatch's side tables, ours (docs/EMULATION.md, the RAM plan): a byte per
+#define BN6_DISPATCH_SIDE     0x0203FF00u /* the second-level dispatch's side tables, ours (docs/engine/emulation/memory.md, the RAM plan): a byte per
                                              object slot, its game's type the dispatch runs it as, the first kind's 32 here, the third's at
                                              +0x20, the fourth's at +0x40; the battle's setup clears them with the rest of 0x0203CDA8-
                                              0x0203FFFF (0x080071F2), and nothing of BN6's reads or writes 0x0203FB50 on */
 #define BN6_DISPATCH_SIDE_STEP 0x20       /* ... from one kind's table to the next */
 
 /* What a moved family's code asks of BN6's engine that BN6's own families
- * never do (issue #82's A2b; docs/ROM_DATA.md, The families' shims and
+ * never do (issue #82's A2b; docs/rom/virus-families.md, The families' shims and
  * pre-steps) */
 #define BN6_BY_NAME_RANGE     0x0800EBD4u /* object_getEnemyByNameRange: r0 a list it fills, r1 and r2 the NameIDs' bounds (each in), r3 the
                                              alliance; back r0 how many (BN5's twin 0x0800CE54, BN5_BY_NAME_RANGE) */

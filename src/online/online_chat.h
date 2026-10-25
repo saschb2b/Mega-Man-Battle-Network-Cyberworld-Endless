@@ -23,7 +23,7 @@ uint32_t online_chat_keys(uint32_t keys);
  * yet: the question of his challenge reads it (epic #167, P5) */
 const OnlineProfile *online_chat_card(uint32_t id);
 /* Emote `emote` sent as the strip sends it, at the MegaMan faced where it
- * can be aimed (the dev step `emote K`, docs/DEVTOOLS.md) */
+ * can be aimed (the dev step `emote K`, docs/devtools/) */
 bool online_chat_emote(int emote);
 /* The player whose card is open in the chat box, 0 none: the link's bars
  * shown beside it (square_ask.h) */

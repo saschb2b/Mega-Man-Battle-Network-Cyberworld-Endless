@@ -1,6 +1,6 @@
 ; Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39 (header code BRKE)
 ; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):
-; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:
+; addresses, names and descriptions only. docs/rom/symbols.md says what is here and how to load it:
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
 02000C20 through_0x08053bf4_into_units_copy

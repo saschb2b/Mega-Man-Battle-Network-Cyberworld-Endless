@@ -1,5 +1,5 @@
 /* The questions a NetBattle from the Net Square asks in BN6's chat box
- * (square_arena.c; docs/ONLINE_ARENA.md, The folder), as the Square's
+ * (square_arena.c; docs/online/arena/from-square/one-rule.md, The folder), as the Square's
  * other choices are: a challenge taken or not, and the folder MegaMan
  * carries, Lan's pick among those that hold chips, B none. Asked where Lan
  * has a choice; where MegaMan has one folder, it goes unasked. Each

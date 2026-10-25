@@ -1,6 +1,6 @@
 /* The dev economy report: what a run hands out, layer by layer and act by
  * act, against its bands, without the game (economy_report.c,
- * docs/ECONOMY.md, docs/DEVTOOLS.md). */
+ * docs/game/economy/, docs/devtools/). */
 #ifndef CW_ECONOMY_REPORT_H
 #define CW_ECONOMY_REPORT_H
 

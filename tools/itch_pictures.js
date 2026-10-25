@@ -1,5 +1,5 @@
 // The pictures of an itch.io devlog post or page text, uploaded to itch
-// (docs/ITCH.md, Each release). itch shows no picture from another site,
+// (docs/project/itch.md, Each release). itch shows no picture from another site,
 // so tools/itch_devlog.py leaves each at its raw GitHub address; this,
 // run in one of itch's own editor pages (Claude in Chrome's
 // javascript_tool), uploads each picture as itch's own editor does

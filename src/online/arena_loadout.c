@@ -1,6 +1,6 @@
 /* A carried MegaMan in an Arena core (arena_loadout.h). The addresses
  * are the ones the carried record is read from (online_snapshot.c), each
- * a bn6.h name (docs/ROM_DATA.md). */
+ * a bn6.h name (docs/rom/). */
 #include "arena_loadout.h"
 
 #include <stdio.h>
@@ -18,7 +18,7 @@
 
 /* a chip id the cores hold: every id of the chip registry (BN5's chips
  * in BN6's tables, its blanks and the pack's extension among them: the
- * same in every game with BN5's ROM, docs/MULTIROM.md, The chip
+ * same in every game with BN5's ROM, docs/multirom/chip-registry.md, The chip
  * registry) */
 static bool chip_held(unsigned id) { return id < ONLINE_PACK_IDS; }
 

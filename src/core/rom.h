@@ -20,14 +20,14 @@ typedef enum { ROM_BN6_GREGAR_US } RomVersion;
 enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
 
 /* NetAreaDef.xlooks: what of another game's map objects its area's layers
- * stand in BN6's place (src/layer/xnavi.c, docs/MULTIROM.md): its Security
+ * stand in BN6's place (src/layer/xnavi.c, docs/multirom/): its Security
  * Cube for the security cubes, its wall of dark flames for the pillar of
  * flames, a dark hole past the rim of the layer's best room (the
  * landmark's place). */
 enum { XLOOK_CUBE = 1, XLOOK_DARK_WALL = 2, XLOOK_DARK_HOLE = 4 };
 
-/* The original area a net biome borrows (docs/ROM_DATA.md): BN6's, or
- * another Battle Network game's (docs/MULTIROM.md). */
+/* The original area a net biome borrows (docs/rom/): BN6's, or
+ * another Battle Network game's (docs/multirom/). */
 typedef struct {
 	uint8_t group, number;   /* map whose floor panels are learned */
 	uint32_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too; TILES_RIMMED (0x10000): its platforms' edges are rims; TILES_INNER_WALLS (0x20000): walls inside its floors ring no holes; TILES_MORE_PADS (0x40000): its pads in its other maps' pads' look alone; TILES_ARENA_FLOOR (0x100000): its guardian's arena in its platforms' floor; TILES_NO_SCENERY (0x200000): no free-standing pieces beside its floor; TILES_WALK_NARROW (0x400000): its walkways' hue in 2 x 2 blocks is platform floor; TILES_ARENA_DRAWN (0x800000): its arena drawn in platform floor, laid out as walkway (src/map/tiles.h) */
@@ -40,12 +40,12 @@ typedef struct {
 	uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
 	uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours; SKIP_ANY_PIXEL, SKIP_PALE (src/map/tiles.h) */
 	uint16_t joint_hues;     /* hue buckets of its walkways' joints, a walkway panel whose top shows them: their tiles in a look of their own, drawn at a generated walkway's ends, turns and crossings (the Undernet's yellow gems; src/map/tiles.c, netmap.c) */
-	int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
+	int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/world/level-design/props.md) */
 	uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
-	uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */
+	uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/world/level-design/props.md) */
 	uint16_t pad_hues;       /* its pads are cut whole from its maps' own, the first whose middle has one of these hue buckets (props_learn_pad): Central's and Seaside's framed pads; 0 none */
 	uint8_t rebank[2];       /* first-layer tiles in palette bank rebank[0] drawn in bank rebank[1] where its maps use the same tile in that bank too: one shade of floor (the Graveyard's pale platforms, bank 2, among its dark slabs, bank 1); { 0, 0 } none */
-	uint8_t host;            /* its layers take over map (group, host - 1) of the same tiles, where the learned one draws sprites behind the second tile layer (0: the learned map; docs/ROM_DATA.md) */
+	uint8_t host;            /* its layers take over map (group, host - 1) of the same tiles, where the learned one draws sprites behind the second tile layer (0: the learned map; docs/rom/) */
 	uint8_t arrow_maps[2][2];   /* more maps (group, number) in the same tiles whose arrow panels it learns, beside its own and `more` (issue #43; 0: none) */
 	uint32_t recolour;       /* its maps' tiles in one palette bank read as another's, before anything is learned: pairs of nibbles (from, then to), the lowest first (area_src_load_as; 0: none) */
 	/* (another game's area) */
@@ -58,11 +58,11 @@ typedef struct {
 	uint8_t xnavi2;          /* ... and another they take turns with (0: none) */
 	uint8_t xlooks;          /* its own map objects in BN6's place, XLOOK_* */
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
-	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
+	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/multirom/) */
 	uint8_t xbattles[3][2];  /* (another game's) per layer of an act, the map (group, number) whose battle records its random battles take,
 	                          * fought in BN6's engine (xbattles.h); group 0: its layers fight BN6's battles */
 	uint8_t xguard[2];       /* (another game's) the Navis of its game (their ids table's AI index) who may guard its acts, as its own net maps
-	                          * set them (docs/BOSSES.md, BN5's Navis); 0 none: BN6's guardians */
+	                          * set them (docs/game/bosses/bn5-navis.md); 0 none: BN6's guardians */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
@@ -78,17 +78,17 @@ typedef struct {
 	uint32_t enemy_stats;     /* per actor type, per ai: 6-byte records per version (HP, damage) */
 	uint32_t enemy_traits;    /* per actor type, per ai: an 8-byte record (sprites, second-wheel element and weakness) */
 	uint32_t encounters;      /* random battles: 4 story stages x (real world, internet) -> group -> map -> BattleSettings */
-	uint32_t navicust_programs; /* NaviCust program records: 16 bytes per colour variant (docs/ROM_DATA.md) */
-	uint32_t navicust_codes;  /* NaviCust compression codes: ten buttons a program (docs/ROM_DATA.md) */
-	uint32_t program_advances; /* the Program Advances: their results and the chips that make them (docs/ROM_DATA.md) */
-	uint32_t battle_gem_rewards; /* the in-battle Mystery Data's rewards: 8 tiers of 8 u16 (docs/ROM_DATA.md) */
+	uint32_t navicust_programs; /* NaviCust program records: 16 bytes per colour variant (docs/rom/) */
+	uint32_t navicust_codes;  /* NaviCust compression codes: ten buttons a program (docs/rom/) */
+	uint32_t program_advances; /* the Program Advances: their results and the chips that make them (docs/rom/) */
+	uint32_t battle_gem_rewards; /* the in-battle Mystery Data's rewards: 8 tiers of 8 u16 (docs/rom/) */
 	uint32_t chip_icon_pal;   /* the chips' icons' palette (their tiles: each record's BN6_CHIP_ICON_PTR) */
 	uint32_t element_icons;   /* 16x16 element icons, 2x2 tiles each, by a record's BN6_CHIP_ELEMENT */
 	uint32_t element_icon_pal; /* ... their palette */
 	uint32_t enemy_names[2];  /* text archives: the viruses' names by BN6_T1_NAME_ID, the Navis' past 0xFF */
 	uint32_t navicust_names;  /* text archive: the NaviCust programs' names, entry n program n (the text command FA 00 n 05's) */
 	uint32_t item_names;      /* text archive: the key items' names by their id (the text command FA's first) */
-	struct {                  /* the title screen (docs/ROM_DATA.md) */
+	struct {                  /* the title screen (docs/rom/) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */
 		uint32_t bg_pal;         /* banks 0-13: the logo in 0-4 */
@@ -100,11 +100,11 @@ typedef struct {
 	} title;
 	NetAreaDef net_area[NET_AREAS];   /* the original area each net biome borrows */
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
-	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */
+	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/rom/) */
 	uint32_t battle_bg_anims;  /* their tile and palette animation scripts */
 	uint32_t battle_bg_scroll; /* their scroll callbacks, 16 bytes each */
 	uint32_t battle_bg_refs[3];   /* the loader's literals naming those three tables: BGAnimData, animations, scroll */
-	uint32_t map_enters;       /* the internet map groups' EnterMapGroup routines, one a group from 0x80 (docs/ROM_DATA.md) */
+	uint32_t map_enters;       /* the internet map groups' EnterMapGroup routines, one a group from 0x80 (docs/rom/) */
 	uint32_t map_anims;        /* ... and their LoadGFXAnims routines: through both, a net map's backdrop and animation tables */
 } RomLayout;
 
@@ -118,12 +118,12 @@ typedef struct {
 extern Rom R;
 
 /* Other Battle Network games whose data a layer can take beside BN6's
- * (docs/MULTIROM.md): found by their contents where the BN6 ROM is, read
+ * (docs/multirom/): found by their contents where the BN6 ROM is, read
  * and never run. Each is optional: BN6 alone is the whole game. */
 typedef enum { XROM_BN5_COLONEL_US, XROM_COUNT } XRomId;
 typedef struct {
 	const char *name, *sha1, *code;
-	uint32_t map_table_rw, map_table;       /* MapBGDescriptor lists per map group, as BN6's (docs/ROM_DATA.md) */
+	uint32_t map_table_rw, map_table;       /* MapBGDescriptor lists per map group, as BN6's (docs/rom/) */
 	uint32_t coord_table_rw, coord_table;   /* coordinate data lists per map group */
 	int rw_groups, net_groups;              /* the tables' entries: real-world groups from 0x00, internet ones from 0x80 */
 	const NetAreaDef *areas;                /* the net areas it lends a run */
@@ -134,8 +134,8 @@ typedef struct {
 	uint32_t battle_bgs, battle_bg_anims, battle_bg_scroll;   /* its battle backgrounds' tables, as BN6's */
 	uint32_t map_enters, map_anims;         /* its internet map groups' EnterMapGroup and LoadGFXAnims routines, as BN6's */
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
-	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/ROM_DATA.md) */
-	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/MULTIROM.md) */
+	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
+	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -183,7 +183,7 @@ void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
 /* ... the same in extra ROM `xrom` (rom.h, XR), "" where it is not there:
  * its text in BN6's codes first (xrom_text_bn6) */
 void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
-/* Text of extra ROM `xrom` in BN6's codes (docs/ROM_DATA.md, BN5's text):
+/* Text of extra ROM `xrom` in BN6's codes (docs/rom/bn5-world.md, BN5's text):
  * BN5 spells letters and digits as BN6 does but numbers the rest
  * otherwise, BN6 having put its five version marks at 0x40-0x44. `n`
  * bytes of `src`, to its first command (0xE5 on), into `dst` (`max` at

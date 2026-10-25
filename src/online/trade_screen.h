@@ -1,4 +1,4 @@
-/* Trade Central's two screens (issue #145; docs/ONLINE.md, Trade
+/* Trade Central's two screens (issue #145; docs/online/trade-central.md, Trade
  * Central), PET screens of the project's own over BN6's picture, as the
  * NetPass is (netpass_screen.h): the game held under them, no key reaching
  * the core while one is up, its closing A or B kept from BN6 until let go.

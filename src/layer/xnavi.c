@@ -19,14 +19,14 @@
 #include "emu.h"
 #include "rom.h"
 
-#define XNAVI_AT   FREE_XNAVIS             /* (docs/EMULATION.md) */
+#define XNAVI_AT   FREE_XNAVIS             /* (docs/engine/emulation/) */
 #define XNAVI_END  FREE_BACKDROPS
 #define XNAVI_GUARD_AT (XNAVI_END - 0x12000)   /* (a guardian of another game's, one at a time: KnightMan's, the largest, 68033 bytes) */
 #define BUS        0x08000000u
 #define LIST_NAVIS 6                       /* sprite lists: the Navis and Mr. Progs */
 #define LIST_FACES 8                       /* the mugshots */
 /* (Gregar's list-6 numbers for Falzar's Navis: a placeholder sprite and
- * the black mugshot, docs/ROM_DATA.md; no guardian takes them) */
+ * the black mugshot, docs/rom/; no guardian takes them) */
 static const uint8_t free_slots[] = { 72, 74, 76, 77, 78 };
 #define GUARD_SLOT 78                      /* (the last of them: a guardian's, no area's Navi) */
 #define EMPTY_SPRITE 48                    /* one of them, to compare with */
@@ -115,7 +115,7 @@ static void copy_in(int xrom, int navi) {
 /* ---- Another game's map objects: sprites of its list 7 ---- */
 
 #define LIST_OBJECTS 7                     /* sprite lists: the overworld's objects */
-#define OBJECT_PLACEHOLDER 0x084DC040u     /* (Gregar's list-7 numbers that point at it are free: no layer lists them, docs/ROM_DATA.md) */
+#define OBJECT_PLACEHOLDER 0x084DC040u     /* (Gregar's list-7 numbers that point at it are free: no layer lists them, docs/rom/) */
 
 /* Each: its game, its list-7 number there (bit 31 of the pointer: LZ77,
  * copied decompressed), the free Gregar number it is listed at, whether
@@ -226,9 +226,9 @@ int xnavi_object(int which) {
 	return O.sprite[which] ? objects[which].slot : -1;
 }
 
-/* ---- BN6's own flame of darkness (docs/META.md, BN6's own DarkChips) ---- */
+/* ---- BN6's own flame of darkness (docs/game/meta/bn6-darkchips.md) ---- */
 
-#define FLAME_AT  FREE_FLAME              /* (docs/EMULATION.md: its own place, the same with or without another game's ROM) */
+#define FLAME_AT  FREE_FLAME              /* (docs/engine/emulation/: its own place, the same with or without another game's ROM) */
 #define FLAME_END FREE_FLAME_END
 
 int xnavi_bn6_flame(void) {
@@ -277,7 +277,7 @@ int xnavi_slot(int xrom, int navi, int fallback) {
 }
 
 /* (Gregar's list-6 numbers on a white dot, and their mugshots black, in
- * both versions: bn6f's npcSpritePtrs and mugshotSpritePtrs, docs/ROM_DATA.md;
+ * both versions: bn6f's npcSpritePtrs and mugshotSpritePtrs, docs/rom/;
  * EMPTY_SPRITE, one of them, kept as the reference) */
 static const uint8_t mate_slots[XNAVI_MATES] = { 0x07, 0x28, 0x29, 0x31, 0x35 };
 #define MATE_ROOM 0x12000u   /* (a teammate's place: KnightMan's sprite and mugshot, the largest, 68033 bytes) */

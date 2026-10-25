@@ -1,5 +1,5 @@
 /* BN6's AI data in a battle: the pool its actors' AI data comes from,
- * eight entries of BN6_AI_DATA_SIZE bytes (issue #182; docs/ROM_DATA.md,
+ * eight entries of BN6_AI_DATA_SIZE bytes (issue #182; docs/rom/navis.md,
  * BN6's AI data's pool). Not the first kind's 32 slots: an actor spawned
  * with AI (0x08007540, 0x080076C0) takes the first entry free, or none
  * and is let go; a MegaMan, a Navi, a virus each take one. And the getter

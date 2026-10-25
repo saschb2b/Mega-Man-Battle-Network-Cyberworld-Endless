@@ -1,0 +1,16 @@
+# Home
+
+* [Home](overview.md) - Home in a run: Central Town and Lan's HP, the warp zone where the run's portals grow; its design, the owner's decisions, going back, jobs, the shop, a town that remembers, the Square's gate.
+* [10. AsterLand and the Cyber Academy](asterland-and-academy.md) - AsterLand and the Cyber Academy (issue #96): BN6's maps taken over (`aster_land.c`, `academy.c`), AsterLand's clerk, Request BBS and Chip Trader with the Number Trader off, class 6-1's NetBattle club.
+* [What BN6 has at home](bn6-at-home.md) - What BN6 itself has at home, verified in bn6f and Gregar: Central Town's maps, Lan's PC jacking in to Lan's HP (0x88:00), jack-in points, the Request BBS, AsterLand's Order Service, no day or night.
+* [Lan's HP after an act, the warp zone](lans-hp.md) - Lan's HP as the run's warp zone (`lanhp.c`): an act's exit pad leads there, BN6's link squares and pink pad become this run's portals as guardians fall, the courier, ways on and back.
+* [11. The Net Square's gate](square-gate.md) - The Net Square's gate (epic #120): going online at BN6's white teleporter in Lan's HP, beside a Mr.Prog keeper (`lanhp.c`, `director_gate.c`), not from a menu; consent, name, the NetPass strip, servers in `network.ini`.
+* [4. Central Town, home](central-town.md) - Central Town as every run's home (issue #94): its original width, Lan's house and room taken over (`lan_house.c`), his PC the run's jack-in to Lan's HP, and his room's words recalling the last run.
+* [6. The home shop](home-shop.md) - The home shop: AsterLand's clerk opens BN6's Order Service, one order a visit at twice a Net Dealer's price, sorted on START by BN6's seven keys (`order_sort.c`), beside the SubChip seller.
+* [8. Time of day by act](time-of-day.md) - Time of day by act (issue #90, `home_hour`): morning to night before the Nest, tinted onto Central Town's map and sprites as `scene_emu.c` draws it, since BN6 has no time of day.
+* [3. Going back, and the Net's clock](going-back.md) - Going back (issue #95): two older portals in Lan's HP lead to one `LAYER_BACK` layer of an area won, and each trip moves the Net's clock (`run.clock`), a tenth more HP for each later guardian.
+* [9. The second screen at home](second-screen.md) - The second screen's home panel (issues #79, #91) in town and Lan's HP: the visit's hour, the request held, each way as MegaMan reads it, the Net's clock and the run's setup.
+* [The owner's decisions](decisions.md) - The owner's decisions on home (October 2026): home after every act, Lan's HP as the run's warp zone, going back priced by the Net's clock, Central Town always home, AsterLand and the Academy opened.
+* [7. A town that remembers](town-remembers.md) - A town that remembers (issue #87): the plaza Mr.Prog calls the Net's news, four townsfolk speak of the run (`town_words.c`), and people stand elsewhere at each visit (`town_folk.c`).
+* [5. Jobs (the Request BBS)](jobs.md) - Jobs on the Request BBS (`jobs.c`, `director_jobs.c`, issue #88): three townsfolk post a request each visit, Lan takes one at most, the asker pays at the next visit, and how vows work.
+* [Home's design](design.md) - Home's design by the game-design skill: the old town's faults, two homes (Central Town for Lan, Lan's HP for MegaMan), the prepare-or-press-on dialectic, the loop stack, its patterns and what must not move home.

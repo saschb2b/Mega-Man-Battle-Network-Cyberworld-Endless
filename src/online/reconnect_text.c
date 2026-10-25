@@ -1,4 +1,4 @@
-/* reconnect_text.h. The PET's own text, in its plain style (docs/VOICE.md:
+/* reconnect_text.h. The PET's own text, in its plain style (docs/voice/rules.md:
  * menus and labels keep theirs), as the NetPass's and the trade screens'. */
 #include "reconnect_text.h"
 

@@ -835,7 +835,7 @@ int xdiff_run(const char *text) {
 	static Spec s;
 	static Side a, b;
 	if (!xd_spec_parse(text, &s)) {
-		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/DEVTOOLS.md, The differential)\n");
+		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/devtools/differential.md)\n");
 		return 2;
 	}
 	if (!XR[XROM_BN5_COLONEL_US].data) {

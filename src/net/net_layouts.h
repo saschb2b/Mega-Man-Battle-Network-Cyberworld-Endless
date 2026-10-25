@@ -1,5 +1,5 @@
 /* The layouts a layer is built in, after the shape language of each of
- * BN6's net areas (docs/LEVEL_DESIGN.md). */
+ * BN6's net areas (docs/world/level-design/). */
 #ifndef NET_LAYOUTS_H
 #define NET_LAYOUTS_H
 

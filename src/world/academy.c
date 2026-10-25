@@ -5,7 +5,7 @@
  * whose two doors (2, 3) open into class 6-1 (0x02:00), Lan's, and whose
  * stairs (1) lead down. The teachers' room, the principal's office and
  * the other classrooms stay shut; the NetBattle club meets in class 6-1
- * (place_lines.c). Warp lists read in Gregar (docs/ROM_DATA.md, Lan's
+ * (place_lines.c). Warp lists read in Gregar (docs/rom/world.md, Lan's
  * house and room). */
 #include "academy.h"
 

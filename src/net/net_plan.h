@@ -1,4 +1,4 @@
-/* A layer's plan (docs/LEVEL_DESIGN.md, Identity and Arrivals; issues #98,
+/* A layer's plan (docs/world/level-design/identity.md and Arrivals; issues #98,
  * #106): the layout and the signature it is built in and the side MegaMan
  * arrives at, from the run's seed and the depth alone. */
 #ifndef NET_PLAN_H

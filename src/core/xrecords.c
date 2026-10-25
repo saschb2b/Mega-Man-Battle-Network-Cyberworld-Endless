@@ -1,8 +1,8 @@
 /* Another game's battle records and Navis, read from its ROM file with no
- * core needed (xrecords.h; docs/MULTIROM.md): a net map's records, the
+ * core needed (xrecords.h; docs/multirom/): a net map's records, the
  * pool a battle is picked from to the act's band (the director's and the
  * pacing report's), a record's viruses taken up their versions, and its
- * Navis' records and stats as guardians (docs/BOSSES.md, BN5's Navis). */
+ * Navis' records and stats as guardians (docs/game/bosses/bn5-navis.md). */
 #include "xrecords.h"
 
 #include <stdbool.h>
@@ -189,7 +189,7 @@ int xrecords_pool(XPool *p) {
 	return n || p->max < 1 ? n : weakest(p);
 }
 
-/* ---- its Navis, from the ROM file (docs/BOSSES.md, BN5's Navis) ---- */
+/* ---- its Navis, from the ROM file (docs/game/bosses/bn5-navis.md) ---- */
 
 int xrecords_navi_id(const uint8_t *d, int ai, int v) {
 	for (uint32_t i = 1; i < 0x200; ++i) {

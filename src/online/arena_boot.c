@@ -41,7 +41,7 @@ static const Step boot_steps[] = {
 };
 
 /* Both GBAs' keys through BN6's menus, from the boot's overworld (the
- * research's, tools/online_link_script.c, docs/ONLINE_LINK.md): the PET,
+ * research's, tools/online_link_script.c, docs/online/link.md): the PET,
  * Comm (two rows up), then Link Cable, the save and its message, NetBattle,
  * Single Battle and Practice, each its menu's first row (bn6f
  * CompText86DA1B8, scripts 17/25: Practice above Battle), confirmed; then
@@ -59,7 +59,7 @@ static const Step entry_steps[] = {
 
 #define NSTEPS(a) (sizeof a / sizeof *a)
 
-/* The step whose first frame is the bout's (docs/ONLINE_ARENA.md, A
+/* The step whose first frame is the bout's (docs/online/arena/from-square/rematch-in-a-second.md, A
  * rematch in a second): Practice's last confirm, before the battle keeps
  * BN6's first random word (drawn 19 frames after the press is done, kept,
  * and put back 71 frames on as the battle's opening ends) and shuffles
@@ -299,7 +299,7 @@ static bool entry_frame(ArenaBoot *b) {
 }
 
 /* A MegaMan carried with less than his max HP (a Team NetBattle's winner,
- * docs/ONLINE_ARENA.md, Team NetBattles): his battle object's HP on both
+ * docs/online/arena/teams.md): his battle object's HP on both
  * GBAs as the first Custom screen opens. BN6 makes HP whole from the
  * NaviStats in its menus on the way in, so it is written here, where the
  * battle has made its objects, and read back from both; false where a

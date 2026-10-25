@@ -1,5 +1,5 @@
 /* The sprite props' map objects on a layer (layer_props.c; docs/
- * LEVEL_DESIGN.md, Props), for layer_objs.c. */
+ * docs/world/level-design/props.md), for layer_objs.c. */
 #ifndef CW_LAYER_PROPS_H
 #define CW_LAYER_PROPS_H
 

@@ -1,4 +1,4 @@
-/* A Virus Battler's series on a layer (docs/LEVEL_DESIGN.md, The Virus
+/* A Virus Battler's series on a layer (docs/world/level-design/virus-battler.md, The Virus
  * Battler): BN6's own rounds fought in BN6's battle mode 6, its VIRUS LIST
  * and its fight, the stake held as a pot that each win adds to; after a
  * win his word and the next pair, the pot taken or the next round; a loss

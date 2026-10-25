@@ -1,5 +1,5 @@
 /* What the super bosses say, and MegaMan, Lan and Dad at their meetings
- * (super_lines.c; docs/VOICE.md, docs/BOSSES.md, Super bosses). */
+ * (super_lines.c; docs/voice/rules.md, docs/game/bosses/super-bosses.md). */
 #ifndef CW_SUPER_LINES_H
 #define CW_SUPER_LINES_H
 
@@ -13,7 +13,7 @@ const char *super_intro(int navi, int version, const Rival *r);
 const char *super_defeat(int navi, int version);
 /* MegaMan's battle data on them, once fought in any run (guardian_tip's). */
 const char *super_tip(int navi);
-/* A bystander's word where one waits, never his name (docs/META.md, what
+/* A bystander's word where one waits, never his name (docs/game/meta/what-megaman-knows.md, what
  * MegaMan knows): what the net feels of him; NULL for none. */
 const char *super_rumor(int navi);
 /* What their data says as it is taken: its head ("MegaMan downloaded

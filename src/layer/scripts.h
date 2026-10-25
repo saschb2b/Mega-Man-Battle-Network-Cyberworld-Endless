@@ -31,9 +31,9 @@ void chat_marks_install(void);
  * trader.h.) */
 int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow);
 /* Words that set `flag` as they are said (a bystander's news the director
- * keeps: docs/META.md, what MegaMan knows). */
+ * keeps: docs/game/meta/what-megaman-knows.md). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
-/* The rival's duel (docs/RIVAL.md): ProtoMan's terms (boxes apart by '|'),
+/* The rival's duel (docs/game/rival.md): ProtoMan's terms (boxes apart by '|'),
  * then "Take the duel?", starting on No; Yes sets `flag`. */
 int ta_duel(TextArchive *t, int flag, int face, const char *terms);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
@@ -59,7 +59,7 @@ int ta_music(TextArchive *t, int song);
  * over `sixteenths` sixteen-frame steps, without opening the chat box. */
 int ta_sound(TextArchive *t, int sound);
 int ta_music_fade(TextArchive *t, int sixteenths);
-/* What a Guardian Data adds for the NaviCust (docs/NAVICUST.md): an
+/* What a Guardian Data adds for the NaviCust (docs/game/navicust.md): an
  * ExpMemry, then a draft of `n` programs (give ids and colours) or none
  * for `skip_frags` BugFrags; `teach` marks the run's first draft. */
 typedef struct {
@@ -90,13 +90,13 @@ typedef struct {
  * last the way on. The run's last guardian gives only what carries over:
  * his chip, for the Library. */
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);
-/* A flame of darkness holding a DarkChip BN5's rule plays (docs/META.md,
+/* A flame of darkness holding a DarkChip BN5's rule plays (docs/game/meta/darkchips.md,
  * DarkChips): MegaMan names it, what it does (`does`, pages apart by '|',
  * "" or NULL none: DarkPlus's, DarkInvs's), when it comes (BN5's
  * worried rule) and its price (all of it the `first` time); then asks,
  * starting on Yes; Yes sets event flag `flag`, which it leaves by. */
 int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first);
-/* A flame of darkness holding one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
+/* A flame of darkness holding one BN6's own rule plays (docs/game/meta/bn6-darkchips.md): its
  * DarkChip, its base chip BN6 plays it as without a BugFrag, what its dark
  * power does in MegaMan's words, and whether he says all of its price (a
  * profile's first). */
@@ -110,7 +110,7 @@ typedef struct {
  * leaves by. */
 int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d);
 /* BN6's own words on DarkChips, a post of its BBS run from the player's
- * ROM (docs/ROM_DATA.md), said by a bystander with `face` on a flame's
+ * ROM (docs/rom/), said by a bystander with `face` on a flame's
  * layer; -1 where the ROM's text is not as expected. */
 int ta_dark_rumor(TextArchive *t, int face);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
@@ -134,7 +134,7 @@ int ta_cube_skull(TextArchive *t, int present, int id);
 int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned seed);
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
-/* A collector's vault (docs/META.md, gates): its three chips (`code`
+/* A collector's vault (docs/game/meta/phase-two.md, gates): its three chips (`code`
  * A=0 .. *=26), named, and what each hits for (0: none to say). */
 typedef struct {
 	int chip[3], code[3], power[3];
@@ -144,7 +144,7 @@ typedef struct {
  * words say so; else the three chips, one to take (event flag `flag` set
  * as it is, after which the vault stands empty; B leaves them). */
 int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v);
-/* An official gate (docs/RIVAL.md): sealed while the rival's duels `won`
+/* An official gate (docs/game/rival.md): sealed while the rival's duels `won`
  * are short of `need`, its words say for whom it opens; else its three
  * chips, one to take (a Chip Order from the Library at level 1, Mega
  * chips at level 2). `duel_prize`: the one beside ProtoMan, the clearance
@@ -152,11 +152,11 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
-/* What a dark layer's item panel held (docs/LIBERATION.md): a chip, its
+/* What a dark layer's item panel held (docs/game/liberation/): a chip, its
  * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);
 int ta_lib_find_zenny(TextArchive *t, int zenny);
-/* A dark layer's par prize, its Darkloid deleted (docs/LIBERATION.md):
+/* A dark layer's par prize, its Darkloid deleted (docs/game/liberation/):
  * BN5's tiers, a chip two under par or at par, zenny over it, given as
  * BN6 gives them; its words before it MegaMan's tally of the phases */
 int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code);

@@ -1,4 +1,4 @@
-/* trade_central.h. Trade Central in the Net Square (docs/ONLINE.md): BN6's
+/* trade_central.h. Trade Central in the Net Square (docs/online/): BN6's
  * reception desk in the Square's Trade wing, its clerk's words in BN6's
  * chat boxes. Offered from his desk: the Navi to trade with, a page of two
  * names at a time, then the chip on the spares list (trade_screen.h, issue

@@ -78,7 +78,7 @@ typedef enum { TRIGGER_OFF, TRIGGER_GAUGE, TRIGGER_FAST } FeelTrigger;
 #define TRIGGER_REPORT 47
 /* its 11 bytes as the controller takes them: a mode byte, then its
  * numbers (Nielk1's "DualSense trigger effects", gist.github.com/Nielk1/
- * 6d54cc2c00d2201ccb8c2720ad7538db; docs/FIDELITY.md, Ours) */
+ * 6d54cc2c00d2201ccb8c2720ad7538db; docs/game/fidelity.md) */
 void feel_trigger_bytes(FeelTrigger t, uint8_t out[TRIGGER_BYTES]);
 /* the effects' report SDL_GameControllerSendEffect takes for a
  * DualSense, both triggers set (SDL_hidapi_ps5.c's DS5EffectsState_t:

@@ -23,7 +23,7 @@ typedef struct {
 	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
 	uint8_t navicust_taught;  /* a Guardian Data's draft has said how the NaviCust's board works */
 	uint8_t marks_taught;     /* the map's violet marks and its counters L had explained (MARK_*); unread since the voice sweep of 19 October 2026 */
-	/* the meta layer (docs/META.md): the highest threat rung open to a new
+	/* the meta layer (docs/game/meta/): the highest threat rung open to a new
 	 * run, the starting folders unlocked (a bit each), short nets won */
 	uint8_t threat_open;
 	uint16_t folders_open;
@@ -33,7 +33,7 @@ typedef struct {
 	uint8_t first_area;       /* the last new run's act 1 area, biome + 1 */
 	uint8_t crosses_open;     /* the Cross starts announced (a bit per navi 1-5, meta.h) */
 	uint8_t last_cross;
-	/* the Library (docs/META.md): a bit per chip id held in any run, and
+	/* the Library (docs/game/meta/): a bit per chip id held in any run, and
 	 * how many it held as the current run began */
 	uint8_t library[40];
 	uint16_t library_start;
@@ -44,7 +44,7 @@ typedef struct {
 	 * + 1, small values), unused since Central Town is home: RUN_OPEN is a
 	 * value it never held. */
 	uint8_t run_open;
-	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/NAVICUST.md, 7) */
+	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/game/navicust.md, 7) */
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
 	uint8_t area_before, guardian_before;   /* the run before the last one's first area and guardian (+ 1) */
@@ -54,13 +54,13 @@ typedef struct {
 	uint32_t families_fought[2];
 	uint8_t gem_taught;       /* (unused: the battlefield's Mystery Data is BN6's own, unexplained for its players; kept for the profile's layout) */
 	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
-	 * c - 1: docs/META.md), and the run that found one (its seed) with that
+	 * c - 1: docs/game/meta/), and the run that found one (its seed) with that
 	 * colour, so that a run finds at most one */
 	uint8_t spins;
 	uint8_t spin_colour;
 	uint32_t spin_run;
 	uint32_t records_mark;    /* the guardians' records as Dad's Records mail last showed them (a hash): NEW when they change */
-	/* the rival's duels (docs/RIVAL.md), in any run: won and lost */
+	/* the rival's duels (docs/game/rival.md), in any run: won and lost */
 	uint16_t duel_won, duel_lost;
 	/* the last duel's run (its seed) and layer, and whether it was won: a
 	 * CONTINUE from the checkpoint before it finds it fought, not to be
@@ -80,21 +80,21 @@ typedef struct {
 	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
 	uint8_t pack_taught;      /* (unused: the Pack is BN6's own, unexplained for its players; kept for the profile's layout) */
 	uint8_t guest_taught;     /* (unused since the guest core left runs, issue #82: what an older net's battle on it was; kept for the profile's layout) */
-	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/META.md) */
+	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/game/meta/) */
 	uint8_t recode_taught;    /* (unused since the guest core left runs, issue #82: the guest's codes; kept for the profile's layout) */
 	uint8_t cross_old_told;   /* (unused since the guest core left runs, issue #82: that its battles had no Crosses; kept for the profile's
 	                           * layout, and read once: a profile told so hears that the Cross works there now, nets_words.c) */
-	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/META.md, Souls) */
-	uint8_t dark6_taught;     /* ... and BN6's own DarkChips (docs/META.md): all of a BN6 flame's words, all of their price after a battle (DARK6_*) */
-	uint8_t back_taught;      /* ... and what a trip back costs, the Net's clock, at the first older portal (docs/HOME.md) */
-	/* how the last run ended, for the town's news (docs/HOME.md, a town
+	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/game/meta/souls.md) */
+	uint8_t dark6_taught;     /* ... and BN6's own DarkChips (docs/game/meta/): all of a BN6 flame's words, all of their price after a battle (DARK6_*) */
+	uint8_t back_taught;      /* ... and what a trip back costs, the Net's clock, at the first older portal (docs/world/home/) */
+	/* how the last run ended, for the town's news (docs/world/home/town-remembers.md, a town
 	 * that remembers): the guardian who deleted MegaMan (navi, 0 none), or
 	 * the Nest won */
 	uint8_t last_lost_to;
 	uint8_t last_won;
 	uint8_t hp_taught;        /* MegaMan has said what Lan's HP is, at a run's first jack-in (said short after) */
 	uint8_t last_job;         /* the asker whose request the last run ended holding, plus one (0 none): their word at the next run's start */
-	/* the BeastOut helper (issue #99, docs/META.md): announced, Dad's words
+	/* the BeastOut helper (issue #99, docs/game/meta/): announced, Dad's words
 	 * on it said in full at a run's start, the older net's lack of it said
 	 * (BEAST_*) */
 	uint8_t beast;
@@ -103,7 +103,7 @@ typedef struct {
 	 * anonymous statistics' run's end (analytics.h) */
 	uint32_t played_run;
 	uint32_t played_frames;
-	/* where the nets meet (issue #82, docs/MULTIROM.md, One net): MegaMan
+	/* where the nets meet (issue #82, docs/multirom/one-net.md): MegaMan
 	 * has said that an older net's area fights its own viruses our way,
 	 * named the first visitor of the other net, and said that both nets
 	 * meet in the deep */
@@ -112,11 +112,11 @@ typedef struct {
 	 * pack: xchips_registry.h), a bit each, beside `library` */
 	uint8_t library_x[24];
 	/* MegaMan has said that a Soul and a Cross are not worn together, at a
-	 * Guardian Data that gave a Soul (docs/META.md, Souls); that the
+	 * Guardian Data that gave a Soul (docs/game/meta/souls.md); that the
 	 * older net's Navis fight our way now, to a profile told they fought
 	 * the old way (issue #82, the guest core gone from runs) */
 	uint8_t soul_form_taught, navis_ours_told;
-	/* the Virus Battler (docs/LEVEL_DESIGN.md, The Virus Battler): the
+	/* the Virus Battler (docs/world/level-design/virus-battler.md): the
 	 * BtlrCard held (BTLR_*), given by the first Battler met, and the
 	 * virus families' data on it, a bit per AI index (BN6's flag
 	 * BN6_FLAG_VIRUS_DATA + AI each, set in every run's game from here) */
@@ -133,7 +133,7 @@ enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_V
 
 extern Profile profile;
 
-/* Chaud's clearance (docs/RIVAL.md): 1 after a first duel won, 2 once
+/* Chaud's clearance (docs/game/rival.md): 1 after a first duel won, 2 once
  * ProtoMan himself has been beaten (the third rung, a third win). */
 static inline int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.duel_won >= 1 ? 1 : 0; }
 

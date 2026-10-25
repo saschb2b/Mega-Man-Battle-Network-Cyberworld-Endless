@@ -24,7 +24,7 @@
 
 #define BUS 0x08000000u
 
-/* BN5's rules (bn5.h's routines; docs/ROM_DATA.md) */
+/* BN5's rules (bn5.h's routines; docs/rom/) */
 #define ELEMENT_FIRE   1           /* BN6_COLL_ELEMENT: Fire */
 #define ELEMENT_ELEC   3           /* ... Elec */
 #define LAVA_DAMAGE    50u         /* BN5_LAVA_STEP: movs r1,#0x32, shifted by the weakness to Fire */
@@ -334,7 +334,7 @@ static bool image_own(uint32_t image, uint8_t *was, uint32_t len, uint32_t crc) 
 }
 
 void xpanels_install(int xrom) {
-	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/ONLINE_ARENA.md) */
+	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/online/arena/) */
 	static bool done;
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;

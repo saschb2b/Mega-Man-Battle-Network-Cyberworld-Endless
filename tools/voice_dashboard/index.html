@@ -1261,7 +1261,7 @@ td .meter { min-width: 90px; height: 8px; }
 		const list = (show === 'noted' ? noted : show === 'back' ? back : cut).filter(match);
 		const out = [
 			el('div', { class: 'panel' }, el('h2', { text: 'The sweep' }),
-				el('p', { class: 'lede' }, 'On 19 October the sweep cut what nobody needs to say (docs/VOICE.md, What nobody says) and noted what should move to a better place. ',
+				el('p', { class: 'lede' }, 'On 19 October the sweep cut what nobody needs to say (docs/voice/rules.md, What nobody says) and noted what should move to a better place. ',
 					'Bring back any cut line you want kept: the next voice pass restores it, with your note. Noted lines wait for a rewrite; review them where they live.'),
 				el('div', { class: 'bar', style: 'margin-top:10px' },
 					el('span', { class: 'seg', role: 'group', 'aria-label': 'Show' }, pick('cut', 'Cut (' + cut.length + ')'), pick('back', 'Brought back (' + back.length + ')'), pick('noted', 'Noted (' + noted.length + ')')),
@@ -1328,7 +1328,7 @@ td .meter { min-width: 90px; height: 8px; }
 			add.disabled = S.readOnly;
 		});
 		return [el('div', { class: 'panel' }, el('h2', { text: 'Directions' }),
-			el('p', { class: 'lede', style: 'margin:4px 0 12px' }, 'Standing guidance for every line, one speaker or one area, such as "Mr.Prog: fewer exclamations". Each line shows the ones that apply to it. The ones that hold become rules in docs/VOICE.md, in your words with the date.'),
+			el('p', { class: 'lede', style: 'margin:4px 0 12px' }, 'Standing guidance for every line, one speaker or one area, such as "Mr.Prog: fewer exclamations". Each line shows the ones that apply to it. The ones that hold become rules in docs/voice/rules.md, in your words with the date.'),
 			list, form)];
 	}
 
@@ -1401,7 +1401,7 @@ td .meter { min-width: 90px; height: 8px; }
 		const pc = (v) => Math.round(v * 100) + '%';
 		return el('div', { class: 'panel' },
 			el('div', { class: 'scroll-x' }, el('table', { id: 'numbers' }, el('thead', null, el('tr', null, ['Speaker', 'Boxes', 'Words a box', '"!!" a box', '"..." a box', 'Stutters'].map((h, i) => el('th', { class: i === 1 || i === 3 || i === 4 ? 'n' : '', text: h })))), el('tbody', null, rows))),
-			el('div', { class: 'legend' }, el('span', { class: 'l-ours', text: 'ours' }), el('span', { class: 'l-bn6', text: "BN6's script (docs/VOICE.md, numbers only)" }), el('span', { text: 'bold: more than half off BN6\'s' })),
+			el('div', { class: 'legend' }, el('span', { class: 'l-ours', text: 'ours' }), el('span', { class: 'l-bn6', text: "BN6's script (docs/voice/rules.md, numbers only)" }), el('span', { text: 'bold: more than half off BN6\'s' })),
 			el('details', { style: 'margin-top:10px' }, el('summary', { class: 'small', text: 'Every speaker of ours' }),
 				el('div', { class: 'scroll-x' }, el('table', null, el('thead', null, el('tr', null, ['Speaker', 'Boxes', 'Words', '"!!"', '"..."', 'Ends "!"', 'Ends "?"', 'Openers'].map((h, i) => el('th', { class: i && i < 7 ? 'n' : '', text: h })))),
 					el('tbody', null, Object.entries(s.numbers).sort((a, b) => b[1].boxes - a[1].boxes).map(([who, o]) =>

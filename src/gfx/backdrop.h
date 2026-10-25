@@ -1,7 +1,7 @@
 /* The game's battle backgrounds (the BattleSettings background, 0x00-0x15)
  * drawn from the ROM: 4bpp tiles, a 32x32 map and a palette, with the
  * game's tile and palette animations and the scroll each one has in battle
- * (docs/ROM_DATA.md). */
+ * (docs/rom/). */
 #ifndef BACKDROP_H
 #define BACKDROP_H
 

@@ -3,8 +3,8 @@
  * walking, the NPC script's hop, the chat box's face and pose commands, the
  * battle's "!!" burst, the map objects' table and slots, and the sounds its
  * scripts play at such moments. BN6 has no emotion-bubble set of its own
- * (no "?", heart, note, sweat or sleep icon over a head; docs/ROM_DATA.md,
- * Expression). Names follow the bn6f disassembly; see docs/ROM_DATA.md. */
+ * (no "?", heart, note, sweat or sleep icon over a head; docs/rom/online.md,
+ * Expression). Names follow the bn6f disassembly; see docs/rom/. */
 #ifndef CW_BN6_EXPRESSION_H
 #define CW_BN6_EXPRESSION_H
 

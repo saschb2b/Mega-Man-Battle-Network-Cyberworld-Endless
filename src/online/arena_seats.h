@@ -1,5 +1,5 @@
 /* Two MegaMen a side over the network (protocol v15, issue #181,
- * docs/ONLINE_ARENA.md, Two MegaMen a side over the server): what every
+ * docs/online/arena/two-a-side/overview.md over the server): what every
  * game of a 2v2, and its spectators, sets alike before the pair is built.
  * The pair's two MegaMen a side (arena_team.h's hooks) are the dev flag's
  * (--dev arena2v2) or a 2v2's; the GBAs' MegaMen are seats 0 and 1's,

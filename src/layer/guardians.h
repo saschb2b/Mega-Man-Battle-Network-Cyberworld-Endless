@@ -1,6 +1,6 @@
 /* The guardian Navis as the boss sequence presents them: name, epithet,
  * mugshot, colour, and what they say, chosen by what they remember of
- * MegaMan (docs/BOSSES.md). */
+ * MegaMan (docs/game/bosses/). */
 #ifndef CW_GUARDIANS_H
 #define CW_GUARDIANS_H
 
@@ -24,7 +24,7 @@ typedef struct {
 /* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel;
  * the super bosses 19 Bass and 20 the Cybeast Gregar, super_boss.h) */
 const Guardian *guardian(int navi);
-/* Another game's Navis as a territory's guardians (docs/BOSSES.md, BN5's
+/* Another game's Navis as a territory's guardians (docs/game/bosses/bn5-navis.md, BN5's
  * Navis): BN5's Team Colonel by their AI index there (bn5.h BN5_NAVI_*,
  * Colonel 7 .. ToadMan 12) as navis 24-29 here, each with his own rival
  * record (BN6's Colonel and TomahawkMan are other Navis' copies) */
@@ -33,7 +33,7 @@ const Guardian *guardian(int navi);
 static inline bool guardian_older(int navi) { return navi >= GUARDIAN_OLDER_FIRST && navi <= GUARDIAN_OLDER_LAST; }
 static inline int guardian_older_ai(int navi) { return navi - GUARDIAN_OLDER_FIRST + BN5_NAVI_COLONEL; }
 static inline int guardian_of_older(int ai) { return ai - BN5_NAVI_COLONEL + GUARDIAN_OLDER_FIRST; }
-/* BN5's Darkloids, a dark layer's (docs/LIBERATION.md, stage 4): BN5's
+/* BN5's Darkloids, a dark layer's (docs/game/liberation/building/stage-4-darkloids.md): BN5's
  * AI 13-16 (bn5.h BN5_NAVI_SHADEMAN .. BN5_NAVI_COSMOMAN) as navis 30-33
  * here, moved into BN6's engine as its six were (xnavi_bn5.c) and met only
  * on a dark board, no territory's guardian and no Soul's */
@@ -73,7 +73,7 @@ const char *guardian_tip(int navi);
 int guardian_netbattle_terms(char *out, size_t n);
 /* What the net says of guardian `navi` (the clause after "Word is, "), for
  * a bystander to pass on where MegaMan has never battled him: true, vague,
- * no moves (docs/META.md, what MegaMan knows). NULL for none. */
+ * no moves (docs/game/meta/what-megaman-knows.md). NULL for none. */
 const char *guardian_rumor(int navi);
 /* Whether MegaMan knows guardian `navi`: they have battled him, in any
  * run (rivals.sav). Before that he names him nowhere, and briefs none of
@@ -87,7 +87,7 @@ int guardian_sprite(int navi);
 /* How guardian `navi` stands on the net facing `face` (the overworld's
  * eighths: 1 up-right, 3 down-right, 5 down-left, 7 up-left). */
 NpcBody guardian_body(int navi, int face);
-/* ... and a super boss's (Bass, the Cybeast's beast; docs/BOSSES.md, Super
+/* ... and a super boss's (Bass, the Cybeast's beast; docs/game/bosses/super-bosses.md, Super
  * bosses), with his pose and what he stands in after it */
 SuperBody super_body(int navi, int face);
 /* The eighths that face across the screen */
@@ -97,7 +97,7 @@ enum { GUARDIAN_FACE_RIGHT = 2, GUARDIAN_FACE_LEFT = 6 };
  * of one up or down); a super boss's sprite is wider */
 #define GUARDIAN_STAND       24
 #define GUARDIAN_STAND_SUPER 28
-/* Where MegaMan meets a guardian in his arena (docs/BOSSES.md, the
+/* Where MegaMan meets a guardian in his arena (docs/game/bosses/sequence.md, the
  * sequence): beside him on the screen and at his height, `spread` world
  * units off on both axes (GUARDIAN_STAND), on the side the arena's bridge
  * comes in from (`arena_dir`, the grid direction from the antechamber in,

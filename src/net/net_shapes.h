@@ -1,4 +1,4 @@
-/* The pieces BN6's net areas are built from (docs/LEVEL_DESIGN.md):
+/* The pieces BN6's net areas are built from (docs/world/level-design/):
  * platforms of a few shapes, 1-wide bridges, 3x3 pads on spurs and the
  * stubs of comb boardwalks, carved into the layer being generated. */
 #ifndef NET_SHAPES_H

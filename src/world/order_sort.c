@@ -1,5 +1,5 @@
 /* order_sort.h. The clerk's list at AsterLand holds every chip the Library
- * does, in BN6's ID order, five rows a page (docs/HOME.md, piece 6); BN6's
+ * does, in BN6's ID order, five rows a page (docs/world/home/home-shop.md); BN6's
  * folder editor and the Chip Trader beside him sort theirs by seven keys
  * on START, the Order Service by none (issue #124). Here START on his list
  * steps through those keys in their order, ID, ABCDE, Code, Attack,

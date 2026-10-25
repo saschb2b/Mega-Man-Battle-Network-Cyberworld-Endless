@@ -1,4 +1,4 @@
-/* Two MegaMen a side (epic #167, issue #181; docs/ONLINE_ARENA.md, The
+/* Two MegaMen a side (epic #167, issue #181; docs/online/arena/two-a-side/partners-words.md, The
  * partners' words in BN6's packet): each partner's stream crosses BN6's
  * own link inside his side's GBA's packet, as his lead's pad does. A link
  * battle's packet (BN6_LINK_OUT, eight u16 a frame) leaves two bytes that

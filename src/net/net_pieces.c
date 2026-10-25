@@ -1,5 +1,5 @@
 /* Set pieces: which of BN6's own interactables a layer holds (epic #49,
- * docs/LEVEL_DESIGN.md, Set pieces). Each area repeats the few its
+ * docs/world/level-design/set-pieces.md). Each area repeats the few its
  * originals hold; a layer takes one or two by its place in the act, from
  * the run's seed and the depth alone, so a Net Dealer earlier in the act
  * knows which keys to stock. Where each stands is net_gen.c's. */
@@ -186,7 +186,7 @@ int layer_regup(int depth, int kind) {
  * guardian of navis 1-5 deleted before `depth` gives his) */
 unsigned layer_crosses(int depth) {
 	if (run.cross) return 1u << run.cross;
-	/* (a trip back holds what the run holds by now, docs/HOME.md) */
+	/* (a trip back holds what the run holds by now, docs/world/home/) */
 	if (run.side_kind == LAYER_BACK && run.home_depth) depth = run.home_depth;
 	unsigned held = 0;
 	for (int d = 1; d < depth; ++d)

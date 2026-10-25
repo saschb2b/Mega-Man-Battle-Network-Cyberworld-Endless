@@ -1,6 +1,6 @@
-/* The NetPass's PET text (netpass_text.c; docs/ONLINE.md, The NetPass):
+/* The NetPass's PET text (netpass_text.c; docs/online/netpass.md):
  * the one screen that names which game earns which stamp. Characters
- * speak of stamps alone (docs/VOICE.md); the pass, a PET screen, may name
+ * speak of stamps alone (docs/voice/rules.md); the pass, a PET screen, may name
  * the cartridges. */
 #ifndef CW_NETPASS_TEXT_H
 #define CW_NETPASS_TEXT_H

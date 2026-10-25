@@ -1,4 +1,4 @@
-/* The week's net in the Net Square (square_week.c, docs/ONLINE.md, The
+/* The week's net in the Net Square (square_week.c, docs/online/weekly-net.md, The
  * week's net): a dive's end the game kept (weekly.h) posted as the visit
  * begins; what the greeter Mr.Prog by the Board offers (a new dive, the
  * unfinished one, or nothing while MegaMan is on one or a trade waits to
@@ -12,7 +12,7 @@
 #include "online_types.h"
 #include "square_week_words.h"
 
-/* The greeter's flags for his choice (the Square's own, docs/EMULATION.md:
+/* The greeter's flags for his choice (the Square's own, docs/engine/emulation/:
  * the one left free there): a dive, the new one or the unfinished one as
  * he offered; with the way home's flag beside it, the unfinished one
  * begun again (a pair of the Square's flags, cleared as the chat closes) */

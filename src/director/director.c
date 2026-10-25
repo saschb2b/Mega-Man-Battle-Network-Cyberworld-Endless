@@ -138,7 +138,7 @@ static bool act_on_choices(void) {
 		case OBJ_DUEL:
 			set_encounter(&D.duel_enc, true);
 			/* (its hits, and the netbattle's ProtoMan held to the act's
-			 * band as he spawns: docs/RIVAL.md) */
+			 * band as he spawns: docs/game/rival.md) */
 			emu_battle_watch(D.duel_cap);
 			D.challenge = true;
 			D.duel = true;
@@ -157,7 +157,7 @@ static bool act_on_choices(void) {
 			D.heard_act = D.layer_act;
 			break;
 		case OBJ_BATTLER:
-			/* (his stake paid: BN6's own first round, docs/LEVEL_DESIGN.md) */
+			/* (his stake paid: BN6's own first round, docs/world/level-design/) */
 			battler_begin();
 			return true;
 		case OBJ_NAVI_GATE: {
@@ -181,7 +181,7 @@ static bool act_on_choices(void) {
  * net's, the net rebuilt (the next arrival says so; counted with the next
  * checkpoint, which a CONTINUE cannot undo) and its den the Cybeast's
  * again; a dark layer's special route found, kept for its fork's third way
- * (docs/LIBERATION.md, Special routes) */
+ * (docs/game/liberation/special-routes.md) */
 static void run_left(void) {
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) run.boss_order[BIOME_NEST] = (uint8_t)run_nest_second();
 	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) {
@@ -204,15 +204,15 @@ static bool follow_exit_warp(void) {
 	}
 	if (pending != 1 || emu_read8(BN6_WARP_INDEX) != 1) return false;
 	/* the short net's Nest fallen: the run is won (on threat 10, its first
-	 * guardian's exit leads down to the second's, docs/META.md) */
+	 * guardian's exit leads down to the second's, docs/game/meta/) */
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
 	run_left();
 	if (boss_beaten()) clear_card();
-	/* (an act's last layer: home, docs/HOME.md) */
+	/* (an act's last layer: home, docs/world/home/) */
 	bool home = home_due();
 	const char *beaten = D.act_guardian;
 	/* a side layer's exit leads one area deeper too; a trip back's home
-	 * (docs/HOME.md), the run's own layer made again for it */
+	 * (docs/world/home/), the run's own layer made again for it */
 	bool back = run.side_kind == LAYER_BACK;
 	if (back) run.depth = run.home_depth;
 	else run.depth++;
@@ -248,7 +248,7 @@ static void take_events(void) {
 		switch (ev[i].kind) {
 		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; emu_encounter_started(ev[i].r[0]); darkbn6_battle_begins(); break;
 		/* (a DarkChip's dark power, or its base chip, in a BN6 battle: its
-		 * price after it, docs/META.md) */
+		 * price after it, docs/game/meta/) */
 		case EV_DARK_RAN: case EV_DARK_BASE: darkbn6_event(&ev[i]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
@@ -387,7 +387,7 @@ static void battle_update(void) {
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
 	}
 	/* the duel's time: the results screen's DeleteTime (its hits
-	 * come as events: docs/RIVAL.md) */
+	 * come as events: docs/game/rival.md) */
 	if (D.duel && sub == BN6_SUB_BATTLE) {
 		int t = (int)emu_read32(BN6_BATTLE_TIMER);
 		if (t > D.duel_time) D.duel_time = t;
@@ -480,7 +480,7 @@ static void mail_update(void) {
 
 /* Chaud's verdict and call */
 static void rival_update(void) {
-	/* the rival (docs/RIVAL.md): Chaud's verdict after the duel, his call
+	/* the rival (docs/game/rival.md): Chaud's verdict after the duel, his call
 	 * once the layer's arrival has been said */
 	if (D.duel_verdict_due && on_map() && !cinema_busy() && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
 		talk_start(D.duel_verdict, FACE_CHAUD))

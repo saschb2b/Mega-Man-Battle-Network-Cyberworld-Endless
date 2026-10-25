@@ -1,6 +1,6 @@
 /* The team pick's words (liberation_pick_text.c): the screen's name, its
  * one action, the labels and what the cursor's Navi brings, in the plain
- * style of the game's menus (docs/VOICE.md), apart from the logic that
+ * style of the game's menus (docs/voice/rules.md), apart from the logic that
  * says when. The Navis' and their forms' names are liberation_team.c's,
  * the commands' liberation_words.c's. */
 #ifndef CW_LIBERATION_PICK_TEXT_H

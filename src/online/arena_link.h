@@ -1,7 +1,7 @@
 /* The Arena's link to the other player (issue #120): what a transport
  * carries for a linked battle, and nothing more. Keys go one way per
  * frame, in order, each frame once; the pair's state hashes go now and
- * then, so that two clients that drift apart say so (docs/ONLINE_ARENA.md).
+ * then, so that two clients that drift apart say so (docs/online/arena/).
  *
  * The local link (arena_link_local) stands in for a peer on this machine,
  * its messages held for a set number of ticks; the network's comes later,
@@ -38,7 +38,7 @@ struct ArenaLink {
 	/* another player's keys for `frame` (ARENA_PLAYERS: a partner's, 2 or
 	 * 3; in a 2v2 over the network any seat's but mine and the peer's),
 	 * once they have come, as poll's: NULL where the link carries none (a
-	 * NetBattle of two over the network, docs/ONLINE_ARENA.md, Two MegaMen
+	 * NetBattle of two over the network, docs/online/arena/two-a-side/overview.md, Two MegaMen
 	 * a side) */
 	bool (*poll_player)(ArenaLink *link, unsigned player, uint32_t frame, uint16_t *keys);
 	/* a 2v2's partner's seat (2 or 3: his stream mine, his side's GBA

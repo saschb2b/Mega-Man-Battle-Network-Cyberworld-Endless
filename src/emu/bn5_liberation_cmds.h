@@ -1,5 +1,5 @@
 /* Battle Network 5: Team Colonel (USA): the Liberation board's commands, per
- * Navi (docs/LIBERATION.md, The Navis; docs/ROM_DATA.md, BN5's Liberation
+ * Navi (docs/game/liberation/bn5/navis.md; docs/rom/liberation.md, BN5's Liberation
  * board: the commands). Both versions share the code: Team Colonel's ROM
  * holds Team ProtoMan's commands whole (masks, routines, shapes, texts),
  * played in romlab with a unit's Navi id poked. Split from bn5_liberation.h,

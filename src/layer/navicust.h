@@ -1,4 +1,4 @@
-/* The NaviCust as a run's second build axis (docs/NAVICUST.md): the
+/* The NaviCust as a run's second build axis (docs/game/navicust.md): the
  * programs a run can be offered, by tier and build, the guardian's draft,
  * the ExpMemry milestones, and MegaMan's words for the bugs a layout
  * causes. Programs are BN6's: a program n is given as id n * 4 (EF 1B)
@@ -78,7 +78,7 @@ bool navicust_code_text(const uint8_t raw[10], char out[12]);
  * by side; each turned as the NaviCust's L and R turn it. */
 bool navicust_pack(const NaviShape *shapes, int n, int w, int h);
 /* The colours whose programs turn: a bit per colour 1-6 (bit c - 1), the
- * NaviCust's Spins (key item 0x4F + colour, found in the net: docs/META.md).
+ * NaviCust's Spins (key item 0x4F + colour, found in the net: docs/game/meta/).
  * navicust_pack turns only those; the others lie as their records draw
  * them. All six until set. */
 void navicust_set_spins(unsigned mask);

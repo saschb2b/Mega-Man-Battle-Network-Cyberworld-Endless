@@ -1,5 +1,5 @@
 /* BN5's own pieces of a liberation's board (liberation_pieces.h), each
- * laid out as BN5 lays its OBJs and BG0 (traced in BN5: docs/ROM_DATA.md,
+ * laid out as BN5 lays its OBJs and BG0 (traced in BN5: docs/rom/liberation.md,
  * BN5's Liberation board drawn in BN6), its tiles and colours read from
  * the player's BN5 ROM. Positions are the GBA picture's. */
 #include "liberation_pieces.h"

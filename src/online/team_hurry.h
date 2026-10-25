@@ -1,5 +1,5 @@
 /* Two MegaMen a side: the turn's one limit for all four (the owner's
- * call, docs/ONLINE_ARENA.md, The turn's limit). Once any player of the
+ * call, docs/online/arena/two-a-side/leads-wait.md, The turn's limit). Once any player of the
  * match has pressed OK on a turn, every player still picking has
  * TEAM_TURN_LIMIT frames; at it his picks so far are taken: a partner's
  * by his own client (arena_team_client.c) or, where it has gone quiet,

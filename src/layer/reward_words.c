@@ -1,4 +1,4 @@
-/* The rewards' chats (docs/VOICE.md): a guardian's Guardian Data, its
+/* The rewards' chats (docs/voice/rules.md): a guardian's Guardian Data, its
  * NaviCust draft and its routes, a Navi gate and its SP chip, a vault, an
  * official gate, the first layer's gift. */
 
@@ -341,7 +341,7 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 		FACE_PROG, &first);
 	else ta_pages(t, "HELLO,MEGAMAN!|I'M DR.HIKARI'S DIVE SUPPORT PROGRAM!|SO HERE'S A GIFT!", FACE_PROG, &first);
 	if (g->head_start) {
-		/* the head-start helper (docs/META.md) */
+		/* the head-start helper (docs/game/meta/) */
 		ta_page(t, FACE_PROG, "FIRST,A HEAD START!\nTAKE THESE!", false);
 		ta_give_hp_memory(t, 2);
 		ta_got_hp(t, 2, &first);

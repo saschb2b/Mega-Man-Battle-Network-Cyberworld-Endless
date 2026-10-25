@@ -5,7 +5,7 @@
  * x / 8 + 127. Walls: types 1 NE, 2 SW, 3 SE, 4 NW edges and 5 E, 6 S, 7 N,
  * 8 W outer corners. Triggers: an original warp pad is 3x3 cells, types 9-C
  * at the corners and 0x11 elsewhere, the value its warp index (see
- * docs/ROM_DATA.md); a layer's covers the pad's square whole. */
+ * docs/rom/); a layer's covers the pad's square whole. */
 #include "coords.h"
 
 #include <stdio.h>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """xrecipe.py [--check] [--report] [--ai N ...] [--no-search]: BN5's virus families' recipes, made from the two ROMs
-(issue #82; docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The recipe generator).
+(issue #82; docs/multirom/families.md; docs/devtools/recipe-generator.md).
 
 A family's recipe (src/emu/xvirus_recipe.h) is numbers alone: where its code lies in BN5 and where it goes, which of its
 bytes are data, its calls' and pointers' twins in BN6, the immediates BN6 numbers otherwise, its states and hooks in
@@ -9,10 +9,10 @@ Gregar's (found by their SHA-1s in CYBERWORLD_ROM_DIR or ~/.cache/mmbn-ref/roms)
 reach, walked instruction by instruction (tools/xrecipe_thumb.py, the project's own decoder); every call out paired with
 BN6's twin (tools/xrecipe_pairs.py: the project's pairs in tools/bn5_twins.py first, the symbol map of
 tools/bn6f_match.py where it was made, then a BN6 routine of the same body), each pair's bodies compared and a pair
-whose bodies differ taken only where its audit says it serves (bn5_twins.AUDITS, docs/ROM_DATA.md); the objects it
+whose bodies differ taken only where its audit says it serves (bn5_twins.AUDITS, docs/rom/); the objects it
 spawns BN6 has no twin of moved with it, through the second-level dispatch (src/emu/xvirus_dispatch.h); its sprites,
 effects and sounds by their bytes. Numbers are allocated in install order (FAMILIES: an AI index from 32, six ids from
-0x200, a home, code and art places, sprite numbers, effect ids), as the static model wants them (docs/MULTIROM.md).
+0x200, a home, code and art places, sprite numbers, effect ids), as the static model wants them (docs/multirom/).
 
   python3 tools/xrecipe.py              write src/emu/xvirus_bn5.c: FAMILIES' recipes, whole (no decision open)
   python3 tools/xrecipe.py --check      write nothing: fail where src/emu/xvirus_bn5.c is not what it would write
@@ -55,7 +55,7 @@ FAMILIES = ((14, 'CanGard'), (4, 'Handi'), (2, 'Powie'), (3, 'Bugtank'), (5, 'Do
             (11, 'Lark'), (12, 'BomBoy'), (13, 'Zomon'), (16, 'Drixol'), (17, 'Batty'), (18, 'Skarab'), (20, 'Draggin'), (21, 'Whirly'),
             (22, 'Marina'), (23, 'Flashy'), (24, 'Eleogre'), (25, 'Cactikil'), (26, 'WuNote'), (27, 'Appley'), (28, 'BigBrute'),
             (29, 'TinHawk'), (30, 'Bladia'))
-# BN5's families not moved, and why (the report says so for each): the five BN6 has by name are BN6's own (docs/MULTIROM.md,
+# BN5's families not moved, and why (the report says so for each): the five BN6 has by name are BN6's own (docs/multirom/one-net.md,
 # the finer calls), and these no battle of BN5's names (a scan of every entity list a word of BN5's ROM points at, 386 of
 # them, names no id of AI 31-34: TestVirs's 0x00 is its only id, AI 31 and 32 have none, AI 33's 0xB5-0xC6 and 0xCD-0xFF
 # and Tuby's 0xC7-0xCC appear in none)
@@ -418,7 +418,7 @@ def derive(b5, b6, pairs, ai, slot, alloc, reg):
                 f.decide('pre-step', f'BN5\'s virus dispatcher acts for its ids {lo:#x}-{hi:#x} before its state each frame ({at:08X}), '
                                      f'which no port of the installer\'s does (bn5_twins.PRESTEP)')
     if ai in SHARED:
-        f.notes.insert(0, f'BN6 has this family by name ({SHARED[ai]}): BN5\'s records name BN6\'s (docs/MULTIROM.md, the finer calls); not moved')
+        f.notes.insert(0, f'BN6 has this family by name ({SHARED[ai]}): BN5\'s records name BN6\'s (docs/multirom/one-net.md, the finer calls); not moved')
     return r
 
 
@@ -492,7 +492,7 @@ def dispatcher_cases(b5, at=0x08104550):
 
 COND_LT = {11: 'lo', 3: 'lo'}   # blt, bcc: the check of a low bound
 
-# BN5's families BN6 has by name: BN5's records name BN6's (docs/MULTIROM.md, the finer calls)
+# BN5's families BN6 has by name: BN5's records name BN6's (docs/multirom/one-net.md, the finer calls)
 SHARED = {1: 'Mettaur', 8: 'Trumpy', 10: 'WindBox', 15: 'Catack', 19: 'Champy'}
 
 
@@ -1137,7 +1137,7 @@ def c_recipe(r):
 
 HEADER = '''/* xvirus_bn5.c: BN5's virus families' recipes, written by tools/xrecipe.py from the two ROMs (python3 tools/xrecipe.py;
  * --check says whether this is what it writes). Do not edit: change the generator (or tools/bn5_twins.py, its pairs and
- * their audits) and write it again. Numbers alone (docs/MULTIROM.md, Transplanted families): addresses in BN5 Team
+ * their audits) and write it again. Numbers alone (docs/multirom/families.md): addresses in BN5 Team
  * Colonel (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies from the player's
  * ROM; nothing of either game's. The families here are the generator's, whole (no decision open), in install order
  * (each its AI index, ids, home, code and art places by its slot): the ones installed wherever BN5's ROM is read

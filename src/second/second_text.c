@@ -4,7 +4,7 @@
  * spend as a Cybeast will decrease your EmotionCounter by 1", tired at 0,
  * and "don't press the CybeastButton" then: he would BeastOver), Full
  * Synchro's x2 its battle tutorial's. Each verified in a battle played
- * through tools/play.py (docs/ROM_DATA.md, the second screen's battle). */
+ * through tools/play.py (docs/rom/pet-and-second-screen.md, the second screen's battle). */
 #include "second_text.h"
 
 #include <stdio.h>
@@ -282,7 +282,7 @@ const char *second_accessing(void) { return "ACCESSING"; }
 
 void second_layer_next(int guardian_navi, char *out, size_t n) {
 	/* (a super boss unnamed until met, as MegaMan senses him: docs/
-	 * BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	if (super_boss(guardian_navi) && !guardian_known(guardian_navi))
 		snprintf(out, n, "%s waits at the end", guardian_navi == SUPER_BASS ? "A dark signal" : "Something huge");
 	else if (guardian_navi) snprintf(out, n, "The exit opens once %s is deleted", guardian(guardian_navi)->name);
@@ -326,7 +326,7 @@ void second_trader_lines(int kind, int pack_chips, char *out, size_t n) {
 	else snprintf(out, n, "Takes %d chips from the Pack|Gives a chip new to the Library|The Pack holds %d", kind == TRADER_SPECIAL ? 10 : 3, pack_chips);
 }
 
-/* (the run's own: docs/PROGRESSION.md's 20-HP HPMemory, shop.h's keys) */
+/* (the run's own: docs/game/progression/structure.md's 20-HP HPMemory, shop.h's keys) */
 const char *second_item_does(int id) {
 	switch (id) {
 	case 0x70: return "Max HP +20, kept for the run";

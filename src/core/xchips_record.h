@@ -1,5 +1,5 @@
 /* A registered chip's record in BN6's layout (bn6f ChipData, 0x2C bytes;
- * docs/ROM_DATA.md, The chip registry), made from BN5's record field by
+ * docs/rom/chips-code.md, The chip registry), made from BN5's record field by
  * field, or a placeholder's where BN5's ROM is not read; and the small
  * pieces of what the chips' tables need beside the records (the folder
  * editor's ABC place, the icons' colours, the battle deck with the chips
@@ -41,7 +41,7 @@ typedef struct {
  * effect flags but the Library's, stamina, parameters, lockout, power,
  * gate), BN6's icon element, the twin's family, lock-on and lock-on type
  * (and subfamily, but the row's), out of BN6's Library screen (library
- * number and flags 0: docs/MULTIROM.md, the Library call), its own id its
+ * number and flags 0: docs/multirom/one-net.md, the Library call), its own id its
  * ID sort key, no DarkChipID. A chip whose code moved (XREG_MOVED) takes
  * its moved family and subfamily and BN5's parameters, no lock-on (BN5's
  * code knows none). A chip that sits out for want of its code keeps an

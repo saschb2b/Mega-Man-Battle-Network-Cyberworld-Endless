@@ -1,5 +1,5 @@
 /* online_square.h. The Net Square built into the running game (docs/
- * ONLINE.md): square_plan.c's plan from the server's seed, drawn by the
+ * docs/online/): square_plan.c's plan from the server's seed, drawn by the
  * layers' own map builder in one of BN6's areas' tiles, its signs and Board
  * BN6's own map objects, its warps BN6's gem pads (a teleport within the
  * map, as a layer's pair), its pad home BN6's return pad, its channel
@@ -262,7 +262,7 @@ static bool install_square(uint32_t seed) {
 	fprintf(stderr, "online: square %d NPCs, %d sprites of 0x%X bytes, rise %d\n", npcs.n, npcs.nsprites, (unsigned)npcs.sprite_bytes, rise);
 	if (!mapslot_install(group, number, &npcs, NULL, 0)) return false;
 	/* (the Square's own music, whatever area it stands in: BN6's Navi
-	 * Customizer theme, the owner's pick, docs/ONLINE.md) */
+	 * Customizer theme, the owner's pick, docs/online/) */
 	return mapslot_music(group, number, BN6_SONG_NAVI_CUSTOMIZER);
 }
 
@@ -432,7 +432,7 @@ int online_square_peer_ahead(int x, int y, int face) {
 bool online_square_peer_position(unsigned slot, int *x, int *y, int *z) {
 	if (slot >= SQUARE_PEERS || !actors[slot].visible) return false;
 	/* Read the actual NPC pool, not the network buffer or script. Its
-	 * whole-coordinate fields are already verified in docs/ROM_DATA.md. */
+	 * whole-coordinate fields are already verified in docs/rom/. */
 	for (unsigned i = 0; i < BN6_NPC_COUNT; ++i) {
 		uint32_t at = BN6_NPC_OBJECTS + i * BN6_NPC_SIZE;
 		if (!(emu_read8(at + BN6_NPC_IN_USE) & 1u)) continue;

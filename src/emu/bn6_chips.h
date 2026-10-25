@@ -2,8 +2,8 @@
  * Gregar (USA), part of bn6.h's addresses (it includes this): the words
  * and code that name the chip records, their names and descriptions, the
  * pack's routines and its extension in RAM, the pseudo-chips' test and the
- * battle deck's deal (issue #82; docs/MULTIROM.md, The chip registry;
- * docs/ROM_DATA.md, The chip registry; src/emu/xchips_install.c); a chip
+ * battle deck's deal (issue #82; docs/multirom/chip-registry.md;
+ * docs/rom/chips-code.md, The chip registry; src/emu/xchips_install.c); a chip
  * record's fields; and BN6's sorts of the chips, the folder editor's and the
  * Chip Trader's (issue #124: the Order Service's, src/world/order_sort.c). */
 #ifndef CW_BN6_CHIPS_H
@@ -27,7 +27,7 @@
 
 /* A chip record's fields (RomLayout.chip_data, 0x2C bytes an id, the
  * registry's grown copy past EMU_FREE as the core reads them; bn6f
- * ChipData; docs/ROM_DATA.md, BN6's own DarkChips and The chip registry),
+ * ChipData; docs/rom/chips-code.md, BN6's own DarkChips and The chip registry),
  * as BN6's code reads them and the registry lays out BN5's */
 #define BN6_CHIP_RECORD_SIZE  0x2C
 #define BN6_CHIP_CODES        0x00        /* Codes: four, 0-25 A-Z, 26 *, 0xFF none (the pack counts a chip per code of these) */
@@ -75,7 +75,7 @@
                                              BN6_SPAWNER_NOTHING (0x08010488); BN5's 0x185 the same (family 0x1A, spawner 3 0x0800E190), its dud */
 #define BN6_SPAWNER_NOTHING   3
 
-/* How a chip runs (docs/ROM_DATA.md, The attack families and chip
+/* How a chip runs (docs/rom/chips-code.md, The attack families and chip
  * routines grown): its record's family (BN6_CHIP_FAMILY) is the CurAction
  * its user takes (object_setAttack2), which RunAIAttack (0x0801B9E6) runs
  * from the attack families' table by CurAction - 0x10, unbounded (a byte:
@@ -108,7 +108,7 @@
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
-#define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/EMULATION.md) */
+#define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/engine/emulation/) */
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */
@@ -137,7 +137,7 @@
 #define BN6_NAVI_FOLDER2_TAG  (BN6_NAVI_STATS + 0x58) /* Folder2Tag1 and Tag2: its TagChips, their entries; 0xFF none */
 #define BN6_NAVI_FOLDER2_TAG2 (BN6_NAVI_STATS + 0x59)
 
-/* BN6's blank chip records below its last id, 0x13F (docs/ROM_DATA.md, the
+/* BN6's blank chip records below its last id, 0x13F (docs/rom/chips.md, the
  * chip records and the chip registry): no chip of BN6's, where BN5's chips
  * are installed when its ROM is there. A rule of BN6's alone, so two games
  * agree on it whatever ROMs each has (the Net Square's trades and Arena). */

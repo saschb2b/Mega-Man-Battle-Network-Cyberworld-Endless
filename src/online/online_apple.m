@@ -158,7 +158,7 @@ void online_socket_close(void) {
 /* the worker's rest (online_socket.h): a semaphore made once and kept for
  * the process, posted by the game's thread and by each message's
  * completion; NSURLSessionWebSocketTask lets no TCP option be set
- * (docs/ONLINE_ARENA.md, Quicker on the wire) */
+ * (docs/online/arena/rollback/quicker-on-the-wire.md) */
 static SDL_atomic_t wake_made;
 static SDL_sem *wake;
 

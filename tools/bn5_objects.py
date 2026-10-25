@@ -6,7 +6,7 @@ before any Navi, chip's code, family or Soul), checks this file against both ROM
 this file leaves unfixed; the other tracks' generators read it for the kinds their code spawns and aim their calls into a
 module at its copy (tools/xrecipe.py for the families: WuNote's image; tools/xchiprecipe.py for the chips' code: the muzzle
 flashes; tools/xsoul.py for the Souls': the arm's flash in a Soul, ShadowSoul's sword, ToadSoul's charged shot;
-docs/MULTIROM.md, The engine's objects moved once; docs/ROM_DATA.md)."""
+docs/multirom/navis.md, The engine's objects moved once; docs/rom/)."""
 
 # BN5's image object, the first kind's type 5 (an image an attack shows: a sprite by its kind, the object's +4). BN6's
 # type 5 is another object (its own kinds table at 0x080BA444, 52 kinds, other sprites and numbers), so BN5's type 5 is

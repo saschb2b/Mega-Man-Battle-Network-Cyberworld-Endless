@@ -1,4 +1,4 @@
-/* Another game's battlefields in BN6's numbers (xfields.c; docs/ROM_DATA.md,
+/* Another game's battlefields in BN6's numbers (xfields.c; docs/rom/battle.md,
  * Battlefields; issue #82): a BN5 record names its field by BN5's number,
  * and BN5's fields are not BN6's. BN5 lays them out as BN6 does (12 bytes,
  * a nibble a panel, the panel's type), and numbers its panel types as BN6

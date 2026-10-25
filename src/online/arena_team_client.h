@@ -1,5 +1,5 @@
 /* --dev arena2v2: the partners' own clients, stood in for on this machine
- * (epic #167, docs/ONLINE_ARENA.md, A partner's own Custom screen). Each
+ * (epic #167, docs/online/arena/two-a-side/custom-screen.md). Each
  * partner's client has BN6's own Custom screen on a plain copy of the pair
  * of its own (arena_team_screen.h), made as his side's GBA first opens its
  * Custom screen; while that GBA's screen is open his keys drive it (a

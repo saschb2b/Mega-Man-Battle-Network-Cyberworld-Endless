@@ -1,4 +1,4 @@
-/* A liberation's team (docs/LIBERATION.md, The team): MegaMan and the Navis
+/* A liberation's team (docs/game/liberation/decision.md, The team): MegaMan and the Navis
  * whose BN5 Souls the run holds, each with his own HP (BN5's table), his
  * place on the board, his command and his turn a phase, as BN5's team
  * plays (romlab, mission 2): R passes play to the next Navi yet to act,

@@ -1,7 +1,7 @@
 /* super_lines.h. Bass is BN6's legend, real where everything else in the
  * Endless Net is a copy: few words, cold, "Hmph.", MegaMan by his name,
  * the strong his prey; beaten, a vow. The Cybeast never speaks: it roars,
- * with its own face, while MegaMan, Lan and Dad speak (docs/VOICE.md, the
+ * with its own face, while MegaMan, Lan and Dad speak (docs/voice/rules.md, the
  * cast). Unmarked boxes are the boss's own. */
 #include "super_lines.h"
 
@@ -38,7 +38,7 @@ static const char *beast_meeting(const Rival *r) {
 }
 
 /* (no word on how to fight him before the call: MegaMan never coaches, as
- * a guardian's meeting has none, docs/VOICE.md, What nobody says) */
+ * a guardian's meeting has none, docs/voice/rules.md, What nobody says) */
 const char *super_intro(int navi, int version, const Rival *r) {
 	static char buf[640];
 	snprintf(buf, sizeof buf, "%s|@L Battle routine,set!|@M Execute!!", navi == SUPER_BASS ? bass_meeting(version, r) : beast_meeting(r));
@@ -92,7 +92,7 @@ void super_card(int navi, int version, int depth, const char **top, const char *
 }
 
 /* (no word on the battle data it holds: the tip is simply there next time,
- * and MegaMan never explains it, docs/VOICE.md, What nobody says) */
+ * and MegaMan never explains it, docs/voice/rules.md, What nobody says) */
 const char *super_reward_words(int navi, int version) {
 	return navi == SUPER_CYBEAST ? "@M The Cybeast's data,Lan!|@M There's a GigaChip in it!"
 		: version == SUPER_BASS_BX ? "@M Some of the beast's power...|@M He left it behind,Lan!"

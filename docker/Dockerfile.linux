@@ -16,6 +16,6 @@ RUN sh /tmp/sdl2.sh
 # appimagetool and the AppImage runtime
 COPY appimage.sh /tmp/appimage.sh
 RUN sh /tmp/appimage.sh
-# The embedded GBA core (docs/EMULATION.md), for this machine only
+# The embedded GBA core (docs/engine/emulation/), for this machine only
 COPY mgba.sh /tmp/mgba.sh
 RUN sh /tmp/mgba.sh host

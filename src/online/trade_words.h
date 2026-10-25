@@ -1,5 +1,5 @@
-/* What is said at Trade Central (trade_words.c, docs/ONLINE.md,
- * docs/VOICE.md): its clerk, a Mr.Prog in capitals, and MegaMan. Chips
+/* What is said at Trade Central (trade_words.c, docs/online/,
+ * docs/voice/rules.md): its clerk, a Mr.Prog in capitals, and MegaMan. Chips
  * are named as BN6 names them, their code after ("Cannon A"). */
 #ifndef CW_TRADE_WORDS_H
 #define CW_TRADE_WORDS_H
@@ -36,7 +36,7 @@ const char *trade_off(void);
 /* At home, the swap given to the run. */
 const char *trade_settled(const char *gave, const char *got);
 
-/* The board (docs/ONLINE.md, Trade Central: the board). A want's words,
+/* The board (docs/online/trade-central.md: the board). A want's words,
  * "a Fire chip" (WANT_* of online_board.h, 0 "anything"). */
 const char *trade_want(int want);
 extern const char *const trade_want_options[10];

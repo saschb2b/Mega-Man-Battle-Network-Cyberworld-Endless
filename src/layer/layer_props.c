@@ -1,4 +1,4 @@
-/* A layer's sprite props as BN6's own map objects (docs/LEVEL_DESIGN.md,
+/* A layer's sprite props as BN6's own map objects (docs/world/level-design/props.md,
  * Props), and the other objects of the map's object list: another game's
  * prop, Rush and his bones, the obstacles. */
 #include "layer_props.h"
@@ -15,7 +15,7 @@
 #include "rush.h"
 #include "xnavi.h"
 
-/* The sprite props' map objects (docs/LEVEL_DESIGN.md, Props): the
+/* The sprite props' map objects (docs/world/level-design/props.md): the
  * originals' objects by their OverworldMapObjects ids, each at its panel's
  * spot +(14, 18) from the corner, as the originals set theirs, a set
  * piece's pieces where the original has them. */

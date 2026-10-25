@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's that BN6's code plays (issue #82's C1, judged by its C2): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of WideSht3 S in both games, BN5's chip 11 by BN5's own code and the registry's 206 by BN6's (WideSht's family 0x30) under BN5's record, the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's is the chip's (docs/MULTIROM.md, The chip registry).",
+ "about": "A chip of BN5's that BN6's code plays (issue #82's C1, judged by its C2): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of WideSht3 S in both games, BN5's chip 11 by BN5's own code and the registry's 206 by BN6's (WideSht's family 0x30) under BN5's record, the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's is the chip's (docs/multirom/chip-registry.md).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",

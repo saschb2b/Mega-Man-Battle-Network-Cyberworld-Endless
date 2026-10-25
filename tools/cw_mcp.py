@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The project's MCP server for agents (docs/DEVTOOLS.md, Agents' tools):
+"""The project's MCP server for agents (docs/devtools/agents-tools.md):
 tools/cw.py's shot, play and build as tools, each answering in one call
 with a few lines of text and the picture inline. It keeps no state of its
 own (the games are tools/play.py's folders in .build/play, the other
@@ -27,7 +27,7 @@ COMMANDS = ('play.py\'s, apart by ";": press BTN [N] (N frames, 6; then 6 let go
             'mash BTN N (a press every 10 frames), shot (a picture now), second (the second screen); '
             'BTN A B L R START SELECT UP DOWN LEFT RIGHT, or several: UP+RIGHT; 60 frames a second. '
             'Dev steps: place X Y FACING, flags FROM TO 1|0, battle, foes 200@52/01@43, chip ID CODE [N], '
-            'status KIND [FRAMES], xrecord ADDR, sig (docs/DEVTOOLS.md)')
+            'status KIND [FRAMES], xrecord ADDR, sig (docs/devtools/)')
 START = ('Where the game starts: a route, the game\'s options, or both ("jukebox --seed 4", '
          '"--scene emu --seed 7 --net-biome 3"); VAR=VALUE first sets an environment variable '
          '("CYBERWORLD_AUTOPILOT=1 layer"). Routes: ' + ', '.join(cw_routes.ROUTES))

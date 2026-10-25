@@ -1,0 +1,8 @@
+# Guardians and super bosses
+
+* [Guardians and super bosses](overview.md) - Guardian Navis and super bosses: how a guardian is met, fought and left behind from approach to next area, staged after Hades with BN6's own scripts and `src/director/cinema.c`, plus Bass and the Cybeast.
+* [BN5's Navis](bn5-navis.md) - BN5's six Soul Navis guarding the areas BN5 dresses, fought in BN6's engine since issue #82: where and how often, version and HP band, Guardian Data with his Soul and Navi chip, and BN5's Darkloids.
+* [What Hades does, and what was taken](hades.md) - What was taken from Hades' boss staging: safe antechamber, locked arena, the music's drop, intro lines by history, title card, log-out, Guardian Data, area-clear card, `rivals.sav`; changing arenas and extra phases left out.
+* [Guardians](guardians.md) - Guardian Navis' bodies and indexes (`guardian_body`): Gregar's sprites and mugshots, Falzar's Navis in battle sprites with `portrait.c` faces, BN5's copied in, navi indexes 1-29, and how an act's HP band picks the guardian.
+* [Super bosses](super-bosses.md) - Super bosses Bass and the Cybeast (issue #100): the Cybeast in every endless Net's Nest, Bass in the Secret Area once cleared, his form by record, their foreshadowing, grander staging (`src/core/super_boss.c`, `boss_grand.c`) and Giga rewards.
+* [The sequence (src/director/boss.c)](sequence.md) - The guardian fight's states in `src/director/boss.c` (enter, title card, talk, battle, last word, log-out, Guardian Data, open exit), its event flags, BN6's no-song 0x63 for silence, and MegaMan stepping up beside the guardian (`guardian_stand`).

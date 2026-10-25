@@ -1,4 +1,4 @@
-/* The PET's Save as the run's, and its Options (docs/PET.md). */
+/* The PET's Save as the run's, and its Options (docs/game/pet.md). */
 #include "pet.h"
 
 #include <stdio.h>

@@ -1,7 +1,7 @@
 /* MP2K's notes (mp2k_state.h): a note given a channel by priority (ply_note),
  * a tie ended (ply_endtie), a track's and a channel's volumes and pitch
  * (TrkVolPitSet, ChnVolSetAsm, MidiKeyToFreq), as BN6's code does them
- * (bn6f asm/libs.s; docs/ROM_DATA.md, BN6's sound engine). */
+ * (bn6f asm/libs.s; docs/rom/sound.md, BN6's sound engine). */
 #include "mp2k_state.h"
 
 #include <string.h>

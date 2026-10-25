@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The itch.io page kept in step with the releases (docs/ITCH.md): a
+"""The itch.io page kept in step with the releases (docs/project/itch.md): a
 release's own files from GitHub, one butler channel each, the browser
 player made into the zip itch plays in its page, each release's devlog
 post, and the record of what the page holds.
@@ -21,7 +21,7 @@ must be logged in as the page's owner first (`butler login`), whose key
 stays in butler's own file. A new channel's first push makes its upload on
 the page; --hidden keeps it off the page until it is checked there. itch
 has no API for posts or the page's text: an agent applies them in itch's
-editor (docs/ITCH.md) and records them here, which lint holds it to.
+editor (docs/project/itch.md) and records them here, which lint holds it to.
 """
 import argparse
 import json

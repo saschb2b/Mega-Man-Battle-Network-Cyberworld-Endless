@@ -38,7 +38,7 @@ static void add(int biome, uint32_t rec) {
 		if (R.data[a] == 0x00) f->player = R.data[a + 1];
 		/* the field's objects: Mystery Data (0x2_), rocks (0x3_), rock and
 		 * ice cubes (0x8_), guardian statues (0x9_), metal cubes (0xA_)
-		 * (bn6f off_80073A0; docs/ROM_DATA.md) */
+		 * (bn6f off_80073A0; docs/rom/) */
 		int type = R.data[a] >> 4;
 		if ((type == 2 || type == 3 || type == 8 || type == 9 || type == 0xA) && f->nobj < FORMATION_MAX_OBJS) {
 			f->obj[f->nobj].kind = R.data[a];

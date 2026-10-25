@@ -1,4 +1,4 @@
-/* The PET's Save as the run's (docs/PET.md): A on it, disabled in a run,
+/* The PET's Save as the run's (docs/game/pet.md): A on it, disabled in a run,
  * closes the PET and saves the run where MegaMan stands. Comm is the
  * game's Options (pet_options.h); the dive's report and records are
  * Dad's mail (pet_text.h). The KeyItem screen's NetPass and Jukebox open

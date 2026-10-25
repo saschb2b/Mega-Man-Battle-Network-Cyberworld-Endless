@@ -1,4 +1,4 @@
-/* DarkChips on the run (docs/META.md): the flame of darkness on each act's
+/* DarkChips on the run (docs/game/meta/): the flame of darkness on each act's
  * middle layer, BN5's or BN6's own, the chip taken, its price in max HP
  * after a battle a dark power ran in, either net's, and the chips in the
  * Pack. */
@@ -42,7 +42,7 @@ static bool dark_kind_plays(int k) {
 	return id && (k != DARK_PLUS_KIND || darkbn6_bn5_code(id)) && dark_bn5_plays();
 }
 
-/* A flame holding kind `k`, one BN6's battles play by BN6's rule (docs/META.md,
+/* A flame holding kind `k`, one BN6's battles play by BN6's rule (docs/game/meta/bn6-darkchips.md,
  * BN6's own DarkChips): its words naming what its dark power does, the
  * BugFrag it burns and its base chip, from the ROM; `flame` its list-7
  * sprite (BN6's blue flame turned purple, or BN5's on its acts). */
@@ -64,7 +64,7 @@ static void dark6_flame_setup(int k, int flame) {
 	if (emu_debug_on()) fprintf(stderr, "dark: BN6's flame of darkness with %s (%s without a BugFrag), list 7 %d\n", chip, base, layer_objs_dark_flame);
 }
 
-/* A flame of darkness on the middle layer of each act (docs/META.md,
+/* A flame of darkness on the middle layer of each act (docs/game/meta/darkchips.md,
  * DarkChips): a DarkChip the run lacks, from the run's seed and the act, in
  * its last bystander's place (layer_objs_dark_flame): BN5's flame on the
  * acts its areas dress, where its DarkChips play, offering its kinds (BN6's
@@ -118,7 +118,7 @@ void dark_flame_watch(void) {
 
 /* A battle a DarkChip's dark power ran in, either net's chip: one
  * HPMemory of max HP, for the rest of the run (the owner's price,
- * docs/META.md), from the base the game counts HPMemory into, so the
+ * docs/game/meta/), from the base the game counts HPMemory into, so the
  * NaviCust's next RUN keeps it; MegaMan says so, the whole of it the first
  * time in a session (dark_price_told), and after a profile's first such
  * battle of BN6's own (`bn6`) what BN6's darkness took besides: the
@@ -141,7 +141,7 @@ void dark_price(bool bn6) {
 	dark_price_told = true;
 }
 
-/* After a battle (docs/META.md, DarkChips): where a DarkChip's dark power
+/* After a battle (docs/game/meta/darkchips.md): where a DarkChip's dark power
  * ran, either net's (darkbn6.c's hook on every chip MegaMan runs: BN6's
  * where a BugFrag was paid, BN5's by its rule; one given up for a Chaos
  * Unison never runs there), its price, once a battle; else, where one of
@@ -173,7 +173,7 @@ static int chip_held(int id) {
 	return n;
 }
 
-/* The chips of the run's DarkChips (docs/META.md, DarkChips): one a flame
+/* The chips of the run's DarkChips (docs/game/meta/darkchips.md): one a flame
  * gave, a dev run's, or one a run held from before its kind played in
  * BN6's battles, given to the Pack where neither it nor the folder holds
  * it; once on the map, with no chat open. A kind that sits out of BN6's

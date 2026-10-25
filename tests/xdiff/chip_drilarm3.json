@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX at (4,2), free (not held: a flinching hit ends a paralysis in BN5's hit pass, not in BN6's while its target is paralysed, 0x08017D18 / 0x0801B08E: the hold would be the difference), MegaMan with a folder of DrilArm3 I in both games, BN5's chip 74 by BN5's own code and the registry's 210 by the same code moved (BN5's family 0x4F as BN6's 0x9F), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX at (4,2), free (not held: a flinching hit ends a paralysis in BN5's hit pass, not in BN6's while its target is paralysed, 0x08017D18 / 0x0801B08E: the hold would be the difference), MegaMan with a folder of DrilArm3 I in both games, BN5's chip 74 by BN5's own code and the registry's 210 by the same code moved (BN5's family 0x4F as BN6's 0x9F), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/multirom/chips-code.md).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@42",

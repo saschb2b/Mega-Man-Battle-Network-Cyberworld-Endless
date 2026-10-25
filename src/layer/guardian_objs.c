@@ -1,4 +1,4 @@
-/* A guardian's part of a layer (docs/BOSSES.md): its lines and music in the
+/* A guardian's part of a layer (docs/game/bosses/): its lines and music in the
  * layer's text archive, then its actors once the archive has an address. */
 #include "guardian_objs.h"
 
@@ -29,7 +29,7 @@
  * played before, stopped nothing (BN6_MUSIC_STATUS read each frame) */
 #define SONG_STOP         0x63
 #define MD_ANIM_GUARDIAN  0     /* the Mystery Data sprite's crystal, spinning (its animation 1 is one still frame: the owner saw it static) */
-/* a super boss's sounds, BN6's own scenes' (docs/BOSSES.md, Super bosses):
+/* a super boss's sounds, BN6's own scenes' (docs/game/bosses/super-bosses.md):
  * the rumble and the roar, the white's, Bass's going; and the theme's fade
  * as those scenes begin, in sixteen-frame steps */
 #define SOUND_RUMBLE      0xE3
@@ -58,7 +58,7 @@ static const Guardian *guardian_faced(int navi) {
 }
 
 /* The chip his Guardian Data gives: his Navi chip at the version fought,
- * BN5's his own registered (V1, or SP from the fourth act: docs/BOSSES.md,
+ * BN5's his own registered (V1, or SP from the fourth act: docs/game/bosses/bn5-navis.md,
  * BN5's Navis); its code into *code, 0 none */
 static int guardian_chip(const GuardianStage *g, int *code) {
 	*code = 26;
@@ -81,12 +81,12 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 
 /* What his Guardian Data says of the power it gives: a Cross's words
  * (powers.c), or BN5's guardian's Soul, for every battle of the run
- * (docs/META.md, Souls) */
+ * (docs/game/meta/souls.md) */
 static const char *reward_power(int navi) {
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 
-/* Where MegaMan meets guardian `g` (docs/BOSSES.md, the sequence): in his
+/* Where MegaMan meets guardian `g` (docs/game/bosses/sequence.md): in his
  * arena beside him (guardian_stand), a super boss's wider sprite further
  * off, the guardian turned to him; where the layer has no arena, or one
  * too small, MegaMan walks straight at him and the guardian looks back
@@ -111,7 +111,7 @@ static const char *data_says(const GuardianStage *g) {
 	return reward_power(g->navi);
 }
 
-/* A super boss's staging (docs/BOSSES.md, Super bosses; boss_grand.c):
+/* A super boss's staging (docs/game/bosses/super-bosses.md; boss_grand.c):
  * the theme's fade, BN6's rumble, the white's sound, Bass's going; -1 for
  * a guardian */
 static void grand_scripts(TextArchive *text, GuardianStage *g) {
@@ -122,7 +122,7 @@ static void grand_scripts(TextArchive *text, GuardianStage *g) {
 	g->depart = grand ? ta_sound(text, SOUND_DEPART) : -1;
 }
 
-/* The NaviCust's draft after a normal layer's guardian (docs/NAVICUST.md):
+/* The NaviCust's draft after a normal layer's guardian (docs/game/navicust.md):
  * an ExpMemry at the second and fourth acts' guardians, and three programs,
  * or none for BugFrags. */
 static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
@@ -135,7 +135,7 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 	while (have < (int)sizeof run.programs && run.programs[have]) ++have;
 	navicust_board((run.depth >= 6) + (run.depth >= 12), &w, &h);
 	int n = navicust_draft_fitting(run.depth, pick, run.programs, have, w, h);
-	if (run.threat >= 8 && n > 2) n = 2;   /* (threat 8, docs/META.md) */
+	if (run.threat >= 8 && n > 2) n = 2;   /* (threat 8, docs/game/meta/) */
 	if (emu_debug_on()) {
 		fprintf(stderr, "draft: a %dx%d board beside", w, h);
 		for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
@@ -191,7 +191,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
 		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);
-	g->prelude = ta_music(text, super_boss(g->navi) ? GUARDIAN_PRELUDE : guardian_prelude_song);   /* (a super boss's staging BN6's: docs/BOSSES.md) */
+	g->prelude = ta_music(text, super_boss(g->navi) ? GUARDIAN_PRELUDE : guardian_prelude_song);   /* (a super boss's staging BN6's: docs/game/bosses/) */
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
 	grand_scripts(text, g);
@@ -200,7 +200,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	flag_clear(LAYER_SUPER_POSE_FLAG);
 }
 
-/* A super boss's actors (docs/BOSSES.md, Super bosses): Bass's dormant
+/* A super boss's actors (docs/game/bosses/super-bosses.md): Bass's dormant
  * stone where he stands, then himself, hidden until the white; the
  * Cybeast's beast; and the data either leaves */
 static void super_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {

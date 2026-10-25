@@ -1,7 +1,7 @@
 /* Battle Network 5: Team Colonel (USA): what it has to show a character's
  * mood where BN6 has the like or lacks it, beside bn5.h's addresses (it
  * includes this; bn6_expression.h has BN6's). Its sprite lists are found as
- * BN6's are (docs/ROM_DATA.md, Another game's Navis); read as data only. */
+ * BN6's are (docs/rom/bn5-world.md, Another game's Navis); read as data only. */
 #ifndef CW_BN5_EXPRESSION_H
 #define CW_BN5_EXPRESSION_H
 

@@ -30,7 +30,7 @@ uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gon
  * caller writes it between frames: a gate's still and swirling looks). */
 uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at);
 /* ... and standing at world (x, y, z), as npc_mark's: a dark layer's
- * units, their animations the board's (docs/LIBERATION.md) */
+ * units, their animations the board's (docs/game/liberation/) */
 uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32_t *anim_at);
 
 /* A standing NPC that talks with `script` of the text archive at `archive`,

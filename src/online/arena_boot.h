@@ -1,4 +1,4 @@
-/* The Arena's way in (issue #120, docs/ONLINE_ARENA.md): from the ROM to
+/* The Arena's way in (issue #120, docs/online/arena/): from the ROM to
  * both cores at a Practice NetBattle's Custom screen, with no state kept
  * anywhere. One core boots as the game's own boot does (src/emu/boot.c:
  * NEW GAME, then the game's warp into Seaside Area 1); each player's
@@ -44,7 +44,7 @@ double arena_boot_frame_ms(const ArenaBoot *boot, bool worst);
 /* the pair, once READY: the caller's from then on */
 ArenaPair *arena_boot_take(ArenaBoot *boot);
 
-/* The bout's seed, before the way in runs (docs/ONLINE_ARENA.md, A
+/* The bout's seed, before the way in runs (docs/online/arena/from-square/rematch-in-a-second.md, A
  * rematch in a second): BN6's two random words written on both GBAs as
  * Practice's last confirm is pressed, before the battle keeps the first
  * and shuffles the folders from the second, so that each bout's hands and

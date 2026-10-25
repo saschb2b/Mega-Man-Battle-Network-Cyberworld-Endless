@@ -1,7 +1,7 @@
 /* BN5's music: what starts its songs, and where it starts the ones runs
- * play (docs/ROM_DATA.md, Where BN5 plays its songs; docs/SOURCES.md, The
+ * play (docs/rom/bn5-world.md, Where BN5 plays its songs; docs/research/sources.md, The
  * Jukebox's songs). Its code is BN6's twin; read for the Jukebox's names and
- * the cues runs take from BN5 (docs/MULTIROM.md, BN5's music in a run),
+ * the cues runs take from BN5 (docs/multirom/music.md),
  * none of it run. */
 #ifndef CW_BN5_MUSIC_H
 #define CW_BN5_MUSIC_H

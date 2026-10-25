@@ -29,7 +29,7 @@ static int16_t cost[MAP_H][MAP_W];
 
 /* (CYBERWORLD_AUTOPILOT_ROUTE, a test's: the sealed region's route first,
  * its key while its barrier stands, then the route, as the board's own
- * cost map to a target where the Darkloid would stand; docs/LIBERATION.md,
+ * cost map to a target where the Darkloid would stand; docs/game/liberation/special-routes.md,
  * Special routes) */
 static bool route_target(void) {
 	static int want = -1;

@@ -1,4 +1,4 @@
-/* A dark layer's board in BN5's own look (liberation.h; docs/LIBERATION.md,
+/* A dark layer's board in BN5's own look (liberation.h; docs/game/liberation/bn5/look-and-motion.md,
  * How the board looks and moves). Where the layer is drawn in BN5's
  * Liberation map (lib_layer_tiles: its floor learned from map 0x86:00, its
  * tile set and colours copied whole, so BN5's tile numbers and palette
@@ -75,7 +75,7 @@ static uint16_t rom16(uint32_t a) {
 bool lib_look_on(void) { return K.on && LB.on; }
 
 /* ---- each mission's own look ----
- * BN5's nine missions stand on its net areas' maps (docs/LIBERATION.md,
+ * BN5's nine missions stand on its net areas' maps (docs/game/liberation/bn5/overview.md,
  * The nine missions): ACDC 3, Oran 3, SciLab, End 2, End 5, the Undernet,
  * Nebula 1, 3 and 5. A BN6 area takes the missions of BN5's area that
  * dresses it in a run (rom.c's `like`: ACDC Area Central, Oran Area Green,
@@ -274,7 +274,7 @@ void lib_look_freed(int x, int y) {
 
 /* The L view's reach, as it opens: every panel where the units would
  * strike a Navi standing there in their next phase, the telegraph the
- * planner reads (docs/LIBERATION.md, The quality bar, 4); BN5's L view
+ * planner reads (docs/game/liberation/quality-bar.md, 4); BN5's L view
  * shows none, so it takes the red BN5 lights a strike's reach in */
 static void view_reach(void) {
 	bool view = D.l_held && LB.step == LIB_STEP_MOVE;

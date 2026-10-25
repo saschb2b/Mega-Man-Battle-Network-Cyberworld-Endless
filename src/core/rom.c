@@ -184,7 +184,7 @@ void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
 }
 
 /* A code of BN5 Team Colonel's text as BN6's code of the same glyph
- * (docs/ROM_DATA.md, BN5's text: both fonts compared glyph for glyph):
+ * (docs/rom/bn5-world.md, BN5's text: both fonts compared glyph for glyph):
  * the same to 0x3F (space, digits, letters, *), then five on, as BN6 put
  * its version marks at 0x40-0x44 before the rest, three on past BN5's own
  * marks; XTEXT_DS for its DS mark, -1 for a glyph BN6's font lacks (its
@@ -317,7 +317,7 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 			snprintf(R.path, sizeof R.path, "%s", path);
 #if !defined(__3DS__)
 			/* (other games' ROMs beside it lend a run their areas,
-			 * docs/MULTIROM.md: the 3DS's own start reads them where
+			 * docs/multirom/: the 3DS's own start reads them where
 			 * its heap has room, start_3ds.c; a browser holds the files
 			 * chosen on its page, BN5's beside BN6's in its storage) */
 			xrom_find_beside();
@@ -332,9 +332,9 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 
 bool rom_find_close;
 
-/* ---- Extra ROMs (docs/MULTIROM.md) ---- */
+/* ---- Extra ROMs (docs/multirom/) ---- */
 
-/* Battle Network 5's net areas (docs/MULTIROM.md): their maps' descriptors
+/* Battle Network 5's net areas (docs/multirom/): their maps' descriptors
  * lie one after another from group 0x90's (0x90:0-1 ACDC Area 1-2, then the
  * next groups' as 0x90:2 on), named as BN5's own map labels name them.
  * Each takes over a map whose group keeps the descriptor's palette: the
@@ -342,9 +342,9 @@ bool rom_find_close;
  * Their battles are BN5's own maps' by its game's numbers (0x91 Oran Area,
  * 0x92 SciLab, 0x93 End Area, 0x94 the Undernet and Nebula Area, 0x86 the
  * rest of each), an act's layers through the area's maps in BN5's order
- * (docs/ROM_DATA.md, BN5 guest battles), fought in BN6's engine (issue
+ * (docs/rom/bn5-battles.md, BN5 guest battles), fought in BN6's engine (issue
  * #82). Their guardians may be BN5's own Navis where its net maps' records
- * have them roam (xguard: docs/BOSSES.md, BN5's Navis); Nebula Area's and
+ * have them roam (xguard: docs/game/bosses/bn5-navis.md); Nebula Area's and
  * the Undernet's acts draw from both nets' Navis by band (run.h). */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
@@ -367,10 +367,10 @@ static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 11, 0x8000, 0x8000, false, 0x14, 0, 0, 0, { { 0x90, 12 } }, .apart = NET_APART_PLATFORMS, .looks = 1u << LOOK_STATUE | 1u << LOOK_BRAZIER, .emblem = 0x7D37,
 		.recolour = 0x21, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 5,
 		.name = "Undernet", .short_name = "Undernet", .motto = "The old depths, still burning", .xsong = 0x14, .xnavi = 60, .xbg = 24,
-		.xbattles = { { 0x94, 0 }, { 0x94, 1 }, { 0x86, 5 } }, .xguard = { BN5_NAVI_COLONEL } },   /* Undernet 2 and 3: mauve stone plates with a radial seam and lava at their corners, on cobbled paths, told by shape; their raised courts' pale stone and purple slime in the plates' shades (bank 2 as bank 1: recolour); its plates' purple cross its emblem; BN6's statue and braziers, which its number doors count (docs/LEVEL_DESIGN.md) */
+		.xbattles = { { 0x94, 0 }, { 0x94, 1 }, { 0x86, 5 } }, .xguard = { BN5_NAVI_COLONEL } },   /* Undernet 2 and 3: mauve stone plates with a radial seam and lava at their corners, on cobbled paths, told by shape; their raised courts' pale stone and purple slime in the plates' shades (bank 2 as bank 1: recolour); its plates' purple cross its emblem; BN6's statue and braziers, which its number doors count (docs/world/level-design/) */
 	/* (the Liberation Missions' nine maps, group 0x86, mission n's 0x86:n-1: a
 	 * dark layer's board drawn in its mission's framed panels, backdrop and
-	 * colours, BN5's own panel looks over them, docs/LIBERATION.md, Each
+	 * colours, BN5's own panel looks over them, docs/game/liberation/building/mission-look.md, Each
 	 * mission's own look; never a run's dressing, its battles BN6's) */
 #define LIB_MAP(n) { 0x86, n, 0xC000, 0x8000, false, 0x13, 0, 0, 0, { { 0 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0, \
 		.name = "Dark area", .short_name = "Dark area", .motto = "", .xsong = 0x13, .xnavi = 60, .held = true }
@@ -379,7 +379,7 @@ static const NetAreaDef bn5_areas[] = {
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {
-	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
+	/* (tables found by their structure beside BN6's own, docs/rom/) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
 		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5", 0x45, 0x1C },

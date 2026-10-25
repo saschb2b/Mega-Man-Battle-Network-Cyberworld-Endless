@@ -1,5 +1,5 @@
 /* BN5's chips' code as units moved into BN6's battle engine (issue #82's
- * C3; docs/MULTIROM.md, The chips' code): a unit is one attack family of
+ * C3; docs/multirom/chips-code.md): a unit is one attack family of
  * BN5's (the routine a chip's CurAction runs), or one support or Navi
  * routine (the routine BN6's support family, or its Navi object, runs by a
  * chip's subfamily), with every routine and object it reaches that BN6 has

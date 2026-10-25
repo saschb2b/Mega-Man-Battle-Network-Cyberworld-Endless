@@ -1,4 +1,4 @@
-/* Another Battle Network game's songs in BN6 (docs/MULTIROM.md): a song's
+/* Another Battle Network game's songs in BN6 (docs/multirom/): a song's
  * MP2K data copied from that game's ROM into BN6's in-memory free space,
  * its pointers moved, and entered in one of BN6's empty song slots, where
  * BN6's own sound engine plays it as one of its own. */
@@ -19,7 +19,7 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
 
 /* Song `song` of extra ROM `xrom` (XRomId) in BN6: the BN6 song id that
  * plays it, or `fallback` where it cannot be. The first call copies in
- * every song the other games' areas play (docs/MULTIROM.md), in their
+ * every song the other games' areas play (docs/multirom/), in their
  * order, so each has the same place in every session; again where the
  * core's ROM copy was made anew. */
 int xsong_install(int xrom, int song, int fallback);

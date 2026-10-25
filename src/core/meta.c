@@ -1,4 +1,4 @@
-/* The meta layer (meta.h, docs/META.md). */
+/* The meta layer (meta.h, docs/game/meta/). */
 #include "meta.h"
 
 #include <stdarg.h>
@@ -40,7 +40,7 @@ static bool earned(int folder) {
 
 const FolderInfo *meta_folder(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
 
-/* The folders' chips by BN6's record numbers (docs/ROM_DATA.md, chip
+/* The folders' chips by BN6's record numbers (docs/rom/chips.md, chip
  * records): no more than five of a chip, as the game's folders hold; codes
  * gathered so a hand can be picked together. */
 #define C(id, code) (uint16_t)((id) | (((code) == '*' ? 26 : (code) - 'A') << 9))
@@ -114,7 +114,7 @@ const char *meta_threat_rule(int rung) {
 const HelperInfo *meta_helper(int h) {
 	/* (All *: every chip in *, the wildcard, so a hand takes any chips
 	 * together and a Program Advance only its chips in their order,
-	 * docs/META.md; issue #18, a player put off by hunting codes.
+	 * docs/game/meta/; issue #18, a player put off by hunting codes.
 	 * BeastOut: BN6's own, from the first battle, once the endless Nest
 	 * has fallen; issue #99) */
 	static const HelperInfo helpers[HELPERS] = {
@@ -191,7 +191,7 @@ int meta_library_count(int cls) {
 
 bool meta_dark_way_open(void) { return (profile.marks & MARK_SECRET) != 0; }
 
-/* ---- the Spins: one a run, found in the net (docs/META.md) ---- */
+/* ---- the Spins: one a run, found in the net (docs/game/meta/) ---- */
 
 unsigned meta_spins(void) { return profile.spins & 0x3Fu; }
 

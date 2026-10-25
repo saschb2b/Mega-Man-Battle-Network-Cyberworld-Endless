@@ -1,4 +1,4 @@
-/* MegaMan on DarkChips (docs/META.md, docs/VOICE.md). */
+/* MegaMan on DarkChips (docs/game/meta/, docs/voice/rules.md). */
 #include "dark_words.h"
 
 #include <stdio.h>

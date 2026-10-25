@@ -1,4 +1,4 @@
-"""A release's devlog post on the itch.io page (docs/ITCH.md, Each release):
+"""A release's devlog post on the itch.io page (docs/project/itch.md, Each release):
 its title, post type and HTML from the same notes the site's versions page
 renders (tools/site_versions.py: docs/releases/vX.Y.Z.md, else the
 CHANGELOG's section), for itch's post editor.

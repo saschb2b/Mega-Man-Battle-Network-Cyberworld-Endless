@@ -203,7 +203,7 @@ static const char *row_note(char *buf, size_t n, char shut[][SHUT_MAX], int *nsh
 
 /* KeyItem's information box: its label, its white page, the note in the
  * chat font's ink and what is shut under it, dim, each where it fits
- * whole: BN6's box says its piece in three lines at most (docs/UI.md).
+ * whole: BN6's box says its piece in three lines at most (docs/engine/ui.md).
  * (The chat font is wide: "Storm: delete an Aqua guardian" takes two, so
  * Blade's two lines of style leave it to Standard's note, where the
  * folders still shut are told in their order) */

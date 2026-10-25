@@ -15,7 +15,7 @@
 #define LAYER_REWARD_TAKEN_FLAG  0x144B   /* ... and was taken */
 #define LAYER_EXIT_OPEN_FLAG     0x144C   /* the exit pad shows */
 #define LAYER_DRAFT_FIT_FLAG     0x1467   /* (+k) the draft's k-th program fits the board's free space as it stands (the director keeps them) */
-#define LAYER_SUPER_SEAL_FLAG    0x1452   /* a super boss's staging (docs/BOSSES.md): Bass's stone shakes */
+#define LAYER_SUPER_SEAL_FLAG    0x1452   /* a super boss's staging (docs/game/bosses/): Bass's stone shakes */
 #define LAYER_SUPER_POSE_FLAG    0x1454   /* ... and he strikes his pose, out of the white */
 
 typedef struct {
@@ -28,7 +28,7 @@ typedef struct {
 	int stand_x, stand_y, stand_face;
 	int intro, defeat, reward; /* its scripts in the layer's archive */
 	int prelude, hush, theme;  /* music: the boss prelude, silence, the area's */
-	/* a super boss's too (docs/BOSSES.md, Super bosses; -1 for a guardian):
+	/* a super boss's too (docs/game/bosses/super-bosses.md; -1 for a guardian):
 	 * the area's theme fading out, BN6's rumble (0xE3), the white's sound
 	 * (0x100) and Bass's going (0xD7) */
 	int fade, rumble, reveal, depart;
@@ -37,7 +37,7 @@ typedef struct {
 
 /* The song a guardian's prelude plays as he logs in: BN6's before a
  * boss's fight, or the area's game's (another game's area: its own,
- * copied into BN6, docs/MULTIROM.md), as the layer sets it before its
+ * copied into BN6, docs/multirom/), as the layer sets it before its
  * objects are made. */
 #define GUARDIAN_PRELUDE 0x1C
 extern int guardian_prelude_song;

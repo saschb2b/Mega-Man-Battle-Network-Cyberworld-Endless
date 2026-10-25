@@ -1,5 +1,5 @@
 /* What MegaMan says on the run's summary, in its NAVIGATOR box
- * (title_summary.c, docs/VOICE.md): how he came home, and his word. */
+ * (title_summary.c, docs/voice/rules.md): how he came home, and his word. */
 #include "title_lines.h"
 
 const char *summary_words(int which) {

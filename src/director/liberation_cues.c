@@ -1,4 +1,4 @@
-/* BN5's songs at a liberation's moments (liberation.h; docs/MULTIROM.md,
+/* BN5's songs at a liberation's moments (liberation.h; docs/multirom/music.md,
  * BN5's music in a run): copied by src/audio/xsong.c with the board's
  * songs and begun by BN6's own player. A first turn's win answers BN6's
  * win through a hook on its song, as BN5's win picks its own (0x08007A82);

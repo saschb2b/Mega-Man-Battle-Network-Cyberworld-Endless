@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
 	int group, number;
-	int8_t rom;            /* where it was read: 0 BN6, 1 + XRomId an extra game's (docs/MULTIROM.md) */
+	int8_t rom;            /* where it was read: 0 BN6, 1 + XRomId an extra game's (docs/multirom/) */
 	int tw, th;            /* size in tiles */
 	int layers;
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
@@ -44,7 +44,7 @@ typedef struct {
 #define HEIGHT_UNEVEN 255
 
 bool area_src_load(int group, int number, AreaSrc *a);
-/* The same from an extra game's ROM (XRomId, docs/MULTIROM.md), where it
+/* The same from an extra game's ROM (XRomId, docs/multirom/), where it
  * has been read. */
 bool area_src_load_x(int xrom, int group, int number, AreaSrc *a);
 /* Map (group, number)'s descriptor (tile set, palette, tile map: ROM
@@ -85,7 +85,7 @@ int area_src_walled_floor(const AreaSrc *a, int X, int Y);
 /* ... and inside how many rings (-1: cannot tell): 2 and more, even, inside
  * a ring within the floor, a hole or what the walls keep MegaMan off. */
 int area_src_rings(const AreaSrc *a, int X, int Y);
-/* A Liberation map of BN5's (group 0x86, docs/LIBERATION.md): whether
+/* A Liberation map of BN5's (group 0x86, docs/game/liberation/): whether
  * world (X, Y) lies on one of its board's panels, which are its floor
  * whatever its walls say; -1 for any other map. */
 int area_src_board(const AreaSrc *a, int X, int Y);

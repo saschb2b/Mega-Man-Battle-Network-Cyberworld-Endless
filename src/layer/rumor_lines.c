@@ -1,4 +1,4 @@
-/* The net's rumors (docs/META.md, Rumors): one bystander a layer passes on
+/* The net's rumors (docs/game/meta/rumors.md): one bystander a layer passes on
  * the kind of thing a schoolyard did. BN6's own Program Advances, read from
  * its table and picked for the chips the folder holds (a recipe told by a
  * friend: Sword, WideSwrd and LongSwrd in one code); or a word on a secret
@@ -20,7 +20,7 @@
 #include "save.h"
 
 /* ---- Program Advances ----
- * BN6's table (docs/ROM_DATA.md): an entry a Program Advance, its chips'
+ * BN6's table (docs/rom/): an entry a Program Advance, its chips'
  * count, its kind, its result: kind 4 lists its chips, sent in that order in
  * one code; kind 0 one chip, three of it in codes in a row. */
 #define PA_MAX 80
@@ -71,7 +71,7 @@ static bool pa_fits(const Pa *a, const ChipInfo *ci, char c) {
  * to a folder of Sword S and WideSwrd S, and all three come in S (session
  * 62); else the first that fits; 0 none. With the All * helper, *: every
  * chip comes in it, and three of one in a row make kind 0's (the run's
- * check takes three *, docs/META.md). */
+ * check takes three *, docs/game/meta/). */
 static char pa_code(const Pa *a) {
 	if (run_all_star()) return '*';
 	ChipInfo ci[4];

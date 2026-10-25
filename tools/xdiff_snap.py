@@ -1,7 +1,7 @@
 """xdiff_snap.py: the canonical snapshot of a fight frame for tools/xdiff.py (issue #82): the traces
 src/dev/xdiff.c writes, each game's numbers read as BN6's (the engine's own words among them: the alliance
 tables' words, an object's slot), objects matched by role, pointers named by what they point at, and the
-differences of the two games' frames through each game's layouts (tests/xdiff/legit.json; docs/DEVTOOLS.md,
+differences of the two games' frames through each game's layouts (tests/xdiff/legit.json; docs/devtools/differential.md,
 The differential)."""
 import functools
 import json

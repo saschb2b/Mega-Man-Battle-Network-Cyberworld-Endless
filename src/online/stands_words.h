@@ -1,5 +1,5 @@
-/* What the stands say (stands_words.c, issue #128, docs/ONLINE.md, The
- * stands; docs/VOICE.md): the referee Mr.Prog calling the channel's
+/* What the stands say (stands_words.c, issue #128, docs/online/arena-in-brief.md, The
+ * stands; docs/voice/rules.md): the referee Mr.Prog calling the channel's
  * NetBattle as it goes (who fights whom, their HP, the last chip each
  * used, the winner, the cheers) and asking whether to watch, and the
  * Board's posts on it. Composed from the server's report. */

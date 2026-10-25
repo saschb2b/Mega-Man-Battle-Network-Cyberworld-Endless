@@ -1,5 +1,5 @@
 /* town_folk.h. At each visit home the town's people stand elsewhere and a
- * different few are out, as a home's people would be (docs/HOME.md, crowds
+ * different few are out, as a home's people would be (docs/world/home/town-remembers.md, crowds
  * that move); their places stay the town's, each with its facing and what
  * is said there. From the run's depth, so a CONTINUE finds them as they
  * were. */

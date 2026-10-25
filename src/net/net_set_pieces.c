@@ -1,4 +1,4 @@
-/* Where a layer's set pieces stand (epic #49, docs/LEVEL_DESIGN.md, Set
+/* Where a layer's set pieces stand (epic #49, docs/world/level-design/set-pieces.md, Set
  * pieces; which it holds is net_pieces.c's): Rush's gaps, the invisible
  * paths, the teleport pairs, the obstacles and cubes and the navis who
  * tell their P-Codes, and the arrow lanes. */
@@ -81,7 +81,7 @@ void ng_carve_gap(const GapSite *g, int rise) {
 	if (o) { o->param = g->len >= 2 ? 2 : 1; o->prize = true; }
 }
 
-/* ---- Invisible paths (issue #46; docs/LEVEL_DESIGN.md, Set pieces) ----
+/* ---- Invisible paths (issue #46; docs/world/level-design/set-pieces.md) ----
  * BN6's floor drawn as void (Seaside Area 1, Sky Area 2, Underground 1,
  * Undernet 2): a walkway's tip aimed across the void at a lonely pad, the
  * floor between drawn as void, its pad holding what a player who walks on
@@ -443,7 +443,7 @@ void ng_place_block_rewards(void) {
 	}
 }
 
-/* ---- Arrow lanes (issue #43; docs/LEVEL_DESIGN.md, Set pieces) ----
+/* ---- Arrow lanes (issue #43; docs/world/level-design/set-pieces.md) ----
  * BN6's arrow panels carry MegaMan one way, input held, until he is past
  * them. A layer's lane is the quick way back: one wide, its panels across
  * the void from where a long detour ends to the floor by the way, so the

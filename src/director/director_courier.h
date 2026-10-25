@@ -1,5 +1,5 @@
 /* The courier in Lan's HP, the director's part (director_courier.c,
- * docs/HOME.md piece 2, issue #108). */
+ * docs/world/home/lans-hp.md piece 2, issue #108). */
 #ifndef CW_DIRECTOR_COURIER_H
 #define CW_DIRECTOR_COURIER_H
 

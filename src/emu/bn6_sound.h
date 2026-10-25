@@ -2,7 +2,7 @@
  * includes this): MP2K, Nintendo's "m4a", as the game runs it and the
  * engine's own player follows it (src/audio/mp2k*.c): its RAM, its tables
  * in the ROM, its routines. Names follow the bn6f disassembly where it
- * names them; docs/ROM_DATA.md, BN6's sound engine, says how each was found
+ * names them; docs/rom/sound.md, BN6's sound engine, says how each was found
  * and how to verify it. */
 #ifndef CW_BN6_SOUND_H
 #define CW_BN6_SOUND_H

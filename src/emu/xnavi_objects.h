@@ -1,6 +1,6 @@
 /* BN5's engine objects that BN6's engine runs otherwise, moved into BN6
  * once for every track whose code spawns one (issue #82's plan for its
- * tracks; docs/MULTIROM.md, The engine's objects moved once;
+ * tracks; docs/multirom/navis.md, The engine's objects moved once;
  * tools/bn5_objects.py): BN5's image object, the first kind's type 5, its
  * module whole (its kinds table, its routine, the spawner every attack
  * calls, its helpers) at XN_OBJECTS, its type moved through the

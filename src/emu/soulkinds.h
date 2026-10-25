@@ -1,5 +1,5 @@
 /* BN6's chips as BN5's UNITE reads them (the Souls track's S2; docs/
- * MULTIROM.md, Transplanted Souls): a Soul unites with the last chip
+ * docs/multirom/souls.md): a Soul unites with the last chip
  * picked of its kind, and BN5 tells a chip's kind and whether it is a
  * DarkChip from its own record (BN5_CHIP_KIND, its +9's 0x20). A chip of
  * BN6's goes into BN5's battles as BN5's chip of its name (the guest

@@ -182,7 +182,7 @@ def battle_scene():
 
 
 # (Trade Central's two screens, as the trade dev step opens them in a run:
-# the spares list, its sorts, and the chip trade's swap; docs/DEVTOOLS.md)
+# the spares list, its sorts, and the chip trade's swap; docs/devtools/)
 CHIPS = '250:,0:chip 1 A 1,0:chip 20 F 1,0:chip 411 M 1,0:chip 413 E 1,0:chip 21 S 1,'
 TRADE_RUN = ['--scene', 'emu', '--run-depth', '2']
 

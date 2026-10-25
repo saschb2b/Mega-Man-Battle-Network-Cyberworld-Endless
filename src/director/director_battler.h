@@ -1,5 +1,5 @@
 /* A Virus Battler's series on a layer (director_battler.c; docs/
- * LEVEL_DESIGN.md, The Virus Battler), for the director's frame. */
+ * docs/world/level-design/virus-battler.md), for the director's frame. */
 #ifndef CW_DIRECTOR_BATTLER_H
 #define CW_DIRECTOR_BATTLER_H
 

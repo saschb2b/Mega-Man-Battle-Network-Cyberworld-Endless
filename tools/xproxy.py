@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """xproxy.py [--seed S] [--story] [--quiet] [--no-run] [--mutations] [--souls]: the Souls' proxy form's
-self-differential (issue #82, the Souls track's S1; docs/MULTIROM.md,
-Transplanted Souls; docs/DEVTOOLS.md, The proxy form).
+self-differential (issue #82, the Souls track's S1; docs/multirom/souls.md,
+Transplanted Souls; docs/devtools/proxy-form.md).
 
 BN5's Souls will stand behind one form of BN6's own: form 8, Falzar's
 TenguCross, which Gregar keeps in every table by form and never offers.
@@ -302,7 +302,7 @@ MUTATIONS = (
     (1, 'the tables by form left TenguCross\'s', None),
     (2, 'its NameID\'s object id left TenguCross\'s',
      'the battle makes none of the reads of his NameID\'s triple for him in a Cross: his object is set up as a battle '
-     'begins, and every battle of a run begins in no form (docs/ROM_DATA.md, MegaMan\'s forms)'),
+     'begins, and every battle of a run begins in no form (docs/rom/, MegaMan\'s forms)'),
     (4, 'the chip bonus by form not hooked: FireBrn1 without HeatCross\'s +50', None),
     (8, 'the arm flash\'s look not hooked: TenguCross\'s arm as he fires', None),
     (16, 'the summon not hooked: TenguMan behind him as he crosses', None),

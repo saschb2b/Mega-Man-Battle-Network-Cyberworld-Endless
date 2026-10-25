@@ -1,5 +1,5 @@
 /* A liberation's team picked on arrival (liberation_pick.h): a list of the
- * Navis held, GO! at its foot as NaviCust's RUN! at its list's (docs/UI.md,
+ * Navis held, GO! at its foot as NaviCust's RUN! at its list's (docs/engine/ui.md,
  * Ours: the JACK-IN SETUP's JACK IN!). A picks or puts back the Navi under
  * the cursor; with one place, A on another Navi takes him instead; A on
  * GO!, or START, goes once every place is filled. B does nothing: the pick

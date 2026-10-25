@@ -346,7 +346,7 @@ comma := ,
 online-transport: $(TRANSPORT_PROBE)
 .PHONY: online-transport
 
-# The production Arena's base (docs/ONLINE_LINK.md): BN6's Practice on one
+# The production Arena's base (docs/online/link.md): BN6's Practice on one
 # linked pair of cores, the input wire, and a complete snapshot of the pair.
 # Linux only, mGBA's Release library (NDEBUG) from the build image.
 ONLINE_PAIR_SRCS := tools/online_pair_run.c tools/online_frame_pair.c tools/online_frame_wire.c \

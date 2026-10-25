@@ -19,7 +19,7 @@ raised, and the loop's own lessons.
 1. **Build, look, pin.** `python3 build.py linux`; capture every visual
    change of the iteration in the game (not only its chat or its code:
    the `cyberworld` MCP server's `shot`, a call each, `ref` beside the
-   pinned build's commit; docs/DEVTOOLS.md, Agents' tools);
+   pinned build's commit; docs/devtools/agents-tools.md);
    then `.claude/skills/playtest-loop/scripts/pin.sh kai`: the session runs
    this copy (`.build/play/kai/bin/`, kept by `bin.pin`), so rebuilding
    while it plays changes nothing for it, and its replays stay exact. A
@@ -84,7 +84,7 @@ raised, and the loop's own lessons.
      first counted over the tests' 300 layers: the count sizes the problem
      and, kept as a check, holds the fix.
 7. **Fix, verify, commit** per AGENTS.md (its check table; `build.py test`;
-   a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; ROM_DATA.md
+   a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; docs/rom/
    for a new offset; CHANGELOG). A visual fix is verified by looking at
    a picture of the result, never by its code alone (sprite indexes that
    differed in the code drew one navi on the map for two sessions). One commit per change: the subject states

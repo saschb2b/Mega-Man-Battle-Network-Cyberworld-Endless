@@ -1,4 +1,4 @@
-/* A liberation's music and sounds as BN5's (liberation.h; docs/LIBERATION.md,
+/* A liberation's music and sounds as BN5's (liberation.h; docs/game/liberation/bn5/look-and-motion.md,
  * How the board looks and moves): its songs copied from BN5's ROM into
  * BN6's free space (src/audio/xsong.c) and started by BN6's own PlayMusic,
  * its sounds BN6's where BN6 has the same (their tracks compared) or BN5's

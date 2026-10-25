@@ -1,5 +1,5 @@
 /* What a liberation's teammates say (liberation_team_words.h). BN5's Team
- * Colonel, each in the habit his look gives him (docs/VOICE.md, The
+ * Colonel, each in the habit his look gives him (docs/voice/rules.md, The
  * guardians): Colonel a soldier's few words, ShadowMan a ninja's fewer,
  * NumberMan's numbers, TomahawkMan's sayings, KnightMan a knight's
  * courtesy, ToadMan's croak; Gregar's Cross Navis in the habits BN6 gives

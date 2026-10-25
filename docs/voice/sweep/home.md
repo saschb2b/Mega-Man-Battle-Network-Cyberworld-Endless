@@ -1,3 +1,10 @@
+---
+type: Review Log
+title: "Voice sweep: home and online"
+description: "Log of the 19 October 2026 voice sweep of the town, home, requests, the Net Square's gate, the Square, Trade Central and the Arena: 416 lines read, 12 cut, 20 noted, each with its rule."
+tags: [voice]
+generated: { by: claude-code/unrecorded, at: 2026-10-21T21:51:43Z }
+---
 # Voice sweep: home and online
 
 Group: the town, home, the requests, AsterLand and the Academy, the Net
@@ -6,7 +13,7 @@ Square's gate, the Square, Trade Central and the Arena (`town_lines.c`,
 `place_lines.c`, `square_words.c`, `square_life_words.c`,
 `online_text.c`, `trade_words.c`, `arena_words.c`). 19 October 2026,
 after the owner's direction of that day: sweep every line that does not
-need to be said, rewrite nothing. The rules are docs/VOICE.md's "What
+need to be said, rewrite nothing. The rules are [Voice](../rules.md#what-nobody-says)'s "What
 nobody says", numbered as there (1 nobody knows the game is a game,
 2 a button named once, 3 nobody explains BN6, 4 what the run adds taught
 where BN6 teaches, 5 MegaMan never coaches, 6 the goal line explains

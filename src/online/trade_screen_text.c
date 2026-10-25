@@ -39,7 +39,7 @@ const char *trade_text_deal_with(const char *partner) {
 
 const char trade_text_navigator[] = "NAVIGATOR";
 
-/* (MegaMan, in E-Mail's NAVIGATOR box: docs/VOICE.md) */
+/* (MegaMan, in E-Mail's NAVIGATOR box: docs/voice/rules.md) */
 const char *trade_text_ask(const char *mine, const char *partner, const char *theirs) {
 	static char s[96];
 	snprintf(s, sizeof s, "Lan,trade our %s for %s's %s?", mine, partner, theirs);

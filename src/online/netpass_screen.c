@@ -45,7 +45,7 @@ static void seen_write(int seen) {
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "w");
 	if (!f) return;
-	fprintf(f, "# The NetPass's stamps the greeter has stamped in the Net Square (docs/ONLINE.md, The NetPass).\nstamps=%d\n", seen);
+	fprintf(f, "# The NetPass's stamps the greeter has stamped in the Net Square (docs/online/netpass.md).\nstamps=%d\n", seen);
 	bool ok = !ferror(f) && cw_fsync_file(f);
 	if (fclose(f)) ok = false;
 	if (ok) ok = cw_rename(tmp, path);

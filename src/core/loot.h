@@ -24,7 +24,7 @@ extern bool loot_visitors_always;
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */
 extern int loot_territory;
-/* The deep (docs/MULTIROM.md, One net: the deep converges): the older
+/* The deep (docs/multirom/one-net.md: the deep converges): the older
  * net's areas a deep act's random battles draw on beside BN6's own area's,
  * a coin a battle between the nets (and between the two where both are
  * named: the Nest's), as make_encounter rolls them; -1 none. Set by the
@@ -66,14 +66,14 @@ int loot_pool_pick(int tier);
  * and 2 blue) holds at `depth`, by the run's threat and folder codes: a
  * chip (its id in `value`, its code), zenny or BugFrags (how many), or an
  * HPMemory (blue, from the second act on). layer_objs.c writes it in the
- * game's form; the economy report (docs/ECONOMY.md) tallies it. */
+ * game's form; the economy report (docs/game/economy/) tallies it. */
 enum { LOOT_FIND_CHIP, LOOT_FIND_ZENNY, LOOT_FIND_BUGFRAGS, LOOT_FIND_HP_MEMORY };
 typedef struct { int kind, value; char code; } LootFind;
 LootFind loot_mystery_roll(int param, int depth);
 /* An in-battle Mystery Data's four rewards, the game's encoding (bits
  * 14-15: 0 chip, 1 zenny, 3 BugFrags; a chip's id in bits 0-8, its code
  * in 9-13), one of which the game gives where it survives the battle
- * (docs/ROM_DATA.md): three chips a tier above a blue Mystery Data's, in
+ * (docs/rom/): three chips a tier above a blue Mystery Data's, in
  * the folder's codes where they come in them, and zenny twice its. */
 void loot_gem_rewards(int depth, uint16_t out[4]);
 /* A Mystery Data on the enemies' side of `e`'s field, where it has none
@@ -85,7 +85,7 @@ int chip_price(int id);
  * in his act (shop.c, add_keys), so busting him well pays the act's lock;
  * by the plan's zenny (economy.h) */
 int loot_guardian_zenny(int depth);
-/* A reward chip's code, leaned to the folder's (docs/META.md): where it
+/* A reward chip's code, leaned to the folder's (docs/game/meta/): where it
  * rolled a letter and has one of the codes the folder holds most, that one,
  * always or half the time; a * stays a *. */
 char loot_fit_code(int id, char code, bool always);

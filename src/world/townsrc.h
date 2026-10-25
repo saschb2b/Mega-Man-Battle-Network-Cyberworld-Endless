@@ -1,5 +1,5 @@
 /* The ground of an original real-world map, learned as the source of a
- * generated town's tiles (docs/OVERWORLD.md). */
+ * generated town's tiles (docs/world/overworld.md). */
 #ifndef CW_TOWNSRC_H
 #define CW_TOWNSRC_H
 

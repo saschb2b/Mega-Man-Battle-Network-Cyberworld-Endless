@@ -21,6 +21,6 @@ RUN curl -fsSL -o /tmp/gradle.zip https://services.gradle.org/distributions/grad
  && unzip -q /tmp/gradle.zip -d /opt && ln -s /opt/gradle-8.10.2/bin/gradle /usr/local/bin/gradle && rm /tmp/gradle.zip
 COPY sdl2.sh /tmp/sdl2.sh
 RUN sh /tmp/sdl2.sh android
-# The embedded GBA core (docs/EMULATION.md), one static library per ABI
+# The embedded GBA core (docs/engine/emulation/), one static library per ABI
 COPY mgba.sh /tmp/mgba.sh
 RUN sh /tmp/mgba.sh android

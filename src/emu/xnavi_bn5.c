@@ -1,6 +1,6 @@
 /* xnavi_bn5.c: the Navis' recipes, written by tools/xnavirecipe.py from the two ROMs (python3 tools/xnavirecipe.py;
  * --check says whether this is what it writes). Do not edit: change the generator (or tools/bn5_navi_twins.py, its pairs
- * and audits) and write it again. Numbers alone (docs/MULTIROM.md, Transplanted Navis): addresses in BN5 Team Colonel
+ * and audits) and write it again. Numbers alone (docs/multirom/navis.md): addresses in BN5 Team Colonel
  * (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies from the player's ROM;
  * nothing of either game's. The control (BN6's own HeatMan, derived by the same walk) and BN5's Navis proven against
  * BN5's own (tools/xdiff.py), each at its fixed numbers (src/emu/xnavi_recipe.h). */

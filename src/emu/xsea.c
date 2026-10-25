@@ -300,7 +300,7 @@ static const char *unready(uint32_t *spawn) {
 }
 
 void xsea_install(void) {
-	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/ONLINE_ARENA.md) */
+	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/online/arena/) */
 	static bool done;
 	if (done || !xpanels_ready() || !R.data || !emu_ready()) return;
 	done = true;

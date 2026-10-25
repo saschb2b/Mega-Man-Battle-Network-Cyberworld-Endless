@@ -1,4 +1,4 @@
-/* The run's difficulty curve (docs/PROGRESSION.md). The numbers follow BN6's
+/* The run's difficulty curve (docs/game/progression/). The numbers follow BN6's
  * own: the HP of one random battle in each area in story order (Central
  * about 150, Seaside and Green 200-300, Sky 350, the Undernet 400, the
  * Graveyard 550), measured against the max HP MegaMan is meant to have in
@@ -57,7 +57,7 @@ PacingBand pacing_band_wider(PacingBand b) {
 static const int8_t version_low[PACING_ACTS] = { 0, 0, 0, 1, 1, 2, 2 }, version_high[PACING_ACTS] = { 0, 0, 1, 1, 2, 2, 2 };
 
 /* What a version rolled at `depth` adds to the act's: the loop, the
- * challenge, and threat 1 (docs/META.md: a version stronger from act 2) */
+ * challenge, and threat 1 (docs/game/meta/: a version stronger from act 2) */
 static int version_more(int depth, bool challenge) {
 	return pacing_loop(depth) + (challenge ? 1 : 0) + (run.threat >= 1 && pacing_act(depth) >= 1 ? 1 : 0);
 }
@@ -78,7 +78,7 @@ bool pacing_rare(int depth, int roll) {
 	return pacing_act(depth) >= 2 && roll < 3 + 2 * pacing_loop(depth);
 }
 
-/* The areas by the HP of their own battles (docs/PROGRESSION.md). (Sky
+/* The areas by the HP of their own battles (docs/game/progression/). (Sky
  * HP's battles all come in threes of 200 HP, and the Aquarium Comp's pools
  * and water mazes are a hard first map: not a first act's; the Robot
  * Control Comp's that fit act 1 are all OldStove and Mettaur, which a

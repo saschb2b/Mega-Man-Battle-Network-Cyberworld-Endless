@@ -1,4 +1,4 @@
-/* A liberation's board across a CONTINUE (liberation.h; docs/SAVES.md):
+/* A liberation's board across a CONTINUE (liberation.h; docs/engine/saves.md):
  * what its course has changed since the layer's seed made it, saved beside
  * the run's checkpoint as `run.lib` and taken back once the checkpoint's
  * state has loaded on the layer the seed made again. The board's panels,
@@ -20,7 +20,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define LIB_NOTE_MAGIC 0x434C4235u   /* "CLB5": the team picked, its par, and the run's last pick (docs/LIBERATION.md, The team picked) */
+#define LIB_NOTE_MAGIC 0x434C4235u   /* "CLB5": the team picked, its par, and the run's last pick (docs/game/liberation/building/cross-navis-team.md, The team picked) */
 
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */

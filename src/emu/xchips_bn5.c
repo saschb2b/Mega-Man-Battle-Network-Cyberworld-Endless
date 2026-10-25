@@ -1,6 +1,6 @@
 /* xchips_bn5.c: BN5's chips' code as units for BN6's battle engine, written by tools/xchiprecipe.py from the two ROMs
  * (python3 tools/xchiprecipe.py; --check says whether this is what it writes). Do not edit: change the generator (or
- * tools/bn5_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/MULTIROM.md, The chips' code):
+ * tools/bn5_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/multirom/chips-code.md):
  * addresses in BN5 Team Colonel (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies
  * from the player's ROM; nothing of either game's. The units are the generator's, whole (no decision open), in install
  * order; src/emu/xchips_code.c installs them and src/core/xchips_moved.c names the chips that run them. */

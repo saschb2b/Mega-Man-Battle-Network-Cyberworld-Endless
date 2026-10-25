@@ -1,5 +1,5 @@
 /* BN6's own net maps measured for the layers' navigation (navstudy.c,
- * docs/DEVTOOLS.md): the way across, counted as a layer's is, and where
+ * docs/devtools/): the way across, counted as a layer's is, and where
  * MegaMan arrives on them. */
 #ifndef CW_NAVSTUDY_H
 #define CW_NAVSTUDY_H

@@ -1,5 +1,5 @@
 /* What the game's code tells the director through hooks (hook.h; docs/
- * EMULATION.md, Hooks): the kinds of event the hooks queue, which
+ * docs/engine/emulation/hooks.md): the kinds of event the hooks queue, which
  * director_update takes up after each frame. */
 #ifndef CW_EVENTS_H
 #define CW_EVENTS_H

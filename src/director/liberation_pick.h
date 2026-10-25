@@ -1,8 +1,8 @@
-/* A liberation's team picked on arrival (docs/LIBERATION.md, The team
+/* A liberation's team picked on arrival (docs/game/liberation/building/cross-navis-team.md, The team
  * picked): after the board's opening look, before PLAYER PHASE 01, where
  * the run holds more Navis (BN5's Souls, Gregar's Crosses) than BN5's team
  * of the stage has places beside MegaMan. Our own screen in BN6's PET look
- * (docs/UI.md), as neither BN6 nor BN5 has a team screen: each held Navi's
+ * (docs/engine/ui.md), as neither BN6 nor BN5 has a team screen: each held Navi's
  * face, HP, command and its shape, and the form his battles take with its
  * weakness. It opens on the run's last pick where its Navis are held. Its
  * course here, its picture in liberation_pick_draw.c, its words in

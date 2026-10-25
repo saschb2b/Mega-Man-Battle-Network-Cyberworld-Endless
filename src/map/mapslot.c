@@ -1,5 +1,5 @@
 /* Taking over a game map for a layer or the town (tables per bn6f; see
- * docs/ROM_DATA.md). Real-world groups (0x00-0x06) have the same tables at
+ * docs/rom/). Real-world groups (0x00-0x06) have the same tables at
  * other addresses (RW_*).
  *
  * NPCs: NPCList_maps80 -> per-map list of NPC script pointers ending 0xFF.
@@ -28,7 +28,7 @@
 #define NO_MYSTERY   FREE_NO_MYSTERY      /* an empty Mystery Data list, for every map but the layer's */
 #define TOWN_ARENA   FREE_TOWN             /* the town's data, apart from the layers' */
 #define TOWN_SIZE    0x8000
-#define HP_ARENA     FREE_LAN_HP           /* Lan's HP's (docs/HOME.md) */
+#define HP_ARENA     FREE_LAN_HP           /* Lan's HP's (docs/world/home/) */
 #define HP_SIZE      0x8000
 #define INDOORS_ARENA FREE_INDOORS          /* home's other places: AsterLand, the Cyber Academy */
 #define INDOORS_PART 0x8000                /* ... each its own */
@@ -256,7 +256,7 @@ static uint32_t mystery_slot(int group, int number) {
 
 /* `slot` given the layer's list at `md_at`, and every other map BN6's roll
  * reaches an empty one. BN6 rolls every net map's green Mystery Data again
- * at each jack-in (bn6f sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md)
+ * at each jack-in (bn6f sub_8033FDC calls sub_809F9DC, docs/rom/)
  * and clears each one's flag. A map a layer left kept its list in the half
  * a later layer has written over: a jack-in from home read one and crashed
  * the game. And BN6's own maps' flags are the run's: a jack-in cleared

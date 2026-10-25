@@ -297,7 +297,7 @@ void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, i
 	analytics_net_start(headless, plain);
 	/* (BN5's boot state, which its battles on a second core kept beside the
 	 * saves until issue #82 brought every battle into BN6's engine: gone,
-	 * once, from a data folder that has it; docs/MULTIROM.md) */
+	 * once, from a data folder that has it; docs/multirom/) */
 	snprintf(path, sizeof path, "%s/guest-bn5-1.state", g_data_dir);
 	if (remove(path) == 0) {
 		printf("startup: the older net's boot state, unused now, removed\n");

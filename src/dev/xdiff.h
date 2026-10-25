@@ -1,4 +1,4 @@
-/* --xdiff SPEC (tools.c; docs/DEVTOOLS.md, The differential): a family
+/* --xdiff SPEC (tools.c; docs/devtools/differential.md): a family
  * moved into BN6's battle engine (src/emu/xvirus.c, issue #82) against
  * its own game's, frame by frame. One battle is fought twice: in BN5's own
  * engine on the guest core (the reference, guest_dev_battle: BN5's battle
@@ -23,7 +23,7 @@
  *                      frame of the fight
  *   rng=follow         BN6's RNG words written from BN5's after each fight
  *                      frame (BN5's buster draws once more a shot than
- *                      BN6's: docs/DEVTOOLS.md, The differential)
+ *                      BN6's: docs/devtools/differential.md)
  *   out=PATH           the traces: PATH.bn5 and PATH.bn6
  *   game=bn5|bn6       one of them alone
  *   flags5=0000,000C   event flags (hex) set in BN5 before its battle (eToolkit

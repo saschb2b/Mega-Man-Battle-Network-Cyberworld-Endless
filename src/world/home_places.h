@@ -1,4 +1,4 @@
-/* Home's indoor places, for the director (home_places.c, docs/HOME.md):
+/* Home's indoor places, for the director (home_places.c, docs/world/home/):
  * Lan's house and room, AsterLand, the Cyber Academy's open maps. */
 #ifndef CW_HOME_PLACES_H
 #define CW_HOME_PLACES_H

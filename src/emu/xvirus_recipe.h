@@ -160,7 +160,7 @@ typedef struct {
 
 /* Where it all goes, at fixed addresses (pointers into them stay good in
  * the states a session saves): the plan's FREE_VIRUS_ROOM and FREE_FAMILIES,
- * to FREE_CHIPS (free_space.h; docs/EMULATION.md). First BN6's own tables,
+ * to FREE_CHIPS (free_space.h; docs/engine/emulation/). First BN6's own tables,
  * grown once a core (xvirus_grow.h): each holds BN6's entries as the
  * player's ROM has them, the rest its fill, and the one word that names it
  * points here */

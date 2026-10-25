@@ -1,5 +1,5 @@
 /* The Arena's rollback tried against the local stand-in (issue #128,
- * docs/ONLINE_ARENA.md, Rollback): `--dev arena,arenaroll=W` keeps the
+ * docs/online/arena/rollback/overview.md): `--dev arena,arenaroll=W` keeps the
  * pair's snapshot before each of the last W frames and, every W frames,
  * rolls back to the first of them and runs them again with the same keys,
  * as a rollback over a wrong guess would, then goes on from there; each

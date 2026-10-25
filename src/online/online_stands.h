@@ -1,5 +1,5 @@
 /* The channel's NetBattles as the game holds them (issue #128,
- * docs/ONLINE.md, The stands): the server's last STANDS, each battle on
+ * docs/online/arena-in-brief.md, The stands): the server's last STANDS, each battle on
  * or the last one over with who fights whom, by which rules, how many
  * watch and cheer, and the cable's first game's report (HP, the last chip
  * each used, the winner). Every game holds it, one that cannot watch

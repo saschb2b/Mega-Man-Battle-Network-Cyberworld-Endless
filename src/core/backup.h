@@ -1,4 +1,4 @@
-/* The saves in one file (backup.c, docs/SAVES.md): savedata/'s progress and
+/* The saves in one file (backup.c, docs/engine/saves.md): savedata/'s progress and
  * the current run as a .cwsave, which SAVES exports and imports on every
  * system (src/saves/) and the automatic copy keeps in a folder
  * (src/launcher/mirror.c), so that a phone's reinstall finds it there.

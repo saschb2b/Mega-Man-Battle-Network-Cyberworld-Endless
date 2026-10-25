@@ -79,7 +79,7 @@ static bool xguardian_fits(int navi, int act) {
 }
 
 /* The deep acts' (the Undernet's and the Graveyard's areas, whatever
- * dresses them; docs/MULTIROM.md, One net: where they guard): both nets'
+ * dresses them; docs/multirom/one-net.md: where they guard): both nets'
  * Navis that fit the act's band in one pool, each as likely, by a coin of
  * the seed and the act: one of BN5's, or 0, BN6's own pick standing (its
  * area's own favoured, as ever: run.boss_order). None that guards a
@@ -157,7 +157,7 @@ void run_new(uint32_t seed) {
 		}
 		run.boss_order[b] = (uint8_t)g;
 	}
-	/* the super bosses' places (docs/BOSSES.md, Super bosses): the endless
+	/* the super bosses' places (docs/game/bosses/super-bosses.md): the endless
 	 * net's Nest is the Cybeast's den (a short net's setup picks its own
 	 * Nest's guardian, run_setup), and the Secret Area is Bass's once it
 	 * has been cleared in any run (the title's S) */
@@ -246,7 +246,7 @@ int run_dark_area(int act) {
 
 /* BN5's own Darkloid of the act's dark layer, where its ROM brought them
  * into BN6's engine (xnavi_bn5.c): BN5's missions meet BlizzardMan first,
- * then ShadeMan, CloudMan, CosmoMan (docs/LIBERATION.md, stage 4), so the
+ * then ShadeMan, CloudMan, CosmoMan (docs/game/liberation/building/stage-4-darkloids.md), so the
  * act's own of that order twice as likely as each other one moved; 0 none.
  * His strength is his version the act's band takes (xguardian_version). */
 static bool bn5_darkloid_is(int g) { return g && guardian_darkloid(g); }
@@ -295,7 +295,7 @@ int run_nest_second(void) {
 /* The Nest's act, after the net's last: its one way, the Nest */
 static int nest_act(void) { return ((run.mode == RUN_SHORT ? SHORT_LAYERS : CYCLE_LAYERS) - 1) / 3; }
 
-/* Whether act `act` has the short net's dark way (docs/META.md, branches) */
+/* Whether act `act` has the short net's dark way (docs/game/meta/, branches) */
 static bool dark_way_at(int act) { return run.mode == RUN_SHORT && act == 2; }
 
 int run_route_turns(bool dark_open) {
@@ -358,7 +358,7 @@ int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed) {
 	bool route = run_route_turns(dark_open) == act;
 	*sealed = false;
 	/* (the Nest's act: its one way, the Nest; a special route's second
-	 * way to it, its second guardian: docs/LIBERATION.md, Special routes) */
+	 * way to it, its second guardian: docs/game/liberation/special-routes.md) */
 	if (act >= nest_act()) {
 		int g = run.boss_order[BIOME_NEST];
 		way[0] = (RunWay){ BIOME_NEST, g, g, false, false };

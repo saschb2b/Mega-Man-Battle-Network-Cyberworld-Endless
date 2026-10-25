@@ -26,7 +26,7 @@
 #include "square_watch.h"
 #include "talk.h"
 
-#define TEAM_YES_FLAG 0x14C6   /* the Square's own (docs/EMULATION.md): Yes to a team asked of us */
+#define TEAM_YES_FLAG 0x14C6   /* the Square's own (docs/engine/emulation/): Yes to a team asked of us */
 #define ORDER_FLAG    0x14C7   /* + 0 we lead, + 1 the partner does (0x14C7, 0x14C8); the format's too, + 0 one by one, + 1 side by
                                   side (asked as a challenge goes, never with the order open) */
 

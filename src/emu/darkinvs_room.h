@@ -1,5 +1,5 @@
 /* BN5's chip AI's room for a MegaMan in a NetBattle (issue #182;
- * docs/ONLINE_ARENA.md, What a partner meets under full rules): BN5's
+ * docs/online/arena/two-a-side/full-rules.md): BN5's
  * chip AI keeps its state past BN6's 0x100 bytes of AI data, so a
  * MegaMan under it needs BN5's 0x140 (BN5_AI_DATA_SIZE). Side 0's player
  * has RAM_PLAYER_AI from his set-up (darkinvs.c). The others of a

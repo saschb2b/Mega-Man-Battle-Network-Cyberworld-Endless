@@ -1,4 +1,4 @@
-/* Jobs at home (docs/HOME.md, piece 5; issue #88), the director's part:
+/* Jobs at home (docs/world/home/jobs.md; issue #88), the director's part:
  * what each asker says at a visit (job_words.c), the job taken and settled
  * as their scripts set its flags, and its course in the Net (jobs.c): the
  * battles won, a layer's Mystery Data, a Mr.Prog's patch, the guardian's

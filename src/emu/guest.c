@@ -5,8 +5,8 @@
  * pressed through to Lan's room) kept in the data directory. Its battles
  * run while BN6's core waits, on the main thread: its encounter roll,
  * patched in its ROM copy, returns the record a battle is given
- * (docs/ROM_DATA.md, BN5 guest battles). Runs fought on it until issue #82
- * brought every battle into BN6's engine (docs/MULTIROM.md, One net). */
+ * (docs/rom/bn5-battles.md, BN5 guest battles). Runs fought on it until issue #82
+ * brought every battle into BN6's engine (docs/multirom/one-net.md). */
 #include "guest.h"
 
 #include <stdio.h>
@@ -155,7 +155,7 @@ bool guest_start(int xrom) {
 	return true;
 }
 
-/* ---- its random numbers from the spec's seed (docs/ROM_DATA.md, BN5's
+/* ---- its random numbers from the spec's seed (docs/rom/bn5-battles.md, BN5's
  * random numbers): both RNG words written as BN5 begins the battle, so its
  * rolls are the seed's whatever frames its map took before ---- */
 static uint32_t battle_seed;

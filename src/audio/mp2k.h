@@ -1,7 +1,7 @@
 /* MP2K, BN6's sound engine, run by the engine for the screens before and
  * beside the game (the title, the run's setup, Options, SAVES, the PET's
  * screens over the held game): the library's own logic read from BN6's
- * code (bn6f's disassembly of it, Nintendo's "m4a"; docs/ROM_DATA.md,
+ * code (bn6f's disassembly of it, Nintendo's "m4a"; docs/rom/sound.md,
  * BN6's sound engine), its data the player's ROM's, so a song plays as BN6
  * plays it. mp2k_frame is one GBA frame of it: what the library's VCOUNT
  * interrupt runs (m4aSoundVSync, then SoundMain: every music player, the
@@ -27,7 +27,7 @@ bool mp2k_song_playing(int song);
 bool mp2k_busy(void);
 /* ... the same for a song of ROM `rom`: 0 BN6's, 1 + XRomId another
  * game's (rom.h, XR), its own song table's, its own data, on BN6's code
- * (BN5's library is BN6's: docs/ROM_DATA.md, Another game's songs);
+ * (BN5's library is BN6's: docs/rom/bn5-world.md, Another game's songs);
  * nothing where that ROM is not there */
 void mp2k_song_start_in(int rom, int song);
 void mp2k_song_fade_in(int rom, int song, int speed);

@@ -1,5 +1,5 @@
 /* The super bosses' staging, after BN6's own scenes for Bass and the
- * Cybeast (bn6f's cutscenes before their battles; docs/BOSSES.md, Super
+ * Cybeast (bn6f's cutscenes before their battles; docs/game/bosses/super-bosses.md, Super
  * bosses): the music fades as the scene begins, the screen shakes with
  * the rumble every 32 frames, the music stops and the screen fades to
  * white with its sound, the boss stands there out of the white, and the

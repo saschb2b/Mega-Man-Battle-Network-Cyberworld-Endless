@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """xsoul.py [--check] [--report]: the code BN5's Team Colonel Souls run, moved into BN6's battle engine (issue #82, the
-Souls track's S3-S5; docs/MULTIROM.md, Transplanted Souls; docs/DEVTOOLS.md, The Souls' code), derived from the two ROMs.
+Souls track's S3-S5; docs/multirom/souls.md; docs/devtools/, The Souls' code), derived from the two ROMs.
 
-What a Soul does in BN5 is its own code beside the engine's (docs/ROM_DATA.md, The Souls' code in BN6's engine): its
+What a Soul does in BN5 is its own code beside the engine's (docs/rom/souls.md, The Souls' code in BN6's engine): its
 charged shot's power attack and attack family, the objects they spawn, its unison's image (BN5's phase 1 of the unison,
 which BN6 replaced with a Cross's summon) and the routines those call that BN6 has no twin of. This walks each from its
 roots (tools/xrecipe_thumb.py), pairs every call out with BN6's twin (tools/xrecipe_pairs.py and tools/bn5_twins.py),
@@ -233,7 +233,7 @@ DATA_RANGES = ((0x080EC05C, 0x080EC120), (0x080125B8, 0x080125D0), (0x080C33A8, 
 DEAD_TABLES = {(0x08011CCC, 0x08011D00): "BN5's passives by form as a form's state is set again (BN5_SOUL_REAPPLY), read by "
                                          "0x08011144 alone, which nothing moved runs: it lies between ColonelSoul's ready "
                                          "(0x08011C48) and its pool (0x08011D48)"}
-# BN5's AI data fields a Soul keeps its state in, which BN6's AI data holds otherwise (docs/ROM_DATA.md, The Souls' code):
+# BN5's AI data fields a Soul keeps its state in, which BN6's AI data holds otherwise (docs/rom/souls.md, The Souls' code):
 # where a moved routine reads one through its AI data (ldr rX,[r5,#0x58]), the Souls' C answers from BN6_SOULS
 SOUL_FIELDS = {0x0F: 'BN6_SOUL_TURNS', 0x12: 'BN6_SOUL_CHAOS', 0x1F: 'BN6_SOUL_PHASE', 0x32: 'BN6_SOUL_CHIP', 0x6C: 'BN6_SOUL_LEVEL'}
 
@@ -1053,7 +1053,7 @@ def c_value(d, bn5, now):
 def write_c(d):
     L = ['/* soulcode_bn5.c: the code BN5\'s Team Colonel Souls run, moved into BN6\'s battle engine, written by tools/xsoul.py from',
          ' * the two ROMs (python3 tools/xsoul.py; --check says whether this is what it writes). Do not edit: change the generator',
-         ' * and write it again. Numbers alone (docs/MULTIROM.md, Transplanted Souls): addresses in BN5 Team Colonel (USA) and BN6',
+         ' * and write it again. Numbers alone (docs/multirom/souls.md): addresses in BN5 Team Colonel (USA) and BN6',
          ' * Cybeast Gregar (USA), counts and the CRC32s of the ranges src/emu/soulcode.c copies from the player\'s ROM. */',
          '#include "soulcode.h"', '', '#include <stddef.h>', '', '#include "bn6.h"', '#include "soul_room.h"', '#include "xchips_code.h"',
          '#include "xnavi_recipe.h"', '#include "xvirus_dispatch.h"', '']
