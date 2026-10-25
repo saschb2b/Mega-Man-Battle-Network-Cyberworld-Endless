@@ -25,6 +25,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "liberation_battle.h"
+#include "liberation_pick.h"
 #include "liberation_pieces.h"
 #include "liberation_roulette.h"
 #include "liberation_state.h"
@@ -399,4 +400,6 @@ void director_draw_board(void) {
 	}
 	/* (a BonusPanel's flashes and roulette, over everything as BN5's) */
 	if (bn5) lib_roulette_draw();
+	/* (the team picked on arrival: the PET's screen over the board) */
+	if (LB.step == LIB_STEP_PICK) lib_pick_draw();
 }

@@ -330,14 +330,28 @@ static int sneak_target(int fx, int fy) {
 }
 
 /* Whether the Navi in play's command can be taken on the panel he faces
- * (fx, fy, -1 none): a liberating one on a panel to liberate, NumberCheck
- * where its two by three holds an item or a trap, SneakAttack where it
- * reaches a guardian, LifeMelody beside a teammate yet to act */
+ * (fx, fy, -1 none): a liberating one on a panel to liberate (PanelSearch's
+ * where its line holds an item or a trap), NumberCheck where its two by three holds an item or a trap,
+ * SneakAttack where it reaches a guardian, LifeMelody beside a teammate yet
+ * to act, MagnetBarrier where the team stands unshielded, BombLiberation
+ * hovering over a dark panel */
+/* ... the Cross Navis' with no battle or their own rule */
+static bool cross_can(int command, int fx, int fy) {
+	int xs[6], ys[6];
+	switch (command) {
+	case LIB_DO_SEARCH: return fx >= 0 && lib_command_panels(&LB.b, LIB_DO_SEARCH, fx, fy, LB.face, xs, ys) > 0;
+	case LIB_DO_MAGNET: return !LB.shield;
+	case LIB_DO_BOMB: return lib_command_panels(&LB.b, LIB_DO_BOMB, LB.mx, LB.my, LB.face, xs, ys) > 0;
+	default: return false;
+	}
+}
+
 static bool command_can(int fx, int fy) {
 	int command = lib_mate_command(LB.in_play), xs[6], ys[6], n;
 	switch (command) {
-	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK:
+	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK: case LIB_DO_NAPALM: case LIB_DO_WIDESWRD:
 		return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_liberable(&LB.b, fx, fy) && LB.b.kind[fy][fx] != LIB_HOLE;
+	case LIB_DO_SEARCH: case LIB_DO_MAGNET: case LIB_DO_BOMB: return cross_can(command, fx, fy);
 	case LIB_DO_NUMBER:
 		n = fx >= 0 ? lib_command_panels(&LB.b, LIB_DO_NUMBER, fx, fy, LB.face, xs, ys) : 0;
 		for (int i = 0; i < n; ++i) if (LB.b.kind[ys[i]][xs[i]] == LIB_ITEM || LB.b.kind[ys[i]][xs[i]] == LIB_TRAP) return true;
@@ -368,10 +382,13 @@ static void open_menu(void) {
 
 static void after_action(const char *words);
 static void take_item(int x, int y, char *held, size_t n);
+static void free_panel(int x, int y, char *held, size_t n);
 
 /* A command with no battle: NumberCheck's items taken and traps disarmed
  * (its panels left dark), SneakAttack's guardian struck (its next battle
- * the easier), LifeMelody's teammates beside him sung for */
+ * the easier), LifeMelody's teammates beside him sung for, MagnetBarrier's
+ * shield over the team till the next phase (a BonusPanel's), the panel
+ * BombLiberation's flier hovers over freed */
 static void command_done(int command, int fx, int fy) {
 	char said[320] = "";
 	int xs[6], ys[6], n = 0;
@@ -391,6 +408,12 @@ static void command_done(int command, int fx, int fy) {
 	} else if (command == LIB_DO_SNEAK) {
 		int u = sneak_target(fx, fy);
 		if (u > 0) LB.weak[u] = true;
+	} else if (command == LIB_DO_MAGNET) {
+		LB.shield = true;
+		n = 1;
+	} else if (command == LIB_DO_BOMB) {
+		free_panel(LB.mx, LB.my, said, sizeof said);
+		n = 1;
 	} else {
 		for (int k = 0; k < LB.b.team.n; ++k)
 			if (k != LB.in_play && !LB.b.mate[k].out && !LB.mate[k].acted && abs(LB.b.mate[k].x - LB.mx) + abs(LB.b.mate[k].y - LB.my) <= 1) {
@@ -409,7 +432,8 @@ static void fight(int cmd) {
 	lib_faced(&fx, &fy);
 	int u = lib_unit_at(fx, fy);
 	int command = cmd == LIB_CMD_LONGSWRD ? lib_mate_command(LB.in_play) : LIB_DO_NONE;
-	if (command == LIB_DO_NUMBER || command == LIB_DO_SNEAK || command == LIB_DO_MELODY) { command_done(command, fx, fy); return; }
+	if (emu_debug_on()) fprintf(stderr, "liberation: %s takes %s at %d,%d\n", lib_mate_name(LB.in_play), lib_command_label(cmd, command), fx, fy);
+	if (command != LIB_DO_NONE && !lib_command_battles(command)) { command_done(command, fx, fy); return; }
 	LB.fight_cmd = cmd;
 	LB.fight_unit = u;
 	LB.fx = fx; LB.fy = fy;
@@ -551,11 +575,15 @@ static void fight_won(bool one_turn) {
 		for (int u = 1; u < LB.b.nunits; ++u)
 			if (LB.b.unit[u].hole >= 0 && LB.b.hole_x[LB.b.unit[u].hole] == LB.fx && LB.b.hole_y[LB.b.unit[u].hole] == LB.fy) LB.b.unit[u].gone = true;
 	} else {
-		free_panel(LB.fx, LB.fy, held, sizeof held);
-		/* (the command's shape: LongSwrd's, ScrenDiv's, TomahawkSwing's; a
-		 * LifeMelody sung for him, five ahead) */
+		/* (the command's shape: LongSwrd's, ScrenDiv's, TomahawkSwing's, the
+		 * Cross Navis'; a LifeMelody sung for him, five ahead. PanelSearch's
+		 * its line's item and trap panels alone, the faced one only where it
+		 * is one: BN5_LIB_SEARCH_KEEP) */
 		int command = LB.fight_cmd == LIB_CMD_LONGSWRD ? lib_mate_command(LB.in_play) : LB.mate[LB.in_play].melody ? LIB_DO_MELODY : LIB_DO_NONE;
 		int xs[6], ys[6], n = command != LIB_DO_NONE ? lib_command_panels(&LB.b, command, LB.fx, LB.fy, LB.face, xs, ys) : 0;
+		bool faced = command != LIB_DO_SEARCH;
+		for (int i = 0; i < n; ++i) faced |= xs[i] == LB.fx && ys[i] == LB.fy;
+		if (faced) free_panel(LB.fx, LB.fy, held, sizeof held);
 		for (int i = 0; i < n; ++i)
 			if ((xs[i] != LB.fx || ys[i] != LB.fy) && lib_liberable(&LB.b, xs[i], ys[i]) && lib_unit_at(xs[i], ys[i]) < 0 && LB.b.kind[ys[i]][xs[i]] != LIB_HOLE) {
 				free_panel(xs[i], ys[i], held, sizeof held);
@@ -654,7 +682,9 @@ static const int fwx[8] = { 7, 10, 7, 0, -7, -10, -7, 0 }, fwy[8] = { -7, 0, 7, 
 
 static void track_update(void) {
 	int px = bn6_player_x(), py = bn6_player_y(), x, y;
-	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && lib_walkable(&LB.b, x, y) && (x != LB.mx || y != LB.my)) {
+	bool flier = lib_mate_command(LB.in_play) == LIB_DO_BOMB;
+	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && (lib_walkable(&LB.b, x, y) || (flier && lib_flown(&LB.b, x, y))) &&
+	    (x != LB.mx || y != LB.my)) {
 		LB.mx = x; LB.my = y;
 		LB.b.mate[LB.in_play].x = (uint8_t)x;
 		LB.b.mate[LB.in_play].y = (uint8_t)y;
@@ -728,8 +758,21 @@ static bool darkloid_framed(void) {
 	return LB.b.unit[0].gone || lib_camera_at(wx, wy);
 }
 
+/* The opening's words: L's briefing, the par the team's, the team named
+ * ("Colonel and KnightMan") */
+static void brief(void) {
+	say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
+	char names[96] = "";
+	for (int k = 1; k < LB.b.team.n; ++k) {
+		size_t n = strlen(names);
+		snprintf(names + n, sizeof names - n, "%s%s", k == 1 ? "" : k == LB.b.team.n - 1 ? " and " : ",", lib_mate_name(k));
+	}
+	say_more(lib_team_words(names));
+}
+
 /* The board's opening: MegaMan on the start, BN5's mission song, BN5's
- * camera to the Darkloid and back (his entrance), then the briefing */
+ * camera to the Darkloid and back (his entrance), the team picked where
+ * more Navis are held than it has places, then the briefing */
 static void opening_update(void) {
 	if (!LB.tour) {
 		if (!quiet() || D.frame < 60) return;
@@ -745,15 +788,19 @@ static void opening_update(void) {
 		if (lib_camera_at(wx, wy) && ++LB.tour_t >= TOUR_HOLD) LB.tour = 2;
 		return;
 	}
-	if (!lib_camera_home()) return;
-	say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
-	/* (the team named: "Colonel and KnightMan") */
-	char names[96] = "";
-	for (int k = 1; k < LB.b.team.n; ++k) {
-		size_t n = strlen(names);
-		snprintf(names + n, sizeof names - n, "%s%s", k == 1 ? "" : k == LB.b.team.n - 1 ? " and " : ",", lib_mate_name(k));
+	if (LB.tour == 2) {
+		if (!lib_camera_home()) return;
+		if (!LB.picked && lib_pick_needed()) {
+			LB.picked = true;
+			lib_pick_open();
+			LB.step = LIB_STEP_PICK;
+			return;
+		}
+		LB.tour = 3;
 	}
-	say_more(lib_team_words(names));
+	/* (after the pick: the map entered again where it changed the team) */
+	if (!quiet() || !lib_camera_home()) return;
+	brief();
 }
 
 /* A phase's banner: BN5's where its ROM is there (its length, its sound
@@ -897,6 +944,10 @@ uint32_t lib_keys(uint32_t keys) {
 		return keys;
 	}
 	viewing = false;
+	if (LB.step == LIB_STEP_PICK) {
+		lib_pick_step(pressed);
+		return 0;
+	}
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
 	if (LB.step == LIB_STEP_BONUS) lib_bonus_keys(pressed);
 	return keys & (KEY_START | KEY_SELECT);

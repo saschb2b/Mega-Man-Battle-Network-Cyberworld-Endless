@@ -17,8 +17,10 @@ of the generator with its measures, and stages 1 to 3 in the engine: the
 dark layer and its board (Stage 1, as built, below), BN5's liberation
 battle on BN6's own battle loop (Stage 2, as built), the team, the run's
 Soul Navis beside MegaMan, each fought as MegaMan in his Soul (Stage 3,
-as built), and a sealed region's route kept for the run, a third way at
-the next fork (Special routes).
+as built), the run's Cross Navis beside them with Team ProtoMan's
+commands and the team picked on arrival (The Cross Navis and the team
+picked, as built), and a sealed region's route kept for the run, a third
+way at the next fork (Special routes).
 
 ## Summary
 
@@ -37,12 +39,16 @@ the next fork (Special routes).
   BN5's kinds by BN5's rules, rejects what breaks a guarantee, and sets the
   par from a planner that plays it by BN5's rules, scaled by the planner's
   own result on BN5's nine.
-- **The team, as built:** MegaMan and the Navis whose BN5 Souls the run
-  holds, as many as BN5's team of the stage, each with BN5's HP for it,
+- **The team, as built:** MegaMan and the Navis whose BN5 Souls or BN6
+  Crosses the run holds, the player picking who comes where more are held
+  than BN5's team of the stage has places; a Cross Navi brings Team
+  ProtoMan's command of his element, read in BN5's ROM, and fights as
+  MegaMan in his Cross. Each with BN5's HP for the stage,
   his command and his turn a phase, play passing on as BN5's board passes
   it (romlab, mission 2); the Navi in play walks as BN6's player in his own
-  BN5 body; a teammate's battle is MegaMan in his Soul from the first turn
-  with his HP, and deleted there he leaves the board, not the run.
+  body (BN5's for a Soul's Navi, BN6's for a Cross's); a teammate's battle
+  is MegaMan in his Soul or Cross from the first turn with his HP, and
+  deleted there he leaves the board, not the run.
 - **The prototype** (`tools/liberation.py`; `tools/liberation_bn5.py` for
   BN5's own boards) makes 144 missions over acts 2-6 and measures them
   against BN5's nine: the boards keep to BN5's bands of shape and dark,
@@ -216,20 +222,25 @@ Colonel 200 to 800, KnightMan 400 to 900, ShadowMan 250 to 700, TomahawkMan
 The commands are BN5's own list (**text**): Liberation, LongSwrd, WideSwrd,
 ScrenDiv, TwinLiberation (twice), LifeMelody, BombLiberation, SneakAttack,
 PanelSearch, NumberCheck, Napalm, TomahawkSwing, MagnetBarrier, Save, Pass.
-Their shapes are the guides' (the routines that apply them are not traced):
+Their shapes are the guides'; Team ProtoMan's five (WideSwrd, Napalm,
+MagnetBarrier, PanelSearch, BombLiberation) are read in Team Colonel's
+ROM, which runs one code for both versions and keeps their routines and
+shapes (**ROM, play**: The Cross Navis and the team picked, as built,
+below), and LongSwrd's, ScrenDiv's and TomahawkSwing's there match the
+guides':
 
 | Navi | Command | What it does |
 | --- | --- | --- |
 | MegaMan | LongSwrd | Two panels in a line, one battle |
-| Colonel (ProtoMan) | ScrenDiv (WideSwrd) | Three across, one battle; can save |
+| Colonel (ProtoMan) | ScrenDiv (WideSwrd) | Three across, one battle; can save (**ROM**: one shape and routine for both) |
 | TomahawkMan | TomahawkSwing | Two deep and three wide, one battle |
-| NapalmMan | Napalm | Four ahead and both sides of the third |
+| NapalmMan | Napalm | Four ahead and both sides of the third, one battle (**ROM**) |
 | NumberMan | NumberCheck | Two by three ahead, no battle: takes the items, disarms traps, liberates nothing |
-| SearchMan | PanelSearch | A line of dark panels: items shown, then liberated after one battle |
+| SearchMan | PanelSearch | The line of dark and item panels from the one faced, ten at most: its item and trap panels alone liberated after one battle; none, no battle and the Order Point spent (**ROM**) |
 | ShadowMan | SneakAttack | Passes over dark panels; strikes a guardian or the Darkloid one or two ahead (never below 1 HP) |
-| GyroMan | BombLiberation | Flies over dark panels; liberates the one beneath him without a battle |
+| GyroMan | BombLiberation | Flies over dark, item and BonusPanels; liberates the plain dark panel beneath him without a battle, an item's not (**ROM**) |
 | KnightMan | (none) | Takes no damage on the board; shields a Navi beside him |
-| MagnetMan | MagnetBarrier | The team takes no damage on the board until the next phase |
+| MagnetMan | MagnetBarrier | The team takes no damage on the board until the next phase (**ROM**: every teammate's flag 0x40, cleared at the Darkloids' phase's end) |
 | ToadMan | LifeMelody | A teammate beside him liberates five ahead this phase |
 | Meddy | TwinLiberation | Battles at both ends of a line; a second Navi finishes it from the far end |
 
@@ -565,10 +576,11 @@ BN5's Team Colonel liberates with Colonel, KnightMan, ShadowMan, NumberMan,
 TomahawkMan and ToadMan: the six BN5 Navis whose Souls a run already wins
 (docs/BOSSES.md, BN5's Navis). So a held Soul lends that Navi to the board,
 with his BN5 command; the team grows as BN5's does, mission by mission,
-run by run (act 2: MegaMan and one at most). Without BN5's ROM, or for
-BN6's Navis, a held Cross could lend its Navi with a command of BN5's kinds
-(a line, a wide, an area, mobility, defence, support): not chosen (the
-owner's decision 4, 25 October 2026: BN5's Souls only).
+run by run (act 2: MegaMan and one at most). A held Cross lends its Navi
+too, with Team ProtoMan's command of his element (the owner's decisions 9
+and 10, 25 October 2026, which turn decision 4 round: The Cross Navis and
+the team picked, as built), and where the run holds more Navis than the
+team has places, the player picks who comes.
 
 In battle, a teammate's liberation is fought as MegaMan in that Navi's Soul
 (or Cross) from the first turn, with the teammate's own HP pool: BN5's own
@@ -749,9 +761,11 @@ than 10 phases over the par's (the prototype: 1 to 8, scaled as the par),
 where LongSwrd goes unused or wins more than 40% of the phases, where the
 act's barrier or traps find no place, or where a unit reaches the start.
 
-**The command rule.** The run knows which Souls it holds when a layer is
-made, so the generator makes the board for its team. First it gives each
-teammate's command its situation (`situations`): a roaming guardian on the
+**The command rule.** The run knows which Navis it holds when a layer is
+made, so the generator makes the board for them: every held Navi's
+command, the team's or not, since the player picks the team on arrival
+(the engine's, The Cross Navis and the team picked, as built). First it
+gives each command its situation (`situations`): a roaming guardian on the
 way to a DarkHole for SneakAttack; a cache of four item panels in a 3x2 of
 dark, a clean panel beside it to stand on (from act 4 one of them a trap)
 for NumberCheck; a dark line of five on the way for LifeMelody; at least
@@ -2118,10 +2132,168 @@ pacing` (the owner's decision 5: their boards rarely fit five Navis on a
 layer's floor and fall to a smaller team); Colonel's Save; SneakAttack on
 the Darkloid (his HP is whole each battle); BN5's own special chip each teammate brings to his
 Custom screen (Colonel's C-Cannon), and his own folder; the command
-rule's situations (tools/liberation.py: a board kept only where every
-teammate's command earns its point); the second screen's board; the time
+rule's earn check (tools/liberation.py: a board kept only where every
+teammate's command earns its point; its spots are built since, The Cross
+Navis and the team picked, as built); the second screen's board; the time
 a team's board takes to make on the New 3DS (the planner plays every
 Navi); co-op over the server, each battle its own player's (stage 5).
+
+
+### The Cross Navis and the team picked, as built (25 October 2026)
+
+The owner's decisions 9 and 10 (below), each as recommended: BN6's Cross
+Navis join the board with Team ProtoMan's commands, BN5's chip kept for
+the Souls; the player picks the team on arrival.
+
+**Team ProtoMan's commands, traced** (romlab on the plain ROM, mission 1
+with a unit's Navi id poked; `src/emu/bn5_liberation_cmds.h`,
+docs/ROM_DATA.md's BN5's Liberation commands). Team Colonel runs one code
+for both versions: a Navi's commands are a mask (a u16 a Navi at
+0x08050048: bit n is command n and entry n of the board's text), each
+command's check, step and after-battle step are tables by its number, and
+its panels come from a table of shapes by Navi and facing (0x08050344).
+Team ProtoMan's Navis are ids 1-6 (ProtoMan, GyroMan, SearchMan,
+NapalmMan, MagnetMan, Meddy) and their five commands are all there:
+
+| Command | Cross Navi | In BN5's ROM |
+| --- | --- | --- |
+| Napalm | HeatMan | four ahead and both sides of the third (shape 0x08050762), one battle |
+| MagnetBarrier | ElecMan | no battle, no target: every teammate's flag 0x40 (0x08054518) takes his harm to 0 till the Darkloids' phase's end |
+| WideSwrd | SlashMan | ScrenDiv's own shape and steps: three across, one battle |
+| PanelSearch | EraseMan | the line from the faced panel over dark and item panels with no enemy, ten at most, cut to its item and trap panels: one battle frees those alone; with none, no battle and the Order Point spent |
+| BombLiberation | ChargeMan | no battle: the plain dark panel under the flier freed (an item's will not do); his walk mask lets him stand on dark, item and BonusPanels |
+
+The Cross Navis take them by element, as the recommendation set them out:
+Fire's area for HeatMan, Elec's shield for ElecMan, the sword's sweep for
+SlashMan, EraseMan's search, ChargeMan's flying bomb. The pairing is ours;
+the commands are BN5's.
+
+**Who comes** (`liberation_team.c`). Every Navi the run holds: BN5's Souls
+whose bodies stand in BN6 (as stage 3 has them), then Gregar's Cross Navis,
+the Cross brought or those won from an earlier act's guardians, read from
+the run's state alone (`powers_cross_held`: a checkpoint rebuilds the
+board before the game's state is back). The board keeps them all for the
+command rule; its team is as many as BN5's of the stage has places, the
+layer's seed choosing the team the board is made for, and the player the
+team that comes.
+
+**On the board.** A Cross Navi stands in BN6's own overworld sprite, as
+BN6's guardians stand on layers (`guardian_sprite`: HeatMan 0x47, ElecMan
+0x49, SlashMan 0x4B, EraseMan 0x50, ChargeMan 0x4F, each a plain sprite
+the map loads with no list of its own), speaks with his own mugshot, and
+in play walks as BN6's player in that body. His HP is the median of BN5's
+six at the stage (`BN5_LIB_NAVI_HP`, the mean of the middle two: 300 at
+acts 2 and 3, 350 at act 4), as BN5 never sends him. His lines keep the
+habit BN6 gives him (docs/VOICE.md, The guardians), in
+`liberation_team_words.c`. The commands work as BN5's: Napalm's and
+WideSwrd's shapes, MagnetBarrier as a BonusPanel's shield over the team
+till the next phase, PanelSearch's items and traps of its line freed by
+one battle (its menu line greyed where its line holds none: our board
+shows every item, so its search has nothing to find), and BombLiberation
+from the flier's own panel. ChargeMan flies: while he is in play the
+board's fence lets him onto its dark, item and trap panels (our walls,
+not BN6's walk: he walks as BN6 walks its player), and A over a plain
+dark panel opens his window; BN5's lets GyroMan onto BonusPanels too,
+ours not (a BonusPanel here is taken from beside it).
+
+**His battle** is MegaMan in that Navi's Cross from the first turn, with
+the Navi's HP: at the first Custom screen's OK the Cross is committed as
+CROSSSELECT's commit writes it (`BN6_CROSS_RECORD`, 0 for its chaos, its
+used bit in `BN6_CROSSES_USED`), so BN6 crosses him as TURN 1 START!
+shows and its own rules run after: a hit of his weakness breaks the
+Cross, and he finishes as plain MegaMan. For any teammate's battle, a
+Soul's too, MegaMan's Crosses are off CROSSSELECT (their flags cleared
+and set back after it: `powers_crosses_hide`) and UNITE is not offered,
+so he fights in the teammate's form alone. Deleted there, the Cross Navi
+leaves the board as a Soul's teammate does.
+
+**The team picked** (`liberation_pick.c`, `liberation_pick_draw.c`, its
+words `liberation_pick_text.c`). After the board's opening look (the
+camera to the Darkloid and back) and before L's briefing and PLAYER PHASE
+01, where the run holds more Navis than the board has places beside
+MegaMan, the TEAM screen opens: our own in BN6's PET look (docs/UI.md),
+as neither BN6 nor BN5 has a team screen. The held Navis in a list, those
+picked in gold in the ChipFolder's EQUIP corners, the places filled on
+the band ("1/2"); for the cursor's Navi his mugshot, HP and weakness, the
+form his battles take (ColonelSoul, HeatCross), and his command with its
+kind (1 BATTLE, NO BATTLE, ALWAYS ON) and its shape on a small grid. A
+picks or puts back (with one place, A swaps), GO! or START takes the team
+once every place is filled, B does nothing: the team must come. It opens
+on the run's last pick where its Navis are held, the cursor on GO! when
+that fills the places, so one press takes it again. Where the pick
+differs from the board's team, its Navis go to the team's places, their
+bodies are written into the board's objects (`lib_team_dress`: the
+objects' scripts' sprite numbers, BN5's bodies copied in again) and the
+map is entered again for them, and the par is the planner's for the team
+picked (`lib_plan_par`: the board's own plays again, from the seed it was
+made with). The board's note (`run.lib`, "CLB5") keeps the team, its par
+and the run's last pick, so a CONTINUE takes the same board, team and par
+back, and the next board opens on the same pick.
+
+**The command rule in the engine** (`liberation_board.c`). Every held
+Navi's command gets its spot, not only the team's, so any pick has its
+use: two spots of a shape command's whole shape of dark beside a clean
+panel to stand on (ScrenDiv, WideSwrd, TomahawkSwing, Napalm), one dark
+line of five for LifeMelody, the spot that darkens the fewest clean panels
+darkened where too few stand; an item in a dark line for PanelSearch; a
+cache of Order Points and a heart in a two by three for NumberCheck.
+MagnetBarrier, SneakAttack and BombLiberation find theirs on every board
+(a unit's reach, a DarkHole's guardians, dark panels). The prototype's
+check that each command earns its Order Point is not run in the engine.
+`LAYER_MAKE` 103.
+
+**The design** (the game-design skill). The experience: "I read this dark
+area, then choose who it needs." The dialectic stays the run's, *press on
+or prepare*, and the pick adds a loadout's: BN5's places are the budget
+(loadout as budget, opportunity cost: taking one Navi leaves another),
+and the board's spots for every held command keep each pick situational,
+never a dominant one. The loop layers: the session's board, fed by the
+run's Souls and Crosses, feeding nothing past the run (variety, not
+power). The patterns: per-character subsystems over one chassis (each
+Navi's one command), give the defender a verb (MagnetBarrier), an honest
+telegraph (the board seen whole before the pick, each command's shape
+and kind on the screen), and the player's time respected (the screen
+only where there is a choice, the last pick ready under one press). The
+costs of a Cross Navi: his form's weakness breaks his Cross in battle,
+and his HP is the stage's middle, not a specialist's.
+
+**The measures** (`tests/test_core.c`, `test_liberation_team`: 12 layers
+an act, teams of Cross Navis with more held than placed, their HP the
+median's):
+
+| Act | Team (held) | Boards | Par | Another pick's par | Commands a play |
+| --- | --- | --- | --- | --- | --- |
+| 2 | MegaMan, HeatMan (+ Colonel, EraseMan) | 10 of 12 | 5 | 6 | 3.5 |
+| 3 | MegaMan, ElecMan, ChargeMan (+ SlashMan, NumberMan) | 12 of 12 | 7 | 7 | 4.0 |
+| 4 | MegaMan, SlashMan, EraseMan, HeatMan (+ ElecMan, ChargeMan) | 12 of 12 | 7 | 6 | 8.1 |
+
+A pick's par is the same twice from the same board and pick. The teams of
+Souls alone stand as stage 3 measured them (act 2's 16 boards, act 3's
+15, act 4's 16), their spots now made for every held command.
+
+**Checked:** the unit tests above and `build.py lint`; the autopilot (its
+pick the screen's first, its window a Cross Navi's command where it can
+be taken, MagnetBarrier where a unit's reach covers him, the flier onto
+plain dark panels) through dark boards with a Cross brought, `--dev
+dark,god,onehit`: act 2 (`--run-depth 5`) seed 1 with ElecMan,
+MagnetBarrier twice, the board won and its exit taken; seed 2 with
+ChargeMan, BombLiberation twice, then a GAME OVER where one hit passed
+MegaMan's 100 HP (`god` refills HP between frames, never against one
+blow); seed 3 with EraseMan, his battle as EraseCross, then MegaMan's own
+Surrounded battle frozen after an AreaGrab (Left for later). Act 3
+(`--run-depth 8`, `souls=0x3F`): seed 1 with Colonel and SlashMan,
+WideSwrd three times, ColonelSoul's and SlashCross's battles; seed 2
+with Colonel and NumberMan (the seed's team; no Cross picked); seed 3 a
+plain layer (no barrier found even alone, as stage 3's seeds met). By
+hand: the pick screen at acts 2 and 3, Colonel swapped for NumberMan and
+the map entered again with NumberMan and HeatMan on the board, HeatMan's
+battle in HeatCross on his 300 HP.
+
+**Left for later:** TwinLiberation and Colonel's Save (not traced);
+BombLiberation's flier on BonusPanels; the prototype's earn check in the
+engine; an AreaGrab in a Surrounded liberation battle froze the battle
+under the autopilot (MegaMan's own, with no Cross in it: lib-battle's
+field); the second screen's pick; co-op's pick, one player's each.
 
 ## The owner's decisions
 
@@ -2144,7 +2316,8 @@ Decided on 25 October 2026, as recommended:
 4. **BN6's Crosses as teammates:** not lent; the team is BN5's Souls only,
    and a run without BN5's ROM meets no dark layer. Revisited only if act
    2's team (MegaMan and one teammate at most) feels thin once the team has
-   landed (Stage 3, as built).
+   landed (Stage 3, as built). *Turned round by 9 and 10, below, at a
+   player's request.*
 5. **Acts 5 and 6:** their dark layers (`--dev dark`'s alone: a run meets
    acts 2 to 4) are tuned after the team, with `build.py pacing` over boards
    with their teams, not for a lone MegaMan: a follow-up of stage 3's
@@ -2157,3 +2330,16 @@ Decided on 25 October 2026, as recommended:
    way at the act's next fork (Special routes).
 8. **Every remaining alignment with BN5** is built in its own branch,
    BN5 in romlab the hard reference, side by side in its pull request.
+
+Decided on 25 October 2026, as recommended, at a player's request ("the
+Cross Navis on the board too"):
+
+9. **BN6's Cross Navis join the board:** the Cross brought and those
+   found, each with Team ProtoMan's command of his element (HeatMan
+   Napalm, ElecMan MagnetBarrier, SlashMan WideSwrd, EraseMan PanelSearch,
+   ChargeMan BombLiberation), fought as MegaMan in his Cross; BN5's Soul
+   chip stays the Souls' (The Cross Navis and the team picked, as built).
+10. **The player picks the team on arrival,** from every held Navi, for
+    the places BN5's team of the stage holds, where there are more Navis
+    than places; the last pick remembered; every held Navi's command a
+    spot on the board.

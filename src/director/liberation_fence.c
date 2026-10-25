@@ -24,6 +24,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "netmap.h"
 
 #define FENCE_EVENT   0x1640   /* BN6's map events: a wall of value 0x80 + n is off while 0x1640 + n is set */
@@ -151,10 +152,12 @@ void lib_fence_update(void) {
 	/* (the board won: every wall off, the way to the exit open) */
 	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE || (LB.step == LIB_STEP_TALK && LB.after == LIB_STEP_DONE);
 	uint32_t shapes = BN6_COORD_ENTRIES + F.count * BN6_COORD_ENTRY;
+	bool flier = (LB.step == LIB_STEP_MOVE || LB.step == LIB_STEP_MENU) && lib_mate_command(lib_in_play()) == LIB_DO_BOMB;
 	for (int i = 0; i < F.n; ++i) {
 		int x = F.px[i], y = F.py[i];
-		/* (walked: its walls off; dark again, Bladia's: on) */
-		bool shut = !open && (blocking(LB.b.kind[y][x]) || lib_unit_at(x, y) >= 0);
+		/* (walked: its walls off; dark again, Bladia's: on; a dark one off
+		 * for BombLiberation's flier in play, who hovers over it) */
+		bool shut = !open && ((blocking(LB.b.kind[y][x]) && !(flier && lib_flown(&LB.b, x, y))) || lib_unit_at(x, y) >= 0);
 		uint8_t want = 0x80 | (shut ? FENCE_SHUT : FENCE_OPEN);
 		uint32_t at = shapes + F.at[i] * BN6_COORD_ENTRY + BN6_COORD_VALUE;
 		if (emu_read8(at) != want && emu_read16(BN6_COORD_ENTRIES + F.at[i] * BN6_COORD_ENTRY) == F.key[i]) emu_write8(at, want);

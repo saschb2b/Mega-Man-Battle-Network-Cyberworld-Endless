@@ -90,94 +90,7 @@ static bool on_board(const LibBoard *b, int x, int y) {
 	return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && b->kind[y][x] != LIB_VOID;
 }
 
-bool lib_dark_kind(int k) { return k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_TRAP; }
-
-bool lib_walkable(const LibBoard *b, int x, int y) {
-	return on_board(b, x, y) && (b->kind[y][x] == LIB_CLEAN || b->kind[y][x] == LIB_BONUS);
-}
-
-int lib_holes_left(const LibBoard *b) {
-	int n = 0;
-	for (int i = 0; i < b->nholes; ++i) n += b->kind[b->hole_y[i]][b->hole_x[i]] == LIB_HOLE;
-	return n;
-}
-
-bool lib_liberable(const LibBoard *b, int x, int y) {
-	if (!on_board(b, x, y)) return false;
-	int k = b->kind[y][x];
-	return k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP || k == LIB_HOLE || (k == LIB_RING && !lib_holes_left(b));
-}
-
-int lib_dark_around(const LibBoard *b, int x, int y) {
-	int n = 0;
-	for (int d = 0; d < 8; ++d) {
-		int nx = x + dir8[d][0], ny = y + dir8[d][1];
-		if (on_board(b, nx, ny)) n += lib_dark_kind(b->kind[ny][nx]);
-	}
-	return n;
-}
-
-int lib_darkloid_heal(const LibBoard *b, int hp, int max) {
-	if (hp >= max) return hp;
-	hp += max / 10 * lib_dark_around(b, b->boss_x, b->boss_y);
-	return hp > max ? max : hp;
-}
-
-int lib_open_barrier(LibBoard *b, int n) {
-	int opened = 0;
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x)
-			if (b->kind[y][x] == LIB_BAR && b->item[y][x] == n) { b->kind[y][x] = LIB_CLEAN; b->item[y][x] = 0; ++opened; }
-	return opened;
-}
-
 static int manhattan(int ax, int ay, int bx, int by) { return abs(ax - bx) + abs(ay - by); }
-
-/* ---- the team ---- */
-
-int lib_mate_at(const LibBoard *b, int x, int y) {
-	for (int k = 0; k < b->team.n; ++k)
-		if (!b->mate[k].out && b->mate[k].x == x && b->mate[k].y == y) return k;
-	return -1;
-}
-
-int lib_command_of(int navi) {
-	switch (navi) {
-	case MATE_MEGAMAN: return LIB_DO_LONGSWRD;
-	case MATE_COLONEL: return LIB_DO_SCRENDIV;
-	case MATE_TOMAHAWKMAN: return LIB_DO_TOMAHAWK;
-	case MATE_NUMBERMAN: return LIB_DO_NUMBER;
-	case MATE_SHADOWMAN: return LIB_DO_SNEAK;
-	case MATE_TOADMAN: return LIB_DO_MELODY;
-	default: return LIB_DO_NONE;   /* (KnightMan: his StoneBody, always on) */
-	}
-}
-
-/* The shapes BN5's guides give the commands (docs/LIBERATION.md, The
- * Navis), from the panel faced: LongSwrd two in a line; ScrenDiv three
- * across; TomahawkSwing and NumberCheck two deep and three wide;
- * SneakAttack one or two ahead; LifeMelody's five ahead */
-int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]) {
-	static const struct { int8_t deep, wide; } shape[] = {
-		[LIB_DO_NONE] = { 1, 0 }, [LIB_DO_LONGSWRD] = { 2, 0 }, [LIB_DO_SCRENDIV] = { 1, 1 }, [LIB_DO_TOMAHAWK] = { 2, 1 },
-		[LIB_DO_NUMBER] = { 2, 1 }, [LIB_DO_SNEAK] = { 2, 0 }, [LIB_DO_MELODY] = { 5, 0 },
-	};
-	if (command < 0 || command > LIB_DO_MELODY || dir < 0 || dir > 3) return 0;
-	int n = 0, px = -dir4[dir][1], py = dir4[dir][0];
-	for (int d = 0; d < shape[command].deep; ++d)
-		for (int w = -shape[command].wide; w <= shape[command].wide; ++w) {
-			int tx = x + d * dir4[dir][0] + w * px, ty = y + d * dir4[dir][1] + w * py;
-			if (n < 6 && on_board(b, tx, ty)) { xs[n] = tx; ys[n] = ty; ++n; }
-		}
-	return n;
-}
-
-bool lib_mate_shielded(const LibBoard *b, int k) {
-	if (k < 0 || k >= b->team.n || b->mate[k].out) return false;
-	for (int j = 0; j < b->team.n; ++j)
-		if (b->team.navi[j] == MATE_KNIGHTMAN && !b->mate[j].out && manhattan(b->mate[j].x, b->mate[j].y, b->mate[k].x, b->mate[k].y) <= 1) return true;
-	return false;
-}
 
 /* Walks from (sx, sy) over the board's floor, barriers shut where `bars`
  * (and the panels in `wall`, a candidate's): into dist (-1 unreached); the
@@ -872,6 +785,136 @@ static bool place_team(LibBoard *b, int16_t reach[MAP_H][MAP_W], int n) {
 	return true;
 }
 
+/* ---- the command rule: every held Navi's command its spot ---- */
+
+/* The Navis' commands the board gives a spot: the team's and every one
+ * held (docs/LIBERATION.md, The command rule: the player picks the team on
+ * arrival, so any of them may come); into has[LIB_DOS] */
+static void held_commands(const LibTeam *t, bool has[LIB_DOS]) {
+	memset(has, 0, sizeof(bool) * LIB_DOS);
+	for (int k = 1; k < t->n; ++k) has[lib_command_of(t->navi[k])] = true;
+	for (int i = 0; i < t->nheld; ++i) has[lib_command_of(t->held[i])] = true;
+}
+
+/* A shape command's panels from the one faced (fx, fy) facing d, as a spot
+ * asks for them whole: LifeMelody's five, PanelSearch's line of three, the
+ * rest their shapes; how many, 0 where the board cuts it short */
+static int spot_shape(const LibBoard *b, int command, int fx, int fy, int d, int xs[6], int ys[6]) {
+	static const int8_t whole[LIB_DOS] = { [LIB_DO_SCRENDIV] = 3, [LIB_DO_WIDESWRD] = 3, [LIB_DO_TOMAHAWK] = 6, [LIB_DO_NAPALM] = 6, [LIB_DO_MELODY] = 5 };
+	if (command == LIB_DO_SEARCH) {
+		for (int i = 0; i < 3; ++i) {
+			xs[i] = fx + i * dir4[d][0]; ys[i] = fy + i * dir4[d][1];
+			if (!on_board(b, xs[i], ys[i])) return 0;
+		}
+		return 3;
+	}
+	int n = lib_command_panels(b, command, fx, fy, d, xs, ys);
+	return n == whole[command] ? n : 0;
+}
+
+/* A spot's worth of panels free to darken: on the board past the start's
+ * first panels, clean or dark already, nothing of the board's on them; the
+ * clean ones among them, -1 not so */
+static int spot_cost(const LibBoard *b, int16_t reach[MAP_H][MAP_W], const int *xs, const int *ys, int n) {
+	int clean = 0;
+	for (int i = 0; i < n; ++i) {
+		int k = b->kind[ys[i]][xs[i]];
+		if ((k != LIB_CLEAN && k != LIB_DARK && k != LIB_ITEM) || reach[ys[i]][xs[i]] <= 2 || unit_on(b, xs[i], ys[i]) || by_hole(b, xs[i], ys[i]) ||
+		    manhattan(xs[i], ys[i], b->boss_x, b->boss_y) <= 2)
+			return -1;
+		clean += k == LIB_CLEAN;
+	}
+	return clean;
+}
+
+/* Command `command` its spots: a clean panel to stand on beside its whole
+ * shape of dark (the prototype's `situations`: three for ScrenDiv and
+ * TomahawkSwing there, two on the engine's smaller layers; one line for
+ * LifeMelody and PanelSearch); where too few, the spot that darkens the
+ * fewest clean panels darkened */
+#define SPOTS 2
+static void spot_for(LibBoard *b, int16_t reach[MAP_H][MAP_W], int command) {
+	int need = command == LIB_DO_MELODY || command == LIB_DO_SEARCH ? 1 : SPOTS, have = 0, best = 99, seen = 0, bx = -1, by = -1, bd = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (b->kind[y][x] != LIB_CLEAN || reach[y][x] < 0) continue;
+			for (int d = 0; d < 4; ++d) {
+				int xs[6], ys[6], n = spot_shape(b, command, x + dir4[d][0], y + dir4[d][1], d, xs, ys), c = n ? spot_cost(b, reach, xs, ys, n) : -1;
+				if (c < 0) continue;
+				if (!c) { ++have; continue; }
+				if (c < best) { best = c; seen = 0; }
+				if (c == best && rrange(++seen) == 0) { bx = x; by = y; bd = d; }
+			}
+		}
+	if (have >= need || bx < 0) return;
+	int xs[6], ys[6], n = spot_shape(b, command, bx + dir4[bd][0], by + dir4[bd][1], bd, xs, ys);
+	for (int i = 0; i < n; ++i)
+		if (b->kind[ys[i]][xs[i]] == LIB_CLEAN) b->kind[ys[i]][xs[i]] = LIB_DARK;
+}
+
+static void place_spots(LibBoard *b, int16_t reach[MAP_H][MAP_W], const LibTeam *t) {
+	bool has[LIB_DOS];
+	held_commands(t, has);
+	static const uint8_t shaped[] = { LIB_DO_SCRENDIV, LIB_DO_WIDESWRD, LIB_DO_TOMAHAWK, LIB_DO_NAPALM, LIB_DO_MELODY };
+	for (unsigned i = 0; i < sizeof shaped; ++i)
+		if (has[shaped[i]]) spot_for(b, reach, shaped[i]);
+}
+
+/* PanelSearch's spot: a dark line from a clean panel with an item in it
+ * (BN5's frees the line's items and traps alone), where the board has
+ * none: an Order Points item two along the longest such line */
+static void place_search(LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
+	int best = 2, bx = -1, by = -1, bd = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (b->kind[y][x] != LIB_CLEAN || reach[y][x] < 0) continue;
+			for (int d = 0; d < 4; ++d) {
+				int xs[6], ys[6], len = 0;
+				if (lib_command_panels(b, LIB_DO_SEARCH, x + dir4[d][0], y + dir4[d][1], d, xs, ys)) return;
+				while (len < BN5_LIB_SEARCH_MAX && b->kind[y + (len + 1) * dir4[d][1]][x + (len + 1) * dir4[d][0]] == LIB_DARK &&
+				       on_board(b, x + (len + 1) * dir4[d][0], y + (len + 1) * dir4[d][1]) && !region[y + (len + 1) * dir4[d][1]][x + (len + 1) * dir4[d][0]])
+					++len;
+				if (len > best) { best = len; bx = x; by = y; bd = d; }
+			}
+		}
+	if (bx < 0) return;
+	b->kind[by + 2 * dir4[bd][1]][bx + 2 * dir4[bd][0]] = LIB_ITEM;
+	b->item[by + 2 * dir4[bd][1]][bx + 2 * dir4[bd][0]] = LIB_GOT_OP | 2 << 4;
+}
+
+/* NumberCheck's spot: a cache of items in a two by three of dark with a
+ * clean panel before it (the prototype's: Order Points and a heart), where
+ * the board has none; PanelSearch's */
+static void place_cache(LibBoard *b, int16_t reach[MAP_H][MAP_W], const LibTeam *t) {
+	bool has[LIB_DOS];
+	held_commands(t, has);
+	if (has[LIB_DO_SEARCH]) place_search(b, reach);
+	if (!has[LIB_DO_NUMBER]) return;
+	int seen = 0, bx = -1, by = -1, bd = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (b->kind[y][x] != LIB_CLEAN || reach[y][x] < 0) continue;
+			for (int d = 0; d < 4; ++d) {
+				int xs[6], ys[6], n = lib_command_panels(b, LIB_DO_NUMBER, x + dir4[d][0], y + dir4[d][1], d, xs, ys), items = 0, dark = 0;
+				for (int i = 0; i < n; ++i) {
+					int k = b->kind[ys[i]][xs[i]];
+					items += k == LIB_ITEM;
+					dark += k == LIB_DARK && !region[ys[i]][xs[i]] && !unit_on(b, xs[i], ys[i]) && !by_hole(b, xs[i], ys[i]);
+				}
+				if (n == 6 && items >= 2) return;
+				if (n == 6 && dark + items == 6 && rrange(++seen) == 0) { bx = x; by = y; bd = d; }
+			}
+		}
+	if (bx < 0) return;
+	int xs[6], ys[6], n = lib_command_panels(b, LIB_DO_NUMBER, bx + dir4[bd][0], by + dir4[bd][1], bd, xs, ys), put = 0;
+	static const uint8_t cache[3] = { LIB_GOT_OP | 2 << 4, LIB_GOT_HEART, LIB_GOT_OP | 3 << 4 };
+	for (int i = 0; i < n && put < 3; ++i) {
+		if (b->kind[ys[i]][xs[i]] != LIB_DARK || rpercent() < 40) continue;
+		b->kind[ys[i]][xs[i]] = LIB_ITEM;
+		b->item[ys[i]][xs[i]] = cache[put++];
+	}
+}
+
 /* One try at the board: its floor and kinds, LIB_WHY_NONE where it keeps
  * BN5's guarantees */
 static int make_once(LibBoard *b, int act, const LibTeam *t, LibFloor floor, bool few) {
@@ -899,10 +942,13 @@ static int make_once(LibBoard *b, int act, const LibTeam *t, LibFloor floor, boo
 	/* (a team's share of the dark: BN5's pars for its teams, 7 for two at
 	 * mission 1, 9 for three, 10 for four, against a lone board's own) */
 	prune_dark(b, dark_panels[a] * (team > 1 ? 2 * team - 2 : 1) + 8 * holes);
+	/* (the command rule: a spot for every held Navi's command) */
+	place_spots(b, reach, t);
 	if (!place_barriers(b, reach)) return LIB_WHY_BARRIER;
 	place_bonus(b, reach, spec[a].bonus);
 	place_items(b, spec[a].items);
 	place_loot(b, spec[a].loot);
+	place_cache(b, reach, t);
 	if (b->rules & LIB_RULE_TOLLS) place_traps(b, spec[a].traps);
 	if ((b->rules & LIB_RULE_TOLLS) && !b->traps) return LIB_WHY_TRAPS;
 	if (b->rules & LIB_RULE_REACH) place_roamers(b, reach, far, roam, spec[a].kinds);
@@ -923,6 +969,7 @@ bool lib_board_make(LibBoard *b, uint32_t seed, int act, const LibTeam *team, Li
 		for (int k = 0; k < 4; ++k) rnext();
 		uint32_t plan_seed = rnext();
 		int why = make_once(b, act, team, floor, t >= MAKE_TRIES / 2);
+		b->plan_seed = plan_seed;
 		if (why == LIB_WHY_NONE) why = lib_plan(b, plan_seed);
 		b->why = why;
 		b->tries = t + 1;

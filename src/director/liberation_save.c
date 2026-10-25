@@ -12,13 +12,15 @@
 #include <string.h>
 
 #include "debug.h"
+#include "director_state.h"
+#include "liberation_pick.h"
 #include "liberation_state.h"
 #include "liberation_team.h"
 #include "netmap.h"
 #include "run.h"
 #include "save_blob.h"
 
-#define LIB_NOTE_MAGIC 0x434C4234u   /* "CLB4": the units' HP on the board and the team (docs/LIBERATION.md, The team) */
+#define LIB_NOTE_MAGIC 0x434C4235u   /* "CLB5": the team picked, its par, and the run's last pick (docs/LIBERATION.md, The team picked) */
 
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */
@@ -38,8 +40,14 @@ typedef struct {
 	int32_t in_play, nteam, switch_to, switch_after;
 	struct { int16_t hp, wx, wy; uint8_t x, y, out, face, acted, melody, spoke, pad; } mate[LIB_TEAM];
 	uint8_t weak[LIB_UNITS];
+	/* the team picked on arrival (its Navis by place, MegaMan's first) and
+	 * the par it set; the run's last pick, kept on every layer */
+	uint8_t team[LIB_TEAM], pad3[3];
+	int32_t par;
+	uint32_t pick_run;
+	uint8_t pick_n, pick[LIB_TEAM - 1], pad4[3];
 } LibNote;
-_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 + LIB_UNITS * 2 + 16 + LIB_TEAM * 14 + 2 + LIB_UNITS &&
+_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 + LIB_UNITS * 2 + 16 + LIB_TEAM * 14 + 2 + LIB_UNITS + 24 &&
 	offsetof(LibNote, kind) == 68 + LIB_UNITS * 5, "Liberation save layout changed: bump LIB_NOTE_MAGIC");
 
 void lib_save(void) {
@@ -48,6 +56,9 @@ void lib_save(void) {
 	n.seed = run.layer_seed;
 	n.depth = run.depth;
 	n.on = LB.on;
+	n.pick_run = lib_pick_memory.run;
+	n.pick_n = lib_pick_memory.n;
+	memcpy(n.pick, lib_pick_memory.navi, sizeof n.pick);
 	if (LB.on) {
 		n.step = LB.step; n.after = LB.after; n.phase = LB.phase; n.op = LB.op; n.prize = LB.prize;
 		n.fight = LB.fight; n.fight_unit = LB.fight_unit; n.fight_cmd = LB.fight_cmd; n.fx = LB.fx; n.fy = LB.fy;
@@ -75,6 +86,8 @@ void lib_save(void) {
 			n.mate[k].spoke = LB.mate[k].spoke;
 		}
 		for (int u = 0; u < LIB_UNITS; ++u) n.weak[u] = LB.weak[u];
+		memcpy(n.team, LB.b.team.navi, sizeof n.team);
+		n.par = LB.b.par;
 	}
 	save_write_blob("run.lib", LIB_NOTE_MAGIC, &n, sizeof n);
 }
@@ -85,14 +98,30 @@ void lib_save(void) {
 static int resumed_step(int step, int after) {
 	if (step == LIB_STEP_TALK) step = after;
 	if (step == LIB_STEP_MENU || step == LIB_STEP_BONUS) step = LIB_STEP_MOVE;
+	/* (the pick asked again with the opening) */
+	if (step == LIB_STEP_PICK) step = LIB_STEP_WAIT;
 	return step;
 }
 
 bool lib_resume(void) {
 	LibNote n;
-	if (!LB.on || !save_read_blob("run.lib", LIB_NOTE_MAGIC, &n, sizeof n) || !n.on || n.seed != run.layer_seed || n.depth != run.depth ||
+	if (!save_read_blob("run.lib", LIB_NOTE_MAGIC, &n, sizeof n)) return false;
+	/* (the run's last pick, whatever the layer) */
+	lib_pick_memory.run = n.pick_run;
+	lib_pick_memory.n = n.pick_n < LIB_TEAM ? n.pick_n : 0;
+	memcpy(lib_pick_memory.navi, n.pick, sizeof n.pick);
+	if (!LB.on || !n.on || n.seed != run.layer_seed || n.depth != run.depth ||
 	    n.nunits != LB.b.nunits || n.nteam != LB.b.team.n || n.in_play < 0 || n.in_play >= n.nteam)
 		return false;
+	/* (the team picked: its Navis, the par it set, their bodies dressed for
+	 * the map's entry after) */
+	bool picked = false;
+	for (int k = 1; k < n.nteam; ++k) picked |= n.team[k] != LB.b.team.navi[k];
+	if (picked) {
+		lib_team_pick(n.team + 1, n.nteam - 1);
+		lib_team_dress(D.objs.lib_body);
+	}
+	if (n.par > 0) LB.b.par = n.par;
 	memcpy(LB.b.kind, n.kind, sizeof LB.b.kind);
 	memcpy(LB.b.item, n.item, sizeof LB.b.item);
 	LB.route_found = n.route_found != 0;
