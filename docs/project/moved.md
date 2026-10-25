@@ -245,6 +245,7 @@ All of it: [itch.io](../project/itch.md).
 | Guardians' strikes and returns as BN5's, as built (25 October 2026) (`#guardians-strikes-and-returns-as-bn5s-as-built-25-october-2026`) | [Guardians' strikes and returns as BN5's, as built](../game/liberation/building/guardians.md) |
 | Stage 4, as built: BN5's Darkloids (25 October 2026) (`#stage-4-as-built-bn5s-darkloids-25-october-2026`) | [Stage 4, as built: BN5's Darkloids](../game/liberation/building/stage-4-darkloids.md) |
 | Stage 3, as built: the team (25 October 2026) (`#stage-3-as-built-the-team-25-october-2026`) | [Stage 3, as built: the team](../game/liberation/building/stage-3-team.md) |
+| The Cross Navis and the team picked, as built (25 October 2026) (`#the-cross-navis-and-the-team-picked-as-built-25-october-2026`) | [The Cross Navis and the team picked, as built](../game/liberation/building/cross-navis-team.md) |
 | The owner's decisions (`#the-owners-decisions`) | [The owner's decisions](../game/liberation/decisions.md) |
 
 ## META.md
@@ -562,6 +563,7 @@ Its table, a row each, split by subsystem; its opening into [ROM data](../rom/ov
 | BN5's Liberation board: the L view's keys, the Darkloid's first word, the mission won and its tally | [BN5's Liberation Missions](../rom/liberation.md) |
 | BN5's Darkloids: Battle Network 5 Team Colonel | [BN5's Liberation Missions](../rom/liberation.md) |
 | BN5's Liberation board: the team's turns and HP | [BN5's Liberation Missions](../rom/liberation.md) |
+| BN5's Liberation board: the commands, both teams' | [BN5's Liberation Missions](../rom/liberation.md) |
 | BN6's player in another Navi's body, a teammate's Soul at OK, and the teammates' sprite numbers | [BN5's Liberation Missions](../rom/liberation.md) |
 | BN5 map objects: Battle Network 5 Team Colonel | [BN5's maps, songs, text and objects](../rom/bn5-world.md) |
 | GiveZenny and GiveBugfrags | [The game's structures, boot and events](../rom/game-state.md) |

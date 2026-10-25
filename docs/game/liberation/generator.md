@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The Liberation generator (`tools/liberation.py`): BN5-measured bands per act, six steps from floor to traps, the guarantees and command rule that reject boards, and the par from a planner (`liberation_plan.c`) scaled by BN5's ratio."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:41:43Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T13:43:58Z }
 ---
 
 # The generator
@@ -79,9 +79,11 @@ than 10 phases over the par's (the prototype: 1 to 8, scaled as the par),
 where LongSwrd goes unused or wins more than 40% of the phases, where the
 act's barrier or traps find no place, or where a unit reaches the start.
 
-**The command rule.** The run knows which Souls it holds when a layer is
-made, so the generator makes the board for its team. First it gives each
-teammate's command its situation (`situations`): a roaming guardian on the
+**The command rule.** The run knows which Navis it holds when a layer is
+made, so the generator makes the board for them: every held Navi's
+command, the team's or not, since the player picks the team on arrival
+(the engine's, The Cross Navis and the team picked, as built). First it
+gives each command its situation (`situations`): a roaming guardian on the
 way to a DarkHole for SneakAttack; a cache of four item panels in a 3x2 of
 dark, a clean panel beside it to stand on (from act 4 one of them a trap)
 for NumberCheck; a dark line of five on the way for LifeMelody; at least

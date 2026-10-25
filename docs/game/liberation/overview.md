@@ -3,7 +3,7 @@ type: Overview
 title: "Liberation Missions"
 description: "BN5's Liberation Missions dissected and made afresh from a seed as a dark layer: MegaMan and the run's Soul Navis liberate dark panels toward a Darkloid; the dissection, generator, prototype, stages built and decisions."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T01:28:59Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T13:43:58Z }
 ---
 
 # Liberation Missions
@@ -25,8 +25,10 @@ of the generator with its measures, and stages 1 to 3 in the engine: the
 dark layer and its board ([Stage 1, as built](building/stage-1.md)), BN5's liberation
 battle on BN6's own battle loop (Stage 2, as built), the team, the run's
 Soul Navis beside MegaMan, each fought as MegaMan in his Soul (Stage 3,
-as built), and a sealed region's route kept for the run, a third way at
-the next fork (Special routes).
+as built), the run's Cross Navis beside them with Team ProtoMan's
+commands and the team picked on arrival (The Cross Navis and the team
+picked, as built), and a sealed region's route kept for the run, a third
+way at the next fork (Special routes).
 
 ## Summary
 
@@ -45,12 +47,16 @@ the next fork (Special routes).
   BN5's kinds by BN5's rules, rejects what breaks a guarantee, and sets the
   par from a planner that plays it by BN5's rules, scaled by the planner's
   own result on BN5's nine.
-- **The team, as built:** MegaMan and the Navis whose BN5 Souls the run
-  holds, as many as BN5's team of the stage, each with BN5's HP for it,
+- **The team, as built:** MegaMan and the Navis whose BN5 Souls or BN6
+  Crosses the run holds, the player picking who comes where more are held
+  than BN5's team of the stage has places; a Cross Navi brings Team
+  ProtoMan's command of his element, read in BN5's ROM, and fights as
+  MegaMan in his Cross. Each with BN5's HP for the stage,
   his command and his turn a phase, play passing on as BN5's board passes
   it (romlab, mission 2); the Navi in play walks as BN6's player in his own
-  BN5 body; a teammate's battle is MegaMan in his Soul from the first turn
-  with his HP, and deleted there he leaves the board, not the run.
+  body (BN5's for a Soul's Navi, BN6's for a Cross's); a teammate's battle
+  is MegaMan in his Soul or Cross from the first turn with his HP, and
+  deleted there he leaves the board, not the run.
 - **The prototype** (`tools/liberation.py`; `tools/liberation_bn5.py` for
   BN5's own boards) makes 144 missions over acts 2-6 and measures them
   against BN5's nine: the boards keep to BN5's bands of shape and dark,

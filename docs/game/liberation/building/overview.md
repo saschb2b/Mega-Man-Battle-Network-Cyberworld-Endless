@@ -50,3 +50,4 @@ A staged plan, each stage its own pull request:
 - [Guardians' strikes and returns as BN5's, as built](guardians.md)
 - [Stage 4, as built: BN5's Darkloids](stage-4-darkloids.md)
 - [Stage 3, as built: the team](stage-3-team.md)
+- [The Cross Navis and the team picked, as built](cross-navis-team.md)

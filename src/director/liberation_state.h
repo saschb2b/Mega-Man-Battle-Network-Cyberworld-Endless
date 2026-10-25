@@ -24,6 +24,7 @@ enum {
 	LIB_STEP_CLEAR,    /* the Darkloid deleted: BN5's SUCCESS! and its song, then the tally (its value after the
 	                    * others', as a CONTINUE's note keeps the step) */
 	LIB_STEP_SWITCH,   /* play passing to another Navi of the team (liberation_team.c), then `after` */
+	LIB_STEP_PICK,     /* the team picked on arrival (liberation_pick.c), then the opening's words */
 };
 /* The board's objects: its units, then the team's Navis (liberation_team.c) */
 #define LIB_OBJS (LIB_UNITS + LIB_TEAM)
@@ -116,6 +117,7 @@ typedef struct {
 	} mate[LIB_TEAM];
 	bool weak[LIB_UNITS];  /* a unit SneakAttack struck: its next battle the easier */
 	bool mate_down;        /* the battle under way: its Navi deleted in it */
+	bool picked;           /* the arrival's pick asked (not kept: a CONTINUE before the first phase asks again) */
 } LibState;
 
 extern LibState LB;
@@ -141,6 +143,14 @@ int lib_unit_at(int x, int y);
 void lib_bonus_begin(int x, int y);
 void lib_bonus_update(void);
 void lib_bonus_keys(uint32_t pressed);
+
+/* (liberation_pick.c, liberation_pick.h) Whether the arrival asks for the
+ * team; its screen opened; a frame of its keys, the pick made taken: its
+ * Navis on the board (the map entered again where it changed them), the
+ * par theirs, then the opening's words (LIB_STEP_WAIT) */
+bool lib_pick_needed(void);
+void lib_pick_open(void);
+void lib_pick_step(uint32_t pressed);
 
 /* (liberation_darkloid.c) The Darkloid in his own sprite and face where
  * he is BN5's (guardians.h's 30-33), before his unit's object is made; his

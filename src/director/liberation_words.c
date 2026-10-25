@@ -179,8 +179,10 @@ const char *lib_command_label(int cmd, int command) {
 	static const char *const commands[] = {
 		[LIB_DO_NONE] = "", [LIB_DO_LONGSWRD] = "LongSwrd", [LIB_DO_SCRENDIV] = "ScrenDiv", [LIB_DO_TOMAHAWK] = "TomahawkSwing",
 		[LIB_DO_NUMBER] = "NumberCheck", [LIB_DO_SNEAK] = "SneakAttack", [LIB_DO_MELODY] = "LifeMelody",
+		[LIB_DO_NAPALM] = "Napalm", [LIB_DO_WIDESWRD] = "WideSwrd", [LIB_DO_MAGNET] = "MagnetBarrier",
+		[LIB_DO_SEARCH] = "PanelSearch", [LIB_DO_BOMB] = "BombLiberation",
 	};
-	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command <= LIB_DO_MELODY) return commands[command];
+	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command < LIB_DOS) return commands[command];
 	return cmd >= 0 && cmd < LIB_CMDS ? labels[cmd] : "";
 }
 

@@ -70,6 +70,20 @@ bool powers_cross_owned(int navi) {
 	return false;
 }
 
+bool powers_cross_held(int navi) {
+	if (!powers_cross_name(navi)) return false;
+	return run.cross ? navi == run.cross : beaten_before(navi, run.depth);
+}
+
+void powers_crosses_hide(bool hide) {
+	static uint8_t hidden;
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
+		if (hide && flag_get(crosses[i].flag)) { hidden |= (uint8_t)(1u << i); flag_clear(crosses[i].flag); }
+		if (!hide && (hidden >> i & 1)) flag_set(crosses[i].flag);
+	}
+	if (!hide) hidden = 0;
+}
+
 void powers_bring(void) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);

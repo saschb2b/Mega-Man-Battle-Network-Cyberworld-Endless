@@ -596,6 +596,7 @@ static void install_begin(Install *in) {
 	out->lib_zenny = -1;
 	for (int k = 0; k < (int)(sizeof out->lib_bonus / sizeof out->lib_bonus[0]); ++k) out->lib_bonus[k] = -1;
 	memset(out->lib_anim, 0, sizeof out->lib_anim);
+	memset(out->lib_body, 0, sizeof out->lib_body);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
 	layer_objs_official_level = 0;
@@ -866,7 +867,10 @@ static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
 	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 15;
 	if (!npc_need_sprite(&in->npcs, list, sprite) || in->npcs.n >= 32) return;
 	/* (its animation the board's: standing, its strike; liberation_turn.c) */
-	in->npcs.script[in->npcs.n++] = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);
+	uint32_t at = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);
+	in->npcs.script[in->npcs.n++] = at;
+	/* (npc_live's script names its sprite at +2, liberation_team.c's lib_team_dress) */
+	in->out->lib_body[u] = at ? at + 2 : 0;
 }
 
 /* Layer object i on the map: its talker and script, and its choice */

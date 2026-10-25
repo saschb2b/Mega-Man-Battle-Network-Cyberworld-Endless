@@ -19,6 +19,14 @@ const char *powers_cross_strength(int navi);
 const char *powers_cross_on_navis(int navi);
 /* Whether MegaMan has `navi`'s Cross: its CROSSSELECT entry on. */
 bool powers_cross_owned(int navi);
+/* ... held by the run, from its state alone (no flag of the game's): the
+ * Cross brought, else one found as an earlier act's guardian's (a
+ * liberation's team, liberation_team.h, made where a checkpoint's rebuild
+ * runs before the game's state is back) */
+bool powers_cross_held(int navi);
+/* MegaMan's Crosses off CROSSSELECT for a battle (a liberation's
+ * teammate's, who fights in his own form: liberation_battle.h), and back */
+void powers_crosses_hide(bool hide);
 /* A run's start: what it brought of MegaMan's powers (docs/game/meta/), in
  * the Custom screen from the first battle: the Cross of run.cross, and
  * BeastOut with the BeastOut helper (issue #99). */

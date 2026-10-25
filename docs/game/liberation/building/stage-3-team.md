@@ -3,7 +3,7 @@ type: Feature
 title: "Stage 3, as built: the team"
 description: "Stage 3, the team (`src/director/liberation_team.c`): Navis whose BN5 Souls the run holds, two to five by act at BN5's HP, their commands, a teammate's battle fought in his Soul, and boards planned for teams."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:54:22Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T13:43:58Z }
 ---
 
 # Stage 3, as built: the team (25 October 2026)
@@ -159,7 +159,8 @@ pacing` (the owner's decision 5: their boards rarely fit five Navis on a
 layer's floor and fall to a smaller team); Colonel's Save; SneakAttack on
 the Darkloid (his HP is whole each battle); BN5's own special chip each teammate brings to his
 Custom screen (Colonel's C-Cannon), and his own folder; the command
-rule's situations (tools/liberation.py: a board kept only where every
-teammate's command earns its point); the second screen's board; the time
+rule's earn check (tools/liberation.py: a board kept only where every
+teammate's command earns its point; its spots are built since, The Cross
+Navis and the team picked, as built); the second screen's board; the time
 a team's board takes to make on the New 3DS (the planner plays every
 Navi); co-op over the server, each battle its own player's (stage 5).

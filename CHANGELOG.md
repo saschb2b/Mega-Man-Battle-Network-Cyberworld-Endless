@@ -13,6 +13,26 @@
   turn's hand, as in BN5. A Soul won on a layer counts from the next.
   Layers made before continue afresh (their stock changed).
 
+- **Your Crosses join a dark layer's team, and you pick who comes.** On a
+  Liberation board the Navis whose Crosses the run holds (the one brought,
+  or those won from the acts' guardians) now stand beside MegaMan as BN5's
+  Souls do, each in his own BN6 body, with a command from Team ProtoMan,
+  the other version of BN5, by his element: HeatMan's **Napalm** (four
+  ahead and both sides of the third, one battle), ElecMan's
+  **MagnetBarrier** (no harm on the board to the team till the next phase),
+  SlashMan's **WideSwrd** (three across, one battle), EraseMan's
+  **PanelSearch** (the item and trap panels of a dark line, one battle) and
+  ChargeMan's **BombLiberation** (he flies over the dark and frees the
+  panel under him, no battle). Each works as BN5's own code does, read
+  from its ROM. His battles are fought as MegaMan in his Cross from the
+  first turn, on his HP: a hit of its weakness breaks it, and no other
+  Cross or UNITE is offered in it. Where you hold more Navis than the
+  board has places, a **TEAM** screen opens after the board's first look:
+  each Navi's face, HP, command and its shape, and the form he fights in
+  with its weakness. It remembers your last pick, and the board's par is
+  the one for the team you take. Every board now has a spot for each
+  held Navi's command, whoever you bring.
+
 ## 0.15.1 (2026-10-25)
 
 - **Fast forward, outside the fight.** A press of its button runs the
