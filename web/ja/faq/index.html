@@ -67,6 +67,7 @@
 				<li><a class="row" href="#netbattle"><i class="icon i-mail" aria-hidden="true"></i><span>ネットバトルのしくみは？</span></a></li>
 				<li><a class="row" href="#deepnet"><i class="icon i-mail" aria-hidden="true"></i><span>今週のディープネットとは？</span></a></li>
 				<li><a class="row" href="#server"><i class="icon i-mail" aria-hidden="true"></i><span>サーバーは何を残す？</span></a></li>
+				<li><a class="row" href="#host"><i class="icon i-mail" aria-hidden="true"></i><span>自分のネットスクエアを立てられる？</span></a></li>
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>なぜゲームが入っていないの？</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>ブラウザ版はROMをアップロードする？</span></a></li>
 				<li><a class="row" href="#statistics"><i class="icon i-mail" aria-hidden="true"></i><span>ゲームは何か送信する？</span></a></li>
@@ -158,6 +159,16 @@
 					<p>公式サーバーは、アカウントもメールアドレスも求めず、ROMやセーブを見ることもありません。いるあいだに見えるのは、ゲームが接続してくるアドレス、選んだ名前、ロックマンの位置とカードです。サーバーでのあなたのIDは、ゲームがそのサーバーのためだけに作る鍵です。残すのは、成立したトレードと今週のディープネットの掲示板（どれもそのIDと名前によります）、そして名前を含まない一日ごとの合計（何人来て、何回トレードし、何回バトルしたか：<code>/stats</code>）です。だれが入って出たかのログは残しません。自由入力のチャットはないので、通報するものもありません。気になる名前はカードからブロックできます。どのくらい残すかは、サーバーのREADMEにあります。</p>
 					<p>ネットスクエアはだれでも立てられます：サーバーは小さなプログラムで、Linux、Windows、macOS用のビルドとDockerイメージがあります。そのアドレスをゲートのプログラムくんに伝えれば、そこへ行けます。</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#the-official-server">サーバー：TLSとプライバシー（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md">サーバーを立てる（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#servers">ガイド：サーバー（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="host">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>自分のネットスクエアを立てられる？</h2>
+					<p>はい。ROMはいりません。LANパーティーなら、自分のパソコン用のサーバーをダウンロードし、展開して起動するだけです。設定は何もいりません。起動すると、ほかのプレイヤーがゲートのプログラムくんに伝えるアドレス（<code>192.168.1.20</code> など）を表示します。離れた友だちとは、Tailscaleのようなプライベートネットワークか、ルーターのポート転送で遊べます。</p>
+					<p>いつも開いていて、ブラウザ版や3DSからも入れるスクエアにするなら、Dockerとドメインのあるサーバーを使います。Composeファイルひとつで、サーバーと毎日のバックアップ、そしてLet's EncryptからHTTPSの証明書を取るCaddyが起動します。プレイヤーはそのドメインを入力するだけです。名前をつけ、シードを変えれば別の広場と別の週のディープネットに。モデレーションはサーバーのコマンドラインから行います。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#host-your-own-net-square">自分のネットスクエアを立てる（英語）</a> · <a href="../download/#server-line">サーバーのダウンロード</a></p>
 				</div>
 			</article>
 

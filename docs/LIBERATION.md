@@ -2240,7 +2240,7 @@ cache of Order Points and a heart in a two by three for NumberCheck.
 MagnetBarrier, SneakAttack and BombLiberation find theirs on every board
 (a unit's reach, a DarkHole's guardians, dark panels). The prototype's
 check that each command earns its Order Point is not run in the engine.
-`LAYER_MAKE` 102.
+`LAYER_MAKE` 103.
 
 **The design** (the game-design skill). The experience: "I read this dark
 area, then choose who it needs." The dialectic stays the run's, *press on

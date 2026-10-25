@@ -116,7 +116,7 @@ def main():
     with open(os.path.join(WORK, 'server.ini'), 'w') as f:
         f.write(ini)
     server = subprocess.Popen([sys.executable, os.path.join(ROOT, 'build', 'server', 'cyberworld-server.pyz'),
-                               '--config', os.path.join(WORK, 'server.ini'), '--port', str(square_port),
+                               '--config', os.path.join(WORK, 'server.ini'), '--host', '127.0.0.1', '--port', str(square_port),
                                '--state-dir', os.path.join(WORK, 'state')],
                               stdout=open(os.path.join(WORK, 'server.log'), 'w'), stderr=subprocess.STDOUT)
     quiet = type('Quiet', (http.server.SimpleHTTPRequestHandler,), {'log_message': lambda *a: None})
