@@ -7,6 +7,7 @@ post, and the record of what the page holds.
     python3 tools/itch.py prepare [--tag vX.Y.Z]   # .build/itch/channels/, nothing sent
     python3 tools/itch.py push [--tag vX.Y.Z] [--hidden] [--dry-run]
     python3 tools/itch.py devlog [--tag vX.Y.Z]    # .build/itch/devlog-vX.Y.Z.html, its title and type
+    python3 tools/itch.py devlog --missing         # every release without a post: .build/itch/devlogs.json
     python3 tools/itch.py record --post vX.Y.Z URL # the post, once it is on itch
     python3 tools/itch.py description               # .build/itch/description.html for itch's editor
     python3 tools/itch.py record --page            # docs/itch/'s files, once applied on itch
@@ -23,6 +24,7 @@ has no API for posts or the page's text: an agent applies them in itch's
 editor (docs/ITCH.md) and records them here, which lint holds it to.
 """
 import argparse
+import json
 import os
 import re
 import shutil
@@ -176,16 +178,23 @@ def push(tag, hidden, dry_run):
         subprocess.run(cmd, check=True)
 
 
-def devlog(tag):
-    """The release's post written out for itch's editor, and what to set beside it."""
-    rel = itch_devlog.release(tag)
-    p = itch_devlog.post(rel)
+def devlog(tag, missing=False):
+    """A release's post written out for itch's editor, and what to set
+    beside it; with missing, every release since the record's start that
+    has none yet, oldest first, into .build/itch/devlogs.json."""
     os.makedirs(WORK, exist_ok=True)
-    path = os.path.join(WORK, f"devlog-{rel['tag']}.html")
+    if missing:
+        posts = [itch_devlog.post(itch_devlog.release(v)) for v in reversed(itch_sync.unposted())]
+        with open(os.path.join(WORK, 'devlogs.json'), 'w', encoding='utf-8') as f:
+            json.dump(posts, f, ensure_ascii=False, indent=1)
+        return print(f"{len(posts)} posts to make, oldest first: {os.path.relpath(os.path.join(WORK, 'devlogs.json'), ROOT)}")
+    p = itch_devlog.post(itch_devlog.release(tag))
+    path = os.path.join(WORK, f"devlog-v{p['version']}.html")
     with open(path, 'w', encoding='utf-8') as f:
         f.write(p['html'] + '\n')
-    print(f"title: {p['title']}\npost type: {p['type']}\ncontent: {os.path.relpath(path, ROOT)}\n"
-          f"cover: docs/clips/trailer.png\nattachments: Play in the browser only")
+    print(f"title: {p['title']}\npost type: {p['type']}\noriginal publish date: {p['date']} (an older release's only)\n"
+          f"content: {os.path.relpath(path, ROOT)}\ncover: docs/clips/trailer.png (the newest's only)\n"
+          f"attachments: the newest's Play in the browser build only; an older release's none")
 
 
 def main():
@@ -196,6 +205,8 @@ def main():
     ap.add_argument('--dry-run', action='store_true', help="butler lists what it would send")
     ap.add_argument('--post', nargs=2, metavar=('TAG', 'URL'), help='record: a release\'s devlog post on itch')
     ap.add_argument('--page', action='store_true', help="record: docs/itch/'s files as applied on itch")
+    ap.add_argument('--posts', metavar='JSON', help='record: several posts at once, {"X.Y.Z": URL, ...}')
+    ap.add_argument('--missing', action='store_true', help='devlog: every release without a post yet')
     ap.add_argument('--image', nargs=2, metavar=('NAME', 'URL'), help='record: a picture of the description at its itch address')
     a = ap.parse_args()
     if a.what == 'lint':
@@ -203,7 +214,7 @@ def main():
     if a.what == 'check':
         sys.exit(0 if itch_sync.check(butler(), PAGE, [c for c, _, _ in CHANNELS]) else 1)
     if a.what == 'devlog':
-        return devlog(a.tag)
+        return devlog(a.tag, a.missing)
     if a.what == 'description':
         html, missing = itch_sync.itch_html()
         if html is None:
@@ -213,8 +224,8 @@ def main():
             f.write(html)
         return print(f'{os.path.relpath(os.path.join(WORK, "description.html"), ROOT)}: {len(html)} characters')
     if a.what == 'record':
-        if not (a.post or a.page or a.image):
-            sys.exit('record: --post TAG URL, --page or --image NAME URL')
+        if not (a.post or a.page or a.image or a.posts):
+            sys.exit('record: --post TAG URL, --posts JSON, --page or --image NAME URL')
         if a.image:
             itch_sync.record_image(*a.image)
         if a.page:
@@ -222,6 +233,11 @@ def main():
         if a.post:
             rel = itch_devlog.release(a.post[0])
             itch_sync.record_post(rel['version'], itch_devlog.post(rel)['title'], a.post[1])
+        if a.posts:
+            with open(a.posts, encoding='utf-8') as f:
+                for version, url in json.load(f).items():
+                    rel = itch_devlog.release(version)
+                    itch_sync.record_post(rel['version'], itch_devlog.post(rel)['title'], url)
         return
     tag = a.tag or latest_tag()
     if a.what == 'prepare':

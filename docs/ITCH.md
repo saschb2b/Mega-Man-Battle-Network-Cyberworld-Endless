@@ -234,12 +234,13 @@ owner's Chrome (Claude in Chrome; the in-app browser stops at Cloudflare).
 `docs/itch/state.json` records what the page holds: each file of
 `docs/itch/` as last applied there (its SHA-1), itch's address for each
 picture the description shows, and the devlog post of every release since
-0.15.1. `tools/itch.py` keeps it, and two checks hold everyone to it:
+0.1.0 (the 23 before 0.15.1 posted on 25 October 2026 with itch's
+**Original publish date** set to each release's day). `tools/itch.py` keeps it, and two checks hold everyone to it:
 
 - **`build.py lint`** (offline, in CI): the description names no version
   (no "1.2.3", no "New in"); every file of `docs/itch/` is the one the
   page holds, so a change here that never reached itch fails; and every
-  release in the CHANGELOG since 0.15.1 but the newest has its post (the
+  release in the CHANGELOG but the newest has its post (the
   newest is posted after its tag, so the next release's work fails until
   it is).
 - **`python3 tools/itch.py check`** (asks itch through butler): the same,
@@ -259,16 +260,24 @@ After the release is published on GitHub (the tag's workflow done):
 2. `python3 tools/itch.py devlog` writes the release's post from its notes
    (`docs/releases/vX.Y.Z.md`, else its CHANGELOG section, the pictures
    left out: itch takes none from other sites) to
-   `.build/itch/devlog-vX.Y.Z.html`, and prints its title and post type.
+   `.build/itch/devlog-vX.Y.Z.html`, and prints its title and post type
+   (Major Update for X.Y.0, General Update for a patch).
    Post it at `https://itch.io/dashboard/game/5225408/new-devlog`: the
-   title; the type (Major Update for a release with its own notes page,
-   General Update otherwise); the content into the editor with
+   title; the type; the content into the editor with
    `jQuery('textarea[name="post[body]"]').redactor('code.set', html)` and
    `'code.sync'`; of the attachments itch adds, only the release's **Play
    in the browser** build; `docs/clips/trailer.png` as the cover;
    **Published** ticked; Save.
 3. `python3 tools/itch.py record --post vX.Y.Z URL` with the post's
    address, and commit `docs/itch/state.json`.
+
+itch lists a page's posts in the order they were made, whatever their
+original publish date, so the newest release's post is always made last.
+Posts owed for several releases at once (`python3 tools/itch.py devlog
+--missing` writes them all, oldest first, to `.build/itch/devlogs.json`)
+go up oldest first, each older one with its **Original publish date** and
+no attachment, and are recorded together with `record --posts JSON`
+(`{"X.Y.Z": URL, ...}`).
 4. `python3 tools/itch.py check` says in step.
 
 When the page itself changes (the description, a picture, the theme):

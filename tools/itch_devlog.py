@@ -60,14 +60,29 @@ def body(rel):
     return re.sub(r' align="center"', '', html)
 
 
-def post(rel):
-    """The post: its title, itch's post type and its HTML. A release with
-    players' notes of its own (docs/releases/) is itch's major update."""
-    major = rel['source'] == 'notes'
-    title = f"{rel['version']}: {site_versions.headline(rel).rstrip('.')}"
+def when(date):
+    """2026-09-27 as 27 September 2026."""
+    y, m, d = (int(x) for x in date.split('-'))
+    months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+              'October', 'November', 'December')
+    return f'{d} {months[m - 1]} {y}'
+
+
+def post(rel, newest=None):
+    """The post: its title, itch's post type (Major Update for a minor
+    release, X.Y.0, General Update for a patch), its date and its HTML. The
+    newest release's post says it is on the page; an older one's, back-dated
+    to its release, says when it came out."""
+    newest = newest or release()['version']
     anchor = site_versions.anchor(rel['version'])
-    lead = (f"<p><strong>{rel['version']}</strong> is on this page: play it in the browser, or download it for your "
-            f"system. Its full notes, with pictures, are on the "
-            f"<a href=\"{site_versions.SITE_URL}versions/#{anchor}\">project's website</a> and "
-            f"<a href=\"{site_versions.GITHUB}/releases/tag/{rel['tag']}\">GitHub</a>.</p>")
-    return {'title': title, 'type': 'major_update' if major else 'general_update', 'html': lead + '\n' + body(rel)}
+    notes = (f"<a href=\"{site_versions.SITE_URL}versions/#{anchor}\">project's website</a> and "
+             f"<a href=\"{site_versions.GITHUB}/releases/tag/{rel['tag']}\">GitHub</a>")
+    if rel['version'] == newest:
+        lead = (f"<p><strong>{rel['version']}</strong> is on this page: play it in the browser, or download it for "
+                f"your system. Its full notes, with pictures, are on the {notes}.</p>")
+    else:
+        lead = (f"<p><strong>{rel['version']}</strong> came out on {when(rel['date'])}. Its full notes, with "
+                f"pictures, are on the {notes}; the newest version is on this page.</p>")
+    return {'version': rel['version'], 'title': f"{rel['version']}: {site_versions.headline(rel).rstrip('.')}",
+            'type': 'major_update' if rel['version'].endswith('.0') else 'general_update',
+            'date': rel['date'], 'html': lead + '\n' + body(rel)}

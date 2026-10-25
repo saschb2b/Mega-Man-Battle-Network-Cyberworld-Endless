@@ -91,6 +91,14 @@ def record_post(version, title, url):
     save(state)
 
 
+def unposted():
+    """Every release since the record's start without a post, the newest first."""
+    state = load()
+    posted = {p['version'] for p in state['devlog']['posts']}
+    since = site_versions.version_key(state['devlog']['since'])
+    return [v for v in released() if site_versions.version_key(v) >= since and v not in posted]
+
+
 def problems(newest_too=False):
     """What is out of step, offline: each a line saying what to do."""
     state, out = load(), []
