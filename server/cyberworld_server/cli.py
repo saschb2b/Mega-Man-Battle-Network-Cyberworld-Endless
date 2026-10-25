@@ -12,6 +12,7 @@ import signal
 import ssl
 import json
 import sys
+import threading
 
 from .app import Server
 from . import admin, backup, hosting
@@ -104,9 +105,21 @@ async def run(args):
 async def announce(server, host, port, secure, state_dir, config):
     """The console's word to the host as the Square opens: where players
     come in from (hosting.py); this computer's name's addresses looked up
-    off the loop, and given up after two seconds."""
+    off the loop, and given up after two seconds. The lookup has a daemon
+    thread of its own, not the loop's executor, which asyncio.run waits for
+    as the server stops: a name service that never answers (macOS's mDNS
+    on a CI runner) held a SIGTERM's exit past ten seconds."""
+    loop = asyncio.get_running_loop()
+    found = loop.create_future()
+
+    def look():
+        addresses = hosting.local_addresses()
+        with contextlib.suppress(RuntimeError):   # (the loop already closed)
+            loop.call_soon_threadsafe(lambda: found.done() or found.set_result(addresses))
+
+    threading.Thread(target=look, name="addresses", daemon=True).start()
     try:
-        addresses = await asyncio.wait_for(asyncio.to_thread(hosting.local_addresses), 2)
+        addresses = await asyncio.wait_for(found, 2)
     except asyncio.TimeoutError:
         addresses = hosting.local_addresses(named=False)
     hosting.announce(hosting.banner(server.name, host, port, secure, addresses, state_dir, config,
