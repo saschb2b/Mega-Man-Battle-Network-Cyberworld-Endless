@@ -75,6 +75,19 @@ const char *lib_route_words(void) {
 
 const char *lib_rest_words(void) { return "@M Phew... Resting helps."; }
 
+const char *lib_team_words(const char *names) {
+	static char words[160];
+	if (!names || !names[0]) return "";
+	snprintf(words, sizeof words, "@M But we're not alone this time!|@L Yeah! %s came along!", names);
+	return words;
+}
+
+const char *lib_mate_down_words(const char *name) {
+	static char words[120];
+	snprintf(words, sizeof words, "@M %s!!|@L He's down... We'll have to go on without him.", name);
+	return words;
+}
+
 const char *lib_strike_words(int kind, const char *darkloid) {
 	/* (the guardians' as BN5's speak theirs: a cry and their attack's name;
 	 * the Darkloid's in his own habit of speech, docs/VOICE.md) */
@@ -160,8 +173,14 @@ const char *lib_unit_name(int kind) {
 	return names[kind & 3];
 }
 
-const char *lib_command_label(int cmd) {
+const char *lib_command_label(int cmd, int command) {
 	static const char *const labels[LIB_CMDS] = { "Liberation", "LongSwrd", "Pass" };
+	/* (BN5's own names for its Navis' commands) */
+	static const char *const commands[] = {
+		[LIB_DO_NONE] = "", [LIB_DO_LONGSWRD] = "LongSwrd", [LIB_DO_SCRENDIV] = "ScrenDiv", [LIB_DO_TOMAHAWK] = "TomahawkSwing",
+		[LIB_DO_NUMBER] = "NumberCheck", [LIB_DO_SNEAK] = "SneakAttack", [LIB_DO_MELODY] = "LifeMelody",
+	};
+	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command <= LIB_DO_MELODY) return commands[command];
 	return cmd >= 0 && cmd < LIB_CMDS ? labels[cmd] : "";
 }
 

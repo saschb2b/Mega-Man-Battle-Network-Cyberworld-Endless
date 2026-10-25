@@ -4,7 +4,8 @@
  * then the Darkloid; a barrier's key where a barrier walls them off), from the clean panel nearest it beside that one,
  * walking there as a player walks MegaMan (the pad, BN6's walk), turning
  * to face it and pressing A; fights a guardian or the Darkloid it faces;
- * passes below two fifths of its HP. Its presses a frame apart. */
+ * passes below two fifths of its HP. Each Navi of the team in his turn,
+ * as play passes on. Its presses a frame apart. */
 #include "liberation.h"
 
 #include <stdlib.h>
@@ -16,6 +17,7 @@
 #include "netmap.h"
 #include "liberation_bonus.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 
 static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 static const uint32_t pads[4] = { KEY_DOWN | KEY_RIGHT, KEY_DOWN | KEY_LEFT, KEY_UP | KEY_LEFT, KEY_UP | KEY_RIGHT };
@@ -115,7 +117,7 @@ uint32_t lib_auto_keys(int frame) {
 	if (lib_bonus_spinning()) return frame & 1 ? 0 : KEY_A;
 	if (LB.step == LIB_STEP_MENU) {
 		if (frame & 1) return 0;   /* (a press, then a frame up) */
-		int want = LB.can[LIB_CMD_LIBERATE] && emu_read16(BN6_NAVI_HP) * 5 > emu_read16(BN6_NAVI_MAX_HP) * 2 ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
+		int k = lib_in_play(), want = LB.can[LIB_CMD_LIBERATE] && lib_mate_hp(k) * 5 > lib_mate_max(k) * 2 ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
 		return LB.menu == want ? KEY_A : KEY_DOWN;
 	}
 	if (LB.step != LIB_STEP_MOVE) return 0;

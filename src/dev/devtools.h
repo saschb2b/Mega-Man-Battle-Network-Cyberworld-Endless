@@ -72,6 +72,7 @@ typedef struct {
 	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
 	                   from iteration N */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
+	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/LIBERATION.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
 	                   GBA alone, a mutation that must part the two */
 	int team_seat;  /* teamseat=N: under arena2v2 --dev arena shows seat N's screen: 0 and 1 the GBAs' players, 2 and 3 side 0's and

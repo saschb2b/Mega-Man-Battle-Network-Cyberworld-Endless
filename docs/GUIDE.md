@@ -622,6 +622,21 @@ In the short net, once the Secret Area has been cleared in any run, act
 2's also offers a dark way: act 3 in the Undernet, with one of its own
 Navis, harder battles and richer data.
 
+With BN5 Team Colonel's ROM beside BN6's, one of the two ways at a fork
+from the second act can lead to a layer gone dark (MegaMan says so at the
+way, and the act's card names it): a Liberation Mission of BN5's, its
+board of dark panels, DarkHoles and their guardians, and a Darkloid at the
+far end. The Navis whose Souls you hold come along, as many as BN5's team
+of that stage has room for (two at act 2, up to five later). Each takes
+his turn every PLAYER PHASE: walk him beside a dark panel and press A for
+Liberation, his own command (Colonel's ScrenDiv, TomahawkMan's
+TomahawkSwing, NumberMan's NumberCheck, ShadowMan's SneakAttack, ToadMan's
+LifeMelody, MegaMan's LongSwrd; KnightMan has none, and nothing on the
+board hurts him or a Navi beside him) or Pass to rest; R hands play to
+the next Navi yet to act. A teammate's battles are MegaMan's in that
+Navi's Soul from the first turn, on that Navi's own HP: if it runs out,
+he leaves the board, not the run.
+
 A run is **the short net**: three acts, then the Cybeast Nest on layer 10,
 about an hour. When the Nest's guardian falls, the run is won, and that
 opens **the endless net**: the long dive described below, repeating

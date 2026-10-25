@@ -210,6 +210,10 @@
 #define BN5_LIB_DIGITS       0x086F7DECu /* the units' HP under them and a blow's harm over its Navi: digits 8x16, 0x40 bytes each */
 #define BN5_LIB_DIGITS_PAL   0x086CCD24u /* ... white (an HP, OBJ palette 14), */
 #define BN5_LIB_HARM_PAL     0x087E4678u /* ... yellow (a harm, OBJ palette 15), its top 29 pixels over the Navi's feet, centred */
+#define BN5_LIB_HP_DOWN      1           /* ... a teammate's HP out of play: its top this far over his feet, centred (romlab, mission 2) */
+#define BN5_LIB_HP_BOX       0x086D5964u /* the Navi in play's HP at the top left: six 8x16 OBJs at x 0-40, y 0, OBJ palette 12 (BN5_LIB_HUD_PAL): */
+#define BN5_LIB_HP_BOX_DIGITS 0x086D59A4u /* ... its cap (mirrored on the right), the HP's four places between (digits 0-9 from here, */
+#define BN5_LIB_HP_BOX_BLANK 0x086D5C64u /* ... 0x40 bytes each, this blank padding them on the left); found by their tiles in romlab's OAM */
 
 /* The units' HP on the board (BN5_LIB_UNITS +0x14 its HP, +0x16 its max, +0x18 the HP shown), drawn each frame after the
  * board's (0x08004FF0) for every unit in play with HP shown: the team's but the Navi in play's (his in the HP box) while
@@ -359,6 +363,12 @@
 #define BN5_LIB_NAVI_TOMAHAWKMAN 0x0A  /* TomahawkMan: TomahawkSwing */
 #define BN5_LIB_NAVI_KNIGHTMAN   0x0B  /* KnightMan: no command of his own */
 #define BN5_LIB_NAVI_TOADMAN     0x0C  /* ToadMan: LifeMelody */
+
+/* The team's turns (romlab, mission 2: MegaMan, Colonel, KnightMan) */
+#define BN5_LIB_IN_PLAY      (BN5_LIB_STATE + 0x06) /* u8: the Navi in play, his place in the team (0 MegaMan); R moves it to the next yet to act */
+#define BN5_LIB_UNIT_TO_ACT  0x02        /* a team unit's u8 (BN5_LIB_UNITS): 1 till he acts this phase, 0 after (Pass, then the next in play) */
+#define BN5_LIB_REST_PART    5           /* Pass ("End without doing anything?") gives a fifth of his max HP back (MegaMan 32 to 52 of 100,
+                                            Colonel 32 to 72 of 200); the routine not traced */
 
 /* A liberation battle */
 #define BN5_BATTLE_TYPE      0x0802B3E0u /* the battle's record's +3 (BattleSettings' BattleType): */

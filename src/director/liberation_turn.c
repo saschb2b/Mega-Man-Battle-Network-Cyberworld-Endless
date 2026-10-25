@@ -3,14 +3,16 @@
  * romlab on BN5's missions 1, 2 and 4: the camera's pan to the unit and
  * its rest; a guardian that moves warps there, all its steps at once (a
  * puff and a beam's lines where it stands, the camera's pan to the panel
- * it takes, the lines and the puff there); a unit with MegaMan in its
- * reach lights it red, blinking twice, speaks its line, strikes in its own
- * animation (BigBrute's breath of fire over MegaMan, Bladia's DarkSlash
+ * it takes, the lines and the puff there); a unit with a Navi in its reach
+ * lights it red, blinking twice, speaks its line, strikes in its own
+ * animation (BigBrute's breath of fire over its Navi, Bladia's DarkSlash
  * and the Darkloid's blow BN5's burst, TinHawk's HawkAttack a warp to him
  * and back), and its harm shows over him in BN5's yellow digits as his HP
- * drops. After every unit's turn, a DarkHole's deleted guardian rises on
- * it and warps beside it as BN5 brings him back. The frames are BN5's,
- * counted from the moment each step begins (bn5_liberation.h). */
+ * drops. Each goes for the Navi of the team nearest it (BN5's text: closer
+ * enemies first); BigBrute hits every Navi in its reach, the others the one
+ * they went for. After every unit's turn, a DarkHole's deleted guardian
+ * rises on it and warps beside it as BN5 brings him back. The frames are
+ * BN5's, counted from the moment each step begins (bn5_liberation.h). */
 #include "liberation.h"
 
 #include <stdio.h>
@@ -25,6 +27,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "liberation_words.h"
 #include "netmap.h"
 #include "talk.h"
@@ -66,15 +69,20 @@ static const Strike darkloid_strike = { 19, 52, 52, 53, 127, BN5_LIB_BLOW_SPRITE
  * its panel, its warp in there, and the red goes out */
 enum { HAWK_OUT = 22, HAWK_IN = 97, HAWK_BLOW = 105, HAWK_CRY = 110, HAWK_LEAVE = 140, HAWK_HOME = 216, HAWK_END = 284 };
 
-static int dist(int u) { return abs(LB.b.unit[u].x - LB.mx) + abs(LB.b.unit[u].y - LB.my); }
+/* The Navi unit u goes for: the nearest on the board */
+static int target(int u) { return lib_mate_nearest(LB.b.unit[u].x, LB.b.unit[u].y); }
+static int dist_to(int u, int k) { return abs(LB.b.unit[u].x - LB.b.mate[k].x) + abs(LB.b.unit[u].y - LB.b.mate[k].y); }
+static int dist(int u) { int k = target(u); return k < 0 ? 1 << 20 : dist_to(u, k); }
 
 static int reach_of(int u) { return u == 0 ? lib_darkloid_reach(LB.b.act) : lib_guard_rule(LB.b.unit[u].kind)->reach; }
 
-/* The eighth from world (wx, wy) towards MegaMan on the screen: up-right,
- * down-right, down-left or up-left (a world step is x + y across and
- * (y - x) / 2 down) */
-static int face_megaman(int wx, int wy) {
-	int dx = bn6_player_x() + bn6_player_y() - wx - wy, dy = bn6_player_y() - bn6_player_x() - wy + wx;
+/* The eighth from world (wx, wy) towards the Navi unit u goes for on the
+ * screen: up-right, down-right, down-left or up-left (a world step is
+ * x + y across and (y - x) / 2 down) */
+static int face_target(int u, int wx, int wy) {
+	int k = target(u), tx = bn6_player_x(), ty = bn6_player_y();
+	if (k >= 0) lib_mate_world(k, &tx, &ty);
+	int dx = tx + ty - wx - wy, dy = ty - tx - wy + wx;
 	return dy >= 0 ? (dx >= 0 ? 3 : 5) : (dx >= 0 ? 1 : 7);
 }
 
@@ -103,23 +111,25 @@ static void fx_up(int sprite, int anim, int wx, int wy, int up) {
 
 static void fx(int sprite, int anim, int wx, int wy) { fx_up(sprite, anim, wx, wy, 0); }
 
-/* A blow on MegaMan: its sound, BN5's burst over him (16 up, the event's
- * place) with the board shaken, or BigBrute's flame */
-static void blow(int sprite) {
-	int wx = bn6_player_x(), wy = bn6_player_y();
-	lib_sound(LB.shield ? BN5_LIB_NO_HIT_SOUND : BN5_LIB_HIT_SOUND);
+/* A blow on the Navi at world (wx, wy): its sound (BN5's no-hit where it
+ * harms none), BN5's burst over him (16 up, the event's place) with the
+ * board shaken, or BigBrute's flame */
+static void blow(int sprite, int wx, int wy, bool hurt) {
+	lib_sound(hurt ? BN5_LIB_HIT_SOUND : BN5_LIB_NO_HIT_SOUND);
 	if (sprite == BN5_LIB_FLAME_SPRITE) fx(sprite, 0, wx, wy);
 	if (sprite != BN5_LIB_BLOW_SPRITE) return;
 	fx_up(sprite, 0, wx, wy, BN5_LIB_BLOW_UP);
 	cinema_shake(BN5_LIB_BLOW_SHAKE, BN5_LIB_BLOW_JOLT);
 }
 
-/* ... its harm on him, in BN5's digits */
-static void harm_on(int u) {
-	if (LB.shield) return;
+/* ... its harm on the Navis it hurt (bit k Navi k), in BN5's digits */
+static void harm_on(int u, unsigned hurt) {
+	if (!hurt) return;
 	int harm = lib_harm(u == 0 ? UNIT_DARKLOID : LB.b.unit[u].kind, LB.b.act);
-	lib_hp_set(lib_hp() - harm);
+	for (int m = 0; m < LB.b.team.n; ++m)
+		if (hurt >> m & 1) lib_mate_hp_set(m, lib_mate_hp(m) - harm);
 	LB.harm = harm;
+	LB.harm_mates = (uint8_t)hurt;
 	LB.harm_t = 0;
 }
 
@@ -138,13 +148,13 @@ static void step(int s) {
 	LB.enemy_t = 0;
 }
 
-/* After its rest: a guardian's move (its steps toward MegaMan, BN5's
- * warp shown after), then its strike where he is in its reach */
+/* After its rest: a guardian's move (its steps toward the Navi it goes
+ * for, BN5's warp shown after), then its strike where he is in its reach */
 static void decide(int u) {
 	if (u > 0) {
 		const LibGuardRule *r = lib_guard_rule(LB.b.unit[u].kind);
-		int steps = 0;
-		while (dist(u) > r->reach && steps < r->move && lib_guardian_step(&LB.b, u, LB.mx, LB.my)) ++steps;
+		int steps = 0, k = target(u);
+		while (k >= 0 && dist_to(u, k) > r->reach && steps < r->move && lib_guardian_step(&LB.b, u, LB.b.mate[k].x, LB.b.mate[k].y)) ++steps;
 		if (steps) {
 			/* (its object parked now shows gone in the next frame, the
 			 * effect with it) */
@@ -173,7 +183,35 @@ static bool pan_by(int wx, int wy, int t, int due) {
 	return false;
 }
 
-/* ... its warps: out where it stands and from beside MegaMan, in beside
+/* The Navis a unit's blow lands on: every one in its reach where it hits
+ * them all (BigBrute), else the one it went for; bit k Navi k. Those it
+ * harms: none under a BonusPanel's shield, nor KnightMan and those beside
+ * him (his StoneBody) */
+static unsigned victims(int u) {
+	int r = reach_of(u), k0 = target(u);
+	bool all = u > 0 && lib_guard_rule(LB.b.unit[u].kind)->all;
+	unsigned hit = 0;
+	for (int k = 0; k < LB.b.team.n; ++k)
+		if (!LB.b.mate[k].out && dist_to(u, k) <= r && (all || k == k0)) hit |= 1u << k;
+	return hit;
+}
+
+static unsigned harmed(unsigned hit) {
+	unsigned h = 0;
+	for (int k = 0; k < LB.b.team.n; ++k)
+		if ((hit >> k & 1) && !LB.shield && LB.b.team.navi[k] != MATE_KNIGHTMAN && !lib_mate_shielded(&LB.b, k)) h |= 1u << k;
+	return h;
+}
+
+/* Where the Navi unit u goes for stands (MegaMan's place where none) */
+static void target_world(int u, int *wx, int *wy) {
+	int at = target(u);
+	*wx = bn6_player_x();
+	*wy = bn6_player_y();
+	if (at >= 0) lib_mate_world(at, wx, wy);
+}
+
+/* ... its warps: out where it stands and from beside its Navi, in beside
  * him and at its panel, each shown four frames into its warp in */
 static void hawk_warps(int u, int t) {
 	if (t == HAWK_OUT - 1 || t == HAWK_LEAVE - 1) LB.hidden[u] = true;
@@ -184,9 +222,12 @@ static void hawk_warps(int u, int t) {
 	if (t == HAWK_OUT + WARP_OUT_FRAMES || t == HAWK_IN + WARP_IN_FRAMES || t == HAWK_HOME + WARP_IN_FRAMES) LB.effect.sprite = -1;
 }
 
-/* TinHawk's HawkAttack, frame t from its line's box closing */
+/* TinHawk's HawkAttack on the Navi it goes for, frame t from its line's
+ * box closing */
 static bool hawk_strike(int u, int t) {
-	int wx = bn6_player_x(), wy = bn6_player_y(), hx, hy;
+	int wx, wy, hx, hy;
+	target_world(u, &wx, &wy);
+	unsigned hurt = harmed(victims(u));
 	netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &hx, &hy);
 	if (t > HAWK_OUT + WARP_OUT_FRAMES && t < HAWK_IN && !pan_by(wx, wy, t, HAWK_IN)) return false;
 	if (t == HAWK_IN) {
@@ -195,14 +236,14 @@ static bool hawk_strike(int u, int t) {
 		bool right = (LB.phase + u) & 1;
 		LB.ux[u] = wx + (right ? BN5_LIB_HAWK_NEAR : 0);
 		LB.uy[u] = wy - (right ? 0 : BN5_LIB_HAWK_NEAR);
-		pose(u, face_megaman(LB.ux[u], LB.uy[u]), true);
+		pose(u, face_target(u, LB.ux[u], LB.uy[u]), true);
 	}
 	hawk_warps(u, t);
-	if (t == HAWK_BLOW) blow(BN5_LIB_BLOW_SPRITE);
+	if (t == HAWK_BLOW) blow(BN5_LIB_BLOW_SPRITE, wx, wy, hurt != 0);
 	if (t == HAWK_BLOW + BLOW_FRAMES) LB.effect.sprite = -1;
-	if (t == HAWK_BLOW + 1) harm_on(u);
+	if (t == HAWK_BLOW + 1) harm_on(u, hurt);
 	if (t == HAWK_CRY) lib_sound(BN5_LIB_SLASH_SOUND);
-	if (t == HAWK_LEAVE) LB.harm = 0;
+	if (t == HAWK_LEAVE) { LB.harm = 0; LB.harm_mates = 0; }
 	if (t == HAWK_LEAVE + WARP_OUT_FRAMES) {
 		LB.effect.sprite = -1;
 		LB.ux[u] = hx;
@@ -220,10 +261,12 @@ static bool strike(int u, int t) {
 	int kind = u == 0 ? UNIT_DARKLOID : LB.b.unit[u].kind;
 	if (kind == UNIT_HAWK) return hawk_strike(u, t);
 	const Strike *k = kind == UNIT_DARKLOID ? &darkloid_strike : kind == UNIT_BLADIA ? &bladia_strike : &brute_strike;
-	int face = face_megaman(LB.ux[u], LB.uy[u]), wx = bn6_player_x(), wy = bn6_player_y();
+	int face = face_target(u, LB.ux[u], LB.uy[u]), wx, wy;
+	target_world(u, &wx, &wy);
+	unsigned hurt = harmed(victims(u));
 	if (t == k->pose) pose(u, face, true);
 	if (t == k->pose_end) pose(u, face, false);
-	if (t == k->blow) blow(k->fx);
+	if (t == k->blow) blow(k->fx, wx, wy, hurt != 0);
 	if (t == k->cry) lib_sound(BN5_LIB_SLASH_SOUND);
 	if (LB.effect.sprite == BN5_LIB_FLAME_SPRITE) {
 		if (t == k->blow + FLAME_BURN) fx(BN5_LIB_FLAME_SPRITE, 1, wx, wy);
@@ -231,9 +274,10 @@ static bool strike(int u, int t) {
 		if (t == k->blow + FLAME_END) LB.effect.sprite = -1;
 	}
 	if (LB.effect.sprite == BN5_LIB_BLOW_SPRITE && t == k->blow + BLOW_FRAMES) LB.effect.sprite = -1;
-	if (t == k->harm) harm_on(u);
+	if (t == k->harm) harm_on(u, hurt);
 	if (t < k->end) return false;
 	LB.harm = 0;
+	LB.harm_mates = 0;
 	LB.reach_lit = false;
 	return true;
 }
@@ -363,7 +407,10 @@ enum { R_FIND, R_PAN, R_SHOW };
 
 static void return_find(void) {
 	for (; LB.ret_hole < LB.b.nholes; ++LB.ret_hole) {
-		int x, y, u = lib_guardian_return(&LB.b, LB.ret_hole, LB.mx, LB.my, &x, &y);
+		/* (by the Navi nearest the hole, BN5's: BN5_LIB_RETURN_SPOT) */
+		int near = lib_mate_nearest(LB.b.hole_x[LB.ret_hole], LB.b.hole_y[LB.ret_hole]);
+		int nx = near >= 0 ? LB.b.mate[near].x : LB.mx, ny = near >= 0 ? LB.b.mate[near].y : LB.my;
+		int x, y, u = lib_guardian_return(&LB.b, LB.ret_hole, nx, ny, &x, &y);
 		if (u < 0) continue;
 		/* (his panel the board's from now; unseen on the hole till he rises) */
 		LB.b.unit[u].x = (uint8_t)x;

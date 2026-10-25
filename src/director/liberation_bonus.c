@@ -15,6 +15,7 @@
 #include "liberation.h"
 #include "liberation_pieces.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "liberation_words.h"
 #include "emu.h"
 #include "netmap.h"
@@ -87,7 +88,7 @@ static void give(void) {
 		say(lib_bonus_words(S.slot, 0), LIB_STEP_MOVE);
 		break;
 	case LIB_BONUS_HP:
-		lib_hp_set(lib_hp() + 100 * 10);
+		lib_mate_hp_set(lib_in_play(), lib_mate_hp(lib_in_play()) + 100 * 10);
 		if (LB.npops < LIB_POPS) LB.pop[LB.npops++] = (__typeof__(LB.pop[0])){ (int8_t)S.x, (int8_t)S.y, BN5_ITEM_HEART, 0 };
 		say(lib_bonus_words(S.slot, 0), LIB_STEP_MOVE);
 		break;

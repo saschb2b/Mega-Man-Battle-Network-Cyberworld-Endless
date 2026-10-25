@@ -40,6 +40,19 @@ int lib_battle_end(int *turn);
 int lib_battle_field(Encounter *e, int x, int y, bool darkloid);
 /* No liberation's battle armed (the board begun or left). */
 void lib_battle_disarm(void);
+/* The next battle armed is a teammate's (docs/LIBERATION.md, The team):
+ * MegaMan in BN5's Soul `soul` (7-12, the teammate's id) from the first
+ * turn, for the whole battle, committed at the first Custom screen's OK as
+ * BN5's UNITE commits a Soul, no chip given for it; a blow that would delete
+ * him leaves him 1 HP and ends the battle LIBERATE FAILED! (the teammate
+ * leaves the board, not the run). Disarmed with the battle. */
+void lib_battle_soul(int soul);
+/* ... whether one is armed (no UNITE offered in it), and whether its blow
+ * that would have deleted him came */
+bool lib_battle_soul_armed(void);
+bool lib_battle_down(void);
+/* MegaMan's HP in the last battle armed as it was last seen (0 none seen) */
+int lib_battle_hp(void);
 
 /* What liberating panel (x, y) with a command stakes, for the menu: the
  * turns, the panels freed won in any turn, those a win in the first turn

@@ -17,9 +17,11 @@ void lib_piece_gauge(int op);
 /* A blow's harm over its Navi in BN5's yellow digits, centred on (x, y),
  * his feet on the GBA's picture */
 void lib_piece_harm(int harm, int x, int y);
-/* A unit's HP under it in BN5's white digits, centred on (x, y), its place
- * on the floor on the GBA's picture */
-void lib_piece_hp(int hp, int x, int y);
+/* HP under a unit or a Navi in BN5's white digits, centred on x, their top
+ * at `top` (a unit's floor's place on the GBA's picture, a Navi's feet) */
+void lib_piece_hp(int hp, int x, int top);
+/* The Navi in play's HP in BN5's box at the picture's top left */
+void lib_piece_hp_box(int hp);
 /* The L view: "PHASE" and "TRGT PHASE" with their numbers on their panel,
  * its arrows at the picture's edges and its cross at the middle, `t` frames on */
 void lib_piece_phases(int phase, int par, int t);

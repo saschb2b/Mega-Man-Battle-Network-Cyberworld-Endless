@@ -28,6 +28,7 @@
 #include "liberation_pieces.h"
 #include "liberation_roulette.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "liberation_words.h"
 #include "netmap.h"
 #include "pet_look.h"
@@ -257,6 +258,8 @@ static void faced_label(char *s, size_t n) {
 	else s[0] = 0;
 }
 
+static int menu_lines(const char **lines, bool *can, int *cursor);
+
 static void draw_menu(void) {
 	int w = 96, h = 18 + LIB_CMDS * LOOK_LINE, x = P.core_x + EMU_W - w - 6, y = P.core_y + 34;
 	look_band(x, y, w, lib_label_menu);
@@ -264,10 +267,13 @@ static void draw_menu(void) {
 	char s[40];
 	faced_label(s, sizeof s);
 	look_caps(f.x + 3, f.y + 2, s, LOOK_GOLD, LOOK_SHADE);
-	for (int c = 0; c < LIB_CMDS; ++c) {
+	const char *lines[LIB_CMDS];
+	bool can[LIB_CMDS];
+	int cursor = 0, n = menu_lines(lines, can, &cursor);
+	for (int c = 0; c < n; ++c) {
 		int ly = f.y + 10 + c * LOOK_LINE;
-		look_text(f.x + LOOK_CURSOR_W + 4, ly, lib_command_label(c), LB.can[c] ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
-		if (c == LB.menu) look_cursor(f.x + 1, ly + 1);
+		look_text(f.x + LOOK_CURSOR_W + 4, ly, lines[c], can[c] ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
+		if (c == cursor) look_cursor(f.x + 1, ly + 1);
 	}
 }
 
@@ -299,36 +305,69 @@ static void draw_fx(void) {
 		false, LB.effect.pal, 0);
 }
 
-/* The harm of a blow over MegaMan, as BN5 shows a Navi's (its yellow digits) */
+/* The harm of a blow over each Navi it hurt, as BN5 shows a Navi's (its
+ * yellow digits) */
 static void draw_harm(void) {
 	if (!LB.harm || !S.look) return;
-	int wx = bn6_player_x(), wy = bn6_player_y(), dx, dy;
-	cinema_offset(&dx, &dy);
-	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X + dx, (wy - wx) / 2 - S.cam_v + CAM_Y + dy);
+	for (int k = 0; k < LB.b.team.n; ++k) {
+		if (!(LB.harm_mates >> k & 1)) continue;
+		int wx, wy, dx, dy;
+		lib_mate_world(k, &wx, &wy);
+		cinema_offset(&dx, &dy);
+		lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X + dx, (wy - wx) / 2 - S.cam_v + CAM_Y + dy);
+	}
 }
 
 /* Each unit's HP under it as BN5 shows a unit's not in play (its white
- * digits), while it stands on the board, MegaMan's in the Darkloids'
- * phase (in his, BN6's own HP box); under a chat box, none of it shows */
+ * digits, their top this far under its place on the floor: BN5 lays a
+ * unit's OBJs 82 down from its camera's, its floor 80), while it stands on
+ * the board; under a chat box, none of it shows */
+#define HP_DOWN 2
+
 static void draw_hp(void) {
 	if (!S.look) return;
 	SDL_Rect above = { P.core_x, P.core_y, EMU_W, BOX_TOP };
 	if (S.box) gfx_clip(&above);
 	for (int u = 0; u < LB.b.nunits; ++u)
 		if (LB.hp_max[u] && !LB.b.unit[u].gone && !LB.hidden[u])
-			lib_piece_hp(LB.hp_shown[u], LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y);
-	if (lib_megaman_hp_shown()) {
-		int wx = bn6_player_x(), wy = bn6_player_y();
-		lib_piece_hp(LB.megaman_shown, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
-	}
+			lib_piece_hp(LB.hp_shown[u], LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y + HP_DOWN);
 	if (S.box) gfx_clip(NULL);
+}
+
+/* The team's HP as BN5's board shows it: the Navi in play's in the box at
+ * the top left, each other's under him (romlab, mission 2); in the
+ * Darkloids' phase none is in play, so every Navi's is under him */
+static void draw_team_hp(void) {
+	bool theirs = lib_megaman_hp_shown();
+	if (!theirs) lib_piece_hp_box(lib_mate_hp(lib_in_play()));
+	for (int k = 0; k < LB.b.team.n; ++k) {
+		if ((!theirs && k == lib_in_play()) || LB.b.mate[k].out) continue;
+		int wx, wy;
+		lib_mate_world(k, &wx, &wy);
+		lib_piece_hp(lib_mate_hp(k), wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y - BN5_LIB_HP_DOWN);
+	}
+}
+
+/* The menu's lines: Liberation, the Navi in play's command (none for
+ * KnightMan, whose StoneBody is always on), Pass; into lines and can, and
+ * the cursor's line; how many */
+static int menu_lines(const char **lines, bool *can, int *cursor) {
+	int command = lib_mate_command(lib_in_play()), n = 0;
+	for (int c = 0; c < LIB_CMDS; ++c) {
+		if (c == LIB_CMD_LONGSWRD && command == LIB_DO_NONE) continue;
+		if (c == LB.menu) *cursor = n;
+		can[n] = LB.can[c];
+		lines[n++] = lib_command_label(c, command);
+	}
+	return n;
 }
 
 /* The command window as BN5's, its lines BN5's commands */
 static void draw_window(void) {
 	const char *lines[LIB_CMDS];
-	for (int c = 0; c < LIB_CMDS; ++c) lines[c] = lib_command_label(c);
-	lib_piece_window(lines, LB.can, LIB_CMDS, LB.menu);
+	bool can[LIB_CMDS];
+	int cursor = 0, n = menu_lines(lines, can, &cursor);
+	lib_piece_window(lines, can, n, cursor);
 }
 
 void director_draw_board(void) {
@@ -339,6 +378,7 @@ void director_draw_board(void) {
 	draw_pops();
 	draw_hp();
 	draw_fx();
+	if (bn5) draw_team_hp();
 	draw_harm();
 	if (bn5) lib_piece_gauge(LB.op);
 	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);

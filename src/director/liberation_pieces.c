@@ -87,17 +87,27 @@ void lib_piece_harm(int harm, int x, int y) {
 		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - 4 * n + 8 * i, P.core_y + y - HARM_UP, 1, 2, 0);
 }
 
-/* ---- a unit's HP ---- */
+/* ---- the units' and the team's HP ---- */
 
-#define HP_DOWN 2   /* the digits' top under the unit's place on the floor: BN5 lays a unit's OBJs 82 down from its camera's, its floor 80 */
-
-void lib_piece_hp(int hp, int x, int y) {
+void lib_piece_hp(int hp, int x, int top) {
 	const uint8_t *digits = bn5(BN5_LIB_DIGITS, 10 * 0x40), *pal = bn5(BN5_LIB_DIGITS_PAL, 32);
-	if (!digits || !pal || hp <= 0) return;
+	if (!digits || !pal) return;
 	char s[8];
-	int n = snprintf(s, sizeof s, "%d", hp > 9999 ? 9999 : hp);
+	int n = snprintf(s, sizeof s, "%d", hp < 0 ? 0 : hp > 9999 ? 9999 : hp);
 	for (int i = 0; i < n; ++i)
-		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - BN5_LIB_HP_STEP * n / 2 + BN5_LIB_HP_STEP * i, P.core_y + y + HP_DOWN, 1, 2, 0);
+		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - BN5_LIB_HP_STEP * n / 2 + BN5_LIB_HP_STEP * i, P.core_y + top, 1, 2, 0);
+}
+
+void lib_piece_hp_box(int hp) {
+	const uint8_t *cap = bn5(BN5_LIB_HP_BOX, 0x40), *digits = bn5(BN5_LIB_HP_BOX_DIGITS, 10 * 0x40), *blank = bn5(BN5_LIB_HP_BOX_BLANK, 0x40);
+	const uint8_t *pal = bn5(BN5_LIB_HUD_PAL, 32);
+	if (!cap || !digits || !blank || !pal) return;
+	char s[8];
+	snprintf(s, sizeof s, "%4d", hp < 0 ? 0 : hp > 9999 ? 9999 : hp);
+	xtiles_draw(cap, pal, P.core_x, P.core_y, 1, 2, 0);
+	for (int i = 0; i < 4; ++i)
+		xtiles_draw(s[i] == ' ' ? blank : digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + 8 + 8 * i, P.core_y, 1, 2, 0);
+	xtiles_draw(cap, pal, P.core_x + 40, P.core_y, 1, 2, 1);
 }
 
 /* ---- the L view ---- */
