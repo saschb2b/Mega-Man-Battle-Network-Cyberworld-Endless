@@ -7,6 +7,7 @@
  * passes below two fifths of its HP. Its presses a frame apart. */
 #include "liberation.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "bn6.h"
@@ -23,7 +24,35 @@ static const uint32_t pads[4] = { KEY_DOWN | KEY_RIGHT, KEY_DOWN | KEY_LEFT, KEY
  * the barriers before the sealed one where nothing else is reached) */
 static int16_t cost[MAP_H][MAP_W];
 
+/* (CYBERWORLD_AUTOPILOT_ROUTE, a test's: the sealed region's route first,
+ * its key while its barrier stands, then the route, as the board's own
+ * cost map to a target where the Darkloid would stand; docs/LIBERATION.md,
+ * Special routes) */
+static bool route_target(void) {
+	static int want = -1;
+	static LibBoard t;
+	if (want < 0) want = getenv("CYBERWORLD_AUTOPILOT_ROUTE") != NULL;
+	if (!want || LB.route_found || !LB.b.sealed) return false;
+	bool shut = false;
+	int tx = -1, ty = -1;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) shut |= LB.b.kind[y][x] == LIB_BAR && LB.b.item[y][x] == LB.b.sealed;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			int it = LB.b.item[y][x];
+			if (LB.b.kind[y][x] == LIB_ITEM && (shut ? (it & 15) == LIB_GOT_KEY && it >> 4 == LB.b.sealed : (it & 15) == LIB_GOT_ROUTE)) { tx = x; ty = y; }
+		}
+	if (tx < 0) return false;
+	t = LB.b;
+	t.nholes = 0;
+	t.boss_x = tx;
+	t.boss_y = ty;
+	lib_cost_map(&t, cost, false);
+	return true;
+}
+
 static void cost_from_target(void) {
+	if (route_target()) return;
 	lib_cost_map(&LB.b, cost, false);
 	if (cost[LB.my][LB.mx] >= 0x7F00) lib_cost_map(&LB.b, cost, true);
 }

@@ -11,7 +11,7 @@
 #include "net.h"
 #include "run.h"
 
-const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed) {
+const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed, int route) {
 	static char words[400];
 	const char *who = beaten ? beaten : "The guardian";
 	int act = (run.depth - 1) % CYCLE_LAYERS / 3;   /* (acts cleared in this cycle, the Nest's 0) */
@@ -26,9 +26,14 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 		snprintf(words, sizeof words, "@M Whew... %s was tough.|@L But we won! Home sweet home!", who);
 	else
 		snprintf(words, sizeof words, "@M Home again,Lan!|@L Alright! Let's get set for the next dive!");
-	/* (the portals and where they are: docs/HOME.md) */
+	/* (the portals and where they are: docs/HOME.md; a special route's
+	 * way where it comes out, docs/LIBERATION.md) */
 	size_t k = strlen(words);
-	if (ways == 2)
+	if (route == 1 && ways == 2)
+		snprintf(words + k, sizeof words - k, "|@M And Lan... The route we found in the dark!|@M It comes out at the %s. Way down,too!", ports[1]);
+	else if (route == 2 && ways == 3)
+		snprintf(words + k, sizeof words - k, "|@M Three ways! The %s,the %s...|@M And the %s! The route we found in the dark!", ports[0], ports[1], ports[2]);
+	else if (ways == 2)
 		snprintf(words + k, sizeof words - k, "|@M Two ways open this time! The %s and the %s!", ports[0], ports[1]);
 	else if (ways == 3)
 		snprintf(words + k, sizeof words - k, "|@M Three ways! The %s,the %s...|@M And something dark at the %s.", ports[0], ports[1], ports[2]);
@@ -65,8 +70,8 @@ static const char *area_feel(int biome) {
 	return biome >= BIOME_ACDC_HP && biome <= BIOME_SKY_HP ? "@M Cozy data... A town's homepage?" : "@M Hmm... I can't read much from here.";
 }
 
-const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board) {
-	static char words[320];
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route) {
+	static char words[400];
 	/* (the Cybeast below the endless Nest: a growl, never a Navi's signal;
 	 * docs/BOSSES.md, Super bosses) */
 	bool beast = navi == SUPER_CYBEAST, known = navi && guardian_known(navi);
@@ -84,6 +89,13 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool bo
 	/* (its act's dark layer that way: docs/LIBERATION.md) */
 	size_t k = strlen(words);
 	if (board && !sealed) snprintf(words + k, sizeof words - k, "|@M And Lan... Part of it's gone dark.|@M Dark panels,like Nebula's!");
+	/* (the special route's way: the one they found on a dark layer's
+	 * board, so MegaMan knows it, not where it leads) */
+	if (route && !sealed) {
+		static char ours[sizeof words + 48];
+		snprintf(ours, sizeof ours, "@M Lan,look! Our route from the dark!|%s", words);
+		return ours;
+	}
 	return words;
 }
 

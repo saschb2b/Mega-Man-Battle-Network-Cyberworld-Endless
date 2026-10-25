@@ -142,10 +142,12 @@ static const char *arrival_words(void) {
 	if (D.home_back) return home_back_words(run.clock);
 	int open = 1;
 	bool sealed = false;
-	home_ways(&open, &sealed);
+	const RunWay *w = home_ways(&open, &sealed);
 	const char *names[LANHP_PORTALS];
+	int route = -1;
 	for (int k = 0; k < LANHP_PORTALS; ++k) names[k] = home_portal_name(k);
-	return home_words(D.home_beaten, open, names, sealed ? names[2] : NULL);
+	for (int k = 0; k < open; ++k) if (w[k].route) route = k;
+	return home_words(D.home_beaten, open, names, sealed ? names[2] : NULL, route);
 }
 
 /* the map settled: Lan or MegaMan out, the warp done, the card gone */
@@ -196,7 +198,8 @@ static bool ask_link(int k) {
 	flag_clear(HOME_LINK_FLAG);
 	bool asked = back ?
 		talk_ask(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN, home_back_question(), HOME_LINK_FLAG) :
-		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2, false, w[k].board), FACE_MEGAMAN, home_on_question(), HOME_LINK_FLAG);
+		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2 && w[k].biome == BIOME_UNDERNET, false, w[k].board, w[k].route), FACE_MEGAMAN,
+			home_on_question(), HOME_LINK_FLAG);
 	if (!asked) return false;
 	link_asked = k;
 	if (back && !profile.back_taught) { profile.back_taught = 1; profile_save(); }
@@ -212,7 +215,8 @@ bool home_hp_check(void) {
 	if (ask_link(k)) return true;
 	if (k >= n && !(k == 2 && sealed)) return false;
 	bool shut = k >= n;
-	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut, !shut && w[k].board), FACE_MEGAMAN);
+	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2 && (shut || w[k].biome == BIOME_UNDERNET), shut,
+		!shut && w[k].board, !shut && w[k].route), FACE_MEGAMAN);
 }
 
 /* A lit link stepped on: its question, once each time he steps on it; the
@@ -293,6 +297,9 @@ void home_update(void) {
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
 		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
 	if (!arrived) return;
+	/* (the act's fork passed: a special route it offered spent, taken or
+	 * not; not by a trip back) */
+	if (run.side_kind == LAYER_NORMAL) home_route_passed();
 	D.town = false;
 	D.home = false;
 	D.portal_taken = false;

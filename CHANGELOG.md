@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **Special routes: a dark layer's secret opens a third way.** The sealed
+  route behind a Liberation board's locked barrier (acts 3 and 4) now
+  leads somewhere. Free its key and the route, and at the next fork in
+  Lan's HP a third portal lights at the link on the right ("And the link
+  on the right! The route we found in the dark!"): another area of the
+  act's tier and a guardian the act's other ways do not have. Found on
+  act 4's board in the endless net, or act 3's in the short net, it opens
+  a second way into the Nest instead, to a different last boss (in the
+  endless net, a Navi in the Cybeast's place, with its HP). The act's card says "By the route found
+  in the dark". A route not taken at its fork is spent; a CONTINUE keeps
+  it. Saves from 0.15.0 carry on.
+
 ## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,

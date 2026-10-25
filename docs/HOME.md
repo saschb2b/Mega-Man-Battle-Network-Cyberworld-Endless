@@ -209,7 +209,9 @@ opened, BN6's warp pads standing in rooms of its own look. It starts
 bare: one portal, the first act's. Each guardian deleted adds the next
 act's (two, or three with the dark way: the act's own area, the other
 way, the Undernet once the Secret Area is cleared, as `run_ways` gives
-them today), each Nest the next Net's first, and each lights up as
+them today; or a special route's third, found on a dark layer, at the
+link on the right, and at the Nest a second way to it at the link up
+top: docs/LIBERATION.md, Special routes), each Nest the next Net's first, and each lights up as
 MegaMan arrives; the HP grows a room as its portals outgrow it, so the
 run's progress is a place. Beside a portal, MegaMan says what he reads
 through the link, never where it leads: he has not been there (the

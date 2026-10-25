@@ -1403,11 +1403,11 @@ static void test_talk(void) {
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
 			snprintf(what, sizeof what, "the port's words to area %d (guardian %d)", biome, navi);
-			check_talk(what, home_port_words(biome, navi, false, false, false));
-			check_talk(what, home_port_words(biome, navi, true, false, false));
-			check_talk(what, home_port_words(biome, navi, false, false, true));
+			check_talk(what, home_port_words(biome, navi, false, false, false, false));
+			check_talk(what, home_port_words(biome, navi, true, false, false, false));
+			check_talk(what, home_port_words(biome, navi, false, false, true, false));
 		}
-		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false));
+		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false, false));
 	}
 }
 
@@ -1467,12 +1467,19 @@ static void test_home_words(void) {
 			for (int ways = 1; ways <= 3; ++ways) {
 				char what[80];
 				snprintf(what, sizeof what, "home's words at layer %d (net %d, %d ways)", depth, mode, ways);
-				check_talk(what, home_words("TomahawkMan", ways, ports, ways == 2 ? ports[2] : NULL));
-				check_talk(what, home_words(NULL, ways, ports, NULL));
+				check_talk(what, home_words("TomahawkMan", ways, ports, ways == 2 ? ports[2] : NULL, -1));
+				check_talk(what, home_words(NULL, ways, ports, NULL, -1));
+				/* (a special route's way: the fork's third, the Nest's second) */
+				if (ways >= 2) check_talk(what, home_words("TomahawkMan", ways, ports, NULL, ways - 1));
 			}
 		}
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		check_talk("a special route's portal", home_port_words(b, 0, b == BIOME_UNDERNET, false, false, true));
+		check_talk("a special route's portal, a guardian known", home_port_words(b, 3, false, false, false, true));
+	}
 	run.depth = 1;
 }
+
 
 /* Following the arrow gets MegaMan there: from the arrival and from each
  * room, walking the way it shows at a run's pace (a look every 5 frames, a
@@ -4876,7 +4883,7 @@ static void super_words(void) {
 		CHECK(strlen(super_reward_head(navi)) < 48, "super: %d's data's head is long", navi);
 		/* (the net's word on him, and the Nest's port at home, before they
 		 * have met: never his name) */
-		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false);
+		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false, false);
 		snprintf(what, sizeof what, "super_rumor(%d)", navi);
 		check_talk(what, rumor);
 		snprintf(what, sizeof what, "the Nest's port with %d unmet", navi);
@@ -4888,7 +4895,7 @@ static void super_words(void) {
 	}
 	rival_met(SUPER_CYBEAST);
 	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON);
-	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false));
+	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false));
 }
 
 static void test_super_bosses(void) {
