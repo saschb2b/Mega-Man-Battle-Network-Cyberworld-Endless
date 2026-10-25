@@ -72,7 +72,7 @@ Until 2026-10-25 the docs were 27 flat files (`docs/EMULATION.md` and the like).
 | Summary (`#summary`) | [Economy](../game/economy/overview.md#summary) |
 | Measuring it (`#measuring-it`) | [Measuring it](../game/economy/measuring.md) |
 | Before: what a run handed out (the flat plan) (`#before-what-a-run-handed-out-the-flat-plan`) | [Before: what a run handed out (the flat plan)](../game/economy/flat-plan.md) |
-| What BN6 does (docs/SOURCES.md) (`#what-bn6-does-docssourcesmd`) | [What BN6 does (docs/SOURCES.md)](../game/economy/bn6.md) |
+| What BN6 does (docs/SOURCES.md) (`#what-bn6-does-docssourcesmd`) | [What BN6 does](../game/economy/bn6.md) |
 | Research: how other games pace it (`#research-how-other-games-pace-it`) | [Research: how other games pace it](../game/economy/other-games.md) |
 | The opening plan (`#the-opening-plan`) | [The opening plan](../game/economy/opening-plan.md) |
 | Through the game-design skill (`#through-the-game-design-skill`) | [The opening plan](../game/economy/opening-plan.md#through-the-game-design-skill) |

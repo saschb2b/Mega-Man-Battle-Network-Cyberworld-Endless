@@ -2112,7 +2112,9 @@ def lint_docs():
             if not target.startswith('docs' + os.sep) and os.path.isfile(os.path.join(ROOT, target)):
                 continue
         bad.append(f'{m.group(2)}: {m.group(3)}')
-    names = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, capture_output=True, check=True).stdout.decode().split('\0')
+    # the files git keeps and any new one not yet added (a new concept is checked before its commit)
+    names = subprocess.run(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT,
+                           capture_output=True, check=True).stdout.decode().split('\0')
     for n in filter(None, names):
         if n.startswith(DOC_PATH_SKIP) or not os.path.isfile(os.path.join(ROOT, n)):
             continue
@@ -2125,7 +2127,7 @@ def lint_docs():
             p = m.group(0).rstrip('.')
             if re.search(r'[A-Z]{3,}|X\.Y\.Z|\bvX', p.split('/')[-1]) and not p.endswith('.md'):
                 continue
-            if re.search(r'/(NAME|TAG|vX\.Y\.Z|vX_Y_Z)', p) or re.match(r'\s+at\s+`?[0-9a-f]{7}', text[m.end():]):
+            if re.search(r'/(NAME|TAG|vX\.Y\.Z|vX_Y_Z)', p) or re.match(r'`?\s+at\s+`?[0-9a-f]{7}', text[m.end():]):
                 continue
             if not os.path.exists(os.path.join(ROOT, p)):
                 if p.endswith('.md') or p.endswith('/'):

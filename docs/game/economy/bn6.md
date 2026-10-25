@@ -1,6 +1,6 @@
 ---
 type: Research
-title: "What BN6 does ([Sources](../../research/sources.md))"
+title: "What BN6 does"
 description: "BN6's economy in its ROM and bn6f: the busting level picks the reward row's pair, the Chip Trader gives a code the pack lacks three times in four, codes scatter by virus version."
 tags: [game, economy]
 generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }

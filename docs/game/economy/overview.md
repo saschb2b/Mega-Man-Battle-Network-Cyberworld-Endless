@@ -64,7 +64,7 @@ rolls as they were; "after" and "opening" what a run hands out now.
 
 - [Measuring it](measuring.md)
 - [Before: what a run handed out (the flat plan)](flat-plan.md)
-- [What BN6 does (docs/SOURCES.md)](bn6.md)
+- [What BN6 does](bn6.md)
 - [Research: how other games pace it](other-games.md)
 - [The opening plan](opening-plan.md)
 - [The guard](guard.md)
