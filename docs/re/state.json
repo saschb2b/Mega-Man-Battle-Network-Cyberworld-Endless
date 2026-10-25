@@ -83,6 +83,10 @@
       "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/ROM_DATA.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
     },
     {
+      "date": "2026-10-25",
+      "what": "BN5's Liberation Missions hold no special route (docs/LIBERATION.md, Special routes; docs/SOURCES.md): the item kinds' table 0x08051924 ends after six records (BN5_LIB_ITEM_KIND_COUNT; its seventh, 0x08051954, is Thumb code), the nine missions' item lists hold kinds 0-5 alone and their panel lists kinds 0, 1, 3, 5-7 and 9-0x0C alone; the route a sealed region holds is ours, kept for the run and opening a third way at the next fork"
+    },
+    {
       "date": "2026-10-23",
       "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
     },

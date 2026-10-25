@@ -33,7 +33,7 @@
 #include "lan_house.h"
 #include "town.h"
 
-#define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way; the older portals after them */
+#define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way or a special route's; the older portals after them */
 #define ARRIVE_FACE 1   /* +x: up the corridor to the pink pad, the way on (issue #110) */
 
 /* The next act's ways (run_ways), worked out from the run's seed at home
@@ -55,8 +55,9 @@ static void work_out_ways(void) {
 	for (int k = 0; k < nways; ++k) {
 		int px, py;
 		lanhp_portal_spot(k, &px, &py);
-		fprintf(stderr, "home: way %d area %d guardian %d (meets %d), portal at %d,%d%s%s\n", k, ways[k].biome, ways[k].navi,
-			ways[k].meets, px, py, ways[k].board ? ", a dark layer that way" : "", sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+		fprintf(stderr, "home: way %d area %d guardian %d (meets %d), portal at %d,%d%s%s%s\n", k, ways[k].biome, ways[k].navi,
+			ways[k].meets, px, py, ways[k].board ? ", a dark layer that way" : "", ways[k].route ? ", the special route's" : "",
+			sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
 	}
 	for (int j = 0; j < nolder; ++j) fprintf(stderr, "home: back %d to depth %d area %d%s\n", j, older[j], biome_for_depth(older[j]),
 		run.back_spent >> j & 1 ? ", taken this visit" : "");
@@ -77,6 +78,11 @@ int home_older(int k) {
 
 int director_older_portal(void) {
 	for (int k = 0; k < LANHP_PORTALS; ++k) if (home_older(k) >= 0) return k;
+	return -1;
+}
+
+int director_route_portal(void) {
+	for (int k = 0; k < nways; ++k) if (ways[k].route) return k;
 	return -1;
 }
 
@@ -136,13 +142,25 @@ bool home_take_way(int k) {
 	run.back_spent = 0;   /* (the next visit's older portals open again) */
 	if (k == taken) return true;
 	int act = next_act();
-	run.biome_order[act] = (uint8_t)ways[k].biome;
+	/* (the Nest's act is past the run's order: a special route's second
+	 * way changes its guardian alone) */
+	if (ways[k].biome != BIOME_NEST) run.biome_order[act] = (uint8_t)ways[k].biome;
 	run.boss_order[ways[k].biome] = (uint8_t)ways[k].navi;
+	/* (a special route's way: its layer's words and card say so) */
+	run.route_way = (uint8_t)(ways[k].route ? act + 1 : 0);
 	taken = k;
 	if (emu_debug_on()) fprintf(stderr, "home: way %d taken, area %d\n", k, ways[k].biome);
 	if (!new_layer(false)) return false;
 	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, D.start_face);
 	return true;
+}
+
+void home_route_passed(void) {
+	bool offered = false;
+	for (int k = 0; k < nways; ++k) offered |= ways[k].route;
+	run.route_way = (uint8_t)(offered && ways[taken].route ? next_act() + 1 : 0);
+	if (offered) run.route_found = 0;
+	if (offered && emu_debug_on()) fprintf(stderr, "home: the special route %s\n", run.route_way ? "taken" : "passed by");
 }
 
 bool home_due(void) {

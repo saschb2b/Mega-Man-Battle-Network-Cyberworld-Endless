@@ -244,6 +244,9 @@ void director_describe(FILE *f) {
 	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
+	/* (a special route kept for its fork, and the act it led to) */
+	if (run.route_found) fprintf(f, "route kept from act %d\n", run.route_found);
+	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
 	/* (a trip back, and the Net's clock: docs/HOME.md) */

@@ -53,6 +53,13 @@ typedef struct {
 	/* (new since the "CWE8" save) the request taken at home (docs/HOME.md,
 	 * piece 5: jobs.h), JOB_NONE for none */
 	Job job;
+	/* (new since the "CWE9" save) a dark layer's special route
+	 * (docs/LIBERATION.md, Special routes): the act whose board's route was
+	 * found, 1-based in its cycle, 0 none, kept until the fork it turns
+	 * (run_route_turns) is passed; the act that came by the route's way,
+	 * the same, for its card */
+	uint8_t route_found;
+	uint8_t route_way;
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
@@ -136,9 +143,29 @@ int run_darkloid(int act, int biome);
  * set there (`navi`, run.boss_order's) and the one MegaMan meets (`meets`:
  * an older net's own where its game guards the area); how many are open,
  * the dark way only when `dark_open` (else `*sealed` where it would be).
- * The act after the net's last is the Nest's: the Nest its one way. */
-typedef struct { int biome, navi, meets; bool board; } RunWay;   /* (board: its act's dark layer is that way's, run_dark_area) */
+ * The act after the net's last is the Nest's: the Nest its one way. A
+ * special route found turns its fork (run_route_turns): a third way, the
+ * sealed dark way's where the fork has one, else another area's of the
+ * act's tier and its guardian; at the Nest, a second way to it, its
+ * second guardian (run_nest_second). */
+typedef struct { int biome, navi, meets; bool board, route; } RunWay;   /* (board: its act's dark layer is that way's, run_dark_area; route: the special route's way) */
 int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed);
+/* The act (0-based) whose fork the special route found turns: the next
+ * one after the board's act with a fork that has room for a third way
+ * (not the short net's act 2, 0-based, with its dark way open), else the
+ * Nest's; -1 none found. */
+int run_route_turns(bool dark_open);
+/* The route found on the dark layer of the act MegaMan leaves (`depth`'s):
+ * kept for the run (run.route_found). */
+void run_route_keep(int depth);
+/* The endless net's Nest rebuilt past its guardian: the Cybeast's den
+ * again, whoever a special route brought there. */
+void run_nest_rebuilt(void);
+/* The HP a Navi guarding the endless net's Nest at `depth` is fought at,
+ * `hp` his own: a special route's last boss there at the Cybeast's HP at
+ * least, as the Cybeast would have been (a different last boss, never an
+ * easier one); the Cybeast's and the short net's own as they are. */
+int run_nest_hp(int depth, int navi, int hp);
 /* A guardian's HP more, in percent, each notch of the Net's clock
  * (pacing_clock_hp, docs/HOME.md). */
 #define RUN_CLOCK_PERCENT 10

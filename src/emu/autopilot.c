@@ -557,11 +557,21 @@ static int trips_wanted(void) {
 	return v ? atoi(v) : 0;
 }
 
+/* (CYBERWORLD_AUTOPILOT_ROUTE: a dark layer's special route sought on its
+ * board, liberation_auto.c, and its way taken at home: docs/LIBERATION.md,
+ * Special routes) */
+static bool route_wanted(void) {
+	static int want = -1;
+	if (want < 0) want = getenv("CYBERWORLD_AUTOPILOT_ROUTE") != NULL;
+	return want;
+}
+
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	/* (a liberation's board, docs/LIBERATION.md: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
+		if (k < 0 && route_wanted()) k = director_route_portal();
 		lanhp_portal_spot(k < 0 ? 0 : k, wx, wy);
 		/* (an older portal: out of the blue pad's alcove first, along +X,
 		 * as its walls stand between the pad and the links) */
@@ -582,6 +592,16 @@ static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t 
 	return HOME_WALK;
 }
 
+/* A chat paged with A; the route's link's question, the cursor on No: one
+ * press across to Yes first, as LEFT goes round the two */
+static uint32_t chat_keys(uint32_t frame) {
+	static int asked;
+	if (route_wanted() && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
+		if (++asked < 20) return asked >= 8 && asked < 10 ? KEY_LEFT : 0;
+	} else asked = 0;
+	return (frame / 4) & 1 ? KEY_A : 0;
+}
+
 uint32_t autopilot_keys(void) {
 	static uint32_t frame;
 	++frame;
@@ -592,7 +612,7 @@ uint32_t autopilot_keys(void) {
 		return custom_guard(rhythm_keys(frame));
 	}
 	battle_frames = 0;
-	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
+	if (emu_read8(BN6_CHATBOX)) return chat_keys(frame);
 	int px = bn6_player_x(), py = bn6_player_y();
 	int cx, cy, ex, ey, nx, ny;
 	bool talk = false;

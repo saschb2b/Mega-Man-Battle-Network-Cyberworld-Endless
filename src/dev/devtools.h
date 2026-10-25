@@ -18,6 +18,8 @@ typedef struct {
 	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/LIBERATION.md) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
+
+	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/LIBERATION.md) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */

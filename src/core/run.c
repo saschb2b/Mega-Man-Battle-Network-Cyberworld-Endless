@@ -261,39 +261,111 @@ static const uint8_t nest_pool[4] = { 3, 4, 11, 3 };   /* SlashMan, EraseMan, Pr
 int run_nest_second(void) {
 	uint32_t keep = rng_state();
 	rng_seed(run.seed ^ 0x4E455332u);
-	int first = run.boss_order[BIOME_NEST], g = first;
+	/* (the endless net's too, a special route's last boss: none of its six
+	 * acts' guardians) */
+	int first = run.boss_order[BIOME_NEST], g = first, acts = run.mode == RUN_SHORT ? 3 : 6;
 	for (int tries = 0; tries < 16; ++tries) {
 		g = pacing_guardian_pick(nest_pool, navis, (int)sizeof navis, 3, 0, false, navi_hp);
 		bool again = g == first;
-		for (int e = 0; e < 3; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+		for (int e = 0; e < acts; ++e) again |= run.boss_order[run.biome_order[e]] == g;
 		if (!again) break;
 	}
 	rng_restore(keep);
 	return g;
 }
 
+/* The Nest's act, after the net's last: its one way, the Nest */
+static int nest_act(void) { return ((run.mode == RUN_SHORT ? SHORT_LAYERS : CYCLE_LAYERS) - 1) / 3; }
+
+/* Whether act `act` has the short net's dark way (docs/META.md, branches) */
+static bool dark_way_at(int act) { return run.mode == RUN_SHORT && act == 2; }
+
+int run_route_turns(bool dark_open) {
+	if (run.route_found < 1) return -1;
+	for (int t = run.route_found; t < nest_act(); ++t) {
+		int navi;
+		/* (a fork with room for a third way: its dark way sealed, or none) */
+		if (run_route_alt(t, &navi) >= 0 && !(dark_way_at(t) && dark_open)) return t;
+	}
+	return nest_act();
+}
+
+void run_route_keep(int depth) {
+	int act = (depth - 1) % CYCLE_LAYERS / 3;
+	if (act < nest_act()) run.route_found = (uint8_t)(act + 1);
+}
+
+void run_nest_rebuilt(void) { run.boss_order[BIOME_NEST] = (uint8_t)super_nest_master(); }
+
+int run_nest_hp(int depth, int navi, int hp) {
+	if (run_short_nest(depth) || super_boss(navi)) return hp;
+	int beast = navi_hp(SUPER_CYBEAST, super_form(SUPER_CYBEAST, depth));
+	return beast > hp ? beast : hp;
+}
+
+/* The special route's way at act `act`'s fork where the fork has no dark
+ * way: another area of the act's tier the run has not taken, not the
+ * other way's (`alt`), and its guardian fit for the act, no other act's
+ * nor the other way's (`alt_navi`); -1 none. From the seed, as the other
+ * way is: the same offered after a CONTINUE. */
+static int route_third(int act, int alt, int alt_navi, int *navi) {
+	uint8_t pool[PACING_AREA_POOL], free_areas[PACING_AREA_POOL];
+	int n = pacing_area_pool(act, pool), m = 0;
+	for (int i = 0; i < n; ++i) {
+		bool taken = pool[i] == alt;
+		for (int a = 0; a < 6; ++a) taken |= run.biome_order[a] == pool[i];
+		if (!taken) free_areas[m++] = pool[i];
+	}
+	if (!m) return -1;
+	uint32_t keep = rng_state();
+	rng_seed(run.seed ^ 0x52545233u ^ (uint32_t)act * 2654435761u);   /* "RTR3" */
+	int b = free_areas[rng_range(0, m - 1)], g = 0;
+	bool again = true;
+	/* (none of the deep acts' either, as one of the run's own, the way
+	 * found is a guardian not met again: the fork's guardians are the
+	 * surface's) */
+	for (int tries = 0; tries < 12 && again; ++tries) {
+		g = pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
+		again = guardian_taken(g) || g == alt_navi;
+		for (int a = 4; a < 6 && run.mode != RUN_SHORT; ++a) again |= run.boss_order[run.biome_order[a]] == g;
+	}
+	int free = again ? nearest_free_guardian(act, pools[b]) : -1;
+	if (free > 0 && free != alt_navi) g = free;
+	rng_restore(keep);
+	*navi = g;
+	return b;
+}
+
 int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed) {
-	/* (the Nest's act, after the net's last: its one way, the Nest) */
-	if (act >= ((run.mode == RUN_SHORT ? SHORT_LAYERS : CYCLE_LAYERS) - 1) / 3) {
+	bool route = run_route_turns(dark_open) == act;
+	*sealed = false;
+	/* (the Nest's act: its one way, the Nest; a special route's second
+	 * way to it, its second guardian: docs/LIBERATION.md, Special routes) */
+	if (act >= nest_act()) {
 		int g = run.boss_order[BIOME_NEST];
-		way[0] = (RunWay){ BIOME_NEST, g, g, false };
-		*sealed = false;
-		return 1;
+		way[0] = (RunWay){ BIOME_NEST, g, g, false, false };
+		if (!route) return 1;
+		g = run_nest_second();
+		way[1] = (RunWay){ BIOME_NEST, g, g, false, true };
+		return 2;
 	}
 	int alt_navi = 0, dark_navi = 0, alt = run_route_alt(act, &alt_navi);
 	int dark = alt >= 0 ? run_route_dark(act, alt_navi, &dark_navi) : -1;
 	int b[3] = { run.biome_order[act], alt, dark }, navi[3] = { run.boss_order[run.biome_order[act]], alt_navi, dark_navi };
-	int n = alt < 0 ? 1 : dark < 0 || !dark_open ? 2 : 3;
-	*sealed = dark >= 0 && !dark_open;
+	/* (the route opens a sealed dark way, else brings a third area) */
+	bool open = dark_open || route;
+	int n = alt < 0 ? 1 : dark < 0 || !open ? 2 : 3;
+	*sealed = dark >= 0 && !open;
+	if (route && alt >= 0 && dark < 0 && (b[2] = route_third(act, alt, alt_navi, &navi[2])) >= 0) n = 3;
 	for (int k = 0; k < n; ++k) {
 		int x = run_xguardian_at(act, b[k]);
-		way[k] = (RunWay){ b[k], navi[k], x ? x : navi[k], k < 2 && run_dark_area(act) == b[k] };
+		way[k] = (RunWay){ b[k], navi[k], x ? x : navi[k], k < 2 && run_dark_area(act) == b[k], route && k == 2 && !(dark >= 0 && dark_open) };
 	}
 	return n;
 }
 
 int run_route_dark(int act, int avoid, int *navi) {
-	if (run.mode != RUN_SHORT || act != 2) return -1;
+	if (!dark_way_at(act)) return -1;
 	uint32_t keep = rng_state();
 	rng_seed(run.seed ^ 0x4441524Bu);   /* "DARK" */
 	int g = 0;

@@ -395,7 +395,10 @@ Acts 2 and 3 in the short net; 2 to 4 in the endless net, where the
 Undernet and the Graveyard stay fixed. (Until issue #86 the Guardian Data
 asked "Which way?" and event flag `0x1452` carried the answer to the exit
 pad; issue #86 made the ways ports in town, issue #93 portals in Lan's
-HP.) New branches come later.
+HP.) A dark layer's special route adds a third way at the fork after it,
+another area of the tier, or, after the endless net's act 4 and the short
+net's act 3, a second way to the Nest, its second guardian the last boss
+(docs/LIBERATION.md, Special routes).
 
 ### Gates (phase three, begun)
 

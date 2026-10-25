@@ -264,6 +264,8 @@ static void fight_begin(void) {
 	int own = navi_hp(e.foes[0].family, e.foes[0].version);
 	if (older) own = xguardian_hp(B.g.navi, B.g.version);
 	int fought = older ? xguardian_hp_fought(B.g.navi, B.g.version, run.depth) : own;
+	/* (a special route's last boss at the endless Nest: the Cybeast's HP) */
+	if (run.biome == BIOME_NEST && run.side_kind == LAYER_NORMAL) fought = run_nest_hp(run.depth, B.g.navi, fought);
 	B.fought_hp = pacing_clock_hp(fought, run.clock);
 	emu_battle_hp(own, B.fought_hp);
 	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d\n", B.g.navi, e.foes[0].id, e.foes[0].version, own,

@@ -25,6 +25,12 @@
  * guardian falls (1 for the first cycle). */
 static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
 
+/* Whether the act MegaMan is in came by a special route's way (its fork's
+ * third, or the Nest's second: docs/LIBERATION.md, Special routes) */
+static bool by_route(void) {
+	return run.side_kind == LAYER_NORMAL && run.route_way && run.route_way == (run.depth - 1) % CYCLE_LAYERS / 3 + 1;
+}
+
 /* The arrival's words begun: the Nest shakes, the guardian they name is
  * named, and the older net's word is said for the profile. */
 void beat_said(void) {
@@ -61,6 +67,23 @@ static int super_here(void) {
 	return super_boss(navi) ? navi : 0;
 }
 
+/* Arriving in the Nest where no super boss waits: the short net's (on
+ * threat 10 its first of two, said before it, and the second below it,
+ * docs/META.md), the endless net's by a special route (its second
+ * guardian, not the Cybeast), or the Nest's own words */
+static const char *nest_arrival(void) {
+	if (run_short_nest(run.depth) && !run_short_last(run.depth))
+		return "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
+			"@M And it's not alone. A second guardian waits below!|@L Then we beat them both,MegaMan!";
+	if (run_short_nest(run.depth) && run.depth > SHORT_LAYERS)
+		return "@M Below the Nest... The second guardian's here,Lan.|@B Grrrr...|@L The last one,MegaMan! Let's finish this!";
+	if (by_route())
+		return "@M Lan... Our route led all the way down.|@M The Nest. But that signal isn't the beast's...|"
+			"@L Then whoever's down here,we take 'em on!";
+	return "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
+		"@L Hang on,MegaMan! Whatever it is,we'll find it!";
+}
+
 /* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first
  * layer, a new cycle, the Undernet, the Graveyard, the Nest, the side
  * layers; where a super boss waits, what MegaMan senses of him. Empty for
@@ -88,15 +111,8 @@ void arrival_words(void) {
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
 		snprintf(D.beat, sizeof D.beat, "@D Lan,it's Dad! The Endless Net just rebuilt itself!|@D Same areas,but stronger data. It's Net V%d now.|"
 			"@L Stronger,huh? Bring it on!", net_version());
-	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && !run_short_last(run.depth))
-		/* (threat 10: said before the first of the two, docs/META.md) */
-		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
-			"@M And it's not alone. A second guardian waits below!|@L Then we beat them both,MegaMan!");
-	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS)
-		snprintf(D.beat, sizeof D.beat, "@M Below the Nest... The second guardian's here,Lan.|@B Grrrr...|@L The last one,MegaMan! Let's finish this!");
 	else if (run.biome == BIOME_NEST)
-		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
-			"@L Hang on,MegaMan! Whatever it is,we'll find it!");
+		snprintf(D.beat, sizeof D.beat, "%s", nest_arrival());
 	else if (first_of_act && run.biome == BIOME_UNDERNET)
 		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied...|@L Then stay sharp,MegaMan!");
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
@@ -127,8 +143,13 @@ static const char *nets_card(int biome) {
 
 /* The act card's line under the area's name, its motto, and its colour;
  * an act whose way holds a dark layer says so in the motto's place, in
- * Nebula's purple (docs/LIBERATION.md) */
+ * Nebula's purple (docs/LIBERATION.md), and an act a special route led to
+ * says that, in a liberated panel's green */
 static const char *card_motto(int biome, SDL_Color *accent) {
+	if (by_route()) {
+		*accent = rgba(136, 224, 152, 255);
+		return "By the route found in the dark";
+	}
 	bool dark = run.side_kind == LAYER_NORMAL && lib_way_dark((run.depth - 1) % CYCLE_LAYERS / 3, biome);
 	*accent = dark ? rgba(184, 120, 248, 255) : rgba(120, 200, 248, 255);
 	return dark ? lib_card_line : guardian_area_motto(biome);

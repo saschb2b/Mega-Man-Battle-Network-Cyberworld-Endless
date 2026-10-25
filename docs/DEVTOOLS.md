@@ -838,7 +838,12 @@ the visitor's family among them, and the run log marks it `+`), `dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, docs/LIBERATION.md; `CYBERWORLD_EMU_DEBUG` prints the board as
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
-N, for each tier of its prize), `veteran` (a profile that has met seven
+N, for each tier of its prize; `CYBERWORLD_AUTOPILOT_ROUTE=1` beside it
+seeks the sealed region's route first, its key and then the route, and
+takes the way it opens at home), `route` (a special route found: with
+`--scene home` on the act before's board, from a layer on its own act's,
+so the next fork offers its third way, docs/LIBERATION.md, Special
+routes), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
