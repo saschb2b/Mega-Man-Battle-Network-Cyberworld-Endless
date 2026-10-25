@@ -441,7 +441,8 @@ TomahawkMan and ToadMan: the six BN5 Navis whose Souls a run already wins
 with his BN5 command; the team grows as BN5's does, mission by mission,
 run by run (act 2: MegaMan and one at most). Without BN5's ROM, or for
 BN6's Navis, a held Cross could lend its Navi with a command of BN5's kinds
-(a line, a wide, an area, mobility, defence, support): the owner's call.
+(a line, a wide, an area, mobility, defence, support): not chosen (the
+owner's decision 4, 25 October 2026: BN5's Souls only).
 
 In battle, a teammate's liberation is fought as MegaMan in that Navi's Soul
 (or Cross) from the first turn, with the teammate's own HP pool: BN5's own
@@ -536,7 +537,7 @@ hundreds of boards.
    (Special routes, below).
 7. **Rewards feed the run, failure is graduated.** The par's tiers stay
    stage 1's: a Server's prize two under par, one tier lower at par, one
-   lower still over it (assumed until the owner's open decision 5); item
+   lower still over it (assumed until the owner's open decision 6); item
    panels add a chip of the layer's band (one at act 2, two later) and the
    act's zenny (BN5's amounts, 300 at act 2 to 700 at act 6), off the way:
    a detour's worth. Over par is a lesser prize, never a lost run. The dark
@@ -1448,8 +1449,10 @@ going on with MegaMan; over six seeds of act 3 with two Souls held, four
 boards for the whole team, one for MegaMan and one teammate, one plain
 (its barrier finds no place even alone).
 
-**Left for later:** Colonel's Save; SneakAttack on the Darkloid (his HP
-is whole each battle); BN5's own special chip each teammate brings to his
+**Left for later:** acts 5 and 6 tuned for their teams with `build.py
+pacing` (the owner's decision 5: their boards rarely fit five Navis on a
+layer's floor and fall to a smaller team); Colonel's Save; SneakAttack on
+the Darkloid (his HP is whole each battle); BN5's own special chip each teammate brings to his
 Custom screen (Colonel's C-Cannon), and his own folder; the command
 rule's situations (tools/liberation.py: a board kept only where every
 teammate's command earns its point); the second screen's board; the time
@@ -1472,13 +1475,20 @@ as MegaMan in their Soul, co-op later over the server."
    from the first turn, with the teammate's own HP. (Not chosen: a
    teammate as a playable Navi of his own.)
 
+Decided on 25 October 2026, as recommended:
+
+4. **BN6's Crosses as teammates:** not lent; the team is BN5's Souls only,
+   and a run without BN5's ROM meets no dark layer. Revisited only if act
+   2's team (MegaMan and one teammate at most) feels thin once the team has
+   landed (Stage 3, as built).
+5. **Acts 5 and 6:** their dark layers (`--dev dark`'s alone: a run meets
+   acts 2 to 4) are tuned after the team, with `build.py pacing` over boards
+   with their teams, not for a lone MegaMan: a follow-up of stage 3's
+   (Stage 3, as built, Left for later).
+
 Still open:
 
-4. **BN6's Crosses as teammates** (commands of BN5's kinds for BN6's
-   Navis), for runs without BN5's ROM or beside the Souls: not decided;
-   until then a run without BN5's ROM meets no dark layer, or meets it with
-   MegaMan alone.
-5. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
+6. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
    zenny after) in the run's economy (docs/ECONOMY.md), or the route a
    sealed region opens as the only special reward. Stage 1 gives BN5's
    tiers as chips, a Server's prize two under par down to a lesser one
