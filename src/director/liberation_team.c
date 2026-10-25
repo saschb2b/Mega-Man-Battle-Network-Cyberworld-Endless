@@ -22,6 +22,7 @@
 #include "bn6_expression.h"
 #include "bn6_fields.h"
 #include "debug.h"
+#include "devtools.h"
 #include "director_state.h"
 #include "emu.h"
 #include "guardians.h"
@@ -116,6 +117,8 @@ void lib_team_begin(void) {
 	memset(LB.weak, 0, sizeof LB.weak);
 	for (int k = 0; k < LB.b.team.n; ++k) {
 		LB.mate[k].max = LB.mate[k].hp = LB.b.team.hp[k];
+		/* (--dev matehp=N: a teammate's deletion tested) */
+		if (k && dev.mate_hp > 0 && dev.mate_hp < LB.mate[k].max) LB.mate[k].hp = dev.mate_hp;
 		LB.mate[k].sprite = bodies[k];
 		LB.mate[k].face = MATE_FACE;
 		LB.mate[k].acted = LB.mate[k].melody = false;

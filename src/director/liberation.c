@@ -266,6 +266,13 @@ static void units_show(void) {
 					LB.slot[u] = n;
 		}
 		if (LB.slot[u] >= 0) { npc_put(LB.slot[u], want_x, want_y); put_x[u] = want_x; put_y[u] = want_y; }
+		/* (a Navi who has acted this phase drawn darker, as BN5's board
+		 * draws him: BN6's own shade on his sprite) */
+		if (k >= 0 && LB.slot[u] >= 0) {
+			uint32_t o = npc(LB.slot[u]), spr = o + (uint32_t)(emu_read8(o + BN6_OBJ_SPRITE_AT) >> 4 << 4);
+			uint16_t shade = LB.mate[k].acted ? BN6_SHADE_DARK : 0;
+			if (emu_read16(spr + BN6_SPRITE_SHADER) != shade) emu_write(spr + BN6_SPRITE_SHADER, &shade, 2);
+		}
 		/* (its animation the board's, its object's own byte) */
 		uint32_t a = D.objs.lib_anim[u];
 		if (a && emu_read8(a) != LB.anim[u]) emu_write8(a, LB.anim[u]);
@@ -540,6 +547,7 @@ static void fight_won(bool one_turn) {
 	if (LB.fight == LIB_FIGHT_GUARDIAN) {
 		/* (his panel liberated with him: the prototype's rule) */
 		LB.b.unit[LB.fight_unit].gone = true;
+		LB.weak[LB.fight_unit] = false;
 		LB.back_in[LB.fight_unit] = BACK_PHASES;
 		free_panel(LB.fx, LB.fy, held, sizeof held);
 		if (one_turn) freed += free_around(LB.fx, LB.fy, held, sizeof held);

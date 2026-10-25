@@ -84,6 +84,15 @@
 #define BN6_NPC_X16           0x26        /* X16, Y16, Z16: its position's whole world units (s16) */
 #define BN6_NPC_Y16           0x2A
 #define BN6_NPC_Z16           0x2E
+/* An object's sprite (bn6f's ObjectSprite), at the object less the low
+ * four bits of the header's byte BN6_OBJ_SPRITE_AT, as sprite_setColorShader
+ * finds it */
+#define BN6_OBJ_SPRITE_AT     0x02        /* ObjectHeader TypeAndSpriteOffset: its high nibble x 16, the sprite's offset in the object */
+#define BN6_SPRITE_SHADER     0x06        /* ObjectSprite +6, u16, the colour shader on its palette as it is drawn: bit 15 subtracts the
+                                             BGR555 colour below it from every colour, else adds it (bn6f sub_3005EF0); an NPC script's
+                                             command 0x2B sets it */
+#define BN6_SHADE_DARK        0xA108      /* ... less 8 of each channel: BN6's own darkening (owPlayer's at a map's dark spot, coordinate
+                                             trigger 0x3C), the shade BN5's board gives a Navi who has acted */
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
