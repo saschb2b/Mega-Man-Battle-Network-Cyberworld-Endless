@@ -1,0 +1,142 @@
+{
+ "page": {
+  "description.html": "27706f7566b57e5fbb8d93b123ad67e8e40053a7",
+  "cover.png": "49dc58c693b187b9ff3d61a112027bd99759b347",
+  "banner.png": "86fa03db0e5920a1540ebd3c2e5f4c7831579fa1",
+  "embed.png": "c03e168ec2175596d53a882277532d2b7dffa4a6",
+  "background.png": "003a6c95bf8f47da6cd0e5b6727f7362a88c6773"
+ },
+ "images": {
+  "sky.gif": "https://img.itch.zone/aW1nLzMxMzIwNTA5LmdpZg==/original/lMJm9%2B.gif",
+  "guardian.gif": "https://img.itch.zone/aW1nLzMxMzIwNjk1LmdpZg==/original/uDDIxU.gif",
+  "bn5-lib-darkloid.gif": "https://img.itch.zone/aW1nLzMxMzIwNzA4LmdpZg==/original/Q01KD4.gif",
+  "bn5-unite.gif": "https://img.itch.zone/aW1nLzMxMzIwNzE5LmdpZg==/original/4HHevj.gif",
+  "online-square.gif": "https://img.itch.zone/aW1nLzMxMzIwNzQ3LmdpZg==/original/RCCKz8.gif",
+  "online-battle.gif": "https://img.itch.zone/aW1nLzMxMzIwNzYwLmdpZg==/original/6nGUll.gif"
+ },
+ "devlog": {
+  "since": "0.1.0",
+  "posts": [
+   {
+    "version": "0.15.1",
+    "title": "0.15.1: The team joins the dark",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729057/0151-the-team-joins-the-dark"
+   },
+   {
+    "version": "0.15.0",
+    "title": "0.15.0: Liberate the net",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729054/0150-liberate-the-net"
+   },
+   {
+    "version": "0.14.1",
+    "title": "0.14.1: Every song, in BN6's own look",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729053/0141-every-song-in-bn6s-own-look"
+   },
+   {
+    "version": "0.14.0",
+    "title": "0.14.0: Pick a side",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729051/0140-pick-a-side"
+   },
+   {
+    "version": "0.13.0",
+    "title": "0.13.0: Cyberworld Endless connects",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729050/0130-cyberworld-endless-connects"
+   },
+   {
+    "version": "0.12.0",
+    "title": "0.12.0: One Battle Network",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729049/0120-one-battle-network"
+   },
+   {
+    "version": "0.11.4",
+    "title": "0.11.4: Any controller, any map",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729048/0114-any-controller-any-map"
+   },
+   {
+    "version": "0.11.3",
+    "title": "0.11.3: Locks that hold",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729047/0113-locks-that-hold"
+   },
+   {
+    "version": "0.11.2",
+    "title": "0.11.2: A guardian's fall, done right",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729046/0112-a-guardians-fall-done-right"
+   },
+   {
+    "version": "0.11.1",
+    "title": "0.11.1: The buttons answer",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729044/0111-the-buttons-answer"
+   },
+   {
+    "version": "0.11.0",
+    "title": "0.11.0: Home between dives",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729043/0110-home-between-dives"
+   },
+   {
+    "version": "0.10.0",
+    "title": "0.10.0: The second screen follows the game",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729042/0100-the-second-screen-follows-the-game"
+   },
+   {
+    "version": "0.9.0",
+    "title": "0.9.0: Battle Network 5 joins the net",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729041/090-battle-network-5-joins-the-net"
+   },
+   {
+    "version": "0.8.0",
+    "title": "0.8.0: The net's layers are worth exploring now",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729040/080-the-nets-layers-are-worth-exploring-now"
+   },
+   {
+    "version": "0.7.0",
+    "title": "0.7.0: Cyberworld Endless comes to iPhone and iPad, and the game runs lighter everywhere",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729039/070-cyberworld-endless-comes-to-iphone-and-ipad-and-the-game-runs-lighter-everywhere"
+   },
+   {
+    "version": "0.6.0",
+    "title": "0.6.0: Battle Network 5 joins in, on a net drawn like the original's",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729038/060-battle-network-5-joins-in-on-a-net-drawn-like-the-originals"
+   },
+   {
+    "version": "0.5.3",
+    "title": "0.5.3: Two fixes, found by a player",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729037/053-two-fixes-found-by-a-player"
+   },
+   {
+    "version": "0.5.2",
+    "title": "0.5.2: Smooth on the 3DS",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729036/052-smooth-on-the-3ds"
+   },
+   {
+    "version": "0.5.1",
+    "title": "0.5.1: A fix for the 3DS, and a net that points the way",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729035/051-a-fix-for-the-3ds-and-a-net-that-points-the-way"
+   },
+   {
+    "version": "0.5.0",
+    "title": "0.5.0: The first beta. A map on the 3DS's second screen, and touch controls for every thumb",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729034/050-the-first-beta-a-map-on-the-3dss-second-screen-and-touch-controls-for-every-thumb"
+   },
+   {
+    "version": "0.4.0",
+    "title": "0.4.0: A rival who keeps score. And a HOME Menu of its own",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729033/040-a-rival-who-keeps-score-and-a-home-menu-of-its-own"
+   },
+   {
+    "version": "0.3.0",
+    "title": "0.3.0: Every run leaves more behind. And it fits in your pocket",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729032/030-every-run-leaves-more-behind-and-it-fits-in-your-pocket"
+   },
+   {
+    "version": "0.2.0",
+    "title": "0.2.0: A run with a finish line. A next run with more to choose",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729030/020-a-run-with-a-finish-line-a-next-run-with-more-to-choose"
+   },
+   {
+    "version": "0.1.0",
+    "title": "0.1.0: Jack in. Dive deeper. The net is new every run",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729028/010-jack-in-dive-deeper-the-net-is-new-every-run"
+   }
+  ]
+ }
+}
