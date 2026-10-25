@@ -89,7 +89,7 @@ part of the tree; a new file gets its line there.
 
 | Path | Its files, in the knowledge base |
 | --- | --- |
-| `server/`, `deploy/`, `shared/online/` | [docs/code/server.md](docs/code/server.md): the ROM-free server anyone can host, the official server's deployment, the versioned wire contract |
+| `server/`, `deploy/`, `shared/online/` | [docs/code/server.md](docs/code/server.md): the ROM-free server anyone can host, the official server's deployment and a self-hosted Square's, the versioned wire contract |
 | `src/online/` | [docs/code/online.md](docs/code/online.md): online play's client |
 | `src/core/` | [docs/code/core.md](docs/code/core.md): entry point, platform, Options, ROM access and `RomLayout`, run state and saves |
 | `src/emu/` | [docs/code/emu.md](docs/code/emu.md): the mGBA core, hooks, the moved families, Navis, chips and Souls, free space, the `bn6*.h` headers |

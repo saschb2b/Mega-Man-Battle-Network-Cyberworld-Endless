@@ -3,7 +3,7 @@ type: Feature
 title: "The server and the wire"
 description: "Protocol v15, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T13:42:36Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
 ---
 
 # The server and the wire
@@ -35,7 +35,11 @@ and the Arena each have their switch in its configuration
 derived per server from a local secret; moderators ban, mute, kick and
 allowlist through the server's command line, and take a week's Board
 entry down (`hide`). Hosting, TLS, backups and
-the platforms' transports are [server/README.md](../../server/README.md)'s.
+the platforms' transports are [server/README.md](../../server/README.md)'s:
+a Square of one's own started with nothing set on a computer of the
+network, or behind HTTPS with `deploy/selfhost/` (Caddy and Let's Encrypt
+in front of the release's image), its [Host your own Net
+Square](../../server/README.md#host-your-own-net-square).
 
 ## The official server
 

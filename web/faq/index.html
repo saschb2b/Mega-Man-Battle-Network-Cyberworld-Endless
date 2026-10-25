@@ -66,6 +66,7 @@
 				<li><a class="row" href="#netbattle"><i class="icon i-mail" aria-hidden="true"></i><span>How do NetBattles work?</span></a></li>
 				<li><a class="row" href="#deepnet"><i class="icon i-mail" aria-hidden="true"></i><span>What is the week's DeepNet?</span></a></li>
 				<li><a class="row" href="#server"><i class="icon i-mail" aria-hidden="true"></i><span>What does a server keep?</span></a></li>
+				<li><a class="row" href="#host"><i class="icon i-mail" aria-hidden="true"></i><span>Can I host my own Net Square?</span></a></li>
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>Why isn't the game included?</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>Does the browser upload my ROM?</span></a></li>
 				<li><a class="row" href="#statistics"><i class="icon i-mail" aria-hidden="true"></i><span>Does the game send anything?</span></a></li>
@@ -214,6 +215,22 @@
 					<p>Anyone can run a Net Square of their own: the server is a small program, with ready builds for Linux,
 						Windows and macOS and a Docker image. Give its address to the Mr.Prog at the gate to go there.</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#the-official-server">Server: TLS and privacy</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md">Hosting a server</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#servers">Guide: Servers</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="host">
+				<span class="who">From: Guide</span>
+				<div class="textbox">
+					<h2>Can I host my own Net Square?</h2>
+					<p>Yes, and it needs no ROM. For a LAN party, download the server for your computer, unzip it and start it.
+						Nothing needs setting: it names the address the others give the Mr.Prog at the gate, such as
+						<code>192.168.1.20</code>. Friends elsewhere come in over a private network such as Tailscale, or through a
+						port forwarded on your router.</p>
+					<p>For a Square that stays up, and that the browser and the 3DS reach too, use a server with Docker and a
+						domain: one Compose file starts the server, its daily backup and Caddy, which gets the HTTPS certificate
+						from Let's Encrypt. Players then type the domain. Your Square, your rules: name it, give it a seed of its
+						own for another plaza and another week's DeepNet, and moderate it from its command line.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#host-your-own-net-square">Host your own Net Square</a> · <a href="../download/#server-line">The server's downloads</a></p>
 				</div>
 			</article>
 

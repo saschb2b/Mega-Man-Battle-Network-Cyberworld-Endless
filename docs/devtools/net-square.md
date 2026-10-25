@@ -3,14 +3,15 @@ type: Tool
 title: "The Net Square: two games at once"
 description: "Testing the Net Square on a local server: `python3 build.py server-run`, a data folder's `network.ini` or `--dev online=URL`, two `tools/play.py` games, dev steps (`emote`, `netpass`, `trade`, `reconnect`) and `tools/link_relay.py` for dropped links."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T12:28:49Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
 ---
 
 # The Net Square: two games at once
 
-The Square needs a server: `python3 build.py server-run --config
-server/server.example.ini` runs one on `ws://127.0.0.1:8765/presence`
-(seed 120; another `seed` in the file gives another Square). A game's
+The Square needs a server: `python3 build.py server-run --host
+127.0.0.1` runs one on `ws://127.0.0.1:8765/presence`, this computer
+alone (seed 120; `--seed`, or another `seed` in a `server.ini` from
+`server/server.example.ini`, gives another Square). A game's
 data folder points its gate at it with a `network.ini` of its own:
 
 ```
