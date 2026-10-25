@@ -13,7 +13,9 @@
 #include "compat.h"
 #include "desktop.h"
 #include "display.h"
+#include "devtools.h"
 #include "fast_forward.h"
+#include "feel_out.h"
 #include "game.h"
 #include "pads.h"
 #include "platform.h"
@@ -229,16 +231,17 @@ bool startup_fullscreen(bool big) {
 /* settings.ini in the data folder, made with the defaults where it is
  * missing: the display's lines (display.h), the sound, the music and
  * the effects heard (sound_heard.h), fast forward's speed (fast_forward.h),
- * the frame log */
+ * the controller's vibration and trigger effects (feel_out.h), the frame
+ * log */
 static void settings_load(const char *path) {
 	FILE *f = fopen(path, "r");
 	if (!f) {
 		f = fopen(path, "w");
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
-			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n",
+			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n",
 			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note(),
-			options_fast_note(), fast_speed_word(FAST_DEFAULT));
+			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note());
 		fclose(f);
 		platform_persist();
 		return;
@@ -252,6 +255,8 @@ static void settings_load(const char *path) {
 		if (!strcmp(key, "music")) sound_heard_set(on, sound_heard_effects());
 		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), on);
 		if (!strcmp(key, "fast_forward")) fast_speed_set(fast_speed_read(val));
+		if (!strcmp(key, "vibration")) feel_set_level(feel_level_read(val));
+		if (!strcmp(key, "trigger_effects")) feel_set_triggers(on);
 		/* (not written by default: for a report of a machine's pacing) */
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}
@@ -283,6 +288,10 @@ void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, i
 	if (music_arg >= 0) sound_heard_set(music_arg, sound_heard_effects());
 	if (effects_arg >= 0) sound_heard_set(sound_heard_music(), effects_arg);
 	if (screen_arg) display_scale_use(display_scale_read(screen_arg));
+	/* (the vibration as settings.ini has it, or its default where an older
+	 * one has no line: SDL asked for a Bluetooth pad's rumble either way) */
+	feel_set_level(feel_level());
+	feel_trace(dev.feel);
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
 	 * view where it is yes: analytics.h) */
 	analytics_net_start(headless, plain);

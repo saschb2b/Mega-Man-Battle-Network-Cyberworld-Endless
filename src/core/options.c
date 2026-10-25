@@ -12,6 +12,7 @@
 #include "controls.h"
 #include "display.h"
 #include "fast_forward.h"
+#include "feel_out.h"
 #include "game.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -28,6 +29,8 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_MUSIC;
 		kinds[n++] = LINE_EFFECTS;
 		kinds[n++] = LINE_SOUND;
+		if (feel_here()) kinds[n++] = LINE_VIBRATION;
+		if (feel_dualsense()) kinds[n++] = LINE_TRIGGERS;
 	} else if (O.section == SECTION_DISPLAY) {
 		if (display_has_window()) kinds[n++] = LINE_FULLSCREEN;
 		if (display_has_scale()) kinds[n++] = LINE_SCALE;
@@ -105,6 +108,22 @@ static void fast_keep(int dir) {
 	platform_persist();
 }
 
+/* the vibration turned (`dir`) or the trigger effects switched, and kept */
+static void feel_keep(int kind, int dir) {
+	char path[600];
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	if (kind == LINE_VIBRATION) {
+		feel_set_level(feel_level_next(feel_level(), dir));
+		settings_line_write(path, "vibration", feel_level_word(feel_level()), options_vibration_note());
+		/* (the new strength felt at once, as a hit of a quarter of his HP) */
+		feel_beat(FEEL_HIT, 255);
+	} else {
+		feel_set_triggers(!feel_triggers());
+		settings_line_write(path, "trigger_effects", feel_triggers() ? "on" : "off", options_triggers_note());
+	}
+	platform_persist();
+}
+
 #ifdef __EMSCRIPTEN__
 /* The page's Sound button (web/play/app.js): set here as Options sets it. */
 void cw_set_sound(int soft);
@@ -120,6 +139,8 @@ static void turn(int kind, int dir) {
 	case LINE_MUSIC:
 	case LINE_EFFECTS: heard_keep(kind); break;
 	case LINE_FAST: fast_keep(dir); break;
+	case LINE_VIBRATION:
+	case LINE_TRIGGERS: feel_keep(kind, dir); break;
 	default: options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true); break;
 	}
 	audio_sfx(SFX_CURSOR);

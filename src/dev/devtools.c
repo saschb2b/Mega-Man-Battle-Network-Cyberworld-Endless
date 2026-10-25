@@ -50,6 +50,7 @@ static bool dev_switch(const char *t) {
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
+		{ "feel", &dev.feel },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },

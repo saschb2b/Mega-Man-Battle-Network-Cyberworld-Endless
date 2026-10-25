@@ -1,7 +1,7 @@
 ---
 type: Tool
 title: "A controller in a test"
-description: "`--pad KIND` (xbox, playstation, nintendo, generic) attaches an SDL virtual controller to a headless shot or `tools/play.py` game, and `pad.NAME` and `key.NAME` steps press its buttons and keyboard keys as a player's."
+description: "`--pad KIND` (xbox, playstation, ps5, nintendo, generic) attaches an SDL virtual controller to a headless shot or `tools/play.py` game, and `pad.NAME` and `key.NAME` steps press its buttons and keyboard keys as a player's."
 tags: [devtools]
 generated: { by: claude-code/unrecorded, at: 2026-10-24T23:07:49Z }
 ---
@@ -15,9 +15,9 @@ python3 tools/play.py start NAME -- --pad playstation
 python3 tools/play.py do NAME "press pad.back; press key.J"
 ```
 
-`--pad KIND` (xbox, playstation, nintendo or generic) attaches one of
+`--pad KIND` (xbox, playstation, ps5, nintendo or generic) attaches one of
 SDL's virtual controllers, named and numbered as that kind is (an Xbox 360
-pad, a PS4 pad, a Switch Pro Controller), so the game opens and reads it
+pad, a PS4 pad, a DualSense, a Switch Pro Controller), so the game opens and reads it
 as a player's (`pads.c`): its family and labels, the controls screen,
 `pad.ini`, which the data folder then holds headless too (written with
 the defaults where missing, and when the controls screen keeps a map).
@@ -30,3 +30,5 @@ SDL's events as a player's, past any map; the GBA's own names (`A`,
 reads no `settings.ini`; [The player's guide](../GUIDE.md#fast-forward), Fast forward). It needs SDL 2.24 (every
 build but the handhelds' PortMaster binary, linked against 2.0.14, where
 `--pad` says it has none).
+What the game sends it, rumble and a DualSense's trigger effects, it says
+on stdout: [The controller's feel: what was sent](feel.md).

@@ -454,10 +454,16 @@ bool pads_any_held(void) {
 	return false;
 }
 
-bool pads_last(int *family, int *style, const char **name) {
+/* the pad played on: the one used last, else the first */
+static int played(void) {
 	int s = last >= 0 && used(last) ? last : -1;
 	for (int k = 0; s < 0 && k < SLOTS; ++k)
 		if (used(k)) s = k;
+	return s;
+}
+
+bool pads_last(int *family, int *style, const char **name) {
+	int s = played();
 	if (s < 0) return false;
 	*family = slot[s].family;
 	*style = slot[s].style;
@@ -470,6 +476,38 @@ int pads_presses(PadPress *out, int most) {
 	int n = npress < most ? npress : most;
 	memcpy(out, press, (size_t)n * sizeof *out);
 	return n;
+}
+
+/* ---- the feel: rumble, and a DualSense's triggers (feel_out.c) ---- */
+
+void pads_rumble(uint16_t low, uint16_t high, uint32_t ms) {
+	int s = played();
+	if (s >= 0 && slot[s].gc) SDL_GameControllerRumble(slot[s].gc, low, high, ms);
+}
+
+int pads_feel_pad(bool *dualsense, uint32_t *l2, uint32_t *r2) {
+	int s = played();
+	*dualsense = false;
+	*l2 = *r2 = 0;
+	if (s < 0 || !slot[s].gc) return 0;
+#if SDL_VERSION_ATLEAST(2, 0, 16)
+	*dualsense = SDL_GameControllerGetType(slot[s].gc) == SDL_CONTROLLER_TYPE_PS5;
+#endif
+	*l2 = lut[slot[s].family][PAD_LEFTTRIGGER];
+	*r2 = lut[slot[s].family][PAD_RIGHTTRIGGER];
+	return (int)slot[s].id + 1;
+}
+
+bool pads_send_effect(const void *data, int size) {
+	int s = played();
+	if (s < 0 || !slot[s].gc) return false;
+#if SDL_VERSION_ATLEAST(2, 0, 16)
+	return SDL_GameControllerSendEffect(slot[s].gc, data, size) == 0;
+#else
+	(void)data;
+	(void)size;
+	return false;
+#endif
 }
 
 /* ---- the map ---- */
@@ -520,12 +558,30 @@ bool pads_save(void) {
 static SDL_Joystick *vjoy;
 static bool vjoy_raw;
 
+/* (what the game sends a virtual pad, told: the feel's way, tested
+ * headless; --dev feel traces what it meant) */
+static int SDLCALL virtual_rumble(void *user, Uint16 low, Uint16 high) {
+	(void)user;
+	say("virtual pad: rumble %u %u", low, high);
+	return 0;
+}
+
+static int SDLCALL virtual_effect(void *user, const void *data, int size) {
+	(void)user;
+	const Uint8 *b = data;
+	say("virtual pad: effect of %d bytes, %02x; right %02x %02x %02x %02x, left %02x %02x %02x %02x", size, b[0], b[10], b[11], b[12], b[13],
+		b[21], b[22], b[23], b[24]);
+	return 0;
+}
+
 /* (raw: a joystick SDL makes no controller of, as an 8BitDo Micro in its
- * D-input mode is on SDL 2.32: sixteen buttons, two axes, a hat) */
+ * D-input mode is on SDL 2.32: sixteen buttons, two axes, a hat; ps5 a
+ * DualSense, which takes the feel's rumble and trigger effects) */
 bool pads_virtual(const char *kind) {
 	static const struct { const char *kind, *name; Uint16 vendor, product; } kinds[] = {
 		{ "xbox", "Xbox 360 Controller", 0x045e, 0x028e },
 		{ "playstation", "PS4 Controller", 0x054c, 0x09cc },
+		{ "ps5", "DualSense Wireless Controller", 0x054c, 0x0ce6 },
 		{ "nintendo", "Nintendo Switch Pro Controller", 0x057e, 0x2009 },
 		{ "generic", "Virtual Controller", 0, 0 },
 		{ "raw", "8BitDo Micro gamepad", 0x2dc8, 0x9020 },
@@ -544,6 +600,8 @@ bool pads_virtual(const char *kind) {
 	d.vendor_id = kinds[k].vendor;
 	d.product_id = kinds[k].product;
 	d.name = kinds[k].name;
+	d.Rumble = virtual_rumble;
+	d.SendEffect = virtual_effect;
 	/* (headless, no window has the focus SDL wants before it passes on a
 	 * pad's press) */
 	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");

@@ -11,12 +11,14 @@
  * Statistics), the
  * Display section's (Fullscreen, Scale, Smooth motion, where the system
  * has them: display.h), the Audio section's (Sound; Music and Effects,
- * sound_heard.h), and Done */
-enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST };
+ * sound_heard.h; Vibration and Trigger effects where the system has them,
+ * feel_out.h), and Done */
+enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
+	LINE_VIBRATION, LINE_TRIGGERS };
 #define LINES_MAX 5
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
-static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_FAST; }
+static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_TRIGGERS; }
 
 /* The section open: the hub's lines, or a section's in their place */
 enum { SECTION_HUB, SECTION_DISPLAY, SECTION_AUDIO };

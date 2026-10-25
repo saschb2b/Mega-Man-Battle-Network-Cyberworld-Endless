@@ -5,6 +5,10 @@
 #ifndef CW_BN6_MAP_H
 #define CW_BN6_MAP_H
 
+/* BN6_MAP_GROUP (bn6.h): the internet's groups from here, the real
+ * world's under it (bn6f's map groups; Lan's HP 0x88, a layer 0x8C) */
+#define BN6_GROUP_INTERNET    0x80
+
 /* The map's tile map, decompressed at map entry and read in place: a
  * 12-byte header (tw, th, 0, 0, the two layers' offsets), then tw x th
  * entries of layer 0 (BG1), then layer 1's (BG2) */
