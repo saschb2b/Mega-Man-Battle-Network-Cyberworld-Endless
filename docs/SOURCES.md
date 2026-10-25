@@ -201,6 +201,53 @@ to another way is ours, from the player's request the design began with
 (docs/LIBERATION.md); BN5's own detours are its BarrierPanels and their
 keys, which ours keep.
 
+## The Virus Battler (BN6)
+
+**Verified in the ROM and the disassembly** (25 October 2026, a spike for
+a run's Virus Battler: docs/LEVEL_DESIGN.md, The Virus Battler; the
+addresses in docs/ROM_DATA.md's three Virus Battler rows). The players'
+guides (MMHP's BN6 page, the Rockman EXE Zone's "MMBN6 Virus Battler
+Solution Guide", SuperCheats' rare virus page) and RockmanSlayer00's video
+"The Virus Battler and ALL the Viruses!" were the leads; each point was
+checked so:
+
+- *A HeelNavi on Class 1-2's blackboard sells the BtlrCard for 2000
+  zenny*: its chat takes 0x7D0 zenny and gives key item 0x40, BtlrCard by
+  the ROM's own item names. Where the HeelNavi stands was not traced.
+- *The card comes with two viruses* (SuperCheats): the purchase sets
+  Mettaur's and Gunner's data flags, and the VIRUS LIST sets them again
+  each time it opens.
+- *Deleting a Rare virus stores its data, once each*: a version 4 or 5
+  deleted with the card's flag set and its family's flag clear runs "You
+  got new Virus Data" after the results, which sets the flag; 27 families
+  can be held (all but Trumpy and Kettle). Seen in a run's game: a
+  PiranhaRare the run fielded, then the chat; no chat without the flag.
+- *Five Battler Mr.Progs, each hinting at the next* (RoboDog's comp,
+  Seaside's water machine, Green Town's punishment chair, Sky Town's
+  oxygen tank, Central Area 1): the five archives' hints run in that order
+  (a comp related to water; the comp you are taken to for bad things; an
+  area you pass through regularly), the first is RoboDog's own archive, and
+  the map scripts that start their battles are bn6f's Comps1 (the first),
+  Comps2 (the next three) and CentralArea (the fifth). The comps were not
+  traced one by one.
+- *Your stored viruses fight theirs on their own, a win in the time
+  limit pays chips, zenny or BugFrags*: battle mode 6. The VIRUS LIST
+  takes one or two families, which the player then places on his panels,
+  each as its V1; no button but START (pause) acts in the fight (romlab,
+  every button pressed through it). The time limit is the gauge at the
+  top, full in about 21 seconds: TIME UP and DRAW, which ends the series as a
+  loss does (the map's script goes on only on a result of 1, a win).
+  A first win pays a chip or a NaviCust program, later wins zenny or
+  BugFrags.
+- *Higher levels ask for 5 or 10 wins*: the series are 3, 5, 5, 10 and 10
+  rounds, each round a fixed pair of V1 viruses (the last Battler's last
+  Mettaur and BlastMan); a loss ends the series.
+- *A battle mode of its own, type 06* (a modding forum): BattleSettings
+  +3 is 6 in all 33 records and nowhere else in list 0.
+- *No source gives the team size*: the Battlers' own rules say two
+  viruses whose sizes total 50 MB at most (the check is `cmp #0x32` in the
+  list's code), and a team of one fights too.
+
 ## The trailers' music
 
 What Battle Network's music does is read from the ROMs: the songs'

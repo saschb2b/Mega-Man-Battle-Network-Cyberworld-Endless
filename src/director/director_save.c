@@ -278,6 +278,7 @@ bool director_resume(void) {
 	act_note_read();
 	dark_load(run.seed);
 	souls_load(run.seed);
+	folder_souls_load();
 	runlog_tally_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;

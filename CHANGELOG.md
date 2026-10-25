@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **A Soul's chips reach the folder.** A run that holds a BN5 Soul now
+  finds the chips it unites with. A quarter of the chips in Mystery Data
+  are of a held Soul's kind (Colonel's Obstacle, ShadowMan's Invisible,
+  NumberMan's Plus, TomahawkMan's Wood, KnightMan's Break, ToadMan's
+  Aqua), each as rare as the chip it replaces, and a Net Dealer's fourth
+  chip is one. With two Souls held, the kind your folder holds fewest of
+  comes first. You find as many chips as before; only which ones changes,
+  and a DarkChip never comes this way. A Soul still takes a chip of that
+  turn's hand, as in BN5. A Soul won on a layer counts from the next.
+  Layers made before continue afresh (their stock changed).
+
 - **Your Crosses join a dark layer's team, and you pick who comes.** On a
   Liberation board the Navis whose Crosses the run holds (the one brought,
   or those won from the acts' guardians) now stand beside MegaMan as BN5's

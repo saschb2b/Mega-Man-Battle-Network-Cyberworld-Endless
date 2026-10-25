@@ -18,9 +18,11 @@
 #include "emu.h"
 #include "gamecall.h"
 #include "loot.h"
+#include "loot_souls.h"
 #include "meta.h"
 #include "save.h"
 #include "save_blob.h"
+#include "souls.h"
 #include "trader.h"
 
 /* The run's folder as the game holds it (30 entries, chip | code << 9;
@@ -65,7 +67,8 @@ void folder_made_load(void) {
 
 /* The folder's codes, for the layer about to be made (loot_fit_code): read
  * from the game as MegaMan moves on, kept with the run, so a checkpoint
- * rebuilds the layer as it was without the game's memory; and the
+ * rebuilds the layer as it was without the game's memory; and the Souls
+ * held, whose kinds its finds and stock lean to (loot_souls.h); and the
  * NaviCust's board, which the guardian's draft fits its programs beside;
  * and the Library, which a vault's lock counts (as the checkpoint after
  * keeps it, which a CONTINUE's rebuild reads). */
@@ -79,7 +82,11 @@ void note_folder_codes(void) {
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
 	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
+	souls_note_layer();
+	loot_soul_souls(souls_layer());
 }
+
+void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
 
 /* The folder's chips owned, as BN6 marks a chip it gives (bn6f
  * encryption_applyPack, Gregar 0x08006E70): its byte in the table at
