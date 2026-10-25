@@ -638,11 +638,14 @@ static bool place_barriers(LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
 
 /* ---- what else lies on it ---- */
 
-/* BonusPanels at dead ends (BN5's "?" at the ends of its stubs) */
+/* BonusPanels at dead ends (BN5's "?" at the ends of its stubs); where the
+ * floor has too few, at its corners (two neighbours) */
 static void place_bonus(LibBoard *b, int16_t reach[MAP_H][MAP_W], int want) {
-	for (int got = 0, tries = 0; got < want && tries < 400; ++tries) {
-		int x = rrange(MAP_W), y = rrange(MAP_H), k = b->kind[y][x];
-		if ((k != LIB_CLEAN && k != LIB_DARK) || reach[y][x] <= 2 || neighbours(b, x, y) != 1 || region[y][x] == b->sealed) continue;
+	for (int got = 0, tries = 0; got < want && tries < 800; ++tries) {
+		int x = rrange(MAP_W), y = rrange(MAP_H), k = b->kind[y][x], corner = tries >= 400;
+		/* (not behind the sealed barrier, where a board has one; a corner a clean one) */
+		if ((k != LIB_CLEAN && (k != LIB_DARK || corner)) || reach[y][x] <= 2 || neighbours(b, x, y) > 1 + corner || unit_on(b, x, y) ||
+		    by_hole(b, x, y) || (b->sealed && region[y][x] == b->sealed)) continue;
 		b->kind[y][x] = LIB_BONUS;
 		++got;
 	}

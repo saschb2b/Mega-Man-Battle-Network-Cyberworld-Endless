@@ -43,6 +43,7 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 #define LIB_HOLES 5
 #define LIB_BARS  3
 #define LIB_LOOT  6      /* chip and zenny items a board at most */
+#define LIB_BONUS_CHIPS 4   /* the chips a board's BonusPanels give, one of them each (BN5's four a mission) */
 /* Order Points: BN5's, 3 at the start and 8 at most (BN5_LIB_OP_ADD) */
 #define LIB_OP_START 3
 #define LIB_OP_MAX   8

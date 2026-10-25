@@ -66,7 +66,7 @@ void lib_save(void) {
  * closed; a banner shown from its start */
 static int resumed_step(int step, int after) {
 	if (step == LIB_STEP_TALK) step = after;
-	if (step == LIB_STEP_MENU) step = LIB_STEP_MOVE;
+	if (step == LIB_STEP_MENU || step == LIB_STEP_BONUS) step = LIB_STEP_MOVE;
 	return step;
 }
 

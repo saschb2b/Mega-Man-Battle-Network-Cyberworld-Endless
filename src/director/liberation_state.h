@@ -19,6 +19,7 @@ enum {
 	LIB_STEP_TALK,     /* words said, then `after` */
 	LIB_STEP_PRIZE,    /* the par's prize given */
 	LIB_STEP_DONE,     /* liberated: the exit open, MegaMan walks as ever */
+	LIB_STEP_BONUS,    /* a BonusPanel's flashes and roulette (liberation_bonus.c) */
 };
 /* The commands (BN5's names) */
 enum { LIB_CMD_LIBERATE, LIB_CMD_LONGSWRD, LIB_CMD_PASS, LIB_CMDS };
@@ -55,6 +56,7 @@ typedef struct {
 	 * and the step of the one acting (liberation_turn.c) and its frames */
 	int enemy_unit, enemy_t, enemy_steps;
 	bool shield;           /* a BonusPanel's: no harm on the board this phase */
+	int darkloid_cut;      /* ... Major Hit's on the Darkloid with no guardian left: fifths of his max HP off (BN5's) */
 	/* ... as BN5 shows it, not kept: */
 	bool hidden[LIB_UNITS];        /* a guardian between its warp out and in */
 	uint8_t anim[LIB_UNITS];       /* each unit's animation (its object's byte, LayerObjs.lib_anim) */
@@ -108,5 +110,10 @@ bool lib_turn(int u);
 /* ... and whether A there takes a command */
 bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);
+/* (liberation_bonus.c, liberation_bonus.h) The Liberation command taken on
+ * the BonusPanel at (x, y); each frame of LIB_STEP_BONUS; its keys */
+void lib_bonus_begin(int x, int y);
+void lib_bonus_update(void);
+void lib_bonus_keys(uint32_t pressed);
 
 #endif

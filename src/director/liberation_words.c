@@ -41,14 +41,22 @@ const char *lib_item_words(bool heart, int op) {
 	return words;
 }
 
-const char *lib_bonus_words(int outcome) {
-	static const char *const said[4] = {
-		"@M A BonusPanel! HP full!",
-		"@M A BonusPanel! Five Order Points!",
-		"@M A BonusPanel! It deleted a guardian!",
-		"@M A BonusPanel! Nothing can hit us this phase!",
+const char *lib_bonus_found_words(void) { return "@M A BonusPanel!"; }
+
+const char *lib_bonus_words(int slot, int op) {
+	static char words[80];
+	static const char *const said[5] = {
+		"@M Nothing can hit us this phase!",
+		"@M HP full! That's better.",
+		"",
+		"@M A BattleChip!",
+		"@M That hits the nearest enemy hard!",
 	};
-	return said[outcome & 3];
+	if (slot == 2) {
+		snprintf(words, sizeof words, "@M Five Order Points! We've got %d now.", op);
+		return words;
+	}
+	return said[slot >= 0 && slot < 5 ? slot : 0];
 }
 
 const char *lib_key_words(bool sealed) {

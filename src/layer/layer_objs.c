@@ -594,6 +594,7 @@ static void install_begin(Install *in) {
 	out->lib_prize[0] = out->lib_prize[1] = out->lib_prize[2] = -1;
 	for (int k = 0; k < (int)(sizeof out->lib_loot / sizeof out->lib_loot[0]); ++k) out->lib_loot[k] = -1;
 	out->lib_zenny = -1;
+	for (int k = 0; k < (int)(sizeof out->lib_bonus / sizeof out->lib_bonus[0]); ++k) out->lib_bonus[k] = -1;
 	memset(out->lib_anim, 0, sizeof out->lib_anim);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;

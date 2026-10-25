@@ -131,7 +131,9 @@ kinds (`BN5_PANEL_*`):
 - **Clean** (0): the team walks it.
 - **Dark** (1): liberated by a battle. Guardians walk dark panels.
 - **Item** (3): looks dark and holds an item or a trap.
-- **BonusPanel** (9, "?"): a roulette (below), at the ends of stubs.
+- **BonusPanel** (9, "?"): a roulette (below), at the ends of stubs;
+  freed by the Liberation command without a battle or the Navi's action
+  (**ROM**, **play**: BonusPanels as BN5's, below).
 - **DarkHole** (0x0A): in a ring of dark panels, its guardian beside it;
   every one must fall before the Darkloid can be fought (**text**).
 - **The Darkloid's ring** (0x0B): the eight panels around him.
@@ -178,7 +180,7 @@ turns meets: assumed to be the Darkloid's.
 
 One pool for the team: 3 at the start, 8 at most (`BN5_LIB_OP_ADD` caps
 it), 1 for every command (**text**), found in item panels (2 or 3, **ROM**)
-and from the BonusPanel's roulette (5, **guides**).
+and from the BonusPanel's roulette (5, **ROM**, **play**).
 
 ### Items, traps and BonusPanels (ROM)
 
@@ -188,10 +190,12 @@ with the missions), a BarrierPanel's key, Order Points (2-3), zenny (its
 amount times 100), BugFrags, a chip. Traps (`BN5_LIB_PTR_TRAPS`) from
 mission 5: damage (50 in missions 5 and 6, 100 later) or paralysis. A
 BonusPanel's roulette (`BN5_LIB_BONUS_ROLL`) starts on one of five slots
-from the random number; its five outcomes are each mission's records (full
-HP, Order Points, one of the mission's chips, damage to the nearest enemy,
-the team untouchable for a phase, **guides**; the slots' order in the
-records is not traced).
+from the random number and is stopped by A; its five slots are each
+mission's records in this order (**ROM**, **play**): the team untouchable
+for a phase, the acting Navi's HP full, five Order Points, one of the
+mission's four chips, the nearest guardian deleted (none: the Darkloid a
+fifth of his max HP down). The guides' list was right; its order and what
+each does exactly are traced below (BonusPanels as BN5's).
 
 ### The Navis (ROM, text, guides)
 
@@ -409,13 +413,66 @@ the mission maps' panel grid where BN5's ROM is read. The dark layer's
 first build (stage 1) tints BN6's floor instead and has none of the
 animations; its rework follows this section.
 
+### BonusPanels as BN5's (ROM, play)
+
+Traced in BN5's own board (`tools/romlab`'s BN5 lab, mission 1 from its
+board's state, the faced dark panel made a BonusPanel in RAM and the
+mission's first BonusPanel record moved to it; each slot forced by its
+byte and played to its end; `src/emu/bn5_liberation.h`'s
+`BN5_LIB_BONUS_*`):
+
+- **Freed by command.** A BonusPanel is not walked (the walk mask of
+  MegaMan's unit, 0x1001, is clean and start alone); facing it, the
+  command window offers Liberation, which frees it **without a battle**:
+  the player's phase's step `0x0804C468` sends kind 9 to the roulette's
+  steps, and the Navi's actions left (his unit's +2) are untouched: the
+  same Navi's menu opens again after it.
+- **The lead-in:** MegaMan's line ("A BonusPanel!"); the panel dissolves
+  (19 frames) and shines (31); three white flashes over the whole picture,
+  sound 0xD7 each, two frames white then down by 2/16 a frame, the second
+  26 frames after the first, the third 10 after that; the band opens 30
+  frames after the third.
+- **The roulette** (its state `0x0200ABB0`, ten routines from
+  `0x08054EF4`): the phase banner's band (BG0 filled with one tile of the
+  phase words' palette, WIN1, blended over the board at half) opens in two
+  frames to rows 56-87; 16 frames on, sound 0xD6, the slot's icon slides
+  in from the right, 32 pixels a frame, to the middle (x 120, y 72); 8
+  frames later "PRESS A BUTTON" shows under it (y 98) and A is heard. The
+  slot steps every 4 frames (each BonusPanel record's u16) from a random
+  first one, sound 0x80 at each step once the icon is in place; the icon
+  shown is the slot's, one frame behind it, so the slot stopped on is the
+  one on screen as A is pressed (sound 0x92). Its name replaces the prompt
+  for 88 frames, then the icon slides out to the left, the band shuts in
+  two frames, and the slot is given (`0x0804C754`'s five handlers).
+- **The icons and words** are BN5's sprites of list 9: the icons
+  0x3F, 0x3C, 0x3D, 0x3E and 0x40 (`BN5_LIB_BONUS_ICONS`: a flexing
+  green Navi, a heart, an Order Point, a chip, a skull), the words list
+  9's 25 (`BN5_LIB_PHASE_WORDS`' sprite): animation 4 "PRESS A BUTTON",
+  6-10 the names "1PHS INVIN", "HP Rec!", "Order Pt!", "BattleChip!",
+  "Major Hit!".
+- **The slots, in BN5's order** (each mission's BonusPanel records,
+  `BN5_LIB_PTR_BONUS`, the same five in all nine):
+  0. no harm on the board for the rest of the phase: every Navi's unit
+     flagged 0x80 (sound 0x93, the team tinted green), cleared at the
+     next player's phase;
+  1. the acting Navi's HP full: an item find of a heart of 100 (x 10),
+     his alone (30 of 100 to 100; Colonel's 50 of 200 untouched);
+  2. five Order Points (3 to 8), an item find;
+  3. a chip, an item find: one of the mission's four (mission 1: four
+     standard chips, one of them a "*" code), their weights alike (0x20);
+  4. "Damages the closest enemy the most!": the nearest guardian (BigBrute,
+     TinHawk or Bladia, by squared distance from the Navi) deleted, the
+     camera on it ("Gyaaaaahh!!", its explosion); with no guardian left,
+     the nearest Darkloid loses a fifth of his max HP (400 to 320, 1000 to
+     800, 300 of 400 to 220: his max's, not his HP's).
+
 ### Not found, and assumed
 
 - The commands' shapes in the ROM: the board's command code
   (`0x0804B000`-`0x0805D000`) was located, not read through; the shapes
   are the guides'.
-- The BonusPanel's five slots' order, the record's +9, what the Darkloid's
-  battle does past three turns: not traced.
+- The record's +9, what the Darkloid's battle does past three turns: not
+  traced. (The BonusPanel's slots: traced, BonusPanels as BN5's.)
 - A hard phase limit: none found in the state's readers or the guides; a
   mission runs on past par for the lesser reward.
 
@@ -888,9 +945,9 @@ eight, a DarkHole or its guardian; won, the panel is liberated, and the
 eight round it where no second Custom screen opened, BN5's one-turn win),
 **LongSwrd** (an Order Point: two panels in a line, one battle) or
 **Pass** (half his max HP back, BN5's guides). Item panels give Order
-Points (3 to 8) or a heart (30% of max HP); a BonusPanel stepped on spins
-BN5's roulette's four we can give (HP full, five Order Points, the nearest
-guardian deleted, no harm for a phase). Then DARKLOID PHASE: each guardian
+Points (3 to 8) or a heart (30% of max HP); a BonusPanel stepped on spun
+four of BN5's roulette's slots (since BN5's own: BonusPanels as BN5's, as
+built, below). Then DARKLOID PHASE: each guardian
 steps toward him over the dark (BigBrute two and hits all in one,
 TinHawk three and one in three, Bladia two, darkening what it lands on),
 the Darkloid hits him within his reach (two or three); the board's harm
@@ -1033,7 +1090,7 @@ they were, the banner shown again once the act's card was gone.
 entrance, a guardian's HP under it (the Darkloid's came with The
 board's HP as BN5's), the mission's end in BN5's words (the target and the phases
 taken), the other eight missions' maps (stage 1 draws every dark layer in
-mission 1's); the BonusPanel's chip; the economy report and pacing for
+mission 1's); the economy report and pacing for
 dark layers; the second screen's board; stages 2 to 5. (Barriers, keys,
 the sealed region, traps, chips and zenny in item panels and the
 planner's par came with the quality bar, below.)
@@ -1412,6 +1469,53 @@ none dark round him); the autopilot through seed 1's board to its exit.
 traced: which of its battle's enemies the record marks); the rest's heal
 by BN5's table (a game-design call: ours is the guides' half); the HP
 box and the team's digits with stage 3.
+
+### BonusPanels as BN5's, as built (25 October 2026)
+
+A BonusPanel is BN5's (traced: BonusPanels as BN5's, above), drawn from
+BN5's ROM as the game runs, nothing of it kept:
+
+- **The rule** (`src/director/liberation_bonus.c`): fenced like a dark
+  panel, so MegaMan no longer steps on it; facing it, A opens the menu
+  with Liberation (LongSwrd not offered), which frees it without a battle,
+  and his action is not spent: the board goes back to his move. A CONTINUE
+  saved during it resumes at his move with the panel freed.
+- **The picture** (`src/director/liberation_roulette.c`): "A BonusPanel!",
+  the panel freed as BN5's dissolve, the three flashes and their sound,
+  the band, the slot's icon sliding in, "PRESS A BUTTON", the slot every
+  4 frames from a random first one with BN5's tick, A to stop it with
+  BN5's sound, its name held 88 frames, out and shut: BN5's sprites
+  (list 9's icons and words) and frames.
+- **The slots, BN5's order:** no harm on the board this phase
+  (`LB.shield`, BN5's sound); HP full; five Order Points; a chip; Major
+  Hit (the camera on the nearest guardian, deleted, its DarkHole sending
+  it back as ever; with none left, the Darkloid: `LB.darkloid_cut` counts
+  the fifths of his max HP BN5 takes, for his battle's HP once the board
+  keeps it). HP, Order Points and the chip pop over the freed panel in
+  BN5's icons with their words, as an item panel's do.
+- **The chip:** BN5's are a mission's standard chips, picked among four
+  alike, as its item panels' are; a board's BonusPanels give one of four
+  chips rolled in its item panels' band (`lib_prizes.c`, the layer's
+  seed's rolls of their own), so a chip from a BonusPanel is worth what an
+  item panel's is (docs/ECONOMY.md, Where it is decided). The economy
+  report does not play dark layers yet (Stage 1's left for later).
+- **The placement** (`place_bonus`): a board without a sealed region got
+  none (its test read every panel as the sealed region's), and the floor
+  of a layer's map has few stubs; BonusPanels now go to stubs' ends, else
+  to a clean corner (two neighbours), never by a DarkHole: every board has
+  its act's two or three.
+- **The planner** frees a BonusPanel for nothing as before and stops the
+  roulette as a player does, where it helps most (HP when below half, a
+  guardian within three, else Order Points, else no harm), one in five
+  missed; boards made in acts 5 and 6 stay above half (43 of 80).
+  `LAYER_MAKE` 101. Without BN5's ROM, the roulette is not shown: its
+  first slot is given at once.
+
+Reasoned with the game-design skill: the BonusPanel stays a lure at a
+stub's end, the detour its only price (*prepare or press on*); BN5's
+stop by A makes it a small act of timing in a turn-based board, and its
+five a choice by need (no harm before a risky phase, HP when low, Order
+Points for a LongSwrd, a chip for the run, a guardian off the way).
 
 ## The owner's decisions
 

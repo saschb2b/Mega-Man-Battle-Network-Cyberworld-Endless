@@ -25,6 +25,7 @@
 #include "guardians.h"
 #include "liberation_battle.h"
 #include "liberation_pieces.h"
+#include "liberation_roulette.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "netmap.h"
@@ -77,7 +78,8 @@ static Sprite *bn5_sprite(int index) {
  * ripple, while the command window is open over a panel to liberate */
 static void see_outline(void) {
 	int u = S.fx >= 0 ? lib_unit_at(S.fx, S.fy) : 0;
-	Sprite *spr = S.look && S.fx >= 0 && LB.step == LIB_STEP_MENU && u < 0 && lib_liberable(&LB.b, S.fx, S.fy) ? bn5_sprite(BN5_LIB_OUTLINE) : NULL;
+	bool free = u < 0 && (lib_liberable(&LB.b, S.fx, S.fy) || LB.b.kind[S.fy][S.fx] == LIB_BONUS);
+	Sprite *spr = S.look && S.fx >= 0 && LB.step == LIB_STEP_MENU && free ? bn5_sprite(BN5_LIB_OUTLINE) : NULL;
 	if (!spr) { S.out_x = S.out_y = -1; return; }
 	if (S.fx != S.out_x || S.fy != S.out_y) { anim_play(&S.outline, spr, BN5_LIB_OUTLINE_RIPPLE); S.out_t = 0; }
 	else if (++S.out_t > BN5_LIB_OUTLINE_DELAY) anim_update(&S.outline);
@@ -305,4 +307,6 @@ void director_draw_board(void) {
 		/* (what the battle stakes, above BN5's window or under the menu) */
 		lib_battle_draw_stakes(EMU_W - 6, bn5 ? 82 : 34 + LOOK_BAND_H + 18 + LIB_CMDS * LOOK_LINE + 2 * LOOK_FRAME + 2);
 	}
+	/* (a BonusPanel's flashes and roulette, over everything as BN5's) */
+	if (bn5) lib_roulette_draw();
 }

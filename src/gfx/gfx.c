@@ -79,13 +79,13 @@ Sprite *sprite_get(int cat, int idx) {
 }
 
 Sprite *sprite_get_rom(const uint8_t *rom, uint32_t lists, int cat, int idx) {
-	/* (a few, kept: the launcher's cartridges' faces) */
-	static struct { const uint8_t *rom; int cat, idx; Sprite *s; } kept[8];
+	/* (a few, kept: the launcher's cartridges' faces, a liberation's board's pieces) */
+	static struct { const uint8_t *rom; int cat, idx; Sprite *s; } kept[32];
 	if (!rom || cat < 0 || cat >= 10 || idx < 0 || idx >= 256) return NULL;
 	if (rom == R.data) return sprite_get(cat, idx);
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 32; ++i)
 		if (kept[i].s && kept[i].rom == rom && kept[i].cat == cat && kept[i].idx == idx) return kept[i].s;
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 32; ++i)
 		if (!kept[i].s) {
 			kept[i].s = sprite_load(rom, lists, cat, idx);
 			kept[i].rom = rom;

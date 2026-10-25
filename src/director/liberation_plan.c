@@ -418,17 +418,24 @@ static void unit_fight(int t, int u) {
 	free_panel(t);
 }
 
-/* A BonusPanel stepped on: BN5's roulette's four we give */
+/* A BonusPanel: BN5's frees it without a battle or the Navi's action
+ * (liberation_bonus.c), as walking onto it here; its roulette's five in
+ * BN5's order (no harm this phase, HP full, five Order Points, a chip,
+ * the nearest guardian deleted) stopped by the player's A on the slot
+ * shown: the planner stops it where it helps most, missing one in five */
 static void bonus(int s) {
 	P.b.kind[py[s]][px[s]] = LIB_CLEAN;
 	if (P.strip) return;
-	int r = rr(4), near = -1;
-	for (int u = 1; u < P.b.nunits; ++u)
-		if (!P.b.unit[u].gone && (near < 0 || abs(P.b.unit[u].x - px[s]) + abs(P.b.unit[u].y - py[s]) < abs(P.b.unit[near].x - px[s]) + abs(P.b.unit[near].y - py[s]))) near = u;
-	if (r == 0) P.hp = P.max;
-	else if (r == 1) P.op = P.op + 5 > LIB_OP_MAX ? LIB_OP_MAX : P.op + 5;
-	else if (r == 2 && near > 0) P.b.unit[near].gone = true;
-	else P.shield = true;
+	int near = -1, nd = 1 << 30;
+	for (int u = 1; u < P.b.nunits; ++u) {
+		int dx = P.b.unit[u].x - px[s], dy = P.b.unit[u].y - py[s];
+		if (!P.b.unit[u].gone && dx * dx + dy * dy < nd) { nd = dx * dx + dy * dy; near = u; }
+	}
+	int r = rr(5) == 0 ? rr(5) : P.hp * 2 < P.max ? 1 : near > 0 && nd <= 9 ? 4 : P.op + 5 <= LIB_OP_MAX ? 2 : 0;
+	if (r == 0) P.shield = true;
+	else if (r == 1) P.hp = P.max;
+	else if (r == 2) P.op = P.op + 5 > LIB_OP_MAX ? LIB_OP_MAX : P.op + 5;
+	else if (r == 4 && near > 0) P.b.unit[near].gone = true;
 }
 
 static void take(const Option *o) {
