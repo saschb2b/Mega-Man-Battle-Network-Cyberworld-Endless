@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-enum { TOUCH_DPAD, TOUCH_A, TOUCH_B, TOUCH_L, TOUCH_R, TOUCH_START, TOUCH_SELECT, TOUCH_MENU, TOUCH_CONTROLS };
+/* (TOUCH_FAST: fast forward's button, BTN_FAST) */
+enum { TOUCH_DPAD, TOUCH_A, TOUCH_B, TOUCH_L, TOUCH_R, TOUCH_START, TOUCH_SELECT, TOUCH_MENU, TOUCH_FAST, TOUCH_CONTROLS };
 /* The three arrangements, each the player's own: under the picture (a
  * screen held upright), beside it (on its side), and over its edges where
  * neither has room. */

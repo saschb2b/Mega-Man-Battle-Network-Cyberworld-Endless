@@ -14,9 +14,11 @@ const char *lib_briefing_words(int holes, int par);
 const char *lib_battle_words(int fight, bool won, bool one_turn, int panels, int holes_left, bool guardian_back);
 /* An item panel liberated: Order Points (now `op`), or a heart. */
 const char *lib_item_words(bool heart, int op);
-/* A BonusPanel's roulette (0 full HP, 1 Order Points, 2 a guardian
- * deleted, 3 no harm this phase). */
-const char *lib_bonus_words(int outcome);
+/* A BonusPanel faced and liberated (BN5's line), and its roulette's slot
+ * given (liberation_bonus.h's LIB_BONUS_*: no harm this phase, HP full,
+ * five Order Points (now `op`), a chip, Major Hit). */
+const char *lib_bonus_found_words(void);
+const char *lib_bonus_words(int slot, int op);
 /* A barrier's key found: the sealed region's, or one across the way. */
 const char *lib_key_words(bool sealed);
 /* A trap panel liberated: its harm, `hp`. */
@@ -25,15 +27,28 @@ const char *lib_trap_words(int hp);
 const char *lib_route_words(void);
 /* A rest (BN5's Pass). */
 const char *lib_rest_words(void);
+/* The team as the board begins: the teammates' names ("Colonel and
+ * KnightMan"), "" MegaMan alone */
+const char *lib_team_words(const char *names);
+/* A teammate deleted in his battle (`name`): he leaves the board */
+const char *lib_mate_down_words(const char *name);
 /* The Darkloids' phase: a unit's line as it strikes (UNIT_*; the
  * Darkloid's by his Navi's name, said with his face). */
 const char *lib_strike_words(int kind, const char *darkloid);
-/* The Darkloid deleted in `phases` against `par`. */
-const char *lib_won_words(int phases, int par);
+/* The board won: BN5's `tally` of the phases against the target where it
+ * is there (liberation_pieces.h; "" else), and over par (`tier` 2) MegaMan's
+ * own word on the prize; without it, the `phases` against `par` in ours */
+const char *lib_won_words(const char *tally, int tier, int phases, int par);
+/* ... and after its prize, the exit open */
+const char *lib_exit_words(void);
+/* The Darkloid at his first turn, claiming the area (his Navi's name; said
+ * with his face) */
+const char *lib_entrance_words(const char *darkloid);
 /* The units' names (UNIT_*; the Darkloid's is his Navi's) */
 const char *lib_unit_name(int kind);
-/* The labels: the commands (LIB_CMD_*), the banners, the corner's */
-const char *lib_command_label(int cmd);
+/* The labels: the commands (LIB_CMD_*; LIB_CMD_LONGSWRD the Navi's own,
+ * `command` liberation_board.h's LIB_DO_*), the banners, the corner's */
+const char *lib_command_label(int cmd, int command);
 extern const char *const lib_label_player_phase, *const lib_label_enemy_phase, *const lib_label_phase, *const lib_label_par,
 	*const lib_label_op, *const lib_label_menu;
 /* What MegaMan faces, for the menu's information: a panel's kind

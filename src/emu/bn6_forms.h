@@ -156,6 +156,9 @@
 #define BN6_CUSTOM_PICK_ICONS 0x0600A4A0u /* (VRAM) each pick's icon in the column under the chip's window, 0x80 bytes a pick (0x080281D4) */
 #define BN6_EMBLEM_GIVEN      0x08029418u /* cmp r0,#1 (a link battle) as the turn's picks leave the deck (0x080293F8): a pick of type 2's +4 names
                                              the chip it took (its deck entry 0xFFFF), in a link battle alone; BN5's in every battle (0x080250A2) */
+#define BN6_CUSTOM_OK_HAND    0x08029110u /* OK's hand built (bn6f sub_8029110, Gregar's the same): its picks into the hand, Beast Out's commit
+                                             for a type-2 pick (BN6_EMBLEM_COMMIT), before BN6_CROSS_RECORD goes into the side's packet
+                                             (0x0800B3A2) and so to BN6_CROSS_PENDING; a form written to the record here is taken as the turn starts */
 #define BN6_EMBLEM_COMMIT     0x08029150u /* bl 0x08029344 at OK, Beast Out's commit, for a pick of type 2 (r0 its element), */
 #define BN6_EMBLEM_COMMIT_NEXT 0x08029154u /* ... and on to the next pick */
 #define BN6_TURN_COUNT        0x08008472u /* bl 0x08015A16 for side 0's player (r0) in the step that opens each Custom screen (0x08008452), right

@@ -1,0 +1,11 @@
+{
+ "about": "BlizzardMan SP (BN5's 0x152, BN6's 0x1E7) alone at (5,2), MegaMan idle at (1,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): the SP's numbers through the same code as V1. MegaMan stands off the column his ice lands on: at (2,2) his Snowball's Aqua hit lands on an iced panel, which BN6's engine answers with its own freeze (MegaMan's CurAction 6, the panel plain again) where BN5 has none, BlizzardMan's objects the same to t1200 (an engine rule of BN6's, every battle's)",
+ "kind": "differential",
+ "foes": "152@52",
+ "mm": "12",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

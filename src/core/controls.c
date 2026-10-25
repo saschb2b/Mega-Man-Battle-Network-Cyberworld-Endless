@@ -12,7 +12,7 @@
 
 ControlsState C;
 
-int controls_gba_of(int row) { return row >= ROW_A && row <= ROW_SELECT ? row - ROW_A + 4 : -1; }
+int controls_gba_of(int row) { return row >= ROW_A && row <= ROW_SELECT ? row - ROW_A + 4 : row == ROW_FAST ? PAD_FAST : -1; }
 
 static void say(const char *s, bool warn) {
 	snprintf(C.said, sizeof C.said, "%s", s);
@@ -79,9 +79,9 @@ static const char *input_word(int input, int family) {
 	return family < 0 ? controls_key_word(input) : padmap_label_of(family, C.style, input);
 }
 
-/* the other GBA button an input is on, -1 for none */
+/* the other button an input is on, -1 for none */
 static int owner_of(int gba, int input, int family) {
-	for (int g = 0; g < PAD_GBA; ++g)
+	for (int g = 0; g < PAD_ROWS; ++g)
 		for (int i = 0; g != gba && i < PAD_PER; ++i) {
 			int in = family < 0 ? platform_keys_slot(&C.keys, g, i) : (C.pads.in[family][g][i] == PAD_NONE ? -1 : C.pads.in[family][g][i]);
 			if (in == input) return g;
@@ -106,12 +106,14 @@ static bool put(int gba, int slot, int input, int family) {
 	bool swapped = old != (family < 0 ? 0 : PAD_NONE) && owner_of(gba, old, family) == r;
 	int kept = family < 0 ? platform_keys_slot(&C.keys, r, 0) : C.pads.in[family][r][0];
 	if (swapped) snprintf(s, sizeof s, "Swapped: %s now on %s", padmap_gba_name(r), input_word(old, family));
+	/* (fast forward's may be left with none) */
+	else if (kept == (family < 0 ? 0 : PAD_NONE)) snprintf(s, sizeof s, "Taken from %s, which has none now", padmap_gba_name(r));
 	else snprintf(s, sizeof s, "Taken from %s, which keeps %s", padmap_gba_name(r), input_word(kept, family));
 	say(s, false);
 	return true;
 }
 
-/* ---- the box: a slot, the D-pad's four, Set all's ten ---- */
+/* ---- the box: a slot, the D-pad's four, Set all's eleven ---- */
 
 static void ask_start(int ask, int gba, int slot) {
 	C.pads_before = C.pads;
@@ -200,20 +202,20 @@ static void ask_update(void) {
 			if (put(C.ask_step, C.ask_slot, input, family)) { audio_sfx(SFX_CURSOR); ask_next(4, "D-pad set: DONE keeps it"); }
 		} else if (put(C.ask_step, SLOT_MAIN, input, family)) {
 			audio_sfx(SFX_CURSOR);
-			ask_next(PAD_GBA, "All set: DONE keeps them");
+			ask_next(PAD_ROWS, "All set: DONE keeps them");
 		}
 		return;
 	}
 	if (--C.ask_left > 0) return;
 	/* (waited out: Set all skips the button, the rest stop) */
-	if (C.ask == ASK_ALL) ask_next(PAD_GBA, "All set: DONE keeps them");
+	if (C.ask == ASK_ALL) ask_next(PAD_ROWS, "All set: DONE keeps them");
 	else ask_cancel();
 }
 
 /* ---- the list ---- */
 
 /* A slot cleared: the D-pad's four, or a button's (MAIN cleared, ALSO
- * takes its place); never a button's last */
+ * takes its place); never a GBA button's last */
 static void clear(void) {
 	int gba = controls_gba_of(C.row);
 	if (C.row != ROW_DPAD && gba < 0) return;
@@ -307,14 +309,14 @@ static void light(void) {
 	int n = pads_presses(p, 8);
 	for (int i = 0; i < n; ++i) {
 		uint32_t bits = padmap_bits(&C.pads, p[i].family, p[i].input);
-		for (int g = 0; g < PAD_GBA; ++g)
+		for (int g = 0; g < PAD_ROWS; ++g)
 			if (bits >> g & 1) C.lit[g] = LIT;
 	}
 #if KEYS
 	int k[8];
 	n = platform_keys_pressed(k, 8);
 	for (int i = 0; i < n; ++i)
-		for (int g = 0; g < PAD_GBA; ++g)
+		for (int g = 0; g < PAD_ROWS; ++g)
 			for (int s = 0; s < KEYS_PER; ++s)
 				if (C.keys.slot[g][s] && C.keys.slot[g][s] == k[i]) C.lit[g] = LIT;
 #endif
@@ -359,7 +361,7 @@ void controls_update(void) {
 	if (!C.open) return;
 	++C.t;
 	if (C.said_t > 0) --C.said_t;
-	for (int g = 0; g < PAD_GBA; ++g)
+	for (int g = 0; g < PAD_ROWS; ++g)
 		if (C.lit[g] > 0) --C.lit[g];
 	refresh_pad();
 	if (C.confirm) confirm_update();
@@ -423,7 +425,7 @@ const char *controls_word(uint32_t bit) {
 	static char s[32];
 	int gba = 0, family, style;
 	const char *name;
-	while (gba < PAD_GBA - 1 && !(bit >> gba & 1)) ++gba;
+	while (gba < PAD_ROWS - 1 && !(bit >> gba & 1)) ++gba;
 	if (touch_shown()) return padmap_gba_name(gba);
 	if (!P.keyboard_last && pads_last(&family, &style, &name)) {
 		int in = pads_map()->in[family][gba][0];

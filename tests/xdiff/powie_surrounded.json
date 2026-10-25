@@ -1,0 +1,12 @@
+{
+ "about": "Powie V1 (BN5's 0x7, BN6's 0x20c) alone at (1,2) on BN5's Surrounded field (both records' +6 0x33: the enemy's columns 1-2 and 5-6), MegaMan idle at (3,2) with 2000 HP, every draw of BN6's replayed from BN5's (rng=replay): the family's code that reads the field (its call of BN5's 0x0802B416, BN6's 0x0802D26A) and its facing on the left of him, as a liberation battle's (docs/LIBERATION.md, The battle's field)",
+ "kind": "differential",
+ "foes": "07@12",
+ "mm": "32",
+ "sides": "33",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "sprites": "bytes"
+}

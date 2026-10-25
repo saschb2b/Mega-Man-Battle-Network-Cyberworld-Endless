@@ -45,6 +45,12 @@ static const Guardian guardians[] = {
 	[27] = { "TomahawkMan", "Spirit of the Totem", GUARDIAN_NO_MUGSHOT, 24, 232, 88, 72 },
 	[28] = { "KnightMan", "The Iron Fortress", GUARDIAN_NO_MUGSHOT, 24, 152, 136, 200 },
 	[29] = { "ToadMan", "Maestro of the Marsh", GUARDIAN_NO_MUGSHOT, 24, 104, 200, 104 },
+	/* BN5's Darkloids (docs/LIBERATION.md, stage 4): faces and sprites
+	 * copied in as the six's, no pose of theirs read yet */
+	[30] = { "ShadeMan", "Lord of the Night", GUARDIAN_NO_MUGSHOT, -1, 168, 64, 120 },
+	[31] = { "BlizzardMan", "Darkloid of the Snow", GUARDIAN_NO_MUGSHOT, -1, 112, 184, 248 },
+	[32] = { "CloudMan", "Darkloid of the Storm", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 216 },
+	[33] = { "CosmoMan", "Darkloid of the Stars", GUARDIAN_NO_MUGSHOT, -1, 144, 112, 224 },
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
 
@@ -74,13 +80,18 @@ int guardian_sprite(int navi) {
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
 	/* (BN5's: his own, copied in at the face's number, guardian_set_face) */
-	if (guardian_older(navi) && set_face[navi]) return set_face[navi] - 1;
+	if ((guardian_older(navi) || guardian_darkloid(navi)) && set_face[navi]) return set_face[navi] - 1;
 	return GUARDIAN_HEEL_SPRITE;
 }
 
 int guardian_older_sprite(int navi) {
 	/* (BN5's lists 6 and 8: docs/ROM_DATA.md, BN5's Navis) */
 	static const uint8_t numbers[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1] = { 69, 75, 71, 72, 73, 74 };
+	/* (the Darkloids': BlizzardMan's 76 drawn on BN5's own board, mission
+	 * 1's, read in romlab; ShadeMan's, CloudMan's and CosmoMan's by their
+	 * palettes beside his, docs/ROM_DATA.md) */
+	static const uint8_t darkloids[GUARDIAN_DARKLOID_LAST - GUARDIAN_DARKLOID_FIRST + 1] = { 70, 76, 77, 78 };
+	if (guardian_darkloid(navi)) return darkloids[navi - GUARDIAN_DARKLOID_FIRST];
 	return guardian_older(navi) ? numbers[navi - GUARDIAN_OLDER_FIRST] : 0;
 }
 

@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""The itch.io page's pictures (docs/ITCH.md): the cover in listings and
+search, the banner over the page, the picture behind the player's Run game
+button, the theme's background tile, and the screenshots at a whole scale.
+
+The cover and banner are tools/steam_art.py's drawing (the infinity mark,
+the CYBERWORLD ENDLESS lettering, the net's platforms in the site's PET
+colours); --frame NAME draws the cover instead with one whole frame of the
+game running from docs/screenshots in the site's screen frame (AGENTS.md:
+whole frames only, never a crop). Each picture is drawn small and scaled by
+a whole number.
+The cover, banner, embed picture and tile are committed in docs/itch/; the screenshots are
+written to .build/itch/ for the upload.
+
+    python3 tools/itch_art.py [--frame NAME]
+"""
+import argparse
+import os
+import sys
+
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import steam_art as art  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, 'docs', 'itch')
+SHOTS_OUT = os.path.join(ROOT, '.build', 'itch')
+SHOTS = os.path.join(ROOT, 'docs', 'screenshots')
+
+# the site's screen frame (tools/site_art.py's 'screen'), outside in
+SCREEN_RINGS = [(0, 123, 74), (107, 222, 255), (66, 198, 231), (66, 198, 231), (33, 115, 140)]
+
+# the page's screenshots, in the order itch shows them, each at 4x
+SCREENSHOTS = ['net', 'boss-custom', 'guardian', 'liberation-turn', 'online-square', 'bn5-unite', 'home-news', 'setup']
+
+
+def logo_layer(w, h, x, y, inf_scale):
+    """The wordmark on its own transparent layer, centred on (x, y)."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    art.wordmark(im, x, y, inf_scale, False)
+    return im
+
+
+def framed(shot):
+    """A 240x160 frame inside the site's screen rings."""
+    k = len(SCREEN_RINGS)
+    im = Image.new('RGBA', (shot.width + 2 * k, shot.height + 2 * k))
+    px = im.load()
+    for i, c in enumerate(SCREEN_RINGS):
+        for x in range(i, im.width - i):
+            px[x, i] = px[x, im.height - 1 - i] = c + (255,)
+        for y in range(i, im.height - i):
+            px[i, y] = px[im.width - 1 - i, y] = c + (255,)
+    im.paste(shot.convert('RGBA'), (k, k))
+    return im
+
+
+def cover(frame):
+    """630 x 500, the cover with a frame (base 315 x 250, 2x): the wordmark at twice
+    the base over a whole frame of the game, the net round it."""
+    im = art.sky(315, 250)
+    art.net(im, 20, 168, [(0, 0, 3, 3), (3, 1, 2, 'u'), (-3, 2, 3, 'v'), (-4, 5, 2, 2), (2, 5, 2, 2)], 5)
+    art.net(im, 290, 150, [(0, 0, 2, 2), (2, 0, 3, 'u'), (-1, 3, 3, 3), (-3, 1, 3, 'v'), (2, 5, 2, 2)], 6,
+            specks=False)
+    logo = logo_layer(144, 32, 72, 16, 0.8).resize((288, 64), Image.NEAREST)
+    im.alpha_composite(logo, ((315 - 288) // 2, 4))
+    shot = framed(Image.open(os.path.join(SHOTS, frame + '.png')).convert('RGB'))
+    im.alpha_composite(shot, ((315 - shot.width) // 2, 72))
+    return im, 2
+
+
+def cover_art():
+    """630 x 500, itch's cover (base 126 x 100, 5x): the wordmark stacked
+    over the net, as the Steam capsule draws it."""
+    im = art.sky(126, 100)
+    art.net(im, 63, 52, [(-7, -1, 2, 2), (-5, 0, 3, 'u'), (-2, -1, 3, 3), (-1, 2, 3, 'v'), (-2, 5, 2, 2),
+                         (4, -5, 2, 2), (5, -3, 3, 'v'), (4, 0, 3, 3), (7, 1, 3, 'u'), (1, 6, 3, 2),
+                         (-6, 4, 3, 'u'), (-8, 3, 2, 2)], 8)
+    art.wordmark(im, 63, 46, 1.0, True)
+    return im, 5
+
+
+def banner():
+    """960 x 240, the page's banner (base 192 x 48, 5x): the wide capsule's
+    net with the wordmark across it."""
+    im = art.sky(192, 48)
+    art.net(im, 96, 18, [(-11, -1, 2, 2), (-9, 0, 3, 'u'), (-6, -1, 3, 3), (-5, 2, 2, 'v'), (-6, 4, 2, 2),
+                         (6, -6, 2, 2), (7, -4, 4, 'v'), (6, 0, 3, 3), (9, 1, 3, 'u'), (12, 0, 2, 3),
+                         (1, 5, 3, 2), (-1, 5, 2, 'u')], 7)
+    im.alpha_composite(logo_layer(192, 48, 96, 24, 0.8))
+    return im, 5
+
+
+def embed_bg(frame='central'):
+    """960 x 640, behind the player's Run game button until it is clicked:
+    one whole frame of the game at 4x (240 x 160), a layer of the net,
+    dimmed a third towards the page's navy so the button stands out. No
+    wordmark: the banner above carries it."""
+    im = Image.open(os.path.join(SHOTS, frame + '.png')).convert('RGBA')
+    im.alpha_composite(Image.new('RGBA', im.size, (11, 37, 50, 85)))
+    return im, 4
+
+
+def tile():
+    """48 x 48, the theme's background: the site's PET floor (web/assets/ui/floor.png) at 3x, as the site shows it."""
+    return Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGBA'), 3
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
+    ap.add_argument('--frame', help='a cover with this screenshot in it (docs/screenshots/NAME.png)')
+    a = ap.parse_args()
+    os.makedirs(OUT, exist_ok=True)
+    for name, (im, k) in (('cover', cover(a.frame) if a.frame else cover_art()), ('banner', banner()), ('embed', embed_bg()), ('background', tile())):
+        im = im.resize((im.width * k, im.height * k), Image.NEAREST)
+        path = os.path.join(OUT, name + '.png')
+        im.save(path, optimize=True)
+        print(f'{os.path.relpath(path, ROOT)}: {im.width}x{im.height}')
+    os.makedirs(SHOTS_OUT, exist_ok=True)
+    for i, name in enumerate(SCREENSHOTS, 1):
+        im = Image.open(os.path.join(SHOTS, name + '.png')).convert('RGB')
+        path = os.path.join(SHOTS_OUT, f'{i:02d}-{name}.png')
+        im.resize((im.width * 4, im.height * 4), Image.NEAREST).save(path, optimize=True)
+        print(f'{os.path.relpath(path, ROOT)}: {im.width * 4}x{im.height * 4}')
+
+
+if __name__ == '__main__':
+    main()

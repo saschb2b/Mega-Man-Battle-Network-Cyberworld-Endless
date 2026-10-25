@@ -13,7 +13,7 @@ static const char *const input_names[PAD_INPUTS] = {
 	"-leftx", "+leftx", "-lefty", "+lefty", "-rightx", "+rightx", "-righty", "+righty",
 	NULL, "lefttrigger", NULL, "righttrigger",
 };
-static const char *const gba_names[PAD_GBA] = { "UP", "DOWN", "LEFT", "RIGHT", "A", "B", "L", "R", "START", "SELECT" };
+static const char *const gba_names[PAD_ROWS] = { "UP", "DOWN", "LEFT", "RIGHT", "A", "B", "L", "R", "START", "SELECT", "FAST" };
 static const char *const family_names[PAD_FAMILIES] = { "pad", "nintendo", "joystick" };
 
 /* (ASCII, either case: the files are written by hand too) */
@@ -95,10 +95,10 @@ int padmap_input_of(int family, const char *name) {
 	return in != PAD_NONE && same_word(name, raw_text(in, false)) ? in : PAD_NONE;
 }
 
-const char *padmap_gba_name(int gba) { return gba >= 0 && gba < PAD_GBA ? gba_names[gba] : NULL; }
+const char *padmap_gba_name(int gba) { return gba >= 0 && gba < PAD_ROWS ? gba_names[gba] : NULL; }
 
 int padmap_gba(const char *name) {
-	for (int g = 0; g < PAD_GBA; ++g)
+	for (int g = 0; g < PAD_ROWS; ++g)
 		if (same_word(name, gba_names[g])) return g;
 	return -1;
 }
@@ -171,6 +171,7 @@ void padmap_default_family(PadMap *m, int family) {
 		set_row(r[7], 5, 7);
 		set_row(r[8], 9, 11);
 		set_row(r[9], 8, 10);
+		memset(r[PAD_FAST], PAD_NONE, PAD_PER);
 		return;
 	}
 	set_row(r[0], PAD_DPUP, PAD_AXIS(1, false));
@@ -180,9 +181,12 @@ void padmap_default_family(PadMap *m, int family) {
 	set_row(r[4], PAD_A, PAD_NONE);
 	set_row(r[5], PAD_B, PAD_NONE);
 	set_row(r[6], PAD_LEFTSHOULDER, PAD_LEFTTRIGGER);
-	set_row(r[7], PAD_RIGHTSHOULDER, PAD_RIGHTTRIGGER);
+	set_row(r[7], PAD_RIGHTSHOULDER, PAD_NONE);
 	set_row(r[8], PAD_START, PAD_NONE);
 	set_row(r[9], PAD_BACK, PAD_NONE);
+	/* (the right trigger, as Chrono Cross's remaster speeds up on R2, and
+	 * the right stick's press beside it) */
+	set_row(r[PAD_FAST], PAD_RIGHTTRIGGER, PAD_RIGHTSTICK);
 }
 
 void padmap_default(PadMap *m) {
@@ -194,7 +198,7 @@ bool padmap_same(const PadMap *a, const PadMap *b) { return !memcmp(a, b, sizeof
 uint32_t padmap_bits(const PadMap *m, int family, int input) {
 	uint32_t bits = 0;
 	if (family < 0 || family >= PAD_FAMILIES) return 0;
-	for (int g = 0; g < PAD_GBA; ++g)
+	for (int g = 0; g < PAD_ROWS; ++g)
 		for (int i = 0; i < PAD_PER && m->in[family][g][i] != PAD_NONE; ++i)
 			if (m->in[family][g][i] == input) bits |= 1u << g;
 	return bits;
@@ -213,13 +217,19 @@ static bool take_out(uint8_t *row, int input) {
 }
 
 void padmap_bind(PadMap *m, int family, int gba, int input) {
-	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || !padmap_name_of(family, input)) return;
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_ROWS || !padmap_name_of(family, input)) return;
 	uint8_t old[PAD_PER];
 	memcpy(old, m->in[family][gba], PAD_PER);
+	/* (a GBA button whose only input it is, with none of `gba`'s to take
+	 * in its place: fast forward's had none) */
+	bool gives = false;
+	for (int i = 0; i < PAD_PER; ++i) gives |= old[i] != PAD_NONE && old[i] != input;
+	for (int g = 0; g < PAD_GBA && !gives; ++g)
+		if (g != gba && padmap_count(m, family, g) == 1 && m->in[family][g][0] == input) return;
 	set_row(m->in[family][gba], input, PAD_NONE);
-	for (int g = 0; g < PAD_GBA; ++g) {
+	for (int g = 0; g < PAD_ROWS; ++g) {
 		uint8_t *row = m->in[family][g];
-		if (g == gba || !take_out(row, input) || row[0] != PAD_NONE) continue;
+		if (g == gba || !take_out(row, input) || row[0] != PAD_NONE || g == PAD_FAST) continue;
 		/* (left with nothing: what `gba` had, so the two swapped) */
 		int k = 0;
 		for (int i = 0; i < PAD_PER; ++i)
@@ -234,7 +244,7 @@ int padmap_count(const PadMap *m, int family, int gba) {
 }
 
 int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input) {
-	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || slot < 0 || slot >= PAD_PER || !padmap_name_of(family, input))
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_ROWS || slot < 0 || slot >= PAD_PER || !padmap_name_of(family, input))
 		return PAD_SLOT_REFUSED;
 	uint8_t *row = m->in[family][gba];
 	int n = padmap_count(m, family, gba);
@@ -245,12 +255,12 @@ int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input) {
 			return PAD_SLOT_ALONE;
 		}
 	int old = slot < n ? row[slot] : PAD_NONE;
-	/* a button whose only input it is gives it up for the one replaced,
-	 * or, with none replaced, keeps it */
+	/* a GBA button whose only input it is gives it up for the one
+	 * replaced, or, with none replaced, keeps it (fast forward's may go) */
 	for (int g = 0; g < PAD_GBA; ++g)
 		if (g != gba && padmap_count(m, family, g) == 1 && m->in[family][g][0] == input && old == PAD_NONE) return PAD_SLOT_REFUSED;
 	int from = PAD_SLOT_ALONE;
-	for (int g = 0; g < PAD_GBA; ++g) {
+	for (int g = 0; g < PAD_ROWS; ++g) {
 		if (g == gba || !take_out(m->in[family][g], input)) continue;
 		from = g;
 		if (m->in[family][g][0] == PAD_NONE) m->in[family][g][0] = (uint8_t)old;
@@ -260,9 +270,9 @@ int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input) {
 }
 
 bool padmap_clear_slot(PadMap *m, int family, int gba, int slot) {
-	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA) return false;
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_ROWS) return false;
 	int n = padmap_count(m, family, gba);
-	if (slot < 0 || slot >= n || n < 2) return false;
+	if (slot < 0 || slot >= n || (n < 2 && gba != PAD_FAST)) return false;
 	take_out(m->in[family][gba], m->in[family][gba][slot]);
 	return true;
 }
@@ -370,6 +380,14 @@ static bool parse_line(char *s, PadMap *m, int *family, char *errors, int size, 
 	return *family < 0 || parse_inputs(eq + 1, m->in[*family][gba], *family, errors, size, line);
 }
 
+/* Fast forward's inputs that a GBA button has too, taken from it (a file
+ * from before it gave the right trigger to R) */
+static void fast_apart(PadMap *m) {
+	for (int f = 0; f < PAD_FAMILIES; ++f)
+		for (int g = 0; g < PAD_GBA; ++g)
+			for (int i = 0; i < PAD_PER && m->in[f][g][i] != PAD_NONE; ++i) take_out(m->in[f][PAD_FAST], m->in[f][g][i]);
+}
+
 int padmap_parse(const char *text, PadMap *m, char *errors, int size) {
 	padmap_default(m);
 	if (errors && size > 0) errors[0] = 0;
@@ -382,6 +400,7 @@ int padmap_parse(const char *text, PadMap *m, char *errors, int size) {
 		if (!parse_line(buf, m, &family, errors, size, ++line)) ++bad;
 		text = nl ? nl + 1 : NULL;
 	}
+	fast_apart(m);
 	return bad;
 }
 
@@ -401,7 +420,7 @@ int padmap_format(const PadMap *m, char *out, int size) {
 		"# pushed one way, -a0 +a0 -a1 +a1... Delete this file for the defaults.\n");
 	for (int f = 0; f < PAD_FAMILIES && n >= 0 && n < size; ++f) {
 		n += snprintf(out + n, (size_t)(size - n), "\n[%s]\n", family_names[f]);
-		for (int g = 0; g < PAD_GBA && n >= 0 && n < size; ++g) {
+		for (int g = 0; g < PAD_ROWS && n >= 0 && n < size; ++g) {
 			n += snprintf(out + n, (size_t)(size - n), "%-6s =", gba_names[g]);
 			for (int i = 0; i < PAD_PER && m->in[f][g][i] != PAD_NONE && n >= 0 && n < size; ++i)
 				if (padmap_name_of(f, m->in[f][g][i])) n += snprintf(out + n, (size_t)(size - n), "%s %s", i ? "," : "", padmap_name_of(f, m->in[f][g][i]));

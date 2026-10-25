@@ -41,6 +41,7 @@ static void parse_buttons(const char *s, InputStep *step) {
 	static const struct { const char *n; uint32_t b; } names[] = {
 		{ "UP", BTN_UP }, { "DOWN", BTN_DOWN }, { "LEFT", BTN_LEFT }, { "RIGHT", BTN_RIGHT },
 		{ "A", BTN_A }, { "B", BTN_B }, { "L", BTN_L }, { "R", BTN_R }, { "START", BTN_START }, { "SELECT", BTN_SELECT },
+		{ "FAST", BTN_FAST },
 	};
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", s);

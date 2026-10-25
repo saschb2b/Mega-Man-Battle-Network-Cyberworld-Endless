@@ -358,6 +358,26 @@ static void desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
 }
 #endif
 
+/* The run a scene on the game starts on (`home`: at home before the act at
+ * --run-depth), its setup and the dev switches' changes to it */
+static void start_run(const Options *o, bool home, int net, int folder, int threat, int helpers, int cross) {
+	run_new(o->seed ? o->seed : 1);
+	run_setup(net, folder, threat, helpers, cross);
+	if (o->run_depth > 0) run.depth = o->run_depth;
+	else if (home) run.depth = 4;
+	run.clock = (uint8_t)dev.clock;   /* (--dev clock=N, docs/HOME.md) */
+	/* (--dev route: a special route found, at home on the act before's
+	 * board, on a layer on its own act's: docs/LIBERATION.md) */
+	if (dev.route) run.route_found = (uint8_t)((run.depth - 1) % CYCLE_LAYERS / 3 + !home);
+	jobs_dev(&run.job, run.seed, run.depth, home, dev.job, dev.job_state);   /* (--dev job=K,jobstate=S) */
+	/* (the area its act's in the run too, whose draws read it, and every
+	 * area's guardian one navi: a scripted capture keeps its run as the
+	 * areas' draw changes) */
+	int p = (run.depth - 1) % CYCLE_LAYERS;
+	if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
+	if (o->guardian_navi > 0) run_debug_guardian(o->guardian_navi);
+}
+
 /* The first scene, and the run it starts on: --scene's ("town" a new run
  * from the town as NEW GAME starts one, "setup" the title's setup,
  * "summary" a made-up run's), --setup's run, --run-depth, --guardian */
@@ -395,20 +415,7 @@ static void start_scene(const Options *o) {
 		title_summary = true;
 		s = &scene_title;
 	}
-	if (s == &scene_emu) {
-		run_new(o->seed ? o->seed : 1);
-		run_setup(net, folder, threat, helpers, cross);
-		if (o->run_depth > 0) run.depth = o->run_depth;
-		else if (home) run.depth = 4;
-		run.clock = (uint8_t)dev.clock;   /* (--dev clock=N, docs/HOME.md) */
-		jobs_dev(&run.job, run.seed, run.depth, home, dev.job, dev.job_state);   /* (--dev job=K,jobstate=S) */
-		/* (the area its act's in the run too, whose draws read it, and
-		 * every area's guardian one navi: a scripted capture keeps its
-		 * run as the areas' draw changes) */
-		int p = (run.depth - 1) % CYCLE_LAYERS;
-		if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
-		if (o->guardian_navi > 0) run_debug_guardian(o->guardian_navi);
-	}
+	if (s == &scene_emu) start_run(o, home, net, folder, threat, helpers, cross);
 	/* (later NEW GAMEs take the next seeds, so a session replays) */
 	title_seed = !o->seed ? 0 : !s || s == &scene_title ? o->seed : o->seed + 1;
 	if (town) emu_start_in_town = true;

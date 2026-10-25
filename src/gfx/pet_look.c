@@ -319,16 +319,21 @@ void look_new(int x, int y, const char *s) { look_caps(x, y, s, LOOK_NEW, LOOK_N
 void look_cursor(int x, int y) {
 	/* (KeyItem's, measured a frame at a time: 1, 0, 2 pixels right, six frames each) */
 	static const int step[3] = { 1, 0, 2 };
-	x += step[P.frame / 6 % 3];
+	look_cursor_scaled(x + step[P.frame / 6 % 3], y, 1, 255);
+}
+
+void look_cursor_scaled(int x, int y, int k, uint8_t alpha) {
 	/* (rows of 4 to 8 pixels, the point at the fifth: lit along its top
 	 * and left, darker along its lower edges, a shade under them) */
-	static const SDL_Color hi = { 255, 247, 115, 255 }, body = { 255, 173, 16, 255 }, lo = { 214, 107, 0, 255 }, under = { 16, 82, 82, 255 };
+	SDL_Color hi = { 255, 247, 115, alpha }, body = { 255, 173, 16, alpha }, lo = { 214, 107, 0, alpha }, under = { 16, 82, 82, alpha },
+		gold = LOOK_GOLD;
+	gold.a = alpha;
 	for (int r = 0; r < 9; ++r) {
 		int len = 4 + (r <= 4 ? r : 8 - r);
-		if (r >= 4) fill_rect(x + 1, y + r + 1, len, 1, under);
-		fill_rect(x, y + r, len, 1, r == 0 ? hi : r == 8 ? lo : body);
-		fill_rect(x, y + r, 1, 1, r == 8 ? lo : hi);
-		fill_rect(x + len - 1, y + r, 1, 1, r < 4 ? LOOK_GOLD : lo);
+		if (r >= 4) fill_rect(x + k, y + (r + 1) * k, len * k, k, under);
+		fill_rect(x, y + r * k, len * k, k, r == 0 ? hi : r == 8 ? lo : body);
+		fill_rect(x, y + r * k, k, k, r == 8 ? lo : hi);
+		fill_rect(x + (len - 1) * k, y + r * k, k, k, r < 4 ? gold : lo);
 	}
 }
 

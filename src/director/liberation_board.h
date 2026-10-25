@@ -43,9 +43,37 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 #define LIB_HOLES 5
 #define LIB_BARS  3
 #define LIB_LOOT  6      /* chip and zenny items a board at most */
+#define LIB_BONUS_CHIPS 4   /* the chips a board's BonusPanels give, one of them each (BN5's four a mission) */
 /* Order Points: BN5's, 3 at the start and 8 at most (BN5_LIB_OP_ADD) */
 #define LIB_OP_START 3
 #define LIB_OP_MAX   8
+/* BN5's Pass gives a Navi this part of his max HP back (romlab, mission 2:
+ * MegaMan 32 to 52 of 100, Colonel 32 to 72 of 200) */
+#define LIB_REST_PART 5
+
+/* The team (docs/LIBERATION.md, The team): MegaMan first, then the Navis
+ * the run holds, at most BN5's team of five: those whose BN5 Souls it
+ * holds, each by BN5's id (a team record's +5, bn5_liberation.h's
+ * BN5_LIB_NAVI_*), which is his Soul's number too (souls.h: bit k the Soul
+ * of id 7 + k), and Gregar's Cross Navis it holds (the Cross brought, or
+ * those found), each by BN6's navi index (powers.c: HeatMan 1 .. ChargeMan
+ * 5) past 0x20 */
+#define LIB_TEAM 5
+#define LIB_HELD 11      /* the Navis a run can hold: BN5's six Souls, Gregar's five Crosses */
+enum { MATE_MEGAMAN = 0, MATE_COLONEL = 7, MATE_SHADOWMAN, MATE_NUMBERMAN, MATE_TOMAHAWKMAN, MATE_KNIGHTMAN, MATE_TOADMAN,
+	MATE_HEATMAN = 0x21, MATE_ELECMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_CHARGEMAN };
+/* ... a Cross Navi's BN6 navi index (1-5), 0 another */
+static inline int lib_mate_cross(int navi) { return navi >= MATE_HEATMAN && navi <= MATE_CHARGEMAN ? navi - MATE_HEATMAN + 1 : 0; }
+typedef struct {
+	int n;                      /* 1 to LIB_TEAM: MegaMan and his teammates */
+	uint8_t navi[LIB_TEAM];     /* MATE_*, MegaMan first */
+	int16_t hp[LIB_TEAM];       /* each one's max HP on the board (MegaMan's 0: the act's, liberation_plan.c's) */
+	int nheld;                  /* every Navi the run holds (MegaMan not among them), on the team or not: the */
+	uint8_t held[LIB_HELD];     /* ... command rule gives each one's command its spot */
+} LibTeam;
+/* A Navi of the team where the board stands: his panel, and whether he
+ * is out (deleted in a battle: BN5's Navi leaves the mission) */
+typedef struct { uint8_t x, y; bool out; } LibMate;
 
 typedef struct {
 	uint8_t kind;      /* UNIT_* */
@@ -61,8 +89,9 @@ typedef struct {
 	int median, p25, p75;            /* phases to liberate it, the wins' */
 	int phases, dead, strikes;       /* the plays' phases; those with one sensible move on the way; strikes at a DarkHole or the Darkloid */
 	int moves;                       /* sensible moves over every phase (decisions per phase: moves / phases) */
-	int best[4];                     /* the best move by command: Liberation, LongSwrd, Pass, a fight */
-	int longswrd;                    /* LongSwrd taken, over the plays */
+	int best[4];                     /* the best move by command: Liberation, a Navi's command (LongSwrd ...), Pass, a fight */
+	int longswrd;                    /* the Navis' commands taken (LongSwrd and the teammates'), over the plays */
+	int out;                         /* teammates deleted, over the plays */
 	int orders;                      /* distinct orders the DarkHoles were taken in */
 	int sealed, route;               /* the route's plays that took it, and their median phases */
 	int bare_dead, bare_phases;      /* ... the board with its rewards stripped */
@@ -75,6 +104,8 @@ typedef struct {
 	uint8_t kind[MAP_H][MAP_W];     /* LIB_* */
 	uint8_t item[MAP_H][MAP_W];     /* an item panel's: LIB_GOT_* | amount << 4; a barrier's number */
 	int start_x, start_y;           /* MegaMan's first panel (the arrival) */
+	LibTeam team;                   /* the team it was made for */
+	LibMate mate[LIB_TEAM];         /* ... where each stands (their first panels by the start, the course's after) */
 	int boss_x, boss_y;             /* the Darkloid's panel, the middle of his 3x3 */
 	int nholes;
 	uint8_t hole_x[LIB_HOLES], hole_y[LIB_HOLES];
@@ -87,6 +118,7 @@ typedef struct {
 	int traps;
 	int panels, dark;               /* the board's panels, and those dark as it begins (items and rings among them) */
 	int par;                        /* phases: the planner's (lib_plan) */
+	uint32_t plan_seed;             /* ... its plays' seed (a pick's par plays them again: lib_plan_par) */
 	int tries;                      /* the seeds it took (a board rejected tries the next) */
 	int why;                        /* the last try's rejection (LIB_WHY_*) */
 	uint8_t rejected[16];           /* ... each kind's tries rejected (LIB_WHY_*: the measures') */
@@ -108,22 +140,52 @@ int lib_darkloid_reach(int act);
 int lib_trap_harm(int act);
 /* A zenny item's zenny in act `act` (BN5's amount times 100, the act's more) */
 int lib_zenny(int act);
+/* A board cleared over par: its zenny at `depth` (BN5's 1000 at the
+ * second act, 250 more an act, by the plan's zenny curve) */
+int lib_par_zenny(int depth);
 /* Guardian u's step toward (x, y) in the Darkloids' phase (Bladia's
  * darkening the clean panel it lands on): false where none brings it
  * nearer */
 bool lib_guardian_step(LibBoard *b, int u, int x, int y);
+/* A deleted guardian's return as BN5's (BN5_LIB_RETURN), at the
+ * Darkloids' phase's end: DarkHole h still standing, MegaMan at (mx, my)
+ * within three panels of it on both axes, fewer than eight units standing
+ * and fewer than three of the hole's own: one of its deleted guardians
+ * (BN5's pick at random among them; a board's hole has one), on the free
+ * dark panel of the eight round the hole nearest MegaMan, BN5's order
+ * breaking a tie. The guardian, its panel into (*x, *y); -1 none. */
+int lib_guardian_return(const LibBoard *b, int h, int mx, int my, int *x, int *y);
 
 /* Whether panel (x, y) is floor MegaMan walks at the ground's height: the
  * director's reads the layer's map as built (netmap's floor, after legal.c
  * made it drawable), so every way of the board is a way of the map's */
 typedef bool (*LibFloor)(int x, int y);
 /* The board for the layer just generated (net.h's `layer`, a dark one) in
- * act `act` (0-based), for a team of `team` Navis (1: MegaMan alone),
- * from `seed`, on the panels `floor` says (NULL: the layer's flat floor
- * cells as generated, a test's): its kinds, DarkHoles, units and par;
- * false where no seed of a few gives one that keeps BN5's guarantees and
- * the quality bar (the layer is then a plain one). */
-bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team, LibFloor floor);
+ * act `act` (0-based), for `team` (NULL: MegaMan alone), from `seed`, on
+ * the panels `floor` says (NULL: the layer's flat floor cells as
+ * generated, a test's): its kinds, DarkHoles, units, the team's first
+ * panels and par; false where no seed of a few gives one that keeps BN5's
+ * guarantees and the quality bar (the layer is then a plain one). */
+bool lib_board_make(LibBoard *b, uint32_t seed, int act, const LibTeam *team, LibFloor floor);
+/* The Navi of the team on panel (x, y), -1 none (an out one is none) */
+int lib_mate_at(const LibBoard *b, int x, int y);
+/* A Navi's command (BN5's: a team record's command by his id), and its
+ * panels: those a command taken on panel (x, y), facing grid way `dir`
+ * from (sx, sy), frees or searches, into xs/ys (at most 6); how many */
+enum { LIB_DO_NONE, LIB_DO_LONGSWRD, LIB_DO_SCRENDIV, LIB_DO_TOMAHAWK, LIB_DO_NUMBER, LIB_DO_SNEAK, LIB_DO_MELODY,
+	/* Team ProtoMan's, the Cross Navis' (docs/LIBERATION.md, The Cross Navis) */
+	LIB_DO_NAPALM, LIB_DO_WIDESWRD, LIB_DO_MAGNET, LIB_DO_SEARCH, LIB_DO_BOMB, LIB_DOS };
+int lib_command_of(int navi);
+int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]);
+/* ... whether a command frees its panels by a battle (LongSwrd, ScrenDiv,
+ * TomahawkSwing, Napalm, WideSwrd, PanelSearch), not with none */
+bool lib_command_battles(int command);
+/* Whether panel (x, y) is one BombLiberation's flier hovers over: dark,
+ * an item's, a trap (BN5's GyroMan flies over dark panels: the guides) */
+bool lib_flown(const LibBoard *b, int x, int y);
+/* The shield of KnightMan's StoneBody: no harm on the board to him or a
+ * Navi beside him (BN5's guides) */
+bool lib_mate_shielded(const LibBoard *b, int k);
 /* Whether panel (x, y) is on the board and walked (clean: BN5's units
  * move over clean panels alone). */
 bool lib_walkable(const LibBoard *b, int x, int y);
@@ -135,6 +197,10 @@ bool lib_liberable(const LibBoard *b, int x, int y);
 bool lib_dark_kind(int k);
 /* The dark panels around (x, y) (its eight), which make its battle harder. */
 int lib_dark_around(const LibBoard *b, int x, int y);
+/* The Darkloid's HP after his heal in his phase, as BN5's (its ROM,
+ * BN5_LIB_HEAL): below his max, a tenth of it for each dark panel round
+ * him (lib_dark_kind's, BN5's weights), his max at most */
+int lib_darkloid_heal(const LibBoard *b, int hp, int max);
 /* The DarkHoles still standing. */
 int lib_holes_left(const LibBoard *b);
 /* A key taken: barrier n's panels open (clean); how many */

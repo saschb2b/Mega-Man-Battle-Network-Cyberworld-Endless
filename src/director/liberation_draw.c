@@ -18,14 +18,18 @@
 
 #include "bn5_liberation.h"
 #include "bn6_fields.h"
+#include "cinema.h"
 #include "director.h"
 #include "director_state.h"
 #include "emu.h"
 #include "gfx.h"
 #include "guardians.h"
 #include "liberation_battle.h"
+#include "liberation_pick.h"
 #include "liberation_pieces.h"
+#include "liberation_roulette.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "liberation_words.h"
 #include "netmap.h"
 #include "pet_look.h"
@@ -38,6 +42,7 @@
  * on captures as MegaMan was moved) and the sprites' palettes */
 #define GBA_BG1HOFS     0x04000014u
 #define GBA_BG1VOFS     0x04000016u
+#define GBA_BG_PALETTE  0x05000000u
 #define GBA_OBJ_PALETTE 0x05000200u
 #define BOX_TOP 96        /* a chat box's first row (scene_emu.c's TINT_BOX_TOP) */
 #define CAM_X  120        /* where MegaMan's place shows, the scroll's own (calibrated on a capture) */
@@ -52,6 +57,7 @@ static struct {
 	bool look;             /* the board in BN5's own look (liberation_look.c) */
 	int blink;             /* frames seen, for the faced panel's blink */
 	uint8_t sprite[4096];  /* the sprites' colours, a bit each of BN6's 15-bit colours */
+	uint8_t bg[4096];      /* ... and the backgrounds' */
 	int fx, fy;            /* the panel MegaMan faces, -1 none */
 	Anim outline;          /* ... outlined by BN5's own sprite, its ripple from the menu's opening */
 	int out_x, out_y;      /* ... the panel it ripples on, -1 none */
@@ -77,7 +83,8 @@ static Sprite *bn5_sprite(int index) {
  * ripple, while the command window is open over a panel to liberate */
 static void see_outline(void) {
 	int u = S.fx >= 0 ? lib_unit_at(S.fx, S.fy) : 0;
-	Sprite *spr = S.look && S.fx >= 0 && LB.step == LIB_STEP_MENU && u < 0 && lib_liberable(&LB.b, S.fx, S.fy) ? bn5_sprite(BN5_LIB_OUTLINE) : NULL;
+	bool free = u < 0 && (lib_liberable(&LB.b, S.fx, S.fy) || LB.b.kind[S.fy][S.fx] == LIB_BONUS);
+	Sprite *spr = S.look && S.fx >= 0 && LB.step == LIB_STEP_MENU && free ? bn5_sprite(BN5_LIB_OUTLINE) : NULL;
 	if (!spr) { S.out_x = S.out_y = -1; return; }
 	if (S.fx != S.out_x || S.fy != S.out_y) { anim_play(&S.outline, spr, BN5_LIB_OUTLINE_RIPPLE); S.out_t = 0; }
 	else if (++S.out_t > BN5_LIB_OUTLINE_DELAY) anim_update(&S.outline);
@@ -124,9 +131,11 @@ void lib_see(void) {
 	S.look = lib_look_on();
 	++S.blink;
 	memset(S.sprite, 0, sizeof S.sprite);
+	memset(S.bg, 0, sizeof S.bg);
 	for (uint32_t i = 0; i < 256; ++i) {
-		int c = emu_read16(GBA_OBJ_PALETTE + 2 * i) & 0x7FFF;
+		int c = emu_read16(GBA_OBJ_PALETTE + 2 * i) & 0x7FFF, b = emu_read16(GBA_BG_PALETTE + 2 * i) & 0x7FFF;
 		S.sprite[c >> 3] |= (uint8_t)(1u << (c & 7));
+		S.bg[b >> 3] |= (uint8_t)(1u << (b & 7));
 	}
 	S.fx = S.fy = -1;
 	if (LB.step == LIB_STEP_MENU || (LB.step == LIB_STEP_MOVE && lib_faced_takes())) lib_faced(&S.fx, &S.fy);
@@ -152,14 +161,53 @@ static uint32_t recolour(uint32_t c, int kind, bool faced) {
 	return (c & 0xFF000000u) | (uint32_t)(b > 255 ? 255 : b) << 16 | (uint32_t)(g > 255 ? 255 : g) << 8 | (uint32_t)(r > 255 ? 255 : r);
 }
 
+static int colour15(uint32_t c) { return (int)((c & 0xFF) >> 3 | (c >> 11 & 0x1F) << 5 | (c >> 19 & 0x1F) << 10); }
+
 static bool sprite_colour(uint32_t c) {
-	int k = (int)((c & 0xFF) >> 3 | (c >> 11 & 0x1F) << 5 | (c >> 19 & 0x1F) << 10);
+	int k = colour15(c);
 	return S.sprite[k >> 3] >> (k & 7) & 1;
+}
+
+/* ... one of the sprites' the backgrounds have none of */
+static bool sprite_only(uint32_t c) {
+	int k = colour15(c);
+	return sprite_colour(c) && !(S.bg[k >> 3] >> (k & 7) & 1);
+}
+
+static uint32_t mix(uint32_t a, uint32_t b, int w) {
+	uint32_t c = a & 0xFF000000u;
+	for (int s = 0; s < 24; s += 8) c |= (((a >> s & 0xFF) * (uint32_t)w + (b >> s & 0xFF) * (uint32_t)(16 - w)) / 16) << s;
+	return c;
+}
+
+/* A guardian rising on its DarkHole as BN5 shows it (BN5_LIB_RETURN_RISE):
+ * its sprite in OBJ mosaic, blocks of size + 1 pixels from the screen's
+ * corner each its first pixel's colour, fading in as it sharpens. Ours
+ * over the frame's pixels about him: a sprite's told by its colours (the
+ * sprites' that no background has), the floor under a block its first
+ * floor pixel's */
+static void rise_mosaic(uint32_t *px) {
+	int u = LB.rise_unit, m = LB.rise_mosaic + 1, w = 16 - LB.rise_mosaic;
+	if (!S.on || u < 0 || LB.rise_mosaic <= 0) return;
+	int sx = LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, sy = (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y;
+	int x0 = sx - 32 < 0 ? 0 : (sx - 32) / m * m, y0 = sy - 56 < 0 ? 0 : (sy - 56) / m * m;
+	for (int by = y0; by < sy + 16 && by < EMU_H; by += m)
+		for (int bx = x0; bx < sx + 32 && bx < EMU_W; bx += m) {
+			uint32_t first = px[by * EMU_W + bx], floor = first;
+			bool solid = sprite_only(first), found = !solid;
+			for (int y = by; y < by + m && y < EMU_H && !found; ++y)
+				for (int x = bx; x < bx + m && x < EMU_W && !found; ++x)
+					if (!sprite_only(px[y * EMU_W + x])) { floor = px[y * EMU_W + x]; found = true; }
+			for (int y = by; y < by + m && y < EMU_H; ++y)
+				for (int x = bx; x < bx + m && x < EMU_W; ++x)
+					if (solid || sprite_only(px[y * EMU_W + x])) px[y * EMU_W + x] = solid ? mix(first, floor, w) : floor;
+		}
 }
 
 void director_tint_board(uint32_t *px) {
 	/* (at home, the dark way's portal marked) */
 	lib_way_tint(px);
+	rise_mosaic(px);
 	if (!S.on || S.look) return;
 	for (int y = 0; y < (S.box ? BOX_TOP : EMU_H); ++y)
 		for (int x = 0; x < EMU_W; ++x) {
@@ -211,6 +259,8 @@ static void faced_label(char *s, size_t n) {
 	else s[0] = 0;
 }
 
+static int menu_lines(const char **lines, bool *can, int *cursor);
+
 static void draw_menu(void) {
 	int w = 96, h = 18 + LIB_CMDS * LOOK_LINE, x = P.core_x + EMU_W - w - 6, y = P.core_y + 34;
 	look_band(x, y, w, lib_label_menu);
@@ -218,10 +268,13 @@ static void draw_menu(void) {
 	char s[40];
 	faced_label(s, sizeof s);
 	look_caps(f.x + 3, f.y + 2, s, LOOK_GOLD, LOOK_SHADE);
-	for (int c = 0; c < LIB_CMDS; ++c) {
+	const char *lines[LIB_CMDS];
+	bool can[LIB_CMDS];
+	int cursor = 0, n = menu_lines(lines, can, &cursor);
+	for (int c = 0; c < n; ++c) {
 		int ly = f.y + 10 + c * LOOK_LINE;
-		look_text(f.x + LOOK_CURSOR_W + 4, ly, lib_command_label(c), LB.can[c] ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
-		if (c == LB.menu) look_cursor(f.x + 1, ly + 1);
+		look_text(f.x + LOOK_CURSOR_W + 4, ly, lines[c], can[c] ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
+		if (c == cursor) look_cursor(f.x + 1, ly + 1);
 	}
 }
 
@@ -243,24 +296,79 @@ static void draw_pops(void) {
 	}
 }
 
-/* The Darkloids' phase's effect at its world place, BN5's sprite's own origin */
+/* The Darkloids' phase's effect at its world place, BN5's sprite's own
+ * origin, `up` over it; shaken with the picture, as BN5's world's OBJs are */
 static void draw_fx(void) {
 	if (S.effect_n < 0 || LB.effect.sprite < 0) return;
-	anim_draw(&S.effect, P.core_x + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y, false, 0, 0);
+	int dx, dy;
+	cinema_offset(&dx, &dy);
+	anim_draw(&S.effect, P.core_x + dx + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + dy + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y - LB.effect.up,
+		false, LB.effect.pal, 0);
 }
 
-/* The harm of a blow over MegaMan, as BN5 shows a Navi's (its yellow digits) */
+/* The harm of a blow over each Navi it hurt, as BN5 shows a Navi's (its
+ * yellow digits) */
 static void draw_harm(void) {
 	if (!LB.harm || !S.look) return;
-	int wx = bn6_player_x(), wy = bn6_player_y();
-	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
+	for (int k = 0; k < LB.b.team.n; ++k) {
+		if (!(LB.harm_mates >> k & 1)) continue;
+		int wx, wy, dx, dy;
+		lib_mate_world(k, &wx, &wy);
+		cinema_offset(&dx, &dy);
+		lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X + dx, (wy - wx) / 2 - S.cam_v + CAM_Y + dy);
+	}
+}
+
+/* Each unit's HP under it as BN5 shows a unit's not in play (its white
+ * digits, their top this far under its place on the floor: BN5 lays a
+ * unit's OBJs 82 down from its camera's, its floor 80), while it stands on
+ * the board; under a chat box, none of it shows */
+#define HP_DOWN 2
+
+static void draw_hp(void) {
+	if (!S.look) return;
+	SDL_Rect above = { P.core_x, P.core_y, EMU_W, BOX_TOP };
+	if (S.box) gfx_clip(&above);
+	for (int u = 0; u < LB.b.nunits; ++u)
+		if (LB.hp_max[u] && !LB.b.unit[u].gone && !LB.hidden[u])
+			lib_piece_hp(LB.hp_shown[u], LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y + HP_DOWN);
+	if (S.box) gfx_clip(NULL);
+}
+
+/* The team's HP as BN5's board shows it: the Navi in play's in the box at
+ * the top left, each other's under him (romlab, mission 2); in the
+ * Darkloids' phase none is in play, so every Navi's is under him */
+static void draw_team_hp(void) {
+	bool theirs = lib_megaman_hp_shown();
+	if (!theirs) lib_piece_hp_box(lib_mate_hp(lib_in_play()));
+	for (int k = 0; k < LB.b.team.n; ++k) {
+		if ((!theirs && k == lib_in_play()) || LB.b.mate[k].out) continue;
+		int wx, wy;
+		lib_mate_world(k, &wx, &wy);
+		lib_piece_hp(lib_mate_hp(k), wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y - BN5_LIB_HP_DOWN);
+	}
+}
+
+/* The menu's lines: Liberation, the Navi in play's command (none for
+ * KnightMan, whose StoneBody is always on), Pass; into lines and can, and
+ * the cursor's line; how many */
+static int menu_lines(const char **lines, bool *can, int *cursor) {
+	int command = lib_mate_command(lib_in_play()), n = 0;
+	for (int c = 0; c < LIB_CMDS; ++c) {
+		if (c == LIB_CMD_LONGSWRD && command == LIB_DO_NONE) continue;
+		if (c == LB.menu) *cursor = n;
+		can[n] = LB.can[c];
+		lines[n++] = lib_command_label(c, command);
+	}
+	return n;
 }
 
 /* The command window as BN5's, its lines BN5's commands */
 static void draw_window(void) {
 	const char *lines[LIB_CMDS];
-	for (int c = 0; c < LIB_CMDS; ++c) lines[c] = lib_command_label(c);
-	lib_piece_window(lines, LB.can, LIB_CMDS, LB.menu);
+	bool can[LIB_CMDS];
+	int cursor = 0, n = menu_lines(lines, can, &cursor);
+	lib_piece_window(lines, can, n, cursor);
 }
 
 void director_draw_board(void) {
@@ -269,16 +377,20 @@ void director_draw_board(void) {
 	bool bn5 = S.look && lib_pieces_on();
 	draw_faced();
 	draw_pops();
+	draw_hp();
 	draw_fx();
+	if (bn5) draw_team_hp();
 	draw_harm();
 	if (bn5) lib_piece_gauge(LB.op);
 	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
-	/* (L held, as BN5's map view: the phase and its target) */
+	/* (L held, as BN5's map view: the phase and its target, its keys) */
 	if (bn5 && D.l_held && LB.step == LIB_STEP_MOVE) lib_piece_phases(LB.phase, LB.b.par, S.blink);
 	if (LB.step == LIB_STEP_BANNER) {
 		if (bn5 && lib_piece_banner_frames()) lib_piece_phase_banner(LB.enemy_banner, LB.phase, LB.banner_t);
 		else draw_banner();
 	}
+	/* (the board won: BN5's SUCCESS! in the same band) */
+	if (bn5 && LB.step == LIB_STEP_CLEAR) lib_piece_clear_banner(LB.banner_t - BN5_LIB_CLEAR_BAND);
 	if (bn5 && LB.cheer && LB.cheer_t >= LIB_CHEER_WAIT) lib_piece_cheer(LB.cheer, LB.cheer_t - LIB_CHEER_WAIT);
 	if (LB.step == LIB_STEP_MENU) {
 		if (bn5) draw_window();
@@ -286,4 +398,8 @@ void director_draw_board(void) {
 		/* (what the battle stakes, above BN5's window or under the menu) */
 		lib_battle_draw_stakes(EMU_W - 6, bn5 ? 82 : 34 + LOOK_BAND_H + 18 + LIB_CMDS * LOOK_LINE + 2 * LOOK_FRAME + 2);
 	}
+	/* (a BonusPanel's flashes and roulette, over everything as BN5's) */
+	if (bn5) lib_roulette_draw();
+	/* (the team picked on arrival: the PET's screen over the board) */
+	if (LB.step == LIB_STEP_PICK) lib_pick_draw();
 }

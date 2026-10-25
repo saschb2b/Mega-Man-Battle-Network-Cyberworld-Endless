@@ -8,6 +8,7 @@
 #include "economy.h"
 #include "formations.h"
 #include "game.h"
+#include "loot_souls.h"
 #include "net.h"
 #include "pacing.h"
 #include "run.h"
@@ -672,6 +673,25 @@ static int md_zenny(int param, int depth) {
 	return param == 0 ? (100 + rng_range(0, 8) * 50) * (1 + depth / 6) : 800 + depth * 60;
 }
 
+/* A find's chip of bonus tier `bonus` (roll_chip), leaned: a share of
+ * them, where the run holds a Soul, of its kind, of the tier rolled
+ * (loot_souls.h); then half the time a chip that comes in the folder's
+ * codes, in one of them: rolled again, eight times at most, for one (smart
+ * loot, as Diablo 3 leans a drop to its finder), a Soul's kind keeping its
+ * chip; the other half as it rolls. Leaning only the code, where the chip
+ * had one, a Blade folder's (S, L) finds came in its codes two times in
+ * seven (docs/META.md) */
+static int lean_find(int depth, int bonus, char *code) {
+	int id = roll_chip(depth, bonus, code);
+	bool kind = loot_soul_find(&id, code);
+	if (run.codes[0] && rng_range(0, 1) && econ_keep(ECON_LEVER_LEAN, depth)) {
+		for (int t = 0; t < 8 && !kind && !loot_folder_code(id, false); ++t) id = roll_chip(depth, bonus, code);
+		char c = loot_folder_code(id, false);
+		if (c) *code = c;
+	}
+	return id;
+}
+
 LootFind loot_mystery_roll(int param, int depth) {
 	int roll = rng_range(0, 99);
 	LootFind f = { LOOT_FIND_ZENNY, 100, '*' };
@@ -701,17 +721,7 @@ LootFind loot_mystery_roll(int param, int depth) {
 	}
 	if (bonus >= 0) {
 		f.kind = LOOT_FIND_CHIP;
-		f.value = roll_chip(depth, bonus, &f.code);
-		/* half the time a chip that comes in the folder's codes, in one of
-		 * them: rolled again, eight times at most, for one (smart loot, as
-		 * Diablo 3 leans a drop to its finder); the other half as it rolls.
-		 * Leaning only the code, where the chip had one, a Blade folder's
-		 * (S, L) finds came in its codes two times in seven (docs/META.md) */
-		if (run.codes[0] && rng_range(0, 1) && econ_keep(ECON_LEVER_LEAN, depth)) {
-			for (int t = 0; t < 8 && !loot_folder_code(f.value, false); ++t) f.value = roll_chip(depth, bonus, &f.code);
-			char c = loot_folder_code(f.value, false);
-			if (c) f.code = c;
-		}
+		f.value = lean_find(depth, bonus, &f.code);
 	}
 	if (f.kind == LOOT_FIND_ZENNY) f.value = econ_scale(f.value, ECON_LEVER_ZENNY, depth);
 	return f;

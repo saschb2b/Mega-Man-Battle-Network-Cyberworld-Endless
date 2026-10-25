@@ -512,6 +512,89 @@ The owner said yes to every decision as proposed:
   who opens every Mystery Data and shops (the playtest loop's next
   session is the place).
 
+## A dark layer's prize (25 October 2026)
+
+A dark layer (docs/LIBERATION.md) pays its par's prize as BN5's
+Liberation Missions do, the owner's decision of 25 October 2026: a chip
+two under par or better, a chip within par, zenny over par. The chips are
+a Server's prize and one a tier lower (`src/layer/lib_prizes.c`); the
+zenny is BN5's first mission's 1000 at act 2 and 250 more an act, by the
+zenny curve (`lib_par_zenny`). `build.py economy` prints them act by act,
+each board's (a run meets one at most an act, by its choice at a fork, in
+place of a layer's finds: not in the acts' sums or bands):
+
+| Act | Two under: good, price | At par: good, price | Over par: zenny (flat, opening) |
+| --- | --- | --- | --- |
+| 2 | 69%, 2,335 | 47%, 1,677 | 1,000, 653 |
+| 3 | 76%, 2,697 | 57%, 1,875 | 1,250, 959 |
+| 4 | 80%, 2,863 | 67%, 2,345 | 1,500, 1,288 |
+| 5 | 81%, 2,807 | 73%, 2,430 | 1,750, 1,636 |
+| 6 | 74%, 2,593 | 73%, 2,428 | 2,000, 2,000 |
+
+The price is a dealer's for that chip (`chip_price`), the yardstick
+between a chip and zenny. BN5's own zenny (1000 a mission to 5000) would
+pay 3,435 to 5,000 from act 4, more than the chip at par is worth, and
+dawdling would beat racing the par; the report counts an act outside
+where the zenny over par reaches the chip at par's price (0 now). The
+opening plan's chips are as the flat plan's here: a Server's prize rolls
+its rarer tiers by their own weight, which the good chips' lever leaves
+alone.
+
+## A held Soul's kind (25 October 2026)
+
+A Soul unites with a chip of its kind given up from the hand (docs/META.md,
+Souls), and a run cannot farm: the run's starting folders hold almost
+none of the six kinds (the Blade folder none), so a won Soul often went
+unused. The owner's decision of 25 October 2026, as
+recommended: BN5's rule for the chip stays, and the chips come to the
+folder instead (`src/core/loot_souls.c`).
+
+- **Through the game-design skill.** The dialectic is the Souls' own, what
+  you bring against what you find: the Soul is found, and now the finds
+  answer it. It feeds the run's loop (the folder between layers), never the
+  meta loop. The patterns are smart loot (Diablo 3's Loot 2.0: a drop
+  leaned to its finder, as the finds already lean to the folder's codes)
+  and a build-around (a held Soul gives the folder a direction), the costed
+  power left as it was (each unison still takes a chip of the hand).
+- **Finds:** a quarter of the Mystery Data's chips (`LOOT_SOUL_LEAN`, 25%)
+  are of a held Soul's kind, of the tier the chip rolled (no Giga early:
+  the counts and tiers as they were), where its tier has one, from the
+  nets the layer's chips come from; the code lean after it keeps the chip
+  and sets its code to the folder's where it has one.
+- **Stock:** a Net Dealer's fourth chip is of a held Soul's kind, of the
+  roll's tier or the nearest under it, else over it up to a rare standard,
+  never one the folder is full of (his first is the act's answer, his
+  second sometimes the viruses').
+- **Which kind:** of the held Souls' kinds, the one the folder holds fewest
+  chips of, a draw among those tied. DarkChips are never leaned to.
+- **When:** the Souls held as the layer is made (`souls_layer`, kept beside
+  the checkpoint with the Souls), so a CONTINUE rebuilds the same stock; a
+  Soul won on a layer counts from the next. A run that holds none draws
+  nothing more: the plans' numbers above are as they were.
+
+The share was set with `build.py economy`, which holds each Soul alone from
+the first layer (300 runs, the opening plan): the chips of its kind gained
+per run by act (the finds, the battles' rows, the field's data, the
+Guardian Data), before (none held) and now, and on the dealers' lists.
+Every chip gained over the net stays 82.6 (82.3 to 82.5 with a Soul held).
+
+| Soul (kind) | Act 1 | 2 | 3 | 4 | 5 | 6 | Nest | Dealers' lists an act |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Colonel (Obstacle) | 0.5 → 1.5 | 0.5 → 1.5 | 1.0 → 2.7 | 1.0 → 3.0 | 1.1 → 4.0 | 1.1 → 3.6 | 0.3 → 1.2 | 3.0 to 3.5 |
+| ShadowMan (Invisible) | 0.0 → 0.2 | 0.1 → 0.3 | 0.1 → 0.6 | 0.1 → 0.7 | 0.2 → 1.3 | 0.3 → 1.3 | 0.1 → 0.5 | 2.5 to 3.1 |
+| NumberMan (Plus) | 0.2 → 1.4 | 0.1 → 1.2 | 0.2 → 2.1 | 0.2 → 2.2 | 0.2 → 3.2 | 0.1 → 2.9 | 0.0 → 1.1 | 2.6 to 3.1 |
+| TomahawkMan (Wood) | 0.4 → 1.5 | 1.0 → 2.0 | 1.4 → 3.3 | 0.8 → 2.7 | 1.3 → 4.2 | 0.9 → 3.4 | 0.3 → 1.3 | 2.8 to 4.3 |
+| KnightMan (Break) | 0.3 → 1.4 | 0.7 → 1.8 | 0.9 → 2.7 | 0.6 → 2.7 | 0.7 → 3.8 | 0.5 → 3.2 | 0.3 → 1.3 | 2.8 to 4.4 |
+| ToadMan (Aqua) | 1.6 → 2.7 | 0.9 → 1.9 | 0.7 → 2.7 | 0.9 → 2.9 | 1.5 → 4.3 | 1.1 → 3.6 | 0.6 → 1.5 | 4.1 to 5.9 |
+
+A Soul won at act 1's end so finds one or two more of its kind an act
+from the second, three from the fifth, beside about three on the dealers'
+lists: about four found by act 3's end, where a folder of thirty holding
+four or five of them has one in a first hand of five more often than not,
+while three finds in four stay as they roll. ShadowMan's kind
+has the fewest chips of any (Invisibl, Mine, AntiDmg and BN5's Blinder,
+none in most tiers), so his come mostly from the dealers.
+
 ## Where it is decided
 
 | What | Where |
@@ -521,9 +604,12 @@ The owner said yes to every decision as proposed:
 | Green and blue data on a layer | `src/net/net_gen.c` (`place_data`) |
 | Chip rarity, codes leaned to the folder | `src/core/loot.c` (`roll_chip`, `loot_fit_code`, `loot_folder_code`) |
 | A guardian's chip-entry zenny | `src/core/loot.c` (`loot_guardian_zenny`), `src/director/encounter.c` |
+| A dark layer's par prize: its chips, the zenny over par | `src/layer/lib_prizes.c`, `src/director/liberation_board.c` (`lib_par_zenny`) |
 | Battle rewards (BN6's rows, the lean) | `src/director/encounter.c` (`lean_row`) |
 | Dealer stock, prices | `src/layer/shop.c`, `src/core/loot.c` (`chip_price`) |
+| A held Soul's kind in the finds and on a dealer's list | `src/core/loot_souls.c` (`LOOT_SOUL_LEAN`), the Souls as the layer was made `src/director/souls.c` (`souls_layer`) |
 | Traders: their pools as BN6 has them, its code pick | `src/layer/trader.c` |
+| A dark layer's chips (docs/LIBERATION.md): its par's prizes, its item panels' and its BonusPanels' (one of four, the item panels' band, as BN5's are its mission's standard chips) | `src/layer/lib_prizes.c` |
 | Requests' pay | `src/core/jobs.c` |
 | The report | `src/dev/economy_report.c` |
 | The run's counts, sent at its end | `src/director/runlog.c` (kept, saved as `run.tally`, a battle's reward and a Guardian Data's chip counted), `src/director/director_jobs.c` (the Mystery Data opened, as a layer is left), `src/analytics/analytics.c` (`analytics_count_*`, `analytics_run_end`) |

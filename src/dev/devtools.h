@@ -17,6 +17,9 @@ typedef struct {
 	bool gem;       /* every random battle with a Mystery Data on the field */
 	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/LIBERATION.md) */
+	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
+
+	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/LIBERATION.md) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
@@ -33,6 +36,7 @@ typedef struct {
 	int job;        /* job=K: the run holding a request of kind K (jobs.h), taken; at --scene home one from the act before */
 	int job_state;  /* jobstate=S: ... in state S (2 done, 3 failed) */
 	int zenny;      /* zenny=N: N zenny given as the run starts (BN6's GiveZenny: home's shops, docs/HOME.md piece 6) */
+	int lib_par;    /* libpar=N: a dark layer's par made N (each tier of its prize, docs/LIBERATION.md); 0 the planner's */
 	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/BOSSES.md) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
@@ -68,6 +72,7 @@ typedef struct {
 	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
 	                   from iteration N */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
+	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/LIBERATION.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
 	                   GBA alone, a mutation that must part the two */
 	int team_seat;  /* teamseat=N: under arena2v2 --dev arena shows seat N's screen: 0 and 1 the GBAs' players, 2 and 3 side 0's and

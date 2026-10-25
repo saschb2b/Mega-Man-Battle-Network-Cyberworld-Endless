@@ -256,6 +256,11 @@ class Canon:
                     self.pointer_bytes.setdefault(int(nid, 0), {}).update(spans)
             else:
                 self.obj_pointer_bytes.setdefault((rule['kind'], int(rule['type'], 0)), {}).update(spans)
+        # (a word of an object of a moved type that its spawn took from a register the caller never set, each game's engine's
+        # leftover, which neither its code nor the engine's routines it runs read: BN5's an AI data's word, BN6's a number)
+        self.spawn_leftovers = {}
+        for rule in legit['layouts'].get('spawn_leftovers', {}).get('rules', []):
+            self.spawn_leftovers.setdefault((rule['kind'], int(rule['type'], 0)), {})[int(rule['word'], 0)] = int(rule['bn6'], 0)
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
         self.attack_families = num(m['action'].get('families', {}))   # (BN5's attack families BN6 numbers otherwise)
@@ -1054,6 +1059,9 @@ def obj_cells(fa, fb, oa, ob):
         view = word_view(fa, fb, wa, wb, rel)
         if view is not None and view[0] != view[1] and rel is None:
             view = (stale(fa, oa, view[0]), stale(fb, ob, view[1]))
+        left = canon.spawn_leftovers.get((kind, oa.o8(OBJ_TYPE)), {})
+        if w - NODE in left and isinstance(view, tuple) and view[0][1:] == ('ai', 0) and view[1] == ('raw', left[w - NODE]):
+            continue   # (the spawn's leftover register: layouts' spawn_leftovers)
         if view is not None:
             if view[0] != view[1]:
                 out.append(('obj', w - NODE, view[0], view[1]))

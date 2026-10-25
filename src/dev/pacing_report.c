@@ -326,6 +326,84 @@ static int first_cycle_guardians(FILE *out) {
 	return flagged;
 }
 
+/* Whether the special route's way `r` at act `act`'s fork (`w[0..n)` the
+ * fork's ways, the route's last) shares a guardian with another way or
+ * one of the run's acts, or a fork's third way an area with them; or the
+ * fork offers otherwise a second time, as after a CONTINUE */
+static bool route_clash(const RunWay *w, int n, int act) {
+	const RunWay *r = &w[n - 1];
+	bool clash = false, nest = r->biome == BIOME_NEST, dark = r->biome == BIOME_UNDERNET;
+	for (int k = 0; k < n - 1; ++k) clash |= w[k].navi == r->navi || (!nest && w[k].biome == r->biome);
+	for (int a = 0; a < (run.mode == RUN_SHORT ? 3 : 6); ++a)
+		clash |= run.boss_order[run.biome_order[a]] == r->navi || (!nest && !dark && run.biome_order[a] == r->biome);
+	RunWay again[3];
+	bool sealed;
+	run.route_found = (uint8_t)act;
+	clash |= run_ways(act, false, again, &sealed) != n;
+	for (int k = 0; k < n; ++k)
+		clash |= again[k].biome != w[k].biome || again[k].navi != w[k].navi || again[k].meets != w[k].meets || again[k].route != w[k].route;
+	run.route_found = 0;
+	return clash;
+}
+
+/* A fork a special route turns: its net, its act (0-based), its name */
+typedef struct { int mode, act; const char *what; } RouteFork;
+
+/* One fork of routes_report's over 500 runs: the route's way's guardians
+ * counted (navi, version), how many past the act's band (not the endless
+ * Nest's), clashing, or not offered; its line written, the three's sum
+ * returned */
+static int route_fork(FILE *out, const RouteFork *f) {
+	int lo, hi, seen[32][6] = { { 0 } }, outside = 0, clash = 0, none = 0, act = f->act;
+	pacing_guardian_band(act, &lo, &hi);
+	bool banded = !(f->mode == RUN_ENDLESS && act == 6);
+	for (uint32_t seed = 1; seed <= 500; ++seed) {
+		run_new(seed * 2654435761u);
+		run_setup(f->mode, 0, 0, 0, 0);
+		RunWay w[3];
+		bool sealed;
+		run.route_found = (uint8_t)act;
+		int n = run_ways(act, false, w, &sealed);
+		run.route_found = 0;
+		if (n < 2 || !w[n - 1].route) { ++none; continue; }
+		/* (the endless Nest's at the Cybeast's HP: its fought HP the one counted) */
+		int navi = w[n - 1].navi, v = cycle_version(navi, act, !banded), hp = navi_hp(navi, v);
+		if (!banded) hp = run_nest_hp(CYCLE_LAYERS, navi, hp);
+		if (navi >= 0 && navi < 32 && v >= 0 && v < 6) seen[navi][v]++;
+		outside += banded && (hp < lo || hp > hi);
+		clash += route_clash(w, n, act);
+	}
+	if (banded) fprintf(out, "%s (band %d-%d):", f->what, lo, hi);
+	else fprintf(out, "%s (its strongest version at the Cybeast's HP, %d, at least):", f->what, run_nest_hp(CYCLE_LAYERS, 1, 0));
+	for (int i = 0; i < 32 * 6; ++i) {
+		int n = i / 6, v = i % 6, hp = navi_hp(n, v);
+		if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "", banded ? hp : run_nest_hp(CYCLE_LAYERS, n, hp), seen[n][v]);
+	}
+	if (none) fprintf(out, "  none in %d runs", none);
+	if (outside) fprintf(out, "  OUTSIDE %d", outside);
+	if (clash) fprintf(out, "  CLASH %d", clash);
+	fprintf(out, "\n");
+	return outside + clash + none;
+}
+
+/* A special route's ways (docs/LIBERATION.md, Special routes) over 500
+ * runs: the third way it opens at the endless net's act 4 fork (from act
+ * 3's board), the Nest's second way after either net's last fork; each
+ * guardian, version and HP, how often, past the act's band (not the
+ * endless Nest's, where every version stands) or clashing */
+static int routes_report(FILE *out) {
+	static const RouteFork forks[] = {
+		{ RUN_ENDLESS, 3, "the endless net's act 4 fork, a third way" },
+		{ RUN_ENDLESS, 6, "the endless net's Nest, a second way" },
+		{ RUN_SHORT, 3, "the short net's Nest, a second way" },
+	};
+	int flagged = 0;
+	fprintf(out, "\nSpecial routes over 500 runs: the way a route opens, its guardian, version and HP, how often (OUTSIDE its act's band, CLASH\n"
+		"another way's or act's guardian or area, or not the same twice).\n");
+	for (unsigned f = 0; f < sizeof forks / sizeof *forks; ++f) flagged += route_fork(out, &forks[f]);
+	return flagged;
+}
+
 /* The super bosses (docs/BOSSES.md, Super bosses): BN6's own battles,
  * above the bands by design, each form's HP where it stands, the last
  * act's band beside */
@@ -499,7 +577,7 @@ int pacing_report_run(const char *path) {
 			for (int k = 0; k < 8 && acts[a].biomes[k] >= 0; ++k)
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
-	flagged += first_cycle_guardians(out) + older_guardians(out);
+	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out);
 	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
 	super_report(out);
 	clock_report(out);

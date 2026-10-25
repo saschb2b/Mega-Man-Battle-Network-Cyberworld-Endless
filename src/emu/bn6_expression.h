@@ -11,6 +11,21 @@
 /* MegaMan's overworld sprite and its animations (facing 0-7 added where a
  * number is a first of eight) */
 #define BN6_OW_MEGAMAN          0x37   /* sprite list 6's MegaMan, plain (no LZ77): the player's on the net, an NPC's in a cutscene, the Square's peers */
+/* The player object's body: the sprite its spawn loads (a liberation's
+ * Navi in play, player_body.c) */
+#define BN6_PLAYER_SPRITE_LOAD 0x0809E7EAu /* movs r0,#0x80 before the player object's spawn (bn6f owPlayer's sub_809D270) loads its sprite: r6 its
+                                             list x 4 (BN6_OW_NPC_LIST on the net), r4 its number (PETNaviToNPCSpriteTable's, 0x37 MegaMan's);
+                                             it runs again where BN6_PLAYER_MAIN is set to 0 */
+#define BN6_OW_NPC_LIST       0x18        /* sprite_load's list x 4: list 6, the Navis and Mr. Progs */
+/* An object's sprite (bn6f's ObjectSprite), at the object less the low
+ * four bits of the header's byte BN6_OBJ_SPRITE_AT, as sprite_setColorShader
+ * finds it */
+#define BN6_OBJ_SPRITE_AT     0x02        /* ObjectHeader TypeAndSpriteOffset: its high nibble x 16, the sprite's offset in the object */
+#define BN6_SPRITE_SHADER     0x06        /* ObjectSprite +6, u16, the colour shader on its palette as it is drawn: bit 15 subtracts the
+                                             BGR555 colour below it from every colour, else adds it (bn6f sub_3005EF0); an NPC script's
+                                             command 0x2B sets it */
+#define BN6_SHADE_DARK        0xA108      /* ... less 8 of each channel: BN6's own darkening (owPlayer's at a map's dark spot, coordinate
+                                             trigger 0x3C), the shade BN5's board gives a Navi who has acted */
 #define BN6_OW_MEGAMAN_ANIMS    0x49   /* ... its animations: 0-7 standing, 8-0xF walking, 0x10-0x17 running (+ facing) */
 #define BN6_OW_ANIM_GOT         0x18   /* BN6_OW_MEGAMAN: the item-get pose, a hand raised (3 frames, 35 long), text F8 01 0x18 with sound 0x73 */
 #define BN6_OW_ANIM_LOG_IN      0x19   /* BN6_OW_MEGAMAN: + facing, logging in (9 frames blank, 4 lighter, 4 himself) */

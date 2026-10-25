@@ -276,6 +276,31 @@ int xnavi_slot(int xrom, int navi, int fallback) {
 	return slot < 0 ? fallback : slot;
 }
 
+/* (Gregar's list-6 numbers on a white dot, and their mugshots black, in
+ * both versions: bn6f's npcSpritePtrs and mugshotSpritePtrs, docs/ROM_DATA.md;
+ * EMPTY_SPRITE, one of them, kept as the reference) */
+static const uint8_t mate_slots[XNAVI_MATES] = { 0x07, 0x28, 0x29, 0x31, 0x35 };
+#define MATE_ROOM 0x12000u   /* (a teammate's place: KnightMan's sprite and mugshot, the largest, 68033 bytes) */
+_Static_assert(XNAVI_MATES * MATE_ROOM <= FREE_LIB_TEAM_END - FREE_LIB_TEAM, "the teammates past their room (free_space.h)");
+
+int xnavi_mate(int k, int navi) {
+	const int xrom = XROM_BN5_COLONEL_US;
+	if (k < 0 || k >= XNAVI_MATES || !XR[xrom].data || !XR[xrom].layout->sprite_lists || !R.data || !R.layout || !R.layout->sprite_lists) return -1;
+	uint32_t own = R.layout->sprite_lists, lists = XR[xrom].layout->sprite_lists;
+	uint32_t empty = get32(R.data + list_entry(own, LIST_NAVIS, EMPTY_SPRITE)), black = get32(R.data + list_entry(own, LIST_FACES, EMPTY_FACE));
+	int s = mate_slots[k];
+	/* (still a placeholder in the player's ROM) */
+	if (get32(R.data + list_entry(own, LIST_NAVIS, s)) != empty || get32(R.data + list_entry(own, LIST_FACES, s)) != black) return -1;
+	uint32_t next = FREE_LIB_TEAM + (uint32_t)k * MATE_ROOM;
+	uint32_t sprite = copy_sprite_at(XR[xrom].data, lists, LIST_NAVIS, navi, &next, next + MATE_ROOM);
+	uint32_t face = sprite ? copy_sprite_at(XR[xrom].data, lists, LIST_FACES, navi, &next, FREE_LIB_TEAM + (uint32_t)(k + 1) * MATE_ROOM) : 0;
+	if (!face) return -1;
+	emu_write32(BUS + list_entry(own, LIST_NAVIS, s), sprite);
+	emu_write32(BUS + list_entry(own, LIST_FACES, s), face);
+	if (emu_debug_on()) fprintf(stderr, "xnavi: teammate %d of %s at %#x, %u bytes\n", navi, XR[xrom].layout->name, s, next - FREE_LIB_TEAM - (uint32_t)k * MATE_ROOM);
+	return s;
+}
+
 int xnavi_guardian(int xrom, int navi) {
 	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->sprite_lists || !R.data || !R.layout || !R.layout->sprite_lists)
 		return -1;

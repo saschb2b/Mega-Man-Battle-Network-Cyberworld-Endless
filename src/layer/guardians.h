@@ -33,8 +33,19 @@ const Guardian *guardian(int navi);
 static inline bool guardian_older(int navi) { return navi >= GUARDIAN_OLDER_FIRST && navi <= GUARDIAN_OLDER_LAST; }
 static inline int guardian_older_ai(int navi) { return navi - GUARDIAN_OLDER_FIRST + BN5_NAVI_COLONEL; }
 static inline int guardian_of_older(int ai) { return ai - BN5_NAVI_COLONEL + GUARDIAN_OLDER_FIRST; }
+/* BN5's Darkloids, a dark layer's (docs/LIBERATION.md, stage 4): BN5's
+ * AI 13-16 (bn5.h BN5_NAVI_SHADEMAN .. BN5_NAVI_COSMOMAN) as navis 30-33
+ * here, moved into BN6's engine as its six were (xnavi_bn5.c) and met only
+ * on a dark board, no territory's guardian and no Soul's */
+#define GUARDIAN_DARKLOID_FIRST 30
+#define GUARDIAN_DARKLOID_LAST  33
+static inline bool guardian_darkloid(int navi) { return navi >= GUARDIAN_DARKLOID_FIRST && navi <= GUARDIAN_DARKLOID_LAST; }
+/* ... BN5's AI index of one of its Navis here (the six or a Darkloid), -1 another's */
+static inline int guardian_bn5_ai(int navi) {
+	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN : -1;
+}
 /* His overworld sprite and mugshot in his game's lists 6 and 8 (the same
- * number), 0 for none */
+ * number), 0 for none: BN5's six and its Darkloids */
 int guardian_older_sprite(int navi);
 /* ElementMan, whose element changes as he fights: none of his answers his
  * every form (bn6f: no element in his stats or traits) */

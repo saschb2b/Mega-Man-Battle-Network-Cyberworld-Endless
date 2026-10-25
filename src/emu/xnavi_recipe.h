@@ -21,17 +21,19 @@
  * player's forms at 0x1C3) and before the families' (XV_FIRST_ID): the
  * Navis' names are the Navi archive's (BN6_NAME_OF, an id's low byte),
  * rebuilt (xnavi_room.h). BN5's Navi n (Team Colonel's 7-12, the Dark
- * Soul's 0x16) is AI XN_AI_OF(n), its V1 id XN_ID_OF(n), its versions'
- * after it */
+ * Soul's 0x16, the Darkloids 13-16: ShadeMan, BlizzardMan, CloudMan,
+ * CosmoMan) has its seat XN_SEAT(n) (0-5, 6, 7-10): AI XN_AI_OF(n), its
+ * V1 id XN_ID_OF(n), its versions' after it */
+#define XN_SEAT(n)    ((n) == 0x16 ? 6 : (n) >= 13 ? (n) - 6 : (n) - 7)
 #define XN_FIRST_AI   25                  /* the first AI index past BN6's (the control's) */
-#define XN_AI_OF(n)   (32 + ((n) == 0x16 ? 6 : (n) - 7))
+#define XN_AI_OF(n)   (32 + XN_SEAT(n))
 #define XN_FIRST_ID   0x1C4               /* the Navis' ids, from here (the control's first), */
 #define XN_IDS_END    XV_FIRST_ID         /* ... to here */
-#define XN_ID_OF(n)   (XN_FIRST_ID + 4 * ((n) == 0x16 ? 6 : (n) - 7))
+#define XN_ID_OF(n)   (XN_FIRST_ID + 4 * XN_SEAT(n))
 /* ... and its companion's overlay, where its game's kind is one BN6
  * lacks, BN6's kind XN_KIND_OF(n), past BN6's own (the grown overlay
  * tables, xnavi_room.h) */
-#define XN_KIND_OF(n) (BN6_OVERLAY_KINDS + ((n) == 0x16 ? 6 : (n) - 7))
+#define XN_KIND_OF(n) (BN6_OVERLAY_KINDS + XN_SEAT(n))
 #define XN_VERSIONS_MAX XV_VERSIONS       /* (the control's six: BN6's V1, EX, SP, RV, BX and a sixth) */
 /* Where they go */
 #define XN_HOMES      FREE_NAVI_HOMES     /* their homes, XV_HOME_SIZE each (XV_HOME_*'s layout), XN_HOMES_MAX of them */
@@ -49,13 +51,25 @@
 #define XN_OBJECTS    XN_SEA_END          /* BN5's engine objects moved once for every track (xnavi_objects.h), to: */
 #define XN_OBJECTS_END (FREE_NAVI_CODE + 0x2000u)
 #define XN_OBJECTS_HOME (XN_HOMES + (XN_HOMES_MAX - 1) * XV_HOME_SIZE)   /* ... their home (their veneers), the last of the homes */
-#define XN_CODE       XN_OBJECTS_END      /* the Navis' code, block by block, a room each, to: */
+#define XN_CODE       XN_OBJECTS_END      /* the Navis' code, block by block, a room each (slots 0-7), to: */
 #define XN_ART        FREE_NAVI_ART       /* what their attacks draw: a room each (their overlays' masks), then: */
 #define XN_SHARED_ART (FREE_NAVI_ART + 0x2000u)  /* ... their sprites, each at a place and number of its own whichever Navi draws it,
                                                       copied by the first install that needs it, to: */
-#define XN_END        XN_DARK_RECORDS
+#define XN_END        XN_MORE
+#define XN_MORE       (FREE_NAVI_ART + 0x38000u)  /* the Darkloids' code, a room each (slots 8-11, XN_SLOT_CODE bytes), to: */
+#define XN_MORE_ART   (XN_MORE + 0xF000u) /* ... what their attacks draw, a room each (XN_SLOT_ART bytes), to: */
+#define XN_MORE_END   (XN_MORE_ART + 0x1000u)   /* (before XN_DARK_RECORDS) */
+#define XN_SLOT_CODE  0x3C00u             /* a Navi's code room */
+#define XN_SLOT_ART   0x400u              /* ... and its art's */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
+
+/* Whether `a` is in a Navi's code room (XN_CODE's or XN_MORE's) */
+static inline bool xn_code_at(uint32_t a) { return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART); }
+/* ... or in one of their art's rooms (XN_ART's or XN_MORE_ART's) */
+static inline bool xn_art_room(uint32_t a, uint32_t n) {
+	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a);
+}
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at
  * 0x50 + F, as the chips' are (issue #82's plan) */

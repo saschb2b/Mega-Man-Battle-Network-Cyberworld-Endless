@@ -4,7 +4,8 @@
  * Set All): a tab per device, CONTROLLER and KEYBOARD, switched with L and
  * R; a row per GBA button, each with a MAIN and an ALSO slot and a dot
  * that lights while it is pressed, so the map is tried on the spot; the
- * D-pad's four directions one row, asked in turn; a slot asked for in a
+ * D-pad's four directions one row, asked in turn; fast forward's button
+ * last, which may have none; a slot asked for in a
  * box over the rows, a clash swapped and said; Set all, which asks every
  * button in turn for a pad nobody laid out; DEFAULTS per device; DONE,
  * kept once the new A is pressed. */
@@ -25,7 +26,7 @@
 #endif
 
 /* The list's rows, then the bottom line's items */
-enum { ROW_PRESET, ROW_DPAD, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROWS, ROW_BOTTOM = ROWS };
+enum { ROW_PRESET, ROW_DPAD, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_FAST, ROWS, ROW_BOTTOM = ROWS };
 #define ROWS_SHOWN 5   /* the list's rows in view at once, the rest a scroll away */
 enum { ITEM_SETALL, ITEM_DEFAULTS, ITEM_DONE, ITEMS };
 enum { TAB_PAD, TAB_KEYS };
@@ -54,14 +55,14 @@ typedef struct {
 	char said[72];
 	int said_t;
 	bool said_warn;
-	int lit[PAD_GBA];
+	int lit[PAD_ROWS];
 	SDL_FingerID finger;          /* (a finger that went down on it: only its lift taps) */
 	bool finger_down;
 } ControlsState;
 extern ControlsState C;
 
-/* The row's GBA button (ROW_A ... ROW_SELECT; the D-pad's directions
- * are UP 0 to RIGHT 3) */
+/* The row's button (ROW_A ... ROW_SELECT a GBA button's, ROW_FAST
+ * PAD_FAST; the D-pad's directions are UP 0 to RIGHT 3) */
 int controls_gba_of(int row);
 /* A slot's input in words, on the tab shown ("-" for none): one GBA
  * button's, or the D-pad's four as one ("D-pad", "L stick", "WASD") */

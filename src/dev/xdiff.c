@@ -111,6 +111,7 @@ typedef struct Side_ {
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
+	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
 	bool seeded, fought, done, decked, held;
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
 } Side;
@@ -434,6 +435,21 @@ static void shots_take(const Side *g, const Spec *s) {
 	}
 }
 
+/* (film=) its picture of the fight at timer `t`, once a timer value, where the spec films it */
+static void film_take(Side *g, const Spec *s, uint32_t t) {
+	const Film *m = &s->film;
+	if (!m->step || t < (uint32_t)m->from || t > (uint32_t)m->to || (t - (uint32_t)m->from) % (uint32_t)m->step || g->filmed == t + 1) return;
+	g->filmed = t + 1;
+	static uint32_t px[EMU_W * EMU_H];
+	const uint32_t *v = g->v.game == 5 ? guest_video() : emu_video();
+	for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
+	char path[200];
+	snprintf(path, sizeof path, "%s_bn%d_t%04u.bmp", m->prefix, g->v.game, (unsigned)t);
+	SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+	if (!f || SDL_SaveBMP(f, path) != 0) fprintf(stderr, "xdiff: %s not saved\n", path);
+	SDL_FreeSurface(f);
+}
+
 /* One frame of a battle: each Custom screen passed by its keys (custom_keys)
  * from its window's opening; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -467,6 +483,7 @@ static bool step(Side *g, const Spec *s) {
 	sub = v->rd8(v->gamestate);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
+	if (fighting) film_take(g, s, t);
 	if (fighting && !g->seeded) seed(g, s);
 	sounds(g);
 	if (fighting && t != g->last) {
@@ -662,6 +679,7 @@ static bool subject(Side *g, const Spec *s) {
 	Encounter e;
 	memset(&e, 0, sizeof e);
 	e.player = s->mm;
+	e.sides = s->sides;
 	/* (BN5's field as BN6's: xfields.h, or the spec's own number for it) */
 	e.field = s->field6 >= 0 ? s->field6 : s->field ? xfield_bn6(XROM_BN5_COLONEL_US, s->field) : 0;
 	if (e.field < 0) {
@@ -722,7 +740,7 @@ static bool reference(Side *g, const Spec *s) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data || !guest_start(XROM_BN5_COLONEL_US)) return false;
 	/* (BN5's random battles' record: its field, music, background the map's, side, options; MegaMan, then the foes) */
-	uint8_t rec[0x80] = { (uint8_t)s->field, 0x14, 0x15, 0x00, 0xFF, 0x00, 0x38, 0x00, 0xE2, 0x49, 0x00, 0x00 };
+	uint8_t rec[0x80] = { (uint8_t)s->field, 0x14, 0x15, 0x00, 0xFF, 0x00, (uint8_t)(s->sides ? s->sides : 0x38), 0x00, 0xE2, 0x49, 0x00, 0x00 };
 	uint32_t len = 0x10;
 	const uint8_t mm[4] = { 0x00, (uint8_t)s->mm, 0, 0 };
 	memcpy(rec + len, mm, 4);
@@ -783,7 +801,12 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	int n = spec_families(s, fams);
 	/* (and whether a foe is a moved Navi: the Navis' code is then a foe's too) */
 	bool navis = false;
-	for (int i = 0; i < s->nfoes; ++i) navis = navis || xnavi_bn6_id(s->foes[i].id) >= 0;
+	int ids[XD_NAVI_IDS_MAX], nids = 0;
+	for (int i = 0; i < s->nfoes; ++i) {
+		navis = navis || xnavi_bn6_id(s->foes[i].id) >= 0;
+		if (nids < XD_NAVI_IDS_MAX) ids[nids++] = s->foes[i].id;
+	}
+	xd_log_navis(ids, nids);
 	a->log = a->out ? xd_log_start(5, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);

@@ -38,8 +38,8 @@ typedef enum {
 	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/META.md, gates) */
 	OBJ_DUEL,        /* ProtoMan, the rival: a busting duel against his time (docs/RIVAL.md) */
 	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/RIVAL.md); param: its level, 1-2 */
-	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid (docs/LIBERATION.md); param: its
-	                    list-6 sprite | animation << 8 | its sprite list << 16 | its number << 20 */
+	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid, or a Navi of its team (docs/LIBERATION.md);
+	                    param: its sprite | animation << 8 | its sprite list << 16 | its number << 20 (the team's after the units') */
 } ObjType;
 
 typedef struct {

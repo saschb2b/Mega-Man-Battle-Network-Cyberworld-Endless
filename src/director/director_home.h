@@ -38,6 +38,11 @@ const RunWay *home_ways(int *n, bool *dark_sealed);
  * and the portal pointed at it; the older portals open again for the next
  * visit. */
 bool home_take_way(int k);
+/* MegaMan arrived on the next act's first layer from home: a special
+ * route the fork offered spent (run.route_found), and whether its way was
+ * the one taken kept for the act's card (run.route_way; docs/LIBERATION.md,
+ * Special routes). */
+void home_route_passed(void);
 /* The portals lit in Lan's HP (a bit each, lanhp_lit): the ways, and the
  * older portals not yet taken this visit; of them the older ones, the ways
  * back, which look their own and ask first (issue #110). */

@@ -16,6 +16,7 @@
 #include "buttons.h"
 #include "options.h"
 #include "director.h"
+#include "fast_forward_game.h"
 #include "pads.h"
 #include "platform.h"
 #include "touch_art.h"
@@ -192,6 +193,16 @@ static bool four_way(void) { return !director_on_map(); }
 static bool is_button(int c) { return touch_button(c) != 0; }
 
 /* A finger, down or moved, takes or keeps what it reaches. */
+/* A control on the screen: fast forward's only where it can run
+ * (fast_forward_available), always in the touch menu and its editor */
+static bool control_shown(int c) { return c != TOUCH_FAST || page || fast_forward_available(); }
+
+/* The control a finger at (x, y) reaches, of those shown (touch_control_at) */
+static int control_at(float x, float y, int held) {
+	int c = touch_control_at(&lay, x, y, held);
+	return c >= 0 && control_shown(c) ? c : -1;
+}
+
 static void finger_at(int k, float x, float y, bool down) {
 	fingers[k].x = x;
 	fingers[k].y = y;
@@ -203,7 +214,7 @@ static void finger_at(int k, float x, float y, bool down) {
 		return;
 	}
 	if (mode == F_MENU) return;
-	int c = touch_control_at(&lay, x, y, mode == F_PRESS ? fingers[k].control : -1);
+	int c = control_at(x, y, mode == F_PRESS ? fingers[k].control : -1);
 	if (mode == F_NONE) {
 		/* (one that went down between them takes the first it reaches;
 		 * MENU only by a tap on it) */
@@ -269,7 +280,7 @@ bool touch_takes(uint32_t type, SDL_FingerID id, float x, float y) {
 		for (int k = 0; k < FINGERS; ++k) if (fingers[k].on && fingers[k].id == id) return true;
 		return false;
 	}
-	int c = touch_control_at(&lay, x, y, -1);
+	int c = control_at(x, y, -1);
 	return c >= 0 && c != TOUCH_MENU;
 }
 
@@ -306,7 +317,7 @@ static struct { float x, y, w, h; } panel;
 static float row_h, pad_x, text_y[3];   /* (the title's, the chosen control's name's and the hint's middles) */
 static int ts_title, ts, ts_small;
 
-static const char *const control_titles[TOUCH_CONTROLS] = { "D-PAD", "A BUTTON", "B BUTTON", "L BUTTON", "R BUTTON", "START", "SELECT", "MENU" };
+static const char *const control_titles[TOUCH_CONTROLS] = { "D-PAD", "A BUTTON", "B BUTTON", "L BUTTON", "R BUTTON", "START", "SELECT", "MENU", "FAST FORWARD" };
 
 static void add(int id, int kind, float x, float y, float w, float h, const char *text) {
 	if (nui >= (int)(sizeof ui / sizeof *ui)) return;
@@ -700,7 +711,8 @@ static ArtSpec dpad_spec(const TouchBox *b, int arm) {
 	return s;
 }
 
-static const char *const control_labels[TOUCH_CONTROLS] = { "", "A", "B", "L", "R", "START", "SELECT", "MENU" };
+/* (fast forward's is the PET's orange cursor twice, ▶▶: fast_forward_glyph) */
+static const char *const control_labels[TOUCH_CONTROLS] = { "", "A", "B", "L", "R", "START", "SELECT", "MENU", "" };
 
 static ArtSpec control_spec(int c, bool lit) {
 	const TouchBox *b = &lay.box[c];
@@ -732,6 +744,7 @@ static void draw_controls(void) {
 		int c = sel < 0 || page != PAGE_EDIT ? i : i == TOUCH_CONTROLS - 1 ? sel : i < sel ? i : i + 1;
 		const TouchBox *b = &lay.box[c];
 		float a = lay.alpha[c];
+		if (!control_shown(c)) continue;
 		if (c == TOUCH_DPAD) {
 			ArtSpec s = dpad_spec(b, -1);
 			art_draw(&s, b->cx, b->cy, a);
@@ -744,6 +757,7 @@ static void draw_controls(void) {
 		}
 		ArtSpec s = control_spec(c, lit[c]);
 		art_draw(&s, b->cx, b->cy, a);
+		if (c == TOUCH_FAST) fast_forward_glyph(b->cx, b->cy, b->h * 0.5f, a);
 	}
 }
 

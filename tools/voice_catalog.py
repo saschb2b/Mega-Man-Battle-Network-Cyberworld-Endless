@@ -97,6 +97,7 @@ DOMAINS = {
     'square_week_words': ('Net Square', 'MegaMan', 'speech'),
     'online_text': ('Net Square', 'Screen', 'screen'),
     'netpass_text': ('The NetPass', 'Screen', 'screen'),
+    'liberation_pick_text': ('Other', 'Screen', 'screen'),
     'trade_words': ('Trade Central', 'MegaMan', 'speech'),
     'trade_screen_text': ('Trade Central', 'Screen', 'screen'),
     'reconnect_text': ('Net Square', 'Screen', 'screen'),
@@ -128,6 +129,19 @@ OVERRIDES = [
     (r'^square_words:square_greeter_stamp_words\b', 'Mr.Prog', None),
     (r'^stands_words:stands_board_words\b', 'Narration', None),
     (r'^navicust_words:', 'MegaMan', None),
+    # (a liberation's teammates, each his own table and command's case: liberation_team_words.c)
+    (r'^liberation_team_words:(colonel|\w+:caseMATE_COLONEL)\b', 'Colonel', None),
+    (r'^liberation_team_words:(shadowman|\w+:caseMATE_SHADOWMAN)\b', 'ShadowMan', None),
+    (r'^liberation_team_words:(numberman|\w+:caseMATE_NUMBERMAN)\b', 'NumberMan', None),
+    (r'^liberation_team_words:(tomahawkman|\w+:caseMATE_TOMAHAWKMAN)\b', 'TomahawkMan', None),
+    (r'^liberation_team_words:(knightman|\w+:caseMATE_KNIGHTMAN)\b', 'KnightMan', None),
+    (r'^liberation_team_words:(toadman|\w+:caseMATE_TOADMAN)\b', 'ToadMan', None),
+    (r'^liberation_team_words:(heatman|\w+:caseMATE_HEATMAN)\b', 'HeatMan', None),
+    (r'^liberation_team_words:(elecman|\w+:caseMATE_ELECMAN)\b', 'ElecMan', None),
+    (r'^liberation_team_words:(slashman|\w+:caseMATE_SLASHMAN)\b', 'SlashMan', None),
+    (r'^liberation_team_words:(eraseman|\w+:caseMATE_ERASEMAN)\b', 'EraseMan', None),
+    (r'^liberation_team_words:(chargeman|\w+:caseMATE_CHARGEMAN)\b', 'ChargeMan', None),
+    (r'^liberation_team_words:lib_soul_form_name\b', 'Screen', 'screen'),
     (r'^trade_screen_text:trade_text_(ask|waiting|swapping|traded)\b', 'MegaMan', 'speech'),
     (r'^story_words:(area_card|nets_card|clear_card)\b', 'Screen', 'screen'),
     (r'^pet_text:(report_text|records_text|where_text|codes_known|codes_text|install_descriptions|install_mails\.subjects)\b', 'Screen', 'screen'),
@@ -156,7 +170,10 @@ FACES = {'FACE_NONE': 'Narration', 'FACE_LAN': 'Lan', 'FACE_MAYL': 'Mayl', 'FACE
 NUMBERS_GROUP = {'Lan': 'Lan', 'MegaMan': 'MegaMan', 'Mr.Prog': 'Mr.Prog', 'Dad': 'Dad', 'Chaud': 'Chaud',
                  'Guardian': 'Navis (bosses, bystanders)', 'Bystander': 'Navis (bosses, bystanders)',
                  'HeelNavi': 'Navis (bosses, bystanders)', 'Shop Navi': 'Navis (bosses, bystanders)',
-                 'ProtoMan': 'Navis (bosses, bystanders)', 'Bass': 'Navis (bosses, bystanders)'}
+                 'ProtoMan': 'Navis (bosses, bystanders)', 'Bass': 'Navis (bosses, bystanders)',
+                 'Colonel': 'Navis (bosses, bystanders)', 'ShadowMan': 'Navis (bosses, bystanders)',
+                 'NumberMan': 'Navis (bosses, bystanders)', 'TomahawkMan': 'Navis (bosses, bystanders)',
+                 'KnightMan': 'Navis (bosses, bystanders)', 'ToadMan': 'Navis (bosses, bystanders)'}
 
 # Where a file's lines show: pictures in docs/ (screenshots and clips'
 # posters), where one fits.

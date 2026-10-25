@@ -155,7 +155,7 @@ int xrom_find_beside(void);
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
  * game's ROM is not read. */
-#define XAREAS_MAX 8
+#define XAREAS_MAX 16
 const NetAreaDef *net_area_def(int area);
 
 /* Looks for a supported ROM in dir (any *.gba). On failure, msg explains why. */

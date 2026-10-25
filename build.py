@@ -196,7 +196,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -2048,7 +2048,7 @@ def lint_files():
 
 
 # bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/), and the map's buffers' (bn6_map.h)
-BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h', 'bn6_map.h')
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h', 'bn6_map.h', 'bn6_battler.h')
 
 
 def lint_rom_data(update):

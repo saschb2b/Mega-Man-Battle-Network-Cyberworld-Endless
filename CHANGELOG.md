@@ -25,6 +25,121 @@
   no `origins` line lets the published browser game in (`origins =`,
   empty, keeps native games alone).
 
+- **A Soul's chips reach the folder.** A run that holds a BN5 Soul now
+  finds the chips it unites with. A quarter of the chips in Mystery Data
+  are of a held Soul's kind (Colonel's Obstacle, ShadowMan's Invisible,
+  NumberMan's Plus, TomahawkMan's Wood, KnightMan's Break, ToadMan's
+  Aqua), each as rare as the chip it replaces, and a Net Dealer's fourth
+  chip is one. With two Souls held, the kind your folder holds fewest of
+  comes first. You find as many chips as before; only which ones changes,
+  and a DarkChip never comes this way. A Soul still takes a chip of that
+  turn's hand, as in BN5. A Soul won on a layer counts from the next.
+  Layers made before continue afresh (their stock changed).
+
+- **Your Crosses join a dark layer's team, and you pick who comes.** On a
+  Liberation board the Navis whose Crosses the run holds (the one brought,
+  or those won from the acts' guardians) now stand beside MegaMan as BN5's
+  Souls do, each in his own BN6 body, with a command from Team ProtoMan,
+  the other version of BN5, by his element: HeatMan's **Napalm** (four
+  ahead and both sides of the third, one battle), ElecMan's
+  **MagnetBarrier** (no harm on the board to the team till the next phase),
+  SlashMan's **WideSwrd** (three across, one battle), EraseMan's
+  **PanelSearch** (the item and trap panels of a dark line, one battle) and
+  ChargeMan's **BombLiberation** (he flies over the dark and frees the
+  panel under him, no battle). Each works as BN5's own code does, read
+  from its ROM. His battles are fought as MegaMan in his Cross from the
+  first turn, on his HP: a hit of its weakness breaks it, and no other
+  Cross or UNITE is offered in it. Where you hold more Navis than the
+  board has places, a **TEAM** screen opens after the board's first look:
+  each Navi's face, HP, command and its shape, and the form he fights in
+  with its weakness. It remembers your last pick, and the board's par is
+  the one for the team you take. Every board now has a spot for each
+  held Navi's command, whoever you bring.
+
+## 0.15.1 (2026-10-25)
+
+- **Fast forward, outside the fight.** A press of its button runs the
+  game faster (Tab or Space, a controller's right trigger or right stick
+  press, ▶▶ on the touch controls; held, only while held): walking a
+  layer and the town, chats, fades and warps, a battle's opening and its
+  results. From a battle's first Custom screen to its last deletion it is
+  BN6's speed, always, and so are BN6's menus and online play: nothing you
+  decide against the clock changes, and there its button does nothing and
+  the touch controls' ▶▶ steps aside. Two of the PET's orange arrows show in
+  the corner while it runs. Options' new **Fast forward** line sets 2x, 3x
+  (the default), 4x or off; the music keeps its pitch, and a machine that
+  cannot go that fast goes as fast as it can. The controls screen has a
+  **FAST** row for its button. A controller's right trigger was R as well
+  before; a `pad.ini` from before keeps it so. The run's minutes count the
+  game's own time now, so the week's DeepNet ranks a dive alike with fast
+  forward or without.
+
+- **Special routes: a dark layer's secret opens a third way.** The sealed
+  route behind a Liberation board's locked barrier (acts 3 and 4) now
+  leads somewhere. Free its key and the route, and at the next fork in
+  Lan's HP a third portal lights at the link on the right ("And the link
+  on the right! The route we found in the dark!"): another area of the
+  act's tier and a guardian the act's other ways do not have. Found on
+  act 4's board in the endless net, or act 3's in the short net, it opens
+  a second way into the Nest instead, to a different last boss (in the
+  endless net, a Navi in the Cybeast's place, with its HP). The act's card says "By the route found
+  in the dark". A route not taken at its fork is spent; a CONTINUE keeps
+  it. Saves from 0.15.0 carry on.
+
+- **Liberation Missions with a team.** On a dark layer, the Navis whose
+  BN5 Souls the run holds now join MegaMan on the board, as many as BN5's
+  team of that stage holds (two at act 2, three at act 3, four at act 4),
+  each in his own BN5 body with BN5's HP for him. Each takes his turn a
+  phase as BN5's team does: play passes on after each Navi acts, R hands
+  it to the next yet to act, and those who have acted stand darker. Each
+  brings his own command for an Order Point: Colonel's ScrenDiv frees
+  three across, TomahawkMan's TomahawkSwing two deep and three wide,
+  NumberMan's NumberCheck takes the items of the dark ahead with no battle,
+  ShadowMan's SneakAttack weakens a guardian, ToadMan's LifeMelody lets a
+  teammate beside him free five in a line, and KnightMan's StoneBody keeps
+  harm off him and whoever stands beside him. A teammate's battle is
+  MegaMan in that Navi's Soul from the first turn, on that Navi's HP;
+  deleted there, he leaves the board and the run goes on. The guardians
+  and the Darkloid go for the nearest Navi. BN5's HP box shows the Navi in
+  play's HP and each other Navi's stands under him. The boards are made
+  for their team, as thick with dark as BN5's own of that stage, and a
+  Pass now gives back a fifth of a Navi's HP, as BN5's does. A CONTINUE
+  goes on with the same team where it stood.
+
+- **Liberation Missions as BN5 plays them,** each piece traced in BN5's
+  own ROM and shown side by side with it:
+  - **Each board in its own mission's look:** a dark layer is drawn in
+    the BN5 mission its area takes, its map, backdrop and colours, where
+    every board had mission 1's.
+  - **The board's HP:** every unit's HP stands under it in BN5's white
+    digits. The Darkloid keeps his HP between battles, a battle that
+    leaves him standing leaves him hurt, and he heals at the start of his
+    turn by the dark round him, BN5's rising lines over him.
+  - **The guardians strike as BN5's:** TinHawk's HawkAttack warps beside
+    its Navi and back, Bladia's DarkSlash and the Darkloid's blow burst
+    over him, and a deleted guardian rises on its DarkHole and warps
+    beside it, as BN5 brings him back.
+  - **The battle on BN5's field:** the dark round a panel sets the field,
+    up to Surrounded, foes on both sides, where L or R turns MegaMan
+    round. The Custom screen opens by itself as the gauge fills, and the
+    Darkloid's battle has BN5's three turns too.
+  - **BonusPanels:** Liberation frees one without a battle or the Navi's
+    turn, then BN5's roulette spins its five slots (no harm this phase, HP
+    full, five Order Points, a chip, Major Hit) until A stops it.
+  - **The words:** the Darkloid speaks as his first turn begins, L's map
+    view has BN5's keys and shows the guardians' reach, and a board won
+    ends with BN5's SUCCESS! and MegaMan's tally of the target and the
+    phases taken.
+  - **The prize, BN5's tiers:** two phases under par or better a chip, at
+    par a lesser one, over par zenny.
+  - **BN5's own Darkloids:** BlizzardMan and ShadeMan hold boards of
+    BN5's areas, in their own sprites, faces and battles, matched to BN5's
+    frame by frame.
+
+- **Cyberworld Endless is on itch.io:**
+  <https://saschb2b.itch.io/cyberworld-endless>, with the browser game and
+  every system's download; the site and the README link it.
+
 ## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,

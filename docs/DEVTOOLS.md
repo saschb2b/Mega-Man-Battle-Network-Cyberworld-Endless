@@ -372,7 +372,13 @@ every assumption). It prints, per act:
   codes, Megas and Gigas; and by layer the Mystery Data laid (green, blue,
   purple), chips gained, codes held and zenny earned so far;
 - the proposal's curves by act on either net, and BN6's busting table's
-  pay: a battle's chip share and zenny with every battle at one level.
+  pay: a battle's chip share and zenny with every battle at one level;
+- a dark layer's par prize by act;
+- a held Soul's kind (where BN5's ROM is read): each Soul held alone from
+  the first layer, the chips of its kind gained by act with none held and
+  with it (`src/core/loot_souls.c`), on the dealers' lists, every chip
+  gained over the net with and without, and the chips of each kind a run
+  can hold, by tier.
 
 Output: `.build/economy.txt`, in a few seconds. It needs the ROM, and
 prints how many numbers of the plan in play are past their band: 0 now;
@@ -838,7 +844,13 @@ docs/MULTIROM.md, One net; `CYBERWORLD_EMU_DEBUG` prints each roll's foes,
 the visitor's family among them, and the run log marks it `+`), `dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, docs/LIBERATION.md; `CYBERWORLD_EMU_DEBUG` prints the board as
-text, and `CYBERWORLD_AUTOPILOT=1` plays it), `veteran` (a profile that has met seven
+text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
+N, for each tier of its prize; `CYBERWORLD_AUTOPILOT_ROUTE=1` beside it
+seeks the sealed region's route first, its key and then the route, and
+takes the way it opens at home), `route` (a special route found: with
+`--scene home` on the act before's board, from a layer on its own act's,
+so the next fork offers its third way, docs/LIBERATION.md, Special
+routes), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
@@ -949,9 +961,13 @@ quiet` too).
 The `foes` step (`--input`'s `0:foes 200@52/01@43`, play.py's `foes
 200@52 01@43`) starts a battle of the foes it names, at the same first
 free moment: each an enemy id in hex at its panel, column 1-6 then row
-1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without),
+1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without; columns 1-4),
 on a plain field with nothing else on it (`field@66` on BN6's field 0x66
-instead: BN5's sea field 0x42 as `src/emu/xfields.c` installs it), in
+instead: BN5's sea field 0x42 as `src/emu/xfields.c` installs it; `sides@33`
+with its columns shared as BN5's Surrounded liberation battles share
+them, the enemy's 1-2 and 5-6, `mm@32` putting MegaMan between, and
+`sides@30` or `sides@3C` MegaMan's four or two: docs/LIBERATION.md, The
+battle's field), in
 BN6's engine whatever the layer. It names the families moved into the
 engine (docs/MULTIROM.md, Transplanted families) beside BN6's own: with
 BN5's ROM read, BN5's CanGard is AI 32 with ids 0x200-0x205 (its six
@@ -1196,6 +1212,11 @@ and traces both:
   data's `BN6_OBJ_INVULNERABLE` set before every frame of the battle (the
   same bit in BN5: no hit takes him, so a long spec keeps its course).
   What a spec does not set stays each game's boot state's.
+- **Film**: a spec's `"film": [FROM, TO, STEP, PREFIX]` saves each
+  game's picture at the battle's timer values FROM to TO, STEP apart, as
+  `PREFIX_bn5_tNNNN.bmp` and `PREFIX_bn6_tNNNN.bmp`: the two battles side by
+  side by the clock the comparison keeps (the Darkloids' pull request's
+  pictures).
 - **Seeding**: both RNG words written in both cores after the fight's
   first frame (`seed=P:S`); seeding as the battle begins does not work
   (BN5's opening draws 84 more). With `rng=follow`, BN6's words are
@@ -2170,7 +2191,9 @@ Steps of `--input` and play.py's commands take `pad.NAME`, that pad's input
 by SDL's name held for the step (`pad.a`, `pad.dpup`, `pad.lefttrigger`,
 `pad.-lefty`), and `key.NAME`, a key (`key.J`, `key.Return`), both through
 SDL's events as a player's, past any map; the GBA's own names (`A`,
-`UP+RIGHT`) still inject the buttons themselves. It needs SDL 2.24 (every
+`UP+RIGHT`) still inject the buttons themselves, and `FAST` fast forward's
+(`30:,4:FAST` turns it on for the rest of the run, at 3x headless, which
+reads no `settings.ini`; docs/GUIDE.md, Fast forward). It needs SDL 2.24 (every
 build but the handhelds' PortMaster binary, linked against 2.0.14, where
 `--pad` says it has none).
 
