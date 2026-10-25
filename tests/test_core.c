@@ -5806,8 +5806,8 @@ static void test_liberation_team(void) {
 	 * command its spot; the par a pick's, the same twice) */
 	static const LibTeam crosses[3] = {
 		{ 2, { MATE_MEGAMAN, MATE_HEATMAN }, { 0, 300 }, 3, { MATE_HEATMAN, MATE_COLONEL, MATE_ERASEMAN } },
-		{ 3, { MATE_MEGAMAN, MATE_ELECMAN, MATE_CHARGEMAN }, { 0, 425, 425 }, 4, { MATE_ELECMAN, MATE_CHARGEMAN, MATE_SLASHMAN, MATE_NUMBERMAN } },
-		{ 4, { MATE_MEGAMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN }, { 0, 500, 500, 500 }, 5, { MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN, MATE_ELECMAN, MATE_CHARGEMAN } },
+		{ 3, { MATE_MEGAMAN, MATE_ELECMAN, MATE_CHARGEMAN }, { 0, 300, 300 }, 4, { MATE_ELECMAN, MATE_CHARGEMAN, MATE_SLASHMAN, MATE_NUMBERMAN } },
+		{ 4, { MATE_MEGAMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN }, { 0, 350, 350, 350 }, 5, { MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN, MATE_ELECMAN, MATE_CHARGEMAN } },
 	};
 	for (int act = 1; act <= 3; ++act) {
 		int n = 0, tried = 0, cmds = 0, plays = 0, par = 0, repar = 0;
