@@ -92,16 +92,14 @@ def banner():
     return im, 5
 
 
-def embed_bg():
-    """960 x 640, behind the player's Run game button until it is clicked
-    (base 192 x 128, 5x): the net, the wordmark high over it, the button's
-    place in the middle left clear."""
-    im = art.sky(192, 128)
-    art.net(im, 96, 70, [(-11, -1, 2, 2), (-9, 0, 3, 'u'), (-6, -1, 3, 3), (-5, 2, 3, 'v'), (-6, 5, 2, 2),
-                         (6, -6, 2, 2), (7, -4, 4, 'v'), (6, 0, 3, 3), (9, 1, 3, 'u'), (12, 0, 2, 3),
-                         (1, 7, 3, 2), (-1, 7, 2, 'u'), (-10, 6, 3, 'u'), (-13, 5, 2, 2)], 9)
-    im.alpha_composite(logo_layer(192, 48, 96, 26, 0.8))
-    return im, 5
+def embed_bg(frame='central'):
+    """960 x 640, behind the player's Run game button until it is clicked:
+    one whole frame of the game at 4x (240 x 160), a layer of the net,
+    dimmed a third towards the page's navy so the button stands out. No
+    wordmark: the banner above carries it."""
+    im = Image.open(os.path.join(SHOTS, frame + '.png')).convert('RGBA')
+    im.alpha_composite(Image.new('RGBA', im.size, (11, 37, 50, 85)))
+    return im, 4
 
 
 def tile():

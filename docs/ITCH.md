@@ -1,7 +1,7 @@
 # itch.io
 
 The game's page on itch.io, <https://saschb2b.itch.io/cyberworld-endless>
-(project 5225408; a Draft since 25 October 2026, until the owner publishes it):
+(project 5225408; drafted and published 25 October 2026, with 0.15.0's files):
 what it holds, why, and how it follows each release. itch is where many
 players look for fan games and roguelikes, and the page plays the browser
 build in place and offers every system's file, all from the release on
@@ -66,7 +66,7 @@ plain voice and claims only what the README and the guide say.
 | AI disclosure | Yes: code, text, graphics and sound | The owner's answer: the code and the lines were written with Claude, and so were the scripts that draw the site's art, the cover and the banner and write the trailers' music; the game's own pictures and sound are BN6's |
 | Custom noun | (none) | |
 | Community | Comments | Questions and reports in one place on the page; GitHub's Discussions and issues stay the project's own |
-| Visibility | Draft until the owner publishes | |
+| Visibility | Public | Published 25 October 2026 |
 
 The tags, with the number of games itch lists under each (25 October 2026;
 a capital in itch's name for it marks one of its suggested tags):
@@ -110,7 +110,7 @@ wordmark and net and the site's PET colours, nothing from the ROM:
 | --- | --- | --- |
 | Cover (listings, search, the page's preview) | [itch/cover.png](itch/cover.png): the infinity mark and the wordmark stacked over the net, as the Steam capsule draws them; the owner's pick of six (25 October 2026) over covers with a frame of the game (`--frame NAME` draws one) | 630x500 |
 | Banner (replaces the title on the page) | [itch/banner.png](itch/banner.png) | 960x240 |
-| Embed BG (behind the player's Run game button) | [itch/embed.png](itch/embed.png): the net, the wordmark high, the middle clear | 960x640 |
+| Embed BG (behind the player's Run game button) | [itch/embed.png](itch/embed.png): one whole frame of a Central Area layer at 4x, dimmed a third towards the column's navy; no wordmark, which the banner above carries (the owner, 25 October 2026: the two together read as redundant) | 960x640 |
 | Background tile | [itch/background.png](itch/background.png): the site's PET floor | 48x48 |
 | Screenshots | `.build/itch/NN-NAME.png`: eight of `docs/screenshots` at 4x, whole frames | 960x640 |
 
@@ -185,7 +185,9 @@ itch plays an HTML upload in a frame on its own domain
 at most 1,000 files, 500 MB in all and 200 MB a file, paths relative.
 `tools/itch.py` makes it from the release's website zip: `play/` at the
 root with the site's assets it uses, the site's bar hidden (the itch page
-is the site there), the manifest left out, and every link to the site, to
+is the site there), the manifest left out, `play.css`'s pictures named
+from the root (on itch's server `../` leaves the game's folder: the first
+upload lost the cartridge slots' frames), and every link to the site, to
 GitHub and to the licenses opened in a new tab, since a link in a frame
 would open inside it. 60 files, 3.3 MB.
 
@@ -212,29 +214,24 @@ origin.
 
 ## Going public
 
-The draft holds every text, picture, setting and the theme above; it has
-no files yet. The owner, once:
-
-1. installs butler (<https://itchio.itch.io/butler>) and runs
-   `butler login` (the key stays in butler's own file);
-2. `python3 tools/itch.py push --hidden`: every channel of the latest
-   release, its uploads hidden;
-3. on the edit page: the `web` upload's **This file will be played in the
-   browser**, each upload's display name and platform as the table above
-   says, then unhides them;
-4. opens the draft (its Secret URL) on a phone and a computer, the ROMs
-   chosen, a game started;
-5. sets **Visibility** to Public and saves: the page is indexed from then
-   on, and links from the site and the README can follow.
+Done on 25 October 2026: butler installed in `.build/butler/` and logged in
+as the owner (`butler login`, its key in `~/.config/itch/butler_creds`),
+`python3 tools/itch.py push --hidden` for 0.15.0, the `web` upload taken by
+itch as the page's game, the display names set, the uploads shown, the
+game loaded from itch's servers to its ROMs screen, the page made Public,
+and the site's footers, its schema.org `sameAs` and the README linking it.
+Not checked there: a phone (itch starts the game full screen on one) and a
+ROM chosen on itch's page, which the same zip passed in a cross-origin
+frame on this machine.
 
 ## Each release
 
 After `build.py release` and the tag (docs: the release recipe):
 
 1. `python3 tools/itch.py push` sends the latest release's files, each
-   channel under its version. butler must be logged in as the page's
-   owner (`butler login` once, on the owner's machine; the key stays in
-   butler's own file). A new channel's first push makes a new upload:
+   channel under its version, with butler from `PATH` or `.build/butler/`
+   logged in as the page's owner (`butler login` once, in a terminal; the
+   key stays in butler's own file). A new channel's first push makes a new upload:
    `--hidden` keeps it off the page until its display name and platform
    are set.
 2. A minor release rewrites the description's **New in** section (between
