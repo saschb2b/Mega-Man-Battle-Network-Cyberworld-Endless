@@ -18,10 +18,12 @@
 #include "bn6_fields.h"
 #include "bn6_forms.h"
 #include "director_home.h"
+#include "devtools.h"
 #include "director_state.h"
 #include "emu.h"
 #include "lanhp.h"
 #include "rom.h"
+#include "run.h"
 
 #define CAM_X 120                 /* where the camera's point shows */
 #define CAM_Y 80
@@ -93,4 +95,19 @@ void lib_way_tint(uint32_t *px) {
 			px[y * EMU_W + xx] = (c & 0xFF000000u) | ramp[s];
 		}
 	}
+}
+
+bool lib_way_dark(int act, int biome) {
+	if (act < 1 || act >= 6) return false;
+	if (dev.dark) return true;
+	int area = run_dark_area(act);
+	return area >= 0 && biome == area;
+}
+
+int lib_layer_tiles(int tiles) {
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *d = net_area_def(NET_AREAS + k);
+		if (d && d->xrom > 0 && d->group == BN5_LIB_MAP_GROUP) return NET_AREAS + k;
+	}
+	return tiles;
 }

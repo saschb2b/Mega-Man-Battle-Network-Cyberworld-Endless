@@ -64,10 +64,6 @@
 #define BN6_PLAYER_NEXT_Y     (BN6_PLAYER + 0x2C)
 #define BN6_PLAYER_PAD        (BN6_PLAYER + 0x4C)  /* Unk_4c, u16: the pad as BN6 took it this frame, BN6_PAD_STEP a walk or run; 0 while held (bn6f sub_809D9E0) */
 #define BN6_PAD_STEP          0x30        /* BN6_PLAYER_PAD: 0x10 a walk, 0x20 a run */
-#define BN6_PLAYER_SPRITE_LOAD 0x0809E7EAu /* movs r0,#0x80 before the player object's spawn (bn6f owPlayer's sub_809D270) loads its sprite: r6 its
-                                             list x 4 (BN6_OW_NPC_LIST on the net), r4 its number (PETNaviToNPCSpriteTable's, 0x37 MegaMan's);
-                                             it runs again where BN6_PLAYER_MAIN is set to 0 */
-#define BN6_OW_NPC_LIST       0x18        /* sprite_load's list x 4: list 6, the Navis and Mr. Progs */
 /* The overworld's NPC objects (eOverworldNPCObjects): 16 of 0xD8 bytes,
  * fields from each one's start */
 #define BN6_NPC_OBJECTS       0x020057B0u
@@ -84,15 +80,6 @@
 #define BN6_NPC_X16           0x26        /* X16, Y16, Z16: its position's whole world units (s16) */
 #define BN6_NPC_Y16           0x2A
 #define BN6_NPC_Z16           0x2E
-/* An object's sprite (bn6f's ObjectSprite), at the object less the low
- * four bits of the header's byte BN6_OBJ_SPRITE_AT, as sprite_setColorShader
- * finds it */
-#define BN6_OBJ_SPRITE_AT     0x02        /* ObjectHeader TypeAndSpriteOffset: its high nibble x 16, the sprite's offset in the object */
-#define BN6_SPRITE_SHADER     0x06        /* ObjectSprite +6, u16, the colour shader on its palette as it is drawn: bit 15 subtracts the
-                                             BGR555 colour below it from every colour, else adds it (bn6f sub_3005EF0); an NPC script's
-                                             command 0x2B sets it */
-#define BN6_SHADE_DARK        0xA108      /* ... less 8 of each channel: BN6's own darkening (owPlayer's at a map's dark spot, coordinate
-                                             trigger 0x3C), the shade BN5's board gives a Navi who has acted */
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */

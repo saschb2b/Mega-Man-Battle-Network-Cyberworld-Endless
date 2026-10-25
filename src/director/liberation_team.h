@@ -33,6 +33,11 @@ int lib_in_play(void);
 const char *lib_mate_name(int k);
 int lib_mate_face(int k);
 int lib_mate_command(int k);
+/* What Navi k says, in his own habit (liberation_team_words.c): as he
+ * first comes into play, after his battle (won, in its first turn, or
+ * not), resting, his command with no battle (`n` its finds or teammates) */
+enum { LIB_SAYS_JOIN, LIB_SAYS_WON, LIB_SAYS_ONE_TURN, LIB_SAYS_FAILED, LIB_SAYS_REST, LIB_SAYS_COMMAND };
+const char *lib_mate_says(int k, int what, int n);
 /* Navi k's HP and max (MegaMan's his own, NaviStats'), set (1 at least, his max at most) */
 int lib_mate_hp(int k);
 int lib_mate_max(int k);
@@ -53,8 +58,6 @@ int lib_team_other(void);
 /* A frame of play passing to Navi `k`: BN5's camera to him, his body the
  * player's, the camera following him; true once he is in play */
 bool lib_team_switch_frame(int k);
-/* The board left or ended: the player's body MegaMan's again */
-void lib_team_end(void);
 /* After a CONTINUE (liberation_save.c): the player's body the Navi in play's */
 void lib_team_resume(void);
 

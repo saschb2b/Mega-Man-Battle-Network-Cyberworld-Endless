@@ -19,23 +19,21 @@
 
 #include "bn5_liberation.h"
 #include "bn6.h"
-#include "bn6_expression.h"
 #include "bn6_fields.h"
 #include "debug.h"
 #include "devtools.h"
-#include "director_state.h"
 #include "emu.h"
 #include "guardians.h"
 #include "liberation.h"
 #include "liberation_battle.h"
 #include "liberation_state.h"
+#include "liberation_team_words.h"
 #include "netmap.h"
 #include "player_body.h"
 #include "rom.h"
 #include "run.h"
 #include "souls.h"
 #include "soulunite.h"
-#include "text.h"
 #include "xnavi.h"
 
 #define MATE_FACE   3      /* the eighth the team faces as the board begins (MegaMan's, down-right) */
@@ -134,7 +132,18 @@ const char *lib_mate_name(int k) {
 	return navi == MATE_MEGAMAN ? "MegaMan" : guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name;
 }
 
-int lib_mate_face(int k) { return k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : FACE_MEGAMAN; }
+/* (a Navi's mugshot is at his list-6 number: BN6_OW_MEGAMAN is MegaMan's face too) */
+int lib_mate_face(int k) { return k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN; }
+
+const char *lib_mate_says(int k, int what, int n) {
+	int navi = k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN;
+	switch (what) {
+	case LIB_SAYS_JOIN: return lib_mate_join_words(navi);
+	case LIB_SAYS_REST: return lib_mate_rest_words(navi);
+	case LIB_SAYS_COMMAND: return lib_mate_command_words(navi, n);
+	default: return lib_mate_battle_words(navi, what != LIB_SAYS_FAILED, what == LIB_SAYS_ONE_TURN);
+	}
+}
 
 int lib_mate_command(int k) { return lib_command_of(k >= 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN); }
 
@@ -224,8 +233,6 @@ bool lib_team_switch_frame(int k) {
 	LB.switch_t = 0;
 	return true;
 }
-
-void lib_team_end(void) { player_body(-1); }
 
 void lib_team_resume(void) {
 	player_body(LB.in_play ? LB.mate[LB.in_play].sprite : -1);

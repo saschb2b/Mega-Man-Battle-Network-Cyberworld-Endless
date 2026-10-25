@@ -26,7 +26,6 @@
 #include <string.h>
 
 #include "bn6_fields.h"
-#include "devtools.h"
 #include "director_layer.h"
 #include "cinema.h"
 #include "debug.h"
@@ -39,7 +38,6 @@
 #include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_team.h"
-#include "liberation_team_words.h"
 #include "liberation_words.h"
 #include "loot.h"
 #include "bn5_liberation.h"
@@ -60,21 +58,6 @@ static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 /* BN6's facings and walking keys along the grid's ways (net.h: grid x
  * runs down-right on screen, y down-left) */
 static const int facing[4] = { 3, 5, 7, 1 };
-
-bool lib_way_dark(int act, int biome) {
-	if (act < 1 || act >= 6) return false;
-	if (dev.dark) return true;
-	int area = run_dark_area(act);
-	return area >= 0 && biome == area;
-}
-
-int lib_layer_tiles(int tiles) {
-	for (int k = 0; k < XAREAS_MAX; ++k) {
-		const NetAreaDef *d = net_area_def(NET_AREAS + k);
-		if (d && d->xrom > 0 && d->group == BN5_LIB_MAP_GROUP) return NET_AREAS + k;
-	}
-	return tiles;
-}
 
 bool lib_layer_dark(void) {
 	if (run.side_kind != LAYER_NORMAL) return false;
@@ -243,6 +226,23 @@ static void npc_put(int slot, int x, int y) {
 
 static int put_x[LIB_OBJS], put_y[LIB_OBJS];   /* where each object was put last */
 
+/* A Navi who has acted this phase drawn darker, as BN5's board draws him:
+ * BN6's own shade on his sprite */
+static void shade(int slot, bool dark) {
+	uint32_t o = npc(slot), spr = o + (uint32_t)(emu_read8(o + BN6_OBJ_SPRITE_AT) >> 4 << 4);
+	uint16_t v = dark ? BN6_SHADE_DARK : 0;
+	if (emu_read16(spr + BN6_SPRITE_SHADER) != v) emu_write(spr + BN6_SPRITE_SHADER, &v, 2);
+}
+
+/* Where object u wants to stand: off the floor while gone or between a
+ * warp's ends (a unit), or in play or out (a Navi of the team) */
+static void wanted(int u, int *x, int *y) {
+	int k = u - LIB_UNITS;
+	bool away = k < 0 ? LB.b.unit[u].gone || LB.hidden[u] : k == LB.in_play || LB.b.mate[k].out;
+	*x = away ? PARK_X : k < 0 ? LB.ux[u] : LB.mate[k].wx;
+	*y = away ? 0 : k < 0 ? LB.uy[u] : LB.mate[k].wy;
+}
+
 /* Each unit's and teammate's object found where the map put it (again
  * after a battle, whose return makes the map's objects afresh), and set
  * where it stands: off the floor while gone, a Navi's while in play */
@@ -250,10 +250,9 @@ static void units_show(void) {
 	for (int u = 0; u < LIB_OBJS; ++u) {
 		int k = u - LIB_UNITS;
 		if (k < 0 ? u >= LB.b.nunits : k >= LB.b.team.n) continue;
-		int wx = LB.from_x[u], wy = LB.from_y[u], s = LB.slot[u];
+		int wx = LB.from_x[u], wy = LB.from_y[u], s = LB.slot[u], want_x, want_y;
 		bool held = s >= 0 && (emu_read8(npc(s)) & 1);
-		bool away = k < 0 ? LB.b.unit[u].gone || LB.hidden[u] : k == LB.in_play || LB.b.mate[k].out;
-		int want_x = away ? PARK_X : k < 0 ? LB.ux[u] : LB.mate[k].wx, want_y = away ? 0 : k < 0 ? LB.uy[u] : LB.mate[k].wy;
+		wanted(u, &want_x, &want_y);
 		if (held) {
 			int x = (int16_t)emu_read16(npc(s) + BN6_NPC_X16), y = (int16_t)emu_read16(npc(s) + BN6_NPC_Y16);
 			/* (where it was put last, or where the map put it) */
@@ -266,13 +265,7 @@ static void units_show(void) {
 					LB.slot[u] = n;
 		}
 		if (LB.slot[u] >= 0) { npc_put(LB.slot[u], want_x, want_y); put_x[u] = want_x; put_y[u] = want_y; }
-		/* (a Navi who has acted this phase drawn darker, as BN5's board
-		 * draws him: BN6's own shade on his sprite) */
-		if (k >= 0 && LB.slot[u] >= 0) {
-			uint32_t o = npc(LB.slot[u]), spr = o + (uint32_t)(emu_read8(o + BN6_OBJ_SPRITE_AT) >> 4 << 4);
-			uint16_t shade = LB.mate[k].acted ? BN6_SHADE_DARK : 0;
-			if (emu_read16(spr + BN6_SPRITE_SHADER) != shade) emu_write(spr + BN6_SPRITE_SHADER, &shade, 2);
-		}
+		if (k >= 0 && LB.slot[u] >= 0) shade(LB.slot[u], LB.mate[k].acted);
 		/* (its animation the board's, its object's own byte) */
 		uint32_t a = D.objs.lib_anim[u];
 		if (a && emu_read8(a) != LB.anim[u]) emu_write8(a, LB.anim[u]);
@@ -410,7 +403,7 @@ static void command_done(int command, int fx, int fy) {
 			}
 	}
 	char words[sizeof LB.words];
-	snprintf(words, sizeof words, "%s", lib_mate_command_words(LB.b.team.navi[LB.in_play], n));
+	snprintf(words, sizeof words, "%s", lib_mate_says(LB.in_play, LIB_SAYS_COMMAND, n));
 	if (said[0]) { size_t k = strlen(words); snprintf(words + k, sizeof words - k, "%s%s", k ? "|" : "", said); }
 	after_action(words);
 }
@@ -571,7 +564,7 @@ static void fight_won(bool one_turn) {
 		if (one_turn) freed += free_around(LB.fx, LB.fy, held, sizeof held);
 	}
 	/* (a teammate's own line for his panel's battle, MegaMan's for the rest) */
-	if (LB.in_play && LB.fight == LIB_FIGHT_PANEL) say_more(lib_mate_battle_words(LB.b.team.navi[LB.in_play], true, one_turn));
+	if (LB.in_play && LB.fight == LIB_FIGHT_PANEL) say_more(lib_mate_says(LB.in_play, one_turn ? LIB_SAYS_ONE_TURN : LIB_SAYS_WON, 0));
 	else say_more(lib_battle_words(LB.fight, true, one_turn, freed, lib_holes_left(&LB.b), back));
 	say_more(held);
 	/* (BN5's banner was the battle's own, LIBERATE SUCCESS! or 1 TURN
@@ -601,7 +594,7 @@ static void after_fight(void) {
 	LB.words[0] = 0;
 	if (won) fight_won(one_turn);
 	else if (down) say_more(lib_mate_down_words(lib_mate_name(LB.in_play)));
-	else if (LB.in_play) say_more(lib_mate_battle_words(LB.b.team.navi[LB.in_play], false, false));
+	else if (LB.in_play) say_more(lib_mate_says(LB.in_play, LIB_SAYS_FAILED, 0));
 	else say_more(lib_battle_words(LB.fight, false, false, 0, 0, false));
 	if (LB.b.unit[0].gone) {
 		LB.prize = LB.phase <= LB.b.par - 2 ? 0 : LB.phase <= LB.b.par ? 1 : 2;
@@ -784,7 +777,7 @@ static void steps_update(void) {
 		LB.banner_t = 0;
 		if (LB.in_play && !LB.mate[LB.in_play].spoke) {
 			LB.mate[LB.in_play].spoke = true;
-			say(lib_mate_join_words(LB.b.team.navi[LB.in_play]), LB.switch_after);
+			say(lib_mate_says(LB.in_play, LIB_SAYS_JOIN, 0), LB.switch_after);
 		}
 		break;
 	default: break;
@@ -820,7 +813,7 @@ static void menu_keys(uint32_t pressed) {
 	if (LB.menu == LIB_CMD_PASS) {
 		/* (BN5's Pass: a fifth of his HP back) */
 		hp_set(hp_now() + hp_max() / LIB_REST_PART);
-		after_action(LB.in_play ? lib_mate_rest_words(LB.b.team.navi[LB.in_play]) : lib_rest_words());
+		after_action(LB.in_play ? lib_mate_says(LB.in_play, LIB_SAYS_REST, 0) : lib_rest_words());
 		return;
 	}
 	fight(LB.menu);
@@ -851,9 +844,18 @@ uint32_t lib_keys(uint32_t keys) {
 			nudge_y = (keys & KEY_DOWN ? s : 0) - (keys & KEY_UP ? s : 0);
 			return keys & ~(uint32_t)(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
 		}
-		/* (A opens the command window, Pass at least, as BN5's does; R
-		 * passes play to the next Navi yet to act) */
-		if (pressed & KEY_A) { open_menu(); return keys & (KEY_START | KEY_SELECT); }
+		/* (A beside what he can take opens the command window: BN5's opens
+		 * anywhere, its Pass behind a question we have not, so A pressed
+		 * through a chat would rest a Navi; R passes play to the next Navi
+		 * yet to act; once nothing else shows, a CONTINUE's act card first) */
+		if (!quiet()) return keys;
+		int fx, fy;
+		lib_faced(&fx, &fy);
+		if ((pressed & KEY_A) && (lib_faced_takes() || (LB.op > 0 && command_can(fx, fy)))) {
+			open_menu();
+			if (emu_debug_on()) fprintf(stderr, "liberation: %s's window at frame %d\n", lib_mate_name(LB.in_play), D.frame);
+			return keys & (KEY_START | KEY_SELECT);
+		}
 		int other = (pressed & KEY_R) ? lib_team_other() : -1;
 		if (other >= 0) {
 			LB.switch_to = other;

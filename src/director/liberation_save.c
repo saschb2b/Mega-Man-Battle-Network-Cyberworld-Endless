@@ -64,7 +64,7 @@ void lib_save(void) {
 		n.nteam = LB.b.team.n;
 		n.switch_to = LB.switch_to;
 		n.switch_after = LB.switch_after;
-		for (int k = 0; k < LB.b.team.n; ++k) {
+		for (int k = 0; k < LB.b.team.n && k < LIB_TEAM; ++k) {
 			lib_mate_world(k, &LB.mate[k].wx, &LB.mate[k].wy);
 			n.mate[k].hp = (int16_t)LB.mate[k].hp; n.mate[k].wx = (int16_t)LB.mate[k].wx; n.mate[k].wy = (int16_t)LB.mate[k].wy;
 			n.mate[k].x = LB.b.mate[k].x; n.mate[k].y = LB.b.mate[k].y; n.mate[k].out = LB.b.mate[k].out;
@@ -93,7 +93,7 @@ bool lib_resume(void) {
 	memcpy(LB.b.kind, n.kind, sizeof LB.b.kind);
 	memcpy(LB.b.item, n.item, sizeof LB.b.item);
 	LB.route_found = n.route_found != 0;
-	for (int k = 0; k < LB.b.team.n; ++k) {
+	for (int k = 0; k < LB.b.team.n && k < LIB_TEAM; ++k) {
 		LB.mate[k].hp = n.mate[k].hp; LB.mate[k].wx = n.mate[k].wx; LB.mate[k].wy = n.mate[k].wy;
 		LB.b.mate[k].x = n.mate[k].x; LB.b.mate[k].y = n.mate[k].y; LB.b.mate[k].out = n.mate[k].out != 0;
 		LB.mate[k].face = n.mate[k].face; LB.mate[k].acted = n.mate[k].acted != 0; LB.mate[k].melody = n.mate[k].melody != 0;
