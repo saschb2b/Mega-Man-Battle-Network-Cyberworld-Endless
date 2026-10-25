@@ -239,7 +239,19 @@ MegaMan asks "To the Net Square,Lan?" each time
 [EMULATION.md](EMULATION.md)). The keeper changes the name or the server:
 the official one, or another's address, typed once in the one screen
 of the Square's own, a field with a keyboard on the pad and by touch and
-the system's where there is one (`online_field.c`, `text_input.c`). Yes saves the run as a checkpoint at the gate
+the system's where there is one (`online_field.c`, `text_input.c`). What
+is typed becomes the server's URL (`network_address.c`): a scheme or a
+port typed is kept; an address that can only be on the player's own
+network (a private or Tailscale's IPv4 address, localhost, a `.local` or
+`.lan` name, a name with no dot, a ULA or link-local IPv6 one) is a
+Square started there with nothing set, `ws://` on port 8765, so
+`192.168.1.20` alone reaches it; any other is `wss://` on its own port.
+The lens (the game-design skill, interface: error prevention and minimum
+workload, Hodent and Nielsen): typing on a pad is friction nobody meant,
+so the field asks for no more than the host's server names as it starts;
+an explicit scheme or port always wins, the way out where the guess is
+wrong (a home server behind its own TLS on 443). Loop layer: the visit
+between acts; nothing of a run changes. Yes saves the run as a checkpoint at the gate
 (`home_gate_save`), then the gate flickers while the server answers;
 B calls it off.
 
@@ -1248,7 +1260,11 @@ and the Arena each have their switch in its configuration
 derived per server from a local secret; moderators ban, mute, kick and
 allowlist through the server's command line, and take a week's Board
 entry down (`hide`). Hosting, TLS, backups and
-the platforms' transports are [server/README.md](../server/README.md)'s.
+the platforms' transports are [server/README.md](../server/README.md)'s:
+a Square of one's own started with nothing set on a computer of the
+network, or behind HTTPS with `deploy/selfhost/` (Caddy and Let's Encrypt
+in front of the release's image), its [Host your own Net
+Square](../server/README.md#host-your-own-net-square).
 
 ### The official server
 

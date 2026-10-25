@@ -533,9 +533,10 @@ collision problems show up here that the atlas cannot show.
 
 ## The Net Square: two games at once
 
-The Square needs a server: `python3 build.py server-run --config
-server/server.example.ini` runs one on `ws://127.0.0.1:8765/presence`
-(seed 120; another `seed` in the file gives another Square). A game's
+The Square needs a server: `python3 build.py server-run --host
+127.0.0.1` runs one on `ws://127.0.0.1:8765/presence`, this computer
+alone (seed 120; `--seed`, or another `seed` in a `server.ini` from
+`server/server.example.ini`, gives another Square). A game's
 data folder points its gate at it with a `network.ini` of its own:
 
 ```

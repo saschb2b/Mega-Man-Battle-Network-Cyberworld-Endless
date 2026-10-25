@@ -838,7 +838,10 @@ next CONTINUE puts him there.
 
 The keeper changes your name or the server: the official Square (he
 asks first, the cursor on **No**), or another one's address (`host` or
-`host:port`, as its owner gives it).
+`host:port`, as its owner gives it). A Square on your own network needs
+its address alone, `192.168.1.20` say: the server says it as it starts,
+and an address that can only be on your network is taken as a Square
+started there with nothing set (`ws://`, port 8765).
 He also moves you to the next or the last channel.
 
 #### Finding your way
@@ -1063,10 +1066,14 @@ unlocks nothing and counts in none of your records.
 
 Anyone can run a Net Square: the server is a small program of its own,
 in Python, with ready builds for Linux, Windows and macOS and a Docker
-image, and it never needs a ROM or sees a save
-([server/README.md](../server/README.md) says how). Each server has its
-own channels, moderators and week's DeepNet. Give its address to the
-gate's keeper to go there.
+image, and it never needs a ROM or sees a save. For a LAN party, unzip
+it on one computer and start it: nothing needs setting, and it names the
+address the others type at the gate. For a Square always up, with HTTPS
+for the browser and the 3DS, three commands on a server with Docker and
+a domain ([server/README.md, Host your own Net
+Square](../server/README.md#host-your-own-net-square) says how, both
+ways and the ones between). Each server has its own channels, moderators
+and week's DeepNet. Give its address to the gate's keeper to go there.
 
 The official server asks for no account and no e-mail. It sees the
 address your game connects from, the name you chose, where MegaMan

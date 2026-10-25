@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "network_address.h"
 #include "network_prefs.h"
 #include "text_input.h"
 
@@ -164,11 +165,63 @@ static void editor(void) {
 	SDL_Quit();
 }
 
+/* what a player types at the keeper, and the URL it reaches (network_address.h) */
+static bool reaches(const char *typed, const char *url) {
+	char out[NETWORK_URL];
+	bool ok = network_address_url(typed, out, sizeof out) && !strcmp(out, url);
+	if (!ok) fprintf(stderr, "  \"%s\" reached \"%s\", not \"%s\"\n", typed, network_address_url(typed, out, sizeof out) ? out : "nothing", url);
+	return ok;
+}
+
+static void addresses(void) {
+	/* a Square started bare on this network: plain WebSocket, the server's port */
+	CHECK(reaches("192.168.1.20", "ws://192.168.1.20:8765/presence"));
+	CHECK(reaches("10.0.0.5", "ws://10.0.0.5:8765/presence"));
+	CHECK(reaches("172.16.4.1", "ws://172.16.4.1:8765/presence"));
+	CHECK(reaches("172.31.255.1", "ws://172.31.255.1:8765/presence"));
+	CHECK(reaches("100.101.102.103", "ws://100.101.102.103:8765/presence"));
+	CHECK(reaches("127.0.0.1", "ws://127.0.0.1:8765/presence"));
+	CHECK(reaches("localhost", "ws://localhost:8765/presence"));
+	CHECK(reaches("Lans-PC", "ws://Lans-PC:8765/presence"));
+	CHECK(reaches("lans-pc.local", "ws://lans-pc.local:8765/presence"));
+	CHECK(reaches("NAS.LAN", "ws://NAS.LAN:8765/presence"));
+	CHECK(reaches("pc.home.arpa", "ws://pc.home.arpa:8765/presence"));
+	CHECK(reaches("[::1]", "ws://[::1]:8765/presence"));
+	CHECK(reaches("[fd12:3456::1]", "ws://[fd12:3456::1]:8765/presence"));
+	CHECK(reaches("[fe80::1]", "ws://[fe80::1]:8765/presence"));
+	/* a port, a path or a scheme typed is kept */
+	CHECK(reaches("192.168.1.20:9000", "ws://192.168.1.20:9000/presence"));
+	CHECK(reaches("192.168.1.20/presence", "ws://192.168.1.20:8765/presence"));
+	CHECK(reaches("[fd12::1]:9000", "ws://[fd12::1]:9000/presence"));
+	CHECK(reaches("wss://nas.local", "wss://nas.local/presence"));
+	CHECK(reaches("ws://192.168.1.20:8765", "ws://192.168.1.20:8765/presence"));
+	CHECK(reaches("ws://example.com:8765/presence", "ws://example.com:8765/presence"));
+	/* anywhere else: TLS on its own port, as before */
+	CHECK(reaches("square.example.com", "wss://square.example.com/presence"));
+	CHECK(reaches("square.example.com:8443", "wss://square.example.com:8443/presence"));
+	CHECK(reaches("172.32.0.1", "wss://172.32.0.1/presence"));
+	CHECK(reaches("100.128.0.1", "wss://100.128.0.1/presence"));
+	CHECK(reaches("8.8.8.8", "wss://8.8.8.8/presence"));
+	CHECK(reaches("[2001:db8::1]", "wss://[2001:db8::1]/presence"));
+	CHECK(reaches("local.example.com", "wss://local.example.com/presence"));
+	CHECK(reaches("cyberworld.saschb2b.com", NETWORK_DEFAULT_URL));
+	CHECK(!network_address_local("192.168.1"));
+	CHECK(!network_address_local("192.168.1.256"));
+	CHECK(!network_address_local("[fc0::1]"));
+	/* no address at all */
+	char out[NETWORK_URL];
+	CHECK(!network_address_url("", out, sizeof out));
+	CHECK(!network_address_url("host/other", out, sizeof out));
+	CHECK(!network_address_url("user@host", out, sizeof out));
+	CHECK(!network_address_url("192.168.1.20", out, 20));
+}
+
 int main(void) {
 	identity_keys();
 	preferences();
 	server_migration();
 	editor();
+	addresses();
 	if (!failures) puts("network: identity isolation, consent persistence and text input passed");
 	return failures ? 1 : 0;
 }
