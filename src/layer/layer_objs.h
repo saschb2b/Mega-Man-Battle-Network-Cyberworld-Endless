@@ -77,7 +77,7 @@ typedef struct {
 	int lib_prize[3];          /* a dark layer's prizes by its par (docs/LIBERATION.md): two under, at par, over; their scripts, -1 none */
 	int lib_loot[6];           /* ... its board's chips found in item panels (liberation_board.h's LIB_LOOT, by their loot index), -1 none */
 	int lib_zenny;             /* ... and its zenny found (lib_zenny's), -1 none */
-	uint32_t lib_anim[8];      /* ... each unit's animation byte (npc_live; liberation_board.h's LIB_UNITS), 0 none */
+	uint32_t lib_anim[16];     /* ... each unit's and teammate's animation byte (npc_live; liberation_state.h's LIB_OBJS), 0 none */
 } LayerObjs;
 
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny

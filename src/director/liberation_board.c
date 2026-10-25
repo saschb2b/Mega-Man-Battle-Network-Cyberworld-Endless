@@ -35,7 +35,7 @@ static const struct { int team, holes, roam, kinds, dark_lo, dark_hi, items, bon
 };
 #define MAKE_TRIES 16
 /* The dark panels (beyond the DarkHoles' rings) a lone MegaMan meets by
- * act, a teammate's share more each: BN5's mission 1 has 33 for two Navis
+ * act, a teammate's share more each (make_once): BN5's mission 1 has 33 for two Navis
  * on a board of 100, our layers twice its floor (the par a lone board's
  * 10 to 20 phases, BN5's 10 to 20 minutes) */
 static const int dark_panels[6] = { 14, 14, 18, 18, 22, 26 };
@@ -111,6 +111,52 @@ int lib_open_barrier(LibBoard *b, int n) {
 
 static int manhattan(int ax, int ay, int bx, int by) { return abs(ax - bx) + abs(ay - by); }
 
+/* ---- the team ---- */
+
+int lib_mate_at(const LibBoard *b, int x, int y) {
+	for (int k = 0; k < b->team.n; ++k)
+		if (!b->mate[k].out && b->mate[k].x == x && b->mate[k].y == y) return k;
+	return -1;
+}
+
+int lib_command_of(int navi) {
+	switch (navi) {
+	case MATE_MEGAMAN: return LIB_DO_LONGSWRD;
+	case MATE_COLONEL: return LIB_DO_SCRENDIV;
+	case MATE_TOMAHAWKMAN: return LIB_DO_TOMAHAWK;
+	case MATE_NUMBERMAN: return LIB_DO_NUMBER;
+	case MATE_SHADOWMAN: return LIB_DO_SNEAK;
+	case MATE_TOADMAN: return LIB_DO_MELODY;
+	default: return LIB_DO_NONE;   /* (KnightMan: his StoneBody, always on) */
+	}
+}
+
+/* The shapes BN5's guides give the commands (docs/LIBERATION.md, The
+ * Navis), from the panel faced: LongSwrd two in a line; ScrenDiv three
+ * across; TomahawkSwing and NumberCheck two deep and three wide;
+ * SneakAttack one or two ahead; LifeMelody's five ahead */
+int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]) {
+	static const struct { int8_t deep, wide; } shape[] = {
+		[LIB_DO_NONE] = { 1, 0 }, [LIB_DO_LONGSWRD] = { 2, 0 }, [LIB_DO_SCRENDIV] = { 1, 1 }, [LIB_DO_TOMAHAWK] = { 2, 1 },
+		[LIB_DO_NUMBER] = { 2, 1 }, [LIB_DO_SNEAK] = { 2, 0 }, [LIB_DO_MELODY] = { 5, 0 },
+	};
+	if (command < 0 || command > LIB_DO_MELODY || dir < 0 || dir > 3) return 0;
+	int n = 0, px = -dir4[dir][1], py = dir4[dir][0];
+	for (int d = 0; d < shape[command].deep; ++d)
+		for (int w = -shape[command].wide; w <= shape[command].wide; ++w) {
+			int tx = x + d * dir4[dir][0] + w * px, ty = y + d * dir4[dir][1] + w * py;
+			if (n < 6 && on_board(b, tx, ty)) { xs[n] = tx; ys[n] = ty; ++n; }
+		}
+	return n;
+}
+
+bool lib_mate_shielded(const LibBoard *b, int k) {
+	if (k < 0 || k >= b->team.n || b->mate[k].out) return false;
+	for (int j = 0; j < b->team.n; ++j)
+		if (b->team.navi[j] == MATE_KNIGHTMAN && !b->mate[j].out && manhattan(b->mate[j].x, b->mate[j].y, b->mate[k].x, b->mate[k].y) <= 1) return true;
+	return false;
+}
+
 /* Walks from (sx, sy) over the board's floor, barriers shut where `bars`
  * (and the panels in `wall`, a candidate's): into dist (-1 unreached); the
  * farthest */
@@ -176,12 +222,12 @@ static int unit_at(const LibBoard *b, int x, int y) {
 
 /* Unit u's next step from (ux, uy) toward (x, y), as the Darkloids' phase
  * takes it: over the dark (Bladia onto clean panels too), past no other
- * unit, nearer, never onto (x, y); -1 none */
+ * unit, nearer, never onto (x, y) nor a Navi of the team; -1 none */
 static int step_toward(const LibBoard *b, int u, int ux, int uy, int x, int y) {
 	int best = -1, bd = manhattan(ux, uy, x, y);
 	for (int f = 0; f < 4; ++f) {
 		int sx = ux + dir4[f][0], sy = uy + dir4[f][1];
-		if (!on_board(b, sx, sy) || (sx == x && sy == y)) continue;
+		if (!on_board(b, sx, sy) || (sx == x && sy == y) || lib_mate_at(b, sx, sy) >= 0) continue;
 		int k = b->kind[sy][sx], o = unit_at(b, sx, sy);
 		bool ok = k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP || (b->unit[u].kind == UNIT_BLADIA && k == LIB_CLEAN);
 		int d = manhattan(sx, sy, x, y);
@@ -258,8 +304,9 @@ static bool place_darkloid(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far) {
 
 /* DarkHoles: whole rings of floor, a third of the walk on and more, six
  * apart and four off the Darkloid, the farthest first; each ring dark and
- * its guardian on it, BigBrute the first (BN5's mission 1) */
-static bool place_holes(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far, int want, int kinds) {
+ * its guardian on it, BigBrute the first (BN5's mission 1); `want` of
+ * them where the floor has room, `least` at least */
+static bool place_holes(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far, int want, int least, int kinds) {
 	static uint16_t cand[MAP_W * MAP_H];
 	static int score[MAP_W * MAP_H];
 	int n = 0;
@@ -283,7 +330,7 @@ static bool place_holes(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far, int w
 			if (!apart) { score[i] = -1; continue; }
 			if (best < 0 || score[i] > score[best]) best = i;
 		}
-		if (best < 0) return false;
+		if (best < 0) return b->nholes >= least;
 		score[best] = -1;
 		int x = cand[best] % MAP_W, y = cand[best] / MAP_W, h = b->nholes++;
 		b->hole_x[h] = (uint8_t)x; b->hole_y[h] = (uint8_t)y;
@@ -752,23 +799,53 @@ static int board_floor(LibBoard *b, int16_t reach[MAP_H][MAP_W], LibFloor floor)
 	return far;
 }
 
+/* The team's first panels: MegaMan on the arrival, each teammate on the
+ * clean panel nearest it by the walk, none in a unit's reach (BN5's teams
+ * stand together by their start, mission 2's three side by side) */
+static bool place_team(LibBoard *b, int16_t reach[MAP_H][MAP_W], int n) {
+	memset(b->mate, 0, sizeof b->mate);
+	b->mate[0] = (LibMate){ (uint8_t)b->start_x, (uint8_t)b->start_y, false };
+	for (b->team.n = 1; b->team.n < n; ++b->team.n) {
+		int best = -1, bx = 0, by = 0;
+		for (int y = 0; y < MAP_H; ++y)
+			for (int x = 0; x < MAP_W; ++x) {
+				if (b->kind[y][x] != LIB_CLEAN || reach[y][x] < 0 || lib_mate_at(b, x, y) >= 0 || lib_threat(b, x, y)) continue;
+				int score = reach[y][x] * MAP_W * MAP_H + y * MAP_W + x;
+				if (best < 0 || score < best) { best = score; bx = x; by = y; }
+			}
+		if (best < 0 || reach[by][bx] > 3) return false;
+		b->mate[b->team.n] = (LibMate){ (uint8_t)bx, (uint8_t)by, false };
+	}
+	return true;
+}
+
 /* One try at the board: its floor and kinds, LIB_WHY_NONE where it keeps
  * BN5's guarantees */
-static int make_once(LibBoard *b, int act, int team, LibFloor floor) {
-	int a = act < 0 ? 0 : act > 5 ? 5 : act, short_by = spec[a].team - team < 0 ? 0 : spec[a].team - team;
+static int make_once(LibBoard *b, int act, const LibTeam *t, LibFloor floor, bool few) {
+	int team = t->n, a = act < 0 ? 0 : act > 5 ? 5 : act, short_by = spec[a].team - team < 0 ? 0 : spec[a].team - team;
 	int holes = spec[a].holes - short_by / 2 < 1 ? 1 : spec[a].holes - short_by / 2, thin = 5 * short_by;
+	/* (a team's board as many more DarkHoles as its floor has room for, a
+	 * lone MegaMan's at least, and his alone in the last tries: the layers
+	 * are smaller than BN5's late boards, and their barriers need room) */
+	int lone = spec[a].holes - (spec[a].team - 1) / 2 < 1 ? 1 : spec[a].holes - (spec[a].team - 1) / 2;
+	if (few && lone < holes) holes = lone;
 	int roam = spec[a].roam - short_by / 2 < 1 ? 1 : spec[a].roam - short_by / 2;
 	memset(b, 0, sizeof *b);
 	b->act = act;
 	b->rules = spec[a].rules;
 	b->route_x = b->route_y = -1;
+	b->team = *t;
+	b->team.n = 0;   /* (no Navi stands on it till the team is placed, last) */
 	static int16_t reach[MAP_H][MAP_W];
 	int far = board_floor(b, reach, floor);
 	if (far < 0) return LIB_WHY_FLOOR;
 	if (!place_darkloid(b, reach, far)) return LIB_WHY_DARKLOID;
-	if (!place_holes(b, reach, far, holes, spec[a].kinds)) return LIB_WHY_HOLES;
+	if (!place_holes(b, reach, far, holes, lone < holes ? lone : holes, spec[a].kinds)) return LIB_WHY_HOLES;
+	holes = b->nholes;
 	place_dark(b, reach, far, spec[a].dark_lo - thin, spec[a].dark_hi - thin);
-	prune_dark(b, dark_panels[a] * (2 + team) / 3 + 8 * holes);
+	/* (a team's share of the dark: BN5's pars for its teams, 7 for two at
+	 * mission 1, 9 for three, 10 for four, against a lone board's own) */
+	prune_dark(b, dark_panels[a] * (team > 1 ? 2 * team - 2 : 1) + 8 * holes);
 	if (!place_barriers(b, reach)) return LIB_WHY_BARRIER;
 	place_bonus(b, reach, spec[a].bonus);
 	place_items(b, spec[a].items);
@@ -777,19 +854,22 @@ static int make_once(LibBoard *b, int act, int team, LibFloor floor) {
 	if ((b->rules & LIB_RULE_TOLLS) && !b->traps) return LIB_WHY_TRAPS;
 	if (b->rules & LIB_RULE_REACH) place_roamers(b, reach, far, roam, spec[a].kinds);
 	if (!fair(b, reach)) return LIB_WHY_FAIR;
+	if (!place_team(b, reach, t->n)) return LIB_WHY_FAIR;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) b->dark += lib_dark_kind(b->kind[y][x]);
 	return LIB_WHY_NONE;
 }
 
-bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team, LibFloor floor) {
+bool lib_board_make(LibBoard *b, uint32_t seed, int act, const LibTeam *team, LibFloor floor) {
+	static const LibTeam alone = { 1, { MATE_MEGAMAN }, { 0 } };
+	if (!team || team->n < 1 || team->n > LIB_TEAM) team = &alone;
 	uint8_t rejected[16] = { 0 };
 	for (int t = 0; t < MAKE_TRIES; ++t) {
 		rs = (seed ^ 0x4C494245u) + (uint32_t)t * 0x9E3779B9u;   /* "LIBE" */
 		if (!rs) rs = 1;
 		for (int k = 0; k < 4; ++k) rnext();
 		uint32_t plan_seed = rnext();
-		int why = make_once(b, act, team, floor);
+		int why = make_once(b, act, team, floor, t >= MAKE_TRIES / 2);
 		if (why == LIB_WHY_NONE) why = lib_plan(b, plan_seed);
 		b->why = why;
 		b->tries = t + 1;

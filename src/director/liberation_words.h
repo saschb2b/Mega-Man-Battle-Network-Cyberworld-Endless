@@ -25,6 +25,11 @@ const char *lib_trap_words(int hp);
 const char *lib_route_words(void);
 /* A rest (BN5's Pass). */
 const char *lib_rest_words(void);
+/* The team as the board begins: the teammates' names ("Colonel and
+ * KnightMan"), "" MegaMan alone */
+const char *lib_team_words(const char *names);
+/* A teammate deleted in his battle (`name`): he leaves the board */
+const char *lib_mate_down_words(const char *name);
 /* The Darkloids' phase: a unit's line as it strikes (UNIT_*; the
  * Darkloid's by his Navi's name, said with his face). */
 const char *lib_strike_words(int kind, const char *darkloid);
@@ -32,8 +37,9 @@ const char *lib_strike_words(int kind, const char *darkloid);
 const char *lib_won_words(int phases, int par);
 /* The units' names (UNIT_*; the Darkloid's is his Navi's) */
 const char *lib_unit_name(int kind);
-/* The labels: the commands (LIB_CMD_*), the banners, the corner's */
-const char *lib_command_label(int cmd);
+/* The labels: the commands (LIB_CMD_*; LIB_CMD_LONGSWRD the Navi's own,
+ * `command` liberation_board.h's LIB_DO_*), the banners, the corner's */
+const char *lib_command_label(int cmd, int command);
 extern const char *const lib_label_player_phase, *const lib_label_enemy_phase, *const lib_label_phase, *const lib_label_par,
 	*const lib_label_op, *const lib_label_menu;
 /* What MegaMan faces, for the menu's information: a panel's kind

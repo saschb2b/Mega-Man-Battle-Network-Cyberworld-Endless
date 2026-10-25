@@ -64,6 +64,10 @@
 #define BN6_PLAYER_NEXT_Y     (BN6_PLAYER + 0x2C)
 #define BN6_PLAYER_PAD        (BN6_PLAYER + 0x4C)  /* Unk_4c, u16: the pad as BN6 took it this frame, BN6_PAD_STEP a walk or run; 0 while held (bn6f sub_809D9E0) */
 #define BN6_PAD_STEP          0x30        /* BN6_PLAYER_PAD: 0x10 a walk, 0x20 a run */
+#define BN6_PLAYER_SPRITE_LOAD 0x0809E7EAu /* movs r0,#0x80 before the player object's spawn (bn6f owPlayer's sub_809D270) loads its sprite: r6 its
+                                             list x 4 (BN6_OW_NPC_LIST on the net), r4 its number (PETNaviToNPCSpriteTable's, 0x37 MegaMan's);
+                                             it runs again where BN6_PLAYER_MAIN is set to 0 */
+#define BN6_OW_NPC_LIST       0x18        /* sprite_load's list x 4: list 6, the Navis and Mr. Progs */
 /* The overworld's NPC objects (eOverworldNPCObjects): 16 of 0xD8 bytes,
  * fields from each one's start */
 #define BN6_NPC_OBJECTS       0x020057B0u

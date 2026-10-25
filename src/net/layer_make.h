@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 100   /* (100: a guardian's draft offers no program that adds nothing to those held, docs/NAVICUST.md) */
+#define LAYER_MAKE 101   /* (101: a dark layer's board made for the run's team, its Pass BN5's fifth, docs/LIBERATION.md, The team) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

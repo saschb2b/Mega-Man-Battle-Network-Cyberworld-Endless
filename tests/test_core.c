@@ -3499,8 +3499,10 @@ static void test_free_space(void) {
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
+		{ "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
+	CHECK(FREE_TAIL <= FREE_LIB_TEAM, "free space: the teammates' room before the free tail");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
@@ -5570,11 +5572,11 @@ static void test_liberation_board(void) {
 			/* (a run meets dark layers in acts 2 to 4, run_dark_area; acts 5
 			 * and 6 with --dev dark and the separate mode to come) */
 			++*(act <= 3 ? &tried : &late_tried);
-			bool ok = lib_board_make(&a, s, act, 1, NULL);
+			bool ok = lib_board_make(&a, s, act, NULL, NULL);
 			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
 			if (!ok) continue;
 			++*(act <= 3 ? &made : &late_made);
-			CHECK(lib_board_make(&b, s, act, 1, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
+			CHECK(lib_board_make(&b, s, act, NULL, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
 			CHECK(a.kind[a.boss_y][a.boss_x] == LIB_BOSS && a.unit[0].kind == UNIT_DARKLOID, "board %u: no Darkloid", s);
 			for (int d = 0; d < 9; ++d)
 				CHECK(d == 4 || a.kind[a.boss_y - 1 + d / 3][a.boss_x - 1 + d % 3] == LIB_RING, "board %u: the Darkloid's ring broken", s);
@@ -5615,6 +5617,73 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
+/* Boards made for a team of BN5's (docs/LIBERATION.md, The team): BN5's
+ * own teams by act, their HP its table's (BN5_LIB_NAVI_HP: missions 1, 3,
+ * 5, 7 and 9), every Navi on a clean panel by the start and none in a
+ * unit's reach, each command taken, the measures printed beside the lone
+ * MegaMan's */
+static void test_liberation_team(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x11BE;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static const LibTeam teams[6] = {
+		{ 2, { MATE_MEGAMAN, MATE_COLONEL }, { 0, 200 } },
+		{ 2, { MATE_MEGAMAN, MATE_COLONEL }, { 0, 200 } },
+		{ 3, { MATE_MEGAMAN, MATE_COLONEL, MATE_KNIGHTMAN }, { 0, 350, 500 } },
+		{ 4, { MATE_MEGAMAN, MATE_COLONEL, MATE_SHADOWMAN, MATE_TOMAHAWKMAN }, { 0, 450, 350, 350 } },
+		{ 5, { MATE_MEGAMAN, MATE_TOMAHAWKMAN, MATE_NUMBERMAN, MATE_TOADMAN, MATE_SHADOWMAN }, { 0, 500, 450, 400, 500 } },
+		{ 5, { MATE_MEGAMAN, MATE_COLONEL, MATE_KNIGHTMAN, MATE_SHADOWMAN, MATE_TOADMAN }, { 0, 800, 900, 700, 600 } },
+	};
+	static LibBoard a, b;
+	int made = 0, tried = 0;
+	for (int act = 1; act <= 5; ++act) {
+		int n = 0, par = 0, dark = 0, dead = 0, way = 0, cmds = 0, plays = 0, out = 0, why[LIB_WHYS] = { 0 };
+		/* (a run meets dark layers in acts 2 to 4: those held to the bar) */
+		if (act == 4) made = tried = 0;
+		for (uint32_t s = 1; s <= 16; ++s) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			++tried;
+			bool lone = getenv("LIB_TEAM_DEBUG") && lib_board_make(&a, s, act, NULL, NULL);
+			bool ok = lib_board_make(&a, s, act, &teams[act], NULL);
+			if (getenv("LIB_TEAM_DEBUG")) printf("team act %d seed %u: lone %d team %d (why %d, holes %d)\n", act + 1, s, lone, ok, a.why, a.nholes);
+			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
+			if (!ok) continue;
+			++made;
+			CHECK(lib_board_make(&b, s, act, &teams[act], NULL) && !memcmp(&a, &b, sizeof a), "team board %u act %d: not the same twice", s, act);
+			CHECK(a.team.n == teams[act].n, "team board %u act %d: %d Navis of %d", s, act, a.team.n, teams[act].n);
+			for (int k = 0; k < a.team.n; ++k) {
+				CHECK(a.kind[a.mate[k].y][a.mate[k].x] == LIB_CLEAN && !lib_threat(&a, a.mate[k].x, a.mate[k].y), "team board %u act %d: Navi %d not on a clean, safe panel", s, act, k);
+				CHECK(lib_mate_at(&a, a.mate[k].x, a.mate[k].y) == k, "team board %u act %d: two Navis on one panel", s, act);
+			}
+			CHECK(a.mate[0].x == a.start_x && a.mate[0].y == a.start_y, "team board %u act %d: MegaMan not on the start", s, act);
+			++n; par += a.par; dark += a.dark * 100 / a.panels; dead += a.m.dead; way += a.m.phases - a.m.strikes; cmds += a.m.longswrd; plays += a.m.plays; out += a.m.out;
+		}
+		if (act == 3) CHECK(made * 10 >= tried * 9, "liberation: %d team boards of %d layers in acts 2 to 4", made, tried);
+		printf("liberation team act %d (%d Navis): %d boards, %d%% dark, par %d, dead %d%%, commands %d.%d a play, teammates out %d.%d a play;", act + 1, teams[act].n, n, n ? dark / n : 0,
+			n ? par / n : 0, dead * 100 / (way ? way : 1), cmds / (plays ? plays : 1), cmds * 10 / (plays ? plays : 1) % 10, out / (plays ? plays : 1), out * 10 / (plays ? plays : 1) % 10);
+		for (int w = 1; w < LIB_WHYS; ++w) if (why[w]) printf(" %d:%d", w, why[w]);
+		printf("\n");
+	}
+	/* (acts 5 and 6, --dev dark's alone, a smaller team where the whole one
+	 * finds no board: liberation.c's lib_layer_made) */
+	printf("liberation: %d team boards of %d layers in acts 5 and 6\n", made, tried);
+	/* (the commands' shapes, BN5's guides': facing +x from (5, 5)) */
+	memset(&a, 0, sizeof a);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) a.kind[y][x] = LIB_DARK;
+	int xs[6], ys[6];
+	CHECK(lib_command_panels(&a, LIB_DO_LONGSWRD, 5, 5, 0, xs, ys) == 2 && xs[1] == 6 && ys[1] == 5, "LongSwrd: two in a line");
+	CHECK(lib_command_panels(&a, LIB_DO_SCRENDIV, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && xs[2] == 5 && ys[0] + ys[2] == 10, "ScrenDiv: three across");
+	CHECK(lib_command_panels(&a, LIB_DO_TOMAHAWK, 5, 5, 0, xs, ys) == 6, "TomahawkSwing: two deep and three wide");
+	CHECK(lib_command_panels(&a, LIB_DO_MELODY, 5, 5, 0, xs, ys) == 5 && xs[4] == 9, "LifeMelody: five ahead");
+	run = before;
+}
+
 /* A map's floor as its build leaves it, made up: the layer's flat floor
  * with a panel in 29 gone, as legal.c drops a few to draw the rest */
 static bool lib_test_floor(int x, int y) {
@@ -5636,9 +5705,9 @@ static void test_liberation_floor(void) {
 			layer_make_dark = true;
 			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
 			layer_make_dark = false;
-			if (!lib_board_make(&a, s, act, 1, lib_test_floor)) continue;
+			if (!lib_board_make(&a, s, act, NULL, lib_test_floor)) continue;
 			++made;
-			CHECK(lib_board_make(&b, s, act, 1, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
+			CHECK(lib_board_make(&b, s, act, NULL, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
 			for (int y = 0; y < MAP_H; ++y)
 				for (int x = 0; x < MAP_W; ++x)
 					CHECK(a.kind[y][x] == LIB_VOID || lib_test_floor(x, y), "board %u act %d: panel %d,%d off the map's floor", s, act, x, y);
@@ -5650,6 +5719,7 @@ static void test_liberation_floor(void) {
 int main(void) {
 	test_sha1();
 	test_liberation_board();
+	test_liberation_team();
 	test_liberation_floor();
 	test_jobs();
 	test_economy();
