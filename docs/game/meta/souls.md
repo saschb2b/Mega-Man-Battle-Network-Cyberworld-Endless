@@ -3,7 +3,7 @@ type: Feature
 title: "Souls"
 description: "BN5's Souls (issue #69): a beaten BN5 Navi's Soul serves every battle of the run, UNITE on BN6's Custom screen giving up a chip of its kind, Chaos Unison with a DarkChip, kept in `run.souls`."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T12:46:43Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
 ---
 
 # Souls (4 October 2026, issue #69; in every battle since issue #82)
@@ -38,14 +38,19 @@ points first marked as proposals among them.
   [Transplanted Souls](../../multirom/souls.md)), BN5's own of the registry by
   their own:
 
-  | Soul | Its kind | BN6's chips of it | Chaos Unison with |
+  | Soul | Its kind | The chips of it a run can hold: BN6's; BN5's own | Chaos Unison with |
   | --- | --- | --- | --- |
-  | Colonel's | Obstacle | RockCube, TimeBom1-3, Fanfare, Discord, Timpani, Silence, VDoll, Guardian, Anubis, Otenko, WhiCapsl | DrkSonic |
-  | ShadowMan's | Invisible | Invisibl, Mine, AntiDmg | DarkInvs |
-  | NumberMan's | Plus | BusterUp, ColorPt, DblPoint | DarkPlus |
-  | TomahawkMan's | Wood | Boomer, Lance, Snake | DrkLance |
-  | KnightMan's | Break | JustcOne, BigHook, MetrKnuk | DarkDril |
-  | ToadMan's | Aqua | BblWrap | DarkWide |
+  | Colonel's | Obstacle | RockCube, AirRaid1-3, LilBolr1-3, TimeBom1-3, Fanfare, Discord, Timpani, Silence, WhiCapsl, VDoll, Guardian, Anubis; BoyBomb1-3 | DrkSonic |
+  | ShadowMan's | Invisible | Invisibl, Mine, AntiDmg; Blinder | DarkInvs |
+  | NumberMan's | Plus | Atk+10, Atk+30, Navi+20, BusterUp, ColorPt, DblPoint | DarkPlus |
+  | TomahawkMan's | Wood | CornSht1-3, RlngLog1-3, RskyHny1-3, Boomer, HiBoomer, M-Boomer, BambSwrd, Lance, Snake, WoodDrgn; CactBal1-3, WoodNos1-3, AntiWood, MudWave, his three Navi chips | DrkLance |
+  | KnightMan's | Break | AuraHed1-3, GolmHit1-3, IronShl1-3, AirHocky, DrilArm, JustcOne, BigHook, MetrKnuk; DrilArm1-3, Quake1-3, AirHoc, CannBall, his three Navi chips | DarkDril |
+  | ToadMan's | Aqua | AquaNdl1-3, BblStar1-3, TrnArrw1-3, AquaSwrd, BblWrap, WideSht, AquaDrgn, BlzrdBal, DiveMan; AqWhirl1-3, SideBub1-3, WideSht1-3, WavePit, AntiWatr, Geyser, MetaGel, RainyDay | DarkWide |
+
+  (Counted by `build.py economy`, its last table: the chips of each kind in
+  `chip_pool.h`'s pools, BN6's by BN5's kind of their names as soulkinds.h
+  reads them, and BN5's own of the registry; DarkChips and the chips a run
+  never holds left out, Otenko among them.)
 
 - **Where**: BN6's Custom screen, in the place under OK where BN6 puts
   its Beast Out emblem (BN6's emblem is BN5's UNITE button): UNITE while
@@ -90,12 +95,27 @@ points first marked as proposals among them.
   at setup: it would be power across runs. A run continued without BN5's
   ROM keeps its Souls, asleep until the ROM is back, and MegaMan says so
   once ("I can't feel the old Souls,Lan...").
-- **The key with the lock**: two kinds have few chips in BN6
-  (ToadMan's Aqua only BblWrap, KnightMan's Break JustcOne and two
-  Gigas). Until the last round his Guardian Data gave a chip of his
-  Soul's kind; now it gives his own Navi chip, as BN6's guardians give
-  theirs ([Guardians and super bosses](../bosses/overview.md)), BN5's chips of every kind being in the run's
-  finds and stock on its areas ([One net: the design](../../multirom/one-net.md)).
+- **The key with the lock** (corrected 25 October 2026): four of the six
+  kinds have chips enough, by BN5's kind of their names (the table above):
+  Obstacle 18 of BN6's and 3 of BN5's own, Wood 16 and 11, Break 14 and
+  11, Aqua 17 and 14. The thin kinds are ShadowMan's Invisible (Invisibl,
+  Mine, AntiDmg, BN5's Blinder) and NumberMan's Plus (six of BN6's). This
+  said Aqua and Break were the thin ones, reading BN6's own kinds: BN5
+  counts the needles, the bubbles and WideSht Aqua, and AuraHed, GolmHit
+  and IronShl Break. Until the last round his Guardian Data gave a chip of
+  his Soul's kind; now it gives his own Navi chip, as BN6's guardians give
+  theirs ([Guardians and super bosses](../bosses/overview.md)). What a run lacked was the chips in its folder:
+  it cannot farm, and its starting folders hold almost none of the six
+  kinds, so a won Soul often went unused. A player asked for Souls without
+  the chip given up; the owner kept BN5's rule and chose to bring the
+  chips instead (25 October 2026, as recommended; [A held Soul's kind](../economy/held-soul-kind.md), A held
+  Soul's kind): a quarter of the Mystery Data's chips are of a held Soul's
+  kind, each of the tier it rolled, and a Net Dealer's fourth chip is one,
+  the kind the folder holds fewest of first (`src/core/loot_souls.c`). The
+  counts stay; only which chips come changes, and DarkChips never come so.
+  The Souls held as each layer is made are what its finds and stock lean
+  to (`souls_layer`, beside the checkpoint), so a Soul won on a layer
+  counts from the next and a CONTINUE makes the same stock.
 - **Said where it happens:** at his Guardian Data MegaMan names the Soul,
   that it is with them every battle, the chip kind it takes (with one of
   the run's chips of it), UNITE, once a battle; all of it the first time

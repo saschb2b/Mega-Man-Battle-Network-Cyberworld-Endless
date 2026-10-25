@@ -3,7 +3,7 @@ type: Code Map
 title: "Where it is decided"
 description: "Where the economy is decided in code: plans and bands in `src/core/economy.c`, Mystery Data and chip rolls in `src/core/loot.c`, data placement, battle rewards, dealers, traders, dark-layer prizes, requests' pay, the report, run counts."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:18:16Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
 ---
 
 # Where it is decided
@@ -18,6 +18,7 @@ generated: { by: claude-code/unrecorded, at: 2026-10-25T00:18:16Z }
 | A dark layer's par prize: its chips, the zenny over par | `src/layer/lib_prizes.c`, `src/director/liberation_board.c` (`lib_par_zenny`) |
 | Battle rewards (BN6's rows, the lean) | `src/director/encounter.c` (`lean_row`) |
 | Dealer stock, prices | `src/layer/shop.c`, `src/core/loot.c` (`chip_price`) |
+| A held Soul's kind in the finds and on a dealer's list | `src/core/loot_souls.c` (`LOOT_SOUL_LEAN`), the Souls as the layer was made `src/director/souls.c` (`souls_layer`) |
 | Traders: their pools as BN6 has them, its code pick | `src/layer/trader.c` |
 | A dark layer's chips ([Liberation Missions](../liberation/overview.md)): its par's prizes, its item panels' and its BonusPanels' (one of four, the item panels' band, as BN5's are its mission's standard chips) | `src/layer/lib_prizes.c` |
 | Requests' pay | `src/core/jobs.c` |

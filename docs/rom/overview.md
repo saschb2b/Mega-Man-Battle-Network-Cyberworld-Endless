@@ -47,3 +47,4 @@ the first one's name: a new table goes at the end, so no published name changes.
 - [Virus families moved into BN6's battle engine](virus-families.md)
 - [Navis moved into BN6's battle engine](navis.md)
 - [MegaMan's forms and BN5's Souls in BN6's engine](souls.md)
+- [BN6's Virus Battler](virus-battler.md)

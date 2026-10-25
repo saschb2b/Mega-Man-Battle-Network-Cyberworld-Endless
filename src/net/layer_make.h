@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 101   /* (101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five; drawn in its own mission's map; a deleted guardian back as BN5 brings him, the planner's par after it; the board made for the run's team, its Pass BN5's fifth, docs/game/liberation/) */
+#define LAYER_MAKE 102   /* (102: a held Soul's kind in a share of the finds and on a dealer's list, loot_souls.h; 101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five; drawn in its own mission's map; a deleted guardian back as BN5 brings him, the planner's par after it; the board made for the run's team, its Pass BN5's fifth, docs/game/liberation/) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

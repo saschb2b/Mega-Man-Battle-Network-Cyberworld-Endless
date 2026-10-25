@@ -9,10 +9,12 @@
 
 #define SOULS_MAGIC 0x534F5531u   /* "SOU1" */
 
-typedef struct { uint32_t seed; uint8_t held; } SoulSave;
+/* (layer: the Souls held as the layer was made, in the byte after held,
+ * which saves before it wrote as 0: none) */
+typedef struct { uint32_t seed; uint8_t held, layer; } SoulSave;
 static SoulSave souls;
-_Static_assert(sizeof(SoulSave) == 8 && offsetof(SoulSave, seed) == 0 && offsetof(SoulSave, held) == 4,
-	"Soul save layout changed");
+_Static_assert(sizeof(SoulSave) == 8 && offsetof(SoulSave, seed) == 0 && offsetof(SoulSave, held) == 4 &&
+	offsetof(SoulSave, layer) == 5, "Soul save layout changed");
 uint8_t souls_dev_mask;
 
 void souls_new_run(uint32_t seed) {
@@ -32,6 +34,10 @@ void souls_load(uint32_t seed) {
 }
 
 unsigned souls_held(void) { return souls.held; }
+
+void souls_note_layer(void) { souls.layer = souls.held; }
+
+unsigned souls_layer(void) { return souls.layer; }
 
 bool soul_held(int navi) { return guardian_older(navi) && souls.held >> (navi - GUARDIAN_OLDER_FIRST) & 1; }
 

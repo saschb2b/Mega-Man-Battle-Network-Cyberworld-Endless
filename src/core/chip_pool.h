@@ -24,6 +24,8 @@ int chip_pool_pick(int tier);
 /* ... from net `net`'s pool (CHIP_NET_*), of `tier` alone; -1 where it has
  * none of it (BN5's without its ROM) */
 int chip_pool_pick_net(int tier, int net);
+/* ... of those of `tier` alone that `want` takes; -1 where it has none */
+int chip_pool_pick_if(int tier, int net, bool (*want)(int rom_id));
 /* Chip `rom_id`'s Library class (0 standard, 1 Mega, 2 Giga), or -1 when a
  * run cannot hold it; and how many chips of a class a run can hold. BN6's
  * chips alone: the classes' marks are BN6's (docs/game/meta/). */

@@ -70,4 +70,5 @@ rolls as they were; "after" and "opening" what a run hands out now.
 - [The guard](guard.md)
 - [Decided](decided.md)
 - [A dark layer's prize](dark-layer-prize.md)
+- [A held Soul's kind](held-soul-kind.md)
 - [Where it is decided](where-decided.md)

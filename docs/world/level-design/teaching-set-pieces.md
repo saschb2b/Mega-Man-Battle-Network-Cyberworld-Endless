@@ -3,7 +3,7 @@ type: Design
 title: "Teaching them"
 description: "Teaching set pieces (issue #48): each names itself and its key at A, the Net Dealer names keys and their locks (`dealer_keys`), L senses them (`status_words`), and the map marks every shut lock."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:59:51Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T14:07:16Z }
 ---
 
 # Teaching them (issue #48, in part)

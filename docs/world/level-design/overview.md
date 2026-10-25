@@ -29,3 +29,4 @@ generator (`src/net/`) follows them.
 - [Invisible paths](invisible-paths.md)
 - [The Undernet's doors](undernet-doors.md)
 - [Teaching them](teaching-set-pieces.md)
+- [The Virus Battler](virus-battler.md)

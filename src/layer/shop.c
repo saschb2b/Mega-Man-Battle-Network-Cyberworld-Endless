@@ -9,11 +9,13 @@
 #include "shop.h"
 
 #include "bn6.h"
+#include "chip_pool.h"
 #include "emu.h"
 #include "flags.h"
 #include "game.h"
 #include "data.h"
 #include "loot.h"
+#include "loot_souls.h"
 #include "save.h"
 #include "navicust.h"
 #include "net.h"
@@ -297,6 +299,20 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 		if (i == 1 && counter < 0 && viruses > 0) {
 			int a = answer(depth, viruses, it.id, &code);
 			if (a >= 0) it.id = (uint16_t)a;
+		}
+		/* the last, where the run holds a Soul: a chip of its kind, of the
+		 * roll's tier or under, not one on the list already (loot_souls.h;
+		 * a run's starting folder holds almost none, and it cannot farm) */
+		for (int t = 0; i == 3 && t < 4; ++t) {
+			char c = '*';
+			ShopItem k = { 2, 1, 0, 0, 0 };
+			int s = loot_soul_stock(chip_pool_tier(it.id), &c);
+			if (s <= 0) break;
+			k.id = (uint16_t)s;
+			if (listed(out, n, &k)) continue;
+			it.id = k.id;
+			code = c;
+			break;
 		}
 		/* (in the folder's codes where the chip comes in them: a playtester's
 		 * rewards, each in its own code, left him hands of five codes) */

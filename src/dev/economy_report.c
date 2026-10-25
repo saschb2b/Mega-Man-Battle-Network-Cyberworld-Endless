@@ -39,6 +39,7 @@
 #include "layer_objs.h"
 #include "liberation_board.h"
 #include "loot.h"
+#include "loot_souls.h"
 #include "net.h"
 #include "netmap.h"
 #include "pacing.h"
@@ -55,6 +56,7 @@
 #define GEM_KEPT 50              /* % of a battle's Mystery Data still there at its end (assumed) */
 #define CODES 27                 /* A-Z and * */
 #define PLANS 2
+#define SOULS_TEAM 6             /* Team Colonel's Souls (souls.h), each held alone in the Souls' table */
 
 /* What a run gains or is offered on one layer (summed over the runs) */
 typedef struct {
@@ -66,6 +68,7 @@ typedef struct {
 	double servers, server_good, traders, bugtraders, vaults, officials, gates;
 	double job_zenny, job_frags, job_chips, job_hpmem;
 	double tier[CHIP_TIERS], cls[3], chips, good, strong, fit;
+	double kind[SOULS_TEAM], kind_offer[SOULS_TEAM];   /* chips of each Soul's kind gained, and on the dealers' lists */
 } LayerTally;
 
 /* Where a reward lands in the tally */
@@ -86,6 +89,7 @@ static int codes_held[CODES];
 static int zenny_run, wanted_run;
 static int bust_fixed;   /* a busting level for every battle (the skill table), 0: the mix */
 static int net_layers = LAYERS;   /* the net measured: the endless net's first cycle, or the short net (SHORT_LAYERS) */
+static unsigned souls_held;        /* the Souls a measured run holds from its first layer (souls.h's bits) */
 
 static int cmp_int(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
 
@@ -112,6 +116,7 @@ static void gain_chip(LayerTally *t, int id, char code) {
 	bool fits = code == '*';
 	for (int k = 0; k < 3 && run.codes[k]; ++k) fits |= code == 'A' + run.codes[k] - 1;
 	t->fit += fits;
+	for (int k = 0; k < SOULS_TEAM; ++k) t->kind[k] += loot_soul_chip(id, k);
 }
 
 /* BN6's reward pick as a battle ends (bn6f sub_80AA910, sub_80AAA98): one
@@ -257,6 +262,7 @@ static void layer_dealer(LayerTally *t, int depth, int biome) {
 		if (stock[i].kind == 2) { t->dealer_chips += stock[i].stock; t->dealer_cost += cost; }
 		else if (stock[i].kind == 1 && stock[i].id == 0x70) t->hpmem_cost += cost;
 		if (wanted) wanted_run += cost;
+		for (int k = 0; k < SOULS_TEAM && stock[i].kind == 2; ++k) t->kind_offer[k] += loot_soul_chip(stock[i].id, k) * stock[i].stock;
 	}
 }
 
@@ -318,6 +324,7 @@ static void start_folder(void) {
 	for (int i = 0; i < 30; ++i) folder[i] = rom_u16(START_FOLDER + 2u * (uint32_t)i);
 	loot_folder_codes(folder, 30, run.codes);
 	loot_folder_counts(folder, 30);
+	loot_soul_souls(souls_held);
 }
 
 /* One layer of run `r`, made and emptied as a run would */
@@ -583,6 +590,59 @@ static int dark_table(FILE *out) {
 	return flagged;
 }
 
+/* A held Soul's kind (loot_souls.h): each Soul held alone from the first
+ * layer, under the plan in play: its kind's chips gained by act (the finds,
+ * the battles' rows, the field's data, the Guardian Data), before (none
+ * held, nothing leaned) -> now, and on the dealers' lists now; and every
+ * chip gained over the net, which the lean leaves as it was */
+static void souls_table(FILE *out) {
+	static const char *const names[SOULS_TEAM] = { "Colonel", "ShadowMan", "NumberMan", "TomahawkMan", "KnightMan", "ToadMan" };
+	static const char *const kinds[] = { "Fire", "Aqua", "Elec", "Wood", "Recov", "Plus", "Sword", "Invis", "Cursor", "Obst", "Wind", "Break" };
+	if (loot_soul_kind_of(0) < 0) {
+		fprintf(out, "\nA held Soul's kind: none measured, BN5's ROM not read (a run holds no Soul without it)\n");
+		return;
+	}
+	fprintf(out, "\nA held Soul's kind (loot_souls.h: %d%% of the Mystery Data's chips, of the tier rolled; a dealer's last chip), the plan in\n"
+		"play, each Soul held alone from the first layer (a run wins one from a BN5 guardian, at an act's end): the chips of its kind\n"
+		"gained per run by act (the finds, the battles' rows, the field's data, the Guardian Data), before (none held) -> now; on the\n"
+		"dealers' lists by act, now; every chip gained over the net, before -> now\n"
+		"soul         kind  ", LOOT_SOUL_LEAN);
+	for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %-12s", act_names[a]);
+	fprintf(out, "  dealers' lists                     all chips\n");
+	const Measure *before = &M[econ_plan == plans[0] ? 0 : 1];
+	static Measure probe;
+	for (int k = 0; k < SOULS_TEAM; ++k) {
+		souls_held = 1u << k;
+		measure(&probe, econ_plan, LAYERS);
+		souls_held = 0;
+		int kind = loot_soul_kind_of(k);
+		fprintf(out, "%-12s %-5s", names[k], kind >= 0 && kind < (int)(sizeof kinds / sizeof *kinds) ? kinds[kind] : "-");
+		double all[2] = { 0, 0 };
+		for (int a = 0; a < ECON_ACTS; ++a) {
+			LayerTally b = act_sum(before, a), n = act_sum(&probe, a);
+			fprintf(out, " %4.2f->%4.2f ", b.kind[k], n.kind[k]);
+			all[0] += b.chips;
+			all[1] += n.chips;
+		}
+		fprintf(out, " ");
+		for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %4.2f", act_sum(&probe, a).kind_offer[k]);
+		fprintf(out, "   %5.1f->%5.1f\n", all[0], all[1]);
+	}
+	/* (the chips a run can hold of each kind, BN6's and BN5's own, by
+	 * tier: where a find's tier has none, it stays as it rolled) */
+	fprintf(out, "Chips of each kind a run can hold (chip_pool.h), by tier 0-4: BN6's + BN5's own\n");
+	for (int k = 0; k < SOULS_TEAM; ++k) {
+		int by[2][CHIP_TIERS] = { { 0 } };
+		for (int id = 1; id < CHIPS_IDS; ++id) {
+			int t = chip_pool_tier(id);
+			if (t >= 0 && loot_soul_chip(id, k)) ++by[chips_bn5(id)][t];
+		}
+		fprintf(out, "%-12s", names[k]);
+		for (int t = 0; t < CHIP_TIERS; ++t) fprintf(out, "  %2d+%-2d", by[0][t], by[1][t]);
+		fprintf(out, "\n");
+	}
+}
+
 int economy_report_run(const char *spec) {
 	char path[256] = "economy.txt";
 	runs = 300;
@@ -610,6 +670,7 @@ int economy_report_run(const char *spec) {
 	curves_table(out);
 	skill_table(out);
 	flagged += dark_table(out);
+	souls_table(out);
 	fclose(out);
 	printf("economy report in %s: %d numbers of the plan in play (%s) outside their band\n", path, flagged, econ_plan->name);
 	return 0;
