@@ -18,6 +18,7 @@
 #include "bn6_fields.h"
 #include "debug.h"
 #include "director_state.h"
+#include "gfx.h"
 #include "guardians.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
@@ -26,7 +27,7 @@
 #include "text.h"
 
 /* The steps of a turn */
-enum { T_PAN, T_REST, T_OUT, T_TRAVEL, T_IN, T_SETTLE, T_REACH, T_LINE, T_STRIKE };
+enum { T_PAN, T_REST, T_OUT, T_TRAVEL, T_IN, T_SETTLE, T_REACH, T_LINE, T_STRIKE, T_HEAL };
 
 static int line_at;      /* the frame the unit's line began */
 
@@ -37,6 +38,7 @@ static int line_at;      /* the frame the unit's line began */
 #define FLAME_BURN       6    /* the flame's rise (its animation 0, 3 frames of 2), */
 #define FLAME_FALL       24   /* ... its burning till here, */
 #define FLAME_END        27   /* ... its fall till here */
+#define HEAL_LINES       16   /* the heal's rising lines shown till here (BN5's 15 frames) */
 
 /* A strike's frames from its line's chat box closing: the attacker in its
  * strike, the blow (its sound, the effect over MegaMan), its harm's digits
@@ -75,6 +77,7 @@ static void pose(int u, int face, bool strike) {
 static void fx(int sprite, int anim, int wx, int wy) {
 	LB.effect.sprite = sprite;
 	LB.effect.anim = anim;
+	LB.effect.pal = sprite == BN5_LIB_HEAL_SPRITE ? SPRITE_PAL_PAST + BN5_LIB_HEAL_PAL : 0;
 	LB.effect.x = wx;
 	LB.effect.y = wy;
 	++LB.effect.n;
@@ -193,12 +196,31 @@ static void reach_frame(int u, int t) {
 	step(T_LINE);
 }
 
+/* The Darkloid's heal as his turn begins (BN5's, as DARKLOID PHASE's band
+ * closes): his HP up at once by the dark round him (lib_darkloid_heal),
+ * its rising lines over him and its sound, then BN5's wait */
+static void heal_frame(int t) {
+	if (t == 0) {
+		int was = LB.hp[0];
+		LB.hp[0] = LB.hp_shown[0] = lib_darkloid_heal(&LB.b, LB.hp[0], LB.hp_max[0]);
+		if (emu_debug_on()) fprintf(stderr, "liberation: the Darkloid heals from %d to %d HP at frame %d\n", was, LB.hp[0], D.frame);
+		fx(BN5_LIB_HEAL_SPRITE, BN5_LIB_HEAL_ANIM, LB.ux[0], LB.uy[0]);
+		lib_sound(BN5_LIB_HEAL_SOUND);
+	}
+	if (t == HEAL_LINES && LB.effect.sprite == BN5_LIB_HEAL_SPRITE) LB.effect.sprite = -1;
+	if (t >= BN5_LIB_HEAL_WAIT) step(T_REST);
+}
+
 static bool turn_frame(int u) {
 	int t = LB.enemy_t++;
 	switch (LB.enemy_steps) {
 	case T_PAN:
-		/* (BN5's camera to the unit, then its rest there) */
-		if (lib_camera_at(LB.ux[u], LB.uy[u])) step(T_REST);
+		/* (BN5's camera to the unit, then its rest there; the Darkloid's
+		 * heal first where it is due) */
+		if (lib_camera_at(LB.ux[u], LB.uy[u])) step(u == 0 && lib_darkloid_heal(&LB.b, LB.hp[0], LB.hp_max[0]) > LB.hp[0] ? T_HEAL : T_REST);
+		return false;
+	case T_HEAL:
+		heal_frame(t);
 		return false;
 	case T_REST:
 		if (lib_look_on() && t < BN5_LIB_UNIT_HOLD) return false;

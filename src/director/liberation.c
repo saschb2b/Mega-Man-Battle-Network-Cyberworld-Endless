@@ -185,6 +185,12 @@ bool lib_layer_made(void) {
 	return true;
 }
 
+/* The Darkloid's HP in his battle, as it spawns (make_boss's version) */
+static int darkloid_hp(void) {
+	Encounter e = make_boss(run.depth, run.biome, LB.darkloid);
+	return navi_hp(e.foes[0].family, e.foes[0].version);
+}
+
 void lib_begin(void) {
 	if (!layer.dark) { LB.on = false; return; }
 	LB.step = LIB_STEP_WAIT;
@@ -203,6 +209,15 @@ void lib_begin(void) {
 	LB.reach_lit = false;
 	memset(LB.hidden, 0, sizeof LB.hidden);
 	lib_battle_disarm();
+	/* (the board's HP: the Darkloid's his own battle's, BN5's on the board
+	 * through his battles; our guardians' none, their battles the act's
+	 * viruses) */
+	memset(LB.hp, 0, sizeof LB.hp);
+	memset(LB.hp_max, 0, sizeof LB.hp_max);
+	LB.hp[0] = LB.hp_max[0] = darkloid_hp();
+	if (dev.lib_hp > 0 && dev.lib_hp < LB.hp[0]) LB.hp[0] = dev.lib_hp;
+	if (emu_debug_on()) fprintf(stderr, "liberation: the Darkloid's HP %d of %d on the board\n", LB.hp[0], LB.hp_max[0]);
+	memcpy(LB.hp_shown, LB.hp, sizeof LB.hp_shown);
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.slot[u] = -1;
 		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &LB.ux[u], &LB.uy[u]);
@@ -346,6 +361,8 @@ static void fight(int cmd) {
 	e.held = true;
 	set_encounter(&e, true);
 	lib_battle_arm(LB.fight == LIB_FIGHT_DARKLOID ? 0 : LIB_TURNS);
+	/* (his battle from the HP the board keeps, BN5's) */
+	lib_battle_foe(u >= 0 ? LB.hp[u] : 0);
 	if (emu_debug_on()) fprintf(stderr, "liberation: fight %d at %d,%d\n", LB.fight, fx, fy);
 	LB.step = LIB_STEP_BATTLE;
 }
@@ -480,6 +497,13 @@ static void after_fight(void) {
 	if (emu_debug_on()) fprintf(stderr, "liberation: battle %d at %d,%d %s%s (turn %d)\n", LB.fight, LB.fx, LB.fy,
 		won ? "won" : out == LIB_OUT_TIME_UP ? "time up" : "lost", one_turn ? " in one turn" : "", turn);
 	LB.words[0] = 0;
+	/* (a unit not deleted keeps what his battle left him, BN5's; one left
+	 * at none by a battle not won a quarter of his max) */
+	int u = LB.fight_unit, left = lib_battle_foe_left();
+	if (!won && u >= 0 && u < LB.b.nunits && LB.hp_max[u] && left >= 0) {
+		LB.hp[u] = LB.hp_shown[u] = left > 0 ? left : LB.hp_max[u] / 4;
+		if (emu_debug_on()) fprintf(stderr, "liberation: unit %d left at %d HP on the board\n", u, LB.hp[u]);
+	}
 	if (won) fight_won(one_turn);
 	else say_more(lib_battle_words(LB.fight, false, false, 0, 0, false));
 	if (LB.b.unit[0].gone) {
@@ -645,6 +669,20 @@ static void steps_update(void) {
 	}
 }
 
+/* The HP each unit's digits show, stepped toward its HP as BN5 steps them */
+static int roll(int shown, int hp) {
+	int d = hp - shown;
+	return shown + (d > BN5_LIB_HP_ROLL ? BN5_LIB_HP_ROLL : d < -BN5_LIB_HP_ROLL ? -BN5_LIB_HP_ROLL : d);
+}
+
+static void hp_roll(void) {
+	for (int u = 0; u < LB.b.nunits; ++u) LB.hp_shown[u] = roll(LB.hp_shown[u], LB.hp[u]);
+	/* (MegaMan's from the HP box's as the Darkloids' phase begins) */
+	LB.megaman_shown = lib_megaman_hp_shown() ? roll(LB.megaman_shown, hp_now()) : hp_now();
+}
+
+bool lib_megaman_hp_shown(void) { return LB.step == LIB_STEP_ENEMY || (LB.step == LIB_STEP_BANNER && LB.enemy_banner); }
+
 void lib_update(void) {
 	if (!LB.on || !D.active || D.town || !on_map()) return;
 	if (LB.step != LIB_STEP_DONE) flag_set(BN6_FLAG_NO_ENCOUNTERS);
@@ -653,6 +691,7 @@ void lib_update(void) {
 	lib_cue_frame();
 	++LB.cheer_t;
 	for (int i = 0; i < LB.npops && i < LIB_POPS; ++i) ++LB.pop[i].t;
+	hp_roll();
 	if (LB.step != LIB_STEP_WAIT) track_update();
 	steps_update();
 	/* (the units' objects where the step just put them: BN6 draws them so

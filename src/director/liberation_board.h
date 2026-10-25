@@ -138,6 +138,10 @@ bool lib_liberable(const LibBoard *b, int x, int y);
 bool lib_dark_kind(int k);
 /* The dark panels around (x, y) (its eight), which make its battle harder. */
 int lib_dark_around(const LibBoard *b, int x, int y);
+/* The Darkloid's HP after his heal in his phase, as BN5's (its ROM,
+ * BN5_LIB_HEAL): below his max, a tenth of it for each dark panel round
+ * him (lib_dark_kind's, BN5's weights), his max at most */
+int lib_darkloid_heal(const LibBoard *b, int hp, int max);
 /* The DarkHoles still standing. */
 int lib_holes_left(const LibBoard *b);
 /* A key taken: barrier n's panels open (clean); how many */

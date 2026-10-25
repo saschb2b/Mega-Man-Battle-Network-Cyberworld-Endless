@@ -246,7 +246,8 @@ static void draw_pops(void) {
 /* The Darkloids' phase's effect at its world place, BN5's sprite's own origin */
 static void draw_fx(void) {
 	if (S.effect_n < 0 || LB.effect.sprite < 0) return;
-	anim_draw(&S.effect, P.core_x + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y, false, 0, 0);
+	anim_draw(&S.effect, P.core_x + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y, false,
+		LB.effect.pal, 0);
 }
 
 /* The harm of a blow over MegaMan, as BN5 shows a Navi's (its yellow digits) */
@@ -254,6 +255,23 @@ static void draw_harm(void) {
 	if (!LB.harm || !S.look) return;
 	int wx = bn6_player_x(), wy = bn6_player_y();
 	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
+}
+
+/* Each unit's HP under it as BN5 shows a unit's not in play (its white
+ * digits), while it stands on the board, MegaMan's in the Darkloids'
+ * phase (in his, BN6's own HP box); under a chat box, none of it shows */
+static void draw_hp(void) {
+	if (!S.look) return;
+	SDL_Rect above = { P.core_x, P.core_y, EMU_W, BOX_TOP };
+	if (S.box) gfx_clip(&above);
+	for (int u = 0; u < LB.b.nunits; ++u)
+		if (LB.hp_max[u] && !LB.b.unit[u].gone && !LB.hidden[u])
+			lib_piece_hp(LB.hp_shown[u], LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y);
+	if (lib_megaman_hp_shown()) {
+		int wx = bn6_player_x(), wy = bn6_player_y();
+		lib_piece_hp(LB.megaman_shown, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
+	}
+	if (S.box) gfx_clip(NULL);
 }
 
 /* The command window as BN5's, its lines BN5's commands */
@@ -269,6 +287,7 @@ void director_draw_board(void) {
 	bool bn5 = S.look && lib_pieces_on();
 	draw_faced();
 	draw_pops();
+	draw_hp();
 	draw_fx();
 	draw_harm();
 	if (bn5) lib_piece_gauge(LB.op);

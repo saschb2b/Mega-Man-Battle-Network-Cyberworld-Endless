@@ -115,6 +115,12 @@ int lib_dark_around(const LibBoard *b, int x, int y) {
 	return n;
 }
 
+int lib_darkloid_heal(const LibBoard *b, int hp, int max) {
+	if (hp >= max) return hp;
+	hp += max / 10 * lib_dark_around(b, b->boss_x, b->boss_y);
+	return hp > max ? max : hp;
+}
+
 int lib_open_barrier(LibBoard *b, int n) {
 	int opened = 0;
 	for (int y = 0; y < MAP_H; ++y)

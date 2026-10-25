@@ -87,6 +87,19 @@ void lib_piece_harm(int harm, int x, int y) {
 		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - 4 * n + 8 * i, P.core_y + y - HARM_UP, 1, 2, 0);
 }
 
+/* ---- a unit's HP ---- */
+
+#define HP_DOWN 2   /* the digits' top under the unit's place on the floor: BN5 lays a unit's OBJs 82 down from its camera's, its floor 80 */
+
+void lib_piece_hp(int hp, int x, int y) {
+	const uint8_t *digits = bn5(BN5_LIB_DIGITS, 10 * 0x40), *pal = bn5(BN5_LIB_DIGITS_PAL, 32);
+	if (!digits || !pal || hp <= 0) return;
+	char s[8];
+	int n = snprintf(s, sizeof s, "%d", hp > 9999 ? 9999 : hp);
+	for (int i = 0; i < n; ++i)
+		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - BN5_LIB_HP_STEP * n / 2 + BN5_LIB_HP_STEP * i, P.core_y + y + HP_DOWN, 1, 2, 0);
+}
+
 /* ---- the L view ---- */
 
 static void phase_number(int n, int x, int y) {

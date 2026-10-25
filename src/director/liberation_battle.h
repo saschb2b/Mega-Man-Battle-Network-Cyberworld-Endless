@@ -26,7 +26,12 @@ void lib_battle_install(void);
 /* The next battle a liberation's: `turns` (LIB_TURNS, or 0 for the
  * Darkloid's, whose hits double from LIB_DOUBLE_TURN). */
 void lib_battle_arm(int turns);
-/* Each frame of it: the turn it is in. */
+/* The foe's HP for the battle armed, the board's (BN5_LIB_FOE_HP: the
+ * Darkloid's, 0 none), given him as he is first in play; and after it his
+ * HP as the battle left it (BN5_LIB_FOE_HP_BACK), -1 unseen */
+void lib_battle_foe(int hp);
+int lib_battle_foe_left(void);
+/* Each frame of it: the turn it is in, and the foe's HP. */
 void lib_battle_watch(void);
 /* Back on the map: how it ended (LIB_OUT_*) and in which turn; disarmed. */
 int lib_battle_end(int *turn);

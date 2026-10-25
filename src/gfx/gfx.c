@@ -198,7 +198,8 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF); o += 5, ++k) {
 		if ((o[4] & 3) > 2 || (part > 0 && k != part - 1)) continue;
 		int bank = ((o[4] >> 4) + pal) % banks;
-		const uint8_t *pl = pal >= SPRITE_ROM_PAL && pal != SPRITE_WHITE ? R.data + (pal - SPRITE_ROM_PAL) : pals + bank * 32;
+		const uint8_t *pl = pal >= SPRITE_PAL_PAST ? pals + (pal - SPRITE_PAL_PAST) * 32
+			: pal >= SPRITE_ROM_PAL && pal != SPRITE_WHITE ? R.data + (pal - SPRITE_ROM_PAL) : pals + bank * 32;
 		blit_obj(px, W, o, (int8_t)o[1] - minx, (int8_t)o[2] - miny, tiles, tiles_len, pal == SPRITE_WHITE ? NULL : pl);
 	}
 	cf->ox = minx; cf->oy = miny; cf->w = W; cf->h = H;
