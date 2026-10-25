@@ -9,7 +9,7 @@
   own attacks rumble as they sound: each buster shot a tick, every
   Vulcan bullet its own, a sword's swing, a Cannon's blast and its tail,
   each hit he lands a knock. The charge hums as it fills, clicks when
-  full and kicks back as the shot leaves. Nothing rumbles while fast
+  full, throbs while held and kicks back as the shot leaves. Nothing rumbles while fast
   forward runs. On a PS5
   DualSense, over USB or Bluetooth, the trigger that is L clicks once the
   Custom gauge is full, and pulling through it opens the Custom screen;

@@ -122,6 +122,13 @@ uint8_t feel_charge_hum(int frames) {
 	return (uint8_t)(26 + t * 60 / 90);
 }
 
+uint8_t feel_charged_throb(int frames) {
+	if (frames < 0) return 0;
+	/* (a quick rise and a slower fall each beat, over a floor that never lets go) */
+	int t = frames % FEEL_THROB_FRAMES, swell = t < 4 ? t * 25 : (FEEL_THROB_FRAMES - t) * 100 / (FEEL_THROB_FRAMES - 4);
+	return (uint8_t)(50 + (swell > 100 ? 100 : swell) * 60 / 100);
+}
+
 uint16_t feel_motor(int level, int v) {
 	int scale = level >= 0 && level < FEEL_LEVELS ? level_scale[level] : 0;
 	v = v < 0 ? 0 : v > 255 ? 255 : v;

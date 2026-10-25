@@ -2813,6 +2813,15 @@ static void test_feel(void) {
 	/* the charge's hum: rising as it fills, at most a third of a motor, none before it */
 	CHECK(feel_charge_hum(-1) == 0 && feel_charge_hum(0) > 0 && feel_charge_hum(45) > feel_charge_hum(0) && feel_charge_hum(90) == feel_charge_hum(600) &&
 		feel_charge_hum(600) <= 255 / 3 + 1, "the charge's hum does not rise and cap (%u, %u, %u)", feel_charge_hum(0), feel_charge_hum(45), feel_charge_hum(600));
+	/* held full, a throb: a beat every FEEL_THROB_FRAMES over a floor, never off */
+	int floor = 255, peak = 0;
+	for (int f = 0; f < FEEL_THROB_FRAMES; ++f) {
+		int v = feel_charged_throb(f);
+		floor = v < floor ? v : floor;
+		peak = v > peak ? v : peak;
+	}
+	CHECK(feel_charged_throb(-1) == 0 && floor > 0 && peak > floor + 30 && peak < 128 && feel_charged_throb(3) == feel_charged_throb(3 + FEEL_THROB_FRAMES),
+		"the charge's throb is off (%d to %d)", floor, peak);
 	/* settings.ini's words, Options' turn round */
 	for (int v = FEEL_OFF; v < FEEL_LEVELS; ++v) CHECK(feel_level_read(feel_level_word(v)) == v, "%s does not read back", feel_level_word(v));
 	CHECK(feel_level_read("no") == FEEL_OFF && feel_level_read("loud") == FEEL_DEFAULT, "vibration's words read wrong");

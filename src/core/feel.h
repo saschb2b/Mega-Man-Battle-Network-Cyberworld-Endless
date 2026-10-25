@@ -72,8 +72,13 @@ void feel_mix_start(FeelMix *m, FeelCue cue, uint8_t amount);
  * one frame on; true while any plays */
 bool feel_mix_frame(FeelMix *m, int level, uint16_t *low, uint16_t *high);
 /* The buster's charge, `frames` into it: the light motor's 0-255, a hum
- * that rises as it fills (a tenth to a third), none once it is full */
+ * that rises as it fills (a tenth to a third) */
 uint8_t feel_charge_hum(int frames);
+/* ... and held full, `frames` since: a throb, a beat every
+ * FEEL_THROB_FRAMES, the light motor's 0-255 (the heavy one a third of
+ * it), so the shot is felt waiting */
+#define FEEL_THROB_FRAMES 20
+uint8_t feel_charged_throb(int frames);
 /* A charged shot's kick waits for its sound (feel_sound.h) this many
  * frames at most after B's release: the shot leaves a moment after */
 #define FEEL_SHOT_WAIT 30
