@@ -192,8 +192,11 @@ def devlog(tag, missing=False):
     path = os.path.join(WORK, f"devlog-v{p['version']}.html")
     with open(path, 'w', encoding='utf-8') as f:
         f.write(p['html'] + '\n')
+    subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'itch_art.py'), '--devlog', f"v{p['version']}"],
+                   check=True, capture_output=True)
     print(f"title: {p['title']}\npost type: {p['type']}\noriginal publish date: {p['date']} (an older release's only)\n"
-          f"content: {os.path.relpath(path, ROOT)}\ncover: docs/clips/trailer.png (the newest's only)\n"
+          f"content: {os.path.relpath(path, ROOT)} (its pictures through tools/itch_pictures.js)\n"
+          f"cover: .build/itch/covers/v{p['version']}.png\n"
           f"attachments: the newest's Play in the browser build only; an older release's none")
 
 

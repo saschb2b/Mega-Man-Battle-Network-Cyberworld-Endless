@@ -258,16 +258,24 @@ After the release is published on GitHub (the tag's workflow done):
    `--hidden` keeps it off the page until its display name and platform
    are set.
 2. `python3 tools/itch.py devlog` writes the release's post from its notes
-   (`docs/releases/vX.Y.Z.md`, else its CHANGELOG section, the pictures
-   left out: itch takes none from other sites) to
-   `.build/itch/devlog-vX.Y.Z.html`, and prints its title and post type
-   (Major Update for X.Y.0, General Update for a patch).
+   (`docs/releases/vX.Y.Z.md`, else its CHANGELOG section) to
+   `.build/itch/devlog-vX.Y.Z.html`: the notes' own lead paragraph, the
+   notes with their pictures at their raw GitHub address at the tag, and a
+   last line linking the notes on the website and GitHub (a picture over
+   itch's 3 MB is a link). It prints the title and post type (Major Update
+   for X.Y.0, General Update for a patch) and draws the post's 16:9 cover,
+   `.build/itch/covers/vX.Y.Z.png` (`tools/itch_art.py --devlog`: the
+   release's trailer poster where its notes open with its trailer, else
+   its notes' first picture no older cover took, whole, in the site's
+   screen frame over the net, title screens left out).
    Post it at `https://itch.io/dashboard/game/5225408/new-devlog`: the
    title; the type; the content into the editor with
    `jQuery('textarea[name="post[body]"]').redactor('code.set', html)` and
-   `'code.sync'`; of the attachments itch adds, only the release's **Play
-   in the browser** build; `docs/clips/trailer.png` as the cover;
-   **Published** ticked; Save.
+   `'code.sync'`, after `tools/itch_pictures.js`'s `itchPictures(html)`
+   has uploaded its pictures to itch (itch shows none from another site;
+   it runs in the editor page as itch's own Add image does, one picture
+   once); of the attachments itch adds, only the release's **Play in the
+   browser** build; the cover; **Published** ticked; Save.
 3. `python3 tools/itch.py record --post vX.Y.Z URL` with the post's
    address, and commit `docs/itch/state.json`.
 

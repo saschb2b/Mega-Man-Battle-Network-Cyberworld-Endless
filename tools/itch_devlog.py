@@ -3,18 +3,33 @@ its title, post type and HTML from the same notes the site's versions page
 renders (tools/site_versions.py: docs/releases/vX.Y.Z.md, else the
 CHANGELOG's section), for itch's post editor.
 
-itch's pages refuse pictures from other sites, so the notes' pictures are
-left out; the post opens with where the release is and where its full
-notes, pictures and all, are on the website.
+The notes' pictures stay, at their raw GitHub address at the release's
+tag; itch shows no picture from another site, so tools/itch_pictures.js,
+run in itch's editor, uploads each one to itch and swaps its address
+before the post is saved. A picture over itch's 3 MB is a link instead.
+The post opens with the notes' own lead and ends with where the notes are
+on the website and GitHub.
 """
 import os
 import re
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import site_versions  # noqa: E402
 
-PICTURE = re.compile(r'<img\b[^>]*>|!\[[^\]]*\]\([^)]*\)')
+RAW = re.compile(r'<img\b[^>]*\bsrc="(https://raw\.githubusercontent\.com/[^/]+/[^/]+/([^/]+)/([^"]+))"[^>]*>')
+ITCH_LIMIT = 3 * 1024 * 1024
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def too_big(m):
+    """A picture over itch's limit, as a link to it."""
+    url, ref, path = m.groups()
+    size = subprocess.run(['git', 'cat-file', '-s', f'{ref}:{path}'], cwd=ROOT, capture_output=True, text=True).stdout
+    if size.strip() and int(size) > ITCH_LIMIT:
+        return f'<a href="{url}">{os.path.basename(path)}</a>'
+    return m.group(0)
 
 
 def release(version=None):
@@ -46,43 +61,28 @@ def entries(md):
 
 
 def body(rel):
-    """The notes as itch takes them: no pictures, no opening (the trailer
-    and headline the site's article shows), links at the tag."""
+    """The notes as itch takes them: their own lead paragraph (the opening's
+    picture and headline left out, the headline being the post's title),
+    then the rest, links and pictures at the tag."""
     md = site_versions.at_tag(rel['md'], rel['tag'])
     if rel['source'] == 'notes':
-        _, md = site_versions.parts(md)
+        opening, md = site_versions.parts(md)
+        lead = re.split(r'</h2>', opening, maxsplit=1)[-1] if '</h2>' in opening else ''
+        md = (lead.strip() + '\n\n' + md) if lead.strip() else md
     else:
         md = entries(md)
-    md = PICTURE.sub('', md)
-    html = site_versions.markdown(md, shift=0)
-    # (blocks left empty by their pictures, and the notes' centring)
-    html = re.sub(r'<p[^>]*>\s*(<br>\s*)*</p>\s*', '', html)
+    html = RAW.sub(too_big, site_versions.markdown(md, shift=0))
+    # (the notes' centring, which itch's editor drops)
     return re.sub(r' align="center"', '', html)
 
 
-def when(date):
-    """2026-09-27 as 27 September 2026."""
-    y, m, d = (int(x) for x in date.split('-'))
-    months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-              'October', 'November', 'December')
-    return f'{d} {months[m - 1]} {y}'
-
-
-def post(rel, newest=None):
+def post(rel):
     """The post: its title, itch's post type (Major Update for a minor
-    release, X.Y.0, General Update for a patch), its date and its HTML. The
-    newest release's post says it is on the page; an older one's, back-dated
-    to its release, says when it came out."""
-    newest = newest or release()['version']
+    release, X.Y.0, General Update for a patch), its date and its HTML,
+    which ends where the notes are with their pictures."""
     anchor = site_versions.anchor(rel['version'])
-    notes = (f"<a href=\"{site_versions.SITE_URL}versions/#{anchor}\">project's website</a> and "
-             f"<a href=\"{site_versions.GITHUB}/releases/tag/{rel['tag']}\">GitHub</a>")
-    if rel['version'] == newest:
-        lead = (f"<p><strong>{rel['version']}</strong> is on this page: play it in the browser, or download it for "
-                f"your system. Its full notes, with pictures, are on the {notes}.</p>")
-    else:
-        lead = (f"<p><strong>{rel['version']}</strong> came out on {when(rel['date'])}. Its full notes, with "
-                f"pictures, are on the {notes}; the newest version is on this page.</p>")
+    end = (f"<p>These notes with their pictures are on the <a href=\"{site_versions.SITE_URL}versions/#{anchor}\">"
+           f"project's website</a> and <a href=\"{site_versions.GITHUB}/releases/tag/{rel['tag']}\">GitHub</a>.</p>")
     return {'version': rel['version'], 'title': f"{rel['version']}: {site_versions.headline(rel).rstrip('.')}",
             'type': 'major_update' if rel['version'].endswith('.0') else 'general_update',
-            'date': rel['date'], 'html': lead + '\n' + body(rel)}
+            'date': rel['date'], 'html': body(rel) + '\n' + end}
