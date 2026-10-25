@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.1 (2026-10-25)
 
 - **Fast forward, outside the fight.** A press of its button runs the
   game faster (Tab or Space, a controller's right trigger or right stick
@@ -49,6 +49,40 @@
   for their team, as thick with dark as BN5's own of that stage, and a
   Pass now gives back a fifth of a Navi's HP, as BN5's does. A CONTINUE
   goes on with the same team where it stood.
+
+- **Liberation Missions as BN5 plays them,** each piece traced in BN5's
+  own ROM and shown side by side with it:
+  - **Each board in its own mission's look:** a dark layer is drawn in
+    the BN5 mission its area takes, its map, backdrop and colours, where
+    every board had mission 1's.
+  - **The board's HP:** every unit's HP stands under it in BN5's white
+    digits. The Darkloid keeps his HP between battles, a battle that
+    leaves him standing leaves him hurt, and he heals at the start of his
+    turn by the dark round him, BN5's rising lines over him.
+  - **The guardians strike as BN5's:** TinHawk's HawkAttack warps beside
+    its Navi and back, Bladia's DarkSlash and the Darkloid's blow burst
+    over him, and a deleted guardian rises on its DarkHole and warps
+    beside it, as BN5 brings him back.
+  - **The battle on BN5's field:** the dark round a panel sets the field,
+    up to Surrounded, foes on both sides, where L or R turns MegaMan
+    round. The Custom screen opens by itself as the gauge fills, and the
+    Darkloid's battle has BN5's three turns too.
+  - **BonusPanels:** Liberation frees one without a battle or the Navi's
+    turn, then BN5's roulette spins its five slots (no harm this phase, HP
+    full, five Order Points, a chip, Major Hit) until A stops it.
+  - **The words:** the Darkloid speaks as his first turn begins, L's map
+    view has BN5's keys and shows the guardians' reach, and a board won
+    ends with BN5's SUCCESS! and MegaMan's tally of the target and the
+    phases taken.
+  - **The prize, BN5's tiers:** two phases under par or better a chip, at
+    par a lesser one, over par zenny.
+  - **BN5's own Darkloids:** BlizzardMan and ShadeMan hold boards of
+    BN5's areas, in their own sprites, faces and battles, matched to BN5's
+    frame by frame.
+
+- **Cyberworld Endless is on itch.io:**
+  <https://saschb2b.itch.io/cyberworld-endless>, with the browser game and
+  every system's download; the site and the README link it.
 
 ## 0.15.0 (2026-10-24)
 
