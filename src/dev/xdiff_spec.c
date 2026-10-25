@@ -126,13 +126,15 @@ static int dark_parse(Spec *s, const char *name, char *v) {
 	return (s->ndschips = n) > 0;
 }
 
-/* the spec's numbers: MegaMan's panel, HP and element, the frames, the seed, the foes held; -1 where `name` is none of them */
+/* the spec's numbers: MegaMan's panel, HP and element, the frames, the seed, the foes held, the field's column
+ * pattern; -1 where `name` is none of them */
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
+	if (!strcmp(name, "sides")) return sscanf(v, "%x", &a) == 1 && a && a < 0x40 && (s->sides = (int)a) > 0;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");
 	if (!mm && !seed) return -1;
 	if ((mm ? sscanf(v, "%1u%1u", &a, &b) : sscanf(v, "%x:%x", &a, &b)) != 2) return 0;

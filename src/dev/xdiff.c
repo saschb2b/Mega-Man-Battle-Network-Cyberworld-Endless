@@ -662,6 +662,7 @@ static bool subject(Side *g, const Spec *s) {
 	Encounter e;
 	memset(&e, 0, sizeof e);
 	e.player = s->mm;
+	e.sides = s->sides;
 	/* (BN5's field as BN6's: xfields.h, or the spec's own number for it) */
 	e.field = s->field6 >= 0 ? s->field6 : s->field ? xfield_bn6(XROM_BN5_COLONEL_US, s->field) : 0;
 	if (e.field < 0) {
@@ -722,7 +723,7 @@ static bool reference(Side *g, const Spec *s) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data || !guest_start(XROM_BN5_COLONEL_US)) return false;
 	/* (BN5's random battles' record: its field, music, background the map's, side, options; MegaMan, then the foes) */
-	uint8_t rec[0x80] = { (uint8_t)s->field, 0x14, 0x15, 0x00, 0xFF, 0x00, 0x38, 0x00, 0xE2, 0x49, 0x00, 0x00 };
+	uint8_t rec[0x80] = { (uint8_t)s->field, 0x14, 0x15, 0x00, 0xFF, 0x00, (uint8_t)(s->sides ? s->sides : 0x38), 0x00, 0xE2, 0x49, 0x00, 0x00 };
 	uint32_t len = 0x10;
 	const uint8_t mm[4] = { 0x00, (uint8_t)s->mm, 0, 0 };
 	memcpy(rec + len, mm, 4);
