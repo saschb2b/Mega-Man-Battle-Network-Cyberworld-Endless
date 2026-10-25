@@ -87,21 +87,21 @@ how to verify it.
 | Fields of structures | 156 | 42 |
 | Event flags | 34 | 3 |
 | Values of fields | 112 | 16 |
-| Constants, sizes and counts | 440 | 272 |
-| All | 1889 | 1274 |
+| Constants, sizes and counts | 454 | 272 |
+| All | 1903 | 1274 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 71 | 1 |
 | Shops and traders | 37 | 0 |
 | NaviCust | 23 | 1 |
-| Chips and folders | 298 | 224 |
-| Battle | 524 | 368 |
+| Chips and folders | 301 | 224 |
+| Battle | 525 | 368 |
 | Text and fonts | 39 | 7 |
 | Sound | 15 | 25 |
 | Maps and the overworld | 128 | 41 |
 | Events and progress | 49 | 19 |
-| Engine core | 705 | 588 |
+| Engine core | 715 | 588 |
 
 <!-- end of what tools/symbols.py writes -->
 

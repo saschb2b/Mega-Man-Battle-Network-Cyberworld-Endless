@@ -984,6 +984,49 @@ static uint32_t set_pieces_hash(uint32_t h) {
 	return h;
 }
 
+/* The Virus Battler's layers (net_pieces.c, docs/LEVEL_DESIGN.md): an act's
+ * first layer, at most one an act, from the second act to the last before
+ * the Nest, about half of those acts, at least one a run, the Battlers in
+ * BN6's order by act; and each one placed stands on the layer, its
+ * Battler its param */
+static void test_battler(void) {
+	Run before = run;
+	int acts = 0, held = 0, placed = 0, made = 0;
+	for (int mode = RUN_ENDLESS; mode <= RUN_SHORT; ++mode)
+		for (uint32_t seed = 1; seed <= 300; ++seed) {
+			memset(&run, 0, sizeof run);
+			run.seed = seed * 2654435761u;
+			run.mode = (uint8_t)mode;
+			int last = mode == RUN_SHORT ? 2 : 5, n = 0, prev = 0;
+			for (int act = 0; act < PACING_ACTS; ++act) {
+				int in_act = 0;
+				for (int k = 0; k < 3; ++k) {
+					int depth = act * 3 + 1 + k, b = layer_battler(depth, LAYER_NORMAL);
+					if (!b) continue;
+					++in_act;
+					CHECK(k == 0 && act >= 1 && act <= last, "a Battler on layer %d (act %d, %d in it)", depth, act + 1, k + 1);
+					CHECK(b > prev && b <= 5, "Battler %d after %d at act %d", b, prev, act + 1);
+					prev = b;
+					CHECK(!layer_battler(depth, LAYER_UNDERNET) && !layer_battler(depth, LAYER_BACK), "a Battler on a side layer");
+					if (seed % 25 == 0 && made < 24) {
+						++made;
+						layer_generate(run.seed ^ (uint32_t)depth, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+						for (int i = 0; i < layer.nobj; ++i) placed += layer.obj[i].type == OBJ_BATTLER && layer.obj[i].param == b;
+					}
+				}
+				CHECK(in_act <= 1, "%d Battlers in act %d", in_act, act + 1);
+				n += in_act;
+			}
+			CHECK(n >= 1, "no Battler in run %u (%s net)", seed, mode ? "short" : "endless");
+			acts += last;
+			held += n;
+			if (mode == RUN_ENDLESS) CHECK(!n || prev <= 5, "past the fifth Battler");
+		}
+	CHECK(held * 100 >= acts * 45 && held * 100 <= acts * 65, "Battlers in %d of %d acts, not about half", held, acts);
+	CHECK(placed == made, "%d of %d Battlers placed on their layers", placed, made);
+	run = before;
+}
+
 static void test_layer_make(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
@@ -2725,6 +2768,13 @@ static void test_fast_forward(void) {
 	CHECK(!fast_scene_allows(&s), "fast forward ran on the Custom screen");
 	s.phase = BN6_PHASE_FIGHT;
 	CHECK(!fast_scene_allows(&s), "fast forward ran in the fight");
+	/* (a Virus Battler's fight takes no input: it plays; his VIRUS LIST is a menu) */
+	s.mode = BN6_MODE_VIRUS_BATTLER;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a Virus Battler's fight");
+	s.phase = BN6_PHASE_CUSTOM;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the VIRUS LIST");
+	s.mode = 0;
+	s.phase = BN6_PHASE_FIGHT;
 	s.sub = BN6_SUB_PET;
 	CHECK(!fast_scene_allows(&s), "fast forward ran on the PET's menu");
 	s.sub = BN6_SUB_MAP;
@@ -5900,6 +5950,7 @@ int main(void) {
 	test_lz77();
 	test_pad_art();
 	test_generation();
+	test_battler();
 	test_layer_make();
 	test_layouts_build();
 	test_identity();

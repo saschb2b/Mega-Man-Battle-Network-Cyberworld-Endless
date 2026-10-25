@@ -47,7 +47,9 @@ bool fast_scene_allows(const FastScene *s) {
 	if (!s->run || s->apart) return false;
 	/* (BN6's own menus, shops, traders and mail: a cursor's repeat at its pace) */
 	if (s->toolkit != BN6_MODE_GAME || s->sub == BN6_SUB_PET) return false;
-	/* (the fight, the Custom screen and the pause with it: BN6's clock) */
+	/* (the fight, the Custom screen and the pause with it: BN6's clock; a
+	 * Virus Battler's fight is the viruses' own, its VIRUS LIST a menu) */
+	if (s->sub == BN6_SUB_BATTLE && s->mode == BN6_MODE_VIRUS_BATTLER) return s->phase != BN6_PHASE_CUSTOM;
 	if (s->sub == BN6_SUB_BATTLE && (s->phase == BN6_PHASE_CUSTOM || s->phase == BN6_PHASE_FIGHT)) return false;
 	return true;
 }
