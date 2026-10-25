@@ -1001,8 +1001,8 @@ board, phase 4, the panels it had freed clean and its Order Points as
 they were, the banner shown again once the act's card was gone.
 
 **Left for later:** the L view's keys' help, the Darkloid's words at his
-entrance, each unit's HP under it (our guardians have none on the board
-yet), the mission's end in BN5's words (the target and the phases
+entrance, a guardian's HP under it (the Darkloid's came with The
+board's HP as BN5's), the mission's end in BN5's words (the target and the phases
 taken), the other eight missions' maps (stage 1 draws every dark layer in
 mission 1's); the BonusPanel's chip; the economy report and pacing for
 dark layers; the second screen's board; stages 2 to 5. (Barriers, keys,
@@ -1273,18 +1273,74 @@ was clipped. The phase is now BN5's as traced above
   picture's middle; the BG scroll's wrap read it a half turn off away
   from MegaMan.
 
-Not done: the Darkloid's heal (his HP is not kept on the board: each
-battle with him is whole, so there is nothing to heal; its effect 0x78
-and sound are traced); the HP digits under every unit; TinHawk's and
-Bladia's strike effects and the BN6 Darkloids' (not traced: their
-strikes are their animations and the harm); a deleted guardian's return
-through BN5's warp. Teammates stay stage 3's.
+Not done: TinHawk's and Bladia's strike effects and the BN6 Darkloids'
+(not traced: their strikes are their animations and the harm); a deleted
+guardian's return through BN5's warp. Teammates stay stage 3's. (The
+Darkloid's heal and the units' HP digits: The board's HP as BN5's,
+below.)
 
 **Checked:** an autopilot run through seed 1's act 2 board from its
 opening to its exit (`--run-depth 5 --seed 1 --dev dark,god,onehit`,
 11-12 phases on its par of 12, the exit taken to depth 6); seed 2's
 board for a BigBrute's warp and strike (frame 5409 on), seed 1's for
 the Darkloid's (frame 13667 on).
+
+### The board's HP as BN5's, as built (25 October 2026)
+
+**BN5's rules, read in its ROM and played in romlab** (mission 1;
+`src/emu/bn5_liberation.h`, docs/ROM_DATA.md's row): each board unit
+keeps its HP, its max and the HP its digits show. The digits stand under
+every unit in play but the Navi in play (his HP is the HP box's): white,
+8x16 (BN5's HP digits), centred on the unit's place on the floor, their
+top there; the HP shown steps 4 a frame toward the HP. A unit fought
+lends its battle's marked enemy its HP and max as the enemy spawns, and
+takes back the HP that enemy has as the battle ends, so one not deleted
+keeps on the board what its battle left (one left at none by a battle
+not won gets a quarter of its max). The Darkloid heals as his turn
+begins, as DARKLOID PHASE's band closes, where his HP is below his max
+and dark panels stand round him: a tenth of his max for each (dark, an
+item's, a DarkHole, his ring: BN5's weights), his max at most, the
+digits with it at once; rising lines over him (list 7's 120, in the
+palette its variant names) with sound 0x8A, then 20 frames before his
+turn goes on. (The guides' "100 a panel" is a tenth of a 1000 HP
+Darkloid's.) A Navi's rest heals by BN5's story's progress, a fifth of
+his max on mission 1 to a half (its ROM); ours is the guides' half.
+
+**On our board** (`liberation.c`, `liberation_battle.c`,
+`liberation_turn.c`, `liberation_pieces.c`, `liberation_draw.c`):
+
+- **The Darkloid's HP is the board's**: his own battle's (the version
+  make_boss gives him) as the board begins, kept across a CONTINUE
+  (`run.lib`, its note `CLB3`), shown under him in BN5's digits, rolled
+  as BN5 rolls them, hidden under a chat box. His battle begins from it:
+  the director gives his object the board's HP as it is first in play,
+  his max his own (BN6's MaxHP, as BN5 gives the board's max), and
+  reads his HP each frame of it; a battle that leaves him standing
+  leaves the board that HP.
+- **His heal** is BN5's, at the start of his turn in the Darkloids'
+  phase, its effect and sound BN5's, read from its ROM, then BN5's wait.
+- **The guardians show no HP**: our guardians' battles are the act's
+  viruses, not one foe of theirs, so they have none to keep.
+
+With MegaMan alone nothing on the board lowers the Darkloid's HP and
+his one battle ends with his deletion or the run's, so his heal and his
+HP carried come into play with the team (stage 3: ShadowMan's
+SneakAttack, a teammate deleted in his battle) and BN5's BonusPanel's
+harm to the nearest enemy. `--dev libhp=N` begins him at N HP to see
+them.
+
+**Checked:** BN5 and ours side by side (the pull request's pictures):
+the digits under BlizzardMan and a guardian in BN5, under the Darkloid
+on our board; the heal with `--dev dark,god,onehit,libhp=100` (seed 1,
+depth 5): 100 to 660 at once (his ring's eight dark, 70 each, frame
+2266), BN5's lines over him in its purple, 700 the next phase;
+`test_liberation_heal` (the weights, the cap, none at full HP or with
+none dark round him); the autopilot through seed 1's board to its exit.
+
+**Left:** a guardian's own HP (BN5's guardian battles' marked enemy not
+traced: which of its battle's enemies the record marks); the rest's heal
+by BN5's table (a game-design call: ours is the guides' half); the HP
+box and the team's digits with stage 3.
 
 ## The owner's decisions
 

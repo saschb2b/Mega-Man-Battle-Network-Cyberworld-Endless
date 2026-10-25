@@ -2,8 +2,9 @@
  * what its course has changed since the layer's seed made it, saved beside
  * the run's checkpoint as `run.lib` and taken back once the checkpoint's
  * state has loaded on the layer the seed made again. The board's panels,
- * its units, the phase and the Order Points are the note's; what was being
- * shown (a banner's frames, words due, a unit's glide) begins again. */
+ * its units and their HP, the phase and the Order Points are the note's;
+ * what was being shown (a banner's frames, words due, a unit's glide)
+ * begins again. */
 #include "liberation.h"
 
 #include <stddef.h>
@@ -16,7 +17,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define LIB_NOTE_MAGIC 0x434C4232u   /* "CLB2": the items and the route (the quality bar) */
+#define LIB_NOTE_MAGIC 0x434C4233u   /* "CLB3": the units' HP on the board */
 
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */
@@ -30,8 +31,9 @@ typedef struct {
 	uint8_t kind[MAP_H][MAP_W];
 	uint8_t item[MAP_H][MAP_W];    /* the item panels' and barriers' (keys taken, finds left) */
 	uint8_t route_found, pad2[3];
+	int16_t hp[LIB_UNITS];         /* each unit's HP on the board (the Darkloid's through his battles) */
 } LibNote;
-_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 && offsetof(LibNote, kind) == 68 + LIB_UNITS * 5,
+_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 + LIB_UNITS * 2 && offsetof(LibNote, kind) == 68 + LIB_UNITS * 5,
 	"Liberation save layout changed: bump LIB_NOTE_MAGIC");
 
 void lib_save(void) {
@@ -50,6 +52,7 @@ void lib_save(void) {
 		for (int u = 0; u < LB.b.nunits && u < LIB_UNITS; ++u) {
 			n.back_in[u] = (int8_t)LB.back_in[u];
 			n.unit[u].x = LB.b.unit[u].x; n.unit[u].y = LB.b.unit[u].y; n.unit[u].gone = LB.b.unit[u].gone;
+			n.hp[u] = (int16_t)LB.hp[u];
 		}
 		memcpy(n.kind, LB.b.kind, sizeof n.kind);
 		memcpy(n.item, LB.b.item, sizeof n.item);
@@ -78,6 +81,7 @@ bool lib_resume(void) {
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.b.unit[u].x = n.unit[u].x; LB.b.unit[u].y = n.unit[u].y; LB.b.unit[u].gone = n.unit[u].gone != 0;
 		LB.back_in[u] = n.back_in[u];
+		if (LB.hp_max[u]) LB.hp[u] = LB.hp_shown[u] = n.hp[u] < 1 ? 1 : n.hp[u] > LB.hp_max[u] ? LB.hp_max[u] : n.hp[u];
 		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &LB.ux[u], &LB.uy[u]);
 	}
 	LB.step = resumed_step(n.step, n.after);

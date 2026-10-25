@@ -5647,10 +5647,30 @@ static void test_liberation_floor(void) {
 	run = before;
 }
 
+/* The Darkloid's heal in his phase, BN5's (BN5_LIB_HEAL): a tenth of his
+ * max for each dark panel round him (dark, an item's, a DarkHole, his
+ * ring), his max at most, none at full HP or with none dark round him */
+static void test_liberation_heal(void) {
+	static LibBoard b;
+	memset(&b, 0, sizeof b);
+	b.boss_x = b.boss_y = 10;
+	for (int y = 9; y <= 11; ++y)
+		for (int x = 9; x <= 11; ++x) b.kind[y][x] = LIB_CLEAN;
+	b.kind[10][10] = LIB_BOSS;
+	CHECK(lib_darkloid_heal(&b, 100, 700) == 100, "heal with none dark round him: %d", lib_darkloid_heal(&b, 100, 700));
+	b.kind[9][9] = LIB_RING; b.kind[9][10] = LIB_DARK; b.kind[11][11] = LIB_ITEM; b.kind[10][9] = LIB_BONUS; b.kind[10][11] = LIB_BAR;
+	CHECK(lib_darkloid_heal(&b, 100, 700) == 310, "heal with three dark round him: %d, not 310", lib_darkloid_heal(&b, 100, 700));
+	b.kind[11][9] = LIB_HOLE;
+	CHECK(lib_darkloid_heal(&b, 400, 700) == 680, "heal with four dark round him: %d, not 680", lib_darkloid_heal(&b, 400, 700));
+	CHECK(lib_darkloid_heal(&b, 650, 700) == 700, "heal past his max: %d", lib_darkloid_heal(&b, 650, 700));
+	CHECK(lib_darkloid_heal(&b, 700, 700) == 700, "heal at full HP: %d", lib_darkloid_heal(&b, 700, 700));
+}
+
 int main(void) {
 	test_sha1();
 	test_liberation_board();
 	test_liberation_floor();
+	test_liberation_heal();
 	test_jobs();
 	test_economy();
 	test_home_words();

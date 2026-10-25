@@ -3,6 +3,7 @@
 ; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
+02000C20 through_0x08053bf4_into_units_copy
 02001120 bn5_step
 02001440 BN5_CHIP_KEYS
 02001AB0 BN5_LIB_EVENT
@@ -129,6 +130,7 @@
 080031CC BN5_SPAWN_4
 080031E8 BN5_SPAWN_1_LAST2
 0800325D engine_destroy
+08003498 centred_on_unit_place_by
 08003958 BN5_T1_TYPES
 08003B80 BN5_T3_TYPES
 08003F60 BN5_T4_TYPES
@@ -137,13 +139,16 @@
 08004C98 game_state_routine
 08004DE2 BN5_ENTER_MAP_BOARD
 08004FB6 entermap_choice_sub_mode_0x18_routine
+08004FF0 bn5_liberation_board_3
 080053FC encounter_check
 080054F6 battle_start
 08005CD0 sine_table
 08005D50 cosine_table
+08006862 where_battle_record_enemy_entry_has
 08006874 mystery_data_set_on_field
 08006AAE BN5_CHAOS_FAIL_SPAWN
 08006D2A bn5_chips_code.from
+08007120 bn5_lib_foe_hp_back_0x08009050
 08007954 BN5_LIB_TURN_BANNER
 08007A50 BN5_LIB_WIN_BANNER
 08007A82 BN5_WIN_SONG
@@ -152,6 +157,7 @@
 08008D82 folder_shuffle
 08009016 BN5_BATTLE_TURN
 0800901E BN5_LIB_LATE_DOUBLE
+08009050 BN5_LIB_FOE_HP_BACK
 080090E8 bn5_chips_code.gate
 08009190 BN5_LIB_TURNS_UP
 08009326 side_battle_counter_raised
@@ -528,6 +534,7 @@
 0804BD94 BN5_LIB_BOARD_STEP
 0804BDB4 BN5_LIB_BOARD_STEPS
 0804BDD8 bn5_liberation_missions.setup
+0804D2EC bn5_liberation_board_4
 0804D8B4 bn5_liberation_missions.handlers
 0804E9F4 BN5_LIB_WON_STEP
 0804ECF0 BN5_LIB_CORNERS
@@ -537,17 +544,30 @@
 0804F628 BN5_LIB_MISSIONS
 0804F968 BN5_LIB_NAVI_HP
 0804FB94 BN5_LIB_EDGE_TABLES
+08050334 BN5_LIB_DARK_WEIGHT
 08051924 BN5_LIB_ITEM_KINDS
 0805198A BN5_LIB_ON_MAP
 080519D0 BN5_LIB_OP_ADD
 080519E0 BN5_LIB_OP_SPEND
 08051BA8 BN5_LIB_PANEL_PLACE
+08051E7C sum_over_his_eight_panels_bn5
 08051F20 BN5_LIB_ITEM_FIND
 080529F0 BN5_LIB_REACH_BLINK
+08052EE8 finds_set_from_first
 08052FF4 BN5_LIB_PHASE_LOAD
+08053028 his_hp_box
 080531C8 BN5_LIB_HUD_LOADS
 080531F4 BN5_LIB_HUD_OAM
 08053240 BN5_LIB_HUD_MASKS
+080533A0 BN5_LIB_TEAM_HP
+080533D8 bn5_liberation_board_5
+0805341A BN5_LIB_ENEMY_HP
+08053482 BN5_LIB_HP_DIGITS
+08053B9E BN5_LIB_FOE_HP
+08053BF4 into_units_copy
+08053CBE BN5_LIB_PASS_HEAL
+08053CF8 bn5_liberation_board.2
+08053D04 BN5_LIB_HEAL
 08053EBA BN5_LIB_HARM
 08053EFC bn5_liberation_board.plays
 08054DA2 routine_whose
@@ -555,6 +575,9 @@
 08054F78 BN5_LIB_BONUS_ROLL
 08055208 BN5_LIB_HEAL_FX
 08055D68 BN5_LIB_EVENT_QUEUE
+08055EB0 hp_below_max
+080560AC BN5_LIB_DARKLOID_HEAL
+0805BFF8 bn5_liberation_board.on
 08073AB8 bn5_liberation_missions.beside
 08073B20 BN5_LIB_ANIM_DARK
 08073B60 BN5_LIB_ANIM_HOLE
@@ -728,12 +751,13 @@
 081D774A bn5_sea_submerge.image
 081D778C bn5_sea_submerge.image_2
 0823158C bn5_cangard.lz77
-0833A1B4 bn5_liberation_board_3
+08300268 palette_variant_names_past_block_one
+0833A1B4 bn5_liberation_board_6
 08358E28 bn5_cangard
 0836684C bn5_cangard_2
-08389E68 bn5_liberation_board_4
-08474848 bn5_liberation_board_5
-08478DE0 bn5_liberation_board_6
+08389E68 bn5_liberation_board_7
+08474848 bn5_liberation_board_8
+08478DE0 bn5_liberation_board_9
 0847C53C bn5_liberation_board.bigbrute
 0848A5E0 BN5_LIB_OUTLINE_SPRITE
 0848B160 BN5_LIB_OUTLINE_PAL

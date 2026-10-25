@@ -28,6 +28,7 @@
 #include "bn6.h"
 #include "bn6_battle_loop.h"
 #include "bn6_forms.h"
+#include "debug.h"
 #include "director.h"
 #include "emu.h"
 #include "hook.h"
@@ -46,6 +47,11 @@ static struct {
 static int draw_pass;          /* (the hooks') the draw's banner shown: 0 TIME UP!, 1 LIBERATE FAILED! */
 static int turn_seen;          /* (the director's) the turn the battle is in */
 static bool doubling;          /* the late double's hook in */
+/* (the director's) the foe's HP the board keeps, as BN5 gives its battle's
+ * marked enemy the unit's (0 none), given him once he is in play; and his
+ * HP as the battle last showed it, -1 unseen */
+static int foe_hp, foe_left;
+static bool foe_given;
 
 static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
@@ -142,11 +148,48 @@ void lib_battle_disarm(void) {
 	doubling = false;
 }
 
+void lib_battle_foe(int hp) {
+	foe_hp = hp;
+	foe_left = -1;
+	foe_given = false;
+}
+
+int lib_battle_foe_left(void) { return foe_left; }
+
+/* The foe's object: the first of the battle's in play on the enemies' side */
+static uint32_t foe_object(void) {
+	for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
+		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
+		if ((emu_read8(o + BN6_T1_IN_PLAY) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 1) return o;
+	}
+	return 0;
+}
+
+/* The foe's HP from the board's as he is first seen in play (his max his
+ * own, as BN5's 0x08006862 gives the board's max with it), then kept as
+ * the battle takes it, for the board (BN5's 0x08009050) */
+static void foe_watch(void) {
+	uint32_t o = foe_hp > 0 ? foe_object() : 0;
+	if (!o) return;
+	int hp = emu_read16(o + BN6_T1_HP);
+	if (!foe_given) {
+		foe_given = true;
+		if (foe_hp < hp) {
+			uint16_t v = (uint16_t)foe_hp;
+			emu_write(o + BN6_T1_HP, &v, 2);
+			if (emu_debug_on()) fprintf(stderr, "liberation: the foe's battle from the board's %d HP (his own %d)\n", foe_hp, hp);
+			hp = foe_hp;
+		}
+	}
+	foe_left = hp;
+}
+
 void lib_battle_watch(void) {
 	if (!arm.on) return;
 	int phase = emu_read8(BN6_BATTLE_PHASE);
 	if (emu_read8(BN6_BATTLE_MODE) == BN6_BATTLE_ON && (phase == BN6_PHASE_CUSTOM || phase == BN6_PHASE_FIGHT))
 		turn_seen = emu_read8(BN6_BATTLE_SCREENS);
+	foe_watch();
 }
 
 int lib_battle_end(int *turn) {

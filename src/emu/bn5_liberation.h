@@ -171,6 +171,36 @@
 #define BN5_LIB_DIGITS_PAL   0x086CCD24u /* ... white (an HP, OBJ palette 14), */
 #define BN5_LIB_HARM_PAL     0x087E4678u /* ... yellow (a harm, OBJ palette 15), its top 29 pixels over the Navi's feet, centred */
 
+/* The units' HP on the board (BN5_LIB_UNITS +0x14 its HP, +0x16 its max, +0x18 the HP shown), drawn each frame after the
+ * board's (0x08004FF0) for every unit in play with HP shown: the team's but the Navi in play's (his in the HP box) while
+ * BN5_LIB_STATE +0x18 lacks 0x100, the Darkloid's and guardians' while it lacks 0x80 (a command's animation sets both) */
+#define BN5_LIB_TEAM_HP      0x080533A0u /* the team's digits under them, */
+#define BN5_LIB_ENEMY_HP     0x0805341Au /* ... the Darkloid's and the guardians', */
+#define BN5_LIB_HP_DIGITS    0x08053482u /* ... each drawn: BN5_LIB_DIGITS' digit d at OBJ tile 664 + 2d, an 8x16 OBJ (priority 2) a */
+#define BN5_LIB_HP_STEP      8           /* ... digit, this far apart, the number centred on the unit's place on the picture, */
+                                         /* ... its top there (0x08003498: x + y + 120 across, (y - x) / 2 - z + 82 down) */
+#define BN5_LIB_HP_ROLL      4           /* ... the HP shown stepped this much a frame toward its HP (0x080533D8) */
+#define BN5_LIB_HP_TILE      664         /* ... (OBJ palette 14, BN5_LIB_DIGITS_PAL) */
+#define BN5_LIB_DARKLOID_HEAL 0x080560ACu /* the Darkloid's turn's heal, as DARKLOID PHASE's band closes: where his HP is below */
+#define BN5_LIB_HEAL         0x08053D04u /* ... his max and dark panels stand round him, his max / 10 for each (weighed by */
+#define BN5_LIB_DARK_WEIGHT  0x08050334u /* ... this table, a byte per panel kind: 1 for dark, an item's, a DarkHole and his */
+                                         /* ... ring, 0 else; 0x08051E7C sums his eight), his HP and the HP shown up at once, */
+                                         /* ... his max at most; then BN5_LIB_HEAL_FX (variant 2) and its sound, */
+#define BN5_LIB_HEAL_WAIT    20          /* ... and this many frames before his turn goes on (his reach lit 21 frames later) */
+#define BN5_LIB_HEAL_SPRITE  120         /* ... the effect: sprite list 7's 120 (0x082FF3AC), rising lines, 15 frames, at his place, */
+#define BN5_LIB_HEAL_ANIM    0           /* ... this animation (its first frame's 32x32 OBJ 16 left of and 24 over his place), */
+#define BN5_LIB_HEAL_PAL     2           /* ... in the palette its variant names, 2 (a Navi's rest's 0): the frame's palette block's */
+                                         /* ... third, past the one it counts (0x08300268, loaded in OBJ palette 2) */
+#define BN5_LIB_PASS_HEAL    0x08053CBEu /* a Navi's rest (Pass) and the like: his max / 10 times a byte of 0x08053CF8 (2, 2, 3, 3, */
+                                         /* ... 4, 4, 5, 5, 5) by the event flags 0x300-0x308 set from the first (0x08052EE8), */
+                                         /* ... his max at most: a fifth on mission 1's state, none of them set */
+/* A board unit's HP through its battle: as the battle's enemy marked by its record (bit 2 of its entry's first byte) spawns
+ * (0x08006862) it takes the HP and max of the unit fought (BN5_LIB_STATE +8 = 2, +9 its index; 0x08053B9E); as the battle
+ * ends (0x08007120) each such enemy's HP is written back into it (0x08009050, 0x08053BF4), so a unit not deleted keeps on the
+ * board what its battle left (one left at 0 by a battle not won given back a quarter of its max, 0x0804D2EC) */
+#define BN5_LIB_FOE_HP       0x08053B9Eu /* the fought unit's HP and max for its battle's marked enemy, */
+#define BN5_LIB_FOE_HP_BACK  0x08009050u /* ... and its HP back into the unit as the battle ends */
+
 /* The L view's arrows and cross (OBJ palette 12, BN5_LIB_HUD_PAL; read in its OAM) */
 #define BN5_LIB_LVIEW_ARROWS 0x087E4B64u /* eight 8x8 tiles, up, up-right, right, down-right, down, down-left, left, up-left, */
 #define BN5_LIB_LVIEW_BLINK  0x100       /* ... and their second look this far on, shown 8 frames of every 32 */

@@ -60,9 +60,15 @@ typedef struct {
 	uint8_t anim[LIB_UNITS];       /* each unit's animation (its object's byte, LayerObjs.lib_anim) */
 	uint8_t reach[MAP_H][MAP_W];   /* 1: in the acting unit's reach, */
 	bool reach_lit;                /* ... lit in BN5's red (liberation_look.c) */
-	struct { int sprite, anim, x, y, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none) and its animation
-	                                             * at world (x, y), the n-th begun */
+	struct { int sprite, anim, pal, x, y, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none), its
+	                                                  * animation and palette at world (x, y), the n-th begun */
 	int harm, harm_t;              /* a blow's harm in BN5's digits over MegaMan (0 none), frames shown */
+	/* each unit's HP on the board, as BN5 keeps it (its battle begins
+	 * from it and leaves it what it took; the Darkloid's heal raises it):
+	 * its max (0 none: our guardians', whose battles are the act's
+	 * viruses), and the HP its digits show, stepped toward it */
+	int hp[LIB_UNITS], hp_max[LIB_UNITS], hp_shown[LIB_UNITS];
+	int megaman_shown;             /* ... MegaMan's, under him while he is not the Navi in play (the Darkloids' phase) */
 	/* where each unit's sprite is (its object), and where it shows */
 	uint8_t fence[MAP_H][MAP_W];   /* 1: the panel has walls of its own (liberation_fence.c), shut or open as it is walked */
 	int slot[LIB_UNITS];
@@ -93,6 +99,9 @@ void lib_faced(int *x, int *y);
 bool lib_quiet(void);
 int lib_hp(void);
 void lib_hp_set(int hp);
+/* ... and whether his HP shows under him, as BN5 shows a Navi's not in
+ * play: the Darkloids' phase (its banner's too) */
+bool lib_megaman_hp_shown(void);
 /* (liberation_turn.c) Unit u's turn in the Darkloids' phase as BN5 plays
  * it, a frame at a time: true once over */
 bool lib_turn(int u);
