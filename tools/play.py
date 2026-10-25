@@ -71,7 +71,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (CYBERWORLD_PLAY_BIN: another build, e.g. a session's own bin/ copy, to replay it exactly)
 BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linux', 'cyberworld'))
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
-BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
+BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
 SCALE = 3
 DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24

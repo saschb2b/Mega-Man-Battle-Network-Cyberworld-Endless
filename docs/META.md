@@ -151,6 +151,13 @@ for it. The summary names the new entries of a run. The Library feeds:
   budget (the skill's loadout-as-budget);
 - the programs pool of docs/NAVICUST.md, 7, on the same rule.
 
+Beside it the BtlrCard, BN6's own card of virus data (the owner's
+decision of 25 October 2026; docs/LEVEL_DESIGN.md, The Virus Battler):
+the first Virus Battler met gives it, with Mettaur and Gunner, and each
+Rare virus deleted in any run joins it. It is variety, never power: its
+viruses fight for MegaMan only at a Battler, where a bigger card plays
+longer series.
+
 ### 6. Gates that open over runs (BN's security cubes)
 
 BN hid paths behind cubes and doors that opened with codes found later.

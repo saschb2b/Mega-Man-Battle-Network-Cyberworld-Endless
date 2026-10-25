@@ -2254,6 +2254,15 @@ def lint_voice():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'voice_catalog.py'), '--check']) == 0
 
 
+def lint_itch():
+    """The itch.io page in step with the repository (docs/ITCH.md, Keeping it
+    in step): its description names no version, docs/itch/'s files are the
+    ones applied on itch, and every release but the newest has its devlog
+    post there (tools/itch.py lint, offline)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'itch.py'), 'lint']) == 0
+
+
 # ---- the code's smells (AGENTS.md, Code structure) ----
 
 SMELL_LINES = {'.c': 1000, '.m': 1000, '.h': 400}   # a file past this many lines holds more than one thing
@@ -2450,6 +2459,7 @@ def lint(update=False):
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
     ok = lint_voice() and ok
+    ok = lint_itch() and ok
     ok = lint_complexity(update) and ok
     ok = lint_smells(update) and ok
     ok = lint_headers() and ok

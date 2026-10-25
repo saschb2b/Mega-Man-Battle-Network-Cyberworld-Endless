@@ -43,7 +43,7 @@ the site.
 | The screens the engine draws in BN6's PET look (the Jukebox, Options, Trade Central, the NetPass, the second screen): BN's own screens' hierarchy, keys, cursor, letters and colours, measured, and what ours take from them | [docs/UI.md](docs/UI.md) |
 | Moving saves between systems: the `.cwsave` file, import, Undo, the automatic copy | [docs/SAVES.md](docs/SAVES.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
-| The itch.io page: its texts, settings, pictures and files, and how each release reaches it | [docs/ITCH.md](docs/ITCH.md) |
+| The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/ITCH.md](docs/ITCH.md) |
 | Online play (epic #120): the gate in Lan's HP, the Net Square, Trade Central, the Arena, the server and the wire | [docs/ONLINE.md](docs/ONLINE.md); the gate in [docs/HOME.md](docs/HOME.md) piece 11; hosting in [server/README.md](server/README.md); the wire in [shared/online/README.md](shared/online/README.md); the link cable and the Arena's engine in [docs/ONLINE_LINK.md](docs/ONLINE_LINK.md) and [docs/ONLINE_ARENA.md](docs/ONLINE_ARENA.md) |
 
 ## Layout
@@ -151,8 +151,9 @@ the site.
   the game's structures as a bare offset outside `src/emu/bn6.h` (issue
   #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), no new code smell and
   no header that is not whole on its own (Code structure, below), and no
-  ROM, save, state or large file in git outside `docs/`. A baseline only
-  shrinks: after fixing one, `build.py lint --update`.
+  ROM, save, state or large file in git outside `docs/`, and the itch.io
+  page in step with `docs/itch/` (docs/ITCH.md, Keeping it in step). A
+  baseline only shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the
   layer before it loads `run.state`, so generation and object placement
   must not depend on the game's RAM.
@@ -288,6 +289,7 @@ python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's ch
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 python3 tools/itch.py push   # the latest release's files to the itch.io page, a butler channel each (docs/ITCH.md; `prepare` lays them out without sending)
+python3 tools/itch.py devlog  # the newest release's devlog post for itch's editor; `record --post TAG URL` once posted, `check` after (docs/ITCH.md)
 python3 tools/itch_art.py    # docs/itch: the itch.io page's cover, banner and background tile; .build/itch: its screenshots at 4x
 ```
 
@@ -341,7 +343,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 scale over `settings.ini`'s (Options' Display), `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
-undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader; intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumor_lines.c); dark for a flame of darkness (docs/META.md);
+undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader, battler for a Virus Battler (`--dev battler=K` puts one on the layer); intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumor_lines.c); dark for a flame of darkness (docs/META.md);
 fragment for MegaMan's words at a ScrtData; bugfrags gives 50 BugFrags, keys an Unlocker, rushfood three RushFood, wwwid a WWW-ID, zenny 10000 zenny, regup a RegUP3). `--input "FRAMES:BUTTONS,..."` scripts the
 buttons (`UP+RIGHT`, `A`; play.py's dev steps too, `0:place X Y FACE`, `0:flags FROM TO 1`, `0:sig` (MegaMan in the layer's signature, docs/LEVEL_DESIGN.md, Identity) and `0:battle`, the layer's next random battle as soon as MegaMan is free on its map, BN5's on its territory; `300:battle` waits its 300 frames first; `0:foes 200@52/01@43` a battle in BN6's engine of the enemy ids named at their panels, column then row, `0:xrecord 811DE10` one of BN5's battle records in BN6's engine (`build.py xrecords` lists them), and `0:status freeze 90` its enemies given a status as a hit leaves it, docs/DEVTOOLS.md), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames (the canvas; `--screen-shot FRAME:PATH,...` the whole screen, the touch controls on it; `--second-shot FRAME:PATH,...` the second screen, the 3DS's bottom one with its panel, at `--second-size WxH` an Android display's, and `--second-shot-range A:B:PREFIX` its frames as `--shot-range` the picture's), and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
@@ -391,7 +393,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
-| Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, its files on itch.io (`python3 tools/itch.py push`, butler logged in as the owner) and, for a minor release, the page's New in section (docs/ITCH.md); runs on real devices are the owner's, after the release, and no blocker |
+| Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, the itch.io page in step (docs/ITCH.md, Each release): its files (`python3 tools/itch.py push`), its devlog post (`tools/itch.py devlog`, posted on itch, `tools/itch.py record --post`), and `tools/itch.py check` in step; `build.py lint` fails the next release's work while a release lacks its post; runs on real devices are the owner's, after the release, and no blocker |
 
 ## Device testing
 

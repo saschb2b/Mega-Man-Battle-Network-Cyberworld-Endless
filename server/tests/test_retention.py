@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cyberworld_server import admin, backup, retention, week
 from cyberworld_server.app import Server
-from cyberworld_server.identity import read_json, write_json
+from cyberworld_server.identity import read_json, state_lock, write_json
 from cyberworld_server.retention import DAY, PlayersLog, Retention
 from test_server import Client
 
@@ -175,6 +175,24 @@ class RetentionTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.05)
         self.assertNotIn("Beta", (self.dir / "logs" / today).read_text())
         self.assertEqual(PlayersLog(self.dir, 0).prune(time.time()), 2)
+
+    async def test_close_waits_for_a_log_still_being_appended(self):
+        # (no day's totals or players' log, which would wait on the lock too)
+        await self.start(stats_days=0, log_days=0)
+        # (an append that fails is logged)
+        with self.assertLogs("cyberworld.server", "ERROR"):
+            self.server.append("gone/trades.jsonl", {"trade": 1})
+            await asyncio.gather(*self.server.writes, return_exceptions=True)
+        # (one still in its thread holds the state's lock and the log open,
+        # which Windows will not delete under it: close() waits for it)
+        with state_lock(self.dir):
+            self.server.append("trades.jsonl", {"trade": 2})
+            closing = asyncio.create_task(self.server.close())
+            await asyncio.sleep(0.1)
+            self.assertFalse(closing.done())
+        await closing
+        self.server = None
+        self.assertEqual(lines(self.dir / "trades.jsonl"), [{"trade": 2}])
 
     async def test_forget_takes_a_player_out_of_every_record_but_a_ban(self):
         await self.start()

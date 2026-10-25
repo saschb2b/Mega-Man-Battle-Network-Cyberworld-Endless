@@ -9,7 +9,7 @@
 duplicate src/gfx/gfx.c src/layer/text.c 21
 includes src/director/director.c 34
 includes src/director/director_layer.c 33
-includes src/layer/layer_objs.c 25
+includes src/layer/layer_objs.c 24
 nesting src/core/touch_art.c:rasterize 6
 nesting src/map/area_src.c:draw_layers 6
 nesting src/map/decor.c:decor_learn 6

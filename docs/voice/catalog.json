@@ -228,6 +228,38 @@
    "header": "Back in the Square (the rematch is asked on the result card, arena_card.h): won, lost, over with no result, stopped",
    "line": 73
   },
+  "battler_words:answers": {
+   "line": 20
+  },
+  "battler_words:card": {
+   "comment": "The BtlrCard, BN6's own: its key item and the flags BN6's HeelNavi sets as he sells it (the card, Mettaur's and Gunner's data), and his rules",
+   "line": 50
+  },
+  "battler_words:offer": {
+   "comment": "The pair, the stake and the question, then the stake taken, into the script under way: the box opened (`first`), and the pot's rule in a line where the card's chat has not said it all",
+   "line": 37
+  },
+  "battler_words:pot": {
+   "comment": "The pot given, as BN6 gives zenny",
+   "line": 86
+  },
+  "battler_words:series_won": {
+   "comment": "The series won: the pot, and a first win's prize",
+   "line": 120
+  },
+  "battler_words:ta_battler": {
+   "line": 67
+  },
+  "battler_words:ta_battler_after": {
+   "line": 143
+  },
+  "battler_words:won": {
+   "comment": "A win short of the series' end: the pot, the next pair, and the choice",
+   "line": 94
+  },
+  "battler_words:won.labels": {
+   "line": 112
+  },
   "board_words:clean_words": {
    "comment": "The NaviCust's bugs gone",
    "line": 51
@@ -895,30 +927,30 @@
   },
   "lock_words:obstacle_answer_words": {
    "comment": "... and his answer",
-   "line": 156
+   "line": 154
   },
   "lock_words:obstacle_cross_words": {
    "comment": "... and with `cross`'s Cross data, who is asked to `deed` it",
-   "line": 149
+   "line": 147
   },
   "lock_words:obstacle_stuck_words": {
    "comment": "MegaMan at a Link Navi's obstacle (issue #42), `what`: the two whose Cross could clear it, which the run lacks (the hint for the next run's Cross, said as it is)",
-   "line": 142
+   "line": 140
   },
   "lock_words:ta_cube_number": {
-   "line": 98
+   "line": 96
   },
   "lock_words:ta_cube_pcode": {
    "line": 21
   },
   "lock_words:ta_cube_skull": {
-   "line": 62
+   "line": 60
   },
   "lock_words:ta_cube_toll": {
    "line": 39
   },
   "lock_words:ta_pcode_teller": {
-   "line": 128
+   "line": 126
   },
   "navicust_words:abouts": {
    "comment": "What each program of the pool does, in MegaMan's words, its name first (navicust.c's POOL)",
@@ -1395,7 +1427,7 @@
    "line": 126
   },
   "service_words:ta_challenge_reward": {
-   "line": 367
+   "line": 361
   },
   "service_words:ta_dark_flame": {
    "line": 151
@@ -1416,11 +1448,11 @@
    "line": 316
   },
   "service_words:ta_lib_find_zenny": {
-   "line": 342
+   "line": 336
   },
   "service_words:ta_lib_prize_zenny": {
    "comment": "(over par BN5's \"You got:\" and the Zennys, straight after the clear's tally, as ta_lib_prize gives a chip)",
-   "line": 356
+   "line": 350
   },
   "service_words:ta_secret_gate": {
    "line": 278
@@ -2174,6 +2206,15 @@
    "speaker": "Screen",
    "stem": "pick_text"
   },
+  "src/layer/battler_words.c": {
+   "comment": "A Virus Battler Mr.Prog's words (battler_words.h): BN6's minigame in his voice, ALL CAPITALS (docs/VOICE.md, Mr.Prog). His rules are said once a profile, with the BtlrCard; after that he names the pair and the price.",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 19,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "battler_words"
+  },
   "src/layer/guardian_lines.c": {
    "comment": "What the guardians say, and MegaMan and Lan of them (docs/VOICE.md, docs/BOSSES.md): each one's lines meeting MegaMan, again, after a win or a loss, stronger, deleted; the net's rumor of him and MegaMan's battle data on him; ProtoMan's netbattle terms; the split's question. Who they are, guardians.c.",
    "domain": "Guardians",
@@ -2567,7 +2608,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2204,
+  "boxes": 2241,
   "domains": {
    "Arena": {
     "files": [
@@ -2714,11 +2755,12 @@
      "src/director/liberation_team_words.c",
      "src/director/liberation_words.c",
      "src/jukebox/jukebox_text.c",
+     "src/layer/battler_words.c",
      "src/online/emote_strip_text.c"
     ],
     "flagged": 11,
-    "lines": 213,
-    "speech": 200
+    "lines": 232,
+    "speech": 217
    },
    "Powers": {
     "files": [
@@ -2896,18 +2938,18 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 75,
+    "boxes": 76,
     "dots_per_box": 0.16,
-    "end_ask": 0.15,
-    "end_bang": 0.75,
+    "end_ask": 0.16,
+    "end_bang": 0.74,
     "end_dots": 0.04,
     "openers": [
      "Then",
      "The",
      "Alright",
+     "And",
      "We",
-     "*gulp*",
-     "And"
+     "*gulp*"
     ],
     "stutters": "1 box in 38",
     "words_per_box": 5.7
@@ -2915,7 +2957,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 790,
+    "boxes": 791,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.57,
@@ -2932,10 +2974,10 @@
     "words_per_box": 5.9
    },
    "Mr.Prog": {
-    "bangs_per_box": 0.01,
+    "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 173,
-    "dots_per_box": 0.06,
+    "boxes": 207,
+    "dots_per_box": 0.07,
     "end_ask": 0.06,
     "end_bang": 0.9,
     "end_dots": 0.02,
@@ -2945,10 +2987,10 @@
      "NET",
      "ONE",
      "THIS",
-     "HELLO"
+     "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.7
+    "words_per_box": 5.5
    },
    "Navis (bosses, bystanders)": {
     "bangs_per_box": 0.02,
@@ -2970,7 +3012,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 1870,
+  "lines": 1889,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3194,18 +3236,18 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 75,
+    "boxes": 76,
     "dots_per_box": 0.16,
-    "end_ask": 0.15,
-    "end_bang": 0.75,
+    "end_ask": 0.16,
+    "end_bang": 0.74,
     "end_dots": 0.04,
     "openers": [
      "Then",
      "The",
      "Alright",
+     "And",
      "We",
-     "*gulp*",
-     "And"
+     "*gulp*"
     ],
     "stutters": "1 box in 38",
     "words_per_box": 5.7
@@ -3213,7 +3255,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 790,
+    "boxes": 791,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.57,
@@ -3230,10 +3272,10 @@
     "words_per_box": 5.9
    },
    "Mr.Prog": {
-    "bangs_per_box": 0.01,
+    "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 173,
-    "dots_per_box": 0.06,
+    "boxes": 207,
+    "dots_per_box": 0.07,
     "end_ask": 0.06,
     "end_bang": 0.9,
     "end_dots": 0.02,
@@ -3243,10 +3285,10 @@
      "NET",
      "ONE",
      "THIS",
-     "HELLO"
+     "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.7
+    "words_per_box": 5.5
    },
    "Narration": {
     "bangs_per_box": 0.38,
@@ -3409,7 +3451,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1381
+  "speech": 1398
  },
  "version": 1,
  "conversations": [
@@ -3551,9 +3593,9 @@
   {"container":"service_words:gate_beyond","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:gate_beyond","line":272,"lines":["service_words:gate_beyond:0","service_words:gate_beyond:1","service_words:gate_beyond:2","service_words:gate_beyond:3"],"speakers":["MegaMan"],"title":"What MegaMan senses behind the golden gate where Bass waits","when":"What MegaMan senses behind the golden gate where Bass waits (docs/ BOSSES.md, Super bosses): a dark signal, unnamed until they have met, then Bass and his form; NULL for ProtoMan's copy"},
   {"container":"service_words:ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_secret_gate","line":280,"lines":["service_words:ta_secret_gate:0","service_words:ta_secret_gate:1","service_words:ta_secret_gate:2","service_words:ta_secret_gate:3"],"speakers":["MegaMan"],"title":"Secret gate","when":""},
   {"container":"service_words:ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_chip","line":319,"lines":["service_words:ta_lib_find_chip:0"],"speakers":["MegaMan"],"title":"Lib find chip","when":""},
-  {"container":"service_words:ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_zenny","line":346,"lines":["service_words:ta_lib_find_zenny:0","service_words:ta_lib_find_zenny:1"],"speakers":["MegaMan"],"title":"Lib find zenny","when":""},
-  {"container":"service_words:ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_prize_zenny","line":360,"lines":["service_words:ta_lib_prize_zenny:0"],"speakers":["MegaMan"],"title":"Lib prize zenny","when":"(over par BN5's \"You got:\" and the Zennys, straight after the clear's tally, as ta_lib_prize gives a chip)"},
-  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":370,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
+  {"container":"service_words:ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_zenny","line":340,"lines":["service_words:ta_lib_find_zenny:0","service_words:ta_lib_find_zenny:1"],"speakers":["MegaMan"],"title":"Lib find zenny","when":""},
+  {"container":"service_words:ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_prize_zenny","line":354,"lines":["service_words:ta_lib_prize_zenny:0"],"speakers":["MegaMan"],"title":"Lib prize zenny","when":"(over par BN5's \"You got:\" and the Zennys, straight after the clear's tally, as ta_lib_prize gives a chip)"},
+  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":364,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
   {"container":"reward_words:draft_take","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_take","line":25,"lines":["reward_words:draft_take:0","reward_words:draft_take:1","reward_words:draft_take:2"],"speakers":["MegaMan","Narration"],"title":"The draft's branches","when":"the draft's branches: a program given, or BugFrags for none; each sets `taken_flag` and ends, or goes on to the way on (`next`). A program that fits the board as it stands (its `fit_flag` set) is installed as it comes; else MegaMan says one moves first (the draft offers only programs that fit once they move): said after the pick, a plan, where three boxes before the menu said it of each (the owner, 6 October 2026: the reward's words were far too many)"},
   {"container":"reward_words:draft_menu","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_menu","line":63,"lines":["reward_words:draft_menu:0","reward_words:draft_menu:1"],"speakers":["MegaMan"],"title":"The draft","when":"The draft: one box, the BugFrags of none in it, then the programs in a column with their colours and the copies held (ts_option: its number and those above and below it), each to its branch (`take`), B to `skip`. Its script. A box each said what BN6's programs do: seventeen boxes from the data to the pick, which the owner found far too many (6 October 2026)."},
   {"container":"reward_words:draft_skip","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_skip","line":98,"lines":["reward_words:draft_skip:0"],"speakers":["MegaMan"],"title":"Draft skip","when":""},
@@ -3566,12 +3608,12 @@
   {"container":"reward_words:ta_gift","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:ta_gift","line":303,"lines":["reward_words:ta_gift:0","reward_words:ta_gift:1","reward_words:ta_gift:2","reward_words:ta_gift:3","reward_words:ta_gift:4","reward_words:ta_gift:5","reward_words:ta_gift:6","reward_words:ta_gift:7","reward_words:ta_gift:8","reward_words:ta_gift:9","reward_words:ta_gift:10","reward_words:ta_gift:11","reward_words:ta_gift:12"],"speakers":["Mr.Prog","Narration","MegaMan"],"title":"Gift","when":""},
   {"container":"lock_words:ta_cube_pcode","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_pcode","line":25,"lines":["lock_words:ta_cube_pcode:0","lock_words:ta_cube_pcode:1","lock_words:ta_cube_pcode:2"],"speakers":["MegaMan","Narration"],"title":"Cube pcode","when":""},
   {"container":"lock_words:ta_cube_toll","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_toll","line":42,"lines":["lock_words:ta_cube_toll:0","lock_words:ta_cube_toll:1","lock_words:ta_cube_toll:2"],"speakers":["Narration","MegaMan"],"title":"Cube toll","when":""},
-  {"container":"lock_words:ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_skull","line":64,"lines":["lock_words:ta_cube_skull:0","lock_words:ta_cube_skull:1","lock_words:ta_cube_skull:2"],"speakers":["Narration","MegaMan"],"title":"Cube skull","when":""},
-  {"container":"lock_words:ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_number","line":101,"lines":["lock_words:ta_cube_number:0","lock_words:ta_cube_number:1","lock_words:ta_cube_number:2","lock_words:ta_cube_number:3","lock_words:ta_cube_number:4"],"speakers":["Narration","MegaMan"],"title":"Cube number","when":""},
-  {"container":"lock_words:ta_pcode_teller","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_pcode_teller","line":132,"lines":["lock_words:ta_pcode_teller:0"],"speakers":["MegaMan"],"title":"Pcode teller","when":""},
-  {"container":"lock_words:obstacle_stuck_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_stuck_words","line":144,"lines":["lock_words:obstacle_stuck_words:0"],"speakers":["MegaMan"],"title":"MegaMan at a Link Navi's obstacle","when":"MegaMan at a Link Navi's obstacle (issue #42), `what`: the two whose Cross could clear it, which the run lacks (the hint for the next run's Cross, said as it is)"},
-  {"container":"lock_words:obstacle_cross_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_cross_words","line":151,"lines":["lock_words:obstacle_cross_words:0"],"speakers":["MegaMan"],"title":"Obstacle cross words","when":"... and with `cross`'s Cross data, who is asked to `deed` it"},
-  {"container":"lock_words:obstacle_answer_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_answer_words","line":156,"lines":["lock_words:obstacle_answer_words:0"],"speakers":["MegaMan"],"title":"Obstacle answer words","when":"... and his answer"},
+  {"container":"lock_words:ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_skull","line":62,"lines":["lock_words:ta_cube_skull:0","lock_words:ta_cube_skull:1","lock_words:ta_cube_skull:2"],"speakers":["Narration","MegaMan"],"title":"Cube skull","when":""},
+  {"container":"lock_words:ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_number","line":99,"lines":["lock_words:ta_cube_number:0","lock_words:ta_cube_number:1","lock_words:ta_cube_number:2","lock_words:ta_cube_number:3","lock_words:ta_cube_number:4"],"speakers":["Narration","MegaMan"],"title":"Cube number","when":""},
+  {"container":"lock_words:ta_pcode_teller","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_pcode_teller","line":130,"lines":["lock_words:ta_pcode_teller:0"],"speakers":["MegaMan"],"title":"Pcode teller","when":""},
+  {"container":"lock_words:obstacle_stuck_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_stuck_words","line":142,"lines":["lock_words:obstacle_stuck_words:0"],"speakers":["MegaMan"],"title":"MegaMan at a Link Navi's obstacle","when":"MegaMan at a Link Navi's obstacle (issue #42), `what`: the two whose Cross could clear it, which the run lacks (the hint for the next run's Cross, said as it is)"},
+  {"container":"lock_words:obstacle_cross_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_cross_words","line":149,"lines":["lock_words:obstacle_cross_words:0"],"speakers":["MegaMan"],"title":"Obstacle cross words","when":"... and with `cross`'s Cross data, who is asked to `deed` it"},
+  {"container":"lock_words:obstacle_answer_words","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:obstacle_answer_words","line":154,"lines":["lock_words:obstacle_answer_words:0"],"speakers":["MegaMan"],"title":"Obstacle answer words","when":"... and his answer"},
   {"container":"npc_lines:early","domain":"Bystanders","file":"src/layer/npc_lines.c","id":"npc_lines:early","line":16,"lines":["npc_lines:early:0","npc_lines:early:1","npc_lines:early:2","npc_lines:early:3","npc_lines:early:4"],"speakers":["Bystander"],"title":"The first two areas","when":"the first two areas"},
   {"container":"npc_lines:mid","domain":"Bystanders","file":"src/layer/npc_lines.c","id":"npc_lines:mid","line":25,"lines":["npc_lines:mid:0","npc_lines:mid:1","npc_lines:mid:2","npc_lines:mid:3","npc_lines:mid:4","npc_lines:mid:5"],"speakers":["Bystander"],"title":"The middle areas","when":"the middle areas"},
   {"container":"npc_lines:deep","domain":"Bystanders","file":"src/layer/npc_lines.c","id":"npc_lines:deep","line":35,"lines":["npc_lines:deep:0","npc_lines:deep:1","npc_lines:deep:2","npc_lines:deep:3","npc_lines:deep:4"],"speakers":["Bystander"],"title":"The Undernet, the Graveyard and the Nest","when":"the Undernet, the Graveyard and the Nest"},
@@ -3908,6 +3950,15 @@
   {"container":"liberation_pick_text:lib_pick_word","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_word","line":21,"lines":["liberation_pick_text:lib_pick_word:0"],"speakers":["Screen"],"title":"Lib pick word","when":""},
   {"container":"liberation_pick_text:lib_pick_hp","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_hp","line":31,"lines":["liberation_pick_text:lib_pick_hp:0"],"speakers":["Screen"],"title":"The Navi's HP","when":"The Navi's HP (\"HP 350\")"},
   {"container":"liberation_pick_text:lib_pick_command_note","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_command_note","line":37,"lines":["liberation_pick_text:lib_pick_command_note:caseLIB_DO_NONE.0","liberation_pick_text:lib_pick_command_note:caseLIB_DO_BOMB.0","liberation_pick_text:lib_pick_command_note:casedefault.0"],"speakers":["Screen"],"title":"What command `command`","when":"What command `command` (liberation_board.h's LIB_DO_*) costs, in small capitals for its tag: a battle, none, or always on"},
+  {"container":"battler_words:answers","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:answers","line":22,"lines":["battler_words:answers:0","battler_words:answers:1","battler_words:answers:2"],"speakers":["Mr.Prog"],"title":"Answers","when":""},
+  {"container":"battler_words:offer","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:offer","line":39,"lines":["battler_words:offer:0","battler_words:offer:1","battler_words:offer:2"],"speakers":["Mr.Prog"],"title":"The pair, the stake and the question, then the stake taken, into the script under way","when":"The pair, the stake and the question, then the stake taken, into the script under way: the box opened (`first`), and the pot's rule in a line where the card's chat has not said it all"},
+  {"container":"battler_words:card","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:card","line":52,"lines":["battler_words:card:0","battler_words:card:1"],"speakers":["Mr.Prog","MegaMan","Lan"],"title":"The BtlrCard, BN6's own","when":"The BtlrCard, BN6's own: its key item and the flags BN6's HeelNavi sets as he sells it (the card, Mettaur's and Gunner's data), and his rules"},
+  {"container":"battler_words:ta_battler","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler","line":68,"lines":["battler_words:ta_battler:0"],"speakers":["Mr.Prog"],"title":"Battler","when":""},
+  {"container":"battler_words:pot","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:pot","line":89,"lines":["battler_words:pot:0"],"speakers":["MegaMan"],"title":"The pot given, as BN6 gives zenny","when":"The pot given, as BN6 gives zenny"},
+  {"container":"battler_words:won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won","line":100,"lines":["battler_words:won:0","battler_words:won:1","battler_words:won:2"],"speakers":["Mr.Prog"],"title":"A win short of the series' end","when":"A win short of the series' end: the pot, the next pair, and the choice"},
+  {"container":"battler_words:won.labels","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won.labels","line":112,"lines":["battler_words:won.labels:0","battler_words:won.labels:1"],"speakers":["MegaMan"],"title":"Won: labels","when":""},
+  {"container":"battler_words:series_won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:series_won","line":123,"lines":["battler_words:series_won:0","battler_words:series_won:1"],"speakers":["Mr.Prog"],"title":"The series won","when":"The series won: the pot, and a first win's prize"},
+  {"container":"battler_words:ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler_after","line":148,"lines":["battler_words:ta_battler_after:0","battler_words:ta_battler_after:1"],"speakers":["Mr.Prog"],"title":"Battler after","when":""},
   {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":7,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"The keys' hints","when":"the keys' hints: the favourites' box's, the palette's"},
   {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":8,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
   {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":9,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
@@ -4842,6 +4893,25 @@
   {"boxes":[{"pages":[["The file could not","be written."]],"speaker":"Screen","text":"The file could not be written."}],"container":"pick_text_not_written","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"id":"pick_text:pick_text_not_written:0","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"The file could not be written.","text_hash":"6bdef1afb7c5"},
   {"boxes":[{"pages":[["The folder could not","be kept."]],"speaker":"Screen","text":"The folder could not be kept."}],"container":"pick_text_folder_not_kept","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"id":"pick_text:pick_text_folder_not_kept:0","kind":"screen","line":18,"speaker":"Screen","speakers":["Screen"],"text":"The folder could not be kept.","text_hash":"bc3b6e286b48"},
   {"boxes":[{"pages":[["your downloads"]],"speaker":"Screen","text":"your downloads"}],"container":"pick_text_downloads","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"fragment":true,"id":"pick_text:pick_text_downloads:0","kind":"screen","line":21,"speaker":"Screen","speakers":["Screen"],"text":"your downloads","text_hash":"185c45e4ae1e"},
+  {"boxes":[{"pages":[["NOT ENOUGH ZENNY!"]],"speaker":"Mr.Prog","text":"NOT ENOUGH ZENNY!"},{"pages":[["COME BACK WITH {stake}!"]],"speaker":"Mr.Prog","text":"COME BACK WITH {stake}!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:0","kind":"speech","line":22,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NOT ENOUGH ZENNY!|COME BACK WITH {stake}!","text_hash":"0f5de3c9ff04"},
+  {"boxes":[{"pages":[["OK! ANYTIME!"]],"speaker":"Mr.Prog","text":"OK! ANYTIME!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:1","kind":"speech","line":25,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OK! ANYTIME!","text_hash":"7dd3978ce1e5"},
+  {"boxes":[{"pages":[["ALL RIGHT! LET'S","VIRUS BATTLE!"]],"speaker":"Mr.Prog","text":"ALL RIGHT! LET'S VIRUS BATTLE!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:2","kind":"speech","line":29,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ALL RIGHT! LET'S VIRUS BATTLE!","text_hash":"935ba3049d12"},
+  {"boxes":[{"pages":[["VIRUS BATTLE! {rounds}","ROUNDS!"]],"speaker":"Mr.Prog","text":"VIRUS BATTLE! {rounds} ROUNDS!"},{"pages":[["EACH WIN ADDS {stake}","ZENNY!"]],"speaker":"Mr.Prog","text":"EACH WIN ADDS {stake} ZENNY!"},{"pages":[["MY FIRST PAIR...","{pair}!"]],"speaker":"Mr.Prog","text":"MY FIRST PAIR...\n{pair}!"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:0","kind":"speech","line":39,"placeholders":[{"name":"rounds","spec":"%d"},{"name":"stake","spec":"%d"},{"name":"pair","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"VIRUS BATTLE! {rounds} ROUNDS!|EACH WIN ADDS {stake} ZENNY!|MY FIRST PAIR...\n{pair}!","text_hash":"395bafb18047"},
+  {"boxes":[{"pages":[["{rounds} ROUNDS!"]],"speaker":"Mr.Prog","text":"{rounds} ROUNDS!"},{"pages":[["MY FIRST PAIR...","{pair}!"]],"speaker":"Mr.Prog","text":"MY FIRST PAIR...\n{pair}!"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:1","kind":"speech","line":40,"placeholders":[{"name":"rounds","spec":"%d"},{"name":"pair","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{rounds} ROUNDS!|MY FIRST PAIR...\n{pair}!","text_hash":"5e271037ba32"},
+  {"boxes":[{"pages":[["ENTER FOR","{stake} ZENNY?"]],"speaker":"Mr.Prog","text":"ENTER FOR\n{stake} ZENNY?\n"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:2","kind":"speech","line":42,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ENTER FOR\n{stake} ZENNY?\n","text_hash":"e88b8aff46a9"},
+  {"boxes":[{"pages":[["HI THERE! I'M A","VIRUS BATTLER!"]],"speaker":"Mr.Prog","text":"HI THERE! I'M A VIRUS BATTLER!"},{"pages":[["YOUR VIRUSES BATTLE","MINE!"]],"speaker":"Mr.Prog","text":"YOUR VIRUSES BATTLE MINE!"},{"pages":[["BUT FIRST,TAKE THIS!"]],"speaker":"Mr.Prog","text":"BUT FIRST,TAKE THIS!"}],"container":"card","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:card:0","kind":"speech","line":52,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HI THERE! I'M A VIRUS BATTLER!|YOUR VIRUSES BATTLE MINE!|BUT FIRST,TAKE THIS!","text_hash":"c2e2a00e4c90"},
+  {"boxes":[{"pages":[["METTAUR AND GUNNER","ARE ON IT!"]],"speaker":"Mr.Prog","text":"METTAUR AND GUNNER ARE ON IT!"},{"pages":[["DELETE A RARE","VIRUS,AND IT JOINS","THEM!"]],"speaker":"Mr.Prog","text":"DELETE A RARE VIRUS,AND IT JOINS THEM!"},{"pages":[["A card of","viruses,Lan!"]],"speaker":"MegaMan","text":"A card of viruses,Lan!"},{"pages":[["ENTRY'S {stake} ZENNY."]],"speaker":"Mr.Prog","text":"ENTRY'S {stake} ZENNY."},{"pages":[["EACH WIN ADDS {stake} TO","THE POT!"]],"speaker":"Mr.Prog","text":"EACH WIN ADDS {stake} TO THE POT!"},{"pages":[["STOP AFTER ANY WIN.","IT'S YOURS!"]],"speaker":"Mr.Prog","text":"STOP AFTER ANY WIN. IT'S YOURS!"},{"pages":[["And if we lose?"]],"speaker":"Lan","text":"And if we lose?"},{"pages":[["THEN IT'S ALL MINE!"]],"speaker":"Mr.Prog","text":"THEN IT'S ALL MINE!"}],"container":"card","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:card:1","kind":"speech","line":61,"placeholders":[{"name":"stake","spec":"%d"},{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog","MegaMan","Lan"],"text":"METTAUR AND GUNNER ARE ON IT!|DELETE A RARE VIRUS,AND IT JOINS THEM!|@M A card of viruses,Lan!|ENTRY'S {stake} ZENNY.|EACH WIN ADDS {stake} TO THE POT!|STOP AFTER ANY WIN. IT'S YOURS!|@L And if we lose?|THEN IT'S ALL MINE!","text_hash":"a2a7999de380"},
+  {"boxes":[{"pages":[["THAT'S MY SERIES FOR","TODAY!"]],"speaker":"Mr.Prog","text":"THAT'S MY SERIES FOR TODAY!"},{"pages":[["SEE YOU AROUND THE","NET!"]],"speaker":"Mr.Prog","text":"SEE YOU AROUND THE NET!"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:0","kind":"speech","line":68,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S MY SERIES FOR TODAY!|SEE YOU AROUND THE NET!","text_hash":"5a2c981a546a"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"pot","domain":"Other","file":"src/layer/battler_words.c","flags":[],"fragment":true,"id":"battler_words:pot:0","kind":"speech","line":89,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["SMART! SEE YOU","AROUND THE NET!"]],"speaker":"Mr.Prog","text":"SMART! SEE YOU AROUND THE NET!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:0","kind":"speech","line":100,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SMART! SEE YOU AROUND THE NET!","text_hash":"376cb1ea3f92"},
+  {"boxes":[{"pages":[["THAT'S THE SPIRIT!","HERE THEY COME!"]],"speaker":"Mr.Prog","text":"THAT'S THE SPIRIT! HERE THEY COME!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:1","kind":"speech","line":104,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S THE SPIRIT! HERE THEY COME!","text_hash":"6d3df57e5617"},
+  {"boxes":[{"pages":[["YOU WIN!! THE POT'S","{pot} ZENNY!"]],"speaker":"Mr.Prog","text":"YOU WIN!! THE POT'S\n{pot} ZENNY!"},{"pages":[["ROUND {round} OF {rounds}!","NEXT PAIR...","{next}!"]],"speaker":"Mr.Prog","text":"ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:2","kind":"speech","line":108,"placeholders":[{"name":"pot","spec":"%d"},{"name":"round","spec":"%d"},{"name":"rounds","spec":"%d"},{"name":"next","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU WIN!! THE POT'S\n{pot} ZENNY!|ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!","text_hash":"93442809cdc8"},
+  {"boxes":[{"pages":[["TAKE THE POT"]],"speaker":"MegaMan","text":"TAKE THE POT"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:0","kind":"screen","line":112,"speaker":"MegaMan","speakers":["MegaMan"],"text":"TAKE THE POT","text_hash":"edd100c360ac"},
+  {"boxes":[{"pages":[["FIGHT ON"]],"speaker":"MegaMan","text":"FIGHT ON"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:1","kind":"screen","line":112,"speaker":"MegaMan","speakers":["MegaMan"],"text":"FIGHT ON","text_hash":"eef940a7b692"},
+  {"boxes":[{"pages":[["YOU BEAT MY WHOLE","SERIES!!"]],"speaker":"Mr.Prog","text":"YOU BEAT MY WHOLE SERIES!!"},{"pages":[["WOW,WOW!"]],"speaker":"Mr.Prog","text":"WOW,WOW!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:0","kind":"speech","line":123,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU BEAT MY WHOLE SERIES!!|WOW,WOW!","text_hash":"edc3e953355c"},
+  {"boxes":[{"pages":[["AND FOR YOUR FIRST","WIN..."]],"speaker":"Mr.Prog","text":"AND FOR YOUR FIRST WIN..."},{"pages":[["TAKE THIS!"]],"speaker":"Mr.Prog","text":"TAKE THIS!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:1","kind":"speech","line":127,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AND FOR YOUR FIRST WIN...|TAKE THIS!","text_hash":"731ee4c7d321"},
+  {"boxes":[{"pages":[["TIME UP! A DRAW!"]],"speaker":"Mr.Prog","text":"TIME UP! A DRAW!"},{"pages":[["A DRAW GOES TO ME!"]],"speaker":"Mr.Prog","text":"A DRAW GOES TO ME!"},{"pages":[["THE {pot} ZENNY'S","MINE!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:0","kind":"speech","line":148,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TIME UP! A DRAW!|A DRAW GOES TO ME!|THE {pot} ZENNY'S MINE!","text_hash":"64178801f1d7"},
+  {"boxes":[{"pages":[["MY VIRUSES WIN!"]],"speaker":"Mr.Prog","text":"MY VIRUSES WIN!"},{"pages":[["THE {pot} ZENNY'S","MINE! THANKS!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE! THANKS!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:1","kind":"speech","line":149,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"MY VIRUSES WIN!|THE {pot} ZENNY'S MINE! THANKS!","text_hash":"12f383b8de12"},
   {"boxes":[{"pages":[["His fire tower gives","no yellow warning!"]],"speaker":"MegaMan","text":"His fire tower gives no yellow warning!"},{"pages":[["It turns into our","row. Sidestep it","late!"]],"speaker":"MegaMan","text":"It turns into our row. Sidestep it late!"},{"pages":[["His flamethrower","sweeps the lit row."]],"speaker":"MegaMan","text":"His flamethrower sweeps the lit row."},{"pages":[["A shadow under us?","He's leaping there.","Move!"]],"speaker":"MegaMan","text":"A shadow under us? He's leaping there. Move!"},{"pages":[["He stays back while","his fire burns.","Strike!"]],"speaker":"MegaMan","text":"He stays back while his fire burns. Strike!"}],"container":"guardian_tip","domain":"Guardians","file":"src/layer/guardian_lines.c","flags":["long-speech"],"id":"guardian_lines:guardian_tip:case1.0","kind":"speech","line":25,"note":"(the last box, \"|@M \", for when a sword lands, where a guardian's warps made swords miss: watched in god mode, HeatMan stands at the back through his tower and his flame, SpoutMan in his front column through his bubbles, SlashMan beside MegaMan some 40 frames after his slash, EraseMan at the back while his ghosts drift, and so on for each below; Colonel's dark-screen slash, unannounced, deleted a standing MegaMan)","speaker":"MegaMan","speakers":["MegaMan"],"text":"His fire tower gives no yellow warning!|@M It turns into our row. Sidestep it late!|@M His flamethrower sweeps the lit row.|@M A shadow under us? He's leaping there. Move!|@M He stays back while his fire burns. Strike!","text_hash":"8535afc235ea","who":"HeatMan"},
   {"boxes":[{"pages":[["His current runs","straight down our","row!"]],"speaker":"MegaMan","text":"His current runs straight down our row!"},{"pages":[["His lightning","strikes the yellow","panels."]],"speaker":"MegaMan","text":"His lightning strikes the yellow panels."},{"pages":[["He warps in close to","slash. Keep moving!"]],"speaker":"MegaMan","text":"He warps in close to slash. Keep moving!"},{"pages":[["Strike while his","lightning falls!"]],"speaker":"MegaMan","text":"Strike while his lightning falls!"}],"container":"guardian_tip","domain":"Guardians","file":"src/layer/guardian_lines.c","flags":["long-speech"],"id":"guardian_lines:guardian_tip:case2.0","kind":"speech","line":27,"note":"(the last box, \"|@M \", for when a sword lands, where a guardian's warps made swords miss: watched in god mode, HeatMan stands at the back through his tower and his flame, SpoutMan in his front column through his bubbles, SlashMan beside MegaMan some 40 frames after his slash, EraseMan at the back while his ghosts drift, and so on for each below; Colonel's dark-screen slash, unannounced, deleted a standing MegaMan)","speaker":"MegaMan","speakers":["MegaMan"],"text":"His current runs straight down our row!|@M His lightning strikes the yellow panels.|@M He warps in close to slash. Keep moving!|@M Strike while his lightning falls!","text_hash":"dc720a707ce5","who":"ElecMan"},
   {"boxes":[{"pages":[["He leaps beside us","to slash the lit","panel!"]],"speaker":"MegaMan","text":"He leaps beside us to slash the lit panel!"},{"pages":[["Step off it when he","lands!"]],"speaker":"MegaMan","text":"Step off it when he lands!"},{"pages":[["Then he spins across","the whole field."]],"speaker":"MegaMan","text":"Then he spins across the whole field."},{"pages":[["Blades left on our","side fly back down","their rows!"]],"speaker":"MegaMan","text":"Blades left on our side fly back down their rows!"},{"pages":[["After his slash,he","stays close. Swing!"]],"speaker":"MegaMan","text":"After his slash,he stays close. Swing!"}],"container":"guardian_tip","domain":"Guardians","file":"src/layer/guardian_lines.c","flags":["long-speech"],"id":"guardian_lines:guardian_tip:case3.0","kind":"speech","line":29,"speaker":"MegaMan","speakers":["MegaMan"],"text":"He leaps beside us to slash the lit panel!|@M Step off it when he lands!|@M Then he spins across the whole field.|@M Blades left on our side fly back down their rows!|@M After his slash,he stays close. Swing!","text_hash":"e9d68c9e7806","who":"SlashMan"},
@@ -5101,18 +5171,18 @@
   {"boxes":[{"pages":[["Paid. The cube","opens!"]],"speaker":"Narration","text":"Paid. The cube opens!"}],"container":"ta_cube_toll","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_toll:0","kind":"speech","line":42,"speaker":"Narration","speakers":["Narration"],"text":"Paid. The cube opens!","text_hash":"cfc3c71e31cc"},
   {"boxes":[{"pages":[["We don't have enough","Zenny,Lan..."]],"speaker":"MegaMan","text":"We don't have enough Zenny,Lan..."}],"container":"ta_cube_toll","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_toll:1","kind":"speech","line":46,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We don't have enough Zenny,Lan...","text_hash":"4cd35bf71791"},
   {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["Toll: {price} Zenny.","Pay to pass?"]],"speaker":"MegaMan","text":"Toll: {price} Zenny.\nPay to pass?\n"}],"container":"ta_cube_toll","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":["colon"],"id":"lock_words:ta_cube_toll:2","kind":"speech","line":53,"note":"(a line at most 22 characters: TOLL: 200 ZENNY TO PASS. overran the box, its first letters drawn over)","placeholders":[{"name":"price","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Toll: {price} Zenny.\nPay to pass?\n","text_hash":"7cfd456aa8dd"},
-  {"boxes":[{"pages":[["MegaMan showed the","WWW-ID."]],"speaker":"Narration","text":"MegaMan showed the WWW-ID."}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:0","kind":"speech","line":64,"speaker":"Narration","speakers":["Narration"],"text":"MegaMan showed the WWW-ID.","text_hash":"c0386ad636bf"},
-  {"boxes":[{"pages":[["The skull door","opens!"]],"speaker":"Narration","text":"The skull door opens!"}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:1","kind":"speech","line":66,"speaker":"Narration","speakers":["Narration"],"text":"The skull door opens!","text_hash":"c3ff481d57f3"},
-  {"boxes":[{"pages":[["A skull door,Lan..."]],"speaker":"MegaMan","text":"A skull door,Lan..."},{"pages":[["Only WWW members get","through."]],"speaker":"MegaMan","text":"Only WWW members get through."},{"pages":[["Without a","WWW-ID,we're stuck!"]],"speaker":"MegaMan","text":"Without a WWW-ID,we're stuck!"}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:2","kind":"speech","line":70,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A skull door,Lan...|Only WWW members get through.|Without a WWW-ID,we're stuck!","text_hash":"6636b8aedbbe"},
-  {"boxes":[{"pages":[["The number is right."]],"speaker":"Narration","text":"The number is right."}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:0","kind":"speech","line":101,"speaker":"Narration","speakers":["Narration"],"text":"The number is right.","text_hash":"cdb992d8416b"},
-  {"boxes":[{"pages":[["The door opens!"]],"speaker":"Narration","text":"The door opens!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:1","kind":"speech","line":103,"speaker":"Narration","speakers":["Narration"],"text":"The door opens!","text_hash":"07f269af97b6"},
-  {"boxes":[{"pages":[["ACCESS DENIED."]],"speaker":"Narration","text":"ACCESS DENIED."},{"pages":[["The door seals","itself!"]],"speaker":"Narration","text":"The door seals itself!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:2","kind":"speech","line":107,"speaker":"Narration","speakers":["Narration"],"text":"ACCESS DENIED.|The door seals itself!","text_hash":"268ffd8ca6a6"},
-  {"boxes":[{"pages":[["The door sealed","itself,Lan..."]],"speaker":"MegaMan","text":"The door sealed itself,Lan..."},{"pages":[["We got the number","wrong."]],"speaker":"MegaMan","text":"We got the number wrong."}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:3","kind":"speech","line":111,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The door sealed itself,Lan...|We got the number wrong.","text_hash":"ad669db27cf9"},
-  {"boxes":[{"pages":[["NUMBER DOOR."]],"speaker":"Narration","text":"NUMBER DOOR."},{"pages":[["How many flames of","hatred burn on this","layer?"]],"speaker":"Narration","text":"How many flames of hatred burn on this layer?"},{"pages":[["The braziers'","flames,Lan!"]],"speaker":"MegaMan","text":"The braziers' flames,Lan!"},{"pages":[["Let's count","carefully. A wrong","number seals it!"]],"speaker":"MegaMan","text":"Let's count carefully. A wrong number seals it!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:4","kind":"speech","line":118,"note":"ts_check_flag","speaker":"Narration","speakers":["Narration","MegaMan"],"text":"NUMBER DOOR.|How many flames of hatred burn on this layer?|@M The braziers' flames,Lan!|@M Let's count carefully. A wrong number seals it!","text_hash":"045cbd7a9571"},
-  {"boxes":[{"pages":[["Psst! MegaMan!"]],"speaker":"MegaMan","text":"Psst! MegaMan!"},{"pages":[["That security cube","here?"]],"speaker":"MegaMan","text":"That security cube here?"},{"pages":[["Its P-Code is","{code}."]],"speaker":"MegaMan","text":"Its P-Code is {code}."},{"pages":[["Don't tell anyone I","told you!"]],"speaker":"MegaMan","text":"Don't tell anyone I told you!"}],"container":"ta_pcode_teller","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":["long-speech"],"id":"lock_words:ta_pcode_teller:0","kind":"speech","line":132,"placeholders":[{"name":"code","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Psst! MegaMan!|That security cube here?|Its P-Code is {code}.|Don't tell anyone I told you!","text_hash":"db0a6ba25e13"},
-  {"boxes":[{"pages":[["{what} blocks the","way,Lan."]],"speaker":"MegaMan","text":"{what} blocks the way,Lan."},{"pages":[["{a}'s or","{b}'s Cross","could clear it..."]],"speaker":"MegaMan","text":"{a}'s or {b}'s Cross could clear it..."},{"pages":[["But we don't have","either."]],"speaker":"MegaMan","text":"But we don't have either."}],"container":"obstacle_stuck_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_stuck_words:0","kind":"speech","line":144,"placeholders":[{"name":"what","spec":"%s"},{"name":"a","spec":"%s"},{"name":"b","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{what} blocks the way,Lan.|{a}'s or {b}'s Cross could clear it...|But we don't have either.","text_hash":"bd2ef6078f50"},
-  {"boxes":[{"pages":[["{what} blocks the","way!"]],"speaker":"MegaMan","text":"{what} blocks the way!"},{"pages":[["We've got {cross}'s","Cross data!"]],"speaker":"MegaMan","text":"We've got {cross}'s Cross data!"},{"pages":[["Let's ask him to","{deed} it!"]],"speaker":"MegaMan","text":"Let's ask him to {deed} it!"}],"container":"obstacle_cross_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_cross_words:0","kind":"speech","line":151,"placeholders":[{"name":"what","spec":"%s"},{"name":"cross","spec":"%s"},{"name":"deed","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{what} blocks the way!|We've got {cross}'s Cross data!|Let's ask him to {deed} it!","text_hash":"305fc78f66fc"},
-  {"boxes":[{"pages":[["Leave it to me!"]],"speaker":"MegaMan","text":"Leave it to me!"}],"container":"obstacle_answer_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_answer_words:0","kind":"speech","line":156,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Leave it to me!","text_hash":"47857d8b3fb2"},
+  {"boxes":[{"pages":[["MegaMan showed the","WWW-ID."]],"speaker":"Narration","text":"MegaMan showed the WWW-ID."}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:0","kind":"speech","line":62,"speaker":"Narration","speakers":["Narration"],"text":"MegaMan showed the WWW-ID.","text_hash":"c0386ad636bf"},
+  {"boxes":[{"pages":[["The skull door","opens!"]],"speaker":"Narration","text":"The skull door opens!"}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:1","kind":"speech","line":64,"speaker":"Narration","speakers":["Narration"],"text":"The skull door opens!","text_hash":"c3ff481d57f3"},
+  {"boxes":[{"pages":[["A skull door,Lan..."]],"speaker":"MegaMan","text":"A skull door,Lan..."},{"pages":[["Only WWW members get","through."]],"speaker":"MegaMan","text":"Only WWW members get through."},{"pages":[["Without a","WWW-ID,we're stuck!"]],"speaker":"MegaMan","text":"Without a WWW-ID,we're stuck!"}],"container":"ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_skull:2","kind":"speech","line":68,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A skull door,Lan...|Only WWW members get through.|Without a WWW-ID,we're stuck!","text_hash":"6636b8aedbbe"},
+  {"boxes":[{"pages":[["The number is right."]],"speaker":"Narration","text":"The number is right."}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:0","kind":"speech","line":99,"speaker":"Narration","speakers":["Narration"],"text":"The number is right.","text_hash":"cdb992d8416b"},
+  {"boxes":[{"pages":[["The door opens!"]],"speaker":"Narration","text":"The door opens!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:1","kind":"speech","line":101,"speaker":"Narration","speakers":["Narration"],"text":"The door opens!","text_hash":"07f269af97b6"},
+  {"boxes":[{"pages":[["ACCESS DENIED."]],"speaker":"Narration","text":"ACCESS DENIED."},{"pages":[["The door seals","itself!"]],"speaker":"Narration","text":"The door seals itself!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:2","kind":"speech","line":105,"speaker":"Narration","speakers":["Narration"],"text":"ACCESS DENIED.|The door seals itself!","text_hash":"268ffd8ca6a6"},
+  {"boxes":[{"pages":[["The door sealed","itself,Lan..."]],"speaker":"MegaMan","text":"The door sealed itself,Lan..."},{"pages":[["We got the number","wrong."]],"speaker":"MegaMan","text":"We got the number wrong."}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:3","kind":"speech","line":109,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The door sealed itself,Lan...|We got the number wrong.","text_hash":"ad669db27cf9"},
+  {"boxes":[{"pages":[["NUMBER DOOR."]],"speaker":"Narration","text":"NUMBER DOOR."},{"pages":[["How many flames of","hatred burn on this","layer?"]],"speaker":"Narration","text":"How many flames of hatred burn on this layer?"},{"pages":[["The braziers'","flames,Lan!"]],"speaker":"MegaMan","text":"The braziers' flames,Lan!"},{"pages":[["Let's count","carefully. A wrong","number seals it!"]],"speaker":"MegaMan","text":"Let's count carefully. A wrong number seals it!"}],"container":"ta_cube_number","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:ta_cube_number:4","kind":"speech","line":116,"note":"ts_check_flag","speaker":"Narration","speakers":["Narration","MegaMan"],"text":"NUMBER DOOR.|How many flames of hatred burn on this layer?|@M The braziers' flames,Lan!|@M Let's count carefully. A wrong number seals it!","text_hash":"045cbd7a9571"},
+  {"boxes":[{"pages":[["Psst! MegaMan!"]],"speaker":"MegaMan","text":"Psst! MegaMan!"},{"pages":[["That security cube","here?"]],"speaker":"MegaMan","text":"That security cube here?"},{"pages":[["Its P-Code is","{code}."]],"speaker":"MegaMan","text":"Its P-Code is {code}."},{"pages":[["Don't tell anyone I","told you!"]],"speaker":"MegaMan","text":"Don't tell anyone I told you!"}],"container":"ta_pcode_teller","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":["long-speech"],"id":"lock_words:ta_pcode_teller:0","kind":"speech","line":130,"placeholders":[{"name":"code","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Psst! MegaMan!|That security cube here?|Its P-Code is {code}.|Don't tell anyone I told you!","text_hash":"db0a6ba25e13"},
+  {"boxes":[{"pages":[["{what} blocks the","way,Lan."]],"speaker":"MegaMan","text":"{what} blocks the way,Lan."},{"pages":[["{a}'s or","{b}'s Cross","could clear it..."]],"speaker":"MegaMan","text":"{a}'s or {b}'s Cross could clear it..."},{"pages":[["But we don't have","either."]],"speaker":"MegaMan","text":"But we don't have either."}],"container":"obstacle_stuck_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_stuck_words:0","kind":"speech","line":142,"placeholders":[{"name":"what","spec":"%s"},{"name":"a","spec":"%s"},{"name":"b","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{what} blocks the way,Lan.|{a}'s or {b}'s Cross could clear it...|But we don't have either.","text_hash":"bd2ef6078f50"},
+  {"boxes":[{"pages":[["{what} blocks the","way!"]],"speaker":"MegaMan","text":"{what} blocks the way!"},{"pages":[["We've got {cross}'s","Cross data!"]],"speaker":"MegaMan","text":"We've got {cross}'s Cross data!"},{"pages":[["Let's ask him to","{deed} it!"]],"speaker":"MegaMan","text":"Let's ask him to {deed} it!"}],"container":"obstacle_cross_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_cross_words:0","kind":"speech","line":149,"placeholders":[{"name":"what","spec":"%s"},{"name":"cross","spec":"%s"},{"name":"deed","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{what} blocks the way!|We've got {cross}'s Cross data!|Let's ask him to {deed} it!","text_hash":"305fc78f66fc"},
+  {"boxes":[{"pages":[["Leave it to me!"]],"speaker":"MegaMan","text":"Leave it to me!"}],"container":"obstacle_answer_words","domain":"Layers: locks","file":"src/layer/lock_words.c","flags":[],"id":"lock_words:obstacle_answer_words:0","kind":"speech","line":154,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Leave it to me!","text_hash":"47857d8b3fb2"},
   {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["SuperArmor: I won't","flinch when I'm hit."]],"speaker":"MegaMan","text":"SuperArmor: I won't flinch when I'm hit."}],"container":"abouts","domain":"NaviCust","file":"src/layer/navicust_words.c","flags":["colon"],"id":"navicust_words:abouts:1","kind":"speech","line":13,"speaker":"MegaMan","speakers":["MegaMan"],"text":"SuperArmor: I won't flinch when I'm hit.","text_hash":"f7e06c082099"},
   {"boxes":[{"pages":[["Custom1: one more","chip each turn."]],"speaker":"MegaMan","text":"Custom1: one more chip each turn."}],"container":"abouts","domain":"NaviCust","file":"src/layer/navicust_words.c","flags":[],"id":"navicust_words:abouts:2","kind":"speech","line":14,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Custom1: one more chip each turn.","text_hash":"702052a3aef1"},
   {"boxes":[{"pages":[["Custom2: two more","chips each turn."]],"speaker":"MegaMan","text":"Custom2: two more chips each turn."}],"container":"abouts","domain":"NaviCust","file":"src/layer/navicust_words.c","flags":[],"id":"navicust_words:abouts:3","kind":"speech","line":15,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Custom2: two more chips each turn.","text_hash":"1bf1f5856f72"},
@@ -5269,10 +5339,10 @@
   {"boxes":[{"pages":[["Whoa! Our two","ScrtData are","glowing!"]],"speaker":"MegaMan","text":"Whoa! Our two ScrtData are glowing!"},{"pages":[["One more should open","it!"]],"speaker":"MegaMan","text":"One more should open it!"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:2","kind":"speech","line":282,"note":"how many ScrtData MegaMan holds, said at a closed gate","speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! Our two ScrtData are glowing!|One more should open it!","text_hash":"6a6bd79b4e15"},
   {"boxes":[{"pages":[["The ScrtData glows!","Open the gate?"]],"speaker":"MegaMan","text":"The ScrtData glows!\nOpen the gate?\n"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:3","kind":"speech","line":300,"note":"(Bass behind it: said first, and the question starts on No, as a risky choice's does)","speaker":"MegaMan","speakers":["MegaMan"],"text":"The ScrtData glows!\nOpen the gate?\n","text_hash":"33a113aeb112"},
   {"boxes":[{"pages":[["Lan! There was a","chip in that panel!"]],"speaker":"MegaMan","text":"Lan! There was a chip in that panel!"}],"container":"ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_chip:0","kind":"speech","line":319,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! There was a chip in that panel!","text_hash":"82b6edcf5e5f"},
-  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_find_zenny:0","kind":"speech","line":346,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
-  {"boxes":[{"pages":[["Lan! Zenny in that","panel!"]],"speaker":"MegaMan","text":"Lan! Zenny in that panel!"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_zenny:1","kind":"speech","line":347,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! Zenny in that panel!","text_hash":"03f56be3a004"},
-  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_prize_zenny:0","kind":"speech","line":360,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
-  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":370,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_find_zenny:0","kind":"speech","line":340,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["Lan! Zenny in that","panel!"]],"speaker":"MegaMan","text":"Lan! Zenny in that panel!"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_zenny:1","kind":"speech","line":341,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! Zenny in that panel!","text_hash":"03f56be3a004"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_prize_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_prize_zenny:0","kind":"speech","line":354,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":364,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
   {"boxes":[{"pages":[["...Hmph. You again."]],"speaker":"Bass","text":"...Hmph. You again."},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"fragment":true,"id":"super_lines:bass_meeting:0","kind":"speech","line":20,"speaker":"Bass","speakers":["Bass"],"text":"...Hmph. You again.|Copy or not... I delete the strong.","text_hash":"ba3c9161b59c"},
   {"boxes":[{"pages":[["W-Whoa! Someone was","in that stone!?"]],"speaker":"Lan","text":"W-Whoa! Someone was in that stone!?"},{"pages":[["That's... Bass!!"]],"speaker":"MegaMan","text":"That's... Bass!!"},{"pages":[["...Hmph."]],"speaker":"Bass","text":"...Hmph."},{"pages":[["Another copy,come to","be deleted?"]],"speaker":"Bass","text":"Another copy,come to be deleted?"},{"pages":[["I'm no copy! I'm","MegaMan!"]],"speaker":"MegaMan","text":"I'm no copy! I'm MegaMan!"},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:1","kind":"speech","line":21,"speaker":"Lan","speakers":["Lan","MegaMan","Bass"],"text":"@L W-Whoa! Someone was in that stone!?|@M That's... Bass!!|...Hmph.|Another copy,come to be deleted?|@M I'm no copy! I'm MegaMan!|Copy or not... I delete the strong.","text_hash":"94f0f8349cd3"},
   {"boxes":[{"pages":[["Hmph. Back again?"]],"speaker":"Bass","text":"Hmph. Back again?"},{"pages":[["Then be deleted","again."]],"speaker":"Bass","text":"Then be deleted again."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:2","kind":"speech","line":23,"speaker":"Bass","speakers":["Bass"],"text":"Hmph. Back again?|Then be deleted again.","text_hash":"d717d7ce4a1b"},

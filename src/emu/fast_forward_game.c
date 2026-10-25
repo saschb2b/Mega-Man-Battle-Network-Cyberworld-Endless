@@ -41,6 +41,8 @@ static bool allowed(void) {
 		s.toolkit = emu_read8(emu_read32(BN6_TOOLKIT));
 		s.sub = emu_read8(BN6_GAMESTATE);
 		s.phase = emu_read8(BN6_BATTLE_PHASE);
+		uint32_t settings = emu_read32(BN6_BATTLE_SETTINGS);
+		s.mode = settings >= 0x08000000u && settings < 0x0A000000u ? emu_read8(settings + 3) : 0;
 	}
 	return fast_scene_allows(&s);
 }

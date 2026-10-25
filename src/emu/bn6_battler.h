@@ -1,10 +1,10 @@
 /* The Virus Battler in BN6 Cybeast Gregar (USA), part of bn6.h's addresses
  * (bn6_battle_loop.h includes this): the BtlrCard and the rare viruses'
  * data it holds, the battle mode in which two of them fight a Battler's
- * pair on their own, and the five Battler Mr.Progs' series of records.
- * Research for a run's Virus Battler, nothing the engine uses yet
- * (docs/LEVEL_DESIGN.md, The Virus Battler; docs/ROM_DATA.md, The Virus
- * Battler; docs/SOURCES.md). */
+ * pair on their own, and the five Battler Mr.Progs' series of records,
+ * which a run's Battler Mr.Prog fights by BN6's own code
+ * (src/director/director_battler.c; docs/LEVEL_DESIGN.md, The Virus
+ * Battler; docs/ROM_DATA.md, The Virus Battler; docs/SOURCES.md). */
 #ifndef CW_BN6_BATTLER_H
 #define CW_BN6_BATTLER_H
 
@@ -61,5 +61,27 @@
 #define BN6_VB_TEXT_3         0x0879F080u /* ... the punishment chair's comp, Green Town */
 #define BN6_VB_TEXT_4         0x087A10BCu /* ... the oxygen tank's comp, Sky Town */
 #define BN6_VB_TEXT_5         0x08782844u /* ... Central Area 1 */
+#define BN6_VB_BATTLERS       5
+/* Each Battler's own Mr.Prog, never the generic green one (sprite list 6,
+ * as his map's NPC script sets it: bn6f's Comps1, Comps2 and CentralArea,
+ * each shown once the Battler before is beaten, BN6_FLAG_VB_BEATEN) */
+#define BN6_VB_SPRITE_1       0x5C
+#define BN6_VB_SPRITE_2       0x5D
+#define BN6_VB_SPRITE_3       0x5F
+#define BN6_VB_SPRITE_4       0x5E
+#define BN6_VB_SPRITE_5       0x3D
+/* Each Battler's first prize, as his archive gives it (ts_item_give_chip
+ * F4 10 and ts_item_give_navi_cust_program EF 1B, read from the five
+ * archives above): Battler 1's WindRack *, 2's HP+500 (pink), 3's BugFix *,
+ * 4's FldrPak2 (yellow), 5's SuprVulc V; a chip's id and code (0-25, 26
+ * '*'), a program's give id (its name's index times four) and colour */
+#define BN6_VB_PRIZE_CHIP_1   0x50
+#define BN6_VB_PRIZE_PROGRAM_2 0xB8
+#define BN6_VB_PRIZE_COLOR_2  6
+#define BN6_VB_PRIZE_CHIP_3   0xB0
+#define BN6_VB_PRIZE_PROGRAM_4 0x78
+#define BN6_VB_PRIZE_COLOR_4  3
+#define BN6_VB_PRIZE_CHIP_5   0x08
+#define BN6_VB_PRIZE_CODE_5   21
 
 #endif

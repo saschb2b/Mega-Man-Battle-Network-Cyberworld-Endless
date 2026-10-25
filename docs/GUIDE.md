@@ -498,7 +498,9 @@ clock: walking a layer, the town and its places, chats, fades and warps,
 a battle's opening up to its first Custom screen, and its results from
 the last deletion on. The fight itself always runs at BN6's speed, from
 its first Custom screen to its end, the pause with it; so do BN6's own
-menus (the PET, shops, traders, mail), and online it never runs.
+menus (the PET, shops, traders, mail), and online it never runs. The one
+fight it runs in is a Virus Battler's (below), whose viruses fight on
+their own: his VIRUS LIST and the placing stay at BN6's pace.
 
 Press its button to turn it on and again to turn it off: **Tab** or
 **Space** on a keyboard, a controller's right trigger or a press of its
@@ -753,6 +755,7 @@ it pays one of BN6's GigaChips.
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
 | Collector's vault | From the second act: its lock opens for a Library of 30 chips (60 in act 3, 90 later), and it holds three rare chips, one to take |
+| Virus Battler (a Mr.Prog of his own colour) | BN6's Virus Battler, at a side path's end on an act's first layer in about half the acts from the second. Your stored viruses fight his pair on their own. Entry costs zenny (500 to 3000 by act), each win adds that much to the pot, and after each win you take the pot or fight on; a loss or a draw loses it. A whole series won pays the pot, and once a run his BN6 prize. The first one you meet gives you the BtlrCard |
 
 ### What carries over
 
@@ -778,6 +781,10 @@ behind is options. From the second run, NEW GAME opens a setup:
   go in a hand and every Program Advance forms from its chips in order.
   Once the endless net's own Nest has fallen, a fifth: BeastOut from the
   first battle. Helped runs count for everything.
+
+The BtlrCard carries over too: the viruses on it (Mettaur and Gunner, and
+each Rare virus deleted in any run, BN6's "You got new Virus Data") are
+yours in every run, for the Virus Battlers alone.
 
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
 PET shows whole: a Chip Trader's prize is new to it first, and the summary
