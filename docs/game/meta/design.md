@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:02:58Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
 ---
 
 # The meta layer's design
@@ -152,6 +152,13 @@ for it. The summary names the new entries of a run. The Library feeds:
 - later, a custom starting folder built from Library chips under a
   budget (the skill's loadout-as-budget);
 - the programs pool of [The NaviCust](../navicust.md), 7, on the same rule.
+
+Beside it the BtlrCard, BN6's own card of virus data (the owner's
+decision of 25 October 2026; [The Virus Battler](../../world/level-design/virus-battler.md)):
+the first Virus Battler met gives it, with Mettaur and Gunner, and each
+Rare virus deleted in any run joins it. It is variety, never power: its
+viruses fight for MegaMan only at a Battler, where a bigger card plays
+longer series.
 
 ### 6. Gates that open over runs (BN's security cubes)
 

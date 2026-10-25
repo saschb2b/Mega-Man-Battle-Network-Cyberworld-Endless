@@ -116,9 +116,16 @@ typedef struct {
 	 * older net's Navis fight our way now, to a profile told they fought
 	 * the old way (issue #82, the guest core gone from runs) */
 	uint8_t soul_form_taught, navis_ours_told;
+	/* the Virus Battler (docs/world/level-design/virus-battler.md): the
+	 * BtlrCard held (BTLR_*), given by the first Battler met, and the
+	 * virus families' data on it, a bit per AI index (BN6's flag
+	 * BN6_FLAG_VIRUS_DATA + AI each, set in every run's game from here) */
+	uint8_t btlr_card;
+	uint32_t btlr_data;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
+enum { BTLR_CARD_HELD = 1 };
 #define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 

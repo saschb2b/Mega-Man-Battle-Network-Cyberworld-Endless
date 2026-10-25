@@ -3,7 +3,7 @@ type: Process
 title: "itch.io"
 description: "The itch.io page's source, changed here first: its title, tagline, settings, tags, pictures (`tools/itch_art.py`) and theme, the files `tools/itch.py` pushes to butler channels, the browser build there, and each release's steps."
 tags: [project, itch]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:57:32Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T16:55:22Z }
 ---
 
 # itch.io
@@ -56,10 +56,12 @@ The title is the site's brand. The tagline, shown under the cover in
 listings and search results, names the series and BN6 for the players
 who look for it, and says the rest of the site's pitch in fewer words;
 itch takes 120 characters at most. The description says first what the game is and what it needs,
-then a run, the release's news, BN5, online, where it runs, the browser
+then a run, Liberation Missions, BN5, online, where it runs, the browser
 player's controls and saves, the links and the legal line, each with a
 whole-frame GIF of the game from `docs/clips/`. It keeps the README's
-plain voice and claims only what the README and the guide say.
+plain voice and claims only what the README and the guide say. It names
+no version, so no release leaves it behind: each release's news is a
+devlog post (Keeping it in step, below).
 
 ## The settings
 
@@ -232,18 +234,78 @@ Not checked there: a phone (itch starts the game full screen on one) and a
 ROM chosen on itch's page, which the same zip passed in a cross-origin
 frame on this machine.
 
+## Keeping it in step
+
+itch has an API for files (butler) and none for the page's text or its
+devlog, so those are applied by hand, in practice by an agent in the
+owner's Chrome (Claude in Chrome; the in-app browser stops at Cloudflare).
+`docs/itch/state.json` records what the page holds: each file of
+`docs/itch/` as last applied there (its SHA-1), itch's address for each
+picture the description shows, and the devlog post of every release since
+0.1.0 (the 23 before 0.15.1 posted on 25 October 2026 with itch's
+**Original publish date** set to each release's day). `tools/itch.py` keeps it, and two checks hold everyone to it:
+
+- **`build.py lint`** (offline, in CI): the description names no version
+  (no "1.2.3", no "New in"); every file of `docs/itch/` is the one the
+  page holds, so a change here that never reached itch fails; and every
+  release in the CHANGELOG but the newest has its post (the
+  newest is posted after its tag, so the next release's work fails until
+  it is).
+- **`python3 tools/itch.py check`** (asks itch through butler): the same,
+  the newest release's post included, and every channel serving the
+  newest release. Run it after every release.
+
 ## Each release
 
-After `build.py release` and the tag (docs: the release recipe):
+After the release is published on GitHub (the tag's workflow done):
 
-1. `python3 tools/itch.py push` sends the latest release's files, each
-   channel under its version, with butler from `PATH` or `.build/butler/`
-   logged in as the page's owner (`butler login` once, in a terminal; the
-   key stays in butler's own file). A new channel's first push makes a new upload:
+1. `python3 tools/itch.py push` sends its files, each channel under its
+   version, with butler from `PATH` or `.build/butler/`, logged in as the
+   page's owner (`butler login` once, in a terminal; the key stays in
+   butler's own file). A new channel's first push makes a new upload:
    `--hidden` keeps it off the page until its display name and platform
    are set.
-2. A minor release rewrites the description's **New in** section (between
-   its `NEW IN` comments) with the release's news and its GIF, and the
-   cover when its frame should change (`tools/itch_art.py --frame`).
-3. A devlog post on the page with the release's notes, linking the
-   version on the website: itch mails it to the page's followers.
+2. `python3 tools/itch.py devlog` writes the release's post from its notes
+   (`docs/releases/vX.Y.Z.md`, else its CHANGELOG section) to
+   `.build/itch/devlog-vX.Y.Z.html`: the notes' own lead paragraph, the
+   notes with their pictures at their raw GitHub address at the tag, and a
+   last line linking the notes on the website and GitHub (a picture over
+   itch's 3 MB is a link). It prints the title and post type (Major Update
+   for X.Y.0, General Update for a patch) and draws the post's 16:9 cover,
+   `.build/itch/covers/vX.Y.Z.png` (`tools/itch_art.py --devlog`: the
+   release's trailer poster where its notes open with its trailer, else
+   its notes' first picture no older cover took, whole, in the site's
+   screen frame over the net, title screens left out).
+   Post it at `https://itch.io/dashboard/game/5225408/new-devlog`: the
+   title; the type; the content into the editor with
+   `jQuery('textarea[name="post[body]"]').redactor('code.set', html)` and
+   `'code.sync'`, after `tools/itch_pictures.js`'s `itchPictures(html)`
+   has uploaded its pictures to itch (itch shows none from another site;
+   it runs in the editor page as itch's own Add image does, one picture
+   once); of the attachments itch adds, only the release's **Play in the
+   browser** build; the cover; **Published** ticked; Save.
+3. `python3 tools/itch.py record --post vX.Y.Z URL` with the post's
+   address, and commit `docs/itch/state.json`.
+
+itch lists a page's posts in the order they were made, whatever their
+original publish date, so the newest release's post is always made last.
+Posts owed for several releases at once (`python3 tools/itch.py devlog
+--missing` writes them all, oldest first, to `.build/itch/devlogs.json`)
+go up oldest first, each older one with its **Original publish date** and
+no attachment, and are recorded together with `record --posts JSON`
+(`{"X.Y.Z": URL, ...}`).
+4. `python3 tools/itch.py check` says in step.
+
+When the page itself changes (the description, a picture, the theme):
+edit it here first; `python3 tools/itch.py description` writes the
+description as itch's editor takes it (each GIF at its itch address; a new
+GIF is uploaded through the editor's Add image first and recorded with
+`record --image NAME URL`); apply it on the edit page
+(`textarea[name="game[description]"]`, the same two Redactor calls) or the
+theme editor; then `python3 tools/itch.py record --page` and commit.
+
+itch's upload buttons open a native file picker, which an agent cannot
+answer and which freezes the tab: before clicking one, capture the file
+input it creates (patch `HTMLInputElement.prototype.click` to keep inputs
+of type file), move it into the open form or dialog, and give it the file
+from there.

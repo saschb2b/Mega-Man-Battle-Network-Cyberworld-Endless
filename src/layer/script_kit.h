@@ -15,6 +15,8 @@ int ta_closing(TextArchive *t);
 extern const uint8_t ta_full_hp[4];   /* ts_call_set_full_h_p */
 void ta_give_chip(TextArchive *t, int id, int code, int count);
 void ta_give_hp_memory(TextArchive *t, int count);
+void ta_give_zenny(TextArchive *t, int zenny);
+void ta_take_zenny(TextArchive *t, int zenny, int paid, int broke);
 void ta_got(TextArchive *t, const char *thing, bool *first);
 void ta_got_hp(TextArchive *t, int count, bool *first);
 void ta_got_chip(TextArchive *t, const char *chip, int code, bool *first);

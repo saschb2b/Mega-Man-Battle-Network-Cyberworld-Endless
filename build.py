@@ -2085,7 +2085,8 @@ def lint_rom_data(update):
 
 # the knowledge base (AGENTS.md, The knowledge base): the okf skill's validator, and every docs/ path the tree names
 DOC_PATH = re.compile(r'(?<![\w/.\-])docs/[\w./\-]*[\w/]')
-DOC_PATH_SKIP = ('docs/project/moved.md', 'docs/releases/v', 'docs/symbols/', 'docs/voice/catalog.json', 'docs/re/state.json',
+# (docs/itch/description.html is the live itch page's copy, changed only with the page: docs/project/itch.md)
+DOC_PATH_SKIP = ('docs/project/moved.md', 'docs/releases/v', 'docs/itch/description.html', 'docs/symbols/', 'docs/voice/catalog.json', 'docs/re/state.json',
                  'docs/re/dashboard.html', '.claude/skills/okf/', '.claude/skills/reverse-engineering/',
                  '.claude/skills/game-design/', 'CHANGELOG.md')
 
@@ -2312,6 +2313,15 @@ def lint_voice():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'voice_catalog.py'), '--check']) == 0
 
 
+def lint_itch():
+    """The itch.io page in step with the repository (docs/project/itch.md, Keeping it
+    in step): its description names no version, docs/itch/'s files are the
+    ones applied on itch, and every release but the newest has its devlog
+    post there (tools/itch.py lint, offline)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'itch.py'), 'lint']) == 0
+
+
 # ---- the code's smells (AGENTS.md, Code structure) ----
 
 SMELL_LINES = {'.c': 1000, '.m': 1000, '.h': 400}   # a file past this many lines holds more than one thing
@@ -2509,6 +2519,7 @@ def lint(update=False):
     ok = lint_symbols() and ok
     ok = lint_voice() and ok
     ok = lint_docs() and ok
+    ok = lint_itch() and ok
     ok = lint_complexity(update) and ok
     ok = lint_smells(update) and ok
     ok = lint_headers() and ok

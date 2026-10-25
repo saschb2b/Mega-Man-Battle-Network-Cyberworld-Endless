@@ -90,6 +90,11 @@ void emu_battle_force(const Encounter *e) {
 	forcing = true;
 }
 
+void emu_battle_force_record(uint32_t settings) {
+	record = settings;
+	forcing = true;
+}
+
 void emu_battle_release(void) { forcing = false; }
 
 bool emu_battle_forcing(void) { return forcing; }

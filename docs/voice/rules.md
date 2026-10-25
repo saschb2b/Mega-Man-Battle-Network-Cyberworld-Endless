@@ -3,7 +3,7 @@ type: Style Guide
 title: "Voice"
 description: "Voice guide for every character line, measured from BN6's script: about six words a box, how BN6's people talk, the cast, what reads machine-written, what nobody says, where lines live, checks before committing."
 tags: [voice]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:02:58Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
 ---
 
 # Voice
@@ -384,6 +384,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The super bosses: Bass's and the Cybeast's meetings by their record, last words, tips, their data's words and title cards | `src/layer/super_lines.c` |
 | The Net Dealer, the NaviCust vendor, ProtoMan's terms, a rumor, the invisible path's hint, a ScrtData, a Spin | `src/layer/layer_words.c` |
 | Services' chats: Mr.Prog's heal, shops, a Server, flames of darkness, the duel, dark warps, the golden gate | `src/layer/service_words.c` |
+| A Virus Battler Mr.Prog: the BtlrCard and his rules (once a profile), his pair and stake, a round's result, the pot, TAKE THE POT or FIGHT ON, a series won and his prize | `src/layer/battler_words.c` |
 | Rewards' chats: Guardian Data and its draft, a Navi gate, a vault, an official gate, the gift | `src/layer/reward_words.c` |
 | Locks: security cubes, skull and number doors, the P-Code's teller, a Link Navi's obstacle | `src/layer/lock_words.c` |
 | Bystanders' small talk; the net's whispers | `src/layer/npc_lines.c`; `src/layer/rumor_lines.c` |

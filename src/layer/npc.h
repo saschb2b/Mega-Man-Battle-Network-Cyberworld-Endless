@@ -42,6 +42,11 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * (sx, sy) world units from where it stands, as the originals' counter
  * navis are. */
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
+/* A list 6 talker's sprite (script `at`, npc_talker's) set by BN6's own
+ * ns_set_sprite, which dresses it in its variation: the palette and hidden
+ * pieces BN6's NPC sprite variations give that sprite (a Virus Battler's
+ * Mr.Prog: bn6f OverworldNPCSpriteVariations) */
+void npc_variation(uint32_t at);
 
 /* ... a wide object (a desk) spoken to anywhere along it: sprite `index`
  * of list `category` at world (x, y) playing `anim`, talking with `script`

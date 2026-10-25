@@ -49,6 +49,10 @@ void emu_battle_unwatch(void);
 void emu_battle_hp(int from, int to);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
+/* ... one of BN6's own BattleSettings (a Virus Battler's round, battle mode
+ * 6: docs/world/level-design/virus-battler.md); the next emu_encounter_set
+ * hands out the engine's own again */
+void emu_battle_force_record(uint32_t settings);
 void emu_battle_release(void);
 bool emu_battle_forcing(void);
 

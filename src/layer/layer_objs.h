@@ -64,7 +64,7 @@ typedef struct {
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
-	int script_of[OBJ_OFFICIAL + 1];   /* each kind's first talker's script, -1 none (for --talk); OBJ_OFFICIAL the last kind */
+	int script_of[OBJ_KINDS];   /* each kind's first talker's script, -1 none (for --talk) */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
 	int dark_flame;            /* the flame of darkness's script, -1 none (for --talk) */

@@ -96,6 +96,20 @@ void ta_give_chip(TextArchive *t, int id, int code, int count) {
 	ta_bytes(t, b, sizeof b);
 }
 
+/* ts_check_give_zenny (BN5's over par gives its Zennys by the same EF 0E) */
+void ta_give_zenny(TextArchive *t, int zenny) {
+	uint8_t b[] = { 0xEF, 0x0E, (uint8_t)zenny, (uint8_t)(zenny >> 8), (uint8_t)(zenny >> 16), (uint8_t)(zenny >> 24), 0xFF, 0xFF, 0xFF };
+	ta_bytes(t, b, sizeof b);
+}
+
+/* ts_check_take_zenny: `zenny` taken where MegaMan has it, on in script
+ * `paid`; else on in `broke` */
+void ta_take_zenny(TextArchive *t, int zenny, int paid, int broke) {
+	uint8_t b[] = { 0xEF, 0x0F, (uint8_t)zenny, (uint8_t)(zenny >> 8), (uint8_t)(zenny >> 16), (uint8_t)(zenny >> 24), (uint8_t)paid, (uint8_t)broke,
+		(uint8_t)broke };
+	ta_bytes(t, b, sizeof b);
+}
+
 /* ts_item_give HPMemory, with its jingle */
 void ta_give_hp_memory(TextArchive *t, int count) {
 	uint8_t b[] = { 0xF4, 0x00, SCRIPTS_HP_MEMORY, (uint8_t)count };

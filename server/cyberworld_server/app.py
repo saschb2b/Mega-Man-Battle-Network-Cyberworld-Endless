@@ -17,7 +17,7 @@ from .stands import Stands
 from .teams import Teams
 from .trade import Trades
 from .week import Weeks, week_of
-from .identity import IdentityStore
+from .identity import IdentityStore, append_log
 from . import retention
 from .stats import Daily
 
@@ -81,6 +81,7 @@ class Server:
         self.roster_written = None
         self.roster_task = None
         self.roster_failed = False
+        self.writes = set()         # the logs' appends in threads (trades, the Board), for shutdown
         self.listener = self.ticker = None
         self.trading, self.arena_on = trading, arena
         self.trades, self.arena = Trades(self), Arena(self)
@@ -129,6 +130,9 @@ class Server:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        # (an append still in its thread holds the state directory's lock and
+        # its log open: done before the server is, or the files stay in use)
+        await asyncio.gather(*self.writes, return_exceptions=True)
         if self.roster_task:
             await asyncio.gather(self.roster_task, return_exceptions=True)
         if self.retention_task:
@@ -435,6 +439,18 @@ class Server:
                 self.drop(player, protocol.ProtocolError("Removed by a moderator", 14))
                 self.holds.removed(player)
         self.save_roster()
+
+    def append(self, name, entry):
+        """An entry appended to a log of the state directory, in a thread;
+        close() waits for it."""
+        task = asyncio.create_task(asyncio.to_thread(append_log, self.store.directory, name, entry))
+        self.writes.add(task)
+        task.add_done_callback(self.appended)
+
+    def appended(self, task):
+        self.writes.discard(task)
+        if not task.cancelled() and task.exception():
+            LOG.error("Could not write the state directory's log: %s", task.exception())
 
     def save_roster(self):
         """Write the local roster when it changed: in a thread, one write at a time."""

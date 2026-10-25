@@ -237,6 +237,14 @@ uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int an
 	return talker(category, index, x, y, z, anim, archive, script, -1, false, true, sx, sy);
 }
 
+void npc_variation(uint32_t at) {
+	/* (its 0x25 sprite, index and category made 0x17 and its index, then
+	 * 0x08 again, which the script began with: the same length) */
+	if (!at || emu_read8(at + 1) != 0x25 || emu_read8(at + 3) != 6 * 4) return;
+	uint8_t c[3] = { 0x17, emu_read8(at + 2), 0x08 };
+	emu_write(at + 1, c, sizeof c);
+}
+
 uint32_t npc_desk(const NpcDesk *d) {
 	uint32_t a = d->archive;
 	uint8_t s[56] = {

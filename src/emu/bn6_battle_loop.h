@@ -40,6 +40,6 @@
 #define BN6_MSG_LIB_FAILED    0x5C        /* LIBERATE FAILED! */
 #define BN6_MSG_TURN_LIBERATE 0x60        /* n TURN LIBERATE! */
 
-#include "bn6_battler.h"   /* the Virus Battler's mode, its own loop: the BtlrCard's data, the five Battlers' records (research) */
+#include "bn6_battler.h"   /* the Virus Battler's mode, its own loop: the BtlrCard's data, the five Battlers' records */
 
 #endif

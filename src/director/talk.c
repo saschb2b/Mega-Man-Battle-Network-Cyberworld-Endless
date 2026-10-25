@@ -76,6 +76,16 @@ bool talk_ask(const char *boxes, int face, const char *question, int yes_flag) {
 	return true;
 }
 
+bool talk_archive(const TextArchive *a, int script) {
+	if (K.running || emu_read8(BN6_CHATBOX)) return false;
+	static uint8_t bytes[TEXT_ARCHIVE_MAX];
+	int n = ta_build(a, bytes);
+	if (n > TALK_SIZE) return false;
+	emu_write(TALK_AT, bytes, (size_t)n);
+	begin(TALK_AT, script);
+	return true;
+}
+
 bool talk_script(uint32_t archive, int script) {
 	if (K.running || emu_read8(BN6_CHATBOX) || !archive || script < 0) return false;
 	begin(archive, script);

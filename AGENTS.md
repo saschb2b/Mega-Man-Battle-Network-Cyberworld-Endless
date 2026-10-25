@@ -60,7 +60,7 @@ commits, issues and old notes) are mapped section by section in
 | Moving saves between systems: the `.cwsave` file, import, Undo, the automatic copy | [docs/engine/saves.md](docs/engine/saves.md) |
 | Online play (epic #120): the gate in Lan's HP, the Net Square, Trade Central, the Arena, the server and the wire | [docs/online/](docs/online/index.md); the gate in [docs/world/home/square-gate.md](docs/world/home/square-gate.md); hosting in [server/README.md](server/README.md); the wire in [shared/online/README.md](shared/online/README.md); the link cable and the Arena's engine in [docs/online/link.md](docs/online/link.md) and [docs/online/arena/](docs/online/arena/index.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md); the players' notes in [docs/releases/](docs/releases/index.md) |
-| The itch.io page: its texts, settings, pictures and files, and how each release reaches it | [docs/project/itch.md](docs/project/itch.md) |
+| The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
 
@@ -164,8 +164,9 @@ part of the tree; a new file gets its line there.
   the game's structures as a bare offset outside `src/emu/bn6.h` (issue
   #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), no new code smell and
   no header that is not whole on its own (Code structure, below), and no
-  ROM, save, state or large file in git outside `docs/`. A baseline only
-  shrinks: after fixing one, `build.py lint --update`.
+  ROM, save, state or large file in git outside `docs/`, and the itch.io
+  page in step with `docs/itch/` (docs/project/itch.md, Keeping it in step). A
+  baseline only shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the
   layer before it loads `run.state`, so generation and object placement
   must not depend on the game's RAM.
@@ -301,6 +302,7 @@ python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's ch
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 python3 tools/itch.py push   # the latest release's files to the itch.io page, a butler channel each (docs/project/itch.md; `prepare` lays them out without sending)
+python3 tools/itch.py devlog  # the newest release's devlog post for itch's editor; `record --post TAG URL` once posted, `check` after (docs/project/itch.md)
 python3 tools/itch_art.py    # docs/itch: the itch.io page's cover, banner and background tile; .build/itch: its screenshots at 4x
 ```
 
@@ -350,7 +352,7 @@ pacing) stays local.
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
-| Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, its files on itch.io (`python3 tools/itch.py push`, butler logged in as the owner) and, for a minor release, the page's New in section (docs/project/itch.md); runs on real devices are the owner's, after the release, and no blocker |
+| Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, the itch.io page in step (docs/project/itch.md, Each release): its files (`python3 tools/itch.py push`), its devlog post (`tools/itch.py devlog`, posted on itch, `tools/itch.py record --post`), and `tools/itch.py check` in step; `build.py lint` fails the next release's work while a release lacks its post; runs on real devices are the owner's, after the release, and no blocker |
 
 ## Device testing
 

@@ -85,6 +85,7 @@ Until 2026-10-25 the docs were 27 flat files (`docs/EMULATION.md` and the like).
 | Checked when it was switched on (`#checked-when-it-was-switched-on`) | [Decided](../game/economy/decided.md#checked-when-it-was-switched-on) |
 | A dark layer's prize (25 October 2026) (`#a-dark-layers-prize-25-october-2026`) | [A dark layer's prize](../game/economy/dark-layer-prize.md) |
 | A held Soul's kind (25 October 2026) (`#a-held-souls-kind-25-october-2026`) | [A held Soul's kind](../game/economy/held-soul-kind.md) |
+| The Virus Battler's stake (25 October 2026) (`#the-virus-battlers-stake-25-october-2026`) | [The Virus Battler's stake](../game/economy/virus-battler-stake.md) |
 | Where it is decided (`#where-it-is-decided`) | [Where it is decided](../game/economy/where-decided.md) |
 
 ## EMULATION.md
@@ -195,7 +196,7 @@ All of it: [itch.io](../project/itch.md).
 | Invisible paths (built, issue #46) (`#invisible-paths-built-issue-46`) | [Invisible paths](../world/level-design/invisible-paths.md) |
 | The Undernet's doors (built, issue #47) (`#the-undernets-doors-built-issue-47`) | [The Undernet's doors](../world/level-design/undernet-doors.md) |
 | Teaching them (issue #48, in part) (`#teaching-them-issue-48-in-part`) | [Teaching them](../world/level-design/teaching-set-pieces.md) |
-| The Virus Battler (researched, not built) (`#the-virus-battler-researched-not-built`) | [The Virus Battler](../world/level-design/virus-battler.md) |
+| The Virus Battler (`#the-virus-battler`) | [The Virus Battler](../world/level-design/virus-battler.md) |
 
 ## LIBERATION.md
 
@@ -628,6 +629,7 @@ Its table, a row each, split by subsystem; its opening into [ROM data](../rom/ov
 | The Virus Battler: the BtlrCard and the data on it | [BN6's Virus Battler](../rom/virus-battler.md) |
 | The Virus Battler: battle mode 6, its VIRUS LIST, placing, fight and time limit | [BN6's Virus Battler](../rom/virus-battler.md) |
 | The Virus Battler: the five Battlers' records, series and prizes | [BN6's Virus Battler](../rom/virus-battler.md) |
+| The Virus Battler: each Battler's own Mr.Prog, his prizes' gives, the card's viewer | [BN6's Virus Battler](../rom/virus-battler.md) |
 | Virus families moved into the battle engine: the ice block's size, and every other read by AI index | [Virus families moved into BN6's battle engine](../rom/virus-families.md) |
 | Virus families moved into the battle engine: the engine's room for them | [Virus families moved into BN6's battle engine](../rom/virus-families.md) |
 | Virus families moved into the battle engine: the second-level dispatch | [Virus families moved into BN6's battle engine](../rom/virus-families.md) |

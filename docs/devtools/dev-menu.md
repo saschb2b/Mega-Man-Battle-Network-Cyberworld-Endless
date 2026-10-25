@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T01:17:25Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
 ---
 
 # Dev menu: shorter test runs
@@ -63,7 +63,14 @@ hurt), and
 where they find room: 1 purple data, 2 a Rush gap, 4 teleports, 8 a Link
 Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
 path; `pieces=32` to look at an area's arrow lane and ride it;
-[Set pieces](../world/level-design/set-pieces.md)), and `mapall` (the layer's map whole,
+[Set pieces](../world/level-design/set-pieces.md)), and `battler=K` (BN6's Virus Battler K,
+1-5, on every normal layer but a guardian's, the first too, at a side
+path's end; `--talk battler:FRAME` opens his offer, and the debug log
+names where he stands: `battler K at X Y`, for `place`), and
+`viruses=MASK` (the profile's BtlrCard held with the families of the
+mask's bits, a bit per AI index 1-29, beside Mettaur and Gunner:
+`viruses=0x10000` puts ErthDrgn on it, whose V1 with Mettaur wins Battler
+1's series; [The Virus Battler](../world/level-design/virus-battler.md)), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it), and `xcontrol`
 (the control family installed as the core starts: BN6's own Mettaur

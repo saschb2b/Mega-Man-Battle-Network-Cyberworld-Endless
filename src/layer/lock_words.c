@@ -52,9 +52,7 @@ int ta_cube_toll(TextArchive *t, int present, int price) {
 	 * box, its first letters drawn over) */
 	snprintf(q, sizeof q, "Toll: %d Zenny.\nPay to pass?\n", price);
 	ta_ask(t, FACE_NONE, q, no);
-	uint8_t take[] = { 0xEF, 0x0F, (uint8_t)price, (uint8_t)(price >> 8), (uint8_t)(price >> 16), (uint8_t)(price >> 24),
-		(uint8_t)paid, (uint8_t)broke, (uint8_t)broke };   /* ts_check_take_zenny */
-	ta_bytes(t, take, sizeof take);
+	ta_take_zenny(t, price, paid, broke);
 	ta_end(t);
 	return i;
 }

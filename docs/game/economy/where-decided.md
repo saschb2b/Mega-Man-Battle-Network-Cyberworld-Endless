@@ -3,7 +3,7 @@ type: Code Map
 title: "Where it is decided"
 description: "Where the economy is decided in code: plans and bands in `src/core/economy.c`, Mystery Data and chip rolls in `src/core/loot.c`, data placement, battle rewards, dealers, traders, dark-layer prizes, requests' pay, the report, run counts."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
 ---
 
 # Where it is decided
@@ -22,5 +22,6 @@ generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
 | Traders: their pools as BN6 has them, its code pick | `src/layer/trader.c` |
 | A dark layer's chips ([Liberation Missions](../liberation/overview.md)): its par's prizes, its item panels' and its BonusPanels' (one of four, the item panels' band, as BN5's are its mission's standard chips) | `src/layer/lib_prizes.c` |
 | Requests' pay | `src/core/jobs.c` |
+| The Virus Battler's stake, pot and series (BN6's own) | `src/layer/battler.c`, `src/director/director_battler.c`; where he stands `src/net/net_pieces.c` (`layer_battler`) |
 | The report | `src/dev/economy_report.c` |
 | The run's counts, sent at its end | `src/director/runlog.c` (kept, saved as `run.tally`, a battle's reward and a Guardian Data's chip counted), `src/director/director_jobs.c` (the Mystery Data opened, as a layer is left), `src/analytics/analytics.c` (`analytics_count_*`, `analytics_run_end`) |

@@ -129,11 +129,12 @@ static void print_near(int id, int x, int y, void *ctx) {
 }
 
 /* What the game is doing, for a state, and MegaMan's HP there: in a
- * battle the HUD's is his battle object's */
+ * battle the HUD's is his battle object's (in a Virus Battler's, the
+ * first virus's: his own, as it stays) */
 void director_megaman_hp(int *hp, int *max) {
 	*hp = emu_read16(BN6_NAVI_HP);
 	*max = emu_read16(BN6_NAVI_MAX_HP);
-	if (on_map()) return;
+	if (on_map() || D.battler) return;
 	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
 		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { *hp = emu_read16(o + BN6_T1_HP); *max = emu_read16(o + BN6_T1_MAX_HP); break; }
@@ -153,6 +154,11 @@ static const char *state_doing(int *hp, int *max) {
  * after turn, as BN6 draws him half a row above his panel. */
 static void battle_describe(FILE *f) {
 	if (on_map()) return;
+	/* (a Virus Battler's: BN6's VIRUS LIST, then the viruses on their own) */
+	if (D.battler) {
+		fprintf(f, "virus battle phase %02x placed %d\n", emu_read8(BN6_BATTLE_PHASE), emu_read8(BN6_VB_LIST_PLACED));
+		return;
+	}
 	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
 		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0 && emu_read8(o + BN6_T1_PANEL_X)) {

@@ -71,4 +71,5 @@ rolls as they were; "after" and "opening" what a run hands out now.
 - [Decided](decided.md)
 - [A dark layer's prize](dark-layer-prize.md)
 - [A held Soul's kind](held-soul-kind.md)
+- [The Virus Battler's stake](virus-battler-stake.md)
 - [Where it is decided](where-decided.md)

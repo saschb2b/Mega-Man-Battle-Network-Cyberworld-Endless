@@ -2,7 +2,8 @@
  * two to four to a frame shown where nothing is decided against the clock,
  * the walk, the chats, the fades and a battle's opening and close; never
  * in the fight, from its first Custom screen to its last deletion, nor on
- * BN6's menus or online. A press of its button (BTN_FAST) turns it on or
+ * BN6's menus or online. The one fight it plays is a Virus Battler's,
+ * which takes no input (its VIRUS LIST, a menu, at BN6's pace). A press of its button (BTN_FAST) turns it on or
  * off; held, it is the other way while held. The rules alone, tested
  * without SDL (tests/test_core.c); fast_forward_game.c runs them on BN6. */
 #ifndef CW_FAST_FORWARD_H
@@ -34,6 +35,7 @@ typedef struct {
 	bool run;                 /* the run's own game on the screen: a layer, the town, Lan's HP */
 	bool apart;               /* online, the PET's Jukebox, the dev menu: the run's frames are not the game's */
 	int toolkit, sub, phase;  /* BN6_TOOLKIT's mode, BN6_GAMESTATE's sub-mode, BN6_BATTLE_PHASE */
+	int mode;                 /* in a battle, its BattleSettings' mode (BN6_MODE_VIRUS_BATTLER: a Virus Battler's) */
 } FastScene;
 bool fast_scene_allows(const FastScene *s);
 
