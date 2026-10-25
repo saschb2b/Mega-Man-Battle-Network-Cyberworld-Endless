@@ -5810,13 +5810,13 @@ static void test_liberation_team(void) {
 		{ 4, { MATE_MEGAMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN }, { 0, 350, 350, 350 }, 5, { MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN, MATE_ELECMAN, MATE_CHARGEMAN } },
 	};
 	for (int act = 1; act <= 3; ++act) {
-		int n = 0, tried = 0, cmds = 0, plays = 0, par = 0, repar = 0;
+		int n = 0, layers = 0, cmds = 0, plays = 0, par = 0, repar = 0;
 		for (uint32_t s = 1; s <= 12; ++s) {
 			int depth = act * 3 + 2;
 			layer_make_dark = true;
 			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
 			layer_make_dark = false;
-			++tried;
+			++layers;
 			if (!lib_board_make(&a, s, act, &crosses[act - 1], NULL)) continue;
 			++n; par += a.par; cmds += a.m.longswrd; plays += a.m.plays;
 			/* (another pick of the held: the par again, the same twice) */
@@ -5829,8 +5829,8 @@ static void test_liberation_team(void) {
 			CHECK(b.par == p1 && b.par > 0, "cross board %u act %d: a pick's par %d then %d", s, act + 1, p1, b.par);
 			repar += b.par;
 		}
-		CHECK(n * 2 >= tried, "liberation: %d Cross team boards of %d at act %d", n, tried, act + 1);
-		printf("liberation crosses act %d (%d Navis): %d boards of %d, par %d (another pick's %d), commands %d.%d a play\n", act + 1, crosses[act - 1].n, n, tried,
+		CHECK(n * 2 >= layers, "liberation: %d Cross team boards of %d at act %d", n, layers, act + 1);
+		printf("liberation crosses act %d (%d Navis): %d boards of %d, par %d (another pick's %d), commands %d.%d a play\n", act + 1, crosses[act - 1].n, n, layers,
 			n ? par / n : 0, n ? repar / n : 0, cmds / (plays ? plays : 1), cmds * 10 / (plays ? plays : 1) % 10);
 	}
 	run = before;
