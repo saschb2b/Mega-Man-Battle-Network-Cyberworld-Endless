@@ -18,6 +18,8 @@
 #include <string.h>
 
 #include "economy.h"
+
+#include "bn5_liberation.h"
 #include "liberation_plan.h"
 #include "pacing.h"
 
@@ -218,6 +220,34 @@ bool lib_guardian_step(LibBoard *b, int u, int x, int y) {
 	n->y = (uint8_t)(n->y + dir4[f][1]);
 	if (n->kind == UNIT_BLADIA && b->kind[n->y][n->x] == LIB_CLEAN) b->kind[n->y][n->x] = LIB_DARK;
 	return true;
+}
+
+/* The eight round a DarkHole in BN5's order (BN5_LIB_RETURN_SPOT: up,
+ * then clockwise, a panel's y the first of its id) */
+static const int round8[8][2] = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 1 }, { -1, 0 }, { -1, -1 } };
+
+int lib_guardian_return(const LibBoard *b, int h, int mx, int my, int *x, int *y) {
+	if (h < 0 || h >= b->nholes) return -1;
+	int hx = b->hole_x[h], hy = b->hole_y[h], standing = 0, own = 0, back = -1;
+	if (b->kind[hy][hx] != LIB_HOLE || abs(mx - hx) > BN5_LIB_RETURN_NEAR || abs(my - hy) > BN5_LIB_RETURN_NEAR) return -1;
+	for (int u = 0; u < b->nunits; ++u) {
+		standing += !b->unit[u].gone;
+		if (b->unit[u].hole != h) continue;
+		if (!b->unit[u].gone) ++own;
+		else if (back < 0) back = u;
+	}
+	if (back < 0 || standing >= BN5_LIB_RETURN_ALL || own >= BN5_LIB_RETURN_MAX) return -1;
+	int best = -1, bd = 1 << 30;
+	for (int f = 0; f < 8; ++f) {
+		int sx = hx + round8[f][0], sy = hy + round8[f][1];
+		if (!on_board(b, sx, sy) || unit_at(b, sx, sy) >= 0 || (sx == mx && sy == my)) continue;
+		int k = b->kind[sy][sx], d = (sx - mx) * (sx - mx) + (sy - my) * (sy - my);
+		if ((k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP) && d < bd) { bd = d; best = f; }
+	}
+	if (best < 0) return -1;
+	*x = hx + round8[best][0];
+	*y = hy + round8[best][1];
+	return back;
 }
 
 int lib_threat(const LibBoard *b, int x, int y) {

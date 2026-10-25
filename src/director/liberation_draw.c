@@ -18,6 +18,7 @@
 
 #include "bn5_liberation.h"
 #include "bn6_fields.h"
+#include "cinema.h"
 #include "director.h"
 #include "director_state.h"
 #include "emu.h"
@@ -39,6 +40,7 @@
  * on captures as MegaMan was moved) and the sprites' palettes */
 #define GBA_BG1HOFS     0x04000014u
 #define GBA_BG1VOFS     0x04000016u
+#define GBA_BG_PALETTE  0x05000000u
 #define GBA_OBJ_PALETTE 0x05000200u
 #define BOX_TOP 96        /* a chat box's first row (scene_emu.c's TINT_BOX_TOP) */
 #define CAM_X  120        /* where MegaMan's place shows, the scroll's own (calibrated on a capture) */
@@ -53,6 +55,7 @@ static struct {
 	bool look;             /* the board in BN5's own look (liberation_look.c) */
 	int blink;             /* frames seen, for the faced panel's blink */
 	uint8_t sprite[4096];  /* the sprites' colours, a bit each of BN6's 15-bit colours */
+	uint8_t bg[4096];      /* ... and the backgrounds' */
 	int fx, fy;            /* the panel MegaMan faces, -1 none */
 	Anim outline;          /* ... outlined by BN5's own sprite, its ripple from the menu's opening */
 	int out_x, out_y;      /* ... the panel it ripples on, -1 none */
@@ -126,9 +129,11 @@ void lib_see(void) {
 	S.look = lib_look_on();
 	++S.blink;
 	memset(S.sprite, 0, sizeof S.sprite);
+	memset(S.bg, 0, sizeof S.bg);
 	for (uint32_t i = 0; i < 256; ++i) {
-		int c = emu_read16(GBA_OBJ_PALETTE + 2 * i) & 0x7FFF;
+		int c = emu_read16(GBA_OBJ_PALETTE + 2 * i) & 0x7FFF, b = emu_read16(GBA_BG_PALETTE + 2 * i) & 0x7FFF;
 		S.sprite[c >> 3] |= (uint8_t)(1u << (c & 7));
+		S.bg[b >> 3] |= (uint8_t)(1u << (b & 7));
 	}
 	S.fx = S.fy = -1;
 	if (LB.step == LIB_STEP_MENU || (LB.step == LIB_STEP_MOVE && lib_faced_takes())) lib_faced(&S.fx, &S.fy);
@@ -154,14 +159,53 @@ static uint32_t recolour(uint32_t c, int kind, bool faced) {
 	return (c & 0xFF000000u) | (uint32_t)(b > 255 ? 255 : b) << 16 | (uint32_t)(g > 255 ? 255 : g) << 8 | (uint32_t)(r > 255 ? 255 : r);
 }
 
+static int colour15(uint32_t c) { return (int)((c & 0xFF) >> 3 | (c >> 11 & 0x1F) << 5 | (c >> 19 & 0x1F) << 10); }
+
 static bool sprite_colour(uint32_t c) {
-	int k = (int)((c & 0xFF) >> 3 | (c >> 11 & 0x1F) << 5 | (c >> 19 & 0x1F) << 10);
+	int k = colour15(c);
 	return S.sprite[k >> 3] >> (k & 7) & 1;
+}
+
+/* ... one of the sprites' the backgrounds have none of */
+static bool sprite_only(uint32_t c) {
+	int k = colour15(c);
+	return sprite_colour(c) && !(S.bg[k >> 3] >> (k & 7) & 1);
+}
+
+static uint32_t mix(uint32_t a, uint32_t b, int w) {
+	uint32_t c = a & 0xFF000000u;
+	for (int s = 0; s < 24; s += 8) c |= (((a >> s & 0xFF) * (uint32_t)w + (b >> s & 0xFF) * (uint32_t)(16 - w)) / 16) << s;
+	return c;
+}
+
+/* A guardian rising on its DarkHole as BN5 shows it (BN5_LIB_RETURN_RISE):
+ * its sprite in OBJ mosaic, blocks of size + 1 pixels from the screen's
+ * corner each its first pixel's colour, fading in as it sharpens. Ours
+ * over the frame's pixels about him: a sprite's told by its colours (the
+ * sprites' that no background has), the floor under a block its first
+ * floor pixel's */
+static void rise_mosaic(uint32_t *px) {
+	int u = LB.rise_unit, m = LB.rise_mosaic + 1, w = 16 - LB.rise_mosaic;
+	if (!S.on || u < 0 || LB.rise_mosaic <= 0) return;
+	int sx = LB.ux[u] + LB.uy[u] - S.cam_u + CAM_X, sy = (LB.uy[u] - LB.ux[u]) / 2 - S.cam_v + CAM_Y;
+	int x0 = sx - 32 < 0 ? 0 : (sx - 32) / m * m, y0 = sy - 56 < 0 ? 0 : (sy - 56) / m * m;
+	for (int by = y0; by < sy + 16 && by < EMU_H; by += m)
+		for (int bx = x0; bx < sx + 32 && bx < EMU_W; bx += m) {
+			uint32_t first = px[by * EMU_W + bx], floor = first;
+			bool solid = sprite_only(first), found = !solid;
+			for (int y = by; y < by + m && y < EMU_H && !found; ++y)
+				for (int x = bx; x < bx + m && x < EMU_W && !found; ++x)
+					if (!sprite_only(px[y * EMU_W + x])) { floor = px[y * EMU_W + x]; found = true; }
+			for (int y = by; y < by + m && y < EMU_H; ++y)
+				for (int x = bx; x < bx + m && x < EMU_W; ++x)
+					if (solid || sprite_only(px[y * EMU_W + x])) px[y * EMU_W + x] = solid ? mix(first, floor, w) : floor;
+		}
 }
 
 void director_tint_board(uint32_t *px) {
 	/* (at home, the dark way's portal marked) */
 	lib_way_tint(px);
+	rise_mosaic(px);
 	if (!S.on || S.look) return;
 	for (int y = 0; y < (S.box ? BOX_TOP : EMU_H); ++y)
 		for (int x = 0; x < EMU_W; ++x) {
@@ -245,18 +289,22 @@ static void draw_pops(void) {
 	}
 }
 
-/* The Darkloids' phase's effect at its world place, BN5's sprite's own origin */
+/* The Darkloids' phase's effect at its world place, BN5's sprite's own
+ * origin, `up` over it; shaken with the picture, as BN5's world's OBJs are */
 static void draw_fx(void) {
 	if (S.effect_n < 0 || LB.effect.sprite < 0) return;
-	anim_draw(&S.effect, P.core_x + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y, false,
-		LB.effect.pal, 0);
+	int dx, dy;
+	cinema_offset(&dx, &dy);
+	anim_draw(&S.effect, P.core_x + dx + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + dy + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y - LB.effect.up,
+		false, LB.effect.pal, 0);
 }
 
 /* The harm of a blow over MegaMan, as BN5 shows a Navi's (its yellow digits) */
 static void draw_harm(void) {
 	if (!LB.harm || !S.look) return;
-	int wx = bn6_player_x(), wy = bn6_player_y();
-	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
+	int wx = bn6_player_x(), wy = bn6_player_y(), dx, dy;
+	cinema_offset(&dx, &dy);
+	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X + dx, (wy - wx) / 2 - S.cam_v + CAM_Y + dy);
 }
 
 /* Each unit's HP under it as BN5 shows a unit's not in play (its white

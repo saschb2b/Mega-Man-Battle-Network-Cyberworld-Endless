@@ -156,7 +156,7 @@
 #define BN5_LIB_GUARD_ANIM   0           /* ... the animations they stand in on the board: 0-7 by the eighth faced (1 up-right, */
                                          /* ... 3 down-right, 5 down-left, 7 up-left), a loop of 2 or 4 frames; */
 #define BN5_LIB_BRUTE_STRIKE 33          /* ... BigBrute's strike (BeastBreath) 33 + the eighth, a loop of 2 frames, 3 each; */
-#define BN5_LIB_HAWK_STRIKE  25          /* ... TinHawk's (HawkAttack) 25 facing left, 26 right, 10 frames a frame; */
+#define BN5_LIB_HAWK_STRIKE  25          /* ... TinHawk's (HawkAttack) 25 facing right, 26 left, 10 frames a frame (BN5_LIB_HAWK_PLACES); */
 #define BN5_LIB_BLADIA_STRIKE 25         /* ... Bladia's (DarkSlash) 25-28 by the eighth, 1 then clockwise, 10, 3, 3, 10 frames */
 
 /* The Darkloids' phase (mission 1 in romlab: MegaMan's place poked beside a BigBrute and beside BlizzardMan): each unit's
@@ -166,8 +166,8 @@
 #define BN5_LIB_WARP_FX      0x080AF3F8u /* a guardian's move, all its steps at once: a warp effect spawned (0x08004508) and */
 #define BN5_LIB_WARP_SOUND   0xB4        /* ... this sound, at the panel it leaves and 46 frames on at the one it takes */
 #define BN5_LIB_WARP_SPRITE  59          /* ... the effect: sprite list 7's 59 (0x08389E68), a puff and a beam's lines, 2 frames */
-#define BN5_LIB_WARP_OUT     2           /* ... each: the guardian's out (puff, lines; animation 0 the large, 4 the small) and */
-#define BN5_LIB_WARP_IN      3           /* ... in (lines, puff; 1 and 5), the camera's pan between; the guardian shows 4 frames */
+#define BN5_LIB_WARP_OUT     4           /* ... each: the unit's out (puff, lines; animations 0 and 2 larger, unused on the board) and */
+#define BN5_LIB_WARP_IN      5           /* ... in (lines, puff), the camera's pan between (every unit's, 0x080AF3F8's callers' r1); shows 4 frames */
 #define BN5_LIB_WARP_SHOWS   4           /* ... into the warp in, */
 #define BN5_LIB_APPEAR_SOUND 0x94        /* ... with this sound (0x080B051E) */
 #define BN5_LIB_HEAL_FX      0x08055208u /* the Darkloid's heal: effect 0x78 (rising lines) over him, sound 0x8A, his HP up at */
@@ -184,6 +184,29 @@
 #define BN5_LIB_NO_HIT_SOUND 0x6E        /* ... where nothing does (a BonusPanel's shield) */
 #define BN5_LIB_FLAME_SPRITE 56          /* BigBrute's BeastBreath on its Navi: sprite list 7's 56 (0x0833A1B4), animation 0 */
                                          /* ... rising (3 x 2 frames), 1 burning (looped), 2 falling (3 x 1) */
+#define BN5_LIB_BLOW_EVENT   0x08051904u /* a blow's board event (BN5_LIB_EVENT: kind 0x19, its object 0x080B3204 spawned at the */
+#define BN5_LIB_BLOW_SPRITE  58          /* ... Navi's place 16 up): sprite list 7's 58 (0x0837CBF8), animation 0, a burst 13 frames, */
+#define BN5_LIB_BLOW_UP      16          /* ... and BN5_LIB_HARM; queued by Bladia's DarkSlash, TinHawk's HawkAttack and Darkloids */
+#define BN5_LIB_BLOW_SHAKE   10          /* ... the board shaken with it (BG1's scroll read): this many frames, */
+#define BN5_LIB_BLOW_JOLT    4           /* ... up to this many pixels */
+#define BN5_LIB_SLASH_SOUND  0x10A       /* the cry of TinHawk's HawkAttack (0x080B0002) and Bladia's DarkSlash (0x080B034A) */
+#define BN5_LIB_UNIT_TABLES  0x080AE964u /* each unit kind's routines (a u32 a kind, 0x00-0x16), a table of 29: 14 its turn to face, */
+                                         /* ... 15 its strike (BigBrute 0x080AF831, TinHawk's warp out 0x080AFED9, Bladia 0x080B0301), */
+                                         /* ... TinHawk's 16-18 its attack and way home, 23-24 the warp of a move, 25-28 a guardian's */
+#define BN5_LIB_UNIT_ROUTINE 0x080AE850u /* ... return; a unit's +3 to its entry: a byte table of entry x 4 */
+#define BN5_LIB_HAWK_ATTACK  0x080AFF4Cu /* TinHawk's HawkAttack: beside its Navi by the RNG (& 4) at BN5_LIB_HAWK_PLACES: */
+#define BN5_LIB_HAWK_PLACES  0x080AFFD0u /* ... two of 4 bytes (its animation, world dx, dy): 25 at (0, -20), 26 at (+20, 0) */
+#define BN5_LIB_HAWK_NEAR    20          /* ... world units off its Navi */
+
+/* A deleted guardian's return (0x0804E700-0x0804E858, the Darkloids' phase's steps 0x0A-0x11, after every unit's turn) */
+#define BN5_LIB_RETURN       0x0804E71Au /* each DarkHole in its order, while fewer than BN5_LIB_RETURN_ALL enemies stand: */
+#define BN5_LIB_RETURN_ALL   8           /* ... standing, a Navi within BN5_LIB_RETURN_NEAR panels on both axes (the shape */
+#define BN5_LIB_RETURN_NEAR  3           /* ... 0x08051734, 7 x 7), one of its deleted guardians at random (0x08054806) while */
+#define BN5_LIB_RETURN_MAX   3           /* ... fewer than this many of them stand (0x080547DE), on the free dark panel of the eight */
+#define BN5_LIB_RETURN_SPOT  0x08052B3Au /* ... round it (no unit; dark or item, 0x080502F4) nearest the Navi nearest the hole; */
+#define BN5_LIB_RETURN_RISE  0x080B055Cu /* ... the camera to the hole, 20 frames, it rises on it (its +3 0x16: OBJ mosaic 15 */
+#define BN5_LIB_RISE_FRAMES  16          /* ... down to 0 over 16 frames, sound 0x94), 20 frames, its warp out of the hole and in */
+#define BN5_LIB_RETURN_WAIT  20          /* ... on its panel (+3 0x17, 0x18; BN5_LIB_WARP_*), 20 frames, the next hole */
 #define BN5_LIB_DIGITS       0x086F7DECu /* the units' HP under them and a blow's harm over its Navi: digits 8x16, 0x40 bytes each */
 #define BN5_LIB_DIGITS_PAL   0x086CCD24u /* ... white (an HP, OBJ palette 14), */
 #define BN5_LIB_HARM_PAL     0x087E4678u /* ... yellow (a harm, OBJ palette 15), its top 29 pixels over the Navi's feet, centred */

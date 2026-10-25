@@ -51,7 +51,6 @@ static int nudge_x, nudge_y;  /* ... pixels a frame across and down */
 #define BANNER_FRAMES  70
 #define PARK_X         (-2000)   /* where a deleted unit's object waits, off the floor */
 #define TOUR_HOLD      60     /* frames the opening's camera rests on the Darkloid */
-#define BACK_PHASES    2      /* the Darkloids' phases a DarkHole takes to send its guardian back */
 
 static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 /* BN6's facings and walking keys along the grid's ways (net.h: grid x
@@ -205,6 +204,8 @@ void lib_begin(void) {
 	LB.harm = 0;
 	LB.reach_lit = false;
 	memset(LB.hidden, 0, sizeof LB.hidden);
+	LB.ret_hole = LB.ret_step = LB.ret_t = LB.rise_mosaic = 0;
+	LB.ret_unit = LB.rise_unit = -1;
 	lib_battle_disarm();
 	/* (the board's HP: the Darkloid's his own battle's, BN5's on the board
 	 * through his battles; our guardians' none, their battles the act's
@@ -426,8 +427,8 @@ static int free_around(int x, int y, char *held, size_t n) {
 	return freed;
 }
 
-/* A DarkHole's guardian deleted: back in the Darkloid's phase while its
- * hole stands */
+/* A DarkHole's guardian deleted: back at a Darkloids' phase's end while
+ * its hole stands (lib_guardian_return) */
 static bool guardian_back(int u) {
 	int h = LB.b.unit[u].hole;
 	return h >= 0 && LB.b.kind[LB.b.hole_y[h]][LB.b.hole_x[h]] == LIB_HOLE;
@@ -447,7 +448,6 @@ static void fight_won(bool one_turn) {
 	if (LB.fight == LIB_FIGHT_GUARDIAN) {
 		/* (his panel liberated with him: the prototype's rule) */
 		LB.b.unit[LB.fight_unit].gone = true;
-		LB.back_in[LB.fight_unit] = BACK_PHASES;
 		free_panel(LB.fx, LB.fy, held, sizeof held);
 		if (one_turn) freed += free_around(LB.fx, LB.fy, held, sizeof held);
 		back = guardian_back(LB.fight_unit);
@@ -502,27 +502,9 @@ static void after_fight(void) {
 
 /* ---- the Darkloids' phase ---- */
 
-/* A DarkHole still standing sends its deleted guardian back beside it,
- * the Darkloids' phase after next (BN5 sends him in the next: with a team
- * another Navi strikes the hole meanwhile; MegaMan alone gets his phase
- * for it) */
-static void guardians_back(void) {
-	for (int u = 1; u < LB.b.nunits; ++u) {
-		LibUnit *n = &LB.b.unit[u];
-		if (!n->gone || n->hole < 0 || !guardian_back(u) || --LB.back_in[u] > 0) continue;
-		int hx = LB.b.hole_x[n->hole], hy = LB.b.hole_y[n->hole];
-		for (int f = 0; f < 4; ++f) {
-			int x = hx + dirs[f][0], y = hy + dirs[f][1], k = LB.b.kind[y][x];
-			if ((k != LIB_DARK && k != LIB_ITEM) || lib_unit_at(x, y) >= 0 || (x == LB.mx && y == LB.my)) continue;
-			n->x = (uint8_t)x; n->y = (uint8_t)y; n->gone = false;
-			netmap_world(x, y, &LB.ux[u], &LB.uy[u]);
-			break;
-		}
-	}
-}
-
 /* The phase as BN5 plays it: the Darkloid first, then each guardian in
- * its order, each its turn (liberation_turn.c); then the player's phase */
+ * its order, each its turn, then the DarkHoles' deleted guardians back
+ * beside them (liberation_turn.c); then the player's phase */
 static void enemy_update(void) {
 	/* (the Darkloid's word at his first turn, as BN5's says his once,
 	 * before anything of his phase: his face, his habit of speech) */
@@ -530,9 +512,9 @@ static void enemy_update(void) {
 		if (talk_start(lib_entrance_words(guardian(LB.darkloid)->name), guardian_face(LB.darkloid))) LB.met = true;
 		return;
 	}
-	if (LB.enemy_unit == 0 && LB.enemy_t == 0 && LB.enemy_steps == 0) guardians_back();
 	if (LB.enemy_unit < LB.b.nunits && !lib_turn(LB.enemy_unit)) return;
-	if (++LB.enemy_unit < LB.b.nunits) return;
+	if (LB.enemy_unit < LB.b.nunits && ++LB.enemy_unit < LB.b.nunits) return;
+	if (!lib_return()) return;
 	LB.enemy_unit = 0;
 	LB.shield = false;
 	++LB.phase;

@@ -65,8 +65,9 @@ typedef struct {
 	uint8_t anim[LIB_UNITS];       /* each unit's animation (its object's byte, LayerObjs.lib_anim) */
 	uint8_t reach[MAP_H][MAP_W];   /* 1: in the acting unit's reach, */
 	bool reach_lit;                /* ... lit in BN5's red (liberation_look.c) */
-	struct { int sprite, anim, pal, x, y, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none), its
-	                                                  * animation and palette at world (x, y), the n-th begun */
+	struct { int sprite, anim, pal, x, y, up, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none), its
+	                                                      * animation and palette at world (x, y), `up` pixels over it,
+	                                                      * the n-th begun */
 	int harm, harm_t;              /* a blow's harm in BN5's digits over MegaMan (0 none), frames shown */
 	/* each unit's HP on the board, as BN5 keeps it (its battle begins
 	 * from it and leaves it what it took; the Darkloid's heal raises it):
@@ -77,7 +78,11 @@ typedef struct {
 	/* where each unit's sprite is (its object), and where it shows */
 	uint8_t fence[MAP_H][MAP_W];   /* 1: the panel has walls of its own (liberation_fence.c), shut or open as it is walked */
 	int slot[LIB_UNITS];
-	int back_in[LIB_UNITS];  /* a deleted guardian's Darkloids' phases till his DarkHole sends him back */
+	int back_in[LIB_UNITS];  /* (unused since BN5's return, lib_guardian_return: kept for the note's layout) */
+	/* a deleted guardian's return at the phase's end (liberation_turn.c's lib_return):
+	 * the DarkHole looked at next, the guardian returning (-1 none), its step and frames */
+	int ret_hole, ret_unit, ret_step, ret_t;
+	int rise_unit, rise_mosaic;    /* ... the unit rising on its hole, drawn in BN5's OBJ mosaic this size (0 none) */
 	int ux[LIB_UNITS], uy[LIB_UNITS];   /* world units, gliding */
 	int from_x[LIB_UNITS], from_y[LIB_UNITS];   /* ... and where the map puts its object */
 	int darkloid;          /* the Darkloid's navi (guardians.h) */
@@ -111,6 +116,9 @@ bool lib_megaman_hp_shown(void);
 /* (liberation_turn.c) Unit u's turn in the Darkloids' phase as BN5 plays
  * it, a frame at a time: true once over */
 bool lib_turn(int u);
+/* ... and after every unit's, the DarkHoles' deleted guardians back as BN5
+ * brings them, a frame at a time: true once over */
+bool lib_return(void);
 /* ... and whether A there takes a command */
 bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);

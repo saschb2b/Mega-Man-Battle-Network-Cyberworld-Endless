@@ -231,7 +231,8 @@ Guardians "attack closer enemies first" (**text**), and one is best
 deleted before the Darkloids' phase or its DarkHole liberated in one shot.
 A DarkHole's liberation is a fight with its guardian; won, it frees the
 eight panels around it; while the hole stands, a deleted guardian comes
-back (**guides**). The kinds (`0x11`-`0x13` in the records): BigBrute
+back (**guides**; when and where read in BN5's code: The Darkloids' phase
+as BN5 shows it, below). The kinds (`0x11`-`0x13` in the records): BigBrute
 moves two and hits every Navi beside it; TinHawk hits one within three;
 Bladia teleports, darkening the clean panel it lands on (**guides**, with
 HP and damage by mission). The Darkloid attacks Navis in his reach and
@@ -279,6 +280,41 @@ caller (docs/ROM_DATA.md, BN5's Liberation board: the Darkloids' phase):
   two or four frames looped), facing down-left on the board; their
   strikes their own animations (BigBrute's 33-40, TinHawk's 25-26,
   Bladia's 25-28).
+- **Every warp the small pair.** A unit's move, TinHawk's attack and a
+  guardian's return all spawn list 7's 59 in its animations 4 (out) and
+  5 (in), read in each caller's r1 (missions 1, 2 and 4).
+- **Bladia's DarkSlash** (mission 4, Colonel beside it): its pose (25 + its
+  eighth / 2) 22 frames after the box closed, sound 0x10A at 33, the blow
+  at 34: BN5's burst (list 7's 58, 16 pixels over the Navi, 13 frames;
+  the board event 0x08051904) with 0x6B, the board shaken (BG1's scroll,
+  up to 4 pixels for 10 frames), the harm at 35, its pose back at 69, the
+  red out at 123 as BigBrute's.
+- **TinHawk's HawkAttack** (mission 2, MegaMan two from it): it warps out
+  where it stands (22), the camera pans to MegaMan, it warps in beside him
+  already in its strike (97), 20 world units up (25, facing right) or right
+  (26, facing left) of him by the RNG, shows four frames on with 0x94;
+  BN5's burst and the shake at 105, the harm at 106, 0x10A at 110; it warps
+  out with the harm's digits at 140, the camera back to its panel, in there
+  at 216 (0x94 at 220), the red out at 284.
+- **A Darkloid's strike** is his own pose and, for two of BN5's Darkloids
+  (kinds 0x15, 0x16) as for Bladia, BN5's burst (the same event); the
+  others' own effects (BlizzardMan's Snowball, 0x080517F4; 0x0F's
+  0x08051874; 0x10's 0x08051914), one (0x0D) warps beside the Navi as
+  TinHawk does.
+- **A deleted guardian's return** (0x0804E700-0x0804E858; romlab, mission
+  2, a BigBrute poked deleted beside its DarkHole): at the Darkloids'
+  phase's end, after every unit's turn, while fewer than eight enemies
+  stand, each DarkHole in its order still standing with a Navi within
+  three panels of it on both axes (the 7 x 7 round it) sends back one of
+  its deleted guardians (at random, while fewer than three of its own
+  stand) to the free dark panel (dark or an item's, no unit) of the eight
+  round it nearest the Navi nearest the hole, with full HP. The camera
+  pans to the hole; 20 frames on the guardian rises on the hole in OBJ
+  mosaic, 15 down to 0 as it fades in over 16 frames, with 0x94; 40 frames
+  after the rise began it warps out of the hole, 22 later in on its panel
+  (0xB4 each, 0x94 as it shows); 20 frames, the next hole. Deleted in a
+  player's phase, a guardian is back for the next one where a Navi stayed
+  near its hole, and strikes from the Darkloids' phase after.
 
 ### How the board looks and moves (play, ROM)
 
@@ -953,9 +989,9 @@ steps toward him over the dark (BigBrute two and hits all in one,
 TinHawk three and one in three, Bladia two, darkening what it lands on),
 the Darkloid hits him within his reach (two or three); the board's harm
 never takes his last HP (alone, a deletion off a battle would end the run
-unfought). A DarkHole sends its deleted guardian back the Darkloids' phase
-after next (BN5's the next: with a team another Navi strikes the hole
-meanwhile). Every DarkHole down, the Darkloid's ring can be liberated, and
+unfought). A DarkHole sends its deleted guardian back as BN5 does, at the
+Darkloids' phase's end while MegaMan stands within three panels of it
+(`lib_guardian_return`; The Darkloids' phase as BN5 shows it). Every DarkHole down, the Darkloid's ring can be liberated, and
 the Darkloid fought from it: a Navi of BN6's whose HP fits the act's band,
 no act's guardian (`run_darkloid`), in his own battle. Deleted, the exit
 opens where he stood and the par's prize is given, BN5's tiers (The par's
@@ -1358,11 +1394,9 @@ was clipped. The phase is now BN5's as traced above
   picture's middle; the BG scroll's wrap read it a half turn off away
   from MegaMan.
 
-Not done: TinHawk's and Bladia's strike effects and the BN6 Darkloids'
-(not traced: their strikes are their animations and the harm); a deleted
-guardian's return through BN5's warp. Teammates stay stage 3's. (The
-Darkloid's heal and the units' HP digits: The board's HP as BN5's,
-below.)
+Teammates stay stage 3's. (The Darkloid's heal and the units' HP
+digits: The board's HP as BN5's, below. TinHawk's and Bladia's strikes,
+the Darkloid's blow and a deleted guardian's return: below.)
 
 **Checked:** an autopilot run through seed 1's act 2 board from its
 opening to its exit (`--run-depth 5 --seed 1 --dev dark,god,onehit`,
@@ -1675,6 +1709,57 @@ and tiles never kept:
 **Checked:** side by side with BN5 in the pull request (the entrance,
 the L view, the clear); an autopilot run through seed 1's act 2 board
 (`--run-depth 5 --seed 1 --dev dark,god,onehit`).
+
+### Guardians' strikes and returns as BN5's, as built (25 October 2026)
+
+BN5 as the hard reference (the owner's direction), traced in romlab on
+missions 2 and 4 (The Darkloids' phase as BN5 shows it, above;
+docs/ROM_DATA.md, BN5's Liberation board: the guardians' and Darkloids'
+strikes) and played on the board (`src/director/liberation_turn.c`):
+
+- **Every warp the small pair** (list 7's 59, animations 4 and 5), as
+  BN5's every caller passes; the board's had shown the medium pair.
+- **Bladia's DarkSlash:** its pose at 22 from the box's closing, 0x10A at
+  33, BN5's blow at 34 (list 7's 58 16 pixels over MegaMan, 13 frames,
+  0x6B, the board and the board's sprites shaken: `cinema_shake`, 10
+  frames up to 4 pixels), the harm at 35, its pose back at 69, the red out
+  at 123.
+- **TinHawk's HawkAttack:** its warp out at 22, the camera's pan to
+  MegaMan, its warp in beside him in its strike at 97 (BN5's two places,
+  20 world units up-left or down-right of him on the screen; BN5's RNG
+  picks, ours the phase), shown at 101, the blow at 105, the harm at 106,
+  0x10A at 110, its warp out with the digits at 140, the camera back, its
+  warp in at home at 216, the red out at 284; it no longer stands where it
+  struck from. TinHawk's two strike animations were read the wrong way
+  round (25 faces right, as BN5 lands it up-left of its Navi).
+- **The Darkloid's blow:** BN6's Navis have no BN5 attack, so his strike is
+  his pose where list 6 has one and BN5's own blow, as BN5's Darkloids
+  0x15 and 0x16 strike: the burst, 0x6B and the shake at 52, the harm with
+  it at 53 (BlizzardMan's Snowball delayed his to 73).
+- **A deleted guardian's return as BN5's** (`lib_guardian_return`,
+  `src/director/liberation_board.c`, the planner's and the board's): at
+  the Darkloids' phase's end, each DarkHole in its order still standing
+  with MegaMan within three panels of it on both axes sends its deleted
+  guardian to the free dark panel of the eight round it nearest him; the
+  camera pans to the hole, the guardian rises on it in BN5's OBJ mosaic
+  fading in (ours over the frame's pixels about him, a sprite's told by
+  its colours: BN6 draws the object, so its mosaic is approximated, the
+  floor under a block its first floor pixel's), with 0x94, then warps to
+  its panel. Before, he came back silently beside the hole at the start of
+  the Darkloids' phase after next, wherever MegaMan stood, on one of the
+  four panels beside it. **The game-design check:** the guardian deleted
+  in a player's phase strikes again from the Darkloids' phase after the
+  next one, in BN5 as before (the next player's phase is his to strike the
+  hole); what changes is that he stands beside the hole in that phase, so
+  MegaMan meets him again if he does not take the hole, and that walking
+  away from the hole keeps him gone. The planner plays the same rule, so
+  the par follows it: `LAYER_MAKE` 101.
+
+**Checked:** BN5 and ours side by side in the pull request (TinHawk's
+HawkAttack: seed 1's act 4 board, `--run-depth 11 --seed 1 --dev
+dark,god,onehit`, frame 5808 on; the return: frame 2678 on, a TinHawk
+rising on its hole and warping beside it); `build.py test`, `build.py
+lint`.
 
 ## The owner's decisions
 

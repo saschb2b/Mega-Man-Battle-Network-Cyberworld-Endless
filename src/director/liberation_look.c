@@ -313,8 +313,9 @@ int lib_look_unit_anim(int kind, int face, bool strike) {
 	face &= 7;
 	if (!strike) return BN5_LIB_GUARD_ANIM + face;
 	/* (each one's strike by the way it faces: BigBrute's eight, TinHawk's
-	 * two, left and right, Bladia's four, from up-right clockwise) */
+	 * two, right and left (BN5 lands it up-left of its Navi in 25, down-right
+	 * in 26), Bladia's four, from up-right clockwise) */
 	if (kind == UNIT_BRUTE) return BN5_LIB_BRUTE_STRIKE + face;
-	if (kind == UNIT_HAWK) return BN5_LIB_HAWK_STRIKE + (face >= 1 && face <= 3);
+	if (kind == UNIT_HAWK) return BN5_LIB_HAWK_STRIKE + !(face >= 1 && face <= 3);
 	return BN5_LIB_BLADIA_STRIKE + (face & 1 ? face / 2 : (face + 1) / 2 % 4);
 }

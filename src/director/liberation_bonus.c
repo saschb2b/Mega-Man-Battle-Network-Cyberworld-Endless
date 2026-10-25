@@ -35,7 +35,6 @@
 #define SHUT_AT   (OUT_AT + 8 + 3)
 #define DONE_AT   (SHUT_AT + 2)
 #define STRIKE_HOLD 60   /* frames the camera rests on what Major Hit strikes before it goes */
-#define BACK_PHASES 2    /* (liberation.c's: a DarkHole's guardian back the Darkloids' phase after next) */
 
 enum { PH_LEAD, PH_SPIN, PH_STOPPED, PH_AIM, PH_STRIKE };
 
@@ -128,11 +127,15 @@ static void strike(void) {
 	}
 	if (++S.t == STRIKE_HOLD / 2) {
 		if (S.target > 0) {
-			/* (deleted; a DarkHole still standing sends him back as ever) */
+			/* (deleted; a DarkHole still standing sends him back as ever,
+			 * BN5's warp at a Darkloids' phase's end: lib_guardian_return) */
 			LB.b.unit[S.target].gone = true;
-			LB.back_in[S.target] = BACK_PHASES;
-		} else
-			LB.darkloid_cut += 1;   /* (a fifth of his max off: his board HP's, docs/LIBERATION.md) */
+		} else {
+			/* (a fifth of his max off his board HP, BN5's; never to none, his
+			 * deletion his battle's: docs/LIBERATION.md, The board's HP) */
+			LB.darkloid_cut += 1;
+			if (LB.hp_max[0] > 0) LB.hp[0] = LB.hp[0] - LB.hp_max[0] / 5 > 1 ? LB.hp[0] - LB.hp_max[0] / 5 : 1;
+		}
 	}
 	if (S.t < STRIKE_HOLD || !lib_camera_home()) return;
 	LB.step = LIB_STEP_MOVE;

@@ -57,7 +57,6 @@ static struct {
 	int me, hp, max, op;
 	bool shield, strip, lost;
 	int taste;             /* percent: his care for the sealed region's route (0 the par's player) */
-	int back_in[LIB_UNITS];
 	uint32_t rs;
 	/* its measures */
 	int dead, moves, phases, strikes, best[4], longswrd, hurt, order, norder;
@@ -414,7 +413,6 @@ static void unit_fight(int t, int u) {
 	battle_hurt(virus_harm() * 2 * (50 + rr(101)) / 100);
 	if (P.lost || rr(100) >= 70 - 2 * d) return;
 	P.b.unit[u].gone = true;
-	P.back_in[u] = 2;
 	free_panel(t);
 }
 
@@ -452,21 +450,11 @@ static void take(const Option *o) {
 	}
 }
 
-/* The Darkloids' phase: a hole's deleted guardian back the phase after
- * next, each guardian's steps and blow, the Darkloid's */
+/* The Darkloids' phase: each guardian's steps and blow, the Darkloid's,
+ * then a hole's deleted guardian back beside it as BN5 sends him
+ * (lib_guardian_return) */
 static void enemy(void) {
 	int mx = px[P.me], my = py[P.me];
-	for (int u = 1; u < P.b.nunits; ++u) {
-		LibUnit *n = &P.b.unit[u];
-		if (!n->gone || n->hole < 0 || P.b.kind[P.b.hole_y[n->hole]][P.b.hole_x[n->hole]] != LIB_HOLE || --P.back_in[u] > 0) continue;
-		for (int f = 0; f < 4; ++f) {
-			int x = P.b.hole_x[n->hole] + dir4[f][0], y = P.b.hole_y[n->hole] + dir4[f][1], i = at_xy(x, y);
-			if (i < 0 || !lib_dark_kind(K(i)) || K(i) == LIB_HOLE || unit_on(i) >= 0 || i == P.me) continue;
-			n->x = (uint8_t)x; n->y = (uint8_t)y; n->gone = false;
-			occ[i] = (int8_t)u;
-			break;
-		}
-	}
 	for (int u = 1; u < P.b.nunits; ++u) {
 		LibUnit *n = &P.b.unit[u];
 		if (n->gone) continue;
@@ -477,6 +465,12 @@ static void enemy(void) {
 	}
 	if (!P.b.unit[0].gone && abs(P.b.boss_x - mx) + abs(P.b.boss_y - my) <= lib_darkloid_reach(P.b.act)) board_hurt(lib_harm(UNIT_DARKLOID, P.b.act));
 	P.shield = false;
+	for (int h = 0; h < P.b.nholes; ++h) {
+		int x, y, u = lib_guardian_return(&P.b, h, mx, my, &x, &y);
+		if (u < 0) continue;
+		P.b.unit[u].x = (uint8_t)x; P.b.unit[u].y = (uint8_t)y; P.b.unit[u].gone = false;
+		occ[at_xy(x, y)] = (int8_t)u;
+	}
 }
 
 /* One play: the phases it took to delete the Darkloid, 0 not done */

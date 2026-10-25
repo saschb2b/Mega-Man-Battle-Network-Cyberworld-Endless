@@ -116,6 +116,14 @@ int lib_par_zenny(int depth);
  * darkening the clean panel it lands on): false where none brings it
  * nearer */
 bool lib_guardian_step(LibBoard *b, int u, int x, int y);
+/* A deleted guardian's return as BN5's (BN5_LIB_RETURN), at the
+ * Darkloids' phase's end: DarkHole h still standing, MegaMan at (mx, my)
+ * within three panels of it on both axes, fewer than eight units standing
+ * and fewer than three of the hole's own: one of its deleted guardians
+ * (BN5's pick at random among them; a board's hole has one), on the free
+ * dark panel of the eight round the hole nearest MegaMan, BN5's order
+ * breaking a tie. The guardian, its panel into (*x, *y); -1 none. */
+int lib_guardian_return(const LibBoard *b, int h, int mx, int my, int *x, int *y);
 
 /* Whether panel (x, y) is floor MegaMan walks at the ground's height: the
  * director's reads the layer's map as built (netmap's floor, after legal.c
