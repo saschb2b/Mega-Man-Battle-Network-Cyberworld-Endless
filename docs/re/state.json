@@ -67,6 +67,15 @@
       "link": "../LIBERATION.md",
       "updated": "2026-10-25",
       "state_text": "Works"
+    },
+    {
+      "name": "BN6's Virus Battler",
+      "state": "proven",
+      "now": "Mapped and played on the plain ROM in romlab and in a run's game: the BtlrCard is event flag 0x1D8, each family's data a flag 0x196 + AI that BN6's \"You got new Virus Data\" chat sets after a rare's deletion (27 families; Mettaur and Gunner always held); battle mode 6 replaces the Custom screen by the VIRUS LIST (the V1's HP, attack and MB from 0x0802B5FC, two families at most and 50 MB), the picked placed by a cursor, then both sides fight on their own (no button but START acts), the Custom gauge their time limit (13 a frame, about 21 s): won 1, lost 2, a draw at time up 7 at BN6_BATTLE_RESULT. The five Battlers' 33 records (list 0's 0x1A-0x3A: 3, 5, 5, 10, 10 rounds of fixed V1 pairs), their series' flags, start cutscene and prizes read. In a run's game, the engine's forced battle started a mode 6 record and BN6 ran it whole; a run's own PiranhaRare registered with 0x1D8 set.",
+      "left": "The design (frequency, stake, prizes by act, the card across runs: the owner's decisions); then the build: a mode 6 record of the act's pair, the held families' flags at the run's start, the series and prize in the director, the Mr.Prog's words. Not reached: a natural time up (the gauge was poked full), the Battlers' chats played through on their own maps.",
+      "updated": "2026-10-25",
+      "link": "../LEVEL_DESIGN.md#the-virus-battler-researched-not-built",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
@@ -98,6 +107,10 @@
     {
       "date": "2026-10-25",
       "what": "BN5's Liberation team mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the Navi in play at the liberation state's +6, a team unit's +2 its turn yet to come, the HP box's cap 0x086D5964, digits 0x086D59A4 and blank 0x086D5C64 on palette 12, the others' HP under them, Pass a fifth of max HP; BN6's player spawn's sprite load 0x0809E7EA and OK's hand 0x08029110 named (src/emu/bn6.h, bn6_forms.h), Gregar's list-6 numbers 0x07, 0x28, 0x29, 0x31 and 0x35 found empty in both versions"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "BN6's Virus Battler mapped (src/emu/bn6_battler.h, docs/ROM_DATA.md's three Virus Battler rows, docs/SOURCES.md, tools/virus_battler.py): the card's flags 0x1D8 and 0x196 + AI and their one writer 0x08736058, battle mode 6's loop 0x0800961C, VIRUS LIST state 0x020364C0, family data 0x0802B5FC, spawn 0x0802AEEA, the 50 MB check, the time limit on the Custom gauge, results 1/2/7, the Battlers' records 0x080B06E0's 0x1A-0x3A and their start cutscene 0x0809A5F0"
     },
     {
       "date": "2026-10-23",
@@ -244,6 +257,22 @@
       "result": "On a dark board in the engine (--dev dark,souls=1 and 0x2B, BN5's ROM): the teammate's battle, his Soul's record written at OK's start (0x08029110) as UNITE's commit writes it with turns 0xFF, crossed MegaMan into ColonelSoul, ShadowSoul and ToadSoul as TURN 1 START! showed, his HP the teammate's (200, 350, 300) and kept after the battle; with --dev matehp=81 Colonel's deleting blow left 1 HP and ended the battle, Colonel off the board and MegaMan in play, the run going on.",
       "meaning": "BN6's own cross at a turn's start carries a teammate's Soul from the first turn with no chip given; the Soul's life (soullife.c) keeps it for the whole battle where its turns are 0xFF.",
       "link": "../LIBERATION.md#the-team-as-built"
+    },
+    {
+      "feature": "BN6's Virus Battler",
+      "date": "2026-10-25",
+      "name": "A Battler's record played on the plain ROM",
+      "result": "romlab from an engine boot state on SeasideArea1, its random battles all made list 0's record 0x1A and the card's flags set: the VIRUS LIST, two placed, Fight with this set?, BATTLE START!; ErthDrgn + Mettaur won (result 1, ~6 s), Mettaur + Piranha lost (2), WindBox alone lost (2), the gauge poked full gave TIME UP! DRAW! (7); the gauge rose 0x30C in 60 frames; A, B, L, R, SELECT and the D-pad pressed through a fight left all 60 pictures the same, START paused it.",
+      "meaning": "The Virus Battle is one BattleSettings record of mode 6 and needs nothing of its Battler's map: started from anywhere it runs whole. romlab's own save and load broke input in the list (a fresh session each run).",
+      "link": "../ROM_DATA.md"
+    },
+    {
+      "feature": "BN6's Virus Battler",
+      "date": "2026-10-25",
+      "name": "The Virus Battle in a run, and a run's rare on the card",
+      "result": "In the engine (a local change: the forced battle's record replaced by 0x080B0880): the VIRUS LIST, ErthDrgn + Mettaur placed, YOU WIN!, back on the layer with MegaMan's 140 HP. With flag 0x1D8 set, a forced PiranhaRare (id 0x0B) deleted by the autopilot ended in \"You got new Virus Data:\\\"Piranha\\\"!\" and the next VIRUS LIST showed Mettaur, Piranha and dashes; without the flag, no chat.",
+      "meaning": "A run can host BN6's own Virus Battler through the engine's forced battle, and its rares register as BN6's do once the card's flag is set.",
+      "link": "../LEVEL_DESIGN.md#the-virus-battler-researched-not-built"
     },
     {
       "feature": "BN6's sound engine",
