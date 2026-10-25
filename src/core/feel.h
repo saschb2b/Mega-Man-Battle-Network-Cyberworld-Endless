@@ -71,6 +71,12 @@ void feel_mix_start(FeelMix *m, FeelCue cue, uint8_t amount);
 /* A frame of it: the motors' 0-65535 at the strength `level`, each beat
  * one frame on; true while any plays */
 bool feel_mix_frame(FeelMix *m, int level, uint16_t *low, uint16_t *high);
+/* The buster's charge, `frames` into it: the light motor's 0-255, a hum
+ * that rises as it fills (a tenth to a third), none once it is full */
+uint8_t feel_charge_hum(int frames);
+/* A charged shot's kick waits for its sound (feel_sound.h) this many
+ * frames at most after B's release: the shot leaves a moment after */
+#define FEEL_SHOT_WAIT 30
 /* A motor's 0-255 as 0-65535 at the strength `level` */
 uint16_t feel_motor(int level, int v);
 /* MegaMan's own sounds as they play (feel_sound.h), each motor 0-255,

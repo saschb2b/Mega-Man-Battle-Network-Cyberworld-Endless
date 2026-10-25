@@ -66,8 +66,9 @@ int feel_beats(const FeelGame *was, const FeelGame *now, FeelBeat out[FEEL_BEATS
 typedef struct { uint8_t frames, low0, high0, low1, high1; } Step;
 
 static const Step hit[] = { { 3, 255, 150, 255, 150 }, { 7, 210, 30, 30, 0 }, { 0, 0, 0, 0, 0 } };
-static const Step charged[] = { { 3, 0, 110, 0, 110 }, { 0, 0, 0, 0, 0 } };
-static const Step shot[] = { { 3, 220, 220, 220, 220 }, { 6, 130, 60, 0, 0 }, { 0, 0, 0, 0, 0 } };
+/* (the charge full: a crisp click over its hum; the charged shot: a recoil, heavier and longer than a buster's tick) */
+static const Step charged[] = { { 2, 90, 230, 90, 230 }, { 3, 30, 80, 0, 0 }, { 0, 0, 0, 0, 0 } };
+static const Step shot[] = { { 4, 255, 210, 255, 210 }, { 12, 210, 90, 0, 0 }, { 0, 0, 0, 0, 0 } };
 static const Step counter[] = { { 4, 140, 230, 140, 230 }, { 4, 0, 0, 0, 0 }, { 6, 210, 255, 210, 255 }, { 5, 140, 120, 0, 0 }, { 0, 0, 0, 0, 0 } };
 static const Step deleted[] = { { 4, 190, 110, 190, 110 }, { 9, 150, 40, 0, 0 }, { 0, 0, 0, 0, 0 } };
 static const Step navi_delete[] = { { 10, 255, 180, 255, 180 }, { 48, 255, 120, 0, 0 }, { 0, 0, 0, 0, 0 } };
@@ -113,6 +114,12 @@ bool feel_mix_frame(FeelMix *m, int level, uint16_t *low, uint16_t *high) {
 	*low = feel_motor(level, lo);
 	*high = feel_motor(level, hi);
 	return any;
+}
+
+uint8_t feel_charge_hum(int frames) {
+	if (frames < 0) return 0;
+	int t = frames > 90 ? 90 : frames;
+	return (uint8_t)(26 + t * 60 / 90);
 }
 
 uint16_t feel_motor(int level, int v) {

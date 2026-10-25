@@ -2810,6 +2810,9 @@ static void test_feel(void) {
 	sl = sh = 0;
 	feel_mix_sound(FEEL_OFF, 255, 255, &sl, &sh);
 	CHECK(!sl && !sh, "a sound rumbled at Off");
+	/* the charge's hum: rising as it fills, at most a third of a motor, none before it */
+	CHECK(feel_charge_hum(-1) == 0 && feel_charge_hum(0) > 0 && feel_charge_hum(45) > feel_charge_hum(0) && feel_charge_hum(90) == feel_charge_hum(600) &&
+		feel_charge_hum(600) <= 255 / 3 + 1, "the charge's hum does not rise and cap (%u, %u, %u)", feel_charge_hum(0), feel_charge_hum(45), feel_charge_hum(600));
 	/* settings.ini's words, Options' turn round */
 	for (int v = FEEL_OFF; v < FEEL_LEVELS; ++v) CHECK(feel_level_read(feel_level_word(v)) == v, "%s does not read back", feel_level_word(v));
 	CHECK(feel_level_read("no") == FEEL_OFF && feel_level_read("loud") == FEEL_DEFAULT, "vibration's words read wrong");

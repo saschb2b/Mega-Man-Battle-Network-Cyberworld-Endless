@@ -542,6 +542,8 @@ deletion, and as he jacks in. His own attacks are felt as they sound:
 the rumble follows BN6's sound of each one as it plays, so a buster shot
 is a short tick, every bullet of a Vulcan its own, a sword a swing and a
 Cannon a blast with its rumbling tail, and his hits landing a knock. The
+buster's charge hums, rising as it fills, clicks once it is full, and
+the charged shot kicks back as it leaves the buster. The
 enemies' attacks are felt only when they hit him. Each one comes with
 what the screen and the sound already show, so turning it off loses
 nothing. Nothing rumbles while fast forward runs or online.

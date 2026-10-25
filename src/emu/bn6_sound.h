@@ -28,6 +28,13 @@
 /* a player's row in BN6_MPLAYS (bn6.h), 12 bytes: +0 its MusicPlayerInfo */
 #define BN6_MPLAY_ROW         12
 #define BN6_MPLAY_TRACKS      0x04 /* its tracks (MusicPlayerTrack, BN6_TRACK_SIZE each) in EWRAM */
+/* its MusicPlayerInfo */
+#define BN6_MPLAY_SONG        0x00 /* u32: the song it plays, its header's address (a lower priority's start refused leaves it) */
+#define BN6_MPLAY_CLOCK       0x0C /* u32: its clock, 0 as a song starts on it */
+/* a song's entry in the song table (RomLayout.song_table), 8 bytes */
+#define BN6_SONG_ROW          8
+#define BN6_SONG_HEADER       0x00 /* u32: its header's address */
+#define BN6_SONG_PLAYER       0x04 /* u16: the player it plays on */
 #define BN6_MPLAY_TRACK_COUNT 0x08 /* u8: how many */
 /* a track (MusicPlayerTrack) */
 #define BN6_TRACK_SIZE        0x50
