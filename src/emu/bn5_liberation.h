@@ -16,7 +16,7 @@
 #define BN5_LIB_PANEL_LIST   (BN5_LIB_STATE + 0x28) /* u32: its panels in RAM (0x02030000), 8 bytes each: the kind, */
 #define BN5_LIB_PANEL_SIZE   8           /* ... +1 flags (0x10 a unit stands on it), +2 x, +3 y, +4-+7 its edges' looks */
 #define BN5_LIB_UNITS        0x0203E000u /* the board's units, 0x28 bytes each: the team, then the Darkloid and guardians */
-#define BN5_LIB_UNIT_SIZE    0x28        /* ... +5 the Navi or enemy, +0x0A x, +0x0B y, +0x14 HP, +0x16 its max */
+#define BN5_LIB_UNIT_SIZE    0x28        /* ... +1 the Navi or enemy, +5 its facing, +0x0A x, +0x0B y, +0x14 HP, +0x16 its max */
 #define BN5_LIB_OP_ADD       0x080519D0u /* Order Points raised by r0, no higher than BN5_LIB_OP_MAX */
 #define BN5_LIB_OP_SPEND     0x080519E0u /* Order Points lowered by r0, no lower than 0 */
 #define BN5_LIB_OP_MAX       8           /* the most Order Points the team holds */
@@ -370,6 +370,7 @@
 #define BN5_LIB_REST_PART    5           /* Pass ("End without doing anything?") gives a fifth of his max HP back (MegaMan 32 to 52 of 100,
                                             Colonel 32 to 72 of 200); the routine not traced */
 
+#include "bn5_liberation_cmds.h"    /* the commands: each Navi's, their routines, shapes and rules, both teams' */
 #include "bn5_liberation_rules.h"   /* a liberation battle, the battle a panel's dark chooses, a BonusPanel */
 
 #endif

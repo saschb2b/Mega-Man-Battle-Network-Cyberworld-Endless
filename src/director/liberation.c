@@ -333,14 +333,19 @@ static int sneak_target(int fx, int fy) {
 }
 
 /* Whether the Navi in play's command can be taken on the panel he faces
- * (fx, fy, -1 none): a liberating one on a panel to liberate, NumberCheck
- * where its two by three holds an item or a trap, SneakAttack where it
- * reaches a guardian, LifeMelody beside a teammate yet to act */
+ * (fx, fy, -1 none): a liberating one on a panel to liberate (PanelSearch's
+ * a dark one), NumberCheck where its two by three holds an item or a trap,
+ * SneakAttack where it reaches a guardian, LifeMelody beside a teammate yet
+ * to act, MagnetBarrier where the team stands unshielded, BombLiberation
+ * hovering over a dark panel */
 static bool command_can(int fx, int fy) {
 	int command = lib_mate_command(LB.in_play), xs[6], ys[6], n;
 	switch (command) {
-	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK:
+	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK: case LIB_DO_NAPALM: case LIB_DO_WIDESWRD:
 		return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_liberable(&LB.b, fx, fy) && LB.b.kind[fy][fx] != LIB_HOLE;
+	case LIB_DO_SEARCH: return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_flown(&LB.b, fx, fy);
+	case LIB_DO_MAGNET: return !LB.shield;
+	case LIB_DO_BOMB: return lib_flown(&LB.b, LB.mx, LB.my);
 	case LIB_DO_NUMBER:
 		n = fx >= 0 ? lib_command_panels(&LB.b, LIB_DO_NUMBER, fx, fy, LB.face, xs, ys) : 0;
 		for (int i = 0; i < n; ++i) if (LB.b.kind[ys[i]][xs[i]] == LIB_ITEM || LB.b.kind[ys[i]][xs[i]] == LIB_TRAP) return true;
@@ -371,10 +376,13 @@ static void open_menu(void) {
 
 static void after_action(const char *words);
 static void take_item(int x, int y, char *held, size_t n);
+static void free_panel(int x, int y, char *held, size_t n);
 
 /* A command with no battle: NumberCheck's items taken and traps disarmed
  * (its panels left dark), SneakAttack's guardian struck (its next battle
- * the easier), LifeMelody's teammates beside him sung for */
+ * the easier), LifeMelody's teammates beside him sung for, MagnetBarrier's
+ * shield over the team till the next phase (a BonusPanel's), the panel
+ * BombLiberation's flier hovers over freed */
 static void command_done(int command, int fx, int fy) {
 	char said[320] = "";
 	int xs[6], ys[6], n = 0;
@@ -394,6 +402,12 @@ static void command_done(int command, int fx, int fy) {
 	} else if (command == LIB_DO_SNEAK) {
 		int u = sneak_target(fx, fy);
 		if (u > 0) LB.weak[u] = true;
+	} else if (command == LIB_DO_MAGNET) {
+		LB.shield = true;
+		n = 1;
+	} else if (command == LIB_DO_BOMB) {
+		free_panel(LB.mx, LB.my, said, sizeof said);
+		n = 1;
 	} else {
 		for (int k = 0; k < LB.b.team.n; ++k)
 			if (k != LB.in_play && !LB.b.mate[k].out && !LB.mate[k].acted && abs(LB.b.mate[k].x - LB.mx) + abs(LB.b.mate[k].y - LB.my) <= 1) {
@@ -412,7 +426,7 @@ static void fight(int cmd) {
 	lib_faced(&fx, &fy);
 	int u = lib_unit_at(fx, fy);
 	int command = cmd == LIB_CMD_LONGSWRD ? lib_mate_command(LB.in_play) : LIB_DO_NONE;
-	if (command == LIB_DO_NUMBER || command == LIB_DO_SNEAK || command == LIB_DO_MELODY) { command_done(command, fx, fy); return; }
+	if (command != LIB_DO_NONE && !lib_command_battles(command)) { command_done(command, fx, fy); return; }
 	LB.fight_cmd = cmd;
 	LB.fight_unit = u;
 	LB.fx = fx; LB.fy = fy;
@@ -657,7 +671,9 @@ static const int fwx[8] = { 7, 10, 7, 0, -7, -10, -7, 0 }, fwy[8] = { -7, 0, 7, 
 
 static void track_update(void) {
 	int px = bn6_player_x(), py = bn6_player_y(), x, y;
-	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && lib_walkable(&LB.b, x, y) && (x != LB.mx || y != LB.my)) {
+	bool flier = lib_mate_command(LB.in_play) == LIB_DO_BOMB;
+	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && (lib_walkable(&LB.b, x, y) || (flier && lib_flown(&LB.b, x, y))) &&
+	    (x != LB.mx || y != LB.my)) {
 		LB.mx = x; LB.my = y;
 		LB.b.mate[LB.in_play].x = (uint8_t)x;
 		LB.b.mate[LB.in_play].y = (uint8_t)y;

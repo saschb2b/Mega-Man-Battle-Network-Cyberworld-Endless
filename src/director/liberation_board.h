@@ -177,6 +177,12 @@ enum { LIB_DO_NONE, LIB_DO_LONGSWRD, LIB_DO_SCRENDIV, LIB_DO_TOMAHAWK, LIB_DO_NU
 	LIB_DO_NAPALM, LIB_DO_WIDESWRD, LIB_DO_MAGNET, LIB_DO_SEARCH, LIB_DO_BOMB, LIB_DOS };
 int lib_command_of(int navi);
 int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]);
+/* ... whether a command frees its panels by a battle (LongSwrd, ScrenDiv,
+ * TomahawkSwing, Napalm, WideSwrd, PanelSearch), not with none */
+bool lib_command_battles(int command);
+/* Whether panel (x, y) is one BombLiberation's flier hovers over: dark,
+ * an item's, a trap (BN5's GyroMan flies over dark panels: the guides) */
+bool lib_flown(const LibBoard *b, int x, int y);
 /* The shield of KnightMan's StoneBody: no harm on the board to him or a
  * Navi beside him (BN5's guides) */
 bool lib_mate_shielded(const LibBoard *b, int k);

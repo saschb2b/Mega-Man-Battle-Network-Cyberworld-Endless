@@ -131,6 +131,7 @@ static bool flag_was_set(int flag) {
 	return false;
 }
 bool flag_get(int flag) { (void)flag; return false; }
+void flag_clear(int flag) { (void)flag; }
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
@@ -5791,6 +5792,46 @@ static void test_liberation_team(void) {
 	CHECK(lib_command_panels(&a, LIB_DO_SCRENDIV, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && xs[2] == 5 && ys[0] + ys[2] == 10, "ScrenDiv: three across");
 	CHECK(lib_command_panels(&a, LIB_DO_TOMAHAWK, 5, 5, 0, xs, ys) == 6, "TomahawkSwing: two deep and three wide");
 	CHECK(lib_command_panels(&a, LIB_DO_MELODY, 5, 5, 0, xs, ys) == 5 && xs[4] == 9, "LifeMelody: five ahead");
+	/* (the Cross Navis', Team ProtoMan's) */
+	CHECK(lib_command_panels(&a, LIB_DO_NAPALM, 5, 5, 0, xs, ys) == 6 && xs[3] == 8 && xs[4] == 7 && xs[5] == 7 && ys[4] + ys[5] == 10, "Napalm: four ahead, the third's sides");
+	CHECK(lib_command_panels(&a, LIB_DO_WIDESWRD, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && ys[0] + ys[2] == 10, "WideSwrd: three across");
+	CHECK(lib_command_panels(&a, LIB_DO_MAGNET, 5, 5, 0, xs, ys) == 0, "MagnetBarrier: no panel");
+	CHECK(lib_command_panels(&a, LIB_DO_BOMB, 5, 5, 0, xs, ys) == 1 && xs[0] == 5 && ys[0] == 5, "BombLiberation: the panel under him");
+	a.kind[5][8] = LIB_CLEAN;
+	CHECK(lib_command_panels(&a, LIB_DO_SEARCH, 5, 5, 0, xs, ys) == 3 && xs[2] == 7, "PanelSearch: the dark line, to a clean panel");
+	CHECK(!lib_command_battles(LIB_DO_MAGNET) && !lib_command_battles(LIB_DO_BOMB) && lib_command_battles(LIB_DO_NAPALM) && lib_command_battles(LIB_DO_SEARCH),
+		"the Cross Navis' commands: battles or none");
+	/* (the Cross Navis on the board: a team of them, every held Navi's
+	 * command its spot; the par a pick's, the same twice) */
+	static const LibTeam crosses[3] = {
+		{ 2, { MATE_MEGAMAN, MATE_HEATMAN }, { 0, 300 }, 3, { MATE_HEATMAN, MATE_COLONEL, MATE_ERASEMAN } },
+		{ 3, { MATE_MEGAMAN, MATE_ELECMAN, MATE_CHARGEMAN }, { 0, 425, 425 }, 4, { MATE_ELECMAN, MATE_CHARGEMAN, MATE_SLASHMAN, MATE_NUMBERMAN } },
+		{ 4, { MATE_MEGAMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN }, { 0, 500, 500, 500 }, 5, { MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN, MATE_ELECMAN, MATE_CHARGEMAN } },
+	};
+	for (int act = 1; act <= 3; ++act) {
+		int n = 0, tried = 0, cmds = 0, plays = 0, par = 0, repar = 0;
+		for (uint32_t s = 1; s <= 12; ++s) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			++tried;
+			if (!lib_board_make(&a, s, act, &crosses[act - 1], NULL)) continue;
+			++n; par += a.par; cmds += a.m.longswrd; plays += a.m.plays;
+			/* (another pick of the held: the par again, the same twice) */
+			memcpy(&b, &a, sizeof a);
+			b.team.navi[1] = crosses[act - 1].held[crosses[act - 1].nheld - 1];
+			lib_plan_par(&b);
+			int p1 = b.par;
+			b.par = 0;
+			lib_plan_par(&b);
+			CHECK(b.par == p1 && b.par > 0, "cross board %u act %d: a pick's par %d then %d", s, act + 1, p1, b.par);
+			repar += b.par;
+		}
+		CHECK(n * 2 >= tried, "liberation: %d Cross team boards of %d at act %d", n, tried, act + 1);
+		printf("liberation crosses act %d (%d Navis): %d boards of %d, par %d (another pick's %d), commands %d.%d a play\n", act + 1, crosses[act - 1].n, n, tried,
+			n ? par / n : 0, n ? repar / n : 0, cmds / (plays ? plays : 1), cmds * 10 / (plays ? plays : 1) % 10);
+	}
 	run = before;
 }
 
