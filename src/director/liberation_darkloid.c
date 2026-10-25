@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "debug.h"
+#include "devtools.h"
 #include "encounter.h"
 #include "guardians.h"
 #include "loot.h"
@@ -26,4 +27,19 @@ Encounter lib_darkloid_battle(void) {
 	emu_battle_hp(xguardian_hp(LB.darkloid, v), xguardian_hp_fought(LB.darkloid, v, run.depth));
 	if (emu_debug_on()) fprintf(stderr, "liberation: darkloid %d, enemy id %#x, version %d\n", LB.darkloid, e.foes[0].id, v);
 	return e;
+}
+
+void lib_darkloid_hp(int *hp, int *max) {
+	/* (the HP his battle gives him: BN5's own's held to the act's band,
+	 * else make_boss's version's) */
+	if (guardian_darkloid(LB.darkloid)) {
+		int v = xguardian_version(LB.darkloid, run.depth);
+		*max = xguardian_hp_fought(LB.darkloid, v, run.depth);
+	} else {
+		Encounter e = make_boss(run.depth, run.biome, LB.darkloid);
+		*max = navi_hp(e.foes[0].family, e.foes[0].version);
+	}
+	/* (--dev libhp=N: he begins at N, his heal and his battle from the
+	 * board's HP seen) */
+	*hp = dev.lib_hp > 0 && dev.lib_hp < *max ? dev.lib_hp : *max;
 }

@@ -147,5 +147,8 @@ void lib_bonus_keys(uint32_t pressed);
  * battle: BN5's at the act's version and band, else make_boss's */
 void lib_darkloid_dress(void);
 Encounter lib_darkloid_battle(void);
+/* ... and his HP on the board as it begins: his battle's, `hp` lowered by
+ * --dev libhp=N */
+void lib_darkloid_hp(int *hp, int *max);
 
 #endif

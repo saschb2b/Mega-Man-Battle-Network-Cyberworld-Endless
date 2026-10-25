@@ -31,7 +31,6 @@
 #include "debug.h"
 #include "devtools.h"
 #include "director_state.h"
-#include "emu.h"
 #include "encounter.h"
 #include "flags.h"
 #include "guardians.h"
@@ -181,12 +180,6 @@ bool lib_layer_made(void) {
 	return true;
 }
 
-/* The Darkloid's HP in his battle, as it spawns (make_boss's version) */
-static int darkloid_hp(void) {
-	Encounter e = make_boss(run.depth, run.biome, LB.darkloid);
-	return navi_hp(e.foes[0].family, e.foes[0].version);
-}
-
 void lib_begin(void) {
 	if (!layer.dark) { LB.on = false; return; }
 	LB.step = LIB_STEP_WAIT;
@@ -212,8 +205,7 @@ void lib_begin(void) {
 	 * viruses) */
 	memset(LB.hp, 0, sizeof LB.hp);
 	memset(LB.hp_max, 0, sizeof LB.hp_max);
-	LB.hp[0] = LB.hp_max[0] = darkloid_hp();
-	if (dev.lib_hp > 0 && dev.lib_hp < LB.hp[0]) LB.hp[0] = dev.lib_hp;
+	lib_darkloid_hp(&LB.hp[0], &LB.hp_max[0]);
 	if (emu_debug_on()) fprintf(stderr, "liberation: the Darkloid's HP %d of %d on the board\n", LB.hp[0], LB.hp_max[0]);
 	memcpy(LB.hp_shown, LB.hp, sizeof LB.hp_shown);
 	LB.harm_mates = 0;
