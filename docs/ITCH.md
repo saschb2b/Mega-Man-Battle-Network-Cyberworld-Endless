@@ -1,6 +1,7 @@
 # itch.io
 
-The game's page on itch.io, <https://saschb2b.itch.io/cyberworld-endless>:
+The game's page on itch.io, <https://saschb2b.itch.io/cyberworld-endless>
+(project 5225408; a Draft since 25 October 2026, until the owner publishes it):
 what it holds, why, and how it follows each release. itch is where many
 players look for fan games and roguelikes, and the page plays the browser
 build in place and offers every system's file, all from the release on
@@ -40,12 +41,13 @@ your page, HTML5 games; 25 October 2026):
 | --- | --- |
 | Title | Cyberworld Endless |
 | Project URL | `saschb2b.itch.io/cyberworld-endless` |
-| Short description or tagline | A Mega Man Battle Network 6 roguelike, played by BN6 itself from your own ROM. A new net every run, and NetBattles online. |
+| Short description or tagline | A Mega Man Battle Network 6 roguelike, played by BN6 itself from your ROM. A new net every run, and NetBattles online. |
 | Description | [itch/description.html](itch/description.html) |
 
 The title is the site's brand. The tagline, shown under the cover in
 listings and search results, names the series and BN6 for the players
-who look for it, and says the rest of the site's pitch in fewer words. The description says first what the game is and what it needs,
+who look for it, and says the rest of the site's pitch in fewer words;
+itch takes 120 characters at most. The description says first what the game is and what it needs,
 then a run, the release's news, BN5, online, where it runs, the browser
 player's controls and saves, the links and the legal line, each with a
 whole-frame GIF of the game from `docs/clips/`. It keeps the README's
@@ -58,9 +60,9 @@ plain voice and claims only what the README and the guide say.
 | Classification | Games | |
 | Kind of project | HTML | The page plays the browser build; the other files are listed under it |
 | Release status | In development | The releases are betas (0.x) |
-| Pricing | $0 or donate, no suggested amount | The owner's choice: free, a tip optional |
+| Pricing | $0 or donate, suggested donation $2.00 | The owner's choice: free, a tip optional. itch keeps a suggested amount above $0 in this mode; a player can skip it and download for free |
 | Genre | Role Playing | BN is an action RPG; roguelike is a tag on itch, not a genre |
-| Tags | `roguelike`, `roguelite`, `fangame`, `megaman`, `battle-network`, `deck-building`, `procedural-generation`, `gameboy-advance`, `nintendo-3ds`, `action-rpg` | Below |
+| Tags | `roguelike`, `roguelite`, `fangame`, `megaman`, `battle-network`, `deck-building`, `procedural`, `gameboy-advance`, `3ds`, `action-rpg` | Below |
 | AI disclosure | Yes: code, text, graphics and sound | The owner's answer: the code and the lines were written with Claude, and so were the scripts that draw the site's art, the cover and the banner and write the trailers' music; the game's own pictures and sound are BN6's |
 | Custom noun | (none) | |
 | Community | Comments | Questions and reports in one place on the page; GitHub's Discussions and issues stay the project's own |
@@ -77,9 +79,9 @@ a capital in itch's name for it marks one of its suggested tags):
 | megaman | 178 | Mega Man fans (itch's largest Mega Man tag; `mega-man` has 69) |
 | battle-network | 11 | Battle Network fans, where BN fan games gather |
 | Deck Building | 3,959 | The folder built from the chips a run finds |
-| Procedural Generation | 10,301 | A new net every run |
+| Procedural Generation | 10,301 | A new net every run (itch stores it as `procedural`) |
 | Game Boy Advance | 787 | It plays a GBA game (itch's slug `gameboy-advance`) |
-| Nintendo 3DS | 110 | The 3DS build, for homebrew players |
+| Nintendo 3DS | 110 | The 3DS build, for homebrew players (itch stores it as `3ds`) |
 | Action RPG | 6,082 | What BN is |
 
 Left out: Pixel Art (223,357 games, says little), Multiplayer (the
@@ -89,14 +91,15 @@ Metadata tab says it), PortMaster (3 games; the description says it).
 
 | Field | Value |
 | --- | --- |
-| Release date | 27 September 2026 (0.1.0) |
 | Languages | English |
-| Inputs | Keyboard, Gamepad (any), Touchscreen |
+| Inputs | Keyboard, Gamepad (any), Touchscreen, Xbox controller, PlayStation controller |
 | Accessibility | Configurable controls |
 | Multiplayer | Server-based networked multiplayer, 1 to 8 players (a Net Square channel's eight) |
 | Average session | About an hour (the short net) |
+| Engines & tools | SDL (itch's list has no Emscripten, mGBA or devkitPro) |
 | Code license | MIT License |
-| Links | Homepage: the website; Source code: GitHub; Community: GitHub Discussions; Support: GitHub issues |
+| Release date | Blank: itch asks for one only when it differs from the page's publishing |
+| External links | Homepage: the website; Source code: GitHub; Community: GitHub Discussions; Support: GitHub issues |
 
 ## The pictures
 
@@ -105,8 +108,9 @@ wordmark and net and the site's PET colours, nothing from the ROM:
 
 | Picture | File | Size |
 | --- | --- | --- |
-| Cover (listings, search, the page's preview) | [itch/cover.png](itch/cover.png): the wordmark over one whole frame of a battle's Custom screen (`--frame` picks another) | 630x500 |
+| Cover (listings, search, the page's preview) | [itch/cover.png](itch/cover.png): the infinity mark and the wordmark stacked over the net, as the Steam capsule draws them; the owner's pick of six (25 October 2026) over covers with a frame of the game (`--frame NAME` draws one) | 630x500 |
 | Banner (replaces the title on the page) | [itch/banner.png](itch/banner.png) | 960x240 |
+| Embed BG (behind the player's Run game button) | [itch/embed.png](itch/embed.png): the net, the wordmark high, the middle clear | 960x640 |
 | Background tile | [itch/background.png](itch/background.png): the site's PET floor | 48x48 |
 | Screenshots | `.build/itch/NN-NAME.png`: eight of `docs/screenshots` at 4x, whole frames | 960x640 |
 
@@ -120,7 +124,7 @@ Set in the page's theme editor (Edit theme):
 
 | Setting | Value |
 | --- | --- |
-| Layout, screenshots | Hidden (itch's default for a page with a game in it; the GIFs carry the description) |
+| Layout, screenshots | Auto, which hides them on a page with a game in it; the GIFs carry the description |
 | BG | `#08bd73`, the PET's green, with the background tile repeated |
 | BG2 (the column) | `#0b2532`, the browser player's own background, opaque |
 | Text | `#f7fff7` |
@@ -128,10 +132,16 @@ Set in the page's theme editor (Edit theme):
 | Buttons | `#ffd610` |
 | Headers | `#ffd610` |
 | Header font | Silkscreen |
-| Body font | Pixelify Sans |
+| Font | Lato, Large |
 | Banner | [itch/banner.png](itch/banner.png), centred |
+| Background | [itch/background.png](itch/background.png), repeated both ways |
+| Embed BG | [itch/embed.png](itch/embed.png) |
 
-The fonts are the site's (both from Google Fonts, which itch offers).
+The headers are the site's Silkscreen (Google Fonts, which itch offers).
+The site's body font, Pixelify Sans, was tried and dropped: Google's copy
+draws the "fi" ligature like an A ("file" read "Ale", "five" "Ave"), and
+itch's theme cannot turn ligatures off without custom CSS, which itch
+enables only on request. Lato, itch's default, reads cleanly.
 
 ## The files
 
@@ -199,6 +209,23 @@ origin's IndexedDB under `/cyberworld-endless`, apart from the website
 player's (another origin) and from every other itch game's (another
 name). Online play reaches the server from there too: it checks no
 origin.
+
+## Going public
+
+The draft holds every text, picture, setting and the theme above; it has
+no files yet. The owner, once:
+
+1. installs butler (<https://itchio.itch.io/butler>) and runs
+   `butler login` (the key stays in butler's own file);
+2. `python3 tools/itch.py push --hidden`: every channel of the latest
+   release, its uploads hidden;
+3. on the edit page: the `web` upload's **This file will be played in the
+   browser**, each upload's display name and platform as the table above
+   says, then unhides them;
+4. opens the draft (its Secret URL) on a phone and a computer, the ROMs
+   chosen, a game started;
+5. sets **Visibility** to Public and saves: the page is indexed from then
+   on, and links from the site and the README can follow.
 
 ## Each release
 

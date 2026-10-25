@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """The itch.io page's pictures (docs/ITCH.md): the cover in listings and
-search, the banner over the page, the theme's background tile, and the
-screenshots at a whole scale.
+search, the banner over the page, the picture behind the player's Run game
+button, the theme's background tile, and the screenshots at a whole scale.
 
 The cover and banner are tools/steam_art.py's drawing (the infinity mark,
 the CYBERWORLD ENDLESS lettering, the net's platforms in the site's PET
-colours), the cover with one whole frame of the game running from
-docs/screenshots in the site's screen frame (AGENTS.md: whole frames only,
-never a crop). Each picture is drawn small and scaled by a whole number.
-The cover, banner and tile are committed in docs/itch/; the screenshots are
+colours); --frame NAME draws the cover instead with one whole frame of the
+game running from docs/screenshots in the site's screen frame (AGENTS.md:
+whole frames only, never a crop). Each picture is drawn small and scaled by
+a whole number.
+The cover, banner, embed picture and tile are committed in docs/itch/; the screenshots are
 written to .build/itch/ for the upload.
 
     python3 tools/itch_art.py [--frame NAME]
@@ -29,9 +30,6 @@ SHOTS = os.path.join(ROOT, 'docs', 'screenshots')
 
 # the site's screen frame (tools/site_art.py's 'screen'), outside in
 SCREEN_RINGS = [(0, 123, 74), (107, 222, 255), (66, 198, 231), (66, 198, 231), (33, 115, 140)]
-
-# the cover's frame by default: a battle's Custom screen against a guardian
-COVER_FRAME = 'boss-custom'
 
 # the page's screenshots, in the order itch shows them, each at 4x
 SCREENSHOTS = ['net', 'boss-custom', 'guardian', 'liberation-turn', 'online-square', 'bn5-unite', 'home-news', 'setup']
@@ -59,7 +57,7 @@ def framed(shot):
 
 
 def cover(frame):
-    """630 x 500, itch's cover (base 315 x 250, 2x): the wordmark at twice
+    """630 x 500, the cover with a frame (base 315 x 250, 2x): the wordmark at twice
     the base over a whole frame of the game, the net round it."""
     im = art.sky(315, 250)
     art.net(im, 20, 168, [(0, 0, 3, 3), (3, 1, 2, 'u'), (-3, 2, 3, 'v'), (-4, 5, 2, 2), (2, 5, 2, 2)], 5)
@@ -70,6 +68,17 @@ def cover(frame):
     shot = framed(Image.open(os.path.join(SHOTS, frame + '.png')).convert('RGB'))
     im.alpha_composite(shot, ((315 - shot.width) // 2, 72))
     return im, 2
+
+
+def cover_art():
+    """630 x 500, itch's cover (base 126 x 100, 5x): the wordmark stacked
+    over the net, as the Steam capsule draws it."""
+    im = art.sky(126, 100)
+    art.net(im, 63, 52, [(-7, -1, 2, 2), (-5, 0, 3, 'u'), (-2, -1, 3, 3), (-1, 2, 3, 'v'), (-2, 5, 2, 2),
+                         (4, -5, 2, 2), (5, -3, 3, 'v'), (4, 0, 3, 3), (7, 1, 3, 'u'), (1, 6, 3, 2),
+                         (-6, 4, 3, 'u'), (-8, 3, 2, 2)], 8)
+    art.wordmark(im, 63, 46, 1.0, True)
+    return im, 5
 
 
 def banner():
@@ -83,6 +92,18 @@ def banner():
     return im, 5
 
 
+def embed_bg():
+    """960 x 640, behind the player's Run game button until it is clicked
+    (base 192 x 128, 5x): the net, the wordmark high over it, the button's
+    place in the middle left clear."""
+    im = art.sky(192, 128)
+    art.net(im, 96, 70, [(-11, -1, 2, 2), (-9, 0, 3, 'u'), (-6, -1, 3, 3), (-5, 2, 3, 'v'), (-6, 5, 2, 2),
+                         (6, -6, 2, 2), (7, -4, 4, 'v'), (6, 0, 3, 3), (9, 1, 3, 'u'), (12, 0, 2, 3),
+                         (1, 7, 3, 2), (-1, 7, 2, 'u'), (-10, 6, 3, 'u'), (-13, 5, 2, 2)], 9)
+    im.alpha_composite(logo_layer(192, 48, 96, 26, 0.8))
+    return im, 5
+
+
 def tile():
     """48 x 48, the theme's background: the site's PET floor (web/assets/ui/floor.png) at 3x, as the site shows it."""
     return Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGBA'), 3
@@ -90,10 +111,10 @@ def tile():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('--frame', default=COVER_FRAME, help='the screenshot in the cover (docs/screenshots/NAME.png)')
+    ap.add_argument('--frame', help='a cover with this screenshot in it (docs/screenshots/NAME.png)')
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
-    for name, (im, k) in (('cover', cover(a.frame)), ('banner', banner()), ('background', tile())):
+    for name, (im, k) in (('cover', cover(a.frame) if a.frame else cover_art()), ('banner', banner()), ('embed', embed_bg()), ('background', tile())):
         im = im.resize((im.width * k, im.height * k), Image.NEAREST)
         path = os.path.join(OUT, name + '.png')
         im.save(path, optimize=True)
