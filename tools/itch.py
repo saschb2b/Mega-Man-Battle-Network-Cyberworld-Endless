@@ -107,6 +107,13 @@ def web(site_zip, out):
     text = text.replace('</head>', '<style>body.play > .pet-bar { display: none; }</style>\n</head>', 1)
     with open(page, 'w', encoding='utf-8') as f:
         f.write(text)
+    # (the player's pictures named from play/, now at the root beside them:
+    # on itch's server ../ leaves the game's folder)
+    style = os.path.join(out, 'play.css')
+    with open(style, encoding='utf-8') as f:
+        text = f.read()
+    with open(style, 'w', encoding='utf-8') as f:
+        f.write(text.replace('url(../assets/', 'url(assets/'))
     files = sum(len(fs) for _, _, fs in os.walk(out))
     size = sum(os.path.getsize(os.path.join(d, n)) for d, _, fs in os.walk(out) for n in fs)
     # (itch's limits for a played zip: 1000 files, 500 MB, 200 MB a file)
