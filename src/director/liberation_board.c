@@ -170,31 +170,46 @@ bool lib_flown(const LibBoard *b, int x, int y) {
 	return k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP;
 }
 
-/* The shapes BN5's guides give the commands (docs/LIBERATION.md, The
- * Navis), from the panel faced: LongSwrd two in a line; ScrenDiv and
- * WideSwrd three across; TomahawkSwing and NumberCheck two deep and three
- * wide; SneakAttack one or two ahead; LifeMelody's five ahead; Napalm four
- * ahead and both sides of the third; PanelSearch the line of dark panels
- * from the one faced; BombLiberation the panel the flier hovers over (x,
- * y his own); MagnetBarrier none, the whole team's */
+/* The shapes of the commands, from the panel faced (docs/LIBERATION.md,
+ * The Navis: BN5's shapes table BN5_LIB_SHAPES, read for LongSwrd,
+ * ScrenDiv, TomahawkSwing and the Cross Navis' five; the guides' for the
+ * rest): LongSwrd two in a line; ScrenDiv and WideSwrd three across;
+ * TomahawkSwing and NumberCheck two deep and three wide; SneakAttack one
+ * or two ahead; LifeMelody's five ahead; Napalm four ahead and both sides
+ * of the third; PanelSearch the item and trap panels of the dark line from
+ * the one faced; BombLiberation the plain dark panel the flier hovers over
+ * (x, y his own); MagnetBarrier none, the whole team's */
+static bool unit_on(const LibBoard *b, int x, int y);
+
 int lib_command_panels(const LibBoard *b, int command, int x, int y, int dir, int xs[6], int ys[6]) {
 	static const struct { int8_t deep, wide; } shape[] = {
 		[LIB_DO_NONE] = { 1, 0 }, [LIB_DO_LONGSWRD] = { 2, 0 }, [LIB_DO_SCRENDIV] = { 1, 1 }, [LIB_DO_TOMAHAWK] = { 2, 1 },
 		[LIB_DO_NUMBER] = { 2, 1 }, [LIB_DO_SNEAK] = { 2, 0 }, [LIB_DO_MELODY] = { 5, 0 }, [LIB_DO_NAPALM] = { 4, 0 },
-		[LIB_DO_WIDESWRD] = { 1, 1 }, [LIB_DO_MAGNET] = { 0, 0 }, [LIB_DO_SEARCH] = { 6, 0 }, [LIB_DO_BOMB] = { 1, 0 },
+		[LIB_DO_WIDESWRD] = { 1, 1 }, [LIB_DO_MAGNET] = { 0, 0 }, [LIB_DO_SEARCH] = { 0, 0 }, [LIB_DO_BOMB] = { 1, 0 },
 	};
 	if (command < 0 || command >= LIB_DOS || dir < 0 || dir > 3) return 0;
+	/* (BombLiberation: a plain dark panel alone, BN5_LIB_BOMB_KINDS) */
 	if (command == LIB_DO_BOMB) {
-		if (!lib_flown(b, x, y)) return 0;
+		if (!on_board(b, x, y) || b->kind[y][x] != LIB_DARK) return 0;
 		xs[0] = x; ys[0] = y;
 		return 1;
+	}
+	/* (PanelSearch: the line from the faced panel on while dark or an
+	 * item's, no unit on it, BN5_LIB_SEARCH_MAX at most, cut to its item
+	 * and trap panels, BN5_LIB_SEARCH_KEEP) */
+	if (command == LIB_DO_SEARCH) {
+		int n = 0;
+		for (int d = 0; d < BN5_LIB_SEARCH_MAX && n < 6; ++d) {
+			int tx = x + d * dir4[dir][0], ty = y + d * dir4[dir][1];
+			if (!lib_flown(b, tx, ty) || unit_on(b, tx, ty)) break;
+			if (b->kind[ty][tx] != LIB_DARK) { xs[n] = tx; ys[n] = ty; ++n; }
+		}
+		return n;
 	}
 	int n = 0, px = -dir4[dir][1], py = dir4[dir][0];
 	for (int d = 0; d < shape[command].deep; ++d)
 		for (int w = -shape[command].wide; w <= shape[command].wide; ++w) {
 			int tx = x + d * dir4[dir][0] + w * px, ty = y + d * dir4[dir][1] + w * py;
-			/* (PanelSearch's line runs on while the panels are dark) */
-			if (command == LIB_DO_SEARCH && !lib_flown(b, tx, ty)) return n;
 			if (n < 6 && on_board(b, tx, ty)) { xs[n] = tx; ys[n] = ty; ++n; }
 		}
 	/* (Napalm's flames spread at the third panel ahead) */
@@ -975,17 +990,40 @@ static void spot_for(LibBoard *b, int16_t reach[MAP_H][MAP_W], int command) {
 static void place_spots(LibBoard *b, int16_t reach[MAP_H][MAP_W], const LibTeam *t) {
 	bool has[LIB_DOS];
 	held_commands(t, has);
-	static const uint8_t shaped[] = { LIB_DO_SCRENDIV, LIB_DO_WIDESWRD, LIB_DO_TOMAHAWK, LIB_DO_NAPALM, LIB_DO_MELODY, LIB_DO_SEARCH };
+	static const uint8_t shaped[] = { LIB_DO_SCRENDIV, LIB_DO_WIDESWRD, LIB_DO_TOMAHAWK, LIB_DO_NAPALM, LIB_DO_MELODY };
 	for (unsigned i = 0; i < sizeof shaped; ++i)
 		if (has[shaped[i]]) spot_for(b, reach, shaped[i]);
 }
 
+/* PanelSearch's spot: a dark line from a clean panel with an item in it
+ * (BN5's frees the line's items and traps alone), where the board has
+ * none: an Order Points item two along the longest such line */
+static void place_search(LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
+	int best = 2, bx = -1, by = -1, bd = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (b->kind[y][x] != LIB_CLEAN || reach[y][x] < 0) continue;
+			for (int d = 0; d < 4; ++d) {
+				int xs[6], ys[6], len = 0;
+				if (lib_command_panels(b, LIB_DO_SEARCH, x + dir4[d][0], y + dir4[d][1], d, xs, ys)) return;
+				while (len < BN5_LIB_SEARCH_MAX && b->kind[y + (len + 1) * dir4[d][1]][x + (len + 1) * dir4[d][0]] == LIB_DARK &&
+				       on_board(b, x + (len + 1) * dir4[d][0], y + (len + 1) * dir4[d][1]) && !region[y + (len + 1) * dir4[d][1]][x + (len + 1) * dir4[d][0]])
+					++len;
+				if (len > best) { best = len; bx = x; by = y; bd = d; }
+			}
+		}
+	if (bx < 0) return;
+	b->kind[by + 2 * dir4[bd][1]][bx + 2 * dir4[bd][0]] = LIB_ITEM;
+	b->item[by + 2 * dir4[bd][1]][bx + 2 * dir4[bd][0]] = LIB_GOT_OP | 2 << 4;
+}
+
 /* NumberCheck's spot: a cache of items in a two by three of dark with a
  * clean panel before it (the prototype's: Order Points and a heart), where
- * the board has none */
+ * the board has none; PanelSearch's */
 static void place_cache(LibBoard *b, int16_t reach[MAP_H][MAP_W], const LibTeam *t) {
 	bool has[LIB_DOS];
 	held_commands(t, has);
+	if (has[LIB_DO_SEARCH]) place_search(b, reach);
 	if (!has[LIB_DO_NUMBER]) return;
 	int seen = 0, bx = -1, by = -1, bd = 0;
 	for (int y = 0; y < MAP_H; ++y)

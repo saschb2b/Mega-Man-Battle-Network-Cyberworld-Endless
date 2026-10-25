@@ -5797,8 +5797,9 @@ static void test_liberation_team(void) {
 	CHECK(lib_command_panels(&a, LIB_DO_WIDESWRD, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && ys[0] + ys[2] == 10, "WideSwrd: three across");
 	CHECK(lib_command_panels(&a, LIB_DO_MAGNET, 5, 5, 0, xs, ys) == 0, "MagnetBarrier: no panel");
 	CHECK(lib_command_panels(&a, LIB_DO_BOMB, 5, 5, 0, xs, ys) == 1 && xs[0] == 5 && ys[0] == 5, "BombLiberation: the panel under him");
-	a.kind[5][8] = LIB_CLEAN;
-	CHECK(lib_command_panels(&a, LIB_DO_SEARCH, 5, 5, 0, xs, ys) == 3 && xs[2] == 7, "PanelSearch: the dark line, to a clean panel");
+	a.kind[5][6] = LIB_ITEM; a.kind[5][7] = LIB_TRAP; a.kind[5][8] = LIB_CLEAN; a.kind[5][9] = LIB_ITEM;
+	CHECK(lib_command_panels(&a, LIB_DO_SEARCH, 5, 5, 0, xs, ys) == 2 && xs[0] == 6 && xs[1] == 7, "PanelSearch: the dark line's items and traps, to a clean panel");
+	CHECK(lib_command_panels(&a, LIB_DO_BOMB, 6, 5, 0, xs, ys) == 0, "BombLiberation: no item panel");
 	CHECK(!lib_command_battles(LIB_DO_MAGNET) && !lib_command_battles(LIB_DO_BOMB) && lib_command_battles(LIB_DO_NAPALM) && lib_command_battles(LIB_DO_SEARCH),
 		"the Cross Navis' commands: battles or none");
 	/* (the Cross Navis on the board: a team of them, every held Navi's

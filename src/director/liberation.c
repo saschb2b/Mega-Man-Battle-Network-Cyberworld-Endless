@@ -334,7 +334,7 @@ static int sneak_target(int fx, int fy) {
 
 /* Whether the Navi in play's command can be taken on the panel he faces
  * (fx, fy, -1 none): a liberating one on a panel to liberate (PanelSearch's
- * a dark one), NumberCheck where its two by three holds an item or a trap,
+ * where its line holds an item or a trap), NumberCheck where its two by three holds an item or a trap,
  * SneakAttack where it reaches a guardian, LifeMelody beside a teammate yet
  * to act, MagnetBarrier where the team stands unshielded, BombLiberation
  * hovering over a dark panel */
@@ -343,9 +343,9 @@ static bool command_can(int fx, int fy) {
 	switch (command) {
 	case LIB_DO_LONGSWRD: case LIB_DO_SCRENDIV: case LIB_DO_TOMAHAWK: case LIB_DO_NAPALM: case LIB_DO_WIDESWRD:
 		return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_liberable(&LB.b, fx, fy) && LB.b.kind[fy][fx] != LIB_HOLE;
-	case LIB_DO_SEARCH: return fx >= 0 && lib_unit_at(fx, fy) < 0 && lib_flown(&LB.b, fx, fy);
+	case LIB_DO_SEARCH: return fx >= 0 && lib_command_panels(&LB.b, LIB_DO_SEARCH, fx, fy, LB.face, xs, ys) > 0;
 	case LIB_DO_MAGNET: return !LB.shield;
-	case LIB_DO_BOMB: return lib_flown(&LB.b, LB.mx, LB.my);
+	case LIB_DO_BOMB: return lib_command_panels(&LB.b, LIB_DO_BOMB, LB.mx, LB.my, LB.face, xs, ys) > 0;
 	case LIB_DO_NUMBER:
 		n = fx >= 0 ? lib_command_panels(&LB.b, LIB_DO_NUMBER, fx, fy, LB.face, xs, ys) : 0;
 		for (int i = 0; i < n; ++i) if (LB.b.kind[ys[i]][xs[i]] == LIB_ITEM || LB.b.kind[ys[i]][xs[i]] == LIB_TRAP) return true;
@@ -568,11 +568,15 @@ static void fight_won(bool one_turn) {
 		for (int u = 1; u < LB.b.nunits; ++u)
 			if (LB.b.unit[u].hole >= 0 && LB.b.hole_x[LB.b.unit[u].hole] == LB.fx && LB.b.hole_y[LB.b.unit[u].hole] == LB.fy) LB.b.unit[u].gone = true;
 	} else {
-		free_panel(LB.fx, LB.fy, held, sizeof held);
-		/* (the command's shape: LongSwrd's, ScrenDiv's, TomahawkSwing's; a
-		 * LifeMelody sung for him, five ahead) */
+		/* (the command's shape: LongSwrd's, ScrenDiv's, TomahawkSwing's, the
+		 * Cross Navis'; a LifeMelody sung for him, five ahead. PanelSearch's
+		 * its line's item and trap panels alone, the faced one only where it
+		 * is one: BN5_LIB_SEARCH_KEEP) */
 		int command = LB.fight_cmd == LIB_CMD_LONGSWRD ? lib_mate_command(LB.in_play) : LB.mate[LB.in_play].melody ? LIB_DO_MELODY : LIB_DO_NONE;
 		int xs[6], ys[6], n = command != LIB_DO_NONE ? lib_command_panels(&LB.b, command, LB.fx, LB.fy, LB.face, xs, ys) : 0;
+		bool faced = command != LIB_DO_SEARCH;
+		for (int i = 0; i < n; ++i) faced |= xs[i] == LB.fx && ys[i] == LB.fy;
+		if (faced) free_panel(LB.fx, LB.fy, held, sizeof held);
 		for (int i = 0; i < n; ++i)
 			if ((xs[i] != LB.fx || ys[i] != LB.fy) && lib_liberable(&LB.b, xs[i], ys[i]) && lib_unit_at(xs[i], ys[i]) < 0 && LB.b.kind[ys[i]][xs[i]] != LIB_HOLE) {
 				free_panel(xs[i], ys[i], held, sizeof held);

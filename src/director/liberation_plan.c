@@ -299,10 +299,13 @@ static void panel_options(int s, int t, int dir, int extra) {
 	if (P.melody[P.k]) for (int j = 0, n = also_freed(LIB_DO_MELODY, t, dir, more); j < n; ++j) lib += panel_worth(more[j], t, NULL);
 	add((lib + bonus) * keep / 100 + extra, CMD_LIB, why, s, t, dir);
 	if (!P.op || !liberating(P.command)) return;
+	/* (PanelSearch frees its line's items and traps alone, the faced
+	 * panel only where it is one) */
+	bool search = P.command == LIB_DO_SEARCH, faced = !search || K(t) == LIB_ITEM || K(t) == LIB_TRAP;
 	int n = also_freed(P.command, t, dir, more), v2 = 0;
-	if (!n) return;
+	if (!n && !(search && faced)) return;
 	for (int j = 0; j < n; ++j) v2 += panel_worth(more[j], t, NULL);
-	add((v + v2 + bonus) * keep / 100 - command_price() + extra, CMD_LONG, why, s, t, dir);
+	add(((faced ? v : 0) + v2 + bonus) * keep / 100 - command_price() + extra, CMD_LONG, why, s, t, dir);
 }
 
 /* NumberCheck on the two by three ahead of stand s: its items taken and
@@ -348,10 +351,10 @@ static void magnet_option(int s, int extra) {
 	if (v) add(v - command_price() + extra, CMD_LONG, WHY_SHIELD, s, -1, -1);
 }
 
-/* BombLiberation over stand s: its panel freed with no battle, its item
- * taken (a trap's harm with it) */
+/* BombLiberation over stand s: its plain dark panel freed with no battle
+ * (BN5_LIB_BOMB_KINDS: an item's will not do) */
 static void bomb_option(int s, int extra) {
-	if (!lib_flown(&P.b, px[s], py[s])) return;
+	if (K(s) != LIB_DARK) return;
 	int why, v = panel_worth(s, -1, &why);
 	add(v - command_price() + extra, CMD_LONG, why, s, s, -1);
 }
@@ -485,7 +488,7 @@ static void liberate(int t, int dir, int command) {
 	if (fail || down()) return;
 	int16_t more[6];
 	int n = command != LIB_DO_NONE && dir >= 0 ? also_freed(command, t, dir, more) : 0;
-	free_panel(t);
+	if (command != LIB_DO_SEARCH || K(t) == LIB_ITEM || K(t) == LIB_TRAP) free_panel(t);
 	for (int j = 0; j < n; ++j) if (freeable(more[j])) free_panel(more[j]);
 	if (one) free_around(t);
 }

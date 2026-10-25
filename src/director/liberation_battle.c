@@ -317,8 +317,11 @@ bool lib_battle_stakes(int x, int y, int cmd, LibStakes *s) {
 	int command = cmd == LIB_CMD_LONGSWRD ? lib_mate_command(lib_in_play()) : LB.mate[lib_in_play()].melody ? LIB_DO_MELODY : LIB_DO_NONE;
 	if (cmd == LIB_CMD_LONGSWRD && !lib_command_battles(command)) return false;
 	int xs[6], ys[6], n = command != LIB_DO_NONE ? lib_command_panels(&LB.b, command, x, y, LB.face, xs, ys) : 0;
+	/* (PanelSearch's: its line's item and trap panels alone) */
+	if (command == LIB_DO_SEARCH) s->freed = 0;
 	for (int i = 0; i < n; ++i)
-		s->freed += (xs[i] != x || ys[i] != y) && lib_liberable(&LB.b, xs[i], ys[i]) && lib_unit_at(xs[i], ys[i]) < 0 && LB.b.kind[ys[i]][xs[i]] != LIB_HOLE;
+		s->freed += (command == LIB_DO_SEARCH || xs[i] != x || ys[i] != y) && lib_liberable(&LB.b, xs[i], ys[i]) && lib_unit_at(xs[i], ys[i]) < 0 &&
+		            LB.b.kind[ys[i]][xs[i]] != LIB_HOLE;
 	s->one_turn = swept_around(x, y);
 	return true;
 }
