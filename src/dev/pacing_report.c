@@ -346,13 +346,53 @@ static bool route_clash(const RunWay *w, int n, int act) {
 	return clash;
 }
 
+/* A fork a special route turns: its net, its act (0-based), its name */
+typedef struct { int mode, act; const char *what; } RouteFork;
+
+/* One fork of routes_report's over 500 runs: the route's way's guardians
+ * counted (navi, version), how many past the act's band (not the endless
+ * Nest's), clashing, or not offered; its line written, the three's sum
+ * returned */
+static int route_fork(FILE *out, const RouteFork *f) {
+	int lo, hi, seen[32][6] = { { 0 } }, outside = 0, clash = 0, none = 0, act = f->act;
+	pacing_guardian_band(act, &lo, &hi);
+	bool banded = !(f->mode == RUN_ENDLESS && act == 6);
+	for (uint32_t seed = 1; seed <= 500; ++seed) {
+		run_new(seed * 2654435761u);
+		run_setup(f->mode, 0, 0, 0, 0);
+		RunWay w[3];
+		bool sealed;
+		run.route_found = (uint8_t)act;
+		int n = run_ways(act, false, w, &sealed);
+		run.route_found = 0;
+		if (n < 2 || !w[n - 1].route) { ++none; continue; }
+		/* (the endless Nest's at the Cybeast's HP: its fought HP the one counted) */
+		int navi = w[n - 1].navi, v = cycle_version(navi, act, !banded), hp = navi_hp(navi, v);
+		if (!banded) hp = run_nest_hp(CYCLE_LAYERS, navi, hp);
+		if (navi >= 0 && navi < 32 && v >= 0 && v < 6) seen[navi][v]++;
+		outside += banded && (hp < lo || hp > hi);
+		clash += route_clash(w, n, act);
+	}
+	if (banded) fprintf(out, "%s (band %d-%d):", f->what, lo, hi);
+	else fprintf(out, "%s (its strongest version at the Cybeast's HP, %d, at least):", f->what, run_nest_hp(CYCLE_LAYERS, 1, 0));
+	for (int i = 0; i < 32 * 6; ++i) {
+		int n = i / 6, v = i % 6, hp = navi_hp(n, v);
+		if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "", banded ? hp : run_nest_hp(CYCLE_LAYERS, n, hp), seen[n][v]);
+	}
+	if (none) fprintf(out, "  none in %d runs", none);
+	if (outside) fprintf(out, "  OUTSIDE %d", outside);
+	if (clash) fprintf(out, "  CLASH %d", clash);
+	fprintf(out, "\n");
+	return outside + clash + none;
+}
+
 /* A special route's ways (docs/LIBERATION.md, Special routes) over 500
  * runs: the third way it opens at the endless net's act 4 fork (from act
  * 3's board), the Nest's second way after either net's last fork; each
  * guardian, version and HP, how often, past the act's band (not the
  * endless Nest's, where every version stands) or clashing */
 static int routes_report(FILE *out) {
-	static const struct { int mode, act; const char *what; } forks[] = {
+	static const RouteFork forks[] = {
 		{ RUN_ENDLESS, 3, "the endless net's act 4 fork, a third way" },
 		{ RUN_ENDLESS, 6, "the endless net's Nest, a second way" },
 		{ RUN_SHORT, 3, "the short net's Nest, a second way" },
@@ -360,40 +400,7 @@ static int routes_report(FILE *out) {
 	int flagged = 0;
 	fprintf(out, "\nSpecial routes over 500 runs: the way a route opens, its guardian, version and HP, how often (OUTSIDE its act's band, CLASH\n"
 		"another way's or act's guardian or area, or not the same twice).\n");
-	for (unsigned f = 0; f < sizeof forks / sizeof *forks; ++f) {
-		int lo, hi, seen[32][6] = { { 0 } }, outside = 0, clash = 0, none = 0, act = forks[f].act;
-		pacing_guardian_band(act, &lo, &hi);
-		bool banded = !(forks[f].mode == RUN_ENDLESS && act == 6);
-		for (uint32_t seed = 1; seed <= 500; ++seed) {
-			run_new(seed * 2654435761u);
-			run_setup(forks[f].mode, 0, 0, 0, 0);
-			RunWay w[3];
-			bool sealed;
-			run.route_found = (uint8_t)act;
-			int n = run_ways(act, false, w, &sealed);
-			run.route_found = 0;
-			if (n < 2 || !w[n - 1].route) { ++none; continue; }
-			bool nest = w[n - 1].biome == BIOME_NEST && forks[f].mode == RUN_ENDLESS;
-			int navi = w[n - 1].navi, v = cycle_version(navi, act, nest), hp = navi_hp(navi, v);
-			/* (the endless Nest's at the Cybeast's HP: its fought HP the one counted) */
-			if (nest) hp = run_nest_hp(CYCLE_LAYERS, navi, hp);
-			if (navi >= 0 && navi < 32 && v >= 0 && v < 6) seen[navi][v]++;
-			if (banded && (hp < lo || hp > hi)) ++outside;
-			if (route_clash(w, n, act)) ++clash;
-		}
-		if (banded) fprintf(out, "%s (band %d-%d):", forks[f].what, lo, hi);
-		else fprintf(out, "%s (its strongest version at the Cybeast's HP, %d, at least):", forks[f].what, run_nest_hp(CYCLE_LAYERS, 1, 0));
-		for (int n = 0; n < 32; ++n)
-			for (int v = 0; v < 6; ++v)
-				if (seen[n][v])
-					fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "",
-						banded ? navi_hp(n, v) : run_nest_hp(CYCLE_LAYERS, n, navi_hp(n, v)), seen[n][v]);
-		if (none) fprintf(out, "  none in %d runs", none);
-		if (outside) fprintf(out, "  OUTSIDE %d", outside);
-		if (clash) fprintf(out, "  CLASH %d", clash);
-		fprintf(out, "\n");
-		flagged += outside + clash + none;
-	}
+	for (unsigned f = 0; f < sizeof forks / sizeof *forks; ++f) flagged += route_fork(out, &forks[f]);
 	return flagged;
 }
 
