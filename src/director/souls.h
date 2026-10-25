@@ -22,6 +22,12 @@ void souls_load(uint32_t seed);
 /* The Souls held, bit k BN5's Soul 7 + k (soulunite.h's, handed to BN6's
  * engine as each battle begins: encounter.c) */
 unsigned souls_held(void);
+/* The Souls held as the layer about to be made is made (the director's,
+ * with the folder's codes), kept beside the checkpoint: what its finds
+ * and stock lean to (loot_souls.h), the same on a CONTINUE's rebuild, a
+ * Soul won on the layer counted from the next */
+void souls_note_layer(void);
+unsigned souls_layer(void);
 /* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older),
  * and his given */
 bool soul_held(int navi);

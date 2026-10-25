@@ -141,8 +141,10 @@ round's calls stand on the owner's delegation (12 October 2026).
   guardians'); the honest telegraph, the territory's look, words and card
   already saying whose net this is; meta as variety, nothing of it
   carried to the next run.
-- **What to watch:** a Soul the folder cannot use (see the table: two
-  kinds have few chips in BN6); the strongest Soul taken every battle
+- **What to watch:** a Soul the folder cannot use (Invisible and Plus
+  have few chips; since 25 October 2026 a held Soul's kind leans a
+  quarter of the finds and a dealer's fourth chip, docs/META.md, Souls:
+  the key with the lock); the strongest Soul taken every battle
   now that it serves every one (each still costs a chip and comes once a
   battle).
 

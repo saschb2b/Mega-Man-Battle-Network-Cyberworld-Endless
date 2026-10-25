@@ -372,7 +372,13 @@ every assumption). It prints, per act:
   codes, Megas and Gigas; and by layer the Mystery Data laid (green, blue,
   purple), chips gained, codes held and zenny earned so far;
 - the proposal's curves by act on either net, and BN6's busting table's
-  pay: a battle's chip share and zenny with every battle at one level.
+  pay: a battle's chip share and zenny with every battle at one level;
+- a dark layer's par prize by act;
+- a held Soul's kind (where BN5's ROM is read): each Soul held alone from
+  the first layer, the chips of its kind gained by act with none held and
+  with it (`src/core/loot_souls.c`), on the dealers' lists, every chip
+  gained over the net with and without, and the chips of each kind a run
+  can hold, by tier.
 
 Output: `.build/economy.txt`, in a few seconds. It needs the ROM, and
 prints how many numbers of the plan in play are past their band: 0 now;
