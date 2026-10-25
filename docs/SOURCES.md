@@ -185,6 +185,22 @@ the two bytes of `byte_804B068`, `C0 40`. In Gregar the routine stands at
 four a code the pack lacks. The project's traders follow it since issue
 #154 (docs/ECONOMY.md, docs/ROM_DATA.md's Chip Traders).
 
+## BN5's Liberation Missions have no special routes
+
+**Verified in the ROM** (25 October 2026, for docs/LIBERATION.md's
+Special routes): nothing on BN5's boards leads anywhere but the mission's
+own Darkloid. Its item kinds' table (`0x08051924`, 8 bytes a kind) holds
+six records, a heart, a key, Order Points, zenny, BugFrags and a chip; its
+seventh, `0x08051954`, is Thumb code (`push {r0-r3,lr}`). The nine
+missions' item lists (record pointer 10) hold only those six kinds, 172
+panels in all, and their panel lists (pointer 1) only the kinds docs/
+ROM_DATA.md names (clean, dark, item, BarrierPanels 1-3, BonusPanel,
+DarkHole, the Darkloid's ring, the start): read with a script over the
+records, as `tools/liberation_bn5.py` reads them. A sealed region's route
+to another way is ours, from the player's request the design began with
+(docs/LIBERATION.md); BN5's own detours are its BarrierPanels and their
+keys, which ours keep.
+
 ## The trailers' music
 
 What Battle Network's music does is read from the ROMs: the songs'

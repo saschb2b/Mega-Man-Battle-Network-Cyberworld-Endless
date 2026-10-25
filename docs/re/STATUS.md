@@ -1,6 +1,6 @@
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 23 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
+Updated 25 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
@@ -13,6 +13,7 @@ Updated 23 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.j
 
 ## Since the last update (18 Oct 2026)
 
+- 25 Oct 2026: BN5's Liberation Missions hold no special route (docs/LIBERATION.md, Special routes; docs/SOURCES.md): the item kinds' table 0x08051924 ends after six records (BN5_LIB_ITEM_KIND_COUNT; its seventh, 0x08051954, is Thumb code), the nine missions' item lists hold kinds 0-5 alone and their panel lists kinds 0, 1, 3, 5-7 and 9-0x0C alone; the route a sealed region holds is ours, kept for the run and opening a third way at the next fork
 - 23 Oct 2026: The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started.
 - 23 Oct 2026: The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options
 - 23 Oct 2026: BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)

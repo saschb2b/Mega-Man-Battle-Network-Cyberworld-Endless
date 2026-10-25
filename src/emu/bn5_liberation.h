@@ -226,6 +226,8 @@
 #define BN5_LIB_NAVI_HP      0x0804F968u /* per team Navi: u16 his id, then his HP in each of the nine missions */
 #define BN5_LIB_ITEM_KINDS   0x08051924u /* per item kind 8 bytes: +2 the amount's multiplier (hearts 10, zenny 100), +5 its icon */
                                          /* ... (BN5_LIB_ICON_OF); handlers 0x0804D8B4 */
+#define BN5_LIB_ITEM_KIND_COUNT 6        /* ... six kinds (BN5_ITEM_*): the table's seventh entry, 0x08051954, is code (Thumb's */
+                                         /* ... push {r0-r3,lr}); no route among them (docs/LIBERATION.md, Special routes) */
 
 /* A panel's kind */
 #define BN5_LIB_PANEL_FREE       0x00        /* clean: the team walks it */
