@@ -368,11 +368,14 @@ static const NetAreaDef bn5_areas[] = {
 		.recolour = 0x21, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 5,
 		.name = "Undernet", .short_name = "Undernet", .motto = "The old depths, still burning", .xsong = 0x14, .xnavi = 60, .xbg = 24,
 		.xbattles = { { 0x94, 0 }, { 0x94, 1 }, { 0x86, 5 } }, .xguard = { BN5_NAVI_COLONEL } },   /* Undernet 2 and 3: mauve stone plates with a radial seam and lava at their corners, on cobbled paths, told by shape; their raised courts' pale stone and purple slime in the plates' shades (bank 2 as bank 1: recolour); its plates' purple cross its emblem; BN6's statue and braziers, which its number doors count (docs/LEVEL_DESIGN.md) */
-	/* (the Liberation Missions' maps, group 0x86: a dark layer's board drawn in
-	 * mission 1's framed panels and BN5's own panel looks over them, docs/
-	 * LIBERATION.md; never a run's dressing, its battles BN6's) */
-	{ 0x86, 0, 0xC000, 0x8000, false, 0x13, 0, 0, 0, { { 0 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
-		.name = "Dark area", .short_name = "Dark area", .motto = "", .xsong = 0x13, .xnavi = 60, .held = true },
+	/* (the Liberation Missions' nine maps, group 0x86, mission n's 0x86:n-1: a
+	 * dark layer's board drawn in its mission's framed panels, backdrop and
+	 * colours, BN5's own panel looks over them, docs/LIBERATION.md, Each
+	 * mission's own look; never a run's dressing, its battles BN6's) */
+#define LIB_MAP(n) { 0x86, n, 0xC000, 0x8000, false, 0x13, 0, 0, 0, { { 0 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0, \
+		.name = "Dark area", .short_name = "Dark area", .motto = "", .xsong = 0x13, .xnavi = 60, .held = true }
+	LIB_MAP(0), LIB_MAP(1), LIB_MAP(2), LIB_MAP(3), LIB_MAP(4), LIB_MAP(5), LIB_MAP(6), LIB_MAP(7), LIB_MAP(8),
+#undef LIB_MAP
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

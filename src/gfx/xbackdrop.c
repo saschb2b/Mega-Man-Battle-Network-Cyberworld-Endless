@@ -126,7 +126,31 @@ static bool copy_frames(uint8_t *out, const uint8_t *h, uint32_t nf, uint32_t le
  * lists and the tiles they number, staged where BN6 has room for them, a
  * palette copy's colours, its palette RAM moved by `pal_move`; 0 for
  * another command or what cannot be read. */
+/* The net maps' copies made, by what they copy: the Liberation Missions'
+ * nine maps share their scripts and five backdrops, which the range has
+ * room for once (each map's its own filled it by the fifth) */
+static struct { uint32_t from, move, to; } made[4 * SCRIPTS_MAX];
+static int nmade;
+static const Space *made_in;   /* (the net maps' range) */
+
+static uint32_t made_of(uint32_t from, uint32_t move) {
+	for (int i = 0; space == made_in && i < nmade; ++i)
+		if (made[i].from == from && made[i].move == move) return made[i].to;
+	return 0;
+}
+
+static uint32_t made_now(uint32_t from, uint32_t move, uint32_t to) {
+	if (to && space == made_in && nmade < (int)(sizeof made / sizeof *made)) made[nmade++] = (__typeof__(made[0])){ from, move, to };
+	return to;
+}
+
+static uint32_t copy_script_new(uint32_t s, uint32_t pal_move);
 static uint32_t copy_script(uint32_t s, uint32_t pal_move) {
+	uint32_t was = made_of(s, pal_move);
+	return was ? was : made_now(s, pal_move, copy_script_new(s, pal_move));
+}
+
+static uint32_t copy_script_new(uint32_t s, uint32_t pal_move) {
 	if (!xptr(s, 12)) return 0;
 	const uint8_t *h = xr + (s - BUS);
 	uint8_t cmd = h[8], count = h[10];
@@ -169,7 +193,13 @@ static uint32_t copy_anims(uint32_t list, uint32_t pal_move) {
 /* A background's BGAnimData record copied with its tiles, map and
  * palette, the map's offset and the palette's RAM as BN6's own records
  * (`own`) name them; 0 where it cannot be. */
+static uint32_t copy_record_new(uint32_t rec, const uint8_t *own);
 static uint32_t copy_record(uint32_t rec, const uint8_t *own) {
+	uint32_t move = get32(own + 12) ^ get32(own + 20), was = made_of(rec, move);
+	return was ? was : made_now(rec, move, copy_record_new(rec, own));
+}
+
+static uint32_t copy_record_new(uint32_t rec, const uint8_t *own) {
 	if (!xptr(rec, 28)) return 0;
 	uint8_t out[28];
 	memcpy(out, xr + (rec - BUS), sizeof out);
@@ -448,6 +478,8 @@ void xbackdrop_map(int area) {
 		M.ready = true;
 		M.sp = (Space){ XMAP_AT, XMAP_END };
 		space = &M.sp;
+		made_in = &M.sp;
+		nmade = 0;
 		for (int k = 0; k < XAREAS_MAX; ++k) {
 			const NetAreaDef *a = net_area_def(NET_AREAS + k);
 			if (a && a->xrom > 0 && a->xrom <= XROM_COUNT && XR[a->xrom - 1].data) copy_map(k, a);

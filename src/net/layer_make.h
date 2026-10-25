@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 101   /* (101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five, docs/LIBERATION.md) */
+#define LAYER_MAKE 101   /* (101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five; drawn in its own mission's map, docs/LIBERATION.md) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

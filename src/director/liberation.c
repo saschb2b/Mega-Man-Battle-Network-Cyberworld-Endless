@@ -65,12 +65,9 @@ bool lib_way_dark(int act, int biome) {
 	return area >= 0 && biome == area;
 }
 
-int lib_layer_tiles(int tiles) {
-	for (int k = 0; k < XAREAS_MAX; ++k) {
-		const NetAreaDef *d = net_area_def(NET_AREAS + k);
-		if (d && d->xrom > 0 && d->group == BN5_LIB_MAP_GROUP) return NET_AREAS + k;
-	}
-	return tiles;
+int lib_layer_tiles(int tiles, int biome) {
+	int a = lib_look_area(lib_look_mission(biome, (run.depth - 1) % CYCLE_LAYERS / 3));
+	return a >= 0 ? a : tiles;
 }
 
 bool lib_layer_dark(void) {

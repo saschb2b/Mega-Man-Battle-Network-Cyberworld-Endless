@@ -318,9 +318,28 @@ static void layer_host(int tiles, int *group, int *number) {
 	*number = a->host ? a->host - 1 : a->number;
 }
 
+/* A dark layer no board fits on its mission's map (`*tiles`): made again on
+ * the first mission's, where every dark layer stood before each took its
+ * own (docs/LIBERATION.md, Each mission's own look), else plain; false
+ * where a map cannot be built */
+static bool dark_again(int *tiles, int biome, LayerKit *kit) {
+	int first = lib_look_area(1);
+	if (first >= 0 && first != *tiles) {
+		D.layer_tiles = *tiles = first;
+		netmap_kit(first, kit);
+		layer_make_dark = true;
+		layer_generate(run.layer_seed, run.depth, biome, run.side_kind, kit);
+		layer_make_dark = false;
+		if (!netmap_build_layer(first, run.layer_seed)) return false;
+		if (lib_layer_made()) return true;
+	}
+	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, kit);
+	return netmap_build_layer(*tiles, run.layer_seed);
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome(), tiles = layer_area(&biome);
-	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles);
+	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles, biome);
 	run.biome = biome;
 	D.layer_tiles = tiles;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
@@ -335,10 +354,7 @@ static bool build_layer(void) {
 	layer_make_dark = false;
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
 	if (!netmap_build_layer(tiles, run.layer_seed)) return false;
-	if (layer.dark && !lib_layer_made()) {
-		layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
-		if (!netmap_build_layer(tiles, run.layer_seed)) return false;
-	}
+	if (layer.dark && !lib_layer_made() && !dark_again(&tiles, biome, &kit)) return false;
 	if (layer.dark) lib_fence_build();
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);

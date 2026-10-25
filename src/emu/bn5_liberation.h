@@ -63,8 +63,13 @@
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the looks' pointers (BN5_LIB_LOOKS; past the twelve the start's, 0x0C, all blank, */
                                          /* ... then two on palette 7 no record's kind takes) */
-#define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
-#define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
+#define BN5_LIB_MISSION_ANIMS 0x08073E70u /* the mission maps' GFXAnim lists while a mission is on (group 0x86's LoadGFXAnims takes */
+                                         /* ... them where BN5_LIB_ON_MAP, else BN5_LIB_ANIMS): a u32 a map; each loads its board's */
+#define BN5_LIB_BOARD_PAL_RAM 0x03003980u /* ... colours over the map's by a script to bank 1's working copy (BN5_LIB_BOARD_PAL_FIRST), */
+#define BN5_LIB_BOARD_PAL_FIRST 1        /* ... BN5_LIB_BOARD_PAL_SIZE bytes, its one frame held: the frames grey, bank 8 */
+#define BN5_LIB_BOARD_PAL_SIZE 0x180     /* ... BN5_LIB_PAL_CLEAN; banks 1-12 */
+#define BN5_LIB_BOARD_PAL_ACDC 0x08614DD4u /* missions 1-5's (their lists' script 0x08073AA0) */
+#define BN5_LIB_BOARD_PAL_NEBULA 0x08615100u /* missions 6-9's (0x08073D10): banks 1 and 3 other than 1-5's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
 #define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 at rest: the dark panels' swirl, held 120 frames; then BN5_LIB_DARK_FRAMES' three */
 #define BN5_LIB_DARK_FRAMES  0x08614B24u /* ... below it (0x20 apart, from here), down and up: 0x08614B64 16 frames, 0x08614B44 16, */
@@ -75,8 +80,9 @@
 #define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
 #define BN5_LIB_BREATH       0x08614CF0u /* palette 12 (the BonusPanel's): six palettes 0x20 apart stepped there and back, 12 frames */
                                          /* ... each (8 at the last); a palette's working copy at 0x03003960 + 0x20 n, then 0x03003B60 + 0x20 n */
-#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists (group 0x86's, a u32 a map; LoadGFXAnims' table 0x08031468 */
-                                         /* ... entry 6, its literal at 0x08073E44): 0x86:00's at 0x08073E94 runs palettes 9-12 */
+#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists out of a mission (group 0x86's, a u32 a map; LoadGFXAnims' */
+                                         /* ... table 0x08031468 entry 6, its literal at 0x08073E44); in both these and a mission's */
+                                         /* ... (BN5_LIB_MISSION_ANIMS) the same four scripts run palettes 9-12 */
 #define BN5_LIB_ANIM_DARK    0x08073B20u /* ... palette 9's script (to 0x03003A80, 0x20 bytes; then palette and delay pairs, 1 loops) */
 #define BN5_LIB_ANIM_HOLE    0x08073B60u /* ... palette 10's (to 0x03003AA0) */
 #define BN5_LIB_ANIM_PULSE   0x08073BA0u /* ... palette 11's (to 0x03003AC0) */
@@ -246,7 +252,10 @@
 #define BN5_LIB_CURSOR_PAL   0x086CCD24u /* ... OBJ palette 14 */
 #define BN5_LIB_BACKDROP_PAL 0x0861BF20u /* BG palette 0 in a mission: the map's own animated backdrop (its tiles rebuilt in RAM at */
                                          /* ... 0x0200E960) in purple; map 0x86:00's own palette 0 otherwise 0x086203CC */
-#define BN5_LIB_BACKDROP     0x080741B8u /* ... the mission's BGAnimData record that loads it (0x0861BF1C: a size word, then these), */
+#define BN5_LIB_MISSION_BACKDROPS 0x0807416Cu /* the mission maps' BGAnimData records while a mission is on, a u32 a map: their own */
+                                         /* ... backdrops' tiles and maps in a mission's colours (ACDC's, Oran's, SciLab's, End's for 4 */
+                                         /* ... and 5, the Undernet and Nebula Area's one for 6-9), each map's out of one at 0x08074194 */
+#define BN5_LIB_BACKDROP     0x080741B8u /* ... mission 1's, which loads it (0x0861BF1C: a size word, then these), */
                                          /* ... map 0x86:00's own tiles and map: group 0x86's LoadBGAnim (0x08074098) takes its records */
                                          /* ... from 0x0807416C while BN5_LIB_ON_MAP, else 0x08074194 (0x080741D4, palette 0x086203C8), */
                                          /* ... and its LoadGFXAnims (0x08073E2A) its lists from 0x08073E70, else 0x08073E48 */
