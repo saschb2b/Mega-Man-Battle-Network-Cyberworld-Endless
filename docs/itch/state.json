@@ -1,0 +1,27 @@
+{
+ "page": {
+  "description.html": "27706f7566b57e5fbb8d93b123ad67e8e40053a7",
+  "cover.png": "49dc58c693b187b9ff3d61a112027bd99759b347",
+  "banner.png": "86fa03db0e5920a1540ebd3c2e5f4c7831579fa1",
+  "embed.png": "c03e168ec2175596d53a882277532d2b7dffa4a6",
+  "background.png": "003a6c95bf8f47da6cd0e5b6727f7362a88c6773"
+ },
+ "images": {
+  "sky.gif": "https://img.itch.zone/aW1nLzMxMzIwNTA5LmdpZg==/original/lMJm9%2B.gif",
+  "guardian.gif": "https://img.itch.zone/aW1nLzMxMzIwNjk1LmdpZg==/original/uDDIxU.gif",
+  "bn5-lib-darkloid.gif": "https://img.itch.zone/aW1nLzMxMzIwNzA4LmdpZg==/original/Q01KD4.gif",
+  "bn5-unite.gif": "https://img.itch.zone/aW1nLzMxMzIwNzE5LmdpZg==/original/4HHevj.gif",
+  "online-square.gif": "https://img.itch.zone/aW1nLzMxMzIwNzQ3LmdpZg==/original/RCCKz8.gif",
+  "online-battle.gif": "https://img.itch.zone/aW1nLzMxMzIwNzYwLmdpZg==/original/6nGUll.gif"
+ },
+ "devlog": {
+  "since": "0.15.1",
+  "posts": [
+   {
+    "version": "0.15.1",
+    "title": "0.15.1: The team joins the dark",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1729013/0151-the-team-joins-the-dark"
+   }
+  ]
+ }
+}
