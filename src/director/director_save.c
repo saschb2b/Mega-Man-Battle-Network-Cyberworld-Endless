@@ -121,7 +121,7 @@ void save_checkpoint(void) {
 }
 
 bool director_can_suspend(void) {
-	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && hold_save_ok();
+	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && !D.battler_series && hold_save_ok();
 }
 
 const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }

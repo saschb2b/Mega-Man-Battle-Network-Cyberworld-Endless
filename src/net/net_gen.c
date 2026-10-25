@@ -236,7 +236,7 @@ bool ng_near_talker(int x, int y) {
 	for (int i = 0; i < layer.nobj; ++i) {
 		int t = layer.obj[i].type, reach = layer.obj[i].prop >= 0 ? 3 : 2;
 		bool talks = t == OBJ_SHOP || t == OBJ_HEAL || t == OBJ_TRADER || t == OBJ_BUGTRADER || t == OBJ_NPC ||
-			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT;
+			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT || t == OBJ_BATTLER;
 		if (talks && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
 	}
 	return false;
@@ -804,6 +804,19 @@ static void place_purple(uint8_t *taken) {
 	if (o) o->param = MD_PURPLE;
 }
 
+/* The layer's Virus Battler (net_pieces.c's layer_battler): at the end of
+ * a side path, after the blue data have taken theirs, as BN6's Battlers
+ * stand off the way (in a comp's corner, by a machine); else in a room */
+static void place_battler(int battler, uint8_t *taken, const int *order, int n, int *next) {
+	int x, y;
+	DetourEnd end;
+	NetObj *o = NULL;
+	for (int min = DETOUR_BLUE; min >= 1 && !o; min -= 2)
+		if (ng_detour_end(min, taken, &end)) o = ng_add_obj(OBJ_BATTLER, end.x, end.y);
+	if (!o) { o = PLACE(OBJ_BATTLER); ++*next; }
+	if (o) o->param = battler;
+}
+
 /* Blue data where the detours end, more of them deeper and in the Undernet
  * (a dark warp's, or the short net's dark way's act), the farthest a tier
  * up where it is a long walk; in a room where the layer has too few
@@ -827,6 +840,12 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		 * rich data, about as much in all; by the plan's share of good
 		 * chips, economy.h, the farthest detour's kept whole) */
 		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < econ_scale(30, ECON_LEVER_GOOD, depth) ? 2 : 1;
+	}
+	/* (his room held for him till now, fill_layer) */
+	int battler = layer_battler(depth, kind);
+	if (battler) {
+		--npcs_held;
+		place_battler(battler, taken, order, n, next);
 	}
 	static int dx[256], dy[256];
 	int nde = dead_ends(dx, dy, 256), di = 0;
@@ -926,6 +945,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	if (pieces & PIECE_CUBE) ng_plan_obstacle(ng_cube_kind(depth, biome, kind));
 	npcs_held += layer.nblocks + (ng_pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
 	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
+	npcs_held += layer_battler(depth, kind) != 0;        /* (the Virus Battler, after the blue data) */
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;

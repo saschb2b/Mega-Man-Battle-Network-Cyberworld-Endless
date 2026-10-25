@@ -863,7 +863,14 @@ hurt), and
 where they find room: 1 purple data, 2 a Rush gap, 4 teleports, 8 a Link
 Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
 path; `pieces=32` to look at an area's arrow lane and ride it;
-docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
+docs/LEVEL_DESIGN.md, Set pieces), and `battler=K` (BN6's Virus Battler K,
+1-5, on every normal layer but a guardian's, the first too, at a side
+path's end; `--talk battler:FRAME` opens his offer, and the debug log
+names where he stands: `battler K at X Y`, for `place`), and
+`viruses=MASK` (the profile's BtlrCard held with the families of the
+mask's bits, a bit per AI index 1-29, beside Mettaur and Gunner:
+`viruses=0x10000` puts ErthDrgn on it, whose V1 with Mettaur wins Battler
+1's series; docs/LEVEL_DESIGN.md, The Virus Battler), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it), and `xcontrol`
 (the control family installed as the core starts: BN6's own Mettaur

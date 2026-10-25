@@ -40,6 +40,8 @@ typedef enum {
 	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/RIVAL.md); param: its level, 1-2 */
 	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid, or a Navi of its team (docs/LIBERATION.md);
 	                    param: its sprite | animation << 8 | its sprite list << 16 | its number << 20 (the team's after the units') */
+	OBJ_BATTLER,     /* a Virus Battler Mr.Prog, BN6's minigame (docs/LEVEL_DESIGN.md, The Virus Battler); param: his Battler, 1-5 */
+	OBJ_KINDS
 } ObjType;
 
 typedef struct {
@@ -257,6 +259,14 @@ enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8,
 unsigned layer_pieces(int depth, int biome, int kind);
 /* (dev: --dev pieces=MASK) set pieces every layer of an area that has them holds */
 extern unsigned layer_pieces_forced;
+/* The Virus Battler a layer holds (docs/LEVEL_DESIGN.md, The Virus
+ * Battler): BN6's Battler 1-5 on an act's first layer, from the second act
+ * to the last before the Nest, in about half those acts and at least one
+ * of each cycle's, the Battler by how far the act is through its net
+ * (the fifth at the last); 0 none. From the run's seed and the depth. */
+int layer_battler(int depth, int kind);
+/* (dev: --dev battler=K) Battler K on every normal layer but a guardian's, the first too */
+extern int layer_battler_forced;
 /* The Crosses MegaMan holds as layer `depth` begins (a bit per navi 1-5),
  * which of them clear obstacle `kind` (BLOCK_*), and the obstacle a
  * layer's pocket takes (BLOCK_*, -1 none): the area's own kinds, mostly

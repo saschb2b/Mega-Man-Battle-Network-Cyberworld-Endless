@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **BN6's Virus Battler.** On an act's first layer, in about half the
+  acts from the second (one a run at least), a Virus Battler Mr.Prog waits
+  at the end of a side path, in his own BN6 colour. The first one you meet
+  gives you the BtlrCard with Mettaur and Gunner on it, and every Rare
+  virus you delete from then on joins it, in this run and every run after.
+  He names his pair, you stake zenny (500 to 3000, by act), pick one or two
+  viruses on BN6's own VIRUS LIST and place them, and they fight his on
+  their own. Each win adds the stake to the pot and shows his next pair:
+  take the pot or fight on, up to his BN6 series of 3, 5 or 10 rounds. A
+  loss or a draw loses it. A whole series won pays the pot, and the first
+  time in a run his BN6 prize (WindRack \*, HP+500, BugFix \*, FldrPak2,
+  SuprVulc V). A on the BtlrCard in KeyItem shows the card. Fast forward
+  runs during a Virus Battle's fight, which takes no input. Layers made
+  before continue afresh.
+
 - **A Soul's chips reach the folder.** A run that holds a BN5 Soul now
   finds the chips it unites with. A quarter of the chips in Mystery Data
   are of a held Soul's kind (Colonel's Obstacle, ShadowMan's Invisible,

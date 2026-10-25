@@ -103,6 +103,11 @@ three open the golden gate) and five of the profile's, in the ids
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
 | NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
 | Jukebox | always | every song of the town and the Net; A opens the Jukebox |
+| BtlrCard | once the first Virus Battler has given it (docs/LEVEL_DESIGN.md, The Virus Battler) | BN6's own words; A opens BN6's own VIRUS LIST of the card: the families on it, their V1's data and descriptions |
+
+The BtlrCard (`0x40`) is BN6's own key item, and its screen BN6's: the
+card's flags, the profile's (`src/director/btlr_card.c`), are set in the
+run's game as MegaMan comes onto each layer, and the item with them.
 
 The profile's five are given on each layer as it begins, and at home
 wherever the game's state lacks them (`pet_text_items`, from `pet.c`'s

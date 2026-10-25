@@ -324,12 +324,6 @@ int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code) 
 	return i;
 }
 
-/* ts_check_give_zenny (BN5's over par gives its Zennys by the same EF 0E) */
-static void give_zenny(TextArchive *t, int zenny) {
-	uint8_t b[] = { 0xEF, 0x0E, (uint8_t)zenny, (uint8_t)(zenny >> 8), (uint8_t)(zenny >> 16), (uint8_t)(zenny >> 24), 0xFF, 0xFF, 0xFF };
-	ta_bytes(t, b, sizeof b);
-}
-
 int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;
@@ -345,7 +339,7 @@ int ta_lib_find_zenny(TextArchive *t, int zenny) {
 	char what[24];
 	snprintf(what, sizeof what, "%d Zenny", zenny);
 	ta_page(t, FACE_MEGAMAN, "Lan! Zenny in that panel!", true);
-	give_zenny(t, zenny);
+	ta_give_zenny(t, zenny);
 	ta_got(t, what, &first);
 	ta_end(t);
 	return i;
@@ -358,7 +352,7 @@ int ta_lib_prize_zenny(TextArchive *t, int zenny) {
 	bool first = true;
 	char what[24];
 	snprintf(what, sizeof what, "%d Zenny", zenny);
-	give_zenny(t, zenny);
+	ta_give_zenny(t, zenny);
 	ta_got(t, what, &first);
 	ta_end(t);
 	return i;

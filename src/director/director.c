@@ -19,6 +19,7 @@
 #include "darkbn6.h"
 #include "data.h"
 #include "debug.h"
+#include "director_battler.h"
 #include "director_board.h"
 #include "director_dark.h"
 #include "director_dev.h"
@@ -37,7 +38,6 @@
 #include "gamecall.h"
 #include "guardians.h"
 #include "loot.h"
-#include "meta.h"
 #include "nets_words.h"
 #include "netmap.h"
 #include "pet_text.h"
@@ -156,6 +156,10 @@ static bool act_on_choices(void) {
 			/* a bystander named the act's guardian (and no more to do) */
 			D.heard_act = D.layer_act;
 			break;
+		case OBJ_BATTLER:
+			/* (his stake paid: BN6's own first round, docs/LEVEL_DESIGN.md) */
+			battler_begin();
+			return true;
 		case OBJ_NAVI_GATE: {
 			/* his SP, as a challenge: the boss theme, and his chip after */
 			Encounter e = make_boss(run.depth, run.biome, D.objs.gate_navi);
@@ -266,6 +270,7 @@ static void take_events(void) {
 void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
+	battler_forget();
 	darkbn6_battle_begins();
 	dark_forget();
 }
@@ -340,12 +345,30 @@ static void map_update(void) {
 	final_update();
 }
 
+/* (where the game put MegaMan, once a battle: the debug log's) */
+static void placed_tell(void) {
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) {
+			fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
+			D.placed_told = true;
+			return;
+		}
+	}
+}
+
 /* A battle under way, the game off its map: its start counted, the duel's
  * time, the battle the game was handed */
 static void battle_update(void) {
 	int sub = emu_read8(BN6_GAMESTATE);
 	if (sub != BN6_SUB_BATTLE_INIT && sub != BN6_SUB_BATTLE) return;
 	emu_battle_release();   /* the forced battle has begun */
+	/* (a Virus Battler's round: BN6's own record, its viruses on MegaMan's
+	 * side, none of MegaMan's battles' counts) */
+	if (D.battler) {
+		D.in_battle = true;
+		return;
+	}
 	if (!D.in_battle) {
 		bool guardian = boss_fighting();
 		D.record_known = guardian;
@@ -382,16 +405,7 @@ static void battle_update(void) {
 		}
 		if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
 	}
-	/* (where the game put MegaMan, once a battle) */
-	if (emu_debug_on() && !D.placed_told)
-		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) {
-				fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
-				D.placed_told = true;
-				break;
-			}
-		}
+	if (emu_debug_on() && !D.placed_told) placed_tell();
 }
 
 /* Back on the map from a battle: its viruses counted, the PET's battle
@@ -401,6 +415,9 @@ static void after_battle(void) {
 	D.in_battle = false;
 	D.placed_told = false;
 	D.battle_record = 0;
+	/* (and a Rare deleted on BN6's BtlrCard, for the profile's card) */
+	battler_card_note();
+	if (D.battler) return;
 	bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 	runlog_battle_souls(D.souls_used);
 	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
@@ -433,6 +450,7 @@ static void after_forced(void) {
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		if (D.duel) { emu_battle_unwatch(); duel_verdict(won); D.pet_refreshed = false; }
+		else if (D.battler) battler_round_over(emu_read8(BN6_BATTLE_RESULT));
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;
@@ -567,6 +585,7 @@ void director_update(void) {
 	arrival_update();
 	lib_update();
 	dev_steps();
+	battler_update();
 	if (act_on_choices()) return;
 	checkpoint_update();
 	if (astray_update()) return;
