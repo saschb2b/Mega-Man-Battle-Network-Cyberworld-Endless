@@ -40,12 +40,13 @@ static int draft_take(TextArchive *t, int program, int color, int fit_flag, int 
 	ta_program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
+	/* (one box after the give: the install, or the move that makes room
+	 * for it, which says it; the main path's words cut, docs/game/core-loop.md) */
 	if (fit_flag) {
 		uint8_t check[] = { 0xEF, 0x00, (uint8_t)fit_flag, (uint8_t)(fit_flag >> 8), (uint8_t)fits, 0xFF };  /* ts_check_flag */
 		ta_bytes(t, check, sizeof check);
 		ta_page(t, FACE_MEGAMAN, "We'll move one\nto make room,Lan!", false);
-	}
-	ta_page(t, FACE_MEGAMAN, install, false);
+	} else ta_page(t, FACE_MEGAMAN, install, false);
 	ta_flag_set(t, taken_flag);
 	ta_end_or(t, next);
 	return s;
@@ -103,13 +104,14 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 }
 
 /* A guardian's HPMemory, his chip and the heal, in BN6's own boxes: what
- * was given, and the heal; nothing of the Pack and the Folder, BN6's own
- * (a playtester counted fourteen calls from a guardian's last words to
- * the way on, session 63). The run's last gives only his chip: no HP or
- * heal for a walk to its exit (a playtester given five HPMemory and a
- * program after the final fight), and it stays in the Library. */
+ * was given; nothing of the Pack and the Folder, BN6's own (a playtester
+ * counted fourteen calls from a guardian's last words to the way on,
+ * session 63), nor of the heal, which the act's end and the way home ask
+ * nothing of (the main path's words cut, docs/game/core-loop.md). The
+ * run's last gives only his chip: no HP or heal for a walk to its exit (a
+ * playtester given five HPMemory and a program after the final fight),
+ * and it stays in the Library. */
 static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
-	static const char healed[] = "MegaMan's HP was\nfully restored!";
 	if (!r->last && r->chip > 0) {
 		ta_give_hp_memory(t, r->hp_memories);
 		ta_give_chip(t, r->chip, r->code, 1);
@@ -119,7 +121,6 @@ static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
 		snprintf(line, sizeof line, "MegaMan got:\n\"%sHPMemory\" and\n\"%s %c\"!!", hp, r->chip_name, r->code == 26 ? '*' : 'A' + r->code);
 		ta_page(t, FACE_NONE, line, *first);
 		*first = false;
-		ta_page(t, FACE_NONE, healed, false);
 		return;
 	}
 	if (!r->last) {
@@ -132,10 +133,7 @@ static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
 		ta_got_chip(t, r->chip_name, r->code, first);
 		if (r->last) ta_page(t, FACE_MEGAMAN, "It's in our Library\nfor good,Lan!", false);
 	}
-	if (!r->last) {
-		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		ta_page(t, FACE_NONE, healed, false);
-	}
+	if (!r->last) ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
 }
 
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {

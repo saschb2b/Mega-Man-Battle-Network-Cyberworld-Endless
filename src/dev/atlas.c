@@ -14,6 +14,7 @@
 #include <time.h>
 
 #include "area_src.h"
+#include "lineups.h"
 #include "emu.h"
 #include "net.h"
 #include "net_layouts.h"
@@ -86,6 +87,51 @@ static void write_cells(const char *dir, int biome, int layout, int depth, uint3
  * BN6's facings, UP first) */
 static const char *const side_names[SIDE_COUNT] = { "top", "bottom", "left", "right" };
 static const char *const face_names[8] = { "up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left" };
+
+/* Services and navis beside a panel-wide stretch of floor, as the floor
+ * was drawn (made drawable after they were placed). */
+static int at_mouths(void) {
+	int mouths = 0;
+	for (int i = 1; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
+			o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
+		if (!stands || o->prop >= 0) continue;
+		static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = (int)o->x + d4[k][0], ny = (int)o->y + d4[k][1];
+			if (nx < 1 || ny < 1 || nx >= MAP_W - 1 || ny >= MAP_H - 1 || layer.cell[ny][nx] != C_PATH) continue;
+			int ax = d4[k][1], ay = d4[k][0];
+			if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) { ++mouths; break; }
+		}
+	}
+	return mouths;
+}
+
+/* The lining up the floor as drawn asks on the walks a player takes: from
+ * the arrival to the exit (the arena's antechamber) and to each Net
+ * Dealer's talk spot (lineups.h; issue #164). */
+static void walk_counts(int *lineups, int *walked, int *junctions) {
+	*lineups = *walked = *junctions = 0;
+	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
+	int sx = layer.rooms[0].ax, sy = layer.rooms[0].ay, len, jn;
+	int n = layer_lineups(sx, sy, goal->ax, goal->ay, &len, &jn);
+	if (n > 0) *lineups += n;
+	*walked += len;
+	*junctions += jn;
+	static const int d5[5][2] = { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int i = 1; i < layer.nobj; ++i) {
+		if (layer.obj[i].type != OBJ_SHOP) continue;
+		int best = -1, best_len = 0, best_jn = 0;
+		for (int k = 0; k < 5; ++k) {
+			n = layer_lineups(sx, sy, (int)layer.obj[i].x + d5[k][0], (int)layer.obj[i].y + d5[k][1], &len, &jn);
+			if (n >= 0 && (best < 0 || len < best_len)) { best = n; best_len = len; best_jn = jn; }
+		}
+		if (best > 0) *lineups += best;
+		*walked += best_len;
+		*junctions += best_jn;
+	}
+}
 
 /* A layer of `area` (a BN6 biome's own, or another game's), laid out by
  * `biome`'s rules. */
@@ -170,28 +216,15 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	free(px);
 	int floor = 0;
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) floor += layer.cell[y][x] == C_PATH;
-	/* services and navis beside a panel-wide stretch of floor, as the
-	 * floor was drawn (made drawable after they were placed) */
-	int mouths = 0;
-	for (int i = 1; i < layer.nobj; ++i) {
-		const NetObj *o = &layer.obj[i];
-		bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
-			o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
-		if (!stands || o->prop >= 0) continue;
-		static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
-			int nx = (int)o->x + d4[k][0], ny = (int)o->y + d4[k][1];
-			if (nx < 1 || ny < 1 || nx >= MAP_W - 1 || ny >= MAP_H - 1 || layer.cell[ny][nx] != C_PATH) continue;
-			int ax = d4[k][1], ay = d4[k][0];
-			if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) { ++mouths; break; }
-		}
-	}
-	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s\n",
+	int mouths = at_mouths();
+	int picks = tiles_stats.picks ? tiles_stats.picks : 1, lineups, walked, junctions;
+	walk_counts(&lineups, &walked, &junctions);
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
 		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
 		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
-		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7]);
+		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7],
+		lineups, junctions, walked);
 }
 
 /* A view of an area's map: its panels as the tiles learn them (as text,

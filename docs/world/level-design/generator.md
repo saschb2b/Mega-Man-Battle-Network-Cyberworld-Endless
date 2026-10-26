@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T13:05:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:50:00Z }
 ---
 
 # The generator
@@ -89,6 +89,28 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   layer); the panels beside a rung's landing are filled, so the edge runs
   straight past it. Seaside's ways past its count fell from 12 of the
   test's 60 to 8.
+- **Art that draws one-wide floor alone keeps it** (issue #164). BN5's
+  End Area is laid out as Seaside, but its maps (End Area 1 to 3, the
+  atlas's `src_b21_*` views) draw no floor two panels wide but their grey
+  pads: one-wide yellow roads, rings round posts, pads. Seaside's cap of
+  one widened nearly every walkway on the way, and its fields were
+  ragged; the legalizer, keeping only what End Area's tiles show, wore
+  both into rings and stubs, a junction at every other panel, 45 cells
+  changed a layer. A persona spent 35 of 134 calls there (session 75):
+  junction stubs and corners that took a turn only on their exact panel,
+  a 2 x 2 pocket, a dealer at the end of a road beside the one he stood
+  on. Such an area (`TILES_ONE_WIDE`) draws every room as its pads, the
+  signature and the arena among them, and keeps the way's walkways one
+  wide (`LayerKit.one_wide`): its rooms stay whole grey plazas in yellow
+  rims, its roads its own, its dealers on them. Over 36 layers (`build.py atlas a2 12`), the
+  walkways' junctions on the walks to the exit and the dealers fell from
+  11.4 a layer to 2.3 (Seaside's 1.8), the cells changed from 45 to 13,
+  the panels not drawn exactly from 51 to 21 and the near misses from 22%
+  to 13%. The panels where MegaMan must stop on one exact panel (`lineups`
+  in the atlas's report) stayed at 5.3 a layer against Seaside's 2.9: each
+  road is entered from a plaza's side. Widening the way into the pads'
+  floor took that to 4.6 and the junctions to 0.7, but drew pale stray
+  tiles where a wide road meets a plaza; it waits on those joins.
 
 Still apart from the originals: their dead ends. Capcom's maps have about
 twenty-five dead-end panels each (comb teeth on boardwalks, stubs, pads

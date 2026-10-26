@@ -101,6 +101,20 @@ const char *guardian_tip(int navi) {
 	}
 }
 
+bool guardian_mailed(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
+
+const char *guardian_warning(int navi) {
+	/* (the two that cost runs unwarned and saved them warned,
+	 * docs/game/core-loop.md: EraseMan's erasing blow; DiveMan's wave,
+	 * beaten with 10 HP left in session 25. The tips' own words, so the
+	 * mail and L agree) */
+	switch (navi) {
+	case 4: return "Low on HP? He erases us in one blow!";
+	case 13: return "His wave lights our panels? Get to our back column!";
+	default: return NULL;
+	}
+}
+
 /* (MegaMan's battle data on him is Dad's mail's: recited here before the
  * choice, it was MegaMan coaching, docs/voice/rules.md, What nobody says;
  * the stake as it is: a blow that would delete MegaMan ends the netbattle,

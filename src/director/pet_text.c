@@ -213,7 +213,7 @@ static void item_set(int id, int count) {
 
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
  * story's, which a run never delivers); then the lab's two */
-static bool mail_of(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
+static bool mail_of(int navi) { return guardian_mailed(navi); }
 enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22 };
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
