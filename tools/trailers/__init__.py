@@ -6,7 +6,7 @@ still renders from here, into .build/ only, and its video stays at its
 release's tag."""
 import importlib
 
-CURRENT = '0.16.0'
+CURRENT = '0.17.0'
 VERSIONS = ('0.3.0', '0.12.0', '0.13.0', '0.14.0', '0.15.0', '0.16.0', '0.17.0')
 
 

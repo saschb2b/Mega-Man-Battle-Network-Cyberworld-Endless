@@ -339,3 +339,44 @@ section, the foil's sweep; and from the second cut, the PET screen as the
 whole frame: the list's cursor stepping as the cut, the band as the
 headline, the INFORMATION box as the caption, the page arrows between
 sections, the brightness steps for the drop, the frame flashing on hits.
+
+## 0.17.0: Sharper, not bigger (2026-10-26), `tools/trailers/v0_17_0.py`
+
+The release: the core loop review's rounds, no new system. A battle on
+every layer, BN5's End Area one wide, fewer words on the way, a won
+Server's pick of three, MegaMan reading the way ahead, BugFrags that buy
+programs, three new starting folders, guardians who remember how the
+last fight ended, ProtoMan's netbattle stopped at 1 HP.
+
+Sketches and stills first, together: three music sketches from BN5's
+"Virus Busting" (0x15, Kaida's) and stills of the look, before any cut.
+The owner picked sketch A, Busting, and the look as the stills showed
+it: the release as one virus battle in BN6's own screens. The battle net
+with a drifting grid, the HP box holding the version, the Custom gauge
+the section's label and filling through it; on each section card the
+Custom screen's cursor steps onto that section's chip and OK sends it to
+the column; each shot opens out of the chip's window into the field,
+its caption on the chip's plate, a count where the damage number goes;
+the recap the fifth chip, P; the stinger S-H-A-R-P as a Program Advance
+flashing into the logo; the end card the results screen (DELETE TIME,
+BUSTING LEVEL S, GET DATA), held still. Approved at its first full render.
+
+The piece: sketch A grown to the cut's 26 bars (cold open, title, four
+sections of a card and three shots, recap, stinger, end), FluidR3 GM;
+music_check.py against 0x15 "busier than the source: none", no rubs.
+The 3DS banner from the climax's hook (`3ds/banner-0.17.0.wav`).
+
+The footage came from two media agents' release pictures while the cut
+was built: it was cut on stand-ins first (a placeholder card marked
+FOOTAGE TO COME), and each stand-in swapped for its run as the runs
+landed, which kept the trailer off the release's critical path. Two
+runs could not be taken as they were: CLIPS' `battle` run shows PAUSE
+throughout on this build, so the won Server's battle opened the cut;
+`guardian-memory` needs a run before it in the same data folder
+(`SCREENSHOT_PREP`), so its committed screenshot stood in for a capture.
+A change with no picture ("finds vary again") stays out of the cut.
+
+Devices now used up: the battle's own screens as the whole frame, the
+chip picked as the section card, the shot opening out of the chip
+window, the caption on the chip plate, the Program Advance as the
+stinger, the results screen as the end card.
