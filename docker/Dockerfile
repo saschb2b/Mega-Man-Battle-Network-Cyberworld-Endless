@@ -8,6 +8,6 @@ RUN apt-get update \
     cmake curl libsdl2-dev python3-pip \
  && pip3 install --break-system-packages --no-cache-dir lizard==1.24.0 \
  && rm -rf /var/lib/apt/lists/*
-# The embedded GBA core (docs/EMULATION.md)
+# The embedded GBA core (docs/engine/emulation/)
 COPY mgba.sh /tmp/mgba.sh
 RUN sh /tmp/mgba.sh host

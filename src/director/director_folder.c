@@ -18,9 +18,11 @@
 #include "emu.h"
 #include "gamecall.h"
 #include "loot.h"
+#include "loot_souls.h"
 #include "meta.h"
 #include "save.h"
 #include "save_blob.h"
+#include "souls.h"
 #include "trader.h"
 
 /* The run's folder as the game holds it (30 entries, chip | code << 9;
@@ -65,7 +67,8 @@ void folder_made_load(void) {
 
 /* The folder's codes, for the layer about to be made (loot_fit_code): read
  * from the game as MegaMan moves on, kept with the run, so a checkpoint
- * rebuilds the layer as it was without the game's memory; and the
+ * rebuilds the layer as it was without the game's memory; and the Souls
+ * held, whose kinds its finds and stock lean to (loot_souls.h); and the
  * NaviCust's board, which the guardian's draft fits its programs beside;
  * and the Library, which a vault's lock counts (as the checkpoint after
  * keeps it, which a CONTINUE's rebuild reads). */
@@ -79,7 +82,11 @@ void note_folder_codes(void) {
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
 	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
+	souls_note_layer();
+	loot_soul_souls(souls_layer());
 }
+
+void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
 
 /* The folder's chips owned, as BN6 marks a chip it gives (bn6f
  * encryption_applyPack, Gregar 0x08006E70): its byte in the table at
@@ -143,7 +150,7 @@ static uint32_t pack_count_at(int entry) {
 	return at ? at + (uint32_t)slot : 0;
 }
 
-/* The run's starting folder in the game's first folder (docs/META.md): the
+/* The run's starting folder in the game's first folder (docs/game/meta/): the
  * chosen one's 30 chips over the game's own (Standard keeps those), as
  * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
 void set_start_folder(void) {
@@ -172,7 +179,7 @@ void set_start_folder(void) {
 	own_folder_chips();
 }
 
-/* The All * helper in the game (docs/META.md, issue #18): every chip's
+/* The All * helper in the game (docs/game/meta/all-star-helper.md, issue #18): every chip's
  * record holds * alone in the core's ROM copy, so the pack keeps a chip in
  * * whatever code it was given in (bn6f getOffsetToQuantityOfChipCode
  * counts a code the record lacks as its first), the folder's EDIT moves it
@@ -221,7 +228,7 @@ void star_folder_pack(void) {
 	}
 }
 
-/* The profile's Library (docs/META.md) in the run's game: the PET's Library
+/* The profile's Library (docs/game/meta/) in the run's game: the PET's Library
  * shows every chip held in any run, and a Chip Trader's prize, new to the
  * Library first, is new across runs. */
 void library_to_game(void) {
@@ -261,7 +268,7 @@ void library_from_game(void) {
 }
 
 /* ... and the programs MegaMan has, into the programs found, which later
- * runs' NaviCust vendors keep (docs/NAVICUST.md, 7). */
+ * runs' NaviCust vendors keep (docs/game/navicust.md, 7). */
 void programs_from_game(void) {
 	uint8_t now[10];
 	int n = board_programs(now, (int)sizeof now);

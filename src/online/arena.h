@@ -1,4 +1,4 @@
-/* The Arena (issue #120, docs/ONLINE_ARENA.md): a NetBattle of BN6's own
+/* The Arena (issue #120, docs/online/arena/): a NetBattle of BN6's own
  * between two players, each client running both linked cores and only
  * the players' keys crossing between them (arena_link.h). This is its
  * local engine: the way in (arena_boot.h), then the battle in lockstep,
@@ -37,7 +37,7 @@ typedef struct Arena Arena;
  * below */
 void arena_free(Arena *a);
 
-/* A rematch in a second (issue #167, docs/ONLINE_ARENA.md): the pair
+/* A rematch in a second (issue #167, docs/online/arena/): the pair
  * kept as its bout began, before the bout's seed went in, taken from an
  * Arena whose way in is done (NULL: none; the Arena keeps the rest and is
  * freed as ever). It holds about 33 MB until it is gone into or freed. */
@@ -131,7 +131,7 @@ uint16_t arena_bot_keys(const Arena *a, unsigned side, uint32_t tick);
  * and every 60th frame the game's hash said (without the sound's fields),
  * which a run that rolls back must say alike; 0 the hash alone */
 void arena_rollback(Arena *a, int window);
-/* The rollback window, before the way in is done (docs/ONLINE_ARENA.md,
+/* The rollback window, before the way in is done (docs/online/arena/rollback/overview.md,
  * Rollback): up to `window` frames run on a guess of the other player's
  * keys and rolled back where it was wrong (0: the delay alone, a frame
  * run once its keys have all come); -1, as it starts, what a frame of the

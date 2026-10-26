@@ -1,4 +1,4 @@
-/* job_words.h. The askers' requests in their own voices (docs/VOICE.md):
+/* job_words.h. The askers' requests in their own voices (docs/voice/rules.md):
  * the NetBattler at AsterLand's board (a grown-up who calls Lan "kid"),
  * the NetBattle club's member in class 6-1 (a classmate), the man from
  * Dad's lab in town. Each offers, waits, and settles at the next visit,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """A TCP relay between a game and a local Net Square server that can drop
-the link on cue (issue #153, docs/ONLINE.md, A dropped link): for testing
+the link on cue (issue #153, docs/online/square/dropped-link.md): for testing
 the reconnect without touching a real network, and never against the
 official server.
 

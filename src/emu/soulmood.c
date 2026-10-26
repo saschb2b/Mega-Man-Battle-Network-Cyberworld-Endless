@@ -239,7 +239,7 @@ void soulmood_dev_dark(bool on) { dev_dark = on; }
 
 /* BN5's dark gate (0x08010110, at its chip use 0x080100DE): a chip of its own whose BN5 record names one is usable only
  * while he is not dark, or only while he is, where his side names no Navi (+0x29); dark is the battle's here (a BN5
- * DarkChip used), where BN5 reads his dark meter (no meter comes into a run: docs/MULTIROM.md) */
+ * DarkChip used), where BN5 reads his dark meter (no meter comes into a run: docs/multirom/) */
 bool soulmood_chip_refused(uint32_t me, uint32_t attack, int chip, uint32_t *record) {
 	int gate = done && chip > 0 && chip < XREG_IDS ? gates[chip] : 0;
 	if (!gate || stats8(me, BN6_NAVI_SIDE_NAVI) || (breaks & SOULMOOD_BREAK_GATE) || soulmood_dark_of(me) == (gate != GATE_NOT_DARK))

@@ -1,9 +1,13 @@
 /* BN6's map as it is drawn on the overworld: its tile map in RAM and the
- * screen maps its BGs are copied from each frame (docs/ROM_DATA.md, BN6's
+ * screen maps its BGs are copied from each frame (docs/rom/net-maps.md, BN6's
  * map drawing). Read and written for a dark layer's board in BN5's look
  * (src/director/liberation_look.c). */
 #ifndef CW_BN6_MAP_H
 #define CW_BN6_MAP_H
+
+/* BN6_MAP_GROUP (bn6.h): the internet's groups from here, the real
+ * world's under it (bn6f's map groups; Lan's HP 0x88, a layer 0x8C) */
+#define BN6_GROUP_INTERNET    0x80
 
 /* The map's tile map, decompressed at map entry and read in place: a
  * 12-byte header (tw, th, 0, 0, the two layers' offsets), then tw x th
@@ -20,7 +24,7 @@
 #define BN6_BG2_SCREEN        0x030035C0u /* the map's layer 1 */
 #define BN6_BG_SCREEN_SIZE    0x800
 /* The map's coordinate data, decompressed at map entry and read in place
- * (docs/ROM_DATA.md, Map buffers): its walls' section first, a u32 count n,
+ * (docs/rom/net-maps.md, Map buffers): its walls' section first, a u32 count n,
  * then n entries of a u16 cell key ((cy + 127) * 254 + cx + 127, 8-unit
  * world cells, ascending) and a u16 offset, then n shapes of 4 bytes (z,
  * value, height, type; src/map/coords.c). A wall whose value has bit 7 set

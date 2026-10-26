@@ -10,13 +10,13 @@
 /* Makes the game's encounter roll return the engine's battle settings, and
  * hooks its battles: their start (EV_BATTLE_START, events.h), their
  * rewards, picked in the folder's codes half the time, and a DarkChip's
- * dark power as it runs (darkbn6.h; docs/META.md). */
+ * dark power as it runs (darkbn6.h; docs/game/meta/). */
 void emu_encounters_install(void);
 /* The battle the next encounter starts: enemies, area background and music. */
 void emu_encounter_set(const Encounter *e);
 /* The songs a battle's record names, a random battle's and a boss's: BN6's
  * themes, or another game's where the layer is one of its areas
- * (docs/MULTIROM.md), as the layer sets them. */
+ * (docs/multirom/), as the layer sets them. */
 #define ENCOUNTER_SONG_BATTLE 0x15
 #define ENCOUNTER_SONG_BOSS   0x16
 extern int encounter_song[2];
@@ -32,25 +32,30 @@ int emu_encounter_record(uint32_t settings);
  * frames: a guardian's pays zenny where his row has his chip, which his
  * Guardian Data gives; and the run's Souls handed to BN6's engine for it
  * (soulunite_held, for UNITE on its Custom screen: every battle, where the
- * Souls stand in BN6's engine with BN5's Navis, docs/MULTIROM.md). */
+ * Souls stand in BN6's engine with BN5's Navis, docs/multirom/). */
 void emu_encounter_started(uint32_t settings);
 /* The Souls MegaMan has united with in the battle under way (BN6_SOUL_USED:
  * bit n Soul n, bit 16 + n its Chaos Unison), 0 where the Souls do not
  * stand in BN6's engine */
 uint32_t emu_battle_souls(void);
 /* The next battle watched, until emu_battle_unwatch (the duel's: docs/
- * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, the first enemy to
- * spawn given `hp_cap` HP at most (0: its own), and with `spare` the blow
- * that would delete MegaMan ending the battle instead (battle_spare.h). */
+ * docs/game/rival.md): MegaMan's hits queued as EV_MEGAMAN_HIT, the first
+ * enemy to spawn given `hp_cap` HP at most (0: its own), and with `spare`
+ * the blow that would delete MegaMan ending the battle instead
+ * (battle_spare.h). */
 void emu_battle_watch(int hp_cap, bool spare);
 /* ... and the watch ended: whether it spared MegaMan */
 bool emu_battle_unwatch(void);
 /* The next enemy to spawn with `from` HP given `to` instead (a guardian's
- * own, raised by the Net's clock, docs/HOME.md), until
+ * own, raised by the Net's clock, docs/world/home/), until
  * emu_battle_unwatch; nothing where they are the same. */
 void emu_battle_hp(int from, int to);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
+/* ... one of BN6's own BattleSettings (a Virus Battler's round, battle mode
+ * 6: docs/world/level-design/virus-battler.md); the next emu_encounter_set
+ * hands out the engine's own again */
+void emu_battle_force_record(uint32_t settings);
 void emu_battle_release(void);
 bool emu_battle_forcing(void);
 

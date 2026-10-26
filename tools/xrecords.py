@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """xrecords.py [--all] [--no-build]: BN5's battle records in BN6's own engine
-(issue #82; docs/MULTIROM.md, One net; docs/DEVTOOLS.md).
+(issue #82; docs/multirom/one-net.md; docs/devtools/).
 
 Every random record of the maps BN5's areas take their battles from
 (NetAreaDef.xbattles, src/core/rom.c), as BN5 has it and as BN6's engine

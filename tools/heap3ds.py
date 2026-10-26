@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5] [--cap MB] [--no-build]: the
 New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
-docs/EMULATION.md, The 3DS's memory).
+docs/engine/emulation/3ds-memory.md).
 
 The host build plays long runs headless (the test autopilot, MegaMan kept
 alive and his foes deleted at a hit: --dev god,onehit, so a run goes

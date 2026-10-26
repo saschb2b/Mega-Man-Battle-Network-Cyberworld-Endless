@@ -6,7 +6,7 @@
  * objects over 30 tiles, one palette), on a ground of the guardian's
  * title-card colour, written into free space and listed at a mugshot
  * number no face takes in Gregar. Numbers only in the code: the pixels are
- * the player's ROM's (docs/ROM_DATA.md, Mugshots). */
+ * the player's ROM's (docs/rom/graphics.md, Mugshots). */
 #include "portrait.h"
 
 #include <limits.h>
@@ -19,7 +19,7 @@
 #include "rom.h"
 #include "xnavi.h"
 
-#define PORTRAIT_AT   FREE_PORTRAITS          /* (docs/EMULATION.md) */
+#define PORTRAIT_AT   FREE_PORTRAITS          /* (docs/engine/emulation/) */
 #define PORTRAIT_SIZE 0x500
 #define BUS           0x08000000u
 #define LIST_BATTLE   0
@@ -35,7 +35,7 @@
  * townsfolk's faces (0x00-0x1F, their list-5 sprite less 0x20), and not
  * one the chat box gives a palette bank of its own (0x29, 0x31 and others:
  * TomahawkMan's at 0x31 drew in his palette's second bank, which it lacks;
- * docs/ROM_DATA.md, Mugshots). */
+ * docs/rom/graphics.md, Mugshots). */
 static const struct { int8_t wx, wy; uint8_t face; } P[5] = {
 	{ -20, -40, 0x30 }, { -12, -50, 0x28 }, { -18, -78, 0x34 }, { -20, -62, 0x35 }, { -8, -56, 0x36 },
 };

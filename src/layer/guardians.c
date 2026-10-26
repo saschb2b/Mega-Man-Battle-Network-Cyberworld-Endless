@@ -31,12 +31,12 @@ static const Guardian guardians[] = {
 	[15] = { "JudgeMan", "Voice of Verdict", 0x55, -1, 88, 104, 216 },
 	[16] = { "ElementMan", "Lord of Elements", 0x56, -1, 176, 136, 232 },
 	[18] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
-	/* the super bosses (docs/BOSSES.md, Super bosses): Bass, his own face
+	/* the super bosses (docs/game/bosses/super-bosses.md): Bass, his own face
 	 * and cloaked sprite, and the Cybeast, its face and its beast on the
 	 * map; their poses super_body's */
 	[19] = { "Bass", "The Strongest Navi", 0x5B, -1, 232, 176, 40 },
 	[20] = { "Gregar", "It copies everything", 0x58, -1, 248, 128, 40 },
-	/* BN5's (docs/BOSSES.md, BN5's Navis): their faces and sprites copied in
+	/* BN5's (docs/game/bosses/bn5-navis.md): their faces and sprites copied in
 	 * from its ROM as they are met (guardian_set_face), their pose its own
 	 * animation 24, as Gregar's Navis' */
 	[24] = { "Colonel", "Commander of the Old Net", GUARDIAN_NO_MUGSHOT, 24, 96, 184, 176 },
@@ -45,7 +45,7 @@ static const Guardian guardians[] = {
 	[27] = { "TomahawkMan", "Spirit of the Totem", GUARDIAN_NO_MUGSHOT, 24, 232, 88, 72 },
 	[28] = { "KnightMan", "The Iron Fortress", GUARDIAN_NO_MUGSHOT, 24, 152, 136, 200 },
 	[29] = { "ToadMan", "Maestro of the Marsh", GUARDIAN_NO_MUGSHOT, 24, 104, 200, 104 },
-	/* BN5's Darkloids (docs/LIBERATION.md, stage 4): faces and sprites
+	/* BN5's Darkloids (docs/game/liberation/building/stage-4-darkloids.md): faces and sprites
 	 * copied in as the six's, no pose of theirs read yet */
 	[30] = { "ShadeMan", "Lord of the Night", GUARDIAN_NO_MUGSHOT, -1, 168, 64, 120 },
 	[31] = { "BlizzardMan", "Darkloid of the Snow", GUARDIAN_NO_MUGSHOT, -1, 112, 184, 248 },
@@ -85,11 +85,11 @@ int guardian_sprite(int navi) {
 }
 
 int guardian_older_sprite(int navi) {
-	/* (BN5's lists 6 and 8: docs/ROM_DATA.md, BN5's Navis) */
+	/* (BN5's lists 6 and 8: docs/rom/navis.md, BN5's Navis) */
 	static const uint8_t numbers[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1] = { 69, 75, 71, 72, 73, 74 };
 	/* (the Darkloids': BlizzardMan's 76 drawn on BN5's own board, mission
 	 * 1's, read in romlab; ShadeMan's, CloudMan's and CosmoMan's by their
-	 * palettes beside his, docs/ROM_DATA.md) */
+	 * palettes beside his, docs/rom/) */
 	static const uint8_t darkloids[GUARDIAN_DARKLOID_LAST - GUARDIAN_DARKLOID_FIRST + 1] = { 70, 76, 77, 78 };
 	if (guardian_darkloid(navi)) return darkloids[navi - GUARDIAN_DARKLOID_FIRST];
 	return guardian_older(navi) ? numbers[navi - GUARDIAN_OLDER_FIRST] : 0;
@@ -113,9 +113,9 @@ static int toward_camera(int face) {
  *   Falzar's Navis, whom Gregar has no overworld sprite of, in their
  *   battle sprites (list 0, 0x2E + the navi, each uncompressed), which face
  *   left as they fight, mirrored to face right, standing in animation 0
- *   and logging in by BN6's warp-in, their animation 3 (docs/ROM_DATA.md). */
+ *   and logging in by BN6's warp-in, their animation 3 (docs/rom/). */
 /* How a Navi's overworld sprite logs in and out on the net, as BN6's
- * scenes play them beside the beam (docs/ROM_DATA.md, Guardians): its
+ * scenes play them beside the beam (docs/rom/battle.md, Guardians): its
  * animation 0x19 and 0x21 plus its facing, in Gregar's own Navis and BN5's;
  * BlastMan and DiveMan log out by their own and have no log-in, JudgeMan
  * has his own pair, ElementMan neither (he shows and goes with the beam) */
@@ -139,7 +139,7 @@ NpcBody guardian_body(int navi, int face) {
 	return b;
 }
 
-/* The super bosses as they stand on the net (docs/BOSSES.md, Super
+/* The super bosses as they stand on the net (docs/game/bosses/super-bosses.md, Super
  * bosses), in BN6's own sprites and animations as its scenes use them:
  * Bass cloaked, drawn only towards the camera as BlastMan is (2 to 5),
  * throwing his cloak open (26) to stand without it (25), as he fights;

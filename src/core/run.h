@@ -34,7 +34,7 @@ typedef struct {
 	int viruses_deleted;
 	int fragments;           /* ScrtData held (the game's key item), for generation */
 	bool secret_cleared;
-	/* what the player brought (docs/META.md): the net's length, the
+	/* what the player brought (docs/game/meta/): the net's length, the
 	 * starting folder, the threat rung, the helpers switched on */
 	uint8_t mode;            /* RUN_ENDLESS (0, as runs were), RUN_SHORT */
 	uint8_t folder;          /* FOLDER_* (folders.h) */
@@ -45,16 +45,16 @@ typedef struct {
 	uint8_t codes[3];        /* the folder's codes as the layer was made, most held first: code + 1 (loot_fit_code) */
 	/* (new since the "CWE6" save) */
 	uint8_t programs[8];     /* the NaviCust programs on MegaMan's board as the layer was made (variant: program * 4 + v), 0 ends */
-	/* (new since the "CWE7" save) the Net's clock (docs/HOME.md, going
+	/* (new since the "CWE7" save) the Net's clock (docs/world/home/going-back.md, going
 	 * back): the trips back taken, each a notch on the guardians ahead */
 	uint8_t clock;
 	uint8_t back_spent;      /* the older portals taken on this visit home, a bit each (pacing_older_acts) */
 	uint16_t home_depth;     /* on a trip back, the run's own layer it comes home to (depth then the older act's), else 0 */
-	/* (new since the "CWE8" save) the request taken at home (docs/HOME.md,
+	/* (new since the "CWE8" save) the request taken at home (docs/world/home/jobs.md,
 	 * piece 5: jobs.h), JOB_NONE for none */
 	Job job;
 	/* (new since the "CWE9" save) a dark layer's special route
-	 * (docs/LIBERATION.md, Special routes): the act whose board's route was
+	 * (docs/game/liberation/special-routes.md): the act whose board's route was
 	 * found, 1-based in its cycle, 0 none, kept until the fork it turns
 	 * (run_route_turns) is passed; the act that came by the route's way,
 	 * the same, for its card */
@@ -68,7 +68,7 @@ typedef struct {
 enum { RUN_ENDLESS, RUN_SHORT };
 #define SHORT_LAYERS 10
 #define THREAT_MAX 10
-/* The helpers (docs/META.md), a bit each in run.helpers: two more
+/* The helpers (docs/game/meta/), a bit each in run.helpers: two more
  * HPMemory, a heal on every layer, gentler battles, every chip in *, and
  * BeastOut from the first battle (the one a profile earns: the endless
  * net's own Nest cleared, meta_beast_open; issue #99) */
@@ -87,7 +87,7 @@ static inline bool run_beast_start(void) { return (run.helpers & HELP_BEAST) != 
 
 void run_new(uint32_t seed);
 /* The net area that draws BN6 area `biome` in this run: its own, or
- * another game's like it (docs/MULTIROM.md), where that game's ROM is
+ * another game's like it (docs/multirom/), where that game's ROM is
  * there and the run's seed picks it, in half the runs. */
 int run_dress(int biome);
 /* The guardian of the run's act in area `biome` (a normal layer's): one of
@@ -97,10 +97,10 @@ int run_dress(int biome);
 int run_guardian(int biome);
 /* ... and the guardian of the layer MegaMan stands on: a side layer's
  * (an Undernet detour, the Secret Area) is run.boss_order's, a trip back's
- * none (its guardian deleted, docs/HOME.md) */
+ * none (its guardian deleted, docs/world/home/) */
 int run_layer_guardian(void);
 /* Another game's Navi guarding act `act` (0-based) in area `biome`, 0 for
- * none (docs/BOSSES.md, BN5's Navis), fought in BN6's engine where his
+ * none (docs/game/bosses/bn5-navis.md), fought in BN6's engine where his
  * Navi is moved in: on a surface act where an area of his game dresses it
  * and names him (NetAreaDef.xguard), in half the runs; in the deep's acts
  * (the Undernet's, the Graveyard's) where his HP fits the act's band, by a
@@ -118,29 +118,29 @@ void run_debug_guardian(int navi);
  * guardian is picked as a fourth act's. */
 void run_setup(int mode, int folder, int threat, int helpers, int cross);
 /* The other way act `act` (0-based) may take, offered where the act before
- * it ends (docs/META.md, routes): an area of its tier the run has not
+ * it ends (docs/game/meta/phase-two.md, routes): an area of its tier the run has not
  * taken, and `navi` its guardian, fit for the act and no other act's; -1
  * for none (the first act, the short net's Nest, the Undernet and on). */
 int run_route_alt(int act, int *navi);
 /* The dark way the short net's last act before the Nest (act 2, 0-based)
- * may take once it is open (docs/META.md, branches): the Undernet, `navi`
+ * may take once it is open (docs/game/meta/, branches): the Undernet, `navi`
  * its guardian, fit for the act, no other act's and not `avoid` (the other
  * way's); -1 for none. */
 int run_route_dark(int act, int avoid, int *navi);
 /* The area whose way at act `act`'s fork (0-based, from the second act:
  * the act's own area or the other way, run_route_alt) holds the act's dark
- * layer, its second (docs/LIBERATION.md): two acts in three that have a
+ * layer, its second (docs/game/liberation/): two acts in three that have a
  * fork, either way by a coin of the seed; -1 none. The fork as it was
  * offered, whichever way was taken since. */
 int run_dark_area(int act);
 /* The Darkloid of act `act`'s dark layer in area `biome`: one of BN5's own
  * Darkloids where its ROM brought them into BN6's engine, the act's of
  * BN5's missions' order the likeliest (guardians.h, navis 30-33;
- * docs/LIBERATION.md stage 4); else a Navi of BN6's whose HP fits the act's
+ * docs/game/liberation/ stage 4); else a Navi of BN6's whose HP fits the act's
  * band, the area's own first, no act's guardian. */
 int run_darkloid(int act, int biome);
 /* The ways act `act` (0-based) may take once the act before it ends
- * (docs/HOME.md: the town's ports): its own area, the other way's and the
+ * (docs/world/home/: the town's ports): its own area, the other way's and the
  * dark way's where the act has them, each with the guardian the run will
  * set there (`navi`, run.boss_order's) and the one MegaMan meets (`meets`:
  * an older net's own where its game guards the area); how many are open,
@@ -169,7 +169,7 @@ void run_nest_rebuilt(void);
  * easier one); the Cybeast's and the short net's own as they are. */
 int run_nest_hp(int depth, int navi, int hp);
 /* A guardian's HP more, in percent, each notch of the Net's clock
- * (pacing_clock_hp, docs/HOME.md). */
+ * (pacing_clock_hp, docs/world/home/). */
 #define RUN_CLOCK_PERCENT 10
 /* The run's own depth: on a trip back, the layer it comes home to. */
 static inline int run_reached(void) { return run.home_depth ? run.home_depth : run.depth; }

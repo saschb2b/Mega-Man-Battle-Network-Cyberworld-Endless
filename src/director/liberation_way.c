@@ -1,4 +1,4 @@
-/* The way to a dark layer marked at home (liberation.h; docs/LIBERATION.md,
+/* The way to a dark layer marked at home (liberation.h; docs/game/liberation/,
  * Where it appears): in Lan's HP, the portal of the way whose act holds a
  * dark layer shows BN5's dark panels' colours before MegaMan steps on it.
  * Its own colours where it is drawn (the pink pad's magenta, a link

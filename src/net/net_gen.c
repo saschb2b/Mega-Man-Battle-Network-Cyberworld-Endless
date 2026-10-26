@@ -1,5 +1,5 @@
 /* Layer generation: a layout after the area's own maps (net_layouts.c),
- * then points of interest (docs/LEVEL_DESIGN.md). Here the driver
+ * then points of interest (docs/world/level-design/). Here the driver
  * (layer_generate), the way through, the floor's searches and where the
  * services, the data and the people stand; the detours are net_detours.c's,
  * the landmarks and props net_landmarks.c's, the set pieces' places
@@ -25,7 +25,7 @@
 #include "super_boss.h"
 
 /* Layer generation: a layout after the area's own maps (net_layouts.c),
- * then points of interest (docs/LEVEL_DESIGN.md). */
+ * then points of interest (docs/world/level-design/). */
 
 Layer layer;
 
@@ -236,7 +236,7 @@ bool ng_near_talker(int x, int y) {
 	for (int i = 0; i < layer.nobj; ++i) {
 		int t = layer.obj[i].type, reach = layer.obj[i].prop >= 0 ? 3 : 2;
 		bool talks = t == OBJ_SHOP || t == OBJ_HEAL || t == OBJ_TRADER || t == OBJ_BUGTRADER || t == OBJ_NPC ||
-			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT;
+			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT || t == OBJ_BATTLER;
 		if (talks && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
 	}
 	return false;
@@ -309,7 +309,7 @@ static void flood_from(int from, int16_t dist[MAP_H][MAP_W]) {
 }
 
 /* The room farthest from the arrival by walking, of those the walk reaches
- * only past the layer's signature where there are any (docs/LEVEL_DESIGN.md,
+ * only past the layer's signature where there are any (docs/world/level-design/identity.md,
  * Identity: the way runs through it). */
 static int exit_far(void) {
 	static int16_t dist[MAP_H][MAP_W];
@@ -406,7 +406,7 @@ bool ng_fits(int rise) {
 
 /* MegaMan arrives at the pad nearest the layer's side of the screen
  * (layer.arrive_side: the top least x + y, the bottom most, the left
- * least x - y, the right most; docs/LEVEL_DESIGN.md, Arrivals), which
+ * least x - y, the right most; docs/world/level-design/arrivals.md), which
  * becomes room 0. */
 static void choose_arrival(void) {
 	int best = 0, bv = 1 << 30;
@@ -554,7 +554,7 @@ static int layer_guardian_of(int biome, int kind) {
 /* The way MegaMan faces as he arrives, BN6's (0-7, UP first): along the
  * way's first leg, the grid's axis it runs along most over its first five
  * panels (BN6's arrivals face along one of the world's axes, into the map:
- * docs/LEVEL_DESIGN.md, Arrivals). Grid +x is world +Y, DOWN+RIGHT; grid +y
+ * docs/world/level-design/arrivals.md). Grid +x is world +Y, DOWN+RIGHT; grid +y
  * world -X, DOWN+LEFT. */
 static int arrival_facing(void) {
 	int x = layer.rooms[0].ax, y = layer.rooms[0].ay, dx = 0, dy = 0;
@@ -615,13 +615,13 @@ typedef struct {
 static void roll_services(Services *s, int depth, int biome, int kind) {
 	/* each act's middle layer has the Net Dealer and a heal, and so does its
 	 * first after the run's first (the guardian's zenny to spend on what the
-	 * new act calls for); docs/PROGRESSION.md */
+	 * new act calls for); docs/game/progression/ */
 	int biome_layer = layer_in_act(depth);
 	/* (a trip back as its act's middle layer: the dealer, the heal and the
-	 * vendor's chance, docs/HOME.md) */
+	 * vendor's chance, docs/world/home/) */
 	bool own = kind == LAYER_NORMAL || kind == LAYER_BACK;
 	s->shop = own && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
-	/* (threat 2, docs/META.md: only the heals an act is sure of; the heals
+	/* (threat 2, docs/game/meta/: only the heals an act is sure of; the heals
 	 * helper: one on every layer) */
 	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (own && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
@@ -630,7 +630,7 @@ static void roll_services(Services *s, int depth, int biome, int kind) {
 	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
 	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
-	/* the rival's duel (docs/RIVAL.md): on each act's second layer, where
+	/* the rival's duel (docs/game/rival.md): on each act's second layer, where
 	 * no strong virus signal stands (one battle to seek out a layer) */
 	s->duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
 	s->challenge &= !s->duel;
@@ -641,17 +641,17 @@ static void roll_services(Services *s, int depth, int biome, int kind) {
 
 /* The gates' rolls, after the services'. */
 static void roll_gates(Services *s, uint32_t seed, int depth, int kind) {
-	/* a gate sealed with a Navi's code (docs/META.md, gates): from act 3,
+	/* a gate sealed with a Navi's code (docs/game/meta/phase-two.md, gates): from act 3,
 	 * before the guardian's layer, where no dark warp stands; its Navi one
 	 * of the guardians (but ProtoMan, the Secret Area's) */
 	s->navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !s->undernet && rng_range(0, 99) < 30;
 	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
 	s->gate_navi = s->navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
-	/* a collector's vault (docs/META.md, gates): from act 2, before the
+	/* a collector's vault (docs/game/meta/phase-two.md, gates): from act 2, before the
 	 * guardian's layer, where no other gate or dark warp stands */
 	s->vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !s->undernet && !s->navi_gate &&
 		rng_range(0, 99) < 20;
-	/* an official gate (docs/RIVAL.md): from act 2, where no other gate or
+	/* an official gate (docs/game/rival.md): from act 2, where no other gate or
 	 * dark warp stands; sealed until Chaud's clearance reaches its level
 	 * (from the seed, not the rolls: two rolls more reshuffled the rooms
 	 * of every layer after them). And on every act's duel layer, the prize
@@ -775,7 +775,7 @@ static void place_duel_gate(int level, const int *order, int n, int *next) {
 int layer_npcs(void) {
 	int n = 0;
 	/* (a guardian two, himself and his data; Bass three, his stone too:
-	 * docs/BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	for (int i = 0; i < layer.nobj; ++i)
 		n += layer.obj[i].type == OBJ_WARP_IN ? 0 : layer.obj[i].type != OBJ_BOSS ? 1 : layer.obj[i].param == SUPER_BASS ? 3 : 2;
 	return n;
@@ -804,13 +804,26 @@ static void place_purple(uint8_t *taken) {
 	if (o) o->param = MD_PURPLE;
 }
 
+/* The layer's Virus Battler (net_pieces.c's layer_battler): at the end of
+ * a side path, after the blue data have taken theirs, as BN6's Battlers
+ * stand off the way (in a comp's corner, by a machine); else in a room */
+static void place_battler(int battler, uint8_t *taken, const int *order, int n, int *next) {
+	int x, y;
+	DetourEnd end;
+	NetObj *o = NULL;
+	for (int min = DETOUR_BLUE; min >= 1 && !o; min -= 2)
+		if (ng_detour_end(min, taken, &end)) o = ng_add_obj(OBJ_BATTLER, end.x, end.y);
+	if (!o) { o = PLACE(OBJ_BATTLER); ++*next; }
+	if (o) o->param = battler;
+}
+
 /* Blue data where the detours end, more of them deeper and in the Undernet
  * (a dark warp's, or the short net's dark way's act), the farthest a tier
  * up where it is a long walk; in a room where the layer has too few
  * detours. Then green data loose through the rest, most at dead ends. The
  * colour says what a walk there is worth, as BN6's do: where the old roll
  * gave any data any tier, most of the good ones lay by the way, all green
- * (docs/LEVEL_DESIGN.md, Set pieces). */
+ * (docs/world/level-design/set-pieces.md). */
 static void place_data(int depth, int kind, int biome, int size, const int *order, int n, int *next) {
 	int x, y;
 	static uint8_t taken[MAP_W * MAP_H];
@@ -827,6 +840,12 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		 * rich data, about as much in all; by the plan's share of good
 		 * chips, economy.h, the farthest detour's kept whole) */
 		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < econ_scale(30, ECON_LEVER_GOOD, depth) ? 2 : 1;
+	}
+	/* (his room held for him till now, fill_layer) */
+	int battler = layer_battler(depth, kind);
+	if (battler) {
+		--npcs_held;
+		place_battler(battler, taken, order, n, next);
 	}
 	static int dx[256], dy[256];
 	int nde = dead_ends(dx, dy, 256), di = 0;
@@ -888,7 +907,7 @@ static void place_last(const GapSite *gap, unsigned pieces, int rise, const Laye
  * props, rival, set pieces, data and bystanders. */
 static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, int rise, const LayerKit *kit) {
 	/* the landmark first, at the back of the layer's signature: its room
-	 * bare of counters still (docs/LEVEL_DESIGN.md, Identity) */
+	 * bare of counters still (docs/world/level-design/identity.md) */
 	int land = -1;
 	if (kit && kit->looks) {
 		ng_route_distances();
@@ -901,7 +920,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	place_services(&s, depth, kind, kit, order, n, &next);
 	/* the area's other props, set as the originals set theirs, before the
 	 * loose Mystery Data and bystanders fill the rooms: rows and the signs
-	 * (docs/LEVEL_DESIGN.md, Props) */
+	 * (docs/world/level-design/props.md) */
 	if (kit && kit->looks) {
 		ng_rows(kit, land, order, n);
 		ng_signs(kit, land, order, n);
@@ -926,6 +945,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	if (pieces & PIECE_CUBE) ng_plan_obstacle(ng_cube_kind(depth, biome, kind));
 	npcs_held += layer.nblocks + (ng_pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
 	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
+	npcs_held += layer_battler(depth, kind) != 0;        /* (the Virus Battler, after the blue data) */
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;
@@ -934,7 +954,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 
 bool layer_make_dark;
 
-/* A dark layer (docs/LIBERATION.md): the run's normal layer asked for so,
+/* A dark layer (docs/game/liberation/): the run's normal layer asked for so,
  * never a guardian's */
 static bool make_dark(int kind) { return layer_make_dark && kind == LAYER_NORMAL && !layer.boss_layer; }
 
@@ -958,13 +978,13 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	int p = (depth - 1) % CYCLE_LAYERS;
 	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
 	/* an act's three layers each in another of the area's layouts and
-	 * signatures (docs/LEVEL_DESIGN.md, Identity), */
+	 * signatures (docs/world/level-design/identity.md), */
 	LayerPlan plan;
 	layer_plan(seed, depth, biome, kind, kit, &plan);
 	int planned = plan.layout, sig = plan.sig;
 	/* ... arrived at from another side of the screen (Arrivals) */
 	layer.arrive_side = plan.side;
-	/* (a super boss's arena is bigger: docs/BOSSES.md, Super bosses) */
+	/* (a super boss's arena is bigger: docs/game/bosses/super-bosses.md) */
 	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
 	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
 	finish_rooms(seed, stair_dirs, rise);

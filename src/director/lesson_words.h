@@ -3,7 +3,7 @@
 #define CW_LESSON_WORDS_H
 
 /* how near the port R was pressed (port_words); home's port is Lan's PC
- * (docs/HOME.md): R in his house or room off it, and L in the home town
+ * (docs/world/home/): R in his house or room off it, and L in the home town
  * (`way` the way to Lan's front door) and in AsterLand and the Academy
  * (`way` the way out) */
 enum { PORT_ALMOST_CELL, PORT_ALMOST, PORT_AWAY, PORT_HOUSE, PORT_ROOM, PORT_HOME, PORT_OUT };

@@ -1,5 +1,5 @@
 /* Set pieces: which of BN6's own interactables a layer holds (epic #49,
- * docs/LEVEL_DESIGN.md, Set pieces). Each area repeats the few its
+ * docs/world/level-design/set-pieces.md). Each area repeats the few its
  * originals hold; a layer takes one or two by its place in the act, from
  * the run's seed and the depth alone, so a Net Dealer earlier in the act
  * knows which keys to stock. Where each stands is net_gen.c's. */
@@ -119,6 +119,28 @@ static unsigned rolled_pieces(int depth, int biome, int kind) {
 
 bool layer_purple(int depth, int biome, int kind) { return layer_pieces(depth, biome, kind) & PIECE_PURPLE; }
 
+int layer_battler_forced;
+
+/* Whether act `act` (0-based) of cycle `loop` holds a Battler, of the acts
+ * 1 to `last`: a coin each, and where none came up, one of them anyway */
+static bool battler_act(int loop, int act, int last) {
+	bool any = false;
+	for (int a = 1; a <= last; ++a) any |= piece_hash(loop * 32 + a, 0xBA771E5u) >> 11 & 1;
+	if (!any) return act == 1 + (int)(piece_hash(loop * 32, 0xBA771E6u) % (uint32_t)last);
+	return piece_hash(loop * 32 + act, 0xBA771E5u) >> 11 & 1;
+}
+
+/* (BN6's five in order through the acts that may hold one: the endless
+ * net's second act the first, its sixth the fifth; the short net's second
+ * act the first, its third the fifth; a later cycle's the fifth) */
+int layer_battler(int depth, int kind) {
+	if (kind != LAYER_NORMAL || is_boss_depth(depth)) return 0;
+	if (layer_battler_forced) return layer_battler_forced;
+	int act = pacing_act(depth), loop = pacing_loop(depth), last = run.mode == RUN_SHORT ? 2 : 5;
+	if (layer_in_act(depth) != 0 || act < 1 || act > last || !battler_act(loop, act, last)) return 0;
+	return loop ? 5 : 1 + (4 * (act - 1) + (last - 1) / 2) / (last - 1);
+}
+
 bool layer_area_hides(int biome) { return biome >= 0 && biome < BIOME_COUNT && area_pieces[biome].hidden > 0; }
 
 int layer_keys_last(int depth, int *kind) {
@@ -164,7 +186,7 @@ int layer_regup(int depth, int kind) {
  * guardian of navis 1-5 deleted before `depth` gives his) */
 unsigned layer_crosses(int depth) {
 	if (run.cross) return 1u << run.cross;
-	/* (a trip back holds what the run holds by now, docs/HOME.md) */
+	/* (a trip back holds what the run holds by now, docs/world/home/) */
 	if (run.side_kind == LAYER_BACK && run.home_depth) depth = run.home_depth;
 	unsigned held = 0;
 	for (int d = 1; d < depth; ++d)

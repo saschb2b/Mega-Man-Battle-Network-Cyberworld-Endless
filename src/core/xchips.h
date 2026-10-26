@@ -1,4 +1,4 @@
-/* Another game's chips as BN6's, by name (docs/MULTIROM.md, One net and
+/* Another game's chips as BN6's, by name (docs/multirom/one-net.md and
  * Guest battles): the tables the translation runs on, worked out from the
  * names and codes it is handed, so the tests run it on made-up ones; and
  * BN5's chips paired with the run's, read from both ROMs as the game runs,
@@ -16,7 +16,7 @@
  * chips paired with BN5's of the same name the first time both ROMs are
  * read (BN5's names in BN6's text codes, rom.h's xrom_text_bn6) */
 int xchips_bn6_of(int x);
-/* The run's chip for BN5's chip `x` (issue #82, docs/MULTIROM.md, One
+/* The run's chip for BN5's chip `x` (issue #82, docs/multirom/one-net.md, One
  * net): the registry's id for it where it registers it (BN6's own for a
  * name both games have) and it plays in BN6's battles (chips.h,
  * chips_sits_out), else BN6's of its name; 0 none (0 without BN5's ROM) */

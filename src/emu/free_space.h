@@ -1,6 +1,6 @@
 /* The free space past the game's 8 MB in the core's ROM copy, and the RAM
  * BN6 leaves alone: one plan every part of the engine and every track of
- * issue #82 follows (docs/EMULATION.md, Memory the engine writes and BN6's
+ * issue #82 follows (docs/engine/emulation/memory.md and BN6's
  * RAM). Each region is its own writer's, [its start, its end); a span no
  * region names is free. tests/test_core.c checks the regions in order and
  * apart, and each installer's own layout inside its region; what the
@@ -80,7 +80,7 @@
 #define FREE_LIB_TEAM       (EMU_FREE + 0x7A0000u)   /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c), to: */
 #define FREE_LIB_TEAM_END   (EMU_FREE + 0x7FA000u)
 
-/* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
+/* ---- BN6's RAM it leaves alone (docs/engine/emulation/memory.md, BN6's RAM) ---- */
 /* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */
 #define RAM_PACK_EXT        0x02010CE0u   /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT; xchips_install.c), to: */
 #define RAM_PACK_EXT_END    0x020115E0u   /* ... then: */

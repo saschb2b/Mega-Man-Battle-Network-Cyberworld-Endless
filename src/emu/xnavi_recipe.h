@@ -1,4 +1,4 @@
-/* A Navi's recipe (issue #82; docs/MULTIROM.md, Transplanted Navis): what
+/* A Navi's recipe (issue #82; docs/multirom/navis.md): what
  * a Navi of another game's (or BN6's own, the control) brings into BN6's
  * engine, numbers alone. Its code, records and art as a virus family's
  * recipe has them (xvirus_recipe.h: the families' code mover moves both),

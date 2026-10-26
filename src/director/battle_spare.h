@@ -1,4 +1,4 @@
-/* A battle MegaMan is spared in: ProtoMan's netbattle (docs/RIVAL.md, The
+/* A battle MegaMan is spared in: ProtoMan's netbattle (docs/game/rival.md, The
  * netbattle). The blow that would delete him leaves him 1 HP, and the
  * battle ends at the fight's next frame as BN6's own draw ends one (result
  * 3: no reward, his HP as it stands, as an escape ends), without its DRAW!

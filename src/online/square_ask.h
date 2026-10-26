@@ -1,5 +1,5 @@
 /* The Net Square's open challenge and the link before one (epic #167's
- * fourth step, protocol v13, docs/ONLINE_ARENA.md, The Square before a
+ * fourth step, protocol v13, docs/online/arena/from-square/square-before.md, The Square before a
  * NetBattle): the challenger's strip over the Square while his challenge
  * is open (whom it asks, his PET ringing until he reads the question, then
  * his time to answer running down, the way to call it off), and the link

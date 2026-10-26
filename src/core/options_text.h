@@ -1,7 +1,8 @@
 /* Options' words (options_text.c): its lines, their notes, the Display
- * and Audio sections' choices, settings.ini's notes for
- * the display's lines, the sound, the music, the effects and fast forward,
- * in the plain style of the game's menus (docs/VOICE.md), apart from the
+ * and Audio sections' choices, settings.ini's notes for the display's
+ * lines, the sound, the music, the effects, fast forward and the
+ * controller's vibration and trigger effects,
+ * in the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. */
 #ifndef CW_OPTIONS_TEXT_H
 #define CW_OPTIONS_TEXT_H
@@ -27,6 +28,9 @@ typedef enum {
 	OW_MUSIC, OW_MUSIC_ON_NOTE, OW_MUSIC_OFF_NOTE,   /* the Audio section's lines (sound_heard.h) */
 	OW_EFFECTS, OW_EFFECTS_ON_NOTE, OW_EFFECTS_OFF_NOTE,
 	OW_FAST, OW_FAST_ON_NOTE, OW_FAST_OFF_NOTE,   /* the hub's fast forward line (fast_forward.h) */
+	OW_VIBRATION, OW_WEAK, OW_MEDIUM, OW_STRONG,   /* the Audio section's controller lines (feel_out.h; FEEL_WEAK's order) */
+	OW_VIBRATION_ON_NOTE, OW_VIBRATION_OFF_NOTE,
+	OW_TRIGGERS, OW_TRIGGERS_ON_NOTE, OW_TRIGGERS_OFF_NOTE,
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
@@ -42,5 +46,8 @@ const char *options_smooth_note(void);
 const char *options_fullscreen_note(void);
 /* ... before fast forward's */
 const char *options_fast_note(void);
+/* ... before the controller's vibration and trigger effects */
+const char *options_vibration_note(void);
+const char *options_triggers_note(void);
 
 #endif

@@ -82,13 +82,18 @@ void emu_encounters_install(void) {
 	emu_hook(BN6_ENCOUNTER_CHECK, forced, NULL);
 	emu_hook_event(BN6_START_BATTLE, EV_BATTLE_START);
 	emu_hook(BN6_REWARD_PICK, picking, NULL);
-	darkbn6_install();   /* (BN6's own DarkChips' uses: docs/META.md) */
+	darkbn6_install();   /* (BN6's own DarkChips' uses: docs/game/meta/) */
 	lib_battle_install();   /* (a liberation's battle on BN6's loop: liberation_battle.h) */
 	battle_spare_install();   /* (ProtoMan's netbattle, never MegaMan's last: battle_spare.h) */
 }
 
 void emu_battle_force(const Encounter *e) {
 	emu_encounter_set(e);
+	forcing = true;
+}
+
+void emu_battle_force_record(uint32_t settings) {
+	record = settings;
 	forcing = true;
 }
 
@@ -155,13 +160,13 @@ void emu_encounter_set(const Encounter *e) {
 	int bg = biome_bg(e->biome);   /* (rolled either way) */
 	if (encounter_backdrop >= 0) bg = encounter_backdrop;
 	/* (a super boss's: the map's own background and BN6's music for him,
-	 * as his story record has them, docs/BOSSES.md) */
+	 * as his story record has them, docs/game/bosses/) */
 	if (e->map_backdrop) bg = BG_MAP_OWN;
 	int song = e->song ? e->song : encounter_song[e->boss];
 	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)song, 0x00, (uint8_t)bg, 0x00, (uint8_t)(e->sides ? e->sides : BN6_SIDES_PLAIN), 0x00 };
 	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
 	 * story's bosses clear it, the random battles and BN6's roaming SP
-	 * Navis set it; docs/ROM_DATA.md) */
+	 * Navis set it; docs/rom/) */
 	put32(s + 8, e->held ? 0x000049C2 : 0x000049E2);
 	put32(s + 12, settings + 0x20);
 	emu_write(settings, s, sizeof s);
@@ -192,7 +197,7 @@ static int encounter_boss_zenny(void) { return loot_guardian_zenny(run.depth); }
 static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_zenny()); }
 
 /* One enemy's reward row in the folder's codes, half the time (docs/
- * META.md). BN6 picks the reward as the battle ends: one of the enemies
+ * docs/game/meta/). BN6 picks the reward as the battle ends: one of the enemies
  * spawned, then one of its row's 20 entries by the busting level, a coin
  * and MegaMan's HP; a chip entry has bits 14-15 clear, the id in 0-8 and
  * the code in 9-13. The coin picks between the two entries of a pair: the

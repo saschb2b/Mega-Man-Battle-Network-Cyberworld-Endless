@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The itch.io page's pictures (docs/ITCH.md): the cover in listings and
+"""The itch.io page's pictures (docs/project/itch.md): the cover in listings and
 search, the banner over the page, the picture behind the player's Run game
 button, the theme's background tile, and the screenshots at a whole scale.
 
@@ -13,14 +13,20 @@ The cover, banner, embed picture and tile are committed in docs/itch/; the scree
 written to .build/itch/ for the upload.
 
     python3 tools/itch_art.py [--frame NAME]
+    python3 tools/itch_art.py --devlog [TAG ...]   # each release's devlog cover, .build/itch/covers/
 """
 import argparse
+import hashlib
+import io
 import os
+import re
+import subprocess
 import sys
 
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import site_versions  # noqa: E402
 import steam_art as art  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -102,6 +108,80 @@ def embed_bg(frame='central'):
     return im, 4
 
 
+def pictures(rel):
+    """A release's notes' pictures in order, each as (commit or tag, path):
+    from the release's tag, or the commit a raw address names."""
+    out = []
+    for url in re.findall(r'(?:src="|\]\()([^")]+\.(?:png|gif))', rel['md']):
+        raw = re.match(r'https://raw\.githubusercontent\.com/[^/]+/[^/]+/([^/]+)/(.+)', url)
+        if raw:
+            out.append(raw.groups())
+        elif '../' in url:
+            out.append((rel['tag'], 'docs/' + url.split('../', 1)[1]))
+    return out
+
+
+def lead_picture(rel, used=()):
+    """The release's cover picture, its first frame: its trailer's poster
+    where its notes open with one; else the first of its pictures whose
+    bytes no older release's cover took, title screens left out (Capcom's
+    logo is no cover). Returns it, whether it is a trailer, and its bytes'
+    SHA-1."""
+    found = pictures(rel)
+    trailer = bool(found) and found[0][1].endswith('trailer-play.png')
+    if trailer:
+        found = [(found[0][0], found[0][1].replace('trailer-play.png', 'trailer.png'))]
+    candidates = [f for f in found if not re.search(r'/(title|marks)[^/]*$', f[1])] or found
+    pick = None
+    for ref, path in candidates:
+        data = subprocess.run(['git', 'show', f'{ref}:{path}'], cwd=ROOT, capture_output=True, check=True).stdout
+        digest = hashlib.sha1(data).hexdigest()
+        if pick is None:
+            pick = (data, digest)
+        if digest not in used:
+            pick = (data, digest)
+            break
+    im = Image.open(io.BytesIO(pick[0]))
+    im.seek(0)
+    return im.convert('RGBA'), trailer, pick[1]
+
+
+def devlog_cover(rel, used=()):
+    """1280 x 720, a release's devlog post's cover (itch: 16:9): its trailer's
+    poster, or its picture (lead_picture), whole, at the largest whole scale
+    the net's card holds, in the site's screen frame (rings 3 pixels each).
+    Returns the cover and the picture's SHA-1."""
+    im, trailer, pick = lead_picture(rel, used)
+    if trailer:
+        return (im.resize((1280, 720), Image.LANCZOS) if im.size != (1280, 720) else im), pick
+    w, h = im.size
+    k = w // 240 if w % 240 == 0 and h % 160 == 0 and w // 240 == h // 160 else 1
+    im = im.resize((w // k, h // k), Image.NEAREST)
+    w, h = im.size
+    s = min(1216 // w, 656 // h)
+    if s >= 1:
+        im = im.resize((w * s, h * s), Image.NEAREST)
+    else:
+        d = -(-max(w, 1216) * 1 // 1216) if w * 656 >= h * 1216 else -(-h // 656)
+        d = max(d, -(-w // 1216), -(-h // 656))
+        im = im.resize((w // d, h // d), Image.LANCZOS)
+    card = art.sky(256, 144)
+    art.net(card, 128, 60, [(-15, -2, 2, 2), (-13, -1, 3, 'u'), (-10, -2, 3, 3), (10, -6, 2, 2), (11, -4, 4, 'v'),
+                            (10, 0, 3, 3), (-12, 6, 3, 3), (-9, 7, 3, 'u'), (13, 5, 2, 2), (11, 6, 2, 'u')], 11)
+    card = card.resize((1280, 720), Image.NEAREST)
+    rings = [c for c in SCREEN_RINGS for _ in range(3)]
+    framed = Image.new('RGBA', (im.width + 2 * len(rings), im.height + 2 * len(rings)))
+    px = framed.load()
+    for i, c in enumerate(rings):
+        for x in range(i, framed.width - i):
+            px[x, i] = px[x, framed.height - 1 - i] = c + (255,)
+        for y in range(i, framed.height - i):
+            px[i, y] = px[framed.width - 1 - i, y] = c + (255,)
+    framed.paste(im, (len(rings), len(rings)))
+    card.alpha_composite(framed, ((1280 - framed.width) // 2, (720 - framed.height) // 2))
+    return card, pick
+
+
 def tile():
     """48 x 48, the theme's background: the site's PET floor (web/assets/ui/floor.png) at 3x, as the site shows it."""
     return Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGBA'), 3
@@ -110,7 +190,24 @@ def tile():
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--frame', help='a cover with this screenshot in it (docs/screenshots/NAME.png)')
+    ap.add_argument('--devlog', nargs='*', metavar='TAG',
+                    help="the releases' devlog covers into .build/itch/covers/ (no TAG: every release)")
     a = ap.parse_args()
+    if a.devlog is not None:
+        # (oldest first, each taking a picture no older cover took)
+        rels = [r for r in reversed(site_versions.releases()) if r['date']]
+        out = os.path.join(SHOTS_OUT, 'covers')
+        os.makedirs(out, exist_ok=True)
+        used = set()
+        for rel in rels:
+            cover, pick = devlog_cover(rel, used)
+            used.add(pick)
+            if a.devlog and rel['tag'] not in a.devlog:
+                continue
+            path = os.path.join(out, rel['tag'] + '.png')
+            cover.convert('RGB').save(path, optimize=True)
+            print(os.path.relpath(path, ROOT))
+        return
     os.makedirs(OUT, exist_ok=True)
     for name, (im, k) in (('cover', cover(a.frame) if a.frame else cover_art()), ('banner', banner()), ('embed', embed_bg()), ('background', tile())):
         im = im.resize((im.width * k, im.height * k), Image.NEAREST)

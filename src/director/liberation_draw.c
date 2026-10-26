@@ -6,7 +6,7 @@
  * pixel in one of the sprites' colours, or under an open chat box, is not
  * the floor's. Where the floor lies comes from the map layer's scroll,
  * which follows MegaMan (BG1's: x + y and (y - x) / 2 of the world, as
- * docs/ROM_DATA.md's row for BN6's camera says). With BN5's ROM the board
+ * docs/rom/liberation.md's row for BN6's camera says). With BN5's ROM the board
  * is BN5's own look (liberation_look.c), and the panel MegaMan faces is
  * outlined by BN5's own sprite, read from its ROM. The corner's phase, par
  * and Order Points, the banner and the command menu in BN6's PET look
@@ -25,6 +25,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "liberation_battle.h"
+#include "liberation_pick.h"
 #include "liberation_pieces.h"
 #include "liberation_roulette.h"
 #include "liberation_state.h"
@@ -399,4 +400,6 @@ void director_draw_board(void) {
 	}
 	/* (a BonusPanel's flashes and roulette, over everything as BN5's) */
 	if (bn5) lib_roulette_draw();
+	/* (the team picked on arrival: the PET's screen over the board) */
+	if (LB.step == LIB_STEP_PICK) lib_pick_draw();
 }

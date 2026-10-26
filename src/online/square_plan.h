@@ -1,4 +1,4 @@
-/* The Net Square's plan (square_plan.c, docs/ONLINE.md, The Square): the
+/* The Net Square's plan (square_plan.c, docs/online/square/dropped-link.md, The Square): the
  * same on every client from the server's seed alone, no ROM and no run in
  * it, and built into BN6's own map formats by netmap_build from one of
  * BN6's areas' tiles. A hub and its spokes: the welcome plaza, where every

@@ -1,5 +1,5 @@
 /* soulproxy.h. The engine reads MegaMan's form (BN6_BATTLE_FORM) through
- * tables of BN6_FORMS entries and in three places by code (docs/ROM_DATA.md,
+ * tables of BN6_FORMS entries and in three places by code (docs/rom/souls.md,
  * MegaMan's forms: every read of the form in Gregar followed with the forms
  * 1 and 8 side by side, and tools/xproxy.py's battles). Form 8 is Falzar's
  * TenguCross: Gregar keeps its entries (its overlay, element, Airshoe,

@@ -30,7 +30,7 @@ side is behind, rather than a refused upgrade (v10).
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; else zeros) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
-| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/ONLINE_ARENA.md, Quicker on the wire), never kept for the stands |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
@@ -62,7 +62,7 @@ display, never authoritative progression or anti-cheat evidence.
 Phrase IDs are 0..7 and emote IDs 0..11 (v14: Wave, Cheer, Laugh,
 Surprised, Thinking, Bow, Got it!, Buster, Phew..., I'm beat, Spin,
 Zapped). The client owns their localized words and visuals (MegaMan's
-BN6 poses and sounds: docs/ONLINE.md, Emotes). No arbitrary chat text is accepted. NOTICE codes are
+BN6 poses and sounds: docs/online/square/emotes.md). No arbitrary chat text is accepted. NOTICE codes are
 10 channel unavailable, 11 muted, 12 social cooldown and 13 Inspect
 target unavailable. ERROR closes the connection; it includes version
 and identity mismatch, rate violation and moderation. ERROR 12 tells a
@@ -98,7 +98,7 @@ Compatibility metadata is not anti-cheat attestation: a modified client
 can forge it.
 
 The Net Square is every game's; the Arena, Trade Central and the week's
-posts need the full set (protocol v9; docs/ONLINE.md, The NetPass).
+posts need the full set (protocol v9; docs/online/netpass.md).
 Walking, phrases and emotes, Inspect, channels, STANDS, BOARD and
 WEEK_BOARD go to every session. A challenge or an answer (ARENA 1 and
 2), a WATCH, a proposal, an answer or a take (TRADE 1, 2 and 5), an
@@ -118,7 +118,7 @@ is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
 
-Protocol v15 (issue #181; docs/ONLINE_ARENA.md, Two MegaMen a side,
+Protocol v15 (issue #181; docs/online/arena/two-a-side/overview.md,
 Over the server). **A team challenge's format**: ARENA's last byte names
 it, `team_relay` (0, the relay of v12) or `team_side_by_side` (1);
 ARENA_STATE's CHALLENGED and WAITING tell it, and TEAM_STATE tells all
@@ -138,7 +138,7 @@ screen's picks, his Cross and a Program Advance travel in his stream,
 bit 15 set: `TEAM_PICK`, `TEAM_CROSS`, `TEAM_PA` in
 src/online/arena_team_custom.h). The wire carries his stream as it
 carries a lead's keys; inside each game the pair hands it to his side's
-GBA, whose own link packets carry it to both GBAs (docs/ONLINE_ARENA.md,
+GBA, whose own link packets carry it to both GBAs (docs/online/arena/two-a-side/partners-words.md,
 The partners' words in BN6's packet): nothing of the wire changed for
 it. The cable's first
 (seat 0) sends the report and the over, as in a battle of two; its winner
@@ -154,7 +154,7 @@ report, and the referee calls the leads' teams. A game of another version
 is never paired into one: the server answers its HELLO with ERROR 2 or
 17, as for any version.
 
-Protocol v14 (issue #176; docs/ONLINE.md, Emotes). **An emote aimed**:
+Protocol v14 (issue #176; docs/online/square/emotes.md). **An emote aimed**:
 SOCIAL names the session it is aimed at, where it is one of
 `emote_aimed`'s (35: Wave, Cheer and Bow, the warm ones; a target on a
 phrase or another emote is a ProtocolError); a target gone from the
@@ -171,7 +171,7 @@ largest round trip its PINGs say) and `beat_lead_ms` (60) ahead, at most
 the EVENT came, less half its own round trip, so emotes sent together
 start together. Twelve emotes (`emote_count`), and the burst above.
 
-Protocol v13 (epic #167's third and fourth steps; docs/ONLINE_ARENA.md,
+Protocol v13 (epic #167's third and fourth steps; docs/online/arena/from-square/rematch-in-a-second.md,
 A rematch in a second and The Square before a NetBattle). **A bout's
 seed is its battle ID**: every game and spectator writes BN6's two random
 words from it into both GBAs of the pair as Practice's last confirm is
@@ -194,7 +194,7 @@ PING says (above): bars only, never a number in the game, the owner's
 word; a game shows the fewer of his bars and its own, the longer round
 trip deciding a battle's delay.
 
-A dropped link (protocol v10, issue #153; docs/ONLINE.md, A dropped
+A dropped link (protocol v10, issue #153; docs/online/square/dropped-link.md, A dropped
 link). A session that ends without a goodbye (BYE or a WebSocket
 close), its socket gone or silent for 15 seconds, keeps its place for 40
 seconds (`server/cyberworld_server/holds.py`): its slot in its channel,
@@ -270,7 +270,7 @@ chips named, and goes on as any (both accept, the server commits). The
 poster's game checks that the chip meets his want and cancels it
 otherwise.
 
-The week's net (docs/ONLINE.md): every Monday 00:00 UTC a server
+The week's net (docs/online/): every Monday 00:00 UTC a server
 begins a week; its seed is the first four bytes of HMAC-SHA256(the
 server's identity secret, "week" and the week's number as a u32), 1
 where those are 0, so each server has its own. A WEEK_POST is taken
@@ -287,9 +287,9 @@ only their shape, and nothing is given for one.
 The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.
 Each game runs both players' linked BN6 cores and only their keys cross
-(docs/ONLINE_ARENA.md): START gives each its side of the cable and the
-input delay, from both players' latencies: the lockstep's frame, then the longer latency in frames, 1 at least (v8: the lockstep a frame, not 3, and each game's latency less what its rollback window covers; issue #167: less its window but a frame, the server's tick for a key to be taken no longer added; docs/ONLINE_ARENA.md's Rollback and Quicker on the wire)
-(`server/cyberworld_server/arena.py`, docs/ONLINE_ARENA.md's Smoothed delay).
+(docs/online/arena/): START gives each its side of the cable and the
+input delay, from both players' latencies: the lockstep's frame, then the longer latency in frames, 1 at least (v8: the lockstep a frame, not 3, and each game's latency less what its rollback window covers; issue #167: less its window but a frame, the server's tick for a key to be taken no longer added; docs/online/arena/rollback/overview.md and Quicker on the wire)
+(`server/cyberworld_server/arena.py`, docs/online/arena/smoothed-delay.md).
 A challenge waits 30 seconds for its answer. One player of a battle
 sends ARENA's over (the cable's first, as the battle ends on its cores);
 a leave, a decline or a dropped connection ends it for both, ARENA_STATE
@@ -299,10 +299,10 @@ busy), 17 (no longer here, or the battle is over), 18 (the Arena is
 closed on this server) and 28 (a challenge from or to a game without the
 full set, or an answer from one) answer an ARENA that cannot be done.
 Every battle is by full rules, BN5's chips and Souls among them
-(docs/ONLINE_ARENA.md): v9's ARENA, ARENA_STATE, STANDS and WATCH_STATE
+(docs/online/arena/): v9's ARENA, ARENA_STATE, STANDS and WATCH_STATE
 carry no rules byte.
 
-Team NetBattles (protocol v12, epic #167; docs/ONLINE_ARENA.md, Team
+Team NetBattles (protocol v12, epic #167; docs/online/arena/teams.md, Team
 NetBattles; `server/cyberworld_server/teams.py`): a relay of two teams of
 two. TEAM 1 asks a player of the channel to team up (he is told stage
 asked, the asker waiting); 2 answers it within 30 seconds (formed to
@@ -336,7 +336,7 @@ busy: a challenge, a trade or a team ask to him is answered NOTICE 16.
 STANDS's last byte names a team bout's number for the referee and the
 Board. The server keeps teams and matches in memory only.
 
-The stands (protocol v7, docs/ONLINE_ARENA.md, The stands): every
+The stands (protocol v7, docs/online/arena/stands.md): every
 started battle's loadouts, ready, installs' record, the cable's first's
 hashes every 60 frames and both players' keys from frame 0 are kept
 while it runs (the frames before a side's first keys, its input delay's,

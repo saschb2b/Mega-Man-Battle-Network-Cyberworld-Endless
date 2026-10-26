@@ -1,5 +1,5 @@
 /* The launcher's words (launcher_text.c): its labels, buttons and notes,
- * in the plain style of the game's menus (docs/VOICE.md), apart from the
+ * in the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. */
 #ifndef CW_LAUNCHER_TEXT_H
 #define CW_LAUNCHER_TEXT_H

@@ -1,5 +1,5 @@
 /* home_words.h. Coming home after an act: MegaMan's relief and Lan's
- * answer, one beat a box (docs/VOICE.md), by how far the run has come;
+ * answer, one beat a box (docs/voice/rules.md), by how far the run has come;
  * Lan's HP's portals and what MegaMan says of them. */
 #include "home_words.h"
 
@@ -26,8 +26,8 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 		snprintf(words, sizeof words, "@M Whew... %s was tough.|@L But we won! Home sweet home!", who);
 	else
 		snprintf(words, sizeof words, "@M Home again,Lan!|@L Alright! Let's get set for the next dive!");
-	/* (the portals and where they are: docs/HOME.md; a special route's
-	 * way where it comes out, docs/LIBERATION.md) */
+	/* (the portals and where they are: docs/world/home/; a special route's
+	 * way where it comes out, docs/game/liberation/) */
 	size_t k = strlen(words);
 	if (route == 1 && ways == 2)
 		snprintf(words + k, sizeof words - k, "|@M And Lan... The route we found in the dark!|@M It comes out at the %s. Way down,too!", ports[1]);
@@ -43,7 +43,7 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 }
 
 /* What MegaMan reads of an area through a link he has not taken: its data,
- * never its name (docs/META.md, what MegaMan knows) */
+ * never its name (docs/game/meta/what-megaman-knows.md) */
 static const char *area_feel(int biome) {
 	static const struct { int biome; const char *line; } feels[] = {
 		{ BIOME_CENTRAL, "@M Busy data over there,Lan." },
@@ -73,7 +73,7 @@ static const char *area_feel(int biome) {
 const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route) {
 	static char words[400];
 	/* (the Cybeast below the endless Nest: a growl, never a Navi's signal;
-	 * docs/BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	bool beast = navi == SUPER_CYBEAST, known = navi && guardian_known(navi);
 	if (!known) navi = 0;
 	char signal[64];
@@ -86,7 +86,7 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool bo
 		snprintf(words, sizeof words, "@M Lan... This one's dark. Really dark.|@M It feels like the Undernet...|%s", signal);
 	else
 		snprintf(words, sizeof words, "%s|%s", area_feel(biome), signal);
-	/* (its act's dark layer that way: docs/LIBERATION.md) */
+	/* (its act's dark layer that way: docs/game/liberation/) */
 	size_t k = strlen(words);
 	if (board && !sealed) snprintf(words + k, sizeof words - k, "|@M And Lan... Part of it's gone dark.|@M Dark panels,like Nebula's!");
 	/* (the special route's way: the one they found on a dark layer's

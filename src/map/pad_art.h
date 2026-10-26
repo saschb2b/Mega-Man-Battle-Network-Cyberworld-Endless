@@ -1,5 +1,5 @@
 /* A pad as it is drawn: where MegaMan stands on it to the eye, which BN6's
- * trigger cells behind the art need not match (docs/ROM_DATA.md, Lan's HP
+ * trigger cells behind the art need not match (docs/rom/world.md, Lan's HP
  * and Pads as drawn). One zone for every pad: Lan's HP's pink pad and
  * link squares, a layer's exit pad, the Net Square's pad home. */
 #ifndef CW_PAD_ART_H

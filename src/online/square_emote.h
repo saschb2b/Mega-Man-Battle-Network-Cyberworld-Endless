@@ -1,4 +1,4 @@
-/* The Net Square's emotes performed (square_emote.c, docs/ONLINE.md,
+/* The Net Square's emotes performed (square_emote.c, docs/online/square/emotes.md,
  * Emotes; issue #176): each emote is MegaMan's own BN6 pose and a sound of
  * BN6's, a peer's played by his puppet's animation byte, MegaMan's own
  * through BN6's text command F8 01, on every screen alike from the

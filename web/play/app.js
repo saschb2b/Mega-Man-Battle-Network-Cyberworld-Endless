@@ -14,7 +14,7 @@ const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 // its SHA-1 and kept under its own name in ROM_DIR, where the game finds
 // BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
 // optional, whose net areas, viruses, Navis and chips then join runs, fought in
-// BN6's engine (docs/MULTIROM.md). The names and words of Android's ROM page.
+// BN6's engine (docs/multirom/). The names and words of Android's ROM page.
 const JA = LANG === 'ja';
 const ROMS = {
 	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)' },
@@ -195,7 +195,7 @@ function offer(note) {
 
 // ---- the cartridges: an open spot, or the cartridge with its game's face ----
 
-const FACES = {   // the label's mugshot: sprite list 8 (src/launcher/launcher_art.c, docs/ROM_DATA.md)
+const FACES = {   // the label's mugshot: sprite list 8 (src/launcher/launcher_art.c, docs/rom/)
 	bn6: { lists: 0x031CC4, face: 0x37 },   // MegaMan
 	bn5: { lists: 0x03272C, face: 0x45 },   // Colonel
 };

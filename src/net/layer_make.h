@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 101   /* (101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five; drawn in its own mission's map; a deleted guardian back as BN5 brings him, the planner's par after it; the board made for the run's team, its Pass BN5's fifth, docs/LIBERATION.md) */
-#define LAYER_MAKE_HASH 0xdfa0d42au
+#define LAYER_MAKE 104   /* (104: a Virus Battler Mr.Prog at a side path's end on an act's first layer, in about half the acts from the second, net_pieces.c's layer_battler; 103: a dark layer's board gives every held Navi's command its spot, the Cross Navis' among them, docs/game/liberation/generator.md, The command rule; 102: a held Soul's kind in a share of the finds and on a dealer's list, loot_souls.h; 101: a dark layer's BonusPanels as BN5's: placed on boards without a sealed region too, its four chips, the planner's roulette of five; drawn in its own mission's map; a deleted guardian back as BN5 brings him, the planner's par after it; the board made for the run's team, its Pass BN5's fifth, docs/game/liberation/) */
+#define LAYER_MAKE_HASH 0x4eb572d6u
 
 #endif

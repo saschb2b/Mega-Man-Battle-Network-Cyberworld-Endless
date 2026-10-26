@@ -1,15 +1,15 @@
 /* A battle MegaMan is spared in (battle_spare.h).
  *
  * BN6 deletes MegaMan in ProtoMan's netbattle as anywhere, and its GAME
- * OVER starts inside the battle as he falls (docs/RIVAL.md). The
+ * OVER starts inside the battle as he falls (docs/game/rival.md). The
  * statistics of October 2026 had that netbattle ending 30 of 88 lost runs,
  * for 24 players, 12 of them on layer 8, the third act's duel layer, where
- * it first stands (docs/CORE_LOOP.md): the owner's call, a lost netbattle
+ * it first stands (docs/game/core-loop.md): the owner's call, a lost netbattle
  * costs the HP and the clearance, never the run. So the deleting blow is
  * taken short of it, as a liberation's teammate is spared
  * (liberation_battle.c), and two hooks end the battle at the fight's next
  * frame: BN6's draw, its banner passed by. Both stand where a
- * liberation's hooks never lead (docs/ROM_DATA.md, BN6's battle loop and
+ * liberation's hooks never lead (docs/rom/battle.md, BN6's battle loop and
  * banners), and only read what the director armed. */
 #include "battle_spare.h"
 

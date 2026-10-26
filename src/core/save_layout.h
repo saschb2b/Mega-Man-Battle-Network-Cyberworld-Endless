@@ -14,9 +14,10 @@
 _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save scalar widths differ");
 
 
-/* (the profile grew at its end for issue #82, read up to its size: an older
- * profile reads whole, the new fields zero) */
-_Static_assert(sizeof(Profile) == 216, "Profile save size changed");
+/* (the profile grew at its end for issue #82 and for the Virus Battler's
+ * card, read up to its size: an older profile reads whole, the new fields
+ * zero) */
+_Static_assert(sizeof(Profile) == 220, "Profile save size changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");
@@ -87,6 +88,8 @@ _Static_assert(offsetof(Profile, deep_taught) == 186, "Profile.deep_taught save 
 _Static_assert(offsetof(Profile, library_x) == 187, "Profile.library_x save offset changed");
 _Static_assert(offsetof(Profile, soul_form_taught) == 211, "Profile.soul_form_taught save offset changed");
 _Static_assert(offsetof(Profile, navis_ours_told) == 212, "Profile.navis_ours_told save offset changed");
+_Static_assert(offsetof(Profile, btlr_card) == 213, "Profile.btlr_card save offset changed");
+_Static_assert(offsetof(Profile, btlr_data) == 216, "Profile.btlr_data save offset changed");
 
 _Static_assert(sizeof(Run) == 112, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");

@@ -1,5 +1,5 @@
 /* Another game's battle records and Navis, read from its ROM file with no
- * core needed (xrecords.c; docs/MULTIROM.md): a net map's records, the
+ * core needed (xrecords.c; docs/multirom/): a net map's records, the
  * pool a battle is picked from to the act's band, a record's viruses taken
  * up their versions, its Navis' records and stats. Its battles in BN6's
  * engine (xbattles.h) read
@@ -12,7 +12,7 @@
 
 #include "rom.h"
 
-/* A battle's scaling to the act (docs/PROGRESSION.md, BN5's battles): its
+/* A battle's scaling to the act (docs/game/progression/structure.md, BN5's battles): its
  * record's viruses `up` versions up, each to version `vcap` at most (its
  * game's version index: BN5's six V1, V1EX, V2, V2EX, V3, V3EX) and never
  * below its own; within a family (its ids table's version and AI index)
@@ -75,7 +75,7 @@ typedef struct {
  * file, no core needed: the director's pick and the pacing report's. */
 int xrecords_pool(XPool *p);
 
-/* ---- its Navis (docs/BOSSES.md, BN5's Navis) ---- */
+/* ---- its Navis (docs/game/bosses/bn5-navis.md) ---- */
 
 /* The ids table's id of Navi `ai` at version `v`, 0 none */
 int xrecords_navi_id(const uint8_t *d, int ai, int v);

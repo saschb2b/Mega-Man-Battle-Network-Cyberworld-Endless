@@ -1,5 +1,5 @@
-/* BN6's own DarkChips in its battles (docs/META.md, BN6's own DarkChips;
- * docs/ROM_DATA.md; issue #70): the records of the four its battles play
+/* BN6's own DarkChips in its battles (docs/game/meta/bn6-darkchips.md;
+ * docs/rom/; issue #70): the records of the four its battles play
  * made whole in the core's ROM copy, their power honest to the BugFrags
  * held, and the hooks that see a DarkChip's dark power run, either net's,
  * which the run's price (darkchips.h) is counted by. */

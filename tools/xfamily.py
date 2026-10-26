@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """xfamily.py [--spec fight|status|delete|native|all] [--quiet]: a family of
 BN5's moved into BN6's battle engine, checked in BN6's own battles (issue
-#82; docs/MULTIROM.md, Transplanted families).
+#82; docs/multirom/families.md).
 
 BN5's CanGard is installed as the core starts wherever BN5's ROM is read
 (src/emu/xvirus.c): its code and its reticle's copied from the player's
@@ -323,9 +323,9 @@ def native(c, a):
     (ma, fa, la), (mb, fb, lb) = (run('native', name, '01@52', keys, 4800, dev) for name, dev in
                                   (('alone', 'nofamilies,nonavis,hp=1000'), ('installed', 'hp=1000')))
     # (BN6's tables grown in both where BN5's ROM is read: its chips' moved code takes them, xchips_code.c; CanGard's own
-    # install line in the second alone, and BN5's Navis' too, docs/MULTIROM.md, Transplanted Navis)
+    # install line in the second alone, and BN5's Navis' too, docs/multirom/navis.md)
     c(not any(l.startswith(('xvirus: CanGard', 'xnavi:')) for l in la) and any(l.startswith('xvirus: CanGard') for l in lb),
-      'CanGard installed in the second run alone (and BN5\'s Navis, docs/MULTIROM.md, Transplanted Navis)')
+      'CanGard installed in the second run alone (and BN5\'s Navis, docs/multirom/navis.md)')
     # (the Souls, which install with BN5's Navis, compared as xproxy.py --souls compares them: no Soul held)
     import xproxy
     xproxy.SOULS = True

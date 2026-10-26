@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """rom_tables.py ROM: a Battle Network 4-6 ROM's map tables, found by their
-structure (docs/MULTIROM.md). Prints the candidate tables of map group
+structure (docs/multirom/). Prints the candidate tables of map group
 pointers, each to a list of 12-byte MapBGDescriptors (tile set, palette,
 tile map; the tile map a (w, h, 0, 0, u32 12, u32 offset) header before
 LZ77 data), and the coordinate data tables whose empty groups match the

@@ -1,5 +1,5 @@
 /* Learning a town's ground from an original real-world map, and picking
- * a generated town's tiles from it (docs/OVERWORLD.md).
+ * a generated town's tiles from it (docs/world/overworld.md).
  *
  * Every 8-unit world cell of the source gets a material from the colours
  * its ground shows (real-world maps are 256-colour, and each material has

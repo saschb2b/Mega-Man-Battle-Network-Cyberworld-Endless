@@ -1,5 +1,5 @@
 /* What each guardian remembers of MegaMan across runs, as Hades' bosses
- * keep a tally of who won (docs/BOSSES.md). Stored beside the profile. */
+ * keep a tally of who won (docs/game/bosses/). Stored beside the profile. */
 #ifndef RIVALS_H
 #define RIVALS_H
 

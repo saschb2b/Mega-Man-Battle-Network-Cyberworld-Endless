@@ -8,7 +8,7 @@ pitch classes, the drums' places in the bar and the form, bar by bar.
     python3 .claude/skills/trailer/scripts/song_habits.py GAME SONG [--offset TICKS] [--bars] [--detail] [--theory]
 
 GAME is bn6 or bn5 (the ROMs told by their SHA-1 in build.py's ROM folder),
-SONG the song's number in its game's table (docs/ROM_DATA.md: BN6's at
+SONG the song's number in its game's table (docs/rom/: BN6's at
 0x159F48, BN5's at 0x155BF4; a title's or battle's number from the
 disassembly or by listening with `build.py shot --render-song`). A song
 that starts on a pickup counts its bars late: --offset TICKS moves the bar

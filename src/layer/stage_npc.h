@@ -1,4 +1,4 @@
-/* The actors of a guardian's sequence (docs/BOSSES.md): NPC scripts that
+/* The actors of a guardian's sequence (docs/game/bosses/): NPC scripts that
  * wait hidden for the director's event flags. */
 #ifndef CW_STAGE_NPC_H
 #define CW_STAGE_NPC_H
@@ -40,10 +40,10 @@ uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int 
 /* A floor pad (sprite list `category`, `index`) that appears once
  * `open_flag` is set; `over_bg2` draws it over the map's second layer
  * (layer priority 2), as a dark layer's board lies there in BN5's look
- * (docs/LIBERATION.md), still under MegaMan, sorted after him by depth. */
+ * (docs/game/liberation/), still under MegaMan, sorted after him by depth. */
 uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2);
 
-/* A super boss's body (docs/BOSSES.md, Super bosses): his sprite, the
+/* A super boss's body (docs/game/bosses/super-bosses.md): his sprite, the
  * animation he stands in and his pose (NpcBody's; no log-in), how long the
  * pose holds and what he stands in after it (Bass his cloak thrown off),
  * and whether he fades slowly (the beast) */

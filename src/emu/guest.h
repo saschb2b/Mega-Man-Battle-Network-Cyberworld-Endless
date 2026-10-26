@@ -1,6 +1,6 @@
 /* Another game's battles on a second core beside BN6's: BN5's own battles
  * in BN5's own engine, the reference the differential compares BN6's with
- * (src/dev/xdiff.c, build.py xdiff; docs/MULTIROM.md, Guest battles). A
+ * (src/dev/xdiff.c, build.py xdiff; docs/multirom/guest-battles.md). A
  * run's battles are all BN6's since issue #82 (One net): this core takes
  * no part in runs. Every build but the 3DS's, whose heap holds no second
  * core. */

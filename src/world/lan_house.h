@@ -1,4 +1,4 @@
-/* Lan's house and his room (lan_house.c, docs/HOME.md): BN6's own maps as
+/* Lan's house and his room (lan_house.c, docs/world/home/): BN6's own maps as
  * the run's home, his PC its jack-in. */
 #ifndef CW_LAN_HOUSE_H
 #define CW_LAN_HOUSE_H

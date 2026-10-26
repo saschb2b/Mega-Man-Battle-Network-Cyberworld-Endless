@@ -1,6 +1,6 @@
 /* The pickers' words for SAVES (pick_text.c): what a chooser is titled,
  * and why a file was not found or written, in the menus' plain style
- * (docs/VOICE.md), apart from the platforms' code. */
+ * (docs/voice/rules.md), apart from the platforms' code. */
 #ifndef CW_PICK_TEXT_H
 #define CW_PICK_TEXT_H
 

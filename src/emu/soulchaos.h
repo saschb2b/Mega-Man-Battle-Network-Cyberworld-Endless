@@ -1,5 +1,5 @@
 /* Chaos Unison in BN6's engine (issue #82, the Souls track's S6;
- * docs/MULTIROM.md, Transplanted Souls; docs/ROM_DATA.md, Chaos Unison): a
+ * docs/multirom/souls.md; docs/rom/souls.md, Chaos Unison): a
  * Soul united by a DarkChip of its kind charges B as BN5's does. Its time
  * by the Soul's chaos power attack (his loadout's sixth, AIData +0x11) and
  * the chaos level (BN5's 0x08010654); once full, a cycle of phases (BN5's

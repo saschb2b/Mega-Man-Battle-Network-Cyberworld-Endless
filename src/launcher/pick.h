@@ -37,7 +37,7 @@ bool pick_done(PickResult *r);
 int pick_look(char *msg, size_t n);
 /* (phones) The folder kept: its name, false for none */
 bool pick_folder(char *name, size_t n);
-/* The SAVES screen's own pickers (docs/SAVES.md). An import gives a file
+/* The SAVES screen's own pickers (docs/engine/saves.md). An import gives a file
  * to read: the one chosen (a desktop's), or a copy in the data folder
  * named saves-import.cwsave (a phone's, the browser's page); an export
  * copies `from` where the player chooses. These return at once, and

@@ -1,13 +1,13 @@
 /* A liberation's board fenced (liberation.h): MegaMan walks the board as
  * BN6 walks him, and a panel he may not walk holds him back as a wall
- * would, as BN5's board holds its Navis back (docs/LIBERATION.md: BN5
+ * would, as BN5's board holds its Navis back (docs/game/liberation/: BN5
  * raises its border cells' heights, per panel, as the board changes).
  * Every panel that is not walked when the board is made (dark, an item's,
  * a DarkHole, the Darkloid's ring and his panel) gets walls of BN6's own on
  * its cells that border another panel's floor, written with the layer's
  * own. Their value names one of two of BN6's map events (a wall whose value
  * has bit 7 set is skipped while event 0x1640 + its low bits is set; Rush's
- * gaps' walls, docs/ROM_DATA.md): FENCE_SHUT, never set, so the wall
+ * gaps' walls, docs/rom/): FENCE_SHUT, never set, so the wall
  * stands, or FENCE_OPEN, set each frame (entering a map clears it), so it
  * is skipped. As panels are liberated, or darkened again, each panel's
  * walls are switched between the two in BN6's coordinate data in RAM
@@ -24,6 +24,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "liberation_state.h"
+#include "liberation_team.h"
 #include "netmap.h"
 
 #define FENCE_EVENT   0x1640   /* BN6's map events: a wall of value 0x80 + n is off while 0x1640 + n is set */
@@ -151,10 +152,12 @@ void lib_fence_update(void) {
 	/* (the board won: every wall off, the way to the exit open) */
 	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE || (LB.step == LIB_STEP_TALK && LB.after == LIB_STEP_DONE);
 	uint32_t shapes = BN6_COORD_ENTRIES + F.count * BN6_COORD_ENTRY;
+	bool flier = (LB.step == LIB_STEP_MOVE || LB.step == LIB_STEP_MENU) && lib_mate_command(lib_in_play()) == LIB_DO_BOMB;
 	for (int i = 0; i < F.n; ++i) {
 		int x = F.px[i], y = F.py[i];
-		/* (walked: its walls off; dark again, Bladia's: on) */
-		bool shut = !open && (blocking(LB.b.kind[y][x]) || lib_unit_at(x, y) >= 0);
+		/* (walked: its walls off; dark again, Bladia's: on; a dark one off
+		 * for BombLiberation's flier in play, who hovers over it) */
+		bool shut = !open && ((blocking(LB.b.kind[y][x]) && !(flier && lib_flown(&LB.b, x, y))) || lib_unit_at(x, y) >= 0);
 		uint8_t want = 0x80 | (shut ? FENCE_SHUT : FENCE_OPEN);
 		uint32_t at = shapes + F.at[i] * BN6_COORD_ENTRY + BN6_COORD_VALUE;
 		if (emu_read8(at) != want && emu_read16(BN6_COORD_ENTRIES + F.at[i] * BN6_COORD_ENTRY) == F.key[i]) emu_write8(at, want);

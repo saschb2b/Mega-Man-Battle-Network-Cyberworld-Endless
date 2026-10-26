@@ -1,5 +1,5 @@
 /* The camera over a liberation's board as BN5's moves it (liberation.h;
- * docs/LIBERATION.md, How the board looks and moves): to the unit about to
+ * docs/game/liberation/bn5/look-and-motion.md): to the unit about to
  * act before it acts and the banners, and back to MegaMan. BN6's own
  * camera does it: while the board holds it, its mode is 0, so it no longer
  * copies MegaMan's place, and its place is the one written here each frame;

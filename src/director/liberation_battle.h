@@ -1,4 +1,4 @@
-/* A liberation's battle on BN6's own battle loop (docs/LIBERATION.md, The
+/* A liberation's battle on BN6's own battle loop (docs/game/liberation/building/stage-2-battle.md, The
  * liberation battle): BN5's rules, read in its ROM, answered at BN6's
  * loop by hooks (src/emu/bn6_battle_loop.h). Three turns, a Custom gauge
  * each: TURN 1 START!, TURN 2 START!, FINAL TURN! as each turn's fight
@@ -40,14 +40,20 @@ int lib_battle_end(int *turn);
 int lib_battle_field(Encounter *e, int x, int y, bool darkloid);
 /* No liberation's battle armed (the board begun or left). */
 void lib_battle_disarm(void);
-/* The next battle armed is a teammate's (docs/LIBERATION.md, The team):
+/* The next battle armed is a teammate's (docs/game/liberation/decision.md, The team):
  * MegaMan in BN5's Soul `soul` (7-12, the teammate's id) from the first
  * turn, for the whole battle, committed at the first Custom screen's OK as
  * BN5's UNITE commits a Soul, no chip given for it; a blow that would delete
  * him leaves him 1 HP and ends the battle LIBERATE FAILED! (the teammate
  * leaves the board, not the run). Disarmed with the battle. */
 void lib_battle_soul(int soul);
-/* ... whether one is armed (no UNITE offered in it), and whether its blow
+/* ... or a Cross Navi's: MegaMan in BN6's Cross `cross` (1-5, HeatCross
+ * to ChargeCross) from the first turn, committed at the first Custom
+ * screen's OK as CROSSSELECT commits one, BN6's rules after (his
+ * weakness's hit breaks it, and he fights on as MegaMan); his deleting
+ * blow as a Soul's */
+void lib_battle_cross(int cross);
+/* ... whether either is armed (no UNITE offered in it), and whether its blow
  * that would have deleted him came */
 bool lib_battle_soul_armed(void);
 bool lib_battle_down(void);

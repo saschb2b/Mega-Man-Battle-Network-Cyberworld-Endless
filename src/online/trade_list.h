@@ -1,4 +1,4 @@
-/* The spares list's rows (trade_list.c, issue #145; docs/ONLINE.md, Trade
+/* The spares list's rows (trade_list.c, issue #145; docs/online/trade-central.md, Trade
  * Central): what Trade Central lists as MegaMan's to trade, a chip in a
  * code with the copies past those his folders hold, filtered by a board
  * offer's want and sorted by one of BN6's keys. Numbers only: the game's

@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of MrkCan1 M in both games, BN5's chip 12 by BN5's own code and the registry's 411 by the same code moved (BN5's family 0x4E as BN6's 0x9E), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code). Its shot's sparks (the fourth kind's 0x04, the engine's hit area's, BN6's own in both) are MegaMan's (megaman_types): his hit's look, as his buster's.",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of MrkCan1 M in both games, BN5's chip 12 by BN5's own code and the registry's 411 by the same code moved (BN5's family 0x4E as BN6's 0x9E), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/multirom/chips-code.md). Its shot's sparks (the fourth kind's 0x04, the engine's hit area's, BN6's own in both) are MegaMan's (megaman_types): his hit's look, as his buster's.",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",

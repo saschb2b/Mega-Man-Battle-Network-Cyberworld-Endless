@@ -1,5 +1,5 @@
 /* Trade Central's trade as the game holds it (online_trade.c, docs/
- * ONLINE.md): its stage as the server last said (TRADE_STATE), the spare
+ * docs/online/): its stage as the server last said (TRADE_STATE), the spare
  * chips MegaMan can offer, and a swap the server committed, kept in a file
  * of its own until the run has it. The chats around it are
  * trade_central.c's. */

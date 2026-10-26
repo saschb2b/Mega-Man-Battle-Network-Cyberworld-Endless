@@ -2,7 +2,7 @@
  * blue pad, where the jack-in from Lan's PC lands (destination 1) and
  * whose warp jacks MegaMan out (warp entry 1, departure 0x10), its pink pad
  * to Central Area 1 (2) and four link squares on its floor to the
- * Aquarium, Green, Sky and ACDC HPs (3 to 6; docs/ROM_DATA.md, Lan's HP).
+ * Aquarium, Green, Sky and ACDC HPs (3 to 6; docs/rom/world.md, Lan's HP).
  * The run's portals are the pink pad and the links; where each leads is
  * the director's. The blue pad stays BN6's way out. */
 #include "lanhp.h"
@@ -25,7 +25,7 @@
 #define ENTRIES 6
 /* A link square's marker (map objects 0xCB-0xCE, sprite list 7's 0x88)
  * shows while its story flag is set, else it turns its link's warp off:
- * flag LINK_OPEN + n for warp entry 3 + n (docs/ROM_DATA.md, Lan's HP) */
+ * flag LINK_OPEN + n for warp entry 3 + n (docs/rom/world.md, Lan's HP) */
 #define FIRST_LINK 3
 #define LINK_OPEN 0x017D
 
@@ -33,7 +33,7 @@
  * then the floor's link squares, nearest the pink pad's side first */
 static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 
-/* The courier (docs/HOME.md, piece 2): a Mr.Prog (sprite list 6's 60) on
+/* The courier (docs/world/home/lans-hp.md, piece 2): a Mr.Prog (sprite list 6's 60) on
  * the floor below the way from the blue pad to the corridor (y -14), 50
  * units and more from every link square, facing the blue pad (-x), BN6's
  * "!!" burst (list 5's 0x07, the counter's sign in AsterLand) over his
@@ -46,7 +46,7 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define MARK_Z 46
 #define COURIER_TEXT 768   /* the bytes his words may take */
 
-/* The Net Square's gate (docs/HOME.md, piece 11; docs/ONLINE.md): BN6's
+/* The Net Square's gate (docs/world/home/square-gate.md; docs/online/): BN6's
  * great white teleporter (sprite list 7's 0x06: its core lit in animation
  * 0, dark in 2) on the free floor at the room's front, the way out
  * to other players; its keeper, a Mr.Prog (list 6's 61) beside it, facing

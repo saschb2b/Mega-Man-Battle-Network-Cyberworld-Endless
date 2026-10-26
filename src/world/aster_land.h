@@ -1,4 +1,4 @@
-/* AsterLand, Central Town's chip store (aster_land.c, docs/HOME.md piece
+/* AsterLand, Central Town's chip store (aster_land.c, docs/world/home/ piece
  * 10): BN6's own map as a place of home. */
 #ifndef CW_ASTER_LAND_H
 #define CW_ASTER_LAND_H

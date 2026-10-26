@@ -1,5 +1,5 @@
 /* The dev atlas: every area's generated layers drawn without the game
- * (atlas.c, docs/DEVTOOLS.md). */
+ * (atlas.c, docs/devtools/). */
 #ifndef CW_ATLAS_H
 #define CW_ATLAS_H
 

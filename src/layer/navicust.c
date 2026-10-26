@@ -1,4 +1,4 @@
-/* The NaviCust as a run's second build axis (navicust.h, docs/NAVICUST.md). */
+/* The NaviCust as a run's second build axis (navicust.h, docs/game/navicust.md). */
 #include "navicust.h"
 
 #include "game.h"
@@ -224,7 +224,7 @@ bool navicust_shape(int variant, NaviShape *out) { return navicust_shape_as(vari
 bool navicust_shape_as(int variant, bool compressed, NaviShape *out) {
 	/* the record's +1 the kind, +3 the colour, +8 a pointer to the shape:
 	 * 49 bytes, a row of seven after another, +0xC to the compressed one
-	 * (docs/ROM_DATA.md) */
+	 * (docs/rom/) */
 	if (!R.data || !R.layout || !R.layout->navicust_programs || variant <= 0 || variant >= 47 * 4) return false;
 	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16, *p = rec + (compressed ? 12 : 8);
 	uint32_t at = (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
@@ -419,7 +419,7 @@ bool navicust_expmemry(int depth) { return depth == 6 || depth == 12; }
 
 /* (BN6's own rule: a program turns only where its colour's Spin is held;
  * MegaMan had said L and R turn a program, and a playtester with no Spin
- * spent twenty calls pressing them, docs/NAVICUST.md 8) */
+ * spent twenty calls pressing them, docs/game/navicust.md 8) */
 static const char *const spin_names[7] = { "", "white", "yellow", "pink", "red", "blue", "green" };
 
 const char *navicust_color_name(int c) { return c >= 1 && c <= 6 ? spin_names[c] : ""; }

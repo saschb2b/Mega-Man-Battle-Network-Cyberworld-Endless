@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "battler.h"
 #include "blockers.h"
-#include "bytes.h"
 #include "chip_pool.h"
 #include "data.h"
 #include "debug.h"
@@ -13,6 +13,7 @@
 #include "flags.h"
 #include "game.h"
 #include "guardians.h"
+#include "layer_props.h"
 #include "layer_words.h"
 #include "loot.h"
 #include "meta.h"
@@ -21,13 +22,11 @@
 #include "npc.h"
 #include "npc_lines.h"
 #include "rivals.h"
-#include "rom.h"
 #include "rumor_lines.h"
 #include "rush.h"
 #include "save.h"
 #include "trader.h"
 #include "xguardian.h"
-#include "xnavi.h"
 
 /* Overworld objects (sprite list 7) */
 #define SPR_EXIT_PAD    0x22
@@ -67,7 +66,7 @@ bool layer_objs_dark_first;
 #define SPECIAL_CHANCE  40   /* % of those */
 
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
- * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md), as
+ * 4 item, 5 BugFrags (tested in the game; see docs/rom/), as
  * loot_mystery_roll rolls it (loot.h). True for an HPMemory, which the
  * game keeps in blue Mystery Data. */
 static bool mystery_content(const NetObj *o, uint8_t out[8]) {
@@ -111,84 +110,10 @@ static void fragment_content(uint8_t out[8]) {
 	for (int i = 0; i < 8; ++i) out[i] = c[i];
 }
 
-/* The sprite props' map objects (docs/LEVEL_DESIGN.md, Props): the
- * originals' objects by their OverworldMapObjects ids, each at its panel's
- * spot +(14, 18) from the corner, as the originals set theirs, a set
- * piece's pieces where the original has them. */
-#define OW_MAP_OBJECTS 0x0A4F24u
-static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } prop_pieces[] = {
-	{ LOOK_TREE, 0x3D, 14, 18, 0 },            /* a cybertree (Green Area 2, ACDC Area) */
-	{ LOOK_GIANT_TREE, 0x7F, 14, 18, 0 },      /* the giant cybertree's body, */
-	{ LOOK_GIANT_TREE, 0x80, 38, -6, -24 },    /* its base */
-	{ LOOK_GIANT_TREE, 0x81, -10, 42, 154 },   /* and its crown (Green Area 2) */
-	{ LOOK_STATUE, 0x9C, 14, 18, -12 },        /* the Undernet's statue */
-	{ LOOK_BRAZIER, 0x9F, 14, 18, 0 },         /* a brazier (Undernet 1 and Zero) */
-	{ LOOK_MONUMENT, 0xD3, 16, 16, 0 },        /* the Graveyard's monument */
-	{ LOOK_GRAVE, 0xCA, 14, 18, 0 },           /* a gravestone (the Graveyard's rows) */
-	{ LOOK_SIGN, 0x3E, 14, 18, 0 },            /* the NetCafe's WELCOME sign (Central Area 1) */
-	{ LOOK_BBS, 0x47, 14, 18, -24 },           /* a BBS (Seaside Area 1) */
-};
-
-#define RUSH_OBJECTS_MAX 12   /* Rush and its bones in each panel of two gaps */
-
-/* BN5's dark hole on Nebula Area's layers (XLOOK_DARK_HOLE): a vortex in
- * the void past the back rim of the layer's best room, where its own maps
- * stand theirs past a platform's edge, the Graveyard's monument's place;
- * the layer itself unchanged (a handler-3 object of blockers.c's, as
- * BN6's map objects' table has no room for an id of the engine's) */
-static int xprops_objects(uint8_t *recs, int n, int max) {
-	int x, y, cx, cy;
-	if (!(layer_objs_xlooks & XLOOK_DARK_HOLE) || xnavi_object(XOBJ_DARK_HOLE) < 0 || !layer_landmark_void(&x, &y)) return n;
-	netmap_world(x, y, &cx, &cy);
-	if (emu_debug_on()) fprintf(stderr, "prop: BN5's dark hole at %d,%d (world %d,%d)\n", x, y, cx, cy);
-	return blockers_xprop(recs, n, max, cx, cy);
-}
-
-int layer_prop_objects(NpcList *npcs, const NetProp *p, int cz, uint8_t *recs, int n, int max) {
-	/* (its sprites first: a piece without its sprite would draw noise) */
-	bool loaded = true;
-	for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces; ++k)
-		if (prop_pieces[k].look == p->look) {
-			const uint8_t *e = R.data + OW_MAP_OBJECTS + prop_pieces[k].id * 16u;
-			loaded &= npc_need_sprite(npcs, e[0] / 4, e[1]);
-		}
-	if (emu_debug_on()) fprintf(stderr, "prop look %d at %d,%d%s%s\n", p->look, p->x, p->y, cz ? " (raised)" : "", loaded ? "" : " - no room for its sprite");
-	if (!loaded) return n;
-	int cx, cy;
-	netmap_world(p->x, p->y, &cx, &cy);   /* (the panel's centre, 16 in from its corner) */
-	for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces && n < max; ++k) {
-		if (prop_pieces[k].look != p->look) continue;
-		uint8_t *r = recs + n++ * 20;
-		memset(r, 0, 20);
-		r[0] = 5;   /* a map object, its handler looked up by its id */
-		put32(r + 4, (uint32_t)((int32_t)(cx - 16 + prop_pieces[k].dx) * 65536));
-		put32(r + 8, (uint32_t)((int32_t)(cy - 16 + prop_pieces[k].dy) * 65536));
-		put32(r + 12, (uint32_t)((int32_t)(cz + prop_pieces[k].dz) * 65536));
-		put32(r + 16, prop_pieces[k].id);
-	}
-	return n;
-}
-
-static uint32_t props_objects(NpcList *npcs) {
-	static uint8_t recs[(MAX_PROPS * 3 + 1 + RUSH_OBJECTS_MAX + MAX_BLOCKS + 1) * 20];
-	int n = 0;
-	for (int i = 0; i < layer.nprops; ++i) {
-		const NetProp *p = &layer.props[i];
-		if (p->kind != PROP_SPRITE) continue;
-		n = layer_prop_objects(npcs, p, layer.level[p->y][p->x] ? layer.rise : 0, recs, n, MAX_PROPS * 3);
-	}
-	n = xprops_objects(recs, n, MAX_PROPS * 3 + 1);
-	n = rush_objects(recs, n, MAX_PROPS * 3 + 1 + RUSH_OBJECTS_MAX);
-	n = blockers_objects(recs, n, MAX_PROPS * 3 + 1 + RUSH_OBJECTS_MAX + MAX_BLOCKS);
-	if (!n) return 0;
-	memset(recs + n * 20, 0, 4);
-	recs[n * 20] = 0xFF;
-	return mapslot_alloc(recs, n * 20 + 4);
-}
-
 typedef struct {
 	int x, y, z, cat, sprite, script, gone_flag;
 	bool floor;
+	bool variation;     /* its sprite in BN6's variation of it (npc_variation) */
 	uint32_t archive;   /* its text archive; 0: the layer's */
 	/* behind a counter: facing its front (animation), spoken to across it
 	 * at (sx, sy) from where it stands */
@@ -214,7 +139,7 @@ static void vault_chip(ScriptsVault *v, int k, int id, char code) {
 	chip_desc(id, v->desc[k], sizeof v->desc[k]);
 }
 
-/* An official gate's three chips (docs/RIVAL.md): at level 1 an official
+/* An official gate's three chips (docs/game/rival.md): at level 1 an official
  * Chip Order, standard chips the Library holds (held in any run), as BN6's
  * Chip Order orders them, in the folder's codes; at level 2 Mega chips. */
 static void official_picks(int level, ScriptsVault *v) {
@@ -429,7 +354,7 @@ static bool skull_here(void) {
 
 /* The first bystander on an act's first layer passes on the net's word
  * about its guardian, where MegaMan has never battled him: who he is and a
- * rumor, no moves (docs/META.md, what MegaMan knows; MegaMan himself had
+ * rumor, no moves (docs/game/meta/what-megaman-knows.md; MegaMan himself had
  * said it, and how could he know?). His script, -1 none. */
 static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	int navi = run_layer_guardian();
@@ -437,7 +362,7 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || out->nchoices >= LAYER_MAX_CHOICES)
 		return -1;
 	/* (a super boss's: what the net feels of him, and nothing heard, as he
-	 * goes unnamed till met: docs/BOSSES.md, Super bosses) */
+	 * goes unnamed till met: docs/game/bosses/super-bosses.md) */
 	if (super_boss(navi)) return rumor_words(navi) ? ta_say(text, face, rumor_words(navi)) : -1;
 	if (!guardian_rumor(navi)) return -1;
 	/* (heard, MegaMan names him for the rest of the act: the director
@@ -461,7 +386,7 @@ static int last_bystander(void) {
 
 static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who);
 
-/* Where the flame of darkness stands (docs/META.md): in the last
+/* Where the flame of darkness stands (docs/game/meta/): in the last
  * bystander's place, else, where the services and data took all the map's
  * talkers, in its last green Mystery Data's (never the best, the Spin's): a
  * playtester walked a layer of ACDC Area whose flame had nowhere to stand
@@ -588,7 +513,7 @@ static void install_begin(Install *in) {
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = out->nmd = 0;
-	for (int i = 0; i <= OBJ_OFFICIAL; ++i) out->script_of[i] = -1;
+	for (int i = 0; i < OBJ_KINDS; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	out->lib_prize[0] = out->lib_prize[1] = out->lib_prize[2] = -1;
@@ -596,6 +521,7 @@ static void install_begin(Install *in) {
 	out->lib_zenny = -1;
 	for (int k = 0; k < (int)(sizeof out->lib_bonus / sizeof out->lib_bonus[0]); ++k) out->lib_bonus[k] = -1;
 	memset(out->lib_anim, 0, sizeof out->lib_anim);
+	memset(out->lib_body, 0, sizeof out->lib_body);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
 	layer_objs_official_level = 0;
@@ -603,12 +529,12 @@ static void install_begin(Install *in) {
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
 	in->counter = counter_element(run.depth, run.biome, run_layer_guardian());
 	/* ScrtData lie in deep layers until three are out there (none on a
-	 * trip back, docs/HOME.md) */
+	 * trip back, docs/world/home/) */
 	rolls_of(0x100);
 	bool fragment = !run.secret_cleared && run.fragments < 3 && run.side_kind != LAYER_BACK &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
-	 * META.md: one a run, a colour the profile lacks, kept for good) */
+	 * docs/game/meta/spins.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
 	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
 	in->spin_first = meta_spins() == 0;
@@ -668,7 +594,7 @@ static void install_dealer(Install *in, Talker *tk) {
 	 * first keeps the mystery of a guardian never battled, but for
 	 * a bystander's rumor, sought out; a playtester's dealer named
 	 * one two minutes into the act. A super boss has no word on the
-	 * net till met: docs/BOSSES.md, Super bosses) */
+	 * net till met: docs/game/bosses/super-bosses.md) */
 	bool tells = navi > 0 && (guardian_known(navi) || (layer_in_act(run.depth) > 0 && !super_boss(navi)));
 	layer_objs_dealer_named = tells;
 	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
@@ -766,7 +692,7 @@ static void install_gift(Install *in, Talker *tk) {
 	flag_clear(LAYER_GIFT_FLAG);
 }
 
-/* The real ProtoMan (docs/RIVAL.md), in his own body: the Nest's copies
+/* The real ProtoMan (docs/game/rival.md), in his own body: the Nest's copies
  * are the guardians; a netbattle not yet due, he names where it will be.
  * True where his duel is a choice. */
 static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
@@ -778,7 +704,7 @@ static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	return !layer_objs_duel_later;
 }
 
-/* A Navi gate, sealed until his code is earned (docs/META.md, gates): its
+/* A Navi gate, sealed until his code is earned (docs/game/meta/phase-two.md, gates): its
  * talk then says how, else it asks for his SP and pays his SP chip. True
  * where it asks. */
 static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
@@ -800,7 +726,7 @@ static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
 	return asks;
 }
 
-/* An official gate (docs/RIVAL.md): sealed until Chaud's clearance reaches
+/* An official gate (docs/game/rival.md): sealed until Chaud's clearance reaches
  * its level; open, three chips to take one: at level 1 an official Chip
  * Order, standard chips the Library holds (held in any run), as BN6's Chip
  * Order orders them; at level 2 Mega chips */
@@ -813,7 +739,7 @@ static void install_official(Install *in, const NetObj *o, Talker *tk) {
 	tk->script = ta_official(in->text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, official_duel_prize(level), &v);
 }
 
-/* A collector's vault (docs/META.md, gates): sealed until the profile's
+/* A collector's vault (docs/game/meta/phase-two.md, gates): sealed until the profile's
  * Library holds enough chips, its talk then says how many; open, three
  * rare chips, one to take, in the folder's codes where they come in them */
 static void install_vault(Install *in, Talker *tk) {
@@ -855,18 +781,22 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk, const char 
 		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, prize, layer_objs_server_navi)
 		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
+		: o->type == OBJ_BATTLER ? battler_offer(in->text, flag, o->param)
 		: ta_secret_gate(in->text, flag);
 	/* not chosen yet */
 	flag_clear(flag);
 }
 
-/* A dark layer's unit (docs/LIBERATION.md): its sprite standing on its
+/* A dark layer's unit (docs/game/liberation/): its sprite standing on its
  * panel, nothing to walk into or talk to; the director moves its object */
 static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
 	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 15;
 	if (!npc_need_sprite(&in->npcs, list, sprite) || in->npcs.n >= 32) return;
 	/* (its animation the board's: standing, its strike; liberation_turn.c) */
-	in->npcs.script[in->npcs.n++] = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);
+	uint32_t at = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);
+	in->npcs.script[in->npcs.n++] = at;
+	/* (npc_live's script names its sprite at +2, liberation_team.c's lib_team_dress) */
+	in->out->lib_body[u] = at ? at + 2 : 0;
 }
 
 /* Layer object i on the map: its talker and script, and its choice */
@@ -889,7 +819,7 @@ static bool install_place(Install *in, const NetObj *o, int wx, int wy, int wz) 
  * aisle, facing its front (screen down-right or down-left: the game's
  * facings 3 and 5). */
 static Talker talker_at(const NetObj *o, int wx, int wy, int wz) {
-	Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0, false, 0, 0, 0 };
+	Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, false, 0, false, 0, 0, 0 };
 	if (o->prop >= 0 && netmap_prop_navi(o->prop, &tk.x, &tk.y, &tk.sx, &tk.sy)) {
 		tk.behind = true;
 		tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
@@ -916,6 +846,13 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i, char *
 	case OBJ_NAVI_GATE: return install_navi_gate(in, o, tk);
 	case OBJ_OFFICIAL: install_official(in, o, tk); return false;
 	case OBJ_VAULT: install_vault(in, tk); return false;
+	case OBJ_BATTLER:
+		/* (his own Mr.Prog, as BN6 dresses each of its five) */
+		tk->sprite = battler_sprite(o->param);
+		tk->variation = true;
+		npc_need_sprite(&in->npcs, 6, tk->sprite);
+		if (emu_debug_on()) fprintf(stderr, "battler %d at %d %d\n", o->param, tk->x, tk->y);
+		return true;
 	default: return false;
 	}
 }
@@ -966,7 +903,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	if (out->guardian.navi) guardian_sprites(npcs, &out->guardian);
 	for (int i = 0; i < in.ntalk; ++i)
 		if (in.talkers[i].cat == 7) npc_need_sprite(npcs, 7, in.talkers[i].sprite);
-	npcs->objects = props_objects(npcs);
+	npcs->objects = layer_props_objects(npcs);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
 	/* (what a ScrtData is for, said as it is picked up: layer_words.c) */
@@ -980,6 +917,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		uint32_t a = t->archive ? t->archive : archive;
 		npcs->script[npcs->n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
+		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}
 	rush_install(group, number);
 	return mapslot_install(group, number, npcs, in.md, in.nmd);

@@ -106,6 +106,13 @@ SCENES = [
      {'CYBERWORLD_AUTOPILOT': '1'}, (800, 880)),
     ('bn5-guardian', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '3', '--seed', '3', '--guardian', '28', '--dev', 'quiet'],
      {'CYBERWORLD_AUTOPILOT': '1'}, 1940),
+    # (0.16.0's: Options' Audio with a PlayStation pad attached, Vibration
+    # new under Sound; a Net Dealer's shelf on seed 3's layer 2, BN5's
+    # ACDC Area, with Colonel's Soul held: its fourth chip of his kind)
+    ('options-audio', ['--scene', 'title', '--pad', 'playstation', '--input', '60:,4:SELECT,6:,40:,4:DOWN,6:,30:,4:DOWN,6:,30:,4:A,6:,60:'],
+     {}, 259),
+    ('bn5-soul-shelf', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet,souls=1', '--talk', 'shop:430',
+                        '--input', '500:' + ',4:A,6:,96:' * 9], {}, 1440),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 

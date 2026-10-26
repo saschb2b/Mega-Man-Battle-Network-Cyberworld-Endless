@@ -425,5 +425,5 @@
    ]
   }
  },
- "expect_why": "BN5's rules (docs/ROM_DATA.md, BN5's mood in BN6's battles): the hit's step raises the attacker's mood by the hit's gain (0x08016FE6-0x08017022, the attack's collision +7 accumulated at 0x08016A7E: the Cannon's 0x1E; the buster's none), the worried rule deals the DarkChip into the hand's end (0x08025118), UNITE stands where the emotion getter (0x08012738) reads no worry (0x08023C8C, element 0xB 2), a DarkChip of a held Soul's kind lights its Chaos Unison (0x08024B76-0x08024BC4), OK gives it one turn (0x08025012-0x08025016), the unison calms."
+ "expect_why": "BN5's rules (docs/rom/souls.md, BN5's mood in BN6's battles): the hit's step raises the attacker's mood by the hit's gain (0x08016FE6-0x08017022, the attack's collision +7 accumulated at 0x08016A7E: the Cannon's 0x1E; the buster's none), the worried rule deals the DarkChip into the hand's end (0x08025118), UNITE stands where the emotion getter (0x08012738) reads no worry (0x08023C8C, element 0xB 2), a DarkChip of a held Soul's kind lights its Chaos Unison (0x08024B76-0x08024BC4), OK gives it one turn (0x08025012-0x08025016), the unison calms."
 }

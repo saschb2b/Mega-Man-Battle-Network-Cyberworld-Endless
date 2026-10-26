@@ -121,7 +121,7 @@ bool network_prefs_write(const char *directory, const NetworkPrefs *prefs) {
 #if !defined(_WIN32) && !defined(__3DS__)
 	if (fchmod(fileno(file), 0600)) { fclose(file); remove(tmp); return false; }
 #endif
-	fputs("# The Net Square's settings (docs/ONLINE.md). A connection begins only at the gate in Lan's HP.\nidentity=", file);
+	fputs("# The Net Square's settings (docs/online/). A connection begins only at the gate in Lan's HP.\nidentity=", file);
 	for (unsigned i = 0; i < NETWORK_ID_BYTES; ++i) fprintf(file, "%02x", prefs->identity[i]);
 	fprintf(file, "\nname=%s\nnamed=%u\nselected=%u\nconsent=%u\n", prefs->name, prefs->named ? 1u : 0u, prefs->selected, prefs->consent);
 	for (unsigned i = 0; i < prefs->count; ++i) fprintf(file, "server=%s\n", prefs->servers[i]);

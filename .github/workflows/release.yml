@@ -3,8 +3,8 @@
 # its .zsync, .deb and tar.gz, and a Flatpak bundle), the Windows build (an
 # installer and a zip), the macOS app (a .dmg), the Nintendo 3DS build (a
 # CIA for the HOME Menu and a .3dsx for the Homebrew Launcher) and the
-# browser build as a site to serve anywhere, and the separate ROM-free server.
-# None holds game data.
+# browser build as a site to serve anywhere, and the separate ROM-free server
+# (its archives here, its container image on ghcr.io). None holds game data.
 name: Release
 
 on:
@@ -32,6 +32,16 @@ jobs:
   # on its own system: PyInstaller does not cross-compile
   server:
     uses: ./.github/workflows/server-native.yml
+    with:
+      ref: ${{ inputs.tag || github.ref_name }}
+
+  # the server's container image on ghcr.io (server-image.yml), for hosts
+  # with Docker; not a file of the release, so the release waits on none
+  server-image:
+    uses: ./.github/workflows/server-image.yml
+    permissions:
+      contents: read
+      packages: write
     with:
       ref: ${{ inputs.tag || github.ref_name }}
 

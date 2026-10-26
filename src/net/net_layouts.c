@@ -1,4 +1,4 @@
-/* Layouts after BN6's net areas (docs/LEVEL_DESIGN.md). Each builds from
+/* Layouts after BN6's net areas (docs/world/level-design/). Each builds from
  * the pieces in net_shapes.c; the generator then joins anything left
  * apart, picks where MegaMan arrives and checks the size. */
 #include "net_layouts.h"
@@ -103,7 +103,7 @@ static int platform(int cx, int cy, int w, int h, int shape, int kind) {
 
 /* The layer's signature in its box at `size`, `most` a side at most,
  * centred on (cx, cy) where the box and a panel round it are free; its room
- * or -1 (docs/LEVEL_DESIGN.md, Identity). */
+ * or -1 (docs/world/level-design/identity.md). */
 static int sig_fit(int sig, int biome, int cx, int cy, int size, int most) {
 	int w, h;
 	sig_box(sig, biome, size, &w, &h);

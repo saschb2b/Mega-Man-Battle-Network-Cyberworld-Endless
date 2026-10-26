@@ -61,6 +61,7 @@
 #include "touch_layout.h"
 #include "padmap.h"
 #include "fast_forward.h"
+#include "feel.h"
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
@@ -131,6 +132,7 @@ static bool flag_was_set(int flag) {
 	return false;
 }
 bool flag_get(int flag) { (void)flag; return false; }
+void flag_clear(int flag) { (void)flag; }
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
@@ -247,7 +249,7 @@ static void check_approach(uint32_t seed, int wx, int wy) {
 	CHECK(!arena_approach(a->ax, a->ay), "seed %u: the arena's middle is on its approach", seed);
 }
 
-/* MegaMan's place to meet the guardian (guardian_stand; docs/BOSSES.md, the
+/* MegaMan's place to meet the guardian (guardian_stand; docs/game/bosses/sequence.md, the
  * sequence): at his height on the screen and turned to him, on the arena's
  * floor under his feet, on the side the bridge comes in from (nearer the
  * antechamber than the place across the guardian), whichever way the
@@ -720,7 +722,7 @@ static void test_generation(void) {
 			memcpy(layer.cell, save, sizeof save);
 		}
 		gaps_bridge(false);
-		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
+		/* every act's second layer holds the rival's duel (docs/game/rival.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
 			int official = 0, gates = 0, px = -99, py = -99, gx = 99, gy = 99;
@@ -983,6 +985,49 @@ static uint32_t set_pieces_hash(uint32_t h) {
 	return h;
 }
 
+/* The Virus Battler's layers (net_pieces.c, docs/world/level-design/): an act's
+ * first layer, at most one an act, from the second act to the last before
+ * the Nest, about half of those acts, at least one a run, the Battlers in
+ * BN6's order by act; and each one placed stands on the layer, its
+ * Battler its param */
+static void test_battler(void) {
+	Run before = run;
+	int acts = 0, held = 0, placed = 0, made = 0;
+	for (int mode = RUN_ENDLESS; mode <= RUN_SHORT; ++mode)
+		for (uint32_t seed = 1; seed <= 300; ++seed) {
+			memset(&run, 0, sizeof run);
+			run.seed = seed * 2654435761u;
+			run.mode = (uint8_t)mode;
+			int last = mode == RUN_SHORT ? 2 : 5, n = 0, prev = 0;
+			for (int act = 0; act < PACING_ACTS; ++act) {
+				int in_act = 0;
+				for (int k = 0; k < 3; ++k) {
+					int depth = act * 3 + 1 + k, b = layer_battler(depth, LAYER_NORMAL);
+					if (!b) continue;
+					++in_act;
+					CHECK(k == 0 && act >= 1 && act <= last, "a Battler on layer %d (act %d, %d in it)", depth, act + 1, k + 1);
+					CHECK(b > prev && b <= 5, "Battler %d after %d at act %d", b, prev, act + 1);
+					prev = b;
+					CHECK(!layer_battler(depth, LAYER_UNDERNET) && !layer_battler(depth, LAYER_BACK), "a Battler on a side layer");
+					if (seed % 25 == 0 && made < 24) {
+						++made;
+						layer_generate(run.seed ^ (uint32_t)depth, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+						for (int i = 0; i < layer.nobj; ++i) placed += layer.obj[i].type == OBJ_BATTLER && layer.obj[i].param == b;
+					}
+				}
+				CHECK(in_act <= 1, "%d Battlers in act %d", in_act, act + 1);
+				n += in_act;
+			}
+			CHECK(n >= 1, "no Battler in run %u (%s net)", seed, mode ? "short" : "endless");
+			acts += last;
+			held += n;
+			if (mode == RUN_ENDLESS) CHECK(!n || prev <= 5, "past the fifth Battler");
+		}
+	CHECK(held * 100 >= acts * 45 && held * 100 <= acts * 65, "Battlers in %d of %d acts, not about half", held, acts);
+	CHECK(placed == made, "%d of %d Battlers placed on their layers", placed, made);
+	run = before;
+}
+
 static void test_layer_make(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
@@ -1077,7 +1122,7 @@ static void test_depth_plan(void) {
 	CHECK(!is_boss_depth(1) && !is_boss_depth(2) && is_boss_depth(3), "every third layer has a boss");
 	CHECK(biome_for_depth(19) == BIOME_NEST && is_boss_depth(19), "layer 19 is the Cybeast Nest");
 	CHECK(biome_for_depth(20) == run.biome_order[0], "the cycle restarts after the Nest");
-	/* the short net: three acts, then the Nest on layer 10 (docs/META.md) */
+	/* the short net: three acts, then the Nest on layer 10 (docs/game/meta/) */
 	run.mode = RUN_SHORT;
 	CHECK(is_boss_depth(3) && is_boss_depth(6) && is_boss_depth(9) && !is_boss_depth(8), "the short net's acts end in guardians");
 	CHECK(biome_for_depth(9) == run.biome_order[2], "the short net's third act is the run's third area");
@@ -1171,7 +1216,7 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
-	/* BN5's guardians (docs/BOSSES.md, BN5's Navis): the lowest version
+	/* BN5's guardians (docs/game/bosses/bn5-navis.md): the lowest version
 	 * whose HP reaches their band, BN6's guardians' since they fight in
 	 * BN6's engine (400-600 in act 1; the three-quarters discount stood for
 	 * the Cross that never came into BN5's), V2 at least from act 4, and
@@ -1196,7 +1241,7 @@ static void test_pacing(void) {
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
 		!pacing_heal_certain(19) && !pacing_heal_certain(1 + CYCLE_LAYERS), "a heal on each act's middle layer and the first");
 	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
-	/* the Net's clock (docs/HOME.md, going back): a tenth more a notch on a
+	/* the Net's clock (docs/world/home/going-back.md): a tenth more a notch on a
 	 * guardian's HP, the stats rows' top kept */
 	CHECK(pacing_clock_hp(400, 0) == 400 && pacing_clock_hp(400, 3) == 520 && pacing_clock_hp(4000, 2) == PACING_HP_MOST &&
 		pacing_clock_hp(-1, 2) == -1, "the clock's notches on a guardian's HP");
@@ -1399,7 +1444,7 @@ static void test_talk(void) {
 			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s guards this area!", area, guardian(navi)->name);
 			check_talk(what, line);
 		}
-		/* (MegaMan at a port at home, docs/HOME.md: the way's area, its
+		/* (MegaMan at a port at home, docs/world/home/: the way's area, its
 		 * guardian battled or never, the dark way's and its seal) */
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
@@ -1412,7 +1457,7 @@ static void test_talk(void) {
 	}
 }
 
-/* Coming home (docs/HOME.md): MegaMan and Lan's words in Lan's HP after
+/* Coming home (docs/world/home/): MegaMan and Lan's words in Lan's HP after
  * each act of either net, its portals named (every name, the longest ones
  * together), a dark way sealed or open; and what Lan's HP is, the run's
  * first time there. */
@@ -1452,7 +1497,7 @@ static void test_home_words(void) {
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true, "to the lower left"));
 	check_talk("AsterLand's counter", home_aster_words("@M The way out's to the lower right,Lan!|@M Your PC's back home,remember?"));
 	check_talk("the house's front door", home_door_words("@M Your room's to the upper left,Lan!|@M The PC's up there!", "to the lower left"));
-	/* (going back, docs/HOME.md: the older portals, the way home, L there) */
+	/* (going back, docs/world/home/: the older portals, the way home, L there) */
 	for (int clock = 0; clock <= 6; ++clock) {
 		char what[80];
 		snprintf(what, sizeof what, "home again at clock %d", clock);
@@ -2102,7 +2147,7 @@ static void test_walks(void) {
 	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
 }
 
-/* The way across (docs/LEVEL_DESIGN.md, Navigation): from the arrival to
+/* The way across (docs/world/level-design/generator.md, Navigation): from the arrival to
  * the guardian's antechamber or the exit, a layer crosses no more one-wide
  * walkways than its area's originals do, each a lining up for MegaMan. */
 static void test_way_links(void) {
@@ -2149,7 +2194,7 @@ static void test_way_links(void) {
 	printf("  ways: %d of %d past their area's cap of one-wide walkways (the most in area %d, %.0f%%)\n", over_all, all, worst_area, 100 * worst);
 }
 
-/* The NaviCust's draft (docs/NAVICUST.md): three programs of three builds,
+/* The NaviCust's draft (docs/game/navicust.md): three programs of three builds,
  * each of a tier its act has reached, none of the left-out ones; and
  * MegaMan's words for the bugs. */
 static void test_navicust(void) {
@@ -2344,7 +2389,7 @@ static int room_floor(int r, bool *way) {
 	return n;
 }
 
-/* Identity (docs/LEVEL_DESIGN.md, issue #98): each of a run's layers is
+/* Identity (docs/world/level-design/identity.md, issue #98): each of a run's layers is
  * built round its signature, the room with the most floor, the way through
  * it; never two layers in a row in one layout and one signature both, where
  * the area has another of either, nor an act's first and third where it
@@ -2424,7 +2469,7 @@ static int arrival_side(bool *into) {
 	return d[side] > 0.25 ? SIDE_COUNT : side;
 }
 
-/* Arrivals (docs/LEVEL_DESIGN.md, Arrivals, issue #106): over the runs of
+/* Arrivals (docs/world/level-design/arrivals.md, issue #106): over the runs of
  * test_identity, MegaMan arrives at every side of the screen (BN6's own maps
  * at each about as often), facing along one of the world's axes into the
  * layer; an act's three layers at three sides, and the act after it not
@@ -2687,6 +2732,115 @@ static bool mapping_fields_ok(const char *m, char *bad, size_t n) {
 /* The controllers' map (issue #37): the defaults, SDL's names both ways,
  * a binding's swap, the presets, pad.ini written and read back (and its
  * mistakes said), the labels, Android's Joy-Con mappings. */
+/* The controller's feel (feel.h): the beats a frame's change raises, their
+ * mix by Options' strength, the words, a DualSense's trigger bytes */
+static void test_feel(void) {
+	FeelGame was = { .fight = true, .hp = 200, .max_hp = 200, .viruses = 3 }, now = was;
+	FeelBeat b[FEEL_BEATS_MOST];
+	CHECK(feel_beats(&was, &now, b) == 0, "a still frame raised a beat");
+	/* a hit by its damage: a scratch soft, a quarter of his HP and more full */
+	now.hp = 195;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_HIT, "a hit raised no hit");
+	uint8_t scratch = b[0].amount;
+	now.hp = 150;
+	feel_beats(&was, &now, b);
+	CHECK(b[0].amount == 255 && scratch < 128, "a hit's strength by its damage is off (%u, %u)", scratch, b[0].amount);
+	now.hp = 0;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_DEFEAT, "MegaMan's deletion was not his defeat");
+	/* the buster's charge full, then fired; a counter; two viruses at once; a Navi; a Cross */
+	now = was;
+	was.charge = 1;
+	now.charge = 2;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_CHARGED, "the charge's full was not felt");
+	was.charge = 2;
+	now.charge = 0;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_SHOT, "the charged shot was not felt");
+	was.charge = 1;
+	CHECK(feel_beats(&was, &now, b) == 0, "a plain shot was felt as a charged one");
+	was.charge = 0;
+	now.synchro = true;
+	now.viruses = 1;
+	int n = feel_beats(&was, &now, b);
+	CHECK(n == 2 && b[0].cue == FEEL_COUNTER && b[1].cue == FEEL_DELETE && b[1].amount == 255, "a counter and two deletions were not felt so");
+	now = was;
+	was.navis = 1;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_NAVI_DELETE, "a Navi's deletion was felt as a virus's");
+	was.navis = 0;
+	now.form = 1;
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_FORM, "a Cross was not felt");
+	was.form = 1;
+	now.form = 0;
+	CHECK(feel_beats(&was, &now, b) == 0, "a Cross's end was felt");
+	/* nothing across a battle's start or end, its objects cleared; a jack-in */
+	now = (FeelGame){ .real = true };
+	CHECK(feel_beats(&was, &now, b) == 0, "a battle's end raised a beat");
+	was = now;
+	now = (FeelGame){ .net = true };
+	CHECK(feel_beats(&was, &now, b) == 1 && b[0].cue == FEEL_JACK_IN, "a jack-in was not felt");
+	CHECK(feel_beats(&now, &now, b) == 0, "the net felt as a jack-in again");
+	/* the mix: a beat's shape played out, the strength scaling it, nothing at Off */
+	FeelMix m = { 0 };
+	uint16_t lo, hi, strong = 0, weak = 0;
+	CHECK(!feel_mix_frame(&m, FEEL_STRONG, &lo, &hi) && !lo && !hi, "an empty mix rumbled");
+	feel_mix_start(&m, FEEL_HIT, 255);
+	CHECK(feel_mix_frame(&m, FEEL_STRONG, &strong, &hi) && strong == 65535, "a full hit did not rumble the heavy motor full (%u)", strong);
+	FeelMix w = { 0 };
+	feel_mix_start(&w, FEEL_HIT, 255);
+	feel_mix_frame(&w, FEEL_WEAK, &weak, &hi);
+	CHECK(weak > 0 && weak < strong / 2, "Weak is not weaker (%u against %u)", weak, strong);
+	FeelMix off = { 0 };
+	feel_mix_start(&off, FEEL_DEFEAT, 255);
+	feel_mix_frame(&off, FEEL_OFF, &lo, &hi);
+	CHECK(!lo && !hi, "Off rumbled");
+	int frames = 1;
+	while (feel_mix_frame(&m, FEEL_STRONG, &lo, &hi) && frames < 600) ++frames;
+	CHECK(frames > 5 && frames < 30 && !lo && !hi, "a hit's shape lasted %d frames", frames);
+	/* more beats than voices: the newest is felt */
+	for (int i = 0; i < FEEL_VOICES + 2; ++i) feel_mix_start(&m, FEEL_DELETE, 200);
+	feel_mix_start(&m, FEEL_DEFEAT, 255);
+	feel_mix_frame(&m, FEEL_STRONG, &lo, &hi);
+	CHECK(lo == 65535, "the newest beat went unfelt in a full mix");
+	/* his sounds under the beats: three quarters of a motor at most, a full hit above, nothing at Off */
+	uint16_t sl = 0, sh = 0;
+	feel_mix_sound(FEEL_STRONG, 255, 40, &sl, &sh);
+	CHECK(sl == feel_motor(FEEL_STRONG, FEEL_SOUND_SHARE * 255 / 256) && sl < 65535 && sh > 0 && sh < sl, "a sound's level is not under a hit (%u, %u)", sl, sh);
+	uint16_t hit_low = 65535;
+	feel_mix_sound(FEEL_STRONG, 255, 255, &hit_low, &sh);
+	CHECK(hit_low == 65535, "a sound took a hit's motor down");
+	sl = sh = 0;
+	feel_mix_sound(FEEL_OFF, 255, 255, &sl, &sh);
+	CHECK(!sl && !sh, "a sound rumbled at Off");
+	/* the charge's hum: rising as it fills, at most a third of a motor, none before it */
+	CHECK(feel_charge_hum(-1) == 0 && feel_charge_hum(0) > 0 && feel_charge_hum(45) > feel_charge_hum(0) && feel_charge_hum(90) == feel_charge_hum(600) &&
+		feel_charge_hum(600) <= 255 / 3 + 1, "the charge's hum does not rise and cap (%u, %u, %u)", feel_charge_hum(0), feel_charge_hum(45), feel_charge_hum(600));
+	/* held full, a throb: a beat every FEEL_THROB_FRAMES over a floor, never off */
+	int floor = 255, peak = 0;
+	for (int f = 0; f < FEEL_THROB_FRAMES; ++f) {
+		int v = feel_charged_throb(f);
+		floor = v < floor ? v : floor;
+		peak = v > peak ? v : peak;
+	}
+	CHECK(feel_charged_throb(-1) == 0 && floor > 0 && peak > floor + 30 && peak < 128 && feel_charged_throb(3) == feel_charged_throb(3 + FEEL_THROB_FRAMES),
+		"the charge's throb is off (%d to %d)", floor, peak);
+	/* settings.ini's words, Options' turn round */
+	for (int v = FEEL_OFF; v < FEEL_LEVELS; ++v) CHECK(feel_level_read(feel_level_word(v)) == v, "%s does not read back", feel_level_word(v));
+	CHECK(feel_level_read("no") == FEEL_OFF && feel_level_read("loud") == FEEL_DEFAULT, "vibration's words read wrong");
+	CHECK(feel_level_next(FEEL_STRONG, 1) == FEEL_OFF && feel_level_next(FEEL_OFF, -1) == FEEL_STRONG && feel_level_next(FEEL_WEAK, 1) == FEEL_MEDIUM,
+		"Options' turn of the vibration is off");
+	/* the triggers: off free, the clicks Weapon's (0x25) giving way at half the pull, the gauge's firmer */
+	uint8_t t[TRIGGER_BYTES], r[TRIGGER_REPORT];
+	feel_trigger_bytes(TRIGGER_OFF, t);
+	CHECK(t[0] == 0x05 && !t[1] && !t[3], "a free trigger is not Off");
+	feel_trigger_bytes(TRIGGER_GAUGE, t);
+	CHECK(t[0] == 0x25 && (t[1] | t[2] << 8) == (1 << 2 | 1 << 5), "the gauge's click is not Weapon's from zone 2 to 5");
+	uint8_t firm = t[3];
+	feel_trigger_bytes(TRIGGER_FAST, t);
+	CHECK(t[0] == 0x25 && t[3] < firm, "FAST's click is not lighter than the gauge's");
+	feel_trigger_report(TRIGGER_GAUGE, TRIGGER_FAST, r);
+	CHECK(r[0] == 0x0C && r[21] == 0x25 && r[24] == firm && r[10] == 0x25 && r[13] < firm && !r[2] && !r[3],
+		"the effects' report does not set both triggers, the left at 21 and the right at 10, nor leave the rumble be");
+}
+
 /* Fast forward's rules (fast_forward.h): its button, where it runs, its speed */
 static void test_fast_forward(void) {
 	FastButton b = { 0 };
@@ -2724,6 +2878,13 @@ static void test_fast_forward(void) {
 	CHECK(!fast_scene_allows(&s), "fast forward ran on the Custom screen");
 	s.phase = BN6_PHASE_FIGHT;
 	CHECK(!fast_scene_allows(&s), "fast forward ran in the fight");
+	/* (a Virus Battler's fight takes no input: it plays; his VIRUS LIST is a menu) */
+	s.mode = BN6_MODE_VIRUS_BATTLER;
+	CHECK(fast_scene_allows(&s), "fast forward stopped in a Virus Battler's fight");
+	s.phase = BN6_PHASE_CUSTOM;
+	CHECK(!fast_scene_allows(&s), "fast forward ran on the VIRUS LIST");
+	s.mode = 0;
+	s.phase = BN6_PHASE_FIGHT;
 	s.sub = BN6_SUB_PET;
 	CHECK(!fast_scene_allows(&s), "fast forward ran on the PET's menu");
 	s.sub = BN6_SUB_MAP;
@@ -2959,7 +3120,7 @@ static void test_xsong(void) {
 }
 
 /* Both games' RNG step and a seed's word (battle_rng.c): the guest's
- * battles' words as docs/ROM_DATA.md has them for seed 1 (BN5's random
+ * battles' words as docs/rom/ has them for seed 1 (BN5's random
  * numbers), a fixed point of the step, and one step of the differential's
  * (BN5's word on the frame its buster draws once more: tests/xdiff) */
 static void test_battle_rng(void) {
@@ -3470,7 +3631,7 @@ static void test_xvirus_static(void) {
 	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
 }
 
-/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/MULTIROM.md,
+/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/multirom/navis.md,
  * Transplanted Navis), each whole and apart from the others and from the
  * families: its AI index, ids, home and code its own; a sprite two Navis
  * draw at one place and number in both (the shared art), no other sprite's
@@ -3543,7 +3704,7 @@ static void test_xnavi_static(void) {
 	CHECK(xnavi_bn5_count < 1 || navi_clashes(&xnavi_bn5[0]->code, &xnavi_bn5[0]->code, true) > 0, "xnavi: one Navi's room twice not seen");
 }
 
-/* The free space's plan (free_space.h; docs/EMULATION.md, Memory the
+/* The free space's plan (free_space.h; docs/engine/emulation/memory.md, Memory the
  * engine writes and BN6's RAM): every writer's region in order and apart,
  * inside the ROM copy past the game's 8 MB; each of issue #82's installers'
  * own layout inside its region (the families' room and the families, the
@@ -4033,7 +4194,7 @@ static void test_enemy_moved(void) {
 	CHECK(!name[0] && !enemy_triple(0x201), "data: an id from 0x200 no family took (%s)", name);
 }
 
-/* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
+/* The All * helper (docs/game/meta/all-star-helper.md, issue #18): every chip in *. The engine's
  * view of a record (chip_info, which every reward, stock and prize takes
  * its code from) holds * alone while the helper is on, and the record's own
  * codes otherwise; a folder entry goes to *; a pack entry's four counts go
@@ -4079,7 +4240,7 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
-/* The BeastOut helper (issue #99, docs/META.md): shut until the endless
+/* The BeastOut helper (issue #99, docs/game/meta/): shut until the endless
  * net's own Nest has fallen, a short net's Nest opening none; announced
  * once, on the summary of the run that opened it and NEW on the setup's
  * Help row, NEW too where a run given up for a NEW GAME opened it; in a
@@ -4166,7 +4327,7 @@ static void test_beast(void) {
 		char what[64];
 		snprintf(what, sizeof what, "a run's start with BeastOut, %s, %s", k & 1 ? "taught" : "first", k & 2 ? "Dad's call before" : "alone");
 		check_talk(what, words);
-		/* (told once, by Dad who unlocked it: docs/VOICE.md, What nobody says) */
+		/* (told once, by Dad who unlocked it: docs/voice/rules.md, What nobody says) */
 		CHECK(!strstr(words, "CybeastButton") == !!(k & 1), "%s: %s word of it: \"%s\"", what, k & 1 ? "a" : "no", words);
 		CHECK(!!strstr(words, "@D Lan,it's Dad. I've unlocked") == (k == 0), "%s: Dad's call: \"%s\"", what, words);
 	}
@@ -4176,7 +4337,7 @@ static void test_beast(void) {
 	run = run_was;
 }
 
-/* Another game's chips as BN6's (src/core/xchips.c; docs/MULTIROM.md,
+/* Another game's chips as BN6's (src/core/xchips.c; docs/multirom/guest-battles.md,
  * Guest battles), on made-up tables: paired by name each way (a name the
  * other game gives two chips comes back from either; a chip it lacks, or
  * a nameless one, pairs none); a code re-read as the other game's chip of
@@ -4236,7 +4397,7 @@ static void test_xchips(void) {
 		xchips_reward_bn6(0xFFFF) == 0xFFFF, "xchips: BN5's rewards as BN6's without a pairing");
 }
 
-/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/ROM_DATA.md,
+/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/rom/bn5-world.md,
  * BN5's text): BN6 put its five version marks at 0x40-0x44, so BN5's codes
  * from 0x40 are five on, its marks and punctuation where BN6 has their
  * glyphs, its DS mark as the letters D and S, a glyph BN6 lacks left out;
@@ -4269,7 +4430,7 @@ static void test_xtext(void) {
 	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
 }
 
-/* BN5's chips' code (issue #82's C3; docs/MULTIROM.md, The chips' code):
+/* BN5's chips' code (issue #82's C3; docs/multirom/chips-code.md):
  * the generated units (src/emu/xchips_bn5.c) each a recipe the installer
  * takes in the chips' region, numbered by BN5's own number and homed in
  * order; the moved chips (src/core/xchips_moved.c) each a registry row of
@@ -4342,7 +4503,7 @@ static void test_chip_code(void) {
 		"chips' code: CrakOut BN5's family 0x1B as 0x6B, NrthWind its support routine 0x15 as 0x3F, Cannon none");
 }
 
-/* The chip registry (src/core/xchips_registry.c; docs/MULTIROM.md, The
+/* The chip registry (src/core/xchips_registry.c; docs/multirom/chip-registry.md, The
  * chip registry, issue #82): the table as decided (Team Colonel's chips a
  * run can meet, one chip per name, the rest in BN6's free ids), its checks
  * failing on made-up rows that break each rule, and its lookups both ways. */
@@ -4523,7 +4684,7 @@ static void test_soulkinds(void) {
 	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
 }
 
-/* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
+/* The run's DarkChips (src/director/darkchips.c; docs/game/meta/bn6-darkchips.md, BN6's own
  * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
  * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
  * among the four its battles play and never one held; the flame a layer
@@ -4635,7 +4796,7 @@ static void test_darkchips(void) {
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,
- * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/META.md): its
+ * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/game/meta/): its
  * BBS positioning left out, its characters, breaks, waits and clears kept to
  * its hold; anything else, or no hold, refused. A made-up archive. */
 /* The intro's QR code (scene_intro.c): the project's address in version 4,
@@ -4700,9 +4861,9 @@ static double filtered_rms(SoundFilter mode, double hz) {
 	return sqrt(out / in);
 }
 
-/* The Jukebox's songs (docs/PET.md, The Jukebox): every song of each
+/* The Jukebox's songs (docs/game/pet.md, The Jukebox): every song of each
  * game's music player once (BN6's 0x01-0x25; BN5's 0x01-0x24 but its
- * empty 0x0A: docs/ROM_DATA.md), each in a section, each name a row's */
+ * empty 0x0A: docs/rom/), each in a section, each name a row's */
 static void test_jukebox_songs(void) {
 	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
 	for (int i = 0; i < jukebox_song_count; ++i) {
@@ -4869,7 +5030,7 @@ static void test_rom_pages(void) {
 	CHECK(!ta_rom_pages(face, (int)sizeof face, 1, out, (int)sizeof out), "rom pages: a command it does not know refused");
 }
 
-/* The super bosses (docs/BOSSES.md, Super bosses): their forms by record
+/* The super bosses (docs/game/bosses/super-bosses.md): their forms by record
  * and by Net; BN6's records' themes, names and Gigas; never at random,
  * the Servers' SP Navis without them */
 static void super_records(void) {
@@ -4988,7 +5149,7 @@ static void test_super_bosses(void) {
 	run = run_was;
 }
 
-/* The economy's plans (economy.c, docs/ECONOMY.md, issue #154): a curve
+/* The economy's plans (economy.c, docs/game/economy/, issue #154): a curve
  * starts at its floor, ends at 1 and rises ever more slowly between (a
  * logarithm's: the run opens fastest early); no plan hands out more than
  * today's anywhere (no power creep); today's leaves every roll as it was
@@ -5084,7 +5245,7 @@ static void test_economy(void) {
 	run = run_was;
 }
 
-/* Requests at home (jobs.c, docs/HOME.md piece 5): the visit's three, a
+/* Requests at home (jobs.c, docs/world/home/jobs.md): the visit's three, a
  * kind each asker posts and none twice, the same at a CONTINUE; pay by
  * the act; each kind's course, and when one is due. */
 static void test_jobs(void) {
@@ -5424,7 +5585,7 @@ static void test_analytics_online(void) {
 	rmdir(base);
 }
 
-/* The nets' meeting (issue #82, docs/MULTIROM.md, One net): a family's
+/* The nets' meeting (issue #82, docs/multirom/one-net.md): a family's
  * role by its placements; the visitors' gate, one battle in each four, the
  * same at every reroll; the rules that keep visitors out; a visitor's
  * place, family and version against the band; the deep's coin between the
@@ -5591,7 +5752,7 @@ static void test_pad_art(void) {
 	CHECK(!pad_art_on(&ring, -18, -18, 0) && pad_art_on(&ring, -18, -18, 4), "a reach takes in more");
 }
 
-/* A dark layer's board (docs/LIBERATION.md, stage 1 and The quality bar):
+/* A dark layer's board (docs/game/liberation/building/stage-1.md and The quality bar):
  * the same from its seed, its kinds where BN5's rules put them (the
  * Darkloid's 3x3 whole, a ring of dark round each DarkHole with its
  * guardian, the start clean, no guardian within three of it nor reaching
@@ -5702,7 +5863,7 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
-/* A board cleared over par pays zenny (docs/LIBERATION.md, The par's prize,
+/* A board cleared over par pays zenny (docs/game/liberation/building/par-prize.md, The par's prize,
  * as built): BN5's first mission's 1000 at act 2, 250 more an act, dearer on
  * later cycles, by the zenny curve */
 static void test_liberation_prize(void) {
@@ -5727,7 +5888,7 @@ static void test_liberation_prize(void) {
 	run = before;
 }
 
-/* Boards made for a team of BN5's (docs/LIBERATION.md, The team): BN5's
+/* Boards made for a team of BN5's (docs/game/liberation/decision.md, The team): BN5's
  * own teams by act, their HP its table's (BN5_LIB_NAVI_HP: missions 1, 3,
  * 5, 7 and 9), every Navi on a clean panel by the start and none in a
  * unit's reach, each command taken, the measures printed beside the lone
@@ -5791,6 +5952,47 @@ static void test_liberation_team(void) {
 	CHECK(lib_command_panels(&a, LIB_DO_SCRENDIV, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && xs[2] == 5 && ys[0] + ys[2] == 10, "ScrenDiv: three across");
 	CHECK(lib_command_panels(&a, LIB_DO_TOMAHAWK, 5, 5, 0, xs, ys) == 6, "TomahawkSwing: two deep and three wide");
 	CHECK(lib_command_panels(&a, LIB_DO_MELODY, 5, 5, 0, xs, ys) == 5 && xs[4] == 9, "LifeMelody: five ahead");
+	/* (the Cross Navis', Team ProtoMan's) */
+	CHECK(lib_command_panels(&a, LIB_DO_NAPALM, 5, 5, 0, xs, ys) == 6 && xs[3] == 8 && xs[4] == 7 && xs[5] == 7 && ys[4] + ys[5] == 10, "Napalm: four ahead, the third's sides");
+	CHECK(lib_command_panels(&a, LIB_DO_WIDESWRD, 5, 5, 0, xs, ys) == 3 && xs[0] == 5 && ys[0] + ys[2] == 10, "WideSwrd: three across");
+	CHECK(lib_command_panels(&a, LIB_DO_MAGNET, 5, 5, 0, xs, ys) == 0, "MagnetBarrier: no panel");
+	CHECK(lib_command_panels(&a, LIB_DO_BOMB, 5, 5, 0, xs, ys) == 1 && xs[0] == 5 && ys[0] == 5, "BombLiberation: the panel under him");
+	a.kind[5][6] = LIB_ITEM; a.kind[5][7] = LIB_TRAP; a.kind[5][8] = LIB_CLEAN; a.kind[5][9] = LIB_ITEM;
+	CHECK(lib_command_panels(&a, LIB_DO_SEARCH, 5, 5, 0, xs, ys) == 2 && xs[0] == 6 && xs[1] == 7, "PanelSearch: the dark line's items and traps, to a clean panel");
+	CHECK(lib_command_panels(&a, LIB_DO_BOMB, 6, 5, 0, xs, ys) == 0, "BombLiberation: no item panel");
+	CHECK(!lib_command_battles(LIB_DO_MAGNET) && !lib_command_battles(LIB_DO_BOMB) && lib_command_battles(LIB_DO_NAPALM) && lib_command_battles(LIB_DO_SEARCH),
+		"the Cross Navis' commands: battles or none");
+	/* (the Cross Navis on the board: a team of them, every held Navi's
+	 * command its spot; the par a pick's, the same twice) */
+	static const LibTeam crosses[3] = {
+		{ 2, { MATE_MEGAMAN, MATE_HEATMAN }, { 0, 300 }, 3, { MATE_HEATMAN, MATE_COLONEL, MATE_ERASEMAN } },
+		{ 3, { MATE_MEGAMAN, MATE_ELECMAN, MATE_CHARGEMAN }, { 0, 300, 300 }, 4, { MATE_ELECMAN, MATE_CHARGEMAN, MATE_SLASHMAN, MATE_NUMBERMAN } },
+		{ 4, { MATE_MEGAMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN }, { 0, 350, 350, 350 }, 5, { MATE_SLASHMAN, MATE_ERASEMAN, MATE_HEATMAN, MATE_ELECMAN, MATE_CHARGEMAN } },
+	};
+	for (int act = 1; act <= 3; ++act) {
+		int n = 0, layers = 0, cmds = 0, plays = 0, par = 0, repar = 0;
+		for (uint32_t s = 1; s <= 12; ++s) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			++layers;
+			if (!lib_board_make(&a, s, act, &crosses[act - 1], NULL)) continue;
+			++n; par += a.par; cmds += a.m.longswrd; plays += a.m.plays;
+			/* (another pick of the held: the par again, the same twice) */
+			memcpy(&b, &a, sizeof a);
+			b.team.navi[1] = crosses[act - 1].held[crosses[act - 1].nheld - 1];
+			lib_plan_par(&b);
+			int p1 = b.par;
+			b.par = 0;
+			lib_plan_par(&b);
+			CHECK(b.par == p1 && b.par > 0, "cross board %u act %d: a pick's par %d then %d", s, act + 1, p1, b.par);
+			repar += b.par;
+		}
+		CHECK(n * 2 >= layers, "liberation: %d Cross team boards of %d at act %d", n, layers, act + 1);
+		printf("liberation crosses act %d (%d Navis): %d boards of %d, par %d (another pick's %d), commands %d.%d a play\n", act + 1, crosses[act - 1].n, n, layers,
+			n ? par / n : 0, n ? repar / n : 0, cmds / (plays ? plays : 1), cmds * 10 / (plays ? plays : 1) % 10);
+	}
 	run = before;
 }
 
@@ -5858,6 +6060,7 @@ int main(void) {
 	test_lz77();
 	test_pad_art();
 	test_generation();
+	test_battler();
 	test_layer_make();
 	test_layouts_build();
 	test_identity();
@@ -5878,6 +6081,7 @@ int main(void) {
 	test_touch();
 	test_padmap();
 	test_fast_forward();
+	test_feel();
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();

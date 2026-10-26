@@ -35,7 +35,7 @@
 #include "stands_words.h"
 #include "talk.h"
 
-#define WATCH_FLAG    0x14C4   /* the referee's Yes to watching: the Square's own (docs/EMULATION.md) */
+#define WATCH_FLAG    0x14C4   /* the referee's Yes to watching: the Square's own (docs/engine/emulation/) */
 #define ASK_WAIT_MS   5000     /* the server's answer to WATCH */
 #define OVER_TICKS    300      /* the end shown before the Square */
 #define OVER_HELD     30       /* ... at least, before A or B goes back */

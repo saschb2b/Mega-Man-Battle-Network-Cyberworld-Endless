@@ -1,4 +1,4 @@
-/* Faces for the guardians Gregar has none of (docs/BOSSES.md): a portrait
+/* Faces for the guardians Gregar has none of (docs/game/bosses/): a portrait
  * from MegaMan's battle data, made from the Navi's own battle sprite. */
 #ifndef CW_PORTRAIT_H
 #define CW_PORTRAIT_H

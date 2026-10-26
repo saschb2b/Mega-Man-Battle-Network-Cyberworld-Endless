@@ -1,6 +1,6 @@
 /* MP2K's driver of the GBA's PSG (mp2k_state.h): the four channels'
  * envelopes stepped in software once a frame and their registers written,
- * as BN6's CgbSound does it (bn6f asm/libs.s; docs/ROM_DATA.md, BN6's
+ * as BN6's CgbSound does it (bn6f asm/libs.s; docs/rom/sound.md, BN6's
  * sound engine). The PSG's own envelope runs between the frames from what
  * it writes into NRx2, and every change of volume retriggers the channel:
  * gba_sound.c plays it on mGBA's PSG. */

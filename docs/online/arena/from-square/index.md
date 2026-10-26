@@ -1,0 +1,10 @@
+# From the Net Square
+
+* [From the Net Square](overview.md) - Challenging a player from his card in the Net Square: Battle and Team up in BN6's chat boxes, offered where both NetPasses hold the Arena stamp, the question and answer, and the New 3DS declining.
+* [Full rules](full-rules.md) - Full rules in the Arena: BN5's installs recorded once (`xinstall_log.c`) and taken into both pair cores, the record's hash in the pair's, Souls carried across the cable (`arena_souls.c`), what one GBA alone writes.
+* [Rematches and the referee](rematches.md) - Rematches from the result card (issue #167): Again with NAME?, both Yeses needed, sent as ARENA's challenge answered at once (`square_arena.c`), and the referee by the ring calling bouts and keeping the count.
+* [The two-client proof](two-client-proof.md) - The two-client proof of 18 October 2026: two host builds fight a NetBattle from the Square through a local server, stalls, hashes, a desync and a reset caught, a mixed pair before v9, a rematch.
+* [A rematch in a second](rematch-in-a-second.md) - A rematch in about a second (issue #167, protocol v13): BN6's random words seeded at a battle's start from the bout's battle ID, and the pair kept for the next bout (`arena_boot_keep`), with proofs.
+* [The Square before a NetBattle](square-before.md) - What the Square shows of the Arena before anyone commits (issue #167, protocol v13): busy marks, the bout called in the world, an open challenge's strip and Call off, the PET ringing, link bars.
+* [One rule: full rules](one-rule.md) - Every NetBattle by full rules since protocol v9, the BN6 rules and stand-ins of v4 to v8 retired: the folder Lan picks (`arena_folder.c`), ARENA_LOADOUT, the ready hash, the 60-frame hashes, the battle's end.
+* [The way in, the battle and the result](way-in.md) - The NetBattle's PET screens (issue #167): refusals in MegaMan's words, the way in's panel (`square_card.c`), the name plate and the bars-only link badge with its stall notes (`arena_view.c`), and the result card.

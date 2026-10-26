@@ -26,7 +26,7 @@
 #include "xvirus_recipe.h"
 
 #define BUS 0x08000000u
-/* The Souls' free space (free_space.h's FREE_SOULS to FREE_PANELS; docs/EMULATION.md), written once a core */
+/* The Souls' free space (free_space.h's FREE_SOULS to FREE_PANELS; docs/engine/emulation/), written once a core */
 #define SOULS_AT      FREE_SOULS
 #define AT_STUBS      (SOULS_AT + 0x000u)   /* soullife.c's two stubs, 8 bytes */
 #define AT_UNITE_A    (SOULS_AT + 0x012u)   /* BN5's A on UNITE, moved (its distance from a word boundary BN5's: 2) */

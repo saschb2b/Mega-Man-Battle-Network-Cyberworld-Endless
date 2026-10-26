@@ -29,7 +29,7 @@ static int16_t cost[MAP_H][MAP_W];
 
 /* (CYBERWORLD_AUTOPILOT_ROUTE, a test's: the sealed region's route first,
  * its key while its barrier stands, then the route, as the board's own
- * cost map to a target where the Darkloid would stand; docs/LIBERATION.md,
+ * cost map to a target where the Darkloid would stand; docs/game/liberation/special-routes.md,
  * Special routes) */
 static bool route_target(void) {
 	static int want = -1;
@@ -112,19 +112,44 @@ static uint32_t toward(int x, int y, int near) {
 	return k;
 }
 
+/* The menu's line to take: a Cross Navi's command where it can be taken
+ * (MagnetBarrier where a unit's reach covers him), else Liberation,
+ * passing below two fifths of his HP */
+static int menu_want(void) {
+	int k = lib_in_play(), command = lib_mate_command(k);
+	if (LB.can[LIB_CMD_LONGSWRD] && command >= LIB_DO_NAPALM && (command != LIB_DO_MAGNET || lib_threat(&LB.b, LB.mx, LB.my) > 0)) return LIB_CMD_LONGSWRD;
+	return LB.can[LIB_CMD_LIBERATE] && lib_mate_hp(k) * 5 > lib_mate_max(k) * 2 ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
+}
+
+/* The flier at his stand: onto the plain dark panel he would face, flying
+ * over it (the pad's way there), 0 where it is none */
+static uint32_t fly_onto(int face) {
+	int x = LB.mx + dirs[face][0], y = LB.my + dirs[face][1], wx, wy;
+	if (LB.b.kind[y][x] != LIB_DARK || lib_unit_at(x, y) >= 0) return 0;
+	netmap_world(x, y, &wx, &wy);
+	uint32_t on = toward(wx, wy, 4);
+	return on ? on : pads[face];
+}
+
 uint32_t lib_auto_keys(int frame) {
 	/* (a BonusPanel's roulette: A as soon as it is heard) */
 	if (lib_bonus_spinning()) return frame & 1 ? 0 : KEY_A;
+	/* (the team picked on arrival: the one it opens on) */
+	if (LB.step == LIB_STEP_PICK) return frame & 1 ? 0 : KEY_START;
 	if (LB.step == LIB_STEP_MENU) {
 		if (frame & 1) return 0;   /* (a press, then a frame up) */
-		int k = lib_in_play(), want = LB.can[LIB_CMD_LIBERATE] && lib_mate_hp(k) * 5 > lib_mate_max(k) * 2 ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
-		return LB.menu == want ? KEY_A : KEY_DOWN;
+		return LB.menu == menu_want() ? KEY_A : KEY_DOWN;
 	}
 	if (LB.step != LIB_STEP_MOVE) return 0;
+	/* (BombLiberation's flier over a plain dark panel: his command) */
+	bool flier = lib_mate_command(lib_in_play()) == LIB_DO_BOMB && LB.op > 0;
+	if (flier && LB.b.kind[LB.my][LB.mx] == LIB_DARK && lib_unit_at(LB.mx, LB.my) < 0) return frame & 1 ? 0 : KEY_A;
 	cost_from_target();
 	int face, step;
 	if (!plan(&face, &step)) return 0;
 	int wx, wy;
+	uint32_t over = flier && step < 0 ? fly_onto(face) : 0;
+	if (over) return over;
 	/* (on to the next panel of the way, else to the middle of the stand) */
 	netmap_world(LB.mx + (step >= 0 ? dirs[step][0] : 0), LB.my + (step >= 0 ? dirs[step][1] : 0), &wx, &wy);
 	uint32_t k = toward(wx, wy, step >= 0 ? 2 : 6);

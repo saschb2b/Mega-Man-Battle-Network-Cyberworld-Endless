@@ -205,5 +205,5 @@
    ]
   }
  },
- "expect_why": "One form at a time (docs/MULTIROM.md, One net: the design): a Cross chosen while a Soul is united is committed as BN6 commits a Cross (0x0802937A: its form, its used bit 0 for HeatCross), and the turn's crossing leaves form 8 through its removal entry (src/emu/soullife.c), which clears the Soul."
+ "expect_why": "One form at a time (docs/multirom/one-net.md): a Cross chosen while a Soul is united is committed as BN6 commits a Cross (0x0802937A: its form, its used bit 0 for HeatCross), and the turn's crossing leaves form 8 through its removal entry (src/emu/soullife.c), which clears the Soul."
 }

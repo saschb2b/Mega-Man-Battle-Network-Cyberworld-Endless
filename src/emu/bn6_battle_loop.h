@@ -3,7 +3,7 @@
  * what it came to), and the banners it shows over the field (BN6's battle
  * messages: BN5's table kept whole, its Liberation Missions' among them).
  * Read and answered by a liberation's battle (src/director/
- * liberation_battle.c; docs/ROM_DATA.md, BN6's battle loop and banners). */
+ * liberation_battle.c; docs/rom/battle.md, BN6's battle loop and banners). */
 #ifndef CW_BN6_BATTLE_LOOP_H
 #define CW_BN6_BATTLE_LOOP_H
 
@@ -41,5 +41,7 @@
 #define BN6_MSG_LIB_SUCCESS   0x58        /* LIBERATE SUCCESS! */
 #define BN6_MSG_LIB_FAILED    0x5C        /* LIBERATE FAILED! */
 #define BN6_MSG_TURN_LIBERATE 0x60        /* n TURN LIBERATE! */
+
+#include "bn6_battler.h"   /* the Virus Battler's mode, its own loop: the BtlrCard's data, the five Battlers' records */
 
 #endif

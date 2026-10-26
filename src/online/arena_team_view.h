@@ -1,4 +1,4 @@
-/* --dev arena2v2 on a seat's screen (epic #167, docs/ONLINE_ARENA.md, Two
+/* --dev arena2v2 on a seat's screen (epic #167, docs/online/arena/two-a-side/overview.md, Two
  * MegaMen a side): over the picture of the GBA a seat sees (seats 0 and 1
  * the GBAs' players, 2 and 3 side 0's and side 1's partners, who see
  * their side's GBA, their own Custom screen BN6's on a core of their own:

@@ -95,7 +95,7 @@ void analytics_run_start(void);
 enum { ANALYTICS_WON, ANALYTICS_LOST, ANALYTICS_LEFT };
 void analytics_guardian(int navi, int result, int hp, int max_hp, int frames);
 /* The run's economy, counted as it goes whatever the answer (docs/
- * ECONOMY.md, the guard; the run log keeps them, runlog.h): the chips
+ * docs/game/economy/guard.md; the run log keeps them, runlog.h): the chips
  * found (a battle's reward, a Mystery Data's, a Guardian Data's) and the
  * good among them (3 stars or more, a Mega or a Giga), the Mystery Data
  * opened and the zenny they and the battles paid, in the whole run and in

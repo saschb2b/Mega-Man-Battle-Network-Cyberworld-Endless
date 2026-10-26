@@ -11,6 +11,100 @@
   optional fight. Before the choice, MegaMan and Lan say the stake as it
   is now. A race's viruses still delete MegaMan as any battle's do.
 
+## 0.16.0 (2026-10-26)
+
+- **Rumble, and a DualSense's adaptive triggers.** A controller now
+  rumbles on a fight's beats: MegaMan hit (harder the more HP it takes),
+  the charged shot ready and fired, a counter's Full Synchro, a virus or
+  a Navi deleted, Beast Out and a Cross, his defeat, and a jack-in. His
+  own attacks rumble as they sound: each buster shot a tick, every
+  Vulcan bullet its own, a sword's swing, a Cannon's blast and its tail,
+  each hit he lands a knock. The charge hums as it fills, clicks when
+  full, throbs while held and kicks back as the shot leaves. Nothing
+  rumbles while fast forward runs or online. On a PS5 DualSense, over USB
+  or Bluetooth, the trigger that is L clicks once the Custom gauge is
+  full, and pulling through it opens the Custom screen; FAST's trigger
+  clicks lightly where fast forward can run and pulls free in the fight.
+  Options' Audio has **Vibration** (Strong, Medium, Weak, Off) and
+  **Trigger effects**. It rumbles on Linux (a Steam Deck too), Windows,
+  macOS and iOS (no trigger effects there); Android, the browser and the
+  3DS don't yet. With Steam Input on for the game's shortcut, the
+  triggers don't reach the pad: turn it off for them
+  ([Rumble and triggers](docs/GUIDE.md#rumble-and-triggers)).
+
+- **BN6's Virus Battler.** On an act's first layer, in about half the
+  acts from the second (one a run at least), a Virus Battler Mr.Prog waits
+  at the end of a side path, in his own BN6 colour. The first one you meet
+  gives you the BtlrCard with Mettaur and Gunner on it, and every Rare
+  virus you delete from then on joins it, in this run and every run after.
+  He names his pair, you stake zenny (500 to 3000, by act), pick one or two
+  viruses on BN6's own VIRUS LIST and place them, and they fight his on
+  their own. Each win adds the stake to the pot and shows his next pair:
+  take the pot or fight on, up to his BN6 series of 3, 5 or 10 rounds. A
+  loss or a draw loses it. A whole series won pays the pot, and the first
+  time in a run his BN6 prize (WindRack \*, HP+500, BugFix \*, FldrPak2,
+  SuprVulc V). A on the BtlrCard in KeyItem shows the card. Fast forward
+  runs during a Virus Battle's fight, which takes no input. Layers made
+  before continue afresh.
+
+- **Host your own Net Square, with nothing to set.** The server, started
+  bare (a double-click on Windows), now opens a Square every computer on
+  the network can reach, and says on its console the address players
+  type at the gate: `ws://192.168.1.20:8765`, and how to let friends in
+  from the internet. A `server.ini` beside it is read by itself, and any
+  setting can come from the environment (`CYBERWORLD_SERVER_SEED=7`). At
+  the gate's keeper, an address that can only be on your own network
+  needs nothing else: `192.168.1.20` alone reaches a Square started that
+  way (`ws://`, port 8765); a scheme or a port typed is kept as typed.
+  For a Square always up, with HTTPS for the browser and the 3DS,
+  `deploy/selfhost/compose.yaml` runs the server, its daily backup and
+  Caddy with a Let's Encrypt certificate from one line of `.env`
+  (`DOMAIN=square.example.com`), and each release publishes the server's
+  image for x86-64 and ARM64 as `ghcr.io/saschb2b/cyberworld-server`.
+  The published game's page may come into any Square by default.
+  server/README.md opens with how, each way
+  ([Host your own Net Square](server/README.md#host-your-own-net-square)).
+  For hosts already running one: a `server.ini` with no `host` line now
+  listens on every interface rather than 127.0.0.1 (`host = 127.0.0.1`
+  keeps a server behind a proxy on the same computer to it), and one with
+  no `origins` line lets the published browser game in (`origins =`,
+  empty, keeps native games alone).
+
+- **A Soul's chips reach the folder.** A run that holds a BN5 Soul now
+  finds the chips it unites with. A quarter of the chips in Mystery Data
+  are of a held Soul's kind (Colonel's Obstacle, ShadowMan's Invisible,
+  NumberMan's Plus, TomahawkMan's Wood, KnightMan's Break, ToadMan's
+  Aqua), each as rare as the chip it replaces, and a Net Dealer's fourth
+  chip is one. With two Souls held, the kind your folder holds fewest of
+  comes first. You find as many chips as before; only which ones changes,
+  and a DarkChip never comes this way. A Soul still takes a chip of that
+  turn's hand, as in BN5. A Soul won on a layer counts from the next.
+  Layers made before continue afresh (their stock changed).
+
+- **Your Crosses join a dark layer's team, and you pick who comes.** On a
+  Liberation board the Navis whose Crosses the run holds (the one brought,
+  or those won from the acts' guardians) now stand beside MegaMan as BN5's
+  Souls do, each in his own BN6 body, with a command from Team ProtoMan,
+  the other version of BN5, by his element: HeatMan's **Napalm** (four
+  ahead and both sides of the third, one battle), ElecMan's
+  **MagnetBarrier** (no harm on the board to the team till the next phase),
+  SlashMan's **WideSwrd** (three across, one battle), EraseMan's
+  **PanelSearch** (the item and trap panels of a dark line, one battle) and
+  ChargeMan's **BombLiberation** (he flies over the dark and frees the
+  panel under him, no battle). Each works as BN5's own code does, read
+  from its ROM. His battles are fought as MegaMan in his Cross from the
+  first turn, on his HP: a hit of its weakness breaks it, and no other
+  Cross or UNITE is offered in it. Where you hold more Navis than the
+  board has places, a **TEAM** screen opens after the board's first look:
+  each Navi's face, HP, command and its shape, and the form he fights in
+  with its weakness. It remembers your last pick, and the board's par is
+  the one for the team you take. Every board now has a spot for each
+  held Navi's command, whoever you bring.
+
+- **A Net Square's server stops cleanly.** A trade or a Board post made
+  as the server stops is written before it ends, and a slow name service
+  (macOS's) no longer holds its stop for seconds.
+
 ## 0.15.1 (2026-10-25)
 
 - **Fast forward, outside the fight.** A press of its button runs the
@@ -123,7 +217,7 @@
   from its ROM as the game runs: its board and backdrop, banners, command
   window, L view and camera, its units animated, its board music. A
   CONTINUE goes on with the same board. Needs BN5 Team Colonel's ROM
-  beside BN6's; MegaMan liberates alone for now (docs/LIBERATION.md).
+  beside BN6's; MegaMan liberates alone for now (docs/game/liberation/).
 - **The JACK-IN SETUP looks like BN6's PET.** The setup after NEW GAME
   now sits in the PET window as Options does: BN6's orange arrows on each
   value, the row under the cursor explained in KeyItem's INFORMATION box,
@@ -200,7 +294,7 @@
   and words sit in BN6's NAVIGATOR box, asking "Lan,trade our FireBrn1 F
   for Beta's MrkCan1 M?" with Yes and No, and the statistics question is
   asked in BN6's chat box. The rules, measured from BN6's screens, are in
-  docs/UI.md.
+  docs/engine/ui.md.
 - **A run ends on BN6's RESULT.** The summary after a run was bold
   coloured lines over the darkened area. It is two PET screens now, as
   BN6's battle RESULT gives its record and then what it got: **RESULT**
@@ -381,7 +475,7 @@
   MegaMan's card before "Take it,Lan?", and his 30 seconds start only
   when the question is up. The link between two players shows as bars,
   never a number, beside a player's card and the question. Protocol v13:
-  a server and its games update together (docs/ONLINE_ARENA.md, A rematch
+  a server and its games update together (docs/online/arena/from-square/rematch-in-a-second.md, A rematch
   in a second and The Square before a NetBattle).
 - **Team NetBattles (epic #167).** Two players team up in the Net
   Square: Team up on a player's card asks him, his MegaMan asks Lan, and
@@ -397,7 +491,7 @@
   for both teams, with no result; nothing is won or lost. The referee
   calls a team's bouts. Protocol v12 (TEAM and TEAM_STATE, a carried HP,
   STANDS's bout): a server and its games update together
-  (docs/ONLINE_ARENA.md, Team NetBattles).
+  (docs/online/arena/teams.md).
 - **NetBattles from the ask to the result (epic #167, steps 1 and 2).**
   The way in is a PET Network panel instead of a black screen: both
   players, each MegaMan's HP, Crosses and Souls as carried, your set's
@@ -415,7 +509,7 @@
   stop is the PET's word on the card, never a frame number, and a bout
   that broke off counts neither won nor lost (the referee: "BROKE OFF! NO
   CALL!"). Short fades and BN6's own sounds take you in and out
-  (docs/ONLINE_ARENA.md, The way in, the battle and the result).
+  (docs/online/arena/from-square/way-in.md).
 - **Snappier NetBattles (epic #167, the netcode's quick wins).** Where
   both games' rollback windows cover the trip, a NetBattle's input delay
   is 1 frame instead of 2: every press, step and chip of your own a frame
@@ -430,7 +524,7 @@
   Custom screen or while your keys rest. Protocol v11 (the Arena's lag
   notes): a server and its games update together. A server host: the
   Arena's delay comes from `delay_for` as before, now 1 at least
-  (docs/ONLINE_ARENA.md, Quicker on the wire).
+  (docs/online/arena/rollback/quicker-on-the-wire.md).
 - **Every version on the site.** The project page has a versions page
   (`versions/`, and `ja/versions/` in Japanese): the newest release first,
   its notes with their pictures and clips and its trailer playing in the
@@ -686,8 +780,8 @@
   and without BN5's ROM DarkInvs keeps BN6's rule. After any BN5
   DarkChip MegaMan keeps his own colours: BN6's sprite has no dark
   palette, and BN5's number for it had drawn him tan. The owner's two calls
-  on DarkInvs and DarkPlus are written into docs/META.md and
-  docs/MULTIROM.md.
+  on DarkInvs and DarkPlus are written into docs/game/meta/ and
+  docs/multirom/.
 
 - **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
   beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New
@@ -888,7 +982,7 @@
   copy serves all (the Navis' attacks for the Navi chips, the chips'
   bombs and bubbles for the viruses that throw them), and the muzzle
   flashes are BN5's own, moved once for everyone. The chips that still
-  sit out wait for what docs/MULTIROM.md names; those that play come
+  sit out wait for what docs/multirom/ names; those that play come
   into runs. Layers made before continue afresh (the older net's stock
   holds more chips).
 
@@ -907,7 +1001,7 @@
   out of the deck until their code is moved. Without BN5's ROM each is a
   placeholder that keeps its id, codes and MB, so a run saved with one
   continues, the chip sits out, and MegaMan says why. Nothing in a run
-  gives one yet; a dev step does (docs/DEVTOOLS.md).
+  gives one yet; a dev step does (docs/devtools/).
 
 - **BN5's chips by their own names (issue #82).** BN5 numbers its text
   otherwise than BN6 past letters and digits (BN6 put its version marks
@@ -1361,7 +1455,7 @@
   MegaMan on the middle row's middle or front panel. Now attacks strike
   him again as he lands from the cross, as BN6 has it after a cross cut
   short, both as a guardian's copy and in the rival's netbattle
-  (docs/FIDELITY.md).
+  (docs/game/fidelity.md).
 - **The Library's card on the second screen** (issue #83). In the PET's
   Library the second screen shows the chip under the cursor as the Custom
   screen's card: its picture twice as large, its element, power and
@@ -1435,7 +1529,7 @@
   guardian's last word. It plays BN6's own "no song" now, 0x63, and after
   the battle once the map's theme has started, so the last word comes in
   silence and the theme returns with the Guardian Data, as the staging
-  meant (docs/BOSSES.md).
+  meant (docs/game/bosses/).
 - **Face to face with a guardian** (issue #100). Before the talk MegaMan
   steps up beside the guardian, at his height, and turns to him; the
   guardian logs in facing MegaMan. Where an arena was entered from above,
@@ -1467,7 +1561,7 @@
   on, so holding the arrow's way no longer walks MegaMan past a lane
   there. BN5's Science Labs and Oran Isle, whose art draws every room as
   its small hubs, keep their layers without one. The design, what
-  Warframe's tilesets taught and the numbers are in docs/LEVEL_DESIGN.md
+  Warframe's tilesets taught and the numbers are in docs/world/level-design/
   (Identity); `build.py atlas` names each layer's signature, the dev step
   `sig` puts MegaMan in it, and `build.py screenshots identity-central`
   (and -seaside, -sky, -green, -graveyard, -undernet), `build.py clips
@@ -1526,7 +1620,7 @@
   takes three ideas from game launchers on Dribbble: the empty slot as a
   card with a plus and its one action, one accent colour for the cursor
   and PLAY alone, and the chosen cartridge lit round its edge with a
-  status chip (docs/FIDELITY.md). Also: the title's line of keys, which
+  status chip (docs/game/fidelity.md). Also: the title's line of keys, which
   a saved run's CONTINUE row hid, stands between the logo and the menu
   then; and the Android game reads its screen's size again as it starts,
   where a size that came just before (the navigation bar hidden) was
@@ -1634,7 +1728,7 @@
   own, his house too), and R at his PC jacks MegaMan in ("Jack in!
   MegaMan, Execute!!"); down the stairs and out of the front door (L in
   the house names it) is the town, its townsfolk and shops as before, no longer with a jack-in of
-  its own. The other towns are no longer a run's. docs/HOME.md has the
+  its own. The other towns are no longer a run's. docs/world/home/ has the
   design: next, going back through older portals priced by the Net's
   clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
@@ -1675,7 +1769,7 @@
   (the AYN Thor's 413 x 360 and up), which captures check with
   `--second-size WxH`; the README shows the battle's, the folder editor's
   and the NaviCustomizer's panels beside BN6's screens, and
-  docs/FIDELITY.md says what the second screen is and whose its pictures
+  docs/game/fidelity.md says what the second screen is and whose its pictures
   and words are.
 - **Shops and traders on the second screen** (issue #78). At the Net
   Dealer and the NaviCust vendor the entry under the cursor is a card (a
@@ -1754,7 +1848,7 @@
   logic, is fourteen files of one domain each (`director_*.c`), what they
   say in seven words files beside them; the layer's objects, its chats,
   the guardians, the NaviCust, the towns, the Crosses, the BN5 wait and
-  the run summary likewise. docs/VOICE.md's "Where the lines live" names the file for
+  the run summary likewise. docs/voice/rules.md's "Where the lines live" names the file for
   each speaker, so a voice pass reads every line in one place. Nothing a
   player sees or hears changed: the same scenarios gave the same pictures
   and the same words, line for line, before and after each step.
@@ -1776,7 +1870,7 @@
   like "reading a summary of a regular sentence", and it did: our boxes
   held nine to eleven words, packed facts together with colons and rarely
   showed a feeling. BN6's whole script, read character by character
-  (docs/VOICE.md), holds about six words a box and leads with a reaction.
+  (docs/voice/rules.md), holds about six words a box and leads with a reaction.
   Every line was rewritten to it: MegaMan teases and worries and calls Lan
   by name, Lan answers and decides, Mr.Prog speaks in capitals, Chaud in
   "Hmph."s, the bystanders gossip, and each guardian has his habit of
@@ -1873,7 +1967,7 @@
   its 13,646 (98.1%), and 4,329 (31.7%) in BN5 Team Colonel, which has no
   public disassembly. bn6f carries no license, so its names are not
   redistributed: `build.py symbols --bn6f DIR` makes that full map from a
-  local bn6f checkout, kept out of git. docs/SYMBOLS.md says how it was
+  local bn6f checkout, kept out of git. docs/rom/symbols.md says how it was
   all found and checked, how to load the files and what may be reused;
   `build.py lint` keeps them in step with the engine's headers.
 - **BN6's own DarkChips play in BN6's battles, on every build (issue
@@ -3294,7 +3388,7 @@
   across runs ("That's 3-1 between us"), ProtoMan gets faster as he
   loses, and Dad's Records mail lists it. Each duel is one squad of the
   act's, a little above its band, the same every time the layer is made.
-  docs/RIVAL.md has the design. A run saved by an older build continues
+  docs/game/rival.md has the design. A run saved by an older build continues
   its layer afresh.
 - A duel shows its clock: in the battle, under the Custom gauge, MegaMan's
   time so far against ProtoMan's (and on the second rung whether MegaMan
@@ -3785,7 +3879,7 @@
   Konsole (README). Steam closes for a moment and opens again; an entry
   made before by Steam's own "Add to Steam" keeps its place and play time
   and gets the artwork.
-- **The meta layer, phase one** (docs/META.md): what a run leaves for the
+- **The meta layer, phase one** (docs/game/meta/): what a run leaves for the
   next is options, never power.
   - A run is the short net: three acts, then the Cybeast Nest on layer
     10, whose fall wins the run and opens the endless net.
@@ -4003,7 +4097,7 @@
   Green Area 2's NetCafe desk in Green, cut whole from the ROM with their
   walls, facing the camera one panel in from a platform's back edge, the
   aisle behind them walled off. MegaMan speaks to him across it. The first of
-  the originals' props on generated floors (docs/LEVEL_DESIGN.md, Props);
+  the originals' props on generated floors (docs/world/level-design/props.md);
   runs from an older build start their layer afresh.
 - An area's card fades out when a chat opens under it: an A at the gift
   Prog beside the arrival drew the chat box under the card.
@@ -4065,7 +4159,7 @@ The first alpha, and the first release. Its players' notes are
   names the Recovery Mr. Prog only below three quarters of MegaMan's HP,
   says that three ScrtData open the golden gate, and SpoutMan's warning
   names his whirl.
-- The NaviCust is a run's second build (docs/NAVICUST.md). Every guardian's
+- The NaviCust is a run's second build (docs/game/navicust.md). Every guardian's
   Guardian Data offers three programs of three builds (buster, hand, guard,
   field, HP), each with MegaMan's words for what it does, or B for
   BugFrags; the pool is 34 of BN6's programs by tier, the large ones as the
@@ -4320,7 +4414,7 @@ The first alpha, and the first release. Its players' notes are
   the houses, shops, signs and statues answer A. At the statue (or ACDC
   Town's doghouse) R plays the game's own jack-in to the first layer. The
   real world's maps, their tables, objects, checks and jack-in
-  destinations are documented in docs/OVERWORLD.md and docs/ROM_DATA.md;
+  destinations are documented in docs/world/overworld.md and docs/rom/;
   `build.py town` and `build.py world` show them.
 - Keyboard: the layout of Capcom's PC version (the Legacy Collection). W A S D
   move, J and K are A and B, Q and E are L and R, Enter is Start, R is Select;
@@ -4343,7 +4437,7 @@ The first alpha, and the first release. Its players' notes are
   of the game's maps per area (Central, Seaside, Sky, Green, Graveyard,
   Undernet, Undernet Zero, Underground), with walls the game's collision
   reads. Each area builds its layers in its own layouts, after how BN6's net
-  maps are laid out (docs/LEVEL_DESIGN.md): Central's routes, crater fields
+  maps are laid out (docs/world/level-design/): Central's routes, crater fields
   and catwalk mazes, Seaside's fields framed by comb boardwalks, Sky's
   mirrored hubs, Green's plank ladders, Graveyard's holed slabs, the
   Undernet's webs of long bridges and lattices of crosses. Walkways wear the
@@ -4387,7 +4481,7 @@ The first alpha, and the first release. Its players' notes are
   holes, poison), with versions that grow with depth; viruses the story
   meets late (the dragons, Nightmare) wait for the later acts. Every third
   layer ends in a guardian's arena, staged after Hades' bosses
-  (docs/BOSSES.md): a safe room with a heal and the Net Dealer before it;
+  (docs/game/bosses/): a safe room with a heal and the Net Dealer before it;
   the arena seals, the guardian logs in over the boss prelude with a title
   card and lines that remember earlier battles, and the battle starts
   without a question. Deleted, it says a last word and logs out; its
@@ -4424,7 +4518,7 @@ The first alpha, and the first release. Its players' notes are
   bookworm with its own SDL2 (backends loaded at run time), so it runs on
   glibc 2.34 and newer. `build.py run` plays it here; `build.py release`
   writes the PortMaster zip and the Linux archive.
-- A fair difficulty curve (docs/PROGRESSION.md). Depth, not the area, sets
+- A fair difficulty curve (docs/game/progression/). Depth, not the area, sets
   how hard a battle is: every random battle is sized from the ROM's virus HP
   and damage to its act's limits, at the highest version that fits, and the
   first battles of a run and after each guardian are gentler. The first act
@@ -4465,7 +4559,7 @@ The first alpha, and the first release. Its players' notes are
   great slab with rooms reached by its conveyor belts, now its walkways.
 - Robot Control Comp's platforms are its long white slabs joined by circuit
   walkways, as in the original, instead of wide octagons around a hub.
-- Dev tools (docs/DEVTOOLS.md): Select+R opens a dev menu for test runs (no
+- Dev tools (docs/devtools/): Select+R opens a dev menu for test runs (no
   random battles, can't die, one-hit enemies, up to 8x speed, win the battle,
   heal, zenny, the next layer or guardian, a chosen area). `build.py atlas`
   draws every area's layers with a report on their tiles; `build.py tour` has

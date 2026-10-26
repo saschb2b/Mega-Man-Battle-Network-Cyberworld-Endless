@@ -58,7 +58,7 @@ const char *const save_progress_names[SAVE_PROGRESS_NAMES] = {
 };
 
 /* (the normal slot's files, the week's net's beside them after "weekly-",
- * and weekly.sav, its record: weekly.h, docs/SAVES.md) */
+ * and weekly.sav, its record: weekly.h, docs/engine/saves.md) */
 bool backup_progress_name(const char *name) {
 	if (strncmp(name, "savedata/", 9)) return false;
 	const char *file = name + 9;

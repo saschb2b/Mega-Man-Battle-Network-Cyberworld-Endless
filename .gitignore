@@ -13,6 +13,8 @@ tools/romlab/romlab.bin
 *.state
 *.dat
 rom/
+# (but the knowledge base's map of the ROM, docs/rom/: text only, `build.py lint` refusing a ROM anywhere)
+!/docs/rom/
 savedata/
 network.ini
 network.ini.tmp

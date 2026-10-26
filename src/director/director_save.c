@@ -121,7 +121,7 @@ void save_checkpoint(void) {
 }
 
 bool director_can_suspend(void) {
-	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && hold_save_ok();
+	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && !D.battler_series && hold_save_ok();
 }
 
 const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
@@ -278,6 +278,7 @@ bool director_resume(void) {
 	act_note_read();
 	dark_load(run.seed);
 	souls_load(run.seed);
+	folder_souls_load();
 	runlog_tally_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
@@ -289,7 +290,7 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		/* (chips or Souls of BN5's, BN5's ROM not read: they wait for it,
-		 * and MegaMan says so, docs/MULTIROM.md) */
+		 * and MegaMan says so, docs/multirom/) */
 		D.resumed = true;
 		if (home) return resume_home();
 		spins_sync();

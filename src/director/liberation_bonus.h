@@ -1,4 +1,4 @@
-/* A BonusPanel as BN5's (docs/LIBERATION.md, BonusPanels as BN5's): the
+/* A BonusPanel as BN5's (docs/game/liberation/bn5/bonus-panels.md): the
  * Liberation command on it frees it without a battle and without the
  * Navi's action; three white flashes, then BN5's roulette on the phase
  * banner's band, its five slots in BN5's order, stopped by A, and the slot

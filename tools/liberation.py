@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """liberation.py [--seeds N] [--act A] [--show K] [--draw DIR] [--json FILE]:
-the liberation generator's ROM-free prototype (docs/LIBERATION.md).
+the liberation generator's ROM-free prototype (docs/game/liberation/).
 
 Makes Battle Network 5's Liberation Missions afresh from a seed, by the rules
 dissected from its ROM and its players' guides: a board of panels laid out in
@@ -16,7 +16,7 @@ rules, abstracted (a team acting once a phase, three-turn liberations, the
 one-turn bonus, Order Points, the enemy's phase): its phases set the
 mission's par, and the board is kept only where every teammate's command
 earns its Order Point, and only where it keeps the quality bar
-(docs/LIBERATION.md, The quality bar: one new rule an act, the staircase;
+(docs/game/liberation/quality-bar.md: one new rule an act, the staircase;
 dead decisions on the way bounded; the sealed region's route a price of
 phases, never required; traps shown). Prints the measures the design
 promises over the seeds: phases against par, every command's worth, dead
@@ -39,7 +39,7 @@ DIRS = ((1, 0), (0, 1), (-1, 0), (0, -1))
 DARKS = (DARK, ITEM, HOLE, RING, TRAP)
 AROUND = tuple((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
 
-# The staircase (docs/LIBERATION.md, The quality bar, 3): each act one rule more, its new
+# The staircase (docs/game/liberation/quality-bar.md, 3): each act one rule more, its new
 # question. Act 2 the basics (dark panels, DarkHoles, the Darkloid, Order Points, hearts);
 # 'barriers' (act 3) the sealed region behind a BarrierPanel, its key off the way and its route;
 # 'reach' (act 4) roaming guardians and a barrier across the way; 'tolls' (act 5) trap panels
@@ -47,8 +47,8 @@ AROUND = tuple((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
 # first. Traps' harm: BN5's 50 in missions 5-6, 100 later.
 TRAP_HARM = {5: 50, 6: 100}
 TRAPS = {5: 4, 6: 4}
-# Per act of the endless net (docs/PROGRESSION.md), the BN5 mission it stands
-# for and the sizes BN5's missions have there (docs/LIBERATION.md, The
+# Per act of the endless net (docs/game/progression/), the BN5 mission it stands
+# for and the sizes BN5's missions have there (docs/game/liberation/bn5/overview.md, The
 # missions): panels, DarkHoles, team, barrier kinds, the share of dark panels,
 # items, BonusPanels, guardians beyond one a hole, the enemies' damage and HP.
 # The layout's and the dark's bands are measured on BN5's own boards
@@ -73,13 +73,13 @@ ACTS = {
             plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.45, fields=(0.86, 1.0), dense=(4.2, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=600, ally_hp=650, virus=40, boss_hp=1500, boss_range=3, boss_dmg=100),
 }
-# The guardians, as BN5's guides give them (docs/LIBERATION.md, The enemy's phase): steps, reach, damage by act.
+# The guardians, as BN5's guides give them (docs/game/liberation/bn5/darkloids-phase.md, The enemy's phase): steps, reach, damage by act.
 GUARDS = {
     'brute': dict(move=2, reach=1, all_in_reach=True, hp=(120, 180, 220, 250, 300), dmg=(20, 40, 50, 60, 80)),
     'hawk': dict(move=3, reach=3, all_in_reach=False, hp=(100, 150, 180, 200, 250), dmg=(20, 30, 40, 60, 70)),
     'bladia': dict(move=2, reach=1, all_in_reach=False, hp=(200, 230, 230, 300, 340), dmg=(50, 50, 70, 100, 120), darkens=True),
 }
-# Every Navi's liberation ability, its kind and its shape (docs/LIBERATION.md, The Navis).
+# Every Navi's liberation ability, its kind and its shape (docs/game/liberation/bn5/navis.md).
 ABILITIES = {
     'MegaMan': 'longswrd', 'Colonel': 'screndiv', 'ProtoMan': 'wideswrd', 'ShadowMan': 'sneak',
     'NumberMan': 'numbercheck', 'TomahawkMan': 'tomahawk', 'KnightMan': 'stonebody', 'ToadMan': 'melody',
@@ -103,7 +103,7 @@ PAR_SCALE = {2: 0.58, 3: 0.67, 4: 0.70, 5: 0.82, 6: 0.79}
 EARN = -0.1
 USE_MIN = {2: 0.5, 3: 0.5, 4: 0.25, 5: 0.25, 6: 0.25}   # ... and only where the planner uses every teammate's command,
 # half a time a play at least, a quarter with four or five Navis to share the Order Points
-# The quality bar's measures (docs/LIBERATION.md, The quality bar, 1 and 6): a board is rejected
+# The quality bar's measures (docs/game/liberation/quality-bar.md, 1 and 6): a board is rejected
 # where more than this share of its decisions on the way have one sensible move, or where its
 # sealed region's route costs the route's player fewer phases than ROUTE_COST's first (a gift,
 # not a choice) or more than its second (a wall, not a choice), scaled as the par.
@@ -172,7 +172,7 @@ def carve_line(cells, a, b, rng):
 
 
 def lay_out(act, rng):
-    """The board's floor in the net's shape language (docs/LEVEL_DESIGN.md): platforms,
+    """The board's floor in the net's shape language (docs/world/level-design/): platforms,
     walkways between their sides, a start zone at the left edge, the Darkloid's
     block at the right, spurs ending in pads or stubs."""
     spec = ACTS[act]
@@ -205,7 +205,7 @@ def lay_out(act, rng):
     for c in start + boss_block: floor.add(c)
     nodes = [(2, sy)] + [(x + ww // 2, y + hh // 2) for x, y, ww, hh in rects] + [(bx - 2, by)]
     floor.add((2, sy)); floor.add((bx - 2, by)); carve_line(floor, (1, sy), (2, sy), rng); floor.add((bx - 2, by))
-    # A spanning tree by distance, then a loop or two (BN5's maps are mostly trees, docs/LEVEL_DESIGN.md).
+    # A spanning tree by distance, then a loop or two (BN5's maps are mostly trees, docs/world/level-design/).
     linked, edges = {0}, []
     while len(linked) < len(nodes):
         best = min(((abs(nodes[i][0] - nodes[j][0]) + abs(nodes[i][1] - nodes[j][1]), i, j)
@@ -217,7 +217,7 @@ def lay_out(act, rng):
     for i, j in edges:
         path = carve_line(floor, nodes[i], nodes[j], rng)
         if rng.random() < spec['wide']:
-            # A field's way two panels wide, as BN5's later boards run (docs/LIBERATION.md, The board).
+            # A field's way two panels wide, as BN5's later boards run (docs/game/liberation/bn5/board.md).
             for k, c in enumerate(path):
                 nxt = path[k + 1] if k + 1 < len(path) else path[k - 1]
                 if nxt[0] != c[0]: floor.add((c[0], c[1] + 1))
@@ -358,7 +358,7 @@ def generate(act, seed, team=None):
     stubs = [e for e in ends if b.cells.get(e) in (FREE, DARK)]
     rng.shuffle(stubs)
     for e in stubs[:spec['bonus']]: b.cells[e] = BONUS
-    # The staircase's barriers (docs/LIBERATION.md, The quality bar, 3 and 6).
+    # The staircase's barriers (docs/game/liberation/quality-bar.md, 3 and 6).
     why = barriers(b, rng, reach)
     if why:
         return None, why
@@ -417,7 +417,7 @@ def way_on(b):
 
 
 def situations(b, team, rng, reach, far):
-    """Each teammate's command its situation on this board (docs/LIBERATION.md, The command
+    """Each teammate's command its situation on this board (docs/game/liberation/generator.md, The command
     rule): a guardian in the way for SneakAttack, an item cache for NumberCheck, a dark line of
     five for LifeMelody, rows and blocks of dark for ScrenDiv and TomahawkSwing."""
     abilities = {ABILITIES[n] for n in team}
@@ -484,7 +484,7 @@ ITEMS = {
 
 
 def item_mix(act, rng, n=None):
-    """What the item panels hold, BN5's counts for the act (docs/LIBERATION.md, Item panels)."""
+    """What the item panels hold, BN5's counts for the act (docs/game/liberation/bn5/phase.md, Item panels)."""
     out = []
     for kind, count in ITEMS[act].items():
         for _ in range(count):
@@ -630,7 +630,7 @@ def find_cut(b, rng, min_region=3):
 
 
 def check(b):
-    """The fairness rules (docs/LIBERATION.md, Guarantees): a reason to reject, or None."""
+    """The fairness rules (docs/game/liberation/generator.md, Guarantees): a reason to reject, or None."""
     lib = lambda k: k not in (BOSS,)
     dist = graph_dist(b, b.start, lambda k: k not in BARS)
     for i, k in enumerate(BARS):
@@ -677,7 +677,7 @@ class Sim:
         self.decisions = 0
         self.close_calls = 0
         self.taste = 0           # the route's player (1) goes for the sealed region's route first
-        self.moves = 0           # sensible moves over the decisions (docs/LIBERATION.md, The quality bar, 1)
+        self.moves = 0           # sensible moves over the decisions (docs/game/liberation/quality-bar.md, 1)
         self.dead = 0            # decisions with one sensible move, strikes apart
         self.strikes = 0         # ... a strike at a DarkHole or the Darkloid being the best
         self.best = collections.Counter()

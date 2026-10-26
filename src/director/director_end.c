@@ -59,7 +59,7 @@ void end_run(void) {
 
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
  * exit. The run ends on the title's summary of a win, and what it opened
- * for the next (docs/META.md). */
+ * for the next (docs/game/meta/). */
 void win_run(void) {
 	snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
 	title_cause_short[0] = 0;

@@ -1,4 +1,4 @@
-/* Jobs at home, the director's part (director_jobs.c, docs/HOME.md piece
+/* Jobs at home, the director's part (director_jobs.c, docs/world/home/ piece
  * 5): the askers' talk at a visit, the job taken and settled, and its
  * course in the Net. */
 #ifndef CW_DIRECTOR_JOBS_H

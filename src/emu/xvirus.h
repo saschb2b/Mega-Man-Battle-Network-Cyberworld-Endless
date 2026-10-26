@@ -1,5 +1,5 @@
 /* Virus families moved into BN6's own battle engine (issue #82; docs/
- * MULTIROM.md, Transplanted families; docs/EMULATION.md, its free space):
+ * docs/multirom/families.md; docs/engine/emulation/memory.md, its free space):
  * a family's own code copied whole from its game's ROM into the core's copy
  * past EMU_FREE, its calls out aimed again at BN6's routines through
  * veneers, the pointers in it moved, a state table laid out BN6's way, and
@@ -27,7 +27,7 @@
 enum {
 	XVIRUS_FAMILIES,   /* the families whose game's ROM is read: BN5's CanGard */
 	XVIRUS_CONTROL,    /* --dev xcontrol: the control instead, BN6's own Mettaur (AI 1) moved through the same steps as AI 32,
-	                      which must play frame for frame as Mettaur does (docs/MULTIROM.md, Transplanted families) */
+	                      which must play frame for frame as Mettaur does (docs/multirom/families.md) */
 	XVIRUS_NONE,       /* --dev nofamilies: none (BN6's battles as the player's ROM has them, to compare) */
 };
 /* The families a run may meet (XVIRUS_*), installed into the core's ROM

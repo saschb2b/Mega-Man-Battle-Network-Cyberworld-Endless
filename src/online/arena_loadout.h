@@ -1,4 +1,4 @@
-/* A carried MegaMan in an Arena core (issue #120, docs/ONLINE_ARENA.md):
+/* A carried MegaMan in an Arena core (issue #120, docs/online/arena/):
  * the OnlineLoadout a run's checkpoint gives (online_snapshot.h) written
  * into BN6's own RAM, where the game keeps them, through bn6.h's names:
  * the first folder, the pack, the NaviCust's board, HP and the buster.

@@ -1,4 +1,4 @@
-/* The week's net on the wire (online_week.c, docs/ONLINE.md, The week's
+/* The week's net on the wire (online_week.c, docs/online/weekly-net.md, The week's
  * net; protocol v6): the Board's dives as the server last said
  * (WEEK_BOARD), and a dive's end posted (WEEK_POST). */
 #ifndef CW_ONLINE_WEEK_H

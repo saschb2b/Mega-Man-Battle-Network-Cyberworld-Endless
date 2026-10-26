@@ -1,4 +1,4 @@
-/* A liberation's team (docs/LIBERATION.md, The team): MegaMan and the Navis
+/* A liberation's team (docs/game/liberation/decision.md, The team): MegaMan and the Navis
  * whose BN5 Souls the run holds, each with his own HP (BN5's table), his
  * place on the board, his command and his turn a phase, as BN5's team
  * plays (romlab, mission 2): R passes play to the next Navi yet to act,
@@ -14,12 +14,36 @@
 
 #include "liberation_board.h"
 
+/* The Navis the run holds for a board (MegaMan not among them), in their
+ * order: the BN5 Souls whose bodies stand in BN6 (BN5's ROM read, the
+ * Souls in BN6's engine), then Gregar's Cross Navis (the Cross brought,
+ * else those found as an earlier act's guardian's: the run's state alone,
+ * which a checkpoint's rebuild reads as the layer was made); into navi,
+ * how many */
+int lib_team_held(uint8_t navi[LIB_HELD]);
+/* A held Navi (MATE_*): his name; his HP on a board of act `act` (a Soul's
+ * BN5's for that stage, BN5_LIB_NAVI_HP; a Cross Navi's the median of
+ * BN5's six there); the form his battles are fought in ("ColonelSoul",
+ * "HeatCross") and the element it is weak to (NULL none) */
+const char *lib_navi_name(int navi);
+int lib_navi_hp(int navi, int act);
+const char *lib_navi_form(int navi);
+const char *lib_navi_weakness(int navi);
 /* The team a dark layer of act `act` (0-based) is made for: MegaMan and
- * the run's Soul Navis whose bodies stand in BN6 (BN5's ROM read, the
- * Souls in BN6's engine), as many as BN5's team of that stage holds, the
- * layer's seed choosing where more are held; their HP BN5's for the
- * stage. MegaMan alone without them. Their sprites copied in as it is made. */
+ * the Navis the run holds, as many as BN5's team of that stage holds, the
+ * layer's seed choosing where more are held (the player picks on arrival:
+ * lib_team_pick); every one held kept in `held` for the command rule.
+ * MegaMan alone without them. Their sprites copied in as it is made. */
 void lib_team_make(LibTeam *t, int act);
+/* The team picked on arrival (liberation_pick.c): MegaMan and navi[0 ..
+ * n - 1] in the board's places, their HP the stage's (the board's par the
+ * planner's with them: lib_plan_par; their bodies lib_team_dress's) */
+void lib_team_pick(const uint8_t *navi, int n);
+/* The team's bodies on the board's objects as the team stands (a pick's,
+ * a CONTINUE's): their sprites copied in and the objects' scripts naming
+ * them (`scripts`: LayerObjs' lib_body, each object's sprite byte), for
+ * the map's next entry */
+void lib_team_dress(const uint32_t *scripts);
 /* ... the same less its last teammate (a board the whole team finds none
  * for tries a smaller one): false where MegaMan is alone */
 bool lib_team_shrink(LibTeam *t);

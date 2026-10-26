@@ -1,5 +1,5 @@
 /* The Navis' recipes as tools/xnavirecipe.py makes them from the two ROMs
- * (issue #82; docs/MULTIROM.md, Transplanted Navis): xnavi_bn5.c, written
+ * (issue #82; docs/multirom/navis.md): xnavi_bn5.c, written
  * by the generator, never by hand. The control (BN6's own HeatMan, derived
  * by the same walk) and BN5's Navis whose code is proven against BN5's own
  * (tools/xdiff.py), each at its fixed numbers (xnavi_recipe.h). */

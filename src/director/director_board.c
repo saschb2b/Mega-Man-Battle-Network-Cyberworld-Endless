@@ -1,4 +1,4 @@
-/* The NaviCust's board watched (docs/NAVICUST.md): the programs placed
+/* The NaviCust's board watched (docs/game/navicust.md): the programs placed
  * and left off, what fits, its bugs as the RUN leaves them, the Spins and
  * the TagChip system the profile holds, compression codes and RegUps. */
 #include "director_board.h"
@@ -185,7 +185,7 @@ bool fits_beside_placed(int v) { return fits_beside_as(v, flag_get(BN6_FLAG_COMP
 /* The NaviCust's rotations (key items 0x50-0x55, one a colour: white,
  * yellow, pink, red, blue, green; "Lets you rotate white parts with the L
  * and R Button"): BN6 hands them out over its story; a run has those the
- * profile found in the net, one a run (docs/META.md), and no other: a
+ * profile found in the net, one a run (docs/game/meta/), and no other: a
  * program of another colour lies as its record draws it, and the drafts
  * offer only what fits so (navicust_set_spins). */
 void grant_spins(void) {
@@ -281,14 +281,14 @@ void code_watch(void) {
 }
 
 /* The codes the profile knows, entered for MegaMan as a run begins (docs/
- * META.md, Compression codes): the flags of each program's four colours
+ * docs/game/meta/compression-codes.md): the flags of each program's four colours
  * set, as BN6's code input sets them, so the NaviCust lists it compressed;
  * its code entered again undoes it, as in BN6. Not on a program placed on
  * the board, whose cells the grid holds (none in a fresh game). A
  * CONTINUE's state keeps the flags as the player left them. */
 void codes_bring(void) {
 	/* (codes=N: the first N programs' codes known, as if entered in a run
-	 * before, docs/DEVTOOLS.md) */
+	 * before, docs/devtools/) */
 	for (int p = 1, known = 0; p < NAVICUST_PROGRAMS && known < dev.codes; ++p) {
 		char code[12];
 		if (!navicust_code(p, code)) continue;
@@ -397,7 +397,7 @@ static uint32_t board_hash(void) {
 #define BUG_CALM 10
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
- * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
+ * (docs/game/navicust.md). A bug the player can read is a price they chose; the
  * game only says that there is one. Read on the layer's first quiet frame
  * without a word, so a layer entered bugged does not repeat it; spoken
  * BUG_CALM frames after the map is back, before a step (issue #13: a

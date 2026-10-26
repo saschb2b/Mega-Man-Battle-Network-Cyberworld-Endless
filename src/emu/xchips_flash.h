@@ -1,5 +1,5 @@
-/* BN5's green flash in BN6's engine (issue #82's C3; docs/MULTIROM.md, The
- * chips' code; docs/ROM_DATA.md, DarkPlus's flash): DarkPlus's power
+/* BN5's green flash in BN6's engine (issue #82's C3; docs/multirom/chips-code.md, The
+ * chips' code; docs/rom/chips-code.md, DarkPlus's flash): DarkPlus's power
  * stored in the next chip of the hand flashes its user green 24 frames
  * (BN5's misc family's subfamily 3, 0x0800E1D0-0x0800E1D4, moved: xchips_
  * bn5.c's Misc), a timer BN5 keeps in his AI data's +0x3C, which BN6's

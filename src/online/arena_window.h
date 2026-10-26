@@ -1,5 +1,5 @@
 /* The Arena's rollback window on this system (issue #128,
- * docs/ONLINE_ARENA.md, Rollback): what a frame of the pair costs here,
+ * docs/online/arena/rollback/overview.md): what a frame of the pair costs here,
  * as the last battle (or --dev rollbench) measured it, kept in the data
  * folder (arena.ini, never in a .cwsave: it is the machine's, not the
  * player's), for the delay the next challenge or Yes asks for; the

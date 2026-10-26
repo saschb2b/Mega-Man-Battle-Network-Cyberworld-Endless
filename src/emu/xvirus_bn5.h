@@ -1,5 +1,5 @@
 /* BN5's virus families' recipes as tools/xrecipe.py makes them from the two
- * ROMs (issue #82; docs/MULTIROM.md, Transplanted families): xvirus_bn5.c,
+ * ROMs (issue #82; docs/multirom/families.md): xvirus_bn5.c,
  * written by the generator, never by hand. Each is whole (no decision
  * open) and numbered by its place in the generator's install order; these
  * are the families installed wherever BN5's ROM is read (xvirus.c), each at

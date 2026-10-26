@@ -1,4 +1,4 @@
-/* The meta layer (docs/META.md): what a run leaves for the next one.
+/* The meta layer (docs/game/meta/): what a run leaves for the next one.
  * Options, never power: starting folders, threat rungs, the endless net. */
 #ifndef META_H
 #define META_H
@@ -75,7 +75,7 @@ int meta_library_new(void);
 /* Whether the short net's dark way into the Undernet is open: the Secret
  * Area cleared in any run (the title's S). */
 bool meta_dark_way_open(void);
-/* The NaviCust's Spins found in the net (docs/META.md): a bit per colour
+/* The NaviCust's Spins found in the net (docs/game/meta/): a bit per colour
  * 1-6 (bit c - 1), the colours whose programs turn with L and R. */
 unsigned meta_spins(void);
 /* The Spin this run can find: its colour (1-6), one the profile lacks, or
@@ -89,7 +89,7 @@ void meta_spin_found(int colour);
 /* "pink", for colour 1-6. */
 const char *meta_spin_name(int colour);
 /* How many chips a collector's vault at `depth` wants in the Library
- * (docs/META.md, gates): more in each act. */
+ * (docs/game/meta/phase-two.md, gates): more in each act. */
 int meta_vault_need(int depth);
 
 /* The setup's rows with news since the last summary (profile.setup_new):

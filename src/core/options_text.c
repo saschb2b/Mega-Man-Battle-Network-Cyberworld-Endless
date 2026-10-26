@@ -9,7 +9,7 @@ static const char *const words[] = {
 	"Controls",   /* OW_CONTROLS */
 	"Which buttons and keys are A, B, L, R, START and SELECT",   /* OW_CONTROLS_NOTE */
 	"Audio",   /* OW_AUDIO */
-	"Music and sounds, on or off, and their mix",   /* OW_AUDIO_NOTE */
+	"Music and sounds, their mix, and the controller's rumble",   /* OW_AUDIO_NOTE */
 	"Sound",   /* OW_SOUND */
 	"GBA",   /* OW_GBA */
 	"As a GBA plays it: BN6's own mix, crisp and bright",   /* OW_GBA_NOTE */
@@ -44,6 +44,15 @@ static const char *const words[] = {
 	"Fast forward",   /* OW_FAST */
 	"FAST's button speeds up walks, talk and fades. Every fight stays at BN6's pace",   /* OW_FAST_ON_NOTE */
 	"The game always at the GBA's pace: FAST's button does nothing",   /* OW_FAST_OFF_NOTE */
+	"Vibration",   /* OW_VIBRATION */
+	"Weak",   /* OW_WEAK */
+	"Medium",   /* OW_MEDIUM */
+	"Strong",   /* OW_STRONG */
+	"The controller rumbles on hits, your attacks, counters and deletes",   /* OW_VIBRATION_ON_NOTE */
+	"No rumble: the controller stays still",   /* OW_VIBRATION_OFF_NOTE */
+	"Trigger effects",   /* OW_TRIGGERS */
+	"L's trigger clicks at a full Custom gauge, FAST's where it can run",   /* OW_TRIGGERS_ON_NOTE */
+	"Both triggers pull free, as on any controller",   /* OW_TRIGGERS_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
@@ -92,6 +101,20 @@ const char *options_fast_note(void) {
 		"# online. Its button, FAST in keys.ini and pad.ini (Tab or Space, a\n"
 		"# controller's right trigger), turns it on and off; held, it is the other\n"
 		"# way while held. Options changes it too.\n";
+}
+
+const char *options_vibration_note(void) {
+	return "\n# vibration: how strongly the controller rumbles on a fight's beats (a hit,\n"
+		"# by its damage; the charged shot ready and fired; a counter; a deletion;\n"
+		"# Beast Out and a Cross; MegaMan's defeat), on his attacks as each sounds\n"
+		"# and on a jack-in: strong, medium, weak or off. Never while fast forward\n"
+		"# runs. Options' Audio changes it too.\n";
+}
+
+const char *options_triggers_note(void) {
+	return "\n# trigger_effects: on, a DualSense's triggers click: the one that is L or R\n"
+		"# once the Custom gauge is full, FAST's where fast forward can run (as\n"
+		"# pad.ini maps them); off, both pull free. Options' Audio changes it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

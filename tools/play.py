@@ -26,7 +26,7 @@ Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
 flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map; on an older net's area,
 one of its records in BN6's engine), sig (MegaMan in the layer's
-signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
+signature, the room it is remembered by: docs/world/level-design/identity.md,
 Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
 200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
@@ -39,7 +39,7 @@ UP versions up: issue #82), chip ID CODE [N] (chip ID, 1-511, in code
 CODE, a letter or *, in the folder's first N entries, one where none, and
 one more in the pack: a chip of BN5's in BN6's tables, issue #82), cross
 F (the next Cross chosen on CROSSSELECT committed as form F, with --dev
-soulproxy form 8 HeatCross's copy: docs/DEVTOOLS.md, The proxy form),
+soulproxy form 8 HeatCross's copy: docs/devtools/proxy-form.md),
 stuck NAME (the run saved with BN6 holding MegaMan so: fade,
 chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
 its CONTINUE lets him go, issue #23), dump NAME (the video memory into
@@ -71,7 +71,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (CYBERWORLD_PLAY_BIN: another build, e.g. a session's own bin/ copy, to replay it exactly)
 BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linux', 'cyberworld'))
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
-BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
+BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
 SCALE = 3
 DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24

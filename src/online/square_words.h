@@ -1,5 +1,5 @@
-/* What is said in the Net Square (square_words.c, docs/ONLINE.md,
- * docs/VOICE.md): MegaMan to Lan, the channel keeper Mr.Prog, and MegaMan
+/* What is said in the Net Square (square_words.c, docs/online/,
+ * docs/voice/rules.md): MegaMan to Lan, the channel keeper Mr.Prog, and MegaMan
  * reading another player's MegaMan. The quick phrases and emotes
  * themselves are the protocol's (online_text.c). */
 #ifndef CW_SQUARE_WORDS_H

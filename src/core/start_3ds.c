@@ -83,7 +83,7 @@ static char rom_3ds[600];   /* the 3DS's own rom folder */
  * emu.c hands the core its padded copy as a file in memory, which the core
  * maps as it is (GBALoadROM maps a 16 MB ROM, and patches it in place).
  * Given back, the heap holds BN5's file with 8 MB to spare
- * (docs/EMULATION.md, The 3DS's memory). */
+ * (docs/engine/emulation/3ds-memory.md). */
 extern uint32_t *romBuffer;
 extern size_t romBufferSize;
 
@@ -152,7 +152,7 @@ void start_3ds(bool data_dir_given) {
 	buffer_give_back();
 }
 
-/* BN5's file read beside BN6's (docs/MULTIROM.md) where the heap holds it
+/* BN5's file read beside BN6's (docs/multirom/) where the heap holds it
  * with room left: its 8 MB, the core's 16 MB copy still to come and what a
  * run takes beside them, 50 MB at most where a layer's area is learned
  * (tools/heap3ds.py), and some to spare. Short of it, BN5's ROM is left

@@ -1,4 +1,4 @@
-/* Generated net layers in the game's own map formats (docs/EMULATION.md). */
+/* Generated net layers in the game's own map formats (docs/engine/emulation/). */
 #ifndef CW_NETMAP_H
 #define CW_NETMAP_H
 
@@ -93,7 +93,7 @@ void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
 /* Walls of the caller's beside the floor's own (a liberation's fence,
- * docs/LIBERATION.md), after netmap_build_layer: written with the pads. */
+ * docs/game/liberation/), after netmap_build_layer: written with the pads. */
 void netmap_add_walls(const CoordCell *c, int n);
 /* The layer's warp pads (the walls are written again with them). */
 bool netmap_set_pads(const CoordPad *pads, int n);

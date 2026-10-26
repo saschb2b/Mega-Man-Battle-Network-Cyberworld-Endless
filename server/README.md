@@ -9,6 +9,137 @@ the default total cap of 64 creates eight channels. There are no
 accounts, e-mail addresses, arbitrary chat or currency, and it never
 runs a game, holds a ROM or sees a save.
 
+## Host your own Net Square
+
+A Square of your own is one small program, no ROM and nothing to set.
+Pick how far it should reach.
+
+### On your computer, for players on your network
+
+A LAN party, or friends on the same Wi-Fi.
+
+1. Download the server for your computer from the
+   [latest release](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest):
+   `cyberworld-server-windows-x64.zip`, `cyberworld-server-linux-x86_64.zip`,
+   `cyberworld-server-linux-arm64.zip` (a Raspberry Pi on its 64-bit system too),
+   `cyberworld-server-macos-arm64.zip` or `cyberworld-server-macos-x86_64.zip`;
+   anywhere else with Python 3.11 or newer, `cyberworld-server-python.zip`
+   (`python3 cyberworld-server.pyz`).
+2. Unzip it and start `cyberworld-server`: on Windows double-click
+   `cyberworld-server.exe`, and when Windows asks whether to let it
+   through the firewall, allow it on private networks. On a Mac, macOS
+   stops a downloaded program it cannot verify the first time: **System
+   Settings › Privacy & Security › Open Anyway**, or
+   `xattr -d com.apple.quarantine cyberworld-server` in its folder.
+3. It says where players come in:
+
+   ```text
+   The Net Square "Cyberworld Endless" is open on port 8765.
+   Players give the Mr.Prog at the gate in Lan's HP, on this network:
+     ws://192.168.1.20:8765
+     ws://localhost:8765  (a game on this computer)
+   ```
+
+4. Each player talks to the Mr.Prog beside the gate in Lan's HP, chooses
+   another server and types that address. A game newer than 0.15.0
+   needs only `192.168.1.20`: an address that can only be on your own
+   network is taken as a Square started like this one, `ws://` on port
+   8765. Then everyone steps on the gate.
+
+Leave it running while you play; Ctrl+C closes the Square. What it keeps
+(`server-data/` in the folder it started in: its key, bans and the week's
+Board) carries over to the next start and the next version: keep that
+folder, and never share it.
+
+A browser game cannot come in this way: a page served over HTTPS reaches
+only `wss://` Squares (and `ws://localhost` on its own computer). For
+browser players, give the Square HTTPS (the last way below).
+
+### On your computer, for friends over the internet
+
+Two ways, neither needing a server of its own:
+
+- **A private network** such as [Tailscale](https://tailscale.com) or
+  [ZeroTier](https://www.zerotier.com): you and your friends join the
+  same one, and they type your computer's address on it. Tailscale's
+  addresses (`100.64.0.0/10`) count as your own network, so
+  `100.101.102.103` alone reaches the Square; no port is opened on your
+  router.
+- **A forwarded port**: forward TCP port 8765 on your router to the
+  computer the server runs on (the address it names), and give players
+  `ws://YOUR-PUBLIC-ADDRESS:8765` (your router, or a site such as
+  "what is my IP", says it). Plain `ws://` is not encrypted and browser
+  players cannot use it; a Square always up is better on a server.
+
+### On a server, with a domain and HTTPS
+
+For a Square that stays up, that browser players and the 3DS reach too: a
+Linux server with Docker (a small VPS does), a domain or subdomain whose
+DNS record points at it, and ports 80 and 443 open to the internet. In
+an empty folder on it:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/main/deploy/selfhost/compose.yaml
+echo "DOMAIN=square.example.com" > .env
+docker compose up -d
+```
+
+Players type `square.example.com`, and
+`https://square.example.com/health` says it is up.
+[`deploy/selfhost/compose.yaml`](../deploy/selfhost/compose.yaml) starts
+three containers: the server from the release's image,
+`ghcr.io/saschb2b/cyberworld-server`; its daily backup ([Backups and
+restores](#backups-and-restores)); and [Caddy](https://caddyserver.com),
+which gets the certificate from Let's Encrypt (the one authority the 3DS
+build trusts), renews it, and forwards `wss://square.example.com/presence`
+to the server. Caddy keeps no access log, so no player's address is
+written down. More lines for `.env`, each optional:
+
+| Line | What it does |
+| --- | --- |
+| `NAME=Lan's Square`, `MOTD=...` | The Square's name and welcome, in `/health` |
+| `SEED=7` | Another Square: its plaza's shape and landmark, and its own week's DeepNet |
+| `VERSION=0.16.0` | That release's image rather than the latest |
+
+`docker compose pull && docker compose up -d` updates it; the state
+stays in its volume. Compose 2.23.1 or newer is needed (the Caddyfile is
+inline). Where the image cannot be pulled, Compose builds it from the
+repository's `main` (a few minutes, the first time).
+
+Without Compose, the image alone serves plain `ws://` on port 8765, for
+a network of your own:
+
+```sh
+docker run -d --name cyberworld-square --restart unless-stopped -p 8765:8765 -v cyberworld-square:/data ghcr.io/saschb2b/cyberworld-server
+```
+
+### Settings
+
+None is needed. To change one, copy `server.example.ini` (in the archive,
+every line at its default) to `server.ini` beside the server or in the
+folder it starts in, edit it and restart; `--config FILE` names another
+file. The environment sets any of them too, over the file:
+`CYBERWORLD_SERVER_SEED=7` is `seed = 7` (with Docker,
+`-e CYBERWORLD_SERVER_SEED=7`, or a `server.ini` mounted at
+`/app/server.ini`). The ones a host reaches for:
+
+| Key | Default | What it does |
+| --- | --- | --- |
+| `name`, `motd` | `Cyberworld Endless`, `Welcome to the Net Square` | The Square's name and welcome, in `/health` |
+| `seed` | 120 | The Square: its plaza and landmark, and the start of its week's DeepNet |
+| `host` | empty: every interface | `127.0.0.1` lets this computer's games alone in |
+| `port` | 8765 | The TCP port |
+| `capacity`, `player_cap` | 8, 64 | Players in a channel, and in the Square (another channel opens as one fills) |
+| `trading`, `arena` | `true` | Trade Central and the NetBattles |
+| `origins` | `https://saschb2b.github.io` | The browser pages whose game may come in (the published one); empty, native games alone |
+| `maintenance` | empty | A line that turns every game away at the gate ([Maintenance](#maintenance)) |
+
+Moderation is the server's command line ([Identity and
+moderation](#identity-and-moderation)); what its state keeps and for how
+long, [What the state keeps](#what-the-state-keeps). Your Square, your
+rules: write them where your players read them, as [The official
+server](#the-official-server) does its own.
+
 ## The official server
 
 `wss://cyberworld.saschb2b.com/presence` is the Net Square the game's
@@ -122,21 +253,26 @@ From the repository root:
 ```sh
 python3 build.py server-test
 python3 build.py server
-python3 build.py server-run --config server/server.example.ini
+python3 build.py server-run --host 127.0.0.1
 ```
 
 Or independently of the game's build tools:
 
 ```sh
 python3 server/build.py
-python3 build/server/cyberworld-server.pyz --config server/server.example.ini
+python3 build/server/cyberworld-server.pyz --host 127.0.0.1
 ```
 
-The zipapp can be copied to another computer with Python installed. The
-configuration is supplied explicitly; without one the server binds
-`127.0.0.1:8765`, seed 120, room capacity 8, total cap 64, snapshots at 20 Hz. Ctrl+C stops it
-and closes its clients. `--host`, `--port` and `--seed` override the INI.
-Port 0 chooses a free port and reports it in the `listening` log event.
+The zipapp can be copied to another computer with Python installed. With
+no `--config` it reads a `server.ini` in the folder it starts in, else
+one beside it, else none: then it listens on every interface, port 8765,
+seed 120, room capacity 8, total cap 64, snapshots at 20 Hz, and says on
+the console where players come in (`hosting.py`). `CYBERWORLD_SERVER_KEY`
+in the environment sets the INI's `key`, over the file. Ctrl+C stops it
+and closes its clients. `--host`, `--port` and `--seed` override both;
+`--host 127.0.0.1` keeps it to this computer, as a developer's local
+server wants. Port 0 chooses a free port and reports it in the
+`listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
@@ -154,11 +290,17 @@ docker build -f server/Dockerfile -t cyberworld-server .
 docker run --rm -p 127.0.0.1:8765:8765 -v cyberworld-state:/data cyberworld-server
 ```
 
+Each release publishes this image for x86-64 and ARM64 as
+`ghcr.io/saschb2b/cyberworld-server` (`latest`, and the version's tags:
+`0.16.0`, `0.16`; `.github/workflows/server-image.yml`), which
+[Host your own Net Square](#on-a-server-with-a-domain-and-https) pulls.
 The Dockerfile-specific ignore file restricts the build context to server
 code and the shared protocol. The final image runs as a non-root user,
 contains the zipapp and Python, and has no game or ROM dependency.
-Mount a config read-only and pass `--config /path/server.ini` to customize
-it; container traffic needs `host = 0.0.0.0` inside the container.
+`-e CYBERWORLD_SERVER_KEY=VALUE` sets a setting; a config mounted
+read-only at `/app/server.ini` is read by itself, or pass `--config
+/path/server.ini`; container traffic needs `host = 0.0.0.0` inside the
+container (the image's default command sets it).
 
 `GET /health` returns JSON with the configured name, message of the day,
 protocol, occupancy, limits and rules. It contains no player identities.
@@ -178,7 +320,7 @@ for online play, BN6 and BN5 Team Colonel today, as each HELLO's ROM
 identities say (`roms_full` in `shared/online/protocol.json`). The
 server refuses those to a game without the full set, and a challenge or
 a trade aimed at one, with NOTICE 28 before anything changes; the game
-tells its player through its NetPass (docs/ONLINE.md, The NetPass).
+tells its player through its NetPass (docs/online/netpass.md).
 Between two games of the full set there are no per-pair rules: every
 chip trades and every battle is by full rules.
 
@@ -210,7 +352,7 @@ keeps no rules per battle. The server pairs a challenge with its answer,
 gives each player its side of the cable and an input delay fitted to
 both games' latencies (2 to 30 frames: the lockstep's frame, a tick, the
 longer latency, each a round trip with its jitter less what its rollback
-window covers; docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then
+window covers; docs/online/arena/smoothed-delay.md and Rollback), then
 relays their loadouts, keys and state hashes to each other alone, in a
 rate bucket of their own (120 a second). A player leaving ends the
 battle for the other. Since protocol v13 (epic #167) a pair of players'
@@ -245,7 +387,7 @@ team wins; a leave or a drop of any of the four breaks it off for both
 teams. The server relays a partner's sixteen-bit stream as it relays a
 lead's keys and reads none of it: his chips, Cross and Program Advance
 ride in it, and each game's linked GBAs take them from their own link
-packets (docs/ONLINE_ARENA.md, The partners' words in BN6's packet).
+packets (docs/online/arena/two-a-side/partners-words.md).
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first
@@ -395,7 +537,7 @@ published:
    today's archive. The `cyberworld` container's **Logs** show the join
    and the leave without a name or a public identity, and `/data/logs`
    holds no players' log (`log_days = 0`).
-10. Write the result down: docs/ONLINE.md's line on the official server
+10. Write the result down: docs/online/overview.md's line on the official server
     (it follows `main`, the protocol it speaks) and this section's dates.
 
 Where a step fails, **Deployments** has the last good deployment to
@@ -439,7 +581,7 @@ emotes, while movement and Inspect remain available. An optional
 `whitelist` is a space-separated list of public IDs allowed to connect.
 Profiles remain anonymous: resetting a private key can evade a ban.
 An allowlist is available where a host needs stricter admission.
-`hide` takes a profile's entry off the week's Board (docs/ONLINE.md, The
+`hide` takes a profile's entry off the week's Board (docs/online/weekly-net.md, The
 week's net) for the week `--week` names, this week where none, and
 refuses that profile's posts for that week; `unhide` puts it back.
 `forget` answers a player's request to be removed: it takes the public
@@ -511,7 +653,7 @@ Each UTC day the server counts, with no personal data (`stats.py`):
 | `passes` | joins by the NetPass: `full` (BN6's and BN5's ROMs) or `square` (BN6's alone) |
 
 HELLO names no system, so the server counts none by system; the game's
-own statistics do, where the player said yes ([GUIDE.md, Anonymous
+own statistics do, where the player said yes ([Anonymous
 statistics](../docs/GUIDE.md#anonymous-statistics)). A day is written once,
 as a line of `stats.jsonl` in the state directory, when the next begins or
 as the server stops; a restart the same day takes that line up again and
@@ -627,8 +769,9 @@ The browser uses its own trust store. There is no trust-on-first-use,
 certificate-warning bypass, or automatic fallback to plaintext.
 
 Browser clients must have their exact origin listed, separated by spaces,
-in `origins`. For example, `origins = http://localhost:8080`. Empty means
-native clients only. An HTTPS page requires `wss://`, as enforced by the
+in `origins`. For example, `origins = http://localhost:8080`. Without the
+key it is the published game's page, `https://saschb2b.github.io`; empty
+means native clients only. An HTTPS page requires `wss://`, as enforced by the
 browser. The origin check is not player authentication.
 
 The host sees connecting IPs at the network layer, display names and
@@ -685,7 +828,7 @@ platform tests must cover the remaining targets. The 3DS's bundled roots
 support the documented Let's Encrypt deployment; other certificate
 authorities require an explicit root-bundle update, never a validation bypass.
 
-See [online play](../docs/ONLINE.md) and
+See [online play](../docs/online/overview.md) and
 [the wire format](../shared/online/README.md).
 
 ## Release packaging

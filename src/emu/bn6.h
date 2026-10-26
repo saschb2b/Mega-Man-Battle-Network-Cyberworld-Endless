@@ -1,5 +1,5 @@
 /* Addresses in BN6 Cybeast Gregar (USA), the supported ROM (checked by
- * SHA-1 in rom.c). Names follow the bn6f disassembly; see docs/ROM_DATA.md. */
+ * SHA-1 in rom.c). Names follow the bn6f disassembly; see docs/rom/. */
 #ifndef CW_BN6_H
 #define CW_BN6_H
 
@@ -14,7 +14,7 @@
 #define BN6_STEPS_WALKED      0x12        /* S2001c04 +0x12: the distance walked since the last battle */
 #define BN6_STEPS_CHECKED     0x14        /* S2001c04 +0x14: where the roll last checked */
 #define BN6_FOLDER_ENTRIES    30          /* the chips in a folder */
-/* each enemy id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
+/* each enemy id's reward row in ROM, 20 u16 entries (docs/rom/) */
 #define BN6_DROP_ROWS         0x080AC718u
 #define BN6_BATTLE_REWARD     0x0200A00Cu /* the reward picked as the battle ended (u16, a row's entry) */
 #define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
@@ -84,9 +84,9 @@
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
-#define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
+#define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/rom/): */
 #define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
-#define BN6_BATTLE_BUSTING    (BN6_BATTLE_STATE + 0x1E) /* u8: the busting level, 1-10 and 11 for S, which the reward pick takes (bn6f sub_802C8FA; docs/ROM_DATA.md, Battle rewards) */
+#define BN6_BATTLE_BUSTING    (BN6_BATTLE_STATE + 0x1E) /* u8: the busting level, 1-10 and 11 for S, which the reward pick takes (bn6f sub_802C8FA; docs/rom/battle.md, Battle rewards) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
@@ -105,7 +105,7 @@
                                              less each chosen this battle (BN6_CROSSES_USED) and the one he began it in (0x08029EF6 lists them) */
 #define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
 #define BN6_PA_STAR_LIMIT     0x08029606u /* bn6f sub_80295C8, a Program Advance of one chip in codes in a row: cmp r2, #1 (0x2A01), one * of its three at most */
-#define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/ROM_DATA.md) */
+#define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/rom/) */
 #define BN6_FIELD_PANELS      0x02039AE0u /* the field's panels (bn6f PanelData), 8 a row from column 0, rows 0-4, each: */
 #define BN6_PANEL_SIZE        0x20        /* a panel's size */
 #define BN6_PANEL_TYPE        0x02        /* Type: 1 a hole, 2 a plain panel, 4 poison, 0x0B and 0x0C a conveyor left and right */
@@ -125,7 +125,7 @@
                                              type (BN6_PANEL_TYPE), read by bn6f sub_800C4BC through sub_800C6D6's literal 0x0800C8D4 */
 #define BN6_FIELD_COUNT       237         /* ... its fields: 0-236, up to the code at 0x0800E24C (a BattleSettings' byte 0 names one) */
 #define BN6_FIELD_SIZE        12          /* ... a field's bytes */
-#define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
+#define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/rom/) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle (BattleObject), */
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */
 #define BN6_T1_COUNT          0x20        /* 32 of them */
@@ -147,7 +147,7 @@
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
-#define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/ROM_DATA.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
+#define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/rom/battle.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
 #define BN6_T1_AI_DATA        0x58        /* AIDataPtr: its AI's data in EWRAM, BN6_AI_DATA_SIZE bytes: +1 its AI index, +0x80 its state, +0xA0 its attack's variables */
 #define BN6_AI_DATA_SIZE      0x100       /* an AI's data (BN6_T1_AI_DATA), the same in BN5 */
 #define BN6_COLL_SIZE         0xA8        /* a collision data's bytes (BN5_COLL_SIZE: BN5's are 8 fewer) */
@@ -232,11 +232,11 @@
 #define BN6_NAVI_ATTACK       (BN6_NAVI_STATS + 0x01) /* Attack, Speed and Charge: the buster's levels less one (0-4), as the NaviCust's RUN ... */
 #define BN6_NAVI_SPEED        (BN6_NAVI_STATS + 0x02) /* ... makes them (bn6f applyNavicustPrograms_813C684: Attack+1 to ChargMAX, BustPack, ... */
 #define BN6_NAVI_CHARGE       (BN6_NAVI_STATS + 0x03) /* ... each capped at 4); a battle reads its copy's (a shot's damage Attack + 1, sub_801265A) */
-#define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
+#define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/game/navicust.md) */
 #define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
 #define BN6_NAVICUST_PLACED_MAX 25        /* the most programs the board holds */
 #define BN6_NAVICUST_SLOTS    49          /* the list's room, as the game's compile walks it (holes where a program was taken off) */
-#define BN6_NAVICUST_GRID     0x0200414Cu /* the board as a 7x7 grid, a byte a cell: its placed program's index + 1, 0 none (bn6f sub_813B9B4; docs/NAVICUST.md) */
+#define BN6_NAVICUST_GRID     0x0200414Cu /* the board as a 7x7 grid, a byte a cell: its placed program's index + 1, 0 none (bn6f sub_813B9B4; docs/game/navicust.md) */
 #define BN6_PROGRAM_ITEMS     0x90        /* key item 0x90 + program * 4 + variant: how many of it MegaMan has, on the board or not */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data */
 #define BN6_WARP_PENDING      (BN6_WARP + 0x10)    /* Unk_10: 1 while a trigger's warp is under way */
@@ -257,14 +257,14 @@
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
 #define BN6_FLAG_PET_OFF      0x1707      /* EVENT_PET_DISABLED: START opens nothing (EnterMap clears it) */
 #define BN6_FLAG_CONVEYOR     0x1717      /* EVENT_1717_PLAYER_ADVANCE_FORWARD: BN6's conveyor carries MegaMan (map triggers 0x48-0x4F), the pad and START off */
-#define BN6_FLAG_COMPRESSED   0x2660      /* + a NaviCust program's variant: compressed by its code (docs/ROM_DATA.md, NaviCust) */
+#define BN6_FLAG_COMPRESSED   0x2660      /* + a NaviCust program's variant: compressed by its code (docs/rom/navicust.md, NaviCust) */
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 #define BN6_FLAG_NAVI_IN_PET  0x171D      /* EVENT_PET_NAVI_ACTIVE: MegaMan is in the PET; clear, a jack-in says "MegaMan isn't in the PET..." (bn6f CompText87385CC), and only BN6's own jack-out sets it again */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */
 #define BN6_FLAG_NAVICUST     0x00F2      /* MegaMan's STATUS in the PET offers the NaviCust (found by setting flags there) */
 #define BN6_FLAG_BEAST_OUT    0x00E0      /* Beast Out in the Custom screen (unless 0x163 is set) */
-#define BN6_FLAG_LIBRARY      0x1E20      /* + chip id: the chip is in the Library (docs/ROM_DATA.md) */
+#define BN6_FLAG_LIBRARY      0x1E20      /* + chip id: the chip is in the Library (docs/rom/) */
 #define BN6_TOOLKIT_CHIP_MARKS 0x7C       /* eToolkit: a byte per chip id, the chip's key XOR BN6_CHIP_KEY_XOR where owned */
 #define BN6_TOOLKIT_PACK      0x4C        /* eToolkit: the pack, 12 bytes a chip id: a count (99 at most) per code of its record's four */
 #define BN6_CHIP_KEYS         0x020008A0u /* a key byte per chip id */
@@ -348,7 +348,7 @@
 #define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count */
 #define BN6_PROTOMAN_CROSS_END 0x080FDFA0u /* ProtoMan landing from his cross (bn6f sub_80FCC4C + 0x2C; issue #55), his collision data just restored: strh r0,[r2,#0x2E], r2 his collision data */
 
-/* BN6's own DarkChips (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md;
+/* BN6's own DarkChips (docs/rom/chips-code.md, BN6's own DarkChips; docs/game/meta/;
  * issue #70): the routines every chip use runs, the battle's BugFrags
  * (Gregar's as Falzar's); a chip record's fields are bn6_chips.h's */
 #define BN6_DARK_FIRST_ID     0x11E       /* DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus: chips 0x11E-0x122 */

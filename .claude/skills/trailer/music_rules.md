@@ -30,6 +30,32 @@ Every claim below marked *ROM* was read from the developer's ROMs with
 the scripts here; *Kaida* and *Aoki* are their words (Kaida's through a
 fan translation); *opinion* is a writer's.
 
+## The measure: music Akari Kaida would be proud of
+
+The owner's goal for every piece (26 October 2026): "music that would
+make Akari Kaida 'proud'". Matching numbers is the floor, not the
+measure: 0.16.0's first piece read "busier than the source: none" and
+still sounded "rather random" to him. What the goal asks, built from her
+own words in this file and the rules below:
+
+- **A melody first.** A one-bar hook a listener can hum after one hearing,
+  answered, stated again and cadenced (Melody 1), held up by everything
+  else. If the hook cannot be sung back, the piece is not ready.
+- **Few voices, each doing a lot.** Two or three sampled voices at a time
+  and the whole accompaniment in one fast arpeggio (*Kaida*, Melody 5,
+  Arrangement): never a wall of parts all moving at once.
+- **Colour from little.** One chord sample recoloured by the bass (C over
+  A is Am7) rather than many chords played out (*Kaida*, Harmony 6).
+- **Her instruments' sound.** BN was made from XV-1080 and SC-88 samples
+  (*Kaida*), so the sampled palette (FluidR3 GM, below) is the default,
+  the owner's gate 3, never an option left out.
+- **Its seed audible.** A fan names the Battle Network song it grew from
+  after one listen: its tempo, groove, harmonic language and the parts'
+  jobs, never its notes.
+
+Before the owner hears anything, listen for these five, and say in the
+gate report (SKILL.md, Review) how each one is met.
+
 ## Why 0.13.0's piece read as "AI-ish"
 
 The owner on 22 October 2026: "Its current music feels very ai-ish.
@@ -270,8 +296,10 @@ What the kit does for it (`tools/trailer_music.py`):
 - `bend` on PSG and Direct Sound notes, followed a frame at a time.
 - Hard pans per note are the piece's: alternate `pan` -0.9 and 0.9.
 
-Or sampled instruments, nearer the XV-1080 and SC-88 sounds BN was made
-from (*Kaida*): `tools/trailer_soundfont.py` cuts FluidR3 GM's (Frank Wen,
+The sampled instruments are the default since 0.14.0, the palette the
+owner loved in 0.14.0 and 0.15.0 (the owner's gate 3; 0.16.0's first
+piece, synthesis alone, was missed), nearer the XV-1080 and SC-88 sounds
+BN was made from (*Kaida*): `tools/trailer_soundfont.py` cuts FluidR3 GM's (Frank Wen,
 the MIT license; Debian's `fluid-soundfont-gm` in `docker/Dockerfile.music`,
 the owner's go-ahead of 22 October 2026) into MP2K samples, a note or a
 chord as one sample at 10512 Hz and 8 bits, cut short, for the same model
@@ -284,6 +312,17 @@ written by `--write-banner`). Good programs: 24 Electronic kit's kick, the
 clap (39) over a snare (40), 30 Distortion Guitar's power chord, 28 Palm
 Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
 Section, 81 Saw Wave.
+
+Which soundfont was settled by ear (26 October 2026): 0.16.0's three
+sketches, the same notes rendered through FluidR3 GM, GeneralUser GS
+v2.0.3 (the SC-88's kind, a GS bank) and MuseScore General. The owner
+"can't hear a difference in soundfonts": cut to 8 bits at 10512 Hz and
+played by MP2K, the banks' samples come out alike (their numbers moved a
+few points of tonal share and flatness, no more). FluidR3 GM stays, for
+its licence (MIT, no doubt about its samples' origin). The image holds it
+alone; `CW_SOUNDFONT_NAME` in `tools/trailer_soundfont.py` stays as the
+hook for another comparison (a bank added to the image and to its
+`FONTS`).
 
 ## Checks before the owner listens
 

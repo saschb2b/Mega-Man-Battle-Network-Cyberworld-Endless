@@ -201,7 +201,7 @@ int xrecords_report_run(const char *path) {
 	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
-	fprintf(out, "BN5's battle records in BN6's own engine (issue #82, docs/MULTIROM.md, One net): each random record of\n"
+	fprintf(out, "BN5's battle records in BN6's own engine (issue #82, docs/multirom/one-net.md): each random record of\n"
 		"its areas' maps as BN5 has it, then as BN6's engine fights it (xbattles.h) or why it cannot yet.\n"
 		"A family both games have by name is BN6's (its version by tier), a family moved into the engine its own ids.\n"
 		"Panels are row then column (BN5's records' own numbers: 0x15 row 1, column 5).\n");

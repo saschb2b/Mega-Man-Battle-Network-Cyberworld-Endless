@@ -1,5 +1,5 @@
 /* The Net Square built into the running game (online_square.c,
- * docs/ONLINE.md): its plan from the server's seed (square_plan.h), BN6's
+ * docs/online/): its plan from the server's seed (square_plan.h), BN6's
  * own map engine drawing it and walking the other players' MegaMen. */
 #ifndef CW_ONLINE_SQUARE_H
 #define CW_ONLINE_SQUARE_H

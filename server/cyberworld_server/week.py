@@ -25,7 +25,6 @@ The Board is every game's to read (a WEEK_BOARD after every WELCOME);
 posting a dive takes the full set (protocol v9, protocol.full_set), a
 post from a game without it refused with NOTICE notice_pass."""
 
-import asyncio
 import hashlib
 import hmac
 import logging
@@ -33,7 +32,7 @@ import struct
 import time
 
 from . import protocol, websocket
-from .identity import append_log, rewrite_log
+from .identity import rewrite_log
 
 LOG = logging.getLogger("cyberworld.server")
 SPEC = protocol.SPEC
@@ -102,7 +101,6 @@ class Weeks:
         self.server = server
         self.clock = clock
         self.best = {}          # (week, identity hex) -> entry
-        self.write_task = None
         self.load()
 
     def first_kept(self):
@@ -195,10 +193,8 @@ class Weeks:
         self.best[key] = entry
         self.prune()
         self.server.event("week_post", id=player.id, week=entry["week"], depth=entry["depth"], won=entry["won"])
-        directory = self.server.store.directory
-        if directory:
-            kept = {field: value for field, value in entry.items() if field != "flags"}
-            self.write_task = asyncio.create_task(asyncio.to_thread(append_log, directory, BOARD_LOG, kept))
+        if self.server.store.directory:
+            self.server.append(BOARD_LOG, {field: value for field, value in entry.items() if field != "flags"})
         self.broadcast()
 
     def prune(self):

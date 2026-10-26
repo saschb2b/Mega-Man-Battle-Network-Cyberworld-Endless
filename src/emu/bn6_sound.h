@@ -2,7 +2,7 @@
  * includes this): MP2K, Nintendo's "m4a", as the game runs it and the
  * engine's own player follows it (src/audio/mp2k*.c): its RAM, its tables
  * in the ROM, its routines. Names follow the bn6f disassembly where it
- * names them; docs/ROM_DATA.md, BN6's sound engine, says how each was found
+ * names them; docs/rom/sound.md, BN6's sound engine, says how each was found
  * and how to verify it. */
 #ifndef CW_BN6_SOUND_H
 #define CW_BN6_SOUND_H
@@ -12,11 +12,29 @@
 #define BN6_SOUND_CHANS       (BN6_SOUND_INFO + 0x50) /* its DirectSound channels, 0x40 bytes each */
 #define BN6_SOUND_PCM_FREQ    (BN6_SOUND_INFO + 0x14) /* s32: the mix's rate in Hz, 10512 (above its half the GBA's mix holds only images) */
 #define BN6_SOUND_CGB_CHANS   0x03005600u /* the PSG's four CgbChannels, 0x40 bytes each */
+#define BN6_SOUND_MAX_CHANS   (BN6_SOUND_INFO + 0x06) /* u8: its DirectSound channels in use, 4 */
+#define BN6_CGB_CHAN_COUNT    4    /* the PSG's channels at BN6_SOUND_CGB_CHANS, its squares, wave and noise */
+/* a channel (SoundChannel, CgbChannel alike to +0x2C; src/audio/mp2k_state.h) */
+#define BN6_CHAN_SIZE         0x40
+#define BN6_CHAN_STATUS       0x00 /* u8: 0 silent, else it plays (the envelope's phase in its low bits) */
+#define BN6_CHAN_TYPE         0x01 /* u8: 0 a sample (8 its fixed pitch), 1-2 the PSG's squares, 3 its wave, 4 its noise */
+#define BN6_CHAN_KEY          0x08 /* u8: the note's key */
+#define BN6_CHAN_ENV          0x09 /* u8: the envelope's volume, 0-255 (the PSG's 0-15) */
+#define BN6_CHAN_VELOCITY     0x12 /* u8: the note's velocity, 0-127 (the track's volume apart: Options' Effects off leaves it) */
+#define BN6_CHAN_CUR          0x28 /* u32: a sample's next byte's address (signed 8-bit, in the ROM); the PSG's wave loaded */
+#define BN6_CHAN_TRACK        0x2C /* u32: its track (MusicPlayerTrack, in a player's BN6_MPLAY_TRACKS) */
 #define BN6_SOUND_JUMP_TABLE  0x03005570u /* MPlayJumpTable: the commands 0xB1-0xCE, then the library's own calls (36 words) */
 
 /* a player's row in BN6_MPLAYS (bn6.h), 12 bytes: +0 its MusicPlayerInfo */
 #define BN6_MPLAY_ROW         12
 #define BN6_MPLAY_TRACKS      0x04 /* its tracks (MusicPlayerTrack, BN6_TRACK_SIZE each) in EWRAM */
+/* its MusicPlayerInfo */
+#define BN6_MPLAY_SONG        0x00 /* u32: the song it plays, its header's address (a lower priority's start refused leaves it) */
+#define BN6_MPLAY_CLOCK       0x0C /* u32: its clock, 0 as a song starts on it */
+/* a song's entry in the song table (RomLayout.song_table), 8 bytes */
+#define BN6_SONG_ROW          8
+#define BN6_SONG_HEADER       0x00 /* u32: its header's address */
+#define BN6_SONG_PLAYER       0x04 /* u16: the player it plays on */
 #define BN6_MPLAY_TRACK_COUNT 0x08 /* u8: how many */
 /* a track (MusicPlayerTrack) */
 #define BN6_TRACK_SIZE        0x50

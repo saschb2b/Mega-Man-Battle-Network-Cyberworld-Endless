@@ -1,4 +1,4 @@
-/* The guardian's arena (docs/LEVEL_DESIGN.md, Guardians): a square platform
+/* The guardian's arena (docs/world/level-design/, Guardians): a square platform
  * at the end of a single bridge, as far from MegaMan's arrival as the layer
  * allows. The room the bridge leaves from is the antechamber, where the
  * last services before the fight stand. */
@@ -31,7 +31,7 @@ static bool bridge_clear(int ex, int ey, int d, int len) {
 
 /* (as far from the arrival as there is room for, past the layer's
  * signature where it can be: the way to the guardian runs through it,
- * docs/LEVEL_DESIGN.md, Identity) */
+ * docs/world/level-design/identity.md) */
 int arena_attach(int n, ArenaInfo *out) {
 	static int16_t dist[MAP_H][MAP_W];
 	ng_walk_past_signature(dist);

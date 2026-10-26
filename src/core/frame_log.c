@@ -70,7 +70,7 @@ void frame_log_present(uint64_t present) {
 		}
 #ifdef __3DS__
 		/* (and the heap, whose high-water mark a layer's learning raises:
-		 * docs/EMULATION.md, The 3DS's memory) */
+		 * docs/engine/emulation/3ds-memory.md) */
 		char heap[120];
 		start_3ds_heap(heap, sizeof heap);
 		size_t at = strlen(bottom);

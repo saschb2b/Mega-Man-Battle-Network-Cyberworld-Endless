@@ -1,4 +1,4 @@
-/* The rival's duel on a layer (docs/RIVAL.md): its squad and ProtoMan's
+/* The rival's duel on a layer (docs/game/rival.md): its squad and ProtoMan's
  * time, rolled aside from the layer's own rolls, the official gate's
  * opening, a CONTINUE's duel as it was, and the verdict. */
 #include "director_duel.h"
@@ -44,7 +44,7 @@ static bool duel_layer(void) {
 }
 
 /* The layer's official gate open where Chaud's clearance reaches its level
- * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md); the one beside
+ * (its script reads LAYER_CLEARED_FLAG, docs/game/rival.md); the one beside
  * ProtoMan's duel opens to its winner alone, as the duel is won, and stays
  * as a CONTINUE (`resumed`) finds it (a playtester with the clearance found
  * it open before the duel, which then paid nothing but the record). Where
@@ -59,7 +59,7 @@ void official_sync(bool resumed) {
 	else flag_clear(LAYER_CLEARED_FLAG);
 }
 
-/* The rival's time to beat for a squad of `hp` (docs/RIVAL.md): three
+/* The rival's time to beat for a squad of `hp` (docs/game/rival.md): three
  * seconds and one for every thirty HP, eight percent faster for every two
  * duels ProtoMan has lost (a rung's round), never under six tenths of it. */
 static int duel_frames(int hp) {
@@ -90,7 +90,7 @@ static int encounter_hp(const Encounter *e) {
 	return total;
 }
 
-/* The rival's duel on the layer being built (docs/RIVAL.md): its squad,
+/* The rival's duel on the layer being built (docs/game/rival.md): its squad,
  * rolled aside from the layer's own rolls, and ProtoMan's time for it. The
  * squad is the layer seed's alone, not the last battles fought: they steer
  * a random battle away from their viruses, and a CONTINUE brings them back
@@ -128,7 +128,7 @@ void duel_roll(void) {
 	/* (the netbattle's ProtoMan: half the act's guardian band's top at
 	 * most, as his attacks stay his 1800 HP version's, ten times a
 	 * guardian's damage a second: at the top, 1000 in act 3, a playtester's
-	 * MegaMan ran after one hand, docs/RIVAL.md) */
+	 * MegaMan ran after one hand, docs/game/rival.md) */
 	int lo, hi;
 	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 	D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
@@ -138,7 +138,7 @@ void duel_roll(void) {
 	D.duel_call_due = true;
 }
 
-/* The duel's verdict (docs/RIVAL.md): MegaMan's DeleteTime against
+/* The duel's verdict (docs/game/rival.md): MegaMan's DeleteTime against
  * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
  * words queued, with both times as the results screen shows them (and
  * whether Lan pulled MegaMan out of the netbattle). */
@@ -153,7 +153,7 @@ void duel_verdict(bool won, bool spared) {
 	profile.duel_depth = (uint16_t)run.depth;
 	profile.duel_beat = beat;
 	profile_save();
-	/* (what his respect opens: docs/RIVAL.md; the first clearance brings
+	/* (what his respect opens: docs/game/rival.md; the first clearance brings
 	 * the TagChip system, for good: issue #51) */
 	int after = rival_clearance();
 	if (after > before && after == 1) {

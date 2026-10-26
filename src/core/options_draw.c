@@ -13,6 +13,7 @@
 #include "controls.h"
 #include "display.h"
 #include "fast_forward.h"
+#include "feel_out.h"
 #include "gfx.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -46,7 +47,8 @@ static const char *title_word(void) {
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
 
-/* a turned line's value: the window's, the scale's, smooth motion's, the music's, the effects', fast forward's, the sound's */
+/* a turned line's value: the window's, the scale's, smooth motion's, the music's, the effects', fast forward's, the
+ * vibration's, the trigger effects', the sound's */
 static const char *value_word(int kind) {
 	switch (kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_ON : OW_OFF);
@@ -55,6 +57,8 @@ static const char *value_word(int kind) {
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_ON : OW_OFF);
 	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_ON : OW_OFF);
 	case LINE_FAST: return fast_speed() > FAST_OFF ? fast_speed_word(fast_speed()) : options_word(OW_OFF);
+	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_OFF : (OptionsWord)(OW_WEAK + feel_level() - FEEL_WEAK));
+	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_ON : OW_OFF);
 	default: return sound_word();
 	}
 }
@@ -64,7 +68,7 @@ static const char *value_word(int kind) {
 static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
 		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND,
-		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST };
+		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST, [LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
@@ -96,6 +100,8 @@ static const char *note_words(int kind) {
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_MUSIC_ON_NOTE : OW_MUSIC_OFF_NOTE);
 	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_EFFECTS_ON_NOTE : OW_EFFECTS_OFF_NOTE);
 	case LINE_FAST: return options_word(fast_speed() > FAST_OFF ? OW_FAST_ON_NOTE : OW_FAST_OFF_NOTE);
+	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_VIBRATION_OFF_NOTE : OW_VIBRATION_ON_NOTE);
+	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_TRIGGERS_ON_NOTE : OW_TRIGGERS_OFF_NOTE);
 	default: return "";
 	}
 }

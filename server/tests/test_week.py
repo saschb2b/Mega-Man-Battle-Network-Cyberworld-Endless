@@ -91,7 +91,7 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         _, place, mine, top, _ = await self.board(b)
         self.assertEqual((place, [e[0] for e in top]), (1, ["Beta", "Alpha"]))
         self.assertEqual(top[0], ("Beta", 10, 4, 1, 70))
-        await asyncio.sleep(0.2)
+        await asyncio.gather(*self.server.writes)
         kept = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([(e["name"], e["depth"]) for e in kept], [("Alpha", 5), ("Beta", 10)])
         # (kept across a restart, and shown as last week's once the week turns)

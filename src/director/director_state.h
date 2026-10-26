@@ -23,8 +23,10 @@ typedef struct {
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
-	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/META.md, gates) */
-	/* the rival's duel (docs/RIVAL.md): the layer's squad, the duel under
+	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/game/meta/phase-two.md, gates) */
+	bool battler;          /* ... a Virus Battler's round (director_battler.c), battle mode 6: no MegaMan on its field */
+	bool battler_series;   /* a Virus Battler's series under way, its pot at stake: no save */
+	/* the rival's duel (docs/game/rival.md): the layer's squad, the duel under
 	 * way (a hit taken, the DeleteTime), and Chaud's words due: his call
 	 * as the layer begins, his verdict after */
 	Encounter duel_enc;
@@ -51,7 +53,7 @@ typedef struct {
 	uint32_t souls_used;   /* the Souls MegaMan united with in the battle under way (emu_battle_souls), for the run log */
 	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
-	bool beat_native;      /* the arrival's words say an older net's area fights our way, the first time a profile comes to one (docs/MULTIROM.md, One net) */
+	bool beat_native;      /* the arrival's words say an older net's area fights our way, the first time a profile comes to one (docs/multirom/one-net.md) */
 	bool beat_ours;        /* ... to a profile once told its battles were the old way, that they are ours now, Crosses and all */
 	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
 	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
@@ -67,11 +69,11 @@ typedef struct {
 	int act_frames;        /* frames spent in the act */
 	const char *act_guardian;  /* the guardian beaten on the way out */
 	bool town;             /* home: the town or Lan's HP; the next layer waits behind a portal */
-	bool home;             /* ... come home after an act (docs/HOME.md), not the run's start */
+	bool home;             /* ... come home after an act (docs/world/home/), not the run's start */
 	bool hp_said;          /* ... MegaMan has said what Lan's HP is, this run */
 	bool portal_taken;     /* ... a portal's way is under way */
 	const char *home_beaten;   /* ... the guardian deleted on the way */
-	bool home_back;        /* ... home from a trip back (docs/HOME.md, going back), not an act */
+	bool home_back;        /* ... home from a trip back (docs/world/home/going-back.md), not an act */
 	bool home_saved;       /* ... and the run saved there */
 	bool home_save_due;    /* the PET's Save at home, waiting for MegaMan (or Lan) free */
 	unsigned home_told;    /* ... the portals MegaMan has named this visit, a bit each */

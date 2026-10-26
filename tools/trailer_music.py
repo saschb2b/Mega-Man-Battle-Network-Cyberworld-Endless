@@ -638,8 +638,9 @@ def render_any(path, piece, seconds=None, rate=RATE, start=0.0):
         raise SystemExit(f'{path}: outside the repository, which the image mounts')
     cmd = ['docker', 'run', '--rm', '--name', f'cw-music-render-{os.getpid()}', '-u', f'{os.getuid()}:{os.getgid()}',
            '-v', f'{ROOT}:/src', '-w', '/src/tools']
-    if os.environ.get('CW_TRAILER_SOUND'):
-        cmd += ['-e', 'CW_TRAILER_SOUND=' + os.environ['CW_TRAILER_SOUND']]
+    for var in ('CW_TRAILER_SOUND', 'CW_SOUNDFONT_NAME'):
+        if os.environ.get(var):
+            cmd += ['-e', f'{var}={os.environ[var]}']
     cmd += [MUSIC_IMAGE, 'python3', 'trailer_music.py', '/src/' + rel, '--piece', piece.__name__.split('.')[-1],
             '--rate', str(rate), '--start', repr(start)] + (['--seconds', repr(seconds)] if seconds else [])
     subprocess.check_call(cmd)

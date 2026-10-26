@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """xnavirecipe.py [--check] [--report] [--ai N ...]: the Navis' recipes, made from the two ROMs (issue #82;
-docs/MULTIROM.md, Transplanted Navis; docs/DEVTOOLS.md, The recipe generator).
+docs/multirom/navis.md; docs/devtools/recipe-generator.md).
 
 A Navi's recipe (src/emu/xnavi_recipe.h) is a virus family's (src/emu/xvirus_recipe.h, tools/xrecipe.py) with what a
 Navi has more: its code walked from its own states and hooks (the Navi tables', BN5's ten or BN6's thirteen), the
@@ -49,7 +49,7 @@ NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'),
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
-# BN5's Darkloids, the Liberation Missions' (docs/LIBERATION.md, stage 4): ShadeMan, BlizzardMan, CloudMan, CosmoMan
+# BN5's Darkloids, the Liberation Missions' (docs/game/liberation/building/stage-4-darkloids.md): ShadeMan, BlizzardMan, CloudMan, CosmoMan
 DARKLOIDS = (13, 14, 15, 16)
 MOVED = SIX + (DARK_SOUL,) + DARKLOIDS
 
@@ -1457,7 +1457,7 @@ def c_objects(r):
 
 HEADER = '''/* xnavi_bn5.c: the Navis' recipes, written by tools/xnavirecipe.py from the two ROMs (python3 tools/xnavirecipe.py;
  * --check says whether this is what it writes). Do not edit: change the generator (or tools/bn5_navi_twins.py, its pairs
- * and audits) and write it again. Numbers alone (docs/MULTIROM.md, Transplanted Navis): addresses in BN5 Team Colonel
+ * and audits) and write it again. Numbers alone (docs/multirom/navis.md): addresses in BN5 Team Colonel
  * (USA) and BN6 Cybeast Gregar (USA), counts and the CRC32s of the ranges the install copies from the player's ROM;
  * nothing of either game's. The control (BN6's own HeatMan, derived by the same walk) and BN5's Navis proven against
  * BN5's own (tools/xdiff.py), each at its fixed numbers (src/emu/xnavi_recipe.h). */

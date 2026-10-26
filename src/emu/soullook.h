@@ -1,5 +1,5 @@
 /* A Soul's look in BN6's engine (issue #82, the Souls track's S3; docs/
- * MULTIROM.md, Transplanted Souls; docs/ROM_DATA.md, A Soul's look): the
+ * docs/multirom/souls.md; docs/rom/souls.md, A Soul's look): the
  * proxy form drawn as BN5 draws a Soul. MegaMan's sprite is the Soul's
  * whole sprite, BN5's list 0 by the Soul (BN6's list 0 grown with them),
  * its palette 0, 2 in Chaos Unison; no Cross's overlay but what BN5's

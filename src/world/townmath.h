@@ -1,4 +1,4 @@
-/* Moving pieces of a real-world map (docs/OVERWORLD.md): which moves keep
+/* Moving pieces of a real-world map (docs/world/overworld.md): which moves keep
  * the tile grid and the ground's patterns, and where a moved tile lands. */
 #ifndef CW_TOWNMATH_H
 #define CW_TOWNMATH_H

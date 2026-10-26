@@ -1,4 +1,4 @@
-/* Two MegaMen a side (epic #167, issue #181; docs/ONLINE_ARENA.md, Two
+/* Two MegaMen a side (epic #167, issue #181; docs/online/arena/two-a-side/overview.md, Two
  * MegaMen a side): the pair's NetBattle with two MegaMen a side, BN6's
  * own engine fighting them, behind --dev arena2v2 and for a side-by-side
  * team match (arena_seats.h). Hooks on each of the pair's cores: the

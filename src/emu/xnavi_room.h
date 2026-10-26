@@ -1,5 +1,5 @@
 /* BN6's battle engine given the room other games' Navis take (issue #82;
- * docs/ROM_DATA.md, The Navis' tables; docs/EMULATION.md, the free-space
+ * docs/rom/navis.md, The Navis' tables; docs/engine/emulation/memory.md, the free-space
  * map): the thirteen tables a Navi is found through by its AI index, the
  * Navi words of the four triples by actor type (its ice block's size, its
  * held chips, its companion's start and end), the routine its attacks hide

@@ -21,7 +21,7 @@
 #define RW_GROUPS      7
 
 /* The ROM the map being read comes from: BN6's, or an extra game's
- * (docs/MULTIROM.md), whose maps are in the same formats. */
+ * (docs/multirom/), whose maps are in the same formats. */
 static struct { const uint8_t *data; uint32_t map_rw, map_net, coord_rw, coord_net; int rw_groups, net_groups; } src;
 
 static void use_rom(int xrom) {
@@ -405,7 +405,7 @@ int area_src_height(const AreaSrc *a, int X, int Y) {
 	return a->hz[(size_t)cy * a->hw + cx];
 }
 
-/* ---- a Liberation map of BN5's (group 0x86, docs/LIBERATION.md) ----
+/* ---- a Liberation map of BN5's (group 0x86, docs/game/liberation/) ----
  * Its board's panels, as its mission's record lists them, are its floor,
  * whatever its walls say: the board moves its units, not the walls (a
  * panel's place: BN5_LIB_PANEL_PLACE, 32 world units a panel from 0x80,

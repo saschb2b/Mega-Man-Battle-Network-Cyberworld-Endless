@@ -1,7 +1,7 @@
 """xdiff_masks.py: whose a difference is, and the masks that explain it, for tools/xdiff.py (issue #82):
 each role attributed from both traces (the family's, MegaMan's, a native's, the engine's), the renderer's places
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
-place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
+place and its rule, never to the family's own records (docs/devtools/differential.md)."""
 from xdiff_snap import (NODE, SIZE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
                         PLAYER_SOULS, PLAYER_UNITE, Diff, Frame, icon_flag, role_name, u16, u32)
 from xdiff_events import engine_chose, engine_draw, spawned_by, spawns_of

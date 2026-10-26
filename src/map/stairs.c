@@ -1,7 +1,7 @@
 /* The game's ramps are floor-height cells of type 0x13 (climbing towards
  * world +X) or 0x14 (towards world -Y) in coordinate data section 1: a
  * foot z, value 1 and the height above the foot, rising 4 per 8-unit cell
- * (docs/ROM_DATA.md). A stair is one connected set of them. */
+ * (docs/rom/). A stair is one connected set of them. */
 #include "stairs.h"
 
 #include <stdlib.h>

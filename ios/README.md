@@ -54,7 +54,7 @@ the saves and `settings.ini`,
 copy the saves off there. Uninstalling the app deletes it, so the game
 keeps a copy of the saves, `cyberworld-endless.cwsave`
 (`src/core/backup.h`, the same file on every system), in a folder
-outside the app (`src/launcher/mirror.c`, docs/SAVES.md): the ROM
+outside the app (`src/launcher/mirror.c`, docs/engine/saves.md): the ROM
 folder, or a folder chosen with **SAVES › FOLDER**
 (`src/core/ios_saves.m`). It is written a few seconds after the game
 last saved and as the app goes to the background, through the folder's

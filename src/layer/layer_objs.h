@@ -29,9 +29,9 @@
 /* ... and the NaviCust vendor his, and a Recovery Mr. Prog. */
 #define LAYER_VENDOR_TOLD_FLAG 0x1450
 #define LAYER_HEAL_TOLD_FLAG   0x1451
-/* The layer's vault gave its chip (docs/META.md, gates). */
+/* The layer's vault gave its chip (docs/game/meta/phase-two.md, gates). */
 #define LAYER_VAULT_FLAG       0x1453
-/* The layer's official gate gave its chip (docs/RIVAL.md). */
+/* The layer's official gate gave its chip (docs/game/rival.md). */
 #define LAYER_OFFICIAL_FLAG    0x1455
 /* ... and Chaud's clearance reaches its level: it opens (the director sets
  * it as the layer begins, and as a duel on it is won). */
@@ -48,7 +48,7 @@
 #define LAYER_PCODE_FLAG       0x1465
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
 #define LAYER_NUMBER_SEALED_FLAG 0x1466
-/* The layer's flame of darkness gave its DarkChip, and left (docs/META.md,
+/* The layer's flame of darkness gave its DarkChip, and left (docs/game/meta/darkchips.md,
  * DarkChips). (0x1467-0x1469: the draft's fit flags,
  * guardian_objs.h) */
 #define LAYER_DARK_TAKEN_FLAG  0x146D
@@ -62,9 +62,9 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
-	int spin_found;            /* ... and the run's Spin (docs/META.md), -1 for none */
+	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
-	int script_of[OBJ_OFFICIAL + 1];   /* each kind's first talker's script, -1 none (for --talk); OBJ_OFFICIAL the last kind */
+	int script_of[OBJ_KINDS];   /* each kind's first talker's script, -1 none (for --talk) */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
 	int dark_flame;            /* the flame of darkness's script, -1 none (for --talk) */
@@ -74,15 +74,16 @@ typedef struct {
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
 	uint8_t md_colour[16], md_obj[16];
 	uint32_t md_find[16];      /* ... and what each holds: its content's kind << 16 | its value (a chip's id, zenny), for the run's counts */
-	int lib_prize[3];          /* a dark layer's prizes by its par (docs/LIBERATION.md): two under and at par a chip, over zenny; their scripts, -1 none */
+	int lib_prize[3];          /* a dark layer's prizes by its par (docs/game/liberation/): two under and at par a chip, over zenny; their scripts, -1 none */
 	int lib_loot[6];           /* ... its board's chips found in item panels (liberation_board.h's LIB_LOOT, by their loot index), -1 none */
 	int lib_zenny;             /* ... and its zenny found (lib_zenny's), -1 none */
 	int lib_bonus[4];          /* ... the chips its BonusPanels give (LIB_BONUS_CHIPS, the item panels' band), -1 none */
 	uint32_t lib_anim[16];     /* ... each unit's and teammate's animation byte (npc_live; liberation_state.h's LIB_OBJS), 0 none */
+	uint32_t lib_body[16];     /* ... and its script's sprite number (a team picked on arrival dresses its Navis there), 0 none */
 } LayerObjs;
 
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny
- * its board's item panels hold: their scripts into `out` (docs/LIBERATION.md) */
+ * its board's item panels hold: their scripts into `out` (docs/game/liberation/) */
 void lib_prizes_install(LayerObjs *out, TextArchive *text);
 /* ... the chip of par tier `tier` (0 two under par, 1 at par: a Server's
  * prize and a tier lower) at `depth` from the layer's seed, its code
@@ -96,7 +97,7 @@ void layer_objs_shops(const LayerObjs *o, bool saved);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);
-/* Sprite prop `p` as BN6's map objects (docs/LEVEL_DESIGN.md, Props):
+/* Sprite prop `p` as BN6's map objects (docs/world/level-design/props.md):
  * its pieces' 20-byte spawn records from record `n` of `recs` (`max` at
  * most) at height `cz`, their sprites asked of `npcs`; the records' count
  * after them, `n` where a sprite found no room (it is left out whole). */
@@ -107,7 +108,7 @@ extern bool layer_objs_dealer_again;
 /* Set by layer_objs_install: this layer's Net Dealer names the act's
  * guardian (from the act's second layer, or once battled). */
 extern bool layer_objs_dealer_named;
-/* Set before layer_objs_install on a duel's layer (docs/RIVAL.md): ProtoMan's
+/* Set before layer_objs_install on a duel's layer (docs/game/rival.md): ProtoMan's
  * time to beat, in frames, the rivalry's rung (0 his time, 1 his time
  * without a hit, 2 a netbattle with him), and whether the netbattle waits
  * for a later act (ProtoMan then names it, and asks nothing). */
@@ -122,7 +123,7 @@ extern int layer_objs_bystander, layer_objs_bystander2;
  * XLOOK_*: its look for BN6's set pieces and props), 0 on BN6's own (set
  * before layer_objs_install). */
 extern unsigned layer_objs_xlooks;
-/* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
+/* The level of the layer's official gate (docs/game/rival.md), 0 for none. */
 extern int layer_objs_official_level;
 /* Set before layer_objs_install on a layer that holds a flame of darkness:
  * its list-7 sprite (-1: none), the DarkChip in it, and for one of BN5's
@@ -130,7 +131,7 @@ extern int layer_objs_official_level;
  * layer_objs_dark_first). It stands in its last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
-/* ... one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
+/* ... one BN6's own rule plays (docs/game/meta/bn6-darkchips.md): its
  * words' pieces, NULL for BN5's own */
 extern const ScriptsDark6 *layer_objs_dark6;
 /* ... one played by BN5's rule: what it does in MegaMan's words (DarkPlus,

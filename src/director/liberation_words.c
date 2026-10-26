@@ -1,4 +1,4 @@
-/* What is said and shown on a liberation's board (docs/LIBERATION.md):
+/* What is said and shown on a liberation's board (docs/game/liberation/):
  * Lan and MegaMan knew BN5's Liberation Missions, Nebula's dark areas
  * taken back panel by panel, so they name what they see in its words. */
 #include "liberation_words.h"
@@ -90,7 +90,7 @@ const char *lib_mate_down_words(const char *name) {
 
 const char *lib_strike_words(int kind, const char *darkloid) {
 	/* (the guardians' as BN5's speak theirs: a cry and their attack's name;
-	 * the Darkloid's in his own habit of speech, docs/VOICE.md) */
+	 * the Darkloid's in his own habit of speech, docs/voice/rules.md) */
 	static const char *const guardians[4] = { "", "@N Grrrah!! BeastBreath!!", "@N Kyaaah!! HawkAttack!!", "@N Out of my way!! DarkSlash!!" };
 	static const struct { const char *name, *line; } darkloids[] = {
 		{ "HeatMan", "C'mon!! Feel the heat!" },
@@ -140,7 +140,7 @@ const char *lib_exit_words(void) { return "@M The exit's open,Lan!"; }
 
 const char *lib_entrance_words(const char *darkloid) {
 	/* (said once, at his first turn, as BN5's Darkloids claim their area:
-	 * each in his own habit of speech, docs/VOICE.md, The guardians) */
+	 * each in his own habit of speech, docs/voice/rules.md, The guardians) */
 	static const struct { const char *name, *line; } darkloids[] = {
 		{ "HeatMan", "This whole area's my furnace now! C'mon!" },
 		{ "ElecMan", "...tzz. This area runs on my current." },
@@ -179,8 +179,10 @@ const char *lib_command_label(int cmd, int command) {
 	static const char *const commands[] = {
 		[LIB_DO_NONE] = "", [LIB_DO_LONGSWRD] = "LongSwrd", [LIB_DO_SCRENDIV] = "ScrenDiv", [LIB_DO_TOMAHAWK] = "TomahawkSwing",
 		[LIB_DO_NUMBER] = "NumberCheck", [LIB_DO_SNEAK] = "SneakAttack", [LIB_DO_MELODY] = "LifeMelody",
+		[LIB_DO_NAPALM] = "Napalm", [LIB_DO_WIDESWRD] = "WideSwrd", [LIB_DO_MAGNET] = "MagnetBarrier",
+		[LIB_DO_SEARCH] = "PanelSearch", [LIB_DO_BOMB] = "BombLiberation",
 	};
-	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command <= LIB_DO_MELODY) return commands[command];
+	if (cmd == LIB_CMD_LONGSWRD && command >= 0 && command < LIB_DOS) return commands[command];
 	return cmd >= 0 && cmd < LIB_CMDS ? labels[cmd] : "";
 }
 

@@ -1,4 +1,4 @@
-/* A liberation board's planner (liberation_plan.h; docs/LIBERATION.md, The
+/* A liberation board's planner (liberation_plan.h; docs/game/liberation/quality-bar.md, The
  * quality bar). It plays the board as a fair player would, with the team
  * it was made for: each phase every Navi in turn (support first: ToadMan's
  * LifeMelody, ShadowMan's SneakAttack, NumberMan's NumberCheck, then the
@@ -35,7 +35,7 @@ bool lib_plan_lax;
 #define ROUTE_MOST   10      /* ... and at most (a choice, not a wall) */
 
 /* MegaMan's HP on the board by act (a run's: about a hundred more an act,
- * its HPMemory, docs/ECONOMY.md) and a virus battle's harm (BN5's numbers
+ * its HPMemory, docs/game/economy/) and a virus battle's harm (BN5's numbers
  * for its missions, tools/liberation.py's ACTS) */
 static const int mm_hp[6] = { 300, 300, 400, 500, 600, 700 };
 static const int virus[6] = { 14, 14, 20, 28, 34, 40 };
@@ -53,7 +53,7 @@ static int np;
 enum { MAPS = LIB_HOLES + 3, MAP_BOSS = LIB_HOLES, MAP_KEY, MAP_ROUTE };
 #define FAR 0x7F00
 /* A move's purpose: a map's, or these */
-enum { WHY_WIDEN = MAPS, WHY_ITEM, WHY_UNIT };
+enum { WHY_WIDEN = MAPS, WHY_ITEM, WHY_UNIT, WHY_SHIELD = WHY_UNIT + LIB_UNITS };
 enum { CMD_LIB, CMD_LONG, CMD_PASS, CMD_FIGHT };   /* (CMD_LONG: the Navi's command, LongSwrd or his own) */
 
 static struct {
@@ -136,7 +136,8 @@ static void build_map(int m, const int16_t *src, int nsrc) {
 }
 
 /* Where he may stand this phase: the clean panels joined to his, past no
- * unit (the team's Navis walk through one another, as BN5's do) */
+ * unit (the team's Navis walk through one another, as BN5's do); the dark
+ * ones too for BombLiberation's flier */
 static void reach(void) {
 	static uint8_t seen[MAP_W * MAP_H];
 	units_placed();
@@ -147,7 +148,8 @@ static void reach(void) {
 	for (int h = 0; h < nstands; ++h)
 		for (int d = 0; d < 4; ++d) {
 			int n = nb[stands[h]][d];
-			if (n < 0 || seen[n] || (K(n) != LIB_CLEAN && K(n) != LIB_BONUS) || unit_on(n) >= 0) continue;
+			if (n < 0 || seen[n] || unit_on(n) >= 0) continue;
+			if (K(n) != LIB_CLEAN && K(n) != LIB_BONUS && !(P.command == LIB_DO_BOMB && lib_flown(&P.b, px[n], py[n]))) continue;
 			seen[n] = 1;
 			stands[nstands++] = (int16_t)n;
 		}
@@ -279,9 +281,7 @@ static int also_freed(int command, int t, int dir, int16_t out[6]) {
 	return m;
 }
 
-static bool liberating(int command) {
-	return command == LIB_DO_LONGSWRD || command == LIB_DO_SCRENDIV || command == LIB_DO_TOMAHAWK;
-}
+static bool liberating(int command) { return lib_command_battles(command); }
 
 /* Liberation and the Navi's command on panel t from stand s, facing dir */
 static void panel_options(int s, int t, int dir, int extra) {
@@ -299,10 +299,13 @@ static void panel_options(int s, int t, int dir, int extra) {
 	if (P.melody[P.k]) for (int j = 0, n = also_freed(LIB_DO_MELODY, t, dir, more); j < n; ++j) lib += panel_worth(more[j], t, NULL);
 	add((lib + bonus) * keep / 100 + extra, CMD_LIB, why, s, t, dir);
 	if (!P.op || !liberating(P.command)) return;
+	/* (PanelSearch frees its line's items and traps alone, the faced
+	 * panel only where it is one) */
+	bool search = P.command == LIB_DO_SEARCH, faced = !search || K(t) == LIB_ITEM || K(t) == LIB_TRAP;
 	int n = also_freed(P.command, t, dir, more), v2 = 0;
-	if (!n) return;
+	if (!n && !(search && faced)) return;
 	for (int j = 0; j < n; ++j) v2 += panel_worth(more[j], t, NULL);
-	add((v + v2 + bonus) * keep / 100 - command_price() + extra, CMD_LONG, why, s, t, dir);
+	add(((faced ? v : 0) + v2 + bonus) * keep / 100 - command_price() + extra, CMD_LONG, why, s, t, dir);
 }
 
 /* NumberCheck on the two by three ahead of stand s: its items taken and
@@ -338,6 +341,24 @@ static void melody_option(int s, int extra) {
 	if (sung) add(320 * sung - command_price() + extra, CMD_LONG, WHY_WIDEN, s, -1, -1);
 }
 
+/* MagnetBarrier from stand s: the harm the board's units would do the team
+ * next phase, none of it taken */
+static void magnet_option(int s, int extra) {
+	if (P.shield) return;
+	int v = threat_at(s) * 600 / (P.hp > 0 ? P.hp : 1);
+	for (int j = 0; j < P.b.team.n; ++j)
+		if (j != P.k && !P.b.mate[j].out && P.mhp[j] > 0) v += lib_threat(&P.b, P.b.mate[j].x, P.b.mate[j].y) * 600 / P.mhp[j];
+	if (v) add(v - command_price() + extra, CMD_LONG, WHY_SHIELD, s, -1, -1);
+}
+
+/* BombLiberation over stand s: its plain dark panel freed with no battle
+ * (BN5_LIB_BOMB_KINDS: an item's will not do) */
+static void bomb_option(int s, int extra) {
+	if (K(s) != LIB_DARK) return;
+	int why, v = panel_worth(s, -1, &why);
+	add(v - command_price() + extra, CMD_LONG, why, s, s, -1);
+}
+
 /* A fight with the unit on panel t from stand s */
 static void fight_option(int s, int t, int u, int dir, int extra) {
 	int d = dark_at(t), weak = P.weak[u] ? 15 : 0;
@@ -364,6 +385,8 @@ static void stand_options(int s) {
 	for (int dir = 0; dir < 4 && !any; ++dir) any = nb[s][dir] >= 0 && (unit_on(nb[s][dir]) >= 0 || freeable(nb[s][dir]) || K(nb[s][dir]) == LIB_HOLE);
 	int extra = -threat_cost(s) + (K(s) == LIB_BONUS && !P.strip ? 200 : 0);
 	if (P.op && P.command == LIB_DO_MELODY) melody_option(s, extra);
+	if (P.op && P.command == LIB_DO_MAGNET) magnet_option(s, extra);
+	if (P.op && P.command == LIB_DO_BOMB) bomb_option(s, extra);
 	for (int dir = 0; dir < 4; ++dir) {
 		int t = nb[s][dir];
 		if (t < 0) continue;
@@ -465,7 +488,7 @@ static void liberate(int t, int dir, int command) {
 	if (fail || down()) return;
 	int16_t more[6];
 	int n = command != LIB_DO_NONE && dir >= 0 ? also_freed(command, t, dir, more) : 0;
-	free_panel(t);
+	if (command != LIB_DO_SEARCH || K(t) == LIB_ITEM || K(t) == LIB_TRAP) free_panel(t);
 	for (int j = 0; j < n; ++j) if (freeable(more[j])) free_panel(more[j]);
 	if (one) free_around(t);
 }
@@ -531,6 +554,8 @@ static void command(const Option *o) {
 		if (unit_on(o->t) >= 0) P.weak[unit_on(o->t)] = true;
 		return;
 	}
+	if (P.command == LIB_DO_MAGNET) { P.shield = true; return; }
+	if (P.command == LIB_DO_BOMB) { free_panel(o->stand); return; }
 	if (P.command == LIB_DO_NUMBER) {
 		int xs[6], ys[6], n = lib_command_panels(&P.b, LIB_DO_NUMBER, px[o->t], py[o->t], o->dir, xs, ys);
 		for (int j = 0; j < n; ++j) {
@@ -723,4 +748,12 @@ int lib_plan(LibBoard *b, uint32_t seed) {
 	if (b->sealed && (m->sealed * 2 < ROUTE_PLAYS || m->route - m->median < least || m->route - m->median > ROUTE_MOST)) return LIB_WHY_ROUTE;
 	if (m->longswrd * 100 < m->plays * LONGSWRD_LEAST || m->best[CMD_LONG] * 100 > m->phases * LONGSWRD_MOST) return LIB_WHY_LONGSWRD;
 	return LIB_WHY_NONE;
+}
+
+void lib_plan_par(LibBoard *b) {
+	LibMeasure kept = b->m;
+	index_board(b);
+	plays(b, b->plan_seed);
+	if (b->m.wins) b->par = b->m.median;
+	b->m = kept;
 }

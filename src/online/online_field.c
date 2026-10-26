@@ -6,6 +6,7 @@
 #include "audio.h"
 #include "gfx.h"
 #include "minifont.h"
+#include "network_address.h"
 #include "network_prefs.h"
 #include "online_text.h"
 #include "pixfont.h"
@@ -67,18 +68,6 @@ static int finish(int result) {
 	return result;
 }
 
-bool online_field_url(const char *typed, char *out, size_t cap) {
-	char url[NETWORK_URL];
-	bool whole = !strncmp(typed, "ws://", 5) || !strncmp(typed, "wss://", 6);
-	snprintf(url, sizeof url, "%s%s", whole ? "" : "wss://", typed);
-	/* (the path the server answers on, where only a host was typed) */
-	const char *host = strstr(url, "://") + 3;
-	if (!strchr(host, '/') && strlen(url) + 9 < sizeof url) strcat(url, "/presence");
-	if (!network_url_valid(url) || strlen(url) >= cap) return false;
-	snprintf(out, cap, "%s", url);
-	return true;
-}
-
 void online_field_host(const char *url, char *out, size_t cap) {
 	const char *host = strstr(url, "://");
 	host = host ? host + 3 : url;
@@ -94,7 +83,7 @@ static int done(char *out, size_t cap) {
 	if (F.kind == FIELD_NAME) {
 		if (!network_name_valid(F.text) || n >= cap) { F.note = online_field_bad_name; return FIELD_EDITING; }
 		snprintf(out, cap, "%s", F.text);
-	} else if (!online_field_url(F.text, out, cap)) { F.note = online_field_bad_address; return FIELD_EDITING; }
+	} else if (!network_address_url(F.text, out, cap)) { F.note = online_field_bad_address; return FIELD_EDITING; }
 	return finish(FIELD_DONE);
 }
 

@@ -1,6 +1,6 @@
 /* The run summary's words (title_summary_text.c): its two screens' names,
  * the rows of the run and of the records, in the plain style of the game's
- * menus (docs/VOICE.md), apart from the logic that says when. MegaMan's
+ * menus (docs/voice/rules.md), apart from the logic that says when. MegaMan's
  * words in its NAVIGATOR box are title_lines.c's; what a run opened and the
  * closest goal are meta.c's. */
 #ifndef CW_TITLE_SUMMARY_TEXT_H

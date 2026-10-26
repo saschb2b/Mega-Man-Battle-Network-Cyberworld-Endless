@@ -1,4 +1,4 @@
-/* Home after an act (director_home.c, docs/HOME.md), for the director's
+/* Home after an act (director_home.c, docs/world/home/), for the director's
  * other parts. */
 #ifndef CW_DIRECTOR_HOME_H
 #define CW_DIRECTOR_HOME_H
@@ -31,7 +31,7 @@ bool home_return(void);
  * cannot be built. */
 bool home_run_start(bool abandoned);
 
-/* The next act's ways at home (Lan's HP's portals, docs/HOME.md): how many
+/* The next act's ways at home (Lan's HP's portals, docs/world/home/): how many
  * are open, and whether a dark way stands sealed. */
 const RunWay *home_ways(int *n, bool *dark_sealed);
 /* Portal `k` taken: its way's first layer built where it was another's,
@@ -40,7 +40,7 @@ const RunWay *home_ways(int *n, bool *dark_sealed);
 bool home_take_way(int k);
 /* MegaMan arrived on the next act's first layer from home: a special
  * route the fork offered spent (run.route_found), and whether its way was
- * the one taken kept for the act's card (run.route_way; docs/LIBERATION.md,
+ * the one taken kept for the act's card (run.route_way; docs/game/liberation/special-routes.md,
  * Special routes). */
 void home_route_passed(void);
 /* The portals lit in Lan's HP (a bit each, lanhp_lit): the ways, and the
@@ -53,7 +53,7 @@ unsigned home_lit_back(void);
 /* A in Lan's HP facing a portal: MegaMan's words on it, or a lit link's
  * question; true where a talk began. */
 bool home_hp_check(void);
-/* The area older portal `k` goes back to (docs/HOME.md, going back), -1
+/* The area older portal `k` goes back to (docs/world/home/going-back.md), -1
  * where `k` is none, or taken this visit. */
 int home_older(int k);
 /* Older portal `k` taken: a notch on the Net's clock, the trip's layer

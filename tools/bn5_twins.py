@@ -2,8 +2,8 @@
 (issue #82): numbers only, each pair's two bodies compared by tools/xrecipe_thumb.py (SAME, LAYOUT: but for the offsets
 of loads and stores, or DIFF), each DIFF judged for what BN5's code asks of the routine (AUDITS). Read by
 tools/xrecipe.py, which aims a moved family's calls at the twins, and by tools/bn6f_match.py, which writes them into its
-BN5 table where its search placed none or the wrong function (docs/SYMBOLS.md, Twins of the project's). The record of
-each audit is docs/ROM_DATA.md's (The engine's differing twins)."""
+BN5 table where its search placed none or the wrong function (docs/rom/symbols.md, Twins of the project's). The record of
+each audit is docs/rom/virus-families.md's (The engine's differing twins)."""
 
 # (BN5, BN6, where the pair was found and checked): a routine's entry in each game. 'cangard' and 'handi' are the pairs
 # of their recipes (src/emu/xvirus_families.c), each body compared as they were built and their families compared with
@@ -216,19 +216,19 @@ AUDITS = {
                                      "numbers (14 14 00 00: list 5's 0x14, animation 0), BN6's drawn from its own redrawn sprite", ()),
 }
 
-# panel types both games number alike (docs/ROM_DATA.md, Battlefields and their panels' types)
+# panel types both games number alike (docs/rom/battle.md, Battlefields and their panels' types)
 SAME_PANEL_TYPES = (0, 1, 2, 3, 4, 6, 7)
 
 # Tables of BN5's ROM its families' code names and their twins in BN6 (BN5, its bytes, BN6, how found): a literal naming
 # a place in one is BN6's at the same distance
 DATA_TWINS = (
-    (0x0801629C, 32 * 4, 0x08019B78, "the panel patterns by region (BN6's 47, its first 32 the same patterns: docs/MULTIROM.md, "
+    (0x0801629C, 32 * 4, 0x08019B78, "the panel patterns by region (BN6's 47, its first 32 the same patterns: docs/multirom/, "
                                      "the Navis' survey)"),
     (0x08005CD0, 0x80, 0x080065E0, 'a sine table (its 0x80 bytes the same)'),
     (0x08005D50, 0x80, 0x08006660, 'a cosine table (its 0x80 bytes the same)'),
 )
 
-# Tables of numbers a family's code reads ids from, each read by hand (issue #82's A2b; docs/ROM_DATA.md, The recipe
+# Tables of numbers a family's code reads ids from, each read by hand (issue #82's A2b; docs/rom/virus-families.md, The recipe
 # generator's reads of BN5): its address in BN5, its bytes, its entry's size, the entries its family's code reads (the rest
 # dead in the copy: no code of the family reaches them), the fields of an entry that are ids (offset, kind: 'effect' an
 # effect id, 'list' a sprite list's byte offset as struct1's, 'sprite' the number in that list), the calls whose id comes

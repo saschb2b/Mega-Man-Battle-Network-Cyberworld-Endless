@@ -1,4 +1,4 @@
-/* xvirus_families.h: the recipes made by hand, numbers alone (docs/ROM_DATA.md,
+/* xvirus_families.h: the recipes made by hand, numbers alone (docs/rom/virus-families.md,
  * Transplanted virus families, says how each was found and how to check
  * it). The code and records they name are copied from the player's ROMs as
  * the core starts. */
@@ -90,7 +90,7 @@ const XVirusFamily xvirus_control = {
  * a reticle that walks to MegaMan's panel and strikes there, with the
  * spawn and release CanGard calls. A BL scan of both finds 4 calls within
  * them (one from CanGard to the reticle's spawner, two to its release) and
- * 39 to 39 routines outside, each paired with BN6's own (docs/ROM_DATA.md,
+ * 39 to 39 routines outside, each paired with BN6's own (docs/rom/virus-families.md,
  * Virus families moved into the battle engine: BN5's CanGard), but the
  * reticle's spawn, which goes to the second-level dispatch's spawner: the
  * reticle runs as its type in BN5, 0x25, through the dispatch. */
@@ -116,7 +116,7 @@ static const XvData cangard_data[] = {
 };
 
 /* BN5's routines it calls and BN6's in their place (each pair's bodies
- * compared, docs/ROM_DATA.md) */
+ * compared, docs/rom/) */
 static const XvPair cangard_calls[] = {
 	/* CanGard's: an object's flags set, cleared and read; its attack begun and ended; its animation's frame; its counter
 	 * time; a panel's coordinates; an effect spawned; the battle paused, time stopped, over; MegaMan found; the dying state */
@@ -200,7 +200,7 @@ const XVirusFamily xvirus_cangard = {
  * a panel at random. Three of its attack's steps are the engine's own
  * (BN5's shared virus code, 0x08104AC0 on): its jump table names their
  * twins in BN6 (words), each body compared. A BL scan finds 1 call within
- * it and 14 out, to 11 routines, each paired with BN6's (docs/ROM_DATA.md,
+ * it and 14 out, to 11 routines, each paired with BN6's (docs/rom/virus-families.md,
  * BN5's Handi). It draws random numbers (three calls of its own, one in
  * the panel's pick) and teleports, reserving the panel it goes to. */
 
@@ -218,7 +218,7 @@ static const XvData handi_data[] = {
 	{ 0x081063DC, 0x081063E0, XV_POOL },   /* (its callback, the panel's pick) */
 };
 
-/* BN5's routines it calls and BN6's in their place (each pair's bodies compared, docs/ROM_DATA.md): a positive random number,
+/* BN5's routines it calls and BN6's in their place (each pair's bodies compared, docs/rom/): a positive random number,
  * an animation's frame, its facing, its counter time, its attack begun, a panel picked at random, an object's flag set, its
  * attack's object spawned (the third kind's type 0x4B in both), the battle's objects counted, its teleport's end, the
  * panels' filter by its side */

@@ -132,3 +132,15 @@ int chip_pool_pick_net(int tier, int net) {
 	int n = count[CHIP_NET_BN5][tier];
 	return n ? pool[CHIP_NET_BN5][tier][rng_range(0, n - 1)] : -1;
 }
+
+int chip_pool_pick_if(int tier, int net, bool (*want)(int id)) {
+	if (!R.data || net < CHIP_NET_BN6 || net > CHIP_NET_BN5 || tier < 0 || tier >= CHIP_TIERS) return -1;
+	ready();
+	int n = 0;
+	for (int k = 0; k < count[net][tier]; ++k) n += want(pool[net][tier][k]);
+	if (!n) return -1;
+	int pick = rng_range(0, n - 1);
+	for (int k = 0; k < count[net][tier]; ++k)
+		if (want(pool[net][tier][k]) && pick-- == 0) return pool[net][tier][k];
+	return -1;
+}

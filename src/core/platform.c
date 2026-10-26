@@ -17,6 +17,7 @@
 #include "audio.h"
 #include "display.h"
 #include "emu.h"
+#include "feel_out.h"
 #include "frame_log.h"
 #include "gfx.h"
 #include "keymap.h"
@@ -606,6 +607,7 @@ void platform_shutdown(void) {
 	save_queue_quit();
 	mirror_flush();
 	analytics_net_quit();
+	feel_close();
 	pads_close();
 	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
@@ -935,6 +937,8 @@ void platform_draw_over(void) { SDL_SetRenderTarget(P.renderer, P.canvas); }
 
 void platform_end_frame(void) {
 	mirror_tick();
+	/* (the pad's rumble and triggers, a game frame's output as its sound is) */
+	feel_frame();
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();
 	/* (a frame the loop plays to catch up, or one smooth motion mixes: not

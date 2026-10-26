@@ -11,6 +11,9 @@ void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]);
 void folder_made_save(void);
 void folder_made_load(void);
 void note_folder_codes(void);
+/* The Souls the layer was made with (souls_layer) for its finds and stock
+ * again on a CONTINUE, after souls_load (loot_souls.h) */
+void folder_souls_load(void);
 void own_folder_chips(void);
 void own_library_chips(void);
 void dev_folder(void);
@@ -18,7 +21,7 @@ void dev_folder(void);
 /* The pack's ids: BN6's pack holds 0-319 (eToolkit +0x4C, 12 bytes an id;
  * past it lie the key items' counts: a BblStar2 bought once read as no
  * change), its extension 320-511 (BN6_PACK_EXT, which the engine points
- * BN6's pack routines at: docs/EMULATION.md, src/emu/xchips_install.c). */
+ * BN6's pack routines at: docs/engine/emulation/, src/emu/xchips_install.c). */
 #define PACK_CHIPS 512
 /* Chip `id`'s pack entry, a bus address (12 bytes: a count per code of its
  * record's four, then four u16 order stamps), 0 where the pack cannot be

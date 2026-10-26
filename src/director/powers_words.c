@@ -1,5 +1,5 @@
-/* What MegaMan says of the Crosses and the Cybeast (docs/META.md,
- * docs/VOICE.md): a Cross won from a guardian and how it feels; one the
+/* What MegaMan says of the Crosses and the Cybeast (docs/game/meta/,
+ * docs/voice/rules.md): a Cross won from a guardian and how it feels; one the
  * run cannot carry; the Graveyard's call; Dad's
  * CybeastButton after the Cybeast's fall. The Crosses themselves,
  * powers.c. */

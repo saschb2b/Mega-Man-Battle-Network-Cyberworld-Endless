@@ -1,3 +1,11 @@
+---
+type: Player Guide
+title: "The player's guide"
+description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
+tags: [player]
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+---
+
 # The player's guide
 
 The [README](../README.md) shows the game on one page. This guide holds the
@@ -498,7 +506,9 @@ clock: walking a layer, the town and its places, chats, fades and warps,
 a battle's opening up to its first Custom screen, and its results from
 the last deletion on. The fight itself always runs at BN6's speed, from
 its first Custom screen to its end, the pause with it; so do BN6's own
-menus (the PET, shops, traders, mail), and online it never runs.
+menus (the PET, shops, traders, mail), and online it never runs. The one
+fight it runs in is a Virus Battler's (below), whose viruses fight on
+their own: his VIRUS LIST and the placing stay at BN6's pace.
 
 Press its button to turn it on and again to turn it off: **Tab** or
 **Space** on a keyboard, a controller's right trigger or a press of its
@@ -521,6 +531,49 @@ gains little). The run's rules do not change with it: random battles come
 as often per step, every reward is the same, and the run's minutes count
 the game's own time, so the week's DeepNet ranks a dive alike with it or
 without.
+
+### Rumble and triggers
+
+A controller rumbles on the beats of a fight: when MegaMan is hit (harder
+the more of his HP it takes), when his buster's charge is full and when
+the charged shot fires, on a counter's Full Synchro, when a virus is
+deleted (a Navi longer), as he takes Beast Out or a Cross, at his own
+deletion, and as he jacks in. His own attacks are felt as they sound:
+the rumble follows BN6's sound of each one as it plays, so a buster shot
+is a short tick, every bullet of a Vulcan its own, a sword a swing and a
+Cannon a blast with its rumbling tail, and his hits landing a knock. The
+buster's charge hums, rising as it fills, clicks once it is full, throbs
+while you hold it, and the charged shot kicks back as it leaves the
+buster. The
+enemies' attacks are felt only when they hit him. Each one comes with
+what the screen and the sound already show, so turning it off loses
+nothing. Nothing rumbles while fast forward runs or online.
+
+On a PS5 DualSense the adaptive triggers click where a pull does
+something. Once the Custom gauge is full, the trigger that is L or R
+resists and gives way halfway, as the press opens the Custom screen.
+Where fast forward can run, FAST's trigger has a lighter click like a
+switch. Elsewhere both triggers pull free. By default L2 is L and R2 is
+FAST; the controls screen moves them, and the clicks follow.
+
+Options' **Audio** sets them: **Vibration** (**Strong**, **Medium**, the
+default, **Weak** or **Off**; `vibration` in `settings.ini`) and, while
+a DualSense is the controller in use, **Trigger effects** (**On** or
+**Off**; `trigger_effects`).
+
+- **Where:** the Linux builds (a Steam Deck's own controls too), Windows,
+  macOS and iOS rumble a controller, iOS without the trigger effects. A
+  PortMaster handheld rumbles where its firmware's SDL drives its motor
+  (untested). Android, the browser and the 3DS don't yet.
+- **Bluetooth or USB:** a DualSense rumbles and clicks either way. Over
+  Bluetooth the game asks SDL for the controller's full reports, which it
+  keeps until it is turned off. On Windows, a game reading it through
+  DirectInput afterwards may need the controller turned off and on again.
+- **Steam:** with Steam Input on for the game's shortcut, the game sees
+  Steam's own controller in the DualSense's place. Rumble still gets
+  through, but the trigger effects don't. Turn Steam Input off for the
+  shortcut (its Properties, Controller) or start the game outside Steam
+  to feel the triggers.
 
 ### A run
 
@@ -716,6 +769,7 @@ it pays one of BN6's GigaChips.
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
 | Collector's vault | From the second act: its lock opens for a Library of 30 chips (60 in act 3, 90 later), and it holds three rare chips, one to take |
+| Virus Battler (a Mr.Prog of his own colour) | BN6's Virus Battler, at a side path's end on an act's first layer in about half the acts from the second. Your stored viruses fight his pair on their own. Entry costs zenny (500 to 3000 by act), each win adds that much to the pot, and after each win you take the pot or fight on; a loss or a draw loses it. A whole series won pays the pot, and once a run his BN6 prize. The first one you meet gives you the BtlrCard |
 
 ### What carries over
 
@@ -741,6 +795,10 @@ behind is options. From the second run, NEW GAME opens a setup:
   go in a hand and every Program Advance forms from its chips in order.
   Once the endless net's own Nest has fallen, a fifth: BeastOut from the
   first battle. Helped runs count for everything.
+
+The BtlrCard carries over too: the viruses on it (Mettaur and Gunner, and
+each Rare virus deleted in any run, BN6's "You got new Virus Data") are
+yours in every run, for the Virus Battlers alone.
 
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
 PET shows whole: a Chip Trader's prize is new to it first, and the summary
@@ -838,7 +896,10 @@ next CONTINUE puts him there.
 
 The keeper changes your name or the server: the official Square (he
 asks first, the cursor on **No**), or another one's address (`host` or
-`host:port`, as its owner gives it).
+`host:port`, as its owner gives it). A Square on your own network needs
+its address alone, `192.168.1.20` say: the server says it as it starts,
+and an address that can only be on your network is taken as a Square
+started there with nothing set (`ws://`, port 8765).
 He also moves you to the next or the last channel.
 
 #### Finding your way
@@ -1063,10 +1124,14 @@ unlocks nothing and counts in none of your records.
 
 Anyone can run a Net Square: the server is a small program of its own,
 in Python, with ready builds for Linux, Windows and macOS and a Docker
-image, and it never needs a ROM or sees a save
-([server/README.md](../server/README.md) says how). Each server has its
-own channels, moderators and week's DeepNet. Give its address to the
-gate's keeper to go there.
+image, and it never needs a ROM or sees a save. For a LAN party, unzip
+it on one computer and start it: nothing needs setting, and it names the
+address the others type at the gate. For a Square always up, with HTTPS
+for the browser and the 3DS, three commands on a server with Docker and
+a domain ([server/README.md, Host your own Net
+Square](../server/README.md#host-your-own-net-square) says how, both
+ways and the ones between). Each server has its own channels, moderators
+and week's DeepNet. Give its address to the gate's keeper to go there.
 
 The official server asks for no account and no e-mail. It sees the
 address your game connects from, the name you chose, where MegaMan
@@ -1131,7 +1196,7 @@ G-Sync), needs neither.
 The music and sounds are BN6's own, played by its own sound engine as a
 GBA plays them: in a run by the game itself, and on the title and the
 screens around it by the same engine's rules, followed note for note
-(docs/EMULATION.md, The engine's own sound). The Legacy Collection's are not: it plays recordings from
+([The engine's own sound](engine/emulation/engine-sound.md)). The Legacy Collection's are not: it plays recordings from
 the soundtrack CDs in their place, mixed its own way, BN6's more muffled
 than the cartridge (The Rockman EXE Zone's wiki). So the same song can
 sound brighter here. BN6 mixes its music 10512 times a second, and what
@@ -1294,10 +1359,10 @@ tag such as `v1.0.0` publishes a release with all three archives.
 tests, `build.py atlas` draws every area's layers and `build.py tour` has the
 game show every room of them. In the game, Select+R opens a dev menu (no
 random battles, can't die, one-hit enemies, speed, skip to the next layer or
-guardian). See [docs/DEVTOOLS.md](DEVTOOLS.md) for the tools,
+guardian). See [Dev tools](devtools/overview.md) for the tools,
 [AGENTS.md](../AGENTS.md) for the development workflow,
-[docs/LEVEL_DESIGN.md](LEVEL_DESIGN.md) for how layers are laid out and
-[docs/ROM_DATA.md](ROM_DATA.md) for where the ROM data comes from.
+[Level design](world/level-design/overview.md) for how layers are laid out and
+[ROM data](rom/overview.md) for where the ROM data comes from.
 
 ## Follow updates
 

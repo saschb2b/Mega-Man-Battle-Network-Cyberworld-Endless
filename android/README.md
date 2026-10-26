@@ -37,7 +37,7 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
 - The saves and settings are in `files/data`, which uninstalling deletes.
   The game keeps a copy of the saves, `cyberworld-endless.cwsave`
   (`src/core/backup.h`), in a folder outside the app
-  (`src/launcher/mirror.c`, docs/SAVES.md): the ROM folder, or a folder
+  (`src/launcher/mirror.c`, docs/engine/saves.md): the ROM folder, or a folder
   chosen with **SAVES › FOLDER**. It is packed a few seconds after the
   game last wrote a file and as the app goes to the background, and
   written into the folder by `savesPut` (whole as a new file, then put in

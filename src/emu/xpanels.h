@@ -1,5 +1,5 @@
 /* BN5's lava and sea in BN6's own battle engine (xpanels.c; issue #82,
- * docs/MULTIROM.md, One net; docs/ROM_DATA.md, BN5's lava and sea in
+ * docs/multirom/one-net.md; docs/rom/bn5-world.md, BN5's lava and sea in
  * BN6's engine), at panel types BN6 leaves free, so that BN5's
  * battlefields with them translate (xfields.c):
  * - their flags (BN6's table grown to 16 words, its IWRAM literal pointed

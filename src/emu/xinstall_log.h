@@ -1,5 +1,5 @@
 /* The tracks' installs written down as they are made on BN6's core
- * (issue #120, docs/ONLINE_ARENA.md, Full rules): every byte BN5's
+ * (issue #120, docs/online/arena/from-square/full-rules.md): every byte BN5's
  * installs write into the core's ROM copy (xinstall.h's tracks, the chip
  * registry, xchips_install.h, the Souls' soulproxy.h and soulunite.h) and
  * every hook they set, in their order, so

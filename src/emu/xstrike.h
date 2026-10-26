@@ -1,5 +1,5 @@
-/* BN5's obstacle strike in BN6's engine (issue #82; docs/MULTIROM.md,
- * Transplanted Souls; docs/ROM_DATA.md, ColonelSoul's button, chip shot
+/* BN5's obstacle strike in BN6's engine (issue #82; docs/multirom/souls.md,
+ * Transplanted Souls; docs/rom/souls.md, ColonelSoul's button, chip shot
  * and obstacle strike): BN5's obstacles' states (0x08018002-0x0801802E, a
  * block BN6's lack) turn an obstacle on the side opposite a Colonel's,
  * with an enemy of his before it or one of his side behind it, into BN5's

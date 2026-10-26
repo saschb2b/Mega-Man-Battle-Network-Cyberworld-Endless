@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of ShakPar1 A in both games, BN5's chip 332 by BN5's own code and the registry's 359 by the same code moved (BN5's misc family 0x1A as BN6's 0x6A; a Program Advance of the registry's, dealt straight into the battle deck, as its rule is to come, subfamily 0x16), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of ShakPar1 A in both games, BN5's chip 332 by BN5's own code and the registry's 359 by the same code moved (BN5's misc family 0x1A as BN6's 0x6A; a Program Advance of the registry's, dealt straight into the battle deck, as its rule is to come, subfamily 0x16), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/multirom/chips-code.md).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",

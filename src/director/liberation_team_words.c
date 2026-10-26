@@ -1,8 +1,11 @@
 /* What a liberation's teammates say (liberation_team_words.h). BN5's Team
- * Colonel, each in the habit his look gives him (docs/VOICE.md, The
+ * Colonel, each in the habit his look gives him (docs/voice/rules.md, The
  * guardians): Colonel a soldier's few words, ShadowMan a ninja's fewer,
  * NumberMan's numbers, TomahawkMan's sayings, KnightMan a knight's
- * courtesy, ToadMan's croak. Each line is his alone, said with his face. */
+ * courtesy, ToadMan's croak; Gregar's Cross Navis in the habits BN6 gives
+ * them: HeatMan hot-blooded, ElecMan's calm crackle, SlashMan's "Slash!",
+ * EraseMan's cackle, ChargeMan a train. Each line is his alone, said with
+ * his face. */
 #include "liberation_team_words.h"
 
 #include <stdio.h>
@@ -54,6 +57,42 @@ static const char *const toadman[LINES] = {
 	"Ribbit... A little rest.",
 };
 
+static const char *const heatman[LINES] = {
+	"HeatMan's here!|I'm all fired up! C'mon!",
+	"Burned clean through!",
+	"Hah! Didn't even break a sweat!",
+	"Grr... My fire went out...",
+	"Gotta stoke the flames...",
+};
+static const char *const elecman[LINES] = {
+	"...tzz. ElecMan.|I shall keep this team from harm.",
+	"The panel is clear.",
+	"Swift as current. ...tzz.",
+	"...tzz. The circuit failed.",
+	"Recharging.",
+};
+static const char *const slashman[LINES] = {
+	"Slaaash! SlashMan's in!|I'll cut this dark to ribbons!",
+	"Slashed it!",
+	"Slaaash! Too easy!",
+	"Tch! It didn't cut...",
+	"Sharpening my claws...",
+};
+static const char *const eraseman[LINES] = {
+	"Hyahaha! EraseMan...|My scythe wants this darkness.",
+	"Erased.",
+	"Hyahaha! Gone in one swing!",
+	"Hrr... It would not fade...",
+	"My scythe rests... for now.",
+};
+static const char *const chargeman[LINES] = {
+	"Choo,choo! ChargeMan,all aboard!|Next stop,the Darkloid!",
+	"Track's clear!",
+	"Choo,choo! Right on schedule!",
+	"Derailed...",
+	"Taking on coal...",
+};
+
 static const char *const *lines_of(int navi) {
 	switch (navi) {
 	case MATE_COLONEL: return colonel;
@@ -62,6 +101,11 @@ static const char *const *lines_of(int navi) {
 	case MATE_TOMAHAWKMAN: return tomahawkman;
 	case MATE_KNIGHTMAN: return knightman;
 	case MATE_TOADMAN: return toadman;
+	case MATE_HEATMAN: return heatman;
+	case MATE_ELECMAN: return elecman;
+	case MATE_SLASHMAN: return slashman;
+	case MATE_ERASEMAN: return eraseman;
+	case MATE_CHARGEMAN: return chargeman;
 	default: return NULL;
 	}
 }
@@ -86,6 +130,13 @@ const char *lib_mate_command_words(int navi, int n) {
 		return words;
 	case MATE_SHADOWMAN: return "...Struck from the shadows.";
 	case MATE_TOADMAN: return n ? "Ribbit! This song's for you!" : "Ribbit... Nobody to sing for.";
+	case MATE_ELECMAN: return "...tzz. MagnetBarrier. None shall touch us.";
+	case MATE_CHARGEMAN: return "Choo,choo! Clearing the track!";
 	default: return "";
 	}
+}
+
+const char *lib_soul_form_name(int navi) {
+	static const char *const forms[] = { "ColonelSoul", "ShadowSoul", "NumberSoul", "TomahawkSoul", "KnightSoul", "ToadSoul" };
+	return navi >= MATE_COLONEL && navi <= MATE_TOADMAN ? forms[navi - MATE_COLONEL] : "";
 }

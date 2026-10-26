@@ -1,6 +1,7 @@
 /* What the drawing reads of the game, taken after each frame (seen), and
  * what is drawn over the picture from it: CircusMan's tent, the Mystery Data
- * counters' state, the NaviCust's bug note and the duel's clock. */
+ * counters' state, the NaviCust's bug note and the duel's clock; and what
+ * the controller's feel reads of it (feel_game.h), output as the drawing is. */
 #include "director_see.h"
 
 #include <stdio.h>
@@ -13,6 +14,7 @@
 #include "director_board.h"
 #include "director_folder.h"
 #include "director_state.h"
+#include "feel_game.h"
 #include "liberation.h"
 #include "gfx.h"
 #include "net_shapes.h"
@@ -182,6 +184,7 @@ void director_see(void) {
 	see_locks();
 	see_bug_note();
 	lib_see();
+	feel_game_frame();
 }
 
 /* The panel BN6 lights under MegaMan's feet, marked over his sprite: a
@@ -198,7 +201,7 @@ void director_draw_tent(void) {
 	fill_rect(x + 38, y + 2, 2, 20, c);
 }
 
-/* The duel's clock (docs/RIVAL.md): while its battle runs, the time so far
+/* The duel's clock (docs/game/rival.md): while its battle runs, the time so far
  * against ProtoMan's, as BN6's results screen counts them, in the picture's
  * top right, under the Custom gauge; on the second rung whether MegaMan has
  * been hit. Hidden while the clock holds (BATTLE START!, the Custom screen,

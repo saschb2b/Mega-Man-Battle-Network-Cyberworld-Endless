@@ -1,4 +1,4 @@
-/* MegaMan's word on R pressed in the town away from its port (docs/VOICE.md):
+/* MegaMan's word on R pressed in the town away from its port (docs/voice/rules.md):
  * where the port is, never how to jack in, BN6's own (Rush's bone panels'
  * lesson went in the voice sweep of 19 October 2026: BN6's RushFood, and
  * A named on every layer; docs/voice/sweep/net.md). */

@@ -21,11 +21,10 @@ Each commit is a line of the state directory's `trades.jsonl` (the time,
 both public identities and the chips each gave), kept `trade_days` days
 (retention.py) for a moderator to go on."""
 
-import asyncio
 import time
 
 from . import protocol, websocket
-from .identity import append_log, rewrite_log
+from .identity import rewrite_log
 
 OFFERED, WAITING, ANSWERED, ACCEPTED, DONE, CANCELLED = range(1, 7)
 PROPOSE, ANSWER, ACCEPT, CANCEL, TAKE = range(1, 6)
@@ -71,7 +70,6 @@ class Trades:
         self.open = {}         # trade id -> Trade
         self.of = {}           # player id -> trade id
         self.next = 1
-        self.log_task = None
         self.offers = {}       # player id -> (chip, want): the board's
         self.done = set()      # players whose session has traded
         self.last = {}         # player id -> his last trade's end (done or off) as sent: said again to a place taken back (holds.py)
@@ -227,7 +225,7 @@ class Trades:
         if trade.a in players:
             self.withdraw((trade.a, trade.b), players[trade.a].channel)
         if self.server.store.directory and self.server.retention.trade_days:
-            self.log_task = asyncio.create_task(asyncio.to_thread(append_log, self.server.store.directory, LOG, entry))
+            self.server.append(LOG, entry)
 
     def left(self, player):
         """A player gone from his channel (left the server, replaced, or changed channel)."""

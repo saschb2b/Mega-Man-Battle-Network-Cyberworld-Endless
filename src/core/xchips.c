@@ -130,7 +130,7 @@ uint16_t xchips_reward_bn6(uint16_t v) {
 	if (v == 0xFFFF || v >> 14) return v;
 	/* (the registry's id where it registers the chip, BN6's of its name
 	 * otherwise; none, or one that sits out of BN6's battles, the
-	 * stand-in's zenny: docs/MULTIROM.md, One net, BN5's viruses' own
+	 * stand-in's zenny: docs/multirom/one-net.md, BN5's viruses' own
 	 * rewards) */
 	int id = xchips_run_chip(v & 0x1FF);
 	if (!id) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);

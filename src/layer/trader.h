@@ -14,7 +14,7 @@ typedef enum {
 /* Makes the trade screen on map (group, number) serve `kind`, with prizes
  * for layer `depth`. One trader per map. */
 void trader_install(int group, int number, TraderKind kind, int depth);
-/* AsterLand's own Chip Trader at home (docs/HOME.md, piece 10): its pool
+/* AsterLand's own Chip Trader at home (docs/world/home/asterland-and-academy.md): its pool
  * as BN6 has it, its prizes in the folder's codes. */
 void trader_home(void);
 

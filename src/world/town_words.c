@@ -1,4 +1,4 @@
-/* town_words.h. A town that remembers (docs/HOME.md; docs/VOICE.md): the
+/* town_words.h. A town that remembers (docs/world/home/; docs/voice/rules.md): the
  * plaza's Mr.Prog calls the Net's news, Lan's classmate his progress, the
  * neighbor and the man from the lab the run and the runs before it, the
  * gossip by the statue a guardian beaten often. One line a person, each

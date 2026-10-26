@@ -211,11 +211,11 @@ TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-fra
 TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xchips_bn5.c src/emu/soulcode_bn5.c \
-	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
+	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/core/settings_line.c src/gfx/letters.c \
-	src/jukebox/jukebox_text.c src/core/fast_forward.c
+	src/jukebox/jukebox_text.c src/core/fast_forward.c src/core/feel.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -267,9 +267,9 @@ build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/ti
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
 		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
 
-NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_identity.c \
+NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_address.c src/online/network_identity.c \
 	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
-build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
+build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h src/online/network_address.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \
@@ -346,7 +346,7 @@ comma := ,
 online-transport: $(TRANSPORT_PROBE)
 .PHONY: online-transport
 
-# The production Arena's base (docs/ONLINE_LINK.md): BN6's Practice on one
+# The production Arena's base (docs/online/link.md): BN6's Practice on one
 # linked pair of cores, the input wire, and a complete snapshot of the pair.
 # Linux only, mGBA's Release library (NDEBUG) from the build image.
 ONLINE_PAIR_SRCS := tools/online_pair_run.c tools/online_frame_pair.c tools/online_frame_wire.c \

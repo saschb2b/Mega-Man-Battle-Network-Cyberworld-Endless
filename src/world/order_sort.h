@@ -1,5 +1,5 @@
 /* AsterLand's Order Service sorted as BN6's folder editor and Chip Trader
- * sort (order_sort.c; issue #124, docs/HOME.md piece 6). */
+ * sort (order_sort.c; issue #124, docs/world/home/home-shop.md). */
 #ifndef CW_ORDER_SORT_H
 #define CW_ORDER_SORT_H
 

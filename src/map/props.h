@@ -1,5 +1,5 @@
 /* Props cut whole out of an area's original maps: a counter's tiles, its
- * walls and where its navi stands behind it (docs/LEVEL_DESIGN.md, Props).
+ * walls and where its navi stands behind it (docs/world/level-design/props.md).
  * A layer places one where the generator set a PROP_COUNTER. */
 #ifndef CW_PROPS_H
 #define CW_PROPS_H

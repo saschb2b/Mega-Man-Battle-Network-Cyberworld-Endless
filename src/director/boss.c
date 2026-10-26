@@ -1,4 +1,4 @@
-/* A guardian from beginning to end (docs/BOSSES.md), after the way Hades
+/* A guardian from beginning to end (docs/game/bosses/), after the way Hades
  * stages its bosses: MegaMan steps into the arena and the music falls
  * away; the guardian logs in over the boss prelude, its name and epithet
  * on a title card, and speaks, remembering how their last battle went. The
@@ -237,7 +237,7 @@ static void wait_update(void) {
 }
 
 /* What the Guardian Data, taken, has told once: the draft the board's rules,
- * BN5's guardian's what a Soul does (docs/META.md, Souls) */
+ * BN5's guardian's what a Soul does (docs/game/meta/souls.md) */
 static void reward_taught(void) {
 	bool older = B.soul_new, soul = older && !profile.soul_taught, form = older && !profile.soul_form_taught,
 		board = !profile.navicust_taught && run.side_kind == LAYER_NORMAL;
@@ -252,14 +252,14 @@ static void fight_begin(void) {
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
 	/* (BN5's in BN6's engine as BN6's are, his moved id at the version his
-	 * act's band takes: docs/BOSSES.md, BN5's Navis) */
+	 * act's band takes: docs/game/bosses/bn5-navis.md) */
 	bool older = guardian_older(B.g.navi);
 	Encounter e = older ? xguardian_encounter(B.g.navi, B.g.version) : make_boss(run.depth, run.biome, B.g.navi);
 	/* (no running from a guardian, as from BN6's story bosses: a
 	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
 	 * came back to a fresh fight) */
 	e.held = true;
-	/* (a tenth more HP each notch of the Net's clock, docs/HOME.md: on his
+	/* (a tenth more HP each notch of the Net's clock, docs/world/home/: on his
 	 * own HP, or on BN5's held to the act's band, as he spawns) */
 	int own = navi_hp(e.foes[0].family, e.foes[0].version);
 	if (older) own = xguardian_hp(B.g.navi, B.g.version);

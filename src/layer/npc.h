@@ -30,7 +30,7 @@ uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gon
  * caller writes it between frames: a gate's still and swirling looks). */
 uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at);
 /* ... and standing at world (x, y, z), as npc_mark's: a dark layer's
- * units, their animations the board's (docs/LIBERATION.md) */
+ * units, their animations the board's (docs/game/liberation/) */
 uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32_t *anim_at);
 
 /* A standing NPC that talks with `script` of the text archive at `archive`,
@@ -42,6 +42,11 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * (sx, sy) world units from where it stands, as the originals' counter
  * navis are. */
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
+/* A list 6 talker's sprite (script `at`, npc_talker's) set by BN6's own
+ * ns_set_sprite, which dresses it in its variation: the palette and hidden
+ * pieces BN6's NPC sprite variations give that sprite (a Virus Battler's
+ * Mr.Prog: bn6f OverworldNPCSpriteVariations) */
+void npc_variation(uint32_t at);
 
 /* ... a wide object (a desk) spoken to anywhere along it: sprite `index`
  * of list `category` at world (x, y) playing `anim`, talking with `script`

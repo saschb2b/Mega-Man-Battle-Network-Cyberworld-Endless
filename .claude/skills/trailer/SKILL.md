@@ -16,6 +16,88 @@ with new screens.** Each trailer has its own look and its own music, in
 the manner of what the release is about (0.12.0, BN5's net: BN5's title
 theme for the music, BN5's Liberation Missions for the look).
 
+## The owner's gates
+
+A cut that misses one of these is not shown to the owner as a candidate.
+They hold above any time box: a trailer that cannot pass them in its
+time waits, it is not cut short. Each came from a cut the owner refused.
+
+1. **The look is the game's world, in the project's style.** Build it
+   from Battle Network's own visual language as the project already shows
+   it: BN6's PET look (the band, cyan-framed windows on a navy field, the
+   INFORMATION box, the orange cursor arrow, the green pill; `docs/engine/ui.md`,
+   `src/gfx/pet_look.c`, the site's frames in `tools/site_art.py`'s
+   colours), the net's grids, a battle's or a board's own screens.
+   Never a real-world metaphor dressed over the footage. 0.16.0's first cut
+   dealt shots as cards onto a casino's green felt under a lamp; the
+   owner: "it is totally not in our design style."
+2. **The music grows from one chosen Battle Network song, and sounds like
+   it.** The owner's measure (26 October 2026): music that would make
+   Akari Kaida proud. She wrote songs for Battle Network 1 and 5 (her own
+   2008 interview) and is one of the series' main composers, beside
+   Yoshino Aoki and Toshihiko Horiyama; BN5's songs, hers among them, are
+   in reach in its ROM. Pick the song from the ROM for what the release is about (the
+   feature's own theme first), read its habits (step 2), and keep its
+   tempo, groove, harmonic language and the roles of its parts audible,
+   so that a fan hears where it comes from (never its notes). Numbers that
+   match are not enough: 0.16.0's first piece read "busier than the
+   source: none" and still sounded "rather random" to the owner.
+3. **The soundfont palette the owner loved.** The piece plays FluidR3 GM's
+   instruments through `SOUNDFONT` (`tools/trailer_soundfont.py`,
+   `render_any` in `docker/Dockerfile.music`), the palette of 0.14.0 and
+   0.15.0, not the plain GBA synthesis alone. 0.16.0's first piece had
+   none, and the owner missed it.
+4. **Sketches for the owner's ear before the piece, always** (step 2's
+   sketch step): two or three eight-bar sketches from the chosen song, in
+   the soundfont, rendered to `.build/trailer-sketches/`, sent to the
+   owner; he chooses one, and only then is it grown into the piece. Never
+   skipped for time (0.16.0's first piece skipped them).
+5. **The owner sees the cut before the tag.** The render goes to him; the
+   release waits for his word. A green `music_check.py`, sheets that look
+   right and tests that pass are the agent's own checks, never his
+   approval.
+
+## The structure (every trailer)
+
+The owner (26 October 2026): "I want structure, and professional polish,
+while still making each trailer unique and interesting to consume",
+pointing at two update trailers to study frame by frame: Cyberpunk 2077's
+Edgerunners II update overview and The Blood of Dawnwalker's Update 1.1.
+Both run on the same skeleton, so every cut here does too. The skeleton
+is fixed; what fills each slot (the look, the transitions, the music, the
+moment chosen) is the trailer's own.
+
+| Slot | Length | What it holds |
+| --- | --- | --- |
+| 1. Cold open | 2 bars | One or two of the release's most striking moments, full frame, no words. The music's intro. |
+| 2. Title card | 2 bars | Cyberworld Endless, the release's name and its version, and that it is out now ("0.16.0 · OUT NOW"), held still long enough to read. |
+| 3. Feature segments | 3-5 bars each | One segment for each headline of the CHANGELOG, most important first, two to four segments. A segment opens on a one-bar section card (the feature's name, its colour), then two to four shots of a bar each, each showing one concrete thing the feature does. |
+| 4. The rest | 1-2 bars | Everything else in the CHANGELOG as one recap grid: a tile each, a short label and a picture, and a count where there is one. Dawnwalker's "1100+ other fixes and improvements" is the model. |
+| 5. Logo stinger | 1 bar | The logo with the version, on the music's last cadence. |
+| 6. End card | 2-3 bars, held | Logo, "0.16.0 · out now", where to play it (the systems by name or our own drawn icons), the site's address, and the ROM line (your own BN6 ROM; unofficial, not affiliated with Capcom). Still, readable, the cut's last frame. |
+
+The labels hold one grammar through the whole cut:
+- **The section label** is small capitals in one fixed corner, the same on
+  every shot of its segment (Cyberpunk's "EDGERUNNERS II SIDE QUEST" top
+  left).
+- **The feature caption** is one line in one fixed band, concrete and
+  where possible counted ("5 BATTLERS, 33 ROUNDS", Cyberpunk's "40+ NEW
+  VARIANTS OF CYBERWARE"), at most about 40 characters.
+- **Never two words change at once.** A caption stays at least 1.5
+  seconds (about three words a second), its change on a beat.
+- **One type family and one place for each kind of word.** Nothing moves
+  between shots but the words themselves.
+- **Inside the safe area** (5% of each edge), at 1280x720: captions at
+  least 28 px tall, labels 18 px.
+- **The game picture as large as the look allows.** The shots are what
+  sells; the frame serves them.
+
+A cut is 35 to 60 seconds: as many bars as the slots need, the piece
+written to that length (its `BARS`). The unique part of each trailer
+lives in the slots, never in moving them: a cut that opens on a title,
+drops the end card or lets a caption wander is not shown to the owner
+as a candidate.
+
 ## The parts
 
 | Part | Where |
@@ -47,10 +129,20 @@ Write down, in a few lines:
   Missions: dark panels freed shot by shot. Name the devices the last
   trailer used (`lessons.md`) and choose others: its transitions, its
   type, its overlays, its colours.
-- **The arc in bars**: an intro (4 bars), a main section of short shots
-  with a headline each (8), a drop or breakdown for the release's darker
-  or stranger part (2), a climax (4), the logo and the end card (2). About
-  20 bars, 30 to 40 seconds.
+- **The arc in bars**, on the structure's slots (above): which moment is
+  the cold open, the title card's words, each feature segment's section
+  card and its shots in order, the recap grid's tiles, the stinger and
+  the end card, each with its bars. The music's sections fall on the
+  slots: its intro under the cold open, its hook arriving with the title
+  card, a lift into each segment, its cadence on the stinger. 35 to 60
+  seconds.
+- **The seed song** (the owner's gate 2): two or three candidates from
+  the ROMs, the feature's own theme first (0.16.0's Virus Battler plays
+  BN6's 0x15), each with a line on why it fits the release; the sketches
+  come from them and the owner's ear picks one.
+- **The look's sources** (gate 1): which of the game's own screens or the
+  site's PET pieces the look is built from, and how it differs from the
+  last trailer's devices.
 - **The claims**: every headline and caption checked against the CHANGELOG
   and docs (0.12.0: "one battle in four from the second act", "six
   areas", the Dark Soul rising after a missed Chaos Unison). A trailer
@@ -87,8 +179,9 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
 2. **Read the recording** if there is one: `scripts/music_check.py
    --ref FILE` prints its balance and its punch (the swing inside a beat)
    to match.
-3. **Sketch first.** Before the full piece, write three eight-bar
-   sketches (12-16 seconds) in different moods as modules beside the cuts
+3. **Sketch first, never skipped** (the owner's gate 4). Before the full
+   piece, write three eight-bar sketches (12-16 seconds) from the chosen
+   song, in the soundfont (gate 3), in different moods as modules beside the cuts
    (`tools/trailers/sketch_a.py`; not in `VERSIONS`), render them with
    `python3 tools/trailer_music.py OUT.wav --piece sketch_a` to
    `.build/trailer-sketches/` as WAV and MP3 (ffmpeg in its image), and let
@@ -162,6 +255,9 @@ only: `build.py 3ds` renders the banner with it.
 
 ## 4. The look
 
+- Inside the project's style, always (the owner's gate 1): the cut's own
+  drawing borrows BN's screens and the site's PET frames, never a world
+  outside the net.
 - The game's picture stays whole and sharp: 4x nearest (960x640) in the
   1280x720 frame, or 2x for a mosaic of four. The 160-pixel margins are
   free for the cut's own readouts.
@@ -188,8 +284,14 @@ only: `build.py 3ds` renders the banner with it.
   as a glitch, a dead stretch.
 - `ffprobe` the MP4 (`--entrypoint ffprobe` on the ffmpeg image): 1280x720,
   AAC, the length the plan says.
-- Send the MP4 to the owner (SendUserFile, `display: render`) with what
-  you could not check: the music by ear.
+- **The gate report** goes with anything the owner is sent, a sketch or a
+  cut: one line for each of the owner's gates, how it is met and the
+  evidence (the look's sources; the seed song and what of it is kept,
+  and `music_rules.md`'s five points of the measure; the soundfont
+  programs played; the sketch he chose and when; what still waits for his
+  word). A gate that cannot be shown met is fixed first, not reported.
+- Send the MP4 to the owner (SendUserFile, `display: render`) with the
+  gate report and what you could not check: the music by ear.
 
 ## 6. Make it current and show it
 

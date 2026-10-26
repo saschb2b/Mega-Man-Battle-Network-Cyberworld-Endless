@@ -30,7 +30,7 @@ void ta_clear(TextArchive *t);           /* F2 */
 void ta_end(TextArchive *t);             /* E6 */
 void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 
-/* The speakers' faces (the game's mugshots; docs/ROM_DATA.md). Townsfolk of
+/* The speakers' faces (the game's mugshots; docs/rom/). Townsfolk of
  * sprite list 5 have the face of their sprite less 0x20, Navis of list 6
  * that of their sprite. */
 #define FACE_NONE    -1
@@ -39,7 +39,7 @@ void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 #define FACE_CHAUD   0x04
 #define FACE_DAD     0x05
 #define FACE_MEGAMAN 0x37
-#define FACE_CLERK   0x33   /* AsterLand's clerk, the Order Service's (docs/ROM_DATA.md, Home's shops) */
+#define FACE_CLERK   0x33   /* AsterLand's clerk, the Order Service's (docs/rom/world.md, Home's shops) */
 #define FACE_PROG    0x3C   /* Mr. Prog */
 #define FACE_NAVI    0x3E   /* a Normal Navi, the Net Dealers' own */
 #define FACE_TECH    0x45   /* GirlNavi, the NaviCust vendor (shop 3's keeper, 0x42, is the Net Dealer's GreenNavi on the map) */

@@ -1,6 +1,6 @@
 /* The code BN5's Team Colonel Souls run, moved into BN6's battle engine
- * (issue #82, the Souls track's S3-S5; docs/MULTIROM.md, Transplanted
- * Souls; docs/ROM_DATA.md, The Souls' code in BN6's engine): each Soul's
+ * (issue #82, the Souls track's S3-S5; docs/multirom/souls.md, Transplanted
+ * Souls; docs/rom/souls.md, The Souls' code in BN6's engine): each Soul's
  * charged shot's power attack and attack family, the objects they spawn,
  * and BN5's phase of the unison that shows the Soul's image, copied from
  * BN5's ROM into the Souls' room (soul_room.h) as the core starts, their

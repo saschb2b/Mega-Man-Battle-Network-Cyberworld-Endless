@@ -1,6 +1,6 @@
 /* tools/heap3ds.c: the New 3DS's heap modelled on a computer, preloaded
  * (LD_PRELOAD) into the host build by tools/heap3ds.py (3ds/README.md,
- * Testing on a 3DS; docs/EMULATION.md, The 3DS's memory).
+ * Testing on a 3DS; docs/engine/emulation/3ds-memory.md).
  *
  * The game's allocations are the same on both: the ROMs' copies, the
  * tiles a layer's area learns, the installs. What differs is held apart:

@@ -1,4 +1,4 @@
-/* A Net Square visit (docs/ONLINE.md): asked for at Lan's HP's gate, where
+/* A Net Square visit (docs/online/): asked for at Lan's HP's gate, where
  * the director has just saved the run, and back to that checkpoint after.
  * One core all the way: the Square is built into the running game, and
  * the way back loads the gate's checkpoint as CONTINUE does, with no new

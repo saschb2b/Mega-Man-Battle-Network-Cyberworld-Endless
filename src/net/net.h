@@ -34,12 +34,14 @@ typedef enum {
 	OBJ_PROGRAMS,    /* NaviCust program vendor */
 	OBJ_RETURN,      /* leave a side layer */
 	OBJ_GIFT,        /* the run's first layer: a gift to choose */
-	OBJ_NAVI_GATE,   /* a gate sealed with a Navi's code, his SP inside (docs/META.md, gates); param: navi */
-	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/META.md, gates) */
-	OBJ_DUEL,        /* ProtoMan, the rival: a busting duel against his time (docs/RIVAL.md) */
-	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/RIVAL.md); param: its level, 1-2 */
-	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid, or a Navi of its team (docs/LIBERATION.md);
+	OBJ_NAVI_GATE,   /* a gate sealed with a Navi's code, his SP inside (docs/game/meta/phase-two.md, gates); param: navi */
+	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/game/meta/phase-two.md, gates) */
+	OBJ_DUEL,        /* ProtoMan, the rival: a busting duel against his time (docs/game/rival.md) */
+	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/game/rival.md); param: its level, 1-2 */
+	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid, or a Navi of its team (docs/game/liberation/);
 	                    param: its sprite | animation << 8 | its sprite list << 16 | its number << 20 (the team's after the units') */
+	OBJ_BATTLER,     /* a Virus Battler Mr.Prog, BN6's minigame (docs/world/level-design/virus-battler.md); param: his Battler, 1-5 */
+	OBJ_KINDS
 } ObjType;
 
 typedef struct {
@@ -52,7 +54,7 @@ typedef struct {
 	bool prize;       /* a Mystery Data a set piece keeps: behind a lock, or out on an island (the layer's RegUp goes there first) */
 } NetObj;
 
-/* Props: what the originals set on their floors (docs/LEVEL_DESIGN.md,
+/* Props: what the originals set on their floors (docs/world/level-design/props.md,
  * Props). A counter faces the camera: along grid y with its front towards
  * grid +x (screen down-right), or along grid x with its front towards
  * grid +y (down-left); its navi stands in the aisle behind it. A sprite
@@ -72,7 +74,7 @@ typedef struct {
 	int look;         /* a sprite's LOOK_* */
 } NetProp;
 
-/* Room kinds: where points of interest go (docs/LEVEL_DESIGN.md). */
+/* Room kinds: where points of interest go (docs/world/level-design/). */
 enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD, ROOM_LEG };   /* ROOM_LEG: a stretch of a winding path, never raised */
 
 /* A platform or pad: its box, a floor cell in it (ax, ay) and its kind. */
@@ -84,7 +86,7 @@ typedef struct {
 
 /* A layer's kind: the run's own, a side layer (an Undernet detour, the
  * Secret Area), or a trip back from home to an area the run has won
- * (docs/HOME.md, going back: as its act's second layer was, its services,
+ * (docs/world/home/going-back.md: as its act's second layer was, its services,
  * battles and data, no guardian, duel, gate or dark warp; its exit leads
  * home). */
 enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET, LAYER_BACK };
@@ -99,7 +101,7 @@ typedef struct { int x, y, dir; } Stair;
  * stand, `len` void panels towards DIR_* `dir` to floor of the same
  * height; the far floor is an island holding one thing, or a shortcut. The
  * gap's panels stay C_VOID in `cell`: the map side makes them walkable
- * once Rush lies there (docs/LEVEL_DESIGN.md, Set pieces). */
+ * once Rush lies there (docs/world/level-design/set-pieces.md). */
 typedef struct { int x, y, dir, len; bool island; } NetGap;
 #define MAX_GAPS 2
 
@@ -164,10 +166,10 @@ typedef struct {
 	int sig_room;      /* ... that room, -1 where the layout found it no place */
 	int arrive_side;   /* the side of the screen MegaMan arrives at (SIDE_*, issue #106) */
 	int arrive_face;   /* ... and the way he faces there, BN6's (0-7, UP first): along the way on */
-	bool dark;         /* a dark layer (docs/LIBERATION.md): its floor flat and bare, a liberation's board */
+	bool dark;         /* a dark layer (docs/game/liberation/): its floor flat and bare, a liberation's board */
 } Layer;
 
-/* The sides of the screen a layer's arrival lies at (docs/LEVEL_DESIGN.md,
+/* The sides of the screen a layer's arrival lies at (docs/world/level-design/arrivals.md,
  * Arrivals): top and bottom by x + y, left and right by x - y. */
 enum { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT, SIDE_COUNT };
 /* The side every layer arrives at (tools and tests; -1: the plan's). */
@@ -192,7 +194,7 @@ typedef struct {
 
 /* Generation is deterministic for a given seed and kit. */
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
-/* Set before layer_generate: the run's layer is a dark one (docs/LIBERATION.md,
+/* Set before layer_generate: the run's layer is a dark one (docs/game/liberation/building/board-on-the-floor.md,
  * a liberation's board): its floor alone, flat, its arrival and exit, none of
  * a normal layer's services, data, bystanders or set pieces (a guardian's
  * layer is never dark). */
@@ -205,7 +207,7 @@ int layer_npcs(void);
 /* Lifts dead-end rooms onto stairs (net_height.c). */
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 /* The one-wide walkways the way from the arrival to (gx, gy) crosses, past
- * the area's cap widened to two panels (net_way.c, docs/LEVEL_DESIGN.md,
+ * the area's cap widened to two panels (net_way.c, docs/world/level-design/generator.md,
  * Navigation); and how many it crosses, from (sx, sy). */
 void layer_widen_way(int biome, int gx, int gy);
 int layer_way_runs(int sx, int sy, int gx, int gy);
@@ -234,7 +236,7 @@ bool layer_detour_open(int x, int y);
 /* The void panel past the back rim of the layer's best room for a
  * landmark, as the Graveyard's monument stands, on the layer as built:
  * read only, for a prop the map side adds to the layer (another game's,
- * docs/MULTIROM.md); false where none fits. */
+ * docs/multirom/); false where none fits. */
 bool layer_landmark_void(int *x, int *y);
 /* The way's cell a walk to (x, y) leaves the way from (its branch: the
  * cells of a spur, a room off the way and what lies past them share it),
@@ -257,6 +259,14 @@ enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8,
 unsigned layer_pieces(int depth, int biome, int kind);
 /* (dev: --dev pieces=MASK) set pieces every layer of an area that has them holds */
 extern unsigned layer_pieces_forced;
+/* The Virus Battler a layer holds (docs/world/level-design/virus-battler.md, The Virus
+ * Battler): BN6's Battler 1-5 on an act's first layer, from the second act
+ * to the last before the Nest, in about half those acts and at least one
+ * of each cycle's, the Battler by how far the act is through its net
+ * (the fifth at the last); 0 none. From the run's seed and the depth. */
+int layer_battler(int depth, int kind);
+/* (dev: --dev battler=K) Battler K on every normal layer but a guardian's, the first too */
+extern int layer_battler_forced;
 /* The Crosses MegaMan holds as layer `depth` begins (a bit per navi 1-5),
  * which of them clear obstacle `kind` (BLOCK_*), and the obstacle a
  * layer's pocket takes (BLOCK_*, -1 none): the area's own kinds, mostly
@@ -274,7 +284,7 @@ bool layer_area_hides(int biome);
 int layer_keys_last(int depth, int *kind);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);
-/* The layer's RegUp (issue #51, docs/META.md): the MB of Reg memory its
+/* The layer's RegUp (issue #51, docs/game/meta/): the MB of Reg memory its
  * Mystery Data adds (BN6's RegUP2 or RegUP3), 0 for none. */
 #define REG_START 4    /* BN6's Reg memory as a game begins (bn6f initNaviStats) */
 #define REG_MAX   50   /* none past it: the big Mega chips and the Gigas stay out of REG's reach */

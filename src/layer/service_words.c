@@ -1,4 +1,4 @@
-/* The services' chats (docs/VOICE.md): a Recovery Mr.Prog, a shop, a
+/* The services' chats (docs/voice/rules.md): a Recovery Mr.Prog, a shop, a
  * Server's challenge and its prize, a flame of darkness and the rumor of
  * one, ProtoMan's duel, the Undernet's dark warp, the Secret Area's gate. */
 
@@ -152,13 +152,13 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
-	 * first time: docs/META.md, issue #65; when it comes, said every time:
+	 * first time: docs/game/meta/, issue #65; when it comes, said every time:
 	 * a returning playtester heard only "when I'm hurt badly", session 68;
 	 * BN5's own worried rule and its dark battle unsaid, and the Pack's
 	 * EDIT after the take: the voice sweep, docs/voice/sweep/net.md.
 	 * One by BN5's rule: BN5's worried rule deals it into his hand in our
 	 * battles too, and one used makes him dark for that battle, as BN5's
-	 * do: docs/MULTIROM.md, One net. DarkPlus and DarkInvs say what they
+	 * do: docs/multirom/one-net.md. DarkPlus and DarkInvs say what they
 	 * do, as the owner's calls of 13 October 2026 ask: `does`, pages apart
 	 * by '|', "" none) */
 	const char *bar = does && *does ? "|" : "";
@@ -239,7 +239,7 @@ int ta_duel(TextArchive *t, int flag, int face, const char *terms) {
 	int no = ta_closing(t);
 	int i = ta_script(t);
 	/* ProtoMan's terms, then the choice, which starts on No (a duel costs
-	 * HP; docs/RIVAL.md) */
+	 * HP; docs/game/rival.md) */
 	bool first = true;
 	ta_pages(t, terms, face, &first);
 	ta_ask_in(t, face, "Take the duel?\n", no, true, true);
@@ -265,7 +265,7 @@ int ta_undernet(TextArchive *t, int flag, bool deeper) {
 }
 
 /* What MegaMan senses behind the golden gate where Bass waits (docs/
- * BOSSES.md, Super bosses): a dark signal, unnamed until they have met,
+ * docs/game/bosses/super-bosses.md): a dark signal, unnamed until they have met,
  * then Bass and his form; NULL for ProtoMan's copy */
 static const char *gate_beyond(void) {
 	if (run.boss_order[BIOME_SECRET] != SUPER_BASS) return NULL;
@@ -324,12 +324,6 @@ int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code) 
 	return i;
 }
 
-/* ts_check_give_zenny (BN5's over par gives its Zennys by the same EF 0E) */
-static void give_zenny(TextArchive *t, int zenny) {
-	uint8_t b[] = { 0xEF, 0x0E, (uint8_t)zenny, (uint8_t)(zenny >> 8), (uint8_t)(zenny >> 16), (uint8_t)(zenny >> 24), 0xFF, 0xFF, 0xFF };
-	ta_bytes(t, b, sizeof b);
-}
-
 int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;
@@ -345,7 +339,7 @@ int ta_lib_find_zenny(TextArchive *t, int zenny) {
 	char what[24];
 	snprintf(what, sizeof what, "%d Zenny", zenny);
 	ta_page(t, FACE_MEGAMAN, "Lan! Zenny in that panel!", true);
-	give_zenny(t, zenny);
+	ta_give_zenny(t, zenny);
 	ta_got(t, what, &first);
 	ta_end(t);
 	return i;
@@ -358,7 +352,7 @@ int ta_lib_prize_zenny(TextArchive *t, int zenny) {
 	bool first = true;
 	char what[24];
 	snprintf(what, sizeof what, "%d Zenny", zenny);
-	give_zenny(t, zenny);
+	ta_give_zenny(t, zenny);
 	ta_got(t, what, &first);
 	ta_end(t);
 	return i;

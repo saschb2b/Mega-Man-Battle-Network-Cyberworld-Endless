@@ -1,4 +1,4 @@
-/* Jobs at home (jobs.c, docs/HOME.md piece 5, issue #88): at each visit
+/* Jobs at home (jobs.c, docs/world/home/jobs.md, issue #88): at each visit
  * three people post a request for the act ahead, and Lan takes one or
  * none, BN6's Request BBS's rule; the one who asked settles it at the next
  * visit. Its kind is its price: a job asks what an act can give, and pays

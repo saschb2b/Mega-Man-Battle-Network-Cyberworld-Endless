@@ -1,5 +1,5 @@
 /* second.h. The screen the player is on, from BN6's state once a frame
- * (docs/ROM_DATA.md, the second screen's contexts), and the panel drawn
+ * (docs/rom/pet-and-second-screen.md, the second screen's contexts), and the panel drawn
  * for it in the PET's frame (issue #72): the map on a layer, as Operate
  * Shooting Star keeps it up, the folder, the battle, the NaviCustomizer,
  * MegaMan's status, the Library, a mail's sender, the PET at home in the

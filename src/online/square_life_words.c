@@ -100,7 +100,7 @@ static int green_lines(const char **out, char (*buf)[96], const SquareFacts *f) 
 }
 
 /* GirlNavi's talk: she gushes, and tells one of the Square's tips as
- * gossip (docs/VOICE.md, What nobody says: a bystander's one tip) */
+ * gossip (docs/voice/rules.md, What nobody says: a bystander's one tip) */
 static int girl_lines(const char **out, char (*buf)[96], const SquareFacts *f) {
 	int n = 0;
 	if (f->navis > 2) { snprintf(buf[n], 96, "%u Navis! It's\nsooo lively!", f->navis); out[n] = buf[n]; ++n; }

@@ -50,11 +50,12 @@ static bool dev_switch(const char *t) {
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
+		{ "feel", &dev.feel },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
-		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
+		{ "side=", &dev.side }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
@@ -81,6 +82,7 @@ void devtools_parse(const char *spec) {
 		if (dev_switch(t) || analytics_dev(t)) continue;
 		if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
+		else if (!strncmp(t, "viruses=", 8)) dev.viruses = (unsigned)strtoul(t + 8, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
 		else if (!strncmp(t, "folder=", 7)) {
 			char *end;
@@ -98,8 +100,15 @@ void devtools_parse(const char *spec) {
 
 void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
+	/* (the card as the first Battler gives it, Mettaur's and Gunner's data
+	 * on it, and the mask's: btlr_card.h) */
+	if (dev.viruses) {
+		profile.btlr_card |= BTLR_CARD_HELD;
+		profile.btlr_data |= (dev.viruses & ~1u) | 1u << 1 | 1u << 23;
+		profile_save();
+	}
 	/* (the super bosses' records made N: their forms and words, docs/
-	 * BOSSES.md, Super bosses) */
+	 * docs/game/bosses/super-bosses.md) */
 	for (int k = 0; k < 2; ++k) {
 		int navi = k ? SUPER_CYBEAST : SUPER_BASS, wins = k ? dev.beast : dev.bass;
 		while (rival(navi)->megaman_won < wins) {

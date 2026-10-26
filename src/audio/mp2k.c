@@ -13,7 +13,7 @@ Mp2k M;
 /* SoundInfo as BN6's start leaves it: SoundInit's master volume 15 and the
  * ring of 1584 samples, then m4aSoundMode with BN6's word (BN6_M4A_SOUND_MODE,
  * 0x0093040D): any reverb bits its reverb (13), 4 DirectSound channels, rate
- * 3, which is 176 samples a frame (romlab: docs/ROM_DATA.md, The sound's mix) */
+ * 3, which is 176 samples a frame (romlab: docs/rom/sound.md, The sound's mix) */
 #define BN6_PER_FRAME 176
 #define BN6_RING 1584
 #define BN6_MASTER_VOLUME 15
@@ -105,7 +105,7 @@ bool mp2k_init(void) {
 /* ---- songs ---- */
 
 /* song `song` of ROM `rom`: the player its table names (BN5's 32 players
- * are BN6's, docs/ROM_DATA.md) and its header, the ROM left being read */
+ * are BN6's, docs/rom/) and its header, the ROM left being read */
 static Mp2kPlayer *player_of(int rom, int song, uint32_t *header) {
 	if (!M.ready || song < 0 || song >= MP2K_SONGS || !rom_data(rom)) return NULL;
 	mp2k_read(rom);

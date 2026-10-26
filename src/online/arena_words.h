@@ -1,5 +1,5 @@
 /* What MegaMan says of the Arena in the Net Square (arena_words.c,
- * square_arena.c, docs/VOICE.md): the Battle choice for another player's
+ * square_arena.c, docs/voice/rules.md): the Battle choice for another player's
  * MegaMan, a challenge sent and answered, the question a challenge asks,
  * a MegaMan who cannot go, and the word back in the Square, a rematch
  * asked with it. */

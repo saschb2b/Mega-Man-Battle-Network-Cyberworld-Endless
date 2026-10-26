@@ -4,7 +4,7 @@ arrive where its name says by the state's `screen` line. Arguments given
 with a route follow its own, so `--seed 7 --net-biome 3` picks a layer.
 
 Each route's input waits out the fades before its presses: a press during
-one is lost (docs/DEVTOOLS.md, Agents' tools).
+one is lost (docs/devtools/agents-tools.md).
 """
 
 # (Options from the title: SELECT; its hub's lines Controls, Display,

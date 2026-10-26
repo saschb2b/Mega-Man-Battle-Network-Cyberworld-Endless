@@ -1,7 +1,7 @@
-/* The run's Souls (docs/META.md, Souls; issues #69, #82): which of BN5's
- * Team Colonel Navis the run has beaten as a guardian (docs/BOSSES.md,
+/* The run's Souls (docs/game/meta/souls.md; issues #69, #82): which of BN5's
+ * Team Colonel Navis the run has beaten as a guardian (docs/game/bosses/bn5-navis.md,
  * BN5's Navis) and holds the Soul of, for every battle of the run, the
- * Souls standing in BN6's engine (docs/MULTIROM.md, Transplanted Souls);
+ * Souls standing in BN6's engine (docs/multirom/souls.md);
  * kept beside the run's checkpoint. A new run holds none. */
 #ifndef CW_SOULS_H
 #define CW_SOULS_H
@@ -22,6 +22,12 @@ void souls_load(uint32_t seed);
 /* The Souls held, bit k BN5's Soul 7 + k (soulunite.h's, handed to BN6's
  * engine as each battle begins: encounter.c) */
 unsigned souls_held(void);
+/* The Souls held as the layer about to be made is made (the director's,
+ * with the folder's codes), kept beside the checkpoint: what its finds
+ * and stock lean to (loot_souls.h), the same on a CONTINUE's rebuild, a
+ * Soul won on the layer counted from the next */
+void souls_note_layer(void);
+unsigned souls_layer(void);
 /* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older),
  * and his given */
 bool soul_held(int navi);
