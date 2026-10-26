@@ -1100,6 +1100,25 @@ LIB_BOARD = ['--scene', 'emu', '--run-depth', '5', '--seed', '1', '--dev', 'dark
 LIB_FORK = ['--scene', 'home', '--run-depth', '4', '--seed', '7', '--dev', 'quiet', '--input',
             '40:,' + '4:A,12:,' * 4 + '160:,' + '4:A,12:,' * 6 + '0:place 120 -15 1,180:,0:place 165 -15 1,30:,6:A,'
             + '90:,4:A,60:,4:A,60:,4:A,60:,4:A,60:,4:A,200:']
+# 0.16.0's. (the Cross Navis on a dark board, docs/game/liberation/building/
+# cross-navis-team.md: act 3's board on seed 1 with every Soul held and
+# HeatCross brought, seven Navis for two places, the TEAM screen's cursor
+# up from GO! to HeatMan; act 2's on seed 2 with ChargeCross brought,
+# played by the autopilot: ChargeMan's words as he takes his turn, his
+# BombLiberation in BN5's command window, his move onto the dark)
+LIB_TEAM = ['--scene', 'emu', '--run-depth', '8', '--seed', '1', '--setup', 'endless,0,0,0,1', '--dev', 'dark,god,onehit,souls=0x3F']
+LIB_CHARGE = ['--scene', 'emu', '--run-depth', '5', '--seed', '2', '--setup', 'endless,0,0,0,5', '--dev', 'dark,god,onehit']
+# (BN6's Virus Battler, docs/world/level-design/virus-battler.md: Battler 1
+# on seed 1's first layer, --dev battler=1, MegaMan placed beside him by
+# frame 400 and A; on a fresh profile the BtlrCard given;
+# with the card held, ErthDrgn on it, and 3000 zenny: his first pair, the
+# stake's question, Yes, ErthDrgn on BN6's VIRUS LIST, picked with Mettaur,
+# placed, the fight won, his next pair, TAKE THE POT, the pot paid)
+VB_RUN = ['--scene', 'emu', '--seed', '1', '--dev', 'quiet,battler=1']
+VB_HELD = VB_RUN[:-1] + ['quiet,battler=1,zenny=3000,viruses=0x10000']
+VB_MET = '150:,' + '4:A,6:,' * 13 + '100:,0:place 44 72 1,20:,'
+VB_SERIES = (VB_MET + '4:A,6:,110:,' * 3 + '4:A,6:,120:,4:LEFT,6:,10:,4:A,6:,110:,4:A,6:,420:,' + '3:DOWN,6:,8:,' * 13 + '20:,3:A,6:,30:,'
+             + '3:UP,6:,8:,' * 13 + '3:A,6:,30:,3:A,6:,60:,3:A,6:,40:,3:UP,6:,20:,3:A,6:,40:,60:,3:A,6:,1300:,' + '4:A,6:,110:,' * 4)
 
 # Screenshots of the running game for the site and the README
 # (docs/screenshots): name, game options, (frame, shot name) pairs, env.
@@ -1550,6 +1569,17 @@ SCREENSHOTS = [
      [(144, 'liberation-darkloid'), (360, 'liberation-phase'), (1680, 'liberation-turn'), (1830, 'liberation-win'),
       (13760, 'liberation-showtime'), (13850, 'liberation-reach'), (16450, 'liberation-failed'),
       (23600, 'liberation-deleted'), (23900, 'liberation-par'), (23972, 'liberation-chip')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # 0.16.0's notes. (Options' Audio with a DualSense attached: the cursor
+    # on Vibration, then on Trigger effects, each explained)
+    ('options-feel', ['--scene', 'title', '--pad', 'ps5', '--input', '60:,4:SELECT,6:,40:,4:DOWN,6:,30:,4:DOWN,6:,30:,4:A,6:,60:,'
+                      '4:DOWN,6:,20:,4:DOWN,6:,20:,4:DOWN,6:,30:,4:DOWN,6:,30:'], [(359, 'options-vibration'), (399, 'options-triggers')], {}),
+    # (the Virus Battler: MegaMan by him, the card; then a series)
+    ('vb-card', VB_RUN + ['--input', VB_MET + '4:A,6:,110:,' * 4], [(398, 'vb-battler'), (860, 'vb-card')], {}),
+    ('vb-series', VB_HELD + ['--input', VB_SERIES],
+     [(750, 'vb-pair'), (1701, 'vb-list'), (3780, 'vb-choice'), (3926, 'vb-cashout')], {}),
+    # (the Cross Navis on a dark board: the TEAM screen, ChargeMan's turn)
+    ('bn5-team-pick', LIB_TEAM + ['--input', '600:,4:UP,6:,30:'], [(639, 'liberation-team')], {}),
+    ('bn5-lib-charge', LIB_CHARGE, [(3420, 'liberation-chargeman'), (3740, 'liberation-bomb')], {'CYBERWORLD_AUTOPILOT': '1'}),
 ]
 
 
@@ -1761,6 +1791,11 @@ CLIPS = [
     # his line and his blow)
     ('bn5-lib-battle', LIB_BOARD, {'CYBERWORLD_AUTOPILOT': '1'}, None, 1600, 1860),
     ('bn5-lib-darkloid', LIB_BOARD, {'CYBERWORLD_AUTOPILOT': '1'}, None, 13550, 13900),
+    # (0.16.0's: a Virus Battle's first round, ErthDrgn and Mettaur against
+    # Mettaur and Gunner, to YOU WIN!; ChargeMan's BombLiberation, his
+    # move onto the dark and his command in its window)
+    ('vb-fight', VB_HELD, {}, VB_SERIES, 2290, 2770),
+    ('bn5-lib-bomb', LIB_CHARGE, {'CYBERWORLD_AUTOPILOT': '1'}, None, 3590, 3800),
 ]
 
 
@@ -1775,7 +1810,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
-               'bn5-lib-darkloid': (None, 15)}
+               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15)}
 
 
 def clips(only=None):
