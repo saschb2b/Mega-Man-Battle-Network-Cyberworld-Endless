@@ -1211,6 +1211,11 @@ SERVER_SHOTS = '6:B,6:,12:,' * 6
 SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' + SERVER_SHOTS +
                '8:UP,15:,' + SERVER_SHOTS + '8:DOWN,15:,8:DOWN,15:,' + SERVER_SHOTS + '200:,60:,' + '6:A,6:,60:,' * 2 +
                '6:A,6:,200:,' + '6:A,6:,90:,' * 2)
+# (0.17.0's battle floor, PR #247: seed 2's layer 4 with its random battles
+# on, its arrival paged; MegaMan put two panels short of the exit pad, no
+# battle yet on the layer, walks onto it: the pad holds the layer's battle)
+FLOOR_PAD = ['--scene', 'emu', '--run-depth', '4', '--seed', '2']
+FLOOR_PAD_INPUT = '1:,150:,' + '6:A,6:,30:,' * 14 + '60:,0:place 316 84 1,10:,55:UP+RIGHT,300:'
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1607,6 +1612,9 @@ SCREENSHOTS = [
     ('bn5-vendor', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet', '--talk', 'bugfrags:100', '--input',
                     '1:,300:,' + '6:A,6:,60:,' * 21 + '30:,0:place -12 -260 7,20:,6:A,6:,90:,' + '6:A,6:,80:,' * 2],
      [(1963, 'vendor-greeting'), (2147, 'vendor-shop')], {}),
+    # (a battle on every layer: MegaMan steps onto the exit pad of a layer
+    # still owed its battle, and the battle starts there)
+    ('floor-pad', FLOOR_PAD + ['--input', FLOOR_PAD_INPUT], [(863, 'floor-pad'), (868, 'floor-pad-start')], {}),
 ]
 
 
@@ -1823,6 +1831,9 @@ CLIPS = [
     # move onto the dark and his command in its window)
     ('vb-fight', VB_HELD, {}, VB_SERIES, 2290, 2770),
     ('bn5-lib-bomb', LIB_CHARGE, {'CYBERWORLD_AUTOPILOT': '1'}, None, 3590, 3800),
+    # (0.17.0's: the exit pad holding a layer's battle, from MegaMan's walk
+    # onto it to the Custom screen)
+    ('floor-pad', FLOOR_PAD, {}, FLOOR_PAD_INPUT, 800, 1090),
 ]
 
 
@@ -1837,7 +1848,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
-               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15)}
+               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15),
+               'floor-pad': (None, 15)}
 
 
 def clips(only=None):
