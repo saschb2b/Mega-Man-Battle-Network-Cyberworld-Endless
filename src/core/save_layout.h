@@ -116,11 +116,14 @@ _Static_assert(offsetof(Run, back_spent) == 94, "Run.back_spent save offset chan
 _Static_assert(offsetof(Run, home_depth) == 96, "Run.home_depth save offset changed");
 _Static_assert(offsetof(Run, job) == 98, "Run.job save offset changed");
 
-_Static_assert(sizeof(Rival) == 16, "Rival save size changed");
+_Static_assert(sizeof(Rival) == 20, "Rival save size changed");
 _Static_assert(offsetof(Rival, met) == 0, "Rival.met save offset changed");
 _Static_assert(offsetof(Rival, megaman_won) == 4, "Rival.megaman_won save offset changed");
 _Static_assert(offsetof(Rival, navi_won) == 8, "Rival.navi_won save offset changed");
 _Static_assert(offsetof(Rival, last) == 12, "Rival.last save offset changed");
+_Static_assert(offsetof(Rival, form) == 16, "Rival.form save offset changed");
+_Static_assert(offsetof(Rival, left) == 17, "Rival.left save offset changed");
+_Static_assert(offsetof(Rival, run) == 18, "Rival.run save offset changed");
 
 /* (its families 64 bits a battle for issue #82, with BATTLE_MAGIC's "CWB3": an
  * older battle.sav is forgotten, as loot.h says) */

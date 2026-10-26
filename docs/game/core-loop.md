@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T22:00:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -299,7 +299,14 @@ seen; the opening plan of 21 October is still unplayed by a person.
   programs. Hades' doors, with no new screen.
 - **Guardian lines keyed to the last fight**, on the path every dive
   takes (the arena's intro, the first arrival in Lan's HP): he deleted
-  MegaMan last run, what finished him, the Cross MegaMan wore.
+  MegaMan last run, what finished him, the Cross MegaMan wore. The
+  arena's intro built 26 October 2026 ([what was taken from
+  Hades](bosses/hades.md)): `rivals.sav` keeps how the last battle ended
+  (MegaMan's form, the winner's HP left, its run), and the guardian's
+  second box says the closest call, his own Cross worn against him, a
+  Beast Out, a Cross by name or a long while away. The move that
+  finished MegaMan is not known to the engine (BN6's hit carries no
+  attacker the director reads), and Lan's HP is untouched.
 - **The three designed folders** (Z-Canon, Busting, Lean): horizontal
   options on the strongest meta axis, known to this audience.
 

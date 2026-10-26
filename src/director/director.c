@@ -385,6 +385,7 @@ static void battle_update(void) {
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		runlog_fought();
+		boss_battle_frame();
 		lib_battle_frame();
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
