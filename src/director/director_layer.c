@@ -376,6 +376,8 @@ static bool build_layer(void) {
 	int song = layer_song(tiles, a->song);   /* (before the objects: the guardian's prelude names its song) */
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	lib_begin();
+	/* (the run's choices: a dark layer or the Undernet's entered, once) */
+	runlog_layer_entered((uint32_t)run.depth << 8 | (uint32_t)run.side_kind, layer.dark, run.side_kind == LAYER_UNDERNET);
 	mapslot_music(D.group, D.number, lib_board_song(song));
 	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);

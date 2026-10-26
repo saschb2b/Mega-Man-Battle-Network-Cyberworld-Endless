@@ -284,6 +284,7 @@ void home_update(void) {
 	if (hp) home_entered();
 	home_courier_frame();
 	home_gate_frame();
+	home_order_watch();
 	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
 	town_tint();
 	was_hp = hp;

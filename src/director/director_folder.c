@@ -79,7 +79,12 @@ void note_folder_codes(void) {
 	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
-	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
+	uint32_t hash = 2166136261u;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
+		folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
+		hash = (hash ^ folder_made[i]) * 16777619u;
+	}
+	runlog_folder(hash);   /* (the run's choices: an edit since the last layer) */
 	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	souls_note_layer();

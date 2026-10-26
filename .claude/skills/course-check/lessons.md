@@ -46,8 +46,10 @@ is visited a median minute.
 
 **Decided by the owner:** a lost netbattle costs the HP and the
 clearance, never the run (built the same day: `battle_spare.c`). The
-freeze, deferring Virus Battler and a playtest gate per minor release
-were proposed and left to the owner.
+owner declined the other three: no freeze of side systems, Virus Battler
+built now as decided on 25 October, no playtest gate per minor release.
+A later check proposes them again only with new evidence (the choice
+counts, a sag in the numbers), said as such.
 
 **Lessons for the check itself:**
 
@@ -74,5 +76,7 @@ were proposed and left to the owner.
   with one run only.
 - Threat climbed past 1; folders and Crosses brought.
 - The Square's minutes and NetBattles, under the freeze.
-- Whether the choice counts (Phase 0) are in the statistics yet; if
-  they are, read them first.
+- The choice counts (Phase 0, the run-choices event, in the summary
+  script's `choices`): read them first. Are trips back ever taken, drafts
+  ever skipped, orders made every visit, folders edited, and how do a
+  run's minutes split between the map and battle?

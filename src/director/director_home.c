@@ -200,6 +200,13 @@ static bool home_install(void) {
 
 bool home_order_open(void) { return !flag_get(HOME_ORDER_FLAG) && emu_read32(BN6_ZENNY) >= ORDER_LEAST; }
 
+void home_order_watch(void) {
+	static bool counted;
+	bool made = flag_get(HOME_ORDER_FLAG);
+	if (made && !counted) runlog_choice(CHOICE_ORDER);
+	counted = made;   /* (the flag cleared as a visit begins: the next order counted) */
+}
+
 bool home_run_start(bool abandoned) {
 	town_after_abandon = abandoned;
 	work_out_ways();

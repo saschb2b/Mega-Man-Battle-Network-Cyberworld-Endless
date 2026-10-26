@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "analytics.h"
 #include "foes.h"
 
 /* A battle begins: `e` its foes, `kind` a word ("battle", "challenge",
@@ -39,5 +40,15 @@ void runlog_tally_begin(uint32_t seed);
 void runlog_md_opened(uint32_t find);
 void runlog_tally_save(void);
 void runlog_tally_load(uint32_t seed);
+/* ... and beside them what the run chose (analytics.h's CHOICE_*), sent as
+ * the run ends (run-choices): a choice made; a frame on the map, a frame
+ * of battle; the folder as a layer notes it (`hash`: an edit where it
+ * differs from the last); a layer entered (`key` its depth and kind, so a
+ * CONTINUE's rebuild counts it once), dark or the Undernet's */
+void runlog_choice(int choice);
+void runlog_walked(void);
+void runlog_fought(void);
+void runlog_folder(uint32_t hash);
+void runlog_layer_entered(uint32_t key, bool dark, bool undernet);
 
 #endif

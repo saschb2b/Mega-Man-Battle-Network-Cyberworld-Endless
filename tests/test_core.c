@@ -5435,13 +5435,26 @@ static void test_analytics(void) {
 		"statistics: run-end names how far, by whom and how long (%s)", stats_sent[4]);
 	analytics_run_end(true, NULL, NULL);
 	CHECK(stats_posts == 6 && strstr(stats_sent[5], "\"won\":true") && !strstr(stats_sent[5], "\"by\""), "statistics: a won run names no one (%s)", stats_sent[5]);
-	for (int i = 0; i < 6; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
+	/* (what the run chose, an event of its own beside run-end) */
+	for (int c = 0; c < CHOICES; ++c) analytics_count_choice(&econ, c);
+	analytics_count_choice(&econ, CHOICE_JOB);
+	analytics_count_choice(&econ, CHOICES);   /* (none such: nothing counted) */
+	econ.map_frames = 60 * 754;
+	econ.battle_frames = 60 * 321 + 59;
+	analytics_run_choices(false, 3, &econ);
+	CHECK(stats_posts == 7 && strstr(stats_sent[6], "\"name\":\"run-choices\",\"data\":{\"won\":false,\"layer\":7,\"net\":\"short\",\"threat\":2,\"trips\":3,"
+		"\"jobs\":2,\"kept\":1,\"vows\":1,\"orders\":1,\"skips\":1,\"undernet\":1,\"dark\":1,\"duels\":1,\"duelswon\":1,\"netbattles\":1,"
+		"\"netbattleswon\":1,\"edits\":1,\"mapseconds\":754,\"battleseconds\":321}"),
+		"statistics: run-choices counts what the run chose, the seconds on the map and in battle (%s)", stats_sent[6]);
+	analytics_run_choices(true, 0, NULL);
+	CHECK(stats_posts == 7, "statistics: no counts, no run-choices");
+	for (int i = 0; i < 7; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
 	/* no: kept, what waits dropped, nothing more sent */
 	analytics_answer(false);
 	stats_line(settings, line, sizeof line);
 	CHECK(!strcmp(line, "statistics = off\n") && stats_drops == 1, "statistics: a no is kept (%s) and drops what waits", line);
 	analytics_run_start();
-	CHECK(stats_posts == 6, "statistics: after a no, nothing is sent");
+	CHECK(stats_posts == 7, "statistics: after a no, nothing is sent");
 	/* the next start reads the answer: off asks nothing; on sends its view */
 	stats_begin(settings, true, "0.10.0");
 	CHECK(analytics_here() && !analytics_unasked() && analytics_consent() == ANALYTICS_OFF && stats_posts == 0, "statistics: a no is remembered");

@@ -95,7 +95,7 @@ static void guardian_over(int result, int frames) {
 	if (L.guardian) analytics_guardian(L.guardian, result, megaman_hp(), megaman_max(), frames);
 }
 
-#define TALLY_MAGIC 0x43544C31u   /* "CTL1": run.tally, the run's economy's counts */
+#define TALLY_MAGIC 0x43544C32u   /* "CTL2": run.tally, the run's economy's counts and choices (CTL1's, without them, begin anew) */
 static AnalyticsEconomy T;
 
 void runlog_tally_begin(uint32_t seed) {
@@ -124,6 +124,37 @@ void runlog_md_opened(uint32_t find) {
 	analytics_count_md(e, act1);
 	if (kind == 1) analytics_count_chip(e, econ_chip_good(chip_pool_tier(value & 0x1FF)), act1);
 	else if (kind == 3) analytics_count_zenny(e, value, act1);
+}
+
+void runlog_choice(int choice) {
+	bool act1;
+	analytics_count_choice(tally(&act1), choice);
+}
+
+void runlog_walked(void) {
+	bool act1;
+	++tally(&act1)->map_frames;
+}
+
+void runlog_fought(void) {
+	bool act1;
+	++tally(&act1)->battle_frames;
+}
+
+void runlog_folder(uint32_t hash) {
+	bool act1;
+	AnalyticsEconomy *e = tally(&act1);
+	if (e->folder && e->folder != hash) analytics_count_choice(e, CHOICE_FOLDER_EDIT);
+	e->folder = hash;
+}
+
+void runlog_layer_entered(uint32_t key, bool dark, bool undernet) {
+	bool act1;
+	AnalyticsEconomy *e = tally(&act1);
+	if (e->entered == key) return;
+	e->entered = key;
+	if (dark) analytics_count_choice(e, CHOICE_DARK_LAYER);
+	if (undernet) analytics_count_choice(e, CHOICE_UNDERNET);
 }
 
 /* (a won battle's reward, BN6's word, into the run's economy's counts:
@@ -168,5 +199,13 @@ void runlog_run_end(bool won) {
 		(unsigned)run.seed, won ? "won" : "over", run.depth, run.biome, run.viruses_deleted, run.bosses_beaten, e->chips, e->good, e->md,
 		(unsigned)e->zenny, e->chips1, e->good1, e->md1, (unsigned)e->zenny1);
 	append(line);
+	/* (and what it chose: docs/game/core-loop.md, Phase 0) */
+	const uint16_t *c = e->choice;
+	snprintf(line, sizeof line, "seed %08x choices trips %d jobs %d kept %d vows %d orders %d skips %d undernet %d dark %d duels %d/%d netbattles %d/%d edits %d map %us battle %us",
+		(unsigned)run.seed, run.clock, c[CHOICE_JOB], c[CHOICE_JOB_KEPT], c[CHOICE_VOW], c[CHOICE_ORDER], c[CHOICE_DRAFT_SKIP], c[CHOICE_UNDERNET],
+		c[CHOICE_DARK_LAYER], c[CHOICE_DUEL_WON], c[CHOICE_DUEL], c[CHOICE_NETBATTLE_WON], c[CHOICE_NETBATTLE], c[CHOICE_FOLDER_EDIT],
+		(unsigned)(e->map_frames / 60), (unsigned)(e->battle_frames / 60));
+	append(line);
 	analytics_run_end(won, by, e);
+	analytics_run_choices(won, run.clock, e);
 }
