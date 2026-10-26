@@ -2,6 +2,61 @@
 
 ## Unreleased
 
+- **A battle on every layer.** Every layer without a guardian now has at
+  least one random battle. BN6's own roll still decides when: on a layer
+  that has had none, it gets BN6's best odds once MegaMan has walked about
+  a quarter of it, and on the few that still have none the exit pad waits
+  for one as MegaMan steps on it. An act is no longer a walk to its
+  guardian.
+
+- **BN5's End Area walks one wide.** Its rooms are drawn whole as its
+  pads and its ways stay one wide, as BN5 draws them: the rings and stubs
+  that put a junction at every other panel are gone, and the junctions on
+  the way to the exit fell from eleven a layer to two (#164).
+
+- **Fewer words on the way.** Lines that change no decision are gone. An
+  act's first layer says two boxes where it said five to seven; a
+  guardian's layer three or four where it said nine or ten; the next
+  guardian is named once at each place you decide (the act card, the Net
+  Dealer, MegaMan at the portal, L on his layer), his full tips in Dad's
+  mail. After a guardian, BN6's own "MegaMan got:" boxes carry two things
+  each and the call to install a program moves into the draft's ask: the
+  Guardian Data's chain is seven boxes where it was twelve. L still warns
+  of EraseMan's erase and DiveMan's wave.
+
+- **MegaMan reads the way ahead.** At a layer's two ways (the exit pad
+  beside a dark warp, the warp itself, and each portal of Lan's HP) he
+  says what he senses on the layer behind it: a strong virus signal,
+  someone selling programs, a trader's call, the Net Dealer, a dark
+  board. A layer saved before this update starts afresh at a CONTINUE.
+
+- **A Server pays a pick.** A won Server challenge offers three chips
+  on the vault's screen, one to take, instead of one rolled chip; B
+  leaves them at the Server until you take one.
+
+- **The requests on one board.** All three askers' requests go up on
+  BN6's own Request BBS at AsterLand, so one walk reads them all, and the
+  courier in Lan's HP says what each one asks and pays. The askers still
+  pay where they stand.
+
+- **Guardians remember how it ended.** A guardian's arena intro names
+  how your last battle with him went: a close call, his own Cross worn
+  against him, a Beast Out, a Cross by name, or the runs since you met.
+
+- **Three more starting folders.** Z-Canon (Cannon A A B B C for
+  GigaCan1), Busting (TankCan1, HiCannon and swords in L and R, no
+  Recovery chip) and Lean join Standard, Blade and Storm in the setup,
+  each a different way to play rather than a stronger one, each opened by
+  a milestone that teaches its style.
+
+- **The statistics count a run's choices.** Where you said yes to the
+  anonymous statistics, a run's end now also sends what it chose: trips
+  back home, requests taken, kept and vowed, orders at AsterLand, drafts
+  left for their BugFrags, the Undernet's and dark layers entered,
+  ProtoMan's duels and netbattles, folder edits, Virus Battlers' series
+  and pots, and its seconds on the map against those in battle. Numbers
+  only, as before; the guide and the FAQ list them.
+
 - **Finds vary again.** A Mystery Data's chip is no longer rolled again
   until it comes in your folder's codes. The chip stays as the net rolled
   it and takes one of your folder's codes where it comes in one, more
