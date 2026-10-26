@@ -21,6 +21,7 @@ typedef struct {
 
 	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/game/liberation/) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
+	bool folders;   /* every starting folder open in the profile (captures: the setup's Folder row, each folder's first hand) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/game/rival.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
 	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a battle begun hurt); 0 the max */
@@ -125,7 +126,8 @@ extern DevFlags dev;
 /* "god,onehit,quiet,speed=4,powers" */
 void devtools_parse(const char *spec);
 /* With `veteran`, once the profile is loaded: its guardians' records and
- * Spins, where it has none yet; with `duels=N`, the rival's wins. */
+ * Spins, where it has none yet; with `duels=N`, the rival's wins; with
+ * `folders`, every starting folder. */
 void devtools_veteran(void);
 /* The player's GBA keys: the menu takes them while it is open. */
 uint32_t devtools_keys(uint32_t keys);

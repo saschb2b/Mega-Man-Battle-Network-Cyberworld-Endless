@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -51,7 +51,9 @@ takes the way it opens at home), `route` (a special route found: with
 so the next fork offers its third way, [Special routes](../game/liberation/special-routes.md), Special
 routes), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
-has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
+has none: the PET's mails for `build.py screenshots pet`), `folders`
+(every starting folder open in the profile: the setup's Folder row turns
+through all six, [Decisions and phase one](../game/meta/decisions.md)) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
 words naming the third act before it, `duels=1` opens the official gates
 of level 1; [The rival: Chaud and ProtoMan](../game/rival.md)), and `hp=N` (MegaMan's max HP made N, and his

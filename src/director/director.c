@@ -252,6 +252,9 @@ static void take_events(void) {
 		/* (a DarkChip's dark power, or its base chip, in a BN6 battle: its
 		 * price after it, docs/game/meta/) */
 		case EV_DARK_RAN: case EV_DARK_BASE: darkbn6_event(&ev[i]); break;
+		/* (a Program Advance or a Recovery chip in a run's battle: the
+		 * Z-Canon and Busting folders' milestones, docs/game/meta/) */
+		case EV_CHIP_WATCHED: folder_milestone_chip((int)ev[i].r[0]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
 		 * lost before he could act, session 65) */
@@ -447,7 +450,9 @@ static void after_battle(void) {
 static void after_forced(void) {
 	/* back from the guardian's battle */
 	if (boss_fighting() && !emu_battle_forcing()) {
-		boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
+		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+		boss_battle_over(won);
+		if (won) folder_milestone_guardian();
 		D.pet_refreshed = false;   /* (Dad's mails made again: the Records, the report) */
 	}
 	if (D.challenge && !emu_battle_forcing()) {

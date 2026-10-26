@@ -405,7 +405,12 @@ seen; the opening plan of 21 October is still unplayed by a person.
   finished MegaMan is not known to the engine (BN6's hit carries no
   attacker the director reads), and Lan's HP is untouched.
 - **The three designed folders** (Z-Canon, Busting, Lean): horizontal
-  options on the strongest meta axis, known to this audience.
+  options on the strongest meta axis, known to this audience. Built 26
+  October 2026 ([the meta layer's decisions](meta/decisions.md), the
+  designed three): GigaCan1's Cannons and shots that stop at cover, heavy
+  hitters with no Recovery chip, seven kinds in B; opened by a Program
+  Advance used, an act cleared without a Recovery chip, layer 10. The
+  statistics' folder counts will say which are brought.
 
 ### Phase 3: variety, from what Phase 0 shows
 

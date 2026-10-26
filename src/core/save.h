@@ -122,10 +122,18 @@ typedef struct {
 	 * BN6_FLAG_VIRUS_DATA + AI each, set in every run's game from here) */
 	uint8_t btlr_card;
 	uint32_t btlr_data;
+	/* the designed folders' milestones reached in any run (FEAT_*,
+	 * docs/game/meta/design.md, Starting folders), and the act (its
+	 * meta_act_key) of the run `recov_run` (its seed) in which MegaMan last
+	 * used a Recovery chip: an act cleared without one opens Busting */
+	uint8_t folder_feats;
+	uint8_t recov_act;
+	uint32_t recov_run;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
 enum { BTLR_CARD_HELD = 1 };
+enum { FEAT_PA = 1 /* a Program Advance used: Z-Canon */, FEAT_DRY_ACT = 2 /* an act cleared without a Recovery chip: Busting */ };
 #define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 

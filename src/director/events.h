@@ -13,6 +13,7 @@ enum {
 	EV_DARK_RAN,           /* a DarkChip's dark power ran for MegaMan, a BugFrag paid (darkbn6.h): r0 the chip */
 	EV_DARK_BASE,          /* ... or, with no BugFrag, its base chip ran: r0 its DarkChipID */
 	EV_JOB,                /* SetEventFlag on one of the jobs' flags at home (job_words.h): r0 the flag */
+	EV_CHIP_WATCHED,       /* a chip the folders' milestones watch ran for MegaMan (meta_chip_watched: a Program Advance, a Recovery chip): r0 the chip */
 };
 
 /* The hooks for the map, flag and key item events, once the core is up

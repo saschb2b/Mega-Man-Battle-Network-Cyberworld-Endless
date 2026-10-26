@@ -6,24 +6,23 @@
 #include <string.h>
 
 #include "analytics.h"
+#include "bn6.h"
 #include "chip_pool.h"
+#include "meta_text.h"
 #include "net.h"
 #include "pacing.h"
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
 #include "save.h"
+#include "xchips_registry.h"
 
 /* Each folder opens with a milestone that teaches its style and that a
  * first or second run reaches (not a count to grind, and not a guardian
  * the net may not bring for many runs: SlashMan and ElecMan, their first
- * keys, came in act 3 or the Nest). */
-static const FolderInfo folders[FOLDER_COUNT] = {
-	{ "Standard", "BN6's own starting folder", NULL },
-	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian" },
-	{ "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian" },
-};
-
+ * keys, came in act 3 or the Nest); Lean's, layer 10, the design's one
+ * for a player who has seen the net's middle. Their words are
+ * meta_text.c's. */
 /* (in any run, this build's or one before: rivals.sav keeps who fell) */
 static bool earned(int folder) {
 	switch (folder) {
@@ -34,18 +33,23 @@ static bool earned(int folder) {
 	case FOLDER_STORM:
 		/* BN6's Aqua navis among the guardians: SpoutMan and DiveMan */
 		return rival(6)->megaman_won > 0 || rival(13)->megaman_won > 0;
+	case FOLDER_ZCANON: return (profile.folder_feats & FEAT_PA) != 0;
+	case FOLDER_BUSTING: return (profile.folder_feats & FEAT_DRY_ACT) != 0;
+	/* (the best depth, kept from the first runs on) */
+	case FOLDER_LEAN: return profile.best_depth >= 10;
 	default: return folder == FOLDER_STANDARD;
 	}
 }
 
-const FolderInfo *meta_folder(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
+const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
 
 /* The folders' chips by BN6's record numbers (docs/rom/chips.md, chip
  * records): no more than five of a chip, as the game's folders hold; codes
  * gathered so a hand can be picked together. */
 #define C(id, code) (uint16_t)((id) | (((code) == '*' ? 26 : (code) - 'A') << 9))
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
-	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175 };
+	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
+	HICANNON = 2, TANKCAN1 = 12, CRAKSHOT = 89, DUBLSHOT = 90, RFLECTR1 = 131, HOLYPANL = 168 };
 static const uint16_t blade[30] = {
 	/* LifeSword's three in S, a spare in L; AreaGrab to close in, nothing
 	 * that reaches the back */
@@ -69,14 +73,89 @@ static const uint16_t storm[30] = {
 	C(AREAGRAB, 'S'), C(AREAGRAB, 'S'), C(BARRIER, 'A'), C(BARRIER, 'A'),
 	C(ATK10, '*'), C(ATK10, '*'), C(BUSTERUP, '*'),
 };
+static const uint16_t zcanon[30] = {
+	/* GigaCan1's three Cannons (A, B, C in a row) and shots in their
+	 * codes that stop at the first thing in the row; two MiniBombs the only
+	 * throw over cover */
+	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'C'),
+	C(CRAKSHOT, 'A'), C(CRAKSHOT, 'A'), C(TANKCAN1, 'A'), C(DUBLSHOT, 'C'), C(DUBLSHOT, 'C'),
+	C(RFLECTR1, 'C'), C(RFLECTR1, 'C'), C(AIRSHOT, '*'), C(AIRSHOT, '*'),
+	C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(HOLYPANL, 'B'),
+	C(BARRIER, 'A'), C(BARRIER, 'A'), C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(PANLGRAB, '*'), C(PANLGRAB, '*'),
+};
+static const uint16_t busting[30] = {
+	/* the heaviest of each kind a first act allows, in L and R: TankCan1
+	 * after its wind-up, HiCannon, the swords but LongSwrd (LifeSword stays
+	 * Blade's); no Recovery chip, so every heal is the net's */
+	C(TANKCAN1, 'R'), C(TANKCAN1, 'R'), C(TANKCAN1, 'R'), C(TANKCAN1, 'R'),
+	C(HICANNON, 'L'), C(HICANNON, 'L'), C(HICANNON, 'L'),
+	C(WIDESWRD, 'L'), C(WIDESWRD, 'L'), C(WIDESWRD, 'L'), C(SWORD, 'L'), C(SWORD, 'L'), C(SWORD, 'L'),
+	C(MINIBOMB, 'L'), C(MINIBOMB, 'L'), C(MINIBOMB, 'L'), C(MINIBOMB, 'R'), C(MINIBOMB, 'R'),
+	C(THUNDER, 'R'), C(THUNDER, 'R'), C(THUNDER, 'R'), C(BARRIER, 'R'), C(BARRIER, 'R'),
+	C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(PANLGRAB, '*'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+static const uint16_t lean[30] = {
+	/* seven kinds, all in B or *: any five make a hand, and none of them
+	 * strong, sharp or far */
+	C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'B'),
+	C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'),
+	C(VULCAN1, 'B'), C(VULCAN1, 'B'), C(VULCAN1, 'B'), C(VULCAN1, 'B'), C(VULCAN1, 'B'),
+	C(THUNDER, 'B'), C(THUNDER, 'B'), C(THUNDER, 'B'), C(THUNDER, 'B'), C(THUNDER, 'B'),
+	C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
+};
 #undef C
 
 const uint16_t *meta_folder_chips(int folder) {
 	switch (folder) {
 	case FOLDER_BLADE: return blade;
 	case FOLDER_STORM: return storm;
+	case FOLDER_ZCANON: return zcanon;
+	case FOLDER_BUSTING: return busting;
+	case FOLDER_LEAN: return lean;
 	default: return NULL;
 	}
+}
+
+/* ---- the milestones a battle reaches (Z-Canon's and Busting's) ---- */
+
+/* (BN6's Recovery chips, Recov10-Recov300 154-161, and DrkRecov 288, BN6's
+ * DarkChip of the kind: BN5's map onto the same ids, xchips_registry.c) */
+static bool recovery(int id) { return (id >= 154 && id <= 161) || id == 288; }
+
+/* (BN6's Program Advances, and the registry's own: BN5's formed in BN6's
+ * lists) */
+static bool program_advance(int id) {
+	const XChipReg *x = xreg_at(id);
+	return (id >= BN6_PA_FIRST && id <= BN6_PA_LAST) || (x && x->how == XREG_PA);
+}
+
+/* (an act of the run, its cycle's too: an endless net's second act 1 is
+ * another act) */
+static int act_key(void) { return pacing_loop(run.depth) * PACING_ACTS + pacing_act(run.depth) + 1; }
+
+bool meta_chip_watched(int id) { return recovery(id) || program_advance(id); }
+
+void meta_chip_used(int id) {
+	if (program_advance(id) && !(profile.folder_feats & FEAT_PA)) {
+		profile.folder_feats |= FEAT_PA;
+		profile_save();
+	}
+	if (recovery(id) && (profile.recov_run != run.seed || profile.recov_act != act_key())) {
+		profile.recov_run = run.seed;
+		profile.recov_act = (uint8_t)act_key();
+		profile_save();
+	}
+}
+
+void meta_guardian_deleted(void) {
+	/* (an act's own guardian: the Secret Area's master ends no act) */
+	if (run.side_kind == LAYER_SECRET || (profile.folder_feats & FEAT_DRY_ACT)) return;
+	if (profile.recov_run == run.seed && profile.recov_act == act_key()) return;
+	profile.folder_feats |= FEAT_DRY_ACT;
+	profile_save();
 }
 
 /* (earned in any run; the profile's bit marks it as announced on a
@@ -265,7 +344,7 @@ static void open_folders(bool tell) {
 	for (int f = 1; f < FOLDER_COUNT; ++f) {
 		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
 		profile.folders_open |= (uint16_t)(1u << f);
-		if (tell) say("the %s folder", folders[f].name);
+		if (tell) say("the %s folder", meta_folder(f)->name);
 		profile.setup_new |= SETUP_NEW_FOLDER;
 	}
 }
@@ -376,9 +455,9 @@ const char *meta_next_goal(void) {
 	/* (a line of the summary: 32 letters at most) */
 	if (!meta_endless_open()) return "Win a short net: the endless net";
 	for (int f = 1; f < FOLDER_COUNT; ++f)
-		if (!meta_folder_open(f) && folders[f].opens) {
+		if (!meta_folder_open(f) && meta_folder(f)->opens) {
 			/* ("Delete an Aqua guardian: Storm") */
-			snprintf(goal, sizeof goal, "%c%s: %s", folders[f].opens[0] - 'a' + 'A', folders[f].opens + 1, folders[f].name);
+			snprintf(goal, sizeof goal, "%c%s: %s", meta_folder(f)->opens[0] - 'a' + 'A', meta_folder(f)->opens + 1, meta_folder(f)->name);
 			return goal;
 		}
 	bool cross = false;

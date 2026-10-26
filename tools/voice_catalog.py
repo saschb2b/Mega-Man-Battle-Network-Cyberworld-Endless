@@ -107,6 +107,7 @@ DOMAINS = {
     'stands_text': ('Arena', 'Screen', 'screen'),
     'title_lines': ('Title', 'MegaMan', 'speech'),
     'title_setup_text': ('Title', 'Screen', 'screen'),
+    'meta_text': ('Title', 'Screen', 'screen'),
     'title_summary_text': ('Title', 'Screen', 'screen'),
     'launcher_text': ('The ROMs screen', 'Screen', 'screen'),
     'pick_text': ('The ROMs screen', 'Screen', 'screen'),

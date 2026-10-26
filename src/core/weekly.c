@@ -60,6 +60,7 @@ static void standard_profile(void) {
 	p.first_guardian = p.first_area = p.area_before = p.guardian_before = 0;
 	p.threat_open = 0;
 	p.folders_open = 0;
+	p.folder_feats = 0;
 	p.short_wins = 0;
 	p.crosses_open = 0;
 	p.marks = 0;
