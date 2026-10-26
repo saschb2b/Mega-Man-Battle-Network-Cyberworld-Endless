@@ -1203,6 +1203,14 @@ JUKEBOX_SOUND = {'CYBERWORLD_AUDIO_DUMP': '/src/.build/screenshots/sound.raw', '
 # step puts MegaMan in the room the layer is remembered by)
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
 SIG_PAGED = '150:,' + '4:A,6:,' * 30 + '0:sig,'
+# (0.17.0's: the Server's talk opened on seed 8's layer 4, paged to its
+# question, Yes; the battle (OldHeatr, Shooter, Mettaur2, one hit each) won
+# by the buster down each row; the result and the pick's words paged)
+SERVER_8 = ['--scene', 'emu', '--run-depth', '4', '--seed', '8', '--dev', 'god,onehit,quiet', '--talk', 'challenge:200']
+SERVER_SHOTS = '6:B,6:,12:,' * 6
+SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' + SERVER_SHOTS +
+               '8:UP,15:,' + SERVER_SHOTS + '8:DOWN,15:,8:DOWN,15:,' + SERVER_SHOTS + '200:,60:,' + '6:A,6:,60:,' * 2 +
+               '6:A,6:,200:,' + '6:A,6:,90:,' * 2)
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1589,6 +1597,9 @@ SCREENSHOTS = [
      [(405, 'fork-pad')], {}),
     ('fork-portal', ['--scene', 'home', '--run-depth', '7', '--seed', '7', '--input',
                      HP_PAGED + '0:place 160 37 0,20:,6:A,100:,6:A,90:,6:A,90:'], [(1516, 'fork-portal')], {}),
+    # (a won Server pays a pick: seed 8's layer 4, its offer naming the
+    # three, Yes, the battle won by the buster down each row, then the pick)
+    ('server-pick', SERVER_8 + ['--input', SERVER_PICK], [(546, 'server-offer'), (2556, 'server-pick')], {}),
 ]
 
 
