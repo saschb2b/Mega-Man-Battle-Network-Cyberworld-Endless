@@ -140,6 +140,8 @@ static void wrap(TextArchive *t, const char *s) {
 	}
 }
 
+void ta_wrap(TextArchive *t, const char *s) { wrap(t, s); }
+
 void ta_page(TextArchive *t, int face, const char *s, bool first) {
 	static const uint8_t hide[] = { 0xF5, 0x01 };
 	if (face >= 0) ta_mugshot(t, face);

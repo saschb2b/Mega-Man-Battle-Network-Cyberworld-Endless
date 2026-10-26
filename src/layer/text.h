@@ -50,6 +50,9 @@ void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
  * word-wrapped to the box (20 characters a line; '\n' breaks the line, a
  * new box every three lines), waiting for A. */
 void ta_page(TextArchive *t, int face, const char *s, bool first);
+/* `s` word-wrapped as a page's text is, into whatever box is open: its
+ * pages apart by a wait for A and a clear, the last left to the caller. */
+void ta_wrap(TextArchive *t, const char *s);
 /* Pages of a conversation into the script under way (ta_talk's boxes);
  * `first` opens the chat box, and is cleared. */
 void ta_pages(TextArchive *t, const char *boxes, int face, bool *first);

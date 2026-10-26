@@ -36,8 +36,14 @@ extern JobTalk job_talk[JOB_ASKERS];
 /* Asker `asker`'s script at this visit, spoken with `face`; `plain` its
  * words where it has no job to talk of. */
 int job_script(TextArchive *t, int asker, int face, const char *plain);
-/* What AsterLand's request board reads (A at it): the board's post. */
-const char *job_board_words(void);
+/* Request `j` on BN6's Request BBS at AsterLand (request_bbs.c): its title
+ * in the board's list (14 letters at most), and its post as the board reads
+ * it out, in the poster's own words: what it asks, the pay, where they wait. */
+const char *job_bbs_title(const Job *j);
+const char *job_bbs_post(const Job *j);
+/* The courier in Lan's HP on offer `j`: what it asks and what it pays, in a
+ * Mr.Prog's capitals. */
+const char *job_offer_brief(const Job *j);
 
 /* MegaMan at home on the held request, now up for settling (`job`): its
  * reward waiting, or the asker to tell, and where they are. */

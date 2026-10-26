@@ -21,6 +21,7 @@
 #include "job_words.h"
 #include "layer_objs.h"
 #include "mapslot.h"
+#include "request_bbs.h"
 #include "run.h"
 #include "save.h"
 #include "talk.h"
@@ -93,10 +94,18 @@ void home_jobs_flags(void) {
 	flag_clear(JOB_SETTLED_FLAG);
 	if (run.job.kind != JOB_NONE) flag_set(JOB_HELD_FLAG);
 	else flag_clear(JOB_HELD_FLAG);
+	request_bbs_post();
 }
 
 void home_jobs_flag(int flag) {
 	if (!D.town) return;
+	/* (taken on BN6's Request BBS: as its asker's Yes, which their script
+	 * then follows) */
+	int board = request_bbs_taken(flag);
+	if (board >= 0) {
+		flag = JOB_TAKE_FLAG + board;
+		if (run.job.kind == JOB_NONE) { flag_set(flag); flag_set(JOB_HELD_FLAG); }
+	}
 	if (flag >= JOB_TAKE_FLAG && flag < JOB_TAKE_FLAG + JOB_ASKERS && run.job.kind == JOB_NONE) {
 		run.job = job_talk[flag - JOB_TAKE_FLAG].job;
 		run.job.state = JOB_TAKEN;
@@ -108,6 +117,7 @@ void home_jobs_flag(int flag) {
 		if (run.job.state == JOB_DONE) runlog_choice(CHOICE_JOB_KEPT);
 		memset(&run.job, 0, sizeof run.job);
 	}
+	request_bbs_post();
 	if (emu_debug_on()) fprintf(stderr, "jobs: flag %04x, the run's job now kind %d from %d\n", flag, run.job.kind, run.job.asker);
 }
 

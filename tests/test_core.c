@@ -3735,7 +3735,7 @@ static void test_free_space(void) {
 		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
 		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
 		{ "a Chip Trader's prizes of both nets", FREE_TRADER_LIST, FREE_TRADER_LIST_END },
-		{ "the PET menu's labels", FREE_PET_OPTIONS, FREE_PET_OPTIONS_END },
+		{ "the PET menu's labels", FREE_PET_OPTIONS, FREE_PET_OPTIONS_END }, { "the Request BBS's posts", FREE_BBS, FREE_BBS_END },
 		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
 		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
 		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },

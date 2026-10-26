@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -264,7 +264,10 @@ seen; the opening plan of 21 October is still unplayed by a person.
   "MegaMan got:" boxes and the draft.
 - **Jobs on BN6's Request BBS** at AsterLand, all three askers' posts in
   one place, the courier naming each offer's kind and pay. The askers and
-  the Academy stay as places (decision 10 stands).
+  the Academy stay as places (decision 10 stands). Built 26 October 2026
+  ([Jobs](../world/home/jobs.md), On BN6's Request BBS): BN6's own screen
+  lists, reads and takes the three; the statistics' requests taken and
+  vows will say whether the draft is read more.
 
 ### Phase 2: sharpen (small, one at a time)
 
