@@ -57,6 +57,47 @@ time waits, it is not cut short. Each came from a cut the owner refused.
    right and tests that pass are the agent's own checks, never his
    approval.
 
+## The structure (every trailer)
+
+The owner (26 October 2026): "I want structure, and professional polish,
+while still making each trailer unique and interesting to consume",
+pointing at two update trailers to study frame by frame: Cyberpunk 2077's
+Edgerunners II update overview and The Blood of Dawnwalker's Update 1.1.
+Both run on the same skeleton, so every cut here does too. The skeleton
+is fixed; what fills each slot (the look, the transitions, the music, the
+moment chosen) is the trailer's own.
+
+| Slot | Length | What it holds |
+| --- | --- | --- |
+| 1. Cold open | 2 bars | One or two of the release's most striking moments, full frame, no words. The music's intro. |
+| 2. Title card | 2 bars | Cyberworld Endless, the release's name and its version, and that it is out now ("0.16.0 · OUT NOW"), held still long enough to read. |
+| 3. Feature segments | 3-5 bars each | One segment for each headline of the CHANGELOG, most important first, two to four segments. A segment opens on a one-bar section card (the feature's name, its colour), then two to four shots of a bar each, each showing one concrete thing the feature does. |
+| 4. The rest | 1-2 bars | Everything else in the CHANGELOG as one recap grid: a tile each, a short label and a picture, and a count where there is one. Dawnwalker's "1100+ other fixes and improvements" is the model. |
+| 5. Logo stinger | 1 bar | The logo with the version, on the music's last cadence. |
+| 6. End card | 2-3 bars, held | Logo, "0.16.0 · out now", where to play it (the systems by name or our own drawn icons), the site's address, and the ROM line (your own BN6 ROM; unofficial, not affiliated with Capcom). Still, readable, the cut's last frame. |
+
+The labels hold one grammar through the whole cut:
+- **The section label** is small capitals in one fixed corner, the same on
+  every shot of its segment (Cyberpunk's "EDGERUNNERS II SIDE QUEST" top
+  left).
+- **The feature caption** is one line in one fixed band, concrete and
+  where possible counted ("5 BATTLERS, 33 ROUNDS", Cyberpunk's "40+ NEW
+  VARIANTS OF CYBERWARE"), at most about 40 characters.
+- **Never two words change at once.** A caption stays at least 1.5
+  seconds (about three words a second), its change on a beat.
+- **One type family and one place for each kind of word.** Nothing moves
+  between shots but the words themselves.
+- **Inside the safe area** (5% of each edge), at 1280x720: captions at
+  least 28 px tall, labels 18 px.
+- **The game picture as large as the look allows.** The shots are what
+  sells; the frame serves them.
+
+A cut is 35 to 60 seconds: as many bars as the slots need, the piece
+written to that length (its `BARS`). The unique part of each trailer
+lives in the slots, never in moving them: a cut that opens on a title,
+drops the end card or lets a caption wander is not shown to the owner
+as a candidate.
+
 ## The parts
 
 | Part | Where |
@@ -88,10 +129,13 @@ Write down, in a few lines:
   Missions: dark panels freed shot by shot. Name the devices the last
   trailer used (`lessons.md`) and choose others: its transitions, its
   type, its overlays, its colours.
-- **The arc in bars**: an intro (4 bars), a main section of short shots
-  with a headline each (8), a drop or breakdown for the release's darker
-  or stranger part (2), a climax (4), the logo and the end card (2). About
-  20 bars, 30 to 40 seconds.
+- **The arc in bars**, on the structure's slots (above): which moment is
+  the cold open, the title card's words, each feature segment's section
+  card and its shots in order, the recap grid's tiles, the stinger and
+  the end card, each with its bars. The music's sections fall on the
+  slots: its intro under the cold open, its hook arriving with the title
+  card, a lift into each segment, its cadence on the stinger. 35 to 60
+  seconds.
 - **The seed song** (the owner's gate 2): two or three candidates from
   the ROMs, the feature's own theme first (0.16.0's Virus Battler plays
   BN6's 0x15), each with a line on why it fits the release; the sketches
