@@ -28,6 +28,8 @@ void draft_fit_watch(void);
 /* A guardian's draft left for its BugFrags, counted among the run's choices */
 void draft_skip_watch(void);
 void bug_watch(void);
+/* A battle over, `won` or not: a win with bugs on the board earns BugFrags. */
+void bug_pay_battle(bool won);
 void dev_programs(void);
 
 #endif

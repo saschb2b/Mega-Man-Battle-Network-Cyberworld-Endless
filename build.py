@@ -54,7 +54,8 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 layer got worse than tests/atlas_baseline.txt
                                 (docs/devtools/)
   python3 build.py pacing       every act's battles and guardians against
-                                their bands, in .build/pacing.txt
+                                their bands, and the battles per layer and
+                                act played, in .build/pacing.txt
   python3 build.py economy [RUNS]  what a run hands out by act (chips, good
                                 chips, codes, zenny, Mystery Data) against
                                 their bands, in .build/economy.txt
@@ -2696,8 +2697,11 @@ def main():
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
         os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
-        sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
-                        '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')]))
+        r = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                   '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')])
+        # (then the battles per layer and act, played: the battle floor's bands)
+        sys.exit(r or subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'battle_floor.py'), '--out',
+                                       os.path.join(ROOT, '.build', 'pacing.txt'), *a.rest]))
     if a.action == 'economy':
         # (local only: the ROM; what a run hands out by act against its bands, docs/game/economy/; RUNS after the action)
         build('host')

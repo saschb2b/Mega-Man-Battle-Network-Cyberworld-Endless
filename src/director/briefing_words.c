@@ -26,17 +26,20 @@
 #include "talk.h"
 #include "town.h"
 
-/* Where world (wx, wy) is, for L's words, in buf: its lie, how far the
- * walk there is, and whether it winds (as the crow flies, "close by" named
- * ProtoMan across a gap). The winding said in a box of its own (WINDS),
- * which the words around end. */
+/* The way's winding, said in a box of its own, which the words around
+ * end: for the heal and the last stop's services, where the arrow leads */
 #define WINDS ".|@M It's a winding walk"
+
+/* Where world (wx, wy) is, for L's words, in buf: its lie and how far the
+ * walk there is (as the crow flies, "close by" named ProtoMan across a
+ * gap). Not whether it winds, a box each that no arrow follows (the main
+ * path's words cut, docs/game/core-loop.md). */
 static const char *spot_where(int wx, int wy, char *buf, size_t n) {
 	static const char *const dist[3] = { "close by", "a ways off", "far off" };
 	int far;
 	bool winds;
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	snprintf(buf, n, "%s,%s%s", lies, dist[far], winds ? WINDS : "");
+	snprintf(buf, n, "%s,%s", lies, dist[far]);
 	return buf;
 }
 
@@ -48,29 +51,32 @@ static const char *rival_where(void) {
 	return duel_waiting(&wx, &wy) ? spot_where(wx, wy, buf, sizeof buf) : NULL;
 }
 
-/* MegaMan's words on the layer's guardian, on arriving: who he is and how
- * he fights once they have fought him, in any run (the tip, strategy, is
- * kept here for BN5's guardians and the super bosses, whom no mail of
- * Dad's covers; noted for the BBS, docs/voice/sweep/net.md); before that
- * only hearsay or a strong signal, as naming him would spend the first
- * fight's discovery (and how could he know?). The yellow panels and
- * EraseCross's bug are BN6's own, unsaid (the voice sweep). Appended to
- * `buf` at `k`; the new length. */
+/* MegaMan's words on the layer's guardian, on arriving: who he is once
+ * they have fought him, in any run, and of how he fights only the move
+ * that deletes unwarned (guardian_warning): the rest is Dad's mail's, one
+ * channel a fact (the main path's words cut, docs/game/core-loop.md). The
+ * whole tip, strategy, stays here for BN5's guardians and the super
+ * bosses, whom no mail covers (noted for the BBS, docs/voice/sweep/net.md).
+ * Before a fight only hearsay or a strong signal, as naming him would
+ * spend the first fight's discovery (and how could he know?). The yellow
+ * panels and EraseCross's bug are BN6's own, unsaid (the voice sweep).
+ * Appended to `buf` at `k`; the new length. */
 static int guardian_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	int navi = D.objs.guardian.navi;
-	const char *tip = guardian_tip(navi);
+	const char *tip = guardian_mailed(navi) ? guardian_warning(navi) : guardian_tip(navi);
 	/* (what a Navi on the net said, as hearsay; a super boss sensed,
 	 * docs/game/bosses/super-bosses.md) */
 	if (guardian_known(navi)) {
-		ADD("|@M %s waits at the end!|", guardian(navi)->name);
-		if (tip) ADD("@M We've got battle data on him!|@M %s|", tip);
-	} else if (navi == SUPER_CYBEAST) ADD("|@M Something huge waits at the end...|@M It's growling,Lan. Like the beast in me.|");
-	else if (navi == SUPER_BASS) ADD("|@M A dark signal waits at the end...|@M It doesn't feel like a copy,Lan.|");
-	else if (guardian_heard()) ADD("|@M Word is,%s waits at the end!|", guardian(navi)->name);
-	else ADD("|@M A strong Navi's signal waits at the end...|");
+		ADD("@M %s waits at the end!|", guardian(navi)->name);
+		if (tip && !guardian_mailed(navi)) ADD("@M We've got battle data on him!|");
+		if (tip) ADD("@M %s|", tip);
+	} else if (navi == SUPER_CYBEAST) ADD("@M Something huge waits at the end...|@M It's growling,Lan. Like the beast in me.|");
+	else if (navi == SUPER_BASS) ADD("@M A dark signal waits at the end...|@M It doesn't feel like a copy,Lan.|");
+	else if (guardian_heard()) ADD("@M Word is,%s waits at the end!|", guardian(navi)->name);
+	else ADD("@M A strong Navi's signal waits at the end...|");
 	/* (the Net's clock: his copy a tenth stronger a notch, docs/world/home/) */
-	if (run.clock) ADD("@M The Net kept copying while we went back...|@M %s tougher for it,Lan!|", guardian_known(navi) ? "He's" : "It's");
+	if (run.clock) ADD("@M The Net kept copying. %s tougher,Lan!|", guardian_known(navi) ? "He's" : "It's");
 	#undef ADD
 	return k;
 }
@@ -290,7 +296,7 @@ static int flame_words(char *buf, int k, int size) {
 	bool winds;
 	netmap_world((int)o->x, (int)o->y, &wx, &wy);
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame's %s,%s%s!|", lies, near_far[far], winds ? WINDS : "");
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame's %s,%s!|", lies, near_far[far]);
 }
 
 static void here_scan(Here *h) {
@@ -316,27 +322,20 @@ static void here_scan(Here *h) {
 		run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0;
 }
 
-/* L's first words on a layer: where they are and what guards it,
- * appended to `buf` at `k`; the new length. */
+/* L's first words on a layer: what guards it, a box each ended by "|",
+ * appended to `buf` at `k`; the new length. The layer and the area are
+ * the screen's corner and the act card's, unsaid (the main path's words
+ * cut, one channel a fact: docs/game/core-loop.md). */
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	const char *area = guardian_area_in_text(run.biome, run.side_kind);
 	/* (a trip back: its way home, docs/world/home/) */
-	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.", area);
-	else ADD("@M Layer %d,Lan. We're in %s!", run.depth, area);
+	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.|", guardian_area_in_text(run.biome, run.side_kind));
 	/* (where the nets meet: docs/multirom/one-net.md) */
-	if (D.deep) ADD("|@M Both Nets' viruses come down here!");
-	else if (D.territory_native) ADD("|@M Its viruses come from the older Net!");
+	if (D.deep) ADD("@M Both Nets' viruses come down here!|");
+	else if (D.territory_native) ADD("@M Its viruses come from the older Net!|");
+	/* (on his own layer only: before it, the act card names him as the act
+	 * begins and the Net Dealer at his pick, one channel a decision) */
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
-	/* (not after the act's arrival words, which spoke of him; a
-	 * CONTINUE does not say them again, and there he is spoken of) */
-	else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
-		int navi = run_guardian(run.biome);
-		if (guardian_known(navi)) ADD("|@M %s's copy guards this area!|", guardian(navi)->name);
-		else if (guardian_heard()) ADD("|@M Word is,%s guards this area!|", guardian(navi)->name);
-		else ADD("|@M A strong Navi's signal waits deeper in...|");
-	}
-	else ADD("|");
 	#undef ADD
 	return k;
 }

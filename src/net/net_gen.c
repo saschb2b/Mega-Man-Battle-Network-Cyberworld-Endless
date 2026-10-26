@@ -491,11 +491,13 @@ static void last_stop(int kind, const LayerKit *kit) {
 
 /* The rooms' last shaping once the arena stands: the exit, the way to it
  * widened past the area's cap (net_way.c, the guardian's own bridge left
- * as his gate), the raised rooms. */
-static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
+ * as his gate) where the area's art draws floor two wide (`one_wide`: BN5's
+ * End Area draws none, and the legalizer wore a widened way into rings,
+ * issue #164), the raised rooms. */
+static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, bool one_wide) {
 	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
-	layer_widen_way(layer.biome, goal->ax, goal->ay);
+	if (!one_wide) layer_widen_way(layer.biome, goal->ax, goal->ay);
 	/* (a dark layer flat: the board's units stand on one floor) */
 	layer_raise_rooms(seed, layer.dark ? 0u : stair_dirs, rise);
 }
@@ -626,7 +628,11 @@ static void roll_services(Services *s, int depth, int biome, int kind) {
 	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (own && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
 	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	s->programs = own && biome_layer == 1 && rng_range(0, 99) < 60;
+	/* (the NaviCust vendor on every act's middle layer, BugFrags' sink:
+	 * docs/game/navicust.md 4; his old 60% chance still rolled, so the rest
+	 * of the layer rolls as it did) */
+	s->programs = own && biome_layer == 1;
+	if (s->programs) (void)rng_range(0, 99);
 	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
 	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
@@ -987,7 +993,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* (a super boss's arena is bigger: docs/game/bosses/super-bosses.md) */
 	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
 	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
-	finish_rooms(seed, stair_dirs, rise);
+	finish_rooms(seed, stair_dirs, rise, kit && kit->one_wide);
 	place_ends(kind, biome, &arena);
 	/* (a dark layer's floor is its board: the director places the rest) */
 	if (!layer.dark) fill_layer(seed, depth, biome, kind, size, rise, kit);

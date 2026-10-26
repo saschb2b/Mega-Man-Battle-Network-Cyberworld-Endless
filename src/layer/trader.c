@@ -144,3 +144,18 @@ static bool both_nets(uint32_t from) {
 	return true;
 }
 
+int trader_bugfrag_offer(char *code) {
+	uint32_t pools = BN6_TRADER_POOLS & 0x1FFFFFF, end;
+	uint32_t start = list_of(pools + POOL_BUGFRAG * 12u, &end);
+	int n = start ? (int)((end - start) / REC) : 0;
+	for (int tries = 0; tries < 8 && n; ++tries) {
+		uint32_t r = start + REC * (uint32_t)rng_range(0, n - 1);
+		int id = rom_u16(r) & 0x1FF;
+		/* (not one the folder holds as many of as it may) */
+		if (loot_folder_full(id) && tries < 7) continue;
+		uint8_t c = R.data[r + 2];
+		*code = c >= 26 ? '*' : (char)('A' + c);
+		return id;
+	}
+	return 0;
+}

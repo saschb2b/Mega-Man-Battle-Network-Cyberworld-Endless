@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 
+#include "battle_floor.h"
 #include "bn6_fields.h"
 #include "boss.h"
 #include "briefing_words.h"
@@ -41,7 +42,6 @@
 #include "nets_words.h"
 #include "netmap.h"
 #include "pet_text.h"
-#include "rivals.h"
 #include "save.h"
 #include "story_words.h"
 #include "talk.h"
@@ -208,6 +208,7 @@ static bool follow_exit_warp(void) {
 	 * guardian's exit leads down to the second's, docs/game/meta/) */
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
 	run_left();
+	runlog_layer_left(D.battles, D.objs.guardian.navi);
 	if (boss_beaten()) clear_card();
 	/* (an act's last layer: home, docs/world/home/) */
 	bool home = home_due();
@@ -231,7 +232,7 @@ static bool follow_exit_warp(void) {
  * as the guardian's state changes and after the game enters a map (bn6f
  * EnterMap clears the map's flags, 0x1640-0x16FF: EV_MAP_ENTER). */
 static void exit_flag(bool entered) {
-	bool shut = !boss_exit_open() || lib_exit_shut();
+	bool shut = !boss_exit_open() || lib_exit_shut() || floor_owed();
 	if (!entered && shut == D.exit_shut) return;
 	D.exit_shut = shut;
 	if (shut) flag_set(BN6_FLAG_WARP_OFF + 1);
@@ -403,7 +404,7 @@ static void battle_update(void) {
 		if (s != -2) {
 			D.record_known = true;
 			loot_battle_fought(&D.next);
-			runlog_battle_start(&D.next, D.duel ? "duel" : D.challenge ? "challenge" : "battle");
+			runlog_battle_start(&D.next, D.duel ? "duel" : D.challenge ? "challenge" : D.floor_fight ? "floor" : "battle");
 		}
 		if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
 	}
@@ -415,6 +416,7 @@ static void battle_update(void) {
 static void after_battle(void) {
 	/* back from a battle: count the deleted viruses (a navi counts below) */
 	D.in_battle = false;
+	D.floor_fight = false;
 	D.placed_told = false;
 	D.battle_record = 0;
 	/* (and a Rare deleted on BN6's BtlrCard, for the profile's card) */
@@ -425,6 +427,7 @@ static void after_battle(void) {
 	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
 	/* (a request's battles: a guardian's counts for none) */
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
+	bug_pay_battle(won);
 	if (emu_debug_on() && won) {
 		int r = emu_read16(BN6_BATTLE_REWARD);
 		if (r >> 14 == 0 && r != 0xFFFF) {
@@ -573,7 +576,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **BugFrags buy programs.** The NaviCust vendor now stands on every
+  act's middle layer and sells for BugFrags in BN6's own shop screen: four
+  programs and a rare chip from the BugFrag Trader's pool, named and
+  priced where the machine rolls one. A battle won with bugs on the board
+  pays a BugFrag a bug level, five at most. Skipping a guardian's
+  NaviCust draft for BugFrags now buys a program of your choosing at the
+  next vendor. A layer saved before this update starts
+  afresh at a CONTINUE.
+
 - **ProtoMan's netbattle no longer ends the dive.** Where his blow would
   delete MegaMan, Lan stops the battle: it ends at once, MegaMan
   back on the layer at 1 HP, the duel lost and Chaud's full clearance

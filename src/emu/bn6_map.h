@@ -35,4 +35,9 @@
 #define BN6_COORD_KEY_SPAN    254
 #define BN6_COORD_VALUE       0x01        /* in a shape */
 
+/* BN6's encounter roll (bn6f sub_80AA4C0, bn6.h's BN6_ENCOUNTER_*) checks once each 0x40 of BN6_STEPS_WALKED:
+ * odds out of 32 from a row by that walk and a column by the map's class (src/director/battle_floor.c) */
+#define BN6_ENCOUNTER_ODDS    0x08020C5Cu /* bn6f byte_8020C5C: 17 rows of 8, a row each 0x40 walked (the last from 0x400), a column a class */
+#define BN6_ENCOUNTER_CLASS   0x08020CE4u /* bn6f byte_8020CE4: each net map's class, at (MapGroup - 0x80) * 16 + MapNumber: 0 the most battles, 7 none */
+
 #endif

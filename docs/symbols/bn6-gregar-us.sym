@@ -713,6 +713,8 @@
 080203EA BN6_FORM_PALETTES
 08020404 BN6_CHARGE_TIMES
 08020B9C busting_table
+08020C5C encounter_odds_classes
+08020CE4 encounter_odds_classes_2
 08020E54 BN6_NAVI_POWERS
 080210DD navi_base_stats
 080211A0 RomLayout.battle_gem_rewards

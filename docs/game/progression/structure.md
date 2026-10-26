@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The structure"
-description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, growth, risk the player chooses, the Cybeast, later cycles."
+description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, the battle floor, growth, risk the player chooses, the Cybeast, later cycles."
 tags: [game, progression]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 ---
 
 # The structure
@@ -109,6 +109,45 @@ report, the two commonest about half. And a battle that shares a family
 with the last one is a third as likely as it would be (six of a
 playtester's seven act 1 battles in the RoboDog Comp held Gunners): the
 area keeps its viruses, but not the same ones fight after fight.
+
+## The battle floor (26 October 2026)
+
+Every layer without a guardian has at least one random battle, Phase 1 of
+[the core loop](../core-loop.md) ("A battle floor"): 43% of the layers of
+seeds 1-12 had none, and an act could be a walk to its guardian. It serves
+the run's own dialectic, preparing for the act's guardian against the walk
+that costs time: a layer's battle is where the folder is tested and chips,
+zenny and busting levels come from, so a layer without one is all price
+and no find. The pattern is bad-luck protection (pity), as loot systems
+bias a drop upward after a dry spell, on BN6's own roll and never in its
+battle:
+
+- BN6's roll ([BN6's battles](../../rom/battle.md), Encounter odds and classes) checks once
+  each 0x40 of the walk since the last battle, its odds rising with that
+  walk, scaled by the map's class; the maps the layers take over have
+  classes 3, 5 and 6, and class 6 gives nothing before 0x380, longer than
+  many a layer's walk. On a layer still without a battle, past 0x100 of
+  the walk (about a quarter of a layer's), the walk reads 0x400, BN6's
+  best row, so its roll comes at its own moment with its best odds
+  (`src/director/battle_floor.c`). Once a battle has been fought there,
+  BN6's walk counts as BN6 counts it.
+- The few layers it misses hold their exit pad shut, and stepping onto it
+  starts the battle the layer owes, the same roll; the pad opens after it.
+  Over seeds 1-12 that was 1 layer of 92.
+- Not on a guardian's layer (his battle is its own), a dark layer's board
+  (its battles are the board's), a trip back (the player's errand home),
+  or where BN6's random battles are off.
+
+The battles are the roll's as ever, so the first act keeps its gentler
+openings (the run's first two battles and the first layer after each
+guardian from the lower half of the band, above). MegaMan's walk and BN6's
+battles are untouched; what a layer seed makes is too (no `LAYER_MAKE`).
+With it, over seeds 1-12 (the autopilot, `--dev god,onehit`, 60000
+frames), layers without a guardian went from 0.27-1.00 random battles a
+layer by act and 41 of 106 without one to 1.23-1.50 and none, acts from
+1-4 to 2-5; on act 1 played as it is (30000 frames) viruses ended 3 runs
+of 12 (2 before) and the guardian 7 (10 before), two runs still going.
+`build.py pacing` holds every layer to it ([Measuring it](measuring.md)).
 
 ## BN5's battles: one band, floor and cap (4 October 2026)
 

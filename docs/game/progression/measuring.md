@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Measuring it"
-description: "How progression is measured: `build.py pacing` rolls every area's battles per act and 500 runs' guardians against their bands, `tests/test_core.c` checks the rules, `runlog.txt` records battles, and `build.py economy` measures handouts."
+description: "How progression is measured: `build.py pacing` rolls every area's battles per act and 500 runs' guardians against their bands and plays seeds 1-12 for the battles per layer and act, `tests/test_core.c` checks the rules, `runlog.txt` records battles, and `build.py economy` measures handouts."
 tags: [game, progression]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 ---
 
 # Measuring it
@@ -13,12 +13,16 @@ generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
   ([Dev tools](../../devtools/overview.md)). It reports 0 now. Median battle HP by act: about
   140, 200, 270, 340, 400 and 500, and 510 in the Nest. The super bosses'
   forms are listed after the guardians, unflagged: their battles are
-  BN6's own.
+  BN6's own. Then it plays seeds 1-12 (`tools/battle_floor.py`) and counts
+  the random battles on every layer MegaMan left: one to three on a layer
+  without a guardian ([the battle floor](structure.md)), NONE marking one
+  without, and six at most an act.
 - `tests/test_core.c` checks the acts, bands, versions, area tiers, guardian
   choice and heals without a ROM.
 - `runlog.txt` in the data folder records every battle (area, foes, their
   HP, MegaMan's HP before and after, the zenny on hand, a win's busting
-  level and reward) and where each run ended.
+  level and reward), each layer left with its random battles, and where
+  each run ended.
 - `python3 build.py economy` measures what a run hands out, act by act:
   chips, good chips, codes, zenny against what there is to buy, Mystery
   Data ([Economy](../economy/overview.md), [Dev tools](../../devtools/overview.md)), the flat plan (before issue

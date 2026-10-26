@@ -14,6 +14,7 @@
 #include "emu.h"
 #include "game.h"
 #include "guardians.h"
+#include "net.h"
 #include "pacing.h"
 #include "platform.h"
 #include "run.h"
@@ -181,6 +182,15 @@ void runlog_battle_end(bool won, int frames) {
 	else snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> left hp %d", megaman_hp());
 	append(L.line);
 	guardian_over(won ? ANALYTICS_WON : ANALYTICS_LEFT, frames);
+}
+
+void runlog_layer_left(int battles, int guardian) {
+	static const char *kind[] = { "layer", "undernet", "secret", "back" };
+	char line[120];
+	int n = snprintf(line, sizeof line, "seed %08x depth %d area %d act %d %s%s left battles %d", (unsigned)run.seed, run.depth, run.biome,
+		pacing_act(run.depth) + 1, kind[run.side_kind & 3], layer.dark ? " dark" : "", battles);
+	if (guardian && n < (int)sizeof line) snprintf(line + n, sizeof line - (size_t)n, " guardian g%d", guardian);
+	append(line);
 }
 
 void runlog_run_end(bool won) {

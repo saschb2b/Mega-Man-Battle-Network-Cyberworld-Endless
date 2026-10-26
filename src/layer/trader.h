@@ -17,5 +17,9 @@ void trader_install(int group, int number, TraderKind kind, int depth);
 /* AsterLand's own Chip Trader at home (docs/world/home/asterland-and-academy.md): its pool
  * as BN6 has it, its prizes in the folder's codes. */
 void trader_home(void);
+/* A chip of BN6's BugFrag Trader's pool (Undernet 2's: 60 chips of 3 to 5
+ * stars), at random, one of its record's codes into `code`, for the
+ * NaviCust vendor's list (docs/game/navicust.md, 4); 0 for none. */
+int trader_bugfrag_offer(char *code);
 
 #endif
