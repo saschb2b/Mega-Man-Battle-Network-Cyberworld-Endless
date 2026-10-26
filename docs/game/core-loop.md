@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -301,7 +301,12 @@ seen; the opening plan of 21 October is still unplayed by a person.
   takes (the arena's intro, the first arrival in Lan's HP): he deleted
   MegaMan last run, what finished him, the Cross MegaMan wore.
 - **The three designed folders** (Z-Canon, Busting, Lean): horizontal
-  options on the strongest meta axis, known to this audience.
+  options on the strongest meta axis, known to this audience. Built 26
+  October 2026 ([the meta layer's decisions](meta/decisions.md), the
+  designed three): GigaCan1's Cannons and shots that stop at cover, heavy
+  hitters with no Recovery chip, seven kinds in B; opened by a Program
+  Advance used, an act cleared without a Recovery chip, layer 10. The
+  statistics' folder counts will say which are brought.
 
 ### Phase 3: variety, from what Phase 0 shows
 

@@ -4240,6 +4240,101 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
+/* The starting folders (docs/game/meta/design.md, Starting folders): each
+ * a legal folder of 30 chips in codes BN6 gives them, five of a chip at
+ * most, its identity kept (Z-Canon's Cannons A, B and C, Busting with no
+ * Recovery chip, Lean's seven kinds in B or *); and the designed three's
+ * milestones: a Program Advance used, an act cleared without a Recovery
+ * chip, layer 10, each in any run. */
+static void test_folders(void) {
+	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
+	 * 0x2C, read from the ROM: docs/rom/chips.md) */
+	static const struct { int id; const char *codes; } bn6_codes[] = {
+		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
+		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 131, "ACP*" },
+		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+	};
+	Profile profile_was = profile;
+	Run run_was = run;
+	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
+		const uint16_t *c = meta_folder_chips(f);
+		const char *name = meta_folder(f)->name;
+		CHECK(c && meta_folder(f)->opens, "folders: %s has no chips or no milestone", name);
+		if (!c) continue;
+		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
+		for (int k = 0; k < 30; ++k) {
+			int id = c[k] & 0x1FF, code = c[k] >> 9;
+			const char *given = NULL;
+			for (unsigned q = 0; q < sizeof bn6_codes / sizeof *bn6_codes; ++q)
+				if (bn6_codes[q].id == id) given = bn6_codes[q].codes;
+			CHECK(given && strchr(given, code == 26 ? '*' : 'A' + code), "folders: %s's chip %d in a code BN6 does not give it (%d)", name, id, code);
+			kinds += !count[id]++;
+			recov += id >= 154 && id <= 161;
+			cannons |= id == 1 && code <= 2 ? 1 << code : 0;
+			off_lean += code != 1 && code != 26;
+		}
+		for (int id = 0; id < 512; ++id) CHECK(count[id] <= 5, "folders: %s holds %d of chip %d", name, count[id], id);
+		if (f == FOLDER_ZCANON) CHECK(cannons == 7, "folders: Z-Canon lacks a Cannon in A, B or C (%#x)", cannons);
+		if (f == FOLDER_BUSTING) CHECK(recov == 0, "folders: Busting holds %d Recovery chips", recov);
+		if (f == FOLDER_LEAN) CHECK(kinds <= 7 && !off_lean, "folders: Lean has %d kinds, %d chips outside B and *", kinds, off_lean);
+	}
+	/* the milestones, from a new profile */
+	memset(&profile, 0, sizeof profile);
+	memset(&run, 0, sizeof run);
+	run.seed = 7;
+	run.depth = 2;
+	CHECK(!meta_folder_open(FOLDER_ZCANON) && !meta_folder_open(FOLDER_BUSTING) && !meta_folder_open(FOLDER_LEAN), "folders: open on a new profile");
+	CHECK(meta_chip_watched(320) && meta_chip_watched(154) && meta_chip_watched(161) && !meta_chip_watched(1) && !meta_chip_watched(71),
+		"folders: the chips watched");
+	meta_chip_used(1);
+	CHECK(!meta_folder_open(FOLDER_ZCANON), "folders: Z-Canon open after a Cannon");
+	meta_chip_used(320);
+	CHECK(meta_folder_open(FOLDER_ZCANON), "folders: Z-Canon shut after GigaCan1");
+	/* a Recovery chip in act 1 keeps act 1 from counting; act 2 clean opens it */
+	meta_chip_used(154);
+	run.depth = 3;
+	meta_guardian_deleted();
+	CHECK(!meta_folder_open(FOLDER_BUSTING), "folders: Busting open after an act with a Recov10");
+	run.depth = 6;
+	run.side_kind = LAYER_SECRET;
+	meta_guardian_deleted();
+	CHECK(!meta_folder_open(FOLDER_BUSTING), "folders: Busting open after the Secret Area's master");
+	run.side_kind = LAYER_NORMAL;
+	meta_guardian_deleted();
+	CHECK(meta_folder_open(FOLDER_BUSTING), "folders: Busting shut after act 2 without a Recovery chip");
+	/* (a Recovery chip in act 1 of another run is that run's) */
+	memset(&profile, 0, sizeof profile);
+	meta_chip_used(154);
+	run.seed = 8;
+	run.depth = 3;
+	meta_guardian_deleted();
+	CHECK(meta_folder_open(FOLDER_BUSTING), "folders: another run's Recovery chip kept this act from counting");
+	profile.best_depth = 9;
+	CHECK(!meta_folder_open(FOLDER_LEAN), "folders: Lean open at layer 9");
+	profile.best_depth = 10;
+	CHECK(meta_folder_open(FOLDER_LEAN), "folders: Lean shut at layer 10");
+	/* (said on the summary as they open, the closest one named before) */
+	memset(&profile, 0, sizeof profile);
+	profile.short_wins = 1;
+	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
+	const char *goal = meta_next_goal();
+	CHECK(goal && !strcmp(goal, "Use a Program Advance: Z-Canon"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	for (int f = FOLDER_ZCANON; f < FOLDER_COUNT; ++f) {
+		char g[64];
+		snprintf(g, sizeof g, "%c%s: %s", meta_folder(f)->opens[0] - 'a' + 'A', meta_folder(f)->opens + 1, meta_folder(f)->name);
+		CHECK(strlen(g) <= 32, "folders: the goal line \"%s\" past 32 letters", g);
+	}
+	profile.folder_feats = FEAT_PA;
+	meta_run_over(false);
+	const char *said[6];
+	int n = meta_unlocked(said, 6);
+	bool told = false;
+	for (int i = 0; i < n; ++i) told |= !strcmp(said[i], "the Z-Canon folder");
+	CHECK(told && (profile.setup_new & SETUP_NEW_FOLDER), "folders: the summary did not say Z-Canon");
+	profile = profile_was;
+	run = run_was;
+}
+
 /* The BeastOut helper (issue #99, docs/game/meta/): shut until the endless
  * net's own Nest has fallen, a short net's Nest opening none; announced
  * once, on the summary of the run that opened it and NEW on the setup's
@@ -6125,6 +6220,7 @@ int main(void) {
 	test_xnavi();
 	test_all_star();
 	test_beast();
+	test_folders();
 	test_xchips();
 	test_xtext();
 	test_chip_code();

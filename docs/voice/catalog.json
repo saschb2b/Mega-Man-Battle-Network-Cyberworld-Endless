@@ -963,6 +963,10 @@
   "lock_words:ta_pcode_teller": {
    "line": 126
   },
+  "meta_text:folders": {
+   "comment": "(in the folders' order, FOLDER_STANDARD first)",
+   "line": 10
+  },
   "navicust_words:abouts": {
    "comment": "What each program of the pool does, in MegaMan's words, its name first (navicust.c's POOL)",
    "line": 12
@@ -2010,6 +2014,15 @@
    "speaker": "Screen",
    "stem": "analytics_text"
   },
+  "src/core/meta_text.c": {
+   "comment": "meta_text.h. Menu words, short and plain: a folder's style and its cost in a line, as KeyItem's box says what an item is, and its milestone as the summary's goal line says it (\"Delete an Aqua guardian: Storm\", 32 letters at most with the name).",
+   "domain": "Title",
+   "kind": "screen",
+   "lines": 11,
+   "shows": [],
+   "speaker": "Screen",
+   "stem": "meta_text"
+  },
   "src/core/options_text.c": {
    "comment": "options_text.h. Menu words, short and plain: what each line opens or sets, and the choices as docs/GUIDE.md's Screen and Sound say them.",
    "domain": "Options",
@@ -2863,12 +2876,13 @@
    },
    "Title": {
     "files": [
+     "src/core/meta_text.c",
      "src/scenes/title_lines.c",
      "src/scenes/title_setup_text.c",
      "src/scenes/title_summary_text.c"
     ],
     "flagged": 0,
-    "lines": 34,
+    "lines": 45,
     "speech": 7
    },
    "Trade Central": {
@@ -3020,7 +3034,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 1894,
+  "lines": 1905,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3468,6 +3482,7 @@
   {"container":"title_setup_text:setup_word","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_word","line":39,"lines":["title_setup_text:setup_word:0"],"speakers":["Screen"],"title":"Setup word","when":""},
   {"container":"title_setup_text:setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_cross_note","line":46,"lines":["title_setup_text:setup_cross_note:0","title_setup_text:setup_cross_note:1"],"speakers":["Screen"],"title":"The Cross row's note for a Cross with its `strong` power and `weak` element","when":"(its costs said: BN6's own weakness, which a playtester was told wrong; and \"break it\": a playtester knew it from BN6, a newer player would not)"},
   {"container":"title_setup_text:setup_helpers_on","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_helpers_on","line":63,"lines":["title_setup_text:setup_helpers_on:0"],"speakers":["Screen"],"title":"The Help row's value with `on` helpers on, where their names run too long","when":"the Help row's value with `on` helpers on, where their names run too long"},
+  {"container":"meta_text:folders","domain":"Title","file":"src/core/meta_text.c","id":"meta_text:folders","line":11,"lines":["meta_text:folders:0.1","meta_text:folders:1.1","meta_text:folders:1.2","meta_text:folders:2.1","meta_text:folders:2.2","meta_text:folders:3.1","meta_text:folders:3.2","meta_text:folders:4.1","meta_text:folders:4.2","meta_text:folders:5.1","meta_text:folders:5.2"],"speakers":["Screen"],"title":"Folders","when":"(in the folders' order, FOLDER_STANDARD first)"},
   {"container":"title_summary_text:words","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:words","line":13,"lines":["title_summary_text:words:4","title_summary_text:words:5","title_summary_text:words:7","title_summary_text:words:8","title_summary_text:words:11"],"speakers":["Screen"],"title":"Words","when":"(in SummaryText's order, its name beside each)"},
   {"container":"title_summary_text:summary_text","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_text","line":24,"lines":["title_summary_text:summary_text:0"],"speakers":["Screen"],"title":"Summary text","when":""},
   {"container":"title_summary_text:summary_layer","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_layer","line":29,"lines":["title_summary_text:summary_layer:0"],"speakers":["Screen"],"title":"A layer, as the rows give it","when":"a layer, as the rows give it: \"Layer 5\""},
@@ -4231,6 +4246,17 @@
   {"boxes":[{"pages":[["a word for each","AnalyticsWord"]],"speaker":"Screen","text":"a word for each AnalyticsWord"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"fragment":true,"id":"analytics_text:words:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"a word for each AnalyticsWord","text_hash":"8883b5b4b78a"},
   {"boxes":[{"pages":[["Change it any time","in Options."]],"speaker":"Screen","text":"Change it any time in Options."}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":23,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options.","text_hash":"e37b9887522a"},
   {"boxes":[{"pages":[["# statistics: on","sends anonymous play","statistics to the"],["game's own Umami","#","(umami.saschb2b.com):"],["the system and","version, the setups","runs take, how"],["# far they get and","which guardians win.","No names, no IDs."],["off sends nothing.","# The game asks at","its first start"],["(README.md,","Anonymous","statistics)."]],"speaker":"Screen","text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n"}],"container":"analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_setting_note:0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n","text_hash":"921b2dee734d"},
+  {"boxes":[{"pages":[["BN6's own starting","folder"]],"speaker":"Screen","text":"BN6's own starting folder"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:0.1","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"BN6's own starting folder","text_hash":"f2da4d374ae1"},
+  {"boxes":[{"pages":[["Swords in S for","LifeSword. Nothing","reaches the back"]],"speaker":"Screen","text":"Swords in S for LifeSword. Nothing reaches the back"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:1.1","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Swords in S for LifeSword. Nothing reaches the back","text_hash":"e56b093a99fa"},
+  {"boxes":[{"pages":[["delete any guardian"]],"speaker":"Screen","text":"delete any guardian"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:1.2","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"delete any guardian","text_hash":"4f3c1a48d7e1"},
+  {"boxes":[{"pages":[["Elec chips: double","on Aqua, plain on","the rest"]],"speaker":"Screen","text":"Elec chips: double on Aqua, plain on the rest"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:2.1","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"Elec chips: double on Aqua, plain on the rest","text_hash":"5e4178da58d9"},
+  {"boxes":[{"pages":[["delete an Aqua","guardian"]],"speaker":"Screen","text":"delete an Aqua guardian"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:2.2","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"delete an Aqua guardian","text_hash":"1e5d8b68c44e"},
+  {"boxes":[{"pages":[["Cannons in A, B and","C for GigaCan1."],["Little hits behind","cover"]],"speaker":"Screen","text":"Cannons in A, B and C for GigaCan1. Little hits behind cover"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:3.1","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Cannons in A, B and C for GigaCan1. Little hits behind cover","text_hash":"c88863c60fea"},
+  {"boxes":[{"pages":[["use a Program","Advance"]],"speaker":"Screen","text":"use a Program Advance"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:3.2","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"use a Program Advance","text_hash":"3b18c7cfcc6b"},
+  {"boxes":[{"pages":[["Heavy hitters in L","and R. No Recovery","chips"]],"speaker":"Screen","text":"Heavy hitters in L and R. No Recovery chips"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:4.1","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"Heavy hitters in L and R. No Recovery chips","text_hash":"27274d3852ce"},
+  {"boxes":[{"pages":[["clear an act, no","Recov"]],"speaker":"Screen","text":"clear an act, no Recov"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:4.2","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"clear an act, no Recov","text_hash":"52805ef52049"},
+  {"boxes":[{"pages":[["Seven kinds in B or","*: whole hands,","little else"]],"speaker":"Screen","text":"Seven kinds in B or *: whole hands, little else"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:5.1","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"Seven kinds in B or *: whole hands, little else","text_hash":"6bde526b79be"},
+  {"boxes":[{"pages":[["reach layer 10"]],"speaker":"Screen","text":"reach layer 10"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:5.2","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"reach layer 10","text_hash":"65dac702bce6"},
   {"boxes":[{"pages":[["Which buttons and","keys are A, B, L, R,","START and SELECT"]],"speaker":"Screen","text":"Which buttons and keys are A, B, L, R, START and SELECT"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:2","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"Which buttons and keys are A, B, L, R, START and SELECT","text_hash":"27046bd21805"},
   {"boxes":[{"pages":[["Music and sounds,","their mix, and the","controller's rumble"]],"speaker":"Screen","text":"Music and sounds, their mix, and the controller's rumble"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:4","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Music and sounds, their mix, and the controller's rumble","text_hash":"18159455c35e"},
   {"boxes":[{"pages":[["As a GBA plays it:","BN6's own mix, crisp","and bright"]],"speaker":"Screen","text":"As a GBA plays it: BN6's own mix, crisp and bright"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:7","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"As a GBA plays it: BN6's own mix, crisp and bright","text_hash":"87f8fd8f2c4a"},

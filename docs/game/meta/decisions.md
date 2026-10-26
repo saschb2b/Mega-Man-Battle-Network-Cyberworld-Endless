@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Decisions and phase one"
-description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen) and phase one as built: unlocks, threat rungs 1-5, helpers, the Blade and Storm folders."
+description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen), phase one as built (unlocks, threat rungs 1-5, helpers, the Blade and Storm folders) and the designed Z-Canon, Busting and Lean folders."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T09:52:44Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
@@ -54,9 +54,60 @@ Built as planned, with these particulars:
   win. The milestones now come in the first or second run and still
   teach the folder's style (Storm's Elec answers Aqua). BN6's five other preset folders ([ROM data](../../rom/overview.md)) wait for later
   phases: one is a Program Advance folder, one a Navi-chip folder.
+- The design's other three, Z-Canon, Busting and Lean, came on 26
+  October 2026 ([the core loop](../core-loop.md), Phase 2: folders are
+  the meta axis players name most, and of 251 runs the statistics saw
+  135 brought Standard, 76 Storm, 40 Blade). Below.
 - The helpers are two more HPMemory from the gift, a heal on every layer,
   and gentle battles (the lower half of the band all run); since issue
   #18 a fourth, All *, every chip in * (below).
 - `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's (HELPERS a bit
   each: 1 HP+, 2 Heals, 4 Gentle, 8 All *, 16 BeastOut); the weak
   autopilot wins a short net (layers 1-10).
+
+## The designed three (26 October 2026)
+
+Each a different way to play, none a stronger one (the design's stance):
+its chips are BN6's commonest, in codes BN6's records give them (read at
+`0x021DA8` + id x 0x2C, [ROM data](../../rom/overview.md); `test_folders`
+holds each folder to them, five of a chip at most), and each gives up
+something Standard keeps.
+
+| Folder | Its 30 | What it plays like | What it gives up | Opens |
+| --- | --- | --- | --- | --- |
+| Z-Canon | Cannon A A B B C, CrakShot A x2, TankCan1 A, DublShot C x2, Rflectr1 C x2, AirShot * x2, MiniBomb B x2, AreaGrab B x2, HolyPanl B, Barrier A x2, Recov10 A x2 * x2, Atk+10 * x3, PanlGrab * x2 | GigaCan1 (Cannon A, B, C in a row) waits in every draw; the rest are shots in its codes | The design's few answers behind cover: two MiniBombs its only throw (that its shots stop at the first foe in the row is assumed from play, not measured) | A Program Advance used, any, in any run |
+| Busting | TankCan1 R x4, HiCannon L x3, WideSwrd L x3, Sword L x3, MiniBomb L x3 R x2, Thunder R x3, Barrier R x2, AreaGrab * x2, PanlGrab *, Atk+10 * x4 | The heaviest chips act 1 allows, in two codes; Thunder holds a foe for TankCan1's wind-up | No Recovery chip: every heal is the net's (a Mr.Prog's, a find's). No LongSwrd, so LifeSword stays Blade's | An act cleared with no Recovery chip used in it (its guardian deleted; the Secret Area's master ends no act) |
+| Lean | Cannon B x5, MiniBomb B x5, Vulcan1 B x5, Thunder B x5, AreaGrab B x4, Atk+10 * x3, Recov10 * x3 | Seven kinds, all in B or *: any five chips make a hand, every turn | Every chip weak and near the same; and the code lean (phase two) brings its finds in B too, so a strong find off B breaks the hands it is built on | Layer 10 reached in any run (the best depth, so a veteran's profile has it) |
+
+The game-design reasoning, the part the design left open:
+
+- **The dialectic** is the meta layer's, what you bring against what you
+  find: Z-Canon brings a combo and finds cover; Busting brings damage and
+  finds its heals in the net, which sharpens the run's prepare or press on
+  (a Mr.Prog's heal is worth a detour); Lean brings whole hands and finds
+  chips that would break them, a loadout as budget where the budget is
+  the code.
+- **Costed power, not more of it.** Standard's Recov10s heal 40 HP a
+  battle at most, so Busting's cost is in its chips too: TankCan1's
+  wind-up, Sword and WideSwrd's reach, and no LongSwrd. Lean's chips are
+  Standard's weakest kinds; its five-chip turns are the power, its lack
+  of anything sharp the cost. Z-Canon's Cannons are 40 each, GigaCan1 the
+  payoff of a draw.
+- **Milestones that teach the style** (the design's rule, never a count):
+  a Program Advance is what Z-Canon is for, a dry act is Busting's whole
+  run, and layer 10 is the middle of the net, where Lean's weak chips
+  begin to need the finds it leans.
+- **Measured:** the statistics' `folder` (the run's start event) names
+  each; a folder nobody brings needs a reason to exist (the design's
+  Measuring it).
+
+Two milestones are seen in battle: BN6's chip use's last step
+(`BN6_DARK_AFTER`, `src/director/darkbn6.c`, its one hook there) reports
+MegaMan's Program Advances and Recovery chips (`meta_chip_watched`) to
+`meta_chip_used`, which keeps them in the profile (`folder_feats`, and the
+act of the last Recovery chip with its run's seed); a guardian deleted
+asks `meta_guardian_deleted` whether its act had one. Checked in the game
+with a folder of GigaCan1 and one of Recov10 (`--dev folder=320`,
+`folder=154`): the profile's bit and act written as each ran. `--dev
+folders` opens every folder for a capture of the setup
+([the dev menu](../../devtools/dev-menu.md)).

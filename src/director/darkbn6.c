@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "emu.h"
 #include "events.h"
+#include "meta.h"
 #include "rom.h"
 #include "xchips_moved.h"
 
@@ -169,8 +170,9 @@ unsigned darkbn6_base_take(void) {
 
 /* ---- the hooks: MegaMan's side's chip uses only ---- */
 
-/* every DarkChip of the registry, either net's (dark_chip_is), a bit an id: what the hook below tests, made once */
-static uint32_t dark_ids[CHIP_IDS / 32];
+/* every DarkChip of the registry, either net's (dark_chip_is), a bit an id: what the hook below tests, made once; and the chips
+ * the starting folders' milestones watch (meta_chip_watched), which the same hook reports, one hook an address */
+static uint32_t dark_ids[CHIP_IDS / 32], watched_ids[CHIP_IDS / 32];
 
 /* a chip's after-effects as it runs (BN6_DARK_AFTER, from every chip use, 0x080128EA: r0 the chip that ran): a DarkChip of
  * either net's, BN5's own seven and BN6's five (a BN6 one's id reaches it only where its dark power ran, a BugFrag paid; its
@@ -178,7 +180,9 @@ static uint32_t dark_ids[CHIP_IDS / 32];
 static HookAct after(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t id = r->r[0];
-	if (id < CHIP_IDS && (dark_ids[id / 32] >> (id % 32) & 1) && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 0) hook_post(r, EV_DARK_RAN);
+	if (id >= CHIP_IDS || hook_read8(r->r[5] + BN6_T1_ALLIANCE) != 0) return HOOK_CONTINUE;
+	if (dark_ids[id / 32] >> (id % 32) & 1) hook_post(r, EV_DARK_RAN);
+	if (watched_ids[id / 32] >> (id % 32) & 1) hook_post(r, EV_CHIP_WATCHED);
 	return HOOK_CONTINUE;
 }
 
@@ -194,8 +198,10 @@ void darkbn6_install(void) {
 	static bool done;
 	if (done) return;
 	done = true;
-	for (int id = 1; id < CHIP_IDS; ++id)
+	for (int id = 1; id < CHIP_IDS; ++id) {
 		if (dark_chip_is(id)) dark_ids[id / 32] |= 1u << (id % 32);
+		if (meta_chip_watched(id)) watched_ids[id / 32] |= 1u << (id % 32);
+	}
 	emu_hook(BN6_DARK_AFTER, after, NULL);
 	emu_hook(BN6_DARK_CHECK, check, NULL);
 }
