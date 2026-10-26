@@ -1581,6 +1581,14 @@ SCREENSHOTS = [
     # (the Cross Navis on a dark board: the TEAM screen, ChargeMan's turn)
     ('bn5-team-pick', LIB_TEAM + ['--input', '600:,4:UP,6:,30:'], [(639, 'liberation-team')], {}),
     ('bn5-lib-charge', LIB_CHARGE, [(3420, 'liberation-chargeman'), (3740, 'liberation-bomb')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # 0.17.0's notes. (MegaMan reads the way ahead, docs/world/level-design/
+    # fork-read.md: seed 30's layer 4, a dark warp beside its exit pad,
+    # MegaMan put within three panels of the pad by the warp; Lan's HP
+    # before act 3 on seed 7, A facing the pink pad, its third box the read)
+    ('fork-pad', ['--scene', 'emu', '--run-depth', '4', '--seed', '30', '--dev', 'quiet', '--input', '300:,0:place 284 -300 1,110:'],
+     [(405, 'fork-pad')], {}),
+    ('fork-portal', ['--scene', 'home', '--run-depth', '7', '--seed', '7', '--input',
+                     HP_PAGED + '0:place 160 37 0,20:,6:A,100:,6:A,90:,6:A,90:'], [(1516, 'fork-portal')], {}),
 ]
 
 
