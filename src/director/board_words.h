@@ -8,5 +8,6 @@ enum { REG_LESSON, REG_UP, REG_TAGCHIP };
 const char *reg_words(int kind, int reg);
 const char *compressed_words(const char *about);
 const char *clean_words(void);
+const char *bug_pay_words(int frags);
 
 #endif

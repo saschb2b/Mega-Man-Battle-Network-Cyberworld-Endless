@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
 ---
 
 # The player's guide
@@ -724,7 +724,9 @@ it pays one of BN6's GigaChips.
   Taking it also restores MegaMan's HP.
 - **The NaviCust.** Guardian Data also offers three NaviCust programs, one
   from each of three builds (buster, hand, guard, field, HP), or BugFrags
-  if you take none. A program you already hold shows how many beside its
+  if you take none. BugFrags are what the NaviCust vendor takes, and a
+  battle won with bugs on the board pays a BugFrag a bug level, five at
+  most. A program you already hold shows how many beside its
   name ("Held 1"), and one a copy would add nothing to (a second UnderSht
   or SuperArmor, SuperArmor beside BodyPack, Attack+1 beside AttckMAX) is
   not offered. The second and fourth acts' guardians grow the board
@@ -760,7 +762,7 @@ it pays one of BN6's GigaChips.
 | Place | What it does |
 | --- | --- |
 | Net Dealer (a green Normal Navi) | The game's shop: chips, an HP Memory and SubChips |
-| NaviCust vendor (a pink navi) | NaviCust programs from the game's own shops |
+| NaviCust vendor (a pink navi), on every act's middle layer | NaviCust programs and a rare chip, for BugFrags |
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |

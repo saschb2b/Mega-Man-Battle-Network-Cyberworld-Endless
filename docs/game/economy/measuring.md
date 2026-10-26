@@ -3,7 +3,7 @@ type: Design
 title: "Measuring it"
 description: "How `build.py economy` and `src/dev/economy_report.c` measure a run's handouts without running the game: layers and Mystery Data simulated by the engine's code, battle rewards from BN6's ROM rows, the assumptions, definitions and autopilot check."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
 ---
 
 # Measuring it
@@ -24,7 +24,10 @@ apart:
   rolls in the same order); each Net Dealer's stock by
   `shop_dealer_stock`, the NaviCust vendor's by `shop_program_stock`; the
   requests' pay by `jobs_offers`; a guardian's Guardian Data (his Navi
-  chip, five HPMemory).
+  chip, five HPMemory, and the BugFrags his draft pays skipped). The
+  BugFrag table sets an act's BugFrags (Mystery Data, requests, BN6's
+  battle rewards, the skip, battles won at one bug level) beside the
+  vendor's prices ([The NaviCust](../navicust.md), 3 and 4).
 - **The game's, read from the ROM.** Each random battle the engine rolls
   (`loot_random_battle`, the opening battles' rules as the director's)
   pays as BN6 picks a reward: one enemy at random, its reward row

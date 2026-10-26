@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-26
+* **Update**: game/navicust.md, the BugFrag workshop built (the vendor on every act's middle layer selling in BugFrags on BN6's shop screen, the BugFrag Trader's chip on his list, bugged wins paying a BugFrag a bug level, five at most); game/core-loop.md, Phase 2's item marked built; rom/scripts-and-shops.md, shops 6 and 7's currency and shop 3's made BugFrags; game/economy/measuring.md, the report's BugFrag table; GUIDE.md, the vendor and the bugged pay.
 * **Update**: game/rival.md, rom/battle.md and game/core-loop.md, the netbattle's stake and Chaud's verdict reworded (Lan stops the battle; "pull him out" read as a double meaning).
 * **Creation**: game/core-loop.md, the core loop reviewed (October 2026): what works, what it lacks, what has grown, the players' statistics, the next evolution's phases and the owner's decisions; its line in game/index.md and AGENTS.md.
 * **Update**: game/rival.md, ProtoMan's netbattle never ends the run (his deleting blow ends the battle, MegaMan at 1 HP); rom/battle.md and engine/emulation/hooks.md, the two battle-loop hooks of `src/director/battle_spare.c`; code/director.md, its line.

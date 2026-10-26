@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:02:17Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -255,7 +255,9 @@ seen; the opening plan of 21 October is still unplayed by a person.
   any new rule. The statistics' guardian event measures it after.
 - **The BugFrag workshop** as designed: programs for BugFrags at the
   vendor, the BugFrag Trader folded in, bugged battles paying BugFrags.
-  It closes the dead currency and makes the draft's skip real.
+  It closes the dead currency and makes the draft's skip real. Built 26
+  October 2026 ([the NaviCust](navicust.md), Status); the statistics'
+  draft skips will say whether the skip is taken.
 - **Lean the code, not the chip**: a find keeps its chip and takes a
   folder code, so variety widens and the folder still converges. Say the
   rule once where the dealer already half says it.

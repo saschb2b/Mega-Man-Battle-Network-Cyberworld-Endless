@@ -21,6 +21,11 @@ typedef struct {
 #define SHOP_SUBS_HOME 0x0F   /* home's: Central Town's SubChip seller */
 #define SHOP_ORDER    0x12    /* ... and AsterLand's counter, the Order Service */
 #define SHOP_MAX_ITEMS 8
+/* A shop descriptor's currency (its u32 at +0, BN6_SHOP_DESCS): zenny, the
+ * prices hundreds of it; BugFrags, the prices a count of them (BN6's shops
+ * 6 and 7, Undernet 2's, and the NaviCust vendor's: docs/rom/) */
+#define SHOP_ZENNY    0
+#define SHOP_BUGFRAGS 1
 /* An order made at AsterLand's counter this visit: one a visit (docs/
  * docs/world/home/home-shop.md), its keeper's script checks it. */
 #define HOME_ORDER_FLAG 0x146B

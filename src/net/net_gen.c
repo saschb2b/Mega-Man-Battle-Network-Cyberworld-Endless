@@ -626,7 +626,11 @@ static void roll_services(Services *s, int depth, int biome, int kind) {
 	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (own && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
 	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	s->programs = own && biome_layer == 1 && rng_range(0, 99) < 60;
+	/* (the NaviCust vendor on every act's middle layer, BugFrags' sink:
+	 * docs/game/navicust.md 4; his old 60% chance still rolled, so the rest
+	 * of the layer rolls as it did) */
+	s->programs = own && biome_layer == 1;
+	if (s->programs) (void)rng_range(0, 99);
 	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
 	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
