@@ -50,6 +50,7 @@ typedef struct {
 	Encounter next;        /* that battle */
 	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
+	bool floor_fight;      /* the battle under way is the one the layer owed at its exit (battle_floor.h) */
 	uint32_t souls_used;   /* the Souls MegaMan united with in the battle under way (emu_battle_souls), for the run log */
 	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */

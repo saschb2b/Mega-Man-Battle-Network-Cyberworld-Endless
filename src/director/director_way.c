@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 
+#include "battle_floor.h"
 #include "bn6_fields.h"
 #include "boss.h"
 #include "cinema.h"
@@ -199,7 +200,9 @@ void push_arrow(void) {
 void exit_pad_step(void) {
 	PadArt art = { D.objs.exit_x, D.objs.exit_y, PAD_RING_ACROSS, PAD_RING_DOWN };
 	if (D.warping || D.dir_held || emu_read8(BN6_PLAYER_STATE) || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || boss_cinematic()) return;
-	if (emu_read8(BN6_WARP_PENDING) || flag_get(BN6_FLAG_WARP_OFF + 1) || !pad_art_on(&art, bn6_player_x(), bn6_player_y(), 0)) return;
+	if (emu_read8(BN6_WARP_PENDING) || !pad_art_on(&art, bn6_player_x(), bn6_player_y(), 0)) return;
+	/* (the layer's battle, owed before its exit: battle_floor.h) */
+	if (floor_at_exit() || flag_get(BN6_FLAG_WARP_OFF + 1)) return;
 	emu_warp_link(1);
 }
 

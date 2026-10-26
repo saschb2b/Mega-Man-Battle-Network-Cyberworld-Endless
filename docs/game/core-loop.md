@@ -239,7 +239,13 @@ seen; the opening plan of 21 October is still unplayed by a person.
   2.3 ([the generator](../world/level-design/generator.md), Navigation); a persona's session there
   still to measure the share.
 - **A battle floor**: at least one random battle a layer, and a
-  battles-per-act band in `build.py pacing`.
+  battles-per-act band in `build.py pacing`. Done (26 October 2026): 43%
+  of the layers without a guardian had none over seeds 1-12; now each
+  has one, BN6's own roll given its best odds on a layer still without
+  one and the exit pad holding the battle the rest owe ([the battle
+  floor](progression/structure.md)). The pacing report plays seeds 1-12 and marks a layer
+  without one. Watch the statistics' virus deaths: the floor adds about
+  half a battle a layer.
 - **The deep acts** (16 to 18 minutes) brought toward the early ones'
   ten. The measure is decisions a minute, not minutes an act.
 - **Words on the main path cut**: the Guardian Data chain to one screen,
