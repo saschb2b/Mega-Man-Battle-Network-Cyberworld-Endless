@@ -22,9 +22,7 @@ void reg_watch(void);
 void code_watch(void);
 void codes_bring(void);
 const char *bug_cause(void);
-bool fits_free_as(int v, bool compressed);
 bool fits_as_it_stands(int v);
-void draft_fit_watch(void);
 /* A guardian's draft left for its BugFrags, counted among the run's choices */
 void draft_skip_watch(void);
 void bug_watch(void);

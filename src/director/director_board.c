@@ -344,7 +344,7 @@ const char *bug_cause(void) {
 
 /* Whether program variant `v` fits the board's free cells as its programs
  * stand (true where that cannot be read) */
-bool fits_free_as(int v, bool compressed) {
+static bool fits_free_as(int v, bool compressed) {
 	NaviShape s;
 	int n = read_board(), w, h;
 	if (!R.data || !R.layout || !R.layout->navicust_programs || !navicust_shape_as(v, compressed, &s)) return true;
@@ -357,21 +357,6 @@ bool fits_as_it_stands(int v) { return fits_free_as(v, flag_get(BN6_FLAG_COMPRES
 const char *director_board_bug(void) { return bug_cause(); }
 
 bool director_board_fits(int v) { return fits_as_it_stands(v); }
-
-/* Whether each program of the guardian's draft fits the board's free
- * space as it stands, in the flags its Guardian Data's lines read
- * (LAYER_DRAFT_FIT_FLAG + k), kept while it waits: said before the pick,
- * where two playtesters took a program MegaMan then said would not fit
- * (session 63). */
-void draft_fit_watch(void) {
-	if (!D.objs.guardian.navi || boss_done() || D.frame % 16) return;
-	for (int k = 0; k < 3; ++k) {
-		int v = D.objs.guardian.draft[k];
-		bool fits = v && fits_free_as(v, false);
-		if (fits && !flag_get(LAYER_DRAFT_FIT_FLAG + k)) flag_set(LAYER_DRAFT_FIT_FLAG + k);
-		else if (!fits && flag_get(LAYER_DRAFT_FIT_FLAG + k)) flag_clear(LAYER_DRAFT_FIT_FLAG + k);
-	}
-}
 
 /* The draft left for its BugFrags (the run's choices, docs/game/core-loop.md):
  * its skip and a program taken set the same flag, so the BugFrags the

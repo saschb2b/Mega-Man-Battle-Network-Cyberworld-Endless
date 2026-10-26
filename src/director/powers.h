@@ -35,6 +35,10 @@ void powers_bring(void);
  * a Cross MegaMan did not have yet, the beast stirred in the first
  * Graveyard), or NULL. */
 const char *powers_reward_text(int navi, int biome, int depth);
+/* The Cross guardian `navi`'s Guardian Data gives at `depth`, for BN6's
+ * "MegaMan got:" box: his, where it is new to the run and the run brought
+ * none; NULL else */
+const char *powers_reward_cross(int navi, int depth);
 /* Dad's word after the Cybeast's fall at `depth`, said on in his call
  * (ta_talk's boxes): the PET's CybeastButton unlocked, where the fall
  * gave the run BeastOut (the first Net's, a run that did not bring it),
@@ -42,8 +46,9 @@ const char *powers_reward_text(int navi, int biome, int depth);
 const char *powers_den_text(int depth);
 
 /* (powers_words.c) MegaMan's words after guardian `navi`'s battle: his
- * Cross, where it is new to the run (`cross`), and the Nest's call to the
- * Cybeast in him (`beast`), which unlocks nothing; NULL for none */
+ * Cross, where it is new to the run (`cross`) and the run brought one, and
+ * the Nest's call to the Cybeast in him (`beast`), which unlocks nothing;
+ * NULL for none */
 const char *powers_reward_words(int navi, bool cross, bool beast);
 /* (powers_words.c) Dad's word that he unlocks the CybeastButton, MegaMan
  * having beaten the beast */

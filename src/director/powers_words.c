@@ -10,18 +10,17 @@
 #include "save.h"
 
 /* The words after guardian `navi`'s battle: his Cross where it is new to
- * the run (`cross`), as the run holds Crosses, in BN6's own box alone (what
- * MegaMan felt of each went with the main path's words cut,
+ * the run (`cross`) and one was brought (one the run takes is BN6's own
+ * "MegaMan got:" box, beside his chip's: powers_reward_cross, reward_words.c;
+ * what MegaMan felt of each went with the main path's words cut,
  * docs/game/core-loop.md); the Cybeast's waking (`beast`) */
 const char *powers_reward_words(int navi, bool cross, bool beast) {
 	static char text[512];
 	int k = 0;
 	#define ADD(...) (k += snprintf(text + k, k < (int)sizeof text ? sizeof text - (size_t)k : 0, __VA_ARGS__))
 	const char *brought = powers_cross_name(run.cross);
-	if (cross) {
-		/* (its weakness unsaid: BN6's own Cross rule, its players know it) */
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!", k ? "|" : "", powers_cross_name(navi));
-		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
+	if (cross && brought) {
+		if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
 		 * the game's word in MegaMan's mouth; and said as settled, the
 		 * brought one kept: "It won't fit beside our SlashCross" read to a

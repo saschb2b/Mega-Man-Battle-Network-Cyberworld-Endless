@@ -11,6 +11,9 @@ sources:
   - id: playtest-log
     resource: ".claude/skills/playtest-loop/lessons.md and .build/play/*/report-s*.md"
     title: ".claude/skills/playtest-loop/lessons.md, sessions 1 to 75"
+  - id: deep-acts
+    resource: "build/host/cyberworld --headless with CYBERWORLD_AUTOPILOT=1, CYBERWORLD_EMU_DEBUG=1 and --dev god,onehit,hp=999, seeds 1-12 from depths 1, 10, 13 and 16; layer_generate over 200 seeds a depth in the 15 main areas, the Undernet and the Graveyard"
+    title: "The deep acts measured headless on dev, 26 October 2026 (the runs and scripts in .build/deep/, not in git)"
 ---
 
 # The core loop, reviewed
@@ -74,10 +77,11 @@ Every source agrees on one small core:
    just felt so slow", and BN fans call traversal the slog of replays. It
    is friction on every path (walkway mouths, junctions, shops at the ends
    of parallel walkways), not a count of detours. Acts 1 and 2 take 9 to
-   11 minutes; deeper acts 16 to 18. Battles per act range from one in
-   three layers to eight in two (BN5's End Area). Nine runs in ten carry
-   BN5, so its walk reaches nearly everyone. The rule stands: MegaMan
-   walks as BN6 walks him, so the maps change.
+   11 minutes; two persona acts took 16 and 18 (acts 2 and 3, each played
+   again after a CONTINUE: Phase 1, The deep acts). Battles per act
+   range from one in three layers to eight in two (BN5's End Area). Nine
+   runs in ten carry BN5, so its walk reaches nearly everyone. The rule
+   stands: MegaMan walks as BN6 walks him, so the maps change.
 2. **A climax that bites.** Players win 93% of guardian battles, in the
    short net with a median 81 to 85% of MegaMan's HP left after about
    half a minute (the Nest: 62% after 42 seconds). The chain players love
@@ -252,7 +256,97 @@ seen; the opening plan of 21 October is still unplayed by a person.
   without one. Watch the statistics' virus deaths: the floor adds about
   half a battle a layer.
 - **The deep acts** (16 to 18 minutes) brought toward the early ones'
-  ten. The measure is decisions a minute, not minutes an act.
+  ten. The measure is decisions a minute, not minutes an act. Measured
+  26 October 2026 on `dev` (the battle floor, BN5's End Area one wide and
+  the main path's words in); nothing changed yet:
+  - *The figure is not the deep acts'.* "16 to 18" is two persona AREA
+    CLEAR cards: act 2 of session 61 (18:23) and act 3 of session 63
+    (16:20), each continued from a save with its layer rebuilt and played
+    again, the PET's work on the clock (a NaviCust bug fixed, a mail read,
+    a chip tagged). No act 4 to 6 has a time from a player or a persona,
+    and the statistics count the map's and the battles' seconds per run.
+  - *The way, headless.* The test autopilot walks the shortest way to the
+    exit and wins each battle at a hit (`--dev god,onehit,hp=999`, fresh
+    data folders, seeds 1-12 from depths 1, 10, 13 and 16: 329 layers of
+    the first cycle), its time split by `CYBERWORLD_EMU_DEBUG`'s line every
+    30 frames (the game's mode and state, the chat box, the map) into each
+    layer's walk, talk, battles, menus and loads, the battles counted from
+    the run log. It is the floor every run pays, not a person's time:
+
+    | Act | Areas these seeds met | Walk a layer | Random battles a layer | An act on the way: walk, battles, talk |
+    | --- | --- | --- | --- | --- |
+    | 1 | Central, Seaside, a comp | 22 s | 1.36 | 2.5 min: 1.1, 1.1, 0.2 |
+    | 2 | Green, the comps, Sky's HP | 24 s | 1.35 | 3.0 min: 1.3, 1.4, 0.2 |
+    | 3 | Sky, the story's comps, the homepages | 25 s | 1.36 | 3.0 min: 1.3, 1.4, 0.2 |
+    | 4 | Weather Comp, ACDC's HP | 22 s | 1.17 | 2.1 min: 1.0, 1.0, 0.2 |
+    | 5 | The Undernet | 27 s | 1.37 | 3.0 min: 1.3, 1.4, 0.2 |
+    | 6 | The Graveyard | 27 s | 1.69 | 3.5 min: 1.4, 1.8, 0.2 |
+
+    Talk on the way stays 2 to 3 seconds a layer in every act (6 to 7 on
+    a guardian's), and loads, set pieces' warps and locks' doors under a
+    second. A battle won at a hit takes 13 to 14 seconds in act 1 and 17
+    to 18 deep, its foes more (their HP together 120 in act 1, 420 to 480
+    in acts 5 and 6).
+  - *The layer, from the generator* (`layer_generate` over 200 seeds in
+    each of the 15 main areas, an act's first two layers): the floor
+    grows from 177 panels to 227, the way from 33 to 39, the Mystery Data
+    from 4.1 a layer to 7.4 to 7.6 (the Undernet's 8.7), and the walk off
+    the way to all of them, there and back, from 69 panels to 111 to 114.
+    Each data costs the same walk in every act, 15 to 18 panels (a green
+    one about 12, a blue one at a far detour 20).
+  - *What makes them long.* For a full clear at the autopilot's two
+    thirds of a second a panel, act 1 is about 4.7 minutes of walking,
+    battles and talk and act 6 about 7.1: the data's detours 1.4 minutes
+    of the difference (more data, each as far), the battles 0.7, the way
+    0.3; the battles BN6 rolls on the longer detours come on top. If
+    people take the same multiple of this floor in every act (the
+    personas took about twice it in acts 1 and 2), a deep act's full
+    clear comes to about 14 minutes. Not talk, not loads or locks, not
+    the Undernet's layouts (its act on the way is as long as act 2's).
+    Battles follow the walk: BN6 rolls by the distance walked, about a
+    battle to every 850 to 1000 of the trace's steps in every area, and
+    the Graveyard's walk is the deep acts' longest (1472 steps a layer
+    against the Undernet's 1244), so 44 of its 68 layers without a
+    guardian held two or three; its own map (96:01) also reads BN6's
+    encounter class 3 where the other areas' read 5 ([BN6's
+    battles](../rom/battle.md), Encounter odds and classes): 1.86 battles
+    a layer there, 1.55 on the map it shares (92:00), where the
+    Undernet's hold 1.32. People's battles against V2 and V3 are not
+    measured by act: a guardian takes them 29 seconds in act 1 and 42 in
+    the Nest (the statistics), the folder keeping up with more than twice
+    the HP for half again the time. The autopilot cannot stand in (144
+    seconds for act 1's guardian with the starting folder).
+  - *Through the game-design skill.* The dialectic is the battle floor's,
+    preparing for the act's guardian against the walk that costs time;
+    the loop layer is the layer's (the walk for Mystery Data and the
+    battles on it), feeding the act's folder. A sawtooth steepens late by
+    what an act holds, not by its length, and Slay the Spire keeps each
+    act's count of floors as its content hardens. By the measure chosen
+    the deep acts' main growth is not a fault: their data are decisions
+    at act 1's walk each, so a deep act is longer because it holds more
+    choices at the same rate. What thins the rate deep is time no one
+    chose: the way's six more panels and the battles its walk rolls.
+  - *What a small change buys*, each measured on the generator: holding
+    the data at act 3's count from act 4 on takes the detours' walk in
+    acts 5 and 6 from 111 to 114 panels a layer to 95 to 100, holding
+    acts 5 and 6 at acts 3 and 4's layouts (`size` 1 in
+    `layer_generate`) to 96 to 102 with a green data fewer or to 103 to
+    108 with the data kept: half a minute of a full clear an act at most,
+    the first two by taking away a decision a layer. The Graveyard's map
+    at class 5 would take about 0.3 of a battle from half its layers.
+    None brings a deep act near ten minutes, and the one that would (act
+    1's count of data deep) undoes the economy's plan and nearly halves
+    the deep acts' decisions.
+  - *The proposal, the smallest change:* count before cutting. The
+    seconds per layer by kind (map, battle, the rest) on the run log's
+    layer line and per act in the run-choices event, Phase 0's open
+    count, with no `Run` change, so the statistics show people's acts 1
+    to 6 and their battles against V2 and V3. Then judge a deep act by
+    decisions a minute, its way and its unchosen battles no larger a
+    share of it than in act 1; ten minutes stays the early acts'
+    measure. If people's deep acts run past about 14 minutes, the lever
+    is the data's count from act 4 (fewer, each richer, through
+    `build.py economy`), not the layouts, the walk or BN6's battles.
 - **Words on the main path cut**: the Guardian Data chain to one screen,
   arrivals to three or four boxes, one channel per fact at each decision
   point (the warnings that saved runs stay), through [the voice rules](../voice/rules.md) and
@@ -260,8 +354,11 @@ seen; the opening plan of 21 October is still unplayed by a person.
   arrivals at two to four boxes, the next guardian named once a decision
   (the card, the dealer, the portal, his own layer), his tips in Dad's
   mail alone but EraseMan's and DiveMan's warnings; the Guardian Data
-  chain from 12 boxes to 9, short of one screen, its rest BN6's own
-  "MegaMan got:" boxes and the draft.
+  chain from 12 boxes to 9, then to 7 (5 to 6 for a veteran, no mail):
+  BN6's own "MegaMan got:" boxes two things each, the call to install in
+  the draft's ask, nothing after the pick but BN6's box. Short of one
+  screen still; what is left is his last word, the facts in BN6's boxes,
+  the draft whole and Dad's first mail.
 - **Jobs on BN6's Request BBS** at AsterLand, all three askers' posts in
   one place, the courier naming each offer's kind and pay. The askers and
   the Academy stay as places (decision 10 stands). Built 26 October 2026
