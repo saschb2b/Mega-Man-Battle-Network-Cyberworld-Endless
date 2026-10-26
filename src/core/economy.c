@@ -67,7 +67,9 @@ bool econ_keep_by(int lever, int depth, uint32_t hash) {
  * dealers or the report's assumptions that moves an act past it is
  * flagged, as the pacing report flags a battle past its band. Per act
  * (the sixth's and the Nest's last): chips gained, good chips' share in
- * percent, Mystery Data laid, zenny earned, codes held at its end. */
+ * percent, Mystery Data laid, zenny earned, codes held at its end (set
+ * again when the lean kept the chip and leaned only its code,
+ * docs/game/economy/opening-plan.md, The code leans). */
 #define BAND_SLACK 0.2
 static const double centre[2][ECON_METRICS][ECON_ACTS] = {
 	{   /* the flat plan's */
@@ -75,14 +77,14 @@ static const double centre[2][ECON_METRICS][ECON_ACTS] = {
 		[ECON_GOOD] = { 26.3, 31.3, 38.3, 45.8, 57.0, 70.1, 69.0 },
 		[ECON_MD] = { 14.8, 15.1, 20.3, 19.5, 24.7, 22.6, 7.6 },
 		[ECON_ZENNY] = { 3550, 4350, 6880, 7900, 10890, 10760, 5360 },
-		[ECON_CODES] = { 5, 8, 11, 15, 20, 24, 26 },
+		[ECON_CODES] = { 4, 7, 11, 14, 17, 20, 21 },
 	},
 	{   /* the opening plan's */
 		[ECON_CHIPS] = { 9.5, 9.4, 12.5, 12.9, 17.1, 15.8, 5.4 },
 		[ECON_GOOD] = { 23.4, 29.0, 34.3, 43.8, 56.9, 70.1, 69.5 },
 		[ECON_MD] = { 11.6, 12.6, 17.9, 18.2, 24.7, 22.6, 7.6 },
 		[ECON_ZENNY] = { 2630, 3610, 5880, 7100, 10740, 10700, 5340 },
-		[ECON_CODES] = { 3, 5, 8, 11, 15, 19, 21 },
+		[ECON_CODES] = { 3, 5, 8, 10, 14, 17, 18 },
 	},
 };
 
@@ -93,14 +95,14 @@ static const double centre_short[2][ECON_METRICS][4] = {
 		[ECON_GOOD] = { 26.4, 31.2, 38.3, 41.7 },
 		[ECON_MD] = { 14.8, 15.1, 20.3, 6.6 },
 		[ECON_ZENNY] = { 3550, 4360, 6880, 4130 },
-		[ECON_CODES] = { 5, 8, 12, 13 },
+		[ECON_CODES] = { 4, 7, 11, 11 },
 	},
 	{   /* the opening plan's */
 		[ECON_CHIPS] = { 9.6, 10.0, 14.7, 4.6 },
 		[ECON_GOOD] = { 23.3, 30.1, 38.1, 41.9 },
 		[ECON_MD] = { 11.6, 13.5, 20.3, 6.6 },
 		[ECON_ZENNY] = { 2630, 4000, 6860, 4150 },
-		[ECON_CODES] = { 3, 5, 9, 11 },
+		[ECON_CODES] = { 3, 6, 9, 10 },
 	},
 };
 
