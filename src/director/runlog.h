@@ -25,6 +25,10 @@ void runlog_battle_souls(uint32_t used);
 /* ... and ends, won or left (a deletion ends it as runlog_run_end), at
  * MegaMan's HP after, the battle's frames (BN6's DeleteTime) */
 void runlog_battle_end(bool won, int frames);
+/* MegaMan left the layer by its exit, `battles` the random battles fought
+ * on it, `guardian` his where one stood: a line a layer, so one without a
+ * battle shows (the battle floor, docs/game/progression/measuring.md) */
+void runlog_layer_left(int battles, int guardian);
 /* The run is over, won, or MegaMan was deleted: the open battle and the
  * run end, its economy's counts (below) on its line and sent with the
  * statistics' run-end event. */

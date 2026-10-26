@@ -520,6 +520,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	 * flat and in pieces of other surfaces, and one of seven a side drew
 	 * its tiles off on a fifth more of the floor, over 18 layers each) */
 	kit->hub_rooms = na->pad_rooms >= 25;
+	kit->one_wide = na->styles & TILES_ONE_WIDE;
 	kit->emblem = learned[area].emblem.ok;
 	kit->gem = learned[area].ornament[0].ok;
 	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
@@ -571,8 +572,10 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	memset(pads, 0, sizeof pads);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
-		int small = net_area_def(area) ? net_area_def(area)->pad_rooms : 0;
-		bool pad = m->kind == ROOM_PAD || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena || r == layer.sig_room));
+		const NetAreaDef *na = net_area_def(area);
+		int small = na ? na->pad_rooms : 0;
+		bool every = na && (na->styles & TILES_ONE_WIDE);
+		bool pad = m->kind == ROOM_PAD || every || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena || r == layer.sig_room));
 		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;

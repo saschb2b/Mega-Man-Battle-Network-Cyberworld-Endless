@@ -154,6 +154,13 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * walkway floor): the Undernet's walkway floor is bridges, stripes and
  * gems, which laid over a 5x5 field came out a jumble of joints. */
 #define TILES_ARENA_DRAWN 0x800000
+/* ... and with TILES_ONE_WIDE, its maps draw no floor two panels wide but
+ * their pads: every room is drawn as one (netmap.c) and the way's walkways
+ * stay one wide (net_gen.c, LayerKit.one_wide). BN5's End Area is one-wide
+ * roads, rings round posts and pads; a field or a widened way laid out as
+ * Seaside's was worn by the legalizer into rings and stubs, a junction at
+ * every other panel (issue #164). */
+#define TILES_ONE_WIDE 0x1000000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a

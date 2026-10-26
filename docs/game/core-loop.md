@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -233,15 +233,30 @@ seen; the opening plan of 21 October is still unplayed by a person.
   side, a loss too cheap to fear.
 - **Navigation in the generator**, gated per area on walk share with
   `build.py tiles` and a play measure, BN5's End Area first (#164). The
-  maze fix showed the share can fall from 44% to 10%.
+  maze fix showed the share can fall from 44% to 10%. BN5's End Area begun
+  (26 October 2026): its rooms drawn whole as its pads and its way kept
+  one wide, the walkways' junctions on its walks from 11.4 a layer to
+  2.3 ([the generator](../world/level-design/generator.md), Navigation); a persona's session there
+  still to measure the share.
 - **A battle floor**: at least one random battle a layer, and a
-  battles-per-act band in `build.py pacing`.
+  battles-per-act band in `build.py pacing`. Done (26 October 2026): 43%
+  of the layers without a guardian had none over seeds 1-12; now each
+  has one, BN6's own roll given its best odds on a layer still without
+  one and the exit pad holding the battle the rest owe ([the battle
+  floor](progression/structure.md)). The pacing report plays seeds 1-12 and marks a layer
+  without one. Watch the statistics' virus deaths: the floor adds about
+  half a battle a layer.
 - **The deep acts** (16 to 18 minutes) brought toward the early ones'
   ten. The measure is decisions a minute, not minutes an act.
 - **Words on the main path cut**: the Guardian Data chain to one screen,
   arrivals to three or four boxes, one channel per fact at each decision
   point (the warnings that saved runs stay), through [the voice rules](../voice/rules.md) and
-  the review dashboard.
+  the review dashboard. Begun 26 October 2026 ([the log](../voice/sweep/main-path.md)):
+  arrivals at two to four boxes, the next guardian named once a decision
+  (the card, the dealer, the portal, his own layer), his tips in Dad's
+  mail alone but EraseMan's and DiveMan's warnings; the Guardian Data
+  chain from 12 boxes to 9, short of one screen, its rest BN6's own
+  "MegaMan got:" boxes and the draft.
 - **Jobs on BN6's Request BBS** at AsterLand, all three askers' posts in
   one place, the courier naming each offer's kind and pay. The askers and
   the Academy stay as places (decision 10 stands).

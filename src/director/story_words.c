@@ -31,11 +31,10 @@ static bool by_route(void) {
 	return run.side_kind == LAYER_NORMAL && run.route_way && run.route_way == (run.depth - 1) % CYCLE_LAYERS / 3 + 1;
 }
 
-/* The arrival's words begun: the Nest shakes, the guardian they name is
- * named, and the older net's word is said for the profile. */
+/* The arrival's words begun: the Nest shakes, and the older net's word is
+ * said for the profile. */
 void beat_said(void) {
 	if (run.biome == BIOME_NEST) cinema_shake(30, 3);
-	D.guardian_named = D.beat_guardian;
 	D.beat[0] = 0;
 	if (D.beat_ours) { profile.navis_ours_told = profile.native_taught = 1; profile_save(); }
 	if (D.beat_native) { profile.native_taught = 1; profile_save(); }
@@ -93,7 +92,6 @@ void arrival_words(void) {
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	int super = super_here();
 	D.beat[0] = 0;
-	D.beat_guardian = D.guardian_named = false;
 	if (super)
 		snprintf(D.beat, sizeof D.beat, "%s", super_arrival(super, super_form(super, run.depth), guardian_known(super)));
 	else if (run.side_kind == LAYER_UNDERNET)
@@ -117,18 +115,9 @@ void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied...|@L Then stay sharp,MegaMan!");
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
 		snprintf(D.beat, sizeof D.beat, "@M So much deleted data...|@L Creepy... Is the bottom close?|@M I think so,Lan.");
-	else if (first_of_act && run.depth > 1) {
-		/* a new act: where they are now, and whose copy waits at its end,
-		 * named where they have battled him: else a signal MegaMan does
-		 * not know (docs/game/meta/what-megaman-knows.md) */
-		int navi = run_guardian(run.biome);
-		if (guardian_known(navi))
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s,Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
-		else
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s,Lan!|@M A strong Navi's signal waits deeper in.|@M ...I don't recognize it.|"
-				"@L Then let's go find out who!", area);
-		D.beat_guardian = true;
-	}
+	/* (a new act's other areas: none, where they are and whose copy waits
+	 * at its end the act card's, just before; the main path's words cut,
+	 * one channel a fact: docs/game/core-loop.md) */
 	nets_arrival_words();
 }
 

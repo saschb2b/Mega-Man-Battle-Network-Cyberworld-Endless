@@ -9,20 +9,10 @@
 #include "powers.h"
 #include "save.h"
 
-/* What MegaMan feels of each Cross, by its navi (HeatMan 1 .. ChargeMan 5) */
-static const char *cross_feel(int navi) {
-	static const char *const feel[6] = {
-		[1] = "HeatMan's Cross data! I'm all fired up,Lan!",
-		[2] = "ElecMan's Cross data! It's crackling through me!",
-		[3] = "SlashMan's Cross data! I feel faster already!",
-		[4] = "EraseMan's Cross data... It's cold,Lan. But strong.",
-		[5] = "ChargeMan's Cross data! Choo,choo! Full steam ahead!",
-	};
-	return navi >= 1 && navi <= 5 ? feel[navi] : "";
-}
-
 /* The words after guardian `navi`'s battle: his Cross where it is new to
- * the run (`cross`), as the run holds Crosses; the Cybeast's waking (`beast`) */
+ * the run (`cross`), as the run holds Crosses, in BN6's own box alone (what
+ * MegaMan felt of each went with the main path's words cut,
+ * docs/game/core-loop.md); the Cybeast's waking (`beast`) */
 const char *powers_reward_words(int navi, bool cross, bool beast) {
 	static char text[512];
 	int k = 0;
@@ -30,7 +20,7 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 	const char *brought = powers_cross_name(run.cross);
 	if (cross) {
 		/* (its weakness unsaid: BN6's own Cross rule, its players know it) */
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", powers_cross_name(navi), cross_feel(navi));
+		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!", k ? "|" : "", powers_cross_name(navi));
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
 		 * the game's word in MegaMan's mouth; and said as settled, the
@@ -38,8 +28,8 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 		 * playtester as an offer to swap, which never came, session 64.
 		 * That a first win opens its start for the next dive is the
 		 * setup's to show, never MegaMan's: the voice sweep,
-		 * docs/voice/sweep/net.md) */
-		else ADD("%s@M %s's Cross data... We carry just one,Lan.|@M So we keep our %s.", k ? "|" : "", guardian(navi)->name, brought);
+		 * docs/voice/sweep/net.md; one box since the main path's words cut) */
+		else ADD("%s@M %s's Cross data... We keep our %s.", k ? "|" : "", guardian(navi)->name, brought);
 	}
 	/* (the Nest's call, and Lan's word, no unlocking: the beast stirs
 	 * here, and its power comes once MegaMan has beaten it at the Nest,
