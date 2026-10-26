@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.0 (2026-10-26)
 
 - **A battle on every layer.** Every layer without a guardian now has at
   least one random battle. BN6's own roll still decides when: on a layer
