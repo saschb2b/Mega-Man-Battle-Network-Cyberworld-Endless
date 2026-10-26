@@ -32,7 +32,11 @@ time waits, it is not cut short. Each came from a cut the owner refused.
    dealt shots as cards onto a casino's green felt under a lamp; the
    owner: "it is totally not in our design style."
 2. **The music grows from one chosen Battle Network song, and sounds like
-   it.** Pick the song from the ROM for what the release is about (the
+   it.** The owner's measure (26 October 2026): music that would make
+   Akari Kaida proud. She wrote songs for Battle Network 1 and 5 (her own
+   2008 interview) and is one of the series' main composers, beside
+   Yoshino Aoki and Toshihiko Horiyama; BN5's songs, hers among them, are
+   in reach in its ROM. Pick the song from the ROM for what the release is about (the
    feature's own theme first), read its habits (step 2), and keep its
    tempo, groove, harmonic language and the roles of its parts audible,
    so that a fan hears where it comes from (never its notes). Numbers that
