@@ -1,20 +1,22 @@
-"""0.16.0's trailer, FIGHT ON?: BN6's Virus Battler in the run, and the
-Crosses a run holds on a dark layer's team. The release's news is a hand
-the PET holds: the viruses on a BtlrCard (a KeyItem) picked from BN6's
-VIRUS LIST, the Navis whose Crosses the run holds picked on the TEAM
-screen. So the cut is a PET screen of its own, drawn in BN6's PET look
-(docs/engine/ui.md, tools/site_art.py's colours): the band names the
-shot, a list window holds the shots as its rows with the orange cursor
-stepping down them on the beat, the game's window beside it shows the
-row under the cursor, and the INFORMATION box says what it is. The
-sections are the list's pages, turned by its green arrows; the dark
-layer's two bars take the screen down a few of the GBA's brightness
-steps; the rumble flashes the window's frame; the end asks the
-Battler's own question, Fight on?, with the green triangle before Yes.
-The screen fades up and out as BN6's do, in sixteen steps. The devices
-the earlier trailers used (chrome type, typed briefing words, panels
-freed, linked windows, a slanted seam, a war room's map and its pans)
-are not here.
+"""0.16.0's trailer, FIGHT ON?: BN6's Virus Battler in the run, the
+Crosses a run holds on a dark layer's team, and rumble with a
+DualSense's triggers, in the skill's structure (SKILL.md, The structure):
+a cold open of two bars with no words, the title card, a segment for each
+headline (a section card of a bar, then a shot a bar, each one concrete
+thing), the recap of the rest, the logo's stinger on the music's
+cadence, and the end card held.
+
+The look is BN6's PET (docs/engine/ui.md, tools/site_art.py's colours):
+the big window, the game at 4x in one cyan window on the PET's body, for
+the cold open, the title, the stinger and the end card; and the PET
+screen for the segments: the band holds the section's label, a list
+window holds the segment's shots with the orange cursor stepping down it
+on the beat (the cut), the game's window beside it, the INFORMATION box
+the caption, one line. A section opens with its number and name in its
+colour in the game's window, under the page arrow just pressed. The
+rumble flashes the window's frame on the hits; the screen fades up and
+changes in the GBA's brightness steps; the end card stays, still. One
+type family: the site's Pixelify Sans.
 
 Its shots are whole frames of the game running from the developer's ROMs,
 BN6's and BN5 Team Colonel's beside it: a Battler's series on seed 1's
@@ -22,9 +24,11 @@ first layer (`--dev battler=1`, the Virus Battler PR's own session:
 MegaMan walking up to him, two rounds at fast forward, the pot taken),
 the TEAM screen at act 3 with six Souls and SlashMan's Cross held, the
 autopilot on act 2's dark board with each Cross brought (`--setup
-endless,0,0,0,N`). Everything else is drawn here; the music is
-v0_16_0_music.py's, an original piece in the manner of BN6's virus
-battle theme, which a Battler's rounds play.
+endless,0,0,0,N`), Options' Audio with a virtual DualSense, a Net
+Dealer's shelf with a Soul held, and two of docs/screenshots (the Net
+Square, a battle). Everything else is drawn here; the music is
+v0_16_0_music.py's, an original piece in the manner of BN6's "Showdown"
+(song 0x22), grown from the sketch the owner chose.
 
     python3 build.py host && python3 tools/trailer.py 0.16.0 [--keep]
 """
@@ -105,54 +109,70 @@ def scenes():
         'elec': board(1, 5, 2, 9860, 10020),
         'charge': board(1, 5, 5, 4360, 4620),
         'slash': board(1, 5, 3, 4000, 4900),
+        # Options' Audio with a DualSense (a virtual one): Vibration, Trigger effects
+        'options': (['--scene', 'title', '--pad', 'ps5'], {},
+                    play('wait 60; press SELECT; wait 40; press DOWN; wait 20; press DOWN; wait 20; press A; wait 60; '
+                         + 'press DOWN; wait 40; ' * 6 + 'wait 60'), 100, 700),
+        # layer 2 of seed 3 with Colonel's Soul held: the Net Dealer's shelf,
+        # its fourth chip one of the Soul's kind
+        'shelf': (['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet,souls=1', '--talk', 'shop:430'], {},
+                  '500:' + ',4:A,96:' * 8 + ',4:A,56:' * 6 + ',6:DOWN,24:' * 2 + ',60:', 1200, 1800),
     }
     return s
 
 
-# ---- the look: a PET screen ----
+
+
+# ---- the look: BN6's PET, in the skill's structure ----
 #
-# Drawn at the PET's own scale, a 427 x 240 screen (the game's picture at
-# 1x in it), and scaled 3x by nearest neighbour into the 1280 x 720 frame,
-# so a PET pixel is three of the video's and every edge stays hard. Its
-# parts and colours are BN6's PET screens' as docs/engine/ui.md measured
-# them and tools/site_art.py draws the site's (the band, the cyan window,
-# the information box, the orange cursor, the green choice, the page
-# arrows); the words are the site's fonts (web/assets/fonts, OFL):
-# Silkscreen for the band and labels, Pixelify Sans for the list and the
-# information, drawn at the video's scale.
+# Two screens, both drawn in BN6's PET look (docs/engine/ui.md, the colours
+# of tools/site_art.py) and scaled by nearest neighbour so every edge stays
+# hard: the big window (a 320 x 180 screen at 4x, the game's picture at 4x
+# in one cyan window on the PET's body) for the cold open, the title card,
+# the logo's stinger and the end card; and the PET screen (427 x 240 at 3x)
+# for the feature segments and the recap: the band with the section's
+# label, a list window of the segment's shots with the orange cursor
+# stepping down it on the beat, the game's window beside it, and the
+# INFORMATION box holding the feature's caption. One type family, the
+# site's Pixelify Sans (OFL, web/assets/fonts), drawn at the video's scale
+# inside the safe area.
 
 FPS, W, H = 30, 1280, 720
 BAR = round(FPS * 60 * 4 / music.BPM)     # (48 frames at 150 beats a minute)
 BEAT = BAR // 4
 FRAMES = music.BARS * BAR + round(music.TAIL * FPS)
 
-S = 3                               # video pixels to a PET pixel
-LW, LH = 427, 240                   # the PET screen
-
-FONTS = os.path.join(ROOT, 'web', 'assets', 'fonts')
-CAPS = os.path.join(FONTS, 'silkscreen-700.woff2')
-CAPS_THIN = os.path.join(FONTS, 'silkscreen-400.woff2')
-CHAT = os.path.join(FONTS, 'pixelify-sans.woff2')
+PIXEL = os.path.join(ROOT, 'web', 'assets', 'fonts', 'pixelify-sans.woff2')
 
 BAND = (0, 123, 49)
 BODY = (8, 189, 115)
-BODY_LINE = (74, 231, 115)
 FRAME_HI, FRAME, FRAME_LO = (107, 222, 255), (66, 198, 231), (16, 140, 239)
 FIELD = (16, 82, 107)
 WHITE = (247, 255, 247)
 SHADE = (33, 115, 140)
 EDGE = (33, 74, 82)
 INFO_BOX, PAGE, INK = (74, 231, 115), (247, 247, 247), (66, 57, 57)
-ORANGE, ORANGE_DARK = (255, 173, 16), (214, 107, 0)
+ORANGE, ORANGE_DARK, ORANGE_LIT = (255, 173, 16), (214, 107, 0), (255, 206, 24)
 CHOICE, CHOICE_HI, CHOICE_OUT = (57, 255, 0), (115, 255, 74), (33, 165, 33)
+BUTTON, BUTTON_EDGE, BUTTON_SHADE = (16, 231, 41), (206, 222, 239), (41, 132, 148)
 ARROW, ARROW_HI, ARROW_DARK = (74, 198, 16), (189, 231, 132), (8, 165, 0)
 CYAN_TEXT = (107, 222, 255)
+GOLD = (255, 214, 16)
 
-BAND_H = 18
-LIST = (7, 23, 161, 192)            # the list window (x0, y0, x1, y1)
-GAME = (168, 23, 417, 192)          # the game's window: its picture at (173, 28)
-INFO = (7, 196, 417, 236)           # the information box
-ROW0, ROW_H = 43, 16                # the list's first row and its height
+SAFE_X, SAFE_Y = 64, 36               # 5% of each edge
+
+# the PET screen, at its 427 x 240
+S = 3
+LW, LH = 427, 240
+BAND_H = 25
+LIST = (7, 28, 161, 197)
+GAME = (168, 28, 417, 197)            # its picture at (173, 33)
+INFO = (7, 200, 417, 238)
+ROW0, ROW_H = 50, 20
+# the big window, at its 320 x 180
+B = 4
+BW, BH = 320, 180
+BIG = (35, 5, 284, 174)               # its picture at (40, 10)
 
 
 def F(bar, beat=0.0):
@@ -162,10 +182,24 @@ def F(bar, beat=0.0):
 _fonts = {}
 
 
-def font(path, size):
-    if (path, size) not in _fonts:
-        _fonts[(path, size)] = ImageFont.truetype(path, size)
-    return _fonts[(path, size)]
+def font(size, bold=False):
+    key = (size, bold)
+    if key not in _fonts:
+        f = ImageFont.truetype(PIXEL, size)
+        f.set_variation_by_axes([700 if bold else 400])
+        _fonts[key] = f
+    return _fonts[key]
+
+
+def text(d, xy, words, size, fill, bold=False, anchor='la', shade=None, width=None):
+    """Pixelify Sans, its ligatures off (its fi is no letter of the PET's),
+    shrunk to `width` where given"""
+    while width and size > 16 and font(size, bold).getlength(words) > width:
+        size -= 1
+    f = font(size, bold)
+    if shade:
+        d.text((xy[0] + 3, xy[1] + 3), words, font=f, fill=shade, anchor=anchor, features=['-liga'])
+    d.text(xy, words, font=f, fill=fill, anchor=anchor, features=['-liga'])
 
 
 def ease(t):
@@ -178,18 +212,20 @@ def steps(t):
     return math.floor(max(0.0, min(1.0, t)) * 16) / 16
 
 
-# ---- the shots: a row of the PET's list each ----
+def lerp(a, b, t):
+    return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+
+# ---- the timeline ----
 
 class Shot:
-    """A row of the list: `row` its line, `head` the band's name while the
-    cursor is on it, `text` the information box's, `feed` [(frame, scene,
-    sample, rate)] the game's window (from each frame on, that scene's
-    footage from that sample; rate 0 holds it), `hits` frames the window's
-    frame flashes on (the rumble)."""
+    """One bar's shot of a segment: its row in the list, the caption in
+    the INFORMATION box, `feed` [(frame, scene, sample, rate)] as 0.15.0's
+    (from each frame on, that scene's footage from that sample; rate 0
+    holds it), `hits` frames the window's frame flashes on (the rumble)."""
 
-    def __init__(self, start, row, head, text, feed, hits=(), hint=''):
-        self.start, self.row, self.head, self.text, self.feed = start, row, head, text, feed
-        self.hits, self.hint = hits, hint
+    def __init__(self, start, row, caption, feed, hits=()):
+        self.start, self.row, self.caption, self.feed, self.hits = start, row, caption, feed, hits
 
     def sample(self, fr):
         i = max([j for j, e in enumerate(self.feed) if e[0] <= fr] or [0])
@@ -197,112 +233,69 @@ class Shot:
         return scene, first + max(0, int((fr - start) * rate))
 
 
-class Page:
-    """A page of the list: its name on the window's band, its shots"""
+class Segment:
+    """A feature: its section card's bar, its label (the band's, fixed
+    through the segment), its colour and its shots"""
 
-    def __init__(self, name, shots):
-        self.name, self.shots = name, shots
+    def __init__(self, card, number, label, colour, shots):
+        self.card, self.number, self.label, self.colour, self.shots = card, number, label, colour, shots
 
 
-def pages():
+COLD = [(0, 'bv-series', 800, 1), (F(1), 'heat', 300, 1)]          # the fight's last blows; HeatCross
+TITLE, STINGER, END = F(2), F(19), F(20)
+RECAP = F(17)
+
+
+def segments():
     return [
-        Page('VIRUS BATTLER', [
-            # the intro: MegaMan walks up to a Battler at a side path's end; his offer
-            Shot(F(0, 2), 'The Battler', 'A VIRUS BATTLER', "A Mr.Prog in his own BN6 colour, at a side path's end",
-                 [(F(0, 2), 'bv-series', 12, 1)]),
-            Shot(F(2), 'His offer', "BN6'S VIRUS BATTLER", 'On the first layer of about half the acts, from the second',
-                 [(F(2), 'bv-series', 86, 1)], hint='CYBERWORLD ENDLESS 0.16.0'),
-            # the main section: the stake, the list, the fight, the pot
-            Shot(F(4), 'The stake', 'STAKE YOUR ZENNY', '500 to 3000 by act; each win adds it again to the pot',
-                 [(F(4), 'bv-series', 186, 1)]),
-            Shot(F(5), 'VIRUS LIST', "YOUR BTLRCARD'S VIRUSES", 'Every Rare you delete joins it, this run and every run after',
-                 [(F(5), 'bv-series', 440, 0), (F(5, 1.5), 'bv-series', 624, 1)]),
-            Shot(F(6), 'Place them', 'PLACE THEM, THEN WATCH', "They fight his pair on their own; MegaMan's HP is untouched",
-                 [(F(6), 'bv-series', 656, 1)]),
-            Shot(F(7), 'The fight', 'THE FIGHT RUNS FAST', 'It takes no input, so fast forward can run through it',
-                 [(F(7), 'bv-series', 768, 1)]),
-            Shot(F(9), 'The pot', 'THE POT GROWS', 'A win adds the stake; a loss or a draw loses it all',
-                 [(F(9), 'bv-series', 896, 1)]),
-            Shot(F(10), 'Fight on?', 'TAKE THE POT, OR FIGHT ON?', 'He shows his next pair before you choose',
-                 [(F(10), 'bv-series', 1006, 1), (F(10, 2), 'bv-series', 1062, 1)]),
-            Shot(F(11), 'Cash out', 'CASH OUT', 'Two wins on a 500 stake: 1500 zenny', [(F(11), 'bv-series', 2296, 1)]),
+        Segment(F(4), '01', "BN6'S VIRUS BATTLER", GOLD, [
+            Shot(F(5), 'His offer', 'Stake zenny; he names his pair', [(F(5), 'bv-series', 100, 1)]),
+            Shot(F(6), 'VIRUS LIST', "Pick yours on BN6's VIRUS LIST",
+                 [(F(6), 'bv-series', 440, 0), (F(6, 1.5), 'bv-series', 624, 1)]),
+            Shot(F(7), 'The fight', 'They fight his pair on their own', [(F(7), 'bv-series', 778, 1)]),
+            Shot(F(8), 'The pot', 'Take the pot, or fight on', [(F(8), 'bv-series', 1040, 1), (F(8, 2), 'bv-series', 1062, 1)]),
         ]),
-        # the drop: the dark layer's team; the climax: the commands, the Cross
-        Page('LIBERATION TEAM', [
-            Shot(F(12), 'Your Crosses', 'YOUR CROSSES JOIN THE TEAM', "On a dark layer's board, each in his own BN6 body",
-                 [(F(12), 'heat', 16, 1)]),
-            Shot(F(13), 'TEAM', 'PICK WHO COMES', 'Where you hold more Navis than the board has places',
-                 [(F(13), 'team', 150, 1)]),
-            Shot(F(14), 'Napalm', "HEATMAN'S NAPALM", 'Four ahead and both sides of the third, one battle',
-                 [(F(14), 'heat', 122, 1), (F(14) + 12, 'heat', 134, 0)]),
-            Shot(F(14, 2), 'MagnetBarrier', "ELECMAN'S MAGNETBARRIER", 'No harm on the board to the team till the next phase',
-                 [(F(14, 2), 'elec', 45, 0), (F(14, 2) + 9, 'elec', 52, 1), (F(14, 2) + 15, 'elec', 58, 0)]),
-            Shot(F(15), 'BombLiberation', "CHARGEMAN'S BOMBLIBERATION", 'He flies over the dark and frees the panel, no battle',
-                 [(F(15), 'charge', 84, 0), (F(15) + 8, 'charge', 90, 1), (F(15) + 14, 'charge', 96, 0)]),
-            Shot(F(15, 2), 'WideSwrd', "SLASHMAN'S WIDESWRD", 'Three across, one battle',
-                 [(F(15, 2), 'slash', 148, 1), (F(15, 2) + 10, 'slash', 158, 0)]),
-            Shot(F(16), 'HeatCross', 'HIS BATTLES, IN HIS CROSS', "MegaMan in HeatCross from the first turn, on HeatMan's HP",
-                 [(F(16), 'heat', 327, 1)]),
+        Segment(F(9), '02', 'YOUR CROSSES JOIN THE DARK', ORANGE, [
+            Shot(F(10), 'TEAM', 'Pick who comes on the TEAM screen', [(F(10), 'team', 150, 1)]),
+            Shot(F(11), 'BombLiberation', "ChargeMan's command frees a dark panel",
+                 [(F(11), 'charge', 84, 0), (F(11) + 8, 'charge', 90, 1), (F(11) + 14, 'charge', 96, 0)]),
+            Shot(F(12), 'HeatCross', 'His battles: MegaMan in his Cross', [(F(12), 'heat', 372, 1)]),
         ]),
-        Page('FEEL', [
-            Shot(F(17), 'Rumble', 'FEEL EVERY HIT', "Rumble on a fight's beats: a hit, the charge, a delete",
-                 [(F(17), 'heat', 476, 1)], hits=(F(17, 0.75), F(17, 1.25), F(17, 1.75))),
-            Shot(F(17, 2), 'Triggers', "A DUALSENSE'S TRIGGERS", "On a DualSense, L's trigger clicks once the Custom gauge is full",
-                 [(F(17, 2), 'heat', 500, 1)], hits=(F(17, 2.5),)),
+        Segment(F(13), '03', 'RUMBLE AND TRIGGERS', CYAN_TEXT, [
+            Shot(F(14), 'Vibration', 'Vibration: Strong, Medium, Weak or Off', [(F(14), 'options', 135, 0)]),
+            Shot(F(15), 'Triggers', "A DualSense's L clicks at a full gauge", [(F(15), 'options', 165, 0)]),
+            Shot(F(16), 'In a fight', 'A hit, a delete, a Cross: you feel it', [(F(16), 'heat', 450, 1)],
+                 hits=(F(16, 0.5), F(16, 1.25), F(16, 2.75))),
         ]),
     ]
 
 
-NEWS = ['Virus Battler', "Crosses' team", "Souls' chips", 'Rumble', 'Your Square']
-END = F(18)
+# the recap: (picture, its label); a count only where the CHANGELOG gives one
+TILES = [(('shelf', 110), "1 in 4 finds of a held Soul's kind"),
+         (('still', 'online-square'), 'Host your own Net Square'),
+         (('still', 'battle'), 'Attacks rumble as they sound')]
+SYSTEMS = ('PortMaster handhelds · Linux · Windows · macOS', 'Android · iPhone and iPad · New 3DS · the browser')
+SITE = 'saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless'
 
 
-def where(book, fr):
-    """(page, the shot under the cursor, its row) at frame fr; the shot is
-    None before the first and from the end"""
-    if fr >= END:
-        return None, None, 0
-    page, shot, row = book[0], None, 0
-    for p in book:
-        for i, s in enumerate(p.shots):
-            if s.start <= fr:
-                page, shot, row = p, s, i
-    return page, shot, row
-
-
-# ---- the PET's parts, at its scale ----
+# ---- the PET's parts ----
 
 _floor = []
 
 
-def body():
-    """the PET's body under its windows: site_art.py's floor"""
-    if not _floor:
-        tile = Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGB')
-        im = Image.new('RGB', (LW, LH), BODY)
-        for x in range(0, LW, tile.width):
-            for y in range(BAND_H, LH, tile.height):
-                im.paste(tile, (x, y))
-        _floor.append(im)
-    return _floor[0].copy()
-
-
-def band(d, name, hint):
-    """the band across the top: the screen's name in heavy white capitals,
-    two stripes running off to its right; a hint at its right end"""
-    d.rectangle([0, 0, LW - 1, BAND_H - 1], fill=BAND)
-    f = font(CAPS, 16)
-    x1 = 8
-    if name:
-        d.text((8, -3), name, font=f, fill=WHITE)
-        x1 = 8 + round(f.getlength(name)) + 8
-    hw = round(font(CAPS_THIN, 8).getlength(hint)) + 10 if hint else 0
-    for y, lead in ((6, 0), (11, 5)):
-        x = x1 + lead
-        d.line([(x, y + 4), (x + 4, y)], fill=BODY, width=1)
-        d.line([(x + 4, y), (LW - 1 - hw, y)], fill=BODY, width=2)
-    if hint:
-        d.text((LW - 6, 9), hint, font=font(CAPS_THIN, 8), fill=WHITE, anchor='rm')
+def body(w, h, top=0):
+    """the PET's body: site_art.py's floor"""
+    key = (w, h, top)
+    for k, im in _floor:
+        if k == key:
+            return im.copy()
+    tile = Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGB')
+    im = Image.new('RGB', (w, h), BODY)
+    for x in range(0, w, tile.width):
+        for y in range(top, h, tile.height):
+            im.paste(tile, (x, y))
+    _floor.append((key, im))
+    return im.copy()
 
 
 def window(d, box, lit=0.0):
@@ -316,196 +309,244 @@ def window(d, box, lit=0.0):
     d.rectangle([x0 + 5, y0 + 5, x1 - 5, y1 - 5], fill=FIELD)
 
 
-def lerp(a, b, t):
-    return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+def band(d, stripes_from):
+    """the band across the top, two stripes running off to its right"""
+    d.rectangle([0, 0, LW - 1, BAND_H - 1], fill=BAND)
+    for y, lead in ((9, 0), (15, 5)):
+        x = stripes_from + lead
+        d.line([(x, y + 4), (x + 4, y)], fill=BODY, width=1)
+        d.line([(x + 4, y), (LW - 1, y)], fill=BODY, width=2)
 
 
 def page_arrow(d, x, y, right, lit=False):
-    """the green arrow where L or R turns the page"""
-    body_, hi = (ARROW_HI, WHITE) if lit else (ARROW, ARROW_HI)
+    fill, hi = (ARROW_HI, WHITE) if lit else (ARROW, ARROW_HI)
     pts = [(x, y), (x, y + 8), (x + 4, y + 4)] if right else [(x + 4, y), (x + 4, y + 8), (x, y + 4)]
-    d.polygon(pts, fill=body_, outline=ARROW_DARK)
+    d.polygon(pts, fill=fill, outline=ARROW_DARK)
     d.line([pts[0], pts[2]], fill=hi)
 
 
 def cursor(d, x, y, fr):
-    """the orange arrow at a row's left, never still: one pixel right, back,
-    two right, three video frames each (KeyItem's six of the game's)"""
+    """the orange arrow, never still: one pixel right, back, two right"""
     x += (0, 1, 0, 2)[(fr // 3) % 4]
     d.polygon([(x, y), (x, y + 8), (x + 5, y + 4)], fill=ORANGE, outline=ORANGE_DARK)
-    d.line([(x + 1, y + 2), (x + 1, y + 6)], fill=(255, 206, 24))
+    d.line([(x + 1, y + 2), (x + 1, y + 6)], fill=ORANGE_LIT)
 
 
 def triangle(d, x, y):
-    """the green triangle before the chosen answer"""
+    """the green triangle before the chosen answer, at its scale"""
     d.polygon([(x, y), (x, y + 8), (x + 5, y + 4)], fill=CHOICE, outline=CHOICE_OUT)
     d.line([(x + 1, y + 1), (x + 1, y + 7)], fill=CHOICE_HI)
-
-
-def list_window(d, name, rows, row, fr, turned=None):
-    """the list: its page's name on the window's band between the page
-    arrows, its rows, the cursor on `row` (None: no cursor); `turned` the
-    arrow just pressed ('L' or 'R')"""
-    window(d, LIST)
-    x0, y0, x1, _ = LIST
-    d.rectangle([x0 + 5, y0 + 5, x1 - 5, y0 + 16], fill=FRAME)
-    d.line([(x0 + 5, y0 + 16), (x1 - 5, y0 + 16)], fill=FRAME_LO)
-    d.text(((x0 + x1) / 2, y0 + 11), name, font=font(CAPS, 8), fill=WHITE, anchor='mm')
-    page_arrow(d, x0 + 8, y0 + 7, False, turned == 'L')
-    page_arrow(d, x1 - 12, y0 + 7, True, turned == 'R')
-    if row is not None:
-        cursor(d, x0 + 8, ROW0 + row * ROW_H + 4, fr)
 
 
 def info_box(d):
     x0, y0, x1, y1 = INFO
     d.rectangle([x0, y0, x1, y1], fill=EDGE)
     d.rectangle([x0 + 1, y0 + 1, x1 - 1, y1 - 1], fill=INFO_BOX)
-    d.text((x0 + 5, y0 + 5), 'INFORMATION', font=font(CAPS, 8), fill=WHITE, anchor='lm', stroke_width=0)
     d.rectangle([x0 + 3, y0 + 10, x1 - 3, y1 - 3], fill=PAGE)
 
 
-# ---- the words, at the video's scale ----
-
-def chat(d, xy, text, size, fill, shade=None, anchor='la', width=None):
-    """Pixelify Sans, its ligatures off (its fi is no letter of the PET's),
-    shrunk to `width` where given"""
-    while width and size > 12 and font(CHAT, size).getlength(text) > width:
-        size -= 1
-    f = font(CHAT, size)
-    if shade:
-        d.text((xy[0] + S, xy[1] + S), text, font=f, fill=shade, anchor=anchor, features=['-liga'])
-    d.text(xy, text, font=f, fill=fill, anchor=anchor, features=['-liga'])
-
-
-def rows_text(d, rows):
-    x0 = LIST[0]
-    for i, r in enumerate(rows):
-        y = (ROW0 + i * ROW_H) * S
-        f = 31
-        while font(CHAT, f).getlength(r) > (LIST[2] - LIST[0] - 26) * S:
-            f -= 1
-        chat(d, ((x0 + 19) * S, y + 2 * S), r, f, WHITE, SHADE)
+def button(d, cx, cy, words, size=34):
+    """the one action, NaviCust's RUN!: bright green in a light edge, a
+    dark shade under it, at the video's scale"""
+    f = font(size, True)
+    w = f.getlength(words) + 60
+    h = size + 24
+    x0, y0 = round(cx - w / 2), round(cy - h / 2)
+    d.rectangle([x0 + 6, y0 + 6, x0 + w + 6, y0 + h + 6], fill=BUTTON_SHADE)
+    d.rectangle([x0, y0, x0 + w, y0 + h], fill=BUTTON_EDGE)
+    d.rectangle([x0 + 6, y0 + 6, x0 + w - 6, y0 + h - 6], fill=BUTTON)
+    text(d, (cx, cy), words, size, WHITE, True, 'mm', shade=(8, 140, 24))
 
 
-def info_text(d, text):
-    x0, y0, x1, y1 = INFO
-    f = 33
-    while font(CHAT, f).getlength(text) > (x1 - x0 - 14) * S:
-        f -= 1
-    chat(d, ((x0 + 8) * S, (y0 + 22) * S), text, f, INK, anchor='lm')
+# ---- the big window: the cold open, the title, the stinger, the end ----
+
+_logo = {}
 
 
-# ---- the end: the logo in the game's window, the question in the box ----
-
-_logo = []
-
-
-def logo():
-    if not _logo:
+def logo(width):
+    if width not in _logo:
         lg = Image.open(os.path.join(ROOT, 'linux', 'steam', 'logo.png')).convert('RGBA')
-        w = 600
-        _logo.append(lg.resize((w, round(lg.height * w / lg.width)), Image.LANCZOS))
-    return _logo[0]
+        _logo[width] = lg.resize((width, round(lg.height * width / lg.width)), Image.LANCZOS)
+    return _logo[width]
 
 
-def ending_small(d, fr):
-    """the end's PET parts: Yes and No's triangle"""
-    if fr >= END + 10:
-        triangle(d, INFO[0] + 8, INFO[1] + 25)
+def appear(fr, at, n=6):
+    """0-1: words come up in the GBA's brightness steps over n frames"""
+    return steps((fr - at + 1) / n)
 
 
-def ending_big(im, d, fr):
-    """the end's words and the logo, at the video's scale"""
-    k = fr - END
-    gx, gy = (GAME[0] + 5) * S, (GAME[1] + 5) * S
-    if k >= 4:
-        lg = logo()
-        im.paste(lg, (gx + (720 - lg.width) // 2, gy + 70), lg)
-        chat(d, (gx + 360, gy + 270), 'saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless', 24, CYAN_TEXT,
-             anchor='mm', width=680)
-    if k >= 16:
-        for i, n in enumerate(('Unofficial fan project, not affiliated with Capcom. Free; it runs',
-                               'from your own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM.',
-                               'The dark boards need Mega Man Battle Network 5: Team Colonel (USA) beside it.')):
-            chat(d, (gx + 360, gy + 352 + 30 * i), n, 19, WHITE, anchor='mm', width=680)
-    x0, y0 = INFO[0] * S, INFO[1] * S
-    if k >= 4:
-        chat(d, (x0 + 8 * S, y0 + 16 * S), 'Fight on?', 33, INK, anchor='lm')
-    if k >= 10:
-        chat(d, (x0 + 16 * S, y0 + 29 * S), 'Yes', 33, INK, anchor='lm')
-        chat(d, (x0 + 46 * S, y0 + 29 * S), 'No', 33, INK, anchor='lm')
+def draw_big(fr):
+    small = body(BW, BH)
+    d = ImageDraw.Draw(small)
+    window(d, BIG)
+    if fr < TITLE:
+        i = 0 if fr < COLD[1][0] else 1
+        start, scene, first, rate = COLD[i]
+        small.paste(kit.shot(scene, first + (fr - start) * rate), (BIG[0] + 5, BIG[1] + 5))
+    im = small.resize((BW * B, BH * B), Image.NEAREST)
+    d = ImageDraw.Draw(im)
+    gx, gy = (BIG[0] + 5) * B, (BIG[1] + 5) * B          # the window's field: 960 x 640
+    cx = gx + 480
+
+    def put_logo(width, y, at):
+        a = appear(fr, at)
+        if a <= 0:
+            return
+        lg = logo(width).copy()
+        lg.putalpha(lg.getchannel('A').point(lambda v: int(v * a)))
+        im.paste(lg, (round(cx - lg.width / 2), y), lg)
+
+    def say(at, xy, words, size, fill, bold=False, width=880):
+        a = appear(fr, at)
+        if a > 0:
+            text(d, xy, words, size, lerp(FIELD, fill, a), bold, 'mm', width=width)
+
+    if TITLE <= fr < F(4):
+        put_logo(760, gy + 90, TITLE)
+        say(TITLE + BEAT, (cx, gy + 360), 'FIGHT ON?', 72, WHITE, True)
+        if fr >= TITLE + 2 * BEAT:
+            button(d, cx, gy + 490, '0.16.0 · OUT NOW', 40)
+    elif STINGER <= fr < END:
+        put_logo(760, gy + 150, STINGER, )
+        say(STINGER + 2, (cx, gy + 420), '0.16.0', 80, GOLD, True)
+    elif fr >= END:
+        put_logo(560, gy + 40, END - 6)
+        button(d, cx, gy + 250, '0.16.0 · OUT NOW', 34)
+        for i, line in enumerate(SYSTEMS):
+            say(END + BEAT + i * 2, (cx, gy + 345 + 40 * i), line, 30, WHITE)
+        say(END + 2 * BEAT, (cx, gy + 450), SITE, 28, CYAN_TEXT)
+        say(END + 3 * BEAT, (cx, gy + 535), "Needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM.", 22,
+            (198, 222, 239))
+        say(END + 3 * BEAT, (cx, gy + 566), 'The dark boards need Mega Man Battle Network 5: Team Colonel (USA) too.', 22,
+            (198, 222, 239))
+        say(END + 3 * BEAT, (cx, gy + 597), 'An unofficial fan project, not affiliated with Capcom.', 22, (198, 222, 239))
+    return im
+
+
+# ---- the PET screen: the segments and the recap ----
+
+def where(segs, fr):
+    """(the segment, the shot under the cursor or None on its card)"""
+    seg = None
+    for s in segs:
+        if s.card <= fr:
+            seg = s
+    if seg is None:
+        return None, None, -1
+    shot, row = None, -1
+    for i, sh in enumerate(seg.shots):
+        if sh.start <= fr:
+            shot, row = sh, i
+    return seg, shot, row
+
+
+def draw_pet(segs, fr):
+    small = body(LW, LH, BAND_H)
+    d = ImageDraw.Draw(small)
+    recap = fr >= RECAP
+    seg, shot, row = (None, None, -1) if recap else where(segs, fr)
+    label = 'ALSO IN 0.16.0' if recap else seg.label
+    band(d, 22 + round(font(40, True).getlength(label) / S) + 8)
+    if recap:
+        # the recap's one window, its tiles in it
+        window(d, (LIST[0], LIST[1], GAME[2], INFO[3]))
+    else:
+        # the list: the segment's shots as its rows, its number on the window's band
+        window(d, LIST)
+        x0, y0, x1, _ = LIST
+        d.rectangle([x0 + 5, y0 + 5, x1 - 5, y0 + 17], fill=FRAME)
+        d.line([(x0 + 5, y0 + 17), (x1 - 5, y0 + 17)], fill=FRAME_LO)
+        page_arrow(d, x0 + 8, y0 + 7, False)
+        page_arrow(d, x1 - 12, y0 + 7, True, 0 <= fr - seg.card < 6)
+        if shot:
+            cursor(d, x0 + 8, ROW0 + row * ROW_H + 5, fr)
+        lit = max([1 - (fr - h) / 4 for h in (shot.hits if shot else ()) if 0 <= fr - h < 4] or [0.0])
+        window(d, GAME, lit)
+        if shot:
+            scene, i = shot.sample(fr)
+            small.paste(kit.shot(scene, i), (GAME[0] + 5, GAME[1] + 5))
+        info_box(d)
+    im = small.resize((LW * S, LH * S), Image.NEAREST).crop((0, 0, W, H))
+    d = ImageDraw.Draw(im)
+    text(d, (SAFE_X + 2, 40), label, 40, WHITE, True, 'lm', shade=EDGE)
+    if recap:
+        draw_recap(im, d, fr)
+        return im
+    x0, y0, x1, _ = LIST
+    text(d, ((x0 + x1) / 2 * S, (y0 + 11) * S), f'{seg.number} / 03', 20, WHITE, True, 'mm')
+    if fr - seg.card >= 2 * BEAT:
+        for i, sh in enumerate(seg.shots):
+            text(d, ((x0 + 19) * S, (ROW0 + i * ROW_H + 9) * S), sh.row, 30, WHITE, anchor='lm', shade=SHADE,
+                 width=(x1 - x0 - 26) * S)
+    ix0, iy0, ix1, _ = INFO
+    text(d, ((ix0 + 5) * S, (iy0 + 5) * S), 'INFORMATION', 18, WHITE, True, 'lm')
+    if shot:
+        text(d, (SAFE_X + 8, (iy0 + 24) * S), shot.caption, 36, INK, anchor='lm', width=(ix1 - ix0 - 20) * S)
+    else:
+        # the section card: the feature's number and name in its colour, in the game's window
+        gx, gy = (GAME[0] + 5) * S, (GAME[1] + 5) * S
+        k = fr - seg.card
+        a = appear(fr, seg.card)
+        text(d, (gx + 360, gy + 170), seg.number, 96, lerp(FIELD, seg.colour, a), True, 'mm')
+        words = seg.label.split(' ')
+        half = (len(words) + 1) // 2
+        for j, line in enumerate((' '.join(words[:half]), ' '.join(words[half:]))):
+            if line and k >= 2:
+                text(d, (gx + 360, gy + 290 + 60 * j), line, 48, lerp(FIELD, WHITE, appear(fr, seg.card + 2)), True, 'mm',
+                     width=660)
+    return im
+
+
+def draw_recap(im, d, fr):
+    """three tiles, a picture and its label each, one a beat"""
+    w, h = 240, 160
+    gap = 90
+    x0 = (W - 3 * w - 2 * gap) // 2
+    y0 = 230
+    for i, ((scene, sample), label) in enumerate(TILES):
+        at = RECAP + i * BEAT
+        if fr < at:
+            continue
+        x = x0 + i * (w + gap)
+        d.rectangle([x - 15, y0 - 15, x + w + 14, y0 + h + 14], fill=FRAME_LO)
+        d.rectangle([x - 15, y0 - 15, x + w + 11, y0 + h + 11], fill=FRAME_HI)
+        d.rectangle([x - 12, y0 - 12, x + w + 11, y0 + h + 11], fill=FRAME)
+        d.rectangle([x - 3, y0 - 3, x + w + 2, y0 + h + 2], fill=FRAME_LO)
+        im.paste(kit.shot(scene, sample), (x, y0))
+        words = label.split(' ')
+        half = (len(words) + 1) // 2
+        for j, line in enumerate((' '.join(words[:half]), ' '.join(words[half:]))):
+            text(d, (x + w / 2, y0 + h + 66 + 42 * j), line, 30, WHITE, True, 'mm', shade=SHADE, width=w + 70)
 
 
 # ---- the frame ----
-
-def dim_at(fr):
-    """the dark layer's two bars: the screen down six of the GBA's sixteen
-    brightness steps, and back"""
-    if F(12) <= fr < F(14):
-        return min(6, (fr - F(12)) // 1 + 1) / 16
-    if F(14) <= fr < F(14) + 6:
-        return (5 - (fr - F(14))) / 16
-    return 0.0
-
-
-def turned_at(book, fr):
-    """the page arrow pressed in the frames after a page turns"""
-    for p in book[1:] + [None]:
-        start = p.shots[0].start if p else END
-        if 0 <= fr - start < 6:
-            return 'R'
-    return None
-
-
-def draw(book, fr):
-    page, shot, row = where(book, fr)
-    small = body()
-    d = ImageDraw.Draw(small)
-    d.fontmode = '1'
-    end = fr >= END
-    band(d, 'CYBERWORLD ENDLESS' if end else (shot.head if shot else ''), '0.16.0' if end else (shot.hint if shot else ''))
-    lit = max([1 - (fr - h) / 4 for h in (shot.hits if shot else ()) if 0 <= fr - h < 4] or [0.0])
-    window(d, GAME, lit)
-    if end:
-        list_window(d, 'NEW IN 0.16.0', NEWS, min(len(NEWS) - 1, (fr - END) // BEAT), fr, turned_at(book, fr))
-    else:
-        list_window(d, page.name, [s.row for s in page.shots], row if shot else None, fr, turned_at(book, fr))
-    info_box(d)
-    if shot:
-        scene, i = shot.sample(fr)
-        small.paste(kit.shot(scene, i), (GAME[0] + 5, GAME[1] + 5))
-    if end:
-        ending_small(d, fr)
-    im = small.resize((LW * S, LH * S), Image.NEAREST).crop((0, 0, W, H))
-    d = ImageDraw.Draw(im)
-    rows_text(d, NEWS if end else [s.row for s in page.shots])
-    if shot:
-        info_text(d, shot.text)
-    if end:
-        ending_big(im, d, fr)
-    return im
-
 
 def compose(only=None):
     frames_dir = os.path.join(kit.WORK, 'frames')
     if only is None:
         shutil.rmtree(frames_dir, ignore_errors=True)
     os.makedirs(frames_dir, exist_ok=True)
-    book = pages()
+    segs = segments()
     black = Image.new('RGB', (W, H))
     for fr in range(FRAMES):
         if only is not None and fr not in only:
             continue
-        im = draw(book, fr)
-        # BN6's fades: up from black as the screen opens, down at the end,
-        # the dark layer's two bars a few steps down, in sixteen steps
-        dark = max(dim_at(fr), 1 - steps((fr + 1) / 16), steps((fr - (FRAMES - 17)) / 16))
+        pet = F(4) <= fr < STINGER
+        im = draw_pet(segs, fr) if pet else draw_big(fr)
+        # BN6's fades: up from black as the screen opens, and quickly out
+        # and in where the screen changes (the title to the first section,
+        # the recap to the stinger), in the GBA's sixteen steps
+        dark = 1 - steps((fr + 1) / 12)
+        for at in (F(4), STINGER):
+            if at - 4 <= fr < at:
+                dark = max(dark, (fr - at + 5) / 5)
+            elif at <= fr < at + 4:
+                dark = max(dark, 1 - (fr - at + 1) / 5)
         if dark > 0:
-            im = Image.blend(im, black, dark)
+            im = Image.blend(im, black, min(1.0, steps(dark)))
         im.save(os.path.join(frames_dir, f'{fr:05d}.png'), compress_level=1)
         if fr % 100 == 0:
             print('frame', fr, '/', FRAMES, flush=True)
 
 
-POSTER = F(3, 2)        # (BN6'S VIRUS BATTLER on the band, his first pair named)
+POSTER = F(3, 3)        # (the title card held: the logo, FIGHT ON?, 0.16.0 · OUT NOW)

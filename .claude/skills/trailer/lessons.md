@@ -303,6 +303,29 @@ voiced an octave higher and the squares louder in the mix brought it
 near (music_check.py's bands 46/32/20/2 against the seed's 49/29/21/2)
 without a part more, busier than the source still none.
 
+Before he heard that cut, the owner asked for structure: "I think we
+need to define a stricter layout on how we present the changes. also its
+start and end. ... I want structure, and professional polish. while still
+making each trailer unique and interesting to consume", pointing at two
+update trailers, Cyberpunk 2077's Edgerunners II update overview and The
+Blood of Dawnwalker's Update 1.1. Their shared skeleton became SKILL.md's
+The structure (every trailer), and the third cut follows it in 23 bars
+(39 seconds): a cold open of two bars with no words (a Virus Battle's
+last blows at fast forward, MegaMan becoming HeatCross) in one big
+window, the game at 4x; the title card (the logo, FIGHT ON?, the green
+RUN! button's 0.16.0 · OUT NOW); three segments on the PET screen, each a
+section card (its number and name in its colour in the game's window, the
+band taking its label) and two to four shots of a bar, one concrete
+caption each in the INFORMATION box; the recap, three tiles in one window
+(a count only where the CHANGELOG gives one: "1 in 4 finds", its "a
+quarter"); the logo's stinger with 0.16.0 on the cadence; the end card
+held still, never faded (the systems by name, the site, the ROM line).
+One type family, the site's Pixelify Sans, inside the safe area. The
+piece was rewritten to the slots: its intro under the cold open, the
+hook arriving with the title, the toms lifting into each segment, the
+drop for the dark layer's, the cadence on the stinger, the backing alone
+again under the end card.
+
 Devices now used up: the card table, the deal as the cut, suits by
 section, the foil's sweep; and from the second cut, the PET screen as the
 whole frame: the list's cursor stepping as the cut, the band as the

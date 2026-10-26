@@ -15,30 +15,32 @@ sketches were heard through GeneralUser GS and MuseScore General too; the
 owner heard no difference through MP2K's cut, and FluidR3 GM stays for its
 licence (music_rules.md).
 
-Here, in B-flat minor at 150 (a bar is 48 frames of the trailer's 30), 20
-bars, a section's idea at its head and nowhere else:
-- 0-3 the intro: the paired 12.5% backing alone over Bbm, a riser; bar 1
-  the strings and the bass held under Bbm Gdim; bar 2 the broken beat in
-  half (its kicks on 0, 3, 6, the snare on 8), the bass's sixteenths, a
-  power chord on one; bar 3 the beat in full to beat three, the toms, the
-  lead's pickup.
-- 4-11 the main section, the sketch's: the hook (F held and struck again,
-  a turn through G-flat, up to the D-flat held) over Bbm Gdim, its answer
-  over Absus2 Gb, the hook again falling to the diminished E-natural over
-  Bbm Bbdim, the cadence over Gb Fm; the B, the backing to the 75% voice's
-  repeating 32nds and the melody's long notes on the sampled saw (Gb
-  Absus2 | Ebm Fm), brass on its last beat; the hook back; the
-  turnaround over Gb and Fsus4 to F (the major V once, its fourth falling
-  to the A-natural on the beat the chord turns major).
-- 12-13 the drop, kept short: B-flat minor struck, the hook's first half
-  alone at half speed on a thin square over the held bass and the
-  strings, its turn through G-natural over Gdim; bar 13 the climb back over Gb
-  Absus2, the repeating 32nds rising, a snare roll, a riser, the pickup.
-- 14-17 the climax: the A again, the saw doubling the lead an octave
-  down, the guitar's low stab into every other bar, brass on the
-  cadence, a crash every two bars.
-- 18-19 the logo and the end card: the turnaround over Ebm and Fsus4-F,
-  the toms; then B-flat minor with its ninth, struck and ringing.
+Here, in B-flat minor at 150 (a bar is 48 frames of the trailer's 30), 23
+bars to the trailer's slots (SKILL.md, The structure), a section's idea
+at its head and nowhere else:
+- 0-1 under the cold open: the paired 12.5% backing alone, a riser; the
+  strings and the bass held under Bbm Gdim, the kick's broken beat, the
+  toms and the lead's pickup.
+- 2-3 the title card: the hook arrives with the band (F held and struck
+  again, a turn through G-flat, up to the D-flat held, over Bbm Gdim),
+  then its answer over Absus2 Gb.
+- 4-8 the Virus Battler's segment: the hook again, falling to the
+  diminished E-natural (Bbm Bbdim), the cadence over Gb Fm; the B, the
+  backing to the 75% voice's repeating 32nds and the melody's long notes
+  on the sampled saw (Gb Absus2 | Ebm Fm), brass on its last beat; the
+  hook back; the toms, the lift into the next.
+- 9-12 the dark layer's segment: the drop (B-flat minor struck, the
+  hook's first half alone at half speed on a thin square), the climb
+  back (the 32nds rising, a snare roll), the B again, the lift.
+- 13-16 the feel's segment, the climax: the A at full strength, the saw
+  doubling the lead an octave down, the stab, brass on the cadence.
+- 17-18 the recap: the hook back, the turnaround over Ebm and Fsus4 to
+  F (the major V once, its fourth falling to the A-natural on the beat
+  the chord turns major), the toms.
+- 19 the logo's stinger: B-flat minor with its ninth struck on the
+  cadence and ringing.
+- 20-22 the end card held: the paired backing alone again, softly, over
+  the strings, as the piece began, and the ninth ringing out.
 
 The middle (500-2000 Hz) brought toward 0x22's (37% of its energy; the
 sketch had 14-17%) without more parts: the strings' chord samples voiced
@@ -61,12 +63,12 @@ from trailers import sketch_vb_lib as L  # noqa: E402
 from trailers.sketch_vb_lib import CHORD_SAMPLES, DS_ENV, DS_LEVEL, HARDWARE, REVERB, SAMPLED_LEADS, SOUNDFONT  # noqa: E402,F401
 
 BPM = 150
-BARS = 20
+BARS = 23
 TAIL = 2.0
 MIX = (('lead', ('sq1',), 0.15), ('arp', ('sq2',), 0.26), ('bass', ('wave',), 0.11),
        ('hats', ('noise',), 0.12), ('fx', ('fx',), 0.08))
 DS_GAIN = dict(L.DS_GAIN, kick=0.8, pad=0.92, pad_m=0.92, pad_M=0.92, pad_d=0.92)
-BANNER = (14 * 4 * 60 / BPM, 2.9)      # (from bar 14's downbeat, seconds)
+BANNER = (13 * 4 * 60 / BPM, 2.9)      # (from bar 13's downbeat, seconds: the climax's hook)
 BANNER_AUDIO = '3ds/banner-0.16.0.wav'
 
 
@@ -94,11 +96,11 @@ H = {
     'F': ('F2', 'F3 A3 C4 F4 A4 C5', 'pad_M', 'F2'),
 }
 CHORDS = {0: ('Bbm',), 1: ('Bbm', 'Gdim'), 2: ('Bbm', 'Gdim'), 3: ('Absus2', 'Gb'),
-          4: ('Bbm', 'Gdim'), 5: ('Absus2', 'Gb'), 6: ('Bbm', 'Bbdim'), 7: ('Gb', 'Fm'),
-          8: ('Gb', 'Absus2'), 9: ('Ebm', 'Fm'), 10: ('Bbm', 'Gdim'), 11: ('Gb', 'Fsus4', 'F'),
-          12: ('Bbm', 'Gdim'), 13: ('Gb', 'Absus2'),
-          14: ('Bbm', 'Gdim'), 15: ('Absus2', 'Gb'), 16: ('Bbm', 'Bbdim'), 17: ('Gb', 'Fm'),
-          18: ('Ebm', 'Fsus4', 'F'), 19: ('Bbm',)}
+          4: ('Bbm', 'Bbdim'), 5: ('Gb', 'Fm'), 6: ('Gb', 'Absus2'), 7: ('Ebm', 'Fm'), 8: ('Bbm', 'Gdim'),
+          9: ('Bbm', 'Gdim'), 10: ('Gb', 'Absus2'), 11: ('Gb', 'Absus2'), 12: ('Ebm', 'Fm'),
+          13: ('Bbm', 'Gdim'), 14: ('Absus2', 'Gb'), 15: ('Bbm', 'Bbdim'), 16: ('Gb', 'Fm'),
+          17: ('Bbm', 'Gdim'), 18: ('Ebm', 'Fsus4', 'F'), 19: ('Bbm',),
+          20: ('Bbm', 'Gdim'), 21: ('Gb', 'Absus2'), 22: ('Bbm',)}
 
 # ---- the lines: (tick, ticks, note), the sketch's ----
 HOOK = [(0, 24, 'F5'), (24, 6, 'F5'), (30, 6, 'Gb5'), (36, 12, 'F5'), (48, 36, 'Db6'), (84, 12, 'Bb5')]
@@ -108,8 +110,7 @@ A = [HOOK,
      [(0, 24, 'Db6'), (24, 12, 'Db6'), (36, 12, 'Bb5'), (48, 48, 'C6')]]
 SAWLINE = {8: [(0, 36, 'Db6'), (36, 12, 'Db6'), (48, 36, 'Eb6'), (84, 12, 'Eb6')],
            9: [(0, 36, 'Gb5'), (36, 12, 'Gb5'), (48, 48, 'F5')]}
-TURN = {11: [(0, 24, 'Bb5'), (24, 12, 'Bb5'), (36, 12, 'Ab5'), (48, 24, 'Bb5'), (72, 24, 'A5')],
-        18: [(0, 24, 'Gb5'), (24, 12, 'Gb5'), (36, 12, 'Eb5'), (48, 24, 'Bb5'), (72, 24, 'A5')]}
+TURN = {18: [(0, 24, 'Gb5'), (24, 12, 'Gb5'), (36, 12, 'Eb5'), (48, 24, 'Bb5'), (72, 24, 'A5')]}
 
 PAIRS = (0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15)
 FIG = (0, 3, 3, 2, 1, 1, 2, 3, 3, 4, 3)       # tones by onset: an octave up, skips back, a note struck again
@@ -187,119 +188,144 @@ def band(s, bar, vel=104):
 
 # ---- the sections ----
 
-def intro(s):
-    """Bars 0-3: the backing alone; the strings and the bass held; the
-    broken beat in half; in full to beat three, the toms, the pickup."""
-    backing(s, 0, 0, 96, 'Bbm', vel=84)
-    s.note('fx', 0, 0, 92, 0, 100, sweep=(1500, 120000), ramp=(1, 8))
-    for p in range(8, 16):
-        s.note('noise', 0, 6 * p, 3, 0, 30 + 6 * (p - 8), **L.HAT)
-    # bar 1: the strings, the bass held
-    for t0, n, name in L.halves(CHORDS[1]):
-        backing(s, 1, t0, t0 + n, name, vel=96)
-        s.note('wave', 1, t0, n - 2, H[name][0], 112, **HELD)
-    chords(s, 1, CHORDS[1], vel=88)
-    s.note('fx', 1, 0, 92, 0, 104, sweep=(2000, 180000), ramp=(1, 10))
-    stab(s, 1, 'Gdim')
-    # bar 2: the beat in half, the bass's sixteenths, a power chord on one
-    s.note('fx', 2, 0, 48, 0, 118, **L.CRASH)
-    L.power(s, 2, 0, 30, 'Bb2', vel=118)
-    band(s, 2)
-    kit(s, 2, half=True)
-    # bar 3: in full to beat three, the toms, the pickup
-    band(s, 3)
-    kit(s, 3, until=12)
-    L.toms(s, 3)
-    s.note('sq1', 3, 84, 6, 'Db5', 104, **LEAD)
-    s.note('sq1', 3, 90, 6, 'Eb5', 110, **LEAD)
 
+# ---- the sections, to the trailer's slots (SKILL.md, The structure) ----
 
-def main(s):
-    """Bars 4-11: the A, the B, the hook back, the turnaround."""
-    for i, bar in enumerate(range(4, 8)):
-        band(s, bar)
-        lead(s, bar, A[i])
-        kit(s, bar, crash=bar == 4, until=14 if bar == 7 else 16)
-    stab(s, 5, 'Gb')
-    L.power(s, 4, 0, 30, 'Bb2', vel=118)
-    s.hit('tom_mid', 7, 84, 6, vel=108, pan=0.2)
-    s.hit('tom_lo', 7, 90, 6, vel=112, pan=0.2)
-    for bar in (8, 9):
+def b_section(s, first, brass_last=True):
+    """two bars of the B: the 75% voice's repeating 32nds, the melody's
+    long notes on the sampled saw, brass on the second bar's last beat"""
+    for i, bar in enumerate((first, first + 1)):
         names = CHORDS[bar]
         for t0, n, name in L.halves(names):
             repeats(s, bar, t0, t0 + n, name)
         chords(s, bar, names, vel=100)
         bass(s, bar, names)
-        for t, n, k in SAWLINE[bar]:
+        for t, n, k in SAWLINE[8 + i]:
             s.hit('dlead', bar, t, n - 1, k, 112, -0.25)
             s.hit('dlead', bar, t + 3, n - 1, k, 64, 0.4)
-        kit(s, bar, crash=bar == 8)
-    L.power(s, 8, 0, 30, 'Gb2', vel=116)
-    for t in (72, 78, 84):
-        s.hit('brass', 9, t, 5, 'Ab3', 104 - (t - 72), 0.3)       # Ab C Eb over F: Fm7
-    # bar 10: the hook back; bar 11: the turnaround, the major V once
-    band(s, 10)
-    lead(s, 10, HOOK, vel=120)
-    kit(s, 10, crash=True)
-    L.power(s, 10, 0, 30, 'Bb2', vel=116)
-    band(s, 11)
-    lead(s, 11, TURN[11], vel=120)
-    kit(s, 11, until=12)
-    L.toms(s, 11)
+        kit(s, bar, crash=i == 0)
+    L.power(s, first, 0, 30, 'Gb2', vel=116)
+    if brass_last:
+        for t in (72, 78, 84):
+            s.hit('brass', first + 1, t, 5, 'Ab3', 104 - (t - 72), 0.3)       # Ab C Eb over F: Fm7
 
 
-def drop(s):
-    """Bar 12: B-flat minor struck, the hook's first half alone at half
-    speed over the held bass and the strings. Bar 13: the climb back."""
-    s.note('fx', 12, 0, 72, 0, 118, **L.CRASH)
-    s.hit('kick', 12, 0, 6, vel=124)
-    L.power(s, 12, 0, 40, 'Bb2', vel=120, fall=True)
-    for t0, n, name in L.halves(CHORDS[12]):
-        s.note('wave', 12, t0, n - 2, H[name][0], 112, **dict(HELD, bend=[(0, 0), (n - 12, 0), (n - 2, -1)]))
-    chords(s, 12, CHORDS[12], vel=100)
+def fill(s, bar):
+    """the toms into the next section, its lift"""
+    L.toms(s, bar)
+
+
+def cold_open(s):
+    """Bars 0-1, under the cold open: the paired backing alone, a riser;
+    then the strings and the bass held, the stab, the toms and the
+    lead's pickup into the title."""
+    backing(s, 0, 0, 96, 'Bbm', vel=88)
+    s.note('fx', 0, 0, 92, 0, 100, sweep=(1500, 120000), ramp=(1, 8))
+    for p in range(8, 16):
+        s.note('noise', 0, 6 * p, 3, 0, 30 + 6 * (p - 8), **L.HAT)
+    for t0, n, name in L.halves(CHORDS[1]):
+        backing(s, 1, t0, t0 + n, name, vel=98)
+        s.note('wave', 1, t0, n - 2, H[name][0], 112, **HELD)
+    chords(s, 1, CHORDS[1], vel=90)
+    s.note('fx', 1, 0, 92, 0, 104, sweep=(2000, 180000), ramp=(1, 10))
+    for p in (0, 3, 6, 8):
+        s.hit('kick', 1, 6 * p, 6, vel=88)
+    fill(s, 1)
+    s.note('sq1', 1, 84, 6, 'Db5', 104, **LEAD)
+    s.note('sq1', 1, 90, 6, 'Eb5', 110, **LEAD)
+
+
+def title(s):
+    """Bars 2-3, the title card: the hook arrives with the band, and its
+    answer."""
+    for i, bar in enumerate((2, 3)):
+        band(s, bar)
+        lead(s, bar, A[i])
+        kit(s, bar, crash=bar == 2)
+    L.power(s, 2, 0, 30, 'Bb2', vel=118)
+    stab(s, 3, 'Gb')
+
+
+def battler(s):
+    """Bars 4-8, the Virus Battler's segment: the hook again and its
+    cadence, the B, the hook back and the lift into the next."""
+    for i, bar in enumerate((4, 5)):
+        band(s, bar)
+        lead(s, bar, A[2 + i])
+        kit(s, bar, crash=bar == 4, until=14 if bar == 5 else 16)
+    L.power(s, 4, 0, 30, 'Bb2', vel=118)
+    s.hit('tom_mid', 5, 84, 6, vel=108, pan=0.2)
+    s.hit('tom_lo', 5, 90, 6, vel=112, pan=0.2)
+    b_section(s, 6)
+    band(s, 8)
+    lead(s, 8, HOOK, vel=120)
+    kit(s, 8, crash=True, until=12)
+    L.power(s, 8, 0, 30, 'Bb2', vel=116)
+    fill(s, 8)
+
+
+def crosses(s):
+    """Bars 9-12, the dark layer's segment: the drop (B-flat minor struck,
+    the hook's first half alone at half speed), the climb back, then the B
+    over its own chords, the lift into the climax."""
+    s.note('fx', 9, 0, 72, 0, 118, **L.CRASH)
+    s.hit('kick', 9, 0, 6, vel=124)
+    L.power(s, 9, 0, 40, 'Bb2', vel=120, fall=True)
+    for t0, n, name in L.halves(CHORDS[9]):
+        s.note('wave', 9, t0, n - 2, H[name][0], 112, **dict(HELD, bend=[(0, 0), (n - 12, 0), (n - 2, -1)]))
+    chords(s, 9, CHORDS[9], vel=100)
     for t, n, k in ((0, 48, 'F5'), (48, 12, 'F5'), (60, 12, 'G5'), (72, 24, 'F5')):
-        s.note('sq1', 12, t, n, k, 114, **ALONE)
+        s.note('sq1', 9, t, n, k, 114, **ALONE)
     for t in (24, 72):
-        s.note('noise', 12, t, 3, 0, 60, **L.HAT)
-    # bar 13: the climb back
-    s.note('fx', 13, 0, 90, 0, 112, sweep=(2500, 240000), ramp=(2, 13))
-    for i, (t0, n, name) in enumerate(L.halves(CHORDS[13])):
-        repeats(s, 13, t0, t0 + n, name, vel=72 + 24 * i, soft=40 + 12 * i)
-    chords(s, 13, CHORDS[13], vel=100)
-    bass(s, 13, CHORDS[13], vel=104)
+        s.note('noise', 9, t, 3, 0, 60, **L.HAT)
+    # bar 10: the climb back
+    s.note('fx', 10, 0, 90, 0, 112, sweep=(2500, 240000), ramp=(2, 13))
+    for i, (t0, n, name) in enumerate(L.halves(CHORDS[10])):
+        repeats(s, 10, t0, t0 + n, name, vel=72 + 24 * i, soft=40 + 12 * i)
+    chords(s, 10, CHORDS[10], vel=100)
+    bass(s, 10, CHORDS[10], vel=104)
     for t in (0, 24, 48, 72):
-        s.hit('kick', 13, t, 6, vel=110)
+        s.hit('kick', 10, t, 6, vel=110)
     roll = list(range(0, 48, 12)) + list(range(48, 72, 6)) + list(range(72, 96, 3))
     for i, t in enumerate(roll):
-        s.hit('snare', 13, t, 3, vel=52 + 66 * i // len(roll), pan=-0.2 + 0.4 * i / len(roll))
-    s.note('sq1', 13, 84, 6, 'Db5', 110, **LEAD)
-    s.note('sq1', 13, 90, 6, 'Eb5', 116, **LEAD)
+        s.hit('snare', 10, t, 3, vel=52 + 66 * i // len(roll), pan=-0.2 + 0.4 * i / len(roll))
+    b_section(s, 11)
+    fill(s, 12)
+    s.note('sq1', 12, 84, 6, 'Db5', 110, **LEAD)
+    s.note('sq1', 12, 90, 6, 'Eb5', 116, **LEAD)
 
 
 def climax(s):
-    """Bars 14-17: the A again, the saw doubling the lead an octave down,
-    the stab into every other bar, brass on the cadence."""
-    for i, bar in enumerate(range(14, 18)):
+    """Bars 13-16, the feel's segment: the A at full strength, the saw
+    doubling the lead an octave down, the stab, brass on the cadence."""
+    for i, bar in enumerate(range(13, 17)):
         band(s, bar, vel=110)
         lead(s, bar, A[i], vel=122)
         for t, n, k in A[i]:
             s.hit('double', bar, t, n - 1, key(k) - 12, 92, 0.25)
-        kit(s, bar, crash=bar % 2 == 0)
-    stab(s, 15, 'Gb')
-    L.power(s, 14, 0, 30, 'Bb2', vel=120)
-    L.power(s, 16, 0, 30, 'Bb2', vel=118)
+        kit(s, bar, crash=bar % 2 == 1, until=14 if bar == 16 else 16)
+    stab(s, 14, 'Gb')
+    L.power(s, 13, 0, 30, 'Bb2', vel=120)
+    L.power(s, 15, 0, 30, 'Bb2', vel=118)
     for t in (72, 78, 84):
-        s.hit('brass', 17, t, 5, 'Ab3', 108 - (t - 72), 0.3)
+        s.hit('brass', 16, t, 5, 'Ab3', 108 - (t - 72), 0.3)
 
 
-def ending(s):
-    """Bar 18: the turnaround over Ebm and Fsus4-F, the toms; bar 19:
-    B-flat minor with its ninth, struck and ringing."""
+def rest_and_stinger(s):
+    """Bars 17-18, the recap: the hook back, the turnaround over Ebm and
+    Fsus4-F (the major V once), the toms. Bar 19, the logo's stinger:
+    B-flat minor with its ninth, struck on the cadence and ringing."""
+    band(s, 17, vel=110)
+    lead(s, 17, HOOK, vel=122)
+    for t, n, k in HOOK:
+        s.hit('double', 17, t, n - 1, key(k) - 12, 92, 0.25)
+    kit(s, 17, crash=True)
+    L.power(s, 17, 0, 30, 'Bb2', vel=118)
     band(s, 18, vel=110)
     lead(s, 18, TURN[18], vel=122)
     for t, n, k in TURN[18]:
         s.hit('double', 18, t, n - 1, key(k) - 12, 92, 0.25)
-    kit(s, 18, until=12, crash=True)
+    kit(s, 18, until=12)
     L.toms(s, 18)
     s.note('fx', 19, 0, 96, 0, 124, **L.CRASH)
     s.hit('kick', 19, 0, 6)
@@ -313,11 +339,25 @@ def ending(s):
     s.note('sq2', 19, 0, 96, 'Db5', 96, **dict(LEAD, pan=0.35, bend=[(0, 0), (76, 0), (96, -2)]))
 
 
+def end_card(s):
+    """Bars 20-22, under the end card held: the paired backing alone again,
+    softly, over the strings, as the piece began; B-flat minor's ninth
+    ringing out."""
+    for bar in (20, 21):
+        for t0, n, name in L.halves(CHORDS[bar]):
+            backing(s, bar, t0, t0 + n, name, vel=76 - 8 * (bar - 20))
+        chords(s, bar, CHORDS[bar], vel=76 - 8 * (bar - 20))
+    s.hit('pad', 22, 0, 140, 'Bb3', 70, 0.0)            # Bb C F
+    s.note('wave', 22, 0, 90, 'Bb2', 96, **HELD)
+
+
 def arrangement():
     s = Score()
-    intro(s)
-    main(s)
-    drop(s)
+    cold_open(s)
+    title(s)
+    battler(s)
+    crosses(s)
     climax(s)
-    ending(s)
+    rest_and_stinger(s)
+    end_card(s)
     return s
