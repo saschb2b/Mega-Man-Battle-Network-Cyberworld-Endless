@@ -16,6 +16,43 @@ with new screens.** Each trailer has its own look and its own music, in
 the manner of what the release is about (0.12.0, BN5's net: BN5's title
 theme for the music, BN5's Liberation Missions for the look).
 
+## The owner's gates
+
+A cut that misses one of these is not shown to the owner as a candidate.
+They hold above any time box: a trailer that cannot pass them in its
+time waits, it is not cut short. Each came from a cut the owner refused.
+
+1. **The look is the game's world, in the project's style.** Build it
+   from Battle Network's own visual language as the project already shows
+   it: BN6's PET look (the band, cyan-framed windows on a navy field, the
+   INFORMATION box, the orange cursor arrow, the green pill; `docs/UI.md`,
+   `src/gfx/pet_look.c`, the site's frames in `tools/site_art.py`'s
+   colours), the net's grids, a battle's or a board's own screens.
+   Never a real-world metaphor dressed over the footage. 0.16.0's first cut
+   dealt shots as cards onto a casino's green felt under a lamp; the
+   owner: "it is totally not in our design style."
+2. **The music grows from one chosen Battle Network song, and sounds like
+   it.** Pick the song from the ROM for what the release is about (the
+   feature's own theme first), read its habits (step 2), and keep its
+   tempo, groove, harmonic language and the roles of its parts audible,
+   so that a fan hears where it comes from (never its notes). Numbers that
+   match are not enough: 0.16.0's first piece read "busier than the
+   source: none" and still sounded "rather random" to the owner.
+3. **The soundfont palette the owner loved.** The piece plays FluidR3 GM's
+   instruments through `SOUNDFONT` (`tools/trailer_soundfont.py`,
+   `render_any` in `docker/Dockerfile.music`), the palette of 0.14.0 and
+   0.15.0, not the plain GBA synthesis alone. 0.16.0's first piece had
+   none, and the owner missed it.
+4. **Sketches for the owner's ear before the piece, always** (step 2's
+   sketch step): two or three eight-bar sketches from the chosen song, in
+   the soundfont, rendered to `.build/trailer-sketches/`, sent to the
+   owner; he chooses one, and only then is it grown into the piece. Never
+   skipped for time (0.16.0's first piece skipped them).
+5. **The owner sees the cut before the tag.** The render goes to him; the
+   release waits for his word. A green `music_check.py`, sheets that look
+   right and tests that pass are the agent's own checks, never his
+   approval.
+
 ## The parts
 
 | Part | Where |
@@ -87,8 +124,9 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
 2. **Read the recording** if there is one: `scripts/music_check.py
    --ref FILE` prints its balance and its punch (the swing inside a beat)
    to match.
-3. **Sketch first.** Before the full piece, write three eight-bar
-   sketches (12-16 seconds) in different moods as modules beside the cuts
+3. **Sketch first, never skipped** (the owner's gate 4). Before the full
+   piece, write three eight-bar sketches (12-16 seconds) from the chosen
+   song, in the soundfont (gate 3), in different moods as modules beside the cuts
    (`tools/trailers/sketch_a.py`; not in `VERSIONS`), render them with
    `python3 tools/trailer_music.py OUT.wav --piece sketch_a` to
    `.build/trailer-sketches/` as WAV and MP3 (ffmpeg in its image), and let
@@ -162,6 +200,9 @@ only: `build.py 3ds` renders the banner with it.
 
 ## 4. The look
 
+- Inside the project's style, always (the owner's gate 1): the cut's own
+  drawing borrows BN's screens and the site's PET frames, never a world
+  outside the net.
 - The game's picture stays whole and sharp: 4x nearest (960x640) in the
   1280x720 frame, or 2x for a mosaic of four. The 160-pixel margins are
   free for the cut's own readouts.
