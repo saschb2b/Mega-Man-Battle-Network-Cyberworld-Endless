@@ -190,6 +190,7 @@ typedef struct {
 	bool gem;         /* its maps mark their teleport pads with BN6's gem (issue #44) */
 	unsigned arrows;  /* the ways its maps draw an arrow panel (bit per DIR_*, issue #43) */
 	bool hub_rooms;   /* its art draws every room as its small hubs: no signature, one more of them (issue #98) */
+	bool one_wide;    /* its art draws no floor two wide but its pads: the way's walkways never widened (TILES_ONE_WIDE, issue #164) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */

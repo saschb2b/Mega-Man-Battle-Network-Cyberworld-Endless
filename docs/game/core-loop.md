@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:02:17Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:50:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -233,7 +233,11 @@ seen; the opening plan of 21 October is still unplayed by a person.
   side, a loss too cheap to fear.
 - **Navigation in the generator**, gated per area on walk share with
   `build.py tiles` and a play measure, BN5's End Area first (#164). The
-  maze fix showed the share can fall from 44% to 10%.
+  maze fix showed the share can fall from 44% to 10%. BN5's End Area begun
+  (26 October 2026): its rooms drawn whole as its pads and its way kept
+  one wide, the walkways' junctions on its walks from 11.4 a layer to
+  2.3 ([the generator](../world/level-design/generator.md), Navigation); a persona's session there
+  still to measure the share.
 - **A battle floor**: at least one random battle a layer, and a
   battles-per-act band in `build.py pacing`.
 - **The deep acts** (16 to 18 minutes) brought toward the early ones'

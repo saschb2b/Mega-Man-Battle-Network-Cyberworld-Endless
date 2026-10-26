@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-26
+* **Update**: world/level-design/generator.md, BN5's End Area keeps its one-wide art (`TILES_ONE_WIDE`: every room drawn as its pads, the way never widened; issue #164) and the walks measured before and after; devtools/atlas.md, the report's `lineups` and `junctions`; code/dev.md, `lineups.c`; game/core-loop.md, Phase 1's navigation begun.
 * **Update**: game/rival.md, rom/battle.md and game/core-loop.md, the netbattle's stake and Chaud's verdict reworded (Lan stops the battle; "pull him out" read as a double meaning).
 * **Creation**: game/core-loop.md, the core loop reviewed (October 2026): what works, what it lacks, what has grown, the players' statistics, the next evolution's phases and the owner's decisions; its line in game/index.md and AGENTS.md.
 * **Update**: game/rival.md, ProtoMan's netbattle never ends the run (his deleting blow ends the battle, MegaMan at 1 HP); rom/battle.md and engine/emulation/hooks.md, the two battle-loop hooks of `src/director/battle_spare.c`; code/director.md, its line.

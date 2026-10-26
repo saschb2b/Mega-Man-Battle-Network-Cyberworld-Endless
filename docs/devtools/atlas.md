@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T13:05:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:50:00Z }
 ---
 
 # Atlas: every layer drawn
@@ -59,7 +59,13 @@ Output in `.build/atlas`:
   any: they stand in the way on), `signature` the room the layer is
   remembered by ([Identity](../world/level-design/identity.md); `none` where its layout
   found it no place), and `arrives` the side of the screen MegaMan arrives
-  at and the way he faces there (Arrivals).
+  at and the way he faces there (Arrivals); `lineups` and `junctions` the walks from the arrival
+  to the exit (the arena's antechamber) and to each Net Dealer, over the
+  floor as drawn: the panels where MegaMan must stop on one exact panel to
+  go on (a one-wide walkway entered from wider floor, a turn at a junction
+  the floor runs on past; a corner's wall stops him there) and the
+  walkways' junctions passed, and the panels walked (`src/dev/lineups.c`;
+  [the generator](../world/level-design/generator.md), Navigation).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
