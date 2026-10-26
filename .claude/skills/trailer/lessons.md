@@ -251,52 +251,52 @@ Devices now used up: the war room's map and its sector monitors, the
 camera's pan as the cut, the phase-against-par readout, tracking that
 settles onto the beat, the run's position on every shot.
 
+
 ## 0.16.0: Fight on? (2026-10-26), `tools/trailers/v0_16_0.py`
 
 The release: BN6's Virus Battler in the run (a stake, BN6's VIRUS LIST,
 the fight at fast forward, take the pot or fight on, the BtlrCard kept
 across runs), the run's Crosses on Liberation boards with Team
 ProtoMan's commands and a TEAM screen, a held Soul's chips in the finds,
-rumble and a DualSense's triggers, a Square anyone can host. Made by an
-agent in one sitting, without sketches for the owner's ear first (its
-time box); the owner has not heard or seen it yet.
+rumble and a DualSense's triggers, a Square anyone can host.
 
-What was made: 34 seconds, 20 bars at 150 (a bar 48 frames). A card
-table: both headline features are a hand (the viruses on a BtlrCard, the
-Navis picked for a board), so every shot is a card dealt from above onto
-a pile on a green felt under a lamp, landing square on its beat (an
-overshooting ease, a slap), the cards before it left askew underneath.
-The game's picture is the card's art at 3x, its headline the card's name
-(URW Bookman Demi), its section the type line, its caption the card's
-text (C059 Italic), a set number in the corner; the frame's colour is
-its suit (the Battler's gold, the team's blue, the dark layer's violet,
-the feel's red). The drop turns the lamp down; the climax deals a card a
-half bar, a foil's light sweeping each; the rumble's card throws
-vibration arcs at its sides on the hits; the end gathers the pile off
-the table and leaves the logo and the Battler's own question, FIGHT ON?.
-The music: BN6's song 0x15, which a Battler's rounds play (its battle
-records name it; 0x16 for a series' last), its habits in C-sharp minor at
-150 with its Phrygian bIImaj7, the plucked 25% backing thrown a beat a
-side, the saw bass's sixteenths leaping octaves, its kit (the kick on 0,
-7, 8, 10, 14), a 75% riff in the B, a drop a tritone away on Gm7b5.
-`music_check.py --source bn6 0x15 --offset 12`: busier than the source
-none; against the engine's own render of 0x15 (`--render-song 0x15`, in
-`.build/` only) bands 49/32/17/2 against 53/28/17/2, punch 8.8 dB
-against 5.8.
+The first cut, refused: a card table. Every shot a card dealt with a slap
+onto a pile on a green felt under a lamp, suits by section, set numbers,
+a foil's sweep, the pile gathered up at the end. The owner: "it is
+totally not in our design style." A real-world metaphor dressed over the
+footage, where every approved trailer was built from the game's own world
+(0.12.0's board, 0.14.0's versus screen in the game's colours, 0.15.0's
+net-blue grid). It became the owner's gate 1 (SKILL.md).
 
-What helped: the Virus Battler PR's play.py session (its history turned
-into `--input` steps by the cut's `play()`), scanning long autopilot runs
-natively with the debug log's command lines (`liberation: HeatMan takes
-Napalm`) to find each command's frames before capturing.
+The second cut: a PET screen of its own, at the PET's scale (427 x 240,
+the game's picture at 1x, scaled 3x by nearest neighbour), in
+`docs/engine/ui.md`'s parts and `tools/site_art.py`'s colours, the site's
+fonts (Silkscreen, Pixelify Sans): the band names the shot, a list
+window holds the shots as rows with the orange cursor stepping down them
+on the beat (the cut), the game's window beside it, the INFORMATION box
+the caption. Sections are the list's pages, turned under the green page
+arrows; the dark layer's two bars take the screen down six of the GBA's
+sixteen brightness steps; the rumble flashes the game window's frame;
+the screen fades up and out in sixteen steps as BN6's do; the end asks
+"Fight on?" with Yes and No and the green triangle before Yes. Its first
+draw had the band's name hanging below the band and Pixelify Sans' fi
+ligature reading "frst": its ligatures are turned off.
 
-What went wrong on the way: `--talk battler:N` opened his chat with the
-layer's greeting still typing, which ate the script's presses (he was
-told No): walk up to him and press A instead, after paging the greeting.
-FAST pressed at "Fight with this set?" does nothing; pressed in the fight
-it runs (and stays on into the chat: press it again). A run's KeyItem
-shows no BtlrCard before the first Battler is met. A noise texture on the
-felt made the poster PNG eight times larger: a regular twill compresses.
+The music, heard: "the music is alright. but it seems to be again rather
+random rather than using an existing cool mmbn music from the rom as a
+seed and orient on that style + I hear no usage of the soundfont we loved
+in the last two trailers." The piece had been written straight from 0x15's
+habits, with no sketch for his ear and its sampled parts few and quiet
+(chords on downbeats only, as 0x15's). His measure since: music Akari
+Kaida would be proud of (music_rules.md). The sketch round that followed:
+three nine-bar sketches, each from one seed (A BN6's 0x15, the Battler's
+rounds; B BN6's 0x22 "Showdown", diminished chords and a broken beat; C
+BN5's 0x15, Kaida's), each through FluidR3 GM, GeneralUser GS v2.0.3 and
+MuseScore General (`CW_SOUNDFONT_NAME`, docker/Dockerfile.music), for him
+to pick a sketch and a soundfont by ear.
 
-Devices now used up: the card table and the deal as the cut, words
-printed on the card, suits by section, the pile askew, the foil's sweep,
-vibration arcs.
+Devices now used up: the card table, the deal as the cut, suits by
+section, the foil's sweep; and from the second cut, the PET screen as the
+whole frame: the list's cursor stepping as the cut, the band as the
+headline, the INFORMATION box as the caption, the page arrows between
+sections, the brightness steps for the drop, the frame flashing on hits.

@@ -1,15 +1,28 @@
 # The trailers' music when a piece plays sampled instruments
-# (tools/trailers/, a piece's SOUNDFONT): Debian's FluidR3 GM soundfont
-# (fluid-soundfont-gm, Frank Wen's, under the MIT license) and Python.
-# tools/trailer_soundfont.py reads its samples (standard library only) and
-# the kit plays them as MP2K plays its own: 8-bit at 10512 Hz, mixed at
-# 13379 Hz with its echo. The soundfont lives in the image only, never in
-# git; a piece that uses it keeps its 3DS banner's seconds as our own audio
-# (3ds/README.md's banner). Built by build.py's ensure_image as
-# cyberworld-music.
+# (tools/trailers/, a piece's SOUNDFONT), and Python.
+# tools/trailer_soundfont.py reads a soundfont's samples (standard library
+# only) and the kit plays them as MP2K plays its own: 8-bit at 10512 Hz,
+# mixed at 13379 Hz with its echo. Three soundfonts, CW_SOUNDFONT_NAME
+# choosing (FluidR3 GM by default):
+# - fluidr3: Debian's FluidR3 GM (fluid-soundfont-gm, Frank Wen's, the MIT
+#   license), the one 0.14.0's and 0.15.0's pieces play;
+# - musescore: Debian's MuseScore General, uncompressed
+#   (musescore-general-soundfont-lossless, the MIT license, FluidR3's
+#   descendant with its notices kept);
+# - generaluser: GeneralUser GS v2.0.3 by S. Christian Collins (its License
+#   v2.0: free use in music, commercial included; its author cannot vouch
+#   for every sample's origin), from its GitHub repository at a pinned
+#   commit, checked by its SHA-256.
+# The soundfonts live in the image only, never in git; a piece that uses
+# one keeps its 3DS banner's seconds as our own audio (3ds/README.md's
+# banner). Built by build.py's ensure_image as cyberworld-music.
 FROM debian:trixie
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    python3 fluid-soundfont-gm \
+    python3 fluid-soundfont-gm musescore-general-soundfont-lossless curl ca-certificates \
+ && curl -fsSL -o /usr/share/sounds/sf2/GeneralUser-GS.sf2 \
+    https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/97049183643d5fc5a9322a69c5b09efb667c6c3a/GeneralUser-GS.sf2 \
+ && echo '9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe  /usr/share/sounds/sf2/GeneralUser-GS.sf2' | sha256sum -c - \
+ && apt-get purge -y curl && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
 ENV CW_SOUNDFONT=/usr/share/sounds/sf2/FluidR3_GM.sf2

@@ -6,7 +6,9 @@ sample, brought down to 10512 Hz and 8 bits, cut short, for MP2K to play
 and echo). Standard library only. The soundfont is FluidR3 GM (Frank Wen,
 the MIT license), which docker/Dockerfile.music installs from Debian
 (fluid-soundfont-gm); it is never in git, and a piece that uses it renders
-in that image (CW_SOUNDFONT names the file).
+in that image (CW_SOUNDFONT names the file). The image holds GeneralUser
+GS and MuseScore General too, for the owner to hear a piece in each:
+CW_SOUNDFONT_NAME=generaluser or musescore (FONTS).
 
     instrument(program, keys, seconds)       a sample of a melodic preset
     drum(key, seconds)                       one of the GM kit's (bank 128)
@@ -17,8 +19,22 @@ import struct
 
 from trailer_music import SAMPLE_RATE, Sample
 
-PATH = os.environ.get('CW_SOUNDFONT', '/usr/share/sounds/sf2/FluidR3_GM.sf2')
-SOUNDFONT = 'FluidR3 GM (Frank Wen, the MIT license; Debian\'s fluid-soundfont-gm)'
+# the soundfonts docker/Dockerfile.music holds, by the name CW_SOUNDFONT_NAME
+# gives (FluidR3 GM by default, until the owner picks one by ear);
+# CW_SOUNDFONT names any other file
+FONTS = {
+    'fluidr3': ('/usr/share/sounds/sf2/FluidR3_GM.sf2',
+                'FluidR3 GM (Frank Wen, the MIT license; Debian\'s fluid-soundfont-gm)'),
+    'generaluser': ('/usr/share/sounds/sf2/GeneralUser-GS.sf2',
+                    'GeneralUser GS v2.0.3 (S. Christian Collins, its License v2.0)'),
+    'musescore': ('/usr/share/sounds/sf2/MuseScore_General_Full.sf2',
+                  'MuseScore General (the MIT license; Debian\'s musescore-general-soundfont-lossless)'),
+}
+FONT = os.environ.get('CW_SOUNDFONT_NAME', 'fluidr3')
+if FONT not in FONTS:
+    raise SystemExit(f'no soundfont {FONT}: {", ".join(FONTS)}')
+PATH = FONTS[FONT][0] if 'CW_SOUNDFONT_NAME' in os.environ else os.environ.get('CW_SOUNDFONT', FONTS['fluidr3'][0])
+SOUNDFONT = FONTS['fluidr3'][1]       # (what a piece names: the default's, whichever renders)
 
 
 def available():
@@ -191,6 +207,13 @@ def drum(key, seconds, fade=0.02, drive=None, program=0, layer=()):
     """One of the GM kit's sounds at its own pitch (bank 128), cut to
     `seconds`, optionally with other keys layered under it."""
     sf = font()
+    try:
+        sf.zone(program, key, 128)
+    except KeyError:
+        # (a soundfont without that kit: its standard kit, said aloud)
+        import sys
+        print(f'{FONT}: no drum kit {program}, its standard kit (0) instead', file=sys.stderr)
+        program = 0
     notes = [sf.note(program, k, seconds, 128, 100, fixed=True) for k in (key, *layer)]
     n = max(len(x) for x in notes)
     mix = [sum(x[i] for x in notes if i < len(x)) for i in range(n)]
