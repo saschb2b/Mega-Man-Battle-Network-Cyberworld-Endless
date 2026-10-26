@@ -250,3 +250,53 @@ frame. The owner: "approved".
 Devices now used up: the war room's map and its sector monitors, the
 camera's pan as the cut, the phase-against-par readout, tracking that
 settles onto the beat, the run's position on every shot.
+
+## 0.16.0: Fight on? (2026-10-26), `tools/trailers/v0_16_0.py`
+
+The release: BN6's Virus Battler in the run (a stake, BN6's VIRUS LIST,
+the fight at fast forward, take the pot or fight on, the BtlrCard kept
+across runs), the run's Crosses on Liberation boards with Team
+ProtoMan's commands and a TEAM screen, a held Soul's chips in the finds,
+rumble and a DualSense's triggers, a Square anyone can host. Made by an
+agent in one sitting, without sketches for the owner's ear first (its
+time box); the owner has not heard or seen it yet.
+
+What was made: 34 seconds, 20 bars at 150 (a bar 48 frames). A card
+table: both headline features are a hand (the viruses on a BtlrCard, the
+Navis picked for a board), so every shot is a card dealt from above onto
+a pile on a green felt under a lamp, landing square on its beat (an
+overshooting ease, a slap), the cards before it left askew underneath.
+The game's picture is the card's art at 3x, its headline the card's name
+(URW Bookman Demi), its section the type line, its caption the card's
+text (C059 Italic), a set number in the corner; the frame's colour is
+its suit (the Battler's gold, the team's blue, the dark layer's violet,
+the feel's red). The drop turns the lamp down; the climax deals a card a
+half bar, a foil's light sweeping each; the rumble's card throws
+vibration arcs at its sides on the hits; the end gathers the pile off
+the table and leaves the logo and the Battler's own question, FIGHT ON?.
+The music: BN6's song 0x15, which a Battler's rounds play (its battle
+records name it; 0x16 for a series' last), its habits in C-sharp minor at
+150 with its Phrygian bIImaj7, the plucked 25% backing thrown a beat a
+side, the saw bass's sixteenths leaping octaves, its kit (the kick on 0,
+7, 8, 10, 14), a 75% riff in the B, a drop a tritone away on Gm7b5.
+`music_check.py --source bn6 0x15 --offset 12`: busier than the source
+none; against the engine's own render of 0x15 (`--render-song 0x15`, in
+`.build/` only) bands 49/32/17/2 against 53/28/17/2, punch 8.8 dB
+against 5.8.
+
+What helped: the Virus Battler PR's play.py session (its history turned
+into `--input` steps by the cut's `play()`), scanning long autopilot runs
+natively with the debug log's command lines (`liberation: HeatMan takes
+Napalm`) to find each command's frames before capturing.
+
+What went wrong on the way: `--talk battler:N` opened his chat with the
+layer's greeting still typing, which ate the script's presses (he was
+told No): walk up to him and press A instead, after paging the greeting.
+FAST pressed at "Fight with this set?" does nothing; pressed in the fight
+it runs (and stays on into the chat: press it again). A run's KeyItem
+shows no BtlrCard before the first Battler is met. A noise texture on the
+felt made the poster PNG eight times larger: a regular twill compresses.
+
+Devices now used up: the card table and the deal as the cut, words
+printed on the card, suits by section, the pile askew, the foil's sweep,
+vibration arcs.

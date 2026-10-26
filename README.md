@@ -22,7 +22,7 @@ Jack MegaMan into a net that is new every run, and meet other players' MegaMen i
 <p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク、オンライン対応。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
 
 <p align="center">
-<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.15.0 trailer, 35 seconds with sound: a board of dark panels in BN5's look, the Darkloid CircusMan on his ring, under the title Liberation. Watch the 0.15.0 trailer"></a>
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.16.0 trailer, 34 seconds with sound: cards dealt onto a green felt, the title card BN6's Virus Battler over a red Mr.Prog naming his first pair. Watch the 0.16.0 trailer"></a>
 </p>
 
 <p align="center">
