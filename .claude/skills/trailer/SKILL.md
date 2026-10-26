@@ -92,6 +92,13 @@ Write down, in a few lines:
   with a headline each (8), a drop or breakdown for the release's darker
   or stranger part (2), a climax (4), the logo and the end card (2). About
   20 bars, 30 to 40 seconds.
+- **The seed song** (the owner's gate 2): two or three candidates from
+  the ROMs, the feature's own theme first (0.16.0's Virus Battler plays
+  BN6's 0x15), each with a line on why it fits the release; the sketches
+  come from them and the owner's ear picks one.
+- **The look's sources** (gate 1): which of the game's own screens or the
+  site's PET pieces the look is built from, and how it differs from the
+  last trailer's devices.
 - **The claims**: every headline and caption checked against the CHANGELOG
   and docs (0.12.0: "one battle in four from the second act", "six
   areas", the Dark Soul rising after a missed Chaos Unison). A trailer
@@ -233,8 +240,14 @@ only: `build.py 3ds` renders the banner with it.
   as a glitch, a dead stretch.
 - `ffprobe` the MP4 (`--entrypoint ffprobe` on the ffmpeg image): 1280x720,
   AAC, the length the plan says.
-- Send the MP4 to the owner (SendUserFile, `display: render`) with what
-  you could not check: the music by ear.
+- **The gate report** goes with anything the owner is sent, a sketch or a
+  cut: one line for each of the owner's gates, how it is met and the
+  evidence (the look's sources; the seed song and what of it is kept,
+  and `music_rules.md`'s five points of the measure; the soundfont
+  programs played; the sketch he chose and when; what still waits for his
+  word). A gate that cannot be shown met is fixed first, not reported.
+- Send the MP4 to the owner (SendUserFile, `display: render`) with the
+  gate report and what you could not check: the music by ear.
 
 ## 6. Make it current and show it
 
