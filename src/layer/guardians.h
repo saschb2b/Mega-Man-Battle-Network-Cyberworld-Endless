@@ -63,6 +63,14 @@ const char *guardian_defeat(int navi);
  * before the arena (a playtester met EraseMan's ghosts and his erasing
  * blow unwarned); NULL where there is nothing to add. */
 const char *guardian_tip(int navi);
+/* Whether Dad mails guardian `navi`'s tip as his battle data (BN6's own,
+ * 1-18 but the Secret Area's 17): then the mail is its channel, and L says
+ * only guardian_warning's. */
+bool guardian_mailed(int navi);
+/* The one box of a mailed guardian's tip that L still says on his layer,
+ * a move that deletes MegaMan unwarned (EraseMan's, DiveMan's); NULL for
+ * the rest. */
+const char *guardian_warning(int navi);
 /* ProtoMan's terms for the netbattle past an act's guardian, as ta_duel
  * shows them: the stake said (BN6 deletes MegaMan in a netbattle as
  * anywhere, its GAME OVER from inside the battle), and how he fights,
