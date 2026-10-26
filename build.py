@@ -1600,6 +1600,13 @@ SCREENSHOTS = [
     # (a won Server pays a pick: seed 8's layer 4, its offer naming the
     # three, Yes, the battle won by the buster down each row, then the pick)
     ('server-pick', SERVER_8 + ['--input', SERVER_PICK], [(546, 'server-offer'), (2556, 'server-pick')], {}),
+    # (BugFrags buy programs: seed 3's layer 2, an act's middle layer, 50
+    # BugFrags given, Chaud's call paged, MegaMan beside the NaviCust
+    # vendor; her greeting, then BN6's shop screen in BugFrags; with BN5's
+    # ROM beside BN6's, which dresses the layer as the Nest's copy)
+    ('bn5-vendor', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet', '--talk', 'bugfrags:100', '--input',
+                    '1:,300:,' + '6:A,6:,60:,' * 21 + '30:,0:place -12 -260 7,20:,6:A,6:,90:,' + '6:A,6:,80:,' * 2],
+     [(1963, 'vendor-greeting'), (2147, 'vendor-shop')], {}),
 ]
 
 
