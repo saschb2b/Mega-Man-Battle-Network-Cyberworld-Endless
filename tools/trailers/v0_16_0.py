@@ -15,8 +15,8 @@ on the beat (the cut), the game's window beside it, the INFORMATION box
 the caption, one line. A section opens with its number and name in its
 colour in the game's window, under the page arrow just pressed. The
 rumble flashes the window's frame on the hits; the screen fades up and
-changes in the GBA's brightness steps; the end card stays, still. One
-type family: the site's Pixelify Sans.
+changes in the GBA's brightness steps; the end card stays, still. The
+words are the site's Silkscreen; the address alone its Pixelify Sans.
 
 Its shots are whole frames of the game running from the developer's ROMs,
 BN6's and BN5 Team Colonel's beside it: a Battler's series on seed 1's
@@ -133,16 +133,20 @@ def scenes():
 # for the feature segments and the recap: the band with the section's
 # label, a list window of the segment's shots with the orange cursor
 # stepping down it on the beat, the game's window beside it, and the
-# INFORMATION box holding the feature's caption. One type family, the
-# site's Pixelify Sans (OFL, web/assets/fonts), drawn at the video's scale
-# inside the safe area.
+# INFORMATION box holding the feature's caption. The words are the site's
+# Silkscreen (OFL, web/assets/fonts), whose B, G, 8 and 6 stay apart, drawn
+# at the video's scale inside the safe area; the site's address alone, whose
+# case matters, in its Pixelify Sans.
 
 FPS, W, H = 30, 1280, 720
 BAR = round(FPS * 60 * 4 / music.BPM)     # (48 frames at 150 beats a minute)
 BEAT = BAR // 4
 FRAMES = music.BARS * BAR + round(music.TAIL * FPS)
 
-PIXEL = os.path.join(ROOT, 'web', 'assets', 'fonts', 'pixelify-sans.woff2')
+FONTS = os.path.join(ROOT, 'web', 'assets', 'fonts')
+CAPS = os.path.join(FONTS, 'silkscreen-700.woff2')        # (heavy: names, labels, the buttons)
+CAPS_THIN = os.path.join(FONTS, 'silkscreen-400.woff2')   # (the list, the captions, the end card's lines)
+PIXEL = os.path.join(FONTS, 'pixelify-sans.woff2')        # (the site's address alone: its case matters)
 
 BAND = (0, 123, 49)
 BODY = (8, 189, 115)
@@ -183,23 +187,39 @@ _fonts = {}
 
 
 def font(size, bold=False):
+    """the site's Silkscreen, a pixel face whose B, G, 8 and 6 stay apart
+    (Pixelify Sans' B read as a G at these sizes: the owner, 26 October)"""
     key = (size, bold)
     if key not in _fonts:
-        f = ImageFont.truetype(PIXEL, size)
-        f.set_variation_by_axes([700 if bold else 400])
-        _fonts[key] = f
+        _fonts[key] = ImageFont.truetype(CAPS if bold else CAPS_THIN, size)
     return _fonts[key]
 
 
 def text(d, xy, words, size, fill, bold=False, anchor='la', shade=None, width=None):
-    """Pixelify Sans, its ligatures off (its fi is no letter of the PET's),
-    shrunk to `width` where given"""
-    while width and size > 16 and font(size, bold).getlength(words) > width:
+    """Silkscreen's capitals, shrunk to `width` where given"""
+    while width and size > 12 and font(size, bold).getlength(words) > width:
         size -= 1
     f = font(size, bold)
     if shade:
-        d.text((xy[0] + 3, xy[1] + 3), words, font=f, fill=shade, anchor=anchor, features=['-liga'])
-    d.text(xy, words, font=f, fill=fill, anchor=anchor, features=['-liga'])
+        d.text((xy[0] + 3, xy[1] + 3), words, font=f, fill=shade, anchor=anchor)
+    d.text(xy, words, font=f, fill=fill, anchor=anchor)
+
+
+def address(d, cx, cy, words, fill):
+    """the site's address, whose case matters (Silkscreen has capitals
+    only): Pixelify Sans, its B and C Silkscreen's at its height"""
+    p = ImageFont.truetype(PIXEL, 26)
+    k = ImageFont.truetype(CAPS_THIN, 27)
+    pb, kb = p.getbbox('B'), k.getbbox('B')
+    widths = [k.getlength(c) if c in 'BC' else p.getlength(c) for c in words]
+    x = cx - sum(widths) / 2
+    y = cy - (pb[1] + pb[3]) / 2
+    for c, w in zip(words, widths):
+        if c in 'BC':
+            d.text((x, y + pb[3] - kb[3]), c, font=k, fill=fill)
+        else:
+            d.text((x, y), c, font=p, fill=fill, features=['-liga'])
+        x += w
 
 
 def ease(t):
@@ -413,13 +433,15 @@ def draw_big(fr):
         put_logo(560, gy + 40, END - 6)
         button(d, cx, gy + 250, '0.16.0 · OUT NOW', 34)
         for i, line in enumerate(SYSTEMS):
-            say(END + BEAT + i * 2, (cx, gy + 345 + 40 * i), line, 30, WHITE)
-        say(END + 2 * BEAT, (cx, gy + 450), SITE, 28, CYAN_TEXT)
-        say(END + 3 * BEAT, (cx, gy + 535), "Needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM.", 22,
+            say(END + BEAT + i * 2, (cx, gy + 345 + 40 * i), line, 24, WHITE)
+        a = appear(fr, END + 2 * BEAT)
+        if a > 0:
+            address(d, cx, gy + 450, SITE, lerp(FIELD, CYAN_TEXT, a))
+        say(END + 3 * BEAT, (cx, gy + 535), "Needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM.", 16,
             (198, 222, 239))
-        say(END + 3 * BEAT, (cx, gy + 566), 'The dark boards need Mega Man Battle Network 5: Team Colonel (USA) too.', 22,
+        say(END + 3 * BEAT, (cx, gy + 566), 'The dark boards need Mega Man Battle Network 5: Team Colonel (USA) too.', 16,
             (198, 222, 239))
-        say(END + 3 * BEAT, (cx, gy + 597), 'An unofficial fan project, not affiliated with Capcom.', 22, (198, 222, 239))
+        say(END + 3 * BEAT, (cx, gy + 597), 'An unofficial fan project, not affiliated with Capcom.', 16, (198, 222, 239))
     return im
 
 
@@ -473,15 +495,15 @@ def draw_pet(segs, fr):
         draw_recap(im, d, fr)
         return im
     x0, y0, x1, _ = LIST
-    text(d, ((x0 + x1) / 2 * S, (y0 + 11) * S), f'{seg.number} / 03', 20, WHITE, True, 'mm')
+    text(d, ((x0 + x1) / 2 * S, (y0 + 11) * S), f'{seg.number} / 03', 24, WHITE, True, 'mm')
     if fr - seg.card >= 2 * BEAT:
         for i, sh in enumerate(seg.shots):
-            text(d, ((x0 + 19) * S, (ROW0 + i * ROW_H + 9) * S), sh.row, 30, WHITE, anchor='lm', shade=SHADE,
+            text(d, ((x0 + 19) * S, (ROW0 + i * ROW_H + 9) * S), sh.row, 24, WHITE, anchor='lm', shade=SHADE,
                  width=(x1 - x0 - 26) * S)
     ix0, iy0, ix1, _ = INFO
-    text(d, ((ix0 + 5) * S, (iy0 + 5) * S), 'INFORMATION', 18, WHITE, True, 'lm')
+    text(d, ((ix0 + 5) * S, (iy0 + 5) * S + 1), 'INFORMATION', 24, WHITE, True, 'lm')
     if shot:
-        text(d, (SAFE_X + 8, (iy0 + 24) * S), shot.caption, 36, INK, anchor='lm', width=(ix1 - ix0 - 20) * S)
+        text(d, (SAFE_X + 8, (iy0 + 24) * S), shot.caption, 32, INK, anchor='lm', width=(ix1 - ix0 - 20) * S)
     else:
         # the section card: the feature's number and name in its colour, in the game's window
         gx, gy = (GAME[0] + 5) * S, (GAME[1] + 5) * S
@@ -516,7 +538,7 @@ def draw_recap(im, d, fr):
         words = label.split(' ')
         half = (len(words) + 1) // 2
         for j, line in enumerate((' '.join(words[:half]), ' '.join(words[half:]))):
-            text(d, (x + w / 2, y0 + h + 66 + 42 * j), line, 30, WHITE, True, 'mm', shade=SHADE, width=w + 70)
+            text(d, (x + w / 2, y0 + h + 66 + 42 * j), line, 24, WHITE, True, 'mm', shade=SHADE, width=w + 70)
 
 
 # ---- the frame ----

@@ -326,6 +326,14 @@ hook arriving with the title, the toms lifting into each segment, the
 drop for the dark layer's, the cadence on the stinger, the backing alone
 again under the end card.
 
+The owner approved that cut with one fix: "Fix the B/G font and keep
+everything else." Pixelify Sans' capital B reads as a G at these sizes
+("GN6'S VIRUS GATTLER"); the words are now the site's Silkscreen, whose
+B, G, 8 and 6 stay apart, checked on 1:1 crops of every label and card.
+Silkscreen has capitals only, so the site's address, whose case matters,
+stays in Pixelify Sans with Silkscreen's B and C set in. Check a pixel
+face's B, G, 8 and 6 at the cut's own size before using it.
+
 Devices now used up: the card table, the deal as the cut, suits by
 section, the foil's sweep; and from the second cut, the PET screen as the
 whole frame: the list's cursor stepping as the cut, the band as the
