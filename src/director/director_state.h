@@ -119,8 +119,6 @@ typedef struct {
 	bool checkpoint_here;  /* ... or the PET's Save's, where MegaMan stands */
 	bool checkpoint_door;  /* the checkpoint being saved is the arena's door's */
 	const char *saved_at;  /* where the run was last saved, for the quit prompt */
-	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
-	bool guardian_named;   /* ... and have been said on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
