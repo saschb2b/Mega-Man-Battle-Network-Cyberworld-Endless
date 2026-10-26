@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-26
+* **Update**: game/progression/structure.md, the battle floor (a random battle on every layer without a guardian: BN6's roll at its best odds on a layer still without one, the exit pad holding the rest's); game/progression/measuring.md, devtools/pacing-report.md and devtools/run-log.md, the pacing report's battles per layer and act played and the run log's layer lines; rom/battle.md, BN6's encounter odds and classes; game/core-loop.md, Phase 1's floor done; code/director.md and code/tools.md, their lines.
 * **Update**: game/rival.md, rom/battle.md and game/core-loop.md, the netbattle's stake and Chaud's verdict reworded (Lan stops the battle; "pull him out" read as a double meaning).
 * **Creation**: game/core-loop.md, the core loop reviewed (October 2026): what works, what it lacks, what has grown, the players' statistics, the next evolution's phases and the owner's decisions; its line in game/index.md and AGENTS.md.
 * **Update**: game/rival.md, ProtoMan's netbattle never ends the run (his deleting blow ends the battle, MegaMan at 1 HP); rom/battle.md and engine/emulation/hooks.md, the two battle-loop hooks of `src/director/battle_spare.c`; code/director.md, its line.

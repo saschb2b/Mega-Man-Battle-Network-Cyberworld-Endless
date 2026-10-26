@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "Pacing report: every act's battles and guardians"
-description: "`python3 build.py pacing` rolls every area's random battles in every act and draws 500 runs' guardians into `.build/pacing.txt`, marking OVER or OUTSIDE past the act's band, BN5's territories and visitors included."
+description: "`python3 build.py pacing` rolls every area's random battles in every act and draws 500 runs' guardians into `.build/pacing.txt`, marking OVER or OUTSIDE past the act's band, BN5's territories and visitors included, then plays seeds 1-12 for the battles per layer and act, NONE marking a layer without one."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-12T21:51:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 ---
 
 # Pacing report: every act's battles and guardians
@@ -48,7 +48,22 @@ of it are not in the pool: said so), at the version he is fought at, his
 own HP and as he spawns, on threat 4 too, against BN6's guardians' band;
 OUTSIDE past it.
 
+Then `tools/battle_floor.py` plays seeds 1-12 side by side (the test
+autopilot, each in a fresh data folder under `.build/battle_floor/`, with
+`--dev god,onehit` so the walk is measured act after act, 60000 frames;
+`--seeds` and `--frames` after the action) and counts the random battles
+on every layer MegaMan left, from the run log's layer lines
+([Run log](run-log.md)): a row a seed (`4:1`, depth 4 and one battle; `g` a
+guardian's layer, `l` a dark one), then each act's layers, battles, the
+share a layer, how many had none and its whole acts' range. A layer
+without a guardian (not a dark layer's board, not a trip back) holds one
+to three ([the battle floor](../game/progression/structure.md)), NONE marking one without and
+OVER past three, and an act six at most, its guardian's layer's battles
+among them (BN5's End Area's eight in two would show). About three
+minutes on all cores.
+
 Output: `.build/pacing.txt`. It needs the ROM, and prints how many
-battles and guardians were past their band, the territories' included;
-after a change to the bands, the areas or the encounter code, that number
-should stay 0.
+battles and guardians were past their band, the territories' included,
+and how many layers and acts were past theirs; after a change to the
+bands, the areas, the encounter code or the generator's walk, both
+numbers should stay 0.

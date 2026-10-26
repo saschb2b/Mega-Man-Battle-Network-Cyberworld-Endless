@@ -1,16 +1,17 @@
 ---
 type: Tool
 title: "Run log"
-description: "`runlog.txt` in the data folder (`src/director/runlog.c`) records every battle (seed, depth, area, kind, HP before and after, foes, busting level, reward) and each run's end with its economy's counts, on the handheld too."
+description: "`runlog.txt` in the data folder (`src/director/runlog.c`) records every battle (seed, depth, area, kind, HP before and after, foes, busting level, reward), each layer left with its random battles, and each run's end with its economy's counts, on the handheld too."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 ---
 
 # Run log
 
 Every battle and every finished run is appended to `runlog.txt` in the data
 folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
-area, what kind of battle (`battle`, `challenge`, `duel` for ProtoMan's,
+area, what kind of battle (`battle`, `floor` for the one a layer owed at
+its exit pad ([the battle floor](../game/progression/structure.md)), `challenge`, `duel` for ProtoMan's,
 `guardian`), MegaMan's HP and max HP before, the zenny and BugFrags on
 hand (`z 1850 bf 3`), each foe as family.version, the foes' HP together,
 and MegaMan's HP after (or "deleted"); a won battle's busting level, 1
@@ -30,7 +31,12 @@ A battle MegaMan united with a Soul in has `unite` and the Soul by BN5's
 number before its end (`unite 9`, NumberMan's; `unite 11c`, KnightMan's
 Chaos Unison). Until issue #82's last round a battle in BN5's engine had
 `guest`, its record and BN5's enemy ids instead ([Guest battles](../multirom/guest-battles.md), Guest
-battles). A last
+battles). Each layer MegaMan leaves by its exit has a line
+with its act and kind (`layer`, `undernet`, `secret`, `back`, and `dark`
+for a dark layer's board) and the random battles fought on it, `guardian`
+and his number where one stood (`seed 00000004 depth 6 area 1 act 2 layer
+left battles 0 guardian g12`): a layer without a battle shows, which
+`build.py pacing` counts ([Pacing report](pacing-report.md)). A last
 line gives where the run ended (`run over`, or `run won`) and its
 economy's counts: the chips found and the good among them, the Mystery
 Data opened and the zenny earned, then the same for its first act
