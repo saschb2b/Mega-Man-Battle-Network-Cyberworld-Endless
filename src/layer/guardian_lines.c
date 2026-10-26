@@ -4,8 +4,11 @@
  * data on him; ProtoMan's netbattle terms; the split's question. Who they
  * are, guardians.c. */
 #include <stdio.h>
+#include <string.h>
 
+#include "bn6.h"
 #include "guardians.h"
+#include "powers.h"
 #include "rivals.h"
 #include "save.h"
 #include "super_lines.h"
@@ -316,22 +319,51 @@ static const char *first_sight(int navi, const char *name) {
 	return s;
 }
 
+/* What the last battle left him to say past who won, where it left
+ * something (Hades' "died to Megaera three times" over "you died",
+ * docs/game/core-loop.md, Phase 2): the closest call first, then his own
+ * power worn against him, a beast, a Cross, and a long while away. The
+ * copies learn from every fight, and these are what they kept. */
+static const char *last_fight(int navi, const Rival *r) {
+	static char s[48];
+	const char *cross = r->form >= 1 && r->form <= 5 ? powers_cross_name(r->form) : NULL;
+	bool lost = r->last == RIVAL_NAVI_WON;
+	/* (the winner's HP left, an eighth or less: his, where he won) */
+	if (r->left && r->left <= RIVAL_LEFT_FULL / 8) return lost ? "You came close,though. Too close." : "You barely made it,though!";
+	/* (HeatMan's copy to a HeatCross: Crosses 1-5 are navis 1-5's) */
+	if (cross && r->form == navi) return lost ? "You wore my power,and still fell!" : "You beat me with my own power...";
+	if (r->form >= BN6_FORM_BEAST) return lost ? "Even your beast fell to me!" : "That beast won't scare me twice!";
+	if (cross && lost) snprintf(s, sizeof s, "Not even %s saved you!", cross);
+	else if (cross) snprintf(s, sizeof s, "Your %s won't work twice!", cross);
+	else if (r->run && profile.runs + 1 - r->run >= 3) return "It's been a long time,MegaMan.";
+	else return NULL;
+	return s;
+}
+
 /* What the guardian says on meeting MegaMan: a first meeting's line, his
  * revenge after a win, a stronger version's, respect after three losses,
- * else a rematch's. */
+ * else a rematch's; after the first, what the last battle left him to say
+ * in place of its second box. */
 static const char *greeting(int navi, int version, const Rival *r) {
-	const char *s = NULL;
+	static char s[160];
+	const char *line = NULL;
+	/* (a meeting without a result, MegaMan gone or the run over, is no
+	 * rematch) */
+	bool fought = r->megaman_won || r->navi_won;
 	if (navi > 0 && navi < NLINES && lines[navi].first) {
-		/* (a meeting without a result, MegaMan gone or the run over, is no
-		 * rematch) */
-		bool fought = r->megaman_won || r->navi_won;
-		if (!fought) s = lines[navi].first;
-		else if (r->last == RIVAL_NAVI_WON) s = lines[navi].revenge;
-		else if (version > 0 && r->megaman_won % 2) s = lines[navi].stronger;
-		else if (r->megaman_won >= 3) s = respect[r->megaman_won % 3];
-		else s = lines[navi].rematch;
+		if (!fought) line = lines[navi].first;
+		else if (r->last == RIVAL_NAVI_WON) line = lines[navi].revenge;
+		else if (version > 0 && r->megaman_won % 2) line = lines[navi].stronger;
+		else if (r->megaman_won >= 3) line = respect[r->megaman_won % 3];
+		else line = lines[navi].rematch;
 	}
-	return s ? s : "You want through? Beat me first!";
+	if (!line) return "You want through? Beat me first!";
+	const char *kept = fought ? last_fight(navi, r) : NULL;
+	if (!kept) return line;
+	/* (his own first box, in his voice, and what he kept: two, as ever) */
+	const char *bar = strchr(line, '|');
+	snprintf(s, sizeof s, "%.*s|%s", bar ? (int)(bar - line) : (int)strlen(line), line, kept);
+	return s;
 }
 
 /* MegaMan answers now and then, never over a first meeting (after a loss

@@ -107,6 +107,7 @@ DOMAINS = {
     'stands_text': ('Arena', 'Screen', 'screen'),
     'title_lines': ('Title', 'MegaMan', 'speech'),
     'title_setup_text': ('Title', 'Screen', 'screen'),
+    'meta_text': ('Title', 'Screen', 'screen'),
     'title_summary_text': ('Title', 'Screen', 'screen'),
     'launcher_text': ('The ROMs screen', 'Screen', 'screen'),
     'pick_text': ('The ROMs screen', 'Screen', 'screen'),
@@ -241,7 +242,7 @@ FLAGS = {
 GLUE = re.compile(r'\b(however|additionally|therefore|in order to|currently|furthermore|moreover|thus|hence|consequently|nevertheless)\b', re.I)
 RULE_TALK = re.compile(r'\b(this layer|this run|the player\'?s?|per run)\b', re.I)
 HEDGE = re.compile(r'\b(it seems that|it seems like|you might want to|you may want to|it appears that|perhaps you)\b', re.I)
-META = re.compile(r"\b(sav(?:e|es|ed|ing)\b(?! up)(?! (?:dad|him|her|them|us|the net|it)\b)|save point|game over|levels? up|leveled up|stats\b|EXP\b|checkpoints?|retry|reload|respawn|this run|a run\b|the run\b|your run|our run|every run|new run)", re.I)
+META = re.compile(r"\b(sav(?:e|es|ed|ing)\b(?! up)(?! (?:dad|him|her|them|us|you|me|the net|it)\b)|save point|game over|levels? up|leveled up|stats\b|EXP\b|checkpoints?|retry|reload|respawn|this run|a run\b|the run\b|your run|our run|every run|new run)", re.I)
 BUTTON = re.compile(r"\b(?:press|hold|tap|push)\s+(?:the\s+)?(?:A|B|L|R|START|SELECT|UP|DOWN|LEFT|RIGHT)\b|\b(?:A|B|L|R|START|SELECT) (?:Button|BUTTON)\b|\bbuttons?\b", re.I)
 SCREEN_TALK = re.compile(r'\b(you can see|on the screen|on screen|the screen shows)\b', re.I)
 DIRECTION = re.compile(r'\b(up|down|upper|lower)-(left|right)\b', re.I)

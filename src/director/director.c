@@ -252,6 +252,9 @@ static void take_events(void) {
 		/* (a DarkChip's dark power, or its base chip, in a BN6 battle: its
 		 * price after it, docs/game/meta/) */
 		case EV_DARK_RAN: case EV_DARK_BASE: darkbn6_event(&ev[i]); break;
+		/* (a Program Advance or a Recovery chip in a run's battle: the
+		 * Z-Canon and Busting folders' milestones, docs/game/meta/) */
+		case EV_CHIP_WATCHED: folder_milestone_chip((int)ev[i].r[0]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
 		 * lost before he could act, session 65) */
@@ -386,6 +389,7 @@ static void battle_update(void) {
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		runlog_fought();
+		boss_battle_frame();
 		lib_battle_frame();
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
@@ -447,7 +451,9 @@ static void after_battle(void) {
 static void after_forced(void) {
 	/* back from the guardian's battle */
 	if (boss_fighting() && !emu_battle_forcing()) {
-		boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
+		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+		boss_battle_over(won);
+		if (won) folder_milestone_guardian();
 		D.pet_refreshed = false;   /* (Dad's mails made again: the Records, the report) */
 	}
 	if (D.challenge && !emu_battle_forcing()) {
@@ -581,7 +587,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

@@ -49,8 +49,8 @@
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
 #define LAYER_NUMBER_SEALED_FLAG 0x1466
 /* The layer's flame of darkness gave its DarkChip, and left (docs/game/meta/darkchips.md,
- * DarkChips). (0x1467-0x1469: the draft's fit flags,
- * guardian_objs.h) */
+ * DarkChips). (0x1467-0x1469 free: the draft's fit flags, gone with
+ * the words after its pick) */
 #define LAYER_DARK_TAKEN_FLAG  0x146D
 /* The layer's Server was beaten: its talk opens its pick of three (the
  * director sets it as the battle is won), and the pick gave its chip

@@ -360,3 +360,12 @@ void bugfrag_trade(void) {
 	emu_write(BN6_TRADER_STATE_30, v, 2);
 	howl = true;
 }
+
+/* (a run's battles only: the title's and the town's none) */
+void folder_milestone_chip(int id) {
+	if (D.active) meta_chip_used(id);
+}
+
+void folder_milestone_guardian(void) {
+	if (D.active) meta_guardian_deleted();
+}

@@ -101,6 +101,10 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 	return powers_reward_words(navi, powers_cross_name(navi) && !beaten_before(navi, depth), biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS);
 }
 
+const char *powers_reward_cross(int navi, int depth) {
+	return !powers_cross_name(run.cross) && !beaten_before(navi, depth) ? powers_cross_name(navi) : NULL;
+}
+
 const char *powers_den_text(int depth) {
 	/* (beat the beast, then its power: the first Net's Cybeast, in a run
 	 * that did not bring BeastOut; on the Nets after, the run has it) */

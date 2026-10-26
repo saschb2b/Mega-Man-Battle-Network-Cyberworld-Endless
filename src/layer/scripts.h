@@ -68,13 +68,13 @@ typedef struct {
 	uint8_t held[3];      /* how many of program k MegaMan holds, any colour (navicust_held) */
 	int skip_frags;
 	bool teach;
-	int fit_flag;   /* event flag + k set where program k fits the board's free space as it stands; 0 none */
 } ScriptsDraft;
 
 /* What a guardian's Guardian Data gives (ta_guardian_reward). */
 typedef struct {
 	const char *name;        /* the navi */
-	const char *power;       /* what a Cross or BeastOut brings, ta_talk's boxes; NULL for none */
+	const char *cross;       /* the Cross it gives, said in BN6's "MegaMan got:" box beside his chip; NULL for none */
+	const char *power;       /* a power's words before the items (a Cross kept, a Soul, the Nest's call, a super boss's), ta_talk's boxes; NULL for none */
 	int chip, code;          /* his navi chip, 0 for none; its code A=0 .. *=26 */
 	const char *chip_name;
 	bool last;               /* the run's last guardian: only what carries over */
@@ -84,8 +84,9 @@ typedef struct {
 	const char *head;        /* its first line, NULL for "MegaMan downloaded NAME's Guardian Data!" (a super boss's own) */
 } ScriptsReward;
 
-/* A guardian's Guardian Data, checked: his power, then the HPMemory, his
- * navi chip, a full heal, the NaviCust's draft, then the taken flag, and
+/* A guardian's Guardian Data, checked: his power's words, then his Cross,
+ * the HPMemory, a full heal, his navi chip and an ExpMemry, two a box,
+ * the NaviCust's draft, then the taken flag, and
  * last the way on. The run's last guardian gives only what carries over:
  * his chip, for the Library. */
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);

@@ -63,6 +63,9 @@ static struct {
 	Encounter fought;        /* his battle, as it was forced (the run log's), */
 	int fought_hp;           /* ... and the HP he spawns with */
 	bool soul_new;           /* BN5's guardian beaten, his Soul new to the run: his data's words told it (souls.h) */
+	/* how his battle stands, its last frame his record's (rivals.h):
+	 * MegaMan's form while he stands, and each side's HP and max */
+	int form, hp, max, g_hp, g_max;
 } B;
 
 static void to(int state) {
@@ -356,6 +359,7 @@ void boss_update(void) {
 	case B_TALK:
 		if (!chat_done()) break;
 		fight_begin();
+		B.form = B.hp = B.max = B.g_hp = B.g_max = 0;
 		to(B_FIGHT);
 		break;
 	case B_FIGHT:
@@ -384,6 +388,28 @@ void boss_update(void) {
 
 bool boss_fighting(void) { return B.state == B_FIGHT; }
 
+void boss_battle_frame(void) {
+	if (B.state != B_FIGHT) return;
+	bool mine = false;
+	for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
+		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
+		if (!(emu_read8(o + BN6_T1_IN_PLAY) & 1)) continue;
+		int side = emu_read8(o + BN6_T1_ALLIANCE), hp = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
+		/* (MegaMan the first in play on his side, as encounter.c takes
+		 * him; the guardian the enemy with the most MaxHP, his soldiers
+		 * and summons fewer) */
+		if (side == 0 && !mine) {
+			mine = true;
+			B.hp = hp;
+			B.max = max;
+			if (hp > 0) B.form = emu_read8(BN6_BATTLE_FORM);
+		} else if (side == 1 && max >= B.g_max) {
+			B.g_hp = hp;
+			B.g_max = max;
+		}
+	}
+}
+
 const Encounter *boss_battle(int *hp) {
 	*hp = B.fought_hp;
 	return &B.fought;
@@ -396,7 +422,7 @@ void boss_battle_over(bool won) {
 		to(B_WAIT);
 		return;
 	}
-	rival_result(B.g.navi, RIVAL_MEGAMAN_WON);
+	rival_result(B.g.navi, RIVAL_MEGAMAN_WON, &(RivalEnd){ B.form, B.hp, B.max }, profile.runs + 1);
 	run.bosses_beaten++;
 	B.soul_new = powers_after_boss(B.g.navi);
 	if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
@@ -404,7 +430,7 @@ void boss_battle_over(bool won) {
 }
 
 void boss_lost(void) {
-	if (B.state == B_FIGHT) rival_result(B.g.navi, RIVAL_NAVI_WON);
+	if (B.state == B_FIGHT) rival_result(B.g.navi, RIVAL_NAVI_WON, &(RivalEnd){ B.form, B.g_hp, B.g_max }, profile.runs + 1);
 }
 
 bool boss_exit_open(void) { return B.state == B_NONE || B.state >= B_OPEN; }

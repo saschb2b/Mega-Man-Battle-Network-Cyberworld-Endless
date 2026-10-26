@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
 ---
 
 # The meta layer's design
@@ -94,6 +94,10 @@ milestone that teaches its style, never by a count to grind.
 | Z-Canon | Cannons in codes A, B and C: BN6's Program Advance ready to draw | Few answers to viruses behind cover | Use any Program Advance in a run |
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
+
+Z-Canon, Busting and Lean are built since 26 October 2026 ([Decisions
+and phase one](decisions.md), the designed three), each in codes BN6's
+records give its chips.
 
 A folder is what the run brings: the pack starts as BN6's would have after
 NEW GAME gave that folder (its chips counted, marked as given), not with

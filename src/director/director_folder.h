@@ -17,6 +17,10 @@ void folder_souls_load(void);
 void own_folder_chips(void);
 void own_library_chips(void);
 void dev_folder(void);
+/* The starting folders' milestones (meta.h) a battle of the run reached:
+ * a chip MegaMan used (EV_CHIP_WATCHED's), a guardian deleted */
+void folder_milestone_chip(int id);
+void folder_milestone_guardian(void);
 
 /* The pack's ids: BN6's pack holds 0-319 (eToolkit +0x4C, 12 bytes an id;
  * past it lie the key items' counts: a BblStar2 bought once read as no

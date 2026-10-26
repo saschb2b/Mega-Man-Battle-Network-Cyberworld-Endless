@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_COUNT };
+enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_COUNT };
 
 typedef struct {
 	const char *name;
@@ -19,6 +19,13 @@ const FolderInfo *meta_folder(int folder);
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
 bool meta_folder_open(int folder);
+/* The milestones the Z-Canon and Busting folders open with, in any run
+ * (Profile.folder_feats): chip `id` used by MegaMan in a battle (a Program
+ * Advance, a Recovery chip; meta_chip_watched says which are worth the
+ * call), and an act's guardian deleted. */
+bool meta_chip_watched(int id);
+void meta_chip_used(int id);
+void meta_guardian_deleted(void);
 /* Whether a run may bring `navi`'s Cross (HeatMan 1 .. ChargeMan 5): open
  * once that navi has been deleted as a guardian, in any run. */
 bool meta_cross_open(int navi);

@@ -14,10 +14,10 @@
 _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save scalar widths differ");
 
 
-/* (the profile grew at its end for issue #82 and for the Virus Battler's
- * card, read up to its size: an older profile reads whole, the new fields
- * zero) */
-_Static_assert(sizeof(Profile) == 220, "Profile save size changed");
+/* (the profile grew at its end for issue #82, for the Virus Battler's
+ * card and for the designed folders' milestones, read up to its size: an
+ * older profile reads whole, the new fields zero) */
+_Static_assert(sizeof(Profile) == 228, "Profile save size changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");
@@ -90,6 +90,9 @@ _Static_assert(offsetof(Profile, soul_form_taught) == 211, "Profile.soul_form_ta
 _Static_assert(offsetof(Profile, navis_ours_told) == 212, "Profile.navis_ours_told save offset changed");
 _Static_assert(offsetof(Profile, btlr_card) == 213, "Profile.btlr_card save offset changed");
 _Static_assert(offsetof(Profile, btlr_data) == 216, "Profile.btlr_data save offset changed");
+_Static_assert(offsetof(Profile, folder_feats) == 220, "Profile.folder_feats save offset changed");
+_Static_assert(offsetof(Profile, recov_act) == 221, "Profile.recov_act save offset changed");
+_Static_assert(offsetof(Profile, recov_run) == 224, "Profile.recov_run save offset changed");
 
 _Static_assert(sizeof(Run) == 112, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");
@@ -116,11 +119,14 @@ _Static_assert(offsetof(Run, back_spent) == 94, "Run.back_spent save offset chan
 _Static_assert(offsetof(Run, home_depth) == 96, "Run.home_depth save offset changed");
 _Static_assert(offsetof(Run, job) == 98, "Run.job save offset changed");
 
-_Static_assert(sizeof(Rival) == 16, "Rival save size changed");
+_Static_assert(sizeof(Rival) == 20, "Rival save size changed");
 _Static_assert(offsetof(Rival, met) == 0, "Rival.met save offset changed");
 _Static_assert(offsetof(Rival, megaman_won) == 4, "Rival.megaman_won save offset changed");
 _Static_assert(offsetof(Rival, navi_won) == 8, "Rival.navi_won save offset changed");
 _Static_assert(offsetof(Rival, last) == 12, "Rival.last save offset changed");
+_Static_assert(offsetof(Rival, form) == 16, "Rival.form save offset changed");
+_Static_assert(offsetof(Rival, left) == 17, "Rival.left save offset changed");
+_Static_assert(offsetof(Rival, run) == 18, "Rival.run save offset changed");
 
 /* (its families 64 bits a battle for issue #82, with BATTLE_MAGIC's "CWB3": an
  * older battle.sav is forgotten, as loot.h says) */

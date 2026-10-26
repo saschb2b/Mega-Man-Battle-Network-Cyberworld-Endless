@@ -46,7 +46,7 @@ static struct {
 static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
-		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
+		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
@@ -100,6 +100,8 @@ void devtools_parse(const char *spec) {
 
 void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
+	/* (a bit a folder but the Standard's, every one meta.h has) */
+	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
 	/* (the card as the first Battler gives it, Mettaur's and Gunner's data
 	 * on it, and the mask's: btlr_card.h) */
 	if (dev.viruses) {
@@ -113,7 +115,7 @@ void devtools_veteran(void) {
 		int navi = k ? SUPER_CYBEAST : SUPER_BASS, wins = k ? dev.beast : dev.bass;
 		while (rival(navi)->megaman_won < wins) {
 			rival_met(navi);
-			rival_result(navi, RIVAL_MEGAMAN_WON);
+			rival_result(navi, RIVAL_MEGAMAN_WON, NULL, 0);
 		}
 	}
 	if (!dev.veteran) return;
@@ -129,7 +131,7 @@ void devtools_veteran(void) {
 			rival_met(rec[i].navi);
 			/* (the last result last) */
 			bool won = k < n - 1 ? (rec[i].last == RIVAL_MEGAMAN_WON ? k < rec[i].won - 1 : k < rec[i].won) : rec[i].last == RIVAL_MEGAMAN_WON;
-			rival_result(rec[i].navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON);
+			rival_result(rec[i].navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON, NULL, 0);
 		}
 	}
 	if (!profile.spins) profile.spins = 0x05;   /* (white and pink) */
