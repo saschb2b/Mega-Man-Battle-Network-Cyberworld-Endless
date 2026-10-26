@@ -1,6 +1,7 @@
 /* The services' chats (docs/voice/rules.md): a Recovery Mr.Prog, a shop, a
- * Server's challenge and its prize, a flame of darkness and the rumor of
- * one, ProtoMan's duel, the Undernet's dark warp, the Secret Area's gate. */
+ * Server's challenge (its pick in reward_words.c), a flame of darkness and
+ * the rumor of one, ProtoMan's duel, the Undernet's dark warp, the Secret
+ * Area's gate. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,11 +124,14 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 	return i;
 }
 
-int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) {
+int ta_challenge(TextArchive *t, int flag, int won_flag, int pick, const ScriptsVault *v, const char *navi) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The signal's quiet now,Lan.");
 	int no = ta_closing(t);
 	int i = ta_script(t);
-	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
+	/* (won, its pick waits: B left the three) */
+	uint8_t won[] = { 0xEF, 0x00, (uint8_t)won_flag, (uint8_t)(won_flag >> 8), (uint8_t)pick, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, won, sizeof won);
+	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };
 	ta_bytes(t, done, sizeof done);
 	/* how strong, before the choice (a playtester took one on at 100 HP,
 	 * not knowing, and came out at 10) */
@@ -138,11 +142,13 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 	if (navi && *navi) snprintf(signal, sizeof signal, "Lan,careful! A strong Navi's signal!|%s|He outclasses anything here!", navi);
 	else snprintf(signal, sizeof signal, "Lan,careful! A strong virus signal!|Its viruses outclass anything here!");
 	ta_pages(t, signal, FACE_MEGAMAN, &first);
-	/* (and what it pays: "a good chip" left a playtester guessing whether
-	 * the risk was worth it) */
-	char ask[64];
-	snprintf(ask, sizeof ask, "It pays %s.\nTake it on?\n", prize && *prize ? prize : "a good chip");
-	ta_ask_in(t, FACE_MEGAMAN, ask, no, true, true);
+	/* (and what it pays, the three by name: "a good chip" left a
+	 * playtester guessing whether the risk was worth it) */
+	char held[96];
+	snprintf(held, sizeof held, "It holds %s %c,%s %c and %s %c!", v->name[0], v->code[0] == 26 ? '*' : 'A' + v->code[0],
+		v->name[1], v->code[1] == 26 ? '*' : 'A' + v->code[1], v->name[2], v->code[2] == 26 ? '*' : 'A' + v->code[2]);
+	ta_pages(t, held, FACE_MEGAMAN, &first);
+	ta_ask_in(t, FACE_MEGAMAN, "Win,and one's ours!\nTake it on?\n", no, true, true);
 	ta_flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -354,17 +360,6 @@ int ta_lib_prize_zenny(TextArchive *t, int zenny) {
 	snprintf(what, sizeof what, "%d Zenny", zenny);
 	ta_give_zenny(t, zenny);
 	ta_got(t, what, &first);
-	ta_end(t);
-	return i;
-}
-
-int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
-	int i = ta_script(t);
-	bool first = true;
-	ta_page(t, FACE_MEGAMAN, "Look,Lan! The signal left a chip!", true);
-	first = false;
-	ta_give_chip(t, chip, code, 1);
-	ta_got_chip(t, chip_name, code, &first);
 	ta_end(t);
 	return i;
 }

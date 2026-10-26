@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # The player's guide
@@ -766,7 +766,7 @@ it pays one of BN6's GigaChips.
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |
-| Server | A strong virus signal: an optional harder battle that pays a better chip. From the fourth act it may hold an SP Navi. Never on the first layer |
+| Server | A strong virus signal: an optional harder battle that pays your pick of three better chips, named before you fight. From the fourth act it may hold an SP Navi. Never on the first layer |
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
