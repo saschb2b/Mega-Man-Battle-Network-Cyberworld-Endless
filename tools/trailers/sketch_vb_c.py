@@ -6,8 +6,9 @@ in their order. Played on the approved palette's samples
 (sketch_vb_lib.py).
 
     tools/trailer_music.py's render_any(OUT, trailers.sketch_vb_c), in
-    docker/Dockerfile.music's image (CW_SOUNDFONT_NAME: fluidr3, generaluser
-    or musescore)
+    docker/Dockerfile.music's image; on 26 October 2026 also through
+    GeneralUser GS and MuseScore General (CW_SOUNDFONT_NAME), for the owner's
+    comparison by ear
 
 What BN5's 0x15 does, read from its ROM with song_habits.py --detail
 --theory and the bars' rhythms in aggregate (the bar line 24 ticks in:

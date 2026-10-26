@@ -6,9 +6,8 @@ sample, brought down to 10512 Hz and 8 bits, cut short, for MP2K to play
 and echo). Standard library only. The soundfont is FluidR3 GM (Frank Wen,
 the MIT license), which docker/Dockerfile.music installs from Debian
 (fluid-soundfont-gm); it is never in git, and a piece that uses it renders
-in that image (CW_SOUNDFONT names the file). The image holds GeneralUser
-GS and MuseScore General too, for the owner to hear a piece in each:
-CW_SOUNDFONT_NAME=generaluser or musescore (FONTS).
+in that image (CW_SOUNDFONT names the file; CW_SOUNDFONT_NAME a bank of
+FONTS, for a comparison by ear).
 
     instrument(program, keys, seconds)       a sample of a melodic preset
     drum(key, seconds)                       one of the GM kit's (bank 128)
@@ -19,9 +18,11 @@ import struct
 
 from trailer_music import SAMPLE_RATE, Sample
 
-# the soundfonts docker/Dockerfile.music holds, by the name CW_SOUNDFONT_NAME
-# gives (FluidR3 GM by default, until the owner picks one by ear);
-# CW_SOUNDFONT names any other file
+# soundfonts by the name CW_SOUNDFONT_NAME gives, FluidR3 GM by default:
+# the hook of 0.16.0's comparison by ear (three banks, the same notes, no
+# difference heard through MP2K's cut; FluidR3 GM kept for its licence,
+# music_rules.md). docker/Dockerfile.music holds FluidR3 GM alone: another
+# comparison adds a bank there and here. CW_SOUNDFONT names any other file.
 FONTS = {
     'fluidr3': ('/usr/share/sounds/sf2/FluidR3_GM.sf2',
                 'FluidR3 GM (Frank Wen, the MIT license; Debian\'s fluid-soundfont-gm)'),

@@ -292,8 +292,16 @@ Kaida would be proud of (music_rules.md). The sketch round that followed:
 three nine-bar sketches, each from one seed (A BN6's 0x15, the Battler's
 rounds; B BN6's 0x22 "Showdown", diminished chords and a broken beat; C
 BN5's 0x15, Kaida's), each through FluidR3 GM, GeneralUser GS v2.0.3 and
-MuseScore General (`CW_SOUNDFONT_NAME`, docker/Dockerfile.music), for him
-to pick a sketch and a soundfont by ear.
+MuseScore General (`CW_SOUNDFONT_NAME`), for him to pick a sketch and a
+soundfont by ear. The owner: "i like b but can't hear a difference in
+soundfonts." Three banks, the same notes, no audible difference through
+MP2K's cut (8 bits at 10512 Hz): FluidR3 GM stays, for its licence, and
+the image holds it alone again (music_rules.md). Sketch B grew into the
+piece (`v0_16_0_music.py`, 20 bars at 150, B-flat minor): its middle,
+500-2000 Hz, had been well under 0x22's; the strings' chord samples
+voiced an octave higher and the squares louder in the mix brought it
+near (music_check.py's bands 46/32/20/2 against the seed's 49/29/21/2)
+without a part more, busier than the source still none.
 
 Devices now used up: the card table, the deal as the cut, suits by
 section, the foil's sweep; and from the second cut, the PET screen as the

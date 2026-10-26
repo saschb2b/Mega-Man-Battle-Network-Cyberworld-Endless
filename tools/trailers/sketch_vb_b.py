@@ -5,8 +5,9 @@ fighting on a dark layer; none of its notes, nor its chords in their
 order. Played on the approved palette's samples (sketch_vb_lib.py).
 
     tools/trailer_music.py's render_any(OUT, trailers.sketch_vb_b), in
-    docker/Dockerfile.music's image (CW_SOUNDFONT_NAME: fluidr3, generaluser
-    or musescore)
+    docker/Dockerfile.music's image; on 26 October 2026 also through
+    GeneralUser GS and MuseScore General (CW_SOUNDFONT_NAME), for the owner's
+    comparison by ear
 
 What 0x22 does, read from the ROM with song_habits.py --detail --theory
 --offset 12 and the bars' rhythms in aggregate, numbers only:
