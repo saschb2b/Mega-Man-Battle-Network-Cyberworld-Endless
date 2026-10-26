@@ -3,7 +3,7 @@ type: Feature
 title: "10. AsterLand and the Cyber Academy"
 description: "AsterLand and the Cyber Academy (issue #96): BN6's maps taken over (`aster_land.c`, `academy.c`), AsterLand's clerk, Request BBS and Chip Trader with the Number Trader off, class 6-1's NetBattle club."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T00:18:57Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # 10. AsterLand and the Cyber Academy
@@ -43,7 +43,8 @@ crowd does not use.
 - **AsterLand** (`aster_land.c`): BN6's checks read as BN6 has them (the
   virus panel, the showcases, the magazines, the locked register). The
   request board opens BN6's own Request BBS, which holds none of BN6's
-  requests in a run: the jobs (piece 5) are to post there. The Chip
+  requests in a run: the visit's three requests are posted there, read
+  and taken on BN6's own screen (piece 5, [Jobs](jobs.md)). The Chip
   Trader trades from AsterLand's own list in the folder's codes, as the
   layers' traders do (theirs moved to the tables' second entry, Sky
   Town's, a map the run never visits). The **Number Trader is off**: its

@@ -1,7 +1,7 @@
 /* aster_land.h. AsterLand (Central Town's map 0x01:04) as BN6 has it: its
  * door out to the town (its warp entry 1), the counter, the Request BBS on
- * the wall (its post the run's request, job_words.c: BN6's own Request
- * BBS holds none of its requests in a run), its checks, and
+ * the wall (BN6's own, its check 0xF6, the visit's requests posted on it:
+ * request_bbs.c), its checks, and
  * BN6's Chip Trader, whose trade screen holds AsterLand's own prizes
  * (docs/rom/chips.md, Chip Traders), and home's shops (docs/world/home/home-shop.md, piece
  * 6): the counter's Order Service (its list sorted as BN6's folder editor
@@ -26,14 +26,12 @@
 #define DOOR_OUT 1
 #define TOWN_DOOR 4        /* the town's warp entry into it */
 #define MUSIC_SLOT 3       /* home's music slot (mapslot.h) */
-#define REQUEST_BOARD 0xF6 /* its check: BN6's Request BBS, its post ours (job_words.c) */
 #define NUMBER_TRADER 0xF9 /* its check */
 #define NUMBER_TRADER_MAPS 0x08034E80u /* the map ids (u16, 0xFFFF ending) whose check 0xF9 BN6's Number Trader is: AsterLand's (bn6f dword_8034E80) */
 
 static int front[2];       /* where Lan comes out in the town, before its door */
 static bool front_ok;
 static int numbers[4];     /* the Number Trader's check cells' bounds: x0, y0, x1, y1 */
-static int board[4];       /* ... and the request board's */
 static int orders = -1;    /* the Order Service's copies to order as the visit began */
 
 bool aster_land_install(void) {
@@ -53,7 +51,6 @@ bool aster_land_install(void) {
 	emu_write32(NUMBER_TRADER_MAPS, 0xFFFFFFFFu);
 	int nx, ny;
 	if (!indoors_spot(ASTER_GROUP, ASTER_LAND, NUMBER_TRADER, &nx, &ny, numbers)) numbers[0] = numbers[2] = 0;
-	if (!indoors_spot(ASTER_GROUP, ASTER_LAND, REQUEST_BOARD, &nx, &ny, board)) board[0] = board[2] = 0;
 	/* (out where the planned town has its door) */
 	int ox, oy, tx, ty;
 	indoors_dest(indoors_bn6_warps(ASTER_GROUP, ASTER_LAND), DOOR_OUT, &ox, &oy, &face);
@@ -86,7 +83,6 @@ static bool in(const int b[4], int x, int y) { return x >= b[0] && y >= b[1] && 
 
 bool aster_land_number_trader(int x, int y) { return in(numbers, x, y); }
 
-bool aster_land_board(int x, int y) { return in(board, x, y); }
 
 void aster_land_frame(void) {
 	indoors_shut(1u << DOOR_OUT);

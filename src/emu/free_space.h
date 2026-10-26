@@ -44,6 +44,8 @@
 #define FREE_TRADER_LIST_END (EMU_FREE + 0x169000u)
 #define FREE_PET_OPTIONS    (EMU_FREE + 0x169000u)   /* the PET menu's labels with Comm's made Options (pet_options.c), to: */
 #define FREE_PET_OPTIONS_END (EMU_FREE + 0x16A000u)
+#define FREE_BBS            (EMU_FREE + 0x16A000u)   /* the visit's requests on BN6's Request BBS: their titles and posts, LZ77 (request_bbs.c), to: */
+#define FREE_BBS_END        (EMU_FREE + 0x16B000u)
 #define FREE_XAREA          (EMU_FREE + 0x170000u)   /* another game's net area (netmap.c), to: */
 #define FREE_SONGS          (EMU_FREE + 0x1A0000u)   /* other games' songs (xsong.c), to: */
 #define FREE_XNAVIS         (EMU_FREE + 0x260000u)   /* other games' Navis and map objects (xnavi.c), to: */

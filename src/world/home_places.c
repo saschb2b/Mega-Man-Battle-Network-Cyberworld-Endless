@@ -9,7 +9,6 @@
 #include "aster_land.h"
 #include "bn6_fields.h"
 #include "indoors.h"
-#include "job_words.h"
 #include "lan_house.h"
 #include "npc.h"
 #include "place_lines.h"
@@ -64,7 +63,7 @@ bool home_places_counter(int group, int number, int x, int y, int face, uint32_t
 const char *home_places_check(int group, int number, int x, int y, int face) {
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
-	if (!aster_land_map(group, number)) return NULL;
-	if (aster_land_number_trader(x + dx, y + dy)) return place_number_trader;
-	return aster_land_board(x + dx, y + dy) ? job_board_words() : NULL;
+	/* (the request board is BN6's own Request BBS, the visit's requests
+	 * posted on it: request_bbs.c) */
+	return aster_land_map(group, number) && aster_land_number_trader(x + dx, y + dy) ? place_number_trader : NULL;
 }

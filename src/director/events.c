@@ -6,17 +6,21 @@
 #include <stdbool.h>
 
 #include "bn6.h"
+#include "bn6_bbs.h"
 #include "emu.h"
 #include "job_words.h"
 #include "layer_objs.h"
 
 /* SetEventFlag runs for every flag the game sets, many a frame: an event
  * only for a layer's choice, which a Yes in its chat sets (the chat's
- * EA 00 command), and for a request taken or settled at home */
+ * EA 00 command), and for a request taken or settled at home, on BN6's
+ * Request BBS too */
 static HookAct flag_set(HookRegs *r, void *user) {
 	(void)user;
 	if (r->r[0] >= LAYER_FLAG_BASE && r->r[0] < LAYER_FLAG_BASE + LAYER_MAX_CHOICES) hook_post(r, EV_CHOICE);
-	else if ((r->r[0] >= JOB_TAKE_FLAG && r->r[0] < JOB_TAKE_FLAG + JOB_ASKERS) || r->r[0] == JOB_SETTLED_FLAG) hook_post(r, EV_JOB);
+	else if ((r->r[0] >= JOB_TAKE_FLAG && r->r[0] < JOB_TAKE_FLAG + JOB_ASKERS) || r->r[0] == JOB_SETTLED_FLAG ||
+		(r->r[0] >= BN6_FLAG_BBS_TAKEN && r->r[0] < BN6_FLAG_BBS_TAKEN + JOB_ASKERS))
+		hook_post(r, EV_JOB);
 	return HOOK_CONTINUE;
 }
 

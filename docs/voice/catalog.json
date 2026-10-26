@@ -533,7 +533,7 @@
   },
   "home_words:home_aster_words": {
    "header": "L's words in AsterLand: where its counter takes orders and sells SubChips, then `words`.",
-   "line": 153
+   "line": 155
   },
   "home_words:home_back_portal_words": {
    "header": "MegaMan beside an older portal (docs/world/home/going-back.md): where it leads (an area won, so named) and its price on the Net's clock, all of it until `taught`.",
@@ -548,18 +548,15 @@
    "line": 136
   },
   "home_words:home_courier_words": {
-   "header": "The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the requests posted (bit k asker k), new after an act, simply up at the run's first visit (`first`), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none.",
-   "line": 180
+   "header": "The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the `n_offers` requests posted on AsterLand's BBS, new after an act, simply up at the run's first visit (`first`), what each asks and pays a box each (`offers`, boxes apart by '|'), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none.",
+   "line": 182
   },
   "home_words:home_courier_words.paid_by": {
-   "line": 183
-  },
-  "home_words:home_courier_words.places": {
    "line": 185
   },
   "home_words:home_door_words": {
    "header": "L's words in Lan's house `words`, then where its front door is (`door` from Lan, way_to's word).",
-   "line": 161
+   "line": 163
   },
   "home_words:home_errands_words": {
    "header": "L's words at home `words`, then once a visit what it holds besides the way on: `requests` posted (none held), an order `order` AsterLand can still make that the zenny held pays for, and which way AsterLand is (`aster`, way_to's word; NULL unsaid).",
@@ -571,7 +568,7 @@
   },
   "home_words:home_hp_words": {
    "header": "MegaMan in Lan's HP the run's first time there: what it is, or, to a profile `taught` that, a word.",
-   "line": 168
+   "line": 170
   },
   "home_words:home_on_question": {
    "header": "... and before a way on through a link.",
@@ -590,7 +587,7 @@
   },
   "job_words:bring_script": {
    "comment": "a chip asked for: the first of the element's MegaMan holds that is in the Pack as Lan talks; else where it has to be, and whether to let the request go",
-   "line": 236
+   "line": 283
   },
   "job_words:done_words": {
    "line": 93
@@ -600,11 +597,16 @@
   },
   "job_words:hand_over": {
    "comment": "a chip handed over: chip c of the talk's, taken from the Pack, then the pay",
-   "line": 216
+   "line": 263
   },
-  "job_words:job_board_words": {
-   "header": "What AsterLand's request board reads (A at it): the board's post.",
-   "line": 133
+  "job_words:job_bbs_post": {
+   "comment": "the post, in its poster's voice, and where they wait: they pay there",
+   "line": 148
+  },
+  "job_words:job_bbs_title": {
+   "comment": "---- on BN6's Request BBS (request_bbs.c) ----",
+   "header": "Request `j` on BN6's Request BBS at AsterLand (request_bbs.c): its title in the board's list (14 letters at most), and its post as the board reads it out, in the poster's own words: what it asks, the pay, where they wait.",
+   "line": 135
   },
   "job_words:job_broken_words": {
    "line": 129
@@ -623,15 +625,20 @@
   "job_words:job_due_words.who": {
    "line": 119
   },
+  "job_words:job_offer_brief": {
+   "comment": "the courier's word on an offer, in his capitals: what it asks, for what",
+   "header": "The courier in Lan's HP on offer `j`: what it asks and what it pays, in a Mr.Prog's capitals.",
+   "line": 177
+  },
   "job_words:job_vow_words": {
    "line": 131
   },
   "job_words:lost_words": {
    "comment": "the asker whose request the last run ended holding, at the next run's first visit (a playtester's bet went with his run without a word, session 69)",
-   "line": 187
+   "line": 234
   },
   "job_words:offer_script": {
-   "line": 195
+   "line": 242
   },
   "job_words:offer_words": {
    "comment": "---- what each says ----",
@@ -2079,7 +2086,7 @@
    "comment": "home_words.h. Coming home after an act: MegaMan's relief and Lan's answer, one beat a box (docs/voice/rules.md), by how far the run has come; Lan's HP's portals and what MegaMan says of them.",
    "domain": "Lan's HP and the gate",
    "kind": "speech",
-   "lines": 73,
+   "lines": 72,
    "shows": [
     "screenshots/home-back.png",
     "screenshots/home-courier.png"
@@ -2499,7 +2506,7 @@
    "comment": "job_words.h. The askers' requests in their own voices (docs/voice/rules.md): the NetBattler at AsterLand's board (a grown-up who calls Lan \"kid\"), the NetBattle club's member in class 6-1 (a classmate), the man from Dad's lab in town. Each offers, waits, and settles at the next visit, paying in BN6's own way (\"MegaMan got: ...\"); BN6's Request BBS's rule holds: one request at a time.",
    "domain": "Requests",
    "kind": "speech",
-   "lines": 60,
+   "lines": 74,
    "shows": [
     "screenshots/home-request.png"
    ],
@@ -2609,7 +2616,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2227,
+  "boxes": 2240,
   "domains": {
    "Arena": {
     "files": [
@@ -2676,9 +2683,9 @@
      "src/director/gate_words.c",
      "src/director/home_words.c"
     ],
-    "flagged": 2,
-    "lines": 105,
-    "speech": 97
+    "flagged": 1,
+    "lines": 104,
+    "speech": 96
    },
    "Layers: dealers and finds": {
     "files": [
@@ -2775,9 +2782,9 @@
     "files": [
      "src/world/job_words.c"
     ],
-    "flagged": 6,
-    "lines": 60,
-    "speech": 57
+    "flagged": 4,
+    "lines": 74,
+    "speech": 65
    },
    "SAVES": {
     "files": [
@@ -2882,16 +2889,16 @@
     "speech": 7
    }
   },
-  "flagged": 130,
+  "flagged": 127,
   "flags": {
    "beats": 4,
    "box-words": 4,
    "button": 5,
-   "colon": 40,
+   "colon": 38,
    "line-long": 15,
-   "long-speech": 51,
+   "long-speech": 50,
    "meta": 2,
-   "pages": 14,
+   "pages": 13,
    "prog-caps": 1,
    "rule-talk": 8,
    "spelling": 4,
@@ -2977,18 +2984,18 @@
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 207,
+    "boxes": 215,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
-    "end_bang": 0.9,
+    "end_bang": 0.91,
     "end_dots": 0.02,
     "openers": [
      "THE",
+     "A",
      "HMM",
      "NET",
      "ONE",
-     "THIS",
-     "A"
+     "THIS"
     ],
     "stutters": "never",
     "words_per_box": 5.5
@@ -3013,7 +3020,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 1881,
+  "lines": 1894,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3275,18 +3282,18 @@
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 207,
+    "boxes": 215,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
-    "end_bang": 0.9,
+    "end_bang": 0.91,
     "end_dots": 0.02,
     "openers": [
      "THE",
+     "A",
      "HMM",
      "NET",
      "ONE",
-     "THIS",
-     "A"
+     "THIS"
     ],
     "stutters": "never",
     "words_per_box": 5.5
@@ -3435,24 +3442,24 @@
    "Townsfolk": {
     "bangs_per_box": 0.0,
     "bn6": null,
-    "boxes": 255,
+    "boxes": 264,
     "dots_per_box": 0.11,
     "end_ask": 0.14,
-    "end_bang": 0.47,
+    "end_bang": 0.49,
     "end_dots": 0.07,
     "openers": [
      "The",
      "By",
-     "A",
      "Lan",
+     "A",
      "I",
      "No"
     ],
     "stutters": "never",
-    "words_per_box": 5.6
+    "words_per_box": 5.7
    }
   },
-  "speech": 1390
+  "speech": 1397
  },
  "version": 1,
  "conversations": [
@@ -3499,11 +3506,13 @@
   {"container":"job_words:job_due_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_due_words","line":123,"lines":["job_words:job_due_words:0","job_words:job_due_words:1","job_words:job_due_words:2"],"speakers":["MegaMan","Townsfolk"],"title":"MegaMan at home on the held request, now up for settling","when":"MegaMan at home on the held request, now up for settling (`job`): its reward waiting, or the asker to tell, and where they are."},
   {"container":"job_words:job_broken_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_broken_words","line":129,"lines":["job_words:job_broken_words:0"],"speakers":["MegaMan"],"title":"Job broken words","when":""},
   {"container":"job_words:job_vow_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_vow_words","line":131,"lines":["job_words:job_vow_words:0"],"speakers":["MegaMan"],"title":"Job vow words","when":""},
-  {"container":"job_words:job_board_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_board_words","line":136,"lines":["job_words:job_board_words:0","job_words:job_board_words:1","job_words:job_board_words:2"],"speakers":["Townsfolk"],"title":"What AsterLand's request board reads","when":"What AsterLand's request board reads (A at it): the board's post."},
-  {"container":"job_words:lost_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:lost_words","line":189,"lines":["job_words:lost_words:caseJOB_BOARD.0","job_words:lost_words:caseJOB_CLUB.0","job_words:lost_words:casedefault.0"],"speakers":["Townsfolk"],"title":"The asker whose request the last run ended holding, at the next run's first visit","when":"the asker whose request the last run ended holding, at the next run's first visit (a playtester's bet went with his run without a word, session 69)"},
-  {"container":"job_words:offer_script","domain":"Requests","file":"src/world/job_words.c","id":"job_words:offer_script","line":207,"lines":["job_words:offer_script:0"],"speakers":["Townsfolk"],"title":"Offer script","when":""},
-  {"container":"job_words:hand_over","domain":"Requests","file":"src/world/job_words.c","id":"job_words:hand_over","line":221,"lines":["job_words:hand_over:0"],"speakers":["Townsfolk"],"title":"A chip handed over","when":"a chip handed over: chip c of the talk's, taken from the Pack, then the pay"},
-  {"container":"job_words:bring_script","domain":"Requests","file":"src/world/job_words.c","id":"job_words:bring_script","line":239,"lines":["job_words:bring_script:0","job_words:bring_script:1","job_words:bring_script:2"],"speakers":["Townsfolk"],"title":"A chip asked for","when":"a chip asked for: the first of the element's MegaMan holds that is in the Pack as Lan talks; else where it has to be, and whether to let the request go"},
+  {"container":"job_words:job_bbs_title","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_bbs_title","line":138,"lines":["job_words:job_bbs_title:caseJOB_BRING.0","job_words:job_bbs_title:caseJOB_VOW.0","job_words:job_bbs_title:caseJOB_QUICK.0","job_words:job_bbs_title:caseJOB_EXPLORE.0","job_words:job_bbs_title:casedefault.0","job_words:job_bbs_title:casedefault.1"],"speakers":["Townsfolk"],"title":"On BN6's Request BBS","when":"---- on BN6's Request BBS (request_bbs.c) ----"},
+  {"container":"job_words:job_bbs_post","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_bbs_post","line":152,"lines":["job_words:job_bbs_post:caseJOB_BRING.0","job_words:job_bbs_post:caseJOB_VOW.0","job_words:job_bbs_post:caseJOB_QUICK.0","job_words:job_bbs_post:caseJOB_EXPLORE.0","job_words:job_bbs_post:casedefault.0","job_words:job_bbs_post:casedefault.1"],"speakers":["Townsfolk"],"title":"The post, in its poster's voice, and where they wait","when":"the post, in its poster's voice, and where they wait: they pay there"},
+  {"container":"job_words:job_offer_brief","domain":"Requests","file":"src/world/job_words.c","id":"job_words:job_offer_brief","line":180,"lines":["job_words:job_offer_brief:caseJOB_BRING.0","job_words:job_offer_brief:caseJOB_VOW.0","job_words:job_offer_brief:caseJOB_QUICK.0","job_words:job_offer_brief:caseJOB_EXPLORE.0","job_words:job_offer_brief:casedefault.0"],"speakers":["Mr.Prog"],"title":"The courier's word on an offer, in his capitals","when":"the courier's word on an offer, in his capitals: what it asks, for what"},
+  {"container":"job_words:lost_words","domain":"Requests","file":"src/world/job_words.c","id":"job_words:lost_words","line":236,"lines":["job_words:lost_words:caseJOB_BOARD.0","job_words:lost_words:caseJOB_CLUB.0","job_words:lost_words:casedefault.0"],"speakers":["Townsfolk"],"title":"The asker whose request the last run ended holding, at the next run's first visit","when":"the asker whose request the last run ended holding, at the next run's first visit (a playtester's bet went with his run without a word, session 69)"},
+  {"container":"job_words:offer_script","domain":"Requests","file":"src/world/job_words.c","id":"job_words:offer_script","line":254,"lines":["job_words:offer_script:0"],"speakers":["Townsfolk"],"title":"Offer script","when":""},
+  {"container":"job_words:hand_over","domain":"Requests","file":"src/world/job_words.c","id":"job_words:hand_over","line":268,"lines":["job_words:hand_over:0"],"speakers":["Townsfolk"],"title":"A chip handed over","when":"a chip handed over: chip c of the talk's, taken from the Pack, then the pay"},
+  {"container":"job_words:bring_script","domain":"Requests","file":"src/world/job_words.c","id":"job_words:bring_script","line":286,"lines":["job_words:bring_script:0","job_words:bring_script:1","job_words:bring_script:2"],"speakers":["Townsfolk"],"title":"A chip asked for","when":"a chip asked for: the first of the element's MegaMan holds that is in the Pack as Lan talks; else where it has to be, and whether to let the request go"},
   {"container":"home_words:home_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_words","line":16,"lines":["home_words:home_words:0","home_words:home_words:1","home_words:home_words:2","home_words:home_words:3","home_words:home_words:4","home_words:home_words:5","home_words:home_words:6","home_words:home_words:7","home_words:home_words:8","home_words:home_words:9","home_words:home_words:10"],"speakers":["MegaMan","Lan"],"title":"Home words: their words on arriving in Lan's HP, `beaten` the guardian just deleted","when":"Their words on arriving in Lan's HP, `beaten` the guardian just deleted (NULL unknown), the run at the next act's first layer; its ways open, `ports[0..ways)` the portals' names (\"pink pad\"), `sealed` where a dark way's stands shut (NULL none), and `route` the portal of a special route's way (docs/game/liberation/special-routes.md; -1 none)."},
   {"container":"home_words:area_feel.feels","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:area_feel.feels","line":49,"lines":["home_words:area_feel.feels:0.line","home_words:area_feel.feels:1.line","home_words:area_feel.feels:2.line","home_words:area_feel.feels:3.line","home_words:area_feel.feels:4.line","home_words:area_feel.feels:5.line","home_words:area_feel.feels:6.line","home_words:area_feel.feels:7.line","home_words:area_feel.feels:8.line","home_words:area_feel.feels:9.line","home_words:area_feel.feels:10.line","home_words:area_feel.feels:11.line","home_words:area_feel.feels:12.line","home_words:area_feel.feels:13.line","home_words:area_feel.feels:14.line","home_words:area_feel.feels:15.line"],"speakers":["MegaMan"],"title":"Area feel: feels","when":""},
   {"container":"home_words:area_feel","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:area_feel","line":66,"lines":["home_words:area_feel:0","home_words:area_feel:1","home_words:area_feel:2"],"speakers":["MegaMan"],"title":"What MegaMan reads of an area through a link he has not taken","when":"What MegaMan reads of an area through a link he has not taken: its data, never its name (docs/game/meta/what-megaman-knows.md)"},
@@ -3515,13 +3524,12 @@
   {"container":"home_words:home_back_question","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_back_question","line":132,"lines":["home_words:home_back_question:0"],"speakers":["MegaMan"],"title":"MegaMan's question before a trip back","when":"MegaMan's question before a trip back (talk_ask's)."},
   {"container":"home_words:home_on_question","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_on_question","line":134,"lines":["home_words:home_on_question:0"],"speakers":["MegaMan"],"title":"Home on question","when":"... and before a way on through a link."},
   {"container":"home_words:home_back_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_back_words","line":137,"lines":["home_words:home_back_words:0","home_words:home_back_words:1"],"speakers":["MegaMan","Lan"],"title":"Home again from a trip back, the Net's clock at `clock`","when":"Home again from a trip back, the Net's clock at `clock`."},
-  {"container":"home_words:home_errands_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_errands_words","line":147,"lines":["home_words:home_errands_words:0","home_words:home_errands_words:1","home_words:home_errands_words:2"],"speakers":["MegaMan"],"title":"L's words at home `words`, then once a visit what it holds besides the way on","when":"L's words at home `words`, then once a visit what it holds besides the way on: `requests` posted (none held), an order `order` AsterLand can still make that the zenny held pays for, and which way AsterLand is (`aster`, way_to's word; NULL unsaid)."},
-  {"container":"home_words:home_aster_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_aster_words","line":157,"lines":["home_words:home_aster_words:0"],"speakers":["MegaMan"],"title":"L's words in AsterLand","when":"L's words in AsterLand: where its counter takes orders and sells SubChips, then `words`."},
-  {"container":"home_words:home_door_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_door_words","line":164,"lines":["home_words:home_door_words:0"],"speakers":["MegaMan"],"title":"L's words in Lan's house `words`, then where its front door is","when":"L's words in Lan's house `words`, then where its front door is (`door` from Lan, way_to's word)."},
-  {"container":"home_words:home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_hp_words","line":169,"lines":["home_words:home_hp_words:0","home_words:home_hp_words:1"],"speakers":["MegaMan"],"title":"MegaMan in Lan's HP the run's first time there","when":"MegaMan in Lan's HP the run's first time there: what it is, or, to a profile `taught` that, a word."},
-  {"container":"home_words:home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.paid_by","line":183,"lines":["home_words:home_courier_words.paid_by:0","home_words:home_courier_words.paid_by:1","home_words:home_courier_words.paid_by:2"],"speakers":["Mr.Prog"],"title":"Home courier words: paid by","when":""},
-  {"container":"home_words:home_courier_words.places","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.places","line":185,"lines":["home_words:home_courier_words.places:1"],"speakers":["Mr.Prog"],"title":"Home courier words: places","when":""},
-  {"container":"home_words:home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words","line":191,"lines":["home_words:home_courier_words:0","home_words:home_courier_words:1","home_words:home_courier_words:2","home_words:home_courier_words:3","home_words:home_courier_words:4","home_words:home_courier_words:5","home_words:home_courier_words:6","home_words:home_courier_words:7"],"speakers":["Mr.Prog"],"title":"The courier in Lan's HP","when":"The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the requests posted (bit k asker k), new after an act, simply up at the run's first visit (`first`), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none."},
+  {"container":"home_words:home_errands_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_errands_words","line":149,"lines":["home_words:home_errands_words:0","home_words:home_errands_words:1","home_words:home_errands_words:2"],"speakers":["MegaMan"],"title":"L's words at home `words`, then once a visit what it holds besides the way on","when":"L's words at home `words`, then once a visit what it holds besides the way on: `requests` posted (none held), an order `order` AsterLand can still make that the zenny held pays for, and which way AsterLand is (`aster`, way_to's word; NULL unsaid)."},
+  {"container":"home_words:home_aster_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_aster_words","line":159,"lines":["home_words:home_aster_words:0"],"speakers":["MegaMan"],"title":"L's words in AsterLand","when":"L's words in AsterLand: where its counter takes orders and sells SubChips, then `words`."},
+  {"container":"home_words:home_door_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_door_words","line":166,"lines":["home_words:home_door_words:0"],"speakers":["MegaMan"],"title":"L's words in Lan's house `words`, then where its front door is","when":"L's words in Lan's house `words`, then where its front door is (`door` from Lan, way_to's word)."},
+  {"container":"home_words:home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_hp_words","line":171,"lines":["home_words:home_hp_words:0","home_words:home_hp_words:1"],"speakers":["MegaMan"],"title":"MegaMan in Lan's HP the run's first time there","when":"MegaMan in Lan's HP the run's first time there: what it is, or, to a profile `taught` that, a word."},
+  {"container":"home_words:home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.paid_by","line":185,"lines":["home_words:home_courier_words.paid_by:0","home_words:home_courier_words.paid_by:1","home_words:home_courier_words.paid_by:2"],"speakers":["Mr.Prog"],"title":"Home courier words: paid by","when":""},
+  {"container":"home_words:home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words","line":192,"lines":["home_words:home_courier_words:0","home_words:home_courier_words:1","home_words:home_courier_words:2","home_words:home_courier_words:3","home_words:home_courier_words:4","home_words:home_courier_words:5","home_words:home_courier_words:6","home_words:home_courier_words:7"],"speakers":["Mr.Prog"],"title":"The courier in Lan's HP","when":"The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the `n_offers` requests posted on AsterLand's BBS, new after an act, simply up at the run's first visit (`first`), what each asks and pays a box each (`offers`, boxes apart by '|'), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none."},
   {"container":"gate_words:gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_options","line":8,"lines":["gate_words:gate_options:0","gate_words:gate_options:1","gate_words:gate_options:2"],"speakers":["MegaMan"],"title":"Gate options","when":""},
   {"container":"gate_words:gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_hello","line":12,"lines":["gate_words:gate_keeper_hello:0","gate_words:gate_keeper_hello:1"],"speakers":["Mr.Prog"],"title":"The keeper talked to","when":"The keeper talked to: who he is, where the gate leads (the official Square or another server's, never its address), then his question over the options."},
   {"container":"gate_words:gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_ask","line":16,"lines":["gate_words:gate_keeper_ask:0"],"speakers":["Mr.Prog"],"title":"Gate keeper ask","when":""},
@@ -4490,22 +4498,21 @@
   {"boxes":[{"pages":[["Go this way,Lan?"]],"speaker":"MegaMan","text":"Go this way,Lan?\n"}],"container":"home_on_question","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_on_question:0","kind":"speech","line":134,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Go this way,Lan?\n","text_hash":"fddaf55e00b4"},
   {"boxes":[{"pages":[["Home again,Lan..."]],"speaker":"MegaMan","text":"Home again,Lan..."},{"pages":[["The Net's copying","fast now."]],"speaker":"MegaMan","text":"The Net's copying fast now."},{"pages":[["Then no more","stalling! Let's","dive!"]],"speaker":"Lan","text":"Then no more stalling! Let's dive!"}],"container":"home_back_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_back_words:0","kind":"speech","line":137,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Home again,Lan...|@M The Net's copying fast now.|@L Then no more stalling! Let's dive!","text_hash":"5fdbf7400f95"},
   {"boxes":[{"pages":[["Home again,Lan!"]],"speaker":"MegaMan","text":"Home again,Lan!"},{"pages":[["The Net kept copying","while we were","away..."]],"speaker":"MegaMan","text":"The Net kept copying while we were away..."},{"pages":[["Then we'd better get","moving!"]],"speaker":"Lan","text":"Then we'd better get moving!"}],"container":"home_back_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_back_words:1","kind":"speech","line":138,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Home again,Lan!|@M The Net kept copying while we were away...|@L Then we'd better get moving!","text_hash":"134676dde6a4"},
-  {"boxes":[{"pages":[["Folks posted","requests,Lan!"]],"speaker":"MegaMan","text":"Folks posted requests,Lan!"},{"flags":[{"at":"4 lines","code":"pages"}],"pages":[["AsterLand's","board,the club,and"],["the lab man out","here!"]],"speaker":"MegaMan","text":"AsterLand's board,the club,and the lab man out here!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":["pages"],"id":"home_words:home_errands_words:0","kind":"speech","line":147,"note":"(the three askers in one box: six boxes in all, session 73)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M Folks posted requests,Lan!|@M AsterLand's board,the club,and the lab man out here!","text_hash":"1e855885af6d"},
-  {"boxes":[{"pages":[["AsterLand can order","us a chip,too!"]],"speaker":"MegaMan","text":"AsterLand can order us a chip,too!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_errands_words:1","kind":"speech","line":148,"note":"(the three askers in one box: six boxes in all, session 73)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M AsterLand can order us a chip,too!","text_hash":"66d3b46d8086"},
-  {"boxes":[{"pages":[["AsterLand's door is","{aster}!"]],"speaker":"MegaMan","text":"AsterLand's door is {aster}!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_errands_words:2","kind":"speech","line":149,"note":"(the three askers in one box: six boxes in all, session 73)","placeholders":[{"name":"aster","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M AsterLand's door is {aster}!","text_hash":"2aeca9daa8cd"},
-  {"boxes":[{"pages":[["Chips to order at","the counter's","right,Lan!"]],"speaker":"MegaMan","text":"Chips to order at the counter's right,Lan!"},{"pages":[["SubChips at its","left!"]],"speaker":"MegaMan","text":"SubChips at its left!"},{"pages":[["{words}"]],"speaker":"MegaMan","text":"{words}"}],"container":"home_aster_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_aster_words:0","kind":"speech","line":157,"note":"(a playtester never found the Order Service's clerk on two visits, and L named only the way out, session 70)","placeholders":[{"name":"words","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Chips to order at the counter's right,Lan!|@M SubChips at its left!|{words}","text_hash":"aed5ea48db4f"},
-  {"boxes":[{"pages":[["{words}"]],"speaker":"MegaMan","text":"{words}"},{"pages":[["The front door's","{door},if we head","out!"]],"speaker":"MegaMan","text":"The front door's {door},if we head out!"}],"container":"home_door_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_door_words:0","kind":"speech","line":164,"note":"(seven calls looking for it, session 69)","placeholders":[{"name":"words","spec":"%s"},{"name":"door","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{words}|@M The front door's {door},if we head out!","text_hash":"77bab348f24a"},
-  {"boxes":[{"pages":[["Our HP,Lan! The pink","pad's waiting!"]],"speaker":"MegaMan","text":"Our HP,Lan! The pink pad's waiting!"}],"container":"home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_hp_words:0","kind":"speech","line":169,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Our HP,Lan! The pink pad's waiting!","text_hash":"5143268d4c27"},
-  {"boxes":[{"pages":[["Our HP,Lan! Home","sweet home!"]],"speaker":"MegaMan","text":"Our HP,Lan! Home sweet home!"},{"pages":[["The Endless Net's","linked in here","now..."]],"speaker":"MegaMan","text":"The Endless Net's linked in here now..."},{"pages":[["The pink pad leads","into it!"]],"speaker":"MegaMan","text":"The pink pad leads into it!"}],"container":"home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_hp_words:1","kind":"speech","line":170,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!","text_hash":"de24ccea7ec3"},
-  {"boxes":[{"pages":[["THE NETBATTLER,","ASTERLAND!"]],"speaker":"Mr.Prog","text":"THE NETBATTLER,\nASTERLAND!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:0","kind":"speech","line":183,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE NETBATTLER,\nASTERLAND!","text_hash":"2c2573e5e696"},
-  {"boxes":[{"pages":[["THE NETBATTLE CLUB,","THE ACADEMY!"]],"speaker":"Mr.Prog","text":"THE NETBATTLE CLUB,\nTHE ACADEMY!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:1","kind":"speech","line":183,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE NETBATTLE CLUB,\nTHE ACADEMY!","text_hash":"70e31163f06e"},
-  {"boxes":[{"pages":[["THE MAN FROM THE LAB","OUT IN TOWN!"]],"speaker":"Mr.Prog","text":"THE MAN FROM THE LAB\nOUT IN TOWN!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:2","kind":"speech","line":184,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE MAN FROM THE LAB\nOUT IN TOWN!","text_hash":"5b0e012017c8"},
-  {"boxes":[{"pages":[["THE ACADEMY"]],"speaker":"Mr.Prog","text":"THE ACADEMY"}],"container":"home_courier_words.places","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words.places:1","kind":"speech","line":185,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE ACADEMY","text_hash":"fea5c9dff6f0"},
-  {"boxes":[{"pages":[["REWARD WAITING!","{paid_by}"]],"speaker":"Mr.Prog","text":"REWARD WAITING!\n{paid_by}"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:0","kind":"speech","line":191,"placeholders":[{"name":"paid_by","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REWARD WAITING!\n{paid_by}","text_hash":"d49120373fc0"},
-  {"boxes":[{"pages":[["REQUESTS ARE UP AT"]],"speaker":"Mr.Prog","text":"REQUESTS ARE UP AT\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:1","kind":"speech","line":196,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REQUESTS ARE UP AT\n","text_hash":"6bc4583ae489"},
-  {"boxes":[{"pages":[["A REQUEST IS UP AT"]],"speaker":"Mr.Prog","text":"A REQUEST IS UP AT\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:2","kind":"speech","line":196,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A REQUEST IS UP AT\n","text_hash":"39f58be0c5e4"},
-  {"boxes":[{"pages":[["NEW REQUESTS POSTED!"]],"speaker":"Mr.Prog","text":"NEW REQUESTS POSTED!\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:3","kind":"speech","line":197,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUESTS POSTED!\n","text_hash":"50ac52b8be3e"},
-  {"boxes":[{"pages":[["NEW REQUEST POSTED!","AT"]],"speaker":"Mr.Prog","text":"NEW REQUEST POSTED!\nAT "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:4","kind":"speech","line":197,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUEST POSTED!\nAT ","text_hash":"96441ba2d0c9"},
+  {"boxes":[{"pages":[["Folks posted","requests,Lan!"]],"speaker":"MegaMan","text":"Folks posted requests,Lan!"},{"pages":[["They're all up on","AsterLand's BBS!"]],"speaker":"MegaMan","text":"They're all up on AsterLand's BBS!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_errands_words:0","kind":"speech","line":149,"note":"(the three askers in one box: six boxes in all, session 73; their posts in one place, AsterLand's BBS, since the course check of 26 October 2026)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M Folks posted requests,Lan!|@M They're all up on AsterLand's BBS!","text_hash":"bfd4c4727b30"},
+  {"boxes":[{"pages":[["AsterLand can order","us a chip,too!"]],"speaker":"MegaMan","text":"AsterLand can order us a chip,too!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_errands_words:1","kind":"speech","line":150,"note":"(the three askers in one box: six boxes in all, session 73; their posts in one place, AsterLand's BBS, since the course check of 26 October 2026)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M AsterLand can order us a chip,too!","text_hash":"66d3b46d8086"},
+  {"boxes":[{"pages":[["AsterLand's door is","{aster}!"]],"speaker":"MegaMan","text":"AsterLand's door is {aster}!"}],"container":"home_errands_words","continues":true,"domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_errands_words:2","kind":"speech","line":151,"note":"(the three askers in one box: six boxes in all, session 73; their posts in one place, AsterLand's BBS, since the course check of 26 October 2026)","placeholders":[{"name":"aster","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M AsterLand's door is {aster}!","text_hash":"2aeca9daa8cd"},
+  {"boxes":[{"pages":[["Chips to order at","the counter's","right,Lan!"]],"speaker":"MegaMan","text":"Chips to order at the counter's right,Lan!"},{"pages":[["SubChips at its","left!"]],"speaker":"MegaMan","text":"SubChips at its left!"},{"pages":[["{words}"]],"speaker":"MegaMan","text":"{words}"}],"container":"home_aster_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_aster_words:0","kind":"speech","line":159,"note":"(a playtester never found the Order Service's clerk on two visits, and L named only the way out, session 70)","placeholders":[{"name":"words","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Chips to order at the counter's right,Lan!|@M SubChips at its left!|{words}","text_hash":"aed5ea48db4f"},
+  {"boxes":[{"pages":[["{words}"]],"speaker":"MegaMan","text":"{words}"},{"pages":[["The front door's","{door},if we head","out!"]],"speaker":"MegaMan","text":"The front door's {door},if we head out!"}],"container":"home_door_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_door_words:0","kind":"speech","line":166,"note":"(seven calls looking for it, session 69)","placeholders":[{"name":"words","spec":"%s"},{"name":"door","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{words}|@M The front door's {door},if we head out!","text_hash":"77bab348f24a"},
+  {"boxes":[{"pages":[["Our HP,Lan! The pink","pad's waiting!"]],"speaker":"MegaMan","text":"Our HP,Lan! The pink pad's waiting!"}],"container":"home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_hp_words:0","kind":"speech","line":171,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Our HP,Lan! The pink pad's waiting!","text_hash":"5143268d4c27"},
+  {"boxes":[{"pages":[["Our HP,Lan! Home","sweet home!"]],"speaker":"MegaMan","text":"Our HP,Lan! Home sweet home!"},{"pages":[["The Endless Net's","linked in here","now..."]],"speaker":"MegaMan","text":"The Endless Net's linked in here now..."},{"pages":[["The pink pad leads","into it!"]],"speaker":"MegaMan","text":"The pink pad leads into it!"}],"container":"home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_hp_words:1","kind":"speech","line":172,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!","text_hash":"de24ccea7ec3"},
+  {"boxes":[{"pages":[["THE NETBATTLER,","ASTERLAND!"]],"speaker":"Mr.Prog","text":"THE NETBATTLER,\nASTERLAND!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:0","kind":"speech","line":185,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: what each request asks and pays, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE NETBATTLER,\nASTERLAND!","text_hash":"2c2573e5e696"},
+  {"boxes":[{"pages":[["THE NETBATTLE CLUB,","THE ACADEMY!"]],"speaker":"Mr.Prog","text":"THE NETBATTLE CLUB,\nTHE ACADEMY!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:1","kind":"speech","line":185,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: what each request asks and pays, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE NETBATTLE CLUB,\nTHE ACADEMY!","text_hash":"70e31163f06e"},
+  {"boxes":[{"pages":[["THE MAN FROM THE LAB","OUT IN TOWN!"]],"speaker":"Mr.Prog","text":"THE MAN FROM THE LAB\nOUT IN TOWN!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:2","kind":"speech","line":186,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: what each request asks and pays, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE MAN FROM THE LAB\nOUT IN TOWN!","text_hash":"5b0e012017c8"},
+  {"boxes":[{"pages":[["REWARD WAITING!","{paid_by}"]],"speaker":"Mr.Prog","text":"REWARD WAITING!\n{paid_by}"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:0","kind":"speech","line":192,"placeholders":[{"name":"paid_by","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REWARD WAITING!\n{paid_by}","text_hash":"d49120373fc0"},
+  {"boxes":[{"pages":[["REQUESTS ARE UP ON","ASTERLAND'S BBS!"]],"speaker":"Mr.Prog","text":"REQUESTS ARE UP ON\nASTERLAND'S BBS!"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:1","kind":"speech","line":196,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REQUESTS ARE UP ON\nASTERLAND'S BBS!","text_hash":"d5586d4fe6fd"},
+  {"boxes":[{"pages":[["A REQUEST IS UP ON","ASTERLAND'S BBS!"]],"speaker":"Mr.Prog","text":"A REQUEST IS UP ON\nASTERLAND'S BBS!"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:2","kind":"speech","line":196,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A REQUEST IS UP ON\nASTERLAND'S BBS!","text_hash":"e023d37dc557"},
+  {"boxes":[{"pages":[["NEW REQUESTS ON","ASTERLAND'S BBS!"]],"speaker":"Mr.Prog","text":"NEW REQUESTS ON\nASTERLAND'S BBS!"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:3","kind":"speech","line":197,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUESTS ON\nASTERLAND'S BBS!","text_hash":"5a1b0ccc3e85"},
+  {"boxes":[{"pages":[["A NEW REQUEST ON","ASTERLAND'S BBS!"]],"speaker":"Mr.Prog","text":"A NEW REQUEST ON\nASTERLAND'S BBS!"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:4","kind":"speech","line":197,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A NEW REQUEST ON\nASTERLAND'S BBS!","text_hash":"7f900dc705fb"},
   {"boxes":[{"pages":[["AN UNLOCKER"]],"speaker":"Mr.Prog","text":"AN UNLOCKER"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:5","kind":"speech","line":202,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AN UNLOCKER","text_hash":"ec5a018f8091"},
   {"boxes":[{"pages":[["A WWW-ID"]],"speaker":"Mr.Prog","text":"A WWW-ID"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:6","kind":"speech","line":204,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A WWW-ID","text_hash":"74d37e848e02"},
   {"boxes":[{"pages":[["{k}ASTERLAND","HAS"]],"speaker":"Mr.Prog","text":"{k}ASTERLAND HAS "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:7","kind":"speech","line":206,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{k}ASTERLAND HAS ","text_hash":"e89021ffad33"},
@@ -5956,17 +5963,31 @@
   {"boxes":[{"pages":[["We didn't finish","{who}'s","request..."]],"speaker":"MegaMan","text":"We didn't finish {who}'s request..."},{"pages":[["Let's tell them."]],"speaker":"MegaMan","text":"Let's tell them."}],"container":"job_due_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_due_words:2","kind":"speech","line":125,"placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M We didn't finish {who}'s request...|@M Let's tell them.","text_hash":"a532af273cb5"},
   {"boxes":[{"pages":[["Uh-oh... That","patch-up broke our","vow."]],"speaker":"MegaMan","text":"Uh-oh... That patch-up broke our vow."},{"pages":[["Oh well. Safety","first,Lan!"]],"speaker":"MegaMan","text":"Oh well. Safety first,Lan!"}],"container":"job_broken_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_broken_words:0","kind":"speech","line":129,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Uh-oh... That patch-up broke our vow.|@M Oh well. Safety first,Lan!","text_hash":"785b787adee5"},
   {"boxes":[{"pages":[["Remember our","vow,Lan!"]],"speaker":"MegaMan","text":"Remember our vow,Lan!"},{"pages":[["No Mr.Prog patch-ups","this time!"]],"speaker":"MegaMan","text":"No Mr.Prog patch-ups this time!"}],"container":"job_vow_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_vow_words:0","kind":"speech","line":131,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Remember our vow,Lan!|@M No Mr.Prog patch-ups this time!","text_hash":"40405001b1b8"},
-  {"boxes":[{"pages":[["The request board."]],"speaker":"Townsfolk","text":"The request board."},{"pages":[["Nothing new posted."]],"speaker":"Townsfolk","text":"Nothing new posted."}],"container":"job_board_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_board_words:0","kind":"speech","line":136,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"The request board.|Nothing new posted.","text_hash":"3cba63a1a05b"},
-  {"boxes":[{"pages":[["A request on the","board!"]],"speaker":"Townsfolk","text":"A request on the board!"},{"pages":[["\"A challenge! Beat","the next guardian"]],"speaker":"Townsfolk","text":"\"A challenge! Beat the next guardian"},{"pages":[["without a Mr.Prog's","patch-up.\""]],"speaker":"Townsfolk","text":"without a Mr.Prog's patch-up.\""},{"flags":[{"at":":","code":"colon"}],"pages":[["\"Reward: {pay_name}.\""]],"speaker":"Townsfolk","text":"\"Reward: {pay_name}.\""}],"container":"job_board_words","domain":"Requests","file":"src/world/job_words.c","flags":["colon","long-speech"],"id":"job_words:job_board_words:1","kind":"speech","line":138,"placeholders":[{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"A request on the board!|\"A challenge! Beat the next guardian|without a Mr.Prog's patch-up.\"|\"Reward: {pay_name}.\"","text_hash":"5f20c63c8fd5"},
-  {"boxes":[{"pages":[["A request on the","board!"]],"speaker":"Townsfolk","text":"A request on the board!"},{"flags":[{"at":":","code":"colon"}],"pages":[["\"Wanted: {an_element}","chip.\""]],"speaker":"Townsfolk","text":"\"Wanted: {an_element} chip.\""},{"flags":[{"at":":","code":"colon"}],"pages":[["\"Reward: {pay_name}.\""]],"speaker":"Townsfolk","text":"\"Reward: {pay_name}.\""}],"container":"job_board_words","domain":"Requests","file":"src/world/job_words.c","flags":["colon"],"id":"job_words:job_board_words:2","kind":"speech","line":140,"placeholders":[{"name":"an_element","spec":"%s"},{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"A request on the board!|\"Wanted: {an_element} chip.\"|\"Reward: {pay_name}.\"","text_hash":"4716b63a0468"},
-  {"boxes":[{"pages":[["Heard about your","last dive,kid."]],"speaker":"Townsfolk","text":"Heard about your last dive,kid."},{"pages":[["Forget our deal.","Fresh start!"]],"speaker":"Townsfolk","text":"Forget our deal. Fresh start!"}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:caseJOB_BOARD.0","kind":"speech","line":189,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Heard about your last dive,kid.|Forget our deal. Fresh start!","text_hash":"759ae11c72c5"},
-  {"boxes":[{"pages":[["Lan! We heard about","your dive..."]],"speaker":"Townsfolk","text":"Lan! We heard about your dive..."},{"pages":[["Forget that","challenge. Here's a","new one!"]],"speaker":"Townsfolk","text":"Forget that challenge. Here's a new one!"}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:caseJOB_CLUB.0","kind":"speech","line":190,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lan! We heard about your dive...|Forget that challenge. Here's a new one!","text_hash":"458e458678ed"},
-  {"boxes":[{"pages":[["Your readings","stopped last","time,Lan..."]],"speaker":"Townsfolk","text":"Your readings stopped last time,Lan..."},{"pages":[["Never mind my","request. Here's","another."]],"speaker":"Townsfolk","text":"Never mind my request. Here's another."}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:casedefault.0","kind":"speech","line":191,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Your readings stopped last time,Lan...|Never mind my request. Here's another.","text_hash":"57e666b09841"},
-  {"boxes":[{"pages":[["Will you take it?"]],"speaker":"Townsfolk","text":"Will you take it?\n"}],"container":"offer_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:offer_script:0","kind":"speech","line":207,"note":"(a vow costs a run its heals: it starts on No)","speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Will you take it?\n","text_hash":"57410bd49106"},
-  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["Lan handed over:","\"{name} {bring_code}\"."]],"speaker":"Townsfolk","text":"Lan handed over:\n\"{name} {bring_code}\"."}],"container":"hand_over","domain":"Requests","file":"src/world/job_words.c","flags":["colon"],"id":"job_words:hand_over:0","kind":"speech","line":221,"placeholders":[{"name":"name","spec":"%s"},{"name":"bring_code","spec":"%c"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lan handed over:\n\"{name} {bring_code}\".","text_hash":"33c21b475896"},
-  {"boxes":[{"pages":[["I'll wait,then!"]],"speaker":"Townsfolk","text":"I'll wait,then!"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:0","kind":"speech","line":239,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"I'll wait,then!","text_hash":"82d2edefe7b5"},
-  {"boxes":[{"pages":[["No {element_name} chip in","your Pack?"]],"speaker":"Townsfolk","text":"No {element_name} chip in your Pack?"},{"pages":[["From your Pack,kid.","Not your Folder!"]],"speaker":"Townsfolk","text":"From your Pack,kid. Not your Folder!"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:1","kind":"speech","line":242,"placeholders":[{"name":"element_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"No {element_name} chip in your Pack?|From your Pack,kid. Not your Folder!","text_hash":"f39c373378b6"},
-  {"boxes":[{"pages":[["Give up on it?"]],"speaker":"Townsfolk","text":"Give up on it?\n"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:2","kind":"speech","line":245,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Give up on it?\n","text_hash":"fe9c454151a1"},
+  {"boxes":[{"pages":[["Need {element_name} Chip"]],"speaker":"Townsfolk","text":"Need {element_name} Chip"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:caseJOB_BRING.0","kind":"screen","line":138,"placeholders":[{"name":"element_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Need {element_name} Chip","text_hash":"715f5025e47f"},
+  {"boxes":[{"pages":[["Guardian Dare!"]],"speaker":"Townsfolk","text":"Guardian Dare!"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:caseJOB_VOW.0","kind":"screen","line":139,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Guardian Dare!","text_hash":"02fc4104ce96"},
+  {"boxes":[{"pages":[["Speed Busting!"]],"speaker":"Townsfolk","text":"Speed Busting!"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:caseJOB_QUICK.0","kind":"screen","line":140,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Speed Busting!","text_hash":"e2ae0ce6e4c6"},
+  {"boxes":[{"pages":[["Data Readings"]],"speaker":"Townsfolk","text":"Data Readings"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:caseJOB_EXPLORE.0","kind":"screen","line":141,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Data Readings","text_hash":"63e9061fbdc4"},
+  {"boxes":[{"pages":[["Clean Sweep!"]],"speaker":"Townsfolk","text":"Clean Sweep!"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:casedefault.0","kind":"screen","line":142,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Clean Sweep!","text_hash":"607eb089b43a"},
+  {"boxes":[{"pages":[["Clean Win Data"]],"speaker":"Townsfolk","text":"Clean Win Data"}],"container":"job_bbs_title","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_title:casedefault.1","kind":"screen","line":142,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Clean Win Data","text_hash":"5f6fdd5b3182"},
+  {"boxes":[{"pages":[["Big NetBattle coming","up! I need {an_element}","chip."]],"speaker":"Townsfolk","text":"Big NetBattle coming up! I need {an_element} chip."},{"pages":[["One from your","Pack,for my","{pay_name}!"]],"speaker":"Townsfolk","text":"One from your Pack,for my {pay_name}!"},{"pages":[["I'm right here in","AsterLand."]],"speaker":"Townsfolk","text":"I'm right here in AsterLand."}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:caseJOB_BRING.0","kind":"speech","line":152,"placeholders":[{"name":"an_element","spec":"%s"},{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Big NetBattle coming up! I need {an_element} chip.|One from your Pack,for my {pay_name}!|I'm right here in AsterLand.","text_hash":"e1d54db1caa7"},
+  {"boxes":[{"pages":[["Think you're tough?"]],"speaker":"Townsfolk","text":"Think you're tough?"},{"pages":[["Beat the next","guardian without a","patch-up!"]],"speaker":"Townsfolk","text":"Beat the next guardian without a patch-up!"},{"pages":[["Pull it off and","{pay_name} are yours.","I'm in AsterLand."]],"speaker":"Townsfolk","text":"Pull it off and {pay_name} are yours. I'm in AsterLand."}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:caseJOB_VOW.0","kind":"speech","line":156,"placeholders":[{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Think you're tough?|Beat the next guardian without a patch-up!|Pull it off and {pay_name} are yours. I'm in AsterLand.","text_hash":"d7911d260666"},
+  {"boxes":[{"pages":[["Club challenge! Win","{need} battles,ten","seconds each!"]],"speaker":"Townsfolk","text":"Club challenge! Win {need} battles,ten seconds each!"},{"pages":[["The prize is","{pay_name}!"]],"speaker":"Townsfolk","text":"The prize is {pay_name}!"},{"pages":[["Come find us in","class 6-1!"]],"speaker":"Townsfolk","text":"Come find us in class 6-1!"}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:caseJOB_QUICK.0","kind":"speech","line":160,"placeholders":[{"name":"need","spec":"%u"},{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Club challenge! Win {need} battles,ten seconds each!|The prize is {pay_name}!|Come find us in class 6-1!","text_hash":"085b4e43f636"},
+  {"boxes":[{"pages":[["The lab needs","Mystery Data","readings!"]],"speaker":"Townsfolk","text":"The lab needs Mystery Data readings!"},{"pages":[["Open every one on a","layer,three or more.","I'll pay {pay_name}."]],"speaker":"Townsfolk","text":"Open every one on a layer,three or more. I'll pay {pay_name}."},{"pages":[["You'll find me out","in town."]],"speaker":"Townsfolk","text":"You'll find me out in town."}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:caseJOB_EXPLORE.0","kind":"speech","line":163,"placeholders":[{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"The lab needs Mystery Data readings!|Open every one on a layer,three or more. I'll pay {pay_name}.|You'll find me out in town.","text_hash":"e610f0bdc085"},
+  {"boxes":[{"pages":[["Club challenge! Win","{need} battles without","a scratch!"]],"speaker":"Townsfolk","text":"Club challenge! Win {need} battles without a scratch!"},{"pages":[["The prize is","{pay_name}!"]],"speaker":"Townsfolk","text":"The prize is {pay_name}!"},{"pages":[["Come find us in","class 6-1!"]],"speaker":"Townsfolk","text":"Come find us in class 6-1!"}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:casedefault.0","kind":"speech","line":168,"placeholders":[{"name":"need","spec":"%u"},{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Club challenge! Win {need} battles without a scratch!|The prize is {pay_name}!|Come find us in class 6-1!","text_hash":"fde92643dda7"},
+  {"boxes":[{"pages":[["The lab's studying","clean wins!"]],"speaker":"Townsfolk","text":"The lab's studying clean wins!"},{"pages":[["Win {need} battles","without taking","damage."]],"speaker":"Townsfolk","text":"Win {need} battles without taking damage."},{"pages":[["I'll pay {pay_name}.","You'll find me out","in town."]],"speaker":"Townsfolk","text":"I'll pay {pay_name}. You'll find me out in town."}],"container":"job_bbs_post","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_bbs_post:casedefault.1","kind":"speech","line":169,"placeholders":[{"name":"need","spec":"%u"},{"name":"pay_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"The lab's studying clean wins!|Win {need} battles without taking damage.|I'll pay {pay_name}. You'll find me out in town.","text_hash":"61f26e398382"},
+  {"boxes":[{"pages":[["{an_element} CHIP FOR","{pay_name}!"]],"speaker":"Mr.Prog","text":"{an_element} CHIP FOR {pay_name}!"}],"container":"job_offer_brief","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_offer_brief:caseJOB_BRING.0","kind":"speech","line":180,"placeholders":[{"name":"an_element","spec":"%s"},{"name":"pay_name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{an_element} CHIP FOR {pay_name}!","text_hash":"5edcdc727329"},
+  {"boxes":[{"pages":[["A GUARDIAN DARE FOR","{pay_name}!"]],"speaker":"Mr.Prog","text":"A GUARDIAN DARE FOR {pay_name}!"}],"container":"job_offer_brief","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_offer_brief:caseJOB_VOW.0","kind":"speech","line":181,"placeholders":[{"name":"pay_name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A GUARDIAN DARE FOR {pay_name}!","text_hash":"54f19ca9b83f"},
+  {"boxes":[{"pages":[["{need} QUICK WINS FOR","{pay_name}!"]],"speaker":"Mr.Prog","text":"{need} QUICK WINS FOR {pay_name}!"}],"container":"job_offer_brief","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_offer_brief:caseJOB_QUICK.0","kind":"speech","line":182,"placeholders":[{"name":"need","spec":"%u"},{"name":"pay_name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{need} QUICK WINS FOR {pay_name}!","text_hash":"460c3fac7986"},
+  {"boxes":[{"pages":[["A LAYER'S DATA FOR","{pay_name}!"]],"speaker":"Mr.Prog","text":"A LAYER'S DATA FOR {pay_name}!"}],"container":"job_offer_brief","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_offer_brief:caseJOB_EXPLORE.0","kind":"speech","line":183,"placeholders":[{"name":"pay_name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A LAYER'S DATA FOR {pay_name}!","text_hash":"6229c7df0cf3"},
+  {"boxes":[{"pages":[["{need} CLEAN WINS FOR","{pay_name}!"]],"speaker":"Mr.Prog","text":"{need} CLEAN WINS FOR {pay_name}!"}],"container":"job_offer_brief","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:job_offer_brief:casedefault.0","kind":"speech","line":184,"placeholders":[{"name":"need","spec":"%u"},{"name":"pay_name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{need} CLEAN WINS FOR {pay_name}!","text_hash":"95182fb8b76b"},
+  {"boxes":[{"pages":[["Heard about your","last dive,kid."]],"speaker":"Townsfolk","text":"Heard about your last dive,kid."},{"pages":[["Forget our deal.","Fresh start!"]],"speaker":"Townsfolk","text":"Forget our deal. Fresh start!"}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:caseJOB_BOARD.0","kind":"speech","line":236,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Heard about your last dive,kid.|Forget our deal. Fresh start!","text_hash":"759ae11c72c5"},
+  {"boxes":[{"pages":[["Lan! We heard about","your dive..."]],"speaker":"Townsfolk","text":"Lan! We heard about your dive..."},{"pages":[["Forget that","challenge. Here's a","new one!"]],"speaker":"Townsfolk","text":"Forget that challenge. Here's a new one!"}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:caseJOB_CLUB.0","kind":"speech","line":237,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lan! We heard about your dive...|Forget that challenge. Here's a new one!","text_hash":"458e458678ed"},
+  {"boxes":[{"pages":[["Your readings","stopped last","time,Lan..."]],"speaker":"Townsfolk","text":"Your readings stopped last time,Lan..."},{"pages":[["Never mind my","request. Here's","another."]],"speaker":"Townsfolk","text":"Never mind my request. Here's another."}],"container":"lost_words","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:lost_words:casedefault.0","kind":"speech","line":238,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Your readings stopped last time,Lan...|Never mind my request. Here's another.","text_hash":"57e666b09841"},
+  {"boxes":[{"pages":[["Will you take it?"]],"speaker":"Townsfolk","text":"Will you take it?\n"}],"container":"offer_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:offer_script:0","kind":"speech","line":254,"note":"(a vow costs a run its heals: it starts on No)","speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Will you take it?\n","text_hash":"57410bd49106"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["Lan handed over:","\"{name} {bring_code}\"."]],"speaker":"Townsfolk","text":"Lan handed over:\n\"{name} {bring_code}\"."}],"container":"hand_over","domain":"Requests","file":"src/world/job_words.c","flags":["colon"],"id":"job_words:hand_over:0","kind":"speech","line":268,"placeholders":[{"name":"name","spec":"%s"},{"name":"bring_code","spec":"%c"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lan handed over:\n\"{name} {bring_code}\".","text_hash":"33c21b475896"},
+  {"boxes":[{"pages":[["I'll wait,then!"]],"speaker":"Townsfolk","text":"I'll wait,then!"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:0","kind":"speech","line":286,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"I'll wait,then!","text_hash":"82d2edefe7b5"},
+  {"boxes":[{"pages":[["No {element_name} chip in","your Pack?"]],"speaker":"Townsfolk","text":"No {element_name} chip in your Pack?"},{"pages":[["From your Pack,kid.","Not your Folder!"]],"speaker":"Townsfolk","text":"From your Pack,kid. Not your Folder!"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:1","kind":"speech","line":289,"placeholders":[{"name":"element_name","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"No {element_name} chip in your Pack?|From your Pack,kid. Not your Folder!","text_hash":"f39c373378b6"},
+  {"boxes":[{"pages":[["Give up on it?"]],"speaker":"Townsfolk","text":"Give up on it?\n"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:2","kind":"speech","line":292,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Give up on it?\n","text_hash":"fe9c454151a1"},
   {"boxes":[{"pages":[["Welcome to","AsterLand!"]],"speaker":"Townsfolk","text":"Welcome to AsterLand!"},{"pages":[["Any chip you've","had,I can order!"]],"speaker":"Townsfolk","text":"Any chip you've had,I can order!"},{"pages":[["One order a","visit,OK?"]],"speaker":"Townsfolk","text":"One order a visit,OK?"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:0.2.5","kind":"speech","line":22,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Welcome to AsterLand!|Any chip you've had,I can order!|One order a visit,OK?","text_hash":"089d10d7d0ec"},
   {"boxes":[{"pages":[["SubChips! Energy and","keys!"]],"speaker":"Townsfolk","text":"SubChips! Energy and keys!"},{"pages":[["Take a look!"]],"speaker":"Townsfolk","text":"Take a look!"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:1.2.5","kind":"speech","line":23,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"SubChips! Energy and keys!|Take a look!","text_hash":"6f1f5f043851"},
   {"boxes":[{"pages":[["Hmm... The request","board's empty."]],"speaker":"Townsfolk","text":"Hmm... The request board's empty."},{"pages":[["Doesn't anybody need","a NetBattler?"]],"speaker":"Townsfolk","text":"Doesn't anybody need a NetBattler?"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:2.2.5","kind":"speech","line":25,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?","text_hash":"c590f78743b6"},

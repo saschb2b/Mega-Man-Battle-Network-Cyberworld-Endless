@@ -1,8 +1,9 @@
 /* director_courier.h. The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2;
  * issue #108): a Mr.Prog who stands there while the town holds something
- * for this visit, BN6's "!!" over his head, and says where it waits, the
+ * for this visit, BN6's "!!" over his head, and says what waits, the
  * most valuable first: a finished request's pay with its asker, else the
- * new requests posted while none is held, then the keys AsterLand's
+ * new requests on AsterLand's Request BBS while none is held, what each
+ * asks and pays, then the keys AsterLand's
  * SubChip seller stocked. What the visit holds is fixed as it begins
  * (the run's state); what still waits follows the askers' flags, so a
  * reward taken or a request taken in the town sends him off, and L's word
@@ -82,8 +83,17 @@ void home_courier_frame(void) {
 	ta_begin(&t);
 	ta_script(&t);
 	/* (the run's first visit, before its first layer: run.depth as the askers' own, director_jobs.c) */
-	ta_pages(&t, home_courier_words(w & WAITS_REWARD ? C.reward : -1, w & WAITS_REQUESTS ? C.posted : 0u, run.depth <= 1, keys ? C.unlockers : 0,
-		keys && C.rush_food, keys && C.www_id), FACE_PROG, &first);
+	/* (each offer's kind and pay, a box each: what a walk to the board
+	 * would read, course check of 26 October 2026) */
+	char offers[200];
+	int n = 0;
+	size_t k = 0;
+	offers[0] = 0;
+	for (int a = 0; a < JOB_ASKERS && (w & WAITS_REQUESTS); ++a)
+		if (C.posted >> a & 1 && k < sizeof offers)
+			k += (size_t)snprintf(offers + k, sizeof offers - k, "%s%s", n++ ? "|" : "", job_offer_brief(&job_talk[a].job));
+	ta_pages(&t, home_courier_words(w & WAITS_REWARD ? C.reward : -1, offers, n, run.depth <= 1, keys ? C.unlockers : 0, keys && C.rush_food,
+		keys && C.www_id), FACE_PROG, &first);
 	/* (heard, his "!!" goes; new words bring it back as he is met again) */
 	ta_flag_set(&t, LANHP_COURIER_TOLD_FLAG);
 	ta_end(&t);

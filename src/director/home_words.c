@@ -143,9 +143,11 @@ const char *home_errands_words(const char *words, bool requests, bool order, con
 	/* (a playtester heard only the way home in town, and found the
 	 * request board by chance, session 69; then walked round AsterLand
 	 * twice to its door, session 70) */
-	/* (the three askers in one box: six boxes in all, session 73) */
+	/* (the three askers in one box: six boxes in all, session 73; their
+	 * posts in one place, AsterLand's BBS, since the course check of 26
+	 * October 2026) */
 	int k = snprintf(buf, sizeof buf, "%s%s%s", words, requests ? "|@M Folks posted requests,Lan!|"
-		"@M AsterLand's board,the club,and the lab man out here!" : "", order ? "|@M AsterLand can order us a chip,too!" : "");
+		"@M They're all up on AsterLand's BBS!" : "", order ? "|@M AsterLand can order us a chip,too!" : "");
 	if ((requests || order) && aster && k > 0 && (size_t)k < sizeof buf) snprintf(buf + k, sizeof buf - (size_t)k, "|@M AsterLand's door is %s!", aster);
 	return buf;
 }
@@ -177,26 +179,24 @@ static size_t name_list(char *w, size_t size, size_t k, const char *const *names
 	return k < size ? k : size - 1;
 }
 
-const char *home_courier_words(int reward, unsigned posted, bool first, int unlockers, bool rush_food, bool www_id) {
+const char *home_courier_words(int reward, const char *offers, int n_offers, bool first, int unlockers, bool rush_food, bool www_id) {
 	/* (a homepage's helper relaying the town's posts and AsterLand's stock:
-	 * where each waits, never what the Net ahead holds) */
+	 * what each request asks and pays, never what the Net ahead holds) */
 	static const char *const paid_by[JOB_ASKERS] = { "THE NETBATTLER,\nASTERLAND!", "THE NETBATTLE CLUB,\nTHE ACADEMY!",
 		"THE MAN FROM THE LAB\nOUT IN TOWN!" };
-	static const char *const places[JOB_ASKERS] = { "ASTERLAND", "THE ACADEMY", "TOWN" };
-	static char w[320];
+	static char w[400];
 	const char *names[JOB_ASKERS];
 	size_t k = 0;
 	int n = 0;
 	w[0] = 0;
 	if (reward >= 0 && reward < JOB_ASKERS) k = (size_t)snprintf(w, sizeof w, "REWARD WAITING!\n%s", paid_by[reward]);
-	else if (posted) {
-		for (int a = 0; a < JOB_ASKERS; ++a) if (posted >> a & 1) names[n++] = places[a];
+	else if (n_offers) {
 		/* (at a run's first visit nothing is new yet: a player heard
 		 * "NEW REQUESTS POSTED!" before he had done a thing, session 74) */
-		if (first) k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "REQUESTS ARE UP AT\n" : "A REQUEST IS UP AT\n");
-		else k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "NEW REQUESTS POSTED!\n" : "NEW REQUEST POSTED!\nAT ");
-		k = name_list(w, sizeof w, k, names, n);
-		k += (size_t)snprintf(w + k, sizeof w - k, "!");
+		if (first) k = (size_t)snprintf(w, sizeof w, "%s", n_offers > 1 ? "REQUESTS ARE UP ON\nASTERLAND'S BBS!" : "A REQUEST IS UP ON\nASTERLAND'S BBS!");
+		else k = (size_t)snprintf(w, sizeof w, "%s", n_offers > 1 ? "NEW REQUESTS ON\nASTERLAND'S BBS!" : "A NEW REQUEST ON\nASTERLAND'S BBS!");
+		k += (size_t)snprintf(w + k, sizeof w - k, "|%s", offers);
+		if (k >= sizeof w) k = sizeof w - 1;
 	}
 	n = 0;
 	if (unlockers) names[n++] = unlockers > 1 ? "UNLOCKERS" : "AN UNLOCKER";

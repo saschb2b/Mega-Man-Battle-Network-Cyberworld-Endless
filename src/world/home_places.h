@@ -31,8 +31,8 @@ bool home_places_door(int group, int number, int *x, int *y);
 /* Each frame in one of them: the doors it keeps shut. */
 void home_places_frame(int group, int number);
 /* What A reads from world (x, y) facing `face` (0-7) in one of them where
- * the place answers instead of BN6 (AsterLand's Number Trader, and its
- * request board's post); NULL elsewhere. */
+ * the place answers instead of BN6 (AsterLand's Number Trader); NULL
+ * elsewhere (its request board BN6's own Request BBS, request_bbs.c). */
 const char *home_places_check(int group, int number, int x, int y, int face);
 /* Whether A from world (x, y) facing `face` talks to a keeper across a
  * counter in one of them (AsterLand's clerk and SubChip seller), whose

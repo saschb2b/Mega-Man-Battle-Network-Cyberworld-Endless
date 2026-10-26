@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "5. Jobs (the Request BBS)"
-description: "Jobs on the Request BBS (`jobs.c`, `director_jobs.c`, issue #88): three townsfolk post a request each visit, Lan takes one at most, the asker pays at the next visit, and how vows work."
+description: "Jobs on the Request BBS (`jobs.c`, `director_jobs.c`, `request_bbs.c`, issue #88): three townsfolk post a request each visit on BN6's own Request BBS at AsterLand, Lan takes one at most, the asker pays at the next visit, and how vows work."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-18T21:46:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # 5. Jobs (the Request BBS)
@@ -43,7 +43,7 @@ the act, none twice at a visit; the pay grows by the act and stays under
 what the act's own sources give (`build.py pacing` lists it: act 1's 500
 zenny against its guardian's 600 and an HPMemory's 800). Lan takes one
 with Yes; the others then say one at a time is enough (BN6's Request
-BBS's rule), and the board reads its post until it is taken. In the Net
+BBS's rule). In the Net
 the request counts its own act's battles (BN6's and the older net's; a
 guardian's counts for none), each layer's Mystery Data as MegaMan leaves
 it, a Mr.Prog's patch and the guardian's fall; MegaMan says when one is
@@ -87,3 +87,38 @@ after an act, the PET's Save saves where Lan stands, as the HP's arrival
 does, and CONTINUE goes on from there (a playtester's purchase and
 request in the town were left unsaved, under "Saves begin on layer 1",
 session 70).
+
+## On BN6's Request BBS (26 October 2026)
+
+The course check of 26 October 2026 ([The core loop](../../game/core-loop.md),
+Phase 1) found the vow, the best-rated job, behind a walk: the three
+posts stood in three places, and the courier said where they waited, not
+what they were. A home visit measured 2.5 minutes for one purchase
+against a design of 60 to 90 seconds. Through the game-design skill's
+interface layer: a usability fault, not an engageability one (the player
+could not compare a draft of three without walking it), so the fix is
+where the information lives, not what it says. The draft serves home's
+dialectic, prepare or press on ([Home's design](design.md)), on the
+session loop between acts, and its patterns are a pick of one from three
+(each kind's price what it bends) and feedforward: the decision readable
+before the walk, so a player who wants none of them presses on.
+
+So all three posts are on BN6's own Request BBS, the board on
+AsterLand's wall (`request_bbs.c`), and nothing is redrawn: the board's
+check opens BN6's screen, which lists them (the NetBattler's on top), reads
+a post out, asks its own "Take this request?" and keeps its own rule, "You
+can only pick one request at a time.", while one is held. Each visit the
+askers' requests are posted as BN6's requests 0 to 2, asker k's request k
+(the one held among them, marked taken), their titles and posts the run's
+(`job_words.c`: what it asks, the pay, where the poster waits) in place of
+BN6's 48, which a run never posts; BN6's taken flag for one is its
+asker's Yes, which their script then follows. The askers and the Academy
+stay as places (decision 10): each still offers in person, settles where
+they stand, and hands a chip over there. The courier in Lan's HP names
+each offer's kind and pay, a box each ("3 CLEAN WINS FOR 1000 ZENNY!"),
+and L in the town says the posts are all on AsterLand's BBS. A vow taken
+on the board starts its question on BN6's Yes; the NetBattler's own
+starts on No. The addresses and flags are in [The real world and
+home](../../rom/world.md), The Request BBS; the statistics' requests taken
+and vows ([The run log](../../devtools/run-log.md)) will say whether the
+draft is read more.

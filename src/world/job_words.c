@@ -130,14 +130,61 @@ const char *job_broken_words(void) { return "@M Uh-oh... That patch-up broke our
 
 const char *job_vow_words(void) { return "@M Remember our vow,Lan!|@M No Mr.Prog patch-ups this time!"; }
 
-const char *job_board_words(void) {
-	static char w[200];
-	const JobTalk *jt = &job_talk[JOB_BOARD];
-	if (jt->mode != JOB_TALK_OFFER || flag_get(JOB_HELD_FLAG)) return "The request board.|Nothing new posted.";
-	if (jt->job.kind == JOB_VOW)
-		snprintf(w, sizeof w, "A request on the board!|\"A challenge! Beat the next guardian|without a Mr.Prog's patch-up.\"|\"Reward: %s.\"",
-			pay_name(&jt->job));
-	else snprintf(w, sizeof w, "A request on the board!|\"Wanted: %s chip.\"|\"Reward: %s.\"", an_element(jt->job.need), pay_name(&jt->job));
+/* ---- on BN6's Request BBS (request_bbs.c) ---- */
+
+const char *job_bbs_title(const Job *j) {
+	static char w[16];
+	switch (j->kind) {
+	case JOB_BRING: snprintf(w, sizeof w, "Need %s Chip", element_name(j->need)); break;
+	case JOB_VOW: return "Guardian Dare!";
+	case JOB_QUICK: return "Speed Busting!";
+	case JOB_EXPLORE: return "Data Readings";
+	default: return j->asker == JOB_CLUB ? "Clean Sweep!" : "Clean Win Data";
+	}
+	return w;
+}
+
+/* the post, in its poster's voice, and where they wait: they pay there */
+const char *job_bbs_post(const Job *j) {
+	static char w[256];
+	switch (j->kind) {
+	case JOB_BRING:
+		snprintf(w, sizeof w, "Big NetBattle coming up! I need %s chip.|One from your Pack,for my %s!|"
+			"I'm right here in AsterLand.", an_element(j->need), pay_name(j));
+		break;
+	case JOB_VOW:
+		snprintf(w, sizeof w, "Think you're tough?|Beat the next guardian without a patch-up!|"
+			"Pull it off and %s are yours. I'm in AsterLand.", pay_name(j));
+		break;
+	case JOB_QUICK:
+		snprintf(w, sizeof w, "Club challenge! Win %u battles,ten seconds each!|The prize is %s!|Come find us in class 6-1!", j->need, pay_name(j));
+		break;
+	case JOB_EXPLORE:
+		snprintf(w, sizeof w, "The lab needs Mystery Data readings!|Open every one on a layer,three or more. I'll pay %s.|"
+			"You'll find me out in town.", pay_name(j));
+		break;
+	default:
+		if (j->asker == JOB_CLUB)
+			snprintf(w, sizeof w, "Club challenge! Win %u battles without a scratch!|The prize is %s!|Come find us in class 6-1!", j->need, pay_name(j));
+		else snprintf(w, sizeof w, "The lab's studying clean wins!|Win %u battles without taking damage.|"
+			"I'll pay %s. You'll find me out in town.", j->need, pay_name(j));
+		break;
+	}
+	return w;
+}
+
+/* the courier's word on an offer, in his capitals: what it asks, for what */
+const char *job_offer_brief(const Job *j) {
+	static char w[64];
+	switch (j->kind) {
+	case JOB_BRING: snprintf(w, sizeof w, "%s CHIP FOR %s!", an_element(j->need), pay_name(j)); break;
+	case JOB_VOW: snprintf(w, sizeof w, "A GUARDIAN DARE FOR %s!", pay_name(j)); break;
+	case JOB_QUICK: snprintf(w, sizeof w, "%u QUICK WINS FOR %s!", j->need, pay_name(j)); break;
+	case JOB_EXPLORE: snprintf(w, sizeof w, "A LAYER'S DATA FOR %s!", pay_name(j)); break;
+	default: snprintf(w, sizeof w, "%u CLEAN WINS FOR %s!", j->need, pay_name(j)); break;
+	}
+	for (char *c = w; *c; ++c)
+		if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 	return w;
 }
 
