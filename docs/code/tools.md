@@ -1,7 +1,7 @@
 ---
 type: Code Map
 title: "Tools and skills"
-description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, agent-browser)."
+description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, course-check, agent-browser)."
 tags: [code]
 generated: { by: claude-code/unrecorded, at: 2026-10-23T17:18:21Z }
 ---
@@ -19,4 +19,5 @@ generated: { by: claude-code/unrecorded, at: 2026-10-23T17:18:21Z }
 | `.claude/skills/playtest-loop/` | The playtest loop as a skill: a persona plays through `tools/play.py`, its reports are triaged and fixed, and the loop's log (`lessons.md`) grows with every session |
 | `.claude/skills/game-design/` | The game-design skill (from saschb2b/skills): the lens, pattern catalog and frameworks to reason from before a design decision |
 | `.claude/skills/trailer/` | The trailer skill: a release's trailer from the brief to the site, its music's habits read from the ROM (`scripts/song_habits.py`), checked without ears (`scripts/music_check.py`), its frames picked and reviewed on contact sheets (`scripts/sheets.py`), and the log of the trailers made (`lessons.md`) |
+| `.claude/skills/course-check/` | The course check as a skill: the whole game's course reviewed (the players' statistics read first with `scripts/umami_summary.js`, a time-boxed team of six whose briefs are in `roles.md`, a devil's advocate, the owner's calls), written into [The core loop, reviewed](../game/core-loop.md), and the log of the checks run (`lessons.md`) |
 | `.claude/skills/agent-browser/` | The agent-browser skill: a real Chrome driven from the shell (`npm i -g agent-browser`), to look over the site at desktop and phone widths |

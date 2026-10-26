@@ -222,6 +222,13 @@ and screens, "is this fun") goes through the game-design skill first: name
 the dialectic it serves, the loop layer it feeds and the patterns it uses,
 before the numbers. This holds mid-implementation too.
 
+The whole game's course is checked with the course-check skill
+(`.claude/skills/course-check/`) every few minor releases, or when the
+owner asks to step back: the players' statistics first, a time-boxed
+team, a devil's advocate, the owner's calls, the result in
+[docs/game/core-loop.md](docs/game/core-loop.md). A new system or meta
+axis is checked against that page first.
+
 ## Trailers
 
 A release whose news changes how the game looks or plays (a minor
