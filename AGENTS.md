@@ -250,8 +250,7 @@ its release's tag and still renders from its cut, into `.build/` only.
 
 ## Pull requests
 
-PRs target `dev` and are merged by hand once CI is green; commits carry
-only the author (no Co-Authored-By). A PR's description is short and
+PRs target `dev`; commits carry only the author (no Co-Authored-By). A PR's description is short and
 shows the change: a line or two on what changes, **See it** (pictures or
 GIFs, before and after where something visible changed), a short
 **Checked** list, and follow-ups if any; the mechanism stays in the
@@ -259,6 +258,43 @@ commits and docs. Its pictures (whole frames of the game or pages of the
 site, never a sprite cropped out) go on the orphan branch `pr-media`
 under `prs/<branch>/`, embedded by their raw URL at that branch's commit;
 motion as a GIF, which GitHub plays inline.
+
+### Merging
+
+The owner does not merge. The session that opened a PR, or the one that
+started the session that opened it, watches it (the app's Auto-fix on
+it) and merges it itself once it is good: every check green on its
+latest commit, its own **Checked** list done, no review comment left
+unanswered, no conflict with `dev`. With a merge commit, pinned to the
+commit checked: `gh pr merge N --merge --match-head-commit SHA`; never
+`--auto`, which merges at once here (`dev` has no required checks). A
+check that cannot be made green goes back to the owner with why, unmerged.
+
+Several PRs open at once are merged so that the least waits and the
+least is done twice:
+
+1. **Merge them all together first, locally**, on a scratch branch from
+   `origin/dev` (in `.build/`), in the order below; resolve each
+   conflict there once, and run `CI=1 build.py test` and `CI=1 build.py
+   lint` on the whole. That finds every conflict and every clash between
+   them before anything lands.
+2. **The order:** first the PRs no other open PR shares a file with,
+   then the rest from the fewest shared files to the most; between two
+   that tighten the run (prices, heals, sinks, battles), the one the
+   statistics measure first.
+3. **Merge the first** as soon as its checks are green. For each next
+   one: bring `dev` in where git reports a conflict or the PRs share a
+   generated or counted file (`docs/voice/catalog.json`,
+   `docs/symbols/`, `LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`,
+   `tests/lint/` baselines, the economy's bands), regenerate those
+   rather than merging them by hand (`tools/voice_catalog.py`,
+   `tools/symbols.py`, the hash the unit tests name; two `LAYER_MAKE`
+   bumps become one), and reuse step 1's resolution for the rest. A PR
+   whose only change since its green checks is `dev` brought in, its
+   resolution step 1 tested, merges at once without waiting on CI again;
+   any other change waits for green.
+4. **After the last**, `dev`'s own CI on the merge is the check of the
+   whole: a red there is fixed before anything else merges.
 
 A merged branch goes: deleted on GitHub and here, its worktree
 (`.claude/worktrees/`, `.build/`) removed once it holds no changes. At

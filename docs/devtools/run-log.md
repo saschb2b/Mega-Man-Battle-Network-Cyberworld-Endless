@@ -41,7 +41,15 @@ line gives where the run ended (`run over`, or `run won`) and its
 economy's counts: the chips found and the good among them, the Mystery
 Data opened and the zenny earned, then the same for its first act
 (`chips 11 good 3 md 9 zenny 4210 (act 1: 6 2 7 1830)`; the anonymous
-statistics' run-end event carries them, src/analytics/). Past 512 KB
+statistics' run-end event carries them, src/analytics/), and a line of
+what it chose (`choices trips 1 jobs 2 kept 1 vows 1 orders 2 skips 0
+undernet 1 dark 0 duels 1/2 netbattles 0/1 edits 3 battlers 1/2/1 map 1840s battle 960s`:
+trips back home, requests taken, kept and vowed, AsterLand's orders,
+drafts left for their BugFrags, the Undernet's and dark layers entered,
+duels and netbattles won of taken, folder edits between layers, Virus
+Battlers' series begun, rounds fought on and pots taken, and the
+seconds on the map against those in battle; the run-choices event
+carries them, [The core loop, reviewed](../game/core-loop.md), Phase 0). Past 512 KB
 the log moves to `runlog.old`. Collected from real runs, it shows where
 runs are lost. The same moments give the anonymous statistics their
 guardian and run-end events (src/analytics/, [The player's guide](../GUIDE.md#anonymous-statistics)'s Anonymous

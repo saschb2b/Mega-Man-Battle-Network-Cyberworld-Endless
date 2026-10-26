@@ -373,6 +373,23 @@ void draft_fit_watch(void) {
 	}
 }
 
+/* The draft left for its BugFrags (the run's choices, docs/game/core-loop.md):
+ * its skip and a program taken set the same flag, so the BugFrags the
+ * Guardian Data paid tell them apart, the skip's alone */
+void draft_skip_watch(void) {
+	static bool waiting;
+	static uint32_t before;
+	if (boss_reward_waiting()) {
+		if (!waiting) before = emu_read32(BN6_BUGFRAGS);
+		waiting = true;
+		return;
+	}
+	if (!waiting) return;
+	waiting = false;
+	int frags = navicust_skip_frags(run.depth);
+	if (frags > 0 && emu_read32(BN6_BUGFRAGS) >= before + (uint32_t)frags) runlog_choice(CHOICE_DRAFT_SKIP);
+}
+
 /* MegaMan free to speak of the NaviCust: no talk, staging or chat box, and
  * the game not holding him for lines of its own. A Chip Trader's lines go
  * on on the map after its trade screen: a talk begun in between took their

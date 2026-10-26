@@ -149,6 +149,9 @@ void duel_verdict(bool won, bool spared) {
 
 	if (beat) profile.duel_won++;
 	else profile.duel_lost++;
+	/* (the run's choices: a race or the netbattle taken, and won) */
+	runlog_choice(rung == 2 ? CHOICE_NETBATTLE : CHOICE_DUEL);
+	if (beat) runlog_choice(rung == 2 ? CHOICE_NETBATTLE_WON : CHOICE_DUEL_WON);
 	profile.duel_run = run.seed;
 	profile.duel_depth = (uint16_t)run.depth;
 	profile.duel_beat = beat;

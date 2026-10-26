@@ -39,7 +39,9 @@ docs/game/core-loop.md's), no team.
 
 ## The check
 
-1. **What changed since the last check.** CHANGELOG.md and `git log`
+1. **What changed since the last check.** Pull `dev` first: the first
+   check read a tree a release behind and called a shipped system
+   unbuilt. Then CHANGELOG.md and `git log`
    since the date of docs/game/core-loop.md's last review: the systems added (on
    the main path or off it), the decisions taken, how far each phase got.
    Count where the work went (core loop, BN5, online, PET, platforms), as

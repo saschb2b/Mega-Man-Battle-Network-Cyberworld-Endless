@@ -24,6 +24,7 @@ static struct {
 	int round;      /* the round under way or just fought, 0-based */
 	int result;     /* the last round's BN6_RESULT_*, 0 none waiting to be said */
 	bool known;     /* ... of the layer `seed` made, as MegaMan came onto it */
+	bool won;       /* the last round won (a series ended on it: the pot taken) */
 	uint32_t seed;
 } B;
 
@@ -56,12 +57,14 @@ void battler_begin(void) {
 	if (!B.k) return;
 	B.round = 0;
 	D.battler_series = true;
+	runlog_choice(CHOICE_BATTLER);   /* (the run's choices: a series begun) */
 	fight();
 }
 
 void battler_round_over(int result) {
 	D.battler = false;
 	B.result = result ? result : BN6_RESULT_LOST;
+	B.won = B.result == BN6_RESULT_WON;
 	if (emu_debug_on()) fprintf(stderr, "battler %d: round %d result %d\n", B.k, B.round + 1, result);
 }
 
@@ -96,6 +99,10 @@ void battler_update(void) {
 	if (flag_get(BATTLER_ON_FLAG)) {
 		flag_clear(BATTLER_ON_FLAG);
 		++B.round;
+		runlog_choice(CHOICE_BATTLER_ON);   /* (the run's choices: on after a win) */
 		fight();
-	} else if (flag_get(BATTLER_DONE_FLAG)) D.battler_series = false;
+	} else if (flag_get(BATTLER_DONE_FLAG)) {
+		D.battler_series = false;
+		if (B.won) runlog_choice(CHOICE_BATTLER_CASH);   /* (... or the pot taken) */
+	}
 }

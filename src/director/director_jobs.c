@@ -101,7 +101,13 @@ void home_jobs_flag(int flag) {
 		run.job = job_talk[flag - JOB_TAKE_FLAG].job;
 		run.job.state = JOB_TAKEN;
 		run.job.got = 0;
-	} else if (flag == JOB_SETTLED_FLAG) memset(&run.job, 0, sizeof run.job);
+		/* (the run's choices: a request taken, a vow among them) */
+		runlog_choice(CHOICE_JOB);
+		if (run.job.kind == JOB_VOW) runlog_choice(CHOICE_VOW);
+	} else if (flag == JOB_SETTLED_FLAG) {
+		if (run.job.state == JOB_DONE) runlog_choice(CHOICE_JOB_KEPT);
+		memset(&run.job, 0, sizeof run.job);
+	}
 	if (emu_debug_on()) fprintf(stderr, "jobs: flag %04x, the run's job now kind %d from %d\n", flag, run.job.kind, run.job.asker);
 }
 

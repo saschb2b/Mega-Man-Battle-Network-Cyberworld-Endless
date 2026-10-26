@@ -210,16 +210,21 @@ seen; the opening plan of 21 October is still unplayed by a person.
 
 - **Read the statistics**: done (above), to be read again after each
   phase.
-- **Count the choices** in the run's tally and the run-end statistics (no
-  `Run` change): trips back, jobs taken and kept, orders (the chip, its
-  price, zenny left), drafts skipped, dark flames and dark layers taken,
-  duels, Liberation boards, folder edits, the final folder's codes and
-  how much of it the run found, and each layer's seconds walking against
-  fighting.
-- **Freeze** new online social surface, PET extras, meta axes, lock kinds
-  and the comps' errands. Defer Virus Battler until Phase 1 has landed.
-- **Gate each minor release** on one main-path playtest; patch releases
-  as now.
+- **Count the choices**, done (26 October 2026): the run-choices event
+  beside run-end and the run log's choices line (docs/devtools/run-log.md),
+  in the run's tally with no `Run` change. Counted: trips back, requests
+  taken, kept and vowed, orders at AsterLand, drafts left for their
+  BugFrags, the Undernet's and dark layers entered, duels and netbattles
+  taken and won, folder edits between layers, Virus Battlers' series
+  begun, rounds fought on after a win and pots taken, and the run's
+  seconds on the map against those in battle. Not yet: an order's chip and price, the
+  final folder's codes and how much of it the run found, the seconds per
+  layer rather than per run.
+- ~~**Freeze** new online social surface, PET extras, meta axes, lock
+  kinds and the comps' errands. Defer Virus Battler until Phase 1 has
+  landed.~~ Not taken: the owner's decisions, below.
+- ~~**Gate each minor release** on one main-path playtest.~~ Not taken:
+  the owner's decisions, below.
 
 ### Phase 1: pace and the run's peaks (the next release)
 
@@ -341,5 +346,15 @@ seen; the opening plan of 21 October is still unplayed by a person.
   never the run** (chosen over halving ProtoMan's hits or moving the
   netbattle to the endless net): his deleting blow ends the battle with
   MegaMan at 1 HP, Lan stopping the battle.
+- **26 October 2026: no freeze.** Side systems (online, the PET's
+  extras, meta axes) may keep growing beside Phase 1 (chosen over the
+  freeze this review proposed).
+- **26 October 2026: Virus Battler stays** (chosen over deferring it
+  until Phase 1 has landed). It had shipped in 0.16.0 (#237) while this
+  review read 0.15.1's tree, which called it unbuilt; its series, the
+  rounds fought on and the pots taken are among the counted choices.
+- **26 October 2026: no release gate.** Releases go out as now, without
+  a main-path persona session per minor release; the statistics and the
+  players' reports are the check.
 
-The rest pending.
+The rest of the phases stand as proposed: the choice counts, then pace.

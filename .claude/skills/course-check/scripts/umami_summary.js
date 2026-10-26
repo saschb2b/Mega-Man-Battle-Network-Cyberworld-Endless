@@ -48,6 +48,13 @@ const guardianAt = (layer) => {
 	return { won: won.length + '/' + g.length, hpLeft: st(won.map((x) => x.data.hp)), seconds: st(won.map((x) => x.data.seconds)) };
 };
 const md = E.filter((x) => x.data.md != null && x.data.layer > 0);
+// what the runs chose (run-choices, since the first check's Phase 0): of
+// each count, how many runs made it at all and its median among them
+const C = by('run-choices');
+const choiceKeys = ['trips', 'jobs', 'kept', 'vows', 'orders', 'skips', 'undernet', 'dark', 'duels', 'duelswon', 'netbattles', 'netbattleswon', 'edits', 'battlers', 'fighton', 'cashed'];
+const choices = C.length ? Object.fromEntries([['runs', C.length],
+	...choiceKeys.map((k) => [k, { runsWithAny: C.filter((x) => x.data[k] > 0).length, med: q(C.filter((x) => x.data[k] > 0).map((x) => x.data[k]), 0.5) }]),
+	['mapSeconds', st(C.map((x) => x.data.mapseconds))], ['battleSeconds', st(C.map((x) => x.data.battleseconds))]]) : 'none yet';
 
 ({
 	period: [START, END || 'now'],
@@ -67,6 +74,7 @@ const md = E.filter((x) => x.data.md != null && x.data.layer > 0);
 	protoManDeaths: { runs: E.filter((x) => x.data.by === 'ProtoMan').length, players: players(E.filter((x) => x.data.by === 'ProtoMan')), layer: tally(E.filter((x) => x.data.by === 'ProtoMan'), (x) => x.data.layer) },
 	economy: { mysteryDataPerLayer: st(md.map((x) => x.data.md / x.data.layer)), act1MysteryData: st(E.filter((x) => x.data.net === 'short' && x.data.layer >= 4 && x.data.md1 > 0).map((x) => x.data.md1)),
 		zennyWonShort: st(short.filter((x) => x.data.won && x.data.zenny != null).map((x) => x.data.zenny)), zennyAct1: st(E.filter((x) => x.data.layer >= 4 && x.data.zenny1 > 0).map((x) => x.data.zenny1)) },
+	choices,
 	online: { squarePlayers: players(O), visits: O.length, minutes: st(O.map((x) => x.data.minutes)), ended: tally(O, (x) => x.data.ended),
 		netbattles: by('netbattle').length, netbattlePlayers: players(by('netbattle')), watched: by('online-watch').length, deepnetPosts: by('deepnet-post').length },
 })

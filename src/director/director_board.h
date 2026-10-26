@@ -25,6 +25,8 @@ const char *bug_cause(void);
 bool fits_free_as(int v, bool compressed);
 bool fits_as_it_stands(int v);
 void draft_fit_watch(void);
+/* A guardian's draft left for its BugFrags, counted among the run's choices */
+void draft_skip_watch(void);
 void bug_watch(void);
 /* A battle over, `won` or not: a win with bugs on the board earns BugFrags. */
 void bug_pay_battle(bool won);

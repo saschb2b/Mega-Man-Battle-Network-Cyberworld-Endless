@@ -285,6 +285,10 @@ void analytics_count_zenny(AnalyticsEconomy *e, int zenny, bool act1) {
 	if (act1) e->zenny1 += (uint32_t)zenny;
 }
 
+void analytics_count_choice(AnalyticsEconomy *e, int choice) {
+	if (choice >= 0 && choice < CHOICES && e->choice[choice] < UINT16_MAX) ++e->choice[choice];
+}
+
 void analytics_run_start(void) {
 	if (!sends()) return;
 	char out[ANALYTICS_PAYLOAD];
@@ -343,6 +347,26 @@ void analytics_run_end(bool won, const char *by, const AnalyticsEconomy *e) {
 	json_int(&j, "good1", e->good1);
 	json_int(&j, "md1", e->md1);
 	json_int(&j, "zenny1", (int)e->zenny1);
+	payload_send(&j, true, false);
+}
+
+void analytics_run_choices(bool won, int trips, const AnalyticsEconomy *e) {
+	if (!sends() || !e) return;
+	static const char *const names[CHOICES] = {
+		"jobs", "kept", "vows", "orders", "skips", "undernet", "dark", "duels", "duelswon", "netbattles", "netbattleswon", "edits",
+		"battlers", "fighton", "cashed",
+	};
+	char out[ANALYTICS_PAYLOAD];
+	Json j;
+	payload_begin(&j, out, sizeof out, A.path, "run-choices");
+	json_bool(&j, "won", won);
+	json_int(&j, "layer", run_reached());
+	json_member(&j, "net", net_name());
+	json_int(&j, "threat", run.threat);
+	json_int(&j, "trips", trips);
+	for (int c = 0; c < CHOICES; ++c) json_int(&j, names[c], e->choice[c]);
+	json_int(&j, "mapseconds", (int)(e->map_frames / 60));
+	json_int(&j, "battleseconds", (int)(e->battle_frames / 60));
 	payload_send(&j, true, false);
 }
 

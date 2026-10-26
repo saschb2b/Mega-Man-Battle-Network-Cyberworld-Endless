@@ -100,10 +100,26 @@ void analytics_guardian(int navi, int result, int hp, int max_hp, int frames);
  * good among them (3 stars or more, a Mega or a Giga), the Mystery Data
  * opened and the zenny they and the battles paid, in the whole run and in
  * its first act. Numbers only, nothing of the player. */
+/* ... and beside it what the run chose (docs/game/core-loop.md, Phase 0:
+ * the decisions a review could only argue about): requests taken, kept
+ * and vowed, orders at AsterLand, NaviCust drafts left for their BugFrags,
+ * the Undernet's and dark layers entered, ProtoMan's duels and netbattles
+ * taken and won, folder edits between layers, Virus Battlers' series
+ * begun, rounds fought on after a win and pots taken; and the frames on a layer's
+ * map (its talks and menus among them) against those in battle. */
+enum {
+	CHOICE_JOB, CHOICE_JOB_KEPT, CHOICE_VOW, CHOICE_ORDER, CHOICE_DRAFT_SKIP, CHOICE_UNDERNET, CHOICE_DARK_LAYER,
+	CHOICE_DUEL, CHOICE_DUEL_WON, CHOICE_NETBATTLE, CHOICE_NETBATTLE_WON, CHOICE_FOLDER_EDIT,
+	CHOICE_BATTLER, CHOICE_BATTLER_ON, CHOICE_BATTLER_CASH, CHOICES
+};
 typedef struct {
 	uint32_t seed;
 	uint16_t chips, good, md, chips1, good1, md1;
 	uint32_t zenny, zenny1;
+	uint16_t choice[CHOICES];
+	uint32_t map_frames, battle_frames;
+	uint32_t folder;    /* (the folder as last noted, a hash: its edits counted against it) */
+	uint32_t entered;   /* (the last layer whose kind was counted: a CONTINUE's rebuild counts it once) */
 } AnalyticsEconomy;
 /* A chip found (`good` one), a Mystery Data opened, zenny earned, on the
  * run's first act (`act1`) or past it */
@@ -113,6 +129,11 @@ void analytics_count_zenny(AnalyticsEconomy *e, int zenny, bool act1);
 /* ... a run over: won, or lost and `by` whom ("viruses", a guardian's
  * name, "ProtoMan"), and its economy's counts (`e`, NULL none) */
 void analytics_run_end(bool won, const char *by, const AnalyticsEconomy *e);
+/* A choice the run made (CHOICE_*) */
+void analytics_count_choice(AnalyticsEconomy *e, int choice);
+/* ... and what the run chose, as it ends (`trips` back home: the Net's
+ * clock), beside run-end: an event of its own, the payload's room */
+void analytics_run_choices(bool won, int trips, const AnalyticsEconomy *e);
 
 /* A payload's most bytes, and the system's queue of them (its lock held
  * round each call): ANALYTICS_QUEUE at most wait, more are dropped, never

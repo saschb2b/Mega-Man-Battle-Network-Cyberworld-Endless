@@ -82,6 +82,8 @@ bool home_counter(uint32_t *archive, int *script);
 /* Whether AsterLand's order of this visit is still to make, and the zenny
  * held pays for one. */
 bool home_order_open(void);
+/* An order made at AsterLand, counted among the run's choices once a visit */
+void home_order_watch(void);
 /* The way on at home from where Lan or MegaMan stands (way_to's word,
  * way_last its direction, `far` how far): the PC in Lan's room, the room
  * up the house's stairs, the way out of AsterLand and the Academy, home
