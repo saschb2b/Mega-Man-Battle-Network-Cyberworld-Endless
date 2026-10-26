@@ -57,10 +57,55 @@ BN6_ONLY = ()
 
 # ---- the footage ----
 
+def from_compare(name, first, last):
+    """a scene of tools/before_after.py's, this build's side: its run, its
+    input and its environment, game frames first to last"""
+    import before_after
+    e = next(x for x in before_after.SCENES if x[0] == name)
+    argv = list(e[1])
+    script = None
+    if '--input' in argv:
+        i = argv.index('--input')
+        script = argv[i + 1]
+        del argv[i:i + 2]
+    return (argv, dict(e[2]), script, first, last)
+
+
+# (the media branch's recipes for 0.17.0's notes, until build.py on the
+# release branch has them: MegaMan's read by seed 30's layer 4's exit pad
+# beside a dark warp and at Lan's HP's pink pad on seed 7; a won Server's
+# offer and pick on seed 8's layer 4)
+FORK_PAD = (['--scene', 'emu', '--run-depth', '4', '--seed', '30', '--dev', 'quiet'], {}, '300:,0:place 284 -300 1,110:')
+SERVER_8 = ['--scene', 'emu', '--run-depth', '4', '--seed', '8', '--dev', 'god,onehit,quiet', '--talk', 'challenge:200']
+SERVER_SHOTS = '6:B,6:,12:,' * 6
+SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' + SERVER_SHOTS +
+               '8:UP,15:,' + SERVER_SHOTS + '8:DOWN,15:,8:DOWN,15:,' + SERVER_SHOTS + '200:,60:,' + '6:A,6:,60:,' * 2 +
+               '6:A,6:,200:,' + '6:A,6:,90:,' * 2)
+
+
 def scenes():
-    """(stand-ins until the release pictures' runs land: build.py's CLIPS)"""
+    """the release pictures' runs (build.py's SCREENSHOTS and CLIPS,
+    tools/before_after.py's), a scene each"""
+    import build
     return {
-        'battle': kit.from_clips('battle'),
+        'fork-pad': (*FORK_PAD, 330, 470),
+        # an act's first layer, seed 1's layer 4: the card, its two boxes
+        'arrival': from_compare('arrival-words', 120, 420),
+        'fork-portal': (['--scene', 'home', '--run-depth', '7', '--seed', '7'], {},
+                        build.HP_PAGED + '0:place 160 37 0,20:,6:A,100:,6:A,90:,6:A,90:', 1380, 1560),
+        'server-offer': (SERVER_8, {}, SERVER_PICK, 440, 620),
+        'server-pick': (SERVER_8, {}, SERVER_PICK, 2380, 2640),
+        # (its battle, the buster down each row: the cold open's, until the
+        # battle floor's run)
+        'server-battle': (SERVER_8, {}, SERVER_PICK, 1050, 1750),
+        # the setup's Folder row stepping to Z-Canon (245), Busting (285)
+        # and Lean (325); Z-Canon's and Busting's first hands
+        'setup-folders': kit.from_shots('setup-folders', 200, 360),
+        'hand-zcanon': kit.from_shots('hand-zcanon', 940, 1100),
+        'hand-busting': kit.from_shots('hand-busting', 940, 1100),
+        # ProtoMan's netbattle on seed 7's layer 8: his blow stopped,
+        # MegaMan on the layer at 1 HP, Chaud's word (3000)
+        'protoman': from_compare('protoman-netbattle', 2200, 3100),
     }
 
 
@@ -285,8 +330,8 @@ class Shot:
     frame on, that scene's footage from that sample; rate 0 holds it; a
     scene 'still' is a screenshot by name)"""
 
-    def __init__(self, start, caption, feed, count=''):
-        self.start, self.caption, self.feed, self.count = start, caption, feed, count
+    def __init__(self, start, caption, feed, count='', opens=True):
+        self.start, self.caption, self.feed, self.count, self.opens = start, caption, feed, count, opens
 
     def sample(self, fr):
         i = max([j for j, e in enumerate(self.feed) if e[0] <= fr] or [0])
@@ -304,7 +349,7 @@ class Segment:
         self.card, self.number, self.label, self.chip, self.shots = card, number, label, chip, shots
 
 
-COLD = [(0, 'battle', 100, 1)]              # a battle's opening blows, no words
+COLD = [(0, 'server-battle', 92, 1), (F(1), 'server-battle', 262, 1)]   # a battle's blows and its end, no words
 TITLE, RECAP, PA, STINGER, END = F(2), F(20), F(21, 2), F(22), F(23)
 
 
@@ -312,35 +357,48 @@ def still(name):
     return [(0, 'still', name, 0)]
 
 
+# (footage still to come: a marked placeholder, never another feature's picture)
+STANDIN = [(0, 'standin', 0, 0)]
+
+
 def segments():
     return [
         Segment(F(4), '01', 'THE BATTLE FLOOR', 0, [
-            Shot(F(5), 'A BATTLE ON EVERY LAYER', still('battle')),
-            Shot(F(6), "BN6'S OWN ROLL STILL DECIDES WHEN", still('net')),
-            Shot(F(7), 'AN ACT OPENS IN TWO BOXES', still('act-card')),
+            # (the Server's battle until the battle floor's run lands; the
+            # End Area's to come)
+            Shot(F(5), 'A BATTLE ON EVERY LAYER', [(F(5), 'server-battle', 140, 1)]),
+            Shot(F(6), "BN5'S END AREA WALKS ONE WIDE", STANDIN),
+            Shot(F(7), 'FEWER WORDS ON THE WAY', [(F(7), 'arrival', 30, 1)]),
         ]),
         Segment(F(8), '02', 'EVERY PICK COUNTS', 1, [
-            Shot(F(9), 'A WON SERVER: PICK ONE OF', still('reward'), count='3'),
-            Shot(F(10), 'MEGAMAN READS THE WAY AHEAD', still('map-marks')),
-            Shot(F(11), 'BUGFRAGS BUY PROGRAMS', still('navicust-held')),
+            Shot(F(9), 'A WON SERVER: PICK ONE OF', [(F(9), 'server-pick', 40, 1)], count='3'),
+            Shot(F(10), 'MEGAMAN READS THE WAY AHEAD', [(F(10), 'fork-pad', 4, 1)]),
+            # (the BugFrag shop's run to come)
+            Shot(F(11), 'BUGFRAGS BUY PROGRAMS', STANDIN),
         ]),
-        Segment(F(12), '03', 'FOLDERS AND FINDS', 2, [
-            Shot(F(13), 'NEW STARTING FOLDERS', still('custom'), count='3'),
-            Shot(F(14), 'Z-CANON, BUSTING AND LEAN', still('regup-folder')),
-            Shot(F(15), 'A FIND KEEPS THE CHIP IT ROLLED', still('codes')),
+        Segment(F(12), '03', 'THREE NEW FOLDERS', 2, [
+            Shot(F(13), 'NEW STARTING FOLDERS', [(F(13), 'setup-folders', 8, 1), (F(13, 1.5), 'setup-folders', 26, 1),
+                                                 (F(13, 3), 'setup-folders', 47, 0)], count='3'),
+            Shot(F(14), 'Z-CANON: CANNONS FOR GIGACAN1', [(F(14), 'hand-zcanon', 10, 1)]),
+            Shot(F(15), 'BUSTING: NO RECOVERY CHIP', [(F(15), 'hand-busting', 50, 0)]),
         ]),
         Segment(F(16), '04', 'THE RIVALS REMEMBER', 3, [
-            Shot(F(17), 'GUARDIANS REMEMBER HOW IT ENDED', still('guardian-meet')),
-            Shot(F(18), 'LAN STOPS THE NETBATTLE AT', still('rival'), count='1 HP'),
-            Shot(F(19), 'THE DIVE GOES ON', still('net')),
+            Shot(F(17), 'GUARDIANS REMEMBER HOW IT ENDED', still('guardian-memory')),
+            Shot(F(18), 'LAN STOPS THE NETBATTLE AT', [(F(18), 'protoman', 128, 1), (F(18, 2.5), 'protoman', 196, 1)],
+                 count='1 HP'),
+            Shot(F(19), 'THE DIVE GOES ON', [(F(19), 'protoman', 240, 0)], opens=False),
         ]),
+        # the recap: the fifth chip, its tiles in the field
+        Segment(RECAP, '05', f'ALSO IN {VERSION}', 4, []),
     ]
 
 
-# the recap: (picture, its label); a count only where the CHANGELOG gives one
-TILES = [(('still', 'home-request'), ("REQUESTS ON", "BN6'S OWN BBS")),
-         (('still', 'identity-undernet'), ("END AREA'S JUNCTIONS:", '11 TO 2')),
-         (('still', 'saves-home'), ("A RUN'S CHOICES,", 'COUNTED'))]
+# the recap: (picture, its label); a count only where the CHANGELOG gives
+# one; and its caption on the plate
+TILES = [(('still', 'home-bbs-post'), ("REQUESTS ON", "BN6'S OWN BBS")),
+         (('still', 'home-courier-offer'), ('THE COURIER NAMES', 'EACH ONE')),
+         (('fork-portal', 70), ("LAN'S HP'S PORTALS", 'READ TOO'))]
+RECAP_CAPTION = "OPT-IN STATS COUNT A RUN'S CHOICES"
 SYSTEMS = ('PortMaster handhelds · Linux · Windows · macOS', 'Android · iPhone and iPad · New 3DS · the browser')
 SITE = 'saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless'
 OPEN = 5                                   # a shot's opening out of the chip's window, in frames
@@ -414,6 +472,18 @@ def chip_card(small, d, seg, fr):
     put_chip(small, (GAME[0] + GAME[2]) // 2 - 36, GAME[1] + 20, art, 6)
 
 
+def standin():
+    """the field's picture while a shot's footage is still to come"""
+    im = Image.new('RGB', (240, 160), GAUGE_IN)
+    d = ImageDraw.Draw(im)
+    for x in range(-160, 240, 12):
+        d.line([(x, 0), (x + 160, 160)], fill=PLATE)
+    d.rectangle([60, 66, 180, 94], fill=GAUGE_IN, outline=FRAME_LO)
+    f = ImageFont.truetype(CAPS, 8)
+    d.text((120, 80), 'FOOTAGE TO COME', font=f, fill=SOFT, anchor='mm')
+    return im
+
+
 def opening(small, picture, fr, start):
     """the cut: the shot opening out of the chip's window into the field"""
     t = ease((fr - start + 1) / OPEN)
@@ -430,51 +500,41 @@ def opening(small, picture, fr, start):
 def draw_battle(segs, fr):
     small = net(fr)
     d = ImageDraw.Draw(small)
-    recap = fr >= RECAP
-    seg, shot = where(segs, min(fr, RECAP - 1))
-    if fr < segs[0].card + SLIDE:
-        dx = -round((CUSTOM[2] + 4) * (1 - ease((fr - segs[0].card + 1) / SLIDE)))
-    elif recap:
-        dx = -round((CUSTOM[2] + 4) * ease((fr - RECAP + 1) / SLIDE))
-    else:
-        dx = 0
+    seg, shot = where(segs, fr)
+    recap = seg.card == RECAP
+    dx = -round((CUSTOM[2] + 4) * (1 - ease((fr - segs[0].card + 1) / SLIDE))) if fr < segs[0].card + SLIDE else 0
     plate(d, HP_BOX)
-    if recap:
-        gauge(d, 1.0, fr)
-    else:
-        gauge(d, (fr - seg.card) / (4 * BAR - BEAT), fr)
-    if recap:
-        # the recap's one window, over the field, the Custom screen's place and the plate
-        window(d, (GAME[0] if fr < RECAP + SLIDE else CUSTOM[0], GAME[1], GAME[2],
-                   GAME[3] if fr < RECAP + SLIDE else PLATE_BOX[3]))
-    else:
-        window(d, GAME)
-        if shot is None:
-            chip_card(small, d, seg, fr)
+    span = (PA - RECAP - BEAT // 2) if recap else (4 * BAR - BEAT)
+    gauge(d, (fr - seg.card) / span, fr)
+    window(d, GAME)
+    if shot is None and not recap:
+        chip_card(small, d, seg, fr)
+    elif shot is not None:
+        scene, i = shot.sample(fr)
+        pic = standin() if scene == 'standin' else kit.shot(scene, i)
+        if shot.opens and fr - shot.start < OPEN:
+            prev = seg.shots.index(shot) - 1
+            if prev >= 0:
+                before = seg.shots[prev].sample(shot.start - 1)
+                small.paste(standin() if before[0] == 'standin' else kit.shot(*before), PIC)
+            opening(small, pic, fr, shot.start)
         else:
-            scene, i = shot.sample(fr)
-            pic = kit.shot(scene, i)
-            if fr - shot.start < OPEN:
-                prev = seg.shots.index(shot) - 1
-                if prev >= 0:
-                    small.paste(kit.shot(*seg.shots[prev].sample(shot.start - 1)), PIC)
-                opening(small, pic, fr, shot.start)
-            else:
-                small.paste(pic, PIC)
+            small.paste(pic, PIC)
     if dx > -(CUSTOM[2] + 4):
         custom_window(small, d, seg, segs, fr, dx)
-    if not recap or fr < RECAP + SLIDE:
-        plate(d, PLATE_BOX)
+    plate(d, PLATE_BOX)
     im = small.resize((LW * S, LH * S), Image.NEAREST).crop((0, 0, W, H))
     d = ImageDraw.Draw(im)
     text(d, ((HP_BOX[0] + HP_BOX[2]) * S / 2, (HP_BOX[1] + HP_BOX[3]) * S / 2), VERSION, 30, WHITE, True, 'mm')
-    label = f'ALSO IN {VERSION}' if recap else f'{seg.number} · {seg.label}'
+    label = f'{seg.number} · {seg.label}'
     text(d, (GAUGE[0] * S + 14, (GAUGE[1] + GAUGE[3]) * S / 2 + 1), label, 22, WHITE, True, 'lm', shade=GAUGE_IN)
     if dx > -(CUSTOM[2] + 4):
         custom_words(d, seg, fr, dx)
     cy = (PLATE_BOX[1] + PLATE_BOX[3]) * S / 2
     if recap:
         draw_recap(im, d, fr)
+        text(d, (PLATE_BOX[0] * S + 30, cy), RECAP_CAPTION, 40, WHITE, True, 'lm',
+             width=(PLATE_BOX[2] - PLATE_BOX[0]) * S - 60)
     elif shot is None:
         # the card's words in the field, under the chip
         gx = (GAME[0] + GAME[2]) * S / 2
@@ -491,21 +551,19 @@ def draw_battle(segs, fr):
 
 
 def draw_recap(im, d, fr):
-    """three tiles, a picture and its two lines each, one a beat"""
-    w, h = 240, 160
-    gap = 120
-    x0 = (W - 3 * w - 2 * gap) // 2
-    y0 = 230
-    if fr < RECAP + SLIDE:
-        return
+    """three tiles in the field at 1x, a picture and its two lines each,
+    one a beat"""
+    w, h, gap = 240, 160, 12
+    x0 = (GAME[0] + 5) * S
+    y0 = (GAME[1] + 5) * S + 110
     for i, ((scene, sample), lines) in enumerate(TILES):
-        if fr < RECAP + SLIDE + i * BEAT:
+        if fr < RECAP + i * BEAT:
             continue
         x = x0 + i * (w + gap)
-        window(d, (x - 15, y0 - 15, x + w + 14, y0 + h + 14), 3)
+        d.rectangle([x - 3, y0 - 3, x + w + 2, y0 + h + 2], fill=FRAME_HI)
         im.paste(kit.shot(scene, sample), (x, y0))
         for j, line in enumerate(lines):
-            text(d, (x + w / 2, y0 + h + 62 + 40 * j), line, 26, WHITE, True, 'mm', shade=GAUGE_IN, width=w + 100)
+            text(d, (x + w / 2, y0 + h + 44 + 36 * j), line, 22, WHITE, True, 'mm', shade=GAUGE_IN, width=w)
 
 
 # ---- the big window: the cold open, the title, the stinger, the end ----
@@ -548,11 +606,12 @@ def draw_title(fr):
         text(d, (W // 2, 120 + lg.height + 70), 'THE RUN, SHARPENED', 56, lerp(FIELD, WHITE, a), True, 'mm',
              shade=GAUGE_IN)
     if k >= 2 * BEAT:
-        x0, x1, y0, y1 = 380, 900, 470, 560
+        x0, x1, y0, y1 = 330, 950, 440, 526
         d.rectangle([x0, y0, x1, y1], fill=PLATE_EDGE)
         d.rectangle([x0 + 3, y0 + 3, x1 - 3, y1 - 3], fill=PLATE)
         d.rectangle([x0 + 6, y1 - 9, x1 - 6, y1 - 6], fill=GAUGE_IN)
-        text(d, (W // 2, (y0 + y1) / 2), f'{VERSION} · OUT NOW', 44, GOLD, True, 'mm', shade=GAUGE_IN)
+        text(d, (W // 2, (y0 + y1) / 2), f'{VERSION} · OUT NOW', 44, GOLD, True, 'mm', shade=GAUGE_IN,
+             width=x1 - x0 - 60)
     return im
 
 
