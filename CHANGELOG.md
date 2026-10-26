@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.16.0 (2026-10-26)
 
 - **Rumble, and a DualSense's adaptive triggers.** A controller now
   rumbles on a fight's beats: MegaMan hit (harder the more HP it takes),
@@ -89,6 +89,10 @@
   with its weakness. It remembers your last pick, and the board's par is
   the one for the team you take. Every board now has a spot for each
   held Navi's command, whoever you bring.
+
+- **A Net Square's server stops cleanly.** A trade or a Board post made
+  as the server stops is written before it ends, and a slow name service
+  (macOS's) no longer holds its stop for seconds.
 
 ## 0.15.1 (2026-10-25)
 
