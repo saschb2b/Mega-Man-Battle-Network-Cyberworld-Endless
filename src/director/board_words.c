@@ -49,3 +49,11 @@ const char *compressed_words(const char *about) {
 
 /* The NaviCust's bugs gone */
 const char *clean_words(void) { return "@M Phew! Our NaviCust runs clean now,Lan!"; }
+
+/* A battle won with bugs on the board paid `frags` BugFrags (docs/game/
+ * navicust.md, 3): said the first time a session, what MegaMan sees */
+const char *bug_pay_words(int frags) {
+	static char words[64];
+	snprintf(words, sizeof words, "@M Lan,look! Our bugs shed %d BugFrag%s!", frags, frags == 1 ? "" : "s");
+	return words;
+}

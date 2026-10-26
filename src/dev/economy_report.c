@@ -41,11 +41,11 @@
 #include "loot.h"
 #include "loot_souls.h"
 #include "net.h"
+#include "navicust.h"
 #include "netmap.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
-#include "shop.h"
 #include "xguardian.h"
 
 #define RUNS_MAX 1000
@@ -65,6 +65,7 @@ typedef struct {
 	double gem, gem_chip, gem_zenny;
 	double g_chip, g_zenny, g_hpmem;
 	double dealers, dealer_chips, dealer_cost, hpmem_cost, vendors, vendor_cost;
+	double vendor_programs, vendor_chips, vendor_chip_cost, skip_frags;   /* the vendor's list in BugFrags; a guardian's draft skipped */
 	double servers, server_good, traders, bugtraders, vaults, officials, gates;
 	double job_zenny, job_frags, job_chips, job_hpmem;
 	double tier[CHIP_TIERS], cls[3], chips, good, strong, fit;
@@ -214,6 +215,8 @@ static void layer_guardian(LayerTally *t, int depth, int biome) {
 		t->g_chip += 1;
 	}
 	t->g_hpmem += 5;
+	/* (his draft skipped, but the net's last: docs/game/navicust.md, 2) */
+	if (depth < net_layers) t->skip_frags += navicust_skip_frags(depth);
 }
 
 /* A purple data's chip, as layer_objs.c's purple_content rolls it (no
@@ -292,7 +295,10 @@ static void layer_services(LayerTally *t, int depth, int biome) {
 			ShopItem p[SHOP_MAX_ITEMS];
 			int n = shop_program_stock(depth, p);
 			t->vendors += 1;
-			for (int k = 0; k < n; ++k) t->vendor_cost += p[k].price * 100;
+			for (int k = 0; k < n; ++k) {
+				if (p[k].kind == 3) { t->vendor_programs += 1; t->vendor_cost += p[k].price; }
+				else { t->vendor_chips += 1; t->vendor_chip_cost += p[k].price; }
+			}
 			break;
 		}
 		case OBJ_CHALLENGE: layer_server(t, depth); break;
@@ -460,6 +466,21 @@ static void sources_table(FILE *out, const Measure *m, const char *name) {
 			s.g_chip, s.g_zenny, s.g_hpmem, s.dealers, s.dealer_chips, s.dealer_cost + s.hpmem_cost, s.servers,
 			s.servers ? 100 * s.server_good / s.servers : 0, s.job_zenny, s.job_frags, s.job_chips, s.job_hpmem, s.traders, s.bugtraders,
 			s.vaults, s.officials, s.gates);
+	}
+}
+
+/* BugFrags by act (docs/game/navicust.md, 3 and 4): what comes in, and the
+ * NaviCust vendor's prices */
+static void bugfrag_table(FILE *out, const Measure *m) {
+	fprintf(out, "\nBugFrags by act, now (per run): the layers' Mystery Data, the requests' (all three offered), BN6's battle\n"
+		"rewards, the guardian's draft skipped, battles won with one bug level (a BugFrag each); the vendor's lists:\n"
+		"programs and the BugFrag Trader's chip, their mean price\n"
+		"act     MD  requests  battles   skip  bugged1   vendors  programs  price   chips  price\n");
+	for (int a = 0; a < ECON_ACTS; ++a) {
+		LayerTally s = act_sum(m, a);
+		fprintf(out, "%-4s %5.1f %8.1f %8.1f %6.1f %8.1f %9.2f %9.2f %6.1f %7.2f %6.1f\n", act_names[a], s.md_frags, s.job_frags,
+			s.bt_frags, s.skip_frags, s.battles, s.vendors, s.vendor_programs, s.vendor_programs ? s.vendor_cost / s.vendor_programs : 0,
+			s.vendor_chips, s.vendor_chips ? s.vendor_chip_cost / s.vendor_chips : 0);
 	}
 }
 
@@ -665,6 +686,7 @@ int economy_report_run(const char *spec) {
 	int flagged = compare_table(out, M, false) + compare_table(out, S, true);
 	sources_table(out, &M[0], "before (flat)");
 	sources_table(out, &M[1], "now (opening)");
+	bugfrag_table(out, &M[1]);
 	rarity_table(out);
 	layers_table(out);
 	curves_table(out);

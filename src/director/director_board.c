@@ -10,11 +10,13 @@
 #include "board_words.h"
 #include "boss.h"
 #include "cinema.h"
+#include "debug.h"
 #include "devtools.h"
 #include "director.h"
 #include "director_folder.h"
 #include "director_state.h"
 #include "emu.h"
+#include "gamecall.h"
 #include "meta.h"
 #include "save.h"
 #include "save_blob.h"
@@ -395,6 +397,24 @@ static uint32_t board_hash(void) {
 }
 
 #define BUG_CALM 10
+#define BUG_PAY_MOST 5   /* BugFrags a battle won bugged pays at most */
+
+/* The BugFrags battles won bugged have earned, still to give and to say
+ * (bug_watch gives them on the settled map); the first said this session */
+static int pay_due;
+static bool pay_told;
+
+void bug_pay_battle(bool won) {
+	/* (a BugFrag a bug level, the counts the map last held: fighting bugged
+	 * pays risk in resources, docs/game/navicust.md 3; five at most, a board
+	 * bugged on purpose a program an act, not every one; BugStop zeroes
+	 * the counts, so pays none) */
+	if (!won || !D.bugs_known) return;
+	int levels = 0;
+	for (int t = 0; t < NAVICUST_BUGS; ++t) levels += D.bugs[t];
+	pay_due += levels > BUG_PAY_MOST ? BUG_PAY_MOST : levels;
+}
+
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
  * (docs/game/navicust.md). A bug the player can read is a price they chose; the
@@ -429,6 +449,13 @@ void bug_watch(void) {
 		D.board = board;
 		D.board_size = size;
 		D.bugs_known = true;
+		return;
+	}
+	if (pay_due && free_to_speak()) {
+		if (emu_debug_on()) fprintf(stderr, "navicust: a bugged win pays %d BugFrags\n", pay_due);
+		game_call(BN6_GIVE_BUGFRAGS, (uint32_t)pay_due, 0);
+		if (!pay_told) pay_told = talk_start(bug_pay_words(pay_due), FACE_MEGAMAN);
+		pay_due = 0;
 		return;
 	}
 	/* (back from the PET with a program left off the board: said at once,

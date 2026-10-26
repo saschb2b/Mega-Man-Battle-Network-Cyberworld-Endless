@@ -260,6 +260,10 @@
   "battler_words:won.labels": {
    "line": 112
   },
+  "board_words:bug_pay_words": {
+   "comment": "A battle won with bugs on the board paid `frags` BugFrags (docs/game/ navicust.md, 3): said the first time a session, what MegaMan sees",
+   "line": 55
+  },
   "board_words:clean_words": {
    "comment": "The NaviCust's bugs gone",
    "line": 51
@@ -2021,7 +2025,7 @@
    "comment": "MegaMan on the NaviCust (docs/game/navicust.md, docs/voice/rules.md): a program off the board, Reg memory, compression codes, a board run clean.",
    "domain": "NaviCust",
    "kind": "speech",
-   "lines": 6,
+   "lines": 7,
    "shows": [
     "screenshots/program-fit-now.png"
    ],
@@ -2605,7 +2609,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2221,
+  "boxes": 2222,
   "domains": {
    "Arena": {
     "files": [
@@ -2722,8 +2726,8 @@
      "src/layer/navicust_words.c"
     ],
     "flagged": 20,
-    "lines": 49,
-    "speech": 49
+    "lines": 50,
+    "speech": 50
    },
    "Net Square": {
     "files": [
@@ -2954,7 +2958,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 774,
+    "boxes": 775,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.57,
@@ -3009,7 +3013,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 1878,
+  "lines": 1879,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3252,7 +3256,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 774,
+    "boxes": 775,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.57,
@@ -3448,7 +3452,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1387
+  "speech": 1388
  },
  "version": 1,
  "conversations": [
@@ -3668,6 +3672,7 @@
   {"container":"board_words:reg_words","domain":"NaviCust","file":"src/director/board_words.c","id":"board_words:reg_words","line":34,"lines":["board_words:reg_words:0","board_words:reg_words:1","board_words:reg_words:2"],"speakers":["MegaMan"],"title":"MegaMan's words on Reg memory","when":"MegaMan's words on Reg memory (issue #51), `reg` MB of it: the first RegUp in any run; a RegUp after that; and the TagChip system, for a profile whose Chaud's clearance came before it did. What a Regular Chip and a TagChip are, and their buttons, are BN6's own, unsaid (the voice sweep, docs/voice/sweep/net.md)."},
   {"container":"board_words:compressed_words","domain":"NaviCust","file":"src/director/board_words.c","id":"board_words:compressed_words","line":45,"lines":["board_words:compressed_words:0"],"speakers":["MegaMan"],"title":"A program's compression code entered the first time in any run","when":"A program's compression code entered the first time in any run (issue #50; `about` its NaviCust words, \"Name: ...\"): Dad's lab compresses it in every dive after, and its code is in his mail"},
   {"container":"board_words:clean_words","domain":"NaviCust","file":"src/director/board_words.c","id":"board_words:clean_words","line":51,"lines":["board_words:clean_words:0"],"speakers":["MegaMan"],"title":"The NaviCust's bugs gone","when":"The NaviCust's bugs gone"},
+  {"container":"board_words:bug_pay_words","domain":"NaviCust","file":"src/director/board_words.c","id":"board_words:bug_pay_words","line":57,"lines":["board_words:bug_pay_words:0"],"speakers":["MegaMan"],"title":"A battle won with bugs on the board paid `frags` BugFrags","when":"A battle won with bugs on the board paid `frags` BugFrags (docs/game/ navicust.md, 3): said the first time a session, what MegaMan sees"},
   {"container":"navicust_words:abouts","domain":"NaviCust","file":"src/layer/navicust_words.c","id":"navicust_words:abouts","line":13,"lines":["navicust_words:abouts:1","navicust_words:abouts:2","navicust_words:abouts:3","navicust_words:abouts:4","navicust_words:abouts:5","navicust_words:abouts:6","navicust_words:abouts:7","navicust_words:abouts:8","navicust_words:abouts:9","navicust_words:abouts:10","navicust_words:abouts:11","navicust_words:abouts:12","navicust_words:abouts:13","navicust_words:abouts:14","navicust_words:abouts:21","navicust_words:abouts:25","navicust_words:abouts:26","navicust_words:abouts:27","navicust_words:abouts:28","navicust_words:abouts:29","navicust_words:abouts:30","navicust_words:abouts:31","navicust_words:abouts:35","navicust_words:abouts:36","navicust_words:abouts:37","navicust_words:abouts:38","navicust_words:abouts:39","navicust_words:abouts:40","navicust_words:abouts:41","navicust_words:abouts:42","navicust_words:abouts:43","navicust_words:abouts:44","navicust_words:abouts:45","navicust_words:abouts:46"],"speakers":["MegaMan"],"title":"What each program of the pool does, in MegaMan's words, its name first","when":"What each program of the pool does, in MegaMan's words, its name first (navicust.c's POOL)"},
   {"container":"navicust_words:navicust_bug_cause.why","domain":"NaviCust","file":"src/layer/navicust_words.c","id":"navicust_words:navicust_bug_cause.why","line":88,"lines":["navicust_words:navicust_bug_cause.why:0","navicust_words:navicust_bug_cause.why:1","navicust_words:navicust_bug_cause.why:2"],"speakers":["MegaMan"],"title":"Navicust bug cause: why","when":""},
   {"container":"navicust_words:navicust_bug_cause","domain":"NaviCust","file":"src/layer/navicust_words.c","id":"navicust_words:navicust_bug_cause","line":105,"lines":["navicust_words:navicust_bug_cause:0"],"speakers":["MegaMan"],"title":"Navicust bug cause","when":""},
@@ -4127,7 +4132,7 @@
   {"group":"net","id":"layer_words:spin_words:1","ids":["layer_words:spin_words:1"],"live":["layer_words:spin_words:1"],"status":"cut","text":"A Spin for {c} programs,Lan! / That's all six! Every program turns now! / In every dive!","why":"3: \"Every program turns now!\" cut"},
   {"group":"net","id":"layer_words:spin_words:2","ids":["layer_words:spin_words:2"],"live":["layer_words:spin_words:2"],"status":"cut","text":"A Spin for {c} programs,Lan! / {c}{c} programs turn with L and R now! / In every dive from here on!","why":"2, 3: box 2 cut"},
   {"group":"net","id":"layer_words:dealer_words:2","ids":["layer_words:dealer_words:2"],"live":[],"status":"cut","text":"Its needles drop a moment late. / So fire when he stops!","why":"4: a second tip, strategy (how AquaNdl2 lands), the BBS's"},
-  {"group":"net","id":"layer_words:vendor_words:2","ids":["layer_words:vendor_words:2"],"live":["layer_words:vendor_words:2"],"status":"cut","text":"NaviCust programs! / Fresh from my workbench!{again} / Install them in the PET. / Pick MegaMan,then NaviCust!","why":"3: boxes 3-4 (PET, MegaMan, NaviCust) cut"},
+  {"group":"net","id":"layer_words:vendor_words:2","ids":["layer_words:vendor_words:2"],"live":[],"status":"cut","text":"NaviCust programs! / Fresh from my workbench!{again} / Install them in the PET. / Pick MegaMan,then NaviCust!","why":"3: boxes 3-4 (PET, MegaMan, NaviCust) cut"},
   {"group":"net","id":"layer_words:duel_terms:0","ids":["layer_words:duel_terms:0"],"live":["layer_words:duel_terms:0"],"status":"cut","text":"{met}I busted {count} here in {sec}:{sec}.{cs}. / Beat that{rung}. / Real viruses,Lan! / If they delete us,the dive's over. / Let's heal up first if we're hurt.","why":"5: \"Let's heal up first if we're hurt.\" cut; the stake kept (NOTE)"},
   {"group":"net","id":"navicust_words:navicust_color_turns:0","ids":["navicust_words:navicust_color_turns:0"],"live":[],"status":"cut","text":"Our {navicust_color_name} Spin lets L and R turn it!","why":"2, 3 (Spins and L/R)"},
   {"group":"net","id":"navicust_words:navicust_turn_words:0","ids":["navicust_words:navicust_turn_words:0"],"live":[],"status":"cut","text":"L and R turn any program as we place it!","why":"2, 3"},
@@ -4263,6 +4268,7 @@
   {"boxes":[{"pages":[["Lan! Chaud's","clearance comes with","the TagChip system!"]],"speaker":"MegaMan","text":"Lan! Chaud's clearance comes with the TagChip system!"}],"container":"reg_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:reg_words:2","kind":"speech","line":36,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Lan! Chaud's clearance comes with the TagChip system!","text_hash":"8b7626bc7ede"},
   {"boxes":[{"pages":[["{about}'s","compressed,Lan!"]],"speaker":"MegaMan","text":"{about}'s compressed,Lan!"},{"pages":[["Dad's lab will","compress it for us","every dive now!"]],"speaker":"MegaMan","text":"Dad's lab will compress it for us every dive now!"},{"pages":[["The code's in his","Compression mail."]],"speaker":"MegaMan","text":"The code's in his Compression mail."}],"container":"compressed_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:compressed_words:0","kind":"speech","line":45,"placeholders":[{"name":"about","spec":"%.*s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M {about}'s compressed,Lan!|@M Dad's lab will compress it for us every dive now!|@M The code's in his Compression mail.","text_hash":"f1c91c077d83"},
   {"boxes":[{"pages":[["Phew! Our NaviCust","runs clean now,Lan!"]],"speaker":"MegaMan","text":"Phew! Our NaviCust runs clean now,Lan!"}],"container":"clean_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:clean_words:0","kind":"speech","line":51,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Phew! Our NaviCust runs clean now,Lan!","text_hash":"ab7def2d0b90"},
+  {"boxes":[{"pages":[["Lan,look! Our bugs","shed {frags}","BugFrag{frags}!"]],"speaker":"MegaMan","text":"Lan,look! Our bugs shed {frags} BugFrag{frags}!"}],"container":"bug_pay_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:bug_pay_words:0","kind":"speech","line":57,"placeholders":[{"name":"frags","spec":"%d"},{"name":"frags","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Lan,look! Our bugs shed {frags} BugFrag{frags}!","text_hash":"d6b1597c7f0c"},
   {"boxes":[{"pages":[["close by"]],"speaker":"MegaMan","text":"close by"}],"container":"spot_where.dist","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"fragment":true,"id":"briefing_words:spot_where.dist:0","kind":"speech","line":38,"speaker":"MegaMan","speakers":["MegaMan"],"text":"close by","text_hash":"fa6d4b9ba2f4"},
   {"boxes":[{"pages":[["a ways off"]],"speaker":"MegaMan","text":"a ways off"}],"container":"spot_where.dist","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"fragment":true,"id":"briefing_words:spot_where.dist:1","kind":"speech","line":38,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a ways off","text_hash":"80ffef310a8a"},
   {"boxes":[{"pages":[["far off"]],"speaker":"MegaMan","text":"far off"}],"container":"spot_where.dist","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"fragment":true,"id":"briefing_words:spot_where.dist:2","kind":"speech","line":38,"speaker":"MegaMan","speakers":["MegaMan"],"text":"far off","text_hash":"b2fd255ccfc8"},
@@ -5153,9 +5159,9 @@
   {"boxes":[{"pages":[["Sold out,MegaMan!"]],"speaker":"Shop Navi","text":"Sold out,MegaMan!"},{"pages":[["You bought every","chip I had!"]],"speaker":"Shop Navi","text":"You bought every chip I had!"}],"container":"dealer_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:dealer_words:10","kind":"speech","line":137,"note":"(met in this act already: the pick, in a line)","speaker":"Shop Navi","speakers":["Shop Navi"],"text":"Sold out,MegaMan!|You bought every chip I had!","text_hash":"17697a5f86f0"},
   {"boxes":[{"pages":[["I hear you've used","{names} before!"]],"speaker":"Shop Navi","text":"I hear you've used {names} before!"},{"pages":[["So I brought it","along!"]],"speaker":"Shop Navi","text":"So I brought it along!"}],"container":"vendor_words","continues":true,"domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:0","kind":"speech","line":145,"placeholders":[{"name":"names","spec":"%s"}],"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"|I hear you've used {names} before!|So I brought it along!","text_hash":"baa16de12ae3"},
   {"boxes":[{"pages":[["I hear you've used","{names} and","{names}!"]],"speaker":"Shop Navi","text":"I hear you've used {names} and {names}!"},{"pages":[["So I brought them","along!"]],"speaker":"Shop Navi","text":"So I brought them along!"}],"container":"vendor_words","continues":true,"domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:1","kind":"speech","line":147,"placeholders":[{"name":"names","spec":"%s"},{"name":"names","spec":"%s"}],"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"|I hear you've used {names} and {names}!|So I brought them along!","text_hash":"5561a1a9d584"},
-  {"boxes":[{"pages":[["NaviCust programs!"]],"speaker":"Shop Navi","text":"NaviCust programs!"},{"pages":[["Fresh from my","workbench!{again}"]],"speaker":"Shop Navi","text":"Fresh from my workbench!{again}"}],"container":"vendor_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:2","kind":"speech","line":148,"placeholders":[{"name":"again","spec":"%s"}],"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"NaviCust programs!|Fresh from my workbench!{again}","text_hash":"07e6062ed3e3"},
+  {"boxes":[{"pages":[["NaviCust","programs,for","BugFrags!"]],"speaker":"Shop Navi","text":"NaviCust programs,for BugFrags!"},{"pages":[["Fresh from my","workbench!{again}"]],"speaker":"Shop Navi","text":"Fresh from my workbench!{again}"}],"container":"vendor_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:2","kind":"speech","line":148,"placeholders":[{"name":"again","spec":"%s"}],"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"NaviCust programs,for BugFrags!|Fresh from my workbench!{again}","text_hash":"69055b7f1f00"},
   {"boxes":[{"pages":[["More programs? Take","a look!"]],"speaker":"Shop Navi","text":"More programs? Take a look!"}],"container":"vendor_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:3","kind":"speech","line":149,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"More programs? Take a look!","text_hash":"ebfae3f03d59"},
-  {"boxes":[{"pages":[["Sold out!"]],"speaker":"Shop Navi","text":"Sold out!"},{"pages":[["Every program I","brought is yours!"]],"speaker":"Shop Navi","text":"Every program I brought is yours!"}],"container":"vendor_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:4","kind":"speech","line":149,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"Sold out!|Every program I brought is yours!","text_hash":"dab0ab61b231"},
+  {"boxes":[{"pages":[["Sold out!"]],"speaker":"Shop Navi","text":"Sold out!"},{"pages":[["Everything I brought","is yours!"]],"speaker":"Shop Navi","text":"Everything I brought is yours!"}],"container":"vendor_words","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"id":"layer_words:vendor_words:4","kind":"speech","line":149,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"Sold out!|Everything I brought is yours!","text_hash":"b97c55999916"},
   {"boxes":[{"pages":[["a lone virus"]],"speaker":"Shop Navi","text":"a lone virus"}],"container":"duel_terms.count","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"fragment":true,"id":"layer_words:duel_terms.count:1","kind":"speech","line":161,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"a lone virus","text_hash":"f104411e75f3"},
   {"boxes":[{"pages":[["a pair of viruses"]],"speaker":"Shop Navi","text":"a pair of viruses"}],"container":"duel_terms.count","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"fragment":true,"id":"layer_words:duel_terms.count:2","kind":"speech","line":161,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"a pair of viruses","text_hash":"a0acd38a0951"},
   {"boxes":[{"pages":[["three viruses"]],"speaker":"Shop Navi","text":"three viruses"}],"container":"duel_terms.count","domain":"Layers: dealers and finds","file":"src/layer/layer_words.c","flags":[],"fragment":true,"id":"layer_words:duel_terms.count:3","kind":"speech","line":161,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"three viruses","text_hash":"ad643a893f82"},

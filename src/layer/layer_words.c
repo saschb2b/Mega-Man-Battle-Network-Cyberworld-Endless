@@ -145,8 +145,8 @@ ShopWords vendor_words(char names[][16], int n) {
 	if (n == 1) snprintf(again, sizeof again, "|I hear you've used %s before!|So I brought it along!", names[0]);
 	else if (n == 2)
 		snprintf(again, sizeof again, "|I hear you've used %s and %s!|So I brought them along!", names[0], names[1]);
-	snprintf(hello, sizeof hello, "NaviCust programs!|Fresh from my workbench!%s", again);
-	return (ShopWords){ hello, "More programs? Take a look!", "Sold out!|Every program I brought is yours!" };
+	snprintf(hello, sizeof hello, "NaviCust programs,for BugFrags!|Fresh from my workbench!%s", again);
+	return (ShopWords){ hello, "More programs? Take a look!", "Sold out!|Everything I brought is yours!" };
 }
 
 /* ProtoMan's terms for a race (docs/game/rival.md), into `terms`: the time to

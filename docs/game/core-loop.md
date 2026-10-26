@@ -270,7 +270,9 @@ seen; the opening plan of 21 October is still unplayed by a person.
   any new rule. The statistics' guardian event measures it after.
 - **The BugFrag workshop** as designed: programs for BugFrags at the
   vendor, the BugFrag Trader folded in, bugged battles paying BugFrags.
-  It closes the dead currency and makes the draft's skip real.
+  It closes the dead currency and makes the draft's skip real. Built 26
+  October 2026 ([the NaviCust](navicust.md), Status); the statistics'
+  draft skips will say whether the skip is taken.
 - **Lean the code, not the chip**: a find keeps its chip and takes a
   folder code, so variety widens and the folder still converges. Say the
   rule once where the dealer already half says it.

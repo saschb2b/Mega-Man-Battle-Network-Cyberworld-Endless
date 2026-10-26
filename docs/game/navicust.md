@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T20:35:40Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
 ---
 
 # The NaviCust
@@ -117,8 +117,8 @@ walks past every program.
 
 BugFrags come from green Mystery Data (as now), from skipping a draft, and
 from **fighting bugged**: each battle won with bugs active pays one BugFrag
-per bug level. A light bug the player chose is an income; a heavy one is a
-gamble. This pays risk in resources, not only in survival (the skill's
+per bug level, five at most. A light bug the player chose is an income; a
+heavy one is a gamble. This pays risk in resources, not only in survival (the skill's
 move from Expedition 33's parry).
 
 ### 4. The vendor becomes a workshop
@@ -362,8 +362,32 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   begins (23 October 2026); the fit checks read the compressed shapes
   (issue #54).
 
-Next: BugFrags as the vendor's currency with the workshop and the
-bugged-battle pay, the vendor's stock from this pool (it still sells
-HP+400 at 2100 zenny beside the dealer's 20-HP HPMemory at 1200), then
-blue Mystery Data programs, the next act's answer in the draft, then the
-profile's programs.
+- The workshop's shop (26 October 2026; core-loop.md's Phase 2): the
+  vendor stands on every act's middle layer (60% of acts before) and
+  sells in BugFrags on BN6's own shop screen, shop 3's currency made
+  BN6's BugFrag shops' in the core's copy (`shop.c` vendor_bugfrags;
+  [Scripts and shops](../rom/scripts-and-shops.md)). A program costs a
+  fifth of BN6's zenny price in BugFrags, 2 more and 2 more an act (by
+  its tier where BN6's shops don't sell it; HP+200 16, 4 more an act):
+  6 to 11 in act 1, 8 to 13 in act 2. The BugFrag Trader is folded in as
+  the list's last entry, a chip of its pool (BN6's Undernet 2 machine's,
+  3 to 5 stars) named and priced where the machine rolls one for 10: 10
+  for 3 stars, 5 more a star, 2 more an act. His machine stays where BN6
+  puts it, on the Undernet's layers. A battle won with bugs pays a
+  BugFrag a bug level, five at most (`director_board.c` bug_pay_battle),
+  and MegaMan says so the first time a session ("Lan,look! Our bugs shed
+  2 BugFrags!").
+- The numbers (`build.py economy`'s BugFrag table, 300 runs): an act's
+  Mystery Data bring about 4 to 10 BugFrags, a skipped draft 10, 5 more
+  an act, a bug level about 6 an act; the vendor's programs average 8.5
+  in act 1, 10.5 in act 2, 15 in act 3 and 23 in act 6, his chip 15 to
+  25. The skip at act 1's guardian, with the data on the way, buys any
+  of act 2's four programs with BugFrags to spare (about 14 against
+  10.5); his chip wants more data or a second skip. The data alone buy
+  about half a program an act, a light bug most of one. Act 1's vendor is a
+  window most runs can't buy from yet: he shows what BugFrags buy before
+  the first draft asks whether to skip.
+
+Next: the vendor's compression (above, 4), the vendor's stock from this
+pool, then blue Mystery Data programs, the next act's answer in the
+draft, then the profile's programs.

@@ -426,6 +426,7 @@ static void after_battle(void) {
 	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
 	/* (a request's battles: a guardian's counts for none) */
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
+	bug_pay_battle(won);
 	if (emu_debug_on() && won) {
 		int r = emu_read16(BN6_BATTLE_REWARD);
 		if (r >> 14 == 0 && r != 0xFFFF) {

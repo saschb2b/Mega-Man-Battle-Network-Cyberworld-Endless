@@ -10,6 +10,7 @@
 
 #include "bn6.h"
 #include "chip_pool.h"
+#include "chips.h"
 #include "emu.h"
 #include "flags.h"
 #include "game.h"
@@ -23,6 +24,7 @@
 #include "rom.h"
 #include "run.h"
 #include "text.h"
+#include "trader.h"
 
 #define ORDER_SHOP SHOP_ORDER   /* the Chip Order list: one entry per chip */
 
@@ -51,10 +53,20 @@ static void vendor_face(void) {
 	if (R.data[o - 2] == 0xF5 && R.data[o - 1] == 0x00 && R.data[o] == 0x42) emu_write8(BN6_VENDOR_FACE, FACE_TECH);
 }
 
+/* ... and his shop paid in BugFrags (docs/game/navicust.md, 4: the NaviCust's
+ * currency, as BN6's own BugFrag shop 7 sells programs): its descriptor's
+ * currency 1 in the core's copy, where the player's ROM has 0, zenny.
+ * BN6's shop screen then shows and takes BugFrags, each price a count of
+ * them where zenny's are hundreds (docs/rom/scripts-and-shops.md). */
+static void vendor_bugfrags(void) {
+	uint32_t at = desc(SHOP_PROGRAMS), o = at - 0x08000000u;
+	if (rom_u32(o) == SHOP_ZENNY) emu_write8(at, SHOP_BUGFRAGS);
+}
+
 bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return false;
-	if (shop == SHOP_PROGRAMS) vendor_face();
+	if (shop == SHOP_PROGRAMS) { vendor_face(); vendor_bugfrags(); }
 	uint32_t at = data + emu_read32(desc(shop) + 8);
 	int slots = (int)emu_read32(desc(shop) + 12);
 	uint8_t was[16][8] = { { 0 } };
@@ -363,11 +375,14 @@ bool shop_program_found(int program) {
 	return program > 0 && program < 64 && (profile.programs_found[program / 8] >> (program % 8) & 1);
 }
 
-/* Program `id`'s price at `depth`, from `base`, the game's shop price (0:
- * the first the game's shops ask for it): a quarter of it, which is its
- * endgame's (a run brings 100 to 1000 zenny a battle or Mystery Data, and
- * the programs sat at 2500 to 7100), 200 more an act; one the game's
- * shops don't sell, by its tier as they price theirs */
+/* Program `id`'s price in BugFrags at `depth`, from `base`, the game's
+ * shop price in hundreds of zenny (0: the first the game's shops ask for
+ * it; by its tier as they price theirs where they don't sell it): a fifth
+ * of it, 2 more, and 2 more an act. An act's Mystery Data bring 4 to 10
+ * BugFrags and a guardian's draft skipped 10, 5 more an act, so the skip
+ * buys one of the act's programs at the next vendor and the data alone
+ * about half of one (docs/game/navicust.md, 4; build.py economy's BugFrag
+ * table) */
 static uint16_t program_price(int id, int base, int depth) {
 	int step = pacing_act(depth) + 7 * pacing_loop(depth);
 	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
@@ -381,10 +396,26 @@ static uint16_t program_price(int id, int base, int depth) {
 		int t = navicust_tier(id / 4);
 		base = by_tier[t < 0 ? 0 : t > 7 ? 7 : t];
 	}
-	/* (HP+200 at that price tripled a first act's 100 HP for 1200 zenny,
-	 * where an HPMemory's 20 cost 800) */
-	if (id == PROGRAM_HP_200) return (uint16_t)(24 + 4 * step);
-	return (uint16_t)(base / 4 + 2 + 2 * step);
+	/* (HP+200 the dearest of its act: at a fifth it tripled a first
+	 * cycle's HP for one draft skipped) */
+	if (id == PROGRAM_HP_200) return (uint16_t)(16 + 4 * step);
+	return (uint16_t)(base / 5 + 2 + 2 * step);
+}
+
+/* The BugFrag Trader's trade at the vendor (docs/game/navicust.md, 4): a
+ * chip of its pool on his list, named and priced, where BN6's machine
+ * rolls one for 10 BugFrags: 10 for 3 stars, 5 more a star, 2 more an
+ * act; in the folder's codes where it comes in them */
+static bool bugfrag_chip(int depth, ShopItem *out) {
+	char code = '*';
+	int id = trader_bugfrag_offer(&code);
+	const uint8_t *rec = id > 0 ? chips_record(id) : NULL;
+	if (!rec) return false;
+	code = loot_fit_code(id, code, true);
+	int stars = rec[5] + 1, step = pacing_act(depth) + 7 * pacing_loop(depth);
+	*out = (ShopItem){ 2, 1, (uint16_t)id, (uint8_t)(code == '*' ? 26 : code - 'A'), 0 };
+	out->price = (uint16_t)(10 + 5 * (stars > 3 ? stars - 3 : 0) + 2 * step);
+	return true;
 }
 
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
@@ -431,6 +462,9 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		offer[i].price = program_price(offer[i].id, offer[i].price, depth);
 		out[n++] = offer[i];
 	}
+	/* last, the BugFrag Trader's chip: BugFrags a board too full for a
+	 * program still spends */
+	if (n < SHOP_MAX_ITEMS && bugfrag_chip(depth, &out[n])) ++n;
 	return n;
 }
 
