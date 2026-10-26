@@ -122,9 +122,11 @@ ShopWords dealer_words(const DealerTalk *d) {
 			"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 	else if (navi > 0)
 		dealer_word(word, sizeof word, d, brought);
-	/* (and that his chips come in the folder's codes, loot_fit_code) */
+	/* (and that his chips come in the folder's codes, loot_fit_code, and
+	 * past act 1 the finds' too, their chips as they roll: loot.c's
+	 * lean_find, the opening plan's lean none on act 1) */
 	snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
-		? run.codes[0] ? "Welcome! Chips for sale!|In your Folder's codes,when I can!"
+		? run.codes[0] ? "Welcome! Chips for sale!|In your Folder's codes,when I can!|Deeper in,Mystery Data too!"
 			: "Welcome! Chips for sale!"
 		: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
 			/* (the run's last layer has no "from here": a playtester heard it there) */

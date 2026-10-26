@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -280,7 +280,12 @@ seen; the opening plan of 21 October is still unplayed by a person.
   draft skips will say whether the skip is taken.
 - **Lean the code, not the chip**: a find keeps its chip and takes a
   folder code, so variety widens and the folder still converges. Say the
-  rule once where the dealer already half says it.
+  rule once where the dealer already half says it. Built 26 October 2026
+  ([the opening plan](economy/opening-plan.md#the-code-leans-not-the-chip)):
+  in act 6 the Mystery Data's chips spread over 219 kinds rather than
+  172, a third of the finds fit the folder rather than half, and a median
+  run holds 17 chips of one code rather than 19; act 1's dealer adds
+  "Deeper in,Mystery Data too!".
 - **The Server's prize a pick of one from three** on the vault's screen:
   the riskiest optional fight pays a decision, not a roll.
 - **MegaMan reads the next layer at a fork** (an exit pad beside a dark

@@ -652,7 +652,8 @@ Level as in BN6. The battlefields are the area's own too: its panels
 (a battle in forty or so) a green Mystery Data sits on the enemies' side:
 it breaks at the first hit, yours or theirs, but still there when the
 battle ends, it gives a rare find besides the battle's reward: most often
-a chip a tier above a blue Mystery Data's, in your folder's codes.
+a chip a tier above a blue Mystery Data's, in your folder's codes where
+it comes in one.
 
 Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
@@ -782,7 +783,8 @@ behind is options. From the second run, NEW GAME opens a setup:
 - **Folder:** BN6's starting folder, or one opened in any run: Blade
   (swords in S for LifeSword), once any guardian falls, and Storm (Elec
   chips), once an Aqua guardian does. Chips the net gives lean to the
-  codes the folder holds most.
+  codes the folder holds most: the chip comes as it rolled, in one of
+  those codes where it can.
 - **Cross:** a Cross MegaMan has from the first battle, once its Navi
   (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan) has fallen as a
   guardian. It is the run's only Cross: guardians' Cross data won't fit

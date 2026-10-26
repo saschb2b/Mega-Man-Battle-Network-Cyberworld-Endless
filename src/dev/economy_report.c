@@ -24,6 +24,7 @@
  * them; the plan in play's count is the report's verdict. */
 #include "economy_report.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +71,7 @@ typedef struct {
 	double job_zenny, job_frags, job_chips, job_hpmem;
 	double tier[CHIP_TIERS], cls[3], chips, good, strong, fit;
 	double kind[SOULS_TEAM], kind_offer[SOULS_TEAM];   /* chips of each Soul's kind gained, and on the dealers' lists */
+	double md_id[512];   /* the layers' Mystery Data's chips by id: how widely the finds spread */
 } LayerTally;
 
 /* Where a reward lands in the tally */
@@ -242,7 +244,7 @@ static void layer_mystery(LayerTally *t, int depth, int *fragments) {
 		if (reg && o->param >= 1) { reg = false; t->md_keys += 1; continue; }
 		if (frag) { frag = false; ++*fragments; t->md_keys += 1; continue; }
 		LootFind f = loot_mystery_roll(o->param, depth);
-		if (f.kind == LOOT_FIND_CHIP) { gain_chip(t, f.value, f.code); t->md_chip += 1; }
+		if (f.kind == LOOT_FIND_CHIP) { gain_chip(t, f.value, f.code); t->md_chip += 1; t->md_id[f.value & 0x1FF] += 1; }
 		else if (f.kind == LOOT_FIND_ZENNY) { t->md_zenny += f.value; zenny_run += f.value; }
 		else if (f.kind == LOOT_FIND_BUGFRAGS) t->md_frags += f.value;
 		else t->md_hpmem += 1;
@@ -484,12 +486,23 @@ static void bugfrag_table(FILE *out, const Measure *m) {
 	}
 }
 
-/* Rarity: the chips gained by tier, and how many fit the folder's codes */
+/* The variety of the Mystery Data's chips: e to their entropy over every
+ * run, the number of chips found equally often that would spread as far
+ * (docs/game/economy/measuring.md, Variety) */
+static double md_kinds(const LayerTally *s) {
+	double n = 0, h = 0;
+	for (int i = 0; i < 512; ++i) n += s->md_id[i];
+	for (int i = 0; i < 512; ++i) if (s->md_id[i] > 0) h -= s->md_id[i] / n * log(s->md_id[i] / n);
+	return n > 0 ? exp(h) : 0;
+}
+
+/* Rarity: the chips gained by tier, how many fit the folder's codes, and
+ * how widely the Mystery Data's spread */
 static void rarity_table(FILE *out) {
 	fprintf(out, "\nThe chips gained by tier (chip_pool.h: 0 common, 1 uncommon, 2 rare standard, 3 rarer or Mega, 4 Mega 5-star\n"
 		"or Giga), %% of the act's, before (flat) -> now (opening); good = tier %d or more; strong = a straight hit of %d or more; fit = in\n"
-		"one of the folder's codes or *\n"
-		"act   tier0      tier1      tier2      tier3      tier4      strong%%    fit%%       mega        giga\n", ECON_GOOD_TIER,
+		"one of the folder's codes or *; kinds = the layers' Mystery Data's chips, e to their entropy over every run\n"
+		"act   tier0      tier1      tier2      tier3      tier4      strong%%    fit%%       mega        giga          kinds\n", ECON_GOOD_TIER,
 		ECON_STRONG_POWER);
 	for (int a = 0; a < ECON_ACTS; ++a) {
 		LayerTally s[PLANS];
@@ -497,9 +510,9 @@ static void rarity_table(FILE *out) {
 		fprintf(out, "%-4s ", act_names[a]);
 		for (int k = 0; k < CHIP_TIERS; ++k)
 			fprintf(out, " %3.0f -> %3.0f", 100 * s[0].tier[k] / (s[0].chips ? s[0].chips : 1), 100 * s[1].tier[k] / (s[1].chips ? s[1].chips : 1));
-		fprintf(out, " %3.0f -> %3.0f %3.0f -> %3.0f %4.2f -> %4.2f %4.2f -> %4.2f\n", 100 * s[0].strong / (s[0].chips ? s[0].chips : 1),
+		fprintf(out, " %3.0f -> %3.0f %3.0f -> %3.0f %4.2f -> %4.2f %4.2f -> %4.2f %5.1f -> %5.1f\n", 100 * s[0].strong / (s[0].chips ? s[0].chips : 1),
 			100 * s[1].strong / (s[1].chips ? s[1].chips : 1), 100 * s[0].fit / (s[0].chips ? s[0].chips : 1),
-			100 * s[1].fit / (s[1].chips ? s[1].chips : 1), s[0].cls[1], s[1].cls[1], s[0].cls[2], s[1].cls[2]);
+			100 * s[1].fit / (s[1].chips ? s[1].chips : 1), s[0].cls[1], s[1].cls[1], s[0].cls[2], s[1].cls[2], md_kinds(&s[0]), md_kinds(&s[1]));
 	}
 }
 
