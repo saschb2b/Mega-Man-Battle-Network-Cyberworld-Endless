@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -260,8 +260,11 @@ seen; the opening plan of 21 October is still unplayed by a person.
   arrivals at two to four boxes, the next guardian named once a decision
   (the card, the dealer, the portal, his own layer), his tips in Dad's
   mail alone but EraseMan's and DiveMan's warnings; the Guardian Data
-  chain from 12 boxes to 9, short of one screen, its rest BN6's own
-  "MegaMan got:" boxes and the draft.
+  chain from 12 boxes to 9, then to 7 (5 to 6 for a veteran, no mail):
+  BN6's own "MegaMan got:" boxes two things each, the call to install in
+  the draft's ask, nothing after the pick but BN6's box. Short of one
+  screen still; what is left is his last word, the facts in BN6's boxes,
+  the draft whole and Dad's first mail.
 - **Jobs on BN6's Request BBS** at AsterLand, all three askers' posts in
   one place, the courier naming each offer's kind and pay. The askers and
   the Academy stay as places (decision 10 stands). Built 26 October 2026

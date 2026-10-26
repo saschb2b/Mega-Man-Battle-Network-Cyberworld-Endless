@@ -111,6 +111,12 @@ static const char *data_says(const GuardianStage *g) {
 	return reward_power(g->navi);
 }
 
+/* The Cross his data gives the run, said in BN6's own box beside his chip
+ * (a BN5 guardian's power is his Soul, a super boss's his own) */
+static const char *data_cross(const GuardianStage *g) {
+	return super_boss(g->navi) || guardian_older(g->navi) ? NULL : powers_reward_cross(g->navi, run.depth);
+}
+
 /* A super boss's staging (docs/game/bosses/super-bosses.md; boss_grand.c):
  * the theme's fade, BN6's rumble, the white's sound, Bass's going; -1 for
  * a guardian */
@@ -125,7 +131,7 @@ static void grand_scripts(TextArchive *text, GuardianStage *g) {
 /* The NaviCust's draft after a normal layer's guardian (docs/game/navicust.md):
  * an ExpMemry at the second and fourth acts' guardians, and three programs,
  * or none for BugFrags. */
-static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
+static void draft_make(ScriptsDraft *draft) {
 	draft->expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
 	/* (programs that fit beside those on MegaMan's board as the layer
 	 * was made, on the board this Guardian Data leaves: its ExpMemry
@@ -158,11 +164,6 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 		/* (the player's first draft ever: a run from an older build met
 		 * its first past act 1's, without it) */
 		draft->teach = !profile.navicust_taught;
-		/* (and whether each fits the board as it stands: two playtesters
-		 * took a program MegaMan then said would not fit, session 63; he says
-		 * now, after the pick, that one moves first) */
-		draft->fit_flag = LAYER_DRAFT_FIT_FLAG;
-		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k) g->draft[k] = draft->program[k];
 	}
 }
 
@@ -181,13 +182,12 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* the NaviCust's part (only a normal layer's guardian; a side layer's
 	 * is its own reward) */
 	ScriptsDraft draft = { 0 };
-	memset(g->draft, 0, sizeof g->draft);
 	/* (the run's last guardian: none, nothing more to run with) */
 	bool last = run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth);
-	if (run.side_kind == LAYER_NORMAL && !last) draft_make(&draft, g);
+	if (run.side_kind == LAYER_NORMAL && !last) draft_make(&draft);
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
-	ScriptsReward reward = { .name = gd->name, .power = data_says(g), .chip = chip, .code = code, .chip_name = ci.name, .last = last,
+	ScriptsReward reward = { .name = gd->name, .cross = data_cross(g), .power = data_says(g), .chip = chip, .code = code, .chip_name = ci.name, .last = last,
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
 		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);

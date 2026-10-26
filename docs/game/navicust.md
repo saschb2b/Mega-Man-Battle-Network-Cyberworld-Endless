@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
 ---
 
 # The NaviCust
@@ -334,9 +334,11 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   of three builds, or B for BugFrags (10, and 5 more an act), in one box
   and the menu, each program's colour beside its name (6 October 2026:
   a box a program said what BN6's programs do, which its players know,
-  and the owner found the reward's words far too many). A program that
-  fits only once one moves says so after its pick ("We'll move one to
-  make room,Lan!").
+  and the owner found the reward's words far too many). The ask says to
+  install one ("Program data! Let's install one! Or B for 10
+  BugFrags!"); after the pick BN6's own "MegaMan got:" box alone, a
+  program that fits only once one moves left to BN6's NaviCust to show
+  (the main path's words cut, [the sweep](../voice/sweep/main-path.md)).
 - ExpMemry at the act 2 and act 4 guardians: the board grows to 5x4, then
   5x5 (checked on the NaviCust screen).
 - The bug note: at the RUN itself, the PET still open, a red note over the
