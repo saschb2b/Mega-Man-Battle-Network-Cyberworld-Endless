@@ -1,4 +1,4 @@
-"""0.17.0's trailer, THE RUN, SHARPENED: the run cut to its battles and
+"""0.17.0's trailer, SHARPER, NOT BIGGER: the run cut to its battles and
 the picks between them (CHANGELOG.md's 0.17.0, from the course check of
 26 October 2026, docs/game/core-loop.md), in the skill's structure
 (SKILL.md, The structure): a cold open of two bars with no words, the
@@ -37,6 +37,17 @@ Silkscreen's S reads as its 5 at these sizes (and BN's busting levels run
 1 to 10 and S), so the codes and the rank are drawn from letters of our
 own (GLYPHS).
 
+Its shots are whole frames of the game running from the developer's ROMs,
+BN6's and BN5 Team Colonel's beside it, from the runs of 0.17.0's notes
+(build.py's SCREENSHOTS and CLIPS, tools/before_after.py's this-build
+side): a won Server's battle and its pick of three, MegaMan onto an exit
+pad still owed its battle, an End Area layer and its map, an act's
+arrival, his read by a pad, the NaviCust vendor's BugFrag shop, the
+setup's three new folders and two first hands, a guardian's memory (its
+screenshot: its run needs another before it in the same data folder) and
+ProtoMan's netbattle stopped at 1 HP; the recap's tiles the Request BBS,
+the courier and a portal of Lan's HP read.
+
     python3 build.py host && python3 tools/trailer.py 0.17.0 [--keep] [--frames A,B]
 """
 import os
@@ -71,33 +82,28 @@ def from_compare(name, first, last):
     return (argv, dict(e[2]), script, first, last)
 
 
-# (the media branch's recipes for 0.17.0's notes, until build.py on the
-# release branch has them: MegaMan's read by seed 30's layer 4's exit pad
-# beside a dark warp and at Lan's HP's pink pad on seed 7; a won Server's
-# offer and pick on seed 8's layer 4)
-FORK_PAD = (['--scene', 'emu', '--run-depth', '4', '--seed', '30', '--dev', 'quiet'], {}, '300:,0:place 284 -300 1,110:')
-SERVER_8 = ['--scene', 'emu', '--run-depth', '4', '--seed', '8', '--dev', 'god,onehit,quiet', '--talk', 'challenge:200']
-SERVER_SHOTS = '6:B,6:,12:,' * 6
-SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' + SERVER_SHOTS +
-               '8:UP,15:,' + SERVER_SHOTS + '8:DOWN,15:,8:DOWN,15:,' + SERVER_SHOTS + '200:,60:,' + '6:A,6:,60:,' * 2 +
-               '6:A,6:,200:,' + '6:A,6:,90:,' * 2)
-
-
 def scenes():
     """the release pictures' runs (build.py's SCREENSHOTS and CLIPS,
     tools/before_after.py's), a scene each"""
-    import build
     return {
-        'fork-pad': (*FORK_PAD, 330, 470),
-        # an act's first layer, seed 1's layer 4: the card, its two boxes
+        # a won Server on seed 8's layer 4: its battle, the buster down each
+        # row (the cold open), then its pick of three
+        'server-battle': kit.from_shots('server-pick', 1050, 1750),
+        'server-pick': kit.from_shots('server-pick', 2380, 2640),
+        # MegaMan steps onto the exit pad of a layer still owed its battle,
+        # and the battle starts there (seed 2's layer 4)
+        'floor-pad': kit.from_clips('floor-pad'),
+        # an End Area layer's map whole on BN5's area 2, its way one wide
+        'end-area': from_compare('bn5-end-area', 940, 1100),
+        # an act's first layer, seed 1's layer 4: the card, then on
         'arrival': from_compare('arrival-words', 120, 420),
-        'fork-portal': (['--scene', 'home', '--run-depth', '7', '--seed', '7'], {},
-                        build.HP_PAGED + '0:place 160 37 0,20:,6:A,100:,6:A,90:,6:A,90:', 1380, 1560),
-        'server-offer': (SERVER_8, {}, SERVER_PICK, 440, 620),
-        'server-pick': (SERVER_8, {}, SERVER_PICK, 2380, 2640),
-        # (its battle, the buster down each row: the cold open's, until the
-        # battle floor's run)
-        'server-battle': (SERVER_8, {}, SERVER_PICK, 1050, 1750),
+        # MegaMan's read by seed 30's layer 4's exit pad beside a dark warp,
+        # and at Lan's HP's pink pad on seed 7
+        'fork-pad': kit.from_shots('fork-pad', 330, 470),
+        'fork-portal': kit.from_shots('fork-portal', 1380, 1560),
+        # the NaviCust vendor on seed 3's layer 2: her greeting (1963),
+        # BN6's shop screen in BugFrags (2147)
+        'vendor': kit.from_shots('bn5-vendor', 1900, 2240),
         # the setup's Folder row stepping to Z-Canon (245), Busting (285)
         # and Lean (325); Z-Canon's and Busting's first hands
         'setup-folders': kit.from_shots('setup-folders', 200, 360),
@@ -357,24 +363,20 @@ def still(name):
     return [(0, 'still', name, 0)]
 
 
-# (footage still to come: a marked placeholder, never another feature's picture)
-STANDIN = [(0, 'standin', 0, 0)]
-
-
 def segments():
     return [
         Segment(F(4), '01', 'THE BATTLE FLOOR', 0, [
-            # (the Server's battle until the battle floor's run lands; the
-            # End Area's to come)
-            Shot(F(5), 'A BATTLE ON EVERY LAYER', [(F(5), 'server-battle', 140, 1)]),
-            Shot(F(6), "BN5'S END AREA WALKS ONE WIDE", STANDIN),
+            # (MegaMan onto an exit pad, the battle breaking in; an End Area
+            # layer's way, then its map)
+            Shot(F(5), 'A BATTLE ON EVERY LAYER', [(F(5), 'floor-pad', 14, 1), (F(5, 2), 'floor-pad', 84, 1)]),
+            Shot(F(6), "BN5'S END AREA WALKS ONE WIDE", [(F(6), 'end-area', 20, 1), (F(6, 2), 'end-area', 48, 0)]),
             Shot(F(7), 'FEWER WORDS ON THE WAY', [(F(7), 'arrival', 30, 1)]),
         ]),
         Segment(F(8), '02', 'EVERY PICK COUNTS', 1, [
             Shot(F(9), 'A WON SERVER: PICK ONE OF', [(F(9), 'server-pick', 40, 1)], count='3'),
             Shot(F(10), 'MEGAMAN READS THE WAY AHEAD', [(F(10), 'fork-pad', 4, 1)]),
-            # (the BugFrag shop's run to come)
-            Shot(F(11), 'BUGFRAGS BUY PROGRAMS', STANDIN),
+            # (the vendor's greeting, then BN6's shop screen in BugFrags)
+            Shot(F(11), 'BUGFRAGS BUY PROGRAMS', [(F(11), 'vendor', 6, 1), (F(11, 1.5), 'vendor', 116, 0)]),
         ]),
         Segment(F(12), '03', 'THREE NEW FOLDERS', 2, [
             Shot(F(13), 'NEW STARTING FOLDERS', [(F(13), 'setup-folders', 8, 1), (F(13, 1.5), 'setup-folders', 26, 1),
@@ -472,18 +474,6 @@ def chip_card(small, d, seg, fr):
     put_chip(small, (GAME[0] + GAME[2]) // 2 - 36, GAME[1] + 20, art, 6)
 
 
-def standin():
-    """the field's picture while a shot's footage is still to come"""
-    im = Image.new('RGB', (240, 160), GAUGE_IN)
-    d = ImageDraw.Draw(im)
-    for x in range(-160, 240, 12):
-        d.line([(x, 0), (x + 160, 160)], fill=PLATE)
-    d.rectangle([60, 66, 180, 94], fill=GAUGE_IN, outline=FRAME_LO)
-    f = ImageFont.truetype(CAPS, 8)
-    d.text((120, 80), 'FOOTAGE TO COME', font=f, fill=SOFT, anchor='mm')
-    return im
-
-
 def opening(small, picture, fr, start):
     """the cut: the shot opening out of the chip's window into the field"""
     t = ease((fr - start + 1) / OPEN)
@@ -511,12 +501,11 @@ def draw_battle(segs, fr):
         chip_card(small, d, seg, fr)
     elif shot is not None:
         scene, i = shot.sample(fr)
-        pic = standin() if scene == 'standin' else kit.shot(scene, i)
+        pic = kit.shot(scene, i)
         if shot.opens and fr - shot.start < OPEN:
             prev = seg.shots.index(shot) - 1
             if prev >= 0:
-                before = seg.shots[prev].sample(shot.start - 1)
-                small.paste(standin() if before[0] == 'standin' else kit.shot(*before), PIC)
+                small.paste(kit.shot(*seg.shots[prev].sample(shot.start - 1)), PIC)
             opening(small, pic, fr, shot.start)
         else:
             small.paste(pic, PIC)
@@ -596,14 +585,14 @@ def draw_cold(fr):
 
 
 def draw_title(fr):
-    """the logo, THE RUN, SHARPENED and the version on BN's plate"""
+    """the logo, SHARPER, NOT BIGGER and the version on BN's plate"""
     im, d = big_frame(fr)
     k = fr - TITLE
     lg = logo(620)
     im.paste(lg, (W // 2 - 310, 120), lg)
     if k >= BEAT:
         a = min(1.0, (k - BEAT + 1) / 4)
-        text(d, (W // 2, 120 + lg.height + 70), 'THE RUN, SHARPENED', 56, lerp(FIELD, WHITE, a), True, 'mm',
+        text(d, (W // 2, 120 + lg.height + 70), 'SHARPER, NOT BIGGER', 56, lerp(FIELD, WHITE, a), True, 'mm',
              shade=GAUGE_IN)
     if k >= 2 * BEAT:
         x0, x1, y0, y1 = 330, 950, 440, 526
@@ -713,4 +702,4 @@ def compose(only=None):
             print('frame', fr, '/', FRAMES, flush=True)
 
 
-POSTER = F(3, 3)        # (the title card held: the logo, THE RUN, SHARPENED, 0.17.0 · OUT NOW)
+POSTER = F(3, 3)        # (the title card held: the logo, SHARPER, NOT BIGGER, 0.17.0 · OUT NOW)
