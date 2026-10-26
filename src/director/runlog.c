@@ -192,7 +192,7 @@ void runlog_run_end(bool won) {
 		append(L.line);
 		if (!won) guardian_over(ANALYTICS_LOST, 0);
 	}
-	char line[200];
+	char line[256];
 	bool act1;
 	const AnalyticsEconomy *e = tally(&act1);
 	snprintf(line, sizeof line, "seed %08x run %s at depth %d area %d viruses %d navis %d chips %d good %d md %d zenny %u (act 1: %d %d %d %u)",
@@ -201,9 +201,10 @@ void runlog_run_end(bool won) {
 	append(line);
 	/* (and what it chose: docs/game/core-loop.md, Phase 0) */
 	const uint16_t *c = e->choice;
-	snprintf(line, sizeof line, "seed %08x choices trips %d jobs %d kept %d vows %d orders %d skips %d undernet %d dark %d duels %d/%d netbattles %d/%d edits %d map %us battle %us",
+	snprintf(line, sizeof line, "seed %08x choices trips %d jobs %d kept %d vows %d orders %d skips %d undernet %d dark %d duels %d/%d netbattles %d/%d edits %d battlers %d/%d/%d map %us battle %us",
 		(unsigned)run.seed, run.clock, c[CHOICE_JOB], c[CHOICE_JOB_KEPT], c[CHOICE_VOW], c[CHOICE_ORDER], c[CHOICE_DRAFT_SKIP], c[CHOICE_UNDERNET],
 		c[CHOICE_DARK_LAYER], c[CHOICE_DUEL_WON], c[CHOICE_DUEL], c[CHOICE_NETBATTLE_WON], c[CHOICE_NETBATTLE], c[CHOICE_FOLDER_EDIT],
+		c[CHOICE_BATTLER], c[CHOICE_BATTLER_ON], c[CHOICE_BATTLER_CASH],
 		(unsigned)(e->map_frames / 60), (unsigned)(e->battle_frames / 60));
 	append(line);
 	analytics_run_end(won, by, e);

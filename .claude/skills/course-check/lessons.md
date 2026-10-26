@@ -47,7 +47,9 @@ is visited a median minute.
 **Decided by the owner:** a lost netbattle costs the HP and the
 clearance, never the run (built the same day: `battle_spare.c`). The
 owner declined the other three: no freeze of side systems, Virus Battler
-built now as decided on 25 October, no playtest gate per minor release.
+kept (it had shipped in 0.16.0 while the review read 0.15.1's tree: pull
+`dev` before a check, and read the CHANGELOG since the last tag), no
+playtest gate per minor release.
 A later check proposes them again only with new evidence (the choice
 counts, a sag in the numbers), said as such.
 

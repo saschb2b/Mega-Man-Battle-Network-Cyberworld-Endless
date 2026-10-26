@@ -5444,7 +5444,7 @@ static void test_analytics(void) {
 	analytics_run_choices(false, 3, &econ);
 	CHECK(stats_posts == 7 && strstr(stats_sent[6], "\"name\":\"run-choices\",\"data\":{\"won\":false,\"layer\":7,\"net\":\"short\",\"threat\":2,\"trips\":3,"
 		"\"jobs\":2,\"kept\":1,\"vows\":1,\"orders\":1,\"skips\":1,\"undernet\":1,\"dark\":1,\"duels\":1,\"duelswon\":1,\"netbattles\":1,"
-		"\"netbattleswon\":1,\"edits\":1,\"mapseconds\":754,\"battleseconds\":321}"),
+		"\"netbattleswon\":1,\"edits\":1,\"battlers\":1,\"fighton\":1,\"cashed\":1,\"mapseconds\":754,\"battleseconds\":321}"),
 		"statistics: run-choices counts what the run chose, the seconds on the map and in battle (%s)", stats_sent[6]);
 	analytics_run_choices(true, 0, NULL);
 	CHECK(stats_posts == 7, "statistics: no counts, no run-choices");

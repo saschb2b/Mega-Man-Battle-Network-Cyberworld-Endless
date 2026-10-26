@@ -104,11 +104,13 @@ void analytics_guardian(int navi, int result, int hp, int max_hp, int frames);
  * the decisions a review could only argue about): requests taken, kept
  * and vowed, orders at AsterLand, NaviCust drafts left for their BugFrags,
  * the Undernet's and dark layers entered, ProtoMan's duels and netbattles
- * taken and won, folder edits between layers; and the frames on a layer's
+ * taken and won, folder edits between layers, Virus Battlers' series
+ * begun, rounds fought on after a win and pots taken; and the frames on a layer's
  * map (its talks and menus among them) against those in battle. */
 enum {
 	CHOICE_JOB, CHOICE_JOB_KEPT, CHOICE_VOW, CHOICE_ORDER, CHOICE_DRAFT_SKIP, CHOICE_UNDERNET, CHOICE_DARK_LAYER,
-	CHOICE_DUEL, CHOICE_DUEL_WON, CHOICE_NETBATTLE, CHOICE_NETBATTLE_WON, CHOICE_FOLDER_EDIT, CHOICES
+	CHOICE_DUEL, CHOICE_DUEL_WON, CHOICE_NETBATTLE, CHOICE_NETBATTLE_WON, CHOICE_FOLDER_EDIT,
+	CHOICE_BATTLER, CHOICE_BATTLER_ON, CHOICE_BATTLER_CASH, CHOICES
 };
 typedef struct {
 	uint32_t seed;

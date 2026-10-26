@@ -215,8 +215,9 @@ seen; the opening plan of 21 October is still unplayed by a person.
   in the run's tally with no `Run` change. Counted: trips back, requests
   taken, kept and vowed, orders at AsterLand, drafts left for their
   BugFrags, the Undernet's and dark layers entered, duels and netbattles
-  taken and won, folder edits between layers, and the run's seconds on the
-  map against those in battle. Not yet: an order's chip and price, the
+  taken and won, folder edits between layers, Virus Battlers' series
+  begun, rounds fought on after a win and pots taken, and the run's
+  seconds on the map against those in battle. Not yet: an order's chip and price, the
   final folder's codes and how much of it the run found, the seconds per
   layer rather than per run.
 - ~~**Freeze** new online social surface, PET extras, meta axes, lock
@@ -331,8 +332,10 @@ seen; the opening plan of 21 October is still unplayed by a person.
 - **26 October 2026: no freeze.** Side systems (online, the PET's
   extras, meta axes) may keep growing beside Phase 1 (chosen over the
   freeze this review proposed).
-- **26 October 2026: Virus Battler is built now**, as decided on 25
-  October (chosen over deferring it until Phase 1 has landed).
+- **26 October 2026: Virus Battler stays** (chosen over deferring it
+  until Phase 1 has landed). It had shipped in 0.16.0 (#237) while this
+  review read 0.15.1's tree, which called it unbuilt; its series, the
+  rounds fought on and the pots taken are among the counted choices.
 - **26 October 2026: no release gate.** Releases go out as now, without
   a main-path persona session per minor release; the statistics and the
   players' reports are the check.

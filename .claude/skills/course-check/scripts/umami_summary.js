@@ -51,7 +51,7 @@ const md = E.filter((x) => x.data.md != null && x.data.layer > 0);
 // what the runs chose (run-choices, since the first check's Phase 0): of
 // each count, how many runs made it at all and its median among them
 const C = by('run-choices');
-const choiceKeys = ['trips', 'jobs', 'kept', 'vows', 'orders', 'skips', 'undernet', 'dark', 'duels', 'duelswon', 'netbattles', 'netbattleswon', 'edits'];
+const choiceKeys = ['trips', 'jobs', 'kept', 'vows', 'orders', 'skips', 'undernet', 'dark', 'duels', 'duelswon', 'netbattles', 'netbattleswon', 'edits', 'battlers', 'fighton', 'cashed'];
 const choices = C.length ? Object.fromEntries([['runs', C.length],
 	...choiceKeys.map((k) => [k, { runsWithAny: C.filter((x) => x.data[k] > 0).length, med: q(C.filter((x) => x.data[k] > 0).map((x) => x.data[k]), 0.5) }]),
 	['mapSeconds', st(C.map((x) => x.data.mapseconds))], ['battleSeconds', st(C.map((x) => x.data.battleseconds))]]) : 'none yet';

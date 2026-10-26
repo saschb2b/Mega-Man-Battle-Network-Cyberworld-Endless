@@ -354,6 +354,7 @@ void analytics_run_choices(bool won, int trips, const AnalyticsEconomy *e) {
 	if (!sends() || !e) return;
 	static const char *const names[CHOICES] = {
 		"jobs", "kept", "vows", "orders", "skips", "undernet", "dark", "duels", "duelswon", "netbattles", "netbattleswon", "edits",
+		"battlers", "fighton", "cashed",
 	};
 	char out[ANALYTICS_PAYLOAD];
 	Json j;
