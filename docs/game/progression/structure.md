@@ -3,7 +3,7 @@ type: Design
 title: "The structure"
 description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, the battle floor, growth, risk the player chooses, the Cybeast, later cycles."
 tags: [game, progression]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # The structure
@@ -313,12 +313,27 @@ prize's code as BN6 does, three in four one the pack lacks.
 
 - The Server challenge never appears on layer 1 and fights the next act's
   band one version up, at the layer's own depth (not three layers deeper).
-  A win pays a chip from the best Mystery Data's roll on top of the game's
-  own reward. From act 4 it may hold the area's SP Navi, who keeps his own
+  A win pays a pick of one chip from three on top of the game's own
+  reward, on the collector's vault's screen: each the hardest hitting of
+  four rolled two layers deeper, the ones the layer's Net Dealer doesn't
+  sell first, in the folder's codes or their *, all three named in the
+  offer. B leaves them at the Server, whose talk opens the pick again
+  until one is taken. From act 4 it may hold the area's SP Navi, who keeps his own
   HP: never Bass BX, MegaMan's beast or the place of the Navi the US
   version cut, whose records the Graveyard's and the Nest's tables hold
   beside the story's SP Navis (`navi_challenge`, `super_reserved_ai`): the
   super bosses come at their own places ([Super bosses](../bosses/super-bosses.md)).
+- Why a pick, and no skip that pays (the game-design skill, 26 October
+  2026; [the core loop](../core-loop.md), Phase 2): the run's dialectic is
+  press on or hold back, and the Server is its sharpest "press on", so
+  its pay is a decision about the run's build (Hades' boon draft, pick
+  one of three), not a roll. A chip goes to the Pack, which has no slot
+  to fill, so the cost of a pick is the two left behind, and a skip that
+  paid (BugFrags, as the NaviCust draft's does, where programs fight for
+  the board's cells) would be a second faucet without a budget behind
+  it. The tier stays the old prize's (two layers deeper, the same twelve
+  rolls, four a chip): `build.py economy` finds a good chip among the
+  three at 96 to 100% of Servers by act.
 - The dark flame into the Undernet stays a side route with tougher viruses
   and better Mystery Data.
 - Busting Level stays the game's: a clean, fast battle already earns better

@@ -457,7 +457,11 @@ static void after_forced(void) {
 		if (D.duel) { duel_verdict(won, emu_battle_unwatch()); D.pet_refreshed = false; }
 		else if (D.battler) battler_round_over(emu_read8(BN6_BATTLE_RESULT));
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
-		else D.reward_due = won && D.objs.challenge_reward >= 0;
+		else {
+			/* (its pick of three, there at the Server while B leaves it) */
+			if (won) flag_set(LAYER_SERVER_WON_FLAG);
+			D.reward_due = won && D.objs.challenge_reward >= 0;
+		}
 		D.gate_fight = false;
 		roll_encounter();
 	}
@@ -500,7 +504,7 @@ static void rival_update(void) {
 	}
 }
 
-/* What waits for its moment on the map: the Server's prize, the PET's words
+/* What waits for its moment on the map: the Server's pick, the PET's words
  * and Dad's mail, Chaud's verdict and call, the lessons, a ScrtData's */
 static void talks_due(void) {
 	/* (as a talk, MegaMan held: run straight off, the A paging its first

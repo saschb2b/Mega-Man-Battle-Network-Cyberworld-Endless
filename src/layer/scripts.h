@@ -46,9 +46,8 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
  * one order a visit). */
 int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed);
 
-/* Choices: Yes sets event flag `flag`, which the director acts on. A
- * challenge answers only once; the gate first wants three ScrtData. */
-int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi);
+/* Choices: Yes sets event flag `flag`, which the director acts on (a
+ * challenge's, ta_challenge, below). The gate first wants three ScrtData. */
 int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0x63, BN6's no song, stops the music;
@@ -150,8 +149,15 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
  * chips at level 2). `duel_prize`: the one beside ProtoMan, the clearance
  * held, waiting on his duel's winner. */
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
-/* A won challenge's own reward: a chip. */
-int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
+/* A Server's challenge (docs/game/core-loop.md, Phase 2): its signal and
+ * the three chips `v` it holds, then Yes sets `flag`; answered only once.
+ * Once `won_flag` is set (the director sets it as the battle is won), its
+ * talk is the pick, `pick` (ta_server_pick). */
+int ta_challenge(TextArchive *t, int flag, int won_flag, int pick, const ScriptsVault *v, const char *navi);
+/* A won challenge's own reward: its three chips, one to take (event flag
+ * `taken_flag` set as it is, after which the signal is quiet; B leaves
+ * them, for the Server's talk to open again). */
+int ta_server_pick(TextArchive *t, int taken_flag, const ScriptsVault *v);
 /* What a dark layer's item panel held (docs/game/liberation/): a chip, its
  * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);

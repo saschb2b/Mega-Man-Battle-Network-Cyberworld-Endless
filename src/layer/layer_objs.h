@@ -52,6 +52,11 @@
  * DarkChips). (0x1467-0x1469: the draft's fit flags,
  * guardian_objs.h) */
 #define LAYER_DARK_TAKEN_FLAG  0x146D
+/* The layer's Server was beaten: its talk opens its pick of three (the
+ * director sets it as the battle is won), and the pick gave its chip
+ * (docs/game/core-loop.md, Phase 2). */
+#define LAYER_SERVER_WON_FLAG   0x147E
+#define LAYER_SERVER_TAKEN_FLAG 0x147F
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
