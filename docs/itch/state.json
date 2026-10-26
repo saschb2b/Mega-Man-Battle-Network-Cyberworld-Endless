@@ -1,6 +1,6 @@
 {
  "page": {
-  "description.html": "27706f7566b57e5fbb8d93b123ad67e8e40053a7",
+  "description.html": "19958791760d5a5ecb3da448f23ff451fbc50613",
   "cover.png": "49dc58c693b187b9ff3d61a112027bd99759b347",
   "banner.png": "86fa03db0e5920a1540ebd3c2e5f4c7831579fa1",
   "embed.png": "c03e168ec2175596d53a882277532d2b7dffa4a6",
@@ -12,11 +12,17 @@
   "bn5-lib-darkloid.gif": "https://img.itch.zone/aW1nLzMxMzIwNzA4LmdpZg==/original/Q01KD4.gif",
   "bn5-unite.gif": "https://img.itch.zone/aW1nLzMxMzIwNzE5LmdpZg==/original/4HHevj.gif",
   "online-square.gif": "https://img.itch.zone/aW1nLzMxMzIwNzQ3LmdpZg==/original/RCCKz8.gif",
-  "online-battle.gif": "https://img.itch.zone/aW1nLzMxMzIwNzYwLmdpZg==/original/6nGUll.gif"
+  "online-battle.gif": "https://img.itch.zone/aW1nLzMxMzIwNzYwLmdpZg==/original/6nGUll.gif",
+  "vb-fight.gif": "https://img.itch.zone/aW1nLzMxMzc2NDMxLmdpZg==/original/pEIgoJ.gif"
  },
  "devlog": {
   "since": "0.1.0",
   "posts": [
+   {
+    "version": "0.16.0",
+    "title": "0.16.0: Your viruses fight for you",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1730258/0160-your-viruses-fight-for-you"
+   },
    {
     "version": "0.15.1",
     "title": "0.15.1: The team joins the dark",
