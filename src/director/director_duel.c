@@ -141,7 +141,7 @@ void duel_roll(void) {
 /* The duel's verdict (docs/game/rival.md): MegaMan's DeleteTime against
  * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
  * words queued, with both times as the results screen shows them (and
- * whether Lan pulled MegaMan out of the netbattle). */
+ * whether Lan stopped the netbattle short of MegaMan's deletion). */
 void duel_verdict(bool won, bool spared) {
 	D.duel = false;
 	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung, before = rival_clearance();

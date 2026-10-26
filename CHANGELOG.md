@@ -3,7 +3,7 @@
 ## Unreleased
 
 - **ProtoMan's netbattle no longer ends the dive.** Where his blow would
-  delete MegaMan, Lan pulls him out: the battle ends at once, MegaMan
+  delete MegaMan, Lan stops the battle: it ends at once, MegaMan
   back on the layer at 1 HP, the duel lost and Chaud's full clearance
   still to win. The netbattle had become the most common end of a run (30
   of 88 lost runs in the anonymous statistics since 6 October, most of

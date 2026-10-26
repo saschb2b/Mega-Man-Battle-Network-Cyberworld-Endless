@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:40:42Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:02:17Z }
 ---
 
 # The rival: Chaud and ProtoMan
@@ -153,10 +153,10 @@ beat: ProtoMan in battle, his own AI and his attacks.
   and the battle ends at once as BN6's draw ends one, its DRAW! not shown,
   as an escape ends (result 3, no reward, his HP as it stands;
   `src/director/battle_spare.c`; [BN6's battles, the battle loop and
-  banners](../rom/battle.md)). Lan pulled him out: Chaud's "Hmph. You pulled him out in
-  time. That one's ProtoMan's,Lan.", the duel lost, the clearance not
+  banners](../rom/battle.md)). Lan stopped the battle: Chaud's "Hmph. You stopped it just
+  in time. That one's ProtoMan's,Lan.", the duel lost, the clearance not
   given. The stake is said before the choice as it is: "He hits hard,
-  Lan..." and Lan's "If it goes bad,I'll pull you out!". The battle still
+  Lan..." and Lan's "If it goes bad,I'm stopping it!". The battle still
   lets him run (a loss, Chaud's "You ran,Lan?").
   Until 0.15.1 the deletion ended the run, the stake said ("If ProtoMan
   deletes us, the dive's over."). The statistics of 6 to 26 October 2026

@@ -2,7 +2,7 @@
  * netbattle). The blow that would delete him leaves him 1 HP, and the
  * battle ends at the fight's next frame as BN6's own draw ends one (result
  * 3: no reward, his HP as it stands, as an escape ends), without its DRAW!
- * banner: Lan pulls him out. */
+ * banner: Lan stops the battle. */
 #ifndef CW_BATTLE_SPARE_H
 #define CW_BATTLE_SPARE_H
 

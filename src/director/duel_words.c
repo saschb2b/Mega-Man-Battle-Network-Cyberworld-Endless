@@ -17,9 +17,9 @@ static int verdict_result(char *out, size_t n, const DuelVerdict *v) {
 	char a[16], b[16];
 	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
 	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
-	/* (his blow would have deleted MegaMan, and Lan pulled him out: the
+	/* (his blow would have deleted MegaMan, and Lan stopped the battle: the
 	 * netbattle's loss, no longer the dive's end, docs/game/rival.md) */
-	if (v->spared) return snprintf(out, n, "@C Hmph. You pulled him out in time.|@C That one's ProtoMan's,Lan.|");
+	if (v->spared) return snprintf(out, n, "@C Hmph. You stopped it just in time.|@C That one's ProtoMan's,Lan.|");
 	if (!won && rung == 2) return snprintf(out, n, "@C Hmph. You ran,Lan?|@C Better than deleted. But it's a loss.|@C ProtoMan will be back.|");
 	if (!won) return snprintf(out, n, "@C Hmph. You ran from the duel?|@C That's a loss,Lan.|");
 	if (rung == 2) return snprintf(out, n, "@C ...Jack out,ProtoMan.|@C You beat him,Lan.|");
