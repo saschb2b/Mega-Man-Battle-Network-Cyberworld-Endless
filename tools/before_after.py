@@ -113,6 +113,20 @@ SCENES = [
      {}, 259),
     ('bn5-soul-shelf', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet,souls=1', '--talk', 'shop:430',
                         '--input', '500:' + ',4:A,6:,96:' * 9], {}, 1440),
+    # (0.17.0's: an act's first layer, seed 1's layer 4, untouched: 0.16.0
+    # on the first of its four boxes, this build's MegaMan free after the
+    # card; Guardian Data on seed 1's layer 6, A every 87 frames: 0.16.0 on
+    # its seventh box, "Let's install it!", this build done after five)
+    ('arrival-words', ['--scene', 'emu', '--run-depth', '4', '--seed', '1', '--dev', 'quiet'], {}, 400),
+    ('guardian-data', ['--scene', 'emu', '--run-depth', '6', '--seed', '1', '--dev', 'quiet', '--talk', 'reward:300',
+                       '--input', '400:,' + '6:A,81:,' * 16], {}, 1060),
+    # (ProtoMan's netbattle, seed 7's layer 8: MegaMan placed beside him,
+    # his five boxes paged, Yes, OK with no chips; his blow ends 0.16.0's
+    # run in RESULT, and leaves this build's MegaMan on the layer at 1 HP
+    # with Chaud's word)
+    ('protoman-netbattle', ['--scene', 'emu', '--run-depth', '8', '--seed', '7', '--net-biome', '11', '--dev', 'quiet,duels=2',
+                            '--input', '300:,' + '4:A,6:,' * 70 + '60:,0:place -124 -160 6,20:,' + '6:A,114:,' * 5 +
+                            '150:,6:LEFT,14:,6:A,400:,6:START,4:,6:A,1400:'], {}, (3000, 2800)),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 

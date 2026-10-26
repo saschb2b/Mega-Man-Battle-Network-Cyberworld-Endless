@@ -1203,6 +1203,26 @@ JUKEBOX_SOUND = {'CYBERWORLD_AUDIO_DUMP': '/src/.build/screenshots/sound.raw', '
 # step puts MegaMan in the room the layer is remembered by)
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
 SIG_PAGED = '150:,' + '4:A,6:,' * 30 + '0:sig,'
+# 0.17.0's notes. (the visit's requests on BN6's Request BBS, seed 2 after
+# act 2: in AsterLand, A at the board, its words and Lan's paged, the list
+# up from frame 1440, the newest post read out from 1700, its second page
+# by 2060; the courier in Lan's HP on the same seed, his four boxes from
+# frame 1230: the BBS, then each offer and its pay)
+HOME_BBS = HOME_ASTER + '0:place -76 -38 0,20:,6:A,60:,6:A,80:,6:A,60:,6:A,120:,62:,6:A,200:,6:A,150:,6:A,300:'
+HP_2 = ['--scene', 'home', '--run-depth', '7', '--seed', '2']
+COURIER_OFFERS = HP_PAGED + '0:place -84 60 7,10:,6:A,124:,' + '6:A,104:,' * 3 + '120:'
+# (an endless run's first layer, seed 1: its three boxes paged, then its
+# first battle, the Custom screen open by frame 920)
+FIRST_HAND = ['--scene', 'emu', '--seed', '1', '--dev', 'quiet']
+FIRST_HAND_IN = '330:,6:A,94:,6:A,94:,6:A,94:,6:A,94:,0:battle,250:,'
+# (a screenshot's run that another runs before it in the same data folder:
+# its options, environment and frames)
+SCREENSHOT_PREP = {
+    # (MegaMan loses to ElecMan, at 1 HP from the first hit: the record his
+    # next meeting speaks from)
+    'guardian-memory': (['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '2', '--dev', 'fragile'],
+                        {'CYBERWORLD_AUTOPILOT': '1'}, 4000),
+}
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1581,6 +1601,23 @@ SCREENSHOTS = [
     # (the Cross Navis on a dark board: the TEAM screen, ChargeMan's turn)
     ('bn5-team-pick', LIB_TEAM + ['--input', '600:,4:UP,6:,30:'], [(639, 'liberation-team')], {}),
     ('bn5-lib-charge', LIB_CHARGE, [(3420, 'liberation-chargeman'), (3740, 'liberation-bomb')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # 0.17.0's notes. (the requests on one board: BN6's Request BBS with
+    # the visit's three posts, one read out; the courier naming an offer)
+    ('home-bbs', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--input', HOME_BBS],
+     [(1600, 'home-bbs'), (2090, 'home-bbs-post')], {}),
+    ('home-offers', HP_2 + ['--input', COURIER_OFFERS], [(1530, 'home-courier-offer')], {}),
+    # (ElecMan met again five runs after he won (SCREENSHOT_PREP's run;
+    # --dev veteran makes the profile's runs six), the weak autopilot
+    # walking into his arena: his second box names how long it has been)
+    ('guardian-memory', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '2', '--dev', 'veteran,quiet'],
+     [(1680, 'guardian-memory')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (the three new starting folders on the setup's Folder row, each
+    # explained; each one's first hand, Z-Canon's cursor on Cannon A)
+    ('setup-folders', ['--scene', 'setup', '--dev', 'folders', '--input', '60:,6:DOWN,20:,6:DOWN,40:,' + '6:RIGHT,34:,' * 6],
+     [(245, 'setup-zcanon'), (285, 'setup-busting'), (325, 'setup-lean')], {}),
+    ('hand-zcanon', FIRST_HAND + ['--setup', 'endless,3,0,0', '--input', FIRST_HAND_IN + '6:RIGHT,100:'], [(1040, 'hand-zcanon')], {}),
+    ('hand-busting', FIRST_HAND + ['--setup', 'endless,4,0,0', '--input', FIRST_HAND_IN + '100:'], [(1040, 'hand-busting')], {}),
+    ('hand-lean', FIRST_HAND + ['--setup', 'endless,5,0,0', '--input', FIRST_HAND_IN + '100:'], [(1040, 'hand-lean')], {}),
 ]
 
 
@@ -1631,6 +1668,22 @@ def two_screens(top, bottom):
     return im
 
 
+def screenshot_prep(args, env, frames):
+    """The run a screenshot's needs before it (SCREENSHOT_PREP), headless in
+    the same data folder, on BN6's ROM alone: nonzero if it failed."""
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        return docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
+                      *args, '--frames', str(frames), mounts=docs_rom_mounts())
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
 def screenshots(only=None):
     """docs/screenshots/NAME.png: the 240x160 picture of chosen frames (or the
     whole screen, shrunk by the entry's last number; or '3ds', the picture
@@ -1650,6 +1703,8 @@ def screenshots(only=None):
         # (the whole screen, the touch controls on it, where the canvas has the game alone)
         shot = '--screen-shot' if whole and not dual and not alone else '--shot'
         second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual or alone else []
+        if name in SCREENSHOT_PREP and screenshot_prep(*SCREENSHOT_PREP[name]):
+            return 1
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         # (the ROMs screen: both ROMs, and the saves where a Linux player's
@@ -1797,6 +1852,9 @@ CLIPS = [
     # move onto the dark and his command in its window)
     ('vb-fight', VB_HELD, {}, VB_SERIES, 2290, 2770),
     ('bn5-lib-bomb', LIB_CHARGE, {'CYBERWORLD_AUTOPILOT': '1'}, None, 3590, 3800),
+    # (0.17.0's: the courier in Lan's HP after act 2, seed 2, naming the
+    # BBS and each offer with its pay, a box each)
+    ('courier-offers', HP_2, {}, COURIER_OFFERS, 1220, 1700),
 ]
 
 
@@ -1811,7 +1869,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
-               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15)}
+               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15)}
 
 
 def clips(only=None):
