@@ -297,7 +297,7 @@ build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/ar
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -Ishared/online -o $@ $(ARENA_TEST_SRCS) -lm
 
-LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
+LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rivals.c src/core/rng.c src/core/compat.c
 build/host/test_legacy: $(LEGACY_TEST_SRCS)
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \

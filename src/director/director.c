@@ -388,6 +388,7 @@ static void battle_update(void) {
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		runlog_fought();
+		boss_battle_frame();
 		lib_battle_frame();
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
@@ -585,7 +586,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

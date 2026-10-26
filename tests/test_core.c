@@ -1368,14 +1368,35 @@ static void test_talk(void) {
 	for (int navi = 1; navi < 32; ++navi) {
 		/* every history: a first meeting, a loss, wins up to respect */
 		for (int step = 0; step < 7; ++step) {
-			if (step == 1) { rival_met(navi); rival_result(navi, RIVAL_NAVI_WON); }
-			else if (step > 1) { rival_met(navi); rival_result(navi, RIVAL_MEGAMAN_WON); }
+			if (step == 1) { rival_met(navi); rival_result(navi, RIVAL_NAVI_WON, NULL, 0); }
+			else if (step > 1) { rival_met(navi); rival_result(navi, RIVAL_MEGAMAN_WON, NULL, 0); }
 			for (int version = 0; version < 3; ++version)
 				for (int biome = 0; biome < BIOME_COUNT; ++biome) {
 					snprintf(what, sizeof what, "guardian_intro(%d, %d, %d) step %d", navi, version, biome, step);
 					check_talk(what, guardian_intro(navi, version, biome));
 				}
 		}
+		/* and what the last battle left him to say: a close call, a
+		 * Cross (his own among them), a beast, a long while away */
+		static const RivalEnd ends[] = { { 0, 3, 400 }, { 1, 300, 400 }, { 2, 300, 400 }, { 3, 300, 400 }, { 4, 300, 400 }, { 5, 300, 400 },
+			{ BN6_FORM_BEAST, 300, 400 }, { BN6_FORM_CROSS_BEAST + 2, 300, 400 }, { 0, 300, 400 } };
+		profile.runs = 9;
+		for (unsigned e = 0; e < sizeof ends / sizeof *ends; ++e)
+			for (int won = 0; won < 2; ++won) {
+				rival_met(navi);
+				rival_result(navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON, &ends[e], e + 1 < sizeof ends / sizeof *ends ? 10 : 2);
+				snprintf(what, sizeof what, "guardian_intro(%d) after end %u, %s", navi, e, won ? "won" : "lost");
+				const char *said = guardian_intro(navi, 0, BIOME_CENTRAL);
+				check_talk(what, said);
+				if (!guardian_rumor(navi)) continue;   /* (his own lines: the guardians a run meets) */
+				static const char *const kept[][2] = { { "Too close", "barely made it" }, { "HeatCross saved", "HeatCross won't" },
+					{ "ElecCross saved", "ElecCross won't" }, { "SlashCross saved", "SlashCross won't" }, { "EraseCross saved", "EraseCross won't" },
+					{ "ChargeCross saved", "ChargeCross won't" }, { "your beast fell", "beast won't" }, { "your beast fell", "beast won't" },
+					{ "long time", "long time" } };
+				const char *want = e >= 1 && e <= 5 && (int)e == navi ? (won ? "my own power" : "wore my power") : kept[e][won];
+				CHECK(strstr(said, want) != NULL, "%s: \"%s\" not said", what, want);
+			}
+		profile.runs = 0;
 		snprintf(what, sizeof what, "guardian_defeat(%d)", navi);
 		check_talk(what, guardian_defeat(navi));
 		snprintf(what, sizeof what, "guardian_tip(%d)", navi);
@@ -5230,7 +5251,7 @@ static void super_words(void) {
 				rumor ? rumor : "", port);
 	}
 	rival_met(SUPER_CYBEAST);
-	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON);
+	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON, NULL, 0);
 	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false));
 }
 

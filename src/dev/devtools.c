@@ -115,7 +115,7 @@ void devtools_veteran(void) {
 		int navi = k ? SUPER_CYBEAST : SUPER_BASS, wins = k ? dev.beast : dev.bass;
 		while (rival(navi)->megaman_won < wins) {
 			rival_met(navi);
-			rival_result(navi, RIVAL_MEGAMAN_WON);
+			rival_result(navi, RIVAL_MEGAMAN_WON, NULL, 0);
 		}
 	}
 	if (!dev.veteran) return;
@@ -131,7 +131,7 @@ void devtools_veteran(void) {
 			rival_met(rec[i].navi);
 			/* (the last result last) */
 			bool won = k < n - 1 ? (rec[i].last == RIVAL_MEGAMAN_WON ? k < rec[i].won - 1 : k < rec[i].won) : rec[i].last == RIVAL_MEGAMAN_WON;
-			rival_result(rec[i].navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON);
+			rival_result(rec[i].navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON, NULL, 0);
 		}
 	}
 	if (!profile.spins) profile.spins = 0x05;   /* (white and pink) */

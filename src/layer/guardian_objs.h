@@ -14,7 +14,6 @@
 #define LAYER_REWARD_FLAG        0x144A   /* its Guardian Data shows */
 #define LAYER_REWARD_TAKEN_FLAG  0x144B   /* ... and was taken */
 #define LAYER_EXIT_OPEN_FLAG     0x144C   /* the exit pad shows */
-#define LAYER_DRAFT_FIT_FLAG     0x1467   /* (+k) the draft's k-th program fits the board's free space as it stands (the director keeps them) */
 #define LAYER_SUPER_SEAL_FLAG    0x1452   /* a super boss's staging (docs/game/bosses/): Bass's stone shakes */
 #define LAYER_SUPER_POSE_FLAG    0x1454   /* ... and he strikes his pose, out of the white */
 
@@ -32,7 +31,6 @@ typedef struct {
 	 * the area's theme fading out, BN6's rumble (0xE3), the white's sound
 	 * (0x100) and Bass's going (0xD7) */
 	int fade, rumble, reveal, depart;
-	uint8_t draft[3];          /* the draft's programs (variants), 0 none: LAYER_DRAFT_FIT_FLAG + k says whether each fits */
 } GuardianStage;
 
 /* The song a guardian's prelude plays as he logs in: BN6's before a

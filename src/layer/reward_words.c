@@ -12,24 +12,12 @@
 static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
 
 /* the draft's branches: a program given, or BugFrags for none; each sets
- * `taken_flag` and ends, or goes on to the way on (`next`). A program
- * that fits the board as it stands (its `fit_flag` set) is installed as
- * it comes; else MegaMan says one moves first (the draft offers only
- * programs that fit once they move): said after the pick, a plan, where
- * three boxes before the menu said it of each (the owner, 6 October
- * 2026: the reward's words were far too many) */
-static int draft_take(TextArchive *t, int program, int color, int fit_flag, int taken_flag, int next) {
-	/* (every time: a returning playtester, told once runs before, left
-	 * one off the board for two acts; which Spin turns it, and L and R,
-	 * are BN6's own, unsaid: the voice sweep, docs/voice/sweep/net.md) */
-	static const char install[] = "Let's install it!";
-	int fits = -1;
-	if (fit_flag) {
-		fits = ta_script(t);
-		ta_page(t, FACE_MEGAMAN, install, false);
-		ta_flag_set(t, taken_flag);
-		ta_end_or(t, next);
-	}
+ * `taken_flag` and ends, or goes on to the way on (`next`). What was got
+ * is BN6's own box alone: the ask before the menu says to install it
+ * ("Let's install it!" after the pick, or "We'll move one to make
+ * room,Lan!", went with the main path's words cut, docs/game/core-loop.md;
+ * BN6's NaviCust shows what moves) */
+static int draft_take(TextArchive *t, int program, int color, int taken_flag, int next) {
 	int s = ta_script(t);
 	uint8_t give[] = { 0xEF, 0x1B, (uint8_t)program, 1, (uint8_t)color };   /* ts_item_give_navi_cust_program */
 	ta_bytes(t, give, sizeof give);
@@ -40,13 +28,6 @@ static int draft_take(TextArchive *t, int program, int color, int fit_flag, int 
 	ta_program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	/* (one box after the give: the install, or the move that makes room
-	 * for it, which says it; the main path's words cut, docs/game/core-loop.md) */
-	if (fit_flag) {
-		uint8_t check[] = { 0xEF, 0x00, (uint8_t)fit_flag, (uint8_t)(fit_flag >> 8), (uint8_t)fits, 0xFF };  /* ts_check_flag */
-		ta_bytes(t, check, sizeof check);
-		ta_page(t, FACE_MEGAMAN, "We'll move one\nto make room,Lan!", false);
-	} else ta_page(t, FACE_MEGAMAN, install, false);
 	ta_flag_set(t, taken_flag);
 	ta_end_or(t, next);
 	return s;
@@ -61,7 +42,11 @@ static int draft_take(TextArchive *t, int program, int color, int fit_flag, int 
 static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
 	int s = ta_script(t), n = draft->n;
 	char lead[96];
-	snprintf(lead, sizeof lead, "Program data,too!\nPick one! Or B for\n%d BugFrags,Lan!", draft->skip_frags);
+	/* (the install said here, every draft: a returning playtester, told
+	 * once runs before, left one off the board for two acts; L names one
+	 * still off it after, briefing_words.c; which Spin turns it, and L and
+	 * R, are BN6's own, unsaid: the voice sweep, docs/voice/sweep/net.md) */
+	snprintf(lead, sizeof lead, "Program data! Let's\ninstall one! Or B\nfor %d BugFrags!", draft->skip_frags);
 	ta_page(t, FACE_MEGAMAN, lead, false);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
@@ -103,37 +88,58 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	return s;
 }
 
-/* A guardian's HPMemory, his chip and the heal, in BN6's own boxes: what
- * was given; nothing of the Pack and the Folder, BN6's own (a playtester
- * counted fourteen calls from a guardian's last words to the way on,
- * session 63), nor of the heal, which the act's end and the way home ask
- * nothing of (the main path's words cut, docs/game/core-loop.md). The
- * run's last gives only his chip: no HP or heal for a walk to its exit (a
- * playtester given five HPMemory and a program after the final fight),
- * and it stays in the Library. */
-static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
-	if (!r->last && r->chip > 0) {
+/* What a Guardian Data gives, in the order its boxes say them */
+enum { GOT_CROSS, GOT_HP, GOT_CHIP, GOT_EXP };
+
+static void give(TextArchive *t, const ScriptsReward *r, int kind) {
+	if (kind == GOT_HP) {
 		ta_give_hp_memory(t, r->hp_memories);
-		ta_give_chip(t, r->chip, r->code, 1);
-		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		char line[96], hp[16] = "";
-		if (r->hp_memories > 1) snprintf(hp, sizeof hp, "%d ", r->hp_memories);
-		snprintf(line, sizeof line, "MegaMan got:\n\"%sHPMemory\" and\n\"%s %c\"!!", hp, r->chip_name, r->code == 26 ? '*' : 'A' + r->code);
-		ta_page(t, FACE_NONE, line, *first);
-		*first = false;
-		return;
+		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);   /* (the heal to the new max, unsaid) */
+	} else if (kind == GOT_CHIP) ta_give_chip(t, r->chip, r->code, 1);   /* (to the Pack, as Battle Network gives it) */
+	else if (kind == GOT_EXP) {
+		/* BN6's own ExpMemry (key item 0x71): the game grows the board and
+		 * runs the NaviCust again as it gives it */
+		static const uint8_t b[] = { 0xF4, 0x00, SCRIPTS_EXP_MEMORY, 1 };   /* ts_item_give */
+		ta_bytes(t, b, sizeof b);
 	}
+}
+
+/* A guardian's Cross, HPMemory, chip and ExpMemry, and the heal, in BN6's
+ * own boxes, two things a box ("MegaMan got:", each in quotes), each
+ * pair given just before its box: what was given; nothing of the Pack and
+ * the Folder, BN6's own (a playtester counted fourteen calls from a
+ * guardian's last words to the way on, session 63), nor of the heal, which
+ * the act's end and the way home ask nothing of (the main path's words
+ * cut, docs/game/core-loop.md: a box a thing was four). The run's last
+ * gives only his chip: no HP or heal for a walk to its exit (a playtester
+ * given five HPMemory and a program after the final fight), and it stays
+ * in the Library. */
+static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
+	const char *thing[4];
+	int kind[4], n = 0;
+	char hp[24], chip[32];
+	if (r->cross) { kind[n] = GOT_CROSS; thing[n++] = r->cross; }
 	if (!r->last) {
-		ta_give_hp_memory(t, r->hp_memories);
-		ta_got_hp(t, r->hp_memories, first);
+		if (r->hp_memories > 1) snprintf(hp, sizeof hp, "%d HPMemory", r->hp_memories);
+		else snprintf(hp, sizeof hp, "HPMemory");
+		kind[n] = GOT_HP; thing[n++] = hp;
 	}
 	if (r->chip > 0) {
-		/* the navi's own chip, as Battle Network gives it (to the Pack) */
-		ta_give_chip(t, r->chip, r->code, 1);
-		ta_got_chip(t, r->chip_name, r->code, first);
-		if (r->last) ta_page(t, FACE_MEGAMAN, "It's in our Library\nfor good,Lan!", false);
+		snprintf(chip, sizeof chip, "%s %c", r->chip_name, r->code == 26 ? '*' : 'A' + r->code);
+		kind[n] = GOT_CHIP; thing[n++] = chip;
 	}
-	if (!r->last) ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
+	if (r->draft && r->draft->expmemry) { kind[n] = GOT_EXP; thing[n++] = "ExpMemry"; }
+	for (int k = 0; k < n; k += 2) {
+		char line[96];
+		give(t, r, kind[k]);
+		if (k + 1 < n) {
+			give(t, r, kind[k + 1]);
+			snprintf(line, sizeof line, "MegaMan got:\n\"%s\" and\n\"%s\"!!", thing[k], thing[k + 1]);
+		} else snprintf(line, sizeof line, "MegaMan got:\n\"%s\"!!", thing[k]);
+		ta_page(t, FACE_NONE, line, *first);
+		*first = false;
+	}
+	if (r->last && r->chip > 0) ta_page(t, FACE_MEGAMAN, "It's in our Library\nfor good,Lan!", false);
 }
 
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
@@ -142,26 +148,20 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	int next = -1;
 	int take[3] = { 0 }, n = r->draft ? r->draft->n : 0, menu = -1;
 	for (int k = 0; k < n; ++k)
-		take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->draft->fit_flag ? r->draft->fit_flag + k : 0, r->taken_flag, next);
+		take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->taken_flag, next);
 	if (n) menu = draft_menu(t, r->draft, take, draft_skip(t, r->draft->skip_frags, r->taken_flag, next));
 	int i = ta_script(t);
 	bool first = true;
 	/* (BN6's own "MegaMan got:" boxes lead, and its own rules go unsaid:
 	 * the Cross's weakness, the Pack, ExpMemry's board, what a program
-	 * does; a super boss's data has its own first line) */
+	 * does; a super boss's data has its own first line and words, and a
+	 * power more to say before the items: a Cross kept, a Soul, the Nest) */
 	if (r->head) {
 		ta_page(t, FACE_NONE, r->head, first);
 		first = false;
 	}
 	if (r->power) ta_pages(t, r->power, FACE_NONE, &first);
 	reward_items(t, r, &first);
-	if (r->draft && r->draft->expmemry) {
-		/* BN6's own ExpMemry (key item 0x71): the game grows the board and
-		 * runs the NaviCust again as it gives it */
-		uint8_t give[] = { 0xF4, 0x00, SCRIPTS_EXP_MEMORY, 1 };   /* ts_item_give */
-		ta_bytes(t, give, sizeof give);
-		ta_got(t, "ExpMemry", &first);
-	}
 	if (!n) {
 		ta_flag_set(t, r->taken_flag);
 		ta_end_or(t, next);

@@ -16,6 +16,8 @@ void boss_update(void);
 bool boss_fighting(void);
 /* ... his battle as it was forced, and the HP he spawns with into *hp */
 const Encounter *boss_battle(int *hp);
+/* A frame of the guardian's battle: how it stands, for his record. */
+void boss_battle_frame(void);
 /* Back from the guardian's battle. */
 void boss_battle_over(bool won);
 /* MegaMan was deleted: in the guardian's battle, it remembers. */
