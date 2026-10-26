@@ -1,9 +1,9 @@
 ---
 type: Review Log
 title: "Voice sweep: the main path's words cut"
-description: "Log of the 26 October 2026 cut of the words a run's main path pages through (Phase 1 of the core loop's review): the Guardian Data chain, arrival talk and the channels that name the next guardian, with the boxes counted before and after."
+description: "Log of the 26 October 2026 cuts of the words a run's main path pages through (Phase 1 of the core loop's review): the Guardian Data chain in two passes, arrival talk and the channels that name the next guardian, with the boxes counted before and after."
 tags: [voice]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
 ---
 # Voice sweep: the main path's words cut
 
@@ -30,10 +30,43 @@ and from the reward's script, captured with `--talk reward`:
 | A busy layer's second L (ProtoMan, a flame, services) | 11 | 9 |
 | The catalog | 1890 lines, 2768 boxes | 1878 lines, 2746 boxes |
 
-The Guardian Data chain is not down to one screen: what remains is
-BN6's own "MegaMan got:" boxes, the draft's ask and its menu, the call
-to install, and the pointer to Dad's mail. Each says something a later
-decision needs.
+The Guardian Data chain was not down to one screen after this pass: what
+remained was BN6's own "MegaMan got:" boxes, the draft's ask and its
+menu, the call to install, and the pointer to Dad's mail. The second
+pass, below, took it further.
+
+## The Guardian Data chain, a second pass
+
+Round three of Phase 1, the same evening. BN6's own "MegaMan got:" boxes
+carry the facts, two things a box (the form the HPMemory and the chip
+already shared): his Cross now beside the HPMemory, ExpMemry beside the
+chip, each pair given just before its box and the heal with the
+HPMemory. The call to install moved into the draft's ask, said before
+every pick ("Program data! Let's install one! Or B for 10 BugFrags!"),
+and after the pick only BN6's own box says what was got; L's briefing
+still names a program left off the board ("Lan,{off} is still off our
+board!"). "We'll move one to make room" went with it: BN6's NaviCust
+shows what has to move, and the draft offers only programs that fit
+once one does. The draft's ask and menu stay whole: the B price is the
+decision's.
+
+Counted from the reward's script with `tools/cw.py shot` and `ref dev`
+(`--scene emu --seed 2 --talk reward:300`, A every 75 frames), then the
+boxes around it as the first pass counted them:
+
+| Where | Before | After |
+| --- | --- | --- |
+| The Guardian Data's own boxes, act 2 (a new Cross, HPMemory, chip, ExpMemry, the draft) | 7 | 5 |
+| The same, act 1's SpoutMan (no Cross, no ExpMemry) | 5 | 4 |
+| The chain, act 2, with his last word and Dad's mail (the first pass's 9) | 9 | 7 |
+| The chain, any act, a veteran (no mail; a brought Cross's word one more) | 6 to 8 | 5 to 6 |
+| The catalog | 1894 lines, 2240 boxes | 1893 lines, 2239 boxes |
+
+Still not one screen: his last word (his voice, the fight's end), two
+"MegaMan got:" boxes, the ask, the menu, the program's own box, and Dad's
+mail the first time. Every one is a fact BN6's own box says or the
+draft's choice; going further means BN6's boxes holding more than two
+things, which its three lines of twenty letters do not.
 
 ## The next guardian, one channel a decision
 
@@ -71,6 +104,10 @@ DiveMan's "His wave lights our panels? Get to our back column!"
 | `briefing_words:guardian_words:6` | The Net kept copying **while we went back... / {guardian_known}** tougher **for it**,Lan! | One box |
 | `briefing_words:spot_where:0` | **It's a winding walk** | Said of ProtoMan and the locks, where no arrow leads; kept for the heal and the last stop's services |
 | `briefing_words:flame_words:1` | **It's a winding walk** | as above, for the flame |
+| `powers_words:powers_reward_words:0` | MegaMan got: / "{powers_cross_name}"!! **in a box of its own** (the second pass) | Folded, not cut: the Cross shares the items' "MegaMan got:" box, two things a box |
+| `reward_words:draft_take:0` | **Let's install it!** (a program that fits; the second pass) | The draft's ask says it before every pick; L names one left off |
+| `reward_words:draft_take:2` | **We'll move one / to make room,Lan!** (the second pass) | BN6's NaviCust shows what moves; the draft offers only programs that fit once one does |
+| `reward_words:draft_menu:0` | Program data**,too**! / **Pick one!** Or B for / {skip_frags} BugFrags**,Lan**! (the second pass) | Reworded, not cut: "Let's install one!" carries the install, and the line's three fit one box at three-digit BugFrags |
 
 ## Kept, and why some stay
 
@@ -80,7 +117,8 @@ DiveMan's "His wave lights our panels? Get to our back column!"
   from next.
 - The draft's ask ("Pick one! Or B for N BugFrags"): the decision.
 - "Let's install it!": a program waits off the board until placed (a
-  returning playtester left one off for two acts).
+  returning playtester left one off for two acts). The second pass moved
+  it into the ask, "Let's install one!", said before every pick.
 - "Lan,mail from Dad! Our battle data on {name}!": the one pointer to the
   channel that now holds the tips.
 - Chaud's call before ProtoMan's netbattle (four boxes): the rival's own
