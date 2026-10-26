@@ -9,14 +9,16 @@
   own attacks rumble as they sound: each buster shot a tick, every
   Vulcan bullet its own, a sword's swing, a Cannon's blast and its tail,
   each hit he lands a knock. The charge hums as it fills, clicks when
-  full, throbs while held and kicks back as the shot leaves. Nothing rumbles while fast
-  forward runs. On a PS5
-  DualSense, over USB or Bluetooth, the trigger that is L clicks once the
-  Custom gauge is full, and pulling through it opens the Custom screen;
-  FAST's trigger clicks lightly where fast forward can run and pulls free
-  in the fight. Options' Audio has **Vibration** (Strong, Medium, Weak,
-  Off) and **Trigger effects**. With Steam Input on for the game's
-  shortcut, the triggers don't reach the pad: turn it off for them
+  full, throbs while held and kicks back as the shot leaves. Nothing
+  rumbles while fast forward runs or online. On a PS5 DualSense, over USB
+  or Bluetooth, the trigger that is L clicks once the Custom gauge is
+  full, and pulling through it opens the Custom screen; FAST's trigger
+  clicks lightly where fast forward can run and pulls free in the fight.
+  Options' Audio has **Vibration** (Strong, Medium, Weak, Off) and
+  **Trigger effects**. It rumbles on Linux (a Steam Deck too), Windows,
+  macOS and iOS (no trigger effects there); Android, the browser and the
+  3DS don't yet. With Steam Input on for the game's shortcut, the
+  triggers don't reach the pad: turn it off for them
   ([Rumble and triggers](docs/GUIDE.md#rumble-and-triggers)).
 
 - **BN6's Virus Battler.** On an act's first layer, in about half the
@@ -33,6 +35,7 @@
   SuprVulc V). A on the BtlrCard in KeyItem shows the card. Fast forward
   runs during a Virus Battle's fight, which takes no input. Layers made
   before continue afresh.
+
 - **Host your own Net Square, with nothing to set.** The server, started
   bare (a double-click on Windows), now opens a Square every computer on
   the network can reach, and says on its console the address players

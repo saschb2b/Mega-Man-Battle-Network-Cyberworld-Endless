@@ -10,6 +10,7 @@ generated: { by: claude-code/unrecorded, at: 2026-10-25T00:00:00Z }
 
 The players' notes of each release, which the site's versions page renders (`tools/site_versions.py`) and each GitHub release opens with; a release without notes shows its CHANGELOG section instead.
 
+- [Cyberworld Endless 0.16.0](v0.16.0.md): Your viruses fight for you.
 - [Cyberworld Endless 0.15.1](v0.15.1.md): The team joins the dark.
 - [Cyberworld Endless 0.15.0](v0.15.0.md): Liberate the net.
 - [Cyberworld Endless 0.14.1](v0.14.1.md): Every song, in BN6's own look.
