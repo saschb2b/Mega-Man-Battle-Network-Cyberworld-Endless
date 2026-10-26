@@ -25,7 +25,7 @@ time waits, it is not cut short. Each came from a cut the owner refused.
 1. **The look is the game's world, in the project's style.** Build it
    from Battle Network's own visual language as the project already shows
    it: BN6's PET look (the band, cyan-framed windows on a navy field, the
-   INFORMATION box, the orange cursor arrow, the green pill; `docs/UI.md`,
+   INFORMATION box, the orange cursor arrow, the green pill; `docs/engine/ui.md`,
    `src/gfx/pet_look.c`, the site's frames in `tools/site_art.py`'s
    colours), the net's grids, a battle's or a board's own screens.
    Never a real-world metaphor dressed over the footage. 0.16.0's first cut
