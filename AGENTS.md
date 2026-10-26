@@ -32,6 +32,7 @@ the site.
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
 | What a run hands out (chips, their rarity and codes, zenny, Mystery Data), measured by act, the plans its curves come in by, and the guard against drift | [docs/ECONOMY.md](docs/ECONOMY.md) |
+| The core loop reviewed (October 2026): what works, what it lacks, what has grown, the players' statistics, the next evolution's phases and what it freezes; a new system or meta axis is checked against it first | [docs/CORE_LOOP.md](docs/CORE_LOOP.md) |
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem, the Jukebox | [docs/PET.md](docs/PET.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
 | Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
