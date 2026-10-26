@@ -1223,6 +1223,19 @@ SCREENSHOT_PREP = {
     'guardian-memory': (['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '2', '--dev', 'fragile'],
                         {'CYBERWORLD_AUTOPILOT': '1'}, 4000),
 }
+# (0.17.0's: the Server's talk opened on seed 8's layer 4, paged to its
+# question, Yes; the battle (OldHeatr, Shooter, Mettaur2, one hit each) won
+# by the buster down each row; the result and the pick's words paged)
+SERVER_8 = ['--scene', 'emu', '--run-depth', '4', '--seed', '8', '--dev', 'god,onehit,quiet', '--talk', 'challenge:200']
+SERVER_SHOTS = '6:B,6:,12:,' * 6
+SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' + SERVER_SHOTS +
+               '8:UP,15:,' + SERVER_SHOTS + '8:DOWN,15:,8:DOWN,15:,' + SERVER_SHOTS + '200:,60:,' + '6:A,6:,60:,' * 2 +
+               '6:A,6:,200:,' + '6:A,6:,90:,' * 2)
+# (0.17.0's battle floor, PR #247: seed 2's layer 4 with its random battles
+# on, its arrival paged; MegaMan put two panels short of the exit pad, no
+# battle yet on the layer, walks onto it: the pad holds the layer's battle)
+FLOOR_PAD = ['--scene', 'emu', '--run-depth', '4', '--seed', '2']
+FLOOR_PAD_INPUT = '1:,150:,' + '6:A,6:,30:,' * 14 + '60:,0:place 316 84 1,10:,55:UP+RIGHT,300:'
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1618,6 +1631,27 @@ SCREENSHOTS = [
     ('hand-zcanon', FIRST_HAND + ['--setup', 'endless,3,0,0', '--input', FIRST_HAND_IN + '6:RIGHT,100:'], [(1040, 'hand-zcanon')], {}),
     ('hand-busting', FIRST_HAND + ['--setup', 'endless,4,0,0', '--input', FIRST_HAND_IN + '100:'], [(1040, 'hand-busting')], {}),
     ('hand-lean', FIRST_HAND + ['--setup', 'endless,5,0,0', '--input', FIRST_HAND_IN + '100:'], [(1040, 'hand-lean')], {}),
+    # 0.17.0's notes. (MegaMan reads the way ahead, docs/world/level-design/
+    # fork-read.md: seed 30's layer 4, a dark warp beside its exit pad,
+    # MegaMan put within three panels of the pad by the warp; Lan's HP
+    # before act 3 on seed 7, A facing the pink pad, its third box the read)
+    ('fork-pad', ['--scene', 'emu', '--run-depth', '4', '--seed', '30', '--dev', 'quiet', '--input', '300:,0:place 284 -300 1,110:'],
+     [(405, 'fork-pad')], {}),
+    ('fork-portal', ['--scene', 'home', '--run-depth', '7', '--seed', '7', '--input',
+                     HP_PAGED + '0:place 160 37 0,20:,6:A,100:,6:A,90:,6:A,90:'], [(1516, 'fork-portal')], {}),
+    # (a won Server pays a pick: seed 8's layer 4, its offer naming the
+    # three, Yes, the battle won by the buster down each row, then the pick)
+    ('server-pick', SERVER_8 + ['--input', SERVER_PICK], [(546, 'server-offer'), (2556, 'server-pick')], {}),
+    # (BugFrags buy programs: seed 3's layer 2, an act's middle layer, 50
+    # BugFrags given, Chaud's call paged, MegaMan beside the NaviCust
+    # vendor; her greeting, then BN6's shop screen in BugFrags; with BN5's
+    # ROM beside BN6's, which dresses the layer as the Nest's copy)
+    ('bn5-vendor', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet', '--talk', 'bugfrags:100', '--input',
+                    '1:,300:,' + '6:A,6:,60:,' * 21 + '30:,0:place -12 -260 7,20:,6:A,6:,90:,' + '6:A,6:,80:,' * 2],
+     [(1963, 'vendor-greeting'), (2147, 'vendor-shop')], {}),
+    # (a battle on every layer: MegaMan steps onto the exit pad of a layer
+    # still owed its battle, and the battle starts there)
+    ('floor-pad', FLOOR_PAD + ['--input', FLOOR_PAD_INPUT], [(863, 'floor-pad'), (868, 'floor-pad-start')], {}),
 ]
 
 
@@ -1855,6 +1889,9 @@ CLIPS = [
     # (0.17.0's: the courier in Lan's HP after act 2, seed 2, naming the
     # BBS and each offer with its pay, a box each)
     ('courier-offers', HP_2, {}, COURIER_OFFERS, 1220, 1700),
+    # (0.17.0's: the exit pad holding a layer's battle, from MegaMan's walk
+    # onto it to the Custom screen)
+    ('floor-pad', FLOOR_PAD, {}, FLOOR_PAD_INPUT, 800, 1090),
 ]
 
 
@@ -1869,7 +1906,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
-               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15)}
+               'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15),
+               'floor-pad': (None, 15)}
 
 
 def clips(only=None):
