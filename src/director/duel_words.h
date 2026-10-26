@@ -9,6 +9,7 @@ const char *duel_call_words(void);
 /* a duel's end, as Chaud's verdict speaks of it */
 typedef struct {
 	bool won, beat, opened;   /* the battle won; ProtoMan's time beaten (or him); the gate beside opened */
+	bool spared;              /* the netbattle ended by ProtoMan's deleting blow, MegaMan pulled out */
 	int rung, mine, his;      /* the duel's rung; the two times, in frames */
 	int before, after;        /* Chaud's clearance before the duel and after */
 } DuelVerdict;

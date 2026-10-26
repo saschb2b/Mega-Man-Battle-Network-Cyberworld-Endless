@@ -138,8 +138,9 @@ static bool act_on_choices(void) {
 		case OBJ_DUEL:
 			set_encounter(&D.duel_enc, true);
 			/* (its hits, and the netbattle's ProtoMan held to the act's
-			 * band as he spawns: docs/RIVAL.md) */
-			emu_battle_watch(D.duel_cap);
+			 * band as he spawns, his deleting blow ending it instead:
+			 * docs/RIVAL.md) */
+			emu_battle_watch(D.duel_cap, layer_objs_duel_rung == 2);
 			D.challenge = true;
 			D.duel = true;
 			D.duel_hit = false;
@@ -432,7 +433,7 @@ static void after_forced(void) {
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		if (D.duel) { emu_battle_unwatch(); duel_verdict(won); D.pet_refreshed = false; }
+		if (D.duel) { duel_verdict(won, emu_battle_unwatch()); D.pet_refreshed = false; }
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;

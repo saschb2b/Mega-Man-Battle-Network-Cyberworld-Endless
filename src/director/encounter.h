@@ -39,10 +39,12 @@ void emu_encounter_started(uint32_t settings);
  * stand in BN6's engine */
 uint32_t emu_battle_souls(void);
 /* The next battle watched, until emu_battle_unwatch (the duel's: docs/
- * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, and the first enemy
- * to spawn given `hp_cap` HP at most (0: its own). */
-void emu_battle_watch(int hp_cap);
-void emu_battle_unwatch(void);
+ * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, the first enemy to
+ * spawn given `hp_cap` HP at most (0: its own), and with `spare` the blow
+ * that would delete MegaMan ending the battle instead (battle_spare.h). */
+void emu_battle_watch(int hp_cap, bool spare);
+/* ... and the watch ended: whether it spared MegaMan */
+bool emu_battle_unwatch(void);
 /* The next enemy to spawn with `from` HP given `to` instead (a guardian's
  * own, raised by the Net's clock, docs/HOME.md), until
  * emu_battle_unwatch; nothing where they are the same. */

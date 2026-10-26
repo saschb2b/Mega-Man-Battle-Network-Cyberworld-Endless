@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "battle_spare.h"
 #include "bn6.h"
 #include "bn6_panels.h"
 #include "bytes.h"
@@ -83,6 +84,7 @@ void emu_encounters_install(void) {
 	emu_hook(BN6_REWARD_PICK, picking, NULL);
 	darkbn6_install();   /* (BN6's own DarkChips' uses: docs/META.md) */
 	lib_battle_install();   /* (a liberation's battle on BN6's loop: liberation_battle.h) */
+	battle_spare_install();   /* (ProtoMan's netbattle, never MegaMan's last: battle_spare.h) */
 }
 
 void emu_battle_force(const Encounter *e) {
@@ -259,10 +261,14 @@ static uint32_t megaman_object(void) {
 }
 
 /* object_subtractHP, run on every object every frame, mostly with nothing
- * to take: an event where it lowers MegaMan's HP */
+ * to take: an event where it lowers MegaMan's HP, and a blow that would
+ * delete him taken short of it where the battle spares him */
 static HookAct hurt(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[0] && hook_read16(r->r[5] + BN6_T1_HP) && r->r[5] == megaman_object()) hook_post(r, EV_MEGAMAN_HIT);
+	uint32_t hp = r->r[0] ? hook_read16(r->r[5] + BN6_T1_HP) : 0;
+	if (!hp || r->r[5] != megaman_object()) return HOOK_CONTINUE;
+	r->r[0] = battle_spare_blow(r->r[0], hp);
+	hook_post(r, EV_MEGAMAN_HIT);
 	return HOOK_CONTINUE;
 }
 
@@ -282,16 +288,20 @@ static HookAct spawned(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
-void emu_battle_watch(int hp_cap) {
+void emu_battle_watch(int hp_cap, bool spare) {
+	battle_spare_arm(spare);
 	emu_hook(BN6_SUBTRACT_HP, hurt, NULL);
 	if (hp_cap > 0) emu_hook(BN6_SPAWN_HP, spawned, NULL);
 	cap = hp_cap > 0 ? hp_cap : 0;
 }
 
-void emu_battle_unwatch(void) {
+bool emu_battle_unwatch(void) {
 	emu_unhook(BN6_SUBTRACT_HP);
 	emu_unhook(BN6_SPAWN_HP);
+	bool spared = battle_spare_down();
+	battle_spare_arm(false);
 	cap = hp_from = 0;
+	return spared;
 }
 
 void emu_battle_hp(int from, int to) {
