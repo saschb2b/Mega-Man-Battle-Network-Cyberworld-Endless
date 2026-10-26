@@ -313,6 +313,17 @@ clap (39) over a snare (40), 30 Distortion Guitar's power chord, 28 Palm
 Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
 Section, 81 Saw Wave.
 
+Which soundfont was settled by ear (26 October 2026): 0.16.0's three
+sketches, the same notes rendered through FluidR3 GM, GeneralUser GS
+v2.0.3 (the SC-88's kind, a GS bank) and MuseScore General. The owner
+"can't hear a difference in soundfonts": cut to 8 bits at 10512 Hz and
+played by MP2K, the banks' samples come out alike (their numbers moved a
+few points of tonal share and flatness, no more). FluidR3 GM stays, for
+its licence (MIT, no doubt about its samples' origin). The image holds it
+alone; `CW_SOUNDFONT_NAME` in `tools/trailer_soundfont.py` stays as the
+hook for another comparison (a bank added to the image and to its
+`FONTS`).
+
 ## Checks before the owner listens
 
 - `music_check.py --piece NAME --source GAME SONG [--offset TICKS]`:
