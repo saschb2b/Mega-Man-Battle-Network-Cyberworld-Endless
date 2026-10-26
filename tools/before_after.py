@@ -113,6 +113,12 @@ SCENES = [
      {}, 259),
     ('bn5-soul-shelf', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet,souls=1', '--talk', 'shop:430',
                         '--input', '500:' + ',4:A,6:,96:' * 9], {}, 1440),
+    # (0.17.0's: an End Area layer's map whole, BN5's area 2, its rings and
+    # stubs before #245, its rooms drawn as its pads and its way one wide
+    # after; LAYER_MAKE moved between them, so the layouts differ; 0.16.0's
+    # longer arrival paged too, the map held from frame 1030)
+    ('bn5-end-area', ['--scene', 'emu', '--net-biome', 'x2', '--run-depth', '4', '--seed', '2', '--dev', 'quiet,mapall',
+                      '--input', '250:' + ',6:A,24:' * 24 + ',60:,40:SELECT'], {}, 1055),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
