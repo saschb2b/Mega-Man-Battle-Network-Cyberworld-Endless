@@ -271,20 +271,25 @@ static void layer_dealer(LayerTally *t, int depth, int biome) {
 	}
 }
 
-/* A Server's prize: the hardest hitting of a dozen two layers deeper
- * (layer_objs.c, install_server, without its folder and stock checks) */
+/* A Server's prize: a pick of three, each the hardest hitting of four two
+ * layers deeper (layer_objs.c, install_server, without its folder and
+ * stock checks); good where one of the three is */
 static void layer_server(LayerTally *t, int depth) {
-	int best = -1, power = -1;
-	for (int k = 0; k < 12; ++k) {
-		char code;
-		int id = roll_chip(depth + 2, 4, &code);
-		ChipInfo ci;
-		chip_info(id, &ci);
-		int p = chip_direct(id) ? ci.power : 0;
-		if (p > power) { power = p; best = id; }
+	bool good = false;
+	for (int k = 0; k < 3; ++k) {
+		int best = -1, power = -1;
+		for (int r = 0; r < 4; ++r) {
+			char code;
+			int id = roll_chip(depth + 2, 4, &code);
+			ChipInfo ci;
+			chip_info(id, &ci);
+			int p = chip_direct(id) ? ci.power : 0;
+			if (p > power) { power = p; best = id; }
+		}
+		good |= best > 0 && econ_chip_good(chip_pool_tier(best));
 	}
 	t->servers += 1;
-	t->server_good += best > 0 && econ_chip_good(chip_pool_tier(best));
+	t->server_good += good;
 }
 
 /* What stands on the layer besides its data: dealers, vendors, Servers,

@@ -1,6 +1,6 @@
 /* The rewards' chats (docs/voice/rules.md): a guardian's Guardian Data, its
- * NaviCust draft and its routes, a Navi gate and its SP chip, a vault, an
- * official gate, the first layer's gift. */
+ * NaviCust draft and its routes, a Navi gate and its SP chip, a vault, a
+ * won Server's pick, an official gate, the first layer's gift. */
 
 #include <stdio.h>
 #include <string.h>
@@ -216,6 +216,11 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 	}
 	snprintf(s, sizeof s, "Our Library of %d opens the lock!|Three rare chips inside!|We can take one,Lan.", have);
 	return pick_three(t, flag, v, s, "Take", "The vault's open,Lan.|We took our pick.", "Let's leave them for now.|The vault will keep.");
+}
+
+int ta_server_pick(TextArchive *t, int taken_flag, const ScriptsVault *v) {
+	return pick_three(t, taken_flag, v, "Look,Lan! The signal left chips!|We can take one!", "Take", "The signal's quiet now,Lan.",
+		"Let's leave them for now.|We can come back!");
 }
 
 /* Three chips, one to take (event flag `flag` set as it is, after which

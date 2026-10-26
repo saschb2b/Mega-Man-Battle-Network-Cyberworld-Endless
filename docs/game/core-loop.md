@@ -287,7 +287,10 @@ seen; the opening plan of 21 October is still unplayed by a person.
   run holds 17 chips of one code rather than 19; act 1's dealer adds
   "Deeper in,Mystery Data too!".
 - **The Server's prize a pick of one from three** on the vault's screen:
-  the riskiest optional fight pays a decision, not a roll.
+  the riskiest optional fight pays a decision, not a roll. Built 26
+  October 2026 ([the structure](progression/structure.md), Risk the player
+  chooses): three chips named in the offer, the pick after the win, B
+  leaving them at the Server; no skip that pays.
 - **MegaMan reads the next layer at a fork** (an exit pad beside a dark
   flame, a Liberation way): a strong virus signal, someone selling
   programs. Hades' doors, with no new screen.
