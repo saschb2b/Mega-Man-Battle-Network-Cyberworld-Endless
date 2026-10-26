@@ -3,7 +3,7 @@ type: Design
 title: "The core loop, reviewed"
 description: "The core loop reviewed in October 2026 with the game-design skill, a team of six analysts, a devil's advocate and the players' own statistics: what works, what it lacks, what has grown, the next evolution's phases, what it freezes and the owner's decisions."
 tags: [game, core-loop]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-526-10-26T19:56:00Z }
 sources:
   - id: umami
     resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end, guardian and online events"
@@ -296,7 +296,12 @@ seen; the opening plan of 21 October is still unplayed by a person.
   leaving them at the Server; no skip that pays.
 - **MegaMan reads the next layer at a fork** (an exit pad beside a dark
   flame, a Liberation way): a strong virus signal, someone selling
-  programs. Hades' doors, with no new screen.
+  programs. Hades' doors, with no new screen. Built 26 October 2026
+  ([a fork's read](../world/level-design/fork-read.md)): by the exit pad of
+  a layer with a dark warp, at the warp, and beside each portal of Lan's
+  HP, two calls at most, read from the next layer's seed before it is
+  built; the statistics' Undernet and dark layers taken will say whether
+  the read is followed.
 - **Guardian lines keyed to the last fight**, on the path every dive
   takes (the arena's intro, the first arrival in Lan's HP): he deleted
   MegaMan last run, what finished him, the Cross MegaMan wore.

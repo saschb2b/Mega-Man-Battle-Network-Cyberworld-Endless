@@ -344,6 +344,7 @@ static void map_update(void) {
 				if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 	}
 	last_stop(cx, cy);
+	fork_pad_read(cx, cy);
 	final_update();
 }
 

@@ -18,6 +18,7 @@
 #include "net_landmarks.h"
 #include "net_layouts.h"
 #include "net_plan.h"
+#include "net_services.h"
 #include "net_set_pieces.h"
 #include "net_signature.h"
 #include "pacing.h"
@@ -607,70 +608,6 @@ static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 	layer.arrive_face = arrival_facing();
 }
 
-/* What a layer's rolls put on it: its services, gates and the rival. */
-typedef struct {
-	bool shop, heal, trader, programs, bugtrader, challenge, duel, undernet, secret, navi_gate, vault, official;
-	int gate_navi, official_level;
-} Services;
-
-/* Points of interest in the other rooms. */
-static void roll_services(Services *s, int depth, int biome, int kind) {
-	/* each act's middle layer has the Net Dealer and a heal, and so does its
-	 * first after the run's first (the guardian's zenny to spend on what the
-	 * new act calls for); docs/game/progression/ */
-	int biome_layer = layer_in_act(depth);
-	/* (a trip back as its act's middle layer: the dealer, the heal and the
-	 * vendor's chance, docs/world/home/) */
-	bool own = kind == LAYER_NORMAL || kind == LAYER_BACK;
-	s->shop = own && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
-	/* (threat 2, docs/game/meta/: only the heals an act is sure of; the heals
-	 * helper: one on every layer) */
-	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (own && pacing_heal_certain(depth)) ||
-		(run.helpers & HELP_HEALS);
-	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	/* (the NaviCust vendor on every act's middle layer, BugFrags' sink:
-	 * docs/game/navicust.md 4; his old 60% chance still rolled, so the rest
-	 * of the layer rolls as it did) */
-	s->programs = own && biome_layer == 1;
-	if (s->programs) (void)rng_range(0, 99);
-	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
-	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
-	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
-	/* the rival's duel (docs/game/rival.md): on each act's second layer, where
-	 * no strong virus signal stands (one battle to seek out a layer) */
-	s->duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
-	s->challenge &= !s->duel;
-	s->undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
-		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
-	s->secret = kind == LAYER_UNDERNET && !run.secret_cleared;
-}
-
-/* The gates' rolls, after the services'. */
-static void roll_gates(Services *s, uint32_t seed, int depth, int kind) {
-	/* a gate sealed with a Navi's code (docs/game/meta/phase-two.md, gates): from act 3,
-	 * before the guardian's layer, where no dark warp stands; its Navi one
-	 * of the guardians (but ProtoMan, the Secret Area's) */
-	s->navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !s->undernet && rng_range(0, 99) < 30;
-	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
-	s->gate_navi = s->navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
-	/* a collector's vault (docs/game/meta/phase-two.md, gates): from act 2, before the
-	 * guardian's layer, where no other gate or dark warp stands */
-	s->vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !s->undernet && !s->navi_gate &&
-		rng_range(0, 99) < 20;
-	/* an official gate (docs/game/rival.md): from act 2, where no other gate or
-	 * dark warp stands; sealed until Chaud's clearance reaches its level
-	 * (from the seed, not the rolls: two rolls more reshuffled the rooms
-	 * of every layer after them). And on every act's duel layer, the prize
-	 * where the duel is offered, its level the act's (1 to the third, then
-	 * 2), the only gate there (the rolls kept): a playtester's promise of
-	 * official gates pointed at none he had met */
-	if (s->duel) s->navi_gate = s->vault = false;
-	uint32_t oh = (seed ^ 0x0FF1C1A1u) * 2654435761u;
-	s->official = kind == LAYER_NORMAL && !layer.boss_layer &&
-		(s->duel || (pacing_act(depth) >= 1 && !s->undernet && !s->navi_gate && !s->vault && (oh >> 16) % 100 < 25));
-	s->official_level = !s->official ? 0 : s->duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
-}
-
 /* The other rooms in a shuffled order: services on the bigger platforms,
  * the pads left for the better data. */
 static int room_order(int *order) {
@@ -920,8 +857,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 		land = ng_landmark(kit);
 	}
 	Services s;
-	roll_services(&s, depth, biome, kind);
-	roll_gates(&s, seed, depth, kind);
+	ng_roll_services(&s, seed, depth, biome, kind);
 	int order[MAX_ROOMS], n = room_order(order), next = 0;
 	place_services(&s, depth, kind, kit, order, n, &next);
 	/* the area's other props, set as the originals set theirs, before the

@@ -59,9 +59,11 @@ static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 static const int facing[4] = { 3, 5, 7, 1 };
 
 
-bool lib_layer_dark(void) {
-	if (run.side_kind != LAYER_NORMAL) return false;
-	int p = (run.depth - 1) % CYCLE_LAYERS;
+bool lib_layer_dark(void) { return lib_layer_dark_at(run.depth, run.side_kind); }
+
+bool lib_layer_dark_at(int depth, int side) {
+	if (side != LAYER_NORMAL) return false;
+	int p = (depth - 1) % CYCLE_LAYERS;
 	if (p >= 18 || p % 3 != 1) return false;
 	return lib_way_dark(p / 3, run.biome_order[p / 3]);
 }

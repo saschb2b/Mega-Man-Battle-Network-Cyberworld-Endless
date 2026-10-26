@@ -21,5 +21,8 @@ void push_arrow(void);
 /* MegaMan standing still on the exit pad as drawn: its warp (pad_art.h). */
 void exit_pad_step(void);
 void arrow_update(void);
+/* MegaMan on panel (cx, cy) of a fork's layer: his read of the layer past
+ * its exit pad, once he comes near it */
+void fork_pad_read(int cx, int cy);
 
 #endif

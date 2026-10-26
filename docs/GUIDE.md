@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-526-10-26T19:56:00Z }
 ---
 
 # The player's guide
@@ -671,7 +671,9 @@ fighting from his battle data. Guardians remember how your earlier
 battles went. Their Guardian Data takes MegaMan home to Lan's HP,
 where two portals lead to the next act's areas; beside each he reads
 its data and its guardian's signal, naming him where he has battled
-him, so you choose the fight your folder answers.
+him, so you choose the fight your folder answers, and what he senses on
+its first layer: a strong virus signal (a Server), someone selling
+programs, a trader's call.
 In the short net, once the Secret Area has been cleared in any run, act
 2's also offers a dark way: act 3 in the Undernet, with one of its own
 Navis, harder battles and richer data.
@@ -768,7 +770,7 @@ it pays one of BN6's GigaChips.
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |
 | Server | A strong virus signal: an optional harder battle that pays your pick of three better chips, named before you fight. From the fourth act it may hold an SP Navi. Never on the first layer |
-| Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
+| Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper. MegaMan says whether a strong virus signal waits in there; by the exit pad beside it, what he senses past the pad |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
 | Collector's vault | From the second act: its lock opens for a Library of 30 chips (60 in act 3, 90 later), and it holds three rare chips, one to take |

@@ -200,6 +200,16 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
  * a normal layer's services, data, bystanders or set pieces (a guardian's
  * layer is never dark). */
 extern bool layer_make_dark;
+/* What a layer's seed puts on it, known before it is built (a fork's read,
+ * docs/world/level-design/fork-read.md): its services and gates, a HOLDS_*
+ * bit each, rolled apart from its floor (a dark layer holds none of them:
+ * the caller knows whether it is one) */
+enum {
+	HOLDS_DEALER = 1u << 0, HOLDS_HEAL = 1u << 1, HOLDS_TRADER = 1u << 2, HOLDS_PROGRAMS = 1u << 3,
+	HOLDS_BUGTRADER = 1u << 4, HOLDS_SERVER = 1u << 5, HOLDS_DUEL = 1u << 6, HOLDS_UNDERNET = 1u << 7,
+	HOLDS_GATE = 1u << 8, HOLDS_GUARDIAN = 1u << 9
+};
+unsigned layer_holds(uint32_t seed, int depth, int biome, int kind);
 /* The game runs at most 16 NPCs on a map (BN6_NPC_COUNT) and leaves the
  * rest of a map's list out without a word; every object but the warp-in
  * takes one, the guardian two (himself and his data). The layer's count. */

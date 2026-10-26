@@ -254,16 +254,19 @@ int ta_duel(TextArchive *t, int flag, int face, const char *terms) {
 	return i;
 }
 
-int ta_undernet(TextArchive *t, int flag, bool deeper) {
+int ta_undernet(TextArchive *t, int flag, bool deeper, bool server) {
 	int no = ta_closing(t);
 	int i = ta_script(t);
 	/* what is in there, where it is chosen (a playtester kept off one, not
 	 * knowing what it was for): the Undernet's viruses, its richer Mystery
 	 * Data and BugFrag Trader, and where its exit leads */
 	bool first = true;
-	ta_pages(t, deeper ? "Even tougher viruses down there!|And richer data,too!|Its exit leads back to the main path."
-		: "The Undernet,Lan!|Tougher viruses,and richer data!|A BugFrag Trader,too!|Its exit leads to the next layer.",
+	ta_pages(t, deeper ? "Even tougher viruses down there!|And richer data,too!" : "The Undernet,Lan!|Tougher viruses,and richer data!|A BugFrag Trader,too!",
 		FACE_MEGAMAN, &first);
+	/* (what the Undernet behind it holds, read from its seed: a Server's
+	 * signal, as at the exit pad beside it, docs/world/level-design/fork-read.md) */
+	if (server) ta_pages(t, "And a strong virus signal!", FACE_MEGAMAN, &first);
+	ta_pages(t, deeper ? "Its exit leads back to the main path." : "Its exit leads to the next layer.", FACE_MEGAMAN, &first);
 	ta_ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true, true);
 	ta_flag_set(t, flag);
 	ta_end(t);
