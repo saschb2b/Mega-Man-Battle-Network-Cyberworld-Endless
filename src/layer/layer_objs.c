@@ -426,6 +426,7 @@ typedef struct {
 	ShopItem stock[SHOP_MAX_ITEMS];   /* the Net Dealer's */
 	int nstock;
 	MysteryPlan plan;
+	ScriptsVault server;   /* a Server's three chips (install_server) */
 } Install;
 
 /* A bystander's talker (Normal Navis and pink navis, or the two Navis
@@ -621,41 +622,50 @@ static void install_vendor(Install *in, Talker *tk) {
 	tk->script = ta_shop(in->text, SHOP_PROGRAMS, FACE_TECH, w.hello, w.again, w.sold_out, LAYER_VENDOR_TOLD_FLAG);
 }
 
-/* A Server: a win pays with a chip well past Mystery Data, the hardest
- * hitting of a dozen from where the Net Dealer finds his picks, two layers
- * deeper (a WhiCapsl, a FireBrn1 for 120 HP, then an M-Cannon beside his
- * DolThdr2 were poor prizes for the risk); the chip, named in its offer,
- * into `prize` */
-static void install_server(Install *in, Talker *tk, char *prize, size_t n) {
+/* A Server: a win pays a pick of one chip from three (docs/game/core-loop.md,
+ * Phase 2), well past Mystery Data, each the hardest hitting of four from
+ * where the Net Dealer finds his picks, two layers deeper (a WhiCapsl, a
+ * FireBrn1 for 120 HP, then an M-Cannon beside his DolThdr2 were poor
+ * prizes for the risk); the three, named in its offer, into in->server */
+static void install_server(Install *in, Talker *tk) {
 	tk->cat = 7; tk->sprite = SPR_SERVER;
-	char code = '*';
-	ChipInfo ci;
-	int chip = roll_chip(run.depth + 2, 4, &code), best_power = -1;
-	bool best_fits = false, best_new = false;
-	for (int tries = 0; tries < 12; ++tries) {
-		char c = '*';
-		int id = tries ? roll_chip(run.depth + 2, 4, &c) : chip;
-		chip_info(id, &ci);
-		int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
-		/* (one the folder can play first, in its codes or *: a Blade
-		 * folder's won HeatManEX H; and first of all one the layer's
-		 * Net Dealer doesn't sell, from the same pool: a playtester
-		 * won a third MoonBld A beside the two he had just bought) */
-		bool fits = loot_folder_code(id, true) != 0, fresh = true;
-		for (int s = 0; s < in->nstock; ++s) fresh &= !(in->stock[s].kind == 2 && in->stock[s].id == id);
-		if ((fresh && !best_new) || (fresh == best_new && ((fits && !best_fits) || (fits == best_fits && power > best_power)))) {
-			best_power = power; best_fits = fits; best_new = fresh; chip = id; if (tries) code = c;
+	ScriptsVault *v = &in->server;
+	memset(v, 0, sizeof *v);
+	for (int k = 0; k < 3; ++k) {
+		char code = '*';
+		int chip = -1, best_power = -1;
+		bool best_fits = false, best_new = false;
+		ChipInfo ci;
+		for (int tries = 0; tries < 4 || (chip <= 0 && tries < 12); ++tries) {
+			char c = '*';
+			int id = roll_chip(run.depth + 2, 4, &c);
+			bool again = id <= 0;
+			for (int j = 0; j < k; ++j) again |= v->chip[j] == id;
+			if (again) continue;
+			chip_info(id, &ci);
+			int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
+			/* (one the folder can play first, in its codes or *: a Blade
+			 * folder's won HeatManEX H; and first of all one the layer's
+			 * Net Dealer doesn't sell, from the same pool: a playtester
+			 * won a third MoonBld A beside the two he had just bought) */
+			bool fits = loot_folder_code(id, true) != 0, fresh = true;
+			for (int s = 0; s < in->nstock; ++s) fresh &= !(in->stock[s].kind == 2 && in->stock[s].id == id);
+			if (chip <= 0 || (fresh && !best_new) || (fresh == best_new && ((fits && !best_fits) || (fits == best_fits && power > best_power)))) {
+				best_power = power; best_fits = fits; best_new = fresh; chip = id; code = c;
+			}
 		}
+		if (chip <= 0) chip = roll_chip(run.depth + 2, 4, &code);
+		chip_info(chip, &ci);
+		/* (in the folder's code, or its * where it has none of them, for
+		 * any folder: an M-Cannon R went with nothing a playtester
+		 * carried) */
+		char fit = loot_folder_code(chip, true);
+		if (fit) code = fit;
+		else if (strchr(ci.codes, '*')) code = '*';
+		vault_chip(v, k, chip, code);
+		if (emu_debug_on()) fprintf(stderr, "server: pick %d %s %c\n", k, ci.name, code);
 	}
-	chip_info(chip, &ci);
-	/* (in the folder's code, or its * where it has none of them, for
-	 * any folder: an M-Cannon R went with nothing a playtester
-	 * carried) */
-	char fit = loot_folder_code(chip, true);
-	if (fit) code = fit;
-	else if (strchr(ci.codes, '*')) code = '*';
-	in->out->challenge_reward = ta_challenge_reward(in->text, chip, ci.name, code == '*' ? 26 : code - 'A');
-	snprintf(prize, n, "%s %c", ci.name, code);
+	in->out->challenge_reward = ta_server_pick(in->text, LAYER_SERVER_TAKEN_FLAG, v);
 }
 
 /* The first layer's gift: a chip that hits hard (the tier's traps and
@@ -762,7 +772,7 @@ static void install_vault(Install *in, Talker *tk) {
 
 /* A Yes/No the director acts on (out->choice): its flag, not chosen yet,
  * and its script; ProtoMan's terms said before his */
-static void install_choice(Install *in, const NetObj *o, Talker *tk, const char *prize) {
+static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 	LayerObjs *out = in->out;
 	int flag = LAYER_FLAG_BASE + out->nchoices;
 	out->choice[out->nchoices].type = o->type;
@@ -778,7 +788,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk, const char 
 		tk->gone_flag = flag;
 	}
 	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms)
-		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, prize, layer_objs_server_navi)
+		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
 		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 		: o->type == OBJ_BATTLER ? battler_offer(in->text, flag, o->param)
@@ -828,8 +838,8 @@ static Talker talker_at(const NetObj *o, int wx, int wy, int wz) {
 }
 
 /* The object's chat; true where it ends on a Yes/No the director acts on
- * (a Server names its chip in `prize`). */
-static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i, char *prize, size_t size) {
+ * (a Server's, its three chips in in->server). */
+static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i) {
 	switch (o->type) {
 	case OBJ_MYSTERY: mystery_or_flame(in, tk, i); return false;
 	case OBJ_NPC: bystander(in, tk, i); return false;
@@ -838,7 +848,7 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i, char *
 	case OBJ_BUGTRADER: install_trader(in, o, tk); return false;
 	case OBJ_SHOP: install_dealer(in, tk); return false;
 	case OBJ_PROGRAMS: install_vendor(in, tk); return false;
-	case OBJ_CHALLENGE: install_server(in, tk, prize, size); return true;
+	case OBJ_CHALLENGE: install_server(in, tk); return true;
 	case OBJ_GIFT: install_gift(in, tk); return false;
 	case OBJ_UNDERNET: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
 	case OBJ_DUEL: return install_duel(in, tk, tk->x, tk->y);
@@ -866,9 +876,8 @@ static void install_object(Install *in, int i) {
 	int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
 	if (install_place(in, o, wx, wy, wz)) return;
 	Talker tk = talker_at(o, wx, wy, wz);
-	char prize[24] = "";
-	bool asks = install_talk(in, o, &tk, i, prize, sizeof prize);
-	if (asks && in->out->nchoices < LAYER_MAX_CHOICES) install_choice(in, o, &tk, prize);
+	bool asks = install_talk(in, o, &tk, i);
+	if (asks && in->out->nchoices < LAYER_MAX_CHOICES) install_choice(in, o, &tk);
 	if (tk.script >= 0 && !tk.archive && in->out->script_of[o->type] < 0) in->out->script_of[o->type] = tk.script;
 	if (tk.script >= 0 && in->ntalk < 16) in->talkers[in->ntalk++] = tk;
 }

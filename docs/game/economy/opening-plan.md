@@ -3,7 +3,7 @@ type: Design
 title: "The opening plan"
 description: "The opening plan: five levers (green Mystery Data, their chips, good chips, zenny, the folder-code lean) rising on a logarithm from act 1's floor to the flat plan's, with its reasoning, before-and-after numbers and costs."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # The opening plan
@@ -121,6 +121,48 @@ chips and 4,000 zenny, act 3 the flat plan's.
   (`encounter.c`, `lean_row`), takes the curve by a hash of the layer, the
   enemy and the entry (`econ_keep_by`). Saves need no change (`Run` is
   untouched; the counts are a file of their own, `run.tally`).
+
+## The code leans, not the chip
+
+Changed 26 October 2026 ([the core loop](../core-loop.md), Phase 2).
+The lean's share stays as the curves above set it (half the data, by the
+act); what it does changed. A Mystery Data's chip used to be rolled
+again, eight times at most, for one that comes in the folder's codes, a
+gem's three twelve times. Now the chip stays as it rolled and only its
+code leans, to the first of the folder's codes it comes in (a gem's, else
+its \*): the way BN6 hands out codes, one chip from a virus in the code
+the busting level earns.
+
+Through the game-design skill: the dialectic is variety against
+concentration. Smart loot (Diablo 3) leaned which chip came, and with the
+starting folder's S and A it kept the chips that come in those codes and
+threw away the rest, Megas first (most come in one code). Borderlands'
+bet, the roll as the content, is the other pole. BN's own answer sits
+between: the chip is the net's roll, the code is the folder's. The
+folder still converges by code, and a folder edit still steers it (the
+codes are read as each layer is made); the net varies by chip again.
+Act 1's dealer says it once, beside his own: "Deeper in,Mystery Data
+too!" (none lean on act 1).
+
+300 runs, the endless net, the opening plan; kinds as [Measuring it](measuring.md)
+defines them:
+
+| Act | Kinds | Fit | Codes held | Good | Megas |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 158 → 158 | 34% → 35% | 3 → 3 | 22.6% → 22.5% | 0.92 → 0.92 |
+| 2 | 156 → 157 | 32% → 29% | 5 → 5 | 28.9% → 28.2% | 1.00 → 1.00 |
+| 3 | 188 → 199 | 41% → 33% | 8 → 8 | 34.1% → 34.2% | 1.20 → 1.27 |
+| 4 | 199 → 221 | 48% → 37% | 10 → 10 | 43.6% → 41.5% | 1.40 → 1.44 |
+| 5 | 190 → 224 | 52% → 37% | 15 → 14 | 57.3% → 55.3% | 1.78 → 2.02 |
+| 6 | 172 → 219 | 54% → 35% | 19 → 17 | 70.5% → 69.3% | 1.88 → 2.05 |
+| Nest | 155 → 200 | 61% → 38% | 20 → 18 | 68.6% → 66.9% | 0.45 → 0.54 |
+
+The codes held moved on purpose, so their bands' centres in `economy.c`
+were set again from this measure (the opening plan's 3, 5, 8, 10, 14, 17,
+18; the short net's 3, 6, 9, 10; the flat plan's too); nothing else left
+its band. The good chips' share fell two points in acts 4 and 5: the
+reroll had kept rare standard chips, which come in more codes, over
+Megas.
 
 ## Not proposed, and why
 

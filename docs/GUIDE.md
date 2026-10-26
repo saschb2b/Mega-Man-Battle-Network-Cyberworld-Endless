@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # The player's guide
@@ -652,7 +652,8 @@ Level as in BN6. The battlefields are the area's own too: its panels
 (a battle in forty or so) a green Mystery Data sits on the enemies' side:
 it breaks at the first hit, yours or theirs, but still there when the
 battle ends, it gives a rare find besides the battle's reward: most often
-a chip a tier above a blue Mystery Data's, in your folder's codes.
+a chip a tier above a blue Mystery Data's, in your folder's codes where
+it comes in one.
 
 Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
@@ -766,7 +767,7 @@ it pays one of BN6's GigaChips.
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |
-| Server | A strong virus signal: an optional harder battle that pays a better chip. From the fourth act it may hold an SP Navi. Never on the first layer |
+| Server | A strong virus signal: an optional harder battle that pays your pick of three better chips, named before you fight. From the fourth act it may hold an SP Navi. Never on the first layer |
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
@@ -782,7 +783,8 @@ behind is options. From the second run, NEW GAME opens a setup:
 - **Folder:** BN6's starting folder, or one opened in any run: Blade
   (swords in S for LifeSword), once any guardian falls, and Storm (Elec
   chips), once an Aqua guardian does. Chips the net gives lean to the
-  codes the folder holds most.
+  codes the folder holds most: the chip comes as it rolled, in one of
+  those codes where it can.
 - **Cross:** a Cross MegaMan has from the first battle, once its Navi
   (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan) has fallen as a
   guardian. It is the run's only Cross: guardians' Cross data won't fit

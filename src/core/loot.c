@@ -141,16 +141,16 @@ static void build_foes(const Formation *f, int depth, int want, bool rare, Encou
 }
 
 /* (a rare find, rarer than a blue Mystery Data's: three chips a tier above
- * its, each in the folder's codes where one comes in them, and zenny twice
- * its; threat 6's chips only, a fourth chip for the zenny. A playtester's
- * gem paid 980 zenny, a blue Mystery Data's on the same layer, and read as
- * no find at all) */
+ * its, each as it rolled, in the folder's code where it comes in one, else
+ * its * where it has one (the code leans, never the chip: lean_find), and
+ * zenny twice its; threat 6's chips only, a fourth chip for the zenny. A
+ * playtester's gem paid 980 zenny, a blue Mystery Data's on the same
+ * layer, and read as no find at all) */
 void loot_gem_rewards(int depth, uint16_t out[4]) {
 	for (int k = 0; k < 4; ++k) {
 		if (k == 3 && run.threat < 6) break;
 		char code = '*';
 		int id = roll_chip(depth, 2, &code);
-		for (int t = 0; t < 12 && run.codes[0] && !loot_folder_code(id, false); ++t) id = roll_chip(depth, 2, &code);
 		char c = loot_folder_code(id, true);
 		if (c) code = c;
 		out[k] = (uint16_t)((id & 0x1FF) | (code == '*' ? 26 : code - 'A') << 9);
@@ -675,17 +675,16 @@ static int md_zenny(int param, int depth) {
 
 /* A find's chip of bonus tier `bonus` (roll_chip), leaned: a share of
  * them, where the run holds a Soul, of its kind, of the tier rolled
- * (loot_souls.h); then half the time a chip that comes in the folder's
- * codes, in one of them: rolled again, eight times at most, for one (smart
- * loot, as Diablo 3 leans a drop to its finder), a Soul's kind keeping its
- * chip; the other half as it rolls. Leaning only the code, where the chip
- * had one, a Blade folder's (S, L) finds came in its codes two times in
- * seven (docs/game/meta/) */
+ * (loot_souls.h); then, half the time, the chip as it rolled in one of the
+ * folder's codes where it comes in one: the code leans, never the chip, as
+ * a virus drops its one chip in the code busting earns. Rolling the chip
+ * again for one in the folder's codes (eight times at most, until
+ * docs/game/core-loop.md's Phase 2) narrowed which chips the net held: a
+ * player 23 hours in found it not random enough, too many S and A codes */
 static int lean_find(int depth, int bonus, char *code) {
 	int id = roll_chip(depth, bonus, code);
-	bool kind = loot_soul_find(&id, code);
+	loot_soul_find(&id, code);
 	if (run.codes[0] && rng_range(0, 1) && econ_keep(ECON_LEVER_LEAN, depth)) {
-		for (int t = 0; t < 8 && !kind && !loot_folder_code(id, false); ++t) id = roll_chip(depth, bonus, code);
 		char c = loot_folder_code(id, false);
 		if (c) *code = c;
 	}

@@ -3,7 +3,7 @@ type: Design
 title: "Measuring it"
 description: "How `build.py economy` and `src/dev/economy_report.c` measure a run's handouts without running the game: layers and Mystery Data simulated by the engine's code, battle rewards from BN6's ROM rows, the assumptions, definitions and autopilot check."
 tags: [game, economy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # Measuring it
@@ -58,6 +58,10 @@ Definitions:
   median run, at an act's end: how big a hand of one code the finds alone
   make (BN6's Custom screen takes up to five chips of one code; \* joins
   any). **Fit:** a chip found in one of the folder's three codes or \*.
+- **Kinds:** how widely the layers' Mystery Data's chips spread, over
+  every run of an act: e to the power of their entropy, the number of
+  chips found equally often that would spread as far. It falls when a
+  lean picks the chip and rises when only the code leans.
 - **Wanted:** what the act's middle-layer dealer asks for his first chip
   (the act's answer, two copies) and his HPMemory, summed act by act: the
   purchases a run plans around ([The structure](../progression/structure.md#growth), Growth).

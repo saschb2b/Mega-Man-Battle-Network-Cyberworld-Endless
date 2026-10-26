@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Finds vary again.** A Mystery Data's chip is no longer rolled again
+  until it comes in your folder's codes. The chip stays as the net rolled
+  it and takes one of your folder's codes where it comes in one, more
+  often the deeper you go; a battle's rare find does the same with its
+  chips. The net holds more kinds of chips (a tenth more by act 4, a
+  quarter more by act 6, Megas among them), and your folder still gathers
+  by code. Act 1's Net Dealer says so. A layer saved before this update
+  starts afresh at a CONTINUE.
+
 - **BugFrags buy programs.** The NaviCust vendor now stands on every
   act's middle layer and sells for BugFrags in BN6's own shop screen: four
   programs and a rare chip from the BugFrag Trader's pool, named and

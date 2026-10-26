@@ -3,7 +3,7 @@ type: Design
 title: "Phase two, reasoned"
 description: "Meta phase two: rewards leaned to the folder's codes, Cross starts, the Library, programs found joining later runs; and phase three begun: route choices in Lan's HP and Navi gates sealed with a guardian's code."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:18:26Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
 ---
 
 # Phase two, reasoned (29 September 2026)
@@ -24,17 +24,23 @@ against what you find**; each piece restates it.
    of them takes it: the Net Dealers' stock and the gift always, a
    battle's chip half the time (BN6 picks a reward from a pair of entries
    in its virus's row by a coin; the second of each pair leans). Mystery
-   Data, half the time, roll their chip again (eight times at most) for
-   one that comes in the folder's codes, smart loot as Diablo 3 leans a
-   drop to its finder: leaning the code alone, where the chip had one, a
-   Blade folder's finds came in its codes two times in seven (session 31;
-   measured over 400 rolls, 37% in the folder's codes or *, now 65%). A
+   Data, half the time, keep the chip they rolled and take the folder's
+   code where it comes in one, as a virus drops its one chip in the code
+   busting earns. From session 31 until 26 October 2026 they rolled the
+   chip again instead (eight times at most) for one in the folder's codes,
+   smart loot as Diablo 3 leans a drop to its finder (a Blade folder's
+   finds then fit 65% of the time against 37% leaning the code alone);
+   that narrowed which chips the net held, and a player 23 hours in found
+   it not random enough ([the core loop](../core-loop.md), Phase 2;
+   [the opening plan](../economy/opening-plan.md#the-code-leans-not-the-chip)
+   has the numbers). A
    Chip Trader's prize comes in the folder's code, or in * where its chip
    has one and none of theirs: a trade turns three chips the folder cannot
    play into one it can, the fusion that keeps the finds that do not fit
    worth picking up. A * stays a *. The choice between a strong chip and
    one that fits stays; a folder built around a code is paid back. The
-   first dealer of a run says so.
+   first dealer of a run says so, and that the Mystery Data do too deeper
+   in.
 2. **Cross starts** (costed power, nested progression: MegaMan's axis
    beside the folder). A Cross Navi deleted as a guardian in any run lets
    later runs bring his Cross from the first battle. Crossing is a choice
