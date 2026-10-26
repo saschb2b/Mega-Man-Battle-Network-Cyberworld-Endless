@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fork_words.h"
 #include "guardians.h"
 #include "jobs.h"
 #include "net.h"
@@ -70,7 +71,7 @@ static const char *area_feel(int biome) {
 	return biome >= BIOME_ACDC_HP && biome <= BIOME_SKY_HP ? "@M Cozy data... A town's homepage?" : "@M Hmm... I can't read much from here.";
 }
 
-const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route) {
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route, unsigned holds) {
 	static char words[400];
 	/* (the Cybeast below the endless Nest: a growl, never a Navi's signal;
 	 * docs/game/bosses/super-bosses.md) */
@@ -86,8 +87,13 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool bo
 		snprintf(words, sizeof words, "@M Lan... This one's dark. Really dark.|@M It feels like the Undernet...|%s", signal);
 	else
 		snprintf(words, sizeof words, "%s|%s", area_feel(biome), signal);
-	/* (its act's dark layer that way: docs/game/liberation/) */
+	/* (what the way's first layer holds, read from its seed: Hades' doors,
+	 * docs/world/level-design/fork-read.md) */
 	size_t k = strlen(words);
+	const char *read = sealed ? NULL : fork_words(holds, false, FORK_PORTAL);
+	if (read) snprintf(words + k, sizeof words - k, "|%s", read);
+	/* (its act's dark layer that way: docs/game/liberation/) */
+	k = strlen(words);
 	if (board && !sealed) snprintf(words + k, sizeof words - k, "|@M And Lan... Part of it's gone dark.|@M Dark panels,like Nebula's!");
 	/* (the special route's way: the one they found on a dark layer's
 	 * board, so MegaMan knows it, not where it leads) */

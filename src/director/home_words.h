@@ -16,8 +16,9 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
  * `navi` its guardian (his signal named where MegaMan has battled him);
  * `dark` the dark way into the Undernet, `sealed` that way still shut;
  * `board` its act's dark layer that way, `route` the way a special route
- * found on a dark layer opened. */
-const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route);
+ * found on a dark layer opened; `holds` what the way's first layer holds
+ * (fork_holds_in, its HOLDS_* bits: docs/world/level-design/fork-read.md). */
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board, bool route, unsigned holds);
 /* Lan's HP's portal `k` (lanhp.h) as MegaMan names it, after "the". */
 const char *home_portal_name(int k);
 /* MegaMan in Lan's HP the run's first time there: what it is, or, to a

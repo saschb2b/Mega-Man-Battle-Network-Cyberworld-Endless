@@ -59,6 +59,7 @@ const char *layer_objs_dark_does = "";
  * BN6's own words on DarkChips, a rumor before the find) */
 static bool dark_rumor_due;
 const char *layer_objs_server_navi = "";
+bool layer_objs_undernet_server;
 bool layer_objs_dark_first;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
@@ -789,7 +790,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 	}
 	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms)
 		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
-		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET)
+		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 		: o->type == OBJ_BATTLER ? battler_offer(in->text, flag, o->param)
 		: ta_secret_gate(in->text, flag);

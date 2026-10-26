@@ -146,6 +146,9 @@ extern const char *layer_objs_dark_does;
  * battle rolled with the layer): the words its signal is named by ("" for
  * viruses). */
 extern const char *layer_objs_server_navi;
+/* Set before layer_objs_install: the Undernet behind a dark warp holds a
+ * Server, for MegaMan's read at the warp (docs/world/level-design/fork-read.md) */
+extern bool layer_objs_undernet_server;
 extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
 

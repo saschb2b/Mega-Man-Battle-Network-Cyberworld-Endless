@@ -164,11 +164,19 @@ static const __typeof__(R.layout->net_area[0]) *area(int biome) {
 	return &R.layout->net_area[biome < 0 || biome >= NET_AREAS ? 0 : biome];
 }
 
-static int layer_biome(void) {
+/* The area of the run's layer at `depth` of kind `side` (LAYER_*) */
+static int layer_biome_at(int depth, int side) {
 	if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT) return director_debug_biome;
-	if (run.side_kind == LAYER_UNDERNET) return BIOME_UNDERNET;
-	if (run.side_kind == LAYER_SECRET) return BIOME_SECRET;
-	return biome_for_depth(run.depth);
+	if (side == LAYER_UNDERNET) return BIOME_UNDERNET;
+	if (side == LAYER_SECRET) return BIOME_SECRET;
+	return biome_for_depth(depth);
+}
+
+static int layer_biome(void) { return layer_biome_at(run.depth, run.side_kind); }
+
+unsigned fork_holds_in(int depth, int side, int biome) {
+	if (lib_layer_dark_at(depth, side)) return FORK_DARK;
+	return layer_holds(run_layer_seed(depth, side), depth, biome >= 0 ? biome : layer_biome_at(depth, side), side);
 }
 
 /* MegaMan stays in the run: no jacking out, and no PET save to the game's
@@ -343,7 +351,7 @@ static bool build_layer(void) {
 	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles, biome);
 	run.biome = biome;
 	D.layer_tiles = tiles;
-	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
+	run.layer_seed = run_layer_seed(run.depth, run.side_kind);
 	/* (each trip back another layer: the clock counts them) */
 	if (run.side_kind == LAYER_BACK) run.layer_seed ^= (uint32_t)run.clock * 0x9E3779B9u;
 	LayerKit kit;
@@ -374,6 +382,9 @@ static bool build_layer(void) {
 	D.server_rolled = false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_CHALLENGE) { server_roll(); break; }
+	/* (what the Undernet behind a dark warp holds, for MegaMan's read of it:
+	 * docs/world/level-design/fork-read.md) */
+	layer_objs_undernet_server = (fork_holds(run.depth, LAYER_UNDERNET) & HOLDS_SERVER) != 0;
 	int song = layer_song(tiles, a->song);   /* (before the objects: the guardian's prelude names its song) */
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	lib_begin();
@@ -410,6 +421,7 @@ static bool build_layer(void) {
 	D.bugs_known = false;
 	D.off_told = false;
 	D.last_stop_told = false;
+	D.fork_told = false;
 	D.final_told = false;
 	D.checkpoint_data = false;
 	D.pet_refreshed = false;

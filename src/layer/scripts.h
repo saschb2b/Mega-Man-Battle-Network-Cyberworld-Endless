@@ -48,7 +48,7 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 
 /* Choices: Yes sets event flag `flag`, which the director acts on (a
  * challenge's, ta_challenge, below). The gate first wants three ScrtData. */
-int ta_undernet(TextArchive *t, int flag, bool deeper);
+int ta_undernet(TextArchive *t, int flag, bool deeper, bool server);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0x63, BN6's no song, stops the music;
  * SCRIPTS_AREA_MUSIC the map's own) without opening the chat box. */

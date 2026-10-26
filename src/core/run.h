@@ -171,6 +171,11 @@ int run_nest_hp(int depth, int navi, int hp);
 /* A guardian's HP more, in percent, each notch of the Net's clock
  * (pacing_clock_hp, docs/world/home/). */
 #define RUN_CLOCK_PERCENT 10
+/* The seed of the run's layer at `depth` of kind `side` (LAYER_*): a trip
+ * back's mixes in the Net's clock too (director_layer.c) */
+static inline uint32_t run_layer_seed(int depth, int side) {
+	return run.seed ^ (uint32_t)(depth * 2654435761u) ^ (uint32_t)(side * 40503u);
+}
 /* The run's own depth: on a trip back, the layer it comes home to. */
 static inline int run_reached(void) { return run.home_depth ? run.home_depth : run.depth; }
 /* Whether depth is the short net's Nest, the run's last layer (on threat

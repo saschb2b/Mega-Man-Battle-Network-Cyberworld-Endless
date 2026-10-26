@@ -36,6 +36,7 @@
 #include "guardians.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
+#include "fork_words.h"
 #include "home_words.h"
 #include "economy.h"
 #include "jobs.h"
@@ -1070,6 +1071,7 @@ static void test_layer_make(void) {
 	run = before;
 }
 
+
 static bool on_stair(int x, int y) {
 	for (int i = 0; i < layer.nstairs; ++i)
 		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
@@ -1305,6 +1307,47 @@ static void check_talk(const char *what, const char *s) {
 	CHECK(s[0] && s[strlen(s) - 1] != '|', "%s: an empty box: \"%s\"", what, s);
 }
 
+/* A fork's read (docs/world/level-design/fork-read.md): what layer_holds
+ * says a seed puts on a layer is what layer_generate puts there, a
+ * telegraph that never lies; and its words for every mix of calls. */
+static void test_fork_read(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x5EED;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static const struct { int type; unsigned holds; } told[] = {
+		{ OBJ_CHALLENGE, HOLDS_SERVER }, { OBJ_PROGRAMS, HOLDS_PROGRAMS }, { OBJ_TRADER, HOLDS_TRADER },
+		{ OBJ_BUGTRADER, HOLDS_BUGTRADER }, { OBJ_SHOP, HOLDS_DEALER }, { OBJ_UNDERNET, HOLDS_UNDERNET },
+	};
+	int wrong = 0, read = 0;
+	for (uint32_t s = 1; s <= 300; ++s) {
+		int depth = 1 + (int)(s * 7 % 18), kind = s % 4 == 0 ? LAYER_UNDERNET : LAYER_NORMAL;
+		int biome = kind == LAYER_UNDERNET ? BIOME_UNDERNET : s % 3 ? (int)(s % 6) : biome_for_depth(depth);
+		uint32_t seed = s * 2654435761u ^ 0xF0F0u;
+		unsigned holds = layer_holds(seed, depth, biome, kind);
+		layer_generate(seed, depth, biome, kind, &kit);
+		for (size_t k = 0; k < sizeof told / sizeof *told; ++k) {
+			if (told[k].type == OBJ_SHOP && (holds & HOLDS_GUARDIAN)) continue;   /* (the last stop's, unread) */
+			bool there = false;
+			for (int i = 0; i < layer.nobj; ++i) there |= layer.obj[i].type == told[k].type;
+			if (there != ((holds & told[k].holds) != 0)) {
+				if (wrong++ < 4) printf("  fork read: seed %u depth %d biome %d kind %d, object %d %s\n", (unsigned)seed, depth, biome, kind,
+					told[k].type, there ? "built, not read" : "read, not built");
+			}
+			read += there;
+		}
+	}
+	CHECK(wrong == 0, "a fork's read differs from the layer built in %d of %d calls", wrong, read);
+	for (unsigned h = 0; h < 1u << 10; ++h) {
+		check_talk("a fork's read at its pad", fork_words(h, false, FORK_PAD));
+		const char *portal = fork_words(h, false, FORK_PORTAL);
+		if (portal) check_talk("a fork's read at a portal", portal);
+	}
+	check_talk("a fork's read of a dark layer", fork_words(0, true, FORK_PAD));
+	run = before;
+}
+
 /* The pages ta_talk builds from `s`: at most three lines of at most 20
  * characters, and no page with a line alone in a box of more. */
 static void check_pages(const char *what, const char *s) {
@@ -1470,11 +1513,11 @@ static void test_talk(void) {
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
 			snprintf(what, sizeof what, "the port's words to area %d (guardian %d)", biome, navi);
-			check_talk(what, home_port_words(biome, navi, false, false, false, false));
-			check_talk(what, home_port_words(biome, navi, true, false, false, false));
-			check_talk(what, home_port_words(biome, navi, false, false, true, false));
+			check_talk(what, home_port_words(biome, navi, false, false, false, false, 0));
+			check_talk(what, home_port_words(biome, navi, true, false, false, false, 0));
+			check_talk(what, home_port_words(biome, navi, false, false, true, false, 0));
 		}
-		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false, false));
+		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false, false, 0));
 	}
 }
 
@@ -1541,8 +1584,8 @@ static void test_home_words(void) {
 			}
 		}
 	for (int b = 0; b < BIOME_COUNT; ++b) {
-		check_talk("a special route's portal", home_port_words(b, 0, b == BIOME_UNDERNET, false, false, true));
-		check_talk("a special route's portal, a guardian known", home_port_words(b, 3, false, false, false, true));
+		check_talk("a special route's portal", home_port_words(b, 0, b == BIOME_UNDERNET, false, false, true, 0));
+		check_talk("a special route's portal, a guardian known", home_port_words(b, 3, false, false, false, true, 0));
 	}
 	run.depth = 1;
 }
@@ -5240,7 +5283,7 @@ static void super_words(void) {
 		CHECK(strlen(super_reward_head(navi)) < 48, "super: %d's data's head is long", navi);
 		/* (the net's word on him, and the Nest's port at home, before they
 		 * have met: never his name) */
-		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false, false);
+		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false, false, 0);
 		snprintf(what, sizeof what, "super_rumor(%d)", navi);
 		check_talk(what, rumor);
 		snprintf(what, sizeof what, "the Nest's port with %d unmet", navi);
@@ -5252,7 +5295,7 @@ static void super_words(void) {
 	}
 	rival_met(SUPER_CYBEAST);
 	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON, NULL, 0);
-	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false));
+	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false, 0));
 }
 
 static void test_super_bosses(void) {
@@ -6191,6 +6234,7 @@ int main(void) {
 	test_generation();
 	test_battler();
 	test_layer_make();
+	test_fork_read();
 	test_layouts_build();
 	test_identity();
 	test_arrivals();

@@ -198,7 +198,8 @@ static bool ask_link(int k) {
 	flag_clear(HOME_LINK_FLAG);
 	bool asked = back ?
 		talk_ask(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN, home_back_question(), HOME_LINK_FLAG) :
-		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2 && w[k].biome == BIOME_UNDERNET, false, w[k].board, w[k].route), FACE_MEGAMAN,
+		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2 && w[k].biome == BIOME_UNDERNET, false, w[k].board, w[k].route,
+			fork_holds_in(run.depth, LAYER_NORMAL, w[k].biome)), FACE_MEGAMAN,
 			home_on_question(), HOME_LINK_FLAG);
 	if (!asked) return false;
 	link_asked = k;
@@ -216,7 +217,7 @@ bool home_hp_check(void) {
 	if (k >= n && !(k == 2 && sealed)) return false;
 	bool shut = k >= n;
 	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2 && (shut || w[k].biome == BIOME_UNDERNET), shut,
-		!shut && w[k].board, !shut && w[k].route), FACE_MEGAMAN);
+		!shut && w[k].board, !shut && w[k].route, shut ? 0 : fork_holds_in(run.depth, LAYER_NORMAL, w[k].biome)), FACE_MEGAMAN);
 }
 
 /* A lit link stepped on: its question, once each time he steps on it; the

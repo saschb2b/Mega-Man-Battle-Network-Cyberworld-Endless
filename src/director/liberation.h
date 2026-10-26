@@ -16,6 +16,8 @@
  * run's seed darkened (run_dark_area); every act's second from the second
  * with --dev dark. */
 bool lib_layer_dark(void);
+/* ... and whether the layer at `depth` of kind `side` (LAYER_*) will be */
+bool lib_layer_dark_at(int depth, int side);
 /* The net area a dark layer of area `biome` is drawn in: the map of BN5's
  * Liberation Mission that area takes (lib_look_mission) where BN5's ROM is
  * there, else `tiles`, the act's own. */

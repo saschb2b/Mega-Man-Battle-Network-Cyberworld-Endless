@@ -129,6 +129,7 @@ typedef struct {
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
+	bool fork_told;        /* ... and, at a fork's exit pad, read the layer past it (director_fork.c) */
 	bool final_told;       /* ... and, the short net's last guardian fallen, said the run is won */
 	int code_due;          /* a program whose compression code was entered for the first time in any run, until MegaMan says Dad keeps it (issue #50) */
 	bool reg_due;          /* a RegUp just found, until MegaMan says what Reg memory MegaMan has now (issue #51) */

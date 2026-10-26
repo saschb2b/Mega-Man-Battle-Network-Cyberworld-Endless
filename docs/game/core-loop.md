@@ -393,7 +393,12 @@ seen; the opening plan of 21 October is still unplayed by a person.
   leaving them at the Server; no skip that pays.
 - **MegaMan reads the next layer at a fork** (an exit pad beside a dark
   flame, a Liberation way): a strong virus signal, someone selling
-  programs. Hades' doors, with no new screen.
+  programs. Hades' doors, with no new screen. Built 26 October 2026
+  ([a fork's read](../world/level-design/fork-read.md)): by the exit pad of
+  a layer with a dark warp, at the warp, and beside each portal of Lan's
+  HP, two calls at most, read from the next layer's seed before it is
+  built; the statistics' Undernet and dark layers taken will say whether
+  the read is followed.
 - **Guardian lines keyed to the last fight**, on the path every dive
   takes (the arena's intro, the first arrival in Lan's HP): he deleted
   MegaMan last run, what finished him, the Cross MegaMan wore. The

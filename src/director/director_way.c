@@ -11,7 +11,9 @@
 #include "cinema.h"
 #include "director_folder.h"
 #include "director_home.h"
+#include "director_layer.h"
 #include "director_state.h"
+#include "fork_words.h"
 #include "gamecall.h"
 #include "jobs.h"
 #include "net_route.h"
@@ -204,6 +206,26 @@ void exit_pad_step(void) {
 	/* (the layer's battle, owed before its exit: battle_floor.h) */
 	if (floor_at_exit() || flag_get(BN6_FLAG_WARP_OFF + 1)) return;
 	emu_warp_link(1);
+}
+
+/* A fork (a dark warp on the layer beside its exit pad): MegaMan reads the
+ * layer past the pad as he comes within FORK_NEAR panels of it, once a
+ * layer, as he reads the Undernet at the warp (ta_undernet): a found layer
+ * made a chosen one, docs/world/level-design/fork-read.md */
+#define FORK_NEAR 3
+void fork_pad_read(int cx, int cy) {
+	if (D.fork_told) return;
+	int ex = -1, ey = -1;
+	bool warp = false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type == OBJ_EXIT) { ex = (int)o->x; ey = (int)o->y; }
+		warp |= o->type == OBJ_UNDERNET;
+	}
+	if (!warp || ex < 0 || abs(cx - ex) > FORK_NEAR || abs(cy - ey) > FORK_NEAR) return;
+	if (emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping || D.map_shown) return;
+	unsigned holds = fork_holds(run.depth + 1, LAYER_NORMAL);
+	if (talk_start(fork_words(holds & ~FORK_DARK, (holds & FORK_DARK) != 0, FORK_PAD), FACE_MEGAMAN)) D.fork_told = true;
 }
 
 /* As the layer's map closes (SELECT let go): the way-on arrow, as after
