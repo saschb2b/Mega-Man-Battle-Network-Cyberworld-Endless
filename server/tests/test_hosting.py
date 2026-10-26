@@ -112,7 +112,9 @@ class ProcessTests(unittest.TestCase):
         interface and tells the host where players come in."""
         port = free_port()
         with tempfile.TemporaryDirectory() as directory:
-            work = Path(directory)
+            # (resolved: macOS's temporary folders are under /var, a link to
+            # /private/var, which the server's own working folder reports)
+            work = Path(directory).resolve()
             (work / "server.ini").write_text(f"[server]\nname = From the INI\nport = {port}\nstate_dir = state\n")
             environ = dict(os.environ, CYBERWORLD_SERVER_NAME="Lan's Square", PYTHONPATH=str(ROOT / "server"))
             process = subprocess.Popen([sys.executable, str(ROOT / "server/main.py")], cwd=work, env=environ,
