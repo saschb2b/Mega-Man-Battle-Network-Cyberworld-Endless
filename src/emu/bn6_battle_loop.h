@@ -16,6 +16,7 @@
 #define BN6_FIGHT_BANNER_SHOW 0x080080AEu /* ... its bl to the banner (0x0801E792: r0 the message, r1 its number) */
 #define BN6_FIGHT_ASK         0x08008144u /* cmp r0,#0xff in the fight's frame (0x080080D2) with no outcome yet, before the Custom screen's request */
 #define BN6_FIGHT_RETURN      0x080081A2u /* ... the routine's pop {pc} */
+#define BN6_FIGHT_GOING       0x08008158u /* ... its bl 0x0800A8F8, reached by BN6_FIGHT_ASK's beq alone: no outcome and nothing asked this frame */
 #define BN6_FIGHT_CUSTOM      0x0800819Au /* ... its way to the Custom screen as L or R asks it (bl 0x0800A028, then the loop's phase 0x20) */
 #define BN6_STATE_FLAGS       0x32        /* BattleState +0x32, u16 the battle's flags (bn6f battle_getFlags 0x0800A2F0, battle_setFlags 0x0800A2D8): */
 #define BN6_FLAG_GAUGE_FULL   0x02        /* ... the Custom gauge full (BN5's liberation ask opens the screen on it alone, 0x08008BD2), */
@@ -28,6 +29,7 @@
 #define BN6_WIN_BANNER        0x0800822Cu /* adds r0,r6,#0 in the win (0x080081A4): r6 its banner (4, ENEMY DELETED!), shown at the next bl */
 #define BN6_DRAW_BANNER       0x080082F8u /* movs r0,#0x1c (DRAW!) in the draw's first step, */
 #define BN6_DRAW_BANNER_SHOW  0x080082FAu /* ... its bl to the banner */
+#define BN6_DRAW_TICK         0x080082FEu /* ... ldrh r0,[r5,#8] past that bl, in the same frame: the draw's count, then its wait for the banner */
 #define BN6_DRAW_SHOWN        0x0800830Cu /* ldrh r0,[r5,#8] in the draw, its banner gone */
 #define BN6_DRAW_RETURN       0x08008348u /* ... the routine's pop {pc} */
 #define BN6_GAUGE_FULL        0x4000      /* BN6_CUSTOM_GAUGE (bn6.h): full */

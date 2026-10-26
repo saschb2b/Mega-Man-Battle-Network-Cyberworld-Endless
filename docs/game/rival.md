@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:46:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:02:17Z }
 ---
 
 # The rival: Chaud and ProtoMan
@@ -65,7 +65,9 @@ clearance opens), which only matter to a player who plays on.
 - **Meta as variety, not power**: Chaud's clearance opens places, not
   stats: official gates, whose chips are a pick of three, not a stat.
 - **The risky elite** (Hades' Charon, Slay the Spire's burning elites):
-  the top rung is optional, telegraphed and deadly, its prize permanent.
+  the top rung is optional, telegraphed and sharp, its prize permanent;
+  its loss costs MegaMan's HP and the clearance, never the run (The
+  netbattle, below).
 - **Name failure in the fiction's voice**: "Too slow, Lan." "Log out,
   ProtoMan."
 
@@ -142,13 +144,30 @@ beat: ProtoMan in battle, his own AI and his attacks.
   no longer recites them as the netbattle is offered (the voice sweep of
   19 October 2026: MegaMan never coaches, [Voice](../voice/rules.md#what-nobody-says), What nobody
   says; docs/voice/sweep/story.md).
-- **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
-  GAME OVER starts inside the battle, as he falls (tried: the battle
-  options' bit 0x08 is a link battle, which waits for a partner; bit
-  0x800000 makes his HP full after a lost battle, too late; clearing
-  `EVENT_1733`, which the deletion sets, changes nothing). So the stake is said before
-  the choice, in MegaMan's voice: "If ProtoMan deletes us, the dive's
-  over. We can run if it goes bad." The battle lets him run (a loss).
+- **A real fight, never the last.** BN6 deletes MegaMan in a netbattle
+  as anywhere: its GAME OVER starts inside the battle, as he falls
+  (tried: the battle options' bit 0x08 is a link battle, which waits for
+  a partner; bit 0x800000 makes his HP full after a lost battle, too
+  late; clearing `EVENT_1733`, which the deletion sets, changes nothing).
+  So the blow that would delete him is taken short of it: he keeps 1 HP,
+  and the battle ends at once as BN6's draw ends one, its DRAW! not shown,
+  as an escape ends (result 3, no reward, his HP as it stands;
+  `src/director/battle_spare.c`; [BN6's battles, the battle loop and
+  banners](../rom/battle.md)). Lan stopped the battle: Chaud's "Hmph. You stopped it just
+  in time. That one's ProtoMan's,Lan.", the duel lost, the clearance not
+  given. The stake is said before the choice as it is: "He hits hard,
+  Lan..." and Lan's "If it goes bad,I'm stopping it!". The battle still
+  lets him run (a loss, Chaud's "You ran,Lan?").
+  Until 0.15.1 the deletion ended the run, the stake said ("If ProtoMan
+  deletes us, the dive's over."). The statistics of 6 to 26 October 2026
+  had it ending 30 of 88 lost runs, for 24 players, 12 of them on layer 8,
+  the third act's duel layer where it first stands, against one on the
+  races' layers ([the core loop reviewed](core-loop.md)): the rivalry's top rung was the
+  game's most common death, an hour's run lost to one optional fight, and
+  its own "fair challenge, cheap retry" broken. A 400 HP MegaMan standing
+  still lasted 12 seconds, 90 to 150 a hit. The owner's call, 26 October
+  2026: a lost netbattle costs the HP and the clearance, never the run.
+  A race's squad (rungs 0 and 1) deletes as any battle does.
 - **Won**, Chaud: "...Log out, ProtoMan. You beat him, Lan." and his full
   clearance.
 
@@ -224,12 +243,15 @@ himself. Beat him, and my full clearance is yours.").
   stay loose until playtests set them.
 - **A duel that reads as a chore**: one an act at most, never on a
   guardian's layer, and never forced.
-- **A netbattle that ends a run unfairly**: optional, starting on No, its
-  stake said, a run from it allowed, and from the third act only, with
-  his HP at half the act's guardian band's top and his tells said. If
-  playtests still find it too sharp, the next lever is his attacks (a
-  lower version where BN6 has one: it has none under 1800 HP) or
-  MegaMan's HP for it.
+- **A netbattle that ends a run unfairly**: it did, a third of lost runs
+  (The netbattle, above); now his deleting blow ends the battle, not the
+  run. Optional, starting on No, its stake said, a run from it allowed,
+  from the third act only, with his HP at half the act's guardian band's
+  top and his tells in Dad's mail. What to watch now is the other side: a
+  loss too cheap to fear. It leaves MegaMan at 1 HP with a layer's heal
+  to find and the clearance unearned; if the statistics show players
+  taking it without a plan, the next lever is what a loss costs (the
+  layer's heal spent, or the next duel's rung), not the run.
 - **The copy and the real ProtoMan**: the Nest copies ProtoMan as a
   guardian too. Chaud says so ("A copy. It'll never match the real
   thing.") the first time the copy is met.

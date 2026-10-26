@@ -11,10 +11,15 @@
 
 /* Chaud's first words on a duel's end, with both times as the results
  * screen shows them: the netbattle, a win, a hit taken, a time too slow. */
-static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, int mine, int his) {
+static int verdict_result(char *out, size_t n, const DuelVerdict *v) {
+	bool won = v->won, beat = v->beat;
+	int rung = v->rung, mine = v->mine, his = v->his;
 	char a[16], b[16];
 	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
 	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
+	/* (his blow would have deleted MegaMan, and Lan stopped the battle: the
+	 * netbattle's loss, no longer the dive's end, docs/game/rival.md) */
+	if (v->spared) return snprintf(out, n, "@C Hmph. You stopped it just in time.|@C That one's ProtoMan's,Lan.|");
 	if (!won && rung == 2) return snprintf(out, n, "@C Hmph. You ran,Lan?|@C Better than deleted. But it's a loss.|@C ProtoMan will be back.|");
 	if (!won) return snprintf(out, n, "@C Hmph. You ran from the duel?|@C That's a loss,Lan.|");
 	if (rung == 2) return snprintf(out, n, "@C ...Jack out,ProtoMan.|@C You beat him,Lan.|");
@@ -80,7 +85,7 @@ const char *duel_call_words(void) {
 /* Chaud's words on a duel's end (duel_verdict), with both times as the
  * results screen shows them, into `out` (`size` bytes) */
 void verdict_words(char *out, int size, const DuelVerdict *v) {
-	int k = verdict_result(out, (size_t)size, v->won, v->beat, v->rung, v->mine, v->his);
+	int k = verdict_result(out, (size_t)size, v);
 	#define ADD(...) (k += snprintf(out + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	/* (what his respect opens: docs/game/rival.md) */
 	if (v->after > v->before && v->after == 1) {

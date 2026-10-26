@@ -102,10 +102,12 @@ const char *guardian_tip(int navi) {
 }
 
 /* (MegaMan's battle data on him is Dad's mail's: recited here before the
- * choice, it was MegaMan coaching, docs/voice/rules.md, What nobody says) */
+ * choice, it was MegaMan coaching, docs/voice/rules.md, What nobody says;
+ * the stake as it is: a blow that would delete MegaMan ends the netbattle,
+ * Lan stopping the battle, battle_spare.h) */
 int guardian_netbattle_terms(char *out, size_t n) {
 	return snprintf(out, n, "Enough,MegaMan. No more racing.|Chaud says you're ready. Face me.|"
-		"@M If he deletes us,our dive's over!|@L We can still run if it goes bad.");
+		"@M He hits hard,Lan...|@L If it goes bad,I'm stopping it!");
 }
 
 /* (a first meeting's hint: the net's gossip, which lives in that world and

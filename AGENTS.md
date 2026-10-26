@@ -41,6 +41,7 @@ commits, issues and old notes) are mapped section by section in
 | How a run is paced: acts, battles, areas, guardians, growth | [docs/game/progression/](docs/game/progression/index.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/game/meta/](docs/game/meta/index.md) |
 | What a run hands out (chips, their rarity and codes, zenny, Mystery Data), measured by act, the plans its curves come in by, and the guard against drift | [docs/game/economy/](docs/game/economy/index.md) |
+| The core loop reviewed (October 2026): what works, what it lacks, what has grown, the players' statistics, the next evolution's phases and what it freezes; a new system or meta axis is checked against it first | [docs/game/core-loop.md](docs/game/core-loop.md) |
 | Guardians and super bosses | [docs/game/bosses/](docs/game/bosses/index.md) |
 | The NaviCust | [docs/game/navicust.md](docs/game/navicust.md) |
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem, the Jukebox | [docs/game/pet.md](docs/game/pet.md) |
@@ -220,6 +221,13 @@ rates, prices, rewards, progression, the NaviCust and other loadouts, menus
 and screens, "is this fun") goes through the game-design skill first: name
 the dialectic it serves, the loop layer it feeds and the patterns it uses,
 before the numbers. This holds mid-implementation too.
+
+The whole game's course is checked with the course-check skill
+(`.claude/skills/course-check/`) every few minor releases, or when the
+owner asks to step back: the players' statistics first, a time-boxed
+team, a devil's advocate, the owner's calls, the result in
+[docs/game/core-loop.md](docs/game/core-loop.md). A new system or meta
+axis is checked against that page first.
 
 ## Trailers
 

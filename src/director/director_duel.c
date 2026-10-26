@@ -140,8 +140,9 @@ void duel_roll(void) {
 
 /* The duel's verdict (docs/game/rival.md): MegaMan's DeleteTime against
  * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
- * words queued, with both times as the results screen shows them. */
-void duel_verdict(bool won) {
+ * words queued, with both times as the results screen shows them (and
+ * whether Lan stopped the netbattle short of MegaMan's deletion). */
+void duel_verdict(bool won, bool spared) {
 	D.duel = false;
 	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung, before = rival_clearance();
 	bool beat = won && (rung == 2 || (mine < his && !(rung == 1 && D.duel_hit)));
@@ -163,7 +164,7 @@ void duel_verdict(bool won) {
 	 * where it was offered) */
 	bool opened = beat && layer_objs_official_level && after >= layer_objs_official_level;
 	if (opened) flag_set(LAYER_CLEARED_FLAG);
-	DuelVerdict v = { won, beat, opened, rung, mine, his, before, after };
+	DuelVerdict v = { won, beat, opened, spared, rung, mine, his, before, after };
 	verdict_words(D.duel_verdict, (int)sizeof D.duel_verdict, &v);
 	D.duel_verdict_due = true;
 }

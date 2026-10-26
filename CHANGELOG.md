@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **ProtoMan's netbattle no longer ends the dive.** Where his blow would
+  delete MegaMan, Lan stops the battle: it ends at once, MegaMan
+  back on the layer at 1 HP, the duel lost and Chaud's full clearance
+  still to win. The netbattle had become the most common end of a run (30
+  of 88 lost runs in the anonymous statistics since 6 October, most of
+  them on layer 8, where it first waits), an hour's dive lost to one
+  optional fight. Before the choice, MegaMan and Lan say the stake as it
+  is now. A race's viruses still delete MegaMan as any battle's do.
+
 ## 0.16.0 (2026-10-26)
 
 - **Rumble, and a DualSense's adaptive triggers.** A controller now

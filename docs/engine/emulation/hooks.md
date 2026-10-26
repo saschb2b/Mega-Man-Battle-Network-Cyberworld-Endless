@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Hooks"
 description: "Hooks on BN6's code (`src/emu/hook.c`): a BKPT over an instruction that calls the engine's C mid-frame, event and answer hooks, one table per core, and every address hooked, from battles and maps to BN5's Souls."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T20:25:41Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:40:28Z }
 ---
 
 # Hooks
@@ -72,7 +72,9 @@ The hooks in use (`src/director/encounter.c`; [ROM data](../../rom/overview.md))
 | `0x0800A4D2` | the battle's deck dealt from the folder (bn6f `sub_800A3E4` at its end, `src/emu/xchips_install.c`) | answer: the chips that sit out (a chip of BN5's whose code BN6 lacks, a DarkChip of BN5's, every one of BN5's without its ROM: [Other games' ROMs](../../multirom/overview.md)) taken out of the deck, the rest in their order, `0xFFFF` after them; the Regular chip's and the TagChips' marks (BattleState `+0x17`, `+0x44`) cleared where theirs sat out | once a battle |
 | `0x08010D58` | every chip use's DarkChip check (bn6f `sub_8010D58`, `src/director/darkbn6.c`) | answer, posting an event (`hook_post`) where a DarkChip of MegaMan's runs as its base chip, no BugFrag in the battle's count | once a chip used |
 | `0x0800B79A` | a chip's after-effects as it runs (bn6f `sub_800B79A`) | answer, posting an event where a DarkChip's dark power ran for MegaMan (its id 0x11E-0x122 reaches it only then): its price after the battle | once a chip used |
-| `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
+| `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls; in his netbattle, a blow that would delete him taken short of it (`src/director/battle_spare.c`) | in the rival's duel only: once per battle object a frame |
+| `0x08008158` | the battle loop's fight frame, no outcome and nothing asked (`battle_spare.c`) | answer: after ProtoMan's sparing blow, the loop set to its draw and the frame left | each fight frame of every battle, idle but in that netbattle |
+| `0x080082FA` | the draw's bl to its DRAW! banner (`battle_spare.c`) | answer: passed by after that blow, the draw on to its result in the same frame | once a draw |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
 | `0x080FDFA0` | ProtoMan's cross landing back on his panel (bn6f `sub_80FCC4C`, `src/emu/protoman_cross.c`) | answer: his collision region given his own panel back where the cross left it cleared (issue #55; `CYBERWORLD_EMU_DEBUG` says each) | once a cross |
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
