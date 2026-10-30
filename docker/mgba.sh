@@ -5,7 +5,8 @@
 # MinGW-w64 cross compiler of docker/Dockerfile.windows; android: each
 # Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
 # 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
-# library alone). The web build
+# library alone; switch: the Nintendo Switch, devkitA64's, the same way).
+# The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
@@ -71,6 +72,24 @@ case " $TARGETS " in *" 3ds "*)
 	cp build-3ds/libmgba.a /opt/mgba/3ds/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/3ds/include/
 	cp -r build-3ds/include/mgba /opt/mgba/3ds/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" switch "*)
+	# (the library target alone, with mGBA's own Switch toolchain file, and
+	# the whole core, as on the 3DS: the link cable's and threaded video's
+	# parts are left out of the minimal one mGBA builds for a "Generic"
+	# system. Its OpenGL ES 3 renderer, which mGBA turns on for the Switch,
+	# is left out: the game draws the core's picture itself, as everywhere)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	sed -i 's/set(BUILD_GLES3 ON CACHE BOOL "Build with OpenGL|ES 3" FORCE)/set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)/' mgba-$VER/CMakeLists.txt
+	grep -q 'set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)' mgba-$VER/CMakeLists.txt
+	cmake -S mgba-$VER -B build-switch $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/switch \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/switch/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON
+	cmake --build build-switch --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/switch/lib /opt/mgba/switch/include
+	cp build-switch/libmgba.a /opt/mgba/switch/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/switch/include/
+	cp -r build-switch/include/mgba /opt/mgba/switch/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

@@ -1,0 +1,7 @@
+# Build image for the Nintendo Switch (switch/README.md): devkitPro's
+# devkitA64 with libnx and its portlibs (SDL2, curl), and the embedded GBA
+# core built for it. The game builds into a .nro for the Homebrew Menu
+# (build.py switch).
+FROM devkitpro/devkita64:latest
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh switch
