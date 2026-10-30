@@ -11,9 +11,15 @@
 #include "analytics.h"
 #include "analytics_roots.h"
 
-/* (the 3DS's where its build found devkitPro's libcurl: the Makefile's CW_3DS_CURL) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || (defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
+/* (the 3DS's where its build found devkitPro's libcurl: the Makefile's
+ * CW_3DS_CURL; the Switch's always, devkitPro's 7.69 on its own TLS) */
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || \
+	(defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
 #define HTTP_CURL 1
+#endif
+/* (libcurl linked in, not loaded: the consoles') */
+#if defined(__3DS__) || defined(__SWITCH__)
+#define CURL_LINKED 1
 #endif
 
 #define CONNECT_S 5L   /* seconds to the host */
@@ -21,8 +27,13 @@
 
 #ifdef HTTP_CURL
 
+#ifdef CURL_LINKED
 #ifdef __3DS__
 #include "network_3ds.h"
+#else
+#include <switch/types.h>
+#include <switch/services/ssl.h>
+#endif
 #include <curl/curl.h>
 
 #define CURL_DO(f) curl_##f
@@ -107,6 +118,17 @@ static int stopped(void *stop, curl_off_t a, curl_off_t b, curl_off_t c, curl_of
 	return SDL_AtomicGet((SDL_atomic_t *)stop) ? 1 : 0;
 }
 
+#ifdef __SWITCH__
+/* (the roots the game carries into the console's TLS context, which curl
+ * hands over before it connects: its 7.69 has no CAINFO_BLOB) */
+static CURLcode add_roots(CURL *h, void *context, void *user) {
+	(void)h;
+	(void)user;
+	sslContextImportServerPki(context, analytics_roots, (u32)strlen(analytics_roots), SslCertificateFormat_Pem, NULL);
+	return CURLE_OK;
+}
+#endif
+
 /* One request: its result (CURLE_*), the answer's status in `code` */
 static int curl_once(const char *url, const char *agent, const char *body, SDL_atomic_t *stop, bool roots, long *code) {
 	CURL *h = CURL_DO(easy_init)();
@@ -124,8 +146,12 @@ static int curl_once(const char *url, const char *agent, const char *body, SDL_a
 	CURL_DO(easy_setopt)(h, CURLOPT_NOPROGRESS, 0L);
 	CURL_DO(easy_setopt)(h, CURLOPT_XFERINFOFUNCTION, stopped);
 	CURL_DO(easy_setopt)(h, CURLOPT_XFERINFODATA, (void *)stop);
+#ifdef __SWITCH__
+	if (roots) CURL_DO(easy_setopt)(h, CURLOPT_SSL_CTX_FUNCTION, add_roots);
+#else
 	struct curl_blob ca = { analytics_roots, strlen(analytics_roots), CURL_BLOB_NOCOPY };
 	if (roots) CURL_DO(easy_setopt)(h, CURLOPT_CAINFO_BLOB, &ca);
+#endif
 	int r = CURL_DO(easy_perform)(h);
 	*code = 0;
 	if (r == CURLE_OK) CURL_DO(easy_getinfo)(h, CURLINFO_RESPONSE_CODE, code);
@@ -148,7 +174,7 @@ static bool net_3ds(void) {
 #endif
 
 bool analytics_http_ready(void) {
-#ifdef __3DS__
+#ifdef CURL_LINKED
 	return true;
 #else
 	return curl_load() && sandbox_network();
@@ -157,9 +183,12 @@ bool analytics_http_ready(void) {
 
 bool analytics_http_post(const char *url, const char *agent, const char *body, SDL_atomic_t *stop) {
 	static bool begun, roots;
-#ifdef __3DS__
-	/* (no store of its own knows Let's Encrypt's roots) */
+#ifdef CURL_LINKED
+	/* (the 3DS has no store of its own that knows Let's Encrypt's roots;
+	 * the Switch's knows ISRG Root X1 from its 10.1.0 on) */
 	roots = true;
+#endif
+#ifdef __3DS__
 	if (!net_3ds()) return false;
 #endif
 	if (!begun) {
