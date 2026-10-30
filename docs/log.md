@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-10-31
+* **Update**: code/platforms.md, `switch/` and `Dockerfile.switch`, the Nintendo Switch build (a `.nro` for the Homebrew Menu, online and the statistics included), and its index line; code/core.md, `start_switch.c`; code/online.md, the consoles' stream `online_stream_curl.c` (the 3DS's, now the Switch's too); code/analytics.md and devtools/statistics.md, the Switch's sending; GUIDE.md, On a Switch.
+
 ## 2026-10-26
 * **Creation**: releases/v0.17.0.md, 0.17.0's notes ("Sharper, not bigger.": the core loop review's rounds, a picture each); its lines in releases/index.md and releases/overview.md.
 * **Creation**: world/level-design/fork-read.md, a fork's read (core loop Phase 2): MegaMan reads the layer behind each way at a fork (the exit pad beside a dark warp, the warp, Lan's HP's portals) from its seed, the services' rolls on numbers of their own (`net_services.c`, `layer_holds`; LAYER_MAKE 109); its line in world/level-design/index.md; game/core-loop.md, Phase 2's item marked built; code/director.md, code/net-and-map.md and code/layer.md, their lines; GUIDE.md, the portals' and the dark flame's reads.

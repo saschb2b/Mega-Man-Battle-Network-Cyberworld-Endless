@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **The Switch.** A Switch with custom firmware (Atmosphère) plays the
+  game from the Homebrew Menu: `cyberworld-endless.nro` in
+  `sdmc:/switch/cyberworld-endless/`, the ROM in its `rom/` folder or where
+  GBA games are kept (`sdmc:/roms/gba/`). Online too, NetBattles included.
+  Not yet run on a console.
+
 ## 0.17.0 (2026-10-26)
 
 - **A battle on every layer.** Every layer without a guardian now has at

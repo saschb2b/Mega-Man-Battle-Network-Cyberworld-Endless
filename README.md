@@ -142,6 +142,7 @@ and UNITE with it in every battle after. Online, it fills your NetPass.
 | **iPhone and iPad**, iOS 14 or newer | through SideStore or AltStore Classic | all of it | [On an iPhone or iPad](docs/GUIDE.md#on-an-iphone-or-ipad) |
 | **Handhelds** with PortMaster | the PortMaster zip | all of it | [On a PortMaster handheld](docs/GUIDE.md#on-a-portmaster-handheld) |
 | **New 3DS** | the `.cia`, or the `.3dsx` | all but NetBattles | [On a New 3DS](docs/GUIDE.md#on-a-new-3ds) |
+| **Switch** with custom firmware | the `.nro` | all of it | [On a Switch](docs/GUIDE.md#on-a-switch) |
 
 Every file is on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest);
 the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/) leads with your system.
