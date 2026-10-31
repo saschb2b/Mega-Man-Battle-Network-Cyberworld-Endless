@@ -14,6 +14,7 @@ CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
 CC_vita := /usr/local/vitasdk/bin/arm-vita-eabi-gcc
+CC_ps4 := clang
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
@@ -35,6 +36,7 @@ BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN_switch := $(OUT)/cyberworld-endless.elf
 BIN_vita := $(OUT)/cyberworld-endless.elf
+BIN_ps4 := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -46,25 +48,31 @@ OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 # only when it changes, so only what shows it is built again.
 VERSION ?= $(shell git describe --tags --match 'v*' 2>/dev/null | sed 's/^v//' | grep . || echo dev)
 GEN := $(OUT)/gen
+# (the consoles' packages' version, two numbers of two digits: the
+# version's major and minor)
+APP_VER = $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' | xargs printf '%02d.%02d')
 # The warnings (issue #19): -Wall -Wextra and stricter ones, clean on every
 # target; the last three are GCC's own, which clang (Emscripten, macOS,
 # the NDK) does not know. SDL2's and mGBA's headers are the system's.
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita ps4,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
 ifeq ($(TARGET),ios)
 PKGCONF := true   # SDL2 comes from ios/deps.sh (sdl2-config), never the Mac's own
+endif
+ifeq ($(TARGET),ps4)
+PKGCONF := true   # SDL2 comes with the OpenOrbis toolchain
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
 MGBA_LICENSE := /opt/mgba/LICENSE
@@ -190,8 +198,6 @@ ifeq ($(TARGET),vita)
 VITASDK ?= /usr/local/vitasdk
 VITA_BIN := $(VITASDK)/bin
 VITA_TITLE := CWEN00001
-# (APP_VER is two numbers of two digits: the version's major and minor)
-VITA_VER := $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' | xargs printf '%02d.%02d')
 CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -isystem $(VITASDK)/arm-vita-eabi/include
 LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(PKGCONF) --static --libs libcurl) $(shell $(PKGCONF) --libs sdl2) \
           -lScePower_stub -lSceShaccCgExt -ltaihen_stub -lstdc++ -lm -Wl,-q -Wl,--gc-sections
@@ -200,11 +206,55 @@ $(OUT)/eboot.bin: $(BIN)
 	$(VITA_BIN)/vita-elf-create $(BIN) $(OUT)/cyberworld-endless.velf
 	$(VITA_BIN)/vita-make-fself -s $(OUT)/cyberworld-endless.velf $@
 $(OUT)/param.sfo: $(GEN)/version.h
-	$(VITA_BIN)/vita-mksfoex -s TITLE_ID=$(VITA_TITLE) -s APP_VER=$(VITA_VER) "Cyberworld Endless" $@
+	$(VITA_BIN)/vita-mksfoex -s TITLE_ID=$(VITA_TITLE) -s APP_VER=$(APP_VER) "Cyberworld Endless" $@
 $(OUT)/cyberworld-endless.vpk: $(OUT)/eboot.bin $(OUT)/param.sfo vita/icon0.png vita/bg.png vita/startup.png vita/template.xml
 	$(VITA_BIN)/vita-pack-vpk -s $(OUT)/param.sfo -b $(OUT)/eboot.bin -a vita/icon0.png=sce_sys/icon0.png \
 	 -a vita/bg.png=sce_sys/livearea/contents/bg.png -a vita/startup.png=sce_sys/livearea/contents/startup.png \
 	 -a vita/template.xml=sce_sys/livearea/contents/template.xml $@
+endif
+# the PS4 (docker/Dockerfile.ps4, ps4/), whose fake package a jailbroken PS5
+# installs too: OpenOrbis's clang for its FreeBSD-like system, its libc,
+# SDL2 (2.0.9: src/core/sdl_old.h stands in for what it lacks) and the
+# system's libraries' stubs, mGBA and mbedTLS (online play's TLS) linked
+# in, lld with the toolchain's script
+ifeq ($(TARGET),ps4)
+OO := /lib/OpenOrbisSDK
+CFLAGS := $(filter-out -g,$(CFLAGS)) --target=x86_64-pc-freebsd12-elf -fPIC -funwind-tables -D_GNU_SOURCE -DCW_PS4 \
+          -isysroot $(OO) -isystem $(OO)/include -isystem $(OO)/include/SDL2 -isystem /opt/mbedtls/include -include src/core/sdl_old.h
+LDLIBS := --target=x86_64-pc-freebsd12-elf -fuse-ld=lld -nostdlib -Wl,-m,elf_x86_64 -Wl,-pie -Wl,--script,$(OO)/link.x \
+          -Wl,--eh-frame-hdr $(OO)/lib/crt1.o -L$(OO)/lib $(MGBA)/lib/libmgba.a -L/opt/mbedtls/lib -lmbedtls -lmbedx509 -lmbedcrypto \
+          -lSDL2 -lc -lkernel -lSceUserService \
+          -lSceVideoOut -lSceAudioOut -lScePad -lSceSysmodule -lSceNet -lSceNetCtl
+# (the fake PKG: eboot.bin from the ELF, its param.sfo and icon, and
+# ps4/pkg.gp4, its project, packed by PkgTool)
+OO_BIN := $(OO)/bin/linux
+PS4_TITLE := CWEN00001
+PS4_CONTENT := IV0000-$(PS4_TITLE)_00-CYBERWORLDENDLES
+PKG := $(OUT)/pkg
+all: $(OUT)/cyberworld-endless.pkg
+$(PKG)/eboot.bin: $(BIN)
+	@mkdir -p $(PKG)
+	cd $(PKG) && $(OO_BIN)/create-eboot -in=$(abspath $(BIN)) -out=cyberworld-endless.oelf --paid 0x3800000000000011
+$(PKG)/sce_sys/param.sfo: $(GEN)/version.h
+	@mkdir -p $(dir $@)
+	rm -f $@ && $(OO_BIN)/PkgTool.Core sfo_new $@
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ APP_TYPE --type Integer --maxsize 4 --value 1
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ APP_VER --type Utf8 --maxsize 8 --value '$(APP_VER)'
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ ATTRIBUTE --type Integer --maxsize 4 --value 0
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ CATEGORY --type Utf8 --maxsize 4 --value 'gd'
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ CONTENT_ID --type Utf8 --maxsize 48 --value '$(PS4_CONTENT)'
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ DOWNLOAD_DATA_SIZE --type Integer --maxsize 4 --value 0
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ SYSTEM_VER --type Integer --maxsize 4 --value 0
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ TITLE --type Utf8 --maxsize 128 --value 'Cyberworld Endless'
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ TITLE_ID --type Utf8 --maxsize 12 --value '$(PS4_TITLE)'
+	$(OO_BIN)/PkgTool.Core sfo_setentry $@ VERSION --type Utf8 --maxsize 8 --value '01.00'
+$(PKG)/sce_sys/icon0.png: ps4/icon0.png
+	@mkdir -p $(dir $@)
+	cp $< $@
+$(OUT)/cyberworld-endless.pkg: $(PKG)/eboot.bin $(PKG)/sce_sys/param.sfo $(PKG)/sce_sys/icon0.png ps4/pkg.gp4
+	cp ps4/pkg.gp4 $(PKG)/pkg.gp4
+	cd $(PKG) && $(OO_BIN)/PkgTool.Core pkg_build pkg.gp4 .
+	mv $(PKG)/$(PS4_CONTENT).pkg $@
 endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer

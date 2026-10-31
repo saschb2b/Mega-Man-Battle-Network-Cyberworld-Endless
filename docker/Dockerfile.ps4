@@ -1,0 +1,13 @@
+# Build image for the PS4 (ps4/README.md), whose fake package a jailbroken
+# PS5 installs too: the OpenOrbis toolchain (its clang, libc, SDL2 and the
+# system's libraries' stubs), and the embedded GBA core and mbedTLS built
+# for it (docker/ps4.cmake). The game builds into a fake PKG (build.py ps4).
+FROM openorbisofficial/toolchain:latest
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends cmake make curl ca-certificates python3 bzip2 \
+ && rm -rf /var/lib/apt/lists/*
+COPY ps4.cmake /opt/ps4.cmake
+COPY mbedtls.sh /tmp/mbedtls.sh
+RUN sh /tmp/mbedtls.sh
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh ps4

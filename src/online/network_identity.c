@@ -19,6 +19,8 @@ EM_JS(int, identity_random, (uint8_t *out), {
 #include <switch/kernel/random.h>
 #elif defined(__vita__)
 #include <psp2/kernel/rng.h>
+#elif defined(CW_PS4)
+#include <unistd.h>
 #else
 #include <stdio.h>
 #endif
@@ -48,6 +50,9 @@ bool network_identity(uint8_t out[NETWORK_ID_BYTES]) {
 	return true;
 #elif defined(__vita__)
 	return sceKernelGetRandomNumber(out, NETWORK_ID_BYTES) >= 0;
+#elif defined(CW_PS4)
+	/* (the kernel's random bytes: the PS4's sandbox shows no /dev/urandom) */
+	return getentropy(out, NETWORK_ID_BYTES) == 0;
 #else
 	FILE *file = fopen("/dev/urandom", "rb");
 	if (!file) return false;

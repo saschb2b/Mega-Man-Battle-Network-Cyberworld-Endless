@@ -1,14 +1,14 @@
 /* A console's own start, before the game's (main.c): the New 3DS's
- * (start_3ds.c), the Switch's (start_switch.c) and the PlayStation
- * Vita's (start_vita.c), each built where it runs; CW_CONSOLE says this
- * build is one. */
+ * (start_3ds.c), the Switch's (start_switch.c), the PlayStation Vita's
+ * (start_vita.c) and the PS4's (start_ps4.c), each built where it runs;
+ * CW_CONSOLE says this build is one. */
 #ifndef CW_START_CONSOLE_H
 #define CW_START_CONSOLE_H
 
 #include <stdbool.h>
 #include <stddef.h>
 
-#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__)
+#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__) || defined(CW_PS4)
 #define CW_CONSOLE 1
 #endif
 

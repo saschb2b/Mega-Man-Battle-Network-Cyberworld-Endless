@@ -69,6 +69,8 @@ const char *backup_system_name(void) {
 	return "Switch";
 #elif defined(__vita__)
 	return "PS Vita";
+#elif defined(CW_PS4)
+	return "PS4";
 #elif defined(__ANDROID__)
 	return "Android";
 #elif defined(CW_IOS)
