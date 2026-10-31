@@ -183,7 +183,9 @@ void padmap_default_family(PadMap *m, int family) {
 	set_row(r[6], PAD_LEFTSHOULDER, PAD_LEFTTRIGGER);
 	set_row(r[7], PAD_RIGHTSHOULDER, PAD_NONE);
 	set_row(r[8], PAD_START, PAD_NONE);
-	set_row(r[9], PAD_BACK, PAD_NONE);
+	/* (a PlayStation pad's touchpad press too: the PS5 keeps its Create
+	 * button, back, for its screenshots, and its SDL maps no back) */
+	set_row(r[9], PAD_BACK, PAD_TOUCHPAD);
 	/* (the right trigger, as Chrono Cross's remaster speeds up on R2, and
 	 * the right stick's press beside it) */
 	set_row(r[PAD_FAST], PAD_RIGHTTRIGGER, PAD_RIGHTSTICK);

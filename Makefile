@@ -270,7 +270,13 @@ endif
 # folder (sce_sys/param.json, which Prospero Store's catalog also reads at
 # the tag, its contentVersion raised by each release, build.py lint; the
 # icon; the template's clean-room libc.prx) zipped with the folder at its
-# top, as Prospero Store takes it
+# top, as Prospero Store takes it. A game's process gets only some of the
+# system's modules (PS5_LOADED, those its loader put into ours): a call into
+# another is a call to nothing, so the stubs of those the game's libraries
+# would ask for (WebKit's POSIX, the kernel's system and web parts, the
+# keyboard, the text dialog, libSceRandom) are left out, src/core/ps5_libc.c
+# making what the game needs of them, and a module outside the list stops
+# the build
 ifeq ($(TARGET),ps5)
 PS5APP := /opt/ps5app
 PS5SDK := $(PS5APP)/.deps/native/ps5-payload-sdk
@@ -279,12 +285,24 @@ PS5_PB = $(shell python3 -c "import json; print(' '.join(json.load(open('$(PS5AP
 CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -fdata-sections -DCW_PS5 $(call PS5_PB,cflags)
 LINK := $(PS5SDK)/bin/prospero-lld
 LDLIBS := -T $(PS5APP)/tooling/native/ps5-pie.ld --eh-frame-hdr --version-script $(PS5APP)/tooling/native/app-symbols.map \
+          $(foreach f,malloc calloc realloc posix_memalign free fcntl socket,--wrap=$(f)) \
           -e _start $(PS5APP)/build/obj/app_crt.o $(PS5APP)/build/obj/app_cpp_runtime.o $(MGBA)/lib/libmgba.a \
-          -L$(PS5SDK)/target/lib --start-group $(call PS5_PB,libs) --end-group --as-needed $(wildcard $(PS5SDK)/target/lib/*.so)
+          -L$(PS5SDK)/target/lib --start-group $(filter-out -lSceKeyboard -lSceImeDialog,$(call PS5_PB,libs)) --end-group \
+          --as-needed $(filter-out $(PS5_UNLOADED:%=\%/%.so),$(wildcard $(PS5SDK)/target/lib/*.so))
+PS5_UNLOADED := libScePosixForWebKit libkernel_sys libkernel_web libSceKeyboard libSceImeDialog libSceRandom
+PS5_LOADED := libkernel libSceLibcInternal libSceSysmodule libSceNet libSceNetCtl libSceSsl libSceHttp libSceHttp2 \
+              libSceVideoOut libSceAudioOut libSceAudioIn libScePad libSceSystemService libSceUserService libSceRtc \
+              libSceRegMgr libSceSaveData libSceCommonDialog libSceSysUtil
+# (the stand-ins and the heap hidden, which the template's compiler makes
+# default whatever their attributes say; the game's allocations into the
+# heap, src/core/ps5_heap.c, and its fcntl and socket through ps5_libc.c's)
+$(OUT)/obj/core/ps5_libc.o $(OUT)/obj/core/ps5_heap.o: CFLAGS += -fvisibility-nodllstorageclass=hidden
 PS5_TITLE := CWEN00001
 PS5_APP := $(OUT)/$(PS5_TITLE)
 all: $(OUT)/cyberworld-endless-ps5.zip
 $(OUT)/eboot.elf: $(BIN)
+	@other=$$(llvm-readelf-18 -d $(BIN) | sed -n 's/.*Shared library: \[\(.*\)\.sprx\]/\1/p' | grep -vx $(PS5_LOADED:%=-e %)); \
+	 if [ -n "$$other" ]; then echo "the PS5 gives a game no" $$other "(Makefile, PS5_LOADED)"; exit 1; fi
 	$(PS5_TOOL) link --in $(BIN) --out $@ --stub-dir $(PS5SDK)/target/lib --module-sdk 0x02000009 \
 	 --companion-sdk 0x08050001 --file-name eboot.elf
 $(OUT)/cyberworld-endless-ps5.zip: $(OUT)/eboot.elf sce_sys/param.json ps5/icon0.png

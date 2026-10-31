@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-10-31
+* **Update**: GUIDE.md, On a PS5: the touchpad's press is SELECT, the Create button the PS5's own; its generated stamp repaired.
+* **Update**: code/platforms.md, the PS5 build as it first ran on a console: the template's converter's RELRO placement corrected in `Dockerfile.ps5`, the link to the modules a game's process gets (`PS5_LOADED`), the heap on flexible memory (`param.json`'s `kernel.flexibleMemorySize`); code/core.md, `ps5_heap.c`, `ps5_libc.c`'s lookups, keyboard and folders, `start_ps4.c`'s wait at the end.
 * **Update**: code/platforms.md, the PS5's `param.json` at `sce_sys/` in the repository's root, where Prospero Store's catalog reads it at each tag, its contentVersion held to the CHANGELOG by `build.py lint`.
 * **Creation**: releases/v0.18.0.md, 0.18.0's notes ("Four more systems.": the Switch, the PS Vita, the PS4 and the PS5, each with its download entry); its lines in releases/index.md and releases/overview.md. project/itch.md, the four new files' channels and display names.
 * **Update**: code/platforms.md, `ps5/` and `Dockerfile.ps5` with `ps5.cmake`, the PS5's own build (a native app's folder, `CWEN00001/`, zipped for Prospero Store), and its index line; code/core.md, `ps5_libc.c` and `start_ps4.c`'s PS5; code/online.md and code/analytics.md, the PS5's libcurl; devtools/statistics.md, the PS5's sending; GUIDE.md, On a PS4 and On a PS5 apart.
