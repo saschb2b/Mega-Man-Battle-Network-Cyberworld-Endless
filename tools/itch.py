@@ -167,14 +167,22 @@ def butler():
     return found
 
 
+def existing_channels():
+    """The page's channels, as butler's status lists them."""
+    out = subprocess.run([butler(), 'status', PAGE], capture_output=True, text=True, check=True).stdout
+    return {m.group(1) for m in re.finditer(r'^\|\s*([a-z0-9-]+)\s*\|', out, re.M)} - {'channel'}
+
+
 def push(tag, hidden, dry_run):
     channels = prepare(tag)
     version = tag.lstrip('v')
+    # (itch takes --hidden only on a channel's first push: the new ones)
+    known = existing_channels() if hidden else set()
     for channel, _, how in CHANNELS:
         cmd = [butler(), 'push', os.path.join(channels, channel), f'{PAGE}:{channel}', '--userversion', version]
         if how == 'file':
             cmd.append('--no-auto-unzip')
-        if hidden:
+        if hidden and channel not in known:
             cmd.append('--hidden')
         if dry_run:
             cmd.append('--dry-run')
@@ -208,7 +216,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('what', choices=('prepare', 'push', 'devlog', 'description', 'record', 'check', 'lint'))
     ap.add_argument('--tag', help="the release (default: GitHub's latest; devlog: the newest in CHANGELOG.md)")
-    ap.add_argument('--hidden', action='store_true', help="a new channel's upload hidden on the page")
+    ap.add_argument('--hidden', action='store_true', help="a new channel's upload hidden on the page (a channel it has already, as it is)")
     ap.add_argument('--dry-run', action='store_true', help="butler lists what it would send")
     ap.add_argument('--post', nargs=2, metavar=('TAG', 'URL'), help='record: a release\'s devlog post on itch')
     ap.add_argument('--page', action='store_true', help="record: docs/itch/'s files as applied on itch")
