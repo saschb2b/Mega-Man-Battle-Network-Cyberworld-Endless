@@ -95,7 +95,10 @@ What differs from the other builds:
   takes their errors (the game's own key grid takes text), and random
   bytes from `/dev/urandom`; and the folders read with the kernel's
   `getdents`, in the internal drive's 64 KB blocks, where libc's `opendir`
-  is refused (EPERM).
+  is refused (EPERM). And `fcntl` on a socket, refused too (curl's
+  close-on-exec and non-blocking, which stopped every connection): through
+  the linker's `--wrap`, close-on-exec does nothing (a game never execs)
+  and O_NONBLOCK goes through the socket's own option, `SO_NBIO`.
 - **The heap** (`src/core/ps5_heap.c`): libc's `malloc` there draws on the
   kernel's internal memory, some 14 MB, too little for SDL's 1080p window
   alone. The linker sends the game's and its libraries' `malloc`,

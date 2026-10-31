@@ -13,6 +13,10 @@
   system's launch argument, and waits for the system at its end instead
   of crashing on the way out. Run on a PS5 this time.
 
+- **Online on the PS5.** The PS5 refuses a game two of the settings curl
+  makes on each connection, so the Net Square's gate said it could not
+  connect: the game now makes them the PS5's way.
+
 - **Fast forward no longer sticks on.** A device SDL takes for a
   controller but that never reports its triggers (the PS5's media remote,
   which the PS5 lists among its pads) read as the right trigger half
