@@ -318,8 +318,14 @@ static int parse_args(int argc, char **argv, Options *o) {
 		if (!took && (took = run_option(a, v, o)) != 0 && strcmp(a, "--launcher")) o->dev = true;
 		if (!took && v && (capture_option(a, v) || tools_option(a, v))) { took = 2; o->dev = true; }
 		if (!took) {
+#if defined(CW_PS4) || defined(CW_PS5)
+			/* (what the system passes an app, the PS5 its title ID after
+			 * an empty name: not the game's to refuse) */
+			continue;
+#else
 			fprintf(stderr, "unknown argument %s\n", a);
 			return 2;
+#endif
 		}
 		i += took - 1;
 	}
@@ -507,7 +513,8 @@ static int launcher_mode(const Options *o) {
 	return (DESKTOP || IOS) && !o->rom_dir && !o->headless ? LAUNCHER_AUTO : LAUNCHER_OFF;
 }
 
-int main(int argc, char **argv) {
+/* The game, from its start to its end: the exit code */
+static int game_main(int argc, char **argv) {
 	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .sound_arg = -1, .music_arg = -1, .effects_arg = -1, .marks_spec = -1, .launcher = -1 };
 	int code = parse_args(argc, argv, &o);
 	if (code >= 0) return code;
@@ -529,4 +536,12 @@ int main(int argc, char **argv) {
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
 	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);
+}
+
+int main(int argc, char **argv) {
+	int code = game_main(argc, argv);
+#ifdef CW_PS5
+	console_park(code);
+#endif
+	return code;
 }

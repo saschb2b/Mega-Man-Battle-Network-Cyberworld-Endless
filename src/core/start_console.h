@@ -21,5 +21,11 @@ void console_start(bool data_dir_given);
  * console's players keep GBA ROMs; `msg` where there is none. BN5's
  * beside it, or in those folders */
 bool console_rom(const char *rom_dir, char *msg, size_t n);
+#ifdef CW_PS5
+/* The game's end, its exit code said: on the PS5, whose app may not end
+ * itself (its process crashes on the way out), a wait for the system to
+ * close it */
+void console_park(int code);
+#endif
 
 #endif

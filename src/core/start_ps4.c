@@ -6,6 +6,7 @@
 #if defined(CW_PS4) || defined(CW_PS5)
 #include <stdio.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "game.h"
 #include "rom.h"
@@ -40,7 +41,7 @@ void console_start(bool data_dir_given) {
 	char log[600];
 	snprintf(log, sizeof log, "%s/log.txt", g_data_dir);
 	if (freopen(log, "w", stdout)) setvbuf(stdout, NULL, _IOLBF, 0);
-	freopen(log, "a", stderr);
+	if (freopen(log, "a", stderr)) setvbuf(stderr, NULL, _IONBF, 0);
 	printf(CONSOLE ": the saves in %s\n", g_data_dir);
 }
 
@@ -68,4 +69,13 @@ bool console_rom(const char *rom_dir, char *msg, size_t n) {
 	for (size_t i = 0; !XR[XROM_BN5_COLONEL_US].data && i < count; ++i) xrom_find(places[i]);
 	return true;
 }
+
+#ifdef CW_PS5
+void console_park(int code) {
+	printf(CONSOLE ": the game ended (%d); the system closes it\n", code);
+	fflush(stdout);
+	fflush(stderr);
+	for (;;) sleep(1);
+}
+#endif
 #endif

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- **The PS5 app starts.** 0.18.0's app was refused at launch: the
+  template's converter misplaced a segment of the game's, so the system's
+  loader never ran it. The app now starts from the home screen and reaches
+  the title with its music, the ROMs found in
+  `/data/cyberworld-endless/rom/`. The fixes along the way: the game links
+  only to the system's modules a game gets (SDL's keyboard was missing),
+  makes its heap in flexible memory (libc's held some 14 MB), reads its
+  folders with the kernel's own call (libc's was refused), takes the
+  system's launch argument, and waits for the system at its end instead
+  of crashing on the way out. Run on a PS5 this time.
+
 ## 0.18.0 (2026-10-31)
 
 - **The Switch.** A Switch with custom firmware (Atmosphère) plays the

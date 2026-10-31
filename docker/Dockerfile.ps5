@@ -17,6 +17,15 @@ RUN git clone https://github.com/drakmor/ps5-native-app-boilerplate /opt/ps5app 
  && bash /opt/ps5app/tools/setup-pacbrew-dependencies.sh --resolve sdl2 libcurl > /opt/ps5app/pacbrew.json
 # (PacBrew's archive keeps its folders root's alone: readable by the build's user)
 RUN chmod -R a+rX /opt/ps5app
+# (the converter puts the RELRO segment's file at .got's, right only where
+# nothing comes before .got: the game's big .data.rel.ro does, and the
+# system's loader refused the misplaced segment, "not page aligned", so the
+# app never started; its file is where relro_start's bytes are, and the
+# converter is built again with that)
+RUN sed -i 's/const std::uint64_t relro_file = got.file_offset;/const std::uint64_t relro_file = got.file_offset - (got.address - relro_start);/' \
+    /opt/ps5app/tooling/native/sce_module_writer.cpp \
+ && grep -q 'got.file_offset - (got.address - relro_start)' /opt/ps5app/tooling/native/sce_module_writer.cpp \
+ && rm -f /opt/ps5app/build/host/ps5-native-tool && make -C /opt/ps5app app && chmod -R a+rX /opt/ps5app
 # (the template's compiler as one command, C's and C++'s, for CMake and the Makefile)
 RUN printf '#!/bin/sh\nPS5_PAYLOAD_SDK=/opt/ps5app/.deps/native/ps5-payload-sdk exec sh /opt/ps5app/tooling/prospero-clang18 "$@"\n' \
     > /usr/local/bin/ps5-cc \
