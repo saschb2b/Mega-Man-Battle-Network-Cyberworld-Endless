@@ -14,6 +14,9 @@
  * SDL 2.0.14, the oldest a handheld's firmware brings, has these 21) */
 /* (the PS4's SDL 2.0.9 has fewer: its pads have none of the rest, sdl_old.h) */
 _Static_assert((int)PAD_BUTTONS == (int)SDL_CONTROLLER_BUTTON_MAX || !SDL_VERSION_ATLEAST(2, 0, 14), "padmap.h's buttons are SDL's");
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+_Static_assert((int)PAD_TOUCHPAD == (int)SDL_CONTROLLER_BUTTON_TOUCHPAD, "padmap.h's touchpad is SDL's");
+#endif
 _Static_assert((int)PAD_AXES == (int)SDL_CONTROLLER_AXIS_MAX, "padmap.h's axes are SDL's");
 _Static_assert((int)PAD_BACK == (int)SDL_CONTROLLER_BUTTON_BACK && (int)PAD_DPRIGHT == (int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT &&
 	(int)PAD_MISC1 == (int)SDL_CONTROLLER_BUTTON_MISC1 && PAD_LEFTTRIGGER == PAD_AXIS((int)SDL_CONTROLLER_AXIS_TRIGGERLEFT, true),

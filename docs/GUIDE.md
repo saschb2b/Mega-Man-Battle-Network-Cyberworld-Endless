@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-526-10-26T19:56:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-31T15:40:00Z }
 ---
 
 # The player's guide
@@ -409,8 +409,9 @@ Store, or unzip `cyberworld-endless-ps5.zip` and copy its `CWEN00001/`
 folder into `/data/homebrew/`, where ShadowMountPlus registers it. Your
 ROM goes where the PS4's does, `/data/cyberworld-endless/rom/` or a USB
 drive, and the saves beside it, outside the app, so an update keeps them.
-Cross is the GBA's A. Online is as everywhere.
-[ps5/README.md](../ps5/README.md) has the rest.
+Cross is the GBA's A, and the touchpad's press is SELECT (BN6's map): the
+Create button is the PS5's own, for its screenshots. Online is as
+everywhere. [ps5/README.md](../ps5/README.md) has the rest.
 
 ### In a browser
 

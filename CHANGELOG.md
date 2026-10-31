@@ -18,6 +18,10 @@
   connect, and then dropped the link every few seconds: the game now
   makes them the PS5's way.
 
+- **SELECT on the touchpad.** A controller's touchpad press is SELECT
+  beside back, in a new `pad.ini`: on the PS5, whose Create button takes
+  screenshots, nothing opened BN6's map.
+
 - **Fast forward no longer sticks on.** A device SDL takes for a
   controller but that never reports its triggers (the PS5's media remote,
   which the PS5 lists among its pads) read as the right trigger half

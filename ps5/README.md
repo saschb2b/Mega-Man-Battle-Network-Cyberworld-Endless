@@ -20,7 +20,8 @@ installs PS4 packages can take the PS4 build's PKG instead, ps4/README.md.)
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `/data/cyberworld-endless/`, outside the app's folder, so an update
   keeps them; the PS4 build keeps its own there too.
-- Cross is the GBA's A, Circle its B; Options' Controls moves the rest.
+- Cross is the GBA's A, Circle its B, the touchpad's press SELECT (BN6's
+  map; Create is the PS5's own); Options' Controls moves the rest.
 - Online is as on every system, and the anonymous statistics are asked
   for as elsewhere.
 
@@ -119,6 +120,9 @@ What differs from the other builds:
   3DS's and the Vita's, Let's Encrypt's roots given with each connection;
   the random bytes `sceRandomGetRandomNumber`'s.
 - **Pads** (`src/core/pads.c`): named as PlayStation's, Cross the GBA's A.
+  SELECT is the touchpad's press (`pad.ini`'s default `SELECT = back,
+  touchpad` on every system): the PS5 keeps the Create button for its
+  screenshots, and its SDL maps no back.
   The PS5's SDL lists a pad for each signed-in user and one for the media
   remote, "PS5 Remote Control", whose triggers never report: SDL's first
   value, which the controller layer reads as a trigger half pressed, held
