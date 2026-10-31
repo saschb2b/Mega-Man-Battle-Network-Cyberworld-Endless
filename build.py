@@ -2458,6 +2458,23 @@ def lint_itch():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'itch.py'), 'lint']) == 0
 
 
+def lint_ps5_param():
+    """The PS5 app's sce_sys/param.json, which Prospero Store's catalog reads
+    at each release's tag (ps5/README.md, Submitting to Prospero Store): its
+    contentVersion is the CHANGELOG's newest version's, its major plus one,
+    minor and patch (0.18.0 as 01.018.000), so a release raises it."""
+    import json
+    with open(os.path.join(ROOT, 'CHANGELOG.md')) as f:
+        newest = re.search(r'^## (\d+)\.(\d+)\.(\d+) \(', f.read(), re.M)
+    with open(os.path.join(ROOT, 'sce_sys', 'param.json')) as f:
+        have = json.load(f)['contentVersion']
+    want = f'{int(newest.group(1)) + 1:02d}.{int(newest.group(2)):03d}.{int(newest.group(3)):03d}'
+    print(f'ps5 param.json: contentVersion {have}, {want} for the CHANGELOG\'s newest version')
+    if have != want:
+        print(f'  refused: sce_sys/param.json\'s contentVersion is {have}; set it to {want} with the release')
+    return have == want
+
+
 # ---- the code's smells (AGENTS.md, Code structure) ----
 
 SMELL_LINES = {'.c': 1000, '.m': 1000, '.h': 400}   # a file past this many lines holds more than one thing
@@ -2656,6 +2673,7 @@ def lint(update=False):
     ok = lint_voice() and ok
     ok = lint_docs() and ok
     ok = lint_itch() and ok
+    ok = lint_ps5_param() and ok
     ok = lint_complexity(update) and ok
     ok = lint_smells(update) and ok
     ok = lint_headers() and ok

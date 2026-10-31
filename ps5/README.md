@@ -44,10 +44,15 @@ The Makefile compiles the game with the template's clang (target
 `x86_64-sie-ps5`) and our own warnings, links it with the SDK's lld, the
 template's CRT and linker script against the system's stubs, turns it
 into `eboot.elf` and signs it into `eboot.bin` with the template's tool,
-then lays out `CWEN00001/` (`ps5/param.json` with its contentVersion
-from the version, 0.18.0 as `01.018.000`; `ps5/icon0.png`,
+then lays out `CWEN00001/` (`sce_sys/param.json` at the repository's
+root, as the catalog wants it committed; `ps5/icon0.png`,
 `tools/app_icon.py`; the template's `libc.prx`) and zips it with the
 folder at its top.
+
+Each release raises `sce_sys/param.json`'s contentVersion, which is how a
+console sees an update: the CHANGELOG's version's major plus one, its
+minor and its patch (0.18.0 as `01.018.000`, 0.19.0 as `01.019.000`).
+`build.py lint` holds the two together, so the release commit sets it.
 
 The title ID is the game's own, `CWEN00001`, a custom prefix the catalog
 takes: no PS5 game or other homebrew uses it, as the template's
@@ -81,12 +86,15 @@ What differs from the other builds:
 
 Its [submit page](https://prosperostore.net/submit/) reads the
 repository's latest release: the release's `cyberworld-endless-ps5.zip`
-is the artifact, the release's tag its version. The repository keeps
-`param.json` in `ps5/`, not `sce_sys/`, so the page asks for the zip from
-the computer and reads the title ID and name from it (in the browser,
-the file's SHA-256 checked against GitHub's). Category: games. The icon:
-`ps5/icon0.png` at the release's tag. Every release raises contentVersion
-by itself (above), which is how a console sees an update.
+is the artifact, the release's tag its version, and `sce_sys/param.json`
+at the tag the title ID, name and contentVersion. Type: Game; category:
+homebrew-games; the icon `ps5/icon0.png` at the release's tag; the
+author Saschb2b. Its button opens the record as a pull request on
+darkxex/ps5-homebrew-catalog from the repository owner's account (0.18.0:
+darkxex/ps5-homebrew-catalog#960, made with `gh` when GitHub's fork button
+would not answer the browser extension, and from the zip, as 0.18.0's tag
+had no `sce_sys/param.json` yet). A later release's update is the same
+record with its new `version`, `artifact_url` and `sha256`.
 
 ## Testing on a PS5
 
