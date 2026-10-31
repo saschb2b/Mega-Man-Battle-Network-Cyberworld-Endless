@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-31
+* **Creation**: releases/v0.18.1.md, 0.18.1's notes ("The PS5 app starts.": the app starts, online, SELECT on the touchpad, fast forward); its lines in releases/index.md and releases/overview.md.
 * **Update**: GUIDE.md, On a PS5: the touchpad's press is SELECT, the Create button the PS5's own; its generated stamp repaired.
 * **Update**: code/platforms.md, the PS5 build as it first ran on a console: the template's converter's RELRO placement corrected in `Dockerfile.ps5`, the link to the modules a game's process gets (`PS5_LOADED`), the heap on flexible memory (`param.json`'s `kernel.flexibleMemorySize`); code/core.md, `ps5_heap.c`, `ps5_libc.c`'s lookups, keyboard and folders, `start_ps4.c`'s wait at the end.
 * **Update**: code/platforms.md, the PS5's `param.json` at `sce_sys/` in the repository's root, where Prospero Store's catalog reads it at each tag, its contentVersion held to the CHANGELOG by `build.py lint`.

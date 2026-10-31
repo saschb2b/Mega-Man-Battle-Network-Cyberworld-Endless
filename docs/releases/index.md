@@ -1,6 +1,7 @@
 # Release notes
 
 * [Release notes](overview.md) - The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with.
+* [Cyberworld Endless 0.18.1](v0.18.1.md) - The PS5 app starts.
 * [Cyberworld Endless 0.18.0](v0.18.0.md) - Four more systems.
 * [Cyberworld Endless 0.17.0](v0.17.0.md) - Sharper, not bigger.
 * [Cyberworld Endless 0.16.0](v0.16.0.md) - Your viruses fight for you.

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.18.1 (2026-10-31)
 
 - **The PS5 app starts.** 0.18.0's app was refused at launch: the
   template's converter misplaced a segment of the game's, so the system's
