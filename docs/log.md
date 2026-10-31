@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-31
+* **Update**: code/platforms.md, the PS5's `param.json` at `sce_sys/` in the repository's root, where Prospero Store's catalog reads it at each tag, its contentVersion held to the CHANGELOG by `build.py lint`.
 * **Creation**: releases/v0.18.0.md, 0.18.0's notes ("Four more systems.": the Switch, the PS Vita, the PS4 and the PS5, each with its download entry); its lines in releases/index.md and releases/overview.md. project/itch.md, the four new files' channels and display names.
 * **Update**: code/platforms.md, `ps5/` and `Dockerfile.ps5` with `ps5.cmake`, the PS5's own build (a native app's folder, `CWEN00001/`, zipped for Prospero Store), and its index line; code/core.md, `ps5_libc.c` and `start_ps4.c`'s PS5; code/online.md and code/analytics.md, the PS5's libcurl; devtools/statistics.md, the PS5's sending; GUIDE.md, On a PS4 and On a PS5 apart.
 * **Update**: code/platforms.md, `ps4/`, `Dockerfile.ps4` and its `ps4.cmake` and `mbedtls.sh`, the PS4 build (a fake `.pkg`, a PS5's too, online over mbedTLS), and its index line; code/core.md, `start_ps4.c` and `sdl_old.h`; code/online.md, `online_stream_tls.c`; GUIDE.md, On a PS4 or PS5.

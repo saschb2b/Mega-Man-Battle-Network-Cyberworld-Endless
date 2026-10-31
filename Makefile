@@ -267,8 +267,10 @@ endif
 # compiler (clang 18 for x86_64-sie-ps5) and PacBrew's SDL2 and libcurl;
 # linked by the SDK's lld with the template's CRT and script against the
 # system's stubs, made eboot.elf and signed by the template's tool; the app
-# folder (ps5/param.json, the icon, the template's clean-room libc.prx)
-# zipped with the folder at its top, as Prospero Store takes it
+# folder (sce_sys/param.json, which Prospero Store's catalog also reads at
+# the tag, its contentVersion raised by each release, build.py lint; the
+# icon; the template's clean-room libc.prx) zipped with the folder at its
+# top, as Prospero Store takes it
 ifeq ($(TARGET),ps5)
 PS5APP := /opt/ps5app
 PS5SDK := $(PS5APP)/.deps/native/ps5-payload-sdk
@@ -281,17 +283,14 @@ LDLIBS := -T $(PS5APP)/tooling/native/ps5-pie.ld --eh-frame-hdr --version-script
           -L$(PS5SDK)/target/lib --start-group $(call PS5_PB,libs) --end-group --as-needed $(wildcard $(PS5SDK)/target/lib/*.so)
 PS5_TITLE := CWEN00001
 PS5_APP := $(OUT)/$(PS5_TITLE)
-# (contentVersion, NN.NNN.NNN, raised by every release: the version's
-# major plus one, its minor and its patch, 0.18.0 as 01.018.000)
-PS5_CV = $(or $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+)\.([0-9]+).*/\1 \2 \3/p' | awk '{printf "%02d.%03d.%03d", $$1 + 1, $$2, $$3}'),01.000.000)
 all: $(OUT)/cyberworld-endless-ps5.zip
 $(OUT)/eboot.elf: $(BIN)
 	$(PS5_TOOL) link --in $(BIN) --out $@ --stub-dir $(PS5SDK)/target/lib --module-sdk 0x02000009 \
 	 --companion-sdk 0x08050001 --file-name eboot.elf
-$(OUT)/cyberworld-endless-ps5.zip: $(OUT)/eboot.elf ps5/param.json ps5/icon0.png $(GEN)/version.h
+$(OUT)/cyberworld-endless-ps5.zip: $(OUT)/eboot.elf sce_sys/param.json ps5/icon0.png
 	rm -rf $(PS5_APP) $@ && mkdir -p $(PS5_APP)/sce_sys $(PS5_APP)/sce_module
 	$(PS5_TOOL) self --sign --in $(OUT)/eboot.elf --out $(PS5_APP)/eboot.bin --magic 0x1D3D154F
-	sed 's/@CONTENT_VERSION@/$(PS5_CV)/' ps5/param.json > $(PS5_APP)/sce_sys/param.json
+	cp sce_sys/param.json $(PS5_APP)/sce_sys/param.json
 	cp ps5/icon0.png $(PS5_APP)/sce_sys/icon0.png
 	cp $(PS5APP)/dist/PPSA99999/sce_module/libc.prx $(PS5_APP)/sce_module/libc.prx
 	$(PS5_TOOL) self --inspect --file $(PS5_APP)/eboot.bin

@@ -10,7 +10,7 @@
   "conceptId": "00001",
   "contentBadgeType": 1,
   "contentId": "IV0000-CWEN00001_00-CYBERWORLDENDLES",
-  "contentVersion": "@CONTENT_VERSION@",
+  "contentVersion": "01.018.000",
   "downloadDataSize": 256,
   "gameIntent": {
     "permittedIntents": [
