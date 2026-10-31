@@ -164,7 +164,7 @@ void online_stream_wake(void) {
 	if (write(wake_pipe[1], &one, 1) < 0) return;
 }
 
-#elif !defined(__ANDROID__) && !defined(__SWITCH__) && (!defined(__3DS__) || !defined(CW_3DS_CURL))
+#elif !defined(__ANDROID__) && !defined(__SWITCH__) && !defined(__vita__) && (!defined(__3DS__) || !defined(CW_3DS_CURL))
 
 bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t size) {
 	(void)url; (void)stop;

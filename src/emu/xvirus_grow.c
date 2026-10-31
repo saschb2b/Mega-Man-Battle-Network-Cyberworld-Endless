@@ -19,7 +19,7 @@
 
 #define BUS          0x08000000u
 #define TEXT_END     0xE6   /* a text archive's entry ends with it */
-#define NAME_MAX     32     /* a name's bytes at most, its end among them */
+#define NAME_BYTES     32     /* a name's bytes at most, its end among them */
 #define ENTRY_MAX    BN6_ARM_VIRUS_SIZE   /* the largest entry, an arm points' record's (a reward row's 2 x ENEMY_DROPS) */
 #define ID_HIGH_BITS 4      /* the bits of an id's high byte the spawn reads (0x080073F4), its preload made to read as many */
 
@@ -271,6 +271,6 @@ uint32_t xg_names_end(void) {
 		if (off > last && off < XV_NAMES_ROOM) last = off;
 	}
 	uint32_t n = 0;
-	while (n < NAME_MAX && last + n < XV_NAMES_ROOM && emu_read8(XV_NAMES + last + n) != TEXT_END) ++n;
+	while (n < NAME_BYTES && last + n < XV_NAMES_ROOM && emu_read8(XV_NAMES + last + n) != TEXT_END) ++n;
 	return last + n + 1;
 }

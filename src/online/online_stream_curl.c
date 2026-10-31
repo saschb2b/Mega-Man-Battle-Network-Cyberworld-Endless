@@ -1,13 +1,16 @@
 #include "online_stream.h"
 
-/* The stream over a libcurl linked in: the 3DS's (devkitPro's, on mbedTLS)
- * and the Switch's (devkitPro's 7.69, on the console's own TLS service,
- * which reads without blocking where curl asks it to) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__)
+/* The stream over a libcurl linked in: the 3DS's (devkitPro's, on mbedTLS),
+ * the Switch's (devkitPro's 7.69, on the console's own TLS service, which
+ * reads without blocking where curl asks it to) and the Vita's (VitaSDK's,
+ * on OpenSSL) */
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__)
 #ifdef __3DS__
 #include <3ds/types.h>
 #include <3ds/result.h>
 #include <3ds/services/ps.h>
+#elif defined(__vita__)
+#include <psp2/kernel/rng.h>
 #else
 #include <switch/types.h>
 #include <switch/result.h>
@@ -49,7 +52,7 @@ static bool network_begin(void) {
 	network_held = network_3ds_begin();
 	random_held = network_held && R_SUCCEEDED(psInit());
 #else
-	/* (the sockets are up from the start, start_switch.c) */
+	/* (the network is up from the start, start_switch.c and start_vita.c) */
 	network_held = random_held = true;
 #endif
 	return random_held;
@@ -78,11 +81,11 @@ bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 	curl_easy_setopt(connection, CURLOPT_NOPROGRESS, 0L);
 	curl_easy_setopt(connection, CURLOPT_XFERINFOFUNCTION, cancel_transfer);
 	curl_easy_setopt(connection, CURLOPT_XFERINFODATA, (void *)stop);
-#ifdef __3DS__
+#ifdef __SWITCH__
+	curl_easy_setopt(connection, CURLOPT_SSL_CTX_FUNCTION, add_roots);
+#else
 	struct curl_blob roots = { analytics_roots, strlen(analytics_roots), CURL_BLOB_NOCOPY };
 	curl_easy_setopt(connection, CURLOPT_CAINFO_BLOB, &roots);
-#else
-	curl_easy_setopt(connection, CURLOPT_SSL_CTX_FUNCTION, add_roots);
 #endif
 	CURLcode result = curl_easy_perform(connection);
 	if (result != CURLE_OK) snprintf(error, size, "Connect failed: %s", curl_easy_strerror(result));
@@ -114,6 +117,8 @@ bool online_stream_random(uint8_t *out, size_t size) {
 	if (!random_held || size > UINT32_MAX) return false;
 #ifdef __3DS__
 	return R_SUCCEEDED(PS_GenerateRandomBytes(out, (u32)size));
+#elif defined(__vita__)
+	return sceKernelGetRandomNumber(out, size) >= 0;
 #else
 	randomGet(out, size);
 	return true;

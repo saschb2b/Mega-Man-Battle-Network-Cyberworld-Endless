@@ -50,8 +50,9 @@ bool cw_rename(const char *from, const char *to) {
 	/* (UTF-8 paths: the .exe's manifest makes them the ANSI calls' own) */
 	return MoveFileExA(from, to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
 #else
-	/* (the 3DS's and the Switch's file systems rename onto no file that is there) */
-#if defined(__3DS__) || defined(__SWITCH__)
+	/* (the 3DS's, the Switch's and the Vita's file systems rename onto no
+	 * file that is there) */
+#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__)
 	remove(to);
 #endif
 	return rename(from, to) == 0;

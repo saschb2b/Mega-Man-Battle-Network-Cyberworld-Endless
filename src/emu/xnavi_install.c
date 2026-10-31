@@ -28,7 +28,7 @@
 #define BUS        0x08000000u
 #define HELD_LISTS 0xC0     /* six held-chip lists, 0x20 bytes each */
 #define TEXT_END   0xE6     /* a text archive's entry ends with it */
-#define NAME_MAX   20       /* a name's bytes at most, its end among them */
+#define NAME_BYTES   20       /* a name's bytes at most, its end among them */
 
 /* ---- its game's Navi tables ---- */
 
@@ -82,7 +82,7 @@ static bool sane(const XNavi *n, const Game *g) {
 
 static struct {
 	uint8_t traits[BN6_TRAITS_SIZE], stats[XV_VERSIONS * BN6_STATS_SIZE];
-	uint8_t name[XV_VERSIONS][NAME_MAX];
+	uint8_t name[XV_VERSIONS][NAME_BYTES];
 	uint32_t name_len[XV_VERSIONS];
 	uint16_t drops[XV_VERSIONS][ENEMY_DROPS];
 } rec;
@@ -203,13 +203,13 @@ static void names_of(const XNavi *n, const Game *g) {
 		uint32_t i = (uint32_t)(n->shown[v] ? n->shown[v] : n->code.names[v]) - 0x100u, at = g->names - BUS + 2 * i;
 		if (i >= 0x100 || at + 2 > ROM_SIZE) { xv_fail("its name %d", v); return; }
 		uint32_t p = g->names - BUS + get16(g->rom + at), len = 0;
-		while (p + len < ROM_SIZE && len < NAME_MAX && g->rom[p + len] != TEXT_END) ++len;
-		if (p + len >= ROM_SIZE || len >= NAME_MAX) { xv_fail("its name %d has no end", v); return; }
+		while (p + len < ROM_SIZE && len < NAME_BYTES && g->rom[p + len] != TEXT_END) ++len;
+		if (p + len >= ROM_SIZE || len >= NAME_BYTES) { xv_fail("its name %d has no end", v); return; }
 		if (g->bn5 && n->code.names[v] == BN5_DARK_SOUL_ID && script_word(g->rom, BN5_DARK_SOUL_NAME, BN5_DARK_SOUL_NAME_LEN)) {
 			p = BN5_DARK_SOUL_NAME - BUS;
 			len = BN5_DARK_SOUL_NAME_LEN;
 		}
-		uint32_t k = name_bn6(g, g->rom + p, len, rec.name[v], NAME_MAX - 1);
+		uint32_t k = name_bn6(g, g->rom + p, len, rec.name[v], NAME_BYTES - 1);
 		rec.name[v][k] = TEXT_END;
 		rec.name_len[v] = k + 1;
 	}

@@ -327,7 +327,13 @@ static void start_worker(void) {
 	threaded = worker != NULL;
 #else
 	const char *e = getenv("CYBERWORLD_EMU_THREAD");
-	if (e && *e && strcmp(e, "0")) threaded = (worker = SDL_CreateThread(worker_main, "emu", NULL)) != NULL;
+	bool want = e && *e && strcmp(e, "0");
+#ifdef __vita__
+	/* (the Vita's 444 MHz cores: the GBA's on one of its own, its drawing
+	 * beside it, as on the New 3DS) */
+	want = !e || strcmp(e, "0");
+#endif
+	if (want) threaded = (worker = SDL_CreateThread(worker_main, "emu", NULL)) != NULL;
 #endif
 	printf("emu: the GBA core runs %s\n", threaded ? "on a core of its own" : "between the frames' drawing");
 }

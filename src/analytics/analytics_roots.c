@@ -2,7 +2,7 @@
  * isrgrootx1.pem and gen-y/root-yr.pem. */
 #include "analytics_roots.h"
 
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || (defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__) || (defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
 /* (not const: libcurl's blob takes its data as void *) */
 char analytics_roots[] =
 	"-----BEGIN CERTIFICATE-----\n"
