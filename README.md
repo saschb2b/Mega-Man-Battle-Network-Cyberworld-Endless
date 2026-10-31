@@ -144,6 +144,7 @@ and UNITE with it in every battle after. Online, it fills your NetPass.
 | **New 3DS** | the `.cia`, or the `.3dsx` | all but NetBattles | [On a New 3DS](docs/GUIDE.md#on-a-new-3ds) |
 | **Switch** with custom firmware | the `.nro` | all of it | [On a Switch](docs/GUIDE.md#on-a-switch) |
 | **PS Vita** with custom firmware | the `.vpk` | all of it | [On a PS Vita](docs/GUIDE.md#on-a-ps-vita) |
+| **PS4** with GoldHEN, **PS5** with etaHEN | the `.pkg` | all of it | [On a PS4 or PS5](docs/GUIDE.md#on-a-ps4-or-ps5) |
 
 Every file is on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest);
 the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/) leads with your system.
