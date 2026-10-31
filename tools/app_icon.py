@@ -5,7 +5,7 @@ with the title's infinity mark, drawn from code (nothing from the ROM).
 Writes linux/icons/<size>.png (32 to 512, whole-number scales),
 windows/icon.ico (the .exe's and the installer's), macos/icon.icns (the
 app bundle's), ios/icons (the iPhone's and the iPad's), 3ds/icon.png (the
-Homebrew Launcher's) and src/core/app_icon.h
+Homebrew Launcher's), switch/icon.jpg (the Homebrew Menu's) and src/core/app_icon.h
 (the 32x32 pixels, for the window icon). Run it after changing the drawing;
 the outputs are committed.
 
@@ -164,6 +164,12 @@ def main():
     tile.alpha_composite(im, ((48 - N) // 2,) * 2)
     os.makedirs(os.path.join(ROOT, '3ds'), exist_ok=True)
     tile.save(os.path.join(ROOT, '3ds', 'icon.png'), optimize=True)
+    # the Switch Homebrew Menu's (the .nro's), a 256x256 JPEG: the tile at
+    # 7x on the backdrop
+    tile = Image.new('RGBA', (256, 256), BACKDROP + (255,))
+    tile.alpha_composite(im.resize((N * 7, N * 7), Image.NEAREST), ((256 - N * 7) // 2,) * 2)
+    os.makedirs(os.path.join(ROOT, 'switch'), exist_ok=True)
+    tile.convert('RGB').save(os.path.join(ROOT, 'switch', 'icon.jpg'), quality=95, subsampling=0)
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -171,7 +177,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons, the Android app\'s icons, ios/icons, 3ds/icon.png and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons, the Android app\'s icons, ios/icons, 3ds/icon.png, switch/icon.jpg and src/core/app_icon.h')
 
 
 if __name__ == '__main__':

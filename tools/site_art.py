@@ -309,6 +309,20 @@ kssskkkksssk
 .ksskcbkssk.
 .ksskkkkssk.
 .kkkkkkkkkk.""",
+    # a Switch: its screen between the two Joy-Cons, a stick on each
+    'switch': """
+............
+............
+.kkkkkkkkkk.
+kcckkkkkkrrk
+kcskbbbbkrrk
+kcckbwbbkrsk
+kcckbbbbkrrk
+kcckbbbbksrk
+kcckkkkkkrrk
+.kkkkkkkkkk.
+............
+............""",
     # a phone: the Android app
     'phone': """
 ...kkkkkk...

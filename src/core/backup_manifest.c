@@ -65,6 +65,8 @@ const char *backup_system_name(void) {
 	return "browser";
 #elif defined(__3DS__)
 	return "New 3DS";
+#elif defined(__SWITCH__)
+	return "Switch";
 #elif defined(__ANDROID__)
 	return "Android";
 #elif defined(CW_IOS)

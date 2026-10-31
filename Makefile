@@ -12,10 +12,12 @@ CC_macos := clang
 IOS_SDK ?= iphoneos
 CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
+CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_3ds := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
+PKG_switch := PKG_CONFIG_PATH=/opt/devkitpro/portlibs/switch/lib/pkgconfig PKG_CONFIG_LIBDIR=/opt/devkitpro/portlibs/switch/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
@@ -29,6 +31,7 @@ BIN_windows := $(OUT)/cyberworld-endless.exe
 BIN_macos := $(OUT)/cyberworld-endless
 BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
+BIN_switch := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -53,7 +56,7 @@ ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -156,6 +159,23 @@ $(OUT)/banner.bnr: 3ds/banner.png $(OUT)/banner.wav
 	bannertool makebanner -i 3ds/banner.png -a $(OUT)/banner.wav -o $@
 $(OUT)/cyberworld-endless.cia: $(BIN) 3ds/cia.rsf $(OUT)/cyberworld-endless.smdh $(OUT)/banner.bnr
 	makerom -f cia -o $@ -rsf 3ds/cia.rsf -target t -exefslogo -elf $(BIN) -icon $(OUT)/cyberworld-endless.smdh -banner $(OUT)/banner.bnr
+endif
+# the Nintendo Switch (docker/Dockerfile.switch, switch/): devkitA64 for its
+# Cortex-A57, libnx, devkitPro's SDL2 and curl and mGBA linked in, a .nro
+# for the Homebrew Menu with its title, version and icon (switch/icon.jpg,
+# tools/app_icon.py)
+ifeq ($(TARGET),switch)
+ARCH_NX := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+PORTLIBS_NX := /opt/devkitpro/portlibs/switch
+CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_NX) -ffunction-sections -D__SWITCH__ -isystem /opt/devkitpro/libnx/include -isystem $(PORTLIBS_NX)/include
+LDLIBS := $(MGBA)/lib/libmgba.a -L$(PORTLIBS_NX)/lib -lcurl -lz $(shell $(PKGCONF) --libs sdl2) -lm \
+          -specs=/opt/devkitpro/libnx/switch.specs $(ARCH_NX) -Wl,--gc-sections
+all: $(OUT)/cyberworld-endless.nro
+$(OUT)/cyberworld-endless.nacp: $(GEN)/version.h
+	@mkdir -p $(dir $@)
+	/opt/devkitpro/tools/bin/nacptool --create "Cyberworld Endless" "Saschb2b" "$(VERSION)" $@
+$(OUT)/cyberworld-endless.nro: $(BIN) $(OUT)/cyberworld-endless.nacp switch/icon.jpg
+	/opt/devkitpro/tools/bin/elf2nro $(BIN) $@ --icon=switch/icon.jpg --nacp=$(OUT)/cyberworld-endless.nacp
 endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer

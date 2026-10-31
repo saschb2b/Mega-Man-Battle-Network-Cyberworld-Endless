@@ -14,6 +14,9 @@ EM_JS(int, identity_random, (uint8_t *out), {
 #include <string.h>
 #elif defined(__3DS__)
 #include <3ds.h>
+#elif defined(__SWITCH__)
+#include <switch/types.h>
+#include <switch/kernel/random.h>
 #else
 #include <stdio.h>
 #endif
@@ -37,6 +40,10 @@ bool network_identity(uint8_t out[NETWORK_ID_BYTES]) {
 	bool ok = R_SUCCEEDED(PS_GenerateRandomBytes(out, NETWORK_ID_BYTES));
 	psExit();
 	return ok;
+#elif defined(__SWITCH__)
+	/* (the kernel's random numbers: the Switch has no /dev/urandom) */
+	randomGet(out, NETWORK_ID_BYTES);
+	return true;
 #else
 	FILE *file = fopen("/dev/urandom", "rb");
 	if (!file) return false;

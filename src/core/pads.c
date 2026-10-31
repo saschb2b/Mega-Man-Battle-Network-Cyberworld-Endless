@@ -86,7 +86,12 @@ static void kind_of(SDL_GameController *gc, int *family, int *style) {
 	int type = (int)SDL_GameControllerGetType(gc);
 	*family = PAD_FAMILY_XBOX;
 	*style = PAD_STYLE_GENERIC;
-	if (type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO || (type >= 11 && type <= 13) || SDL_GameControllerGetVendor(gc) == 0x057e) {
+	/* (a Switch's own pads have no vendor: switch_mapping names them) */
+	bool own = false;
+#ifdef __SWITCH__
+	own = true;
+#endif
+	if (own || type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO || (type >= 11 && type <= 13) || SDL_GameControllerGetVendor(gc) == 0x057e) {
 		*family = PAD_FAMILY_NINTENDO;
 		*style = PAD_STYLE_NINTENDO;
 	} else if (type == SDL_CONTROLLER_TYPE_PS3 || type == SDL_CONTROLLER_TYPE_PS4 || type == SDL_CONTROLLER_TYPE_PS5) {
@@ -129,6 +134,22 @@ static void joycon_mappings(void) {
 		snprintf(m, sizeof m, "%s,%s", guid, padmap_joycon(product, halves == 3));
 		if (SDL_GameControllerAddMapping(m) < 0) say("Joy-Con mapping refused: %s", SDL_GetError());
 	}
+}
+#endif
+
+#ifdef __SWITCH__
+/* The Switch's own pads (libnx's, one "Switch Controller" a player, the
+ * Joy-Cons in the console's hands among them) by their labels, a the one
+ * marked A, as SDL 2 names a Switch pad's buttons elsewhere: SDL's own
+ * mapping for them names them by their places, an Xbox pad's, a the one
+ * marked B. Its buttons are libnx's HidNpadButton bits: A, B, X, Y, the
+ * sticks, L, R, ZL, ZR, Plus, Minus, then the D-pad's left, up, right and
+ * down. */
+static void switch_mapping(void) {
+	if (SDL_GameControllerAddMapping("000038f853776974636820436f6e7400,Switch Controller,a:b0,b:b1,x:b2,y:b3,"
+	    "leftstick:b4,rightstick:b5,leftshoulder:b6,rightshoulder:b7,lefttrigger:b8,righttrigger:b9,start:b10,back:b11,"
+	    "dpleft:b12,dpup:b13,dpright:b14,dpdown:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,") < 0)
+		say("the Switch's pad mapping refused: %s", SDL_GetError());
 }
 #endif
 
@@ -257,6 +278,8 @@ void pads_open(void) {
 	map_init();
 #ifdef __ANDROID__
 	joycon_mappings();
+#elif defined(__SWITCH__)
+	switch_mapping();
 #endif
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) open_one(i);
 }

@@ -23,9 +23,12 @@
 #include "options.h"
 #include "platform.h"
 #include "rom.h"
-#include "run.h"
-#include "save.h"
+#include "save.h"   /* (and run.h, whose Run it keeps) */
+#ifdef __3DS__
 #include "start_3ds.h"
+#elif defined(__SWITCH__)
+#include "start_switch.h"
+#endif
 #include "startup.h"
 #include "tools.h"
 #include "touch.h"
@@ -215,7 +218,7 @@ static void cores_quit(void) { emu_quit(); }
 /* SIGTERM or SIGINT (a launcher closing the port, a terminal's Ctrl+C):
  * the loop ends at a frame's end and the run is kept */
 static volatile sig_atomic_t quit_signal;
-#ifndef __3DS__
+#if !defined(__3DS__) && !defined(__SWITCH__)
 static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 #endif
 #endif
@@ -330,6 +333,8 @@ static int parse_args(int argc, char **argv, Options *o) {
 static bool rom_at_start(const Options *o, char *msg, size_t n) {
 #ifdef __3DS__
 	return start_3ds_rom(o->rom_dir, msg, n);
+#elif defined(__SWITCH__)
+	return start_switch_rom(o->rom_dir, msg, n);
 #else
 	return start_rom(o->rom_dir, msg, n);
 #endif
@@ -470,7 +475,7 @@ static int frame_loop(const Options *o) {
 #if defined(_WIN32)
 	signal(SIGTERM, on_quit_signal);
 	signal(SIGINT, on_quit_signal);
-#elif !defined(__EMSCRIPTEN__) && !defined(__3DS__)
+#elif !defined(__EMSCRIPTEN__) && !defined(__3DS__) && !defined(__SWITCH__)
 	/* (no SA_RESTART: a remote game waiting in read() wakes up to quit) */
 	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);
@@ -515,6 +520,8 @@ int main(int argc, char **argv) {
 	startup_output();
 #ifdef __3DS__
 	start_3ds(o.data_dir_given);
+#elif defined(__SWITCH__)
+	start_switch(o.data_dir_given);
 #endif
 	if (o.headless && !o.force_w) { o.force_w = 1280; o.force_h = 960; }
 	data_dir_setup(o.data_dir_given);

@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+/* (remote play: where a pipe can be made, mkfifo) */
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__) && !defined(__SWITCH__)
+#define REMOTE_PLAY 1
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -228,7 +230,7 @@ static void script_actions(void) {
 	}
 }
 
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+#ifdef REMOTE_PLAY
 /* ---- remote play (tools/play.py): the game waits for batches of steps on
  * DIR/in and answers each on DIR/out once its frames have run ---- */
 static int remote_in = -1, remote_out = -1;
@@ -332,7 +334,7 @@ static void script_key(int key) {
 
 void capture_input(void) {
 	if (bot_seed) { bot_tick(); return; }
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+#ifdef REMOTE_PLAY
 	if (remote_in >= 0) remote_tick();
 #endif
 	script_actions();
@@ -397,7 +399,7 @@ static bool test_option(const char *a, const char *v) {
 	return true;
 }
 
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+#ifdef REMOTE_PLAY
 static const char *remote_dir;   /* --remote: remote play's pipes' folder */
 #endif
 
@@ -406,7 +408,7 @@ bool capture_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--taps")) parse_taps(v);
 	else if (!strcmp(a, "--shot-range")) parse_range(v, &range);
 	else if (!strcmp(a, "--second-shot-range")) parse_range(v, &second_range);
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+#ifdef REMOTE_PLAY
 	else if (!strcmp(a, "--remote")) remote_dir = v;
 #endif
 	else if (!strcmp(a, "--bot")) bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1;
@@ -415,7 +417,7 @@ bool capture_option(const char *a, const char *v) {
 }
 
 bool capture_start(void) {
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
+#ifdef REMOTE_PLAY
 	if (remote_dir && !remote_open(remote_dir)) { fprintf(stderr, "--remote: cannot open the pipes in %s\n", remote_dir); return false; }
 #endif
 	return true;

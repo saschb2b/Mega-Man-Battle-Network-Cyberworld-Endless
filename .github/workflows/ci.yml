@@ -218,6 +218,32 @@ jobs:
             build/3ds/cyberworld-endless.cia
           retention-days: 14
 
+  switch:
+    name: Nintendo Switch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.switch, tag: cyberworld-switch }
+      - run: python3 build.py switch
+      - name: A .nro for the Homebrew Menu, its icon and title with it
+        run: |
+          f=build/switch/cyberworld-endless.nro
+          # (an NRO's header names itself at 0x10 and gives the program's
+          # size at 0x18; its assets follow, the icon and the title)
+          python3 - "$f" <<'P'
+          import struct, sys
+          d = open(sys.argv[1], 'rb').read()
+          size = struct.unpack_from('<I', d, 0x18)[0]
+          assert d[0x10:0x14] == b'NRO0' and d[size:size + 4] == b'ASET', 'not an NRO with its icon and title'
+          P
+          ls -l "$f"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-switch
+          path: build/switch/cyberworld-endless.nro
+          retention-days: 14
+
   android:
     name: Android
     runs-on: ubuntu-latest

@@ -26,7 +26,7 @@
 #include "version.h"
 
 /* (the systems that send from a thread of the game's: analytics_http.c's) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(_WIN32) || \
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(_WIN32) || \
 	(defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
 #define THREADED 1
 #endif
@@ -46,6 +46,8 @@ static const char *platform_name(void) {
 	return "ios";
 #elif defined(__3DS__)
 	return "3ds";
+#elif defined(__SWITCH__)
+	return "switch";
 #elif defined(_WIN32)
 	return "windows";
 #elif defined(__APPLE__)
@@ -111,6 +113,8 @@ static void make_agent(int w, int h) {
 	snprintf(agent, sizeof agent, "Mozilla/5.0 (Linux; Android) CyberworldEndless/%s", v);
 #elif defined(__3DS__)
 	snprintf(agent, sizeof agent, "Mozilla/5.0 (Nintendo 3DS) CyberworldEndless/%s", v);
+#elif defined(__SWITCH__)
+	snprintf(agent, sizeof agent, "Mozilla/5.0 (Nintendo Switch) CyberworldEndless/%s", v);
 #else
 #if defined(__x86_64__)
 	const char *arch = "x86_64";
