@@ -59,6 +59,10 @@ CHANNELS = [
     ('portmaster', build.PORT_ZIP, 'file'),
     ('3ds-cia', 'cyberworld-endless.cia', 'file'),
     ('3ds-3dsx', 'cyberworld-endless.3dsx', 'file'),
+    ('switch-nro', 'cyberworld-endless.nro', 'file'),
+    ('vita-vpk', 'cyberworld-endless.vpk', 'file'),
+    ('ps4-pkg', 'cyberworld-endless.pkg', 'file'),
+    ('ps5-zip', 'cyberworld-endless-ps5.zip', 'file'),
 ]
 
 

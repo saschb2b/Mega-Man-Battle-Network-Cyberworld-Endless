@@ -3,7 +3,7 @@ type: Process
 title: "itch.io"
 description: "The itch.io page's source, changed here first: its title, tagline, settings, tags, pictures (`tools/itch_art.py`) and theme, the files `tools/itch.py` pushes to butler channels, the browser build there, and each release's steps."
 tags: [project, itch]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T16:55:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-31T01:15:12Z }
 ---
 
 # itch.io
@@ -170,6 +170,10 @@ to a butler channel under the release's version:
 | `portmaster` | `cyberworld-endless-portmaster.zip`, whole | none (PortMaster handhelds) |
 | `3ds-cia` | `cyberworld-endless.cia` | none (New 3DS, FBI) |
 | `3ds-3dsx` | `cyberworld-endless.3dsx` | none (New 3DS, Homebrew Launcher) |
+| `switch-nro` | `cyberworld-endless.nro` | none (Switch, Homebrew Menu) |
+| `vita-vpk` | `cyberworld-endless.vpk` | none (PS Vita, VitaShell) |
+| `ps4-pkg` | `cyberworld-endless.pkg` | none (PS4 with GoldHEN) |
+| `ps5-zip` | `cyberworld-endless-ps5.zip`, whole | none (PS5, its app folder) |
 
 butler tags the channels named for Windows, macOS, Linux and Android with
 their platform. Every file but the Windows one goes up as the release has
@@ -187,6 +191,10 @@ app can start. The display names, set once on the edit page:
 | `portmaster` | Handhelds with PortMaster (.zip) |
 | `3ds-cia` | New 3DS (.cia, for FBI) |
 | `3ds-3dsx` | New 3DS (.3dsx, for the Homebrew Launcher) |
+| `switch-nro` | Switch (.nro, for the Homebrew Menu) |
+| `vita-vpk` | PS Vita (.vpk, for VitaShell) |
+| `ps4-pkg` | PS4 (.pkg, for GoldHEN) |
+| `ps5-zip` | PS5 (.zip, its app folder) |
 
 ### The browser build on itch
 

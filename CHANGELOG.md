@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.18.0 (2026-10-31)
 
 - **The Switch.** A Switch with custom firmware (Atmosphère) plays the
   game from the Homebrew Menu: `cyberworld-endless.nro` in
