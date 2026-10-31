@@ -15,6 +15,7 @@ CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
 CC_vita := /usr/local/vitasdk/bin/arm-vita-eabi-gcc
 CC_ps4 := clang
+CC_ps5 := /usr/local/bin/ps5-cc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
@@ -22,6 +23,8 @@ PKG_3ds := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_switch := PKG_CONFIG_PATH=/opt/devkitpro/portlibs/switch/lib/pkgconfig PKG_CONFIG_LIBDIR=/opt/devkitpro/portlibs/switch/lib/pkgconfig
 PKG_vita := PKG_CONFIG_PATH=/usr/local/vitasdk/arm-vita-eabi/lib/pkgconfig PKG_CONFIG_LIBDIR=/usr/local/vitasdk/arm-vita-eabi/lib/pkgconfig
 CC := $(CC_$(TARGET))
+# (the linker: the compiler, but on the PS5, whose link is lld's alone)
+LINK = $(CC)
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
 BIN_host := $(OUT)/cyberworld
@@ -37,6 +40,7 @@ BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN_switch := $(OUT)/cyberworld-endless.elf
 BIN_vita := $(OUT)/cyberworld-endless.elf
 BIN_ps4 := $(OUT)/cyberworld-endless.elf
+BIN_ps5 := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -57,14 +61,14 @@ APP_VER = $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' 
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4 ps5,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita ps4,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita ps4 ps5,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -73,6 +77,9 @@ PKGCONF := true   # SDL2 comes from ios/deps.sh (sdl2-config), never the Mac's o
 endif
 ifeq ($(TARGET),ps4)
 PKGCONF := true   # SDL2 comes with the OpenOrbis toolchain
+endif
+ifeq ($(TARGET),ps5)
+PKGCONF := true   # SDL2 comes from PacBrew, docker/Dockerfile.ps5
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
 MGBA_LICENSE := /opt/mgba/LICENSE
@@ -256,6 +263,40 @@ $(OUT)/cyberworld-endless.pkg: $(PKG)/eboot.bin $(PKG)/sce_sys/param.sfo $(PKG)/
 	cd $(PKG) && $(OO_BIN)/PkgTool.Core pkg_build pkg.gp4 .
 	mv $(PKG)/$(PS4_CONTENT).pkg $@
 endif
+# the PS5's own build (docker/Dockerfile.ps5, ps5/): the native-app template's
+# compiler (clang 18 for x86_64-sie-ps5) and PacBrew's SDL2 and libcurl;
+# linked by the SDK's lld with the template's CRT and script against the
+# system's stubs, made eboot.elf and signed by the template's tool; the app
+# folder (ps5/param.json, the icon, the template's clean-room libc.prx)
+# zipped with the folder at its top, as Prospero Store takes it
+ifeq ($(TARGET),ps5)
+PS5APP := /opt/ps5app
+PS5SDK := $(PS5APP)/.deps/native/ps5-payload-sdk
+PS5_TOOL := $(PS5APP)/build/host/ps5-native-tool
+PS5_PB = $(shell python3 -c "import json; print(' '.join(json.load(open('$(PS5APP)/pacbrew.json'))['$(1)']))")
+CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -fdata-sections -DCW_PS5 $(call PS5_PB,cflags)
+LINK := $(PS5SDK)/bin/prospero-lld
+LDLIBS := -T $(PS5APP)/tooling/native/ps5-pie.ld --eh-frame-hdr --version-script $(PS5APP)/tooling/native/app-symbols.map \
+          -e _start $(PS5APP)/build/obj/app_crt.o $(PS5APP)/build/obj/app_cpp_runtime.o $(MGBA)/lib/libmgba.a \
+          -L$(PS5SDK)/target/lib --start-group $(call PS5_PB,libs) --end-group --as-needed $(wildcard $(PS5SDK)/target/lib/*.so)
+PS5_TITLE := CWEN00001
+PS5_APP := $(OUT)/$(PS5_TITLE)
+# (contentVersion, NN.NNN.NNN, raised by every release: the version's
+# major plus one, its minor and its patch, 0.18.0 as 01.018.000)
+PS5_CV = $(or $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+)\.([0-9]+).*/\1 \2 \3/p' | awk '{printf "%02d.%03d.%03d", $$1 + 1, $$2, $$3}'),01.000.000)
+all: $(OUT)/cyberworld-endless-ps5.zip
+$(OUT)/eboot.elf: $(BIN)
+	$(PS5_TOOL) link --in $(BIN) --out $@ --stub-dir $(PS5SDK)/target/lib --module-sdk 0x02000009 \
+	 --companion-sdk 0x08050001 --file-name eboot.elf
+$(OUT)/cyberworld-endless-ps5.zip: $(OUT)/eboot.elf ps5/param.json ps5/icon0.png $(GEN)/version.h
+	rm -rf $(PS5_APP) $@ && mkdir -p $(PS5_APP)/sce_sys $(PS5_APP)/sce_module
+	$(PS5_TOOL) self --sign --in $(OUT)/eboot.elf --out $(PS5_APP)/eboot.bin --magic 0x1D3D154F
+	sed 's/@CONTENT_VERSION@/$(PS5_CV)/' ps5/param.json > $(PS5_APP)/sce_sys/param.json
+	cp ps5/icon0.png $(PS5_APP)/sce_sys/icon0.png
+	cp $(PS5APP)/dist/PPSA99999/sce_module/libc.prx $(PS5_APP)/sce_module/libc.prx
+	$(PS5_TOOL) self --inspect --file $(PS5_APP)/eboot.bin
+	cd $(OUT) && zip -qr $(notdir $@) $(PS5_TITLE)
+endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDLIBS += -fsanitize=address,undefined
@@ -274,7 +315,7 @@ $(OUT)/licenses/mGBA.txt: $(MGBA_LICENSE)
 	cp $< $@
 
 $(BIN): $(OBJS)
-	$(CC) -o $@ $^ $(LDLIBS)
+	$(LINK) -o $@ $^ $(LDLIBS)
 
 ifeq ($(TARGET),windows)
 $(OUT)/obj/windows.res.o: windows/cyberworld-endless.rc windows/cyberworld-endless.manifest windows/icon.ico $(GEN)/version.h

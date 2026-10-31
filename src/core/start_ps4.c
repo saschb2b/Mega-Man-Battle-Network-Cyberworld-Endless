@@ -1,15 +1,22 @@
-/* The PS4's own start (start_console.h), before the game's: the internal
- * drive's folders, the output to log.txt, and the ROMs, there or on a USB
- * drive. A jailbroken PS5 runs the same package. */
+/* The PS4's and the PS5's own start (start_console.h), before the game's:
+ * the internal drive's folders, the output to log.txt, and the ROMs, there
+ * or on a USB drive. The two keep their saves in the same folder. */
 #include "start_console.h"
 
-#ifdef CW_PS4
+#if defined(CW_PS4) || defined(CW_PS5)
 #include <stdio.h>
 #include <sys/stat.h>
 
 #include "game.h"
 #include "rom.h"
 
+#ifdef CW_PS4
+#define CONSOLE "ps4"
+#else
+#define CONSOLE "ps5"
+#endif
+
+#ifdef CW_PS4
 /* (musl's own, which OpenOrbis's libc calls from its timed waits, SDL's
  * semaphores', and leaves undefined beside libkernel's threads: none of
  * the game's threads is ever cancelled) */
@@ -19,29 +26,30 @@ int __pthread_setcancelstate(int state, int *old) {
 	if (old) *old = 0;
 	return 0;
 }
+#endif
 
-static char rom_ps4[600];   /* the game's own rom folder */
+static char rom_own[600];   /* the game's own rom folder */
 
 void console_start(bool data_dir_given) {
 	if (!data_dir_given) snprintf(g_data_dir, sizeof g_data_dir, "/data/cyberworld-endless");
-	snprintf(rom_ps4, sizeof rom_ps4, "%s/rom", g_data_dir);
+	snprintf(rom_own, sizeof rom_own, "%s/rom", g_data_dir);
 	mkdir("/data", 0777);
 	mkdir(g_data_dir, 0777);
-	mkdir(rom_ps4, 0777);
+	mkdir(rom_own, 0777);
 	/* (the output into log.txt beside the saves, as the other consoles keep it) */
 	char log[600];
 	snprintf(log, sizeof log, "%s/log.txt", g_data_dir);
 	if (freopen(log, "w", stdout)) setvbuf(stdout, NULL, _IOLBF, 0);
 	freopen(log, "a", stderr);
-	printf("ps4: the saves in %s\n", g_data_dir);
+	printf(CONSOLE ": the saves in %s\n", g_data_dir);
 }
 
 bool console_rom(const char *rom_dir, char *msg, size_t n) {
 	if (rom_dir) return rom_find(rom_dir, msg, n);
-	/* (the game's own rom folder on the internal drive, then where PS4
-	 * players keep GBA ROMs, there or on a USB drive: a header check passes
+	/* (the game's own rom folder on the internal drive, then where PS4 and
+	 * PS5 players keep GBA ROMs, there or on a USB drive: a header check passes
 	 * over the other games without reading them) */
-	const char *places[] = { rom_ps4, "/data/cyberworld-endless/rom", "/data/roms/gba", "/mnt/usb0/roms/gba", "/mnt/usb0/gba",
+	const char *places[] = { rom_own, "/data/cyberworld-endless/rom", "/data/roms/gba", "/mnt/usb0/roms/gba", "/mnt/usb0/gba",
 		"/mnt/usb0", "/mnt/usb1/roms/gba", "/mnt/usb1" };
 	size_t count = sizeof places / sizeof *places;
 	char first[512] = "", close[512] = "";

@@ -121,9 +121,10 @@ N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
 SWITCH_IMAGE = 'cyberworld-switch'   # docker/Dockerfile.switch
 VITA_IMAGE = 'cyberworld-vita'   # docker/Dockerfile.vita
 PS4_IMAGE = 'cyberworld-ps4'   # docker/Dockerfile.ps4
+PS5_IMAGE = 'cyberworld-ps5'   # docker/Dockerfile.ps5
 PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PS4_IMAGE: 'Dockerfile.ps4',
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PS4_IMAGE: 'Dockerfile.ps4', PS5_IMAGE: 'Dockerfile.ps5',
           PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 
 
@@ -218,7 +219,7 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'ps4': PS4_IMAGE,
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'ps4': PS4_IMAGE, 'ps5': PS5_IMAGE,
              'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
@@ -241,7 +242,7 @@ def build(target):
 # The release's files are named for the system each is for (players picked
 # the PortMaster port's plain cyberworld.zip for Windows): all but the
 # AppImage, whose name its update information points at, and the ones whose
-# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx, .nro, .vpk).
+# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx, .nro, .vpk, .pkg).
 PORT_ZIP = 'cyberworld-endless-portmaster.zip'
 WEB_ZIP = 'cyberworld-endless-website.zip'
 
@@ -2688,7 +2689,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -2758,6 +2759,11 @@ def main():
         # the PS4, and a PS5 through it (ps4/README.md): build/ps4/cyberworld-endless.pkg
         build('ps4')
         print('built', os.path.join(ROOT, 'build', 'ps4', 'cyberworld-endless.pkg'))
+        return
+    if a.action == 'ps5':
+        # the PS5's own build (ps5/README.md): build/ps5/cyberworld-endless-ps5.zip, its app folder zipped
+        build('ps5')
+        print('built', os.path.join(ROOT, 'build', 'ps5', 'cyberworld-endless-ps5.zip'))
         return
     if a.action == 'macos':
         macos_release()

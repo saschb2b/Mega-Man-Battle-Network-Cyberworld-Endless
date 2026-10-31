@@ -3,7 +3,8 @@
 The same game as every other build, for a PS4 with GoldHEN (a jailbroken
 PS4): a fake PKG, installed from its Package Installer, with its tile on
 the home screen. A jailbroken PS5 that installs PS4 packages (etaHEN)
-should run the same PKG; there is no build of the PS5's own. Homebrew is
+should run the same PKG; the PS5's own build, a native app for Prospero
+Store, is ps5/README.md. Homebrew is
 the only way there: a game that runs and patches another game's ROM
 cannot be a signed title.
 
@@ -48,6 +49,10 @@ the fake PKG with `PkgTool.Core` from `ps4/pkg.gp4`, its icon
 OpenOrbis's samples ship Sony's `libc.prx` and `libSceFios2.prx` taken
 from a game, which this one neither needs (its libc is linked in) nor may
 carry.
+
+**License.** The PKG links OpenOrbis's runtime (GPL-3.0): it is
+distributed under GPL-3.0's terms, the game's public MIT-licensed source
+its corresponding source.
 
 What differs from the other builds:
 

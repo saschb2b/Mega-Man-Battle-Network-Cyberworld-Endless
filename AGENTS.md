@@ -10,8 +10,8 @@ for ROCKNIX, the primary target, as a Linux desktop build, as a Windows
 build, as a macOS app, as a browser build on GitHub Pages and as a
 homebrew build for the New 3DS (a CIA for the HOME Menu and a .3dsx), the
 Switch (a .nro for the Homebrew Menu), the PlayStation Vita (a .vpk for
-VitaShell) and the PS4 (a fake .pkg, which a jailbroken PS5 installs too)
-and an iPhone and iPad app through AltStore and SideStore. Reference
+VitaShell), the PS4 (a fake .pkg) and the PS5 (a native app's folder,
+zipped for Prospero Store) and an iPhone and iPad app through AltStore and SideStore. Reference
 devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
@@ -106,7 +106,7 @@ part of the tree; a new file gets its line there.
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
 | `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the skills |
-| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `ps4/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
+| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `ps4/`, `ps5/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
 | `web/`, `docs/screenshots/`, `docs/clips/` | [docs/code/site-and-media.md](docs/code/site-and-media.md): the site, screenshots and clips |
 | `docs/` | [docs/index.md](docs/index.md): the knowledge base |
 
@@ -322,7 +322,8 @@ python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-
 python3 build.py 3ds        # build/3ds: cyberworld-endless.cia and .3dsx (devkitARM in Docker; 3ds/README.md)
 python3 build.py switch     # build/switch/cyberworld-endless.nro (devkitA64 in Docker; switch/README.md)
 python3 build.py vita       # build/vita/cyberworld-endless.vpk (VitaSDK in Docker; vita/README.md)
-python3 build.py ps4        # build/ps4/cyberworld-endless.pkg, a PS5's too (OpenOrbis in Docker; ps4/README.md)
+python3 build.py ps4        # build/ps4/cyberworld-endless.pkg (OpenOrbis in Docker; ps4/README.md)
+python3 build.py ps5        # build/ps5/cyberworld-endless-ps5.zip, the app folder CWEN00001/ (the native-app template in Docker; ps5/README.md)
 python3 tools/cw.py shot options/audio [--do CMDS] [--until COND] [--ref REF]   # one call: a look at a screen (the cyberworld MCP server's shot; docs/devtools/agents-tools.md)
 python3 tools/cw.py play NAME --start ROUTE|OPTIONS --do CMDS   # one call: play.py's game, what changed and a picture (the MCP's play)
 python3 tools/cw.py build [host|linux|test|lint]   # a build or check, its complaints alone (the MCP's build)
@@ -402,6 +403,7 @@ pacing) stays local.
 | Switch build | `build.py switch`; on a Switch with Atmosphère (switch/README.md, Testing on a Switch): the `.nro` over nxlink or ftpd and a start from the Homebrew Menu, `log.txt`'s `switch:` line, NEW GAME to the first layer, A on the button marked A, docked and handheld, HOME's close and CONTINUE, the gate to the Net Square and a NetBattle (`--dev rollbench`); the other targets still build, the 3DS's above all, whose libcurl stream the Switch shares |
 | PS Vita build | `build.py vita`; on a Vita with HENkaku or h-encore (vita/README.md, Testing on a Vita): the VPK over VitaShell's FTP and installed, `log.txt`'s `vita:` and `emu:` lines, NEW GAME to the first layer at full speed (`frame_log = on`), Cross as A, the touch controls, a close from the LiveArea and CONTINUE, the gate to the Net Square and a NetBattle's frame times; the other targets still build, the consoles' above all, whose start (`start_console.h`) and curl stream the Vita shares |
 | PS4 build | `build.py ps4` (its PKG validated by `PkgTool.Core pkg_validate`); on a PS4 with GoldHEN, and a PS5 with etaHEN (ps4/README.md, Testing on a PS4): the PKG installed, `log.txt`'s `ps4:` and `emu:` lines over FTP, NEW GAME to the first layer at full speed, Cross as A, a close and CONTINUE, the gate to the Net Square and a NetBattle; the other targets still build, as the PS4's changes are mostly shared code |
+| PS5 build | `build.py ps5` (its zip's folder, `param.json` and signed `eboot.bin` checked as CI does); on a jailbroken PS5 with ShadowMountPlus (ps5/README.md, Testing on a PS5): the folder in `/data/homebrew/`, `log.txt`'s `ps5:` and `emu:` lines, NEW GAME to the first layer, Cross as A, the gate to the Net Square and a NetBattle, the statistics' question, an update over the folder keeping the saves; the title ID stays `CWEN00001` |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, the itch.io page in step (docs/project/itch.md, Each release): its files (`python3 tools/itch.py push`), its devlog post (`tools/itch.py devlog`, posted on itch, `tools/itch.py record --post`), and `tools/itch.py check` in step; `build.py lint` fails the next release's work while a release lacks its post; runs on real devices are the owner's, after the release, and no blocker |

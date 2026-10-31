@@ -13,13 +13,13 @@
 
 /* (the 3DS's where its build found devkitPro's libcurl: the Makefile's
  * CW_3DS_CURL; the Switch's always, devkitPro's 7.69 on its own TLS; the
- * Vita's, VitaSDK's on OpenSSL) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__) || \
+ * Vita's, VitaSDK's on OpenSSL; the PS5's, PacBrew's on OpenSSL) */
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__) || defined(CW_PS5) || \
 	(defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
 #define HTTP_CURL 1
 #endif
 /* (libcurl linked in, not loaded: the consoles') */
-#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__)
+#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__) || defined(CW_PS5)
 #define CURL_LINKED 1
 #endif
 
@@ -185,8 +185,9 @@ bool analytics_http_ready(void) {
 bool analytics_http_post(const char *url, const char *agent, const char *body, SDL_atomic_t *stop) {
 	static bool begun, roots;
 #ifdef CURL_LINKED
-	/* (the 3DS and the Vita have no store of their own that knows Let's
-	 * Encrypt's roots; the Switch's knows ISRG Root X1 from its 10.1.0 on) */
+	/* (the 3DS, the Vita and the PS5 have no store of their own that knows
+	 * Let's Encrypt's roots; the Switch's knows ISRG Root X1 from its
+	 * 10.1.0 on) */
 	roots = true;
 #endif
 #ifdef __3DS__

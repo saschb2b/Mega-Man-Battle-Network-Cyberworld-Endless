@@ -29,8 +29,8 @@ statistics, troubleshooting and building the game yourself.
   handheld, a New 3DS, New 3DS XL or New 2DS XL with custom firmware
   (Luma3DS) and FBI, a Switch with custom firmware (Atmosphère), a
   PlayStation Vita or PlayStation TV with custom firmware (HENkaku or
-  h-encore) and VitaShell, a PS4 with GoldHEN or a PS5 with etaHEN, or a
-  current browser.
+  h-encore) and VitaShell, a PS4 with GoldHEN, a jailbroken PS5 with
+  ShadowMountPlus, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -84,7 +84,8 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A Switch with custom firmware | `cyberworld-endless.nro` (Homebrew Menu) | [On a Switch](#on-a-switch) |
 | A PS Vita or PS TV with custom firmware | `cyberworld-endless.vpk` (VitaShell) | [On a PS Vita](#on-a-ps-vita) |
-| A PS4 with GoldHEN, or a PS5 with etaHEN | `cyberworld-endless.pkg` (the Package Installer) | [On a PS4 or PS5](#on-a-ps4-or-ps5) |
+| A PS4 with GoldHEN | `cyberworld-endless.pkg` (the Package Installer) | [On a PS4](#on-a-ps4) |
+| A jailbroken PS5 | `cyberworld-endless-ps5.zip` (Prospero Store, or its folder in `/data/homebrew/`) | [On a PS5](#on-a-ps5) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
 
 Releases up to 0.6.0 named the PortMaster port
@@ -388,7 +389,7 @@ the touch controls. Closing the game from the LiveArea ends it at once, so
 a run goes on from its last checkpoint. Online is as everywhere.
 [vita/README.md](../vita/README.md) has the rest.
 
-### On a PS4 or PS5
+### On a PS4
 
 On a PS4 with GoldHEN, install `cyberworld-endless.pkg` from its Package
 Installer; a PS5 that installs PS4 packages (etaHEN) takes the same
@@ -400,6 +401,16 @@ Put your ROM in `/data/cyberworld-endless/rom/` on the internal drive
 beside it, or in any of those folders. Cross is the GBA's A and Circle
 its B. Online is as everywhere; this build sends no statistics and never
 asks. [ps4/README.md](../ps4/README.md) has the rest.
+
+### On a PS5
+
+On a jailbroken PS5, the game is a native app: install it from Prospero
+Store, or unzip `cyberworld-endless-ps5.zip` and copy its `CWEN00001/`
+folder into `/data/homebrew/`, where ShadowMountPlus registers it. Your
+ROM goes where the PS4's does, `/data/cyberworld-endless/rom/` or a USB
+drive, and the saves beside it, outside the app, so an update keeps them.
+Cross is the GBA's A. Online is as everywhere.
+[ps5/README.md](../ps5/README.md) has the rest.
 
 ### In a browser
 
@@ -1137,7 +1148,7 @@ system measures how far it can rewind, and asks the server for the
 delay its connection still needs.
 
 NetBattles run on computers, phones and tablets, PortMaster handhelds,
-the Steam Deck, the Switch, the PS Vita, the PS4 and PS5 and in the browser. The New 3DS has none: running both
+the Steam Deck, the Switch, the PS Vita, the PS4, the PS5 and in the browser. The New 3DS has none: running both
 players' GBAs takes it half again a frame's time. There a full pass
 trades and dives, and the pass says so.
 
@@ -1313,7 +1324,7 @@ project page's:
 
 | When | What is sent |
 | --- | --- |
-| The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, the browser...), the version and the screen's size |
+| The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, PS5, the browser...), the version and the screen's size |
 | A run begins | its setup (net, folder, Cross, threat, helpers), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |

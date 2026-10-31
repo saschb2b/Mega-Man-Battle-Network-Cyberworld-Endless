@@ -2,15 +2,18 @@
 
 /* The stream over a libcurl linked in: the 3DS's (devkitPro's, on mbedTLS),
  * the Switch's (devkitPro's 7.69, on the console's own TLS service, which
- * reads without blocking where curl asks it to) and the Vita's (VitaSDK's,
- * on OpenSSL) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__)
+ * reads without blocking where curl asks it to), the Vita's (VitaSDK's, on
+ * OpenSSL) and the PS5's (PacBrew's, on OpenSSL) */
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__) || defined(CW_PS5)
 #ifdef __3DS__
 #include <3ds/types.h>
 #include <3ds/result.h>
 #include <3ds/services/ps.h>
 #elif defined(__vita__)
 #include <psp2/kernel/rng.h>
+#elif defined(CW_PS5)
+/* (the system's random bytes, 64 at a time: libSceRandom) */
+int sceRandomGetRandomNumber(void *out, size_t size);
 #else
 #include <switch/types.h>
 #include <switch/result.h>
@@ -52,7 +55,7 @@ static bool network_begin(void) {
 	network_held = network_3ds_begin();
 	random_held = network_held && R_SUCCEEDED(psInit());
 #else
-	/* (the network is up from the start, start_switch.c and start_vita.c) */
+	/* (the network is up from the start: start_switch.c, start_vita.c, the PS5's system) */
 	network_held = random_held = true;
 #endif
 	return random_held;
@@ -119,6 +122,10 @@ bool online_stream_random(uint8_t *out, size_t size) {
 	return R_SUCCEEDED(PS_GenerateRandomBytes(out, (u32)size));
 #elif defined(__vita__)
 	return sceKernelGetRandomNumber(out, size) >= 0;
+#elif defined(CW_PS5)
+	for (size_t n; size; out += n, size -= n)
+		if (sceRandomGetRandomNumber(out, n = size < 64 ? size : 64) < 0) return false;
+	return true;
 #else
 	randomGet(out, size);
 	return true;
