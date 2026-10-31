@@ -10,8 +10,8 @@
  * only libScePosixForWebKit exports, made here on libSceNet's resolver (as
  * the PS5's own games resolve); readlink, libkernel_sys's alone; and the
  * keyboard, the text dialog and the random bytes SDL and the game ask for.
- * And the folders' reading and two of fcntl's settings on a socket, which
- * a game's process is refused. All of them the game's own, never exported (the Makefile builds the file
+ * And the folders' reading and a socket's close-on-exec and non-blocking,
+ * which a game's process is refused or never given. All of them the game's own, never exported (the Makefile builds the file
  * hidden): the template's converter publishes nothing of an app's. */
 #ifdef CW_PS5
 #include <dirent.h>
@@ -318,12 +318,26 @@ int closedir(DIR *dir) {
 	return result;
 }
 
-/* ---- fcntl on a socket (the Makefile's --wrap) ---- */
+/* ---- a socket's settings (the Makefile's --wrap) ---- */
 
-/* (refused a game's process on a socket: close-on-exec, nothing to a game
- * that never execs, and O_NONBLOCK, which the socket's own option sets;
- * curl asks for both on each connection, and gave up at the first) */
+/* (refused a game's process on a socket: fcntl's close-on-exec, nothing to
+ * a game that never execs, and its O_NONBLOCK, which the socket's own
+ * option sets; curl asks for close-on-exec on each connection, and gave
+ * up there. And socket's SOCK_NONBLOCK, which curl asks for in place of
+ * fcntl's: the PS5 makes the socket and leaves it blocking, so a read
+ * waited for the server, the game's pings stayed unsent, and the server
+ * ended the silent link after some seconds) */
 #define SO_NBIO 0x1200
+
+int __real_socket(int domain, int type, int protocol);
+int __wrap_socket(int domain, int type, int protocol);
+
+int __wrap_socket(int domain, int type, int protocol) {
+	int fd = __real_socket(domain, type & ~(SOCK_NONBLOCK | SOCK_CLOEXEC), protocol);
+	int on = 1;
+	if (fd >= 0 && (type & SOCK_NONBLOCK)) setsockopt(fd, SOL_SOCKET, SO_NBIO, &on, sizeof on);
+	return fd;
+}
 
 int __real_fcntl(int fd, int cmd, ...);
 int __wrap_fcntl(int fd, int cmd, ...);

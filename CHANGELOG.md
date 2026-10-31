@@ -15,7 +15,8 @@
 
 - **Online on the PS5.** The PS5 refuses a game two of the settings curl
   makes on each connection, so the Net Square's gate said it could not
-  connect: the game now makes them the PS5's way.
+  connect, and then dropped the link every few seconds: the game now
+  makes them the PS5's way.
 
 - **Fast forward no longer sticks on.** A device SDL takes for a
   controller but that never reports its triggers (the PS5's media remote,

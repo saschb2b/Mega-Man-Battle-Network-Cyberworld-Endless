@@ -98,7 +98,10 @@ What differs from the other builds:
   is refused (EPERM). And `fcntl` on a socket, refused too (curl's
   close-on-exec and non-blocking, which stopped every connection): through
   the linker's `--wrap`, close-on-exec does nothing (a game never execs)
-  and O_NONBLOCK goes through the socket's own option, `SO_NBIO`.
+  and O_NONBLOCK goes through the socket's own option, `SO_NBIO`; and
+  `socket` sets `SO_NBIO` where `SOCK_NONBLOCK` is asked for (curl's way),
+  which the PS5 leaves undone: a blocking read held the game's pings back,
+  and the server dropped the link every few seconds.
 - **The heap** (`src/core/ps5_heap.c`): libc's `malloc` there draws on the
   kernel's internal memory, some 14 MB, too little for SDL's 1080p window
   alone. The linker sends the game's and its libraries' `malloc`,
