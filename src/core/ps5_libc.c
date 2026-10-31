@@ -10,7 +10,8 @@
  * only libScePosixForWebKit exports, made here on libSceNet's resolver (as
  * the PS5's own games resolve); readlink, libkernel_sys's alone; and the
  * keyboard, the text dialog and the random bytes SDL and the game ask for.
- * And the folders' reading, which libc refuses a game's process. All of them the game's own, never exported (the Makefile builds the file
+ * And the folders' reading and two of fcntl's settings on a socket, which
+ * a game's process is refused. All of them the game's own, never exported (the Makefile builds the file
  * hidden): the template's converter publishes nothing of an app's. */
 #ifdef CW_PS5
 #include <dirent.h>
@@ -24,6 +25,7 @@
 #include <netinet/in.h>
 #include <pwd.h>
 #include <setjmp.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -314,6 +316,31 @@ int closedir(DIR *dir) {
 	int result = close(dir->fd);
 	free(dir);
 	return result;
+}
+
+/* ---- fcntl on a socket (the Makefile's --wrap) ---- */
+
+/* (refused a game's process on a socket: close-on-exec, nothing to a game
+ * that never execs, and O_NONBLOCK, which the socket's own option sets;
+ * curl asks for both on each connection, and gave up at the first) */
+#define SO_NBIO 0x1200
+
+int __real_fcntl(int fd, int cmd, ...);
+int __wrap_fcntl(int fd, int cmd, ...);
+
+int __wrap_fcntl(int fd, int cmd, ...) {
+	va_list ap;
+	va_start(ap, cmd);
+	intptr_t arg = va_arg(ap, intptr_t);   /* (an int or a pointer, as the command takes) */
+	va_end(ap);
+	int result = __real_fcntl(fd, cmd, arg);
+	if (result != -1) return result;
+	int saved = errno;
+	if (cmd == F_SETFD) return 0;
+	int on = ((int)arg & O_NONBLOCK) != 0;
+	if (cmd == F_SETFL && setsockopt(fd, SOL_SOCKET, SO_NBIO, &on, sizeof on) == 0) return 0;
+	errno = saved;
+	return -1;
 }
 
 /* (zstd's tracing hooks, weak in PacBrew's libzstd, which curl's decoding

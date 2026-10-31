@@ -285,7 +285,7 @@ PS5_PB = $(shell python3 -c "import json; print(' '.join(json.load(open('$(PS5AP
 CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -fdata-sections -DCW_PS5 $(call PS5_PB,cflags)
 LINK := $(PS5SDK)/bin/prospero-lld
 LDLIBS := -T $(PS5APP)/tooling/native/ps5-pie.ld --eh-frame-hdr --version-script $(PS5APP)/tooling/native/app-symbols.map \
-          $(foreach f,malloc calloc realloc posix_memalign free,--wrap=$(f)) \
+          $(foreach f,malloc calloc realloc posix_memalign free fcntl,--wrap=$(f)) \
           -e _start $(PS5APP)/build/obj/app_crt.o $(PS5APP)/build/obj/app_cpp_runtime.o $(MGBA)/lib/libmgba.a \
           -L$(PS5SDK)/target/lib --start-group $(filter-out -lSceKeyboard -lSceImeDialog,$(call PS5_PB,libs)) --end-group \
           --as-needed $(filter-out $(PS5_UNLOADED:%=\%/%.so),$(wildcard $(PS5SDK)/target/lib/*.so))
@@ -295,7 +295,7 @@ PS5_LOADED := libkernel libSceLibcInternal libSceSysmodule libSceNet libSceNetCt
               libSceRegMgr libSceSaveData libSceCommonDialog libSceSysUtil
 # (the stand-ins and the heap hidden, which the template's compiler makes
 # default whatever their attributes say; the game's allocations into the
-# heap, src/core/ps5_heap.c)
+# heap, src/core/ps5_heap.c, and its fcntl through ps5_libc.c's)
 $(OUT)/obj/core/ps5_libc.o $(OUT)/obj/core/ps5_heap.o: CFLAGS += -fvisibility-nodllstorageclass=hidden
 PS5_TITLE := CWEN00001
 PS5_APP := $(OUT)/$(PS5_TITLE)
