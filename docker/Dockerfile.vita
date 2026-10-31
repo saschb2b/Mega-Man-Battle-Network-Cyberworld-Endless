@@ -1,0 +1,6 @@
+# Build image for the PlayStation Vita (vita/README.md): VitaSDK with its
+# packages (SDL2, curl with OpenSSL), and the embedded GBA core built for
+# it. The game builds into a .vpk that VitaShell installs (build.py vita).
+FROM vitasdk/vitasdk:latest
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh vita

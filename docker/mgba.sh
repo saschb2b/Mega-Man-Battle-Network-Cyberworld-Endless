@@ -5,7 +5,8 @@
 # MinGW-w64 cross compiler of docker/Dockerfile.windows; android: each
 # Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
 # 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
-# library alone; switch: the Nintendo Switch, devkitA64's, the same way).
+# library alone; switch: the Nintendo Switch, devkitA64's, the same way;
+# vita: the PlayStation Vita, VitaSDK's, the same way).
 # The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
@@ -90,6 +91,21 @@ case " $TARGETS " in *" switch "*)
 	cp build-switch/libmgba.a /opt/mgba/switch/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/switch/include/
 	cp -r build-switch/include/mgba /opt/mgba/switch/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" vita "*)
+	# (the library target alone, with mGBA's own Vita toolchain file, and
+	# the whole core, as on the 3DS and the Switch; not position-independent,
+	# whose GOT relocations vita-elf-create refuses)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	cmake -S mgba-$VER -B build-vita $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/vita \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/psp2/CMakeToolchain.vitasdk" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+	cmake --build build-vita --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/vita/lib /opt/mgba/vita/include
+	cp build-vita/libmgba.a /opt/mgba/vita/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/vita/include/
+	cp -r build-vita/include/mgba /opt/mgba/vita/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

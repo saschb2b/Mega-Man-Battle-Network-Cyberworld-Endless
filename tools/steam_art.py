@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Steam's library artwork for the game as a non-Steam shortcut: the
 portrait capsule, the wide capsule, the hero banner and the logo that sits
-on it (linux/steam/add-to-steam.py puts them in Steam's grid folder); and
-the 3DS HOME Menu's banner for the CIA (3ds/banner.png).
+on it (linux/steam/add-to-steam.py puts them in Steam's grid folder); the
+3DS HOME Menu's banner for the CIA (3ds/banner.png); and the Vita
+LiveArea's background and start button for the VPK (vita/bg.png,
+vita/startup.png, 8-bit as the LiveArea wants them).
 
 Pixel art drawn from code, nothing from the ROM: the title's infinity mark
 and its CYBERWORLD ENDLESS lettering (the same shapes scene_title.c draws),
@@ -323,13 +325,40 @@ def banner():
     return im, 2
 
 
+def live_area():
+    """840 x 500: the Vita LiveArea's background (base 168 x 100, 5x): the
+    wide capsule's net under the wordmark."""
+    im = sky(168, 100)
+    net(im, 84, 56, [(-9, -1, 2, 2), (-7, 0, 3, 'u'), (-4, -1, 3, 3), (-3, 2, 3, 'v'), (-4, 5, 2, 2),
+                     (4, -6, 2, 2), (5, -4, 4, 'v'), (4, 0, 3, 3), (7, 1, 3, 'u'), (10, 0, 2, 3),
+                     (0, 6, 3, 2), (-2, 6, 2, 'u')], 5)
+    wordmark(im, 84, 40, 0.8, False)
+    return im, 5
+
+
+def live_start():
+    """280 x 158: the Vita LiveArea's start button (base 140 x 79, 2x): the
+    3DS banner's net under the wordmark."""
+    im = sky(140, 79)
+    net(im, 70, 38, [(-6, -1, 2, 2), (-4, 0, 3, 'u'), (-1, -1, 3, 3), (0, 2, 2, 'v'), (-1, 4, 2, 2),
+                     (3, -5, 2, 2), (4, -3, 3, 'v'), (4, 0, 2, 2), (6, 0, 2, 'u')], 6)
+    wordmark(im, 70, 32, 0.6, False)
+    return im, 2
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    vita = os.path.join(ROOT, 'vita')
+    os.makedirs(vita, exist_ok=True)
     for name, make, out in (('capsule', capsule, OUT), ('wide', wide, OUT), ('hero', hero, OUT), ('logo', logo, OUT),
-                            ('banner', banner, os.path.join(ROOT, '3ds'))):
+                            ('banner', banner, os.path.join(ROOT, '3ds')), ('bg', live_area, vita),
+                            ('startup', live_start, vita)):
         im, k = make()
         im = im.resize((im.width * k, im.height * k), Image.NEAREST)
         path = os.path.join(out, name + '.png')
+        # (the LiveArea's pictures 8-bit, with a palette, as it takes them)
+        if out == vita:
+            im = im.convert('RGB').quantize(256)
         im.save(path, optimize=True)
         print(f'{path}: {im.width}x{im.height}')
 

@@ -27,8 +27,9 @@ statistics, troubleshooting and building the game yourself.
   and later), a 64-bit Windows 10 or 11 PC, a Mac with macOS 11 or newer
   (Apple silicon or Intel), an Android 5 or newer phone, tablet or
   handheld, a New 3DS, New 3DS XL or New 2DS XL with custom firmware
-  (Luma3DS) and FBI, a Switch with custom firmware (Atmosphère), or a
-  current browser.
+  (Luma3DS) and FBI, a Switch with custom firmware (Atmosphère), a
+  PlayStation Vita or PlayStation TV with custom firmware (HENkaku or
+  h-encore) and VitaShell, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -53,7 +54,7 @@ statistics, troubleshooting and building the game yourself.
   [NetPass](#the-netpass): NetBattles, trades and the week's DeepNet. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
-  iPhones and iPads, a New 3DS, a Switch and in the browser. Added later, it
+  iPhones and iPads, a New 3DS, a Switch, a PS Vita and in the browser. Added later, it
   is found at the next start beside BN6 (on Android, an iPhone or an
   iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
   on the title also opens the [ROMs screen](#the-roms-screen) to add it,
@@ -81,6 +82,7 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A handheld with PortMaster | `cyberworld-endless-portmaster.zip` | [On a PortMaster handheld](#on-a-portmaster-handheld) |
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A Switch with custom firmware | `cyberworld-endless.nro` (Homebrew Menu) | [On a Switch](#on-a-switch) |
+| A PS Vita or PS TV with custom firmware | `cyberworld-endless.vpk` (VitaShell) | [On a PS Vita](#on-a-ps-vita) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
 
 Releases up to 0.6.0 named the PortMaster port
@@ -370,6 +372,20 @@ folders. The GBA's buttons are on the Switch's buttons of the same names,
 Plus for START and Minus for SELECT. Online is as everywhere, NetBattles
 included. [switch/README.md](../switch/README.md) has the rest.
 
+### On a PS Vita
+
+On a PlayStation Vita or PlayStation TV with custom firmware (HENkaku or
+h-encore), copy `cyberworld-endless.vpk` to the memory card and install it
+from VitaShell; the game gets its bubble on the home screen.
+
+Put your ROM in `ux0:data/cyberworld-endless/rom/`, or leave it where you
+keep GBA games (`ux0:roms/gba/`, `ux0:roms/`, `ux0:data/gba/`): any file
+name works. BN5 Team Colonel's goes beside it, or in any of those folders.
+Cross is the GBA's A and Circle its B; a touch on the front screen shows
+the touch controls. Closing the game from the LiveArea ends it at once, so
+a run goes on from its last checkpoint. Online is as everywhere.
+[vita/README.md](../vita/README.md) has the rest.
+
 ### In a browser
 
 Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: the two cartridge slots on its screen,
@@ -581,7 +597,8 @@ a DualSense is the controller in use, **Trigger effects** (**On** or
 - **Where:** the Linux builds (a Steam Deck's own controls too), Windows,
   macOS and iOS rumble a controller, iOS without the trigger effects. A
   PortMaster handheld and the Switch rumble where their SDL drives the
-  motor (untested). Android, the browser and the 3DS don't yet.
+  motor (untested). Android, the browser and the 3DS don't yet; the PS
+  Vita has no motor.
 - **Bluetooth or USB:** a DualSense rumbles and clicks either way. Over
   Bluetooth the game asks SDL for the controller's full reports, which it
   keeps until it is turned off. On Windows, a game reading it through
@@ -1105,7 +1122,7 @@ system measures how far it can rewind, and asks the server for the
 delay its connection still needs.
 
 NetBattles run on computers, phones and tablets, PortMaster handhelds,
-the Steam Deck, the Switch and in the browser. The New 3DS has none: running both
+the Steam Deck, the Switch, the PS Vita and in the browser. The New 3DS has none: running both
 players' GBAs takes it half again a frame's time. There a full pass
 trades and dives, and the pass says so.
 
@@ -1281,7 +1298,7 @@ project page's:
 
 | When | What is sent |
 | --- | --- |
-| The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, the browser...), the version and the screen's size |
+| The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, the browser...), the version and the screen's size |
 | A run begins | its setup (net, folder, Cross, threat, helpers), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |

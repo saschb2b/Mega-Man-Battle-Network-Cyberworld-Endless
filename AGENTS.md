@@ -8,8 +8,9 @@ directs it: generated layers in the game's map formats, the run's structure,
 loot and saves. It is written in C11 with SDL2 and ships as a PortMaster port
 for ROCKNIX, the primary target, as a Linux desktop build, as a Windows
 build, as a macOS app, as a browser build on GitHub Pages and as a
-homebrew build for the New 3DS (a CIA for the HOME Menu and a .3dsx) and
-the Switch (a .nro for the Homebrew Menu) and an iPhone and iPad app through AltStore and SideStore. Reference
+homebrew build for the New 3DS (a CIA for the HOME Menu and a .3dsx), the
+Switch (a .nro for the Homebrew Menu) and the PlayStation Vita (a .vpk for
+VitaShell) and an iPhone and iPad app through AltStore and SideStore. Reference
 devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
@@ -104,7 +105,7 @@ part of the tree; a new file gets its line there.
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
 | `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the skills |
-| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
+| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
 | `web/`, `docs/screenshots/`, `docs/clips/` | [docs/code/site-and-media.md](docs/code/site-and-media.md): the site, screenshots and clips |
 | `docs/` | [docs/index.md](docs/index.md): the knowledge base |
 
@@ -319,6 +320,7 @@ python3 build.py ios        # build/release/cyberworld-endless.ipa, on a Mac wit
 python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-builder on this machine)
 python3 build.py 3ds        # build/3ds: cyberworld-endless.cia and .3dsx (devkitARM in Docker; 3ds/README.md)
 python3 build.py switch     # build/switch/cyberworld-endless.nro (devkitA64 in Docker; switch/README.md)
+python3 build.py vita       # build/vita/cyberworld-endless.vpk (VitaSDK in Docker; vita/README.md)
 python3 tools/cw.py shot options/audio [--do CMDS] [--until COND] [--ref REF]   # one call: a look at a screen (the cyberworld MCP server's shot; docs/devtools/agents-tools.md)
 python3 tools/cw.py play NAME --start ROUTE|OPTIONS --do CMDS   # one call: play.py's game, what changed and a picture (the MCP's play)
 python3 tools/cw.py build [host|linux|test|lint]   # a build or check, its complaints alone (the MCP's build)
@@ -396,6 +398,7 @@ pacing) stays local.
 | iOS packaging | CI's ios job (arm64, iOS 14, only iOS's frameworks, `codesign --verify`, the Simulator's app reaching its ROMs screen: look at the artifact's screenshot); on a Mac, the Simulator with the ROMs: BN6's slot on a folder with BN6 and BN5 (both taken, the title's "BN5 found"), on one with only a wrong `.gba` (refused with its reason), BN5 put in the folder after the first start (taken at the next), FILES INSTEAD with both, the folder's saves' copy opening SAVES' comparison after the app was deleted and installed again, a new game, a turn to landscape, CONTINUE after the app was sent to the background; on an iPhone, AltStore's install from the release's source |
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | Switch build | `build.py switch`; on a Switch with Atmosphère (switch/README.md, Testing on a Switch): the `.nro` over nxlink or ftpd and a start from the Homebrew Menu, `log.txt`'s `switch:` line, NEW GAME to the first layer, A on the button marked A, docked and handheld, HOME's close and CONTINUE, the gate to the Net Square and a NetBattle (`--dev rollbench`); the other targets still build, the 3DS's above all, whose libcurl stream the Switch shares |
+| PS Vita build | `build.py vita`; on a Vita with HENkaku or h-encore (vita/README.md, Testing on a Vita): the VPK over VitaShell's FTP and installed, `log.txt`'s `vita:` and `emu:` lines, NEW GAME to the first layer at full speed (`frame_log = on`), Cross as A, the touch controls, a close from the LiveArea and CONTINUE, the gate to the Net Square and a NetBattle's frame times; the other targets still build, the consoles' above all, whose start (`start_console.h`) and curl stream the Vita shares |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, the itch.io page in step (docs/project/itch.md, Each release): its files (`python3 tools/itch.py push`), its devlog post (`tools/itch.py devlog`, posted on itch, `tools/itch.py record --post`), and `tools/itch.py check` in step; `build.py lint` fails the next release's work while a release lacks its post; runs on real devices are the owner's, after the release, and no blocker |

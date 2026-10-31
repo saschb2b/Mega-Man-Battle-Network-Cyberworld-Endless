@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => { for (const [name, data] of
 const LANG = document.documentElement.lang === 'ja' ? 'ja' : 'en';
 
 const PLATFORMS = LANG === 'ja'
-	? { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone・iPad', handheld: 'PortMaster', '3ds': 'New 3DS', switch: 'Switch', browser: 'ブラウザ' }
-	: { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'PortMaster', '3ds': 'New 3DS', switch: 'Switch', browser: 'Browser' };
+	? { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone・iPad', handheld: 'PortMaster', '3ds': 'New 3DS', switch: 'Switch', vita: 'PS Vita', browser: 'ブラウザ' }
+	: { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'PortMaster', '3ds': 'New 3DS', switch: 'Switch', vita: 'PS Vita', browser: 'Browser' };
 
 // the visitor's system, as far as the browser says: a New 3DS's says it is
 // like an iPhone, an iPad's like a Mac (but with touch); a Steam Deck's
@@ -34,6 +34,7 @@ function detectPlatform() {
 	const p = navigator.userAgentData?.platform || navigator.platform || '';
 	if (/nintendo 3ds/i.test(ua)) return '3ds';
 	if (/nintendo switch/i.test(ua)) return 'switch';
+	if (/playstation vita/i.test(ua)) return 'vita';
 	if (/android/i.test(ua)) return 'android';
 	if (/iphone|ipad|ipod/i.test(ua) || (/mac/i.test(p) && navigator.maxTouchPoints > 1)) return 'ios';
 	if (/steamos|steam deck/i.test(ua) || (/valve steam/i.test(ua) && /linux|x11/i.test(ua))) return 'deck';
