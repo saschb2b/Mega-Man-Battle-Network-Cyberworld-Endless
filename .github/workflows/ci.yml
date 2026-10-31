@@ -289,6 +289,34 @@ jobs:
           path: build/ps4/cyberworld-endless.pkg
           retention-days: 14
 
+  ps5:
+    name: PS5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.ps5, tag: cyberworld-ps5 }
+      - run: python3 build.py ps5
+      - name: The app folder, zipped with the folder at its top, its title ID our own
+        run: |
+          python3 - build/ps5/cyberworld-endless-ps5.zip <<'P'
+          import json, sys, zipfile
+          z = zipfile.ZipFile(sys.argv[1])
+          names = set(z.namelist())
+          want = {'CWEN00001/eboot.bin', 'CWEN00001/sce_sys/param.json', 'CWEN00001/sce_sys/icon0.png',
+                  'CWEN00001/sce_module/libc.prx'}
+          assert want <= names, f'missing: {sorted(want - names)}'
+          param = json.loads(z.read('CWEN00001/sce_sys/param.json'))
+          assert param['titleId'] == 'CWEN00001' and param['contentId'].startswith('IV0000-CWEN00001_00-'), param
+          assert z.read('CWEN00001/eboot.bin')[:4] == bytes.fromhex('4f153d1d'), 'eboot.bin is not a signed FSELF'
+          P
+          ls -l build/ps5/cyberworld-endless-ps5.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-ps5
+          path: build/ps5/cyberworld-endless-ps5.zip
+          retention-days: 14
+
   android:
     name: Android
     runs-on: ubuntu-latest

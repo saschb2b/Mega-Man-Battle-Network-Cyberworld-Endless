@@ -14,11 +14,16 @@
   `ux0:data/cyberworld-endless/rom/` or where GBA games are kept
   (`ux0:roms/gba/`). Online too. Not yet run on a console.
 
-- **The PS4 and the PS5.** A PS4 with GoldHEN installs
-  `cyberworld-endless.pkg` from its Package Installer, and a PS5 that
-  installs PS4 packages (etaHEN) takes the same one; the ROM goes in
+- **The PS4.** A PS4 with GoldHEN installs `cyberworld-endless.pkg`
+  from its Package Installer, and a PS5 that installs PS4 packages
+  (etaHEN) takes the same one; the ROM goes in
   `/data/cyberworld-endless/rom/` or on a USB drive. Online too. Not yet
   run on a console.
+
+- **The PS5.** A native PS5 app for a jailbroken PS5: from Prospero
+  Store, or `cyberworld-endless-ps5.zip`'s `CWEN00001/` folder copied into
+  `/data/homebrew/`. Its saves sit beside the PS4's, outside the app, so
+  an update keeps them. Online too. Not yet run on a console.
 
 ## 0.17.0 (2026-10-26)
 
