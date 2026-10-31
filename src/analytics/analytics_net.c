@@ -50,6 +50,8 @@ static const char *platform_name(void) {
 	return "switch";
 #elif defined(__vita__)
 	return "vita";
+#elif defined(CW_PS4)
+	return "ps4";
 #elif defined(_WIN32)
 	return "windows";
 #elif defined(__APPLE__)
@@ -119,6 +121,8 @@ static void make_agent(int w, int h) {
 	snprintf(agent, sizeof agent, "Mozilla/5.0 (Nintendo Switch) CyberworldEndless/%s", v);
 #elif defined(__vita__)
 	snprintf(agent, sizeof agent, "Mozilla/5.0 (PlayStation Vita) CyberworldEndless/%s", v);
+#elif defined(CW_PS4)
+	snprintf(agent, sizeof agent, "Mozilla/5.0 (PlayStation 4) CyberworldEndless/%s", v);
 #else
 #if defined(__x86_64__)
 	const char *arch = "x86_64";

@@ -269,6 +269,26 @@ jobs:
           path: build/vita/cyberworld-endless.vpk
           retention-days: 14
 
+  ps4:
+    name: PS4 and PS5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.ps4, tag: cyberworld-ps4 }
+      - run: python3 build.py ps4
+      - name: A fake PKG whose hashes and signatures hold
+        run: |
+          ls -l build/ps4/cyberworld-endless.pkg
+          docker run --rm -v "$PWD/build/ps4":/w -w /w cyberworld-ps4 sh -c \
+            '$OO_PS4_TOOLCHAIN/bin/linux/PkgTool.Core pkg_validate cyberworld-endless.pkg' | tee validate.txt
+          ! grep -q FAIL validate.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-ps4
+          path: build/ps4/cyberworld-endless.pkg
+          retention-days: 14
+
   android:
     name: Android
     runs-on: ubuntu-latest

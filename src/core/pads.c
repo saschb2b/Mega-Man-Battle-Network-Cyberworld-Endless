@@ -12,7 +12,8 @@
 
 /* (padmap.c numbers a pad's inputs as SDL numbers its buttons and axes;
  * SDL 2.0.14, the oldest a handheld's firmware brings, has these 21) */
-_Static_assert((int)PAD_BUTTONS == (int)SDL_CONTROLLER_BUTTON_MAX, "padmap.h's buttons are SDL's");
+/* (the PS4's SDL 2.0.9 has fewer: its pads have none of the rest, sdl_old.h) */
+_Static_assert((int)PAD_BUTTONS == (int)SDL_CONTROLLER_BUTTON_MAX || !SDL_VERSION_ATLEAST(2, 0, 14), "padmap.h's buttons are SDL's");
 _Static_assert((int)PAD_AXES == (int)SDL_CONTROLLER_AXIS_MAX, "padmap.h's axes are SDL's");
 _Static_assert((int)PAD_BACK == (int)SDL_CONTROLLER_BUTTON_BACK && (int)PAD_DPRIGHT == (int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT &&
 	(int)PAD_MISC1 == (int)SDL_CONTROLLER_BUTTON_MISC1 && PAD_LEFTTRIGGER == PAD_AXIS((int)SDL_CONTROLLER_AXIS_TRIGGERLEFT, true),
@@ -85,9 +86,9 @@ static void map_init(void) {
 static void kind_of(SDL_GameController *gc, int *family, int *style) {
 	*family = PAD_FAMILY_XBOX;
 	*style = PAD_STYLE_GENERIC;
-#ifdef __vita__
-	/* (a Vita's own, by their places as SDL's mapping gives them, are
-	 * PlayStation's: Cross the GBA's A) */
+#if defined(__vita__) || defined(CW_PS4)
+	/* (a Vita's own pads and a PS4's, by their places as SDL's mapping
+	 * gives them, are PlayStation's: Cross the GBA's A) */
 	*style = PAD_STYLE_PLAYSTATION;
 	return;
 #endif

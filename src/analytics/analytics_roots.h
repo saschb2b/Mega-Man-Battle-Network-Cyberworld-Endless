@@ -1,5 +1,6 @@
-/* The roots of trust the statistics' requests carry where the system's
- * own may not reach Umami's host (analytics_http.c): Let's Encrypt's,
+/* The roots of trust the statistics' requests and the consoles' online
+ * streams carry where the system's own may not reach Umami's host or the
+ * Net Square's (analytics_http.c, online_stream_curl.c, online_stream_tls.c): Let's Encrypt's,
  * whose chain the host serves (its certificate from YR2, under ISRG Root
  * YR, which ISRG Root X1 signs too). The 3DS has no store of its own that
  * knows them, nor the Vita's OpenSSL, the Switch's only from its 10.1.0 on; a handheld's libcurl

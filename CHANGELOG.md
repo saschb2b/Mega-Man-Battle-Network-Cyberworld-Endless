@@ -14,6 +14,12 @@
   `ux0:data/cyberworld-endless/rom/` or where GBA games are kept
   (`ux0:roms/gba/`). Online too. Not yet run on a console.
 
+- **The PS4 and the PS5.** A PS4 with GoldHEN installs
+  `cyberworld-endless.pkg` from its Package Installer, and a PS5 that
+  installs PS4 packages (etaHEN) takes the same one; the ROM goes in
+  `/data/cyberworld-endless/rom/` or on a USB drive. Online too. Not yet
+  run on a console.
+
 ## 0.17.0 (2026-10-26)
 
 - **A battle on every layer.** Every layer without a guardian now has at

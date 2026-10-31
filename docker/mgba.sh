@@ -6,7 +6,8 @@
 # Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
 # 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
 # library alone; switch: the Nintendo Switch, devkitA64's, the same way;
-# vita: the PlayStation Vita, VitaSDK's, the same way).
+# vita: the PlayStation Vita, VitaSDK's, the same way; ps4: the PS4,
+# OpenOrbis's clang and libc, docker/ps4.cmake).
 # The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
@@ -106,6 +107,19 @@ case " $TARGETS " in *" vita "*)
 	cp build-vita/libmgba.a /opt/mgba/vita/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/vita/include/
 	cp -r build-vita/include/mgba /opt/mgba/vita/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" ps4 "*)
+	# (OpenOrbis's clang and libc, docker/ps4.cmake; the library target
+	# alone and the whole core, as on the other consoles; the threads'
+	# names left unset, as libkernel has FreeBSD's pthread_set_name_np and
+	# no header declares it)
+	cmake -S mgba-$VER -B build-ps4 $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/ps4 \
+	 -DCMAKE_TOOLCHAIN_FILE=/opt/ps4.cmake -DLIBMGBA_ONLY=ON -DHAVE_PTHREAD_SET_NAME_NP=OFF -DHAVE_PTHREAD_SETNAME_NP=OFF
+	cmake --build build-ps4 --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/ps4/lib /opt/mgba/ps4/include
+	cp build-ps4/libmgba.a /opt/mgba/ps4/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps4/include/
+	cp -r build-ps4/include/mgba /opt/mgba/ps4/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

@@ -337,6 +337,20 @@ knkkkkkkkknk
 ..kkkkkkkk..
 ............
 ............""",
+    # a controller: the PS4 and the PS5, its D-pad and face buttons
+    'pad': """
+............
+............
+............
+.kkkkkkkkkk.
+kssssssssssk
+ksnssssssrsk
+knnnsssscsck
+ksnssssssysk
+ksssskkssssk
+kssk....kssk
+.kk......kk.
+............""",
     # a phone: the Android app
     'phone': """
 ...kkkkkk...
