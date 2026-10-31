@@ -7,7 +7,8 @@
 # 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
 # library alone; switch: the Nintendo Switch, devkitA64's, the same way;
 # vita: the PlayStation Vita, VitaSDK's, the same way; ps4: the PS4,
-# OpenOrbis's clang and libc, docker/ps4.cmake).
+# OpenOrbis's clang and libc, docker/ps4.cmake; ps5: the PS5, the native-app
+# template's clang, docker/ps5.cmake).
 # The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
@@ -120,6 +121,23 @@ case " $TARGETS " in *" ps4 "*)
 	cp build-ps4/libmgba.a /opt/mgba/ps4/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps4/include/
 	cp -r build-ps4/include/mgba /opt/mgba/ps4/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" ps5 "*)
+	# (the native-app template's compiler, docker/ps5.cmake; the library
+	# target alone, the whole core as on the other consoles. Its checks
+	# compile without linking, so each function the PS5's system libraries
+	# lack is preset missing, and mGBA uses its own: zlib's crc32,
+	# popcount32, the locale's _l functions, localtime_r, futimens and
+	# futimes, and the threads' names)
+	cmake -S mgba-$VER -B build-ps5 $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/ps5 \
+	 -DCMAKE_TOOLCHAIN_FILE=/opt/ps5.cmake -DLIBMGBA_ONLY=ON -DHAVE_PTHREAD_SET_NAME_NP=OFF -DHAVE_PTHREAD_SETNAME_NP=OFF \
+	 -DHAVE_CRC32=OFF -DHAVE_POPCOUNT32=OFF -DHAVE_SNPRINTF_L=OFF -DHAVE_STRTOF_L=OFF -DHAVE_NEWLOCALE=OFF \
+	 -DHAVE_FREELOCALE=OFF -DHAVE_USELOCALE=OFF -DHAVE_LOCALTIME_R=OFF -DHAVE_FUTIMENS=OFF -DHAVE_FUTIMES=OFF
+	cmake --build build-ps5 --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/ps5/lib /opt/mgba/ps5/include
+	cp build-ps5/libmgba.a /opt/mgba/ps5/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps5/include/
+	cp -r build-ps5/include/mgba /opt/mgba/ps5/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

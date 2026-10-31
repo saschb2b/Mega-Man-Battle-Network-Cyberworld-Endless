@@ -86,9 +86,9 @@ static void map_init(void) {
 static void kind_of(SDL_GameController *gc, int *family, int *style) {
 	*family = PAD_FAMILY_XBOX;
 	*style = PAD_STYLE_GENERIC;
-#if defined(__vita__) || defined(CW_PS4)
-	/* (a Vita's own pads and a PS4's, by their places as SDL's mapping
-	 * gives them, are PlayStation's: Cross the GBA's A) */
+#if defined(__vita__) || defined(CW_PS4) || defined(CW_PS5)
+	/* (a Vita's own pads and a PS4's and PS5's, by their places as SDL's
+	 * mapping gives them, are PlayStation's: Cross the GBA's A) */
 	*style = PAD_STYLE_PLAYSTATION;
 	return;
 #endif

@@ -21,6 +21,10 @@ EM_JS(int, identity_random, (uint8_t *out), {
 #include <psp2/kernel/rng.h>
 #elif defined(CW_PS4)
 #include <unistd.h>
+#elif defined(CW_PS5)
+#include <stddef.h>
+/* (the system's random bytes, 64 at a time: libSceRandom) */
+int sceRandomGetRandomNumber(void *out, size_t size);
 #else
 #include <stdio.h>
 #endif
@@ -53,6 +57,8 @@ bool network_identity(uint8_t out[NETWORK_ID_BYTES]) {
 #elif defined(CW_PS4)
 	/* (the kernel's random bytes: the PS4's sandbox shows no /dev/urandom) */
 	return getentropy(out, NETWORK_ID_BYTES) == 0;
+#elif defined(CW_PS5)
+	return sceRandomGetRandomNumber(out, NETWORK_ID_BYTES) >= 0;
 #else
 	FILE *file = fopen("/dev/urandom", "rb");
 	if (!file) return false;

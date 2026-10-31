@@ -1,0 +1,27 @@
+# Build image for the PS5's own build (ps5/README.md): the public PS5 payload
+# SDK, PacBrew's ports for it (SDL2, libcurl) and the native-app pipeline of
+# drakmor's ps5-native-app-boilerplate (GPL-3.0: its ELF converter and FSELF
+# writer, its clean-room libc.prx, its CRT and linker script), pinned to a
+# commit and run once on its own hello world so its pieces are built, each
+# download checked against its SHA-256 by the template's own scripts. The
+# game builds into an app folder, zipped as Prospero Store takes it
+# (build.py ps5).
+FROM ubuntu:24.04
+RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates clang-18 lld-18 llvm-18 \
+    clang-format-18 clang-tidy-18 cmake curl git make pkg-config python3 python3-venv tar unzip wget zip \
+ && rm -rf /var/lib/apt/lists/*
+ARG BOILERPLATE=470695e0c557f99ff2df0e36e4df713c5e636526
+RUN git clone https://github.com/drakmor/ps5-native-app-boilerplate /opt/ps5app \
+ && git -C /opt/ps5app checkout --quiet $BOILERPLATE \
+ && make -C /opt/ps5app app \
+ && bash /opt/ps5app/tools/setup-pacbrew-dependencies.sh --resolve sdl2 libcurl > /opt/ps5app/pacbrew.json
+# (PacBrew's archive keeps its folders root's alone: readable by the build's user)
+RUN chmod -R a+rX /opt/ps5app
+# (the template's compiler as one command, C's and C++'s, for CMake and the Makefile)
+RUN printf '#!/bin/sh\nPS5_PAYLOAD_SDK=/opt/ps5app/.deps/native/ps5-payload-sdk exec sh /opt/ps5app/tooling/prospero-clang18 "$@"\n' \
+    > /usr/local/bin/ps5-cc \
+ && printf '#!/bin/sh\nPS5_CLANG=/usr/bin/clang++-18 PS5_PAYLOAD_SDK=/opt/ps5app/.deps/native/ps5-payload-sdk exec sh /opt/ps5app/tooling/prospero-clang18 "$@"\n' \
+    > /usr/local/bin/ps5-cxx && chmod +x /usr/local/bin/ps5-cc /usr/local/bin/ps5-cxx
+COPY ps5.cmake /opt/ps5.cmake
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh ps5
