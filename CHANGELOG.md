@@ -13,6 +13,12 @@
   system's launch argument, and waits for the system at its end instead
   of crashing on the way out. Run on a PS5 this time.
 
+- **Fast forward no longer sticks on.** A device SDL takes for a
+  controller but that never reports its triggers (the PS5's media remote,
+  which the PS5 lists among its pads) read as the right trigger half
+  pressed: fast forward stayed on and could not be turned off, and L was
+  held too. A trigger now counts once it has been seen let go.
+
 ## 0.18.0 (2026-10-31)
 
 - **The Switch.** A Switch with custom firmware (Atmosphère) plays the

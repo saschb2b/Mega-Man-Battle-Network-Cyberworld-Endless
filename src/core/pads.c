@@ -29,16 +29,17 @@ _Static_assert(PAD_INPUTS_MOST <= 63, "a family's inputs are bits of one 64-bit 
 #define DIRECTIONS (BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT)
 
 /* An open controller: its family and style, and the inputs held (its
- * buttons from SDL's events, its sticks and triggers read each frame); or
- * a joystick SDL makes no controller of, read raw (issue #112): where its
- * axes rest (a trigger at an end) and, in a browser, an axis that is its
- * hat (Chrome's). */
+ * buttons from SDL's events, its sticks and triggers read each frame, and
+ * the triggers seen let go); or a joystick SDL makes no controller of, read
+ * raw (issue #112): where its axes rest (a trigger at an end) and, in a
+ * browser, an axis that is its hat (Chrome's). */
 static struct {
 	SDL_GameController *gc;
 	SDL_Joystick *joy;
 	SDL_JoystickID id;
 	int family, style;
 	uint64_t on;
+	unsigned rested;
 	int naxes, nhats, pov;
 	Sint16 rest[PAD_RAW_AXES];
 } slot[SLOTS];
@@ -399,9 +400,14 @@ static void poll_controller(int s) {
 	uint64_t axes = 0;
 	for (int a = 0; a < PAD_AXES; ++a) {
 		int v = SDL_GameControllerGetAxis(slot[s].gc, (SDL_GameControllerAxis)a);
-		/* (a trigger goes one way) */
-		if (v < -PUSHED && a < 4) axes |= BIT(PAD_AXIS(a, false));
-		if (v > PUSHED) axes |= BIT(PAD_AXIS(a, true));
+		/* (a trigger goes one way, and counts once it has been seen let go:
+		 * a device that never reports one, the PS5's media remote among its
+		 * pads, keeps SDL's first value, which a trigger's mapping reads as
+		 * half pressed, and held fast forward on for good) */
+		bool trigger = a >= SDL_CONTROLLER_AXIS_TRIGGERLEFT;
+		if (trigger && v < PUSHED) slot[s].rested |= 1u << a;
+		if (v < -PUSHED && !trigger) axes |= BIT(PAD_AXIS(a, false));
+		if (v > PUSHED && (!trigger || (slot[s].rested & (1u << a)))) axes |= BIT(PAD_AXIS(a, true));
 	}
 	for (int i = PAD_AXIS_FIRST; i < PAD_INPUTS; ++i)
 		if ((axes & BIT(i)) && !(slot[s].on & BIT(i))) pressed(s, i);

@@ -113,6 +113,10 @@ What differs from the other builds:
   3DS's and the Vita's, Let's Encrypt's roots given with each connection;
   the random bytes `sceRandomGetRandomNumber`'s.
 - **Pads** (`src/core/pads.c`): named as PlayStation's, Cross the GBA's A.
+  The PS5's SDL lists a pad for each signed-in user and one for the media
+  remote, "PS5 Remote Control", whose triggers never report: SDL's first
+  value, which the controller layer reads as a trigger half pressed, held
+  fast forward on until the triggers counted only once seen let go.
 - Remote play's pipes (`tools/play.py`) and the quit signals are not
   built.
 
