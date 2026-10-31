@@ -1,7 +1,7 @@
-/* start_switch.h. The Switch's own start, before the game's: the sockets,
- * the SD card's folders, the output to nxlink or log.txt, the memory the
- * Homebrew Menu gave, and the ROMs. */
-#include "start_switch.h"
+/* The Switch's own start (start_console.h), before the game's: the
+ * sockets, the SD card's folders, the output to nxlink or log.txt, the
+ * memory the Homebrew Menu gave, and the ROMs. */
+#include "start_console.h"
 
 #ifdef __SWITCH__
 #include <stdio.h>
@@ -23,7 +23,7 @@
 
 static char rom_switch[600];   /* the game's own rom folder */
 
-void start_switch(bool data_dir_given) {
+void console_start(bool data_dir_given) {
 	bool net = R_SUCCEEDED(socketInitializeDefault());
 	bool linked = net && __nxlink_host.s_addr && nxlinkStdio() >= 0;
 	if (!data_dir_given) snprintf(g_data_dir, sizeof g_data_dir, "sdmc:/switch/cyberworld-endless");
@@ -51,7 +51,7 @@ void start_switch(bool data_dir_given) {
 		(unsigned long)(total >> 20), (unsigned long)(used >> 20), net ? "up" : "refused");
 }
 
-bool start_switch_rom(const char *rom_dir, char *msg, size_t n) {
+bool console_rom(const char *rom_dir, char *msg, size_t n) {
 	if (rom_dir) return rom_find(rom_dir, msg, n);
 	/* (the game's own rom folder, then where Switch players keep GBA ROMs:
 	 * a header check passes over the other games without reading them;

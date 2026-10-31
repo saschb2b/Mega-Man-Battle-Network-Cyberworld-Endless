@@ -31,7 +31,7 @@
 #define BUS        0x08000000u
 #define HELD_LISTS 0xC0     /* a family's six held-chip lists, 0x20 bytes each */
 #define TEXT_END   0xE6     /* a text archive's entry ends with it */
-#define NAME_MAX   32       /* a name's bytes at most, its end among them */
+#define NAME_BYTES   32       /* a name's bytes at most, its end among them */
 
 _Static_assert(XV_IDS <= ENEMY_IDS_MAX, "data.c is told of every id a family may take");
 
@@ -443,7 +443,7 @@ static void ice_set(const XVirusFamily *f, const Game *g) {
 /* ---- the names of its ids, after those already in the families' archive ---- */
 
 static struct {
-	uint8_t text[XV_VERSIONS][NAME_MAX];   /* (BN6's codes, each ended) */
+	uint8_t text[XV_VERSIONS][NAME_BYTES];   /* (BN6's codes, each ended) */
 	uint32_t len[XV_VERSIONS];
 	XvMoved moved[XV_VERSIONS];   /* each from its game's archive to the families' */
 } names;
@@ -452,9 +452,9 @@ static struct {
 static uint32_t entry_of(const uint8_t *rom, uint32_t archive, uint32_t i, const uint8_t **out) {
 	if (archive + 2 * i + 2 > ROM_SIZE) return 0;
 	uint32_t p = archive + get16(rom + archive + 2 * i), n = 0;
-	while (p + n < ROM_SIZE && n < NAME_MAX && rom[p + n] != TEXT_END) ++n;
+	while (p + n < ROM_SIZE && n < NAME_BYTES && rom[p + n] != TEXT_END) ++n;
 	*out = rom + p;
-	return p + n < ROM_SIZE && n < NAME_MAX ? n + 1 : 0;
+	return p + n < ROM_SIZE && n < NAME_BYTES ? n + 1 : 0;
 }
 
 static void names_set(const XVirusFamily *f, const Game *g) {
@@ -466,7 +466,7 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 		/* (another game's in BN6's text codes: rom.h, xrom_text_bn6) */
 		uint32_t to = n - 1;
 		if (f->game == XV_GAME_BN6) memcpy(names.text[v], s, to);
-		else to = (uint32_t)xrom_text_bn6(f->game, s, to, names.text[v], NAME_MAX - 1);
+		else to = (uint32_t)xrom_text_bn6(f->game, s, to, names.text[v], NAME_BYTES - 1);
 		names.text[v][to] = TEXT_END;
 		names.len[v] = to + 1;
 		if (end + names.len[v] > XV_NAMES_ROOM) { xv_fail("no room for its name %d", v); return; }

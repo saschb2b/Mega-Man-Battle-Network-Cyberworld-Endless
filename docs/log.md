@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-10-31
+* **Update**: code/platforms.md, `vita/` and `Dockerfile.vita`, the PlayStation Vita build (a `.vpk` for VitaShell, online and the statistics included), and its index line; code/core.md, `start_console.h`, the consoles' one start, and `start_vita.c`; code/online.md and code/analytics.md, the Vita's libcurl; devtools/statistics.md, the Vita's sending; GUIDE.md, On a PS Vita.
 * **Update**: code/platforms.md, `switch/` and `Dockerfile.switch`, the Nintendo Switch build (a `.nro` for the Homebrew Menu, online and the statistics included), and its index line; code/core.md, `start_switch.c`; code/online.md, the consoles' stream `online_stream_curl.c` (the 3DS's, now the Switch's too); code/analytics.md and devtools/statistics.md, the Switch's sending; GUIDE.md, On a Switch.
 
 ## 2026-10-26

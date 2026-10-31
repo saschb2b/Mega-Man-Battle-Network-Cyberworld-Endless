@@ -18,7 +18,7 @@
 
 #define BUS      0x08000000u
 #define TEXT_END 0xE6   /* a text archive's entry ends with it */
-#define NAME_MAX 32     /* a name's bytes at most, its end among them */
+#define NAME_BYTES 32     /* a name's bytes at most, its end among them */
 
 /* One of BN6's tables as it grows: the word naming it, its entries and
  * their size, where it grows to and to how many; the entries past BN6's
@@ -92,7 +92,7 @@ uint32_t xn_names_end(void) {
 		if (off > last && off < XN_NAMES_ROOM) last = off;
 	}
 	uint32_t n = 0;
-	while (n < NAME_MAX && last + n < XN_NAMES_ROOM && emu_read8(XN_NAMES + last + n) != TEXT_END) ++n;
+	while (n < NAME_BYTES && last + n < XN_NAMES_ROOM && emu_read8(XN_NAMES + last + n) != TEXT_END) ++n;
 	return last + n + 1;
 }
 

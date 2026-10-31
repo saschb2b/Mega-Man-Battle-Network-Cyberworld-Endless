@@ -323,6 +323,20 @@ kcckkkkkkrrk
 .kkkkkkkkkk.
 ............
 ............""",
+    # a PlayStation Vita: its wide screen, a stick at each end below it
+    'vita': """
+............
+............
+..kkkkkkkk..
+.kssssssssk.
+kskkkkkkkksk
+kskbwbbbbksk
+kskbbbbbbksk
+knkkkkkkkknk
+.kssssssssk.
+..kkkkkkkk..
+............
+............""",
     # a phone: the Android app
     'phone': """
 ...kkkkkk...

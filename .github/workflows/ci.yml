@@ -244,6 +244,31 @@ jobs:
           path: build/switch/cyberworld-endless.nro
           retention-days: 14
 
+  vita:
+    name: PlayStation Vita
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.vita, tag: cyberworld-vita }
+      - run: python3 build.py vita
+      - name: A VPK with its eboot, param.sfo, bubble and LiveArea
+        run: |
+          f=build/vita/cyberworld-endless.vpk
+          python3 - "$f" <<'P'
+          import sys, zipfile
+          names = set(zipfile.ZipFile(sys.argv[1]).namelist())
+          want = {'eboot.bin', 'sce_sys/param.sfo', 'sce_sys/icon0.png', 'sce_sys/livearea/contents/bg.png',
+                  'sce_sys/livearea/contents/startup.png', 'sce_sys/livearea/contents/template.xml'}
+          assert want <= names, f'missing: {sorted(want - names)}'
+          P
+          ls -l "$f"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-vita
+          path: build/vita/cyberworld-endless.vpk
+          retention-days: 14
+
   android:
     name: Android
     runs-on: ubuntu-latest

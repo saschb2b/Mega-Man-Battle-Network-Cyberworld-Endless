@@ -8,6 +8,12 @@
   GBA games are kept (`sdmc:/roms/gba/`). Online too, NetBattles included.
   Not yet run on a console.
 
+- **The PS Vita.** A PlayStation Vita or PlayStation TV with custom
+  firmware (HENkaku or h-encore) installs `cyberworld-endless.vpk` from
+  VitaShell, with its own bubble and LiveArea; the ROM goes in
+  `ux0:data/cyberworld-endless/rom/` or where GBA games are kept
+  (`ux0:roms/gba/`). Online too. Not yet run on a console.
+
 ## 0.17.0 (2026-10-26)
 
 - **A battle on every layer.** Every layer without a guardian now has at

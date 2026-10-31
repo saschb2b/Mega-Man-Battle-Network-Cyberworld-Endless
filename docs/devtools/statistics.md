@@ -3,7 +3,7 @@ type: Tool
 title: "Statistics: asked, sent and checked"
 description: "Only a plain player's start asks about and sends the anonymous statistics; `--dev statistics=ask|on|off` and `statsurl=URL` test the question, Options' line and a local Umami stand-in, and `statscheck` sends one event to Umami itself."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-30T23:52:16Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-31T00:08:07Z }
 ---
 
 # Statistics: asked, sent and checked
@@ -24,7 +24,7 @@ nothing but to `statsurl=URL`, a local stand-in for Umami's `/api/send`
 (any server that logs what it is posted). `statscheck` sends one event,
 `game-dev-check` at `/dev-check` (its system as its data), to Umami itself
 whatever the answer, and nothing else: on the systems that send from a
-thread of the game's (Linux, the handhelds, Windows, the 3DS, the Switch) the output
+thread of the game's (Linux, the handhelds, Windows, the 3DS, the Switch, the Vita) the output
 says `statistics: taken (2xx) by ...` or `not taken by ...`. It is the
 one way a test reaches the real Umami; keep it to a check of a system's
 way there.

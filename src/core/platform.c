@@ -513,6 +513,27 @@ static void phone_controls(void) {
 /* Keyboard defaults and file drops are ready before the first event. */
 static void input_start(void) { keymap_default(); SDL_EventState(SDL_DROPFILE, SDL_ENABLE); }
 
+/* The renderer SDL is asked for first, where its own first choice is the
+ * worse one. */
+static void render_hints(void) {
+#ifdef _WIN32
+	/* Direct3D 11 first: SDL's lets the GPU queue one frame at most
+	 * (SetMaximumFrameLatency), where Direct3D 9, SDL2's first choice,
+	 * leaves it to the driver, which queues up to three, each a frame of
+	 * input lag; SDL falls back if it fails. (Naming a driver turns SDL's
+	 * batching off: on again.) */
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+#endif
+#ifdef __vita__
+	/* (the Vita's own GXM renderer: SDL lists OpenGL ES first, through
+	 * vitaGL, whose shaders want a compiler most consoles have not been
+	 * given) */
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "VITA gxm");
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+#endif
+}
+
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
 	if (headless) {
@@ -567,15 +588,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		APP_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
 	if (icon) { SDL_SetWindowIcon(P.window, icon); SDL_FreeSurface(icon); }
 #endif
-#ifdef _WIN32
-	/* Direct3D 11 first: SDL's lets the GPU queue one frame at most
-	 * (SetMaximumFrameLatency), where Direct3D 9, SDL2's first choice,
-	 * leaves it to the driver, which queues up to three, each a frame of
-	 * input lag; SDL falls back if it fails. (Naming a driver turns SDL's
-	 * batching off: on again.) */
-	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
-	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
-#endif
+	render_hints();
 #ifdef __3DS__
 	/* (the 3DS: the renderer draws a canvas of the GBA's size into memory
 	 * the GPU puts on the screen, present_3ds.c) */

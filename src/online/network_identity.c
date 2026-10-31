@@ -17,6 +17,8 @@ EM_JS(int, identity_random, (uint8_t *out), {
 #elif defined(__SWITCH__)
 #include <switch/types.h>
 #include <switch/kernel/random.h>
+#elif defined(__vita__)
+#include <psp2/kernel/rng.h>
 #else
 #include <stdio.h>
 #endif
@@ -44,6 +46,8 @@ bool network_identity(uint8_t out[NETWORK_ID_BYTES]) {
 	/* (the kernel's random numbers: the Switch has no /dev/urandom) */
 	randomGet(out, NETWORK_ID_BYTES);
 	return true;
+#elif defined(__vita__)
+	return sceKernelGetRandomNumber(out, NETWORK_ID_BYTES) >= 0;
 #else
 	FILE *file = fopen("/dev/urandom", "rb");
 	if (!file) return false;

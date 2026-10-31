@@ -83,9 +83,15 @@ static void map_init(void) {
  * the words on the others' buttons. (Joy-Cons are SDL 2.24's types 11-13,
  * which the older SDL's headers a handheld's build reads do not name.) */
 static void kind_of(SDL_GameController *gc, int *family, int *style) {
-	int type = (int)SDL_GameControllerGetType(gc);
 	*family = PAD_FAMILY_XBOX;
 	*style = PAD_STYLE_GENERIC;
+#ifdef __vita__
+	/* (a Vita's own, by their places as SDL's mapping gives them, are
+	 * PlayStation's: Cross the GBA's A) */
+	*style = PAD_STYLE_PLAYSTATION;
+	return;
+#endif
+	int type = (int)SDL_GameControllerGetType(gc);
 	/* (a Switch's own pads have no vendor: switch_mapping names them) */
 	bool own = false;
 #ifdef __SWITCH__

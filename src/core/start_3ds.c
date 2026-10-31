@@ -30,6 +30,7 @@
 #include "emu.h"
 #include "game.h"
 #include "rom.h"
+#include "start_console.h"
 
 /* (the main thread's stack: libctru's 32 KB is tight for the game's
  * deepest calls, a layer's making; the browser build's is 1 MB too) */
@@ -113,7 +114,7 @@ static size_t heap_free(void) {
 
 /* (whether ptm:sysm, which sets the clock, answers is asked first for the
  * log) */
-void start_3ds(bool data_dir_given) {
+void console_start(bool data_dir_given) {
 	/* (the heap's high-water mark kept: start_3ds_heap) */
 	mallopt(M_TRIM_THRESHOLD, INT_MAX);
 	Result sysm = ptmSysmInit();
@@ -212,7 +213,7 @@ static void bn5_3ds(const char *const *places, size_t count) {
 
 const char *start_3ds_bn5_unread(void) { return bn5_unread; }
 
-bool start_3ds_rom(const char *rom_dir, char *msg, size_t n) {
+bool console_rom(const char *rom_dir, char *msg, size_t n) {
 	/* (the game's own rom folder, then where 3DS players keep GBA ROMs: a
 	 * header check passes over the other games without reading them) */
 	if (rom_dir) {

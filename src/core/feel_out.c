@@ -68,7 +68,7 @@ int feel_level(void) { return F.level; }
 void feel_set_triggers(bool on) { F.triggers = on; }
 bool feel_triggers(void) { return F.triggers; }
 bool feel_here(void) {
-#if defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(__3DS__)
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(__3DS__) || defined(__vita__)
 	return false;
 #else
 	return true;

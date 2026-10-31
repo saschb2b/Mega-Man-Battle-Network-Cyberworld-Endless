@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 /* (remote play: where a pipe can be made, mkfifo) */
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__) && !defined(__SWITCH__)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__) && !defined(__SWITCH__) && !defined(__vita__)
 #define REMOTE_PLAY 1
 #include <fcntl.h>
 #include <sys/stat.h>

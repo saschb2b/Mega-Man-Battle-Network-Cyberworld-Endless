@@ -13,11 +13,13 @@ IOS_SDK ?= iphoneos
 CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
+CC_vita := /usr/local/vitasdk/bin/arm-vita-eabi-gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_3ds := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_switch := PKG_CONFIG_PATH=/opt/devkitpro/portlibs/switch/lib/pkgconfig PKG_CONFIG_LIBDIR=/opt/devkitpro/portlibs/switch/lib/pkgconfig
+PKG_vita := PKG_CONFIG_PATH=/usr/local/vitasdk/arm-vita-eabi/lib/pkgconfig PKG_CONFIG_LIBDIR=/usr/local/vitasdk/arm-vita-eabi/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
@@ -32,6 +34,7 @@ BIN_macos := $(OUT)/cyberworld-endless
 BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN_switch := $(OUT)/cyberworld-endless.elf
+BIN_vita := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -56,7 +59,7 @@ ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -176,6 +179,32 @@ $(OUT)/cyberworld-endless.nacp: $(GEN)/version.h
 	/opt/devkitpro/tools/bin/nacptool --create "Cyberworld Endless" "Saschb2b" "$(VERSION)" $@
 $(OUT)/cyberworld-endless.nro: $(BIN) $(OUT)/cyberworld-endless.nacp switch/icon.jpg
 	/opt/devkitpro/tools/bin/elf2nro $(BIN) $@ --icon=switch/icon.jpg --nacp=$(OUT)/cyberworld-endless.nacp
+endif
+# the PlayStation Vita (docker/Dockerfile.vita, vita/): VitaSDK, its SDL2
+# (whose vitaGL is C++, its shaders compiled by SceShaccCgExt) and curl
+# with OpenSSL and mGBA linked in (-q keeps the relocations
+# vita-elf-create needs), a VPK that VitaShell installs, with its title
+# ID, version, bubble and LiveArea (vita/: tools/app_icon.py and
+# tools/steam_art.py draw them)
+ifeq ($(TARGET),vita)
+VITASDK ?= /usr/local/vitasdk
+VITA_BIN := $(VITASDK)/bin
+VITA_TITLE := CWEN00001
+# (APP_VER is two numbers of two digits: the version's major and minor)
+VITA_VER := $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' | xargs printf '%02d.%02d')
+CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -isystem $(VITASDK)/arm-vita-eabi/include
+LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(PKGCONF) --static --libs libcurl) $(shell $(PKGCONF) --libs sdl2) \
+          -lScePower_stub -lSceShaccCgExt -ltaihen_stub -lstdc++ -lm -Wl,-q -Wl,--gc-sections
+all: $(OUT)/cyberworld-endless.vpk
+$(OUT)/eboot.bin: $(BIN)
+	$(VITA_BIN)/vita-elf-create $(BIN) $(OUT)/cyberworld-endless.velf
+	$(VITA_BIN)/vita-make-fself -s $(OUT)/cyberworld-endless.velf $@
+$(OUT)/param.sfo: $(GEN)/version.h
+	$(VITA_BIN)/vita-mksfoex -s TITLE_ID=$(VITA_TITLE) -s APP_VER=$(VITA_VER) "Cyberworld Endless" $@
+$(OUT)/cyberworld-endless.vpk: $(OUT)/eboot.bin $(OUT)/param.sfo vita/icon0.png vita/bg.png vita/startup.png vita/template.xml
+	$(VITA_BIN)/vita-pack-vpk -s $(OUT)/param.sfo -b $(OUT)/eboot.bin -a vita/icon0.png=sce_sys/icon0.png \
+	 -a vita/bg.png=sce_sys/livearea/contents/bg.png -a vita/startup.png=sce_sys/livearea/contents/startup.png \
+	 -a vita/template.xml=sce_sys/livearea/contents/template.xml $@
 endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer

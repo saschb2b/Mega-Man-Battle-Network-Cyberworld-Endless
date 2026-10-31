@@ -119,9 +119,10 @@ WINDOWS_IMAGE = 'cyberworld-windows'   # docker/Dockerfile.windows
 ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
 SWITCH_IMAGE = 'cyberworld-switch'   # docker/Dockerfile.switch
+VITA_IMAGE = 'cyberworld-vita'   # docker/Dockerfile.vita
 PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch',
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita',
           PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 
 
@@ -216,7 +217,7 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE,
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE,
              'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
@@ -239,7 +240,7 @@ def build(target):
 # The release's files are named for the system each is for (players picked
 # the PortMaster port's plain cyberworld.zip for Windows): all but the
 # AppImage, whose name its update information points at, and the ones whose
-# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx, .nro).
+# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx, .nro, .vpk).
 PORT_ZIP = 'cyberworld-endless-portmaster.zip'
 WEB_ZIP = 'cyberworld-endless-website.zip'
 
@@ -2686,7 +2687,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -2746,6 +2747,11 @@ def main():
         # the Nintendo Switch (switch/README.md): build/switch/cyberworld-endless.nro
         build('switch')
         print('built', os.path.join(ROOT, 'build', 'switch', 'cyberworld-endless.nro'))
+        return
+    if a.action == 'vita':
+        # the PlayStation Vita (vita/README.md): build/vita/cyberworld-endless.vpk
+        build('vita')
+        print('built', os.path.join(ROOT, 'build', 'vita', 'cyberworld-endless.vpk'))
         return
     if a.action == 'macos':
         macos_release()

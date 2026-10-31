@@ -12,13 +12,14 @@
 #include "analytics_roots.h"
 
 /* (the 3DS's where its build found devkitPro's libcurl: the Makefile's
- * CW_3DS_CURL; the Switch's always, devkitPro's 7.69 on its own TLS) */
-#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || \
+ * CW_3DS_CURL; the Switch's always, devkitPro's 7.69 on its own TLS; the
+ * Vita's, VitaSDK's on OpenSSL) */
+#if (defined(__3DS__) && defined(CW_3DS_CURL)) || defined(__SWITCH__) || defined(__vita__) || \
 	(defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__))
 #define HTTP_CURL 1
 #endif
 /* (libcurl linked in, not loaded: the consoles') */
-#if defined(__3DS__) || defined(__SWITCH__)
+#if defined(__3DS__) || defined(__SWITCH__) || defined(__vita__)
 #define CURL_LINKED 1
 #endif
 
@@ -30,7 +31,7 @@
 #ifdef CURL_LINKED
 #ifdef __3DS__
 #include "network_3ds.h"
-#else
+#elif defined(__SWITCH__)
 #include <switch/types.h>
 #include <switch/services/ssl.h>
 #endif
@@ -184,8 +185,8 @@ bool analytics_http_ready(void) {
 bool analytics_http_post(const char *url, const char *agent, const char *body, SDL_atomic_t *stop) {
 	static bool begun, roots;
 #ifdef CURL_LINKED
-	/* (the 3DS has no store of its own that knows Let's Encrypt's roots;
-	 * the Switch's knows ISRG Root X1 from its 10.1.0 on) */
+	/* (the 3DS and the Vita have no store of their own that knows Let's
+	 * Encrypt's roots; the Switch's knows ISRG Root X1 from its 10.1.0 on) */
 	roots = true;
 #endif
 #ifdef __3DS__
