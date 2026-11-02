@@ -380,3 +380,75 @@ Devices now used up: the battle's own screens as the whole frame, the
 chip picked as the section card, the shot opening out of the chip
 window, the caption on the chip plate, the Program Advance as the
 stinger, the results screen as the end card.
+
+## 0.19.0: See it as you set it (2026-11-02), `tools/trailers/v0_19_0.py`
+
+The release: Options reworked into pages (Display, Audio, Game) in BN6's
+PET look with pill tabs, a battle beside Display's lines that shows each
+change as it is made, a GBA's screen (mGBA's colour correction and the
+VBA, DS and PSP colours, frame blending to LCD ghosting, RetroArch's LCD
+3x) and the sound set your way (Music and Effects in levels, Output,
+mGBA's Audio Filter). The owner's word (2 November 2026): "a new cool
+trailer showcasing our new customization options rework", BN5's ACDC Town
+as the music's reference for "its happy upbeat rhythm", and "Don't wait
+for my approvals": gates 4 and 5 waived for this release, every other
+gate held.
+
+The music: BN5's song 0x03 (the recording's own title, "T03: Home Town
+(ACDC Town)", and the map-music lists agree), read at --offset 12: 112
+beats a minute, A major on suspended Vs, ii and vi sevenths, the
+Mixolydian v; the lead's four-bar breath of call, busy answer, call and
+held bar, half its notes repeated; the backing's 32nd blips thrown hard
+left and right; the bass high (B2 up) repeating its root; a mellow chord
+sample struck on the beat and its third and fourth sixteenths; the kick
+on 0 7 10 14. Two sketches in the soundfont, both "busier than the
+source: none" once their leads repeated as 0x03's does (their first
+drafts repeated 25% and 10% against 54%, and A's backing leapt 55%
+against 32%): A, Hometown, the square leading as in 0x03's A and B; B,
+Your way, the saw's sampled melody leading as in its C. A was chosen by
+the agent (the owner's pick waived): its parts nearest 0x03's roles and
+its balance nearest the recording's (40/37/22/2 against 44/33/21/2; B
+32/37/29/3), though B's punch was nearer (5.4 dB against the
+recording's 5.1; A 7.7). Grown into 23 bars at 112.5 (a bar 64 frames),
+B-flat major, with 0x03's C in the third segment. One change to the
+approved palette, for the source's own sound: the chord struck on the
+off-beats is FluidR3 GM's electric piano (program 4), mellow and
+decaying as 0x03's chord sample, where the strings swell. The recording
+swings less than BN6's battle themes (5.1 dB): its kit sits back, so the
+kick and snare went down. The piece: "busier than the source: none", no
+lead note rubbing the harmony, 37/38/23/2 against 44/33/21/2 (the wave's
+bass sits above 120 Hz, as 0x03's), a punch of 6.1 dB. The 3DS banner
+is the call under the title (`3ds/banner-0.19.0.wav`).
+
+The look: the trailer is an Options page and the screen it sets. A navy
+field of faint LCD stripes (lcd3x's own pattern), Options' new pill tabs
+as the section label (a pill a segment, the shown one RUN!'s green),
+the shot at 3x in a PET window, a side window that is the setting being
+turned (its name, its value between Options' orange arrows lit as it
+turns, a pip a value), the caption a line of Options' list with the
+orange cursor. Every cut is the screen's refresh: the new picture drawn
+in row by row from the top under a bright line; a look turned inside a
+shot (the same battle in another screen's colours, on the beat) is drawn
+the same way, the side window's value turning on that frame. The same
+battle frame for frame in every look (its input fixed, the looks only
+how it is shown); LCD 3x from screen shots (`--screen-shot`, sixteen a
+run, so four runs a bar, `footage()`), at 4x for the cold open, where the
+same moment plays plain, then as a GBA's screen.
+
+What went wrong on the way: Options fades each turned page in from
+black over seven frames, three black flashes in one bar that read as a
+glitch: the pages are held once shown and the turn is drawn by the
+refresh. A recap of three tiles at 1x in a 1280 frame was too small to
+read: two tiles at 2x. The pill row's L and R letters sat outside the
+safe area. A shot's footage ran past its scene's end and would have
+frozen: the battle's scenes are 131 samples, so a bar's feed starts no
+later than sample 67. The section card's caption repeated its title:
+cards show their lines one a beat instead, the caption plate empty.
+
+Devices now used up: the LCD's stripes as the field, the pill tabs as
+the section label, the refresh as the cut, the setting's spinner and
+pips as a readout, the same moment twice (plain, then set) as the cold
+open.
+
+Neither the music nor the cut has yet been heard or seen by the owner:
+his word on them goes here.
