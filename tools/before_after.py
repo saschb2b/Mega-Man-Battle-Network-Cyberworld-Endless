@@ -41,7 +41,7 @@ MAP_CALLED = '250:' + ',6:A,24:' * 17 + ',60:,40:SELECT'
 SEASIDE_4 = ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '2']
 # (a layer's arrival words paged, MegaMan still where he arrived by frame 530)
 ARRIVED = '150:,' + '4:A,6:,' * 30 + '80:'
-# name, game options, environment, frame (or OLD's and NEW's, where they differ)
+# name, game options, environment, frame (options and frame: or OLD's and NEW's, where they differ)
 SCENES = [
     # (BlastMan's arena in the Robot Control Comp, as the autopilot walks in)
     ('robot-arena', build.RUN_7, WEAK, 1300),
@@ -133,6 +133,18 @@ SCENES = [
     # longer arrival paged too, the map held from frame 1030)
     ('bn5-end-area', ['--scene', 'emu', '--net-biome', 'x2', '--run-depth', '4', '--seed', '2', '--dev', 'quiet,mapall',
                       '--input', '250:' + ',6:A,24:' * 24 + ',60:,40:SELECT'], {}, 1055),
+    # (0.19.0's: Options as SELECT on the title opens it, 0.18.1's one list
+    # beside this build's Display page, its tabs and BN6's battle staged in
+    # its information box)
+    ('options-display', ['--scene', 'title', '--input', '60:,4:SELECT,150:'], {}, 210),
+    # (Display: 0.18.1's list down to Display, A, its three lines; this
+    # build's page as it opens, its scene running; the same for Audio: down
+    # to Audio, A against R from Display, its levels and Output; each
+    # build's own input, OLD's first)
+    ('options-display-page', (['--scene', 'title', '--input', '60:,4:SELECT,40:,4:DOWN,10:,4:A,100:'],
+                              ['--scene', 'title', '--input', '60:,4:SELECT,150:']), {}, 210),
+    ('options-sound', (['--scene', 'title', '--input', '60:,4:SELECT,40:,4:DOWN,10:,4:DOWN,10:,4:A,70:'],
+                       ['--scene', 'title', '--input', '60:,4:SELECT,40:,4:R,94:']), {}, 200),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -217,7 +229,8 @@ def main():
             continue
         path = os.path.join(out, f'compare-{name}.png')
         old_at, new_at = at if isinstance(at, tuple) else (at, at)
-        pair(frame(old, args, env, old_at, name, *whole), frame(new, args, env, new_at, name, *whole), a.old_label or a.old.lstrip('v'),
+        old_args, new_args = args if isinstance(args, tuple) else (args, args)
+        pair(frame(old, old_args, env, old_at, name, *whole), frame(new, new_args, env, new_at, name, *whole), a.old_label or a.old.lstrip('v'),
              a.new).save(path, optimize=True)
         print('compared', name)
 
