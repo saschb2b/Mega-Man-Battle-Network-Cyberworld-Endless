@@ -1240,6 +1240,23 @@ SERVER_PICK = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:
 # battle yet on the layer, walks onto it: the pad holds the layer's battle)
 FLOOR_PAD = ['--scene', 'emu', '--run-depth', '4', '--seed', '2']
 FLOOR_PAD_INPUT = '1:,150:,' + '6:A,6:,30:,' * 14 + '60:,0:place 316 84 1,10:,55:UP+RIGHT,300:'
+# 0.19.0's a GBA's screen (issue #265): seed 1's first layer, its words
+# paged, its first random battle, the hand sent, then MegaMan up and down a
+# row firing his buster from frame 1200 to 1500 or so. At 720x480 the canvas
+# is the game's 240x160 and the screen it 3x, lcd3x's stripes whole there.
+GBA_SCREEN = ['--scene', 'emu', '--dev', 'quiet', '--size', '720x480', '--input',
+              '150:,' + '4:A,6:,' * 60 + '20:,0:battle,220:,4:A,16:,4:A,16:,4:START,16:,4:A,110:,6:A,24:,'
+              + '6:B,14:,6:UP,10:,6:B,14:,6:DOWN,10:,' * 6 + '200:']
+GBA_SHOT = 1280
+# (a Sky layer's map held over the game, the engine's drawing on BN6's picture)
+MAP_SKY = ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall',
+           '--input', '250:' + ',6:A,24:' * 14 + ',60:,40:SELECT']
+# (Options' Display on the title, its scene staged: down its lines, the
+# scene changing with the line; Colour correction from Off through GBA,
+# VBA, DS and PSP and back, the whole screen recoloured each time; Frame
+# blending's scene MegaMan hit and flickering, Simple, Smart and LCD)
+OPTIONS_LIVE = ('60:,4:SELECT,150:,' + '4:DOWN,6:,40:,' + '4:DOWN,6:,100:,' + '4:DOWN,6:,60:,' + '4:RIGHT,6:,50:,' * 5 +
+                '4:DOWN,6:,100:,' + '4:RIGHT,6:,70:,' * 3)
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1657,7 +1674,66 @@ SCREENSHOTS = [
     # (a battle on every layer: MegaMan steps onto the exit pad of a layer
     # still owed its battle, and the battle starts there)
     ('floor-pad', FLOOR_PAD + ['--input', FLOOR_PAD_INPUT], [(863, 'floor-pad'), (868, 'floor-pad-start')], {}),
+    # 0.19.0's notes. (a GBA's screen: one battle frame with each Colour
+    # correction, side by side in SCREENSHOT_SHEETS; LCD 3x, the whole
+    # screen at 720x480, its stripes 1:1; the map held over a Sky layer,
+    # Off and PSP: the engine's drawing recoloured with BN6's picture)
+    ('gba-off', GBA_SCREEN, [(GBA_SHOT, 'gba-off')], {}),
+    ('gba-gba', GBA_SCREEN + ['--colour-correction', 'gba'], [(GBA_SHOT, 'gba-gba')], {}),
+    ('gba-vba', GBA_SCREEN + ['--colour-correction', 'vba'], [(GBA_SHOT, 'gba-vba')], {}),
+    ('gba-nds', GBA_SCREEN + ['--colour-correction', 'nds'], [(GBA_SHOT, 'gba-nds')], {}),
+    ('gba-psp', GBA_SCREEN + ['--colour-correction', 'psp'], [(GBA_SHOT, 'gba-psp')], {}),
+    ('gba-lcd3x', GBA_SCREEN + ['--lcd3x', 'on'], [(GBA_SHOT, 'gba-lcd3x')], {}, 1),
+    ('map-off', MAP_SKY, [(755, 'map-off')], {}),
+    ('map-psp', MAP_SKY + ['--colour-correction', 'psp'], [(755, 'map-psp')], {}),
+    # (the sound your way, #270: Options' Audio from the title, Music turned
+    # down to 7; then down to Output, Headphones, explained)
+    ('options-sound', ['--scene', 'title', '--input', '60:,4:SELECT,6:,40:,4:R,6:,60:,' + '4:LEFT,6:,10:,' * 3 + '40:,' +
+                       '4:DOWN,6:,20:,' * 2 + '4:RIGHT,6:,50:'], [(275, 'options-levels'), (395, 'options-output')], {}),
 ]
+
+# pictures of others side by side for a release's notes (made after the
+# screenshots they hold): name, then its rows of (screenshot, label), each
+# at 2x under its label as tools/before_after.py's pairs
+SCREENSHOT_SHEETS = {
+    'gba-colour': [[('gba-off', 'Off'), ('gba-gba', 'Colour correction: GBA')]],
+    'gba-profiles': [[('gba-gba', 'GBA'), ('gba-vba', 'VBA')], [('gba-nds', 'DS'), ('gba-psp', 'PSP')]],
+    'gba-map': [[('map-off', 'Off'), ('map-psp', 'Colour correction: PSP')]],
+}
+SHEET_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+
+
+def sheet(rows):
+    """Pictures side by side and rows under rows, each at 2x with whole
+    pixels under its label: rows of (PIL image, label)."""
+    from PIL import Image, ImageDraw, ImageFont
+    gap, bar = 8, 30
+    cells = [[(im.resize((2 * im.width, 2 * im.height), Image.NEAREST), label) for im, label in row] for row in rows]
+    w, h = cells[0][0][0].size
+    cols = max(len(row) for row in cells)
+    out = Image.new('RGB', (cols * w + (cols - 1) * gap, len(cells) * (bar + h) + (len(cells) - 1) * gap), (16, 24, 40))
+    d = ImageDraw.Draw(out)
+    font = ImageFont.truetype(SHEET_FONT, 18) if os.path.exists(SHEET_FONT) else ImageFont.load_default()
+    for r, row in enumerate(cells):
+        y = r * (bar + h + gap)
+        for c, (im, label) in enumerate(row):
+            x = c * (w + gap)
+            out.paste(im, (x, y + bar))
+            d.text((x + w // 2, y + bar // 2), label, fill=(120, 248, 255), font=font, anchor='mm')
+    return out
+
+
+def screenshot_sheets(only=None):
+    """docs/screenshots/NAME.png for each SCREENSHOT_SHEETS entry whose
+    pictures were just made (all of them, with no names)."""
+    from PIL import Image
+    out = os.path.join(ROOT, 'docs', 'screenshots')
+    for name, rows in SCREENSHOT_SHEETS.items():
+        if only and name not in only:
+            continue
+        sheet([[(Image.open(os.path.join(out, f'{n}.png')).convert('RGB'), label) for n, label in row] for row in rows]).save(
+            os.path.join(out, f'{name}.png'), optimize=True)
+        print('screenshot', name)
 
 
 SAVES_HOME = '/home/player'
@@ -1732,6 +1808,12 @@ def screenshots(only=None):
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
     os.makedirs(out, exist_ok=True)
+    # (a sheet named, or one of its pictures: all of its pictures, and it)
+    only = set(only or ())
+    for name, rows in SCREENSHOT_SHEETS.items():
+        parts = {n for row in rows for n, _ in row}
+        if name in only or parts & only:
+            only |= parts | {name}
     for name, args, frames, env, *whole in SCREENSHOTS:
         if only and name not in only:
             continue
@@ -1786,6 +1868,7 @@ def screenshots(only=None):
                 im = two_screens(im, Image.open(os.path.join(tmp, f'{n}-second.bmp')).convert('RGB'))
             im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
+    screenshot_sheets(only)
     return 0
 
 
@@ -1897,6 +1980,12 @@ CLIPS = [
     # (0.17.0's: the exit pad holding a layer's battle, from MegaMan's walk
     # onto it to the Custom screen)
     ('floor-pad', FLOOR_PAD, {}, FLOOR_PAD_INPUT, 800, 1090),
+    # (0.19.0's: Options' Display on the title, its scene changing with the
+    # line and the whole screen with Colour correction; a GBA's screen's
+    # battle, MegaMan stepping and firing, Off beside LCD ghosting)
+    ('options-live', ['--scene', 'title'], {}, OPTIONS_LIVE, 200, 1100),
+    ('gba-blend', GBA_SCREEN, {}, None, 1200, 1420,
+     'beside', [('Off', []), ('Frame blending: LCD', ['--interframe-blending', 'lcd_ghosting'])]),
 ]
 
 
@@ -1912,7 +2001,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
                'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15),
-               'floor-pad': (None, 15)}
+               'floor-pad': (None, 15), 'options-live': (None, 15), 'gba-blend': (None, 15)}
 
 
 def clips(only=None):
@@ -1928,6 +2017,8 @@ def clips(only=None):
         if only and name not in only:
             continue
         dual = mode == ['3ds']
+        # (a clip 'beside': the same run once a (label, options) each, side by side under the labels)
+        beside = mode[1] if mode[:1] == ['beside'] else [(None, [])]
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         os.makedirs(os.path.join(tmp, 'png'))
@@ -1936,9 +2027,13 @@ def clips(only=None):
         extra = ['--input', script] if script else []
         if dual:
             extra += ['--second-shot-range', f'{first}:{last}:/src/.build/clips/s']
-        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
-                      *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
-                      mounts=docs_rom_mounts(bn5='bn5' in name or name.startswith('trade-')))
+        code = 0
+        for i, (_, more) in enumerate(beside):
+            shutil.rmtree(os.path.join(tmp, 'data'), ignore_errors=True)
+            os.makedirs(os.path.join(tmp, 'data'))
+            code = code or docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
+                                  *args, *more, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f{i}_',
+                                  mounts=docs_rom_mounts(bn5='bn5' in name or name.startswith('trade-')))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1948,16 +2043,20 @@ def clips(only=None):
             return code
         n = 0
         for f in range(first, last + 1, 2):
-            im = Image.open(os.path.join(tmp, f'f{f:05d}.bmp')).convert('RGB')
-            w, h = im.size   # the canvas: the game's 240 x 160 in the middle
-            im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            ims = []
+            for i in range(len(beside)):
+                im = Image.open(os.path.join(tmp, f'f{i}_{f:05d}.bmp')).convert('RGB')
+                w, h = im.size   # the canvas: the game's 240 x 160 in the middle
+                ims.append(im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)))
+            im = ims[0] if len(ims) == 1 else sheet([list(zip(ims, (label for label, _ in beside)))])
             if dual:
                 im = two_screens(im, Image.open(os.path.join(tmp, f's{f:05d}.bmp')).convert('RGB'))
             if n == 0:
                 im.save(os.path.join(out, f'{name}.png'), optimize=True)
             im.save(os.path.join(tmp, 'png', f'{n:05d}.png'))
             n += 1
-        if encode_clip(name, tmp, out, n, im.size, dual):
+        # (side by side the sheet is 2x already: encoded as two screens are)
+        if encode_clip(name, tmp, out, n, im.size, dual or len(beside) > 1):
             return 1
     return 0
 
