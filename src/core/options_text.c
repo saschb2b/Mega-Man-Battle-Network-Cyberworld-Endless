@@ -56,6 +56,12 @@ static const char *const words[] = {
 	"Colour correction",   /* OW_COLOUR */
 	"mGBA's GBA colours: darker and softer, as a GBA's own screen shows them",   /* OW_COLOUR_GBA_NOTE */
 	"The colours as the game stores them, bright and full",   /* OW_COLOUR_OFF_NOTE */
+	"VBA",   /* OW_VBA */
+	"DS",   /* OW_NDS */
+	"PSP",   /* OW_PSP */
+	"VisualBoyAdvance's GBA colours: darker still, and softer",   /* OW_COLOUR_VBA_NOTE */
+	"The first DS's screen: dimmer whites, softer colours",   /* OW_COLOUR_NDS_NOTE */
+	"A PSP 1000's or 2000's screen: bright, its colours warmer",   /* OW_COLOUR_PSP_NOTE */
 	"Frame blending",   /* OW_BLEND */
 	"Simple",   /* OW_SIMPLE */
 	"Smart",   /* OW_SMART */
@@ -136,8 +142,10 @@ const char *options_triggers_note(void) {
 const char *options_colour_note(void) {
 	return "\n# colour_correction: gba shows the game's colours as a GBA's own screen\n"
 		"# does, darker and softer, by mGBA's Color Correction (its libretro core's,\n"
-		"# step for step); off as the game stores them. Options' Display changes\n"
-		"# it too.\n";
+		"# step for step); vba, nds and psp run libretro's handheld colour shaders\n"
+		"# over the picture as RetroArch does: VisualBoyAdvance's GBA colours, the\n"
+		"# first DS's screen, a PSP 1000's or 2000's; off as the game stores them.\n"
+		"# Options' Display changes it too.\n";
 }
 
 const char *options_blend_note(void) {

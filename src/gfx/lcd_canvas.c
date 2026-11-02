@@ -4,17 +4,18 @@
 #include "lcd_frame.h"
 #include "platform.h"
 
-static bool was;
+static LcdColour was;
 static unsigned gen;
 
-/* whether the engine's colours are corrected now */
+/* whether the engine's colours are corrected now (and the count stepped
+ * where the colour they take changed) */
 static bool on_now(void) {
-	bool on = lcd_colour() == LCD_COLOUR_GBA && !platform_own_screen();
-	if (on != was) {
-		was = on;
+	LcdColour c = platform_own_screen() ? LCD_COLOUR_OFF : lcd_colour();
+	if (c != was) {
+		was = c;
 		++gen;
 	}
-	return on;
+	return c != LCD_COLOUR_OFF;
 }
 
 unsigned lcd_canvas_gen(void) {

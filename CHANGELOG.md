@@ -10,9 +10,15 @@
   and blue stripes and a dark line through each row (not on the 3DS). The
   first two are the mGBA core's Color Correction and Interframe Blending
   as RetroArch runs it, matched to its own code pixel for pixel; the third
-  is RetroArch's lcd3x shader. Colour correction covers Cyberworld's own
-  screens and the map too, so the whole screen reads as one GBA's and
-  Options shows the change as you make it.
+  is RetroArch's lcd3x shader.
+- **More screens' colours.** Colour correction has three more beside
+  GBA, libretro's handheld colour shaders as RetroArch runs them: **VBA**
+  (VisualBoyAdvance's GBA colours, darker still), **DS** (the first DS's
+  screen, dimmer and softer) and **PSP** (a PSP 1000's or 2000's, bright
+  and warmer), each matched to its shader's math for every colour.
+  Whichever you pick covers Cyberworld's own screens and the map too, so
+  the whole screen reads as one and Options shows the change as you make
+  it.
 
 ## 0.18.1 (2026-10-31)
 
