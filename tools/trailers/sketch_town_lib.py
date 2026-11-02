@@ -45,9 +45,12 @@ one, the snare on two and four), numbers only:
   leads), one bar of the bass and drums thinned, then all again.
 
 What these sketches do with those jobs: every part on FluidR3 GM's
-instruments (the owner's gate 3, SKILL.md), never the squares' or the
-wave's own sound: the lead on 81 Saw Wave, the blips on 12 Marimba, the
-bass on 38 Synth Bass 1 (SAMPLED_PARTS); the noise channel keeps the hats.
+instruments (the owner's gate 3, SKILL.md), the squares doubling the lead
+and the blips for the top the samples cannot reach: the lead on 81 Saw
+Wave over square 1, the blips on 13 Xylophone over square 2 at 25%, the
+bass on 34 Electric Bass (pick) (SAMPLED_PARTS); a counter-part of short
+notes from the chords (chime) in the busy sampled track's job; the noise
+channel keeps the hats.
 """
 import os
 import sys
@@ -61,24 +64,36 @@ from trailers.sketch_vb_lib import HARDWARE, REVERB, SOUNDFONT, halves  # noqa: 
 BPM = 112.5                      # (112 in the game; 112.5 makes a bar 64 video frames)
 TAIL = 2.0
 DS_LEVEL = 1.0
-MIX = (('lead', ('sq1',), 0.15), ('arp', ('sq2',), 0.16), ('bass', ('wave',), 0.15),
-       ('hats', ('noise',), 0.08), ('fx', ('fx',), 0.07))
+MIX = (('lead', ('sq1',), 0.11), ('arp', ('sq2',), 0.14), ('bass', ('wave',), 0.15),
+       ('hats', ('noise',), 0.15), ('fx', ('fx',), 0.08))
 # the chord samples: the strings' (the approved palette) and the
 # electric piano's (FluidR3 GM's program 4), one each of major, minor,
 # suspended and diminished, recoloured by the bass (Kaida's way)
 CHORD_SAMPLES = dict(V.CHORD_SAMPLES, ep=(0, 2, 7, 12), ep_m=(0, 3, 7, 12), ep_M=(0, 4, 7, 12), ep_d=(0, 3, 6, 12))
 DS_ENV = dict(V.DS_ENV, ep=(255, 238, 80, 200), ep_m=(255, 238, 80, 200), ep_M=(255, 238, 80, 200),
               ep_d=(255, 238, 80, 200), low=(255, 0, 230, 200),
-              sflead=(255, 0, 230, 200), mallet=(255, 0, 255, 170), sfbass=(255, 0, 240, 190))
-DS_GAIN = dict(V.DS_GAIN, kick=0.7, snare=0.6, ep=0.75, ep_m=0.75, ep_M=0.75, ep_d=0.75, dlead=0.34, low=0.42,
-               pad=0.6, pad_m=0.6, pad_M=0.6, pad_d=0.6, sflead=0.32, mallet=0.3, sfbass=0.55)
+              sflead=(255, 0, 230, 200), mallet=(255, 0, 255, 150), sfbass=(255, 0, 235, 180),
+              celesta=(255, 0, 255, 160), vibes=(255, 0, 255, 170), pizz=(255, 0, 255, 150))
+DS_GAIN = dict(V.DS_GAIN, kick=0.78, snare=0.6, ep=0.55, ep_m=0.55, ep_M=0.55, ep_d=0.55, dlead=0.34, low=0.42,
+               pad=0.45, pad_m=0.45, pad_M=0.45, pad_d=0.45, sflead=0.28, mallet=0.3, sfbass=0.6,
+               celesta=0.36, vibes=0.34, pizz=0.36)
 SAMPLED_LEADS = ('dlead',)
 # every melodic part on FluidR3 GM's instruments (the owner, 2 November
 # 2026: the squares and the wave alone are "just not on the quality we
-# want"): the lead the saw lead's, the backing's blips the marimba's, the
-# bass the synth bass's; music_check.py reads them by these roles and
-# fails a piece whose lead, backing or bass is not the soundfont's
+# want"): the lead on the saw lead, the backing's blips on the xylophone,
+# the bass on the picked bass; music_check.py reads them by these roles
+# and fails a piece whose lead, backing or bass is not the soundfont's.
+# The lead and the blips are doubled by the squares, as 0x03 plays them:
+# the samples, mixed at MP2K's 13379 Hz, end near 5 kHz, and the squares
+# give the top a GBA's music has (the owner, the same day: "why does the
+# track still sound so dull?"; the soundfont alone kept a quarter of the
+# recording's energy above 3 kHz)
 SAMPLED_PARTS = {'lead': ('sflead',), 'backing': ('mallet',), 'bass': ('sfbass',)}
+# the squares doubling them, 0x03's own: the lead's 50% (envelope 0 3 11 1,
+# a vibrato after 14 ticks), the backing's blips at its thinner 25%, more
+# top and less middle
+LEAD = dict(duty=0.5, env=(0, 3, 11, 1), vib=(22, 14))
+BLIP = dict(duty=0.25, env=(0, 1, 11, 1))
 
 
 
@@ -91,8 +106,12 @@ def instruments():
     # the lead (F4 to D6), the backing's blips (F4 to B-flat 5) and the bass
     # (B-flat 2 to G4), each recorded in the middle of its range
     S['sflead'] = sf.instrument(81, [74], 2.4, fade=0.2)
-    S['mallet'] = sf.instrument(12, [74], 0.35, fade=0.05)
-    S['sfbass'] = sf.instrument(38, [55], 2.4, fade=0.2)
+    S['mallet'] = sf.instrument(13, [74], 0.35, fade=0.05)
+    S['sfbass'] = sf.instrument(34, [55], 2.4, fade=0.2)
+    # the counter-part's three bright voices, one a section (A3 to A5)
+    S['celesta'] = sf.instrument(8, [69], 0.6, fade=0.1)
+    S['vibes'] = sf.instrument(11, [69], 0.8, fade=0.15)
+    S['pizz'] = sf.instrument(45, [69], 0.5, fade=0.1)
     return S
 
 
@@ -139,7 +158,9 @@ def lead(s, bar, line, vel=112, shift=0):
     and 92 between)"""
     for t, n, k in line:
         soft = t % 24 != 0
-        s.hit('sflead', bar, t, n, key(k) + shift, vel - (18 if soft and n <= 6 else 0))
+        v = vel - (18 if soft and n <= 6 else 0)
+        s.hit('sflead', bar, t, n, key(k) + shift, v)
+        s.note('sq1', bar, t, n, key(k) + shift, v - 20, **LEAD)
 
 
 BLIP_VEL = (100, 32, 60, 32)     # a beat's four sixteenths
@@ -160,6 +181,7 @@ def blips(s, bar, names, until=16, double=False, vel=0, register=0):
             side = -0.9 if n % 2 == 0 else 0.9
             level = BLIP_VEL[p % 4] if not half else 32
             s.hit('mallet', bar, 6 * p + 3 * half, 3, k, max(24, level + vel), side)
+            s.note('sq2', bar, 6 * p + 3 * half, 3, k, max(16, level + vel - 24), pan=side, **BLIP)
             n += 1
 
 
@@ -212,6 +234,24 @@ def melody(s, bar, line, vel=100):
         s.hit('dlead', bar, t, max(4, n - 1), key(k), vel if t % 24 == 0 else vel - 16, -0.15)
 
 
+# the counter-part's figure: a short note on these sixteenths, each the
+# chord's note at this index of its four (ours, written for this piece:
+# 0x03's sampled part only says how many, how short and how bright)
+CHIME = ((2, 1), (3, 2), (6, 0), (9, 3), (10, 2), (13, 1), (14, 0))
+
+
+def chime(s, bar, names, inst, vel=78, register=-12, until=16, side=1):
+    """the sampled counter-part (0x03's busy sampled track's job: short
+    notes, a bright voice a section, moving across the stereo): five
+    ticks a note, the chord's own notes an octave under the blips, from
+    the other side note by note"""
+    for i, (p, idx) in enumerate(CHIME):
+        if p < until:
+            k = keys(H[at(names, p)][1])[idx] + register
+            pan = side * (0.6 if i % 2 == 0 else -0.25)
+            s.hit(inst, bar, 6 * p, 5, k, vel if p in (2, 10) else vel - 14, pan)
+
+
 def kit(s, bar, crash=False, until=16, clap=False, ghost=True):
     """0x03's kit: the kick on 0 7 10 14, the snare on 4 and 12 (a ghost
     on 13), closed hats on every sixteenth at four levels, the open hat on
@@ -252,3 +292,4 @@ def ring(s, bar, name, top, vel=112):
     s.hit(H[name][4], bar, 0, 150, key(H[name][5]) + 12, 96, 0.35)
     s.hit('sfbass', bar, 0, 90, root(name), 127, 0.0, [(0, 0), (60, 0), (90, -2)])
     s.hit('sflead', bar, 0, 96, key(top), vel, 0.0, [(0, 0), (80, 0), (96, -1)])
+    s.note('sq1', bar, 0, 96, key(top), vel - 20, **dict(LEAD, bend=[(0, 0), (80, 0), (96, -1)]))

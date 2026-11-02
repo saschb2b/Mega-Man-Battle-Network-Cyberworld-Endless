@@ -2,8 +2,8 @@
 """A trailer piece checked without ears: rendered, then its loudness and
 peaks bar by bar (no bar near clipping, the drop and the climax where the
 plan put them), its balance of lows, mids and highs and its punch (the
-swing inside a beat) beside a reference recording's (the game it is in
-the manner of), the lead's notes that rub the harmony (where the piece
+swing inside a beat) and its highs above 3 kHz at the full rate beside
+a reference recording's (the game it is in the manner of), the lead's notes that rub the harmony (where the piece
 names its CHORD_SAMPLES), and a piano roll of its score to look at (the
 squares, the wave's bass, the stabs and pads). It fails (exit 1) a piece
 whose lead, backing or bass is not played by the soundfont (the owner's
@@ -55,6 +55,30 @@ def bands(x, sr, edges=(200, 1500)):
                                               for lo, hi in zip(lows, lows[1:])]
     total = sum(energy) or 1
     return [round(100 * e / total) for e in energy]
+
+
+def highs(x, sr, cut=3000.0):
+    """The share of the energy above `cut` Hz at the full rate, %: the
+    top a GBA's squares and noise give, which the 8 kHz bands cannot see
+    (0.19.0's re-voiced piece measured 1.8% against the recording's 6.8%,
+    and the owner heard it "dull"). Two passes of a second-order
+    high-pass (RBJ)."""
+    w = 2 * math.pi * cut / sr
+    alpha = math.sin(w) / (2 * 0.7071)
+    c = math.cos(w)
+    b0, b1, b2 = (1 + c) / 2, -(1 + c), (1 + c) / 2
+    a0, a1, a2 = 1 + alpha, -2 * c, 1 - alpha
+    b0, b1, b2, a1, a2 = b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0
+    y = x
+    for _ in range(2):
+        out, x1, x2, y1, y2 = [], 0.0, 0.0, 0.0, 0.0
+        for v in y:
+            o = b0 * v + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+            x2, x1, y2, y1 = x1, v, y1, o
+            out.append(o)
+        y = out
+    total = sum(v * v for v in x) or 1.0
+    return 100 * sum(v * v for v in y) / total
 
 
 def punch(x, sr, bpm):
@@ -227,7 +251,10 @@ def soundfont(piece):
     """The owner's gate 3 held by numbers (SKILL.md): the piece names
     FluidR3 GM (SOUNDFONT), and its lead, its backing and its bass each
     play at least four in five of their notes on the soundfont's
-    instruments (SAMPLED_PARTS), not on the GBA's squares and wave alone.
+    instruments (SAMPLED_PARTS), not on the GBA's squares and wave alone:
+    a square or wave note that doubles one of the role's sampled notes
+    (the same tick, the same pitch class) counts with it, as the squares'
+    top is wanted over the samples (0.19.0's second fix).
     0.16.0's and 0.19.0's first pieces played their melody, backing and
     bass on the squares and the wave with a few sampled accents, and the
     owner heard no soundfont in either ("just not on the quality we
@@ -239,12 +266,13 @@ def soundfont(piece):
     sampled = getattr(piece, 'SAMPLED_PARTS', {})
     print('soundfont: each part\'s notes on its instruments (SAMPLED_PARTS) against the GBA\'s own channel')
     for role, ch in (('lead', 'sq1'), ('backing', 'sq2'), ('bass', 'wave')):
-        psg = len(s.psg[ch])
+        mine = {(e[0], e[3] % 12) for e in s.ds if e[2] in sampled.get(role, ())}
         sf = sum(1 for e in s.ds if e[2] in sampled.get(role, ()))
+        psg = sum(1 for t, n, k, *_ in s.psg[ch] if (t, k % 12) not in mine)
         if psg + sf == 0:
             continue
         share = sf / (psg + sf)
-        print(f'  {role:8s} {sf:4d} sampled, {psg:4d} on {ch}: {100 * share:3.0f}%')
+        print(f'  {role:8s} {sf:4d} sampled, {psg:4d} on {ch} alone: {100 * share:3.0f}%')
         if share < SAMPLED_SHARE:
             fails.append(f'{role}: {100 * share:.0f}% of its notes on the soundfont, under {100 * SAMPLED_SHARE:.0f}%')
     print('soundfont: ' + ('FAIL: ' + '; '.join(fails) if fails else 'every part on FluidR3 GM'))
@@ -324,6 +352,7 @@ def main():
     print('balance low/mid/high %:', bands(mine[8000 * 2:8000 * 30], 8000))
     print('bass/body/mids/top % (120, 500, 2000 Hz):', bands(mine[8000 * 2:8000 * 30], 8000, (120, 500, 2000)))
     print(f'punch (the swing inside a beat): {punch(mine[8000 * 2:8000 * 30], 8000, piece.BPM):.1f} dB')
+    print(f'highs above 3 kHz, the full band: {highs(mono[sr * 4:sr * 20], sr):.1f}%')
     if ref:
         local = os.path.join(work, 'ref' + os.path.splitext(ref)[1])
         shutil.copy(ref, local)   # (inside the repository: Docker mounts no /tmp)
@@ -337,6 +366,13 @@ def main():
         print('reference low/mid/high %:', bands(x[8000 * 10:8000 * 40] or x, 8000))
         print('reference bass/body/mids/top %:', bands(x[8000 * 10:8000 * 40] or x, 8000, (120, 500, 2000)))
         print(f'reference punch: {punch(x[8000 * 10:8000 * 40] or x, 8000, piece.BPM):.1f} dB')
+        full = os.path.join(work, 'ref44.raw')
+        subprocess.check_call(['docker', 'run', '--rm', '--name', f'cw-music-check-full-{os.getpid()}', '-u',
+                               f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '--entrypoint', 'ffmpeg',
+                               build.FFMPEG_IMAGE, '-y', '-loglevel', 'error', '-i', rel(local), '-ac', '1', '-ar', '44100',
+                               '-f', 's16le', rel(full)])
+        y = [v / 32768 for v in array.array('h', open(full, 'rb').read())]
+        print(f'reference highs above 3 kHz: {highs(y[44100 * 10:44100 * 26] or y, 44100):.1f}%')
     clashes(piece)
     discipline(piece, source)
     fails = soundfont(piece)

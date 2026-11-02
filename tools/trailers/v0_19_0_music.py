@@ -8,13 +8,18 @@ rendered in docker/Dockerfile.music's image, its 3DS banner kept as our
 own audio (BANNER_AUDIO).
 
 Every part plays FluidR3 GM's instruments (the owner's gate 3, SKILL.md):
-the lead, 0x03's square, on 81 Saw Wave; the backing's blips, its other
-square, on 12 Marimba; the bass, its wave, on 38 Synth Bass 1
-(SAMPLED_PARTS); the chords on 4 Electric Piano 1 and 48 Strings, the low
-answer on 61 Brass Section, the C's melody on 81, the kit 24's. The GBA's
-noise channel keeps the hats and the crash. (The first cut played the
-lead, the blips and the bass on the squares and the wave, and the owner
-heard no soundfont in it, 2 November 2026.)
+the lead, 0x03's square, on 81 Saw Wave doubled by square 1 at 50%; the
+backing's blips, its other square, on 13 Xylophone doubled by square 2
+at 25%; the bass, its wave, on 34 Electric Bass (pick) (SAMPLED_PARTS);
+the chords on 4 Electric Piano 1 and 48 Strings, the low answer on 61
+Brass Section, the C's melody on 81, the kit 24's; and a counter-part of
+our own in 0x03's busy sampled track's job (short notes from the chords,
+from the other side note by note), 8 Celesta in the A and the recap, 11
+Vibraphone in the B, 45 Pizzicato Strings in the C. The GBA's noise
+channel keeps the hats and the crash. Its highs above 3 kHz match the
+recording's (6.0%). (The first cut played the lead, the blips and the
+bass on the squares and the wave, and the owner heard no soundfont in
+it; the second on samples alone, and he heard it dull: 2 November 2026.)
 
 The owner waived his pick of a sketch for this release (2 November 2026:
 "Don't wait for my approvals"). Of the two written, A was chosen: every
@@ -128,13 +133,16 @@ def nxt(bar):
     return CHORDS.get(bar + 1, (None,))[0]
 
 
-def band(s, bar, double=False, clap=False, crash=False, toms=False, stab_vel=96):
+def band(s, bar, double=False, clap=False, crash=False, toms=False, stab_vel=96, chime=None):
     """the band under the lead: the blips, the bass, the chord struck, the
-    kit (cut short for the toms where they fall)"""
+    counter-part in its section's voice (from the other side each bar),
+    the kit (cut short for the toms where they fall)"""
     names = CHORDS[bar]
     L.blips(s, bar, names, double=double)
     L.bass(s, bar, names, nxt(bar))
     L.stabs(s, bar, names, vel=stab_vel)
+    if chime:
+        L.chime(s, bar, names, chime, until=13 if toms else 16, side=1 if bar % 2 else -1)
     L.kit(s, bar, crash=crash, clap=clap, until=13 if toms else 16)
     if toms:
         L.toms(s, bar)
@@ -152,15 +160,15 @@ def arrangement():
     L.lead(s, 1, [(72, 6, 'F4'), (78, 6, 'G4'), (84, 12, 'A4')], vel=100)
     # bars 2-7: the A (the title, the new Options)
     for bar in range(2, 8):
-        band(s, bar, crash=bar in (2, 6), toms=bar == 7)
+        band(s, bar, crash=bar in (2, 6), toms=bar == 7, chime='celesta')
         L.lead(s, bar, LINES[bar])
         if bar in LOW:
             L.answer(s, bar, LOW[bar])
     # bars 8-12: the B (the GBA's screen), the call back at its climax
     for bar in range(8, 12):
-        band(s, bar, double=True, clap=True, crash=bar == 8, toms=bar == 11, stab_vel=100)
+        band(s, bar, double=True, clap=True, crash=bar == 8, toms=bar == 11, stab_vel=100, chime='vibes')
         L.lead(s, bar, LINES[bar])
-    band(s, 12, crash=True, toms=True, stab_vel=100)
+    band(s, 12, crash=True, toms=True, stab_vel=100, chime='vibes')
     L.lead(s, 12, CALL, vel=118)
     for t, n, k in CALL:
         s.hit('double', 12, t, max(4, n - 1), L.key(k) - 12, 84, 0.25)
@@ -180,12 +188,13 @@ def arrangement():
         L.stabs(s, bar, names, vel=86, places=(3, 6, 10))
         L.strings(s, bar, names)
         L.melody(s, bar, MELODY[bar])
+        L.chime(s, bar, names, 'pizz', vel=72, until=13 if bar == 16 else 16, side=1 if bar % 2 else -1)
         L.kit(s, bar, crash=bar == 14, clap=True, until=13 if bar == 16 else 16)
     L.toms(s, 16)
     # bars 17-18, the recap: the call, then the cadence held
-    band(s, 17, crash=True)
+    band(s, 17, crash=True, chime='celesta')
     L.lead(s, 17, CALL, vel=116)
-    band(s, 18, toms=True)
+    band(s, 18, toms=True, chime='celesta')
     L.lead(s, 18, LINES[18])
     # bar 19, the stinger: B-flat ringing
     L.ring(s, 19, 'Bb', 'D5')

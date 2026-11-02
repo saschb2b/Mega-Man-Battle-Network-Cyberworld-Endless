@@ -48,15 +48,26 @@ time waits, it is not cut short. Each came from a cut the owner refused.
    `render_any` in `docker/Dockerfile.music`'s image), named by role in
    the piece's `SAMPLED_PARTS` (`{'lead': ('sflead',), 'backing':
    ('mallet',), 'bass': ('sfbass',)}`), and so do its chords and drums.
-   The GBA's squares and wave never carry a part: at most they double
-   one; the noise channel keeps the hats. `music_check.py` fails (exit 1)
-   a piece or a sketch where fewer than four in five of a part's notes are
-   the soundfont's, and nothing that fails it is rendered for the owner or
-   cut into a trailer. 0.16.0's first piece and 0.19.0's first cut played
-   their melody, backing and bass on the squares and the wave with a few
-   sampled accents, and the owner heard no soundfont in either (2 November
-   2026: "make sure the trailer skill forces you to always use the
-   soundfont. otherwise it is just not on the quality we want").
+   The GBA's squares never carry a part alone, but they **double the lead
+   and the backing** at the source's duty, under the samples: MP2K mixes
+   samples at 13379 Hz, so nothing sampled sounds above about 5 kHz, and
+   a GBA's top comes from its squares and its noise channel's hats. Pick
+   bright, light programs (a xylophone or celesta, a picked bass) over
+   dark ones (a marimba, a fat synth bass), and give the source's busiest
+   sampled track a counter-part of its own (short notes, a bright voice a
+   section, moving across the stereo). `music_check.py` fails (exit 1) a
+   piece or a sketch where fewer than four in five of a part's notes are
+   the soundfont's (a square doubling a sampled note counts with it), and
+   prints its highs above 3 kHz at the full band beside the recording's:
+   the two within a point, or it is dull. Nothing that fails is rendered
+   for the owner or cut into a trailer. 0.16.0's first piece and 0.19.0's
+   first cut played their melody, backing and bass on the squares and the
+   wave with a few sampled accents, and the owner heard no soundfont
+   (2 November 2026: "make sure the trailer skill forces you to always use
+   the soundfont. otherwise it is just not on the quality we want"); the
+   fix that put them on the soundfont alone kept a quarter of the
+   recording's highs and missed its busy sampled track, and the owner
+   heard it "dull" ("it sounds much lighter and more complex").
 4. **Sketches for the owner's ear before the piece, always** (step 2's
    sketch step): two or three eight-bar sketches from the chosen song, in
    the soundfont, rendered to `.build/trailer-sketches/`, sent to the
@@ -221,7 +232,8 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
    `HARDWARE = 32768` are in `music_rules.md`, Mix and timbre.
 7. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE
    --source GAME SONG [--offset TICKS]` (or `--piece NAME`): "soundfont:
-   every part on FluidR3 GM" (gate 3; a failure exits 1 and stops there);
+   every part on FluidR3 GM" (gate 3; a failure exits 1 and stops there)
+   and "highs above 3 kHz" within a point of the recording's;
    every part's motion beside the source song's, "busier than the source:
    none" (`music_rules.md`, Discipline); no bar near clipping, loudness steady through a
    section, the four-band balance and the punch near the reference's (sketch A

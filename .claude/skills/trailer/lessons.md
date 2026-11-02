@@ -465,3 +465,22 @@ punch 5.8 dB against 5.1), and the trailer re-rendered and replaced
 (docs/clips, the site, the README, the v0.19.0 release). Gate 3 now
 requires every melodic part on the soundfont, and `music_check.py` fails
 a piece that does not (SKILL.md).
+
+The owner on the re-voiced piece: "why does the track still sound so
+'dull'? take a look again at the reference ... it sounds much lighter and
+more complex." Measured at the full band, the soundfont-only voicing kept
+1.8% of its energy above 3 kHz against the recording's 6.8% (the first
+cut on squares 3.4%): MP2K mixes samples at 13379 Hz, so a GBA's top is
+its squares' and its hats', and the marimba and the fat synth bass were
+dark. BN5's 0x03, read from the ROM: six tracks, its lightness the lead
+and backing on squares (50% and 25%), its complexity a sampled track of
+462 five-tick notes in six voices re-panned about 200 times, which the
+piece had played as a few electric piano stabs. (A fan MIDI was not
+fetched: no downloads from such sites, and its notes are Capcom's; the
+ROM is the exact score, read as habits.) The second voicing: the samples
+doubled by the squares on the lead and the blips, the xylophone, a picked
+bass, a counter-part of our own in celesta, vibraphone and pizzicato a
+section each, the hats up, the kick for the lows: 6.0% above 3 kHz against
+the recording's 6.0%, 35/38/26/2 against 44/33/21/2, punch 7.4 dB against
+5.1. Gate 3 now asks for the squares' doubling and the highs within a
+point of the recording's.

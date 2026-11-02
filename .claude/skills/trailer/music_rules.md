@@ -50,7 +50,13 @@ own words in this file and the rules below:
   (*Kaida*), so every melodic part plays the sampled palette (FluidR3 GM,
   below): the lead, the backing and the bass as well as the chords and
   drums, the owner's gate 3, which `music_check.py` holds (Mix and
-  timbre). The squares and the wave give a part its job, never its sound.
+  timbre). The squares double the lead and the backing for the top the
+  samples cannot reach; never a part on the squares or the wave alone.
+- **Light and busy where the source is.** A BN town theme's lightness is
+  its squares' and hats' top and its complexity a busy sampled track of
+  short notes changing voice and side (BN5's 0x03: 462 notes of 5 ticks,
+  six voices, re-panned about 200 times). Match the recording's highs
+  above 3 kHz (`music_check.py`) and give that track's job a part.
 - **Its seed audible.** A fan names the Battle Network song it grew from
   after one listen: its tempo, groove, harmonic language and the parts'
   jobs, never its notes.
@@ -305,12 +311,20 @@ cut played its melody, backing and bass on the squares and the wave with
 a few sampled accents, and the owner heard no soundfont ("just not on
 the quality we want"), as with 0.16.0's first piece. `music_check.py`
 prints each part's share of notes on its instruments and fails (exit 1)
-under four in five. 0.19.0's piece, re-voiced: the lead on 81 Saw Wave,
-the backing's 32nd-note blips on 12 Marimba, the bass on 38 Synth Bass 1,
-each recorded in the middle of its range (`sf.instrument(81, [74],
-2.4)`), long enough for its longest held note; `hit` with `pan` throws
-the blips left and right and `bend` slides the bass. The palette is
-nearer the XV-1080 and SC-88 sounds
+under four in five, a square doubling a sampled note counting with it.
+The samples alone are dull: MP2K mixes them at 13379 Hz and they are cut
+at 10512, so nothing sampled sounds above about 5 kHz; 0.19.0's piece
+with its lead, blips and bass on samples alone kept 1.8% of its energy
+above 3 kHz against the recording's 6.8% (at the full band; the 8 kHz
+bands below cannot see it), and the owner heard it dull. Its second
+voicing: the lead on 81 Saw Wave doubled by square 1 at 50%, the blips on
+13 Xylophone doubled by square 2 at 25%, the bass on 34 Electric Bass
+(pick), a counter-part on 8 Celesta, 11 Vibraphone and 45 Pizzicato
+Strings a section each, the hats up: 6.0% above 3 kHz against the
+recording's 6.0%. Each sample recorded in the middle of its range
+(`sf.instrument(81, [74], 2.4)`), long enough for its longest held note;
+`hit` with `pan` throws the blips left and right and `bend` slides the
+bass. The palette is nearer the XV-1080 and SC-88 sounds
 BN was made from (*Kaida*): `tools/trailer_soundfont.py` cuts FluidR3 GM's (Frank Wen,
 the MIT license; Debian's `fluid-soundfont-gm` in `docker/Dockerfile.music`,
 the owner's go-ahead of 22 October 2026) into MP2K samples, a note or a
@@ -324,7 +338,10 @@ written by `--write-banner`). Good programs: 24 Electronic kit's kick, the
 clap (39) over a snare (40), 30 Distortion Guitar's power chord, 28 Palm
 Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
 Section, 81 Saw Wave (a lead), 4 Electric Piano 1 (a mellow chord sample),
-12 Marimba (a backing's blips), 38 Synth Bass 1 (a bass).
+13 Xylophone (a backing's blips), 34 Electric Bass (pick) (a light bass),
+8 Celesta, 11 Vibraphone, 45 Pizzicato Strings (a counter-part's bright
+voices). Dark ones dull a light theme: 12 Marimba and 38 Synth Bass 1
+did.
 
 Which soundfont was settled by ear (26 October 2026): 0.16.0's three
 sketches, the same notes rendered through FluidR3 GM, GeneralUser GS
@@ -340,7 +357,8 @@ hook for another comparison (a bank added to the image and to its
 ## Checks before the owner listens
 
 - `music_check.py`: "soundfont: every part on FluidR3 GM" (gate 3), or
-  nothing goes further.
+  nothing goes further; "highs above 3 kHz" within a point of the
+  recording's, or it is dull.
 - `music_check.py --piece NAME --source GAME SONG [--offset TICKS]`:
   "busier than the source: none" (Discipline, above).
 
