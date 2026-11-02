@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T17:18:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
@@ -27,7 +27,7 @@ the size asked. Claude Code asks once whether to use the project's server
 | `build` | `build.py host`, `linux`, `test` or `lint` | `host ok in 0.8 s, 1 files compiled`, or the complaints alone |
 
 ```bash
-python3 tools/cw.py shot options/audio                      # a route: Options' Audio section
+python3 tools/cw.py shot options/audio                      # a route: Options' Audio page
 python3 tools/cw.py shot "jukebox --seed 4" --do "press A; wait 300" --every 60
 python3 tools/cw.py shot "CYBERWORLD_AUTOPILOT=1 layer --seed 3" --until "layer>=2"
 python3 tools/cw.py shot jukebox --ref v0.13.0                # this build beside v0.13.0's
@@ -47,7 +47,7 @@ missed its screen:
 
 | Route | Arrives at |
 | --- | --- |
-| `title`, `options`, `controls`, `options/display`, `options/audio`, `setup`, `saves`, `launcher` | the title and the engine's own screens over it |
+| `title`, `options` (its Display page), `controls`, `options/display`, `options/audio`, `options/game`, `setup`, `saves`, `launcher` | the title and the engine's own screens over it |
 | `room`, `pet`, `pet/folder`, `pet/subchip`, `pet/library`, `pet/megaman`, `pet/mail`, `pet/keyitem`, `pet/options`, `jukebox` | a new run in Lan's room (seed 2), Dad's call paged, and the PET's screens |
 | `layer`, `battle` | a run's first layer, its arrival's words paged (`--dev quiet`); its first battle's Custom screen |
 | `hp` | Lan's HP after act 2 (seed 3), its words paged |
@@ -60,7 +60,7 @@ by `|` (`layer>=2`, `screen=battle|doing~battle`), at most `limit` frames
 (20000): the autopilot to a layer's exit, a battle to its end.
 
 **The state** names the screen: `screen` is ours over the game first
-(`devmenu`, `options`, `options-display`, `options-audio`, `controls`,
+(`devmenu`, `options-display`, `options-audio`, `options-game`, `controls`,
 `statistics-question`, `jukebox`, `netpass`), then the scene's name off the
 run (`title`, `saves`, `launcher`), and in it BN6's (`map`, `town`,
 `battle`, `pet`, `folders`, `folder-edit`, `navicust`, `status`, `library`,

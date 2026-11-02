@@ -1,5 +1,5 @@
-/* Options' words (options_text.c): its lines, their notes, the Display
- * and Audio sections' choices, settings.ini's notes for the display's
+/* Options' words (options_text.c): its pages, its lines, their notes,
+ * the Display and Audio pages' choices, START's hint and question, settings.ini's notes for the display's
  * lines, the sound, mGBA's filter's level, the output, the music, the
  * effects, fast forward and the
  * controller's vibration and trigger effects,
@@ -13,30 +13,32 @@
 
 typedef enum {
 	OW_TITLE,           /* the head's name */
-	OW_CONTROLS, OW_CONTROLS_NOTE,
-	OW_AUDIO, OW_AUDIO_NOTE,
-	OW_SOUND,           /* the Audio section's line */
+	OW_CONTROLS, OW_CONTROLS_NOTE,   /* the Game page's lines */
+	OW_AUDIO,           /* the pages' names: Display, Audio, Game */
+	OW_SOUND,           /* the Audio page's line */
 	OW_GBA, OW_GBA_NOTE,
 	OW_SOFT, OW_SOFT_NOTE,
-	OW_DISPLAY, OW_DISPLAY_NOTE,
-	OW_FULLSCREEN, OW_FULLSCREEN_ON_NOTE, OW_FULLSCREEN_OFF_NOTE,   /* the Display section's lines */
+	OW_DISPLAY, OW_GAME,
+	OW_FULLSCREEN, OW_FULLSCREEN_ON_NOTE, OW_FULLSCREEN_OFF_NOTE,   /* the Display page's lines */
 	OW_SCALE,
 	OW_AUTO, OW_WHOLE, OW_FILL, OW_STRETCH,   /* (in DisplayScale's order) */
 	OW_AUTO_NOTE, OW_WHOLE_NOTE, OW_FILL_NOTE, OW_STRETCH_NOTE,
 	OW_SMOOTH, OW_SMOOTH_ON_NOTE, OW_SMOOTH_OFF_NOTE,
 	OW_ON, OW_OFF,
 	OW_INFORMATION,     /* the information box's label, KeyItem's */
-	OW_MUSIC, OW_MUSIC_ON_NOTE, OW_MUSIC_OFF_NOTE,   /* the Audio section's lines (sound_heard.h) */
+	OW_MUSIC, OW_MUSIC_ON_NOTE, OW_MUSIC_OFF_NOTE,   /* the Audio page's lines (sound_heard.h) */
 	OW_EFFECTS, OW_EFFECTS_ON_NOTE, OW_EFFECTS_OFF_NOTE,
-	OW_FAST, OW_FAST_ON_NOTE, OW_FAST_OFF_NOTE,   /* the hub's fast forward line (fast_forward.h) */
-	OW_VIBRATION, OW_WEAK, OW_MEDIUM, OW_STRONG,   /* the Audio section's controller lines (feel_out.h; FEEL_WEAK's order) */
+	OW_FAST, OW_FAST_ON_NOTE, OW_FAST_OFF_NOTE,   /* the Game page's fast forward line (fast_forward.h) */
+	OW_VIBRATION, OW_WEAK, OW_MEDIUM, OW_STRONG,   /* the Audio page's controller lines (feel_out.h; FEEL_WEAK's order) */
 	OW_VIBRATION_ON_NOTE, OW_VIBRATION_OFF_NOTE,
 	OW_TRIGGERS, OW_TRIGGERS_ON_NOTE, OW_TRIGGERS_OFF_NOTE,
-	OW_COLOUR, OW_COLOUR_GBA_NOTE, OW_COLOUR_OFF_NOTE,   /* the Display section's GBA screen (display.h); its GBA is OW_GBA */
+	OW_COLOUR, OW_COLOUR_GBA_NOTE, OW_COLOUR_OFF_NOTE,   /* the Display page's GBA screen (display.h); its GBA is OW_GBA */
 	OW_VBA, OW_NDS, OW_PSP, OW_COLOUR_VBA_NOTE, OW_COLOUR_NDS_NOTE, OW_COLOUR_PSP_NOTE,   /* (the shaders', LcdColour's order) */
 	OW_BLEND, OW_SIMPLE, OW_SMART, OW_LCD, OW_LCD_FAST,   /* (LcdBlend's order from Simple; Off OW_OFF) */
 	OW_BLEND_OFF_NOTE, OW_SIMPLE_NOTE, OW_SMART_NOTE, OW_LCD_NOTE, OW_LCD_FAST_NOTE,   /* (LcdBlend's order) */
 	OW_LCD3X, OW_LCD3X_ON_NOTE, OW_LCD3X_OFF_NOTE,
+	OW_DEFAULT,         /* START's hint on the band: the page's lines back */
+	OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME,   /* ... its question, a page each (PAGE_*'s order) */
 	OW_MGBA, OW_MGBA_NOTE,   /* the Sound line's third (SoundFilter's order after OW_SOFT) */
 	OW_OUTPUT, OW_SPEAKERS, OW_HEADPHONES, OW_MONO,   /* the Audio section's Output (sound_filter.h; SoundOutput's order) */
 	OW_SPEAKERS_NOTE, OW_HEADPHONES_NOTE, OW_MONO_NOTE,

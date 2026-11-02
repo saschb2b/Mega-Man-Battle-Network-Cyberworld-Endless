@@ -3,7 +3,7 @@ type: Feature
 title: "The sound out: levels, output and filters"
 description: "Options' Audio sets how the game is heard on the player's speakers, handheld or headphones: Music and Effects in ten steps of 3 dB (`sound_heard.c`), Output as Speakers, Headphones (bs2b's crossfeed, `crossfeed.c`) or Mono, and Sound as GBA, Soft or mGBA's libretro Audio Filter step for step (`sound_filter.c`); what each does, where it runs, what a NetBattle keeps alike, and how each was checked against its source's own code and measured."
 tags: [engine, sound, options]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T02:30:00Z }
 sources:
   - id: mgba-libretro
     resource: "https://github.com/libretro/mgba/blob/master/src/platform/libretro/libretro.c"
@@ -150,10 +150,12 @@ come after the cores and are each player's own.
 
 ## In Options
 
-The Audio section's lines, top to bottom: Music, Effects, Output, Sound,
-then Vibration and Trigger effects where the controller has them (six at
-most). Each change is heard at once, the cursor's sound passing through
-the new chain. In a run the game waits under Options with its music
-stopped, so a music level is heard on the title (its song plays there) or
-back in the game. The browser player's Sound button turns GBA, Soft and
-mGBA in turn, as Options does.
+The Audio page's lines, top to bottom: Music, Effects, Output, Sound,
+then Vibration and Trigger effects where the controller has them, three
+shown at a time, the list scrolling. START:DEFAULT puts them back as they
+came after a Yes: Music and Effects at 10, Output on Speakers, Sound on
+GBA. Each change is heard at once, the cursor's sound passing through the
+new chain. In a run the game waits under Options with its music stopped,
+so a music level is heard on the title (its song plays there) or back in
+the game. The browser player's Sound button turns GBA, Soft and mGBA in
+turn, as Options does.

@@ -149,43 +149,57 @@ void lcd_set_colour(LcdColour c) {
 #define RESPONSE      0.333f   /* LCD_RESPONSE_TIME: a frame's share of the one before */
 #define RESPONSE_FAST 0.5f     /* LCD_RESPONSE_TIME_FAKE: Fast's, raised to look as long */
 
-static int frame_n;            /* the buffers' pixels */
-static uint16_t *now, *made;   /* the picture as 565, the frame blended from it */
-static uint16_t *before[4];    /* the pictures before, the latest first (outputBufferPrev1-4) */
-static float *acc;             /* Fast's running frame, R, G and B a pixel */
-static bool seed;              /* the next picture stands for the ones before it */
+struct LcdHistory {
+	int n;                     /* the buffers' pixels */
+	uint16_t *now, *made;      /* the picture as 565, the frame blended from it */
+	uint16_t *before[4];       /* the pictures before, the latest first (outputBufferPrev1-4) */
+	float *acc;                /* Fast's running frame, R, G and B a pixel */
+	bool seed;                 /* the next picture stands for the ones before it */
+	unsigned turned;           /* the blending's turn it was seeded for */
+};
+static LcdHistory game;        /* the game's own picture's */
+static unsigned turns;         /* the blending turned so far: each history seeds again */
 static float response[4];
 
-static void release(void) {
-	free(now);
-	free(made);
-	free(acc);
-	now = made = NULL;
-	acc = NULL;
-	for (int k = 0; k < 4; ++k) { free(before[k]); before[k] = NULL; }
+static void release(LcdHistory *h) {
+	free(h->now);
+	free(h->made);
+	free(h->acc);
+	h->now = h->made = NULL;
+	h->acc = NULL;
+	for (int k = 0; k < 4; ++k) { free(h->before[k]); h->before[k] = NULL; }
+}
+
+LcdHistory *lcd_history_new(void) { return calloc(1, sizeof(LcdHistory)); }
+
+void lcd_history_free(LcdHistory *h) {
+	if (!h) return;
+	release(h);
+	free(h);
 }
 
 /* the buffers the blending needs, for pictures of `n` pixels */
-static bool ready(int n) {
-	if (n != frame_n) { release(); frame_n = n; seed = true; }
+static bool ready(LcdHistory *h, int n) {
+	if (n != h->n) { release(h); h->n = n; h->seed = true; }
+	if (h->turned != turns) { h->turned = turns; h->seed = true; }
 	int k = blend == LCD_BLEND_SMART ? 3 : blend == LCD_BLEND_LCD ? 4 : blend == LCD_BLEND_SIMPLE ? 1 : 0;
 	/* (cleared: each is seeded before it is read, but never left unknown) */
-	if (!now) now = calloc((size_t)n, sizeof *now);
-	if (!made) made = calloc((size_t)n, sizeof *made);
-	bool ok = now && made;
+	if (!h->now) h->now = calloc((size_t)n, sizeof *h->now);
+	if (!h->made) h->made = calloc((size_t)n, sizeof *h->made);
+	bool ok = h->now && h->made;
 	for (int i = 0; i < k; ++i) {
-		if (!before[i]) { before[i] = calloc((size_t)n, sizeof *before[i]); seed = true; }
-		ok = ok && before[i];
+		if (!h->before[i]) { h->before[i] = calloc((size_t)n, sizeof *h->before[i]); h->seed = true; }
+		ok = ok && h->before[i];
 	}
-	if (blend == LCD_BLEND_LCD_FAST && !acc) { acc = calloc((size_t)n * 3, sizeof *acc); seed = true; }
-	return ok && (blend != LCD_BLEND_LCD_FAST || acc);
+	if (blend == LCD_BLEND_LCD_FAST && !h->acc) { h->acc = calloc((size_t)n * 3, sizeof *h->acc); h->seed = true; }
+	return ok && (blend != LCD_BLEND_LCD_FAST || h->acc);
 }
 
 LcdBlend lcd_blend(void) { return blend; }
 
 void lcd_set_blend(LcdBlend b) {
 	blend = (unsigned)b < LCD_BLEND_COUNT ? b : LCD_BLEND_OFF;
-	seed = true;
+	++turns;
 	/* (mGBA's response factors for the four frames before) */
 	response[0] = RESPONSE;
 	for (int k = 1; k < 4; ++k) response[k] = (float)pow(RESPONSE, (double)(k + 1));
@@ -195,39 +209,39 @@ void lcd_set_blend(LcdBlend b) {
  * channel half of the two, rounded up */
 static uint16_t mix(uint16_t a, uint16_t b) { return (uint16_t)((a + b + ((a ^ b) & 0x821)) >> 1); }
 
-static void blend_simple(void) {
-	for (int i = 0; i < frame_n; ++i) {
-		uint16_t c = now[i], p = before[0][i];
-		before[0][i] = c;
-		made[i] = mix(c, p);
+static void blend_simple(LcdHistory *h) {
+	for (int i = 0; i < h->n; ++i) {
+		uint16_t c = h->now[i], p = h->before[0][i];
+		h->before[0][i] = c;
+		h->made[i] = mix(c, p);
 	}
 }
 
 /* mixed only where the frames alternate: the same as two before, not as
  * the one before */
-static void blend_smart(void) {
-	for (int i = 0; i < frame_n; ++i) {
-		uint16_t c = now[i], p1 = before[0][i], p2 = before[1][i], p3 = before[2][i];
-		before[0][i] = c;
-		before[1][i] = p1;
-		before[2][i] = p2;
-		made[i] = ((c == p2 || p1 == p3) && c != p1 && c != p3 && p1 != p2) ? mix(c, p1) : c;
+static void blend_smart(LcdHistory *h) {
+	for (int i = 0; i < h->n; ++i) {
+		uint16_t c = h->now[i], p1 = h->before[0][i], p2 = h->before[1][i], p3 = h->before[2][i];
+		h->before[0][i] = c;
+		h->before[1][i] = p1;
+		h->before[2][i] = p2;
+		h->made[i] = ((c == p2 || p1 == p3) && c != p1 && c != p3 && p1 != p2) ? mix(c, p1) : c;
 	}
 }
 
 /* a channel (at bit `at`) of the picture, moved toward each of the four
  * before it by their response: Harlequin's exponential drop-off */
-static unsigned ghost(int i, int at) {
-	float v = (float)(now[i] >> at & 0x1F);
-	for (int k = 0; k < 4; ++k) v += ((float)(before[k][i] >> at & 0x1F) - v) * response[k];
+static unsigned ghost(const LcdHistory *h, int i, int at) {
+	float v = (float)(h->now[i] >> at & 0x1F);
+	for (int k = 0; k < 4; ++k) v += ((float)(h->before[k][i] >> at & 0x1F) - v) * response[k];
 	return (unsigned)(v + 0.5f) & 0x1F;
 }
 
-static void blend_lcd(void) {
-	for (int i = 0; i < frame_n; ++i) {
-		made[i] = (uint16_t)(ghost(i, 11) << 11 | ghost(i, 6) << 6 | ghost(i, 0));
-		for (int k = 3; k > 0; --k) before[k][i] = before[k - 1][i];
-		before[0][i] = now[i];
+static void blend_lcd(LcdHistory *h) {
+	for (int i = 0; i < h->n; ++i) {
+		h->made[i] = (uint16_t)(ghost(h, i, 11) << 11 | ghost(h, i, 6) << 6 | ghost(h, i, 0));
+		for (int k = 3; k > 0; --k) h->before[k][i] = h->before[k - 1][i];
+		h->before[0][i] = h->now[i];
 	}
 }
 
@@ -238,51 +252,53 @@ static unsigned ghost_fast(float *keep, unsigned cur) {
 	return (unsigned)(v + 0.5f) & 0x1F;
 }
 
-static void blend_lcd_fast(void) {
-	for (int i = 0; i < frame_n; ++i) {
-		float *a = acc + i * 3;
-		unsigned c = now[i];
-		made[i] = (uint16_t)(ghost_fast(a, c >> 11 & 0x1F) << 11 | ghost_fast(a + 1, c >> 6 & 0x1F) << 6 | ghost_fast(a + 2, c & 0x1F));
+static void blend_lcd_fast(LcdHistory *h) {
+	for (int i = 0; i < h->n; ++i) {
+		float *a = h->acc + i * 3;
+		unsigned c = h->now[i];
+		h->made[i] = (uint16_t)(ghost_fast(a, c >> 11 & 0x1F) << 11 | ghost_fast(a + 1, c >> 6 & 0x1F) << 6 | ghost_fast(a + 2, c & 0x1F));
 	}
 }
 
 /* the pictures before, and Fast's running frame, all the picture's */
-static void seed_from_now(void) {
+static void seed_from_now(LcdHistory *h) {
 	for (int k = 0; k < 4; ++k)
-		if (before[k]) memcpy(before[k], now, (size_t)frame_n * sizeof *now);
-	if (acc)
-		for (int i = 0; i < frame_n; ++i) {
-			acc[i * 3] = (float)(now[i] >> 11 & 0x1F);
-			acc[i * 3 + 1] = (float)(now[i] >> 6 & 0x1F);
-			acc[i * 3 + 2] = (float)(now[i] & 0x1F);
+		if (h->before[k]) memcpy(h->before[k], h->now, (size_t)h->n * sizeof *h->now);
+	if (h->acc)
+		for (int i = 0; i < h->n; ++i) {
+			h->acc[i * 3] = (float)(h->now[i] >> 11 & 0x1F);
+			h->acc[i * 3 + 1] = (float)(h->now[i] >> 6 & 0x1F);
+			h->acc[i * 3 + 2] = (float)(h->now[i] & 0x1F);
 		}
-	seed = false;
+	h->seed = false;
 }
 
 /* ---- the frame ---- */
 
-void lcd_frame(uint32_t *px, int n, bool fresh) {
-	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !ready(n)) return;
-	if (fresh || seed || blend == LCD_BLEND_OFF) {
+void lcd_frame_in(LcdHistory *h, uint32_t *px, int n, bool fresh) {
+	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !h || !ready(h, n)) return;
+	if (fresh || h->seed || blend == LCD_BLEND_OFF) {
 		/* (the 8-bit picture back to mGBA's 565: its top five bits a channel) */
 		for (int i = 0; i < n; ++i) {
 			uint32_t c = px[i];
-			now[i] = (uint16_t)((c >> 3 & 0x1F) << 11 | (c >> 11 & 0x1F) << 6 | (c >> 19 & 0x1F));
+			h->now[i] = (uint16_t)((c >> 3 & 0x1F) << 11 | (c >> 11 & 0x1F) << 6 | (c >> 19 & 0x1F));
 		}
-		if (seed) seed_from_now();
+		if (h->seed) seed_from_now(h);
 		switch (blend) {
-		case LCD_BLEND_SIMPLE: blend_simple(); break;
-		case LCD_BLEND_SMART: blend_smart(); break;
-		case LCD_BLEND_LCD: blend_lcd(); break;
-		case LCD_BLEND_LCD_FAST: blend_lcd_fast(); break;
-		default: memcpy(made, now, (size_t)n * sizeof *now); break;
+		case LCD_BLEND_SIMPLE: blend_simple(h); break;
+		case LCD_BLEND_SMART: blend_smart(h); break;
+		case LCD_BLEND_LCD: blend_lcd(h); break;
+		case LCD_BLEND_LCD_FAST: blend_lcd_fast(h); break;
+		default: memcpy(h->made, h->now, (size_t)n * sizeof *h->now); break;
 		}
 	}
 	if (colour == LCD_COLOUR_OFF)
-		for (int i = 0; i < n; ++i) px[i] = shown(made[i]);
+		for (int i = 0; i < n; ++i) px[i] = shown(h->made[i]);
 	else
-		for (int i = 0; i < n; ++i) px[i] = table[made[i]];
+		for (int i = 0; i < n; ++i) px[i] = table[h->made[i]];
 }
+
+void lcd_frame(uint32_t *px, int n, bool fresh) { lcd_frame_in(&game, px, n, fresh); }
 
 /* ---- colours drawn over the frame ---- */
 

@@ -1,9 +1,9 @@
 ---
 type: Style Guide
 title: "The PET's screens: Battle Network's rules"
-description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options, Trade Central) take from them through `pet_look.c`."
+description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:02:58Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -132,13 +132,24 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - One key's hint on the band where the key does something unguessed:
-  the Jukebox's `START:REPEAT` (the mode), the reconnect wait's `B:GO
-  HOME` (leaving the Square). None at the foot.
-- Pages turn by L and R under green arrows: the Jukebox's sections, the
-  emote strip's two pages.
-- A section takes the band: Options' Display and Audio, the JACK-IN
-  SETUP's helpers (its Help row opens them, each On or Off as Options'
-  lines).
+  the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a
+  page's lines back, on pages that have such lines), the reconnect
+  wait's `B:GO HOME` (leaving the Square). None at the foot.
+- Pages turn by L and R under green arrows: the Jukebox's sections,
+  Options' three pages (Display, Audio, Game: no hub above them, as
+  Valhalla's tabs and Forza's LB and RB turn,
+  [Settings screens elsewhere](settings-screens.md)), the emote strip's
+  two pages. Options' pages are tabs in a row over its list: STATUS's
+  cyan pills, the page shown lit as NaviCust's green RUN! (as the gate's
+  and SAVES' buttons light the one under the cursor), each named in a
+  screen's heavy capitals, the Library's green arrows at the row's ends
+  with L and R in a hint's small capitals as BN6 names START in
+  START:SORT, each tab a tap's place (the owner's call, 2 November 2026:
+  one name between the arrows did not say there were other pages, nor
+  which key turns them; Valhalla's tab row with its Q and E, Forza's LB
+  and RB).
+- A section takes the band: the JACK-IN SETUP's helpers (its Help row
+  opens them, each On or Off as Options' lines).
 - The JACK-IN SETUP is Options' kin: its rows and their values in the
   window, the row under the cursor in the information box (in three lines
   at most, a folder still shut said only where its line fits whole),
@@ -164,16 +175,26 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   pills and a caption stood. The statistics question is asked in BN6's
   chat box, faceless as a machine's, its explanation in the panel above.
   Options' note is KeyItem's INFORMATION box, in the game's own voice as
-  KeyItem's are.
+  KeyItem's are; its START asks in the same box, Yes and No on its last
+  line behind the green triangle, faceless as a machine asks.
+- A picture of what a setting does sits in STATUS's slot (navy in two
+  pixels of white, where STATUS shows MegaMan): Options' Display page
+  puts BN6's own battle in its information box where KeyItem's box holds
+  its tag, the slot the box's height, INFORMATION over the page beside
+  it, at its own pixels, staged for the line under the cursor and run through the
+  display's settings (`showcase.c`, `options_scene.c`), Valhalla's list,
+  description and picture on a PET (the owner's call, 2 November 2026,
+  over three layouts that stepped the panel aside: none showed a
+  setting's effect where it is chosen).
 - Each screen fades up from black as it opens (`look_fade_in`), and the
   arrow steps as KeyItem's (`look_cursor`): the Jukebox, Options and its
-  sections, the statistics question, Trade Central, the NetPass. They
+  pages, the statistics question, Trade Central, the NetPass. They
   close at once; BN6's fade out is not done yet.
 - START opens Trade Central's SORT pop-up, as the folder editor's: the
   keys in a small window, A sorts, B leaves it.
-- No Done lines: B leaves Options' sections and Options, as every BN6
-  list. The controls screen keeps its Done, which keeps the keys set, as
-  NaviCust's RUN! runs the program.
+- No Done lines: B leaves Options, as every BN6 list, which opens again
+  on the page and line it was left on. The controls screen keeps its
+  Done, which keeps the keys set, as NaviCust's RUN! runs the program.
 - Words that explained the screen are gone ("Pick a song and press A.",
   "Spares: the copies your folders don't hold"); what the cursor's item
   is stays in the information box.

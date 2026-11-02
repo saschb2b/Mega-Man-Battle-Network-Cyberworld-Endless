@@ -11,6 +11,17 @@
   first two are the mGBA core's Color Correction and Interframe Blending
   as RetroArch runs it, matched to its own code pixel for pixel; the third
   is RetroArch's lcd3x shader.
+- **See the screen while you set it.** Options' Display page shows a
+  battle of BN6's own beside its lines, played on a second GBA of the
+  game's from your ROM and staged for the line under the cursor: a busy
+  fight for the colours, MegaMan hit and flickering for Frame blending,
+  steady steps under a moving sky for Smooth motion. Turn a line and the
+  battle changes at once (on the 3DS the paused game shows there).
+- **Options in pages.** Display, Audio and Game (Controls, Fast forward,
+  Statistics) are tabs along the top, L and R turning from one to the
+  next as the Library turns its own (a tap opens one on a phone), and
+  Options opens again where you left it. START puts a page's lines back
+  as they came, after a Yes.
 - **More screens' colours.** Colour correction has three more beside
   GBA, libretro's handheld colour shaders as RetroArch runs them: **VBA**
   (VisualBoyAdvance's GBA colours, darker still), **DS** (the first DS's
