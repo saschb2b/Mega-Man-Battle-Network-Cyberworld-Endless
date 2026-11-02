@@ -1,9 +1,9 @@
 ---
 type: Research
 title: "Settings screens elsewhere: what Options can take"
-description: "How well-regarded games, the accessibility guidelines, emulator frontends and retro collections show a setting's effect while it is chosen (live preview, a still frame behind the menu, a picture per setting, a one-press look), describe, confirm, reset and lay out their settings, researched on 2 November 2026 for Options' Display, and what of it fits a PET panel at 240x160."
+description: "How well-regarded games, the accessibility guidelines, emulator frontends and retro collections show a setting's effect while it is chosen (live preview, a still frame behind the menu, a picture per setting, a one-press look), describe, confirm, reset and lay out their settings, researched on 2 November 2026 for Options' Display, what of it fits a PET panel at 240x160, and what Options was rebuilt with: pages on L and R, START's defaults, and BN6's own battle looping beside Display's lines."
 tags: [engine, ui, options, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
 sources:
   - id: xag
     resource: "https://learn.microsoft.com/en-us/gaming/accessibility/guidelines"
@@ -23,6 +23,12 @@ sources:
   - id: analogue-pocket
     resource: "https://assets.analogue.co/pdf/f48dbccc2a7c529e3ef677db3b4ab9d8/Analogue+Pocket+User+Manual+v1.2.pdf"
     title: "Analogue Pocket user manual v1.2: Original Display Modes"
+  - id: nixxes-ports
+    resource: "https://www.ggrecon.com/reviews/horizon-forbidden-west-complete-edition-review/"
+    title: "Reviews of Nixxes's PC ports (Horizon Forbidden West, Ghost of Tsushima, Ratchet & Clank, Spider-Man Remastered): the game behind the settings menu"
+  - id: lyra
+    resource: "https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-sample-game-settings-in-unreal-engine"
+    title: "Epic's Lyra sample: game settings, their descriptions, edit conditions and reset"
   - id: owner-valhalla
     resource: "human:saschb2b"
     title: "Assassin's Creed Valhalla's Graphics settings (PC), a screenshot the owner shared on 2026-11-02"
@@ -107,6 +113,36 @@ evidence the redesign of Options rests on.
   Graphics, Controls, Gameplay, Interface, Sound), sections inside a tab
   are headed (Environment, Textures, Postprocessing), and the foot names
   Back, Default (R) and Apply. Verified from the screenshot.
+- **Big-budget PC ports put the menu over the running game.** Nixxes's
+  ports draw their graphics settings as a panel with the game running
+  behind it, each change showing at once: Horizon Forbidden West
+  ([GGRecon](https://www.ggrecon.com/reviews/horizon-forbidden-west-complete-edition-review/)),
+  Ghost of Tsushima ([Digital Trends](https://digitaltrends.com/?p=3601342)),
+  Ratchet & Clank: Rift Apart
+  ([GamingBolt](https://gamingbolt.com/ratchet-and-clank-rift-apart-pc-vs-ps5-improvements-performance-and-more))
+  and Spider-Man Remastered ([id.nl](https://id.nl/huis-en-entertainment/computer-en-gaming/game-accessoires/hoe-presteert-spider-man-remastered-op-pc-2)),
+  verified in each review. Where a game does not, players add it: mods
+  show the world behind the graphics menus of The Witcher 3, Cyberpunk
+  2077 and Control (their pages say the stock menus are opaque or frozen;
+  assumed from search excerpts, the pages refused fetches).
+- **A sample made for the setting, where the game cannot be the sample.**
+  Fortnite puts six Ishihara-style plates beside its colour-blind modes,
+  so the mode is tuned without a match
+  ([APX, Distinguish this from that](https://accessible.games/accessible-player-experiences/access-patterns/distinguish-this-from-that/),
+  verified); Forza Horizon 5's Preview Subtitles shows the subtitles in
+  motion (assumed from an excerpt); Modern Warfare III draws how the
+  sticks respond in its deadzone menu
+  ([GamingTrend](https://gamingtrend.com/news/modern-warfare-iii-adds-more-accessibility-options/),
+  verified); Resident Evil Village explains each setting with text and
+  an image, and God of War Ragnarök's settings carry preview images for
+  comparison ([Can I Play That](https://caniplaythat.com/?p=10258),
+  verified). No shipped game was found that splits one picture into the
+  old value and the new (searched for side-by-side graphics comparisons
+  in settings menus: only guides outside the games).
+- **The Game UI Database** could not be read: its listing pages for the
+  Settings Menu and Display screen types sit behind a challenge the
+  fetches and the browser were refused at, so no claim here rests on its
+  screenshots.
 - **Motion needs motion.** A still frame shows a colour change and a
   grid; it cannot show frame blending or a refresh-rate fix, which change
   how one frame follows the next (assumed by construction: mGBA's Simple,
@@ -130,13 +166,27 @@ evidence the redesign of Options rests on.
   reverse a change before it is committed (Grounded warns when leaving
   settings without Apply), offer a reset to defaults (Grounded's "Factory
   Default"), and never require a held button to confirm. Verified.
+- God of War Ragnarök marks a changed setting in blue and resets all of
+  them by an Off preset or a held button
+  ([PlayStation](https://www.playstation.com/en-gb/games/god-of-war-ragnarok/accessibility/),
+  verified). Epic's Lyra sample asks a name and a description of every
+  setting, says why one is disabled by another, and lets a setting be
+  kept out of a reset
+  ([Lyra's settings](https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-sample-game-settings-in-unreal-engine),
+  verified).
 - No guideline covers reverting a display change that leaves the screen
   unusable (searched XAG 101-120 and the 21 GAG pages for revert, keep
   changes, countdown, resolution, brightness, gamma: nothing). XAG 116
   (Time limits) asks any UI time limit to be essential, warned of in more
   than one way, and extendable with one press for at least 20 seconds.
-  Windows' own "Keep these display settings?" reverting after about 15
-  seconds is assumed from memory.
+  The countdown is the systems' and engines' habit: Windows reverts a
+  display change after 10 seconds without an answer, KDE after 15
+  (assumed from search excerpts), and Unreal's `UGameUserSettings` has
+  `RevertVideoMode` to go back to the last confirmed mode (verified). The
+  last named game found with one is LEGO The Lord of the Rings (2012),
+  15 seconds, Revert chosen at first, its players unsure what was chosen
+  ([Steam](https://steamcommunity.com/app/214510/discussions/0/828923952113962552),
+  verified); none from the last five years was found.
 - Apple: good defaults so most players change nothing; as few settings as
   possible; settings opened where players expect them. Verified.
 
@@ -175,15 +225,42 @@ research offers, held against it:
 
 | Pattern | Seen in | At 240x160 in the PET's look |
 | --- | --- | --- |
-| The game frozen behind the menu, the setting drawn on it | RetroArch | The game already waits under Options with its last frame; only the panel hides it |
-| A preview picture beside the list | Valhalla, Fenyx (XAG 114) | A slot beside a six-line list leaves about 90 by 46 of the game's pixels: too little to judge a filter by, and a scaled-down picture loses the pixels the filters work on |
+| The game frozen behind the menu, the setting drawn on it | RetroArch | The game already waits under Options with its last frame, but from the PET it is BN6's PET menu, and a still frame shows no blending or motion |
+| The game running behind a panel | Nixxes's ports | The game cannot run under Options: a battle would go on unplayed |
+| A preview beside the list, a description over it | Valhalla, Resident Evil Village, God of War Ragnarök, Fenyx (XAG 114) | The list over the foot, the note and a picture side by side at the foot: about 109 by 66 of the game's pixels at their own size |
+| A sample made for the setting | Fortnite's plates, Forza's subtitle preview | BN6's own battle, staged for the line: flicker for Frame blending, motion for Smooth motion, colour for the rest |
 | One press shows the preview | Forza Horizon 4 (XAG 104) | A key's hint on the band ([The PET's screens](ui.md), Keys); a single press, not a hold (XAG 107) |
-| The menu gives way to the picture | RetroArch's transparency, the Pocket's shortcut | The panel stepping aside to a strip at the foot, as BN6's PET menu lets the field show through its middle |
-| Help text for the line under the cursor | Forza Horizon 4, Valhalla | Already Options' INFORMATION box |
+| Help text for the line under the cursor | Forza Horizon 4, Valhalla, Lyra | Already Options' INFORMATION box |
 | Sections on the shoulder buttons | Forza Horizon 4, Valhalla, Apple | L and R under green arrows, as the Library turns its pages |
-| Default on one key | Valhalla, Grounded (XAG 115) | Six lines whose defaults are Off and Auto: little to reset |
-| Apply with a countdown | Windows (assumed), mGBA's Apply | Not needed: every display change here is borderless and instant, none can leave the screen unusable |
-| The filter cycled while playing | Analogue Pocket | The only way to judge Frame blending as it is chosen; a new key in play, the owner's to decide |
+| Default on one key | Valhalla, Grounded (XAG 115), Lyra | START's hint on the band, as E-Mail's START:SORT, asking Yes or No first |
+| Apply with a countdown | Windows, KDE, Unreal | Not needed: every display change here is borderless and instant, none can leave the screen unusable |
+| The filter cycled while playing | Analogue Pocket | A new key in play; not taken |
 
-The layouts mocked from this and the owner's choice are in [The PET's
-screens](ui.md), Ours.
+## What was built
+
+Three layouts were mocked first as headless captures (2 November 2026):
+the panel as it was with a one-press look at the game (SELECT), the
+panel stepped aside to three lines at the foot with the game above, and
+the game above three lines and a two-line note. The owner turned all
+three down for Valhalla's: a running scene beside the setting and its
+description, a mocked fight in a loop, a scene for each setting that
+shows its impact. Built so ([The PET's screens](ui.md), Ours):
+
+- Three pages turned by L and R (Display, Audio, Game), no hub above
+  them, Options opening again on the page and line it was left on.
+- On Display, the note and a scene share the foot: BN6's own battle on a
+  second, plain core of the player's ROM (`src/emu/showcase.c`, booted as
+  the Arena's cores are, `core_boot.c`), its battle forced from a record
+  of ours, its keys scripted from the Custom screen on and looped from a
+  state kept in memory, run through the display's settings with a
+  blending history of its own (`lcd_frame_in`). Colour correction, LCD 3x
+  and the scale show on a busy battle (a Mettaur, a Piranha and a Puffy);
+  Frame blending on MegaMan hit by a Mettaur's wave and flickering;
+  Smooth motion on MegaMan stepping at a steady beat under a moving sky.
+  On the 3DS, whose heap holds no second core, the paused game shows
+  there.
+- START:DEFAULT on the band puts the page's lines back after BN6's Yes or
+  No, Fullscreen, Controls and Statistics kept as set, as Lyra's reset
+  leaves what it marks.
+- The notes on the Display page cut to four short lines beside the
+  scene.

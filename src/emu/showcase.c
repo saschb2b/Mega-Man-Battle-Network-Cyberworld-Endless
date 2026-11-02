@@ -70,8 +70,8 @@ static struct {
 	uint32_t video[EMU_W * EMU_H];
 	uint8_t *base;      /* the boot's end: MegaMan on the net (RAM alone) */
 	size_t base_size;
-	uint8_t *loop;      /* the scene's loop start */
-	size_t loop_size;
+	uint8_t *loop[SCENE_COUNT];   /* each scene's loop start, kept once staged */
+	size_t loop_size[SCENE_COUNT];
 	int want, staged;   /* the scene wanted, and the one staged (-1 none) */
 	int beat, in_beat;  /* where its keys are */
 	int frames;         /* frames of the staging so far */
@@ -147,18 +147,21 @@ static void booted(void) {
 	S.staged = -1;
 }
 
-/* the wanted scene begun from the boot's end */
+/* the wanted scene from its loop's start where it was staged before,
+ * else begun from the boot's end */
 static void stage(void) {
+	S.staged = S.want;
+	S.beat = S.in_beat = 0;
+	if (S.loop[S.want]) {
+		if (!arena_core_load(S.core, S.loop[S.want], S.loop_size[S.want])) fail("the scene's loop did not load");
+		return;
+	}
 	if (!arena_core_load(S.core, S.base, S.base_size)) { fail("the boot's state did not load"); return; }
 	write_record(&scenes[S.want]);
 	S.forcing = true;
 	S.frames = 0;
-	S.staged = S.want;
-	S.beat = S.in_beat = 0;
 	S.fight = 0;
 	S.stage = ST_OPEN;
-	free(S.loop);
-	S.loop = NULL;
 }
 
 /* a frame of the scene's beats: false once its list is over */
@@ -188,7 +191,7 @@ static void open_frame(void) {
 		else if (++S.frames > 1800) fail("its fight did not begin");
 		return;
 	}
-	if (!(S.loop = arena_core_save(S.core, &S.loop_size))) { fail("the scene's loop could not be kept"); return; }
+	if (!(S.loop[S.staged] = arena_core_save(S.core, &S.loop_size[S.staged]))) { fail("the scene's loop could not be kept"); return; }
 	S.beat = S.in_beat = 0;
 	S.stage = ST_LOOP;
 }
@@ -196,7 +199,7 @@ static void open_frame(void) {
 static void loop_frame(void) {
 	if (beat_frame(scenes[S.staged].loop)) return;
 	/* (its end: the loop's start again, and its first frame) */
-	if (!arena_core_load(S.core, S.loop, S.loop_size)) { fail("the scene's loop did not load"); return; }
+	if (!arena_core_load(S.core, S.loop[S.staged], S.loop_size[S.staged])) { fail("the scene's loop did not load"); return; }
 	S.beat = S.in_beat = 0;
 	beat_frame(scenes[S.staged].loop);
 }
@@ -247,7 +250,7 @@ void showcase_close(void) {
 		arena_core_free(S.core);
 	}
 	free(S.base);
-	free(S.loop);
+	for (int k = 0; k < SCENE_COUNT; ++k) free(S.loop[k]);
 	memset(&S, 0, sizeof S);
 	S.staged = -1;
 }

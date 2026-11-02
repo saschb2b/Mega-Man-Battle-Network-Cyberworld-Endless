@@ -3,7 +3,7 @@ type: Feature
 title: "The GBA's screen: colour correction, frame blending, lcd3x"
 description: "Options' Display can show the game as a GBA's own screen did (issue #265): mGBA's libretro core's Color Correction and Interframe Blending on BN6's picture, step for step (`lcd_frame.c`), libretro's handheld colour shaders (VBA, DS, PSP) over that picture as RetroArch runs them, and RetroArch's lcd3x shader over the screen (`lcd_grid.c`); what each does, where it runs, and how it was checked against mGBA's own code and the shaders' math."
 tags: [engine, display, options]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
 sources:
   - id: mgba-libretro
     resource: "https://github.com/libretro/mgba/blob/master/src/platform/libretro/libretro.c"
@@ -73,8 +73,11 @@ numbers:
   0.333 to 0.5 so its trail looks as long).
 
 It runs on the core's picture and nothing else: `emu_picture.c` (the
-town's hour and a liberation's panels on it first) and the Arena's
-`arena_view.c`. What the engine draws over the picture (the map, the
+town's hour and a liberation's panels on it first), the Arena's
+`arena_view.c`, and Options' scene (`options_scene.c`: BN6's battle on a
+core of its own beside Display's lines, blended through a history of its
+own, `lcd_frame_in`, so that it and the paused game never mix;
+[Settings screens elsewhere](settings-screens.md)). What the engine draws over the picture (the map, the
 counts, its own PET screens) keeps its colours, as no core's frame holds
 it. Each picture the core makes is blended once (`emu_pictures`, a count
 of them): a frame the loop plays to catch up makes none, and while the
