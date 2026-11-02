@@ -900,6 +900,8 @@ static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_RenderClear(P.renderer);
 	if (P.fill > 0) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
 	else copy_frames(older, newer, alpha, &dst);
+	/* (the lcd3x shader at the screen's pixels, as its preset draws; not a menu's own screen) */
+	if (!own_taps) lcd_grid_draw(P.renderer, &dst, P.w, P.h);
 }
 
 void platform_present_blend(double w) {

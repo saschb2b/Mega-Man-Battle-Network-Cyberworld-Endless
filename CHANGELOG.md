@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **A GBA's screen, if you want it (issue #265).** Options' Display has
+  three new lines, each off until turned on: **Colour correction** shows
+  the game's colours as a GBA's own screen did, darker and softer;
+  **Frame blending** mixes frames (Simple, Smart, or LCD ghosting, each
+  frame fading over the next); **LCD 3x** draws each pixel's red, green
+  and blue stripes and a dark line through each row (not on the 3DS). The
+  first two are the mGBA core's Color Correction and Interframe Blending
+  as RetroArch runs it, matched to its own code pixel for pixel; the third
+  is RetroArch's lcd3x shader.
+
 ## 0.18.1 (2026-10-31)
 
 - **The PS5 app starts.** 0.18.0's app was refused at launch: the

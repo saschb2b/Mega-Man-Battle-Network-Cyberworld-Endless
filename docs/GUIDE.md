@@ -1258,6 +1258,28 @@ pace), in the browser player's menu (the two keep in step), or with
 start). A screen at 60 or 120 Hz, or one that follows the game (FreeSync,
 G-Sync), needs neither.
 
+A GBA's own screen showed the game darker and softer than a modern screen
+does, and each frame faded into the next. Three lines of Display bring
+that back, each off until you turn it on, as RetroArch's mGBA core and its
+shaders do it:
+
+- **Colour correction**: **GBA** shows the colours as mGBA's Color
+  Correction does, a GBA screen's darker, softer ones
+  (`colour_correction = gba`).
+- **Frame blending**: mGBA's Interframe Blending. **Simple** mixes each
+  frame half and half with the last; **Smart** does that only where a
+  pixel flickers; **LCD** is its LCD ghosting, each frame fading out over
+  the next four; **LCD fast** a lighter one with a longer trail
+  (`interframe_blending = simple`, `smart`, `lcd_ghosting` or
+  `lcd_ghosting_fast`).
+- **LCD 3x**: RetroArch's lcd3x shader, each pixel striped red, green and
+  blue with a dark line through each row, the picture a little darker
+  (`lcd3x = on`; not on the 3DS). It looks best at a scale of 3 or more.
+
+The first two change the game's own picture; what Cyberworld draws over
+it (the map, its own PET screens) keeps its colours. How each matches
+mGBA's is in [The GBA's screen](engine/lcd.md).
+
 ## Sound
 
 The music and sounds are BN6's own, played by its own sound engine as a

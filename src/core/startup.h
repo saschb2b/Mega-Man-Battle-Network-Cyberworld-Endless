@@ -47,5 +47,8 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen);
  * settings.ini; then the anonymous statistics' session (analytics_net.h),
  * a player's own where `plain` (no test's or developer's option) */
 void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, int effects_arg, const char *screen_arg, bool plain);
+/* ... and the GBA's screen's flags (display_arg's), set at once and kept
+ * over settings.ini's lines: true where `flag` was one */
+bool player_screen_flag(const char *flag, const char *val);
 
 #endif
