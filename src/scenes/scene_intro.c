@@ -123,6 +123,7 @@ static void draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	if (S.notice) notice_render();
 	else intro_logo_render(px, S.t);
+	lcd_canvas_pixels(px, CORE_W * CORE_H);
 	if (!S.tex) {
 		S.tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, CORE_W, CORE_H);
 		SDL_SetTextureScaleMode(S.tex, SDL_ScaleModeNearest);

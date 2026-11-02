@@ -44,7 +44,8 @@ static int wrap_lines(const char *text, int cols, char out[][64], int max) {
 /* The message, in the ROM's font when there is one, else in the engine's
  * own (a handheld without its ROM showed a row of bars). */
 static void error_draw(void) {
-	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
+	SDL_Color bg = lcd_canvas_colour(rgba(8, 16, 48, 255));
+	SDL_SetRenderDrawColor(P.renderer, bg.r, bg.g, bg.b, 255);
 	SDL_RenderClear(P.renderer);
 	if (R.data) {
 		text_draw(P.w / 2, 40, "Cyberworld Endless", WHITE, TEXT_CENTER);

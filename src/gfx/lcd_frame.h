@@ -6,7 +6,7 @@
  * and shown as a GPU shows a 565 frame; or, in the correction's place,
  * through one of libretro's handheld colour shaders as RetroArch runs it
  * over that frame (glsl-shaders, handheld/shaders/color). What the engine
- * draws over the picture keeps its colours, as no core's frame holds it.
+ * draws over the picture takes the same colours from lcd_canvas.h.
  * docs/engine/lcd.md */
 #ifndef CW_LCD_FRAME_H
 #define CW_LCD_FRAME_H
@@ -47,5 +47,12 @@ uint16_t lcd_correct565(uint16_t c);
  * in the low byte (its table's entry, the tests): GBA's mGBA's correction
  * shown as a 565 frame, the shaders' at 8 bits as a GPU writes them */
 uint32_t lcd_shown565(LcdColour c, uint16_t px);
+
+/* An ARGB8888 colour (R at bit 16), and `n` pixels of them in place,
+ * through the chosen colour as lcd_frame shows the picture's (its alpha
+ * kept); as they are where it is off. What the engine draws over the picture
+ * takes them through lcd_canvas.h. */
+uint32_t lcd_correct_argb(uint32_t c);
+void lcd_correct_pixels(uint32_t *px, int n);
 
 #endif

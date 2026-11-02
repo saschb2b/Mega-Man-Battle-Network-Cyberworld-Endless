@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The GBA's screen: colour correction, frame blending, lcd3x"
-description: "Options' Display can show the game as a GBA's own screen did (issue #265): mGBA's libretro core's Color Correction and Interframe Blending on BN6's picture, step for step (`lcd_frame.c`), libretro's handheld colour shaders (VBA, DS, PSP) over that picture as RetroArch runs them, and RetroArch's lcd3x shader over the screen (`lcd_grid.c`); what each does, where it runs, and how it was checked against mGBA's own code and the shaders' math."
+description: "Options' Display can show the game as a GBA's own screen did (issue #265): mGBA's libretro core's Color Correction and Interframe Blending on BN6's picture, step for step (`lcd_frame.c`), libretro's handheld colour shaders (VBA, DS, PSP) over that picture as RetroArch runs them, the chosen colours on what the engine draws over it too (`lcd_canvas.c`), and RetroArch's lcd3x shader over the screen (`lcd_grid.c`); what each does, where it runs, and how it was checked against mGBA's own code and the shaders' math."
 tags: [engine, display, options]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:16:00Z }
 sources:
   - id: mgba-libretro
     resource: "https://github.com/libretro/mgba/blob/master/src/platform/libretro/libretro.c"
@@ -72,13 +72,12 @@ numbers:
   each new one mixed into it half and half (mGBA raises its response from
   0.333 to 0.5 so its trail looks as long).
 
-It runs on the core's picture and nothing else: `emu_picture.c` (the
-town's hour and a liberation's panels on it first) and the Arena's
-`arena_view.c`. What the engine draws over the picture (the map, the
-counts, its own PET screens) keeps its colours, as no core's frame holds
-it. Each picture the core makes is blended once (`emu_pictures`, a count
-of them): a frame the loop plays to catch up makes none, and while the
-game waits under Options the last frame shows again, as a frontend shows
+Both run on the core's picture: `emu_picture.c` (the town's hour and a
+liberation's panels on it first) and the Arena's `arena_view.c`; the
+correction also on what the engine draws over it (below). Each picture
+the core makes is blended once (`emu_pictures`, a count of them): a
+frame the loop plays to catch up makes none, and while the game waits
+under Options the last frame shows again, as a frontend shows
 its last while the core runs no frame. Two differences from mGBA, both at
 a start: its buffers start white (Accurate's four) or black (Fast's), ours
 from the first picture, so turning one on mid-game flashes nothing; and in
@@ -148,6 +147,56 @@ GBA again, then the two later handhelds. A presentation choice only, it
 feeds no loop of the game: the picture as the game stores it against
 the screen a player remembers, each applied at once and named on the
 panel by the screen it shows ([The PET's screens](ui.md)).
+
+## The engine's colours, on the same screen (`src/gfx/lcd_canvas.c`)
+
+A frontend corrects the one frame the core hands it, and all a GBA's
+screen showed came from that frame. Here the engine draws over BN6's
+picture too (the map, the counts, its PET look's screens, Options
+itself, the title), and with the picture alone corrected those stood out
+brighter than BN6's own menus beside them, and Options could not show
+what its line does. So Colour correction takes the engine's colours
+through the chosen colour's table (GBA's or a shader's), each where it
+enters the canvas:
+
+- a fill's colour (`fill_rect`, `fill_rects`: the PET look's panels, the
+  map, the 3x5 letters), the battle font's and the pixel letters' colours
+  (`pixfont.c`), a fade's (`platform_apply_effects`) and the error
+  screen's ground;
+- the pixels of what is drawn from a texture: sprites' frames and ROM
+  tiles (`gfx.c`), BN5's tiles (`xtiles.c`), the chat font's two tones
+  (`chatbox.c`), the battle font's shade, the title's OPTIONS
+  (`title_menu.c`);
+- the title's and the start's whole pictures (the logo over an area's
+  backdrop, the notice), before they go to their textures.
+
+A colour goes as `lcd_frame` takes the picture's: its channels' top five
+bits as a 565 colour (a colour from a palette, `bgr555`, gives back its
+own five), and that colour's entry in the table, what the screen shows
+(`lcd_correct_argb`). A texture made from colours is made again when the
+colour it takes changes (`lcd_canvas_gen`: Off, another of the five, a
+screen of its own), so the line turned in Options recolours the panel it
+is on, and the picture behind it.
+
+Two differences from correcting one frame. What lies in front is
+corrected and then laid over the corrected picture, where a frontend
+would lay it over first: for an opaque pixel the two are the same, and a
+translucent fill (a dim, a ghost) differs by little. And the battle
+font's shade is drawn as the corrected shade times the text's corrected
+colour, as its atlas is tinted, where one frame would correct the
+product: white text's shade a few hundredths darker than one frame's.
+
+Kept out, as none of them is a GBA's screen: a screen of its own
+(`platform_own_taps`: the ROMs screen, SAVES, the Net Square's text
+field), whose canvas is the app's; the touch controls, drawn at the
+phone's own pixels (`touch_art.c`); and the second screen, drawn into
+memory (`gfx_draw_into`). The title and the start are in: they are BN6's
+own pixels at the GBA's 240x160 (its logo, the areas' backdrops, PRESS
+START, the chat box), and Options opens over the title, where its
+preview has the game behind it. Frame blending stays on the core's
+picture. With the line off nothing changes: every colour and texture as
+before, the title, Options' Display, the PET and a layer's map checked
+pixel for pixel against the build before.
 
 ## lcd3x, over the screen (`src/gfx/lcd_grid.c`)
 
