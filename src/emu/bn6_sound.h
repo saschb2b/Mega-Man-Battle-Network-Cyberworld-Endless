@@ -44,6 +44,12 @@
 #define BN6_TRACK_EXISTS      0x80 /* ... it plays: its player's frame runs it */
 #define BN6_TRACK_VOL_RIGHT   0x10 /* u8: its volume worked out, right and left, which its notes take (ChnVolSetAsm) */
 #define BN6_TRACK_VOL_LEFT    0x11 /* u8: ... and left */
+#define BN6_TRACK_VOL         0x12 /* u8: its own volume (vol), times BN6_TRACK_VOL_X shifted right 5 in TrkVolPitSet */
+#define BN6_TRACK_VOL_X       0x13 /* u8: its player's fade's (volX) */
+#define BN6_TRACK_PAN         0x14 /* s8: its pan (pan), twice it with BN6_TRACK_PAN_X added */
+#define BN6_TRACK_PAN_X       0x15 /* s8: its player's (panX) */
+#define BN6_TRACK_MOD_M       0x16 /* s8: its LFO's value now (modM): the volume's (x (modM + 128) >> 7) where BN6_TRACK_MOD_T is 1, the pan's where 2 */
+#define BN6_TRACK_MOD_T       0x18 /* u8: what its LFO moves (modT): 0 the pitch, 1 the volume, 2 the pan */
 
 /* the library's tables in the ROM */
 #define BN6_M4A_JUMP_TEMPLATE 0x081C1F68u /* gMPlayJumpTableTemplate, copied to BN6_SOUND_JUMP_TABLE (MEMACC and XCMD put in at the start) */

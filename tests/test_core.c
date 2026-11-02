@@ -53,6 +53,7 @@
 #include "liberation_board.h"
 #include "liberation_plan.h"
 #include "sound_filter.h"
+#include "sound_heard.h"
 #include "super_lines.h"
 #include "flags.h"
 #include "mapslot.h"
@@ -5006,20 +5007,31 @@ static void test_audio_pace(void) {
 
 /* settings.ini's sound: gba leaves the sound as it is; soft keeps 1 kHz
  * and takes 12 kHz (the GBA mix's images) and 50 Hz down as the Legacy
- * Collection's balance does (sound_filter.c: -12.5 and -9 dB) */
-static double filtered_rms(SoundFilter mode, double hz) {
+ * Collection's balance does (sound_filter.c: -12.5 and -9 dB). A tone of
+ * `hz` on the sides `sides` says (bit 0 left, bit 1 right) through the
+ * chain at `level`: what is left of it on side `ch` (0 left, 1 right) */
+static double side_rms(SoundFilter mode, SoundOutput out, int level, double hz, int sides, int ch) {
 	static int16_t buf[24000 * 2];
 	sound_filter_set(mode);
-	for (int i = 0; i < 24000; ++i) buf[i * 2] = buf[i * 2 + 1] = (int16_t)lrint(10000.0 * sin(2.0 * M_PI * hz * i / 48000.0));
-	sound_filter_run(buf, 24000);
-	double in = 0.0, out = 0.0;
+	sound_output_set(out);
+	for (int i = 0; i < 24000; ++i) {
+		int16_t x = (int16_t)lrint(10000.0 * sin(2.0 * M_PI * hz * i / 48000.0));
+		buf[i * 2] = sides & 1 ? x : 0;
+		buf[i * 2 + 1] = sides & 2 ? x : 0;
+	}
+	sound_filter_run(buf, 24000, level);
+	double in = 0.0, sum = 0.0;
 	for (int i = 12000; i < 24000; ++i) {
 		double x = 10000.0 * sin(2.0 * M_PI * hz * i / 48000.0);
 		in += x * x;
-		out += (double)buf[i * 2 + 1] * buf[i * 2 + 1];
+		sum += (double)buf[i * 2 + ch] * buf[i * 2 + ch];
 	}
-	return sqrt(out / in);
+	sound_output_set(OUTPUT_SPEAKERS);
+	return sqrt(sum / in);
 }
+
+static double filtered_rms(SoundFilter mode, double hz) { return side_rms(mode, OUTPUT_SPEAKERS, SOUND_LEVELS, hz, 3, 1); }
+static double db(double r) { return 20.0 * log10(r); }
 
 /* The Jukebox's songs (docs/game/pet.md, The Jukebox): every song of each
  * game's music player once (BN6's 0x01-0x25; BN5's 0x01-0x24 but its
@@ -5053,6 +5065,96 @@ static void test_sound_filter(void) {
 	CHECK(fabs(20.0 * log10(r) + 9.0) < 1.0, "soft left a 50 Hz tone at %.1f dB, not -9", 20.0 * log10(r));
 	r = filtered_rms(SOUND_GBA, 12000.0);
 	CHECK(fabs(r - 1.0) < 0.001, "gba again changed a 12 kHz tone by %.4f", r);
+	/* the defaults leave every sample as it came: noise, both sides apart */
+	static int16_t noise[4800 * 2], kept[4800 * 2];
+	uint32_t seed = 12345;
+	for (int i = 0; i < 4800 * 2; ++i) {
+		seed = seed * 1103515245u + 12345u;
+		noise[i] = kept[i] = (int16_t)(seed >> 16);
+	}
+	sound_filter_run(noise, 4800, SOUND_LEVELS);
+	CHECK(!memcmp(noise, kept, sizeof noise), "gba, speakers and the game's own level changed a sample");
+}
+
+/* mGBA's Audio Filter, its libretro core's _audioLowPassFilter step for
+ * step (sound_filter.c): at 60 % (0x10000 x 60 / 100 = 39321) an impulse
+ * falls as its 16.16 arithmetic has it, a fall from below settles at -2
+ * (its shift rounds down), and at 48 kHz the level's one pole is where
+ * its formula puts it: -3 dB at 3990 Hz for 60 %, 392 Hz for 95 %, and
+ * 5 % barely there */
+static void test_sound_mgba(void) {
+	static int16_t buf[48 * 2];
+	sound_low_pass_set(SOUND_LOW_PASS_DEFAULT);
+	sound_filter_set(SOUND_MGBA);
+	memset(buf, 0, sizeof buf);
+	buf[0] = buf[1] = 32767;
+	sound_filter_run(buf, 6, SOUND_LEVELS);
+	static const int16_t fall[6] = { 13107, 7864, 4718, 2830, 1697, 1018 };
+	for (int i = 0; i < 6; ++i) CHECK(buf[i * 2] == fall[i] && buf[i * 2 + 1] == fall[i], "mgba: the impulse's %d: %d %d, not %d", i, buf[i * 2], buf[i * 2 + 1], fall[i]);
+	/* (a fall from above settles at 0) */
+	memset(buf, 0, sizeof buf);
+	sound_filter_run(buf, 48, SOUND_LEVELS);
+	memset(buf, 0, sizeof buf);
+	buf[0] = buf[1] = -32768;
+	sound_filter_run(buf, 48, SOUND_LEVELS);
+	CHECK(buf[0] == -13108 && buf[94] == -2 && buf[95] == -2, "mgba: from below %d ... %d %d, not -13108 ... -2 -2", buf[0], buf[94], buf[95]);
+	memset(buf, 0, sizeof buf);
+	sound_filter_run(buf, 48, SOUND_LEVELS);
+	double r = filtered_rms(SOUND_MGBA, 3990.0);
+	CHECK(fabs(db(r) + 3.01) < 0.15, "mgba 60%%: 3990 Hz at %.2f dB, not -3", db(r));
+	sound_low_pass_set(95);
+	r = filtered_rms(SOUND_MGBA, 392.0);
+	CHECK(fabs(db(r) + 3.01) < 0.15, "mgba 95%%: 392 Hz at %.2f dB, not -3", db(r));
+	sound_low_pass_set(5);
+	r = filtered_rms(SOUND_MGBA, 12000.0);
+	CHECK(db(r) > -0.6, "mgba 5%%: 12 kHz at %.2f dB", db(r));
+	sound_low_pass_set(200);
+	CHECK(sound_low_pass() == SOUND_LOW_PASS_MAX, "mgba's level past 95 kept as %d", sound_low_pass());
+	sound_low_pass_set(SOUND_LOW_PASS_DEFAULT);
+	sound_filter_set(SOUND_GBA);
+}
+
+/* Output: headphones' crossfeed is bs2b's default (700 Hz, 4.5 dB):
+ * a low tone on one side reaches the other 4.5 dB down, a high one far
+ * less, a tone on both comes out as loud as it went in at the lowest
+ * and 1.8 dB under it at the highest (bs2b's gain); mono puts each side
+ * on both, halved */
+static void test_sound_output(void) {
+	double near = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 60.0, 1, 0);
+	double far = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 60.0, 1, 1);
+	CHECK(fabs(db(far / near) + 4.5) < 0.3, "headphones: 60 Hz on the left reaches the right %.2f dB down, not 4.5", -db(far / near));
+	near = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 10000.0, 1, 0);
+	far = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 10000.0, 1, 1);
+	CHECK(db(far / near) < -20.0, "headphones: 10 kHz on the left reaches the right only %.1f dB down", -db(far / near));
+	double both = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 60.0, 3, 0);
+	CHECK(fabs(db(both)) < 0.25, "headphones: 60 Hz on both sides at %.2f dB", db(both));
+	both = side_rms(SOUND_GBA, OUTPUT_HEADPHONES, SOUND_LEVELS, 15000.0, 3, 1);
+	CHECK(fabs(db(both) + 1.8) < 0.3, "headphones: 15 kHz on both sides at %.2f dB, not -1.8", db(both));
+	double l = side_rms(SOUND_GBA, OUTPUT_MONO, SOUND_LEVELS, 1000.0, 1, 0), rr = side_rms(SOUND_GBA, OUTPUT_MONO, SOUND_LEVELS, 1000.0, 1, 1);
+	CHECK(fabs(l - 0.5) < 0.001 && fabs(rr - 0.5) < 0.001, "mono: the left alone came out %.3f left and %.3f right, not half on each", l, rr);
+	CHECK(sound_output_read("headphones") == OUTPUT_HEADPHONES && sound_output_read("mono") == OUTPUT_MONO && sound_output_read("?") == OUTPUT_SPEAKERS &&
+		!strcmp(sound_output_word(OUTPUT_MONO), "mono") && sound_filter_read("mgba") == SOUND_MGBA && sound_filter_read("soft") == SOUND_SOFT &&
+		sound_filter_read("loud") == SOUND_GBA && !strcmp(sound_filter_word(SOUND_MGBA), "mgba"), "settings.ini's sound and output words");
+}
+
+/* Music's and Effects' levels (sound_heard.h): 3 dB a step, 0 none;
+ * settings.ini's words before the levels read as the game's own and none;
+ * the quieter one's share of the louder's in BN6's 256ths, and the gain
+ * on the device */
+static void test_sound_levels(void) {
+	CHECK(sound_heard_read("on") == 10 && sound_heard_read("yes") == 10 && sound_heard_read("off") == 0 && sound_heard_read("no") == 0 &&
+		sound_heard_read("7") == 7 && sound_heard_read("0") == 0 && sound_heard_read("12") == 10 && sound_heard_read("-3") == 0 &&
+		sound_heard_read("loud") == 10, "settings.ini's music and effects read");
+	CHECK(sound_heard_share(10, 10) == 256 && sound_heard_share(9, 10) == 181 && sound_heard_share(8, 10) == 128 && sound_heard_share(4, 10) == 32 &&
+		sound_heard_share(1, 10) == 11 && sound_heard_share(0, 10) == 0 && sound_heard_share(5, 5) == 256 && sound_heard_share(3, 5) == 128,
+		"the shares: %d %d %d %d %d", sound_heard_share(9, 10), sound_heard_share(8, 10), sound_heard_share(4, 10), sound_heard_share(1, 10), sound_heard_share(3, 5));
+	CHECK(sound_heard_gain(10) == 1.0 && sound_heard_gain(0) == 0.0 && fabs(db(sound_heard_gain(7)) + 9.0) < 1e-9 && fabs(db(sound_heard_gain(1)) + 27.0) < 1e-9,
+		"the gains: %f %f", sound_heard_gain(7), sound_heard_gain(1));
+	double r = side_rms(SOUND_GBA, OUTPUT_SPEAKERS, 7, 1000.0, 3, 0);
+	CHECK(fabs(db(r) + 9.0) < 0.05, "level 7: a tone at %.2f dB, not -9", db(r));
+	r = side_rms(SOUND_SOFT, OUTPUT_SPEAKERS, 0, 1000.0, 3, 0);
+	CHECK(r == 0.0, "level 0: a tone left at %f", r);
+	sound_filter_set(SOUND_GBA);
 }
 
 /* settings.ini's lines one at a time (Options' sound and display): its
@@ -6329,6 +6431,9 @@ int main(void) {
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();
+	test_sound_mgba();
+	test_sound_output();
+	test_sound_levels();
 	test_jukebox_songs();
 	test_settings_line();
 	test_lcd_frame();

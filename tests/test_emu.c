@@ -918,7 +918,7 @@ static void quiet_rom(void) {
 
 /* the driver's frame from the reset, both tracks playing with their
  * volume to work out (0x81) and none yet */
-static void quiet_run(bool music, bool effects) {
+static void quiet_run(int music, int effects) {
 	sound_heard_set(music, effects);
 	emu_reset();
 	for (int k = 0; k < 2; ++k) {
@@ -926,6 +926,13 @@ static void quiet_run(bool music, bool effects) {
 		emu_write8(t + BN6_TRACK_FLAGS, BN6_TRACK_EXISTS | BN6_TRACK_VOL_SET);
 		emu_write8(t + BN6_TRACK_VOL_RIGHT, 0);
 		emu_write8(t + BN6_TRACK_VOL_LEFT, 0);
+		/* (its volume 127, its fade's 64, panned a little left: BN6 works
+		 * out 0x6F right and 0x8D left from them, the driver's stand-in 0x40) */
+		emu_write8(t + BN6_TRACK_VOL, 127);
+		emu_write8(t + BN6_TRACK_VOL_X, 64);
+		emu_write8(t + BN6_TRACK_PAN, (uint8_t)-8);
+		emu_write8(t + BN6_TRACK_PAN_X, 0);
+		emu_write8(t + BN6_TRACK_MOD_T, 0);
 	}
 	emu_write32(Q_MARK, 0);
 	emu_frame(0);
@@ -937,14 +944,19 @@ static void quiet_players(void) {
 	emu_write32(0x080000C8, Q_DRV | 1);
 	sound_quiet_install();
 	CHECK(emu_read16(BN6_M4A_TRK_VOL_PIT_SET) == 0xBECE, "the hook on TrkVolPitSet");
-	static const struct { bool music, effects; uint8_t music_vol, effect_vol; } runs[4] = {
-		{ true, true, 0x40, 0x40 }, { false, true, 0, 0x40 }, { true, false, 0x40, 0 }, { false, false, 0, 0 },
+	/* (each level as its share of the louder one's: the louder's tracks as
+	 * BN6 works them out, the driver's stand-in; the quieter's BN6's own
+	 * numbers, 0x6F and 0x8D, times their share: 4 under 10 is 32/256,
+	 * 9 under 10 181/256) */
+	static const struct { int music, effects; uint8_t music_r, music_l, effect_r, effect_l; } runs[7] = {
+		{ 10, 10, 0x40, 0x40, 0x40, 0x40 }, { 0, 10, 0, 0, 0x40, 0x40 }, { 10, 0, 0x40, 0x40, 0, 0 }, { 4, 10, 0x0E, 0x12, 0x40, 0x40 },
+		{ 6, 6, 0x40, 0x40, 0x40, 0x40 }, { 10, 9, 0x40, 0x40, 0x4E, 0x64 }, { 0, 0, 0, 0, 0, 0 },
 	};
-	for (int k = 0; k < 4; ++k) {
+	for (int k = 0; k < 7; ++k) {
 		quiet_run(runs[k].music, runs[k].effects);
 		CHECK(emu_read32(Q_MARK) == 0x5A, "quiet %d: the driver did not run to its end", k);
-		CHECK(emu_read8(Q_MUSIC + BN6_TRACK_VOL_RIGHT) == runs[k].music_vol && emu_read8(Q_MUSIC + BN6_TRACK_VOL_LEFT) == runs[k].music_vol &&
-			emu_read8(Q_EFFECT + BN6_TRACK_VOL_RIGHT) == runs[k].effect_vol && emu_read8(Q_EFFECT + BN6_TRACK_VOL_LEFT) == runs[k].effect_vol,
+		CHECK(emu_read8(Q_MUSIC + BN6_TRACK_VOL_RIGHT) == runs[k].music_r && emu_read8(Q_MUSIC + BN6_TRACK_VOL_LEFT) == runs[k].music_l &&
+			emu_read8(Q_EFFECT + BN6_TRACK_VOL_RIGHT) == runs[k].effect_r && emu_read8(Q_EFFECT + BN6_TRACK_VOL_LEFT) == runs[k].effect_l,
 			"quiet %d: the music's volume %#x %#x, the effect's %#x %#x", k, emu_read8(Q_MUSIC + BN6_TRACK_VOL_RIGHT),
 			emu_read8(Q_MUSIC + BN6_TRACK_VOL_LEFT), emu_read8(Q_EFFECT + BN6_TRACK_VOL_RIGHT), emu_read8(Q_EFFECT + BN6_TRACK_VOL_LEFT));
 		/* (worked out, silenced or not: nothing left to do) */
@@ -953,7 +965,7 @@ static void quiet_players(void) {
 	}
 	/* a change tells the players it touches before the next frame (the
 	 * driver loops at its end since), and a state's load tells them all */
-	sound_heard_set(false, true);
+	sound_heard_set(0, 10);
 	emu_frame(0);
 	emu_sync();
 	CHECK(emu_read8(Q_EFFECT + BN6_TRACK_FLAGS) == (BN6_TRACK_EXISTS | BN6_TRACK_VOL_CHANGED) &&
@@ -966,7 +978,7 @@ static void quiet_players(void) {
 		emu_read8(Q_MUSIC + BN6_TRACK_FLAGS));
 	/* (a track that does not play is left alone) */
 	emu_write8(Q_MUSIC + BN6_TRACK_FLAGS, 0);
-	sound_heard_set(true, true);
+	sound_heard_set(10, 10);
 	emu_frame(0);
 	emu_sync();
 	CHECK(emu_read8(Q_MUSIC + BN6_TRACK_FLAGS) == 0, "a track that does not play told: %#x", emu_read8(Q_MUSIC + BN6_TRACK_FLAGS));

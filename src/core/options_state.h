@@ -11,15 +11,15 @@
  * Statistics), the
  * Display section's (Fullscreen, Scale, Smooth motion, and the GBA's
  * screen's Colour correction, Frame blending and LCD 3x, where the
- * system has them: display.h), the Audio section's (Sound; Music and
- * Effects, sound_heard.h; Vibration and Trigger effects where the system
- * has them, feel_out.h), and Done */
+ * system has them: display.h), the Audio section's (Music and Effects,
+ * sound_heard.h; Output and Sound, sound_filter.h; Vibration and Trigger
+ * effects where the system has them, feel_out.h), and Done */
 enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
-	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X };
+	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT };
 #define LINES_MAX 6
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
-static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_LCD3X; }
+static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_OUTPUT; }
 
 /* The section open: the hub's lines, or a section's in their place */
 enum { SECTION_HUB, SECTION_DISPLAY, SECTION_AUDIO };

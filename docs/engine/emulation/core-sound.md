@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The core's sound"
-description: "How the core's sound reaches the device: `audio_pace.c` nudges mGBA's resampling by the ring's averaged fill, settings.ini's `sound` filters it, and a hook on TrkVolPitSet (`sound_quiet.c`) silences music or effects."
+description: "How the core's sound reaches the device: `audio_pace.c` nudges mGBA's resampling by the ring's averaged fill, settings.ini's `sound` and `output` shape it, and a hook on TrkVolPitSet (`sound_quiet.c`) makes the quieter of music and effects quieter or silent."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T20:47:59Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:40:00Z }
 ---
 
 # The core's sound
@@ -36,30 +36,44 @@ songs within a dB of each other. Soft is three biquads fitted to it,
 within 0.8 dB from 35 Hz to 17 kHz: a low-pass at 6750 Hz (Q 0.88), a
 high-pass at 68 Hz and a low shelf of -2.5 dB at 320 Hz. It takes the
 images of BN6's 10512 Hz mix ([Sound and music](../../rom/sound.md), The sound's mix) down
-with the rest of the highs. Neither setting touches the game: a headless
-capture's frames are the same byte for byte with either.
+with the rest of the highs. `mgba` puts it through mGBA's libretro Audio
+Filter instead, and `output` lays it out for speakers, headphones or one
+ear ([The sound out](../sound-out.md)). None of them touches the game: a
+headless capture's frames are the same byte for byte with any.
 
 **The music and the effects** (settings.ini's `music` and `effects`,
-Options' Audio; `src/audio/sound_heard.c`). BN6 plays its music on player
+levels 0 to 10, Options' Audio; `src/audio/sound_heard.c`; [The sound
+out](../sound-out.md) has the whole chain). BN6 plays its music on player
 31 and each sound on a player of its own, and works each track's volume
 out in one routine, TrkVolPitSet, from the track's own, the fade's and its
 pan; each of its notes takes what it worked out ([Sound and music](../../rom/sound.md), The
-music and the effects silenced). A hook there (`src/emu/sound_quiet.c`)
-gives a silenced player's tracks none, right and left, and leaves the rest
-as BN6 works it: the notes play on, silent, so the effects take the
+music and the effects silenced). The louder of the two levels is the
+device's gain; a hook there (`src/emu/sound_quiet.c`) gives the quieter
+one's tracks their share of what BN6 works out, right and left, worked
+out as BN6's own code does it (its fields read from the ROM's code,
+verified there), and a silenced player's none, and leaves the rest
+untouched: the notes play on, quieter or silent, so the effects take the
 channels they took before, and the game runs as it did. A change tells the
-tracks that play, of the players it touches, to work their volume out
-again before the next frame; so does a state's load, whose tracks hold
-what the setting was when it was saved. The engine's own MP2K does the
-same in its C (`mp2k_quiet_set`), but for the song the Jukebox plays,
-which was asked for; with both off the device hears nothing at all. The
-Arena's and the stands' cores take no hook: each player's system runs both
-GBAs and hashes their states whole, sound and all (`arena_pair.c`), so a
-NetBattle's music plays unless the effects are off too. Proved on the
+tracks that play, of the players whose share it moves, to work their
+volume out again before the next frame; so does a state's load, whose
+tracks hold what the setting was when it was saved. The engine's own MP2K
+does the same in its C (`mp2k_shares_set`), but for the song the Jukebox
+plays, which was asked for and plays at the game's own level where the
+music is off; with both off the device hears nothing at all. The Arena's
+and the stands' cores take no hook: each player's system runs both GBAs
+and hashes their states whole, sound and all (`arena_pair.c`), so a
+NetBattle is heard at the louder of the two levels. Proved on the
 core's sound dumped (`CYBERWORLD_AUDIO_DUMP`, a Central layer, `--seed 2`):
 with the music off nothing from the moment the net's song begins, the
 jack-in's effects alone before it; with the effects off nothing in the
 jack-in's sound, and the song at the same level (within 0.02 dB) and
 envelope (0.95 by 10 ms) as with both; with both on, the same byte for byte
 as the build before the hook, and an autopilot run's battles and run log
-the same with the effects off.
+the same with the effects off. With the levels (2 November 2026): the same
+run at the defaults the same byte for byte as the build before them; the
+music at 4 under the effects at 10 heard 23 dB down in the song's windows
+where no effect plays (18 meant: [The sound out](../sound-out.md) has what
+the share costs), the effects at 4 leaving the music's windows as they
+were; the hook's numbers checked in `tests/test_emu.c` against BN6's own
+(0x6F and 0x8D for a track at 127, 64, panned -8; 0x0E and 0x12 at a share
+of 32).

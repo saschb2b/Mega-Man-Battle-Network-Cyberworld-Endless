@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:45:00Z }
 ---
 
 # The player's guide
@@ -490,7 +490,7 @@ waits under it, and B brings you back to the PET where you were. On a
 phone or tablet the touch controls' menu has **OPTIONS** as well. Its
 **Controls** opens the controls screen (not on the 3DS, whose
 buttons are its own), **Display** the picture ([Screen](#screen)),
-**Audio** the music, the sound effects and the sound ([Sound](#sound)),
+**Audio** the music's and the sound effects' levels, the output and the sound ([Sound](#sound)),
 **Fast forward** its speed ([Fast forward](#fast-forward)), and
 **Statistics** your answer to the statistics' question, where the game can
 send them; B goes back (on a phone, the touch controls' B).
@@ -1299,21 +1299,44 @@ the GBA makes of that mix carries a bright hiss above the music.
 recording of it on the same songs: the highs from 5 kHz up taken down as it
 has them (-4.5 dB at 8 kHz, -10 at 10 kHz, -18 at 13 kHz) and the deepest
 bass a little (-3 dB around 100 Hz). **GBA**, the default, leaves it as the
-cartridge plays it. Choose in Options' **Audio** (on the title's menu, or
-the PET's in a run): Left, Right or A on
-**Sound** changes it at once, so you hear it, and it is kept. The browser
-player's menu has a **Sound** button too, and `sound = soft` or
-`sound = gba` in `settings.ini` in the data folder sets it as well.
+cartridge plays it. **mGBA** is mGBA's Audio Filter as RetroArch's mGBA
+core has it: a gentle low-pass that softens the highs more the higher its
+level (`low_pass = 60` in `settings.ini`, 5 to 95, mGBA's own default 60;
+this game runs it at 48 kHz, where today's RetroArch core's 60 sounds
+like 50 here: [The sound out](engine/sound-out.md)). Choose in Options'
+**Audio** (on the title's menu, or the PET's in a run): Left, Right or A
+on **Sound** changes it at once, so you hear it, and it is kept. The
+browser player's menu has a **Sound** button too, and `sound = gba`,
+`sound = soft` or `sound = mgba` in `settings.ini` in the data folder
+sets it as well.
 
-To play your own music over the game, turn **Music** off in Options'
-**Audio**: the game's songs fall silent and its sound effects play on, the
-menus', the chips' and the battles'. **Effects** turns those off and on in
-the same way; with both off the game makes no sound at all. Each applies
-at once and is kept (`music = off` and `effects = off` in `settings.ini`).
-The Jukebox still plays the song you choose with the music off. In a
-NetBattle the music plays on unless the effects are off too: both GBAs of
-a NetBattle run alike on both players' systems, and the music is part of
-what they run.
+**Output** lays the sound out for where you listen:
+
+| Output | For |
+| --- | --- |
+| **Speakers** (the default) | The game's stereo as it plays it. |
+| **Headphones** | Each ear hears a little of the other side, lower and a moment later, as from speakers in a room (bs2b's crossfeed): easier on long sessions in headphones. |
+| **Mono** | Both sides the same: one speaker, one earbud, or hearing on one side. A GBA's own speaker played it this way. |
+
+`output = speakers`, `headphones` or `mono` in `settings.ini` sets it too.
+
+**Music** and **Effects** each go from **10**, the game's own level, down
+to **1**, every step 3 dB quieter, and **Off**. Left and Right stop at
+the ends, so the sound never jumps from silence to the loudest; A goes
+round from 10 to Off. Turn the music off to play your own over the game:
+its songs fall silent and its sound effects play on, the menus', the
+chips' and the battles'. With both off the game makes no sound at all.
+Each applies at once and is kept (`music = 7`, `effects = 0` in
+`settings.ini`; an older file's `on` and `off` still read). Turned down
+together, the game sounds exactly as it does, only quieter. Set far apart
+(the music 6 steps or more under the effects), the quieter one plays
+through the GBA's own volume steps and loses its quietest notes, as the
+game's fades do. In a run, Options holds the game and its music, so a
+music level is heard back in the game or on the title. The Jukebox still
+plays the song you choose with the music off. In a NetBattle the music
+and the effects play at the louder of your two levels: both GBAs of a
+NetBattle run alike on both players' systems, and the music is part of
+what they run. Output and Sound are your own there too.
 
 ## The Jukebox
 
