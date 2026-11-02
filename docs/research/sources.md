@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, music, players' reports."
 tags: [research]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T14:07:16Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:45:00Z }
 ---
 
 # Sources
@@ -326,6 +326,38 @@ how it is known:
   cutscenes' camera scripts (whose 0x10 plays a song: none of these at
   their starts). Not here: Team ProtoMan's version. A player who knows where one plays is the lead to verify
   (Learned from players, below).
+
+## Sound settings (2 November 2026)
+
+For Options' Audio ([The sound out](../engine/sound-out.md)):
+
+- **A GBA's own speaker is mono**, its stereo heard only in headphones:
+  verified, Nintendo's Game Boy Advance page
+  (nintendo.co.uk, Hardware, Nintendo History, Game Boy Advance) says the
+  built-in speaker plays the games and headphones bring their stereo. So
+  Output's Mono is also how the cartridge sounded on the console itself.
+- **BN6's TrkVolPitSet** works a track's volume out from +0x12, +0x13,
+  +0x14, +0x15, +0x16 and +0x18 as Nintendo's m4a does: verified, its code
+  in Gregar at `0x08150E40` read with devkitARM's objdump
+  ([Sound and music](../rom/sound.md)).
+- **mGBA's libretro Audio Filter**: `_audioLowPassFilter` in
+  libretro/mgba's `src/platform/libretro/libretro.c`, its options in
+  `libretro_core_options.h` (disabled by default, level 60 of 5 to 95);
+  verified by reading them (master at 7a12d6d4b9) and by its function cut
+  into a scratch build: the same output as ours. The rate it runs at,
+  verified by the file at each change: 32768 Hz until 0f39405ece
+  (2025-01-25), 65536 Hz from it, the frontend's target rate from
+  c758314a63 (2025-10-13), 65536 Hz from 517e518c48 (2026-08-03).
+- **bs2b** (libbs2b 3.1.0, Boris Mikhaylov, MIT; alexmarsev/libbs2b on
+  GitHub, the SourceForge project's code): its default level is 700 Hz
+  and 4.5 dB (`BS2B_DEFAULT_CLEVEL`), Chu Moy's 700 and 6, Jan Meier's 650
+  and 9.5; verified in `bs2b.h`, and its code built beside ours.
+- **The guidelines**: the Game Accessibility Guidelines' "Provide a
+  stereo/mono toggle" (Hearing, Intermediate) and "Provide separate
+  volume controls or mutes for effects, speech and background / music"
+  (Hearing, Basic), and Xbox Accessibility Guideline 105 (separate
+  volumes; stereo converted to mono on both channels): verified, read on
+  their pages.
 
 ## Learned from players
 

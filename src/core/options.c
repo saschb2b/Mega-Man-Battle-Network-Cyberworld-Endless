@@ -33,6 +33,7 @@ int options_lines(int kinds[LINES_MAX]) {
 	if (O.page == PAGE_AUDIO) {
 		kinds[n++] = LINE_MUSIC;
 		kinds[n++] = LINE_EFFECTS;
+		kinds[n++] = LINE_OUTPUT;
 		kinds[n++] = LINE_SOUND;
 		if (feel_here()) kinds[n++] = LINE_VIBRATION;
 		if (feel_dualsense()) kinds[n++] = LINE_TRIGGERS;
@@ -107,23 +108,50 @@ void options_sound_keep(SoundFilter f, bool tell_page) {
 	char path[600];
 	sound_filter_set(f);
 	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
-	settings_line_write(path, "sound", f == SOUND_SOFT ? "soft" : "gba", options_sound_note());
+	settings_line_write(path, "sound", sound_filter_word(f), options_sound_note());
 	platform_persist();
 #ifdef __EMSCRIPTEN__
-	if (tell_page) emscripten_run_script(f == SOUND_SOFT ? "if (Module.cwSound) Module.cwSound(true);" : "if (Module.cwSound) Module.cwSound(false);");
+	if (tell_page) {
+		char js[64];
+		snprintf(js, sizeof js, "if (Module.cwSound) Module.cwSound('%s');", sound_filter_word(f));
+		emscripten_run_script(js);
+	}
 #else
 	(void)tell_page;
 #endif
 }
 
-/* the music or the effects (`kind`'s) turned on or off and kept */
-static void heard_keep(int kind) {
-	char path[600];
-	bool music = sound_heard_music() ^ (kind == LINE_MUSIC), effects = sound_heard_effects() ^ (kind == LINE_EFFECTS);
+/* A press of A or a tap on a line (TURN_PRESS): its value the next, round
+ * from the last to the first; Left and Right are -1 and +1 */
+#define TURN_PRESS 2
+
+/* a level turned (`dir`): Left and Right stop at Off and the game's own,
+ * so neither leaps from silence to the loudest; a press goes round from
+ * the loudest to Off */
+static int level_next(int level, int dir) {
+	if (dir == TURN_PRESS) return level >= SOUND_LEVELS ? 0 : level + 1;
+	level += dir < 0 ? -1 : 1;
+	return level < 0 ? 0 : level > SOUND_LEVELS ? SOUND_LEVELS : level;
+}
+
+/* the music's or the effects' (`kind`'s) level set to `level` and kept */
+static void heard_keep(int kind, int level) {
+	char path[600], word[12];
+	int music = kind == LINE_MUSIC ? level : sound_heard_music(), effects = kind == LINE_EFFECTS ? level : sound_heard_effects();
 	sound_heard_set(music, effects);
 	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
-	if (kind == LINE_MUSIC) settings_line_write(path, "music", music ? "on" : "off", options_music_note());
-	else settings_line_write(path, "effects", effects ? "on" : "off", options_effects_note());
+	snprintf(word, sizeof word, "%d", kind == LINE_MUSIC ? sound_heard_music() : sound_heard_effects());
+	if (kind == LINE_MUSIC) settings_line_write(path, "music", word, options_music_note());
+	else settings_line_write(path, "effects", word, options_effects_note());
+	platform_persist();
+}
+
+/* the output set to `o` and kept */
+static void output_keep(SoundOutput o) {
+	char path[600];
+	sound_output_set(o);
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	settings_line_write(path, "output", sound_output_word(o), options_output_note());
 	platform_persist();
 }
 
@@ -154,12 +182,13 @@ static void feel_keep(int kind, int level) {
 }
 
 #ifdef __EMSCRIPTEN__
-/* The page's Sound button (web/play/app.js): set here as Options sets it. */
-void cw_set_sound(int soft);
-EMSCRIPTEN_KEEPALIVE void cw_set_sound(int soft) { options_sound_keep(soft ? SOUND_SOFT : SOUND_GBA, false); }
+/* The page's Sound button (web/play/app.js): set here as Options sets it
+ * (`filter` a SoundFilter: 0 gba, 1 soft, 2 mgba). */
+void cw_set_sound(int filter);
+EMSCRIPTEN_KEEPALIVE void cw_set_sound(int filter) { options_sound_keep((unsigned)filter < SOUND_FILTER_COUNT ? (SoundFilter)filter : SOUND_GBA, false); }
 #endif
 
-/* A line's value turned (`dir`: +1 Right, A or a tap; -1 Left) and kept */
+/* A line's value turned (`dir`: +1 Right, TURN_PRESS A or a tap, -1 Left) and kept */
 static void turn(int kind, int dir) {
 	switch (kind) {
 	case LINE_FULLSCREEN: display_fullscreen_keep(!P.fullscreen); break;
@@ -169,11 +198,12 @@ static void turn(int kind, int dir) {
 	case LINE_BLEND: display_blend_keep(display_blend_next(dir)); break;
 	case LINE_LCD3X: display_lcd3x_keep(!lcd_grid()); break;
 	case LINE_MUSIC:
-	case LINE_EFFECTS: heard_keep(kind); break;
+	case LINE_EFFECTS: heard_keep(kind, level_next(kind == LINE_MUSIC ? sound_heard_music() : sound_heard_effects(), dir)); break;
+	case LINE_OUTPUT: output_keep((SoundOutput)((sound_output() + SOUND_OUTPUT_COUNT + (dir < 0 ? -1 : 1)) % SOUND_OUTPUT_COUNT)); break;
 	case LINE_FAST: fast_keep(fast_speed_next(fast_speed(), dir)); break;
 	case LINE_VIBRATION: feel_keep(kind, feel_level_next(feel_level(), dir)); break;
 	case LINE_TRIGGERS: feel_keep(kind, !feel_triggers()); break;
-	default: options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true); break;
+	default: options_sound_keep((SoundFilter)((sound_filter() + SOUND_FILTER_COUNT + (dir < 0 ? -1 : 1)) % SOUND_FILTER_COUNT), true); break;
 	}
 	audio_sfx(SFX_CURSOR);
 }
@@ -189,8 +219,9 @@ static void defaults(void) {
 		display_blend_keep(LCD_BLEND_OFF);
 		if (display_has_lcd3x() && lcd_grid()) display_lcd3x_keep(false);
 	} else if (O.page == PAGE_AUDIO) {
-		if (!sound_heard_music()) heard_keep(LINE_MUSIC);
-		if (!sound_heard_effects()) heard_keep(LINE_EFFECTS);
+		if (sound_heard_music() != SOUND_LEVELS) heard_keep(LINE_MUSIC, SOUND_LEVELS);
+		if (sound_heard_effects() != SOUND_LEVELS) heard_keep(LINE_EFFECTS, SOUND_LEVELS);
+		if (sound_output() != OUTPUT_SPEAKERS) output_keep(OUTPUT_SPEAKERS);
 		if (sound_filter() != SOUND_GBA) options_sound_keep(SOUND_GBA, true);
 		if (feel_here() && feel_level() != FEEL_DEFAULT) feel_keep(LINE_VIBRATION, FEEL_DEFAULT);
 		if (feel_dualsense() && !feel_triggers()) feel_keep(LINE_TRIGGERS, 1);
@@ -225,7 +256,7 @@ static void choose(void) {
 	/* (the statistics' question over the page, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
-	default: turn(options_line_kind(), 1); break;
+	default: turn(options_line_kind(), TURN_PRESS); break;
 	}
 }
 

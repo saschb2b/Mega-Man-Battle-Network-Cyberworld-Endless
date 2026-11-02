@@ -79,27 +79,60 @@ static const char *const words[] = {
 	"Display back as it came?",   /* OW_ASK_DISPLAY */
 	"Audio back as it came?",   /* OW_ASK_AUDIO */
 	"Fast forward back as it came?",   /* OW_ASK_GAME */
+	"mGBA",   /* OW_MGBA */
+	"mGBA's Audio Filter, as in RetroArch: its low-pass softens the highs",   /* OW_MGBA_NOTE */
+	"Output",   /* OW_OUTPUT */
+	"Speakers",   /* OW_SPEAKERS */
+	"Headphones",   /* OW_HEADPHONES */
+	"Mono",   /* OW_MONO */
+	"The game's stereo, left and right as it plays them",   /* OW_SPEAKERS_NOTE */
+	"Crossfeed: each ear hears a little of the other side, as from speakers",   /* OW_HEADPHONES_NOTE */
+	"Both sides the same: for one speaker, one earbud or one ear",   /* OW_MONO_NOTE */
+	"The game's music, quieter: each step down is 3 dB",   /* OW_MUSIC_LOW_NOTE */
+	"Menus, chips and battles quieter: each step down is 3 dB",   /* OW_EFFECTS_LOW_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
 const char *options_word(OptionsWord w) { return (unsigned)w < OW_COUNT ? words[w] : ""; }
 
+const char *options_level_word(int level) {
+	static const char *const levels[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+	return level <= 0 ? words[OW_OFF] : levels[level > 10 ? 9 : level - 1];
+}
+
 const char *options_sound_note(void) {
 	return "\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n"
 		"# the music and all; soft gives it the Legacy Collection's balance, as\n"
-		"# measured from it: the highs and the deepest bass taken down. Options\n"
-		"# (the title's menu, or the PET's in a run) changes it too.\n";
+		"# measured from it: the highs and the deepest bass taken down; mgba puts\n"
+		"# it through mGBA's Audio Filter, the low-pass RetroArch's mGBA has, at\n"
+		"# low_pass's level. Options (the title's menu, or the PET's in a run)\n"
+		"# changes it too.\n";
+}
+
+const char *options_low_pass_note(void) {
+	return "\n# low_pass: mGBA's Audio Filter Level, 5 to 95 (%), when sound is mgba:\n"
+		"# the higher, the more of the highs it takes. 60 is mGBA's own default.\n";
+}
+
+const char *options_output_note(void) {
+	return "\n# output: speakers plays the game's stereo as it is; headphones lets each\n"
+		"# ear hear a little of the other side, lower and later, as from speakers\n"
+		"# in a room (bs2b's crossfeed); mono plays both sides together on each,\n"
+		"# for one speaker, one earbud or hearing on one side. Options' Audio\n"
+		"# changes it too.\n";
 }
 
 const char *options_music_note(void) {
-	return "\n# music: off silences the game's music, so your own can play over it; its\n"
-		"# sounds play on, as effects says. Options' Audio changes it too.\n";
+	return "\n# music: how loud the game's music plays, 10 (its own level) down to 1,\n"
+		"# each step 3 dB quieter, or 0 (off) for none, so your own can play over\n"
+		"# it; its sounds play on, as effects says. Options' Audio changes it too.\n";
 }
 
 const char *options_effects_note(void) {
-	return "\n# effects: off silences the game's sounds, its menus', chips' and\n"
-		"# battles'. With music off as well, the game makes no sound. Options'\n"
-		"# Audio changes it too.\n";
+	return "\n# effects: how loud the game's sounds play, its menus', chips' and\n"
+		"# battles': 10 (their own level) down to 1, each step 3 dB quieter, or 0\n"
+		"# (off) for none. With music at 0 as well, the game makes no sound.\n"
+		"# Options' Audio changes it too.\n";
 }
 
 const char *options_screen_note(void) {

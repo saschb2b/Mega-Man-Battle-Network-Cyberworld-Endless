@@ -239,9 +239,10 @@ static void settings_load(const char *path) {
 		f = fopen(path, "w");
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
-			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n"
+			"%slow_pass = %d\n%soutput = speakers\n%smusic = %d\n%seffects = %d\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n"
 			"%scolour_correction = off\n%sinterframe_blending = off\n%slcd3x = off\n",
-			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note(),
+			options_smooth_note(), options_screen_note(), options_sound_note(), options_low_pass_note(), SOUND_LOW_PASS_DEFAULT,
+			options_output_note(), options_music_note(), SOUND_LEVELS, options_effects_note(), SOUND_LEVELS,
 			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note(),
 			options_colour_note(), options_blend_note(), options_lcd3x_note());
 		fclose(f);
@@ -252,10 +253,12 @@ static void settings_load(const char *path) {
 	while (fgets(line, sizeof line, f)) {
 		char key[64], val[64];
 		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2 || display_setting(key, val)) continue;
-		if (!strcmp(key, "sound")) sound_filter_set(!strcmp(val, "soft") ? SOUND_SOFT : SOUND_GBA);
+		if (!strcmp(key, "sound")) sound_filter_set(sound_filter_read(val));
+		if (!strcmp(key, "low_pass")) sound_low_pass_set(atoi(val));
+		if (!strcmp(key, "output")) sound_output_set(sound_output_read(val));
 		bool on = strcmp(val, "off") && strcmp(val, "no") && strcmp(val, "0");
-		if (!strcmp(key, "music")) sound_heard_set(on, sound_heard_effects());
-		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), on);
+		if (!strcmp(key, "music")) sound_heard_set(sound_heard_read(val), sound_heard_effects());
+		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), sound_heard_read(val));
 		if (!strcmp(key, "fast_forward")) fast_speed_set(fast_speed_read(val));
 		if (!strcmp(key, "vibration")) feel_set_level(feel_level_read(val));
 		if (!strcmp(key, "trigger_effects")) feel_set_triggers(on);
@@ -271,7 +274,17 @@ static void settings_load(const char *path) {
 
 bool player_screen_flag(const char *flag, const char *val) { return display_arg(flag, val); }
 
-void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, int effects_arg, const char *screen_arg, bool plain) {
+bool player_sound_flag(SoundArgs *sound, const char *flag, const char *val) {
+	if (!strcmp(flag, "--sound")) sound->filter = (int)sound_filter_read(val);
+	else if (!strcmp(flag, "--low-pass")) sound->low_pass = atoi(val);
+	else if (!strcmp(flag, "--output")) sound->output = (int)sound_output_read(val);
+	else if (!strcmp(flag, "--music")) sound->music = sound_heard_read(val);
+	else if (!strcmp(flag, "--effects")) sound->effects = sound_heard_read(val);
+	else return false;
+	return true;
+}
+
+void player_files(bool headless, int smooth_arg, const SoundArgs *sound, const char *screen_arg, bool plain) {
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
@@ -288,9 +301,11 @@ void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, i
 		touch_load(path);
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
-	if (sound_arg >= 0) sound_filter_set((SoundFilter)sound_arg);
-	if (music_arg >= 0) sound_heard_set(music_arg, sound_heard_effects());
-	if (effects_arg >= 0) sound_heard_set(sound_heard_music(), effects_arg);
+	if (sound->filter >= 0) sound_filter_set((SoundFilter)sound->filter);
+	if (sound->low_pass >= 0) sound_low_pass_set(sound->low_pass);
+	if (sound->output >= 0) sound_output_set((SoundOutput)sound->output);
+	if (sound->music >= 0) sound_heard_set(sound->music, sound_heard_effects());
+	if (sound->effects >= 0) sound_heard_set(sound_heard_music(), sound->effects);
 	if (screen_arg) display_scale_use(display_scale_read(screen_arg));
 	/* (the vibration as settings.ini has it, or its default where an older
 	 * one has no line: SDL asked for a Bluetooth pad's rumble either way) */

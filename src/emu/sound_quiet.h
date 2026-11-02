@@ -1,13 +1,15 @@
 /* settings.ini's music and effects in the core (sound_heard.h): a hook on
  * BN6's TrkVolPitSet, where a track's volume is worked out from its own,
- * the fade's and its pan, gives a silenced player's tracks none, right
- * and left. Its notes play on silent: their channels, their priorities
- * and every sound of the players heard as before. A change, or a state
- * loaded with the volumes another setting left, has the tracks work their
- * volume out again before the next frame. On BN6's own core alone: the
- * Arena's two cores make the same sound on both players' systems, their
- * states hashed whole (arena_pair.c), and there the device's sound is
- * silenced only where both are off (audio.c). */
+ * the fade's and its pan, gives the tracks of the quieter of the two
+ * their share of what BN6 works out (the louder is the device's gain),
+ * right and left, and a silenced player's none. Its notes play on, quieter
+ * or silent: their channels, their priorities and every sound of the
+ * players heard as before. A change, or a state loaded with the volumes
+ * another setting left, has the tracks work their volume out again before
+ * the next frame. On BN6's own core alone: the Arena's two cores make the
+ * same sound on both players' systems, their states hashed whole
+ * (arena_pair.c), and there the device's sound is heard at the louder
+ * level of the two, silenced only where both are off (audio.c). */
 #ifndef CW_SOUND_QUIET_H
 #define CW_SOUND_QUIET_H
 

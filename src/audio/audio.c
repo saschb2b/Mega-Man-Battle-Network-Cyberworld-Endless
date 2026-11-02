@@ -33,15 +33,22 @@ static int8_t prev_right[704], prev_left[704];
 /* (the Jukebox's song, asked for: heard with the music off) */
 static volatile bool asked;
 
-/* the engine's players silenced: the music's where the music is off, the
- * rest where the effects are (sound_heard.h) */
-static uint32_t quiet_players(void) {
-	uint32_t music = 1u << MP2K_MUSIC;
-	return (sound_heard_music() || asked ? 0 : music) | (sound_heard_effects() ? 0 : ~music);
+/* the music's level as the engine plays it: the Jukebox's song heard with
+ * the music off, at the game's own */
+static int music_level(void) {
+	int m = sound_heard_music();
+	return !m && asked ? SOUND_LEVELS : m;
+}
+
+/* the louder of the music's and the effects' levels: the device's gain (sound_heard.h) */
+static int louder_level(void) {
+	int m = music_level(), e = sound_heard_effects();
+	return m > e ? m : e;
 }
 
 static void engine_frame(void) {
-	mp2k_quiet_set(quiet_players());
+	int louder = louder_level();
+	mp2k_shares_set(sound_heard_share(music_level(), louder), sound_heard_share(sound_heard_effects(), louder));
 	mp2k_frame();
 	int n = mp2k_per_frame();
 	gba_sound_frame(prev_right, prev_left, n);
@@ -69,9 +76,10 @@ static void render(int16_t *o, int frames) {
 static long chime_at = -1;   /* the sample next, -1 silent */
 
 static void chime_mix(int16_t *out, int frames) {
-	int g = sfx_volume * 3;   /* (sfx_volume / 10 x 0.75, in 40ths) */
+	/* (sfx_volume / 10 x 0.75, in 40ths; the effects' share of the louder level) */
+	int g = sfx_volume * 3, share = sound_heard_share(sound_heard_effects(), louder_level());
 	for (int f = 0; f < frames && chime_at >= 0; ++f) {
-		int s = intro_chime[chime_at] * g / 40;
+		int s = intro_chime[chime_at] * g / 40 * share / SOUND_SHARE_ALL;
 		for (int k = 0; k < 2; ++k) {
 			int v = out[f * 2 + k] + s;
 			out[f * 2 + k] = (int16_t)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
@@ -109,13 +117,13 @@ static void mix_sources(int16_t *out, int frames) {
 	}
 }
 
-/* (everything heard, shaped as settings.ini's sound says; nothing where
- * the music and the effects are both off, the Arena's cores' too, which
- * play on as both players' systems play them: sound_quiet.h) */
+/* (everything heard, shaped and laid out as settings.ini's sound and
+ * output say, at the louder of the music's and the effects' levels;
+ * nothing where both are off, the Arena's cores' too, which play on as
+ * both players' systems play them: sound_quiet.h) */
 static void mix_out(int16_t *out, int frames) {
 	mix_sources(out, frames);
-	sound_filter_run(out, frames);
-	if (!sound_heard_music() && !sound_heard_effects() && !asked) memset(out, 0, (size_t)frames * 4);
+	sound_filter_run(out, frames, louder_level());
 }
 
 static void callback(void *ud, Uint8 *stream, int len) {
@@ -291,7 +299,9 @@ void audio_set_volume(int music, int sfx) {
 	sfx_volume = sfx;
 }
 
-/* Offline render for tests: writes a 16-bit stereo WAV. */
+/* Offline render for tests: writes a 16-bit stereo WAV, as the device
+ * would hear the song (its sound, output and levels: the game's own as
+ * they stand by default). */
 bool audio_render_wav(int rom, int song, int seconds, const char *path) {
 	if (!mp2k_init()) return false;
 	mp2k_song_start_in(rom, song);
@@ -311,6 +321,7 @@ bool audio_render_wav(int rom, int song, int seconds, const char *path) {
 	for (uint32_t done = 0; done < frames;) {
 		int n = frames - done > 2048 ? 2048 : (int)(frames - done);
 		render(buf, n);
+		sound_filter_run(buf, n, louder_level());
 		fwrite(buf, 4, (size_t)n, f);
 		done += (uint32_t)n;
 	}

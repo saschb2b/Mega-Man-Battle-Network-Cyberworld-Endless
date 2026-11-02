@@ -7,6 +7,7 @@
 #include "gba_sound.h"
 #include "mp2k_state.h"
 #include "rom.h"
+#include "sound_heard.h"
 
 Mp2k M;
 
@@ -250,12 +251,14 @@ const int8_t *mp2k_mix_right(void) { return &M.ring[0][M.slice * M.per_frame]; }
 const int8_t *mp2k_mix_left(void) { return &M.ring[1][M.slice * M.per_frame]; }
 int mp2k_per_frame(void) { return M.per_frame; }
 
-void mp2k_quiet_set(uint32_t players) {
-	uint32_t changed = players ^ M.quiet;
-	M.quiet = players;
+void mp2k_shares_set(int music, int effects) {
+	int cut[2] = { SOUND_SHARE_ALL - music, SOUND_SHARE_ALL - effects };
+	bool changed[2] = { cut[0] != M.cut[0], cut[1] != M.cut[1] };
+	M.cut[0] = cut[0];
+	M.cut[1] = cut[1];
 	/* (a change: the tracks that play of its players work their volume out again) */
 	for (int p = 0; p < MP2K_PLAYERS; ++p) {
-		if (!(changed >> p & 1)) continue;
+		if (!changed[p == MP2K_MUSIC ? 0 : 1]) continue;
 		Mp2kPlayer *pl = &M.players[p];
 		for (int i = 0; i < pl->tracks; ++i) {
 			Mp2kTrack *t = &M.tracks[pl->first + i];

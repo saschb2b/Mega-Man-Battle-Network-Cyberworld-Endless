@@ -72,7 +72,7 @@ const W = JA ? {
 	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
 	move: '移動', menu: 'メニュー', fast: '早送り',
 	smooth: (on) => 'なめらか表示：' + (on ? 'オン' : 'オフ'),
-	sound: (soft) => 'サウンド：' + (soft ? 'ソフト' : 'GBA'),
+	sound: (word) => 'サウンド：' + ({ soft: 'ソフト', mgba: 'mGBA' }[word] || 'GBA'),
 } : {
 	stopped: (what) => 'The engine stopped: ' + what,
 	today: 'Today ',
@@ -96,7 +96,7 @@ const W = JA ? {
 	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
 	move: 'Move', menu: 'Menu', fast: 'Fast',
 	smooth: (on) => 'Smooth motion: ' + (on ? 'on' : 'off'),
-	sound: (soft) => 'Sound: ' + (soft ? 'soft' : 'GBA'),
+	sound: (word) => 'Sound: ' + ({ soft: 'soft', mgba: 'mGBA' }[word] || 'GBA'),
 };
 
 const $ = (id) => document.getElementById(id);
@@ -150,7 +150,7 @@ var Module = {
 	onRuntimeInitialized: () => { ready = true; offer(); },
 	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
 	// the game's Options changed the sound, or smooth motion: the menu's button follows
-	cwSound: (soft) => { keepSound(soft); },
+	cwSound: (word) => { keepSound(word); },
 	cwSmooth: (on) => { keepSmooth(on); },
 };
 
@@ -587,26 +587,28 @@ $('smooth').addEventListener('click', () => {
 });
 showSmooth();
 
-// Sound: as a GBA plays it, or soft, the Legacy Collection's balance (the
-// game's Options set it too, and tell the button: Module.cwSound)
+// Sound: as a GBA plays it, soft, the Legacy Collection's balance, or
+// mGBA's Audio Filter, each press the next (the game's Options set it too,
+// and tell the button: Module.cwSound); SoundFilter's order
+const SOUNDS = ['gba', 'soft', 'mgba'];
 function soundSet() { try { return localStorage.getItem('cw-sound'); } catch (e) { return null; } }
-function soundSoft() { return soundSet() === 'soft'; }
+function soundWord() { const v = soundSet(); return SOUNDS.includes(v) ? v : 'gba'; }
 // (passed at the start only once chosen: else settings.ini's)
-function soundArgs() { const v = soundSet(); return v === 'soft' || v === 'gba' ? ['--sound', v] : []; }
+function soundArgs() { const v = soundSet(); return SOUNDS.includes(v) ? ['--sound', v] : []; }
 function showSound() {
-	const soft = soundSoft();
-	$('sound-label').textContent = W.sound(soft);
-	$('sound').setAttribute('aria-pressed', soft ? 'true' : 'false');
+	const word = soundWord();
+	$('sound-label').textContent = W.sound(word);
+	$('sound').setAttribute('aria-pressed', word !== 'gba' ? 'true' : 'false');
 }
-function keepSound(soft) {
-	try { localStorage.setItem('cw-sound', soft ? 'soft' : 'gba'); } catch (e) { /* not kept */ }
+function keepSound(word) {
+	try { localStorage.setItem('cw-sound', SOUNDS.includes(word) ? word : 'gba'); } catch (e) { /* not kept */ }
 	showSound();
 }
 $('sound').addEventListener('click', () => {
-	const soft = !soundSoft();
-	keepSound(soft);
-	track('sound', { state: soft ? 'soft' : 'gba' });
-	if (started) Module.ccall('cw_set_sound', null, ['number'], [soft ? 1 : 0]);
+	const next = SOUNDS[(SOUNDS.indexOf(soundWord()) + 1) % SOUNDS.length];
+	keepSound(next);
+	track('sound', { state: next });
+	if (started) Module.ccall('cw_set_sound', null, ['number'], [SOUNDS.indexOf(next)]);
 });
 showSound();
 

@@ -6,6 +6,9 @@
 
 #include <string.h>
 
+#include "mp2k.h"
+#include "sound_heard.h"
+
 /* umul3232H32: the high word of a 32 x 32 product */
 static uint32_t mul_high(uint32_t a, uint32_t b) { return (uint32_t)(((uint64_t)a * b) >> 32); }
 
@@ -19,12 +22,6 @@ uint32_t mp2k_key_to_freq(uint32_t wav, int key, int fine) {
 }
 
 void mp2k_track_vol_pit(int player, Mp2kTrack *t) {
-	/* (a player silenced: its volume none and none left to work out, the
-	 * pitch's part as BN6 works it; mp2k_quiet_set) */
-	if ((M.quiet >> player & 1) && (t->flags & TRK_VOLSET)) {
-		t->vol_mr = t->vol_ml = 0;
-		t->flags &= (uint8_t)~TRK_VOLSET;
-	}
 	if (t->flags & TRK_VOLSET) {
 		uint32_t x = (uint32_t)(t->vol * t->vol_x) >> 5;
 		if (t->mod_t == 1) x = (x * (uint32_t)(t->mod_m + 128)) >> 7;
@@ -34,6 +31,13 @@ void mp2k_track_vol_pit(int player, Mp2kTrack *t) {
 		if (y > 127) y = 127;
 		t->vol_mr = (uint8_t)(((uint32_t)(y + 128) * x) >> 8);
 		t->vol_ml = (uint8_t)(((uint32_t)(127 - y) * x) >> 8);
+		/* (a player quieter than the louder of the music and the effects,
+		 * or silent: its share of what BN6 worked out; mp2k_shares_set) */
+		int share = SOUND_SHARE_ALL - M.cut[player == MP2K_MUSIC ? 0 : 1];
+		if (share < SOUND_SHARE_ALL) {
+			t->vol_mr = (uint8_t)((t->vol_mr * share + 128) >> 8);
+			t->vol_ml = (uint8_t)((t->vol_ml * share + 128) >> 8);
+		}
 	}
 	if (t->flags & TRK_PITSET) {
 		int x = (t->bend * t->bend_range + t->tune) * 4 + (t->key_shift << 8) + (t->key_shift_x << 8) + t->pit_x;

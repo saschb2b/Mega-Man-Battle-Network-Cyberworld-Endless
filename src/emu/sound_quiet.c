@@ -1,5 +1,5 @@
-/* The game's music or effects silenced in the core (sound_quiet.h;
- * docs/engine/emulation/core-sound.md). */
+/* The game's music or effects quieter or silenced in the core
+ * (sound_quiet.h; docs/engine/emulation/core-sound.md). */
 #include "sound_quiet.h"
 
 #include <stdbool.h>
@@ -15,26 +15,48 @@ static uint32_t tracks[BN6_MPLAY_COUNT];
 static uint8_t counts[BN6_MPLAY_COUNT];
 static uint32_t music_lo, music_hi;
 static bool installed;
-/* what the tracks were last told: bit 0 the music heard, bit 1 the
- * effects; -1 none (a state just loaded) */
-static int told;
+/* the levels last taken in, the music's and the effects', and their
+ * shares the tracks were told (SOUND_SHARE_ALL: BN6's own volume) */
+static int levels[2] = { -1, -1 };
+static volatile int shares[2] = { SOUND_SHARE_ALL, SOUND_SHARE_ALL };
+/* (a state just loaded: every track told at the next frame) */
+static bool loaded;
 
-static int heard(void) { return (sound_heard_music() ? 1 : 0) | (sound_heard_effects() ? 2 : 0); }
-
-/* (on the core's thread where it has one: the settings read there) */
+/* (on the core's thread where it has one) */
 static HookAct vol_pit_set(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t t = r->r[1];
-	bool music = t >= music_lo && t < music_hi;
-	if (music ? sound_heard_music() : sound_heard_effects()) return HOOK_CONTINUE;
+	int share = shares[t >= music_lo && t < music_hi ? 0 : 1];
+	if (share >= SOUND_SHARE_ALL) return HOOK_CONTINUE;
 	uint8_t flags = hook_read8(t + BN6_TRACK_FLAGS);
 	if (!(flags & BN6_TRACK_VOL_SET)) return HOOK_CONTINUE;
-	/* (none, right and left, and none left to work out: the pitch's part
-	 * as BN6 works it) */
-	hook_write8(t + BN6_TRACK_VOL_RIGHT, 0);
-	hook_write8(t + BN6_TRACK_VOL_LEFT, 0);
+	/* the volume as BN6 works it out (TrkVolPitSet: docs/rom/sound.md),
+	 * right and left, its share of it kept, and none left to work out:
+	 * the pitch's part as BN6 works it */
+	uint32_t x = (uint32_t)(hook_read8(t + BN6_TRACK_VOL) * hook_read8(t + BN6_TRACK_VOL_X)) >> 5;
+	uint8_t mod_t = hook_read8(t + BN6_TRACK_MOD_T);
+	int mod_m = (int8_t)hook_read8(t + BN6_TRACK_MOD_M);
+	if (mod_t == 1) x = (x * (uint32_t)(mod_m + 128)) >> 7;
+	int y = 2 * (int8_t)hook_read8(t + BN6_TRACK_PAN) + (int8_t)hook_read8(t + BN6_TRACK_PAN_X);
+	if (mod_t == 2) y += mod_m;
+	y = y < -128 ? -128 : y > 127 ? 127 : y;
+	uint8_t right = (uint8_t)(((uint32_t)(y + 128) * x) >> 8), left = (uint8_t)(((uint32_t)(127 - y) * x) >> 8);
+	hook_write8(t + BN6_TRACK_VOL_RIGHT, (uint8_t)((right * share + 128) >> 8));
+	hook_write8(t + BN6_TRACK_VOL_LEFT, (uint8_t)((left * share + 128) >> 8));
 	hook_write8(t + BN6_TRACK_FLAGS, (uint8_t)(flags & ~BN6_TRACK_VOL_SET));
 	return HOOK_CONTINUE;
+}
+
+/* the shares of the levels heard now, true where either changed */
+static bool take_levels(void) {
+	int m = sound_heard_music(), e = sound_heard_effects();
+	if (m == levels[0] && e == levels[1]) return false;
+	levels[0] = m;
+	levels[1] = e;
+	int louder = m > e ? m : e;
+	shares[0] = sound_heard_share(m, louder);
+	shares[1] = sound_heard_share(e, louder);
+	return true;
 }
 
 void sound_quiet_install(void) {
@@ -49,7 +71,8 @@ void sound_quiet_install(void) {
 	}
 	installed = music_hi > music_lo && emu_hook(BN6_M4A_TRK_VOL_PIT_SET, vol_pit_set, NULL);
 	/* (before the boot, or a state's load: no track plays yet) */
-	told = heard();
+	take_levels();
+	loaded = false;
 }
 
 /* the tracks that play of the players `which` (bit 0 the music's, bit 1
@@ -67,10 +90,11 @@ static void tell(int which) {
 
 void sound_quiet_frame(void) {
 	if (!installed) return;
-	int now = heard(), changed = told < 0 ? 3 : now ^ told;
-	if (!changed) return;
-	told = now;
-	tell(changed);
+	int was[2] = { shares[0], shares[1] };
+	bool changed = take_levels();
+	int which = loaded ? 3 : changed ? (shares[0] != was[0] ? 1 : 0) | (shares[1] != was[1] ? 2 : 0) : 0;
+	loaded = false;
+	if (which) tell(which);
 }
 
-void sound_quiet_loaded(void) { told = -1; }
+void sound_quiet_loaded(void) { loaded = true; }

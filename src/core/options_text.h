@@ -1,6 +1,7 @@
 /* Options' words (options_text.c): its pages, its lines, their notes,
  * the Display and Audio pages' choices, START's hint and question, settings.ini's notes for the display's
- * lines, the sound, the music, the effects, fast forward and the
+ * lines, the sound, mGBA's filter's level, the output, the music, the
+ * effects, fast forward and the
  * controller's vibration and trigger effects,
  * in the plain style of the game's menus (docs/voice/rules.md), apart from the
  * logic that says when. */
@@ -38,12 +39,21 @@ typedef enum {
 	OW_LCD3X, OW_LCD3X_ON_NOTE, OW_LCD3X_OFF_NOTE,
 	OW_DEFAULT,         /* START's hint on the band: the page's lines back */
 	OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME,   /* ... its question, a page each (PAGE_*'s order) */
+	OW_MGBA, OW_MGBA_NOTE,   /* the Sound line's third (SoundFilter's order after OW_SOFT) */
+	OW_OUTPUT, OW_SPEAKERS, OW_HEADPHONES, OW_MONO,   /* the Audio section's Output (sound_filter.h; SoundOutput's order) */
+	OW_SPEAKERS_NOTE, OW_HEADPHONES_NOTE, OW_MONO_NOTE,
+	OW_MUSIC_LOW_NOTE, OW_EFFECTS_LOW_NOTE,   /* Music's and Effects' notes under the game's own level */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
+/* Music's and Effects' value at `level` (sound_heard.h): its number, or Off */
+const char *options_level_word(int level);
 
 /* settings.ini's lines before the sound line: what it is */
 const char *options_sound_note(void);
+/* ... before mGBA's filter's level and the output's */
+const char *options_low_pass_note(void);
+const char *options_output_note(void);
 /* ... before the music's and the effects' */
 const char *options_music_note(void);
 const char *options_effects_note(void);

@@ -10,15 +10,16 @@
 /* A line's kind: the Display page's (Fullscreen, Scale, Smooth motion, and
  * the GBA's screen's Colour correction, Frame blending and LCD 3x, where
  * the system has them: display.h), the Audio page's (Music and Effects,
- * sound_heard.h; Sound; Vibration and Trigger effects where the system has
+ * sound_heard.h; Output and Sound, sound_filter.h; Vibration and Trigger
+ * effects where the system has
  * them, feel_out.h) and the Game page's (Controls, Fast forward,
  * Statistics) */
 enum { LINE_CONTROLS, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
-	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X };
+	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT };
 #define LINES_MAX 6
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
-static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_LCD3X; }
+static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_OUTPUT; }
 
 /* The pages, L and R turning from one to the next as the Library turns
  * its own (Valhalla's tabs, docs/engine/settings-screens.md) */
