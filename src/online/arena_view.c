@@ -9,6 +9,7 @@
 #include "arena_pair.h"
 #include "arena_text.h"
 #include "gfx.h"
+#include "lcd_frame.h"
 #include "pixfont.h"
 #include "platform.h"
 #include "protocol.h"
@@ -51,7 +52,11 @@ void arena_view_core(const uint32_t *v) {
 	}
 	/* (mGBA keeps layer flags in the top byte, which a renderer reads as alpha) */
 	static uint32_t px[ARENA_W * ARENA_H];
-	for (int i = 0; i < ARENA_W * ARENA_H; ++i) px[i] = v[i] | 0xFF000000u;
+	for (int i = 0; i < ARENA_W * ARENA_H; ++i) px[i] = v[i];
+	/* (the GBA's screen on it as on BN6's own picture: a frame the Arena
+	 * steps each time it is drawn) */
+	lcd_frame(px, ARENA_W * ARENA_H, true);
+	for (int i = 0; i < ARENA_W * ARENA_H; ++i) px[i] |= 0xFF000000u;
 	SDL_UpdateTexture(tex, NULL, px, ARENA_W * 4);
 	SDL_Rect dst = { P.core_x, P.core_y, ARENA_W, ARENA_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);

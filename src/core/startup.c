@@ -239,9 +239,11 @@ static void settings_load(const char *path) {
 		f = fopen(path, "w");
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
-			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n",
+			"%smusic = on\n%seffects = on\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n"
+			"%scolour_correction = off\n%sinterframe_blending = off\n%slcd3x = off\n",
 			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note(),
-			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note());
+			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note(),
+			options_colour_note(), options_blend_note(), options_lcd3x_note());
 		fclose(f);
 		platform_persist();
 		return;
@@ -266,6 +268,8 @@ static void settings_load(const char *path) {
 	 * the default's) */
 	if (P.renderer && !P.headless) platform_relayout();
 }
+
+bool player_screen_flag(const char *flag, const char *val) { return display_arg(flag, val); }
 
 void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, int effects_arg, const char *screen_arg, bool plain) {
 	char path[600];

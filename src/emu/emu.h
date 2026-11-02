@@ -53,6 +53,13 @@ extern int emu_draw_waits;
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
 const uint32_t *emu_video(void);
+/* The pictures the core has made so far (a frame unshown makes none):
+ * one more where emu_video has a new one (lcd_frame.h blends each once) */
+uint32_t emu_pictures(void);
+/* The last frame on the canvas at (x, y), as the player sees it: the
+ * town's hour, a liberation's panels and the GBA's screen on it
+ * (emu_picture.c) */
+void emu_picture_draw(int x, int y);
 /* Another core's sound (a struct mCore: the differential's, guest.c) into the
  * same ring BN6's plays from, and the rate it is played at. */
 void emu_audio_from(void *core);

@@ -16,7 +16,7 @@ static const char *const words[] = {
 	"Soft",   /* OW_SOFT */
 	"The Legacy Collection's balance: softer highs, less deep bass",   /* OW_SOFT_NOTE */
 	"Display",   /* OW_DISPLAY */
-	"How the picture fills the screen",   /* OW_DISPLAY_NOTE */
+	"How the picture fills the screen, and a GBA screen's look",   /* OW_DISPLAY_NOTE */
 	"Fullscreen",   /* OW_FULLSCREEN */
 	"Borderless, over the whole screen (Alt+Enter or F11)",   /* OW_FULLSCREEN_ON_NOTE */
 	"In a window you can size (Alt+Enter or F11)",   /* OW_FULLSCREEN_OFF_NOTE */
@@ -53,6 +53,22 @@ static const char *const words[] = {
 	"Trigger effects",   /* OW_TRIGGERS */
 	"L's trigger clicks at a full Custom gauge, FAST's where it can run",   /* OW_TRIGGERS_ON_NOTE */
 	"Both triggers pull free, as on any controller",   /* OW_TRIGGERS_OFF_NOTE */
+	"Colour correction",   /* OW_COLOUR */
+	"mGBA's GBA colours: darker and softer, as a GBA's own screen shows them",   /* OW_COLOUR_GBA_NOTE */
+	"The colours as the game stores them, bright and full",   /* OW_COLOUR_OFF_NOTE */
+	"Frame blending",   /* OW_BLEND */
+	"Simple",   /* OW_SIMPLE */
+	"Smart",   /* OW_SMART */
+	"LCD",   /* OW_LCD */
+	"LCD fast",   /* OW_LCD_FAST */
+	"Every frame on its own, sharp",   /* OW_BLEND_OFF_NOTE */
+	"mGBA's Simple: each frame mixed half and half with the last",   /* OW_SIMPLE_NOTE */
+	"mGBA's Smart: frames mixed only where a pixel flickers",   /* OW_SMART_NOTE */
+	"mGBA's LCD ghosting: each frame fades out over the next four, as on a GBA",   /* OW_LCD_NOTE */
+	"mGBA's fast LCD ghosting: a longer trail, lighter to run",   /* OW_LCD_FAST_NOTE */
+	"LCD 3x",   /* OW_LCD3X */
+	"The lcd3x shader: each pixel striped red, green and blue, a dark line through each row",   /* OW_LCD3X_ON_NOTE */
+	"Plain pixels, no stripes or lines",   /* OW_LCD3X_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
@@ -115,6 +131,29 @@ const char *options_triggers_note(void) {
 	return "\n# trigger_effects: on, a DualSense's triggers click: the one that is L or R\n"
 		"# once the Custom gauge is full, FAST's where fast forward can run (as\n"
 		"# pad.ini maps them); off, both pull free. Options' Audio changes it too.\n";
+}
+
+const char *options_colour_note(void) {
+	return "\n# colour_correction: gba shows the game's colours as a GBA's own screen\n"
+		"# does, darker and softer, by mGBA's Color Correction (its libretro core's,\n"
+		"# step for step); off as the game stores them. Options' Display changes\n"
+		"# it too.\n";
+}
+
+const char *options_blend_note(void) {
+	return "\n# interframe_blending: each frame mixed with the ones before, by mGBA's\n"
+		"# Interframe Blending: simple (half and half with the one before), smart\n"
+		"# (that only where a pixel flickers), lcd_ghosting (a GBA screen's fade\n"
+		"# over the next four frames) or lcd_ghosting_fast (a running mix that\n"
+		"# costs less); off shows every frame on its own. Options' Display changes\n"
+		"# it too.\n";
+}
+
+const char *options_lcd3x_note(void) {
+	return "\n# lcd3x: on draws RetroArch's lcd3x shader over the picture at the\n"
+		"# screen's own pixels: each of the game's pixels striped red, green and\n"
+		"# blue, a dark line through each row, the picture darker for it. Not on\n"
+		"# the 3DS. Options' Display changes it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

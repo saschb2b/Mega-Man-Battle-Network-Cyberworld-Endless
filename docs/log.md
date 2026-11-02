@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-02
+* **Creation**: engine/lcd.md, the GBA's screen (issue #265): mGBA's libretro core's Color Correction and Interframe Blending on BN6's picture step for step (`lcd_frame.c`, checked bit for bit against mGBA's own code), RetroArch's lcd3x over the screen (`lcd_grid.c`), Options' Display lines and `settings.ini`'s; its line in engine/index.md. GUIDE.md, Screen: the three lines; code/gfx-and-audio.md, code/emu.md (`emu_picture.c`) and code/core.md, their lines; devtools/headless-shot.md, the flags.
+
 ## 2026-10-31
 * **Creation**: releases/v0.18.1.md, 0.18.1's notes ("The PS5 app starts.": the app starts, online, SELECT on the touchpad, fast forward); its lines in releases/index.md and releases/overview.md.
 * **Update**: GUIDE.md, On a PS5: the touchpad's press is SELECT, the Create button the PS5's own; its generated stamp repaired.

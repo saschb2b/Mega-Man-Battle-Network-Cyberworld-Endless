@@ -1,6 +1,7 @@
 /* display.h. The scale is read by the layout (platform.c's game_canvas,
  * the 3DS's present); the window and smooth motion are the platform's
- * own (P.fullscreen, P.blend), set through it. */
+ * own (P.fullscreen, P.blend), set through it; the GBA's screen's are
+ * lcd_frame.c's and lcd_grid.c's. */
 #include "display.h"
 
 #include <stdio.h>
@@ -21,6 +22,8 @@ static DisplayScale scale = SCALE_AUTO;
 #endif
 
 static const char *const keys[SCALE_COUNT] = { "auto", "whole", "fill", "stretch" };
+/* (interframe_blending's words, LcdBlend's order; mGBA's mix and mix_smart read too) */
+static const char *const blends[LCD_BLEND_COUNT] = { "off", "simple", "smart", "lcd_ghosting", "lcd_ghosting_fast" };
 
 DisplayScale display_scale(void) { return scale; }
 
@@ -41,11 +44,47 @@ static void set(DisplayScale s) {
 	scale = s;
 }
 
+static LcdBlend blend_read(const char *word) {
+	for (int b = 0; b < LCD_BLEND_COUNT; ++b)
+		if (!strcmp(word, blends[b])) return (LcdBlend)b;
+	return !strcmp(word, "mix") ? LCD_BLEND_SIMPLE : !strcmp(word, "mix_smart") ? LCD_BLEND_SMART : LCD_BLEND_OFF;
+}
+
+/* The GBA's screen's lines (the command line's, which settings.ini's leave
+ * as they set them: `forced`, a bit each) */
+static const char *const lcd_keys[] = { "colour_correction", "interframe_blending", "lcd3x" };
+static unsigned forced;
+
+static bool lcd_setting(const char *key, const char *val) {
+	int k = 0;
+	while (k < 3 && strcmp(key, lcd_keys[k])) ++k;
+	/* (as mGBA spells it) */
+	if (!strcmp(key, "color_correction")) k = 0;
+	if (k == 3) return false;
+	if (forced & 1u << k) return true;
+	if (k == 0) lcd_set_colour(!strcmp(val, "gba") || !strcmp(val, "GBA") || yes(val) ? LCD_COLOUR_GBA : LCD_COLOUR_OFF);
+	else if (k == 1) lcd_set_blend(blend_read(val));
+	else lcd_set_grid(yes(val));
+	return true;
+}
+
 bool display_setting(const char *key, const char *val) {
 	if (!strcmp(key, "smooth_motion")) P.blend = yes(val);
 	else if (!strcmp(key, "screen")) set(display_scale_read(val));
-	else return false;
+	else return lcd_setting(key, val);
 	return true;
+}
+
+bool display_arg(const char *flag, const char *val) {
+	static const char *const flags[] = { "--colour-correction", "--interframe-blending", "--lcd3x" };
+	for (int k = 0; k < 3; ++k)
+		if (!strcmp(flag, flags[k])) {
+			forced &= ~(1u << k);
+			lcd_setting(lcd_keys[k], val);
+			forced |= 1u << k;
+			return true;
+		}
+	return false;
 }
 
 bool display_has_scale(void) {
@@ -65,6 +104,14 @@ bool display_has_window(void) {
 }
 
 bool display_has_smooth(void) {
+#ifdef __3DS__
+	return false;
+#else
+	return true;
+#endif
+}
+
+bool display_has_lcd3x(void) {
 #ifdef __3DS__
 	return false;
 #else
@@ -115,6 +162,23 @@ void display_smooth_keep(bool on, bool tell_page) {
 #else
 	(void)tell_page;
 #endif
+}
+
+void display_colour_keep(LcdColour c) {
+	lcd_set_colour(c);
+	keep("colour_correction", lcd_colour() == LCD_COLOUR_GBA ? "gba" : "off", options_colour_note());
+}
+
+LcdBlend display_blend_next(int dir) { return (LcdBlend)((lcd_blend() + LCD_BLEND_COUNT + (dir < 0 ? -1 : 1)) % LCD_BLEND_COUNT); }
+
+void display_blend_keep(LcdBlend b) {
+	lcd_set_blend(b);
+	keep("interframe_blending", blends[lcd_blend()], options_blend_note());
+}
+
+void display_lcd3x_keep(bool on) {
+	lcd_set_grid(on);
+	keep("lcd3x", lcd_grid() ? "on" : "off", options_lcd3x_note());
 }
 
 #ifdef __EMSCRIPTEN__

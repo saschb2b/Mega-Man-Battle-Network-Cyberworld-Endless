@@ -1,13 +1,19 @@
 /* The display's settings (Options' Display section, settings.ini): how
  * the picture is scaled (screen = auto, whole, fill or stretch), the
- * window or the whole screen (fullscreen, the desktops) and smooth motion
- * (smooth_motion), each where the system has it. A change applies at
- * once and is kept in settings.ini; the browser player's menu is told
- * (its Smooth motion button), as it tells the game. */
+ * window or the whole screen (fullscreen, the desktops), smooth motion
+ * (smooth_motion) and the GBA's screen (colour_correction,
+ * interframe_blending, lcd3x: issue #265), each where the system has it.
+ * A change applies at once and is kept in settings.ini; the browser
+ * player's menu is told (its Smooth motion button), as it tells the game. */
 #ifndef CW_DISPLAY_H
 #define CW_DISPLAY_H
 
 #include <stdbool.h>
+
+/* (the GBA's screen: mGBA's two on the core's picture, lcd3x's grid,
+ * which the platform draws over the screen) */
+#include "lcd_frame.h"
+#include "lcd_grid.h"
 
 /* settings.ini's screen. Auto: whole scales, filling where one leaves the
  * picture a quarter smaller or more; whole: the largest whole scale; fill:
@@ -21,8 +27,12 @@ DisplayScale display_scale(void);
  * else auto) */
 DisplayScale display_scale_read(const char *word);
 /* settings.ini's display lines as the start reads them (screen,
- * smooth_motion): true where `key` was one */
+ * smooth_motion, the GBA's screen's): true where `key` was one */
 bool display_setting(const char *key, const char *val);
+/* A command line's --colour-correction off|gba, --interframe-blending
+ * off|simple|smart|lcd_ghosting|lcd_ghosting_fast or --lcd3x on|off: set,
+ * over settings.ini's line; true where `flag` was one */
+bool display_arg(const char *flag, const char *val);
 
 /* What this system offers: the scale (all but the browser's page, which
  * sizes the picture itself), the window (the desktops) and smooth motion
@@ -30,6 +40,8 @@ bool display_setting(const char *key, const char *val);
 bool display_has_scale(void);
 bool display_has_window(void);
 bool display_has_smooth(void);
+/* ... and lcd3x (all but the 3DS, whose picture its own GPU shows) */
+bool display_has_lcd3x(void);
 
 /* The scale `dir` (+1 or -1) from the one in use, in the order this
  * system offers them (the 3DS's auto is its fill: it has no auto of its own) */
@@ -41,6 +53,12 @@ void display_scale_keep(DisplayScale s);
 void display_fullscreen_keep(bool on);
 /* ... `tell_page`: the browser player's Smooth motion button follows */
 void display_smooth_keep(bool on, bool tell_page);
+/* The GBA's screen's, set and kept (docs/engine/lcd.md): the blending
+ * `dir` from the one in use, in mGBA's order */
+void display_colour_keep(LcdColour c);
+LcdBlend display_blend_next(int dir);
+void display_blend_keep(LcdBlend b);
+void display_lcd3x_keep(bool on);
 
 /* settings.ini's fullscreen in the data folder, for the window the start
  * opens: 1 on, 0 off, -1 none kept */

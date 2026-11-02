@@ -19,7 +19,10 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--scene summary` the title's run summary (a win's with `--setup short` at
 `--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS]` the run's setup (CROSS the navi whose Cross it brings, 1-5),
 `--marks HEX` the title's marks, `--screen auto|whole|fill|stretch` the
-scale over `settings.ini`'s (Options' Display), `--touch` the touch controls from the
+scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba`,
+`--interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast` and
+`--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
+shows only in a `--screen-shot`), `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
 undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader, battler for a Virus Battler (`--dev battler=K` puts one on the layer); intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumor_lines.c); dark for a flame of darkness ([The meta layer](../game/meta/overview.md));

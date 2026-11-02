@@ -280,6 +280,7 @@ static void run_frame(bool unshown) {
  * next). The frame done's picture is copied aside for the drawing. */
 static bool threaded;
 static volatile bool in_flight, stopping;
+static uint32_t pictures;   /* (emu_pictures) */
 static SDL_sem *go, *done;
 static uint32_t shown[EMU_W * EMU_H];
 #ifdef __3DS__
@@ -315,6 +316,7 @@ static void wait_frame(void) {
 	SDL_SemWait(done);
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
+	++pictures;
 }
 
 bool emu_threaded(void) { return threaded; }
@@ -376,6 +378,7 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	bool unshown = ((P.skip_present && !P.blend) || (how & EMU_FRAME_UNSHOWN)) && layout_ok;
 	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 	run_frame(unshown);
+	if (!unshown) ++pictures;
 }
 
 int emu_audio_read(int16_t *out, int frames) {
@@ -394,6 +397,8 @@ int emu_audio_read(int16_t *out, int frames) {
 }
 
 const uint32_t *emu_video(void) { return threaded ? shown : video; }
+
+uint32_t emu_pictures(void) { return pictures; }
 
 uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }

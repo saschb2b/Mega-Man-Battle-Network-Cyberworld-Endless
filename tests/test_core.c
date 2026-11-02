@@ -49,6 +49,7 @@
 #include "save.h"
 #include "save_blob.h"
 #include "settings_line.h"
+#include "lcd_frame.h"
 #include "liberation_board.h"
 #include "liberation_plan.h"
 #include "sound_filter.h"
@@ -5058,6 +5059,59 @@ static void test_sound_filter(void) {
  * line replaced where it was, every other line kept; added at the end
  * with what it is where it was not; a file made with it alone; a line
  * read back, none where there is no line or no file */
+/* mGBA's 565 colour as our picture holds it (its 32-bit picture's 8 bits),
+ * and as a GPU shows its 565 frame */
+static uint32_t lcd_in(uint16_t c) {
+	unsigned r = c >> 11, g = c >> 6 & 0x1F, b = c & 0x1F;
+	return (b << 3 | b >> 2) << 16 | (g << 3 | g >> 2) << 8 | (r << 3 | r >> 2);
+}
+
+static uint32_t lcd_out(uint16_t c) {
+	unsigned r = c >> 11, g = c >> 5 & 0x3F, b = c & 0x1F;
+	return 0xFF000000u | ((b * 510 + 31) / 62) << 16 | ((g * 510 + 63) / 126) << 8 | (r * 510 + 31) / 62;
+}
+
+/* The GBA's screen (lcd_frame.c) against mGBA's libretro core's own
+ * results: its Color Correction table (ccLUT) for a few colours, and its
+ * four blendings of a pixel turning white from black and one flickering
+ * blue and red from red (docs/engine/lcd.md, Checked against mGBA) */
+static void test_lcd_frame(void) {
+	static const uint16_t cc[][2] = { { 0xFFDF, 0xF79E }, { 0x0000, 0x0000 }, { 0xF800, 0xE30E }, { 0x07C0, 0x8649 }, { 0x001F, 0x03DA },
+		{ 0x8410, 0x630C }, { 0x4208, 0x2104 }, { 0xFFC0, 0xFED1 }, { 0x0C2C, 0x3287 }, { 0x5B4F, 0x3A4A } };
+	for (size_t i = 0; i < sizeof cc / sizeof *cc; ++i)
+		CHECK(lcd_correct565(cc[i][0]) == cc[i][1], "lcd: %04X corrected as mGBA's %04X (got %04X)", cc[i][0], cc[i][1], lcd_correct565(cc[i][0]));
+	static const uint16_t want[4][6][2] = {
+		{ { 0x83F0, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 } },
+		{ { 0xFFDF, 0x001F }, { 0xFFDF, 0xF800 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 }, { 0xFFDF, 0x8010 } },
+		{ { 0x8C51, 0x7011 }, { 0xD69A, 0xB009 }, { 0xEF5D, 0x5015 }, { 0xFFDF, 0xA80A }, { 0xFFDF, 0x5015 }, { 0xFFDF, 0xA80A } },
+		{ { 0x8410, 0x8010 }, { 0xBDD7, 0xB808 }, { 0xDEDB, 0x6013 }, { 0xEF5D, 0xA80A }, { 0xF79E, 0x5814 }, { 0xFFDF, 0xA80A } },
+	};
+	for (int m = 0; m < 4; ++m) {
+		lcd_set_blend((LcdBlend)(LCD_BLEND_SIMPLE + m));
+		uint32_t px[2] = { lcd_in(0x0000), lcd_in(0xF800) };
+		lcd_frame(px, 2, true);   /* (the frames before) */
+		for (int t = 0; t < 6; ++t) {
+			px[0] = lcd_in(0xFFDF);
+			px[1] = lcd_in((t & 1) ? 0xF800 : 0x001F);
+			lcd_frame(px, 2, true);
+			CHECK(px[0] == lcd_out(want[m][t][0]) && px[1] == lcd_out(want[m][t][1]), "lcd: blending %d, frame %d as mGBA's (%08X %08X)", m + 1, t, px[0], px[1]);
+		}
+		/* (no new picture: the last frame again, the blending not stepped) */
+		px[0] = px[1] = 0;
+		lcd_frame(px, 2, false);
+		CHECK(px[0] == lcd_out(want[m][5][0]) && px[1] == lcd_out(want[m][5][1]), "lcd: blending %d kept while no picture comes", m + 1);
+	}
+	lcd_set_colour(LCD_COLOUR_GBA);
+	lcd_set_blend(LCD_BLEND_OFF);
+	uint32_t px[1] = { lcd_in(0x5B4F) };
+	lcd_frame(px, 1, true);
+	CHECK(px[0] == lcd_out(0x3A4A), "lcd: the picture corrected alone (%08X)", px[0]);
+	lcd_set_colour(LCD_COLOUR_OFF);
+	px[0] = 0x00123456;
+	lcd_frame(px, 1, true);
+	CHECK(px[0] == 0x00123456, "lcd: both off, the picture untouched");
+}
+
 static void test_settings_line(void) {
 	char path[96], all[512];
 	snprintf(path, sizeof path, "build/host/test-settings-%d.ini", (int)getpid());
@@ -6260,6 +6314,7 @@ int main(void) {
 	test_sound_filter();
 	test_jukebox_songs();
 	test_settings_line();
+	test_lcd_frame();
 	test_letters();
 	test_thumb_bl();
 	test_thumb_block();

@@ -277,6 +277,8 @@ static int screen_option(const char *a, const char *v, Options *o) {
 	else if (!strcmp(a, "--music")) o->music_arg = !strcmp(v, "on");
 	else if (!strcmp(a, "--effects")) o->effects_arg = !strcmp(v, "on");
 	else if (!strcmp(a, "--screen")) o->screen_arg = v;
+	/* (--colour-correction, --interframe-blending, --lcd3x) */
+	else if (player_screen_flag(a, v)) {}
 	/* (the screen's density for the touch controls, in dots per inch) */
 	else if (!strcmp(a, "--dpi")) platform_set_dpi((float)atof(v));
 	else return 0;

@@ -31,6 +31,10 @@ typedef enum {
 	OW_VIBRATION, OW_WEAK, OW_MEDIUM, OW_STRONG,   /* the Audio section's controller lines (feel_out.h; FEEL_WEAK's order) */
 	OW_VIBRATION_ON_NOTE, OW_VIBRATION_OFF_NOTE,
 	OW_TRIGGERS, OW_TRIGGERS_ON_NOTE, OW_TRIGGERS_OFF_NOTE,
+	OW_COLOUR, OW_COLOUR_GBA_NOTE, OW_COLOUR_OFF_NOTE,   /* the Display section's GBA screen (display.h); its GBA is OW_GBA */
+	OW_BLEND, OW_SIMPLE, OW_SMART, OW_LCD, OW_LCD_FAST,   /* (LcdBlend's order from Simple; Off OW_OFF) */
+	OW_BLEND_OFF_NOTE, OW_SIMPLE_NOTE, OW_SMART_NOTE, OW_LCD_NOTE, OW_LCD_FAST_NOTE,   /* (LcdBlend's order) */
+	OW_LCD3X, OW_LCD3X_ON_NOTE, OW_LCD3X_OFF_NOTE,
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
@@ -40,10 +44,14 @@ const char *options_sound_note(void);
 /* ... before the music's and the effects' */
 const char *options_music_note(void);
 const char *options_effects_note(void);
-/* ... before the display's: screen, smooth_motion and fullscreen */
+/* ... before the display's: screen, smooth_motion, fullscreen and the
+ * GBA's screen's colour_correction, interframe_blending and lcd3x */
 const char *options_screen_note(void);
 const char *options_smooth_note(void);
 const char *options_fullscreen_note(void);
+const char *options_colour_note(void);
+const char *options_blend_note(void);
+const char *options_lcd3x_note(void);
 /* ... before fast forward's */
 const char *options_fast_note(void);
 /* ... before the controller's vibration and trigger effects */

@@ -35,6 +35,9 @@ int options_lines(int kinds[LINES_MAX]) {
 		if (display_has_window()) kinds[n++] = LINE_FULLSCREEN;
 		if (display_has_scale()) kinds[n++] = LINE_SCALE;
 		if (display_has_smooth()) kinds[n++] = LINE_SMOOTH;
+		kinds[n++] = LINE_COLOUR;
+		kinds[n++] = LINE_BLEND;
+		if (display_has_lcd3x()) kinds[n++] = LINE_LCD3X;
 	} else {
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
@@ -136,6 +139,9 @@ static void turn(int kind, int dir) {
 	case LINE_FULLSCREEN: display_fullscreen_keep(!P.fullscreen); break;
 	case LINE_SCALE: display_scale_keep(display_scale_next(dir)); break;
 	case LINE_SMOOTH: display_smooth_keep(!P.blend, true); break;
+	case LINE_COLOUR: display_colour_keep(lcd_colour() == LCD_COLOUR_GBA ? LCD_COLOUR_OFF : LCD_COLOUR_GBA); break;
+	case LINE_BLEND: display_blend_keep(display_blend_next(dir)); break;
+	case LINE_LCD3X: display_lcd3x_keep(!lcd_grid()); break;
 	case LINE_MUSIC:
 	case LINE_EFFECTS: heard_keep(kind); break;
 	case LINE_FAST: fast_keep(dir); break;

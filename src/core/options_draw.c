@@ -26,13 +26,13 @@
 #define WIN_Y 18
 #define WIN_H 84
 #define ROW_Y 25
-#define ROW_H 18   /* (14 for five lines) */
+#define ROW_H 18   /* (14 for five lines, 12 for six) */
 #define LABEL_X 24
 #define VALUE_R (CORE_W - 30)   /* a value's right edge, the chevron after it */
 #define NOTE_Y 104
 #define NOTE_H 50
 
-static int row_h(int n) { return n > 4 ? 14 : ROW_H; }
+static int row_h(int n) { return n > 5 ? 12 : n > 4 ? 14 : ROW_H; }
 
 int options_tap_line(int x, int y) {
 	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
@@ -47,13 +47,16 @@ static const char *title_word(void) {
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
 
-/* a turned line's value: the window's, the scale's, smooth motion's, the music's, the effects', fast forward's, the
- * vibration's, the trigger effects', the sound's */
+/* a turned line's value: the window's, the scale's, smooth motion's, the GBA's screen's, the music's, the effects',
+ * fast forward's, the vibration's, the trigger effects', the sound's */
 static const char *value_word(int kind) {
 	switch (kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_ON : OW_OFF);
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_ON : OW_OFF);
+	case LINE_COLOUR: return options_word(lcd_colour() == LCD_COLOUR_GBA ? OW_GBA : OW_OFF);
+	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
+	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_ON : OW_OFF);
 	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_ON : OW_OFF);
 	case LINE_FAST: return fast_speed() > FAST_OFF ? fast_speed_word(fast_speed()) : options_word(OW_OFF);
@@ -68,7 +71,8 @@ static const char *value_word(int kind) {
 static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
 		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND,
-		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST, [LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS };
+		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST, [LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS,
+		[LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
@@ -87,22 +91,32 @@ static void line_draw(int x0, int y, int kind, bool on) {
 	look_pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
 }
 
+/* the Display section's lines' notes */
+static const char *display_note(int kind) {
+	switch (kind) {
+	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_FULLSCREEN_ON_NOTE : OW_FULLSCREEN_OFF_NOTE);
+	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO_NOTE + display_scale()));
+	case LINE_SMOOTH: return options_word(P.blend ? OW_SMOOTH_ON_NOTE : OW_SMOOTH_OFF_NOTE);
+	case LINE_COLOUR: return options_word(lcd_colour() == LCD_COLOUR_GBA ? OW_COLOUR_GBA_NOTE : OW_COLOUR_OFF_NOTE);
+	case LINE_BLEND: return options_word((OptionsWord)(OW_BLEND_OFF_NOTE + lcd_blend()));
+	case LINE_LCD3X: return options_word(lcd_grid() ? OW_LCD3X_ON_NOTE : OW_LCD3X_OFF_NOTE);
+	default: return "";
+	}
+}
+
 static const char *note_words(int kind) {
 	switch (kind) {
 	case LINE_CONTROLS: return options_word(OW_CONTROLS_NOTE);
 	case LINE_DISPLAY: return options_word(OW_DISPLAY_NOTE);
 	case LINE_AUDIO: return options_word(OW_AUDIO_NOTE);
 	case LINE_STATS: return analytics_word(AW_ROW_NOTE);
-	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_FULLSCREEN_ON_NOTE : OW_FULLSCREEN_OFF_NOTE);
-	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO_NOTE + display_scale()));
-	case LINE_SMOOTH: return options_word(P.blend ? OW_SMOOTH_ON_NOTE : OW_SMOOTH_OFF_NOTE);
 	case LINE_SOUND: return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT_NOTE : OW_GBA_NOTE);
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_MUSIC_ON_NOTE : OW_MUSIC_OFF_NOTE);
 	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_EFFECTS_ON_NOTE : OW_EFFECTS_OFF_NOTE);
 	case LINE_FAST: return options_word(fast_speed() > FAST_OFF ? OW_FAST_ON_NOTE : OW_FAST_OFF_NOTE);
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_VIBRATION_OFF_NOTE : OW_VIBRATION_ON_NOTE);
 	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_TRIGGERS_ON_NOTE : OW_TRIGGERS_OFF_NOTE);
-	default: return "";
+	default: return display_note(kind);
 	}
 }
 
