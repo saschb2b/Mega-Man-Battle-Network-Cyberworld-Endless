@@ -450,5 +450,18 @@ the section label, the refresh as the cut, the setting's spinner and
 pips as a readout, the same moment twice (plain, then set) as the cold
 open.
 
-Neither the music nor the cut has yet been heard or seen by the owner:
-his word on them goes here.
+The owner, after the release (2 November 2026): "the trailer music
+misses the soundfont. fix that and replace the trailer. also make sure
+the trailer skill forces you to always use the soundfont. otherwise it is
+just not on the quality we want." The piece had the soundfont, but only
+for its drums, its chord stabs, the strings, one brass note and the C's
+saw: its melody, its backing and its bass, the parts an ear follows,
+were the squares and the wave, as 0x03's are, so it sounded like the
+plain GBA synthesis 0.16.0's first piece was missed for. Re-voiced with
+every note kept: the lead on 81 Saw Wave, the blips on 12 Marimba, the
+bass on 38 Synth Bass 1 (`SAMPLED_PARTS`), the kick raised to 0.7 for the
+lows (bass/body/mids/top 39/40/20/1 against the recording's 44/33/21/2,
+punch 5.8 dB against 5.1), and the trailer re-rendered and replaced
+(docs/clips, the site, the README, the v0.19.0 release). Gate 3 now
+requires every melodic part on the soundfont, and `music_check.py` fails
+a piece that does not (SKILL.md).

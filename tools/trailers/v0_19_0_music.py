@@ -7,6 +7,15 @@ sketch_town_lib.py's docstring; the palette is FluidR3 GM's (SOUNDFONT),
 rendered in docker/Dockerfile.music's image, its 3DS banner kept as our
 own audio (BANNER_AUDIO).
 
+Every part plays FluidR3 GM's instruments (the owner's gate 3, SKILL.md):
+the lead, 0x03's square, on 81 Saw Wave; the backing's blips, its other
+square, on 12 Marimba; the bass, its wave, on 38 Synth Bass 1
+(SAMPLED_PARTS); the chords on 4 Electric Piano 1 and 48 Strings, the low
+answer on 61 Brass Section, the C's melody on 81, the kit 24's. The GBA's
+noise channel keeps the hats and the crash. (The first cut played the
+lead, the blips and the bass on the squares and the wave, and the owner
+heard no soundfont in it, 2 November 2026.)
+
 The owner waived his pick of a sketch for this release (2 November 2026:
 "Don't wait for my approvals"). Of the two written, A was chosen: every
 part's motion near 0x03's (music_check.py: "busier than the source:
@@ -57,7 +66,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from trailer_music import Score  # noqa: E402
 from trailers import sketch_town_lib as L  # noqa: E402
 from trailers.sketch_town_lib import (BPM, CHORD_SAMPLES, DS_ENV, DS_GAIN, DS_LEVEL,  # noqa: E402,F401
-                                      HARDWARE, REVERB, SAMPLED_LEADS, SOUNDFONT, instruments)
+                                      HARDWARE, REVERB, SAMPLED_LEADS, SAMPLED_PARTS, SOUNDFONT, instruments)
 from trailers.sketch_town_a import CALL  # noqa: E402
 
 BARS = 23

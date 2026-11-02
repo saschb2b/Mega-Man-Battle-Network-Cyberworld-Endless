@@ -30,7 +30,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from trailer_music import Score  # noqa: E402
 from trailers import sketch_town_lib as L  # noqa: E402
 from trailers.sketch_town_lib import (BPM, CHORD_SAMPLES, DS_ENV, DS_GAIN, DS_LEVEL,  # noqa: E402,F401
-                                      HARDWARE, MIX, REVERB, SAMPLED_LEADS, SOUNDFONT, TAIL, instruments)
+                                      HARDWARE, MIX, REVERB, SAMPLED_LEADS, SAMPLED_PARTS, SOUNDFONT, TAIL,
+                                      instruments)
 
 BARS = 9
 BANNER = (1 * 4 * 60 / BPM, 2.9)

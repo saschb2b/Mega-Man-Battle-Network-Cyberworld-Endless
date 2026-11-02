@@ -5,8 +5,9 @@ plan put them), its balance of lows, mids and highs and its punch (the
 swing inside a beat) beside a reference recording's (the game it is in
 the manner of), the lead's notes that rub the harmony (where the piece
 names its CHORD_SAMPLES), and a piano roll of its score to look at (the
-squares, the wave's bass, the stabs and pads). The numbers to aim for are
-in ../music_rules.md.
+squares, the wave's bass, the stabs and pads). It fails (exit 1) a piece
+whose lead, backing or bass is not played by the soundfont (the owner's
+gate 3, SKILL.md). The numbers to aim for are in ../music_rules.md.
 
     python3 .claude/skills/trailer/scripts/music_check.py [VERSION] [--ref AUDIO] [--piece NAME]
 
@@ -85,11 +86,17 @@ def clashes(piece):
     s = piece.arrangement()
     names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
+    sampled = getattr(piece, 'SAMPLED_PARTS', {})
+    under = set(sampled.get('backing', ())) | set(sampled.get('bass', ()))
+    leads = set(sampled.get('lead', ()))
+
     def sounding(t):
         pcs = {k % 12 for ch in ('wave', 'sq2') for t0, n, k, _, _ in s.psg[ch] if t0 <= t < t0 + max(n, 6)}
+        pcs |= {k % 12 for t0, n, inst, k, *_ in s.ds if inst in under and t0 <= t < t0 + max(n, 6)}
         return pcs | {(k + i) % 12 for t0, n, inst, k, *_ in s.ds if inst in chords and t0 <= t < t0 + n
                       for i in chords[inst]}
-    strong = [(t, n, k) for t, n, k, _, _ in sorted(s.psg['sq1']) if t % 24 == 0 or n >= 12]
+    lead = [(t, n, k) for t, n, k, _, _ in s.psg['sq1']] + [(t, n, k) for t, n, inst, k, *_ in s.ds if inst in leads]
+    strong = [(t, n, k) for t, n, k in sorted(lead) if t % 24 == 0 or n >= 12]
     rubs = []
     for t, n, k in strong:
         pcs = sounding(t + 1)
@@ -123,14 +130,18 @@ def motion(notes):
 
 
 def piece_parts(piece):
-    """The piece's parts by role: the lead square, the backing square, the
-    wave's bass, and the sampled lead: the Direct Sound instruments the
-    piece names in SAMPLED_LEADS ('dlead' by default; a sample doubling
-    the square goes under another name), its echo (the same key within
-    four ticks) left out."""
+    """The piece's parts by role: the lead, the backing and the bass, each
+    on the square or wave it would have on a GBA or on the soundfont's
+    instruments the piece names for it in SAMPLED_PARTS ({'lead':
+    ('sflead',), ...}), and the sampled lead: the Direct Sound instruments
+    the piece names in SAMPLED_LEADS ('dlead' by default; a sample doubling
+    the lead goes under another name), its echo (the same key within four
+    ticks) left out."""
     s = piece.arrangement()
     parts = {'lead': [(t, k) for t, n, k, *_ in s.psg['sq1']], 'backing': [(t, k) for t, n, k, *_ in s.psg['sq2']],
              'bass': [(t, k) for t, n, k, *_ in s.psg['wave']]}
+    for role, insts in getattr(piece, 'SAMPLED_PARTS', {}).items():
+        parts.setdefault(role, []).extend((t, k) for t, n, inst, k, *_ in s.ds if inst in insts)
     leads = getattr(piece, 'SAMPLED_LEADS', ('dlead',))
     seen, sampled = {}, []
     for t, n, inst, k, *_ in sorted(s.ds, key=lambda e: e[0]):
@@ -207,6 +218,37 @@ def discipline(piece, source=None):
         print('busier than the source: ' + ('; '.join(flags) if flags else 'none'))
     else:
         print('(no --source: nothing to hold the parts against)')
+
+
+SAMPLED_SHARE = 0.8   # (of a role's notes, at least, on the soundfont's instruments)
+
+
+def soundfont(piece):
+    """The owner's gate 3 held by numbers (SKILL.md): the piece names
+    FluidR3 GM (SOUNDFONT), and its lead, its backing and its bass each
+    play at least four in five of their notes on the soundfont's
+    instruments (SAMPLED_PARTS), not on the GBA's squares and wave alone.
+    0.16.0's and 0.19.0's first pieces played their melody, backing and
+    bass on the squares and the wave with a few sampled accents, and the
+    owner heard no soundfont in either ("just not on the quality we
+    want"). The failures, none where it holds."""
+    fails = []
+    if not getattr(piece, 'SOUNDFONT', None):
+        fails.append('no SOUNDFONT: the piece plays no FluidR3 GM')
+    s = piece.arrangement()
+    sampled = getattr(piece, 'SAMPLED_PARTS', {})
+    print('soundfont: each part\'s notes on its instruments (SAMPLED_PARTS) against the GBA\'s own channel')
+    for role, ch in (('lead', 'sq1'), ('backing', 'sq2'), ('bass', 'wave')):
+        psg = len(s.psg[ch])
+        sf = sum(1 for e in s.ds if e[2] in sampled.get(role, ()))
+        if psg + sf == 0:
+            continue
+        share = sf / (psg + sf)
+        print(f'  {role:8s} {sf:4d} sampled, {psg:4d} on {ch}: {100 * share:3.0f}%')
+        if share < SAMPLED_SHARE:
+            fails.append(f'{role}: {100 * share:.0f}% of its notes on the soundfont, under {100 * SAMPLED_SHARE:.0f}%')
+    print('soundfont: ' + ('FAIL: ' + '; '.join(fails) if fails else 'every part on FluidR3 GM'))
+    return fails
 
 
 def roll(score, bars, path):
@@ -297,8 +339,11 @@ def main():
         print(f'reference punch: {punch(x[8000 * 10:8000 * 40] or x, 8000, piece.BPM):.1f} dB')
     clashes(piece)
     discipline(piece, source)
+    fails = soundfont(piece)
     roll(piece.arrangement(), piece.BARS, os.path.join(work, 'roll.png'))
     print('wrote', os.path.relpath(path, ROOT), 'and', os.path.relpath(os.path.join(work, 'roll.png'), ROOT))
+    if fails:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

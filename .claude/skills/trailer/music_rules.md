@@ -47,8 +47,10 @@ own words in this file and the rules below:
 - **Colour from little.** One chord sample recoloured by the bass (C over
   A is Am7) rather than many chords played out (*Kaida*, Harmony 6).
 - **Her instruments' sound.** BN was made from XV-1080 and SC-88 samples
-  (*Kaida*), so the sampled palette (FluidR3 GM, below) is the default,
-  the owner's gate 3, never an option left out.
+  (*Kaida*), so every melodic part plays the sampled palette (FluidR3 GM,
+  below): the lead, the backing and the bass as well as the chords and
+  drums, the owner's gate 3, which `music_check.py` holds (Mix and
+  timbre). The squares and the wave give a part its job, never its sound.
 - **Its seed audible.** A fan names the Battle Network song it grew from
   after one listen: its tempo, groove, harmonic language and the parts'
   jobs, never its notes.
@@ -296,9 +298,19 @@ What the kit does for it (`tools/trailer_music.py`):
 - `bend` on PSG and Direct Sound notes, followed a frame at a time.
 - Hard pans per note are the piece's: alternate `pan` -0.9 and 0.9.
 
-The sampled instruments are the default since 0.14.0, the palette the
-owner loved in 0.14.0 and 0.15.0 (the owner's gate 3; 0.16.0's first
-piece, synthesis alone, was missed), nearer the XV-1080 and SC-88 sounds
+The sampled instruments are required since 2 November 2026, for every
+melodic part: the lead, the backing and the bass, named by role in the
+piece's `SAMPLED_PARTS`, as well as the chords and drums. 0.19.0's first
+cut played its melody, backing and bass on the squares and the wave with
+a few sampled accents, and the owner heard no soundfont ("just not on
+the quality we want"), as with 0.16.0's first piece. `music_check.py`
+prints each part's share of notes on its instruments and fails (exit 1)
+under four in five. 0.19.0's piece, re-voiced: the lead on 81 Saw Wave,
+the backing's 32nd-note blips on 12 Marimba, the bass on 38 Synth Bass 1,
+each recorded in the middle of its range (`sf.instrument(81, [74],
+2.4)`), long enough for its longest held note; `hit` with `pan` throws
+the blips left and right and `bend` slides the bass. The palette is
+nearer the XV-1080 and SC-88 sounds
 BN was made from (*Kaida*): `tools/trailer_soundfont.py` cuts FluidR3 GM's (Frank Wen,
 the MIT license; Debian's `fluid-soundfont-gm` in `docker/Dockerfile.music`,
 the owner's go-ahead of 22 October 2026) into MP2K samples, a note or a
@@ -311,7 +323,8 @@ piece that uses them names its `SOUNDFONT`, renders in the image
 written by `--write-banner`). Good programs: 24 Electronic kit's kick, the
 clap (39) over a snare (40), 30 Distortion Guitar's power chord, 28 Palm
 Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
-Section, 81 Saw Wave.
+Section, 81 Saw Wave (a lead), 4 Electric Piano 1 (a mellow chord sample),
+12 Marimba (a backing's blips), 38 Synth Bass 1 (a bass).
 
 Which soundfont was settled by ear (26 October 2026): 0.16.0's three
 sketches, the same notes rendered through FluidR3 GM, GeneralUser GS
@@ -326,6 +339,8 @@ hook for another comparison (a bank added to the image and to its
 
 ## Checks before the owner listens
 
+- `music_check.py`: "soundfont: every part on FluidR3 GM" (gate 3), or
+  nothing goes further.
 - `music_check.py --piece NAME --source GAME SONG [--offset TICKS]`:
   "busier than the source: none" (Discipline, above).
 

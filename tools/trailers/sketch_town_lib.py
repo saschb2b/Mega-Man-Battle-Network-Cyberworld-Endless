@@ -43,6 +43,11 @@ one, the snare on two and four), numbers only:
 - The form: an A (eight bars: the call, the low answer), a B (eight: the
   backing in 32nds, the low answer out), a C (nine: the sampled melody
   leads), one bar of the bass and drums thinned, then all again.
+
+What these sketches do with those jobs: every part on FluidR3 GM's
+instruments (the owner's gate 3, SKILL.md), never the squares' or the
+wave's own sound: the lead on 81 Saw Wave, the blips on 12 Marimba, the
+bass on 38 Synth Bass 1 (SAMPLED_PARTS); the noise channel keeps the hats.
 """
 import os
 import sys
@@ -63,15 +68,18 @@ MIX = (('lead', ('sq1',), 0.15), ('arp', ('sq2',), 0.16), ('bass', ('wave',), 0.
 # suspended and diminished, recoloured by the bass (Kaida's way)
 CHORD_SAMPLES = dict(V.CHORD_SAMPLES, ep=(0, 2, 7, 12), ep_m=(0, 3, 7, 12), ep_M=(0, 4, 7, 12), ep_d=(0, 3, 6, 12))
 DS_ENV = dict(V.DS_ENV, ep=(255, 238, 80, 200), ep_m=(255, 238, 80, 200), ep_M=(255, 238, 80, 200),
-              ep_d=(255, 238, 80, 200), low=(255, 0, 230, 200))
-DS_GAIN = dict(V.DS_GAIN, kick=0.55, snare=0.6, ep=0.75, ep_m=0.75, ep_M=0.75, ep_d=0.75, dlead=0.34, low=0.42,
-               pad=0.6, pad_m=0.6, pad_M=0.6, pad_d=0.6)
+              ep_d=(255, 238, 80, 200), low=(255, 0, 230, 200),
+              sflead=(255, 0, 230, 200), mallet=(255, 0, 255, 170), sfbass=(255, 0, 240, 190))
+DS_GAIN = dict(V.DS_GAIN, kick=0.7, snare=0.6, ep=0.75, ep_m=0.75, ep_M=0.75, ep_d=0.75, dlead=0.34, low=0.42,
+               pad=0.6, pad_m=0.6, pad_M=0.6, pad_d=0.6, sflead=0.32, mallet=0.3, sfbass=0.55)
 SAMPLED_LEADS = ('dlead',)
+# every melodic part on FluidR3 GM's instruments (the owner, 2 November
+# 2026: the squares and the wave alone are "just not on the quality we
+# want"): the lead the saw lead's, the backing's blips the marimba's, the
+# bass the synth bass's; music_check.py reads them by these roles and
+# fails a piece whose lead, backing or bass is not the soundfont's
+SAMPLED_PARTS = {'lead': ('sflead',), 'backing': ('mallet',), 'bass': ('sfbass',)}
 
-LEAD = dict(duty=0.5, env=(0, 3, 11, 1), vib=(22, 14))
-BLIP = dict(duty=0.5, env=(0, 1, 11, 1))
-BASS = dict(env=(0, 5, 4, 1), wave=V.SAW)
-HELD = dict(env=(0, 0, 15, 3), wave=V.SAW)
 
 
 def instruments():
@@ -80,6 +88,11 @@ def instruments():
         S[name] = sf.instrument(4, [60 + i for i in CHORD_SAMPLES[name]], 0.9, base=60, fade=0.25)
     # (the low answer: the brass section's one note, an octave down)
     S['low'] = sf.instrument(61, [48], 0.5, fade=0.12)
+    # the lead (F4 to D6), the backing's blips (F4 to B-flat 5) and the bass
+    # (B-flat 2 to G4), each recorded in the middle of its range
+    S['sflead'] = sf.instrument(81, [74], 2.4, fade=0.2)
+    S['mallet'] = sf.instrument(12, [74], 0.35, fade=0.05)
+    S['sfbass'] = sf.instrument(38, [55], 2.4, fade=0.2)
     return S
 
 
@@ -121,11 +134,12 @@ def root(name):
 # ---- the parts ----
 
 def lead(s, bar, line, vel=112, shift=0):
-    """the square's line, legato; between the beats a little softer
-    (0x03's 100 on the beat, 60 and 92 between)"""
+    """the lead's line (the square's part in 0x03, here the saw lead's),
+    legato; between the beats a little softer (0x03's 100 on the beat, 60
+    and 92 between)"""
     for t, n, k in line:
         soft = t % 24 != 0
-        s.note('sq1', bar, t, n, key(k) + shift, vel - (18 if soft and n <= 6 else 0), **LEAD)
+        s.hit('sflead', bar, t, n, key(k) + shift, vel - (18 if soft and n <= 6 else 0))
 
 
 BLIP_VEL = (100, 32, 60, 32)     # a beat's four sixteenths
@@ -145,7 +159,7 @@ def blips(s, bar, names, until=16, double=False, vel=0, register=0):
         for half in ((0, 1) if double else (0,)):
             side = -0.9 if n % 2 == 0 else 0.9
             level = BLIP_VEL[p % 4] if not half else 32
-            s.note('sq2', bar, 6 * p + 3 * half, 3, k, max(24, level + vel), pan=side, **BLIP)
+            s.hit('mallet', bar, 6 * p + 3 * half, 3, k, max(24, level + vel), side)
             n += 1
 
 
@@ -160,9 +174,9 @@ def bass(s, bar, names, nxt=None, until=16):
             target = root(nxt) if nxt else r
             k = target - 2 if target > r else target + 2 if target < r else r
             bend = [(0, 0), (12, 0), (18, (target - k) * 1.0)] if target != r else None
-            s.note('wave', bar, 6 * p, 18, k, 127, **(dict(BASS, bend=bend) if bend else BASS))
+            s.hit('sfbass', bar, 6 * p, 18, k, 127, 0.0, bend)
             continue
-        s.note('wave', bar, 6 * p, 6, k, 88 if p in (1, 5, 9, 11) else 127, **BASS)
+        s.hit('sfbass', bar, 6 * p, 6, k, 88 if p in (1, 5, 9, 11) else 127)
 
 
 STAB = (0, 3, 6, 10, 12)         # the beat, then its fourth and third sixteenths
@@ -236,5 +250,5 @@ def ring(s, bar, name, top, vel=112):
     s.hit('kick', bar, 0, 6)
     s.hit(H[name][2], bar, 0, 90, key(H[name][3]), 104, -0.35)
     s.hit(H[name][4], bar, 0, 150, key(H[name][5]) + 12, 96, 0.35)
-    s.note('wave', bar, 0, 90, root(name), 127, **dict(HELD, bend=[(0, 0), (60, 0), (90, -2)]))
-    s.note('sq1', bar, 0, 96, key(top), vel, **dict(LEAD, bend=[(0, 0), (80, 0), (96, -1)]))
+    s.hit('sfbass', bar, 0, 90, root(name), 127, 0.0, [(0, 0), (60, 0), (90, -2)])
+    s.hit('sflead', bar, 0, 96, key(top), vel, 0.0, [(0, 0), (80, 0), (96, -1)])

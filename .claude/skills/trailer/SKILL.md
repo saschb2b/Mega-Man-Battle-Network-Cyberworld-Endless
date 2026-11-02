@@ -42,11 +42,21 @@ time waits, it is not cut short. Each came from a cut the owner refused.
    so that a fan hears where it comes from (never its notes). Numbers that
    match are not enough: 0.16.0's first piece read "busier than the
    source: none" and still sounded "rather random" to the owner.
-3. **The soundfont palette the owner loved.** The piece plays FluidR3 GM's
-   instruments through `SOUNDFONT` (`tools/trailer_soundfont.py`,
-   `render_any` in `docker/Dockerfile.music`), the palette of 0.14.0 and
-   0.15.0, not the plain GBA synthesis alone. 0.16.0's first piece had
-   none, and the owner missed it.
+3. **Every melodic part on the soundfont, always.** The lead, the
+   backing and the bass play FluidR3 GM's instruments (`sf.instrument`
+   through `SOUNDFONT`: `tools/trailer_soundfont.py`, rendered by
+   `render_any` in `docker/Dockerfile.music`'s image), named by role in
+   the piece's `SAMPLED_PARTS` (`{'lead': ('sflead',), 'backing':
+   ('mallet',), 'bass': ('sfbass',)}`), and so do its chords and drums.
+   The GBA's squares and wave never carry a part: at most they double
+   one; the noise channel keeps the hats. `music_check.py` fails (exit 1)
+   a piece or a sketch where fewer than four in five of a part's notes are
+   the soundfont's, and nothing that fails it is rendered for the owner or
+   cut into a trailer. 0.16.0's first piece and 0.19.0's first cut played
+   their melody, backing and bass on the squares and the wave with a few
+   sampled accents, and the owner heard no soundfont in either (2 November
+   2026: "make sure the trailer skill forces you to always use the
+   soundfont. otherwise it is just not on the quality we want").
 4. **Sketches for the owner's ear before the piece, always** (step 2's
    sketch step): two or three eight-bar sketches from the chosen song, in
    the soundfont, rendered to `.build/trailer-sketches/`, sent to the
@@ -200,17 +210,20 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
 6. **Compose in `vX_Y_Z_music.py`** by the rules: two chords a bar, each
    coloured (sevenths, suspensions; a triad sample over another bass); a
    one-bar hook, answered, stated again, cadenced, its rhythm varied bar to
-   bar; the backing square's arpeggio thrown hard left and right note by
-   note with BN's accents; the bass legato on the kick's places with
-   falls and slides (`bend`); short clipped drums on a syncopated kick; a
+   bar; the backing's arpeggio (a sampled mallet, pluck or keys) thrown
+   hard left and right note by note with BN's accents; the bass (a
+   sampled bass) legato on the kick's places with falls and slides
+   (`bend`); every one of them a FluidR3 GM instrument (gate 3), the
+   source's square or wave giving its part's job, never its sound; short clipped drums on a syncopated kick; a
    chord sample and a low distorted stab between 120 and 500 Hz; a fill
    into every section; a drop that thins the band, kept short; an ending
    cadence that rings. The kit's own sampled instruments and
    `HARDWARE = 32768` are in `music_rules.md`, Mix and timbre.
 7. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE
-   --source GAME SONG [--offset TICKS]` (or `--piece NAME`): every part's
-   motion beside the source song's, "busier than the source: none"
-   (`music_rules.md`, Discipline); no bar near clipping, loudness steady through a
+   --source GAME SONG [--offset TICKS]` (or `--piece NAME`): "soundfont:
+   every part on FluidR3 GM" (gate 3; a failure exits 1 and stops there);
+   every part's motion beside the source song's, "busier than the source:
+   none" (`music_rules.md`, Discipline); no bar near clipping, loudness steady through a
    section, the four-band balance and the punch near the reference's (sketch A
    against "Surge of Power!": 54/31/13/1 against 57/28/13/1, 7.4 dB
    against 7.8), the lead's rubs against the harmony read one by one (a
