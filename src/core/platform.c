@@ -335,6 +335,8 @@ void platform_own_taps(bool on) {
 #endif
 }
 
+bool platform_own_screen(void) { return own_taps; }
+
 void platform_own_wide(bool on) { own_wide = on; }
 
 void platform_picture_taps(bool on) {
@@ -835,9 +837,8 @@ void platform_apply_effects(void) {
 	}
 	if (P.fx_fade > 0) {
 		int a = P.fx_fade >= 16 ? 255 : P.fx_fade * 255 / 16;
-		SDL_SetRenderDrawBlendMode(P.renderer, SDL_BLENDMODE_BLEND);
-		SDL_SetRenderDrawColor(P.renderer, P.fx_fade_color.r, P.fx_fade_color.g, P.fx_fade_color.b, (Uint8)a);
-		SDL_RenderFillRect(P.renderer, NULL);
+		/* (fill_rect's: its colour as the canvas draws it, lcd_canvas.h) */
+		fill_rect(0, 0, P.w, P.h, rgba(P.fx_fade_color.r, P.fx_fade_color.g, P.fx_fade_color.b, a));
 	}
 }
 

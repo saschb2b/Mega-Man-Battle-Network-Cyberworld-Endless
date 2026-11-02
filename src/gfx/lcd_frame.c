@@ -283,3 +283,20 @@ void lcd_frame(uint32_t *px, int n, bool fresh) {
 	else
 		for (int i = 0; i < n; ++i) px[i] = table[made[i]];
 }
+
+/* ---- colours drawn over the frame ---- */
+
+/* (an ARGB8888 colour as the frame's: its channels' top five bits a 565
+ * colour, green's sixth bit 0, through the colour's table, red back at
+ * bit 16; its alpha kept) */
+static uint32_t argb_shown(uint32_t c) {
+	uint32_t k = table[(c >> 19 & 0x1F) << 11 | (c >> 11 & 0x1F) << 6 | (c >> 3 & 0x1F)];
+	return (c & 0xFF000000u) | (k & 0xFFu) << 16 | (k & 0xFF00u) | (k >> 16 & 0xFFu);
+}
+
+uint32_t lcd_correct_argb(uint32_t c) { return colour == LCD_COLOUR_OFF ? c : argb_shown(c); }
+
+void lcd_correct_pixels(uint32_t *px, int n) {
+	if (colour == LCD_COLOUR_OFF) return;
+	for (int i = 0; i < n; ++i) px[i] = argb_shown(px[i]);
+}

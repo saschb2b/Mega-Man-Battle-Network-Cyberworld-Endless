@@ -1281,9 +1281,11 @@ shaders do it:
   blue with a dark line through each row, the picture a little darker
   (`lcd3x = on`; not on the 3DS). It looks best at a scale of 3 or more.
 
-The first two change the game's own picture; what Cyberworld draws over
-it (the map, its own PET screens) keeps its colours. How each matches
-mGBA's is in [The GBA's screen](engine/lcd.md).
+Colour correction changes everything on the game's screen, the map and
+Cyberworld's own PET screens with the game's picture, so Options shows
+it as you choose it; Frame blending changes the game's picture alone.
+Neither touches the ROMs screen, SAVES or the touch controls. How each
+matches mGBA's is in [The GBA's screen](engine/lcd.md).
 
 ## Sound
 

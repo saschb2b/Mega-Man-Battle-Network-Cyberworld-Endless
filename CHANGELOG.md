@@ -16,6 +16,9 @@
   (VisualBoyAdvance's GBA colours, darker still), **DS** (the first DS's
   screen, dimmer and softer) and **PSP** (a PSP 1000's or 2000's, bright
   and warmer), each matched to its shader's math for every colour.
+  Whichever you pick covers Cyberworld's own screens and the map too, so
+  the whole screen reads as one and Options shows the change as you make
+  it.
 - **The sound your way.** Options' Audio: **Music** and **Effects** now go
   from 10 (the game's own level) down to 1, 3 dB a step, and Off; your old
   on and off carry over. **Output** lays the sound out for where you

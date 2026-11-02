@@ -6,6 +6,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* (the canvas's colours: what is drawn here takes the GBA's with Options'
+ * Colour correction, and so does what a scene draws there itself) */
+#include "lcd_canvas.h"
+
 enum {
 	SPR_BATTLE = 0,   /* MegaMan, crosses, beast forms */
 	SPR_VIRUS = 1,

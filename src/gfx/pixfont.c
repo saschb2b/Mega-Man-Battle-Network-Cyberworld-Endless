@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "lcd_canvas.h"
 #include "platform.h"
 
 typedef struct {
@@ -185,7 +186,7 @@ void pixfont_draw(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int
 	if (align == PIXFONT_CENTER) x -= pixfont_width(s, scale) / 2;
 	else if (align == PIXFONT_RIGHT) x -= pixfont_width(s, scale);
 	for (int pass = shade.a ? 0 : 1; pass < 2; ++pass) {
-		SDL_Color k = pass ? c : shade;
+		SDL_Color k = lcd_canvas_colour(pass ? c : shade);
 		int o = pass ? 0 : scale, cx = x;
 		SDL_SetTextureColorMod(atlas, k.r, k.g, k.b);
 		SDL_SetTextureAlphaMod(atlas, k.a);

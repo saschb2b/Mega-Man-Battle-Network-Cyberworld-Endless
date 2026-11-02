@@ -62,6 +62,7 @@ void chatbox_frame(int x, int y, int w, int h) {
  * use, a cell for each byte of text as the battle font's. */
 
 static SDL_Texture *font;
+static unsigned font_gen;   /* (lcd_canvas_gen when it was made: its two colours corrected or not) */
 static uint8_t widths[128];
 
 static void build(void) {
@@ -77,13 +78,14 @@ static void build(void) {
 		for (int y = 0; y < 12; ++y)
 			for (int x = 0; x < widths[ch]; ++x) {
 				int v = x & 1 ? g[y * 8 + x / 2] >> 4 : g[y * 8 + x / 2] & 15;
-				if (v == 1 || v == 3) px[y * 16 * 128 + ch * 16 + x] = v == 1 ? 0xFF423939u : 0xFFDEE7DEu;
+				if (v == 1 || v == 3) px[y * 16 * 128 + ch * 16 + x] = lcd_canvas_argb(v == 1 ? 0xFF423939u : 0xFFDEE7DEu);
 			}
 	}
 	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, 16 * 128, 12, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
 	font = SDL_CreateTextureFromSurface(P.renderer, s);
 	SDL_SetTextureBlendMode(font, SDL_BLENDMODE_BLEND);
 	SDL_FreeSurface(s);
+	font_gen = lcd_canvas_gen();
 }
 
 int chatbox_text_width(const char *s) {
@@ -94,6 +96,10 @@ int chatbox_text_width(const char *s) {
 }
 
 int chatbox_text(int x, int y, const char *s, int n) {
+	if (font && font_gen != lcd_canvas_gen()) {
+		SDL_DestroyTexture(font);
+		font = NULL;
+	}
 	if (!font) build();
 	int x0 = x;
 	for (; *s && n != 0; ++s, --n) {
