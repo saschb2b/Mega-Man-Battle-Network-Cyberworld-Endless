@@ -4,7 +4,7 @@
  * these are), step for step: the picture as its RGB565 frame, blended with
  * the frames before it, then each colour through the correction's table,
  * and shown as a GPU shows a 565 frame. What the engine draws over the
- * picture keeps its colours, as no core's frame holds it.
+ * picture takes the same correction from lcd_canvas.h.
  * docs/engine/lcd.md */
 #ifndef CW_LCD_FRAME_H
 #define CW_LCD_FRAME_H
@@ -37,5 +37,12 @@ void lcd_frame(uint32_t *px, int n, bool fresh);
 
 /* mGBA's correction of a 565 colour (ccLUT's entry, the tests) */
 uint16_t lcd_correct565(uint16_t c);
+
+/* An ARGB8888 colour (R at bit 16), and `n` pixels of them in place,
+ * corrected as lcd_frame corrects the picture's (its alpha kept); as they
+ * are where the correction is off. What the engine draws over the picture
+ * takes them through lcd_canvas.h. */
+uint32_t lcd_correct_argb(uint32_t c);
+void lcd_correct_pixels(uint32_t *px, int n);
 
 #endif

@@ -188,13 +188,17 @@ static void seed_from_now(void) {
 /* a 5- and a 6-bit channel's 8 bits, as a GPU reads a 565 texture (c / 31, c / 63) */
 static uint8_t five[32], six[64];
 
-void lcd_frame(uint32_t *px, int n, bool fresh) {
-	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !ready(n)) return;
+static void eight_made(void) {
 	if (!five[31])
 		for (int i = 0; i < 64; ++i) {
 			if (i < 32) five[i] = (uint8_t)((i * 510 + 31) / 62);
 			six[i] = (uint8_t)((i * 510 + 63) / 126);
 		}
+}
+
+void lcd_frame(uint32_t *px, int n, bool fresh) {
+	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !ready(n)) return;
+	eight_made();
 	if (fresh || seed || blend == LCD_BLEND_OFF) {
 		/* (the 8-bit picture back to mGBA's 565: its top five bits a channel) */
 		for (int i = 0; i < n; ++i) {
@@ -214,4 +218,25 @@ void lcd_frame(uint32_t *px, int n, bool fresh) {
 		uint16_t c = colour == LCD_COLOUR_GBA ? corrected(made[i]) : made[i];
 		px[i] = 0xFF000000u | (uint32_t)five[c & 0x1F] << 16 | (uint32_t)six[c >> 5 & 0x3F] << 8 | five[c >> 11];
 	}
+}
+
+/* ---- colours drawn over the frame ---- */
+
+/* (an ARGB8888 colour as the frame's: its channels' top five bits, through
+ * the table, back as a GPU reads 565; its alpha kept) */
+static uint32_t argb_corrected(uint32_t c) {
+	uint16_t k = corrected((uint16_t)((c >> 19 & 0x1F) << 11 | (c >> 11 & 0x1F) << 6 | (c >> 3 & 0x1F)));
+	return (c & 0xFF000000u) | (uint32_t)five[k >> 11] << 16 | (uint32_t)six[k >> 5 & 0x3F] << 8 | five[k & 0x1F];
+}
+
+uint32_t lcd_correct_argb(uint32_t c) {
+	if (colour != LCD_COLOUR_GBA) return c;
+	eight_made();
+	return argb_corrected(c);
+}
+
+void lcd_correct_pixels(uint32_t *px, int n) {
+	if (colour != LCD_COLOUR_GBA) return;
+	eight_made();
+	for (int i = 0; i < n; ++i) px[i] = argb_corrected(px[i]);
 }

@@ -10,7 +10,9 @@
   and blue stripes and a dark line through each row (not on the 3DS). The
   first two are the mGBA core's Color Correction and Interframe Blending
   as RetroArch runs it, matched to its own code pixel for pixel; the third
-  is RetroArch's lcd3x shader.
+  is RetroArch's lcd3x shader. Colour correction covers Cyberworld's own
+  screens and the map too, so the whole screen reads as one GBA's and
+  Options shows the change as you make it.
 
 ## 0.18.1 (2026-10-31)
 

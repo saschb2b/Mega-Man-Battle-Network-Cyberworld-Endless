@@ -9,6 +9,11 @@
 #include "platform.h"
 #include "rom.h"
 
+/* The textures made from colours (sprites' frames, tiles, the font and
+ * its lines) made again where lcd_canvas.h's correction came on or off
+ * since: Options' Colour correction, or a screen of its own */
+static void colours_follow(void);
+
 /* ------------------------------------------------------------------ */
 /* Sprites
  *
@@ -40,6 +45,10 @@ struct Sprite {
 };
 
 static Sprite *sprite_table[10][256];
+/* (other games' sprites, a few kept: the launcher's cartridges' faces, a
+ * liberation's board's pieces) */
+#define KEPT 32
+static struct { const uint8_t *rom; int cat, idx; Sprite *s; } kept[KEPT];
 
 static inline uint32_t le32(const uint8_t *p) { return p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24; }
 
@@ -79,13 +88,11 @@ Sprite *sprite_get(int cat, int idx) {
 }
 
 Sprite *sprite_get_rom(const uint8_t *rom, uint32_t lists, int cat, int idx) {
-	/* (a few, kept: the launcher's cartridges' faces, a liberation's board's pieces) */
-	static struct { const uint8_t *rom; int cat, idx; Sprite *s; } kept[32];
 	if (!rom || cat < 0 || cat >= 10 || idx < 0 || idx >= 256) return NULL;
 	if (rom == R.data) return sprite_get(cat, idx);
-	for (int i = 0; i < 32; ++i)
+	for (int i = 0; i < KEPT; ++i)
 		if (kept[i].s && kept[i].rom == rom && kept[i].cat == cat && kept[i].idx == idx) return kept[i].s;
-	for (int i = 0; i < 32; ++i)
+	for (int i = 0; i < KEPT; ++i)
 		if (!kept[i].s) {
 			kept[i].s = sprite_load(rom, lists, cat, idx);
 			kept[i].rom = rom;
@@ -210,6 +217,7 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 		cf->raw = px;
 		return cf;
 	}
+	lcd_canvas_pixels(px, W * H);
 	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(px, W, H, 32, W * 4, SDL_PIXELFORMAT_ARGB8888);
 	cf->tex = SDL_CreateTextureFromSurface(P.renderer, surf);
 	SDL_SetTextureBlendMode(cf->tex, SDL_BLENDMODE_BLEND);
@@ -219,6 +227,7 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 }
 
 static CachedFrame *get_frame_part(Sprite *s, int anim, int frame, int pal, int part) {
+	if (part != RAW_PART) colours_follow();
 	const uint8_t *f = frame_ptr(s, anim, frame);
 	if (!f) return NULL;
 	uint32_t off = (uint32_t)(f - s->base);
@@ -369,6 +378,7 @@ static const uint8_t *pal_bytes(uint32_t pal) { return chips_offset_bytes(pal, 3
 static TileEntry tile_cache[4096];
 
 static SDL_Texture *tile_texture(uint32_t tile, uint32_t pal, int flip) {
+	colours_follow();
 	uint32_t h = (tile * 2654435761u ^ pal * 40503u ^ (uint32_t)flip) & 4095;
 	for (int probe = 0; probe < 4096; ++probe, h = (h + 1) & 4095) {
 		TileEntry *e = &tile_cache[h];
@@ -377,6 +387,7 @@ static SDL_Texture *tile_texture(uint32_t tile, uint32_t pal, int flip) {
 			uint32_t px[64] = { 0 };
 			const uint8_t *pb = pal_bytes(pal), *td = tile_data(tile);
 			if (td && pb) blit_tile(px, 8, 0, 0, td, pb, flip & 1, flip & 2);
+			lcd_canvas_pixels(px, 64);
 			e->used = 1;
 			e->key_tile = tile;
 			e->key_pal = pal;
@@ -617,6 +628,20 @@ static int glyph_left(const uint8_t *g) {
 	return minx;
 }
 
+/* an atlas's texel as drawn: the fill white, tinted by the text's colour;
+ * the shade corrected (lcd_canvas.h), as the colour is */
+static uint32_t font_texel(uint32_t v) { return v == 0xFFFFFFFFu || !v ? v : lcd_canvas_argb(v); }
+
+/* the atlas's texture from its pixels */
+static void font_texture(void) {
+	static uint32_t px[16 * 16 * 128];
+	for (int i = 0; i < 16 * 16 * 128; ++i) px[i] = font_texel(font_px[i]);
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, 16 * 128, 16, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
+	font_tex = SDL_CreateTextureFromSurface(P.renderer, s);
+	SDL_SetTextureBlendMode(font_tex, SDL_BLENDMODE_BLEND);
+	SDL_FreeSurface(s);
+}
+
 static void build_font(void) {
 	/* Atlas of 16x16 cells indexed by byte 0-127 (1-5 are version marks,
 	 * 32-127 ASCII). Fill is white so it can be tinted; shade stays dark. */
@@ -659,10 +684,7 @@ static void build_font(void) {
 			}
 	}
 	glyph_first[128] = (uint16_t)n;
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(font_px, 16 * 128, 16, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
-	font_tex = SDL_CreateTextureFromSurface(P.renderer, s);
-	SDL_SetTextureBlendMode(font_tex, SDL_BLENDMODE_BLEND);
-	SDL_FreeSurface(s);
+	font_texture();
 }
 
 int text_width(const char *s) {
@@ -731,7 +753,7 @@ static SDL_Texture *line_tex(const char *s, int scale) {
 		if ((ch < 32 && ch > 5) || ch >= 128) continue;
 		for (int k = glyph_first[ch]; k < glyph_first[ch + 1]; ++k) {
 			int tx = glyph_texels[k] & 15, ty = glyph_texels[k] >> 4 & 15;
-			uint32_t v = font_px[ty * 16 * 128 + ch * 16 + tx];
+			uint32_t v = font_texel(font_px[ty * 16 * 128 + ch * 16 + tx]);
 			for (int j = 0; j < scale; ++j)
 				for (int i = 0; i < scale; ++i) {
 					int qx = x + tx * scale + i;
@@ -760,6 +782,8 @@ void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int s
 	if (align == TEXT_CENTER) x -= text_width(s) * scale / 2;
 	else if (align == TEXT_RIGHT) x -= text_width(s) * scale;
 	if (raw.px) { raw_text(x, y, s, c, scale); return; }
+	colours_follow();
+	c = lcd_canvas_colour(c);
 	SDL_Texture *whole = line_tex(s, scale);
 	if (whole) {
 		SDL_SetTextureColorMod(whole, c.r, c.g, c.b);
@@ -824,6 +848,7 @@ void text_drawf(int x, int y, SDL_Color c, int align, const char *fmt, ...) {
 
 void fill_rect(int x, int y, int w, int h, SDL_Color c) {
 	if (raw.px) { raw_fill(x, y, w, h, c); return; }
+	c = lcd_canvas_colour(c);
 	SDL_SetRenderDrawBlendMode(P.renderer, c.a < 255 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	SDL_SetRenderDrawColor(P.renderer, c.r, c.g, c.b, c.a);
 	SDL_Rect r = { x, y, w, h };
@@ -836,6 +861,7 @@ void fill_rects(const SDL_Rect *r, int n, SDL_Color c) {
 		for (int i = 0; i < n; ++i) raw_fill(r[i].x, r[i].y, r[i].w, r[i].h, c);
 		return;
 	}
+	c = lcd_canvas_colour(c);
 	SDL_SetRenderDrawBlendMode(P.renderer, c.a < 255 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	SDL_SetRenderDrawColor(P.renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderFillRects(P.renderer, r, n);
@@ -845,4 +871,40 @@ bool gfx_init(void) {
 	/* (once: the launcher reads it as BN6 goes in, the game's start again) */
 	if (!font_tex) build_font();
 	return true;
+}
+
+/* ------------------------------------------------------------------ */
+
+/* a sprite's frames made as textures let go (those kept as pixels, for
+ * memory, stay: lcd_canvas.h leaves them as they are) */
+static void frames_forget(Sprite *s) {
+	if (!s) return;
+	for (CachedFrame **c = &s->cache; *c;) {
+		CachedFrame *f = *c;
+		if (f->part == RAW_PART) { c = &f->next; continue; }
+		*c = f->next;
+		if (f->tex) SDL_DestroyTexture(f->tex);
+		free(f);
+	}
+}
+
+static void colours_follow(void) {
+	static unsigned made;
+	unsigned now = lcd_canvas_gen();
+	if (now == made) return;
+	made = now;
+	for (int c = 0; c < 10; ++c)
+		for (int i = 0; i < 256; ++i) frames_forget(sprite_table[c][i]);
+	for (int i = 0; i < KEPT; ++i) frames_forget(kept[i].s);
+	for (int i = 0; i < 4096; ++i)
+		if (tile_cache[i].used && tile_cache[i].tex) SDL_DestroyTexture(tile_cache[i].tex);
+	memset(tile_cache, 0, sizeof tile_cache);
+	for (int i = 0; i < TEXT_LINES; ++i)
+		if (lines[i].tex) SDL_DestroyTexture(lines[i].tex);
+	memset(lines, 0, sizeof lines);
+	memset(seen_lines, 0, sizeof seen_lines);
+	if (font_tex) {
+		SDL_DestroyTexture(font_tex);
+		font_texture();
+	}
 }

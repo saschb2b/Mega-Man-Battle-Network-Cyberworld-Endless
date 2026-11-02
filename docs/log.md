@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-02
+* **Update**: engine/lcd.md, The engine's colours, on the same screen: Colour correction on what the engine draws over the picture too (`lcd_canvas.c`), what it covers, what it keeps out and why the title is in; its description and its line in engine/index.md. GUIDE.md, Screen: what Colour correction changes. code/gfx-and-audio.md, `lcd_canvas.c`.
 * **Creation**: engine/lcd.md, the GBA's screen (issue #265): mGBA's libretro core's Color Correction and Interframe Blending on BN6's picture step for step (`lcd_frame.c`, checked bit for bit against mGBA's own code), RetroArch's lcd3x over the screen (`lcd_grid.c`), Options' Display lines and `settings.ini`'s; its line in engine/index.md. GUIDE.md, Screen: the three lines; code/gfx-and-audio.md, code/emu.md (`emu_picture.c`) and code/core.md, their lines; devtools/headless-shot.md, the flags.
 
 ## 2026-10-31
