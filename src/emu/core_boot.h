@@ -22,6 +22,7 @@ typedef struct {
 	struct mCore *core;
 	HookCore *hooks;
 	unsigned step, in_step;
+	unsigned ran;   /* frames run */
 	struct { bool queued, called; uint32_t lr, kept[8]; } call;
 } CoreBoot;
 

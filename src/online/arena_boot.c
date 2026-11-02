@@ -167,9 +167,10 @@ void arena_boot_free(ArenaBoot *b) {
 
 /* a frame of the boot core: false once it is done */
 static bool boot_frame(ArenaBoot *b) {
+	unsigned ran = b->boot.ran;
 	int more = core_boot_frame(&b->boot);
 	if (more < 0) { fail(b, "the game's warp did not run"); return false; }
-	++b->done;
+	b->done += b->boot.ran - ran;
 	return more > 0;
 }
 

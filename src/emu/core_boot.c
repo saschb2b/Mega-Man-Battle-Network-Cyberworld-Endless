@@ -91,6 +91,7 @@ int core_boot_frame(CoreBoot *b) {
 		b->core->setKeys(b->core, s->keys);
 		b->core->runFrame(b->core);
 		emu_audio_drop_from(b->core);   /* (the boot is not heard) */
+		++b->ran;
 	}
 	bool over = ++b->in_step >= s->frames || (s->act == ACT_WARP && b->call.called);
 	if (over && s->act == ACT_WARP && !b->call.called) return -1;
