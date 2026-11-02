@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T02:04:44Z }
 ---
 
 # The player's guide
@@ -1297,9 +1297,11 @@ shaders do it:
   blue with a dark line through each row, the picture a little darker
   (`lcd3x = on`; not on the 3DS). It looks best at a scale of 3 or more.
 
-The first two change the game's own picture; what Cyberworld draws over
-it (the map, its own PET screens) keeps its colours. How each matches
-mGBA's is in [The GBA's screen](engine/lcd.md). The battle beside
+Colour correction changes everything on the game's screen, the map and
+Cyberworld's own PET screens with the game's picture, so Options shows
+it as you choose it; Frame blending changes the game's picture alone.
+Neither touches the ROMs screen, SAVES or the touch controls. How each
+matches mGBA's is in [The GBA's screen](engine/lcd.md). The battle beside
 Display's lines shows each as you turn it, Frame blending on a MegaMan
 flickering from a hit, as a still picture never could.
 

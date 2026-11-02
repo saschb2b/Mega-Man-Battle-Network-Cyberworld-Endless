@@ -510,6 +510,7 @@ static void render(void) {
 			px[y * 240 + x] = s >= 0 && s < 7 ? lighten(logo_col[v]) : logo_col[v];
 		}
 	}
+	lcd_canvas_pixels(px, 240 * 160);
 	if (!S.tex) {
 		S.tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 240, 160);
 		SDL_SetTextureScaleMode(S.tex, SDL_ScaleModeNearest);

@@ -90,16 +90,25 @@ static int options_word(uint32_t argb[WORD_H][WORD_W]) {
 	return x;
 }
 
-/* OPTIONS' row: the word as a texture, made once; the game's battle
+/* OPTIONS' row: the word as a texture, made once (again where the
+ * colours' correction came on or off, lcd_canvas.h); the game's battle
  * font where the letters are not found */
 static void options_row(int x, int y) {
 	static SDL_Texture *tex;
 	static int w;
 	static bool tried;
+	static unsigned made_gen;
+	if (tried && made_gen != lcd_canvas_gen()) {
+		if (tex) SDL_DestroyTexture(tex);
+		tex = NULL;
+		tried = false;
+	}
 	if (!tried) {
 		tried = true;
+		made_gen = lcd_canvas_gen();
 		static uint32_t argb[WORD_H][WORD_W];
 		w = options_word(argb);
+		lcd_canvas_pixels(&argb[0][0], WORD_H * WORD_W);
 		if (w) tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, WORD_H);
 		if (tex) {
 			SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);

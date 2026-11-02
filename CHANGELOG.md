@@ -27,6 +27,9 @@
   (VisualBoyAdvance's GBA colours, darker still), **DS** (the first DS's
   screen, dimmer and softer) and **PSP** (a PSP 1000's or 2000's, bright
   and warmer), each matched to its shader's math for every colour.
+  Whichever you pick covers Cyberworld's own screens and the map too, so
+  the whole screen reads as one and Options shows the change as you make
+  it.
 
 ## 0.18.1 (2026-10-31)
 

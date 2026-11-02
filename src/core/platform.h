@@ -140,6 +140,8 @@ void platform_set_dpi(float dpi);
  * as a menu's: the largest whole scale that leaves it 240 x 160 or more, or
  * 160 x 240 on a screen held upright. */
 void platform_own_taps(bool on);
+/* ... whether one is up */
+bool platform_own_screen(void);
 /* ... its canvas 240 x 160 or more on a screen held upright too (the Net
  * Square's fields, src/online/online_field.c, 240 across): set before
  * platform_own_taps(true), put back after platform_own_taps(false). */

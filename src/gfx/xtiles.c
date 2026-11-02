@@ -17,6 +17,7 @@ static struct {
 	SDL_Texture *tex;
 } cache[BLOCKS];
 static uint32_t draws;
+static unsigned made_gen;   /* (lcd_canvas_gen the blocks were made at) */
 
 static uint32_t key_of(const uint8_t *tiles, const uint8_t *pal, int n) {
 	uint32_t h = 2166136261u;
@@ -25,8 +26,19 @@ static uint32_t key_of(const uint8_t *tiles, const uint8_t *pal, int n) {
 	return h;
 }
 
+/* the blocks let go where the colours' correction came on or off since
+ * they were made */
+static void colours_follow(void) {
+	if (made_gen == lcd_canvas_gen()) return;
+	made_gen = lcd_canvas_gen();
+	for (int i = 0; i < BLOCKS; ++i)
+		if (cache[i].tex) SDL_DestroyTexture(cache[i].tex);
+	memset(cache, 0, sizeof cache);
+}
+
 static SDL_Texture *block(const uint8_t *tiles, const uint8_t *pal, int w, int h, int flip) {
 	if (!tiles || !pal || w <= 0 || h <= 0 || w * h > BLOCK_TILES) return NULL;
+	colours_follow();
 	uint32_t key = key_of(tiles, pal, w * h);
 	int slot = 0;
 	++draws;
@@ -53,6 +65,7 @@ static SDL_Texture *block(const uint8_t *tiles, const uint8_t *pal, int w, int h
 				if (flip & 2) Y = H - 1 - Y;
 				px[Y * W + X] = bgr555((uint16_t)(pal[ci * 2] | pal[ci * 2 + 1] << 8));
 			}
+	lcd_canvas_pixels(px, W * H);
 	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, W, H, 32, W * 4, SDL_PIXELFORMAT_ARGB8888);
 	SDL_Texture *tex = s ? SDL_CreateTextureFromSurface(P.renderer, s) : NULL;
 	if (tex) SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
