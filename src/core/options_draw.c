@@ -1,11 +1,13 @@
-/* Options' picture (options_state.h), in BN6's PET screens' look as its
- * KeyItem screen (pet_look.h): the band with the section's name (Options,
- * or Display and Audio as the folder editor takes over CHIP FOLDER's),
- * its lines with their values in a window, the note on the line under the
- * cursor in the information box; where a tap lands on them. Drawing
- * changes nothing. */
+/* Options' picture (options_state.h), in BN6's PET screens' look
+ * (pet_look.h): the band named Options, START's hint at its end where the
+ * page has lines to put back (E-Mail's START:SORT); the page's lines in a
+ * window whose band names the page between the Library's green arrows,
+ * three rows at a time; under them the note on the line under the cursor
+ * in KeyItem's information box and, on the Display page, the scene
+ * (options_scene.h) beside it, Valhalla's list, description and picture
+ * (docs/engine/settings-screens.md); START's question in the box with
+ * BN6's Yes and No. Where a tap lands on them. Drawing changes nothing. */
 #include "options.h"
-
 
 #include "analytics.h"
 #include "analytics_ask.h"
@@ -15,34 +17,76 @@
 #include "fast_forward.h"
 #include "feel_out.h"
 #include "gfx.h"
+#include "options_scene.h"
 #include "options_state.h"
 #include "options_text.h"
 #include "pet_panel.h"
 #include "platform.h"
 #include "sound_heard.h"
 
-/* where it draws, from the picture's corner: the lines in a window, the
- * note in the information box under it, to the screen's foot */
-#define WIN_Y 18
-#define WIN_H 84
-#define ROW_Y 25
-#define ROW_H 18   /* (14 for five lines, 12 for six) */
-#define LABEL_X 24
-#define VALUE_R (CORE_W - 30)   /* a value's right edge, the chevron after it */
-#define NOTE_Y 104
-#define NOTE_H 50
+/* where it draws, from the picture's corner: the list's window, its band
+ * (the page's name) and rows; under it the note and the scene */
+#define TABS_Y    19
+#define WIN_X     7
+#define WIN_Y     (TABS_Y + LOOK_PILL_H + 3)
+#define WIN_W     (CORE_W - 14)
+#define ROW_H     13
+#define ROW_Y     (WIN_Y + LOOK_FRAME + 2)
+#define WIN_H     (OPTIONS_ROWS * ROW_H + 12)
+#define LABEL_X   22
+#define VALUE_R   (CORE_W - 32)   /* a value's right edge, the chevron after it */
+#define BOX_Y     (WIN_Y + WIN_H + 3)
+#define BOX_H     (CORE_H - 6 - BOX_Y)
+#define SCENE_W   106             /* the scene's slot, where KeyItem's box holds its tag */
+#define TEXT_IN   8               /* the note's letters in from the page's left, as KeyItem's */
+#define TABS_L    (WIN_X + 18)    /* the tabs' row, between the arrows */
+#define TABS_R    (WIN_X + WIN_W - 18)
+#define TAB_GAP   3
 
-static int row_h(int n) { return n > 5 ? 12 : n > 4 ? 14 : ROW_H; }
-
-int options_tap_line(int x, int y) {
-	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
-	if (y < ROW_Y - 2 || y >= ROW_Y - 2 + n * h || x < 6 || x >= CORE_W - 6) return -1;
-	return (y - ROW_Y + 2) / h;
+/* the hint's words and where it lies (look_band_hint's) */
+static SDL_Rect hint_rect(int x0, int y0) {
+	int ww = look_hint_width("START", options_word(OW_DEFAULT)), hx = x0 + CORE_W - 10 - ww;
+	return (SDL_Rect){ hx - 2, y0 + 9, ww + 4, 11 };
 }
 
-/* the band's name: the section open, Options over them */
-static const char *title_word(void) {
-	return options_word(O.section == SECTION_HUB ? OW_TITLE : O.section == SECTION_DISPLAY ? OW_DISPLAY : OW_AUDIO);
+/* KeyItem's information box across the foot */
+static SDL_Rect box_rect(int x0, int y0) { return (SDL_Rect){ x0 + WIN_X, y0 + BOX_Y, WIN_W, BOX_H }; }
+
+/* ... its white page under the label, to the right of the scene on the
+ * Display page (where KeyItem's tag stands), the box's width elsewhere */
+static SDL_Rect page_rect(int x0, int y0) {
+	SDL_Rect b = box_rect(x0, y0);
+	int px = b.x + 2 + (O.page == PAGE_DISPLAY ? SCENE_W + 3 : 0);
+	return (SDL_Rect){ px, b.y + 2 + LOOK_CAPS_H + 2, b.x + b.w - 2 - px, b.h - LOOK_CAPS_H - 7 };
+}
+
+/* Yes and No on the question's last line in the box's page `r` */
+static SDL_Rect answer_rect(SDL_Rect r, bool yes) {
+	int y = r.y + r.h - LOOK_LINE - 1, x = r.x + TEXT_IN + LOOK_CHOICE_W + 2;
+	if (!yes) x += look_text_width(analytics_word(AW_YES)) + LOOK_CHOICE_W + 12;
+	return (SDL_Rect){ x - LOOK_CHOICE_W - 3, y - 1, (yes ? look_text_width(analytics_word(AW_YES)) : look_text_width(analytics_word(AW_NO))) +
+		LOOK_CHOICE_W + 6, LOOK_LINE + 2 };
+}
+
+static bool inside(SDL_Rect r, int x, int y) { return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h; }
+
+int options_tap(int x, int y) {
+	if (O.asking) {
+		SDL_Rect page = page_rect(0, 0);
+		return inside(answer_rect(page, true), x, y) ? TAP_YES : inside(answer_rect(page, false), x, y) ? TAP_NO : TAP_NONE;
+	}
+	if (options_page_resets() && inside(hint_rect(0, 0), x, y)) return TAP_DEFAULT;
+	/* (the tabs' row: an arrow's end turns a page, a tab shows its own) */
+	if (y >= TABS_Y - 2 && y < TABS_Y + LOOK_PILL_H + 2 && x >= WIN_X && x < WIN_X + WIN_W)
+		return x < TABS_L ? TAP_PREV : x >= TABS_R ? TAP_NEXT : TAP_PAGE - (x - TABS_L) * PAGE_COUNT / (TABS_R - TABS_L);
+	int kinds[LINES_MAX], n = options_lines(kinds), row = (y - ROW_Y + 2) / ROW_H;
+	if (y < ROW_Y - 2 || row >= OPTIONS_ROWS || O.top + row >= n || x < WIN_X || x >= WIN_X + WIN_W) return TAP_NONE;
+	return O.top + row;
+}
+
+static const char *page_word(int page) {
+	static const OptionsWord names[PAGE_COUNT] = { OW_DISPLAY, OW_AUDIO, OW_GAME };
+	return options_word(names[page]);
 }
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
@@ -71,19 +115,16 @@ static const char *value_word(int kind) {
 	}
 }
 
-/* a line: its name, its value at the right with a section's chevron, or
- * a value between its arrows */
+/* a line: its name, its value at the right between the PET's arrows, or
+ * a screen's chevron (Controls, Statistics) */
 static void line_draw(int x0, int y, int kind, bool on) {
-	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
-		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND,
-		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST, [LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS,
-		[LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X };
+	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
+		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
+		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-	if (on) look_cursor(x0 + 12, y + 2);
-	const char *value = kind == LINE_AUDIO ? sound_word()
-		: kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) : NULL;
+	if (on) look_cursor(x0 + 10, y + 2);
 	if (options_line_turns(kind)) {
 		const char *v = value_word(kind);
 		int r = x0 + VALUE_R, l = r - look_text_width(v);
@@ -92,11 +133,12 @@ static void line_draw(int x0, int y, int kind, bool on) {
 		look_pointer(r + 4, y, 4, false, PET_ORANGE);
 		return;
 	}
+	const char *value = kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) : NULL;
 	if (value) look_text(x0 + VALUE_R - look_text_width(value), y, value, LOOK_EDGE_HI, LOOK_SHADE, TEXT_LEFT);
 	look_pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
 }
 
-/* the Display section's lines' notes */
+/* the Display page's lines' notes */
 static const char *display_note(int kind) {
 	switch (kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_FULLSCREEN_ON_NOTE : OW_FULLSCREEN_OFF_NOTE);
@@ -112,8 +154,6 @@ static const char *display_note(int kind) {
 static const char *note_words(int kind) {
 	switch (kind) {
 	case LINE_CONTROLS: return options_word(OW_CONTROLS_NOTE);
-	case LINE_DISPLAY: return options_word(OW_DISPLAY_NOTE);
-	case LINE_AUDIO: return options_word(OW_AUDIO_NOTE);
 	case LINE_STATS: return analytics_word(AW_ROW_NOTE);
 	case LINE_SOUND: return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT_NOTE : OW_GBA_NOTE);
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_MUSIC_ON_NOTE : OW_MUSIC_OFF_NOTE);
@@ -125,20 +165,65 @@ static const char *note_words(int kind) {
 	}
 }
 
-/* the note in KeyItem's information box: its label, its white page, the chat font's ink */
-static void note_draw(int x0, int y, const char *s) {
-	SDL_Rect r = look_info(x0 + 7, y, CORE_W - 14, NOTE_H, options_word(OW_INFORMATION));
-	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 1, LOOK_PAGE);
-	look_wrapped(s, r.x + 6, r.y + 1, r.w - 12, 3, LOOK_INK, LOOK_INK_SHADE);
+/* the pages' tabs over the list, STATUS's pills, the page shown NaviCust's
+ * green RUN! (as the gate's buttons and SAVES' are, the one under the
+ * cursor lit), each named in a screen's heavy capitals; the Library's
+ * green arrows at the row's ends with L and R in a hint's small capitals
+ * (Valhalla's tab row and its Q and E: docs/engine/settings-screens.md) */
+static void tabs_draw(int x0, int y0) {
+	int y = y0 + TABS_Y, w = (TABS_R - TABS_L - (PAGE_COUNT - 1) * TAB_GAP) / PAGE_COUNT;
+	for (int p = 0; p < PAGE_COUNT; ++p) {
+		int x = x0 + TABS_L + p * (w + TAB_GAP);
+		if (p == O.page) look_button(x, y, w - 1, LOOK_PILL_H - 1);
+		else look_pill(x, y, w);
+		const char *name = page_word(p);
+		look_title(x + (w - look_title_width(name)) / 2, y + 4, name, p == O.page ? LOOK_PAGE : LOOK_TEXT);
+	}
+	look_caps(x0 + WIN_X + 1, y + 5, "L", LOOK_PAGE, LOOK_GREEN_LO);
+	look_arrow(x0 + WIN_X + 7, y + 4, false);
+	look_arrow(x0 + TABS_R + 3, y + 4, true);
+	look_caps(x0 + WIN_X + WIN_W - 6, y + 5, "R", LOOK_PAGE, LOOK_GREEN_LO);
+}
+
+/* the pages' tabs, then the page's lines in their window */
+static void list_draw(int x0, int y0) {
+	int kinds[LINES_MAX], n = options_lines(kinds), wy = y0 + WIN_Y;
+	tabs_draw(x0, y0);
+	look_window(x0 + WIN_X, wy, WIN_W, WIN_H, 0, true);
+	for (int i = 0; i < OPTIONS_ROWS && O.top + i < n; ++i) line_draw(x0, y0 + ROW_Y + i * ROW_H, kinds[O.top + i], O.top + i == O.at[O.page]);
+	look_scroll((SDL_Rect){ x0 + WIN_X, wy, WIN_W, WIN_H }, 0, O.top, OPTIONS_ROWS, n);
+}
+
+/* KeyItem's information box: the note on the cursor's line, or START's
+ * question with BN6's Yes and No, the green triangle before the one chosen */
+static void box_draw(int x0, int y0) {
+	static const OptionsWord asks[PAGE_COUNT] = { OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME };
+	SDL_Rect b = box_rect(x0, y0), r = page_rect(x0, y0);
+	look_info(b.x, b.y, b.w, b.h, NULL);
+	look_caps(r.x + 2, b.y + 2, options_word(OW_INFORMATION), LOOK_PAGE, (SDL_Color){ 0, 0, 0, 0 });
+	fill_rect(r.x, r.y, r.w, r.h, LOOK_PAGE);
+	/* (the scene in STATUS's slot, the box's height, beside the page) */
+	if (O.page == PAGE_DISPLAY) options_scene_draw(look_slot(b.x + 2, b.y + 2, SCENE_W, b.h - 5));
+	int most = (r.h - 2) / LOOK_LINE;
+	if (!O.asking) {
+		look_wrapped(note_words(options_line_kind()), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most, LOOK_INK, LOOK_INK_SHADE);
+		return;
+	}
+	look_wrapped(options_word(asks[O.page]), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most - 1, LOOK_INK, LOOK_INK_SHADE);
+	for (int k = 0; k < 2; ++k) {
+		SDL_Rect a = answer_rect(r, k == 0);
+		look_text(a.x + LOOK_CHOICE_W + 3, a.y + 1, analytics_word(k == 0 ? AW_YES : AW_NO), LOOK_INK, LOOK_INK_SHADE, TEXT_LEFT);
+		if ((k == 0) == O.yes) look_choice(a.x, a.y);
+	}
 }
 
 static void options_panel_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
-	pet_panel_draw(x0, y0, title_word());
-	look_window(x0 + 7, y0 + WIN_Y, CORE_W - 14, WIN_H, 0, false);
-	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
-	for (int i = 0; i < n; ++i) line_draw(x0, y0 + ROW_Y + i * h, kinds[i], i == O.at);
-	note_draw(x0, y0 + NOTE_Y, note_words(kinds[O.at < n ? O.at : n - 1]));
+	options_scene_grab();
+	pet_panel_draw(x0, y0, options_word(OW_TITLE));
+	if (options_page_resets()) look_band_hint(x0, y0, CORE_W, "START", options_word(OW_DEFAULT));
+	list_draw(x0, y0);
+	box_draw(x0, y0);
 	look_fade_in(x0, y0, CORE_W, CORE_H, O.t);
 }
 

@@ -1487,9 +1487,10 @@ SCREENSHOTS = [
     # PET's menu in Lan's room, Options in Comm's row)
     ('title-menu', ['--scene', 'title', '--input', '60:,4:START,50:'], [(110, 'title-menu')], {}),
     ('pet-options', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '6:START,60:'], [(590, 'pet-options')], {}),
-    # (SELECT on the title: Options, its Display section, back, then its Audio section)
-    ('options', ['--scene', 'title', '--input', '60:,4:SELECT,40:,4:DOWN,30:,4:A,40:,4:B,30:,4:DOWN,30:,4:A,60:'],
-     [(100, 'options'), (150, 'options-display'), (290, 'options-audio')], {}),
+    # (SELECT on the title: Options on its Display page, its scene being
+    # staged, then running; R to its Audio page, R to its Game page)
+    ('options', ['--scene', 'title', '--input', '60:,4:SELECT,150:,4:R,40:,4:R,40:'],
+     [(100, 'options'), (210, 'options-display'), (255, 'options-audio'), (300, 'options-game')], {}),
     # (SELECT on the title: Options, then its Controls, an Xbox pad attached)
     ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,30:,4:A,40:'], [(134, 'controls')], {}),
     # (a Recovery Mr. Prog on an act's middle layer, MegaMan held at 40 HP:
@@ -1609,8 +1610,8 @@ SCREENSHOTS = [
       (23600, 'liberation-deleted'), (23900, 'liberation-par'), (23972, 'liberation-chip')], {'CYBERWORLD_AUTOPILOT': '1'}),
     # 0.16.0's notes. (Options' Audio with a DualSense attached: the cursor
     # on Vibration, then on Trigger effects, each explained)
-    ('options-feel', ['--scene', 'title', '--pad', 'ps5', '--input', '60:,4:SELECT,6:,40:,4:DOWN,6:,30:,4:DOWN,6:,30:,4:A,6:,60:,'
-                      '4:DOWN,6:,20:,4:DOWN,6:,20:,4:DOWN,6:,30:,4:DOWN,6:,30:'], [(359, 'options-vibration'), (399, 'options-triggers')], {}),
+    ('options-feel', ['--scene', 'title', '--pad', 'ps5', '--input', '60:,4:SELECT,6:,40:,4:R,6:,60:,'
+                      '4:DOWN,6:,20:,4:DOWN,6:,20:,4:DOWN,6:,30:,4:DOWN,6:,30:'], [(279, 'options-vibration'), (319, 'options-triggers')], {}),
     # (the Virus Battler: MegaMan by him, the card; then a series)
     ('vb-card', VB_RUN + ['--input', VB_MET + '4:A,6:,110:,' * 4], [(398, 'vb-battler'), (860, 'vb-card')], {}),
     ('vb-series', VB_HELD + ['--input', VB_SERIES],

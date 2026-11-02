@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:16:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T02:04:44Z }
 ---
 
 # The player's guide
@@ -487,13 +487,29 @@ title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select
 there opens it too), and in a run the PET's menu (START on the map) has
 **Options** in the place BN6 gives Comm, which a run never used; the game
 waits under it, and B brings you back to the PET where you were. On a
-phone or tablet the touch controls' menu has **OPTIONS** as well. Its
-**Controls** opens the controls screen (not on the 3DS, whose
-buttons are its own), **Display** the picture ([Screen](#screen)),
-**Audio** the music, the sound effects and the sound ([Sound](#sound)),
-**Fast forward** its speed ([Fast forward](#fast-forward)), and
-**Statistics** your answer to the statistics' question, where the game can
-send them; B goes back (on a phone, the touch controls' B).
+phone or tablet the touch controls' menu has **OPTIONS** as well. It has
+three pages, tabs across the top of its list, the one shown lit green: **L** and **R** turn from one to the next as the Library turns its
+own, and a tap on a tab opens it: **Display**, the picture ([Screen](#screen)); **Audio**, the
+music, the sound effects and the sound ([Sound](#sound)); and **Game**,
+with **Controls** (the controls screen, not on the 3DS, whose buttons are
+its own), **Fast forward**'s speed ([Fast forward](#fast-forward)) and
+**Statistics**, your answer to the statistics' question, where the game
+can send them. Left and Right turn a line's value, kept at once; B
+leaves (on a phone, the touch controls' B), and Options opens again on
+the page and line you left. **START** (or a tap on START:DEFAULT) puts a
+page's lines back as they came, after a Yes: Fullscreen, Controls and
+Statistics stay as you set them.
+
+On the Display page, under the lines, a battle of BN6's own plays beside
+the note on the line under the cursor, through every Display setting as
+it stands: turn a line and the battle changes at once. It is a scene for
+that line: MegaMan, a Mettaur, a Piranha and a Puffy trading shots for
+the colours, LCD 3x and the scale; a Mettaur's wave hitting MegaMan, who
+flickers, for Frame blending; MegaMan stepping across his row under a
+moving sky for Smooth motion. It is BN6 itself, run on a second GBA of
+the game's own from your ROM, unheard, only while the page is shown (on
+the 3DS, whose memory holds one GBA, the paused game shows there
+instead).
 
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 Options' **Controls** opens it. It has a tab for
@@ -1285,7 +1301,9 @@ Colour correction changes everything on the game's screen, the map and
 Cyberworld's own PET screens with the game's picture, so Options shows
 it as you choose it; Frame blending changes the game's picture alone.
 Neither touches the ROMs screen, SAVES or the touch controls. How each
-matches mGBA's is in [The GBA's screen](engine/lcd.md).
+matches mGBA's is in [The GBA's screen](engine/lcd.md). The battle beside
+Display's lines shows each as you turn it, Frame blending on a MegaMan
+flickering from a hit, as a still picture never could.
 
 ## Sound
 

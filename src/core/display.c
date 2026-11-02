@@ -30,6 +30,14 @@ static const char *const colours[LCD_COLOUR_COUNT] = { "off", "gba", "vba", "nds
 
 DisplayScale display_scale(void) { return scale; }
 
+DisplayScale display_scale_default(void) {
+#ifdef __3DS__
+	return SCALE_FILL;
+#else
+	return SCALE_AUTO;
+#endif
+}
+
 DisplayScale display_scale_read(const char *word) {
 	for (int s = 0; s < SCALE_COUNT; ++s)
 		if (!strcmp(word, keys[s])) return (DisplayScale)s;

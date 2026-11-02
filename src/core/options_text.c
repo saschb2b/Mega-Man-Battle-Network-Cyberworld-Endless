@@ -1,5 +1,6 @@
 /* options_text.h. Menu words, short and plain: what each line opens or
- * sets, and the choices as docs/GUIDE.md's Screen and Sound say them. */
+ * sets, and the choices as docs/GUIDE.md's Screen and Sound say them; the
+ * Display page's notes short enough for the box beside its scene. */
 #include "options_text.h"
 
 
@@ -9,29 +10,28 @@ static const char *const words[] = {
 	"Controls",   /* OW_CONTROLS */
 	"Which buttons and keys are A, B, L, R, START and SELECT",   /* OW_CONTROLS_NOTE */
 	"Audio",   /* OW_AUDIO */
-	"Music and sounds, their mix, and the controller's rumble",   /* OW_AUDIO_NOTE */
 	"Sound",   /* OW_SOUND */
 	"GBA",   /* OW_GBA */
 	"As a GBA plays it: BN6's own mix, crisp and bright",   /* OW_GBA_NOTE */
 	"Soft",   /* OW_SOFT */
 	"The Legacy Collection's balance: softer highs, less deep bass",   /* OW_SOFT_NOTE */
 	"Display",   /* OW_DISPLAY */
-	"How the picture fills the screen, and a GBA screen's look",   /* OW_DISPLAY_NOTE */
+	"Game",   /* OW_GAME */
 	"Fullscreen",   /* OW_FULLSCREEN */
-	"Borderless, over the whole screen (Alt+Enter or F11)",   /* OW_FULLSCREEN_ON_NOTE */
-	"In a window you can size (Alt+Enter or F11)",   /* OW_FULLSCREEN_OFF_NOTE */
+	"Over the whole screen (F11)",   /* OW_FULLSCREEN_ON_NOTE */
+	"In a window you can size (F11)",   /* OW_FULLSCREEN_OFF_NOTE */
 	"Scale",   /* OW_SCALE */
 	"Auto",   /* OW_AUTO */
 	"Integer",   /* OW_WHOLE */
 	"Fill",   /* OW_FILL */
 	"Stretch",   /* OW_STRETCH */
-	"Whole pixels, but filling where they leave it much smaller",   /* OW_AUTO_NOTE */
-	"Whole-number scale: every pixel the same size",   /* OW_WHOLE_NOTE */
-	"As big as the screen holds, its shape kept",   /* OW_FILL_NOTE */
-	"The whole screen, no border: the picture out of shape",   /* OW_STRETCH_NOTE */
+	"Whole pixels, filling a small screen",   /* OW_AUTO_NOTE */
+	"Every pixel the same size",   /* OW_WHOLE_NOTE */
+	"As big as the screen holds",   /* OW_FILL_NOTE */
+	"The whole screen, stretched",   /* OW_STRETCH_NOTE */
 	"Smooth motion",   /* OW_SMOOTH */
-	"Frames mixed at each refresh: even on 90 or 144 Hz",   /* OW_SMOOTH_ON_NOTE */
-	"The game's own frames, sharp: best on 60 or 120 Hz",   /* OW_SMOOTH_OFF_NOTE */
+	"Mixed frames: smooth at 90 Hz and up",   /* OW_SMOOTH_ON_NOTE */
+	"Sharp frames: best at 60 or 120 Hz",   /* OW_SMOOTH_OFF_NOTE */
 	"On",   /* OW_ON */
 	"Off",   /* OW_OFF */
 	"INFORMATION",   /* OW_INFORMATION */
@@ -54,27 +54,31 @@ static const char *const words[] = {
 	"L's trigger clicks at a full Custom gauge, FAST's where it can run",   /* OW_TRIGGERS_ON_NOTE */
 	"Both triggers pull free, as on any controller",   /* OW_TRIGGERS_OFF_NOTE */
 	"Colour correction",   /* OW_COLOUR */
-	"mGBA's GBA colours: darker and softer, as a GBA's own screen shows them",   /* OW_COLOUR_GBA_NOTE */
-	"The colours as the game stores them, bright and full",   /* OW_COLOUR_OFF_NOTE */
+	"Darker and softer, as on a GBA",   /* OW_COLOUR_GBA_NOTE */
+	"The colours as the game stores them",   /* OW_COLOUR_OFF_NOTE */
 	"VBA",   /* OW_VBA */
 	"DS",   /* OW_NDS */
 	"PSP",   /* OW_PSP */
-	"VisualBoyAdvance's GBA colours: darker still, and softer",   /* OW_COLOUR_VBA_NOTE */
-	"The first DS's screen: dimmer whites, softer colours",   /* OW_COLOUR_NDS_NOTE */
-	"A PSP 1000's or 2000's screen: bright, its colours warmer",   /* OW_COLOUR_PSP_NOTE */
+	"As VBA showed it: darker still",   /* OW_COLOUR_VBA_NOTE */
+	"On the first DS: dimmer, softer",   /* OW_COLOUR_NDS_NOTE */
+	"On a PSP: bright and warmer",   /* OW_COLOUR_PSP_NOTE */
 	"Frame blending",   /* OW_BLEND */
 	"Simple",   /* OW_SIMPLE */
 	"Smart",   /* OW_SMART */
 	"LCD",   /* OW_LCD */
 	"LCD fast",   /* OW_LCD_FAST */
 	"Every frame on its own, sharp",   /* OW_BLEND_OFF_NOTE */
-	"mGBA's Simple: each frame mixed half and half with the last",   /* OW_SIMPLE_NOTE */
-	"mGBA's Smart: frames mixed only where a pixel flickers",   /* OW_SMART_NOTE */
-	"mGBA's LCD ghosting: each frame fades out over the next four, as on a GBA",   /* OW_LCD_NOTE */
-	"mGBA's fast LCD ghosting: a longer trail, lighter to run",   /* OW_LCD_FAST_NOTE */
+	"Each frame half the last",   /* OW_SIMPLE_NOTE */
+	"Mixed only where it flickers",   /* OW_SMART_NOTE */
+	"A GBA's fade over four frames",   /* OW_LCD_NOTE */
+	"A longer trail, less work",   /* OW_LCD_FAST_NOTE */
 	"LCD 3x",   /* OW_LCD3X */
-	"The lcd3x shader: each pixel striped red, green and blue, a dark line through each row",   /* OW_LCD3X_ON_NOTE */
+	"Each pixel striped red, green, blue",   /* OW_LCD3X_ON_NOTE */
 	"Plain pixels, no stripes or lines",   /* OW_LCD3X_OFF_NOTE */
+	"DEFAULT",   /* OW_DEFAULT */
+	"Display back as it came?",   /* OW_ASK_DISPLAY */
+	"Audio back as it came?",   /* OW_ASK_AUDIO */
+	"Fast forward back as it came?",   /* OW_ASK_GAME */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 

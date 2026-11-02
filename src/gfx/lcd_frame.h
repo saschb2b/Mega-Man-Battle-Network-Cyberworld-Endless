@@ -40,6 +40,13 @@ void lcd_set_blend(LcdBlend b);
  * made from the last again (the game paused under Options), as a frontend
  * shows its last while the core runs no frame. Nothing where both are off. */
 void lcd_frame(uint32_t *px, int n, bool fresh);
+/* ... through a history of its own, for a picture other than the game's
+ * (Options' scene, showcase.h): blended apart from it, by the same
+ * settings */
+typedef struct LcdHistory LcdHistory;
+LcdHistory *lcd_history_new(void);
+void lcd_history_free(LcdHistory *h);
+void lcd_frame_in(LcdHistory *h, uint32_t *px, int n, bool fresh);
 
 /* mGBA's correction of a 565 colour (ccLUT's entry, the tests) */
 uint16_t lcd_correct565(uint16_t c);
