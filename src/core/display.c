@@ -4,6 +4,7 @@
  * lcd_frame.c's and lcd_grid.c's. */
 #include "display.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef __EMSCRIPTEN__
@@ -24,6 +25,8 @@ static DisplayScale scale = SCALE_AUTO;
 static const char *const keys[SCALE_COUNT] = { "auto", "whole", "fill", "stretch" };
 /* (interframe_blending's words, LcdBlend's order; mGBA's mix and mix_smart read too) */
 static const char *const blends[LCD_BLEND_COUNT] = { "off", "simple", "smart", "lcd_ghosting", "lcd_ghosting_fast" };
+/* (colour_correction's, LcdColour's order: the shaders' names) */
+static const char *const colours[LCD_COLOUR_COUNT] = { "off", "gba", "vba", "nds", "psp" };
 
 DisplayScale display_scale(void) { return scale; }
 
@@ -50,6 +53,18 @@ static LcdBlend blend_read(const char *word) {
 	return !strcmp(word, "mix") ? LCD_BLEND_SIMPLE : !strcmp(word, "mix_smart") ? LCD_BLEND_SMART : LCD_BLEND_OFF;
 }
 
+/* (in either case, as mGBA spells GBA; ds for nds, and on for gba, the
+ * one there was first) */
+static LcdColour colour_read(const char *word) {
+	char low[8];
+	size_t n = strlen(word);
+	if (n >= sizeof low) return LCD_COLOUR_OFF;
+	for (size_t i = 0; i <= n; ++i) low[i] = (char)tolower((unsigned char)word[i]);
+	for (int c = 0; c < LCD_COLOUR_COUNT; ++c)
+		if (!strcmp(low, colours[c])) return (LcdColour)c;
+	return !strcmp(low, "ds") ? LCD_COLOUR_NDS : yes(low) ? LCD_COLOUR_GBA : LCD_COLOUR_OFF;
+}
+
 /* The GBA's screen's lines (the command line's, which settings.ini's leave
  * as they set them: `forced`, a bit each) */
 static const char *const lcd_keys[] = { "colour_correction", "interframe_blending", "lcd3x" };
@@ -62,7 +77,7 @@ static bool lcd_setting(const char *key, const char *val) {
 	if (!strcmp(key, "color_correction")) k = 0;
 	if (k == 3) return false;
 	if (forced & 1u << k) return true;
-	if (k == 0) lcd_set_colour(!strcmp(val, "gba") || !strcmp(val, "GBA") || yes(val) ? LCD_COLOUR_GBA : LCD_COLOUR_OFF);
+	if (k == 0) lcd_set_colour(colour_read(val));
 	else if (k == 1) lcd_set_blend(blend_read(val));
 	else lcd_set_grid(yes(val));
 	return true;
@@ -164,9 +179,11 @@ void display_smooth_keep(bool on, bool tell_page) {
 #endif
 }
 
+LcdColour display_colour_next(int dir) { return (LcdColour)((lcd_colour() + LCD_COLOUR_COUNT + (dir < 0 ? -1 : 1)) % LCD_COLOUR_COUNT); }
+
 void display_colour_keep(LcdColour c) {
 	lcd_set_colour(c);
-	keep("colour_correction", lcd_colour() == LCD_COLOUR_GBA ? "gba" : "off", options_colour_note());
+	keep("colour_correction", colours[lcd_colour()], options_colour_note());
 }
 
 LcdBlend display_blend_next(int dir) { return (LcdBlend)((lcd_blend() + LCD_BLEND_COUNT + (dir < 0 ? -1 : 1)) % LCD_BLEND_COUNT); }

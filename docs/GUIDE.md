@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-31T15:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
 ---
 
 # The player's guide
@@ -1265,7 +1265,12 @@ shaders do it:
 
 - **Colour correction**: **GBA** shows the colours as mGBA's Color
   Correction does, a GBA screen's darker, softer ones
-  (`colour_correction = gba`).
+  (`colour_correction = gba`). The next three are libretro's handheld
+  colour shaders as RetroArch runs them: **VBA**, the GBA's colours as
+  VisualBoyAdvance showed them, darker still in the middle tones (`vba`);
+  **DS**, the game on the first DS's screen, dimmer whites and softer
+  colours (`nds`); **PSP**, a PSP 1000's or 2000's screen, as bright as
+  the game's own, its reds and greens warmer (`psp`).
 - **Frame blending**: mGBA's Interframe Blending. **Simple** mixes each
   frame half and half with the last; **Smart** does that only where a
   pixel flickers; **LCD** is its LCD ghosting, each frame fading out over

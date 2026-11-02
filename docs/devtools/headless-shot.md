@@ -3,7 +3,7 @@ type: Tool
 title: "build.py shot: a headless capture's options"
 description: "`build.py shot`'s options for a headless capture in the build image: the scenes, run depth, area, guardian, seed, setup and marks, `--talk`, scripted `--input` and `--taps`, and the frames saved."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
 ---
 
 # build.py shot: a headless capture's options
@@ -19,7 +19,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--scene summary` the title's run summary (a win's with `--setup short` at
 `--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS]` the run's setup (CROSS the navi whose Cross it brings, 1-5),
 `--marks HEX` the title's marks, `--screen auto|whole|fill|stretch` the
-scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba`,
+scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba|vba|nds|psp`,
 `--interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast` and
 `--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
 shows only in a `--screen-shot`), `--touch` the touch controls from the

@@ -29,9 +29,9 @@ DisplayScale display_scale_read(const char *word);
 /* settings.ini's display lines as the start reads them (screen,
  * smooth_motion, the GBA's screen's): true where `key` was one */
 bool display_setting(const char *key, const char *val);
-/* A command line's --colour-correction off|gba, --interframe-blending
- * off|simple|smart|lcd_ghosting|lcd_ghosting_fast or --lcd3x on|off: set,
- * over settings.ini's line; true where `flag` was one */
+/* A command line's --colour-correction off|gba|vba|nds|psp,
+ * --interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast or
+ * --lcd3x on|off: set, over settings.ini's line; true where `flag` was one */
 bool display_arg(const char *flag, const char *val);
 
 /* What this system offers: the scale (all but the browser's page, which
@@ -53,8 +53,9 @@ void display_scale_keep(DisplayScale s);
 void display_fullscreen_keep(bool on);
 /* ... `tell_page`: the browser player's Smooth motion button follows */
 void display_smooth_keep(bool on, bool tell_page);
-/* The GBA's screen's, set and kept (docs/engine/lcd.md): the blending
- * `dir` from the one in use, in mGBA's order */
+/* The GBA's screen's, set and kept (docs/engine/lcd.md): the colour and
+ * the blending `dir` from the one in use, in LcdColour's and mGBA's order */
+LcdColour display_colour_next(int dir);
 void display_colour_keep(LcdColour c);
 LcdBlend display_blend_next(int dir);
 void display_blend_keep(LcdBlend b);

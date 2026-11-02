@@ -5074,7 +5074,11 @@ static uint32_t lcd_out(uint16_t c) {
 /* The GBA's screen (lcd_frame.c) against mGBA's libretro core's own
  * results: its Color Correction table (ccLUT) for a few colours, and its
  * four blendings of a pixel turning white from black and one flickering
- * blue and red from red (docs/engine/lcd.md, Checked against mGBA) */
+ * blue and red from red (docs/engine/lcd.md, Checked against mGBA); and
+ * the handheld shaders' colours as their math, run apart from the game,
+ * gives them (white, red and green; blue, whose red goes below 0; yellow
+ * at green's top, whose red passes 1: docs/engine/lcd.md, The handheld
+ * colour shaders) */
 static void test_lcd_frame(void) {
 	static const uint16_t cc[][2] = { { 0xFFDF, 0xF79E }, { 0x0000, 0x0000 }, { 0xF800, 0xE30E }, { 0x07C0, 0x8649 }, { 0x001F, 0x03DA },
 		{ 0x8410, 0x630C }, { 0x4208, 0x2104 }, { 0xFFC0, 0xFED1 }, { 0x0C2C, 0x3287 }, { 0x5B4F, 0x3A4A } };
@@ -5101,9 +5105,22 @@ static void test_lcd_frame(void) {
 		lcd_frame(px, 2, false);
 		CHECK(px[0] == lcd_out(want[m][5][0]) && px[1] == lcd_out(want[m][5][1]), "lcd: blending %d kept while no picture comes", m + 1);
 	}
-	lcd_set_colour(LCD_COLOUR_GBA);
+	static const struct { LcdColour c; uint16_t in; uint32_t out; } shaded[] = {
+		{ LCD_COLOUR_VBA, 0xFFDF, 0xFFFDF9FD }, { LCD_COLOUR_VBA, 0xF800, 0xFF2F2FCD }, { LCD_COLOUR_VBA, 0x07C0, 0xFF5CBC64 },
+		{ LCD_COLOUR_VBA, 0x8410, 0xFF3C3B3C }, { LCD_COLOUR_NDS, 0xF800, 0xFF4848DF }, { LCD_COLOUR_NDS, 0xFFE0, 0xFF79CEFF },
+		{ LCD_COLOUR_NDS, 0x001F, 0xFFCB7500 }, { LCD_COLOUR_PSP, 0xFFDF, 0xFFFFFCFE }, { LCD_COLOUR_PSP, 0x001F, 0xFFFD7000 },
+		{ LCD_COLOUR_PSP, 0xFFE0, 0xFF2BEBFF }, { LCD_COLOUR_PSP, 0x07C0, 0xFF1FE279 },
+	};
+	for (size_t i = 0; i < sizeof shaded / sizeof *shaded; ++i)
+		CHECK(lcd_shown565(shaded[i].c, shaded[i].in) == shaded[i].out, "lcd: %04X through shader %d as its math's %08X (got %08X)", shaded[i].in,
+			shaded[i].c, shaded[i].out, lcd_shown565(shaded[i].c, shaded[i].in));
 	lcd_set_blend(LCD_BLEND_OFF);
-	uint32_t px[1] = { lcd_in(0x5B4F) };
+	lcd_set_colour(LCD_COLOUR_PSP);
+	uint32_t px[1] = { lcd_in(0x07C0) };
+	lcd_frame(px, 1, true);
+	CHECK(lcd_colour() == LCD_COLOUR_PSP && px[0] == 0xFF1FE279, "lcd: the picture through psp-color's table (%08X)", px[0]);
+	lcd_set_colour(LCD_COLOUR_GBA);
+	px[0] = lcd_in(0x5B4F);
 	lcd_frame(px, 1, true);
 	CHECK(px[0] == lcd_out(0x3A4A), "lcd: the picture corrected alone (%08X)", px[0]);
 	lcd_set_colour(LCD_COLOUR_OFF);

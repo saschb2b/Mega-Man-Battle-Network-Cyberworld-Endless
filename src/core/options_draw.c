@@ -47,6 +47,11 @@ static const char *title_word(void) {
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
 
+/* the colour correction's words and notes, by LcdColour */
+static const OptionsWord colour_words[LCD_COLOUR_COUNT] = { OW_OFF, OW_GBA, OW_VBA, OW_NDS, OW_PSP };
+static const OptionsWord colour_notes[LCD_COLOUR_COUNT] = { OW_COLOUR_OFF_NOTE, OW_COLOUR_GBA_NOTE, OW_COLOUR_VBA_NOTE, OW_COLOUR_NDS_NOTE,
+	OW_COLOUR_PSP_NOTE };
+
 /* a turned line's value: the window's, the scale's, smooth motion's, the GBA's screen's, the music's, the effects',
  * fast forward's, the vibration's, the trigger effects', the sound's */
 static const char *value_word(int kind) {
@@ -54,7 +59,7 @@ static const char *value_word(int kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_ON : OW_OFF);
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_ON : OW_OFF);
-	case LINE_COLOUR: return options_word(lcd_colour() == LCD_COLOUR_GBA ? OW_GBA : OW_OFF);
+	case LINE_COLOUR: return options_word(colour_words[lcd_colour()]);
 	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_ON : OW_OFF);
@@ -97,7 +102,7 @@ static const char *display_note(int kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_FULLSCREEN_ON_NOTE : OW_FULLSCREEN_OFF_NOTE);
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO_NOTE + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_SMOOTH_ON_NOTE : OW_SMOOTH_OFF_NOTE);
-	case LINE_COLOUR: return options_word(lcd_colour() == LCD_COLOUR_GBA ? OW_COLOUR_GBA_NOTE : OW_COLOUR_OFF_NOTE);
+	case LINE_COLOUR: return options_word(colour_notes[lcd_colour()]);
 	case LINE_BLEND: return options_word((OptionsWord)(OW_BLEND_OFF_NOTE + lcd_blend()));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_LCD3X_ON_NOTE : OW_LCD3X_OFF_NOTE);
 	default: return "";
