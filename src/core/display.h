@@ -23,6 +23,8 @@
 typedef enum { SCALE_AUTO, SCALE_WHOLE, SCALE_FILL, SCALE_STRETCH, SCALE_COUNT } DisplayScale;
 
 DisplayScale display_scale(void);
+/* ... as it comes (Options' START puts it back: auto, the 3DS's fill) */
+DisplayScale display_scale_default(void);
 /* settings.ini's word read as a scale (integer for whole too; anything
  * else auto) */
 DisplayScale display_scale_read(const char *word);

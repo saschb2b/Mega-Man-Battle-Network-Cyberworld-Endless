@@ -7,8 +7,8 @@ Each route's input waits out the fades before its presses: a press during
 one is lost (docs/devtools/agents-tools.md).
 """
 
-# (Options from the title: SELECT; its hub's lines Controls, Display,
-# Audio, Fast forward, Statistics)
+# (Options from the title: SELECT; it opens on its Display page in a fresh
+# game, R turning to Audio, L to Game: Controls, Fast forward, Statistics)
 TITLE = ['--scene', 'title']
 OPTIONS = 'wait 60; press SELECT; wait 40'
 # (Lan's room at a new run: Dad's call paged, Lan free from about frame 530)
@@ -32,10 +32,11 @@ def pet_entry(row):
 ROUTES = {
     # name: (start, commands, the screen it arrives on)
     'title': (TITLE, 'wait 80', 'title'),
-    'options': (TITLE, OPTIONS, 'options'),
-    'controls': (TITLE, OPTIONS + '; press A; wait 40', 'controls'),
-    'options/display': (TITLE, OPTIONS + '; press DOWN; wait 20; press A; wait 40', 'options-display'),
-    'options/audio': (TITLE, OPTIONS + '; press DOWN; wait 20; press DOWN; wait 20; press A; wait 40', 'options-audio'),
+    'options': (TITLE, OPTIONS, 'options-display'),
+    'controls': (TITLE, OPTIONS + '; press L; wait 20; press A; wait 40', 'controls'),
+    'options/display': (TITLE, OPTIONS, 'options-display'),
+    'options/audio': (TITLE, OPTIONS + '; press R; wait 20', 'options-audio'),
+    'options/game': (TITLE, OPTIONS + '; press L; wait 20', 'options-game'),
     'setup': (['--scene', 'setup'], 'wait 60', 'title'),   # (the title's own: its scene's name)
     'saves': (['--scene', 'saves'], 'wait 60', 'saves'),
     'launcher': (['--scene', 'launcher'], 'wait 60', 'launcher'),

@@ -1,10 +1,7 @@
 /* The Arena's way in (arena_boot.h).
  *
- * The boot core has two hooks of its own: the game's own call (gamecall.c's:
- * at cbGameState a queued routine runs in the update's place, and returns
- * into the free space past the game, where the second hook goes back to
- * the main loop) takes MegaMan through the game's warp routine as
- * src/emu/boot.c does. The state it ends in holds RAM alone; the pair's
+ * The boot core goes from power-on to the net as core_boot.h takes a
+ * plain core there; the state it ends in holds RAM alone, and the pair's
  * cores load it over a ROM no hook of the boot's has touched (under full
  * rules BN5's installed bytes in both, the boot's ROM's too, and BN5's
  * hooks on the pair's alone: the boot meets none of them). */
@@ -22,23 +19,14 @@
 #include "arena_seats.h"
 #include "battle_rng.h"
 #include "bn6.h"
+#include "core_boot.h"
 #include "emu.h"
 #include "hook.h"
 #include "protocol.h"
 #include "xinstall_log.h"
 
-#define CALL_FRAMES 120   /* frames a game call may wait for the game's own mode (gamecall.c) */
-#define SEASIDE_1   0x91  /* the boot's warp: Seaside Area 1, as boot.c's */
-
-enum { ACT_RUN, ACT_WARP, ACT_END_INTRO };
+enum { ACT_RUN };
 typedef struct { uint16_t frames, keys; uint8_t act; } Step;
-
-/* src/emu/boot.c's sequence: the title, NEW GAME, the intro's first line,
- * the warp, the intro ended as its own end commands end it */
-static const Step boot_steps[] = {
-	{ 400, 0, ACT_RUN }, { 4, KEY_START, ACT_RUN }, { 100, 0, ACT_RUN }, { 4, KEY_A, ACT_RUN }, { 200, 0, ACT_RUN },
-	{ CALL_FRAMES, 0, ACT_WARP }, { 120, 0, ACT_RUN }, { 0, 0, ACT_END_INTRO }, { 30, 0, ACT_RUN },
-};
 
 /* Both GBAs' keys through BN6's menus, from the boot's overworld (the
  * research's, tools/online_link_script.c, docs/online/link.md): the PET,
@@ -78,7 +66,7 @@ struct ArenaBoot {
 	OnlineLoadout loadout[2];
 	bool carried[2];
 	struct mCore *core;     /* the boot core, until the pair is made */
-	HookCore *hooks;
+	CoreBoot boot;
 	uint32_t video[ARENA_W * ARENA_H];
 	ArenaPair *pair;
 	uint32_t seed;          /* the bout's (arena_boot_seed), 0 none */
@@ -87,67 +75,12 @@ struct ArenaBoot {
 	unsigned step, in_step, done;
 	double pair_ms, pair_worst;   /* the pair's frames through the menus, timed */
 	unsigned pair_frames;
-	struct { bool queued, called; uint32_t lr, kept[8]; } call;
 	char error[160];
 };
 
 static ArenaBootStage fail(ArenaBoot *b, const char *why) {
 	snprintf(b->error, sizeof b->error, "%s", why);
 	return b->stage = ARENA_BOOT_FAILED;
-}
-
-/* ---- the game's own call, on the boot core (gamecall.c's) ---- */
-
-static HookAct state_update(HookRegs *r, void *user) {
-	ArenaBoot *b = user;
-	if (!b->call.queued) return HOOK_CONTINUE;
-	b->call.queued = false;
-	b->call.lr = r->lr;
-	memcpy(b->call.kept, r->r + 4, sizeof b->call.kept);
-	r->r[0] = r->r[1] = r->r[2] = 0;
-	r->lr = FREE_CALL_RETURN | 1;
-	r->r[12] = BN6_ENTER_MAP_ON_WARP | 1;
-	return HOOK_JUMP;
-}
-
-static HookAct returned(HookRegs *r, void *user) {
-	ArenaBoot *b = user;
-	b->call.called = true;
-	memcpy(r->r + 4, b->call.kept, sizeof b->call.kept);
-	/* (the main loop's mov lr,pc; bx r0 left lr's Thumb bit clear) */
-	r->r[12] = b->call.lr | 1;
-	return HOOK_JUMP;
-}
-
-static void write_bytes(struct mCore *c, uint32_t at, const uint8_t *data, size_t n) {
-	for (size_t i = 0; i < n; ++i) c->rawWrite8(c, at + (uint32_t)i, -1, data[i]);
-}
-
-static void put32(uint8_t *p, uint32_t v) {
-	for (unsigned i = 0; i < 4; ++i) p[i] = (uint8_t)(v >> (8 * i));
-}
-
-/* emu_warp's: the destination as warp index 1 of a one-entry list, the
- * map's song started again, the game's warp routine queued */
-static void warp(ArenaBoot *b) {
-	struct mCore *c = b->core;
-	if (c->rawRead32(c, BN6_MUSIC_STATUS, -1) & BN6_MUSIC_STOPPED) c->rawWrite8(c, BN6_SONG_PLAYING, -1, 0xFF);
-	uint8_t data[32] = { SEASIDE_1, 0, 0, 5 };
-	data[17] = 1;
-	put32(data + 20, FREE_WARP);
-	write_bytes(c, FREE_WARP, data, sizeof data);
-	write_bytes(c, BN6_WARP, data, sizeof data);
-	b->call.queued = true;
-	b->call.called = false;
-}
-
-/* boot.c's end of the intro: no cutscene script, the chat box closed */
-static void end_intro(struct mCore *c) {
-	c->rawWrite32(c, BN6_CUTSCENE_POS, -1, 0);
-	c->rawWrite32(c, BN6_CUTSCENE_POS0, -1, 0);
-	c->rawWrite32(c, BN6_CHATBOX_FLAGS, -1, c->rawRead32(c, BN6_CHATBOX_FLAGS, -1) & ~0xC8u);
-	c->rawWrite8(c, BN6_CHATBOX, -1, 0);
-	c->rawWrite8(c, BN6_CHATBOX_STATE, -1, 0);
 }
 
 /* ---- a carried MegaMan into a copy of the boot ---- */
@@ -165,8 +98,7 @@ static void core_write8(void *context, uint32_t address, uint8_t value) {
 /* the boot's state, a copy for each side with its MegaMan written in, and
  * the pair made of them */
 static ArenaBootStage make_pair(ArenaBoot *b) {
-	hook_detach(b->core);
-	b->hooks = NULL;
+	core_boot_end(&b->boot);
 	size_t base_size;
 	uint8_t *base = arena_core_save(b->core, &base_size);
 	uint8_t *state[2] = { NULL, NULL };
@@ -218,16 +150,14 @@ ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *
 		(unsigned long long)xlog_hash());
 	b->core = arena_core_new(rom, size, b->video, true);
 	if (!b->core) { fail(b, "the boot core could not be made (too little memory?)"); return b; }
-	b->hooks = hook_core(b->core);
-	if (!b->hooks || !hook_on(b->hooks, BN6_OW_HOOK, state_update, b) || !hook_on(b->hooks, FREE_CALL_RETURN, returned, b))
-		fail(b, "the boot core's hooks could not be set");
+	if (!core_boot_begin(&b->boot, b->core)) fail(b, "the boot core's hooks could not be set");
 	return b;
 }
 
 void arena_boot_free(ArenaBoot *b) {
 	if (!b) return;
 	if (b->core) {
-		if (b->hooks) hook_detach(b->core);
+		core_boot_end(&b->boot);
 		arena_core_free(b->core);
 	}
 	arena_pair_close(b->pair);
@@ -235,21 +165,12 @@ void arena_boot_free(ArenaBoot *b) {
 	free(b);
 }
 
-/* a frame of the boot core's steps: false once they are done */
+/* a frame of the boot core: false once it is done */
 static bool boot_frame(ArenaBoot *b) {
-	const Step *s = &boot_steps[b->step];
-	if (s->act == ACT_END_INTRO) end_intro(b->core);
-	else {
-		if (s->act == ACT_WARP && b->in_step == 0) warp(b);
-		b->core->setKeys(b->core, s->keys);
-		b->core->runFrame(b->core);
-		emu_audio_drop_from(b->core);   /* (the way in is not heard) */
-		++b->done;
-	}
-	bool over = ++b->in_step >= s->frames || (s->act == ACT_WARP && b->call.called);
-	if (over && s->act == ACT_WARP && !b->call.called) { fail(b, "the game's warp did not run"); return false; }
-	if (over) { b->in_step = 0; ++b->step; }
-	return b->step < NSTEPS(boot_steps);
+	int more = core_boot_frame(&b->boot);
+	if (more < 0) { fail(b, "the game's warp did not run"); return false; }
+	++b->done;
+	return more > 0;
 }
 
 /* BN6's two random words written on both GBAs from the bout's seed, the
@@ -342,11 +263,11 @@ ArenaBootStage arena_boot_run(ArenaBoot *b, unsigned frames) {
 
 static unsigned steps_frames(const Step *s, size_t n) {
 	unsigned total = 0;
-	for (size_t i = 0; i < n; ++i) total += s[i].act == ACT_WARP ? 1 : s[i].frames;
+	for (size_t i = 0; i < n; ++i) total += s[i].frames;
 	return total;
 }
 
-unsigned arena_boot_total(void) { return steps_frames(boot_steps, NSTEPS(boot_steps)) + steps_frames(entry_steps, NSTEPS(entry_steps)); }
+unsigned arena_boot_total(void) { return core_boot_total() + steps_frames(entry_steps, NSTEPS(entry_steps)); }
 
 void arena_boot_seed(ArenaBoot *b, uint32_t seed) { b->seed = seed; }
 void arena_boot_keep(ArenaBoot *b) { b->keep = true; }
@@ -368,7 +289,7 @@ ArenaBoot *arena_boot_again(const OnlineLoadout *loadout[2], ArenaPair *pair, Ar
 	b->keep = true;
 	b->stage = ARENA_BOOT_ENTRY;
 	b->step = BOUT_STEP;
-	b->done = steps_frames(boot_steps, NSTEPS(boot_steps)) + steps_frames(entry_steps, BOUT_STEP);
+	b->done = core_boot_total() + steps_frames(entry_steps, BOUT_STEP);
 	/* (the pair as the last bout began, before its seed: both cores, the cable, the scheduling and the frame clock) */
 	if (!arena_pair_load(pair, kept)) fail(b, "the two PETs kept could not be put back");
 	return b;
