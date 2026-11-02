@@ -1,8 +1,9 @@
 /* lcd_frame.h. Each step is mGBA's libretro core's (_initColorCorrection
  * and the videoPostProcess functions in libretro.c), its numbers and its
  * float arithmetic in the same order, on the same RGB565 frames (its
- * mColorFrom555: red at the top, green's sixth bit 0); tests/test_core.c
- * holds results of mGBA's own code. */
+ * mColorFrom555: red at the top, green's sixth bit 0); the handheld
+ * shaders' pass is theirs, in a GPU's float; tests/test_core.c holds
+ * results of mGBA's own code and of the shaders' math. */
 #include "lcd_frame.h"
 
 #include <math.h>
@@ -51,22 +52,97 @@ uint16_t lcd_correct565(uint16_t c) {
 	return (uint16_t)(ro << 11 | go << 6 | bo);
 }
 
-/* every colour corrected once (mGBA's ccLUT, by the five bits of each
- * channel it reads) */
-static uint16_t *table;
+/* ---- libretro's handheld colour shaders (glsl-shaders,
+ * handheld/shaders/color: Pokefan531's numbers in hunterk's Color Mangler,
+ * in the public domain), each with its #pragma parameter's default ---- */
 
-static bool table_made(void) {
-	if (table) return true;
-	if (!(table = malloc(32768 * sizeof *table))) return false;
-	for (unsigned i = 0; i < 32768; ++i) table[i] = lcd_correct565((uint16_t)((i >> 10) << 11 | (i >> 5 & 0x1F) << 6 | (i & 0x1F)));
+typedef struct {
+	float target_gamma;    /* (with its darken_screen: VBA's 1.0 times 1.7) */
+	float display_gamma, lum;
+	/* each channel's share of red, green and blue in the light out, the
+	 * shader's mat4 by its names (column-major: red r, gr, br) */
+	float r, g, b, rg, rb, gr, gb, br, bg;
+} Shader;
+
+static const Shader shaders[LCD_COLOUR_COUNT] = {
+	/* vba-color: target and display gamma 1.45, darken_screen 1.0 */
+	[LCD_COLOUR_VBA] = { 1.45f + (1.0f * 1.7f), 1.45f, 1.0f, 0.73f, 0.675f, 0.675f, 0.085f, 0.085f, 0.27f, 0.24f, 0.0f, 0.24f },
+	/* nds-color (the DS Phat's) */
+	[LCD_COLOUR_NDS] = { 1.91f, 1.91f, 0.89f, 0.87f, 0.645f, 0.73f, 0.10f, 0.10f, 0.255f, 0.17f, -0.125f, 0.255f },
+	/* psp-color (the PSP 1000's and 2000's) */
+	[LCD_COLOUR_PSP] = { 2.21f, 2.2f, 1.0f, 0.98f, 0.795f, 0.98f, 0.04f, 0.01f, 0.20f, 0.01f, -0.18f, 0.165f },
+};
+
+/* a channel's light out to its 8 bits, as a GPU writes its framebuffer:
+ * at the display's gamma, kept within 0 and 1, to the nearest (a negative
+ * one's pow is undefined in GLSL, a GPU's NaN written as 0: 0, as mGBA's) */
+static unsigned shader_out(float v, float gamma_inv) {
+	if (!(v > 0.0f)) return 0;
+	v = powf(v, gamma_inv);
+	return (unsigned)((v < 1.0f ? v : 1.0f) * 255.0f + 0.5f);
+}
+
+/* a channel of a 565 texel to light, read as a GPU reads one (a channel
+ * over 31, green over 63): at the shader's gamma, times lum, kept within 0
+ * and 1 (its contrast and saturation 1, its black levels 0, do nothing) */
+static float shader_in(const Shader *s, unsigned v, float max) {
+	float x = powf((float)v / max, s->target_gamma) * s->lum;
+	return x < 0.0f ? 0.0f : x > 1.0f ? 1.0f : x;
+}
+
+/* the light mixed by the matrix, and out at the display's gamma */
+static uint32_t shader_mix(const Shader *s, float r, float g, float b) {
+	const float gamma_inv = 1.0f / s->display_gamma;
+	unsigned ro = shader_out(s->r * r + s->gr * g + s->br * b, gamma_inv);
+	unsigned go = shader_out(s->rg * r + s->g * g + s->bg * b, gamma_inv);
+	unsigned bo = shader_out(s->rb * r + s->gb * g + s->b * b, gamma_inv);
+	return 0xFF000000u | bo << 16 | go << 8 | ro;
+}
+
+/* ---- every colour of the frame as the screen shows it ---- */
+
+/* a 565 colour shown as a GPU shows a 565 texture (a channel over 31,
+ * green over 63), R in the low byte */
+static uint32_t shown(uint16_t c) {
+	unsigned r = c >> 11, g = c >> 5 & 0x3F, b = c & 0x1F;
+	return 0xFF000000u | ((b * 510 + 31) / 62) << 16 | ((g * 510 + 63) / 126) << 8 | (r * 510 + 31) / 62;
+}
+
+uint32_t lcd_shown565(LcdColour c, uint16_t px) {
+	if (c == LCD_COLOUR_GBA) return shown(lcd_correct565(px));
+	if ((unsigned)c >= LCD_COLOUR_COUNT || c == LCD_COLOUR_OFF) return shown(px);
+	const Shader *s = &shaders[c];
+	return shader_mix(s, shader_in(s, px >> 11, 31.0f), shader_in(s, px >> 5 & 0x3F, 63.0f), shader_in(s, px & 0x1F, 31.0f));
+}
+
+/* the colour's table, by the frame's 565 colour (mGBA's ccLUT for GBA,
+ * which reads green's top five bits: an entry for each of the two), made
+ * once each time a colour is chosen */
+static uint32_t *table;
+
+static bool table_made(LcdColour c) {
+	if (!table && !(table = malloc(65536 * sizeof *table))) return false;
+	if (c == LCD_COLOUR_GBA) {
+		for (unsigned i = 0; i < 65536; ++i) table[i] = i & 0x20 ? table[i & ~0x20u] : shown(lcd_correct565((uint16_t)i));
+		return true;
+	}
+	/* (each channel's light once: a shader's pass, value for value) */
+	const Shader *s = &shaders[c];
+	float five_in[32], six_in[64];
+	for (unsigned v = 0; v < 64; ++v) {
+		if (v < 32) five_in[v] = shader_in(s, v, 31.0f);
+		six_in[v] = shader_in(s, v, 63.0f);
+	}
+	for (unsigned i = 0; i < 65536; ++i) table[i] = shader_mix(s, five_in[i >> 11], six_in[i >> 5 & 0x3F], five_in[i & 0x1F]);
 	return true;
 }
 
-static uint16_t corrected(uint16_t c) { return table[(unsigned)(c >> 11) << 10 | (unsigned)(c >> 6 & 0x1F) << 5 | (c & 0x1F)]; }
-
 LcdColour lcd_colour(void) { return colour; }
 
-void lcd_set_colour(LcdColour c) { colour = c == LCD_COLOUR_GBA && table_made() ? LCD_COLOUR_GBA : LCD_COLOUR_OFF; }
+void lcd_set_colour(LcdColour c) {
+	if (c == colour && table) return;
+	colour = (unsigned)c < LCD_COLOUR_COUNT && c != LCD_COLOUR_OFF && table_made(c) ? c : LCD_COLOUR_OFF;
+}
 
 /* ---- Interframe Blending ---- */
 
@@ -185,16 +261,8 @@ static void seed_from_now(void) {
 
 /* ---- the frame ---- */
 
-/* a 5- and a 6-bit channel's 8 bits, as a GPU reads a 565 texture (c / 31, c / 63) */
-static uint8_t five[32], six[64];
-
 void lcd_frame(uint32_t *px, int n, bool fresh) {
 	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !ready(n)) return;
-	if (!five[31])
-		for (int i = 0; i < 64; ++i) {
-			if (i < 32) five[i] = (uint8_t)((i * 510 + 31) / 62);
-			six[i] = (uint8_t)((i * 510 + 63) / 126);
-		}
 	if (fresh || seed || blend == LCD_BLEND_OFF) {
 		/* (the 8-bit picture back to mGBA's 565: its top five bits a channel) */
 		for (int i = 0; i < n; ++i) {
@@ -210,8 +278,8 @@ void lcd_frame(uint32_t *px, int n, bool fresh) {
 		default: memcpy(made, now, (size_t)n * sizeof *now); break;
 		}
 	}
-	for (int i = 0; i < n; ++i) {
-		uint16_t c = colour == LCD_COLOUR_GBA ? corrected(made[i]) : made[i];
-		px[i] = 0xFF000000u | (uint32_t)five[c & 0x1F] << 16 | (uint32_t)six[c >> 5 & 0x3F] << 8 | five[c >> 11];
-	}
+	if (colour == LCD_COLOUR_OFF)
+		for (int i = 0; i < n; ++i) px[i] = shown(made[i]);
+	else
+		for (int i = 0; i < n; ++i) px[i] = table[made[i]];
 }

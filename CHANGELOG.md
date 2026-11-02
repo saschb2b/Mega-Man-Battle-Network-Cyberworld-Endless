@@ -11,6 +11,11 @@
   first two are the mGBA core's Color Correction and Interframe Blending
   as RetroArch runs it, matched to its own code pixel for pixel; the third
   is RetroArch's lcd3x shader.
+- **More screens' colours.** Colour correction has three more beside
+  GBA, libretro's handheld colour shaders as RetroArch runs them: **VBA**
+  (VisualBoyAdvance's GBA colours, darker still), **DS** (the first DS's
+  screen, dimmer and softer) and **PSP** (a PSP 1000's or 2000's, bright
+  and warmer), each matched to its shader's math for every colour.
 
 ## 0.18.1 (2026-10-31)
 
