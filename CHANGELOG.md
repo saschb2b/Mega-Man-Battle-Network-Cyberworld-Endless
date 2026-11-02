@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.19.0 (2026-11-02)
 
 - **A GBA's screen, if you want it (issue #265).** Options' Display has
   three new lines, each off until turned on: **Colour correction** shows
