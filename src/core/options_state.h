@@ -47,8 +47,9 @@ int options_line_kind(void);
 /* Whether START puts the page's lines back (some line there has a default) */
 bool options_page_resets(void);
 /* Where a tap at canvas pixel (x, y) from the picture's corner lands: a
- * row's place in the list (0 up), or one of these */
-enum { TAP_NONE = -1, TAP_PREV = -2, TAP_NEXT = -3, TAP_DEFAULT = -4, TAP_YES = -5, TAP_NO = -6 };
+ * row's place in the list (0 up), or one of these (TAP_PAGE - p: page p's
+ * tab) */
+enum { TAP_NONE = -1, TAP_PREV = -2, TAP_NEXT = -3, TAP_DEFAULT = -4, TAP_YES = -5, TAP_NO = -6, TAP_PAGE = -7 };
 int options_tap(int x, int y);
 
 #endif

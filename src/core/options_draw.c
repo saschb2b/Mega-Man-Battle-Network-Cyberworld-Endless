@@ -26,19 +26,21 @@
 
 /* where it draws, from the picture's corner: the list's window, its band
  * (the page's name) and rows; under it the note and the scene */
+#define TABS_Y    19
 #define WIN_X     7
-#define WIN_Y     18
+#define WIN_Y     (TABS_Y + LOOK_PILL_H + 3)
 #define WIN_W     (CORE_W - 14)
-#define WIN_TOP   12
 #define ROW_H     13
-#define ROW_Y     (WIN_Y + WIN_TOP + LOOK_FRAME + 2)
-#define WIN_H     (WIN_TOP + OPTIONS_ROWS * ROW_H + 12)
+#define ROW_Y     (WIN_Y + LOOK_FRAME + 2)
+#define WIN_H     (OPTIONS_ROWS * ROW_H + 12)
 #define LABEL_X   22
 #define VALUE_R   (CORE_W - 32)   /* a value's right edge, the chevron after it */
 #define BOX_Y     (WIN_Y + WIN_H + 3)
 #define BOX_H     (CORE_H - 6 - BOX_Y)
 #define NOTE_W    110             /* the note's beside the scene; the whole width without it */
-#define ARROW_TAP 48              /* a page arrow's tap: this much of the band's end */
+#define TABS_L    (WIN_X + 18)    /* the tabs' row, between the arrows */
+#define TABS_R    (WIN_X + WIN_W - 18)
+#define TAB_GAP   3
 
 /* the hint's words and where it lies (look_band_hint's) */
 static SDL_Rect hint_rect(int x0, int y0) {
@@ -68,16 +70,17 @@ int options_tap(int x, int y) {
 		return inside(answer_rect(page, true), x, y) ? TAP_YES : inside(answer_rect(page, false), x, y) ? TAP_NO : TAP_NONE;
 	}
 	if (options_page_resets() && inside(hint_rect(0, 0), x, y)) return TAP_DEFAULT;
-	if (y >= WIN_Y && y < WIN_Y + WIN_TOP && x >= WIN_X && x < WIN_X + WIN_W)
-		return x < WIN_X + ARROW_TAP ? TAP_PREV : x >= WIN_X + WIN_W - ARROW_TAP ? TAP_NEXT : TAP_NONE;
+	/* (the tabs' row: an arrow's end turns a page, a tab shows its own) */
+	if (y >= TABS_Y - 2 && y < TABS_Y + LOOK_PILL_H + 2 && x >= WIN_X && x < WIN_X + WIN_W)
+		return x < TABS_L ? TAP_PREV : x >= TABS_R ? TAP_NEXT : TAP_PAGE - (x - TABS_L) * PAGE_COUNT / (TABS_R - TABS_L);
 	int kinds[LINES_MAX], n = options_lines(kinds), row = (y - ROW_Y + 2) / ROW_H;
 	if (y < ROW_Y - 2 || row >= OPTIONS_ROWS || O.top + row >= n || x < WIN_X || x >= WIN_X + WIN_W) return TAP_NONE;
 	return O.top + row;
 }
 
-static const char *page_word(void) {
+static const char *page_word(int page) {
 	static const OptionsWord names[PAGE_COUNT] = { OW_DISPLAY, OW_AUDIO, OW_GAME };
-	return options_word(names[O.page]);
+	return options_word(names[page]);
 }
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
@@ -156,15 +159,33 @@ static const char *note_words(int kind) {
 	}
 }
 
-/* the page's lines in their window, its name between the Library's arrows */
+/* the pages' tabs over the list, STATUS's pills, the page shown NaviCust's
+ * green RUN! (as the gate's buttons and SAVES' are, the one under the
+ * cursor lit), each named in a screen's heavy capitals; the Library's
+ * green arrows at the row's ends with L and R in a hint's small capitals
+ * (Valhalla's tab row and its Q and E: docs/engine/settings-screens.md) */
+static void tabs_draw(int x0, int y0) {
+	int y = y0 + TABS_Y, w = (TABS_R - TABS_L - (PAGE_COUNT - 1) * TAB_GAP) / PAGE_COUNT;
+	for (int p = 0; p < PAGE_COUNT; ++p) {
+		int x = x0 + TABS_L + p * (w + TAB_GAP);
+		if (p == O.page) look_button(x, y, w - 1, LOOK_PILL_H - 1);
+		else look_pill(x, y, w);
+		const char *name = page_word(p);
+		look_title(x + (w - look_title_width(name)) / 2, y + 4, name, p == O.page ? LOOK_PAGE : LOOK_TEXT);
+	}
+	look_caps(x0 + WIN_X + 1, y + 5, "L", LOOK_PAGE, LOOK_GREEN_LO);
+	look_arrow(x0 + WIN_X + 7, y + 4, false);
+	look_arrow(x0 + TABS_R + 3, y + 4, true);
+	look_caps(x0 + WIN_X + WIN_W - 6, y + 5, "R", LOOK_PAGE, LOOK_GREEN_LO);
+}
+
+/* the pages' tabs, then the page's lines in their window */
 static void list_draw(int x0, int y0) {
 	int kinds[LINES_MAX], n = options_lines(kinds), wy = y0 + WIN_Y;
-	look_window(x0 + WIN_X, wy, WIN_W, WIN_H, WIN_TOP, true);
-	look_text(x0 + CORE_W / 2, wy + 3, page_word(), LOOK_TEXT, LOOK_EDGE_LO, TEXT_CENTER);
-	look_arrow(x0 + WIN_X + 4, wy + 5, false);
-	look_arrow(x0 + WIN_X + WIN_W - 12, wy + 5, true);
+	tabs_draw(x0, y0);
+	look_window(x0 + WIN_X, wy, WIN_W, WIN_H, 0, true);
 	for (int i = 0; i < OPTIONS_ROWS && O.top + i < n; ++i) line_draw(x0, y0 + ROW_Y + i * ROW_H, kinds[O.top + i], O.top + i == O.at[O.page]);
-	look_scroll((SDL_Rect){ x0 + WIN_X, wy, WIN_W, WIN_H }, WIN_TOP, O.top, OPTIONS_ROWS, n);
+	look_scroll((SDL_Rect){ x0 + WIN_X, wy, WIN_W, WIN_H }, 0, O.top, OPTIONS_ROWS, n);
 }
 
 /* KeyItem's information box: the note on the cursor's line, or START's

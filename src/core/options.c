@@ -207,14 +207,17 @@ static void leave(void) {
 	O.open = false;
 }
 
-/* L or R: the next page (`dir`), its own cursor, fading in */
-static void turn_page(int dir) {
-	O.page = (O.page + PAGE_COUNT + dir) % PAGE_COUNT;
+/* page `p` shown (a tab tapped), its own cursor, fading in */
+static void show_page(int p) {
+	O.page = p;
 	O.top = 0;
 	scroll();
 	O.t = 0;
 	audio_sfx(SFX_CURSOR);
 }
+
+/* L or R: the next page (`dir`) */
+static void turn_page(int dir) { show_page((O.page + PAGE_COUNT + dir) % PAGE_COUNT); }
 
 static void choose(void) {
 	switch (options_line_kind()) {
@@ -295,6 +298,9 @@ static void tapped(int at) {
 		return;
 	}
 	if (at == TAP_PREV || at == TAP_NEXT) turn_page(at == TAP_PREV ? -1 : 1);
+	else if (at <= TAP_PAGE && at > TAP_PAGE - PAGE_COUNT) {
+		if (TAP_PAGE - at != O.page) show_page(TAP_PAGE - at);
+	}
 	else if (at == TAP_DEFAULT && options_page_resets()) ask();
 	else if (at >= 0) {
 		O.at[O.page] = at;

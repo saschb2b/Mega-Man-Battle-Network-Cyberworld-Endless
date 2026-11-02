@@ -488,8 +488,8 @@ there opens it too), and in a run the PET's menu (START on the map) has
 **Options** in the place BN6 gives Comm, which a run never used; the game
 waits under it, and B brings you back to the PET where you were. On a
 phone or tablet the touch controls' menu has **OPTIONS** as well. It has
-three pages, L and R turning from one to the next as the Library turns
-its own: **Display**, the picture ([Screen](#screen)); **Audio**, the
+three pages, tabs across the top of its list, the one shown lit green: **L** and **R** turn from one to the next as the Library turns its
+own, and a tap on a tab opens it: **Display**, the picture ([Screen](#screen)); **Audio**, the
 music, the sound effects and the sound ([Sound](#sound)); and **Game**,
 with **Controls** (the controls screen, not on the 3DS, whose buttons are
 its own), **Fast forward**'s speed ([Fast forward](#fast-forward)) and

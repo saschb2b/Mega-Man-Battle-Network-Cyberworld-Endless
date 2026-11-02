@@ -247,7 +247,11 @@ description, a mocked fight in a loop, a scene for each setting that
 shows its impact. Built so ([The PET's screens](ui.md), Ours):
 
 - Three pages turned by L and R (Display, Audio, Game), no hub above
-  them, Options opening again on the page and line it was left on.
+  them, Options opening again on the page and line it was left on. All
+  three are tabs over the list (STATUS's pills, the shown one lit as
+  RUN!), L and R in small capitals by the green arrows at the row's ends,
+  as Valhalla's tab row and its Q and E (the owner's call after trying
+  it: one page's name between the arrows hid the others and the keys).
 - On Display, the note and a scene share the foot: BN6's own battle on a
   second, plain core of the player's ROM (`src/emu/showcase.c`, booted as
   the Arena's cores are, `core_boot.c`), its battle forced from a record

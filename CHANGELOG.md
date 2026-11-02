@@ -18,7 +18,8 @@
   steady steps under a moving sky for Smooth motion. Turn a line and the
   battle changes at once (on the 3DS the paused game shows there).
 - **Options in pages.** Display, Audio and Game (Controls, Fast forward,
-  Statistics) are pages L and R turn, as the Library turns its own, and
+  Statistics) are tabs along the top, L and R turning from one to the
+  next as the Library turns its own (a tap opens one on a phone), and
   Options opens again where you left it. START puts a page's lines back
   as they came, after a Yes.
 - **More screens' colours.** Colour correction has three more beside

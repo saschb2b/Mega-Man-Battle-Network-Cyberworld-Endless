@@ -139,8 +139,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   Options' three pages (Display, Audio, Game: no hub above them, as
   Valhalla's tabs and Forza's LB and RB turn,
   [Settings screens elsewhere](settings-screens.md)), the emote strip's
-  two pages. The page's name stands on its window's band between the
-  arrows, as the Library's StdChip does.
+  two pages. Options' pages are tabs in a row over its list: STATUS's
+  cyan pills, the page shown lit as NaviCust's green RUN! (as the gate's
+  and SAVES' buttons light the one under the cursor), each named in a
+  screen's heavy capitals, the Library's green arrows at the row's ends
+  with L and R in a hint's small capitals as BN6 names START in
+  START:SORT, each tab a tap's place (the owner's call, 2 November 2026:
+  one name between the arrows did not say there were other pages, nor
+  which key turns them; Valhalla's tab row with its Q and E, Forza's LB
+  and RB).
 - A section takes the band: the JACK-IN SETUP's helpers (its Help row
   opens them, each On or Off as Options' lines).
 - The JACK-IN SETUP is Options' kin: its rows and their values in the
