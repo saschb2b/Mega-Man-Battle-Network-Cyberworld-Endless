@@ -46,15 +46,15 @@ static const Beat loop_colour[] = { { 10, 0 }, { 6, KEY_A }, { 50, 0 }, { 6, KEY
 	{ 30, 0 }, { 6, KEY_DOWN }, { 24, 0 }, { 6, KEY_B }, { 30, 0 }, { 6, KEY_DOWN }, { 24, 0 }, { 6, KEY_B }, { 30, 0 }, { 6, KEY_UP }, { 24, 0 }, { 0, 0 } };
 /* MegaMan stands in the Mettaur's row: its wave hits him, and he flickers */
 static const Beat loop_flicker[] = { { 300, 0 }, { 0, 0 } };
-/* MegaMan up and down the column at a steady beat, the buster at each stop */
+/* MegaMan across his row at a steady beat, the buster at each stop */
 #define HOP(k) { 6, k }, { 8, 0 }, { 4, KEY_B }, { 6, 0 }
-static const Beat loop_motion[] = { HOP(KEY_UP), HOP(KEY_DOWN), HOP(KEY_DOWN), HOP(KEY_UP), HOP(KEY_UP), HOP(KEY_DOWN), HOP(KEY_DOWN), HOP(KEY_UP), { 0, 0 } };
+static const Beat loop_motion[] = { HOP(KEY_RIGHT), HOP(KEY_LEFT), HOP(KEY_LEFT), HOP(KEY_RIGHT), HOP(KEY_RIGHT), HOP(KEY_LEFT), HOP(KEY_LEFT), HOP(KEY_RIGHT), { 0, 0 } };
 #undef HOP
 
 static const Scene scenes[SCENE_COUNT] = {
 	[SCENE_COLOUR] = { 0, 0x07, 0x23, { { 1, 0, 0x24 }, { 2, 0, 0x15 }, { 14, 0, 0x34 } }, open_custom, loop_colour, 120, 92 },
 	[SCENE_FLICKER] = { 0, 0x0B, 0x23, { { 1, 0, 0x25 }, { 0, 0, 0 }, { 0, 0, 0 } }, open_custom, loop_flicker, 110, 96 },
-	[SCENE_MOTION] = { 0, 0x04, 0x22, { { 1, 0, 0x35 }, { 2, 0, 0x16 }, { 0, 0, 0 } }, open_custom, loop_motion, 100, 92 },
+	[SCENE_MOTION] = { 0, 0x04, 0x22, { { 1, 0, 0x35 }, { 2, 0, 0x16 }, { 0, 0, 0 } }, open_custom, loop_motion, 66, 86 },
 };
 
 /* frames after BATTLE START!'s banner has gone where a scene's loop begins */

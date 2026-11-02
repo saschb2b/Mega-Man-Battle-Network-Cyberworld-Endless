@@ -260,11 +260,15 @@ shows its impact. Built so ([The PET's screens](ui.md), Ours):
   blending history of its own (`lcd_frame_in`). Colour correction, LCD 3x
   and the scale show on a busy battle (a Mettaur, a Piranha and a Puffy);
   Frame blending on MegaMan hit by a Mettaur's wave and flickering;
-  Smooth motion on MegaMan stepping at a steady beat under a moving sky.
+  Smooth motion on MegaMan stepping across his row at a steady beat under
+  a moving sky.
   On the 3DS, whose heap holds no second core, the paused game shows
   there.
 - START:DEFAULT on the band puts the page's lines back after BN6's Yes or
   No, Fullscreen, Controls and Statistics kept as set, as Lyra's reset
   leaves what it marks.
-- The notes on the Display page cut to four short lines beside the
-  scene.
+- The note and the scene in one information box, KeyItem's: the scene
+  where its tag stands, INFORMATION over the white page, the letters in
+  as KeyItem's, three lines at most (the owner's call: two frames side by
+  side read below the rest's finish), the Display page's notes cut to
+  fit.

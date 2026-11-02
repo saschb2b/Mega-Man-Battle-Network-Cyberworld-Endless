@@ -18,8 +18,8 @@ static const char *const words[] = {
 	"Display",   /* OW_DISPLAY */
 	"Game",   /* OW_GAME */
 	"Fullscreen",   /* OW_FULLSCREEN */
-	"Over the whole screen. F11 or Alt+Enter too",   /* OW_FULLSCREEN_ON_NOTE */
-	"In a window you can size. F11 or Alt+Enter too",   /* OW_FULLSCREEN_OFF_NOTE */
+	"Over the whole screen (F11)",   /* OW_FULLSCREEN_ON_NOTE */
+	"In a window you can size (F11)",   /* OW_FULLSCREEN_OFF_NOTE */
 	"Scale",   /* OW_SCALE */
 	"Auto",   /* OW_AUTO */
 	"Integer",   /* OW_WHOLE */
@@ -27,11 +27,11 @@ static const char *const words[] = {
 	"Stretch",   /* OW_STRETCH */
 	"Whole pixels, filling a small screen",   /* OW_AUTO_NOTE */
 	"Every pixel the same size",   /* OW_WHOLE_NOTE */
-	"As big as the screen holds, its shape kept",   /* OW_FILL_NOTE */
-	"The whole screen, the picture out of shape",   /* OW_STRETCH_NOTE */
+	"As big as the screen holds",   /* OW_FILL_NOTE */
+	"The whole screen, stretched",   /* OW_STRETCH_NOTE */
 	"Smooth motion",   /* OW_SMOOTH */
-	"Frames mixed: even on a 90 or 144 Hz screen",   /* OW_SMOOTH_ON_NOTE */
-	"The game's own frames: best on 60 or 120 Hz",   /* OW_SMOOTH_OFF_NOTE */
+	"Mixed frames: smooth at 90 Hz and up",   /* OW_SMOOTH_ON_NOTE */
+	"Sharp frames: best at 60 or 120 Hz",   /* OW_SMOOTH_OFF_NOTE */
 	"On",   /* OW_ON */
 	"Off",   /* OW_OFF */
 	"INFORMATION",   /* OW_INFORMATION */
@@ -54,26 +54,26 @@ static const char *const words[] = {
 	"L's trigger clicks at a full Custom gauge, FAST's where it can run",   /* OW_TRIGGERS_ON_NOTE */
 	"Both triggers pull free, as on any controller",   /* OW_TRIGGERS_OFF_NOTE */
 	"Colour correction",   /* OW_COLOUR */
-	"Darker and softer, as a GBA showed them",   /* OW_COLOUR_GBA_NOTE */
+	"Darker and softer, as on a GBA",   /* OW_COLOUR_GBA_NOTE */
 	"The colours as the game stores them",   /* OW_COLOUR_OFF_NOTE */
 	"VBA",   /* OW_VBA */
 	"DS",   /* OW_NDS */
 	"PSP",   /* OW_PSP */
-	"VBA's GBA colours: darker still, softer",   /* OW_COLOUR_VBA_NOTE */
-	"The first DS's screen: dimmer, softer",   /* OW_COLOUR_NDS_NOTE */
-	"A PSP 1000's or 2000's: bright and warmer",   /* OW_COLOUR_PSP_NOTE */
+	"As VBA showed it: darker still",   /* OW_COLOUR_VBA_NOTE */
+	"On the first DS: dimmer, softer",   /* OW_COLOUR_NDS_NOTE */
+	"On a PSP: bright and warmer",   /* OW_COLOUR_PSP_NOTE */
 	"Frame blending",   /* OW_BLEND */
 	"Simple",   /* OW_SIMPLE */
 	"Smart",   /* OW_SMART */
 	"LCD",   /* OW_LCD */
 	"LCD fast",   /* OW_LCD_FAST */
 	"Every frame on its own, sharp",   /* OW_BLEND_OFF_NOTE */
-	"mGBA's Simple: each frame half the last",   /* OW_SIMPLE_NOTE */
-	"mGBA's Smart: mixed only where it flickers",   /* OW_SMART_NOTE */
-	"mGBA's LCD ghosting: a fade over four frames",   /* OW_LCD_NOTE */
-	"mGBA's fast ghosting: a longer trail",   /* OW_LCD_FAST_NOTE */
+	"Each frame half the last",   /* OW_SIMPLE_NOTE */
+	"Mixed only where it flickers",   /* OW_SMART_NOTE */
+	"A GBA's fade over four frames",   /* OW_LCD_NOTE */
+	"A longer trail, less work",   /* OW_LCD_FAST_NOTE */
 	"LCD 3x",   /* OW_LCD3X */
-	"The lcd3x shader: pixels striped red, green, blue",   /* OW_LCD3X_ON_NOTE */
+	"Each pixel striped red, green, blue",   /* OW_LCD3X_ON_NOTE */
 	"Plain pixels, no stripes or lines",   /* OW_LCD3X_OFF_NOTE */
 	"DEFAULT",   /* OW_DEFAULT */
 	"Display back as it came?",   /* OW_ASK_DISPLAY */

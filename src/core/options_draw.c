@@ -37,7 +37,8 @@
 #define VALUE_R   (CORE_W - 32)   /* a value's right edge, the chevron after it */
 #define BOX_Y     (WIN_Y + WIN_H + 3)
 #define BOX_H     (CORE_H - 6 - BOX_Y)
-#define NOTE_W    110             /* the note's beside the scene; the whole width without it */
+#define SCENE_W   106             /* the scene's slot, where KeyItem's box holds its tag */
+#define TEXT_IN   8               /* the note's letters in from the page's left, as KeyItem's */
 #define TABS_L    (WIN_X + 18)    /* the tabs' row, between the arrows */
 #define TABS_R    (WIN_X + WIN_W - 18)
 #define TAB_GAP   3
@@ -48,14 +49,20 @@ static SDL_Rect hint_rect(int x0, int y0) {
 	return (SDL_Rect){ hx - 2, y0 + 9, ww + 4, 11 };
 }
 
-/* the note's box: beside the scene on the Display page */
-static SDL_Rect box_rect(int x0, int y0) {
-	return (SDL_Rect){ x0 + WIN_X, y0 + BOX_Y, O.page == PAGE_DISPLAY ? NOTE_W : WIN_W, BOX_H };
+/* KeyItem's information box across the foot */
+static SDL_Rect box_rect(int x0, int y0) { return (SDL_Rect){ x0 + WIN_X, y0 + BOX_Y, WIN_W, BOX_H }; }
+
+/* ... its white page under the label, to the right of the scene on the
+ * Display page (where KeyItem's tag stands), the box's width elsewhere */
+static SDL_Rect page_rect(int x0, int y0) {
+	SDL_Rect b = box_rect(x0, y0);
+	int px = b.x + 2 + (O.page == PAGE_DISPLAY ? SCENE_W + 3 : 0);
+	return (SDL_Rect){ px, b.y + 2 + LOOK_CAPS_H + 2, b.x + b.w - 2 - px, b.h - LOOK_CAPS_H - 7 };
 }
 
 /* Yes and No on the question's last line in the box's page `r` */
 static SDL_Rect answer_rect(SDL_Rect r, bool yes) {
-	int y = r.y + r.h - LOOK_LINE - 1, x = r.x + 6 + LOOK_CHOICE_W + 2;
+	int y = r.y + r.h - LOOK_LINE - 1, x = r.x + TEXT_IN + LOOK_CHOICE_W + 2;
 	if (!yes) x += look_text_width(analytics_word(AW_YES)) + LOOK_CHOICE_W + 12;
 	return (SDL_Rect){ x - LOOK_CHOICE_W - 3, y - 1, (yes ? look_text_width(analytics_word(AW_YES)) : look_text_width(analytics_word(AW_NO))) +
 		LOOK_CHOICE_W + 6, LOOK_LINE + 2 };
@@ -64,9 +71,8 @@ static SDL_Rect answer_rect(SDL_Rect r, bool yes) {
 static bool inside(SDL_Rect r, int x, int y) { return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h; }
 
 int options_tap(int x, int y) {
-	SDL_Rect box = box_rect(0, 0);
 	if (O.asking) {
-		SDL_Rect page = { box.x + 2, box.y + 8, box.w - 4, box.h - 10 };
+		SDL_Rect page = page_rect(0, 0);
 		return inside(answer_rect(page, true), x, y) ? TAP_YES : inside(answer_rect(page, false), x, y) ? TAP_NO : TAP_NONE;
 	}
 	if (options_page_resets() && inside(hint_rect(0, 0), x, y)) return TAP_DEFAULT;
@@ -192,13 +198,18 @@ static void list_draw(int x0, int y0) {
  * question with BN6's Yes and No, the green triangle before the one chosen */
 static void box_draw(int x0, int y0) {
 	static const OptionsWord asks[PAGE_COUNT] = { OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME };
-	SDL_Rect b = box_rect(x0, y0), r = look_info(b.x, b.y, b.w, b.h, options_word(OW_INFORMATION));
-	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 1, LOOK_PAGE);
+	SDL_Rect b = box_rect(x0, y0), r = page_rect(x0, y0);
+	look_info(b.x, b.y, b.w, b.h, NULL);
+	look_caps(r.x + 2, b.y + 2, options_word(OW_INFORMATION), LOOK_PAGE, (SDL_Color){ 0, 0, 0, 0 });
+	fill_rect(r.x, r.y, r.w, r.h, LOOK_PAGE);
+	/* (the scene in STATUS's slot, the box's height, beside the page) */
+	if (O.page == PAGE_DISPLAY) options_scene_draw(look_slot(b.x + 2, b.y + 2, SCENE_W, b.h - 5));
+	int most = (r.h - 2) / LOOK_LINE;
 	if (!O.asking) {
-		look_wrapped(note_words(options_line_kind()), r.x + 5, r.y + 1, r.w - 10, 4, LOOK_INK, LOOK_INK_SHADE);
+		look_wrapped(note_words(options_line_kind()), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most, LOOK_INK, LOOK_INK_SHADE);
 		return;
 	}
-	look_wrapped(options_word(asks[O.page]), r.x + 5, r.y + 1, r.w - 10, 3, LOOK_INK, LOOK_INK_SHADE);
+	look_wrapped(options_word(asks[O.page]), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most - 1, LOOK_INK, LOOK_INK_SHADE);
 	for (int k = 0; k < 2; ++k) {
 		SDL_Rect a = answer_rect(r, k == 0);
 		look_text(a.x + LOOK_CHOICE_W + 3, a.y + 1, analytics_word(k == 0 ? AW_YES : AW_NO), LOOK_INK, LOOK_INK_SHADE, TEXT_LEFT);
@@ -213,10 +224,6 @@ static void options_panel_draw(void) {
 	if (options_page_resets()) look_band_hint(x0, y0, CORE_W, "START", options_word(OW_DEFAULT));
 	list_draw(x0, y0);
 	box_draw(x0, y0);
-	if (O.page == PAGE_DISPLAY) {
-		int sx = x0 + WIN_X + NOTE_W + 3;
-		options_scene_draw(look_slot(sx, y0 + BOX_Y, x0 + WIN_X + WIN_W - sx, BOX_H));
-	}
 	look_fade_in(x0, y0, CORE_W, CORE_H, O.t);
 }
 

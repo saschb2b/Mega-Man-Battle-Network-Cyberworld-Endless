@@ -179,8 +179,9 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   line behind the green triangle, faceless as a machine asks.
 - A picture of what a setting does sits in STATUS's slot (navy in two
   pixels of white, where STATUS shows MegaMan): Options' Display page
-  halves its information box to put BN6's own battle there, at its own
-  pixels, staged for the line under the cursor and run through the
+  puts BN6's own battle in its information box where KeyItem's box holds
+  its tag, the slot the box's height, INFORMATION over the page beside
+  it, at its own pixels, staged for the line under the cursor and run through the
   display's settings (`showcase.c`, `options_scene.c`), Valhalla's list,
   description and picture on a PET (the owner's call, 2 November 2026,
   over three layouts that stepped the panel aside: none showed a

@@ -505,7 +505,7 @@ the note on the line under the cursor, through every Display setting as
 it stands: turn a line and the battle changes at once. It is a scene for
 that line: MegaMan, a Mettaur, a Piranha and a Puffy trading shots for
 the colours, LCD 3x and the scale; a Mettaur's wave hitting MegaMan, who
-flickers, for Frame blending; MegaMan stepping up and down under a
+flickers, for Frame blending; MegaMan stepping across his row under a
 moving sky for Smooth motion. It is BN6 itself, run on a second GBA of
 the game's own from your ROM, unheard, only while the page is shown (on
 the 3DS, whose memory holds one GBA, the paused game shows there
