@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "How it is built"
 description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space, areas dressed by `run_dress`, songs copied by `xsong.c`, and BN5's ROM on each platform."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T00:52:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
 ---
 
 # How it is built
@@ -12,6 +12,10 @@ generated: { by: claude-code/unrecorded, at: 2026-10-13T00:52:19Z }
    their header's game code and SHA-1, read and never run
    (`xrom_find`). Each has its layout (`XRomLayout`): its tables, found by
    their structure (`tools/rom_tables.py`) and noted in [ROM data](../rom/overview.md).
+   A layout marked `research` (BN4 Red Sun's, [Battle Network 4 in a run](bn4.md)) is
+   read only when a dev tool sets `xrom_research` (the atlas's `x1`), so a
+   run, the ROMs screen and the 3DS's heap never meet a ROM that lends
+   nothing yet.
 2. **A map from any of them** (`area_src_load_x`): the map reader takes
    its maps from the game's ROM; what learns from a map (`tiles_learn.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever

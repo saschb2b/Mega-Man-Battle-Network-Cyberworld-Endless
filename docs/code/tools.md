@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
 ---
 
 # Tools and skills
@@ -11,6 +11,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
 | Path | Contents |
 | --- | --- |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
+| `tools/bn4_lab.py` | BN4 Red Sun in romlab: its tables checked against [BN4 Red Sun's tables](../rom/bn4.md) (report), the plain ROM played from power-on to Lan's room (boot) and a battle started there from a record of its own or one written with the enemies given (battle); BN4 is read for research alone ([Battle Network 4 in a run](../multirom/bn4.md)) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
 | `tools/battle_floor.py` | The battles per layer and act, played: seeds 1-12 headless side by side (the autopilot, `--dev god,onehit`), each layer's random battles from the run log against [the battle floor](../game/progression/structure.md)'s bands; `build.py pacing` runs it after its rolls ([Pacing report](../devtools/pacing-report.md)) |

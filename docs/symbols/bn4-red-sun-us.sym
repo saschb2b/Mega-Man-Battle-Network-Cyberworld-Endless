@@ -1,0 +1,25 @@
+; Mega Man Battle Network 4: Red Sun (USA), SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1 (header code B4WE)
+; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):
+; addresses, names and descriptions only. docs/rom/symbols.md says what is here and how to load it:
+; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
+
+02009E70 BN4_TOOLKIT
+080000AC game_code
+08001B00 BN4_GET_RNG
+08011888 BN4_ENEMY_STATS
+08017FB8 BN4_BATTLE_TABLES
+080189E8 BN4_ENCOUNTER_RATES
+080190D0 BN4_GET_CHIP
+080197EC BN4_CHIP_RECORDS
+0802793C XRomLayout.sprite_lists
+08028304 XRomLayout.map_table_rw
+0802831C XRomLayout.map_table
+08028F04 XRomLayout.coord_table_rw
+08028F1C XRomLayout.coord_table
+080F5370 BN4_ENCOUNTER_CHECK
+080F5448 BN4_ROLL
+080F54B8 BN4_STORY_OFFSET
+08155FF8 XRomLayout.song_table
+087481D8 BN4_CHIP_NAMES
+08748C14 BN4_CHIP_NAMES_HI
+0874A780 BN4_ENEMY_NAMES

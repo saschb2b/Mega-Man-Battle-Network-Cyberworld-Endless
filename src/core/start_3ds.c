@@ -161,8 +161,9 @@ void console_start(bool data_dir_given) {
 #define BN5_ROOM ((size_t)ROM_SIZE + EMU_ROM_SIZE + (56u << 20))
 static const char *bn5_unread;   /* (where BN5's ROM lies, left unread) */
 
-/* A .gba of another game's in `dir`, told by its header's game code alone
- * (rom.c's xrom_of_code), unread: its path in `path` */
+/* A .gba of BN5's in `dir`, told by its header's game code alone (rom.c's
+ * xrom_of_code; BN4's, read for research alone, not), unread: its path in
+ * `path` */
 static bool xrom_peek(const char *dir, char *path, size_t n) {
 	DIR *d = opendir(dir);
 	struct dirent *e;
@@ -174,7 +175,7 @@ static bool xrom_peek(const char *dir, char *path, size_t n) {
 		FILE *f = fopen(path, "rb");
 		char code[5] = "";
 		there = f && !fseek(f, 0, SEEK_END) && ftell(f) == ROM_SIZE && !fseek(f, 0xAC, SEEK_SET) && fread(code, 1, 4, f) == 4 &&
-			xrom_of_code(code) >= 0;
+			xrom_of_code(code) == XROM_BN5_COLONEL_US;
 		if (f) fclose(f);
 	}
 	if (d) closedir(d);
