@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -40,7 +40,16 @@ Colonel has, by name, with the community's lists as the check
 | DarkChips | 8 | DrkCanon, DarkBomb, DrkVulcn, DrkSpred and DrkStage by name | a unit each |
 
 What it costs beside BN5: the data travels as BN5's did, but the code is
-further from BN6's. A third of bn6f's functions are found in BN5 by their
+further from BN6's, and its viruses are built otherwise. BN5's and BN6's
+run every virus as one object type through per-family tables, which a
+recipe fills; BN4's runs each family as an object type of its own, its
+variables in the object and no AI data, its collision data laid out
+otherwise ([BN4 Red Sun's tables](../rom/bn4.md), Virus families). A BN4 family's
+recipe needs a path of its own in `tools/xrecipe.py` (its states, its
+looks and its numbers read from its type's code and its records), a map
+of its collision data and object fields onto BN6's, and the 71 engine
+routines its families call that BN6 has no twin of copied or ported
+once; the 40 that BN6 has the same are paired as BN5's were. A third of bn6f's functions are found in BN5 by their
 bytes and an eighth in BN4; of the 69 routines of BN6's that the moved
 families and Navis call, BN4 shows 46 by bytes, BN5 59. Each transplant
 has more of its engine to pair before its recipe is whole, and its

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:29:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -18,7 +18,19 @@ python3 build.py xdiff megaman_plain --story # MegaMan the subject: his timeline
 python3 tools/xproxy.py --mutations          # the Souls' proxy form against HeatCross (The proxy form, below)
 python3 build.py shot --data-dir /src/.build/xdiff/data \
   --xdiff "foes=4F@62;mm=22;hp=100;frames=1200;out=/src/.build/xdiff/runs/s1"   # the traces alone
+build/host/cyberworld --headless --rom-dir DIR --dev god,onehit \
+  --xdiff "game=bn4;foes=01@52;hp=60"        # BN4 Red Sun's own battle alone: won or lost, the HP left
 ```
+
+BN4: with BN4 Red Sun's ROM beside BN6's, `game=bn4` fights BN4's own
+battle alone on the guest core ([Guest battles](../multirom/guest-battles.md)),
+`foes=` BN4's enemy ids (hex; Mettaur 01) at their panels, `mm=`, `hp=`
+and `seed=` as above, and says how it ended: won or lost, MegaMan's HP at
+the result and in his NaviStats back on the map (`src/dev/xdiff_bn4.c`). Its
+keys are its own (each Custom screen START, then A; the buster while it
+fights; A through the results); `--dev god` and `onehit` hold MegaMan's HP
+and the enemies' at 1 in its battle; `film=` keeps its frames by the
+guest's frame. No trace yet: the first step of the differential's BN4 view.
 
 Issue #82 moves BN5's virus families into BN6's battle engine by their own
 code ([Transplanted families](../multirom/families.md): CanGard, then Handi, the
