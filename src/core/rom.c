@@ -383,6 +383,12 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
 		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5", 0x45, 0x1C },
+	/* (its tables as docs/rom/bn4.md found them; its battle backgrounds and
+	 * map routines named in bn4.h, as their records are 9 words to BN5's 7) */
+	[XROM_BN4_RED_SUN_US] = { .name = "Mega Man Battle Network 4: Red Sun (USA)", .sha1 = "a97e96a7da03abd70f7953328e511b9fa29179f1", .code = "B4WE",
+		.map_table_rw = 0x028304u, .map_table = 0x02831Cu, .coord_table_rw = 0x028F04u, .coord_table = 0x028F1Cu,
+		.rw_groups = 6, .net_groups = 21, .song_table = 0x155FF8u, .sprite_lists = 0x02793Cu, .battle_songs = { 0x14, 0x15 },
+		.tag = "BN4", .research = true },
 };
 
 const NetAreaDef *net_area_def(int area) {
@@ -397,6 +403,7 @@ const NetAreaDef *net_area_def(int area) {
 }
 
 XRom XR[XROM_COUNT];
+bool xrom_research;
 
 bool xrom_load(const char *path) {
 	FILE *f = fopen(path, "rb");
@@ -405,7 +412,7 @@ bool xrom_load(const char *path) {
 	int id = -1;
 	if (fseek(f, 0, SEEK_END) == 0 && ftell(f) == ROM_SIZE && fseek(f, 0xAC, SEEK_SET) == 0 && fread(code, 1, 4, f) == 4)
 		for (int i = 0; i < XROM_COUNT; ++i)
-			if (!memcmp(code, xlayouts[i].code, 4) && !XR[i].data) id = i;
+			if (!memcmp(code, xlayouts[i].code, 4) && !XR[i].data && (!xlayouts[i].research || xrom_research)) id = i;
 	uint8_t *data = id < 0 ? NULL : malloc(ROM_SIZE);
 	bool ok = data && fseek(f, 0, SEEK_SET) == 0 && fread(data, 1, ROM_SIZE, f) == ROM_SIZE;
 	fclose(f);

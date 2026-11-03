@@ -317,6 +317,7 @@ static void world_sources(const char *dir) {
  * world's groups and its internet's, read from beside the BN6 ROM: what
  * its areas could lend a run. */
 static void xrom_sources(const char *dir, int xrom) {
+	xrom_research = true;
 	if (xrom >= 0 && xrom < XROM_COUNT) xrom_find_beside();
 	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { printf("extra ROM %d: not found beside %s\n", xrom, R.path); return; }
 	const XRomLayout *x = XR[xrom].layout;

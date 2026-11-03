@@ -1,5 +1,15 @@
 # The knowledge base's log
 
+## 2026-11-04
+* **Update**: multirom/bn4.md, the owner's first call: BN4 comes, its viruses first.
+
+## 2026-11-03
+* **Update**: rom/bn4.md, BN4's battle backgrounds (27, nine-word records) and its net maps' routines, its music (the map lists, the record's song, the net's, Undernet's, battle, boss, Duo's and tournament's songs; xsong's rules met), its chip records' own fields, Souls and DarkChips, and the battle in RAM (its moving save block, the battle state, result, reward, objects); a record's background is its +5, its +4 the battle's mode; ACDC Area's record corrected. multirom/bn4.md, its holdings and the guest's cost by them.
+* **Update**: rom/bn4.md, BN4 Red Sun's tables mapped further and corrected: its net map groups are 0x80-0x94 from `0x02831C` (the map loader's split; the large areas 0x90-0x94, ACDC Area at 0x90), its eToolkit, the encounter check that starts a battle, its 12-byte battle records and 4-byte entities, its enemy records, sprite lists, getChip, each checked by `tools/bn4_lab.py` in romlab; its description and index line. multirom/bn4.md, Phase 0 done for research; multirom/how-it-is-built.md, an extra ROM read for research alone; code/emu.md, `bn4.h`; code/tools.md, `tools/bn4_lab.py`; rom/symbols.md, BN4's symbol files.
+* **Creation**: multirom/bn4.md, Battle Network 4 in a run: what BN4 Red Sun's ROM could lend (22 net maps, 33 songs, 17 virus families and 18 Navis new to a run, Red Sun's six Souls, about 225 chips by name), what players said of BN4 and what follows, the design against the core loop (its viruses first, a tournament as an act's climax), a phased plan and the owner's open calls; its lines in multirom/index.md and multirom/overview.md; multirom/status.md, BN4 researched.
+* **Creation**: rom/bn4.md, BN4 Red Sun's tables: the ROM (B4WE), its map and coordinate tables, songs, chip records, chip and enemy names, bn6f's functions found in it (12%), the enemy ids table not found; its line in rom/index.md.
+* **Update**: research/sources.md, Battle Network 4: what players and critics said of BN4 (2004 to 2024) with their sources, and the community's claims of what it has against the ROM; TCRF's BN4 page answering a fetch with instructions aimed at agents; its description and index line.
+
 ## 2026-11-02
 * **Creation**: releases/v0.19.0.md, 0.19.0's notes ("Your screen, your sound.": Options in pages with its live Display, a GBA's screen and its colours, the sound your way, each with its picture or GIF, and the trailer); its lines in releases/index.md and releases/overview.md.
 * **Update**: code/site-and-media.md, `docs/screenshots/`'s sheets (`SCREENSHOT_SHEETS`: pictures side by side under their labels) and `compare-*.png`, and `docs/clips/`' clips run `beside` (a run a set of options each, side by side), for 0.19.0's notes.

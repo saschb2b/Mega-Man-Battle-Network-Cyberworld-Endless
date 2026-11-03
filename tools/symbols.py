@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """symbols.py [--check | --full]: what this project has mapped of Mega Man
-Battle Network 6: Cybeast Gregar (USA) and Battle Network 5: Team Colonel
-(USA), written for others to use (docs/rom/symbols.md): per ROM a symbol file
+Battle Network 6: Cybeast Gregar (USA), Battle Network 5: Team Colonel
+(USA) and Battle Network 4: Red Sun (USA), written for others to use (docs/rom/symbols.md): per ROM a symbol file
 that mGBA's and no$gba's debuggers load, and the same symbols as JSON and
 CSV.
 
 Read from what the engine already keeps, so the files follow it:
-src/emu/bn6.h (with the PET's bn6_pet.h, which it includes) and bn5.h
+src/emu/bn6.h (with the PET's bn6_pet.h, which it includes), bn5.h and bn4.h
 (RAM and code addresses, the fields of the game's structures, event
 flags and values, each with its comment), the ROM
 offsets of RomLayout and XRomLayout in src/core/rom.c (rom.h's comments
@@ -44,7 +44,7 @@ MATCH = '.build/symbols/match'    # tools/bn6f_match.py's tables
 DOC = 'docs/rom/symbols.md'
 ROM_DATA = 'docs/rom'      # its tables, one per subsystem (docs/rom/*.md with a Data column)
 
-# The two ROMs: the header with their addresses, rom.c's layout and its
+# The ROMs: the header with their addresses, rom.c's layout and its
 # entry, the files' stem, the game as the tables name it and its short
 # title, tools/bn6f_match.py's table.
 GAMES = (
@@ -52,6 +52,8 @@ GAMES = (
          game='BN6 Cybeast Gregar (USA)', title='BN6 Gregar', match='bn6f-gregar.csv'),
     dict(key='bn5', stem='bn5-colonel-us', header='src/emu/bn5.h', layout=('XRomLayout', 'xlayouts', 'XROM_BN5_COLONEL_US'),
          game='BN5 Team Colonel (USA)', title='BN5 Team Colonel', match='bn6f-bn5.csv'),
+    dict(key='bn4', stem='bn4-red-sun-us', header='src/emu/bn4.h', layout=('XRomLayout', 'xlayouts', 'XROM_BN4_RED_SUN_US'),
+         game='BN4 Red Sun (USA)', title='BN4 Red Sun', match='bn6f-bn4.csv'),
 )
 
 # The game's structures whose fields the headers name by their offset alone:
@@ -137,7 +139,7 @@ def header_items(path):
                     i += 1
                     text += '\n' + lines[i].strip().lstrip('*')
                 comment = clean(text[:text.index('*/')])
-            if re.fullmatch(r'BN[56]_\w+', name) and not name.endswith('_H'):
+            if re.fullmatch(r'BN[456]_\w+', name) and not name.endswith('_H'):
                 item = dict(name=name, value=rest.strip(), comment=comment, line=no, block=block, run=list(run), path=path)
                 items.append(item)
                 run.append(item)
@@ -260,8 +262,8 @@ def header_symbols(game):
         name, value, desc = it['name'], known[it['name']], it['description']
         s = dict(name=name, description=desc, source=f"{it['path']}:{it['line']}", origin='header', own=it['comment'])
         syms[name] = s
-        m_field = re.fullmatch(r'\(\s*(BN[56]_\w+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)\s*\)', it['value'])
-        m_value = re.match(r'(BN[56]_\w+)(?: \(its \+\w+\))?:', desc or '')
+        m_field = re.fullmatch(r'\(\s*(BN[456]_\w+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)\s*\)', it['value'])
+        m_value = re.match(r'(BN[456]_\w+)(?: \(its \+\w+\))?:', desc or '')
         family = next((f for f in FAMILIES if name.startswith(f[0])), None)
         if '_FLAG_' in name:
             s.update(kind='flag', value=value)
@@ -443,12 +445,12 @@ def table_rows(path, text):
         title = re.sub(r'\s*\([^()]*(`|issue #)[^()]*\)\s*$', '', cells[0]).strip()
         title = re.sub(r'`', '', re.sub(r':? Battle Network 5 Team Colonel \(USA\)', '', title))
         rows.append(dict(line=f'{path}:{no}', title=title, entries=offset_entries(cells[1]),
-                         names=set(re.findall(r'`(BN[56]_\w+)`', line)), how=how_verified(cells[2]), text=line))
+                         names=set(re.findall(r'`(BN[456]_\w+)`', line)), how=how_verified(cells[2]), text=line))
     return rows
 
 
 ADDRESS = r'`(0x[0-9A-Fa-f]{6}|0x[0-9A-Fa-f]{8})`'
-NOT_LABELS = {'', 'and', 'or', 'at', 'its', 'their', 'bn5', 'bn6', 'gregar', "gregar's", "bn5's", "bn6's", 'ewram', 'ram',
+NOT_LABELS = {'', 'and', 'or', 'at', 'its', 'their', 'bn4', 'bn5', 'bn6', 'gregar', "gregar's", "bn4's", "bn5's", "bn6's", 'ewram', 'ram',
               'literals', 'rom'}
 
 
@@ -494,12 +496,12 @@ def offset_entries(cell):
     `b`, RAM `c`"); "its" before an address is the one before outside
     parentheses ("`a` (its table `b`) the HP bug a use adds": b is the HP
     bug's table)."""
-    entries, first = [], 'bn5' if cell.startswith('BN5') else 'bn6'
+    entries, first = [], 'bn5' if cell.startswith('BN5') else 'bn4' if cell.startswith('BN4') else 'bn6'
     for clause_at, clause in clauses(cell):
         game, skip, lead, last, end = first, False, '', '', None
-        for m in re.finditer(r'\b(BN5|BN6|Gregar)\b|' + ADDRESS, clause):
+        for m in re.finditer(r'\b(BN4|BN5|BN6|Gregar)\b|' + ADDRESS, clause):
             if m.group(1):
-                game = 'bn5' if m.group(1) == 'BN5' else 'bn6'
+                game = {'BN4': 'bn4', 'BN5': 'bn5'}.get(m.group(1), 'bn6')
                 continue
             listed = end is not None and re.fullmatch(r'[\s,]*(RAM\s*)?', clause[end:m.start()])
             end = m.end()
@@ -618,7 +620,7 @@ def rom_data_symbols(game, rows, taken):
                 seen.setdefault(e['address'], []).append((row, e))
 
     def given(e):
-        return next((n for n in e['names'] if not n.startswith(('BN5_', 'BN6_'))), None)
+        return next((n for n in e['names'] if not n.startswith(('BN4_', 'BN5_', 'BN6_'))), None)
 
     def rank(pair):
         row, e = pair
@@ -1163,7 +1165,7 @@ def coverage(located, by_file=False):
     every = [r for r in located[0][2] if r['kind'] == 'function']   # (Gregar's table lists every function)
     found = {g['key']: {r['name']: r for r in m if r['kind'] == 'function' and r['address']} for g, w, m, c, k in located}
     games = [g for g, *_ in located]
-    out = ['| bn6f\'s functions | ' + ' | '.join(g['title'] + (' (partial)' if g['key'] == 'bn5' else '') for g in games) + ' |',
+    out = ['| bn6f\'s functions | ' + ' | '.join(g['title'] + (' (partial)' if g['key'] != 'bn6' else '') for g in games) + ' |',
            '| --- | ' + ' | '.join('---:' for _ in games) + ' |']
 
     def row(title, subset):

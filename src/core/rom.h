@@ -119,8 +119,10 @@ extern Rom R;
 
 /* Other Battle Network games whose data a layer can take beside BN6's
  * (docs/multirom/): found by their contents where the BN6 ROM is, read
- * and never run. Each is optional: BN6 alone is the whole game. */
-typedef enum { XROM_BN5_COLONEL_US, XROM_COUNT } XRomId;
+ * and never run. Each is optional: BN6 alone is the whole game. BN4 Red
+ * Sun lends a run nothing yet: it is read only when a dev tool asks
+ * (xrom_research; docs/multirom/bn4.md). */
+typedef enum { XROM_BN5_COLONEL_US, XROM_BN4_RED_SUN_US, XROM_COUNT } XRomId;
 typedef struct {
 	const char *name, *sha1, *code;
 	uint32_t map_table_rw, map_table;       /* MapBGDescriptor lists per map group, as BN6's (docs/rom/) */
@@ -136,6 +138,7 @@ typedef struct {
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
 	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
+	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -152,6 +155,9 @@ bool xrom_load(const char *path);
 int xrom_of_code(const char *code);
 /* ... in the folder BN6's ROM was found in. */
 int xrom_find_beside(void);
+/* Set by a dev tool (the atlas): the extra ROMs read for research alone
+ * (XRomLayout.research) are read too, where they lie. */
+extern bool xrom_research;
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
  * game's ROM is not read. */

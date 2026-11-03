@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-26",
+  "updated": "2026-11-03",
   "previous": "2026-10-18",
   "features": [
     {
@@ -75,6 +75,14 @@
       "left": "The BBS's rank and points (requests 0-2 need rank C) left as BN6 keeps them; the done flag (0x1C60) unused: a run's asker settles in person.",
       "updated": "2026-10-26",
       "link": "../world/home/jobs.md"
+    },
+    {
+      "name": "BN4 Red Sun's ROM",
+      "state": "proven",
+      "now": "Read for research alone (XRomLayout.research; the atlas's x1 draws its maps through the engine). Mapped (src/emu/bn4.h, docs/rom/bn4.md): map lists 0x028304 (6 real-world groups) and 0x02831C (net 0x80-0x94, ACDC Area 0x90 to the Undernet and Black Earth 0x94), coordinates 0x028F04/0x028F1C, songs 0x155FF8, sprite lists 0x02793C, eToolkit 0x02009E70 (game state at +0x40), the encounter check 0x080F5370 that starts a battle, 12-byte battle records 0x08017FB8 with 4-byte entities, enemy records 0x08011888 (HP, kind, family, version, attack), chip records 0x0197EC. tools/bn4_lab.py boots it to Lan's room in romlab and starts any of its battles there. Also its 27 battle backgrounds (9-word records), its maps' Enter and LoadGFXAnims routines, its music (map lists 0x0802AFD0; net 0x12, Undernet 0x13, battle 0x14, boss 0x15), its Souls' tables (UNITE lit for WindSoul in romlab) and DarkChips, and the battle in RAM (the battle state 0x02035810, result, reward, objects); its save block moves in RAM at each change of mode.",
+      "left": "Whether Blue Moon's Soul forms run in Red Sun (the forced battle drops the Soul's pseudo-chip at OK); its objects', collision and AI layouts for the differential's view; a BN4 song copied and heard; the ROMs screen, the phones, the browser and the 3DS's heap once BN4 lends a run something.",
+      "updated": "2026-11-03",
+      "link": "../multirom/bn4.md"
     }
   ],
   "decisions": [],
@@ -543,6 +551,30 @@
       "result": "Mission 1's board in romlab (the plain ROM; MegaMan walked to panel 0x7B,0x80 facing 0x7B,0x7F; a unit's Navi id, +1, poked; panels made dark in the RAM list, kept sorted): the window's mask each Navi id's from 0x08050048 (ProtoMan 0xD001, GyroMan 0x8011, SearchMan 0x8041, NapalmMan 0x8101, MagnetMan 0x8401, Meddy 0xC003); each command's panels as predicted from its shape (Napalm six: four ahead, the third's two sides; WideSwrd three across, as ScrenDiv; PanelSearch a line of four dark panels); GyroMan on a dark panel bombed it clean with no battle; MagnetBarrier put 0x40 in both teammates' flags, kept through the Darkloids' phase and cleared at the next PLAYER PHASE; PanelSearch over an item panel cut its line to it and went into a battle, over none ended with no battle; Napalm went into one battle on a dark panel. Each Navi's confirming line came from his own archive.",
       "meaning": "BN5 runs both teams' commands from one code and table set; Team Colonel's ROM can lend Team ProtoMan's commands as they are. Static reading, not played: the harm MagnetBarrier makes 0 (0x08053D32) and the panels a won battle frees (0x0804C57C).",
       "link": "../game/liberation/bn5/navis.md"
+    },
+    {
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-03",
+      "name": "BN4's tables by the shapes BN5's were found by",
+      "result": "tools/rom_tables.py found its map and coordinate tables; a song-header scan found its song table and, as the control, BN5's at its known 0x155BF4; Cannon's codes at a 0x2C stride found its chip records and, as the control, BN5's record 1 (0x01E23C); its text spells letters as BN6's (Cannon, Mettaur found); every map of groups 0x80-0x88 drew whole in a Python copy of area_src.c's reader; tools/bn6f_match.py with BN4 in BN5's place located 1,650 functions and none of bn6f's RAM labels at Falzar's addresses.",
+      "meaning": "BN4's data travels into BN6 as BN5's did (maps, songs, names, chip records in BN6's size); its code is further from BN6's than BN5's, so each transplant pairs more of its engine first.",
+      "link": "../rom/bn4.md"
+    },
+    {
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-03",
+      "name": "A BN4 battle started from Lan's room",
+      "result": "In romlab from power-on (title, NEW GAME, the opening paged), BN4's encounter check patched to return a record started its battle in Lan's room: ACDC Area's first record two Mettaurs at (5,2) and (6,3), 40 HP each; a written record VolGear (80) and Billy (50) at the panels given; enemy 1 with kind 5 a rock. Battles with enemy 1, 3, 5 and 13 alone held 40, 100, 180 and 50 HP, which found the enemy records. The map loader's two literals (0x08028304, 0x0802831C) corrected the first reading of the net's groups (0x80 from 0x02834C), and with it ACDC Area at 0x90.",
+      "meaning": "BN4's battles can be started and watched at will: the harness the differential's reference will build on. Its group numbering is BN5's (net 0x80-0x94, the large areas 0x90-0x94).",
+      "link": "../rom/bn4.md"
+    },
+    {
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-03",
+      "name": "Four parts mapped side by side",
+      "result": "Four research agents in parallel, each in romlab on bn4_lab's battles: a background record's three table entries pointed at another's drew that one's frame byte for byte; a record's +3 set to 0x10 played song 0x10 (its +2 changed nothing); UNITE lit after AirShot with flags 0x14 and 0x19 set, WindSoul's icon in the column; a battle ended at 37 HP and the next began at 37 (NaviStats +0x30), while the game state's address changed between the room and the battle.",
+      "meaning": "BN4's backgrounds, music and Souls follow BN5's and BN6's patterns with formats of their own (9-word backgrounds, a song byte in the record); a guest core must read BN4's save block through eToolkit.",
+      "link": "../rom/bn4.md"
     }
   ],
   "method": {
