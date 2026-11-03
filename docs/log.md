@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-04
+* **Update**: multirom/bn4.md, the owner's first call: BN4 comes, its viruses first.
+
 ## 2026-11-03
 * **Update**: rom/bn4.md, BN4's battle backgrounds (27, nine-word records) and its net maps' routines, its music (the map lists, the record's song, the net's, Undernet's, battle, boss, Duo's and tournament's songs; xsong's rules met), its chip records' own fields, Souls and DarkChips, and the battle in RAM (its moving save block, the battle state, result, reward, objects); a record's background is its +5, its +4 the battle's mode; ACDC Area's record corrected. multirom/bn4.md, its holdings and the guest's cost by them.
 * **Update**: rom/bn4.md, BN4 Red Sun's tables mapped further and corrected: its net map groups are 0x80-0x94 from `0x02831C` (the map loader's split; the large areas 0x90-0x94, ACDC Area at 0x90), its eToolkit, the encounter check that starts a battle, its 12-byte battle records and 4-byte entities, its enemy records, sprite lists, getChip, each checked by `tools/bn4_lab.py` in romlab; its description and index line. multirom/bn4.md, Phase 0 done for research; multirom/how-it-is-built.md, an extra ROM read for research alone; code/emu.md, `bn4.h`; code/tools.md, `tools/bn4_lab.py`; rom/symbols.md, BN4's symbol files.

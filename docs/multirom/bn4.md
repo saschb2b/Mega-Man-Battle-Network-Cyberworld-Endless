@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -168,8 +168,10 @@ battle frame by frame, as BN5's were.
 
 ## The owner's calls
 
-1. Whether BN4 comes at all beside the core loop's main-path work, and
-   if so whether its viruses go first (recommended) or its areas.
+1. **Decided, 4 November 2026: BN4 comes, its viruses first** (chosen over
+   its areas first). Phase 1 begins with the guest core for BN4's battles
+   and its families moved and proved, visiting BN6's and BN5's battles
+   before BN4 has an area of its own.
 2. The tournament as an act's climax (recommended), or not at all.
 3. With three games read, how a run shares BN6's areas between BN5's and
    BN4's dressings.
