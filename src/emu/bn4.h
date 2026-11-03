@@ -1,12 +1,45 @@
 /* Battle Network 4: Red Sun (USA): what is mapped of it, read for research
  * alone so far (docs/rom/bn4.md; docs/multirom/bn4.md, the plan). BN4's
- * engine is BN5's and BN6's elder: its toolkit and chip records are laid
- * out as theirs, its battle records and enemy data are not. */
+ * engine is BN5's and BN6's elder: its toolkit is BN6's from +0x3C shifted
+ * by 4, its chip records 0x2C bytes, its battle records and enemy data its
+ * own. Its save block (the game state, NaviStats, folders, flags) moves in
+ * RAM at each change of mode: read through eToolkit, never as a constant. */
 #ifndef CW_BN4_H
 #define CW_BN4_H
 
 #define BN4_TOOLKIT       0x02009E70u /* eToolkit, set up by `ldr r0,=eToolkit; mov r10,r0` (0x080060D8) as BN5's and BN6's are */
-#define BN4_TOOLKIT_GAMESTATE 0x40    /* eToolkit +0x40: the game state (BN5's and BN6's at +0x3C) */
+#define BN4_TOOLKIT_GAMESTATE 0x40    /* eToolkit +0x40: the game state (BN5's and BN6's at +0x3C), in the moving block */
+#define BN4_TOOLKIT_BATTLE 0x18       /* eToolkit +0x18: the battle state, BN4_BATTLE_STATE (fixed) */
+#define BN4_TOOLKIT_FLAGS 0x48        /* eToolkit +0x48: the event flags (flag f in byte f >> 3, bit 0x80 >> (f & 7)), in the moving block */
+#define BN4_TOOLKIT_FOLDERS 0x4C      /* eToolkit +0x4C: the folders, 30 u16 each (chip | code << 9), in the moving block */
+#define BN4_TOOLKIT_NAVI_STATS 0x78   /* eToolkit +0x78: MegaMan's NaviStats, 0x40 bytes (BN5's 0x60), in the moving block */
+#define BN4_NAVI_HP       0x30        /* NaviStats +0x30: HP (a battle ended at 37 began the next at 37), +0x32 and +0x34 the max HPs */
+#define BN4_MODE_MAP      4           /* eToolkit [+0]'s main mode on the map (the game state's +0 too) */
+#define BN4_MODE_BATTLE   8           /* ... in a battle, a main mode of its own in BN4 */
+#define BN4_MODE_GAME_OVER 0x18       /* ... at GAME OVER */
+#define BN4_BATTLE_STATE  0x02035810u /* BattleState: +1 the phase (8 the Custom screen, 0xC fighting, 0x10 over, 0x14 ending), +0xD the side,
+                                       * +0x32 its flags (u16), +0x3C the record fought */
+#define BN4_BATTLE_RESULT 0x0203BCB4u /* the battle's result, 1 won, 2 lost (a fixed copy of the game state's +0x10) */
+#define BN4_BATTLE_REWARD 0x0203BD4Cu /* u16: the reward the results screen gives (a Mettaur's: 0x0058, Guard1 A), the Busting level at -7 */
+#define BN4_BATTLE_NAVI   0x0203BEC0u /* the battle's NaviStats, 0x40 a side (GetBattleNaviStatsAddr, 0x0800D742), HP at +0x30 */
+#define BN4_CUSTOM_GAUGE  0x02036414u /* u16, full at 0x4000 (SetCustGauge, 0x08016810: its struct 0x020363F0 + 0x24) */
+#define BN4_T1_OBJECTS    0x0203B180u /* the battle's first kind of objects, BN4_T1_SIZE each, 8 (BN5 16, BN6 32): MegaMan first */
+#define BN4_T1_SIZE       0xD8
+#define BN4_T1_HP         0x24        /* u16: an object's HP (MegaMan's 0x0203B1A4, the first enemy's 0x0203B27C; poked, the screen followed) */
+#define BN4_RNG_PRIMARY   0x02001790u /* the main RNG's state (GetRNG's literal) */
+#define BN4_PLAY_MUSIC    0x08000568u /* PlayMusic: r0 the song (0xFF stops it), kept at the game state's +0x19; not again while it plays */
+#define BN4_MPLAYS        0x08155E78u /* the music players' table (m4aSongNumStart, 0x08112848); songs 0x00-0x21 on player 31 */
+#define BN4_SOUND_INFO    0x030036A0u /* MP2K's SoundInfo (BN6's 0x030045C0), sound mode 0x0093040D as BN6's, 32 players */
+#define BN4_MAP_MUSIC     0x0802AFD0u /* four lists by the game state's +7, 8 bytes an entry (the group, a pointer to a song per map), 0xFF
+                                       * ending them, as BN5's (0x080361C8); read at 0x0802BCCC */
+#define BN4_MODE_SONGS    0x08007510u /* the songs of battle modes 0x46 on (BN4_RECORD_MODE - 0x46): 14 14 15 15 17 17 17 */
+#define BN4_SONG_TITLE    0x00        /* the title's */
+#define BN4_SONG_NET      0x12        /* the net areas' theme (BN4_MAP_MUSIC: ACDC, Town, Park Area and the countries') */
+#define BN4_SONG_UNDERNET 0x13        /* the Undernet's and Black Earth's */
+#define BN4_SONG_BATTLE   0x14        /* random battles' */
+#define BN4_SONG_BOSS     0x15        /* the Navis' (the roaming SP Navis', the story's ShadeMan, LaserMan and Bass) */
+#define BN4_SONG_DUO      0x16        /* Duo's */
+#define BN4_SONG_TOURNAMENT 0x17      /* the tournament's records' (their opponents; that it is its theme is assumed) */
 #define BN4_GAMESTATE_GROUP  0x04     /* the game state's +4: the map group (0x80 on the net) */
 #define BN4_GAMESTATE_NUMBER 0x05     /* ... +5: the map's number in its group */
 #define BN4_GAMESTATE_RECORD 0x2C     /* ... +0x2C: the battle record the encounter check chose, which the battle's setup reads (0x08006680) */
@@ -22,7 +55,10 @@
                                        * per map index (16 a story stage), per index a list of BN4_RECORD_SIZE records, 0xFF ending them */
 #define BN4_RECORD_SIZE   12          /* a battle record: 8 bytes, then the pointer to its entities (BN5's and BN6's are 16 bytes) */
 #define BN4_RECORD_WEIGHT 0x00        /* its weight in the roll (0x20 on ACDC Area's) */
-#define BN4_RECORD_BACKDROP 0x04      /* the battle's background where the game state's +0xB is 0xFF (0x08007ADE) */
+#define BN4_RECORD_MODE   0x04        /* the battle's mode, copied to the battle state's +0xF (0x08007ADE): 0, 0x11 in 22 of the net's records;
+                                       * from 0x46 its music is BN4_MODE_SONGS' */
+#define BN4_RECORD_BACKDROP 0x05      /* the battle's background (BN4_BATTLE_BGS' index), 0xFF the map's (BN4_MAP_BACKDROPS): the net's random ones all 0xFF */
+#define BN4_RECORD_MUSIC  0x03        /* the song its battle plays (0x080074A4), 0xFF none: BN4_SONG_BATTLE on every virus record of the net */
 #define BN4_RECORD_MASK   0x06        /* tested against the roll's r2 (a progress byte, 0x17 of eToolkit +0x78's): 0x1F every one */
 #define BN4_RECORD_ENTITIES 0x08      /* u32: its entity list, BN4_ENTITY_SIZE bytes each, 0xFF ending it */
 #define BN4_ENTITY_SIZE   4           /* an entity: the enemy id (0 MegaMan), the panel's column and row, its kind */
@@ -35,12 +71,34 @@
 #define BN4_ENEMY_FAMILY  0x04        /* the virus's family (1 Mettaur, 2 VolGear, 3 Billy) or the Navi's number (1 Roll, 2 GutsMan) */
 #define BN4_ENEMY_VERSION 0x05        /* its version in its family: 0-5 (V1, EX, V2, EX, V3, EX) */
 #define BN4_ENEMY_ATTACK  0x0A        /* u16: its attack's damage (Mettaur 10, Mettaur3 160) */
-#define BN4_CHIP_RECORDS  0x080197ECu /* its chip records, 0x2C bytes each as BN6's (BN6_CHIP_RECORD_SIZE): codes at +0, power at +0x1A */
+#define BN4_CHIP_RECORDS  0x080197ECu /* its chip records, 0x2C bytes each as BN6's: codes at +0, power at +0x1A, +4 and +5 as BN6's; +6 to +8 not */
+#define BN4_CHIP_MB       0x06        /* its MB (Cannon 8, the DarkChips 99): BN6's +8 */
+#define BN4_CHIP_KIND     0x07        /* its kind, the icon's and the one a Soul unites by (0 Fire .. 11 Break, 12 none, 15 a Soul) */
+#define BN4_CHIP_CLASS    0x08        /* 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance: BN6's +7 */
+#define BN4_CHIP_DARK     0x20        /* its +9 (BN6's effect flags): a DarkChip, ids 187-194 (DrkCanon to DrkRecov), as BN6's mark */
+#define BN4_NAVI_CHIPS    221         /* the Navi chips: 20 Navis from Roll to VideoMan, three each (his own, SP, DS) */
+#define BN4_SOUL_CHIPS    0x160       /* the Souls' pseudo-chips, kind 15: 0x160 + the Soul (1-12), MegaSoul 0x160, DarkSoul 0x16F */
+#define BN4_SOUL_KINDS    0x08020008u /* a byte per Soul 1-12: the chip kind it unites by (Roll 4 Recovery .. Wood 3), as BN5_SOUL_KINDS */
+#define BN4_SOUL_FLAGS    0x08020018u /* a byte per Soul: its event flag, 0x17-0x1C Red Sun's six, 0xFF Blue Moon's six (refused) */
+#define BN4_UNITE_CHECK   0x0801FF84u /* the last pick's kind a Soul's, its flag set, not used this battle (0x0203BF88's bit): BN5's twin */
+#define BN4_FLAG_DOUBLE_SOUL 0x0014   /* UNITE stands only with it set and MegaMan neither worried nor dark (0x0801E0B4) */
 #define BN4_CHIP_COUNT    389         /* ids 0-388 */
 #define BN4_GET_CHIP      0x080190D0u /* getChip: BN6's (0x08021AA4) found by its bytes, its literal BN4_CHIP_RECORDS */
 #define BN4_CHIP_NAMES    0x087481D8u /* text archive: the chips' names, ids 0-255 (letters and digits spelt as BN6's) */
 #define BN4_CHIP_NAMES_HI 0x08748C14u /* ... ids 256 on */
 #define BN4_ENEMY_NAMES   0x0874A780u /* text archive: the enemies' names by id (a Navi's four versions in a row from 128) */
 #define BN4_GET_RNG       0x08001B00u /* GetRNG: BN6's (0x0800151C) found by its calls and bytes */
+#define BN4_BATTLE_BGS    0x0808563Cu /* its battle backgrounds' records, a pointer each, 27 (BN6 22), read by the loader at 0x08085430 */
+#define BN4_BATTLE_BG_COUNT 27        /* the backgrounds, ids 0x00-0x1A (3 and 9 share a record) */
+#define BN4_BG_RECORD_SIZE 0x24       /* a background's record: 9 words (BN5's and BN6's 7): tiles, their EWRAM buffer, VRAM; the map, its
+                                       * buffer, its place; the palette, its RAM (BN4_BG_PALETTE_RAM) and size */
+#define BN4_BG_PALETTE_RAM 0x03002A50u /* the record's +0x1C: where its colours go (BN5's 0x03003960, BN6's 0x03001960) */
+#define BN4_BATTLE_BG_ANIMS 0x08085A50u /* per background its animation scripts' list, 0xFFFFFFFF ending it (14 empty), BN6's scripts' header */
+#define BN4_BATTLE_BG_SCROLL 0x08085488u /* per background its scroll callbacks, 16 bytes (the second word the motion, as BN6's) */
+#define BN4_MAP_BACKDROPS 0x08085BD0u /* per net group (group - 0x80) a pointer to a byte per map: the background of a record whose
+                                       * BN4_RECORD_BACKDROP is 0xFF (0x08085BAC): ACDC Area 4, Town Area 5, Park Area 6, the Undernet 8 */
+#define BN4_MAP_ENTERS    0x08026634u /* the net's groups' EnterMapGroup routines (21, 0x80-0x94; stubs where a group has no maps), its
+                                       * dispatch 0x080266E8 as BN5's; LoadBGAnim the routine's fifth call, not its first as BN5's */
+#define BN4_MAP_ANIMS     0x08026688u /* ... their LoadGFXAnims routines (dispatch 0x08026718), called before EnterMapGroup as in BN6 */
 
 #endif

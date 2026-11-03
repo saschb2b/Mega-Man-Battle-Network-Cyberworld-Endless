@@ -32,10 +32,10 @@ Colonel has, by name, with the community's lists as the check
 | Pool | In BN4 Red Sun | New to a run | Cost, as [Data, not code](data-not-code.md) counts it |
 | --- | --- | --- | --- |
 | Net areas | 22 large maps in five groups: ACDC Area 1-3 (lime), Town Area 1-4 (teal), Park Area 1-3 (lavender), Netfrica, Netopia, Sharo and YumLand (one each), the Undernet 1-6 and Black Earth 1-2 (dark green circuits) | All five looks; each map draws whole through the engine's own map reader as it is | moderate, BN5's road |
-| Music | 33 songs | All; its battle and boss themes are what players rate best | low, once a copied song is checked against BN4's own playing (its sound engine is another build) |
+| Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: every song passes `src/audio/xsong.c`'s rules, its one drum kit copied by the keys played |
 | Viruses | 22 families, six versions each | 17: VolGear, Billy, Gaia, Spikey, Shrimpy, Boomer, MagTect, Melody, Dharma, Kilby, Weather, Spidy, CirKill, Moloko, Walla, Elemperor, and Black Earth's sword-only NavBlack and NavShado | a recipe each, as [Transplanted families](families.md) |
 | Navis | 25 bosses with Duo and Bass | 18: Red Sun's Soul Navis GutsMan, FireMan, Roll, WindMan, ThunderMan and SearchMan; Blue Moon's AquaMan, WoodMan, MetalMan and JunkMan, whom Red Sun's tournaments fight too; TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan, VideoMan; Duo | a recipe each, as [Transplanted Navis](navis.md) |
-| Souls | Red Sun's six (Guts, Fire, Roll, Wind, Thunder, Search) | All six; the ROM names Blue Moon's six too, and whether they run in Red Sun is a lead to check in romlab | high, as [Transplanted Souls](souls.md) |
+| Souls | Red Sun's six (Guts, Fire, Roll, Wind, Thunder, Search), by BN5's rule (a chip of the Soul's kind) | All six (UNITE lit for WindSoul in romlab); Blue Moon's six are in its tables, refused by their flags; given one, ProtoSoul's UNITE lights, and whether its form runs is open | high, as [Transplanted Souls](souls.md) |
 | Chips | 389 records | About 225 names neither game has: some 60 Navi chips of the Navis above (V1, SP, DS), its Program Advances (MagShok, PitHoky, BstFang, FlmCros, PitRng, DarkNeo and more), the Gigas RedSun, HolyDrem, BugCharg and BlakBarr; many others BN4's numbering of chips the run has (Thunder1-3, AirHoc1-3), to be told apart by behaviour | a unit each where BN6 lacks the code; [the chip registry](chip-registry.md) grown past 512 |
 | DarkChips | 8 | DrkCanon, DarkBomb, DrkVulcn, DrkSpred and DrkStage by name | a unit each |
 
@@ -44,8 +44,11 @@ further from BN6's. A third of bn6f's functions are found in BN5 by their
 bytes and an eighth in BN4; of the 69 routines of BN6's that the moved
 families and Navis call, BN4 shows 46 by bytes, BN5 59. Each transplant
 has more of its engine to pair before its recipe is whole, and its
-differential needs BN4's own battle run on the guest core first, its enemy
-tables not yet found ([BN4 Red Sun's tables](../rom/bn4.md), Enemy ids table).
+differential needs BN4's own battle on the guest core first, which reads
+BN4's save block through eToolkit, as BN4 moves it in RAM at each change
+of mode ([BN4 Red Sun's tables](../rom/bn4.md), The battle in RAM): about a day or two
+for battles that start, end and report, a week more for the differential's
+view of its objects.
 
 ## What players said, and what follows
 
@@ -142,8 +145,9 @@ battle frame by frame, as BN5's were.
 0. **The ROM and the harness.** Done, for research (3 November 2026):
    BN4 an extra ROM's entry read only when a dev tool asks (the atlas's
    `x1` draws its maps), `src/emu/bn4.h` and BN4's symbol files, its
-   battle records, encounter check, enemy and chip records and sprite
-   lists found ([BN4 Red Sun's tables](../rom/bn4.md)), and `tools/bn4_lab.py`
+   battle records, encounter check, enemy and chip records, sprite lists,
+   battle backgrounds, map routines, music, Souls and the battle in RAM
+   found ([BN4 Red Sun's tables](../rom/bn4.md)), and `tools/bn4_lab.py`
    starting any BN4 battle in romlab. Moved to Phase 1, where BN4 first
    lends a run something: the ROMs screen, the phones' pickers, the
    browser and the 3DS's heap (`tools/heap3ds.py`), and the guest core
