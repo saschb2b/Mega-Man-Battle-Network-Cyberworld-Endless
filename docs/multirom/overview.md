@@ -26,4 +26,5 @@ optional, and the more there are, the bigger the pools a run draws from.
 - [The chips' code](chips-code.md)
 - [Transplanted Souls](souls.md)
 - [BN5's music in a run](music.md)
+- [Battle Network 4 in a run](bn4.md)
 - [Status](status.md)

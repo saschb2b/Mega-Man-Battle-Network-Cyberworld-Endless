@@ -81,7 +81,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-26",
+  "updated": "2026-11-03",
   "previous": "2026-10-18",
   "features": [
     {
@@ -164,6 +164,15 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-10-26",
       "link": "../world/home/jobs.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN4 Red Sun's ROM",
+      "state": "planned",
+      "now": "Its tables found by BN5's and BN6's shapes (docs/rom/bn4.md): the map lists 0x028304 and 0x02834C (22 large net maps in groups 0x84-0x88, each drawn whole by a copy of the engine's map reader), coordinates 0x028F04, songs 0x155FF8 (457, 33 of music), chip records 0x0197EC (0x2C each, 389 ids), chip names 0x7481D8 and 0x748C14, enemy names 0x74A780; bn6f's functions found in it by bytes: 1,650 of 13,646 (BN5 4,329).",
+      "left": "Its enemy ids, stats and battle records (BN6's GetVerActorTyAndAIIdx is not in it), sprite lists, Navi and Soul tables; its battle run on the guest core as the differential's reference; its engine paired with BN6's beyond the 46 of 69 routines found by bytes; whether Blue Moon's six Souls run in Red Sun.",
+      "updated": "2026-11-03",
+      "link": "../multirom/bn4.md",
+      "state_text": "Planned"
     }
   ],
   "decisions": [],
@@ -278,6 +287,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-03",
+      "name": "BN4's tables by the shapes BN5's were found by",
+      "result": "tools/rom_tables.py found its map and coordinate tables; a song-header scan found its song table and, as the control, BN5's at its known 0x155BF4; Cannon's codes at a 0x2C stride found its chip records and, as the control, BN5's record 1 (0x01E23C); its text spells letters as BN6's (Cannon, Mettaur found); every map of groups 0x80-0x88 drew whole in a Python copy of area_src.c's reader; tools/bn6f_match.py with BN4 in BN5's place located 1,650 functions and none of bn6f's RAM labels at Falzar's addresses.",
+      "meaning": "BN4's data travels into BN6 as BN5's did (maps, songs, names, chip records in BN6's size); its code is further from BN6's than BN5's, so each transplant pairs more of its engine first.",
+      "link": "../rom/bn4.md"
+    },
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-25",
