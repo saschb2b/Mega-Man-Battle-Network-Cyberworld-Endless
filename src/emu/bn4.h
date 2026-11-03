@@ -23,9 +23,49 @@
 #define BN4_BATTLE_REWARD 0x0203BD4Cu /* u16: the reward the results screen gives (a Mettaur's: 0x0058, Guard1 A), the Busting level at -7 */
 #define BN4_BATTLE_NAVI   0x0203BEC0u /* the battle's NaviStats, 0x40 a side (GetBattleNaviStatsAddr, 0x0800D742), HP at +0x30 */
 #define BN4_CUSTOM_GAUGE  0x02036414u /* u16, full at 0x4000 (SetCustGauge, 0x08016810: its struct 0x020363F0 + 0x24) */
+#define BN4_OBJECT_KINDS  0x080031B8u /* the object runner's (0x0800314C) table by kind: the first kind's types BN4_T1_TYPES, the third's
+                                       * 0x08003C40 (165), the fourth's 0x08003F78 (130); each type run with `mov lr,pc; bx` */
+#define BN4_T1_TYPES      0x08003A24u /* the first kind's 95 types, a routine each: the virus families, the Navis, MegaMan. A family's routine
+                                       * runs a jump table on +8 (0 its init, 4 its update: the pre-step 0x080137BC, the state runner
+                                       * 0x08013C48 with its state table, the collision's present 0x08012D62; 8 the shared dying state):
+                                       * BN4 has none of BN6's per-family tables */
+#define BN4_ID_RAISE      0x0800B036u /* an enemy id raised by the level ([eToolkit +0x44] +0xD, at most 2): a virus's by 2 a level (to its
+                                       * version 5), a Navi's by 1; that the level is the playthrough's is assumed */
+#define BN4_COLL_SIZE     0x90        /* an object's collision data (BN5's 0xA0, BN6's 0xA8), its offsets otherwise */
 #define BN4_T1_OBJECTS    0x0203B180u /* the battle's first kind of objects, BN4_T1_SIZE each, 8 (BN5 16, BN6 32): MegaMan first */
 #define BN4_T1_SIZE       0xD8
-#define BN4_T1_HP         0x24        /* u16: an object's HP (MegaMan's 0x0203B1A4, the first enemy's 0x0203B27C; poked, the screen followed) */
+#define BN4_T1_COUNT      8           /* (the kinds' descriptor at 0x08003440: 0x6C0 bytes) */
+#define BN4_T1_TYPE       0x01        /* its type (BN4_T1_TYPES), an enemy's its record's BN4_ENEMY_TYPE; MegaMan 0 */
+#define BN4_T1_NAME_ID    0x0F        /* u8: its enemy id (BN6's NAME_ID is a u16 at +0x28, 0 on every BN4 object) */
+#define BN4_T1_PANEL_X    0x12        /* its panel's column, then its row at +0x13, the ones it moves to at +0x14 and +0x15, as BN6's */
+#define BN4_T1_ALLIANCE   0x16        /* its side, as BN6's */
+#define BN4_T1_ELEMENT    0x17        /* its element (BN6's +0x0E; BN6's flip at +0x17, which BN4 has none of) */
+#define BN4_T1_HP         0x24        /* u16: an object's HP (MegaMan's 0x0203B1A4, the first enemy's 0x0203B27C; poked, the screen followed);
+                                       * its max at +0x26, as BN6's */
+#define BN4_T1_X          0x34        /* 16.16: its place, Y at +0x38 and Z at +0x3C, as BN6's */
+#define BN4_T1_COLLISION  0x54        /* its collision data, as BN6's */
+#define BN4_T1_AI_DATA    0x58        /* its AI data, as BN6's: 0 on a virus */
+#define BN4_T3_OBJECTS    0x0203C080u /* the third kind's objects, 32 of 0xD8 (the buster's shots among them) */
+#define BN4_T4_OBJECTS    0x02037D10u /* the fourth kind's, 32 of 0xC8 */
+#define BN4_OBJECT_LIST   0x02009E40u /* the run list's head, its end 0x0200A4C0 (BN6's 0x02009380, 0x02009AB0) */
+#define BN4_TOOLKIT_COLLISION 0x30    /* eToolkit +0x30: the collision data's pool, 32 of BN4_COLL_SIZE (0x02039A10) */
+#define BN4_COLL_ALLIANCE 0x03        /* collision data: its side (BN6's +4) */
+#define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
+#define BN4_COLL_PARALYSIS 0x10       /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
+#define BN4_COLL_FLASH    0x18        /* ... u16: the flashing after a hit (BN6's +0x24): 0x78, less 1 a frame, blinking by bit 2 */
+#define BN4_COLL_INVULNERABLE 0x1C    /* ... u16: invulnerability's frames (BN6's +0x28); BN4 has no freeze or bubble */
+#define BN4_COLL_FINAL_DAMAGE 0x28    /* ... u16: the HP a hit takes, subtracted at 0x08013C58 (BN6's +0x80) */
+#define BN4_COLL_FLAGS    0x64        /* ... u32: ObjectFlags1, BN6's bits (BN6's +0x3C) */
+#define BN4_COLL_STRUCK   0x68        /* ... u32: ObjectFlags2, BN6's bits (BN6's +0x40) */
+#define BN4_AI_DATA       0x02035B20u /* the AI data: one a side (MegaMan's, a Navi's), 0xC0 each, no pool (BN6 8 of 0x100) */
+#define BN4_AI_DATA_SIZE  0xC0        /* (0x0800BFF4: `movs r1,#0xc0; muls`, then BN4_AI_DATA) */
+#define BN4_AI_ATTACK_VARS 0x70       /* AI data: the attack's variables, 0x50 (BN6's +0xA0); the damage at +0x78, the chip at +0x84 */
+#define BN4_FIELD_PANELS  0x0203AC70u /* the panels, BN4_PANEL_SIZE each, (row * 8 + column) << 5 */
+#define BN4_PANEL_SIZE    0x20
+#define BN4_PANEL_TYPE    0x00        /* a panel's type, 2 plain (BN6's +2) */
+#define BN4_PANEL_ALLIANCE 0x01       /* its side (BN6's +3) */
+#define BN4_PANEL_FLAGS   0x04        /* u32: its type, flags, side and occupants (BN6's +0x14) */
+#define BN4_PANEL_RESERVER 0x14       /* the object that reserved it (BN6's +0x1C) */
 #define BN4_RNG_PRIMARY   0x02001790u /* the main RNG's state (GetRNG's literal) */
 #define BN4_PLAY_MUSIC    0x08000568u /* PlayMusic: r0 the song (0xFF stops it), kept at the game state's +0x19; not again while it plays */
 #define BN4_MPLAYS        0x08155E78u /* the music players' table (m4aSongNumStart, 0x08112848); songs 0x00-0x21 on player 31 */
@@ -67,8 +107,9 @@
 #define BN4_ENEMY_STAT_SIZE 12
 #define BN4_ENEMY_COUNT   253         /* ids 0-252, as its enemy names archive (BN4_ENEMY_NAMES) holds them */
 #define BN4_ENEMY_HP      0x00        /* u16: element << 12 | HP (Mettaur 40, VolGear Fire 80), as BN6's stats' first word */
-#define BN4_ENEMY_KIND    0x03        /* 4 a virus, 8 a Navi */
-#define BN4_ENEMY_FAMILY  0x04        /* the virus's family (1 Mettaur, 2 VolGear, 3 Billy) or the Navi's number (1 Roll, 2 GutsMan) */
+#define BN4_ENEMY_TYPE    0x02        /* its first-kind object type (BN4_T1_TYPES): its family's own code (Mettaur 0x02, Billy 0x13, Spikey 0x17) */
+#define BN4_ENEMY_KIND    0x03        /* its sprite's list, as an offset (4 list 1, the viruses'; 8 list 2, the Navis'), read at 0x08002B0E */
+#define BN4_ENEMY_FAMILY  0x04        /* its sprite's number in that list: the virus's family (1 Mettaur, 3 Billy) or the Navi's (1 Roll) */
 #define BN4_ENEMY_VERSION 0x05        /* its version in its family: 0-5 (V1, EX, V2, EX, V3, EX) */
 #define BN4_ENEMY_ATTACK  0x0A        /* u16: its attack's damage (Mettaur 10, Mettaur3 160) */
 #define BN4_CHIP_RECORDS  0x080197ECu /* its chip records, 0x2C bytes each as BN6's: codes at +0, power at +0x1A, +4 and +5 as BN6's; +6 to +8 not */

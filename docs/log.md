@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-04
+* **Update**: rom/bn4.md, BN4's battle objects, collision and AI data and panels against BN6's, for the differential's view of a BN4 battle.
+* **Update**: rom/bn4.md, BN4's virus families: each an object type of its own (an enemy record's +2), no per-family tables, no AI data, the routines they call against BN6's; multirom/bn4.md, what that costs a BN4 family's recipe.
 * **Update**: multirom/bn4.md, the owner's first call: BN4 comes, its viruses first.
 
 ## 2026-11-03
