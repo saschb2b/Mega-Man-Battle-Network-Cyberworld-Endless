@@ -3,6 +3,7 @@
 ; addresses, names and descriptions only. docs/rom/symbols.md says what is here and how to load it:
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
+020015D4 BN4_RNG_SECONDARY
 02001790 BN4_RNG_PRIMARY
 02009E40 BN4_OBJECT_LIST
 02009E70 BN4_TOOLKIT

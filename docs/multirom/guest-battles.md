@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Guest battles"
-description: "History of BN5's battles fought on a second mGBA core (`src/emu/guest.c`, epic #57) before issue #82 moved every battle into BN6's engine; the guest core now serves only as the differential's reference."
+description: "History of BN5's battles fought on a second mGBA core (`src/emu/guest.c`, epic #57) before issue #82 moved every battle into BN6's engine; the guest core now serves only as the differential's reference, BN5's battles and BN4 Red Sun's."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-12T21:51:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:30:00Z }
 ---
 
 # Guest battles
@@ -12,7 +12,7 @@ What runs now: none. Every battle of a run is BN6's engine's, BN5's
 areas' too ([One net](one-net.md)), and the guest core (`src/emu/guest.c`) is
 the differential's alone: BN5's own battle as BN5 has it, booted once on
 the main thread and kept as `xdiff-bn5.state` in the differential's data
-folder (`build.py xdiff`, [The differential: a moved family against its own game](../devtools/differential.md)). A data
+folder, or BN4 Red Sun's (below) (`build.py xdiff`, [The differential: a moved family against its own game](../devtools/differential.md)). A data
 folder a run's guest kept its boot state in (`guest-bn5-1.state`) has it
 removed once at the next start (`src/core/startup.c`). What it took a
 run, gone with it: BN5's first boot (7210 of its frames: five seconds of
@@ -21,6 +21,22 @@ frames' spare time), the switch of engines and its flash, the older
 net's wait screen, the chips that sat out of its battles for want of a
 BN5 namesake and the codes it read its own way, the guest's ROM copy in
 the browser's memory (below), and some 2,500 lines of run code.
+
+BN4 on the guest: the core runs BN4 Red Sun's battles too, a game a
+process, each game a `GuestGame` in `guest.c` (its boot's presses, the
+routine patched to answer a record and the record's layout, its modes,
+where its HP and RNG words go). BN4's boot is `tools/bn4_lab.py`'s,
+kept as `xdiff-bn4.state`; its encounter check answers the record, 12
+bytes and its 4-byte entities ([BN4 Red Sun's tables](../rom/bn4.md),
+Battle records); its save block moves at each change of mode, so it is
+read through eToolkit, and its HP is written as the battle begins, BN4
+writing the NaviStats afresh as a battle is asked. `--xdiff
+"game=bn4;foes=01@52;hp=60"` fights one alone and says won or lost and
+the HP left (`src/dev/xdiff_bn4.c`); BN5's traces and boot state stayed
+byte for byte what they were. What is left for the differential's BN4
+view: a trace of BN4's battle (its objects, panels and timer mapped),
+keys by its battle's timer, and the subject, BN4's families moved into
+BN6's engine ([Battle Network 4 in a run](bn4.md)).
 
 The history (epic #57, issues #61-#69 and #102, until issue #82's last
 round), for what it taught the engine's port:

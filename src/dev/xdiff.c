@@ -48,6 +48,7 @@
 #include "soulunite.h"
 #include "thumb_reloc.h"
 #include "xchips_install.h"
+#include "xdiff_bn4.h"
 #include "xdiff_spec.h"   /* (and xdiff_events.h, its twins') */
 #include "xfields.h"
 #include "xinstall.h"
@@ -838,6 +839,7 @@ int xdiff_run(const char *text) {
 		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/devtools/differential.md)\n");
 		return 2;
 	}
+	if (s.bn4) return xdiff_bn4_run(&s);
 	if (!XR[XROM_BN5_COLONEL_US].data) {
 		fprintf(stderr, "xdiff: BN5 Team Colonel's ROM is not beside BN6's\n");
 		return 2;
