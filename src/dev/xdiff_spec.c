@@ -188,6 +188,14 @@ static int breaks_parse(Spec *s, const char *name, const char *v) {
 	return 1;
 }
 
+/* game=bn5|bn6: one of them alone; bn4: BN4's own battle alone (xdiff_bn4.h) */
+static bool game_parse(Spec *s, const char *v) {
+	s->bn5 = !strcmp(v, "bn5");
+	s->bn6 = !strcmp(v, "bn6");
+	s->bn4 = !strcmp(v, "bn4");
+	return s->bn5 || s->bn6 || s->bn4;
+}
+
 static bool item_parse(Spec *s, const char *name, char *v) {
 	int r = numbers_parse(s, name, v);
 	if (r < 0) r = breaks_parse(s, name, v);
@@ -212,11 +220,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 		s->field6 = got == 2 && f6 < 0x100 ? (int)f6 : -1;
 		return s->field >= 0 && (got == 1 || s->field6 >= 0);
 	}
-	if (!strcmp(name, "game")) {
-		s->bn5 = !strcmp(v, "bn5");
-		s->bn6 = !strcmp(v, "bn6");
-		return s->bn5 || s->bn6;
-	}
+	if (!strcmp(name, "game")) return game_parse(s, v);
 	return false;
 }
 

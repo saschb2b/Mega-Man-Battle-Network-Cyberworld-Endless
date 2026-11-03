@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-04
+* **Update**: multirom/guest-battles.md, rom/bn4.md, code/emu.md, code/dev.md, devtools/differential.md: the guest core runs BN4 Red Sun's battles too (a `GuestGame` per game, `xdiff-bn4.state`, its HP written as the battle begins), `--xdiff "game=bn4;..."` fights one alone and says won or lost and the HP left; BN4's second RNG word and the guest's record place named.
 * **Update**: multirom/bn4.md, the owner's first call: BN4 comes, its viruses first.
 
 ## 2026-11-03

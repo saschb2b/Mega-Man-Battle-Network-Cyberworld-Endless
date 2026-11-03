@@ -14,6 +14,7 @@
 #define BN4_TOOLKIT_FOLDERS 0x4C      /* eToolkit +0x4C: the folders, 30 u16 each (chip | code << 9), in the moving block */
 #define BN4_TOOLKIT_NAVI_STATS 0x78   /* eToolkit +0x78: MegaMan's NaviStats, 0x40 bytes (BN5's 0x60), in the moving block */
 #define BN4_NAVI_HP       0x30        /* NaviStats +0x30: HP (a battle ended at 37 began the next at 37), +0x32 and +0x34 the max HPs */
+#define BN4_NAVI_MAX_HPS  0x32        /* NaviStats +0x32 and +0x34: the max HPs, u16 each (which is the base assumed; the guest's battles write both) */
 #define BN4_MODE_MAP      4           /* eToolkit [+0]'s main mode on the map (the game state's +0 too) */
 #define BN4_MODE_BATTLE   8           /* ... in a battle, a main mode of its own in BN4 */
 #define BN4_MODE_GAME_OVER 0x18       /* ... at GAME OVER */
@@ -27,6 +28,8 @@
 #define BN4_T1_SIZE       0xD8
 #define BN4_T1_HP         0x24        /* u16: an object's HP (MegaMan's 0x0203B1A4, the first enemy's 0x0203B27C; poked, the screen followed) */
 #define BN4_RNG_PRIMARY   0x02001790u /* the main RNG's state (GetRNG's literal) */
+#define BN4_RNG_SECONDARY 0x020015D4u /* the second RNG's state: stepped by GetRNG's twin at 0x08001B30, the same code on its own word */
+#define BN4_FREE          0x08800000u /* the guest core's ROM copy past BN4's 8 MB: its records (src/emu/guest.c) */
 #define BN4_PLAY_MUSIC    0x08000568u /* PlayMusic: r0 the song (0xFF stops it), kept at the game state's +0x19; not again while it plays */
 #define BN4_MPLAYS        0x08155E78u /* the music players' table (m4aSongNumStart, 0x08112848); songs 0x00-0x21 on player 31 */
 #define BN4_SOUND_INFO    0x030036A0u /* MP2K's SoundInfo (BN6's 0x030045C0), sound mode 0x0093040D as BN6's, 32 players */

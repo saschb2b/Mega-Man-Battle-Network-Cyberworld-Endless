@@ -73,6 +73,7 @@ typedef struct {
 	int ntwins;
 	char out[256];
 	bool bn5, bn6, follow, replay;
+	bool bn4;           /* (game=bn4) BN4 Red Sun's own battle alone on the guest core (xdiff_bn4.h) */
 } Spec;
 
 /* SPEC's items into s (its defaults first): false, said on stderr, where

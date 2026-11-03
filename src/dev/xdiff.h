@@ -25,7 +25,10 @@
  *                      frame (BN5's buster draws once more a shot than
  *                      BN6's: docs/devtools/differential.md)
  *   out=PATH           the traces: PATH.bn5 and PATH.bn6
- *   game=bn5|bn6       one of them alone
+ *   game=bn5|bn6       one of them alone; game=bn4: BN4 Red Sun's own
+ *                      battle alone on the guest core, BN4's enemy ids in
+ *                      foes=, fought to its end and its result said
+ *                      (xdiff_bn4.h)
  *   flags5=0000,000C   event flags (hex) set in BN5 before its battle (eToolkit
  *                      +0x44: Double Soul's 0000, a Soul's 0008 + k, Chaos
  *                      Unison's 0236); flags6= BN6's
