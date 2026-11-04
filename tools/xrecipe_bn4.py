@@ -47,7 +47,8 @@ FAMILIES = ((0x13, 'Billy', 13),)
 BN4 = dict(t1=0x08003A24, nt1=95, stats=0x08011888, stat_size=12, names=0x0874A780,
            prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C,
            sprite_load=0x0800287C, shadow=0x08002E96, no_shadow=0x08002FE2, palette=0x08002DEC,
-           byname=0x080B6568, sprites=0x0802793C, effects=0x080E1698, neffects=111, spawn_effect=0x080E18EE)
+           byname=0x080B6568, sprites=0x0802793C, effects=0x080E1698, neffects=111, spawn_effect=0x080E18EE,
+           set_flag=0x08012F82)
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x03: 0x04, 0x08: 0x0A, 0x09: 0x0B, 0x10: 0x1C, 0x18: 0x24, 0x1C: 0x28, 0x28: 0x80, 0x64: 0x3C, 0x68: 0x40}
@@ -146,10 +147,11 @@ def type_table(b4, f):
 
 
 def struct1_of(b4, f, init):
-    """its sprite (list, number), palette step and shadow from its init's calls"""
+    """its sprite (list, number), palette step and shadow from its init's calls, and the struct2 flags BN6's virus init
+    sets for what its init sets itself (setFlag1 with 0x02000000: struct2 +3 bit 0x08, BN6's init 0x08017002)"""
     w = T.walk(b4, init, region=(f.lo, f.hi))
     f.walks[init & ~1] = w
-    s = dict(list=None, index=None, palette=None, shadow=None)
+    s = dict(list=None, index=None, palette=None, shadow=None, stats_flags=0)
     for site, t in sorted(w.bls.items()):
         if t == BN4['sprite_load']:
             lst, _ = T.back_value(w, site, 1)
@@ -163,6 +165,13 @@ def struct1_of(b4, f, init):
             prev = [w.insns[a] for a in sorted(w.insns) if a < site][-2:]
             if [i.form for i in prev] == ['ldrb', 'lsls'] and prev[0].f[1:] == (5, 4):
                 s['palette'] = 1 << prev[1].f[2]
+        elif t == BN4['set_flag']:
+            v, _ = T.back_value(w, site, 0)
+            if v == 0x02000000:
+                s['stats_flags'] |= 0x08
+            else:
+                f.decide('struct2', f'its init sets object flags {v if v is None else hex(v)} (setFlag1 at {site:08X}): '
+                                    f'no struct2 flag of BN6\'s the generator knows sets them')
     for k, v in s.items():
         if v is None:
             f.decide('struct1', f'its init ({init:08X}) gives no {k} the generator reads')
@@ -581,7 +590,7 @@ def c_recipe(f):
     L.append('\t.names = { ' + ', '.join(f'0x{f.first + v:02X}' for v in range(6)) + ' },')
     L.append('\t.ice = 0,')
     L.append(f'\t.traits = {{ .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = {"true" if f.s1["shadow"] else "false"}, '
-             f'.palette = {f.s1["palette"]} }},')
+             f'.palette = {f.s1["palette"]}, .stats_flags = 0x{f.s1["stats_flags"]:02X} }},')
     L.append(f'\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
     if f.effects:
         L.append(f'\t.effects = {n}_effects, .neffects = {count("effects")},')
@@ -608,7 +617,7 @@ def report(fams, path):
             L += [f'- region {f.lo:08X}-{f.hi:08X}, its routine\'s jump table {f.type_table:08X} (init {f.init:08X}, update {f.update:08X})',
                   f'- state table {f.st:08X}: its own states {", ".join(f"{x:08X}" for x in f.own)} as BN6\'s 8-{7 + len(f.own)}',
                   f'- struct1: sprite list {f.s1["list"]} number {f.s1["index"]}, palette step {f.s1["palette"]}, shadow {f.s1["shadow"]}, '
-                  f'element {f.element}',
+                  f'element {f.element}; struct2\'s flags 0x{f.s1["stats_flags"]:02X}',
                   f'- as AI {f.ai}, ids {f.first_id:#x}-{f.first_id + 5:#x}, home {f.home:08X}',
                   f'- blocks: ' + ', '.join(f'{lo:08X}-{hi:08X} at {at:08X}' for lo, hi, at, _ in f.blocks),
                   f'- {len(f.walks)} routines walked, {len(f.tables)} jump tables, {len(f.imms)} immediates rewritten, '

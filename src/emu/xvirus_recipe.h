@@ -92,6 +92,8 @@ typedef struct {
 	uint8_t element, weakness; /* BN6's second wheel: BN5's viruses have none */
 	bool shadow;
 	uint8_t palette;           /* its palette step where its game has no struct1 (BN4: its init's); 0 where its game's record gives it */
+	uint8_t stats_flags;       /* struct2's +3 where its game has no struct2 (BN4: 0x08 where its init sets object flag 0x02000000
+	                              itself, which BN6's virus init sets from that bit, 0x08017002); 0 where its game's record gives it */
 } XvTraits;
 
 typedef struct {

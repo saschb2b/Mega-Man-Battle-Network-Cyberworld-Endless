@@ -130,7 +130,7 @@ static const XVirusFamily bn4_billy = {
 	.struct1 = 0x08011924, .struct2 = 0x08011924,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
 	.names = { 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12 },
 	.ice = 0,
-	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 2 },
+	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 2, .stats_flags = 0x08 },
 	.sprites = billy_sprites, .nsprites = (int)(sizeof billy_sprites / sizeof *billy_sprites),
 	.effects = billy_effects, .neffects = (int)(sizeof billy_effects / sizeof *billy_effects),
 };

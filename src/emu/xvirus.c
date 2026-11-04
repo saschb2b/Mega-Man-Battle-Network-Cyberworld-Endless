@@ -662,8 +662,11 @@ static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 		uint8_t *o = out + BN6_STATS_SIZE * v;
 		put16(o, hp);
 		o[2] = (uint8_t)v;
-		o[3] = 0;
-		put16(o + 4, (uint16_t)((hp & 0xF000u) | (get16(r + BN4_ENEMY_ATTACK) & 0x0FFFu)));
+		o[3] = f->traits.stats_flags;
+		/* (its attack's word as BN4's, no element: BN6's collision setup,
+		 * 0x08019F44, reads the word's top four bits as the hit's properties,
+		 * 15 and 14 as BN4's own does, 0x08012860, 13 and 12 its own) */
+		put16(o + 4, get16(r + BN4_ENEMY_ATTACK));
 	}
 }
 
