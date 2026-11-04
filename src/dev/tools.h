@@ -1,5 +1,5 @@
 /* The dev tools the game's binary runs instead of the game (tools.c):
- * --atlas, --pacing, --economy, --render-song, --sheet, --xdiff, --xrecords. */
+ * --atlas, --pacing, --economy, --render-song, --sheet, --xdiff, --xrecords, --mp2k-trace, --xsong-pack. */
 #ifndef CW_TOOLS_H
 #define CW_TOOLS_H
 

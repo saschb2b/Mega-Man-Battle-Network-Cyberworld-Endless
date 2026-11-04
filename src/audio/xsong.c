@@ -2,8 +2,9 @@
  * voice group), the tracks' command streams, and the voice group's voices
  * with what they point at: samples, programmable waves, the sub-voices
  * and key tables of key splits, the 128 sub-voices of a drum kit. A song
- * takes along only the voices it selects, and a sample two songs share is
- * copied once. */
+ * takes along only the voices it selects (and, from a game whose layout
+ * says so, only the kit's keys its tracks play), and a sample two songs
+ * share is copied once. */
 #include "xsong.h"
 
 #include <stdio.h>
@@ -29,6 +30,7 @@
 #define TRACKS_MAX  8
 #define SEQ_MAX     0x8000  /* a song's sequence: its tracks and header */
 #define PTRS_MAX    512
+#define TODO_MAX    1024    /* the ways a walk has still to go: a track's start or a branch's each (BN4's 0x1C holds 227) */
 #define BUS         0x08000000u
 
 bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *starts, int nstarts, uint32_t *ptrs, int *nptrs, int maxptrs,
@@ -36,9 +38,9 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
 	static uint8_t seen[SEQ_MAX / 8];
 	if (n > SEQ_MAX) return false;
 	memset(seen, 0, (n + 7) / 8);
-	uint32_t todo[64];
+	static uint32_t todo[TODO_MAX];
 	int ntodo = 0;
-	for (int t = 0; t < nstarts && ntodo < 64; ++t) todo[ntodo++] = starts[t];
+	for (int t = 0; t < nstarts && ntodo < TODO_MAX; ++t) todo[ntodo++] = starts[t];
 	while (ntodo) {
 		uint32_t o = todo[--ntodo];
 		while (o < n && !(seen[o >> 3] >> (o & 7) & 1)) {
@@ -51,7 +53,7 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
 			 * written in place the first time runs on past its PEND) */
 			if (c == 0xB2 || c == 0xB3 || c == 0xB5) {
 				uint32_t at = o + 1 + (c == 0xB5);
-				if (at + 4 > n || *nptrs >= maxptrs || ntodo >= 64) return false;
+				if (at + 4 > n || *nptrs >= maxptrs || ntodo >= TODO_MAX) return false;
 				uint32_t to = get32(seq + at) - base;
 				if (to >= n) return false;
 				ptrs[(*nptrs)++] = at;
@@ -67,6 +69,69 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
 				continue;
 			}
 			++o;
+		}
+	}
+	return true;
+}
+
+/* (a byte of the sequence, 0xFF past its end: no argument, no command run on) */
+static uint8_t seq_at(const uint8_t *seq, uint32_t n, uint32_t o) { return o < n ? seq[o] : 0xFF; }
+
+/* Where a track's command `cmd` (its arguments from `a`) leaves off: the
+ * next command's offset, `n` where it ends the track (FINE, the commands
+ * that end it as FINE does); its VOICE's program and its note's or EOT's
+ * key noted (a note's velocity and extra gate after its key) */
+static uint32_t track_step(const uint8_t *seq, uint32_t n, uint8_t cmd, uint32_t a, uint8_t programs[16], uint8_t keys[16]) {
+	if (cmd <= 0xB0 || cmd == 0xB4) return a;   /* a wait, PEND (the pattern's run past, as xsong_walk takes it) */
+	if (cmd == 0xBD) {
+		uint8_t p = seq_at(seq, n, a);
+		if (p < 0x80) programs[p >> 3] |= (uint8_t)(1 << (p & 7));
+		return a + 1;
+	}
+	if ((cmd >= 0xBA && cmd <= 0xC5) || cmd == 0xC8) return a + 1;   /* one argument each */
+	if (cmd == 0xCC) return a + 2;   /* PORT: a register and its byte */
+	if (cmd == 0xCD) {   /* XCMD: its sub-command, then a pointer's four bytes or one */
+		uint8_t x = seq_at(seq, n, a);
+		return x == 1 ? a + 5 : x == 2 || (x >= 4 && x <= 11) ? a + 2 : n;
+	}
+	if (cmd < 0xCE) return n;
+	uint8_t k = seq_at(seq, n, a);
+	if (k >= 0x80) return a;
+	keys[k >> 3] |= (uint8_t)(1 << (k & 7));
+	++a;
+	for (int i = 0; cmd >= 0xCF && i < 2 && seq_at(seq, n, a) < 0x80; ++i) ++a;
+	return a;
+}
+
+bool xsong_track_keys(const uint8_t *seq, uint32_t n, uint32_t base, uint32_t start, uint8_t programs[16], uint8_t keys[16]) {
+	static uint8_t seen[SEQ_MAX / 8];
+	if (n > SEQ_MAX) return false;
+	memset(seen, 0, (n + 7) / 8);
+	static struct { uint32_t o; uint8_t running; } todo[TODO_MAX];
+	int ntodo = 0;
+	todo[ntodo++] = (__typeof__(todo[0])){ start, 0 };
+	while (ntodo) {
+		uint32_t o = todo[--ntodo].o;
+		uint8_t running = todo[ntodo].running;
+		while (o < n && !(seen[o >> 3] >> (o & 7) & 1)) {
+			seen[o >> 3] |= (uint8_t)(1 << (o & 7));
+			/* (a byte under 0x80 runs the last command from VOICE on again, its arguments from there) */
+			uint8_t cmd = seq[o];
+			uint32_t a = o + 1;
+			if (cmd < 0x80) {
+				if (!running) break;
+				cmd = running;
+				a = o;
+			} else if (cmd >= 0xBD) running = cmd;
+			/* GOTO, PATT, REPT: the way on there too */
+			if (cmd == 0xB2 || cmd == 0xB3 || cmd == 0xB5) {
+				uint32_t at = a + (cmd == 0xB5);
+				if (at + 4 > n || ntodo >= TODO_MAX || get32(seq + at) - base >= n) return false;
+				todo[ntodo++] = (__typeof__(todo[0])){ get32(seq + at) - base, running };
+				o = cmd == 0xB2 ? n : at + 4;
+				continue;
+			}
+			o = track_step(seq, n, cmd, a, programs, keys);
 		}
 	}
 	return true;
@@ -89,6 +154,11 @@ static struct {
 
 static const uint8_t *xr;   /* the ROM the song comes from */
 static int xr_id;
+/* The song's drum kits' keys, a bit each per program, where its game's are
+ * copied for those alone (XRomLayout.kit_keys_played): the keys of every
+ * track whose VOICE selects the program */
+static bool by_keys;
+static uint8_t kit_keys[128][16];
 
 /* `len` bytes into the free space, at a word; 0 where it is full. */
 static uint32_t put(const uint8_t *src, uint32_t len) {
@@ -134,7 +204,7 @@ static uint32_t copy_wave(uint32_t ptr) {
 	return len < 0x100000 ? copy_once(ptr, 16 + len + 1) : 0;
 }
 
-static bool copy_voice(const uint8_t *v, uint8_t out[12], bool sub);
+static bool copy_voice(const uint8_t *v, uint8_t out[12], bool sub, const uint8_t *keys);
 
 /* A key split's or drum kit's sub-voices (`n`), copied once; 0 where they
  * cannot be. */
@@ -144,22 +214,41 @@ static uint32_t copy_subs(uint32_t ptr, int n) {
 	if (ptr < BUS || off >= ROM_SIZE || (uint32_t)n * 12 > ROM_SIZE - off) return 0;
 	uint8_t subs[128 * 12];
 	for (int i = 0; i < n; ++i)
-		if (!copy_voice(xr + off + (uint32_t)i * 12, subs + i * 12, true)) return 0;
+		if (!copy_voice(xr + off + (uint32_t)i * 12, subs + i * 12, true, NULL)) return 0;
 	return keep(ptr, put(subs, (uint32_t)n * 12));
+}
+
+/* A drum kit's sub-voices for the keys `keys` names alone, the others a
+ * kit's type with no pointers (the sequencer plays no kit inside a kit:
+ * nothing), copied for its song alone; 0 where it cannot be. */
+static uint32_t copy_kit(uint32_t ptr, const uint8_t keys[16]) {
+	uint32_t off = ptr - BUS;
+	if (ptr < BUS || off >= ROM_SIZE || 128 * 12 > ROM_SIZE - off) return 0;
+	uint8_t subs[128 * 12];
+	memset(subs, 0, sizeof subs);
+	for (int k = 0; k < 128; ++k)
+		if (!(keys[k >> 3] >> (k & 7) & 1)) subs[k * 12] = 0x80;
+		else if (!copy_voice(xr + off + (uint32_t)k * 12, subs + k * 12, true, NULL)) return 0;
+	return put(subs, sizeof subs);
 }
 
 /* A voice (12 bytes: its type first, a pointer at +4 and, for a key
  * split, its key table at +8) with what it points at copied and its
  * pointers moved there; a key split or drum kit inside another, which the
- * sequencer never follows, with its pointers cleared. */
-static bool copy_voice(const uint8_t *v, uint8_t out[12], bool sub) {
+ * sequencer never follows, with its pointers cleared; a drum kit for the
+ * keys `keys` names alone where it is given (none: the voice left empty, as
+ * no track plays it). */
+static bool copy_voice(const uint8_t *v, uint8_t out[12], bool sub, const uint8_t *keys) {
 	memcpy(out, v, 12);
 	uint8_t type = v[0];
 	uint32_t p = get32(v + 4), to = 0;
 	if (type & 0xC0) {
 		if (sub) { memset(out + 4, 0, 8); return true; }
 		if (type & 0x80) {
-			to = copy_subs(p, 128);
+			uint8_t any = 0;
+			for (int k = 0; keys && k < 16; ++k) any |= keys[k];
+			if (keys && !any) { memset(out, 0, 12); return true; }
+			to = keys ? copy_kit(p, keys) : copy_subs(p, 128);
 			put32(out + 4, to);
 			return to != 0;
 		}
@@ -192,7 +281,8 @@ static uint32_t copy_voices(uint32_t group, const uint8_t programs[16]) {
 	uint8_t voices[128 * 12];
 	memset(voices, 0, sizeof voices);
 	for (int p = 0; p <= last; ++p)
-		if (programs[p >> 3] >> (p & 7) & 1 && !copy_voice(xr + off + (uint32_t)p * 12, voices + p * 12, false)) return 0;
+		if (programs[p >> 3] >> (p & 7) & 1 && !copy_voice(xr + off + (uint32_t)p * 12, voices + p * 12, false, by_keys ? kit_keys[p] : NULL))
+			return 0;
 	return put(voices, (uint32_t)(last + 1) * 12);
 }
 
@@ -215,6 +305,16 @@ static uint32_t copy_song(uint32_t header) {
 	static uint32_t ptrs[PTRS_MAX];
 	int nptrs = 0;
 	if (!xsong_walk(xr + lo, hi - lo, BUS + lo, starts, nt, ptrs, &nptrs, PTRS_MAX, programs)) return 0;
+	/* (each track's keys to the kits its VOICEs select, and key 0, which a
+	 * note before any key's plays: a track begins with it, Clear64byte's) */
+	by_keys = XR[xr_id].layout->kit_keys_played;
+	memset(kit_keys, 0, sizeof kit_keys);
+	for (int t = 0; by_keys && t < nt; ++t) {
+		uint8_t selects[16] = { 0 }, keys[16] = { 1 };
+		if (!xsong_track_keys(xr + lo, hi - lo, BUS + lo, starts[t], selects, keys)) return 0;
+		for (int p = 0; p < 128; ++p)
+			for (int k = 0; selects[p >> 3] >> (p & 7) & 1 && k < 16; ++k) kit_keys[p][k] |= keys[k];
+	}
 	uint32_t voices = copy_voices(get32(xr + ho + 4), programs);
 	if (!voices) return 0;
 	/* the sequence where it will be: its pointers moved by as much */

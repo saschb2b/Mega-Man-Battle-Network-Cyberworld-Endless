@@ -13,13 +13,17 @@
  *                         across calls) and appending the IO registers and held
  *                         keys to PREFIX.io (0x60 register bytes + u16 keys each)
  *   pokes ADDR HEX        write a hex byte string starting at ADDR
+ *   pokef ADDR FILE       write a file's bytes starting at ADDR (on ROM, past its
+ *                         end too: mGBA's patch grows it)
  *   watch ADDR LEN        rec also appends these LEN bytes per frame to PREFIX.w
  *   mute MASK             channels left out of the sound (hex: 1 DMA A, 2 DMA B,
  *                         4-0x20 the PSG's 1-4)
- *   sound N PREFIX        run N frames: their sound as a 48 kHz WAV (PREFIX.wav),
- *                         MP2K's SoundInfo, its PSG channels, the music player
- *                         and its tracks after each (PREFIX.si) and the sound
- *                         registers (PREFIX.io): the MP2K player's differential
+ *   sound N PREFIX [SI PLAYERS]   run N frames: their sound as a 48 kHz WAV
+ *                         (PREFIX.wav), MP2K's SoundInfo, its PSG channels, the
+ *                         music player and its tracks after each (PREFIX.si) and
+ *                         the sound registers (PREFIX.io): the MP2K player's
+ *                         differential; SI the game's SoundInfo and PLAYERS its
+ *                         player table (hex; BN6's 030045C0 and 08159DC8)
  */
 #include <mgba/core/core.h>
 #include <mgba/core/serialize.h>
@@ -111,6 +115,13 @@ int main(int argc, char **argv) {
 				unsigned v; sscanf(hx + 2 * i, "%2x", &v);
 				core->rawWrite8(core, addr + i, -1, v);
 			}
+		} else if (!strcmp(cmd, "pokef")) {
+			unsigned addr = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
+			FILE *f = fopen(strtok(NULL, " \t\r\n"), "rb");
+			if (!f) { fprintf(stderr, "pokef: no file\n"); continue; }
+			int c;
+			for (unsigned i = 0; (c = fgetc(f)) != EOF; ++i) core->rawWrite8(core, addr + i, -1, c);
+			fclose(f);
 		} else if (!strcmp(cmd, "shot")) {
 			FILE *f = fopen(strtok(NULL, " \t\r\n"), "wb");
 			fprintf(f, "P6\n%u %u\n255\n", w, h);
@@ -168,10 +179,16 @@ int main(int argc, char **argv) {
 			 * output stage as the game hears it) and, after each frame, MP2K's
 			 * SoundInfo whole (SI bytes from SIADDR: its channels and its mix
 			 * ring) in PREFIX.si and the sound registers 0x04000060-0x040000AF in
-			 * PREFIX.io, for the player's differential (docs/re) */
+			 * PREFIX.io, for the player's differential (docs/re); the game's
+			 * SoundInfo and player table where given (another game's), its
+			 * PSG channels named by SoundInfo +0x1C and its music player by
+			 * the table's row 31 */
 			int n = atoi(strtok(NULL, " \t\r\n"));
 			const char *pre = strtok(NULL, " \t\r\n");
-			const unsigned SIADDR = 0x030045C0, SI = 0xFB0, RATE = 48000;
+			const char *si_arg = strtok(NULL, " \t\r\n"), *pl_arg = si_arg ? strtok(NULL, " \t\r\n") : NULL;
+			const unsigned SIADDR = si_arg ? strtoul(si_arg, NULL, 16) : 0x030045C0, SI = 0xFB0, RATE = 48000;
+			const unsigned PLAYERS = pl_arg ? strtoul(pl_arg, NULL, 16) : 0x08159DC8;
+			const unsigned PLAYER = core->rawRead32(core, PLAYERS + 31 * 12, -1), TRACKS = core->rawRead32(core, PLAYERS + 31 * 12 + 4, -1);
 			char path[600];
 			snprintf(path, sizeof path, "%s.wav", pre);
 			FILE *f = fopen(path, "wb");
@@ -201,9 +218,10 @@ int main(int argc, char **argv) {
 				}
 				for (unsigned a = 0; a < SI; ++a) fputc(core->rawRead8(core, SIADDR + a, -1), si);
 				/* (then the PSG's four channels, the music player and its eight tracks) */
-				for (unsigned a = 0; a < 0x100; ++a) fputc(core->rawRead8(core, 0x03005600 + a, -1), si);
-				for (unsigned a = 0; a < 0x40; ++a) fputc(core->rawRead8(core, 0x02010890 + a, -1), si);
-				for (unsigned a = 0; a < 0x280; ++a) fputc(core->rawRead8(core, 0x02007EE8 + a, -1), si);
+				unsigned cgb = core->rawRead32(core, SIADDR + 0x1C, -1);
+				for (unsigned a = 0; a < 0x100; ++a) fputc(core->rawRead8(core, cgb + a, -1), si);
+				for (unsigned a = 0; a < 0x40; ++a) fputc(core->rawRead8(core, PLAYER + a, -1), si);
+				for (unsigned a = 0; a < 0x280; ++a) fputc(core->rawRead8(core, TRACKS + a, -1), si);
 				/* (I/O by words: mGBA's byte and halfword reads of it mask what the
 				 * registers hold) */
 				for (unsigned a = 0x60; a < 0xB0; a += 4) {

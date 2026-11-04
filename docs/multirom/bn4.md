@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -32,7 +32,7 @@ Colonel has, by name, with the community's lists as the check
 | Pool | In BN4 Red Sun | New to a run | Cost, as [Data, not code](data-not-code.md) counts it |
 | --- | --- | --- | --- |
 | Net areas | 22 large maps in five groups: ACDC Area 1-3 (lime), Town Area 1-4 (teal), Park Area 1-3 (lavender), Netfrica, Netopia, Sharo and YumLand (one each), the Undernet 1-6 and Black Earth 1-2 (dark green circuits) | All five looks; each map draws whole through the engine's own map reader as it is | moderate, BN5's road |
-| Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: every song passes `src/audio/xsong.c`'s rules, its one drum kit copied by the keys played |
+| Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: ready, every song copied into BN6 and proved against BN4's own playing (Its music, below) |
 | Viruses | 22 families, six versions each | 17: VolGear, Billy, Gaia, Spikey, Shrimpy, Boomer, MagTect, Melody, Dharma, Kilby, Weather, Spidy, CirKill, Moloko, Walla, Elemperor, and Black Earth's sword-only NavBlack and NavShado | a recipe each, as [Transplanted families](families.md) |
 | Navis | 25 bosses with Duo and Bass | 18: Red Sun's Soul Navis GutsMan, FireMan, Roll, WindMan, ThunderMan and SearchMan; Blue Moon's AquaMan, WoodMan, MetalMan and JunkMan, whom Red Sun's tournaments fight too; TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan, VideoMan; Duo | a recipe each, as [Transplanted Navis](navis.md) |
 | Souls | Red Sun's six (Guts, Fire, Roll, Wind, Thunder, Search), by BN5's rule (a chip of the Soul's kind) | All six (UNITE lit for WindSoul in romlab); Blue Moon's six are in its tables, refused by their flags; given one, ProtoSoul's UNITE lights, and whether its form runs is open | high, as [Transplanted Souls](souls.md) |
@@ -174,6 +174,28 @@ battle frame by frame, as BN5's were.
    BN5's, its themes and battle backgrounds with it.
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
+
+## Its music
+
+Ready ahead of Phase 3, shown to no one: `src/audio/xsong.c` copies each
+of BN4's 34 songs into BN6 as it copies BN5's, BN4's one drum kit for the
+keys a song's drum tracks play alone (its keys 0-35 hold other data), 11
+to 63 KB a song. Each was proved by `python3 tools/mp2k_verify.py x1/all`
+([The engine's sound against the game's](../devtools/sound-check.md)): the copy played by BN6's own sound
+engine in romlab beside BN4 playing the song from its title, every part
+of the sound engine's state compared frame by frame for 900 frames, the
+copy's pointers moved back to BN4's. 31 are the same in every part; two
+differ in a counter of a channel already let go, the PSG's registers the
+same every frame; the boss theme (0x15) differs in its first 3.3 seconds,
+where two square waves swell in from silence in BN4 and stay silent in
+BN6, as BN6's newer sound engine lets go a PSG channel the hardware has
+stopped ([BN4 Red Sun's tables](../rom/bn4.md), Its sound engine against BN6's). BN4 also mixes its
+music at master volume 12 where BN6 mixes at 15: a copy plays 1.8 dB
+louder in BN6 than in BN4. Both are for the phase that plays them: the
+swell kept or not, BN4's level matched or BN6's kept. `--render-song
+x1/0x12:60:PATH` (0x14, 0x15) renders one through the engine's own sound
+engine for listening, its envelope following BN4's own recording (r 0.92
+to 0.97).
 
 ## The owner's calls
 
