@@ -26,7 +26,7 @@ import os
 import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
-from xdiff_snap import (DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
+from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
@@ -295,10 +295,11 @@ def lacks(d, ta, tb):
     return None
 
 
-def named(canon, game, o, fams=None, reserved=()):
+def named(canon, game, o, fams=None, reserved=(), blinked=()):
     """an object's bytes from its node with its NameID as BN6 numbers it (canon.nid: BN4's MegaMan, enemy id 0, BN6's; a
     moved family's by its recipe); against BN6's (fams given), a BN4 T1's type and CurAction as BN6's too (bn4_as_bn6),
-    and one that has reserved a panel with BN6's 0x20 (reserved_roles)"""
+    one that has reserved a panel with BN6's 0x20 (reserved_roles), and one BN4's blink step ran on with its visible bit
+    in BN6's phase (blinked_roles)"""
     rec = bytearray(o.rec[:SIZE[o.kind]])
     for k, v in o.over.items():   # (the family's renderer places as its ranks: bn4_renderer)
         if k < len(rec):
@@ -310,6 +311,8 @@ def named(canon, game, o, fams=None, reserved=()):
             rec = bn4_as_bn6(rec, fams)
     if game == 4 and fams is not None and o.role in reserved:
         rec[NODE] |= OBJ_RESERVED
+    if game == 4 and fams is not None and o.role in blinked:
+        rec[NODE] ^= OBJ_VISIBLE
     moved = getattr(canon, 'moved_types', None)
     if game == 6 and moved and o.moved:   # (a dispatched object's type, its side-table number, as BN4's own: bn4_moved_types)
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
@@ -341,6 +344,24 @@ def reserved_roles(trace):
         by_addr = {o.addr: o for o in fr['objs']}
         roles |= {by_addr[e.object].role for e in fr['events'] if e.kind == RESERVE and e.object in by_addr}
         fr['reserved'] = frozenset(roles)
+
+
+# An object flashing after a hit, its visible bit read in BN6's phase from BN4's own blink events, as tools/xdiff_events.py
+# reads BN5's: both games' blink step (BN4 0x08010440, BN6 0x08016944, the same steps) takes an object whose flags hold
+# 0x202 (BN4 0x0801044A, BN6 0x0801694E) and shifts its collision data's flash timer right twice (BN4's +0x18, BN6's +0x24,
+# BN4_COLL_FLASH: the same count, compared), clearing its +0 0x02 past BN4's bcs (0x08010456: bit 1 clear hides it) or
+# BN6's bcc (0x0801695A: bit 1 set hides it), the hooks' BN4_BLINK_FLASHING and BN6_BLINK_FLASHING: opposite phases of one
+# timer (walla_v1's MegaMan, struck at t68, shown at BN4's t68-t69 and hidden at t70-t71, hidden at BN6's of the same fight
+# frames and shown at the next two). Not a mask: the object's own record read as BN6 would have written it
+OBJ_VISIBLE = 0x02
+
+
+def blinked_roles(trace):
+    """each frame's roles BN4's blink step ran on in it (BN4's blink events, XD_BLINK, at BN4_BLINK_FLASHING), into
+    fr['blinked']"""
+    for fr in trace['frames']:
+        by_addr = {o.addr: o for o in fr['objs']}
+        fr['blinked'] = frozenset(by_addr[e.object].role for e in fr['events'] if e.kind == BLINK and e.object in by_addr)
 
 
 def cells(fa, fb, part, ba, bb, start=0):
@@ -458,6 +479,56 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
+# MegaMan's animation in each game's own art (legit.json's bn4 allowed, "MegaMan's own art's animation"): a first-kind
+# object's sprite state holds its animation (+0x90), its frame's count (+0x91), its flags (+0x92: 0x80 as its last frame
+# runs), its art (+0xA8, the sprite + 4, its animations' table) and its frame's record (+0xAC: 20 bytes a frame, its
+# duration at +16, +18's 0x80 its last, as tools/xsoul.py anim_life reads them); the sprite update (BN4 0x0800285C, BN6
+# 0x080026C4) loads a frame's duration less 1 and counts it down, a frame each fight frame
+ANIM, ANIM_FLAGS, ANIM_LAST, ANIM_ART, ANIM_FRAME = 0x90, 0x92, 0x80, 0xA8, 0xAC
+FRAME_SIZE, FRAME_DURATION, FRAME_FLAGS, MEGAMAN = 20, 16, 18, ('T1', 0x1A0)
+
+
+def anim_place(o, rom):
+    """(its animation, the frames run of it, its frame its art's last) of a first-kind object's animation in its own art
+    (rom, the game's whose art +0xA8 names), None where its frame is not one of the animation's or its count not in it"""
+    art, frame, anim, BUS = o.o32(ANIM_ART), o.o32(ANIM_FRAME), o.o8(ANIM), 0x08000000
+    g32 = lambda a: int.from_bytes(rom[a - BUS:a - BUS + 4], 'little') if BUS <= a and a + 4 <= BUS + len(rom) else None
+    n = g32(art) if rom else None
+    if n is None or anim >= n // 4 or g32(art + 4 * anim) is None:
+        return None
+    at, run = art + g32(art + 4 * anim), 0
+    for _ in range(256):
+        if not BUS <= at or at + FRAME_SIZE > BUS + len(rom):
+            return None
+        dur, last = rom[at - BUS + FRAME_DURATION], rom[at - BUS + FRAME_FLAGS] & ANIM_LAST
+        if at == frame:
+            count = o.o8(SPRITE_COUNT)
+            return (anim, run + dur - 1 - count, bool(last)) if count < dur else None
+        if last:
+            return None
+        run, at = run + dur, at + FRAME_SIZE
+    return None
+
+
+def own_animation(d, fa, fb):
+    """legit.json's bn4 allowed, MegaMan's own art's animation: his sprite's count (+0x91) and its last frame's bit (+0x92's
+    0x80) where each game's are what its own art gives at the same place in the same animation (the frames run of it the
+    same in both, by anim_place): BN4's art and BN6's cut one animation into other frames (walla_v1's struck, his
+    animation 1: BN4's 4,2,2,2,2,2,4,4,2, BN6's 4,2,2,2,2,4,5,3, 24 frames each). True where it is that alone"""
+    if not (d.part == 'obj' and isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.off in (SPRITE_COUNT, ANIM_FLAGS)):
+        return False
+    roms = getattr(fa.canon, 'roms', {})
+    oa = next((o for o in fa.fr['objs'] if o.role == d.role), None)
+    ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
+    pa = anim_place(oa, roms.get(4, b'')) if oa else None
+    pb = anim_place(ob, roms.get(6, b'')) if ob else None
+    if pa is None or pb is None or pa[:2] != pb[:2]:
+        return False
+    if d.off == SPRITE_COUNT:
+        return True
+    return d.a ^ d.b == ANIM_LAST and bool(d.a & ANIM_LAST) == pa[2] and bool(d.b & ANIM_LAST) == pb[2]
+
+
 SHADER, SHADER_ON, PARALYSED, COLL_FLAGS6 = 0x96, 0x3FF, 0x800, 0x3C   # (legit.json's bn4 clocks, the paralysis's flash)
 
 
@@ -507,7 +578,8 @@ def frame_diffs(fa, fb, fbt=None):
             continue
         # (from its node's +8: its links compared as the run order; BN4's numbers as BN6's only against BN6's)
         fams = getattr(fa.canon, 'fams', None) if fb.game == 6 else None
-        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ())),
+        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ()),
+                                                                                     fa.fr.get('blinked', ())),
                                                                  named(fb.canon, fb.game, ob), 8)]
         alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
         ca = coll_as_bn6(oa.coll, alliance) if alliance and oa.coll is not None else oa.coll
@@ -707,7 +779,8 @@ def compare(spec, ta, tb, canon, show=6):
         for d in world:   # (legit.json's bn4 clocks: what the fight's frames count, at the same fight frame)
             d.mask = ("the opening's animation count, by the fight's frames" if opening_count(d, fa, ft) else
                       "the hit's spark, each engine's own" if spark_own(d) else
-                      "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else None)
+                      "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else
+                      "MegaMan's own art's animation" if own_animation(d, fa, fb) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         world = [d for d in world if not d.mask]
@@ -718,7 +791,9 @@ def compare(spec, ta, tb, canon, show=6):
         world = [d for d in world if not d.mask]
         mine = [d for d in open_ if d.role in fam] if against else open_
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
-            d.mask = allowed_bit(d, fam)
+            # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
+            # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
+            d.mask = allowed_bit(d, fam) or ("the hit's spark, each engine's own" if spark_own(d) and against else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
@@ -807,10 +882,12 @@ def one(name, spec, a, canon, run_xdiff, work):
         rom6b = open(rom6, 'rb').read() if os.path.exists(rom6) else b''
         canon.alliance = bn4_alliance(rom4b, rom6b)
         canon.panels = panel_tables(rom4b, rom6b)
+        canon.roms = {4: rom4b, 6: rom6b}   # (each game's own art read where a record follows it: own_animation)
     for tr in (ta, tb):
         assign_roles(tr, canon)
     if not control:
         reserved_roles(ta)
+        blinked_roles(ta)
     verdict, at, lines = compare(spec, ta, tb, canon, a.show)
     print('\n'.join(lines))
     kind = 'control' if control else 'bn4'

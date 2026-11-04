@@ -1292,6 +1292,22 @@
    "what": "the thunder copy's spawner (BN6's 0x080CADBC copied at XV_CODE + 0x14180) spawning the third kind's 0x29 for 0x2A (movs r0,#0x29): another attack where BN4's thunder flies (caught at t341)"
   },
   {
+   "name": "a ring's hit effect aimed elsewhere",
+   "spec": "walla_v1",
+   "call": [
+    "0801A0D4:0810A952"
+   ],
+   "what": "Walla's rings' call to the effect their hits make (BN4 0x080D4BEA: bl 0x08012F44, its copy's veneer to BN6's twin 0x0801A0D4) aimed at BN6's family nullsub: no hit's spark where BN4's spawns one; the spark counted the family's, whose sprite state and life are each engine's own (legit.json's bn4, the hit's spark), its being in play before both had it compared as ever (caught at t68, the spark in play in BN4's alone; the spec PASSes unmutated)"
+  },
+  {
+   "name": "Elmperor's poison timer left at BN4's offset",
+   "spec": "elmperor_v1",
+   "poke": [
+    "080C2872:7198"
+   ],
+   "what": "Elmperor's pre-step's hold of its collision data's poison timer at 0xFF (BN4 0x080C2872: strb r0,[r3,#6], the recipe's immediate writing BN6's +8) written at BN4's +6 again: BN6's timer (BN6_COLL_POISON_TIMER, the poison panel's step 0x0801A1B8) reads 0 against BN4's 0xFF, mapped by the trace's layout (src/dev/xdiff_bn4_trace.c coll_segs, BN4_COLL_POISON_TIMER), where unmutated they read alike (caught at t1, coll +0x06 and +0x08; the spec fails at t1 without it on its sprite fields alone, so the lines it adds are the check: python3 tools/xdiff.py elmperor_v1 --poke 080C2872:7198)"
+  },
+  {
    "name": "a sprite BN4 keeps LZ77'd drawn from another copy",
    "spec": "spikey_v1",
    "poke": [

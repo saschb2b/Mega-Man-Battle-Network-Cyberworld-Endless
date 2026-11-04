@@ -91,6 +91,8 @@
 #define BN6_AI_ATTACK_VARS    0xA0        /* an AI data's attack's variables (bn6.h, BN6_T1_AI_DATA; BN4's +0x70, bn4.h BN4_AI_ATTACK_VARS) */
 #define BN6_COLL_DAMAGE_ADD   0x84       /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */
 #define BN6_COLL_POISON       0x8C        /* u16, poison's damage, a point each 7 frames (the sea's on a Fire object, as xpanels.c brings it) */
+#define BN6_COLL_POISON_TIMER 0x08        /* u8, the frames to poison's next point on a poison panel: BN6_PANEL_STEP_POISON's ldrb [r7,#8], less 1
+                                           * a frame, 6 again with a point (0x0801A1B8-0x0801A1C2), 0 off poison (0x0801A1D0); BN4's +6 */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */
 
 /* BN5's sea's submerge (bn5.h, BN5_SEA_SUBMERGE), which BN6's engine dropped
