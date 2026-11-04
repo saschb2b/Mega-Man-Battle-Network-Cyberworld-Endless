@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:50:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1297,3 +1297,27 @@ format, its game 4: the trace's header names it):
   (the families' sounds still BN4's numbers) on BN6's player 0, which
   still holds the Custom gauge's 0x8F begun at t513 (BN4's 0x81 on its
   player 20), so BN6 begins none.
+- **The families' copied sounds** (4 November 2026): the families' 12
+  sounds BN6 has no song of now play as BN4's own, each a copy at its
+  slot of BN6's empty songs on BN4's player ([Battle Network 4 in a
+  run](../multirom/bn4.md), Its sounds). BN6's trace names such a copy
+  by its slot (`src/dev/xdiff_events.c` `xd_song_copy`, which names
+  BN5's copies alone by their own numbers), so a copy aimed back at
+  BN6's own song of BN4's number is told apart; `legit.json`'s `bn4`
+  `sounds` pairs each BN4 sound with its slot by the routines that play
+  it (BN4's `movs r0,#N` and its bl, the copy's `movs r0,#slot`, the
+  recipe's immediate; a state's clock), as the thunder's are. A frame's
+  sounds line is the family's where a sound it parts on was played by
+  the family's code in either game (a sound event its code led to in
+  the frame before, as a frame's sounds begun are those its trace's
+  frame before began: `tools/xdiff_bn4.py` `family_sounds`), failing
+  the spec; the rest stay the world's. In the specs' traces every copy
+  is begun on BN4's player at BN4's frame (the lag of 1),
+  `elmperor_v2`'s 0x9D at t515 on player 9 beside the gauge's 0x8F on
+  player 0; no sound line is left in Shrimpy's, Walla's, Elmperor's or
+  CirKill's v1-v3 but `cirkill_v3`'s 0x82 against 0x84 at t1107 (BN4's
+  player 8, BN6's 30, played by no family's code), and Spikey's begin
+  at other frames than BN4's, its fight parting from t1. Its mutation
+  ("a copied sound aimed at BN6's own song of its number",
+  `poke=080BEAE8:20B7`, Walla's 0xB7 named again: BN6 begins its own
+  0xB7 on its player 18) is caught at t3.

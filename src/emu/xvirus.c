@@ -721,10 +721,10 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 }
 
 /* ---- its sounds BN6 has none of: each song copied whole (xsong.h) into the art's room the recipe gives it, and listed at
- * its fixed one of BN6's empty song slots (every track's copy of the same sound the same slot, xsong.c's BN5_SOUNDS), on
+ * its fixed one of BN6's empty song slots (every track's copy of the same sound the same slot, xsong.c's XSOUNDS), on
  * the players its own game's entry names (BN6's 32 are BN5's), as the Navis' copies are ---- */
 
-/* whether the song header at bus address `at` in the core's copy is BN5's song `song`'s (its tracks, blocks, priority and
+/* whether the song header at bus address `at` in the core's copy is its game's song `song`'s (its tracks, blocks, priority and
  * reverb), as another install of the shared allocations' slot copied it */
 static bool song_there(int game, int song, uint32_t at) {
 	const XRom *x = game >= 0 && game < XROM_COUNT ? &XR[game] : NULL;
@@ -740,7 +740,7 @@ static void songs_set(const XVirusFamily *f) {
 		const XvSong *s = &f->songs[i];
 		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot;
 		/* (the slot BN6's empty song, a header of no tracks, in the player's ROM: copied where the core's copy still
-		 * holds it; where another install of the shared slot (docs/multirom/) copied BN5's same song there first,
+		 * holds it; where another install of the shared slot (docs/multirom/) copied its game's same song there first,
 		 * found there) */
 		uint32_t empty = table && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
 		if (!in_rom(empty, 1) || R.data[empty - BUS] != 0) { xv_fail("its song's slot %#x", s->slot); return; }
@@ -751,7 +751,7 @@ static void songs_set(const XVirusFamily *f) {
 		}
 		uint32_t now = emu_read32(BUS + slot);
 		if (now != empty) {
-			/* (BN5's same song there: a family's packed copy before it, or xsong.c's copy of another track's install, the
+			/* (its game's same song there: a family's packed copy before it, or xsong.c's copy of another track's install, the
 			 * Navis' or the chips', made before the families') */
 			int game = -1;
 			if (!song_there(f->game, s->from, now) && !(xsong_copy_of(s->slot, &game) == s->from && game == f->game))

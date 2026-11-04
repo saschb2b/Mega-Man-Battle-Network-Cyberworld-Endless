@@ -67,4 +67,22 @@
                                        * 0x03006793): its frame's count down, at 0 the next frame's record (+0xAC, 20 bytes, its duration at
                                        * +16, +18's 0x80 its last) */
 
+/* The sounds BN4's moved families play that are no BN6 song (xrecipe.song_sig): each a movs r0,#N before its bl to
+ * BN4_PLAY_SOUND in the family's code; its song read by its number through BN4's song table
+ * (XRomLayout.song_table), copied into BN6 at its slot of BN6's empty songs (tools/xrecipe_bn4.py's SOUND_SLOTS,
+ * src/audio/xsong.c's XSOUNDS) on the player BN4's entry names, the copy's movs given the slot (docs/rom/bn4.md, the
+ * families' sounds) */
+#define BN4_SOUND_SPIKEY_C4   0x080D2E84u /* Spikey's 0xC4, player 9 (its fireball's code, the third kind's 0x30) */
+#define BN4_SOUND_SPIKEY_BC   0x080D2F24u /* ... its 0xBC, player 9 */
+#define BN4_SOUND_SHRIMPY_C9  0x080D2BEAu /* Shrimpy's 0xC9, player 8 (its bubble's code, the third kind's 0x2F) */
+#define BN4_SOUND_SHRIMPY_9F  0x080D2C52u /* ... its 0x9F, player 28 */
+#define BN4_SOUND_SHRIMPY_CA  0x080D2D24u /* ... its 0xCA, player 8 */
+#define BN4_SOUND_WALLA_9A    0x080BEA88u /* Walla's 0x9A, player 8 */
+#define BN4_SOUND_WALLA_B7    0x080BEAE8u /* ... its 0xB7, player 9 */
+#define BN4_SOUND_WALLA_70    0x080D4C3Au /* ... its 0x70, player 9 */
+#define BN4_SOUND_WALLA_A6    0x080D4CE2u /* ... its 0xA6, player 9 */
+#define BN4_SOUND_ELMPEROR_FC 0x080C2A7Cu /* Elmperor's 0xFC, player 19 */
+#define BN4_SOUND_ELMPEROR_9D 0x080DC6FEu /* ... its 0x9D, player 9 */
+#define BN4_SOUND_CIRKILL_F9  0x080BD42Eu /* CirKill's 0xF9, player 29, two tracks */
+
 #endif

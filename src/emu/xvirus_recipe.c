@@ -235,7 +235,9 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 static bool songs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nsongs; ++i) {
 		const XvSong *g = &f->songs[i];
-		if (g->slot < XV_SONG_SLOT_FIRST || g->slot > BN6_SONGS_EMPTY_LAST || g->at < XV_ART || (g->at & 3) || !g->room || g->room > XV_ART_END - g->at)
+		bool bn4 = f->game == XROM_BN4_RED_SUN_US;
+		if (g->slot < (bn4 ? XV_BN4_SONG_SLOT_FIRST : XV_SONG_SLOT_FIRST) || g->slot > (bn4 ? XV_BN4_SONG_SLOT_LAST : BN6_SONGS_EMPTY_LAST) ||
+			g->at < XV_ART || (g->at & 3) || !g->room || g->room > XV_ART_END - g->at)
 			return no(why, n, "song %d (slot %#x at %08x)", i, g->slot, (unsigned)g->at);
 		for (int k = 0; k < f->nsprites; ++k)
 			if (spans_meet(g->at, g->room, f->sprites[k].at, f->sprites[k].room)) return no(why, n, "song %d over sprite %d", i, k);

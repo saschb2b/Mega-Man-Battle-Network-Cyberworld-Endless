@@ -21,9 +21,10 @@
 #define XSONG_AT    FREE_SONGS              /* (docs/engine/emulation/) */
 #define XSONG_END   FREE_XNAVIS
 #define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/rom/), */
-#define SLOT_LAST   0x3F    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each BN5
-                               sound at a fixed slot whichever track copies it, BN5_SOUNDS; a moved family's packed into its own
-                               room, xvirus.c's XvSong, the Navis' copied here) */
+#define SLOT_LAST   0x33    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each
+                               sound at a fixed slot whichever track copies it, XSOUNDS; a moved family's packed into its own
+                               room, xvirus.c's XvSong, the Navis' copied here; 0x34-0x3F BN4's families', the themes' top, as
+                               every theme copied today, 12 with BN5's and BN4's ROMs, fits below them) */
 #define SOUND_FIRST (SLOT_LAST + 1)          /* the tracks' sounds' fixed slots: from, */
 #define SOUND_LAST  BN6_SONGS_EMPTY_LAST     /* ... to */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
@@ -429,21 +430,32 @@ int xsong_copy_of(int slot, int *xrom) {
 	return -1;
 }
 
-/* BN5's sounds that are no BN6 song, each at a slot of its own whichever
- * track's code plays it (issue #82's plan for its tracks and its
+/* Another game's sounds that are no BN6 song, each at a slot of its own
+ * whichever track's code plays it (issue #82's plan for its tracks and its
  * amendments; docs/rom/sound.md, BN6's empty song slots): copied by the
  * first install that needs it, found there by the others */
-static const struct { uint16_t song; uint8_t slot; } BN5_SOUNDS[] = {
-	{ 0xC0, 0x62 }, { 0xB7, 0x61 }, { 0xBA, 0x60 }, { 0x70, 0x5F }, { 0x117, 0x5E }, { 0x129, 0x5D }, { 0x16B, 0x5C }, { 0xE1, 0x5B },
-	{ 0x115, 0x5A }, { 0x105, 0x59 }, { 0x10C, 0x58 }, { 0x10D, 0x57 }, { 0xCF, 0x56 }, { 0xBC, 0x55 }, { 0x6F, 0x54 }, { 0xE4, 0x53 },
-	{ 0x12E, 0x52 }, { 0xA6, 0x51 }, { 0xC6, 0x50 }, { 0xBD, 0x4F }, { 0x10E, 0x4E }, { 0x119, 0x4D }, { 0x8E, 0x4C },
+static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
+	{ XROM_BN5_COLONEL_US, 0xC0, 0x62 }, { XROM_BN5_COLONEL_US, 0xB7, 0x61 }, { XROM_BN5_COLONEL_US, 0xBA, 0x60 },
+	{ XROM_BN5_COLONEL_US, 0x70, 0x5F }, { XROM_BN5_COLONEL_US, 0x117, 0x5E }, { XROM_BN5_COLONEL_US, 0x129, 0x5D },
+	{ XROM_BN5_COLONEL_US, 0x16B, 0x5C }, { XROM_BN5_COLONEL_US, 0xE1, 0x5B }, { XROM_BN5_COLONEL_US, 0x115, 0x5A },
+	{ XROM_BN5_COLONEL_US, 0x105, 0x59 }, { XROM_BN5_COLONEL_US, 0x10C, 0x58 }, { XROM_BN5_COLONEL_US, 0x10D, 0x57 },
+	{ XROM_BN5_COLONEL_US, 0xCF, 0x56 }, { XROM_BN5_COLONEL_US, 0xBC, 0x55 }, { XROM_BN5_COLONEL_US, 0x6F, 0x54 },
+	{ XROM_BN5_COLONEL_US, 0xE4, 0x53 }, { XROM_BN5_COLONEL_US, 0x12E, 0x52 }, { XROM_BN5_COLONEL_US, 0xA6, 0x51 },
+	{ XROM_BN5_COLONEL_US, 0xC6, 0x50 }, { XROM_BN5_COLONEL_US, 0xBD, 0x4F }, { XROM_BN5_COLONEL_US, 0x10E, 0x4E },
+	{ XROM_BN5_COLONEL_US, 0x119, 0x4D }, { XROM_BN5_COLONEL_US, 0x8E, 0x4C },
 	/* (the Darkloids', from the first slot up: the chips' own go down from 0x4B) */
-	{ 0xE3, 0x40 },
+	{ XROM_BN5_COLONEL_US, 0xE3, 0x40 },
+	/* BN4's families' (tools/xrecipe_bn4.py's SOUND_SLOTS, by install order from the themes' top down: Spikey's, Shrimpy's,
+	 * Walla's, Elmperor's, CirKill's; docs/multirom/bn4.md, Its sounds) */
+	{ XROM_BN4_RED_SUN_US, 0xBC, 0x3F }, { XROM_BN4_RED_SUN_US, 0xC4, 0x3E }, { XROM_BN4_RED_SUN_US, 0x9F, 0x3D },
+	{ XROM_BN4_RED_SUN_US, 0xC9, 0x3C }, { XROM_BN4_RED_SUN_US, 0xCA, 0x3B }, { XROM_BN4_RED_SUN_US, 0x70, 0x3A },
+	{ XROM_BN4_RED_SUN_US, 0x9A, 0x39 }, { XROM_BN4_RED_SUN_US, 0xA6, 0x38 }, { XROM_BN4_RED_SUN_US, 0xB7, 0x37 },
+	{ XROM_BN4_RED_SUN_US, 0x9D, 0x36 }, { XROM_BN4_RED_SUN_US, 0xFC, 0x35 }, { XROM_BN4_RED_SUN_US, 0xF9, 0x34 },
 };
 
 int xsong_sound_slot(int xrom, int song) {
-	for (size_t i = 0; xrom == XROM_BN5_COLONEL_US && i < sizeof BN5_SOUNDS / sizeof *BN5_SOUNDS; ++i)
-		if (BN5_SOUNDS[i].song == song) return BN5_SOUNDS[i].slot;
+	for (size_t i = 0; i < sizeof XSOUNDS / sizeof *XSOUNDS; ++i)
+		if (XSOUNDS[i].xrom == xrom && XSOUNDS[i].song == song) return XSOUNDS[i].slot;
 	return -1;
 }
 
