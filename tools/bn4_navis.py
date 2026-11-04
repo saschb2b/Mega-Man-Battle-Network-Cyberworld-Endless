@@ -41,7 +41,7 @@ PLAYER, PLAYER_STATES = 0x080EAEA8, 0x080EAEFC    # BN4_MEGAMAN, BN4_PLAYER_STAT
 PLAYER_END = 0x080F6000                           # (past his last state's code, 0x080F5025)
 NAVI_GENERIC = (0x08010D31, 0x08010FA7, 0x08010D4D, 0x08010E89, 0x08010F09, 0x08010FAF)   # BN4_NAVI_GENERIC_0 to _5
 TAKE_AI = 0x0800C09A                              # BN4_AI_TAKE
-SPAWN = {0x080032B8: 1, 0x080032D4: 1, 0x080032F0: 3, 0x0800330C: 3, 0x08003328: 3, 0x08003344: 4}   # BN4_SPAWN_T1 ...
+SPAWN = {0x080032B8: 1, 0x080032D4: 1, 0x080032F0: 3, 0x0800330C: 3, 0x08003328: 3, 0x08003344: 4}   # BN4_SPAWN_1 ...
 AI_NAVI, AI_ATTACK = 0x64, 0x70                   # BN4_AI_NAVI, BN4_AI_ATTACK_VARS
 
 # BN6's: the object types' tables (BN6's first, third and fourth kinds), for the objects' twins

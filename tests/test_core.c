@@ -3191,6 +3191,20 @@ static void test_xsong(void) {
 	uint8_t memacc[6] = { 0xB9, 1, 2, 3, 0xB1, 0 };
 	n = 0;
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
+	/* (a track's voices and keys as the sequencer reads it, a drum kit's
+	 * keys: a note's, its running status's, an EOT's and a pattern's; not
+	 * VOL's running status, nor XCMD's four bytes of a pointer. 0: VOICE 0,
+	 * VOL 80 and 64; 5: a note of key 36, a wait, key 38 by running status;
+	 * 12: EOT 40; 14: XCMD 1 and a pointer; 20: a note of no key; 21: PATT to
+	 * 27, FINE; 27: a note of key 42, PEND) */
+	uint8_t track[30] = { 0xBD, 0, 0xBE, 80, 64, 0xD4, 36, 100, 0x81, 38, 90, 0x81, 0xCE, 40, 0xCD, 1, 0xC0, 0xD4, 0x81, 0x08, 0xD4,
+		0xB3, 0x1B, 0x34, 0x12, 0x08, 0xB1, 0xD0, 42, 0xB4 };
+	uint8_t selects[16] = { 0 }, keys[16] = { 0 }, want[16] = { [4] = 0x50, [5] = 0x05 };
+	ok = xsong_track_keys(track, sizeof track, base, 0, selects, keys);
+	CHECK(ok && selects[0] == 1 && !memcmp(keys, want, sizeof want), "xsong: a track's voice and its keys 36, 38, 40 and 42 (%d, %#x, %#x %#x)",
+		ok, selects[0], keys[4], keys[5]);
+	track[24] = 0x80;
+	CHECK(!xsong_track_keys(track, sizeof track, base, 0, selects, keys), "xsong: a track's pointer out refused");
 }
 
 /* Both games' RNG step and a seed's word (battle_rng.c): the guest's
