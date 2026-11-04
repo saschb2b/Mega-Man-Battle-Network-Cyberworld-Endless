@@ -158,6 +158,57 @@
 #define BN4_SOUL_FLAGS    0x08020018u /* a byte per Soul: its event flag, 0x17-0x1C Red Sun's six, 0xFF Blue Moon's six (refused) */
 #define BN4_UNITE_CHECK   0x0801FF84u /* the last pick's kind a Soul's, its flag set, not used this battle (0x0203BF88's bit): BN5's twin */
 #define BN4_FLAG_DOUBLE_SOUL 0x0014   /* UNITE stands only with it set and MegaMan neither worried nor dark (0x0801E0B4) */
+/* A Soul in battle (docs/rom/bn4.md, Souls in battle; docs/multirom/bn4-souls.md; tools/bn4_souls.py reads each Soul's rows) */
+#define BN4_SOULS_USED    0x0203BF88u /* u32: the Souls used this battle, bit n - 1 the Soul n (zeroed with the battle, 0x0801594E) */
+#define BN4_UNITE_COMMIT  0x0801F0A0u /* OK's picks loop, a pick of UNITE (its slot under 0x20 the Soul): the used bit (0x0801F1FE), then
+                                       * BN4_SOUL_CHIPS + n into the picks, through BN4_PICK_GATE; the hand keeps no kind-15 chip */
+#define BN4_PICK_GATE     0x08020306u /* a pick's chip let through or refused (back 0x3784: dropped): 0x1FF passes, the rest by BN4_CHIP_GATE
+                                       * and the folder's limits */
+#define BN4_CHIP_GATE     0x080063C8u /* a chip's check against the save: BN4_CHIP_KEYS + id XOR 0x64 equal to eToolkit [+0x84] + id, else
+                                       * refused; a Soul's pseudo-chip passes only where the game wrote its byte as it gave the Soul */
+#define BN4_CHIP_KEYS     0x02000670u /* ... its key bytes, a byte a chip id (fixed) */
+#define BN4_TOOLKIT_CHIP_COPY 0x84    /* eToolkit +0x84: the save's chip bytes BN4_CHIP_GATE checks against, in the moving block */
+#define BN4_NAVI_FORM     0x24        /* NaviStats +0x24: MegaMan's form, the Soul 1-12 (BN6's and BN5's +0x2C), 0xF DarkSoul */
+#define BN4_NAVI_NAVI     0x23        /* NaviStats +0x23: whose NaviStats, 0 MegaMan (the sprite's row, BN4_NAVI_SPRITES) */
+#define BN4_NAVI_BYTE     0x0800D7CAu /* a battle NaviStats byte of the object in r5 (r1 its offset): BN6's by object */
+#define BN4_NAVI_BYTE_SIDE 0x0800D772u /* ... of a side (r0), r1 its offset */
+#define BN4_NAVI_BYTE_SET 0x0800D7AAu /* ... written for the object in r5: r1 its offset, r2 the byte */
+#define BN4_FORM_DARK     0x0F        /* DarkSoul's form: timed by frames (BN4_FORM_FRAMES), not turns */
+#define BN4_FORM_TURN_START 0x0800B658u /* as MegaMan's turn starts (0x08013918): the hand's next chip a Soul's pseudo-chip makes it the pending
+                                       * form (AI data +0x10); else a Soul whose turns are spent (+0x18 >= +0x19) ends (pending 0, request
+                                       * 0x40), DarkSoul when its frames run out; 0xFF none */
+#define BN4_FORM_STATE    0x0800E05Cu /* the form's state set as it changes: its enter routine (BN4_FORM_ENTERS), turns, loadout, charge times,
+                                       * element */
+#define BN4_TURN_COUNT    0x0800BA20u /* as each Custom screen opens (0x08007192): both sides' AI data +0x18 one more, unless 0xFF */
+#define BN4_AI_PENDING_FORM 0x10      /* AI data +0x10: the form the change is to take, 0xFF none (BN4_FORM_TURN_START) */
+#define BN4_AI_SOUL_TURNS_USED 0x18   /* AI data +0x18: the Soul's turns counted, 0xFF where UNITE may not stand (a form taken) */
+#define BN4_AI_SOUL_TURNS 0x19        /* AI data +0x19: the Soul's turns (BN4_FORM_TURNS); the emotion window shows +0x19 - +0x18 (0x08014B94) */
+#define BN4_AI_LOADOUT    0x0C        /* AI data +0xC: the form's loadout, 4 bytes (+0xD its plain shot, +0xE chip charge, +0xF charged shot) */
+#define BN4_AI_DARK_FRAMES 0x2C       /* AI data +0x2C: a timed form's frames left (DarkSoul's) */
+#define BN4_AI_REQUESTS   0x44        /* AI data +0x44: the requests (0x40 a form's end, 0x20 GutsSoul's rapid buster), BN6's place */
+#define BN4_FORM_LOADOUTS 0x080184F0u /* by form (0-15), 4 bytes: +1 the plain shot's power attack, +2 the chip charge's, +3 the charged shot's
+                                       * (0xFF none; BN5's 6 bytes at 0x0801CA18) */
+#define BN4_FORM_LOADOUT_SIZE 4       /* ... a form's bytes */
+#define BN4_FORM_ENTERS   0x0800E0A0u /* by form, a routine as it is taken: eight Souls' (a hand pass, an object, a flag), a nullsub the rest's */
+#define BN4_FORM_TURNS    0x080180A8u /* by form, a byte: its turns (3 every Soul's) */
+#define BN4_FORM_FRAMES   0x08018088u /* by form, a u16 into AI data +0x2C: a timed form's frames (DarkSoul 960; the Souls' 600 unused) */
+#define BN4_FORM_ELEMENTS 0x0800C964u /* by form, a byte: his element (FireSoul 1, ThunSoul 3, AquaSoul 2, WoodSoul 4) */
+#define BN4_FORM_COMPANIONS 0x08018068u /* by form, a u16: an object spawned beside him (FireSoul's 0x0010, NumSoul's 0x0110), 0 none */
+#define BN4_NAVI_SPRITES  0x08017F98u /* by BN4_NAVI_NAVI, his sprite's list and number (2 bytes): MegaMan's list 0, number the form (the
+                                       * Souls' sprites list 0's 1-12, BN5's 7-12); 1-13 list 8, the Soul Navis the unison draws */
+#define BN4_POWER_ATTACKS 0x0800CA7Cu /* the power attacks by id, 108 (BN5_POWER_ATTACKS' and BN6_POWER_ATTACKS' twin): each sets the attack's
+                                       * variables (AI data +0x70) and returns its family */
+#define BN4_POWER_ATTACK_COUNT 108    /* ... how many */
+#define BN4_CHARGE_TIMES  0x080180B8u /* a power attack's charge times, 5 halfwords by his Charge (BN6_CHARGE_TIMES' shape; the Souls' the same
+                                       * at every Charge: AquaSoul 30 to NumSoul 120) */
+#define BN4_ATTACK_FAMILIES 0x080EAEFCu /* the attack families by CurAction itself (BN6's from 0x10), 116; MegaMan's update hands it to the state
+                                       * runner (0x080EAEDE) */
+#define BN4_ATTACK_FAMILY_COUNT 116   /* ... how many */
+#define BN4_FAMILY_UNITE  0x0D        /* the unison: its phases, the Soul Navi's image, the form written (0x080EBB80) */
+#define BN4_FAMILY_LEAVE  0x11        /* the Soul's end: form 0 written (0x080EBEF2) */
+#define BN4_CHIP_ATTACK   0x0800D406u /* a power attack's chip (r0): its numbers from its record, its family the record's +0xB (WindSoul's
+                                       * AirShot and WindRack, ProtSoul's WideSwrd, JunkSoul's the battle's chip) */
+#define BN4_CHIP_FAMILY   0x0B        /* a chip record's +0xB: its attack family */
 #define BN4_CHIP_COUNT    389         /* ids 0-388 */
 #define BN4_GET_CHIP      0x080190D0u /* getChip: BN6's (0x08021AA4) found by its bytes, its literal BN4_CHIP_RECORDS */
 #define BN4_CHIP_NAMES    0x087481D8u /* text archive: the chips' names, ids 0-255 (letters and digits spelt as BN6's) */

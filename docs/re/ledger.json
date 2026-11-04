@@ -79,10 +79,18 @@
     {
       "name": "BN4 Red Sun's ROM",
       "state": "proven",
-      "now": "Read for research alone (XRomLayout.research; the atlas's x1 draws its maps through the engine). Mapped (src/emu/bn4.h, docs/rom/bn4.md): map lists 0x028304 (6 real-world groups) and 0x02831C (net 0x80-0x94, ACDC Area 0x90 to the Undernet and Black Earth 0x94), coordinates 0x028F04/0x028F1C, songs 0x155FF8, sprite lists 0x02793C, eToolkit 0x02009E70 (game state at +0x40), the encounter check 0x080F5370 that starts a battle, 12-byte battle records 0x08017FB8 with 4-byte entities, enemy records 0x08011888 (HP, kind, family, version, attack), chip records 0x0197EC. tools/bn4_lab.py boots it to Lan's room in romlab and starts any of its battles there. Also its 27 battle backgrounds (9-word records), its maps' Enter and LoadGFXAnims routines, its music (map lists 0x0802AFD0; net 0x12, Undernet 0x13, battle 0x14, boss 0x15), its Souls' tables (UNITE lit for WindSoul in romlab) and DarkChips, and the battle in RAM (the battle state 0x02035810, result, reward, objects); its save block moves in RAM at each change of mode. The differential's BN4 view traces its battles on the guest core in BN6's units (src/dev/xdiff_bn4_trace.c; its timer BattleState +0x40 0x02035850 and its Custom window 0x02036406 found so), compared by tools/xdiff_bn4.py: BN4's Mettaur fought twice is the same in 900 fight frames, and the control broken on purpose parts at t202.",
-      "left": "Whether Blue Moon's Soul forms run in Red Sun (the forced battle drops the Soul's pseudo-chip at OK); the rest of its collision data's and panels' layouts against BN6's (leads at one frame: devtools/differential.md, The BN4 trace), its numbers as BN6's (CurActions, effects, sounds) and its routines for the hooks, before a moved BN4 family (Billy first) is compared; a BN4 song copied and heard; the ROMs screen, the phones, the browser and the 3DS's heap once BN4 lends a run something.",
+      "now": "Read for research alone (XRomLayout.research; the atlas's x1 draws its maps through the engine). Mapped (src/emu/bn4.h, docs/rom/bn4.md): map lists 0x028304 (6 real-world groups) and 0x02831C (net 0x80-0x94, ACDC Area 0x90 to the Undernet and Black Earth 0x94), coordinates 0x028F04/0x028F1C, songs 0x155FF8, sprite lists 0x02793C, eToolkit 0x02009E70 (game state at +0x40), the encounter check 0x080F5370 that starts a battle, 12-byte battle records 0x08017FB8 with 4-byte entities, enemy records 0x08011888 (HP, kind, family, version, attack), chip records 0x0197EC. tools/bn4_lab.py boots it to Lan's room in romlab and starts any of its battles there. Also its 27 battle backgrounds (9-word records), its maps' Enter and LoadGFXAnims routines, its music (map lists 0x0802AFD0; net 0x12, Undernet 0x13, battle 0x14, boss 0x15), its Souls' tables and their life in battle (BN4's Souls, below) and DarkChips, and the battle in RAM (the battle state 0x02035810, result, reward, objects); its save block moves in RAM at each change of mode. The differential's BN4 view traces its battles on the guest core in BN6's units (src/dev/xdiff_bn4_trace.c; its timer BattleState +0x40 0x02035850 and its Custom window 0x02036406 found so), compared by tools/xdiff_bn4.py: BN4's Mettaur fought twice is the same in 900 fight frames, and the control broken on purpose parts at t202.",
+      "left": "The rest of its collision data's and panels' layouts against BN6's (leads at one frame: devtools/differential.md, The BN4 trace), its numbers as BN6's (CurActions, effects, sounds) and its routines for the hooks, before a moved BN4 family (Billy first) is compared; a BN4 song copied and heard; the ROMs screen, the phones, the browser and the 3DS's heap once BN4 lends a run something.",
       "updated": "2026-11-04",
       "link": "../multirom/bn4.md"
+    },
+    {
+      "name": "BN4's Souls on BN6's proxy form",
+      "state": "proven",
+      "now": "Mapped (src/emu/bn4.h, docs/rom/bn4.md Souls in battle, docs/multirom/bn4-souls.md): OK's Soul branch 0x0801F0A0 puts the pseudo-chip 0x160 + n through the pick's gate 0x08020306, whose chip gate 0x080063C8 refuses a Soul the story never gave (the save's byte at eToolkit +0x84 against the key 0x02000670 XOR 0x64); with it written the form is taken: the hand's Soul the pending form at the turn's start (0x0800B658, AI data +0x10), the unison family 0x0D writes NaviStats +0x24, 0x0800E05C sets the enter routine, 3 turns (AI data +0x19, counted in +0x18 at each Custom screen by 0x0800BA20), the 4-byte loadout 0x080184F0, charge times 0x080180B8, element 0x0800C964; the end the turn after the last, family 0x11. All twelve unite in Red Sun's ROM, Blue Moon's six given a flag, and each charged shot runs (romlab's new probe and writes). tools/bn4_souls.py reads each Soul and pairs the code it brings with BN6's twins: 13 to 43 routines a Soul, 84 SAME, 29 LAYOUT and 27 DIFF calls out counted Soul by Soul, two of the DIFF pairs not audited for Billy (an element's place, a wrong pair), 14 places in BN4's engine that compare the form.",
+      "left": "A BN4 path in tools/xsoul.py (roots from bn4_souls.py, AI data +0x70 as BN6's +0xA0); a number space for BN4's Souls in BN6_SOULS; SOULS_CHARGES, SOULS_LOADOUTS and list 0's numbers grown; 438 KB of sprites in FREE_TAIL (the 3DS's heap measured); the 14 engine places hooked; the guest core's BN4 Souls (flag and gate byte) for the differential; ThunSoul first.",
+      "updated": "2026-11-04",
+      "link": "../multirom/bn4-souls.md"
     },
     {
       "name": "BN4's virus families in BN6's engine",
@@ -222,6 +230,10 @@
     {
       "date": "2026-10-25",
       "what": "BN5's Liberation commands mapped (src/emu/bn5_liberation_cmds.h, docs/rom/liberation.md's row): command ids 0-15, the masks 0x08050048, the window 0x0200A7D0 and checks 0x08055778, steps 0x0804C428 and 0x0804D308, the shapes 0x08050344 applied by 0x08052060, PanelSearch's line 0x0805221C, MagnetBarrier 0x08054518/0x0805455C, the walk masks 0x0804FF5C, Team ProtoMan's Navi ids 1-6. Corrected: BN5_LIB_UNITS' +5 is the facing, the Navi id is +1 (found by poking +1, which changed the window's commands; +5 read as the facing by 0x080537CE)."
+    },
+    {
+      "date": "2026-11-04",
+      "what": "BN4 Red Sun's Souls: the reason no form was taken found (BN4's chip gate), all twelve forms taken in Red Sun's ROM, Blue Moon's six too, each one's tables, abilities and code against BN6's twins mapped, and an order to move them, ThunSoul first."
     }
   ],
   "experiments": [
@@ -583,6 +595,14 @@
       "result": "Four research agents in parallel, each in romlab on bn4_lab's battles: a background record's three table entries pointed at another's drew that one's frame byte for byte; a record's +3 set to 0x10 played song 0x10 (its +2 changed nothing); UNITE lit after AirShot with flags 0x14 and 0x19 set, WindSoul's icon in the column; a battle ended at 37 HP and the next began at 37 (NaviStats +0x30), while the game state's address changed between the room and the battle.",
       "meaning": "BN4's backgrounds, music and Souls follow BN5's and BN6's patterns with formats of their own (9-word backgrounds, a song byte in the record); a guest core must read BN4's save block through eToolkit.",
       "link": "../rom/bn4.md"
+    },
+    {
+      "feature": "BN4's Souls on BN6's proxy form",
+      "date": "2026-11-04",
+      "name": "A Soul's form taken in BN4, then all twelve",
+      "result": "romlab, from bn4_lab's room with a Mettaur: a probe after the pick's gate read 0x3784 for WindSoul's pseudo-chip (its key 0xA3 XOR 0x64 against the save's 0x5C); with the save's byte written as the key XOR 0x64, WindSoul united, its unison played, turns 3, 2, 1, 0 under his face at three screens, plain the turn after (a writes watch: AI data +0x18 1, 2, 3 by 0x0800BA20). Each of the twelve, given Wind's kind and flag in the ROM's tables, united, drew its sprite and name, and fired its charged shot after B held 300 frames against a Mettaur with its update stubbed (probes on its power attack and family; GutsSoul's too, JunkSoul's family the battle's chip).",
+      "meaning": "BN4's Soul code is whole in Red Sun for all twelve: a run can lend Blue Moon's six from one ROM; the guest core's BN4 Souls need the gate's byte beside the flag.",
+      "link": "../multirom/bn4-souls.md"
     }
   ],
   "method": {
