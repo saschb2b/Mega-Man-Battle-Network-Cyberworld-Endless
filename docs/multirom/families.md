@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, and all 25 families proved by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T00:57:11Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:30:00Z }
 ---
 
 # Transplanted families
@@ -407,7 +407,10 @@ and its calls aimed again (`src/emu/xvirus.c`):
   has the same bytes, else copied, decompressed, at the families' numbers
   (lists 1, 4 and 5 upward from BN6's end, list 1's placeholders 0x1E and
   0x00 first; list 2 from 0x30; a sprite of list 3, where it is not
-  grown, in list 4), and an effect of other art takes an id from 0x6C. Every object type a family's
+  grown, in list 4), and an effect of other art takes an id from 0x6C
+  (BN4's families, `tools/xrecipe_bn4.py`: lists 1 and 4 from 0xC0, and
+  the types they move at the dispatch's numbers from 0xE0, apart from
+  every BN5 type's). Every object type a family's
   code spawns is decided once for every track (`bn5_twins.TYPES`): moved
   through the dispatch unless BN6's type of the number runs the same code
   and draws the same sprites by their bytes (19 moved, 6 twins, the

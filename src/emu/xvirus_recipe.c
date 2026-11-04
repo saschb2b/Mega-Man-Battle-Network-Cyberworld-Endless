@@ -137,11 +137,13 @@ static bool data_ok(const XVirusFamily *f, char *why, size_t n) {
 	return true;
 }
 
+/* (a hook entered past its routine's push is code of its own blocks; a state never is) */
 static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nstates; ++i)
-		if (!ref_ok(f, f->states[i])) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
+		if (!ref_ok(f, f->states[i]) || f->states[i].entered) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
 	for (int i = 0; i < XV_HOOKS; ++i)
-		if (!ref_ok(f, f->hooks[i])) return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
+		if (!ref_ok(f, f->hooks[i]) || (f->hooks[i].entered && (!f->hooks[i].own || f->hooks[i].clone)))
+			return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
 	return true;
 }
 
@@ -212,6 +214,7 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (f->prestep && (f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
 		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE;
+	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;
 	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
 	return true;
 }

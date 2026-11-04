@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -58,6 +58,22 @@ BN4's save block through eToolkit, as BN4 moves it in RAM at each change
 of mode ([BN4 Red Sun's tables](../rom/bn4.md), The battle in RAM): about a day or two
 for battles that start, end and report, a week more for the differential's
 view of its objects.
+
+Three families are whole so far, Billy, Spikey and Shrimpy
+(`src/emu/xvirus_bn4.c`, `--dev bn4families`), and each after the first
+cost audits more than code. Spikey and Shrimpy took 14 more pairs in
+`tools/bn4_twins.py` (six of them the collision routines their attacks
+call, read side by side with BN6's), two routines copied with their
+tables, and two ways the generator now has for every family: what an
+init or update does past BN6's own work runs as a hook (a routine of its
+own, or its tail entered through a shim), and an attack BN6 has no object
+of moves with its family (its code, its sprite into list 4, its spawn
+through the second-level dispatch at numbers apart from BN5's). Three
+interims every family meets stay open: BN4's effect table is not mapped
+(its effects draw as BN6's of the same ids: Shrimpy's splash shows as
+BN6's wide sweep), its sounds play as BN6's of the same numbers (BN4's
+have no slots among BN6's empty songs yet), and the can-move check's
+panel type 0xA has no BN6 type known.
 
 ## What players said, and what follows
 
