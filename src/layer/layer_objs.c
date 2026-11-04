@@ -120,6 +120,7 @@ typedef struct {
 	 * at (sx, sy) from where it stands */
 	bool behind;
 	int anim, sx, sy;
+	bool looks;         /* a Glitch warp: its look changed by the director (npc_talker_looks) */
 } Talker;
 
 void layer_objs_shops(const LayerObjs *o, bool saved) {
@@ -514,6 +515,7 @@ static void install_begin(Install *in) {
 	out->guardian = (GuardianStage){ .intro = -1, .defeat = -1, .reward = -1 };
 	out->challenge_reward = -1;
 	out->copy_reward = -1;
+	memset(&out->glitch_warp, 0, sizeof out->glitch_warp);
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = out->nmd = 0;
@@ -717,6 +719,24 @@ static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	return !layer_objs_duel_later;
 }
 
+/* The big framed warp pad, the green oval pad and the orange-framed pad
+ * (list 7's 0x06, 0x22, 0x36): steady every frame, where the dark warp's
+ * flame (0x44) is drawn three frames in five */
+const uint8_t glitch_look_sprite[GLITCH_LOOKS] = { 0x06, 0x22, 0x36 };
+
+/* The run's Glitch warp (docs/game/glitch-layer.md): a pad on the floor in
+ * its first look, the others the map loads too, for the director to switch
+ * it between */
+static void install_glitch_warp(Install *in, Talker *tk) {
+	tk->cat = 7;
+	tk->sprite = glitch_look_sprite[0];
+	tk->floor = true;
+	tk->looks = true;
+	in->out->glitch_looks = 0;
+	for (int k = 0; k < GLITCH_LOOKS; ++k)
+		if (npc_need_sprite(&in->npcs, 7, glitch_look_sprite[k])) in->out->glitch_looks |= (uint8_t)(1u << k);
+}
+
 /* A Glitch layer's copy (docs/game/glitch-layer.md): its first form's body,
  * and its prize, a pick of its forms' Navi chips a version above the act's
  * (an older net's Navi's as his Guardian Data gives it deep), in the
@@ -884,7 +904,7 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i) {
 	case OBJ_CHALLENGE: install_server(in, tk); return true;
 	case OBJ_GIFT: install_gift(in, tk); return false;
 	case OBJ_UNDERNET: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
-	case OBJ_GLITCH: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
+	case OBJ_GLITCH: install_glitch_warp(in, tk); return true;
 	case OBJ_COPY: install_copy(in, tk); return true;
 	case OBJ_DUEL: return install_duel(in, tk, tk->x, tk->y);
 	case OBJ_SECRET_GATE: tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true; return true;
@@ -959,7 +979,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < in.ntalk && npcs->n < 32; ++i) {
 		const Talker *t = &in.talkers[i];
 		uint32_t a = t->archive ? t->archive : archive;
-		npcs->script[npcs->n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
+		NpcTalk looks = { t->cat, t->sprite, t->x, t->y, t->z, a, t->script, t->gone_flag };
+		npcs->script[npcs->n++] = t->looks ? npc_talker_looks(&looks, &out->glitch_warp)
+			: t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
 		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}

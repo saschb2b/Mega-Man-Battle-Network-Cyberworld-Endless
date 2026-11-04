@@ -45,6 +45,8 @@ static const int gap_lo[GLITCH_STAGES] = { 300, 180, 100, 60, 30 }, gap_hi[GLITC
 enum { FX_NONE, FX_TEAR, FX_SLIP, FX_TURN, FX_FLIP };
 
 #define FLIP_EDGE 6        /* a flip's frames in and out under the mosaic */
+#define LOOK_MOSAIC 12     /* the warp's new look under BN6's mosaic as it comes, clearing over the glitch */
+#define LOOK_SET 2         /* frames its loop stays pointed at the new look's snippet */
 
 static struct {
 	bool on;            /* a Glitch layer */
@@ -62,6 +64,12 @@ static struct {
 	 * sprites' colours, a bit each of BGR555) */
 	int sx, sy, mx, my;
 	int look;           /* the warp's colours, turned one of three ways */
+	int look_k;         /* its look now (glitch_look_sprite) */
+	int look_set, blur, blur_len;   /* frames of its new look's snippet, and of its mosaic clearing */
+	int box_w, box_up, box_down;    /* the box its glitches are drawn in, round its foot */
+	int jitter;         /* frames left of a small jitter between its glitches */
+	uint32_t jitter_seed;
+	unsigned tick;      /* the update's frames, for a glitch's alternating frames */
 	bool box, shown;
 	uint8_t sprite[32768 / 8];
 	bool settled;       /* the copy deleted: the glitch gone */
@@ -85,6 +93,11 @@ void glitch_layer_begin(void) {
 		if (layer.obj[i].type == OBJ_GLITCH || layer.obj[i].type == OBJ_COPY) {
 			G.warp = true;
 			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &G.wx, &G.wy);
+			/* (a pad flat on the floor, a Navi standing) */
+			bool pad = layer.obj[i].type == OBJ_GLITCH;
+			G.box_w = pad ? 36 : 18;
+			G.box_up = pad ? 30 : 52;
+			G.box_down = pad ? 22 : 10;
 		}
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) G.floor += layer.cell[y][x] == C_PATH;
@@ -107,6 +120,52 @@ static void measure(void) {
 	if (s > G.stage) G.stage = s;
 }
 
+/* The warp's next look: a pad of another kind the map loaded, under BN6's
+ * mosaic (its talker's look snippet, npc_talker_looks) */
+static void warp_look_next(int frames) {
+	const NpcLooks *w = &D.objs.glitch_warp;
+	if (G.on || !w->jump_at || !w->look || !w->blur) return;
+	int other[GLITCH_LOOKS], n = 0;
+	for (int k = 0; k < GLITCH_LOOKS; ++k)
+		if (k != G.look_k && (D.objs.glitch_looks >> k & 1)) other[n++] = k;
+	if (!n) return;
+	G.look_k = other[roll(0, n - 1)];
+	uint8_t sprite = glitch_look_sprite[G.look_k], m[2] = { LOOK_MOSAIC, LOOK_MOSAIC };
+	emu_write(w->look + 1, &sprite, 1);
+	emu_write(w->look + 6, m, 2);
+	G.look_set = LOOK_SET;
+	G.blur = G.blur_len = frames + LOOK_SET;
+}
+
+/* Each frame: the warp's loop pointed at its new look's snippet, then at
+ * its mosaic clearing, then back at itself */
+static void warp_look_step(void) {
+	const NpcLooks *w = &D.objs.glitch_warp;
+	if (!w->jump_at) return;
+	uint32_t target = w->loop;
+	if (G.look_set > 0) {
+		--G.look_set;
+		target = w->look;
+	} else if (G.blur > 0) {
+		--G.blur;
+		int size = G.blur > 2 ? LOOK_MOSAIC * (G.blur - 2) / G.blur_len : 0;
+		uint8_t m[2] = { (uint8_t)size, (uint8_t)size };
+		emu_write(w->blur + 1, m, 2);
+		target = w->blur;
+	}
+	if (emu_read32(w->jump_at) != target) emu_write32(w->jump_at, target);
+}
+
+/* Between the warp's glitches, now and then a frame or two of a few rows
+ * slipped a pixel or two: it never quite holds still */
+static void warp_jitter(void) {
+	if (G.on || G.fx != FX_NONE) return;
+	if (G.jitter > 0) { --G.jitter; return; }
+	if (roll(0, 59)) return;
+	G.jitter = roll(1, 2);
+	G.jitter_seed = next_rng();
+}
+
 /* The next glitch: torn rows first, blocks slipped from stage 1, colours
  * turned from stage 2; longer the further the layer has come apart */
 static void schedule(void) {
@@ -122,6 +181,7 @@ static void schedule(void) {
 	G.fx_len = G.fx_left;
 	G.fx_seed = next_rng();
 	if (G.fx == FX_FLIP) glitch_look_flip(roll(0, glitch_looks() - 1));
+	warp_look_next(G.fx_left);
 	/* (the warp's: every three to seven seconds) */
 	G.next = D.frame + G.fx_left + (G.on ? roll(gap_lo[s], gap_hi[s]) : roll(180, 420));
 }
@@ -164,12 +224,15 @@ void glitch_update(void) {
 	if (G.on && !G.settled) measure();
 	if (G.on && !G.settled) stage_words();
 	glitch_look_update();
+	warp_look_step();
 	if (G.settled) {
 		if (glitch_look_shown() >= 0) glitch_look_flip(-1);
 		G.fx = FX_NONE;
 		return;
 	}
 	schedule();
+	warp_jitter();
+	++G.tick;
 	G.box = emu_read8(BN6_CHATBOX) != 0;
 	if (G.warp) warp_on_screen();
 	if (G.fx != FX_NONE) {
@@ -267,9 +330,6 @@ static void mosaic(uint32_t *px, int y0, int y1, int n) {
  * it, MegaMan's box left alone): its colours turned one of three ways,
  * never the Undernet's purple nor the guardian's own, the way changed with
  * each glitch; in a glitch, its rows torn sideways, sprite and all */
-#define WARP_W    18       /* its box: this far either side of its foot, */
-#define WARP_UP   52       /* ... this far up */
-#define WARP_DOWN 10       /* ... and down */
 
 /* (MegaMan's box, and BN6's HP window in the corner, left alone) */
 #define HP_W 48
@@ -284,22 +344,42 @@ static uint32_t turned(uint32_t c, int way) {
 	return a | (255 - r) | (255 - g) << 8 | (255 - b) << 16;
 }
 
-static void warp_frame(uint32_t *px) {
-	int x0 = G.sx - WARP_W < 0 ? 0 : G.sx - WARP_W, x1 = G.sx + WARP_W > EMU_W ? EMU_W : G.sx + WARP_W;
-	int y0 = G.sy - WARP_UP < 0 ? 0 : G.sy - WARP_UP, y1 = G.sy + WARP_DOWN, bottom = G.box ? BOX_TOP : EMU_H;
-	if (y1 > bottom) y1 = bottom;
+/* (a row of the box: its pixels shifted `dx` round within it, its sprite's
+ * colours turned, MegaMan's box left) */
+static void warp_row(uint32_t *px, int y, int x0, int x1, int dx) {
 	static uint32_t row[EMU_W];
+	memcpy(row, px + y * EMU_W, sizeof row);
+	for (int x = x0; x < x1; ++x) {
+		if (megaman_px(x, y)) continue;
+		int fx = x - dx < x0 ? x1 - (x0 - (x - dx)) : x - dx >= x1 ? x0 + (x - dx - x1) : x - dx;
+		uint32_t c = row[fx < 0 ? 0 : fx >= EMU_W ? EMU_W - 1 : fx];
+		if (megaman_px(fx, y)) continue;
+		px[y * EMU_W + x] = c >> 24 != 0xF8 && !floor_px(c) ? turned(c, G.look) : c;
+	}
+}
+
+/* (a row of the box split by colour: its red from the left, its blue from
+ * the right, as a signal's channels drift apart) */
+static void warp_split(uint32_t *px, int y, int x0, int x1, int d) {
+	static uint32_t row[EMU_W];
+	memcpy(row, px + y * EMU_W, sizeof row);
+	for (int x = x0; x < x1; ++x) {
+		if (megaman_px(x, y)) continue;
+		uint32_t l = row[x - d < x0 ? x0 : x - d], r = row[x + d >= x1 ? x1 - 1 : x + d], c = row[x];
+		px[y * EMU_W + x] = (c & 0xFF00FF00u) | (l & 0xFFu) | (r & 0xFF0000u);
+	}
+}
+
+static void warp_frame(uint32_t *px) {
+	int x0 = G.sx - G.box_w < 0 ? 0 : G.sx - G.box_w, x1 = G.sx + G.box_w > EMU_W ? EMU_W : G.sx + G.box_w;
+	int y0 = G.sy - G.box_up < 0 ? 0 : G.sy - G.box_up, y1 = G.sy + G.box_down, bottom = G.box ? BOX_TOP : EMU_H;
+	if (y1 > bottom) y1 = bottom;
+	bool glitch = G.fx == FX_TEAR || G.fx == FX_SLIP, split = glitch && (G.tick & 1);
 	for (int y = y0; y < y1; ++y) {
-		uint32_t h = hash(G.fx_seed, (uint32_t)y / 4);
-		int dx = G.fx == FX_TEAR || G.fx == FX_SLIP ? (int)(h >> 8 & 15) - 8 : 0;
-		memcpy(row, px + y * EMU_W, sizeof row);
-		for (int x = x0; x < x1; ++x) {
-			if (megaman_px(x, y)) continue;
-			int fx = x - dx < x0 ? x1 - (x0 - (x - dx)) : x - dx >= x1 ? x0 + (x - dx - x1) : x - dx;
-			uint32_t c = row[fx < 0 ? 0 : fx >= EMU_W ? EMU_W - 1 : fx];
-			if (megaman_px(fx, y)) continue;
-			px[y * EMU_W + x] = c >> 24 != 0xF8 && !floor_px(c) ? turned(c, G.look) : c;
-		}
+		uint32_t h = hash(glitch ? G.fx_seed : G.jitter_seed, (uint32_t)y / 4);
+		int dx = glitch ? (int)(h >> 8 & 15) - 8 : G.jitter && h % 5 == 0 ? (int)(h >> 8 & 3) - 2 : 0;
+		if (split) warp_split(px, y, x0, x1, 2 + (int)(h >> 12 & 1));
+		warp_row(px, y, x0, x1, split ? 0 : dx);
 	}
 }
 
@@ -307,7 +387,7 @@ static void warp_frame(uint32_t *px) {
  * mGBA's layer byte on top): read-only, the update decided them */
 void director_glitch_frame(uint32_t *px) {
 	if (!G.shown) return;
-	if (G.warp && G.sx > -WARP_W && G.sx < EMU_W + WARP_W && G.sy > -WARP_DOWN && G.sy < EMU_H + WARP_UP) warp_frame(px);
+	if (G.warp && G.sx > -G.box_w && G.sx < EMU_W + G.box_w && G.sy > -G.box_down && G.sy < EMU_H + G.box_up) warp_frame(px);
 	if (!G.on || G.fx == FX_NONE) return;
 	if (G.fx == FX_FLIP) {
 		int in = G.fx_len - G.fx_left, edge = in < G.fx_left ? in : G.fx_left;

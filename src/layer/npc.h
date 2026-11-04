@@ -42,6 +42,16 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * (sx, sy) world units from where it stands, as the originals' counter
  * navis are. */
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
+/* ... a floor talker (an object of list `category`, sprite `index`) whose
+ * look the director may change between frames (a Glitch warp's,
+ * docs/game/glitch-layer.md): its idle loop's jump pointed at `look`, after
+ * writing a sprite's number at its +1 and a mosaic's size at its +6 and +7
+ * (ns_set_sprite and ns_set_mosaic), or at `blur`, the mosaic's size at
+ * its +1 and +2, runs that snippet once a frame and back to `loop`; the
+ * jump pointed at `loop` again, as it was */
+typedef struct { int category, index, x, y, z; uint32_t archive; int script, gone_flag; } NpcTalk;
+typedef struct { uint32_t jump_at, loop, look, blur; } NpcLooks;
+uint32_t npc_talker_looks(const NpcTalk *t, NpcLooks *looks);
 /* A list 6 talker's sprite (script `at`, npc_talker's) set by BN6's own
  * ns_set_sprite, which dresses it in its variation: the palette and hidden
  * pieces BN6's NPC sprite variations give that sprite (a Virus Battler's

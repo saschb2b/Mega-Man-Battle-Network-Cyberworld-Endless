@@ -11,7 +11,10 @@
  * own removal. The next form is spawned on that panel by BN6's mid-fight
  * spawn (BN6_SPAWN_ENEMY_1), called from the battle's frame
  * (BN6_BATTLE_MAIN) and back through a hook in free space, as a game call
- * comes back (gamecall.c); it arrives as BN6 brings a Navi into a fight
+ * comes back (gamecall.c), its battle sprite put first into the battle's
+ * sprite cache by BN6's own sprite_decompress (BN6_SPRITE_DECOMPRESS), as
+ * the battle's start puts its starting enemies' there: a Navi whose sprite
+ * is compressed drew as BN6's white dot without it (BlastMan, CircusMan); it arrives as BN6 brings a Navi into a fight
  * under way, its HP listed, in a mosaic that clears. As its arrival ends
  * it takes the first form's count (AIData +2 0, Param2 0), so that the last
  * form's deletion lowers the count to 0 and BN6 wins the battle as ever.
@@ -59,6 +62,8 @@ static struct {
 	uint8_t px, py;            /* the panel it stood on */
 	int out_left, in_left;     /* frames of mosaic left on the one going, and on the one come */
 	bool in_call;              /* the battle's frame entered again from the spawn's return */
+	bool sprite_call;          /* the call under way is the next form's sprite's, its spawn after it */
+	int sprited;               /* the last form whose sprite was put in the cache (a retried spawn puts it there once) */
 	uint32_t kept[4], kept_r5, kept_lr;   /* r0-r3, r5 and lr as the battle's frame met them */
 } S;
 
@@ -127,13 +132,20 @@ static void arrival_panel(void) {
 		}
 }
 
-/* the next form's spawn, from the battle's frame: BN6's mid-fight entry
- * with the panel the last stood on, back through FREE_SWAP_RETURN */
-static HookAct spawn_next(HookRegs *r) {
-	arrival_panel();
-	memcpy(S.kept, r->r, sizeof S.kept);
-	S.kept_r5 = r->r[5];
-	S.kept_lr = r->lr;
+/* a form's battle sprite: its struct1's list and number (BN6_NAVI_REF_STRUCT1, by its AI index) */
+static bool form_sprite(int id, uint32_t *list, uint32_t *index) {
+	uint32_t ids = hook_read32(BN6_ENEMY_IDS_REF);
+	if (ids < 0x08000000u) return false;
+	uint32_t s1 = hook_read32(hook_read32(BN6_NAVI_REF_STRUCT1) + 4u * hook_read8(ids + (uint32_t)id * 3 + 2));
+	if (s1 < 0x08000000u) return false;
+	*list = hook_read8(s1 + BN6_TRAITS_LIST);
+	*index = hook_read8(s1 + BN6_TRAITS_SPRITE);
+	return true;
+}
+
+/* BN6's mid-fight entry for the next form, with the panel the last stood
+ * on, back through FREE_SWAP_RETURN */
+static HookAct call_spawn(HookRegs *r) {
 	r->r[0] = (uint32_t)S.form[S.cur + 1].id;
 	r->r[1] = S.px;
 	r->r[2] = S.py;
@@ -142,6 +154,26 @@ static HookAct spawn_next(HookRegs *r) {
 	r->lr = FREE_SWAP_RETURN | 1;
 	r->r[12] = BN6_SPAWN_ENEMY_1 | 1;
 	return HOOK_JUMP;
+}
+
+/* the next form's spawn, from the battle's frame: its sprite into the
+ * battle's cache first (once a form), then BN6's mid-fight entry */
+static HookAct spawn_next(HookRegs *r) {
+	arrival_panel();
+	memcpy(S.kept, r->r, sizeof S.kept);
+	S.kept_r5 = r->r[5];
+	S.kept_lr = r->lr;
+	uint32_t list, index;
+	if (S.sprited < S.cur + 1 && form_sprite(S.form[S.cur + 1].id, &list, &index)) {
+		S.sprited = S.cur + 1;
+		S.sprite_call = true;
+		r->r[0] = list;
+		r->r[1] = index;
+		r->lr = FREE_SWAP_RETURN | 1;
+		r->r[12] = BN6_SPRITE_DECOMPRESS | 1;
+		return HOOK_JUMP;
+	}
+	return call_spawn(r);
 }
 
 /* the arrival ended (its state on from the spawn's): the first form's count its own */
@@ -211,9 +243,15 @@ static HookAct frame(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
-/* The spawn's return: r0 the object it made, or none (no room) */
+/* The spawn's return: r0 the object it made, or none (no room); or the
+ * sprite's (r0 1 where it was decompressed), the spawn on from it */
 static HookAct returned(HookRegs *r, void *user) {
 	(void)user;
+	if (S.sprite_call) {
+		S.sprite_call = false;
+		if (emu_debug_on()) fprintf(stderr, "swap: form %d's sprite %s\n", S.cur + 2, r->r[0] ? "put in the battle's cache" : "plain, or no room in the cache");
+		return call_spawn(r);
+	}
 	uint32_t o = r->r[0];
 	int id = S.form[S.cur + 1].id;
 	bool made = o >= BN6_T1_OBJECTS && o < BN6_T1_OBJECTS + BN6_T1_COUNT * BN6_T1_SIZE && (hook_read8(o + BN6_T1_IN_PLAY) & 1) &&
