@@ -38,6 +38,12 @@ TWINS = (
     # init, update and type routine call in the same places, which Spikey's and Shrimpy's attacks call too
     (0x080143FC, 0x0801BBAC, 'thunder'), (0x08012F74, 0x0801A140, 'thunder'), (0x080129FC, 0x0801A00E, 'thunder'),
     (0x08009EE4, 0x0800CCBE, 'thunder'),
+    # Walla's, Elmperor's and CirKill's (bn6f's names located in BN4 and in Gregar, .build/bn4-fam2; each body read), and their
+    # attacks'
+    (0x08012DB2, 0x0801A066, 'families-2'), (0x0800AE10, 0x0800E6E8, 'families-2'), (0x0801014C, 0x080165C2, 'families-2'),
+    (0x08009DA0, 0x0800CBD8, 'families-2'), (0x08009DC4, 0x0800CC0A, 'families-2'), (0x0800ABCA, 0x0810A952, 'families-2'),
+    (0x080164B4, 0x0810A952, 'families-2'), (0x080E407A, 0x0810A952, 'families-2'), (0x080E76EA, 0x080011EC, 'families-2'),
+    (0x080E770C, 0x0810A952, 'families-2'), (0x080CDCE4, 0x0801156A, 'families-2'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -84,6 +90,28 @@ AUDITS = {
                                      "+0x70; the frame's fields cleared): BN6's, in BN6's layout, its last step through IWRAM"),
     (0x08012F44, 0x0801A0D4): ('ok', "the effect its hits make (the flags its hits left it tested, its hit effect: BN4's +7, "
                                      "BN6's +9): BN6's, the same steps in BN6's layout"),
+    # (Walla's, Elmperor's and CirKill's code and their attacks', read from both games' code, .build/bn4-fam2)
+    (0x0801014C, 0x080165C2): ('ok', "the generic state 2 (deletion's) Elmperor's own state 2 wraps: BN6's in its place, as every "
+                                     "family's state 2 is BN6's; BN6's first runs its own tests (+0x40000000, 0x0800A03C)"),
+    (0x08009DA0, 0x0800CBD8): ('ok', "a panel highlighted where the attack will strike (its column r0, row r1, a valid panel's): "
+                                     "BN6's object_highlightPanel sets the panel's +1, where BN4 keeps a byte a panel at 0x02037ABE"),
+    (0x08009DC4, 0x0800CC0A): ('ok', "a panel's type set (r0 column, r1 row, r2 type) where the panel is not a hole: BN6's "
+                                     "object_setPanelType; BN4's also gives it 0xBE frames (+0x12) to change back, which BN6's panels "
+                                     "do not count but for its conveyors (an interim: the panel keeps its type)"),
+    (0x0800ABCA, 0x0810A952): ('ok', "Walla's Recov80 or Recov150 used (a held chip, its +0x2A 0x6E or 0x70): dead in BN6 while its "
+                                     "+0x2A stays 0xFFFF (it holds none): BN6's family nullsub"),
+    (0x080164B4, 0x0810A952): ('ok', "Walla's held chip spent after its recovery: dead while its +0x2A stays 0xFFFF: BN6's family "
+                                     "nullsub"),
+    (0x080E407A, 0x0810A952): ('ok', "Walla's held chip's attack spawned (behind 0x080B52E4's test of +0x2A): dead while it holds "
+                                     "none: BN6's family nullsub"),
+    (0x080E76EA, 0x080011EC): ('ok', "Elmperor's aura spawned (the fourth kind's 0x4C: its sprite copied in its panel's colours "
+                                     "through BN4's tile buffer 0x02037810, which has no twin mapped): answered 0, BN6's routine that "
+                                     "returns 0, so its +0x6C stays 0 (an interim: the aura not drawn; its HP's return goes on)"),
+    (0x080E770C, 0x0810A952): ('ok', "Elmperor's aura told to end (its +8 set 8): reached only where +0x6C holds one, never while "
+                                     "the aura is answered 0: BN6's family nullsub"),
+    (0x080CDCE4, 0x0801156A): ('ok', "an object's hit taken from its HP (r0 0: off its +0x24, -1 back where none is left, else a white "
+                                     "flash): BN6's basicHandleBattleObjectDamage, its r0 0 path the same, its sound BN6's (0x85, BN4's "
+                                     "0xC8)"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }
@@ -91,6 +119,9 @@ AUDITS = {
 # BN4's routines its families' code calls that BN6 has no twin of, copied with the family (each a block of its own, its
 # literal pool with it, the code between zeroed): entry -> why
 COPIED = {
+    0x0800AFB0: "the direction from its panel to another (r0-r3, 0-4) into its collision data's +0xA (BN6's +0xC): BN6's "
+                "0x0800E994 answers neighbours alone (5 else), BN4's every panel",
+    0x0800AF90: "... the direction itself, a leaf",
     0x080B52E4: "a held chip's test (+0x2A + 1): a leaf, BN6's +0x2A the same field",
     0x080B54D0: "a held chip's numbers read for its attack (getChip, BN6's twin): self-contained",
     0x0800AD2A: "the can-move check (its flags, then its panel's type): no BN6 routine of its body; ported, its panel's type read "
@@ -129,6 +160,12 @@ ENTRIES = {
 
 # Its pools' words that look like addresses and are numbers, kept: value -> why
 NUMBERS = {
+    0x2A800000: "the flags its hits left it, tested as 0x0A800000 is, with 0x20000000: a word of both games' collision masks' "
+                "tables (BN4's 0x0801268C, BN6's BN6_COLL_MASKS' 0x08019CA8)",
+    0x0B800000: "a panel's flags it may not have (object_checkPanelParameters, BN6's 0x0800CC86 the same body): the support and "
+                "alliance bits, BN6's own code naming the same mask (0x0800E6D4)",
+    0x04080080: "a panel's flags (its panel's, 0x08009A86, BN6's 0x0800C8F8) CirKill waits on: 0x04000000 the enemy's alliance, "
+                "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "
                 "pass the same (eight of its pools)",
     0x0A800000: "the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), "
@@ -137,3 +174,44 @@ NUMBERS = {
 GET_PANEL = 0x08009ABC   # BN4's getPanel (BN6's 0x0800C90A): back r0 the panel, its type at +0 (BN6's +2)
 # BN4's panel types as BN6's, where a copied routine compares one: none known yet (an interim the report lists)
 PANEL4TO6 = {}
+
+# A family's update that does work of its own between BN4's pre-step and its state runner: the update run as its pre-step
+# (the installer's shim, after BN6's own pre-step, before its state: the place BN4 runs it), its calls to the pre-step,
+# the runner and the present aimed at BN6's family nullsub: update -> why
+PRESTEP = {
+    0x080C2808: "Elmperor's: unless time stops (battle_isTimeStop, BN6's 0x0800A098), 0x080C286C: its collision data's poison "
+                "timer (+6, BN6's +8) held at 0xFF, poison panels never striking it, and while its +0x60 is set 1 HP back "
+                "every few frames (object_addHP)",
+    0x080BD10C: "CirKill's: its +0x64 and +0x68 (the objects it spawned) let go once that object is no longer in play "
+                "(its +0 byte 0, as BN6's objects' first byte)",
+}
+
+# A family's generic state of its own (its state table's entry 0-5 another routine than BN4's): a wrapper of the generic
+# state, run in BN6's place, its call to BN4's generic state paired with BN6's: entry -> why
+OWN_STATES = {
+    0x080C2850: "Elmperor's state 2 (deletion's): on its first frame its companion (+0x6C) told to end (0x080E770C) and let go, "
+                "then BN4's generic state 2, BN6's in its place",
+}
+
+# Tables of BN4's ROM out of every region a moved object's code names by a literal, copied whole with it as raw data:
+# address -> its size, an entry's, the kinds its families spawn (bn4_twins.TYPES' spawns' r4), the places of a kind's sprite
+# (list offset, number) and the loads of them (the sprite load whose r1 and r2 come from an entry), why
+TABLES = {
+    0x080CE5B0: dict(size=0x130, entry=0x10, kinds=(10, 11, 12), sprite=(5, 6), loads=(0x080CE718,),
+                     why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
+                         "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "
+                         "(0x080BD3E0-0x080BD3E4), as BN5's records of its own 0x0B are read"),
+}
+
+# What a family keeps of BN4's for now, named over its recipe beside the generator's own interims: family -> lines
+INTERIMS = {
+    'Elmperor': (
+        "its panel types (its attack's, 0x080DC780: 6, 7, 8, 4, 0xA, set by BN6's object_setPanelType) and the panel flags it "
+        "reads its element by (0x080C2948: 0x400, 0x800, 0x1000, 0x100, 0x200) kept as BN4's numbers: BN4's panel types are "
+        "not mapped yet (the same interim as Billy's panel type 0xA; BN6's flag 0x200 is its conveyors')",
+        "a panel its attack changes keeps its new type: BN4 gives it 0xBE frames (+0x12) to change back, which BN6's panels "
+        "count for its conveyors alone",
+        "its aura (the fourth kind's 0x4C, its sprite drawn again in its element's colours through BN4's tile buffer 0x02037810) "
+        "not drawn: its spawn answered 0 (bn4_twins.AUDITS); its HP's return goes on",
+    ),
+}

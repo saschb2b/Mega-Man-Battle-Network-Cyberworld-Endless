@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:55:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -98,16 +98,16 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Code (routines, hooks, instructions) | 295 | 27 | 26 |
-| ROM data (tables, text, literals) | 291 | 267 | 41 |
-| ROM, code or data not told | 443 | 582 | 38 |
-| RAM (variables, structures) | 135 | 65 | 23 |
+| Code (routines, hooks, instructions) | 296 | 27 | 28 |
+| ROM data (tables, text, literals) | 291 | 267 | 45 |
+| ROM, code or data not told | 443 | 582 | 42 |
+| RAM (variables, structures) | 135 | 65 | 25 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 158 | 42 | 2 |
 | Event flags | 34 | 3 | 1 |
 | Values of fields | 112 | 16 | 0 |
-| Constants, sizes and counts | 477 | 272 | 132 |
-| All | 1948 | 1274 | 263 |
+| Constants, sizes and counts | 477 | 272 | 139 |
+| All | 1949 | 1274 | 282 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -115,12 +115,12 @@ how to verify it.
 | Shops and traders | 37 | 0 | 0 |
 | NaviCust | 23 | 1 | 0 |
 | Chips and folders | 301 | 224 | 17 |
-| Battle | 529 | 368 | 128 |
+| Battle | 529 | 368 | 137 |
 | Text and fonts | 42 | 7 | 1 |
 | Sound | 19 | 25 | 12 |
-| Maps and the overworld | 131 | 41 | 13 |
-| Events and progress | 49 | 19 | 3 |
-| Engine core | 746 | 588 | 89 |
+| Maps and the overworld | 131 | 41 | 14 |
+| Events and progress | 49 | 19 | 4 |
+| Engine core | 747 | 588 | 97 |
 
 <!-- end of what tools/symbols.py writes -->
 

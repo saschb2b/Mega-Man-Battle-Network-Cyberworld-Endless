@@ -46,7 +46,8 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
-FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31))
+FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
+            (0x20, 'CirKill', 91))
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
@@ -62,9 +63,10 @@ SPAWNERS4 = {0x080032B8: (1, 'XV_SPAWN_1'), 0x080032D4: (1, 'XV_SPAWN_1_LAST'), 
              0x080032F0: (3, 'XV_SPAWN_3'), 0x0800330C: (3, 'XV_SPAWN_3_LAST'), 0x08003328: (3, 'XV_SPAWN_3_FIRST'),
              0x08003344: (4, 'XV_SPAWN_4')}
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
+BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
-COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x10: 0x1C, 0x18: 0x24, 0x1C: 0x28, 0x28: 0x80,
-            0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
+COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
+            0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
 ELEMENT4, ELEMENT6 = 0x17, 0x0E   # an object's element (BN4_T1_ELEMENT), BN6's (BN6_T1_ELEMENT)
 
 # The numbers BN4's families take, past BN5's (tools/xrecipe.py's 25 in slots 0-24, their code to XV_CODE + 0x11000 and
@@ -76,7 +78,8 @@ XV_AT = 0x08800000 + 0x330000
 XV_HOMES, XV_CODE, XV_ART = XV_AT + 0x18000, XV_AT + 0x38000, XV_AT + 0x50000
 XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0, 0xC0, 0xE0
-CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x200, 0x1000, 0x800
+CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
+CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
 SONGS6 = 0x08159F48   # BN6's song table (RomLayout.song_table)
 
 
@@ -126,6 +129,7 @@ class Family:
         self.regions, self.moved3, self.types, self.numbers, self.attack_sprites = [], {}, [], [], []
         self.hooks = [('BN6', NULLSUB6)] * 8
         self.flags, self.spawn_calls, self.entries = 0, {}, []
+        self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
 
     def decide(self, kind, detail):  # noqa: D401
         self.decisions.append((kind, detail))
@@ -280,14 +284,37 @@ def init_of(f):
 
 def update_of(f, uw):
     """its update past the pre-step, the state runner and the present (BN6's dispatcher runs each): hook 3, the tail
-    entered (ENTRIES), where there is one"""
+    entered (ENTRIES), where there is one; or its own work between the pre-step and the runner, its pre-step"""
     calls = sorted(uw.bls.items())
+    ts = [t for _, t in calls]
+    if ts[:3] != [BN4['prestep'], BN4['runner'], BN4['present']] and f.update in bn4_twins.PRESTEP:
+        prestep_of(f, uw, calls)
+        return
     if [t for _, t in calls[:3]] != [BN4['prestep'], BN4['runner'], BN4['present']]:
         f.decide('pre-step', f'its update calls {", ".join(f"{t:08X}" for _, t in calls)}, not BN4\'s pre-step, state runner and present first')
         return
     at = calls[2][0] + 4
     if not T.is_return(uw.insns[at]):
         enter(f, 0, at, 'its update')
+
+
+def prestep_of(f, uw, calls):
+    """its update's own work between BN4's pre-step and its state runner, run as its pre-step: BN6's dispatcher jumps there
+    from its NameID cases (after its own pre-step, before the state: where BN4 runs it), its state table's load made BN6's
+    state step's address and its call to the runner a call to a bx r0 of BN6's: on to BN6's state step (bn4_twins.PRESTEP)"""
+    ts = [t for _, t in calls]
+    run = [s for s, t in calls if t == BN4['runner']]
+    lit = T.back_value(uw, run[0], 0)[1] if run else []
+    if (ts[0] != BN4['prestep'] or ts[-2:] != [BN4['runner'], BN4['present']] or ts.count(BN4['runner']) != 1
+            or len(lit) != 1 or lit[0][1] != 'ldr_lit'):
+        f.decide('pre-step', f'its update calls {", ".join(f"{t:08X}" for t in ts)}, not BN4\'s pre-step, its own work, the runner and '
+                             f'the present')
+        return
+    f.prestep = calls[0][0] + 4
+    f.roots.append(f.prestep)
+    f.aim[BN4['runner']] = (BX_R0, 'its pre-step\'s way on: a bx r0 of BN6\'s, r0 BN6\'s state step')
+    f.numbers.append((uw.insns[lit[0][0]].lit, f.st, STATE_STEP6, 'its pre-step\'s way on: BN6\'s state step, not its state table'))
+    f.notes.append(f'its pre-step: its update from {f.prestep:08X}, {bn4_twins.PRESTEP[f.update]}')
 
 
 def enter(f, k, at, what):
@@ -320,10 +347,16 @@ def walk_code(b4, f, roots, skip, pairs):
         for lit, v in w.lits.items():
             if v is None or v in skip or v & 3 or not reg or not reg[0] <= v < reg[1]:
                 continue
-            ents = [x for x in table_at(b4, v, reg[0], reg[1]) if reg[0] <= (x & ~1) < reg[1]]
+            ents = table_at(b4, v, reg[0], reg[1])
+            if reg[2] is None or not any(own_region(f, x & ~1) is None for x in ents[:3]):
+                ents = [x for x in ents if reg[0] <= (x & ~1) < reg[1]]
             if ents:
+                # (a moved object's jump table whole: an entry out of its regions a routine of BN4's whose twin the words name)
                 f.tables[v] = ents
-                todo += [x for x in ents if (x & ~1) not in f.walks]
+                todo += [x for x in ents if (x & ~1) not in f.walks and own_region(f, x & ~1)]
+                for x in ents:
+                    if own_region(f, x & ~1) is None:
+                        f.outs.setdefault(x, []).append(v)
         todo += [r for r in f.regions_roots if (r & ~1) not in f.walks]
         f.regions_roots = []
     f.copied = sorted(e for e in f.walks if e in bn4_twins.COPIED)
@@ -500,6 +533,9 @@ def name_ranges(f):
 def pair_calls(f, pairs):
     f.pairs = []
     for t, sites in sorted(f.calls.items()):
+        if t in f.aim:
+            f.pairs.append((t, f.aim[t][0], f.aim[t][1], 'AIMED', sites, True))
+            continue
         if t in f.spawn_calls:
             f.pairs.append((t, f.spawn_calls[t], 'the dispatch\'s spawner', None, sites, False))
             continue
@@ -518,14 +554,23 @@ def pair_calls(f, pairs):
         f.pairs.append((t, tw, how, cls, sites, bool(audit)))
 
 
-def words_of(f):
+def words_of(f, pairs):
+    """its literal words that name RAM, I/O or ROM out of its blocks (a number read by hand, bn4_twins.NUMBERS, kept), and
+    its moved objects' jump tables' entries out of them (a routine of BN4's: its twin)"""
+    f.words = []
+    for x, tabs in sorted(f.outs.items()):
+        tw, how, cls, diff = pairs.twin(x & ~1)
+        if tw is None or (cls == 'DIFF' and not pairs.audit(x & ~1, tw)):
+            f.decide('table', f'{x:08X} (in the jump table at {", ".join(f"{t:08X}" for t in tabs)}): no twin that serves ({how}, {cls})')
+            continue
+        f.words.append((x, tw | 1, f'{how}, {cls}'))
     for e, w in f.walks.items():
         for lit, v in w.lits.items():
             if v is None or any(lo <= (v & ~1) < hi for lo, hi in f.spans) or not 0x02000000 <= v < 0x0E000000:
                 continue
             if v in bn4_twins.NUMBERS:
                 if lit not in [x[0] for x in f.numbers]:
-                    f.numbers.append((lit, v, bn4_twins.NUMBERS[v]))
+                    f.numbers.append((lit, v, v, bn4_twins.NUMBERS[v]))
                 continue
             kind = 'RAM' if v < 0x04000000 else 'I/O' if v < 0x05000000 else 'video' if v < 0x08000000 else 'ROM'
             f.decide('literal', f'{v:08X} ({kind}) at {lit:08X}: no twin known')
@@ -563,11 +608,16 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     site = [s for s, t in uw.bls.items() if t == BN4['runner']]
     f.st = T.back_value(uw, site[0], 0)[0] if site else None
     states = table_at(b4, f.st, f.lo, f.hi, 24) if f.st else []
+    f.states = [('BN6', GENERIC6[k] | 1) for k in range(8)]
     for k in range(6):
-        if k >= len(states) or states[k] & ~1 != bn4_twins.GENERIC4[k]:
+        if k < len(states) and states[k] & ~1 != bn4_twins.GENERIC4[k] and states[k] & ~1 in bn4_twins.OWN_STATES:
+            # (a generic state of its own: a wrapper of BN4's, its call to the generic one paired with BN6's)
+            f.states[k] = ('OWN', states[k] | 1)
+            f.roots.append(states[k] & ~1)
+        elif k >= len(states) or states[k] & ~1 != bn4_twins.GENERIC4[k]:
             f.decide('states', f'its state {k} is not BN4\'s generic one')
     f.own = states[6:]
-    f.states = [('BN6', GENERIC6[k] | 1) for k in range(8)] + [('OWN', x | 1) for x in f.own]
+    f.states += [('OWN', x | 1) for x in f.own]
     f.s1 = struct1_of(b4, f, f.init)
     init_of(f)
     update_of(f, uw)
@@ -580,10 +630,13 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     pair_calls(f, pairs)
     records_of(b4, f)
     blocks_of(b4, f, alloc)
-    words_of(f)
+    words_of(f, pairs)
     art_of(b4, b6, f, alloc)
     effects_of(f)
     sounds_of(b4, b6, f)
+    f.interim += list(bn4_twins.INTERIMS.get(name, ()))
+    if f.prestep and any(not f.lo <= s < f.hi for s in f.calls.get(BN4['runner'], [])):
+        f.decide('pre-step', f'BN4\'s state runner called out of its update too: not to be aimed at a bx r0')
     f.imms.sort(key=lambda x: x['at'])
     return f
 
@@ -633,12 +686,20 @@ def blocks_of(b4, f, alloc):
     table, init and update but for a tail entered, its state table: BN6's virus code does their work; a copied routine's
     neighbours) zeroed, the rest raw, a word of it that points into a block a pool's"""
     spans = [(r[0], r[1]) for r in f.regions]
+    named = sorted({v for w in f.walks.values() for v in w.lits.values() if v in bn4_twins.TABLES})
+    spans += [(v, v + bn4_twins.TABLES[v]['size']) for v in named]
+    copied = []
     for e in f.copied:
         w = f.walks[e]
         hi = max(max(a + i.size for a, i in w.insns.items()), max((l + 4 for l in w.lits), default=0))
         if e in bn4_twins.COPIED_DATA:
             hi = max(hi, bn4_twins.COPIED_DATA[e][1])
-        spans.append((e, hi))
+        # (a copied routine within another's span, its pool past it: one block, the two routines its code)
+        if copied and e < copied[-1][1]:
+            copied[-1] = (copied[-1][0], max(hi, copied[-1][1]))
+        else:
+            copied.append((e, hi))
+    spans += copied
     f.spans = spans
     code, pools, tables, dead, raw = set(), set(), set(), set(), set()
     for e, w in f.walks.items():
@@ -663,7 +724,7 @@ def blocks_of(b4, f, alloc):
         at = rounded(at, CODE_STEP) + (lo & 3)
         f.blocks.append((lo, hi, at, zlib.crc32(b4.bytes(lo, hi - lo)) & 0xFFFFFFFF))
         at += hi - lo
-        rest = 'RAW' if k < len(f.regions) else 'ZERO'
+        rest = 'RAW' if k < len(f.regions) + len(named) else 'ZERO'
         kind_at = ['CODE' if a in code else 'POOL' if a in pools else 'TABLE' if a in tables else 'ZERO' if a in dead else
                    'RAW' if a in raw else rest for a in range(lo, hi)]
         pointers(b4, f, lo, hi, kind_at)
@@ -679,6 +740,8 @@ def blocks_of(b4, f, alloc):
                 f.data.append((a, b, kd))
             a = b
     alloc.code = at
+    if at > CODE_END:
+        f.decide('room', f'its code ends at {at:08X}, past the families\' code ({CODE_END:08X})')
 
 
 def pointers(b4, f, lo, hi, kind_at):
@@ -701,13 +764,48 @@ def art_of(b4, b6, f, alloc):
     f.sprite = dict(list=f.s1['list'], index=f.s1['index'], to_list=1, to_index=alloc.list1, at=alloc.art, room=room, lz=bool(p & 0x80000000))
     alloc.list1 += 1
     alloc.art += room
+    if alloc.art > ART_END:
+        f.decide('room', f'its sprite ends at {alloc.art:08X}, past the families\' art ({ART_END:08X})')
     for e, w in sorted(f.walks.items()):
         reg = own_region(f, e)
         if not reg or reg[2] is None:
             continue
         for site, t in sorted(w.bls.items()):
-            if t == BN4['sprite_load']:
+            tab = next((v for v, x in bn4_twins.TABLES.items() if site in x['loads']), None)
+            if t == BN4['sprite_load'] and tab is not None:
+                table_art(b4, f, alloc, tab)
+            elif t == BN4['sprite_load']:
                 attack_sprite(b4, f, alloc, w, site)
+
+
+def list4_sprite(b4, f, alloc, num):
+    """list 4's sprite num of BN4's, copied once a family at a list 4 number of its own"""
+    p, raw = sprite(b4, BN4['sprites'], 4, num)
+    if raw is None:
+        return None
+    s = next((x for x in f.attack_sprites if x['index'] == num), None)
+    if s is None:
+        room = rounded(len(raw), ROOM_ATTACK)
+        s = dict(list=4, index=num, to_list=4, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
+        f.attack_sprites.append(s)
+        alloc.list4 += 1
+        alloc.art += room
+    return s
+
+
+def table_art(b4, f, alloc, v):
+    """a table its moved object reads its sprite from (bn4_twins.TABLES): each kind it spawns, its sprite copied and its
+    number's byte in the table's copy given the copy's"""
+    t = bn4_twins.TABLES[v]
+    for k in t['kinds']:
+        at = v + t['entry'] * k
+        lst, num = b4.u8(at + t['sprite'][0]), b4.u8(at + t['sprite'][1])
+        s = list4_sprite(b4, f, alloc, num) if lst == 0x10 else None
+        if s is None:
+            f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws {lst // 4}:{num:#x}, which the generator moves none of')
+            continue
+        if all(b[0] != at + t['sprite'][1] for b in f.bytes):
+            f.bytes.append((at + t['sprite'][1], num, s['to_index'], f'its table\'s kind {k}: list 4 {num:#x} in BN4, {s["to_index"]:#x} copied'))
 
 
 def attack_sprite(b4, f, alloc, w, site):
@@ -793,7 +891,15 @@ def c_recipe(f):
         L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
-        L += [f'\t{{ 0x{lit:08X}, 0x{v:08X}, 0x{v:08X} }},   /* {why} */' for lit, v, why in f.numbers]
+        L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
+        L.append('};')
+    if f.words:
+        L.append(f'static const XvPair {n}_words[] = {{')
+        L += [f'\t{{ 0x{a:08X}, 0x{b:08X} }},   /* {why} */' for a, b, why in f.words]
+        L.append('};')
+    if f.bytes:
+        L.append(f'static const XvByte {n}_bytes[] = {{')
+        L += [f'\t{{ 0x{at:08X}, 0x{was:02X}, 0x{now:02X} }},   /* {why} */' for at, was, now, why in f.bytes]
         L.append('};')
     if f.types:
         L.append(f'static const XvType {n}_types[] = {{')
@@ -811,8 +917,8 @@ def c_family(f, n):
     L = ['', f'static const XVirusFamily bn4_{n} = {{', f'\t.name = "{f.name} (BN4\'s)",', '\t.game = XROM_BN4_RED_SUN_US,',
          f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
          f'\t.first_id = XV_FIRST_ID + 0x{f.first_id - XV_FIRST_ID:X},', f'\t.home = XV_HOMES + 0x{f.home - XV_HOMES:X},']
-    for field, there in (('blocks', True), ('data', True), ('calls', True), ('imms', True), ('ranges', f.ranges),
-                         ('numbers', f.numbers), ('types', f.types), ('states', True)):
+    for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
+                         ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t.{field} = {n}_{field}, .n{field} = {count(field)},')
     L.append('\t.hooks = { ' + ', '.join(ref_text(h) for h in f.hooks) + ' },')
@@ -824,6 +930,8 @@ def c_family(f, n):
     L.append(f'\t.traits = {{ .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = {"true" if f.s1["shadow"] else "false"}, '
              f'.palette = {f.s1["palette"]}, .flags = 0x{f.flags:02X} }},')
     L.append(f'\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
+    if f.prestep:
+        L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
     L.append('};')
     return L
 

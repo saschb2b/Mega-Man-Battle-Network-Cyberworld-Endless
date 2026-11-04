@@ -316,6 +316,13 @@ static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
 static void prestep_set(Ctx *c) {
 	const XVirusFamily *f = c->f;
 	if (!f->prestep) return;
+	if (f->game == XROM_BN4_RED_SUN_US) {
+		/* (BN4's: its update's own work, its copy, which goes on to BN6's state step itself) */
+		uint32_t at = moved_to(f, f->prestep);
+		if (!at) xv_fail("its pre-step %08x is none of its code", (unsigned)f->prestep);
+		else xv_word(XV_PRESTEP + 4u * (uint32_t)f->ai, 0, at | 1);
+		return;
+	}
 	if (f->game != XROM_BN5_COLONEL_US || xvirus_crc32(c->rom + (BN5_VIRUS_DISPATCH - BUS), BN5_VIRUS_DISPATCH_END - BN5_VIRUS_DISPATCH) != BN5_VIRUS_DISPATCH_CRC ||
 		xvirus_crc32(c->rom + (BN5_PRESTEP_TAKE - BUS), BN5_PRESTEP_TAKE_END - BN5_PRESTEP_TAKE) != BN5_PRESTEP_TAKE_CRC) {
 		xv_fail("its pre-step's source in its game is not the one ported");
