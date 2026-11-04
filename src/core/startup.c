@@ -183,7 +183,9 @@ static bool ios_rom_start(char *msg, size_t msglen) {
 	char dir[600], said[1024];
 	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 	bool found = ios_rom_here(dir, msg, msglen);
-	unsigned want = (found ? 0 : IOS_ROM_BN6) | (XR[XROM_BN5_COLONEL_US].data ? 0 : IOS_ROM_BN5);
+	unsigned want = found ? 0 : IOS_ROM_BN6;
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (xrom_offered(i) && !XR[i].data) want |= IOS_ROM_X(i);
 	if (want && ios_rom_folder_look(dir, want, said, sizeof said) > 0) {
 		if (!found) found = ios_rom_here(dir, msg, msglen);
 		else xrom_find(dir);
@@ -195,11 +197,12 @@ static bool ios_rom_start(char *msg, size_t msglen) {
 #ifdef __ANDROID__
 /* Android's ROMs at the start: the copies in the app's ROM folder; the
  * folder the player chose in the launcher looked in again for what they
- * lack (a quick look: only a .gba not seen before is opened), so BN5 put
- * there since comes in by itself */
+ * lack (a quick look: only a .gba not seen before is opened), so BN5 (an
+ * extra ROM offered) put there since comes in by itself */
 static bool android_rom_start(const char *rom_dir, char *msg, size_t msglen) {
-	bool found = rom_find(rom_dir, msg, msglen);
-	if (found && XR[XROM_BN5_COLONEL_US].data) return true;
+	bool found = rom_find(rom_dir, msg, msglen), all = found;
+	for (int i = 0; i < XROM_COUNT; ++i) all &= !xrom_offered(i) || XR[i].data != NULL;
+	if (all) return true;
 	char said[1024];
 	if (pick_look(said, sizeof said) > 0) {
 		if (!found) found = rom_find(rom_dir, msg, msglen);

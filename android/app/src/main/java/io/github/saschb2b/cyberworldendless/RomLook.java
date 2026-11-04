@@ -28,10 +28,11 @@ import java.util.Set;
 /**
  * The ROMs from the folder the player chose in the launcher (src/launcher/),
  * or the files picked there. Each .gba is told by its header's game code;
- * Mega Man Battle Network 6: Cybeast Gregar (USA)'s and 5: Team Colonel
- * (USA)'s are checked by their SHA-1 and those two alone copied into the
- * app's own ROM folder, where the game reads them; every other .gba is named
- * with why it was refused. The folder is kept (its access persisted, read
+ * Mega Man Battle Network 6: Cybeast Gregar (USA)'s and each other game's
+ * the game offers (5: Team Colonel (USA)'s; 4: Red Sun (USA)'s once it is,
+ * src/core/rom.c's xrom_offered, told by romsOffer) are checked by their
+ * SHA-1 and those alone copied into the app's own ROM folder, where the
+ * game reads them; every other .gba is named with why it was refused. The folder is kept (its access persisted, read
  * and write) and looked in again at each start, so BN5 put there later comes
  * in by itself; the saves' copy the game keeps in it (cyberworld-endless.cwsave,
  * src/launcher/mirror.h) is read and written here. Nothing leaves the device.
@@ -43,35 +44,74 @@ final class RomLook {
     static final String SAVES = "cyberworld-endless.cwsave";
     static final long SAVES_MAX = 16L << 20;
 
-    /** A ROM the game takes: its header's game code, its SHA-1, its copy's name. */
+    /** A ROM the game takes: its header's game code, its SHA-1, its copy's
+     *  name, its names (whole, as a note says it, as a refusal says it). */
     static final class Rom {
-        final String code, sha1, file, name, tag;
-        Rom(String code, String sha1, String file, String name, String tag) {
-            this.code = code; this.sha1 = sha1; this.file = file; this.name = name; this.tag = tag;
+        final String code, sha1, file, name, tag, named;
+        Rom(String code, String sha1, String file, String name, String tag, String named) {
+            this.code = code; this.sha1 = sha1; this.file = file; this.name = name; this.tag = tag; this.named = named;
         }
         String changed() { return tag + ", but changed: patched, trimmed or a bad dump"; }
     }
+    /** BN6's, then the other games' in rom.h's XRomId order (bit 1 << i
+     *  each, the launcher's cartridges' bits) */
     static final Rom[] ROMS = {
-        new Rom("BR5E", "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6", "bn6g.gba", "Mega Man Battle Network 6: Cybeast Gregar (USA)", "BN6 Cybeast Gregar (USA)"),
-        new Rom("BRKE", "5f472f78d8de2df01d5039e045c043cb40969a39", "bn5c.gba", "Mega Man Battle Network 5: Team Colonel (USA)", "BN5 Team Colonel (USA)"),
+        new Rom("BR5E", "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6", "bn6g.gba", "Mega Man Battle Network 6: Cybeast Gregar (USA)", "BN6 Cybeast Gregar (USA)", "BN6 Gregar"),
+        new Rom("BRKE", "5f472f78d8de2df01d5039e045c043cb40969a39", "bn5c.gba", "Mega Man Battle Network 5: Team Colonel (USA)", "BN5 Team Colonel (USA)", "BN5 Team Colonel"),
+        new Rom("B4WE", "a97e96a7da03abd70f7953328e511b9fa29179f1", "bn4rs.gba", "Mega Man Battle Network 4: Red Sun (USA)", "BN4 Red Sun (USA)", "BN4 Red Sun"),
     };
-    static final int BN6 = 0, BN5 = 1;
-    /** Battle Network 6's and 5's other versions, by their header's game
-     *  code: a player who has one is told which it is (src/launcher/launcher_text.c
+    static final int BN6 = 0;
+    /** The other games' codes the game offers (romsOffer, src/launcher/pick_android.c):
+     *  their ROMs alone taken, BN6's always. */
+    static volatile String offered = "";
+    static boolean taken(int i) { return i == BN6 || offered.contains(ROMS[i].code); }
+    /** The other versions of the games taken, by their header's game code:
+     *  a player who has one is told which it is, where its game is taken
+     *  (the third column its game's code; src/launcher/launcher_text.c
      *  names them the same way). */
     static final String[][] OTHERS = {
-        { "BR6E", "BN6 Cybeast Falzar, not Gregar" },
-        { "BR6P", "BN6 Cybeast Falzar (Europe), not Gregar (USA)" },
-        { "BR6J", "Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)" },
-        { "BR5P", "BN6 Cybeast Gregar (Europe), not the USA version" },
-        { "BR5J", "Rockman EXE 6 Gregar (Japan), not the USA version" },
-        { "BRBE", "BN5 Team ProtoMan, not Team Colonel" },
-        { "BRBP", "BN5 Team ProtoMan (Europe), not Team Colonel (USA)" },
-        { "BRBJ", "Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)" },
-        { "BRKP", "BN5 Team Colonel (Europe), not the USA version" },
-        { "BRKJ", "Rockman EXE 5 Team of Colonel (Japan), not the USA version" },
+        { "BR6E", "BN6 Cybeast Falzar, not Gregar", "BR5E" },
+        { "BR6P", "BN6 Cybeast Falzar (Europe), not Gregar (USA)", "BR5E" },
+        { "BR6J", "Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)", "BR5E" },
+        { "BR5P", "BN6 Cybeast Gregar (Europe), not the USA version", "BR5E" },
+        { "BR5J", "Rockman EXE 6 Gregar (Japan), not the USA version", "BR5E" },
+        { "BRBE", "BN5 Team ProtoMan, not Team Colonel", "BRKE" },
+        { "BRBP", "BN5 Team ProtoMan (Europe), not Team Colonel (USA)", "BRKE" },
+        { "BRBJ", "Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)", "BRKE" },
+        { "BRKP", "BN5 Team Colonel (Europe), not the USA version", "BRKE" },
+        { "BRKJ", "Rockman EXE 5 Team of Colonel (Japan), not the USA version", "BRKE" },
+        { "B4BE", "BN4 Blue Moon, not Red Sun", "B4WE" },
+        { "B4BJ", "Rockman EXE 4 Blue Moon (Japan), not BN4 Red Sun (USA)", "B4WE" },
+        { "B4WJ", "Rockman EXE 4 Red Sun (Japan), not the USA version", "B4WE" },
     };
-    static final String OTHER_GAME = "not BN6 Gregar or BN5 Team Colonel";
+
+    /** `names` as a list read aloud: "A", "A or B", "A, B or C" (`last` the word before the last) */
+    static String listed(List<String> names, String last) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < names.size(); ++i)
+            s.append(i == 0 ? "" : i == names.size() - 1 ? " " + last + " " : ", ").append(names.get(i));
+        return s.toString();
+    }
+
+    /** "not BN6 Gregar or BN5 Team Colonel": the games taken */
+    static String otherGame() {
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < ROMS.length; ++i) if (taken(i)) names.add(ROMS[i].named);
+        return "not " + listed(names, "or");
+    }
+
+    /** The ROMs in `bits` by their tags, "A and B", "A, B and C" */
+    static String tags(int bits) {
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < ROMS.length; ++i) if ((bits & 1 << i) != 0) names.add(ROMS[i].tag);
+        return listed(names, "and");
+    }
+
+    /** Whether every ROM taken has its copy kept */
+    static boolean allKept(Context c) {
+        for (int i = 0; i < ROMS.length; ++i) if (taken(i) && !kept(c, i)) return false;
+        return true;
+    }
     static final String[] COLUMNS = {
         Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME, Document.COLUMN_MIME_TYPE, Document.COLUMN_SIZE, Document.COLUMN_LAST_MODIFIED,
     };
@@ -176,7 +216,11 @@ final class RomLook {
             if (bn) refused.add(battleNetwork++, name + ": " + why);
             else refused.add(name + ": " + why);
         }
-        int bits() { return (kept[BN6] ? 1 : 0) | (kept[BN5] ? 2 : 0); }
+        int bits() {
+            int b = 0;
+            for (int i = 0; i < kept.length; ++i) if (kept[i]) b |= 1 << i;
+            return b;
+        }
     }
 
     /**
@@ -256,8 +300,8 @@ final class RomLook {
     }
 
     /**
-     * One file: told by its header's game code; BN6's or BN5's checked by
-     * its SHA-1 and copied in. True when it is settled (taken, refused, or
+     * One file: told by its header's game code; BN6's or another game's
+     * taken checked by its SHA-1 and copied in. True when it is settled (taken, refused, or
      * the same as a copy kept), so a quick look need not open it again;
      * false when it could not be read this time.
      */
@@ -268,15 +312,20 @@ final class RomLook {
         if (got < head.length) { l.refuse(name, "not a GBA ROM", false); return true; }
         String code = new String(head, 0xAC, 4, StandardCharsets.US_ASCII);
         for (int i = 0; i < ROMS.length; ++i) {
-            if (!ROMS[i].code.equals(code)) continue;
+            if (!taken(i) || !ROMS[i].code.equals(code)) continue;
             if (kept(ctx, i)) { l.had[i] = true; return true; }
             String why = size >= 0 && size != ROM_SIZE ? ROMS[i].changed() : copy(uri, i);
             if (why == null) l.kept[i] = true;
             else l.refuse(name, why, true);
             return true;
         }
-        for (String[] o : OTHERS) if (o[0].equals(code)) { l.refuse(name, o[1], true); return true; }
-        l.refuse(name, OTHER_GAME, false);
+        for (String[] o : OTHERS) {
+            if (!o[0].equals(code)) continue;
+            boolean of = false;
+            for (int i = 0; i < ROMS.length; ++i) of |= taken(i) && ROMS[i].code.equals(o[2]);
+            if (of) { l.refuse(name, o[1], true); return true; }
+        }
+        l.refuse(name, otherGame(), false);
         return true;
     }
 
@@ -330,12 +379,13 @@ final class RomLook {
         if (l.lost != null)
             return "The folder " + (l.where != null ? l.where : folderName()) + " can't be opened any more: it was moved or removed, or its access was taken back. Choose it again.";
         StringBuilder s = new StringBuilder();
-        if (l.kept[BN6] || l.kept[BN5]) {
-            s.append("Took ").append(l.kept[BN6] ? ROMS[BN6].tag : "").append(l.kept[BN6] && l.kept[BN5] ? " and " : "")
-                .append(l.kept[BN5] ? ROMS[BN5].tag : "").append(l.where != null ? " from " + l.where : "").append('.');
+        if (l.bits() != 0) {
+            s.append("Took ").append(tags(l.bits())).append(l.where != null ? " from " + l.where : "").append('.');
         } else if (kept(ctx, BN6)) {
-            if (kept(ctx, BN5)) s.append("Both ROMs are in already.");
-            else s.append("No ").append(ROMS[BN5].tag).append(l.where != null ? " in " + l.where : " there").append('.');
+            int missing = 0, count = 0;
+            for (int i = 1; i < ROMS.length; ++i) if (taken(i)) { ++count; if (!kept(ctx, i)) missing |= 1 << i; }
+            if (missing == 0) s.append(count > 1 ? "All the ROMs are in already." : "Both ROMs are in already.");
+            else s.append("No ").append(tags(missing).replace(" and ", " or ")).append(l.where != null ? " in " + l.where : " there").append('.');
         } else if (l.where != null) {
             s.append(l.gba == 0 ? "No .gba file in " + l.where + " or the folders in it." : "No " + ROMS[BN6].tag + " in " + l.where + ".");
         } else s.append(l.files == 1 ? "That is not " : "None of those is ").append(ROMS[BN6].tag).append('.');

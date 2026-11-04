@@ -3,8 +3,9 @@
  * Android's own pickers, the folder's document tree (its access kept,
  * read and write, for the looks at later starts and the saves' copy) or
  * files, several at once; each .gba there told by its header's game code,
- * BN6's and BN5's checked by their SHA-1 and copied into the app's ROM
- * folder, where the game reads them. SAVES' pickers and its transfer
+ * BN6's and the other games' offered (rom.h's xrom_offered, told to it
+ * before each pick and look: romsOffer) checked by their SHA-1 and copied
+ * into the app's ROM folder, where the game reads them. SAVES' pickers and its transfer
  * place: the folder chosen there, else the ROM folder (mirror.h reads it
  * once a start, through savesGet). */
 #include "pick.h"
@@ -18,6 +19,7 @@
 #include <SDL.h>
 
 #include "pick_saves.h"
+#include "rom.h"
 
 /* a call into GameActivity: its environment, the activity and the method */
 typedef struct {
@@ -84,10 +86,22 @@ static bool call_bool_string(const char *name, const char *arg) {
 
 static bool busy;
 
+/* The other games' ROMs offered, told to RomLook by their game codes
+ * ("BRKE B4WE") */
+static void offer(void) {
+	char codes[64] = "";
+	for (int i = 0; i < XROM_COUNT; ++i) {
+		size_t m = strlen(codes);
+		if (xrom_offered(i)) snprintf(codes + m, sizeof codes - m, "%s%s", m ? " " : "", xrom_layout(i)->code);
+	}
+	call_bool_string("romsOffer", codes);
+}
+
 unsigned pick_kinds(void) { return PICK_FOLDER | PICK_FILES; }
 
 bool pick_open(int kind, int slot) {
 	(void)slot;
+	offer();
 	if (busy || !call_bool_int("romsPick", kind == PICK_FILES ? 1 : 0)) return false;
 	busy = true;
 	return true;
@@ -110,6 +124,7 @@ bool pick_done(PickResult *r) {
 /* romsLook's "bits\nwhat it found" */
 int pick_look(char *msg, size_t n) {
 	char s[1200];
+	offer();
 	if (!call_string("romsLook", s, sizeof s)) return -1;
 	char *nl = strchr(s, '\n');
 	if (nl && nl[1]) snprintf(msg, n, "%s", nl + 1);

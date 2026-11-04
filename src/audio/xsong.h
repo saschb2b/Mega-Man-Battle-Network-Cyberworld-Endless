@@ -17,6 +17,13 @@
 bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *starts, int nstarts, uint32_t *ptrs, int *nptrs, int maxptrs,
                 uint8_t programs[16]);
 
+/* A track of such a sequence (`start` its offset) run as the sequencer
+ * runs it, each command's arguments and running status read: the voices
+ * its VOICEs select and the keys its notes and EOTs give, a bit each in
+ * `programs` and `keys` (a drum kit's sub-voice is its note's key). False
+ * where a pointer leaves the sequence or its branches are too many. */
+bool xsong_track_keys(const uint8_t *seq, uint32_t n, uint32_t base, uint32_t start, uint8_t programs[16], uint8_t keys[16]);
+
 /* Song `song` of extra ROM `xrom` (XRomId) in BN6: the BN6 song id that
  * plays it, or `fallback` where it cannot be. The first call copies in
  * every song the other games' areas play (docs/multirom/), in their

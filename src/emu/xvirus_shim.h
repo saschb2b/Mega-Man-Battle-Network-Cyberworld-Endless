@@ -11,6 +11,10 @@
  *    and the beq or bne after it made a call to a shim that compares with
  *    BN6's id (the chip registry's, past 255) and goes on where the branch
  *    would, the flags the compare's;
+ *  - an entry (XvRef.entered): a hook of BN4's whose own step is the tail
+ *    of its init or update past the engine's work, which BN6's init or
+ *    dispatcher does itself, entered through a shim that pushes lr as the
+ *    routine's push {lr} did and calls the tail, whose pop {pc} returns;
  *  - a pre-step (XVirusFamily.prestep): BN5's virus dispatcher acts for two
  *    families' NameIDs before their state each frame, as BN6's does for
  *    its own ids alone. A hook on BN6's dispatcher (BN6_VIRUS_NAMEID_CASES)
@@ -29,12 +33,18 @@
 #define XV_SHIM_RANGE_SIZE   16   /* a NameID range's shim */
 #define XV_SHIM_CMP_SIZE     28   /* a chip compare's */
 #define XV_SHIM_PRESTEP_MAX  0x70 /* a pre-step's, at most */
+#define XV_SHIM_ENTRY_SIZE   8    /* an entry's */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
  * (and `side` into r3 where it is 0 or more: BN4's look-up takes its side
  * for itself, BN6's in r3) and branches on to `veneer` (BN6_BY_NAME_RANGE's,
  * within a branch's reach): false where it is not. */
 bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo, uint16_t hi, uint32_t veneer, int side);
+
+/* The shim at `at` (word-aligned) that pushes lr and calls `to` (Thumb,
+ * within a call's reach: a tail of a routine past its push {lr}), then pops
+ * pc: false where it is not. */
+bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to);
 
 /* The shim at `at` (word-aligned) a call replaces `cmp reg,#imm; beq to`
  * (eq) or `...; bne to` with: it compares register `reg` (r0-r7) with

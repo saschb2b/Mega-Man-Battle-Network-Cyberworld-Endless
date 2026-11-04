@@ -14,6 +14,8 @@
  * entries of layer 0 (BG1), then layer 1's (BG2) */
 #define BN6_MAP_TILEMAP       0x02013A00u
 #define BN6_MAP_TILEMAP_HEAD  12
+#define BN6_TILEMAP_COLOURS   0x02        /* a tile map's header +2 (bn6f's Unk_2, which no code of BN6's reads): 1 where its tiles are
+                                           * 256-colour, the real world's (BN6's and BN5's) and every map of BN4's; 0 BN6's and BN5's net maps */
 /* The BGs' screen maps in IWRAM, 32 x 32 entries each, copied to VRAM
  * every frame: what scrolls in is written here from the tile map, the map
  * tile t at t plus a constant (the scroll's: BG1 and BG2 scroll by
@@ -23,6 +25,18 @@
 #define BN6_BG1_SCREEN        0x03002DC0u /* the map's layer 0 */
 #define BN6_BG2_SCREEN        0x030035C0u /* the map's layer 1 */
 #define BN6_BG_SCREEN_SIZE    0x800
+/* The BGs' controls, copied to their registers each frame (bn6f
+ * render_800172C) from RenderInfo, which eToolkit names; the map's BG1 and
+ * BG2 are 16-colour on the net, as BN6 sets them entering a map, 256-colour
+ * on a layer in BN4's tiles (src/map/netmap.c, docs/rom/bn4.md, Net maps
+ * in 256 colours) */
+#define BN6_TOOLKIT_RENDER    0x08        /* eToolkit RenderInfoPtr: RenderInfo (bn6f eRenderInfo, 0x0200AC40) */
+#define BN6_RENDER_BGCNT      0x04        /* RenderInfo +4: BG0CNT to BG3CNT, a u16 each */
+#define BN6_BGCNT_256         0x0080      /* a BG control's 256-colour bit (64 bytes a tile, its pixels colour indices) */
+#define BN6_BGCNT_NET_BG1     0x3D03      /* the net's map in RenderInfo, BG1: priority 3, tiles from 0x06000000, its map at 0x0600E800, bit 13
+                                           * set (which BG1's register drops: it reads 0x1D03); BG2 the same tiles, priority 2, its map at
+                                           * 0x0600F000 (seen on BN6's, BN5's and BN4's layers alike) */
+#define BN6_BGCNT_NET_BG2     0x3E02
 /* The map's coordinate data, decompressed at map entry and read in place
  * (docs/rom/net-maps.md, Map buffers): its walls' section first, a u32 count n,
  * then n entries of a u16 cell key ((cy + 127) * 254 + cx + 127, 8-unit

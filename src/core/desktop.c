@@ -226,7 +226,11 @@ bool desktop_can_choose(void) {
 }
 
 bool desktop_choose_rom(int slot, char *path, size_t n) {
-	const char *title = slot == 1 ? "Choose your Mega Man Battle Network 5 ROM" : "Choose your Mega Man Battle Network 6 ROM";
+	/* (its title the game's name, an extra ROM's from its layout: "Mega Man Battle Network 5") */
+	const XRomLayout *x = slot > 0 ? xrom_layout(slot - 1) : NULL;
+	const char *game = x ? x->name : "Mega Man Battle Network 6", *colon = strchr(game, ':');
+	char title[96];
+	snprintf(title, sizeof title, "Choose your %.*s ROM", colon ? (int)(colon - game) : (int)strlen(game), game);
 	path[0] = 0;
 #ifdef __APPLE__
 	/* (macOS: its own open panel, through AppleScript) */

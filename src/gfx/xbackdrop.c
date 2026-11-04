@@ -1,6 +1,7 @@
 /* Another game's backgrounds: BN5 keeps them as BN6 does (bn6f
  * sub_8080DA0, docs/rom/), a BGAnimData record (tiles, their VRAM,
- * map, its offset, palette, its RAM, its size), a list of GFXAnim scripts
+ * map, its offset, palette, its RAM, its size; BN4's with a buffer after
+ * its tiles and after its map, docs/rom/bn4.md), a list of GFXAnim scripts
  * and an entry of scroll callbacks per number. Tiles and map are LZ77,
  * decoded and encoded again as literal blocks; a palette is a size word,
  * then colours; a tile animation's frames are lists of tile numbers (flips
@@ -52,6 +53,12 @@ static struct {
 } X;
 
 static const uint8_t *xr;   /* the ROM a background comes from */
+static int xwords;          /* ... its records' words (XRomLayout.bg_words) */
+
+static void from_rom(int xi) {
+	xr = XR[xi].data;
+	xwords = XR[xi].layout->bg_words;
+}
 static Space *space;        /* the range being filled: the battle backgrounds' or the net maps' */
 
 /* `len` bytes into the free space, at a word; 0 where it is full. */
@@ -65,6 +72,21 @@ static uint32_t put(const void *src, uint32_t len) {
 
 static bool xptr(uint32_t v, uint32_t len) { return v >= BUS && v - BUS <= ROM_SIZE - len; }
 
+/* The other game's BGAnimData record at `rec` as BN6's seven words: BN4's
+ * nine (tiles, their buffer, VRAM; map, its buffer, its place; palette, its
+ * RAM, its size) without the two buffers, which BN6's loader decodes
+ * without; false where it is not in the ROM. */
+static bool record_as_bn6(uint32_t rec, uint8_t out[28]) {
+	if (xwords != 9) {
+		if (!xptr(rec, 28)) return false;
+		memcpy(out, xr + (rec - BUS), 28);
+		return true;
+	}
+	static const uint8_t from[7] = { 0, 2, 3, 5, 6, 7, 8 };
+	if (!xptr(rec, 36)) return false;
+	for (int i = 0; i < 7; ++i) put32(out + 4 * i, get32(xr + (rec - BUS) + 4u * from[i]));
+	return true;
+}
 /* The LZ77 data at `lz` (a bus address in the other ROM) after a header
  * of `nhead` bytes: decoded, encoded again (where it ends is only known by
  * decoding it); the header's address, 0 where it cannot be. */
@@ -200,9 +222,8 @@ static uint32_t copy_record(uint32_t rec, const uint8_t *own) {
 }
 
 static uint32_t copy_record_new(uint32_t rec, const uint8_t *own) {
-	if (!xptr(rec, 28)) return 0;
 	uint8_t out[28];
-	memcpy(out, xr + (rec - BUS), sizeof out);
+	if (!record_as_bn6(rec, out)) return 0;
 	memcpy(out + 12, own + 12, 4);
 	memcpy(out + 20, own + 20, 4);
 	uint32_t gfx = get32(out), map = get32(out + 8), pal = get32(out + 16), size = get32(out + 24);
@@ -274,10 +295,11 @@ static void copy_all(void) {
 		bool have = false;
 		for (int i = 0; i < X.n; ++i) have |= X.bg[i].rom == xi && X.bg[i].bg == a->xbg;
 		if (have) continue;
-		xr = XR[xi].data;
+		from_rom(xi);
 		const XRomLayout *l = XR[xi].layout;
 		uint32_t rec = get32(xr + l->battle_bgs + 4u * a->xbg), list = get32(xr + l->battle_bg_anims + 4u * a->xbg);
-		uint32_t to = copy_record(rec, own), an = to ? copy_anims(list, get32(own + 20) - get32(xr + (rec - BUS) + 20)) : 0;
+		uint8_t theirs[28];
+		uint32_t to = copy_record(rec, own), an = to && record_as_bn6(rec, theirs) ? copy_anims(list, get32(own + 20) - get32(theirs + 20)) : 0;
 		if (!an) continue;
 		int id = BN6_BGS + X.n;
 		put32(bgs + 4 * id, to);
@@ -344,6 +366,8 @@ static const Op group_anims_board[] = { { 0xB5F0, 0xFFFF }, { 0x1C0F, 0xFFFF }, 
 /* its LoadBGAnim: push {r4-r7, lr}; mov r5, r10; ldr r5, [r5, #0x3C] (the game state); ldrb r1, [r5, #5] (the
  * map's number); lsls r1, r1, #4; ldr r7, [pc, #n] (its scroll entries) */
 static const Op group_bg[] = { { 0xB5F0, 0xFFFF }, { 0x4655, 0xFFFF }, { 0x6BED, 0xFFFF }, { 0x7969, 0xFFFF }, { 0x0109, 0xFFFF }, { 0x4F00, 0xFF00 } };
+/* ... BN4's: its game state at +0x40, ldr r5, [r5, #0x40] (BN4_TOOLKIT_GAMESTATE) */
+static const Op group_bg_bn4[] = { { 0xB5F0, 0xFFFF }, { 0x4655, 0xFFFF }, { 0x6C2D, 0xFFFF }, { 0x7969, 0xFFFF }, { 0x0109, 0xFFFF }, { 0x4F00, 0xFF00 } };
 /* ... and further on: ldr r0, [pc, #n] (its BGAnimData records); ldrb r1, [r5, #5]; lsls r1, r1, #2; ldr r0, [r0, r1] */
 static const Op group_records[] = { { 0x4800, 0xFF00 }, { 0x7969, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x5840, 0xFFFF } };
 /* ... BN5's Liberation maps': ldr r6, [pc, #n] (the records out of a mission); bl (BN5_LIB_ON_MAP); beq; ldr r6,
@@ -387,10 +411,17 @@ static bool map_tables(const uint8_t *rom, uint32_t enters, uint32_t anims, int 
 	if (!xptr(la & ~1u, 8) || !xptr(en & ~1u, 64)) return false;
 	la = (la & ~1u) - BUS;
 	en = (en & ~1u) - BUS;
-	/* (its EnterMapGroup's first call is its LoadBGAnim) */
-	for (uint32_t k = 0; k < 64 && !lb; k += 2) lb = bl_dest(rom, en + k);
+	/* (its EnterMapGroup's first call is its LoadBGAnim; BN4's its fifth,
+	 * after the map's loaders, docs/rom/bn4.md) */
+	for (uint32_t k = 0, calls = 0; k < 64 && !lb && calls < 5; k += 2) {
+		uint32_t to = bl_dest(rom, en + k);
+		if (!to) continue;
+		if ((calls == 0 && code_is(rom, to, group_bg, 6)) || (calls == 4 && code_is(rom, to, group_bg_bn4, 6))) lb = to;
+		++calls;
+		k += 2;
+	}
 	bool board = code_is(rom, la, group_anims_board, 7);
-	if ((!board && !code_is(rom, la, group_anims, 4)) || !lb || !code_is(rom, lb, group_bg, 6)) return false;
+	if ((!board && !code_is(rom, la, group_anims, 4)) || !lb) return false;
 	t->lists = pc_load(rom, la + (board ? 12 : 4));
 	t->scroll = pc_load(rom, lb + 10);
 	t->records = 0;
@@ -432,7 +463,7 @@ static void scroll_entry(const uint8_t *theirs, const uint8_t *host, uint8_t out
  * scroll entry of the map it learns from, for the map it takes over. */
 static void copy_map(int k, const NetAreaDef *a) {
 	const XRomLayout *l = XR[a->xrom - 1].layout;
-	xr = XR[a->xrom - 1].data;
+	from_rom(a->xrom - 1);
 	MapTables theirs, own;
 	int group = 0, number = 0;
 	uint32_t descs = a->group >= 0x80 ? entry_at(xr, BUS + l->map_table, (uint32_t)(a->group - 0x80)) : 0;
@@ -441,10 +472,11 @@ static void copy_map(int k, const NetAreaDef *a) {
 		|| !map_tables(R.data, R.layout->map_enters, R.layout->map_anims, a->over[0], &own)) return;
 	uint32_t m = (uint32_t)number, h = a->over[1];
 	uint32_t rec = entry_at(xr, theirs.records, m), host_rec = entry_at(R.data, own.records, h);
-	if (!xptr(rec, 28) || !xptr(host_rec, 28) || !xptr(theirs.scroll, 16 * m + 16) || !xptr(own.scroll, 16 * h + 16)) return;
-	const uint8_t *hr = R.data + (host_rec - BUS), *tr = xr + (rec - BUS);
+	uint8_t tr[28];
+	if (!record_as_bn6(rec, tr) || !xptr(host_rec, 28) || !xptr(theirs.scroll, 16 * m + 16) || !xptr(own.scroll, 16 * h + 16)) return;
+	const uint8_t *hr = R.data + (host_rec - BUS);
 	/* (their scripts' palette RAM moved to BN6's as the two records name
-	 * theirs: BN5's 0x03003960, BN6's 0x03001960) */
+	 * theirs: BN5's 0x03003960, BN4's 0x03002A50, BN6's 0x03001960) */
 	if (!get32(hr + 16) || !get32(tr + 16)) return;
 	uint32_t to = copy_record(rec, hr), list = to ? copy_anims(entry_at(xr, theirs.lists, m), get32(hr + 20) - get32(tr + 20)) : 0;
 	if (!list) return;

@@ -92,6 +92,8 @@ static bool done(Asm *a) {
 #define BX(rm)              ((uint16_t)(0x4700 | (rm) << 3))
 #define PUSH_R(r)           ((uint16_t)(0xB400 | 1u << (r)))
 #define POP_R(r)            ((uint16_t)(0xBC00 | 1u << (r)))
+#define PUSH_LR             ((uint16_t)0xB500)
+#define POP_PC              ((uint16_t)0xBD00)
 #define MOV_LR(rm)          ((uint16_t)(0x4686 | (rm) << 3))   /* mov lr, rm */
 #define BX_LR               ((uint16_t)0x4770)
 enum { EQ = 0, NE = 1, MI = 4 };
@@ -113,6 +115,16 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
 	word(&a, HI, hi);
 	(void)ON;
 	return done(&a) && a.n == XV_SHIM_RANGE_SIZE;
+}
+
+/* ---- a hook entered past its routine's push ---- */
+
+bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to) {
+	Asm a = { out, XV_SHIM_ENTRY_SIZE, 0, at, (at & 3) != 0 || !(to & 1), { 0 }, { { 0 } }, 0 };
+	half(&a, PUSH_LR);
+	bl(&a, to & ~1u);
+	half(&a, POP_PC);   /* (where the tail returns by bx lr: its pop {pc} returns from the push itself) */
+	return done(&a) && a.n == XV_SHIM_ENTRY_SIZE;
 }
 
 /* ---- a chip compare ---- */

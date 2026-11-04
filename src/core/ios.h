@@ -8,18 +8,20 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-/* The ROMs ios.m looks for: BN6's (needed) and BN5's (optional), as bits
- * of `want` and of what a look copied in. */
-enum { IOS_ROM_BN6 = 1, IOS_ROM_BN5 = 2 };
+/* The ROMs ios.m looks for: BN6's (needed) and each extra one offered
+ * (optional: rom.h's xrom_offered, BN5's), as bits of `want` and of what
+ * a look copied in: BN6's 1, extra ROM `x`'s (its XRomId) IOS_ROM_X(x) */
+enum { IOS_ROM_BN6 = 1 };
+#define IOS_ROM_X(x) (2u << (x))
 /* What the ROM screen's picker asks for: the folder the ROMs are in (kept
  * as a bookmark, looked in again at each start), or the files themselves,
  * more than one at once. */
 enum { IOS_PICK_FOLDER, IOS_PICK_FILES };
 
 /* Opens the Files picker over the game. What is picked is looked over:
- * only .gba files are opened, and BN6's and BN5's ROMs, checked by their
- * SHA-1, alone are copied into `dir` (as bn6g.gba and bn5c.gba). Returns
- * at once: ios_pick_result says how it went. */
+ * only .gba files are opened, and BN6's and the extra ROMs offered,
+ * checked by their SHA-1, alone are copied into `dir` (as bn6g.gba,
+ * bn5c.gba). Returns at once: ios_pick_result says how it went. */
 void ios_pick_roms(void *window, const char *dir, int what);
 /* 1 once a pick has been looked over (then 0 again), -1 when it was
  * cancelled or failed (then 0 again), 0 otherwise. `msg` gets what the

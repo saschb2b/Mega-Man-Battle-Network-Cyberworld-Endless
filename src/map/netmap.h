@@ -92,6 +92,11 @@ bool netmap_gap_any(void);
 void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
+/* Each frame: a layer in another game's 256-colour tiles (BN4's) has BG1
+ * and BG2 shown in 256 colours while BN6 shows the net's map, which sets
+ * them 16-colour as it enters one (docs/rom/bn4.md, Net maps in 256
+ * colours); nothing on any other. */
+void netmap_colours(void);
 /* Walls of the caller's beside the floor's own (a liberation's fence,
  * docs/game/liberation/), after netmap_build_layer: written with the pads. */
 void netmap_add_walls(const CoordCell *c, int n);

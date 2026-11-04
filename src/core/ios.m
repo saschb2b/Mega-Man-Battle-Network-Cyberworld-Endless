@@ -27,28 +27,67 @@ int main(int argc, char *argv[]) {
 
 /* ---- the ROMs: what a look takes, and what it refuses ---- */
 
-/* The ROMs the game takes, as android/.../RomActivity.java has them: their
- * header's game code, their SHA-1, their copy's name (IOS_ROM_BN6, then
- * IOS_ROM_BN5) */
-static const struct { const char *code, *sha1, *file, *tag; } known[] = {
-	{ "BR5E", "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6", "bn6g.gba", "BN6 Cybeast Gregar (USA)" },
-	{ "BRKE", "5f472f78d8de2df01d5039e045c043cb40969a39", "bn5c.gba", "BN5 Team Colonel (USA)" },
+/* The ROMs the game takes, as android/.../RomLook.java has them: their
+ * header's game code, their SHA-1, their copy's name and the name a
+ * player knows: BN6's (IOS_ROM_BN6), then each extra ROM's from its
+ * layout (rom.h; bit IOS_ROM_X), taken where it is offered (xrom_offered:
+ * BN5's; BN4's once its research switch is off) */
+typedef struct { const char *code, *sha1, *file; char tag[64], named[48]; } Known;
+#define KNOWN (1 + XROM_COUNT)
+static Known known_rom(int i) {
+	Known k = { "BR5E", "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6", "bn6g.gba", "BN6 Cybeast Gregar (USA)", "BN6 Gregar" };
+	const XRomLayout *x = i > 0 ? xrom_layout(i - 1) : NULL;
+	if (!x) return k;
+	/* ("Mega Man Battle Network 5: Team Colonel (USA)" as "BN5 Team Colonel (USA)" and "BN5 Team Colonel") */
+	const char *game = strchr(x->name, ':');
+	game = game ? game + 2 : x->name;
+	const char *region = strstr(game, " (");
+	int len = region ? (int)(region - game) : (int)strlen(game);
+	k = (Known){ x->code, x->sha1, x->file, "", "" };
+	snprintf(k.tag, sizeof k.tag, "%s %s", x->tag, game);
+	snprintf(k.named, sizeof k.named, "%s %.*s", x->tag, len, game);
+	return k;
+}
+static BOOL taken(int i) { return i == 0 || xrom_offered(i - 1); }
+/* The other versions of the games taken, by their game code: a player
+ * who has one is told which it is (rom.c names BN6's the same way; each
+ * named where its game is taken, `of` its place in known_rom) */
+static const struct { int of; const char *code, *why; } others[] = {
+	{ 0, "BR6E", "BN6 Cybeast Falzar, not Gregar" },
+	{ 0, "BR6P", "BN6 Cybeast Falzar (Europe), not Gregar (USA)" },
+	{ 0, "BR6J", "Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)" },
+	{ 0, "BR5P", "BN6 Cybeast Gregar (Europe), not the USA version" },
+	{ 0, "BR5J", "Rockman EXE 6 Gregar (Japan), not the USA version" },
+	{ 1 + XROM_BN5_COLONEL_US, "BRBE", "BN5 Team ProtoMan, not Team Colonel" },
+	{ 1 + XROM_BN5_COLONEL_US, "BRBP", "BN5 Team ProtoMan (Europe), not Team Colonel (USA)" },
+	{ 1 + XROM_BN5_COLONEL_US, "BRBJ", "Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)" },
+	{ 1 + XROM_BN5_COLONEL_US, "BRKP", "BN5 Team Colonel (Europe), not the USA version" },
+	{ 1 + XROM_BN5_COLONEL_US, "BRKJ", "Rockman EXE 5 Team of Colonel (Japan), not the USA version" },
+	{ 1 + XROM_BN4_RED_SUN_US, "B4BE", "BN4 Blue Moon, not Red Sun" },
+	{ 1 + XROM_BN4_RED_SUN_US, "B4BJ", "Rockman EXE 4 Blue Moon (Japan), not BN4 Red Sun (USA)" },
+	{ 1 + XROM_BN4_RED_SUN_US, "B4WJ", "Rockman EXE 4 Red Sun (Japan), not the USA version" },
 };
-#define KNOWN ((int)(sizeof known / sizeof *known))
-/* Battle Network 6's and 5's other versions, by their game code: a player
- * who has one is told which it is (rom.c names BN6's the same way) */
-static const struct { const char *code, *why; } others[] = {
-	{ "BR6E", "BN6 Cybeast Falzar, not Gregar" },
-	{ "BR6P", "BN6 Cybeast Falzar (Europe), not Gregar (USA)" },
-	{ "BR6J", "Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)" },
-	{ "BR5P", "BN6 Cybeast Gregar (Europe), not the USA version" },
-	{ "BR5J", "Rockman EXE 6 Gregar (Japan), not the USA version" },
-	{ "BRBE", "BN5 Team ProtoMan, not Team Colonel" },
-	{ "BRBP", "BN5 Team ProtoMan (Europe), not Team Colonel (USA)" },
-	{ "BRBJ", "Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)" },
-	{ "BRKP", "BN5 Team Colonel (Europe), not the USA version" },
-	{ "BRKJ", "Rockman EXE 5 Team of Colonel (Japan), not the USA version" },
-};
+
+/* "not BN6 Gregar or BN5 Team Colonel": the games taken */
+static NSString *other_game(void) {
+	NSMutableArray<NSString *> *names = [NSMutableArray new];
+	for (int i = 0; i < KNOWN; ++i)
+		if (taken(i)) [names addObject:@(known_rom(i).named)];
+	NSString *last = names.lastObject;
+	[names removeLastObject];
+	return names.count ? [NSString stringWithFormat:@"not %@ or %@", [names componentsJoinedByString:@", "], last] : [NSString stringWithFormat:@"not %@", last];
+}
+
+/* The ROMs in `bits` by their tags: "BN6 Cybeast Gregar (USA) and BN5 Team Colonel (USA)" */
+static NSString *tags_of(unsigned bits) {
+	NSMutableArray<NSString *> *names = [NSMutableArray new];
+	for (int i = 0; i < KNOWN; ++i)
+		if (bits & (1u << i)) [names addObject:@(known_rom(i).tag)];
+	NSString *last = names.lastObject;
+	if (names.count < 2) return last ?: @"";
+	[names removeLastObject];
+	return [NSString stringWithFormat:@"%@ and %@", [names componentsJoinedByString:@", "], last];
+}
 #define BN6_NAME "Mega Man Battle Network 6: Cybeast Gregar (USA)"
 /* (a pick's folder whose .gba files are in iCloud, not on the phone: they
  * are sent for when there are this few, a ROM folder; a library's are not) */
@@ -89,12 +128,12 @@ static NSString *const kFolder = @"romFolder", *const kFolderName = @"romFolderN
 @end
 
 static NSString *changed(int i) {
-	return [NSString stringWithFormat:@"%s, but changed: patched, trimmed or a bad dump", known[i].tag];
+	return [NSString stringWithFormat:@"%s, but changed: patched, trimmed or a bad dump", known_rom(i).tag];
 }
 
-/* A copy kept in dir already (bn6g.gba or bn5c.gba, 8 MB) */
+/* A copy kept in dir already (bn6g.gba, bn5c.gba, 8 MB) */
 static BOOL kept_in(NSString *dir, int i) {
-	NSDictionary *a = [NSFileManager.defaultManager attributesOfItemAtPath:[dir stringByAppendingPathComponent:@(known[i].file)] error:nil];
+	NSDictionary *a = [NSFileManager.defaultManager attributesOfItemAtPath:[dir stringByAppendingPathComponent:@(known_rom(i).file)] error:nil];
 	return a && a.fileSize == (unsigned long long)ROM_SIZE;
 }
 
@@ -125,7 +164,8 @@ static RomHead head_of(NSURL *url) {
  * that ROM, unchanged, else why not */
 static NSString *copy_in(NSURL *url, int i, NSString *dir) {
 	__block NSString *why = @"could not be read";
-	NSString *to = [dir stringByAppendingPathComponent:@(known[i].file)], *part = [to stringByAppendingString:@".part"];
+	Known k = known_rom(i);
+	NSString *to = [dir stringByAppendingPathComponent:@(k.file)], *part = [to stringByAppendingString:@".part"];
 	[NSFileManager.defaultManager createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
 	coordinated(url, ^(NSURL *at) {
 		FILE *f = fopen(at.fileSystemRepresentation, "rb");
@@ -136,7 +176,7 @@ static NSString *copy_in(NSURL *url, int i, NSString *dir) {
 		if (!data) return;
 		char hex[41] = "";
 		if (n == ROM_SIZE) sha1_hex(data, n, hex);
-		if (n != ROM_SIZE || strcmp(hex, known[i].sha1)) why = changed(i);
+		if (n != ROM_SIZE || strcmp(hex, k.sha1)) why = changed(i);
 		else {
 			FILE *o = fopen(part.fileSystemRepresentation, "wb");
 			BOOL ok = o && fwrite(data, 1, n, o) == n;
@@ -152,8 +192,8 @@ static NSString *copy_in(NSURL *url, int i, NSString *dir) {
 	return why;
 }
 
-/* One file: told by its header's game code; BN6's or BN5's (those `want`
- * names) checked by their SHA-1 and copied into dir. YES when it is
+/* One file: told by its header's game code; BN6's or an extra one taken
+ * (those `want` names) checked by their SHA-1 and copied into dir. YES when it is
  * settled (taken, refused, or the same as a copy kept), so a quick look
  * need not open it again; NO when it could not be read this time. */
 static BOOL offer(NSURL *url, NSString *name, unsigned want, NSString *dir, CWLook *l) {
@@ -161,7 +201,7 @@ static BOOL offer(NSURL *url, NSString *name, unsigned want, NSString *dir, CWLo
 	if (h.got < 0) { [l refuse:name why:@"could not be read" battleNetwork:NO]; return NO; }
 	if (h.got < (int)sizeof h.bytes) { [l refuse:name why:@"not a GBA ROM" battleNetwork:NO]; return YES; }
 	for (int i = 0; i < KNOWN; ++i) {
-		if (memcmp(h.bytes + 0xAC, known[i].code, 4)) continue;
+		if (!taken(i) || memcmp(h.bytes + 0xAC, known_rom(i).code, 4)) continue;
 		if (!(want & (1u << i)) || kept_in(dir, i)) { l.had |= 1u << i; return YES; }
 		NSString *why = h.size >= 0 && h.size != ROM_SIZE ? changed(i) : copy_in(url, i, dir);
 		if (why) [l refuse:name why:why battleNetwork:YES];
@@ -169,8 +209,8 @@ static BOOL offer(NSURL *url, NSString *name, unsigned want, NSString *dir, CWLo
 		return YES;
 	}
 	for (size_t k = 0; k < sizeof others / sizeof *others; ++k)
-		if (!memcmp(h.bytes + 0xAC, others[k].code, 4)) { [l refuse:name why:@(others[k].why) battleNetwork:YES]; return YES; }
-	[l refuse:name why:@"not BN6 Gregar or BN5 Team Colonel" battleNetwork:NO];
+		if (taken(others[k].of) && !memcmp(h.bytes + 0xAC, others[k].code, 4)) { [l refuse:name why:@(others[k].why) battleNetwork:YES]; return YES; }
+	[l refuse:name why:other_game() battleNetwork:NO];
 	return YES;
 }
 
@@ -256,7 +296,8 @@ static NSString *words(CWLook *l, BOOL sent) {
 		sent ? @"downloading it. This screen looks again by itself." : @"download it in Files first."];
 	else if (l.cloud.count) [s appendFormat:@"\n%lu .gba files are in iCloud, not on this phone yet: %@", (unsigned long)l.cloud.count,
 		sent ? @"downloading them. This screen looks again by itself." : @"download BN6's in Files first."];
-	if ((l.kept & IOS_ROM_BN5) || (l.had & IOS_ROM_BN5)) [s appendFormat:@"\n%s is kept, for when BN6 is here.", known[1].tag];
+	for (int i = 1; i < KNOWN; ++i)
+		if ((l.kept | l.had) & (1u << i)) [s appendFormat:@"\n%s is kept, for when BN6 is here.", known_rom(i).tag];
 	return s;
 }
 
@@ -266,7 +307,7 @@ static BOOL fetching;         /* a pick sent for its folder's files in iCloud */
 
 /* What a look that took BN6 says: the ROMs copied in, and from where */
 static NSString *took_words(CWLook *l) {
-	NSString *what = (l.kept & IOS_ROM_BN5) ? [NSString stringWithFormat:@"%s and %s", known[0].tag, known[1].tag] : @(known[0].tag);
+	NSString *what = tags_of(l.kept);
 	return l.where ? [NSString stringWithFormat:@"Took %@ from %@.", what, l.where] : [NSString stringWithFormat:@"Took %@.", what];
 }
 
@@ -325,7 +366,9 @@ static int picked;   /* (ios_pick_result) */
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
 	(void)controller;
 	@autoreleasepool {
-		unsigned want = IOS_ROM_BN6 | IOS_ROM_BN5;
+		unsigned want = IOS_ROM_BN6;
+		for (int i = 0; i < XROM_COUNT; ++i)
+			if (xrom_offered(i)) want |= IOS_ROM_X(i);
 		CWLook *l;
 		fetching = NO;
 		if (self.what == IOS_PICK_FOLDER) {
