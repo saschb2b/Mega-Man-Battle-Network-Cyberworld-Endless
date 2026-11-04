@@ -92,6 +92,10 @@ int xd4_families(const Spec *s, const XVirusFamily **fams) {
 	return n;
 }
 
+int xd4_family_count(void) { return dev.bn4families ? xvirus_bn4_count : 0; }
+
+const XVirusFamily *xd4_family(int k) { return xvirus_bn4[k]; }
+
 int xd4_bn6_id(int id) {
 	for (int k = 0; k < xvirus_bn4_count; ++k)
 		for (int v = 0; v < XV_VERSIONS; ++v)

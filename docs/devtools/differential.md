@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T10:34:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T10:41:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -918,14 +918,23 @@ format, its game 4: the trace's header names it):
       +0x20 and +0x2A; his AI data's BN4 +0xC, +0x10, +0x1D, +0x34, +0x36,
       +0x4C and +0x50 against BN6's +3, +5, +0xF, +0x11, +0x29 and +0x7F
       (17 differences, every other byte of his the same).
-  - **Prepared mutations** (to run once the recipe's thunder copy lands
-    and `billy_v1` can PASS; `tools/xdiff.py` gives a BN4 spec a
-    mutation's `poke` and `call` since): a state immediate off by one
-    (`poke=080B9600:200A`, the recipe's CurAction 7 written as BN6's 9
-    made 10); a call aimed elsewhere (`call=08001532:0800151C`, its
-    positive draws drawing signed); the thunder's spawner aimed at
-    another type (its copy's `movs r0,#0x2a` made another third kind's,
-    at the copy's own address).
+  - **Its mutations** (`tests/xdiff/mutations.json`; `tools/xdiff.py`
+    gives a BN4 spec a mutation's `poke` and `call`, and `call=` aims BN4's
+    families' veneers too, `xd4_family`), each FAIL on the family: a state
+    immediate off by one (`poke=080B9600:200A`, the recipe's CurAction 7
+    written as BN6's 9 made 10: t1, its CurAction); a call aimed
+    elsewhere (`call=0801BB1C:0810A952`, its panel reservation at BN6's
+    family nullsub: t43, no 0x20 in its object); the thunder's spawner
+    aimed at another type (`poke=08B7C184:2029`, the copy's spawner,
+    BN6's `0x080CADBC` at `XV_CODE + 0x14180`, spawning 0x29: t341). A
+    call aimed from GetPositiveSignedRNG to GetRNG
+    (`call=08001532:0800151C`) is no break for Billy: its draws, BN4's
+    words replayed, read alike with bit 31 set or not, and the family
+    stays the same (INCONCLUSIVE).
+  - **Its other versions**: `billy_v2` (BN4's 0x0F, BN6's 0x2C2) and
+    `billy_v3` (BN4's 0x11, BN6's 0x2C4), as `billy_v1` else: each
+    INCONCLUSIVE at t1 on MegaMan alone, the family's own records the
+    same in all 1200 frames.
   - **The thunder** (BN6's own third-kind 0x2A run for Billy's
     parameters: the recipe's audit, `tools/bn4_twins.py` AUDITS
     (0x080D2156, 0x080CADBC)), field by field at t341, each init (BN4

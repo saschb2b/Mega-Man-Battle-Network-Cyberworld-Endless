@@ -31,5 +31,9 @@ int xd4_families(const Spec *s, const XVirusFamily **fams);
 /* A BN4 enemy id as BN6's engine numbers it: a moved family's version its first_id + the version (the recipe's numbers,
  * Billy's 13-18 BN6's 0x2C0-0x2C5); any other id as it is */
 int xd4_bn6_id(int id);
+/* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
+ * mutation's call= aims their veneers as BN5's */
+int xd4_family_count(void);
+const XVirusFamily *xd4_family(int k);
 
 #endif
