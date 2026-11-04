@@ -2574,6 +2574,13 @@
         "clock": "state",
         "what": "MegaMan struck",
         "why": "Played as the thunder's hit strikes him (BN4's bl at 0x08013A9C under his type's routine 0x080B34D8; BN6's at 0x0801BA5A under his 0x080B9A5C), a state's: BN4's at t431, BN6's at t432 in billy_v1; the same number in both"
+      },
+      {
+        "bn4": "0x82",
+        "bn6": "0x84",
+        "clock": "state",
+        "what": "MegaMan's HP low",
+        "why": "Played by the HP gauge's step, twins from its HP test on (BN4 0x0801472C, entry 0 of the HUD's table 0x080146CC that 0x080146A8 runs by the bits of its word each frame; BN6 0x0801C840, entry 4 of its table 0x0801BF10): unless 0x08007A12 / 0x0800A18E or the pause (0x080078EC / 0x0800A03C) says not, his HP (+0x24) at a quarter of his maximum (+0x26 >> 2) or less counts a byte (BN4's +0x19, BN6's +6) each frame to 45 (cmp #0x2d), then 0 and the sound: movs r0,#0x82 at 0x0801475C, bl 0x08000560 (BN4_PLAY_SOUND); movs r0,#0x84 at 0x0801C880, bl 0x080005CC. The count starts on the frame a hit takes him to the quarter, so its clock is the hit's, a state's: cirkill_v3's CirKill takes him from 560 to 380 at t1062 in BN4 and t1063 in BN6, the sound played at t1106, t1151 and t1196 in BN4 and t1107, t1152 and t1197 in BN6 (begun a frame after each). Paired by the routines that play them, not by their samples"
       }
     ],
     "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset",

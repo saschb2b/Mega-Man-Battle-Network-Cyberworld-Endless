@@ -1346,6 +1346,14 @@
     "08B7F14C:080CE5B0:4"
    ],
    "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x16FF0 + 0x15C holding the moved table's 0x08B7F150) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
+  },
+  {
+   "name": "CirKill's direction left in BN4's numbers",
+   "spec": "cirkill_v1",
+   "poke": [
+    "08B7F50A:FFEDF7FF:4"
+   ],
+   "what": "the copied direction routine's call (BN4's 0x0800AFB2, bl 0x0800AF90; its copy at XV_CODE + 0x17282 + 0x288, made a call to its shim, src/emu/xvirus_shim.h's direction) aimed at the rule's copy again (0x08B7F4E8), as an install with no shim would leave it: CirKill's move's end (0x080BD34E) writes BN4's 3 for its step to the left into BN6's +0xC, where BN6's rule numbers it 4 on side 1 (bn4_twins.SIDED; caught at t43, BN4's 3 read as BN6's 4 by the side)"
   }
  ]
 }
