@@ -89,7 +89,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2];
+		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0];
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -107,8 +107,10 @@ static void parse_script(const char *spec) {
 		 * layer's next, one of the given foes or one of BN5's records in BN6's
 		 * engine, of a status gives the battle's enemies one, of a cross
 		 * commits the next Cross chosen as that form, of a layer's signature
-		 * puts him in it; "300:battle" waits its 300 frames first) */
-		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
+		 * puts him in it; "300:battle" waits its 300 frames first; "0:dump
+		 * PREFIX" the video memory, as remote play's) */
+		if (colon && !strncmp(colon + 1, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", colon + 6);
+		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
 		else if (colon && text_step(colon + 1, s)) {}

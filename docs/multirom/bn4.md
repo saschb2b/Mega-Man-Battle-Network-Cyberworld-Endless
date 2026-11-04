@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -285,7 +285,10 @@ battle frame by frame, as BN5's were.
    one mechanism.
 3. **Its areas and music**, area by area as the walk's gate admits
    them: each dresses the BN6 area it is like, as `run_dress` does for
-   BN5's, its themes and battle backgrounds with it.
+   BN5's, its themes and battle backgrounds with it. Prepared, held (4
+   November 2026): the five dress BN6's for review alone, their 256-colour
+   maps shown so, their backdrops and battle backgrounds BN4's own
+   ([Status](status.md), BN4 Red Sun's areas).
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
 

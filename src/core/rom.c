@@ -1,7 +1,7 @@
 #include "rom.h"
 
 #include "net.h"   /* LOOK_* */
-#include "bn4.h"   /* BN4_MUGSHOT_FACE */
+#include "bn4.h"   /* BN4_GROUP_*, BN4_MUGSHOT_FACE */
 #include "bn5.h"   /* BN5_NAVI_* */
 
 #include <dirent.h>
@@ -382,6 +382,33 @@ static const NetAreaDef bn5_areas[] = {
 #undef LIB_MAP
 };
 
+/* Battle Network 4 Red Sun's five large net areas (docs/rom/bn4.md: its
+ * groups 0x90-0x94, each a group of its own, not run on as BN5's are),
+ * each held out of runs until the owner admits it (docs/multirom/bn4.md,
+ * the walk's gate of docs/game/core-loop.md): --net-biome xN draws one,
+ * BN4's areas numbered after BN5's (x15 ACDC Area to x19 the Undernet).
+ * Their battles are BN6's (no xbattles: BN4's records are its own,
+ * docs/rom/bn4.md, Battle records), their guardians BN6's, their
+ * bystanders BN6's; their battle backgrounds the map's own (BN4_MAP_BACKDROPS),
+ * their themes BN4's net and Undernet songs (BN4_SONG_NET, BN4_SONG_UNDERNET). */
+static const NetAreaDef bn4_areas[] = {
+	{ BN4_GROUP_ACDC, 2, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { BN4_GROUP_ACDC, 0 }, { BN4_GROUP_ACDC, 1 } }, .pad_rooms = 64, .apart = NET_APART_PLATFORMS,
+		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x90, 0 }, .like = 0,
+		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of the old ACDC Town", .xsong = 0x12, .xbg = 4, .held = true },   /* ACDC Area 3, 1 and 2: mint walkways in green rims, round hubs ringed blue and yellow, framed square platforms of four by four, told by shape; every room up to 64 panels and the arena drawn as its squares (pad_rooms), their frames framing them */
+	{ BN4_GROUP_TOWN, 0, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { BN4_GROUP_TOWN, 1 }, { BN4_GROUP_TOWN, 2 } }, .skip_styles = 0x800C,
+		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x91, 1 }, .like = 1,
+		.name = "Town Area", .short_name = "Town Area", .motto = "The net between the towns", .xsong = 0x12, .xbg = 5, .held = true },   /* Town Area 1-3: pale cyan walkways in blue rims, wide and holed, told by shape; its yellow and lime conveyors lend no tiles (SKIP_ANY_PIXEL | hue buckets 2-3) */
+	{ BN4_GROUP_PARK, 0, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { 0 } }, .skip_styles = 0x8006,
+		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x92, 1 }, .like = 3,
+		.name = "Park Area", .short_name = "Park Area", .motto = "The net under the park", .xsong = 0x12, .xbg = 6, .held = true },   /* Park Area 1: pink walkways in blue rims, peach framed platforms, told by shape; its orange and yellow conveyors lend no tiles (SKIP_ANY_PIXEL | hue buckets 1-2); its other maps' looks, mixed in, doubled the seams */
+	{ BN4_GROUP_COUNTRIES, 2, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { 0 } }, .apart = NET_APART_PLATFORMS,
+		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x94, 1 }, .like = 2,
+		.name = "Net countries", .short_name = "Countries", .motto = "The nets of far countries", .xsong = 0x12, .xbg = 0x14, .held = true },   /* the countries' third map: green floor in red and yellow rims, cream framed platforms drawn apart, told by shape; the four countries are four looks, so one is learned (which country is which map is not traced) */
+	{ BN4_GROUP_UNDERNET, 2, 0x8000, 0x8000, false, 0x14, 0, 0, 0, { { 0 } }, .apart = NET_APART_PLATFORMS,
+		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x92, 0 }, .like = 5,
+		.name = "Undernet", .short_name = "Undernet", .motto = "Older depths, darker still", .xsong = 0x13, .xbg = 8, .held = true },   /* the Undernet 3: orange cushioned paths a panel wide, grey joints with studs, grey square platforms with a blue cross, drawn apart, told by shape; Black Earth (0x94:6-7) not drawn */
+};
+
 static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/rom/) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
@@ -391,23 +418,43 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	 * map routines named in bn4.h, as their records are 9 words to BN5's 7) */
 	[XROM_BN4_RED_SUN_US] = { .name = "Mega Man Battle Network 4: Red Sun (USA)", .sha1 = "a97e96a7da03abd70f7953328e511b9fa29179f1", .code = "B4WE",
 		.map_table_rw = 0x028304u, .map_table = 0x02831Cu, .coord_table_rw = 0x028F04u, .coord_table = 0x028F1Cu,
-		.rw_groups = 6, .net_groups = 21, .song_table = 0x155FF8u, .sprite_lists = 0x02793Cu, .battle_songs = { 0x14, 0x15 },
-		.tag = "BN4", .face = BN4_MUGSHOT_FACE, .file = "bn4rs.gba", .research = true, .kit_keys_played = true },
+		.rw_groups = 6, .net_groups = 21, .song_table = 0x155FF8u, .sprite_lists = 0x02793Cu,
+		/* (its battle themes, BN4_SONG_BATTLE and BN4_SONG_BOSS, named here once
+		 * an area of its is admitted: a game that lends areas has them copied
+		 * as a run's music starts, src/audio/xsong.c) */
+		.areas = bn4_areas, .nareas = (int)(sizeof bn4_areas / sizeof *bn4_areas),
+		.battle_bgs = 0x08563Cu, .battle_bg_anims = 0x085A50u, .battle_bg_scroll = 0x085488u, .bg_words = 9,
+		.map_enters = 0x026634u, .map_anims = 0x026688u, .tag = "BN4", .face = BN4_MUGSHOT_FACE, .file = "bn4rs.gba", .research = true,
+		.kit_keys_played = true },
 };
+
+XRom XR[XROM_COUNT];
+bool xrom_research;
+static int reviewed = -1;   /* (the area a dev tool reviews, XAREA_ALL every one; -1 none) */
+
+/* The game whose area `area` is (an XRomId), its index among that game's in `*k`; -1 for BN6's or none */
+static int xrom_of_area(int area, int *k) {
+	*k = area - NET_AREAS;
+	for (int i = 0; i < XROM_COUNT && area >= NET_AREAS && *k < XAREAS_MAX; ++i) {
+		if (*k < xlayouts[i].nareas) return i;
+		*k -= xlayouts[i].nareas;
+	}
+	return -1;
+}
 
 const NetAreaDef *net_area_def(int area) {
 	if (area < 0) return NULL;
 	if (area < NET_AREAS) return R.layout ? &R.layout->net_area[area] : NULL;
-	int k = area - NET_AREAS;
-	for (int i = 0; i < XROM_COUNT && k < XAREAS_MAX; ++i) {
-		if (k < xlayouts[i].nareas) return XR[i].data ? &xlayouts[i].areas[k] : NULL;
-		k -= xlayouts[i].nareas;
-	}
-	return NULL;
+	int k, i = xrom_of_area(area, &k);
+	if (i < 0 || !XR[i].data || (xlayouts[i].research && reviewed != XAREA_ALL && reviewed != area)) return NULL;
+	return &xlayouts[i].areas[k];
 }
 
-XRom XR[XROM_COUNT];
-bool xrom_research;
+void xarea_review(int area) {
+	int k, i = xrom_of_area(area, &k);
+	reviewed = area;
+	if (area == XAREA_ALL || (i >= 0 && xlayouts[i].research)) xrom_research = true;
+}
 
 bool xrom_offered(int xrom) { return xrom >= 0 && xrom < XROM_COUNT && (!xlayouts[xrom].research || xrom_research); }
 

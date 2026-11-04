@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_map.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -320,6 +321,19 @@ static int floor_cb(int A, int B, const void *ctx) {
 
 int netmap_rise(void) { return nm_cur ? nm_cur->rise : 0; }
 
+static bool in_256;   /* (the layer's tiles 256-colour: BN4's) */
+
+void netmap_colours(void) {
+	if (!in_256) return;
+	uint32_t render = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_RENDER) + BN6_RENDER_BGCNT;
+	static const uint16_t net[2] = { BN6_BGCNT_NET_BG1, BN6_BGCNT_NET_BG2 };
+	for (uint32_t bg = 1; bg <= 2; ++bg)
+		if (emu_read16(render + 2 * bg) == net[bg - 1]) {
+			uint8_t v[2] = { (uint8_t)(net[bg - 1] | BN6_BGCNT_256), (uint8_t)(net[bg - 1] >> 8) };
+			emu_write(render + 2 * bg, v, sizeof v);
+		}
+}
+
 /* Another game's area: its tile set and colours copied into the core's
  * ROM, where BN6 loads them from the map the layers take over. */
 static bool install_gfx(const Learned *L) {
@@ -408,6 +422,7 @@ static bool write_tilemap(const Learned *L) {
 		for (uint32_t k = 0; k < 8; k += 4) emu_write32(0x08000000u + L->desc + k, rom_u32(L->src_desc + k));
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	if (L->other && !install_gfx(L)) { free(out); return false; }
+	in_256 = L->other && area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
 	free(out);
 	free(nm_last.map);
 	nm_last.map = map;
