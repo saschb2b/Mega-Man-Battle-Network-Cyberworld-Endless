@@ -3,7 +3,7 @@ type: Status
 title: "Status"
 description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
 ---
 
 # Status
@@ -196,8 +196,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:40:00Z }
   and modelled on a computer; a New 3DS's own run with both ROMs is
   3ds/README.md's checklist.
 - [ ] Battle Network 4: Red Sun: researched, its tables found and its
-  maps drawn ([Battle Network 4 in a run](bn4.md), its plan and the owner's
-  open calls); its areas below, held.
+  maps drawn, Billy moved into BN6's engine, and everything a player
+  needs to bring its ROM built on every platform behind its research
+  switch ([How it is built](how-it-is-built.md), Platforms); nothing
+  offered to players yet ([Battle Network 4 in a run](bn4.md), its plan
+  and the owner's open calls); its areas below, held.
 - [ ] Team ProtoMan (the other version), BN4 Blue Moon, BN6 Falzar.
 
 ## BN4 Red Sun's areas

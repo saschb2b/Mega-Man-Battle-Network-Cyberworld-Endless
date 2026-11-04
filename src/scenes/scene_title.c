@@ -538,7 +538,7 @@ static void found_draw(int x0, int y0) {
 	int t = entries == 1 ? S.t - FOUND_AT : 0, n = 0;
 	char s[64] = "";
 	for (int i = 0; i < XROM_COUNT; ++i)
-		if (XR[i].data) {
+		if (XR[i].data && xrom_offered(i)) {
 			size_t m = strlen(s);
 			snprintf(s + m, sizeof s - m, "%s%s", m ? " + " : "", XR[i].layout->tag);
 			++n;
@@ -548,7 +548,8 @@ static void found_draw(int x0, int y0) {
 	 * run, session 62; its areas, towns, songs and Navis join the net's,
 	 * docs/multirom/) */
 	size_t m = strlen(s);
-	snprintf(s + m, sizeof s - m, n > 1 ? " found: their Nets join ours" : " found: its Net joins ours");
+	/* (two or more: what each lends is not one Net, and the line must fit the picture's width) */
+	snprintf(s + m, sizeof s - m, n > 1 ? " found: both join ours" : " found: its Net joins ours");
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 

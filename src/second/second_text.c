@@ -24,9 +24,6 @@
 #include "save.h"
 #include "shop.h"
 #include "trader.h"
-#ifdef __3DS__
-#include "start_3ds.h"
-#endif
 
 void second_cross_lines(int navi, char *out, size_t n) {
 	const char *strong = powers_cross_strength(navi), *navis = powers_cross_on_navis(navi);
@@ -289,14 +286,15 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 	else snprintf(out, n, "Find the exit pad");
 }
 
-/* (on the 3DS BN5's ROM is read where the heap has room for it beside
+/* (on the 3DS an extra ROM is read where the heap has room for it beside
  * BN6's, start_3ds.c: left unread, "not found" would send a player to
  * check his ROM, issue #107) */
-const char *second_bn5_line(bool found) {
-#ifdef __3DS__
-	if (!found && start_3ds_bn5_unread()) return "BN5 found, but this 3DS has no room for it";
-#endif
-	return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6";
+void second_xrom_line(const char *found, const char *missing, const char *unread, char *out, size_t n) {
+	bool many = strchr(found, '+') != NULL;
+	if (found[0] && unread && unread[0]) snprintf(out, n, "%s found; %s too, but this 3DS has no room for it", found, unread);
+	else if (found[0]) snprintf(out, n, "%s found: the older %s the runs", found, many ? "nets join" : "net joins");
+	else if (unread && unread[0]) snprintf(out, n, "%s found, but this 3DS has no room for it", unread);
+	else snprintf(out, n, "%s not found beside BN6", missing);
 }
 
 /* (where a chip's copies are, a shop's and the Library's) */

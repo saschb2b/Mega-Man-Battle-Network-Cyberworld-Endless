@@ -46,7 +46,15 @@ bool desktop_choose_rom(int slot, char *path, size_t n) {
 	ofn.lpstrFilter = L"GBA ROM (*.gba)\0*.gba\0All files\0*.*\0";
 	ofn.lpstrFile = file;
 	ofn.nMaxFile = (DWORD)(sizeof file / sizeof *file);
-	ofn.lpstrTitle = slot == 1 ? L"Choose your Mega Man Battle Network 5 ROM" : L"Choose your Mega Man Battle Network 6 ROM";
+	/* (its title the game's name, an extra ROM's from its layout: "Mega Man Battle Network 5"; ASCII, widened) */
+	const XRomLayout *x = slot > 0 ? xrom_layout(slot - 1) : NULL;
+	const char *game = x ? x->name : "Mega Man Battle Network 6", *colon = strchr(game, ':');
+	char title[96];
+	wchar_t wide[96];
+	snprintf(title, sizeof title, "Choose your %.*s ROM", colon ? (int)(colon - game) : (int)strlen(game), game);
+	for (size_t i = 0; i < sizeof wide / sizeof *wide; ++i)
+		if (!(wide[i] = (wchar_t)(unsigned char)title[i])) break;
+	ofn.lpstrTitle = wide;
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER;
 	HRESULT com = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	bool ok = GetOpenFileNameW(&ofn) && utf8(file, path, n) && path[0];

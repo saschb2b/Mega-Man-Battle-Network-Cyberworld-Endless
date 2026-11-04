@@ -334,7 +334,7 @@ python3 build.py serve      # the site and the browser build on http://localhost
 python3 build.py xdiff [SPEC] [--mutations]   # tools/xdiff.py: a moved virus family against its own game's battle, frame by frame (tests/xdiff; both ROMs)
 python3 build.py xrecords [--all]   # tools/xrecords.py: BN5's territories' records as BN6's engine fights them, each fightable or why not (both ROMs)
 python3 tools/xproxy.py [--mutations] [--souls]   # the Souls' proxy form (form 8) against HeatCross, every byte of every frame (the ROM; --souls the Souls over it, both ROMs)
-python3 tools/heap3ds.py [--seeds 1-12]   # the New 3DS's heap modelled on the host build: long runs' peaks and refused allocations, BN6 alone and with BN5 (both ROMs)
+python3 tools/heap3ds.py [--seeds 1-12]   # the New 3DS's heap modelled on the host build: long runs' peaks and refused allocations, BN6 alone, with BN5, with BN4 and with both (the ROMs)
 python3 tools/mp2k_verify.py [SONG...]   # the engine's MP2K against BN6's own in romlab, frame by frame (the ROM)
 python3 tools/bn5_songs.py [SONG...]   # where BN5 starts each of its songs: its code, map lists, battle records, scripts and text (BN5's ROM; docs/rom/)
 python3 build.py economy [RUNS]  # what a run hands out by act, today's plan and the proposal's, against their bands (docs/game/economy/; the ROM)

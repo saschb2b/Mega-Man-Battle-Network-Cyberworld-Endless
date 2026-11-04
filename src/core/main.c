@@ -296,8 +296,9 @@ static int run_option(const char *a, const char *v, Options *o) {
 	else if (!strcmp(a, "--talk")) director_dev_talks = v;
 	else if (!strcmp(a, "--dev")) {
 		devtools_parse(v);
-		/* (BN4 Red Sun read for research, its families installed after BN5's: xvirus_bn4.h) */
-		if (dev.bn4families) xrom_research = true;
+		/* (BN4 Red Sun read for research, its families installed after BN5's:
+		 * xvirus_bn4.h; or offered for review as players will see it: rom.h) */
+		if (dev.bn4families || dev.showbn4) xrom_research = true;
 	}
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;

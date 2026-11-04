@@ -1,12 +1,13 @@
 /* The launcher's layout and picture (launcher_state.h). As the second
  * screen's PET (second_frame.c): a dark green band with the screen's name
  * and its three light stripes, the place on a slot at its right, the body
- * framed in green and cyan; in it the two cartridges side by side (one
+ * framed in green and cyan; in it the cartridges shown side by side (one
  * over the other on a screen held upright), a line under each, the note,
  * the saves' lines, the buttons and the keys' line. What does not fit a
  * small canvas is left out in turn: the saves' second line and its first,
  * the keys' line, the note's third and second lines; the large cartridges
- * come where there is room for them. */
+ * come where there is room for them, the compact ones where three do not
+ * stand side by side otherwise (their lines then the brief ones). */
 #include "launcher_state.h"
 
 #include <stdio.h>
@@ -58,11 +59,19 @@ static int saves_split(int w, char lines[3][96]) {
 	return n;
 }
 
-/* the height one column of pieces takes, the cartridges `large` or not,
- * with `lines` of the note, `saves` of the saves' and the keys' line or not */
-static int column_h(bool upright, bool large, int lines, int saves, bool hint) {
-	int cart = large ? CART_LARGE_H : CART_H, h = 0;
-	h += upright ? 2 * (cart + 2 + CAPTION_H) + GAP : cart + 2 + CAPTION_H;
+/* the cartridges shown (launcher_roms.h), in order: how many */
+static int shown_slots(int out[SLOTS]) {
+	int n = 0;
+	for (int s = 0; s < SLOTS; ++s)
+		if (roms_shown(s)) out[n++] = s;
+	return n;
+}
+
+/* the height one column of pieces takes, `n` cartridges of `size`, with
+ * `lines` of the note, `saves` of the saves' and the keys' line or not */
+static int column_h(bool upright, int n, int size, int lines, int saves, bool hint) {
+	int cart = art_cart_h(size), h = 0;
+	h += upright ? n * (cart + 2 + CAPTION_H) + (n - 1) * GAP : cart + 2 + CAPTION_H;
 	h += GAP + lines * LINE;
 	if (saves) h += GAP + saves * LINE;
 	h += GAP + (upright ? 2 * BUTTON_H + 2 + GAP + 4 : BUTTON_H);
@@ -70,25 +79,32 @@ static int column_h(bool upright, bool large, int lines, int saves, bool hint) {
 	return h;
 }
 
+/* whether `n` cartridges of `size` stand side by side in `iw` (one a row, held upright) */
+static bool across(bool upright, int n, int size, int iw) {
+	return upright ? iw >= art_cart_w(size) : iw >= n * art_cart_w(size) + (n + 1) * GAP;
+}
+
 /* What a layout holds: the second button (a phone's: its files chosen
  * instead of a folder), the keys' line on a line of its own or beside
  * PLAY (the desktops'), the cartridges' size, the saves' lines and the
  * note's */
 typedef struct {
-	bool alt, hint, beside, large;
-	int saves, lines;
+	bool alt, hint, beside;
+	int size, saves, lines;
 } Fit;
 
-/* ... what fits the body's inside (iw x ih): the large cartridges where all
- * does; else in turn the saves' lines, the keys' line, the note's third
- * and second lines are left out */
-static Fit fit(bool upright, int iw, int ih) {
+/* ... what fits the body's inside (iw x ih) with `n` cartridges: the
+ * large ones where all does, the small ones where they do with a line of
+ * the note, else the compact ones; then in turn the saves' lines, the
+ * keys' line, the note's third and second lines are left out */
+static Fit fit(bool upright, int n, int iw, int ih) {
 	char lines[3][96];
 	Fit f = { .alt = (pick_kinds() & PICK_FILES) != 0, .hint = hint_wanted(), .saves = saves_split(iw, lines), .lines = 3 };
 	f.beside = f.hint && !f.alt && !upright;
-	bool wide_enough = upright ? iw >= CART_LARGE_W : iw >= 2 * CART_LARGE_W + 3 * GAP;
-	f.large = wide_enough && column_h(upright, true, 3, f.saves, f.hint && !f.beside) <= ih;
-	while (column_h(upright, f.large, f.lines, f.saves, f.hint && !f.beside) > ih) {
+	if (across(upright, n, CART_LARGE, iw) && column_h(upright, n, CART_LARGE, 3, f.saves, f.hint && !f.beside) <= ih) f.size = CART_LARGE;
+	else if (across(upright, n, CART_SMALL, iw) && column_h(upright, n, CART_SMALL, 1, 0, false) <= ih) f.size = CART_SMALL;
+	else f.size = CART_COMPACT;
+	while (column_h(upright, n, f.size, f.lines, f.saves, f.hint && !f.beside) > ih) {
 		if (f.saves) --f.saves;
 		else if (f.hint && !f.beside) f.hint = false;
 		else if (f.lines > 1) --f.lines;
@@ -97,18 +113,24 @@ static Fit fit(bool upright, int iw, int ih) {
 	return f;
 }
 
-/* the cartridges and their lines from y: one over the other held upright,
- * else side by side; the y under them */
+/* the cartridges shown and their lines from y: one over the other held
+ * upright, else side by side, their lines the brief ones where two would
+ * run into each other or one past the body; the y under them */
 static int place_carts(LauncherLayout *lay, int ix, int iw, int y) {
-	int cw = lay->large ? CART_LARGE_W : CART_W, ch = lay->large ? CART_LARGE_H : CART_H, gap = (iw - 2 * cw) / 3;
-	for (int s = 0; s < SLOTS; ++s) {
+	int slot[SLOTS], n = shown_slots(slot);
+	int cw = art_cart_w(lay->size), ch = art_cart_h(lay->size), gap = (iw - n * cw) / (n + 1);
+	for (int i = 0; i < n; ++i) {
+		int s = slot[i];
 		if (lay->upright) {
 			lay->cart[s] = (SDL_Rect){ ix + (iw - cw) / 2, y, cw, ch };
 			lay->caption[s] = (SDL_Rect){ ix, y + ch + 2, iw, CAPTION_H };
-			y += ch + 2 + CAPTION_H + (s ? 0 : GAP);
+			y += ch + 2 + CAPTION_H + (i < n - 1 ? GAP : 0);
 		} else {
-			lay->cart[s] = (SDL_Rect){ ix + gap + s * (cw + gap), y, cw, ch };
+			lay->cart[s] = (SDL_Rect){ ix + gap + i * (cw + gap), y, cw, ch };
 			lay->caption[s] = (SDL_Rect){ lay->cart[s].x - gap / 2, y + ch + 2, cw + gap, CAPTION_H };
+			int half = pixfont_width(slot_caption(s, false), 1) / 2, mid = lay->cart[s].x + cw / 2;
+			lay->brief |= mid - half < ix || mid + half > ix + iw;
+			if (i) lay->brief |= half + pixfont_width(slot_caption(slot[i - 1], false), 1) / 2 + 3 > cw + gap;
 		}
 	}
 	return lay->upright ? y : y + ch + 2 + CAPTION_H;
@@ -140,11 +162,12 @@ void launcher_layout(LauncherLayout *lay) {
 	lay->head = (SDL_Rect){ x0, y0, w, HEAD_H };
 	lay->body = (SDL_Rect){ x0 + FRAME, y0 + HEAD_H + FRAME, w - 2 * FRAME, h - HEAD_H - 2 * FRAME };
 	int iw = lay->body.w - 2 * PAD, ih = lay->body.h - 2 * PAD, ix = lay->body.x + PAD, iy = lay->body.y + PAD;
-	Fit f = fit(lay->upright, iw, ih);
-	lay->large = f.large;
+	int slot[SLOTS], n = shown_slots(slot);
+	Fit f = fit(lay->upright, n, iw, ih);
+	lay->size = f.size;
 	lay->note_lines = f.lines;
 	/* (the spare height shared out: a third over the cartridges, the rest round the buttons) */
-	int spare = ih - column_h(lay->upright, f.large, f.lines, f.saves, f.hint && !f.beside);
+	int spare = ih - column_h(lay->upright, n, f.size, f.lines, f.saves, f.hint && !f.beside);
 	int y = place_carts(lay, ix, iw, iy + spare / 3);
 	lay->note = (SDL_Rect){ ix, y + GAP, iw, f.lines * LINE };
 	y += GAP + f.lines * LINE;
@@ -190,12 +213,13 @@ static int drop(int slot, int *flash) {
 
 static void cartridge_or_spot(const LauncherLayout *lay, int slot) {
 	SDL_Rect r = lay->cart[slot];
-	bool lit = L.focus == (slot == SLOT_BN6 ? FOCUS_BN6 : FOCUS_BN5);
+	bool lit = L.focus == slot;
+	if (!r.w) return;
 	if (roms_have(slot)) {
 		int flash, dy = drop(slot, &flash);
 		SDL_Rect at = { r.x, r.y + dy, r.w, r.h };
 		if (lit) art_cursor(r, L.t);
-		art_cartridge(slot, at, lay->large, flash);
+		art_cartridge(slot, at, lay->size, flash);
 		/* READY on its foot, at the right */
 		const char *ready = launcher_word(W_READY);
 		int cw = art_chip_width(ready, true);
@@ -205,8 +229,10 @@ static void cartridge_or_spot(const LauncherLayout *lay, int slot) {
 	bool busy = L.busy_slot == slot || (L.busy_slot == SLOTS && slot == SLOT_BN6);
 	art_open_spot(r, L.t / 6, lit);
 	int cx = r.x + r.w / 2;
-	art_plus(cx, r.y + r.h / 2 - 12, lit ? PET_GOLD : PET_CYAN_HI);
-	pixfont_draw(cx, r.y + r.h / 2 - 3, slot_short(slot), lit ? PET_WHITE : PET_CYAN_HI, ink_shade(), PIXFONT_CENTER, 2);
+	/* (a compact spot's pieces closer: the plus, the name and the word one under another) */
+	int mid = lay->size == CART_COMPACT ? r.y + 20 : r.y + r.h / 2;
+	art_plus(cx, mid - (lay->size == CART_COMPACT ? 11 : 12), lit ? PET_GOLD : PET_CYAN_HI);
+	pixfont_draw(cx, mid - 3, slot_short(slot), lit ? PET_WHITE : PET_CYAN_HI, ink_shade(), PIXFONT_CENTER, 2);
 	/* its word: what it needs, or (the cursor on it) what A does */
 	LauncherWord w = slot == SLOT_BN6 ? W_NEEDED : W_OPTIONAL;
 	if (busy) w = W_WAITING;
@@ -214,14 +240,14 @@ static void cartridge_or_spot(const LauncherLayout *lay, int slot) {
 	SDL_Color c = busy || lit ? PET_GOLD : slot == SLOT_BN6 ? rgba(255, 170, 40, 255) : PET_DIM;
 	char word[32];
 	snprintf(word, sizeof word, "%s%s", launcher_word(w), busy ? &"..."[2 - (L.t / 12) % 3] : "");
-	pixfont_draw(cx, r.y + r.h - 13, word, c, ink_shade(), PIXFONT_CENTER, 1);
+	pixfont_draw(cx, r.y + r.h - (lay->size == CART_COMPACT ? 11 : 13), word, c, ink_shade(), PIXFONT_CENTER, 1);
 }
 
 static void captions(const LauncherLayout *lay) {
 	for (int s = 0; s < SLOTS; ++s) {
 		SDL_Rect c = lay->caption[s];
 		bool have = roms_have(s);
-		pixfont_draw(c.x + c.w / 2, c.y + 1, slot_caption(s), have ? PET_WHITE : PET_DIM, ink_shade(), PIXFONT_CENTER, 1);
+		if (c.w) pixfont_draw(c.x + c.w / 2, c.y + 1, slot_caption(s, lay->brief), have ? PET_WHITE : PET_DIM, ink_shade(), PIXFONT_CENTER, 1);
 	}
 }
 

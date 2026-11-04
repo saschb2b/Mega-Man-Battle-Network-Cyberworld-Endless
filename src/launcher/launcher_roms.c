@@ -1,6 +1,8 @@
 /* launcher_roms.h. A file is told by its header's game code before it is
- * read whole (rom.c checks BN6's SHA-1, xrom_load BN5's); a ROM read once
- * is never read again while the game holds pointers into it. */
+ * read whole (rom.c checks BN6's SHA-1, xrom_load an extra one's); a ROM
+ * read once is never read again while the game holds pointers into it.
+ * Cartridge 1 + i is extra ROM i (rom.h's XRomId), shown where it is
+ * offered: one read for research alone is neither shown nor taken. */
 #include "launcher_roms.h"
 
 #include <stdint.h>
@@ -17,7 +19,19 @@
 #define HEAD 0xB0         /* a GBA ROM's header, its game code at 0xAC */
 #define BN6_CODE "BR5E"   /* (rom.c's layout's) */
 
-bool roms_have(int slot) { return slot == SLOT_BN5 ? XR[XROM_BN5_COLONEL_US].data != NULL : R.data != NULL; }
+_Static_assert(SLOTS == 1 + XROM_COUNT && SLOT_BN5 == 1 + XROM_BN5_COLONEL_US && SLOT_BN4 == 1 + XROM_BN4_RED_SUN_US,
+	"a cartridge an extra ROM, in XRomId's order");
+
+bool roms_have(int slot) { return slot == SLOT_BN6 ? R.data != NULL : slot > 0 && slot < SLOTS && XR[slot - 1].data != NULL; }
+
+bool roms_shown(int slot) { return slot == SLOT_BN6 || (slot > 0 && slot < SLOTS && xrom_offered(slot - 1)); }
+
+unsigned roms_shown_set(bool read) {
+	unsigned bits = 0;
+	for (int s = 0; s < SLOTS; ++s)
+		if (roms_shown(s) && (!read || roms_have(s))) bits |= 1u << s;
+	return bits;
+}
 
 static const char *base_name(const char *path) {
 	const char *a = strrchr(path, '/'), *b = strrchr(path, '\\');
@@ -75,19 +89,20 @@ static int header(const char *path, uint8_t head[HEAD]) {
 	return got;
 }
 
-int roms_take(const char *path, const char *rom_dir, char *note, size_t n, bool *beside) {
+int roms_take(const char *path, const char *rom_dir, char *note, size_t n, unsigned *beside) {
 	const char *file = base_name(path);
 	uint8_t head[HEAD];
 	int got = zipped(file) ? 0 : header(path, head);
-	*beside = false;
+	unsigned shown = roms_shown_set(false);
+	*beside = 0;
 	if (zipped(file) || got < HEAD) {
 		note_refused(file, got < 0 ? "could not be read" : refuse_not_rom(zipped(file)), note, n);
 		return -1;
 	}
 	const char *code = (const char *)head + 0xAC;
-	int slot = !memcmp(code, BN6_CODE, 4) ? SLOT_BN6 : xrom_of_code(code) == XROM_BN5_COLONEL_US ? SLOT_BN5 : -1;
-	if (slot < 0) {
-		note_refused(file, refuse_why(code, -1, false), note, n);
+	int slot = !memcmp(code, BN6_CODE, 4) ? SLOT_BN6 : xrom_of_code(code) >= 0 ? 1 + xrom_of_code(code) : -1;
+	if (slot < 0 || !roms_shown(slot)) {
+		note_refused(file, refuse_why(code, -1, false, shown), note, n);
 		return -1;
 	}
 	/* (one read already stays: the game draws from its bytes) */
@@ -95,17 +110,18 @@ int roms_take(const char *path, const char *rom_dir, char *note, size_t n, bool 
 		note_slot_ready(slot, NULL, note, n);
 		return slot;
 	}
-	bool five = roms_have(SLOT_BN5), ok;
+	unsigned had = roms_shown_set(true);
+	bool ok;
 	if (slot == SLOT_BN6) {
 		char msg[512];
 		ok = rom_load_file(path, msg, sizeof msg);
 	} else ok = xrom_load(path);
 	if (!ok) {
-		note_refused(file, refuse_why(code, slot, true), note, n);
+		note_refused(file, refuse_why(code, slot, true, shown), note, n);
 		return -1;
 	}
 	if (rom_dir) roms_keep_copies(rom_dir);
-	*beside = slot == SLOT_BN6 && !five && roms_have(SLOT_BN5);
+	if (slot == SLOT_BN6) *beside = roms_shown_set(true) & ~had & ~(1u << SLOT_BN6);
 	note_took(slot, file, *beside, note, n);
 	return slot;
 }
@@ -132,6 +148,13 @@ void roms_reload(const char *rom_dir) {
 
 static void record_path(char *out, size_t n) { snprintf(out, n, "%s/launcher.ini", g_data_dir); }
 
+/* (a cartridge's key in the file: its short name, lower case: "bn5") */
+static void record_key(int slot, char *out, size_t n) {
+	snprintf(out, n, "%s", slot_short(slot));
+	for (char *c = out; *c; ++c)
+		if (*c >= 'A' && *c <= 'Z') *c = (char)(*c - 'A' + 'a');
+}
+
 RomRecord roms_record_read(void) {
 	RomRecord r = { 0 };
 	char path[600], line[128];
@@ -140,13 +163,21 @@ RomRecord roms_record_read(void) {
 	if (!f) return r;
 	r.known = true;
 	while (fgets(line, sizeof line, f)) {
-		char key[16], val[16];
+		char key[16], val[16], want[16];
 		if (line[0] == '#' || sscanf(line, " %15[a-z0-9] = %15s", key, val) != 2) continue;
-		bool yes = !strcmp(val, "yes");
-		if (!strcmp(key, "bn6")) r.bn6 = yes;
-		if (!strcmp(key, "bn5")) r.bn5 = yes;
+		/* (a cartridge not shown now, as BN4's after a --dev showbn4 start, is not missed) */
+		for (int s = 0; s < SLOTS; ++s) {
+			record_key(s, want, sizeof want);
+			if (!strcmp(key, want) && roms_shown(s)) r.have[s] = !strcmp(val, "yes");
+		}
 	}
 	fclose(f);
+	return r;
+}
+
+RomRecord roms_record_now(void) {
+	RomRecord r = { .known = true };
+	for (int s = 0; s < SLOTS; ++s) r.have[s] = roms_have(s);
 	return r;
 }
 
@@ -157,8 +188,13 @@ void roms_record_write(void) {
 	if (!f) return;
 	fprintf(f, "# Cyberworld Endless: the ROMs the last start played with. The ROMs\n"
 		"# screen shows again at a start where one of them is gone; delete this\n"
-		"# file to see it at the next start.\n\nbn6 = %s\nbn5 = %s\n",
-		roms_have(SLOT_BN6) ? "yes" : "no", roms_have(SLOT_BN5) ? "yes" : "no");
+		"# file to see it at the next start.\n\n");
+	/* (the cartridges shown alone: one read for research is no player's) */
+	for (int s = 0; s < SLOTS; ++s) {
+		char key[16];
+		record_key(s, key, sizeof key);
+		if (roms_shown(s)) fprintf(f, "%s = %s\n", key, roms_have(s) ? "yes" : "no");
+	}
 	fclose(f);
 	platform_persist();
 }

@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "data.h"
@@ -14,9 +15,11 @@
 #include "visitors.h"
 #include "xbattles.h"
 #include "xvirus.h"
+#include "xvirus_bn4.h"
 
 #define BUS 0x08000000u
 #define XROM XROM_BN5_COLONEL_US
+#define XROM4 XROM_BN4_RED_SUN_US
 
 /* What the records set, by family (BN6's AI index): its placements in the
  * enemy's columns (first, middle, last), those on a plain or cracked
@@ -28,12 +31,14 @@ typedef struct {
 } Tally;
 
 static struct {
-	const uint8_t *rom6, *rom5;
+	const uint8_t *rom6, *rom5, *rom4;
 	bool made;
-	int n[2];
-	VisitorKin kin[2][VISITOR_KIN_MAX];
-	int16_t first_id[VISITOR_KIN_MAX];   /* (BN5's moved families') their V1's id, by family */
-	int8_t role[2][VISITOR_KIN_MAX];     /* every family's role in each net's records, by family */
+	int n[VISIT_NETS];
+	VisitorKin kin[VISIT_NETS][VISITOR_KIN_MAX];
+	int16_t first_id[VISITOR_KIN_MAX];   /* (BN5's and BN4's moved families') their V1's id, by family */
+	int8_t net[VISITOR_KIN_MAX];         /* ... their net (VISIT_BN6 every other's), by family */
+	uint8_t type_ai[256];                /* (BN4's moved families) the family of each of BN4's object types, 0 none */
+	int8_t role[VISIT_NETS][VISITOR_KIN_MAX];   /* every family's role in each net's records, by family */
 } K;
 
 /* A field's panel type (its game's numbering) at column `col`, row `row`
@@ -114,8 +119,65 @@ static void tally_bn5(Tally *t) {
 	}
 }
 
+/* ---- BN4's: its net's random records, each list of viruses once (its
+ * story stages repeat them), where its ROM is read for research: a
+ * family moved into the engine by its object type. Its stage by the
+ * group: the Undernet's 1, Black Earth's 2, the rest of the net 0. Its
+ * fields are not read (a record's +1 is not mapped), so every placement
+ * counts as plain ---- */
+
+static uint32_t word_at(const uint8_t *d, uint32_t a) {
+	if (a < BUS || a - BUS + 4 > ROM_SIZE) return 0;
+	const uint8_t *p = d + (a - BUS);
+	return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+}
+
+/* (a record's entities at `at`: each virus of a family moved in, once a
+ * list) */
+static void tally_entities(Tally *t, const uint8_t *d, uint32_t at, int stage, uint32_t *seen, int *nseen) {
+	if (at < BUS || at - BUS + 8 * BN4_ENTITY_SIZE > ROM_SIZE) return;
+	const uint8_t *e = d + (at - BUS);
+	int n = 0;
+	uint32_t h = 2166136261u;
+	while (n < 8 && e[n * BN4_ENTITY_SIZE] != 0xFF) {
+		for (int b = 0; b < BN4_ENTITY_SIZE; ++b) h = (h ^ e[n * BN4_ENTITY_SIZE + b]) * 16777619u;
+		++n;
+	}
+	for (int s = 0; s < *nseen; ++s)
+		if (seen[s] == h) return;
+	if (*nseen >= 2048) return;
+	seen[(*nseen)++] = h;
+	for (int i = 0; i < n; ++i) {
+		const uint8_t *x = e + i * BN4_ENTITY_SIZE;
+		if (x[BN4_ENTITY_KIND] != 1 || x[0] >= BN4_ENEMY_COUNT) continue;
+		int ai = K.type_ai[d[BN4_ENEMY_STATS - BUS + (uint32_t)x[0] * BN4_ENEMY_STAT_SIZE + BN4_ENEMY_TYPE]];
+		if (ai) tally_one(t, ai, x[BN4_ENTITY_COL] - 1, 2, stage);
+	}
+}
+
+static void tally_bn4(Tally *t) {
+	const uint8_t *d = XR[XROM4].data;
+	const XRomLayout *l = XR[XROM4].layout;
+	static uint32_t seen[2048];
+	int nseen = 0;
+	uint32_t groups = d ? word_at(d, BN4_BATTLE_TABLES + 4) : 0;
+	for (int g = 0; groups && l && g < l->net_groups; ++g) {
+		/* (a group with no maps fights none of its records) */
+		if (!word_at(d, BUS + l->map_table + 4u * (uint32_t)g)) continue;
+		uint32_t list = word_at(d, groups + 4u * (uint32_t)g);
+		for (int k = 0; k < 64; ++k) {
+			uint32_t r = word_at(d, list + 4u * (uint32_t)k);
+			if (r < BUS || r - BUS >= ROM_SIZE) break;
+			int map = k % BN4_STORY_MAPS, stage = BN4_NET_GROUP + g != BN4_GROUP_DEEP ? 0 : map >= BN4_MAP_BLACK_EARTH && map < BN4_MAP_BLACK_EARTH + 2 ? 2 : 1;
+			for (int i = 0; i < 64 && r - BUS + BN4_RECORD_SIZE <= ROM_SIZE && d[r - BUS] != 0xFF; ++i, r += BN4_RECORD_SIZE)
+				tally_entities(t, d, word_at(d, r + BN4_RECORD_ENTITIES), stage, seen, &nseen);
+		}
+	}
+}
+
 /* (net `net`'s kin from its tally: every family it sets, the role of each;
- * those the other net has none of by name may visit) */
+ * those the other nets have none of by name may visit: BN4's moved
+ * families are the ones neither has, docs/multirom/bn4.md) */
 static void kin_make(int net, const Tally *t) {
 	K.n[net] = 0;
 	for (int f = 1; f < VISITOR_KIN_MAX; ++f) {
@@ -123,58 +185,89 @@ static void kin_make(int net, const Tally *t) {
 		int placed = c[0] + c[1] + c[2];
 		K.role[net][f] = placed ? (int8_t)visitor_role(c[0], c[1], c[2]) : VISITOR_FREE;
 		if (!placed || K.n[net] >= VISITOR_KIN_MAX) continue;
-		bool own = net == VISIT_BN5 ? f >= 32 && K.first_id[f] > 0 : f <= 29 && !xbattle_shared(XROM, f);
+		bool own = net == VISIT_BN6 ? f <= 29 && !xbattle_shared(XROM, f) : K.net[f] == net && K.first_id[f] > 0;
 		VisitorKin *v = &K.kin[net][K.n[net]++];
 		*v = (VisitorKin){ f, K.role[net][f], t->stage[f], t->plain[f] == 0, false, (int16_t)placed };
 		v->visits = own && !v->bound;
 	}
 }
 
-/* (BN5's families in BN6's engine: their V1's ids, by BN6's AI index) */
-static int installed(void) {
+/* (a family in BN6's engine: its V1's id and its net, by BN6's AI index) */
+static void moved(const XVirusFamily *f, int net) {
+	K.first_id[f->ai] = (int16_t)f->first_id;
+	K.net[f->ai] = (int8_t)net;
+	if (net == VISIT_BN4 && f->src_ai > 0 && f->src_ai < 256) K.type_ai[f->src_ai] = (uint8_t)f->ai;
+}
+
+/* (net `net`'s families in BN6's engine, BN5's or BN4's (only where its
+ * ROM is read for research), how many) */
+static int installed(int net) {
 	int n = 0;
-	memset(K.first_id, 0, sizeof K.first_id);
-	for (int ai = 1; XR[XROM].data && ai < 64; ++ai) {
-		const XVirusFamily *f = xvirus_installed(XROM, ai);
-		if (f && f->ai < VISITOR_KIN_MAX) { K.first_id[f->ai] = (int16_t)f->first_id; ++n; }
-	}
+	if (net == VISIT_BN5)
+		for (int ai = 1; XR[XROM].data && ai < 64; ++ai) {
+			const XVirusFamily *f = xvirus_installed(XROM, ai);
+			if (f && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
+		}
+	else
+		for (int i = 0; XR[XROM4].data && xrom_research && i < xvirus_bn4_count; ++i) {
+			const XVirusFamily *f = xvirus_installed(XROM4, xvirus_bn4[i]->src_ai);
+			if (f && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
+		}
 	return n;
 }
 
 static void make(void) {
 	K.rom6 = R.data;
 	K.rom5 = XR[XROM].data;
+	K.rom4 = XR[XROM4].data;
 	K.made = true;
-	K.n[0] = K.n[1] = 0;
-	if (!R.data || !XR[XROM].data || !installed()) return;
+	memset(K.n, 0, sizeof K.n);
+	memset(K.first_id, 0, sizeof K.first_id);
+	memset(K.net, 0, sizeof K.net);
+	memset(K.type_ai, 0, sizeof K.type_ai);
+	memset(K.role, 0, sizeof K.role);
+	if (!R.data || !XR[XROM].data) return;
+	int bn5 = installed(VISIT_BN5), bn4 = installed(VISIT_BN4);
+	if (!bn5 && !bn4) return;
 	static Tally t;
-	for (int net = 0; net < 2; ++net) {
+	for (int net = 0; net < VISIT_NETS; ++net) {
+		if (net == VISIT_BN4 && !bn4) continue;
 		memset(&t, 0, sizeof t);
 		memset(t.stage, 3, sizeof t.stage);
 		if (net == VISIT_BN6) tally_bn6(&t);
-		else tally_bn5(&t);
+		else if (net == VISIT_BN5) tally_bn5(&t);
+		else tally_bn4(&t);
 		kin_make(net, &t);
 	}
 }
 
 /* (made again where the ROMs changed, or the families came in since) */
 static void ready(void) {
-	if (!K.made || K.rom6 != R.data || K.rom5 != XR[XROM].data || (!K.n[VISIT_BN5] && K.rom5 && installed())) make();
+	if (!K.made || K.rom6 != R.data || K.rom5 != XR[XROM].data || K.rom4 != XR[XROM4].data ||
+		(!K.n[VISIT_BN5] && K.rom5 && installed(VISIT_BN5)) || (!K.n[VISIT_BN4] && K.rom4 && installed(VISIT_BN4)))
+		make();
 }
 
 int visitor_kin(int net, const VisitorKin **out) {
 	ready();
-	*out = net == VISIT_BN5 ? K.kin[VISIT_BN5] : K.kin[VISIT_BN6];
-	return net == VISIT_BN5 || net == VISIT_BN6 ? K.n[net] : 0;
+	bool ok = net >= 0 && net < VISIT_NETS;
+	*out = K.kin[ok ? net : VISIT_BN6];
+	return ok ? K.n[net] : 0;
 }
 
 int visitor_role_in(int net, int family) {
 	ready();
-	return (net == VISIT_BN5 || net == VISIT_BN6) && family > 0 && family < VISITOR_KIN_MAX ? K.role[net][family] : VISITOR_FREE;
+	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX ? K.role[net][family] : VISITOR_FREE;
+}
+
+int visitor_net(int family) {
+	ready();
+	return family > 0 && family < VISITOR_KIN_MAX ? K.net[family] : VISIT_BN6;
 }
 
 int visitor_id(int net, int family, int version) {
 	if (net == VISIT_BN6) return family >= 1 && family <= 29 && version >= 0 && version <= 3 ? enemy_id(0, family, version) : -1;
 	ready();
-	return family >= 32 && family < VISITOR_KIN_MAX && K.first_id[family] > 0 && version >= 0 && version < 6 ? K.first_id[family] + version : -1;
+	return net < VISIT_NETS && family >= 32 && family < VISITOR_KIN_MAX && K.net[family] == net && K.first_id[family] > 0 && version >= 0 && version < 6
+		? K.first_id[family] + version : -1;
 }

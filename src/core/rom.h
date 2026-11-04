@@ -142,6 +142,10 @@ typedef struct {
 	                                         * shown only as a dev tool reviews them (xarea_review) */
 	uint8_t bg_words;                       /* its backgrounds' records (BGAnimData), in words: 0 BN6's 7; BN4's 9, a buffer after its tiles
 	                                         * and after its map (src/gfx/xbackdrop.c) */
+	bool kit_keys_played;                   /* a song's drum kits copied for the keys its tracks play alone (src/audio/xsong.c):
+	                                           BN4's one kit holds other data under keys 0-35; BN5's are copied whole as they
+	                                           always were, a saved state's music player pointing into the copies */
+	const char *file;                       /* its copy's name where a phone or the browser keeps one ("bn5c.gba") */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -158,9 +162,20 @@ bool xrom_load(const char *path);
 int xrom_of_code(const char *code);
 /* ... in the folder BN6's ROM was found in. */
 int xrom_find_beside(void);
-/* Set by a dev tool (the atlas): the extra ROMs read for research alone
- * (XRomLayout.research) are read too, where they lie. */
+/* Set by a dev tool (the atlas, --dev bn4families, --dev showbn4): the
+ * extra ROMs read for research alone (XRomLayout.research) are read too,
+ * where they lie. */
 extern bool xrom_research;
+/* Whether extra ROM `xrom` is offered to the player: looked for, read,
+ * asked for and named everywhere a player brings ROMs (the ROMs screen,
+ * the phones' pickers, the browser, the 3DS, the title, the second
+ * screen). Each is, but one read for research alone (XRomLayout.research)
+ * only where a dev tool asks; clearing its layout's `research` offers it
+ * to players (docs/multirom/how-it-is-built.md, Platforms). */
+bool xrom_offered(int xrom);
+/* Extra ROM `xrom`'s layout, read or not (its name, SHA-1, game code,
+ * tag, face and copy's name); NULL past the last */
+const XRomLayout *xrom_layout(int xrom);
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
  * game's ROM is not read, or whose game is read for research and which no
