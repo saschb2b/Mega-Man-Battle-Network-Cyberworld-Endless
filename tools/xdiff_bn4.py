@@ -70,8 +70,12 @@ XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's fre
 
 def bn4_sprites(rom4):
     """the sprites BN4's moved families copied (src/emu/xvirus_bn4.c's XvSprite rows: BN4's list and number, BN6's copy's
-    place and room): each (BN4's sprite's address, BN6's copy's, its room), BN4's from its sprite lists (src/core/rom.c's
-    BN4 layout, sprite_lists) in its ROM; a pointer into either read by its offset in the sprite (its frames' data)"""
+    place and room): each (BN4's sprite's address, BN6's copy's, its room, its cache key, its room in BN4's RAM), BN4's from
+    its sprite lists (src/core/rom.c's BN4 layout, sprite_lists) in its ROM; a pointer into either read by its offset in the
+    sprite (its frames' data). A sprite BN4 keeps LZ77'd (its list word's bit 31: the recipe's `(LZ77 in BN4)`) is drawn
+    from RAM, where BN4's battle preload put it (src/emu/bn4.h BN4_SPRITE_PRELOAD): its address None, found by its key
+    (BN4_SPRITE_CACHED's, its list's offset << 8 | its number) in the frame's cache (bn4_cache), its room there the LZ77
+    header's size less the size word the cache's pointer passes (the recipe's copy drops it too: tools/xrecipe.py sprite)"""
     text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
@@ -79,14 +83,33 @@ def bn4_sprites(rom4):
         return []
     lists, out = 0x08000000 + int(m.group(1).rstrip('uU'), 0), []
     for lst, idx, off, room in re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, XV_ART \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text):
-        base = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16)) & 0x7FFFFFFF
-        out.append((base, XV_ART + int(off, 16), int(room, 16)))
+        word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
+        base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
+        lz = bool(word & 0x80000000)
+        out.append((None if lz else base, XV_ART + int(off, 16), int(room, 16), key,
+                    (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
     return out
 
 
-def sprite_ptr(sprites, game, v):
-    """a pointer into a moved family's sprite (bn4_sprites) as ('sprite', which, its offset); None where it is none"""
-    for i, (b4, b6, room) in enumerate(sprites):
+CACHE_SLOTS, CACHE_KEYS, CACHE_SPRITES = 8, 0x04, 0x14   # (src/emu/bn4.h BN4_SPRITE_CACHE: its count, keys and sprites)
+
+
+def bn4_cache(fr):
+    """BN4's battle sprite cache at this frame, {its key: its sprite's address}, from the trace's block BN6 keeps apart
+    (src/dev/xdiff.c apart4_out: BN4_SPRITE_CACHE's bytes first; a trace of before, zeros, holds none)"""
+    if 'sprite_cache' not in fr:
+        b = fr.get('apart', b'')
+        fr['sprite_cache'] = {} if len(b) < CACHE_SPRITES + 4 * CACHE_SLOTS else \
+            {u16(b, CACHE_KEYS + 2 * i): u32(b, CACHE_SPRITES + 4 * i) for i in range(min(b[0], CACHE_SLOTS))}
+    return fr['sprite_cache']
+
+
+def sprite_ptr(sprites, game, v, cache=None):
+    """a pointer into a moved family's sprite (bn4_sprites) as ('sprite', which, its offset); None where it is none. BN4's
+    LZ77'd sprite by the frame's cache (bn4_cache): where its key is not there, BN4 drew none of it"""
+    for i, (b4, b6, room, key, room4) in enumerate(sprites):
+        if game == 4 and b4 is None:
+            b4, room = (cache or {}).get(key), room4
         base = b4 if game == 4 else b6 if game == 6 else None
         if base is not None and base <= v < base + room:
             return ('sprite', i, v - base)
@@ -329,7 +352,8 @@ def cells(fa, fb, part, ba, bb, start=0):
             wa, wb = u32(ba, k), u32(bb, k)
             if is_ptr(wa) or is_ptr(wb):
                 sprites = getattr(fa.canon, 'sprites', ())   # (a moved family's sprite by its offset in it: bn4_sprites)
-                view = sprite_ptr(sprites, fa.game, wa) or fa.ptr(wa), sprite_ptr(sprites, fb.game, wb) or fb.ptr(wb)
+                view = (sprite_ptr(sprites, fa.game, wa, bn4_cache(fa.fr)) or fa.ptr(wa),
+                        sprite_ptr(sprites, fb.game, wb, bn4_cache(fb.fr)) or fb.ptr(wb))
                 if view[0] != view[1]:
                     out.append((part, k, view[0], view[1]))
                 k += 4

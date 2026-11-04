@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T16:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -767,7 +767,40 @@ format, its game 4: the trace's header names it):
   CurActions, BN4's generic 0-5 BN6's 0-5 and its own from 6 BN6's from 8
   (the recipe's state table and immediates; MegaMan's ready 6 BN6's 8, as
   BN5's); a pointer into a moved family's sprite by its offset in it
-  (BN4's own sprite, the recipe's copy in BN6's free space). The
+  (BN4's own sprite, the recipe's copy in BN6's free space). A sprite
+  BN4 keeps LZ77'd (its list word's bit 31, the recipe's `(LZ77 in BN4)`:
+  Spikey's, Shrimpy's, Walla's, Elmperor's and CirKill's battle sprites)
+  is drawn from RAM: the battle's preload (`0x08002AEC`, from the setup's
+  `0x08006C9A`) decompresses each foe's into its sprite cache
+  (`BN4_SPRITE_CACHE`, `0x0200F720`: eight keys, list offset << 8 \|
+  number, and their sprites, each the buffer + 4, past the LZ77 data's
+  size word), and `sprite_load` takes it from there (its look-up
+  `0x08002ACA`), as BN6's battle cache serves BN6's compressed ones. The
+  trace carries the cache's 0x38 bytes each frame in the block BN6 keeps
+  apart, zeros else for BN4 (`src/dev/xdiff.c`, `apart4_out`), and
+  `bn4_cache` reads it: the pointer is read by its offset from the
+  cache's sprite for the row's key, its room the LZ77 header's size less
+  that word; a key not in the cache maps nothing. The recipe's copy is
+  the same bytes, its size word dropped too (`tools/xrecipe.py`'s
+  `sprite`), so Spikey's +0xA8 reads ('sprite', 2, 4) in both. Its
+  mutation (tests/xdiff/mutations.json, on `spikey_v1`) aims BN6's list
+  1's 0xC1 at Shrimpy's copy, its +0xA8 then BN6's ('sprite', 5, 4):
+  `spikey_v1` fails at t1 without it, so the line it adds is the check.
+  What the five's specs meet after it, at their first difference: Spikey
+  (V1-V3) at t1 its +0x88, the moves before its attack (4 plus a draw
+  & 3 at its init, `0x080BA5BC`, a draw of the setup's the replay does
+  not give: BN4's 4, BN6's 7), and its idle animation's place (BN4's
+  frame 2 with 5 left, BN6's frame 0 with 6, its +0x91, +0xAC-+0xB4:
+  BN4's sprite update ran for it 20 frames more before the fight, its
+  sprite set at the setup in both, BN4's by its init's `0x080BA430`,
+  BN6's by its actor init's `0x08016F70`; which opening frames each
+  engine updates a virus's sprite on is not read); Shrimpy at t1 on its
+  row (the world INCONCLUSIVE there, its panels reserved apart); Walla
+  (V1 t72, V2 t68, V3 t66) on the hit's spark, its +0 and state, after
+  MegaMan's +0 parts (INCONCLUSIVE from t68, t64, t62); Elmperor at t1
+  on its animation's place and its collision data +6 and +8; CirKill at
+  t1 on its shot's (the third kind's 0x0B) +0x4C, a pointer into BN4's
+  ROM read raw against BN6's moved block's same address. The
   collision data's layout from code: the collision setup (BN4
   `0x080129AC`, BN6's twin `0x08019FB4`) and the pool's maker
   (`0x08012470`, `0x0801986C`) paired store by store, BN4's +0x05, +0x0C,

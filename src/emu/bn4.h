@@ -342,6 +342,13 @@
 #define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the song (BN6_PLAY_SOUND; BN4_PLAY_MUSIC is the next routine) */
 #define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned (the fourth kind's type 0): r4's low byte its id (BN6_SPAWN_EFFECT) */
 #define BN4_SPRITE_LOAD   0x0800287Cu /* sprite_load: r5 the object, r1 its sprite list's offset, r2 its number (BN6_SPRITE_LOAD) */
+#define BN4_SPRITE_CACHED 0x08002ACAu /* ... its look-up first (0x08002894): r0 the key, list offset << 8 | number; the cache's sprite, 0 none */
+#define BN4_SPRITE_PRELOAD 0x08002AECu /* the battle's preload (from 0x08006C9A): each foe's compressed sprite LZ77'd into the cache */
+#define BN4_SPRITE_CACHE  0x0200F720u /* the cache: its count (u8 +0), keys, sprites and next free byte (+0x34, each buffer the LZ77 */
+#define BN4_SPRITE_CACHE_SIZE 0x38u   /* ... header's size on, below 0x02033000); its bytes */
+#define BN4_SPRITE_CACHE_SLOTS 8      /* ... its keys and sprites (BN6's twin holds 12: bn6_navis.h, BN6_SPRITE_DECOMPRESS) */
+#define BN4_CACHE_KEYS    0x04        /* ... its keys, a u16 a slot (list offset << 8 | number) */
+#define BN4_CACHE_SPRITES 0x14        /* ... its sprites, a word a slot: the buffer + 4, past the LZ77 data's size word */
 #define BN4_RESERVE_PANEL 0x080143A8u /* object_reservePanel: the panel's reserver (+0x14) and its flags' 0x80 set, no bit in the object's
                                        * +0 (BN6's 0x0801BB1C also sets the object's 0x20, as BN5's does not) */
 #define BN4_RESERVE_PANEL_DONE 0x080143C2u /* ... once the panel is reserved: r5 the object (BN6_RESERVE_PANEL_DONE) */

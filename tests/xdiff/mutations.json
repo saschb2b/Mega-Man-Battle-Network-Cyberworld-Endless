@@ -1290,6 +1290,14 @@
     "08B7C184:2029"
    ],
    "what": "the thunder copy's spawner (BN6's 0x080CADBC copied at XV_CODE + 0x14180) spawning the third kind's 0x29 for 0x2A (movs r0,#0x29): another attack where BN4's thunder flies (caught at t341)"
+  },
+  {
+   "name": "a sprite BN4 keeps LZ77'd drawn from another copy",
+   "spec": "spikey_v1",
+   "poke": [
+    "08B34304:08BEBA00:4"
+   ],
+   "what": "BN6's grown list 1's 0xC1 (XV_LISTS + 4 * 0xC1), Spikey's copy of BN4's LZ77'd 1:0x05, aimed at Shrimpy's (XV_ART + 0x6BA00, BN4's 1:0x06): its sprite state's +0x18 (+0xA8) reads BN6's ('sprite', 5, 4) against BN4's ('sprite', 2, 4), BN4's found in its battle's sprite cache by its key (tools/xdiff_bn4.py bn4_cache), where unmutated they read alike (caught at t1; the spec fails at t1 without it, on +0x88, Spikey's first draw before the fight, and its animation's place, so the line it adds is the check: python3 tools/xdiff.py spikey_v1 --poke 08B34304:08BEBA00:4)"
   }
  ]
 }
