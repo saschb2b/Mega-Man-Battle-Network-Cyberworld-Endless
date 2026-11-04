@@ -821,10 +821,17 @@ format, its game 4: the trace's header names it):
   (the allowed difference below): its damage word's top byte (+0x2D,
   BN4's 0x00 against BN6's 0x30), its collision data's +0x12 and +0x13
   (0 against 0xF8, 0x14) and its flags' bit 25 (+0x3C: BN4's 0x02000000,
-  BN6's none). The world parts at t1 too (MegaMan's own fields, BN6's
-  three RNG steps a frame, BN6's opening effect 0x08), unmapped yet, so
-  the family is compared on past the world's stop; its verdict is its
-  own.
+  BN6's none). The RNG words are not compared where BN6's draws are
+  replayed (BN6 steps both three times a frame, its main loop's
+  `0x080050FC`, `0x08005100` and `0x0800031C`, 1473 times each in the
+  1200 frames; BN4 never does, its 177 draws there none a frame's own):
+  each of the family's draws must be given BN4's word instead, one drawn
+  as it is the family's difference. The world parts at t1 still, unmapped
+  yet: MegaMan's own fields (his AI data's layout, his sprite, BN6's +0x2A
+  0xFFFF), BN6's opening effect (the fourth kind's 0x08, which his AI
+  data's +0x58 names) and the panels' bytes past their type, side, flags
+  and reserver; so the family is compared on past the world's stop, and
+  its verdict is its own.
   - **The cause, both sides, the recipe's struct2** (`src/emu/xvirus.c`,
     `stats_bn4`: "element << 12 | its attack's damage", its flags byte 0):
     BN6's virus init copies a version's struct2 word +4 to the object's

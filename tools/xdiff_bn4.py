@@ -25,8 +25,8 @@ import json
 import os
 import re
 
-from xdiff_snap import (NODE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, RESERVE, ROOT, SIZE, SPAWN, Diff, Frame, assign_roles, is_ptr,
-                        read_trace, role_name, u32)
+from xdiff_snap import (DRAW, NODE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, REPLAYED, RESERVE, ROOT, SIZE, SPAWN, UNMAPPED,
+                        UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -279,8 +279,13 @@ def frame_diffs(fa, fb):
             elif xa is not None:
                 found += cells(fa, fb, part, xa, xb)
         out += [Diff(t, role, part, off, a, b) for part, off, a, b in found]
-    if fa.fr['rng'] != fb.fr['rng']:
+    if fa.fr['rng'] != fb.fr['rng'] and not replayed_world(fa, fb):
         out.append(Diff(t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']))
+    # (the family's own draws, each given BN4's: one BN6 made with none of BN4's to give it, or none of its code's place, is
+    # the family's difference, never the world's)
+    for e in fb.fr['events'] if fb.game == 6 and fa.game == 4 else ():
+        if e.kind == DRAW and e.family and e.flags & (UNMATCHED | UNMAPPED):
+            out.append(Diff(t, FAMILY_DRAWS, 'draw', 0, None, f'{e.family:#x} drawn as it is'))
     sa, sb = sorted(s for _, s in fa.fr['sounds']), sorted(s for _, s in fb.fr['sounds'])
     if sa != sb:
         out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
@@ -314,6 +319,21 @@ def family_roles(trace, canon):
             if e.kind == SPAWN and e.family and e.object in by_addr:
                 out.add(by_addr[e.object].role)
     return out
+
+
+# Both RNG words against BN6's where BN6's draws are replayed from BN4's: BN6 steps them three times a frame (its main
+# loop's 0x080050FC and 0x08005100 and 0x0800031C: bn6.h BN6_RNG_PRIMARY and BN6_RNG_SECONDARY; 1473 each in billy_v1's
+# 1200 fight frames, from 0x08005101, 0x08005105 and 0x08000321) and BN4 never does (its 177 draws there none of a
+# frame's own: its callers' counts 42, 42, 30, 30, 15, 15, 2, 1), so the words part at the fight's first frame and stay
+# apart whatever either battle does; with the replay every draw of the family's code reads BN4's word (its own draws
+# compared one by one, below), so the words are read only there
+FAMILY_DRAWS = "the family's draws"   # (the role of a draw of the family's that the replay could not give BN4's word)
+
+
+def replayed_world(fa, fb):
+    """whether BN6's battle here replays its draws from BN4's (its trace's draw events marked so), the words left uncompared"""
+    return fa.game == 4 and fb.game == 6 and any(e.kind == DRAW and e.flags & (REPLAYED | UNMATCHED | UNMAPPED)
+                                                 for fr in fb.trace['frames'][:64] for e in fr['events'])
 
 
 def unexplained(fa, fb, ta, tb, used):
@@ -367,7 +387,7 @@ def compare(spec, ta, tb, canon, show=6):
     (two BN4 traces) fails at its first difference of any kind"""
     bt, used, n = {f['t']: f for f in tb['frames']}, {}, 0
     against = tb['game'] == 6
-    fam = family_roles(ta, canon) | family_roles(tb, canon) if against else set()
+    fam = family_roles(ta, canon) | family_roles(tb, canon) | {FAMILY_DRAWS} if against else set()
     # (allowed_lag: the family's own records against BN6's of `lag` fight frames later, the world's of the same frame)
     lag = allowed_lag(spec) if against else 0
     stop, lines = None, []
