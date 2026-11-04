@@ -971,6 +971,28 @@ static void test_generation(void) {
 	CHECK(!memcmp(a.cell, layer.cell, sizeof a.cell) && a.nobj == layer.nobj, "generation is deterministic");
 }
 
+/* Services and navis off the walkways' mouths where a room has no place
+ * for one off them (a hub three panels a side, walkways into three of its
+ * sides): test_generation's layers of these seeds, of the first 30000,
+ * each had one in a mouth, the way on through him. */
+static void test_mouths(void) {
+	static const uint32_t seeds[] = { 352, 780, 1044, 3163, 4617, 5979, 7551, 7838, 8397, 10163, 10607, 11321, 11765, 12358, 12595, 13139,
+		13265, 13554, 13658, 18346, 19886, 19996, 20805, 21521, 21573, 22755, 24313, 26788, 27660, 27883, 28572, 29346 };
+	for (size_t s = 0; s < sizeof seeds / sizeof *seeds; ++s) {
+		uint32_t seed = seeds[s];
+		int depth = 1 + (int)(seed % 25);
+		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
+		layer_generate(seed * 7919u, depth, biome, kind, biome == BIOME_UNDERNET ? &undernet_kit : &kit);
+		for (int i = 1; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
+				o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
+			CHECK(!stands || o->prop >= 0 || !beside_narrow((int)o->x, (int)o->y), "seed %u: object type %d at a walkway's mouth", seed, o->type);
+		}
+	}
+}
+
 /* The golden hash (issue #19): layer_generate's output over fixed seeds,
  * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
  * (layer_make.h). The determinism check above builds a seed twice in one
@@ -6593,6 +6615,7 @@ int main(void) {
 	test_lz77();
 	test_pad_art();
 	test_generation();
+	test_mouths();
 	test_battler();
 	test_layer_make();
 	test_fork_read();

@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T15:00:00Z }
 ---
 
 # The generator
@@ -111,6 +111,23 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   road is entered from a plaza's side. Widening the way into the pads'
   floor took that to 4.6 and the junctions to 0.7, but drew pale stray
   tiles where a wide road meets a plaza; it waits on those joins.
+- **Who stays where he stands keeps out of a walkway's mouth** (4
+  November 2026). A service or navi takes a room's spot by `room_spot`'s
+  rules, which keep him off the panels beside a panel-wide stretch for
+  most of their tries and give way at the last, where the room has no
+  other place; the first room's spot was then taken. A hub three panels
+  a side with walkways into three of its sides has none: a Recovery
+  Mr.Prog stood in the mouth of one in BN5's Nebula Area (the atlas's area
+  22, `web`, seed 18720), the way on through him, and the tile test
+  failed on it. A spot in a mouth now sends him to the next room
+  (`spot_off_mouth`: `place`, the Net Dealer standing, the heal before an
+  arena), and where no room has a spot apart from others to talk to, he
+  stands by one rather than in a mouth (an A meant for him may open his
+  neighbour, but the way stays open). Over the atlas's 150 seeds a layout,
+  20692 layers, those in a mouth fell from 78 to none and 91 layers
+  changed; `test_mouths` holds the 32 of the unit test's first 30000
+  seeds that had one. Mystery Data and gates still take a room's spot as
+  before.
 
 Still apart from the originals: their dead ends. Capcom's maps have about
 twenty-five dead-end panels each (comb teeth on boardwalks, stubs, pads
