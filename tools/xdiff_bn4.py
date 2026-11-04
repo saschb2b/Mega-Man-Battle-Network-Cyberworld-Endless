@@ -21,11 +21,12 @@ sounds, effects and alliance words are its own still. The fields BN4 has none of
 and only where BN4's trace holds nothing there. Against BN6's, the family's own records (family_roles) fail the spec at
 their first unexplained difference; one in the world's alone makes it INCONCLUSIVE from there, never PASS (the BN5
 differential's stop rule), the family compared on. A control fails at its first difference of any kind."""
+import json
 import os
 import re
 
-from xdiff_snap import (NODE, OBJ_ACTION, OBJ_NAME_ID, OBJ_TYPE, ROOT, SIZE, SPAWN, Diff, Frame, assign_roles, is_ptr, read_trace,
-                        role_name, u32)
+from xdiff_snap import (NODE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, RESERVE, ROOT, SIZE, SPAWN, Diff, Frame, assign_roles, is_ptr,
+                        read_trace, role_name, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -35,11 +36,17 @@ def bn4_families():
     BN4 object type (.src_ai: its first-kind type, BN4 having no AI index) and its six BN4 enemy ids with BN6's for them
     (.names, .first_id: Billy's 13-18 BN6's 0x2C0-0x2C5)"""
     text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    # (its effects: its XvId rows, BN4's id and BN6's, `static const XvId NAME_effects[] = { { 0x16, 0x98 }, ... }`)
+    effects = {k: {int(a, 0): int(b, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', rows)}
+               for k, rows in re.findall(r'static const XvId (\w+)_effects\[\] = \{(.*?)\};', text, re.S)}
     out = []
     for src, first, names in re.findall(r'\.src_ai = (0x[0-9A-Fa-f]+),.*?\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+),.*?'
                                         r'\.names = \{ ([^}]*) \}', text, re.S):
         ids = [int(x, 0) for x in names.split(',')]
-        out.append(dict(type=int(src, 0), ids={v: XV_FIRST_ID + int(first, 0) + k for k, v in enumerate(ids)}))
+        out.append(dict(type=int(src, 0), ids={v: XV_FIRST_ID + int(first, 0) + k for k, v in enumerate(ids)}, effects={}))
+    # (each family's effects by its name's rows: one family yet, Billy's; several matched to theirs by order)
+    for f, rows in zip(out, effects.values()):
+        f['effects'] = rows
     return out
 
 
@@ -77,9 +84,16 @@ class Bn4Canon:
 
     def __init__(self, canon, fams):
         self.canon, self.ids = canon, {k: v for f in fams for k, v in f['ids'].items()}
+        self.effects = {k: v for f in fams for k, v in f['effects'].items()}
 
     def nid(self, game, v):
         return self.ids.get(v, self.canon.nid(game, v)) if game == 4 else self.canon.nid(game, v)
+
+    def fx(self, game, v):
+        """an effect's id as BN6's: a moved family's BN4 effects as its recipe moved them (xvirus_bn4.c's XvId rows: Billy's
+        0x16 and 0x15 BN6's 0x98 and 0x99, its move's flashes, from BN4's effects table 0x080E1698). Any BN4 effect of that
+        number is read so; one the engine spawned would then meet BN6's own of its number and differ, never hide one"""
+        return self.effects.get(v, v) if game == 4 else self.canon.fx(game, v)
 
     def __getattr__(self, name):
         return getattr(self.canon, name)
@@ -93,6 +107,10 @@ class Bn4Canon:
 #     generic states, then BN4's own 0x080B95A9, 0x080B979D, 0x080B97B1, 0x080B98A7) and its immediates (CurAction 6-9
 #     written as 8-11, src/emu/xvirus_bn4.c billy_imms); MegaMan's ready state the same way, 6 against BN6's 8 (BN5's map
 #     too, legit.json's action)
+#   (not its damage word, +0x2C: its top bits are the hit's properties in both games, read by the collision setup's
+#     0x08012860 / 0x08019F44, never an element: a difference there is the family's)
+
+
 def bn4_as_bn6(rec, fams):
     """an object's record (a T1's, from its node) with BN4's numbers as BN6's: its type, its CurAction"""
     types = {f['type'] for f in fams}
@@ -101,6 +119,46 @@ def bn4_as_bn6(rec, fams):
     if rec[NODE + OBJ_ACTION] >= 6:
         rec[NODE + OBJ_ACTION] += 2
     return rec
+
+
+# A collision data's alliance words (+0x30 and +0x34 in BN6's layout, BN4's +0x58 and +0x5C), each read by the same
+# routine from its game's table by alliance and region (BN4 0x08012EF6 from 0x08012660, its 122 words; BN6 0x0801A0BA
+# from BN6_COLL_MASKS, 0x08019C7C, 178): BN4's word read as BN6's entry at its place in BN4's table, where every place of
+# it gives the same (BN6's first 122 are BN4's, 98 of them with bit 0x80: read from both ROMs, bn4_alliance)
+BN4_MASKS, BN4_MASK_WORDS, BN6_MASKS = 0x08012660, 122, 0x08019C7C
+COLL_MASKS = (0x30, 0x34)
+
+
+def bn4_alliance(rom4, rom6):
+    """BN4's alliance words as BN6's: {BN4's word: BN6's}, where its every place in BN4's table gives one BN6 entry"""
+    if not rom4 or not rom6:
+        return {}
+    seen = {}
+    for i in range(BN4_MASK_WORDS):
+        a, b = u32(rom4, BN4_MASKS - 0x08000000 + 4 * i), u32(rom6, BN6_MASKS - 0x08000000 + 4 * i)
+        seen.setdefault(a, set()).add(b)
+    return {a: next(iter(bs)) for a, bs in seen.items() if len(bs) == 1}
+
+
+# A collision data's direction of its last move (BN6's +0xC, BN4's +0xA: the collision panels' update, BN4 0x08012D9A /
+# BN6 0x0801A04C, writes what BN4 0x0800AF90 / BN6 0x0800E994 make of the old panel and the new): BN4's by the screen,
+# 0 none, 1 up, 2 down, 3 left, 4 right; BN6's the same up and down, but left and right by its side (left 3 on side 0 and
+# 4 on side 1, right the other: 0x0800E9C4 and 0x0800E9D0 test the side, r4, the object's +0x16) and 5 a move of two
+# panels or more (0x0800E998-0x0800E99E), which BN4 does not tell apart: BN4's 3 and 4 read as BN6's by the side, its
+# others as they are (a move of two read 5 in BN6 alone stays a difference)
+COLL_ALLIANCE, COLL_DIRECTION = 0x04, 0x0C
+
+
+def coll_as_bn6(coll, alliance):
+    """a BN4 collision data (in BN6's layout) with its alliance words (bn4_alliance) and its last move's direction as
+    BN6's"""
+    out = bytearray(coll)
+    for at in COLL_MASKS:
+        w = u32(out, at)
+        out[at:at + 4] = alliance.get(w, w).to_bytes(4, 'little')
+    if out[COLL_DIRECTION] in (3, 4) and out[COLL_ALLIANCE] & 1:
+        out[COLL_DIRECTION] ^= 7
+    return out
 
 # The fields of BN6's battle BN4's has none of, in BN6's units (part, BN6's offset, bytes): each masked where BN4's trace
 # holds none (zero, or no AI data at all) and the other is BN6's, never where BN4 holds something there
@@ -137,16 +195,46 @@ def lacks(d, ta, tb):
     return None
 
 
-def named(canon, game, o, fams=None):
+def named(canon, game, o, fams=None, reserved=()):
     """an object's bytes from its node with its NameID as BN6 numbers it (canon.nid: BN4's MegaMan, enemy id 0, BN6's; a
-    moved family's by its recipe); against BN6's (fams given), a BN4 T1's type and CurAction as BN6's too (bn4_as_bn6)"""
+    moved family's by its recipe); against BN6's (fams given), a BN4 T1's type and CurAction as BN6's too (bn4_as_bn6),
+    and one that has reserved a panel with BN6's 0x20 (reserved_roles)"""
     rec = bytearray(o.rec[:SIZE[o.kind]])
     if o.kind == 'T1':
         at = NODE + OBJ_NAME_ID
         rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
         if game == 4 and fams is not None:
             rec = bn4_as_bn6(rec, fams)
+    if game == 4 and fams is not None and o.role in reserved:
+        rec[NODE] |= OBJ_RESERVED
+    if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
+        rec[NODE + OBJ_EFFECT] = canon.fx(game, rec[NODE + OBJ_EFFECT])
+    if fams is not None or game == 6:
+        rec[NODE + OBJ_SLOT] = (rec[NODE + OBJ_SLOT] - o.slot) & 0xFF
     return rec
+
+
+# An object's +3 is its own slot in its kind's table in both games (every object record of billy_v1's traces, 2,902 in
+# BN4's and 4,096 in BN6's, holds it; BN5's differential reads it so too, legit.json's maps, slot): read against BN6's as counted from
+# its own, so another game's object taking a slot first (BN6's opening effect 0x08) leaves it the same
+OBJ_SLOT = 0x03
+
+
+# An object that has reserved a panel, read in BN6's terms from BN4's own events, as tools/xdiff_events.py reads BN5's:
+# BN6's object_reservePanel (0x0801BB1C) sets the object's +0 bit 0x20 at its first reservation (0x0801BB36-0x0801BB3C:
+# ldrb r0,[r5]; movs r1,#0x20; orrs; strb) and nothing clears it while the object lives; BN4's (0x080143A8, its research
+# twin) reserves the panel alike (+0x14 the reserver, its flags' 0x80) and sets no bit in the object (bn4.h
+# BN4_RESERVE_PANEL). Not a mask: the object's own record read as BN6 would have written it
+OBJ_RESERVED = 0x20
+
+
+def reserved_roles(trace):
+    """each frame's roles that have reserved a panel by its end (BN4's reservation events, XD_RESERVE), into fr['reserved']"""
+    roles = set()
+    for fr in trace['frames']:
+        by_addr = {o.addr: o for o in fr['objs']}
+        roles |= {by_addr[e.object].role for e in fr['events'] if e.kind == RESERVE and e.object in by_addr}
+        fr['reserved'] = frozenset(roles)
 
 
 def cells(fa, fb, part, ba, bb, start=0):
@@ -181,9 +269,11 @@ def frame_diffs(fa, fb):
             continue
         # (from its node's +8: its links compared as the run order; BN4's numbers as BN6's only against BN6's)
         fams = getattr(fa.canon, 'fams', None) if fb.game == 6 else None
-        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams),
+        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ())),
                                                                  named(fb.canon, fb.game, ob), 8)]
-        for part, xa, xb in (('ai', oa.ai, ob.ai), ('coll', oa.coll, ob.coll)):
+        alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
+        ca = coll_as_bn6(oa.coll, alliance) if alliance and oa.coll is not None else oa.coll
+        for part, xa, xb in (('ai', oa.ai, ob.ai), ('coll', ca, ob.coll)):
             if (xa is None) != (xb is None):
                 found.append((part, 0, xa is not None, xb is not None))
             elif xa is not None:
@@ -226,6 +316,49 @@ def family_roles(trace, canon):
     return out
 
 
+def unexplained(fa, fb, ta, tb, used):
+    """a frame's differences no BN4_LACKS mask explains (the masks applied counted into used)"""
+    diffs = frame_diffs(fa, fb)
+    for d in diffs:
+        d.mask = lacks(d, ta, tb)
+        if d.mask:
+            used[d.mask] = used.get(d.mask, 0) + 1
+    return [d for d in diffs if not d.mask]
+
+
+def allowed_lag(spec):
+    """the fight frames the family's own timeline may run later in BN6's engine: the spec's "lag", only where legit.json's
+    bn4 allowed names exactly that lag for the family (its reason and both games' code paths there: BN6's engine hands a
+    virus its first own state a fight frame later than BN4's); 0 none. Any other lag is refused, so a family off by any
+    other amount fails"""
+    lag = spec.get('lag', 0)
+    if not lag:
+        return 0
+    ok = [a for a in bn4_allowed() if a.get('whose') == 'family' and a.get('lag') == lag]
+    if not ok:
+        raise SystemExit(f'lag {lag}: no allowed difference of tests/xdiff/legit.json (bn4) names it')
+    return lag
+
+
+def bn4_allowed():
+    """legit.json's bn4 allowed differences (each with its reason and both games' code)"""
+    return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('allowed', [])
+
+
+def allowed_bit(d, fam):
+    """the allowed difference of legit.json's bn4 a family's difference is (a bit of its object BN6 has and BN4 not, the
+    whole difference that bit), None where none: never on another's records, never more than its bit"""
+    if d.role not in fam or not isinstance(d.a, int) or not isinstance(d.b, int) or isinstance(d.a, bool):
+        return None
+    for a in bn4_allowed():
+        if 'bit' not in a or a.get('part') != d.part or int(a['offset'], 0) != d.off:
+            continue
+        bit = int(a['bit'], 0)
+        if d.a ^ d.b == bit and d.b & bit:
+            return a['name']
+    return None
+
+
 def compare(spec, ta, tb, canon, show=6):
     """('PASS'|'FAIL'|'INCONCLUSIVE', the frame of it, lines): against BN6's, the first frame with a difference no
     BN4_LACKS mask explains in the family's own records (family_roles) fails it; one in the world's alone (MegaMan, the
@@ -235,21 +368,27 @@ def compare(spec, ta, tb, canon, show=6):
     bt, used, n = {f['t']: f for f in tb['frames']}, {}, 0
     against = tb['game'] == 6
     fam = family_roles(ta, canon) | family_roles(tb, canon) if against else set()
+    # (allowed_lag: the family's own records against BN6's of `lag` fight frames later, the world's of the same frame)
+    lag = allowed_lag(spec) if against else 0
     stop, lines = None, []
     for fra in ta['frames']:
         frb = bt.get(fra['t'])
         if frb is None:
             continue
         n += 1
-        fa, fb = Frame(ta, fra, canon), Frame(tb, frb, canon)
-        diffs = frame_diffs(fa, fb)
-        for d in diffs:
-            d.mask = lacks(d, ta, tb)
+        fa = Frame(ta, fra, canon)
+        open_ = unexplained(fa, Frame(tb, frb, canon), ta, tb, used)
+        world = [d for d in open_ if d.role not in fam] if against else []
+        if lag:
+            frl = bt.get(fra['t'] + lag)
+            mine = [d for d in unexplained(fa, Frame(tb, frl, canon), ta, tb, {}) if d.role in fam] if frl else []
+        else:
+            mine = [d for d in open_ if d.role in fam] if against else open_
+        for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
+            d.mask = allowed_bit(d, fam)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
-        open_ = [d for d in diffs if not d.mask]
-        mine = [d for d in open_ if d.role in fam] if against else open_
-        world = [d for d in open_ if d not in mine]
+        mine = [d for d in mine if not d.mask]
         if world and stop is None:
             stop = fra['t']
             lines += [f'  INCONCLUSIVE from t{stop}: the world parts there (no map or mask explains it), the family compared on:'] + \
@@ -276,6 +415,7 @@ def spec_text(spec, out, game):
              f'frames={spec.get("frames", 1200)}', f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}']
     # (rng=replay: BN6's draws given BN4's, keyed as BN5's are, xdiff_events.h; poke=, call=: a mutation's break of the subject)
     extra = ([f'rng={spec["rng"]}'] if spec.get('rng') and game == 'bn4:bn6' else []) + \
+        ([f'lag={spec["lag"]}'] if spec.get('lag') and game == 'bn4:bn6' else []) + \
         [f'poke={p}' for p in spec.get('poke', [])] + [f'call={c}' for c in spec.get('call', [])]
     return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
@@ -304,9 +444,14 @@ def one(name, spec, a, canon, run_xdiff, work):
         canon = Bn4Canon(canon, fams)
         canon.fams = fams
         rom4 = os.path.join(work, 'rom', 'bn4.gba')
-        canon.sprites = bn4_sprites(open(rom4, 'rb').read() if os.path.exists(rom4) else b'')
+        rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
+        rom6 = os.path.join(work, 'rom', 'bn6.gba')
+        canon.sprites = bn4_sprites(rom4b)
+        canon.alliance = bn4_alliance(rom4b, open(rom6, 'rb').read() if os.path.exists(rom6) else b'')
     for tr in (ta, tb):
         assign_roles(tr, canon)
+    if not control:
+        reserved_roles(ta)
     verdict, at, lines = compare(spec, ta, tb, canon, a.show)
     print('\n'.join(lines))
     kind = 'control' if control else 'bn4'

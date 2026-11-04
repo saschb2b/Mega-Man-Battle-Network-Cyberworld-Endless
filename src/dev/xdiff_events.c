@@ -90,6 +90,8 @@ struct XdLog {
 	const XdTwin *twins;
 	int ntwins;
 	int cursor;                /* the reference's first draw of the timer replayed */
+	int lag, lag_cursor;       /* (xd_replay_lag) the family's own draws given the reference's of `lag` fight frames before: its
+	                              first draw of that timer */
 	uint32_t keyed_t;
 	Keyed keys[KEYS_MAX];
 	int nkeys, replayed, unmatched, unmapped;
@@ -192,6 +194,7 @@ static int nth(XdLog *log, uint32_t key, uint32_t which) {
 		log->keyed_t = log->t;
 		log->nkeys = 0;
 		while (log->cursor < ref->ndraws && ref->draws[log->cursor].t < log->t) ++log->cursor;
+		while (log->lag_cursor < ref->ndraws && ref->draws[log->lag_cursor].t + (uint32_t)log->lag < log->t) ++log->lag_cursor;
 	}
 	for (int i = 0; i < log->nkeys; ++i)
 		if (log->keys[i].key == key && log->keys[i].which == which) return log->keys[i].n++;
@@ -211,7 +214,10 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	}
 	const XdLog *ref = log->ref;
 	int k = nth(log, key, which);
-	for (int i = log->cursor; i < ref->ndraws && ref->draws[i].t == log->t; ++i) {
+	/* (the family's own, with a lag: the reference's of that many fight frames before, xd_replay_lag) */
+	bool lagged = e->family && log->lag;
+	uint32_t at = lagged ? log->t - (uint32_t)log->lag : log->t;
+	for (int i = lagged ? log->lag_cursor : log->cursor; i < ref->ndraws && ref->draws[i].t == at; ++i) {
 		const Draw *d = &ref->draws[i];
 		if (d->key != key || d->which != which || k-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
@@ -545,6 +551,8 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
 	subject->ntwins = ntwins;
 	subject->keyed_t = 0xFFFFFFFFu;
 }
+
+void xd_replay_lag(XdLog *subject, int lag) { subject->lag = lag; }
 
 void xd_setup(XdLog *log, bool setup) { log->setup = setup; }
 

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:35:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -769,8 +769,11 @@ format, its game 4: the trace's header names it):
   `0x080129AC`, BN6's twin `0x08019FB4`) and the pool's maker
   (`0x08012470`, `0x0801986C`) paired store by store, BN4's +0x05, +0x0C,
   +0x1E, +0x58-+0x5F, +0x60 and +0x78 at BN6's +0x07, +0x0E, +0x2E,
-  +0x30-+0x37, +0x38 and +0x44 (bn4.h, `BN4_COLL_*`). Sounds, effects and
-  the alliance words are BN4's own still.
+  +0x30-+0x37, +0x38 and +0x44 (bn4.h, `BN4_COLL_*`); then its +0x0A and
+  +0x0B at BN6's +0x0C and +0x0D (`billy_v1`, below). The alliance words,
+  a move's direction, the slot, the reservation bit and the moved
+  effects' ids are read as BN6's (`billy_v1`, below); sounds are BN4's
+  own still.
 - **The stop rule against BN6's**: the family's own records (its
   enemies, and what its code spawned by the spawn events) fail the spec
   at their first unexplained difference; one in the world's alone
@@ -812,31 +815,76 @@ format, its game 4: the trace's header names it):
   games' routines and joined to the layout, above).
 - **BN4's Billy against its BN6 twin** (`billy_v1`: Billy V1, BN4's 0x0D,
   at (5,2) against MegaMan idle at (2,2) with 2000 HP, `--dev
-  bn4families`, `rng=replay`): both battles trace their 1200 frames, and
-  it FAILS at t1, Billy's own record: its CurAction BN4's 7 (BN6's 9)
-  against BN6's 8, its wait (+0x20) 0x28 against 2, its flags (+0)
-  0x13 against 0x17. The cause, from both games frame by frame through
-  the opening (a probe of Billy's +0, +9, +0xA and each runner's pause
-  byte, BN4's `[eToolkit+0x40]+9` and BN6's `[eToolkit+0x3C]+0xA`, both
-  1 from the appear to the fight, BattleState +0x32 0 in both): both
-  appear alike (CurAction 0, then 1, BN4's frame 183 and BN6's 122);
-  BN4's generic state 1 (`0x0801013A`) runs at once while the battle is
-  paused, clears the object's 0x04 (the bit the object runner, BN4
-  `0x0800314C`, runs a paused object by) and hands it its own first state
-  (6), which then waits for the fight and runs at its first frame; BN6's
-  Billy keeps CurAction 1 through the whole paused opening and runs
-  BN6's state 1 (`0x080165B8`: 8, 0x04 kept) at the fight's first frame,
-  its own first state at the second. BN6's state runner (`0x0801B1C4`,
-  from the virus dispatcher `0x0810A29C`) tests the pause byte first
-  (`0x0800A03C`) where BN4's (`0x08013C48`) does not; which of its
-  branches withholds the state while paused is not pinned yet.
-  BN6's own Mettaur does the same against BN4's (`game=bn4:bn6`,
-  `foes=01@52`: BN4's in its 7 at t1, BN6's in its 8): BN6's engine's
-  for every virus, not Billy's code. Its whole fight is one fight frame
-  late from there (its draws and effects at t44, t107, t170 against
-  BN4's t43, t106, t169, the period the same), so its 32 draws find no
-  draw of BN4's in their frame (`unmatched`). The world parts at t1 too
-  (MegaMan's own fields, BN6's per-frame RNG steps, which BN4 has none
-  of, BN6's opening effect 0x08), which no map explains yet. No mask was
-  added: whether the moved family keeps BN6's timing or the comparison
-  allows the frame is the owner's call.
+  bn4families`, `rng=replay`, `lag: 1`): both battles trace their 1200
+  frames, all 30 of Billy's own draws replayed from BN4's, and it FAILS
+  at t1 on Billy's own record, read against BN6's of the next fight frame
+  (the allowed difference below): its damage word's top byte (+0x2D,
+  BN4's 0x00 against BN6's 0x30), its collision data's +0x12 and +0x13
+  (0 against 0xF8, 0x14) and its flags' bit 25 (+0x3C: BN4's 0x02000000,
+  BN6's none). The world parts at t1 too (MegaMan's own fields, BN6's
+  three RNG steps a frame, BN6's opening effect 0x08), unmapped yet, so
+  the family is compared on past the world's stop; its verdict is its
+  own.
+  - **The cause, both sides, the recipe's struct2** (`src/emu/xvirus.c`,
+    `stats_bn4`: "element << 12 | its attack's damage", its flags byte 0):
+    BN6's virus init copies a version's struct2 word +4 to the object's
+    +0x2C (`0x300F` for Billy at its spawn, BN6's own Mettaur `0x000A`),
+    and the collision setup reads its top bits as the hit's properties,
+    never an element: BN6 `0x08019F44` keeps 11 bits of damage (lsls #21;
+    lsrs #21), bit 15 doubles it, bit 14 sets +0x10 0x10 and +0xE 1, bit
+    13 calls `0x0801A4D0` with 0xF8 and returns (Billy's +0x12 and +0x13,
+    written in its collision setup at `0x08016FE8`: a probe of hooks
+    through the virus init), else bit 12 with 0xF7; BN4's twin
+    `0x08012860` keeps 14 bits and reads bits 15 and 14 alike in its own
+    fields. Elec's 3 << 12 sets bits 13 and 12, so Billy's body takes bit
+    13's hit property, which BN4's has none of. And BN6's
+    virus init sets the object's flags from struct2's byte +3
+    (`0x08016FCE`-`0x08017030`: 0x10 its 0x08000000, 0x08 its
+    0x02000000, 0x04 its 0x20, 0x02 its 0x10, 0x01 its 0x00020000), where
+    BN4's Billy sets 0x02000000 in its own init (`0x080B9552`: `ldr
+    r0,=0x02000000; bl 0x08012F82`, object_setFlag). With the version's
+    struct2 given BN4's damage alone and byte +3 0x08 (an experiment,
+    `poke=08B5804B:08:1` and `08B5804C:000F:2`, V1's struct2 in its home,
+    not committed), Billy is the same as BN4's through t340, its moves,
+    its effects and its draws among it; at t341 its thunder (the third
+    kind's 0x2A, BN6's own object running Billy's parameters) differs:
+    its sprite (each game's own art, compared as pointers), its sprite
+    state's +0xBB (0x80 against 0xC0) and its collision data's hit
+    properties (BN4's bit 14 into its +0xE 0x12 and +0xC 0, BN6's into
+    +0x10 0x10 and +0xE 1, by the two setups above).
+  - **The allowed difference, the family's timeline a fight frame later**
+    (the owner's call, 2026-11-04: the port keeps BN6's timing; its
+    reason in `tests/xdiff/legit.json`, `bn4`, `allowed`): both games'
+    pause byte (BN4's `[eToolkit+0x40]+9`, BN6's `[eToolkit+0x3C]+0xA`)
+    reads 1 from the appear to the fight, and each object runner (BN4
+    `0x0800314C`, BN6 `0x080031AC`) runs a paused object whose +0 has
+    0x04. BN4's state runner (`0x08013C48`) has no pause test and calls
+    the state (`0x08013D9A`), so BN4's generic state 1 (`0x0801013A`)
+    runs in the opening, clears 0x04 and sets the family's first own
+    state, which runs at the fight's first frame. BN6's (`0x0801B1C4`,
+    from the virus dispatcher `0x0810A29C`) tests the pause byte first
+    (`0x0800A03C`, at `0x0801B1CC`) and, for a CurAction not 0 whose flags
+    (`0x0801A166`) have none of 0x40000100 and whose struck word
+    (`0x0801A180`) has no 0x8000, returns at `0x0801B21A` (`b 0x0801B37A`)
+    without calling the state: BN6's generic state 1 (`0x080165B8`) runs
+    at the fight's first frame and the family's first own state at the
+    second. BN6's own Mettaur starts the same way against BN4's. With
+    `"lag": 1` alone (`tools/xdiff_bn4.py` `allowed_lag`, refused unless
+    `legit.json` names that lag), the family's own records (its enemies,
+    what their code spawned) are compared with BN6's of the next fight
+    frame and its own draws given BN4's of the frame before (`lag=1`,
+    `xd_replay_lag`); the world's are compared frame for frame, and a
+    family off by any other amount fails. The family's +0 bit 0x04, which
+    BN4's state 1 clears and BN6's keeps, is allowed beside it (its own
+    entry there), on the family's objects alone, that bit alone.
+  - **Maps added for it**, each from both games' code: the alliance words
+    by their place in each game's table (BN4 `0x08012660`, 122 words, read
+    by `0x08012EF6`; BN6's first 122 the same or with bit 0x80, 98 of
+    them); the last move's direction (BN4's +0xA, BN6's +0xC, by
+    `0x0800AF90` / `0x0800E994`: BN6's left and right by the object's
+    side, a move of two panels its 5); the counter time (BN4's +0xB,
+    BN6's +0xD, by `0x0800AFBC` / `0x0800E9DC`); a reservation's bit 0x20
+    in BN6's terms from BN4's events (BN6's `0x0801BB36`, BN4's
+    `0x080143A8` sets none); an object's slot (+3) counted from its own;
+    the moved effects' ids by the recipe (BN4's 0x16 and 0x15, BN6's 0x98
+    and 0x99).

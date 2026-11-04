@@ -877,6 +877,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
+	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	return true;
 }
 

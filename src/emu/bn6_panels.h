@@ -91,7 +91,10 @@
 #define BN6_STATUS_HIDE       0x0801B16Eu /* bl 0x0801A166, after the sprite's steps: where BN5 hides what is hidden (BN5_HIDE_STEP, at
                                              0x08017DB4); BN6's own of it, 0x0801012C, which hides the invisible, is called by nothing */
 #define BN6_COLL_MADE         0x080198CAu /* str r0,[r5,#0x54]: a collision data made (0x08019892), r0 it; BN5's clears its submerge with it */
-#define BN6_COLL_SETUP_ARG    0x0E        /* u8, the collision setup's r3 (0x08019FB4, at 0x08019FBA; BN4's +0x0C, bn4.h BN4_COLL_SETUP_ARG) */
+#define BN6_COLL_PANEL_BYTE   0x0C        /* u8, what 0x0800E994 gives of its panel, written by the collision panels' update (0x0801A04C, at
+                                           * 0x0801A062; BN4's +0x0A) */
+#define BN6_COLL_COUNTER      0x0D        /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
+#define BN6_COLL_SETUP_ARG    0x0E      /* u8, the collision setup's r3 (0x08019FB4, at 0x08019FBA; BN4's +0x0C, bn4.h BN4_COLL_SETUP_ARG) */
 #define BN6_COLL_OBJ_2E       0x07        /* u8, its object's +0x2E as the setup copies it (0x08019FDA; BN4's +0x05) */
 #define BN6_COLL_HIT_MASKS    0x30        /* two u32, the alliance words from BN6_COLL_MASKS by alliance and region (0x08019FE8, 0x0801A004;
                                            * BN4's +0x58) */

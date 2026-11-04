@@ -118,6 +118,10 @@ bool xd_moved_kept(uint32_t to);
  * (a BN6 routine's through its twin), the k-th of its key in a frame the
  * reference's k-th in the same frame by the battle's timer */
 void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int ntwins);
+/* ... the family's own draws (those its code led to) given the reference's of `lag` fight frames before, the engine's of the
+ * same frame still: BN6's engine hands a virus its first own state a fight frame later than BN4's (lag=1, a BN4 spec's;
+ * docs/devtools/differential.md, The BN4 trace) */
+void xd_replay_lag(XdLog *subject, int lag);
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);

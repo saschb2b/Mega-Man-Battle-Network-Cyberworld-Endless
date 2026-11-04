@@ -86,7 +86,11 @@
 #define BN4_COLL_ALLIANCE 0x03        /* collision data: its side (BN6's +4) */
 #define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
 #define BN4_COLL_OBJ_2E   0x05        /* ... u8, its object's +0x2E (BN6_COLL_OBJ_2E, +7): the setup 0x080129AC at 0x080129C8, BN6's 0x08019FDA */
-#define BN4_COLL_SETUP_ARG 0x0C       /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
+#define BN4_COLL_PANEL_BYTE 0x0A      /* ... u8, what 0x0800AF90 gives of its panel, written by the collision panels' update 0x08012D9A at
+                                       * 0x08012DAE (BN6_COLL_PANEL_BYTE, +0xC: 0x0801A04C's 0x0800E994 at 0x0801A062) */
+#define BN4_COLL_COUNTER  0x0B        /* ... u8, its counter time (its window to be countered), set by 0x0800AFBC at 0x0800AFD6
+                                       * (BN6_COLL_COUNTER, +0xD: its twin 0x0800E9DC at 0x0800E9F6) */
+#define BN4_COLL_SETUP_ARG 0x0C     /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
 #define BN4_COLL_DAMAGE   0x1E        /* ... u16, an attack's damage from its object's +0x2C (BN6_COLL_DAMAGE, +0x2E): 0x080129CC, BN6's 0x08019FDE */
 #define BN4_COLL_HIT_MASKS 0x58       /* ... two u32, the alliance words (BN6_COLL_HIT_MASKS, +0x30): 0x080129D6 and 0x080129F2 from
                                        * 0x08012EF6, BN6's 0x08019FE8 and 0x0801A004 from 0x0801A0BA */

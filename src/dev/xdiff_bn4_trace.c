@@ -25,6 +25,8 @@ static const Seg obj_segs[] = {
  * 0x08019FB4) and the pool's maker (0x08012470, BN6's 0x0801986C) write, store by store: its object's +0x2E, the setup's
  * argument, the damage, the alliance words, its object, its index bit */
 static const Seg coll_segs[] = {
+	{ BN4_COLL_PANEL_BYTE, BN6_COLL_PANEL_BYTE, 1 },
+	{ BN4_COLL_COUNTER, BN6_COLL_COUNTER, 1 },
 	{ BN4_COLL_OBJ_2E, BN6_COLL_OBJ_2E, 1 },
 	{ BN4_COLL_SETUP_ARG, BN6_COLL_SETUP_ARG, 1 },
 	{ BN4_COLL_DAMAGE, BN6_COLL_DAMAGE, 2 },
@@ -57,11 +59,11 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
-	[XD4_COLL] = { coll_segs, 17, BN4_COLL_SIZE, BN6_COLL_SIZE },
+	[XD4_COLL] = { coll_segs, 19, BN4_COLL_SIZE, BN6_COLL_SIZE },
 	[XD4_AI] = { ai_segs, 1, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
 	[XD4_PANEL] = { panel_segs, 4, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 17 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 19 &&
 	sizeof panel_segs / sizeof *panel_segs == 4, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
