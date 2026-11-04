@@ -11,7 +11,9 @@ starts it at its frame 294, its state and sound recorded each frame
 (romlab's `sound`); the engine's --mp2k-trace of the song from the same
 phases; tools/mp2k_diff.py between them.
 
-For xN/SONG (xN/all: every song of its music): the song's own game in
+For xN/SONG (xN/all: every song of its music; a sound effect by its
+number, x1/9D, played on the music player in both games, its own player
+the differential's to check): the song's own game in
 romlab, its title's entry pointed at the song, recorded from its SoundInfo
 and music player; BN6 in romlab with xsong's copy of the song
 (--xsong-pack) written where the copies go, its title's entry pointed at
@@ -159,6 +161,9 @@ def verify_copy(x, song, frames):
     base = f'.build/mp2k/check/x{x}_{song:03x}'
     entry = data[g['songs'] - BUS + 8 * song:g['songs'] - BUS + 8 * song + 8]
     header = struct.unpack_from('<I', entry)[0]
+    # (played on the music player in both games, whose state romlab's sound records: a sound effect's entry names
+    # another player, which the differential checks it is begun on; its music's name 31 already)
+    entry = struct.pack('<IHH', header, 31, 31)
     if not BUS <= header < BUS + len(data) or not data[header - BUS]:
         return None, 'no song'
     header2 = pack(x, song, base + '.pack')

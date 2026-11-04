@@ -2347,6 +2347,15 @@
         "why": "MegaMan is drawn from each game's own art: his sprite state's frame pointers (+0xA8 to +0xB7, sprite_load's +0x18 on, his state at +0x90) point into BN4's sprite list 0's entry 0 (0x08214000, BN4's lists 0x0802793C) and BN6's own MegaMan (0x081D8000, as BN5's differential has it: legit.json's masks, MegaMan's own sprite), and +0xB8's word is copied from that art's data (BN6 0x0800210E-0x08002120): his place, his CurAction and what he does are compared as ever"
       },
       {
+        "name": "MegaMan's own art's animation",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "fields": "his sprite's count (+0x91) and its last frame's bit (+0x92's 0x80), only where each game's are what its own art gives at the same place of the same animation: the animation (+0x90) the same, and the frames run of it the same in both, each read from its own game's art by his frame's record (+0xAC) and his count (tools/xdiff_bn4.py own_animation, anim_place); his animation and its place compared as ever, so a state that starts it a frame apart, or an animation run longer or shorter, still parts",
+        "why": "His art is each game's own (\"MegaMan's own sprite\": BN4's sprite list 0's entry 0, 0x08214000; BN6's 0x081D8000), and each cuts an animation into its own frames: a frame's record is 20 bytes, its duration at +16 and +18's 0x80 its last (tools/xsoul.py anim_life's reading), and the sprite update (BN4 0x0800285C, BN6 0x080026C4) loads a frame's duration less 1 into the count and counts it down a frame each fight frame, the next frame's record (+0xAC) at 0, +0x92's 0x80 set as the last begins. His struck animation (1, set by his state 3 at the hit: walla_v1, t68) runs 24 frames in both, as 4,2,2,2,2,2,4,4,2 in BN4's art and 4,2,2,2,2,4,5,3 in BN6's (both ROMs read by the anim_place walk), so from its sixth frame (t80) the count reads otherwise (BN4's 1, BN6's 3) and BN6's last frame begins a frame sooner (t89, BN4's t90) at the same frames run, and his state ends it at t91 in both. Each game's sprite art, not the port's subject"
+      },
+      {
         "name": "MegaMan's object +0 bit 0x04, which BN6's state 1 of his keeps",
         "whose": "megaman",
         "kind": "T1",
@@ -2516,7 +2525,7 @@
           "0xBB"
         ],
         "fields": "the fourth kind's 0x04 alone: its sprite state (+0x80 to +0xBB), its end where one game's animation ends first (+0's 0x02 cleared and +8 its state 8, the update's twins' stores) and its being in play, and so its place in the run order, where one game's has ended and the other's not; its place, its spawn, its first frame and every other byte compared as ever (tools/xdiff_bn4.py spark_own)",
-        "why": "A hit's spark is each engine's own effect, the same object of each: spawned by the hit's spark routine, twins (BN4 0x08012F44, BN6 from 0x0801A0D8: the striker's place moved by a draw, BN4 0x08014620 / BN6 0x0801BDDE, replayed from BN4's: legit.json's bn4 rng_twins) through twin spawners of the fourth kind's 0x04 (BN4 0x080E2140, BN6 0x080E1C00), its init setting up the same sprite list and number in each game's own art (the hooks' sprite events, BN4 from 0x080E20D0 and BN6 from 0x080E1B8C, b 0x1405 in both; other bytes, CRC32 0x70A851CA and 0x25A05EF3) and its update twins (BN4 0x080E2122, BN6 0x080E1BE2) ending it as its animation ends (the sprite's end bit 0x80: +0's 0x02 cleared, its state 8). So its sprite state (frames, their pointers into its art, +0x80 to +0xBB) and how long it lives are its art's: in billy_v1 BN6's lives 3 frames less (to t443 against BN4's t446, under the battle's offset). The thunder's sprite is allowed so too (\"the thunder's sprite, BN6's own art\")"
+        "why": "A hit's spark is each engine's own effect, the same object of each: spawned by the hit's spark routine, twins (BN4 0x08012F44, BN6 from 0x0801A0D8: the striker's place moved by a draw, BN4 0x08014620 / BN6 0x0801BDDE, replayed from BN4's: legit.json's bn4 rng_twins) through twin spawners of the fourth kind's 0x04 (BN4 0x080E2140, BN6 0x080E1C00), its init setting up the same sprite list and number in each game's own art (the hooks' sprite events, BN4 from 0x080E20D0 and BN6 from 0x080E1B8C, b 0x1405 in both; other bytes, CRC32 0x70A851CA and 0x25A05EF3) and its update twins (BN4 0x080E2122, BN6 0x080E1BE2) ending it as its animation ends (the sprite's end bit 0x80: +0's 0x02 cleared, its state 8). So its sprite state (frames, their pointers into its art, +0x80 to +0xBB) and how long it lives are its art's: in billy_v1 BN6's lives 3 frames less (to t443 against BN4's t446, under the battle's offset). The thunder's sprite is allowed so too (\"the thunder's sprite, BN6's own art\"). The same object where a family's own code makes the hit's effect: Walla's ring (walla_v1-v3, the third kind's 0x3C, moved: BN4_T3_WALLA_RING) calls the engine's routine for the effect its hits make each frame (BN4 0x080D4BEA: bl 0x08012F44; its copy's veneer to BN6's twin 0x0801A0D4, tools/bn4_twins.py AUDITS: BN6's, the same steps in BN6's layout), which draws the place (0x08014620 / 0x0801BDDE, replayed) and spawns the spark through the twin spawners (BN4 0x080E2140, BN6 0x080E1C00; the spawn events' family Walla's, BN4's call at 0x080D4BEA and its copy's), so the spark is counted the family's (its spawn passed through the family's code) and is still each engine's own effect: its sprite state and life allowed so on the family's records too, that object alone (tools/xdiff_bn4.py compare), its spawn, place, first frame and being in play before both had it compared as ever (BN6's spark ends 2 frames before BN4's, t72 against t74 in walla_v1)"
       },
       {
         "name": "BN6's MegaMan's paralysis state's flag 0x400000",
@@ -2527,10 +2536,24 @@
         "offset": "0x3C",
         "bit": "0x400000",
         "direction": "BN6 has, BN4 not",
-        "why": "BN6's own bookkeeping in its own MegaMan's paralysis state, not the port's subject (the lead's call, 2026-11-04, the owner's to overturn). Its writer: BN6's paralysis state (his state 4, entry 4 of his table 0x080EB86C: 0x080175B8) sets 0x400000 in his collision flags as it begins (0x080175C4: ldr r0,=0x400000; bl 0x0801A152); its clearer: 0x08017828 (in 0x08017768, his state 7, entry 7 of that table: bl 0x0801A15C); its reader: 0x08010162, run for him each frame from 0x0801B12E, which clears the flags' 0x04 while 0x400000 stands and sets it else (0x08010182-0x08010192). BN4's paralysis state (0x080109FA, entry 4 of his table 0x080EAEFC) sets no 0x400000: as it begins it clears 0x100441 as BN6's does (0x08010A0A / 0x080175CA), and no load of 0x400000 is in its code. Both set and clear 0x800 alike (the status routines 0x0800AEB4 / 0x0800E798, the ends 0x0800AE6C / 0x0800E74C). Guarded: that bit alone, BN6's side holding it and BN4's not, every other bit of the word compared as ever, the 0x04 it acts on among them, so any effect it had on him would still fail the spec or keep it INCONCLUSIVE (tools/xdiff_bn4.py allowed_world)"
+        "why": "BN6's own bookkeeping in its own MegaMan's paralysis state, not the port's subject (the lead's call, 2026-11-04, the owner's to overturn). Its writer: BN6's paralysis state (his state 4, entry 4 of his table 0x080EB86C: 0x080175B8) sets 0x400000 in his collision flags as it begins (0x080175C4: ldr r0,=0x400000; bl 0x0801A152); its clearer: 0x08017828 (in 0x08017768, his state 7, entry 7 of that table: bl 0x0801A15C); its reader: 0x08010162, run for him each frame from 0x0801B12E, which clears the flags' 0x04 while 0x400000 stands and sets it else (0x08010182-0x08010192). BN4's paralysis state (0x080109FA, entry 4 of his table 0x080EAEFC) sets no 0x400000: as it begins it clears 0x100441 as BN6's does (0x08010A0A / 0x080175CA), and no load of 0x400000 is in its code. Both set and clear 0x800 alike (the status routines 0x0800AEB4 / 0x0800E798, the ends 0x0800AE6C / 0x0800E74C). BN6's struck state (his state 3, entry 3 of 0x080EB86C: 0x080174FE) sets it too, with 0x400, as it begins (0x0801750A: ldr r0,=0x400400; bl 0x0801A152) and clears both as it ends (0x0801758A: bl 0x0801A15C), where BN4's (0x08010960, entry 3 of 0x080EAEFC) sets and clears 0x400 alone (0x0801096C-0x08010970: movs r0,#1; lsls r0,#10; bl 0x08012F82; 0x080109DE-0x080109E2, bl 0x08012F8C): walla_v1-v3, MegaMan struck by Walla's rings, 23 frames a hit. Guarded: that bit alone, BN6's side holding it and BN4's not, every other bit of the word compared as ever, the 0x04 it acts on among them, so any effect it had on him would still fail the spec or keep it INCONCLUSIVE (tools/xdiff_bn4.py allowed_world)"
       }
     ],
     "clocks": "Two clocks, each record's proven from the routine that writes it, never assumed (the lead's call, 2026-11-04, the owner's to overturn). What a state drives (an object's state routine, run by its state runner: BN4 0x08013C48, BN6 0x0801B1C4) is compared with the battle's offset, BN6's at t + 1 against BN4's at t (allowed, \"BN6's battle a fight frame behind BN4's\"); what the battle's timer or the frame counter drives (a routine the main loop runs each fight frame, not through a state) at the same fight frame. Each record of the second clock is named with its code path (bn4.sounds' clock \"timer\"); a record whose clock is not shown is compared with the offset, and where it differs there the spec stays INCONCLUSIVE",
+    "align": [
+      {
+        "name": "BN6's battle opening a frame longer",
+        "at": "BN6_APPEAR_BLINK_FIRST",
+        "was": "0x2002",
+        "frames": 1,
+        "what": "Every BN4 spec against BN6's (game=bn4:bn6) runs BN6's opening one paused frame longer, BN4's never and no BN5 spec: BN6's plain appear's first blink step counts 3 frames where it counts 2 (its movs r0,#2 at BN6_APPEAR_BLINK_FIRST made movs r0,#3, written into BN6's copy after the install: tools/xdiff_bn4.py alignments, the spec's first poke=). Its one object in the appear queue, the spec's virus, then runs its appear, and the paused present after it (XVirusFamily.present), as many times as BN4's does; the blink ends, the queue empties and bit 1 is set a frame later, so MegaMan's appear ends a frame later too (an object of the side the battle state names, its +0xD against the object's +0x16 at 0x080163C0-0x080163D4, skips the queue and the blink and waits for bit 1): the whole opening a frame longer, its fight frames counted as before. The tool checks BN6's ROM holds `was` there (a movs r0,#imm8) and writes its immediate plus `frames`; a spec of more than one foe is refused (the queue blinks its objects one after another, so a longer first blink step would delay the k-th foe k frames where BN4's bit delays each one)",
+        "why": "The owner's call 7, revised (docs/multirom/bn4.md, The owner's calls): a BN4 visitor keeps BN6's appear and opening in play, and the comparison names the engines' frame between them, as it names BN6's battle a fight frame behind BN4's (allowed, lag 1). Both games' appears run the same steps (BN4_APPEAR 0x0800FE00, BN6_APPEAR 0x08016396, compared SAME by tools/xrecipe_thumb.py but for BN4's battle kind 0x44 and its sound): step 0 into the appear queue (BN4 0x08007F1C, BN6 0x0800AA1A), hidden, waiting for the battle state's appear bit 0 and the queue's head (BN4 0x080019C0 and 0x08007F04, BN6 0x0800139A and 0x0800AA06); step 1 a 2 x 16 frame blink, then out of the queue (BN4 0x08007F46, BN6 0x0800AA40); step 2 waiting for bit 1. Each opening sets bit 0 after its fade, from the same step (BN4 0x080E1F04: bl 0x08005B7C, bne; movs r0,#1; bl BN4_APPEAR_BITS_SET 0x080019A8 at 0x080E1F0E; BN6 0x080E1A04: bl 0x080062F8, bne; movs r0,#1; bl BN6_APPEAR_BITS_SET 0x08001382 at 0x080E1A0E; the fade begun with 0x10 in both, BN4 0x080E1EF4, BN6 0x080E19F4), 18 frames after the virus's init in BN4 (its step 0 run 19 times from its init's frame: frame 132 to 150 in spikey_v1, 131 to 149 in shrimpy_v3) and 17 in BN6 (17 runs from the frame after its init: 71 to 88), the blinks the same 32 frames: a probe of hooks on both, temporary, not kept (docs/rom/bn4.md, A virus's appear and the engine's appear bits). So BN4's virus runs its appear, and its after-state's sprite update, once more in the paused opening than BN6's: 53 after-states before its first fight frame against BN6's 51 and its state 1 (the battle's offset), its sprite a step ahead at t1, and Shrimpy's hook (0x080BA13E: its animation 1 cleared where the one in play has ended, 0x08002E56 bit 0x80) reading its idle animation's last frame a frame earlier, shrimpy_v3 FAIL at t65. The difference is the engines' openings, not the appear's code nor the family's. One paused run more of BN6's appear aligns it: a blink step a frame longer takes the run where a bit 0 a frame later would (the same count of appear runs, bit 1 a frame later), with one immediate of BN6's own appear and no code of the harness's; the bit itself a frame later would need a count the opening's step has not (0x080E1A04-0x080E1A16 sets it the frame the fade ends)",
+        "evidence": [
+          "python3 tools/xdiff.py shrimpy_v3 --poke 080163FC:2003:2 (BN6's first blink step a frame longer) PASS, the opening's allowance then in legit.json unused; without it FAIL at t65 (2026-11-04)",
+          "with the alignment every BN4 spec against BN6's PASSES and the opening's allowance and its code (tools/xdiff_bn4.py opening_animation, OPENING_LEAD, anim_steps) are gone; its mutation (tests/xdiff/mutations.json, shrimpy_v3: the first blink step 4 frames, the alignment two) is caught"
+        ]
+      }
+    ],
     "sounds": [
       {
         "bn4": "0xAD",
@@ -2552,6 +2575,97 @@
         "clock": "state",
         "what": "MegaMan struck",
         "why": "Played as the thunder's hit strikes him (BN4's bl at 0x08013A9C under his type's routine 0x080B34D8; BN6's at 0x0801BA5A under his 0x080B9A5C), a state's: BN4's at t431, BN6's at t432 in billy_v1; the same number in both"
+      },
+      {
+        "bn4": "0xBC",
+        "bn6": "0x3F",
+        "clock": "state",
+        "what": "Spikey's sound 0xBC, its copy",
+        "why": "Played by Spikey's code (BN4: movs r0,#0xbc at 0x080D2F24, its bl to PlaySoundEffect at 0x080D2F26; BN6: its copy's movs r0,#0x3f at 0x08B7D27C, the recipe's immediate, its bl at 0x08B7D27E through its veneer to BN6's), a state's: BN4's song 0xBC copied into BN6's empty slot 0x3F on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t171, BN6's at t267 in spikey_v3, each on player 9. BN6's own song 0xBC is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xC4",
+        "bn6": "0x3E",
+        "clock": "state",
+        "what": "Spikey's sound 0xC4, its copy",
+        "why": "Played by Spikey's code (BN4: movs r0,#0xc4 at 0x080D2E84, its bl to PlaySoundEffect at 0x080D2E86; BN6: its copy's movs r0,#0x3e at 0x08B7D1DC, the recipe's immediate, its bl at 0x08B7D1DE through its veneer to BN6's), a state's: BN4's song 0xC4 copied into BN6's empty slot 0x3E on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t166, BN6's at t254 in spikey_v3, each on player 9. BN6's own song 0xC4 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x9F",
+        "bn6": "0x3D",
+        "clock": "state",
+        "what": "Shrimpy's sound 0x9F, its copy",
+        "why": "Played by Shrimpy's code (BN4: movs r0,#0x9f at 0x080D2C52, its bl to PlaySoundEffect at 0x080D2C54; BN6: its copy's movs r0,#0x3d at 0x08B7DC8A, the recipe's immediate, its bl at 0x08B7DC8C through its veneer to BN6's), a state's: BN4's song 0x9F copied into BN6's empty slot 0x3D on BN4's player 28 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t223, BN6's at t224 in shrimpy_v2, each on player 28. BN6's own song 0x9F is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xC9",
+        "bn6": "0x3C",
+        "clock": "state",
+        "what": "Shrimpy's sound 0xC9, its copy",
+        "why": "Played by Shrimpy's code (BN4: movs r0,#0xc9 at 0x080D2BEA, its bl to PlaySoundEffect at 0x080D2BEC; BN6: its copy's movs r0,#0x3c at 0x08B7DC22, the recipe's immediate, its bl at 0x08B7DC24 through its veneer to BN6's), a state's: BN4's song 0xC9 copied into BN6's empty slot 0x3C on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t66, BN6's at t67 in shrimpy_v3, each on player 8. BN6's own song 0xC9 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xCA",
+        "bn6": "0x3B",
+        "clock": "state",
+        "what": "Shrimpy's sound 0xCA, its copy",
+        "why": "Played by Shrimpy's code (BN4: movs r0,#0xca at 0x080D2D24, its bl to PlaySoundEffect at 0x080D2D26; BN6: its copy's movs r0,#0x3b at 0x08B7DD5C, the recipe's immediate, its bl at 0x08B7DD5E through its veneer to BN6's), a state's: BN4's song 0xCA copied into BN6's empty slot 0x3B on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t86, BN6's at t87 in shrimpy_v3, each on player 8. BN6's own song 0xCA is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x70",
+        "bn6": "0x3A",
+        "clock": "state",
+        "what": "Walla's sound 0x70, its copy",
+        "why": "Played by Walla's code (BN4: movs r0,#0x70 at 0x080D4C3A, its bl to PlaySoundEffect at 0x080D4C3C; BN6: its copy's movs r0,#0x3a at 0x08B7E646, the recipe's immediate, its bl at 0x08B7E648 through its veneer to BN6's), a state's: BN4's song 0x70 copied into BN6's empty slot 0x3A on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0x70 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x9A",
+        "bn6": "0x39",
+        "clock": "state",
+        "what": "Walla's sound 0x9A, its copy",
+        "why": "Played by Walla's code (BN4: movs r0,#0x9a at 0x080BEA88, its bl to PlaySoundEffect at 0x080BEA8A; BN6: its copy's movs r0,#0x39 at 0x08B7E430, the recipe's immediate, its bl at 0x08B7E432 through its veneer to BN6's), a state's: BN4's song 0x9A copied into BN6's empty slot 0x39 on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0x9A is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xA6",
+        "bn6": "0x38",
+        "clock": "state",
+        "what": "Walla's sound 0xA6, its copy",
+        "why": "Played by Walla's code (BN4: movs r0,#0xa6 at 0x080D4CE2, its bl to PlaySoundEffect at 0x080D4CE4; BN6: its copy's movs r0,#0x38 at 0x08B7E6EE, the recipe's immediate, its bl at 0x08B7E6F0 through its veneer to BN6's), a state's: BN4's song 0xA6 copied into BN6's empty slot 0x38 on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t47, BN6's at t48 in walla_v1, each on player 9. BN6's own song 0xA6 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xB7",
+        "bn6": "0x37",
+        "clock": "state",
+        "what": "Walla's sound 0xB7, its copy",
+        "why": "Played by Walla's code (BN4: movs r0,#0xb7 at 0x080BEAE8, its bl to PlaySoundEffect at 0x080BEAEA; BN6: its copy's movs r0,#0x37 at 0x08B7E490, the recipe's immediate, its bl at 0x08B7E492 through its veneer to BN6's), a state's: BN4's song 0xB7 copied into BN6's empty slot 0x37 on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t3, BN6's at t4 in walla_v1, each on player 9. BN6's own song 0xB7 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x9D",
+        "bn6": "0x36",
+        "clock": "state",
+        "what": "Elmperor's sound 0x9D, its copy",
+        "why": "Played by Elmperor's code (BN4: movs r0,#0x9d at 0x080DC6FE, its bl to PlaySoundEffect at 0x080DC700; BN6: its copy's movs r0,#0x36 at 0x08B7EB16, the recipe's immediate, its bl at 0x08B7EB18 through its veneer to BN6's), a state's: BN4's song 0x9D copied into BN6's empty slot 0x36 on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t131, BN6's at t132 in elmperor_v1, each on player 9. BN6's own song 0x9D is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xFC",
+        "bn6": "0x35",
+        "clock": "state",
+        "what": "Elmperor's sound 0xFC, its copy",
+        "why": "Played by Elmperor's code (BN4: movs r0,#0xfc at 0x080C2A7C, its bl to PlaySoundEffect at 0x080C2A7E; BN6: its copy's movs r0,#0x35 at 0x08B7EA6C, the recipe's immediate, its bl at 0x08B7EA6E through its veneer to BN6's), a state's: BN4's song 0xFC copied into BN6's empty slot 0x35 on BN4's player 19 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0xFC is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0xF9",
+        "bn6": "0x34",
+        "clock": "state",
+        "what": "CirKill's sound 0xF9, its copy",
+        "why": "Played by CirKill's code (BN4: movs r0,#0xf9 at 0x080BD42E, its bl to PlaySoundEffect at 0x080BD430; BN6: its copy's movs r0,#0x34 at 0x08B7EF6A, the recipe's immediate, its bl at 0x08B7EF6C through its veneer to BN6's), a state's: BN4's song 0xF9 copied into BN6's empty slot 0x34 on BN4's player 29 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t2, BN6's at t3 in cirkill_v1, each on player 29. BN6's own song 0xF9 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x82",
+        "bn6": "0x84",
+        "clock": "state",
+        "what": "MegaMan's HP low",
+        "why": "Played by the HP gauge's step, twins from its HP test on (BN4 0x0801472C, entry 0 of the HUD's table 0x080146CC that 0x080146A8 runs by the bits of its word each frame; BN6 0x0801C840, entry 4 of its table 0x0801BF10): unless 0x08007A12 / 0x0800A18E or the pause (0x080078EC / 0x0800A03C) says not, his HP (+0x24) at a quarter of his maximum (+0x26 >> 2) or less counts a byte (BN4's +0x19, BN6's +6) each frame to 45 (cmp #0x2d), then 0 and the sound: movs r0,#0x82 at 0x0801475C, bl 0x08000560 (BN4_PLAY_SOUND); movs r0,#0x84 at 0x0801C880, bl 0x080005CC. The count starts on the frame a hit takes him to the quarter, so its clock is the hit's, a state's: cirkill_v3's CirKill takes him from 560 to 380 at t1062 in BN4 and t1063 in BN6, the sound played at t1106, t1151 and t1196 in BN4 and t1107, t1152 and t1197 in BN6 (begun a frame after each). Paired by the routines that play them, not by their samples"
       }
     ],
     "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset",

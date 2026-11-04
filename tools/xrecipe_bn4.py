@@ -37,7 +37,7 @@ import xrecipe_bn4_copy  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 from xrecipe_family import BN6, GENERIC6  # noqa: E402
 from xrecipe_pairs import Pairs  # noqa: E402
-from xrecipe import song_sig, sprite  # noqa: E402
+from xrecipe import song_bytes, song_sig, sprite  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_C = os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')
@@ -53,7 +53,7 @@ FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
-           prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C,
+           prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C, after=0x08010736,
            sprite_load=0x0800287C, shadow=0x08002E96, no_shadow=0x08002FE2, palette=0x08002DEC,
            byname=0x080B6568, sprites=0x0802793C, songs=0x08155FF8, effect=0x080E18EE, sound=0x08000560,
            effects=0x080E1698, neffects=111,
@@ -66,6 +66,7 @@ SPAWNERS4 = {0x080032B8: (1, 'XV_SPAWN_1'), 0x080032D4: (1, 'XV_SPAWN_1_LAST'), 
              0x080032F0: (3, 'XV_SPAWN_3'), 0x0800330C: (3, 'XV_SPAWN_3_LAST'), 0x08003328: (3, 'XV_SPAWN_3_FIRST'),
              0x08003344: (4, 'XV_SPAWN_4')}
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
+BN6_PRESENT = 0x08016E64   # BN6_VIRUS_PRESENT, BN4's after-state's twin but for its pause test
 BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
@@ -84,6 +85,18 @@ SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0
 CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
 CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
 SONGS6 = 0x08159F48   # BN6's song table (RomLayout.song_table)
+MPLAYS4, MPLAYS6 = 0x08155E78, 0x08159DC8   # the music players' tables (BN4_MPLAYS, BN6_MPLAYS): 12 bytes a player, +8 its tracks
+# BN4's sounds BN6 has no song of (xrecipe.song_sig), each copied into one of BN6's empty song slots, one slot a sound
+# whichever family plays it (src/audio/xsong.c's XSOUNDS, the same numbers): the per-run themes' top (0x34-0x3F, the themes
+# below, 12 copied today; the sounds' own 0x40-0x62 are BN5's, its chips' and Darkloids' to come in 0x41-0x4B), by install
+# order from 0x3F down; each played on the player BN4's entry names (BN6's 32 players by BN4's numbers, BN4_MPLAYS); a
+# sound not here is a decision
+SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70: 0x3A, 0x9A: 0x39, 0xA6: 0x38, 0xB7: 0x37,
+               0x9D: 0x36, 0xFC: 0x35, 0xF9: 0x34}
+# their copies' rooms: below their families' sprites (ART0), above BN5's families' art (to XV_ART + 0x54000 today,
+# bn5_ranges_clear checks), as the families' sprites leave no room past theirs (ART_END); each its bytes rounded up to
+# SONG_STEP (song_bytes, an upper bound)
+SONG_ART0, SONG_ART_END, SONG_STEP = XV_ART + 0x5A000, ART0, 0x40
 # BN4's effects BN6 has no effect of the same look of, at ids of their own and their sprites at numbers of their own: the
 # families' ranges' top (0x90-0x9F of the effects, list 5's 0x98-0x9F), below the Navis' (0xA0 on), where BN5's families
 # take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
@@ -141,6 +154,8 @@ class Family:
         self.hooks = [('BN6', NULLSUB6)] * 8
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
+        self.sides = []   # (its calls to BN4's direction rule, each through a shim: side_sites)
+        self.after = None
 
     def decide(self, kind, detail):  # noqa: D401
         self.decisions.append((kind, detail))
@@ -293,6 +308,20 @@ def init_of(f):
         f.roots.append(first.target)
     else:
         enter(f, 2, tail[0], 'its init')
+
+
+def after_of(f, tw):
+    """its after-state: its type routine's one call, after its state (init, update or dying), BN4's (BN4_VIRUS_PRESENT),
+    whose BN6 twin skips it while the battle is paused (bn4_twins.COPIED): copied with it and run after its state 0 (its
+    appear) and its hook 5 (its spawn done) while BN6's skips it for the pause alone (XVirusFamily.present)"""
+    ts = sorted(tw.bls.items())
+    if [t for _, t in ts] != [BN4['after']]:
+        f.decide('after-state', f'its type routine calls {", ".join(f"{t:08X}" for _, t in ts)}, not BN4\'s after-state alone')
+        return
+    f.after = BN4['after']
+    f.roots.append(f.after)
+    f.notes.append(f'its after-state: BN4\'s {f.after:08X}, copied, run after its state 0 (its appear) and its hook 5 while BN6\'s battle is paused '
+                   f'(BN6\'s twin {BN6_PRESENT:08X} skips it there)')
 
 
 def update_of(f, uw):
@@ -549,6 +578,15 @@ def name_ranges(f):
             f.ranges.append(dict(at=site, lo=f.first_id, hi=f.first_id + 5, why=f'BN4\'s ids {lo:#x}-{hi:#x}, its own'))
 
 
+def side_sites(f):
+    """its calls (its own code's or a copied routine's) to a rule of BN4's whose answer BN6 numbers by the object's side
+    (bn4_twins.SIDED): each through a shim that numbers it so (src/emu/xvirus_shim.h)"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t in bn4_twins.SIDED:
+                f.sides.append((site, f'its call to {t:08X} (bn4_twins.SIDED): its left and right by the object\'s side, BN6\'s way'))
+
+
 def pair_calls(f, pairs):
     f.pairs = []
     for t, sites in sorted(f.calls.items()):
@@ -630,6 +668,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
         f.decide('type', f'its routine ({f.lo:08X}) names no jump table of three')
         return f
     f.type_table, f.init, f.update = tt, ents[0] & ~1, ents[1] & ~1
+    after_of(f, tw)
     if ents[2] & ~1 != BN4['dying']:
         f.decide('type', f'its dying entry is {ents[2]:08X}, not BN4\'s shared {BN4["dying"]:08X}')
     uw = T.walk(b4, f.update, region=(f.lo, f.hi))
@@ -653,6 +692,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     walk_code(b4, f, [x & ~1 for x in f.own] + f.roots, {f.type_table, f.st}, pairs)
     name_ranges(f)
+    side_sites(f)
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
@@ -770,7 +810,7 @@ def move_effect(b4, f, alloc, e4):
 
 
 def bn5_ranges_clear():
-    """BN5's families' recipes take none of BN4's effect ids nor list 5 numbers (their ranges' top)"""
+    """BN5's families' recipes take none of BN4's effect ids nor list 5 numbers (their ranges' top), nor its sounds' room"""
     with open(BN5_RECIPES, encoding='utf-8') as fh:
         text = fh.read()
     effects = {int(x, 16) for m in re.finditer(r'_effects\[\] = \{([^;]*)\};', text) for x in re.findall(r'0x([0-9A-F]+) \}', m.group(1))}
@@ -778,28 +818,67 @@ def bn5_ranges_clear():
     clash = sorted(e for e in effects if EFFECT0 <= e < EFFECT_END) + sorted(n for n in list5 if LIST5_0 <= n < LIST5_END)
     if clash:
         sys.exit(f'xrecipe_bn4: BN5\'s families take BN4\'s numbers ({", ".join(f"{x:#x}" for x in clash)}): move EFFECT0 or LIST5_0')
+    # (nor BN4's sounds' room, below BN4's sprites: BN5's art spans, a sprite's or a song's, ending at or before it)
+    art_end = max((int(a, 16) + int(r, 16) for a, r in re.findall(r'XV_ART \+ 0x([0-9A-F]+), 0x([0-9A-F]+)', text)), default=0)
+    if XV_ART + art_end > SONG_ART0:
+        sys.exit(f'xrecipe_bn4: BN5\'s families\' art ends at {XV_ART + art_end:08X}, past BN4\'s sounds\' room ({SONG_ART0:08X}): move SONG_ART0')
 
 
 def sounds_of(b4, b6, f):
-    """the sounds its code plays (BN4_PLAY_SOUND, r0 the sound): each BN6's of the same number where it is the same song
-    (how it sounds, xrecipe.song_sig); else kept as BN6's same number, an interim while BN4's sounds have no slots of
-    BN6's empty songs (xsong.c's allocations)"""
+    """the sounds its code plays (BN4_PLAY_SOUND, r0 the sound, a movs): each BN6's of the same number where it is the same
+    song (how it sounds, xrecipe.song_sig); else BN4's copied into its slot of BN6's empty songs (SOUND_SLOTS, xsong.c's
+    XSOUNDS) and the movs given the slot, the copy's room given once every family is derived (songs_room)"""
     ids = {}
     for e, w in f.walks.items():
         for site, t in w.bls.items():
             if t == BN4['sound']:
-                v, _ = T.back_value(w, site, 0)
-                ids.setdefault(v, []).append(site)
+                v, chain = T.back_value(w, site, 0)
+                ids.setdefault(v, []).append((site, chain))
     if None in ids:
-        f.decide('sound', f'a sound played at {", ".join(f"{s:08X}" for s in ids[None])} made otherwise')
+        f.decide('sound', f'a sound played at {", ".join(f"{s:08X}" for s, _ in ids[None])} made otherwise')
     odd = sorted(v for v in ids if v is not None and song_sig(b4, BN4['songs'], v) != song_sig(b6, SONGS6, v))
     same = sorted(v for v in ids if v is not None and v not in odd)
     if same:
         f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
-    if odd:
-        f.interim.append(f'its sounds {" and ".join(f"{v:#x}" for v in odd)} ({", ".join(f"{s:08X}" for v in odd for s in sorted(ids[v]))}) '
-                         f'kept as BN6\'s same numbers, other songs: BN4\'s sounds have no slots among BN6\'s empty songs yet '
-                         f'(src/audio/xsong.c\'s allocations), where a copy of each would go')
+    f.sounds = []
+    for v in odd:
+        slot = SOUND_SLOTS.get(v)
+        if slot is None:
+            f.decide('sound', f'its sound {v:#x} is no song of BN6\'s and has no slot (SOUND_SLOTS): ask')
+            continue
+        hp = b4.u32(BN4['songs'] + 8 * v)
+        player = b4.u16(BN4['songs'] + 8 * v + 4)
+        tracks, room6 = b4.u8(hp), b6.u8(MPLAYS6 + 12 * player + 8)
+        f.sounds.append((v, slot))
+        for site, chain in sorted(ids[v]):
+            if len(chain) != 1 or chain[0][1] != 'movs':
+                f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
+                continue
+            f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
+                               why=f'its sound {v:#x}: BN4\'s copied into BN6\'s empty slot {slot:#x}, on its player {player}'))
+        f.notes.append(f'its sound {v:#x} ({", ".join(f"{s:08X}" for s, _ in sorted(ids[v]))}): BN4\'s song copied into BN6\'s empty slot '
+                       f'{slot:#x}, on BN4\'s player {player} ({tracks} track{"s" if tracks != 1 else ""}; BN6\'s player {player} has {room6})')
+        if tracks > room6:
+            f.interim.append(f'its sound {v:#x} plays {room6} of its {tracks} tracks: BN6\'s player {player} has {room6} where BN4\'s has '
+                             f'{b4.u8(MPLAYS4 + 12 * player + 8)} (BN6_MPLAYS against BN4_MPLAYS), the rest let go as BN6\'s MPlayStart '
+                             f'starts no more tracks than its player has')
+
+
+def songs_room(b4, whole):
+    """each whole family's copied sounds a room in the families' art below their sprites (SONG_ART0 to ART0), one after
+    another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
+    done, at = set(), SONG_ART0
+    for f in whole:
+        f.songs = []
+        for v, slot in getattr(f, 'sounds', []):
+            if v in done:
+                continue
+            done.add(v)
+            room = rounded(song_bytes(b4, v, BN4['songs']), SONG_STEP)
+            f.songs.append(dict(song=v, slot=slot, at=at, room=room))
+            at += room
+            if at > SONG_ART_END:
+                sys.exit(f'xrecipe_bn4: {f.name}\'s sound {v:#x} ends at {at:08X}, past the sounds\' room ({SONG_ART_END:08X})')
 
 
 def blocks_of(b4, f, alloc):
@@ -1012,6 +1091,10 @@ def c_recipe(f):
         L.append(f'static const XvRange {n}_ranges[] = {{')
         L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["lo"]:03X}, 0x{x["hi"]:03X} }},   /* {x["why"]} */' for x in f.ranges]
         L.append('};')
+    if f.sides:
+        L.append(f'static const uint32_t {n}_sides[] = {{')
+        L += [f'\t0x{at:08X},   /* {why} */' for at, why in f.sides]
+        L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
@@ -1033,6 +1116,11 @@ def c_recipe(f):
     L += [f'static const XvSprite {n}_sprites[] = {{'] + [sprite_text(s) for s in [f.sprite] + f.attack_sprites] + ['};']
     if f.effects:
         L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
+    if getattr(f, 'songs', None):
+        L.append(f'static const XvSong {n}_songs[] = {{')
+        L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, XV_ART + 0x{x["at"] - XV_ART:X}, 0x{x["room"]:X} }},   /* its sound {x["song"]:#x}, '
+              f'BN4\'s song copied */' for x in f.songs]
+        L.append('};')
     L += c_family(f, n)
     return '\n'.join(L), f'&bn4_{n}'
 
@@ -1043,7 +1131,7 @@ def c_family(f, n):
          f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
          f'\t.first_id = XV_FIRST_ID + 0x{f.first_id - XV_FIRST_ID:X},', f'\t.home = XV_HOMES + 0x{f.home - XV_HOMES:X},']
     for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
-                         ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
+                         ('sides', f.sides), ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t.{field} = {n}_{field}, .n{field} = {count(field)},')
     L.append('\t.hooks = { ' + ', '.join(ref_text(h) for h in f.hooks) + ' },')
@@ -1057,8 +1145,12 @@ def c_family(f, n):
     L.append(f'\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
     if f.effects:
         L.append(f'\t.effects = {n}_effects, .neffects = {count("effects")},')
+    if getattr(f, 'songs', None):
+        L.append(f'\t.songs = {n}_songs, .nsongs = {count("songs")},')
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
+    if f.after:
+        L.append(f'\t.present = 0x{f.after:08X},   /* its after-state, copied: run after its state 0 and its hook 5 while BN6\'s battle is paused */')
     L.append('};')
     return L
 
@@ -1090,7 +1182,7 @@ def report_family(f):
          f'- sprites: ' + ', '.join(f'{s["list"]}:{s["index"]:#x} as {s["to_list"]}:{s["to_index"]:#x} at {s["at"]:08X}'
                                     for s in [f.sprite] + f.attack_sprites),
          f'- {len(f.walks)} routines walked, {len(f.tables)} jump tables, {len(f.imms)} immediates rewritten, '
-         f'{len(f.ranges)} NameID ranges', '', '### Calls out', '']
+         f'{len(f.ranges)} NameID ranges, {len(f.sides)} directions by the side', '', '### Calls out', '']
     for t, tw, how, cls, sites, audited in f.pairs:
         L.append(f'- {t:08X} x{len(sites)}: ' + (f'{tw} ({how})' if isinstance(tw, str) else f'BN6 {tw:08X} ({how})' if cls is None and tw else
                                                f'BN6 {tw:08X} ({how}, {cls}{", audited" if audited else ""})' if tw else f'none ({how})'))
@@ -1135,6 +1227,7 @@ def main():
             pairs.copies[c.spawner] = c
     fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
+    songs_room(b4, whole)
     for c in copies:
         for d in c.decisions:
             print(f'xrecipe_bn4: BN6\'s {c.ty:#x}\'s copy: {d}')

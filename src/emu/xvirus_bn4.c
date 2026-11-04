@@ -92,8 +92,9 @@ const int xvirus_bn4_bn6copy_nveneers = 30;
 static const XvBlock billy_blocks[] = {
 	{ 0x080B94E4, 0x080B999C, XV_CODE + 0x14440, 0xBBE06B34u },
 	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x14902, 0x793106FEu },
-	{ 0x080B52E4, 0x080B52EC, XV_CODE + 0x14D10, 0xF6607FB0u },
-	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x14D20, 0xB6A58CE9u },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x14D12, 0x7631C49Cu },
+	{ 0x080B52E4, 0x080B52EC, XV_CODE + 0x14D80, 0xF6607FB0u },
+	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x14D90, 0xB6A58CE9u },
 };
 static const XvData billy_data[] = {
 	{ 0x080B94E4, 0x080B94F6, XV_ZERO },
@@ -132,10 +133,16 @@ static const XvData billy_data[] = {
 	{ 0x080B996C, 0x080B9984, XV_RAW },
 	{ 0x0800AD54, 0x0800B128, XV_ZERO },
 	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 };
 static const XvPair billy_calls[] = {
 	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
 	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
 	{ 0x08007BE4, 0x0800A704 },   /* project:research, SAME */
 	{ 0x08007C20, 0x0800A754 },   /* project:research, SAME */
@@ -149,6 +156,7 @@ static const XvPair billy_calls[] = {
 	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
 	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
 	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
 	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
 	{ 0x080190D0, 0x08021AA4 },   /* project:billy, SAME */
@@ -207,16 +215,17 @@ static const XVirusFamily bn4_billy = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 2, .flags = 0x08 },
 	.sprites = billy_sprites, .nsprites = (int)(sizeof billy_sprites / sizeof *billy_sprites),
 	.effects = billy_effects, .neffects = (int)(sizeof billy_effects / sizeof *billy_effects),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's Spikey (its type 0x17 there, its enemy ids 25-30), as AI 65 with ids 0x2c6-0x2cb ---- */
-/* interim: its sounds 0xbc and 0xc4 (080D2F26, 080D2E86) kept as BN6's same numbers, other songs: BN4's sounds have no slots among BN6's empty songs yet (src/audio/xsong.c's allocations), where a copy of each would go */
 
 static const XvBlock spikey_blocks[] = {
-	{ 0x080BA404, 0x080BA7F4, XV_CODE + 0x14D50, 0x7BA719BAu },
-	{ 0x080D2DE8, 0x080D2FDC, XV_CODE + 0x15140, 0x6EDE0007u },
-	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x15342, 0x793106FEu },
-	{ 0x080B552A, 0x080B5594, XV_CODE + 0x15752, 0x29597AFDu },
-	{ 0x080B56A4, 0x080B56E4, XV_CODE + 0x157C0, 0x67EEC233u },
+	{ 0x080BA404, 0x080BA7F4, XV_CODE + 0x14DC0, 0x7BA719BAu },
+	{ 0x080D2DE8, 0x080D2FDC, XV_CODE + 0x151B0, 0x6EDE0007u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x153B2, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x157C2, 0x7631C49Cu },
+	{ 0x080B552A, 0x080B5594, XV_CODE + 0x15832, 0x29597AFDu },
+	{ 0x080B56A4, 0x080B56E4, XV_CODE + 0x158A0, 0x67EEC233u },
 };
 static const XvData spikey_data[] = {
 	{ 0x080BA404, 0x080BA416, XV_ZERO },
@@ -257,6 +266,8 @@ static const XvData spikey_data[] = {
 	{ 0x080D2FD4, 0x080D2FDC, XV_POOL },
 	{ 0x0800AD54, 0x0800B128, XV_ZERO },
 	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 	{ 0x080B557E, 0x080B5580, XV_ZERO },
 	{ 0x080B5580, 0x080B5584, XV_POOL },
 	{ 0x080B5584, 0x080B5594, XV_RAW },
@@ -267,6 +278,7 @@ static const XvPair spikey_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
 	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
 	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
 	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
 	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
 	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
@@ -275,6 +287,7 @@ static const XvPair spikey_calls[] = {
 	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
 	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
 	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
@@ -301,6 +314,7 @@ static const XvPair spikey_calls[] = {
 	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
 	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
 	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
 	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
@@ -320,8 +334,10 @@ static const XvImm spikey_imms[] = {
 	{ 0x080BA744, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080BA7DA, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080D2E18, THUMB_MOVS, 2, 0, 0x13, 0xC0 },   /* its object's sprite: list 4 0x13 in BN4, list 4 0xc0 in BN6 (copied) */
+	{ 0x080D2E84, THUMB_MOVS, 0, 0, 0xC4, 0x3E },   /* its sound 0xc4: BN4's copied into BN6's empty slot 0x3e, on its player 9 */
 	{ 0x080D2ECA, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D2EFC, THUMB_MOVS, 4, 0, 0x2A, 0x94 },   /* its effect: 0x2a in BN4, 0x94 in BN6 (moved) */
+	{ 0x080D2F24, THUMB_MOVS, 0, 0, 0xBC, 0x3F },   /* its sound 0xbc: BN4's copied into BN6's empty slot 0x3f, on its player 9 */
 	{ 0x080D2F74, THUMB_MOVS, 0, 0, 0x30, 0xE0 },   /* its object's type 0x30: moved, the dispatch's 0xe0 */
 	{ 0x080D2F84, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D2FA6, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
@@ -343,6 +359,10 @@ static const XvSprite spikey_sprites[] = {
 	{ 5, 0x11, 5, 0x99, XV_ART + 0x68B00, 0x2F00 },
 };
 static const XvId spikey_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 }, { 0x2A, 0x94 } };
+static const XvSong spikey_songs[] = {
+	{ 0xBC, 0x3F, XV_ART + 0x5A000, 0x40 },   /* its sound 0xbc, BN4's song copied */
+	{ 0xC4, 0x3E, XV_ART + 0x5A040, 0x40 },   /* its sound 0xc4, BN4's song copied */
+};
 
 static const XVirusFamily bn4_spikey = {
 	.name = "Spikey (BN4's)",
@@ -366,14 +386,16 @@ static const XVirusFamily bn4_spikey = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = false, .palette = 1, .flags = 0x00 },
 	.sprites = spikey_sprites, .nsprites = (int)(sizeof spikey_sprites / sizeof *spikey_sprites),
 	.effects = spikey_effects, .neffects = (int)(sizeof spikey_effects / sizeof *spikey_effects),
+	.songs = spikey_songs, .nsongs = (int)(sizeof spikey_songs / sizeof *spikey_songs),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's Shrimpy (its type 0x16 there, its enemy ids 31-36), as AI 66 with ids 0x2cc-0x2d1 ---- */
-/* interim: its sounds 0x9f and 0xc9 and 0xca (080D2C54, 080D2BEC, 080D2D26) kept as BN6's same numbers, other songs: BN4's sounds have no slots among BN6's empty songs yet (src/audio/xsong.c's allocations), where a copy of each would go */
 
 static const XvBlock shrimpy_blocks[] = {
-	{ 0x080BA0AC, 0x080BA404, XV_CODE + 0x15800, 0x9599E33Fu },
-	{ 0x080D2B28, 0x080D2DE8, XV_CODE + 0x15B60, 0xAAC60F82u },
-	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x15E22, 0x793106FEu },
+	{ 0x080BA0AC, 0x080BA404, XV_CODE + 0x158E0, 0x9599E33Fu },
+	{ 0x080D2B28, 0x080D2DE8, XV_CODE + 0x15C40, 0xAAC60F82u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x15F02, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x16312, 0x7631C49Cu },
 };
 static const XvData shrimpy_data[] = {
 	{ 0x080BA0AC, 0x080BA0BE, XV_ZERO },
@@ -427,11 +449,14 @@ static const XvData shrimpy_data[] = {
 	{ 0x080D2DE4, 0x080D2DE8, XV_POOL },
 	{ 0x0800AD54, 0x0800B128, XV_ZERO },
 	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 };
 static const XvPair shrimpy_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
 	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
 	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
 	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
 	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
 	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
@@ -440,6 +465,7 @@ static const XvPair shrimpy_calls[] = {
 	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
 	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
 	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
@@ -463,6 +489,7 @@ static const XvPair shrimpy_calls[] = {
 	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
 	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
 	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
 	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
@@ -481,8 +508,11 @@ static const XvImm shrimpy_imms[] = {
 	{ 0x080BA386, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080BA3F8, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080D2B6E, THUMB_MOVS, 2, 0, 0xB, 0xC1 },   /* its object's sprite: list 4 0xb in BN4, list 4 0xc1 in BN6 (copied) */
+	{ 0x080D2BEA, THUMB_MOVS, 0, 0, 0xC9, 0x3C },   /* its sound 0xc9: BN4's copied into BN6's empty slot 0x3c, on its player 8 */
 	{ 0x080D2C32, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D2C52, THUMB_MOVS, 0, 0, 0x9F, 0x3D },   /* its sound 0x9f: BN4's copied into BN6's empty slot 0x3d, on its player 28 */
 	{ 0x080D2C6A, THUMB_MOVS, 4, 0, 0x25, 0x95 },   /* its effect: 0x25 in BN4, 0x95 in BN6 (moved) */
+	{ 0x080D2D24, THUMB_MOVS, 0, 0, 0xCA, 0x3B },   /* its sound 0xca: BN4's copied into BN6's empty slot 0x3b, on its player 8 */
 	{ 0x080D2D5C, THUMB_MOVS, 0, 0, 0x2F, 0xE1 },   /* its object's type 0x2f: moved, the dispatch's 0xe1 */
 	{ 0x080D2D6C, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D2D90, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
@@ -504,6 +534,11 @@ static const XvSprite shrimpy_sprites[] = {
 	{ 3, 0x1A, 4, 0xC2, XV_ART + 0x6EA00, 0x1100 },
 };
 static const XvId shrimpy_effects[] = { { 0x25, 0x95 } };
+static const XvSong shrimpy_songs[] = {
+	{ 0x9F, 0x3D, XV_ART + 0x5A080, 0x1CC0 },   /* its sound 0x9f, BN4's song copied */
+	{ 0xC9, 0x3C, XV_ART + 0x5BD40, 0x40 },   /* its sound 0xc9, BN4's song copied */
+	{ 0xCA, 0x3B, XV_ART + 0x5BD80, 0x40 },   /* its sound 0xca, BN4's song copied */
+};
 
 static const XVirusFamily bn4_shrimpy = {
 	.name = "Shrimpy (BN4's)",
@@ -528,15 +563,17 @@ static const XVirusFamily bn4_shrimpy = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x04 },
 	.sprites = shrimpy_sprites, .nsprites = (int)(sizeof shrimpy_sprites / sizeof *shrimpy_sprites),
 	.effects = shrimpy_effects, .neffects = (int)(sizeof shrimpy_effects / sizeof *shrimpy_effects),
+	.songs = shrimpy_songs, .nsongs = (int)(sizeof shrimpy_songs / sizeof *shrimpy_songs),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's Walla (its type 0x25 there, its enemy ids 103-108), as AI 67 with ids 0x2d2-0x2d7 ---- */
-/* interim: its sounds 0x70 and 0x9a and 0xa6 and 0xb7 (080D4C3C, 080BEA8A, 080D4CE4, 080BEAEA) kept as BN6's same numbers, other songs: BN4's sounds have no slots among BN6's empty songs yet (src/audio/xsong.c's allocations), where a copy of each would go */
 
 static const XvBlock walla_blocks[] = {
-	{ 0x080BE888, 0x080BEB68, XV_CODE + 0x16230, 0xD185211Eu },
-	{ 0x080D4B04, 0x080D4D30, XV_CODE + 0x16510, 0xDA54AE1Cu },
-	{ 0x080B52E4, 0x080B52EC, XV_CODE + 0x16740, 0xF6607FB0u },
-	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x16750, 0xB6A58CE9u },
+	{ 0x080BE888, 0x080BEB68, XV_CODE + 0x16380, 0xD185211Eu },
+	{ 0x080D4B04, 0x080D4D30, XV_CODE + 0x16660, 0xDA54AE1Cu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x16892, 0x7631C49Cu },
+	{ 0x080B52E4, 0x080B52EC, XV_CODE + 0x16900, 0xF6607FB0u },
+	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x16910, 0xB6A58CE9u },
 };
 static const XvData walla_data[] = {
 	{ 0x080BE888, 0x080BE89A, XV_ZERO },
@@ -570,10 +607,13 @@ static const XvData walla_data[] = {
 	{ 0x080D4CBC, 0x080D4CC0, XV_POOL },
 	{ 0x080D4CC0, 0x080D4CD8, XV_RAW },
 	{ 0x080D4D2C, 0x080D4D30, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 };
 static const XvPair walla_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
 	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
 	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
 	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
 	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
@@ -604,6 +644,7 @@ static const XvPair walla_calls[] = {
 	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
 	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
 	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
 	{ 0x080164B4, 0x0810A952 },   /* project:families-2, DIFF (audited) */
 	{ 0x080190D0, 0x08021AA4 },   /* project:billy, SAME */
@@ -616,10 +657,14 @@ static const XvImm walla_imms[] = {
 	{ 0x080BE98E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 	{ 0x080BE9E4, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080BEA82, THUMB_MOVS, 4, 0, 0x7, 0x96 },   /* its effect: 0x7 in BN4, 0x96 in BN6 (moved) */
+	{ 0x080BEA88, THUMB_MOVS, 0, 0, 0x9A, 0x39 },   /* its sound 0x9a: BN4's copied into BN6's empty slot 0x39, on its player 8 */
+	{ 0x080BEAE8, THUMB_MOVS, 0, 0, 0xB7, 0x37 },   /* its sound 0xb7: BN4's copied into BN6's empty slot 0x37, on its player 9 */
 	{ 0x080BEB5E, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080D4B2C, THUMB_MOVS, 2, 0, 0x27, 0xC3 },   /* its object's sprite: list 4 0x27 in BN4, list 4 0xc3 in BN6 (copied) */
 	{ 0x080D4C02, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D4C34, THUMB_MOVS, 4, 0, 0xF, 0x97 },   /* its effect: 0xf in BN4, 0x97 in BN6 (moved) */
+	{ 0x080D4C3A, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's empty slot 0x3a, on its player 9 */
+	{ 0x080D4CE2, THUMB_MOVS, 0, 0, 0xA6, 0x38 },   /* its sound 0xa6: BN4's copied into BN6's empty slot 0x38, on its player 9 */
 	{ 0x080D4D0A, THUMB_MOVS, 0, 0, 0x3C, 0xE2 },   /* its object's type 0x3c: moved, the dispatch's 0xe2 */
 	{ 0x080D4D1A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 };
@@ -642,6 +687,12 @@ static const XvSprite walla_sprites[] = {
 	{ 5, 0x01, 5, 0x9A, XV_ART + 0x73600, 0x1800 },
 };
 static const XvId walla_effects[] = { { 0x07, 0x96 }, { 0x0F, 0x97 } };
+static const XvSong walla_songs[] = {
+	{ 0x70, 0x3A, XV_ART + 0x5BDC0, 0x40 },   /* its sound 0x70, BN4's song copied */
+	{ 0x9A, 0x39, XV_ART + 0x5BE00, 0x80 },   /* its sound 0x9a, BN4's song copied */
+	{ 0xA6, 0x38, XV_ART + 0x5BE80, 0x40 },   /* its sound 0xa6, BN4's song copied */
+	{ 0xB7, 0x37, XV_ART + 0x5BEC0, 0x40 },   /* its sound 0xb7, BN4's song copied */
+};
 
 static const XVirusFamily bn4_walla = {
 	.name = "Walla (BN4's)",
@@ -665,16 +716,18 @@ static const XVirusFamily bn4_walla = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x00 },
 	.sprites = walla_sprites, .nsprites = (int)(sizeof walla_sprites / sizeof *walla_sprites),
 	.effects = walla_effects, .neffects = (int)(sizeof walla_effects / sizeof *walla_effects),
+	.songs = walla_songs, .nsongs = (int)(sizeof walla_songs / sizeof *walla_songs),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's Elmperor (its type 0x2e there, its enemy ids 109-114), as AI 68 with ids 0x2d8-0x2dd ---- */
-/* interim: its sounds 0x9d and 0xfc (080DC700, 080C2A7E) kept as BN6's same numbers, other songs: BN4's sounds have no slots among BN6's empty songs yet (src/audio/xsong.c's allocations), where a copy of each would go */
 /* interim: its panel types 8 and 0xA (its attack's, 0x080DC780: 6, 7, 8, 4, 0xA, set by BN6's object_setPanelType) and the panel flags 0x1000 and 0x200 it reads its element by (0x080C2948: 0x400, 0x800, 0x1000, 0x100, 0x200) kept as BN4's numbers: 8 is BN6's volcano (an eruption every 140 frames) by its number and its word (0x11010), which is BN5's lava's too, and which of them BN4's 8 is stays unread; 0xA is BN4's holding panel, none in BN6 (bn4_twins.PANEL4TO6), where BN6's 0xA is a conveyor and its flag 0x200 the conveyors' (0x10210): the attack's fifth panel pushes in BN6, and Elmperor standing on a conveyor reads that element. 6, 7 and 4 (grass, ice, poison) and their flags 0x400, 0x800 and 0x100 are BN6's own numbers and words (BN4_PANEL_FLAGS_OF against BN6_PANEL_FLAGS_OF), decided */
 /* interim: a panel its attack changes keeps its new type: BN4 gives it 0xBE frames (+0x12) to change back, which BN6's panels count for its conveyors alone */
 /* interim: its aura (the fourth kind's 0x4C, its sprite drawn again in its element's colours through BN4's tile buffer 0x02037810) not drawn: its spawn answered 0 (bn4_twins.AUDITS); its HP's return goes on */
 
 static const XvBlock elmperor_blocks[] = {
-	{ 0x080C2790, 0x080C2A9C, XV_CODE + 0x16780, 0x1AD67A9Bu },
-	{ 0x080DC678, 0x080DC7AC, XV_CODE + 0x16A90, 0x10B8694Cu },
+	{ 0x080C2790, 0x080C2A9C, XV_CODE + 0x16940, 0x1AD67A9Bu },
+	{ 0x080DC678, 0x080DC7AC, XV_CODE + 0x16C50, 0x10B8694Cu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x16D92, 0x7631C49Cu },
 };
 static const XvData elmperor_data[] = {
 	{ 0x080C2790, 0x080C27A2, XV_ZERO },
@@ -712,10 +765,13 @@ static const XvData elmperor_data[] = {
 	{ 0x080DC77C, 0x080DC780, XV_POOL },
 	{ 0x080DC780, 0x080DC78A, XV_RAW },
 	{ 0x080DC7A8, 0x080DC7AC, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 };
 static const XvPair elmperor_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
 	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
 	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
 	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
 	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
@@ -742,6 +798,8 @@ static const XvPair elmperor_calls[] = {
 	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
 	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
 	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x08013C48, 0x08148864 },   /* its pre-step's way on: a bx r0 of BN6's, r0 BN6's state step, AIMED (audited) */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
 	{ 0x080B6568, 0x0800EBD4 },   /* project:billy, DIFF (audited) */
@@ -757,8 +815,10 @@ static const XvImm elmperor_imms[] = {
 	{ 0x080C2960, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
 	{ 0x080C2972, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080C2A1A, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080C2A7C, THUMB_MOVS, 0, 0, 0xFC, 0x35 },   /* its sound 0xfc: BN4's copied into BN6's empty slot 0x35, on its player 19 */
 	{ 0x080C2A86, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 	{ 0x080DC6AA, THUMB_MOVS, 2, 0, 0x38, 0xC5 },   /* its object's sprite: list 4 0x38 in BN4, list 4 0xc5 in BN6 (copied) */
+	{ 0x080DC6FE, THUMB_MOVS, 0, 0, 0x9D, 0x36 },   /* its sound 0x9d: BN4's copied into BN6's empty slot 0x36, on its player 9 */
 	{ 0x080DC71E, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DC78E, THUMB_MOVS, 0, 0, 0x79, 0xE3 },   /* its object's type 0x79: moved, the dispatch's 0xe3 */
 	{ 0x080DC79E, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
@@ -781,6 +841,10 @@ static const XvRef elmperor_states[] = {
 static const XvSprite elmperor_sprites[] = {
 	{ 1, 0x13, 1, 0xC4, XV_ART + 0x74E00, 0x2000 },   /* (LZ77 in BN4) */
 	{ 4, 0x38, 4, 0xC5, XV_ART + 0x76E00, 0x1800 },
+};
+static const XvSong elmperor_songs[] = {
+	{ 0x9D, 0x36, XV_ART + 0x5BF00, 0x80 },   /* its sound 0x9d, BN4's song copied */
+	{ 0xFC, 0x35, XV_ART + 0x5BF80, 0x1AC0 },   /* its sound 0xfc, BN4's song copied */
 };
 
 static const XVirusFamily bn4_elmperor = {
@@ -805,16 +869,19 @@ static const XVirusFamily bn4_elmperor = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x04 },
 	.sprites = elmperor_sprites, .nsprites = (int)(sizeof elmperor_sprites / sizeof *elmperor_sprites),
+	.songs = elmperor_songs, .nsongs = (int)(sizeof elmperor_songs / sizeof *elmperor_songs),
 	.prestep = 0x080C280E,   /* its update's own work on, run as its pre-step (bn4_twins.PRESTEP) */
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's CirKill (its type 0x20 there, its enemy ids 91-96), as AI 69 with ids 0x2de-0x2e3 ---- */
-/* interim: its sounds 0xf9 (080BD430) kept as BN6's same numbers, other songs: BN4's sounds have no slots among BN6's empty songs yet (src/audio/xsong.c's allocations), where a copy of each would go */
+/* interim: its sound 0xf9 plays 1 of its 2 tracks: BN6's player 29 has 1 where BN4's has 2 (BN6_MPLAYS against BN4_MPLAYS), the rest let go as BN6's MPlayStart starts no more tracks than its player has */
 
 static const XvBlock cirkill_blocks[] = {
-	{ 0x080BD094, 0x080BD4B0, XV_CODE + 0x16BD0, 0xB6638170u },
-	{ 0x080CE6E0, 0x080CE840, XV_CODE + 0x16FF0, 0x5AA41525u },
-	{ 0x080CE5B0, 0x080CE6E0, XV_CODE + 0x17150, 0x69329294u },
-	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x17282, 0x793106FEu },
+	{ 0x080BD094, 0x080BD4B0, XV_CODE + 0x16E00, 0xB6638170u },
+	{ 0x080CE6E0, 0x080CE840, XV_CODE + 0x17220, 0x5AA41525u },
+	{ 0x080CE5B0, 0x080CE6E0, XV_CODE + 0x17380, 0x69329294u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x174B2, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x178C2, 0x7631C49Cu },
 };
 static const XvData cirkill_data[] = {
 	{ 0x080BD094, 0x080BD0A6, XV_ZERO },
@@ -861,16 +928,21 @@ static const XvData cirkill_data[] = {
 	{ 0x0800AD54, 0x0800AF90, XV_ZERO },
 	{ 0x0800AFBC, 0x0800B128, XV_ZERO },
 	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
 };
 static const XvPair cirkill_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
 	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
 	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
 	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
 	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
 	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
 	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
 	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
@@ -896,6 +968,7 @@ static const XvPair cirkill_calls[] = {
 	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
 	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
 	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
 	{ 0x08013C48, 0x08148864 },   /* its pre-step's way on: a bx r0 of BN6's, r0 BN6's state step, AIMED (audited) */
 	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
 	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
@@ -911,6 +984,7 @@ static const XvImm cirkill_imms[] = {
 	{ 0x080BD2A6, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080BD374, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080BD422, THUMB_MOVS, 4, 0, 0x46, 0x98 },   /* its effect: 0x46 in BN4, 0x98 in BN6 (moved) */
+	{ 0x080BD42E, THUMB_MOVS, 0, 0, 0xF9, 0x34 },   /* its sound 0xf9: BN4's copied into BN6's empty slot 0x34, on its player 29 */
 	{ 0x080CE74A, THUMB_STRB, 0, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080CE79A, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE7D6, THUMB_MOVS, 4, 0, 0x56, 0x99 },   /* its effect: 0x56 in BN4, 0x99 in BN6 (moved) */
@@ -918,6 +992,9 @@ static const XvImm cirkill_imms[] = {
 };
 static const XvRange cirkill_ranges[] = {
 	{ 0x080BD480, 0x2DE, 0x2E3 },   /* BN4's ids 0x5b-0x60, its own */
+};
+static const uint32_t cirkill_sides[] = {
+	0x0800AFB2,   /* its call to 0800AF90 (bn4_twins.SIDED): its left and right by the object's side, BN6's way */
 };
 static const XvNumber cirkill_numbers[] = {
 	{ 0x080BD138, 0x080BD13C, 0x0810A349 },   /* its pre-step's way on: BN6's state step, not its state table */
@@ -945,6 +1022,9 @@ static const XvSprite cirkill_sprites[] = {
 	{ 4, 0x15, 4, 0xC8, XV_ART + 0x7B200, 0x800 },
 };
 static const XvId cirkill_effects[] = { { 0x46, 0x98 }, { 0x56, 0x99 } };
+static const XvSong cirkill_songs[] = {
+	{ 0xF9, 0x34, XV_ART + 0x5DA40, 0x80 },   /* its sound 0xf9, BN4's song copied */
+};
 
 static const XVirusFamily bn4_cirkill = {
 	.name = "CirKill (BN4's)",
@@ -959,6 +1039,7 @@ static const XVirusFamily bn4_cirkill = {
 	.words = cirkill_words, .nwords = (int)(sizeof cirkill_words / sizeof *cirkill_words),
 	.imms = cirkill_imms, .nimms = (int)(sizeof cirkill_imms / sizeof *cirkill_imms),
 	.ranges = cirkill_ranges, .nranges = (int)(sizeof cirkill_ranges / sizeof *cirkill_ranges),
+	.sides = cirkill_sides, .nsides = (int)(sizeof cirkill_sides / sizeof *cirkill_sides),
 	.numbers = cirkill_numbers, .nnumbers = (int)(sizeof cirkill_numbers / sizeof *cirkill_numbers),
 	.bytes = cirkill_bytes, .nbytes = (int)(sizeof cirkill_bytes / sizeof *cirkill_bytes),
 	.types = cirkill_types, .ntypes = (int)(sizeof cirkill_types / sizeof *cirkill_types),
@@ -970,7 +1051,9 @@ static const XVirusFamily bn4_cirkill = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = cirkill_sprites, .nsprites = (int)(sizeof cirkill_sprites / sizeof *cirkill_sprites),
 	.effects = cirkill_effects, .neffects = (int)(sizeof cirkill_effects / sizeof *cirkill_effects),
+	.songs = cirkill_songs, .nsongs = (int)(sizeof cirkill_songs / sizeof *cirkill_songs),
 	.prestep = 0x080BD112,   /* its update's own work on, run as its pre-step (bn4_twins.PRESTEP) */
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);

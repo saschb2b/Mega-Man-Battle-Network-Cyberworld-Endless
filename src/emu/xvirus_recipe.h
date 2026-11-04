@@ -74,7 +74,7 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
 typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
 /* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
  * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
- * on), on the music player BN6's own song of its number plays on */
+ * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST), on the music player its own game's entry names */
 typedef struct { uint16_t from; uint8_t slot; uint32_t at, room; } XvSong;
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
@@ -147,12 +147,18 @@ typedef struct {
 	int nranges;
 	const XvCmp *cmps;         /* its compares of a held chip's id with BN6's id past an immediate, through a shim */
 	int ncmps;
+	const uint32_t *sides;     /* its calls to its game's direction rule (BN4_DIRECTION, copied with it), each through a shim that
+	                              numbers left and right by the object's side, as BN6's rule does (xvirus_shim.h) */
+	int nsides;
 	const XvSong *songs;       /* its sounds BN6 has none of, copied into BN6's empty song slots */
 	int nsongs;
 	uint32_t prestep;          /* its game's virus dispatcher's case for its ids, which a port runs before its state each frame
 	                              (xvirus_shim.h, its pre-step: the case's address in its game, 0 none) */
 	const uint16_t *held_chips; /* its viruses' held chips as BN6's ids, six lists of 16 (0xFFFF ending one), written into its home
 	                              (`held` 0); a chip of its game's BN6 has none of left out (the generator's hold-outs) */
+	uint32_t present;          /* its game's after-state, one of its blocks (BN4's BN4_VIRUS_PRESENT, which has no pause test), run after
+	                              its state 0 and its hook 5 where BN6's own (BN6_VIRUS_PRESENT) skips it for the pause alone (xvirus_shim.h,
+	                              a paused present): it animates from its spawn through its appear as in its game; 0 none */
 } XVirusFamily;
 
 #define XV_ICE_OWN (-1)
@@ -230,8 +236,10 @@ typedef struct {
 #define XV_FAMILIES 64                     /* the families' homes */
 #define XV_SONG_SLOTS 3                    /* BN6's empty song slots the families' sounds take, the last three (issue #82's shared
                                               allocations: one slot a BN5 sound whatever track copies it; the other tracks'
-                                              below them, xsong.c's per-run themes in 0x26-0x3F): */
+                                              below them, xsong.c's per-run themes in 0x26-0x33, BN4's families' in 0x34-0x3F): */
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
+#define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
+#define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */

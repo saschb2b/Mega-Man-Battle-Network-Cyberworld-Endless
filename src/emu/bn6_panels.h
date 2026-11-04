@@ -91,6 +91,8 @@
 #define BN6_AI_ATTACK_VARS    0xA0        /* an AI data's attack's variables (bn6.h, BN6_T1_AI_DATA; BN4's +0x70, bn4.h BN4_AI_ATTACK_VARS) */
 #define BN6_COLL_DAMAGE_ADD   0x84       /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */
 #define BN6_COLL_POISON       0x8C        /* u16, poison's damage, a point each 7 frames (the sea's on a Fire object, as xpanels.c brings it) */
+#define BN6_COLL_POISON_TIMER 0x08        /* u8, the frames to poison's next point on a poison panel: BN6_PANEL_STEP_POISON's ldrb [r7,#8], less 1
+                                           * a frame, 6 again with a point (0x0801A1B8-0x0801A1C2), 0 off poison (0x0801A1D0); BN4's +6 */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */
 
 /* BN5's sea's submerge (bn5.h, BN5_SEA_SUBMERGE), which BN6's engine dropped
@@ -105,7 +107,12 @@
 #define BN6_COLL_MADE         0x080198CAu /* str r0,[r5,#0x54]: a collision data made (0x08019892), r0 it; BN5's clears its submerge with it */
 #define BN6_COLL_PANEL_BYTE   0x0C        /* u8, what 0x0800E994 gives of its panel, written by the collision panels' update (0x0801A04C, at
                                            * 0x0801A062; BN4's +0x0A) */
-#define BN6_COLL_COUNTER      0x0D        /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
+#define BN6_DIRECTION         0x0800E994u /* the direction from a panel (r2, r3) to another (r0, r1), r4 the object's side (+0x16): 1 up,
+                                           * 2 down, 4 right and 3 left on side 0 and the other way on side 1, 5 two panels on or a diagonal
+                                           * move; read by 0x0800E498 (by +0xC, from 0x0800E468). BN4's rule BN4_DIRECTION by the screen */
+#define BN6_HP_LOW_STEP       0x0801C840u /* the HP gauge's step, entry 4 of the HUD's table 0x0801BF10: BN4_HP_LOW_STEP's twin from its HP
+                                           * test on, its count +6 to 45, then sound 0x84 (0x0801C880) */
+#define BN6_COLL_COUNTER      0x0D       /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
 #define BN6_COLL_HIT_KIND     0x09        /* u8 set by 0x0801A140 (BN4's +7, 0x08012F74) */
 #define BN6_COLL_STATUS_GIVEN 0x10        /* u8 the status a hit gives, from its object's +6 (0x0801A258), passed by the hit pass at
                                            * 0x081D784E to the struck's BN6_COLL_STATUS_TAKEN (BN4's +0xE) */

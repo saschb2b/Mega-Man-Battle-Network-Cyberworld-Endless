@@ -54,4 +54,53 @@
                                        * (+0 set up, 0x0800EB86 / 0x0800EB8E; +1 its state, 0x0800E4F8) */
 #define BN4_CONTROL_BLOCKS 0x02035A70u /* the sides' control blocks, 0x40 each (cleared by 0x0800E8FE); BN6's ready (0x080F1694) keeps none */
 
+/* (what Walla's and Elmperor's specs met, each read against BN6's twin: docs/devtools/differential.md, The BN4 trace) */
+#define BN4_PLAYER_STRUCK 0x08010960u /* MegaMan's struck state (BN4_PLAYER_STATES entry 3): sets his flags' 0x400 as it begins
+                                       * (0x0801096C-0x08010970, object_setFlag 0x08012F82) and clears it as its count ends (0x080109DE);
+                                       * BN6's twin 0x080174FE sets and clears 0x400400 (0x0801750A, 0x0801758A) */
+#define BN4_HIT_EFFECT    0x08012F44u /* the effect an attack's hits make, run by it each frame (Walla's rings, 0x080D4BEA): its place
+                                       * drawn (0x08014620) and the hit's spark spawned (0x080E2140); BN6's twin 0x0801A0D4 */
+#define BN4_POISON_STEP   0x08013010u /* the poison panel's step under an object, its cmp r0,#4 (BN6_PANEL_STEP_POISON's twin):
+                                       * BN4_COLL_POISON_TIMER less 1 a frame (0x0801301E), 6 again with +0x34 a point more (0x08013026-
+                                       * 0x0801302E), 0 off poison (0x08013034) */
+#define BN4_DIRECTION     0x0800AF90u /* the direction from a panel (r2 column, r3 row) to another (r0, r1), a leaf: 4 and 3 by the
+                                       * column (right and left by the screen), else 2 and 1 by the row, 0 none (0x0800AF92-0x0800AFAE);
+                                       * BN6's rule (0x0800E994) numbers right 4 and left 3 on side 0 and the other way on side 1 (r4,
+                                       * the object's +0x16: 0x0800E9C4, 0x0800E9D0) and a move of two panels or a diagonal one 5 */
+#define BN4_HP_LOW_STEP   0x0801472Cu /* the HP gauge's step, entry 0 of the HUD's table 0x080146CC (0x080146A8 runs them by its word's
+                                       * bits each frame): HP at a quarter of the maximum or less counts +0x19 to 45, then sound 0x82
+                                       * (0x0801475C); BN6's twin BN6_HP_LOW_STEP, its count +6, its sound 0x84 */
+#define BN4_SPRITE_UPDATE 0x0800285Cu /* an object's sprite each fight frame, its work in IWRAM (0x03006377; BN6's twin 0x080026C4, its
+                                       * 0x03006793): its frame's count down, at 0 the next frame's record (+0xAC, 20 bytes, its duration at
+                                       * +16, +18's 0x80 its last) */
+
+/* A virus's appear (docs/rom/bn4.md, A virus's appear and the engine's appear bits): the generic state 0 (BN4_STATE_GENERIC_0,
+ * bn4.h) picks one of four by its +5 and the BattleSettings' +6 bit 0x20; a plain battle's viruses and MegaMan take
+ * BN4_APPEAR, BN6_APPEAR's twin */
+#define BN4_APPEAR        0x0800FE00u /* the plain appear, by +0xA through its table 0x0800FE14: 0x0800FE20 into the appear queue
+                                       * (0x08007F1C) and hidden, waiting for BN4_APPEAR_BITS' bit 0 and the queue's head; 0x0800FE92
+                                       * the 2 x 16 frame blink, then out of the queue (0x08007F46); 0x0800FED6 waiting for bit 1, then
+                                       * CurAction 1. BN6_APPEAR's steps but for BN4's battle kind 0x44 ([[r10+0x18]+0xF]) and its sound */
+#define BN4_APPEAR_BITS   0x080019C0u /* [[r10+0x18]+0x64] into r0: the battle state's appear bits (bit 0 the viruses may appear,
+                                       * set by the opening at 0x080E1F0E after its fade; bit 1 all have); BN6_APPEAR_BITS' twin */
+#define BN4_APPEAR_BITS_SET 0x080019A8u /* ... r0's bits set in it (BN6_APPEAR_BITS_SET's twin) */
+
+/* The sounds BN4's moved families play that are no BN6 song (xrecipe.song_sig): each a movs r0,#N before its bl to
+ * BN4_PLAY_SOUND in the family's code; its song read by its number through BN4's song table
+ * (XRomLayout.song_table), copied into BN6 at its slot of BN6's empty songs (tools/xrecipe_bn4.py's SOUND_SLOTS,
+ * src/audio/xsong.c's XSOUNDS) on the player BN4's entry names, the copy's movs given the slot (docs/rom/bn4.md, the
+ * families' sounds) */
+#define BN4_SOUND_SPIKEY_C4   0x080D2E84u /* Spikey's 0xC4, player 9 (its fireball's code, the third kind's 0x30) */
+#define BN4_SOUND_SPIKEY_BC   0x080D2F24u /* ... its 0xBC, player 9 */
+#define BN4_SOUND_SHRIMPY_C9  0x080D2BEAu /* Shrimpy's 0xC9, player 8 (its bubble's code, the third kind's 0x2F) */
+#define BN4_SOUND_SHRIMPY_9F  0x080D2C52u /* ... its 0x9F, player 28 */
+#define BN4_SOUND_SHRIMPY_CA  0x080D2D24u /* ... its 0xCA, player 8 */
+#define BN4_SOUND_WALLA_9A    0x080BEA88u /* Walla's 0x9A, player 8 */
+#define BN4_SOUND_WALLA_B7    0x080BEAE8u /* ... its 0xB7, player 9 */
+#define BN4_SOUND_WALLA_70    0x080D4C3Au /* ... its 0x70, player 9 */
+#define BN4_SOUND_WALLA_A6    0x080D4CE2u /* ... its 0xA6, player 9 */
+#define BN4_SOUND_ELMPEROR_FC 0x080C2A7Cu /* Elmperor's 0xFC, player 19 */
+#define BN4_SOUND_ELMPEROR_9D 0x080DC6FEu /* ... its 0x9D, player 9 */
+#define BN4_SOUND_CIRKILL_F9  0x080BD42Eu /* CirKill's 0xF9, player 29, two tracks */
+
 #endif

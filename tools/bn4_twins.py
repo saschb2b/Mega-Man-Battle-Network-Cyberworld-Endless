@@ -44,6 +44,9 @@ TWINS = (
     (0x08009DA0, 0x0800CBD8, 'families-2'), (0x08009DC4, 0x0800CC0A, 'families-2'), (0x0800ABCA, 0x0810A952, 'families-2'),
     (0x080164B4, 0x0810A952, 'families-2'), (0x080E407A, 0x0810A952, 'families-2'), (0x080E76EA, 0x080011EC, 'families-2'),
     (0x080E770C, 0x0810A952, 'families-2'), (0x080CDCE4, 0x0801156A, 'families-2'),
+    # the after-state's (BN4_VIRUS_PRESENT, copied with each family: COPIED), its calls BN6's twin makes in the same places
+    # (0x08016E64): the sprite update (BN4_SPRITE_UPDATE, BN6's 0x080026C4) and the struck word read (BN4's +0x68, BN6's +0x40)
+    (0x0800285C, 0x080026C4, 'after-state'), (0x08012FB0, 0x0801A180, 'after-state'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -147,6 +150,21 @@ COPIED = {
     0x080B56A4: "a panel of its side but its own at random (its table of panels' masks by side): BN6's nearest (0x08015C48) "
                 "takes the panels an attack object holds too (its masks 0x0F8800A0 where BN4's 0x3F8800A0); copied, its table "
                 "with it",
+    0x08010736: "a virus's after-state (BN4_VIRUS_PRESENT, its type routine's tail after each state): BN6's twin "
+                "(0x08016E64, BN6_VIRUS_PRESENT, at BN6's virus type's tail, 0x0810A284) skips it while the battle is paused "
+                "(0x08016E84-0x08016E90), BN4's never; copied, run after its state 0 (its appear) and its hook 5 (its spawn "
+                "done) while BN6's skips it for the pause alone (XVirusFamily.present, xvirus_shim.h's paused present), so it "
+                "animates from its spawn through its appear as in BN4",
+}
+# A copied rule whose answer BN6 numbers otherwise, by the object's side: each call of a family's code to it made a call
+# to a shim of its home that calls the rule's copy and numbers its answer BN6's way (src/emu/xvirus_shim.h, a direction;
+# XVirusFamily.sides): entry -> why
+SIDED = {
+    0x0800AF90: "BN4's direction rule (BN4_DIRECTION): right 4 and left 3 by the screen, which BN6's collision data holds by "
+                "the object's side, as BN6's rule numbers them (0x0800E994, r4 its +0x16: right 4 and left 3 on side 0, 3 and "
+                "4 on side 1; BN6's collision panels' update 0x0801A04C passes it) and BN6's code reads them (0x0800E498, by "
+                "+0xC from 0x0800E468): its 3 and 4 swapped on side 1, up, down and none as they are (cirkill_v1 parted at t43 "
+                "on its +0xC, BN6's copy writing BN4's 3 for a move to the left on side 1, where BN6's rule gives 4)",
 }
 # a copied routine's data past its pool, copied with it as it is (raw): entry -> (start, end, what)
 COPIED_DATA = {

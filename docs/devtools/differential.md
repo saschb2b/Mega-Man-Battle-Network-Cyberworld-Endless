@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -767,7 +767,160 @@ format, its game 4: the trace's header names it):
   CurActions, BN4's generic 0-5 BN6's 0-5 and its own from 6 BN6's from 8
   (the recipe's state table and immediates; MegaMan's ready 6 BN6's 8, as
   BN5's); a pointer into a moved family's sprite by its offset in it
-  (BN4's own sprite, the recipe's copy in BN6's free space). The
+  (BN4's own sprite, the recipe's copy in BN6's free space). A sprite
+  BN4 keeps LZ77'd (its list word's bit 31, the recipe's `(LZ77 in BN4)`:
+  Spikey's, Shrimpy's, Walla's, Elmperor's and CirKill's battle sprites)
+  is drawn from RAM: the battle's preload (`0x08002AEC`, from the setup's
+  `0x08006C9A`) decompresses each foe's into its sprite cache
+  (`BN4_SPRITE_CACHE`, `0x0200F720`: eight keys, list offset << 8 \|
+  number, and their sprites, each the buffer + 4, past the LZ77 data's
+  size word), and `sprite_load` takes it from there (its look-up
+  `0x08002ACA`), as BN6's battle cache serves BN6's compressed ones. The
+  trace carries the cache's 0x38 bytes each frame in the block BN6 keeps
+  apart, zeros else for BN4 (`src/dev/xdiff.c`, `apart4_out`), and
+  `bn4_cache` reads it: the pointer is read by its offset from the
+  cache's sprite for the row's key, its room the LZ77 header's size less
+  that word; a key not in the cache maps nothing. The recipe's copy is
+  the same bytes, its size word dropped too (`tools/xrecipe.py`'s
+  `sprite`), so Spikey's +0xA8 reads ('sprite', 2, 4) in both. Its
+  mutation (tests/xdiff/mutations.json, on `spikey_v1`) aims BN6's list
+  1's 0xC1 at Shrimpy's copy, its +0xA8 then BN6's ('sprite', 5, 4):
+  `spikey_v1` fails at t1 without it, so the line it adds is the check.
+  The five's shared opening, settled since, each from both games' code:
+  - **The setup's draws** (`xd_replay_setup`, `src/dev/xdiff_events.c`; a
+    BN4 spec's alone): a family draws before the fight is seeded, in the
+    battle's paused opening, where BN6's replay gave nothing (its draws
+    keyed only from the seed on): Spikey's init (`BN4_SPIKEY_INIT`,
+    `0x080BA428`) stores its moves before an attack, 4 plus a draw & 3
+    (`BN4_SPIKEY_MOVES`, `0x080BA5BC`, from `0x080BA46C`), BN4's 4 against
+    BN6's 7, and Shrimpy's init its first way at random (`0x080BA11A`: its
+    row and panels apart). BN4's draws of the family's code before its seed
+    are kept as its setup's, in order, and BN6's k-th setup draw of a key
+    is given BN4's k-th of that key, whatever the frame (each game's opening
+    its own length; the battle's offset is of the fight's frames), one with
+    none drawn as it is and said so. Spikey's one and Shrimpy's one each
+    replayed: +0x88 and the row alike. Its mutation (tests/xdiff/mutations.json,
+    `spikey_v1`): the init's `adds r0,#4` made 5 in BN6's copy, caught at t1.
+  - **The opening's idle animation, ported** (`XVirusFamily.present`,
+    `src/emu/xvirus_shim.h`'s paused present; [BN4 Red Sun](../rom/bn4.md), A
+    virus's after-state ported through BN6's paused opening): both games
+    update a virus's sprite in its after-state routine, twins but for one
+    test: BN4's (`BN4_VIRUS_PRESENT`, `0x08010736`, at the tail of each
+    family's own type routine, `0x080BA410` in Spikey's) runs the sprite
+    update (`BN4_SPRITE_UPDATE`, `0x0800285C`) whenever the object runs;
+    BN6's (`BN6_VIRUS_PRESENT`, `0x08016E64`, at its virus type's tail,
+    `BN6_VIRUS_TYPE` `0x0810A284`, every virus's) skips it while the battle
+    is paused (`0x08016E84`-`0x08016E90`: the BattleSettings' mode,
+    `BN6_SETTINGS_MODE_READ`, not 1, then the pause test, `BN6_PAUSE_TEST`).
+    The object runner runs a paused object while its +0 has 0x04, so before
+    the port BN4's virus animated from its spawn through the opening and
+    BN6's not once before its first fight frame. The port, in the recipe and
+    never in BN6's routine: `tools/xrecipe_bn4.py` (`after_of`) copies BN4's
+    after-state with each family (`tools/bn4_twins.py` COPIED, its calls
+    BN6's twins), and the installer (`src/emu/xvirus.c` `paused_put`) puts a
+    paused present in the family's state 0 (its appear: BN6's state step,
+    `0x0801B1C4`, runs a CurAction 0 while paused and no other) and its
+    hook 5 (spawn done): the state or the hook, then, where the mode is not
+    1 and the battle is paused, the copy. A probe of hooks on both games
+    (temporary, not kept) in `spikey_v1` counts what is left: BN4's
+    after-state ran 53 times before its first fight frame (its generic state
+    0, `0x0800FCAC`, 52 times, the first in its init's frame, its init
+    calling its update; its state 1 once, `0x0801013A`, which clears the
+    0x04, so none after), BN6's copy 51 (its spawn's, then each of the 50
+    runs of BN6's twin, `0x08016380`, whose appear waits on `0x0800139A`
+    then blinks 2 x 16 frames; none in the 154 paused frames after its
+    appear) and BN6's state 1 at its first fight frame (the battle's
+    offset). So BN4's virus ran its appear, and the sprite update after it,
+    once more than BN6's: at t1 BN4's Spikey was on its idle animation's
+    frame 2 with 5 left and BN6's on the same record with 6, one update
+    behind where it was 152 behind (frame 0 at the first record), Shrimpy's
+    and Elmperor's alike, and `shrimpy_v3` failed at t65, where Shrimpy's
+    hook (`0x080BA13E`: its animation 1 cleared where the animation in play
+    has ended, `0x08002E56` bit 0x80) read its idle animation's last frame
+    in BN4 a frame before BN6 (its +0x10, +0x11 and +0x90). That update is
+    the engines' openings', not the after-state's nor the appear's code
+    (the next item).
+  - **The opening, a frame longer in BN6's** (the owner's call 7, revised:
+    [Battle Network 4 in a run](../multirom/bn4.md), The owner's calls;
+    `legit.json`'s `bn4` `align`, "BN6's battle opening a frame longer";
+    `tools/xdiff_bn4.py` `alignments`). Both appears run the same steps:
+    BN4's generic state 0 (`BN4_STATE_GENERIC_0`) takes its plain appear
+    (`BN4_APPEAR`, `0x0800FE00`) in a plain battle, BN6's twin's steps
+    (`BN6_APPEAR`, `0x08016396`: into the appear queue, wait for the battle
+    state's appear bit 0 and the queue's head, a 2 x 16 frame blink, wait
+    for bit 1) but for BN4's battle kind 0x44 and its sound ([BN4
+    Red Sun](../rom/bn4.md), A virus's appear and the engine's appear bits).
+    Each opening sets bit 0 from the same step, once its fade ends (BN4's
+    `bl BN4_APPEAR_BITS_SET` at `0x080E1F0E`, BN6's `bl BN6_APPEAR_BITS_SET`
+    at `0x080E1A0E`), and a probe of hooks on both (temporary, not kept) in
+    `spikey_v1` and `shrimpy_v3` saw it 18 frames after the virus's init in
+    BN4 (its step 0 run 19 times from its init's frame) and 17 in BN6 (17
+    runs from the frame after), the blinks the same 32 frames. So the
+    harness runs BN6's opening a frame longer in every BN4 spec against
+    BN6's (`game=bn4:bn6`), as it runs BN6's battle a fight frame behind
+    (`lag`): BN6's first blink step (`BN6_APPEAR_BLINK_FIRST`,
+    `0x080163FC`, `movs r0,#2` into +0x20) counts 3. `alignments` reads the
+    place by its name from `src/emu/bn6*.h`, checks that BN6's ROM holds
+    `was` (0x2002) there, and writes its immediate plus `frames` (1) into
+    BN6's copy as the spec's first `poke=` (the run prints
+    `xdiff: poke 080163fc (080163fc) = 2003`); BN4's side, the controls'
+    two BN4 runs and every BN5 spec are left alone, and the game too (a
+    BN4 visitor keeps BN6's appear and opening). The frame is one more run
+    of the appear where a bit 0 a frame later would put it: the virus runs
+    its appear and the paused present after it as often as BN4's, the
+    queue empties and bit 1 is set a frame later, and MegaMan's appear (his
+    side, the battle state's +0xD against his +0x16 at
+    `0x080163C0`-`0x080163D4`, skips the queue and the blink and waits for
+    bit 1) ends with it; the fight's frames count as before. The blink and
+    not the bit, because it is one immediate of BN6's own appear, where a
+    bit a frame later needs a count the opening's step has not (it sets
+    the bit the frame the fade ends). Its limit: the queue blinks its
+    objects one after another, so a longer first blink step would delay a
+    spec's k-th foe k frames where BN4's bit delays each one a frame; a
+    spec of more than one foe is refused (every BN4 spec has one) until the
+    bit itself is delayed. With it every BN4 spec PASSES and nothing in
+    the opening needs allowing: the allowance it replaces ("the opening's
+    idle animation, BN4's appear a run longer", which held a family's
+    sprite place to BN4's one update ahead until an animation was set:
+    `opening_animation`, `OPENING_LEAD`, `anim_steps`, `bn4_sprite_data`)
+    is gone with its code. Its mutation (`shrimpy_v3`, "BN6's opening two
+    frames longer": the step made `movs r0,#4`, written after the
+    alignment's) is caught at t1 (+0x91 BN4 5 | BN6 4), and without the
+    alignment (`--poke 080163FC:2002:2`) `spikey_v1` and `shrimpy_v3` fail
+    at t1 (+0x91 BN4 5 | BN6 6). The two the allowance's own checks caught
+    (`spikey_v1`): BN6's copy's first idle frame given the next frame's
+    mini-animation offset, caught at t12 on its +0xB0 (BN4 11112 | BN6
+    11124, the first frame compared on that record); the port's own,
+    Spikey's copy's sprite update aimed at BN6's family nullsub
+    (`call=080026C4:0810A952`), its place 51 updates behind again, caught
+    at t1 on its +0xAC and +0xB0 (all 181 caught).
+  - **A diagonal step's direction** (`tools/xdiff_bn4.py`
+    `direction_as_bn6`): BN6's rule (`0x0800E994`) gives 5 for a move of two
+    or more toward column or row 7 or a diagonal one, BN4's (`0x0800AF90`)
+    never; both collision panels' updates (`0x08012D9A` / `0x0801A04C`)
+    store the new panel over the old as they write it, so BN4's direction is
+    read as BN6's from its panel at the record before and at this one (where
+    BN4's own rule gives BN4's value from them), kept while its value and
+    panel stay: Spikey's first step, (5,2) to (4,1) at t4, BN4's 3 and
+    BN6's 5. Its mutation (`spikey_v1`): Spikey's collision panels' update
+    aimed at BN6's family nullsub, caught at t4.
+  - **A pointer into BN4's moved code** (`tools/xdiff_bn4.py` `one`): BN4's
+    trace's pointers are named by the BN6 trace's moved blocks, as BN5's
+    are (`xdiff_snap.Frame.ptr`'s `rom`), so CirKill's shot's record (+0x4C,
+    its kind × 16 from the table at the literal `BN4_SHOT_KINDS_LIT`,
+    `0x080CE83C`) reads ('rom', `0x080CE650`) in both, and a flags word of
+    0x08000000 alike (Spikey's and Shrimpy's third kind's 0x03). Its
+    mutation (`cirkill_v1`): the copy's literal left at BN4's address,
+    BN6's shot reading BN6's own ROM, its +0x4C ('raw', `0x080CE650`)
+    where both had read raw alike before, caught at t1.
+  - **Where the fifteen stand**: `spikey_v1`-`v3` and `shrimpy_v1`, `v2`
+    INCONCLUSIVE, the family's own records the same in all 1200 frames,
+    the world parting where MegaMan is struck (his +0 0x13 against BN6's
+    0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above: PASS since, BN6's opening a frame longer);
+    `walla_v1`-`v3` FAIL at t72, t68 and t66 and `cirkill_v1`-`v3` at t32,
+    t26 and t23 on the hit's spark (the fourth kind's 0x04, +0 and +8), each
+    after MegaMan struck (since PASS: CirKill's direction, below); `elmperor_v1`-`v3` FAIL at t1 on its collision data
+    +6 and +8 alone (BN4's 0xFF and 0, BN6's 0 and 0xFF). The
   collision data's layout from code: the collision setup (BN4
   `0x080129AC`, BN6's twin `0x08019FB4`) and the pool's maker
   (`0x08012470`, `0x0801986C`) paired store by store, BN4's +0x05, +0x0C,
@@ -1191,3 +1344,136 @@ format, its game 4: the trace's header names it):
     as their ranks among the family's own drawn (BN5's map, legit.json's
     `renderer`, `bn4_renderer`): BN6's thunder's own art takes other
     tiles, which moves the places of what is drawn after it.
+- **Walla's fight** (`walla_v1`-`walla_v3`: Walla V1-V3, BN4's 0x67,
+  0x69, 0x6B, at (5,2) against MegaMan idle at (2,2) with 2000 HP, as
+  Billy's specs else): each of Walla's rings strikes MegaMan (eight hits
+  in 1200 frames: t68, t225 ... in `walla_v1`), his struck state 3 (BN4
+  `0x08010960`, BN6 `0x080174FE`, `BN4_PLAYER_STRUCK`) runs 23 frames and
+  he flashes after it. The specs parted on three things, none the port's:
+  - **The blink's phase** (MegaMan's +0 0x13 against BN6's 0x15 at t68,
+    the 0x02 BN6 lacked beside the 0x04 already allowed): both games'
+    blink step (BN4 `0x08010440`, BN6 `0x08016944`, the same steps) hides
+    an object whose flags hold 0x202 by its flash timer's bit 1 (BN4's
+    +0x18, BN6's +0x24, mapped and the same count), BN4 where it is clear
+    (`0x08010456`, bcs past the bics), BN6 where it is set (`0x0801695A`,
+    bcc): opposite phases of one timer, as BN5's against BN6's. Read as
+    BN5's is (`tools/xdiff_events.py` `Translations`), not masked: an
+    object BN4's blink step ran on at a frame (its blink events at
+    `BN4_BLINK_FLASHING`, `tools/xdiff_bn4.py` `blinked_roles`) has its
+    visible bit read in BN6's phase. An experiment shows it hides nothing:
+    BN6's step turned to BN4's phase (`--poke 0801695A:D203`, bcs) parts
+    `walla_v1` at t68 on that bit (INCONCLUSIVE, the world's).
+  - **The hit's spark, the family's**: Walla's ring calls the effect its
+    hits make itself each frame (`BN4_HIT_EFFECT`, BN4 `0x080D4BEA`: bl
+    `0x08012F44`; its copy's veneer to BN6's twin `0x0801A0D4`), so the
+    spark it spawns (the fourth kind's 0x04, through the twin spawners
+    `0x080E2140` / `0x080E1C00`) is counted the family's, and BN6's art
+    ended it two frames sooner (t72, BN4's t74). It is the engine's
+    effect still: legit.json's "the hit's spark, each engine's own" holds
+    on the family's records too, that object's sprite state and life
+    alone (`tools/xdiff_bn4.py` `compare`), its spawn, place and being in
+    play before both had it compared as ever. Its mutation
+    (`tests/xdiff/mutations.json`, "a ring's hit effect aimed elsewhere",
+    `call=0801A0D4:0810A952`: no spark in BN6) fails `walla_v1` at t68.
+  - **MegaMan's own art's animation** (his +0x91 BN4 1 against BN6's 3 at
+    t80): his struck animation (1) runs 24 frames in both, cut into
+    frames 4,2,2,2,2,2,4,4,2 by BN4's art (`0x08214000`) and 4,2,2,2,2,4,5,3
+    by BN6's (`0x081D8000`; a frame's record 20 bytes, its duration at
+    +16, +18's 0x80 its last, the sprite update `BN4_SPRITE_UPDATE` /
+    `0x080026C4` loading a duration less 1 into the count). Allowed
+    (legit.json's "MegaMan's own art's animation"): his count and his
+    flags' last-frame bit (+0x92's 0x80, BN6's a frame sooner, t89) only
+    where both are what their own art gives at the same frames run of the
+    same animation, each walked from its own ROM by his frame's record
+    (+0xAC) and count (`own_animation`, `anim_place`). An experiment
+    shows the guard: BN6's sixth frame shortened to 2 in its ROM copy
+    (`--poke 081D80EC:02:1`) parts `walla_v1` at t82 on the count.
+  - BN6's struck state sets 0x400000 with its 0x400 and clears both (at
+    `0x0801750A`, `0x0801758A`), where BN4's sets 0x400 alone
+    (`0x0801096C`, cleared at `0x080109DE`): the paralysis's flag of
+    BN6's own bookkeeping, its legit.json entry's reason extended so.
+  - With these, **`walla_v1`, `walla_v2` and `walla_v3` PASS**: 1200 fight
+    frames each, the family's records and the world's the same.
+- **Elmperor's collision data** (`elmperor_v1`-`elmperor_v3`): its +0x06
+  BN4 0xFF against BN6 0, +0x08 BN4 0 against BN6 0xFF at t1, was the
+  poison timer at another place: Elmperor's pre-step holds it at 0xFF
+  (BN4 `0x080C2870`: `movs r0,#0xff; strb r0,[r3,#6]`), the recipe writing the copy's
+  at BN6's +8 (its immediate, `src/emu/xvirus_bn4.c`); the poison
+  panel's step, twins (`BN4_POISON_STEP` `0x08013010`, BN6's
+  `0x0801A1AA`), counts BN4's +6 and BN6's +8 alike (6 a point, 0 off
+  poison). The trace's layout now writes BN4's +6 at BN6's +8
+  (`src/dev/xdiff_bn4_trace.c` `coll_segs`, `BN4_COLL_POISON_TIMER` to
+  `BN6_COLL_POISON_TIMER`). Its mutation ("Elmperor's poison timer left
+  at BN4's offset", `poke=080C2872:7198`, the store at BN4's +6 again)
+  adds both lines back at t1 (the spec fails there without it on its
+  sprite fields, so those lines are the check). Elmperor's first
+  differences are then its sprite fields alone (+0x91, +0x92, +0xAC and
+  +0xB0 from t1 to t123, its idle animation's place: the opening's
+  sprite updates, the parallel work's); with them passed over by a
+  scratch reading, `elmperor_v1` and `elmperor_v3` would PASS and
+  `elmperor_v2` would be INCONCLUSIVE at t515 on a sound: BN4's 0x9D
+  (Elmperor's attack's, its code's PlaySoundEffect at `0x080DC704`)
+  begun on BN4's player 9, where BN6's copy plays BN6's own song 0x9D
+  (the families' sounds still BN4's numbers) on BN6's player 0, which
+  still holds the Custom gauge's 0x8F begun at t513 (BN4's 0x81 on its
+  player 20), so BN6 begins none.
+- **The families' copied sounds** (4 November 2026): the families' 12
+  sounds BN6 has no song of now play as BN4's own, each a copy at its
+  slot of BN6's empty songs on BN4's player ([Battle Network 4 in a
+  run](../multirom/bn4.md), Its sounds). BN6's trace names such a copy
+  by its slot (`src/dev/xdiff_events.c` `xd_song_copy`, which names
+  BN5's copies alone by their own numbers), so a copy aimed back at
+  BN6's own song of BN4's number is told apart; `legit.json`'s `bn4`
+  `sounds` pairs each BN4 sound with its slot by the routines that play
+  it (BN4's `movs r0,#N` and its bl, the copy's `movs r0,#slot`, the
+  recipe's immediate; a state's clock), as the thunder's are. A frame's
+  sounds line is the family's where a sound it parts on was played by
+  the family's code in either game (a sound event its code led to in
+  the frame before, as a frame's sounds begun are those its trace's
+  frame before began: `tools/xdiff_bn4.py` `family_sounds`), failing
+  the spec; the rest stay the world's. In the specs' traces every copy
+  is begun on BN4's player at BN4's frame (the lag of 1),
+  `elmperor_v2`'s 0x9D at t515 on player 9 beside the gauge's 0x8F on
+  player 0; no sound line is left in Shrimpy's, Walla's, Elmperor's or
+  CirKill's v1-v3 but `cirkill_v3`'s 0x82 against 0x84 at t1107 (BN4's
+  player 8, BN6's 30, played by no family's code), and Spikey's begin
+  at other frames than BN4's, its fight parting from t1. Its mutation
+  ("a copied sound aimed at BN6's own song of its number",
+  `poke=080BEAE8:20B7`, Walla's 0xB7 named again: BN6 begins its own
+  0xB7 on its player 18) is caught at t3.
+
+- **CirKill's direction** (`cirkill_v1`-`cirkill_v3`: CirKill V1-V3,
+  BN4's 0x5B, 0x5D, 0x5F, at (5,2) against MegaMan idle at (2,2) with
+  2000 HP, as Billy's specs else): `cirkill_v1` parted at t43 on its
+  collision data's +0xC, the direction of its last move (BN4's +0xA),
+  BN4's 4 against BN6's 3 (`v2` at t35, `v3` at t29, the same field).
+  CirKill walks its ring a panel at a time, and its move's end (BN4
+  `0x080BD34E`, in its state 7's move) writes the direction from its old
+  panel (+0x74) to its new (+0x14) through BN4's `0x0800AFB0`, which the
+  recipe copies (`tools/bn4_twins.py` COPIED: BN6 has no routine that
+  answers every panel) with its rule (`BN4_DIRECTION`, `0x0800AF90`):
+  right 4 and left 3 by the screen. BN6's rule (`BN6_DIRECTION`,
+  `0x0800E994`) numbers them by the object's side (r4, its +0x16: right
+  4 and left 3 on side 0, 3 and 4 on side 1), as its collision panels'
+  update passes it (`0x0801A05C`) and BN6's code reads the field
+  (`0x0800E498`, by +0xC from `0x0800E468`), so the copy wrote BN4's 3
+  for CirKill's step to the left on side 1, where BN6's own rule gives
+  4: the port's, a number in BN4's terms in BN6's field (the comparator
+  reads BN4's by the side, `direction_as_bn6`). The recipe now aims each
+  call of a family's code to the rule at a shim of its home that calls
+  the rule's copy and swaps its 3 and 4 where the object's side is 1
+  (`bn4_twins.SIDED`, `XVirusFamily.sides`, `src/emu/xvirus_shim.h`'s
+  direction), so its moves keep BN4's answer for every panel in BN6's
+  numbers. Its mutation (`tests/xdiff/mutations.json`, "CirKill's
+  direction left in BN4's numbers": the copy's call aimed at the rule's
+  copy again) fails `cirkill_v1` at t43 on that field.
+  - `cirkill_v3` was then INCONCLUSIVE at t1107 on a sound, BN4's 0x82
+    against BN6's 0x84: MegaMan's HP low, played by the HP gauge's step
+    in each game (`BN4_HP_LOW_STEP`, `0x0801472C`; `BN6_HP_LOW_STEP`,
+    `0x0801C840`), twins from the HP test on (a quarter of his maximum or
+    less counts 45 frames, then the sound), its count started by the hit
+    that took him there (t1062 in BN4, t1063 in BN6): the state's clock,
+    mapped as BN6's number (`legit.json`'s `bn4` `sounds`, "MegaMan's HP
+    low").
+  - With these, **`cirkill_v1`, `cirkill_v2` and `cirkill_v3` PASS**: 1200
+    fight frames each, the family's records and the world's the same.

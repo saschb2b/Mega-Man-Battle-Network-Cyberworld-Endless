@@ -41,6 +41,8 @@ typedef struct {
 	uint32_t state, window, rng[2], t1, t3, t4, nt1, panels, list, list_end, mplays, navi, navi_size, side;
 	uint32_t paralysis, coll_flags, coll_struck;
 	uint32_t ai, ai_size;   /* (MegaMan's AI data, a side's: his pending form, carried in the player block, XD4_PENDING) */
+	uint32_t sprites, sprites_size;   /* (the battle's sprite cache, BN4_SPRITE_CACHE: its compressed sprites in RAM, carried in
+	                                     the block BN6 keeps apart, xdiff.c apart4_out) */
 } Xd4Places;
 extern const Xd4Places xd4_places;
 /* BN4's routines the differential's hooks are placed on (bn4.h: RNG draws, spawns, sounds, effects, reservations, the blink,

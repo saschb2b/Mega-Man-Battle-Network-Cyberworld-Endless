@@ -875,9 +875,10 @@ def sounds_of(r, b5, b6, alloc):
             imm_for(r, chain, 0, v, to, f'its sound {v:#x}: {how}')
 
 
-def song_bytes(rom, v):
-    """the bytes a song takes copied as xsong.c lays it out (its sequence, voice group and samples): an upper bound"""
-    hp = rom.u32(BN5['songs'] + 8 * v)
+def song_bytes(rom, v, table=None):
+    """the bytes a song takes copied as xsong.c lays it out (its sequence, voice group and samples): an upper bound (its
+    game's song table `table`, BN5's where none)"""
+    hp = rom.u32((table or BN5['songs']) + 8 * v)
     nt = rom.u8(hp)
     starts = [rom.u32(hp + 8 + 4 * k) for k in range(nt)]
     n = hp + 8 + 4 * nt - min(starts) + 4

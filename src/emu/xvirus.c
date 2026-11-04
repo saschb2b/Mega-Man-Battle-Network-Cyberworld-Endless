@@ -18,7 +18,6 @@
 #include "xchips.h"
 #include "xfields.h"
 #include "xnavi.h"
-#include "xsong.h"
 #include "xvirus_bn4.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
@@ -26,6 +25,7 @@
 #include "xvirus_grow.h"
 #include "xvirus_move.h"
 #include "xvirus_shim.h"
+#include "xvirus_songs.h"
 #include "xvirus_tx.h"
 
 #define BUS        0x08000000u
@@ -304,7 +304,25 @@ static void cmp_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvCmp *k) {
 	if (!thumb_bl_write(code, off, b->at, at)) xv_fail("its compare at %08x made a call to its shim", (unsigned)k->at);
 }
 
+/* A call to its game's direction rule (XVirusFamily.sides), the rule's copy its target: aimed at a shim that calls it and
+ * numbers left and right by the object's side, BN6's way */
+static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
+	uint32_t was = 0, t = 0, at = 0;
+	const uint8_t *orig = c->rom + (site - BUS);
+	uint8_t shim[XV_SHIM_SIDE_SIZE];
+	if (!thumb_bl_decode(site, get16(orig), get16(orig + 2), &was) || was != BN4_DIRECTION || !thumb_bl_read(code, site - b->start, b->at, &t) ||
+		t != moved_to(c->f, BN4_DIRECTION) || !(at = shim_room(c, sizeof shim)) || !xvirus_shim_side(shim, at, t | 1)) {
+		xv_fail("its direction's call at %08x", (unsigned)site);
+		return;
+	}
+	uint8_t *p = xv_put(at, sizeof shim, true);
+	if (p) memcpy(p, shim, sizeof shim);
+	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its direction's call at %08x aimed at its shim", (unsigned)site);
+}
+
 static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
+	for (int i = 0; i < c->f->nsides && !xv_failed(); ++i)
+		if (xvirus_block_of(c->f, c->f->sides[i]) == b) side_set(c, b, code, c->f->sides[i]);
 	for (int i = 0; i < c->f->nranges && !xv_failed(); ++i)
 		if (xvirus_block_of(c->f, c->f->ranges[i].at) == b) range_set(c, b, code, &c->f->ranges[i]);
 	for (int i = 0; i < c->f->ncmps && !xv_failed(); ++i)
@@ -350,6 +368,18 @@ static void entries_set(Ctx *c, uint32_t entry[XV_TABLES]) {
 		if (p) memcpy(p, shim, sizeof shim);
 		entry[3 + k] = at | 1;
 	}
+}
+
+/* Its game's after-state while BN6's battle is paused (XVirusFamily.present): a paused present (xvirus_shim.h) of its home
+ * that calls `own` first (Thumb; 0 none); its address (Thumb), 0 where it failed */
+static uint32_t paused_put(Ctx *c, uint32_t own) {
+	uint8_t shim[XV_SHIM_PAUSED_SIZE];
+	uint32_t at = shim_room(c, sizeof shim), present = moved_to(c->f, c->f->present | 1);
+	uint32_t mode = thumb_veneer_get(&c->pool, BN6_SETTINGS_MODE_READ), paused = thumb_veneer_get(&c->pool, BN6_PAUSE_TEST);
+	uint8_t *p = at && present && mode && paused && xvirus_shim_paused(shim, at, own, mode, paused, present) ? xv_put(at, sizeof shim, true) : NULL;
+	if (!p) { xv_fail("its after-state %08x while paused", (unsigned)c->f->present); return 0; }
+	memcpy(p, shim, sizeof shim);
+	return at | 1;
 }
 
 /* A call within the block to bytes it holds as dead (a routine of its game's
@@ -694,10 +724,10 @@ static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 
 /* its state table, struct1, struct2 and held chips in its home or BN6's
  * (their words in the grown table of held chips), and its entries of the
- * eleven per-family tables into `entry` */
-static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_TABLES]) {
+ * eleven per-family tables into `entry` (`state0`, not 0: its state 0) */
+static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_TABLES], uint32_t state0) {
 	uint8_t *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, true);
-	for (int i = 0; st && i < f->nstates; ++i) put32(st + 4 * i, ref_to(f, f->states[i]));
+	for (int i = 0; st && i < f->nstates; ++i) put32(st + 4 * i, !i && state0 ? state0 : ref_to(f, f->states[i]));
 	uint8_t *s1 = xv_put(f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE, true), *s2 = xv_put(f->home + XV_HOME_STRUCT2, sizeof rec.stats, true);
 	if (!s1 || !s2 || !in_rom(f->struct1, BN6_TRAITS_SIZE) || !in_rom(f->struct2, sizeof rec.stats)) { xv_fail("its records"); return; }
 	traits_of(f, g->rom + (f->struct1 - BUS), rec.traits);
@@ -718,59 +748,6 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 		held = f->home + XV_HOME_HELD;
 	} else if (!in_rom(held, HELD_LISTS)) xv_fail("its held chips at %08x", (unsigned)held);
 	xg_set_word(XG_HELD, (uint32_t)f->ai, held);
-}
-
-/* ---- its sounds BN6 has none of: each song copied whole (xsong.h) into the art's room the recipe gives it, and listed at
- * its fixed one of BN6's empty song slots (every track's copy of the same sound the same slot, xsong.c's BN5_SOUNDS), on
- * the players its own game's entry names (BN6's 32 are BN5's), as the Navis' copies are ---- */
-
-/* whether the song header at bus address `at` in the core's copy is BN5's song `song`'s (its tracks, blocks, priority and
- * reverb), as another install of the shared allocations' slot copied it */
-static bool song_there(int game, int song, uint32_t at) {
-	const XRom *x = game >= 0 && game < XROM_COUNT ? &XR[game] : NULL;
-	if (!x || !x->data || !x->layout || !x->layout->song_table || !in_rom(at, 4) || (uint32_t)song * 8 + 8 > ROM_SIZE - x->layout->song_table)
-		return false;
-	uint32_t h = get32(x->data + x->layout->song_table + 8u * (uint32_t)song);
-	return in_rom(h, 4) && emu_read32(at) == get32(x->data + (h - BUS)) && emu_read8(at) != 0;
-}
-
-static void songs_set(const XVirusFamily *f) {
-	const XRom *x = f->game >= 0 && f->game < XROM_COUNT ? &XR[f->game] : NULL;
-	for (int i = 0; i < f->nsongs && !xv_failed(); ++i) {
-		const XvSong *s = &f->songs[i];
-		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot;
-		/* (the slot BN6's empty song, a header of no tracks, in the player's ROM: copied where the core's copy still
-		 * holds it; where another install of the shared slot (docs/multirom/) copied BN5's same song there first,
-		 * found there) */
-		uint32_t empty = table && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
-		if (!in_rom(empty, 1) || R.data[empty - BUS] != 0) { xv_fail("its song's slot %#x", s->slot); return; }
-		if (s->slot != xsong_sound_slot(f->game, s->from) || !x || !x->data || !x->layout || !x->layout->song_table ||
-			(uint32_t)s->from * 8 + 8 > ROM_SIZE - x->layout->song_table) {
-			xv_fail("its sound %#x's slot %#x is not the one every track copies it to", s->from, s->slot);
-			return;
-		}
-		uint32_t now = emu_read32(BUS + slot);
-		if (now != empty) {
-			/* (BN5's same song there: a family's packed copy before it, or xsong.c's copy of another track's install, the
-			 * Navis' or the chips', made before the families') */
-			int game = -1;
-			if (!song_there(f->game, s->from, now) && !(xsong_copy_of(s->slot, &game) == s->from && game == f->game))
-				xv_fail("its song's slot %#x holds another song", s->slot);
-			continue;
-		}
-		uint8_t *p = xv_put(s->at, s->room, true);
-		uint32_t header = p ? xsong_pack(f->game, s->from, s->at, p, s->room) : 0;
-		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
-		xv_word(BUS + slot, empty, header);
-		xv_word(BUS + slot + 4, get32(R.data + slot + 4), get32(x->data + x->layout->song_table + 8u * s->from + 4));
-	}
-}
-
-/* its sounds noted at their slots for the other tracks' installs and the differential (xsong.h), once installed */
-static void songs_noted(const XVirusFamily *f) {
-	for (int i = 0; i < f->nsongs; ++i)
-		if (!xsong_found(f->game, f->songs[i].from, f->songs[i].slot))
-			fprintf(stderr, "xvirus: %s's sound %#x at slot %#x not noted\n", f->name, f->songs[i].from, f->songs[i].slot);
 }
 
 /* ---- its rewards: its game's reward rows for its versions' ids, in the
@@ -833,8 +810,13 @@ static void family_stage(Ctx *c, const Game *g) {
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(c, &f->blocks[i]);
 	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(c, &f->clones[i]);
 	uint32_t entry[XV_TABLES] = { 0 };
-	if (!xv_failed()) records_set(f, g, entry);
+	/* (its game's after-state while paused, as its game runs it from its spawn through its state 1: after its spawn's done,
+	 * hook 5, and after its state 0, its appear, which BN6's state step runs in the paused opening; BN6's runs its state 1
+	 * as the fight begins, a fight frame later, xdiff's lag) */
+	uint32_t state0 = f->present ? paused_put(c, thumb_veneer_get(&c->pool, ref_to(f, f->states[0]) & ~1u) | 1) : 0;
+	if (!xv_failed()) records_set(f, g, entry, state0);
 	if (!xv_failed()) entries_set(c, entry);
+	if (!xv_failed() && f->present) entry[5] = paused_put(c, entry[5] == BN6_FAMILY_NULLSUB ? 0 : entry[5]);
 	uint8_t *v = c->pool.n ? xv_put(c->pool.base, (uint32_t)c->pool.n * THUMB_VENEER_SIZE, true) : NULL;
 	if (v) memcpy(v, c->veneers, (size_t)c->pool.n * THUMB_VENEER_SIZE);
 	for (int k = 0; k < XV_TABLES && !xv_failed(); ++k) xg_set_word(XG_FAMILY + k, (uint32_t)f->ai, entry[k]);
@@ -845,7 +827,7 @@ static void family_stage(Ctx *c, const Game *g) {
 	if (!xv_failed()) arms_set(f, g);
 	if (!xv_failed()) effects_set(f, g);
 	if (!xv_failed()) types_set(f, g);
-	if (!xv_failed()) songs_set(f);
+	if (!xv_failed()) xvirus_songs_set(f);
 	if (!xv_failed()) drops_set(f, g);
 }
 
@@ -978,5 +960,5 @@ void xvirus_install(int which) {
 	}
 	claims_end();
 	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */
-	for (int i = 0; i < ninstalled; ++i) songs_noted(installed[i]);
+	for (int i = 0; i < ninstalled; ++i) xvirus_songs_noted(installed[i]);
 }

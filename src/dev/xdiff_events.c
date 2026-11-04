@@ -66,8 +66,9 @@ void xd_log_bn4(const XdGame *g) { game4 = g; }
 /* a game's routines: 5's, 6's or 4's (NULL where BN4's were not given) */
 static const Game *game_of(int game) { return game == 4 ? game4 : &games[game == 6]; }
 
-/* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word */
-typedef struct { uint32_t t, key, word, which; } Draw;
+/* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word; and whether it was a
+ * draw of the family's made before the fight was seeded (xd_replay_setup: kept first, all before the fight's) */
+typedef struct { uint32_t t, key, word, which; bool setup; } Draw;
 /* a key's draws in the frame replayed so far */
 typedef struct { uint32_t key, which; int n; } Keyed;
 
@@ -95,6 +96,10 @@ struct XdLog {
 	uint32_t keyed_t;
 	Keyed keys[KEYS_MAX];
 	int nkeys, replayed, unmatched, unmapped;
+	bool setup_draws;            /* (xd_replay_setup) the family's draws before the fight is seeded kept (the reference's) or
+	                                replayed (the subject's), the k-th of a key in the whole setup the reference's k-th */
+	Keyed setup_keys[KEYS_MAX];  /* ... the subject's setup draws of each key met so far */
+	int nsetup_keys;
 };
 
 /* (made as a dev tool first asks for one: their megabyte or two stays out of every other run) */
@@ -182,7 +187,7 @@ static uint32_t key_of(const XdLog *log, const XdEvent *e, uint32_t *which) {
 
 static void keep(XdLog *log, XdEvent *e, uint32_t which) {
 	if (log->ndraws >= DRAWS_MAX) return;
-	log->draws[log->ndraws++] = (Draw){ log->t, key_of(log, e, &which), e->a, which };
+	log->draws[log->ndraws++] = (Draw){ log->seeded ? log->t : 0, key_of(log, e, &which), e->a, which, !log->seeded };
 	e->flags |= XD_KEPT;
 	e->ref = (uint32_t)log->ndraws;
 }
@@ -220,7 +225,30 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	uint32_t at = lagged ? log->t - (uint32_t)log->lag : log->t;
 	for (int i = lagged ? log->lag_cursor : log->cursor; i < ref->ndraws && ref->draws[i].t == at; ++i) {
 		const Draw *d = &ref->draws[i];
-		if (d->key != key || d->which != which || k-- > 0) continue;
+		if (d->setup || d->key != key || d->which != which || k-- > 0) continue;
+		hook_write32(log->g->rng[own], d->word);
+		e->b = d->word;
+		e->flags |= XD_REPLAYED;
+		e->ref = (uint32_t)i + 1;
+		++log->replayed;
+		return;
+	}
+	e->flags |= XD_UNMATCHED;
+	++log->unmatched;
+}
+
+/* (xd_replay_setup) A draw of the family's before the fight is seeded, the subject's: the reference's k-th setup draw of its
+ * key, whatever the frame (each game's opening is its own length, and lag is of the fight's frames: no setup draw is one of
+ * them); or none, drawn as it is and said so */
+static void replay_setup(XdLog *log, XdEvent *e, uint32_t own) {
+	uint32_t which = own, key = key_of(log, e, &which);
+	int k = -1;
+	for (int i = 0; i < log->nsetup_keys && k < 0; ++i)
+		if (log->setup_keys[i].key == key && log->setup_keys[i].which == which) k = log->setup_keys[i].n++;
+	if (k < 0 && log->nsetup_keys < KEYS_MAX) log->setup_keys[log->nsetup_keys++] = (Keyed){ key, which, 1 };
+	for (int i = 0, n = k < 0 ? 0 : k; i < log->ref->ndraws && log->ref->draws[i].setup; ++i) {
+		const Draw *d = &log->ref->draws[i];
+		if (d->key != key || d->which != which || n-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
 		e->b = d->word;
 		e->flags |= XD_REPLAYED;
@@ -236,14 +264,20 @@ static HookAct on_draw(HookRegs *r, void *user) {
 	XdLog *log = user;
 	int sub = 0;
 	while (sub < 3 && log->g->draw[sub] != r->pc) ++sub;
-	XdEvent *e = add(log, XD_DRAW, sub);
-	if (!e) return HOOK_CONTINUE;
+	/* (before the fight is seeded, a draw of the family's kept or replayed where the spec's logs take them, xd_replay_setup:
+	 * one of its battle's set-up, BATTLE_INIT's, has no event of its own) */
+	bool setup = !log->seeded && log->setup_draws;
+	XdEvent own = { .kind = XD_DRAW, .sub = (uint8_t)sub }, *e = add(log, XD_DRAW, sub);
+	if (!e && !setup) return HOOK_CONTINUE;
+	if (!e) e = &own;
 	uint32_t which = (uint32_t)sub >> 1;
 	callers(log, e, r->lr, r->sp);
 	e->object = running(log);
 	e->a = e->b = hook_read32(log->g->rng[which]);
 	if (log->seeded && log->ref) replay(log, e, which);
 	else if (log->seeded) keep(log, e, which);
+	else if (setup && e->family && log->ref) replay_setup(log, e, which);
+	else if (setup && e->family) keep(log, e, which);
 	return HOOK_CONTINUE;
 }
 
@@ -304,7 +338,7 @@ static HookAct on_sound(HookRegs *r, void *user) {
 	 * plays as another, its number with bit 16, never taken for BN5's: a Navi's code plays each of its sounds from its copy.
 	 * In a family's, BN6's own song of the number is the engine's, a twin of BN5's routine playing each game's own by its
 	 * number: Bugtank's bomb's and MetFire's fire column's 0x70, legit.json's sound) */
-	int copy = log->game == 6 ? xsong_copy_of((int)r->r[0], NULL) : -1;
+	int copy = log->game == 6 ? xd_song_copy((int)r->r[0]) : -1;
 	bool other = log->game == 6 && log->navis && copy < 0 && xsong_sound_slot(XROM_BN5_COLONEL_US, (int)r->r[0]) >= 0;
 	if (e) e->a = copy >= 0 ? (uint32_t)copy : r->r[0] | (other ? 0x10000u : 0u);
 	return HOOK_CONTINUE;
@@ -530,6 +564,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	return log;
 }
 
+
 XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis) {
 	XdLog *log = log_make(game, false, fams, n, navis);
 	if (!log) return NULL;
@@ -554,6 +589,11 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
 }
 
 void xd_replay_lag(XdLog *subject, int lag) { subject->lag = lag; }
+
+void xd_replay_setup(XdLog *subject, XdLog *reference) {
+	subject->setup_draws = reference->setup_draws = true;
+	subject->nsetup_keys = 0;
+}
 
 void xd_setup(XdLog *log, bool setup) { log->setup = setup; }
 
@@ -636,4 +676,7 @@ void xd_control_frame(const char *how) {
 	done = true;
 }
 
-int xd_song_copy(int slot) { return xsong_copy_of(slot, NULL); }
+int xd_song_copy(int slot) {
+	int xrom = -1, song = xsong_copy_of(slot, &xrom);
+	return xrom == XROM_BN5_COLONEL_US ? song : -1;
+}

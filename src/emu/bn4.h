@@ -342,6 +342,23 @@
 #define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the song (BN6_PLAY_SOUND; BN4_PLAY_MUSIC is the next routine) */
 #define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned (the fourth kind's type 0): r4's low byte its id (BN6_SPAWN_EFFECT) */
 #define BN4_SPRITE_LOAD   0x0800287Cu /* sprite_load: r5 the object, r1 its sprite list's offset, r2 its number (BN6_SPRITE_LOAD) */
+#define BN4_SPRITE_CACHED 0x08002ACAu /* ... its look-up first (0x08002894): r0 the key, list offset << 8 | number; the cache's sprite, 0 none */
+#define BN4_SPRITE_PRELOAD 0x08002AECu /* the battle's preload (from 0x08006C9A): each foe's compressed sprite LZ77'd into the cache */
+#define BN4_SPRITE_CACHE  0x0200F720u /* the cache: its count (u8 +0), keys, sprites and next free byte (+0x34, each buffer the LZ77 */
+#define BN4_SPRITE_CACHE_SIZE 0x38u   /* ... header's size on, below 0x02033000); its bytes */
+#define BN4_SPRITE_CACHE_SLOTS 8      /* ... its keys and sprites (BN6's twin holds 12: bn6_navis.h, BN6_SPRITE_DECOMPRESS) */
+#define BN4_CACHE_KEYS    0x04        /* ... its keys, a u16 a slot (list offset << 8 | number) */
+#define BN4_CACHE_SPRITES 0x14        /* ... its sprites, a word a slot: the buffer + 4, past the LZ77 data's size word */
+#define BN4_VIRUS_PRESENT 0x08010736u /* a virus's after-state, called at its own update's tail (Spikey's 0x080BA410, Shrimpy's
+                                       * 0x080BA0B8): unless +0 has 0x08, time is stopped, its HP is 0 or its flags or struck word stop it, its
+                                       * animation set where +0x10 is not +0x11 (0x08002E10), then BN4_SPRITE_UPDATE (0x08010774); no pause
+                                       * test, so a virus animates through the paused opening (BN6_VIRUS_PRESENT's twin skips it there) */
+#define BN4_SPIKEY_INIT   0x080BA428u /* Spikey's init (its type 0x17's state 0): its sprite, its collision, then BN4_SPIKEY_MOVES
+                                       * (0x080BA46C), run in the battle's paused opening */
+#define BN4_SPIKEY_MOVES  0x080BA5BCu /* ... its moves before its attack: 4 + GetPositiveSignedRNG & 3 at its +0x88, from the init and after
+                                       * each attack (0x080BA5B0): a draw made before the fight is seeded */
+#define BN4_SHOT_KINDS_LIT 0x080CE83Cu /* the literal of the third kind's 0x0B's init (0x080CE70C: ldr r7,=BN4_T3_0B_KINDS): its kind's
+                                       * record, kind x 16 from the table, kept at the object's +0x4C (0x080CE710) */
 #define BN4_RESERVE_PANEL 0x080143A8u /* object_reservePanel: the panel's reserver (+0x14) and its flags' 0x80 set, no bit in the object's
                                        * +0 (BN6's 0x0801BB1C also sets the object's 0x20, as BN5's does not) */
 #define BN4_RESERVE_PANEL_DONE 0x080143C2u /* ... once the panel is reserved: r5 the object (BN6_RESERVE_PANEL_DONE) */

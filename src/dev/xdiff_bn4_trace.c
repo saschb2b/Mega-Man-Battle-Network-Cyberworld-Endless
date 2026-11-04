@@ -59,6 +59,9 @@ static const Seg coll_segs[] = {
 	{ BN4_COLL_FINAL_DAMAGE, BN6_COLL_FINAL_DAMAGE, 2 },
 	{ BN4_COLL_FLAGS, BN6_COLL_FLAGS, 4 },
 	{ BN4_COLL_STRUCK, BN6_COLL_STRUCK, 4 },
+	/* (the poison panel's step, twins: BN4 0x0801301E-0x08013034 at its +6, BN6 0x0801A1B8-0x0801A1D0 at its +8; Elmperor's
+	 * pre-step holds it 0xFF, BN4 0x080C2870-0x080C2872, its copy's store at +8 by the recipe) */
+	{ BN4_COLL_POISON_TIMER, BN6_COLL_POISON_TIMER, 1 },
 };
 /* an AI's data: its attack's variables at BN6's +0xA0; MegaMan's power attacks, keys, flags, HP bug's count, damage taken
  * and frames struck, each paired by both games' code (bn4_battle.h, BN4_AI_*) */
@@ -91,12 +94,12 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
-	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
+	[XD4_COLL] = { coll_segs, 32, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
 	[XD4_AI] = { ai_segs, 13, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
 	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
 	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 32 &&
 	sizeof ai_segs / sizeof *ai_segs == 13 && sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
@@ -136,7 +139,8 @@ uint32_t xd4_size(int part) { return layouts[part].in; }
 
 const Xd4Places xd4_places = { BN4_BATTLE_STATE, BN4_CUSTOM_WINDOW, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_T1_OBJECTS, BN4_T3_OBJECTS,
 	BN4_T4_OBJECTS, BN4_T1_COUNT, BN4_FIELD_PANELS, BN4_OBJECT_LIST, BN4_OBJECT_LIST_END, BN4_MPLAYS, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,
-	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK, BN4_AI_DATA, BN4_AI_DATA_SIZE };
+	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK, BN4_AI_DATA, BN4_AI_DATA_SIZE, BN4_SPRITE_CACHE,
+	BN4_SPRITE_CACHE_SIZE };
 
 /* (bn4.h's names, each BN6's twin by its body: docs/rom/bn4.md, The differential's hooks. BN4's viruses keep no AI data, so
  * its setAttack, which writes an AI data's attack variables in BN5 and BN6, is not hooked; its blink hides on its flash

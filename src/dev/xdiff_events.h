@@ -122,6 +122,10 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
  * frames before: BN6's battle runs a fight frame behind BN4's (lag=1, a BN4 spec's; docs/devtools/differential.md, The BN4
  * trace); the engine's per-frame steps have no key */
 void xd_replay_lag(XdLog *subject, int lag);
+/* ... and the family's draws before the fight is seeded too (a BN4 spec's: Spikey's init draws its moves before its first
+ * attack in the opening, 0x080BA46C): the reference's kept as its setup's, in order, and the subject's k-th of a key in its
+ * setup given the reference's k-th of that key in its, whatever the frame (docs/devtools/differential.md, The BN4 trace) */
+void xd_replay_setup(XdLog *subject, XdLog *reference);
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);
@@ -147,8 +151,11 @@ void xd_counts(const XdLog *log, int out[XD_COUNTS]);
  * ("xdraws: ..."). The run with the same draws plays the same. */
 void xd_control_frame(const char *how);
 
-/* The song a BN6 slot plays a copy of (xsong.h): its number in its own
- * game, -1 for one of BN6's own: a sound read in BN5's numbers. */
+/* The song a BN6 slot plays a copy of (xsong.h): its number in BN5, -1 for
+ * one of BN6's own or a copy of BN4's, which is read by its slot (the BN4
+ * differential pairs BN4's sound with it by the routines that play them,
+ * tests/xdiff/legit.json's bn4 sounds, and so tells it from BN6's own song
+ * of BN4's number): a sound read in BN5's numbers. */
 int xd_song_copy(int slot);
 
 #endif

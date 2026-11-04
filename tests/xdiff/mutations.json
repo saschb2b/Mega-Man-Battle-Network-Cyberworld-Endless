@@ -1290,6 +1290,94 @@
     "08B7C184:2029"
    ],
    "what": "the thunder copy's spawner (BN6's 0x080CADBC copied at XV_CODE + 0x14180) spawning the third kind's 0x29 for 0x2A (movs r0,#0x29): another attack where BN4's thunder flies (caught at t341)"
+  },
+  {
+   "name": "a ring's hit effect aimed elsewhere",
+   "spec": "walla_v1",
+   "call": [
+    "0801A0D4:0810A952"
+   ],
+   "what": "Walla's rings' call to the effect their hits make (BN4 0x080D4BEA: bl 0x08012F44, its copy's veneer to BN6's twin 0x0801A0D4) aimed at BN6's family nullsub: no hit's spark where BN4's spawns one; the spark counted the family's, whose sprite state and life are each engine's own (legit.json's bn4, the hit's spark), its being in play before both had it compared as ever (caught at t68, the spark in play in BN4's alone; the spec PASSes unmutated)"
+  },
+  {
+   "name": "Elmperor's poison timer left at BN4's offset",
+   "spec": "elmperor_v1",
+   "poke": [
+    "080C2872:7198"
+   ],
+   "what": "Elmperor's pre-step's hold of its collision data's poison timer at 0xFF (BN4 0x080C2872: strb r0,[r3,#6], the recipe's immediate writing BN6's +8) written at BN4's +6 again: BN6's timer (BN6_COLL_POISON_TIMER, the poison panel's step 0x0801A1B8) reads 0 against BN4's 0xFF, mapped by the trace's layout (src/dev/xdiff_bn4_trace.c coll_segs, BN4_COLL_POISON_TIMER), where unmutated they read alike (caught at t1, coll +0x06 and +0x08; the spec fails at t1 without it on its sprite fields alone, so the lines it adds are the check: python3 tools/xdiff.py elmperor_v1 --poke 080C2872:7198)"
+  },
+  {
+   "name": "a sprite BN4 keeps LZ77'd drawn from another copy",
+   "spec": "spikey_v1",
+   "poke": [
+    "08B34304:08BEBA00:4"
+   ],
+   "what": "BN6's grown list 1's 0xC1 (XV_LISTS + 4 * 0xC1), Spikey's copy of BN4's LZ77'd 1:0x05, aimed at Shrimpy's (XV_ART + 0x6BA00, BN4's 1:0x06): its sprite state's +0x18 (+0xA8) reads BN6's ('sprite', 5, 4) against BN4's ('sprite', 2, 4), BN4's found in its battle's sprite cache by its key (tools/xdiff_bn4.py bn4_cache), where unmutated they read alike (caught at t1; the spec fails at t1 without it, on +0x88, Spikey's first draw before the fight, and its animation's place, so the line it adds is the check: python3 tools/xdiff.py spikey_v1 --poke 08B34304:08BEBA00:4)"
+  },
+  {
+   "name": "a draw of the setup's off by one",
+   "spec": "spikey_v1",
+   "poke": [
+    "08B7CF82:3005"
+   ],
+   "what": "Spikey's init's moves before its first attack, 4 plus a draw & 3 (BN4 0x080BA5BC, its adds r0,#4 at 0x080BA5C6, BN6's copy at XV_CODE + 0x14DC0 + 0x1C2), made 5 plus: drawn in the opening, before the fight is seeded, from BN4's word replayed (src/dev/xdiff_events.c replay_setup), so BN6's +0x88 reads 5 against BN4's 4 (caught at t1; unmutated they read alike since the setup's draws are replayed, BN4's 4 and BN6's 7 before)"
+  },
+  {
+   "name": "the idle animation's first frame drawn from the next one's data",
+   "spec": "spikey_v1",
+   "poke": [
+    "08BE5318:00002B6C:4"
+   ],
+   "what": "BN6's copy of Spikey's sprite (XV_ART + 0x65300, BN4's LZ77'd 1:0x05): its idle animation 0's first frame record (copy +16) given frame 1's mini-animation offset at its +8 (0x2B6C for 0x2B60): BN6's place the same step of animation 0 as BN4's (legit.json's bn4 align, BN6's opening a frame longer), but its frame's bytes (+0xB0 ('sprite', 2, 11124)) not BN4's at that frame record (11112), a difference of the family's own records (caught at t12, the first frame compared on that record)"
+  },
+  {
+   "name": "a diagonal step's collision panels left unmoved",
+   "spec": "spikey_v1",
+   "call": [
+    "0801A04C:0810A952"
+   ],
+   "what": "Spikey's collision panels' update (BN4's 0x08012D9A, its veneer to BN6's 0x0801A04C) aimed at BN6's family nullsub: its collision data keeps its old panel (5,2) and direction 0 where BN4's diagonal step to (4,1) wrote its 3, read as BN6's 5 by BN6's own rule on the old panel and the new (tools/xdiff_bn4.py direction_as_bn6; caught at t4)"
+  },
+  {
+   "name": "CirKill's shot's table left at BN4's address",
+   "spec": "cirkill_v1",
+   "poke": [
+    "08B7F37C:080CE5B0:4"
+   ],
+   "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x17220 + 0x15C holding the moved table's 0x08B7F380) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
+  },
+  {
+   "name": "a copied sound aimed at BN6's own song of its number",
+   "spec": "walla_v1",
+   "poke": [
+    "080BEAE8:20B7"
+   ],
+   "what": "Walla's sound 0xB7 (BN4 0x080BEAE8: movs r0,#0xb7, its copy's immediate the recipe gives BN6's empty slot 0x37, where xsong.c's XSOUNDS puts BN4's song) written as BN4's number again: BN6 begins its own song 0xB7 on its player 18 where BN4 begins its 0xB7 on its player 9, which legit.json's bn4 sounds pair with the copy's 0x37 by the routines that play them; the line is the family's, its code having played the sound (tools/xdiff_bn4.py family_sounds), where unmutated they read alike (caught at t3, BN4 [0x37] | BN6 [0xB7]; the spec PASSes unmutated)"
+  },
+  {
+   "name": "CirKill's direction left in BN4's numbers",
+   "spec": "cirkill_v1",
+   "poke": [
+    "08B7F73A:FFEDF7FF:4"
+   ],
+   "what": "the copied direction routine's call (BN4's 0x0800AFB2, bl 0x0800AF90; its copy at XV_CODE + 0x174B2 + 0x288, made a call to its shim, src/emu/xvirus_shim.h's direction) aimed at the rule's copy again (0x08B7F718), as an install with no shim would leave it: CirKill's move's end (0x080BD34E) writes BN4's 3 for its step to the left into BN6's +0xC, where BN6's rule numbers it 4 on side 1 (bn4_twins.SIDED; caught at t43, BN4's 3 read as BN6's 4 by the side)"
+  },
+  {
+   "name": "the paused after-state's sprite update aimed elsewhere",
+   "spec": "spikey_v1",
+   "call": [
+    "080026C4:0810A952"
+   ],
+   "what": "Spikey's copy of BN4's after-state (BN4 0x08010736, run from its state 0 and its hook 5 while BN6's battle is paused: xvirus_shim.h, a paused present), its sprite update's veneer (BN4's 0x0800285C, BN6's twin 0x080026C4) aimed at BN6's family nullsub: its appear's updates gone, BN6's after-state's own from the fight on, as before the port, so its place at t1 is BN4's of its opening's updates behind, where with BN6's opening a frame longer (legit.json's bn4 align) they are the same (caught at t1)"
+  },
+  {
+   "name": "BN6's opening two frames longer",
+   "spec": "shrimpy_v3",
+   "poke": [
+    "080163FC:2004:2"
+   ],
+   "what": "BN6's plain appear's first blink step (BN6_APPEAR_BLINK_FIRST, 0x080163FC: movs r0,#2, which legit.json's bn4 align makes movs r0,#3 for every BN4 spec against BN6's) made movs r0,#4, written after the alignment's own: BN6's virus runs its appear and its paused present once more than BN4's, its sprite a step ahead of BN4's where the alignment has them the same (caught at t1)"
   }
  ]
 }

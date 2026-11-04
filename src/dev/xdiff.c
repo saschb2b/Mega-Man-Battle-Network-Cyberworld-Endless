@@ -345,11 +345,15 @@ static void apart_out(Side *g, const uint8_t *s1, int n1) {
 	}
 }
 
-/* (BN4's) the same block, zeros: BN4 has none of what BN6's engine keeps apart (no sea's submerge, no Dark Soul's lists, no
- * moved Navis' state, no green flash by side) */
+/* (BN4's) the same block: BN4 has none of what BN6's engine keeps apart (no sea's submerge, no Dark Soul's lists, no moved
+ * Navis' state, no green flash by side), zeros, but for its battle's sprite cache in the sea's room (xd4_places.sprites:
+ * where its preload put each foe's compressed sprite, by its list and number, which tools/xdiff_bn4.py maps a pointer into
+ * by; docs/devtools/differential.md, The BN4 trace) */
 static void apart4_out(Side *g) {
 	static const uint32_t parts[] = { APART_SEA, BN5_DARK_LIST_SIZE, BN5_DARK_LIST_SIZE, APART_NAVIS, APART_DARK, APART_MOVED };
-	for (uint32_t k = 0; k < sizeof parts / sizeof *parts; ++k) bytes_out(g, 0, parts[k], parts[k]);
+	_Static_assert(APART_SEA >= 0x38u, "BN4's sprite cache in the sea's room");
+	bytes_out(g, xd4_places.sprites, xd4_places.sprites_size, parts[0]);
+	for (uint32_t k = 1; k < sizeof parts / sizeof *parts; ++k) bytes_out(g, 0, parts[k], parts[k]);
 }
 
 /* ---- a battle fought ---- */
@@ -884,6 +888,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
+	if (s->replay && s->bn4 && a->log && b->log) xd_replay_setup(b->log, a->log);   /* (the family's init draws: BN4's alone) */
 	return true;
 }
 
