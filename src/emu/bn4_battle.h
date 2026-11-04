@@ -54,4 +54,17 @@
                                        * (+0 set up, 0x0800EB86 / 0x0800EB8E; +1 its state, 0x0800E4F8) */
 #define BN4_CONTROL_BLOCKS 0x02035A70u /* the sides' control blocks, 0x40 each (cleared by 0x0800E8FE); BN6's ready (0x080F1694) keeps none */
 
+/* (what Walla's and Elmperor's specs met, each read against BN6's twin: docs/devtools/differential.md, The BN4 trace) */
+#define BN4_PLAYER_STRUCK 0x08010960u /* MegaMan's struck state (BN4_PLAYER_STATES entry 3): sets his flags' 0x400 as it begins
+                                       * (0x0801096C-0x08010970, object_setFlag 0x08012F82) and clears it as its count ends (0x080109DE);
+                                       * BN6's twin 0x080174FE sets and clears 0x400400 (0x0801750A, 0x0801758A) */
+#define BN4_HIT_EFFECT    0x08012F44u /* the effect an attack's hits make, run by it each frame (Walla's rings, 0x080D4BEA): its place
+                                       * drawn (0x08014620) and the hit's spark spawned (0x080E2140); BN6's twin 0x0801A0D4 */
+#define BN4_POISON_STEP   0x08013010u /* the poison panel's step under an object, its cmp r0,#4 (BN6_PANEL_STEP_POISON's twin):
+                                       * BN4_COLL_POISON_TIMER less 1 a frame (0x0801301E), 6 again with +0x34 a point more (0x08013026-
+                                       * 0x0801302E), 0 off poison (0x08013034) */
+#define BN4_SPRITE_UPDATE 0x0800285Cu /* an object's sprite each fight frame, its work in IWRAM (0x03006377; BN6's twin 0x080026C4, its
+                                       * 0x03006793): its frame's count down, at 0 the next frame's record (+0xAC, 20 bytes, its duration at
+                                       * +16, +18's 0x80 its last) */
+
 #endif

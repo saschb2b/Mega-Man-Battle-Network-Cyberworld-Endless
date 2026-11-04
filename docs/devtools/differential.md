@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -796,9 +796,9 @@ format, its game 4: the trace's header names it):
   BN6's by its actor init's `0x08016F70`; which opening frames each
   engine updates a virus's sprite on is not read); Shrimpy at t1 on its
   row (the world INCONCLUSIVE there, its panels reserved apart); Walla
-  (V1 t72, V2 t68, V3 t66) on the hit's spark, its +0 and state, after
-  MegaMan's +0 parts (INCONCLUSIVE from t68, t64, t62); Elmperor at t1
-  on its animation's place and its collision data +6 and +8; CirKill at
+  (V1-V3) PASS since (Walla's fight, below); Elmperor at t1 on its
+  animation's place alone, its collision data +6 and +8 mapped since
+  (below); CirKill at
   t1 on its shot's (the third kind's 0x0B) +0x4C, a pointer into BN4's
   ROM read raw against BN6's moved block's same address. The
   collision data's layout from code: the collision setup (BN4
@@ -1224,3 +1224,76 @@ format, its game 4: the trace's header names it):
     as their ranks among the family's own drawn (BN5's map, legit.json's
     `renderer`, `bn4_renderer`): BN6's thunder's own art takes other
     tiles, which moves the places of what is drawn after it.
+- **Walla's fight** (`walla_v1`-`walla_v3`: Walla V1-V3, BN4's 0x67,
+  0x69, 0x6B, at (5,2) against MegaMan idle at (2,2) with 2000 HP, as
+  Billy's specs else): each of Walla's rings strikes MegaMan (eight hits
+  in 1200 frames: t68, t225 ... in `walla_v1`), his struck state 3 (BN4
+  `0x08010960`, BN6 `0x080174FE`, `BN4_PLAYER_STRUCK`) runs 23 frames and
+  he flashes after it. The specs parted on three things, none the port's:
+  - **The blink's phase** (MegaMan's +0 0x13 against BN6's 0x15 at t68,
+    the 0x02 BN6 lacked beside the 0x04 already allowed): both games'
+    blink step (BN4 `0x08010440`, BN6 `0x08016944`, the same steps) hides
+    an object whose flags hold 0x202 by its flash timer's bit 1 (BN4's
+    +0x18, BN6's +0x24, mapped and the same count), BN4 where it is clear
+    (`0x08010456`, bcs past the bics), BN6 where it is set (`0x0801695A`,
+    bcc): opposite phases of one timer, as BN5's against BN6's. Read as
+    BN5's is (`tools/xdiff_events.py` `Translations`), not masked: an
+    object BN4's blink step ran on at a frame (its blink events at
+    `BN4_BLINK_FLASHING`, `tools/xdiff_bn4.py` `blinked_roles`) has its
+    visible bit read in BN6's phase. An experiment shows it hides nothing:
+    BN6's step turned to BN4's phase (`--poke 0801695A:D203`, bcs) parts
+    `walla_v1` at t68 on that bit (INCONCLUSIVE, the world's).
+  - **The hit's spark, the family's**: Walla's ring calls the effect its
+    hits make itself each frame (`BN4_HIT_EFFECT`, BN4 `0x080D4BEA`: bl
+    `0x08012F44`; its copy's veneer to BN6's twin `0x0801A0D4`), so the
+    spark it spawns (the fourth kind's 0x04, through the twin spawners
+    `0x080E2140` / `0x080E1C00`) is counted the family's, and BN6's art
+    ended it two frames sooner (t72, BN4's t74). It is the engine's
+    effect still: legit.json's "the hit's spark, each engine's own" holds
+    on the family's records too, that object's sprite state and life
+    alone (`tools/xdiff_bn4.py` `compare`), its spawn, place and being in
+    play before both had it compared as ever. Its mutation
+    (`tests/xdiff/mutations.json`, "a ring's hit effect aimed elsewhere",
+    `call=0801A0D4:0810A952`: no spark in BN6) fails `walla_v1` at t68.
+  - **MegaMan's own art's animation** (his +0x91 BN4 1 against BN6's 3 at
+    t80): his struck animation (1) runs 24 frames in both, cut into
+    frames 4,2,2,2,2,2,4,4,2 by BN4's art (`0x08214000`) and 4,2,2,2,2,4,5,3
+    by BN6's (`0x081D8000`; a frame's record 20 bytes, its duration at
+    +16, +18's 0x80 its last, the sprite update `BN4_SPRITE_UPDATE` /
+    `0x080026C4` loading a duration less 1 into the count). Allowed
+    (legit.json's "MegaMan's own art's animation"): his count and his
+    flags' last-frame bit (+0x92's 0x80, BN6's a frame sooner, t89) only
+    where both are what their own art gives at the same frames run of the
+    same animation, each walked from its own ROM by his frame's record
+    (+0xAC) and count (`own_animation`, `anim_place`). An experiment
+    shows the guard: BN6's sixth frame shortened to 2 in its ROM copy
+    (`--poke 081D80EC:02:1`) parts `walla_v1` at t82 on the count.
+  - BN6's struck state sets 0x400000 with its 0x400 and clears both (at
+    `0x0801750A`, `0x0801758A`), where BN4's sets 0x400 alone
+    (`0x0801096C`, cleared at `0x080109DE`): the paralysis's flag of
+    BN6's own bookkeeping, its legit.json entry's reason extended so.
+  - With these, **`walla_v1`, `walla_v2` and `walla_v3` PASS**: 1200 fight
+    frames each, the family's records and the world's the same.
+- **Elmperor's collision data** (`elmperor_v1`-`elmperor_v3`): its +0x06
+  BN4 0xFF against BN6 0, +0x08 BN4 0 against BN6 0xFF at t1, was the
+  poison timer at another place: Elmperor's pre-step holds it at 0xFF
+  (BN4 `0x080C2870`: `movs r0,#0xff; strb r0,[r3,#6]`), the recipe writing the copy's
+  at BN6's +8 (its immediate, `src/emu/xvirus_bn4.c`); the poison
+  panel's step, twins (`BN4_POISON_STEP` `0x08013010`, BN6's
+  `0x0801A1AA`), counts BN4's +6 and BN6's +8 alike (6 a point, 0 off
+  poison). The trace's layout now writes BN4's +6 at BN6's +8
+  (`src/dev/xdiff_bn4_trace.c` `coll_segs`, `BN4_COLL_POISON_TIMER` to
+  `BN6_COLL_POISON_TIMER`). Its mutation ("Elmperor's poison timer left
+  at BN4's offset", `poke=080C2872:7198`, the store at BN4's +6 again)
+  adds both lines back at t1 (the spec fails there without it on its
+  sprite fields, so those lines are the check). Elmperor's first
+  differences are then its sprite fields alone (+0x91, +0x92, +0xAC and
+  +0xB0 from t1 to t123, its idle animation's place: the opening's
+  sprite updates, the parallel work's); with them passed over by a
+  scratch reading, `elmperor_v1` and `elmperor_v3` would PASS and
+  `elmperor_v2` would be INCONCLUSIVE at t515 on a sound: BN4's 0x9D
+  (Elmperor's attack's, its code's PlaySoundEffect at `0x080DC704`)
+  begun on BN4's player 9, where BN6's copy plays BN6's own song 0x9D
+  (the families' sounds still BN4's numbers) on BN6's player 0, which
+  still holds the Custom gauge's 0x8F begun at t513 (BN4's 0x81 on its
+  player 20), so BN6 begins none.
