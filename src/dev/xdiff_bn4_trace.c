@@ -58,7 +58,8 @@ static const Seg coll_segs[] = {
 	{ BN4_COLL_STRUCK, BN6_COLL_STRUCK, 4 },
 };
 /* an AI's data: its attack's variables at BN6's +0xA0 */
-static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_DATA_SIZE - BN4_AI_ATTACK_VARS } };
+static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_DATA_SIZE - BN4_AI_ATTACK_VARS },
+	{ BN4_AI_POWER_A, BN6_AI_POWER_A, 1 }, { BN4_AI_POWER_CHARGE, BN6_AI_POWER_CHARGE, 1 }, { BN4_AI_POWER_C, BN6_AI_POWER_C, 1 } };
 /* a panel's: its type, side, flags and reserver */
 static const Seg panel_segs[] = {
 	{ BN4_PANEL_TYPE, BN6_PANEL_TYPE, 1 },
@@ -75,7 +76,7 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
 	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE },
-	[XD4_AI] = { ai_segs, 1, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
+	[XD4_AI] = { ai_segs, 4, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
 	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
