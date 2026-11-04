@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:35:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -226,11 +226,22 @@ owner turns BN4 on.
   call.
 - **The telegraph**: the act's card says "Nets meet" where either other
   net's families can come, its words unchanged. MegaMan names a profile's
-  first visitor once, as now, BN5's or BN6's. A BN4 visitor counts as the
-  older Net's (the owner's call 5): one "older Net" beside BN6's, BN5's
-  and BN4's families both of it, so whichever of the two comes first is
-  named and spends the once. As built, a BN4 visitor is not named and
-  does not spend it; that changes before its visitors reach players.
+  first visitor once, as before. A BN4 visitor counts as the older Net's
+  (the owner's call 5): one "older Net" beside BN6's, BN5's and BN4's
+  families both of it, so a BN4 visitor in a battle of BN6's has BN5's
+  words, named by its own family ("Lan,that Walla back there...", "It
+  came from the older Net!"), and spends the same once (the profile's
+  `visitor_taught`): whichever of the two comes first is named, and a
+  later visitor of the other is not. A BN4 visitor in a battle of BN5's
+  is the older Net's in the older Net: no other net met, so MegaMan says
+  nothing and the once is kept for a visitor that crosses. The words for
+  BN6's in BN5's ("one of ours ... In the older Net!?") would be false of
+  it, and a line naming BN4's as apart from BN5's would split the one
+  older Net the call keeps. Built 4 November 2026 (`visitor_telegraph`
+  in `src/core/visitors.c`, read by `src/director/nets_words.c`; the
+  unit tests' visitors), no line changed; seen in a fresh profile with
+  `--dev bn4families,visitors` at depth 5: WallaEX in a battle of BN6's
+  named, then PowieEX of BN5's in the next, nothing said.
 - **The record**: the run log marks a BN4 visitor as any (`+v64.0`,
   Billy, BN6's AI index 64, at V1). A battle's families (a bit each, the
   repeat rule's memory) stop at 63, and no battle of a run's own holds a
@@ -245,8 +256,8 @@ owner turns BN4 on.
 Before BN4's visitors reach players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
 CirKill proved by `build.py xdiff`, their reward rows read (BN6's fill
-stands in for them now), and a BN4 visitor named as the older Net's
-(call 5).
+stands in for them now); a BN4 visitor named as the older Net's (call
+5) is built.
 
 ## The plan
 
@@ -375,7 +386,9 @@ sounds take from the themes' range are the owner's to confirm.
    names the older Net once, at a profile's first visitor of BN5's or
    BN4's, and the deep's card stays "Both Nets", BN6's and the older
    one. Chosen over a third Net, older still, and over leaving BN4's
-   unnamed until its areas come.
+   unnamed until its areas come. Built the same day (Its viruses as
+   visitors, the telegraph): a BN4 visitor in BN6's battle has BN5's
+   words and spends the same once; one in BN5's says nothing.
 6. **Decided, 4 November 2026: once the six moved are proved.** BN4's
    visitors reach players when Billy, Spikey, Shrimpy, Walla, Elmperor
    and CirKill all pass `build.py xdiff`, their reward rows read; the
