@@ -126,6 +126,15 @@
 #define BN4_PLAY_MUSIC    0x08000568u /* PlayMusic: r0 the song (0xFF stops it), kept at the game state's +0x19; not again while it plays */
 #define BN4_MPLAYS        0x08155E78u /* the music players' table (m4aSongNumStart, 0x08112848); songs 0x00-0x21 on player 31 */
 #define BN4_SOUND_INFO    0x030036A0u /* MP2K's SoundInfo (BN6's 0x030045C0), sound mode 0x0093040D as BN6's, 32 players */
+#define BN4_SOUND_CGB_CHANS 0x030046E0u /* its PSG's four channels, SoundInfo +0x1C (BN6's 0x03005600) */
+#define BN4_MUSIC_PLAYER  0x02011AA0u /* the music player's MusicPlayerInfo, BN4_MPLAYS' row 31 (BN6's 0x02010890) */
+#define BN4_MUSIC_TRACKS  0x02008680u /* ... its eight tracks, 0x50 bytes each (BN6's 0x02007EE8) */
+#define BN4_M4A_SOUND_MAIN 0x08111B14u /* SoundMain: BN6's MP2K (0x0814F754) built otherwise, its seven tables BN6's byte for byte */
+#define BN4_M4A_SOUND_MODE 0x08000530u /* the word its start gives m4aSoundMode, 0x0093040D as BN6's (0x0800059C) */
+#define BN4_M4A_INIT_MODE 0x0811282Cu /* m4aSoundInit's own m4aSoundMode word, 0x0093C400: master volume 12, where BN6's (0x08150458,
+                                       * 0x0093F400) sets 15; BN6_SOUND_INFO +0x07 */
+#define BN4_DRUM_KIT      0x08153CD4u /* the music's one drum kit: keys 37-73 played, 0-35 a run of other pointers (xsong.c copies the
+                                       * keys a song plays: XRomLayout.kit_keys_played) */
 #define BN4_MAP_MUSIC     0x0802AFD0u /* four lists by the game state's +7, 8 bytes an entry (the group, a pointer to a song per map), 0xFF
                                        * ending them, as BN5's (0x080361C8); read at 0x0802BCCC */
 #define BN4_MODE_SONGS    0x08007510u /* the songs of battle modes 0x46 on (BN4_RECORD_MODE - 0x46): 14 14 15 15 17 17 17 */
@@ -159,6 +168,11 @@
 #define BN4_RECORD_ENTITIES 0x08      /* u32: its entity list, BN4_ENTITY_SIZE bytes each, 0xFF ending it */
 #define BN4_ENTITY_SIZE   4           /* an entity: the enemy id (0 MegaMan), the panel's column and row, its kind */
 #define BN4_ENTITY_KIND   0x03        /* ... its kind: 0 MegaMan, 1 an enemy, 5 an obstacle (id 1 a rock) */
+#define BN4_ENTITY_COL    0x01        /* ... its panel's column, 1-6 (the enemy's 4-6); its row, 1-3, at +2 */
+#define BN4_NET_GROUP     0x80        /* the net's first map group: BN4_BATTLE_TABLES' second list and XRomLayout.map_table from it */
+#define BN4_STORY_MAPS    16          /* a group's map indices a story stage: the map's number, 16 more each stage */
+#define BN4_GROUP_DEEP    0x94        /* the group of the Undernet 1-6 (its maps 0-5) and Black Earth 1-2 (6 and 7), dark green */
+#define BN4_MAP_BLACK_EARTH 6         /* ... Black Earth's first: NavShado and NavBlack, its own, in maps 6 and 7's records alone */
 #define BN4_ENEMY_STATS   0x08011888u /* a record per enemy id, BN4_ENEMY_STAT_SIZE bytes (0 MegaMan, 1-126 the viruses, 128 on the Navis) */
 #define BN4_ENEMY_STAT_SIZE 12
 #define BN4_ENEMY_COUNT   253         /* ids 0-252, as its enemy names archive (BN4_ENEMY_NAMES) holds them */
@@ -179,6 +193,54 @@
 #define BN4_SOUL_FLAGS    0x08020018u /* a byte per Soul: its event flag, 0x17-0x1C Red Sun's six, 0xFF Blue Moon's six (refused) */
 #define BN4_UNITE_CHECK   0x0801FF84u /* the last pick's kind a Soul's, its flag set, not used this battle (0x0203BF88's bit): BN5's twin */
 #define BN4_FLAG_DOUBLE_SOUL 0x0014   /* UNITE stands only with it set and MegaMan neither worried nor dark (0x0801E0B4) */
+/* A Soul in battle (docs/rom/bn4.md, Souls in battle; docs/multirom/bn4-souls.md; tools/bn4_souls.py reads each Soul's rows) */
+#define BN4_SOULS_USED    0x0203BF88u /* u32: the Souls used this battle, bit n - 1 the Soul n (zeroed with the battle, 0x0801594E) */
+#define BN4_UNITE_COMMIT  0x0801F0A0u /* OK's picks loop, a pick of UNITE (its slot under 0x20 the Soul): the used bit (0x0801F1FE), then
+                                       * BN4_SOUL_CHIPS + n into the picks, through BN4_PICK_GATE; the hand keeps no kind-15 chip */
+#define BN4_PICK_GATE     0x08020306u /* a pick's chip let through or refused (back 0x3784: dropped): 0x1FF passes, the rest by BN4_CHIP_GATE
+                                       * and the folder's limits */
+#define BN4_CHIP_GATE     0x080063C8u /* a chip's check against the save: BN4_CHIP_KEYS + id XOR 0x64 equal to eToolkit [+0x84] + id, else
+                                       * refused; a Soul's pseudo-chip passes only where the game wrote its byte as it gave the Soul */
+#define BN4_CHIP_KEYS     0x02000670u /* ... its key bytes, a byte a chip id (fixed) */
+#define BN4_TOOLKIT_CHIP_COPY 0x84    /* eToolkit +0x84: the save's chip bytes BN4_CHIP_GATE checks against, in the moving block */
+#define BN4_NAVI_FORM     0x24        /* NaviStats +0x24: MegaMan's form, the Soul 1-12 (BN6's and BN5's +0x2C), 0xF DarkSoul */
+#define BN4_NAVI_NAVI     0x23        /* NaviStats +0x23: whose NaviStats, 0 MegaMan (the sprite's row, BN4_STATS_SPRITES) */
+#define BN4_NAVI_BYTE     0x0800D7CAu /* a battle NaviStats byte of the object in r5 (r1 its offset): BN6's by object */
+#define BN4_NAVI_BYTE_SIDE 0x0800D772u /* ... of a side (r0), r1 its offset */
+#define BN4_NAVI_BYTE_SET 0x0800D7AAu /* ... written for the object in r5: r1 its offset, r2 the byte */
+#define BN4_FORM_DARK     0x0F        /* DarkSoul's form: timed by frames (BN4_FORM_FRAMES), not turns */
+#define BN4_FORM_TURN_START 0x0800B658u /* as MegaMan's turn starts (0x08013918): the hand's next chip a Soul's pseudo-chip makes it the pending
+                                       * form (AI data +0x10); else a Soul whose turns are spent (+0x18 >= +0x19) ends (pending 0, request
+                                       * 0x40), DarkSoul when its frames run out; 0xFF none */
+#define BN4_FORM_STATE    0x0800E05Cu /* the form's state set as it changes: its enter routine (BN4_FORM_ENTERS), turns, loadout, charge times,
+                                       * element */
+#define BN4_TURN_COUNT    0x0800BA20u /* as each Custom screen opens (0x08007192): both sides' AI data +0x18 one more, unless 0xFF */
+#define BN4_AI_PENDING_FORM 0x10      /* AI data +0x10: the form the change is to take, 0xFF none (BN4_FORM_TURN_START) */
+#define BN4_AI_SOUL_TURNS_USED 0x18   /* AI data +0x18: the Soul's turns counted, 0xFF where UNITE may not stand (a form taken) */
+#define BN4_AI_SOUL_TURNS 0x19        /* AI data +0x19: the Soul's turns (BN4_FORM_TURNS); the emotion window shows +0x19 - +0x18 (0x08014B94) */
+#define BN4_AI_LOADOUT    0x0C        /* AI data +0xC: the form's loadout, 4 bytes (+0xD its plain shot, +0xE chip charge, +0xF charged shot) */
+#define BN4_AI_DARK_FRAMES 0x2C       /* AI data +0x2C: a timed form's frames left (DarkSoul's) */
+#define BN4_AI_REQUESTS   0x44        /* AI data +0x44: the requests (0x40 a form's end, 0x20 GutsSoul's rapid buster), BN6's place */
+#define BN4_FORM_LOADOUTS 0x080184F0u /* by form (0-15), 4 bytes: +1 the plain shot's power attack, +2 the chip charge's, +3 the charged shot's
+                                       * (0xFF none; BN5's 6 bytes at 0x0801CA18) */
+#define BN4_FORM_LOADOUT_SIZE 4       /* ... a form's bytes */
+#define BN4_FORM_ENTERS   0x0800E0A0u /* by form, a routine as it is taken: eight Souls' (a hand pass, an object, a flag), a nullsub the rest's */
+#define BN4_FORM_TURNS    0x080180A8u /* by form, a byte: its turns (3 every Soul's) */
+#define BN4_FORM_FRAMES   0x08018088u /* by form, a u16 into AI data +0x2C: a timed form's frames (DarkSoul 960; the Souls' 600 unused) */
+#define BN4_FORM_ELEMENTS 0x0800C964u /* by form, a byte: his element (FireSoul 1, ThunSoul 3, AquaSoul 2, WoodSoul 4) */
+#define BN4_FORM_COMPANIONS 0x08018068u /* by form, a u16: an object spawned beside him (FireSoul's 0x0010, NumSoul's 0x0110), 0 none */
+#define BN4_STATS_SPRITES 0x08017F98u /* by BN4_NAVI_NAVI, his sprite's list and number (2 bytes): MegaMan's list 0, number the form (the
+                                       * Souls' sprites list 0's 1-12, BN5's 7-12); 1-13 list 8, the Soul Navis the unison draws */
+#define BN4_POWER_ATTACKS 0x0800CA7Cu /* the power attacks by id, 108 (BN5_POWER_ATTACKS' and BN6_POWER_ATTACKS' twin): each sets the attack's
+                                       * variables (AI data +0x70) and returns its family, a state of MegaMan's (BN4_PLAYER_STATES) */
+#define BN4_POWER_ATTACK_COUNT 108    /* ... how many */
+#define BN4_CHARGE_TIMES  0x080180B8u /* a power attack's charge times, 5 halfwords by his Charge (BN6_CHARGE_TIMES' shape; the Souls' the same
+                                       * at every Charge: AquaSoul 30 to NumSoul 120) */
+#define BN4_FAMILY_UNITE  0x0D        /* MegaMan's state (BN4_PLAYER_STATES) for the unison: its phases, the Soul Navi's image, the form written (0x080EBB80) */
+#define BN4_FAMILY_LEAVE  0x11        /* ... for the Soul's end: form 0 written (0x080EBEF2) */
+#define BN4_CHIP_ATTACK   0x0800D406u /* a power attack's chip (r0): its numbers from its record, its family the record's +0xB (WindSoul's
+                                       * AirShot and WindRack, ProtSoul's WideSwrd, JunkSoul's the battle's chip) */
+#define BN4_CHIP_FAMILY   0x0B        /* a chip record's +0xB: its attack family */
 #define BN4_CHIP_COUNT    389         /* ids 0-388 */
 #define BN4_GET_CHIP      0x080190D0u /* getChip: BN6's (0x08021AA4) found by its bytes, its literal BN4_CHIP_RECORDS */
 #define BN4_CHIP_NAMES    0x087481D8u /* text archive: the chips' names, ids 0-255 (letters and digits spelt as BN6's) */
@@ -198,5 +260,59 @@
 #define BN4_MAP_ENTERS    0x08026634u /* the net's groups' EnterMapGroup routines (21, 0x80-0x94; stubs where a group has no maps), its
                                        * dispatch 0x080266E8 as BN5's; LoadBGAnim the routine's fifth call, not its first as BN5's */
 #define BN4_MAP_ANIMS     0x08026688u /* ... their LoadGFXAnims routines (dispatch 0x08026718), called before EnterMapGroup as in BN6 */
+
+/* BN4's Navis (docs/rom/bn4.md, BN4's Navis; docs/multirom/bn4-navis.md): each a first-kind type of its own, as its
+ * families are, its routine's jump table a family's (BN4_TYPE_INIT, _UPDATE, _DYING); its update the Navi pre-step and
+ * the Navi state runner with its state table, BN4's six generic Navi states first, its own from 6. Ten (Red Sun's and
+ * Blue Moon's Soul Navis) take their side's AI data at their init and name MegaMan's states in their table (their
+ * attacks); the others keep their variables in the object, as the families do */
+#define BN4_NAVI_FIRST_ID 128         /* Roll's V1: a Navi's four enemy ids in a row from here (V1, V2, V3, SP; BN4_ENEMY_VERSION 0-3) */
+#define BN4_NAVI_SPRITES  8           /* a Navi's BN4_ENEMY_KIND: its battle sprite in list 2, its BN4_ENEMY_FAMILY the number (GutsMan 2) */
+#define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
+#define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_SEARCHMAN  0x2B /* SearchMan's (140-143) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_FIREMAN    0x0C /* FireMan's (144-147) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_THUNDERMAN 0x32 /* ThunderMan's (148-151) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_METALMAN   0x3F /* MetalMan's (160-163) first-kind type (BN4_ENEMY_TYPE of its records), Blue Moon's Soul Navis, fought in Red Sun too */
+#define BN4_NAVI_TYPE_JUNKMAN    0x47 /* JunkMan's (164-167) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_AQUAMAN    0x0D /* AquaMan's (168-171) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_WOODMAN    0x46 /* WoodMan's (172-175) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_TOPMAN     0x09 /* TopMan's (176-179) first-kind type (BN4_ENEMY_TYPE of its records), the others: no AI data, their states all their own */
+#define BN4_NAVI_TYPE_BURNERMAN  0x22 /* BurnerMan's (184-187) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_COLDMAN    0x4A /* ColdMan's (188-191) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_SPARKMAN   0x0B /* SparkMan's (192-195) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_LASERMAN   0x29 /* LaserMan's (208-211) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_KENDOMAN   0x2D /* KendoMan's (212-215) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_VIDEOMAN   0x2F /* VideoMan's (216-219) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_TYPE_DUO        0x2A /* Duo's (224-227) first-kind type (BN4_ENEMY_TYPE of its records) */
+#define BN4_NAVI_PRESTEP  0x080135A8u /* a Navi's update's first call (BN4_PRESTEP's), Duo's BN4_NAVI_PRESTEP_DUO */
+#define BN4_NAVI_PRESTEP_DUO 0x0801374Au /* ... Duo's: the same chores in 41 instructions to its 65 */
+#define BN4_NAVI_RUNNER   0x08013DB4u /* its second: r0 the Navi's state table, run by CurAction (+9) with r6 its collision data and r7 its
+                                       * AI data (BN4_STATE_RUNNER's work for a Navi; BN6's status dispatcher 0x0801AF44 another body) */
+#define BN4_NAVI_DYING    0x08010F61u /* a Navi's jump table's +8 (WindMan's BN4_DYING, the families') */
+/* BN4's generic Navi states 0-5, every Navi's table's first six where it does not put its own (BN4_STATE_GENERIC_* the
+ * families'); 2 is the families' 2, 5 BN6's and BN5's Navi state 5 by body, the others BN4's own */
+#define BN4_NAVI_GENERIC_0 0x08010D31u
+#define BN4_NAVI_GENERIC_1 0x08010FA7u
+#define BN4_NAVI_GENERIC_2 0x08010D4Du
+#define BN4_NAVI_GENERIC_3 0x08010E89u
+#define BN4_NAVI_GENERIC_4 0x08010F09u
+#define BN4_NAVI_GENERIC_5 0x08010FAFu
+#define BN4_MEGAMAN       0x080EAEA8u /* MegaMan's routine (the first kind's type 0 calls it): his jump table, his update with his state table */
+#define BN4_PLAYER_STATES 0x080EAEFCu /* MegaMan's state table (his update's literal): his generic 0-5, his own from 6; 44-111 among them
+                                       * the Soul Navis' attacks, a Navi's table naming them after its own (GutsMan's 7-10 his 67-70) */
+#define BN4_PLAYER_STATE_COUNT 116  /* ... how many (the table ends where a word is no Thumb routine's) */
+#define BN4_AI_TAKE       0x0800C09Au /* a Soul Navi's init: its side's AI data (BN4_AI_OF_SIDE by +0x16) into its +0x58 */
+#define BN4_AI_OF_SIDE    0x0800BFF4u /* r0 a side: BN4_AI_DATA + side * BN4_AI_DATA_SIZE, so one Navi with AI data a side */
+#define BN4_AI_NAVI       0x64        /* AI data: the Navi's own 12 bytes before the attack's variables, its decision's sub-state first
+                                       * (BN6's +0x80, 0x20 bytes there: HeatMan's decision reads its sub-state so) */
+#define BN4_SET_ACTION    0x0800C9ACu /* r0 a state: CurAction set, its sub-state and the attack's variables' first u16 cleared */
+#define BN4_ATTACK_END    0x0800CA28u /* a Soul Navi's attack's end: AI data +0x44's bits 0x3F and +9 to +0xB, +0x30, +0x32 cleared, CurAction 6;
+                                       * 0x0800C9FC the same with the attack's +5 kept at +0x3A, 0x0800CA4A the CurAction alone */
+/* (their spawns: BN4_SPAWN_1, BN4_SPAWN_3 and BN4_SPAWN_4 above, r0 the type, r1 to r3 the place, r4 the parameters) */
+#define BN4_ENEMY_RECORD  0x08011878u /* r0 an enemy id: its BN4_ENEMY_STATS record */
+#define BN4_SPAWN_ENEMY   0x080F00F4u /* r0 an enemy id: its type spawned on a free panel of the side (Roll's state 11, MegaMan's 48) */
+#define BN4_PANEL_CRACK   0x08009AECu /* r0, r1 a panel: cracked (its type 3), or broken (1) where it was cracked, sound 0x95 (ColdMan, Duo) */
 
 #endif

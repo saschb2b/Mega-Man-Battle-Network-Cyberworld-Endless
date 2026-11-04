@@ -388,7 +388,7 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	[XROM_BN4_RED_SUN_US] = { .name = "Mega Man Battle Network 4: Red Sun (USA)", .sha1 = "a97e96a7da03abd70f7953328e511b9fa29179f1", .code = "B4WE",
 		.map_table_rw = 0x028304u, .map_table = 0x02831Cu, .coord_table_rw = 0x028F04u, .coord_table = 0x028F1Cu,
 		.rw_groups = 6, .net_groups = 21, .song_table = 0x155FF8u, .sprite_lists = 0x02793Cu, .battle_songs = { 0x14, 0x15 },
-		.tag = "BN4", .research = true },
+		.tag = "BN4", .research = true, .kit_keys_played = true },
 };
 
 const NetAreaDef *net_area_def(int area) {

@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The engine's own sound"
-description: "The engine's own MP2K (`src/audio/mp2k*.c`, `gba_sound.c`): BN6's sound engine rewritten in C for the title and PET screens, proved byte for byte against the game by `tools/mp2k_verify.py`, and BN5's songs on it."
+description: "The engine's own MP2K (`src/audio/mp2k*.c`, `gba_sound.c`): BN6's sound engine rewritten in C for the title and PET screens, proved byte for byte against the game by `tools/mp2k_verify.py`, and BN5's and BN4's songs on it."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T01:11:15Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:30:00Z }
 ---
 
 # The engine's own sound
@@ -83,6 +83,12 @@ x0/ID:SECONDS:PATH` renders BN5's song ID. BN6's songs stay byte for
 byte the game's (`tools/mp2k_verify.py`, the title, the net and a menu
 sound after the change); BN5's title is the plain BN5 ROM's within the
 same bounds as BN6's ([Sources](../../research/sources.md#the-jukeboxs-songs), The Jukebox's songs).
+BN4's songs play on it too (`--render-song x1/ID:SECONDS:PATH`, BN4's ROM
+read for research), as BN6's engine plays their copies: BN4's library is
+another build of BN6's, its tables BN6's byte for byte, its sound engine
+otherwise in two ways a run would hear (its master volume 12, and a PSG
+channel the hardware stopped kept: [BN4 Red Sun's tables](../../rom/bn4.md), Its sound engine
+against BN6's).
 
 **The Jukebox** ([The PET](../../game/pet.md)) holds the core still while it is up (no
 frame of the game runs, so its music stops and its sound ring empties
