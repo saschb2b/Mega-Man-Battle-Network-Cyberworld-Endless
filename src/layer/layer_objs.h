@@ -9,6 +9,7 @@
 #include "guardian_objs.h"
 #include "mapslot.h"
 #include "net.h"
+#include "npc.h"      /* NpcLooks */
 #include "scripts.h"
 #include "shop.h"
 
@@ -61,6 +62,10 @@
  * and the pick gave its chip (docs/game/glitch-layer.md). */
 #define LAYER_COPY_WON_FLAG     0x147A
 #define LAYER_COPY_TAKEN_FLAG   0x147B
+/* A Glitch warp's looks: BN6's own pads (sprite list 7), the first its
+ * own, the others it glitches into (docs/game/glitch-layer.md) */
+#define GLITCH_LOOKS 3
+extern const uint8_t glitch_look_sprite[GLITCH_LOOKS];
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -71,6 +76,8 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int copy_reward;           /* ... and a Glitch layer's copy deleted, its pick, -1 for none */
+	NpcLooks glitch_warp;      /* the layer's Glitch warp, its look changed through these (npc_talker_looks), jump_at 0 none */
+	uint8_t glitch_looks;      /* ... the looks whose sprites the map loads, a bit each */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */

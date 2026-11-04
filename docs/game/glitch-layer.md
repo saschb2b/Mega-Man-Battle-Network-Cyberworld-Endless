@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"
@@ -136,15 +136,22 @@ the exit to the next layer).
 
 ## The warp
 
-A warp like the dark warp (its sprite, BN6's overworld object), never in
-the Undernet's purple: its colours turned one of three ways, and every
-three to seven seconds it glitches for a handful of frames, its rows torn
-sideways sprite and all, and comes back in other colours (drawn over the
-frame, `glitch.c`). BN6's own NPC commands could carry more of it
-(verified in bn6f, `asm/npc.s`): `0x2D` mosaic, "the 'blur' effect when
-viruses spawn in a battle", `0x2B` a colour shader mixed with its
-palette, `0x2F` a squash and rotation, and `ns_set_sprite` another warp's
-look (the Secret Area's gate): left for later.
+A pad on the floor, one of BN6's own overworld objects (sprite list 7:
+the big framed warp pad 0x06, the green oval pad 0x22, the
+orange-framed pad 0x36), never in the Undernet's purple: its colours
+turned one of three ways. Every three to seven seconds it glitches for a
+handful of frames, its rows torn sideways and, every other frame, split
+by colour (its red drifting left, its blue right), and comes back as
+another of the three pads under BN6's own sprite mosaic, clearing; between
+its glitches, now and then a frame or two of a few rows slipped a pixel,
+so it never quite holds still. The pad's switch and its mosaic are BN6's
+NPC commands (`0x25` ns_set_sprite, `0x2D` ns_set_mosaic, verified in
+bn6f, `asm/npc.s`): the director points its talker's idle loop at a
+snippet that runs them, for a frame or two (`npc_talker_looks`); the tears
+and the split are drawn over the frame (`glitch.c`). The dark warp's flame
+(0x44) was its first look: BN6 draws it three frames in five (its one
+animation's frames, seen in the gallery), a see-through flicker that made
+the warp seem to drop frames.
 
 Its read ([a fork's read](../world/level-design/fork-read.md)): at A,
 MegaMan senses, never names: "W-Whoa... Lan,this warp's wrong. It keeps
@@ -226,7 +233,8 @@ half of the act's guardians' band, a share a form): when a form's share
 is gone it glitches out in BN6's own sprite mosaic, uncounted, and the
 next arrives as BN6 brings a Navi into a fight under way, its HP plate
 listed; deleting the last wins the battle as BN6 wins any, ENEMY
-DELETED! and the results (`src/emu/battle_swap.c`, `glitch_copy.c`;
+DELETED! and the results, each form in its own sprite, put first in the
+battle's sprite cache by BN6's `sprite_decompress` (`src/emu/battle_swap.c`, `glitch_copy.c`;
 how, address by address, in [BN6's Navis](../rom/navis.md), A Navi
 swapped mid-battle). No Custom screen between forms. The forms: the
 guardians the run has beaten, the last first (the copy is made of what
@@ -273,9 +281,9 @@ senses, Lan reacts; neither names what they have not seen.
   change: the side kind is `run.side_kind`, the stage comes back from
   BN6's data flags, the copy's outcome is event flags `0x147A` and
   `0x147B` ([a layer](../engine/emulation/layer.md)).
-- The warp: the dark warp's sprite, its colours turned one of three ways
-  that change with each glitch, torn every three to seven seconds, drawn
-  over the frame.
+- The warp: a floor pad of BN6's switched between three looks at each
+  glitch under BN6's mosaic, through its talker's idle loop; its colours
+  turned, torn and split by colour over the frame.
 - Dev: `--dev glitch` (the warp on every act's first layer from the
   second), `glitchstage=N`, `side=4`, the `glitch` step and `--talk
   glitch`/`copy` ([the dev menu](../devtools/dev-menu.md)).
@@ -291,7 +299,7 @@ the autopilot through Glitch layers on ten seeds to the next layer and
 on (stage 0 at their exits, no data taken).
 
 **Left for later:** the copy's body switching between its forms on the
-layer (BN6's `ns_set_sprite` and mosaic, `0x25` and `0x2D`); its record
+layer (as the warp's pads switch: `npc_talker_looks`); its record
 and first meeting as "???", a title's mark, Dad's mail; the backdrop and
 the theme flipping with the floor; the statistics' choices (Glitch layers
 entered, stage reached, the copy fought and beaten); another net's Navis

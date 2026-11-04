@@ -111,6 +111,10 @@ void npc_probe(int face, int *dx, int *dy) {
 /* The idle loop after script `s`'s first `n` bytes: leave once `gone_flag`
  * is set (-1: never), else pause a frame and look again; the script
  * written, its jumps to its own addresses. */
+/* (the last idle loop written: its jump's operand and its own start, for
+ * npc_talker_looks) */
+static uint32_t idle_jump_at, idle_loop;
+
 static uint32_t idle_and_write(uint8_t *s, int n, int gone_flag) {
 	int loop = n, gone_jump = -1;
 	if (gone_flag >= 0) {
@@ -126,6 +130,8 @@ static uint32_t idle_and_write(uint8_t *s, int n, int gone_flag) {
 	put32(s + loop_jump, at + (uint32_t)loop);
 	if (gone_jump >= 0) put32(s + gone_jump, at + (uint32_t)gone);
 	emu_write(at, s, (size_t)n);
+	idle_jump_at = at + (uint32_t)loop_jump;
+	idle_loop = at + (uint32_t)loop;
 	return at;
 }
 
@@ -231,6 +237,25 @@ static uint32_t talker(int category, int index, int x, int y, int z, int anim, u
 
 uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor) {
 	return talker(category, index, x, y, z, anim, archive, script, gone_flag, floor, false, 0, 0);
+}
+
+uint32_t npc_talker_looks(const NpcTalk *t, NpcLooks *looks) {
+	memset(looks, 0, sizeof *looks);
+	uint32_t at = talker(t->category, t->index, t->x, t->y, t->z, 0, t->archive, t->script, t->gone_flag, true, false, 0, 0);
+	if (!at) return 0;
+	looks->jump_at = idle_jump_at;
+	looks->loop = idle_loop;
+	/* (ns_set_sprite's 0x25, the animation's 0x16, ns_set_mosaic's 0x2D,
+	 * then back to the loop: bn6f asm/npc.s) */
+	uint8_t look[] = { 0x25, (uint8_t)t->index, (uint8_t)(t->category * 4), 0x16, 0, 0x2D, 0, 0, 0x02, 0, 0, 0, 0 };
+	uint8_t blur[] = { 0x2D, 0, 0, 0x02, 0, 0, 0, 0 };
+	put32(look + 9, idle_loop);
+	put32(blur + 4, idle_loop);
+	looks->look = mapslot_alloc(look, (int)sizeof look);
+	looks->blur = mapslot_alloc(blur, (int)sizeof blur);
+	if (looks->look) emu_write(looks->look, look, sizeof look);
+	if (looks->blur) emu_write(looks->blur, blur, sizeof blur);
+	return at;
 }
 
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy) {
