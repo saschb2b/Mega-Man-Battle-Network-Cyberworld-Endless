@@ -3,7 +3,7 @@ type: Tool
 title: "build.py shot: a headless capture's options"
 description: "`build.py shot`'s options for a headless capture in the build image: the scenes, run depth, area, guardian, seed, setup and marks, `--talk`, scripted `--input` and `--taps`, and the frames saved."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T00:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:40:00Z }
 ---
 
 # build.py shot: a headless capture's options
@@ -27,7 +27,7 @@ start (as on a phone; with `--size` a phone's screen and `--dpi N` its density),
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
 undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader, battler for a Virus Battler (`--dev battler=K` puts one on the layer); intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumor_lines.c); dark for a flame of darkness ([The meta layer](../game/meta/overview.md));
 fragment for MegaMan's words at a ScrtData; bugfrags gives 50 BugFrags, keys an Unlocker, rushfood three RushFood, wwwid a WWW-ID, zenny 10000 zenny, regup a RegUP3). `--input "FRAMES:BUTTONS,..."` scripts the
-buttons (`UP+RIGHT`, `A`; play.py's dev steps too, `0:place X Y FACE`, `0:flags FROM TO 1`, `0:sig` (MegaMan in the layer's signature, [Identity](../world/level-design/identity.md)) and `0:battle`, the layer's next random battle as soon as MegaMan is free on its map, BN5's on its territory; `300:battle` waits its 300 frames first; `0:foes 200@52/01@43` a battle in BN6's engine of the enemy ids named at their panels, column then row, `0:xrecord 811DE10` one of BN5's battle records in BN6's engine (`build.py xrecords` lists them), and `0:status freeze 90` its enemies given a status as a hit leaves it, [Dev tools](overview.md)), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
+buttons (`UP+RIGHT`, `A`; play.py's dev steps too, `0:place X Y FACE`, `0:flags FROM TO 1`, `0:sig` (MegaMan in the layer's signature, [Identity](../world/level-design/identity.md)) and `0:battle`, the layer's next random battle as soon as MegaMan is free on its map, BN5's on its territory; `300:battle` waits its 300 frames first; `0:foes 200@52/01@43` a battle in BN6's engine of the enemy ids named at their panels, column then row, `0:xrecord 811DE10` one of BN5's battle records in BN6's engine (`build.py xrecords` lists them), and `0:status freeze 90` its enemies given a status as a hit leaves it, [Dev tools](overview.md); `0:dump PREFIX` the video memory, palettes, IO registers and OAM as `PREFIXv.bin`, `p`, `i` and `o`, as play.py's `dump`), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames (the canvas; `--screen-shot FRAME:PATH,...` the whole screen, the touch controls on it; `--second-shot FRAME:PATH,...` the second screen, the 3DS's bottom one with its panel, at `--second-size WxH` an Android display's, and `--second-shot-range A:B:PREFIX` its frames as `--shot-range` the picture's), and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image
 only when `build.py` lists them (`CYBERWORLD_EMU_DEBUG`, `CYBERWORLD_AUTOPILOT`

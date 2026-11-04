@@ -1,9 +1,9 @@
 ---
 type: Status
 title: "Status"
-description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan, BN4 (researched) and Falzar."
+description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T22:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:40:00Z }
 ---
 
 # Status
@@ -196,6 +196,79 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T22:20:00Z }
   and modelled on a computer; a New 3DS's own run with both ROMs is
   3ds/README.md's checklist.
 - [ ] Battle Network 4: Red Sun: researched, its tables found and its
-  maps drawn, nothing built ([Battle Network 4 in a run](bn4.md), its plan and
-  the owner's open calls).
+  maps drawn ([Battle Network 4 in a run](bn4.md), its plan and the owner's
+  open calls); its areas below, held.
 - [ ] Team ProtoMan (the other version), BN4 Blue Moon, BN6 Falzar.
+
+## BN4 Red Sun's areas
+
+Its net's five large areas dress BN6's as BN5's do, each held out of runs
+(`NetAreaDef.held`) until the owner admits it, as the walk's gate of
+[the core loop](../game/core-loop.md) asks of every area, and how three
+games share BN6's areas is the owner's call ([Battle Network 4 in a run](bn4.md),
+The owner's calls). Their tables in [BN4 Red Sun's tables](../rom/bn4.md).
+
+- [x] Read for review alone: BN4's ROM is read for research
+  (`XRomLayout.research`), and its areas are shown only to a dev tool that
+  reviews them (`xarea_review`): `--net-biome x15` (ACDC Area) to `x19`
+  (the Undernet), numbered after BN5's fifteen, and the atlas
+  (`--atlas DIR:a15:3`, `build.py tiles`). A run, or a dev tool reading BN4
+  for its families or the differential, meets none of them: no song,
+  backdrop or bystander of theirs copied in, frames the same as before
+  (autopilot runs from seeds 1 and 3, BN5's ACDC, Oran and Undernet layers,
+  a run with `--dev bn4families`, each frame for frame against the build
+  before them).
+- [x] Their maps in 256 colours: BN4's net maps are 256-colour where BN6's
+  and BN5's are 16, and no packing of their tiles fits BN6's banks, so a
+  layer in BN4's tiles is shown in 256 colours: the map reader draws a map
+  by its tile map's header (`area_src.c`), and while BN6 shows the net's
+  map the director sets BG1 and BG2's 256-colour bit (`netmap_colours`;
+  [BN4 Red Sun's tables](../rom/bn4.md), Net maps in 256 colours; [The net's
+  maps and their pieces](../rom/net-maps.md), the map's BG controls). BN6's chat box,
+  its tiles above BN4's and its colours apart from theirs, shows as on any layer.
+- [x] Their backdrops and battle backgrounds: each layer stands on its
+  learned map's backdrop, animated, and its battles on the map's own
+  background (BN4's map backdrops' byte: ACDC Area 4, Town Area 5, Park
+  Area 6, the countries' third map 0x14, the Undernet 8), BN4's 9-word
+  records copied as BN6's 7 (`XRomLayout.bg_words`) and its LoadBGAnim
+  found as its EnterMapGroup's fifth call (`src/gfx/xbackdrop.c`).
+- [x] Each tuned over the atlas's layers (`--atlas DIR:aN:3`), its looks
+  learned by shape (BN4's floors share hues across looks: the hue buckets
+  part none of them), seams per 100 panels:
+  ACDC Area (x15, like Central Area, over 0x90:0) 144: its third
+  map, then the first two; mint walkways in green rims, round hubs ringed
+  blue and yellow, framed squares of four by four, every room up to 64
+  panels and the arena drawn as one of its squares (`pad_rooms`), apart
+  (151 from its first map, 300 by hue).
+  Town Area (x16, like Seaside Area, over 0x91:1) 28, but 166 tiles per
+  100 panels drawn with other floors than they show: pale cyan walkways in
+  blue rims, wide and holed; its yellow and lime conveyors lend no tiles
+  (82 seams with them); a field is filled with its holed floor's lattice,
+  hole rims where floor is (learned from its third map, 138 seams and 12
+  such tiles; laid out as Central's, Sky's or Green's, the same).
+  Park Area (x17, like Green Area, over 0x92:1) 85: its first map
+  alone (its other maps mixed in, 149), pink walkways, peach framed
+  platforms; its orange and yellow conveyors lend none.
+  The countries (x18, like Sky Area, over 0x94:1) 32: the four are
+  four looks, so one is learned, the third (green floor in red and yellow
+  rims, cream framed platforms, drawn apart; the others 50 to 175); which
+  country it is is not traced, so the area is named the countries.
+  The Undernet (x19, like the Undernet, over 0x92:0) 197: its third map
+  alone (196 with its first two), orange cushioned paths a panel wide, grey
+  joints, grey square platforms with a blue cross, drawn apart; Black Earth
+  (0x94:6-7) not drawn.
+- [x] Their themes named: BN4's net theme (song 0x12) for ACDC, Town,
+  Park Area and the countries, its Undernet's (0x13) for the Undernet
+  (`.xsong`, BN4's map lists, `BN4_MAP_MUSIC`); copied by `xsong.c` as a
+  layer of one is reviewed, its one drum kit whole (219 KB where a BN5
+  theme is 8: copying the keys played is the music's work, [Music](music.md));
+  its battle themes (0x14, 0x15) named once an area is admitted, as a
+  game that lends areas has its battle themes copied as a run starts.
+- [ ] Their battles, guardians and bystanders: BN6's (no `xbattles`,
+  `xguard` or `xnavi`), until BN4's families, Navis and Navis' sprites come
+  (Phases 1 and 2 of [Battle Network 4 in a run](bn4.md)).
+- [ ] Admitted: each area's walk measured against the core loop's gate
+  (its review, Phase 3) and the owner's call on sharing BN6's areas
+  between three games; `run_dress` gives each area of another game a coin
+  of the run's seed by its number (bits 16 on), which BN4's numbers (15-19)
+  run past, so admitting them asks a draw of its own.

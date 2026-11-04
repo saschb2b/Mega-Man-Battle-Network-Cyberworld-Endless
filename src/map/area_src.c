@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "bn5_liberation.h"
+#include "bn6_map.h"
 #include "bytes.h"
 #include "gfx.h"
 #include "lz.h"
@@ -100,6 +101,12 @@ static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_
 	}
 }
 
+/* The map's tiles 256-colour (64 bytes a tile, a colour index a pixel):
+ * the real world's, and BN4's net maps, whose tile map header's third
+ * byte is 1 as the real world's are (BN6's and BN5's net maps 0, their
+ * empty placeholders aside: docs/rom/bn4.md, Net maps in 256 colours) */
+static bool map_bpp8(int group, uint32_t tm) { return group < RW_GROUPS || src.data[tm + BN6_TILEMAP_COLOURS] == 1; }
+
 static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32_t *pal, uint32_t *tm) {
 	uint32_t list = su32(group_slot(src.map_rw, src.map_net, group));
 	if (!rom_is_ptr(list)) return false;
@@ -123,11 +130,11 @@ bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot)
  * what stands on it, the internet's floors under what the originals set in
  * front of them (bridges, stairs, spikes, the floors that overlap others
  * on screen); and the first layer alone (its pixels allocated, cleared). */
-static bool draw_map(AreaSrc *a, uint32_t ts, uint32_t pal) {
+static bool draw_map(AreaSrc *a, uint32_t ts, uint32_t pal, uint32_t tm) {
 	uint32_t colors[256];
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	if (!vram) return false;
-	bool rw = a->group < RW_GROUPS;
+	bool rw = map_bpp8(a->group, tm);
 	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
 	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
 	free(vram);
@@ -156,7 +163,7 @@ static bool decode_tiles(AreaSrc *a) {
 	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
 	if (!a->px || !a->px0 || !a->front || !a->idx) return false;
-	return draw_map(a, ts, pal);
+	return draw_map(a, ts, pal, tm);
 }
 
 uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th) {
@@ -172,9 +179,16 @@ uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles,
 	uint16_t *layers[2] = { t.v, t.v + (size_t)tw * th };
 	/* as the game shows them, in the real world and the internet alike: the
 	 * second layer (BG2, priority 2) over the first (BG1, priority 3) */
-	draw_layers(vram, colors, layers, 2, 1, tw, th, px, NULL, NULL, group < RW_GROUPS);
+	draw_layers(vram, colors, layers, 2, 1, tw, th, px, NULL, NULL, map_bpp8(group, tm));
 	free(vram);
 	return px;
+}
+
+bool area_src_bpp8(int rom, int group, int number) {
+	if (rom < 0 || rom > XROM_COUNT || (rom && !XR[rom - 1].data)) return false;
+	use_rom(rom - 1);
+	uint32_t desc, ts, pal, tm;
+	return map_desc(group, number, &desc, &ts, &pal, &tm) && map_bpp8(group, tm);
 }
 
 /* A Liberation map's board colours (BN5's ROM offset; 0 none): the script
@@ -489,7 +503,7 @@ static bool recolour(AreaSrc *a, uint32_t pairs) {
 	memset(a->px0, 0, cells * 64 * 4);
 	memset(a->front, 0, cells * 64);
 	memset(a->idx, 0, cells * 64);
-	return draw_map(a, ts, pal);
+	return draw_map(a, ts, pal, tm);
 }
 
 bool area_src_load_as(int rom, int group, int number, uint32_t pairs, AreaSrc *a) {

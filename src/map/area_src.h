@@ -71,6 +71,9 @@ bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
  * front: ARGB pixels, alpha 0 where empty (free them). The map is BN6's
  * (rom 0) or another game's (1 + XRomId, where read). */
 uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th);
+/* Whether map (group, number) of game `rom` (0 BN6, 1 + XRomId) is drawn in
+ * 256-colour tiles: the real world's, and BN4's net maps */
+bool area_src_bpp8(int rom, int group, int number);
 /* Map (group, number)'s tile set and colours in game `rom` (as for
  * area_src_render), to stand anywhere: the tile set's header with its
  * blocks encoded again after it (*ts_out, *nts bytes), the palette as it

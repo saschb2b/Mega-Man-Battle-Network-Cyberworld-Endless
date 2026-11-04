@@ -182,6 +182,15 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-04",
       "link": "../rom/bn4.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN4's net areas in BN6's net",
+      "state": "proven",
+      "now": "Its five large areas (groups 0x90-0x94, BN4_GROUP_*) dress BN6's as BN5's do, held out of runs and shown to a dev tool's review alone (xarea_review: --net-biome x15-x19, the atlas). Its net maps are 256-colour (the tile map header's +2, BN6_TILEMAP_COLOURS, 1 as in BN6's real world; no 16-colour packing fits BN6's banks), so the map reader draws them so and BN6's BG1 and BG2 are set 256-colour in RenderInfo (eToolkit +8, its BG controls at +4, BN6_BGCNT_NET_BG1 0x3D03 and BG2 0x3E02 on the net) while such a layer shows: its tiles to 0xCE00 lie below BN6's chat box's at 0xD100. Its backdrops' 9-word records are copied as BN6's 7 and its LoadBGAnim found as EnterMapGroup's fifth call (game state at +0x40). Seen in the game: each area's floor, backdrop and battle background whole, the chat box as on any layer; runs, BN5's areas and a run reading BN4 for its families the same frame for frame as before.",
+      "left": "Their battles, guardians and bystanders BN4's (BN6's for now); a BN4 song copied whole carries its drum kit's 219 KB (the keys played alone, the music's work); which country is which of 0x93's maps; Black Earth's maps (0x94:6-7) not drawn; Town Area's holed fields drawn as lattices; each area's admission (the walk's gate, the owner's call on three games sharing BN6's areas).",
+      "updated": "2026-11-04",
+      "link": "../multirom/status.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],

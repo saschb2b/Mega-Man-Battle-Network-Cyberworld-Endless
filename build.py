@@ -898,8 +898,10 @@ BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10, 'off': 1.10}
 AREAS = ['Central', 'Seaside', 'Sky', 'Green', 'Graveyard', 'Undernet', 'Secret', 'Nest', 'Comp', 'Homepage', 'Comp B',
          'Robot Comp', 'Aquarium Comp', 'Judge Comp', 'Weather Comp', 'CopyBot Comp', 'ACDC HP', 'Green HP', 'Sky HP',   # src/core/run.h
-         # (then another game's areas, where its ROM is beside BN6's: src/core/rom.c's bn5_areas, docs/multirom/)
-         'BN5 ACDC', 'BN5 SciLab', 'BN5 End', 'BN5 Nebula', 'BN5 Oran', 'BN5 Undernet']
+         # (then another game's areas, where its ROM is beside BN6's: src/core/rom.c's bn5_areas, its Liberation
+         # Missions' maps and bn4_areas, held out of runs; docs/multirom/)
+         'BN5 ACDC', 'BN5 SciLab', 'BN5 End', 'BN5 Nebula', 'BN5 Oran', 'BN5 Undernet'] + [f'BN5 dark {n}' for n in range(1, 10)] + [
+         'BN4 ACDC', 'BN4 Town', 'BN4 Park', 'BN4 Countries', 'BN4 Undernet']
 
 
 def tiles(seeds='2', baseline=False):

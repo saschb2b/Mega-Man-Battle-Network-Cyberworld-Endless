@@ -138,7 +138,10 @@ typedef struct {
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
 	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
-	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet */
+	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet, its areas
+	                                         * shown only as a dev tool reviews them (xarea_review) */
+	uint8_t bg_words;                       /* its backgrounds' records (BGAnimData), in words: 0 BN6's 7; BN4's 9, a buffer after its tiles
+	                                         * and after its map (src/gfx/xbackdrop.c) */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -160,9 +163,19 @@ int xrom_find_beside(void);
 extern bool xrom_research;
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
- * game's ROM is not read. */
-#define XAREAS_MAX 16
+ * game's ROM is not read, or whose game is read for research and which no
+ * dev tool reviews (xarea_review). */
+#define XAREAS_MAX 24
 const NetAreaDef *net_area_def(int area);
+/* A dev tool's look at another game's area (--net-biome xN) or at all of
+ * them (XAREA_ALL: the atlas): the extra ROMs read for research alone are
+ * read then too (xrom_research), and their areas, every one held, are
+ * shown to it (net_area_def). Everything else meets none of them: a run,
+ * and a dev tool that reads such a ROM for something else (its families,
+ * the differential's guest battles), go on as if its areas were not
+ * there, no song, backdrop or bystander of theirs copied in. */
+#define XAREA_ALL (-2)
+void xarea_review(int area);
 
 /* Looks for a supported ROM in dir (any *.gba). On failure, msg explains why. */
 bool rom_find(const char *dir, char *msg, size_t msglen);

@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "How it is built"
-description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space, areas dressed by `run_dress`, songs copied by `xsong.c`, and BN5's ROM on each platform."
+description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space (BN4's 256-colour ones shown so), areas dressed by `run_dress` or held for review, songs copied by `xsong.c`, and BN5's ROM on each platform."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:40:00Z }
 ---
 
 # How it is built
@@ -15,7 +15,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
    A layout marked `research` (BN4 Red Sun's, [Battle Network 4 in a run](bn4.md)) is
    read only when a dev tool sets `xrom_research` (the atlas's `x1`), so a
    run, the ROMs screen and the 3DS's heap never meet a ROM that lends
-   nothing yet.
+   nothing yet; its areas, held, are shown only to a dev tool reviewing
+   them (`xarea_review`: `--net-biome xN`, the atlas), so one reading it
+   for its families or the differential copies nothing of them.
 2. **A map from any of them** (`area_src_load_x`): the map reader takes
    its maps from the game's ROM; what learns from a map (`tiles_learn.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever
@@ -29,12 +31,17 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
    (`+0x170000`, [Running the game's own logic](../engine/emulation/overview.md)), and the taken-over map's descriptor
    points at them. BN5's tile sets fill the same VRAM as BN6's (their
    first block at 0, the second after it: 31200 bytes against 30496).
+   BN4's are 256-colour, to `0xCE00`, which BN6's net leaves room for
+   below its chat box's tiles: while a layer in them shows, BG1 and BG2
+   are set 256-colour (`netmap_colours`, [BN4 Red Sun's tables](../rom/bn4.md), Net maps in 256 colours).
    The map's backdrop and animations come with them (`xbackdrop_map`):
    the learned map's backdrop (its record, tiles, map and palette) and
    its GFXAnim scripts (colour cycles, the backdrop's turning tiles) are
    copied into `+0x310000`, and the taken-over map's entries in its
    group's three tables (animation list, backdrop record, scroll
-   callbacks) point at them; a layer of BN6's own puts BN6's back.
+   callbacks) point at them; a layer of BN6's own puts BN6's back. BN4's
+   records are 9 words to BN6's 7 (`XRomLayout.bg_words`) and its
+   LoadBGAnim is its EnterMapGroup's fifth call, both read so.
 4. **Pools by source**: each area, town, song and bystander is an entry
    with the game it came from; BN6 alone is today's game.
 5. **Runs follow the games there**: an area of another game dresses the BN6

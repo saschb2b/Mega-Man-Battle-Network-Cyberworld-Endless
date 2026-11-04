@@ -100,13 +100,13 @@ how to verify it.
 | Code (routines, hooks, instructions) | 295 | 27 | 11 |
 | ROM data (tables, text, literals) | 291 | 267 | 22 |
 | ROM, code or data not told | 443 | 582 | 14 |
-| RAM (variables, structures) | 135 | 65 | 18 |
+| RAM (variables, structures) | 136 | 65 | 18 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 158 | 42 | 2 |
 | Event flags | 34 | 3 | 1 |
 | Values of fields | 112 | 16 | 0 |
-| Constants, sizes and counts | 477 | 272 | 87 |
-| All | 1948 | 1274 | 155 |
+| Constants, sizes and counts | 477 | 272 | 92 |
+| All | 1949 | 1274 | 160 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -117,9 +117,9 @@ how to verify it.
 | Battle | 529 | 368 | 70 |
 | Text and fonts | 42 | 7 | 1 |
 | Sound | 19 | 25 | 10 |
-| Maps and the overworld | 131 | 41 | 9 |
+| Maps and the overworld | 132 | 41 | 9 |
 | Events and progress | 49 | 19 | 2 |
-| Engine core | 746 | 588 | 51 |
+| Engine core | 746 | 588 | 56 |
 
 <!-- end of what tools/symbols.py writes -->
 

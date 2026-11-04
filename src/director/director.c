@@ -573,6 +573,7 @@ void director_update(void) {
 	profile_played_frame();
 	take_events();
 	if (!D.active) return;
+	netmap_colours();
 	if (D.town) { home_update(); return; }
 	++D.frame;
 	++D.act_frames;

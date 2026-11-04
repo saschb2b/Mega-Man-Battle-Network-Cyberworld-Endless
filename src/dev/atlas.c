@@ -359,8 +359,9 @@ static void area_layers(const char *dir, FILE *report, int area, int seeds) {
 
 /* Another game's net area N alone. */
 static void xrom_area(const char *dir, int n, int seeds) {
-	xrom_find_beside();
 	int area = NET_AREAS + n;
+	xarea_review(area);
+	xrom_find_beside();
 	if (!net_area_def(area)) { printf("area %d: its game's ROM is not beside %s\n", area, R.path); return; }
 	char path[600];
 	snprintf(path, sizeof path, "%s/report.txt", dir);
@@ -477,7 +478,9 @@ int atlas_run(const char *spec) {
 	for (int b = 0; b < BIOME_COUNT; ++b)
 		if (want[b]) area_layers(dir, report, b, seeds);
 	/* (and every area another game beside BN6's lends a run, numbered after
-	 * BN6's: docs/multirom/) */
+	 * BN6's, held ones and those of a game read for research too:
+	 * docs/multirom/) */
+	if (!strcmp(biomes, "all")) { xarea_review(XAREA_ALL); xrom_find_beside(); }
 	for (int k = 0; k < XAREAS_MAX && !strcmp(biomes, "all"); ++k)
 		if (net_area_def(NET_AREAS + k)) area_layers(dir, report, NET_AREAS + k, seeds);
 	fclose(report);

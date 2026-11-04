@@ -260,8 +260,11 @@ static void building_word(void) {
  * game (docs/multirom/), laid out as the BN6 area it is like, which then
  * is the layer's biome. */
 void director_net_biome_arg(const char *v) {
-	if (v[0] == 'x') director_debug_area = run_debug_area = NET_AREAS + atoi(v + 1);
-	else director_debug_biome = atoi(v);
+	if (v[0] == 'x') {
+		director_debug_area = run_debug_area = NET_AREAS + atoi(v + 1);
+		/* (a held area of a game read for research alone, BN4's: read and shown) */
+		xarea_review(director_debug_area);
+	} else director_debug_biome = atoi(v);
 }
 
 static int layer_area(int *biome) {
