@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:50:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -862,9 +862,10 @@ format, its game 4: the trace's header names it):
     thunder's hit bits given BN4's (the raw-write experiment) the world
     parts at t1 on MegaMan alone: his object's +0xB, +0x20 and +0x2A and
     his AI data (BN4's 0xC0 bytes, laid out otherwise), since paired by
-    their readers and the battle's one offset (below) but for one byte of
-    his sprite at t1, so it stays INCONCLUSIVE there and the family is
-    compared on past it: its verdict its own.
+    their readers, the battle's one offset and the two clocks (below), the
+    world the same through t430; at t431 his paralysis's flags part
+    (below), so it stays INCONCLUSIVE there and the family is compared on
+    past it: its verdict its own.
   - **MegaMan's AI data and his object, by their writers** (a probe of
     hooks after every call of both player inits, BN4 `0x0801079C` and
     BN6 `0x080172F0`, and of both updates, BN4 `0x080EAECC` and BN6
@@ -973,28 +974,71 @@ format, its game 4: the trace's header names it):
       `0x0800AE80`, BN6's twin `0x0800E760`) is read with the CurAction's
       map at +0x5D (`tools/xdiff_bn4.py`, `OBJ_SAVED_ACTION`: his ready, 6
       BN4's and 8 BN6's).
-    - left under the offset, so `billy_v1` stays INCONCLUSIVE at t1 (the
-      world's; the family's own records the same in all 1200 frames): his
-      object's +0x91 (his sprite's +1, 1 the frame an animation is set,
-      then 0: his paralysis's end sets his idle at t520 in BN4 and t521 in
-      BN6, in step under the offset) at t1 alone, 1 in BN4 at t1 and 0 in
-      BN6 at t2. Both games read 1 at their t1 and 0 at their t2: the
-      opening's, cleared by the same fight frame in both, not a frame
-      behind; which code clears it (the sprite update runs in IWRAM, BN6's
-      from `0x080026C4` into `0x03006793`) is not read yet, nor which code
-      set it in each opening (BN4's state 1 `0x08010A88` writes only his +0
-      and CurAction; BN6's `0x08017888` calls a spawn through `0x080033AC`
-      first, `0x080E2960`).
-      Past t1: while the thunder paralyses him, his collision flags hold
-      0x800 in BN4 (the bit both paralyses' ends clear, `0x0800AE6C` /
-      `0x0800E74C`) and 0x400000 in BN6, its sprite's +6 (+0x96) blinking
-      in opposite phase, and the hit's spark (the fourth kind's 0x04) is
-      each game's own art, 3 frames shorter in BN6 (in play to t443 against
-      t446); the sounds are still BN4's numbers against BN6's (the thunder's
-      173 against 186), and one at t513 in BN4 (129) BN6 plays at its t513
-      too (143), the same fight frame, not a frame behind: what the battle's
-      timer drives rather than a state (the Custom gauge's, not read yet)
-      keeps the timer's frame.
+    - **Two clocks** (the lead's call, 2026-11-04, the owner's to overturn;
+      the rule written once, `legit.json`'s `bn4` `clocks`): what a state
+      drives is compared with the battle's offset (below), what the
+      battle's timer or the frame counter drives at the same fight frame,
+      each record's clock shown by the routine that writes it, never
+      assumed; one whose clock is not shown is compared with the offset and
+      keeps the spec INCONCLUSIVE where it differs there. Shown so far,
+      the sounds (`legit.json`'s `bn4` `sounds`, `tools/xdiff_bn4.py`
+      `sounds_diff`): each of BN4's as BN6's number by the routines that
+      play it in both games, their songs sharing no sample (`song_sig`,
+      and by their samples alone: each game's own recordings): the
+      thunder's launch (BN4's 0xAD from its init `0x080D20AE`, BN6's 0xBA
+      from its twin's `0x080CAD12`; a state's), MegaMan struck (0x6B in
+      both, `0x08013A9C` / `0x0801BA5A`; a state's), and the Custom gauge
+      full (BN4's 0x81, BN6's 0x8F, from the gauge's fill, twins
+      instruction for instruction, `0x080147D4` / `0x0801C488`, which the
+      main loop runs each fight frame, no state: the timer's, both at
+      t512); a BN4 sound not listed is compared as its own number. Two
+      records found by a probe of hooks on both cores (temporary, in
+      `src/dev/xdiff.c`, not kept) and their writers: his sprite's +1
+      (+0x91) is the count of its animation, which both games' animation
+      setter (BN4 `0x08002E10`, BN6 `0x08002DA4`) starts in the opening
+      (fight frame 0, before the first state) and the sprite update (BN4
+      `0x0800285C`, BN6 `0x080026C4`, at every fight frame and none of
+      the paused opening's) counts down, 2 at t1's update, 0 after t2: the
+      opening's count by the fight's frames, so BN4's t1 and t2 are
+      compared with BN6's of the same fight frame (`legit.json`'s
+      `opening_count`), a count a state starts (his paralysis's end, t520
+      and t521) with the offset; and his paralysis's flash, his colour
+      shader (his sprite's +6, +0x96), set by twins (BN4 `0x08010408`,
+      BN6 `0x080168C8`) while his collision flags hold 0x800 (a state's,
+      the status routines' `0x0800AEB4` / `0x0800E798`, t431 and t432)
+      from the battle timer's bit 1 (BN4 `0x08007BE4`, BN6 `0x0800A704`,
+      the timer's): each game's compared with what that code gives, the
+      gate BN6's flags of t + 1 and each game's own timer
+      (`paralysis_flash`).
+    - the hit's spark (the fourth kind's 0x04), each engine's own effect:
+      its place was a draw of the engine's under the family's thunder
+      (twins BN4 `0x08014620`, BN6 `0x0801BDDE`, GetRNG once, the
+      striker's place moved by two nibbles), now given BN4's word
+      (`legit.json`'s `bn4` `rng_twins`, checked byte for byte against
+      both ROMs by `tools/xdiff_bn4.py`; with the battle's offset every
+      keyed draw is given BN4's of the frame before, `xd_replay_lag`), so
+      it stands where BN4's does; its sprite state and its life are its
+      own art's (twin spawners `0x080E2140` / `0x080E1C00`, the same list
+      and number in each game's art, ended by twin updates as its
+      animation ends, `0x080E2122` / `0x080E1BE2`): allowed, that object
+      alone ("the hit's spark, each engine's own").
+    - left, so `billy_v1` is INCONCLUSIVE at t431 (the world's; the
+      family's own records the same in all 1200 frames, the world's
+      through t430): **a difference, reported, not masked**: while the
+      thunder paralyses MegaMan his collision flags hold 0x02000800 in
+      BN4 and 0x02400800 in BN6. Both games' status routines set 0x800 as
+      the paralysis's timer runs (BN4 `0x0800AEB4` at t431, BN6
+      `0x0800E798` at t432 and t1022, the probe) and both its ends clear
+      it; BN6's paralysis state (his state table `0x080EB86C`'s 4th,
+      `0x080175B8`) also sets 0x400000 as it begins (`0x080175C4`) and
+      clears it as it ends (`0x08017828`), where BN4's (`0x080109FA`)
+      sets none, both clearing 0x100441 (`0x08010A0A` / `0x080175CA`).
+      BN6's object runner reads it (`0x08010162`, from `0x0801B12E`):
+      with it the object's flags' 0x04 is cleared each frame, without it
+      set. That 0x04 reads the same in both traces here, so what the bit
+      changes for MegaMan is not seen in these specs; whether it is BN6's
+      own bookkeeping (allowed with its readers) or a difference in what
+      he does is the owner's call.
   - **Its mutations** (`tests/xdiff/mutations.json`; `tools/xdiff.py`
     gives a BN4 spec a mutation's `poke` and `call`, and `call=` aims BN4's
     families' veneers too, `xd4_family`), each FAIL on the family: a state
@@ -1010,7 +1054,7 @@ format, its game 4: the trace's header names it):
     stays the same (INCONCLUSIVE).
   - **Its other versions**: `billy_v2` (BN4's 0x0F, BN6's 0x2C2) and
     `billy_v3` (BN4's 0x11, BN6's 0x2C4), as `billy_v1` else: each
-    INCONCLUSIVE at t1 on MegaMan alone (the same sprite byte left), the
+    INCONCLUSIVE at t431 on MegaMan alone (the same flag left), the
     family's own records the same in all 1200 frames.
   - **The thunder** (BN6's own third-kind 0x2A run for Billy's
     parameters: the recipe's audit, `tools/bn4_twins.py` AUDITS

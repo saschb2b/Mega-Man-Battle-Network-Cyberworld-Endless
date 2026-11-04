@@ -385,7 +385,82 @@ def allowed_world(d, fb):
     return None
 
 
-def frame_diffs(fa, fb):
+def bn4_sounds():
+    """legit.json's bn4 sounds: {BN4's sound: (BN6's, its clock)}, each pair by the routines that play them in both games;
+    a BN4 sound not there is compared as its own number, by the state's clock"""
+    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', [])
+    return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state')) for r in rows}
+
+
+def sounds_diff(fa, fb, fbt, t):
+    """the frame's sounds begun: BN4's as BN6's numbers (bn4_sounds), each against BN6's by its own clock: a state's at
+    the battle's offset (fb), the battle's timer's at the same fight frame (fbt, BN6's frame of BN4's t); None where alike"""
+    sa = [s for _, s in fa.fr['sounds']]
+    if fb.game != 6 or fa.game != 4:
+        sb = [s for _, s in fb.fr['sounds']]
+        return None if sorted(sa) == sorted(sb) else (sorted(sa), sorted(sb))
+    m = bn4_sounds()
+    timer6 = {b for b, c in m.values() if c == 'timer'}
+    state_a = sorted(m.get(s, (s, 'state'))[0] for s in sa if m.get(s, (s, 'state'))[1] == 'state')
+    timer_a = sorted(m[s][0] for s in sa if s in m and m[s][1] == 'timer')
+    state_b = sorted(s for _, s in fb.fr['sounds'] if s not in timer6)
+    timer_b = sorted(s for _, s in (fbt.fr['sounds'] if fbt else ()) if s in timer6)
+    return None if (state_a, timer_a) == (state_b, timer_b) else (state_a + timer_a, state_b + timer_b)
+
+
+SPRITE_COUNT = 0x91   # (a first-kind object's sprite +1: the frames its animation's count runs, legit.json's bn4 clocks)
+
+
+def opening_count(d, fa, fbt):
+    """legit.json's bn4 clocks, the opening's animation count: an object's sprite +1 at the frames the count from the
+    opening's animation set runs (BN4's t1 and t2, the count 2 when the first fight frame's sprite update begins), which the
+    sprite update counts by the fight's frames, compared at the same fight frame: True where BN6's of BN4's t holds the same"""
+    if not (d.part == 'obj' and d.off == SPRITE_COUNT and isinstance(d.role, tuple) and d.role[0] == 'T1' and fbt
+            and fa.fr['t'] <= 2):
+        return False
+    ob = next((o for o in fbt.fr['objs'] if o.role == d.role), None)
+    return ob is not None and ob.o8(SPRITE_COUNT) == d.a
+
+
+SHADER, SHADER_ON, PARALYSED, COLL_FLAGS6 = 0x96, 0x3FF, 0x800, 0x3C   # (legit.json's bn4 clocks, the paralysis's flash)
+
+
+def paralysis_flash(d, fa, fb):
+    """legit.json's bn4 clocks, the paralysis's flash: a first-kind object's colour shader (its sprite +6, u16) is 0x3FF
+    while its collision flags hold 0x800 (a state's clock, the battle's offset) and its battle timer's bit 1 is set (the
+    timer's), else 0, in both games (BN4 0x08010408, BN6 0x080168C8): True where BN4's at t and BN6's at t + 1 are each
+    that, by BN6's flags of t + 1 and each game's own timer"""
+    if not (d.part == 'obj' and d.off in (SHADER, SHADER + 1) and isinstance(d.role, tuple) and d.role[0] == 'T1'):
+        return False
+    oa = next((o for o in fa.fr['objs'] if o.role == d.role), None)
+    ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
+    if oa is None or ob is None or ob.coll is None:
+        return False
+    gate = int.from_bytes(bytes(ob.coll[COLL_FLAGS6:COLL_FLAGS6 + 4]), 'little') & PARALYSED
+    want = lambda t: SHADER_ON if gate and t & 2 else 0
+    return oa.o16(SHADER) == want(fa.fr['t']) and ob.o16(SHADER) == want(fb.fr['t'])
+
+
+SPARK, SPARK_SPRITE = 0x04, (0x80, 0xBB)   # (the fourth kind's hit spark and its sprite state: legit.json's bn4 allowed)
+SPARKS_SEEN = set()   # (the sparks in play in both games at a frame compared before: compare keeps it)
+
+
+def is_spark(role):
+    return isinstance(role, tuple) and role[0] == 'T4' and role[1] == SPARK
+
+
+def spark_own(d):
+    """legit.json's bn4 allowed, the hit's spark: each engine's own effect, its sprite state and its life (how long its own
+    art's animation runs); its place, its spawn and everything else of it compared as ever"""
+    if not is_spark(d.role):
+        return False
+    # (its end, the frame one game's animation ends: its update's +0 0x02 cleared and its state 8, the delete)
+    end = d.part == 'obj' and ((d.off == 0x08 and 8 in (d.a, d.b)) or (d.off == 0x00 and isinstance(d.a, int) and d.a ^ d.b == 0x02))
+    # (in play in one game alone only once both had it in play: its life's end, never a spawn one game lacks)
+    return (d.part == 'obj' and SPARK_SPRITE[0] <= d.off <= SPARK_SPRITE[1]) or (d.part == 'in play' and d.role in SPARKS_SEEN) or end
+
+
+def frame_diffs(fa, fb, fbt=None):
     """each difference of one frame: the objects by role, the RNG words, the songs, the run order, the panels"""
     t, out = fa.fr['t'], []
     ra, rb = {o.role: o for o in fa.fr['objs']}, {o.role: o for o in fb.fr['objs']}
@@ -413,12 +488,17 @@ def frame_diffs(fa, fb):
     for e in fb.fr['events'] if fb.game == 6 and fa.game == 4 else ():
         if e.kind == DRAW and e.family and e.flags & (UNMATCHED | UNMAPPED):
             out.append(Diff(t, FAMILY_DRAWS, 'draw', 0, None, f'{e.family:#x} drawn as it is'))
-    sa, sb = sorted(s for _, s in fa.fr['sounds']), sorted(s for _, s in fb.fr['sounds'])
-    if sa != sb:
-        out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
+    sd = sounds_diff(fa, fb, fbt, t)   # (each by its clock: legit.json's bn4 sounds)
+    if sd:
+        out.append(Diff(t, 'battle', 'sounds', 0, sd[0], sd[1]))
     oa, ob = [fa.ptr(x) for x in fa.fr['order']], [fb.ptr(x) for x in fb.fr['order']]
     if fb.game == 6 and fa.game == 4:   # (BN6's MegaMan's companion, BN6's alone: legit.json's bn4 allowed)
         ob = [x for x in ob if not (isinstance(x, tuple) and x[0] in companions(fb))]
+        # (a hit's spark in play in one game alone, its own art's life: legit.json's bn4 allowed, the hit's spark)
+        ra = {role_name(o.role) for o in fa.fr['objs'] if is_spark(o.role) and o.role in SPARKS_SEEN}
+        rb = {role_name(o.role) for o in fb.fr['objs'] if is_spark(o.role) and o.role in SPARKS_SEEN}
+        oa = [x for x in oa if not (isinstance(x, tuple) and x[0] in ra - rb)]
+        ob = [x for x in ob if not (isinstance(x, tuple) and x[0] in rb - ra)]
     if oa != ob:
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
     # (MegaMan's pending form: BN4's AI data +0x10 at the player block's pending record +0, BN6_CROSS_PENDING's form, by
@@ -511,9 +591,9 @@ def bn4_renderer(fa, fb, fam, last):
                     o.over[sp + 8], o.over[sp + 9] = v & 0xFF, v >> 8
 
 
-def unexplained(fa, fb, ta, tb, used):
+def unexplained(fa, fb, ta, tb, used, fbt=None):
     """a frame's differences no BN4_LACKS mask explains (the masks applied counted into used)"""
-    diffs = frame_diffs(fa, fb)
+    diffs = frame_diffs(fa, fb, fbt)
     for d in diffs:
         d.mask = lacks(d, ta, tb)
         if d.mask:
@@ -574,6 +654,7 @@ def compare(spec, ta, tb, canon, show=6):
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
     stop, lines, ranks = None, [], {}
+    SPARKS_SEEN.clear()
     for fra in ta['frames']:
         frb = bt.get(fra['t'] + lag)
         if frb is None:
@@ -583,8 +664,17 @@ def compare(spec, ta, tb, canon, show=6):
         fb = Frame(tb, frb, canon)
         if against:
             bn4_renderer(fa, fb, fam, ranks)
-        open_ = unexplained(fa, fb, ta, tb, used)
+        frt = bt.get(fra['t'])   # (BN6's frame of the same fight frame: what the battle's timer drives, legit.json's bn4 clocks)
+        open_ = unexplained(fa, fb, ta, tb, used, Frame(tb, frt, canon) if frt and lag else fb)
         world = [d for d in open_ if d.role not in fam] if against else []
+        ft = Frame(tb, frt, canon) if frt and lag else None
+        for d in world:   # (legit.json's bn4 clocks: what the fight's frames count, at the same fight frame)
+            d.mask = ("the opening's animation count, by the fight's frames" if opening_count(d, fa, ft) else
+                      "the hit's spark, each engine's own" if spark_own(d) else
+                      "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else None)
+            if d.mask:
+                used[d.mask] = used.get(d.mask, 0) + 1
+        world = [d for d in world if not d.mask]
         for d in world:   # (legit.json's bn4 allowed of the world's: MegaMan's own sprite, BN6's companion of his)
             d.mask = allowed_world(d, fb)
             if d.mask:
@@ -596,6 +686,7 @@ def compare(spec, ta, tb, canon, show=6):
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
+        SPARKS_SEEN.update({o.role for o in fa.fr['objs'] if is_spark(o.role)} & {o.role for o in fb.fr['objs'] if is_spark(o.role)})
         if world and stop is None:
             stop = fra['t']
             lines += [f'  INCONCLUSIVE from t{stop}: the world parts there (no map or mask explains it), the family compared on:'] + \
@@ -615,6 +706,28 @@ def compare(spec, ta, tb, canon, show=6):
     return 'PASS', None, lines
 
 
+def rng_twins():
+    """legit.json's bn4 rng twins as the spec's twin= items (src/dev/xdiff_spec.c): each BN6's and BN4's bytes the same over
+    its length but where both hold a BL (each to its own game's routine), checked against both ROMs (.build/xdiff/rom)"""
+    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('rng_twins', [])
+    roms = {g: open(os.path.join(ROOT, '.build', 'xdiff', 'rom', f'bn{g}.gba'), 'rb').read() for g in (4, 6)} if rows else {}
+    items = []
+    for t in rows:
+        a6, a4, n = (int(t[k], 0) for k in ('bn6', 'bn4', 'len'))
+        b6, b4 = roms[6][a6 - 0x08000000:a6 - 0x08000000 + n], roms[4][a4 - 0x08000000:a4 - 0x08000000 + n]
+        k = 0
+        while k + 1 < n:
+            h6, h4 = b6[k] | b6[k + 1] << 8, b4[k] | b4[k + 1] << 8
+            if h6 >> 11 == 0x1E and h4 >> 11 == 0x1E and k + 3 < n:   # (a BL's two halves)
+                k += 4
+                continue
+            if h6 != h4:
+                raise SystemExit(f'legit.json\'s bn4 twin BN6 {a6:#x} / BN4 {a4:#x} differs at +{k:#x}: {h6:04x} | {h4:04x}')
+            k += 2
+        items.append(f'twin={a6:08X}:{a4:08X}:{n:X}')
+    return items
+
+
 def spec_text(spec, out, game):
     """the spec's items as src/dev/xdiff_spec.c takes them, its battle BN4's (game: bn4:trace, bn4:bn6)"""
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
@@ -623,6 +736,7 @@ def spec_text(spec, out, game):
     # (rng=replay: BN6's draws given BN4's, keyed as BN5's are, xdiff_events.h; poke=, call=: a mutation's break of the subject)
     extra = ([f'rng={spec["rng"]}'] if spec.get('rng') and game == 'bn4:bn6' else []) + \
         ([f'lag={spec["lag"]}'] if spec.get('lag') and game == 'bn4:bn6' else []) + \
+        (rng_twins() if spec.get('rng') == 'replay' and game == 'bn4:bn6' else []) + \
         [f'poke={p}' for p in spec.get('poke', [])] + [f'call={c}' for c in spec.get('call', [])]
     return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
