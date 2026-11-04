@@ -59,7 +59,7 @@ From there BN4's life of a Soul is BN5's in other places:
   MegaMan plain again the turn after.
 - A charged shot is a power attack by the loadout's id (`0x0800CA7C`). It
   sets the attack's variables and returns an attack family, by CurAction
-  itself into `0x080EAEFC` (BN6's table starts at 0x10). Three of them use
+  itself into `0x080EAEFC`, MegaMan's state table, which the Soul Navis' attacks share ([BN4's Navis in BN6's engine](bn4-navis.md); BN6's table starts at 0x10). Three of them use
   one of BN4's chips through `0x0800D406`: WindSoul's AirShot and WindRack,
   ProtSoul's WideSwrd. JunkSoul uses a chip from the battle. BN6 has
   AirShot, WindRack and WideSwrd by name.
@@ -126,7 +126,7 @@ parts in other shapes:
 | Charge times | BN5's table by power attack | `0x080180B8`, the same shape; each Soul's the same at every Charge |
 | Enter and leave | two tables by form | one enter routine by form (`0x0800E0A0`, eight Souls); the leave is family 0x11 |
 | Passives | the ready and collision tables by form | none: hand passes in the enter routines, and 14 compares of the form in the engine's shared code |
-| The unison's image | BN5's phase 1, the Soul Navi's sprite | family 0x0D, the Soul Navi's sprite (list 8, 1-12) |
+| The unison's image | BN5's phase 1, the Soul Navi's sprite | family 0x0D, the Soul Navi's picture (list 8, 1-12) |
 | His look | list 0 7-12, 25-34 KB each | list 0 1-12, about 36 KB each, 438 KB for twelve; the emotion window's face by form |
 | Element, chip charge | tables by form; `soulchips.c` | `0x0800C964`; the loadout's +2 (Fire, Proto, Metal, Aqua) |
 | Chaos Unison | DarkChips of the Soul's kind | none: BN4's DarkSoul is form 0xF, 960 frames, not taken ([Battle Network 4 in a run](bn4.md), Not taken) |
@@ -168,8 +168,9 @@ These come before the first BN4 Soul, whichever it is:
 - **The generator's BN4 path** described above, and the differential's
   BN4 Souls on the guest core: the flag, the gate's byte, and a BN4
   battle with a held B.
-- **The unison's picture** is the BN4 Navi's battle sprite, which the BN4
-  Navis track copies anyway (list 8, 1-12).
+- **The unison's picture** is the Soul Navi's own in BN4's list 8 (1-12,
+  about 1.7 KB each, 20 KB for twelve), apart from the battle sprites the
+  BN4 Navis track copies from list 2 ([BN4's Navis in BN6's engine](bn4-navis.md)).
 
 ## Cost and order
 
