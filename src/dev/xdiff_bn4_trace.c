@@ -25,6 +25,18 @@ static const Seg obj_segs[] = {
  * 0x08019FB4) and the pool's maker (0x08012470, BN6's 0x0801986C) write, store by store: its object's +0x2E, the setup's
  * argument, the damage, the alliance words, its object, its index bit */
 static const Seg coll_segs[] = {
+	{ BN4_COLL_HIT_KIND, BN6_COLL_HIT_KIND, 1 },
+	{ BN4_COLL_HIT_BITS, BN6_COLL_HIT, 1 },
+	{ BN4_COLL_STATUS_GIVEN, BN6_COLL_STATUS_GIVEN, 1 },
+	{ BN4_COLL_STATUS_TAKEN, BN6_COLL_STATUS_TAKEN, 1 },
+	{ BN4_COLL_MOOD_LOSS, BN6_COLL_MOOD_LOSS, 2 },
+	{ BN4_COLL_MOOD_GAIN, BN6_COLL_MOOD_GAIN, 2 },
+	{ BN4_COLL_HITS_TAKEN, BN6_COLL_HITS_TAKEN, 2 },
+	{ BN4_COLL_HITS_WORD, BN6_COLL_HITS_WORD, 4 },
+	{ BN4_COLL_MET, BN6_COLL_MET, 4 },
+	{ BN4_COLL_HITS_BACK, BN6_COLL_HITS_BACK, 4 },
+	{ BN4_COLL_PUSH_TAKEN, BN6_COLL_PUSH_TAKEN, 2 },
+	{ BN4_COLL_PUSH, BN6_COLL_PUSH, 2 },
 	{ BN4_COLL_PANEL_BYTE, BN6_COLL_PANEL_BYTE, 1 },
 	{ BN4_COLL_COUNTER, BN6_COLL_COUNTER, 1 },
 	{ BN4_COLL_OBJ_2E, BN6_COLL_OBJ_2E, 1 },
@@ -59,11 +71,11 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
-	[XD4_COLL] = { coll_segs, 19, BN4_COLL_SIZE, BN6_COLL_SIZE },
+	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE },
 	[XD4_AI] = { ai_segs, 1, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
 	[XD4_PANEL] = { panel_segs, 4, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 19 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
 	sizeof panel_segs / sizeof *panel_segs == 4, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */

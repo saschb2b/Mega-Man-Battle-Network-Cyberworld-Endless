@@ -90,7 +90,24 @@
                                        * 0x08012DAE (BN6_COLL_PANEL_BYTE, +0xC: 0x0801A04C's 0x0800E994 at 0x0801A062) */
 #define BN4_COLL_COUNTER  0x0B        /* ... u8, its counter time (its window to be countered), set by 0x0800AFBC at 0x0800AFD6
                                        * (BN6_COLL_COUNTER, +0xD: its twin 0x0800E9DC at 0x0800E9F6) */
-#define BN4_COLL_SETUP_ARG 0x0C     /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
+/* (the hit pass: BN4's from 0x08012BC0, its twin BN6's from 0x081D7830, store by store: r7 the attacker's collision data, r6 the
+ * struck's) */
+#define BN4_COLL_HIT_KIND 0x07        /* ... u8 set by 0x08012F74 (BN6_COLL_HIT_KIND, +9: 0x0801A140); the thunder's init gives 3 in both */
+#define BN4_COLL_HIT_BITS 0x0D        /* ... u8 the struck's hit bits, the attacker's +0xC ORed in at 0x08012C40-0x08012C46 (BN6_COLL_HIT) */
+#define BN4_COLL_STATUS_GIVEN 0x0E    /* ... u8 the status a hit gives, from its object's +6 (0x08013212), passed at 0x08012BEC
+                                       * (BN6_COLL_STATUS_GIVEN, +0x10: 0x0801A258, 0x081D784E) */
+#define BN4_COLL_STATUS_TAKEN 0x0F    /* ... u8 the struck's, 0x08012BF2 (BN6_COLL_STATUS_TAKEN, +0x11: 0x081D7854) */
+#define BN4_COLL_MOOD_LOSS 0x36       /* ... u16 the struck's, the attacker's +5 & 0x7F added at 0x08012C2A (BN6_COLL_MOOD_LOSS, +0x8E) */
+#define BN4_COLL_MOOD_GAIN 0x38       /* ... u16 the struck's, at 0x08012C24, 0xFF for a counter (BN6_COLL_MOOD_GAIN, +0x90: 0x8000 for one) */
+#define BN4_COLL_HITS_TAKEN 0x3A      /* ... u16 one more a hit of the bit at 0x08012C36 (BN6_COLL_HITS_TAKEN, +0x92) */
+#define BN4_COLL_HITS_WORD 0x54       /* ... u32 the struck's, the attacker's alliance word ORed in at 0x08012BE8 (BN6's +0x70) */
+#define BN4_COLL_MET      0x4C        /* ... u32 the index bits of those it met, each pair's ORed in at 0x08012AB2-0x08012AC4 (BN6_COLL_MET,
+                                       * +0x68: 0x081D7B1E-0x081D7B30) */
+#define BN4_COLL_HITS_BACK 0x50       /* ... u32 the other's alliance word ORed in at 0x08012D3C-0x08012D42 (BN6_COLL_HITS_BACK, +0x6C:
+                                       * 0x081D7BD2-0x081D7BD8) */
+#define BN4_COLL_PUSH_TAKEN 0x48     /* ... u16 the struck's, the attacker's BN4_COLL_PUSH where its low byte is not 0 (0x08012C54; BN6's +0xA4) */
+#define BN4_COLL_PUSH     0x74        /* ... u16 a hit's (BN6_COLL_PUSH, +0x12: 0x081D78BA; BN6 sets it by the damage word's bit 13) */
+#define BN4_COLL_SETUP_ARG 0x0C    /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
 #define BN4_COLL_DAMAGE   0x1E        /* ... u16, an attack's damage from its object's +0x2C (BN6_COLL_DAMAGE, +0x2E): 0x080129CC, BN6's 0x08019FDE */
 #define BN4_COLL_HIT_MASKS 0x58       /* ... two u32, the alliance words (BN6_COLL_HIT_MASKS, +0x30): 0x080129D6 and 0x080129F2 from
                                        * 0x08012EF6, BN6's 0x08019FE8 and 0x0801A004 from 0x0801A0BA */

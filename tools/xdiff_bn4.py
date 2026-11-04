@@ -25,7 +25,8 @@ import json
 import os
 import re
 
-from xdiff_snap import (DRAW, NODE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, REPLAYED, RESERVE, ROOT, SIZE, SPAWN, UNMAPPED,
+from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
+from xdiff_snap import (DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, REPLAYED, RESERVE, ROOT, SIZE, SPAWN, UNMAPPED,
                         UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
@@ -127,6 +128,10 @@ def bn4_as_bn6(rec, fams):
 # it gives the same (BN6's first 122 are BN4's, 98 of them with bit 0x80: read from both ROMs, bn4_alliance)
 BN4_MASKS, BN4_MASK_WORDS, BN6_MASKS = 0x08012660, 122, 0x08019C7C
 COLL_MASKS = (0x30, 0x34)
+# (and the words a hit ORs another's alliance word into, BN6's +0x6C and +0x70, BN4's +0x50 and +0x54: the hit pass, BN4
+# 0x08012D3C / 0x08012BE2, BN6 0x081D7BD2 / 0x081D783A; read as BN6's entry where the word is one of BN4's table's, which
+# a hit by one alone makes; an OR of several stays as it is and differs where their bit 0x80 does)
+HIT_WORDS = (0x6C, 0x70)
 
 
 def bn4_alliance(rom4, rom6):
@@ -153,7 +158,7 @@ def coll_as_bn6(coll, alliance):
     """a BN4 collision data (in BN6's layout) with its alliance words (bn4_alliance) and its last move's direction as
     BN6's"""
     out = bytearray(coll)
-    for at in COLL_MASKS:
+    for at in COLL_MASKS + HIT_WORDS:
         w = u32(out, at)
         out[at:at + 4] = alliance.get(w, w).to_bytes(4, 'little')
     if out[COLL_DIRECTION] in (3, 4) and out[COLL_ALLIANCE] & 1:
@@ -175,6 +180,11 @@ BN4_LACKS = [
     dict(name='bn4 no freeze', part='coll', offset=0x2A, size=2,
          why="BN6's collision data +0x2A, the frames left frozen in an ice block (bn6.h, BN6_COLL_FREEZE): BN4 has no freeze "
              "(bn4.h, BN4_COLL_INVULNERABLE: its statuses paralysis, confusion, blindness and the hold, +0x10-+0x17)"),
+    dict(name='bn4 no struck-by mask', part='coll', offset=0x7C, size=4,
+         why="BN6's collision data +0x7C, the strikers' index bits a hit pass ORs in (bn6_panels.h BN6_COLL_STRUCK_BY: "
+             "0x081D7832-0x081D7838, ldr r3,[r7,#0x44]; ldr r2,[r6,#0x7c]; orrs; str): BN4's hit pass, its twin, ORs the "
+             "striker's alliance word alone there (0x08012BDC-0x08012BE8: bn4.h BN4_COLL_HITS_WORD), and keeps the pairs met "
+             "apart as BN6 does (BN4_COLL_MET, BN6's +0x68)"),
     dict(name='bn4 no bubble', part='coll', offset=0x2C, size=2,
          why="BN6's collision data +0x2C, the frames left in a bubble (bn6.h, BN6_COLL_BUBBLE): BN4 has no bubble (bn4.h, as the "
              "freeze)"),
@@ -200,6 +210,9 @@ def named(canon, game, o, fams=None, reserved=()):
     moved family's by its recipe); against BN6's (fams given), a BN4 T1's type and CurAction as BN6's too (bn4_as_bn6),
     and one that has reserved a panel with BN6's 0x20 (reserved_roles)"""
     rec = bytearray(o.rec[:SIZE[o.kind]])
+    for k, v in o.over.items():   # (the family's renderer places as its ranks: bn4_renderer)
+        if k < len(rec):
+            rec[k] = v
     if o.kind == 'T1':
         at = NODE + OBJ_NAME_ID
         rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
@@ -336,6 +349,45 @@ def replayed_world(fa, fb):
                                                  for fr in fb.trace['frames'][:64] for e in fr['events'])
 
 
+def bn4_renderer(fa, fb, fam, last):
+    """the family's renderer places read as its own, as BN5's are (legit.json, maps, renderer; tools/xdiff_masks.py
+    renderer_ranks, whose reading this is with the family's roles given): the renderer hands each object it draws its tile
+    place (its sprite state's +0x08) and palette slot (+0x15's high nibble) from running counts over all it draws before
+    it, so what else each game draws (MegaMan's own art, BN6's thunder's own art, BN6's opening effect) moves the numbers:
+    a family object drawn this frame reads its rank among those the family's drawn objects take, in the order they ran;
+    one not drawn keeps its last rank where its place stayed; one never drawn none. Into each object's `over`"""
+    for f in (fa, fb):
+        own = [o for o in f.fr['objs'] if o.role in fam]
+        drawn = [o for o in own if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
+        run = {}
+        for n, a in enumerate(f.fr['order']):
+            for o in drawn:
+                if o.addr - NODE <= a < o.addr - NODE + SIZE[o.kind]:
+                    run.setdefault(o.role, n)
+        drawn.sort(key=lambda o: (run.get(o.role, len(f.fr['order'])), o.kind, o.slot))
+        for k in (0, 1):
+            taken = []
+            for o in drawn:
+                if places(o)[k] not in taken and not (k and places(o)[k] == NO_PALETTE):
+                    taken.append(places(o)[k])
+            for o in own:
+                raw, key, rank, sp = places(o)[k], (f.game, o.role, k), None, SPRITE[o.kind] + NODE
+                if k and raw == NO_PALETTE:
+                    continue
+                if o in drawn:
+                    rank = taken.index(raw)
+                    last[key] = (raw, rank)
+                elif key in last and last[key][0] == raw:
+                    rank = last[key][1]
+                elif key not in last:
+                    raw = NO_PALETTE if k else NO_PLACE
+                if k:
+                    o.over[sp + 0x15] = (rank if rank is not None else raw) << 4 | o.rec[sp + 0x15] & 0xF
+                else:
+                    v = rank if rank is not None else raw if raw == NO_PLACE else 0x8000 | raw
+                    o.over[sp + 8], o.over[sp + 9] = v & 0xFF, v >> 8
+
+
 def unexplained(fa, fb, ta, tb, used):
     """a frame's differences no BN4_LACKS mask explains (the masks applied counted into used)"""
     diffs = frame_diffs(fa, fb)
@@ -368,7 +420,15 @@ def bn4_allowed():
 def allowed_bit(d, fam):
     """the allowed difference of legit.json's bn4 a family's difference is (a bit of its object BN6 has and BN4 not, the
     whole difference that bit), None where none: never on another's records, never more than its bit"""
-    if d.role not in fam or not isinstance(d.a, int) or not isinstance(d.b, int) or isinstance(d.a, bool):
+    if d.role not in fam:
+        return None
+    for a in bn4_allowed():   # (a range of one kind and type's own object: the thunder's sprite state)
+        if 'offsets' not in a or a.get('part') != d.part or not isinstance(d.role, tuple):
+            continue
+        lo, hi = (int(x, 0) for x in a['offsets'])
+        if d.role[0] == a['kind'] and d.role[1] == int(a['type'], 0) and lo <= d.off <= hi:
+            return a['name']
+    if not isinstance(d.a, int) or not isinstance(d.b, int) or isinstance(d.a, bool):
         return None
     for a in bn4_allowed():
         if 'bit' not in a or a.get('part') != d.part or int(a['offset'], 0) != d.off:
@@ -390,7 +450,7 @@ def compare(spec, ta, tb, canon, show=6):
     fam = family_roles(ta, canon) | family_roles(tb, canon) | {FAMILY_DRAWS} if against else set()
     # (allowed_lag: the family's own records against BN6's of `lag` fight frames later, the world's of the same frame)
     lag = allowed_lag(spec) if against else 0
-    stop, lines = None, []
+    stop, lines, ranks = None, [], {}
     for fra in ta['frames']:
         frb = bt.get(fra['t'])
         if frb is None:
@@ -401,7 +461,10 @@ def compare(spec, ta, tb, canon, show=6):
         world = [d for d in open_ if d.role not in fam] if against else []
         if lag:
             frl = bt.get(fra['t'] + lag)
-            mine = [d for d in unexplained(fa, Frame(tb, frl, canon), ta, tb, {}) if d.role in fam] if frl else []
+            fl = Frame(tb, frl, canon) if frl else None
+            if fl:
+                bn4_renderer(fa, fl, fam, ranks)
+            mine = [d for d in unexplained(fa, fl, ta, tb, {}) if d.role in fam] if fl else []
         else:
             mine = [d for d in open_ if d.role in fam] if against else open_
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
