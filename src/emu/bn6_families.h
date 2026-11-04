@@ -18,6 +18,9 @@
 #define BN6_FAMILY_STEP       0x80        /* ... the bytes from one table to the next */
 #define BN6_FAMILIES          32          /* ... their entries: AI indexes 0 (TestVirs) to 31 */
 #define BN6_FAMILY_NULLSUB    0x0810A953u /* the hooks' entry where a family has none: mov pc, lr (Thumb) */
+#define BN6_VIRUS_PRESENT     0x08016E64u /* a virus's after-state, run by the virus dispatcher after its states: BN4_VIRUS_PRESENT's twin
+                                             (bn4.h) but for a pause test first (0x08016E84-0x08016E90: the BattleSettings' mode, 0x0802D234,
+                                             not 1, then battle_isPaused 0x0800A03C), so no virus animates in the paused opening */
 #define BN6_BX_R0             0x08148865u /* a bx r0 the game itself calls into (0x0815E6A8; the tail of a routine, 0x08148860): where a
                                              BN4 family's pre-step goes on to BN6_VIRUS_STATE_STEP, r0 its address (tools/xrecipe_bn4.py) */
 #define BN6_FAMILY_REF_STATES 0x0810A370u /* the literals that name the tables, one each, in their order: table 0's (the dispatcher's);
