@@ -352,6 +352,18 @@ static void entries_set(Ctx *c, uint32_t entry[XV_TABLES]) {
 	}
 }
 
+/* Its game's after-state while BN6's battle is paused (XVirusFamily.present): a paused present (xvirus_shim.h) of its home
+ * that calls `own` first (Thumb; 0 none); its address (Thumb), 0 where it failed */
+static uint32_t paused_put(Ctx *c, uint32_t own) {
+	uint8_t shim[XV_SHIM_PAUSED_SIZE];
+	uint32_t at = shim_room(c, sizeof shim), present = moved_to(c->f, c->f->present | 1);
+	uint32_t mode = thumb_veneer_get(&c->pool, BN6_SETTINGS_MODE_READ), paused = thumb_veneer_get(&c->pool, BN6_PAUSE_TEST);
+	uint8_t *p = at && present && mode && paused && xvirus_shim_paused(shim, at, own, mode, paused, present) ? xv_put(at, sizeof shim, true) : NULL;
+	if (!p) { xv_fail("its after-state %08x while paused", (unsigned)c->f->present); return 0; }
+	memcpy(p, shim, sizeof shim);
+	return at | 1;
+}
+
 /* A call within the block to bytes it holds as dead (a routine of its game's
  * whose twin BN6 has, zeroed in the copy between code that shares a pool):
  * aimed at the twin here, as thumb_block_rebase leaves a call within alone.
@@ -694,10 +706,10 @@ static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 
 /* its state table, struct1, struct2 and held chips in its home or BN6's
  * (their words in the grown table of held chips), and its entries of the
- * eleven per-family tables into `entry` */
-static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_TABLES]) {
+ * eleven per-family tables into `entry` (`state0`, not 0: its state 0) */
+static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_TABLES], uint32_t state0) {
 	uint8_t *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, true);
-	for (int i = 0; st && i < f->nstates; ++i) put32(st + 4 * i, ref_to(f, f->states[i]));
+	for (int i = 0; st && i < f->nstates; ++i) put32(st + 4 * i, !i && state0 ? state0 : ref_to(f, f->states[i]));
 	uint8_t *s1 = xv_put(f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE, true), *s2 = xv_put(f->home + XV_HOME_STRUCT2, sizeof rec.stats, true);
 	if (!s1 || !s2 || !in_rom(f->struct1, BN6_TRAITS_SIZE) || !in_rom(f->struct2, sizeof rec.stats)) { xv_fail("its records"); return; }
 	traits_of(f, g->rom + (f->struct1 - BUS), rec.traits);
@@ -833,8 +845,13 @@ static void family_stage(Ctx *c, const Game *g) {
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(c, &f->blocks[i]);
 	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(c, &f->clones[i]);
 	uint32_t entry[XV_TABLES] = { 0 };
-	if (!xv_failed()) records_set(f, g, entry);
+	/* (its game's after-state while paused, as its game runs it from its spawn through its state 1: after its spawn's done,
+	 * hook 5, and after its state 0, its appear, which BN6's state step runs in the paused opening; BN6's runs its state 1
+	 * as the fight begins, a fight frame later, xdiff's lag) */
+	uint32_t state0 = f->present ? paused_put(c, thumb_veneer_get(&c->pool, ref_to(f, f->states[0]) & ~1u) | 1) : 0;
+	if (!xv_failed()) records_set(f, g, entry, state0);
 	if (!xv_failed()) entries_set(c, entry);
+	if (!xv_failed() && f->present) entry[5] = paused_put(c, entry[5] == BN6_FAMILY_NULLSUB ? 0 : entry[5]);
 	uint8_t *v = c->pool.n ? xv_put(c->pool.base, (uint32_t)c->pool.n * THUMB_VENEER_SIZE, true) : NULL;
 	if (v) memcpy(v, c->veneers, (size_t)c->pool.n * THUMB_VENEER_SIZE);
 	for (int k = 0; k < XV_TABLES && !xv_failed(); ++k) xg_set_word(XG_FAMILY + k, (uint32_t)f->ai, entry[k]);

@@ -211,6 +211,11 @@ static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size
 }
 
 /* its shims' sites (each in its code) and room in its home, its pre-step one of the ports */
+/* its game's after-state its own code, BN4's alone (xvirus_shim.h's paused present, after its state 0 and hook 5), or none */
+static bool present_ok(const XVirusFamily *f) {
+	return !f->present || (f->game == XROM_BN4_RED_SUN_US && !(f->present & 1) && xvirus_is_code(f, f->present));
+}
+
 static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nranges; ++i) {
 		const XvRange *r = &f->ranges[i];
@@ -225,7 +230,9 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (f->prestep && (f->game == XROM_BN4_RED_SUN_US ? !xvirus_is_code(f, f->prestep) :
 		f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
 		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
+	if (!present_ok(f)) return no(why, n, "an after-state %08x none of its code", (unsigned)f->present);
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE;
+	room += 2u * XV_SHIM_PAUSED_SIZE * (f->present != 0);
 	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;
 	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
 	return true;

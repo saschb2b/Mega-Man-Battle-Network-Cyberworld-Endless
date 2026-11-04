@@ -96,6 +96,7 @@ static bool done(Asm *a) {
 #define POP_PC              ((uint16_t)0xBD00)
 #define MOV_LR(rm)          ((uint16_t)(0x4686 | (rm) << 3))   /* mov lr, rm */
 #define BX_LR               ((uint16_t)0x4770)
+#define NOP                 ((uint16_t)0x46C0)   /* mov r8, r8 */
 enum { EQ = 0, NE = 1, MI = 4 };
 
 /* ---- a NameID range ---- */
@@ -125,6 +126,26 @@ bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to
 	bl(&a, to & ~1u);
 	half(&a, POP_PC);   /* (where the tail returns by bx lr: its pop {pc} returns from the push itself) */
 	return done(&a) && a.n == XV_SHIM_ENTRY_SIZE;
+}
+
+/* ---- its game's after-state while BN6's battle is paused ---- */
+
+bool xvirus_shim_paused(uint8_t out[XV_SHIM_PAUSED_SIZE], uint32_t at, uint32_t own, uint32_t mode, uint32_t paused, uint32_t present) {
+	enum { OUT };
+	Asm a = { out, XV_SHIM_PAUSED_SIZE, 0, at, (at & 3) != 0 || (own && !(own & 1)) || !(present & 1), { 0 }, { { 0 } }, 0 };
+	half(&a, PUSH_LR);
+	if (own) bl(&a, own & ~1u);
+	else { half(&a, NOP); half(&a, NOP); }
+	bl(&a, mode & ~1u);
+	half(&a, CMP_I(0, 1));
+	to_label(&a, BCC(EQ), OUT, 'c');   /* (mode 1: BN6's own after-state runs, paused or not) */
+	bl(&a, paused & ~1u);
+	to_label(&a, BCC(EQ), OUT, 'c');   /* (not paused: BN6's own runs) */
+	bl(&a, present & ~1u);
+	here(&a, OUT);
+	half(&a, POP_PC);
+	half(&a, NOP);
+	return done(&a) && a.n == XV_SHIM_PAUSED_SIZE;
 }
 
 /* ---- a chip compare ---- */

@@ -4295,7 +4295,8 @@ static const char *recipe_differs(const XVirusFamily *g, const XVirusFamily *h) 
 	if (g->nclones != h->nclones) return "its clones";
 	for (int i = 0; i < g->nclones; ++i)
 		if (memcmp(&g->clones[i], &h->clones[i], sizeof *g->clones)) return "its clones";
-	if (g->nranges != h->nranges || g->ncmps != h->ncmps || g->nsongs != h->nsongs || g->prestep != h->prestep) return "its shims or songs";
+	if (g->nranges != h->nranges || g->ncmps != h->ncmps || g->nsongs != h->nsongs || g->prestep != h->prestep ||
+		g->present != h->present) return "its shims or songs";
 	for (int i = 0; i < g->nranges; ++i)
 		if (memcmp(&g->ranges[i], &h->ranges[i], sizeof *g->ranges)) return "its NameID ranges";
 	for (int i = 0; i < g->ncmps; ++i)
@@ -4382,6 +4383,21 @@ static void test_xvirus_shims(void) {
 	CHECK(xvirus_shim_entry(e, home, to | 1) && get16(e) == 0xB500 && thumb_bl_decode(home + 2, get16(e + 2), get16(e + 4), &called) &&
 		called == to && get16(e + 6) == 0xBD00, "shims: an entry (%04x, a call to %08x, %04x)", get16(e), (unsigned)called, get16(e + 6));
 	CHECK(!xvirus_shim_entry(e, home + 2, to | 1) && !xvirus_shim_entry(e, home, to), "shims: an entry off its word, or to no Thumb, taken");
+	/* (a paused present: push {lr}, its hook, the mode read and its 1 back, the pause test and not paused back, the after-state,
+	 * pop {pc}; no hook two nops) */
+	uint8_t q[XV_SHIM_PAUSED_SIZE];
+	const uint32_t own = XV_CODE + 0x2001, present = XV_CODE + 0x3001;
+	uint32_t c1 = 0, c2 = 0, c3 = 0, c4 = 0;
+	CHECK(xvirus_shim_paused(q, home, own, veneer, veneer + THUMB_VENEER_SIZE, present) && get16(q) == 0xB500 &&
+		thumb_bl_decode(home + 2, get16(q + 2), get16(q + 4), &c1) && c1 == (own & ~1u) &&
+		thumb_bl_decode(home + 6, get16(q + 6), get16(q + 8), &c2) && c2 == veneer && get16(q + 10) == 0x2801 && get16(q + 12) == 0xD004 &&
+		thumb_bl_decode(home + 14, get16(q + 14), get16(q + 16), &c3) && c3 == veneer + THUMB_VENEER_SIZE && get16(q + 18) == 0xD001 &&
+		thumb_bl_decode(home + 20, get16(q + 20), get16(q + 22), &c4) && c4 == (present & ~1u) && get16(q + 24) == 0xBD00,
+		"shims: a paused present (%04x %04x %04x)", get16(q + 10), get16(q + 12), get16(q + 18));
+	CHECK(xvirus_shim_paused(q, home, 0, veneer, veneer, present) && get16(q + 2) == 0x46C0 && get16(q + 4) == 0x46C0,
+		"shims: a paused present with no hook of its own calls one");
+	CHECK(!xvirus_shim_paused(q, home + 2, own, veneer, veneer, present) && !xvirus_shim_paused(q, home, own & ~1u, veneer, veneer, present) &&
+		!xvirus_shim_paused(q, home, own, veneer, veneer, present & ~1u), "shims: a paused present off its word, or to no Thumb, taken");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not

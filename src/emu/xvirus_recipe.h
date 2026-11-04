@@ -153,6 +153,9 @@ typedef struct {
 	                              (xvirus_shim.h, its pre-step: the case's address in its game, 0 none) */
 	const uint16_t *held_chips; /* its viruses' held chips as BN6's ids, six lists of 16 (0xFFFF ending one), written into its home
 	                              (`held` 0); a chip of its game's BN6 has none of left out (the generator's hold-outs) */
+	uint32_t present;          /* its game's after-state, one of its blocks (BN4's BN4_VIRUS_PRESENT, which has no pause test), run after
+	                              its state 0 and its hook 5 where BN6's own (BN6_VIRUS_PRESENT) skips it for the pause alone (xvirus_shim.h,
+	                              a paused present): it animates from its spawn through its appear as in its game; 0 none */
 } XVirusFamily;
 
 #define XV_ICE_OWN (-1)
