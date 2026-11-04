@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T20:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -801,42 +801,60 @@ format, its game 4: the trace's header names it):
     none drawn as it is and said so. Spikey's one and Shrimpy's one each
     replayed: +0x88 and the row alike. Its mutation (tests/xdiff/mutations.json,
     `spikey_v1`): the init's `adds r0,#4` made 5 in BN6's copy, caught at t1.
-  - **The opening's idle animation** (`legit.json`'s `bn4` allowed, "the
-    opening's idle animation, BN4's run through the paused opening";
-    `tools/xdiff_bn4.py` `opening_animation`): both games update a virus's
-    sprite in its after-state routine, twins but for one test: BN4's
-    (`BN4_VIRUS_PRESENT`, `0x08010736`, at the family's own update's tail,
-    `0x080BA410` in Spikey's) runs the sprite update (`BN4_SPRITE_UPDATE`,
-    `0x0800285C`) whenever the object runs; BN6's (`BN6_VIRUS_PRESENT`,
-    `0x08016E64`, from its virus dispatcher) skips it while the battle is
-    paused (`0x08016E84`-`0x08016E90`: the BattleSettings' mode not 1, then
-    battle_isPaused). The object runner runs a paused object while its +0
-    has 0x04, so BN4's virus animates from its init through the opening to
-    its state 1 (a probe of hooks on both sprite updates in `spikey_v1`: 53
-    updates for Spikey, its frames 132-184, the pause byte 1 throughout) and
-    BN6's not once before its first fight frame; both from then on, one a
-    frame. So at t1 BN4's Spikey is on its idle animation's frame 2 with 5
-    left, BN6's on frame 0 with 6 (Shrimpy's and Elmperor's alike): its
-    sprite place (+0x91 its count, +0x92 its frame's flags, +0xAC its frame
-    record, +0xB0-+0xBB what the update takes from it) is allowed on a
-    family's first-kind object from the first frame compared until its
-    animation (+0x90) is set in either game or the two places meet, never
-    after, and only where it is held to that: both on the same animation of
-    the same sprite, each place a step of that animation as BN4's bytes run
-    it (`anim_steps`: a frame record's duration at +16 counted down, then
-    the next record with its duration less one, the first again after a
-    record whose flags at +18 hold 0x80 and 0x40, read from the probe's
-    counts), the steps the same number apart at every frame, and each
-    place's other bytes what the other game's own trace shows at that frame
-    record. Its mutation (`spikey_v1`): BN6's copy's first idle frame
-    given the next frame's mini-animation offset, its place still a step of
-    BN4's run but its +0xB0 none BN4 shows there, caught at t1. What the
-    phase changes in a family's behaviour it does not explain:
-    `shrimpy_v3` FAILS at t65, where Shrimpy's hook (`0x080BA13E`: its
-    animation 1 cleared where the animation in play has ended, `0x08002E56`
-    bit 0x80) reads its idle animation's last frame in BN4 and not in BN6
-    (its +0x10, +0x11 and +0x90): there only BN6 animating BN4's viruses
-    through the opening would align it.
+  - **The opening's idle animation, ported** (`XVirusFamily.present`,
+    `src/emu/xvirus_shim.h`'s paused present; [BN4 Red Sun](../rom/bn4.md), A
+    virus's after-state ported through BN6's paused opening): both games
+    update a virus's sprite in its after-state routine, twins but for one
+    test: BN4's (`BN4_VIRUS_PRESENT`, `0x08010736`, at the tail of each
+    family's own type routine, `0x080BA410` in Spikey's) runs the sprite
+    update (`BN4_SPRITE_UPDATE`, `0x0800285C`) whenever the object runs;
+    BN6's (`BN6_VIRUS_PRESENT`, `0x08016E64`, at its virus type's tail,
+    `BN6_VIRUS_TYPE` `0x0810A284`, every virus's) skips it while the battle
+    is paused (`0x08016E84`-`0x08016E90`: the BattleSettings' mode,
+    `BN6_SETTINGS_MODE_READ`, not 1, then the pause test, `BN6_PAUSE_TEST`).
+    The object runner runs a paused object while its +0 has 0x04, so before
+    the port BN4's virus animated from its spawn through the opening and
+    BN6's not once before its first fight frame. The port, in the recipe and
+    never in BN6's routine: `tools/xrecipe_bn4.py` (`after_of`) copies BN4's
+    after-state with each family (`tools/bn4_twins.py` COPIED, its calls
+    BN6's twins), and the installer (`src/emu/xvirus.c` `paused_put`) puts a
+    paused present in the family's state 0 (its appear: BN6's state step,
+    `0x0801B1C4`, runs a CurAction 0 while paused and no other) and its
+    hook 5 (spawn done): the state or the hook, then, where the mode is not
+    1 and the battle is paused, the copy. A probe of hooks on both games
+    (temporary, not kept) in `spikey_v1` counts what is left: BN4's
+    after-state ran 53 times before its first fight frame (its generic state
+    0, `0x0800FCAC`, 52 times, the first in its init's frame, its init
+    calling its update; its state 1 once, `0x0801013A`, which clears the
+    0x04, so none after), BN6's copy 51 (its spawn's, then each of the 50
+    runs of BN6's twin, `0x08016380`, whose appear waits on `0x0800139A`
+    then blinks 2 x 16 frames; none in the 154 paused frames after its
+    appear) and BN6's state 1 at its first fight frame (the battle's
+    offset). So at t1 BN4's Spikey is on its idle animation's frame 2 with
+    5 left and BN6's on the same record with 6, one update behind where it
+    was 152 behind (frame 0 at the first record), Shrimpy's and Elmperor's
+    alike: two engines' appears, not the after-state. Allowed (`legit.json`'s
+    `bn4` allowed, "the opening's idle animation, BN4's appear a run
+    longer"; `tools/xdiff_bn4.py` `opening_animation`): the sprite place
+    (+0x91 its count, +0x92 its frame's flags, +0xAC its frame record,
+    +0xB0-+0xBB what the update takes from it) of a family's first-kind
+    object from the first frame compared until its animation (+0x90) is set
+    in either game or the two places meet, never after, and only where both
+    are on the same animation of the same sprite, each place a step of it as
+    BN4's bytes run it (`anim_steps`), BN4's exactly one step ahead at every
+    frame (`OPENING_LEAD`) and each place's other bytes what the other
+    game's own trace shows at that frame record. Its mutations
+    (`spikey_v1`): BN6's copy's first idle frame given the next frame's
+    mini-animation offset, caught at t1 on its +0xB0; the port's own,
+    Spikey's copy's sprite update aimed at BN6's family nullsub
+    (`call=080026C4:0810A952`), its place 51 updates behind again, caught
+    at t1. What the step changes in a family's behaviour it does not
+    explain: `shrimpy_v3` still FAILS at t65, where Shrimpy's hook
+    (`0x080BA13E`: its animation 1 cleared where the animation in play has
+    ended, `0x08002E56` bit 0x80) reads its idle animation's last frame in
+    BN4 a frame before BN6 (its +0x10, +0x11 and +0x90): BN4's appear, its
+    generic state 0, moved with the families in BN6's twin's place, would
+    align it.
   - **A diagonal step's direction** (`tools/xdiff_bn4.py`
     `direction_as_bn6`): BN6's rule (`0x0800E994`) gives 5 for a move of two
     or more toward column or row 7 or a diagonal one, BN4's (`0x0800AF90`)
@@ -859,7 +877,7 @@ format, its game 4: the trace's header names it):
   - **Where the fifteen stand**: `spikey_v1`-`v3` and `shrimpy_v1`, `v2`
     INCONCLUSIVE, the family's own records the same in all 1200 frames,
     the world parting where MegaMan is struck (his +0 0x13 against BN6's
-    0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above);
+    0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above, the opening's animation);
     `walla_v1`-`v3` FAIL at t72, t68 and t66 and `cirkill_v1`-`v3` at t32,
     t26 and t23 on the hit's spark (the fourth kind's 0x04, +0 and +8), each
     after MegaMan struck; `elmperor_v1`-`v3` FAIL at t1 on its collision data

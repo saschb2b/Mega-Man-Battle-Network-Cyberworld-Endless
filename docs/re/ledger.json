@@ -278,6 +278,10 @@
     {
       "date": "2026-11-04",
       "what": "BN4's virus after-state (BN4_VIRUS_PRESENT 0x08010736, no pause test) against BN6's (BN6_VIRUS_PRESENT 0x08016E64, its pause test at 0x08016E84-0x08016E90), BN4's sprite update (BN4_SPRITE_UPDATE 0x0800285C), Spikey's init and its moves' draw (BN4_SPIKEY_INIT 0x080BA428, BN4_SPIKEY_MOVES 0x080BA5BC) and CirKill's shot's table literal (BN4_SHOT_KINDS_LIT 0x080CE83C) mapped (docs/rom/bn4.md's row): the BN4 differential replays the families' draws before the fight, holds the opening's idle animation to BN4's lead and reads a diagonal step's direction and a pointer into BN4's moved code as BN6's"
+    },
+    {
+      "date": "2026-11-04",
+      "what": "BN4's virus after-state ported through BN6's paused opening (XVirusFamily.present; src/emu/xvirus_shim.h's paused present): each moved BN4 family runs BN4's after-state (BN4_VIRUS_PRESENT 0x08010736, copied with it) after its spawn's done and each run of its state 0 where BN6's (BN6_VIRUS_PRESENT, at BN6_VIRUS_TYPE 0x0810A278's tail) skips it for the pause alone (BN6_SETTINGS_MODE_READ 0x0802D234, BN6_PAUSE_TEST 0x0800A03C; BN6_SPRITE_UPDATE 0x080026C4 its twin call), BN6's code untouched; docs/rom/bn4.md's row. The opening's phase from 152 updates apart to one, the engines' appears (BN4's generic state 0 runs 52 times in the paused opening, BN6's twin 50): the allowance held to that one (OPENING_LEAD), its mutation caught; shrimpy_v3 still FAILS at t65 on it"
     }
   ],
   "experiments": [
