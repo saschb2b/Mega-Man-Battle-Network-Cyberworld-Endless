@@ -187,6 +187,11 @@
 #define BN4_RECORD_ENTITIES 0x08      /* u32: its entity list, BN4_ENTITY_SIZE bytes each, 0xFF ending it */
 #define BN4_ENTITY_SIZE   4           /* an entity: the enemy id (0 MegaMan), the panel's column and row, its kind */
 #define BN4_ENTITY_KIND   0x03        /* ... its kind: 0 MegaMan, 1 an enemy, 5 an obstacle (id 1 a rock) */
+#define BN4_ENTITY_COL    0x01        /* ... its panel's column, 1-6 (the enemy's 4-6); its row, 1-3, at +2 */
+#define BN4_NET_GROUP     0x80        /* the net's first map group: BN4_BATTLE_TABLES' second list and XRomLayout.map_table from it */
+#define BN4_STORY_MAPS    16          /* a group's map indices a story stage: the map's number, 16 more each stage */
+#define BN4_GROUP_DEEP    0x94        /* the group of the Undernet 1-6 (its maps 0-5) and Black Earth 1-2 (6 and 7), dark green */
+#define BN4_MAP_BLACK_EARTH 6         /* ... Black Earth's first: NavShado and NavBlack, its own, in maps 6 and 7's records alone */
 #define BN4_ENEMY_STATS   0x08011888u /* a record per enemy id, BN4_ENEMY_STAT_SIZE bytes (0 MegaMan, 1-126 the viruses, 128 on the Navis) */
 #define BN4_ENEMY_STAT_SIZE 12
 #define BN4_ENEMY_COUNT   253         /* ids 0-252, as its enemy names archive (BN4_ENEMY_NAMES) holds them */

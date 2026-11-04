@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Battle Network 4 in a run"
-description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
+description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:44:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -162,6 +162,89 @@ BN6's); Black Earth's gates (five evil chips, then every Navi chip),
 gathering gates the meta layer refuses (its maps may still dress the
 deep).
 
+## Its viruses as visitors
+
+Phase 1's way into runs, before BN4 has an area of its own: its moved
+families visit BN6's and BN5's battles as BN5's visit BN6's
+([One net](one-net.md), the visitors' rule). Decided by this session on
+4 November 2026, reasoned with the game-design skill: the dialectic stays
+what you bring against what you find; it feeds the moment (a family last
+fought in 2004, read in BN6's battle) and the session (a layer's battles,
+one in four with a visitor); its patterns are the hand-made units of a
+procedural run (a battle stays its game's record, a visitor takes one
+place in it), an honest telegraph and meta as variety. Against
+[the core loop](../game/core-loop.md) it serves the fifth lack, variety a
+veteran feels, in battles a run fights already: no walk, no battle and no
+line is added, so pace, the first lack, is untouched. Built behind BN4's
+research switch (`--dev bn4families`): no player's run meets one until the
+owner turns BN4 on.
+
+- **One slot, shared.** The gate stays one random battle in four from act
+  2, with the easing rule and the exclusions as they are (no opening
+  battle, Server's, duel's or Gentle helper's battle). The visitor of that
+  battle is drawn among every fitting family of the two other nets, each
+  family as likely as any: BN6's areas meet BN5's and BN4's viruses, BN5's
+  areas BN6's and BN4's. Not chosen: a slot of BN4's own, which makes nearly one
+  battle in two foreign, so an area's own viruses stop being its identity
+  and "Nets meet" stops naming a seam; and a coin between the nets first,
+  which with one BN4 family moved puts Billy in one battle in eight from
+  act 2, a family repeated where variety was meant. Drawn by family,
+  BN4's share grows with its families moved: with Billy alone about one
+  visitor in eleven (`build.py pacing` with `--dev bn4families`: 739 of
+  8412 rolled), about half with its 17 beside BN5's 18 that may visit.
+- **Roles from BN4's own records**, by the rule BN6's and BN5's take (the
+  back where three of four placements are in the last column, the front
+  where most are in the first enemy column, else either), over its net's
+  random records: the groups from 0x80 that have maps, each list of
+  viruses once, as its story stages and spare map indices repeat them
+  (587 lists). Measured (a scratch tally of BN4 Red Sun's ROM, the same
+  count `src/core/visitor_families.c` makes): Weather the front (21, 14,
+  6); Billy (28, 32, 17), VolGear, Gaia, Spikey, Shrimpy, Boomer, MagTect,
+  Melody, Dharma, Kilby, Spidy, CirKill, Moloko, Walla and Elmperor
+  either; BomBoy and Trumpy the back, but BN6 has both by name.
+- **Stages** by where its records set a family first: its net areas,
+  comps and homepages the surface's (0), the Undernet (group 0x94's maps
+  0 to 5) 1, Black Earth (its maps 6 and 7, whose records alone hold
+  NavShado and NavBlack) 2. Spidy and Elmperor are the Undernet's, the
+  other new families the surface's ([BN4 Red Sun's tables](../rom/bn4.md),
+  Battle records).
+- **Versions by the act's band**: BN4's six (V1, EX, V2, EX, V3, EX) meet
+  the act's cap by BN5's tiers (BN6's V1 allows V1EX, and so on), the
+  highest that keeps the battle's HP to the band's top and its hit to the
+  cap. BN4's ladder runs higher than BN5's (Billy 50, 120, 160, 200, 250
+  and 300 HP), so the band takes lower versions of it.
+- **Panels**: BN4's records name a field the project has not read (a
+  record's +1, assumed), so no BN4 family counts as bound to special
+  panels; a visitor still takes only a plain or cracked panel of the
+  battle it visits.
+- **Only what is new visits.** A family BN6 or BN5 has by name (Mettaur,
+  Trumpy, Lark, BomBoy, WindBox) is not moved; the 17 above are, so every
+  BN4 visitor is a virus a run had not met.
+- **The deep acts draw as now**: BN6's and BN5's late areas by the coin,
+  no visitor, as they mix already and the card says "Both Nets". BN4's
+  records join the deep with its areas (Phase 3), under the owner's third
+  call.
+- **The telegraph**: the act's card says "Nets meet" where either other
+  net's families can come, its words unchanged. MegaMan names a profile's
+  first visitor once, as now, BN5's or BN6's; a BN4 visitor is not named
+  and does not spend that once, until the owner names BN4's net in the
+  run's fiction (a call below): BN5's is "the older Net", the copy the
+  Nest made, and BN4's is older still.
+- **The record**: the run log marks a BN4 visitor as any (`+v64.0`,
+  Billy, BN6's AI index 64, at V1). A battle's families (a bit each, the
+  repeat rule's memory) stop at 63, and no battle of a run's own holds a
+  BN4 family, so its visitor sets none and the rule is as before.
+- **What stays as it was**: with BN4 not read, the nets' families, roles
+  and draws are byte for byte as before (the same random numbers drawn,
+  `LAYER_MAKE` and its hash unchanged). With BN4 read, a visitor's pick
+  is drawn among more families, so a visited battle's foes differ from a
+  run without BN4 from the first visitor on; layers (their layouts,
+  objects and loot) do not change.
+
+Before BN4's visitors reach players: its families proved by `build.py
+xdiff`, their reward rows read (BN6's fill stands in for them now), and
+the owner's calls 5 and 6 below.
+
 ## The plan
 
 Each phase ships on its own; each transplant proved against BN4's own
@@ -179,7 +262,8 @@ battle frame by frame, as BN5's were.
    running BN4's battles as the differential's reference.
 1. **Its viruses.** The 17 families by `tools/xrecipe.py`, BN4's engine
    paired first, each proved by `build.py xdiff`; visitors at the seams
-   as BN5's (one battle in four from act 2), so they reach runs before
+   as BN5's, sharing their one battle in four from act 2 (Its viruses as
+   visitors, built behind the research switch), so they reach runs before
    BN4 has an area of its own.
 2. **Its Navis and the tournament.** The tournament on the Navis already
    moved; BN4's Navis moved, guarding and joining its bracket; BN4's
@@ -209,3 +293,8 @@ battle frame by frame, as BN5's were.
 3. With three games read, how a run shares BN6's areas between BN5's and
    BN4's dressings.
 4. The 3DS: BN4 left out where its heap has no room.
+5. What MegaMan calls BN4's net when its first visitor is met: one more
+   "older Net" beside BN5's, or a third, older still; and whether the
+   deep's "Both Nets" counts three once BN4's areas join it.
+6. When BN4's visitors reach players: with the first of its families
+   proved, or once all 17 are.

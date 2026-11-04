@@ -43,8 +43,12 @@ void nets_arrival_words(void) {
 
 void nets_battle_note(const Encounter *e) {
 	if (!e->visitor || profile.visitor_taught || D.visitor_due) return;
+	/* (none for one of BN4's: what MegaMan calls its net is the owner's
+	 * call, docs/multirom/bn4.md, Its viruses as visitors) */
+	int family = e->foes[e->visitor - 1].family;
+	if (visitor_net(family) == VISIT_BN4) return;
 	D.visitor_due = e->xrecord ? 2 : 1;
-	D.visitor_family = e->foes[e->visitor - 1].family;
+	D.visitor_family = family;
 }
 
 /* (MegaMan free on the map, nothing said or shown: a word can start) */
