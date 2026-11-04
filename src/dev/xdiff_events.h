@@ -69,6 +69,20 @@ typedef struct { uint32_t bn6, bn5, len; int word; } XdTwin;
 
 typedef struct XdLog XdLog;
 
+/* A game's routines the hooks are placed on and the places they read (bn5.h, bn6.h; BN4's, bn4.h, its own module's:
+ * xdiff_bn4_trace.h's xd4_routines); 0 none (BN4's setAttack, its moods) */
+typedef struct {
+	uint32_t draw[4], spawn, spawn_end, sound, effect, attack, reserved, blink, sprite;
+	uint32_t t1;   /* the first kind's objects, MegaMan first */
+	uint32_t runner_ret, running, rng[2];
+	uint32_t flash, hides;   /* the flash timer's place in a collision data; its bit 1 as the blink hides an object */
+	uint32_t mood_gain, navi, navi_size;   /* the mood raised as a hit lands (0 none: BN6's) and the battle NaviStats it raises */
+	uint32_t mood_set, mood_calm;          /* ... and set outright (0 none: BN6's) */
+} XdGame;
+/* BN4's routines, for a log of game 4 (BN4 Red Sun's battle on the guest core, the reference): given before its
+ * xd_log_start */
+void xd_log_bn4(const XdGame *g);
+
 /* The log of game 5 (the reference, the guest's core) or 6 (the subject,
  * BN6's), emptied, its hooks placed on its core: NULL where one could not
  * be. The families' code is xvirus_moved's (BN6's copy, BN5's own): the
@@ -104,6 +118,10 @@ bool xd_moved_kept(uint32_t to);
  * (a BN6 routine's through its twin), the k-th of its key in a frame the
  * reference's k-th in the same frame by the battle's timer */
 void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int ntwins);
+/* ... the family's own draws (those its code led to) given the reference's of `lag` fight frames before, the engine's of the
+ * same frame still: BN6's engine hands a virus its first own state a fight frame later than BN4's (lag=1, a BN4 spec's;
+ * docs/devtools/differential.md, The BN4 trace) */
+void xd_replay_lag(XdLog *subject, int lag);
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);

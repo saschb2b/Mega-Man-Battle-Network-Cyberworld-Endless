@@ -2302,5 +2302,209 @@
         "zomon_v3 at t1084 and zomon_v3ex at t760: MegaMan's HP 0 in both at t1083 and t759, song 0x6B in BN6's frame alone, its event's caller the engine's (0x0801BA5F)"
       ]
     }
-  ]
+  ],
+  "bn4": {
+    "about": "What may differ between BN4 Red Sun's battle (the reference, tools/xdiff_bn4.py) and BN6's with a BN4 family moved in, and why: each allowed difference scoped to whose records it is and the fields it moves, its evidence both games' code by address; never a blanket mask",
+    "allowed": [
+      {
+        "name": "BN6's battle a fight frame behind BN4's",
+        "lag": 1,
+        "whose": "battle",
+        "fields": "every record of BN6's battle, the same offset for all (tools/xdiff_bn4.py compare: the family's, MegaMan's and the world's objects, their AI and collision data, the panels, the run order, the sounds, the events and the family's draws), BN6's at t + 1 against BN4's at t; BN6's battle traced a fight frame longer and its keys by the timer taken a frame later (src/dev/xdiff.c, Side.behind), the family's own draws given BN4's of the frame before (rng=replay with lag=1, src/dev/xdiff_events.h xd_replay_lag). What still differs under the shift fails the spec (the family's) or keeps it INCONCLUSIVE (the world's), never a field or a role given a lag of its own; what is fixed before the first state keeps its own handling (BN6's per-frame RNG steps, not compared where the draws are replayed; BN6's MegaMan's companion, spawned by his init)",
+        "why": "BN6's engine runs no state while the opening is paused, BN4's does, so BN6's whole battle runs a fight frame behind BN4's from the first state on. Both games' pause byte (BN4's [eToolkit+0x40]+9, BN6's [eToolkit+0x3C]+0xA) reads 1 from the appear to the fight, and each object runner (BN4 0x0800314C, BN6 0x080031AC) runs a paused object whose +0 has 0x04. BN4's state runner (0x08013C48) has no pause test and calls the state (0x08013D9A), so in the opening BN4's generic state 1 (0x0801013A) hands a virus its first own state and MegaMan's state 1 (0x08010A88) his ready 6, each run at the fight's first frame. BN6's (0x0801B1C4, from the virus dispatcher 0x0810A29C and MegaMan's update) tests the pause byte first (0x0800A03C, at 0x0801B1CC) and, for a CurAction not 0 whose flags (0x0801A166) have none of 0x40000100 and whose struck word (0x0801A180) has no 0x8000, returns at 0x0801B21A (b 0x0801B37A) without calling the state: BN6's state 1 (a virus's 0x080165B8, MegaMan's 0x08017888) runs at the fight's first frame and the first own state at the second (billy_v1: Billy's first own state at t1 in BN4 and t2 in BN6; MegaMan's ready setting his object's +0xB 4 and +0x20 9 at t1 in BN4, t2 in BN6, the same count-down to t10 and t11). Everything the states do follows a frame later: Billy's moves and reservations, its thunder striking MegaMan (t431 in BN4, t432 in BN6), the sounds they play. BN6's own Mettaur against BN4's starts the same way (game=bn4:bn6, foes=01@52). The lead's call (2026-11-04, the owner's to overturn): one offset for the whole battle, where the owner's earlier call (the port keeps BN6's timing) had it for the family alone. BN6's first fight frame, its states' 1, meets BN4's paused opening, which the trace does not keep, and is not compared"
+      },
+      {
+        "name": "the family's object +0 bit 0x04, which BN6's generic state 1 keeps",
+        "whose": "family",
+        "part": "obj",
+        "offset": "0x00",
+        "bit": "0x04",
+        "direction": "BN6 has it, BN4 not",
+        "why": "The bit the object runner runs a paused object by (BN4 0x0800314C at 0x08003174, BN6 0x080031AC at 0x080031D8: tst r4,#4 while the pause byte is set), set on every first-kind object as it spawns (both games' kind 1 descriptors' flags byte 0x19, BN4 0x08003268, BN6 0x080032D0, then 0x17 once it appears). BN4's generic state 1 clears it (0x0801013A: ldrb r0,[r5]; movs r1,#4; bics r0,r1; strb r0,[r5]), as it hands a virus its first own state during the paused opening, so the virus waits for the fight; BN6's (0x080165B8) does not, BN6's state runner never running a state while paused (0x0801B21A, the family's timeline above). The same engine difference as the lag: BN6's own Mettaur keeps 0x04 too (0x17 at t1 against BN4's Mettaur's 0x13, game=bn4:bn6, foes=01@52)"
+      },
+      {
+        "name": "the thunder's sprite, BN6's own art",
+        "whose": "family",
+        "kind": "T3",
+        "type": "0x2A",
+        "part": "obj",
+        "offsets": [
+          "0xA8",
+          "0xBB"
+        ],
+        "why": "Billy's thunder is BN6's own third-kind 0x2A run for Billy's parameters (the recipe's audit, tools/bn4_twins.py AUDITS (0x080D2156, 0x080CADBC): BN6's object, not BN4's moved), so it draws BN6's own art: its init sets up sprite list 0x10, number 0x11 in BN4 (0x080D2044, its sprite_load 0x0800287C) and number 0x16 in BN6 (0x080CAC80, sprite_load 0x080026E4), two sprites of other bytes (the hooks' CRC32s 0x030B3B0A and 0xAF2AFC99). What the sprite state holds of it is its own: +0xA8 to +0xB7 its frames' pointers into it (sprite_load's +0x18 on, its state at the object's +0x90) and +0xB8's word (its top byte 0x80 in BN4, 0xC0 in BN6) copied from the sprite's own data (BN6 0x0800210E-0x08002120, byte by byte as the art has it): Billy's sprite, a copy of BN4's bytes, holds the same there in both games (+0xBB 0xFC), MegaMan's too (0xF0). The thunder's place, timing, damage and hit are compared as ever"
+      },
+      {
+        "name": "MegaMan's own sprite",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offsets": [
+          "0xA8",
+          "0xBB"
+        ],
+        "why": "MegaMan is drawn from each game's own art: his sprite state's frame pointers (+0xA8 to +0xB7, sprite_load's +0x18 on, his state at +0x90) point into BN4's sprite list 0's entry 0 (0x08214000, BN4's lists 0x0802793C) and BN6's own MegaMan (0x081D8000, as BN5's differential has it: legit.json's masks, MegaMan's own sprite), and +0xB8's word is copied from that art's data (BN6 0x0800210E-0x08002120): his place, his CurAction and what he does are compared as ever"
+      },
+      {
+        "name": "MegaMan's object +0 bit 0x04, which BN6's state 1 of his keeps",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offset": "0x00",
+        "bit": "0x04",
+        "direction": "BN6 has it, BN4 not",
+        "why": "As a virus's (the family's entry above): BN4's MegaMan's state 1 (0x08010A88, his state table 0x080EAEFC, run by his update 0x080EAECC from his type's 0x080B34D8) clears his +0 0x04 (ldrb r0,[r5]; movs r1,#4; bics; strb at 0x08010A8A-0x08010A90) as it sets his ready 6; BN6's (0x08017888, his state table 0x080EB86C by his AI data's +1, from his mode 2's routine 0x080EB7A0) sets his ready 8 and keeps it (0x080178AC-0x080178B2), BN6's state runner never running a state while paused (0x0801B21A): the bit the object runner runs a paused object by, BN6's set and BN4's not; his CurAction is compared as ever"
+      },
+      {
+        "name": "BN6's MegaMan's routine index",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x00",
+          "0x00"
+        ],
+        "why": "BN6's MegaMan runs as the first kind's type 0, whose routine picks his by his AI data +0 (0x080B9A5C: ldr r4,[r5,#0x58]; ldrb r0,[r4]; the table at 0x080B9A74: 0 the virus dispatcher 0x0810A279, 2 his own 0x080EB7A1, his +0 2); BN4's MegaMan's type routine calls his own straight (0x080B34D8: bl 0x080EAEA8) and reads no such index; BN4's AI data +0 is his third power attack (0x0800C9E8), read as BN6's +8"
+      },
+      {
+        "name": "BN6's MegaMan's fourth power attack",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x04",
+          "0x04"
+        ],
+        "why": "BN6's attack state calls four power-attack dispatchers (0x080F17CA +6, 0x080F17F2 +7, 0x080F182E +8, 0x080F185A +4: 0x0801177A), BN4's three (0x080EEC1E +0xD, 0x080EEC3E +0xF, 0x080EEC5E +0, then on as BN6's after its fourth: BN4 bl 0x0800B72C; cmp r0,r3, BN6 bl 0x0800FB54; cmp r0,r3): BN6's +4, set by its loadout (0x080144C0, 0xFF none), has no BN4 twin"
+      },
+      {
+        "name": "BN6's MegaMan's companion",
+        "whose": "megaman",
+        "kind": "T4",
+        "type": "0x08",
+        "why": "BN6's player init spawns a fourth-kind 0x08 for MegaMan and keeps it at his AI data +0x58 (0x080173CA-0x080173CE: r7 his AI data + 0x58, bl 0x080E223E: movs r0,#8; the fourth kind's spawn; its +0x4C him; str r0,[r7]); BN4's twin of that spawner (0x080E28EC: movs r0,#8, the same spawn and owner, no AI data store) has no BL calling it, and BN4's MegaMan's AI data +0x58 stays 0: the object, its place in the run order and the pointer to it are BN6's alone"
+      },
+      {
+        "name": "BN4's MegaMan's loadout's unread first byte",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0C",
+          "0x0C"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4's loadout setter (0x0800BD48, from the form's state 0x0800E05C) writes his AI data +0xC as the loadout's first byte: 0xFF for form 0 (0x0800BD74) or the form's loadout word (0x0800BD5E, 0x080184F0, whose +0 is 0xFF in every form); no code of BN4's reads it through an AI data pointer (every load at +0xC whose base came from an object's +0x58 in the ROM's first 2 MB: none). BN6's loadout (0x080144C0) keeps no such byte, its +0xC no field of his; BN4's power attacks his loadout does keep are mapped (+0xD, +0xE, +0xF, +0 at BN6's +6, +5, +7, +8, xdiff_bn4_trace.c)"
+      },
+      {
+        "name": "BN4's MegaMan's charge times, cached",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x34",
+          "0x37"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4 caches the charge times of his chip charge's and charged shot's power attacks (AI data +0xE and +0xF) as his loadout is set (0x0800BCF4: BN4_CHARGE_TIMES by power attack and his Charge, NaviStats +7; 0xFF none) into u16 +0x34 and +0x36, and its charge levels compare his two charge counters with them (0x0800BB56, 0x0800BB6C). BN6 caches none: its twin reads the same kind of table at each test (0x08012F62: r7 5 for A, 7 for B, 0x11 a Beast chip; BN6_CHARGE_TIMES read at 0x08012FA6 by his Charge, 0x08013774), its +0x34 his anger and +0x36 the drain (BN6_AI_ANGER, BN6_AI_DRAIN), which hold 0 where this applies; the power attacks themselves are compared (mapped)"
+      },
+      {
+        "name": "BN4's MegaMan's control block's pointer",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x50",
+          "0x53"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4's AI data's clear (0x0800B7CE) points each side's +0x50 at its control block (side 0's 0x02035A70, side 1's 0x02035AB0, 0x40 bytes each, cleared by 0x0800E8FE), which his ready routine (0x080EED48) sets up (+0: 0x0800EB86 tests it; 0x0800EAC6 then fills its 0x40 bytes, 0x0800EB8E sets +0) and runs his ready's sub-state from (+1: 0x0800E4F8's table). BN6's ready (0x080F1694, by his object's +0xA) keeps no such block and no pointer: his AI data +0x50 is 0. The ready's phases both games keep in his object (+0xA, +0xB, +0x20) are compared as ever"
+      },
+      {
+        "name": "BN6's AI data's pool bit",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x7C",
+          "0x7F"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6 hands its actors' AI data from a pool of eight (BN6_AI_POOL): the take (0x0800ED2C) sets the entry's own bit into its +0x7C (MegaMan's entry 0, bit 31: +0x7F 0x80), which the let-go (0x0800ED80) reads to free it. BN4 keeps one AI data a side at a fixed place (0x0800BFF4: movs r1,#0xc0; muls, from BN4_AI_DATA) and no pool, so no such bit (its +0x7C one of its attack's variables, at BN6's +0xAC in the trace)"
+      },
+      {
+        "name": "BN6's AI data's palette step",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x03",
+          "0x03"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's battle actors' setup (0x0800768C) writes the enemy record 1's +2 into the AI data's +3 (MegaMan's 1); it is read only by the actor init's palette (0x0800F334, its one caller 0x08016F90 in the virus and Navi init 0x08016F56, not his player init 0x080172F0: palette = 0x0800F354[version] x step) and by a virus's version change (0x0810A90A), neither run for MegaMan. BN4's viruses keep no AI data and its MegaMan's has no such step; BN4's own +3, the HP bug's count (0x0800C164), is BN6's +9 (0x08010230), mapped"
+      },
+      {
+        "name": "BN6's AI data's unused HP mark",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0E",
+          "0x0E"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's AI data +0xE reads 0xFF from its setup; its two readers keep nothing of it: 0x0800A86E walks the eight alive actors and loads the HP of one whose +0xE is not 0xFF, then returns without using it, and the common delete state 0x08016C4E (MegaMan's too, his routine's table 0x080EB7B8) loads his HP into r1 and drops it as it writes 0xFF there (0x08016C66-0x08016C70). BN4 has no such mark (its +0xE the chip charge's power attack, BN6's +5, mapped)"
+      },
+      {
+        "name": "BN6's MegaMan's Beast Out gate",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0F",
+          "0x0F"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's battle start writes 1 into both sides' players' AI data +0xF (0x08009338: 0x0800936E, 0x0800937E); it is read only by Beast Out's: its end (0x080159C6, BN6_TURN_END's call: 0 there sets 2, then the Beast Out counter, NaviStats +0x29) and its count-down (0x08015A16 for both sides, while NaviStats +0x29 is 0: one less to 0, 0xFF left). BN4 has no Beast Out, and no byte of its MegaMan's AI data its code reads so"
+      },
+      {
+        "name": "BN6's MegaMan's Beast chip charge",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x11",
+          "0x11"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's loadout (0x080144C0) writes +0x11 0xFF, the power attack its chip charge takes for a chip whose record +6 is 0xA in place of +5's (the chip charge's dispatcher 0x0800FB54 at 0x0800FB96, the charge time 0x08012F62 at 0x08012F8E: r7 0x11). BN4's chip charge (0x0800B72C, its flag 8) branches by his form alone (0x0800B770: form 5 0x0800D638, else 0x0800D4B4) and caches only +0xE's and +0xF's charge times (0x0800BCF4): no byte like it"
+      },
+      {
+        "name": "MegaMan's held chip, which neither battle reads of his",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offsets": [
+          "0x2A",
+          "0x2B"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "His object's u16 +0x2A, the chip an object uses next (0xFFFF none). Its writers: BN6's state of his at 0x0801741C (its table word 0x0801740C) stores 0xFFFF at 0x08017438 in the opening; BN4's state 2 (0x08010890) stores 0xFFFF at 0x080108AA, run in no frame of these specs, so his reads 0 all battle (BN4's other stores 0x0801017A, 0x0801020A, 0x08010D82, 0x08013256, 0x08013268, 0x08015134). Its readers, searched in both ROMs (every ldr, ldrh or ldrb at #0x2a in the battle engines, BN4 0x08008000-0x08020000 and BN6 0x08008000-0x08020000, and in MegaMan's own code, BN4 0x080EA000-0x080F2000 and BN6 0x080EB000-0x080F3000; every ldrh [r5,#0x2a] in the first 2 MB attributed to its type): BN6's four, 0x0800EDC6, 0x0800EE1A, 0x0800EE8E and 0x0800EF2A (in 0x0800ED90, 0x0800EDD0, 0x0800EE26, 0x0800EF02), each read it only for an object whose name's class (0x0800F29C) is not 2, a MegaMan's chip read from his side's battle hand instead (0x08010018, 0x0802E070); BN4's one, 0x08014AFE (0x08014AE8), reads it of the objects in its list at 0x0203BE40, which 0x080167C0 fills for an enemy, called only from the enemies' types' inits (13 calls, 0x080B3550 to 0x080C4024, none in MegaMan's type 0 0x080B34D8 or his init 0x0801079C); the other loads at +0x2A in those spans are a collision data's, an AI data's or eToolkit's (BN4 0x0800F6FC, 0x08012C8C; BN6 0x0800E7AE, 0x08012E50), and the first 2 MB's ldrh [r5,#0x2a] in BN4 are the viruses' types' own (2, 5, 8, 0x13 and on). Nothing of either battle consumes MegaMan's, so the value each game left there is its own; where BN4's side ever holds one (a chip of his), it is compared as ever"
+      }
+    ]
+  }
 }

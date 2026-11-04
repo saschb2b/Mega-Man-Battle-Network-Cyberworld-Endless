@@ -114,6 +114,8 @@ typedef struct Side_ {
 	Player players[BN6_MPLAY_COUNT];
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
+	int behind;                     /* (BN6's, lag=N) the fight frames its battle runs behind the reference's: its keys by the timer
+	                                 * taken that much later, that many more frames traced (docs/devtools/differential.md, The BN4 trace) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
 	bool seeded, fought, done, decked, held;
@@ -222,7 +224,9 @@ static void player_out(Side *g) {
 	uint32_t side = v->rd8(v->side) & 1;
 	bytes_out(g, v->navi + side * v->navi_size, v->navi_size, BN6_BATTLE_NAVI_SIZE);
 	w32(g, v->used ? v->rd32(v->used) : 0);
-	bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
+	if (v->game == 4)   /* (BN4's pending form in its AI data: XD4_PENDING) */
+		part_out(g, XD4_PENDING, xd4_places.ai + side * xd4_places.ai_size, BN6_CROSS_PENDING_SIZE);
+	else bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
 	bytes_out(g, v->souls, SOULS_SIZE, SOULS_SIZE);
 	bytes_out(g, v->unite, BN6_ELEMENT_SIZE, BN6_ELEMENT_SIZE);
 }
@@ -505,7 +509,7 @@ static bool step(Side *g, const Spec *s) {
 		keys = custom_keys(s, v->game, g->screen, ++g->custom);
 	}
 	if (battle && phase == BN6_PHASE_FIGHT) {
-		keys |= keys_at(s, t);
+		keys |= t >= (uint32_t)g->behind ? keys_at(s, t - (uint32_t)g->behind) : 0;
 		hold_step(g, s);
 	}
 	if (battle && s->safe) keep_safe(v);
@@ -526,7 +530,7 @@ static bool step(Side *g, const Spec *s) {
 	if (fighting && t != g->last) {
 		frame_out(g);
 		g->fought = traced = true;
-		g->done = ++g->traced >= s->frames;
+		g->done = ++g->traced >= s->frames + g->behind;
 	}
 	g->last = t;
 	g->done |= (g->fought && sub != BN6_SUB_BATTLE) || g->frame >= (uint32_t)(OPENING + 4 * s->frames);
@@ -586,11 +590,13 @@ static uint32_t veneer_of(const XVirusFamily *f, uint32_t to) {
 static void call_aim(uint32_t at, uint32_t v) {
 	uint8_t b[4];
 	put32(b, v | 1);
-	for (int k = 0; k < xvirus_bn5_count; ++k) {
-		uint32_t veneer = veneer_of(xvirus_bn5[k], at);
+	/* (BN5's families, then BN4's where they are installed: xdiff_bn4.h's xd4_family) */
+	for (int k = 0; k < xvirus_bn5_count + xd4_family_count(); ++k) {
+		const XVirusFamily *f = k < xvirus_bn5_count ? xvirus_bn5[k] : xd4_family(k - xvirus_bn5_count);
+		uint32_t veneer = veneer_of(f, at);
 		if (!veneer) continue;
 		emu_write(veneer + 8, b, 4);
-		printf("xdiff: %s's call to %08x (veneer %08x) aimed at %08x\n", xvirus_bn5[k]->name, (unsigned)at, (unsigned)veneer, (unsigned)v);
+		printf("xdiff: %s's call to %08x (veneer %08x) aimed at %08x\n", f->name, (unsigned)at, (unsigned)veneer, (unsigned)v);
 	}
 }
 
@@ -724,7 +730,7 @@ static bool subject(Side *g, const Spec *s) {
 		return false;
 	}
 	for (int i = 0; i < s->nfoes; ++i) {
-		int id = bn6_id(s->foes[i].id), p = s->foes[i].panel;
+		int id = s->bn4 ? xd4_bn6_id(s->foes[i].id) : bn6_id(s->foes[i].id), p = s->foes[i].panel;
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 0, 0, (p & 0xF) - 1, (p >> 4) - 1, id };
 		printf("xdiff: BN%d's %#x at column %d, row %d: BN6's %#x\n", s->bn4 ? 4 : 5, s->foes[i].id, p & 0xF, p >> 4, id);
 	}
@@ -810,7 +816,11 @@ static bool reference(Side *g, const Spec *s) {
 	return open_out(g, s, "bn5");
 }
 
-static void bn4_frame(uint32_t keys) { guest_frame_quiet(keys); }
+/* (and BN4_SUBSYSTEM_BYTE watched after it, xd4_watch) */
+static void bn4_frame(uint32_t keys) {
+	guest_frame_quiet(keys);
+	xd4_watch();
+}
 
 /* BN4 Red Sun's own battle on the guest core (xdiff_bn4.h's record), traced in BN6's units (xdiff_bn4_trace.h): its
  * Custom screens passed and its fight keyed by its own window and timer, as BN5's */
@@ -841,6 +851,7 @@ static bool colonel_foe(const Spec *s) {
 }
 
 static int spec_families(const Spec *s, const XVirusFamily **fams) {
+	if (s->bn4) return xd4_families(s, fams);   /* (BN4's foes: its families moved, xdiff_bn4.h) */
 	int n = 0;
 	for (int i = 0; i < s->nfoes; ++i)
 		for (int k = 0; k < xvirus_bn5_count; ++k) {
@@ -864,13 +875,15 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 		if (nids < XD_NAVI_IDS_MAX) ids[nids++] = s->foes[i].id;
 	}
 	xd_log_navis(ids, nids);
-	/* (BN4's battle hooks none yet: its routines' twins are unmapped, so its trace holds no events) */
-	bool hooked = a->v.game == 5;
-	a->log = a->out && hooked ? xd_log_start(5, fams, n, navis) : NULL;
+	/* (BN4's battle on its own routines, xdiff_bn4_trace.h's: bn4.h, each BN6's twin by its body) */
+	bool hooked = a->v.game == 5 || a->v.game == 4;
+	if (a->v.game == 4) xd_log_bn4(&xd4_routines);
+	a->log = a->out && hooked ? xd_log_start(a->v.game, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
+	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	return true;
 }
 
@@ -878,7 +891,9 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 static void summary(const Side *a, const Side *b, const Spec *s) {
 	int ref = s->bn4 ? 4 : 5;
 	printf("xdiff: BN%d's battle %d fight frames traced, BN6's %d%s\n", ref, a->fought ? a->traced : -1, b->fought ? b->traced : -1,
-		s->follow ? " (BN6's RNG words following the reference's)" : s->replay ? " (BN6's draws replayed from BN5's)" : "");
+		s->follow ? " (BN6's RNG words following the reference's)" : s->replay && s->bn4 ? " (BN6's draws replayed from BN4's)"
+		: s->replay ? " (BN6's draws replayed from BN5's)" : "");
+	if (s->bn4 && a->fought) xd4_watched();
 	for (int k = 0; k < 2; ++k) {
 		const Side *g = k ? b : a;
 		int n[XD_COUNTS];
@@ -915,6 +930,7 @@ int xdiff_run(const char *text) {
 	}
 	if (!logs_start(&a, &b, &s)) return 1;
 	b.ref = &a;   /* (read where BN5's battle is fought too: dslist) */
+	b.behind = s.bn4 ? s.lag : 0;   /* (BN6's whole battle a fight frame behind BN4's: the spec's lag, tools/xdiff_bn4.py) */
 	fight(ra ? &a : NULL, rb ? &b : NULL, &s);
 	if (a.out) fclose(a.out);
 	if (b.out) fclose(b.out);

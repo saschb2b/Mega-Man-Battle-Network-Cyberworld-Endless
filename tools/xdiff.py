@@ -231,13 +231,11 @@ def shot_command():
     once, so a spec's run is one container (build.py's IMAGE and Docker engine)"""
     sys.path.insert(0, ROOT)
     import build
-    return (['docker'] + (['--context', build.CONTEXT] if build.CONTEXT else []) +
-            ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src',
+    # (build.docker_run: with CYBERWORLD_DOCKER_NAME each container named NAME-PID-N, so side-by-side work tells its own apart)
+    return (build.docker_run() +
+            ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src',
              '-v', f'{os.path.join(WORK, "rom")}:/rom:ro', build.IMAGE, 'build/host/cyberworld', '--headless', '--rom-dir', '/rom',
              '--data-dir', '/src/.build/xdiff/data'])
-
-
-SHOT = []   # (shot_command(), once a process)
 
 
 def run(name, spec, pokes, calls, quiet, twins=()):
@@ -255,13 +253,12 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     return [os.path.join(WORK, 'runs', f'{name}.{g}') for g in ('bn5', 'bn6')]
 
 
-def run_xdiff(name, text, quiet):
-    """the host build's --xdiff TEXT in its container, its lines printed (quiet: none); a run that fails exits"""
+def run_xdiff(name, text, quiet, extra=()):
+    """the host build's --xdiff TEXT in its container (extra: its other arguments first, a BN4 spec's --dev bn4families), its
+    lines printed (quiet: none); a run that fails exits"""
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
-    if not SHOT:
-        SHOT.extend(shot_command())
-    r = subprocess.run(SHOT + ['--xdiff', text], cwd=ROOT, capture_output=True, text=True)
+    r = subprocess.run(shot_command() + list(extra) + ['--xdiff', text], cwd=ROOT, capture_output=True, text=True)
     lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus', 'xchips', 'xattack'))]
     if not quiet:
         for l in lines:
@@ -648,7 +645,10 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
         if not os.path.exists(os.path.join(WORK, 'rom', 'bn4.gba')):
             print(f'{run_name or name}: INCONCLUSIVE (no BN4 Red Sun, USA, in {ROM_DIR})')
             return 'INCONCLUSIVE', 'bn4'
-        return xdiff_bn4.one(run_name or name, spec, a, canon, lambda text: run_xdiff(run_name or name, text, a.quiet), WORK)
+        # (a mutation's or --poke/--call's breaks of the subject, as its spec's own poke= and call= items: xdiff_bn4.spec_text)
+        spec = dict(spec, poke=list(spec.get('poke', [])) + list(pokes), call=list(spec.get('call', [])) + list(calls))
+        return xdiff_bn4.one(run_name or name, spec, a, canon, lambda text, extra=(): run_xdiff(run_name or name, text, a.quiet, extra),
+                             WORK)
     # (its foes' BN5 ids, as src/dev/xdiff.c parses them: the families' maps they select, the Navis' effects, art an install chose)
     canon.foes = {int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x}
     canon.select(sorted(canon.foes))

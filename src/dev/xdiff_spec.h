@@ -77,6 +77,9 @@ typedef struct {
 	char out[256];
 	bool bn5, bn6, follow, replay;
 	int bn4;            /* (game=bn4...) BN4 Red Sun's own battle on the guest core, XD_BN4_* (xdiff_bn4.h, xdiff_bn4_trace.h); 0 none */
+	int lag;            /* (lag=N) BN6's battle N fight frames behind BN4's: BN6's engine runs no state while the opening is paused
+	                     * (docs/devtools/differential.md, The BN4 trace), so BN6's is traced N frames more, its keys by the timer N
+	                     * later, and with rng=replay the family's own draws given the reference's of N frames before; 0 none */
 } Spec;
 
 /* SPEC's items into s (its defaults first): false, said on stderr, where

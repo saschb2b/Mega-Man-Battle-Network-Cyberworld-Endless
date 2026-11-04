@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-/* The CRC32 of the sprite game `game` (5 the guest's core, 6 BN6's) loads
+/* The CRC32 of the sprite game `game` (5 or 4 the guest's core, 6 BN6's) loads
  * by its list's offset and number (sprite_load's r1 and r2), decompressed
  * as BN6 draws it (its size word and its data, xnavi_sprite_bytes'); 0
  * where it cannot be read. Its lists as the core has them (BN6's grown). */
