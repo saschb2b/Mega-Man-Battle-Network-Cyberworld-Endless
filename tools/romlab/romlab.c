@@ -18,6 +18,13 @@
  *   watch ADDR LEN        rec also appends these LEN bytes per frame to PREFIX.w
  *   mute MASK             channels left out of the sound (hex: 1 DMA A, 2 DMA B,
  *                         4-0x20 the PSG's 1-4)
+ *   probe ADDR [MEM LEN]  a Thumb instruction of the ROM made a probe: each time it
+ *                         runs, a line `probe ADDR fFRAME r0..r7 sp lr [MEM's LEN
+ *                         bytes]` (hex), then the instruction as it was (a BKPT
+ *                         patched in, the original fed to the CPU)
+ *   writes ADDR LEN       each store by the CPU into these LEN bytes (hex): a line
+ *                         `write ADDR=VALUE/SIZE at PC lr LR fFRAME` (a store
+ *                         multiple, push or stmia, and DMA not seen)
  *   sound N PREFIX [SI PLAYERS]   run N frames: their sound as a 48 kHz WAV
  *                         (PREFIX.wav), MP2K's SoundInfo, its PSG channels, the
  *                         music player and its tracks after each (PREFIX.si) and
@@ -35,6 +42,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <mgba/internal/arm/arm.h>
+
+static struct { uint32_t addr, mem, len; uint16_t op; } probes[256];
+static int nprobes;
+static struct mCore *probe_core;
+static void (*probe_next)(struct ARMCore *, int);
+
+/* a probe's BKPT: its line, then the instruction it stands on run as it was */
+static void probe_hit(struct ARMCore *cpu, int imm) {
+	uint32_t at = cpu->gprs[ARM_PC] - 4;
+	if (imm >= nprobes || probes[imm].addr != at) { if (probe_next) probe_next(cpu, imm); return; }
+	printf("probe %08x f%u", at, probe_core->frameCounter(probe_core));
+	for (int r = 0; r < 8; ++r) printf(" %08x", cpu->gprs[r]);
+	printf(" sp=%08x lr=%08x", cpu->gprs[ARM_SP], cpu->gprs[ARM_LR]);
+	if (probes[imm].len) {
+		printf(" ");
+		for (uint32_t i = 0; i < probes[imm].len; ++i) printf("%02x", probe_core->rawRead8(probe_core, probes[imm].mem + i, -1));
+	}
+	printf("\n");
+	ARMRunFake(cpu, probes[imm].op);
+}
+
+static uint32_t wwatch_addr, wwatch_len;
+static void (*store8_next)(struct ARMCore *, uint32_t, int8_t, int *);
+static void (*store16_next)(struct ARMCore *, uint32_t, int16_t, int *);
+static void (*store32_next)(struct ARMCore *, uint32_t, int32_t, int *);
+
+/* a store seen by `writes`: its line where it touches the watched bytes */
+static void wwatch_seen(struct ARMCore *cpu, uint32_t a, uint32_t v, int size) {
+	if (a + size <= wwatch_addr || a >= wwatch_addr + wwatch_len) return;
+	uint32_t pc = cpu->gprs[ARM_PC] - (cpu->executionMode == MODE_THUMB ? 4 : 8);
+	printf("write %08x=%x/%d at %08x lr %08x f%u\n", a, v, size, pc, cpu->gprs[ARM_LR], probe_core->frameCounter(probe_core));
+}
+static void wstore8(struct ARMCore *cpu, uint32_t a, int8_t v, int *c) { wwatch_seen(cpu, a, (uint8_t) v, 1); store8_next(cpu, a, v, c); }
+static void wstore16(struct ARMCore *cpu, uint32_t a, int16_t v, int *c) { wwatch_seen(cpu, a & ~1u, (uint16_t) v, 2); store16_next(cpu, a, v, c); }
+static void wstore32(struct ARMCore *cpu, uint32_t a, int32_t v, int *c) { wwatch_seen(cpu, a & ~3u, (uint32_t) v, 4); store32_next(cpu, a, v, c); }
 
 static void nolog(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va_list a) {(void)l;(void)c;(void)lv;(void)f;(void)a;}
 static struct mLogger quiet = { .log = nolog };
@@ -254,6 +298,29 @@ int main(int argc, char **argv) {
 			unsigned val = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
 			if (cmd[4] == '8') core->rawWrite8(core, addr, -1, val);
 			else core->rawWrite32(core, addr, -1, val);
+		} else if (!strcmp(cmd, "probe")) {
+			struct ARMCore *cpu = core->cpu;
+			char *m = NULL, *n = NULL;
+			unsigned addr = strtoul(strtok(NULL, " \t\r\n"), NULL, 16) & ~1u;
+			if ((m = strtok(NULL, " \t\r\n"))) n = strtok(NULL, " \t\r\n");
+			if (nprobes < 256) {
+				if (!probe_core) { probe_core = core; probe_next = cpu->irqh.bkpt16; cpu->irqh.bkpt16 = probe_hit; }
+				probes[nprobes].addr = addr;
+				probes[nprobes].mem = m ? strtoul(m, NULL, 16) : 0;
+				probes[nprobes].len = n ? strtoul(n, NULL, 16) : 0;
+				probes[nprobes].op = core->rawRead16(core, addr, -1);
+				core->rawWrite16(core, addr, -1, 0xBE00 | nprobes);
+				++nprobes;
+			}
+		} else if (!strcmp(cmd, "writes")) {
+			struct ARMCore *cpu = core->cpu;
+			wwatch_addr = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
+			wwatch_len = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
+			probe_core = core;
+			if (!store8_next) {
+				store8_next = cpu->memory.store8; store16_next = cpu->memory.store16; store32_next = cpu->memory.store32;
+				cpu->memory.store8 = wstore8; cpu->memory.store16 = wstore16; cpu->memory.store32 = wstore32;
+			}
 		} else if (!strcmp(cmd, "peek32")) {
 			unsigned addr = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
 			printf("%08x=%08x\n", addr, core->rawRead32(core, addr, -1));
