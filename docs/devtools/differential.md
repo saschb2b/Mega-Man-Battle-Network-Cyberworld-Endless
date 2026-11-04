@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -833,7 +833,7 @@ format, its game 4: the trace's header names it):
     offset). So at t1 BN4's Spikey is on its idle animation's frame 2 with
     5 left and BN6's on the same record with 6, one update behind where it
     was 152 behind (frame 0 at the first record), Shrimpy's and Elmperor's
-    alike: two engines' appears, not the after-state. Allowed (`legit.json`'s
+    alike: the engines' openings, not the after-state nor the appear's code (below). Allowed (`legit.json`'s
     `bn4` allowed, "the opening's idle animation, BN4's appear a run
     longer"; `tools/xdiff_bn4.py` `opening_animation`): the sprite place
     (+0x91 its count, +0x92 its frame's flags, +0xAC its frame record,
@@ -849,12 +849,25 @@ format, its game 4: the trace's header names it):
     Spikey's copy's sprite update aimed at BN6's family nullsub
     (`call=080026C4:0810A952`), its place 51 updates behind again, caught
     at t1. What the step changes in a family's behaviour it does not
-    explain: `shrimpy_v3` still FAILS at t65, where Shrimpy's hook
-    (`0x080BA13E`: its animation 1 cleared where the animation in play has
-    ended, `0x08002E56` bit 0x80) reads its idle animation's last frame in
-    BN4 a frame before BN6 (its +0x10, +0x11 and +0x90): BN4's appear, its
-    generic state 0, moved with the families in BN6's twin's place, would
-    align it.
+    explain: `shrimpy_v3` FAILS at t65, where Shrimpy's hook (`0x080BA13E`: its
+    animation 1 cleared where the animation in play has ended, `0x08002E56` bit
+    0x80) reads its idle animation's last frame in BN4 a frame before BN6 (its
+    +0x10, +0x11 and +0x90). Not the appear's code: BN4's generic state 0
+    (`BN4_STATE_GENERIC_0`) takes its plain appear (`BN4_APPEAR`) in a plain
+    battle, BN6's twin's steps (`BN6_APPEAR`: into the appear queue, wait for
+    the battle state's appear bit 0 and the queue's head, a 2 x 16 frame blink,
+    wait for bit 1) but for BN4's battle kind 0x44 and its sound ([BN4 Red
+    Sun](../rom/bn4.md), A virus's appear and the engine's appear bits). A probe
+    of hooks on both (temporary, not kept) in `spikey_v1` and `shrimpy_v3` saw
+    bit 0 set by each opening after its fade 18 frames after the virus's init
+    in BN4 and 17 in BN6, and the two blinks the same: BN4's appear moved with
+    the families (the owner's call 7, [BN4 Red Sun](../multirom/bn4.md)) would
+    wait on BN6's bit and run BN6's count, and leave the step where it is. One
+    paused update more does align it: BN6's first blink step a frame longer
+    (`--poke 080163FC:2003:2`, BN6's own appear) and `shrimpy_v3` PASSES, the
+    opening's allowance unused. The step is the engines' openings', a frame
+    apart, and stays allowed until the owner chooses how a visitor's opening
+    meets it.
   - **A diagonal step's direction** (`tools/xdiff_bn4.py`
     `direction_as_bn6`): BN6's rule (`0x0800E994`) gives 5 for a move of two
     or more toward column or row 7 or a diagonal one, BN4's (`0x0800AF90`)

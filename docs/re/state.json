@@ -184,6 +184,10 @@
       "what": "BN4's virus after-state ported through BN6's paused opening (XVirusFamily.present; src/emu/xvirus_shim.h's paused present): each moved BN4 family runs BN4's after-state (BN4_VIRUS_PRESENT 0x08010736, copied with it) after its spawn's done and each run of its state 0 where BN6's (BN6_VIRUS_PRESENT, at BN6_VIRUS_TYPE 0x0810A278's tail) skips it for the pause alone (BN6_SETTINGS_MODE_READ 0x0802D234, BN6_PAUSE_TEST 0x0800A03C; BN6_SPRITE_UPDATE 0x080026C4 its twin call), BN6's code untouched; docs/rom/bn4.md's row. The opening's phase from 152 updates apart to one, the engines' appears (BN4's generic state 0 runs 52 times in the paused opening, BN6's twin 50): the allowance held to that one (OPENING_LEAD), its mutation caught; shrimpy_v3 still FAILS at t65 on it"
     },
     {
+      "date": "2026-11-04",
+      "what": "A virus's appear and the engines' appear bits mapped (BN4_STATE_GENERIC_0 0x0800FCAC, BN4_APPEAR 0x0800FE00, BN4_APPEAR_BITS 0x080019C0, BN4_APPEAR_BITS_SET 0x080019A8; BN6_NAVI_SPAWN_STATE 0x08016380, BN6_APPEAR 0x08016396, BN6_APPEAR_BITS 0x0800139A, BN6_APPEAR_BITS_SET 0x08001382; docs/rom/bn4.md's row): the owner's call 7 (BN4's appear moved with the families) measured before it was built: a plain battle's virus takes BN4's plain appear, BN6's twin's steps but for BN4's battle kind 0x44 and its sound, and the one update shrimpy_v3 parts on is the engines' openings' (bit 0 set 18 frames after a virus's init in BN4, 17 in BN6), not the appear's code; the port not built, the opening's allowance kept, the owner's to decide how a visitor's opening meets it"
+    },
+    {
       "date": "2026-10-25",
       "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
     },
@@ -332,6 +336,14 @@
       "result": "python3 tools/mp2k_verify.py x1/BC ... x1/F9: each of the 12 copies (xsong_pack) played by BN6's sound engine in romlab beside BN4 playing its song, both on the music player, 900 frames: every part of the engine's state the same every frame and the PSG's registers the same, PASS for all 12 (each heard: its track playing 13 to 61 frames in both, 0xF9's two). The BN4 specs' traces: every copied sound begun on BN4's player at BN4's frame (the spec's lag 1), elmperor_v2's 0x9D at t515 on player 9 beside the gauge's 0x8F on player 0; billy_v1-v3 and walla_v1-v3 PASS, no sound line left in Shrimpy's, Walla's, Elmperor's or CirKill's v1-v3 but cirkill_v3's 0x82/0x84 at t1107 (no family's). Mutation: Walla's 0xB7 aimed back at BN6's own number, caught at t3 (174 of 174).",
       "meaning": "A family's sound plays as BN4 plays it, on BN4's player, so the Custom gauge's sound on player 0 no longer silences Elmperor's strike; the copies' bytes come from the player's ROM at install, none in the repository.",
       "link": "../multirom/bn4.md"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-04",
+      "name": "Where BN4's appear runs a frame longer",
+      "result": "A probe of hooks on both cores (temporary, not kept) on each game's generic state 0, its four or two appears, the plain appear's three steps, state 1 and the after-state, printing the object's +9, +0xA, +0xB and the battle state's appear bits each run, in spikey_v1 and shrimpy_v3: BN4's virus took 0x0800FE00 (+5 0, the BattleSettings' bit 0x20 clear), its step 0 19 runs from its init's frame (132), bit 0 read set at 150; BN6's 0x08016396, its step 0 17 runs from the frame after its init (71 to 88), bit 0 set at 88; both blinked 32 frames, one run of step 2, bit 1 set as the queue emptied. shrimpy_v3 --poke 080163FC:2003:2 (BN6's first blink step 3 frames, one paused update more): PASS, the opening's allowance unused; without it FAIL at t65.",
+      "meaning": "BN4's appear in BN6's engine would wait on BN6's bit and run BN6's count: moving it with the families (the owner's call 7) would not align shrimpy_v3. The frame is the openings' (each sets bit 0 after its fade, BN4 0x080E1F0E, BN6 0x080E1A0E), so the allowance's reason is the engines' openings, and how a visitor's opening meets it is the owner's call.",
+      "link": "../devtools/differential.md"
     },
     {
       "feature": "BN4 Red Sun's ROM",

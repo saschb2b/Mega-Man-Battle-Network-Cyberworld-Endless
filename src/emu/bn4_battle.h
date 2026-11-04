@@ -74,6 +74,17 @@
                                        * 0x03006793): its frame's count down, at 0 the next frame's record (+0xAC, 20 bytes, its duration at
                                        * +16, +18's 0x80 its last) */
 
+/* A virus's appear (docs/rom/bn4.md, A virus's appear and the engine's appear bits): the generic state 0 (BN4_STATE_GENERIC_0,
+ * bn4.h) picks one of four by its +5 and the BattleSettings' +6 bit 0x20; a plain battle's viruses and MegaMan take
+ * BN4_APPEAR, BN6_APPEAR's twin */
+#define BN4_APPEAR        0x0800FE00u /* the plain appear, by +0xA through its table 0x0800FE14: 0x0800FE20 into the appear queue
+                                       * (0x08007F1C) and hidden, waiting for BN4_APPEAR_BITS' bit 0 and the queue's head; 0x0800FE92
+                                       * the 2 x 16 frame blink, then out of the queue (0x08007F46); 0x0800FED6 waiting for bit 1, then
+                                       * CurAction 1. BN6_APPEAR's steps but for BN4's battle kind 0x44 ([[r10+0x18]+0xF]) and its sound */
+#define BN4_APPEAR_BITS   0x080019C0u /* [[r10+0x18]+0x64] into r0: the battle state's appear bits (bit 0 the viruses may appear,
+                                       * set by the opening at 0x080E1F0E after its fade; bit 1 all have); BN6_APPEAR_BITS' twin */
+#define BN4_APPEAR_BITS_SET 0x080019A8u /* ... r0's bits set in it (BN6_APPEAR_BITS_SET's twin) */
+
 /* The sounds BN4's moved families play that are no BN6 song (xrecipe.song_sig): each a movs r0,#N before its bl to
  * BN4_PLAY_SOUND in the family's code; its song read by its number through BN4's song table
  * (XRomLayout.song_table), copied into BN6 at its slot of BN6's empty songs (tools/xrecipe_bn4.py's SOUND_SLOTS,

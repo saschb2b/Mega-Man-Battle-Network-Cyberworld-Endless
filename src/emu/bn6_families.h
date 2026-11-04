@@ -30,6 +30,14 @@
                                              paused, BN6_VIRUS_PRESENT's pause test's second call */
 #define BN6_SPRITE_UPDATE     0x080026C4u /* an object's sprite counted on a frame, its work in IWRAM (BN4_SPRITE_UPDATE's twin): BN6_VIRUS_PRESENT's
                                              last call (0x08016EBA) */
+#define BN6_APPEAR            0x08016396u /* the plain appear (the generic state 0's, BN6_NAVI_SPAWN_STATE, where its AI data's +2
+                                             is 0; else 0x080164A0, BN6_NAVI_PLATE's arrival), by +0xA through 0x080163A8: 0x080163B4
+                                             into the appear queue (0x0800AA1A) and hidden, waiting for BN6_APPEAR_BITS' bit 0 and the
+                                             queue's head; 0x0801641A the 2 x 16 frame blink, then out of the queue (0x0800AA40);
+                                             0x08016460 waiting for bit 1, then CurAction 1 (BN4_APPEAR's steps, bn4_battle.h) */
+#define BN6_APPEAR_BITS       0x0800139Au /* [[r10+0x18]+0x5C] into r0: the battle state's appear bits (bit 0 set by the opening at
+                                             0x080E1A0E after its fade, bit 1 once all have appeared); BN4_APPEAR_BITS' twin */
+#define BN6_APPEAR_BITS_SET   0x08001382u /* ... r0's bits set in it */
 #define BN6_BX_R0             0x08148865u /* a bx r0 the game itself calls into (0x0815E6A8; the tail of a routine, 0x08148860): where a
                                              BN4 family's pre-step goes on to BN6_VIRUS_STATE_STEP, r0 its address (tools/xrecipe_bn4.py) */
 #define BN6_FAMILY_REF_STATES 0x0810A370u /* the literals that name the tables, one each, in their order: table 0's (the dispatcher's);
