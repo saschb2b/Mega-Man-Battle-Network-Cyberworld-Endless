@@ -364,7 +364,7 @@ def curaction(f, w, addrs, k, i):
         elif v is None or v >= 6:
             f.decide('curaction', f'{addrs[k]:08X}: CurAction written from {chain}')
     prev = w.insns.get(addrs[k - 1]) if k else None
-    listed = bool(f.ranges) and prev is not None and prev.form == 'ldr' and prev.f[0] == i.f[1] and prev.f[2] == 0
+    listed = bool(f.ranges) and i.form == 'ldrb' and prev is not None and prev.form == 'ldr' and prev.f[0] == i.f[1] and prev.f[2] == 0
     if i.form == 'ldrb' and i.f[2] == 9 and (i.f[1] == 5 or listed):
         # (its own, or another object's of its family: one its NameID range found, its pointer just read from the list; any
         # other base is its own variables', +0x80 on, not a CurAction)
