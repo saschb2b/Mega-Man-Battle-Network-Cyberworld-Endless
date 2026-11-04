@@ -14,8 +14,6 @@
 #define BN6(a) { (a), false, 0 }
 
 /* ---- BN4's Billy (its type 0x13 there, its enemy ids 13-18), as AI 64 with ids 0x2c0-0x2c5 ---- */
-/* interim: 0800AD42: its panel type 0xa compared, which no BN6 type is known to be: compared with 0xFF, no type of BN6's (the case never holds; bn4_twins.PANEL4TO6 to give it) */
-/* interim: its effects 0x15 and 0x16 (080B984C, 080B9800: its move's flashes) kept as BN6's same ids: BN4's effect table is not mapped yet, so their twins are unchecked (effect_twin) */
 
 static const XvBlock billy_blocks[] = {
 	{ 0x080B94E4, 0x080B999C, XV_CODE + 0x14000, 0xBBE06B34u },
@@ -90,14 +88,16 @@ static const XvPair billy_calls[] = {
 };
 static const XvImm billy_imms[] = {
 	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
-	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
 	{ 0x080B9600, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 	{ 0x080B9650, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
 	{ 0x080B967A, THUMB_CMP, 2, 0, 0x9, 0xB },   /* another of its family's (its NameID range's) CurAction 9 compared */
 	{ 0x080B968E, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
 	{ 0x080B9730, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 	{ 0x080B97A6, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B97FE, THUMB_MOVS, 4, 0, 0x16, 0x98 },   /* its effect: 0x16 in BN4, 0x98 in BN6 */
 	{ 0x080B9816, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B984A, THUMB_MOVS, 4, 0, 0x15, 0x99 },   /* its effect: 0x15 in BN4, 0x99 in BN6 */
 	{ 0x080B989C, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080B9992, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 };
@@ -109,7 +109,9 @@ static const XvRef billy_states[] = {
 };
 static const XvSprite billy_sprites[] = {
 	{ 1, 0x03, 1, 0xC0, XV_ART + 0x60000, 0x3000 },
+	{ 5, 0x0D, 5, 0x98, XV_ART + 0x63000, 0x2400 },
 };
+static const XvId billy_effects[] = { { 0x16, 0x98 }, { 0x15, 0x99 } };
 
 static const XVirusFamily bn4_billy = {
 	.name = "Billy (BN4's)",
@@ -130,6 +132,7 @@ static const XVirusFamily bn4_billy = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 2 },
 	.sprites = billy_sprites, .nsprites = (int)(sizeof billy_sprites / sizeof *billy_sprites),
+	.effects = billy_effects, .neffects = (int)(sizeof billy_effects / sizeof *billy_effects),
 };
 const XVirusFamily *const xvirus_bn4[] = { &bn4_billy };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);

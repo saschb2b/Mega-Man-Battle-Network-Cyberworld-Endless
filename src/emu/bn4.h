@@ -42,6 +42,10 @@
 #define BN4_T4_TYPES      0x08003F78u /* the fourth kind's 130 */
 #define BN4_TYPES_T4_COUNT 130       /* ... how many */
 #define BN4_TYPES_T1_COUNT 95        /* the first kind's types (BN4_T1_TYPES), how many */
+#define BN4_EFFECTS       0x080E1698u /* the effects a battle draws (the fourth kind's type 0, 0x080E1854, by the effect id at its +4; its
+                                       * literal 0x080E18FC), 4 bytes an id as BN6_EFFECTS': list << 2, sprite, animation, palette */
+#define BN4_EFFECT_COUNT  111         /* ... their ids (0-0x6E), its type 0's code after them (BN6's 108) */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned, r4's low byte its id (BN6_SPAWN_EFFECT's twin by body) */
 #define BN4_TYPE_INIT     0x00        /* a family's routine's jump table (its first literal of three words): +0 its init, */
 #define BN4_TYPE_UPDATE   0x04        /* ... +4 its update (BN4_PRESTEP, BN4_STATE_RUNNER with its state table, the collision's present), */
 #define BN4_TYPE_DYING    0x08        /* ... +8 the shared dying state, BN4_DYING */
@@ -106,6 +110,23 @@
 #define BN4_PANEL_ALLIANCE 0x01       /* its side (BN6's +3) */
 #define BN4_PANEL_FLAGS   0x04        /* u32: its type, flags, side and occupants (BN6's +0x14) */
 #define BN4_PANEL_RESERVER 0x14       /* the object that reserved it (BN6's +0x1C) */
+/* Its panel types (BN4_PANEL_TYPE), by the flags each gives (BN4_PANEL_FLAGS_OF) and the code that tests them, each against
+ * BN6's (bn6_panels.h; docs/rom/bn4.md, Panel types): 0 none, 1 hole, 2 plain, 3 cracked, 4 poison, 6 grass and 7 ice
+ * BN6's numbers and words (ice the generic move's slide, 0x08010328, BN6's 0x08016754); 8 the word of BN6's volcano and
+ * BN5's lava (0x11010), which of them unread; the rest below */
+#define BN4_SET_PANEL_TYPE 0x08009DC4u /* object_setPanelType (r0 column, r1 row, r2 type): a panel of type 0 refused, its +0x12 given 0xBE */
+#define BN4_PANEL_UPDATE_FLAGS 0x0800A376u /* a panel's flags made (BN6's _object_updatePanelParameters): its type's word, side and occupants */
+#define BN4_PANEL_FLAGS_OF 0x0800A3A8u /* ... the word each type gives, 12 of them (BN6's BN6_PANEL_FLAGS_OF, 13) */
+#define BN4_PANEL_TYPES   12          /* ... how many types (0-0xB) */
+#define BN4_PANEL_TYPE5   5           /* its type 5: 0x30010, BN5's sea's word (BN5_PANEL_SEA, its 0xA), no type of BN6's; its code unread */
+#define BN4_PANEL_HOLY    9           /* holy: 0x12010, BN6's 5's word (BN6's and BN5's damage-halving bit) */
+#define BN4_PANEL_HOLDING 0x0A        /* a panel that holds what stands on it: a non-floating object's move stopped as it arrives (the
+                                       * generic move, 0x0801033E) and its can-move check refused while it stands there (0x0800AD42,
+                                       * 0x0800AD6C, 0x0800AD96), floating its object flags' 0x20; set by the third kind's type 0x6D
+                                       * (0x080DB08A); its word 0x10210 BN6's conveyors' (9-12), which push instead: none in BN6 */
+#define BN4_PANEL_PLAIN_B 0x0B        /* its type 0xB: plain's word (0x10010), set by four objects (0x080CB4F4 and others); its meaning unread */
+#define BN4_CAN_MOVE      0x0800AD2Au /* an object's can-move check (r5): none of its flags 0x5040, and not on BN4_PANEL_HOLDING unless
+                                       * floating; BN6's 0x0800E5E2 the flags test alone (BN6 has no holding panel) */
 #define BN4_RNG_PRIMARY   0x02001790u /* the main RNG's state (GetRNG's literal) */
 #define BN4_RNG_SECONDARY 0x020015D4u /* the second RNG's state: stepped by GetRNG's twin at 0x08001B30, the same code on its own word */
 #define BN4_FREE          0x08800000u /* the guest core's ROM copy past BN4's 8 MB: its records (src/emu/guest.c) */
