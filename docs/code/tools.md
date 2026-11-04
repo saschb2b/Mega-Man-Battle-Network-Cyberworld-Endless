@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:15:00Z }
 ---
 
 # Tools and skills
@@ -12,7 +12,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:40:00Z }
 | --- | --- |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/bn4_lab.py` | BN4 Red Sun in romlab: its tables checked against [BN4 Red Sun's tables](../rom/bn4.md) (report), the plain ROM played from power-on to Lan's room (boot) and a battle started there from a record of its own or one written with the enemies given (battle); BN4 is read for research alone ([Battle Network 4 in a run](../multirom/bn4.md)) |
-| `tools/xrecipe_bn4.py`, `tools/bn4_twins.py` | BN4 Red Sun's virus families' recipes from BN4's and BN6's ROMs, as `tools/xrecipe.py` makes BN5's ([The recipe generator](../devtools/recipe-generator.md)): a family found by its first-kind type, its states from the literal its update hands the state runner, BN4's generic 0-5 as BN6's 0-5 and its own from BN6's 8, its calls paired with BN6's through `tools/bn4_twins.py` (the engine survey's pairs, each compared by its two bodies, a DIFF pair only with an audit) or a BN6 routine of the same body, CurAction, the element's place and the collision data's offsets rewritten (`bn4.h`), struct1 from its init and struct2 from its enemy records; `src/emu/xvirus_bn4.c` the whole families (none yet), `--check` whether it is in step, the open decisions in `.build/xrecipe/bn4_report.md` ([BN4 Red Sun's tables](../rom/bn4.md), Virus families) |
+| `tools/xrecipe_bn4.py`, `tools/bn4_twins.py` | BN4 Red Sun's virus families' recipes from BN4's and BN6's ROMs, as `tools/xrecipe.py` makes BN5's ([The recipe generator](../devtools/recipe-generator.md)): a family found by its first-kind type, its states from the literal its update hands the state runner, BN4's generic 0-5 as BN6's 0-5 and its own from BN6's 8, its calls paired with BN6's through `tools/bn4_twins.py` (the engine survey's pairs, each compared by its two bodies, a DIFF pair only with an audit) or a BN6 routine of the same body, CurAction, the element's place and the collision data's offsets rewritten (`bn4.h`), struct1 from its init and struct2 from its enemy records; a call aimed at a routine of another body only with its audit, the routines with no twin copied (`bn4_twins.COPIED`), its look-ups of its own NameIDs through a shim; `src/emu/xvirus_bn4.c` the whole families (Billy), `--check` whether it is in step, the open decisions and interims in `.build/xrecipe/bn4_report.md` ([BN4 Red Sun's tables](../rom/bn4.md), Virus families) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
 | `tools/battle_floor.py` | The battles per layer and act, played: seeds 1-12 headless side by side (the autopilot, `--dev god,onehit`), each layer's random battles from the run log against [the battle floor](../game/progression/structure.md)'s bands; `build.py pacing` runs it after its rolls ([Pacing report](../devtools/pacing-report.md)) |

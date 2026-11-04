@@ -30,6 +30,27 @@
                                        * runs a jump table on +8 (0 its init, 4 its update: the pre-step 0x080137BC, the state runner
                                        * 0x08013C48 with its state table, the collision's present 0x08012D62; 8 the shared dying state):
                                        * BN4 has none of BN6's per-family tables */
+#define BN4_T3_TYPES      0x08003C40u /* the third kind's 165 types (BN4_OBJECT_KINDS) */
+#define BN4_TYPES_T3_COUNT 165       /* ... how many */
+#define BN4_T4_TYPES      0x08003F78u /* the fourth kind's 130 */
+#define BN4_TYPES_T4_COUNT 130       /* ... how many */
+#define BN4_TYPES_T1_COUNT 95        /* the first kind's types (BN4_T1_TYPES), how many */
+#define BN4_TYPE_INIT     0x00        /* a family's routine's jump table (its first literal of three words): +0 its init, */
+#define BN4_TYPE_UPDATE   0x04        /* ... +4 its update (BN4_PRESTEP, BN4_STATE_RUNNER with its state table, the collision's present), */
+#define BN4_TYPE_DYING    0x08        /* ... +8 the shared dying state, BN4_DYING */
+#define BN4_DYING         0x0801052Du
+#define BN4_PRESTEP       0x080137BCu /* a family's update's first call (Billy's 0x080B9568) */
+#define BN4_STATE_RUNNER  0x08013C48u /* its second: r0 the family's state table, run by CurAction (+9) */
+/* A family's state table opens with BN4's generic states 0-5 (BN5's 0-5 as BN5's families' do; BN6's 0-5 of the same places,
+ * tools/bn4_twins.py GENERIC4), its own from 6 (Billy's 0x080B9580: 6-9) */
+#define BN4_STATE_GENERIC_0 0x0800FCADu
+#define BN4_STATE_GENERIC_1 0x0801013Bu
+#define BN4_STATE_GENERIC_2 0x0801014Du
+#define BN4_STATE_GENERIC_3 0x08010277u
+#define BN4_STATE_GENERIC_4 0x080104ADu
+#define BN4_STATE_GENERIC_5 0x080105BDu
+#define BN4_BY_NAME_RANGE 0x080B6568u /* the enemies of a NameID range (r0 a list it fills, r1 and r2 the bounds): BN6_BY_NAME_RANGE's work, its side
+                                       * its own (BN6's takes it in r3) */
 #define BN4_ID_RAISE      0x0800B036u /* an enemy id raised by the level ([eToolkit +0x44] +0xD, at most 2): a virus's by 2 a level (to its
                                        * version 5), a Navi's by 1; that the level is the playthrough's is assumed */
 #define BN4_COLL_SIZE     0x90        /* an object's collision data (BN5's 0xA0, BN6's 0xA8), its offsets otherwise */
@@ -131,6 +152,7 @@
 #define BN4_CHIP_NAMES    0x087481D8u /* text archive: the chips' names, ids 0-255 (letters and digits spelt as BN6's) */
 #define BN4_CHIP_NAMES_HI 0x08748C14u /* ... ids 256 on */
 #define BN4_ENEMY_NAMES   0x0874A780u /* text archive: the enemies' names by id (a Navi's four versions in a row from 128) */
+#define BN4_TEXT_END      0xE5        /* ... each entry ending with it (BN6's 0xE6), its letters BN6's codes (Billy 0C 2E 31 31 3E) */
 #define BN4_GET_RNG       0x08001B00u /* GetRNG: BN6's (0x0800151C) found by its calls and bytes */
 #define BN4_BATTLE_BGS    0x0808563Cu /* its battle backgrounds' records, a pointer each, 27 (BN6 22), read by the loader at 0x08085430 */
 #define BN4_BATTLE_BG_COUNT 27        /* the backgrounds, ids 0x00-0x1A (3 and 9 share a record) */

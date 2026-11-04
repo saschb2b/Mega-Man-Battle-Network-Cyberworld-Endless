@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-04
+* **Update**: rom/bn4.md, a BN4 family in BN6's engine: its routine's jump table, the dying state, pre-step and state runner, the six generic states, the NameID range look-up, the third and fourth kinds' type tables and the names' end code; devtools/dev-menu.md, `--dev bn4families`; code/emu.md and code/tools.md, Billy the first whole BN4 family (`xvirus_bn4.c`), the generator's audits, copies and shims.
 * **Update**: code/tools.md, `tools/xrecipe_bn4.py` and `tools/bn4_twins.py`, BN4's virus families' recipes from the two ROMs (Billy derived, its decisions open); code/emu.md, `xvirus_bn4.c`, the generator's whole BN4 families (none yet).
 * **Update**: rom/bn4.md, BN4's battle objects, collision and AI data and panels against BN6's, for the differential's view of a BN4 battle.
 * **Update**: rom/bn4.md, BN4's virus families: each an object type of its own (an enemy record's +2), no per-family tables, no AI data, the routines they call against BN6's; multirom/bn4.md, what that costs a BN4 family's recipe.

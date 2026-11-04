@@ -8,6 +8,7 @@
 #ifndef CW_XVIRUS_BN4_H
 #define CW_XVIRUS_BN4_H
 
+#include "bn4.h"
 #include "xvirus.h"
 
 extern const XVirusFamily *const xvirus_bn4[];
