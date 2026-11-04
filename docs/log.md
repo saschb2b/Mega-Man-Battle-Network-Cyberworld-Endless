@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-04
+* **Update**: devtools/differential.md, The BN4 trace: BN4 Red Sun's battle traced in BN6's units (`game=bn4:trace`, `bn4:bn6`; `src/dev/xdiff_bn4_trace.c`), timed by its own timer and Custom window, compared by `tools/xdiff_bn4.py` with the fields BN4 lacks masked; its control (BN4's Mettaur fought twice, the same in 900 frames) and its broken twin (parting at t202), and what BN4's Mettaur against BN6's shows is left. rom/bn4.md, the trace's names (the battle's timer, the Custom window, the side, three statuses' timers, the run list's end, the NaviStats' size); code/dev.md, `xdiff_bn4_trace.c`; re/ledger.json, BN4's entry (STATUS.md and the dashboard written out).
 * **Update**: rom/bn4.md, BN4's battle objects, collision and AI data and panels against BN6's, for the differential's view of a BN4 battle.
 * **Update**: rom/bn4.md, BN4's virus families: each an object type of its own (an enemy record's +2), no per-family tables, no AI data, the routines they call against BN6's; multirom/bn4.md, what that costs a BN4 family's recipe.
 * **Update**: multirom/guest-battles.md, rom/bn4.md, code/emu.md, code/dev.md, devtools/differential.md: the guest core runs BN4 Red Sun's battles too (a `GuestGame` per game, `xdiff-bn4.state`, its HP written as the battle begins), `--xdiff "game=bn4;..."` fights one alone and says won or lost and the HP left; BN4's second RNG word and the guest's record place named.

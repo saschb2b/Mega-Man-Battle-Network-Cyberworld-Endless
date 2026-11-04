@@ -17,6 +17,9 @@ WORK = os.path.join(ROOT, '.build', 'xdiff')
 GAMES = {
     5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16,
             battle=0x02034A90),
+    # (BN4 Red Sun's, src/emu/bn4.h: its trace in BN6's units, src/dev/xdiff_bn4_trace.h; its pointers its own RAM's)
+    4: dict(t1=0x0203B180, t3=0x0203C080, t4=0x02037D10, panels=0x0203AC70, list=0x02009E40, list_end=0x0200A4C0, n1=8,
+            battle=0x02035810),
     6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32,
             battle=0x02034880),
 }
@@ -501,6 +504,8 @@ class Canon:
         return self._copies.get(base & 0x7FFFFFFF)
 
     def nid(self, game, v):
+        if game == 4:   # (BN4's: MegaMan its enemy id 0, bn4.h BN4_ENTITY_SIZE; its others as they are, unmapped)
+            return v or next(iter(self.megaman.values()))
         return self.name_id.get(v, v) if game == 5 else v
 
     def is_navi(self, game, nid):

@@ -188,11 +188,12 @@ static int breaks_parse(Spec *s, const char *name, const char *v) {
 	return 1;
 }
 
-/* game=bn5|bn6: one of them alone; bn4: BN4's own battle alone (xdiff_bn4.h) */
+/* game=bn5|bn6: one of them alone; bn4: BN4's own battle alone (xdiff_bn4.h); bn4:trace BN4's traced alone (OUT.bn4),
+ * bn4:bn6 BN4's traced against BN6's (OUT.bn4 and OUT.bn6, xdiff_bn4_trace.h) */
 static bool game_parse(Spec *s, const char *v) {
 	s->bn5 = !strcmp(v, "bn5");
-	s->bn6 = !strcmp(v, "bn6");
-	s->bn4 = !strcmp(v, "bn4");
+	s->bn6 = !strcmp(v, "bn6") || !strcmp(v, "bn4:bn6");
+	s->bn4 = !strcmp(v, "bn4") ? XD_BN4_ALONE : !strcmp(v, "bn4:trace") ? XD_BN4_TRACE : !strcmp(v, "bn4:bn6") ? XD_BN4_BN6 : 0;
 	return s->bn5 || s->bn6 || s->bn4;
 }
 
