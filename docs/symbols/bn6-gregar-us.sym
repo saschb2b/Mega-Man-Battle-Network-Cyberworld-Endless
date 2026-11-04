@@ -1048,6 +1048,9 @@
 080C834A spawns_bn6_0x12
 080CA91D souls_code_bn6_5
 080CABCA spawned_by
+080CAC3C BN6_THUNDER
+080CACD6 BN6_THUNDER_ARG
+080CADBC BN6_SPAWN_THUNDER
 080CCCCE navis_engine_twins.colonel_third_kind_0x3c_0x59
 080CF11C kinds_bn5_0x080cefcc_bn6
 080CF264 state_table_bn5_0x080cf118_bn6
