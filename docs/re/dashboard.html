@@ -182,10 +182,23 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-04",
       "link": "../rom/bn4.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN4's Navis in BN6's engine",
+      "state": "proven",
+      "now": "Mapped Navi by Navi, nothing built (docs/multirom/bn4-navis.md; src/emu/bn4.h, docs/rom/bn4.md's BN4's Navis rows; tools/bn4_navis.py). Each of the eighteen is a first-kind type of its own (BN4_NAVI_TYPE_*), run by the Navi pre-step 0x080135A8 and runner 0x08013DB4 on a state table that opens with BN4's six generic Navi states. Ten Soul Navis take their side's AI data (0x0800C09A; +0x64 their own, BN6's +0x80; +0x70 the attack's, BN6's +0xA0) and run MegaMan's states 44-111 as theirs (BN4_PLAYER_STATES 0x080EAEFC); eight keep their variables in the object. 64 objects spawned, one with a BN6 twin by body; of 80 engine routines their states call, 24 have no twin or another body. Seen in romlab: GutsMan V1's CurAction 7, 8 and 10 are MegaMan's 67, 68 and 70 (a step, a dash, the machine gun).",
+      "left": "Which of MegaMan's own actions reach states 44-111 (the Souls', assumed); the AI data's fields +9 to +0x44 the attack's end touches against BN6's; Roll's summon against BN6's mid-battle spawn; the objects' code searched for field changes; tools/xnavirecipe.py's BN4 path, then GutsMan moved and proved by build.py xdiff against BN4's own battle.",
+      "updated": "2026-11-04",
+      "link": "../multirom/bn4-navis.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-11-04",
+      "what": "BN4's Navis mapped (src/emu/bn4.h, docs/rom/bn4.md's two rows, docs/multirom/bn4-navis.md, tools/bn4_navis.py): the eighteen's first-kind types, the Navi pre-step 0x080135A8 (Duo's 0x0801374A), runner 0x08013DB4, dying 0x08010F61 and generic states 0x08010D31-0x08010FAF, MegaMan's routine 0x080EAEA8 and state table 0x080EAEFC (116), the AI data taken 0x0800C09A by side 0x0800BFF4 (+0x64 the Navi's own block), the state set 0x0800C9AC and attack's end 0x0800CA28, the three spawns 0x080032B8/0x080032F0/0x08003344, an enemy's record 0x08011878 and spawn 0x080F00F4, the panel crack 0x08009AEC; tools/bn6f_match.py locates bn6f's functions in BN4 too (bn6f-bn4.csv)."
+    },
     {
       "date": "2026-10-25",
       "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
@@ -296,6 +309,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-04",
+      "name": "GutsMan's states in romlab",
+      "result": "GutsMan V1 (enemy 132) alone against MegaMan, his HP held, 1500 fight frames read each frame: CurAction 6 (his decision) and 7 in turn, 10 at frames 398-481 and 849-922 (a machine gun's burst on screen), 8 at 1237 (a dash); his AI data side 1's (0x02035BE0), +0x64/+0x65 his decision's sub-states and +0x70/+0x71 the attack's changing with them.",
+      "meaning": "A Soul Navi's attacks are MegaMan's own states run on the Navi's object: GutsMan's 7, 8 and 10 are MegaMan's 67, 68 and 70, so moving him moves those states of MegaMan's with him.",
+      "link": "../rom/bn4.md"
+    },
     {
       "feature": "BN4 Red Sun's ROM",
       "date": "2026-11-03",
