@@ -154,6 +154,9 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
 		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		/* (its emblem, where its own map draws none: BN4's Undernet's
+		 * plain plates, crossed in another of its maps) */
+		if (na->emblem && !L->emblem.ok && aligned(grid, &b)) props_learn_floor_emblem(&b, na->emblem, &L->emblem);
 		if (aligned(grid, &b)) learn_arrows(&b, na, L);
 		area_src_free(&b);
 	}
