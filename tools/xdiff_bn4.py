@@ -9,17 +9,98 @@ compares it frame by frame by the battle's timer:
                       with "again" (items of the spec's the second run takes instead) they must part, the comparator's
                       own check, and the spec passes where they do
   "against": "bn6"    BN4's battle against BN6's with the foes by BN6's ids (game=bn4:bn6): a family BN4 and BN6 both
-                      have, or (to come) a BN4 family moved into BN6's engine
+                      have, or a BN4 family moved into BN6's engine ("dev": ["bn4families"], its ids BN6's by its recipe),
+                      "rng": "replay" giving BN6's draws BN4's (src/dev/xdiff_events.h, BN4's hooks on its own routines)
 
 Objects are matched by role (xdiff_snap.assign_roles: an enemy by its id, an attack by its type, an effect by its type
 and id), their bytes from their list node on, their AI's data and their collision data compared as BN6 lays them out,
-a pointer by what it names (xdiff_snap.Frame.ptr); the panels, the RNG words, the songs begun and the run order each
-frame. BN4's numbers are its own (its enemy ids, CurActions, sounds and effects: no map of BN4's to BN6's yet), so the
-comparison against BN6 holds where the two games number alike. The fields BN4 has none of are masked (BN4_LACKS, each
-with why), and only where BN4's trace holds nothing there; every other difference fails the spec at its first frame."""
+a pointer by what it names (xdiff_snap.Frame.ptr; a moved family's sprite by its offset in it, bn4_sprites); the panels,
+the RNG words, the songs begun and the run order each frame. Against BN6's, BN4's numbers are read as BN6's where a map
+says so with its evidence (a moved family's enemy ids and object type, CurActions: bn4_families, bn4_as_bn6); its
+sounds, effects and alliance words are its own still. The fields BN4 has none of are masked (BN4_LACKS, each with why),
+and only where BN4's trace holds nothing there. Against BN6's, the family's own records (family_roles) fail the spec at
+their first unexplained difference; one in the world's alone makes it INCONCLUSIVE from there, never PASS (the BN5
+differential's stop rule), the family compared on. A control fails at its first difference of any kind."""
 import os
+import re
 
-from xdiff_snap import NODE, OBJ_NAME_ID, SIZE, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u32
+from xdiff_snap import (NODE, OBJ_ACTION, OBJ_NAME_ID, OBJ_TYPE, ROOT, SIZE, SPAWN, Diff, Frame, assign_roles, is_ptr, read_trace,
+                        role_name, u32)
+
+XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
+
+
+def bn4_families():
+    """BN4's families moved into BN6's engine, from their recipe (src/emu/xvirus_bn4.c, the generator's numbers): each its
+    BN4 object type (.src_ai: its first-kind type, BN4 having no AI index) and its six BN4 enemy ids with BN6's for them
+    (.names, .first_id: Billy's 13-18 BN6's 0x2C0-0x2C5)"""
+    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    out = []
+    for src, first, names in re.findall(r'\.src_ai = (0x[0-9A-Fa-f]+),.*?\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+),.*?'
+                                        r'\.names = \{ ([^}]*) \}', text, re.S):
+        ids = [int(x, 0) for x in names.split(',')]
+        out.append(dict(type=int(src, 0), ids={v: XV_FIRST_ID + int(first, 0) + k for k, v in enumerate(ids)}))
+    return out
+
+
+XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
+
+
+def bn4_sprites(rom4):
+    """the sprites BN4's moved families copied (src/emu/xvirus_bn4.c's XvSprite rows: BN4's list and number, BN6's copy's
+    place and room): each (BN4's sprite's address, BN6's copy's, its room), BN4's from its sprite lists (src/core/rom.c's
+    BN4 layout, sprite_lists) in its ROM; a pointer into either read by its offset in the sprite (its frames' data)"""
+    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
+    m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
+    if not m or not rom4:
+        return []
+    lists, out = 0x08000000 + int(m.group(1).rstrip('uU'), 0), []
+    for lst, idx, off, room in re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, XV_ART \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text):
+        base = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16)) & 0x7FFFFFFF
+        out.append((base, XV_ART + int(off, 16), int(room, 16)))
+    return out
+
+
+def sprite_ptr(sprites, game, v):
+    """a pointer into a moved family's sprite (bn4_sprites) as ('sprite', which, its offset); None where it is none"""
+    for i, (b4, b6, room) in enumerate(sprites):
+        base = b4 if game == 4 else b6 if game == 6 else None
+        if base is not None and base <= v < base + room:
+            return ('sprite', i, v - base)
+    return None
+
+
+class Bn4Canon:
+    """canon (xdiff_snap.Canon) with BN4's moved families' ids read as BN6's (bn4_families), where a BN4 trace is compared
+    with BN6's; everything else canon's own"""
+
+    def __init__(self, canon, fams):
+        self.canon, self.ids = canon, {k: v for f in fams for k, v in f['ids'].items()}
+
+    def nid(self, game, v):
+        return self.ids.get(v, self.canon.nid(game, v)) if game == 4 else self.canon.nid(game, v)
+
+    def __getattr__(self, name):
+        return getattr(self.canon, name)
+
+
+# BN4's numbers in an object's record read as BN6's, only against BN6's trace (a control's two BN4 traces as they are):
+#   its type (+1): a moved family's object runs as BN6's virus type 0 (its recipe's .src_ai the BN4 type its code was; BN6's
+#     viruses all type 0, their AI index in their AI data, bn6_families.h BN6_AI_INDEX)
+#   its CurAction (+9): BN4's generic states 0-5 BN6's 0-5 (tools/bn4_twins.py GENERIC4, each BN6's of the same place), its
+#     own from 6 BN6's from 8 (BN6's 6 and 7, frozen and bubbled, BN4 has none of): the recipe's state table (BN6's eight
+#     generic states, then BN4's own 0x080B95A9, 0x080B979D, 0x080B97B1, 0x080B98A7) and its immediates (CurAction 6-9
+#     written as 8-11, src/emu/xvirus_bn4.c billy_imms); MegaMan's ready state the same way, 6 against BN6's 8 (BN5's map
+#     too, legit.json's action)
+def bn4_as_bn6(rec, fams):
+    """an object's record (a T1's, from its node) with BN4's numbers as BN6's: its type, its CurAction"""
+    types = {f['type'] for f in fams}
+    if rec[NODE + OBJ_TYPE] in types:
+        rec[NODE + OBJ_TYPE] = 0
+    if rec[NODE + OBJ_ACTION] >= 6:
+        rec[NODE + OBJ_ACTION] += 2
+    return rec
 
 # The fields of BN6's battle BN4's has none of, in BN6's units (part, BN6's offset, bytes): each masked where BN4's trace
 # holds none (zero, or no AI data at all) and the other is BN6's, never where BN4 holds something there
@@ -56,12 +137,15 @@ def lacks(d, ta, tb):
     return None
 
 
-def named(canon, game, o):
-    """an object's bytes from its node with its NameID as BN6 numbers it (canon.nid: BN4's MegaMan, enemy id 0, BN6's)"""
+def named(canon, game, o, fams=None):
+    """an object's bytes from its node with its NameID as BN6 numbers it (canon.nid: BN4's MegaMan, enemy id 0, BN6's; a
+    moved family's by its recipe); against BN6's (fams given), a BN4 T1's type and CurAction as BN6's too (bn4_as_bn6)"""
     rec = bytearray(o.rec[:SIZE[o.kind]])
     if o.kind == 'T1':
         at = NODE + OBJ_NAME_ID
         rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
+        if game == 4 and fams is not None:
+            rec = bn4_as_bn6(rec, fams)
     return rec
 
 
@@ -73,7 +157,8 @@ def cells(fa, fb, part, ba, bb, start=0):
         if k % 4 == 0 and k + 4 <= min(len(ba), len(bb)):
             wa, wb = u32(ba, k), u32(bb, k)
             if is_ptr(wa) or is_ptr(wb):
-                view = fa.ptr(wa), fb.ptr(wb)
+                sprites = getattr(fa.canon, 'sprites', ())   # (a moved family's sprite by its offset in it: bn4_sprites)
+                view = sprite_ptr(sprites, fa.game, wa) or fa.ptr(wa), sprite_ptr(sprites, fb.game, wb) or fb.ptr(wb)
                 if view[0] != view[1]:
                     out.append((part, k, view[0], view[1]))
                 k += 4
@@ -94,8 +179,10 @@ def frame_diffs(fa, fb):
         if oa is None or ob is None:
             out.append(Diff(t, role, 'in play', 0, oa is not None, ob is not None))
             continue
-        # (from its node's +8: its links compared as the run order)
-        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa), named(fb.canon, fb.game, ob), 8)]
+        # (from its node's +8: its links compared as the run order; BN4's numbers as BN6's only against BN6's)
+        fams = getattr(fa.canon, 'fams', None) if fb.game == 6 else None
+        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams),
+                                                                 named(fb.canon, fb.game, ob), 8)]
         for part, xa, xb in (('ai', oa.ai, ob.ai), ('coll', oa.coll, ob.coll)):
             if (xa is None) != (xb is None):
                 found.append((part, 0, xa is not None, xb is not None))
@@ -122,9 +209,33 @@ def said(d, tb):
     return f't{d.t} {who} {d.part}+{d.off:#04x}: BN4 {fmt(d.a)} | BN{tb["game"]} {fmt(d.b)}'
 
 
+def family_roles(trace, canon):
+    """the roles of a BN4 family moved into BN6's engine (canon.fams: their enemies by BN6's ids) and of the objects their
+    code spawned (a spawn event whose chain passed through the family's code, xdiff_events.h's family): the family's own
+    records, whose differences fail the spec where the world's (MegaMan, the engine, the RNG, the panels) stop it"""
+    ids = {v for f in getattr(canon, 'fams', ()) for v in f['ids'].values()}
+    out = set()
+    for fr in trace['frames']:
+        by_addr = {o.addr: o for o in fr['objs']}
+        for o in fr['objs']:
+            if o.kind == 'T1' and isinstance(o.role, tuple) and o.role[1] in ids:
+                out.add(o.role)
+        for e in fr['events']:
+            if e.kind == SPAWN and e.family and e.object in by_addr:
+                out.add(by_addr[e.object].role)
+    return out
+
+
 def compare(spec, ta, tb, canon, show=6):
-    """('PASS'|'FAIL', the frame of it, lines): the first frame with a difference no BN4_LACKS mask explains fails it"""
+    """('PASS'|'FAIL'|'INCONCLUSIVE', the frame of it, lines): against BN6's, the first frame with a difference no
+    BN4_LACKS mask explains in the family's own records (family_roles) fails it; one in the world's alone (MegaMan, the
+    engine, the RNG, the songs, the panels) makes it INCONCLUSIVE from there (the battle no longer the same battle for the
+    family: the BN5 differential's stop rule), the family's still compared on and its first difference said. A control
+    (two BN4 traces) fails at its first difference of any kind"""
     bt, used, n = {f['t']: f for f in tb['frames']}, {}, 0
+    against = tb['game'] == 6
+    fam = family_roles(ta, canon) | family_roles(tb, canon) if against else set()
+    stop, lines = None, []
     for fra in ta['frames']:
         frb = bt.get(fra['t'])
         if frb is None:
@@ -137,9 +248,19 @@ def compare(spec, ta, tb, canon, show=6):
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         open_ = [d for d in diffs if not d.mask]
-        if open_:
-            return 'FAIL', fra['t'], [f'  {n} fight frames compared; first unexplained difference at t{fra["t"]}:'] + \
-                [f'    {said(d, tb)}' for d in open_[:show]] + ([f'    ... {len(open_) - show} more'] if len(open_) > show else [])
+        mine = [d for d in open_ if d.role in fam] if against else open_
+        world = [d for d in open_ if d not in mine]
+        if world and stop is None:
+            stop = fra['t']
+            lines += [f'  INCONCLUSIVE from t{stop}: the world parts there (no map or mask explains it), the family compared on:'] + \
+                [f'    {said(d, tb)}' for d in world[:show]] + ([f'    ... {len(world) - show} more'] if len(world) > show else [])
+        if mine:
+            whose = 'the family\'s first' if against else 'first'
+            lines += [f'  {n} fight frames compared; {whose} unexplained difference at t{fra["t"]}:'] + \
+                [f'    {said(d, tb)}' for d in mine[:show]] + ([f'    ... {len(mine) - show} more'] if len(mine) > show else [])
+            return 'FAIL', fra['t'], lines
+    if stop is not None:
+        return 'INCONCLUSIVE', stop, lines + [f'  {n} fight frames compared: the family\'s own records the same in all of them']
     lines = [f'  {n} fight frames compared (t{ta["frames"][0]["t"]}-t{ta["frames"][-1]["t"]}), masks applied: ' +
              (', '.join(f'{k} x{v}' for k, v in sorted(used.items())) or 'none')]
     if len(ta['frames']) != len(tb['frames']):
@@ -153,7 +274,15 @@ def spec_text(spec, out, game):
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
     parts = [f'game={game}', f'foes={spec["foes"]}', f'mm={spec.get("mm", "22")}', f'hp={spec.get("hp", 100)}',
              f'frames={spec.get("frames", 1200)}', f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}']
-    return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []))
+    # (rng=replay: BN6's draws given BN4's, keyed as BN5's are, xdiff_events.h; poke=, call=: a mutation's break of the subject)
+    extra = ([f'rng={spec["rng"]}'] if spec.get('rng') and game == 'bn4:bn6' else []) + \
+        [f'poke={p}' for p in spec.get('poke', [])] + [f'call={c}' for c in spec.get('call', [])]
+    return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
+
+
+def dev_args(spec):
+    """the host build's arguments a spec asks for (its "dev": --dev bn4families, BN4's families moved into BN6's engine)"""
+    return ['--dev', ','.join(spec['dev'])] if spec.get('dev') else []
 
 
 def one(name, spec, a, canon, run_xdiff, work):
@@ -168,8 +297,14 @@ def one(name, spec, a, canon, run_xdiff, work):
     else:
         paths = [os.path.join(runs, f'{name}.{g}') for g in ('bn4', 'bn6')]
         if not a.no_run:
-            run_xdiff(spec_text(spec, f'/src/.build/xdiff/runs/{name}', 'bn4:bn6'))
+            run_xdiff(spec_text(spec, f'/src/.build/xdiff/runs/{name}', 'bn4:bn6'), dev_args(spec))
     ta, tb = read_trace(paths[0]), read_trace(paths[1])
+    if not control:   # (BN4's moved families' ids as BN6's, their recipe's: bn4_families)
+        fams = bn4_families()
+        canon = Bn4Canon(canon, fams)
+        canon.fams = fams
+        rom4 = os.path.join(work, 'rom', 'bn4.gba')
+        canon.sprites = bn4_sprites(open(rom4, 'rb').read() if os.path.exists(rom4) else b'')
     for tr in (ta, tb):
         assign_roles(tr, canon)
     verdict, at, lines = compare(spec, ta, tb, canon, a.show)

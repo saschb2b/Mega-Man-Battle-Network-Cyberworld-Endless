@@ -91,7 +91,12 @@
 #define BN6_STATUS_HIDE       0x0801B16Eu /* bl 0x0801A166, after the sprite's steps: where BN5 hides what is hidden (BN5_HIDE_STEP, at
                                              0x08017DB4); BN6's own of it, 0x0801012C, which hides the invisible, is called by nothing */
 #define BN6_COLL_MADE         0x080198CAu /* str r0,[r5,#0x54]: a collision data made (0x08019892), r0 it; BN5's clears its submerge with it */
-#define BN6_COLL_INDEX_BIT    0x44        /* a collision data's own bit of the 32 (bn6f CollisionIndexBit, set as the pool is made, 0x08019884) */
+#define BN6_COLL_SETUP_ARG    0x0E        /* u8, the collision setup's r3 (0x08019FB4, at 0x08019FBA; BN4's +0x0C, bn4.h BN4_COLL_SETUP_ARG) */
+#define BN6_COLL_OBJ_2E       0x07        /* u8, its object's +0x2E as the setup copies it (0x08019FDA; BN4's +0x05) */
+#define BN6_COLL_HIT_MASKS    0x30        /* two u32, the alliance words from BN6_COLL_MASKS by alliance and region (0x08019FE8, 0x0801A004;
+                                           * BN4's +0x58) */
+#define BN6_COLL_OBJECT       0x38        /* u32, its object (the setup's first store, 0x08019FB8; BN4's +0x60) */
+#define BN6_COLL_INDEX_BIT    0x44       /* a collision data's own bit of the 32 (bn6f CollisionIndexBit, set as the pool is made, 0x08019884) */
 #define BN6_HIT_HIDDEN        0x0300724Au /* the hit gate's test of an invisible target (IWRAM, the image at 0x081D774A): movs r4,#4; tst r0,r4;
                                              beq; ldr r4,=0x1008; tst r3,r4; bne; pop (r0 the target's flags, r3 the attack's +0x30, r6 the
                                              attack's collision data, r7 the target's), */

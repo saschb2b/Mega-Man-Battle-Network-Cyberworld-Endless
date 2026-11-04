@@ -45,26 +45,26 @@
 #define ROM_END     0x0A000000u
 #define IWRAM_END   0x03008000u   /* (the stack's top lies below it: a scan stops there, short of IWRAM's mirrors) */
 
-/* Each game's routines (bn5.h, bn6.h) */
-typedef struct {
-	uint32_t draw[4], spawn, spawn_end, sound, effect, attack, reserved, blink, sprite;
-	uint32_t runner_ret, running, rng[2];
-	uint32_t flash, hides;   /* the flash timer's place in a collision data; its bit 1 as the blink hides an object */
-	uint32_t mood_gain, navi, navi_size;   /* the mood raised as a hit lands (0 none: BN6's) and the battle NaviStats it raises */
-	uint32_t mood_set, mood_calm;          /* ... and set outright (0 none: BN6's) */
-} Game;
+/* Each game's routines (bn5.h, bn6.h; BN4's xdiff_bn4_trace.c's, xd_log_bn4) */
+typedef XdGame Game;
 
 static const Game games[2] = {
 	{ { BN5_RNG_DRAW, BN5_RNG_DRAW_POSITIVE, BN5_RNG_DRAW_SECOND, BN5_RNG_DRAW_SECOND_POSITIVE }, BN5_SPAWN_COMMON, BN5_SPAWN_COMMON_END,
-		BN5_PLAY_SOUND, BN5_SPAWN_EFFECT, BN5_SET_ATTACK, BN5_RESERVE_PANEL_DONE, BN5_BLINK_FLASHING, BN5_SPRITE_LOAD, BN5_OBJECT_RUNNER_RET,
-		BN5_OBJECT_RUNNING,
+		BN5_PLAY_SOUND, BN5_SPAWN_EFFECT, BN5_SET_ATTACK, BN5_RESERVE_PANEL_DONE, BN5_BLINK_FLASHING, BN5_SPRITE_LOAD, BN5_T1_OBJECTS,
+		BN5_OBJECT_RUNNER_RET, BN5_OBJECT_RUNNING,
 		{ BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, BN5_COLL_FLASH, 0, BN5_MOOD_GAIN, BN5_BATTLE_NAVI, BN5_BATTLE_NAVI_SIZE, BN5_MOOD_SET,
 		BN5_MOOD_CALM },
 	{ { BN6_RNG_DRAW, BN6_RNG_DRAW_POSITIVE, BN6_RNG_DRAW_SECOND, BN6_RNG_DRAW_SECOND_POSITIVE }, BN6_SPAWN_COMMON, BN6_SPAWN_COMMON_END,
-		BN6_PLAY_SOUND, BN6_SPAWN_EFFECT, BN6_SET_ATTACK, BN6_RESERVE_PANEL_DONE, BN6_BLINK_FLASHING, BN6_SPRITE_LOAD, BN6_OBJECT_RUNNER_RET,
-		BN6_OBJECT_RUNNING,
+		BN6_PLAY_SOUND, BN6_SPAWN_EFFECT, BN6_SET_ATTACK, BN6_RESERVE_PANEL_DONE, BN6_BLINK_FLASHING, BN6_SPRITE_LOAD, BN6_T1_OBJECTS,
+		BN6_OBJECT_RUNNER_RET, BN6_OBJECT_RUNNING,
 		{ BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, BN6_COLL_FLASH, 2, 0, BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE, 0, 0 },
 };
+static const Game *game4;   /* (BN4's, xd_log_bn4) */
+
+void xd_log_bn4(const XdGame *g) { game4 = g; }
+
+/* a game's routines: 5's, 6's or 4's (NULL where BN4's were not given) */
+static const Game *game_of(int game) { return game == 4 ? game4 : &games[game == 6]; }
 
 /* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word */
 typedef struct { uint32_t t, key, word, which; } Draw;
@@ -144,7 +144,7 @@ static void callers(const XdLog *log, XdEvent *e, uint32_t ret, uint32_t sp) {
 /* MegaMan, the first kind's first object, runs no family's or Navi's own code: an event while he runs that an engine
  * routine a Navi's copy holds led to (BN5's engine runs it for him too: the buster's arm, 0x080EBBA6) is not the family's */
 static void megamans(const XdLog *log, XdEvent *e, uint32_t running_now) {
-	if (running_now == (log->game == 6 ? BN6_T1_OBJECTS : BN5_T1_OBJECTS)) e->family = 0;
+	if (running_now == log->g->t1) e->family = 0;
 }
 
 /* the object the runner runs now (0 none) */
@@ -168,7 +168,7 @@ static XdEvent *add(XdLog *log, int kind, int sub) {
  * the word BN5's draws there take into *which); 0 none */
 static uint32_t key_of(const XdLog *log, const XdEvent *e, uint32_t *which) {
 	if (e->family) return family_of(log, e->family);
-	if (log->game == 5 || log->alone) return e->caller & ~1u;
+	if (log->game != 6 || log->alone) return e->caller & ~1u;
 	for (int i = 0; i < log->ntwins; ++i) {
 		const XdTwin *w = &log->twins[i];
 		if ((e->caller & ~1u) < w->bn6 || (e->caller & ~1u) >= w->bn6 + w->len) continue;
@@ -459,9 +459,10 @@ static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
  * its engine's there) */
 static bool spec_code(const XvMoved *m, const XVirusFamily *const *fams, int nfams, bool navis) {
 	if (!nfams) return !navis;
-	for (int k = 0; k < xvirus_bn5_count; ++k) {
-		const XVirusFamily *f = xvirus_bn5[k];
-		bool mine = false;
+	/* (the spec's own families first, BN4's among them, xvirus_bn4.h; then BN5's that moved a type one of them shares) */
+	for (int k = -nfams; k < xvirus_bn5_count; ++k) {
+		const XVirusFamily *f = k < 0 ? fams[k + nfams] : xvirus_bn5[k];
+		bool mine = k < 0;
 		for (int i = 0; i < nfams && !mine; ++i) mine = fams[i] == f || moved_for(f, fams[i]);
 		for (int i = 0; mine && i < f->nblocks; ++i)
 			if (f->blocks[i].start == m->from && f->blocks[i].at == m->to) return true;
@@ -496,12 +497,12 @@ static bool navi_code(const XvMoved *m) {
 }
 
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {
-	XdLog *log = log_of(game);
+	XdLog *log = game_of(game) ? log_of(game) : NULL;
 	if (!log) return NULL;
 	log->game = game;
 	log->alone = alone;
 	log->navis = navis;
-	log->g = &games[game == 6];
+	log->g = game_of(game);
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
 	/* (the spec's families' code, the Navis' where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
@@ -530,7 +531,7 @@ XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis
 	bool ok = true;
 	for (int i = 0; i < 4; ++i) ok = put(g->draw[i], on_draw, log) && ok;
 	ok = put(g->spawn, on_spawn, log) && put(g->spawn_end, on_spawned, log) && ok;
-	ok = put(g->sound, on_sound, log) && put(g->effect, on_effect, log) && put(g->attack, on_attack, log) && ok;
+	ok = put(g->sound, on_sound, log) && put(g->effect, on_effect, log) && (!g->attack || put(g->attack, on_attack, log)) && ok;
 	ok = put(g->reserved, on_reserved, log) && put(g->blink, on_blink, log) && put(g->sprite, on_sprite, log) && ok;
 	if (g->mood_gain) ok = put(g->mood_gain, on_mood, log) && ok;
 	if (g->mood_set) ok = put(g->mood_set, on_mood_set, log) && put(g->mood_calm, on_mood_calm, log) && ok;

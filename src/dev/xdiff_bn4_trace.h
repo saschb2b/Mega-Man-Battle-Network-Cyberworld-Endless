@@ -13,8 +13,15 @@
 
 #include <stdint.h>
 
+#include "xdiff_events.h"   /* (XdGame: BN4's routines the differential's hooks are placed on) */
+
 /* the parts a BN4 trace translates */
 enum { XD4_OBJECT, XD4_COLL, XD4_AI, XD4_PANEL };
+
+/* After each frame of BN4's guest core: BN4_SUBSYSTEM_BYTE watched while its battle is on, which Billy's recipe takes for 0
+ * (its test at 0x08044AEC aimed at BN6's routine that returns 0); and once the battle is over, what it read said */
+void xd4_watch(void);
+void xd4_watched(void);
 
 /* BN4's game state as BN6's sub-mode (BN6_SUB_BATTLE while its main mode is a battle's; its main mode else) */
 uint8_t xd4_sub(void);
@@ -34,5 +41,8 @@ typedef struct {
 	uint32_t paralysis, coll_flags, coll_struck;
 } Xd4Places;
 extern const Xd4Places xd4_places;
+/* BN4's routines the differential's hooks are placed on (bn4.h: RNG draws, spawns, sounds, effects, reservations, the blink,
+ * sprites; xd_log_bn4) */
+extern const XdGame xd4_routines;
 
 #endif

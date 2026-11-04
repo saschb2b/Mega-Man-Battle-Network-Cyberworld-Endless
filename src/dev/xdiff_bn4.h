@@ -25,4 +25,11 @@ int xdiff_bn4_run(const Spec *s);
  * its length (at most 0x80) */
 uint32_t xd4_record(const Spec *s, uint8_t *rec);
 
+/* The spec's BN4 families moved into BN6's engine (xvirus_bn4.h: installed with --dev bn4families), those its foes (BN4's
+ * enemy ids) are versions of, into fams (MAX_FOES at most): how many */
+int xd4_families(const Spec *s, const XVirusFamily **fams);
+/* A BN4 enemy id as BN6's engine numbers it: a moved family's version its first_id + the version (the recipe's numbers,
+ * Billy's 13-18 BN6's 0x2C0-0x2C5); any other id as it is */
+int xd4_bn6_id(int id);
+
 #endif

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:55:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -743,8 +743,39 @@ format, its game 4: the trace's header names it):
   left its first screen open), the spec's `keys=` by the timer, and both
   RNG words written after the fight's first frame, as BN5's specs seed
   theirs. `safe=1` and `hold=` take BN4's collision data's offsets;
-  `mm_element=`, `deck6=` and the hooks do not yet (BN4's collision
-  element, deck and routines unmapped: its trace holds no events).
+  `mm_element=` and `deck6=` do not yet (BN4's collision element and
+  deck unmapped).
+- **Its events** (`src/dev/xdiff_events.c` on the guest core, BN4's
+  routines given by `xdiff_bn4_trace.c`'s `xd4_routines`: [BN4 Red Sun](../rom/bn4.md),
+  The differential's hooks): its four RNG draws, every spawn (its
+  SpawnBattleObjectCommon, entered and left), PlaySoundEffect, the effect
+  spawner, a panel reserved, the blink and a sprite set up (its CRC32 from
+  BN4's own sprite lists), each BN6's twin by its body; its setAttack is
+  not hooked (BN4's viruses keep no AI data). Each event's caller, family
+  and outermost caller are read as BN5's are, BN4's moved family's code by
+  its BN4 addresses (a spec's BN4 families, `xd4_families`), so `rng=replay`
+  keys BN6's draws by BN4's places as it keys them by BN5's. Every BN4 run
+  also watches `0x020015E1` (`xd4_watch`), which Billy's recipe takes for
+  0: it read 0 at every frame of `billy_v1`'s battle.
+- **Its numbers as BN6's** (`tools/xdiff_bn4.py`, against BN6's only): a
+  moved family's enemy ids from its recipe (`src/emu/xvirus_bn4.c`'s
+  `.names` and `.first_id`: Billy's 13-18 BN6's 0x2C0-0x2C5) and its
+  object type (its `.src_ai`, BN4's own type, BN6's virus type 0); the
+  CurActions, BN4's generic 0-5 BN6's 0-5 and its own from 6 BN6's from 8
+  (the recipe's state table and immediates; MegaMan's ready 6 BN6's 8, as
+  BN5's); a pointer into a moved family's sprite by its offset in it
+  (BN4's own sprite, the recipe's copy in BN6's free space). The
+  collision data's layout from code: the collision setup (BN4
+  `0x080129AC`, BN6's twin `0x08019FB4`) and the pool's maker
+  (`0x08012470`, `0x0801986C`) paired store by store, BN4's +0x05, +0x0C,
+  +0x1E, +0x58-+0x5F, +0x60 and +0x78 at BN6's +0x07, +0x0E, +0x2E,
+  +0x30-+0x37, +0x38 and +0x44 (bn4.h, `BN4_COLL_*`). Sounds, effects and
+  the alliance words are BN4's own still.
+- **The stop rule against BN6's**: the family's own records (its
+  enemies, and what its code spawned by the spawn events) fail the spec
+  at their first unexplained difference; one in the world's alone
+  (MegaMan, the engine, the RNG, the songs, the panels) makes it
+  INCONCLUSIVE from there, the family compared on, as BN5's specs stop.
 - **The comparison** (`tools/xdiff_bn4.py`): the objects matched by role
   as BN5's are (BN4's MegaMan, enemy id 0, read as BN6's 0x1A0; BN4's
   other numbers its own, no map to BN6's yet), their bytes, AI data and
@@ -777,5 +808,27 @@ format, its game 4: the trace's header names it):
   collision data bytes BN4 keeps elsewhere: at t1 BN4's +0x05, +0x0C,
   +0x1E, +0x58-+0x5F, +0x60 and +0x78 held BN6's +0x07, +0x0E, +0x2E
   (the damage), +0x30-+0x37 (the alliance words), +0x38 (its object) and
-  +0x44's values (leads from one frame, to be proved by pairing the two
-  games' routines before they join the layout).
+  +0x44's values (leads from one frame, since proved by pairing the two
+  games' routines and joined to the layout, above).
+- **BN4's Billy against its BN6 twin** (`billy_v1`: Billy V1, BN4's 0x0D,
+  at (5,2) against MegaMan idle at (2,2) with 2000 HP, `--dev
+  bn4families`, `rng=replay`): both battles trace their 1200 frames, and
+  it FAILS at t1, Billy's own record: its CurAction BN4's 7 (BN6's 9)
+  against BN6's 8, its wait (+0x20) 0x28 against 2, its flags (+0)
+  0x13 against 0x17. The cause, from both games frame by frame through
+  the opening: BN4's generic state 1 (`0x0801013A`) clears the object's
+  0x04 and hands it its own first state (6) in the opening, before
+  BATTLE START! ends, so Billy runs it at the fight's first frame; BN6's
+  (`0x080165B8`, which Billy's recipe runs as BN6's state 1) sets 8 and
+  keeps 0x04, and BN6's engine holds a virus in state 1 until the
+  fight's first frame, so BN6's Billy enters 8 at t1 and runs it at t2.
+  BN6's own Mettaur does the same against BN4's (`game=bn4:bn6`,
+  `foes=01@52`: BN4's in its 7 at t1, BN6's in its 8): BN6's engine's
+  for every virus, not Billy's code. Its whole fight is one fight frame
+  late from there (its draws and effects at t44, t107, t170 against
+  BN4's t43, t106, t169, the period the same), so its 32 draws find no
+  draw of BN4's in their frame (`unmatched`). The world parts at t1 too
+  (MegaMan's own fields, BN6's per-frame RNG steps, which BN4 has none
+  of, BN6's opening effect 0x08), which no map explains yet. No mask was
+  added: whether the moved family keeps BN6's timing or the comparison
+  allows the frame is the owner's call.
