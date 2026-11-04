@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T23:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -255,9 +255,46 @@ owner turns BN4 on.
 
 Before BN4's visitors reach players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
-CirKill proved by `build.py xdiff`, their reward rows read (BN6's fill
-stands in for them now); a BN4 visitor named as the older Net's (call
-5) is built.
+CirKill proved by `build.py xdiff` and their reward rows read, both
+done (call 6's condition met, 4 November 2026: Its viruses' rewards,
+below), and a BN4 visitor named as the older Net's (call 5), built.
+
+## Its viruses' rewards
+
+A moved BN4 family pays from BN4's own reward rows (`BN4_REWARD_ROWS`,
+BN6's format: [BN4 Red Sun's tables](../rom/bn4.md), Its rewards, how
+they were found and proved in romlab), read for its six versions' ids as
+it installs and written into the rows of its ids in BN6's grown copy, as
+BN5's families' are ([Transplanted families](families.md), Its rewards):
+zenny and HP as they are, a chip as BN6's own of its name and kind
+(standard, Mega or Giga), else 200 zenny (`xchips_reward_bn4`, BN5's
+stand-in). Before, their ids read BN6's filler row (100 or 60 zenny,
+else Cannon \*).
+
+None of the six families' chips is BN6's (Thunder1-3, HeatShot, Heat-V,
+HeatSide, Bubbler, Bub-V, BublSide, TwnFng1-3, ElemFlar, ElemIce,
+ElemLeaf, ElemSand, ElemDark, CircGun1-3), so each pays zenny and, at
+low HP, HP: Billy V1 30 to 100 zenny and 200 for its Thunder1, its V3EX
+30 to 650; CirKill's rows 30 to 700. One reward pick of a visitor at the
+economy's busting mix (`econ_bust_weight`, 10% at low HP) paid 2 zenny
+and 0.98 chips (Cannon \*) from the fill; it pays 178 (Billy V1) to 438
+zenny (CirKill V2 on) and no chip now, 316 the mean of the 36 versions
+(a scratch tally of both ROMs by the report's rule). `build.py economy`
+does not see visitors (its runs start no core with the families
+installed): with `--dev bn4families` its report was the same before and
+after, 0 numbers outside their bands.
+
+The design (the game-design skill): the dialectic is the nets' what you
+bring against what you find, at the battle's reward in the session loop.
+The patterns: parity across the older nets (a BN4 visitor pays by BN5's
+visitors' rule), an honest telegraph (the results screen never shows a
+chip that cannot play, nor a BN6 chip as a BN4 virus's), and a stand-in
+until the content comes (Phase 4 brings BN4's chips). Its cost: where a
+row's best entries are chips, the stand-in pays a fast busting less than
+the zenny below it (CirKill V3: 600 to 700 zenny for A, 200 for its
+CircGun3). The owner's to decide before Phase 4: keep the stand-in (the
+recommendation, for parity with BN5's), give a chip BN6 lacks the row's
+best zenny instead, or give its nearest BN6 chip by hand.
 
 ## The plan
 
@@ -394,7 +431,9 @@ sounds take from the themes' range are the owner's to confirm.
    and CirKill all pass `build.py xdiff`, their reward rows read; the
    other eleven join as each is proved. Chosen over waiting for all 17
    and over Billy alone (one visitor in eleven, the same family each
-   time).
+   time). Its condition met the same day: all six PASS and pay from
+   BN4's own rows (Its viruses' rewards); the visitors still wait on
+   call 5's naming.
 7. **Decided, 4 November 2026, then revised the same day: the comparison
    is aligned, the game unchanged.** First decided as "BN4's moved viruses
    enter with BN4's own appear", on the lead's claim that the two games'

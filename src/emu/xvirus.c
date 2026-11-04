@@ -48,7 +48,8 @@ typedef struct {
 	                                                                   BN6_T3_TYPES, BN6_T4_TYPES), how many */
 	uint32_t drops;                 /* its enemies' reward rows (as BN6_DROP_ROWS) */
 	bool bn5;                       /* its reward rows' chips BN5's, given as BN6's (xchips.h) */
-	bool bn4;                       /* BN4's: no per-family tables (a family its own object type), its records its enemy records */
+	bool bn4;                       /* BN4's: no per-family tables (a family its own object type), its records its enemy records,
+	                                   its reward rows' chips BN4's (xchips.h) */
 	uint8_t text_end;               /* its text's end code where not BN6's TEXT_END (BN4's 0xE5) */
 } Game;
 
@@ -70,9 +71,10 @@ static bool game_of(int game, Game *g) {
 		return true;
 	}
 	if (game == XROM_BN4_RED_SUN_US && xrom_research && XR[game].data && XR[game].layout) {
-		/* (no per-family tables, no ice, its reward rows not read: BN6's fill for its ids) */
+		/* (no per-family tables, no ice; its reward rows its own, BN6's format, their chips given as BN6's: xchips_reward_bn4) */
 		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, BN4_EFFECTS, BN4_EFFECT_COUNT,
-			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, 0, false, true, BN4_TEXT_END };
+			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, BN4_REWARD_ROWS, false,
+			true, BN4_TEXT_END };
 		return true;
 	}
 	return false;
@@ -756,14 +758,14 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 static uint16_t drops[XV_VERSIONS][ENEMY_DROPS];
 
 static void drops_set(const XVirusFamily *f, const Game *g) {
-	if (!g->drops) return;   /* (BN4's reward rows not read: BN6's fill) */
+	if (!g->drops) return;
 	for (int v = 0; v < XV_VERSIONS && !xv_failed(); ++v) {
 		uint32_t from = g->drops - BUS + 2u * ENEMY_DROPS * f->names[v];
 		if (from + 2u * ENEMY_DROPS > ROM_SIZE) { xv_fail("its reward row %d", v); return; }
 		uint8_t row[2 * ENEMY_DROPS];
 		for (uint32_t k = 0; k < ENEMY_DROPS; ++k) {
 			uint16_t e = get16(g->rom + from + 2 * k);
-			drops[v][k] = g->bn5 ? xchips_reward_bn6(e) : e;
+			drops[v][k] = g->bn5 ? xchips_reward_bn6(e) : g->bn4 ? xchips_reward_bn4(e) : e;
 			put16(row + 2 * k, drops[v][k]);
 		}
 		xg_set(XG_ROWS, (uint32_t)(f->first_id + v), row);
