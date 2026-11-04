@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T09:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:33:24Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -34,7 +34,7 @@ Colonel has, by name, with the community's lists as the check
 | Net areas | 22 large maps in five groups: ACDC Area 1-3 (lime), Town Area 1-4 (teal), Park Area 1-3 (lavender), Netfrica, Netopia, Sharo and YumLand (one each), the Undernet 1-6 and Black Earth 1-2 (dark green circuits) | All five looks; each map draws whole through the engine's own map reader as it is | moderate, BN5's road |
 | Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: every song passes `src/audio/xsong.c`'s rules, its one drum kit copied by the keys played |
 | Viruses | 22 families, six versions each | 17: VolGear, Billy, Gaia, Spikey, Shrimpy, Boomer, MagTect, Melody, Dharma, Kilby, Weather, Spidy, CirKill, Moloko, Walla, Elemperor, and Black Earth's sword-only NavBlack and NavShado | a recipe each, as [Transplanted families](families.md) |
-| Navis | 25 bosses with Duo and Bass | 18: Red Sun's Soul Navis GutsMan, FireMan, Roll, WindMan, ThunderMan and SearchMan; Blue Moon's AquaMan, WoodMan, MetalMan and JunkMan, whom Red Sun's tournaments fight too; TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan, VideoMan; Duo | a recipe each, as [Transplanted Navis](navis.md) |
+| Navis | 25 bosses with Duo and Bass | 18: Red Sun's Soul Navis GutsMan, FireMan, Roll, WindMan, ThunderMan and SearchMan; Blue Moon's AquaMan, WoodMan, MetalMan and JunkMan, whom Red Sun's tournaments fight too; TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan, VideoMan; Duo | a recipe each, as [Transplanted Navis](navis.md), by a BN4 path of its own: each an object type of its own, the Soul Navis' attacks MegaMan's own states, 64 objects to move ([BN4's Navis in BN6's engine](bn4-navis.md)) |
 | Souls | Red Sun's six (Guts, Fire, Roll, Wind, Thunder, Search), by BN5's rule (a chip of the Soul's kind) | All six (UNITE lit for WindSoul in romlab); Blue Moon's six are in its tables, refused by their flags; given one, ProtoSoul's UNITE lights, and whether its form runs is open | high, as [Transplanted Souls](souls.md) |
 | Chips | 389 records | About 225 names neither game has: some 60 Navi chips of the Navis above (V1, SP, DS), its Program Advances (MagShok, PitHoky, BstFang, FlmCros, PitRng, DarkNeo and more), the Gigas RedSun, HolyDrem, BugCharg and BlakBarr; many others BN4's numbering of chips the run has (Thunder1-3, AirHoc1-3), to be told apart by behaviour | a unit each where BN6 lacks the code; [the chip registry](chip-registry.md) grown past 512 |
 | DarkChips | 8 | DrkCanon, DarkBomb, DrkVulcn, DrkSpred and DrkStage by name | a unit each |
@@ -252,7 +252,13 @@ battle frame by frame, as BN5's were.
 2. **Its Navis and the tournament.** The tournament on the Navis already
    moved; BN4's Navis moved, guarding and joining its bracket; Red Sun's
    six Souls (and Blue Moon's, if the ROM runs them); DS chips for dark
-   wins.
+   wins. Mapped Navi by Navi, nothing built
+   ([BN4's Navis in BN6's engine](bn4-navis.md)): two builds (ten Soul Navis
+   on their side's AI data and MegaMan's own states, eight on their own
+   states and the object's variables), about 70 KB of code with their 64
+   objects, 24 engine routines to port once; GutsMan first, then
+   ThunderMan, WindMan, FireMan, SearchMan, Roll and LaserMan, each adding
+   one mechanism.
 3. **Its areas and music**, area by area as the walk's gate admits
    them: each dresses the BN6 area it is like, as `run_dress` does for
    BN5's, its themes and battle backgrounds with it.
