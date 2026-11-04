@@ -115,6 +115,14 @@
       "left": "Their battles, guardians and bystanders BN4's (BN6's for now); a BN4 song copied whole carries its drum kit's 219 KB (the keys played alone, the music's work); which country is which of 0x93's maps; Black Earth's maps (0x94:6-7) not drawn; Town Area's holed fields drawn as lattices; each area's admission (the walk's gate, the owner's call on three games sharing BN6's areas).",
       "updated": "2026-11-04",
       "link": "../multirom/status.md"
+    },
+    {
+      "name": "A Navi swapped mid-battle",
+      "state": "proven",
+      "now": "One BN6 battle against a Navi of BN6's swapped on its panel for a second and a third (src/emu/battle_swap.c, the Glitch layer's copy). BN6 counts the battle's starting enemies at BattleState +5 (lowered at a destroy, 0x0800A104; the win at 0, 0x0800A152) and +0x13 (lowered as a dying begins where Param2 is 0, 0x0800A11C); an enemy of the spawn's mid-fight entry (0x08007696, AIData +2 1, no caller in BN6) counts in neither and is freed at its destroy. The form deleted is made such an arrival at its dying's phase 0 (0x080170E4), glitches out in BN6's sprite mosaic for 24 frames in its phase 4 (0x08017122) and is removed by BN6; the next form is spawned on its panel from battle_main (0x08007800), back through a hook in free space, arrives as BN6 brings a Navi into a fight under way (its HP plate listed), and takes the count (AIData +2 0, Param2 0) as its arrival ends. The last form's deletion is BN6's own: ENEMY DELETED!, the results with the first form's reward.",
+      "left": "Not in a run yet: the director's Glitch layer arms it (battle_swap_arm before, battle_swap_disarm after). BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
+      "updated": "2026-11-04",
+      "link": "../rom/navis.md"
     }
   ],
   "decisions": [],
@@ -254,6 +262,10 @@
     {
       "date": "2026-11-04",
       "what": "BN4 Red Sun's Souls: the reason no form was taken found (BN4's chip gate), all twelve forms taken in Red Sun's ROM, Blue Moon's six too, each one's tables, abilities and code against BN6's twins mapped, and an order to move them, ThunSoul first."
+    },
+    {
+      "date": "2026-11-04",
+      "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
     }
   ],
   "experiments": [
@@ -639,6 +651,14 @@
       "result": "Each of BN4's 34 songs copied by xsong.c (--xsong-pack) and played by BN6's own sound engine in romlab, its title's entry pointed at the copy, beside BN4 playing the song from its title (frame 198), every part of MP2K's state compared for 900 frames with BN4's pointers moved to the copy's: 31 the same in every part once BN6 was given BN4's master volume (12, set by BN4's m4aSoundInit; BN6's 15); 0x0F and 0x1A differ only in a let-go PSG channel's echo count, their PSG registers the same every frame; 0x15's opening swell (two squares from volume 0, frames 20-216) stays silent in BN6, whose CgbSound lets go a channel the hardware stopped (NR52's bit, 0x0815122E), BN4's keeping it (0x08113532). BN4's drum kit was copied for the keys played (37-73), BN5's 308 copies byte for byte as before.",
       "meaning": "BN4's music is ready for a run: it travels as BN5's did, and BN6's engine plays it as BN4's does but for one swell and the level. The library is another build of BN6's MP2K (its tables the same), so a BN4 song is proved frame by frame, not assumed from BN5's.",
       "link": "../rom/bn4.md"
+    },
+    {
+      "feature": "A Navi swapped mid-battle",
+      "date": "2026-11-04",
+      "name": "Three forms in one battle, and two mutations",
+      "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
+      "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
+      "link": "../rom/navis.md"
     }
   ],
   "method": {

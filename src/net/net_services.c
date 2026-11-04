@@ -81,6 +81,11 @@ void ng_roll_services(Services *s, uint32_t seed, int depth, int biome, int kind
 	roll_services(s, depth, biome, kind, boss);
 	roll_gates(s, seed, depth, kind, boss);
 	rng_restore(keep);
+	/* (the run's Glitch warp: from the run's seed, not the rolls, so every
+	 * other layer rolls as before; it takes a dark warp's place, the gates
+	 * rolled as they were, docs/game/glitch-layer.md) */
+	s->glitch = kind == LAYER_NORMAL && !boss && run_glitch_at(depth);
+	if (s->glitch) s->undernet = false;
 }
 
 unsigned layer_holds(uint32_t seed, int depth, int biome, int kind) {
@@ -95,5 +100,5 @@ unsigned layer_holds(uint32_t seed, int depth, int biome, int kind) {
 	return (s.shop ? HOLDS_DEALER : 0u) | (s.heal ? HOLDS_HEAL : 0u) | (s.trader ? HOLDS_TRADER : 0u) |
 		(s.programs ? HOLDS_PROGRAMS : 0u) | (s.bugtrader ? HOLDS_BUGTRADER : 0u) | (s.challenge ? HOLDS_SERVER : 0u) |
 		(s.duel ? HOLDS_DUEL : 0u) | (s.undernet ? HOLDS_UNDERNET : 0u) | (s.navi_gate || s.vault || s.official ? HOLDS_GATE : 0u) |
-		(boss ? HOLDS_GUARDIAN : 0u);
+		(boss ? HOLDS_GUARDIAN : 0u) | (s.glitch ? HOLDS_GLITCH : 0u);
 }

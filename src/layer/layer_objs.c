@@ -71,7 +71,7 @@ bool layer_objs_dark_first;
  * loot_mystery_roll rolls it (loot.h). True for an HPMemory, which the
  * game keeps in blue Mystery Data. */
 static bool mystery_content(const NetObj *o, uint8_t out[8]) {
-	LootFind f = loot_mystery_roll(o->param, run.depth);
+	LootFind f = loot_mystery_roll(o->param, run.depth + o->deep);
 	if (f.kind == LOOT_FIND_HP_MEMORY) {
 		const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_HP_MEMORY, 0, 0, 0 };
 		for (int i = 0; i < 8; ++i) out[i] = c[i];
@@ -428,6 +428,7 @@ typedef struct {
 	int nstock;
 	MysteryPlan plan;
 	ScriptsVault server;   /* a Server's three chips (install_server) */
+	ScriptsVault copy;     /* a Glitch layer's copy's (install_copy) */
 } Install;
 
 /* A bystander's talker (Normal Navis and pink navis, or the two Navis
@@ -512,6 +513,7 @@ static void install_begin(Install *in) {
 	 * layer's archive) */
 	out->guardian = (GuardianStage){ .intro = -1, .defeat = -1, .reward = -1 };
 	out->challenge_reward = -1;
+	out->copy_reward = -1;
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = out->nmd = 0;
@@ -715,6 +717,34 @@ static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	return !layer_objs_duel_later;
 }
 
+/* A Glitch layer's copy (docs/game/glitch-layer.md): its first form's body,
+ * and its prize, a pick of its forms' Navi chips a version above the act's
+ * (an older net's Navi's as his Guardian Data gives it deep), in the
+ * folder's codes; gone once one is taken */
+static void install_copy(Install *in, Talker *tk) {
+	int forms[GLITCH_FORMS], n = run_glitch_forms(run.depth, forms);
+	NpcBody body = guardian_body(n ? forms[0] : 1, 5);
+	tk->cat = body.list;
+	tk->sprite = body.index;
+	tk->anim = body.anim;
+	npc_need_sprite(&in->npcs, body.list, body.index);
+	for (int k = 0; k < 3; ++k) {
+		int navi = k < n ? forms[k] : 0, code = 26, chip = 0;
+		if (navi && guardian_older(navi)) chip = xguardian_chip(navi, run.depth + 9, &code);
+		else if (navi) {
+			int v = make_boss(run.depth, run.biome, navi).foes[0].version + 1;
+			chip = navi_chip(navi, v > 2 ? 2 : v);
+		}
+		char c = '*';
+		if (chip <= 0) chip = roll_chip(run.depth + 6, 4, &c);
+		ChipInfo ci;
+		chip_info(chip, &ci);
+		vault_chip(&in->copy, k, chip, ci.ncodes ? ci.codes[0] : '*');
+	}
+	in->out->copy_reward = ta_copy_pick(in->text, LAYER_COPY_TAKEN_FLAG, &in->copy);
+	tk->gone_flag = LAYER_COPY_TAKEN_FLAG;
+}
+
 /* A Navi gate, sealed until his code is earned (docs/game/meta/phase-two.md, gates): its
  * talk then says how, else it asks for his SP and pays his SP chip. True
  * where it asks. */
@@ -793,6 +823,8 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 		: o->type == OBJ_BATTLER ? battler_offer(in->text, flag, o->param)
+		: o->type == OBJ_GLITCH ? ta_glitch_warp(in->text, flag)
+		: o->type == OBJ_COPY ? ta_copy(in->text, flag, LAYER_COPY_WON_FLAG, LAYER_COPY_TAKEN_FLAG, out->copy_reward, &in->copy, false)
 		: ta_secret_gate(in->text, flag);
 	/* not chosen yet */
 	flag_clear(flag);
@@ -852,6 +884,8 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i) {
 	case OBJ_CHALLENGE: install_server(in, tk); return true;
 	case OBJ_GIFT: install_gift(in, tk); return false;
 	case OBJ_UNDERNET: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
+	case OBJ_GLITCH: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
+	case OBJ_COPY: install_copy(in, tk); return true;
 	case OBJ_DUEL: return install_duel(in, tk, tk->x, tk->y);
 	case OBJ_SECRET_GATE: tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true; return true;
 	case OBJ_NAVI_GATE: return install_navi_gate(in, o, tk);

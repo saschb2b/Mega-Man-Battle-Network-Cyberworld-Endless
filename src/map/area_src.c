@@ -208,25 +208,52 @@ static uint32_t board_colours(int number) {
 	return 0;
 }
 
-bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal) {
-	*ts_out = *pal_out = NULL;
-	*nts = *npal = 0;
+/* Map (group, number)'s tile set as VRAM takes it: its two blocks
+ * decoded (raw[k], rn[k] bytes; wc[k] its words, vo[k] where in VRAM), and
+ * where its palette lies and its size; false where it has none */
+static bool gfx_blocks(int rom, int group, int number, uint8_t *raw[2], size_t rn[2], uint32_t wc[2], uint32_t vo[2], uint32_t *pal, uint32_t *psize) {
+	raw[0] = raw[1] = NULL;
+	rn[0] = rn[1] = 0;
 	if (rom < 0 || rom > XROM_COUNT || (rom && !XR[rom - 1].data)) return false;
 	use_rom(rom - 1);
-	uint32_t desc, ts, pal, tm;
-	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return false;
+	uint32_t desc, ts, tm;
+	if (!map_desc(group, number, &desc, &ts, pal, &tm)) return false;
 	/* the palette as it is: its size, then the colours */
-	uint32_t psize = su32(pal - 4);
-	if (psize > 0x200 || pal + psize > ROM_SIZE) return false;
-	uint8_t *raw[2] = { NULL, NULL };
-	size_t rn[2] = { 0, 0 };
-	uint32_t wc[2], vo[2];
+	*psize = su32(*pal - 4);
+	if (*psize > 0x200 || *pal + *psize > ROM_SIZE) return false;
 	for (int k = 0; k < 2; ++k) {
 		wc[k] = su32(ts + (uint32_t)k * 12);
 		uint32_t off = su32(ts + (uint32_t)k * 12 + 4);
 		vo[k] = su32(ts + (uint32_t)k * 12 + 8);
 		if (wc[k] && off < ROM_SIZE - ts) raw[k] = lz77_decompress(src.data + ts + off, ROM_SIZE - (ts + off), &rn[k]);
 	}
+	return true;
+}
+
+bool area_src_vram(int rom, int group, int number, AreaVram *out) {
+	memset(out, 0, sizeof *out);
+	uint32_t wc[2], pal, psize;
+	if (!gfx_blocks(rom, group, number, out->tiles, out->n, wc, out->vram, &pal, &psize)) return false;
+	out->npal = psize < sizeof out->pal ? psize : sizeof out->pal;
+	memcpy(out->pal, src.data + pal, out->npal);
+	for (int k = 0; k < 2; ++k)
+		if (out->tiles[k] && out->n[k] > wc[k] * 4) out->n[k] = wc[k] * 4;
+	return out->tiles[0] != NULL;
+}
+
+void area_vram_free(AreaVram *v) {
+	free(v->tiles[0]);
+	free(v->tiles[1]);
+	memset(v, 0, sizeof *v);
+}
+
+bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal) {
+	*ts_out = *pal_out = NULL;
+	*nts = *npal = 0;
+	uint8_t *raw[2];
+	size_t rn[2];
+	uint32_t wc[2], vo[2], pal, psize;
+	if (!gfx_blocks(rom, group, number, raw, rn, wc, vo, &pal, &psize)) return false;
 	/* the tile set: a header of its own, each block encoded again after it */
 	uint8_t *t = malloc(24 + 2 * 16 + rn[0] + rn[0] / 8 + rn[1] + rn[1] / 8), *p = malloc(4 + psize);
 	size_t at = 24;

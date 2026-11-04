@@ -97,6 +97,9 @@ void arrival_words(void) {
 	else if (run.side_kind == LAYER_UNDERNET)
 		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke,Lan.|@L Stay sharp! The exit pad leads back,right?|"
 			"@M Right. Back to the main path!");
+	/* (the run's Glitch layer: docs/game/glitch-layer.md) */
+	else if (run.side_kind == LAYER_GLITCH)
+		snprintf(D.beat, sizeof D.beat, "@M Lan... Everything here just flickered.|@L Huh? It looks normal to me...|@L Let's look around. Carefully.");
 	else if (run.side_kind == LAYER_SECRET)
 		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Secret Area.|@M Something strong is in here. I can feel it...|@L *gulp* Let's go,MegaMan!");
 	/* (a trip back from home, docs/world/home/: an area already won) */
@@ -149,6 +152,7 @@ void area_card(void) {
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
 	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "Through a dark warp");
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
+	else if (run.side_kind == LAYER_GLITCH) snprintf(act, sizeof act, "Through a glitching warp");
 	else if (run.side_kind == LAYER_BACK) snprintf(act, sizeof act, "A trip back");
 	else if (biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS) snprintf(act, sizeof act, "Below the Nest");
 	else if (biome == BIOME_NEST && net_version() > 1) snprintf(act, sizeof act, "The bottom of Net V%d", net_version());

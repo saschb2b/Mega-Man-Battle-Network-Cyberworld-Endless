@@ -133,6 +133,21 @@ int run_route_dark(int act, int avoid, int *navi);
  * fork, either way by a coin of the seed; -1 none. The fork as it was
  * offered, whichever way was taken since. */
 int run_dark_area(int act);
+/* Whether the run's layer at `depth` holds the warp to its Glitch layer
+ * (docs/game/glitch-layer.md): one run in three, from its seed, holds one,
+ * on an act's first layer from the second act (the short net's 2 and 3,
+ * the endless net's 2 to 5), in the first cycle; never two. The Glitch
+ * layer is that depth's side layer of kind LAYER_GLITCH. (dev: every act's
+ * first layer from the second holds one, run_debug_glitch) */
+bool run_glitch_at(int depth);
+extern bool run_debug_glitch;
+/* The copy's forms at the Glitch layer of `depth` (docs/game/glitch-layer.md):
+ * the guardians the run has beaten, the last first, then the one that
+ * last deleted MegaMan in any run (rivals.sav), then guardians the run set
+ * elsewhere, from its seed; BN6's own Navis alone, never a super boss, nor
+ * the act's own guardian ahead. How many (GLITCH_FORMS at most). */
+#define GLITCH_FORMS 3
+int run_glitch_forms(int depth, int forms[GLITCH_FORMS]);
 /* The Darkloid of act `act`'s dark layer in area `biome`: one of BN5's own
  * Darkloids where its ROM brought them into BN6's engine, the act's of
  * BN5's missions' order the likeliest (guardians.h, navis 30-33;

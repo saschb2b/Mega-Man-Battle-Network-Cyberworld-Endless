@@ -23,6 +23,7 @@ typedef struct {
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
+	bool copy_due;         /* a Glitch layer's copy deleted: the glitch settles, and its pick is told once a talk can start */
 	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/game/meta/phase-two.md, gates) */
 	bool battler;          /* ... a Virus Battler's round (director_battler.c), battle mode 6: no MegaMan on its field */
 	bool battler_series;   /* a Virus Battler's series under way, its pot at stake: no save */

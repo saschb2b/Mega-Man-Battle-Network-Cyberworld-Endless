@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 
+#include "glitch.h"       /* (the run's Glitch layer, made with the layer: docs/game/glitch-layer.md) */
 #include "liberation.h"   /* (a dark layer's board, made with the layer: docs/game/liberation/) */
 #include "runlog.h"
 

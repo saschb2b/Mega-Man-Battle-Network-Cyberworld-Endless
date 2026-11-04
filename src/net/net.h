@@ -41,6 +41,8 @@ typedef enum {
 	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid, or a Navi of its team (docs/game/liberation/);
 	                    param: its sprite | animation << 8 | its sprite list << 16 | its number << 20 (the team's after the units') */
 	OBJ_BATTLER,     /* a Virus Battler Mr.Prog, BN6's minigame (docs/world/level-design/virus-battler.md); param: his Battler, 1-5 */
+	OBJ_GLITCH,      /* a glitching warp to the run's Glitch layer (docs/game/glitch-layer.md) */
+	OBJ_COPY,        /* the copy at a Glitch layer's heart, fought in its forms (docs/game/glitch-layer.md) */
 	OBJ_KINDS
 } ObjType;
 
@@ -52,6 +54,7 @@ typedef struct {
 	int npc_line;
 	int prop;         /* the prop it stands behind (a counter), -1 none */
 	bool prize;       /* a Mystery Data a set piece keeps: behind a lock, or out on an island (the layer's RegUp goes there first) */
+	int deep;         /* a Glitch layer's Mystery Data: its content as this many layers deeper's, by how far off the way it lies */
 } NetObj;
 
 /* Props: what the originals set on their floors (docs/world/level-design/props.md,
@@ -88,8 +91,11 @@ typedef struct {
  * Secret Area), or a trip back from home to an area the run has won
  * (docs/world/home/going-back.md: as its act's second layer was, its services,
  * battles and data, no guardian, duel, gate or dark warp; its exit leads
- * home). */
-enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET, LAYER_BACK };
+ * home), or the run's Glitch layer, a side layer of the area and depth of
+ * the layer whose warp led there (docs/game/glitch-layer.md: its secrets a
+ * normal layer's, its services a side layer's, the copy at its heart; its
+ * exit leads on to the act's next layer). */
+enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET, LAYER_BACK, LAYER_GLITCH };
 
 /* Which way a stair climbs: towards grid -x or -y (see src/map/stairs.h). */
 enum { STAIR_UP_NX, STAIR_UP_NY };
@@ -207,7 +213,7 @@ extern bool layer_make_dark;
 enum {
 	HOLDS_DEALER = 1u << 0, HOLDS_HEAL = 1u << 1, HOLDS_TRADER = 1u << 2, HOLDS_PROGRAMS = 1u << 3,
 	HOLDS_BUGTRADER = 1u << 4, HOLDS_SERVER = 1u << 5, HOLDS_DUEL = 1u << 6, HOLDS_UNDERNET = 1u << 7,
-	HOLDS_GATE = 1u << 8, HOLDS_GUARDIAN = 1u << 9
+	HOLDS_GATE = 1u << 8, HOLDS_GUARDIAN = 1u << 9, HOLDS_GLITCH = 1u << 10
 };
 unsigned layer_holds(uint32_t seed, int depth, int biome, int kind);
 /* The game runs at most 16 NPCs on a map (BN6_NPC_COUNT) and leaves the

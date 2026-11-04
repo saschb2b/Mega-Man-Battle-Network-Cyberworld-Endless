@@ -223,6 +223,11 @@ int ta_server_pick(TextArchive *t, int taken_flag, const ScriptsVault *v) {
 		"Let's leave them for now.|We can come back!");
 }
 
+int ta_copy_pick(TextArchive *t, int taken_flag, const ScriptsVault *v) {
+	return pick_three(t, taken_flag, v, "It's gone... The layer's back to normal.|And it left its data! We can take one!", "Take",
+		"It's quiet here now,Lan.", "Let's leave them for now.|We can come back!");
+}
+
 /* Three chips, one to take (event flag `flag` set as it is, after which
  * `empty` is said instead); B leaves them (`leave`): a vault's, an official
  * gate's. A pick is asked once more, "`verb` TrplShot J?", on No, which

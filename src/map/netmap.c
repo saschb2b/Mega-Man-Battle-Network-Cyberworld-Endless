@@ -353,6 +353,49 @@ static bool install_gfx(const Learned *L) {
 	return ok;
 }
 
+/* Both layers of the current layout's tile map in `L`'s tiles, tw x th
+ * (freed by the caller): the classes' picks, then what is set whole over
+ * them (the props' with `props`: their stamps the layer's own area's), the
+ * palette banks and the scenery */
+static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
+	size_t cells = (size_t)tw * th;
+	uint16_t *map = calloc(cells * 2, 2);
+	if (!map) return NULL;
+	TileGrid grid = { tw, th, nm_place.ex, nm_place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape || rimmed, apart != NET_APART_NONE };
+	free(nm_last.seams);
+	nm_last.seams = calloc(cells, 1);
+	free(nm_last.pasted);
+	nm_last.pasted = calloc(cells, 1);
+	memo_w = nm_cur->gw + 2 * MEMO_EDGE;
+	memo_h = nm_cur->gh + 2 * MEMO_EDGE;
+	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
+	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
+	picking = true;
+	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
+	picking = false;
+	free(floor_memo);
+	floor_memo = NULL;
+	nm_paste_stairs(L, map, tw, th);
+	if (props) nm_paste_props(map, tw, th);
+	nm_paste_pads(L, map, tw, th);
+	nm_paste_ornaments(L, map, tw, th);
+	nm_paste_emblems(L, map, tw, th);
+	nm_paste_arrows(L, map, tw, th);
+	nm_paste_bushes(L, map, tw, th);
+	/* how the classes' picks went, where they are drawn: not under what
+	 * was set whole over them */
+	for (size_t i = 0; i < cells; ++i) {
+		if (nm_last.pasted[i] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
+		tiles_stats.seams += (nm_last.seams[i] & 1) + (nm_last.seams[i] >> 1 & 1);
+		tiles_stats.off_near += (nm_last.seams[i] >> 2 & 3) == TILE_OFF_NEAR;
+		tiles_stats.off_edge += (nm_last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
+		tiles_stats.other += nm_last.seams[i] >> 7;
+	}
+	nm_rebank_map(L, map, cells);
+	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
+	return map;
+}
+
 static bool write_tilemap(const Learned *L) {
 	/* extent of the floor around the world origin */
 	int umax = 0, vmax = 0;
@@ -370,41 +413,10 @@ static bool write_tilemap(const Learned *L) {
 	if ((th & 1) != (L->th & 1)) ++th;
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
-	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, nm_place.ex, nm_place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape || rimmed, apart != NET_APART_NONE };
-	free(nm_last.seams);
-	nm_last.seams = calloc(cells, 1);
-	free(nm_last.pasted);
-	nm_last.pasted = calloc(cells, 1);
-	memo_w = nm_cur->gw + 2 * MEMO_EDGE;
-	memo_h = nm_cur->gh + 2 * MEMO_EDGE;
-	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
-	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
-	picking = true;
-	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
-	picking = false;
-	free(floor_memo);
-	floor_memo = NULL;
+	uint16_t *map = pick_map(L, tw, th, true);
+	if (!map) return false;
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
-	nm_paste_stairs(L, map, tw, th);
-	nm_paste_props(map, tw, th);
-	nm_paste_pads(L, map, tw, th);
-	nm_paste_ornaments(L, map, tw, th);
-	nm_paste_emblems(L, map, tw, th);
-	nm_paste_arrows(L, map, tw, th);
-	nm_paste_bushes(L, map, tw, th);
-	/* how the classes' picks went, where they are drawn: not under what
-	 * was set whole over them */
-	for (size_t i = 0; i < cells; ++i) {
-		if (nm_last.pasted[i] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
-		tiles_stats.seams += (nm_last.seams[i] & 1) + (nm_last.seams[i] >> 1 & 1);
-		tiles_stats.off_near += (nm_last.seams[i] >> 2 & 3) == TILE_OFF_NEAR;
-		tiles_stats.off_edge += (nm_last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
-		tiles_stats.other += nm_last.seams[i] >> 7;
-	}
-	nm_rebank_map(L, map, cells);
-	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
@@ -474,12 +486,13 @@ static void legalize(Learned *L, const NetLayout *lay) {
 	netmap_legal = legal_fix(&g, LEGAL_BUDGET);
 }
 
-bool netmap_build(int area, const NetLayout *lay) {
+/* Area `area`'s settings for the tiles' pick, its maps learned; NULL where
+ * it has none */
+static Learned *use_area(int area) {
 	const NetAreaDef *na = net_area_def(area);
-	if (!na) return false;
+	if (!na) return NULL;
 	Learned *L = learn_area(area);
-	if (!L->ok) return false;
-	nm_cur = lay;
+	if (!L->ok) return NULL;
 	one_floor = !na->walk_styles;
 	by_shape = na->styles & TILES_BY_SHAPE;
 	arena_b = !by_shape && !(na->styles & TILES_ARENA_FLOOR);
@@ -489,12 +502,19 @@ bool netmap_build(int area, const NetLayout *lay) {
 	arena_drawn = na->styles & TILES_ARENA_DRAWN;
 	joints = na->joint_hues;
 	apart = na->apart;
+	striped = na->styles & TILES_CROSSING;
+	return L;
+}
+
+bool netmap_build(int area, const NetLayout *lay) {
+	Learned *L = use_area(area);
+	if (!L) return false;
+	nm_cur = lay;
 	nm_place.ex = L->ex;
 	nm_place.ey = L->ey;
 	if (!centre(lay)) return false;
 	netmap_legal = (LegalStats){ 0, 0 };
 	/* (the stripes as the floor is, and again as the legalizer left it) */
-	striped = na->styles & TILES_CROSSING;
 	bool keep_pads = pad_look && L->pads_seen;
 	if (striped) make_stripes(keep_pads);
 	if (lay->locked) {
@@ -511,6 +531,68 @@ bool netmap_build(int area, const NetLayout *lay) {
 }
 
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &nm_extra); }
+
+/* (the area settings the pick reads, kept round another look's) */
+typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped; int apart; } AreaFlags;
+
+static AreaFlags flags_now(void) {
+	return (AreaFlags){ one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, apart };
+}
+
+static void flags_set(const AreaFlags *f) {
+	one_floor = f->one_floor; by_shape = f->by_shape; arena_b = f->arena_b; rimmed = f->rimmed; pad_look = f->pad_look;
+	pads_walkway = f->pads_walkway; arena_drawn = f->arena_drawn; joints = f->joints; striped = f->striped; apart = f->apart;
+}
+
+/* The look's tile map: the layer's floor as it stands (its legalizer's
+ * cells kept, nothing locked or changed), in the place it was built */
+static uint16_t *look_map(Learned *L, int tw, int th) {
+	NetLayout dry = *nm_cur;
+	dry.locked = NULL;
+	nm_cur = &dry;
+	if (striped) make_stripes(pad_look && L->pads_seen);
+	uint16_t *map = pick_map(L, tw, th, false);
+	nm_cur = NULL;
+	return map;
+}
+
+bool netmap_look(int area, NetmapLook *out) {
+	memset(out, 0, sizeof *out);
+	if (!nm_cur || !nm_last.map || in_256) return false;
+	const NetLayout *cur = nm_cur;
+	MapPlace place = nm_place;
+	AreaFlags flags = flags_now();
+	LastMap last = nm_last;
+	int scenery = netmap_scenery;
+	static uint8_t stripes[MAP_H][MAP_W];
+	memcpy(stripes, stripe, sizeof stripe);
+	nm_last.seams = nm_last.pasted = NULL;
+	Learned *L = use_area(area);
+	bool ok = L && !area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
+	if (ok) {
+		nm_cur = cur;
+		out->map = look_map(L, last.tw, last.th);
+		out->tw = last.tw;
+		out->th = last.th;
+		ok = out->map && area_src_vram(L->def->xrom, L->def->group, L->def->number, &out->gfx);
+	}
+	free(nm_last.seams);
+	free(nm_last.pasted);
+	nm_last = last;
+	nm_cur = cur;
+	nm_place = place;
+	flags_set(&flags);
+	memcpy(stripe, stripes, sizeof stripe);
+	netmap_scenery = scenery;
+	if (!ok) netmap_look_free(out);
+	return ok;
+}
+
+void netmap_look_free(NetmapLook *l) {
+	free(l->map);
+	area_vram_free(&l->gfx);
+	memset(l, 0, sizeof *l);
+}
 
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 static unsigned netmap_stair_dirs(int area, int *rise) {

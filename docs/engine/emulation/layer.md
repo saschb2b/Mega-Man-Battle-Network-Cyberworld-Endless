@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A layer"
 description: "How a layer is built into the game (`net_gen.c`, `netmap.c`, `layer_objs.c`, `mapslot.c`), its exit pad's warp, what `director.c` watches, checkpoints and CONTINUE, the engine's event flags and `talk.c`'s conversations."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T13:42:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
 ---
 
 # A layer
@@ -91,7 +91,9 @@ set while Lan's HP's link on the left and down front is no way back,
 which sends their way-back marks off, piece 2; `0x1472` that the
 courier has been heard, which his words set and which sends his burst
 off, piece 2; `0x146B` that this visit's order was
-made at AsterLand's counter, piece 6; `0x1473` the Yes of the Net
+made at AsterLand's counter, piece 6; `0x147A` that a Glitch layer's
+copy was deleted and `0x147B` that its pick gave its chip ([the Glitch
+layer](../../game/glitch-layer.md)); `0x1473` the Yes of the Net
 Square's gate's questions and `0x1474`-`0x1476` its keeper's options,
 the official Square, another server and the name, piece 11, which the
 director clears as each visit home begins). In the Net Square itself,

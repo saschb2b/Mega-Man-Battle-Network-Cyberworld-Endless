@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "area_src.h"
 #include "coords.h"
 #include "legal.h"
 #include "net.h"
@@ -41,6 +42,15 @@ typedef struct {
 bool netmap_build(int area, const NetLayout *lay);
 /* netmap_build for the current layer (net.h), its scenery placed by `seed`. */
 bool netmap_build_layer(int area, uint32_t seed);
+/* Another look of the last layer built (docs/game/glitch-layer.md): its
+ * floor's tile map picked in area `area`'s tiles, both layers at the
+ * layer's own size and place (its props left out, their stamps the
+ * layer's own area's), and that area's tile set and colours as VRAM takes
+ * them; nothing written to the game. False where the area cannot draw it
+ * (none learned, or 256-colour tiles). Free with netmap_look_free. */
+typedef struct { uint16_t *map; int tw, th; AreaVram gfx; } NetmapLook;
+bool netmap_look(int area, NetmapLook *out);
+void netmap_look_free(NetmapLook *l);
 /* The pieces of scenery the last layer got. */
 extern int netmap_scenery;
 /* The floor cells the last layer's floor changed to be drawable, and the
