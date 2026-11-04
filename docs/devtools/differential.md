@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T00:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:05:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -30,7 +30,12 @@ the result and in his NaviStats back on the map (`src/dev/xdiff_bn4.c`). Its
 keys are its own (each Custom screen START, then A; the buster while it
 fights; A through the results); `--dev god` and `onehit` hold MegaMan's HP
 and the enemies' at 1 in its battle; `film=` keeps its frames by the
-guest's frame. No trace yet: the first step of the differential's BN4 view.
+guest's frame.
+
+[The BN4 trace](#the-bn4-trace) below traces that battle and compares it
+frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
+`game=bn4:bn6` traces it against BN6's (`OUT.bn4` and `OUT.bn6`), and a
+spec whose `"game"` is `"bn4"` runs through `tools/xdiff_bn4.py`.
 
 Issue #82 moves BN5's virus families into BN6's battle engine by their own
 code ([Transplanted families](../multirom/families.md): CanGard, then Handi, the
@@ -269,7 +274,7 @@ moved family's spec: a sprite no pair of the registry names compared by
 its bytes, as the generator's twins are), and what BN5's battle is known
 to do) and compares the two traces (`tools/xdiff_snap.py` the
 snapshot and its differences, `tools/xdiff_masks.py` whose each is and
-the masks):
+the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
 
 - **By role, never by slot**: the first kind's objects by their enemy id,
   the third and fourth by their type (an effect object, the fourth kind's
@@ -700,3 +705,77 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## The BN4 trace
+
+```bash
+python3 build.py xdiff bn4_mettaur_control bn4_mettaur_broken   # BN4's battle twice, the same; then broken, parting
+build/host/cyberworld --headless --rom-dir DIR --xdiff \
+  "game=bn4:bn6;foes=01@52;hp=200;frames=600;out=PATH"   # BN4's Mettaur against BN6's own, both traced
+```
+
+BN4 Red Sun's viruses come next (BN4's Billy first,
+[BN4 Red Sun](../multirom/bn4.md)); the differential's reference for them is
+BN4's own battle on the guest core, traced as BN5's is (`src/dev/xdiff.c`'s
+format, its game 4: the trace's header names it):
+
+- **Its units**: each part read from BN4's layout ([BN4 Red Sun](../rom/bn4.md),
+  The battle in RAM, The battle's objects, BN4 on the guest core) and
+  written in BN6's (`src/dev/xdiff_bn4_trace.c`): an object of the first
+  or third kind with its element (BN4's +0x17) at BN6's +0x0E and its
+  enemy id (a byte at BN4's +0x0F) at BN6's NameID; its collision data's
+  side, panel, statuses' timers, flash, invulnerability, final damage
+  and two flag words at BN6's offsets; its AI data's attack variables
+  (BN4's +0x70) at BN6's +0xA0; each panel's type, side, flags and
+  reserver at BN6's. BN4's other bytes keep their own offset where BN6's
+  is free there and else fill the places left in order, so nothing of
+  BN4's is dropped and two BN4 traces part where their battles do. The
+  collision data's and panels' sizes in its header are BN6's; what BN6's
+  engine keeps apart (the sea, the Dark Soul's lists, the Navis' state)
+  is zero; the player block is BN4's battle NaviStats (0x40 a side), its
+  used word, pending form, Souls and UNITE zero.
+- **Its timing**: BN4's battle timer (`BN4_BATTLE_TIMER`, BattleState
+  +0x40 as BN5's: 0 through BATTLE START!, held on the Custom screen) is
+  the clock, its main mode read as BN6's sub-mode (`xd4_sub`), its Custom
+  screens passed from the frame its window (`BN4_CUSTOM_WINDOW`) first
+  reads open by START 2 frames and A 2 frames 18 later, again every 40
+  frames (BN4 takes A only after its cursor's slide to OK: BN5's 4-8-4
+  left its first screen open), the spec's `keys=` by the timer, and both
+  RNG words written after the fight's first frame, as BN5's specs seed
+  theirs. `safe=1` and `hold=` take BN4's collision data's offsets;
+  `mm_element=`, `deck6=` and the hooks do not yet (BN4's collision
+  element, deck and routines unmapped: its trace holds no events).
+- **The comparison** (`tools/xdiff_bn4.py`): the objects matched by role
+  as BN5's are (BN4's MegaMan, enemy id 0, read as BN6's 0x1A0; BN4's
+  other numbers its own, no map to BN6's yet), their bytes, AI data and
+  collision data compared as BN6 lays them out, a pointer by what it
+  names (an object by its role and part, a panel; a ROM pointer as it
+  is), the panels, both RNG words, the songs begun and the run order each
+  frame; the first frame with a difference no mask explains fails the
+  spec. The masks are the fields BN4 has none of (`BN4_LACKS`, each with
+  why), applied only where BN4's trace holds nothing there and the other
+  is BN6's: a virus's AI data and its pointer, the AI index, the freeze's
+  and the bubble's timers.
+- **The control** (`"kind": "control"`): `bn4_mettaur_control` fights
+  BN4's Mettaur at (5,2) against MegaMan at (2,2) with 200 HP, 35 buster
+  shots and five steps by the timer, twice, each run in a process of its
+  own: 900 fight frames, the same in every byte (PASS); MegaMan steps
+  through four panels, his shots and the Mettaur's waves come and go, the
+  Mettaur loses 20 HP and MegaMan 30, and the RNG's first word draws. Its
+  broken twin, `bn4_mettaur_broken` (`"again"`: its second run steps up
+  at t201, not t200), must part and does, at t202, where MegaMan's AI
+  data holds the pressed UP in one and not the other (PASS). Two BN5
+  specs, `cangard_v1` and `handi_v1`, PASS as before, their traces the
+  same byte for byte.
+- **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
+  battles trace their 600 frames; they part at t1, as they must until
+  BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
+  type (BN4's family's own type, BN6's 0), its CurActions (MegaMan's
+  ready 6 against BN6's 8, as BN5's), BN6's own effect at the fight's
+  start (the fourth kind's 0x08), the RNG words (BN6 draws through
+  BATTLE START!, BN4 not), the border panels' side (BN6's 0xFF), and
+  collision data bytes BN4 keeps elsewhere: at t1 BN4's +0x05, +0x0C,
+  +0x1E, +0x58-+0x5F, +0x60 and +0x78 held BN6's +0x07, +0x0E, +0x2E
+  (the damage), +0x30-+0x37 (the alliance words), +0x38 (its object) and
+  +0x44's values (leads from one frame, to be proved by pairing the two
+  games' routines before they join the layout).

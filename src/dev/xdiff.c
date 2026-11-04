@@ -79,16 +79,18 @@ _Static_assert(APART_SEA <= 0x100u && APART_LISTS == 2u * BN5_DARK_LIST_SIZE && 
 /* ---- a game's battle as the trace reads it ---- */
 
 typedef struct {
-	int game;   /* 5, 6 */
+	int game;   /* 5, 6; 4 BN4's, its parts written in BN6's units (xdiff_bn4_trace.h) */
 	uint32_t gamestate, state, window, rng[2];
 	uint32_t t1, t3, t4;
 	int nt1;
-	uint32_t panels, panel_size, list, list_end, coll_size, mplays;
-	uint32_t navi, navi_size, used, pending, side;   /* MegaMan's player block's places (BN6_BATTLE_NAVI's or BN5's) */
-	uint32_t souls, unite, deck;   /* ... BN6_SOULS (0: none, BN5's), the Custom screen's element 0xB, the battle's deck */
+	uint32_t panels, panel_size, list, list_end, coll_size, mplays;   /* (BN4's: BN6's sizes, its parts' in the trace) */
+	uint32_t navi, navi_size, used, pending, side;   /* MegaMan's player block's places (BN6_BATTLE_NAVI's or BN5's; 0 none) */
+	uint32_t souls, unite, deck;   /* ... BN6_SOULS (0: none, BN5's), the Custom screen's element 0xB, the battle's deck (0 none) */
 	uint32_t paralysis;            /* a collision data's paralysis timer (BN6_COLL_PARALYSIS, BN5_COLL_PARALYSIS) */
+	uint32_t coll_flags, coll_struck;   /* ... its flags and what a frame's hits left it (BN6_COLL_FLAGS, BN6_COLL_STRUCK: BN5's too) */
 	const uint8_t *rom;
 	uint32_t songs;   /* (its song table, a ROM offset) */
+	uint8_t (*sub)(void);   /* its sub-mode as BN6's (BN4's, xd4_sub); NULL: rd8(gamestate) */
 	uint8_t (*rd8)(uint32_t);
 	uint32_t (*rd32)(uint32_t);
 	void (*wr32)(uint32_t, uint32_t);
@@ -97,6 +99,7 @@ typedef struct {
 } View;
 
 static uint32_t rom32(const uint8_t *rom, uint32_t a) { return get32(rom + (a - 0x08000000u)); }
+static uint8_t sub_of(const View *v) { return v->sub ? v->sub() : v->rd8(v->gamestate); }
 static bool in_ewram(uint32_t a) { return a >= BN6_EWRAM && a < BN6_EWRAM_END; }
 
 /* ---- a game's battle as it runs: its view, its trace, the sounds its music players began ---- */
@@ -132,6 +135,20 @@ static void bytes_out(Side *g, uint32_t at, uint32_t len, uint32_t room) {
 	uint8_t buf[0x100] = { 0 };
 	for (uint32_t i = 0; at && i < len; i += 4) put32(buf + i, g->v.rd32(at + i));
 	fwrite(buf, 1, room, g->out);
+}
+
+/* (BN4's) a part's bytes from `at` (0: none, zeros) in BN6's layout (xd4_translate), padded to `room` */
+static void part_out(Side *g, int part, uint32_t at, uint32_t room) {
+	uint8_t raw[0x100] = { 0 }, buf[0x100] = { 0 };
+	for (uint32_t i = 0, n = xd4_size(part); at && i < n; i += 4) put32(raw + i, g->v.rd32(at + i));
+	if (at) xd4_translate(part, raw, buf);
+	fwrite(buf, 1, room, g->out);
+}
+
+/* a part of an object's: BN4's translated, BN5's and BN6's as they are */
+static void obj_part(Side *g, int part, uint32_t at, uint32_t len, uint32_t room) {
+	if (g->v.game == 4) part_out(g, part, at, room);
+	else bytes_out(g, at, len, room);
 }
 
 /* the objects of a kind in play: their slots */
@@ -204,8 +221,8 @@ static void player_out(Side *g) {
 	const View *v = &g->v;
 	uint32_t side = v->rd8(v->side) & 1;
 	bytes_out(g, v->navi + side * v->navi_size, v->navi_size, BN6_BATTLE_NAVI_SIZE);
-	w32(g, v->rd32(v->used));
-	bytes_out(g, v->pending + side * BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
+	w32(g, v->used ? v->rd32(v->used) : 0);
+	bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
 	bytes_out(g, v->souls, SOULS_SIZE, SOULS_SIZE);
 	bytes_out(g, v->unite, BN6_ELEMENT_SIZE, BN6_ELEMENT_SIZE);
 }
@@ -231,15 +248,15 @@ static void objects_out(Side *g, const uint8_t *s1, int n1, const uint8_t *s3, i
 	for (int i = 0; i < n1; ++i) {
 		uint32_t o = v->t1 + s1[i] * BN6_T1_SIZE, ai = v->rd32(o + BN6_T1_AI_DATA), coll = v->rd32(o + BN6_T1_COLLISION);
 		w8s(g, s1[i], in_ewram(ai), in_ewram(coll), dispatched(v, 1, o));
-		bytes_out(g, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
-		bytes_out(g, in_ewram(ai) ? ai : 0, BN6_AI_DATA_SIZE, BN6_AI_DATA_SIZE);
-		bytes_out(g, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
+		obj_part(g, XD4_OBJECT, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
+		obj_part(g, XD4_AI, in_ewram(ai) ? ai : 0, BN6_AI_DATA_SIZE, BN6_AI_DATA_SIZE);
+		obj_part(g, XD4_COLL, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
 	}
 	for (int i = 0; i < n3; ++i) {
 		uint32_t o = v->t3 + s3[i] * BN6_T1_SIZE, coll = v->rd32(o + BN6_T1_COLLISION);
 		w8s(g, s3[i], 0, in_ewram(coll), dispatched(v, 3, o));
-		bytes_out(g, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
-		bytes_out(g, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
+		obj_part(g, XD4_OBJECT, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
+		obj_part(g, XD4_COLL, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
 	}
 	for (int i = 0; i < n4; ++i) {
 		uint32_t o = v->t4 + s4[i] * BN6_T4_SIZE;
@@ -261,6 +278,9 @@ static uint32_t dark_ai5(const View *v, const uint8_t *s1, int n1) {
 	return 0;
 }
 
+static void apart_out(Side *g, const uint8_t *s1, int n1);
+static void apart4_out(Side *g);
+
 static void frame_out(Side *g) {
 	const View *v = &g->v;
 	int nev = g->log && events ? xd_take(g->log, events, EVENTS_OUT) : 0;
@@ -272,12 +292,30 @@ static void frame_out(Side *g) {
 	fwrite("FRAM", 1, 4, g->out);
 	w32(g, g->frame);
 	w32(g, v->rd32(v->state + 0x40));
-	w8s(g, v->rd8(v->gamestate), v->rd8(v->state + 1), (uint8_t)n1, (uint8_t)n3);
+	w8s(g, sub_of(v), v->rd8(v->state + 1), (uint8_t)n1, (uint8_t)n3);
 	w8s(g, (uint8_t)n4, (uint8_t)ns, (uint8_t)no, 0);
 	w32(g, v->rd32(v->rng[0]));
 	w32(g, v->rd32(v->rng[1]));
 	w32(g, (uint32_t)nev);
 	player_out(g);
+	if (v->game == 4) apart4_out(g);
+	else apart_out(g, s1, n1);
+	objects_out(g, s1, n1, s3, n3, s4, n4);
+	for (uint32_t p = 0; p < PANELS; ++p) obj_part(g, XD4_PANEL, v->panels + p * v->panel_size, v->panel_size, BN5_PANEL_SIZE);
+	for (int i = 0; i < no; ++i) w32(g, order[i]);
+	for (int i = 0; i < ns; ++i) { w32(g, g->begun[i][0]); w32(g, g->begun[i][1]); }
+	g->nbegun = 0;
+	for (int i = 0; i < nev; ++i) {
+		const XdEvent *e = &events[i];
+		w8s(g, e->kind, e->sub, (uint8_t)e->flags, (uint8_t)(e->flags >> 8));
+		const uint32_t words[XD_EVENT_WORDS - 1] = { e->frame, e->t, e->caller, e->family, e->outer, e->object, e->a, e->b, e->ref };
+		for (int k = 0; k < XD_EVENT_WORDS - 1; ++k) w32(g, words[k]);
+	}
+}
+
+/* What BN6's engine keeps apart of the objects, BN5's read as BN6 keeps it (APART_*) */
+static void apart_out(Side *g, const uint8_t *s1, int n1) {
+	const View *v = &g->v;
 	/* (BN6's: RAM_SEA on; BN5 keeps the sea's in the objects' collision data, read by the differential as BN6 keeps it, and its
 	 * lists at its own address) */
 	bytes_out(g, v->game == 6 ? RAM_SEA : 0, APART_SEA, APART_SEA);
@@ -301,17 +339,13 @@ static void frame_out(Side *g) {
 		w32(g, flash);
 		bytes_out(g, 0, APART_MOVED - 4, APART_MOVED - 4);
 	}
-	objects_out(g, s1, n1, s3, n3, s4, n4);
-	for (uint32_t p = 0; p < PANELS; ++p) bytes_out(g, v->panels + p * v->panel_size, v->panel_size, BN5_PANEL_SIZE);
-	for (int i = 0; i < no; ++i) w32(g, order[i]);
-	for (int i = 0; i < ns; ++i) { w32(g, g->begun[i][0]); w32(g, g->begun[i][1]); }
-	g->nbegun = 0;
-	for (int i = 0; i < nev; ++i) {
-		const XdEvent *e = &events[i];
-		w8s(g, e->kind, e->sub, (uint8_t)e->flags, (uint8_t)(e->flags >> 8));
-		const uint32_t words[XD_EVENT_WORDS - 1] = { e->frame, e->t, e->caller, e->family, e->outer, e->object, e->a, e->b, e->ref };
-		for (int k = 0; k < XD_EVENT_WORDS - 1; ++k) w32(g, words[k]);
-	}
+}
+
+/* (BN4's) the same block, zeros: BN4 has none of what BN6's engine keeps apart (no sea's submerge, no Dark Soul's lists, no
+ * moved Navis' state, no green flash by side) */
+static void apart4_out(Side *g) {
+	static const uint32_t parts[] = { APART_SEA, BN5_DARK_LIST_SIZE, BN5_DARK_LIST_SIZE, APART_NAVIS, APART_DARK, APART_MOVED };
+	for (uint32_t k = 0; k < sizeof parts / sizeof *parts; ++k) bytes_out(g, 0, parts[k], parts[k]);
 }
 
 /* ---- a battle fought ---- */
@@ -349,6 +383,8 @@ static uint32_t custom_keys(const Spec *s, int game, int screen, int f) {
 			if (f < c->steps[k].n) return c->steps[k].keys;
 		return 0;
 	}
+	/* (BN4's takes A only after its cursor's slide to OK: START 2 frames, A 2 frames 18 later, again each 40 frames, xdiff_bn4.c's) */
+	if (game == 4) return f % 40 < 2 ? KEY_START : f % 40 >= 20 && f % 40 < 22 ? KEY_A : 0;
 	return f < 4 ? KEY_START : f >= 12 && f < 16 ? KEY_A : 0;
 }
 
@@ -360,7 +396,7 @@ static void hold_foes(const View *v, int frames, bool first) {
 		uint32_t o = v->t1 + (uint32_t)k * BN6_T1_SIZE, coll = v->rd32(o + BN6_T1_COLLISION);
 		if (!(v->rd8(o + BN6_T1_IN_PLAY) & 1) || !v->rd8(o + BN6_T1_ALLIANCE) || !in_ewram(coll)) continue;
 		v->wr16(coll + v->paralysis, (uint16_t)frames);
-		if (first) v->wr32(coll + BN6_COLL_STRUCK, v->rd32(coll + BN6_COLL_STRUCK) | BN6_STRUCK_PARALYSIS);
+		if (first) v->wr32(coll + v->coll_struck, v->rd32(coll + v->coll_struck) | BN6_STRUCK_PARALYSIS);
 	}
 }
 
@@ -374,7 +410,7 @@ static void hold_step(Side *g, const Spec *s) {
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
 static void keep_safe(const View *v) {
 	uint32_t coll = v->rd32(v->t1 + BN6_T1_COLLISION);
-	if (in_ewram(coll)) v->wr32(coll + BN6_COLL_FLAGS, v->rd32(coll + BN6_COLL_FLAGS) | BN6_OBJ_INVULNERABLE);
+	if (in_ewram(coll)) v->wr32(coll + v->coll_flags, v->rd32(coll + v->coll_flags) | BN6_OBJ_INVULNERABLE);
 }
 
 /* (deck5=, deck6=) the battle's deck in the spec's order, as the battle's
@@ -386,7 +422,7 @@ static void keep_safe(const View *v) {
 static void deck_put(Side *g, const Spec *s) {
 	int k = g->v.game == 5 ? 0 : 1;
 	g->decked = true;
-	for (int i = 0; i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
+	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
 }
 
 /* BN6's chip AI's lists written from BN5's (dslist=1), its chip ids BN6's (xnavi_dark.h), after BN6's fight's first frame
@@ -415,9 +451,9 @@ static void seed(Side *g, const Spec *s) {
 	const View *v = &g->v;
 	v->wr32(v->rng[0], s->seed[0]);
 	v->wr32(v->rng[1], s->seed[1]);
-	if (s->mm_element >= 0) element_set(v, s->mm_element);
+	if (s->mm_element >= 0 && v->game != 4) element_set(v, s->mm_element);   /* (BN4's collision data's element unmapped) */
 	if (s->ndschips && v->game == 5) dschips_put(g, s);
-	if (s->dslist && v->game == 6 && g->ref->seeded) lists_copy(g);
+	if (s->dslist && v->game == 6 && g->ref->v.game == 5 && g->ref->seeded) lists_copy(g);
 	g->seeded = true;
 	g->nbegun = 0;   /* (the fight's sounds from here) */
 }
@@ -459,7 +495,7 @@ static void film_take(Side *g, const Spec *s, uint32_t t) {
 static bool step(Side *g, const Spec *s) {
 	const View *v = &g->v;
 	if (g->done) return false;
-	uint8_t sub = v->rd8(v->gamestate), phase = v->rd8(v->state + 1);
+	uint8_t sub = sub_of(v), phase = v->rd8(v->state + 1);
 	uint32_t t = v->rd32(v->state + 0x40), keys = 0;
 	bool battle = sub == BN6_SUB_BATTLE, custom = battle && phase == BN6_PHASE_CUSTOM;
 	/* (a screen counted as its window first reads open: the phase passes the Custom screen's for a frame as a battle begins) */
@@ -481,7 +517,7 @@ static bool step(Side *g, const Spec *s) {
 	v->frame(keys);
 	++g->frame;
 	if (custom && g->custom >= 0) shots_take(g, s);
-	sub = v->rd8(v->gamestate);
+	sub = sub_of(v);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
 	if (fighting) film_take(g, s, t);
@@ -690,7 +726,7 @@ static bool subject(Side *g, const Spec *s) {
 	for (int i = 0; i < s->nfoes; ++i) {
 		int id = bn6_id(s->foes[i].id), p = s->foes[i].panel;
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 0, 0, (p & 0xF) - 1, (p >> 4) - 1, id };
-		printf("xdiff: BN5's %#x at column %d, row %d: BN6's %#x\n", s->foes[i].id, p & 0xF, p >> 4, id);
+		printf("xdiff: BN%d's %#x at column %d, row %d: BN6's %#x\n", s->bn4 ? 4 : 5, s->foes[i].id, p & 0xF, p >> 4, id);
 	}
 	emu_battle_force(&e);
 	for (int f = 0; f < 600 && emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE_INIT && emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE; ++f) emu_frame(0);
@@ -702,7 +738,7 @@ static bool subject(Side *g, const Spec *s) {
 		.panels = BN6_FIELD_PANELS, .panel_size = BN6_PANEL_SIZE, .list = BN6_OBJECT_LIST, .list_end = BN6_OBJECT_LIST_END,
 		.coll_size = BN6_COLL_SIZE, .mplays = BN6_MPLAYS, .navi = BN6_BATTLE_NAVI, .navi_size = BN6_BATTLE_NAVI_SIZE, .used = BN6_CROSSES_USED,
 		.pending = BN6_CROSS_PENDING, .side = BN6_BATTLE_SIDE, .souls = BN6_SOULS, .unite = BN6_CUSTOM_UNITE, .deck = BN6_BATTLE_DECK,
-		.paralysis = BN6_COLL_PARALYSIS,
+		.paralysis = BN6_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK,
 		.rom = R.data, .songs = R.layout->song_table, .rd8 = emu_read8, .rd32 = emu_read32, .wr32 = emu_write32, .wr16 = bn6_wr16,
 		.frame = bn6_frame };
 	return open_out(g, s, "bn6");
@@ -768,10 +804,30 @@ static bool reference(Side *g, const Spec *s) {
 		.panels = BN5_FIELD_PANELS, .panel_size = BN5_PANEL_SIZE, .list = BN5_OBJECT_LIST, .list_end = BN5_OBJECT_LIST_END,
 		.coll_size = BN5_COLL_SIZE, .mplays = BN5_MPLAYS, .navi = BN5_BATTLE_NAVI, .navi_size = BN5_BATTLE_NAVI_SIZE, .used = BN5_SOULS_USED,
 		.pending = BN5_SOUL_PENDING, .side = BN5_BATTLE_SIDE, .souls = 0, .unite = BN5_CUSTOM_UNITE, .deck = BN5_BATTLE_DECK,
-		.paralysis = BN5_COLL_PARALYSIS,
+		.paralysis = BN5_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK,
 		.rom = x->data, .songs = x->layout->song_table, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
 		.wr16 = guest_write16, .frame = bn5_frame };
 	return open_out(g, s, "bn5");
+}
+
+static void bn4_frame(uint32_t keys) { guest_frame_quiet(keys); }
+
+/* BN4 Red Sun's own battle on the guest core (xdiff_bn4.h's record), traced in BN6's units (xdiff_bn4_trace.h): its
+ * Custom screens passed and its fight keyed by its own window and timer, as BN5's */
+static bool reference4(Side *g, const Spec *s) {
+	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
+	if (!guest_start(XROM_BN4_RED_SUN_US) || !x->data) return false;
+	uint8_t rec[0x80];
+	uint32_t len = xd4_record(s, rec);
+	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
+	const Xd4Places *p = &xd4_places;
+	g->v = (View){ .game = 4, .state = p->state, .window = p->window, .rng = { p->rng[0], p->rng[1] }, .t1 = p->t1, .t3 = p->t3,
+		.t4 = p->t4, .nt1 = (int)p->nt1, .panels = p->panels, .panel_size = BN6_PANEL_SIZE, .list = p->list, .list_end = p->list_end,
+		.coll_size = BN6_COLL_SIZE, .mplays = p->mplays, .navi = p->navi, .navi_size = p->navi_size, .side = p->side,
+		.paralysis = p->paralysis, .coll_flags = p->coll_flags, .coll_struck = p->coll_struck, .rom = x->data,
+		.songs = x->layout->song_table, .sub = xd4_sub, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
+		.wr16 = guest_write16, .frame = bn4_frame };
+	return open_out(g, s, "bn4");
 }
 
 /* Each core's hooks, once both battles are made (BN5's code is the families' as xvirus_moved has it), and the
@@ -808,27 +864,30 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 		if (nids < XD_NAVI_IDS_MAX) ids[nids++] = s->foes[i].id;
 	}
 	xd_log_navis(ids, nids);
-	a->log = a->out ? xd_log_start(5, fams, n, navis) : NULL;
+	/* (BN4's battle hooks none yet: its routines' twins are unmapped, so its trace holds no events) */
+	bool hooked = a->v.game == 5;
+	a->log = a->out && hooked ? xd_log_start(5, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);
-	if ((a->out && !a->log) || (b->out && !b->log) || !events) return false;
+	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	return true;
 }
 
 /* what was traced, and what became of each core's draws */
 static void summary(const Side *a, const Side *b, const Spec *s) {
-	printf("xdiff: BN5's battle %d fight frames traced, BN6's %d%s\n", a->fought ? a->traced : -1, b->fought ? b->traced : -1,
-		s->follow ? " (BN6's RNG words following BN5's)" : s->replay ? " (BN6's draws replayed from BN5's)" : "");
+	int ref = s->bn4 ? 4 : 5;
+	printf("xdiff: BN%d's battle %d fight frames traced, BN6's %d%s\n", ref, a->fought ? a->traced : -1, b->fought ? b->traced : -1,
+		s->follow ? " (BN6's RNG words following the reference's)" : s->replay ? " (BN6's draws replayed from BN5's)" : "");
 	for (int k = 0; k < 2; ++k) {
 		const Side *g = k ? b : a;
 		int n[XD_COUNTS];
 		if (g->out && !g->fought)
 			printf("xdiff: BN%d's battle never reached its fight: its game state %02x, its battle's phase %02x, Custom screen %d, after %u frames\n",
-				5 + k, g->v.rd8(g->v.gamestate), g->v.rd8(g->v.state + 1), g->screen, (unsigned)g->frame);
+				k ? 6 : ref, sub_of(&g->v), g->v.rd8(g->v.state + 1), g->screen, (unsigned)g->frame);
 		if (!g->log) continue;
 		xd_counts(g->log, n);
-		printf("xdiff: BN%d's hooks: %d draws replayed, %d unmatched, %d unmapped; %d events lost\n", 5 + k, n[0], n[1], n[2], n[3]);
+		printf("xdiff: BN%d's hooks: %d draws replayed, %d unmatched, %d unmapped; %d events lost\n", k ? 6 : ref, n[0], n[1], n[2], n[3]);
 	}
 }
 
@@ -839,8 +898,8 @@ int xdiff_run(const char *text) {
 		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/devtools/differential.md)\n");
 		return 2;
 	}
-	if (s.bn4) return xdiff_bn4_run(&s);
-	if (!XR[XROM_BN5_COLONEL_US].data) {
+	if (s.bn4 == XD_BN4_ALONE) return xdiff_bn4_run(&s);
+	if (!s.bn4 && !XR[XROM_BN5_COLONEL_US].data) {
 		fprintf(stderr, "xdiff: BN5 Team Colonel's ROM is not beside BN6's\n");
 		return 2;
 	}
@@ -848,8 +907,9 @@ int xdiff_run(const char *text) {
 	const XVirusFamily *fams[MAX_FOES];
 	xd_log_shared(fams, spec_families(&s, fams));
 	if (s.souls6 || colonel_foe(&s)) xd_log_routes();
-	bool ra = s.bn5 && reference(&a, &s), rb = s.bn6 && subject(&b, &s);
-	if ((s.bn5 && !ra) || (s.bn6 && !rb)) {
+	/* (the reference BN4's where the spec says game=bn4:trace or bn4:bn6: xdiff_bn4_trace.h) */
+	bool want = s.bn5 || s.bn4, ra = s.bn4 ? reference4(&a, &s) : s.bn5 && reference(&a, &s), rb = s.bn6 && subject(&b, &s);
+	if ((want && !ra) || (s.bn6 && !rb)) {
 		fprintf(stderr, "xdiff: a battle could not be begun\n");
 		return 1;
 	}

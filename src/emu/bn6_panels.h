@@ -73,7 +73,11 @@
 #define BN6_COLL_DAMAGE       0x2E        /* u16, an attack's damage, what each of its hits deals (BN5's +0x2E too) */
 /* (BN6_COLL_FLAGS, bn6.h's, its object's flags as bn6f's object_getFlag reads them, 0x0801A166: poison spares 0x08000028,
  * lava 0x20 and 0x88000206, its damage 9) */
-#define BN6_COLL_DAMAGE_ADD   0x84        /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */
+#define BN6_COLL_ALLIANCE     0x04        /* its side (BN4's +3: bn4.h, BN4_COLL_ALLIANCE; the setup writes it, BN6 0x08019FB4) */
+#define BN6_COLL_FINAL_DAMAGE 0x80        /* u16, the HP a frame's hits take (BN5's +0x78: legit.json's collision layout; BN4's +0x28) */
+#define BN6_PANEL_RESERVER    0x1C        /* a panel's (BN6_PANEL_SIZE): the object that reserved it (BN4's +0x14, BN5's the same place) */
+#define BN6_AI_ATTACK_VARS    0xA0        /* an AI data's attack's variables (bn6.h, BN6_T1_AI_DATA; BN4's +0x70, bn4.h BN4_AI_ATTACK_VARS) */
+#define BN6_COLL_DAMAGE_ADD   0x84       /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */
 #define BN6_COLL_POISON       0x8C        /* u16, poison's damage, a point each 7 frames (the sea's on a Fire object, as xpanels.c brings it) */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */
 

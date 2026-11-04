@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "bn5.h"
-#include "bn6.h"
 #include "bytes.h"
 #include "claims.h"
 #include "data.h"
@@ -20,6 +19,7 @@
 #include "xfields.h"
 #include "xnavi.h"
 #include "xsong.h"
+#include "xvirus_bn4.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
@@ -48,6 +48,8 @@ typedef struct {
 	                                                                   BN6_T3_TYPES, BN6_T4_TYPES), how many */
 	uint32_t drops;                 /* its enemies' reward rows (as BN6_DROP_ROWS) */
 	bool bn5;                       /* its reward rows' chips BN5's, given as BN6's (xchips.h) */
+	bool bn4;                       /* BN4's: no per-family tables (a family its own object type), its records its enemy records */
+	uint8_t text_end;               /* its text's end code where not BN6's TEXT_END (BN4's 0xE5) */
 } Game;
 
 static bool game_of(int game, Game *g) {
@@ -57,14 +59,20 @@ static bool game_of(int game, Game *g) {
 		/* (the sizes as BN6 reads them for its 32 AI indexes: AI 30's and 31's past its viruses' 30, in the Navis') */
 		*g = (Game){ R.data, BN6_FAMILY_TABLES, BN6_FAMILIES, BN6_FAMILY_STEP, R.layout->enemy_names[0], BN6_ICE_SIZES, BN6_FAMILIES,
 			R.layout->sprite_lists, BN6_EFFECTS, BN6_EFFECT_COUNT, { BN6_T1_TYPES, BN6_T3_TYPES, BN6_T4_TYPES },
-			{ BN6_TYPES_T1_COUNT, BN6_TYPES_T3_COUNT, BN6_TYPES_T4_COUNT }, BN6_DROP_ROWS, false };
+			{ BN6_TYPES_T1_COUNT, BN6_TYPES_T3_COUNT, BN6_TYPES_T4_COUNT }, BN6_DROP_ROWS, false, false };
 		return true;
 	}
 	if (game == XROM_BN5_COLONEL_US && XR[game].data && XR[game].layout) {
 		/* (BN5 freezes no virus: no ice blocks' sizes) */
 		*g = (Game){ XR[game].data, BN5_FAMILY_TABLES, BN5_FAMILIES, BN5_FAMILY_STEP, BN5_ENEMY_NAMES - BUS, 0, 0,
 			XR[game].layout->sprite_lists, BN5_EFFECTS, BN5_EFFECT_COUNT, { BN5_T1_TYPES, BN5_T3_TYPES, BN5_T4_TYPES },
-			{ BN5_TYPES_T1_COUNT, BN5_TYPES_T3_COUNT, BN5_TYPES_T4_COUNT }, BN5_REWARD_ROWS, true };
+			{ BN5_TYPES_T1_COUNT, BN5_TYPES_T3_COUNT, BN5_TYPES_T4_COUNT }, BN5_REWARD_ROWS, true, false };
+		return true;
+	}
+	if (game == XROM_BN4_RED_SUN_US && xrom_research && XR[game].data && XR[game].layout) {
+		/* (no per-family tables, no ice, its effects not mapped, its reward rows not read: BN6's fill for its ids) */
+		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, 0, 0,
+			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, 0, false, true, BN4_TEXT_END };
 		return true;
 	}
 	return false;
@@ -262,13 +270,15 @@ static uint32_t shim_room(Ctx *c, uint32_t n) {
 static void range_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvRange *r) {
 	uint32_t t = 0, was = 0, at = 0;
 	const uint8_t *orig = c->rom + (r->at - BUS);
-	if (!thumb_bl_decode(r->at, get16(orig), get16(orig + 2), &was) || (was != BN5_BY_NAME_RANGE && was != BN5_COUNT_BY_NAME) ||
-		!thumb_bl_read(code, r->at - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, was == BN5_BY_NAME_RANGE ? BN6_BY_NAME_RANGE : BN6_COUNT_BY_NAME)) {
+	bool ok = thumb_bl_decode(r->at, get16(orig), get16(orig + 2), &was);
+	bool bn4 = ok && c->f->game == XROM_BN4_RED_SUN_US && was == BN4_BY_NAME_RANGE;
+	if (!ok || (was != BN5_BY_NAME_RANGE && was != BN5_COUNT_BY_NAME && !bn4) ||
+		!thumb_bl_read(code, r->at - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, was == BN5_COUNT_BY_NAME ? BN6_COUNT_BY_NAME : BN6_BY_NAME_RANGE)) {
 		xv_fail("its NameID range's call at %08x", (unsigned)r->at);
 		return;
 	}
 	uint8_t shim[XV_SHIM_RANGE_SIZE];
-	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_range(shim, at, r->lo, r->hi, t)) { xv_fail("its NameID range's shim for %08x", (unsigned)r->at); return; }
+	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_range(shim, at, r->lo, r->hi, t, bn4 ? 1 : -1)) { xv_fail("its NameID range's shim for %08x", (unsigned)r->at); return; }
 	uint8_t *p = xv_put(at, sizeof shim, true);
 	if (p) memcpy(p, shim, sizeof shim);
 	if (!thumb_bl_write(code, r->at - b->start, b->at, at)) xv_fail("its call at %08x aimed at its shim", (unsigned)r->at);
@@ -448,11 +458,11 @@ static struct {
 	XvMoved moved[XV_VERSIONS];   /* each from its game's archive to the families' */
 } names;
 
-/* an archive's entry `i` in `rom` (ending with TEXT_END): its bytes and length, 0 for none */
-static uint32_t entry_of(const uint8_t *rom, uint32_t archive, uint32_t i, const uint8_t **out) {
+/* an archive's entry `i` in `rom` (ending with `end`): its bytes and length, 0 for none */
+static uint32_t entry_of(const uint8_t *rom, uint32_t archive, uint32_t i, uint8_t end, const uint8_t **out) {
 	if (archive + 2 * i + 2 > ROM_SIZE) return 0;
 	uint32_t p = archive + get16(rom + archive + 2 * i), n = 0;
-	while (p + n < ROM_SIZE && n < NAME_BYTES && rom[p + n] != TEXT_END) ++n;
+	while (p + n < ROM_SIZE && n < NAME_BYTES && rom[p + n] != end) ++n;
 	*out = rom + p;
 	return p + n < ROM_SIZE && n < NAME_BYTES ? n + 1 : 0;
 }
@@ -461,7 +471,7 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 	uint32_t end = xg_names_end();
 	for (int v = 0; v < XV_VERSIONS && !xv_failed(); ++v) {
 		const uint8_t *s;
-		uint32_t n = entry_of(g->rom, g->names, f->names[v], &s), id = (uint32_t)(f->first_id + v);
+		uint32_t n = entry_of(g->rom, g->names, f->names[v], g->text_end ? g->text_end : TEXT_END, &s), id = (uint32_t)(f->first_id + v);
 		if (!n) { xv_fail("its name %d is no entry of its game's archive", v); return; }
 		/* (another game's in BN6's text codes: rom.h, xrom_text_bn6) */
 		uint32_t to = n - 1;
@@ -591,6 +601,13 @@ static void types_set(const XVirusFamily *f, const Game *g) {
 static bool sane(const XVirusFamily *f, const Game *g) {
 	char why[200];
 	if (!xvirus_recipe_ok(f, why, sizeof why)) return xv_fail("%s", why);
+	if (g->bn4) {
+		/* (its records its first version's enemy record, which names its type; no state table of its game's to zero) */
+		uint32_t rec = BN4_ENEMY_STATS + BN4_ENEMY_STAT_SIZE * f->names[0];
+		if (f->struct1 != rec || f->struct2 != rec || g->rom[rec - BUS + BN4_ENEMY_TYPE] != f->src_ai)
+			return xv_fail("its records are not its enemy records (%08x)", (unsigned)rec);
+		return true;
+	}
 	if (f->src_ai < 0 || (uint32_t)f->src_ai >= g->count) return xv_fail("its AI index in its game, %d", f->src_ai);
 	uint32_t at = g->tables + 4u * (uint32_t)f->src_ai, st = rom32(g->rom, at);
 	uint32_t s1 = rom32(g->rom, at + g->step), s2 = rom32(g->rom, at + 2 * g->step);
@@ -608,6 +625,17 @@ static void traits_of(const XVirusFamily *f, const uint8_t *src, uint8_t out[BN6
 	memcpy(out, src, BN6_TRAITS_SIZE);
 	if (!f->traits.laid) return;
 	const XvSprite *s = &f->sprites[0];
+	if (f->game == XROM_BN4_RED_SUN_US) {
+		/* (BN4's enemy record names its sprite: its list's offset and number; the rest the recipe's, from its init) */
+		if (src[BN4_ENEMY_KIND] != 4u * s->list || src[BN4_ENEMY_FAMILY] != s->index) { xv_fail("its enemy record names another sprite"); return; }
+		memset(out, 0, BN6_TRAITS_SIZE);
+		out[BN6_TRAITS_LIST] = (uint8_t)(4u * s->to_list);
+		out[BN6_TRAITS_SPRITE] = s->to_index;
+		out[BN6_TRAITS_PALETTE] = f->traits.palette;
+		out[BN6_TRAITS_MODE] = f->traits.mode < BN6_TRAITS_MODE_COUNT ? f->traits.mode : XV_MODE_PAST;
+		out[BN6_TRAITS_SHADOW] = f->traits.shadow;
+		return;
+	}
 	if (src[BN6_TRAITS_LIST] != 4u * s->list || src[BN6_TRAITS_SPRITE] != s->index || src[BN6_TRAITS_MODE] != f->traits.mode ||
 		!src[BN5_TRAITS_SHADOW] != !f->traits.shadow) {
 		xv_fail("its struct1 is not the one its recipe names");
@@ -625,6 +653,20 @@ static void traits_of(const XVirusFamily *f, const uint8_t *src, uint8_t out[BN6
  * (enemies_tell) once it is installed */
 static struct { uint8_t traits[BN6_TRAITS_SIZE], stats[XV_VERSIONS * BN6_STATS_SIZE]; } rec;
 
+/* BN4's six enemy records (its versions' ids) as BN6's struct2: element << 12 | HP, the version, no flags, element << 12 |
+ * its attack's damage (BN4's +0xA, which carries no element) */
+static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
+	for (int v = 0; v < XV_VERSIONS; ++v) {
+		const uint8_t *r = g->rom + (BN4_ENEMY_STATS - BUS) + BN4_ENEMY_STAT_SIZE * f->names[v];
+		uint16_t hp = get16(r + BN4_ENEMY_HP);
+		uint8_t *o = out + BN6_STATS_SIZE * v;
+		put16(o, hp);
+		o[2] = (uint8_t)v;
+		o[3] = 0;
+		put16(o + 4, (uint16_t)((hp & 0xF000u) | (get16(r + BN4_ENEMY_ATTACK) & 0x0FFFu)));
+	}
+}
+
 /* its state table, struct1, struct2 and held chips in its home or BN6's
  * (their words in the grown table of held chips), and its entries of the
  * eleven per-family tables into `entry` */
@@ -634,7 +676,8 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 	uint8_t *s1 = xv_put(f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE, true), *s2 = xv_put(f->home + XV_HOME_STRUCT2, sizeof rec.stats, true);
 	if (!s1 || !s2 || !in_rom(f->struct1, BN6_TRAITS_SIZE) || !in_rom(f->struct2, sizeof rec.stats)) { xv_fail("its records"); return; }
 	traits_of(f, g->rom + (f->struct1 - BUS), rec.traits);
-	memcpy(rec.stats, g->rom + (f->struct2 - BUS), sizeof rec.stats);
+	if (g->bn4) stats_bn4(f, g, rec.stats);
+	else memcpy(rec.stats, g->rom + (f->struct2 - BUS), sizeof rec.stats);
 	memcpy(s1, rec.traits, BN6_TRAITS_SIZE);
 	memcpy(s2, rec.stats, sizeof rec.stats);
 	entry[0] = f->home + XV_HOME_STATES;
@@ -711,6 +754,7 @@ static void songs_noted(const XVirusFamily *f) {
 static uint16_t drops[XV_VERSIONS][ENEMY_DROPS];
 
 static void drops_set(const XVirusFamily *f, const Game *g) {
+	if (!g->drops) return;   /* (BN4's reward rows not read: BN6's fill) */
 	for (int v = 0; v < XV_VERSIONS && !xv_failed(); ++v) {
 		uint32_t from = g->drops - BUS + 2u * ENEMY_DROPS * f->names[v];
 		if (from + 2u * ENEMY_DROPS > ROM_SIZE) { xv_fail("its reward row %d", v); return; }
@@ -810,7 +854,7 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	for (int i = 0; i < f->nclones; ++i) xv_moved_add(f->clones[i].start, f->clones[i].at, f->clones[i].end - f->clones[i].start);
 	xv_moved_add(f->struct1, f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE);
 	xv_moved_add(f->struct2, f->home + XV_HOME_STRUCT2, XV_VERSIONS * BN6_STATS_SIZE);
-	xv_moved_add(rom32(g.rom, g.tables + 4u * (uint32_t)f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
+	if (g.tables) xv_moved_add(rom32(g.rom, g.tables + 4u * (uint32_t)f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
 	for (int v = 0; v < XV_VERSIONS; ++v) xv_moved_add(names.moved[v].from, names.moved[v].to, names.moved[v].len);
 	installed[ninstalled++] = f;
 	if (f->prestep) prestep_hook();
@@ -902,6 +946,9 @@ void xvirus_install(int which) {
 		else
 			for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
 		xfields_install(XROM_BN5_COLONEL_US);
+		/* (BN4 Red Sun's, where its ROM is read for research alone: --dev bn4families) */
+		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data)
+			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
 	}
 	claims_end();
 	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */

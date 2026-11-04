@@ -19,6 +19,9 @@
 #define MAX_SCRIPT_STEPS 32
 #define MAX_SHOTS 16
 
+/* (game=bn4) BN4's battle alone, its end told; traced alone (bn4:trace, OUT.bn4); traced against BN6's (bn4:bn6) */
+enum { XD_BN4_ALONE = 1, XD_BN4_TRACE, XD_BN4_BN6 };
+
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; bool both, bn5; uint32_t at5; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`;
                                                                                    both: BN5's copy too; bn5: `at` BN5's, its copy's (a chip's
@@ -73,7 +76,7 @@ typedef struct {
 	int ntwins;
 	char out[256];
 	bool bn5, bn6, follow, replay;
-	bool bn4;           /* (game=bn4) BN4 Red Sun's own battle alone on the guest core (xdiff_bn4.h) */
+	int bn4;            /* (game=bn4...) BN4 Red Sun's own battle on the guest core, XD_BN4_* (xdiff_bn4.h, xdiff_bn4_trace.h); 0 none */
 } Spec;
 
 /* SPEC's items into s (its defaults first): false, said on stderr, where
