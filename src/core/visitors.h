@@ -1,12 +1,15 @@
 /* Visitors: where the nets meet (issue #82, docs/multirom/one-net.md, One net: the
  * design). From the run's second act on, where BN5's ROM is read and its
  * families are in BN6's engine, one random battle in four takes one virus
- * of the other net in place of one of its own: BN6's areas meet BN5's
- * viruses, BN5's areas BN6's. The visitor stands on the panel of the one
- * it replaces, of the same role (visitor_families.h), a family the battle
- * does not hold, at the highest version that keeps the battle in the
- * act's band. Never in an opening battle, a Server's, the duel's, one the
- * Gentle helper eases, nor in the deep, whose acts mix the nets already. */
+ * of another net in place of one of its own: BN6's areas meet BN5's
+ * viruses, BN5's areas BN6's, and both BN4 Red Sun's where its ROM is read
+ * for research and its families are moved in (--dev bn4families), in the
+ * same one in four (docs/multirom/bn4.md, Its viruses as visitors). The
+ * visitor stands on the panel of the one it replaces, of the same role
+ * (visitor_families.h), a family the battle does not hold, at the highest
+ * version that keeps the battle in the act's band. Never in an opening
+ * battle, a Server's, the duel's, one the Gentle helper eases, nor in the
+ * deep, whose acts mix the nets already. */
 #ifndef CW_VISITORS_H
 #define CW_VISITORS_H
 
@@ -40,10 +43,11 @@ bool visitor_due(uint32_t layer_seed, int index, int depth, int biome, int kind)
 bool visitors_here(int depth, int biome);
 
 /* Battle `e` (a random battle at `depth`) with one of its viruses taken
- * by a visitor of the other net: the replaced one's panel (plain or
+ * by a visitor of another net: the replaced one's panel (plain or
  * cracked) and role, a family `e` does not hold that its net's own random
- * battles reach at `depth` (its stage), at the highest version up to the
- * act's (BN5's by tier) that keeps the battle's HP to the band's top and
+ * battles reach at `depth` (its stage), each fitting family of the other
+ * nets as likely as any, at the highest version up to the act's (BN5's
+ * and BN4's by tier) that keeps the battle's HP to the band's top and
  * its hit to the band's cap; Encounter.visitor names it (1 + its index).
  * Its picks from the run's random numbers. False, `e` unchanged, where
  * none fits. */

@@ -34,7 +34,7 @@ bool visitors_here(int depth, int biome) {
 	if (depth < 4 || (run.helpers & HELP_GENTLE)) return false;
 	if (biome == BIOME_UNDERNET || biome == BIOME_GRAVEYARD || biome == BIOME_NEST) return false;
 	const VisitorKin *k;
-	return visitor_kin(VISIT_BN5, &k) > 0;
+	return visitor_kin(VISIT_BN5, &k) > 0 || visitor_kin(VISIT_BN4, &k) > 0;
 }
 
 bool visitor_due(uint32_t layer_seed, int index, int depth, int biome, int kind) {
@@ -45,7 +45,7 @@ bool visitor_due(uint32_t layer_seed, int index, int depth, int biome, int kind)
  * back's in the last, the front's in the first of the enemy's */
 static bool stands(int role, int col) { return role == VISITOR_FREE || (role == VISITOR_BACK && col == 5) || (role == VISITOR_FRONT && col == 3); }
 
-/* The highest version up to `top` of family `kin` from net `net` with
+/* The highest version up to `top` of family `family` from net `net` with
  * which the battle (its HP `hp` without the foe replaced) keeps to the
  * band: into *id its enemy id; -1 none */
 static int version_fit(int net, int family, int top, int hp, PacingBand b, int *id) {
@@ -72,11 +72,17 @@ static uint64_t held_of(const Encounter *e, int *hp) {
 	return held;
 }
 
+/* A visitor that fits: its net, its kin's index there, its version */
+typedef struct { int net, k, ver; } Fit;
+#define FITS_MAX (2 * VISITOR_KIN_MAX)
+
 /* The visitors that fit in place of foe `i` (its family's role, a family
  * the battle does not hold, reached at `depth`, a version in the band),
- * their kin's index and version into fit and ver; how many */
-static int fits_for(const Encounter *e, int i, int depth, int fit[VISITOR_KIN_MAX], int ver[VISITOR_KIN_MAX]) {
-	int home = e->xrecord ? VISIT_BN5 : VISIT_BN6, from = home ^ 1, hp, h, d;
+ * of the other nets, BN5's or BN6's first, then BN4's (each family as
+ * likely as any: docs/multirom/bn4.md, Its viruses as visitors), into fit;
+ * how many */
+static int fits_for(const Encounter *e, int i, int depth, Fit fit[FITS_MAX]) {
+	int home = e->xrecord ? VISIT_BN5 : VISIT_BN6, hp, h, d;
 	const Foe *f = &e->foes[i];
 	int role = visitor_role_in(home, f->family), panel = visitor_panel(e, f->col, f->row);
 	if (f->kind != FOE_VIRUS || (panel != 2 && panel != 3) || !stands(role, f->col) || !enemy_stats(f->id, &h, &d)) return 0;
@@ -84,17 +90,20 @@ static int fits_for(const Encounter *e, int i, int depth, int fit[VISITOR_KIN_MA
 	PacingBand b = pacing_band(depth, false, false);
 	int vlo, vhi;
 	pacing_virus_versions(depth, false, &vlo, &vhi);
-	/* (the act's version, BN5's by tier: BN6's V1 its V1EX, and so on) */
-	int top = from == VISIT_BN5 ? (2 * vhi + 1 > 5 ? 5 : 2 * vhi + 1) : vhi, allowed = loot_stage_allowed(depth);
-	const VisitorKin *kin;
-	int nk = visitor_kin(from, &kin), m = 0;
-	for (int k = 0; k < nk; ++k) {
-		int id;
-		if (!kin[k].visits || kin[k].role != role || kin[k].stage > allowed || (held >> kin[k].family & 1)) continue;
-		int v = version_fit(from, kin[k].family, top, hp - h, b, &id);
-		if (v < 0) continue;
-		fit[m] = k;
-		ver[m++] = v;
+	int allowed = loot_stage_allowed(depth), m = 0;
+	for (int from = 0; from < VISIT_NETS; ++from) {
+		if (from == home) continue;
+		/* (the act's version, BN5's and BN4's by tier: BN6's V1 their V1EX,
+		 * and so on) */
+		int top = from == VISIT_BN6 ? vhi : 2 * vhi + 1 > 5 ? 5 : 2 * vhi + 1;
+		const VisitorKin *kin;
+		int nk = visitor_kin(from, &kin);
+		for (int k = 0; k < nk && m < FITS_MAX; ++k) {
+			int id;
+			if (!kin[k].visits || kin[k].role != role || kin[k].stage > allowed || (kin[k].family < 64 && (held >> kin[k].family & 1))) continue;
+			int v = version_fit(from, kin[k].family, top, hp - h, b, &id);
+			if (v >= 0) fit[m++] = (Fit){ from, k, v };
+		}
 	}
 	return m;
 }
@@ -105,23 +114,26 @@ bool visitor_apply(Encounter *e, int depth) {
 	for (int i = 0; i < e->nfoes; ++i)
 		if (e->foes[i].kind == FOE_VIRUS) order[n++] = i;
 	if (!n) return false;
-	int from = e->xrecord ? VISIT_BN6 : VISIT_BN5, start = rng_range(0, n - 1);
+	int start = rng_range(0, n - 1);
 	for (int t = 0; t < n; ++t) {
-		int i = order[(start + t) % n], fit[VISITOR_KIN_MAX], ver[VISITOR_KIN_MAX], m = fits_for(e, i, depth, fit, ver);
+		Fit fit[FITS_MAX];
+		int i = order[(start + t) % n], m = fits_for(e, i, depth, fit);
 		if (!m) continue;
-		int pick = rng_range(0, m - 1), id;
+		const Fit *p = &fit[rng_range(0, m - 1)];
 		const VisitorKin *kin;
-		visitor_kin(from, &kin);
-		const VisitorKin *k = &kin[fit[pick]];
-		id = visitor_id(from, k->family, ver[pick]);
+		visitor_kin(p->net, &kin);
+		const VisitorKin *k = &kin[p->k];
+		int id = visitor_id(p->net, k->family, p->ver);
 		const uint8_t *tr = enemy_triple(id);
 		Foe *o = &e->foes[i];
 		o->kind = FOE_VIRUS;
 		o->family = k->family;
-		o->version = tr ? tr[0] : ver[pick];
+		o->version = tr ? tr[0] : p->ver;
 		o->id = id;
 		e->visitor = i + 1;
-		e->from_families |= (uint64_t)1 << k->family;
+		/* (BN4's families, from 64, have no bit: no battle of a run's own
+		 * holds one, so the repeat rule's memory needs none) */
+		if (k->family < 64) e->from_families |= (uint64_t)1 << k->family;
 		return true;
 	}
 	return false;
