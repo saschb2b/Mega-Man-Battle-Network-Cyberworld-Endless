@@ -116,6 +116,22 @@ AUDITS = {
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }
 
+# BN6's own third-kind types a family's call aims at (its pair's twin the type's spawner) whose code is BN4's but for a
+# number BN6's own users need: copied whole for BN4's families with that number BN4's (tools/xrecipe_bn4_copy.py), run
+# through the second-level dispatch as a moved type at a number of its own, BN6's own type left as it is: type -> its
+# spawner, the immediates changed (each checked against BN6's code), why (docs/rom/bn4.md, The thunder's copy)
+COPIED6 = {
+    0x2A: dict(spawner=0x080CADBC, imms=(
+        dict(at=0x080CACD6, rd=3, was=1, now=0,
+             why="its collision set up (0x08019FB4) with r3 0, as BN4's init (0x080D208C) passes, where BN6's passes 1"),),
+        why="the thunder Billy's attack spawns (0x080D2156, its pair BN6's spawner 0x080CADBC): BN6's init passes r3 = 1 to its "
+            "collision setup (movs r3,#1 at 0x080CACD6, bl 0x08019FB4), BN4's 0 (movs r3,#0 at 0x080D208C, bl 0x080129AC, its "
+            "twin), and the hit pass ORs it into the struck's hit bits, so a struck the paralysis does not take starts its "
+            "struck reaction in BN6 and not in BN4 (billy_v1's comparison found it; with 0 there Billy's own records match "
+            "BN4's through all 1200 frames). BN6's own two calls of the spawner (0x080EDB48, 0x08108464, by a scan of its "
+            "BLs) keep BN6's 1, so BN6's 0x2A is never patched: a copy of it whose init passes 0 serves BN4's families"),
+}
+
 # BN4's routines its families' code calls that BN6 has no twin of, copied with the family (each a block of its own, its
 # literal pool with it, the code between zeroed): entry -> why
 COPIED = {
@@ -212,9 +228,14 @@ TABLES = {
 # What a family keeps of BN4's for now, named over its recipe beside the generator's own interims: family -> lines
 INTERIMS = {
     'Elmperor': (
-        "its panel types (its attack's, 0x080DC780: 6, 7, 8, 4, 0xA, set by BN6's object_setPanelType) and the panel flags it "
-        "reads its element by (0x080C2948: 0x400, 0x800, 0x1000, 0x100, 0x200) kept as BN4's numbers: BN4's panel types are "
-        "not mapped yet (the same interim as Billy's panel type 0xA; BN6's flag 0x200 is its conveyors')",
+        "its panel types 8 and 0xA (its attack's, 0x080DC780: 6, 7, 8, 4, 0xA, set by BN6's object_setPanelType) and the "
+        "panel flags 0x1000 and 0x200 it reads its element by (0x080C2948: 0x400, 0x800, 0x1000, 0x100, 0x200) kept as BN4's "
+        "numbers: 8 is BN6's volcano (an eruption every 140 frames) by its number and its word (0x11010), which is BN5's "
+        "lava's too, and which of them BN4's 8 is stays unread; 0xA is BN4's holding panel, none in BN6 "
+        "(bn4_twins.PANEL4TO6), where BN6's 0xA is a conveyor and its flag 0x200 the conveyors' (0x10210): the attack's "
+        "fifth panel pushes in BN6, and Elmperor standing on a conveyor reads that element. 6, 7 and 4 (grass, ice, "
+        "poison) and their flags 0x400, 0x800 and 0x100 are BN6's own numbers and words (BN4_PANEL_FLAGS_OF against "
+        "BN6_PANEL_FLAGS_OF), decided",
         "a panel its attack changes keeps its new type: BN4 gives it 0xBE frames (+0x12) to change back, which BN6's panels "
         "count for its conveyors alone",
         "its aura (the fourth kind's 0x4C, its sprite drawn again in its element's colours through BN4's tile buffer 0x02037810) "

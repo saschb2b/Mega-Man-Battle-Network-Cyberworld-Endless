@@ -29,9 +29,11 @@ import os
 import re
 import sys
 import zlib
+from struct import error as struct_error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_twins  # noqa: E402
+import xrecipe_bn4_copy  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 from xrecipe_family import BN6, GENERIC6  # noqa: E402
 from xrecipe_pairs import Pairs  # noqa: E402
@@ -54,6 +56,7 @@ BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat
            prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C,
            sprite_load=0x0800287C, shadow=0x08002E96, no_shadow=0x08002FE2, palette=0x08002DEC,
            byname=0x080B6568, sprites=0x0802793C, songs=0x08155FF8, effect=0x080E18EE, sound=0x08000560,
+           effects=0x080E1698, neffects=111,
            create_coll=0x08012496, setup_coll=0x080129AC, set_flag=0x08012F82)
 # the calls BN6's virus init (0x08016F56) makes its own of: an init's that are none of these, or of INIT_ENGINE's, are its own
 INIT_STD = {BN4['sprite_load'], BN4['shadow'], BN4['no_shadow'], BN4['palette'], BN4['create_coll'], BN4['setup_coll'],
@@ -81,6 +84,12 @@ SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0
 CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
 CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
 SONGS6 = 0x08159F48   # BN6's song table (RomLayout.song_table)
+# BN4's effects BN6 has no effect of the same look of, at ids of their own and their sprites at numbers of their own: the
+# families' ranges' top (0x90-0x9F of the effects, list 5's 0x98-0x9F), below the Navis' (0xA0 on), where BN5's families
+# take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
+# a list BN6 has not grown for them (3) listed in list 4, as BN5's are (tools/xrecipe.py, BN6_EFFECT_LIST)
+EFFECT0, EFFECT_END, LIST5_0, LIST5_END, ROOM_EFFECT, EFFECT_LIST = 0x90, 0xA0, 0x98, 0xA0, 0x100, 4
+BN5_RECIPES = os.path.join(ROOT, 'src', 'emu', 'xvirus_bn5.c')
 
 
 def find_roms():
@@ -110,6 +119,7 @@ class Pairs4(Pairs):
         _, self.by6name, _ = self.read_map(MATCH)
         self.by5, self.map_ok, self._index, self._anchors, self.memo = {}, False, None, None, {}
         self.known_cache = {}
+        self.copies = {}   # BN6's spawner of a type copied for BN4's families (bn4_twins.COPIED6): the copy (xrecipe_bn4_copy.Copy)
 
     def map_twin(self, a5):
         return None, None
@@ -127,6 +137,7 @@ class Family:
         self.decisions, self.notes, self.interim, self.ranges = [], [], [], []
         self.walks, self.tables, self.calls, self.imms, self.words = {}, {}, {}, [], {}
         self.regions, self.moved3, self.types, self.numbers, self.attack_sprites = [], {}, [], [], []
+        self.effects, self.copies = [], set()
         self.hooks = [('BN6', NULLSUB6)] * 8
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
@@ -140,6 +151,8 @@ class Alloc:
 
     def __init__(self):
         self.code, self.art, self.list1, self.list4, self.types = CODE0, ART0, LIST1_0, LIST4_0, {1: TYPE_0, 3: TYPE_0, 4: TYPE_0}
+        # (BN4's effects moved, by its id: BN6's; their sprites copied, by BN4's list and number: the copy, its family's name)
+        self.effect, self.list5, self.effects, self.effect_sprites = EFFECT0, LIST5_0, {}, {}
 
 
 def region_of(b4, ty, table=None, n=None):
@@ -421,12 +434,18 @@ def panel_type(f, w, addrs, k, i):
             for c in addrs[addrs.index(b) + 1:addrs.index(b) + 4]:
                 x = w.insns[c]
                 if x.form == 'cmp' and x.f[0] == j.f[0] and '#' in x.text:
-                    to = bn4_twins.PANEL4TO6.get(x.f[1])
-                    if to is None:
+                    why = f'BN4\'s panel type {x.f[1]:#x}'
+                    if x.f[1] not in bn4_twins.PANEL4TO6:
+                        f.decide('panel', f'{c:08X}: its panel type {x.f[1]:#x} compared, which bn4_twins.PANEL4TO6 gives no BN6 meaning')
                         to = 0xFF
-                        f.interim.append(f'{c:08X}: its panel type {x.f[1]:#x} compared, which no BN6 type is known to be: compared with '
-                                         f'0xFF, no type of BN6\'s (the case never holds; bn4_twins.PANEL4TO6 to give it)')
-                    f.imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=to, why=f'BN4\'s panel type {x.f[1]:#x}'))
+                    elif bn4_twins.PANEL4TO6[x.f[1]] is None:
+                        # (a type BN6 has none of, decided: compared with 0xFF, no type of BN6's, the case never holding there
+                        # as in BN6's own routine)
+                        to, why = 0xFF, why + ', none in BN6: compared with no type of BN6\'s'
+                    else:
+                        to = bn4_twins.PANEL4TO6[x.f[1]]
+                        why += f', BN6\'s {to:#x}'
+                    f.imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=to, why=why))
             return
 
 
@@ -547,6 +566,15 @@ def pair_calls(f, pairs):
             continue   # (a spawn it does not move: decided in spawns_of)
         tw, how, cls, diff = pairs.twin(t)
         audit = pairs.audit(t, tw) if tw else None
+        if tw is not None and (tw & ~1) in pairs.copies:
+            # (BN6's spawner of a type copied for BN4's families: the copy's spawner, its type run through the dispatch)
+            c = pairs.copies[tw & ~1]
+            to = xrecipe_bn4_copy.moved(c, tw & ~1)
+            f.pairs.append((t, f'XV_CODE + 0x{to - XV_CODE:X}', f'BN6\'s {tw:08X} as copied for BN4\'s families: its third-kind {c.ty:#x} '
+                            f'run as the dispatch\'s {c.number:#x} (bn4_twins.COPIED6; {how}, {cls}{", audited" if audit else ""})',
+                            None, sites, bool(audit)))
+            f.copies.add(c.ty)
+            continue
         if tw is None:
             f.decide('call', f'{t:08X} ({len(sites)} BLs, at {", ".join(f"{s:08X}" for s in sites)}): no twin in BN6 ({how})')
         elif cls == 'DIFF' and not audit:
@@ -632,7 +660,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     blocks_of(b4, f, alloc)
     words_of(f, pairs)
     art_of(b4, b6, f, alloc)
-    effects_of(f)
+    effects_of(b4, b6, f, alloc)
     sounds_of(b4, b6, f)
     f.interim += list(bn4_twins.INTERIMS.get(name, ()))
     if f.prestep and any(not f.lo <= s < f.hi for s in f.calls.get(BN4['runner'], [])):
@@ -641,21 +669,115 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     return f
 
 
-def effects_of(f):
-    """the effects its code spawns (BN4_SPAWN_EFFECT, r4 the id): kept as BN6's same ids, an interim while BN4's effect table
-    is not mapped"""
+def effects_of(b4, b6, f, alloc):
+    """the effects its code spawns (BN4_SPAWN_EFFECT, r4 the id, a movs): each BN6's of the same look (effect_twin), else
+    moved (move_effect), the movs given BN6's id"""
     ids = {}
     for e, w in f.walks.items():
         for site, t in w.bls.items():
             if t == BN4['effect']:
-                v, _ = T.back_value(w, site, 4)
-                ids.setdefault(v, []).append(site)
-    if None in ids:
-        f.decide('effect', f'an effect spawned at {", ".join(f"{s:08X}" for s in ids[None])} by an id made otherwise')
-    named = sorted((v, sorted(s, reverse=True)) for v, s in ids.items() if v is not None)
-    if named:
-        f.interim.append(f'its effects {" and ".join(f"{v:#x}" for v, _ in named)} ({", ".join(f"{s:08X}" for _, ss in named for s in ss)}) kept '
-                         f'as BN6\'s same ids: BN4\'s effect table is not mapped yet, so their twins are unchecked (effect_twin)')
+                v, chain = T.back_value(w, site, 4)
+                if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= BN4['neffects']:
+                    f.decide('effect', f'an effect spawned at {site:08X} by an id made otherwise ({chain})')
+                    continue
+                ids.setdefault(v, []).append(chain[0][0])
+    for v, at in sorted(ids.items()):
+        e6, how = effect_twin(b4, b6, v), 'the same look'
+        if e6 is None:
+            e6, how = move_effect(b4, f, alloc, v), 'moved'
+        if e6 is None:
+            continue
+        if e6 != v:
+            for a in sorted(set(at)):
+                f.imms.append(dict(at=a, form='THUMB_MOVS', rd=4, rn=0, was=v, now=e6, why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 ({how})'))
+        f.notes.append(f'its effect {v:#x}: BN6\'s {e6:#x}, ' + ('BN6\'s own of the same sprite, animation and palette' if how != 'moved' else
+                       'moved (no effect of BN6\'s draws its sprite\'s bytes)'))
+
+
+_BN6_SPRITES = {}
+
+
+def bn6_sprite_twin(b4, b6, lst, idx):
+    """BN6's sprite of BN4's (list, number)'s bytes in the same list, else None"""
+    _, raw = sprite(b4, BN4['sprites'], lst, idx)
+    if raw is None:
+        return None
+    if lst not in _BN6_SPRITES:
+        _BN6_SPRITES[lst] = {}
+        for k in range(256):
+            try:
+                _, b = sprite(b6, BN6['sprites'], lst, k)
+            except (IndexError, struct_error):
+                break
+            if b:
+                _BN6_SPRITES[lst].setdefault(hashlib.sha1(b).hexdigest(), k)
+    return _BN6_SPRITES[lst].get(hashlib.sha1(raw).hexdigest())
+
+
+def effect_twin(b4, b6, e4):
+    """BN6's effect of BN4's effect e4's look: the same sprite (by its bytes), animation and palette, else None"""
+    r4 = b4.bytes(BN4['effects'] + 4 * e4, 4)
+    tw = bn6_sprite_twin(b4, b6, r4[0] // 4, r4[1])
+    if tw is None:
+        return None
+    for e6 in range(BN6['neffects']):
+        q = b6.bytes(BN6['effects'] + 4 * e6, 4)
+        if q[0] == r4[0] and q[1] == tw and q[2] == r4[2] and q[3] == r4[3]:
+            return e6
+    return None
+
+
+def move_effect(b4, f, alloc, e4):
+    """BN4's effect e4 at an id of its own (one for every family that spawns it), its row BN4's with its sprite as BN6
+    lists the copy: list 5's at a number of its own, list 4's and list 3's (BN6's list 3 not grown for them) in list 4,
+    copied once (a family after the one that copied it finds it installed)"""
+    row = b4.bytes(BN4['effects'] + 4 * e4, 4)
+    lst, idx = row[0] // 4, row[1]
+    if row[0] & 3 or lst not in (3, 4, 5):
+        f.decide('effect', f'its effect {e4:#x}\'s sprite {row[0]:#x}:{idx:#x}: the generator moves lists 3, 4 and 5\'s alone')
+        return None
+    e6 = alloc.effects.get(e4)
+    if e6 is None:
+        if alloc.effect >= EFFECT_END:
+            f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
+            return None
+        e6 = alloc.effects[e4] = alloc.effect
+        alloc.effect += 1
+    f.effects.append((e4, e6))
+    have = alloc.effect_sprites.get((lst, idx))
+    if have is not None:
+        if have[1] != f.name:
+            f.notes.append(f'its effect {e4:#x}\'s sprite {lst}:{idx:#x} is listed by {have[1]} ({have[0]["to_list"]}:{have[0]["to_index"]:#x}): '
+                           f'installed with it')
+        return e6
+    p, raw = sprite(b4, BN4['sprites'], lst, idx)
+    to_list = 5 if lst == 5 else EFFECT_LIST
+    num = alloc.list5 if to_list == 5 else alloc.list4
+    if raw is None or (to_list == 5 and num >= LIST5_END):
+        f.decide('effect', f'its effect {e4:#x}\'s sprite {lst}:{idx:#x} could not be read or numbered')
+        return e6
+    s = dict(list=lst, index=idx, to_list=to_list, to_index=num, at=alloc.art, room=rounded(len(raw), ROOM_EFFECT), lz=bool(p & 0x80000000))
+    f.attack_sprites.append(s)
+    alloc.effect_sprites[(lst, idx)] = (s, f.name)
+    if to_list == 5:
+        alloc.list5 += 1
+    else:
+        alloc.list4 += 1
+    alloc.art += s['room']
+    if alloc.art > ART_END:
+        f.decide('room', f'its effect {e4:#x}\'s sprite ends at {alloc.art:08X}, past the families\' art ({ART_END:08X})')
+    return e6
+
+
+def bn5_ranges_clear():
+    """BN5's families' recipes take none of BN4's effect ids nor list 5 numbers (their ranges' top)"""
+    with open(BN5_RECIPES, encoding='utf-8') as fh:
+        text = fh.read()
+    effects = {int(x, 16) for m in re.finditer(r'_effects\[\] = \{([^;]*)\};', text) for x in re.findall(r'0x([0-9A-F]+) \}', m.group(1))}
+    list5 = {int(x, 16) for x in re.findall(r'\{ \d, 0x[0-9A-F]+, 5, 0x([0-9A-F]+),', text)}
+    clash = sorted(e for e in effects if EFFECT0 <= e < EFFECT_END) + sorted(n for n in list5 if LIST5_0 <= n < LIST5_END)
+    if clash:
+        sys.exit(f'xrecipe_bn4: BN5\'s families take BN4\'s numbers ({", ".join(f"{x:#x}" for x in clash)}): move EFFECT0 or LIST5_0')
 
 
 def sounds_of(b4, b6, f):
@@ -840,7 +962,8 @@ HEADER = '''/* xvirus_bn4.c: BN4 Red Sun's virus families' recipes, written by t
  * tools/bn4_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/multirom/families.md): addresses
  * in BN4 Red Sun (USA) and BN6 Cybeast Gregar (USA), counts and CRC32s. The families here are the generator's whole ones
  * (no decision open; its interims named over each), installed only where BN4's ROM is read for research (xrom_research:
- * --dev bn4families); what stays open is in its report (.build/xrecipe/bn4_report.md). */
+ * --dev bn4families); what stays open is in its report (.build/xrecipe/bn4_report.md). First, BN6's own types copied for
+ * them with a number BN4's (tools/xrecipe_bn4_copy.py; xvirus_bn4_copy.h installs them before the families). */
 #include "xvirus_bn4.h"
 
 #include "bn4.h"
@@ -908,6 +1031,8 @@ def c_recipe(f):
         L.append('};')
     L += [f'static const XvRef {n}_states[] = {{', '\t' + ', '.join(ref_text(x) for x in f.states) + ',', '};']
     L += [f'static const XvSprite {n}_sprites[] = {{'] + [sprite_text(s) for s in [f.sprite] + f.attack_sprites] + ['};']
+    if f.effects:
+        L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
     L += c_family(f, n)
     return '\n'.join(L), f'&bn4_{n}'
 
@@ -930,14 +1055,20 @@ def c_family(f, n):
     L.append(f'\t.traits = {{ .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = {"true" if f.s1["shadow"] else "false"}, '
              f'.palette = {f.s1["palette"]}, .flags = 0x{f.flags:02X} }},')
     L.append(f'\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
+    if f.effects:
+        L.append(f'\t.effects = {n}_effects, .neffects = {count("effects")},')
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
     L.append('};')
     return L
 
 
-def c_file(whole):
+def c_file(whole, copies):
     parts, refs = [HEADER], []
+    # (BN6's types copied for them, installed before them: xvirus_bn6copy.c; one, the thunder, while COPIED6 holds one)
+    parts += [xrecipe_bn4_copy.c_text(c, XV_CODE) for c in copies]
+    if len(copies) != 1:
+        sys.exit('xrecipe_bn4: the C file names one copy of BN6\'s (xvirus_bn4_bn6copy): more want a list')
     for f in whole:
         t, ref = c_recipe(f)
         parts.append(t)
@@ -991,10 +1122,24 @@ def main():
         return 0
     b4, b6 = find_roms()
     pairs = Pairs4(b4, b6)
+    bn5_ranges_clear()
     alloc = Alloc()
+    copies = []
+    for ty in sorted(bn4_twins.COPIED6):
+        # (at the dispatch's number of its own type, which BN4's battle runs it as too: no BN5 track names it, checked)
+        xrecipe_bn4_copy.number_clear(ROOT, 3, ty)
+        c = xrecipe_bn4_copy.derive(b6, ty, alloc.code, ty)
+        alloc.code = rounded(c.room_end, CODE_STEP)
+        copies.append(c)
+        if not c.decisions:
+            pairs.copies[c.spawner] = c
     fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
-    text = c_file(whole)
+    for c in copies:
+        for d in c.decisions:
+            print(f'xrecipe_bn4: BN6\'s {c.ty:#x}\'s copy: {d}')
+    used = {t for f in whole for t in f.copies}
+    text = c_file(whole, [c for c in copies if c.ty in used and not c.decisions])
     if a.check:
         with open(OUT_C, encoding='utf-8') as fh:
             if fh.read() != text:
