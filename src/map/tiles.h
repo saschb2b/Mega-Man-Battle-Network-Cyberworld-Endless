@@ -161,6 +161,21 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * Seaside's was worn by the legalizer into rings and stubs, a junction at
  * every other panel (issue #164). */
 #define TILES_ONE_WIDE 0x1000000
+/* ... and with TILES_SQUARE_PADS, its pads are its platforms of 9 to 16
+ * panels, not the smaller: BN4's ACDC Area frames squares of four by four,
+ * which a room drawn as a pad takes (pad_rooms), where its round studs at
+ * its paths' ends, pads of four panels, ringed a room's corners. */
+#define TILES_SQUARE_PADS 0x2000000
+/* NetAreaDef.joint_hues: JOINT_GREY, its joints are its walkways' grey
+ * panels with no platform floor round them, not those showing its hues:
+ * BN4's Undernet's steel joints between its orange cushions, a cushion's
+ * blue stud in each */
+#define JOINT_GREY 0x1000
+/* ... and with TILES_WALK_HUE, told by shape, a panel of its walkways'
+ * hue (walk_styles) is walkway floor however wide its floor lies there:
+ * BN4's countries lay their green walkways two and three wide, whose
+ * middles stood in their cream platforms' middles as green blotches. */
+#define TILES_WALK_HUE 0x8000000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a
