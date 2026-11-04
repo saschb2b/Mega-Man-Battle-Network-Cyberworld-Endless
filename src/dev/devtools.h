@@ -19,6 +19,8 @@ typedef struct {
 	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/game/liberation/) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
 
+	bool glitch;    /* every act's first layer from the second holds the Glitch warp (docs/game/glitch-layer.md; run_debug_glitch) */
+	int glitch_stage; /* glitchstage=N: a Glitch layer held at stage N - 1 (1-5), its glitches and battles; 0 the floor's */
 	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/game/liberation/) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	bool folders;   /* every starting folder open in the profile (captures: the setup's Folder row, each folder's first hand) */
@@ -40,7 +42,7 @@ typedef struct {
 	unsigned viruses; /* viruses=MASK: the profile's BtlrCard held, with the families of the mask's bits (AI 1-29) beside Mettaur and Gunner
 	                     (a capture of the VIRUS LIST; docs/world/level-design/virus-battler.md); battler=K, net.h's layer_battler_forced */
 	int lib_par;    /* libpar=N: a dark layer's par made N (each tier of its prize, docs/game/liberation/); 0 the planner's */
-	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/game/bosses/) */
+	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/game/bosses/), 4 the Glitch layer (docs/game/glitch-layer.md) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
 	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0x200-0x205

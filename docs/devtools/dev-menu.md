@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -46,7 +46,12 @@ board, [Liberation Missions](../game/liberation/overview.md); `CYBERWORLD_EMU_DE
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
 N, for each tier of its prize; `CYBERWORLD_AUTOPILOT_ROUTE=1` beside it
 seeks the sealed region's route first, its key and then the route, and
-takes the way it opens at home), `route` (a special route found: with
+takes the way it opens at home), `glitch` (every act's first layer from
+the second holds the Glitch warp, [the Glitch layer](../game/glitch-layer.md); with
+`glitchstage=N` a Glitch layer held at stage N - 1, 1 to 5, its glitches,
+flips and battles, and with `side=4` the run starts on one; the debug
+output names the copy's forms, and stdout the stage a Glitch layer's
+exit was reached at), `route` (a special route found: with
 `--scene home` on the act before's board, from a layer on its own act's,
 so the next fork offers its third way, [Special routes](../game/liberation/special-routes.md), Special
 routes), `veteran` (a profile that has met seven
@@ -143,7 +148,7 @@ N trips back from Lan's HP, through its older portals, before a way.
 The super bosses ([Super bosses](../game/bosses/super-bosses.md)) have three: `side=N`
 starts the run on a side layer at `--run-depth`, 1 the Undernet (its
 golden gate) or 2 the Secret Area, Bass's once the title's S is held
-(`--marks 08`); `bass=N` and `beast=N` make MegaMan's wins over Bass and
+(`--marks 08`), or 4 the Glitch layer; `bass=N` and `beast=N` make MegaMan's wins over Bass and
 over the Cybeast N, their forms and words by that record (`bass=1` Bass
 SP, `bass=2,beast=1` Bass BX). `--talk scrtdata:FRAME` gives the three
 ScrtData a golden gate wants. With the debug output on, the music's

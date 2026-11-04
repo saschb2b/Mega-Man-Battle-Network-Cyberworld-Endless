@@ -79,6 +79,19 @@ bool area_src_bpp8(int rom, int group, int number);
  * blocks encoded again after it (*ts_out, *nts bytes), the palette as it
  * is (*pal_out, *npal); free both. */
 bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal);
+/* ... as VRAM and BN6's palette buffer take them at the map's entry
+ * (docs/game/glitch-layer.md, a layer's other looks): its two blocks decoded,
+ * where each goes in VRAM, and its colours (the 16 banks after the
+ * palette's size); free with area_vram_free */
+typedef struct {
+	uint8_t *tiles[2];
+	size_t n[2];
+	uint32_t vram[2];
+	uint8_t pal[0x200];
+	size_t npal;
+} AreaVram;
+bool area_src_vram(int rom, int group, int number, AreaVram *out);
+void area_vram_free(AreaVram *v);
 /* Floor height at world (X, Y): 0 where section 1 says nothing. */
 int area_src_height(const AreaSrc *a, int X, int Y);
 /* Whether the walls put world (X, Y) on floor (1), off it (0) or cannot

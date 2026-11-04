@@ -83,6 +83,9 @@ void director_megaman_hp(int *hp, int *max);
  * in the core's frame `px` (240 x 160, the core's own pixels), and its
  * phase, par, banner and command menu over the picture. */
 void director_tint_board(uint32_t *px);
+/* A Glitch layer's glitches over the core's frame `px`, read-only: rows
+ * torn, blocks slipped, colours turned (glitch.c, docs/game/glitch-layer.md) */
+void director_glitch_frame(uint32_t *px);
 void director_draw_board(void);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/game/rival.md). */
 void director_draw_duel(void);
@@ -116,6 +119,9 @@ void director_dev_place(int x, int y, int face);
 /* ... in the layer's signature, on the free panel nearest its anchor (the
  * "sig" step: docs/world/level-design/identity.md); false on a layer without. */
 bool director_dev_signature(void);
+/* ... two panels from the layer's Glitch warp, or a Glitch layer's copy
+ * (the "glitch" step: docs/game/glitch-layer.md); false where none stands */
+bool director_dev_glitch(void);
 /* A test's start at home (--scene home, docs/world/home/): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */

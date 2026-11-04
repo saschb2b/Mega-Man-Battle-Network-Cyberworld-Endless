@@ -78,7 +78,9 @@
 #define FREE_CHIP_PAS_END   (EMU_FREE + 0x710400u)
 #define FREE_CHIP_AI        (EMU_FREE + 0x710400u)   /* the player's chip AI's stub (darkinvs.c), to: */
 #define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
-#define FREE_TAIL           (EMU_FREE + 0x710440u)   /* free to FREE_LIB_TEAM */
+#define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
+#define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
+#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_LIB_TEAM */
 #define FREE_LIB_TEAM       (EMU_FREE + 0x7A0000u)   /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c), to: */
 #define FREE_LIB_TEAM_END   (EMU_FREE + 0x7FA000u)
 

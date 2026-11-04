@@ -14,6 +14,8 @@
  * entries of layer 0 (BG1), then layer 1's (BG2) */
 #define BN6_MAP_TILEMAP       0x02013A00u
 #define BN6_MAP_TILEMAP_HEAD  12
+#define BN6_MAP_TILEMAP_W     (BN6_MAP_TILEMAP + 0)   /* its header's width and height in tiles, a byte each */
+#define BN6_MAP_TILEMAP_H     (BN6_MAP_TILEMAP + 1)
 #define BN6_TILEMAP_COLOURS   0x02        /* a tile map's header +2 (bn6f's Unk_2, which no code of BN6's reads): 1 where its tiles are
                                            * 256-colour, the real world's (BN6's and BN5's) and every map of BN4's; 0 BN6's and BN5's net maps */
 /* The BGs' screen maps in IWRAM, 32 x 32 entries each, copied to VRAM

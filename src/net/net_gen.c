@@ -15,6 +15,7 @@
 #include "game.h"
 #include "net_arena.h"
 #include "net_detours.h"
+#include "net_glitch.h"
 #include "net_landmarks.h"
 #include "net_layouts.h"
 #include "net_plan.h"
@@ -51,7 +52,7 @@ NetObj *ng_add_obj(int type, int x, int y) {
 	o->x = (float)x + 0.5f;
 	o->y = (float)y + 0.5f;
 	o->solid = type != OBJ_WARP_IN && type != OBJ_EXIT && type != OBJ_UNDERNET && type != OBJ_SECRET_GATE && type != OBJ_RETURN &&
-		type != OBJ_NAVI_GATE && type != OBJ_VAULT && type != OBJ_OFFICIAL;
+		type != OBJ_NAVI_GATE && type != OBJ_VAULT && type != OBJ_OFFICIAL && type != OBJ_GLITCH;
 	o->prop = -1;
 	return o;
 }
@@ -468,6 +469,8 @@ static NetObj *place(int type, const int *order, int n, int next, int *x, int *y
 		if (spot_off_mouth(&layer.rooms[k % n == 0 ? r : order[(next + k) % n]], x, y)) return ng_add_obj(type, *x, *y);
 	return room_spot(&layer.rooms[r], x, y) ? ng_add_obj(type, *x, *y) : NULL;
 }
+
+NetObj *ng_place(int type, const int *order, int n, int next, int *x, int *y) { return place(type, order, n, next, x, y); }
 
 /* The Net Dealer in room r: behind a counter where it has a place for one,
  * else in the first of `order`'s rooms that has (the originals' dealers
@@ -895,6 +898,8 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	GapSite gap = { -1, -1, 0, 0, -1 };
 	unsigned pieces = layer_pieces(depth, biome, kind);
 	ng_measure_detours();
+	if (s.glitch) ng_place_glitch(order, n);
+	if (kind == LAYER_GLITCH) ng_place_copy(order, n, &next);
 	if (pieces & PIECE_RUSH) {
 		gap = ng_plan_gap(layer_rush_len(depth, biome));
 		npcs_held = gap.x >= 0;
@@ -913,6 +918,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	place_bystanders(order, n);
 	npcs_held = 0;
 	place_last(&gap, pieces, rise, kit, order, n);
+	if (kind == LAYER_GLITCH) ng_glitch_deep();
 }
 
 bool layer_make_dark;

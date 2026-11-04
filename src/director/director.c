@@ -150,8 +150,15 @@ static bool act_on_choices(void) {
 			return true;
 		case OBJ_UNDERNET:
 		case OBJ_SECRET_GATE:
-			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
+		case OBJ_GLITCH: {
+			int t = D.objs.choice[i].type;
+			run.side_kind = t == OBJ_UNDERNET ? LAYER_UNDERNET : t == OBJ_GLITCH ? LAYER_GLITCH : LAYER_SECRET;
 			enter_side_layer();
+			return true;
+		}
+		case OBJ_COPY:
+			/* (the Glitch layer's copy, docs/game/glitch-layer.md) */
+			glitch_copy_fight();
 			return true;
 		case OBJ_NPC:
 			/* a bystander named the act's guardian (and no more to do) */
@@ -464,6 +471,7 @@ static void after_forced(void) {
 		if (D.duel) { duel_verdict(won, emu_battle_unwatch()); D.pet_refreshed = false; }
 		else if (D.battler) battler_round_over(emu_read8(BN6_BATTLE_RESULT));
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
+		else if (glitch_copy_fighting()) glitch_copy_over(won);
 		else {
 			/* (its pick of three, there at the Server while B leaves it) */
 			if (won) flag_set(LAYER_SERVER_WON_FLAG);
@@ -518,6 +526,7 @@ static void talks_due(void) {
 	 * box talked to the Server he faced, whose own words took the box, and
 	 * the prize was never named) */
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+	if (D.copy_due && talk_script(D.objs.archive, D.objs.copy_reward)) D.copy_due = false;
 	mail_update();
 	rival_update();
 	words_due();
@@ -582,6 +591,7 @@ void director_update(void) {
 	/* (no way-on arrow over a liberation's board: its way is the board's) */
 	if (!lib_on()) arrow_update();
 	if (on_map()) map_update();
+	glitch_update();
 	/* (the PET's first menu is a screen of the game's own mode, its pages
 	 * and the shops other modes: either; not the way back to the map after
 	 * a battle or a warp, which had MegaMan name a program off the board
