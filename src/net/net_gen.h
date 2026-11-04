@@ -8,6 +8,9 @@
 #include "net_shapes.h"
 
 NetObj *ng_add_obj(int type, int x, int y);
+/* Object `type` in the next room of `order` (`next` into it), apart from
+ * anyone to talk to where it can be; its panel into (*x, *y) */
+NetObj *ng_place(int type, const int *order, int n, int next, int *x, int *y);
 extern uint8_t ng_reserved[MAP_H][MAP_W];
 extern uint8_t ng_hushed[MAP_H][MAP_W];
 bool ng_cell_free(int x, int y);
