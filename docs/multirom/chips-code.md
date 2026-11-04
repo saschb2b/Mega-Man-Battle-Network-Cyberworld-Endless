@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T13:45:57Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:50:00Z }
 ---
 
 # The chips' code
@@ -124,7 +124,7 @@ of. The registry's ids, records and art stay C1's (above).
     shared allocations: 0xBC 0x55, 0xB7 0x61, 0x6F 0x54, 0xE4 0x53, 0x70
     0x5F, 0xBA 0x60, 0xC0 0x62; their second amendment: 0x105 0x59, 0x115
     0x5A, 0x117 0x5E, 0x119 0x4D, 0x8E 0x4C, the fixed ones from 0x40 up,
-    the per-run themes 0x26-0x3F; the chips' own from 0x52 down: 0x12E 0x52,
+    the per-run themes 0x26-0x33, BN4's families' sounds 0x34-0x3F; the chips' own from 0x52 down: 0x12E 0x52,
     0xA6 0x51, 0xC6 0x50, 0xBD 0x4F, 0x10E 0x4E, 0xE1 0x4B, 0x4A next),
     taken only where the slot still holds BN6's empty header; the
     immediates name the slot, a table's row its bytes (`TABLE_SOUNDS`: the

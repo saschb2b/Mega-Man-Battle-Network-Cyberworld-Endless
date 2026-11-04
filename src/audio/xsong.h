@@ -32,8 +32,8 @@ bool xsong_track_keys(const uint8_t *seq, uint32_t n, uint32_t base, uint32_t st
 int xsong_install(int xrom, int song, int fallback);
 /* A sound of extra ROM `xrom` (a song its battles start, issue #82's tracks)
  * in BN6, played by the players its game names for it (BN6's 32 are
- * BN5's): the BN6 song id that plays it, its slot of its own (BN5's sounds
- * that are no BN6 song, each at a fixed slot whichever track plays it),
+ * BN5's): the BN6 song id that plays it, its slot of its own (its game's
+ * sounds that are no BN6 song, each at a fixed slot whichever track plays it),
  * copied there by the first install that needs it, after the areas' songs
  * and their games' themes; `fallback` where it has no slot or cannot be. */
 int xsong_install_sound(int xrom, int song, int fallback);

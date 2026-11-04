@@ -151,8 +151,11 @@ void xd_counts(const XdLog *log, int out[XD_COUNTS]);
  * ("xdraws: ..."). The run with the same draws plays the same. */
 void xd_control_frame(const char *how);
 
-/* The song a BN6 slot plays a copy of (xsong.h): its number in its own
- * game, -1 for one of BN6's own: a sound read in BN5's numbers. */
+/* The song a BN6 slot plays a copy of (xsong.h): its number in BN5, -1 for
+ * one of BN6's own or a copy of BN4's, which is read by its slot (the BN4
+ * differential pairs BN4's sound with it by the routines that play them,
+ * tests/xdiff/legit.json's bn4 sounds, and so tells it from BN6's own song
+ * of BN4's number): a sound read in BN5's numbers. */
 int xd_song_copy(int slot);
 
 #endif

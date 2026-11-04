@@ -1346,6 +1346,14 @@
     "08B7F14C:080CE5B0:4"
    ],
    "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x16FF0 + 0x15C holding the moved table's 0x08B7F150) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
+  },
+  {
+   "name": "a copied sound aimed at BN6's own song of its number",
+   "spec": "walla_v1",
+   "poke": [
+    "080BEAE8:20B7"
+   ],
+   "what": "Walla's sound 0xB7 (BN4 0x080BEAE8: movs r0,#0xb7, its copy's immediate the recipe gives BN6's empty slot 0x37, where xsong.c's XSOUNDS puts BN4's song) written as BN4's number again: BN6 begins its own song 0xB7 on its player 18 where BN4 begins its 0xB7 on its player 9, which legit.json's bn4 sounds pair with the copy's 0x37 by the routines that play them; the line is the family's, its code having played the sound (tools/xdiff_bn4.py family_sounds), where unmutated they read alike (caught at t3, BN4 [0x37] | BN6 [0xB7]; the spec PASSes unmutated)"
   }
  ]
 }

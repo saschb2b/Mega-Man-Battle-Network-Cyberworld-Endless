@@ -74,7 +74,7 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
 typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
 /* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
  * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
- * on), on the music player BN6's own song of its number plays on */
+ * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST), on the music player its own game's entry names */
 typedef struct { uint16_t from; uint8_t slot; uint32_t at, room; } XvSong;
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
@@ -230,8 +230,10 @@ typedef struct {
 #define XV_FAMILIES 64                     /* the families' homes */
 #define XV_SONG_SLOTS 3                    /* BN6's empty song slots the families' sounds take, the last three (issue #82's shared
                                               allocations: one slot a BN5 sound whatever track copies it; the other tracks'
-                                              below them, xsong.c's per-run themes in 0x26-0x3F): */
+                                              below them, xsong.c's per-run themes in 0x26-0x33, BN4's families' in 0x34-0x3F): */
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
+#define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
+#define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */

@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -69,11 +69,11 @@ init or update does past BN6's own work runs as a hook (a routine of its
 own, or its tail entered through a shim), and an attack BN6 has no object
 of moves with its family (its code, its sprite into list 4, its spawn
 through the second-level dispatch at numbers apart from BN5's). Three
-interims every family meets stay open: BN4's effect table is not mapped
-(its effects draw as BN6's of the same ids: Shrimpy's splash shows as
-BN6's wide sweep), its sounds play as BN6's of the same numbers (BN4's
-have no slots among BN6's empty songs yet), and the can-move check's
-panel type 0xA has no BN6 type known.
+interims every family met were open then: BN4's effect table not mapped
+(its effects drawn as BN6's of the same ids: Shrimpy's splash showed as
+BN6's wide sweep), its sounds played as BN6's of the same numbers, and
+the can-move check's panel type 0xA with no BN6 type known; the sounds
+are BN4's own since (Its sounds, below).
 
 ## What players said, and what follows
 
@@ -316,6 +316,42 @@ swell kept or not, BN4's level matched or BN6's kept. `--render-song
 x1/0x12:60:PATH` (0x14, 0x15) renders one through the engine's own sound
 engine for listening, its envelope following BN4's own recording (r 0.92
 to 0.97).
+
+## Its sounds
+
+Shown to no one either, behind `--dev bn4families`: the sounds BN4's six
+virus families play are BN4's own in BN6's engine. Each sound their code
+plays (`BN4_PLAY_SOUND`, r0 a `movs`) that is the same song as BN6's of
+its number (`tools/xrecipe.py`'s `song_sig`) stays BN6's; the other 12
+are no song of BN6's under any number (Spikey's 0xBC and 0xC4, Shrimpy's
+0x9F, 0xC9 and 0xCA, Walla's 0x70, 0x9A, 0xA6 and 0xB7, Elmperor's 0x9D
+and 0xFC, CirKill's 0xF9). As a family installs, each of its sounds is
+copied from the player's ROM (`xsong_pack`, its sequence, voice group and
+samples, none of it in the repository) into a room of the families' art
+below their sprites (from `XV_ART + 0x5A000`, the sprites' own room full)
+and listed at one of BN6's empty song slots fixed for it whichever family
+plays it (`src/audio/xsong.c`'s `XSOUNDS`, `tools/xrecipe_bn4.py`'s
+`SOUND_SLOTS`: 0x3F down to 0x34 in install order, the top of the
+per-run themes' range, whose 12 themes copied today fit below; the
+sounds' own 0x40-0x62 are BN5's, its chips' and Darkloids' still to come
+in 0x41-0x4B), on the player BN4's entry names (players 8, 9, 19, 28 and
+29: BN6's 32 players answer to BN4's numbers), and the `movs` names the
+slot. Played on BN4's player, Elmperor's 0x9D no longer falls on BN6's
+player 0, which the Custom gauge's sound holds at t513.
+
+Each copy was proved as the songs were, by `python3 tools/mp2k_verify.py
+x1/9D` (and the other 11): the copy played by BN6's own sound engine in
+romlab beside BN4 playing its song, both on the music player (whose state
+romlab records; the sound's own player is the differential's to check),
+every part of the engine's state compared frame by frame for 900 frames:
+all 12 the same in every part and their PSG registers the same, each
+playing for the same 13 to 61 frames in both. In the differential every
+copy is begun on BN4's player at BN4's frame ([The
+differential](../devtools/differential.md), The BN4 trace, the families'
+copied sounds). One is left short: CirKill's 0xF9 has two tracks and
+BN6's player 29 one (BN4's two), so BN6 plays its first track alone (13
+frames, its second's 23 not), an interim the recipe names; and the slots BN4's
+sounds take from the themes' range are the owner's to confirm.
 
 ## The owner's calls
 
