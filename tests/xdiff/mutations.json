@@ -1266,6 +1266,30 @@
     "080EF288:2018"
    ],
    "what": "BN5's family 0x49, which ends DarkInvs where its time runs out (its movs r0,#0x17 at 0x080EF288, its frames), 0x18 at its moved copy (BN6's 0x99): MegaMan given back a frame after BN5's"
+  },
+  {
+   "name": "a state immediate off by one",
+   "spec": "billy_v1",
+   "poke": [
+    "080B9600:200A"
+   ],
+   "what": "Billy's CurAction 7 (BN4's own), written as BN6's 9 by the recipe, written 10: its first own state left for another (caught at t1, its CurAction)"
+  },
+  {
+   "name": "a call aimed elsewhere",
+   "spec": "billy_v1",
+   "call": [
+    "0801BB1C:0810A952"
+   ],
+   "what": "Billy's reservation of the panel it moves to (BN6's object_reservePanel, BN4's 0x080143A8's twin) aimed at BN6's family nullsub: no panel reserved, no 0x20 in its object (caught at t43)"
+  },
+  {
+   "name": "the thunder's spawner aimed at another type",
+   "spec": "billy_v1",
+   "poke": [
+    "08B7C184:2029"
+   ],
+   "what": "the thunder copy's spawner (BN6's 0x080CADBC copied at XV_CODE + 0x14180) spawning the third kind's 0x29 for 0x2A (movs r0,#0x29): another attack where BN4's thunder flies (caught at t341)"
   }
  ]
 }

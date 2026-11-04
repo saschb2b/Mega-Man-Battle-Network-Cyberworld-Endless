@@ -8,6 +8,7 @@
 #include "bn6.h"
 #include "rom.h"
 #include "xnavi_recipe.h"
+#include "xvirus_bn4_copy.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_shim.h"
 
@@ -53,6 +54,15 @@ static bool bn6_routine(uint32_t a) { return (a & 1) && a >= BUS && a < BN6_END;
 static bool objects_routine(uint32_t a) { return (a & 1) && a >= XN_OBJECTS && a < XN_OBJECTS_END; }
 /* a routine of a Navi's copy of a type it moves, which another track's code runs as that type's (a chip's unit) */
 static bool navis_routine(uint32_t a) { return (a & 1) && xn_code_at(a); }
+bool xvirus_bn4_copy_routine(uint32_t a) {
+	const XVirusFamily *f = &xvirus_bn4_bn6copy;
+	for (int i = 0; (a & 1) && i < f->nblocks; ++i) {
+		const XvBlock *b = &f->blocks[i];
+		uint32_t at = a & ~1u;
+		if (at >= b->at && at < b->at + (b->end - b->start)) return xvirus_is_code(f, at - b->at + b->start);
+	}
+	return false;
+}
 
 /* a state or a hook: a routine of BN6's, or code of the family's own (in its blocks, or in one of its clones) */
 static bool ref_ok(const XVirusFamily *f, XvRef r) {
@@ -157,7 +167,7 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
-		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) &&
+		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
 			!(r != &families && navis_routine(c->to | 1))))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)

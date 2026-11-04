@@ -41,6 +41,7 @@
                                              BN6_CROSS_RECORD (0x08015952; the routine 0x0802937A, then the row's used bit) */
 /* A Cross chosen, in RAM */
 #define BN6_CROSS_RECORD      0x0203CED0u /* the Custom screen's record of the form chosen: +0 the form (0xFF none), +1, +3; copied to BN6_CROSS_PENDING */
+#define BN6_RECORD_FORM       0x00        /* BN6_CROSS_RECORD +0 (and a side's BN6_CROSS_PENDING +0): the form, 0xFF none */
 #define BN6_RECORD_CHAOS      0x01        /* BN6_CROSS_RECORD +1: 0 for a Cross (0x0802937A); BN5's Chaos Unison, which no code of Gregar's reads */
 #define BN6_RECORD_TURNS      0x03        /* BN6_CROSS_RECORD +3: a Cross's turns (0x0802A118), which no code of Gregar's reads; BN5's Soul's */
 #define BN6_CROSS_PENDING     0x0203A980u /* the form each side takes as its next turn starts, 16 bytes a side, laid out as BN6_CROSS_RECORD */
@@ -142,7 +143,12 @@
 #define BN6_PAUSED            0x0A
 #define BN6_PLAYER_IDLE_FREE  0x080F1870u /* the player's idle state past the chip request's test (0x080F186E: r0 0xFFFF, none asked), its routine's
                                              frame push {r4,r6,r7,lr}: where BN5's twin (0x080F04CC) runs its chip AI while BN5_AI_UNDER stands */
-#define BN6_AI_POWER_CHAOS    0x11        /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */
+#define BN6_AI_POWER_A        0x06        /* u8 a player's AI data +6, +7 and +8: three of his power attacks, each read by its dispatcher into
+                                           * the table 0x080117D4 (0x08011764, 0x080117A4 the charged shot's, 0x08011790), called in that
+                                           * order by his attack state (0x080F17CA, 0x080F17F2, 0x080F182E); BN4's +0xD, +0xF and +0 */
+#define BN6_AI_POWER_CHARGE   0x07        /* ... +7 the charged shot's (0x080117A4) */
+#define BN6_AI_POWER_C        0x08        /* ... +8 (0x08011790) */
+#define BN6_AI_POWER_CHAOS    0x11       /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */
 #define BN6_AI_CHARGE         0x1D        /* u8 his charge: 0 none, 1 charging, 2 full (both games' 0x08012F30 / 0x080105B0) */
 #define BN6_AI_CHARGE_BUTTON  0x1E        /* u8 ... its button: 1 A, 2 B (0x08012EEC, 0x08012F02) */
 #define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */

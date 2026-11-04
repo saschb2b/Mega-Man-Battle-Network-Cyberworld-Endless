@@ -121,7 +121,7 @@ def header_items(path):
         no = i + 1
         if not line:
             run, block = [], None
-        elif re.match(r'#include "bn[56]_\w+\.h"', line):
+        elif re.match(r'#include "bn[456]_\w+\.h"', line):
             items += header_items(os.path.join(os.path.dirname(path), line.split('"')[1]))
             run, block = [], None
         elif line.startswith('/*'):

@@ -140,6 +140,7 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
+	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "sides")) return sscanf(v, "%x", &a) == 1 && a && a < 0x40 && (s->sides = (int)a) > 0;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");
