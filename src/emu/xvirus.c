@@ -70,8 +70,8 @@ static bool game_of(int game, Game *g) {
 		return true;
 	}
 	if (game == XROM_BN4_RED_SUN_US && xrom_research && XR[game].data && XR[game].layout) {
-		/* (no per-family tables, no ice, its effects not mapped, its reward rows not read: BN6's fill for its ids) */
-		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, 0, 0,
+		/* (no per-family tables, no ice, its reward rows not read: BN6's fill for its ids) */
+		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, BN4_EFFECTS, BN4_EFFECT_COUNT,
 			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, 0, false, true, BN4_TEXT_END };
 		return true;
 	}

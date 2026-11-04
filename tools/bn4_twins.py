@@ -67,5 +67,11 @@ COPIED = {
                 "at BN6's +2 (BN4's +0)",
 }
 GET_PANEL = 0x08009ABC   # BN4's getPanel (BN6's 0x0800C90A): back r0 the panel, its type at +0 (BN6's +2)
-# BN4's panel types as BN6's, where a copied routine compares one: none known yet (an interim the report lists)
-PANEL4TO6 = {}
+# BN4's panel types as BN6's, where a copied routine compares one (bn4.h BN4_PANEL_*; docs/rom/bn4.md, Panel types): a
+# number BN6's, or None where BN6 has no type of its meaning (the compare never holds in BN6, as in BN6's own routine)
+PANEL4TO6 = {
+    # BN4's 0xA, the holding panel (BN4_PANEL_HOLDING: a non-floating object's move stopped as it arrives, 0x0801033E; its
+    # can-move refused while it stands there, 0x0800AD42): no type of BN6's holds, and BN6's can-move (0x0800E5E2, the same
+    # flags test, 0x5040) has no panel test at all; its flags word 0x10210 BN6's conveyors' (9-12), which push instead
+    0xA: None,
+}

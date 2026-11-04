@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import zlib
+from struct import error as struct_error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_twins  # noqa: E402
@@ -46,7 +47,7 @@ FAMILIES = ((0x13, 'Billy', 13),)
 BN4 = dict(t1=0x08003A24, nt1=95, stats=0x08011888, stat_size=12, names=0x0874A780,
            prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C,
            sprite_load=0x0800287C, shadow=0x08002E96, no_shadow=0x08002FE2, palette=0x08002DEC,
-           byname=0x080B6568, sprites=0x0802793C)
+           byname=0x080B6568, sprites=0x0802793C, effects=0x080E1698, neffects=111, spawn_effect=0x080E18EE)
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x03: 0x04, 0x08: 0x0A, 0x09: 0x0B, 0x10: 0x1C, 0x18: 0x24, 0x1C: 0x28, 0x28: 0x80, 0x64: 0x3C, 0x68: 0x40}
@@ -59,7 +60,12 @@ XV_AT = 0x08800000 + 0x330000
 XV_HOMES, XV_CODE, XV_ART = XV_AT + 0x18000, XV_AT + 0x38000, XV_AT + 0x50000
 XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0
-CODE_STEP, ART_STEP, ROOM_BATTLE = 0x200, 0x800, 0x1000
+CODE_STEP, ART_STEP, ROOM_BATTLE, ROOM_EFFECT = 0x200, 0x800, 0x1000, 0x400
+# BN4's effects BN6 has no twin of, at ids and list 5 numbers of their own: the families' ranges' top (0x98-0x9F of the
+# effects, list 5's 0x98-0x9F), where BN5's families take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list
+# 5 from 0x80) and the Navis', Souls' and chips' are above (0xA0 on); an effect's sprite of another list is a decision
+EFFECT0, EFFECT_END, LIST5_0, LIST5_END = 0x98, 0xA0, 0x98, 0xA0
+BN5_RECIPES = os.path.join(ROOT, 'src', 'emu', 'xvirus_bn5.c')
 
 
 def find_roms():
@@ -225,12 +231,17 @@ def panel_type(f, w, addrs, k, i):
             for c in addrs[addrs.index(b) + 1:addrs.index(b) + 4]:
                 x = w.insns[c]
                 if x.form == 'cmp' and x.f[0] == j.f[0] and '#' in x.text:
-                    to = bn4_twins.PANEL4TO6.get(x.f[1])
-                    if to is None:
+                    why = f'BN4\'s panel type {x.f[1]:#x}'
+                    if x.f[1] not in bn4_twins.PANEL4TO6:
+                        f.decide('panel', f'{c:08X}: its panel type {x.f[1]:#x} compared, which bn4_twins.PANEL4TO6 gives no BN6 meaning')
                         to = 0xFF
-                        f.interim.append(f'{c:08X}: its panel type {x.f[1]:#x} compared, which no BN6 type is known to be: compared with '
-                                         f'0xFF, no type of BN6\'s (the case never holds; bn4_twins.PANEL4TO6 to give it)')
-                    f.imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=to, why=f'BN4\'s panel type {x.f[1]:#x}'))
+                    elif bn4_twins.PANEL4TO6[x.f[1]] is None:
+                        # (a type BN6 has none of: compared with 0xFF, no type of BN6's, the case never holding there)
+                        to, why = 0xFF, why + ', none in BN6: compared with no type of BN6\'s'
+                    else:
+                        to = bn4_twins.PANEL4TO6[x.f[1]]
+                        why += f', BN6\'s {to:#x}'
+                    f.imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=to, why=why))
             return
 
 
@@ -315,7 +326,7 @@ def records_of(b4, f):
                    '(+0xA) as BN6\'s damage word (the installer makes it)')
 
 
-def derive(b4, b6, pairs, ty, name, first, slot):
+def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     f = Family(ty, name, first)
     f.interim, f.ranges = [], []
     f.slot = SLOT0 + slot
@@ -350,9 +361,8 @@ def derive(b4, b6, pairs, ty, name, first, slot):
     records_of(b4, f)
     blocks_of(b4, f)
     words_of(f)
-    art_of(b4, b6, f, slot)
-    f.interim.append('its effects 0x15 and 0x16 (080B984C, 080B9800: its move\'s flashes) kept as BN6\'s same ids: BN4\'s effect '
-                     'table is not mapped yet, so their twins are unchecked (effect_twin)')
+    art_of(b4, b6, f, slot, alloc)
+    effects_of(b4, b6, f, alloc)
     return f
 
 
@@ -399,14 +409,110 @@ def blocks_of(b4, f):
             a = b
 
 
-def art_of(b4, b6, f, slot):
+def art_of(b4, b6, f, slot, alloc):
     """its battle sprite: BN4's list and number, copied whole (decompressed) to its art's place at a list 1 number of its own"""
     p, raw = sprite(b4, BN4['sprites'], f.s1['list'], f.s1['index'])
     if raw is None:
         f.decide('sprite', f'its sprite {f.s1["list"]}:{f.s1["index"]} is not one the generator reads')
         raw = b''
-    f.sprite = dict(list=f.s1['list'], index=f.s1['index'], to_list=1, to_index=LIST1_0 + slot, at=ART0 + ART_STEP * slot,
-                    room=rounded(len(raw), ROOM_BATTLE), lz=bool(p & 0x80000000))
+    at = rounded(alloc['art'], ART_STEP)
+    f.sprites = [dict(list=f.s1['list'], index=f.s1['index'], to_list=1, to_index=LIST1_0 + slot, at=at,
+                      room=rounded(len(raw), ROOM_BATTLE), lz=bool(p & 0x80000000))]
+    alloc['art'] = at + f.sprites[0]['room']
+
+
+_BN6_SPRITES = {}
+
+
+def bn6_sprite_twin(b4, b6, lst, idx):
+    """BN6's sprite of BN4's (list, number)'s bytes in the same list, else None"""
+    _, raw = sprite(b4, BN4['sprites'], lst, idx)
+    if raw is None:
+        return None
+    if lst not in _BN6_SPRITES:
+        _BN6_SPRITES[lst] = {}
+        for k in range(256):
+            try:
+                _, b = sprite(b6, BN6['sprites'], lst, k)
+            except (IndexError, struct_error):
+                break
+            if b:
+                _BN6_SPRITES[lst].setdefault(hashlib.sha1(b).hexdigest(), k)
+    return _BN6_SPRITES[lst].get(hashlib.sha1(raw).hexdigest())
+
+
+def effect_twin(b4, b6, e4):
+    """BN6's effect of BN4's effect e4's look: the same sprite (by its bytes), animation and palette, else None"""
+    r4 = b4.bytes(BN4['effects'] + 4 * e4, 4)
+    tw = bn6_sprite_twin(b4, b6, r4[0] // 4, r4[1])
+    if tw is None:
+        return None
+    for e6 in range(BN6['neffects']):
+        q = b6.bytes(BN6['effects'] + 4 * e6, 4)
+        if q[0] == r4[0] and q[1] == tw and q[2] == r4[2] and q[3] == r4[3]:
+            return e6
+    return None
+
+
+def effects_of(b4, b6, f, alloc):
+    """the effects its code spawns (BN4's spawner, BN6's twin, r4's low byte the id): each BN6's effect of the same look, or
+    moved: an id of its own past BN6's (EFFECT0 on) whose entry names BN4's sprite, copied to a list 5 number of its own"""
+    f.effects, f.effect_ids = [], {}
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t != BN4['spawn_effect']:
+                continue
+            v, chain = T.back_value(w, site, 4)
+            if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= BN4['neffects']:
+                f.decide('effect', f'{site:08X}: an effect id made otherwise ({chain})')
+                continue
+            e6 = f.effect_ids.get(v)
+            if e6 is None:
+                e6 = effect_twin(b4, b6, v)
+                if e6 is None:
+                    e6 = move_effect(b4, f, v, alloc)
+                f.effect_ids[v] = e6
+            if e6 is not None and e6 != v:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=4, rn=0, was=v, now=e6,
+                                   why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6' + ('' if e6 >= BN6['neffects'] else ' (the same look)')))
+    f.imms.sort(key=lambda x: x['at'])
+
+
+def move_effect(b4, f, e4, alloc):
+    """BN4's effect e4 at an id of its own, its sprite copied (once a family) at a list 5 number of its own"""
+    row = b4.bytes(BN4['effects'] + 4 * e4, 4)
+    lst, idx = row[0] // 4, row[1]
+    if lst != 5:
+        f.decide('effect', f'its effect {e4:#x}\'s sprite {lst}:{idx:#x}: the generator moves list 5\'s alone')
+        return None
+    if alloc['effect'] >= EFFECT_END:
+        f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
+        return None
+    e6 = alloc['effect']
+    alloc['effect'] += 1
+    f.effects.append((e4, e6))
+    if not any((s['list'], s['index']) == (lst, idx) for s in f.sprites):
+        p, raw = sprite(b4, BN4['sprites'], lst, idx)
+        if raw is None or alloc['list5'] >= LIST5_END:
+            f.decide('effect', f'its effect {e4:#x}\'s sprite {lst}:{idx:#x} could not be read or placed')
+            return e6
+        at = rounded(alloc['art'], ART_STEP)
+        f.sprites.append(dict(list=lst, index=idx, to_list=5, to_index=alloc['list5'], at=at,
+                              room=rounded(len(raw), ROOM_EFFECT), lz=bool(p & 0x80000000)))
+        alloc['list5'] += 1
+        alloc['art'] = at + f.sprites[-1]['room']
+    return e6
+
+
+def bn5_ranges_clear():
+    """BN5's families' recipes take none of BN4's effect ids nor list 5 numbers (their ranges' top)"""
+    with open(BN5_RECIPES, encoding='utf-8') as fh:
+        text = fh.read()
+    effects = {int(x, 16) for m in re.finditer(r'_effects\[\] = \{([^;]*)\};', text) for x in re.findall(r'0x([0-9A-F]+) \}', m.group(1))}
+    list5 = {int(x, 16) for x in re.findall(r'\{ \d, 0x[0-9A-F]+, 5, 0x([0-9A-F]+),', text)}
+    clash = sorted(e for e in effects if EFFECT0 <= e < EFFECT_END) + sorted(n for n in list5 if LIST5_0 <= n < LIST5_END)
+    if clash:
+        sys.exit(f'xrecipe_bn4: BN5\'s families take BN4\'s numbers ({", ".join(f"{x:#x}" for x in clash)}): move EFFECT0 or LIST5_0')
 
 
 def rounded(n, step):
@@ -457,10 +563,12 @@ def c_recipe(f):
         L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["lo"]:03X}, 0x{x["hi"]:03X} }},   /* {x["why"]} */' for x in f.ranges]
         L.append('};')
     L += [f'static const XvRef {n}_states[] = {{', '\t' + ', '.join(ref_text(x) for x in f.states) + ',', '};']
-    s = f.sprite
-    L += [f'static const XvSprite {n}_sprites[] = {{',
-          f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, XV_ART + 0x{s["at"] - XV_ART:X}, 0x{s["room"]:X} }},'
-          + ('   /* (LZ77 in BN4) */' if s['lz'] else ''), '};']
+    L += [f'static const XvSprite {n}_sprites[] = {{']
+    L += [f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, XV_ART + 0x{s["at"] - XV_ART:X}, 0x{s["room"]:X} }},'
+          + ('   /* (LZ77 in BN4) */' if s['lz'] else '') for s in f.sprites]
+    L += ['};']
+    if f.effects:
+        L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     L += ['', f'static const XVirusFamily bn4_{n} = {{', f'\t.name = "{f.name} (BN4\'s)",', '\t.game = XROM_BN4_RED_SUN_US,',
           f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
@@ -475,6 +583,8 @@ def c_recipe(f):
     L.append(f'\t.traits = {{ .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = {"true" if f.s1["shadow"] else "false"}, '
              f'.palette = {f.s1["palette"]} }},')
     L.append(f'\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
+    if f.effects:
+        L.append(f'\t.effects = {n}_effects, .neffects = {count("effects")},')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 
@@ -524,7 +634,9 @@ def main():
         return 0
     b4, b6 = find_roms()
     pairs = Pairs4(b4, b6)
-    fams = [derive(b4, b6, pairs, ty, name, first, k) for k, (ty, name, first) in enumerate(FAMILIES)]
+    bn5_ranges_clear()
+    alloc = dict(art=ART0, effect=EFFECT0, list5=LIST5_0)
+    fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
     text = c_file(whole)
     if a.check:
