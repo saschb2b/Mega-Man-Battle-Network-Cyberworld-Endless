@@ -37,18 +37,32 @@ def bn4_families():
     BN4 object type (.src_ai: its first-kind type, BN4 having no AI index) and its six BN4 enemy ids with BN6's for them
     (.names, .first_id: Billy's 13-18 BN6's 0x2C0-0x2C5)"""
     text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
-    # (its effects: its XvId rows, BN4's id and BN6's, `static const XvId NAME_effects[] = { { 0x16, 0x98 }, ... }`)
-    effects = {k: {int(a, 0): int(b, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', rows)}
-               for k, rows in re.findall(r'static const XvId (\w+)_effects\[\] = \{(.*?)\};', text, re.S)}
+    # (each family's struct, `static const XVirusFamily bn4_NAME = { ... };`, and the rows it names: its effects, `.effects =
+    # NAME_effects` and `static const XvId NAME_effects[] = { { 0x15, 0x90 }, ... }`, BN4's id and BN6's; a family naming
+    # none has none, so each family's are its own, never the next one's)
+    rows = {k: v for k, v in re.findall(r'static const Xv\w+ (\w+)\[\] = \{(.*?)\};', text, re.S)}
     out = []
-    for src, first, names in re.findall(r'\.src_ai = (0x[0-9A-Fa-f]+),.*?\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+),.*?'
-                                        r'\.names = \{ ([^}]*) \}', text, re.S):
-        ids = [int(x, 0) for x in names.split(',')]
-        out.append(dict(type=int(src, 0), ids={v: XV_FIRST_ID + int(first, 0) + k for k, v in enumerate(ids)}, effects={}))
-    # (each family's effects by its name's rows: one family yet, Billy's; several matched to theirs by order)
-    for f, rows in zip(out, effects.values()):
-        f['effects'] = rows
+    for body in re.findall(r'static const XVirusFamily \w+ = \{(.*?)\n\};', text, re.S):
+        src, first, names = (re.search(p, body, re.S) for p in (r'\.src_ai = (0x[0-9A-Fa-f]+)', r'\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+)',
+                                                                 r'\.names = \{ ([^}]*) \}'))
+        eff = re.search(r'\.effects = (\w+)', body)
+        effects = {int(a, 0): int(b, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', rows.get(eff.group(1), ''))} \
+            if eff else {}
+        if src and first and names:
+            ids = [int(x, 0) for x in names.group(1).split(',')]
+            out.append(dict(type=int(src.group(1), 0), ids={v: XV_FIRST_ID + int(first.group(1), 0) + k for k, v in enumerate(ids)},
+                            effects=effects))
     return out
+
+
+def bn4_moved_types():
+    """the object types the recipe moves into BN6's engine, run by the second-level dispatch (xvirus_recipe.h XvType: kind,
+    the dispatch's number, XV_TYPE_MOVED, BN4's own number): {(kind, the dispatch's number): BN4's own}, the thunder's copy
+    (BN6's third-kind 0x2A) among them. A dispatched object's type reads in the BN6 trace as the dispatch's side-table
+    number (xdiff_snap.dispatched: Spikey's moved 0x30 runs at 0xE0); read back as BN4's own, so each meets BN4's"""
+    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    return {(int(k), int(a, 0)): int(of, 0) for k, a, of in
+            re.findall(r'\{ (\d), (0x[0-9A-Fa-f]+), XV_TYPE_MOVED, (0x[0-9A-Fa-f]+) \}', text)}
 
 
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
@@ -83,18 +97,26 @@ class Bn4Canon:
     """canon (xdiff_snap.Canon) with BN4's moved families' ids read as BN6's (bn4_families), where a BN4 trace is compared
     with BN6's; everything else canon's own"""
 
-    def __init__(self, canon, fams):
+    def __init__(self, canon, fams, foes=()):
         self.canon, self.ids = canon, {k: v for f in fams for k, v in f['ids'].items()}
-        self.effects = {k: v for f in fams for k, v in f['effects'].items()}
+        # (the effects of the spec's own families alone, those its foes are versions of: another family's ids none of its)
+        own = [f for f in fams if set(f['ids']) & set(foes)] or fams
+        self.effects = {k: v for f in own for k, v in f['effects'].items()}
+        self.moved_types = bn4_moved_types()
 
     def nid(self, game, v):
         return self.ids.get(v, self.canon.nid(game, v)) if game == 4 else self.canon.nid(game, v)
 
     def fx(self, game, v):
-        """an effect's id as BN6's: a moved family's BN4 effects as its recipe moved them (xvirus_bn4.c's XvId rows: Billy's
-        0x16 and 0x15 BN6's 0x98 and 0x99, its move's flashes, from BN4's effects table 0x080E1698). Any BN4 effect of that
-        number is read so; one the engine spawned would then meet BN6's own of its number and differ, never hide one"""
+        """an effect's id as BN6's: the spec's families' BN4 effects as their recipe moved them (xvirus_bn4.c's XvId rows:
+        Billy's 0x15 and 0x16 BN6's 0x90 and 0x91, its move's flashes, from BN4's effects table 0x080E1698). Any BN4 effect
+        of that number is read so; one the engine spawned would then meet BN6's own of its number and differ, never hide one"""
         return self.effects.get(v, v) if game == 4 else self.canon.fx(game, v)
+
+    def t3(self, game, v):
+        """a third-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where the
+        recipe moved it (bn4_moved_types); BN4's as it is"""
+        return self.moved_types.get((3, v), v) if game == 6 else self.canon.t3(game, v)
 
     def __getattr__(self, name):
         return getattr(self.canon, name)
@@ -259,6 +281,9 @@ def named(canon, game, o, fams=None, reserved=()):
             rec = bn4_as_bn6(rec, fams)
     if game == 4 and fams is not None and o.role in reserved:
         rec[NODE] |= OBJ_RESERVED
+    moved = getattr(canon, 'moved_types', None)
+    if game == 6 and moved and o.moved:   # (a dispatched object's type, its side-table number, as BN4's own: bn4_moved_types)
+        rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
         rec[NODE + OBJ_EFFECT] = canon.fx(game, rec[NODE + OBJ_EFFECT])
     if fams is not None or game == 6:
@@ -609,7 +634,7 @@ def one(name, spec, a, canon, run_xdiff, work):
     ta, tb = read_trace(paths[0]), read_trace(paths[1])
     if not control:   # (BN4's moved families' ids as BN6's, their recipe's: bn4_families)
         fams = bn4_families()
-        canon = Bn4Canon(canon, fams)
+        canon = Bn4Canon(canon, fams, [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x])
         canon.fams = fams
         rom4 = os.path.join(work, 'rom', 'bn4.gba')
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
