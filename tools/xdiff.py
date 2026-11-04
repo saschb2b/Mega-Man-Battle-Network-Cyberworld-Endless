@@ -645,6 +645,8 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
         if not os.path.exists(os.path.join(WORK, 'rom', 'bn4.gba')):
             print(f'{run_name or name}: INCONCLUSIVE (no BN4 Red Sun, USA, in {ROM_DIR})')
             return 'INCONCLUSIVE', 'bn4'
+        # (a mutation's or --poke/--call's breaks of the subject, as its spec's own poke= and call= items: xdiff_bn4.spec_text)
+        spec = dict(spec, poke=list(spec.get('poke', [])) + list(pokes), call=list(spec.get('call', [])) + list(calls))
         return xdiff_bn4.one(run_name or name, spec, a, canon, lambda text, extra=(): run_xdiff(run_name or name, text, a.quiet, extra),
                              WORK)
     # (its foes' BN5 ids, as src/dev/xdiff.c parses them: the families' maps they select, the Navis' effects, art an install chose)

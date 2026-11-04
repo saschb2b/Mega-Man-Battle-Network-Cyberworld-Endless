@@ -8,7 +8,19 @@
 
 /* A panel's fields past bn6.h's, and its types the engine names */
 #define BN6_PANEL_ANIM        0x06        /* Drawn as: the type a panel is drawn as (its type; 1 or 2 while a hole closes or a conveyor runs out) */
-#define BN6_PANEL_TIMER       0x12        /* Timer, u16: a conveyor's frames left (0x708 as one is made); 0x708 written every frame on most others */
+/* (the field init's other stores, 0x0800C51A-0x0800C566, r4 the column and r5 the row: none of them in BN4's panels) */
+#define BN6_PANEL_IN_FIELD    0x00        /* u8 from BN6_PANEL_IN_FIELD_TABLE by row * 8 + column (0x0800C51A) */
+#define BN6_PANEL_IN_FIELD_TABLE 0x0800C590u /* ... 40 bytes (0x0800C516's literal) */
+#define BN6_PANEL_SIDE_COPY   0x04        /* u8 its side again (0x0800C54A) */
+#define BN6_PANEL_SIDE_DRAWN  0x07        /* u8 its side a third time (0x0800C54C) */
+#define BN6_PANEL_COLUMN      0x0A        /* u8 its column (0x0800C55A) */
+#define BN6_PANEL_ROW         0x0B        /* u8 its row (0x0800C55C) */
+#define BN6_PANEL_SPOT        0x0C        /* u8 from BN6_PANEL_SPOT_TABLE by row * 8 + column (0x0800C558) */
+#define BN6_PANEL_SPOT_TABLE  0x0800C5B8u /* ... 40 bytes (0x0800C554's literal) */
+#define BN6_PANEL_STATE       0x0E        /* u16 0x258 at the field's start (0x0800C488's r1, stored at 0x0800C562; BN4's +0xC) */
+#define BN6_PANEL_SIDE_TIMER  0x10        /* u16 the side's timer (the setter 0x0800CC14 stores it, BN5's +0x12: tests/xdiff/legit.json's
+                                           * panel layout), 0 at the field's start */
+#define BN6_PANEL_TIMER       0x12      /* Timer, u16: a conveyor's frames left (0x708 as one is made); 0x708 written every frame on most others */
 #define BN6_PANEL_TIMER_IDLE  0x708       /* BN6_PANEL_TIMER: what it holds where it is not counting (a field's start writes it, 0x0800C564) */
 #define BN6_PANEL_VOLCANO     8           /* BN6_PANEL_TYPE: a volcano (an eruption every 140 frames, 0x0800C438; an Aqua hit cools it plain) */
 #define BN6_PANEL_CONVEYOR    9           /* BN6_PANEL_TYPE: the first conveyor, ... */

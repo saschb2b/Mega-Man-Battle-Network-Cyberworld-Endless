@@ -27,7 +27,7 @@ import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, REPLAYED, RESERVE, ROOT, SIZE, SPAWN, UNMAPPED,
-                        UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u32)
+                        UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -154,6 +154,45 @@ def bn4_alliance(rom4, rom6):
 COLL_ALLIANCE, COLL_DIRECTION = 0x04, 0x0C
 
 
+# A panel read in BN6's terms (BN6's field init, 0x0800C51A-0x0800C566, r4 the column and r5 the row, writes what BN4's
+# keeps none of; BN4's, 0x08009120-0x0800920C, its type, side and three u16): BN6's +0 and +0xC from its two tables by
+# row * 8 + column (BN6_PANEL_IN_FIELD_TABLE, BN6_PANEL_SPOT_TABLE: constants of the place), its column and row at +0xA
+# and +0xB, its type again at +6 (BN6_PANEL_ANIM, the type it is drawn as) and its side again at +4 and +7, as BN6's
+# init writes them from BN4's own type and side; a side by its column (BN6's per-column table, 0x0800C8C2, read for every
+# panel: 0xFF on columns 0 and 7, a column's side on the border rows too), where BN4's border holds 0 (its side table
+# BN4_PANEL_SIDES, 0x08009218: 0 off the 18): BN4's ring read so while it holds its start's 0, the column's side that of
+# BN4's own panel of the column's row 1; the timers idle in both read alike (BN4's +0xE 0x3C0 and +0x12 0x80BE at its
+# start, BN6's +0x10 0 and +0x12 BN6_PANEL_TIMER_IDLE 0x708), any count compared as it is. Never a mask: BN6's own
+# record must hold what its init writes, and BN4's own type and side are what it is held to
+PANEL_TYPE, PANEL_SIDE, PANEL_IN_FIELD, PANEL_SIDE_COPY, PANEL_ANIM, PANEL_SIDE_DRAWN = 0x02, 0x03, 0x00, 0x04, 0x06, 0x07
+PANEL_COLUMN, PANEL_ROW, PANEL_SPOT, PANEL_SIDE_TIMER, PANEL_TIMER = 0x0A, 0x0B, 0x0C, 0x10, 0x12
+BN6_IN_FIELD_TABLE, BN6_SPOT_TABLE, BN4_SIDES = 0x0800C590, 0x0800C5B8, 0x08009218
+BN4_TIMERS_IDLE, BN6_TIMERS_IDLE = (0x3C0, 0x80BE), (0, 0x708)
+
+
+def panel_tables(rom4, rom6):
+    """the tables panel_as_bn6 reads: BN6's two by place, BN4's sides at the field's start"""
+    if not rom4 or not rom6:
+        return None
+    at = lambda rom, a: rom[a - 0x08000000:a - 0x08000000 + 40]
+    return dict(in_field=at(rom6, BN6_IN_FIELD_TABLE), spot=at(rom6, BN6_SPOT_TABLE), sides4=at(rom4, BN4_SIDES))
+
+
+def panel_as_bn6(i, p, tabs, panels):
+    """BN4's panel i (in BN6's layout, xdiff_bn4_trace.c) as BN6's field init would hold it (the comment above)"""
+    out, col, row = bytearray(p), i % 8, i // 8
+    if out[PANEL_SIDE] == tabs['sides4'][i] and (col in (0, 7) or row in (0, 4)):
+        out[PANEL_SIDE] = 0xFF if col in (0, 7) else panels[8 + col][PANEL_SIDE]
+    out[PANEL_IN_FIELD], out[PANEL_SPOT] = tabs['in_field'][i], tabs['spot'][i]
+    out[PANEL_COLUMN], out[PANEL_ROW] = col, row
+    out[PANEL_ANIM], out[PANEL_SIDE_COPY], out[PANEL_SIDE_DRAWN] = out[PANEL_TYPE], out[PANEL_SIDE], out[PANEL_SIDE]
+    timers = u16(out, PANEL_SIDE_TIMER), u16(out, PANEL_TIMER)
+    if timers == BN4_TIMERS_IDLE:
+        out[PANEL_SIDE_TIMER:PANEL_SIDE_TIMER + 2] = BN6_TIMERS_IDLE[0].to_bytes(2, 'little')
+        out[PANEL_TIMER:PANEL_TIMER + 2] = BN6_TIMERS_IDLE[1].to_bytes(2, 'little')
+    return out
+
+
 def coll_as_bn6(coll, alliance):
     """a BN4 collision data (in BN6's layout) with its alliance words (bn4_alliance) and its last move's direction as
     BN6's"""
@@ -271,6 +310,42 @@ def cells(fa, fb, part, ba, bb, start=0):
     return out
 
 
+OBJ_OWNER, AI_COMPANION = 0x4C, 0x58
+
+
+def companions(f):
+    """the role names of BN6's MegaMan's companions this frame: the fourth kind's 0x08 objects MegaMan owns (+0x4C), which
+    BN6's player init spawns and keeps at his AI data +0x58 (legit.json's bn4 allowed, BN6's MegaMan's companion)"""
+    mm = [o for o in f.fr['objs'] if o.kind == 'T1' and o.slot == 0]
+    return {role_name(o.role) for o in f.fr['objs'] if mm and o.kind == 'T4' and o.o8(OBJ_TYPE) == 8 and o.o32(OBJ_OWNER) == mm[0].addr}
+
+
+def allowed_world(d, fb):
+    """the allowed difference of legit.json's bn4 a world's difference against BN6's is (MegaMan's own sprite; BN6's
+    MegaMan's companion, its being in play and his AI data's pointer to it), None where none"""
+    if not isinstance(d.role, tuple):
+        return None
+    for a in bn4_allowed():
+        if a.get('whose') != 'megaman' or d.role[0] != a['kind'] or d.role[1] != int(a['type'], 0):
+            if not (a.get('whose') == 'megaman' and a['kind'] == 'T4' and d.role[0] == 'T1' and d.role[1] == 0x1A0
+                    and d.part == 'ai' and d.off == AI_COMPANION and d.a == ('raw', 0) and isinstance(d.b, tuple)
+                    and d.b[0] in companions(fb)):
+                continue
+            return a['name']
+        if 'offsets' in a:
+            lo, hi = (int(x, 0) for x in a['offsets'])
+            if d.part == a['part'] and lo <= d.off <= hi:
+                return a['name']
+        elif 'bit' in a:
+            bit = int(a['bit'], 0)
+            if (d.part == a['part'] and d.off == int(a['offset'], 0) and isinstance(d.a, int) and isinstance(d.b, int)
+                    and d.a ^ d.b == bit and d.b & bit):
+                return a['name']
+        elif role_name(d.role) in companions(fb) and d.part == 'in play' and d.a is False and d.b is True:
+            return a['name']
+    return None
+
+
 def frame_diffs(fa, fb):
     """each difference of one frame: the objects by role, the RNG words, the songs, the run order, the panels"""
     t, out = fa.fr['t'], []
@@ -303,9 +378,13 @@ def frame_diffs(fa, fb):
     if sa != sb:
         out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
     oa, ob = [fa.ptr(x) for x in fa.fr['order']], [fb.ptr(x) for x in fb.fr['order']]
+    if fb.game == 6 and fa.game == 4:   # (BN6's MegaMan's companion, BN6's alone: legit.json's bn4 allowed)
+        ob = [x for x in ob if not (isinstance(x, tuple) and x[0] in companions(fb))]
     if oa != ob:
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
+    tabs = getattr(fa.canon, 'panels', None) if fb.game == 6 else None
     for i, (pa, pb) in enumerate(zip(fa.fr['panels'], fb.fr['panels'])):
+        pa = panel_as_bn6(i, pa, tabs, fa.fr['panels']) if tabs else pa
         out += [Diff(t, f'panel {i % 8},{i // 8}', part, off, a, b) for part, off, a, b in cells(fa, fb, 'panel', pa, pb)]
     return out
 
@@ -457,8 +536,14 @@ def compare(spec, ta, tb, canon, show=6):
             continue
         n += 1
         fa = Frame(ta, fra, canon)
-        open_ = unexplained(fa, Frame(tb, frb, canon), ta, tb, used)
+        fb = Frame(tb, frb, canon)
+        open_ = unexplained(fa, fb, ta, tb, used)
         world = [d for d in open_ if d.role not in fam] if against else []
+        for d in world:   # (legit.json's bn4 allowed of the world's: MegaMan's own sprite, BN6's companion of his)
+            d.mask = allowed_world(d, fb)
+            if d.mask:
+                used[d.mask] = used.get(d.mask, 0) + 1
+        world = [d for d in world if not d.mask]
         if lag:
             frl = bt.get(fra['t'] + lag)
             fl = Frame(tb, frl, canon) if frl else None
@@ -530,7 +615,9 @@ def one(name, spec, a, canon, run_xdiff, work):
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
         rom6 = os.path.join(work, 'rom', 'bn6.gba')
         canon.sprites = bn4_sprites(rom4b)
-        canon.alliance = bn4_alliance(rom4b, open(rom6, 'rb').read() if os.path.exists(rom6) else b'')
+        rom6b = open(rom6, 'rb').read() if os.path.exists(rom6) else b''
+        canon.alliance = bn4_alliance(rom4b, rom6b)
+        canon.panels = panel_tables(rom4b, rom6b)
     for tr in (ta, tb):
         assign_roles(tr, canon)
     if not control:
