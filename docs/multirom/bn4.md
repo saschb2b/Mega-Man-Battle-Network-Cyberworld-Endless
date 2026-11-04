@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Battle Network 4 in a run"
-description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's open calls."
+description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T18:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -226,10 +226,11 @@ owner turns BN4 on.
   call.
 - **The telegraph**: the act's card says "Nets meet" where either other
   net's families can come, its words unchanged. MegaMan names a profile's
-  first visitor once, as now, BN5's or BN6's; a BN4 visitor is not named
-  and does not spend that once, until the owner names BN4's net in the
-  run's fiction (a call below): BN5's is "the older Net", the copy the
-  Nest made, and BN4's is older still.
+  first visitor once, as now, BN5's or BN6's. A BN4 visitor counts as the
+  older Net's (the owner's call 5): one "older Net" beside BN6's, BN5's
+  and BN4's families both of it, so whichever of the two comes first is
+  named and spends the once. As built, a BN4 visitor is not named and
+  does not spend it; that changes before its visitors reach players.
 - **The record**: the run log marks a BN4 visitor as any (`+v64.0`,
   Billy, BN6's AI index 64, at V1). A battle's families (a bit each, the
   repeat rule's memory) stop at 63, and no battle of a run's own holds a
@@ -241,9 +242,11 @@ owner turns BN4 on.
   run without BN4 from the first visitor on; layers (their layouts,
   objects and loot) do not change.
 
-Before BN4's visitors reach players: its families proved by `build.py
-xdiff`, their reward rows read (BN6's fill stands in for them now), and
-the owner's calls 5 and 6 below.
+Before BN4's visitors reach players (the owner's call 6: once the six
+families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
+CirKill proved by `build.py xdiff`, their reward rows read (BN6's fill
+stands in for them now), and a BN4 visitor named as the older Net's
+(call 5).
 
 ## The plan
 
@@ -320,14 +323,26 @@ to 0.97).
    its areas first). Phase 1 begins with the guest core for BN4's battles
    and its families moved and proved, visiting BN6's and BN5's battles
    before BN4 has an area of its own.
-2. The tournament as an act's climax (recommended), or not at all.
-3. With three games read, how a run shares BN6's areas between BN5's and
-   BN4's dressings.
+2. **Decided, 4 November 2026: the tournament as an act's climax** (The
+   tournament, above), over leaving it out. Its numbers still go through
+   the game-design skill and `build.py pacing` when Phase 2 builds it.
+3. **Decided, 4 November 2026: by the seed, area by area.** With three
+   games read, the run's seed picks each BN6 area's dressing among the
+   games present (BN6's own, BN5's or BN4's), as `run_dress` picks BN5's
+   now, so nothing more is saved and a run continued without a ROM goes on
+   in BN6's tiles. Chosen over one other game a run and over BN4 only
+   where BN5 has none.
 4. The 3DS: BN4 left out where its heap has no room (built so: one extra
    ROM a 3DS, BN5's first, `tools/heap3ds.py`'s numbers in
    [The 3DS's memory](../engine/emulation/3ds-memory.md)).
-5. What MegaMan calls BN4's net when its first visitor is met: one more
-   "older Net" beside BN5's, or a third, older still; and whether the
-   deep's "Both Nets" counts three once BN4's areas join it.
-6. When BN4's visitors reach players: with the first of its families
-   proved, or once all 17 are.
+5. **Decided, 4 November 2026: the same "older Net" as BN5's.** MegaMan
+   names the older Net once, at a profile's first visitor of BN5's or
+   BN4's, and the deep's card stays "Both Nets", BN6's and the older
+   one. Chosen over a third Net, older still, and over leaving BN4's
+   unnamed until its areas come.
+6. **Decided, 4 November 2026: once the six moved are proved.** BN4's
+   visitors reach players when Billy, Spikey, Shrimpy, Walla, Elmperor
+   and CirKill all pass `build.py xdiff`, their reward rows read; the
+   other eleven join as each is proved. Chosen over waiting for all 17
+   and over Billy alone (one visitor in eleven, the same family each
+   time).
