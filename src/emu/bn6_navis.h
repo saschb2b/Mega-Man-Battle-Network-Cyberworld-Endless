@@ -80,6 +80,11 @@
 #define BN6_NAME_OF_NAVIS     0x0800EC5Eu /* BN6_NAME_OF once its archive is chosen (movs r1,#0xFF): r0 the id, r2 the archive (the Navis' past 0xFF) */
 /* An enemy spawned mid-battle (r0 its id, r1 and r2 its panel, r3 its side): BN5_CHAOS_FAIL_SPAWN's twin, the Souls
  * track's, the same body with its two entries in the other order */
+/* A sprite into the battle's cache of 12 (bn6f sprite_decompress, located by its 122 bytes; docs/rom/navis.md, A Navi swapped
+ * mid-battle): r0 its list (a byte offset into RomLayout.sprite_lists, struct1's BN6_TRAITS_LIST), r1 its number; where its pointer
+ * is marked compressed (bit 31), decompressed below 0x02033000 as the battle's preload does its starting enemies' (0x080029A8), r0 1;
+ * a sprite neither there nor plain draws as BN6's white dot (sprite_load, 0x080026F0) */
+#define BN6_SPRITE_DECOMPRESS 0x08002A64u
 #define BN6_SPAWN_ENEMY_1     0x08007696u /* ... its +5 and AIData +2 1 (BN5's 0x08006AAE), */
 #define BN6_SPAWN_ENEMY_0     0x080076A0u /* ... 0 (BN5's 0x08006AA4) */
 /* BN5's Colonel's table moved (issue #82's RAM plan, RAM_COLONEL): BN5 keeps two 8-byte entries by alliance at 0x02034000 */

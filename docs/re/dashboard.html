@@ -213,8 +213,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "A Navi swapped mid-battle",
       "state": "proven",
-      "now": "One BN6 battle against a Navi of BN6's swapped on its panel for a second and a third (src/emu/battle_swap.c, the Glitch layer's copy). BN6 counts the battle's starting enemies at BattleState +5 (lowered at a destroy, 0x0800A104; the win at 0, 0x0800A152) and +0x13 (lowered as a dying begins where Param2 is 0, 0x0800A11C); an enemy of the spawn's mid-fight entry (0x08007696, AIData +2 1, no caller in BN6) counts in neither and is freed at its destroy. The form deleted is made such an arrival at its dying's phase 0 (0x080170E4), glitches out in BN6's sprite mosaic for 24 frames in its phase 4 (0x08017122) and is removed by BN6; the next form is spawned on its panel from battle_main (0x08007800), back through a hook in free space, arrives as BN6 brings a Navi into a fight under way (its HP plate listed), and takes the count (AIData +2 0, Param2 0) as its arrival ends. The last form's deletion is BN6's own: ENEMY DELETED!, the results with the first form's reward.",
-      "left": "Not in a run yet: the director's Glitch layer arms it (battle_swap_arm before, battle_swap_disarm after). BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
+      "now": "One BN6 battle against a Navi of BN6's swapped on its panel for a second and a third (src/emu/battle_swap.c, the Glitch layer's copy). BN6 counts the battle's starting enemies at BattleState +5 (lowered at a destroy, 0x0800A104; the win at 0, 0x0800A152) and +0x13 (lowered as a dying begins where Param2 is 0, 0x0800A11C); an enemy of the spawn's mid-fight entry (0x08007696, AIData +2 1, no caller in BN6) counts in neither and is freed at its destroy. The form deleted is made such an arrival at its dying's phase 0 (0x080170E4), glitches out in BN6's sprite mosaic for 24 frames in its phase 4 (0x08017122) and is removed by BN6; the next form is spawned on its panel from battle_main (0x08007800), back through a hook in free space, arrives as BN6 brings a Navi into a fight under way (its HP plate listed), and takes the count (AIData +2 0, Param2 0) as its arrival ends; its battle sprite is put in the battle's sprite cache first by BN6's sprite_decompress (0x08002A64), as the battle's preload puts its starting enemies' there, a compressed one (BlastMan's, Colonel's) drawing as BN6's white dot without it. The last form's deletion is BN6's own: ENEMY DELETED!, the results with the first form's reward.",
+      "left": "BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
       "updated": "2026-11-04",
       "link": "../rom/navis.md",
       "state_text": "Proven in research, not built"
@@ -233,6 +233,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-04",
       "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
+    },
+    {
+      "date": "2026-11-04",
+      "what": "A Navi swapped mid-battle: a later form's battle sprite put in the battle's sprite cache by BN6's sprite_decompress (0x08002A64, BN6_SPRITE_DECOMPRESS) before its spawn; a compressed one drew as BN6's white dot (docs/rom/navis.md's row)."
     },
     {
       "date": "2026-10-25",
