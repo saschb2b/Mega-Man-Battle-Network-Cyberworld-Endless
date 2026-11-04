@@ -109,12 +109,14 @@ from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, S
                         PLAYER_UNITE, NAVI_FORM, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom, soul_view)
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
+import xdiff_bn4  # noqa: E402
 
 SPECS = os.path.join(ROOT, 'tests', 'xdiff')
 LEGIT = os.path.join(SPECS, 'legit.json')
 MUTATIONS = os.path.join(SPECS, 'mutations.json')
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
+SHA1_BN4 = {'bn4.gba': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}   # (BN4 Red Sun, USA: its specs' alone, xdiff_bn4.py; tools/bn4_lab.py's)
 ROM_BASE = ROM_RANGE[0]
 
 
@@ -124,15 +126,17 @@ def find_roms():
     rom = os.path.join(WORK, 'rom')
     os.makedirs(rom, exist_ok=True)
     want = {k: v for k, v in SHA1.items() if not os.path.exists(os.path.join(rom, k))}
-    for name in sorted(os.listdir(ROM_DIR)) if want else []:
+    maybe = {k: v for k, v in SHA1_BN4.items() if not os.path.exists(os.path.join(rom, k))}   # (copied where found, asked by no spec but BN4's)
+    for name in sorted(os.listdir(ROM_DIR)) if want or maybe else []:
         path = os.path.join(ROM_DIR, name)
         if name.lower().endswith('.gba') and os.path.isfile(path):
             with open(path, 'rb') as f:
                 sha = hashlib.sha1(f.read()).hexdigest()
-            for k, v in list(want.items()):
-                if sha == v:
-                    shutil.copy(path, os.path.join(rom, k))
-                    del want[k]
+            for wanted in (want, maybe):
+                for k, v in list(wanted.items()):
+                    if sha == v:
+                        shutil.copy(path, os.path.join(rom, k))
+                        del wanted[k]
     if want:
         sys.exit(f'no {" or ".join(want)} in {ROM_DIR} (BN6 Gregar and BN5 Team Colonel, USA)')
     return rom
@@ -247,16 +251,23 @@ def run(name, spec, pokes, calls, quiet, twins=()):
         p = os.path.join(WORK, 'runs', f'{name}.{g}')
         if os.path.exists(p):
             os.remove(p)
+    run_xdiff(name, spec_text(spec, out, pokes, calls, twins), quiet)
+    return [os.path.join(WORK, 'runs', f'{name}.{g}') for g in ('bn5', 'bn6')]
+
+
+def run_xdiff(name, text, quiet):
+    """the host build's --xdiff TEXT in its container, its lines printed (quiet: none); a run that fails exits"""
+    os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
+    os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     if not SHOT:
         SHOT.extend(shot_command())
-    r = subprocess.run(SHOT + ['--xdiff', spec_text(spec, out, pokes, calls, twins)], cwd=ROOT, capture_output=True, text=True)
+    r = subprocess.run(SHOT + ['--xdiff', text], cwd=ROOT, capture_output=True, text=True)
     lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus', 'xchips', 'xattack'))]
     if not quiet:
         for l in lines:
             print(f'  {l}')
     if r.returncode:
         sys.exit(f'{name}: the run failed\n' + r.stderr[-2000:])
-    return [os.path.join(WORK, 'runs', f'{name}.{g}') for g in ('bn5', 'bn6')]
 
 
 def reference_only(name, spec, a, legit, canon):
@@ -633,6 +644,11 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     with open(os.path.join(SPECS, f'{name}.json')) as f:
         spec = json.load(f)
     spec.update(extra or {})
+    if spec.get('game') == 'bn4':   # (BN4 Red Sun's battle the reference: tools/xdiff_bn4.py)
+        if not os.path.exists(os.path.join(WORK, 'rom', 'bn4.gba')):
+            print(f'{run_name or name}: INCONCLUSIVE (no BN4 Red Sun, USA, in {ROM_DIR})')
+            return 'INCONCLUSIVE', 'bn4'
+        return xdiff_bn4.one(run_name or name, spec, a, canon, lambda text: run_xdiff(run_name or name, text, a.quiet), WORK)
     # (its foes' BN5 ids, as src/dev/xdiff.c parses them: the families' maps they select, the Navis' effects, art an install chose)
     canon.foes = {int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x}
     canon.select(sorted(canon.foes))

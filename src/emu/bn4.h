@@ -20,10 +20,17 @@
 #define BN4_MODE_GAME_OVER 0x18       /* ... at GAME OVER */
 #define BN4_BATTLE_STATE  0x02035810u /* BattleState: +1 the phase (8 the Custom screen, 0xC fighting, 0x10 over, 0x14 ending), +0xD the side,
                                        * +0x32 its flags (u16), +0x3C the record fought */
+#define BN4_BATTLE_SIDE   (BN4_BATTLE_STATE + 0x0D) /* u8: MegaMan's side (BN6_BATTLE_SIDE's twin), as the state's comment has it */
+#define BN4_BATTLE_TIMER  (BN4_BATTLE_STATE + 0x40) /* u32, the frames fought: 0 through BATTLE START!, held on the Custom screen, one more
+                                       * a fight frame (BN5_BATTLE_TIMER's place; seen counting so in xdiff's game=bn4 battle) */
+#define BN4_CUSTOM_WINDOW 0x02036406u /* the Custom screen's window as it slides in, 0 to 0x78 open (BN6_WINDOW_OPEN): the gauge's struct
+                                       * 0x020363F0 + 0x16, BN5's +0x12 shifted by 4 as its gauge (+0x24, BN5's +0x20) is; seen
+                                       * 0x78 while it shows, 0 once OK closed it and in the fight */
 #define BN4_BATTLE_RESULT 0x0203BCB4u /* the battle's result, 1 won, 2 lost (a fixed copy of the game state's +0x10) */
 #define BN4_BATTLE_REWARD 0x0203BD4Cu /* u16: the reward the results screen gives (a Mettaur's: 0x0058, Guard1 A), the Busting level at -7 */
 #define BN4_BATTLE_NAVI   0x0203BEC0u /* the battle's NaviStats, 0x40 a side (GetBattleNaviStatsAddr, 0x0800D742), HP at +0x30 */
-#define BN4_CUSTOM_GAUGE  0x02036414u /* u16, full at 0x4000 (SetCustGauge, 0x08016810: its struct 0x020363F0 + 0x24) */
+#define BN4_NAVI_SIZE     0x40        /* ... a side's (BN6_BATTLE_NAVI_SIZE's twin) */
+#define BN4_CUSTOM_GAUGE 0x02036414u /* u16, full at 0x4000 (SetCustGauge, 0x08016810: its struct 0x020363F0 + 0x24) */
 #define BN4_OBJECT_KINDS  0x080031B8u /* the object runner's (0x0800314C) table by kind: the first kind's types BN4_T1_TYPES, the third's
                                        * 0x08003C40 (165), the fourth's 0x08003F78 (130); each type run with `mov lr,pc; bx` */
 #define BN4_T1_TYPES      0x08003A24u /* the first kind's 95 types, a routine each: the virus families, the Navis, MegaMan. A family's routine
@@ -49,11 +56,15 @@
 #define BN4_T3_OBJECTS    0x0203C080u /* the third kind's objects, 32 of 0xD8 (the buster's shots among them) */
 #define BN4_T4_OBJECTS    0x02037D10u /* the fourth kind's, 32 of 0xC8 */
 #define BN4_OBJECT_LIST   0x02009E40u /* the run list's head, its end 0x0200A4C0 (BN6's 0x02009380, 0x02009AB0) */
+#define BN4_OBJECT_LIST_END 0x0200A4C0u /* ... its end, a node's +4 there ending the run order (BN6_OBJECT_LIST_END's twin) */
 #define BN4_TOOLKIT_COLLISION 0x30    /* eToolkit +0x30: the collision data's pool, 32 of BN4_COLL_SIZE (0x02039A10) */
 #define BN4_COLL_ALLIANCE 0x03        /* collision data: its side (BN6's +4) */
 #define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
 #define BN4_COLL_PARALYSIS 0x10       /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
-#define BN4_COLL_FLASH    0x18        /* ... u16: the flashing after a hit (BN6's +0x24): 0x78, less 1 a frame, blinking by bit 2 */
+#define BN4_COLL_CONFUSE  0x12        /* ... u16: confusion's frames (BN6_COLL_CONFUSE, +0x1E) */
+#define BN4_COLL_BLIND    0x14        /* ... u16: blindness's frames (BN6_COLL_BLIND, +0x20) */
+#define BN4_COLL_HOLD     0x16        /* ... u16: the hold's frames (BN6_COLL_IMMOBILE, +0x22) */
+#define BN4_COLL_FLASH    0x18       /* ... u16: the flashing after a hit (BN6's +0x24): 0x78, less 1 a frame, blinking by bit 2 */
 #define BN4_COLL_INVULNERABLE 0x1C    /* ... u16: invulnerability's frames (BN6's +0x28); BN4 has no freeze or bubble */
 #define BN4_COLL_FINAL_DAMAGE 0x28    /* ... u16: the HP a hit takes, subtracted at 0x08013C58 (BN6's +0x80) */
 #define BN4_COLL_FLAGS    0x64        /* ... u32: ObjectFlags1, BN6's bits (BN6's +0x3C) */

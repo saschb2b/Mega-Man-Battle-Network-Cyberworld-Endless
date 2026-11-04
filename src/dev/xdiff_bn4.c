@@ -18,7 +18,7 @@ static int battle_phase(void) { return guest_read8(BN4_BATTLE_STATE + 1); }
 
 /* A random battle's record as the net's are (weight 0x20, its song, the map's background, every progress), its entity
  * pointer guest_dev_battle's, then MegaMan and the foes (id, column, row, kind), 0xFF ending them: its length */
-static uint32_t record_make(const Spec *s, uint8_t *rec) {
+uint32_t xd4_record(const Spec *s, uint8_t *rec) {
 	const uint8_t head[8] = { 0x20, 0x00, 0x14, BN4_SONG_BATTLE, 0x00, 0xFF, 0x1F, 0x00 };
 	uint32_t len = 0;
 	for (int i = 0; i < 8; ++i) rec[len++] = head[i];
@@ -85,7 +85,7 @@ int xdiff_bn4_run(const Spec *s) {
 	for (int k = 0; k < s->nfoes; ++k)
 		if (s->foes[k].id < 1 || s->foes[k].id >= BN4_ENEMY_COUNT) { fprintf(stderr, "xdiff: %x is no BN4 enemy id\n", s->foes[k].id); return 1; }
 	uint8_t rec[0x80];
-	uint32_t len = record_make(s, rec);
+	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) { fprintf(stderr, "xdiff: BN4's battle could not be asked\n"); return 1; }
 	foes_say(s);
 	int f = 0, result = 0, hp_end = -1, begun = -1;
