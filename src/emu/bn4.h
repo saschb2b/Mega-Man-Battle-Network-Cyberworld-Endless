@@ -74,7 +74,11 @@
 #define BN4_SPAWN_3_LAST  0x0800330Cu /* ... at the list's end (BN6_SPAWN_3_LAST) */
 #define BN4_SPAWN_3_FIRST 0x08003328u /* ... at its start (BN6_SPAWN_3_FIRST) */
 #define BN4_SPAWN_4       0x08003344u /* the fourth kind's, after the object running (BN6_SPAWN_4) */
-#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT's twin by body); BN4's effect table not mapped */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT's twin by body), its row BN4_EFFECTS' */
+#define BN4_THUNDER       0x080D2000u /* the third kind's 0x2A, the thunder Billy's attack spawns: its routine (to 0x080D2224), BN6's
+                                       * BN6_THUNDER but for its collision offsets and its init's r3 (docs/rom/bn4.md, The thunder's copy) */
+#define BN4_THUNDER_ARG   0x080D208Cu /* ... its init's movs r3,#0 before its collision set up (bl 0x080129AC, BN4_COLL_SETUP_ARG) */
+#define BN4_SPAWN_THUNDER 0x080D2156u /* ... its spawner, Billy's call (r1 column, r2 row, r3 element): BN6's BN6_SPAWN_THUNDER's copy */
 #define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the sound (BN6_PLAY_SOUND's twin by body), BN4's own numbers (its songs at
                                        * RomLayout.song_table 0x155FF8, compared with BN6's by how they sound: tools/xrecipe_bn4.py) */
 #define BN4_TIME_STOP     0x08007948u /* battle_isTimeStop: the battle's flags' bit 4 (BN6's 0x0800A098, the same body) */

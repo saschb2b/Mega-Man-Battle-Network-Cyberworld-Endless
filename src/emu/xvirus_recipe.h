@@ -269,5 +269,9 @@ bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t 
 const XvBlock *xvirus_block_of(const XVirusFamily *f, uint32_t a);
 const XvData *xvirus_data_at(const XVirusFamily *f, uint32_t a);
 bool xvirus_is_code(const XVirusFamily *f, uint32_t a);
+/* Whether `a` (Thumb) is a routine of BN6's types copied for BN4's
+ * families, at its copy (xvirus_bn4_copy.h, installed before them): a
+ * family's call may go there */
+bool xvirus_bn4_copy_routine(uint32_t a);
 
 #endif

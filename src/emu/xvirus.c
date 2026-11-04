@@ -123,7 +123,7 @@ static uint32_t resolve(uint32_t target, void *user) {
 			 * chips', xchips_code.h) */
 			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
 			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) &&
-				!own) break;
+				!own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -973,7 +973,7 @@ void xvirus_install(int which) {
 			for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
 		xfields_install(XROM_BN5_COLONEL_US);
 		/* (BN4 Red Sun's, where its ROM is read for research alone: --dev bn4families) */
-		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data)
+		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
 	}
 	claims_end();
