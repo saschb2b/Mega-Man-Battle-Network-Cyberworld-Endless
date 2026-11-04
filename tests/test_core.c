@@ -3659,6 +3659,13 @@ static bool moved_once(const XVirusFamily *f, int track) {
 	return true;
 }
 
+/* whether the Souls' code moves the type kind:from */
+static bool soul_moves(int kind, int from) {
+	for (int i = 0; i < soulcode_bn5.ntypes; ++i)
+		if (soulcode_bn5.types[i].kind == kind && soulcode_bn5.types[i].type == from && soulcode_bn5.types[i].to == XV_TYPE_MOVED) return true;
+	return false;
+}
+
 /* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
  * chips' unit's */
 static bool copied_before(uint32_t bn5, uint32_t bn6) {
@@ -3718,6 +3725,10 @@ static void test_xvirus_static(void) {
 			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
 		for (int k = 0; k < i; ++k)
 			CHECK(!static_clashes(f, xvirus_bn4[k]), "xvirus: %s and %s share numbers or room", xvirus_bn4[k]->name, f->name);
+		/* (the types it moves at the dispatch's numbers BN4's take, apart from every BN5 track's) */
+		for (int t = 0; t < f->ntypes; ++t)
+			CHECK(f->types[t].of && !moved_before(TRACK_SOULS, 0, f->types[t].kind, f->types[t].from) && !soul_moves(f->types[t].kind, f->types[t].from),
+				"xvirus: %s moves its type %d:%#x at a number a BN5 track moves", f->name, f->types[t].kind, f->types[t].from);
 	}
 	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
 	XVirusFamily twin = xvirus_cangard;
@@ -4250,6 +4261,12 @@ static void test_xvirus_shims(void) {
 	}
 	CHECK(!xvirus_shim_prestep(p, sizeof p, home, 0x08104550u, veneer, veneer) && !xvirus_shim_prestep(p, 16, home, BN5_PRESTEP_DOMINERD, veneer, veneer),
 		"shims: a pre-step no port makes, or too little room, taken");
+	/* (an entry: push {lr}, a call of the tail, pop {pc}) */
+	uint8_t e[XV_SHIM_ENTRY_SIZE];
+	uint32_t called = 0;
+	CHECK(xvirus_shim_entry(e, home, to | 1) && get16(e) == 0xB500 && thumb_bl_decode(home + 2, get16(e + 2), get16(e + 4), &called) &&
+		called == to && get16(e + 6) == 0xBD00, "shims: an entry (%04x, a call to %08x, %04x)", get16(e), (unsigned)called, get16(e + 6));
+	CHECK(!xvirus_shim_entry(e, home + 2, to | 1) && !xvirus_shim_entry(e, home, to), "shims: an entry off its word, or to no Thumb, taken");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not

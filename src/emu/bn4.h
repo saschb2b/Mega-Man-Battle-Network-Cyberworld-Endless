@@ -58,6 +58,21 @@
 #define BN4_STATE_GENERIC_5 0x080105BDu
 #define BN4_BY_NAME_RANGE 0x080B6568u /* the enemies of a NameID range (r0 a list it fills, r1 and r2 the bounds): BN6_BY_NAME_RANGE's work, its side
                                        * its own (BN6's takes it in r3) */
+/* Its spawners (each r0 the type, r1-r4 its words, r5 back the object or 0), whose calls in a moved family's code the
+ * second-level dispatch takes (src/emu/xvirus_dispatch.c, XV_SPAWN_*): each BN6's of the same kind (its movs r0) and the
+ * same place in the run order (the routine its spawn ends with: 0x0800337C after the object running, 0x080033A4 at the
+ * list's end, 0x080033BC at its start), as BN5's are */
+#define BN4_SPAWN_COMMON  0x08003210u /* SpawnBattleObjectCommon (BN6_SPAWN_COMMON's twin): r0 the kind, r1 the spawner's five words */
+#define BN4_SPAWN_1       0x080032B8u /* the first kind's, run after the object running (BN6_SPAWN_1) */
+#define BN4_SPAWN_1_LAST  0x080032D4u /* ... at the list's end (BN6_SPAWN_1_LAST) */
+#define BN4_SPAWN_1_LAST2 0x08003360u /* ... a second of the same code (BN6_SPAWN_1_LAST) */
+#define BN4_SPAWN_3       0x080032F0u /* the third kind's, after the object running (BN6_SPAWN_3): Spikey's and Shrimpy's attacks' */
+#define BN4_SPAWN_3_LAST  0x0800330Cu /* ... at the list's end (BN6_SPAWN_3_LAST) */
+#define BN4_SPAWN_3_FIRST 0x08003328u /* ... at its start (BN6_SPAWN_3_FIRST) */
+#define BN4_SPAWN_4       0x08003344u /* the fourth kind's, after the object running (BN6_SPAWN_4) */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT's twin by body); BN4's effect table not mapped */
+#define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the sound (BN6_PLAY_SOUND's twin by body), BN4's own numbers (its songs at
+                                       * RomLayout.song_table 0x155FF8, compared with BN6's by how they sound: tools/xrecipe_bn4.py) */
 #define BN4_ID_RAISE      0x0800B036u /* an enemy id raised by the level ([eToolkit +0x44] +0xD, at most 2): a virus's by 2 a level (to its
                                        * version 5), a Navi's by 1; that the level is the playthrough's is assumed */
 #define BN4_COLL_SIZE     0x90        /* an object's collision data (BN5's 0xA0, BN6's 0xA8), its offsets otherwise */
@@ -79,7 +94,11 @@
 #define BN4_OBJECT_LIST   0x02009E40u /* the run list's head, its end 0x0200A4C0 (BN6's 0x02009380, 0x02009AB0) */
 #define BN4_OBJECT_LIST_END 0x0200A4C0u /* ... its end, a node's +4 there ending the run order (BN6_OBJECT_LIST_END's twin) */
 #define BN4_TOOLKIT_COLLISION 0x30    /* eToolkit +0x30: the collision data's pool, 32 of BN4_COLL_SIZE (0x02039A10) */
+#define BN4_COLL_REGION   0x01        /* collision data: its region's kind (BN6's +1, the same place: BN4's 0x08009EE4 and BN6's
+                                       * object_highlightPanelRegion 0x0800CCBE read it there) */
 #define BN4_COLL_ALLIANCE 0x03        /* collision data: its side (BN6's +4) */
+#define BN4_COLL_HIT_EFFECT 0x07      /* ... its hit's effect (BN6's +9): BN4's setter 0x08012F74 is BN6's object_setCollisionHitEffect
+                                       * (0x0801A140) but for this offset */
 #define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
 #define BN4_COLL_PARALYSIS 0x10       /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
 #define BN4_COLL_CONFUSE  0x12        /* ... u16: confusion's frames (BN6_COLL_CONFUSE, +0x1E) */
@@ -88,6 +107,8 @@
 #define BN4_COLL_FLASH    0x18       /* ... u16: the flashing after a hit (BN6's +0x24): 0x78, less 1 a frame, blinking by bit 2 */
 #define BN4_COLL_INVULNERABLE 0x1C    /* ... u16: invulnerability's frames (BN6's +0x28); BN4 has no freeze or bubble */
 #define BN4_COLL_FINAL_DAMAGE 0x28    /* ... u16: the HP a hit takes, subtracted at 0x08013C58 (BN6's +0x80) */
+#define BN4_COLL_FROM_COLLISION 0x54  /* ... u32: the flags its hits left it (BN6's FlagsFromCollision +0x70): the thunder's update
+                                       * (the third kind's 0x2A, 0x080D20C8) is BN6's (0x080CAD2C) but for this offset (0x080D215E) */
 #define BN4_COLL_FLAGS    0x64        /* ... u32: ObjectFlags1, BN6's bits (BN6's +0x3C) */
 #define BN4_COLL_STRUCK   0x68        /* ... u32: ObjectFlags2, BN6's bits (BN6's +0x40) */
 #define BN4_AI_DATA       0x02035B20u /* the AI data: one a side (MegaMan's, a Navi's), 0xC0 each, no pool (BN6 8 of 0x100) */
@@ -289,9 +310,7 @@
 #define BN4_SET_ACTION    0x0800C9ACu /* r0 a state: CurAction set, its sub-state and the attack's variables' first u16 cleared */
 #define BN4_ATTACK_END    0x0800CA28u /* a Soul Navi's attack's end: AI data +0x44's bits 0x3F and +9 to +0xB, +0x30, +0x32 cleared, CurAction 6;
                                        * 0x0800C9FC the same with the attack's +5 kept at +0x3A, 0x0800CA4A the CurAction alone */
-#define BN4_SPAWN_T1      0x080032B8u /* an object spawned: r0 its type, r1 to r3 its place, r4 its parameters; the first kind's */
-#define BN4_SPAWN_T3      0x080032F0u /* ... the third kind's (its attacks') */
-#define BN4_SPAWN_T4      0x08003344u /* ... the fourth kind's (its effects') */
+/* (their spawns: BN4_SPAWN_1, BN4_SPAWN_3 and BN4_SPAWN_4 above, r0 the type, r1 to r3 the place, r4 the parameters) */
 #define BN4_ENEMY_RECORD  0x08011878u /* r0 an enemy id: its BN4_ENEMY_STATS record */
 #define BN4_SPAWN_ENEMY   0x080F00F4u /* r0 an enemy id: its type spawned on a free panel of the side (Roll's state 11, MegaMan's 48) */
 #define BN4_PANEL_CRACK   0x08009AECu /* r0, r1 a panel: cracked (its type 3), or broken (1) where it was cracked, sound 0x95 (ColdMan, Duo) */

@@ -31,8 +31,10 @@ typedef struct { uint32_t start, end, at, crc; } XvBlock;   /* [start, end) in i
 typedef struct { uint32_t start, end; int kind; } XvData;   /* [start, end) in its game, within a block */
 typedef struct { uint32_t from, to; } XvPair;               /* an address of its game's, and BN6's in its place */
 /* a BN6 routine (its Thumb address), or the family's own (its address in its game: in its blocks, or in clone k - 1 where
- * `clone` is k) */
-typedef struct { uint32_t addr; bool own; uint8_t clone; } XvRef;
+ * `clone` is k); a hook of its own `entered` past its routine's push {lr} (BN4's init or update, whose own step is a tail
+ * of it after the engine's work): run through a shim of its home that pushes lr and calls in, the tail's pop {pc}
+ * returning from the shim (xvirus_shim.h) */
+typedef struct { uint32_t addr; bool own; uint8_t clone; bool entered; } XvRef;
 typedef struct {                                            /* an immediate changed in its instruction, checked first */
 	uint32_t at;
 	ThumbForm form;
@@ -51,8 +53,10 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
  * first, third or fourth kind's), its number in its game left in the code:
  * the second-level dispatch (xvirus_dispatch.h) spawns it as BN6's twin
  * `to`, or, where `to` is XV_TYPE_MOVED, as the kind's dispatch type, which
- * runs its game's routine for `from` copied with the family's code */
-typedef struct { uint8_t kind, from, to; } XvType;
+ * runs its game's routine for `from` copied with the family's code; `of`, where not 0, its number in its game where its
+ * code spawns it by `from`, a number of the dispatch's no other game's type takes (BN4's: its spawn's immediate changed,
+ * BN5's own numbers in the tables) */
+typedef struct { uint8_t kind, from, to, of; } XvType;
 #define XV_TYPE_MOVED 0xFF
 #define XV_TYPE_SHARED 0xFE   /* moved by a family installed before it: its MOVED entry that family's copy, run for this one too */
 /* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
@@ -92,6 +96,8 @@ typedef struct {
 	uint8_t element, weakness; /* BN6's second wheel: BN5's viruses have none */
 	bool shadow;
 	uint8_t palette;           /* its palette step where its game has no struct1 (BN4: its init's); 0 where its game's record gives it */
+	uint8_t flags;             /* BN6's struct2 flags (+3: its collision's float and the ObjectFlags1 BN6's virus init sets by them)
+	                              where its game has no struct2 (BN4: its init's own); 0 where its game's record gives them */
 } XvTraits;
 
 typedef struct {
