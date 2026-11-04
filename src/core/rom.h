@@ -139,6 +139,9 @@ typedef struct {
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
 	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
 	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet */
+	bool kit_keys_played;                   /* a song's drum kits copied for the keys its tracks play alone (src/audio/xsong.c):
+	                                           BN4's one kit holds other data under keys 0-35; BN5's are copied whole as they
+	                                           always were, a saved state's music player pointing into the copies */
 	const char *file;                       /* its copy's name where a phone or the browser keeps one ("bn5c.gba") */
 } XRomLayout;
 typedef struct {

@@ -18,6 +18,8 @@
 #define BN6_FAMILY_STEP       0x80        /* ... the bytes from one table to the next */
 #define BN6_FAMILIES          32          /* ... their entries: AI indexes 0 (TestVirs) to 31 */
 #define BN6_FAMILY_NULLSUB    0x0810A953u /* the hooks' entry where a family has none: mov pc, lr (Thumb) */
+#define BN6_BX_R0             0x08148865u /* a bx r0 the game itself calls into (0x0815E6A8; the tail of a routine, 0x08148860): where a
+                                             BN4 family's pre-step goes on to BN6_VIRUS_STATE_STEP, r0 its address (tools/xrecipe_bn4.py) */
 #define BN6_FAMILY_REF_STATES 0x0810A370u /* the literals that name the tables, one each, in their order: table 0's (the dispatcher's);
                                              1's and 2's RomLayout.enemy_traits and enemy_stats (the virus word of a triple: the
                                              viruses', the Navis' and the player's tables) */

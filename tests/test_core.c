@@ -162,12 +162,19 @@ bool town_after_abandon;
 int loot_older_share;
 bool loot_visitors_always;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
-static VisitorKin test_kin[2][4];
-static int test_nkin[2], test_role[2][64], test_id[2][64][6], test_panel = 2;
-int visitor_kin(int net, const VisitorKin **out) { *out = test_kin[net & 1]; return test_nkin[net & 1]; }
-int visitor_role_in(int net, int family) { return family > 0 && family < 64 ? test_role[net & 1][family] : VISITOR_FREE; }
+static VisitorKin test_kin[VISIT_NETS][4];
+static int test_nkin[VISIT_NETS], test_role[VISIT_NETS][VISITOR_KIN_MAX], test_id[VISIT_NETS][VISITOR_KIN_MAX][6], test_panel = 2;
+int visitor_kin(int net, const VisitorKin **out) {
+	net = net >= 0 && net < VISIT_NETS ? net : VISIT_BN6;
+	*out = test_kin[net];
+	return test_nkin[net];
+}
+int visitor_role_in(int net, int family) {
+	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX ? test_role[net][family] : VISITOR_FREE;
+}
 int visitor_id(int net, int family, int version) {
-	return family > 0 && family < 64 && version >= 0 && version < 6 && test_id[net & 1][family][version] ? test_id[net & 1][family][version] : -1;
+	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX && version >= 0 && version < 6 && test_id[net][family][version]
+		? test_id[net][family][version] : -1;
 }
 int visitor_panel(const Encounter *e, int col, int row) { (void)e; (void)col; (void)row; return test_panel; }
 
@@ -3184,6 +3191,20 @@ static void test_xsong(void) {
 	uint8_t memacc[6] = { 0xB9, 1, 2, 3, 0xB1, 0 };
 	n = 0;
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
+	/* (a track's voices and keys as the sequencer reads it, a drum kit's
+	 * keys: a note's, its running status's, an EOT's and a pattern's; not
+	 * VOL's running status, nor XCMD's four bytes of a pointer. 0: VOICE 0,
+	 * VOL 80 and 64; 5: a note of key 36, a wait, key 38 by running status;
+	 * 12: EOT 40; 14: XCMD 1 and a pointer; 20: a note of no key; 21: PATT to
+	 * 27, FINE; 27: a note of key 42, PEND) */
+	uint8_t track[30] = { 0xBD, 0, 0xBE, 80, 64, 0xD4, 36, 100, 0x81, 38, 90, 0x81, 0xCE, 40, 0xCD, 1, 0xC0, 0xD4, 0x81, 0x08, 0xD4,
+		0xB3, 0x1B, 0x34, 0x12, 0x08, 0xB1, 0xD0, 42, 0xB4 };
+	uint8_t selects[16] = { 0 }, keys[16] = { 0 }, want[16] = { [4] = 0x50, [5] = 0x05 };
+	ok = xsong_track_keys(track, sizeof track, base, 0, selects, keys);
+	CHECK(ok && selects[0] == 1 && !memcmp(keys, want, sizeof want), "xsong: a track's voice and its keys 36, 38, 40 and 42 (%d, %#x, %#x %#x)",
+		ok, selects[0], keys[4], keys[5]);
+	track[24] = 0x80;
+	CHECK(!xsong_track_keys(track, sizeof track, base, 0, selects, keys), "xsong: a track's pointer out refused");
 }
 
 /* Both games' RNG step and a seed's word (battle_rng.c): the guest's
@@ -3638,6 +3659,13 @@ static bool moved_once(const XVirusFamily *f, int track) {
 	return true;
 }
 
+/* whether the Souls' code moves the type kind:from */
+static bool soul_moves(int kind, int from) {
+	for (int i = 0; i < soulcode_bn5.ntypes; ++i)
+		if (soulcode_bn5.types[i].kind == kind && soulcode_bn5.types[i].type == from && soulcode_bn5.types[i].to == XV_TYPE_MOVED) return true;
+	return false;
+}
+
 /* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
  * chips' unit's */
 static bool copied_before(uint32_t bn5, uint32_t bn6) {
@@ -3697,6 +3725,10 @@ static void test_xvirus_static(void) {
 			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
 		for (int k = 0; k < i; ++k)
 			CHECK(!static_clashes(f, xvirus_bn4[k]), "xvirus: %s and %s share numbers or room", xvirus_bn4[k]->name, f->name);
+		/* (the types it moves at the dispatch's numbers BN4's take, apart from every BN5 track's) */
+		for (int t = 0; t < f->ntypes; ++t)
+			CHECK(f->types[t].of && !moved_before(TRACK_SOULS, 0, f->types[t].kind, f->types[t].from) && !soul_moves(f->types[t].kind, f->types[t].from),
+				"xvirus: %s moves its type %d:%#x at a number a BN5 track moves", f->name, f->types[t].kind, f->types[t].from);
 	}
 	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
 	XVirusFamily twin = xvirus_cangard;
@@ -4229,6 +4261,12 @@ static void test_xvirus_shims(void) {
 	}
 	CHECK(!xvirus_shim_prestep(p, sizeof p, home, 0x08104550u, veneer, veneer) && !xvirus_shim_prestep(p, 16, home, BN5_PRESTEP_DOMINERD, veneer, veneer),
 		"shims: a pre-step no port makes, or too little room, taken");
+	/* (an entry: push {lr}, a call of the tail, pop {pc}) */
+	uint8_t e[XV_SHIM_ENTRY_SIZE];
+	uint32_t called = 0;
+	CHECK(xvirus_shim_entry(e, home, to | 1) && get16(e) == 0xB500 && thumb_bl_decode(home + 2, get16(e + 2), get16(e + 4), &called) &&
+		called == to && get16(e + 6) == 0xBD00, "shims: an entry (%04x, a call to %08x, %04x)", get16(e), (unsigned)called, get16(e + 6));
+	CHECK(!xvirus_shim_entry(e, home + 2, to | 1) && !xvirus_shim_entry(e, home, to), "shims: an entry off its word, or to no Thumb, taken");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not
@@ -6086,6 +6124,30 @@ static void test_visitors(void) {
 	rng_seed(99);
 	visitor_apply(&b, 5);
 	CHECK(!memcmp(&a, &b, sizeof a), "visitors: the same seed, the same visitor");
+	/* (BN4's, its ROM read for research: one of its families in BN6's
+	 * battles and BN5's, its version by tier, no bit in the repeat rule's
+	 * memory for its number past 63; beside BN5's, each family as likely) */
+	test_nkin[VISIT_BN5] = 0;
+	test_nkin[VISIT_BN4] = 1;
+	test_kin[VISIT_BN4][0] = (VisitorKin){ 64, VISITOR_FREE, 0, false, true, 10 };
+	for (int v = 0; v < 6; ++v) test_id[VISIT_BN4][64][v] = 0x310 + v;
+	CHECK(visitors_here(8, BIOME_CENTRAL), "visitors: BN4's families alone bring them");
+	e = test_battle(3, 4);
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && !e.from_families,
+		"visitors: one of BN4's in a battle of BN6's, by tier, no bit for its family");
+	e = test_battle(3, 4);
+	e.xrecord = 0x08100000u;
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64, "visitors: one of BN4's in a battle of BN5's");
+	test_nkin[VISIT_BN5] = 1;
+	int nets_drawn[2] = { 0 };
+	for (uint32_t s = 1; s <= 200; ++s) {
+		rng_seed(s);
+		e = test_battle(3, 4);
+		if (visitor_apply(&e, 5)) ++nets_drawn[e.foes[e.visitor - 1].family == 64];
+	}
+	CHECK(nets_drawn[0] + nets_drawn[1] == 200 && nets_drawn[0] > 70 && nets_drawn[1] > 70,
+		"visitors: BN5's and BN4's families share the battle, each as likely (%d, %d)", nets_drawn[0], nets_drawn[1]);
+	test_nkin[VISIT_BN4] = 0;
 	for (int v = 0; v < 6; ++v) enemy_moved_set(0x310 + v, NULL);
 	enemy_moved_set(0x300, NULL);
 	test_nkin[VISIT_BN5] = 0;

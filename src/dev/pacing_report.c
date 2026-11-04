@@ -145,10 +145,12 @@ static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
 
 static void kin_report(FILE *out) {
 	static const char *const roles[] = { "either", "back", "front" };
-	for (int net = 0; net < 2; ++net) {
+	static const char *const nets[VISIT_NETS] = { "BN6", "BN5", "BN4" };
+	for (int net = 0; net < VISIT_NETS; ++net) {
 		const VisitorKin *k;
 		int n = visitor_kin(net, &k);
-		fprintf(out, "%s's families (role, stage, placements; * may visit, ! special panels alone):", net == VISIT_BN5 ? "BN5" : "BN6");
+		if (net == VISIT_BN4 && !n) continue;
+		fprintf(out, "%s's families (role, stage, placements; * may visit, ! special panels alone):", nets[net]);
 		for (int i = 0; i < n; ++i) {
 			char name[24] = "?";
 			int id = visitor_id(net, k[i].family, 0);
@@ -167,7 +169,8 @@ static void kin_report(FILE *out) {
 static int visitor_rolls(FILE *out, int depth, int biome, int tiles, const char *label) {
 	loot_layer_nets(biome, tiles);
 	PacingBand b = pacing_band(depth, false, false);
-	int took = 0, over = 0, hps[ROLLS], pairs[64][64];
+	int took = 0, over = 0, hps[ROLLS];
+	static int pairs[64][VISITOR_KIN_MAX];
 	memset(pairs, 0, sizeof pairs);
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, ENC_NORMAL);
@@ -180,7 +183,7 @@ static int visitor_rolls(FILE *out, int depth, int biome, int tiles, const char 
 		if (!ok) continue;
 		++took;
 		int from = e.foes[v.visitor - 1].family, to = v.foes[v.visitor - 1].family;
-		if (from > 0 && from < 64 && to > 0 && to < 64) ++pairs[from][to];
+		if (from > 0 && from < 64 && to > 0 && to < VISITOR_KIN_MAX) ++pairs[from][to];
 		over += hp > b.hi || dmg > b.cap;
 	}
 	loot_layer_nets(-1, -1);
@@ -188,7 +191,7 @@ static int visitor_rolls(FILE *out, int depth, int biome, int tiles, const char 
 	fprintf(out, "  depth %2d %-24s band %3d-%3d cap %3d | a visitor in %3d of %d, hp %3d / %3d / %3d%s\n    pairs:", depth, label, b.lo, b.hi, b.cap,
 		took, ROLLS, hps[0], hps[ROLLS / 2], hps[ROLLS - 1], over ? "  OVER" : "");
 	for (int f = 1; f < 64; ++f)
-		for (int t = 1; t < 64; ++t)
+		for (int t = 1; t < VISITOR_KIN_MAX; ++t)
 			if (pairs[f][t]) fprintf(out, " %d>%d:%d", f, t, pairs[f][t]);
 	fprintf(out, "\n");
 	return over;

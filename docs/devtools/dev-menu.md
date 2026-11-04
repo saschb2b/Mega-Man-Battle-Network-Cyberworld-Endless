@@ -84,7 +84,9 @@ engine, BN5's ROM read or not: BN6's battles as the player's ROM has
 them, which `tools/xfamily.py` compares with CanGard installed),
 `bn4families` (BN4 Red Sun's ROM read for research and its whole families,
 `src/emu/xvirus_bn4.c` from `tools/xrecipe_bn4.py`, installed after BN5's:
-Billy as AI 64, ids 0x2C0-0x2C5, for the foes step, `0:foes 2C0@52`;
+Billy as AI 64, ids 0x2C0-0x2C5, for the foes step, `0:foes 2C0@52`; Walla
+as AI 67, ids 0x2D2-0x2D7; Elmperor as AI 68, ids 0x2D8-0x2DD; CirKill as
+AI 69, ids 0x2DE-0x2E3;
 [Transplanted families](../multirom/families.md)), `showbn4` (BN4 Red Sun
 offered as players will see it once its research switch is off: read, its
 cartridge on the ROMs screen, its pickers and the title's found line;
