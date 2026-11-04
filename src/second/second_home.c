@@ -7,6 +7,7 @@
 #include "second_home.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "rom.h"
 #ifdef __3DS__

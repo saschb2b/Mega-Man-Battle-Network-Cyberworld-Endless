@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.OpenableColumns;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -86,21 +85,26 @@ final class RomLook {
         { "B4WJ", "Rockman EXE 4 Red Sun (Japan), not the USA version", "B4WE" },
     };
 
+    /** `names` as a list read aloud: "A", "A or B", "A, B or C" (`last` the word before the last) */
+    static String listed(List<String> names, String last) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < names.size(); ++i)
+            s.append(i == 0 ? "" : i == names.size() - 1 ? " " + last + " " : ", ").append(names.get(i));
+        return s.toString();
+    }
+
     /** "not BN6 Gregar or BN5 Team Colonel": the games taken */
     static String otherGame() {
         List<String> names = new ArrayList<>();
         for (int i = 0; i < ROMS.length; ++i) if (taken(i)) names.add(ROMS[i].named);
-        String last = names.remove(names.size() - 1);
-        return "not " + (names.isEmpty() ? last : TextUtils.join(", ", names) + " or " + last);
+        return "not " + listed(names, "or");
     }
 
     /** The ROMs in `bits` by their tags, "A and B", "A, B and C" */
     static String tags(int bits) {
         List<String> names = new ArrayList<>();
         for (int i = 0; i < ROMS.length; ++i) if ((bits & 1 << i) != 0) names.add(ROMS[i].tag);
-        if (names.size() < 2) return names.isEmpty() ? "" : names.get(0);
-        String last = names.remove(names.size() - 1);
-        return TextUtils.join(", ", names) + " and " + last;
+        return listed(names, "and");
     }
 
     /** Whether every ROM taken has its copy kept */
