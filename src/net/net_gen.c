@@ -230,15 +230,20 @@ static bool gap_on_way(int x, int y) {
 	return false;
 }
 
+/* Whether an object of type t is one MegaMan talks to: a service or a
+ * navi, who stays where he stands. */
+static bool talks(int t) {
+	return t == OBJ_SHOP || t == OBJ_HEAL || t == OBJ_TRADER || t == OBJ_BUGTRADER || t == OBJ_NPC ||
+		t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT || t == OBJ_BATTLER;
+}
+
 /* Whether one MegaMan talks to stands within two panels of (x, y), three
  * of one behind a counter, who is talked to from the counter's front: an A
  * meant for a heal Prog opened the Net Dealer beside him, twice. */
 bool ng_near_talker(int x, int y) {
 	for (int i = 0; i < layer.nobj; ++i) {
-		int t = layer.obj[i].type, reach = layer.obj[i].prop >= 0 ? 3 : 2;
-		bool talks = t == OBJ_SHOP || t == OBJ_HEAL || t == OBJ_TRADER || t == OBJ_BUGTRADER || t == OBJ_NPC ||
-			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT || t == OBJ_BATTLER;
-		if (talks && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
+		int reach = layer.obj[i].prop >= 0 ? 3 : 2;
+		if (talks(layer.obj[i].type) && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
 	}
 	return false;
 }
@@ -438,27 +443,43 @@ static int pick_room(const int *order, int n, int next) {
 	return nb ? big[rng_range(0, nb - 1)] : -1;
 }
 
+/* room_spot's spot in room r where it is off the walkways' mouths: its
+ * last tries take one beside a panel-wide stretch where the room has no
+ * other (a hub three panels a side with walkways into three of its sides:
+ * a Recovery Mr.Prog stood in the mouth of one, the way on through him, on
+ * three layers in a thousand). */
+static bool spot_off_mouth(const Room *r, int *x, int *y) { return room_spot(r, x, y) && !ng_beside_narrow(*x, *y); }
+
 /* Object `type` in the next room of `order`: apart from anyone to talk
  * to (near_talker), in the rooms after it where that one has no such
- * place (the Net Dealer's counter may stand in another's room). */
+ * place (the Net Dealer's counter may stand in another's room). One to
+ * talk to also off the walkways' mouths, and where no room has a place
+ * apart, by another rather than in a mouth (a small layer's two rooms
+ * full, the NaviCust vendor stood in the way out of one). */
 static NetObj *place(int type, const int *order, int n, int next, int *x, int *y) {
 	int r = pick_room(order, n, next);
 	if (r < 0) return NULL;
+	bool clear = talks(type);
 	for (int k = 0; k < n; ++k) {
-		int room = k == 0 ? r : order[(next + k) % n];
-		if (room_spot(&layer.rooms[room], x, y) && !ng_near_talker(*x, *y)) return ng_add_obj(type, *x, *y);
+		const Room *room = &layer.rooms[k == 0 ? r : order[(next + k) % n]];
+		if ((clear ? spot_off_mouth(room, x, y) : room_spot(room, x, y)) && !ng_near_talker(*x, *y)) return ng_add_obj(type, *x, *y);
 	}
+	for (int k = 0; k < 4 * n && clear; ++k)
+		if (spot_off_mouth(&layer.rooms[k % n == 0 ? r : order[(next + k) % n]], x, y)) return ng_add_obj(type, *x, *y);
 	return room_spot(&layer.rooms[r], x, y) ? ng_add_obj(type, *x, *y) : NULL;
 }
 
 /* The Net Dealer in room r: behind a counter where it has a place for one,
  * else in the first of `order`'s rooms that has (the originals' dealers
- * all stand behind one), else standing in r. */
+ * all stand behind one), else standing in r, or in the first of them with
+ * a place off the walkways' mouths where r has none. */
 static NetObj *dealer(int r, const int *order, int n, const LayerKit *kit, int *x, int *y) {
 	if (r < 0) return NULL;
 	NetObj *o = ng_counter(r, OBJ_SHOP, kit);
 	for (int i = 0; i < n && !o; ++i)
 		if (order[i] != r) o = ng_counter(order[i], OBJ_SHOP, kit);
+	for (int i = -1; i < n && !o; ++i)
+		if ((i < 0 || order[i] != r) && spot_off_mouth(&layer.rooms[i < 0 ? r : order[i]], x, y)) o = ng_add_obj(OBJ_SHOP, *x, *y);
 	return o ? o : room_spot(&layer.rooms[r], x, y) ? ng_add_obj(OBJ_SHOP, *x, *y) : NULL;
 }
 
@@ -485,7 +506,7 @@ static void last_stop(int kind, const LayerKit *kit) {
 		 * before an arena is a room eleven a side, a ring road's pad in its
 		 * middle a walk round) */
 		for (int tries = 0; tries < 4; ++tries)
-			if (room_spot(r, &x, &y) && !ng_near_talker(x, y) && walk[y][x] >= 0 && walk[y][x] <= HEAL_REACH) { ng_add_obj(OBJ_HEAL, x, y); return; }
+			if (spot_off_mouth(r, &x, &y) && !ng_near_talker(x, y) && walk[y][x] >= 0 && walk[y][x] <= HEAL_REACH) { ng_add_obj(OBJ_HEAL, x, y); return; }
 	}
 	if (floor_near(layer.ante, HEAL_REACH, &x, &y) || room_spot(&layer.rooms[layer.ante], &x, &y)) ng_add_obj(OBJ_HEAL, x, y);
 }
