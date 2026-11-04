@@ -2,6 +2,7 @@
 #include "xdiff_bn4.h"
 
 #include <SDL.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "bn4.h"
@@ -10,6 +11,7 @@
 #include "emu.h"
 #include "guest.h"
 #include "rom.h"
+#include "xvirus_bn4.h"
 
 #define BUDGET 9000   /* the guest's frames its battle may take, from its asking to its map or GAME OVER */
 
@@ -75,6 +77,26 @@ static void foes_say(const Spec *s) {
 		printf("xdiff: BN4's enemy %02x at %d,%d: HP %d, element %d\n", (unsigned)id, s->foes[k].panel & 0xF, s->foes[k].panel >> 4,
 			hp & 0xFFF, hp >> 12);
 	}
+}
+
+int xd4_families(const Spec *s, const XVirusFamily **fams) {
+	int n = 0;
+	for (int i = 0; i < s->nfoes; ++i)
+		for (int k = 0; k < xvirus_bn4_count; ++k) {
+			const XVirusFamily *f = xvirus_bn4[k];
+			bool mine = false, had = false;
+			for (int v = 0; v < XV_VERSIONS; ++v) mine = mine || f->names[v] == s->foes[i].id;
+			for (int j = 0; j < n; ++j) had = had || fams[j] == f;
+			if (mine && !had) fams[n++] = f;
+		}
+	return n;
+}
+
+int xd4_bn6_id(int id) {
+	for (int k = 0; k < xvirus_bn4_count; ++k)
+		for (int v = 0; v < XV_VERSIONS; ++v)
+			if (xvirus_bn4[k]->names[v] == id) return xvirus_bn4[k]->first_id + v;
+	return id;
 }
 
 int xdiff_bn4_run(const Spec *s) {

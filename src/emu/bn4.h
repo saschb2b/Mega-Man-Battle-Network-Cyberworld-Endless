@@ -85,7 +85,18 @@
 #define BN4_TOOLKIT_COLLISION 0x30    /* eToolkit +0x30: the collision data's pool, 32 of BN4_COLL_SIZE (0x02039A10) */
 #define BN4_COLL_ALLIANCE 0x03        /* collision data: its side (BN6's +4) */
 #define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
-#define BN4_COLL_PARALYSIS 0x10       /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
+#define BN4_COLL_OBJ_2E   0x05        /* ... u8, its object's +0x2E (BN6_COLL_OBJ_2E, +7): the setup 0x080129AC at 0x080129C8, BN6's 0x08019FDA */
+#define BN4_COLL_PANEL_BYTE 0x0A      /* ... u8, what 0x0800AF90 gives of its panel, written by the collision panels' update 0x08012D9A at
+                                       * 0x08012DAE (BN6_COLL_PANEL_BYTE, +0xC: 0x0801A04C's 0x0800E994 at 0x0801A062) */
+#define BN4_COLL_COUNTER  0x0B        /* ... u8, its counter time (its window to be countered), set by 0x0800AFBC at 0x0800AFD6
+                                       * (BN6_COLL_COUNTER, +0xD: its twin 0x0800E9DC at 0x0800E9F6) */
+#define BN4_COLL_SETUP_ARG 0x0C     /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
+#define BN4_COLL_DAMAGE   0x1E        /* ... u16, an attack's damage from its object's +0x2C (BN6_COLL_DAMAGE, +0x2E): 0x080129CC, BN6's 0x08019FDE */
+#define BN4_COLL_HIT_MASKS 0x58       /* ... two u32, the alliance words (BN6_COLL_HIT_MASKS, +0x30): 0x080129D6 and 0x080129F2 from
+                                       * 0x08012EF6, BN6's 0x08019FE8 and 0x0801A004 from 0x0801A0BA */
+#define BN4_COLL_OBJECT   0x60        /* ... u32, its object (BN6_COLL_OBJECT, +0x38): 0x080129B0, BN6's 0x08019FB8 */
+#define BN4_COLL_INDEX_BIT 0x78       /* ... u32, its own bit of the 32 (BN6_COLL_INDEX_BIT, +0x44): the pool's maker 0x08012488, BN6's 0x08019884 */
+#define BN4_COLL_PARALYSIS 0x10      /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
 #define BN4_COLL_CONFUSE  0x12        /* ... u16: confusion's frames (BN6_COLL_CONFUSE, +0x1E) */
 #define BN4_COLL_BLIND    0x14        /* ... u16: blindness's frames (BN6_COLL_BLIND, +0x20) */
 #define BN4_COLL_HOLD     0x16        /* ... u16: the hold's frames (BN6_COLL_IMMOBILE, +0x22) */
@@ -186,6 +197,31 @@
 #define BN4_ENEMY_NAMES   0x0874A780u /* text archive: the enemies' names by id (a Navi's four versions in a row from 128) */
 #define BN4_TEXT_END      0xE5        /* ... each entry ending with it (BN6's 0xE6), its letters BN6's codes (Billy 0C 2E 31 31 3E) */
 #define BN4_GET_RNG       0x08001B00u /* GetRNG: BN6's (0x0800151C) found by its calls and bytes */
+/* The differential's hooks on BN4's routines (src/dev/xdiff_events.c; docs/rom/bn4.md, The differential's hooks): each
+ * BN6's twin (bn6.h) by its body, instruction for instruction but for its literals' places */
+#define BN4_RNG_DRAW      BN4_GET_RNG /* GetRNG: the first word stepped, its value in r0 (push {r7,lr}: lr its caller; BN6_RNG_DRAW) */
+#define BN4_RNG_DRAW_POSITIVE 0x08001B16u /* GetPositiveSignedRNG: the same, bit 31 cleared (BN6_RNG_DRAW_POSITIVE) */
+#define BN4_RNG_DRAW_SECOND 0x08001B30u /* GetRNGSecondary: BN4_RNG_SECONDARY stepped (BN6_RNG_DRAW_SECOND) */
+#define BN4_RNG_DRAW_SECOND_POSITIVE 0x08001B46u /* GetPositiveSignedRNGSecondary: the same, bit 31 cleared */
+#define BN4_SPAWN_COMMON  0x08003210u /* SpawnBattleObjectCommon: r0 the kind, r1 its spawner's five words (the type first; its caller
+                                       * at r1 + 0x18: spawnType1 0x080032B8, spawnType3 0x080032F0, spawnType4 0x08003344 and
+                                       * their twins push {r7,lr}; sub sp,#0x14 as BN6's); its kinds' descriptors at 0x08003268 */
+#define BN4_SPAWN_COMMON_END 0x08003260u /* ... its end (add sp,#4): r5 the object spawned, 0 none (BN6_SPAWN_COMMON_END) */
+#define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the song (BN6_PLAY_SOUND; BN4_PLAY_MUSIC is the next routine) */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned (the fourth kind's type 0): r4's low byte its id (BN6_SPAWN_EFFECT) */
+#define BN4_SPRITE_LOAD   0x0800287Cu /* sprite_load: r5 the object, r1 its sprite list's offset, r2 its number (BN6_SPRITE_LOAD) */
+#define BN4_RESERVE_PANEL 0x080143A8u /* object_reservePanel: the panel's reserver (+0x14) and its flags' 0x80 set, no bit in the object's
+                                       * +0 (BN6's 0x0801BB1C also sets the object's 0x20, as BN5's does not) */
+#define BN4_RESERVE_PANEL_DONE 0x080143C2u /* ... once the panel is reserved: r5 the object (BN6_RESERVE_PANEL_DONE) */
+#define BN4_BLINK_FLASHING 0x08010450u /* the blink step of an object flashing: bit 1 of its flash timer (BN4_COLL_FLASH, +0x18) clear
+                                        * hides it, as BN5's (BN6's set hides it: BN6_BLINK_FLASHING) */
+#define BN4_OBJECT_RUNNER 0x0800314Cu /* RunBattleObjectLogic: each object in the run list by mov lr,pc; bx r0 (BN6's 0x080031AC) */
+#define BN4_OBJECT_RUNNER_RET 0x0800319Cu /* ... the return address an object's call chain ends at (BN6_OBJECT_RUNNER_RET) */
+#define BN4_SUBSYSTEM_BYTE 0x020015E1u /* u8 that 0x08044AEC returns tested (ldr r0,=0x020015E0; ldrb r0,[r0,#1]; tst r0,r0): Billy's
+                                        * code asks it, its recipe aiming the call at BN6's routine that returns 0 (0x080011EC);
+                                        * read 0 at every frame of a plain battle (xdiff's BN4 watch, xd4_watch) */
+#define BN4_OBJECT_RUNNING 0x0200B48Cu /* u32 the node of the object running, 0 outside the runner (its literal at 0x080031CC, written at
+                                        * 0x08003160 and 0x080031A4; BN6_OBJECT_RUNNING) */
 #define BN4_BATTLE_BGS    0x0808563Cu /* its battle backgrounds' records, a pointer each, 27 (BN6 22), read by the loader at 0x08085430 */
 #define BN4_BATTLE_BG_COUNT 27        /* the backgrounds, ids 0x00-0x1A (3 and 9 share a record) */
 #define BN4_BG_RECORD_SIZE 0x24       /* a background's record: 9 words (BN5's and BN6's 7): tiles, their EWRAM buffer, VRAM; the map, its

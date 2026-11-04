@@ -2,6 +2,7 @@
 #include "xdiff_bn4_trace.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "bn4.h"
@@ -20,8 +21,18 @@ static const Seg obj_segs[] = {
 	{ BN6_OBJECT_NODE + BN4_T1_NAME_ID, BN6_OBJECT_NODE + BN6_T1_NAME_ID, 1 },
 };
 /* a collision data's: its side, its panel, the statuses' timers, the flash and invulnerability, the final damage, its
- * flags (bn4.h, BN4_COLL_*; their BN6 twins bn6.h's) */
+ * flags (bn4.h, BN4_COLL_*; their BN6 twins bn6.h's); then what the collision setup (BN4 0x080129AC, BN6's twin
+ * 0x08019FB4) and the pool's maker (0x08012470, BN6's 0x0801986C) write, store by store: its object's +0x2E, the setup's
+ * argument, the damage, the alliance words, its object, its index bit */
 static const Seg coll_segs[] = {
+	{ BN4_COLL_PANEL_BYTE, BN6_COLL_PANEL_BYTE, 1 },
+	{ BN4_COLL_COUNTER, BN6_COLL_COUNTER, 1 },
+	{ BN4_COLL_OBJ_2E, BN6_COLL_OBJ_2E, 1 },
+	{ BN4_COLL_SETUP_ARG, BN6_COLL_SETUP_ARG, 1 },
+	{ BN4_COLL_DAMAGE, BN6_COLL_DAMAGE, 2 },
+	{ BN4_COLL_HIT_MASKS, BN6_COLL_HIT_MASKS, 8 },
+	{ BN4_COLL_OBJECT, BN6_COLL_OBJECT, 4 },
+	{ BN4_COLL_INDEX_BIT, BN6_COLL_INDEX_BIT, 4 },
 	{ BN4_COLL_ALLIANCE, BN6_COLL_ALLIANCE, 1 },
 	{ BN4_COLL_PANEL_X, BN6_COLL_PANEL_X, 2 },
 	{ BN4_COLL_PARALYSIS, BN6_COLL_PARALYSIS, 2 },
@@ -48,11 +59,11 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
-	[XD4_COLL] = { coll_segs, 11, BN4_COLL_SIZE, BN6_COLL_SIZE },
+	[XD4_COLL] = { coll_segs, 19, BN4_COLL_SIZE, BN6_COLL_SIZE },
 	[XD4_AI] = { ai_segs, 1, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
 	[XD4_PANEL] = { panel_segs, 4, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 11 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 19 &&
 	sizeof panel_segs / sizeof *panel_segs == 4, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
@@ -89,6 +100,30 @@ uint32_t xd4_size(int part) { return layouts[part].in; }
 const Xd4Places xd4_places = { BN4_BATTLE_STATE, BN4_CUSTOM_WINDOW, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_T1_OBJECTS, BN4_T3_OBJECTS,
 	BN4_T4_OBJECTS, BN4_T1_COUNT, BN4_FIELD_PANELS, BN4_OBJECT_LIST, BN4_OBJECT_LIST_END, BN4_MPLAYS, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,
 	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK };
+
+/* (bn4.h's names, each BN6's twin by its body: docs/rom/bn4.md, The differential's hooks. BN4's viruses keep no AI data, so
+ * its setAttack, which writes an AI data's attack variables in BN5 and BN6, is not hooked; its blink hides on its flash
+ * timer's bit 1 clear, as BN5's; no mood) */
+const XdGame xd4_routines = { { BN4_RNG_DRAW, BN4_RNG_DRAW_POSITIVE, BN4_RNG_DRAW_SECOND, BN4_RNG_DRAW_SECOND_POSITIVE }, BN4_SPAWN_COMMON,
+	BN4_SPAWN_COMMON_END, BN4_PLAY_SOUND, BN4_SPAWN_EFFECT, 0, BN4_RESERVE_PANEL_DONE, BN4_BLINK_FLASHING, BN4_SPRITE_LOAD, BN4_T1_OBJECTS,
+	BN4_OBJECT_RUNNER_RET, BN4_OBJECT_RUNNING, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_COLL_FLASH, 0, 0, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,
+	0, 0 };
+
+/* (BN4_SUBSYSTEM_BYTE: the frames it read nonzero, the first's timer) */
+static uint32_t watch_frames, watch_first, watch_value;
+
+void xd4_watch(void) {
+	uint8_t b = guest_read8(BN4_SUBSYSTEM_BYTE);
+	if (!b || xd4_sub() != BN6_SUB_BATTLE) return;
+	if (!watch_frames++) watch_first = guest_read32(BN4_BATTLE_TIMER), watch_value = b;
+}
+
+void xd4_watched(void) {
+	if (!watch_frames) printf("xdiff: BN4's %08x read 0 at every frame of its battle (Billy's recipe aims 0x08044AEC's test of it at "
+		"BN6's routine that returns 0)\n", (unsigned)BN4_SUBSYSTEM_BYTE);
+	else printf("xdiff: BN4's %08x read nonzero at %u frames of its battle, first %#x at t%u: Billy's recipe's stub returning 0 is not "
+		"BN4's path there\n", (unsigned)BN4_SUBSYSTEM_BYTE, (unsigned)watch_frames, (unsigned)watch_value, (unsigned)watch_first);
+}
 
 uint8_t xd4_sub(void) {
 	uint8_t mode = guest_read8(guest_read32(BN4_TOOLKIT));

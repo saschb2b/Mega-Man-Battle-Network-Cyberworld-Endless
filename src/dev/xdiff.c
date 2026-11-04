@@ -724,7 +724,7 @@ static bool subject(Side *g, const Spec *s) {
 		return false;
 	}
 	for (int i = 0; i < s->nfoes; ++i) {
-		int id = bn6_id(s->foes[i].id), p = s->foes[i].panel;
+		int id = s->bn4 ? xd4_bn6_id(s->foes[i].id) : bn6_id(s->foes[i].id), p = s->foes[i].panel;
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 0, 0, (p & 0xF) - 1, (p >> 4) - 1, id };
 		printf("xdiff: BN%d's %#x at column %d, row %d: BN6's %#x\n", s->bn4 ? 4 : 5, s->foes[i].id, p & 0xF, p >> 4, id);
 	}
@@ -810,7 +810,11 @@ static bool reference(Side *g, const Spec *s) {
 	return open_out(g, s, "bn5");
 }
 
-static void bn4_frame(uint32_t keys) { guest_frame_quiet(keys); }
+/* (and BN4_SUBSYSTEM_BYTE watched after it, xd4_watch) */
+static void bn4_frame(uint32_t keys) {
+	guest_frame_quiet(keys);
+	xd4_watch();
+}
 
 /* BN4 Red Sun's own battle on the guest core (xdiff_bn4.h's record), traced in BN6's units (xdiff_bn4_trace.h): its
  * Custom screens passed and its fight keyed by its own window and timer, as BN5's */
@@ -841,6 +845,7 @@ static bool colonel_foe(const Spec *s) {
 }
 
 static int spec_families(const Spec *s, const XVirusFamily **fams) {
+	if (s->bn4) return xd4_families(s, fams);   /* (BN4's foes: its families moved, xdiff_bn4.h) */
 	int n = 0;
 	for (int i = 0; i < s->nfoes; ++i)
 		for (int k = 0; k < xvirus_bn5_count; ++k) {
@@ -864,13 +869,15 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 		if (nids < XD_NAVI_IDS_MAX) ids[nids++] = s->foes[i].id;
 	}
 	xd_log_navis(ids, nids);
-	/* (BN4's battle hooks none yet: its routines' twins are unmapped, so its trace holds no events) */
-	bool hooked = a->v.game == 5;
-	a->log = a->out && hooked ? xd_log_start(5, fams, n, navis) : NULL;
+	/* (BN4's battle on its own routines, xdiff_bn4_trace.h's: bn4.h, each BN6's twin by its body) */
+	bool hooked = a->v.game == 5 || a->v.game == 4;
+	if (a->v.game == 4) xd_log_bn4(&xd4_routines);
+	a->log = a->out && hooked ? xd_log_start(a->v.game, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
+	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	return true;
 }
 
@@ -878,7 +885,9 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 static void summary(const Side *a, const Side *b, const Spec *s) {
 	int ref = s->bn4 ? 4 : 5;
 	printf("xdiff: BN%d's battle %d fight frames traced, BN6's %d%s\n", ref, a->fought ? a->traced : -1, b->fought ? b->traced : -1,
-		s->follow ? " (BN6's RNG words following the reference's)" : s->replay ? " (BN6's draws replayed from BN5's)" : "");
+		s->follow ? " (BN6's RNG words following the reference's)" : s->replay && s->bn4 ? " (BN6's draws replayed from BN4's)"
+		: s->replay ? " (BN6's draws replayed from BN5's)" : "");
+	if (s->bn4 && a->fought) xd4_watched();
 	for (int k = 0; k < 2; ++k) {
 		const Side *g = k ? b : a;
 		int n[XD_COUNTS];
