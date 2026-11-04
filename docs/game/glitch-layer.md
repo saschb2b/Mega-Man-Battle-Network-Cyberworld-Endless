@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"
@@ -136,21 +136,20 @@ the exit to the next layer).
 
 ## The warp
 
-A floor object like the dark warp, in the area's colours, that every few
-seconds (the seed's, three to seven) glitches for a handful of frames and
-sometimes comes back as something else: another warp's look of BN6's own
-(the dark warp, the Secret Area's gate: overworld objects of sprite list
-7, `layer_objs.c`), changed by the NPC's own `ns_set_sprite`.
-BN6's own NPC commands carry the glitch itself (verified in bn6f,
-`asm/npc.s`): `0x2D` mosaic, "the 'blur' effect when viruses spawn in a
-battle", `0x2B` a colour shader mixed with its palette, `0x2F` a squash
-and rotation. Around it, on the frame only, a few rows torn sideways. Seen
-from the way, the screen hitches as it comes into view.
+A warp like the dark warp (its sprite, BN6's overworld object), never in
+the Undernet's purple: its colours turned one of three ways, and every
+three to seven seconds it glitches for a handful of frames, its rows torn
+sideways sprite and all, and comes back in other colours (drawn over the
+frame, `glitch.c`). BN6's own NPC commands could carry more of it
+(verified in bn6f, `asm/npc.s`): `0x2D` mosaic, "the 'blur' effect when
+viruses spawn in a battle", `0x2B` a colour shader mixed with its
+palette, `0x2F` a squash and rotation, and `ns_set_sprite` another warp's
+look (the Secret Area's gate): left for later.
 
 Its read ([a fork's read](../world/level-design/fork-read.md)): at A,
-MegaMan senses, never names: something like "Lan... This warp's wrong. It
-keeps changing!", and the question. At the exit pad, nothing: the warp is
-its own fork.
+MegaMan senses, never names: "W-Whoa... Lan,this warp's wrong. It keeps
+changing!", where its exit leads, and the question. At the exit pad,
+nothing: the warp is its own fork.
 
 ## The layer, and how it comes apart
 
@@ -160,130 +159,146 @@ from its own seed, its services, locks and secrets rolled as any layer's
 purple data, gaps and hidden paths), its exit pad open from the first
 step. What is new is its soul:
 
-**Its stage** is the share of its floor MegaMan has come near (`D.seen`,
-which `run.seen` keeps for a CONTINUE), in five stages: 0 on arrival, 4
-at about the far end of every detour. A straight walk to the exit should
-reach stage 1 or 2 (to be measured on the generator); the heart only
-opens to the full explorer. The stage never falls.
+**Its stage** is the share of its Mystery Data taken, read from BN6's own
+flags (so a CONTINUE keeps it), in five stages: 0 on arrival, 1 at the
+first data, 2 at 30%, 3 at 55%, 4 at 80%. Its data lie at the ends of its
+detours, so the layer comes apart the further MegaMan explores it, and
+each data taken is the push-your-luck's one decision: a better find, a
+worse glitch. The stage never falls. (The first rule, the share of the
+floor come near, was measured and dropped: a straight walk to the exit
+came near 57 to 97% of the floor on ten seeds, the autopilot's walk
+reaching stage 2 to 4 without a detour; by the data taken it stays at 0.)
 
 | Stage | Its look | Its battles | Said |
 | --- | --- | --- | --- |
-| 0 | the layer's own; now and then a band of rows torn sideways for a few frames | the layer's depth, as any layer's | on arrival, two boxes |
+| 0 | the layer's own; now and then a band of rows torn sideways for a few frames | the layer's depth, as any layer's | on arrival, three boxes |
 | 1 | tears more often; blocks of the picture slipped by a tile | as 0 | |
-| 2 | **flips**: the whole layer shown in another area's look for a moment, mosaic in and out, as the title changes its backdrops | a visitor of another area or net in each battle; battle backgrounds of other areas | "The layer... It's turning into other layers!?" |
-| 3 | flips longer and more often, BN5's areas among them where its ROM is there; the backdrop flips with the floor; the area's theme stutters into another's | the next act's band | "The viruses... They're getting stronger!" |
-| 4 | the heart: flips every few seconds, layers half into each other; the copy seen | the next act's band, a version up (the Server's) | at the heart |
+| 2 | **flips**: the whole layer shown in another area's look for a moment, under BN6's mosaic in and out, as the title changes its backdrops; colours turned in bands | a visitor of another area or net in each battle | "The floor turned into another area!" |
+| 3 | flips longer and more often | an act deeper | "The viruses here... They're getting stronger!" |
+| 4 | flips every second or two | as 3 | "Something's at the middle of all this!" |
 
 **The flips are BN6's own renderer.** A layer is a BN6 map whose tile
 set, palette and tile map the engine writes (`netmap.c`). As the map is
 entered BN6 copies its palette's 13 banks into its palette buffer
 (`palette_3001960`), decompresses its two tile sets into VRAM at their
 headers' offsets and its tile map into EWRAM (`BN6_MAP_TILEMAP`,
-`0x02013A00`), where it stays (verified in bn6f,
-`decompAndCopyMapTiles_8030472`; [the net maps' rows](../rom/net-maps.md)).
-For each other look the layer shows, the engine picks that area's tiles
-for the same layout (its classes, as any layer of that area), and a flip
-writes its tile sets, palette and tile map to those three places between
-frames, in the director's step; the way back writes the layer's own.
-That BN6 draws the screen's tiles from that buffer as the camera moves,
-so a flip shows at once and scrolls whole, is the first thing to prove
-(a write in romlab; assumed until then). The frame or two where one area's tile map meets the other's
-tiles is the corruption a GBA really shows, and is kept as the flip's
-edge. Sprites, MegaMan, the NPCs and the floor's walls never change.
-BN6's map animations (colour cycles) keep running on whichever palette is
-in, a glitch of their own.
+`0x02013A00`), where it stays and is drawn from as the camera moves
+(verified in bn6f, `decompAndCopyMapTiles_8030472`, and by the flips
+themselves: [the net maps' rows](../rom/net-maps.md)). As the Glitch
+layer begins, the engine picks up to three other areas' tiles for its
+floor as it stands (`netmap_look`: the areas that draw the run's this
+run, BN5's among them where its ROM is there, the layer's own props left
+out; two on the 3DS), and a flip writes a look's tile sets and colours
+into VRAM and the palette buffer in one director step and its tile map
+into BN6's buffer and the screen maps in the next (`glitch_look.c`): the
+frame between, one area's tile map read with the other's tiles, is the
+corruption a GBA really shows, kept as the flip's edge. The way back
+writes what the look covered, read before it came. Sprites, MegaMan, the
+NPCs and the walls never change; the palette's banks reach the backdrop
+too, whose sky turns with the floor; BN6's map animations keep cycling
+the layer's own colours over the look, a glitch of their own.
 
-**The tears and slips are the frame's**, drawn as the dark way's portal
-is recoloured (`liberation_way.c`): the frame alone changes, read-only to
-the game, after BN6 has drawn it. The flips' mosaic is the canvas's
-(`P.fx_mosaic`, the GBA's MOSAIC register as the title uses it).
+**The tears, slips and turned colours are the frame's**, drawn after BN6
+has drawn it as the dark way's portal is recoloured (`liberation_way.c`):
+the frame alone changes, the backdrop, the sprites (told by the OBJ
+palette's colours) and a chat box's rows left whole, decided in the
+update and read in the draw (`glitch.c`).
 
-**Its data** stand where any layer's do, their tier by how far off the
-way they lie, decided as the layer is made: on the way the act's, at the
-middle detours an act deeper, at the farthest two acts deeper (the glitch
-pulls data from deeper in the Net), the [code lean](economy/opening-plan.md)
-as everywhere. `build.py economy` gives the glitch layer a band of its own.
+**Its data** stand where any layer's do, their content as data of a
+deeper layer by how far off the way they lie, decided as the layer is
+made (`NetObj.deep`): on the way the layer's own, on a detour an act
+deeper, at a detour's far end or past a set piece's lock two acts
+deeper, and the farthest of them two acts deeper on any layout; the
+[code lean](economy/opening-plan.md) as everywhere.
 
 ## The copy at its heart
 
 The run's guardians are the Nest's copies ([the rival](rival.md)). At the
-Glitch layer's heart (its farthest room, an arena as a guardian's) stands
-one that went wrong: copies written over each other. On the layer it is a
-Navi whose body switches between guardians' bodies (`guardian_body`), by
-`ns_set_sprite`, mosaic and shader, seen flickering at the heart from
-stage 3. Talked to, it fights. It never blocks the exit and never moves.
+Glitch layer's heart, the farthest end of its detours, stands one that
+went wrong: copies written over each other. On the layer it is its first
+form's body, its colours turned and torn as the warp's are. Talked to, it
+names what its data holds (the three chips) and asks; it never blocks
+the exit and never moves.
 
-**How it fights** (the owner's call 2: the true swap, below; the forms as
-battles were the recommendation, kept here as the fallback). One fight in
-three forms, each a guardian, with one pool of HP:
+**How it fights: the true swap** (the owner's call 2). One BN6 battle,
+its forms one after another on the same panel, one pool of HP (one and a
+half of the act's guardians' band, a share a form): when a form's share
+is gone it glitches out in BN6's own sprite mosaic, uncounted, and the
+next arrives as BN6 brings a Navi into a fight under way, its HP plate
+listed; deleting the last wins the battle as BN6 wins any, ENEMY
+DELETED! and the results (`src/emu/battle_swap.c`, `glitch_copy.c`;
+how, address by address, in [BN6's Navis](../rom/navis.md), A Navi
+swapped mid-battle). No Custom screen between forms. The forms: the
+guardians the run has beaten, the last first (the copy is made of what
+MegaMan has fought), then the one that last deleted MegaMan in any run
+(`rivals.sav`), then guardians the run set in areas off its way; BN6's
+own Navis alone, never a super boss nor the act's guardian ahead
+(`run_glitch.c`). Where the swap refuses a plan, its first form alone at
+the pool's HP.
 
-- Each form is a whole BN6 battle against one guardian. When a form's
-  share of the pool is gone, its battle ends as BN6's draw ends one, its
-  banner passed by (the hooks the rival's netbattle already uses,
-  `battle_spare.c`), and the next form's battle is forced at once, its
-  HP set at the enemy's spawn (the netbattle's hook, `0x08007740`), the
-  cut masked by the glitch (tears, mosaic, a torn white). MegaMan's HP
-  goes on as it stands; each form opens with BN6's Custom screen, a fresh
-  hand: a boss in phases. No battle of BN6's changes; the cut is between
-  them.
-- The forms: the guardians the run has beaten, the last first (the copy
-  is made of what MegaMan has fought), then the one that last deleted
-  MegaMan in any run (`rivals.sav`), then the act's pool; another net's
-  Navi where his game is there. The pool is about one and a half act
-  guardians' HP at the act's band (tuned in `build.py pacing`, a band of
-  its own).
+The three ways the brief allowed, weighed before the call:
 
-Weighed against the brief's other two:
-
-| | One fight in forms (recommended) | A true swap inside one battle | Sabotage along the layer |
+| | Forms as battles cut together | A true swap inside one battle (built) | Sabotage along the layer |
 | --- | --- | --- | --- |
 | What it is | three BN6 battles cut into one fight by the glitch | the Navi's object replaced mid-battle by another's on the same panel | the copy crosses the layer, forcing battles, trapping data, cutting ways |
-| In BN6's engine | the established hooks: the draw, the spawn's HP, a forced battle | new RE: BN6's spawner called mid-battle, the old object freed, the new Navi's sprite loaded, the HP window; nothing to diff it against | NPC scripts and forced battles; no battle change |
-| Fun | a boss in phases, each form a new read; the climax that bites | the most striking; the same, without the Custom screen between | tension, but paid in walking, the core loop's first lack, and in danger the player did not choose |
-| Cost | days | weeks, and risk to every battle | days, and the "honest floor" lost if ways are cut |
+| In BN6's engine | the established hooks: the draw, the spawn's HP, a forced battle | BN6's mid-fight spawn and its enemy counts, four hooks idle until armed | NPC scripts and forced battles; no battle change |
+| Fun | a boss in phases, each form a new read | the same, without a seam | tension, but paid in walking, the core loop's first lack, and in danger the player did not choose |
 
-The true swap stays the deepening once the forms have been played: the
-same fight without its seams.
-
-**What it pays** (the owner's call 3). Recommended: a pick of one of its
-forms' Navi chips, a version above the act's guardians' (tuned in
-`build.py economy`), in the folder's codes (the glitch rewrote its code),
-on the vault's pick screen the Server's prize uses, B leaving them with
-the copy. A BN prize (a Navi beaten gives his chip) and a decision about
-the folder, not a roll. With the copy deleted the glitch settles: the
-layer back in its own look and theme, the exit pad on.
-
-**What it remembers:** its first meeting is "???", as a guardian's; after,
-the record (met, beaten) in `rivals.sav`, and its opening line says which
-forms it took last time. A title's mark for the first copy deleted.
+**What it pays** (the owner's call 3): a pick of one of its forms' Navi
+chips, a version above what the act's guardians are fought at (SP at
+most), in the folder's codes (the glitch rewrote its code), on the pick
+screen the Server's prize uses, B leaving them with the copy, which logs
+out once one is taken. A BN prize (a Navi beaten gives his chip) and a
+decision about the folder, not a roll. With the copy deleted the glitch
+settles: the layer back in its own look, no more glitches.
 
 ## The words
 
-Every line through [the voice rules](../voice/rules.md) and the review
-dashboard, in a words file (`glitch_words.c`): the warp's (one box and the
-question), the arrival (two), one a stage from 2 (three), the heart's (one
-or two), the copy's (a few, cut and stuttering, made of guardians' kinds
-of lines, never their quotes), the settling (one), and Dad's one mail
-after the first copy deleted. MegaMan senses, Lan reacts; neither names
-what they have not seen.
+Every line through [the voice rules](../voice/rules.md), in the feature's
+words files (`glitch_words.c`, the arrival and the act card in
+`story_words.c`, the pick in `reward_words.c`): the warp's (three boxes
+and the question, its exit's way said as the Undernet's warp says its
+own), the arrival (three), one a stage from 2, the copy's (MegaMan's,
+and its own cut words in a box with no face), the pick's opening. MegaMan
+senses, Lan reacts; neither names what they have not seen.
 
-## What it asks of the engine
+## As built (4 November 2026)
 
 - `LAYER_GLITCH`, a side kind (`net.h`), its seed `run_layer_seed(depth,
-  LAYER_GLITCH)`; the run's Glitch act from the seed (`run.c`, beside
-  `run_dark_area`); the warp's roll on numbers of its own (`net_services.c`,
-  from the seed, not the rolls, so no other layer changes). `LAYER_MAKE`
-  bumped for the warp's place. No `Run` change: the side kind is
-  `run.side_kind`, the stage comes back from `run.seen`, the copy's
-  outcome is an event flag in the state.
-- The flips: a second tile pick for the same layout per look (no ROM
-  write), the looks' sets in free space (`free_space.h`), the director's
-  writes between frames, the layer's own written back on a load.
-- The frame's glitches in the post-draw step beside the portal's tint;
-  nothing in a draw call changes the game.
-- The copy's fight on the netbattle's hooks; its prize on the vault's
-  screen; the statistics' choices counted (layers entered, stage reached,
-  the copy fought and beaten).
+  LAYER_GLITCH)`; which layer holds the warp from the run's seed
+  (`run_glitch_at`, `run_glitch.c`); the warp in a dark warp's place
+  (`net_services.c`, from the seed, not the rolls, so no other layer
+  changes), on a spur's first panels or a room the way crosses, six panels
+  at least from the arrival (`net_gen.c`). `LAYER_MAKE` 110. No `Run`
+  change: the side kind is `run.side_kind`, the stage comes back from
+  BN6's data flags, the copy's outcome is event flags `0x147A` and
+  `0x147B` ([a layer](../engine/emulation/layer.md)).
+- The warp: the dark warp's sprite, its colours turned one of three ways
+  that change with each glitch, torn every three to seven seconds, drawn
+  over the frame.
+- Dev: `--dev glitch` (the warp on every act's first layer from the
+  second), `glitchstage=N`, `side=4`, the `glitch` step and `--talk
+  glitch`/`copy` ([the dev menu](../devtools/dev-menu.md)).
+
+**Checked:** `build.py test` (`test_glitch`: one run in three over 3,000
+seeds, never two, on an act's first layer from the second; the warp and
+no dark warp on its layer, away from the arrival; the Glitch layer's
+copy, its exit back, its farthest data two acts deeper; the forms), `build.py
+lint`; headless: the warp glitching on its layer, the Glitch layer at
+each stage (its flips, tears and words), the copy's talk, its fight by
+the true swap over three forms to the results, and its pick of three;
+the autopilot through Glitch layers on ten seeds to the next layer and
+on (stage 0 at their exits, no data taken).
+
+**Left for later:** the copy's body switching between its forms on the
+layer (BN6's `ns_set_sprite` and mosaic, `0x25` and `0x2D`); its record
+and first meeting as "???", a title's mark, Dad's mail; the backdrop and
+the theme flipping with the floor; the statistics' choices (Glitch layers
+entered, stage reached, the copy fought and beaten); another net's Navis
+among the forms once the swap is proven on their deletion; a Custom
+screen between forms, if play asks for it; the bands in `build.py
+pacing` and `build.py economy` for the copy and the deeper data; a run
+on a New 3DS.
 
 ## The owner's calls
 
@@ -303,17 +318,3 @@ Decided on 4 November 2026:
 4. **How rare, and BN4's looks:** one run in three, never two; BN4 Red
    Sun's areas among the flips only once they are admitted to runs
    ([Battle Network 4 in a run](../multirom/bn4.md)), as recommended.
-
-## The true swap: where it starts
-
-BN6 already spawns an enemy mid-battle: `BN6_SPAWN_ENEMY_1` and
-`BN6_SPAWN_ENEMY_0` (`0x08007696`, `0x080076A0`), BN5's Chaos Unison
-failure's twin, which the Souls track uses to bring the Dark Soul in
-([BN6's Navis](../rom/navis.md)). The spawn's hook sets an enemy's HP
-(`0x08007740`); a Navi's init loads its sprite (`0x08016F57`). What a swap
-asks beyond them, to locate and prove: the old form's object taken off
-without its deletion (no explosion, no win, no reward pick), the next
-form spawned on its panel first so the battle never stands without an
-enemy, the enemy HP window and the targeting following the new object,
-and the glitch over the cut (BN6's own sprite mosaic, `ObjectSprite`'s
-mosaic bit; a Navi's log-in frames, [BN6's battles](../rom/battle.md)).

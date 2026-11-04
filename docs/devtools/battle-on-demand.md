@@ -3,7 +3,7 @@ type: Tool
 title: "A battle on demand"
 description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
 ---
 
 # A battle on demand
@@ -159,6 +159,11 @@ hit only as it dives along his row), `--dev onehit,god,hp=9999`
 (a later version's hit takes more than his 100 HP at once), the rare
 path's gate set: its MaxHP its struct2 row's, deleted, the results, BN6's
 delete counts and the rare path's byte untouched through every frame.
+
+The `glitch` step (`--input`'s `0:glitch`, play.py's `glitch`) puts
+MegaMan two panels from the layer's Glitch warp, or a Glitch layer's
+copy ([the Glitch layer](../game/glitch-layer.md)); `--talk glitch:FRAME` and
+`--talk copy:FRAME` open their talk.
 
 The `sig` step (`--input`'s `0:sig`, play.py's `sig`) puts MegaMan in the
 layer's signature, the room it is remembered by ([Identity](../world/level-design/identity.md),
