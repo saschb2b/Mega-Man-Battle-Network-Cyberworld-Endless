@@ -137,11 +137,13 @@ static bool data_ok(const XVirusFamily *f, char *why, size_t n) {
 	return true;
 }
 
+/* (a hook entered past its routine's push is code of its own blocks; a state never is) */
 static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nstates; ++i)
-		if (!ref_ok(f, f->states[i])) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
+		if (!ref_ok(f, f->states[i]) || f->states[i].entered) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
 	for (int i = 0; i < XV_HOOKS; ++i)
-		if (!ref_ok(f, f->hooks[i])) return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
+		if (!ref_ok(f, f->hooks[i]) || (f->hooks[i].entered && (!f->hooks[i].own || f->hooks[i].clone)))
+			return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
 	return true;
 }
 
@@ -214,6 +216,7 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 		f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
 		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE;
+	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;
 	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
 	return true;
 }
@@ -244,10 +247,8 @@ static bool art_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n
 		const XvType *t = &f->types[i];
 		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
 		if (t->to == xvirus_dispatch_type(t->kind) && t->to != XV_TYPE_SHARED) return no(why, n, "object type %#x as the dispatch's own", t->from);
-		if (t->as && (t->to != XV_TYPE_MOVED && t->to != XV_TYPE_SHARED)) return no(why, n, "object type %#x run as %#x, not moved", t->from, t->as);
 		for (int k = 0; k < i; ++k)
-			if (f->types[k].kind == t->kind && (f->types[k].from == t->from || XV_TYPE_N(&f->types[k]) == XV_TYPE_N(t)))
-				return no(why, n, "object type %d:%#x twice", t->kind, t->from);
+			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}
 	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES))
 		return no(why, n, "its struct1 laid out with no battle sprite of list 1");

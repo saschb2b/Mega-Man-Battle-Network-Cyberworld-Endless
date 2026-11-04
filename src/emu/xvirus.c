@@ -338,6 +338,20 @@ static void prestep_set(Ctx *c) {
 	xv_word(XV_PRESTEP + 4u * (uint32_t)f->ai, 0, at | 1);
 }
 
+/* Its hooks entered past their routine's push (XvRef.entered): each a shim of its home that pushes lr and calls the
+ * tail, in the hook's entry of its tables in place of the tail itself */
+static void entries_set(Ctx *c, uint32_t entry[XV_TABLES]) {
+	for (int k = 0; k < XV_HOOKS && !xv_failed(); ++k) {
+		if (!c->f->hooks[k].entered) continue;
+		uint8_t shim[XV_SHIM_ENTRY_SIZE];
+		uint32_t at = shim_room(c, sizeof shim);
+		if (!at || !xvirus_shim_entry(shim, at, entry[3 + k])) { xv_fail("its hook %d's entry (%08x)", k, (unsigned)c->f->hooks[k].addr); return; }
+		uint8_t *p = xv_put(at, sizeof shim, true);
+		if (p) memcpy(p, shim, sizeof shim);
+		entry[3 + k] = at | 1;
+	}
+}
+
 /* A call within the block to bytes it holds as dead (a routine of its game's
  * whose twin BN6 has, zeroed in the copy between code that shares a pool):
  * aimed at the twin here, as thumb_block_rebase leaves a call within alone.
@@ -583,21 +597,22 @@ static void effects_set(const XVirusFamily *f, const Game *g) {
 static void types_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->ntypes && !xv_failed(); ++i) {
 		const XvType *t = &f->types[i];
-		int k = xvirus_dispatch_slot(t->kind), n = XV_TYPE_N(t);
+		int k = xvirus_dispatch_slot(t->kind);
 		uint32_t routine = 0;
 		if (t->to == XV_TYPE_SHARED) {
 			/* (moved by a family installed before it: its MOVED entry must name that family's copy, its TWIN entry moved) */
-			uint32_t moved = xvirus_dispatch_moved_at(t->kind, n), twin = xvirus_dispatch_twin_at(t->kind, n);
+			uint32_t moved = xvirus_dispatch_moved_at(t->kind, t->from), twin = xvirus_dispatch_twin_at(t->kind, t->from);
 			if (!moved || emu_read32(moved) == (XV_STUB_NONE | 1) || emu_read8(twin) != XV_TYPE_MOVED)
 				xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
 			continue;
 		}
 		if (k >= 0 && t->to == XV_TYPE_MOVED) {
-			uint32_t own = t->from < g->ntypes[k] ? rom32(g->rom, g->types[k] + 4u * t->from) : 0;
+			uint32_t of = t->of ? t->of : t->from;   /* (its number in its game, where its code spawns it by another) */
+			uint32_t own = of < g->ntypes[k] ? rom32(g->rom, g->types[k] + 4u * of) : 0;
 			routine = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;
 			if (!routine) { xv_fail("its object %d:%#x (%08x) is none of its code", t->kind, t->from, (unsigned)own); return; }
 		}
-		xg_type(t->kind, (uint8_t)n, t->to, routine);
+		xg_type(t->kind, t->from, t->to, routine);
 	}
 }
 
@@ -660,8 +675,8 @@ static void traits_of(const XVirusFamily *f, const uint8_t *src, uint8_t out[BN6
  * (enemies_tell) once it is installed */
 static struct { uint8_t traits[BN6_TRAITS_SIZE], stats[XV_VERSIONS * BN6_STATS_SIZE]; } rec;
 
-/* BN4's six enemy records (its versions' ids) as BN6's struct2: element << 12 | HP, the version, no flags, element << 12 |
- * its attack's damage (BN4's +0xA, which carries no element) */
+/* BN4's six enemy records (its versions' ids) as BN6's struct2: element << 12 | HP, the version, the flags its init's
+ * collision setup gives (the recipe's), element << 12 | its attack's damage (BN4's +0xA, which carries no element) */
 static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 	for (int v = 0; v < XV_VERSIONS; ++v) {
 		const uint8_t *r = g->rom + (BN4_ENEMY_STATS - BUS) + BN4_ENEMY_STAT_SIZE * f->names[v];
@@ -669,7 +684,7 @@ static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 		uint8_t *o = out + BN6_STATS_SIZE * v;
 		put16(o, hp);
 		o[2] = (uint8_t)v;
-		o[3] = 0;
+		o[3] = f->traits.flags;
 		put16(o + 4, (uint16_t)((hp & 0xF000u) | (get16(r + BN4_ENEMY_ATTACK) & 0x0FFFu)));
 	}
 }
@@ -816,6 +831,7 @@ static void family_stage(Ctx *c, const Game *g) {
 	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(c, &f->clones[i]);
 	uint32_t entry[XV_TABLES] = { 0 };
 	if (!xv_failed()) records_set(f, g, entry);
+	if (!xv_failed()) entries_set(c, entry);
 	uint8_t *v = c->pool.n ? xv_put(c->pool.base, (uint32_t)c->pool.n * THUMB_VENEER_SIZE, true) : NULL;
 	if (v) memcpy(v, c->veneers, (size_t)c->pool.n * THUMB_VENEER_SIZE);
 	for (int k = 0; k < XV_TABLES && !xv_failed(); ++k) xg_set_word(XG_FAMILY + k, (uint32_t)f->ai, entry[k]);

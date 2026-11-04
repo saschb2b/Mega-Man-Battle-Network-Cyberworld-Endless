@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:16:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:26:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -98,15 +98,15 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | Code (routines, hooks, instructions) | 296 | 27 | 15 |
-| ROM data (tables, text, literals) | 291 | 267 | 29 |
-| ROM, code or data not told | 443 | 582 | 19 |
+| ROM data (tables, text, literals) | 291 | 267 | 33 |
+| ROM, code or data not told | 443 | 582 | 23 |
 | RAM (variables, structures) | 135 | 65 | 20 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 158 | 42 | 2 |
 | Event flags | 34 | 3 | 1 |
 | Values of fields | 112 | 16 | 0 |
-| Constants, sizes and counts | 477 | 272 | 96 |
-| All | 1949 | 1274 | 182 |
+| Constants, sizes and counts | 477 | 272 | 97 |
+| All | 1949 | 1274 | 191 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -114,12 +114,12 @@ how to verify it.
 | Shops and traders | 37 | 0 | 0 |
 | NaviCust | 23 | 1 | 0 |
 | Chips and folders | 301 | 224 | 12 |
-| Battle | 529 | 368 | 85 |
+| Battle | 529 | 368 | 88 |
 | Text and fonts | 42 | 7 | 1 |
 | Sound | 19 | 25 | 10 |
 | Maps and the overworld | 131 | 41 | 10 |
 | Events and progress | 49 | 19 | 3 |
-| Engine core | 747 | 588 | 61 |
+| Engine core | 747 | 588 | 67 |
 
 <!-- end of what tools/symbols.py writes -->
 
