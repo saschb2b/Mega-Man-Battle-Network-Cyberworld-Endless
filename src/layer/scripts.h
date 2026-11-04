@@ -159,6 +159,17 @@ int ta_challenge(TextArchive *t, int flag, int won_flag, int pick, const Scripts
  * `taken_flag` set as it is, after which the signal is quiet; B leaves
  * them, for the Server's talk to open again). */
 int ta_server_pick(TextArchive *t, int taken_flag, const ScriptsVault *v);
+/* A Glitch layer's copy deleted (docs/game/glitch-layer.md): the glitch
+ * settled, its three chips, one to take (`taken_flag` set as it is; B
+ * leaves them, for the copy's talk to open again). */
+int ta_copy_pick(TextArchive *t, int taken_flag, const ScriptsVault *v);
+/* The run's Glitch warp and the copy at its layer's heart (glitch_words.c):
+ * what MegaMan senses, where the warp's exit leads or what the copy's data
+ * holds (`v`, its three chips named), the question, Yes setting `flag`;
+ * once `won_flag` is set the copy's talk is its pick, `pick`, once
+ * `taken_flag` a quiet line; `met` the copy met in an earlier run. */
+int ta_glitch_warp(TextArchive *t, int flag);
+int ta_copy(TextArchive *t, int flag, int won_flag, int taken_flag, int pick, const ScriptsVault *v, bool met);
 /* What a dark layer's item panel held (docs/game/liberation/): a chip, its
  * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);

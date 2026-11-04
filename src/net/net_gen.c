@@ -51,7 +51,7 @@ NetObj *ng_add_obj(int type, int x, int y) {
 	o->x = (float)x + 0.5f;
 	o->y = (float)y + 0.5f;
 	o->solid = type != OBJ_WARP_IN && type != OBJ_EXIT && type != OBJ_UNDERNET && type != OBJ_SECRET_GATE && type != OBJ_RETURN &&
-		type != OBJ_NAVI_GATE && type != OBJ_VAULT && type != OBJ_OFFICIAL;
+		type != OBJ_NAVI_GATE && type != OBJ_VAULT && type != OBJ_OFFICIAL && type != OBJ_GLITCH;
 	o->prop = -1;
 	return o;
 }
@@ -812,6 +812,51 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 
 #undef PLACE
 
+/* The run's Glitch warp (docs/game/glitch-layer.md): in view of the way, a
+ * rare thing a player who keeps to the way still passes, never by the
+ * arrival: the first panels of a spur first, then a room the way crosses,
+ * then farther off */
+#define GLITCH_FROM_ARRIVAL 6
+
+static void place_glitch(const int *order, int n) {
+	int bx = -1, by = -1, best = 1 << 30, x, y;
+	const Room *arrival = &layer.rooms[0];
+	for (int i = 0; i < n; ++i)
+		for (int tries = 0; tries < 6; ++tries) {
+			if (!room_spot(&layer.rooms[order[i]], &x, &y) || ng_near_talker(x, y)) continue;
+			int d = ng_detour[y][x];
+			if (d < 0 || abs(x - arrival->ax) + abs(y - arrival->ay) < GLITCH_FROM_ARRIVAL) continue;
+			int score = d >= 1 && d <= 4 ? d : d == 0 ? 6 : 10 + d;
+			if (score < best) { best = score; bx = x; by = y; }
+		}
+	if (bx >= 0) ng_add_obj(OBJ_GLITCH, bx, by);
+	else if (n) place(OBJ_GLITCH, order, n, 0, &x, &y);
+}
+
+/* A Glitch layer's copy at its heart: the farthest end of its detours, or
+ * the next room where it has none so long */
+static void place_copy(const int *order, int n, int *next) {
+	static uint8_t taken[MAP_W * MAP_H];
+	memset(taken, 0, sizeof taken);
+	DetourEnd end;
+	int x, y;
+	if (ng_detour_end(DETOUR_BLUE, taken, &end) && ng_add_obj(OBJ_COPY, end.x, end.y)) return;
+	place(OBJ_COPY, order, n, *next, &x, &y);
+	++*next;
+}
+
+/* A Glitch layer's data pulled from deeper in the Net, by how far off the
+ * way each lies: an act deeper on a detour, two acts at its far end or
+ * past a set piece's lock */
+static void glitch_deep(void) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		NetObj *o = &layer.obj[i];
+		if (o->type != OBJ_MYSTERY) continue;
+		int d = ng_detour[(int)o->y][(int)o->x];
+		o->deep = d == 0 ? 0 : d > 0 && d < DETOUR_FAR ? 3 : 6;
+	}
+}
+
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
  * that closed his words opened them again), and never by the way on: they
@@ -874,6 +919,8 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	GapSite gap = { -1, -1, 0, 0, -1 };
 	unsigned pieces = layer_pieces(depth, biome, kind);
 	ng_measure_detours();
+	if (s.glitch) place_glitch(order, n);
+	if (kind == LAYER_GLITCH) place_copy(order, n, &next);
 	if (pieces & PIECE_RUSH) {
 		gap = ng_plan_gap(layer_rush_len(depth, biome));
 		npcs_held = gap.x >= 0;
@@ -892,6 +939,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	place_bystanders(order, n);
 	npcs_held = 0;
 	place_last(&gap, pieces, rise, kit, order, n);
+	if (kind == LAYER_GLITCH) glitch_deep();
 }
 
 bool layer_make_dark;

@@ -51,6 +51,8 @@ void emu_picture_draw(int x, int y) {
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
 	/* (a liberation's dark panels, docs/game/liberation/) */
 	director_tint_board(px);
+	/* (a Glitch layer's, docs/game/glitch-layer.md) */
+	director_glitch_frame(px);
 	/* (each picture the core made blended once, as a frontend blends each
 	 * frame it is given; the game paused, the last one's frame again) */
 	static uint32_t seen;

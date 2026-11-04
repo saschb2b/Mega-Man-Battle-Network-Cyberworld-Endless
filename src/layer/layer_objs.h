@@ -57,6 +57,10 @@
  * (docs/game/core-loop.md, Phase 2). */
 #define LAYER_SERVER_WON_FLAG   0x147E
 #define LAYER_SERVER_TAKEN_FLAG 0x147F
+/* A Glitch layer's copy was deleted: its talk opens its pick of three,
+ * and the pick gave its chip (docs/game/glitch-layer.md). */
+#define LAYER_COPY_WON_FLAG     0x147A
+#define LAYER_COPY_TAKEN_FLAG   0x147B
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -66,6 +70,7 @@ typedef struct {
 	int nchoices;
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
+	int copy_reward;           /* ... and a Glitch layer's copy deleted, its pick, -1 for none */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */

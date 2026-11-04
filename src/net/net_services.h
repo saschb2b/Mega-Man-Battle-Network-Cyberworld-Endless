@@ -10,6 +10,7 @@
 
 typedef struct {
 	bool shop, heal, trader, programs, bugtrader, challenge, duel, undernet, secret, navi_gate, vault, official;
+	bool glitch;   /* the warp to the run's Glitch layer (run_glitch_at), in the dark warp's place */
 	int gate_navi, official_level;
 } Services;
 

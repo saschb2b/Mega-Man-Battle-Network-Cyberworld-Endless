@@ -105,6 +105,7 @@ void map_label(void) {
 	if (D.town) snprintf(name, sizeof name, "%s", home_place_name());
 	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
 	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
+	else if (run.side_kind == LAYER_GLITCH) snprintf(name, sizeof name, "Layer %d?", run.depth);
 	else if (run.side_kind == LAYER_BACK) snprintf(name, sizeof name, "%s", guardian_area_short(run.biome));
 	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
 	else snprintf(name, sizeof name, "Layer %d", run.depth);
@@ -196,8 +197,12 @@ void roll_encounter(void) {
 	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
 		(run.depth == 1 ? D.battles < 2 : true);
 	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
-	loot_visitors_always = dev.visitors;
-	Encounter e = loot_random_battle(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
+	/* (a Glitch layer's battles harden as it comes apart: docs/game/glitch-layer.md) */
+	int depth = run.depth;
+	bool visitors = dev.visitors;
+	glitch_battle(&depth, &visitors);
+	loot_visitors_always = visitors;
+	Encounter e = loot_random_battle(depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
 	if (dev.gem) loot_add_gem(&e);
 	set_encounter(&e, false);
 }
@@ -298,7 +303,7 @@ static int layer_song(int tiles, int song) {
 static void layer_flags_clear(void) {
 	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
 		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG, LAYER_DARK_TAKEN_FLAG, LAYER_SERVER_WON_FLAG,
-		LAYER_SERVER_TAKEN_FLAG };
+		LAYER_SERVER_TAKEN_FLAG, LAYER_COPY_WON_FLAG, LAYER_COPY_TAKEN_FLAG };
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
 }
 
@@ -391,6 +396,7 @@ static bool build_layer(void) {
 	int song = layer_song(tiles, a->song);   /* (before the objects: the guardian's prelude names its song) */
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	lib_begin();
+	glitch_layer_begin();
 	/* (the run's choices: a dark layer or the Undernet's entered, once) */
 	runlog_layer_entered((uint32_t)run.depth << 8 | (uint32_t)run.side_kind, layer.dark, run.side_kind == LAYER_UNDERNET);
 	mapslot_music(D.group, D.number, lib_board_song(song));
@@ -504,7 +510,7 @@ bool director_start_layer(void) {
 	forget_heard();
 	D.town = false;
 	/* (--dev side=N: a test's start on a side layer, once) */
-	if (dev.side == LAYER_UNDERNET || dev.side == LAYER_SECRET) run.side_kind = dev.side;
+	if (dev.side == LAYER_UNDERNET || dev.side == LAYER_SECRET || dev.side == LAYER_GLITCH) run.side_kind = dev.side;
 	dev.side = 0;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it, and no DarkChips but the dev flag's) */

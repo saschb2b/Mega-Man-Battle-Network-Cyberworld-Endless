@@ -33,7 +33,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -102,19 +102,20 @@ static void parse_script(const char *spec) {
 		s->frames = atoi(tok);
 		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
 		 * FROM TO 1|0", "0:battle", "0:foes 200@52/01@43", "0:xrecord
-		 * 811DD90", "0:status freeze 90", "0:cross 8" and "0:sig": a scripted
+		 * 811DD90", "0:status freeze 90", "0:cross 8", "0:sig" and "0:glitch": a scripted
 		 * capture of a set piece puts MegaMan at it, of a battle starts the
 		 * layer's next, one of the given foes or one of BN5's records in BN6's
 		 * engine, of a status gives the battle's enemies one, of a cross
 		 * commits the next Cross chosen as that form, of a layer's signature
-		 * puts him in it; "300:battle" waits its 300 frames first; "0:dump
+		 * puts him in it, of the Glitch warp or its copy by it; "300:battle" waits its 300 frames first; "0:dump
 		 * PREFIX" the video memory, as remote play's) */
 		if (colon && !strncmp(colon + 1, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", colon + 6);
 		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
 		else if (colon && text_step(colon + 1, s)) {}
-		else if (colon && !strcmp(colon + 1, "sig")) s->sig = true;
+		else if (colon && !strcmp(colon + 1, "sig")) s->sig = 1;
+		else if (colon && !strcmp(colon + 1, "glitch")) s->sig = 2;
 		else if (colon && !strncmp(colon + 1, "stuck ", 6)) s->held = (s->hold = held_parse(colon + 7)) != 0;
 		else if (colon) parse_buttons(colon + 1, s);
 		if (dev_step(s) && s->frames > 0 && script_len + 1 < 512) {
@@ -199,7 +200,8 @@ static void emu_steps(const InputStep *s) {
 	if (s->chip[0]) director_dev_chip(s->chip);
 	if (s->folder) director_dev_folder(s->folder);
 	if (s->cross) soulproxy_cross(s->cross);
-	if (s->sig) director_dev_signature();
+	if (s->sig == 1) director_dev_signature();
+	if (s->sig == 2) director_dev_glitch();
 	if (s->held) director_dev_hold(s->hold);
 	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
 	if (s->onehit) devtools_parse("onehit");
@@ -261,7 +263,8 @@ static bool remote_open(const char *dir) {
  * [N]" (a chip in the folder's first entries and the pack,
  * director_dev_chip), "cross F" (the next Cross chosen committed as form
  * F, soulproxy_cross), "sig"
- * (MegaMan in the layer's signature, director_dev_signature), "stuck MASK"
+ * (MegaMan in the layer's signature, director_dev_signature), "glitch"
+ * (by the Glitch warp or its copy, director_dev_glitch), "stuck MASK"
  * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";
  * items apart by ';'. */
 static void remote_parse(char *line) {
@@ -278,7 +281,8 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (!strcmp(tok, "battle")) s->battle = true;
 		else if (text_step(tok, s)) {}
-		else if (!strcmp(tok, "sig")) s->sig = true;
+		else if (!strcmp(tok, "sig")) s->sig = 1;
+		else if (!strcmp(tok, "glitch")) s->sig = 2;
 		else if (!strncmp(tok, "stuck ", 6)) s->held = (s->hold = held_parse(tok + 6)) != 0;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {

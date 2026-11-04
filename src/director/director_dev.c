@@ -69,6 +69,25 @@ bool director_dev_signature(void) {
 	return true;
 }
 
+bool director_dev_glitch(void) {
+	if (!director_on_map()) return false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type != OBJ_GLITCH && o->type != OBJ_COPY) continue;
+		/* (the nearest free floor two panels off, facing it) */
+		static const int at[4][2] = { { 2, 0 }, { 0, 2 }, { -2, 0 }, { 0, -2 } };
+		for (int k = 0; k < 4; ++k) {
+			int x = (int)o->x + at[k][0], y = (int)o->y + at[k][1];
+			if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || layer.cell[y][x] != C_PATH) continue;
+			int wx, wy;
+			netmap_world(x, y, &wx, &wy);
+			director_dev_place(wx, wy, -1);
+			return true;
+		}
+	}
+	return false;
+}
+
 bool director_dev_warp_cell(int x, int y) {
 	if (!director_on_map()) return false;
 	int wx, wy;
@@ -151,6 +170,7 @@ static void dev_talks(void) {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
 		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "duel", OBJ_DUEL }, { "official", OBJ_OFFICIAL }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
 		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT }, { "trader", OBJ_TRADER }, { "bugtrader", OBJ_BUGTRADER }, { "battler", OBJ_BATTLER },
+		{ "glitch", OBJ_GLITCH }, { "copy", OBJ_COPY },
 	};
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", director_dev_talks);
