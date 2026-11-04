@@ -2,7 +2,7 @@
 """bn6f_match.py --bn6f DIR [--roms DIR] [--out DIR] [--report FUNCTION]:
 the functions of the bn6f disassembly (github.com/dism-exe/bn6f, built from
 Cybeast Falzar) located in Cybeast Gregar (USA), and those BN5 Team
-Colonel (USA) shares with it (docs/rom/symbols.md).
+Colonel (USA) and BN4 Red Sun (USA) share with it (docs/rom/symbols.md).
 
 Each function's bytes are made from bn6f's own source, as its assembler
 (GNU as with agbasm's extensions, divided syntax) would make them at its
@@ -17,13 +17,14 @@ versions is placed by them alone, the data between functions by its labels.
 A function still unplaced takes the shift from Falzar its located
 neighbours in its file share, where its bytes are there. RAM the literals
 hold is checked against bn6f's addresses (Gregar's RAM is laid out as
-Falzar's). In BN5, another game, only its bytes and the references count.
+Falzar's). In BN5 and BN4, other games, only its bytes and the references
+count.
 
 In BN5, the routines this project paired with their twins in Gregar
 (tools/bn5_twins.py) are the twins' functions too, where the search placed
 none or, for the rows that file lists, another of another body.
 
-Writes .build/symbols/match/bn6f-gregar.csv and bn6f-bn5.csv (or into
+Writes .build/symbols/match/bn6f-gregar.csv, bn6f-bn5.csv and bn6f-bn4.csv (or into
 --out): per function its bn6f name, its Falzar address, where it is in the
 ROM, how it was located and how many references agree; then the data and
 RAM labels the references locate. Reads the ROMs (found in --roms by their
@@ -49,7 +50,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MATCH = os.path.join(ROOT, '.build', 'symbols', 'match')
 # the ROMs, told by the SHA-1s src/core/rom.c checks, and their tables
 ROMS = (('bn6-gregar', '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn6f-gregar.csv'),
-        ('bn5-colonel', '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn6f-bn5.csv'))
+        ('bn5-colonel', '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn6f-bn5.csv'),
+        ('bn4-red-sun', 'a97e96a7da03abd70f7953328e511b9fa29179f1', 'bn6f-bn4.csv'))
 ANCHOR = re.compile(r'(sub|loc|locret|off|dword|word|byte|unk|asc|stru|jpt|jt)_([0-9A-Fa-f]{7})$')
 
 REGS = {f'r{i}': i for i in range(16)}
@@ -1743,6 +1745,8 @@ def main():
         extra = ()
         if key == 'bn6-gregar':
             gregar = where
+        elif key != 'bn5-colonel':
+            pass   # (the project's twins named here are BN5's, tools/bn5_twins.py; BN4's are paired by its recipes)
         elif gregar is None:
             print(f'{key}: no Gregar ROM, so none of its twins (tools/bn5_twins.py) named')
         else:
