@@ -122,6 +122,10 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
  * frames before: BN6's battle runs a fight frame behind BN4's (lag=1, a BN4 spec's; docs/devtools/differential.md, The BN4
  * trace); the engine's per-frame steps have no key */
 void xd_replay_lag(XdLog *subject, int lag);
+/* ... and the family's draws before the fight is seeded too (a BN4 spec's: Spikey's init draws its moves before its first
+ * attack in the opening, 0x080BA46C): the reference's kept as its setup's, in order, and the subject's k-th of a key in its
+ * setup given the reference's k-th of that key in its, whatever the frame (docs/devtools/differential.md, The BN4 trace) */
+void xd_replay_setup(XdLog *subject, XdLog *reference);
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);

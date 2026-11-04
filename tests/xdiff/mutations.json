@@ -1298,6 +1298,38 @@
     "08B34304:08BEBA00:4"
    ],
    "what": "BN6's grown list 1's 0xC1 (XV_LISTS + 4 * 0xC1), Spikey's copy of BN4's LZ77'd 1:0x05, aimed at Shrimpy's (XV_ART + 0x6BA00, BN4's 1:0x06): its sprite state's +0x18 (+0xA8) reads BN6's ('sprite', 5, 4) against BN4's ('sprite', 2, 4), BN4's found in its battle's sprite cache by its key (tools/xdiff_bn4.py bn4_cache), where unmutated they read alike (caught at t1; the spec fails at t1 without it, on +0x88, Spikey's first draw before the fight, and its animation's place, so the line it adds is the check: python3 tools/xdiff.py spikey_v1 --poke 08B34304:08BEBA00:4)"
+  },
+  {
+   "name": "a draw of the setup's off by one",
+   "spec": "spikey_v1",
+   "poke": [
+    "08B7CF12:3005"
+   ],
+   "what": "Spikey's init's moves before its first attack, 4 plus a draw & 3 (BN4 0x080BA5BC, its adds r0,#4 at 0x080BA5C6, BN6's copy at XV_CODE + 0x14D50 + 0x1C2), made 5 plus: drawn in the opening, before the fight is seeded, from BN4's word replayed (src/dev/xdiff_events.c replay_setup), so BN6's +0x88 reads 5 against BN4's 4 (caught at t1; unmutated they read alike since the setup's draws are replayed, BN4's 4 and BN6's 7 before)"
+  },
+  {
+   "name": "the idle animation's first frame drawn from the next one's data",
+   "spec": "spikey_v1",
+   "poke": [
+    "08BE5318:00002B6C:4"
+   ],
+   "what": "BN6's copy of Spikey's sprite (XV_ART + 0x65300, BN4's LZ77'd 1:0x05): its idle animation 0's first frame record (copy +16) given frame 1's mini-animation offset at its +8 (0x2B6C for 0x2B60): BN6's place is still a step of BN4's run of animation 0, a constant count behind, but its frame's bytes (+0xB0 ('sprite', 2, 11124)) are none BN4's trace shows at that frame record (11112), so the opening's animation no longer holds for it (tools/xdiff_bn4.py opening_animation) and its place's differences are the family's (caught at t1)"
+  },
+  {
+   "name": "a diagonal step's collision panels left unmoved",
+   "spec": "spikey_v1",
+   "call": [
+    "0801A04C:0810A952"
+   ],
+   "what": "Spikey's collision panels' update (BN4's 0x08012D9A, its veneer to BN6's 0x0801A04C) aimed at BN6's family nullsub: its collision data keeps its old panel (5,2) and direction 0 where BN4's diagonal step to (4,1) wrote its 3, read as BN6's 5 by BN6's own rule on the old panel and the new (tools/xdiff_bn4.py direction_as_bn6; caught at t4)"
+  },
+  {
+   "name": "CirKill's shot's table left at BN4's address",
+   "spec": "cirkill_v1",
+   "poke": [
+    "08B7F14C:080CE5B0:4"
+   ],
+   "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x16FF0 + 0x15C holding the moved table's 0x08B7F150) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
   }
  ]
 }
