@@ -13,8 +13,9 @@
 #include "bn6_panels.h"
 #include "guest.h"
 
-/* a field BN4 keeps where BN6 keeps it otherwise: BN4's offset, BN6's, its bytes */
+/* a field BN4 keeps where BN6 keeps it otherwise: BN4's offset, BN6's, its bytes (ELSEWHERE: carried in another part) */
 typedef struct { uint16_t from, to, len; } Seg;
+#define ELSEWHERE 0xFFFF
 
 /* an object's (from its list node: BN6_OBJECT_NODE + the field's offset): its element at BN6's +0x0E, its enemy id (a u8)
  * at NameID's low byte (a u16 in BN6; BN4's bytes at those places move to the ones these leave, xd4_translate) */
@@ -64,7 +65,11 @@ static const Seg coll_segs[] = {
 static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_DATA_SIZE - BN4_AI_ATTACK_VARS },
 	{ BN4_AI_POWER_A, BN6_AI_POWER_A, 1 }, { BN4_AI_POWER_CHARGE, BN6_AI_POWER_CHARGE, 1 }, { BN4_AI_POWER_C, BN6_AI_POWER_C, 1 },
 	{ BN4_AI_POWER_CHIP, BN6_AI_POWER_CHIP, 1 }, { BN4_AI_KEYS, BN6_AI_HELD, BN4_AI_KEYS_SIZE }, { BN4_AI_MODES, BN6_AI_MODES, 4 },
-	{ BN4_AI_HP_BUG, BN6_AI_HP_BUG, 1 }, { BN4_AI_DAMAGE_TAKEN, BN6_AI_DAMAGE_TAKEN, 2 }, { BN4_AI_STRUCK_FRAMES, BN6_AI_STRUCK_FRAMES, 4 } };
+	{ BN4_AI_HP_BUG, BN6_AI_HP_BUG, 1 }, { BN4_AI_DAMAGE_TAKEN, BN6_AI_DAMAGE_TAKEN, 2 }, { BN4_AI_STRUCK_FRAMES, BN6_AI_STRUCK_FRAMES, 4 },
+	{ BN4_AI_PENDING_FORM, ELSEWHERE, 1 } };
+/* MegaMan's pending form, BN6's outside his AI data: BN4's AI data +0x10 at BN6_CROSS_PENDING's +0 (the form, 0xFF none),
+ * the record's other bytes BN6's own (docs/devtools/differential.md, MegaMan's AI data and his object) */
+static const Seg pending_segs[] = { { BN4_AI_PENDING_FORM, BN6_RECORD_FORM, 1 } };
 /* a panel's: its type, side, flags and reserver */
 static const Seg panel_segs[] = {
 	{ BN4_PANEL_TYPE, BN6_PANEL_TYPE, 1 },
@@ -78,17 +83,20 @@ static const Seg panel_segs[] = {
 
 /* (spare: where BN4's bytes left over begin, BN6's places left taken from there on and then from 0. An AI data's from
  * BN6_AI_SPARE, the 16 bytes past its attack's variables, which BN6's AI take never lays out (bn6_ai.h): so BN6's own fields
- * meet BN4's nothing, never a BN4 byte its own place could not keep) */
+ * meet BN4's nothing, never a BN4 byte its own place could not keep. NONE: the part takes its fields alone, the AI data
+ * keeping the rest) */
+#define NONE 0xFFFFFFFFu
 typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
 	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
-	[XD4_AI] = { ai_segs, 10, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
+	[XD4_AI] = { ai_segs, 11, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
 	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
+	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
-	sizeof ai_segs / sizeof *ai_segs == 10 && sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
+	sizeof ai_segs / sizeof *ai_segs == 11 && sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
 
@@ -99,9 +107,12 @@ uint32_t xd4_translate(int part, const uint8_t *in, uint8_t *out) {
 	/* (the fields mapped, at BN6's places) */
 	for (int k = 0; k < l->nsegs; ++k)
 		for (uint32_t i = 0; i < l->segs[k].len; ++i) {
+			moved[l->segs[k].from + i] = true;
+			if (l->segs[k].to == ELSEWHERE) continue;
 			out[l->segs[k].to + i] = in[l->segs[k].from + i];
-			moved[l->segs[k].from + i] = taken[l->segs[k].to + i] = true;
+			taken[l->segs[k].to + i] = true;
 		}
+	if (l->spare == NONE) return l->out;
 	/* (BN4's other bytes at their own offsets where BN6's are free there; those left, into the places left, in order from
 	 * the layout's spare) */
 	uint32_t tried = 0;
@@ -124,7 +135,7 @@ uint32_t xd4_size(int part) { return layouts[part].in; }
 
 const Xd4Places xd4_places = { BN4_BATTLE_STATE, BN4_CUSTOM_WINDOW, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_T1_OBJECTS, BN4_T3_OBJECTS,
 	BN4_T4_OBJECTS, BN4_T1_COUNT, BN4_FIELD_PANELS, BN4_OBJECT_LIST, BN4_OBJECT_LIST_END, BN4_MPLAYS, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,
-	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK };
+	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK, BN4_AI_DATA, BN4_AI_DATA_SIZE };
 
 /* (bn4.h's names, each BN6's twin by its body: docs/rom/bn4.md, The differential's hooks. BN4's viruses keep no AI data, so
  * its setAttack, which writes an AI data's attack variables in BN5 and BN6, is not hooked; its blink hides on its flash

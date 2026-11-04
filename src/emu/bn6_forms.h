@@ -41,6 +41,7 @@
                                              BN6_CROSS_RECORD (0x08015952; the routine 0x0802937A, then the row's used bit) */
 /* A Cross chosen, in RAM */
 #define BN6_CROSS_RECORD      0x0203CED0u /* the Custom screen's record of the form chosen: +0 the form (0xFF none), +1, +3; copied to BN6_CROSS_PENDING */
+#define BN6_RECORD_FORM       0x00        /* BN6_CROSS_RECORD +0 (and a side's BN6_CROSS_PENDING +0): the form, 0xFF none */
 #define BN6_RECORD_CHAOS      0x01        /* BN6_CROSS_RECORD +1: 0 for a Cross (0x0802937A); BN5's Chaos Unison, which no code of Gregar's reads */
 #define BN6_RECORD_TURNS      0x03        /* BN6_CROSS_RECORD +3: a Cross's turns (0x0802A118), which no code of Gregar's reads; BN5's Soul's */
 #define BN6_CROSS_PENDING     0x0203A980u /* the form each side takes as its next turn starts, 16 bytes a side, laid out as BN6_CROSS_RECORD */
