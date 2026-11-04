@@ -168,7 +168,10 @@ static int measure_panel(const Src *s, int A, int B) {
 		if (hues) {
 			const AreaSrc *a = s->a;
 			int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
-			if (!(hues >> tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1)) return OTHER;
+			int st = tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y));
+			if (!(hues >> st & 1)) return OTHER;
+			/* (TILES_WALK_HUE: its walkways' hue walkway floor however wide) */
+			if (s->styles & TILES_WALK_HUE && s->walk_styles >> st & 1 && !(s->styles >> st & 1)) return TILE_B;
 		}
 		/* platform floor lies in a 2 x 2 block of floor, walkways do not;
 		 * a platform's edge, its rim, is walkway floor too */
@@ -233,7 +236,7 @@ uint8_t *tl_find_pads(const Src *s) {
 				q[n++] = ny * SPAN + nx;
 			}
 		}
-		if (n <= PAD_PANELS)
+		if (s->styles & TILES_SQUARE_PADS ? n >= 9 && n <= 16 : n <= PAD_PANELS)
 			for (int k = 0; k < n; ++k) pad[q[k]] = 1;
 	}
 	free(block);
@@ -598,6 +601,15 @@ static bool joint_panel(const Src *s, int A, int B) {
 	if (!s->joint_hues || tl_src_panel(s, A, B) != TILE_B) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	/* (JOINT_GREY: grey in its middle, among walkways of a hue, and no
+	 * platform floor round it, a platform's rim: BN4's Undernet's steel
+	 * joints between its cushions) */
+	if (s->joint_hues & JOINT_GREY) {
+		if (tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) != 12) return false;
+		for (int k = 0; k < 9; ++k)
+			if (tl_src_panel(s, A + k % 3 - 1, B + k / 3 - 1) == TILE_A) return false;
+		return true;
+	}
 	return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->joint_hues) >= JOINT_PIXELS;
 }
 

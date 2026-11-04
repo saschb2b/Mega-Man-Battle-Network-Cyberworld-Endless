@@ -3,7 +3,7 @@ type: Tool
 title: "Tile test: clean tiles in every area"
 description: "`python3 build.py tiles [SEEDS]` runs the atlas over every area and layout, lists each area's tiles drawn off and seams per 100 panels with reasons, and fails where a layer got worse than the baseline."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-01T21:07:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
 ---
 
 # Tile test: clean tiles in every area
@@ -65,6 +65,21 @@ rarely set (a joint stands between); the baseline records it.
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`
 writes the new numbers.
+
+The baseline keys a layer by its area, layout, depth and seed, not by
+what was built there: a change to what a seed makes (`LAYER_MAKE`) builds
+other layers under the same keys, and the comparison then holds one
+layer's numbers against another's. On 4 November 2026 dev read 33
+layers worse than it, all of BN6's and BN5's areas; the atlas draws the
+same report twice and with any data folder, but at the commit that wrote
+the baseline (#164, 26 October) 83 of its 172 layers already differed
+from it and 10 read worse, and since then 179 of the 278 layers had
+changed floor (`LAYER_MAKE` 106-109, services and gates rolled apart):
+24 of the 25 flagged layers were other layers, the 25th flagged at that
+commit already. A stale baseline, written again with BN4's areas'
+polish (their BN6 and BN5 layers the same as before, byte for byte).
+After a change to what seeds make, write it again (`--baseline`) once
+the areas' pictures are looked over.
 
 The check sees the classes' picks, not what is pasted over them (pads,
 emblems, stairs, props), so look over the pictures too. To see why a tile

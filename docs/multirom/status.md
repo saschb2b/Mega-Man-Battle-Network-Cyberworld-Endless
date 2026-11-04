@@ -3,7 +3,7 @@ type: Status
 title: "Status"
 description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
 ---
 
 # Status
@@ -237,29 +237,68 @@ The owner's calls). Their tables in [BN4 Red Sun's tables](../rom/bn4.md).
   found as its EnterMapGroup's fifth call (`src/gfx/xbackdrop.c`).
 - [x] Each tuned over the atlas's layers (`--atlas DIR:aN:3`), its looks
   learned by shape (BN4's floors share hues across looks: the hue buckets
-  part none of them), seams per 100 panels:
-  ACDC Area (x15, like Central Area, over 0x90:0) 144: its third
-  map, then the first two; mint walkways in green rims, round hubs ringed
-  blue and yellow, framed squares of four by four, every room up to 64
-  panels and the arena drawn as one of its squares (`pad_rooms`), apart
-  (151 from its first map, 300 by hue).
-  Town Area (x16, like Seaside Area, over 0x91:1) 28, but 166 tiles per
-  100 panels drawn with other floors than they show: pale cyan walkways in
-  blue rims, wide and holed; its yellow and lime conveyors lend no tiles
-  (82 seams with them); a field is filled with its holed floor's lattice,
-  hole rims where floor is (learned from its third map, 138 seams and 12
-  such tiles; laid out as Central's, Sky's or Green's, the same).
-  Park Area (x17, like Green Area, over 0x92:1) 85: its first map
+  part few of them), then polished against BN4's own maps drawn beside
+  them (`--atlas DIR:x1`). What its first tuning left, area by area: two
+  walkway looks laid tile by tile in one (ACDC Area's cyan roads among its
+  white paths), pieces of hubs strewn on walkways and room corners (red
+  studs, blue and yellow arcs), the walkways' middles in the platforms'
+  (the countries' green blotches in their cream), a lattice's hole rims
+  laid over every field (Town Area, a tile drawn off for each of its
+  panels and more), cushions cut and joints at random along the Undernet's
+  paths and its rooms' middles a scatter of cross pieces. Seams per 100
+  panels and tiles drawn off (`build.py tiles`' magenta), before and
+  after:
+  ACDC Area (x15, like Central Area, over 0x90:0) 144 to 106, off 0 to 5:
+  its third map, then the first two; white walkways in green rims, rounded
+  at their turns; its framed squares of four by four are its pads
+  (`TILES_SQUARE_PADS`, islands of 9 to 16 panels), so every room up to
+  64 panels and the arena are drawn as one, framed with its arrows; its
+  cyan roads, a second walkway look, and its hubs, ringed in azure, lend
+  no tiles (`SKIP_ANY_PIXEL`, hue bucket 6).
+  Town Area (x16, like Seaside Area, over 0x91:1) 28 to 153, off 168 to
+  25: its maps lay no floor wider than a walkway but Town Area 3's
+  blue-framed squares (Town Area 1 is a lattice of walkways round holes,
+  whose hole rims had filled every field), so it learns Town Area 3 and 1,
+  its squares its pads, every room drawn as one and the way kept one wide
+  (`TILES_ONE_WIDE`, as End Area's); Town Area 3's yellow roads and lower
+  blue paths lend no tiles (hue buckets 2, 3 and 7 in their middles). The
+  seams are where the squares meet the walkways, the picture cleaner.
+  Park Area (x17, like Green Area, over 0x92:1) 85 to 81: its first map
   alone (its other maps mixed in, 149), pink walkways, peach framed
-  platforms; its orange and yellow conveyors lend none.
-  The countries (x18, like Sky Area, over 0x94:1) 32: the four are
+  platforms, the pale pink walkway floor however wide (`TILES_WALK_HUE`);
+  its orange and yellow conveyors lend none.
+  The countries (x18, like Sky Area, over 0x94:1) 32 to 40: the four are
   four looks, so one is learned, the third (green floor in red and yellow
-  rims, cream framed platforms, drawn apart; the others 50 to 175); which
-  country it is is not traced, so the area is named the countries.
-  The Undernet (x19, like the Undernet, over 0x92:0) 197: its third map
-  alone (196 with its first two), orange cushioned paths a panel wide, grey
-  joints, grey square platforms with a blue cross, drawn apart; Black Earth
-  (0x94:6-7) not drawn.
+  rims, cream framed platforms, drawn apart; the others 50 to 175); the
+  green floor walkway however wide (`TILES_WALK_HUE`: its wide stretches'
+  middles had stood in the platforms' as green blotches), its cyan arrows
+  lending none (hue bucket 6, their specks gone); which country it is is
+  not traced, so the area is named the countries.
+  The Undernet (x19, like the Undernet, over 0x92:0) 197 to 185: the
+  Undernet 5, then 3; orange cushions a panel each on paths a panel wide,
+  grey plates framed in steel with orange corners, drawn apart; its steel
+  joints, grey among the cushions, in a look of their own at a path's
+  ends, turns and crossings (`joint_hues` `JOINT_GREY`, as BN6's Undernet's
+  gems), so a straight path is whole cushions; its plates plain as the
+  Undernet 5 lays them, and the Undernet 3's blue cross its emblem, set
+  whole in the rooms (`emblem` 0x75C0, learned from the map that draws it,
+  `netmap_learn.c`); Black Earth (0x94:6-7) not drawn.
+  BN6's and BN5's layers are the same as before, byte for byte (the
+  atlas's pictures of all 244, `build.py tiles`).
+- [ ] What the dressing still misses, which the generator's layouts
+  cannot give from BN4's maps alone: BN4's net is one-wide paths between
+  small pieces (hubs, studs, squares of four by four), where BN6's
+  layouts lay fields and widened ways, so a generated room's edges and a
+  walkway's join to it are neighbourhoods BN4 never draws (ACDC Area's and
+  Town Area's seams, Park Area's cut joins); ACDC Area's round studs at its
+  paths' ends, its ringed hubs and its exit arrows, Town Area's and the
+  countries' arrow conveyors, the Undernet's flames and red paths are not
+  drawn; a generated pad is three panels a side, BN4's squares four. What
+  would draw them: a layout kit of BN4's own, as `netmap_kit` gives BN6's
+  areas theirs (one-wide ways ending in studs, rooms of its squares'
+  size, hubs on spurs, its exit arrows at the layer's ends), and the hubs,
+  studs and squares cut whole as pads are (`props_learn_pad` takes
+  islands of three by three); the owner's eye on the pictures first.
 - [x] Their themes named: BN4's net theme (song 0x12) for ACDC, Town,
   Park Area and the countries, its Undernet's (0x13) for the Undernet
   (`.xsong`, BN4's map lists, `BN4_MAP_MUSIC`); copied by `xsong.c` as a
