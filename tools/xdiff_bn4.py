@@ -27,7 +27,7 @@ import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
-                        SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
+                        SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -91,25 +91,12 @@ def bn4_sprites(rom4):
 
 def sprite_rows():
     """BN4's sprite lists (src/core/rom.c's BN4 layout, sprite_lists) and the recipe's XvSprite rows (src/emu/xvirus_bn4.c:
-    BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites' and bn4_sprite_data's"""
+    BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites'"""
     text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
     rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, XV_ART \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
     return (0x08000000 + int(m.group(1).rstrip('uU'), 0) if m else None), rows
-
-
-def bn4_sprite_data(rom4):
-    """each moved sprite's bytes as the recipe copies them into BN6's free space (decompressed, its size word dropped:
-    tools/xrecipe.py sprite), in bn4_sprites' order; None where it cannot be read. Read from BN4's ROM, the reference's: BN6's
-    copy must hold the same, so a copy that does not animates otherwise and is found (opening_animation)"""
-    lists, rows = sprite_rows()
-    if not lists or not rom4:
-        return []
-    import xrecipe_thumb
-    from xrecipe import sprite
-    rom = xrecipe_thumb.Rom(rom4, 'bn4')
-    return [sprite(rom, lists, int(lst), int(idx, 16))[1] for lst, idx, _, _ in rows]
 
 
 CACHE_SLOTS, CACHE_KEYS, CACHE_SPRITES = 8, 0x04, 0x14   # (src/emu/bn4.h BN4_SPRITE_CACHE: its count, keys and sprites)
@@ -559,129 +546,12 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
-# The opening's animation (legit.json's bn4 allowed, "the opening's idle animation, BN4's appear a run longer"):
-# a first-kind object's sprite state in BN6's layout (from its node): +0x90 its animation, +0x91 its count, +0x92 its
-# frame's flags, +0xAC its frame record (20 bytes: tiles, palette, mini-animation and OAM offsets, its duration at +16 and its
-# flags at +18, 0x80 its animation's last, 0x40 back to its first), +0xB0-+0xBB what the update takes from that record (its
-# mini-animation's data, its tiles, the word +0xB8). A moved family's sprite is updated by the virus's after-state routine
-# in both games, twins but for one test: BN4's (0x08010736, from the family's own update's tail, 0x080BA410 in Spikey's)
-# runs the sprite update (0x0800285C) unless time is stopped; BN6's (0x08016E64, from its virus dispatcher) also skips it
-# while the battle is paused (0x08016E84-0x08016E90: the battle's mode, 0x0802D234, not 1, and battle_isPaused,
-# 0x0800A03C). So BN4's virus animates from its init through the paused opening until its state 1 clears its +0 0x04
-# (Spikey: 53 updates, its frames 132-184 in spikey_v1, a probe of hooks on both sprite updates); a moved family runs BN4's
-# copied where BN6's skips it for the pause (XVirusFamily.present: after its spawn and its appear), 51 times: the same
-# animation, BN4's OPENING_LEAD updates ahead
-ANIM, ANIM_COUNT, ANIM_FLAGS, ANIM_FRAME, ANIM_DATA = 0x90, 0x91, 0x92, 0xAC, (0xB0, 0xBC)
-ANIM_PLACE = {ANIM_COUNT, ANIM_FLAGS} | set(range(ANIM_FRAME, ANIM_FRAME + 4)) | set(range(*ANIM_DATA))
-REC_DURATION, REC_FLAGS, REC_SIZE, REC_LAST, REC_LOOP = 16, 18, 20, 0x80, 0x40
-# The lead it is held to, since a moved BN4 family runs BN4's after-state while BN6's battle is paused (XVirusFamily.present:
-# after its spawn's done and after each run of its state 0, its appear): BN4's appear (its generic state 0, 0x0800FCAC, run
-# from its init's frame, its init calling its update) runs 52 times in spikey_v1's opening and its state 1 once, 53 updates;
-# BN6's twin (0x08016380, the recipe's GENERIC6) 50 times, its spawn's update one more, its state 1 at its first fight frame
-# (the battle's offset): BN4's place one update ahead, at every frame (a probe of hooks on both, temporary, not kept)
-OPENING_LEAD = 1
-
-
-def anim_steps(data, anim):
-    """the places (its frame record's offset in the copy, its count) animation `anim` of a sprite's bytes passes through
-    from its set, one a sprite update: its first record with its duration, counted down to 0, then the next (the first after
-    one with 0x80 and 0x40) with its duration less one, as the probe of both games' sprite updates read them; and the step
-    its loop goes back to. (None, None) where the bytes do not say (an animation that ends, a duration of 0)"""
-    g32 = lambda o: int.from_bytes(data[o:o + 4], 'little')
-    if not data or 4 + 4 * anim + 4 > len(data):
-        return None, None
-    first = g32(4 + 4 * anim) + 4
-    if first + REC_SIZE > len(data) or not data[first + REC_DURATION]:
-        return None, None
-    f, n, seq, seen = first, data[first + REC_DURATION], [], {}
-    while (f, n) not in seen:
-        seen[(f, n)] = len(seq)
-        seq.append((f, n))
-        flags = data[f + REC_FLAGS]
-        if n:
-            n -= 1
-            continue
-        if flags & REC_LAST and not flags & REC_LOOP:
-            return None, None
-        f = first if flags & REC_LAST else f + REC_SIZE
-        if f + REC_SIZE > len(data) or not data[f + REC_DURATION]:
-            return None, None
-        n = data[f + REC_DURATION] - 1
-    return seq, seen[(f, n)]
-
-
-def anim_place(f, o):
-    """a first-kind object's animation and place: (its animation, its frame record named, its count, its frame's other
-    bytes named: its flags, the update's +0xB0-+0xBB)"""
-    name = lambda w: sprite_ptr(getattr(f.canon, 'sprites', ()), f.game, w, bn4_cache(f.fr)) or ('raw', w)
-    data = tuple(name(o.o32(k)) for k in range(ANIM_DATA[0], ANIM_DATA[1], 4))
-    return o.o8(ANIM), name(o.o32(ANIM_FRAME)), o.o8(ANIM_COUNT), (o.o8(ANIM_FLAGS),) + data
-
-
-def opening_frames(trace, canon, fam):
-    """each family first-kind role's frames' bytes in a trace as {(role, sprite, animation, frame record's offset): its
-    frame's other bytes}, every frame of the battle: what each game's update takes from a record, read from its own trace"""
-    out = {}
-    for fr in trace['frames']:
-        f = Frame(trace, fr, canon)
-        for o in fr['objs']:
-            if o.kind == 'T1' and o.role in fam:
-                anim, at, _, data = anim_place(f, o)
-                if at[0] == 'sprite':
-                    out.setdefault((o.role, at[1], anim, at[2]), set()).add(data)
-    return out
-
-
-def opening_animation(fa, fb, fam, st):
-    """legit.json's bn4 allowed, the opening's animation: each family first-kind role's place this frame, the roles whose
-    place is BN4's opening's lead (st: each role's state, kept from frame to frame), into st['ok']. A role is held to it from
-    the first frame compared until its animation is set in either game (its +0x90 other than at the first) or the two places
-    meet, never after: both on the same animation of the same sprite (BN4's bytes, bn4_sprite_data), each place a step of
-    its run (anim_steps), BN4's OPENING_LEAD steps ahead (a loop apart) at every frame, and each place's other bytes what the
-    other game's own trace holds at that frame record"""
-    st['ok'] = set()
-    sprites = getattr(fa.canon, 'sprite_data', ())
-    ra = {o.role: o for o in fa.fr['objs'] if o.kind == 'T1' and o.role in fam}
-    rb = {o.role: o for o in fb.fr['objs'] if o.kind == 'T1' and o.role in fam}
-    for role in set(ra) & set(rb):
-        s = st.setdefault(role, {})
-        if s.get('closed'):
-            continue
-        pa, pb = anim_place(fa, ra[role]), anim_place(fb, rb[role])
-        s.setdefault('anims', (pa[0], pb[0]))
-        if (pa[0], pb[0]) != s['anims'] or pa[0] != pb[0] or pa == pb or pa[1][0] != 'sprite' or pa[1][:2] != pb[1][:2]:
-            s['closed'] = True
-            continue
-        seq, loop = anim_steps(sprites[pa[1][1]] if pa[1][1] < len(sprites) else None, pa[0])
-        ia, ib = (seq.index((p[1][2], p[2])) if seq and (p[1][2], p[2]) in seq else None for p in (pa, pb))
-        period = len(seq) - loop if seq else 0
-        if ia is None or ib is None or ia < loop or not period:
-            s['closed'] = True
-            continue
-        lead = (ia - ib) % period
-        if lead != OPENING_LEAD % period:
-            s['closed'] = True
-            continue
-        frames = st['frames']
-        seen = pa[3] in frames[1].get((role, pa[1][1], pa[0], pa[1][2]), ()) and \
-            pb[3] in frames[0].get((role, pb[1][1], pb[0], pb[1][2]), ())
-        if s.setdefault('lead', lead) != lead or not seen:
-            s['closed'] = True
-            continue
-        st['ok'].add(role)
-
-
-def opening_allowed(d, st):
-    """the opening's animation (opening_animation): True where d is a place field of a role held to BN4's lead this frame"""
-    return d.part == 'obj' and d.off in ANIM_PLACE and d.role in st.get('ok', ())
-
-
 # MegaMan's animation in each game's own art (legit.json's bn4 allowed, "MegaMan's own art's animation"): a first-kind
 # object's sprite state holds its animation (+0x90), its frame's count (+0x91), its flags (+0x92: 0x80 as its last frame
 # runs), its art (+0xA8, the sprite + 4, its animations' table) and its frame's record (+0xAC: 20 bytes a frame, its
 # duration at +16, +18's 0x80 its last, as tools/xsoul.py anim_life reads them); the sprite update (BN4 0x0800285C, BN6
 # 0x080026C4) loads a frame's duration less 1 and counts it down, a frame each fight frame
-ANIM_LAST, ANIM_ART = 0x80, 0xA8   # (ANIM, ANIM_FLAGS and ANIM_FRAME the opening's, above)
+ANIM, ANIM_FLAGS, ANIM_FRAME, ANIM_LAST, ANIM_ART = 0x90, 0x92, 0xAC, 0x80, 0xA8
 FRAME_SIZE, FRAME_DURATION, FRAME_FLAGS, MEGAMAN = 20, 16, 18, ('T1', 0x1A0)
 
 
@@ -922,6 +792,32 @@ def allowed_lag(spec):
     return lag
 
 
+def alignments(spec):
+    """legit.json's bn4 align as the spec's poke= items (src/dev/xdiff_spec.c), for a BN4 spec against BN6's alone (the
+    harness's, spec_text: BN4's side and BN5's specs never): each a movs r0,#imm8 of BN6's own code by its name in
+    src/emu/bn6*.h, BN6's ROM (.build/xdiff/rom) checked to hold `was` there, its immediate `was`'s plus `frames`, written
+    into BN6's copy before the spec's own pokes (so a mutation's of the same place is the one that stands). BN6's opening a
+    frame longer is its first blink step's (BN6_APPEAR_BLINK_FIRST), the appear queue's first object's: the queue blinks its
+    objects one after another, so a spec of more than one foe is refused rather than aligned wrong"""
+    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('align', [])
+    if not rows:
+        return []
+    foes = [x for x in spec.get('foes', '').split(',') if x]
+    if len(foes) != 1:
+        raise SystemExit(f'legit.json\'s bn4 align ({rows[0]["name"]}) is the appear queue\'s first object\'s: {len(foes)} foes')
+    heads = sorted(os.path.join('src', 'emu', n) for n in os.listdir(os.path.join(ROOT, 'src', 'emu')) if re.match(r'bn6\w*\.h$', n))
+    names = c_defines(*heads)
+    rom6 = open(os.path.join(ROOT, '.build', 'xdiff', 'rom', 'bn6.gba'), 'rb').read()
+    items = []
+    for r in rows:
+        at, was, n = names[r['at']], int(r['was'], 0), int(r['frames'])
+        have = u16(rom6, at - 0x08000000)
+        if have != was or was >> 8 != 0x20 or not 0 < (was & 0xFF) + n <= 0xFF:
+            raise SystemExit(f'legit.json\'s bn4 align {r["name"]}: BN6 {at:#x} holds {have:04x}, not the movs r0,#imm8 {was:04x}')
+        items.append(f'{at:08X}:{was + n:04X}:2')
+    return items
+
+
 def bn4_allowed():
     """legit.json's bn4 allowed differences (each with its reason and both games' code)"""
     return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('allowed', [])
@@ -966,10 +862,6 @@ def compare(spec, ta, tb, canon, show=6):
     stop, lines, ranks, before = None, [], {}, None
     SPARKS_SEEN.clear()
     MOVES.clear()
-    # (the opening's animation, only where legit.json's bn4 allowed names it: each game's frames' bytes read from its own
-    # trace, each role's state kept frame to frame)
-    rule = next((a['name'] for a in bn4_allowed() if a.get('rule') == 'opening animation'), None) if against else None
-    opening = {'frames': (opening_frames(ta, canon, fam), opening_frames(tb, canon, fam)), 'name': rule} if rule else {}
     for fra in ta['frames']:
         frb = bt.get(fra['t'] + lag)
         if frb is None:
@@ -999,13 +891,10 @@ def compare(spec, ta, tb, canon, show=6):
                 used[d.mask] = used.get(d.mask, 0) + 1
         world = [d for d in world if not d.mask]
         mine = [d for d in open_ if d.role in fam] if against else open_
-        if opening:   # (legit.json's bn4 allowed, the opening's animation: BN4's run through its paused opening)
-            opening_animation(fa, fb, fam, opening)
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
-                (opening['name'] if opening and opening_allowed(d, opening) else None)
+            d.mask = allowed_bit(d, fam) or ("the hit's spark, each engine's own" if spark_own(d) and against else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
@@ -1056,11 +945,13 @@ def spec_text(spec, out, game):
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
     parts = [f'game={game}', f'foes={spec["foes"]}', f'mm={spec.get("mm", "22")}', f'hp={spec.get("hp", 100)}',
              f'frames={spec.get("frames", 1200)}', f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}']
-    # (rng=replay: BN6's draws given BN4's, keyed as BN5's are, xdiff_events.h; poke=, call=: a mutation's break of the subject)
+    # (rng=replay: BN6's draws given BN4's, keyed as BN5's are, xdiff_events.h; legit.json's bn4 align, BN6's opening a frame
+    # longer, against BN6's alone and first; poke=, call=: a mutation's break of the subject)
     extra = ([f'rng={spec["rng"]}'] if spec.get('rng') and game == 'bn4:bn6' else []) + \
         ([f'lag={spec["lag"]}'] if spec.get('lag') and game == 'bn4:bn6' else []) + \
         (rng_twins() if spec.get('rng') == 'replay' and game == 'bn4:bn6' else []) + \
-        [f'poke={p}' for p in spec.get('poke', [])] + [f'call={c}' for c in spec.get('call', [])]
+        [f'poke={p}' for p in (alignments(spec) if game == 'bn4:bn6' else []) + spec.get('poke', [])] + \
+        [f'call={c}' for c in spec.get('call', [])]
     return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
 
@@ -1093,7 +984,6 @@ def one(name, spec, a, canon, run_xdiff, work):
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
         rom6 = os.path.join(work, 'rom', 'bn6.gba')
         canon.sprites = bn4_sprites(rom4b)
-        canon.sprite_data = bn4_sprite_data(rom4b)
         rom6b = open(rom6, 'rb').read() if os.path.exists(rom6) else b''
         canon.alliance = bn4_alliance(rom4b, rom6b)
         canon.panels = panel_tables(rom4b, rom6b)

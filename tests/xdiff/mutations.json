@@ -1329,7 +1329,7 @@
    "poke": [
     "08BE5318:00002B6C:4"
    ],
-   "what": "BN6's copy of Spikey's sprite (XV_ART + 0x65300, BN4's LZ77'd 1:0x05): its idle animation 0's first frame record (copy +16) given frame 1's mini-animation offset at its +8 (0x2B6C for 0x2B60): BN6's place is still a step of BN4's run of animation 0, a constant count behind, but its frame's bytes (+0xB0 ('sprite', 2, 11124)) are none BN4's trace shows at that frame record (11112), so the opening's animation no longer holds for it (tools/xdiff_bn4.py opening_animation) and its place's differences are the family's (caught at t1)"
+   "what": "BN6's copy of Spikey's sprite (XV_ART + 0x65300, BN4's LZ77'd 1:0x05): its idle animation 0's first frame record (copy +16) given frame 1's mini-animation offset at its +8 (0x2B6C for 0x2B60): BN6's place the same step of animation 0 as BN4's (legit.json's bn4 align, BN6's opening a frame longer), but its frame's bytes (+0xB0 ('sprite', 2, 11124)) not BN4's at that frame record (11112), a difference of the family's own records (caught at t12, the first frame compared on that record)"
   },
   {
    "name": "a diagonal step's collision panels left unmoved",
@@ -1369,7 +1369,15 @@
    "call": [
     "080026C4:0810A952"
    ],
-   "what": "Spikey's copy of BN4's after-state (BN4 0x08010736, run from its state 0 and its hook 5 while BN6's battle is paused: xvirus_shim.h, a paused present), its sprite update's veneer (BN4's 0x0800285C, BN6's twin 0x080026C4) aimed at BN6's family nullsub: its appear's updates gone, BN6's after-state's own from the fight on, as before the port, so its place at t1 is no longer BN4's one update ahead (tools/xdiff_bn4.py OPENING_LEAD; caught at t1)"
+   "what": "Spikey's copy of BN4's after-state (BN4 0x08010736, run from its state 0 and its hook 5 while BN6's battle is paused: xvirus_shim.h, a paused present), its sprite update's veneer (BN4's 0x0800285C, BN6's twin 0x080026C4) aimed at BN6's family nullsub: its appear's updates gone, BN6's after-state's own from the fight on, as before the port, so its place at t1 is BN4's of its opening's updates behind, where with BN6's opening a frame longer (legit.json's bn4 align) they are the same (caught at t1)"
+  },
+  {
+   "name": "BN6's opening two frames longer",
+   "spec": "shrimpy_v3",
+   "poke": [
+    "080163FC:2004:2"
+   ],
+   "what": "BN6's plain appear's first blink step (BN6_APPEAR_BLINK_FIRST, 0x080163FC: movs r0,#2, which legit.json's bn4 align makes movs r0,#3 for every BN4 spec against BN6's) made movs r0,#4, written after the alignment's own: BN6's virus runs its appear and its paused present once more than BN4's, its sprite a step ahead of BN4's where the alignment has them the same (caught at t1)"
   }
  ]
 }
