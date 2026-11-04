@@ -16,7 +16,7 @@
 #include "xdiff_events.h"   /* (XdGame: BN4's routines the differential's hooks are placed on) */
 
 /* the parts a BN4 trace translates */
-enum { XD4_OBJECT, XD4_COLL, XD4_AI, XD4_PANEL };
+enum { XD4_OBJECT, XD4_COLL, XD4_AI, XD4_PANEL, XD4_PENDING };
 
 /* After each frame of BN4's guest core: BN4_SUBSYSTEM_BYTE watched while its battle is on, which Billy's recipe takes for 0
  * (its test at 0x08044AEC aimed at BN6's routine that returns 0); and once the battle is over, what it read said */
@@ -27,8 +27,9 @@ void xd4_watched(void);
 uint8_t xd4_sub(void);
 
 /* part's bytes `in` (BN4's: from an object's list node, BN6_T1_SIZE; a collision data's BN4_COLL_SIZE; an AI's
- * BN4_AI_DATA_SIZE; a panel's BN4_PANEL_SIZE) into `out` in BN6's layout (BN6_T1_SIZE, BN6_COLL_SIZE, BN6_AI_DATA_SIZE,
- * BN6_PANEL_SIZE), the rest of `out` zero; how many bytes `out` holds */
+ * BN4_AI_DATA_SIZE; a panel's BN4_PANEL_SIZE; MegaMan's pending form, from his AI data) into `out` in BN6's layout
+ * (BN6_T1_SIZE, BN6_COLL_SIZE, BN6_AI_DATA_SIZE, BN6_PANEL_SIZE, BN6_CROSS_PENDING_SIZE), the rest of `out` zero; how many
+ * bytes `out` holds */
 uint32_t xd4_translate(int part, const uint8_t *in, uint8_t *out);
 /* ... how many bytes of BN4's a part is (the `in` xd4_translate reads) */
 uint32_t xd4_size(int part);
@@ -39,6 +40,7 @@ uint32_t xd4_size(int part);
 typedef struct {
 	uint32_t state, window, rng[2], t1, t3, t4, nt1, panels, list, list_end, mplays, navi, navi_size, side;
 	uint32_t paralysis, coll_flags, coll_struck;
+	uint32_t ai, ai_size;   /* (MegaMan's AI data, a side's: his pending form, carried in the player block, XD4_PENDING) */
 } Xd4Places;
 extern const Xd4Places xd4_places;
 /* BN4's routines the differential's hooks are placed on (bn4.h: RNG draws, spawns, sounds, effects, reservations, the blink,

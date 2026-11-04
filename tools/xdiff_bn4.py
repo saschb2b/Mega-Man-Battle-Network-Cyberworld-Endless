@@ -26,8 +26,8 @@ import os
 import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
-from xdiff_snap import (DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, REPLAYED, RESERVE, ROOT, SIZE, SPAWN, UNMAPPED,
-                        UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
+from xdiff_snap import (DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
+                        SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -132,15 +132,21 @@ class Bn4Canon:
 #     too, legit.json's action)
 #   (not its damage word, +0x2C: its top bits are the hit's properties in both games, read by the collision setup's
 #     0x08012860 / 0x08019F44, never an element: a difference there is the family's)
+# - its saved state word's CurAction (+0x5D) by the same map: the status a hit gives (BN4 0x0800AE80, BN6's twin 0x0800E760:
+#   ldr r0,[r5,#0x5c]; if 0, ldr r0,[r5,#8]; str r0,[r5,#0x5c]; then CurAction 4) keeps the object's +8 to +0xB at +0x5C to
+#   +0x5F while it holds him, the action it gives back after (MegaMan's ready, 6 in BN4 and 8 in BN6)
+OBJ_SAVED_ACTION = 0x5D
 
 
 def bn4_as_bn6(rec, fams):
-    """an object's record (a T1's, from its node) with BN4's numbers as BN6's: its type, its CurAction"""
+    """an object's record (a T1's, from its node) with BN4's numbers as BN6's: its type, its CurAction and the one its
+    saved state word keeps"""
     types = {f['type'] for f in fams}
     if rec[NODE + OBJ_TYPE] in types:
         rec[NODE + OBJ_TYPE] = 0
-    if rec[NODE + OBJ_ACTION] >= 6:
-        rec[NODE + OBJ_ACTION] += 2
+    for at in (OBJ_ACTION, OBJ_SAVED_ACTION):
+        if rec[NODE + at] >= 6:
+            rec[NODE + at] += 2
     return rec
 
 
@@ -415,6 +421,11 @@ def frame_diffs(fa, fb):
         ob = [x for x in ob if not (isinstance(x, tuple) and x[0] in companions(fb))]
     if oa != ob:
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
+    # (MegaMan's pending form: BN4's AI data +0x10 at the player block's pending record +0, BN6_CROSS_PENDING's form, by
+    # src/dev/xdiff_bn4_trace.c's XD4_PENDING; the record's other bytes BN6's own)
+    pa, pb = fa.fr.get('player', b''), fb.fr.get('player', b'')
+    if fa.game == 4 and pa and pb and pa[PLAYER_PENDING] != pb[PLAYER_PENDING]:
+        out.append(Diff(t, 'player', 'pending form', 0, pa[PLAYER_PENDING], pb[PLAYER_PENDING]))
     tabs = getattr(fa.canon, 'panels', None) if fb.game == 6 else None
     for i, (pa, pb) in enumerate(zip(fa.fr['panels'], fb.fr['panels'])):
         pa = panel_as_bn6(i, pa, tabs, fa.fr['panels']) if tabs else pa
@@ -511,14 +522,14 @@ def unexplained(fa, fb, ta, tb, used):
 
 
 def allowed_lag(spec):
-    """the fight frames the family's own timeline may run later in BN6's engine: the spec's "lag", only where legit.json's
-    bn4 allowed names exactly that lag for the family (its reason and both games' code paths there: BN6's engine hands a
-    virus its first own state a fight frame later than BN4's); 0 none. Any other lag is refused, so a family off by any
-    other amount fails"""
+    """the fight frames BN6's whole battle runs behind BN4's: the spec's "lag", only where legit.json's bn4 allowed names
+    exactly that lag for the battle (its reason and both games' code paths there: BN6's engine runs no state while the
+    opening is paused, BN4's does); 0 none. Every record of BN6's battle is compared at t + lag against BN4's at t, never a
+    field or a role apart; any other lag is refused"""
     lag = spec.get('lag', 0)
     if not lag:
         return 0
-    ok = [a for a in bn4_allowed() if a.get('whose') == 'family' and a.get('lag') == lag]
+    ok = [a for a in bn4_allowed() if a.get('whose') == 'battle' and a.get('lag') == lag]
     if not ok:
         raise SystemExit(f'lag {lag}: no allowed difference of tests/xdiff/legit.json (bn4) names it')
     return lag
@@ -560,16 +571,18 @@ def compare(spec, ta, tb, canon, show=6):
     bt, used, n = {f['t']: f for f in tb['frames']}, {}, 0
     against = tb['game'] == 6
     fam = family_roles(ta, canon) | family_roles(tb, canon) | {FAMILY_DRAWS} if against else set()
-    # (allowed_lag: the family's own records against BN6's of `lag` fight frames later, the world's of the same frame)
+    # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
     stop, lines, ranks = None, [], {}
     for fra in ta['frames']:
-        frb = bt.get(fra['t'])
+        frb = bt.get(fra['t'] + lag)
         if frb is None:
             continue
         n += 1
         fa = Frame(ta, fra, canon)
         fb = Frame(tb, frb, canon)
+        if against:
+            bn4_renderer(fa, fb, fam, ranks)
         open_ = unexplained(fa, fb, ta, tb, used)
         world = [d for d in open_ if d.role not in fam] if against else []
         for d in world:   # (legit.json's bn4 allowed of the world's: MegaMan's own sprite, BN6's companion of his)
@@ -577,14 +590,7 @@ def compare(spec, ta, tb, canon, show=6):
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         world = [d for d in world if not d.mask]
-        if lag:
-            frl = bt.get(fra['t'] + lag)
-            fl = Frame(tb, frl, canon) if frl else None
-            if fl:
-                bn4_renderer(fa, fl, fam, ranks)
-            mine = [d for d in unexplained(fa, fl, ta, tb, {}) if d.role in fam] if fl else []
-        else:
-            mine = [d for d in open_ if d.role in fam] if against else open_
+        mine = [d for d in open_ if d.role in fam] if against else open_
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             d.mask = allowed_bit(d, fam)
             if d.mask:
@@ -603,8 +609,8 @@ def compare(spec, ta, tb, canon, show=6):
         return 'INCONCLUSIVE', stop, lines + [f'  {n} fight frames compared: the family\'s own records the same in all of them']
     lines = [f'  {n} fight frames compared (t{ta["frames"][0]["t"]}-t{ta["frames"][-1]["t"]}), masks applied: ' +
              (', '.join(f'{k} x{v}' for k, v in sorted(used.items())) or 'none')]
-    if len(ta['frames']) != len(tb['frames']):
-        lines.append(f'  the traces are {len(ta["frames"])} and {len(tb["frames"])} fight frames long')
+    if len(ta['frames']) + lag != len(tb['frames']):
+        lines.append(f'  the traces are {len(ta["frames"])} and {len(tb["frames"])} fight frames long' + (f' (BN6\'s {lag} more)' if lag else ''))
         return 'FAIL', min(len(ta['frames']), len(tb['frames'])), lines
     return 'PASS', None, lines
 

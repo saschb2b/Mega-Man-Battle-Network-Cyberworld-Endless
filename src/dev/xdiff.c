@@ -114,6 +114,8 @@ typedef struct Side_ {
 	Player players[BN6_MPLAY_COUNT];
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
+	int behind;                     /* (BN6's, lag=N) the fight frames its battle runs behind the reference's: its keys by the timer
+	                                 * taken that much later, that many more frames traced (docs/devtools/differential.md, The BN4 trace) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
 	bool seeded, fought, done, decked, held;
@@ -222,7 +224,9 @@ static void player_out(Side *g) {
 	uint32_t side = v->rd8(v->side) & 1;
 	bytes_out(g, v->navi + side * v->navi_size, v->navi_size, BN6_BATTLE_NAVI_SIZE);
 	w32(g, v->used ? v->rd32(v->used) : 0);
-	bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
+	if (v->game == 4)   /* (BN4's pending form in its AI data: XD4_PENDING) */
+		part_out(g, XD4_PENDING, xd4_places.ai + side * xd4_places.ai_size, BN6_CROSS_PENDING_SIZE);
+	else bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
 	bytes_out(g, v->souls, SOULS_SIZE, SOULS_SIZE);
 	bytes_out(g, v->unite, BN6_ELEMENT_SIZE, BN6_ELEMENT_SIZE);
 }
@@ -505,7 +509,7 @@ static bool step(Side *g, const Spec *s) {
 		keys = custom_keys(s, v->game, g->screen, ++g->custom);
 	}
 	if (battle && phase == BN6_PHASE_FIGHT) {
-		keys |= keys_at(s, t);
+		keys |= t >= (uint32_t)g->behind ? keys_at(s, t - (uint32_t)g->behind) : 0;
 		hold_step(g, s);
 	}
 	if (battle && s->safe) keep_safe(v);
@@ -526,7 +530,7 @@ static bool step(Side *g, const Spec *s) {
 	if (fighting && t != g->last) {
 		frame_out(g);
 		g->fought = traced = true;
-		g->done = ++g->traced >= s->frames;
+		g->done = ++g->traced >= s->frames + g->behind;
 	}
 	g->last = t;
 	g->done |= (g->fought && sub != BN6_SUB_BATTLE) || g->frame >= (uint32_t)(OPENING + 4 * s->frames);
@@ -926,6 +930,7 @@ int xdiff_run(const char *text) {
 	}
 	if (!logs_start(&a, &b, &s)) return 1;
 	b.ref = &a;   /* (read where BN5's battle is fought too: dslist) */
+	b.behind = s.bn4 ? s.lag : 0;   /* (BN6's whole battle a fight frame behind BN4's: the spec's lag, tools/xdiff_bn4.py) */
 	fight(ra ? &a : NULL, rb ? &b : NULL, &s);
 	if (a.out) fclose(a.out);
 	if (b.out) fclose(b.out);

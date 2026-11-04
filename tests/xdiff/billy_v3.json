@@ -1,5 +1,5 @@
 {
-  "about": "BN4 Red Sun's Billy V3 (BN4's enemy 0x11) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against its BN6 twin moved into BN6's engine (--dev bn4families: BN6's 0x2C4, AI 64; src/emu/xvirus_bn4.c), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, each with its evidence; the family's own timeline a fight frame later in BN6's engine allowed (lag 1: tests/xdiff/legit.json, bn4, allowed, both state runners' paths), the world compared frame for frame",
+  "about": "BN4 Red Sun's Billy V3 (BN4's enemy 0x11) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against its BN6 twin moved into BN6's engine (--dev bn4families: BN6's 0x2C4, AI 64; src/emu/xvirus_bn4.c), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, each with its evidence; BN6's whole battle a fight frame behind BN4's allowed (lag 1, one offset for every record: tests/xdiff/legit.json, bn4, allowed, both state runners' paths)",
   "game": "bn4",
   "against": "bn6",
   "dev": [
