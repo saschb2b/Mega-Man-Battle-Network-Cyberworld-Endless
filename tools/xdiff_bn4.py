@@ -359,6 +359,15 @@ def holds_nothing(a, d):
     return {'BN4 has, BN6 not': lambda: zero(d.b), 'BN6 has, BN4 not': lambda: zero(d.a)}.get(a.get('direction'), lambda: True)()
 
 
+def raw_int(v):
+    """a cell's value as a number: an int as it is, a raw word's ('raw', n) its n, else None"""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    return v[1] if isinstance(v, tuple) and len(v) == 2 and v[0] == 'raw' and isinstance(v[1], int) else None
+
+
 def allowed_world(d, fb):
     """the allowed difference of legit.json's bn4 a world's difference against BN6's is (MegaMan's own sprite; BN6's
     MegaMan's companion, its being in play and his AI data's pointer to it), None where none"""
@@ -376,10 +385,13 @@ def allowed_world(d, fb):
             if d.part == a['part'] and lo <= d.off <= hi and holds_nothing(a, d):
                 return a['name']
         elif 'bit' in a:
-            bit = int(a['bit'], 0)
-            if (d.part == a['part'] and d.off == int(a['offset'], 0) and isinstance(d.a, int) and isinstance(d.b, int)
-                    and d.a ^ d.b == bit and d.b & bit):
-                return a['name']
+            # (that bit alone: every other bit of the word compared as ever; a word read as a raw value, its number)
+            bit0, va, vb, k = int(a['bit'], 0), raw_int(d.a), raw_int(d.b), d.off - int(a['offset'], 0)
+            if d.part == a['part'] and 0 <= k < 4 and isinstance(va, int) and isinstance(vb, int):
+                # (the word read whole at its offset, or one byte of it: that byte's share of the bit)
+                bit = bit0 if k == 0 and max(va, vb) > 0xFF else (bit0 >> (8 * k)) & 0xFF
+                if bit and va ^ vb == bit and vb & bit:
+                    return a['name']
         elif role_name(d.role) in companions(fb) and d.part == 'in play' and d.a is False and d.b is True:
             return a['name']
     return None
