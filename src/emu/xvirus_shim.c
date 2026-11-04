@@ -98,13 +98,14 @@ enum { EQ = 0, NE = 1, MI = 4 };
 
 /* ---- a NameID range ---- */
 
-bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo, uint16_t hi, uint32_t veneer) {
+bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo, uint16_t hi, uint32_t veneer, int side) {
 	enum { LO, HI, ON };
-	Asm a = { out, XV_SHIM_RANGE_SIZE, 0, at, (at & 3) != 0, { 0 }, { { 0 } }, 0 };
+	Asm a = { out, XV_SHIM_RANGE_SIZE, 0, at, (at & 3) != 0 || side > 0xFF, { 0 }, { { 0 } }, 0 };
 	to_label(&a, LDR_PC(1), LO, 'l');
 	to_label(&a, LDR_PC(2), HI, 'l');
+	if (side >= 0) half(&a, (uint16_t)(0x2300 | side));   /* movs r3, #side */
 	if (!a.bad) {
-		int32_t off = (int32_t)(veneer - (at + 4 + 4));
+		int32_t off = (int32_t)(veneer - (at + 4 + (side >= 0 ? 6 : 4)));
 		if (off < -2048 || off > 2046 || (veneer & 3)) a.bad = true;
 		else half(&a, (uint16_t)(B_ | ((off >> 1) & 0x7FF)));
 	}
@@ -192,6 +193,13 @@ static void take(Asm *a, uint32_t mask, bool least, uint32_t clear_veneer, TakeL
 	half(a, STRH_R(2, 0, 1));
 }
 
+/* r1 its collision data's u16 at `off` (r0 the collision data), compared with 0 */
+static void coll_zero(Asm *a, int off) {
+	half(a, MOVS(1, off));
+	half(a, LDRH_R(1, 0, 1));
+	half(a, CMP_I(1, 0));
+}
+
 int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint32_t clear_veneer, uint32_t sound_veneer) {
 	enum { DONE, TAKE, LOOP, ONE, SET, MASK, STEP };
 	Asm a = { out, max, 0, at, (at & 3) != 0, { 0 }, { { 0 } }, 0 };
@@ -201,13 +209,9 @@ int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint
 		half(&a, CMP_I(0, 0));
 		to_label(&a, BCC(NE), DONE, 'c');
 		half(&a, LDR_I(0, 5, COLL));
-		half(&a, MOVS(1, C_HELD));
-		half(&a, LDRH_R(1, 0, 1));
-		half(&a, CMP_I(1, 0));
+		coll_zero(&a, C_HELD);
 		to_label(&a, BCC(NE), DONE, 'c');
-		half(&a, MOVS(1, C_DAMAGE));
-		half(&a, LDRH_R(1, 0, 1));
-		half(&a, CMP_I(1, 0));
+		coll_zero(&a, C_DAMAGE);
 		to_label(&a, BCC(EQ), TAKE, 'c');
 		half(&a, MOVS(0, 0x6E));
 		bl(&a, sound_veneer);
@@ -219,9 +223,7 @@ int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint
 		half(&a, CMP_I(0, 0));
 		to_label(&a, BCC(NE), DONE, 'c');
 		half(&a, LDR_I(0, 5, COLL));
-		half(&a, MOVS(1, C_DAMAGE));
-		half(&a, LDRH_R(1, 0, 1));
-		half(&a, CMP_I(1, 0));
+		coll_zero(&a, C_DAMAGE);
 		to_label(&a, BCC(EQ), DONE, 'c');
 		half(&a, LDR_I(0, 0, C_FLAGS));
 		half(&a, MOVS(1, 2));

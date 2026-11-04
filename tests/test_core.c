@@ -93,6 +93,7 @@
 #include "visitors.h"
 #include "xpanels_look.h"
 #include "xsea.h"
+#include "xvirus_bn4.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
@@ -3685,6 +3686,18 @@ static void test_xvirus_static(void) {
 		for (int k = 0; k < i; ++k)
 			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
 	}
+	/* (BN4 Red Sun's whole families, tools/xrecipe_bn4.py's: each whole, past BN5's slots, sharing no number or room with
+	 * BN5's or one another) */
+	CHECK(xvirus_bn4_count >= 1 && !strcmp(xvirus_bn4[0]->name, "Billy (BN4's)"), "xvirus: BN4's families listed (%d)", xvirus_bn4_count);
+	for (int i = 0; i < xvirus_bn4_count; ++i) {
+		const XVirusFamily *f = xvirus_bn4[i];
+		CHECK(xvirus_recipe_ok(f, why, sizeof why) && f->game == XROM_BN4_RED_SUN_US, "xvirus: %s refused: %s", f->name, why);
+		CHECK(f->ai >= BN6_FAMILIES + xvirus_bn5_count, "xvirus: %s in BN5's slots", f->name);
+		for (int k = 0; k < xvirus_bn5_count; ++k)
+			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
+		for (int k = 0; k < i; ++k)
+			CHECK(!static_clashes(f, xvirus_bn4[k]), "xvirus: %s and %s share numbers or room", xvirus_bn4[k]->name, f->name);
+	}
 	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
 	XVirusFamily twin = xvirus_cangard;
 	twin.ai = 33;
@@ -4184,12 +4197,12 @@ static uint32_t shim_lit(const uint8_t *code, uint32_t off) {
 static void test_xvirus_shims(void) {
 	uint8_t r[XV_SHIM_RANGE_SIZE];
 	const uint32_t home = XV_HOMES + XV_HOME_SHIMS, veneer = XV_HOMES + XV_HOME_VENEERS + 3 * THUMB_VENEER_SIZE;
-	CHECK(xvirus_shim_range(r, home, 0x23C, 0x241, veneer), "shims: a NameID range refused");
+	CHECK(xvirus_shim_range(r, home, 0x23C, 0x241, veneer, -1), "shims: a NameID range refused");
 	CHECK((get16(r) & 0xFF00) == 0x4900 && shim_lit(r, 0) == 0x23C && (get16(r + 2) & 0xFF00) == 0x4A00 && shim_lit(r, 2) == 0x241,
 		"shims: a NameID range's bounds %#x %#x", shim_lit(r, 0), shim_lit(r, 2));
 	CHECK((get16(r + 4) & 0xF800) == 0xE000 && home + 8 + 2 * ((get16(r + 4) & 0x7FFu)) == veneer, "shims: a NameID range's branch %04x",
 		get16(r + 4));
-	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000),
+	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer, -1) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000, -1),
 		"shims: a NameID range off its word, or its veneer out of a branch's reach, taken");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;

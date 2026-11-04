@@ -173,6 +173,15 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-04",
       "link": "../multirom/bn4.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN4's virus families in BN6's engine",
+      "state": "proven",
+      "now": "Billy (BN4 ids 13-18) runs as a BN6 virus from a recipe tools/xrecipe_bn4.py derives from the two ROMs (src/emu/xvirus_bn4.c, AI 64, ids 0x2C0-0x2C5): its own states as BN6's 8-11, its calls paired through tools/bn4_twins.py (the engine survey's pairs and Billy's code audit, each compared by body, the differing ones audited), its look-up of its kin through a NameID shim, three routines copied, its struct1 from its init and struct2 from its enemy records. Installed with --dev bn4families (BN4's ROM read for research); headless, 0:foes 2C0@52 puts it on the field, its thunder ball strikes and it is deleted.",
+      "left": "BN4's effects 0x15 and 0x16 kept as BN6's same ids (BN4's effect table not mapped: its move's flash draws as BN6's crescent); its can-move check's panel type 0xA has no BN6 type known (the case never holds); the differential against BN4's own battle (xdiff's game=bn4); BN4's other families.",
+      "updated": "2026-11-04",
+      "link": "../rom/bn4.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],

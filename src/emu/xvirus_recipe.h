@@ -91,6 +91,7 @@ typedef struct {
 	                              BN6_TRAITS_MODE_COUNT), else XV_MODE_PAST */
 	uint8_t element, weakness; /* BN6's second wheel: BN5's viruses have none */
 	bool shadow;
+	uint8_t palette;           /* its palette step where its game has no struct1 (BN4: its init's); 0 where its game's record gives it */
 } XvTraits;
 
 typedef struct {
