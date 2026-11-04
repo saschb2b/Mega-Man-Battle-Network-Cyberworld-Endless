@@ -109,4 +109,48 @@
 #define BN6_DARK_AI_POOL      0x0203FDA8u /* ... that object's own AI data in the pool, which a Dark Soul still out takes back as another
                                              is set up (BN5's failed Chaos Unison ends the one out first, 0x0810436C) */
 
+/* What counts an enemy, and how a Navi is deleted: what a Navi swapped for
+ * another mid-battle stands on (src/emu/battle_swap.c; docs/rom/navis.md, A
+ * Navi swapped mid-battle). BattleState (BN6_BATTLE_STATE) +4 and +5 count
+ * each side's enemies of the battle's start (the spawn's 0 entry raises
+ * them, 0x080077A0); an enemy's destroy lowers its side's (0x0800A104),
+ * and the fight's frame calls the battle won at side 1's 0 (0x0800A152).
+ * BN6_STATE_SIDE1_LEFT is lowered as its dying starts, where its Param2
+ * is 0 (0x0800A11C) */
+#define BN6_STATE_COUNT       0x04        /* BattleState +4 + alliance, u8: the side's enemies counted, the win at side 1's 0 */
+#define BN6_STATE_ALIVE       0x80        /* BattleState +0x80: the objects alive, 4 words a side (side 1's from +0x90), the spawn's first free;
+                                             the targeting's and the Custom screen's names' list (0x0800A998) */
+#define BN6_STATE_SIDE_STEP   0x10        /* ... a side's words in BN6_STATE_ALIVE and BN6_STATE_ROSTER: side 1's this far on */
+#define BN6_STATE_ROSTER      0xD0        /* BattleState +0xD0: the alive list as the battle began (0x08007396), 4 words a side, read by the
+                                             foe finders (0x080103BC, 0x080103F8) that pass a destroyed one (CurState 8) by */
+#define BN6_T1_PARAM2         0x05        /* Param2: 0 where its dying lowers BN6_STATE_SIDE1_LEFT (0x0801710E), 1 from the spawn's 1 entry */
+#define BN6_T1_STATE          0x08        /* CurState, u8: 0 its init, 4 updated, BN6_STATE_DESTROYED its destroy */
+#define BN6_STATE_DESTROYED   0x08        /* ... its destroy (BN6_NAVI_DESTROY) */
+#define BN6_T1_PHASE          0x0A        /* CurPhase, u8: a state's phase (the dying's 0, then 4) */
+#define BN6_T1_PHASE_INIT     0x0B        /* PhaseInitialized, u8: not 0 once its phase began */
+#define BN6_T1_TIMER          0x20        /* Timer, u16 */
+#define BN6_AI_ARRIVAL        0x02        /* AIData +2, u8, the spawn's entry: 0 an enemy of the battle's start (counted, its object kept at its
+                                             destroy), 1 one arriving mid-fight (its arrival BN6_NAVI_PLATE's, uncounted, freed at its destroy) */
+#define BN6_AI_DIE_SPARKS     0x74        /* AIData +0x74: the dying's sparks object (the fourth kind's 0x11, 0x080E2DAA), ended at the removal */
+#define BN6_OBJ_DEAD          0x100u      /* BN6_COLL_FLAGS: deleted (set as the dying begins, 0x0801AF98) */
+#define BN6_NAVI_DIE          0x080170E4u /* the Navi dying's phase 0 (BN6_NAVI_DYING's first, bn6f sub_80170E4; ProtoMan's 0x080FCFB3 calls
+                                             it too): its collision, companion and HP's list cleared, BN6_STATE_SIDE1_LEFT lowered where
+                                             BN6_T1_PARAM2 is 0, then phase 4 */
+#define BN6_NAVI_DIE_FLASH    0x08017122u /* ... its phase 4 (bn6f sub_8017122): on its first frame the sparks and an explosion, then 0x5A frames
+                                             flashing white, then off its panel and the alive list, and CurState BN6_STATE_DESTROYED */
+#define BN6_NAVI_DESTROY      0x08016C4Fu /* the Navi object's destroy (BN6_NAVI_OBJECT's third): BN6_STATE_COUNT lowered where BN6_AI_ARRIVAL
+                                             is 0 (0x0800A104), the object freed where it is not */
+#define BN6_NAVI_DYING_PROTO  0x080FCFB3u /* ProtoMan's state 2 (his state table's), BN6_NAVI_DYING's caller */
+#define BN6_SPRITE_MOSAIC_AT  0x11        /* an object's sprite (BN6_OBJ_SPRITE_AT) +0x11: its OAM attribute 0's high byte, */
+#define BN6_SPRITE_MOSAIC     0x10        /* ... its mosaic bit (bn6f sprite_setMosaicSize 0x08002EF6), its size the render info's: */
+#define BN6_TOOLKIT_RENDER    0x08        /* eToolkit RenderInfoPtr: the frame's display registers, +2 REG_MOSAIC (its high byte the sprites') */
+#define BN6_RENDER_MOSAIC     0x02        /* ... that +2: REG_MOSAIC's value, written to it each frame by render_800172C (0x08001736), its high byte the sprites' size */
+#define BN6_PANEL_RESERVER    0x1C        /* a panel's (BN6_FIELD_PANELS) ReserverObjectPtr: the object standing on it, 0 none (object_reservePanel 0x0801BB1C) */
+#define BN6_HP_PLATES         0x0203EB50u /* the HP under each enemy: entries listed by 0x0801DC7C (BN6_NAVI_PLATE's call), dropped as its
+                                             object's HP reads 0 (0x0801C168), */
+#define BN6_HP_PLATE_COUNT    4           /* ... this many, */
+#define BN6_HP_PLATE_SIZE     0x14        /* ... each this long: +0 its flags (bit 0 listed), */
+#define BN6_HP_PLATE_SHOWN    0x02        /* ... u16 the HP it shows, counted toward the object's a frame at a time, */
+#define BN6_HP_PLATE_OBJECT   0x0C        /* ... its object */
+
 #endif

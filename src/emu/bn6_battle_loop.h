@@ -7,10 +7,14 @@
 #ifndef CW_BN6_BATTLE_LOOP_H
 #define CW_BN6_BATTLE_LOOP_H
 
+#define BN6_BATTLE_MAIN       0x08007800u /* bn6f battle_main: push {r4,r5,lr}, the battle's state update, once a battle frame in every phase */
 #define BN6_LOOP              0x0203CA70u /* u32: the battle loop's phase (+0, a word: a store sets its step to 0 with it), its step (+3), what it came
                                              to (+4: 1 won, 2 lost, 3 drawn, 6 on to the Custom screen), read by the fight's state (0x0800938A) */
 #define BN6_LOOP_STEP         0x0203CA73u /* u8, the loop state's fourth byte: its step, 0 as a phase begins (its first frame), 4 after */
+#define BN6_LOOP_WON          0x0C        /* BN6_LOOP's phase: won, as the fight's frame finds side 1's count 0 (0x0800811C) */
+#define BN6_LOOP_LOST         0x10        /* ... lost, at side 0's (0x08008130) */
 #define BN6_LOOP_DRAW         0x14        /* BN6_LOOP's phase: a draw (0x080082DC): the battle stopped, its banner, then result 3 (no reward) */
+#define BN6_LOOP_TIME_DRAW    0x18        /* ... the fight's own draw, 0x0800A152's 7 (0x0800813A) */
 #define BN6_FIGHT_BANNER      0x080080A0u /* movs r0,#0 (BATTLE START!) as each turn's fight starts (0x08008064), where a NetBattle's TURN n
                                              START! is not (the options' bit 8), */
 #define BN6_FIGHT_BANNER_SHOW 0x080080AEu /* ... its bl to the banner (0x0801E792: r0 the message, r1 its number) */

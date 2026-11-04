@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Hooks"
 description: "Hooks on BN6's code (`src/emu/hook.c`): a BKPT over an instruction that calls the engine's C mid-frame, event and answer hooks, one table per core, and every address hooked, from battles and maps to BN5's Souls."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:40:28Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:55:00Z }
 ---
 
 # Hooks
@@ -76,6 +76,10 @@ The hooks in use (`src/director/encounter.c`; [ROM data](../../rom/overview.md))
 | `0x08008158` | the battle loop's fight frame, no outcome and nothing asked (`battle_spare.c`) | answer: after ProtoMan's sparing blow, the loop set to its draw and the frame left | each fight frame of every battle, idle but in that netbattle |
 | `0x080082FA` | the draw's bl to its DRAW! banner (`battle_spare.c`) | answer: passed by after that blow, the draw on to its result in the same frame | once a draw |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
+| `0x08007800` | battle_main, the battle's state update (`BN6_BATTLE_MAIN`, `src/emu/battle_swap.c`) | answer: with a swap armed, the first form found on the field and given its HP; the next form's spawn called through BN6's mid-fight entry (`0x08007696`) once the last is off the alive list, its return to `EMU_FREE` + `0x710440`; the arrival's mosaic, and its count handed over as its arrival ends | set at a swap's first arm, taken off by `battle_swap_disarm`: once a battle frame |
+| `EMU_FREE` + `0x710440` | where the swap's spawn returns (`FREE_SWAP_RETURN`) | answer: the new form's HP and mosaic, r0-r3, r5 and lr put back, on to battle_main again | the same: once a form |
+| `0x080170E4` | a Navi's dying, its phase 0 (`BN6_NAVI_DIE`) | answer: the swap's form fighting made uncounted (AIData `+2` 1, Param2 1) where another follows, the last counted as the battle's first enemy | the same: once a Navi deleted |
+| `0x08017122` | the dying's phase 4 (`BN6_NAVI_DIE_FLASH`) | answer: for the form taken off, 24 frames of mosaic in its place (on to its caller), then its sparks, explosion and flashing passed by into BN6's removal | the same: each frame of a Navi's dying |
 | `0x080FDFA0` | ProtoMan's cross landing back on his panel (bn6f `sub_80FCC4C`, `src/emu/protoman_cross.c`) | answer: his collision region given his own panel back where the cross left it cleared (issue #55; `CYBERWORLD_EMU_DEBUG` says each) | once a cross |
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
 | `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) and a request's at home (`0x1460`-`0x1462`, `0x146A`) | about once a frame on the map |
