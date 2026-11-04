@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T23:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T00:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -292,9 +292,9 @@ chip that cannot play, nor a BN6 chip as a BN4 virus's), and a stand-in
 until the content comes (Phase 4 brings BN4's chips). Its cost: where a
 row's best entries are chips, the stand-in pays a fast busting less than
 the zenny below it (CirKill V3: 600 to 700 zenny for A, 200 for its
-CircGun3). The owner's to decide before Phase 4: keep the stand-in (the
-recommendation, for parity with BN5's), give a chip BN6 lacks the row's
-best zenny instead, or give its nearest BN6 chip by hand.
+CircGun3). The owner kept the stand-in before Phase 4 (call 9, below), over a
+chip BN6 lacks paying its row's best zenny or its nearest BN6 chip by
+hand.
 
 ## The plan
 
@@ -454,3 +454,7 @@ sounds take from the themes' range are the owner's to confirm.
 8. **Decided, 4 November 2026: BN4's sounds keep slots 0x3F-0x34**
    (Its sounds, above), the top of the per-run themes' range, over taking
    BN5's reserved 0x41-0x4B first.
+9. **Decided, 5 November 2026: a chip BN6 lacks pays 200 zenny**, BN5's
+   visitors' rule (Its viruses' rewards, above), until Phase 4 brings
+   BN4's chips; over a missing chip paying its row's best zenny and over
+   a BN6 chip mapped to it by hand.

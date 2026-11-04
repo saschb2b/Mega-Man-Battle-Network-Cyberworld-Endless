@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-05
+* **Update**: multirom/bn4.md, the owner's call 9: a BN4 visitor's chip BN6 lacks pays 200 zenny, BN5's visitors' rule, until Phase 4 brings BN4's chips.
+
 ## 2026-11-04
 * **Update**: multirom/bn4.md, the owner's call 5 built: a BN4 visitor in a battle of BN6's named as the older Net's with BN5's words and the same once (`visitor_telegraph`, `src/core/visitors.c`; `src/director/nets_words.c`), one in a battle of BN5's unsaid, the once kept; no line changed; seen in a fresh profile (WallaEX named, PowieEX after it unsaid).
 * **Update**: multirom/bn4.md, Its viruses' rewards: BN4's six moved families pay from BN4's own reward rows (`BN4_REWARD_ROWS`), a chip as BN6's own of its name and kind else 200 zenny (`xchips_reward_bn4`), none of their chips BN6's; the owner's call 6's condition met; the stand-in's cost and the owner's call before Phase 4. rom/bn4.md, its rewards (the chooser, pick, an enemy's row, the rows and the busting table, proved in romlab by Billy's row recoded); multirom/families.md, Its rewards names BN4's; re/ledger.json (STATUS.md and the dashboard written out); the symbol files written again.
