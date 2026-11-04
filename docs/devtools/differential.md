@@ -861,7 +861,7 @@ format, its game 4: the trace's header names it):
     of hooks on both (temporary, not kept) in `spikey_v1` and `shrimpy_v3` saw
     bit 0 set by each opening after its fade 18 frames after the virus's init
     in BN4 and 17 in BN6, and the two blinks the same: BN4's appear moved with
-    the families (the owner's call 7, [BN4 Red Sun](../multirom/bn4.md)) would
+    the families (the owner's call 7, [Battle Network 4 in a run](../multirom/bn4.md)) would
     wait on BN6's bit and run BN6's count, and leave the step where it is. One
     paused update more does align it: BN6's first blink step a frame longer
     (`--poke 080163FC:2003:2`, BN6's own appear) and `shrimpy_v3` PASSES, the
