@@ -559,7 +559,7 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
-# The opening's animation (legit.json's bn4 allowed, "the opening's idle animation, BN4's run through the paused opening"):
+# The opening's animation (legit.json's bn4 allowed, "the opening's idle animation, BN4's appear a run longer"):
 # a first-kind object's sprite state in BN6's layout (from its node): +0x90 its animation, +0x91 its count, +0x92 its
 # frame's flags, +0xAC its frame record (20 bytes: tiles, palette, mini-animation and OAM offsets, its duration at +16 and its
 # flags at +18, 0x80 its animation's last, 0x40 back to its first), +0xB0-+0xBB what the update takes from that record (its
@@ -568,11 +568,18 @@ def opening_count(d, fa, fbt):
 # runs the sprite update (0x0800285C) unless time is stopped; BN6's (0x08016E64, from its virus dispatcher) also skips it
 # while the battle is paused (0x08016E84-0x08016E90: the battle's mode, 0x0802D234, not 1, and battle_isPaused,
 # 0x0800A03C). So BN4's virus animates from its init through the paused opening until its state 1 clears its +0 0x04
-# (Spikey: 53 updates, its frames 132-184 in spikey_v1, a probe of hooks on both sprite updates) and BN6's not once: the
-# same animation, a constant number of updates apart
+# (Spikey: 53 updates, its frames 132-184 in spikey_v1, a probe of hooks on both sprite updates); a moved family runs BN4's
+# copied where BN6's skips it for the pause (XVirusFamily.present: after its spawn and its appear), 51 times: the same
+# animation, BN4's OPENING_LEAD updates ahead
 ANIM, ANIM_COUNT, ANIM_FLAGS, ANIM_FRAME, ANIM_DATA = 0x90, 0x91, 0x92, 0xAC, (0xB0, 0xBC)
 ANIM_PLACE = {ANIM_COUNT, ANIM_FLAGS} | set(range(ANIM_FRAME, ANIM_FRAME + 4)) | set(range(*ANIM_DATA))
 REC_DURATION, REC_FLAGS, REC_SIZE, REC_LAST, REC_LOOP = 16, 18, 20, 0x80, 0x40
+# The lead it is held to, since a moved BN4 family runs BN4's after-state while BN6's battle is paused (XVirusFamily.present:
+# after its spawn's done and after each run of its state 0, its appear): BN4's appear (its generic state 0, 0x0800FCAC, run
+# from its init's frame, its init calling its update) runs 52 times in spikey_v1's opening and its state 1 once, 53 updates;
+# BN6's twin (0x08016380, the recipe's GENERIC6) 50 times, its spawn's update one more, its state 1 at its first fight frame
+# (the battle's offset): BN4's place one update ahead, at every frame (a probe of hooks on both, temporary, not kept)
+OPENING_LEAD = 1
 
 
 def anim_steps(data, anim):
@@ -630,7 +637,7 @@ def opening_animation(fa, fb, fam, st):
     place is BN4's opening's lead (st: each role's state, kept from frame to frame), into st['ok']. A role is held to it from
     the first frame compared until its animation is set in either game (its +0x90 other than at the first) or the two places
     meet, never after: both on the same animation of the same sprite (BN4's bytes, bn4_sprite_data), each place a step of
-    its run (anim_steps), the steps a loop apart by the same count at every frame, and each place's other bytes what the
+    its run (anim_steps), BN4's OPENING_LEAD steps ahead (a loop apart) at every frame, and each place's other bytes what the
     other game's own trace holds at that frame record"""
     st['ok'] = set()
     sprites = getattr(fa.canon, 'sprite_data', ())
@@ -652,6 +659,9 @@ def opening_animation(fa, fb, fam, st):
             s['closed'] = True
             continue
         lead = (ia - ib) % period
+        if lead != OPENING_LEAD % period:
+            s['closed'] = True
+            continue
         frames = st['frames']
         seen = pa[3] in frames[1].get((role, pa[1][1], pa[0], pa[1][2]), ()) and \
             pb[3] in frames[0].get((role, pb[1][1], pb[0], pb[1][2]), ())

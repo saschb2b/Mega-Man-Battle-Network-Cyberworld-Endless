@@ -19,6 +19,15 @@
  *    of its init or update past the engine's work, which BN6's init or
  *    dispatcher does itself, entered through a shim that pushes lr as the
  *    routine's push {lr} did and calls the tail, whose pop {pc} returns;
+ *  - a paused present (XVirusFamily.present): BN6's virus type runs its
+ *    after-state (BN6_VIRUS_PRESENT) after each state, but for a pause test
+ *    BN4's (BN4_VIRUS_PRESENT) lacks, so a BN4 virus animates from its spawn
+ *    through its appear (state 0) and its state 1, all in the paused opening,
+ *    and BN6's does not. A shim in its state 0's place (its appear, which
+ *    BN6's state step runs while paused) and its hook 5 (its spawn done)
+ *    runs the state or the hook, then, where BN6's after-state skips for the
+ *    pause alone (the BattleSettings' mode not 1, the battle paused), its
+ *    game's after-state, copied with it: BN6's code untouched;
  *  - a pre-step (XVirusFamily.prestep): BN5's virus dispatcher acts for two
  *    families' NameIDs before their state each frame, as BN6's does for
  *    its own ids alone. A hook on BN6's dispatcher (BN6_VIRUS_NAMEID_CASES)
@@ -39,6 +48,7 @@
 #define XV_SHIM_PRESTEP_MAX  0x70 /* a pre-step's, at most */
 #define XV_SHIM_ENTRY_SIZE   8    /* an entry's */
 #define XV_SHIM_SIDE_SIZE    24   /* a direction's (XVirusFamily.sides) */
+#define XV_SHIM_PAUSED_SIZE  28   /* a paused present's */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
  * (and `side` into r3 where it is 0 or more: BN4's look-up takes its side
@@ -58,6 +68,14 @@ bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to
  * numbers left and right by it (0x0800E994, r4 the side); r0 and r1 as the
  * rule leaves them but for that, r2 and r3 kept: false where it is not. */
 bool xvirus_shim_side(uint8_t out[XV_SHIM_SIDE_SIZE], uint32_t at, uint32_t rule);
+
+/* The paused present at `at` (word-aligned): push lr, call `own` (its hook,
+ * Thumb; 0 none), call `mode` (a veneer to BN6_SETTINGS_MODE_READ) and
+ * return where it reads 1, call `paused` (a veneer to BN6_PAUSE_TEST) and
+ * return where the battle is not paused, else call `present` (its game's
+ * after-state, Thumb), each within a call's reach; then pop pc. false
+ * where it is not. */
+bool xvirus_shim_paused(uint8_t out[XV_SHIM_PAUSED_SIZE], uint32_t at, uint32_t own, uint32_t mode, uint32_t paused, uint32_t present);
 
 /* The shim at `at` (word-aligned) a call replaces `cmp reg,#imm; beq to`
  * (eq) or `...; bne to` with: it compares register `reg` (r0-r7) with

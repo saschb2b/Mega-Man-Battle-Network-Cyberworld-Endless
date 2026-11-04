@@ -53,7 +53,7 @@ FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
-           prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C,
+           prestep=0x080137BC, runner=0x08013C48, present=0x08012D62, dying=0x0801052C, after=0x08010736,
            sprite_load=0x0800287C, shadow=0x08002E96, no_shadow=0x08002FE2, palette=0x08002DEC,
            byname=0x080B6568, sprites=0x0802793C, songs=0x08155FF8, effect=0x080E18EE, sound=0x08000560,
            effects=0x080E1698, neffects=111,
@@ -66,6 +66,7 @@ SPAWNERS4 = {0x080032B8: (1, 'XV_SPAWN_1'), 0x080032D4: (1, 'XV_SPAWN_1_LAST'), 
              0x080032F0: (3, 'XV_SPAWN_3'), 0x0800330C: (3, 'XV_SPAWN_3_LAST'), 0x08003328: (3, 'XV_SPAWN_3_FIRST'),
              0x08003344: (4, 'XV_SPAWN_4')}
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
+BN6_PRESENT = 0x08016E64   # BN6_VIRUS_PRESENT, BN4's after-state's twin but for its pause test
 BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
@@ -154,6 +155,7 @@ class Family:
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
         self.sides = []   # (its calls to BN4's direction rule, each through a shim: side_sites)
+        self.after = None
 
     def decide(self, kind, detail):  # noqa: D401
         self.decisions.append((kind, detail))
@@ -306,6 +308,20 @@ def init_of(f):
         f.roots.append(first.target)
     else:
         enter(f, 2, tail[0], 'its init')
+
+
+def after_of(f, tw):
+    """its after-state: its type routine's one call, after its state (init, update or dying), BN4's (BN4_VIRUS_PRESENT),
+    whose BN6 twin skips it while the battle is paused (bn4_twins.COPIED): copied with it and run after its state 0 (its
+    appear) and its hook 5 (its spawn done) while BN6's skips it for the pause alone (XVirusFamily.present)"""
+    ts = sorted(tw.bls.items())
+    if [t for _, t in ts] != [BN4['after']]:
+        f.decide('after-state', f'its type routine calls {", ".join(f"{t:08X}" for _, t in ts)}, not BN4\'s after-state alone')
+        return
+    f.after = BN4['after']
+    f.roots.append(f.after)
+    f.notes.append(f'its after-state: BN4\'s {f.after:08X}, copied, run after its state 0 (its appear) and its hook 5 while BN6\'s battle is paused '
+                   f'(BN6\'s twin {BN6_PRESENT:08X} skips it there)')
 
 
 def update_of(f, uw):
@@ -652,6 +668,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
         f.decide('type', f'its routine ({f.lo:08X}) names no jump table of three')
         return f
     f.type_table, f.init, f.update = tt, ents[0] & ~1, ents[1] & ~1
+    after_of(f, tw)
     if ents[2] & ~1 != BN4['dying']:
         f.decide('type', f'its dying entry is {ents[2]:08X}, not BN4\'s shared {BN4["dying"]:08X}')
     uw = T.walk(b4, f.update, region=(f.lo, f.hi))
@@ -849,7 +866,7 @@ def sounds_of(b4, b6, f):
 
 def songs_room(b4, whole):
     """each whole family's copied sounds a room in the families' art below their sprites (SONG_ART0 to ART0), one after
-    another in install order, a sound once whichever family plays it (the next finds it installed: xvirus.c songs_set)"""
+    another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
     done, at = set(), SONG_ART0
     for f in whole:
         f.songs = []
@@ -1132,6 +1149,8 @@ def c_family(f, n):
         L.append(f'\t.songs = {n}_songs, .nsongs = {count("songs")},')
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
+    if f.after:
+        L.append(f'\t.present = 0x{f.after:08X},   /* its after-state, copied: run after its state 0 and its hook 5 while BN6\'s battle is paused */')
     L.append('};')
     return L
 

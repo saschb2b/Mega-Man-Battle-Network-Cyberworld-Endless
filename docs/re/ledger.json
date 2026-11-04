@@ -290,6 +290,10 @@
     {
       "date": "2026-11-04",
       "what": "BN4's direction rule (BN4_DIRECTION 0x0800AF90: left and right by the screen) against BN6's (BN6_DIRECTION 0x0800E994: by the object's side, r4 its +0x16) and the HP gauge's low-HP step in both (BN4_HP_LOW_STEP 0x0801472C, its sound 0x82; BN6_HP_LOW_STEP 0x0801C840, its 0x84) mapped (docs/rom/bn4.md's row): a moved family's calls to BN4's rule go through a shim that numbers its answer BN6's way (bn4_twins.SIDED, src/emu/xvirus_shim.h), and cirkill_v1-v3 PASS"
+    },
+    {
+      "date": "2026-11-04",
+      "what": "BN4's virus after-state ported through BN6's paused opening (XVirusFamily.present; src/emu/xvirus_shim.h's paused present): each moved BN4 family runs BN4's after-state (BN4_VIRUS_PRESENT 0x08010736, copied with it) after its spawn's done and each run of its state 0 where BN6's (BN6_VIRUS_PRESENT, at BN6_VIRUS_TYPE 0x0810A278's tail) skips it for the pause alone (BN6_SETTINGS_MODE_READ 0x0802D234, BN6_PAUSE_TEST 0x0800A03C; BN6_SPRITE_UPDATE 0x080026C4 its twin call), BN6's code untouched; docs/rom/bn4.md's row. The opening's phase from 152 updates apart to one, the engines' appears (BN4's generic state 0 runs 52 times in the paused opening, BN6's twin 50): the allowance held to that one (OPENING_LEAD), its mutation caught; shrimpy_v3 still FAILS at t65 on it"
     }
   ],
   "experiments": [

@@ -1319,9 +1319,9 @@
    "name": "a draw of the setup's off by one",
    "spec": "spikey_v1",
    "poke": [
-    "08B7CF12:3005"
+    "08B7CF82:3005"
    ],
-   "what": "Spikey's init's moves before its first attack, 4 plus a draw & 3 (BN4 0x080BA5BC, its adds r0,#4 at 0x080BA5C6, BN6's copy at XV_CODE + 0x14D50 + 0x1C2), made 5 plus: drawn in the opening, before the fight is seeded, from BN4's word replayed (src/dev/xdiff_events.c replay_setup), so BN6's +0x88 reads 5 against BN4's 4 (caught at t1; unmutated they read alike since the setup's draws are replayed, BN4's 4 and BN6's 7 before)"
+   "what": "Spikey's init's moves before its first attack, 4 plus a draw & 3 (BN4 0x080BA5BC, its adds r0,#4 at 0x080BA5C6, BN6's copy at XV_CODE + 0x14DC0 + 0x1C2), made 5 plus: drawn in the opening, before the fight is seeded, from BN4's word replayed (src/dev/xdiff_events.c replay_setup), so BN6's +0x88 reads 5 against BN4's 4 (caught at t1; unmutated they read alike since the setup's draws are replayed, BN4's 4 and BN6's 7 before)"
   },
   {
    "name": "the idle animation's first frame drawn from the next one's data",
@@ -1343,9 +1343,9 @@
    "name": "CirKill's shot's table left at BN4's address",
    "spec": "cirkill_v1",
    "poke": [
-    "08B7F14C:080CE5B0:4"
+    "08B7F37C:080CE5B0:4"
    ],
-   "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x16FF0 + 0x15C holding the moved table's 0x08B7F150) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
+   "what": "the literal of the third kind's 0x0B's init (BN4 0x080CE70C's ldr r7,=0x080CE5B0, its kinds' table, at 0x080CE83C; BN6's copy at XV_CODE + 0x17220 + 0x15C holding the moved table's 0x08B7F380) given BN4's own address, as an install that left it unrelocated would: BN6's shot reads BN6's own ROM there, its +0x4C BN6's ('raw', 0x080CE650) against BN4's ('rom', 0x080CE650), BN4's pointer named by the moved blocks as BN6's is (tools/xdiff_bn4.py one, ta['code']), where both read ('raw', 0x080CE650) before and would have hidden it (caught at t1)"
   },
   {
    "name": "a copied sound aimed at BN6's own song of its number",
@@ -1359,9 +1359,17 @@
    "name": "CirKill's direction left in BN4's numbers",
    "spec": "cirkill_v1",
    "poke": [
-    "08B7F50A:FFEDF7FF:4"
+    "08B7F73A:FFEDF7FF:4"
    ],
-   "what": "the copied direction routine's call (BN4's 0x0800AFB2, bl 0x0800AF90; its copy at XV_CODE + 0x17282 + 0x288, made a call to its shim, src/emu/xvirus_shim.h's direction) aimed at the rule's copy again (0x08B7F4E8), as an install with no shim would leave it: CirKill's move's end (0x080BD34E) writes BN4's 3 for its step to the left into BN6's +0xC, where BN6's rule numbers it 4 on side 1 (bn4_twins.SIDED; caught at t43, BN4's 3 read as BN6's 4 by the side)"
+   "what": "the copied direction routine's call (BN4's 0x0800AFB2, bl 0x0800AF90; its copy at XV_CODE + 0x174B2 + 0x288, made a call to its shim, src/emu/xvirus_shim.h's direction) aimed at the rule's copy again (0x08B7F718), as an install with no shim would leave it: CirKill's move's end (0x080BD34E) writes BN4's 3 for its step to the left into BN6's +0xC, where BN6's rule numbers it 4 on side 1 (bn4_twins.SIDED; caught at t43, BN4's 3 read as BN6's 4 by the side)"
+  },
+  {
+   "name": "the paused after-state's sprite update aimed elsewhere",
+   "spec": "spikey_v1",
+   "call": [
+    "080026C4:0810A952"
+   ],
+   "what": "Spikey's copy of BN4's after-state (BN4 0x08010736, run from its state 0 and its hook 5 while BN6's battle is paused: xvirus_shim.h, a paused present), its sprite update's veneer (BN4's 0x0800285C, BN6's twin 0x080026C4) aimed at BN6's family nullsub: its appear's updates gone, BN6's after-state's own from the fight on, as before the port, so its place at t1 is no longer BN4's one update ahead (tools/xdiff_bn4.py OPENING_LEAD; caught at t1)"
   }
  ]
 }
