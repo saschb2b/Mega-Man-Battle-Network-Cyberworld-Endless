@@ -44,6 +44,7 @@ SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (ob
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 DISPATCH_COPY = 0x3C                               # a virus's AI data's u16 BN6's dispatcher copies its object's +0x3E into
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
+BN4_COLL_SIZE = 0x90   # (BN4's collision data in its RAM, src/emu/bn4.h: a pointer into one read by BN4's size)
 TRACE_VERSION = 8   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block and the dispatch's types; version 2
                     # traces, with none of them, still read)
 # MegaMan's side's player block (src/dev/xdiff.c, trace version 5): his battle NaviStats, the word of what was used this
@@ -775,7 +776,8 @@ class Frame:
                 if o.ai is not None:
                     self.spans.append((ai, ai + AI_SIZE, o.role, 'ai', 0))
                 if o.coll is not None:
-                    self.spans.append((co, co + trace['coll'], o.role, 'coll', 0))
+                    # (BN4's in RAM its own 0x90 bytes, bn4.h BN4_COLL_SIZE: its trace's in BN6's size, xdiff_bn4_trace.h)
+                    self.spans.append((co, co + (BN4_COLL_SIZE if self.game == 4 else trace['coll']), o.role, 'coll', 0))
         self.spans.append((g['panels'], g['panels'] + PANELS * trace['psize'], 'panels', 'panel', 0))
         # (the battle's state, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer into it by its offset, as its decoys' slots at
         # +0x94 and +0x98 are named in both, BN5 0x0800CEE6 / BN6 0x0800EC66, the same code)
@@ -825,9 +827,11 @@ class Frame:
 
 
 def coll_off(canon, game, off):
-    """an offset in a collision data as BN6's layout has it"""
+    """an offset in a collision data as BN6's layout has it (BN4's: its base alone, its other offsets BN4's own)"""
     if game == 6:
         return off
+    if game == 4:
+        return off if off == 0 else ('bn4', off)
     for a, b, n in canon.layouts['collision']['segments']:
         if a <= off < a + n:
             return off - a + b
@@ -837,6 +841,8 @@ def coll_off(canon, game, off):
 def panel_off(canon, game, off):
     if game == 6:
         return off
+    if game == 4:
+        return off if off == 0 else ('bn4', off)
     for a, b, n in canon.layouts['panel']['segments']:
         if a <= off < a + n:
             return off - a + b

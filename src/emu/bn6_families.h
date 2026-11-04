@@ -135,6 +135,11 @@
                                              +0x20, the fourth's at +0x40; the battle's setup clears them with the rest of 0x0203CDA8-
                                              0x0203FFFF (0x080071F2), and nothing of BN6's reads or writes 0x0203FB50 on */
 #define BN6_DISPATCH_SIDE_STEP 0x20       /* ... from one kind's table to the next */
+#define BN6_THUNDER           0x080CAC3Cu /* the third kind's 0x2A, a thunder: its routine (to 0x080CAF10, its type routine's next) */
+#define BN6_THUNDER_ARG       0x080CACD6u /* ... its init's movs r3,#1 before its collision set up (0x08019FB4, BN6_COLL_SETUP_ARG),
+                                             * BN4's 0 (bn4.h BN4_THUNDER_ARG): BN4's families run a copy with 0 (xvirus_bn4_copy.h) */
+#define BN6_SPAWN_THUNDER     0x080CADBCu /* ... its spawner (r1 column, r2 row, r3 element; movs r0,#0x2A, BN6_SPAWN_3), called by
+                                             * BN6 at 0x080EDB48 and 0x08108464 */
 
 /* What a moved family's code asks of BN6's engine that BN6's own families
  * never do (issue #82's A2b; docs/rom/virus-families.md, The families' shims and

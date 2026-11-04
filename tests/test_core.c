@@ -3719,6 +3719,13 @@ static bool moved_once(const XVirusFamily *f, int track) {
 }
 
 /* whether the Souls' code moves the type kind:from */
+/* whether a recipe names its game's type `from` of `kind` (moved, or BN6's twin): the dispatch's number of it taken */
+static bool names_type(const XVirusFamily *f, int kind, int from) {
+	for (int i = 0; i < f->ntypes; ++i)
+		if (f->types[i].kind == kind && f->types[i].from == from) return true;
+	return false;
+}
+
 static bool soul_moves(int kind, int from) {
 	for (int i = 0; i < soulcode_bn5.ntypes; ++i)
 		if (soulcode_bn5.types[i].kind == kind && soulcode_bn5.types[i].type == from && soulcode_bn5.types[i].to == XV_TYPE_MOVED) return true;
@@ -3788,6 +3795,32 @@ static void test_xvirus_static(void) {
 		for (int t = 0; t < f->ntypes; ++t)
 			CHECK(f->types[t].of && !moved_before(TRACK_SOULS, 0, f->types[t].kind, f->types[t].from) && !soul_moves(f->types[t].kind, f->types[t].from),
 				"xvirus: %s moves its type %d:%#x at a number a BN5 track moves", f->name, f->types[t].kind, f->types[t].from);
+	}
+	/* (BN6's thunder copied for BN4's families, xvirus_bn4_copy.h: code alone in the families' room, its init's r3 1 made 0,
+	 * its block and its dispatch number apart from every BN4 family's) */
+	{
+		const XVirusFamily *c = &xvirus_bn4_bn6copy;
+		static const XvRegion copy_room = XV_BN4_COPY_REGION;
+		CHECK(xvirus_code_ok(c, &copy_room, why, sizeof why) && c->game == XV_GAME_BN6 && c->ntypes == 1, "xvirus: the thunder's copy refused: %s", why);
+		bool r3 = false;
+		for (int i = 0; i < c->nimms; ++i) r3 |= c->imms[i].at == 0x080CACD6u && c->imms[i].was == 1 && c->imms[i].now == 0;
+		CHECK(r3, "xvirus: the thunder's copy passes BN6's r3");
+		uint32_t lo = c->blocks[0].at, hi = (uint32_t)xvirus_bn4_bn6copy_veneers + 12u * (uint32_t)xvirus_bn4_bn6copy_nveneers;
+		for (int i = 0; i < xvirus_bn4_count; ++i) {
+			const XVirusFamily *f = xvirus_bn4[i];
+			for (int b = 0; b < f->nblocks; ++b)
+				CHECK(f->blocks[b].at >= hi || f->blocks[b].at + (f->blocks[b].end - f->blocks[b].start) <= lo, "xvirus: %s's code in the thunder's copy", f->name);
+			for (int t = 0; t < f->ntypes; ++t)
+				CHECK(f->types[t].kind != 3 || f->types[t].from != c->types[0].from, "xvirus: %s moves a type at the thunder copy's number", f->name);
+		}
+		/* (its number its own type's, 0x2A, which no BN5 track names in the dispatch's tables) */
+		int k3 = c->types[0].kind, n3 = c->types[0].from;
+		bool named = names_type(&xnavi_objects_bn5, k3, n3);
+		for (int k = 0; k < xnavi_bn5_count; ++k) named |= names_type(&xnavi_bn5[k]->code, k3, n3);
+		for (int k = 0; k < xchips_bn5_count; ++k) named |= names_type(&xchips_bn5[k].code, k3, n3);
+		for (int k = 0; k < xvirus_bn5_count; ++k) named |= names_type(xvirus_bn5[k], k3, n3);
+		for (int i = 0; i < soulcode_bn5.ntypes; ++i) named |= soulcode_bn5.types[i].kind == k3 && soulcode_bn5.types[i].type == n3;
+		CHECK(!named, "xvirus: a BN5 track names %d:%#x, the thunder copy's number in the dispatch", k3, n3);
 	}
 	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
 	XVirusFamily twin = xvirus_cangard;

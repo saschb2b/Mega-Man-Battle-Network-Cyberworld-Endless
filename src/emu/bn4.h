@@ -42,6 +42,10 @@
 #define BN4_T4_TYPES      0x08003F78u /* the fourth kind's 130 */
 #define BN4_TYPES_T4_COUNT 130       /* ... how many */
 #define BN4_TYPES_T1_COUNT 95        /* the first kind's types (BN4_T1_TYPES), how many */
+#define BN4_EFFECTS       0x080E1698u /* the effects a battle draws (the fourth kind's type 0, 0x080E1854, by the effect id at its +4; its
+                                       * literal 0x080E18FC), 4 bytes an id as BN6_EFFECTS': list << 2, sprite, animation, palette */
+#define BN4_EFFECT_COUNT  111         /* ... their ids (0-0x6E), its type 0's code after them (BN6's 108) */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned, r4's low byte its id (BN6_SPAWN_EFFECT's twin by body) */
 #define BN4_TYPE_INIT     0x00        /* a family's routine's jump table (its first literal of three words): +0 its init, */
 #define BN4_TYPE_UPDATE   0x04        /* ... +4 its update (BN4_PRESTEP, BN4_STATE_RUNNER with its state table, the collision's present), */
 #define BN4_TYPE_DYING    0x08        /* ... +8 the shared dying state, BN4_DYING */
@@ -70,7 +74,11 @@
 #define BN4_SPAWN_3_LAST  0x0800330Cu /* ... at the list's end (BN6_SPAWN_3_LAST) */
 #define BN4_SPAWN_3_FIRST 0x08003328u /* ... at its start (BN6_SPAWN_3_FIRST) */
 #define BN4_SPAWN_4       0x08003344u /* the fourth kind's, after the object running (BN6_SPAWN_4) */
-#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT's twin by body); BN4's effect table not mapped */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT's twin by body), its row BN4_EFFECTS' */
+#define BN4_THUNDER       0x080D2000u /* the third kind's 0x2A, the thunder Billy's attack spawns: its routine (to 0x080D2224), BN6's
+                                       * BN6_THUNDER but for its collision offsets and its init's r3 (docs/rom/bn4.md, The thunder's copy) */
+#define BN4_THUNDER_ARG   0x080D208Cu /* ... its init's movs r3,#0 before its collision set up (bl 0x080129AC, BN4_COLL_SETUP_ARG) */
+#define BN4_SPAWN_THUNDER 0x080D2156u /* ... its spawner, Billy's call (r1 column, r2 row, r3 element): BN6's BN6_SPAWN_THUNDER's copy */
 #define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the sound (BN6_PLAY_SOUND's twin by body), BN4's own numbers (its songs at
                                        * RomLayout.song_table 0x155FF8, compared with BN6's by how they sound: tools/xrecipe_bn4.py) */
 #define BN4_TIME_STOP     0x08007948u /* battle_isTimeStop: the battle's flags' bit 4 (BN6's 0x0800A098, the same body) */
@@ -119,7 +127,35 @@
 #define BN4_COLL_HIT_EFFECT 0x07      /* ... its hit's effect (BN6's +9): BN4's setter 0x08012F74 is BN6's object_setCollisionHitEffect
                                        * (0x0801A140) but for this offset */
 #define BN4_COLL_PANEL_X  0x08        /* ... its panel's column, its row at +9 (BN6's +0xA, +0xB) */
-#define BN4_COLL_PARALYSIS 0x10       /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
+#define BN4_COLL_OBJ_2E   0x05        /* ... u8, its object's +0x2E (BN6_COLL_OBJ_2E, +7): the setup 0x080129AC at 0x080129C8, BN6's 0x08019FDA */
+#define BN4_COLL_PANEL_BYTE 0x0A      /* ... u8, what 0x0800AF90 gives of its panel, written by the collision panels' update 0x08012D9A at
+                                       * 0x08012DAE (BN6_COLL_PANEL_BYTE, +0xC: 0x0801A04C's 0x0800E994 at 0x0801A062) */
+#define BN4_COLL_COUNTER  0x0B        /* ... u8, its counter time (its window to be countered), set by 0x0800AFBC at 0x0800AFD6
+                                       * (BN6_COLL_COUNTER, +0xD: its twin 0x0800E9DC at 0x0800E9F6) */
+/* (the hit pass: BN4's from 0x08012BC0, its twin BN6's from 0x081D7830, store by store: r7 the attacker's collision data, r6 the
+ * struck's) */
+#define BN4_COLL_HIT_KIND 0x07        /* ... u8 set by 0x08012F74 (BN6_COLL_HIT_KIND, +9: 0x0801A140); the thunder's init gives 3 in both */
+#define BN4_COLL_HIT_BITS 0x0D        /* ... u8 the struck's hit bits, the attacker's +0xC ORed in at 0x08012C40-0x08012C46 (BN6_COLL_HIT) */
+#define BN4_COLL_STATUS_GIVEN 0x0E    /* ... u8 the status a hit gives, from its object's +6 (0x08013212), passed at 0x08012BEC
+                                       * (BN6_COLL_STATUS_GIVEN, +0x10: 0x0801A258, 0x081D784E) */
+#define BN4_COLL_STATUS_TAKEN 0x0F    /* ... u8 the struck's, 0x08012BF2 (BN6_COLL_STATUS_TAKEN, +0x11: 0x081D7854) */
+#define BN4_COLL_MOOD_LOSS 0x36       /* ... u16 the struck's, the attacker's +5 & 0x7F added at 0x08012C2A (BN6_COLL_MOOD_LOSS, +0x8E) */
+#define BN4_COLL_MOOD_GAIN 0x38       /* ... u16 the struck's, at 0x08012C24, 0xFF for a counter (BN6_COLL_MOOD_GAIN, +0x90: 0x8000 for one) */
+#define BN4_COLL_HITS_TAKEN 0x3A      /* ... u16 one more a hit of the bit at 0x08012C36 (BN6_COLL_HITS_TAKEN, +0x92) */
+#define BN4_COLL_HITS_WORD 0x54       /* ... u32 the struck's, the attacker's alliance word ORed in at 0x08012BE8 (BN6's +0x70) */
+#define BN4_COLL_MET      0x4C        /* ... u32 the index bits of those it met, each pair's ORed in at 0x08012AB2-0x08012AC4 (BN6_COLL_MET,
+                                       * +0x68: 0x081D7B1E-0x081D7B30) */
+#define BN4_COLL_HITS_BACK 0x50       /* ... u32 the other's alliance word ORed in at 0x08012D3C-0x08012D42 (BN6_COLL_HITS_BACK, +0x6C:
+                                       * 0x081D7BD2-0x081D7BD8) */
+#define BN4_COLL_PUSH_TAKEN 0x48     /* ... u16 the struck's, the attacker's BN4_COLL_PUSH where its low byte is not 0 (0x08012C54; BN6's +0xA4) */
+#define BN4_COLL_PUSH     0x74        /* ... u16 a hit's (BN6_COLL_PUSH, +0x12: 0x081D78BA; BN6 sets it by the damage word's bit 13) */
+#define BN4_COLL_SETUP_ARG 0x0C    /* ... u8, the setup's r3 (BN6_COLL_SETUP_ARG, +0xE): 0x080129B2, BN6's 0x08019FBA */
+#define BN4_COLL_DAMAGE   0x1E        /* ... u16, an attack's damage from its object's +0x2C (BN6_COLL_DAMAGE, +0x2E): 0x080129CC, BN6's 0x08019FDE */
+#define BN4_COLL_HIT_MASKS 0x58       /* ... two u32, the alliance words (BN6_COLL_HIT_MASKS, +0x30): 0x080129D6 and 0x080129F2 from
+                                       * 0x08012EF6, BN6's 0x08019FE8 and 0x0801A004 from 0x0801A0BA */
+#define BN4_COLL_OBJECT   0x60        /* ... u32, its object (BN6_COLL_OBJECT, +0x38): 0x080129B0, BN6's 0x08019FB8 */
+#define BN4_COLL_INDEX_BIT 0x78       /* ... u32, its own bit of the 32 (BN6_COLL_INDEX_BIT, +0x44): the pool's maker 0x08012488, BN6's 0x08019884 */
+#define BN4_COLL_PARALYSIS 0x10      /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
 #define BN4_COLL_CONFUSE  0x12        /* ... u16: confusion's frames (BN6_COLL_CONFUSE, +0x1E) */
 #define BN4_COLL_BLIND    0x14        /* ... u16: blindness's frames (BN6_COLL_BLIND, +0x20) */
 #define BN4_COLL_HOLD     0x16        /* ... u16: the hold's frames (BN6_COLL_IMMOBILE, +0x22) */
@@ -144,6 +180,23 @@
 #define BN4_PANEL_ALLIANCE 0x01       /* its side (BN6's +3) */
 #define BN4_PANEL_FLAGS   0x04        /* u32: its type, flags, side and occupants (BN6's +0x14) */
 #define BN4_PANEL_RESERVER 0x14       /* the object that reserved it (BN6's +0x1C) */
+/* Its panel types (BN4_PANEL_TYPE), by the flags each gives (BN4_PANEL_FLAGS_OF) and the code that tests them, each against
+ * BN6's (bn6_panels.h; docs/rom/bn4.md, Panel types): 0 none, 1 hole, 2 plain, 3 cracked, 4 poison, 6 grass and 7 ice
+ * BN6's numbers and words (ice the generic move's slide, 0x08010328, BN6's 0x08016754); 8 the word of BN6's volcano and
+ * BN5's lava (0x11010), which of them unread; the rest below */
+#define BN4_SET_PANEL_TYPE 0x08009DC4u /* object_setPanelType (r0 column, r1 row, r2 type): a panel of type 0 refused, its +0x12 given 0xBE */
+#define BN4_PANEL_UPDATE_FLAGS 0x0800A376u /* a panel's flags made (BN6's _object_updatePanelParameters): its type's word, side and occupants */
+#define BN4_PANEL_FLAGS_OF 0x0800A3A8u /* ... the word each type gives, 12 of them (BN6's BN6_PANEL_FLAGS_OF, 13) */
+#define BN4_PANEL_TYPES   12          /* ... how many types (0-0xB) */
+#define BN4_PANEL_TYPE5   5           /* its type 5: 0x30010, BN5's sea's word (BN5_PANEL_SEA, its 0xA), no type of BN6's; its code unread */
+#define BN4_PANEL_HOLY    9           /* holy: 0x12010, BN6's 5's word (BN6's and BN5's damage-halving bit) */
+#define BN4_PANEL_HOLDING 0x0A        /* a panel that holds what stands on it: a non-floating object's move stopped as it arrives (the
+                                       * generic move, 0x0801033E) and its can-move check refused while it stands there (0x0800AD42,
+                                       * 0x0800AD6C, 0x0800AD96), floating its object flags' 0x20; set by the third kind's type 0x6D
+                                       * (0x080DB08A); its word 0x10210 BN6's conveyors' (9-12), which push instead: none in BN6 */
+#define BN4_PANEL_PLAIN_B 0x0B        /* its type 0xB: plain's word (0x10010), set by four objects (0x080CB4F4 and others); its meaning unread */
+#define BN4_CAN_MOVE      0x0800AD2Au /* an object's can-move check (r5): none of its flags 0x5040, and not on BN4_PANEL_HOLDING unless
+                                       * floating; BN6's 0x0800E5E2 the flags test alone (BN6 has no holding panel) */
 #define BN4_PANEL_TIMER   0x12        /* u16: the frames a panel set by BN4_SET_PANEL_TYPE keeps its type (0xBE there; BN6's +0x12 counts
                                        * for its conveyors alone) */
 #define BN4_PANEL_HIGHLIGHTS 0x02037ABEu /* a byte a panel (row * 8 + column): 1 where an attack will strike, BN4_HIGHLIGHT_PANEL's; BN6
@@ -276,6 +329,31 @@
 #define BN4_ENEMY_NAMES   0x0874A780u /* text archive: the enemies' names by id (a Navi's four versions in a row from 128) */
 #define BN4_TEXT_END      0xE5        /* ... each entry ending with it (BN6's 0xE6), its letters BN6's codes (Billy 0C 2E 31 31 3E) */
 #define BN4_GET_RNG       0x08001B00u /* GetRNG: BN6's (0x0800151C) found by its calls and bytes */
+/* The differential's hooks on BN4's routines (src/dev/xdiff_events.c; docs/rom/bn4.md, The differential's hooks): each
+ * BN6's twin (bn6.h) by its body, instruction for instruction but for its literals' places */
+#define BN4_RNG_DRAW      BN4_GET_RNG /* GetRNG: the first word stepped, its value in r0 (push {r7,lr}: lr its caller; BN6_RNG_DRAW) */
+#define BN4_RNG_DRAW_POSITIVE 0x08001B16u /* GetPositiveSignedRNG: the same, bit 31 cleared (BN6_RNG_DRAW_POSITIVE) */
+#define BN4_RNG_DRAW_SECOND 0x08001B30u /* GetRNGSecondary: BN4_RNG_SECONDARY stepped (BN6_RNG_DRAW_SECOND) */
+#define BN4_RNG_DRAW_SECOND_POSITIVE 0x08001B46u /* GetPositiveSignedRNGSecondary: the same, bit 31 cleared */
+#define BN4_SPAWN_COMMON  0x08003210u /* SpawnBattleObjectCommon: r0 the kind, r1 its spawner's five words (the type first; its caller
+                                       * at r1 + 0x18: spawnType1 0x080032B8, spawnType3 0x080032F0, spawnType4 0x08003344 and
+                                       * their twins push {r7,lr}; sub sp,#0x14 as BN6's); its kinds' descriptors at 0x08003268 */
+#define BN4_SPAWN_COMMON_END 0x08003260u /* ... its end (add sp,#4): r5 the object spawned, 0 none (BN6_SPAWN_COMMON_END) */
+#define BN4_PLAY_SOUND    0x08000560u /* PlaySoundEffect: r0 the song (BN6_PLAY_SOUND; BN4_PLAY_MUSIC is the next routine) */
+#define BN4_SPAWN_EFFECT  0x080E18EEu /* an effect spawned (the fourth kind's type 0): r4's low byte its id (BN6_SPAWN_EFFECT) */
+#define BN4_SPRITE_LOAD   0x0800287Cu /* sprite_load: r5 the object, r1 its sprite list's offset, r2 its number (BN6_SPRITE_LOAD) */
+#define BN4_RESERVE_PANEL 0x080143A8u /* object_reservePanel: the panel's reserver (+0x14) and its flags' 0x80 set, no bit in the object's
+                                       * +0 (BN6's 0x0801BB1C also sets the object's 0x20, as BN5's does not) */
+#define BN4_RESERVE_PANEL_DONE 0x080143C2u /* ... once the panel is reserved: r5 the object (BN6_RESERVE_PANEL_DONE) */
+#define BN4_BLINK_FLASHING 0x08010450u /* the blink step of an object flashing: bit 1 of its flash timer (BN4_COLL_FLASH, +0x18) clear
+                                        * hides it, as BN5's (BN6's set hides it: BN6_BLINK_FLASHING) */
+#define BN4_OBJECT_RUNNER 0x0800314Cu /* RunBattleObjectLogic: each object in the run list by mov lr,pc; bx r0 (BN6's 0x080031AC) */
+#define BN4_OBJECT_RUNNER_RET 0x0800319Cu /* ... the return address an object's call chain ends at (BN6_OBJECT_RUNNER_RET) */
+#define BN4_SUBSYSTEM_BYTE 0x020015E1u /* u8 that 0x08044AEC returns tested (ldr r0,=0x020015E0; ldrb r0,[r0,#1]; tst r0,r0): Billy's
+                                        * code asks it, its recipe aiming the call at BN6's routine that returns 0 (0x080011EC);
+                                        * read 0 at every frame of a plain battle (xdiff's BN4 watch, xd4_watch) */
+#define BN4_OBJECT_RUNNING 0x0200B48Cu /* u32 the node of the object running, 0 outside the runner (its literal at 0x080031CC, written at
+                                        * 0x08003160 and 0x080031A4; BN6_OBJECT_RUNNING) */
 #define BN4_BATTLE_BGS    0x0808563Cu /* its battle backgrounds' records, a pointer each, 27 (BN6 22), read by the loader at 0x08085430 */
 #define BN4_BATTLE_BG_COUNT 27        /* the backgrounds, ids 0x00-0x1A (3 and 9 share a record) */
 #define BN4_BG_RECORD_SIZE 0x24       /* a background's record: 9 words (BN5's and BN6's 7): tiles, their EWRAM buffer, VRAM; the map, its
@@ -296,58 +374,7 @@
                                        * dispatch 0x080266E8 as BN5's; LoadBGAnim the routine's fifth call, not its first as BN5's */
 #define BN4_MAP_ANIMS     0x08026688u /* ... their LoadGFXAnims routines (dispatch 0x08026718), called before EnterMapGroup as in BN6 */
 
-/* BN4's Navis (docs/rom/bn4.md, BN4's Navis; docs/multirom/bn4-navis.md): each a first-kind type of its own, as its
- * families are, its routine's jump table a family's (BN4_TYPE_INIT, _UPDATE, _DYING); its update the Navi pre-step and
- * the Navi state runner with its state table, BN4's six generic Navi states first, its own from 6. Ten (Red Sun's and
- * Blue Moon's Soul Navis) take their side's AI data at their init and name MegaMan's states in their table (their
- * attacks); the others keep their variables in the object, as the families do */
-#define BN4_NAVI_FIRST_ID 128         /* Roll's V1: a Navi's four enemy ids in a row from here (V1, V2, V3, SP; BN4_ENEMY_VERSION 0-3) */
-#define BN4_NAVI_SPRITES  8           /* a Navi's BN4_ENEMY_KIND: its battle sprite in list 2, its BN4_ENEMY_FAMILY the number (GutsMan 2) */
-#define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
-#define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_SEARCHMAN  0x2B /* SearchMan's (140-143) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_FIREMAN    0x0C /* FireMan's (144-147) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_THUNDERMAN 0x32 /* ThunderMan's (148-151) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_METALMAN   0x3F /* MetalMan's (160-163) first-kind type (BN4_ENEMY_TYPE of its records), Blue Moon's Soul Navis, fought in Red Sun too */
-#define BN4_NAVI_TYPE_JUNKMAN    0x47 /* JunkMan's (164-167) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_AQUAMAN    0x0D /* AquaMan's (168-171) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_WOODMAN    0x46 /* WoodMan's (172-175) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_TOPMAN     0x09 /* TopMan's (176-179) first-kind type (BN4_ENEMY_TYPE of its records), the others: no AI data, their states all their own */
-#define BN4_NAVI_TYPE_BURNERMAN  0x22 /* BurnerMan's (184-187) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_COLDMAN    0x4A /* ColdMan's (188-191) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_SPARKMAN   0x0B /* SparkMan's (192-195) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_LASERMAN   0x29 /* LaserMan's (208-211) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_KENDOMAN   0x2D /* KendoMan's (212-215) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_VIDEOMAN   0x2F /* VideoMan's (216-219) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_TYPE_DUO        0x2A /* Duo's (224-227) first-kind type (BN4_ENEMY_TYPE of its records) */
-#define BN4_NAVI_PRESTEP  0x080135A8u /* a Navi's update's first call (BN4_PRESTEP's), Duo's BN4_NAVI_PRESTEP_DUO */
-#define BN4_NAVI_PRESTEP_DUO 0x0801374Au /* ... Duo's: the same chores in 41 instructions to its 65 */
-#define BN4_NAVI_RUNNER   0x08013DB4u /* its second: r0 the Navi's state table, run by CurAction (+9) with r6 its collision data and r7 its
-                                       * AI data (BN4_STATE_RUNNER's work for a Navi; BN6's status dispatcher 0x0801AF44 another body) */
-#define BN4_NAVI_DYING    0x08010F61u /* a Navi's jump table's +8 (WindMan's BN4_DYING, the families') */
-/* BN4's generic Navi states 0-5, every Navi's table's first six where it does not put its own (BN4_STATE_GENERIC_* the
- * families'); 2 is the families' 2, 5 BN6's and BN5's Navi state 5 by body, the others BN4's own */
-#define BN4_NAVI_GENERIC_0 0x08010D31u
-#define BN4_NAVI_GENERIC_1 0x08010FA7u
-#define BN4_NAVI_GENERIC_2 0x08010D4Du
-#define BN4_NAVI_GENERIC_3 0x08010E89u
-#define BN4_NAVI_GENERIC_4 0x08010F09u
-#define BN4_NAVI_GENERIC_5 0x08010FAFu
-#define BN4_MEGAMAN       0x080EAEA8u /* MegaMan's routine (the first kind's type 0 calls it): his jump table, his update with his state table */
-#define BN4_PLAYER_STATES 0x080EAEFCu /* MegaMan's state table (his update's literal): his generic 0-5, his own from 6; 44-111 among them
-                                       * the Soul Navis' attacks, a Navi's table naming them after its own (GutsMan's 7-10 his 67-70) */
-#define BN4_PLAYER_STATE_COUNT 116  /* ... how many (the table ends where a word is no Thumb routine's) */
-#define BN4_AI_TAKE       0x0800C09Au /* a Soul Navi's init: its side's AI data (BN4_AI_OF_SIDE by +0x16) into its +0x58 */
-#define BN4_AI_OF_SIDE    0x0800BFF4u /* r0 a side: BN4_AI_DATA + side * BN4_AI_DATA_SIZE, so one Navi with AI data a side */
-#define BN4_AI_NAVI       0x64        /* AI data: the Navi's own 12 bytes before the attack's variables, its decision's sub-state first
-                                       * (BN6's +0x80, 0x20 bytes there: HeatMan's decision reads its sub-state so) */
-#define BN4_SET_ACTION    0x0800C9ACu /* r0 a state: CurAction set, its sub-state and the attack's variables' first u16 cleared */
-#define BN4_ATTACK_END    0x0800CA28u /* a Soul Navi's attack's end: AI data +0x44's bits 0x3F and +9 to +0xB, +0x30, +0x32 cleared, CurAction 6;
-                                       * 0x0800C9FC the same with the attack's +5 kept at +0x3A, 0x0800CA4A the CurAction alone */
-/* (their spawns: BN4_SPAWN_1, BN4_SPAWN_3 and BN4_SPAWN_4 above, r0 the type, r1 to r3 the place, r4 the parameters) */
-#define BN4_ENEMY_RECORD  0x08011878u /* r0 an enemy id: its BN4_ENEMY_STATS record */
-#define BN4_SPAWN_ENEMY   0x080F00F4u /* r0 an enemy id: its type spawned on a free panel of the side (Roll's state 11, MegaMan's 48) */
-#define BN4_PANEL_CRACK   0x08009AECu /* r0, r1 a panel: cracked (its type 3), or broken (1) where it was cracked, sound 0x95 (ColdMan, Duo) */
+#include "bn4_navis.h"   /* BN4's Navis: their types, routines and the engine's they share (docs/rom/bn4.md) */
+#include "bn4_battle.h"  /* BN4's battle structures past these: its panels' fields (docs/rom/bn4.md) */
 
 #endif

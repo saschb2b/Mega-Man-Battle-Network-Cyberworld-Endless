@@ -70,8 +70,8 @@ static bool game_of(int game, Game *g) {
 		return true;
 	}
 	if (game == XROM_BN4_RED_SUN_US && xrom_research && XR[game].data && XR[game].layout) {
-		/* (no per-family tables, no ice, its effects not mapped, its reward rows not read: BN6's fill for its ids) */
-		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, 0, 0,
+		/* (no per-family tables, no ice, its reward rows not read: BN6's fill for its ids) */
+		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, BN4_EFFECTS, BN4_EFFECT_COUNT,
 			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, 0, false, true, BN4_TEXT_END };
 		return true;
 	}
@@ -123,7 +123,7 @@ static uint32_t resolve(uint32_t target, void *user) {
 			 * chips', xchips_code.h) */
 			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
 			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) &&
-				!own) break;
+				!own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -685,7 +685,10 @@ static void stats_bn4(const XVirusFamily *f, const Game *g, uint8_t *out) {
 		put16(o, hp);
 		o[2] = (uint8_t)v;
 		o[3] = f->traits.flags;
-		put16(o + 4, (uint16_t)((hp & 0xF000u) | (get16(r + BN4_ENEMY_ATTACK) & 0x0FFFu)));
+		/* (its attack's word as BN4's, no element: BN6's collision setup,
+		 * 0x08019F44, reads the word's top four bits as the hit's properties,
+		 * 15 and 14 as BN4's own does, 0x08012860, 13 and 12 its own) */
+		put16(o + 4, get16(r + BN4_ENEMY_ATTACK));
 	}
 }
 
@@ -970,7 +973,7 @@ void xvirus_install(int which) {
 			for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
 		xfields_install(XROM_BN5_COLONEL_US);
 		/* (BN4 Red Sun's, where its ROM is read for research alone: --dev bn4families) */
-		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data)
+		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
 	}
 	claims_end();

@@ -12,8 +12,9 @@
 #define READ_MAX 0x20000u   /* a sprite in the core's free space read to here at most (the largest battle sprite is under it) */
 
 uint32_t xd_sprite_crc(int game, uint32_t list_offset, uint32_t number) {
-	const uint8_t *rom = game == 6 ? R.data : XR[XROM_BN5_COLONEL_US].data;
-	const XRomLayout *x = game == 6 ? NULL : XR[XROM_BN5_COLONEL_US].layout;
+	int other = game == 4 ? XROM_BN4_RED_SUN_US : XROM_BN5_COLONEL_US;   /* (the guest's game: BN5's, or BN4's) */
+	const uint8_t *rom = game == 6 ? R.data : XR[other].data;
+	const XRomLayout *x = game == 6 ? NULL : XR[other].layout;
 	uint32_t lists = game == 6 ? (R.layout ? R.layout->sprite_lists : 0) : (x ? x->sprite_lists : 0);
 	if (!rom || !lists || list_offset > 0xFC || number > 0xFF) return 0;
 	uint32_t base = hook_read32(BUS + lists + list_offset), p = base >= BUS ? hook_read32(base + 4u * number) : 0, a = p & 0x7FFFFFFFu;
