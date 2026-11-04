@@ -345,6 +345,14 @@ def companions(f):
     return {role_name(o.role) for o in f.fr['objs'] if mm and o.kind == 'T4' and o.o8(OBJ_TYPE) == 8 and o.o32(OBJ_OWNER) == mm[0].addr}
 
 
+def holds_nothing(a, d):
+    """an allowed range's direction kept (one game's own field the other has none of): "BN4 has, BN6 not" applies only
+    where BN6's side reads 0 there, "BN6 has, BN4 not" only where BN4's does, so the other game's own field, should it
+    ever hold something there, is compared as ever; a range with no direction, as it is"""
+    zero = lambda v: v == 0 or v == ('raw', 0)
+    return {'BN4 has, BN6 not': lambda: zero(d.b), 'BN6 has, BN4 not': lambda: zero(d.a)}.get(a.get('direction'), lambda: True)()
+
+
 def allowed_world(d, fb):
     """the allowed difference of legit.json's bn4 a world's difference against BN6's is (MegaMan's own sprite; BN6's
     MegaMan's companion, its being in play and his AI data's pointer to it), None where none"""
@@ -359,7 +367,7 @@ def allowed_world(d, fb):
             return a['name']
         if 'offsets' in a:
             lo, hi = (int(x, 0) for x in a['offsets'])
-            if d.part == a['part'] and lo <= d.off <= hi:
+            if d.part == a['part'] and lo <= d.off <= hi and holds_nothing(a, d):
                 return a['name']
         elif 'bit' in a:
             bit = int(a['bit'], 0)

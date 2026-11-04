@@ -2387,6 +2387,110 @@
         "kind": "T4",
         "type": "0x08",
         "why": "BN6's player init spawns a fourth-kind 0x08 for MegaMan and keeps it at his AI data +0x58 (0x080173CA-0x080173CE: r7 his AI data + 0x58, bl 0x080E223E: movs r0,#8; the fourth kind's spawn; its +0x4C him; str r0,[r7]); BN4's twin of that spawner (0x080E28EC: movs r0,#8, the same spawn and owner, no AI data store) has no BL calling it, and BN4's MegaMan's AI data +0x58 stays 0: the object, its place in the run order and the pointer to it are BN6's alone"
+      },
+      {
+        "name": "BN4's MegaMan's loadout's unread first byte",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0C",
+          "0x0C"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4's loadout setter (0x0800BD48, from the form's state 0x0800E05C) writes his AI data +0xC as the loadout's first byte: 0xFF for form 0 (0x0800BD74) or the form's loadout word (0x0800BD5E, 0x080184F0, whose +0 is 0xFF in every form); no code of BN4's reads it through an AI data pointer (every load at +0xC whose base came from an object's +0x58 in the ROM's first 2 MB: none). BN6's loadout (0x080144C0) keeps no such byte, its +0xC no field of his; BN4's power attacks his loadout does keep are mapped (+0xD, +0xE, +0xF, +0 at BN6's +6, +5, +7, +8, xdiff_bn4_trace.c)"
+      },
+      {
+        "name": "BN4's MegaMan's charge times, cached",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x34",
+          "0x37"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4 caches the charge times of his chip charge's and charged shot's power attacks (AI data +0xE and +0xF) as his loadout is set (0x0800BCF4: BN4_CHARGE_TIMES by power attack and his Charge, NaviStats +7; 0xFF none) into u16 +0x34 and +0x36, and its charge levels compare his two charge counters with them (0x0800BB56, 0x0800BB6C). BN6 caches none: its twin reads the same kind of table at each test (0x08012F62: r7 5 for A, 7 for B, 0x11 a Beast chip; BN6_CHARGE_TIMES read at 0x08012FA6 by his Charge, 0x08013774), its +0x34 his anger and +0x36 the drain (BN6_AI_ANGER, BN6_AI_DRAIN), which hold 0 where this applies; the power attacks themselves are compared (mapped)"
+      },
+      {
+        "name": "BN4's MegaMan's control block's pointer",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x50",
+          "0x53"
+        ],
+        "direction": "BN4 has, BN6 not",
+        "why": "BN4's AI data's clear (0x0800B7CE) points each side's +0x50 at its control block (side 0's 0x02035A70, side 1's 0x02035AB0, 0x40 bytes each, cleared by 0x0800E8FE), which his ready routine (0x080EED48) sets up (+0: 0x0800EB86 tests it; 0x0800EAC6 then fills its 0x40 bytes, 0x0800EB8E sets +0) and runs his ready's sub-state from (+1: 0x0800E4F8's table). BN6's ready (0x080F1694, by his object's +0xA) keeps no such block and no pointer: his AI data +0x50 is 0. The ready's phases both games keep in his object (+0xA, +0xB, +0x20) are compared as ever"
+      },
+      {
+        "name": "BN6's AI data's pool bit",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x7C",
+          "0x7F"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6 hands its actors' AI data from a pool of eight (BN6_AI_POOL): the take (0x0800ED2C) sets the entry's own bit into its +0x7C (MegaMan's entry 0, bit 31: +0x7F 0x80), which the let-go (0x0800ED80) reads to free it. BN4 keeps one AI data a side at a fixed place (0x0800BFF4: movs r1,#0xc0; muls, from BN4_AI_DATA) and no pool, so no such bit (its +0x7C one of its attack's variables, at BN6's +0xAC in the trace)"
+      },
+      {
+        "name": "BN6's AI data's palette step",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x03",
+          "0x03"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's battle actors' setup (0x0800768C) writes the enemy record 1's +2 into the AI data's +3 (MegaMan's 1); it is read only by the actor init's palette (0x0800F334, its one caller 0x08016F90 in the virus and Navi init 0x08016F56, not his player init 0x080172F0: palette = 0x0800F354[version] x step) and by a virus's version change (0x0810A90A), neither run for MegaMan. BN4's viruses keep no AI data and its MegaMan's has no such step; BN4's own +3, the HP bug's count (0x0800C164), is BN6's +9 (0x08010230), mapped"
+      },
+      {
+        "name": "BN6's AI data's unused HP mark",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0E",
+          "0x0E"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's AI data +0xE reads 0xFF from its setup; its two readers keep nothing of it: 0x0800A86E walks the eight alive actors and loads the HP of one whose +0xE is not 0xFF, then returns without using it, and the common delete state 0x08016C4E (MegaMan's too, his routine's table 0x080EB7B8) loads his HP into r1 and drops it as it writes 0xFF there (0x08016C66-0x08016C70). BN4 has no such mark (its +0xE the chip charge's power attack, BN6's +5, mapped)"
+      },
+      {
+        "name": "BN6's MegaMan's Beast Out gate",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x0F",
+          "0x0F"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's battle start writes 1 into both sides' players' AI data +0xF (0x08009338: 0x0800936E, 0x0800937E); it is read only by Beast Out's: its end (0x080159C6, BN6_TURN_END's call: 0 there sets 2, then the Beast Out counter, NaviStats +0x29) and its count-down (0x08015A16 for both sides, while NaviStats +0x29 is 0: one less to 0, 0xFF left). BN4 has no Beast Out, and no byte of its MegaMan's AI data its code reads so"
+      },
+      {
+        "name": "BN6's MegaMan's Beast chip charge",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0x11",
+          "0x11"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's loadout (0x080144C0) writes +0x11 0xFF, the power attack its chip charge takes for a chip whose record +6 is 0xA in place of +5's (the chip charge's dispatcher 0x0800FB54 at 0x0800FB96, the charge time 0x08012F62 at 0x08012F8E: r7 0x11). BN4's chip charge (0x0800B72C, its flag 8) branches by his form alone (0x0800B770: form 5 0x0800D638, else 0x0800D4B4) and caches only +0xE's and +0xF's charge times (0x0800BCF4): no byte like it"
       }
     ]
   }

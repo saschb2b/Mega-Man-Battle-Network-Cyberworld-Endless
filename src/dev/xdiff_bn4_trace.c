@@ -7,7 +7,9 @@
 
 #include "bn4.h"
 #include "bn6.h"
+#include "bn6_ai.h"
 #include "bn6_forms.h"
+#include "bn6_link.h"
 #include "bn6_panels.h"
 #include "guest.h"
 
@@ -57,9 +59,12 @@ static const Seg coll_segs[] = {
 	{ BN4_COLL_FLAGS, BN6_COLL_FLAGS, 4 },
 	{ BN4_COLL_STRUCK, BN6_COLL_STRUCK, 4 },
 };
-/* an AI's data: its attack's variables at BN6's +0xA0 */
+/* an AI's data: its attack's variables at BN6's +0xA0; MegaMan's power attacks, keys, flags, HP bug's count, damage taken
+ * and frames struck, each paired by both games' code (bn4_battle.h, BN4_AI_*) */
 static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_DATA_SIZE - BN4_AI_ATTACK_VARS },
-	{ BN4_AI_POWER_A, BN6_AI_POWER_A, 1 }, { BN4_AI_POWER_CHARGE, BN6_AI_POWER_CHARGE, 1 }, { BN4_AI_POWER_C, BN6_AI_POWER_C, 1 } };
+	{ BN4_AI_POWER_A, BN6_AI_POWER_A, 1 }, { BN4_AI_POWER_CHARGE, BN6_AI_POWER_CHARGE, 1 }, { BN4_AI_POWER_C, BN6_AI_POWER_C, 1 },
+	{ BN4_AI_POWER_CHIP, BN6_AI_POWER_CHIP, 1 }, { BN4_AI_KEYS, BN6_AI_HELD, BN4_AI_KEYS_SIZE }, { BN4_AI_MODES, BN6_AI_MODES, 4 },
+	{ BN4_AI_HP_BUG, BN6_AI_HP_BUG, 1 }, { BN4_AI_DAMAGE_TAKEN, BN6_AI_DAMAGE_TAKEN, 2 }, { BN4_AI_STRUCK_FRAMES, BN6_AI_STRUCK_FRAMES, 4 } };
 /* a panel's: its type, side, flags and reserver */
 static const Seg panel_segs[] = {
 	{ BN4_PANEL_TYPE, BN6_PANEL_TYPE, 1 },
@@ -71,16 +76,19 @@ static const Seg panel_segs[] = {
 	{ BN4_PANEL_TIMER_B, BN6_PANEL_TIMER, 2 },
 };
 
-typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
+/* (spare: where BN4's bytes left over begin, BN6's places left taken from there on and then from 0. An AI data's from
+ * BN6_AI_SPARE, the 16 bytes past its attack's variables, which BN6's AI take never lays out (bn6_ai.h): so BN6's own fields
+ * meet BN4's nothing, never a BN4 byte its own place could not keep) */
+typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 
 static const Layout layouts[] = {
-	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
-	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE },
-	[XD4_AI] = { ai_segs, 4, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
-	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
+	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
+	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
+	[XD4_AI] = { ai_segs, 10, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
+	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
-	sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
+	sizeof ai_segs / sizeof *ai_segs == 10 && sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
 
@@ -94,16 +102,17 @@ uint32_t xd4_translate(int part, const uint8_t *in, uint8_t *out) {
 			out[l->segs[k].to + i] = in[l->segs[k].from + i];
 			moved[l->segs[k].from + i] = taken[l->segs[k].to + i] = true;
 		}
-	/* (BN4's other bytes at their own offsets where BN6's are free there; those left, into the places left, in order) */
-	uint32_t spare = 0;
+	/* (BN4's other bytes at their own offsets where BN6's are free there; those left, into the places left, in order from
+	 * the layout's spare) */
+	uint32_t tried = 0;
 	for (int pass = 0; pass < 2; ++pass)
 		for (uint32_t i = 0; i < l->in; ++i) {
 			if (moved[i]) continue;
 			uint32_t at = i;
 			if (pass == 1) {
-				while (spare < l->out && taken[spare]) ++spare;
-				if (spare == l->out) break;
-				at = spare;
+				while (tried < l->out && taken[(l->spare + tried) % l->out]) ++tried;
+				if (tried == l->out) break;
+				at = (l->spare + tried) % l->out;
 			} else if (i >= l->out || taken[i]) continue;
 			out[at] = in[i];
 			moved[i] = taken[at] = true;

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T10:41:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T13:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -726,10 +726,13 @@ format, its game 4: the trace's header names it):
   enemy id (a byte at BN4's +0x0F) at BN6's NameID; its collision data's
   side, panel, statuses' timers, flash, invulnerability, final damage
   and two flag words at BN6's offsets; its AI data's attack variables
-  (BN4's +0x70) at BN6's +0xA0; each panel's type, side, flags and
-  reserver at BN6's. BN4's other bytes keep their own offset where BN6's
-  is free there and else fill the places left in order, so nothing of
-  BN4's is dropped and two BN4 traces part where their battles do. The
+  (BN4's +0x70) at BN6's +0xA0, and MegaMan's fields paired by code
+  (below, MegaMan's AI data and his object); each panel's type, side,
+  flags and reserver at BN6's. BN4's other bytes keep their own offset
+  where BN6's is free there and else fill the places left in order (an
+  AI data's from BN6's +0xF0, past its attack variables, which BN6's AI
+  take never lays out), so nothing of BN4's is dropped and two BN4
+  traces part where their battles do. The
   collision data's and panels' sizes in its header are BN6's; what BN6's
   engine keeps apart (the sea, the Dark Soul's lists, the Navis' state)
   is zero; the player block is BN4's battle NaviStats (0x40 a side), its
@@ -857,12 +860,11 @@ format, its game 4: the trace's header names it):
     `0x080E223E`), whose BN4 twin (`0x080E28EC`) nothing calls: its being
     in play, its place in the run order and his pointer to it. With the
     thunder's hit bits given BN4's (the raw-write experiment) the world
-    parts at t1 on MegaMan alone, unmapped yet: his object's +0xB, +0x20
-    and +0x2A (BN6's 0xFFFF, no held chip) and his AI data (BN4's 0xC0
-    bytes, laid out otherwise: leads by value, BN4's +0x1D 0xFC at BN6's
-    +0x29, BN4's +0xC to +0x10 against BN6's loadout +4 to +8 and +0x11,
-    BN4's +0x50 a pointer, unpaired from code), so it stays INCONCLUSIVE
-    there and the family is compared on past it: its verdict its own.
+    parts at t1 on MegaMan alone: his object's +0xB, +0x20 and +0x2A and
+    his AI data (BN4's 0xC0 bytes, laid out otherwise), since paired by
+    their readers but for 6 bytes, his ready state a fight frame later in
+    BN6's engine among them (below), so it stays INCONCLUSIVE there and
+    the family is compared on past it: its verdict its own.
   - **MegaMan's AI data and his object, by their writers** (a probe of
     hooks after every call of both player inits, BN4 `0x0801079C` and
     BN6 `0x080172F0`, and of both updates, BN4 `0x080EAECC` and BN6
@@ -905,7 +907,7 @@ format, its game 4: the trace's header names it):
       dispatching by his NaviStats' 0x23 and 0x26), BN4's +0x4C 0x10,
       his object's +0xB 4 and +0x20 9, counted down (BN6's +0x48 0x10 a
       frame later; his ready 8 at `0x080EBA74`, by his form's record,
-      sets neither).
+      sets neither at t1 and both at t2: below).
     - his object's +0x2A, 0xFFFF a held chip none: BN4's player state 2
       (`0x080108A6`-`0x080108AA`) writes it once it runs, after t1; BN6's
       before his first update, not in his init (none of its stores).
@@ -914,10 +916,58 @@ format, its game 4: the trace's header names it):
       routine calls his own, `0x080B34D8`), and +4, BN6's fourth power
       attack (`0x0801177A` at `0x080F185A`, where BN4's attack state calls
       three).
-    - still unpaired, so the world parts at t1 on them: his object's +0xB,
-      +0x20 and +0x2A; his AI data's BN4 +0xC, +0x10, +0x1D, +0x34, +0x36,
-      +0x4C and +0x50 against BN6's +3, +5, +0xF, +0x11, +0x29 and +0x7F
-      (17 differences, every other byte of his the same).
+    - the 17 that were left, by their readers (`src/emu/bn4_battle.h` and
+      `src/emu/bn6_ai.h`, [BN4 Red Sun](../rom/bn4.md), MegaMan's AI data
+      against BN6's; every load and store of each offset whose base came
+      from an object's +0x58, in both ROMs' first 2 MB). Mapped in the
+      trace's layout (`src/dev/xdiff_bn4_trace.c`), the same field at
+      another offset, each by twin routines: his keys (BN4's +0x1C to
+      +0x2B BN6's +0x22 to +0x31, the update `0x0800BA78` / `0x08012DFC`:
+      BN4's +0x1D 0xFC was his held keys' mark, BN6's +0x29 the last
+      held's), the flags word (BN4's +0x4C BN6's +0x48, test, set and
+      clear `0x0800C1D6` / `0x08010300`), the chip charge's power attack
+      (BN4's +0xE BN6's +5, both read for its charge time), the HP bug's
+      count (BN4's +3 BN6's +9), the damage taken (BN4's +6 BN6's +0x20)
+      and the frames struck (BN4's +0x54 BN6's +0x4C), the last two
+      parting after t431 only (below). BN4's bytes with no place of BN6's
+      now go past BN6's attack variables (`BN6_AI_SPARE`, +0xF0, which
+      BN6's AI take never lays out), so a field of BN6's meets BN4's
+      nothing rather than another field. Allowed, each game's own, each
+      only where the other game's side reads 0 there (`legit.json`'s `bn4`,
+      its `direction`, `tools/xdiff_bn4.py` `holds_nothing`): BN4's +0xC
+      (its loadout's first byte, written and read by no code), +0x34 to
+      +0x37 (the charge times it caches, `0x0800BCF4`, where BN6 reads its
+      table at each test) and +0x50 (its side's control block, `0x02035A70`,
+      run by his ready `0x080EED48`; BN6's ready keeps none); BN6's +3 (a
+      palette step its readers use only for viruses and Navis), +0xE (a
+      mark whose two readers keep nothing), +0xF and +0x11 (Beast Out's
+      gate and Beast chips' charge) and +0x7C to +0x7F (the pool's bit;
+      BN4 keeps one AI data a side, no pool).
+    - left at t1 (6 bytes): BN4's +0x10, the pending form (0xFF none,
+      BN4_AI_PENDING_FORM), whose counterpart BN6 keeps outside the AI data
+      (`BN6_CROSS_PENDING` +0, `0x0203A980`) where the trace does not read
+      it: the same meaning, unmapped until the trace carries it; his
+      object's +0x2A (the held chip, 0xFFFF none): BN6's 0xFFFF from before
+      his first update, BN4's 0 all battle, its 0xFFFF written only as his
+      state 2 runs (`0x080108AA`, and `0x08013256`, `0x08013268`), no reader
+      of it paired yet; and **a finding, not a mask**: his object's +0xB
+      and +0x20 and his flags' 0x10 (BN4's +0x4C, BN6's +0x48) are his
+      ready state's, the same values in both a fight frame apart. BN4's
+      ready 6 (`0x080EB0CC`) runs at t1 and sets +0xB 4 and +0x20 9,
+      counting it down to +0xA 4 at t10; BN6's ready 8 (`0x080EBA74`) does
+      the same from t2 to t11 (the earlier "sets neither" was its first
+      frame alone). It is the family's lag on MegaMan: BN6's state runner
+      never runs a state while the opening is paused (`0x0801B21A`), so his
+      state 1 runs at t1 and his ready at t2, where BN4's ran both a frame
+      earlier. The family's lag reaches the world too: the thunder strikes
+      him at t431 in BN4 and t432 in BN6, so his HP, statuses, damage taken,
+      frames struck and saved state word (+0x5D his ready's CurAction, 6
+      BN4's and 8 BN6's, not yet read as BN6's) part by that frame, and
+      the panels Billy reserves and the run order with its effects part a
+      frame from t43. A PASS needs the owner's call whether the world's
+      records the family's own timeline drives, and MegaMan's own a frame
+      later in BN6's engine, are compared with its lag; none is allowed
+      here.
   - **Its mutations** (`tests/xdiff/mutations.json`; `tools/xdiff.py`
     gives a BN4 spec a mutation's `poke` and `call`, and `call=` aims BN4's
     families' veneers too, `xd4_family`), each FAIL on the family: a state
@@ -933,8 +983,8 @@ format, its game 4: the trace's header names it):
     stays the same (INCONCLUSIVE).
   - **Its other versions**: `billy_v2` (BN4's 0x0F, BN6's 0x2C2) and
     `billy_v3` (BN4's 0x11, BN6's 0x2C4), as `billy_v1` else: each
-    INCONCLUSIVE at t1 on MegaMan alone, the family's own records the
-    same in all 1200 frames.
+    INCONCLUSIVE at t1 on MegaMan alone (the same 6 bytes left), the
+    family's own records the same in all 1200 frames.
   - **The thunder** (BN6's own third-kind 0x2A run for Billy's
     parameters: the recipe's audit, `tools/bn4_twins.py` AUDITS
     (0x080D2156, 0x080CADBC)), field by field at t341, each init (BN4
