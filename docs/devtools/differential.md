@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T10:09:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T10:41:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -816,20 +816,28 @@ format, its game 4: the trace's header names it):
 - **BN4's Billy against its BN6 twin** (`billy_v1`: Billy V1, BN4's 0x0D,
   at (5,2) against MegaMan idle at (2,2) with 2000 HP, `--dev
   bn4families`, `rng=replay`, `lag: 1`): both battles trace their 1200
-  frames, all 30 of Billy's own draws replayed from BN4's. Billy's own
-  record is BN4's through t340 (since the recipe gives struct2 BN4's
-  attack word as it is and its flags byte from the family's init,
-  `XvTraits.stats_flags`: the struct2 finding below), and it FAILS at
-  t341 on its thunder's collision data +0xE alone (BN4's 0, BN6's 1):
-  the hit's bits, below. The RNG words are not compared where BN6's draws
+  frames, all 30 of Billy's own draws replayed from BN4's (the recipe
+  giving struct2 BN4's attack word as it is and its flags byte from the
+  family's init, `XvTraits.stats_flags`: the struct2 finding below; its
+  thunder's hit bits once parted at t341: the thunder, below). The RNG
+  words are not compared where BN6's draws
   are replayed (BN6 steps both three times a frame, its main loop's
   `0x080050FC`, `0x08005100` and `0x0800031C`, 1473 times each in the
   1200 frames; BN4 never does, its 177 draws there none a frame's own):
   each of the family's draws must be given BN4's word instead, one drawn
-  as it is the family's difference. Since dev's merge brought Billy's
-  move effects back to the interim (BN6's own 0x15 and 0x16, the
-  recipe's change to come), the family parts at t43 on its first flash's
-  effect object (its art, sprite state and +0x10/+0x11, +0x80/+0x81).
+  as it is the family's difference. On the recipe that moves every BN4
+  family's effects (Billy's 0x15 and 0x16 BN6's 0x90 and 0x91) and runs
+  Billy's thunder from a copy of BN6's 0x2A whose init passes r3 = 0
+  (`tools/xrecipe_bn4_copy.py`, `src/emu/xvirus_bn4_copy.c`: the hit's
+  bits BN4's 0, the thunder finding below), the family's own records are
+  BN4's in all 1200 frames, and `billy_v1` is INCONCLUSIVE at t1 on
+  MegaMan alone (below). The comparator reads a dispatched object's type
+  (its side-table number in the BN6 trace) back as BN4's own where the
+  recipe moved it (`bn4_moved_types`, the recipe's `XvType` rows: the
+  copy's 0x2A, Spikey's 0x30 at the dispatch's 0xE0), so a moved type
+  meets BN4's at any number the dispatch gives it, and gives each family
+  the effects its own struct names (`bn4_families`, by `.effects`, never
+  by order: Elmperor names none).
   - **The world, mapped from both games' code** (each in
     `tools/xdiff_bn4.py` or `tests/xdiff/legit.json`'s `bn4`, `allowed`):
     the panels as BN6's field init holds them (BN6 `0x0800C51A`-
@@ -855,14 +863,78 @@ format, its game 4: the trace's header names it):
     +0x29, BN4's +0xC to +0x10 against BN6's loadout +4 to +8 and +0x11,
     BN4's +0x50 a pointer, unpaired from code), so it stays INCONCLUSIVE
     there and the family is compared on past it: its verdict its own.
-  - **Prepared mutations** (to run once the recipe's thunder copy lands
-    and `billy_v1` can PASS; `tools/xdiff.py` gives a BN4 spec a
-    mutation's `poke` and `call` since): a state immediate off by one
-    (`poke=080B9600:200A`, the recipe's CurAction 7 written as BN6's 9
-    made 10); a call aimed elsewhere (`call=08001532:0800151C`, its
-    positive draws drawing signed); the thunder's spawner aimed at
-    another type (its copy's `movs r0,#0x2a` made another third kind's,
-    at the copy's own address).
+  - **MegaMan's AI data and his object, by their writers** (a probe of
+    hooks after every call of both player inits, BN4 `0x0801079C` and
+    BN6 `0x080172F0`, and of both updates, BN4 `0x080EAECC` and BN6
+    `0x080EB7C4`, printing his AI data where it changed; not yet a map:
+    the readers of each field are still to pair):
+    - before the init: BN4's +0x50 a pointer (`0x02035A70`, the AI
+      data's own setup); BN6's +0 2 (the index his type's routine
+      `0x080B9A5C` dispatches by, `0x080B9A62`: 2 his routine
+      `0x080EB7A1`; BN4's type routine `0x080B34D8` calls his own
+      `0x080EAEA8` without one), +3 1, +0xE 0xFF, +0x7F 0x80.
+    - the charged shot's setup, twins (both `movs r0,#0xa; strh
+      r0,[r5,#0x2e]`, r6 a loadout record by side, BN4 `0x0800D742`,
+      BN6 `0x08013682`; r7 the AI data): BN4's `0x0800D836` stores
+      record +0xA into +0xF (1), +0xB into +8 (0), +0xC into +0 (0xFF)
+      and 0 into +5 (`0x0800D8CE`-`0x0800D8DC`); BN6's `0x08013892` stores
+      record +5 into +7 (1) and +7 into +8 (0xFF) (`0x08013918`-
+      `0x0801391E`); both then set the same four object flags from the
+      record (0x20, 0x10, bit 18, bit 17: BN4 its +2, +3, +4, +1, BN6 its
+      +0x1B, +0x1C, +0x1D, +0x23). Paired by their readers, now in the
+      trace's AI layout (`BN4_AI_POWER_*`, `BN6_AI_POWER_*`): each game's
+      power attacks are read by small dispatchers into its table (r7 the
+      attack variables, BN4's +0x70, BN6's +0xA0): BN4's `0x0800C9D2`
+      (+0xD), `0x0800CA60` (+0xF) and `0x0800C9E8` (+0), called in that
+      order by his attack state (`0x080EEC1E`, `0x080EEC3E`,
+      `0x080EEC5E`), each after the same tests, as BN6's `0x08011764`
+      (+6), `0x080117A4` (+7, the charged shot's) and `0x08011790` (+8)
+      by his (`0x080F17CA`, `0x080F17F2`, `0x080F182E`): BN4's +0xD, +0xF
+      and +0 are BN6's +6, +7 and +8 (0, 1 and 0xFF in both at t1). BN6's
+      fourth, `0x0801177A` (+4, `0x080F185A`), has no BN4 twin there.
+    - the loadout's clear and set, twins in shape (12 bytes cleared at
+      the side's block +0x26, then a routine by the Navi's style): BN4's
+      `0x0800E05C` writes +0xC 0xFF, +0xE 0xFF, +0x34 0xFF and +0x36
+      0x78; BN6's `0x080144C0` writes +4, +5 and +0x11 0xFF (his power
+      attacks but the charged shot's).
+    - before the first update (the battle's opening, not the init): BN4's
+      +0x1D and +0x23 0xFC, BN6's +0x23 and +0x29 0xFC (+0x25 a frame);
+      in the first update, BN4's +0x10 0xFF (`0x080EAECE`-`0x080EAEDA`'s
+      calls) and BN6's +0xF 1; from his state runner (BN4 `0x08013A48`
+      with his table `0x080EAEFC`, his ready state 6 `0x080EB0CC`
+      dispatching by his NaviStats' 0x23 and 0x26), BN4's +0x4C 0x10,
+      his object's +0xB 4 and +0x20 9, counted down (BN6's +0x48 0x10 a
+      frame later; his ready 8 at `0x080EBA74`, by his form's record,
+      sets neither).
+    - his object's +0x2A, 0xFFFF a held chip none: BN4's player state 2
+      (`0x080108A6`-`0x080108AA`) writes it once it runs, after t1; BN6's
+      before his first update, not in his init (none of its stores).
+    - allowed, each game's own (`legit.json`'s `bn4`): BN6's AI data +0,
+      the index his type's routine picks his by (`0x080B9A62`; BN4's type
+      routine calls his own, `0x080B34D8`), and +4, BN6's fourth power
+      attack (`0x0801177A` at `0x080F185A`, where BN4's attack state calls
+      three).
+    - still unpaired, so the world parts at t1 on them: his object's +0xB,
+      +0x20 and +0x2A; his AI data's BN4 +0xC, +0x10, +0x1D, +0x34, +0x36,
+      +0x4C and +0x50 against BN6's +3, +5, +0xF, +0x11, +0x29 and +0x7F
+      (17 differences, every other byte of his the same).
+  - **Its mutations** (`tests/xdiff/mutations.json`; `tools/xdiff.py`
+    gives a BN4 spec a mutation's `poke` and `call`, and `call=` aims BN4's
+    families' veneers too, `xd4_family`), each FAIL on the family: a state
+    immediate off by one (`poke=080B9600:200A`, the recipe's CurAction 7
+    written as BN6's 9 made 10: t1, its CurAction); a call aimed
+    elsewhere (`call=0801BB1C:0810A952`, its panel reservation at BN6's
+    family nullsub: t43, no 0x20 in its object); the thunder's spawner
+    aimed at another type (`poke=08B7C184:2029`, the copy's spawner,
+    BN6's `0x080CADBC` at `XV_CODE + 0x14180`, spawning 0x29: t341). A
+    call aimed from GetPositiveSignedRNG to GetRNG
+    (`call=08001532:0800151C`) is no break for Billy: its draws, BN4's
+    words replayed, read alike with bit 31 set or not, and the family
+    stays the same (INCONCLUSIVE).
+  - **Its other versions**: `billy_v2` (BN4's 0x0F, BN6's 0x2C2) and
+    `billy_v3` (BN4's 0x11, BN6's 0x2C4), as `billy_v1` else: each
+    INCONCLUSIVE at t1 on MegaMan alone, the family's own records the
+    same in all 1200 frames.
   - **The thunder** (BN6's own third-kind 0x2A run for Billy's
     parameters: the recipe's audit, `tools/bn4_twins.py` AUDITS
     (0x080D2156, 0x080CADBC)), field by field at t341, each init (BN4

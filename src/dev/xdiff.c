@@ -586,11 +586,13 @@ static uint32_t veneer_of(const XVirusFamily *f, uint32_t to) {
 static void call_aim(uint32_t at, uint32_t v) {
 	uint8_t b[4];
 	put32(b, v | 1);
-	for (int k = 0; k < xvirus_bn5_count; ++k) {
-		uint32_t veneer = veneer_of(xvirus_bn5[k], at);
+	/* (BN5's families, then BN4's where they are installed: xdiff_bn4.h's xd4_family) */
+	for (int k = 0; k < xvirus_bn5_count + xd4_family_count(); ++k) {
+		const XVirusFamily *f = k < xvirus_bn5_count ? xvirus_bn5[k] : xd4_family(k - xvirus_bn5_count);
+		uint32_t veneer = veneer_of(f, at);
 		if (!veneer) continue;
 		emu_write(veneer + 8, b, 4);
-		printf("xdiff: %s's call to %08x (veneer %08x) aimed at %08x\n", xvirus_bn5[k]->name, (unsigned)at, (unsigned)veneer, (unsigned)v);
+		printf("xdiff: %s's call to %08x (veneer %08x) aimed at %08x\n", f->name, (unsigned)at, (unsigned)veneer, (unsigned)v);
 	}
 }
 

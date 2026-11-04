@@ -16,4 +16,13 @@
 #define BN4_PANEL_SIDES   0x08009218u /* a panel's side at the field's start, a byte a panel (0x080091FA's literal): 0 on the border
                                        * columns, where BN6's per-column side reads 0xFF (0x0800C8C2's table) */
 
+/* MegaMan's AI data (BN4_AI_DATA, a side's): three of his power attacks, each read by its dispatcher into BN4's table
+ * (0x0800C9D2 +0xD, 0x0800CA60 +0xF, 0x0800C9E8 +0, the attack variables at +0x70 in r7), called in that order by his
+ * attack state (0x080EEC1E, 0x080EEC3E, 0x080EEC5E) as BN6's by his (BN6_AI_POWER_A, _CHARGE, _C: +6, +7, +8); the charged
+ * shot's setup (0x0800D836) writes +0xF and +0 from his loadout record (0x0800D8CE-0x0800D8D8), as BN6's (0x08013892) +7
+ * and +8 (0x08013918-0x0801391E) */
+#define BN4_AI_POWER_A    0x0D        /* (0x0800C9D2's; BN6_AI_POWER_A, +6) */
+#define BN4_AI_POWER_CHARGE 0x0F      /* the charged shot's (0x0800CA60's; BN6_AI_POWER_CHARGE, +7) */
+#define BN4_AI_POWER_C    0x00        /* (0x0800C9E8's; BN6_AI_POWER_C, +8) */
+
 #endif
