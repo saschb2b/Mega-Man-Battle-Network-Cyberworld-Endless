@@ -35,6 +35,10 @@
                                              into the appear queue (0x0800AA1A) and hidden, waiting for BN6_APPEAR_BITS' bit 0 and the
                                              queue's head; 0x0801641A the 2 x 16 frame blink, then out of the queue (0x0800AA40);
                                              0x08016460 waiting for bit 1, then CurAction 1 (BN4_APPEAR's steps, bn4_battle.h) */
+#define BN6_APPEAR_BLINK_FIRST 0x080163FCu /* movs r0,#2 (0x2002), its first blink step's count stored to +0x20 as BN6_APPEAR's
+                                             step 0 ends (0x080163FE); the blink (0x0801641A) counts it down and puts 2 back at
+                                             0x08016424 each step. The BN4 differential's opening alignment makes it 3
+                                             (tests/xdiff/legit.json, bn4, align; docs/devtools/differential.md, The BN4 trace) */
 #define BN6_APPEAR_BITS       0x0800139Au /* [[r10+0x18]+0x5C] into r0: the battle state's appear bits (bit 0 set by the opening at
                                              0x080E1A0E after its fade, bit 1 once all have appeared); BN4_APPEAR_BITS' twin */
 #define BN6_APPEAR_BITS_SET   0x08001382u /* ... r0's bits set in it */

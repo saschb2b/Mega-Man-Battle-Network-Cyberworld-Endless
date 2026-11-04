@@ -631,6 +631,7 @@
 08016396 BN6_APPEAR
 080163A8 virus_appear_engine.0x08016460_by
 080163B4 virus_appear_engine
+080163FC BN6_APPEAR_BLINK_FIRST
 0801641A virus_appear_engine_2
 08016460 virus_appear_engine.by
 08016594 BN6_NAVI_PLATE
