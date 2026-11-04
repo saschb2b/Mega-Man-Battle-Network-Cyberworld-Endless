@@ -139,6 +139,12 @@ bool visitor_apply(Encounter *e, int depth) {
 	return false;
 }
 
+int visitor_telegraph(int home, int net) {
+	bool older = net == VISIT_BN5 || net == VISIT_BN4;
+	if (home == VISIT_BN6) return older ? VISITOR_OLDER_NETS : VISITOR_UNSAID;
+	return home == VISIT_BN5 && net == VISIT_BN6 ? VISITOR_OURS : VISITOR_UNSAID;
+}
+
 int nets_battle_area(const int deep[2], int territory) {
 	if (deep[0] < 0) return territory;
 	if (rng_range(0, 1)) return -1;
