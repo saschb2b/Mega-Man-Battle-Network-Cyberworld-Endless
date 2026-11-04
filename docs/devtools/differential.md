@@ -816,12 +816,20 @@ format, its game 4: the trace's header names it):
   it FAILS at t1, Billy's own record: its CurAction BN4's 7 (BN6's 9)
   against BN6's 8, its wait (+0x20) 0x28 against 2, its flags (+0)
   0x13 against 0x17. The cause, from both games frame by frame through
-  the opening: BN4's generic state 1 (`0x0801013A`) clears the object's
-  0x04 and hands it its own first state (6) in the opening, before
-  BATTLE START! ends, so Billy runs it at the fight's first frame; BN6's
-  (`0x080165B8`, which Billy's recipe runs as BN6's state 1) sets 8 and
-  keeps 0x04, and BN6's engine holds a virus in state 1 until the
-  fight's first frame, so BN6's Billy enters 8 at t1 and runs it at t2.
+  the opening (a probe of Billy's +0, +9, +0xA and each runner's pause
+  byte, BN4's `[eToolkit+0x40]+9` and BN6's `[eToolkit+0x3C]+0xA`, both
+  1 from the appear to the fight, BattleState +0x32 0 in both): both
+  appear alike (CurAction 0, then 1, BN4's frame 183 and BN6's 122);
+  BN4's generic state 1 (`0x0801013A`) runs at once while the battle is
+  paused, clears the object's 0x04 (the bit the object runner, BN4
+  `0x0800314C`, runs a paused object by) and hands it its own first state
+  (6), which then waits for the fight and runs at its first frame; BN6's
+  Billy keeps CurAction 1 through the whole paused opening and runs
+  BN6's state 1 (`0x080165B8`: 8, 0x04 kept) at the fight's first frame,
+  its own first state at the second. BN6's state runner (`0x0801B1C4`,
+  from the virus dispatcher `0x0810A29C`) tests the pause byte first
+  (`0x0800A03C`) where BN4's (`0x08013C48`) does not; which of its
+  branches withholds the state while paused is not pinned yet.
   BN6's own Mettaur does the same against BN4's (`game=bn4:bn6`,
   `foes=01@52`: BN4's in its 7 at t1, BN6's in its 8): BN6's engine's
   for every virus, not Billy's code. Its whole fight is one fight frame
