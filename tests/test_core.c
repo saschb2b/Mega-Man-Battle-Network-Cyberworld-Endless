@@ -5376,14 +5376,34 @@ static void test_qr(void) {
 /* The launcher (src/launcher/, issue #97): when it shows at a start, and
  * what it says of the saves */
 static void test_launcher(void) {
-	RomRecord none = { 0 }, both = { true, true, true }, six = { true, true, false };
-	CHECK(roms_launcher_wanted(false, true, false, none), "launcher: shown at a first start");
-	CHECK(roms_launcher_wanted(false, false, false, both), "launcher: shown without BN6");
-	CHECK(roms_launcher_wanted(false, true, false, both), "launcher: shown where BN5 has gone");
-	CHECK(!roms_launcher_wanted(false, true, true, six), "launcher: not shown for BN5 come since (the title says so)");
-	CHECK(!roms_launcher_wanted(false, true, false, six) && !roms_launcher_wanted(false, true, true, both), "launcher: not shown where nothing changed");
-	CHECK(roms_launcher_wanted(true, true, true, both), "launcher: shown when asked for");
+	RomRecord none = { 0 }, both = { true, { true, true } }, six = { true, { true, false } }, all = { true, { true, true, true } };
+	RomRecord now_none = { true, { false } };
+	CHECK(roms_launcher_wanted(false, six, none), "launcher: shown at a first start");
+	CHECK(roms_launcher_wanted(false, now_none, both), "launcher: shown without BN6");
+	CHECK(roms_launcher_wanted(false, six, both), "launcher: shown where BN5 has gone");
+	CHECK(roms_launcher_wanted(false, both, all), "launcher: shown where BN4 has gone");
+	CHECK(!roms_launcher_wanted(false, both, six), "launcher: not shown for BN5 come since (the title says so)");
+	CHECK(!roms_launcher_wanted(false, six, six) && !roms_launcher_wanted(false, both, both), "launcher: not shown where nothing changed");
+	CHECK(roms_launcher_wanted(true, both, both), "launcher: shown when asked for");
 	char said[400];
+	/* its notes for the cartridges shown: BN5's as before BN4 was added, BN4's beside it */
+	unsigned two = 1u << SLOT_BN6 | 1u << SLOT_BN5, three = two | 1u << SLOT_BN4;
+	note_play(0, 1u << SLOT_BN5, false, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Play with BN6. BN5 can come later: R on the title brings this screen back."), "launcher: PLAY's note (%s)", said);
+	note_play(1u << SLOT_BN5, 0, true, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Back to the title, BN5's net in."), "launcher: DONE's note (%s)", said);
+	note_play(1u << SLOT_BN5, 1u << SLOT_BN4, false, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Play with BN6 and BN5. BN4 can come later: R on the title brings this screen back."), "launcher: PLAY's note, BN4 out (%s)", said);
+	note_play(1u << SLOT_BN5 | 1u << SLOT_BN4, 0, false, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Play with BN6, BN5 and BN4."), "launcher: PLAY's note, all in (%s)", said);
+	note_took(SLOT_BN6, "a.gba", 1u << SLOT_BN5, said, sizeof said);
+	CHECK(!strcmp(said, "Took BN6 Cybeast Gregar (USA) from a.gba, and BN5 beside it."), "launcher: BN5 beside BN6 (%s)", said);
+	CHECK(!strcmp(refuse_why("XXXX", -1, false, two), "not BN6 Gregar or BN5 Team Colonel"), "launcher: another game refused as before");
+	CHECK(!strcmp(refuse_why("XXXX", -1, false, three), "not BN6 Gregar, BN5 Team Colonel or BN4 Red Sun"), "launcher: another game refused, BN4 shown");
+	CHECK(!strcmp(refuse_why("B4BE", -1, false, two), "not BN6 Gregar or BN5 Team Colonel"), "launcher: Blue Moon not named while BN4 is not shown");
+	CHECK(!strcmp(refuse_why("B4BE", -1, false, three), "BN4 Blue Moon, not Red Sun"), "launcher: Blue Moon named where BN4 is shown");
+	note_gone(SLOT_BN5, said, sizeof said);
+	CHECK(!strcmp(said, "BN5 Team Colonel (USA) is gone from where it was: its areas stay out of runs until it is back."), "launcher: BN5 gone (%s)", said);
 	/* a phone's saves' line: two lines, a long folder's name cut */
 	saves_line_phone("Mega Man Battle Network ROMs", true, false, said, sizeof said);
 	CHECK(!strcmp(said, "Saves: on this device\nA copy in Mega Man Bat..., for a reinstall"), "launcher: a long folder cut in the saves' line (%s)", said);

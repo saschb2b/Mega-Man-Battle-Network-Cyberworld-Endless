@@ -31,7 +31,8 @@ bool pick_busy(void);
 /* A picker closed since the last call: true, and what it gave in `r` */
 bool pick_done(PickResult *r);
 /* (phones) The folder kept looked in again for the ROMs the ROM folder
- * lacks, those found copied there: their bits (1 BN6, 2 BN5), 0 for
+ * lacks, those found copied there: their bits (the cartridges', 1 <<
+ * SLOT_*: 1 BN6, 2 BN5, 4 BN4), 0 for
  * none new, -1 where no folder is kept or it cannot be opened (`msg` says
  * why then) */
 int pick_look(char *msg, size_t n);

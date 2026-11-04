@@ -14,12 +14,17 @@ const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 // its SHA-1 and kept under its own name in ROM_DIR, where the game finds
 // BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
 // optional, whose net areas, viruses, Navis and chips then join runs, fought in
-// BN6's engine (docs/multirom/). The names and words of Android's ROM page.
+// BN6's engine (docs/multirom/). An extra ROM is taken where the game offers it
+// (offered: rom.c's xrom_offered): BN4 Red Sun's not yet, its cartridge hidden
+// and its file refused as another game's (?dev=showbn4 shows it for review).
+// The names and words of Android's ROM page.
 const JA = LANG === 'ja';
 const ROMS = {
-	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)' },
-	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: JA ? '北米版 BN5 Team Colonel' : 'BN5 Team Colonel (USA)' },
+	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)', named: 'BN6 Gregar' },
+	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: JA ? '北米版 BN5 Team Colonel' : 'BN5 Team Colonel (USA)', named: 'BN5 Team Colonel' },
+	bn4: { code: 'B4WE', sha1: 'a97e96a7da03abd70f7953328e511b9fa29179f1', file: 'bn4rs.gba', tag: JA ? '北米版 BN4 Red Sun' : 'BN4 Red Sun (USA)', named: 'BN4 Red Sun' },
 };
+const SHOW_BN4 = new URLSearchParams(location.search).get('dev') === 'showbn4';
 // Battle Network 6's and 5's other versions, by their game code: a player
 // who has one is told which it is (on the Japanese page in Japanese, the
 // Japanese versions by their own titles)
@@ -34,6 +39,9 @@ const OTHERS = JA ? {
 	BRBJ: '日本版『ロックマンエグゼ5 チーム オブ ブルース』です。BN5 は北米版の Team Colonel のみ',
 	BRKP: '欧州版の Team Colonel です。必要なのは北米版',
 	BRKJ: '日本版『ロックマンエグゼ5 チーム オブ カーネル』です。BN5 は北米版の Team Colonel のみ',
+	B4BE: 'BN4 Blue Moon です。必要なのは Red Sun',
+	B4BJ: '日本版『ロックマンエグゼ4 トーナメント ブルームーン』です。BN4 は北米版の Red Sun のみ',
+	B4WJ: '日本版『ロックマンエグゼ4 トーナメント レッドサン』です。必要なのは北米版',
 } : {
 	BR6E: 'BN6 Cybeast Falzar, not Gregar',
 	BR6P: 'BN6 Cybeast Falzar (Europe), not Gregar (USA)',
@@ -45,16 +53,31 @@ const OTHERS = JA ? {
 	BRBJ: 'Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)',
 	BRKP: 'BN5 Team Colonel (Europe), not the USA version',
 	BRKJ: 'Rockman EXE 5 Team of Colonel (Japan), not the USA version',
+	B4BE: 'BN4 Blue Moon, not Red Sun',
+	B4BJ: 'Rockman EXE 4 Blue Moon (Japan), not BN4 Red Sun (USA)',
+	B4WJ: 'Rockman EXE 4 Red Sun (Japan), not the USA version',
 };
-const OTHER_GAME = JA ? 'BN6 Gregar でも BN5 Team Colonel でもありません' : 'not BN6 Gregar or BN5 Team Colonel';
+// (each named where its game is offered: BN4's while BN4's is)
+const OTHER_OF = (code) => (code.startsWith('B4') ? 'bn4' : 'bn6');
+// "not BN6 Gregar or BN5 Team Colonel", the games offered named
+function otherGame() {
+	const names = Object.keys(ROMS).filter(offered).map((id) => ROMS[id].named);
+	if (JA) return names.join(' でも ') + ' でもありません';
+	return 'not ' + (names.length > 2 ? names.slice(0, -1).join(', ') + ' or ' + names[names.length - 1] : names.join(' or '));
+}
+// The offered extra ROMs among `ids`, by their short names: "BN5", "BN5 and BN4"
+function tags(ids) {
+	const t = ids.map((id) => id.toUpperCase());
+	return t.length > 1 ? t.slice(0, -1).join(', ') + (JA ? ' と ' : ' and ') + t[t.length - 1] : t.join('');
+}
 
 // The page's other words, in its language
 const W = JA ? {
 	stopped: (what) => 'エンジンが止まりました：' + what,
 	today: '今日 ',
 	tapSlot: 'スロットをタップ', clickSlot: 'スロットをクリックするか、ここにドロップ',
-	runSaved: (when) => 'ランのセーブ：' + when + '。', ready: '準備OK。', bn5Can: (how) => '\nBN5 も入れられます：' + how + '。',
-	bn5In: 'BN5 が入りました。次は BN6 です。',
+	runSaved: (when) => 'ランのセーブ：' + when + '。', ready: '準備OK。', extraCan: (what, how) => '\n' + what + ' も入れられます：' + how + '。',
+	extraIn: (what) => what + ' が入りました。次は BN6 です。',
 	chooseRoms: 'ROM ファイルを選んでください。', dropRoms: 'ROM ファイルをここにドロップするか、選んでください。',
 	cartReady: '：準備OK', cartNeeded: '：必須、選んでください', cartOptional: '：任意、選んでください',
 	game: 'ゲーム',
@@ -77,8 +100,8 @@ const W = JA ? {
 	stopped: (what) => 'The engine stopped: ' + what,
 	today: 'Today ',
 	tapSlot: 'tap its slot', clickSlot: 'click its slot or drop it here',
-	runSaved: (when) => 'Run saved ' + when + '.', ready: 'Ready.', bn5Can: (how) => '\nBN5 can join: ' + how + '.',
-	bn5In: 'BN5 is in. Now BN6.',
+	runSaved: (when) => 'Run saved ' + when + '.', ready: 'Ready.', extraCan: (what, how) => '\n' + what + ' can join: ' + how + '.',
+	extraIn: (what) => what + (what.includes(' and ') ? ' are' : ' is') + ' in. Now BN6.',
 	chooseRoms: 'Choose your ROM files.', dropRoms: 'Drop your ROM files here, or choose them.',
 	cartReady: ': ready', cartNeeded: ': needed, choose it', cartOptional: ': optional, choose it',
 	game: 'Game',
@@ -147,15 +170,31 @@ var Module = {
 			Module.removeRunDependency('idbfs');
 		});
 	}],
-	onRuntimeInitialized: () => { ready = true; offer(); },
+	onRuntimeInitialized: () => {
+		ready = true;
+		// (BN4 offered for review as --dev showbn4 offers it on the ROMs screen)
+		if (SHOW_BN4) Module.ccall('cw_rom_research', null, [], []);
+		offer();
+	},
 	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
 	// the game's Options changed the sound, or smooth motion: the menu's button follows
 	cwSound: (word) => { keepSound(word); },
 	cwSmooth: (on) => { keepSmooth(on); },
 };
 
-// whether ROM `id` (ROMS) is kept in this browser
+// whether the game takes ROM `id` (ROMS): BN6's, and an extra one's where
+// it is offered (src/core/rom.c's cw_rom_offered), once the engine is up
+const offers = {};
+function offered(id) {
+	if (id === 'bn6') return true;
+	if (!ready) return false;
+	if (!(id in offers)) offers[id] = Module.ccall('cw_rom_offered', 'number', ['string'], [ROMS[id].code]) === 1;
+	return offers[id];
+}
+
+// whether ROM `id` (ROMS) is kept in this browser, and offered
 function kept(id) {
+	if (!offered(id)) return false;
 	try { return Module.FS.stat(ROM_DIR + '/' + ROMS[id].file).size === ROM_SIZE; } catch (e) { return false; }
 }
 
@@ -175,8 +214,9 @@ function when(d) {
 // What is kept, in words
 function keptWords() {
 	const add = touchPlay ? W.tapSlot : W.clickSlot, run = writtenAt(DATA + '/savedata/run.sav');
-	if (kept('bn6')) return (run ? W.runSaved(run) : W.ready) + (kept('bn5') ? '' : W.bn5Can(add));
-	if (kept('bn5')) return W.bn5In;
+	const extras = Object.keys(ROMS).filter((id) => id !== 'bn6' && offered(id)), missing = extras.filter((id) => !kept(id));
+	if (kept('bn6')) return (run ? W.runSaved(run) : W.ready) + (missing.length ? W.extraCan(tags(missing), add) : '');
+	if (missing.length < extras.length) return W.extraIn(tags(extras.filter(kept)));
 	return touchPlay ? W.chooseRoms : W.dropRoms;
 }
 
@@ -198,11 +238,13 @@ function offer(note) {
 const FACES = {   // the label's mugshot: sprite list 8 (src/launcher/launcher_art.c, docs/rom/)
 	bn6: { lists: 0x031CC4, face: 0x37 },   // MegaMan
 	bn5: { lists: 0x03272C, face: 0x45 },   // Colonel
+	bn4: { lists: 0x02793C, face: 0x61 },   // Duo (src/emu/bn4.h's BN4_MUGSHOT_FACE)
 };
 const drawn = {};
 
 function showCart(id) {
 	const cart = $('cart-' + id), here = kept(id);
+	cart.hidden = !offered(id);
 	cart.classList.toggle('in', here);
 	cart.setAttribute('aria-label', ROMS[id].tag + (here ? W.cartReady : id === 'bn6' ? W.cartNeeded : W.cartOptional));
 	if (!here || drawn[id]) return;
@@ -291,14 +333,17 @@ function start() {
 		canvas.style.removeProperty('height');
 		if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
 		keepAwake();
-		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs()));
+		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs(), devArgs()));
 		return;
 	}
 	fit();
 	window.scrollTo(0, 0);
 	canvas.focus();
-	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs()));
+	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs(), devArgs()));
 }
+
+// (?dev=showbn4: the game told too, so that it reads BN4's file kept here)
+function devArgs() { return SHOW_BN4 ? ['--dev', 'showbn4'] : []; }
 
 // the screen stays on while the game plays (asked again when the tab returns)
 async function keepAwake() {
@@ -320,16 +365,17 @@ async function checkRom(file) {
 	const head = new Uint8Array(await file.slice(0, 0xB0).arrayBuffer());
 	if (head.length < 0xB0) return { why: W.notGba, reason: 'other-game' };
 	const code = String.fromCharCode(...head.subarray(0xAC, 0xB0));
-	const id = Object.keys(ROMS).find((k) => ROMS[k].code === code);
-	if (!id) return { why: OTHERS[code] || OTHER_GAME, reason: OTHERS[code] ? 'version' : 'other-game' };
+	const id = Object.keys(ROMS).find((k) => ROMS[k].code === code && offered(k));
+	const other = OTHERS[code] && offered(OTHER_OF(code)) ? OTHERS[code] : null;
+	if (!id) return { why: other || otherGame(), reason: other ? 'version' : 'other-game' };
 	const changed = W.changed(ROMS[id].tag);
 	if (file.size !== ROM_SIZE) return { why: changed, reason: 'size' };
 	const bytes = new Uint8Array(await file.arrayBuffer());
 	if (crypto.subtle && (await sha1(bytes)) !== ROMS[id].sha1) return { why: changed, reason: 'changed' };
-	// (BN6's in place of any .gba but BN5's: the page kept one ROM before)
-	const FS = Module.FS;
+	// (BN6's in place of any .gba but the extra ROMs': the page kept one ROM before)
+	const FS = Module.FS, extra = (name) => Object.keys(ROMS).some((k) => k !== 'bn6' && ROMS[k].file === name);
 	for (const name of FS.readdir(ROM_DIR))
-		if (name === ROMS[id].file || (id === 'bn6' && /\.gba$/i.test(name) && name !== ROMS.bn5.file)) FS.unlink(ROM_DIR + '/' + name);
+		if (name === ROMS[id].file || (id === 'bn6' && /\.gba$/i.test(name) && !extra(name))) FS.unlink(ROM_DIR + '/' + name);
 	FS.writeFile(ROM_DIR + '/' + ROMS[id].file, bytes);
 	return { id };
 }
@@ -507,7 +553,10 @@ menu.addEventListener('mouseover', (e) => {
 
 function showKept() {
 	$('kept-bn6').textContent = kept('bn6') ? W.keptIn : W.keptNotYet;
-	$('kept-bn5').textContent = kept('bn5') ? W.keptIn : W.keptOptional;
+	for (const id of Object.keys(ROMS).filter((k) => k !== 'bn6')) {
+		$('kept-' + id).textContent = kept(id) ? W.keptIn : W.keptOptional;
+		$('kept-' + id).hidden = $('kept-' + id).previousElementSibling.hidden = !offered(id);
+	}
 	$('kept-run').textContent = writtenAt(DATA + '/savedata/run.sav') || W.keptNone;
 	let at = null;
 	try { at = localStorage.getItem('cw-backup-at'); } catch (e) { /* not kept */ }

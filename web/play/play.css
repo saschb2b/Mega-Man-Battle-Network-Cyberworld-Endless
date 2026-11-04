@@ -153,6 +153,7 @@ body.touch-play #canvas {
 .cart:hover .spot b, .cart:focus-visible .spot b, .cart:hover .spot .need, .cart:focus-visible .spot .need { color: var(--gold); }
 .cart .shell { display: none; background-image: url(../assets/ui/cart-bn6.png); }
 #cart-bn5 .shell { background-image: url(../assets/ui/cart-bn5.png); }
+#cart-bn4 .shell { background-image: url(../assets/ui/cart-bn4.png); }
 .cart.in .spot { display: none; }
 .cart.in .shell { display: block; }
 .cart:focus-visible { outline: none; }

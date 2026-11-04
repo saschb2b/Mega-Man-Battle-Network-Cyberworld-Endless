@@ -7,8 +7,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-/* The two cartridges */
-enum { SLOT_BN6, SLOT_BN5, SLOTS };
+/* The cartridges: BN6's, then one an extra ROM (rom.h's XRomId, slot
+ * 1 + the ROM's), each shown where its ROM is offered (rom.h's
+ * xrom_offered); a set of them as bits, 1 << SLOT_* */
+enum { SLOT_BN6, SLOT_BN5, SLOT_BN4, SLOTS };
 
 /* What a note is about: its colour */
 enum { NOTE_INFO, NOTE_GOOD, NOTE_BAD };
@@ -19,37 +21,40 @@ typedef enum {
 	W_NEEDED, W_OPTIONAL, W_READY,
 	W_CHOOSE_FILE, W_CHOOSE_FOLDER, W_LOOK_AGAIN, W_WAITING,
 	W_PLAY, W_DONE, W_FILES_INSTEAD,
-	W_PLAY_LOCKED, W_FIVE_ADDS, W_CANCELLED,
+	W_PLAY_LOCKED, W_CANCELLED,
 	W_COUNT
 } LauncherWord;
 const char *launcher_word(LauncherWord w);
 
 /* A cartridge's names: on its open spot ("BN6"), under it ("Cybeast
- * Gregar (USA)"), on its label (one line, or two on a large one) */
+ * Gregar (USA)", or `brief` where three stand side by side: "Gregar
+ * (USA)"), on its label (one line, or two on a large one) */
 const char *slot_short(int slot);
-const char *slot_caption(int slot);
+const char *slot_caption(int slot, bool brief);
 const char *slot_label(int slot, int line, bool large);
 
 /* The note for what the cursor is on. `kind` the pickers there are
- * (pick.h's bits; 0 none), `where` the place to put a ROM by hand */
-void note_slot_empty(int slot, unsigned kind, const char *where, char *out, size_t n);
+ * (pick.h's bits; 0 none), `where` the place to put a ROM by hand,
+ * `shown` the cartridges on the screen */
+void note_slot_empty(int slot, unsigned kind, const char *where, unsigned shown, char *out, size_t n);
 void note_slot_ready(int slot, const char *kept, char *out, size_t n);
-void note_play(bool bn5, bool from_title, const char *title_button, char *out, size_t n);
-void note_alt(unsigned kind, char *out, size_t n);
+/* ... PLAY's: `in` the extra cartridges in, `missing` those shown and not */
+void note_play(unsigned in, unsigned missing, bool from_title, const char *title_button, char *out, size_t n);
+void note_alt(unsigned kind, unsigned shown, char *out, size_t n);
 
 /* A chosen file's fate: taken ("Took BN6 Cybeast Gregar (USA) from x.gba,
- * and BN5 beside it"), or why not */
-void note_took(int slot, const char *file, bool five_beside, char *out, size_t n);
+ * and BN5 beside it": `beside` the cartridges that came with it), or why not */
+void note_took(int slot, const char *file, unsigned beside, char *out, size_t n);
 void note_refused(const char *file, const char *why, char *out, size_t n);
-/* why a ROM with header game code `code` is not taken (BN6's and BN5's
- * other versions named, as the phones' pages name them) */
-const char *refuse_why(const char code[4], int slot_of_code, bool changed);
+/* why a ROM with header game code `code` is not taken (the other versions
+ * of the games `shown` named, as the phones' pages name them) */
+const char *refuse_why(const char code[4], int slot_of_code, bool changed, unsigned shown);
 /* ... a file that was no ROM at all, or zipped */
 const char *refuse_not_rom(bool zipped);
 /* The ROM found where the game looked at the start */
 void note_found(const char *where, char *out, size_t n);
-/* ... gone since the last start */
-void note_five_gone(char *out, size_t n);
+/* ... an extra cartridge's ROM gone since the last start */
+void note_gone(int slot, char *out, size_t n);
 /* A note that there is no file chooser here: where to put the file */
 void note_no_picker(const char *where, char *out, size_t n);
 

@@ -159,14 +159,22 @@ public class GameActivity extends SDLActivity {
         return r;
     }
 
+    /** The other games' ROMs the game offers, by their header's game codes
+     *  ("BRKE", "BRKE B4WE"): the looks take those alone beside BN6's
+     *  (src/core/rom.c's xrom_offered, told before each pick and look). */
+    public boolean romsOffer(String codes) {
+        RomLook.offered = codes == null ? "" : codes;
+        return true;
+    }
+
     /** The folder kept looked in again (a quick look) for the ROMs the app
-     *  lacks: "bits copied in (1 BN6, 2 BN5)\nwhat it found", "-1\nwhy" where
-     *  it cannot be opened, null for no folder kept. */
+     *  lacks: "bits copied in (1 BN6, 2 BN5, 4 BN4)\nwhat it found", "-1\nwhy"
+     *  where it cannot be opened, null for no folder kept. */
     public String romsLook() {
         RomLook r = roms();
         Uri folder = r.folder();
         if (folder == null) return null;
-        if (RomLook.kept(this, RomLook.BN6) && RomLook.kept(this, RomLook.BN5)) return "0\n";
+        if (RomLook.allKept(this)) return "0\n";
         RomLook.Look l = r.lookFolder(folder, r.folderName(), false);
         if (l.lost != null) return "-1\n" + r.words(l);
         return l.bits() + "\n" + (l.bits() != 0 || !l.refused.isEmpty() ? r.words(l) : "");
