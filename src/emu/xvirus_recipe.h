@@ -147,6 +147,9 @@ typedef struct {
 	int nranges;
 	const XvCmp *cmps;         /* its compares of a held chip's id with BN6's id past an immediate, through a shim */
 	int ncmps;
+	const uint32_t *sides;     /* its calls to its game's direction rule (BN4_DIRECTION, copied with it), each through a shim that
+	                              numbers left and right by the object's side, as BN6's rule does (xvirus_shim.h) */
+	int nsides;
 	const XvSong *songs;       /* its sounds BN6 has none of, copied into BN6's empty song slots */
 	int nsongs;
 	uint32_t prestep;          /* its game's virus dispatcher's case for its ids, which a port runs before its state each frame

@@ -247,6 +247,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "BN4's virus after-state (BN4_VIRUS_PRESENT 0x08010736, no pause test) against BN6's (BN6_VIRUS_PRESENT 0x08016E64, its pause test at 0x08016E84-0x08016E90), BN4's sprite update (BN4_SPRITE_UPDATE 0x0800285C), Spikey's init and its moves' draw (BN4_SPIKEY_INIT 0x080BA428, BN4_SPIKEY_MOVES 0x080BA5BC) and CirKill's shot's table literal (BN4_SHOT_KINDS_LIT 0x080CE83C) mapped (docs/rom/bn4.md's row): the BN4 differential replays the families' draws before the fight, holds the opening's idle animation to BN4's lead and reads a diagonal step's direction and a pointer into BN4's moved code as BN6's"
     },
     {
+      "date": "2026-11-04",
+      "what": "BN4's direction rule (BN4_DIRECTION 0x0800AF90: left and right by the screen) against BN6's (BN6_DIRECTION 0x0800E994: by the object's side, r4 its +0x16) and the HP gauge's low-HP step in both (BN4_HP_LOW_STEP 0x0801472C, its sound 0x82; BN6_HP_LOW_STEP 0x0801C840, its 0x84) mapped (docs/rom/bn4.md's row): a moved family's calls to BN4's rule go through a shim that numbers its answer BN6's way (bn4_twins.SIDED, src/emu/xvirus_shim.h), and cirkill_v1-v3 PASS"
+    },
+    {
       "date": "2026-10-25",
       "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
     },

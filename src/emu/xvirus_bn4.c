@@ -919,6 +919,9 @@ static const XvImm cirkill_imms[] = {
 static const XvRange cirkill_ranges[] = {
 	{ 0x080BD480, 0x2DE, 0x2E3 },   /* BN4's ids 0x5b-0x60, its own */
 };
+static const uint32_t cirkill_sides[] = {
+	0x0800AFB2,   /* its call to 0800AF90 (bn4_twins.SIDED): its left and right by the object's side, BN6's way */
+};
 static const XvNumber cirkill_numbers[] = {
 	{ 0x080BD138, 0x080BD13C, 0x0810A349 },   /* its pre-step's way on: BN6's state step, not its state table */
 	{ 0x080BD228, 0x0B800000, 0x0B800000 },   /* a panel's flags it may not have (object_checkPanelParameters, BN6's 0x0800CC86 the same body): the support and alliance bits, BN6's own code naming the same mask (0x0800E6D4) */
@@ -959,6 +962,7 @@ static const XVirusFamily bn4_cirkill = {
 	.words = cirkill_words, .nwords = (int)(sizeof cirkill_words / sizeof *cirkill_words),
 	.imms = cirkill_imms, .nimms = (int)(sizeof cirkill_imms / sizeof *cirkill_imms),
 	.ranges = cirkill_ranges, .nranges = (int)(sizeof cirkill_ranges / sizeof *cirkill_ranges),
+	.sides = cirkill_sides, .nsides = (int)(sizeof cirkill_sides / sizeof *cirkill_sides),
 	.numbers = cirkill_numbers, .nnumbers = (int)(sizeof cirkill_numbers / sizeof *cirkill_numbers),
 	.bytes = cirkill_bytes, .nbytes = (int)(sizeof cirkill_bytes / sizeof *cirkill_bytes),
 	.types = cirkill_types, .ntypes = (int)(sizeof cirkill_types / sizeof *cirkill_types),

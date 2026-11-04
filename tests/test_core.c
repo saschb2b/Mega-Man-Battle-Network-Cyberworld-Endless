@@ -4382,6 +4382,14 @@ static void test_xvirus_shims(void) {
 	CHECK(xvirus_shim_entry(e, home, to | 1) && get16(e) == 0xB500 && thumb_bl_decode(home + 2, get16(e + 2), get16(e + 4), &called) &&
 		called == to && get16(e + 6) == 0xBD00, "shims: an entry (%04x, a call to %08x, %04x)", get16(e), (unsigned)called, get16(e + 6));
 	CHECK(!xvirus_shim_entry(e, home + 2, to | 1) && !xvirus_shim_entry(e, home, to), "shims: an entry off its word, or to no Thumb, taken");
+	/* (a direction: push {lr}, a call of the rule, 0-2 back as they are, 3 and 4 swapped where r5's +0x16 is not 0) */
+	uint8_t d[XV_SHIM_SIDE_SIZE];
+	static const uint16_t side_ops[] = { 0x2803, 0xDB04, 0x7DA9, 0x2900, 0xD001, 0x2107, 0x4048, 0xBD00 };
+	bool side_ok = xvirus_shim_side(d, home, to | 1) && get16(d) == 0xB500 && thumb_bl_decode(home + 2, get16(d + 2), get16(d + 4), &called) &&
+		called == to;
+	for (int i = 0; i < (int)(sizeof side_ops / sizeof *side_ops); ++i) side_ok = side_ok && get16(d + 6 + 2 * i) == side_ops[i];
+	CHECK(side_ok, "shims: a direction (%04x, a call to %08x, %04x %04x %04x)", get16(d), (unsigned)called, get16(d + 6), get16(d + 8), get16(d + 10));
+	CHECK(!xvirus_shim_side(d, home + 2, to | 1) && !xvirus_shim_side(d, home, to), "shims: a direction off its word, or to no Thumb, taken");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not

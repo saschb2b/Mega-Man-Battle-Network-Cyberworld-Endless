@@ -107,7 +107,12 @@
 #define BN6_COLL_MADE         0x080198CAu /* str r0,[r5,#0x54]: a collision data made (0x08019892), r0 it; BN5's clears its submerge with it */
 #define BN6_COLL_PANEL_BYTE   0x0C        /* u8, what 0x0800E994 gives of its panel, written by the collision panels' update (0x0801A04C, at
                                            * 0x0801A062; BN4's +0x0A) */
-#define BN6_COLL_COUNTER      0x0D        /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
+#define BN6_DIRECTION         0x0800E994u /* the direction from a panel (r2, r3) to another (r0, r1), r4 the object's side (+0x16): 1 up,
+                                           * 2 down, 4 right and 3 left on side 0 and the other way on side 1, 5 two panels on or a diagonal
+                                           * move; read by 0x0800E498 (by +0xC, from 0x0800E468). BN4's rule BN4_DIRECTION by the screen */
+#define BN6_HP_LOW_STEP       0x0801C840u /* the HP gauge's step, entry 4 of the HUD's table 0x0801BF10: BN4_HP_LOW_STEP's twin from its HP
+                                           * test on, its count +6 to 45, then sound 0x84 (0x0801C880) */
+#define BN6_COLL_COUNTER      0x0D       /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
 #define BN6_COLL_HIT_KIND     0x09        /* u8 set by 0x0801A140 (BN4's +7, 0x08012F74) */
 #define BN6_COLL_STATUS_GIVEN 0x10        /* u8 the status a hit gives, from its object's +6 (0x0801A258), passed by the hit pass at
                                            * 0x081D784E to the struck's BN6_COLL_STATUS_TAKEN (BN4's +0xE) */

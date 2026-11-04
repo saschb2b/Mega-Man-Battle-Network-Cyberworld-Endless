@@ -63,6 +63,13 @@
 #define BN4_POISON_STEP   0x08013010u /* the poison panel's step under an object, its cmp r0,#4 (BN6_PANEL_STEP_POISON's twin):
                                        * BN4_COLL_POISON_TIMER less 1 a frame (0x0801301E), 6 again with +0x34 a point more (0x08013026-
                                        * 0x0801302E), 0 off poison (0x08013034) */
+#define BN4_DIRECTION     0x0800AF90u /* the direction from a panel (r2 column, r3 row) to another (r0, r1), a leaf: 4 and 3 by the
+                                       * column (right and left by the screen), else 2 and 1 by the row, 0 none (0x0800AF92-0x0800AFAE);
+                                       * BN6's rule (0x0800E994) numbers right 4 and left 3 on side 0 and the other way on side 1 (r4,
+                                       * the object's +0x16: 0x0800E9C4, 0x0800E9D0) and a move of two panels or a diagonal one 5 */
+#define BN4_HP_LOW_STEP   0x0801472Cu /* the HP gauge's step, entry 0 of the HUD's table 0x080146CC (0x080146A8 runs them by its word's
+                                       * bits each frame): HP at a quarter of the maximum or less counts +0x19 to 45, then sound 0x82
+                                       * (0x0801475C); BN6's twin BN6_HP_LOW_STEP, its count +6, its sound 0x84 */
 #define BN4_SPRITE_UPDATE 0x0800285Cu /* an object's sprite each fight frame, its work in IWRAM (0x03006377; BN6's twin 0x080026C4, its
                                        * 0x03006793): its frame's count down, at 0 the next frame's record (+0xAC, 20 bytes, its duration at
                                        * +16, +18's 0x80 its last) */
