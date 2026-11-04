@@ -17,6 +17,7 @@
 #include "souls.h"
 #include "talk.h"
 #include "visitor_families.h"
+#include "visitors.h"
 
 /* Where the nets meet, the first time a profile comes there, after the
  * arrival's own words: an older net's area whose battles are ours (a
@@ -43,25 +44,25 @@ void nets_arrival_words(void) {
 
 void nets_battle_note(const Encounter *e) {
 	if (!e->visitor || profile.visitor_taught || D.visitor_due) return;
-	/* (none for one of BN4's: what MegaMan calls its net is the owner's
-	 * call, docs/multirom/bn4.md, Its viruses as visitors) */
+	/* (BN4's as BN5's, the older Net's: one of either in our battle
+	 * spends the once, and one of BN4's in BN5's says nothing,
+	 * docs/multirom/bn4.md, the owner's call 5) */
 	int family = e->foes[e->visitor - 1].family;
-	if (visitor_net(family) == VISIT_BN4) return;
-	D.visitor_due = e->xrecord ? 2 : 1;
+	D.visitor_due = visitor_telegraph(e->xrecord ? VISIT_BN5 : VISIT_BN6, visitor_net(family));
 	D.visitor_family = family;
 }
 
 /* (MegaMan free on the map, nothing said or shown: a word can start) */
 static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
 
-/* MegaMan on the first visitor a profile met: one of the older net's in
- * a battle of ours, or one of ours in the older net's (docs/multirom/one-net.md,
- * One net: the telegraph), named by its family */
+/* MegaMan on the first visitor a profile met: one of the older Net's
+ * (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's
+ * (docs/multirom/one-net.md, One net: the telegraph), named by its family */
 static void visitor_words(void) {
 	if (!D.visitor_due || !quiet()) return;
 	char name[24], words[240];
-	enemy_name(visitor_id(D.visitor_due == 1 ? VISIT_BN5 : VISIT_BN6, D.visitor_family, 0), name, sizeof name);
-	if (D.visitor_due == 1)
+	enemy_name(visitor_id(visitor_net(D.visitor_family), D.visitor_family, 0), name, sizeof name);
+	if (D.visitor_due == VISITOR_OLDER_NETS)
 		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
 			"@M Where they meet,yeah. Stay sharp!", name);
 	else snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!", name);

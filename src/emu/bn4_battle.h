@@ -1,6 +1,7 @@
 /* Battle Network 4: Red Sun (USA)'s battle structures past bn4.h's: its
  * panels' fields its field init writes (docs/rom/bn4.md, The battle's
- * panels against BN6's), apart from bn4.h, which includes it. */
+ * panels against BN6's) and a won battle's reward (Its rewards), apart from bn4.h,
+ * which includes it. */
 #ifndef CW_BN4_BATTLE_H
 #define CW_BN4_BATTLE_H
 
@@ -102,5 +103,16 @@
 #define BN4_SOUND_ELMPEROR_FC 0x080C2A7Cu /* Elmperor's 0xFC, player 19 */
 #define BN4_SOUND_ELMPEROR_9D 0x080DC6FEu /* ... its 0x9D, player 9 */
 #define BN4_SOUND_CIRKILL_F9  0x080BD42Eu /* CirKill's 0xF9, player 29, two tracks */
+
+/* A won battle's reward (docs/rom/bn4.md, Its rewards): BN6's chooser and pick by their bytes, an enemy's row by its id */
+#define BN4_REWARD_CHOOSER 0x080F57DCu /* the chooser (BN6's 0x080AC150, bn6f sub_80AA8E0, by its bytes): the pick, then BattleState +0x36 */
+#define BN4_REWARD_PICK   0x080F580Cu /* the pick (BN6_REWARD_PICK's twin): one of the enemies (0x080F5944, u8 ids where BN6's are u16), its
+                                       * row (BN4_REWARD_ROW_OF), an entry by the busting level (BN4_BUSTING_TABLE) and MegaMan's HP, r0 */
+#define BN4_REWARD_ROW_OF 0x080F5EC4u /* an enemy id's row: the id itself, but in a battle whose BattleState +0x60 is one of the 22 Navis'
+                                       * of 0x0800840C (0x080083E8: not 20 or 21), with MegaMan's BattleNaviStats +0x36 past 469 or the
+                                       * byte 0x0203DC81 or 0x0203DC82 not 0, 0x100 + its place there: a virus's always its id */
+#define BN4_REWARD_ROWS   0x080F5F50u /* the reward rows: 20 u16 a row, 0x28 apart, BN6's format (BN6_DROP_ROWS: 0-9 MegaMan's HP over 3/8,
+                                       * 10-19 at or below; bits 14-15 0 a chip, its id and code << 9, 1 zenny, 2 HP); 0x080F5F40's literal */
+#define BN4_BUSTING_TABLE 0x0801881Du /* the busting levels' rows of 16 entries' offsets (BN6's 0x08020B9C), read at 0x080F59D6 */
 
 #endif

@@ -53,6 +53,18 @@ bool visitors_here(int depth, int biome);
  * none fits. */
 bool visitor_apply(Encounter *e, int depth);
 
+/* What MegaMan says of a profile's first visitor, once (the telegraph:
+ * docs/multirom/one-net.md; docs/multirom/bn4.md, the owner's call 5): BN5's
+ * and BN4's families are both the older Net's, so one of either in a
+ * battle of BN6's is the older Net's, one of BN6's in a battle of BN5's
+ * is ours, and one of BN4's in a battle of BN5's is of no other net:
+ * nothing said, and the once kept */
+enum { VISITOR_UNSAID, VISITOR_OLDER_NETS, VISITOR_OURS };
+/* ... of a visitor of net `net` in a battle of net `home` (both
+ * visitor_families.h's VISIT_*: a battle's BN5's where it is one of its
+ * records, Encounter.xrecord) */
+int visitor_telegraph(int home, int net);
+
 /* The deep converges (docs/multirom/one-net.md): the older net's area
  * whose records a random battle takes, -1 BN6's area's own: a territory's
  * (`territory`, -1 none) always; in the deep (`deep`, loot.h's loot_deep:

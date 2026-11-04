@@ -6286,6 +6286,14 @@ static void test_visitors(void) {
 	}
 	CHECK(nets_drawn[0] + nets_drawn[1] == 200 && nets_drawn[0] > 70 && nets_drawn[1] > 70,
 		"visitors: BN5's and BN4's families share the battle, each as likely (%d, %d)", nets_drawn[0], nets_drawn[1]);
+	/* (the telegraph, the owner's call 5: BN4's families the older Net's as
+	 * BN5's, so either in a battle of BN6's has the same words and the
+	 * same once; BN6's in BN5's are ours; BN4's in BN5's of no other net) */
+	CHECK(visitor_telegraph(VISIT_BN6, VISIT_BN5) == VISITOR_OLDER_NETS && visitor_telegraph(VISIT_BN6, VISIT_BN4) == VISITOR_OLDER_NETS,
+		"visitors: BN5's and BN4's in a battle of BN6's both the older Net's");
+	CHECK(visitor_telegraph(VISIT_BN5, VISIT_BN6) == VISITOR_OURS, "visitors: BN6's in a battle of BN5's ours");
+	CHECK(visitor_telegraph(VISIT_BN5, VISIT_BN4) == VISITOR_UNSAID && visitor_telegraph(VISIT_BN6, VISIT_BN6) == VISITOR_UNSAID &&
+		visitor_telegraph(VISIT_BN5, VISIT_BN5) == VISITOR_UNSAID, "visitors: none said of the older Net's in its own battle, nor a net's in its own");
 	test_nkin[VISIT_BN4] = 0;
 	for (int v = 0; v < 6; ++v) enemy_moved_set(0x310 + v, NULL);
 	enemy_moved_set(0x300, NULL);

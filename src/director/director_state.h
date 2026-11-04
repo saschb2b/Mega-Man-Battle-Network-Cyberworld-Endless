@@ -60,7 +60,7 @@ typedef struct {
 	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
 	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
 	bool deep;             /* ... or the deep's, of both nets (loot_deep) */
-	int visitor_due;       /* the first visitor a profile met: 1 one of BN5's in a battle of BN6's, 2 one of BN6's in the older net's; MegaMan's words due */
+	int visitor_due;       /* the first visitor a profile met (visitors.h's visitor_telegraph): one of the older Net's, BN5's or BN4's, in a battle of BN6's, or one of BN6's in BN5's; MegaMan's words due */
 	int visitor_family;    /* ... its family (BN6's AI index) */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
