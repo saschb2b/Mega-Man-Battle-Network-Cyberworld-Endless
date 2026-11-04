@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -382,12 +382,19 @@ sounds take from the themes' range are the owner's to confirm.
    other eleven join as each is proved. Chosen over waiting for all 17
    and over Billy alone (one visitor in eleven, the same family each
    time).
-7. **Decided, 4 November 2026: BN4's moved viruses enter with BN4's own
-   appear.** Each family takes BN4's generic state 0 (`0x0800FCAC`, the
-   appear) with it, as it takes BN4's after-state, so a BN4 visitor
-   appears and idles through the paused opening as it does in BN4, even
-   beside BN6's viruses blinking in their own way. Chosen over BN6's
-   appear for all, which left Shrimpy V3 one sprite update apart.
+7. **Decided, 4 November 2026, then revised the same day: the comparison
+   is aligned, the game unchanged.** First decided as "BN4's moved viruses
+   enter with BN4's own appear", on the lead's claim that the two games'
+   appears differ. Measured before it was built, the claim was wrong: BN4's
+   appear (`0x0800FE00`, from its generic state 0 `0x0800FCAC`) runs BN6's
+   twin's steps (only its sound and a battle-kind check differ), and the
+   one sprite update Shrimpy V3 parts by comes from the battle's opening,
+   whose appear bit BN4 sets a frame later after the virus's init than BN6
+   does ([BN4 Red Sun's tables](../rom/bn4.md), the appear). Revised: the
+   BN4 specs run BN6's opening a frame longer, as they run BN6's battle a
+   frame behind, the engines' difference named in the comparison; a BN4
+   visitor keeps BN6's appear and opening in play. Chosen over a game shim
+   that delays BN4 visitors a frame and over porting BN4's appear anyway.
 8. **Decided, 4 November 2026: BN4's sounds keep slots 0x3F-0x34**
    (Its sounds, above), the top of the per-run themes' range, over taking
    BN5's reserved 0x41-0x4B first.
