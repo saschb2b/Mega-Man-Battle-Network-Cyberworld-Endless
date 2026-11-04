@@ -3589,7 +3589,8 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 	for (int i = 0; i < f->ntypes; ++i)
 		for (int k = 0; k < g->ntypes; ++k) {
 			const XvType *a = &f->types[i], *b = &g->types[k];
-			if (a->kind != b->kind || a->from != b->from) continue;
+			/* (by the number each runs as in the dispatch: BN4's past BN5's) */
+			if (a->kind != b->kind || XV_TYPE_N(a) != XV_TYPE_N(b)) continue;
 			bool shared = (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_SHARED);
 			bad += !shared && (a->to == XV_TYPE_MOVED || a->to != b->to);
 		}

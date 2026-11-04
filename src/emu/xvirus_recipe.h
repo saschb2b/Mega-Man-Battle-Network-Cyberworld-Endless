@@ -52,7 +52,13 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
  * the second-level dispatch (xvirus_dispatch.h) spawns it as BN6's twin
  * `to`, or, where `to` is XV_TYPE_MOVED, as the kind's dispatch type, which
  * runs its game's routine for `from` copied with the family's code */
-typedef struct { uint8_t kind, from, to; } XvType;
+typedef struct { uint8_t kind, from, to, as; } XvType;
+/* The number a type runs as in the dispatch's tables: `as` where its game numbers its types past BN5's (BN4's: the
+ * generator's XV_BN4_TYPE_* on, tools/xrecipe_bn4.py), else its game's own */
+#define XV_TYPE_N(t) ((t)->as ? (t)->as : (t)->from)
+#define XV_BN4_TYPE_T1 0x60   /* the first numbers BN4's moved types of the first, third and fourth kinds run as there, past */
+#define XV_BN4_TYPE_T3 0xD0   /* ... BN5's 95, 204 and 145 types (its families', Navis', chips' and Souls' from 0) */
+#define XV_BN4_TYPE_T4 0xA0
 #define XV_TYPE_MOVED 0xFF
 #define XV_TYPE_SHARED 0xFE   /* moved by a family installed before it: its MOVED entry that family's copy, run for this one too */
 /* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
@@ -144,7 +150,9 @@ typedef struct {
 	const XvSong *songs;       /* its sounds BN6 has none of, copied into BN6's empty song slots */
 	int nsongs;
 	uint32_t prestep;          /* its game's virus dispatcher's case for its ids, which a port runs before its state each frame
-	                              (xvirus_shim.h, its pre-step: the case's address in its game, 0 none) */
+	                              (xvirus_shim.h, its pre-step: the case's address in its game, 0 none); BN4's: the work of
+	                              its own its update does past BN4's pre-step, run there as it is (its code, which goes on to
+	                              BN6's state step itself: tools/xrecipe_bn4.py) */
 	const uint16_t *held_chips; /* its viruses' held chips as BN6's ids, six lists of 16 (0xFFFF ending one), written into its home
 	                              (`held` 0); a chip of its game's BN6 has none of left out (the generator's hold-outs) */
 } XVirusFamily;

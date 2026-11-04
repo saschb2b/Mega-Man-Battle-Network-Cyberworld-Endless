@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -14,14 +15,15 @@
 static const int KINDS[XV_DISPATCH_KINDS] = { 1, 3, 4 };
 static const int TYPES[XV_DISPATCH_KINDS] = { XV_T1_DISPATCH, XV_T3_DISPATCH, XV_T4_DISPATCH };
 
-/* the dispatch's spawners, in their order at XV_SPAWN_1 on: each its kind and BN6's spawner, and BN5's that go to it */
-static const struct { int kind; uint32_t bn6, bn5[2]; } SPAWNERS[XV_SPAWNERS] = {
-	{ 1, BN6_SPAWN_1, { BN5_SPAWN_1, 0 } },
-	{ 1, BN6_SPAWN_1_LAST, { BN5_SPAWN_1_LAST, BN5_SPAWN_1_LAST2 } },
-	{ 3, BN6_SPAWN_3, { BN5_SPAWN_3, 0 } },
-	{ 3, BN6_SPAWN_3_LAST, { BN5_SPAWN_3_LAST, 0 } },
-	{ 3, BN6_SPAWN_3_FIRST, { BN5_SPAWN_3_FIRST, 0 } },
-	{ 4, BN6_SPAWN_4, { BN5_SPAWN_4, 0 } },
+/* the dispatch's spawners, in their order at XV_SPAWN_1 on: each its kind and BN6's spawner, and BN5's and BN4's that go
+ * to it (BN4's each BN5's of the same body: bn4.h) */
+static const struct { int kind; uint32_t bn6, bn5[2], bn4; } SPAWNERS[XV_SPAWNERS] = {
+	{ 1, BN6_SPAWN_1, { BN5_SPAWN_1, 0 }, BN4_SPAWN_1 },
+	{ 1, BN6_SPAWN_1_LAST, { BN5_SPAWN_1_LAST, BN5_SPAWN_1_LAST2 }, BN4_SPAWN_1_LAST },
+	{ 3, BN6_SPAWN_3, { BN5_SPAWN_3, 0 }, BN4_SPAWN_3 },
+	{ 3, BN6_SPAWN_3_LAST, { BN5_SPAWN_3_LAST, 0 }, BN4_SPAWN_3_LAST },
+	{ 3, BN6_SPAWN_3_FIRST, { BN5_SPAWN_3_FIRST, 0 }, BN4_SPAWN_3_FIRST },
+	{ 4, BN6_SPAWN_4, { BN5_SPAWN_4, 0 }, BN4_SPAWN_4 },
 };
 
 int xvirus_dispatch_slot(int kind) {
@@ -56,9 +58,10 @@ uint32_t xvirus_dispatch_routine(int kind) {
 }
 
 uint32_t xvirus_dispatch_spawner(int game, uint32_t from) {
-	if (game != XROM_BN5_COLONEL_US) return 0;
+	if (game != XROM_BN5_COLONEL_US && game != XROM_BN4_RED_SUN_US) return 0;
 	for (int i = 0; i < XV_SPAWNERS; ++i)
-		if (from == SPAWNERS[i].bn5[0] || (SPAWNERS[i].bn5[1] && from == SPAWNERS[i].bn5[1])) return XV_SPAWN_1 + XV_SPAWN_STEP * (uint32_t)i;
+		if (game == XROM_BN4_RED_SUN_US ? from == SPAWNERS[i].bn4 : from == SPAWNERS[i].bn5[0] || (SPAWNERS[i].bn5[1] && from == SPAWNERS[i].bn5[1]))
+			return XV_SPAWN_1 + XV_SPAWN_STEP * (uint32_t)i;
 	return 0;
 }
 

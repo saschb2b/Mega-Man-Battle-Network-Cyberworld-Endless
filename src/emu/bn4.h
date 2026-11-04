@@ -58,6 +58,32 @@
 #define BN4_STATE_GENERIC_5 0x080105BDu
 #define BN4_BY_NAME_RANGE 0x080B6568u /* the enemies of a NameID range (r0 a list it fills, r1 and r2 the bounds): BN6_BY_NAME_RANGE's work, its side
                                        * its own (BN6's takes it in r3) */
+#define BN4_SPAWN_1       0x080032B8u /* a first-kind object spawned (r0 its type, r1-r4 its panel, element, parameters), run after the object
+                                       * running: BN5_SPAWN_1's body, its insert 0x0800337C BN5's 0x08003204 (tools/xrecipe_bn4.py) */
+#define BN4_SPAWN_1_LAST  0x080032D4u /* ... at the run list's end (BN5_SPAWN_1_LAST's body, its insert 0x080033A4) */
+#define BN4_SPAWN_3       0x080032F0u /* the third kind's, after the object running (BN5_SPAWN_3's body) */
+#define BN4_SPAWN_3_LAST  0x0800330Cu /* ... at the list's end (BN5_SPAWN_3_LAST's) */
+#define BN4_SPAWN_3_FIRST 0x08003328u /* ... at its start (BN5_SPAWN_3_FIRST's, its insert 0x080033BC BN5's 0x08003244) */
+#define BN4_SPAWN_4       0x08003344u /* the fourth kind's, after the object running (BN5_SPAWN_4's) */
+#define BN4_TIME_STOP     0x08007948u /* battle_isTimeStop: the battle's flags' bit 4 (BN6's 0x0800A098, the same body) */
+#define BN4_HIGHLIGHT_PANEL 0x08009DA0u /* a panel (r0 column, r1 row) lit where an attack will strike: its byte of BN4_PANEL_HIGHLIGHTS */
+#define BN4_SET_PANEL_TYPE 0x08009DC4u /* a panel's type set (r0 column, r1 row, r2 type) unless it is a hole, for BN4_PANEL_TIMER's 0xBE frames */
+#define BN4_ENEMY_PLAYER_ROW 0x0800A17Au /* the row of the other side's player (BN4_FIND_PLAYER), or its own (BN6's 0x0800D048, its future row
+                                       * where his row is off the field) */
+#define BN4_DIRECTION_TO  0x0800AFB0u /* the direction from its panel to another (0x0800AF90: r0-r3, 0 the same panel, 1-4) into
+                                       * BN4_COLL_DIRECTION; BN6's 0x0800E994 answers neighbours alone */
+#define BN4_FIND_PLAYER   0x0800C456u /* battle_findPlayer: the player object of side r0 (BN6's 0x080103BC, its own search) */
+#define BN4_OBJECT_DESTROY 0x08010561u /* object_genericDestroy, a moved object's jump table's third entry (BN6's 0x08016C8B) */
+#define BN4_HIT_TAKEN     0x080CDCE4u /* an object's hit taken off its HP (r0 0), -1 back where none is left (BN6's 0x0801156A) */
+#define BN4_T3_0B_KINDS   0x080CE5B0u /* the third kind's 0x0B's kinds, 16 bytes each: its collision set-up, element (+3), hit effect, sprite
+                                       * (+5 list offset, +6 number), speed (+0xC); CirKill's 10-12 */
+#define BN4_TILE_BUFFER   0x02037810u /* a buffer of sprite tiles copied each frame (its end at +0, its fill at +4): Elmperor's aura draws
+                                       * through it (the fourth kind's 0x4C); no BN6 twin mapped */
+/* Walla's, Elmperor's and CirKill's types (bn4_twins.TYPES, docs/rom/bn4.md), each moved through the second-level dispatch */
+#define BN4_T3_WALLA_RING 0x3C        /* the third kind's: Walla's rings (two a throw), flying at a speed of their own, shot down by their HP */
+#define BN4_T3_ELMPEROR_STRIKE 0x79   /* ... Elmperor's strike, the panel it lands on given its element's type */
+#define BN4_T3_CIRKILL_SHOT 0x0B      /* ... CirKill's shot, of BN4_T3_0B_KINDS' kind 10 + its version / 2 */
+#define BN4_T4_ELMPEROR_AURA 0x4C     /* the fourth kind's: Elmperor's aura over it (not moved: an interim) */
 #define BN4_ID_RAISE      0x0800B036u /* an enemy id raised by the level ([eToolkit +0x44] +0xD, at most 2): a virus's by 2 a level (to its
                                        * version 5), a Navi's by 1; that the level is the playthrough's is assumed */
 #define BN4_COLL_SIZE     0x90        /* an object's collision data (BN5's 0xA0, BN6's 0xA8), its offsets otherwise */
@@ -90,6 +116,15 @@
 #define BN4_COLL_FINAL_DAMAGE 0x28    /* ... u16: the HP a hit takes, subtracted at 0x08013C58 (BN6's +0x80) */
 #define BN4_COLL_FLAGS    0x64        /* ... u32: ObjectFlags1, BN6's bits (BN6's +0x3C) */
 #define BN4_COLL_STRUCK   0x68        /* ... u32: ObjectFlags2, BN6's bits (BN6's +0x40) */
+#define BN4_COLL_POISON_TIMER 0x06    /* ... u8: frames to poison's next point on a poison panel (BN6's +8): 6, less 1 a frame there
+                                       * (0x0801301E, BN6's 0x0801A1AA); Elmperor holds it at 0xFF, poison never striking it */
+#define BN4_COLL_HIT_EFFECT 0x07      /* ... u8: the effect a hit it lands shows (BN6's +9; object_setCollisionHitEffect 0x08012F74, BN6's
+                                       * 0x0801A140, alike but for this offset) */
+#define BN4_COLL_DIRECTION 0x0A       /* ... u8: the direction it strikes in, 0-4 (BN6's +0xC; BN4_DIRECTION_TO writes it) */
+#define BN4_COLL_STRUCK_BY 0x54       /* ... u32: the masks' bits of what struck it this frame (BN6's +0x70), gathered into +0x80 (BN6's +0x54)
+                                       * by object_presentCollisionData (0x08012D62, BN6's 0x0801A018) */
+#define BN4_COLL_MASKS    0x08012660u /* the collision masks, two words a region (r0 the side), read by 0x08012EF6: BN6_COLL_MASKS' words but
+                                       * for its bit 0x80, region for region (the first 60 compared) */
 #define BN4_AI_DATA       0x02035B20u /* the AI data: one a side (MegaMan's, a Navi's), 0xC0 each, no pool (BN6 8 of 0x100) */
 #define BN4_AI_DATA_SIZE  0xC0        /* (0x0800BFF4: `movs r1,#0xc0; muls`, then BN4_AI_DATA) */
 #define BN4_AI_ATTACK_VARS 0x70       /* AI data: the attack's variables, 0x50 (BN6's +0xA0); the damage at +0x78, the chip at +0x84 */
@@ -99,6 +134,10 @@
 #define BN4_PANEL_ALLIANCE 0x01       /* its side (BN6's +3) */
 #define BN4_PANEL_FLAGS   0x04        /* u32: its type, flags, side and occupants (BN6's +0x14) */
 #define BN4_PANEL_RESERVER 0x14       /* the object that reserved it (BN6's +0x1C) */
+#define BN4_PANEL_TIMER   0x12        /* u16: the frames a panel set by BN4_SET_PANEL_TYPE keeps its type (0xBE there; BN6's +0x12 counts
+                                       * for its conveyors alone) */
+#define BN4_PANEL_HIGHLIGHTS 0x02037ABEu /* a byte a panel (row * 8 + column): 1 where an attack will strike, BN4_HIGHLIGHT_PANEL's; BN6
+                                       * keeps it in the panel's +1 (object_highlightPanel, 0x0800CBD8) */
 #define BN4_RNG_PRIMARY   0x02001790u /* the main RNG's state (GetRNG's literal) */
 #define BN4_RNG_SECONDARY 0x020015D4u /* the second RNG's state: stepped by GetRNG's twin at 0x08001B30, the same code on its own word */
 #define BN4_FREE          0x08800000u /* the guest core's ROM copy past BN4's 8 MB: its records (src/emu/guest.c) */

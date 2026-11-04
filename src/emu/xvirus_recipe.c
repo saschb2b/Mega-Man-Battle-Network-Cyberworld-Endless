@@ -209,7 +209,9 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 		if ((k->at & 1) || !xvirus_is_code(f, k->at) || !xvirus_is_code(f, k->at + 2) || k->reg > 7 || k->was > 0xFF || k->now <= 0xFF)
 			return no(why, n, "chip compare %d at %08x", i, (unsigned)k->at);
 	}
-	if (f->prestep && (f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
+	/* (BN5's a port of its dispatcher's case; BN4's its own code) */
+	if (f->prestep && (f->game == XROM_BN4_RED_SUN_US ? !xvirus_is_code(f, f->prestep) :
+		f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
 		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE;
 	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
@@ -242,8 +244,10 @@ static bool art_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n
 		const XvType *t = &f->types[i];
 		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
 		if (t->to == xvirus_dispatch_type(t->kind) && t->to != XV_TYPE_SHARED) return no(why, n, "object type %#x as the dispatch's own", t->from);
+		if (t->as && (t->to != XV_TYPE_MOVED && t->to != XV_TYPE_SHARED)) return no(why, n, "object type %#x run as %#x, not moved", t->from, t->as);
 		for (int k = 0; k < i; ++k)
-			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
+			if (f->types[k].kind == t->kind && (f->types[k].from == t->from || XV_TYPE_N(&f->types[k]) == XV_TYPE_N(t)))
+				return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}
 	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES))
 		return no(why, n, "its struct1 laid out with no battle sprite of list 1");

@@ -316,6 +316,13 @@ static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
 static void prestep_set(Ctx *c) {
 	const XVirusFamily *f = c->f;
 	if (!f->prestep) return;
+	if (f->game == XROM_BN4_RED_SUN_US) {
+		/* (BN4's: its update's own work, its copy, which goes on to BN6's state step itself) */
+		uint32_t at = moved_to(f, f->prestep);
+		if (!at) xv_fail("its pre-step %08x is none of its code", (unsigned)f->prestep);
+		else xv_word(XV_PRESTEP + 4u * (uint32_t)f->ai, 0, at | 1);
+		return;
+	}
 	if (f->game != XROM_BN5_COLONEL_US || xvirus_crc32(c->rom + (BN5_VIRUS_DISPATCH - BUS), BN5_VIRUS_DISPATCH_END - BN5_VIRUS_DISPATCH) != BN5_VIRUS_DISPATCH_CRC ||
 		xvirus_crc32(c->rom + (BN5_PRESTEP_TAKE - BUS), BN5_PRESTEP_TAKE_END - BN5_PRESTEP_TAKE) != BN5_PRESTEP_TAKE_CRC) {
 		xv_fail("its pre-step's source in its game is not the one ported");
@@ -576,11 +583,11 @@ static void effects_set(const XVirusFamily *f, const Game *g) {
 static void types_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->ntypes && !xv_failed(); ++i) {
 		const XvType *t = &f->types[i];
-		int k = xvirus_dispatch_slot(t->kind);
+		int k = xvirus_dispatch_slot(t->kind), n = XV_TYPE_N(t);
 		uint32_t routine = 0;
 		if (t->to == XV_TYPE_SHARED) {
 			/* (moved by a family installed before it: its MOVED entry must name that family's copy, its TWIN entry moved) */
-			uint32_t moved = xvirus_dispatch_moved_at(t->kind, t->from), twin = xvirus_dispatch_twin_at(t->kind, t->from);
+			uint32_t moved = xvirus_dispatch_moved_at(t->kind, n), twin = xvirus_dispatch_twin_at(t->kind, n);
 			if (!moved || emu_read32(moved) == (XV_STUB_NONE | 1) || emu_read8(twin) != XV_TYPE_MOVED)
 				xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
 			continue;
@@ -590,7 +597,7 @@ static void types_set(const XVirusFamily *f, const Game *g) {
 			routine = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;
 			if (!routine) { xv_fail("its object %d:%#x (%08x) is none of its code", t->kind, t->from, (unsigned)own); return; }
 		}
-		xg_type(t->kind, t->from, t->to, routine);
+		xg_type(t->kind, (uint8_t)n, t->to, routine);
 	}
 }
 
