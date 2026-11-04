@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -395,6 +395,10 @@ sounds take from the themes' range are the owner's to confirm.
    frame behind, the engines' difference named in the comparison; a BN4
    visitor keeps BN6's appear and opening in play. Chosen over a game shim
    that delays BN4 visitors a frame and over porting BN4's appear anyway.
+   Built the same day: the harness writes BN6's first blink step a frame
+   longer into every BN4 spec against BN6's (`tests/xdiff/legit.json`'s
+   `bn4` `align`), every BN4 spec PASSES and the opening's allowance is
+   gone ([the differential](../devtools/differential.md), The BN4 trace).
 8. **Decided, 4 November 2026: BN4's sounds keep slots 0x3F-0x34**
    (Its sounds, above), the top of the per-run themes' range, over taking
    BN5's reserved 0x41-0x4B first.

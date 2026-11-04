@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T22:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -830,44 +830,70 @@ format, its game 4: the trace's header names it):
     runs of BN6's twin, `0x08016380`, whose appear waits on `0x0800139A`
     then blinks 2 x 16 frames; none in the 154 paused frames after its
     appear) and BN6's state 1 at its first fight frame (the battle's
-    offset). So at t1 BN4's Spikey is on its idle animation's frame 2 with
-    5 left and BN6's on the same record with 6, one update behind where it
-    was 152 behind (frame 0 at the first record), Shrimpy's and Elmperor's
-    alike: the engines' openings, not the after-state nor the appear's code (below). Allowed (`legit.json`'s
-    `bn4` allowed, "the opening's idle animation, BN4's appear a run
-    longer"; `tools/xdiff_bn4.py` `opening_animation`): the sprite place
-    (+0x91 its count, +0x92 its frame's flags, +0xAC its frame record,
-    +0xB0-+0xBB what the update takes from it) of a family's first-kind
-    object from the first frame compared until its animation (+0x90) is set
-    in either game or the two places meet, never after, and only where both
-    are on the same animation of the same sprite, each place a step of it as
-    BN4's bytes run it (`anim_steps`), BN4's exactly one step ahead at every
-    frame (`OPENING_LEAD`) and each place's other bytes what the other
-    game's own trace shows at that frame record. Its mutations
+    offset). So BN4's virus ran its appear, and the sprite update after it,
+    once more than BN6's: at t1 BN4's Spikey was on its idle animation's
+    frame 2 with 5 left and BN6's on the same record with 6, one update
+    behind where it was 152 behind (frame 0 at the first record), Shrimpy's
+    and Elmperor's alike, and `shrimpy_v3` failed at t65, where Shrimpy's
+    hook (`0x080BA13E`: its animation 1 cleared where the animation in play
+    has ended, `0x08002E56` bit 0x80) read its idle animation's last frame
+    in BN4 a frame before BN6 (its +0x10, +0x11 and +0x90). That update is
+    the engines' openings', not the after-state's nor the appear's code
+    (the next item).
+  - **The opening, a frame longer in BN6's** (the owner's call 7, revised:
+    [Battle Network 4 in a run](../multirom/bn4.md), The owner's calls;
+    `legit.json`'s `bn4` `align`, "BN6's battle opening a frame longer";
+    `tools/xdiff_bn4.py` `alignments`). Both appears run the same steps:
+    BN4's generic state 0 (`BN4_STATE_GENERIC_0`) takes its plain appear
+    (`BN4_APPEAR`, `0x0800FE00`) in a plain battle, BN6's twin's steps
+    (`BN6_APPEAR`, `0x08016396`: into the appear queue, wait for the battle
+    state's appear bit 0 and the queue's head, a 2 x 16 frame blink, wait
+    for bit 1) but for BN4's battle kind 0x44 and its sound ([BN4
+    Red Sun](../rom/bn4.md), A virus's appear and the engine's appear bits).
+    Each opening sets bit 0 from the same step, once its fade ends (BN4's
+    `bl BN4_APPEAR_BITS_SET` at `0x080E1F0E`, BN6's `bl BN6_APPEAR_BITS_SET`
+    at `0x080E1A0E`), and a probe of hooks on both (temporary, not kept) in
+    `spikey_v1` and `shrimpy_v3` saw it 18 frames after the virus's init in
+    BN4 (its step 0 run 19 times from its init's frame) and 17 in BN6 (17
+    runs from the frame after), the blinks the same 32 frames. So the
+    harness runs BN6's opening a frame longer in every BN4 spec against
+    BN6's (`game=bn4:bn6`), as it runs BN6's battle a fight frame behind
+    (`lag`): BN6's first blink step (`BN6_APPEAR_BLINK_FIRST`,
+    `0x080163FC`, `movs r0,#2` into +0x20) counts 3. `alignments` reads the
+    place by its name from `src/emu/bn6*.h`, checks that BN6's ROM holds
+    `was` (0x2002) there, and writes its immediate plus `frames` (1) into
+    BN6's copy as the spec's first `poke=` (the run prints
+    `xdiff: poke 080163fc (080163fc) = 2003`); BN4's side, the controls'
+    two BN4 runs and every BN5 spec are left alone, and the game too (a
+    BN4 visitor keeps BN6's appear and opening). The frame is one more run
+    of the appear where a bit 0 a frame later would put it: the virus runs
+    its appear and the paused present after it as often as BN4's, the
+    queue empties and bit 1 is set a frame later, and MegaMan's appear (his
+    side, the battle state's +0xD against his +0x16 at
+    `0x080163C0`-`0x080163D4`, skips the queue and the blink and waits for
+    bit 1) ends with it; the fight's frames count as before. The blink and
+    not the bit, because it is one immediate of BN6's own appear, where a
+    bit a frame later needs a count the opening's step has not (it sets
+    the bit the frame the fade ends). Its limit: the queue blinks its
+    objects one after another, so a longer first blink step would delay a
+    spec's k-th foe k frames where BN4's bit delays each one a frame; a
+    spec of more than one foe is refused (every BN4 spec has one) until the
+    bit itself is delayed. With it every BN4 spec PASSES and nothing in
+    the opening needs allowing: the allowance it replaces ("the opening's
+    idle animation, BN4's appear a run longer", which held a family's
+    sprite place to BN4's one update ahead until an animation was set:
+    `opening_animation`, `OPENING_LEAD`, `anim_steps`, `bn4_sprite_data`)
+    is gone with its code. Its mutation (`shrimpy_v3`, "BN6's opening two
+    frames longer": the step made `movs r0,#4`, written after the
+    alignment's) is caught at t1 (+0x91 BN4 5 | BN6 4), and without the
+    alignment (`--poke 080163FC:2002:2`) `spikey_v1` and `shrimpy_v3` fail
+    at t1 (+0x91 BN4 5 | BN6 6). The two the allowance's own checks caught
     (`spikey_v1`): BN6's copy's first idle frame given the next frame's
-    mini-animation offset, caught at t1 on its +0xB0; the port's own,
+    mini-animation offset, caught at t12 on its +0xB0 (BN4 11112 | BN6
+    11124, the first frame compared on that record); the port's own,
     Spikey's copy's sprite update aimed at BN6's family nullsub
     (`call=080026C4:0810A952`), its place 51 updates behind again, caught
-    at t1. What the step changes in a family's behaviour it does not
-    explain: `shrimpy_v3` FAILS at t65, where Shrimpy's hook (`0x080BA13E`: its
-    animation 1 cleared where the animation in play has ended, `0x08002E56` bit
-    0x80) reads its idle animation's last frame in BN4 a frame before BN6 (its
-    +0x10, +0x11 and +0x90). Not the appear's code: BN4's generic state 0
-    (`BN4_STATE_GENERIC_0`) takes its plain appear (`BN4_APPEAR`) in a plain
-    battle, BN6's twin's steps (`BN6_APPEAR`: into the appear queue, wait for
-    the battle state's appear bit 0 and the queue's head, a 2 x 16 frame blink,
-    wait for bit 1) but for BN4's battle kind 0x44 and its sound ([BN4 Red
-    Sun](../rom/bn4.md), A virus's appear and the engine's appear bits). A probe
-    of hooks on both (temporary, not kept) in `spikey_v1` and `shrimpy_v3` saw
-    bit 0 set by each opening after its fade 18 frames after the virus's init
-    in BN4 and 17 in BN6, and the two blinks the same: BN4's appear moved with
-    the families (the owner's call 7, [Battle Network 4 in a run](../multirom/bn4.md)) would
-    wait on BN6's bit and run BN6's count, and leave the step where it is. One
-    paused update more does align it: BN6's first blink step a frame longer
-    (`--poke 080163FC:2003:2`, BN6's own appear) and `shrimpy_v3` PASSES, the
-    opening's allowance unused. The step is the engines' openings', a frame
-    apart, and stays allowed until the owner chooses how a visitor's opening
-    meets it.
+    at t1 on its +0xAC and +0xB0 (all 181 caught).
   - **A diagonal step's direction** (`tools/xdiff_bn4.py`
     `direction_as_bn6`): BN6's rule (`0x0800E994`) gives 5 for a move of two
     or more toward column or row 7 or a diagonal one, BN4's (`0x0800AF90`)
@@ -890,7 +916,7 @@ format, its game 4: the trace's header names it):
   - **Where the fifteen stand**: `spikey_v1`-`v3` and `shrimpy_v1`, `v2`
     INCONCLUSIVE, the family's own records the same in all 1200 frames,
     the world parting where MegaMan is struck (his +0 0x13 against BN6's
-    0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above, the opening's animation);
+    0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above: PASS since, BN6's opening a frame longer);
     `walla_v1`-`v3` FAIL at t72, t68 and t66 and `cirkill_v1`-`v3` at t32,
     t26 and t23 on the hit's spark (the fourth kind's 0x04, +0 and +8), each
     after MegaMan struck (since PASS: CirKill's direction, below); `elmperor_v1`-`v3` FAIL at t1 on its collision data
