@@ -96,7 +96,9 @@ static bool done(Asm *a) {
 #define POP_PC              ((uint16_t)0xBD00)
 #define MOV_LR(rm)          ((uint16_t)(0x4686 | (rm) << 3))   /* mov lr, rm */
 #define BX_LR               ((uint16_t)0x4770)
-enum { EQ = 0, NE = 1, MI = 4 };
+#define LDRB_I(rd, rn, off) ((uint16_t)(0x7800 | (off) << 6 | (rn) << 3 | (rd)))
+#define EORS(rd, rm)        ((uint16_t)(0x4040 | (rm) << 3 | (rd)))
+enum { EQ = 0, NE = 1, MI = 4, LT = 0xB };
 
 /* ---- a NameID range ---- */
 
@@ -125,6 +127,26 @@ bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to
 	bl(&a, to & ~1u);
 	half(&a, POP_PC);   /* (where the tail returns by bx lr: its pop {pc} returns from the push itself) */
 	return done(&a) && a.n == XV_SHIM_ENTRY_SIZE;
+}
+
+/* ---- a direction numbered by the side ---- */
+
+bool xvirus_shim_side(uint8_t out[XV_SHIM_SIDE_SIZE], uint32_t at, uint32_t rule) {
+	enum { RET };
+	Asm a = { out, XV_SHIM_SIDE_SIZE, 0, at, (at & 3) != 0 || !(rule & 1), { 0 }, { { 0 } }, 0 };
+	half(&a, PUSH_LR);
+	bl(&a, rule & ~1u);
+	half(&a, CMP_I(0, 3));
+	to_label(&a, BCC(LT), RET, 'c');      /* (0-2, none, up and down: as they are) */
+	half(&a, LDRB_I(1, 5, 0x16));         /* its side (BN6's rule's r4, 0x0801A05C) */
+	half(&a, CMP_I(1, 0));
+	to_label(&a, BCC(EQ), RET, 'c');
+	half(&a, MOVS(1, 7));
+	half(&a, EORS(0, 1));                 /* (3 and 4 swapped) */
+	here(&a, RET);
+	half(&a, POP_PC);
+	half(&a, 0x46C0);                     /* (a word's end: mov r8,r8) */
+	return done(&a) && a.n == XV_SHIM_SIDE_SIZE;
 }
 
 /* ---- a chip compare ---- */

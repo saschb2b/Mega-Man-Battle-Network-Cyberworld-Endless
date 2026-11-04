@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:55:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -862,7 +862,7 @@ format, its game 4: the trace's header names it):
     0x15: t277, t207, t170, t790, t222); `shrimpy_v3` FAIL at t65 (above);
     `walla_v1`-`v3` FAIL at t72, t68 and t66 and `cirkill_v1`-`v3` at t32,
     t26 and t23 on the hit's spark (the fourth kind's 0x04, +0 and +8), each
-    after MegaMan struck; `elmperor_v1`-`v3` FAIL at t1 on its collision data
+    after MegaMan struck (since PASS: CirKill's direction, below); `elmperor_v1`-`v3` FAIL at t1 on its collision data
     +6 and +8 alone (BN4's 0xFF and 0, BN6's 0 and 0xFF). The
   collision data's layout from code: the collision setup (BN4
   `0x080129AC`, BN6's twin `0x08019FB4`) and the pool's maker
@@ -1384,3 +1384,39 @@ format, its game 4: the trace's header names it):
   ("a copied sound aimed at BN6's own song of its number",
   `poke=080BEAE8:20B7`, Walla's 0xB7 named again: BN6 begins its own
   0xB7 on its player 18) is caught at t3.
+
+- **CirKill's direction** (`cirkill_v1`-`cirkill_v3`: CirKill V1-V3,
+  BN4's 0x5B, 0x5D, 0x5F, at (5,2) against MegaMan idle at (2,2) with
+  2000 HP, as Billy's specs else): `cirkill_v1` parted at t43 on its
+  collision data's +0xC, the direction of its last move (BN4's +0xA),
+  BN4's 4 against BN6's 3 (`v2` at t35, `v3` at t29, the same field).
+  CirKill walks its ring a panel at a time, and its move's end (BN4
+  `0x080BD34E`, in its state 7's move) writes the direction from its old
+  panel (+0x74) to its new (+0x14) through BN4's `0x0800AFB0`, which the
+  recipe copies (`tools/bn4_twins.py` COPIED: BN6 has no routine that
+  answers every panel) with its rule (`BN4_DIRECTION`, `0x0800AF90`):
+  right 4 and left 3 by the screen. BN6's rule (`BN6_DIRECTION`,
+  `0x0800E994`) numbers them by the object's side (r4, its +0x16: right
+  4 and left 3 on side 0, 3 and 4 on side 1), as its collision panels'
+  update passes it (`0x0801A05C`) and BN6's code reads the field
+  (`0x0800E498`, by +0xC from `0x0800E468`), so the copy wrote BN4's 3
+  for CirKill's step to the left on side 1, where BN6's own rule gives
+  4: the port's, a number in BN4's terms in BN6's field (the comparator
+  reads BN4's by the side, `direction_as_bn6`). The recipe now aims each
+  call of a family's code to the rule at a shim of its home that calls
+  the rule's copy and swaps its 3 and 4 where the object's side is 1
+  (`bn4_twins.SIDED`, `XVirusFamily.sides`, `src/emu/xvirus_shim.h`'s
+  direction), so its moves keep BN4's answer for every panel in BN6's
+  numbers. Its mutation (`tests/xdiff/mutations.json`, "CirKill's
+  direction left in BN4's numbers": the copy's call aimed at the rule's
+  copy again) fails `cirkill_v1` at t43 on that field.
+  - `cirkill_v3` was then INCONCLUSIVE at t1107 on a sound, BN4's 0x82
+    against BN6's 0x84: MegaMan's HP low, played by the HP gauge's step
+    in each game (`BN4_HP_LOW_STEP`, `0x0801472C`; `BN6_HP_LOW_STEP`,
+    `0x0801C840`), twins from the HP test on (a quarter of his maximum or
+    less counts 45 frames, then the sound), its count started by the hit
+    that took him there (t1062 in BN4, t1063 in BN6): the state's clock,
+    mapped as BN6's number (`legit.json`'s `bn4` `sounds`, "MegaMan's HP
+    low").
+  - With these, **`cirkill_v1`, `cirkill_v2` and `cirkill_v3` PASS**: 1200
+    fight frames each, the family's records and the world's the same.

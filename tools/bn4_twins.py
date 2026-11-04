@@ -148,6 +148,16 @@ COPIED = {
                 "takes the panels an attack object holds too (its masks 0x0F8800A0 where BN4's 0x3F8800A0); copied, its table "
                 "with it",
 }
+# A copied rule whose answer BN6 numbers otherwise, by the object's side: each call of a family's code to it made a call
+# to a shim of its home that calls the rule's copy and numbers its answer BN6's way (src/emu/xvirus_shim.h, a direction;
+# XVirusFamily.sides): entry -> why
+SIDED = {
+    0x0800AF90: "BN4's direction rule (BN4_DIRECTION): right 4 and left 3 by the screen, which BN6's collision data holds by "
+                "the object's side, as BN6's rule numbers them (0x0800E994, r4 its +0x16: right 4 and left 3 on side 0, 3 and "
+                "4 on side 1; BN6's collision panels' update 0x0801A04C passes it) and BN6's code reads them (0x0800E498, by "
+                "+0xC from 0x0800E468): its 3 and 4 swapped on side 1, up, down and none as they are (cirkill_v1 parted at t43 "
+                "on its +0xC, BN6's copy writing BN4's 3 for a move to the left on side 1, where BN6's rule gives 4)",
+}
 # a copied routine's data past its pool, copied with it as it is (raw): entry -> (start, end, what)
 COPIED_DATA = {
     0x080B552A: (0x080B5584, 0x080B5594, "its masks: two words a side, BN6's bits (bn6f's PanelData flags)"),

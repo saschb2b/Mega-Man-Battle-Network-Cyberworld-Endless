@@ -304,7 +304,25 @@ static void cmp_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvCmp *k) {
 	if (!thumb_bl_write(code, off, b->at, at)) xv_fail("its compare at %08x made a call to its shim", (unsigned)k->at);
 }
 
+/* A call to its game's direction rule (XVirusFamily.sides), the rule's copy its target: aimed at a shim that calls it and
+ * numbers left and right by the object's side, BN6's way */
+static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
+	uint32_t was = 0, t = 0, at = 0;
+	const uint8_t *orig = c->rom + (site - BUS);
+	uint8_t shim[XV_SHIM_SIDE_SIZE];
+	if (!thumb_bl_decode(site, get16(orig), get16(orig + 2), &was) || was != BN4_DIRECTION || !thumb_bl_read(code, site - b->start, b->at, &t) ||
+		t != moved_to(c->f, BN4_DIRECTION) || !(at = shim_room(c, sizeof shim)) || !xvirus_shim_side(shim, at, t | 1)) {
+		xv_fail("its direction's call at %08x", (unsigned)site);
+		return;
+	}
+	uint8_t *p = xv_put(at, sizeof shim, true);
+	if (p) memcpy(p, shim, sizeof shim);
+	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its direction's call at %08x aimed at its shim", (unsigned)site);
+}
+
 static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
+	for (int i = 0; i < c->f->nsides && !xv_failed(); ++i)
+		if (xvirus_block_of(c->f, c->f->sides[i]) == b) side_set(c, b, code, c->f->sides[i]);
 	for (int i = 0; i < c->f->nranges && !xv_failed(); ++i)
 		if (xvirus_block_of(c->f, c->f->ranges[i].at) == b) range_set(c, b, code, &c->f->ranges[i]);
 	for (int i = 0; i < c->f->ncmps && !xv_failed(); ++i)

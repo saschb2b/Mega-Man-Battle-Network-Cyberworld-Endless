@@ -11,6 +11,10 @@
  *    and the beq or bne after it made a call to a shim that compares with
  *    BN6's id (the chip registry's, past 255) and goes on where the branch
  *    would, the flags the compare's;
+ *  - a direction (XVirusFamily.sides): a call of BN4's code to its rule for
+ *    the direction from a panel to another, copied with it, whose left and
+ *    right are the screen's, made a call to a shim that calls the rule and
+ *    numbers them by the object's side, as BN6's collision data holds them;
  *  - an entry (XvRef.entered): a hook of BN4's whose own step is the tail
  *    of its init or update past the engine's work, which BN6's init or
  *    dispatcher does itself, entered through a shim that pushes lr as the
@@ -34,6 +38,7 @@
 #define XV_SHIM_CMP_SIZE     28   /* a chip compare's */
 #define XV_SHIM_PRESTEP_MAX  0x70 /* a pre-step's, at most */
 #define XV_SHIM_ENTRY_SIZE   8    /* an entry's */
+#define XV_SHIM_SIDE_SIZE    24   /* a direction's (XVirusFamily.sides) */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
  * (and `side` into r3 where it is 0 or more: BN4's look-up takes its side
@@ -45,6 +50,14 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
  * within a call's reach: a tail of a routine past its push {lr}), then pops
  * pc: false where it is not. */
 bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to);
+
+/* The shim at `at` (word-aligned) a call to its game's direction rule is
+ * aimed at (BN4's, 0 none, 1 up, 2 down, 3 left and 4 right by the screen):
+ * it calls `rule` (Thumb, within a call's reach: the rule's copy) and swaps
+ * its 3 and 4 where the object's side (r5's +0x16) is not 0, as BN6's rule
+ * numbers left and right by it (0x0800E994, r4 the side); r0 and r1 as the
+ * rule leaves them but for that, r2 and r3 kept: false where it is not. */
+bool xvirus_shim_side(uint8_t out[XV_SHIM_SIDE_SIZE], uint32_t at, uint32_t rule);
 
 /* The shim at `at` (word-aligned) a call replaces `cmp reg,#imm; beq to`
  * (eq) or `...; bne to` with: it compares register `reg` (r0-r7) with

@@ -153,6 +153,7 @@ class Family:
         self.hooks = [('BN6', NULLSUB6)] * 8
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
+        self.sides = []   # (its calls to BN4's direction rule, each through a shim: side_sites)
 
     def decide(self, kind, detail):  # noqa: D401
         self.decisions.append((kind, detail))
@@ -561,6 +562,15 @@ def name_ranges(f):
             f.ranges.append(dict(at=site, lo=f.first_id, hi=f.first_id + 5, why=f'BN4\'s ids {lo:#x}-{hi:#x}, its own'))
 
 
+def side_sites(f):
+    """its calls (its own code's or a copied routine's) to a rule of BN4's whose answer BN6 numbers by the object's side
+    (bn4_twins.SIDED): each through a shim that numbers it so (src/emu/xvirus_shim.h)"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t in bn4_twins.SIDED:
+                f.sides.append((site, f'its call to {t:08X} (bn4_twins.SIDED): its left and right by the object\'s side, BN6\'s way'))
+
+
 def pair_calls(f, pairs):
     f.pairs = []
     for t, sites in sorted(f.calls.items()):
@@ -665,6 +675,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     walk_code(b4, f, [x & ~1 for x in f.own] + f.roots, {f.type_table, f.st}, pairs)
     name_ranges(f)
+    side_sites(f)
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
@@ -1063,6 +1074,10 @@ def c_recipe(f):
         L.append(f'static const XvRange {n}_ranges[] = {{')
         L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["lo"]:03X}, 0x{x["hi"]:03X} }},   /* {x["why"]} */' for x in f.ranges]
         L.append('};')
+    if f.sides:
+        L.append(f'static const uint32_t {n}_sides[] = {{')
+        L += [f'\t0x{at:08X},   /* {why} */' for at, why in f.sides]
+        L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
@@ -1099,7 +1114,7 @@ def c_family(f, n):
          f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
          f'\t.first_id = XV_FIRST_ID + 0x{f.first_id - XV_FIRST_ID:X},', f'\t.home = XV_HOMES + 0x{f.home - XV_HOMES:X},']
     for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
-                         ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
+                         ('sides', f.sides), ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t.{field} = {n}_{field}, .n{field} = {count(field)},')
     L.append('\t.hooks = { ' + ', '.join(ref_text(h) for h in f.hooks) + ' },')
@@ -1148,7 +1163,7 @@ def report_family(f):
          f'- sprites: ' + ', '.join(f'{s["list"]}:{s["index"]:#x} as {s["to_list"]}:{s["to_index"]:#x} at {s["at"]:08X}'
                                     for s in [f.sprite] + f.attack_sprites),
          f'- {len(f.walks)} routines walked, {len(f.tables)} jump tables, {len(f.imms)} immediates rewritten, '
-         f'{len(f.ranges)} NameID ranges', '', '### Calls out', '']
+         f'{len(f.ranges)} NameID ranges, {len(f.sides)} directions by the side', '', '### Calls out', '']
     for t, tw, how, cls, sites, audited in f.pairs:
         L.append(f'- {t:08X} x{len(sites)}: ' + (f'{tw} ({how})' if isinstance(tw, str) else f'BN6 {tw:08X} ({how})' if cls is None and tw else
                                                f'BN6 {tw:08X} ({how}, {cls}{", audited" if audited else ""})' if tw else f'none ({how})'))

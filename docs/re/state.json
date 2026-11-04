@@ -176,6 +176,10 @@
       "what": "BN4's families' sounds BN6 has no song of copied into BN6 as BN4's own: 12 songs (BN4's song table, BN4_MPLAYS' players 8, 9, 19, 28 and 29) at fixed slots 0x3F-0x34 of BN6's empty songs (src/audio/xsong.c XSOUNDS, tools/xrecipe_bn4.py SOUND_SLOTS; xsong's per-run themes now 0x26-0x33, 12 copied today), packed below the families' sprites (XV_ART + 0x5A000, the sprites' room full); the differential names a BN4 copy by its slot and pairs it by routine (legit.json's bn4 sounds), a frame's sounds line the family's where its code played one (tools/xdiff_bn4.py family_sounds); their sites named (BN4_SOUND_* in bn4_battle.h), docs/rom/bn4.md's row"
     },
     {
+      "date": "2026-11-04",
+      "what": "BN4's direction rule (BN4_DIRECTION 0x0800AF90: left and right by the screen) against BN6's (BN6_DIRECTION 0x0800E994: by the object's side, r4 its +0x16) and the HP gauge's low-HP step in both (BN4_HP_LOW_STEP 0x0801472C, its sound 0x82; BN6_HP_LOW_STEP 0x0801C840, its 0x84) mapped (docs/rom/bn4.md's row): a moved family's calls to BN4's rule go through a shim that numbers its answer BN6's way (bn4_twins.SIDED, src/emu/xvirus_shim.h), and cirkill_v1-v3 PASS"
+    },
+    {
       "date": "2026-10-25",
       "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
     },

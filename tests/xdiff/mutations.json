@@ -1354,6 +1354,14 @@
     "080BEAE8:20B7"
    ],
    "what": "Walla's sound 0xB7 (BN4 0x080BEAE8: movs r0,#0xb7, its copy's immediate the recipe gives BN6's empty slot 0x37, where xsong.c's XSOUNDS puts BN4's song) written as BN4's number again: BN6 begins its own song 0xB7 on its player 18 where BN4 begins its 0xB7 on its player 9, which legit.json's bn4 sounds pair with the copy's 0x37 by the routines that play them; the line is the family's, its code having played the sound (tools/xdiff_bn4.py family_sounds), where unmutated they read alike (caught at t3, BN4 [0x37] | BN6 [0xB7]; the spec PASSes unmutated)"
+  },
+  {
+   "name": "CirKill's direction left in BN4's numbers",
+   "spec": "cirkill_v1",
+   "poke": [
+    "08B7F50A:FFEDF7FF:4"
+   ],
+   "what": "the copied direction routine's call (BN4's 0x0800AFB2, bl 0x0800AF90; its copy at XV_CODE + 0x17282 + 0x288, made a call to its shim, src/emu/xvirus_shim.h's direction) aimed at the rule's copy again (0x08B7F4E8), as an install with no shim would leave it: CirKill's move's end (0x080BD34E) writes BN4's 3 for its step to the left into BN6's +0xC, where BN6's rule numbers it 4 on side 1 (bn4_twins.SIDED; caught at t43, BN4's 3 read as BN6's 4 by the side)"
   }
  ]
 }
