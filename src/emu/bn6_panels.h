@@ -94,7 +94,19 @@
 #define BN6_COLL_PANEL_BYTE   0x0C        /* u8, what 0x0800E994 gives of its panel, written by the collision panels' update (0x0801A04C, at
                                            * 0x0801A062; BN4's +0x0A) */
 #define BN6_COLL_COUNTER      0x0D        /* u8, its counter time (its window to be countered), set by 0x0800E9DC at 0x0800E9F6 (BN4's +0xB) */
-#define BN6_COLL_SETUP_ARG    0x0E      /* u8, the collision setup's r3 (0x08019FB4, at 0x08019FBA; BN4's +0x0C, bn4.h BN4_COLL_SETUP_ARG) */
+#define BN6_COLL_HIT_KIND     0x09        /* u8 set by 0x0801A140 (BN4's +7, 0x08012F74) */
+#define BN6_COLL_STATUS_GIVEN 0x10        /* u8 the status a hit gives, from its object's +6 (0x0801A258), passed by the hit pass at
+                                           * 0x081D784E to the struck's BN6_COLL_STATUS_TAKEN (BN4's +0xE) */
+#define BN6_COLL_STATUS_TAKEN 0x11        /* u8 (0x081D7854; BN4's +0xF) */
+#define BN6_COLL_PUSH         0x12        /* u16 a hit's, given the struck's +0xA4 where its low byte is not 0 (0x081D78BA; BN4's +0x74) */
+#define BN6_COLL_PUSH_TAKEN   0xA4        /* u16 the struck's (0x081D78C6; BN4's +0x48) */
+#define BN6_COLL_MET          0x68        /* u32 the index bits of those it met (0x081D7B1E-0x081D7B30; BN4's +0x4C) */
+#define BN6_COLL_HITS_BACK    0x6C        /* u32 the other's alliance word ORed in (0x081D7BD2-0x081D7BD8; BN4's +0x50) */
+#define BN6_COLL_STRUCK_BY    0x7C        /* u32 the striker's index bit ORed in by the hit pass (0x081D7832-0x081D7838): BN4's hit pass has no such
+                                           * store (0x08012BDC-0x08012BE8 ORs the alliance word alone) */
+#define BN6_COLL_HITS_WORD    0x70       /* u32 the struck's, the attacker's alliance word ORed in (0x081D7840; BN4's +0x54) */
+#define BN6_COLL_HITS_TAKEN   0x92        /* u16 one more a hit of the bit (0x081D78B0; BN4's +0x3A) */
+#define BN6_COLL_SETUP_ARG    0x0E     /* u8, the collision setup's r3 (0x08019FB4, at 0x08019FBA; BN4's +0x0C, bn4.h BN4_COLL_SETUP_ARG) */
 #define BN6_COLL_OBJ_2E       0x07        /* u8, its object's +0x2E as the setup copies it (0x08019FDA; BN4's +0x05) */
 #define BN6_COLL_HIT_MASKS    0x30        /* two u32, the alliance words from BN6_COLL_MASKS by alliance and region (0x08019FE8, 0x0801A004;
                                            * BN4's +0x58) */

@@ -2321,6 +2321,18 @@
         "bit": "0x04",
         "direction": "BN6 has it, BN4 not",
         "why": "The bit the object runner runs a paused object by (BN4 0x0800314C at 0x08003174, BN6 0x080031AC at 0x080031D8: tst r4,#4 while the pause byte is set), set on every first-kind object as it spawns (both games' kind 1 descriptors' flags byte 0x19, BN4 0x08003268, BN6 0x080032D0, then 0x17 once it appears). BN4's generic state 1 clears it (0x0801013A: ldrb r0,[r5]; movs r1,#4; bics r0,r1; strb r0,[r5]), as it hands a virus its first own state during the paused opening, so the virus waits for the fight; BN6's (0x080165B8) does not, BN6's state runner never running a state while paused (0x0801B21A, the family's timeline above). The same engine difference as the lag: BN6's own Mettaur keeps 0x04 too (0x17 at t1 against BN4's Mettaur's 0x13, game=bn4:bn6, foes=01@52)"
+      },
+      {
+        "name": "the thunder's sprite, BN6's own art",
+        "whose": "family",
+        "kind": "T3",
+        "type": "0x2A",
+        "part": "obj",
+        "offsets": [
+          "0xA8",
+          "0xBB"
+        ],
+        "why": "Billy's thunder is BN6's own third-kind 0x2A run for Billy's parameters (the recipe's audit, tools/bn4_twins.py AUDITS (0x080D2156, 0x080CADBC): BN6's object, not BN4's moved), so it draws BN6's own art: its init sets up sprite list 0x10, number 0x11 in BN4 (0x080D2044, its sprite_load 0x0800287C) and number 0x16 in BN6 (0x080CAC80, sprite_load 0x080026E4), two sprites of other bytes (the hooks' CRC32s 0x030B3B0A and 0xAF2AFC99). What the sprite state holds of it is its own: +0xA8 to +0xB7 its frames' pointers into it (sprite_load's +0x18 on, its state at the object's +0x90) and +0xB8's word (its top byte 0x80 in BN4, 0xC0 in BN6) copied from the sprite's own data (BN6 0x0800210E-0x08002120, byte by byte as the art has it): Billy's sprite, a copy of BN4's bytes, holds the same there in both games (+0xBB 0xFC), MegaMan's too (0xF0). The thunder's place, timing, damage and hit are compared as ever"
       }
     ]
   }

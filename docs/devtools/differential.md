@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:07:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -816,13 +816,13 @@ format, its game 4: the trace's header names it):
 - **BN4's Billy against its BN6 twin** (`billy_v1`: Billy V1, BN4's 0x0D,
   at (5,2) against MegaMan idle at (2,2) with 2000 HP, `--dev
   bn4families`, `rng=replay`, `lag: 1`): both battles trace their 1200
-  frames, all 30 of Billy's own draws replayed from BN4's, and it FAILS
-  at t1 on Billy's own record, read against BN6's of the next fight frame
-  (the allowed difference below): its damage word's top byte (+0x2D,
-  BN4's 0x00 against BN6's 0x30), its collision data's +0x12 and +0x13
-  (0 against 0xF8, 0x14) and its flags' bit 25 (+0x3C: BN4's 0x02000000,
-  BN6's none). The RNG words are not compared where BN6's draws are
-  replayed (BN6 steps both three times a frame, its main loop's
+  frames, all 30 of Billy's own draws replayed from BN4's. Billy's own
+  record is BN4's through t340 (since the recipe gives struct2 BN4's
+  attack word as it is and its flags byte from the family's init,
+  `XvTraits.stats_flags`: the struct2 finding below), and it FAILS at
+  t341 on its thunder's collision data +0xE alone (BN4's 0, BN6's 1):
+  the hit's bits, below. The RNG words are not compared where BN6's draws
+  are replayed (BN6 steps both three times a frame, its main loop's
   `0x080050FC`, `0x08005100` and `0x0800031C`, 1473 times each in the
   1200 frames; BN4 never does, its 177 draws there none a frame's own):
   each of the family's draws must be given BN4's word instead, one drawn
@@ -832,7 +832,50 @@ format, its game 4: the trace's header names it):
   data's +0x58 names) and the panels' bytes past their type, side, flags
   and reserver; so the family is compared on past the world's stop, and
   its verdict is its own.
-  - **The cause, both sides, the recipe's struct2** (`src/emu/xvirus.c`,
+  - **The thunder** (BN6's own third-kind 0x2A run for Billy's
+    parameters: the recipe's audit, `tools/bn4_twins.py` AUDITS
+    (0x080D2156, 0x080CADBC)), field by field at t341, each init (BN4
+    `0x080D2040`, BN6 `0x080CAC7C`) and the hit pass (BN4's from
+    `0x08012BC0`, BN6's twin from `0x081D7830`) read side by side, a probe
+    of hooks through both inits giving each store's place:
+    - its sprite (+0xA8 to +0xBB): each game's own art, by design (BN4's
+      list 0x10 number 0x11 at `0x080D2044`, BN6's number 0x16 at
+      `0x080CAC80`; other bytes, CRC32 `0x030B3B0A` and `0xAF2AFC99`); the
+      frame pointers into it and the word +0xB8 copied from its data
+      (`0x0800210E`-`0x08002120`), Billy's copied art holding the same in
+      both: allowed (`tests/xdiff/legit.json`, `bn4`, "the thunder's
+      sprite"), that object's sprite state alone.
+    - coll +0x05 and +0x09: no difference but the trace's placement:
+      BN4's +7 is BN6's +9, each set to 3 by the init (BN4 `0x08012F74` /
+      BN6 `0x0801A140`, the same store); BN4's +0xE is BN6's +0x10, the
+      status a hit gives, from the object's +6 (BN4 `0x08013212` / BN6
+      `0x0801A258`) and passed by the hit pass to the struck's +0xF / +0x11
+      (`0x08012BEC` / `0x081D784E`): both 0x10. With the hit pass's other
+      stores (the hit bits, the moods, the hits taken, the alliance words,
+      the push, the pairs met, `bn4.h` `BN4_COLL_*`) the layout takes them.
+    - coll +0xE, the hit's bits: the inits' collision setups give BN4's
+      thunder r3 = 0 (`0x080D208C`) and BN6's r3 = 1 (`0x080CACD6`, `movs
+      r3,#1`), which the hit pass ORs into the struck's hit bits (BN4
+      `0x08012C40`-`0x08012C46` into its +0xD, BN6 `0x081D78B2`-`0x081D78B8`
+      into its +0xF). What the player feels in `billy_v1` is the same: each
+      thunder takes 15 HP and paralyses MegaMan 89 frames, his state 4
+      then his ready, in both (t431 and t1021 in BN4, a frame later in
+      BN6). What it leaves differs: MegaMan's saved state word (+0x5C, the
+      action a status interrupts) holds his ready (BN4's 04 06 04, BN6's
+      04 08 04 with BN4's bits) where BN6's thunder makes it 04 03 00,
+      generic state 3, the struck reaction its bit 0x01 starts and the
+      paralysis cuts short. With BN6's thunder given BN4's bits (a raw
+      write of `0x2300` at `0x080CACD6`, an experiment, not committed),
+      the family's own records are BN4's in all 1200 frames and MegaMan's
+      saved word is the only record of his it changes. So the verdict to
+      keep BN6's thunder holds for its art, place, timing, damage and
+      paralysis, and not for its hit's bits: a struck the paralysis does
+      not take would start its struck reaction in BN6 and not in BN4 (not
+      measured). The spawner's parameters cannot give it, `movs r3,#1`
+      being BN6's init's own: the recipe moves BN4's third-kind 0x2A, as
+      BN5's moved objects are, or runs a copy of BN6's 0x2A whose init
+      passes r3 = 0 (never BN6's own, which its own users run).
+  - **The struct2 finding** (fixed since): the recipe's struct2 (`src/emu/xvirus.c`,
     `stats_bn4`: "element << 12 | its attack's damage", its flags byte 0):
     BN6's virus init copies a version's struct2 word +4 to the object's
     +0x2C (`0x300F` for Billy at its spawn, BN6's own Mettaur `0x000A`),
@@ -854,11 +897,9 @@ format, its game 4: the trace's header names it):
     `poke=08B5804B:08:1` and `08B5804C:000F:2`, V1's struct2 in its home,
     not committed), Billy is the same as BN4's through t340, its moves,
     its effects and its draws among it; at t341 its thunder (the third
-    kind's 0x2A, BN6's own object running Billy's parameters) differs:
-    its sprite (each game's own art, compared as pointers), its sprite
-    state's +0xBB (0x80 against 0xC0) and its collision data's hit
-    properties (BN4's bit 14 into its +0xE 0x12 and +0xC 0, BN6's into
-    +0x10 0x10 and +0xE 1, by the two setups above).
+    kind's 0x2A, BN6's own object running Billy's parameters) differs
+    (the thunder, above). The recipe now gives struct2 both
+    (05016ae4), and the spec runs so.
   - **The allowed difference, the family's timeline a fight frame later**
     (the owner's call, 2026-11-04: the port keeps BN6's timing; its
     reason in `tests/xdiff/legit.json`, `bn4`, `allowed`): both games'
@@ -894,4 +935,11 @@ format, its game 4: the trace's header names it):
     in BN6's terms from BN4's events (BN6's `0x0801BB36`, BN4's
     `0x080143A8` sets none); an object's slot (+3) counted from its own;
     the moved effects' ids by the recipe (BN4's 0x16 and 0x15, BN6's 0x98
-    and 0x99).
+    and 0x99); the hit pass's fields, store by store (BN4's from
+    `0x08012BC0` and `0x08012AB2`, BN6's from `0x081D7830` and
+    `0x081D7B1E`), the hit words read through the alliance tables too
+    (BN6's +0x6C and +0x70) and BN6's +0x7C, the strikers' index bits, a
+    field BN4 has none of (`BN4_LACKS`); and the family's renderer places
+    as their ranks among the family's own drawn (BN5's map, legit.json's
+    `renderer`, `bn4_renderer`): BN6's thunder's own art takes other
+    tiles, which moves the places of what is drawn after it.
