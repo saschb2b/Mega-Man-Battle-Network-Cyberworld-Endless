@@ -214,8 +214,9 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	}
 	const XdLog *ref = log->ref;
 	int k = nth(log, key, which);
-	/* (the family's own, with a lag: the reference's of that many fight frames before, xd_replay_lag) */
-	bool lagged = e->family && log->lag;
+	/* (with a lag, every keyed draw, the family's own and its twins': the reference's of that many fight frames before,
+	 * xd_replay_lag; the engine's per-frame steps have no key) */
+	bool lagged = log->lag != 0;
 	uint32_t at = lagged ? log->t - (uint32_t)log->lag : log->t;
 	for (int i = lagged ? log->lag_cursor : log->cursor; i < ref->ndraws && ref->draws[i].t == at; ++i) {
 		const Draw *d = &ref->draws[i];

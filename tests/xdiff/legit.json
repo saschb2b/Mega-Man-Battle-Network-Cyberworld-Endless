@@ -2310,7 +2310,7 @@
         "name": "BN6's battle a fight frame behind BN4's",
         "lag": 1,
         "whose": "battle",
-        "fields": "every record of BN6's battle, the same offset for all (tools/xdiff_bn4.py compare: the family's, MegaMan's and the world's objects, their AI and collision data, the panels, the run order, the sounds, the events and the family's draws), BN6's at t + 1 against BN4's at t; BN6's battle traced a fight frame longer and its keys by the timer taken a frame later (src/dev/xdiff.c, Side.behind), the family's own draws given BN4's of the frame before (rng=replay with lag=1, src/dev/xdiff_events.h xd_replay_lag). What still differs under the shift fails the spec (the family's) or keeps it INCONCLUSIVE (the world's), never a field or a role given a lag of its own; what is fixed before the first state keeps its own handling (BN6's per-frame RNG steps, not compared where the draws are replayed; BN6's MegaMan's companion, spawned by his init)",
+        "fields": "every record of BN6's battle, the same offset for all (tools/xdiff_bn4.py compare: the family's, MegaMan's and the world's objects, their AI and collision data, the panels, the run order, the sounds, the events and the family's draws), BN6's at t + 1 against BN4's at t; BN6's battle traced a fight frame longer and its keys by the timer taken a frame later (src/dev/xdiff.c, Side.behind), the family's own draws given BN4's of the frame before (rng=replay with lag=1, src/dev/xdiff_events.h xd_replay_lag). Every record a state drives, that is: what the battle's timer drives is compared at the same fight frame, its clock shown by its writer (bn4.clocks, bn4.sounds' clock). What still differs under the shift fails the spec (the family's) or keeps it INCONCLUSIVE (the world's), never a field or a role given a lag of its own; what is fixed before the first state keeps its own handling (BN6's per-frame RNG steps, not compared where the draws are replayed; BN6's MegaMan's companion, spawned by his init)",
         "why": "BN6's engine runs no state while the opening is paused, BN4's does, so BN6's whole battle runs a fight frame behind BN4's from the first state on. Both games' pause byte (BN4's [eToolkit+0x40]+9, BN6's [eToolkit+0x3C]+0xA) reads 1 from the appear to the fight, and each object runner (BN4 0x0800314C, BN6 0x080031AC) runs a paused object whose +0 has 0x04. BN4's state runner (0x08013C48) has no pause test and calls the state (0x08013D9A), so in the opening BN4's generic state 1 (0x0801013A) hands a virus its first own state and MegaMan's state 1 (0x08010A88) his ready 6, each run at the fight's first frame. BN6's (0x0801B1C4, from the virus dispatcher 0x0810A29C and MegaMan's update) tests the pause byte first (0x0800A03C, at 0x0801B1CC) and, for a CurAction not 0 whose flags (0x0801A166) have none of 0x40000100 and whose struck word (0x0801A180) has no 0x8000, returns at 0x0801B21A (b 0x0801B37A) without calling the state: BN6's state 1 (a virus's 0x080165B8, MegaMan's 0x08017888) runs at the fight's first frame and the first own state at the second (billy_v1: Billy's first own state at t1 in BN4 and t2 in BN6; MegaMan's ready setting his object's +0xB 4 and +0x20 9 at t1 in BN4, t2 in BN6, the same count-down to t10 and t11). Everything the states do follows a frame later: Billy's moves and reservations, its thunder striking MegaMan (t431 in BN4, t432 in BN6), the sounds they play. BN6's own Mettaur against BN4's starts the same way (game=bn4:bn6, foes=01@52). The lead's call (2026-11-04, the owner's to overturn): one offset for the whole battle, where the owner's earlier call (the port keeps BN6's timing) had it for the family alone. BN6's first fight frame, its states' 1, meets BN4's paused opening, which the trace does not keep, and is not compared"
       },
       {
@@ -2408,11 +2408,11 @@
         "type": "0x1A0",
         "part": "ai",
         "offsets": [
-          "0x34",
-          "0x37"
+          "0xFC",
+          "0xFF"
         ],
         "direction": "BN4 has, BN6 not",
-        "why": "BN4 caches the charge times of his chip charge's and charged shot's power attacks (AI data +0xE and +0xF) as his loadout is set (0x0800BCF4: BN4_CHARGE_TIMES by power attack and his Charge, NaviStats +7; 0xFF none) into u16 +0x34 and +0x36, and its charge levels compare his two charge counters with them (0x0800BB56, 0x0800BB6C). BN6 caches none: its twin reads the same kind of table at each test (0x08012F62: r7 5 for A, 7 for B, 0x11 a Beast chip; BN6_CHARGE_TIMES read at 0x08012FA6 by his Charge, 0x08013774), its +0x34 his anger and +0x36 the drain (BN6_AI_ANGER, BN6_AI_DRAIN), which hold 0 where this applies; the power attacks themselves are compared (mapped)"
+        "why": "BN4 caches the charge times of his chip charge's and charged shot's power attacks (AI data +0xE and +0xF) as his loadout is set (0x0800BCF4: BN4_CHARGE_TIMES by power attack and his Charge, NaviStats +7; 0xFF none) into u16 +0x34 and +0x36, and its charge levels compare his two charge counters with them (0x0800BB56, 0x0800BB6C). BN6 caches none: its twin reads the same kind of table at each test (0x08012F62: r7 5 for A, 7 for B, 0x11 a Beast chip; BN6_CHARGE_TIMES read at 0x08012FA6 by his Charge, 0x08013774), the trace keeps BN4's cache in the spare's last word (BN6_AI_SPARE_LAST, xdiff_bn4_trace.c), BN6's +0x34 being his anger, BN4's +0x2E (BN4_AI_ANGER); the power attacks themselves are compared (mapped)"
       },
       {
         "name": "BN4's MegaMan's control block's pointer",
@@ -2504,6 +2504,65 @@
         ],
         "direction": "BN6 has, BN4 not",
         "why": "His object's u16 +0x2A, the chip an object uses next (0xFFFF none). Its writers: BN6's state of his at 0x0801741C (its table word 0x0801740C) stores 0xFFFF at 0x08017438 in the opening; BN4's state 2 (0x08010890) stores 0xFFFF at 0x080108AA, run in no frame of these specs, so his reads 0 all battle (BN4's other stores 0x0801017A, 0x0801020A, 0x08010D82, 0x08013256, 0x08013268, 0x08015134). Its readers, searched in both ROMs (every ldr, ldrh or ldrb at #0x2a in the battle engines, BN4 0x08008000-0x08020000 and BN6 0x08008000-0x08020000, and in MegaMan's own code, BN4 0x080EA000-0x080F2000 and BN6 0x080EB000-0x080F3000; every ldrh [r5,#0x2a] in the first 2 MB attributed to its type): BN6's four, 0x0800EDC6, 0x0800EE1A, 0x0800EE8E and 0x0800EF2A (in 0x0800ED90, 0x0800EDD0, 0x0800EE26, 0x0800EF02), each read it only for an object whose name's class (0x0800F29C) is not 2, a MegaMan's chip read from his side's battle hand instead (0x08010018, 0x0802E070); BN4's one, 0x08014AFE (0x08014AE8), reads it of the objects in its list at 0x0203BE40, which 0x080167C0 fills for an enemy, called only from the enemies' types' inits (13 calls, 0x080B3550 to 0x080C4024, none in MegaMan's type 0 0x080B34D8 or his init 0x0801079C); the other loads at +0x2A in those spans are a collision data's, an AI data's or eToolkit's (BN4 0x0800F6FC, 0x08012C8C; BN6 0x0800E7AE, 0x08012E50), and the first 2 MB's ldrh [r5,#0x2a] in BN4 are the viruses' types' own (2, 5, 8, 0x13 and on). Nothing of either battle consumes MegaMan's, so the value each game left there is its own; where BN4's side ever holds one (a chip of his), it is compared as ever"
+      },
+      {
+        "name": "the hit's spark, each engine's own",
+        "whose": "engine",
+        "kind": "T4",
+        "type": "0x04",
+        "part": "obj",
+        "offsets": [
+          "0x80",
+          "0xBB"
+        ],
+        "fields": "the fourth kind's 0x04 alone: its sprite state (+0x80 to +0xBB), its end where one game's animation ends first (+0's 0x02 cleared and +8 its state 8, the update's twins' stores) and its being in play, and so its place in the run order, where one game's has ended and the other's not; its place, its spawn, its first frame and every other byte compared as ever (tools/xdiff_bn4.py spark_own)",
+        "why": "A hit's spark is each engine's own effect, the same object of each: spawned by the hit's spark routine, twins (BN4 0x08012F44, BN6 from 0x0801A0D8: the striker's place moved by a draw, BN4 0x08014620 / BN6 0x0801BDDE, replayed from BN4's: legit.json's bn4 rng_twins) through twin spawners of the fourth kind's 0x04 (BN4 0x080E2140, BN6 0x080E1C00), its init setting up the same sprite list and number in each game's own art (the hooks' sprite events, BN4 from 0x080E20D0 and BN6 from 0x080E1B8C, b 0x1405 in both; other bytes, CRC32 0x70A851CA and 0x25A05EF3) and its update twins (BN4 0x080E2122, BN6 0x080E1BE2) ending it as its animation ends (the sprite's end bit 0x80: +0's 0x02 cleared, its state 8). So its sprite state (frames, their pointers into its art, +0x80 to +0xBB) and how long it lives are its art's: in billy_v1 BN6's lives 3 frames less (to t443 against BN4's t446, under the battle's offset). The thunder's sprite is allowed so too (\"the thunder's sprite, BN6's own art\")"
+      },
+      {
+        "name": "BN6's MegaMan's paralysis state's flag 0x400000",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "coll",
+        "offset": "0x3C",
+        "bit": "0x400000",
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's own bookkeeping in its own MegaMan's paralysis state, not the port's subject (the lead's call, 2026-11-04, the owner's to overturn). Its writer: BN6's paralysis state (his state 4, entry 4 of his table 0x080EB86C: 0x080175B8) sets 0x400000 in his collision flags as it begins (0x080175C4: ldr r0,=0x400000; bl 0x0801A152); its clearer: 0x08017828 (in 0x08017768, his state 7, entry 7 of that table: bl 0x0801A15C); its reader: 0x08010162, run for him each frame from 0x0801B12E, which clears the flags' 0x04 while 0x400000 stands and sets it else (0x08010182-0x08010192). BN4's paralysis state (0x080109FA, entry 4 of his table 0x080EAEFC) sets no 0x400000: as it begins it clears 0x100441 as BN6's does (0x08010A0A / 0x080175CA), and no load of 0x400000 is in its code. Both set and clear 0x800 alike (the status routines 0x0800AEB4 / 0x0800E798, the ends 0x0800AE6C / 0x0800E74C). Guarded: that bit alone, BN6's side holding it and BN4's not, every other bit of the word compared as ever, the 0x04 it acts on among them, so any effect it had on him would still fail the spec or keep it INCONCLUSIVE (tools/xdiff_bn4.py allowed_world)"
+      }
+    ],
+    "clocks": "Two clocks, each record's proven from the routine that writes it, never assumed (the lead's call, 2026-11-04, the owner's to overturn). What a state drives (an object's state routine, run by its state runner: BN4 0x08013C48, BN6 0x0801B1C4) is compared with the battle's offset, BN6's at t + 1 against BN4's at t (allowed, \"BN6's battle a fight frame behind BN4's\"); what the battle's timer or the frame counter drives (a routine the main loop runs each fight frame, not through a state) at the same fight frame. Each record of the second clock is named with its code path (bn4.sounds' clock \"timer\"); a record whose clock is not shown is compared with the offset, and where it differs there the spec stays INCONCLUSIVE",
+    "sounds": [
+      {
+        "bn4": "0xAD",
+        "bn6": "0xBA",
+        "clock": "state",
+        "what": "the thunder's launch",
+        "why": "Played by the thunder's init in each game (BN4's third-kind 0x2A, 0x080D2040: movs r0,#0xad at 0x080D20AE, its bl at 0x080D20B0; BN6's 0x080CAC7C, the audit's twin: movs r0,#0xba at 0x080CAD12, its bl at 0x080CAD14, run from its copy at 0x08B7C0DA), a state's: BN4's at t341, BN6's at t342 in billy_v1. Their songs share no sample (xrecipe.song_sig, and by samples alone: each game's own recording), so they are paired by the routines that play them"
+      },
+      {
+        "bn4": "0x81",
+        "bn6": "0x8F",
+        "clock": "timer",
+        "what": "the Custom gauge full",
+        "why": "Played by the Custom gauge's fill, twins instruction for instruction (BN4 0x080147D4: its +0x24 += +0x26, at 0x4000 flag 2 (0x08007A74) and movs r0,#0x81 at 0x080147F2; BN6 0x0801C488: its +0x20 += +0x22, at 0x4000 flag 2 (0x0800A2D8) and movs r0,#0x8f at 0x0801C4A6), run by the main loop each fight frame (the events' outermost caller 0x08000300 in BN4, 0x0800031C in BN6), no object's state: the battle's timer's clock, both at t512 in billy_v1 (begun t513). Their songs share no sample, so they are paired by the routines that play them"
+      },
+      {
+        "bn4": "0x6B",
+        "bn6": "0x6B",
+        "clock": "state",
+        "what": "MegaMan struck",
+        "why": "Played as the thunder's hit strikes him (BN4's bl at 0x08013A9C under his type's routine 0x080B34D8; BN6's at 0x0801BA5A under his 0x080B9A5C), a state's: BN4's at t431, BN6's at t432 in billy_v1; the same number in both"
+      }
+    ],
+    "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset",
+    "paralysis_flash": "A first-kind object's colour shader (its sprite +6, u16; MegaMan's +0x96) while paralysed: twin routines (BN4 0x08010408, BN6 0x080168C8) read its collision flags (0x08012F96 / 0x0801A166) and, with 0x800 there (the paralysis's, set by both status routines as its timer runs, BN4 0x0800AEB4 and BN6 0x0800E798: a state's clock, BN6's a frame behind, at t432 against BN4's t431 in billy_v1, a probe of hooks), take the battle timer (BN4 0x08007BE4, BN6 0x0800A704: [eToolkit+0x18]+0x40) and 2, the shader from the same two words (BN4 0x0801042C, BN6 0x080168EC: 0, 0x3FF), set through the shader's setter (BN4 0x08002F22, BN6 0x08002ED0; zeroed each frame first, from 0x08013BEC / 0x0801B142). So its gate is a state's and its phase the timer's: BN4's at t and BN6's at t + 1 are each compared with what that code gives, the gate BN6's flags of t + 1 (compared themselves with the offset) and each game's own timer (tools/xdiff_bn4.py paralysis_flash)",
+    "rng_twins": [
+      {
+        "bn6": "0x0801BDDE",
+        "bn4": "0x08014620",
+        "len": "0x26",
+        "what": "a hit's spark's place (the fourth kind's 0x04): GetRNG once, the spark moved from the striker's place by its low nibble less 7 in x and its third nibble less 7 in z",
+        "evidence": "BN4 0x08014620-0x08014645 / BN6 0x0801BDDE-0x0801BE03: the same instructions but for the BL's target, GetRNG (BN4 0x08001B00 / BN6 0x0800151C) at +4; each called with r0 0xF by the hit's spark, twins (BN4 0x08012F44, its bl at 0x08012F66, then the spawner 0x080E2140; BN6's from 0x0801A0D8, its bl at 0x0801A0F6, then 0x080E1C00): the thunder's spark in billy_v1, BN4's draw at t431, BN6's at t432 (a probe of hooks on both spawners: the same striker's place, x 0xFFD7FFE2 and 0xFFD5FFE2, z 0x100000 and 0x50000 from the two words)"
       }
     ]
   }

@@ -41,6 +41,9 @@
                                        * BN6's +0x20 (0x08010548, 0x0801055E: BN6_AI_DAMAGE_TAKEN), instruction for instruction */
 #define BN4_AI_STRUCK_FRAMES 0x54     /* u32 the frames his collision flags hold 0xC00 (0x0800C518: 0x0800C500 counts, 0x0800C50A
                                        * clears, 0x0800C512 reads); BN6's +0x4C (0x080143FC: 0x08014432, 0x08014424, 0x0801442C) */
+#define BN4_AI_ANGER      0x2E        /* u16 his anger's frames: a struck word's 0x200 sets flag 0x200000 and 600 here (0x0800C594, its
+                                       * emotion 0x80 through 0x0800F4DE), counted down after (0x0800C5C6); BN6's +0x34 (0x08014350,
+                                       * BN6_AI_ANGER), instruction for instruction */
 #define BN4_AI_LOADOUT_PAD 0x0C       /* u8 the loadout's first byte, 0xFF in every form (0x080184F0's +0, 0x0800BD74 for form 0) and read
                                        * by no code of BN4's through an AI data pointer (written only at 0x0800BD5E and 0x0800BD74) */
 #define BN4_AI_CHARGE_TIMES 0x34      /* u16 x 2 the charge times of BN4_AI_POWER_CHIP's and the charged shot's (0xFF none), cached as the
