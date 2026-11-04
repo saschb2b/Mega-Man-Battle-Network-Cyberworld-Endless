@@ -1,9 +1,10 @@
 /* pick.h on the iPhone and iPad: Files' pickers over the game (ios.m), the
  * folder the ROMs are in (kept as a bookmark, looked in again at each
- * start) or files, several at once; BN6's and BN5's ROMs, checked by
- * their SHA-1, copied into the app's rom/ folder; and SAVES' pickers and
- * its transfer place: the folder chosen there, else the ROM folder
- * (ios_saves.m; mirror.h reads it once a start). */
+ * start) or files, several at once; BN6's and the extra ROMs offered
+ * (rom.h's xrom_offered), checked by their SHA-1, copied into the app's
+ * rom/ folder; and SAVES' pickers and its transfer place: the folder
+ * chosen there, else the ROM folder (ios_saves.m; mirror.h reads it once
+ * a start). */
 #include "pick.h"
 
 #ifdef CW_IOS
@@ -47,7 +48,9 @@ bool pick_done(PickResult *r) {
 }
 
 int pick_look(char *msg, size_t n) {
-	unsigned want = (R.data ? 0 : IOS_ROM_BN6) | (XR[XROM_BN5_COLONEL_US].data ? 0 : IOS_ROM_BN5);
+	unsigned want = R.data ? 0 : IOS_ROM_BN6;
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (xrom_offered(i) && !XR[i].data) want |= IOS_ROM_X(i);
 	if (!want) return 0;
 	char dir[600];
 	rom_dir(dir, sizeof dir);

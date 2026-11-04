@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T22:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:10:00Z }
 ---
 
 # Sources
@@ -308,6 +308,14 @@ Advance list), against the ROM:
   not read in the ROM.
 - *TCRF: Duo's and Bass's Souls unused in the Soul list*: the chip names
   hold DuoSoul and FrteSoul; that they are unused, assumed.
+- *The versions' game codes* (4 November 2026, for the ROMs screen's
+  refusals): Japan's Tournament Red Sun `B4WJ` and Blue Moon `B4BJ`, the
+  Rockman EXE Zone's Game Pak Variation page (AGB-B4WJ-JPN,
+  AGB-B4BJ-JPN, <https://therockmanexezone.com/wiki/User:MidniteW/Game_Pak_Variation>,
+  a search excerpt); Red Sun (USA) `B4WE` verified in the ROM; Blue Moon
+  (USA) `B4BE` assumed by the pattern (the same page lists the USA Blue
+  Moon as B4WE, a copy of Red Sun's; no other source found); Europe's
+  not found.
 
 ## The trailers' music
 

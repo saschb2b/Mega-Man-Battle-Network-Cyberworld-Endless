@@ -174,6 +174,7 @@
 #define BN4_BATTLE_BG_SCROLL 0x08085488u /* per background its scroll callbacks, 16 bytes (the second word the motion, as BN6's) */
 #define BN4_MAP_BACKDROPS 0x08085BD0u /* per net group (group - 0x80) a pointer to a byte per map: the background of a record whose
                                        * BN4_RECORD_BACKDROP is 0xFF (0x08085BAC): ACDC Area 4, Town Area 5, Park Area 6, the Undernet 8 */
+#define BN4_MUGSHOT_FACE  0x61        /* sprite list 8's (XRomLayout.sprite_lists 0x0802793C) Duo: BN4's face on the ROMs screen's cartridge */
 #define BN4_MAP_ENTERS    0x08026634u /* the net's groups' EnterMapGroup routines (21, 0x80-0x94; stubs where a group has no maps), its
                                        * dispatch 0x080266E8 as BN5's; LoadBGAnim the routine's fifth call, not its first as BN5's */
 #define BN4_MAP_ANIMS     0x08026688u /* ... their LoadGFXAnims routines (dispatch 0x08026718), called before EnterMapGroup as in BN6 */

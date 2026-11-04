@@ -9,15 +9,21 @@
 #include <SDL.h>
 #include <stdbool.h>
 
-/* A cartridge's two sizes, in canvas pixels */
+/* A cartridge's sizes, in canvas pixels: compact where three stand side
+ * by side on a small screen, small, large where there is room */
+enum { CART_COMPACT, CART_SMALL, CART_LARGE, CART_SIZES };
+#define CART_COMPACT_W 70
+#define CART_COMPACT_H 48
 #define CART_W 92
 #define CART_H 58
 #define CART_LARGE_W 112
 #define CART_LARGE_H 72
+int art_cart_w(int size);
+int art_cart_h(int size);
 
-/* Cartridge `slot` (launcher_text.h's SLOT_*) in `r`, CART_W x CART_H or
- * the large size; `flash` (0-255) a white over its label, just in */
-void art_cartridge(int slot, SDL_Rect r, bool large, int flash);
+/* Cartridge `slot` (launcher_text.h's SLOT_*) in `r`, of `size`
+ * (CART_*); `flash` (0-255) a white over its label, just in */
+void art_cartridge(int slot, SDL_Rect r, int size, int flash);
 /* An open spot of a cartridge's size: a recess with its outline in dashes,
  * marching by `phase`, gold where the cursor is (`lit`) */
 void art_open_spot(SDL_Rect r, int phase, bool lit);

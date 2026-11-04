@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The 3DS's memory"
-description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and BN5's (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, measured by `tools/heap3ds.py`."
+description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and one extra ROM, BN5's first (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, measured by `tools/heap3ds.py`, BN4's beside them too."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T00:52:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:25:00Z }
 ---
 
 # The 3DS's memory
@@ -85,3 +85,29 @@ given back and one area's maps kept, the heap holds the file whole, and
 every system reads BN5 alike. Where a New 3DS's own log shows BN5's long
 runs short (the heap's "at most" at its size, `log.txt`), those windows
 are the next room to make: some 6 MB.
+
+## A third ROM: BN4 Red Sun
+
+BN4 Red Sun's ROM ([Battle Network 4 in a run](../../multirom/bn4.md)) is
+read for research alone today; once it is offered, the 3DS reads one
+extra ROM at most, BN5's before BN4's (`start_3ds.c`'s `XROMS_3DS`), and
+leaves the second unread, said in `log.txt` ("a New 3DS holds 1 extra
+ROM beside BN6's, read already") and on the PET ("BN5 found; BN4 too, but
+this 3DS has no room for it"). Modelled on 4 November 2026 (`python3
+tools/heap3ds.py --cases bn5,bn4,all --seeds 1-12`, 120000 frames a run,
+BN4's read with `--dev showbn4`, its one family, Billy, installed):
+
+| The same 12 long runs | BN6 and BN5 | BN6 and BN4 | BN6, BN5 and BN4 |
+| --- | --- | --- | --- |
+| The heap's peak | 95.9 MB | 95.4 MB | 96.0 MB (full) |
+| Runs with an allocation refused | 6 (18 refused: a speed cache of the tiles' learning each) | 0 | 9 (73 refused: maps' mirror images and raised views not learned, besides the caches) |
+| Crashes | 0 | 0 | 0 |
+| Areas learned again | 29 | 15 | 34 |
+
+BN4's file costs the heap what BN5's does, 8 MB, but lends a run less:
+its areas are not dressed yet, so a layer learns BN6's maps alone. Both
+together leave a long run's play 8 MB short, and what is refused then
+is not a cache but a layer's own look. A New 3DS with BN5's and BN4's
+ROMs plays with BN5's; BN4's comes in where BN5's is not there. Should
+BN4 lend more (its areas, Phase 3 of its plan), its own numbers are run
+again: `--cases bn4`.

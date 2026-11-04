@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), and a phased plan with the owner's open calls."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -157,10 +157,16 @@ battle frame by frame, as BN5's were.
    battle records, encounter check, enemy and chip records, sprite lists,
    battle backgrounds, map routines, music, Souls and the battle in RAM
    found ([BN4 Red Sun's tables](../rom/bn4.md)), and `tools/bn4_lab.py`
-   starting any BN4 battle in romlab. Moved to Phase 1, where BN4 first
-   lends a run something: the ROMs screen, the phones' pickers, the
-   browser and the 3DS's heap (`tools/heap3ds.py`), and the guest core
-   running BN4's battles as the differential's reference.
+   starting any BN4 battle in romlab. Built behind the switch (4
+   November 2026): everything a player needs to bring BN4's ROM, on every
+   platform, its research mark the one line that offers it
+   ([How it is built](how-it-is-built.md), Platforms): its cartridge on
+   the ROMs screen (red, Duo's face), the phones' pickers, the browser,
+   the desktops' dialogs, the title's and the PET's found lines, and the
+   3DS, whose heap holds one extra ROM beside BN6's (`tools/heap3ds.py`:
+   BN4's alone fits, BN5's and BN4's together do not), so BN4 is read
+   there where BN5 is not. The guest core runs BN4's battles as the
+   differential's reference.
 1. **Its viruses.** The 17 families by `tools/xrecipe.py`, BN4's engine
    paired first, each proved by `build.py xdiff`; visitors at the seams
    as BN5's (one battle in four from act 2), so they reach runs before
@@ -184,4 +190,6 @@ battle frame by frame, as BN5's were.
 2. The tournament as an act's climax (recommended), or not at all.
 3. With three games read, how a run shares BN6's areas between BN5's and
    BN4's dressings.
-4. The 3DS: BN4 left out where its heap has no room.
+4. The 3DS: BN4 left out where its heap has no room (built so: one extra
+   ROM a 3DS, BN5's first, `tools/heap3ds.py`'s numbers in
+   [The 3DS's memory](../engine/emulation/3ds-memory.md)).

@@ -3,7 +3,8 @@
  * label in a recess, the connector's slot below), never traced: its shell
  * and its label's colours are drawn into pixels once and kept as a
  * texture; the game's face (its mugshot, BN6's MegaMan, BN5 Team
- * Colonel's Colonel), the name and the cursor are drawn over it each frame. */
+ * Colonel's Colonel, BN4 Red Sun's Duo), the name and the cursor are
+ * drawn over it each frame. */
 #include "launcher_art.h"
 
 #include <stdint.h>
@@ -27,15 +28,20 @@
 #define PIN 0xFFC69628u
 #define FACE_BACK 0xFF10364Au
 
-/* a label's colours: its top and its foot, and its light stripes */
-static const uint32_t label_top[SLOTS] = { 0xFF08BD73u, 0xFF319CDEu };
-static const uint32_t label_foot[SLOTS] = { 0xFF008C52u, 0xFF1063A5u };
-static const uint32_t label_stripe[SLOTS] = { 0xFF4AE773u, 0xFF6BDEFFu };
+/* a label's colours: its top and its foot, and its light stripes (BN6's
+ * green, BN5's blue, BN4's red) */
+static const uint32_t label_top[SLOTS] = { 0xFF08BD73u, 0xFF319CDEu, 0xFFE74A31u };
+static const uint32_t label_foot[SLOTS] = { 0xFF008C52u, 0xFF1063A5u, 0xFFA51810u };
+static const uint32_t label_stripe[SLOTS] = { 0xFF4AE773u, 0xFF6BDEFFu, 0xFFFF8C6Bu };
+
+int art_cart_w(int size) { return size == CART_LARGE ? CART_LARGE_W : size == CART_SMALL ? CART_W : CART_COMPACT_W; }
+int art_cart_h(int size) { return size == CART_LARGE ? CART_LARGE_H : size == CART_SMALL ? CART_H : CART_COMPACT_H; }
 
 /* where the label is in a cartridge of each size */
 typedef struct { int x, y, w, h, face_w, face_h; } Label;
-static Label label_of(bool large) {
-	return large ? (Label){ 8, 10, 96, 52, 40, 48 } : (Label){ 6, 9, 80, 38, 34, 34 };
+static Label label_of(int size) {
+	if (size == CART_LARGE) return (Label){ 8, 10, 96, 52, 40, 48 };
+	return size == CART_SMALL ? (Label){ 6, 9, 80, 38, 34, 34 } : (Label){ 5, 8, 60, 29, 26, 25 };
 }
 
 typedef struct { uint32_t *px; int w, h; } Img;
@@ -67,7 +73,7 @@ static uint32_t mix(uint32_t a, uint32_t b, int k, int n) {
 	return r;
 }
 
-static void shell(Img *im, int slot, bool large) {
+static void shell(Img *im, int slot, int size) {
 	int w = im->w, h = im->h;
 	for (int y = 0; y < h; ++y)
 		for (int x = 0; x < w; ++x) {
@@ -81,7 +87,7 @@ static void shell(Img *im, int slot, bool large) {
 	/* the grip along the top, at the right: ridges a pixel apart */
 	for (int x = w * 5 / 8; x < w - 5; ++x)
 		for (int y = 2; y < 6; ++y) put(im, x, y, (x & 1) ? METAL_LO : GRIP);
-	Label l = label_of(large);
+	Label l = label_of(size);
 	/* the label in its recess: its game's colours, top to foot, light stripes slanting up */
 	box(im, l.x - 1, l.y - 1, l.w + 2, l.h + 2, RECESS);
 	for (int y = 0; y < l.h; ++y)
@@ -96,21 +102,21 @@ static void shell(Img *im, int slot, bool large) {
 	for (int r = 0; r < 3; ++r) box(im, 7 + r, foot + 1 + r, 5 - 2 * r, 1, METAL_LO);
 }
 
-static SDL_Texture *shells[SLOTS][2];
+static SDL_Texture *shells[SLOTS][CART_SIZES];
 static int shells_lost;
 
-static SDL_Texture *shell_texture(int slot, bool large) {
+static SDL_Texture *shell_texture(int slot, int size) {
 	if (shells_lost != P.textures_lost) {
 		/* (the renderer reset: textures gone; their handles freed by SDL) */
 		memset(shells, 0, sizeof shells);
 		shells_lost = P.textures_lost;
 	}
-	SDL_Texture **t = &shells[slot][large];
+	SDL_Texture **t = &shells[slot][size];
 	if (*t) return *t;
 	static uint32_t px[CART_LARGE_W * CART_LARGE_H];
-	Img im = { px, large ? CART_LARGE_W : CART_W, large ? CART_LARGE_H : CART_H };
+	Img im = { px, art_cart_w(size), art_cart_h(size) };
 	memset(px, 0, sizeof px);
-	shell(&im, slot, large);
+	shell(&im, slot, size);
 	*t = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, im.w, im.h);
 	if (!*t) return NULL;
 	SDL_UpdateTexture(*t, NULL, px, im.w * 4);
@@ -118,17 +124,19 @@ static SDL_Texture *shell_texture(int slot, bool large) {
 	return *t;
 }
 
-/* the game's face from its own ROM: BN6's MegaMan, BN5's Colonel */
+/* the game's face from its own ROM: BN6's MegaMan, an extra one's its
+ * layout's (rom.h's XRomLayout.face) */
 static Sprite *face_of(int slot) {
 	if (slot == SLOT_BN6) return R.data ? sprite_get(SPR_MUGSHOT, FACE_MEGAMAN) : NULL;
-	const XRom *x = &XR[XROM_BN5_COLONEL_US];
-	return x->data ? sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, x->layout->face) : NULL;
+	const XRom *x = slot > 0 && slot < SLOTS ? &XR[slot - 1] : NULL;
+	return x && x->data ? sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, x->layout->face) : NULL;
 }
 
-void art_cartridge(int slot, SDL_Rect r, bool large, int flash) {
-	SDL_Texture *t = shell_texture(slot, large);
+void art_cartridge(int slot, SDL_Rect r, int size, int flash) {
+	SDL_Texture *t = shell_texture(slot, size);
 	if (t) SDL_RenderCopy(P.renderer, t, NULL, &r);
-	Label l = label_of(large);
+	Label l = label_of(size);
+	bool large = size == CART_LARGE;
 	SDL_Rect win = { r.x + l.x + 2, r.y + l.y + 2, l.face_w, l.face_h };
 	Sprite *face = face_of(slot);
 	if (face) {
@@ -139,11 +147,14 @@ void art_cartridge(int slot, SDL_Rect r, bool large, int flash) {
 	}
 	SDL_Color white = PET_WHITE, shade = rgba(0, 49, 74, 255);
 	int tx = win.x + win.w + 3, tw = r.x + l.x + l.w - 2 - tx, cx = tx + tw / 2;
-	pixfont_draw(cx, r.y + l.y + (large ? 6 : 4), slot_short(slot), white, shade, PIXFONT_CENTER, 2);
 	if (large) {
+		pixfont_draw(cx, r.y + l.y + 6, slot_short(slot), white, shade, PIXFONT_CENTER, 2);
 		pixfont_draw(cx, r.y + l.y + 28, slot_label(slot, 0, true), white, shade, PIXFONT_CENTER, 1);
 		pixfont_draw(cx, r.y + l.y + 39, slot_label(slot, 1, true), white, shade, PIXFONT_CENTER, 1);
-	} else pixfont_draw(cx, r.y + l.y + 24, slot_label(slot, 0, false), white, shade, PIXFONT_CENTER, 1);
+	} else if (size == CART_SMALL) {
+		pixfont_draw(cx, r.y + l.y + 4, slot_short(slot), white, shade, PIXFONT_CENTER, 2);
+		pixfont_draw(cx, r.y + l.y + 24, slot_label(slot, 0, false), white, shade, PIXFONT_CENTER, 1);
+	} else pixfont_draw(cx, r.y + l.y + 4, slot_short(slot), white, shade, PIXFONT_CENTER, 1);   /* (a compact label: its short name alone) */
 	if (flash > 0) fill_rect(r.x + l.x, r.y + l.y, l.w, l.h, rgba(255, 255, 255, flash > 255 ? 255 : flash));
 }
 

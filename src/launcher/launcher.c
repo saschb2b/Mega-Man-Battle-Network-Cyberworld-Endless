@@ -1,13 +1,15 @@
-/* The launcher (game.h's scene_launcher, issue #97): two cartridge slots
- * before the game, BN6 Cybeast Gregar's (needed) and BN5 Team Colonel's
- * (optional), each an open spot until its ROM is in, then the cartridge
- * with its label; PLAY the moment BN6 is in. A start shows it where it is
- * wanted (no BN6, the first start, BN5 gone since the last; --launcher
- * open, Android's ROMs shortcut); the title's R brings it back over the
- * game, to add BN5. The ROMs come from the system's own chooser (pick.h),
- * a file dropped on the window, or the places the game looks; on a phone
- * the folder chosen may hold the saves a reinstall left there (mirror.h),
- * which SAVES compares with this device's (src/saves/). Its layout and
+/* The launcher (game.h's scene_launcher, issue #97): cartridge slots
+ * before the game, BN6 Cybeast Gregar's (needed) and one each extra ROM
+ * offered (optional: BN5 Team Colonel's; BN4 Red Sun's once it is offered,
+ * rom.h's xrom_offered, or with --dev showbn4), each an open spot until
+ * its ROM is in, then the cartridge with its label; PLAY the moment BN6
+ * is in. A start shows it where it is wanted (no BN6, the first start, an
+ * extra ROM gone since the last; --launcher open, Android's ROMs
+ * shortcut); the title's R brings it back over the game, to add BN5. The
+ * ROMs come from the system's own chooser (pick.h), a file dropped on the
+ * window, or the places the game looks; on a phone the folder chosen may
+ * hold the saves a reinstall left there (mirror.h), which SAVES compares
+ * with this device's (src/saves/). Its layout and
  * picture are launcher_draw.c's, its words launcher_text.c's. */
 #include "launcher_state.h"
 
@@ -90,21 +92,19 @@ void launcher_cursor_note(char *out, size_t n, int *kind) {
 	}
 	char where[700];
 	shown_path(L.rom_dir, where, sizeof where);
-	switch (L.focus) {
-	case FOCUS_BN6:
-	case FOCUS_BN5: {
-		int slot = L.focus == FOCUS_BN6 ? SLOT_BN6 : SLOT_BN5;
+	unsigned shown = roms_shown_set(false), in = roms_shown_set(true), extras = ~(1u << SLOT_BN6);
+	if (L.focus < SLOTS) {
+		int slot = L.focus;
 		if (roms_have(slot)) note_slot_ready(slot, slot == SLOT_BN6 && strstr(R.path, L.rom_dir) != R.path ? where : NULL, out, n);
-		else note_slot_empty(slot, L.kinds, where, out, n);
-		break;
-	}
-	case FOCUS_ALT: note_alt(L.kinds, out, n); break;
-	default:
-		if (!roms_have(SLOT_BN6)) { snprintf(out, n, "%s", launcher_word(W_PLAY_LOCKED)); *kind = NOTE_BAD; break; }
+		else note_slot_empty(slot, L.kinds, where, shown, out, n);
+	} else if (L.focus == FOCUS_ALT) note_alt(L.kinds, shown, out, n);
+	else if (!roms_have(SLOT_BN6)) {
+		snprintf(out, n, "%s", launcher_word(W_PLAY_LOCKED));
+		*kind = NOTE_BAD;
+	} else {
 		char r[32];
 		snprintf(r, sizeof r, "%s", controls_word(BTN_R));
-		note_play(roms_have(SLOT_BN5), L.from_title, r, out, n);
-		break;
+		note_play(in & extras, shown & ~in & extras, L.from_title, r, out, n);
 	}
 }
 
@@ -130,7 +130,7 @@ static void look_again(bool said) {
 	} else if (said && !had) {
 		char where[700], s[800];
 		shown_path(L.rom_dir, where, sizeof where);
-		note_slot_empty(SLOT_BN6, 0, where, s, sizeof s);
+		note_slot_empty(SLOT_BN6, 0, where, roms_shown_set(false), s, sizeof s);
 		say(s, NOTE_BAD);
 	}
 }
@@ -139,20 +139,20 @@ static void look_again(bool said) {
 static bool picked(void) {
 	PickResult r;
 	if (!pick_done(&r)) return false;
-	int asked = L.busy_slot == SLOT_BN5 ? SLOT_BN5 : SLOT_BN6;
+	int asked = L.busy_slot > 0 && L.busy_slot < SLOTS ? L.busy_slot : SLOT_BN6;
 	L.busy_slot = -1;
 	if (r.status < 0) { say(launcher_word(W_CANCELLED), NOTE_INFO); return false; }
 	if (r.path) {
-		bool beside;
+		unsigned beside;
 		char s[600];
 		int took = roms_take(r.text, L.rom_dir, s, sizeof s, &beside);
 		say(s, took >= 0 ? NOTE_GOOD : NOTE_BAD);
 		sound(took >= 0 ? SFX_CONFIRM : SFX_ERROR);
 		return false;
 	}
-	bool had[SLOTS] = { roms_have(SLOT_BN6), roms_have(SLOT_BN5) };
+	unsigned had = roms_shown_set(true);
 	roms_reload(L.rom_dir);
-	bool came = (!had[SLOT_BN6] && roms_have(SLOT_BN6)) || (!had[SLOT_BN5] && roms_have(SLOT_BN5));
+	bool came = (roms_shown_set(true) & ~had) != 0;
 	say(r.text, came ? NOTE_GOOD : roms_have(asked) ? NOTE_INFO : NOTE_BAD);
 	/* (a folder newly chosen: looked at for the saves' copy, which SAVES
 	 * compares where it holds saves not answered, saves.h) */
@@ -173,7 +173,7 @@ static bool dropped(void) {
 		saves_import(path);
 		return true;
 	}
-	bool beside;
+	unsigned beside;
 	char s[600];
 	int took = roms_take(path, L.rom_dir, s, sizeof s, &beside);
 	say(s, took >= 0 ? NOTE_GOOD : NOTE_BAD);
@@ -226,8 +226,8 @@ static void activate(int what) {
 		sound(SFX_SELECT);
 		return;
 	}
-	int slot = what == FOCUS_BN6 ? SLOT_BN6 : SLOT_BN5;
-	if (roms_have(slot)) return;
+	int slot = what;
+	if (slot < 0 || slot >= SLOTS || roms_have(slot)) return;
 	int kind = L.kinds & PICK_FOLDER ? PICK_FOLDER : L.kinds & PICK_FILE ? PICK_FILE : 0;
 	if (kind && pick_open(kind, slot)) L.busy_slot = slot;
 	else {
@@ -242,25 +242,29 @@ static void activate(int what) {
 	sound(SFX_SELECT);
 }
 
-/* The cursor's neighbours: the cartridges side by side over the buttons,
- * or (held upright) all in one column */
+/* The cursor's neighbours: the cartridges shown side by side over the
+ * buttons, the first over the second button and the rest over PLAY, or
+ * (held upright) all in one column */
 static int neighbour(int from, int dx, int dy, bool upright, bool alt) {
-	static const int across[FOCUSES][4] = {
-		/* left, right, up, down */
-		[FOCUS_BN6] = { -1, FOCUS_BN5, -1, FOCUS_ALT },
-		[FOCUS_BN5] = { FOCUS_BN6, -1, -1, FOCUS_PLAY },
-		[FOCUS_ALT] = { -1, FOCUS_PLAY, FOCUS_BN6, -1 },
-		[FOCUS_PLAY] = { FOCUS_ALT, -1, FOCUS_BN5, -1 },
-	};
-	static const int column[FOCUSES] = { FOCUS_BN6, FOCUS_BN5, FOCUS_PLAY, FOCUS_ALT };
+	int column[FOCUSES], n = 0, at = -1;
+	for (int s = 0; s < SLOTS; ++s)
+		if (roms_shown(s)) column[n++] = s;
+	int carts = n;
+	column[n++] = FOCUS_PLAY;
+	column[n++] = FOCUS_ALT;
+	for (int i = 0; i < n; ++i)
+		if (column[i] == from) at = i;
 	int to = -1;
+	if (at < 0) return -1;
 	if (upright) {
-		int at = 0;
-		while (at < FOCUSES && column[at] != from) ++at;
 		int step = dx + dy;
-		if (at + step >= 0 && at + step < FOCUSES) to = column[at + step];
-	} else to = across[from][dx < 0 ? 0 : dx > 0 ? 1 : dy < 0 ? 2 : 3];
-	if (to == FOCUS_ALT && !alt) to = upright ? -1 : from == FOCUS_BN6 ? FOCUS_PLAY : -1;
+		if (at + step >= 0 && at + step < n) to = column[at + step];
+	} else if (from < SLOTS) {
+		if (dx) to = at + dx >= 0 && at + dx < carts ? column[at + dx] : -1;
+		else if (dy > 0) to = at == 0 ? FOCUS_ALT : FOCUS_PLAY;
+	} else if (from == FOCUS_ALT) to = dx > 0 ? FOCUS_PLAY : dy < 0 ? column[0] : -1;
+	else to = dx < 0 ? FOCUS_ALT : dy < 0 ? column[carts - 1] : -1;
+	if (to == FOCUS_ALT && !alt) to = upright ? -1 : from < SLOTS ? FOCUS_PLAY : -1;
 	return to;
 }
 
@@ -269,7 +273,7 @@ static int hit(const LauncherLayout *lay, int x, int y) {
 	for (int s = 0; s < SLOTS; ++s) {
 		SDL_Rect r = lay->cart[s];
 		r.h = lay->caption[s].y + lay->caption[s].h - r.y;
-		if (SDL_PointInRect(&p, &r)) return s == SLOT_BN6 ? FOCUS_BN6 : FOCUS_BN5;
+		if (r.w && SDL_PointInRect(&p, &r)) return s;
 	}
 	if (lay->alt.w && SDL_PointInRect(&p, &lay->alt)) return FOCUS_ALT;
 	if (SDL_PointInRect(&p, &lay->play)) return FOCUS_PLAY;
@@ -324,7 +328,7 @@ static void enter(void) {
 		L.had[s] = roms_have(s);
 		L.filled_at[s] = -1;
 	}
-	if (!L.note[0]) L.focus = roms_have(SLOT_BN6) ? FOCUS_PLAY : FOCUS_BN6;
+	if (!L.note[0]) L.focus = roms_have(SLOT_BN6) ? FOCUS_PLAY : SLOT_BN6;
 	if (!pick_folder(L.folder, sizeof L.folder)) L.folder[0] = 0;
 	saves_line();
 }
@@ -368,21 +372,26 @@ static void clear(void) {
 bool launcher_start(int mode, const char *rom_dir, void (*begin)(void)) {
 	if (rom_dir) snprintf(start_rom_dir, sizeof start_rom_dir, "%s", rom_dir);
 	else snprintf(start_rom_dir, sizeof start_rom_dir, "%s/rom", g_data_dir);
-	bool bn6 = roms_have(SLOT_BN6), bn5 = roms_have(SLOT_BN5);
-	RomRecord last = roms_record_read();
-	if (mode == LAUNCHER_OFF || !roms_launcher_wanted(mode == LAUNCHER_OPEN, bn6, bn5, last)) {
-		/* (BN5 come since the last start: the title says so; written, so
-		 * that its going is seen) */
-		if (mode != LAUNCHER_OFF && (last.bn6 != bn6 || last.bn5 != bn5)) roms_record_write();
+	RomRecord now = roms_record_now(), last = roms_record_read();
+	bool bn6 = now.have[SLOT_BN6], changed = false;
+	int gone = -1;
+	for (int s = 0; s < SLOTS; ++s) {
+		changed |= roms_shown(s) && last.have[s] != now.have[s];
+		if (gone < 0 && s != SLOT_BN6 && last.have[s] && !now.have[s]) gone = s;
+	}
+	if (mode == LAUNCHER_OFF || !roms_launcher_wanted(mode == LAUNCHER_OPEN, now, last)) {
+		/* (an extra ROM come since the last start: the title says so;
+		 * written, so that its going is seen) */
+		if (mode != LAUNCHER_OFF && changed) roms_record_write();
 		return false;
 	}
 	clear();
 	L.begin = begin;
 	if (bn6) gfx_init();
-	if (bn6 && last.known && last.bn5 && !bn5) {
-		note_five_gone(L.note, sizeof L.note);
+	if (bn6 && last.known && gone >= 0) {
+		note_gone(gone, L.note, sizeof L.note);
 		L.note_kind = NOTE_BAD;
-		L.focus = L.note_focus = FOCUS_BN5;
+		L.focus = L.note_focus = gone;
 	} else if (bn6 && strncmp(R.path, L.rom_dir, strlen(L.rom_dir))) {
 		/* (found where front ends and downloads keep theirs) */
 		char where[700], dir[700];

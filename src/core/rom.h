@@ -139,6 +139,7 @@ typedef struct {
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
 	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
 	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet */
+	const char *file;                       /* its copy's name where a phone or the browser keeps one ("bn5c.gba") */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -155,9 +156,20 @@ bool xrom_load(const char *path);
 int xrom_of_code(const char *code);
 /* ... in the folder BN6's ROM was found in. */
 int xrom_find_beside(void);
-/* Set by a dev tool (the atlas): the extra ROMs read for research alone
- * (XRomLayout.research) are read too, where they lie. */
+/* Set by a dev tool (the atlas, --dev bn4families, --dev showbn4): the
+ * extra ROMs read for research alone (XRomLayout.research) are read too,
+ * where they lie. */
 extern bool xrom_research;
+/* Whether extra ROM `xrom` is offered to the player: looked for, read,
+ * asked for and named everywhere a player brings ROMs (the ROMs screen,
+ * the phones' pickers, the browser, the 3DS, the title, the second
+ * screen). Each is, but one read for research alone (XRomLayout.research)
+ * only where a dev tool asks; clearing its layout's `research` offers it
+ * to players (docs/multirom/how-it-is-built.md, Platforms). */
+bool xrom_offered(int xrom);
+/* Extra ROM `xrom`'s layout, read or not (its name, SHA-1, game code,
+ * tag, face and copy's name); NULL past the last */
+const XRomLayout *xrom_layout(int xrom);
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
  * game's ROM is not read. */

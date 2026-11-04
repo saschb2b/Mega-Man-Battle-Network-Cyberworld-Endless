@@ -9,8 +9,9 @@
 
 #include "launcher_text.h"
 
-/* What the cursor can be on: the cartridges, the second button, PLAY */
-enum { FOCUS_BN6, FOCUS_BN5, FOCUS_ALT, FOCUS_PLAY, FOCUSES };
+/* What the cursor can be on: a cartridge (its SLOT_*), the second
+ * button, PLAY */
+enum { FOCUS_ALT = SLOTS, FOCUS_PLAY, FOCUSES };
 
 typedef struct {
 	bool from_title;          /* opened from the title: the game runs, DONE goes back */
@@ -37,9 +38,10 @@ extern Launcher L;
  * for the frame's input and its picture */
 typedef struct {
 	bool upright;            /* stacked, a phone held upright */
-	bool large;              /* the cartridges' larger art */
+	int size;                /* the cartridges' size (launcher_art.h's CART_*) */
+	bool brief;              /* their lines the brief ones: three side by side */
 	SDL_Rect head, body;
-	SDL_Rect cart[SLOTS];    /* each cartridge or its open spot */
+	SDL_Rect cart[SLOTS];    /* each cartridge or its open spot (w 0: not shown) */
 	SDL_Rect caption[SLOTS]; /* the line under it */
 	SDL_Rect note;
 	int note_lines;

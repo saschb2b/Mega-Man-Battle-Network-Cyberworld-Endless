@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5] [--cap MB] [--no-build]: the
+"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--no-build]: the
 New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
 docs/engine/emulation/3ds-memory.md).
 
@@ -17,6 +17,9 @@ the 3DS's malloc does. Each case is a 3DS:
          learned maps kept alone (src/map/netmap.c): the host built with
          CW_HEAP_3DS
   bn5    the same with BN5's ROM beside BN6's, read whole
+  bn4    the same with BN4 Red Sun's beside BN6's (--dev showbn4: read as
+         once its research switch is off, its families installed)
+  all    the same with both, BN5's and BN4's, beside BN6's
 
 Per case and seed: the heap's peak, the allocations refused (the first's
 place named), a crash's place, how deep the run went and how often an area
@@ -35,14 +38,17 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(ROOT, '.build', 'heap3ds')
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
-SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
+SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39',
+        'bn4.gba': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
 MB = 1 << 20
 CAP = 96 * MB              # the heap (src/core/start_3ds.c: OS_HEAP_AREA's 96 MB)
 BUFFER = 16 * MB           # mGBA's ROM buffer (docker/mgba.sh's 16 MB), held before main where not given back
 CORE_COPY = 16 * MB        # the core's ROM copy (EMU_ROM_SIZE), which the 3DS keeps (src/emu/emu.c)
 HOST = 'build/host/cyberworld'
 AS_3DS = 'build/heap3ds/cyberworld'   # the host build with CW_HEAP_3DS: the 3DS's rules where they are its own
-CASES = {'today': (False, BUFFER, HOST), 'bn6': (False, 0, AS_3DS), 'bn5': (True, 0, AS_3DS)}
+# each case: the extra ROMs beside BN6's, mGBA's buffer held, the binary
+CASES = {'today': ((), BUFFER, HOST), 'bn6': ((), 0, AS_3DS), 'bn5': (('bn5',), 0, AS_3DS), 'bn4': (('bn4',), 0, AS_3DS),
+         'all': (('bn5', 'bn4'), 0, AS_3DS)}
 
 
 def build_py():
@@ -52,11 +58,11 @@ def build_py():
     return mod
 
 
-def find_roms():
-    """Both ROMs, told by their SHA-1, copied into WORK/rom."""
+def find_roms(names):
+    """The ROMs `names` (bn6, bn5, bn4), told by their SHA-1, copied into WORK/rom."""
     rom = os.path.join(WORK, 'rom')
     os.makedirs(rom, exist_ok=True)
-    want = {k: v for k, v in SHA1.items() if not os.path.exists(os.path.join(rom, k))}
+    want = {k: v for k, v in SHA1.items() if k[:-4] in names and not os.path.exists(os.path.join(rom, k))}
     for name in sorted(os.listdir(ROM_DIR)) if want else []:
         path = os.path.join(ROM_DIR, name)
         if name.lower().endswith('.gba') and os.path.isfile(path):
@@ -67,7 +73,7 @@ def find_roms():
                     shutil.copy(path, os.path.join(rom, k))
                     del want[k]
     if want:
-        sys.exit(f'no {" or ".join(want)} in {ROM_DIR} (BN6 Gregar and BN5 Team Colonel, USA)')
+        sys.exit(f'no {" or ".join(want)} in {ROM_DIR} (BN6 Gregar, BN5 Team Colonel and BN4 Red Sun, USA)')
     return rom
 
 
@@ -98,19 +104,20 @@ def frames_after(text, marker, binary):
 
 def one(bp, rom, case, seed, frames, cap):
     """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes"""
-    bn5, fixed, binary = CASES[case]
+    extras, fixed, binary = CASES[case]
     data = os.path.join(WORK, case, f's{seed}')
     shutil.rmtree(data, ignore_errors=True)
     os.makedirs(data)
     mounts = [(os.path.join(rom, 'bn6.gba'), '/rom/bn6.gba:ro')]
-    if bn5:
-        mounts.append((os.path.join(rom, 'bn5.gba'), '/rom/bn5.gba:ro'))
+    mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
+    # (BN4's read for research alone until it is offered: --dev showbn4 reads it as players' builds will)
+    dev = 'god,onehit' + (',showbn4' if 'bn4' in extras else '')
     env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
            ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')]
     rel = os.path.relpath(data, ROOT)
     r = docker_run(bp, f'3ds-heap3ds-{case}-s{seed}-{os.getpid()}',
                    [binary, '--headless', '--size', '400x240', '--rom-dir', '/rom', '--data-dir', f'/src/{rel}',
-                    '--scene', 'emu', '--seed', str(seed), '--dev', 'god,onehit', '--frames', str(frames)], mounts, env)
+                    '--scene', 'emu', '--seed', str(seed), '--dev', dev, '--frames', str(frames)], mounts, env)
     out = r.stdout + r.stderr
     with open(data + '.out', 'w') as f:
         f.write(out)
@@ -148,15 +155,16 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--seeds', default='1-12', help='seeds, as 1-12 or 1,4,7')
     ap.add_argument('--frames', type=int, default=120000, help="each run's frames (120000: some 25 layers)")
-    ap.add_argument('--cases', default='today,bn6,bn5', help='which 3DS: ' + ', '.join(CASES))
+    ap.add_argument('--cases', default='today,bn6,bn5,bn4,all', help='which 3DS: ' + ', '.join(CASES))
     ap.add_argument('--jobs', type=int, default=os.cpu_count() or 4)
     ap.add_argument('--no-build', action='store_true', help='the host binaries as they are')
-    ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6 and bn5 cases' binary (a variant built with --no-build)")
+    ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
     ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
     a = ap.parse_args()
-    for case in ('bn6', 'bn5'):
+    for case in ('bn6', 'bn5', 'bn4', 'all'):
         CASES[case] = CASES[case][:2] + (a.as_3ds,)
-    rom = find_roms()
+    cases = [c for c in a.cases.split(',') if c in CASES]
+    rom = find_roms({'bn6'} | {x for c in cases for x in CASES[c][0]})
     bp = build_py()
     if not a.no_build:
         build(bp)
@@ -165,7 +173,6 @@ def main():
                                                          'tools/heap3ds.c', '-ldl'])
     if r.returncode:
         sys.exit('heap3ds.c did not build\n' + r.stderr)
-    cases = [c for c in a.cases.split(',') if c in CASES]
     jobs = [(c, s) for c in cases for s in seeds_of(a.seeds)]
     with ThreadPoolExecutor(a.jobs) as pool:
         results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB), jobs)))

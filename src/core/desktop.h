@@ -12,9 +12,10 @@
 /* Whether there is a file chooser: zenity or kdialog on Linux (none in
  * the Flatpak's sandbox), macOS's open panel, Windows' own */
 bool desktop_can_choose(void);
-/* The file chooser for ROM `slot` (0 BN6, 1 BN5, as its title says): the
- * file's path; false where none was chosen. It waits for the player: the
- * launcher runs it on a thread of its own (pick_desktop.c) */
+/* The file chooser for ROM `slot` (the launcher's cartridge: 0 BN6, 1 +
+ * an extra ROM's XRomId, as its title says): the file's path; false where
+ * none was chosen. It waits for the player: the launcher runs it on a
+ * thread of its own (pick_desktop.c) */
 bool desktop_choose_rom(int slot, char *path, size_t n);
 /* SAVES' chooser for a file to import (0), the place to export to (1) or
  * the folder for the copy (2), titled `title` and opened at `start`: the

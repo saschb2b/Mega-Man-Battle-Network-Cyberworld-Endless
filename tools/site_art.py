@@ -492,6 +492,7 @@ CART_FACE = (16, 54, 74)
 CART_LABEL = {   # top, foot, stripes
     'bn6': ((8, 189, 115), (0, 140, 82), (74, 231, 115)),
     'bn5': ((49, 156, 222), (16, 99, 165), (107, 222, 255)),
+    'bn4': ((231, 74, 49), (165, 24, 16), (255, 140, 107)),
 }
 LABEL_X, LABEL_Y, LABEL_W, LABEL_H, FACE = 6, 9, 80, 38, 34
 
@@ -585,6 +586,7 @@ def main():
     }
     art['cart-bn6'] = cartridge('bn6')
     art['cart-bn5'] = cartridge('bn5')
+    art['cart-bn4'] = cartridge('bn4')
     art['cart-spot'] = open_spot(CYAN)
     art['cart-spot-on'] = open_spot(GOLD)
     for name, im in art.items():

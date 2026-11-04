@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:10:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -85,7 +85,10 @@ them, which `tools/xfamily.py` compares with CanGard installed),
 `bn4families` (BN4 Red Sun's ROM read for research and its whole families,
 `src/emu/xvirus_bn4.c` from `tools/xrecipe_bn4.py`, installed after BN5's:
 Billy as AI 64, ids 0x2C0-0x2C5, for the foes step, `0:foes 2C0@52`;
-[Transplanted families](../multirom/families.md)), and
+[Transplanted families](../multirom/families.md)), `showbn4` (BN4 Red Sun
+offered as players will see it once its research switch is off: read, its
+cartridge on the ROMs screen, its pickers and the title's found line;
+[How it is built](../multirom/how-it-is-built.md), Platforms), and
 `xnavicontrol` (the control Navi installed instead of BN5's Navis: BN6's
 own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
 `tools/xcontrol.py --navi`; [Transplanted Navis](../multirom/navis.md)), and

@@ -164,6 +164,7 @@ def default_rom_dir():
 
 BN6_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
 BN5_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'   # Team Colonel (USA), optional beside it (docs/multirom/)
+BN4_SHA1 = 'a97e96a7da03abd70f7953328e511b9fa29179f1'   # Red Sun (USA), read for research until it is offered (docs/multirom/bn4.md)
 
 
 def docs_rom_mounts(bn5=False):
@@ -739,8 +740,8 @@ def site(analytics=True):
 
 def serve(port=8080):
     """The site on http://localhost:PORT; the developer's ROMs also there for tests in a local browser,
-    told by their SHA-1: BN6's at /.dev/rom.gba, BN5's at /.dev/bn5.gba (the page itself takes only the
-    files a player chooses)."""
+    told by their SHA-1: BN6's at /.dev/rom.gba, BN5's at /.dev/bn5.gba, BN4 Red Sun's at /.dev/bn4.gba (the
+    page itself takes only the files a player chooses; BN4's only with ?dev=showbn4 until it is offered)."""
     import glob
     import hashlib
     import http.server
@@ -750,7 +751,7 @@ def serve(port=8080):
     for path in sorted(glob.glob(os.path.join(default_rom_dir(), '*.gba'))):
         with open(path, 'rb') as f:
             digest = hashlib.sha1(f.read()).hexdigest()
-        for url, sha1 in (('/.dev/rom.gba', BN6_SHA1), ('/.dev/bn5.gba', BN5_SHA1)):
+        for url, sha1 in (('/.dev/rom.gba', BN6_SHA1), ('/.dev/bn5.gba', BN5_SHA1), ('/.dev/bn4.gba', BN4_SHA1)):
             if digest == sha1:
                 roms.setdefault(url, path)
 

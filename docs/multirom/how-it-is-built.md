@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "How it is built"
-description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space, areas dressed by `run_dress`, songs copied by `xsong.c`, and BN5's ROM on each platform."
+description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space, areas dressed by `run_dress`, songs copied by `xsong.c`, and the extra ROMs offered on each platform (BN4's held behind its research switch)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:25:00Z }
 ---
 
 # How it is built
@@ -13,9 +13,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
    (`xrom_find`). Each has its layout (`XRomLayout`): its tables, found by
    their structure (`tools/rom_tables.py`) and noted in [ROM data](../rom/overview.md).
    A layout marked `research` (BN4 Red Sun's, [Battle Network 4 in a run](bn4.md)) is
-   read only when a dev tool sets `xrom_research` (the atlas's `x1`), so a
-   run, the ROMs screen and the 3DS's heap never meet a ROM that lends
-   nothing yet.
+   read only when a dev tool sets `xrom_research` (the atlas's `x1`,
+   `--dev bn4families`, `--dev showbn4`), so a run, the ROMs screen and
+   the 3DS's heap never meet a ROM that lends nothing yet.
 2. **A map from any of them** (`area_src_load_x`): the map reader takes
    its maps from the game's ROM; what learns from a map (`tiles_learn.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever
@@ -49,20 +49,38 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-03T23:50:00Z }
    backgrounds (`encounter_backdrop`). The run's seed picks it,
    with the ROMs present, so nothing is saved: a run continued without
    the other ROM goes on in the BN6 area's tiles.
-6. **Platforms**: desktop first. Phones keep copies: Android's
-   `RomLook` and iOS's `src/core/ios.m`, behind the ROMs screen's
-   pickers (`src/launcher/`), copy BN5's ROM beside BN6's from the folder
-   the player chose, and look in it again at each start, so BN5 put there
+6. **Platforms**: desktop first. Every place a player brings ROMs takes
+   the extra ROMs as data, the list `XRomId` names, each offered or not
+   (`xrom_offered`): one whose layout is marked `research` (BN4 Red
+   Sun's) is neither read, shown, copied nor named for a player until the
+   mark goes, which is then the one line that offers it everywhere;
+   `--dev showbn4` (the browser's `?dev=showbn4`) shows it for review. The
+   ROMs screen (`src/launcher/`) has a cartridge for BN6's and one each
+   extra ROM offered, its label in its game's colours and its face from
+   its own ROM (`XRomLayout.face`: BN5's Colonel, BN4's Duo), three side
+   by side in a compact size where a small screen has no room for more;
+   the desktops' file dialogs name the game a cartridge wants. Phones
+   keep copies: Android's `RomLook` (told the codes offered by
+   `pick_android.c`) and iOS's `src/core/ios.m` (its table read from the
+   layouts: game code, SHA-1, the copy's name), behind the ROMs screen's
+   pickers, copy the extra ROMs offered beside BN6's from the folder the
+   player chose, and look in it again at each start, so BN5 put there
    later comes in (issue #66). On the desktops, Android and iOS, R on the
-   title opens the ROMs screen again to add BN5 (issue #97). The browser's
-   play page (`web/play/app.js`) takes BN5's file beside BN6's, either
-   told by its header's game code and checked by its SHA-1, and keeps it
-   in IndexedDB beside BN6's (`rom/bn5c.gba`), where `xrom_find_beside`
-   reads it (issue #68). The New 3DS reads BN5's file whole as well,
-   beside BN6's or in the 3DS's other ROM folders (`src/core/start_3ds.c`),
-   where its 96 MB heap has room for it: mGBA's 3DS setup had taken a
-   16 MB ROM buffer it never used, which the game now gives back, so with
-   BN5's 8 MB read the heap's fixed part is 8 MB smaller than the 3DS's
-   with BN6 alone was ([The 3DS's memory](../engine/emulation/3ds-memory.md)). A 3DS short
-   of room leaves BN5's ROM unread, a run of BN6's, and its log and PET
-   say so.
+   title opens the ROMs screen again to add one (issue #97). The
+   browser's play page (`web/play/app.js`) takes BN5's file beside BN6's,
+   either told by its header's game code and checked by its SHA-1, and
+   keeps it in IndexedDB beside BN6's (`rom/bn5c.gba`), where
+   `xrom_find_beside` reads it (issue #68); it asks the engine which extra
+   ROMs it offers (`cw_rom_offered`) and hides the others' cartridges,
+   refusing their files as another game's. The New 3DS reads one extra
+   ROM offered whole, BN5's before BN4's, beside BN6's or in the 3DS's
+   other ROM folders (`src/core/start_3ds.c`), where its 96 MB heap has
+   room for it: mGBA's 3DS setup had taken a 16 MB ROM buffer it never
+   used, which the game now gives back, so with BN5's 8 MB read the
+   heap's fixed part is 8 MB smaller than the 3DS's with BN6 alone was
+   ([The 3DS's memory](../engine/emulation/3ds-memory.md)). Two extra ROMs do not fit: modelled
+   with BN5's and BN4's both read, 9 of 12 long runs had allocations
+   refused (73, among them maps' mirror images and raised views not
+   learned), where BN4's alone had none and BN5's alone 18 in 6.
+   A second extra ROM, or one a 3DS short of room cannot hold, is left
+   unread, the run going on without it, and its log and PET say so.
