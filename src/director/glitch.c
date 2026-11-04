@@ -1,8 +1,8 @@
 /* The run's Glitch layer, the director's part (glitch.h; docs/game/glitch-layer.md).
  *
- * The stage is the share of the layer's floor MegaMan has come near
- * (D.seen, which a CONTINUE restores), so the layer comes apart the
- * further he explores it. Each glitch is decided in the update, on numbers
+ * The stage is the share of the layer's Mystery Data taken (BN6's own
+ * flags, which a CONTINUE restores): its data lie at the ends of its
+ * detours, so the layer comes apart the further he explores it. Each glitch is decided in the update, on numbers
  * of its own (the generator's and the game's left alone), and drawn over
  * the frame read-only: rows of the floor torn sideways, blocks of it
  * slipped by a tile, its colours turned. On the layer holding the warp the
@@ -22,7 +22,9 @@
 #include "director_layer.h"
 #include "director_state.h"
 #include "emu.h"
+#include "flags.h"
 #include "glitch_words.h"
+#include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
@@ -34,8 +36,9 @@
 #define ZONE 30            /* the warp's glitch: this many rows above and below it */
 #define GBA_OBJ_PALETTE 0x05000200u   /* the sprites' 256 colours */
 
-/* The share of the floor come near (in hundredths) each stage begins at */
-static const int stage_at[GLITCH_STAGES] = { 0, 30, 50, 65, 80 };
+/* The share of the layer's Mystery Data taken (in hundredths) each stage
+ * begins at, the first data taken stage 1's */
+static const int stage_at[GLITCH_STAGES] = { 0, 1, 30, 55, 80 };
 /* Frames between glitches at each stage, from and to */
 static const int gap_lo[GLITCH_STAGES] = { 300, 180, 100, 60, 30 }, gap_hi[GLITCH_STAGES] = { 600, 360, 220, 140, 80 };
 
@@ -49,6 +52,7 @@ static struct {
 	int wx, wy;         /* ... its world place */
 	int floor;          /* the layer's floor panels */
 	int stage, said;    /* its stage, and the stages said */
+	int share;          /* the share of its Mystery Data taken, in hundredths */
 	uint32_t rng;       /* its own numbers */
 	int next;           /* D.frame of the next glitch */
 	int fx, fx_left;    /* the glitch under way */
@@ -90,13 +94,15 @@ void glitch_layer_begin(void) {
 	else glitch_looks_free();
 }
 
-/* The stage from the floor come near (never lower than it was) */
+/* The stage from the layer's Mystery Data taken, BN6's own flags (so a
+ * CONTINUE keeps it): each data taken deepens the glitch; never lower
+ * than it was */
 static void measure(void) {
 	if (dev.glitch_stage > 0) { G.stage = dev.glitch_stage - 1 < GLITCH_STAGES ? dev.glitch_stage - 1 : GLITCH_STAGES - 1; return; }
-	int near = 0;
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x) near += D.seen[y][x] && layer.cell[y][x] == C_PATH;
-	int share = G.floor ? near * 100 / G.floor : 0, s = 0;
+	int taken = 0;
+	for (int k = 0; k < D.objs.nmd; ++k) taken += flag_get(MAPSLOT_MD_FLAG + k);
+	int share = D.objs.nmd ? (taken * 100 + D.objs.nmd - 1) / D.objs.nmd : 0, s = 0;
+	G.share = share;
 	while (s + 1 < GLITCH_STAGES && share >= stage_at[s + 1]) ++s;
 	if (s > G.stage) G.stage = s;
 }
@@ -146,9 +152,9 @@ static void left_at(void) {
 	static uint32_t told;
 	if (!G.on || told == run.layer_seed || D.objs.exit_x == 0) return;
 	int px = bn6_player_x(), py = bn6_player_y();
-	if (abs(px - D.objs.exit_x) + abs(py - D.objs.exit_y) > 24) return;
+	if (abs(px - D.objs.exit_x) + abs(py - D.objs.exit_y) > 48) return;
 	told = run.layer_seed;
-	printf("glitch: at the exit at stage %d%s\n", G.stage, G.settled ? ", the copy deleted" : "");
+	printf("glitch: at the exit at stage %d, %d%% of its data taken%s\n", G.stage, G.share, G.settled ? ", the copy deleted" : "");
 }
 
 void glitch_update(void) {

@@ -10,9 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* How far a Glitch layer has come apart: 0 on arrival to GLITCH_STAGES - 1
- * at its heart, by the share of its floor MegaMan has come near; it never
- * falls. */
+/* How far a Glitch layer has come apart: 0 on arrival to GLITCH_STAGES - 1,
+ * by the share of its Mystery Data taken; it never falls. */
 #define GLITCH_STAGES 5
 
 /* A layer built (any kind): the glitch's state for it, its warp's place

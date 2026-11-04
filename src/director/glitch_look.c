@@ -24,7 +24,14 @@
 #include "netmap.h"
 #include "run.h"
 
+/* (the looks made as the layer begins: learning an area's maps takes
+ * about a second on a New 3DS, whose heap keeps one area learned at a time,
+ * docs/engine/emulation/3ds-memory.md) */
+#if defined(__3DS__) || defined(CW_HEAP_3DS)
+#define LOOKS 2
+#else
 #define LOOKS 3
+#endif
 #define VRAM 0x06000000u
 #define PALETTE_SIZE 0x1A0    /* the 13 banks BN6 copies at a map's entry (bn6f decompAndCopyMapTiles_8030472) */
 #define GBA_BG2HOFS 0x04000018u
