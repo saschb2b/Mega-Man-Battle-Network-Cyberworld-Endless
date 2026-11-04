@@ -30,6 +30,9 @@ signature, the room it is remembered by: docs/world/level-design/identity.md,
 Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
 200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
+swap FORMS (a battle of one Navi swapped mid-fight for the next: 101:300
+107:300 10D:300, each a Navi's enemy id in hex and its HP, 0 its own:
+src/emu/battle_swap.h),
 status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
 in hex, struck at once with paralysis, freeze, bubble, drag, slide,
 confuse or blind as a hit gives it, for FRAMES frames, 60 where none: issue #82), xrecord ADDR
@@ -73,7 +76,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -119,6 +122,8 @@ def steps(commands):
                 out.append(('battle',))
             elif op == 'foes':
                 out.append(('foes', '/'.join([args[0]] + args[1:])))
+            elif op == 'swap':
+                out.append(('swap', '/'.join([args[0]] + args[1:])))
             elif op == 'status':
                 out.append(('status', ' '.join([args[0]] + args[1:3])))
             elif op == 'xrecord':
@@ -134,7 +139,7 @@ def steps(commands):
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, status, xrecord, chip, cross, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, swap, status, xrecord, chip, cross, sig, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -332,7 +337,7 @@ def send(h, seq, record=None):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'status', 'xrecord', 'chip', 'cross'):
+        elif s[0] in ('foes', 'swap', 'status', 'xrecord', 'chip', 'cross'):
             items.append(f'{s[0]} {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))

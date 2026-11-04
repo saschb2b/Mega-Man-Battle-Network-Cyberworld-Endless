@@ -1,8 +1,8 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-26",
-  "previous": "2026-10-18",
+  "updated": "2026-11-04",
+  "previous": "2026-10-26",
   "features": [
     {
       "name": "Net Square",
@@ -75,6 +75,14 @@
       "left": "The BBS's rank and points (requests 0-2 need rank C) left as BN6 keeps them; the done flag (0x1C60) unused: a run's asker settles in person.",
       "updated": "2026-10-26",
       "link": "../world/home/jobs.md"
+    },
+    {
+      "name": "A Navi swapped mid-battle",
+      "state": "proven",
+      "now": "One BN6 battle against a Navi of BN6's swapped on its panel for a second and a third (src/emu/battle_swap.c, the Glitch layer's copy). BN6 counts the battle's starting enemies at BattleState +5 (lowered at a destroy, 0x0800A104; the win at 0, 0x0800A152) and +0x13 (lowered as a dying begins where Param2 is 0, 0x0800A11C); an enemy of the spawn's mid-fight entry (0x08007696, AIData +2 1, no caller in BN6) counts in neither and is freed at its destroy. The form deleted is made such an arrival at its dying's phase 0 (0x080170E4), glitches out in BN6's sprite mosaic for 24 frames in its phase 4 (0x08017122) and is removed by BN6; the next form is spawned on its panel from battle_main (0x08007800), back through a hook in free space, arrives as BN6 brings a Navi into a fight under way (its HP plate listed), and takes the count (AIData +2 0, Param2 0) as its arrival ends. The last form's deletion is BN6's own: ENEMY DELETED!, the results with the first form's reward.",
+      "left": "Not in a run yet: the director's Glitch layer arms it (battle_swap_arm before, battle_swap_disarm after). BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
+      "updated": "2026-11-04",
+      "link": "../rom/navis.md"
     }
   ],
   "decisions": [],
@@ -206,6 +214,10 @@
     {
       "date": "2026-10-25",
       "what": "BN5's Liberation commands mapped (src/emu/bn5_liberation_cmds.h, docs/rom/liberation.md's row): command ids 0-15, the masks 0x08050048, the window 0x0200A7D0 and checks 0x08055778, steps 0x0804C428 and 0x0804D308, the shapes 0x08050344 applied by 0x08052060, PanelSearch's line 0x0805221C, MagnetBarrier 0x08054518/0x0805455C, the walk masks 0x0804FF5C, Team ProtoMan's Navi ids 1-6. Corrected: BN5_LIB_UNITS' +5 is the facing, the Navi id is +1 (found by poking +1, which changed the window's commands; +5 read as the facing by 0x080537CE)."
+    },
+    {
+      "date": "2026-11-04",
+      "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
     }
   ],
   "experiments": [
@@ -543,6 +555,14 @@
       "result": "Mission 1's board in romlab (the plain ROM; MegaMan walked to panel 0x7B,0x80 facing 0x7B,0x7F; a unit's Navi id, +1, poked; panels made dark in the RAM list, kept sorted): the window's mask each Navi id's from 0x08050048 (ProtoMan 0xD001, GyroMan 0x8011, SearchMan 0x8041, NapalmMan 0x8101, MagnetMan 0x8401, Meddy 0xC003); each command's panels as predicted from its shape (Napalm six: four ahead, the third's two sides; WideSwrd three across, as ScrenDiv; PanelSearch a line of four dark panels); GyroMan on a dark panel bombed it clean with no battle; MagnetBarrier put 0x40 in both teammates' flags, kept through the Darkloids' phase and cleared at the next PLAYER PHASE; PanelSearch over an item panel cut its line to it and went into a battle, over none ended with no battle; Napalm went into one battle on a dark panel. Each Navi's confirming line came from his own archive.",
       "meaning": "BN5 runs both teams' commands from one code and table set; Team Colonel's ROM can lend Team ProtoMan's commands as they are. Static reading, not played: the harm MagnetBarrier makes 0 (0x08053D32) and the panels a won battle frees (0x0804C57C).",
       "link": "../game/liberation/bn5/navis.md"
+    },
+    {
+      "feature": "A Navi swapped mid-battle",
+      "date": "2026-11-04",
+      "name": "Three forms in one battle, and two mutations",
+      "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
+      "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
+      "link": "../rom/navis.md"
     }
   ],
   "method": {

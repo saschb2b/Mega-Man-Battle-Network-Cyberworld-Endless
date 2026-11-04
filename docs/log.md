@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-04
+* **Update**: rom/navis.md, A Navi swapped mid-battle: BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, a Navi's dying phases 0 and 4 and its destroy, the HP plates and the sprite mosaic, and how a battle swaps one Navi for the next on its panel (`src/emu/battle_swap.c`), proven over seeds with two mutations; engine/emulation/hooks.md its four hooks; engine/emulation/memory.md `FREE_SWAP_RETURN`; devtools/battle-on-demand.md the `swap` step; code/emu.md and code/dev.md the new files; re/ledger.json its feature, change and experiment, re/STATUS.md and the dashboard written again; symbols written again.
+
 ## 2026-11-02
 * **Creation**: releases/v0.19.0.md, 0.19.0's notes ("Your screen, your sound.": Options in pages with its live Display, a GBA's screen and its colours, the sound your way, each with its picture or GIF, and the trailer); its lines in releases/index.md and releases/overview.md.
 * **Update**: code/site-and-media.md, `docs/screenshots/`'s sheets (`SCREENSHOT_SHEETS`: pictures side by side under their labels) and `compare-*.png`, and `docs/clips/`' clips run `beside` (a run a set of options each, side by side), for 0.19.0's notes.

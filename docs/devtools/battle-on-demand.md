@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "A battle on demand"
-description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `xrecord` (a BN5 record), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
+description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:15:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T14:00:00Z }
 ---
 
 # A battle on demand
@@ -63,6 +63,28 @@ python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
   --shot 1378:/src/.build/a.bmp   # CanGard's reticle striking MegaMan, its muzzle's blast
 python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
 python3 tools/xfamily.py --spec families --family zomon   # every family's (or some): its record, statuses, deletions
+```
+
+The `swap` step (`--input`'s `0:swap 101:300/107:300/10D:300`, play.py's
+`swap 101:300 107:300 10D:300`; `src/dev/swap_dev.c`) fights one Navi
+swapped mid-battle for the next, the Glitch layer's copy
+(`src/emu/battle_swap.c`; [Navis moved into BN6's battle engine](../rom/navis.md),
+A Navi swapped mid-battle): two or three forms, each a Navi of BN6's by
+its enemy id in hex (0x101 HeatMan V1, then six ids a Navi: ElecMan
+0x107, SlashMan 0x10D, ProtoMan 0x13D, BlastMan 0x143) and its HP after
+the colon (none or 0 its own). The first form's battle starts as the
+`foes` step's at column 5, row 2; deleted, it glitches out in BN6's
+sprite mosaic, uncounted, and the next arrives on its panel through
+BN6's mid-fight spawn and fights as itself; the last form's deletion
+wins the battle as BN6 wins any, its results the first form's reward.
+With `CYBERWORLD_EMU_DEBUG` it prints each form found, taken off,
+spawned and arrived, and every 30 frames the form's state, HP, panel
+and the side's counts. A step names a form that is no Navi of BN6's, or
+one whose deletion is not BN6's generic Navi's, and fights nothing.
+
+```bash
+CYBERWORLD_AUTOPILOT=1 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --net-biome 0 --seed 15 --dev god,onehit,quiet --frames 4900 \
+  --input "300:,0:swap 101/107/10D" --shot 1468:/src/.build/out.bmp,1500:/src/.build/in.bmp   # HeatMan glitching out, ElecMan logging in
 ```
 
 The `xrecord` step (`--input`'s `0:xrecord 811DE10`, play.py's `xrecord

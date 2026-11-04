@@ -81,8 +81,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-26",
-  "previous": "2026-10-18",
+  "updated": "2026-11-04",
+  "previous": "2026-10-26",
   "features": [
     {
       "name": "Net Square",
@@ -164,120 +164,33 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-10-26",
       "link": "../world/home/jobs.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "A Navi swapped mid-battle",
+      "state": "proven",
+      "now": "One BN6 battle against a Navi of BN6's swapped on its panel for a second and a third (src/emu/battle_swap.c, the Glitch layer's copy). BN6 counts the battle's starting enemies at BattleState +5 (lowered at a destroy, 0x0800A104; the win at 0, 0x0800A152) and +0x13 (lowered as a dying begins where Param2 is 0, 0x0800A11C); an enemy of the spawn's mid-fight entry (0x08007696, AIData +2 1, no caller in BN6) counts in neither and is freed at its destroy. The form deleted is made such an arrival at its dying's phase 0 (0x080170E4), glitches out in BN6's sprite mosaic for 24 frames in its phase 4 (0x08017122) and is removed by BN6; the next form is spawned on its panel from battle_main (0x08007800), back through a hook in free space, arrives as BN6 brings a Navi into a fight under way (its HP plate listed), and takes the count (AIData +2 0, Param2 0) as its arrival ends. The last form's deletion is BN6's own: ENEMY DELETED!, the results with the first form's reward.",
+      "left": "Not in a run yet: the director's Glitch layer arms it (battle_swap_arm before, battle_swap_disarm after). BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
+      "updated": "2026-11-04",
+      "link": "../rom/navis.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
   "since": [
     {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's board HP mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the units' HP +0x14, max +0x16 and shown +0x18 (stepped 4 a frame toward it, 0x080533D8), the digits under the team (0x080533A0, not the Navi in play) and the enemies (0x0805341A) drawn by 0x08053482 (OBJ tile 664 + 2d, palette 14, centred, 8 apart, their top at the unit's place); a fought unit's HP and max for its battle's marked enemy (0x08053B9E from 0x08006862) and its HP back as the battle ends (0x08009050, 0x08053BF4); the Darkloid's heal 0x080560AC / 0x08053D04 (max / 10 per dark panel round him by 0x08050334's weights, 20 frames' wait), its effect list 7's 120 in palette 2 (0x08300268); a rest's heal 0x08053CBE (max / 10 times 2-5 by flags 0x300-0x308)"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "Each Liberation Mission's own look mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): group 0x86's GFXAnim lists while a mission is on 0x08073E70 (BN5_LIB_MISSION_ANIMS), the board's colours each loads over its map's to 0x03003980, 0x180 bytes (missions 1-5 0x08614DD4 by script 0x08073AA0, 6-9 0x08615100 by 0x08073D10), the BGAnimData records while a mission is on 0x0807416C (BN5_LIB_MISSION_BACKDROPS: five backdrops); BN5_LIB_PALETTE's 0x08614DB4 replaced by the loader's own source; the nine maps' shared tile set 0x085A7DE4"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's board words and banners mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the L view's keys' help 0x087E4294 and its WIN0 panel, the board's text archives 0x0804FB04 (the Darkloids' 13-15, entry 0 his first turn's), the common archive 0x087E866C (the tally 32-40, MegaMan's 38-40), the clear's routine 0x0804E9F4 (SUCCESS! as the phases' banner's kind 2, song 0x18, its frames), the tier 0x08052DD0"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/rom/liberation.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation Missions hold no special route (docs/game/liberation/special-routes.md; docs/research/sources.md): the item kinds' table 0x08051924 ends after six records (BN5_LIB_ITEM_KIND_COUNT; its seventh, 0x08051954, is Thumb code), the nine missions' item lists hold kinds 0-5 alone and their panel lists kinds 0, 1, 3, 5-7 and 9-0x0C alone; the route a sealed region holds is ours, kept for the run and opening a third way at the next fork"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation team mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the Navi in play at the liberation state's +6, a team unit's +2 its turn yet to come, the HP box's cap 0x086D5964, digits 0x086D59A4 and blank 0x086D5C64 on palette 12, the others' HP under them, Pass a fifth of max HP; BN6's player spawn's sprite load 0x0809E7EA and OK's hand 0x08029110 named (src/emu/bn6.h, bn6_forms.h), Gregar's list-6 numbers 0x07, 0x28, 0x29, 0x31 and 0x35 found empty in both versions"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN6's Virus Battler mapped (src/emu/bn6_battler.h, docs/rom/virus-battler.md's three rows, docs/research/sources.md, tools/virus_battler.py): the card's flags 0x1D8 and 0x196 + AI and their one writer 0x08736058, battle mode 6's loop 0x0800961C, VIRUS LIST state 0x020364C0, family data 0x0802B5FC, spawn 0x0802AEEA, the 50 MB check, the time limit on the Custom gauge, results 1/2/7, the Battlers' records 0x080B06E0's 0x1A-0x3A and their start cutscene 0x0809A5F0"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation commands mapped (src/emu/bn5_liberation_cmds.h, docs/rom/liberation.md's row): command ids 0-15, the masks 0x08050048, the window 0x0200A7D0 and checks 0x08055778, steps 0x0804C428 and 0x0804D308, the shapes 0x08050344 applied by 0x08052060, PanelSearch's line 0x0805221C, MagnetBarrier 0x08054518/0x0805455C, the walk masks 0x0804FF5C, Team ProtoMan's Navi ids 1-6. Corrected: BN5_LIB_UNITS' +5 is the facing, the Navi id is +1 (found by poking +1, which changed the window's commands; +5 read as the facing by 0x080537CE)."
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/game/pet.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "A liberation's battle on BN6's loop (src/emu/bn6_battle_loop.h, src/director/liberation_battle.c, docs/rom/battle.md's row BN6's battle loop and banners): BN6's loop state 0x0203CA70, its turn banner 0x080080A0, the fight's frame 0x08008144, the win's banner 0x0800822C, the draw 0x080082DC (its banner 0x080082F8, past it 0x0800830C), the message table 0x0801EF84; BN5's rules named (BN5_LIB_TURN_BANNER, BN5_LIB_TIME_ASK, BN5_LIB_TIME_UP, BN5_LIB_WIN_BANNER, BN5_BATTLE_MESSAGES, BN5_LIB_DOUBLE_HIT)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Liberation board's phases' banners (the words' LZ77 tiles 0x087E5A10, their load list 0x08052FF4, palettes 0x087E5500 and 0x087E5520, the band's WIN1 rows, blend and frames, sound 0xD6 from 0x08054DAE), the L view's panels, the guardians' sprites (list 6's 83-85), the board's songs 0x22 and 0x1C and the item jingle 0x16D mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row); BN6's PlayMusic 0x080005D4"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The NaviCust's compressed shapes compared with their full ones in the program records (0x13B22C, +0xC against +8): each of the 64 colour variants with one is a subset, cell for cell; BN6's compression flags (0x2660 + variant) set as a run begins for the codes the profile knows (codes_bring, docs/rom/navicust.md's NaviCust compression row, docs/game/meta/)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Darkloids' phase mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): a guardian's warp 0x080AF3F8 (sprite list 7's 59, sound 0xB4 out and in, 0x94 as it shows), the Darkloid's heal 0x08055208 (sound 0x8A), the reach's blink 0x080529F0 (look 0x0D, sound 0x91), a blow on a Navi 0x08053EBA (0x6B, 0x6E), BigBrute's flame list 7's 56, the HP digits 0x086F7DEC in white 0x086CCD24 and a harm's yellow 0x087E4678, the guardians' standing and strike animations, the units' world place +0x1C/+0x20"
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: a partner's record takes his loadout's HP and buster (teambuster=N); the full-rules audit of what a partner meets (docs/online/arena/), DarkInvs left out for a MegaMan without BN5's AI block (src/emu/darkinvs.c) and BN5's green flash counted by a side's player alone (src/emu/xchips_flash.c)."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "BN6's and BN5's ways to show a mood named for the Square's emotes: src/emu/bn6_expression.h and bn5_expression.h, docs/rom/online.md's Expression rows, docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: a partner's whole MegaMan (issue #181): his NaviCust compiled by BN6's reload on a core of his client (src/online/arena_team_navicust.c, teamcust=N), his Cross by BN6's crossing controller run for his object (src/online/arena_team_cross.c, teamcross=N), a Program Advance from his own screen joined in his hand (arena_team_screen.c, arena_team_custom.c, teampa=N); docs/rom/'s three rows."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #182 and the full-rules audit made right (src/emu/darkinvs.c, darkinvs_room.h, bn6_ai.h, soullife.c, soulchaos.c, soulchips.c, soullook.c, soulmood.c, src/online/arena_team_rules.c): BN5's chip AI's rooms, the Souls and the mood by object; BN6's AI data's pool and its side-player getter named (docs/rom/), docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #181 integrated (twoaside-net, twoaside-megaman, twoaside-rules): a partner's words carried in his side's GBA's own link packets (src/online/arena_team_link.c, RAM_TEAM_LINK; BN6_LINK_OUT, BN6_LINK_IN and the pad's stores in src/emu/bn6_link.h, docs/rom/online.md's row), his turn worked out on each GBA from them; the GBAs' drift past the rings' delay ended by construction; a partner's whole MegaMan over the network (src/online/arena_seats.c, arena_team_client.c); docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "A partner's UNITE (src/online/arena_team_soul.c, arena_pair_open_screen, HOOK_CORES 5): his copy's GBA with BN5's installs' hooks and his Souls, TEAM_SOUL in his stream, soullife.c's Soul taken up, counted and ended by object, the Souls' modules (soulchaos, soulchips, soulpower, soulpassive, soullook, soulcode, soulmood, soulcolonel) reading the MegaMan's own Souls state; the Souls' differential passing as before."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #181's review: a partner's NaviCust compiled over the way in's own state, never a game's checkpoint (0x08138A00 keeps NaviStats +0x0E, +0x22, +0x2C, +0x2D, +0x2F, +0x30, +0x58-+0x5B from the state it runs on; arena_seats_compile); his messages checked on every GBA by his screen's rules (team_check.c: the hand dealt, one code or one chip, the PA lists' recipes 0x080295B4 and 0x080295B8, his Crosses, Souls and ColonelSoul's chip); sub_801FFD6's read path hooked (0x0802001C, BN6_LINK_TAKES_ANY 0x0203F7D8); the outbox of twelve (team_outbox.c); the server's OVER from seat 0 alone; the packet's other readers and writers named (0x0813F8D4, the library's getters 0x0803EF48 and 0x0803EF50, setter 0x0803EF58)"
-    },
-    {
-      "date": "2026-10-21",
-      "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
-    },
-    {
-      "date": "2026-10-21",
-      "what": "--dev arena2v2: each partner's own battle NaviStats and hand (src/online/arena_team_navi.c), answered by object, kept in two effect slots taken in BN6's own pool; teamhp=N and arenaother for their proof."
-    },
-    {
-      "date": "2026-10-21",
-      "what": "The bout's seed and the kept pair (src/online/arena_boot.c's BOUT_STEP, arena_keep, arena_new_bout; --dev arena's arenaseed=N and arenaagain=N); protocol v13 keeps a pair of players' sides for their rematch."
+      "date": "2026-11-04",
+      "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
     }
   ],
   "experiments": [
+    {
+      "feature": "A Navi swapped mid-battle",
+      "date": "2026-11-04",
+      "name": "Three forms in one battle, and two mutations",
+      "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
+      "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
+      "link": "../rom/navis.md"
+    },
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-25",

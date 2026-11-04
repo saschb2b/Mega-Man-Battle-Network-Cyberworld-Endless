@@ -3811,6 +3811,7 @@ static void test_free_space(void) {
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
+		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
 		{ "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
