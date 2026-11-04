@@ -2333,6 +2333,36 @@
           "0xBB"
         ],
         "why": "Billy's thunder is BN6's own third-kind 0x2A run for Billy's parameters (the recipe's audit, tools/bn4_twins.py AUDITS (0x080D2156, 0x080CADBC): BN6's object, not BN4's moved), so it draws BN6's own art: its init sets up sprite list 0x10, number 0x11 in BN4 (0x080D2044, its sprite_load 0x0800287C) and number 0x16 in BN6 (0x080CAC80, sprite_load 0x080026E4), two sprites of other bytes (the hooks' CRC32s 0x030B3B0A and 0xAF2AFC99). What the sprite state holds of it is its own: +0xA8 to +0xB7 its frames' pointers into it (sprite_load's +0x18 on, its state at the object's +0x90) and +0xB8's word (its top byte 0x80 in BN4, 0xC0 in BN6) copied from the sprite's own data (BN6 0x0800210E-0x08002120, byte by byte as the art has it): Billy's sprite, a copy of BN4's bytes, holds the same there in both games (+0xBB 0xFC), MegaMan's too (0xF0). The thunder's place, timing, damage and hit are compared as ever"
+      },
+      {
+        "name": "MegaMan's own sprite",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offsets": [
+          "0xA8",
+          "0xBB"
+        ],
+        "why": "MegaMan is drawn from each game's own art: his sprite state's frame pointers (+0xA8 to +0xB7, sprite_load's +0x18 on, his state at +0x90) point into BN4's sprite list 0's entry 0 (0x08214000, BN4's lists 0x0802793C) and BN6's own MegaMan (0x081D8000, as BN5's differential has it: legit.json's masks, MegaMan's own sprite), and +0xB8's word is copied from that art's data (BN6 0x0800210E-0x08002120): his place, his CurAction and what he does are compared as ever"
+      },
+      {
+        "name": "MegaMan's object +0 bit 0x04, which BN6's state 1 of his keeps",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offset": "0x00",
+        "bit": "0x04",
+        "direction": "BN6 has it, BN4 not",
+        "why": "As a virus's (the family's entry above): BN4's MegaMan's state 1 (0x08010A88, his state table 0x080EAEFC, run by his update 0x080EAECC from his type's 0x080B34D8) clears his +0 0x04 (ldrb r0,[r5]; movs r1,#4; bics; strb at 0x08010A8A-0x08010A90) as it sets his ready 6; BN6's (0x08017888, his state table 0x080EB86C by his AI data's +1, from his mode 2's routine 0x080EB7A0) sets his ready 8 and keeps it (0x080178AC-0x080178B2), BN6's state runner never running a state while paused (0x0801B21A): the bit the object runner runs a paused object by, BN6's set and BN4's not; his CurAction is compared as ever"
+      },
+      {
+        "name": "BN6's MegaMan's companion",
+        "whose": "megaman",
+        "kind": "T4",
+        "type": "0x08",
+        "why": "BN6's player init spawns a fourth-kind 0x08 for MegaMan and keeps it at his AI data +0x58 (0x080173CA-0x080173CE: r7 his AI data + 0x58, bl 0x080E223E: movs r0,#8; the fourth kind's spawn; its +0x4C him; str r0,[r7]); BN4's twin of that spawner (0x080E28EC: movs r0,#8, the same spawn and owner, no AI data store) has no BL calling it, and BN4's MegaMan's AI data +0x58 stays 0: the object, its place in the run order and the pointer to it are BN6's alone"
       }
     ]
   }

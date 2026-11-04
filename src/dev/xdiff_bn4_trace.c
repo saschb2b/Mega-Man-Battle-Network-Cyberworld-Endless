@@ -65,6 +65,9 @@ static const Seg panel_segs[] = {
 	{ BN4_PANEL_ALLIANCE, BN6_PANEL_ALLIANCE, 1 },
 	{ BN4_PANEL_FLAGS, BN6_PANEL_FLAGS, 4 },
 	{ BN4_PANEL_RESERVER, BN6_PANEL_RESERVER, 4 },
+	{ BN4_PANEL_STATE, BN6_PANEL_STATE, 2 },
+	{ BN4_PANEL_TIMER_A, BN6_PANEL_SIDE_TIMER, 2 },
+	{ BN4_PANEL_TIMER_B, BN6_PANEL_TIMER, 2 },
 };
 
 typedef struct { const Seg *segs; int nsegs; uint32_t in, out; } Layout;
@@ -73,10 +76,10 @@ static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE },
 	[XD4_COLL] = { coll_segs, 31, BN4_COLL_SIZE, BN6_COLL_SIZE },
 	[XD4_AI] = { ai_segs, 1, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE },
-	[XD4_PANEL] = { panel_segs, 4, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
+	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 31 &&
-	sizeof panel_segs / sizeof *panel_segs == 4, "the layouts' counts");
+	sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
 

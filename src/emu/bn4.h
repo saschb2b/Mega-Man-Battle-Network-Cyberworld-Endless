@@ -371,5 +371,6 @@
 #define BN4_MAP_ANIMS     0x08026688u /* ... their LoadGFXAnims routines (dispatch 0x08026718), called before EnterMapGroup as in BN6 */
 
 #include "bn4_navis.h"   /* BN4's Navis: their types, routines and the engine's they share (docs/rom/bn4.md) */
+#include "bn4_battle.h"  /* BN4's battle structures past these: its panels' fields (docs/rom/bn4.md) */
 
 #endif
