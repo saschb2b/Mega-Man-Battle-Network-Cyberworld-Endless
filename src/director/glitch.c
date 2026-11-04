@@ -50,8 +50,8 @@ enum { FX_NONE, FX_TEAR, FX_SLIP, FX_TURN, FX_FLIP };
 
 static struct {
 	bool on;            /* a Glitch layer */
-	bool warp;          /* a layer holding its warp */
-	int wx, wy;         /* the warp's world place */
+	bool warp;          /* a layer holding its warp, or a Glitch layer its copy */
+	int wx, wy;         /* ... its world place */
 	int floor;          /* the layer's floor panels */
 	int stage, said;    /* its stage, and the stages said */
 	uint32_t rng;       /* its own numbers */
@@ -83,7 +83,7 @@ void glitch_layer_begin(void) {
 	G.rng = run.layer_seed ^ 0x9E3779B9u;
 	if (!G.rng) G.rng = 1;
 	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].type == OBJ_GLITCH) {
+		if (layer.obj[i].type == OBJ_GLITCH || layer.obj[i].type == OBJ_COPY) {
 			G.warp = true;
 			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &G.wx, &G.wy);
 		}
@@ -94,10 +94,6 @@ void glitch_layer_begin(void) {
 	if (G.on) glitch_looks_make(D.layer_tiles);
 	else glitch_looks_free();
 }
-
-int glitch_stage(void) { return G.on ? G.stage : -1; }
-
-bool glitch_settled(void) { return G.on && G.settled; }
 
 /* The stage from the floor come near (never lower than it was) */
 static void measure(void) {
@@ -279,10 +275,10 @@ static void mosaic(uint32_t *px, int y0, int y1, int n) {
 		}
 }
 
-/* The warp's own look (its sprite and what stands round it, MegaMan's box
- * left alone): its colours turned one of three ways, never the Undernet's
- * purple, the way changed with each glitch; in a glitch, its rows torn
- * sideways, sprite and all */
+/* The warp's own look, and the copy's (its sprite and what stands round
+ * it, MegaMan's box left alone): its colours turned one of three ways,
+ * never the Undernet's purple nor the guardian's own, the way changed with
+ * each glitch; in a glitch, its rows torn sideways, sprite and all */
 #define WARP_W    18       /* its box: this far either side of its foot, */
 #define WARP_UP   52       /* ... this far up */
 #define WARP_DOWN 10       /* ... and down */
@@ -319,13 +315,12 @@ static void warp_frame(uint32_t *px) {
 	}
 }
 
-void glitch_frame(uint32_t *px) {
+/* The frame's glitches over the picture (`px`, the core's frame with
+ * mGBA's layer byte on top): read-only, the update decided them */
+void director_glitch_frame(uint32_t *px) {
 	if (!G.shown) return;
-	if (!G.on) {
-		if (G.sx > -WARP_W && G.sx < EMU_W + WARP_W && G.sy > -WARP_DOWN && G.sy < EMU_H + WARP_UP) warp_frame(px);
-		return;
-	}
-	if (G.fx == FX_NONE) return;
+	if (G.warp && G.sx > -WARP_W && G.sx < EMU_W + WARP_W && G.sy > -WARP_DOWN && G.sy < EMU_H + WARP_UP) warp_frame(px);
+	if (!G.on || G.fx == FX_NONE) return;
 	if (G.fx == FX_FLIP) {
 		int in = G.fx_len - G.fx_left, edge = in < G.fx_left ? in : G.fx_left;
 		if (edge < FLIP_EDGE) mosaic(px, 0, G.box ? BOX_TOP : EMU_H, 2 * (FLIP_EDGE - edge));
@@ -337,4 +332,3 @@ void glitch_frame(uint32_t *px) {
 	else turn(px, 0, y1);
 }
 
-void director_glitch_frame(uint32_t *px) { glitch_frame(px); }

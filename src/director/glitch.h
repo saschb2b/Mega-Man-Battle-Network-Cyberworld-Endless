@@ -21,8 +21,6 @@ void glitch_layer_begin(void);
 /* Each director frame on the map: the stage, the next glitch scheduled,
  * the stage's words */
 void glitch_update(void);
-/* The layer's stage, -1 on a layer that is not a Glitch layer */
-int glitch_stage(void);
 /* The next random battle on a Glitch layer: its depth (an act deeper from
  * stage 3) and whether it brings a visitor of another area or net (from
  * stage 2); nothing changed elsewhere */
@@ -33,11 +31,6 @@ void glitch_copy_fight(void);
 bool glitch_copy_fighting(void);
 /* ... and back from it: won, its prize waits and the glitch settles */
 void glitch_copy_over(bool won);
-/* Whether the copy has been deleted on this layer (the glitch settled) */
-bool glitch_settled(void);
-/* The frame's glitches over the picture (`px`, the core's frame with
- * mGBA's layer byte on top): read-only, the update decided them */
-void glitch_frame(uint32_t *px);
 
 /* (glitch_look.c) The layer's other looks, made as it begins: the same
  * floor in up to three other areas' tiles, from the areas that draw the

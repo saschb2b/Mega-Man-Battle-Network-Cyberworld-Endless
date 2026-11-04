@@ -110,7 +110,7 @@ static void vram_write(uint32_t at, const uint8_t *p, size_t n) {
 static void keep_own(int tw, int th) {
 	free(L.vram);
 	free(L.map);
-	L.vram = malloc(L.hi - L.lo);
+	L.vram = malloc((L.hi - L.lo) / 4 * sizeof *L.vram);
 	L.map_bytes = (size_t)tw * th * 4;
 	L.map = malloc(L.map_bytes);
 	L.kept = L.vram && L.map;
@@ -145,7 +145,7 @@ static void screen_refresh(int tw, int th) {
 
 void glitch_look_flip(int k) {
 	if (k >= L.n || k == L.shown || !on_map()) return;
-	int tw = emu_read8(BN6_MAP_TILEMAP), th = emu_read8(BN6_MAP_TILEMAP + 1);
+	int tw = emu_read8(BN6_MAP_TILEMAP_W), th = emu_read8(BN6_MAP_TILEMAP_H);
 	if (k >= 0 && (tw != L.look[k].tw || th != L.look[k].th)) return;
 	if (L.shown < 0) keep_own(tw, th);
 	if (!L.kept) return;
@@ -175,7 +175,7 @@ void glitch_look_update(void) {
 	if (!on_map()) return;
 	map_entered();
 	if (L.step != 1) return;
-	int tw = emu_read8(BN6_MAP_TILEMAP), th = emu_read8(BN6_MAP_TILEMAP + 1);
+	int tw = emu_read8(BN6_MAP_TILEMAP_W), th = emu_read8(BN6_MAP_TILEMAP_H);
 	const uint16_t *map = L.want >= 0 ? L.look[L.want].map : L.map;
 	if ((size_t)tw * th * 4 == L.map_bytes) {
 		emu_write(BN6_MAP_TILEMAP + BN6_MAP_TILEMAP_HEAD, map, L.map_bytes);

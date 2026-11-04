@@ -49,7 +49,7 @@ int ta_copy(TextArchive *t, int flag, int won_flag, int taken_flag, int pick, co
 
 const char *glitch_stage_words(int stage) {
 	switch (stage) {
-	case 2: return "@M Whoa! The floor turned into another layer!|@L Just for a second... What IS this place?";
+	case 2: return "@M Whoa! The floor turned into another area!|@L Just for a second... What IS this place?";
 	case 3: return "@M The viruses here... They're getting stronger!|@L The deeper we go,the worse it gets...";
 	case 4: return "@M Lan! Something's at the middle of all this!";
 	default: return NULL;

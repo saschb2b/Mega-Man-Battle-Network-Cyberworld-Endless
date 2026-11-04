@@ -37,6 +37,7 @@
 #include "launcher_roms.h"
 #include "launcher_text.h"
 #include "fork_words.h"
+#include "super_boss.h"
 #include "home_words.h"
 #include "economy.h"
 #include "jobs.h"
@@ -1355,6 +1356,64 @@ static void test_fork_read(void) {
 		if (portal) check_talk("a fork's read at a portal", portal);
 	}
 	check_talk("a fork's read of a dark layer", fork_words(0, true, FORK_PAD));
+	run = before;
+}
+
+/* The run's Glitch layer (docs/game/glitch-layer.md): one run in three
+ * holds one, on an act's first layer from the second act, never two; its
+ * warp stands on that layer in a dark warp's place, away from the arrival;
+ * its own layer holds the copy and its exit back to the run, its data the
+ * deeper the farther off the way, and the copy's forms are guardians, none
+ * twice, none a super boss nor the act's guardian ahead */
+static void glitch_layers(uint32_t seed, int depth) {
+	int biome = biome_for_depth(depth), warps = 0, darks = 0, copies = 0, exits = 0, deep_far = 0, deep_way = 0;
+	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		warps += o->type == OBJ_GLITCH;
+		darks += o->type == OBJ_UNDERNET;
+		if (o->type == OBJ_GLITCH)
+			CHECK(abs((int)o->x - layer.rooms[0].ax) + abs((int)o->y - layer.rooms[0].ay) >= 4, "seed %u: the Glitch warp by the arrival", (unsigned)seed);
+	}
+	CHECK(warps == 1 && darks == 0, "seed %u depth %d: %d Glitch warps, %d dark warps", (unsigned)seed, depth, warps, darks);
+	layer_generate(seed ^ 0x77u, depth, biome, LAYER_GLITCH, &kit);
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		copies += o->type == OBJ_COPY;
+		exits += o->type == OBJ_RETURN;
+		CHECK(o->type != OBJ_EXIT && o->type != OBJ_GLITCH && o->type != OBJ_BOSS, "seed %u: a Glitch layer holds object %d", (unsigned)seed, o->type);
+		if (o->type == OBJ_MYSTERY) { deep_far += o->deep == 6; deep_way += o->deep == 0; }
+	}
+	CHECK(copies == 1 && exits == 1, "seed %u: a Glitch layer with %d copies and %d exits", (unsigned)seed, copies, exits);
+	CHECK(deep_far > 0, "seed %u: a Glitch layer's data none two acts deeper", (unsigned)seed);
+	int forms[GLITCH_FORMS], n = run_glitch_forms(depth, forms), ahead = run.boss_order[run.biome_order[(depth - 1) / 3]];
+	CHECK(n >= 1, "seed %u: the copy has no form", (unsigned)seed);
+	for (int k = 0; k < n; ++k) {
+		CHECK(forms[k] > 0 && forms[k] != ahead && !super_boss(forms[k]), "seed %u: the copy's form %d is %d", (unsigned)seed, k, forms[k]);
+		for (int j = 0; j < k; ++j) CHECK(forms[j] != forms[k], "seed %u: the copy's form %d twice", (unsigned)seed, forms[k]);
+	}
+}
+
+static void test_glitch(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	int runs = 0, held = 0, built = 0;
+	for (uint32_t s = 1; s <= 3000; ++s) {
+		run.seed = s * 2654435761u;
+		run.mode = s % 2 ? RUN_SHORT : RUN_ENDLESS;
+		int n = 0, at = 0;
+		for (int d = 1; d <= 2 * CYCLE_LAYERS; ++d)
+			if (run_glitch_at(d)) { ++n; at = d; }
+		++runs;
+		held += n;
+		CHECK(n <= 1, "seed %u: %d Glitch layers in one run", (unsigned)run.seed, n);
+		if (!n) continue;
+		CHECK((at - 1) % 3 == 0 && at >= 4 && at <= (run.mode == RUN_SHORT ? 7 : 13), "seed %u: a Glitch warp on layer %d", (unsigned)run.seed, at);
+		if (built++ < 24) glitch_layers(s * 40503u ^ 0x61u, at);
+	}
+	CHECK(held * 100 >= runs * 28 && held * 100 <= runs * 39, "%d runs of %d hold a Glitch layer, not one in three", held, runs);
 	run = before;
 }
 
@@ -6503,6 +6562,7 @@ int main(void) {
 	test_battler();
 	test_layer_make();
 	test_fork_read();
+	test_glitch();
 	test_layouts_build();
 	test_identity();
 	test_arrivals();

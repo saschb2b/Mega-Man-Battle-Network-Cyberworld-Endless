@@ -847,14 +847,18 @@ static void place_copy(const int *order, int n, int *next) {
 
 /* A Glitch layer's data pulled from deeper in the Net, by how far off the
  * way each lies: an act deeper on a detour, two acts at its far end or
- * past a set piece's lock */
+ * past a set piece's lock, and the farthest of them two acts deeper on
+ * any layout */
 static void glitch_deep(void) {
+	int far = -1, far_d = 0;
 	for (int i = 0; i < layer.nobj; ++i) {
 		NetObj *o = &layer.obj[i];
 		if (o->type != OBJ_MYSTERY) continue;
 		int d = ng_detour[(int)o->y][(int)o->x];
 		o->deep = d == 0 ? 0 : d > 0 && d < DETOUR_FAR ? 3 : 6;
+		if (d > far_d) { far_d = d; far = i; }
 	}
+	if (far >= 0) layer.obj[far].deep = 6;
 }
 
 /* Bystander navis with a word to share, two panels at least from what else

@@ -99,7 +99,7 @@ void arrival_words(void) {
 			"@M Right. Back to the main path!");
 	/* (the run's Glitch layer: docs/game/glitch-layer.md) */
 	else if (run.side_kind == LAYER_GLITCH)
-		snprintf(D.beat, sizeof D.beat, "@M Lan... This layer just flickered.|@L Huh? It looks normal to me...|@L Let's look around. Carefully.");
+		snprintf(D.beat, sizeof D.beat, "@M Lan... Everything here just flickered.|@L Huh? It looks normal to me...|@L Let's look around. Carefully.");
 	else if (run.side_kind == LAYER_SECRET)
 		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Secret Area.|@M Something strong is in here. I can feel it...|@L *gulp* Let's go,MegaMan!");
 	/* (a trip back from home, docs/world/home/: an area already won) */
