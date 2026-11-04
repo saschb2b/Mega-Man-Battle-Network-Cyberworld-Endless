@@ -105,6 +105,15 @@
 #define BN4_PLAY_MUSIC    0x08000568u /* PlayMusic: r0 the song (0xFF stops it), kept at the game state's +0x19; not again while it plays */
 #define BN4_MPLAYS        0x08155E78u /* the music players' table (m4aSongNumStart, 0x08112848); songs 0x00-0x21 on player 31 */
 #define BN4_SOUND_INFO    0x030036A0u /* MP2K's SoundInfo (BN6's 0x030045C0), sound mode 0x0093040D as BN6's, 32 players */
+#define BN4_SOUND_CGB_CHANS 0x030046E0u /* its PSG's four channels, SoundInfo +0x1C (BN6's 0x03005600) */
+#define BN4_MUSIC_PLAYER  0x02011AA0u /* the music player's MusicPlayerInfo, BN4_MPLAYS' row 31 (BN6's 0x02010890) */
+#define BN4_MUSIC_TRACKS  0x02008680u /* ... its eight tracks, 0x50 bytes each (BN6's 0x02007EE8) */
+#define BN4_M4A_SOUND_MAIN 0x08111B14u /* SoundMain: BN6's MP2K (0x0814F754) built otherwise, its seven tables BN6's byte for byte */
+#define BN4_M4A_SOUND_MODE 0x08000530u /* the word its start gives m4aSoundMode, 0x0093040D as BN6's (0x0800059C) */
+#define BN4_M4A_INIT_MODE 0x0811282Cu /* m4aSoundInit's own m4aSoundMode word, 0x0093C400: master volume 12, where BN6's (0x08150458,
+                                       * 0x0093F400) sets 15; BN6_SOUND_INFO +0x07 */
+#define BN4_DRUM_KIT      0x08153CD4u /* the music's one drum kit: keys 37-73 played, 0-35 a run of other pointers (xsong.c copies the
+                                       * keys a song plays: XRomLayout.kit_keys_played) */
 #define BN4_MAP_MUSIC     0x0802AFD0u /* four lists by the game state's +7, 8 bytes an entry (the group, a pointer to a song per map), 0xFF
                                        * ending them, as BN5's (0x080361C8); read at 0x0802BCCC */
 #define BN4_MODE_SONGS    0x08007510u /* the songs of battle modes 0x46 on (BN4_RECORD_MODE - 0x46): 14 14 15 15 17 17 17 */
