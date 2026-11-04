@@ -1314,6 +1314,14 @@
     "08B34304:08BEBA00:4"
    ],
    "what": "BN6's grown list 1's 0xC1 (XV_LISTS + 4 * 0xC1), Spikey's copy of BN4's LZ77'd 1:0x05, aimed at Shrimpy's (XV_ART + 0x6BA00, BN4's 1:0x06): its sprite state's +0x18 (+0xA8) reads BN6's ('sprite', 5, 4) against BN4's ('sprite', 2, 4), BN4's found in its battle's sprite cache by its key (tools/xdiff_bn4.py bn4_cache), where unmutated they read alike (caught at t1; the spec fails at t1 without it, on +0x88, Spikey's first draw before the fight, and its animation's place, so the line it adds is the check: python3 tools/xdiff.py spikey_v1 --poke 08B34304:08BEBA00:4)"
+  },
+  {
+   "name": "a copied sound aimed at BN6's own song of its number",
+   "spec": "walla_v1",
+   "poke": [
+    "080BEAE8:20B7"
+   ],
+   "what": "Walla's sound 0xB7 (BN4 0x080BEAE8: movs r0,#0xb7, its copy's immediate the recipe gives BN6's empty slot 0x37, where xsong.c's XSOUNDS puts BN4's song) written as BN4's number again: BN6 begins its own song 0xB7 on its player 18 where BN4 begins its 0xB7 on its player 9, which legit.json's bn4 sounds pair with the copy's 0x37 by the routines that play them; the line is the family's, its code having played the sound (tools/xdiff_bn4.py family_sounds), where unmutated they read alike (caught at t3, BN4 [0x37] | BN6 [0xB7]; the spec PASSes unmutated)"
   }
  ]
 }

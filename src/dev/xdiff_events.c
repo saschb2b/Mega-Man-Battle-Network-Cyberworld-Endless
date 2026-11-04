@@ -304,7 +304,7 @@ static HookAct on_sound(HookRegs *r, void *user) {
 	 * plays as another, its number with bit 16, never taken for BN5's: a Navi's code plays each of its sounds from its copy.
 	 * In a family's, BN6's own song of the number is the engine's, a twin of BN5's routine playing each game's own by its
 	 * number: Bugtank's bomb's and MetFire's fire column's 0x70, legit.json's sound) */
-	int copy = log->game == 6 ? xsong_copy_of((int)r->r[0], NULL) : -1;
+	int copy = log->game == 6 ? xd_song_copy((int)r->r[0]) : -1;
 	bool other = log->game == 6 && log->navis && copy < 0 && xsong_sound_slot(XROM_BN5_COLONEL_US, (int)r->r[0]) >= 0;
 	if (e) e->a = copy >= 0 ? (uint32_t)copy : r->r[0] | (other ? 0x10000u : 0u);
 	return HOOK_CONTINUE;
@@ -636,4 +636,7 @@ void xd_control_frame(const char *how) {
 	done = true;
 }
 
-int xd_song_copy(int slot) { return xsong_copy_of(slot, NULL); }
+int xd_song_copy(int slot) {
+	int xrom = -1, song = xsong_copy_of(slot, &xrom);
+	return xrom == XROM_BN5_COLONEL_US ? song : -1;
+}

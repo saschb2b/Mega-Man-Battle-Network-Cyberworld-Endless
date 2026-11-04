@@ -27,7 +27,7 @@ import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
-                        SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
+                        SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 
@@ -465,6 +465,33 @@ def sounds_diff(fa, fb, fbt, t):
     return None if (state_a, timer_a) == (state_b, timer_b) else (state_a + timer_a, state_b + timer_b)
 
 
+FAMILY_SOUNDS = "the family's sounds"   # (the role of a frame's sounds where one they part on is the family's code's)
+
+
+def sounds_played(trace):
+    """each frame's sounds the family's code played (a sound event its code led to, xdiff_events.h's family), into
+    fr['family_sounds']: the frame before's events, as a frame's sounds begun are those its trace's frame before began
+    (src/dev/xdiff.c's sounds, kept for the next frame traced)"""
+    prev = ()
+    for fr in trace['frames']:
+        fr['family_sounds'] = frozenset(e.a for e in prev if e.kind == SOUND and e.family)
+        prev = fr['events']
+
+
+def family_sounds(fa, fb, sd):
+    """whether a sound the frame's two lines part on (sounds_diff's, BN6's numbers) was played by the family's code in
+    either game (sounds_played), BN4's in BN6's numbers (bn4_sounds). Such a line is the family's, failing the spec as
+    its records do (its sound played as another, or on a player that begins nothing); the rest the world's"""
+    left, right = list(sd[0]), list(sd[1])
+    for x in list(left):
+        if x in right:
+            left.remove(x)
+            right.remove(x)
+    m = bn4_sounds()
+    mine = {m.get(v, (v, ''))[0] for v in fa.fr.get('family_sounds', ())} | set(fb.fr.get('family_sounds', ()))
+    return bool((set(left) | set(right)) & mine)
+
+
 SPRITE_COUNT = 0x91   # (a first-kind object's sprite +1: the frames its animation's count runs, legit.json's bn4 clocks)
 
 
@@ -596,9 +623,10 @@ def frame_diffs(fa, fb, fbt=None):
     for e in fb.fr['events'] if fb.game == 6 and fa.game == 4 else ():
         if e.kind == DRAW and e.family and e.flags & (UNMATCHED | UNMAPPED):
             out.append(Diff(t, FAMILY_DRAWS, 'draw', 0, None, f'{e.family:#x} drawn as it is'))
-    sd = sounds_diff(fa, fb, fbt, t)   # (each by its clock: legit.json's bn4 sounds)
+    sd = sounds_diff(fa, fb, fbt, t)   # (each by its clock: legit.json's bn4 sounds; the family's where its code played one)
     if sd:
-        out.append(Diff(t, 'battle', 'sounds', 0, sd[0], sd[1]))
+        out.append(Diff(t, FAMILY_SOUNDS if fb.game == 6 and fa.game == 4 and family_sounds(fa, fb, sd) else 'battle', 'sounds', 0,
+                        sd[0], sd[1]))
     oa, ob = [fa.ptr(x) for x in fa.fr['order']], [fb.ptr(x) for x in fb.fr['order']]
     if fb.game == 6 and fa.game == 4:   # (BN6's MegaMan's companion, BN6's alone: legit.json's bn4 allowed)
         ob = [x for x in ob if not (isinstance(x, tuple) and x[0] in companions(fb))]
@@ -758,7 +786,10 @@ def compare(spec, ta, tb, canon, show=6):
     (two BN4 traces) fails at its first difference of any kind"""
     bt, used, n = {f['t']: f for f in tb['frames']}, {}, 0
     against = tb['game'] == 6
-    fam = family_roles(ta, canon) | family_roles(tb, canon) | {FAMILY_DRAWS} if against else set()
+    fam = family_roles(ta, canon) | family_roles(tb, canon) | {FAMILY_DRAWS, FAMILY_SOUNDS} if against else set()
+    if against:
+        sounds_played(ta)
+        sounds_played(tb)
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
     stop, lines, ranks = None, [], {}
