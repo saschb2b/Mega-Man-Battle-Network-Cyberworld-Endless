@@ -34,6 +34,13 @@ int xchips_kind(int kind, uint16_t *out, int max);
  * others as they are */
 #define XCHIPS_STAND_IN 200
 uint16_t xchips_reward_bn6(uint16_t v);
+/* ... and one of BN4 Red Sun's (its reward rows', BN4_REWARD_ROWS: BN6's
+ * encoding) as BN6's: a chip as BN6's own of its name and kind (standard,
+ * Mega or Giga), in its code where that record has it, else its *, else
+ * its first; XCHIPS_STAND_IN zenny where BN6 has none (none of BN4's
+ * chips is in BN6's tables yet) or where it sits out; the others as they
+ * are (docs/multirom/bn4.md, Its viruses' rewards) */
+uint16_t xchips_reward_bn4(uint16_t v);
 
 /* Pairs BN6's chips 1 to n6 - 1 with the other game's 1 to nx - 1 whose
  * names match (names6[i] and namesx[j], "" for none): to_x[i] the other

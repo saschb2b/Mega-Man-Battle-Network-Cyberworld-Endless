@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, and all 25 families proved by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T03:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T23:55:00Z }
 ---
 
 # Transplanted families
@@ -491,6 +491,9 @@ and its calls aimed again (`src/emu/xvirus.c`):
   BN5's chips are BN6's too), written into the rows of its ids in the
   grown copy, which the battle's results then lean as BN6's
   ([BN5's battles, records and rewards](../rom/bn5-battles.md), BN5's records in BN6's engine).
+  BN4's moved families take BN4's own rows the same way, a chip as
+  BN6's own of its name and kind, else 200 zenny ([Battle Network 4 in a
+  run](bn4.md), Its viruses' rewards).
 - **Not yet**: the families' place in formations and a run's battles (a
   game-design pass). The held chips whose code is BN5's alone (MetaGel,
   Blinder, AntiWatr, AntiElec) wait for the chips track to move it; until
