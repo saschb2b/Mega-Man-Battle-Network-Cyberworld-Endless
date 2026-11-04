@@ -144,8 +144,8 @@ extern bool run_debug_glitch;
 /* The copy's forms at the Glitch layer of `depth` (docs/game/glitch-layer.md):
  * the guardians the run has beaten, the last first, then the one that
  * last deleted MegaMan in any run (rivals.sav), then guardians the run set
- * elsewhere, from its seed; never a super boss, nor the act's own guardian
- * ahead. How many (GLITCH_FORMS at most). */
+ * elsewhere, from its seed; BN6's own Navis alone, never a super boss, nor
+ * the act's own guardian ahead. How many (GLITCH_FORMS at most). */
 #define GLITCH_FORMS 3
 int run_glitch_forms(int depth, int forms[GLITCH_FORMS]);
 /* The Darkloid of act `act`'s dark layer in area `biome`: one of BN5's own

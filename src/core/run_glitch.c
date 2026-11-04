@@ -3,6 +3,7 @@
  * run has fought and what MegaMan's records remember. */
 #include "run.h"
 
+#include "guardians.h"
 #include "net.h"
 #include "pacing.h"
 #include "rivals.h"
@@ -20,9 +21,11 @@ bool run_glitch_at(int depth) {
 	return act == 1 + (int)((h >> 16) % (unsigned)acts);
 }
 
-/* (a form not taken yet, and no super boss's) */
+/* (a form not taken yet, and BN6's own: no super boss, and none moved from
+ * another net, whose deletion the swap has not been proven on,
+ * docs/rom/navis.md, A Navi swapped mid-battle) */
 static int form_add(int forms[GLITCH_FORMS], int n, int navi, int ahead) {
-	if (n >= GLITCH_FORMS || navi <= 0 || navi == ahead || super_boss(navi)) return n;
+	if (n >= GLITCH_FORMS || navi <= 0 || navi == ahead || super_boss(navi) || guardian_older(navi)) return n;
 	for (int k = 0; k < n; ++k) if (forms[k] == navi) return n;
 	forms[n] = navi;
 	return n + 1;

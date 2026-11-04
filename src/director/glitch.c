@@ -22,14 +22,9 @@
 #include "director_layer.h"
 #include "director_state.h"
 #include "emu.h"
-#include "encounter.h"
-#include "flags.h"
 #include "glitch_words.h"
-#include "layer_objs.h"
-#include "loot.h"
 #include "net.h"
 #include "netmap.h"
-#include "pacing.h"
 #include "run.h"
 #include "talk.h"
 
@@ -65,7 +60,7 @@ static struct {
 	int look;           /* the warp's colours, turned one of three ways */
 	bool box, shown;
 	uint8_t sprite[32768 / 8];
-	bool fighting, settled;
+	bool settled;       /* the copy deleted: the glitch gone */
 } G;
 
 static uint32_t next_rng(void) {
@@ -145,8 +140,20 @@ static void stage_words(void) {
 	if (!w || talk_start(w, FACE_MEGAMAN)) ++G.said;
 }
 
+/* (the run log's stdout: the stage a Glitch layer was left at, for the
+ * stages' tuning, docs/game/glitch-layer.md) */
+static void left_at(void) {
+	static uint32_t told;
+	if (!G.on || told == run.layer_seed || D.objs.exit_x == 0) return;
+	int px = bn6_player_x(), py = bn6_player_y();
+	if (abs(px - D.objs.exit_x) + abs(py - D.objs.exit_y) > 24) return;
+	told = run.layer_seed;
+	printf("glitch: at the exit at stage %d%s\n", G.stage, G.settled ? ", the copy deleted" : "");
+}
+
 void glitch_update(void) {
 	G.shown = false;
+	if (on_map()) left_at();
 	if ((!G.on && !G.warp) || !on_map()) return;
 	if (G.on && !G.settled) measure();
 	if (G.on && !G.settled) stage_words();
@@ -175,34 +182,9 @@ void glitch_battle(int *depth, bool *visitors) {
 	if (G.stage >= 3) *depth += 3;
 }
 
-/* ---- the copy ---- */
-
-void glitch_copy_fight(void) {
-	int forms[GLITCH_FORMS], n = run_glitch_forms(run.depth, forms);
-	if (n <= 0) return;
-	/* (the true swap between its forms inside one battle is the next
-	 * step, docs/game/glitch-layer.md; until it lands its first form
-	 * alone, at the pool's HP) */
-	Encounter e = make_boss(run.depth, run.biome, forms[0]);
-	int lo, hi;
-	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
-	int own = navi_hp(forms[0], e.foes[0].version);
-	set_encounter(&e, true);
-	if (own > 0) emu_battle_hp(own, (lo + hi) * 3 / 4);
-	G.fighting = true;
-	D.challenge = true;
-}
-
-bool glitch_copy_fighting(void) { return G.fighting; }
-
-void glitch_copy_over(bool won) {
-	G.fighting = false;
-	emu_battle_unwatch();
-	if (!won) return;
+void glitch_settle(void) {
 	G.settled = true;
 	G.fx = FX_NONE;
-	flag_set(LAYER_COPY_WON_FLAG);
-	D.copy_due = true;
 }
 
 /* ---- the frame ---- */

@@ -25,12 +25,15 @@ void glitch_update(void);
  * stage 3) and whether it brings a visitor of another area or net (from
  * stage 2); nothing changed elsewhere */
 void glitch_battle(int *depth, bool *visitors);
-/* The copy's Yes: its fight begins */
+/* (glitch_copy.c) The copy's Yes: its fight begins */
 void glitch_copy_fight(void);
 /* Whether the battle under way is the copy's */
 bool glitch_copy_fighting(void);
 /* ... and back from it: won, its prize waits and the glitch settles */
 void glitch_copy_over(bool won);
+/* (glitch.c) The glitch settled, the copy deleted: no more glitches, the
+ * layer's own look back */
+void glitch_settle(void);
 
 /* (glitch_look.c) The layer's other looks, made as it begins: the same
  * floor in up to three other areas' tiles, from the areas that draw the
