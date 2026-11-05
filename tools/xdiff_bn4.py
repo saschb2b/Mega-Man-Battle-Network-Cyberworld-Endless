@@ -346,7 +346,10 @@ NAVI_NAMES = set()
 
 
 def navi_role(role):
-    """whether a role is one of BN4's moved Navis' objects (its role's NameID, 'T1:0x384#0', among NAVI_NAMES)"""
+    """whether a role is one of BN4's moved Navis' objects (its role's NameID, ('T1', 0x384, ...) as 'T1:0x384#0' names it,
+    among NAVI_NAMES)"""
+    if isinstance(role, tuple):
+        return len(role) > 1 and role[0] == 'T1' and role[1] in NAVI_NAMES
     m = re.match(r'T1:0x([0-9a-fA-F]+)#', role) if isinstance(role, str) else None
     return bool(m) and int(m.group(1), 16) in NAVI_NAMES
 
@@ -877,6 +880,19 @@ def allowed_bit(d, fam):
     return None
 
 
+def navi_ai(d):
+    """legit.json's bn4 allowed of a Navi's AI data (navi_ai: a range of its offsets, BN6's bookkeeping or BN4's, each with both
+    games' code): the allowance d is, on a moved Navi's AI data alone (NAVI_NAMES), None where none"""
+    if d.part != 'ai' or not navi_role(d.role):
+        return None
+    for a in bn4_allowed():
+        if 'navi_ai' in a and a.get('part') == 'ai':
+            lo, hi = (int(x, 0) for x in a['navi_ai'])
+            if lo <= d.off <= hi:
+                return a['name']
+    return None
+
+
 def compare(spec, ta, tb, canon, show=6):
     """('PASS'|'FAIL'|'INCONCLUSIVE', the frame of it, lines): against BN6's, the first frame with a difference no
     BN4_LACKS mask explains in the family's own records (family_roles) fails it; one in the world's alone (MegaMan, the
@@ -926,7 +942,8 @@ def compare(spec, ta, tb, canon, show=6):
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or ("the hit's spark, each engine's own" if spark_own(d) and against else None)
+            d.mask = allowed_bit(d, fam) or navi_ai(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
+                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
