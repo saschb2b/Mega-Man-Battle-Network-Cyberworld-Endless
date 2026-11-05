@@ -9,25 +9,16 @@
 #include "loot.h"
 #include "pacing.h"
 #include "rom.h"
+#include "xbracket.h"
 #include "xguardian.h"
 
-/* A BN6 or BN5 Navi's plate on BN4's screen: 0x20 + his navi number, the
- * contract of the faces composed for it (docs/multirom/bn4-tournament.md,
- * Faces for every entrant), which xbracket.h names XBR_PLATE_NAVI once
- * they are built. Until then an id past BN4's own (0x1E) reads past its
- * plates' tables, and the screen, and the map after it, show stripes
- * (measured with the dev step, 5 November 2026): no tournament for players
- * (the owner's call 6: none until it can show every entrant), and the dev
- * route's (run_debug_bracket) shows BN4's own plates in their places. */
-#ifdef XBR_PLATE_NAVI
-#define BRACKET_FACES 1
+/* A BN6 or BN5 Navi's plate on BN4's screen: XBR_PLATE_NAVI(n), the faces
+ * composed for it at install (src/emu/xbracket_faces.c;
+ * docs/multirom/bn4-tournament.md, Faces for every entrant), so BN4's screen
+ * shows every entrant (the owner's call 6) */
 #define BRACKET_PLATE(n, place) XBR_PLATE_NAVI(n)
-#else
-#define BRACKET_FACES 0
-#define BRACKET_PLATE(n, place) ((place) - 1)
-#endif
 
-bool bracket_here(int depth) { return (BRACKET_FACES || run_debug_bracket) && XR[XROM_BN4_RED_SUN_US].data && run_bracket_at(depth); }
+bool bracket_here(int depth) { return XR[XROM_BN4_RED_SUN_US].data && run_bracket_at(depth); }
 
 /* The Navis moved of the games present (The entrants): BN6's guardians but
  * ProtoMan (Chaud's own), navi 17 and the super bosses; BN5's six where
