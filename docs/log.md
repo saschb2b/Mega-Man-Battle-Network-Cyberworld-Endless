@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-05
+* **Update**: multirom/bn4.md, the owner's call 10, enable everything: BN4 Red Sun in players' runs whole, its ROM offered (the `research` mark gone), its six families installed wherever it is read (with BN5's or alone) and visiting, its five areas dressing BN6's by the seed (`run_dress`'s coin for areas past BN5's fifteen) with their themes and battle themes; the checks (BN4 absent the same as before, visitors and areas in autopilot runs, tiles, pacing, saves continued without BN4), and a BN4 HP+0 reward read by BN6's results as HP MAX. multirom/how-it-is-built.md, status.md, one-net.md and index.md, rom/bn4.md and rom/index.md, code/core.md, emu.md, screens.md, site-and-media.md and tools.md, devtools/dev-menu.md and 3ds-heap.md, engine/emulation/engine-sound.md and 3ds-memory.md (the heap modelled again with BN4's families and areas: none refused), and GUIDE.md: BN4 offered, its areas and music in runs.
 * **Update**: multirom/bn4.md, the owner's call 9: a BN4 visitor's chip BN6 lacks pays 200 zenny, BN5's visitors' rule, until Phase 4 brings BN4's chips.
 
 ## 2026-11-04

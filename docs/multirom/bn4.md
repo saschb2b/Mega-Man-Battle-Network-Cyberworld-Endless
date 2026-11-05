@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Battle Network 4 in a run"
-description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six are proved)."
+description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T00:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -176,8 +176,8 @@ place in it), an honest telegraph and meta as variety. Against
 [the core loop](../game/core-loop.md) it serves the fifth lack, variety a
 veteran feels, in battles a run fights already: no walk, no battle and no
 line is added, so pace, the first lack, is untouched. Built behind BN4's
-research switch (`--dev bn4families`): no player's run meets one until the
-owner turns BN4 on.
+research switch (`--dev bn4families`), then turned on for players on 5
+November 2026 (Turned on, below).
 
 - **One slot, shared.** The gate stays one random battle in four from act
   2, with the easing rule and the exclusions as they are (no opening
@@ -222,8 +222,8 @@ owner turns BN4 on.
   BN4 visitor is a virus a run had not met.
 - **The deep acts draw as now**: BN6's and BN5's late areas by the coin,
   no visitor, as they mix already and the card says "Both Nets". BN4's
-  records join the deep with its areas (Phase 3), under the owner's third
-  call.
+  records would join the deep with its areas; the areas came on 5
+  November 2026 without them (call 10), so the deep draws as before.
 - **The telegraph**: the act's card says "Nets meet" where either other
   net's families can come, its words unchanged. MegaMan names a profile's
   first visitor once, as before. A BN4 visitor counts as the older Net's
@@ -253,11 +253,83 @@ owner turns BN4 on.
   run without BN4 from the first visitor on; layers (their layouts,
   objects and loot) do not change.
 
-Before BN4's visitors reach players (the owner's call 6: once the six
+Before BN4's visitors reached players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
 CirKill proved by `build.py xdiff` and their reward rows read, both
 done (call 6's condition met, 4 November 2026: Its viruses' rewards,
 below), and a BN4 visitor named as the older Net's (call 5), built.
+
+### Turned on, whole
+
+On 5 November 2026 the owner turned BN4 on for players whole, its
+viruses and its areas with their music at once (call 10, below): "just
+enable everything. no need to held them back". BN4's ROM is offered and
+read as BN5's is: a third cartridge on the ROMs screen (red, Duo's
+face), the phones' pickers, the browser, the desktops' dialogs, the
+title's and the PET's found lines, and the New 3DS where BN5's is not
+read. Its layout's `research` mark is gone ([How it is
+built](how-it-is-built.md), 1 and 6), and its five areas' `held` with
+it, so they dress BN6's by the seed area by area among the games
+present (call 3): `run_dress` gives each other game's area a coin of the
+seed, BN5's by the bits it always took, BN4's by a second word's (bits
+past 31 of the first are none), BN5's first where both dress one BN6
+area. With BN6 and BN4, each of the five BN6 areas BN4's are like is
+BN4's in half the runs (x15 ACDC Area to x19 the Undernet, each over
+the BN6 area its `like` names; seed 5's first act, BN6's Seaside Area,
+is BN4's Town Area); with BN5's too, an area BN5 dresses as well is BN4's in a
+quarter. Their themes (BN4's net and Undernet songs)
+and battle themes (`BN4_SONG_BATTLE`, `BN4_SONG_BOSS`, named in its
+layout now) are copied as BN5's are, their battle backgrounds BN4's own;
+their battles, guardians and bystanders stay BN6's (no records of BN4's
+in a run yet), a guardian's prelude BN6's. `--net-biome x15`-`x19`, the
+atlas's `x1` and `--dev showbn4` work as before. Its six families
+install wherever its ROM is read, after BN5's where BN5's is read and
+alone where it is not (`src/emu/xvirus.c`'s `xvirus_install`; before,
+only beside BN5's and with `--dev bn4families`), and the visitors'
+families are made with BN4's alone beside BN6's
+(`src/core/visitor_families.c`), so with BN6 and BN4 every visitor is
+BN4's. `--dev bn4families` asks nothing of the ROMs now: the
+differential still counts its families by it.
+
+Checked that day:
+
+- **BN4 absent**: autopilot runs from seeds 1-4 with BN6 alone and with
+  BN6 and BN5 (`--dev god,quiet,visitors`, the layer's next battle asked
+  for every 2500 frames, 40000 frames, 12 BN5 visitors among them) the
+  same as the build before, run log and last picture; the unit tests,
+  `LAYER_MAKE` and its hash unchanged. With BN4 a layer seed makes what
+  it made in the BN6 area it dresses, as BN5's areas do, and a layer saved
+  in one tiles and continued in another starts again (`run.area`), so
+  `LAYER_MAKE` stays.
+- **Visitors**: autopilot runs from depth 4, seeds 1-4, BN6 and BN4 and
+  all three, a battle asked for every 2500 frames (200000 frames,
+  MegaMan kept alive; the visitors' build before the areas came): 281
+  battles, every one won, 8 BN4 visitors (Billy 2, Shrimpy 1, Walla 1,
+  CirKill 4), 3 of BN5's, none lost or stuck.
+- **Areas**: each of x15-x19 walked by the autopilot in a run (seed 1,
+  30000 frames): two layers left each, 2 to 5 battles won; seed 4 with
+  BN6 and BN4 fought act 2 in BN4's Park Area, its layers walked and
+  left, its guardian (CircusMan) in BN4's battle background. `build.py
+  tiles`: 278 layers against the baseline, 0 worse; BN4's tiles drawn
+  with other floors than they show, per 100 panels, ACDC Area 5.4, Town
+  Area 24.5 (its pale squares' floor in a near shade), Park Area,
+  Countries and Undernet 0. `build.py pacing`: 0 battles or guardians
+  past their band.
+- **Saves**: a run saved at home and at an arena's door after three BN4
+  visitors, continued without BN4: the arena's door again, the guardian
+  fought, on to layer 12. A run quit in a battle of a BN4 visitor,
+  continued without BN4: the layer's checkpoint, battles fought, BN6's
+  foes in the visitor's place. A run in BN4's Town Area (seed 5, BN6's
+  Seaside Area dressed) quit in a battle, continued without BN4: "From
+  the layer's start", in BN6's Seaside Area, battles fought; with BN4
+  still there it went on in BN4's Town Area.
+- **The New 3DS** (`python3 tools/heap3ds.py --cases bn5,bn4,all --seeds
+  1-6`, 120000 frames a run, BN4's families and areas in its runs): BN6
+  and BN4, 0 allocations refused in 6 runs, the heap's peak 95.8 MB of
+  96, no crash; BN6 and BN5 as before (9 refused in 4 runs, the tiles'
+  speed cache); all three read at once 50 refused in 5 runs, the maps'
+  mirror images, which is why a 3DS reads one extra ROM, BN5's first
+  ([The 3DS's memory](../engine/emulation/3ds-memory.md), A third ROM).
 
 ## Its viruses' rewards
 
@@ -283,6 +355,20 @@ zenny (CirKill V2 on) and no chip now, 316 the mean of the 36 versions
 does not see visitors (its runs start no core with the families
 installed): with `--dev bn4families` its report was the same before and
 after, 0 numbers outside their bands.
+
+An HP entry of 0 (`0x8000`) is in 23 of the six families' entries:
+ShrimpyV3EX's 7, WallaV3's and WallaV3EX's 8 each, all in a row's half
+for MegaMan's HP at 3/8 or less (82 in BN4's whole table, 108 in BN5's,
+none in BN6's: a scratch tally of the three ROMs' rows). BN6's own
+results screen reads it as **HP MAX**, with its recovery's picture, and
+fills MegaMan's HP: WallaV3 alone in BN6's engine, MegaMan at 700 of
+2000 (`--dev hp=2000/700`), deleted at Busting 4, reward `8000`, his HP
+2000 after (5 November 2026, captured). BN5's visitors pass theirs as
+they are (`xchips_reward_bn6` keeps every entry but a chip), so BN4's do
+the same, nothing changed. That BN4's own results screen reads it so is
+assumed (its format is BN6's), not seen. A full heal at low HP is BN's
+own reward, and only V3-tier versions carry it, which the act's band
+gives in the late acts.
 
 The design (the game-design skill): the dialectic is the nets' what you
 bring against what you find, at the battle's reward in the session loop.
@@ -313,15 +399,16 @@ battle frame by frame, as BN5's were.
    ([How it is built](how-it-is-built.md), Platforms): its cartridge on
    the ROMs screen (red, Duo's face), the phones' pickers, the browser,
    the desktops' dialogs, the title's and the PET's found lines, and the
-   3DS, whose heap holds one extra ROM beside BN6's (`tools/heap3ds.py`:
+   3DS (the mark gone on 5 November 2026: Its viruses as visitors,
+   Turned on, whole), whose heap holds one extra ROM beside BN6's (`tools/heap3ds.py`:
    BN4's alone fits, BN5's and BN4's together do not), so BN4 is read
    there where BN5 is not. The guest core runs BN4's battles as the
    differential's reference.
 1. **Its viruses.** The 17 families by `tools/xrecipe.py`, BN4's engine
    paired first, each proved by `build.py xdiff`; visitors at the seams
    as BN5's, sharing their one battle in four from act 2 (Its viruses as
-   visitors, built behind the research switch), so they reach runs before
-   BN4 has an area of its own.
+   visitors), in players' runs since 5 November 2026 (Turned on, whole),
+   with its areas.
 2. **Its Navis and the tournament.** The tournament on the Navis already
    moved; BN4's Navis moved, guarding and joining its bracket; BN4's
    Souls, Blue Moon's six with Red Sun's as the ROM runs them all
@@ -334,18 +421,20 @@ battle frame by frame, as BN5's were.
    objects, 24 engine routines to port once; GutsMan first, then
    ThunderMan, WindMan, FireMan, SearchMan, Roll and LaserMan, each adding
    one mechanism.
-3. **Its areas and music**, area by area as the walk's gate admits
-   them: each dresses the BN6 area it is like, as `run_dress` does for
-   BN5's, its themes and battle backgrounds with it. Prepared, held (4
-   November 2026): the five dress BN6's for review alone, their 256-colour
-   maps shown so, their backdrops and battle backgrounds BN4's own
-   ([Status](status.md), BN4 Red Sun's areas).
+3. **Its areas and music**: each dresses the BN6 area it is like, as
+   `run_dress` does for BN5's, its themes and battle backgrounds with it.
+   Prepared and held for review (4 November 2026), their 256-colour maps
+   shown so, their backdrops and battle backgrounds BN4's own ([Status](status.md),
+   BN4 Red Sun's areas); in runs, all five at once, since 5 November 2026
+   (call 10, over admitting them area by area after review). Its own
+   battle records, guardians and bystanders are still to come.
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
 
 ## Its music
 
-Ready ahead of Phase 3, shown to no one: `src/audio/xsong.c` copies each
+In runs since 5 November 2026 (call 10), the net and Undernet themes on BN4's areas and its
+battle and boss themes in their battles: `src/audio/xsong.c` copies each
 of BN4's 34 songs into BN6 as it copies BN5's, BN4's one drum kit for the
 keys a song's drum tracks play alone (its keys 0-35 hold other data), 11
 to 63 KB a song. Each was proved by `python3 tools/mp2k_verify.py x1/all`
@@ -367,7 +456,7 @@ to 0.97).
 
 ## Its sounds
 
-Shown to no one either, behind `--dev bn4families`: the sounds BN4's six
+Heard in runs since 5 November 2026, wherever BN4's ROM is read: the sounds BN4's six
 virus families play are BN4's own in BN6's engine. Each sound their code
 plays (`BN4_PLAY_SOUND`, r0 a `movs`) that is the same song as BN6's of
 its number (`tools/xrecipe.py`'s `song_sig`) stays BN6's; the other 12
@@ -433,7 +522,8 @@ sounds take from the themes' range are the owner's to confirm.
    and over Billy alone (one visitor in eleven, the same family each
    time). Its condition met the same day: all six PASS and pay from
    BN4's own rows (Its viruses' rewards); the visitors still wait on
-   call 5's naming.
+   call 5's naming. Turned on for players 5 November 2026, call 5
+   built (Its viruses as visitors, Turned on, whole).
 7. **Decided, 4 November 2026, then revised the same day: the comparison
    is aligned, the game unchanged.** First decided as "BN4's moved viruses
    enter with BN4's own appear", on the lead's claim that the two games'
@@ -458,3 +548,12 @@ sounds take from the themes' range are the owner's to confirm.
    visitors' rule (Its viruses' rewards, above), until Phase 4 brings
    BN4's chips; over a missing chip paying its row's best zenny and over
    a BN6 chip mapped to it by hand.
+10. **Decided, 5 November 2026: enable everything.** "just enable
+   everything. no need to held them back": BN4 comes into players' runs
+   whole at once, its ROM offered, its six families visiting and its five
+   areas dressing BN6's by the seed with their themes and battle
+   backgrounds (Its viruses as visitors, Turned on, whole). Chosen over
+   its visitors alone with the areas held for Phase 3's review, area by
+   area as the walk's gate admits them. What the areas still lack (BN4's
+   own battle records, guardians and bystanders, the boss theme's swell
+   and BN4's mixing level, Its music) comes as before, phase by phase.

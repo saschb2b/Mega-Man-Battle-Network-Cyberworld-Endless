@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+- **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
+  Red Sun (USA)** beside BN6's (on the ROMs screen it has a third
+  cartridge, red, with Duo's face) and its five net areas turn up in
+  runs in place of the BN6 areas they resemble: ACDC Area, Town Area,
+  Park Area, the net of far countries and its Undernet, each in BN4's own
+  tiles, with BN4's music on the map and in battle and its battle
+  backgrounds. The seed picks them area by area, about half the runs
+  that come there (a quarter where BN5 has an area there too). From the
+  second act six of its virus families visit battles too, Billy, Spikey,
+  Shrimpy, Walla, Elmperor and CirKill, in the same one battle in four
+  that BN5's viruses visit; MegaMan names them as the older Net's. Each
+  was moved into BN6's battle and checked against BN4's own frame by
+  frame, and pays from BN4's own rewards (a chip BN6 has not got pays 200
+  zenny). Battles, guardians and the people on its maps are still
+  BN6's. Without BN4 a run is exactly as before; a run saved with BN4 goes
+  on without it, a layer of BN4's starting again in BN6's tiles. On every
+  system that takes BN5; the New 3DS has room for one of the two, BN5's
+  first.
+
 ## 0.19.0 (2026-11-02)
 
 - **A GBA's screen, if you want it (issue #265).** Options' Display has
