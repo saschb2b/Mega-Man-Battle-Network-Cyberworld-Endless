@@ -134,6 +134,9 @@ int ta_cube_skull(TextArchive *t, int present, int id);
 int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned seed);
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
+/* A tournament's round won (docs/game/tournament.md, The prize): its Navi's
+ * chip into the Pack, in BN6's own "MegaMan got:" box, and no word more */
+int ta_round_prize(TextArchive *t, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/game/meta/phase-two.md, gates): its three chips (`code`
  * A=0 .. *=26), named, and what each hits for (0: none to say). */
 typedef struct {

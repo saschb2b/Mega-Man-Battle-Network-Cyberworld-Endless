@@ -83,7 +83,7 @@ int director_town_tint(bool *box) {
 
 bool director_on_layer(void) { return D.active && !D.town; }
 
-int director_guardian_battle(void) { return D.active && boss_fighting() ? D.objs.guardian.navi : 0; }
+int director_guardian_battle(void) { return D.active && boss_fighting() ? boss_foe() : 0; }
 
 int director_trader_kind(void) { return D.active && !D.town ? D.objs.trader_kind : -1; }
 
@@ -312,7 +312,7 @@ static bool gameover_update(void) {
 	int mode = main_mode();
 	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
 		D.gameover = true;
-		D.lost_to = boss_fighting() ? D.objs.guardian.navi : 0;
+		D.lost_to = boss_fighting() ? boss_foe() : 0;
 		D.lost_duel = D.duel;
 		/* (deleted in a duel: a duel lost, which the verdict, never
 		 * reached, would have counted; Chaud's next call knew nothing of
@@ -389,7 +389,7 @@ static void battle_update(void) {
 		/* (the one fought, BN5's by his id moved into BN6's engine) */
 		int hp = 0;
 		const Encounter *g = guardian ? boss_battle(&hp) : NULL;
-		if (guardian) runlog_guardian_start(D.objs.guardian.navi, g, hp);
+		if (guardian) runlog_guardian_start(boss_foe(), g, hp);
 		D.souls_used = 0;
 		home_jobs_battle_start();
 	}

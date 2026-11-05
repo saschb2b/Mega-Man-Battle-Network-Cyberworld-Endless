@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **The tournament is built, waiting for its faces.** Once a run has
+  reached the Nest, act 3's arena in half the short runs (and one of acts
+  3 to 5 each endless cycle) holds three Navis in a row instead of one
+  guardian: two rounds below the act's guardian and the final at it, the
+  HP carried with no heal between, a round lost the run's end. Each round
+  pays its results screen and its Navi's chip, the final his Guardian
+  Data; the act's card lists the three ("???" for a Navi you never met),
+  MegaMan reads three signals at the portal, and BN4 Red Sun's own bracket
+  screen shows the rounds between them. A quit comes back at the arena's
+  door, round 1 again. It reaches runs once BN4's bracket can show the
+  faces of BN6's and BN5's Navis, with BN4's ROM beside BN6's; the
+  Tournament switch in EXTRAS turns it off.
 - **Leave out what you don't want.** The setup after NEW GAME now comes
   in three pages, RUN, HELP and a new EXTRAS, turned with L and R; NEXT
   at a page's foot goes on to the next and JACK IN! is on the last

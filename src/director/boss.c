@@ -11,12 +11,12 @@
 
 #include "bn6_fields.h"
 #include "boss_grand.h"
+#include "boss_rounds.h"
 #include "cinema.h"
 #include "debug.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
-#include "gfx.h"
 #include "gamecall.h"
 #include "guardians.h"
 #include "loot.h"
@@ -37,9 +37,12 @@ enum {
 	B_NONE,      /* no guardian on this layer */
 	B_WAIT,      /* waiting in the arena */
 	B_ENTER,     /* bars in, prelude, the guardian logs in */
+	B_BRACKET,   /* a tournament's: its bracket shown on BN4's screen, off the map */
+	B_ROUND_IN,  /* ... back on the map: the next round's Navi, the final's log-in */
 	B_TITLE,     /* its title card */
 	B_TALK,      /* its words before the battle */
 	B_FIGHT,     /* the battle is on */
+	B_PRIZE,     /* a tournament's round won: its Navi's chip */
 	B_AFTER,     /* back on the map, the music hushed */
 	B_LAST_WORD, /* its words, deleted */
 	B_LOGOUT,    /* it logs out */
@@ -66,6 +69,9 @@ static struct {
 	/* how his battle stands, its last frame his record's (rivals.h):
 	 * MegaMan's form while he stands, and each side's HP and max */
 	int form, hp, max, g_hp, g_max;
+	/* the tournament's bracket in his place (docs/game/tournament.md): the
+	 * round under way (0, 1, 2 the final, 3 won), its Navi and version */
+	int round, foe, foe_version;
 } B;
 
 static void to(int state) {
@@ -161,15 +167,13 @@ static uint32_t walk_toward(int x, int y, int near) {
 	return dirs[B.leg].k;
 }
 
-static void title_card(void) {
-	const Guardian *gd = guardian(B.g.navi);
-	static const char *const suffix[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
-	char name[40], top[48];
-	/* (BN5's by its own versions' names) */
-	if (guardian_older(B.g.navi)) snprintf(name, sizeof name, "%s%s", gd->name, older[B.g.version < 0 || B.g.version > 3 ? 0 : B.g.version]);
-	else snprintf(name, sizeof name, "%s%s", gd->name, suffix[B.g.version < 0 || B.g.version > 2 ? 0 : B.g.version]);
-	snprintf(top, sizeof top, "Guardian of %s", guardian_area_in_text(layer.biome, run.side_kind));
-	cinema_title(top, name, gd->epithet, rgba(gd->r, gd->g, gd->b, 255), 170);
+static void title_card(void) { boss_title(B.foe, B.foe_version, B.g.bracket ? B.round : -1); }
+
+/* The bracket's round `round` set to be fought: its Navi and his version */
+static void round_set(int round) {
+	B.round = round;
+	B.foe = B.g.bracket && round < 3 ? B.g.rounds.navi[round] : B.g.navi;
+	B.foe_version = B.g.bracket && round < 3 ? B.g.rounds.version[round] : B.g.version;
 }
 
 void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
@@ -181,6 +185,8 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 		fprintf(stderr, "guardian %d at %d %d, arena entered along %d, MegaMan meets him at %d %d facing %d\n", g->navi, g->x, g->y,
 			layer.arena_dir, g->stand_x, g->stand_y, g->stand_face);
 	B.door = B.door_taken = false;
+	emu_encounters_hold(false);
+	round_set(g->bracket ? 0 : 2);
 	to(g->navi ? B_WAIT : B_NONE);
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
@@ -233,7 +239,10 @@ static void wait_update(void) {
 	cinema_input(CINEMA_WALK);
 	cinema_letterbox(true);
 	run_script(B.g.hush);
-	rival_met(B.g.navi);
+	/* (a quit anywhere in a bracket comes back to its door: round 1 again,
+	 * with the HP walked in with, docs/game/tournament.md, The arena's door) */
+	round_set(B.g.bracket ? 0 : 2);
+	rival_met(B.foe);
 	B.there = false;
 	B.leg = -1;
 	to(B_ENTER);
@@ -256,8 +265,11 @@ static void fight_begin(void) {
 	cinema_letterbox(false);
 	/* (BN5's in BN6's engine as BN6's are, his moved id at the version his
 	 * act's band takes: docs/game/bosses/bn5-navis.md) */
-	bool older = guardian_older(B.g.navi);
-	Encounter e = older ? xguardian_encounter(B.g.navi, B.g.version) : make_boss(run.depth, run.biome, B.g.navi);
+	bool older = guardian_older(B.foe), round = B.g.bracket && B.round < 2;
+	Encounter e = older ? xguardian_encounter(B.foe, B.foe_version) : make_boss(run.depth, run.biome, B.foe);
+	emu_encounters_hold(false);
+	/* (a bracket's round at its own version: run_bracket_draw) */
+	if (round && !older) e.foes[0].version = B.foe_version;
 	/* (no running from a guardian, as from BN6's story bosses: a
 	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
 	 * came back to a fresh fight) */
@@ -265,14 +277,15 @@ static void fight_begin(void) {
 	/* (a tenth more HP each notch of the Net's clock, docs/world/home/: on his
 	 * own HP, or on BN5's held to the act's band, as he spawns) */
 	int own = navi_hp(e.foes[0].family, e.foes[0].version);
-	if (older) own = xguardian_hp(B.g.navi, B.g.version);
-	int fought = older ? xguardian_hp_fought(B.g.navi, B.g.version, run.depth) : own;
+	if (older) own = xguardian_hp(B.foe, B.foe_version);
+	int fought = older ? xguardian_hp_fought(B.foe, B.foe_version, run.depth) : own;
+	if (round && older) fought = B.g.rounds.hp[B.round];
 	/* (a special route's last boss at the endless Nest: the Cybeast's HP) */
 	if (run.biome == BIOME_NEST && run.side_kind == LAYER_NORMAL) fought = run_nest_hp(run.depth, B.g.navi, fought);
 	B.fought_hp = pacing_clock_hp(fought, run.clock);
 	emu_battle_hp(own, B.fought_hp);
-	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d\n", B.g.navi, e.foes[0].id, e.foes[0].version, own,
-		B.fought_hp);
+	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d%s\n", B.foe, e.foes[0].id, e.foes[0].version, own,
+		B.fought_hp, B.g.bracket ? B.round == 0 ? " (round 1)" : B.round == 1 ? " (round 2)" : " (the final)" : "");
 	B.fought = e;
 	emu_battle_force(&e);
 }
@@ -286,6 +299,12 @@ static void enter_update(void) {
 	if (there && cinema_input_mode() == CINEMA_WALK) cinema_input(CINEMA_HOLD);
 	if (grand) {
 		if (grand_enter(B.t, there)) to(B_TITLE);
+		return;
+	}
+	/* (a tournament: its bracket first, the final's Navi logging in after
+	 * the rounds) */
+	if (B.g.bracket) {
+		if (B.t >= 40 && there) { boss_bracket_open(&B.g.rounds, 0); to(B_BRACKET); }
 		return;
 	}
 	if (B.t == 30) run_script(B.g.prelude);
@@ -341,6 +360,62 @@ static void logout_update(void) {
 	to(B_REWARD);
 }
 
+/* Back on the map from the bracket: a round's Navi straight to his card,
+ * the final's logging in as a guardian's does */
+static void round_in_update(void) {
+	if (B.t == 1) { cinema_letterbox(true); cinema_input(CINEMA_HOLD); }
+	/* (the map's theme the map entered again started, hushed) */
+	if (B.t < 10 && music_on()) run_script(B.g.hush);
+	if (B.round < 2) {
+		if (B.t >= 30) { title_card(); to(B_TITLE); }
+		return;
+	}
+	if (B.t == 10) run_script(B.g.prelude);
+	if (B.t == 30) { flag_set(LAYER_BOSS_APPEAR_FLAG); cinema_shake(16, 3); }
+	if (B.t >= 60) { title_card(); to(B_TITLE); }
+}
+
+/* A round won, back on the map: its Navi's chip, then the bracket again */
+static void prize_update(void) {
+	if (B.t == 1) { cinema_letterbox(true); cinema_input(CINEMA_HOLD); }
+	if (B.t < 30) {
+		if (music_on()) run_script(B.g.hush);
+		return;
+	}
+	int script = B.g.round_prize[B.round];
+	if (B.t == 30 && script >= 0) { cinema_letterbox(false); cinema_input(CINEMA_TALK); run_script(script); }
+	if (script >= 0 && !chat_done()) return;
+	cinema_input(CINEMA_HOLD);
+	round_set(B.round + 1);
+	rival_met(B.foe);
+	boss_bracket_open(&B.g.rounds, B.round);
+	to(B_BRACKET);
+}
+
+/* Back from the bracket: the next round, or after the final his last word */
+static void bracket_wait(void) {
+	if (!boss_bracket_back(B.t)) return;
+	if (B.round > 2) emu_encounters_hold(false);
+	to(B.round > 2 ? B_AFTER : B_ROUND_IN);
+}
+
+/* The title card read: a bracket's round to its battle at once, no words;
+ * a guardian's (the final's too) to his intro */
+static void title_done(void) {
+	if (B.g.bracket && B.round < 2) {
+		cinema_letterbox(false);
+		fight_begin();
+		B.form = B.hp = B.max = B.g_hp = B.g_max = 0;
+		to(B_FIGHT);
+		return;
+	}
+	/* the bars make way for the chat box */
+	cinema_letterbox(false);
+	cinema_input(CINEMA_TALK);
+	run_script(B.g.intro);
+	to(B_TALK);
+}
+
 void boss_update(void) {
 	++B.t;
 	switch (B.state) {
@@ -348,13 +423,11 @@ void boss_update(void) {
 	case B_ENTER:
 		enter_update();
 		break;
+	case B_BRACKET: bracket_wait(); break;
+	case B_ROUND_IN: round_in_update(); break;
+	case B_PRIZE: prize_update(); break;
 	case B_TITLE:
-		if (cinema_busy()) break;
-		/* the bars make way for the chat box */
-		cinema_letterbox(false);
-		cinema_input(CINEMA_TALK);
-		run_script(B.g.intro);
-		to(B_TALK);
+		if (!cinema_busy()) title_done();
 		break;
 	case B_TALK:
 		if (!chat_done()) break;
@@ -422,16 +495,32 @@ void boss_battle_over(bool won) {
 		to(B_WAIT);
 		return;
 	}
-	rival_result(B.g.navi, RIVAL_MEGAMAN_WON, &(RivalEnd){ B.form, B.hp, B.max }, profile.runs + 1);
+	rival_result(B.foe, RIVAL_MEGAMAN_WON, &(RivalEnd){ B.form, B.hp, B.max }, profile.runs + 1);
+	/* (a bracket's round: its prize, then the next) */
+	if (B.g.bracket && B.round < 2) {
+		to(B_PRIZE);
+		return;
+	}
 	run.bosses_beaten++;
 	B.soul_new = powers_after_boss(B.g.navi);
 	if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
+	/* (its final: the bracket once more, MegaMan its winner, then his last
+	 * word) */
+	if (B.g.bracket) {
+		round_set(3);
+		boss_bracket_open(&B.g.rounds, 3);
+		to(B_BRACKET);
+		return;
+	}
 	to(B_AFTER);
 }
 
 void boss_lost(void) {
-	if (B.state == B_FIGHT) rival_result(B.g.navi, RIVAL_NAVI_WON, &(RivalEnd){ B.form, B.g_hp, B.g_max }, profile.runs + 1);
+	if (B.state == B_FIGHT) rival_result(B.foe, RIVAL_NAVI_WON, &(RivalEnd){ B.form, B.g_hp, B.g_max }, profile.runs + 1);
 }
+
+int boss_foe(void) { return B.foe; }
+
 
 bool boss_exit_open(void) { return B.state == B_NONE || B.state >= B_OPEN; }
 

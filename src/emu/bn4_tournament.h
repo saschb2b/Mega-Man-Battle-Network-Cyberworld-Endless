@@ -155,4 +155,19 @@
 #define BN4_BRACKET_ART_END 0x086C792Cu /* the end of the bracket's art: BN4_BRACKET_TILES, BN4_BRACKET_PALETTE and its cycles' colours, the six
                                        * maps of BN4_BRACKET_MAPS (0x4B0 bytes each) one after another */
 
+/* What a plate of another game's Navi grows in the moved copy (src/emu/xbracket_faces.h; docs/multirom/bn4-tournament.md, Faces
+ * for every entrant): the literals that name the plates' tables, read in BN4_PLATE_INIT, BN4_PLATE_SET and BN4_MENU_SPRITE_SET */
+#define BN4_PLATE_LIT_FRAMES 0x081040F8u   /* BN4_PLATE_INIT's literal of BN4_PLATE_FRAMES (ldr r1 at 0x08104070) */
+#define BN4_PLATE_LIT_PALETTES 0x081040FCu /* ... of BN4_PLATE_PALETTES (ldr r1 at 0x081040CC) */
+#define BN4_PLATE_LIT_SHEETS 0x08104100u   /* ... of BN4_PLATE_SHEETS (ldr r1 at 0x081040D6; its byte the r6 BN4_PLATE_SET takes) */
+#define BN4_PLATE_LIT_SPRITES 0x081042F4u  /* BN4_PLATE_SET's literal of BN4_PLATE_SPRITES (ldr r1 at 0x0810429A: [r6] the sprite's index) */
+#define BN4_MENU_SPRITE_LIT_PTRS 0x08002930u /* BN4_MENU_SPRITE_SET's literal of BN4_MENU_SPRITE_PTRS (ldr r1 at 0x08002918; a pointer
+                                       * with bit 31 clear read in place) */
+#define BN4_PLATE_IDS     0x1F        /* the entries of BN4_PLATE_FRAMES, BN4_PLATE_SHEETS and BN4_PLATE_PALETTES (ids 0x00-0x1E, one
+                                       * after another from BN4_PLATE_PALETTES; past 0x1E each reads the next table) */
+#define BN4_PLATE_SHEET_VALUES 0x12   /* BN4_PLATE_SPRITES' entries (0x00-0x11: 0 the first sheet's, 0x11 the second's, the rest the lit
+                                       * lines'); BN4_PLATE_SET reads no other table by its r6 */
+#define BN4_MENU_SPRITE_PTRS_USED 6   /* BN4_MENU_SPRITE_PTRS' entries the screen reads (0-5; 2-5 its art) */
+#define BN4_PLATE_SHEET_B_END 0x084BEADCu /* the second sheet's end, BN4_MENU_SPRITE_PTRS 2-5's art's (the first's is BN4_PLATE_SHEET_B) */
+
 #endif

@@ -68,6 +68,24 @@ int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early);
  * (as he spawns), never raised; his own on later cycles and in the Nest */
 int pacing_xguardian_hp(int hp, int act, int loop);
 
+/* The tournament's rounds (docs/game/tournament.md, Each round's band):
+ * round 0's band in act `act` from lo/2 to 3hi/5 of the act's guardian
+ * band, round 1's from 7lo/10 to 4hi/5, round 2's (the final) the band
+ * itself. */
+#define PACING_ROUNDS 3
+void pacing_round_band(int act, int round, int *lo, int *hi);
+/* The version (0 V1, 1 EX) one of BN6's Navis fights a round at, from his
+ * HP at each (hp[v], -1 none): V1 through act 3, EX first from act 4 where
+ * it fits the round's band, else V1; EX on later cycles (a version under
+ * their guardians' SP). */
+int pacing_round_version(const int hp[3], int act, int round, int loop);
+/* ... another game's (0 V1 .. 2 V3): the lowest whose HP reaches the
+ * round's floor, else the strongest; V3 on later cycles */
+int pacing_xround_version(const int hp[4], int act, int round, int loop);
+/* ... and the HP he is fought at there: his own, held to the round's
+ * top, never raised; his own on later cycles */
+int pacing_xround_hp(int hp, int act, int round, int loop);
+
 /* The layer of an act (0-2) that always has a heal and the Net Dealer, and
  * whether the heal is still certain on this cycle. */
 bool pacing_heal_certain(int depth);

@@ -75,7 +75,7 @@
 #define XN_BN4_HOMES     FREE_BN4_NAVIS
 #define XN_BN4_CODE      FREE_BN4_NAVI_CODE
 #define XN_BN4_ART       FREE_BN4_NAVI_ART
-#define XN_BN4_END       FREE_BRACKET
+#define XN_BN4_END       FREE_BRACKET_FACES
 
 /* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {

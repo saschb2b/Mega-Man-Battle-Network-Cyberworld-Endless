@@ -10,5 +10,8 @@ const char *final_words(void);
 const char *mail_words(int navi);
 const char *secret_call_words(void);
 const char *den_call_words(void);
+/* A tournament's round over its Navi's name on his title card (0, 1, 2
+ * the final) */
+const char *bracket_round_label(int round);
 
 #endif

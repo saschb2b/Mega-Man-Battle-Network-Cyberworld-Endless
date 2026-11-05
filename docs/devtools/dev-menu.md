@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -46,7 +46,7 @@ board, [Liberation Missions](../game/liberation/overview.md); `CYBERWORLD_EMU_DE
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
 N, for each tier of its prize; `CYBERWORLD_AUTOPILOT_ROUTE=1` beside it
 seeks the sealed region's route first, its key and then the route, and
-takes the way it opens at home), `glitch` (every act's first layer from
+takes the way it opens at home), `tourney` (every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin, the setup's switch and the Glitch layer's act still honoured, BN4's own plates on its screen until the faces come: [the tournament](../game/tournament.md)), `glitch` (every act's first layer from
 the second holds the Glitch warp, [the Glitch layer](../game/glitch-layer.md); with
 `glitchstage=N` a Glitch layer held at stage N - 1, 1 to 5, its glitches,
 flips and battles, and with `side=4` the run starts on one; the debug

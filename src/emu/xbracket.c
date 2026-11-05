@@ -14,6 +14,7 @@
 #include "rom.h"
 #include "thumb_reloc.h"
 #include "xbracket_bn4.h"
+#include "xbracket_faces.h"
 #include "xsong.h"
 #include "xvirus.h"
 #include "xvirus_tx.h"
@@ -165,6 +166,7 @@ bool xbracket_install(void) {
 		stubs_stage();
 		sites_stage();
 		song_stage();
+		xbracket_faces_stage();
 	}
 	/* (its mode in BN6's main modes' table, empty there) */
 	if (!xv_failed()) xv_word(XBR_MODES + XBR_MODE, 0, XBR_STUB_FRAME | 1u);
@@ -181,6 +183,7 @@ bool xbracket_install(void) {
 	for (int i = 0; i < xbracket_bn4.nblocks; ++i)
 		xv_moved_add(xbracket_bn4.blocks[i].start, xbracket_bn4.blocks[i].at, xbracket_bn4.blocks[i].end - xbracket_bn4.blocks[i].start);
 	installed = true;
+	xbracket_faces_dump();
 	printf("xbracket: BN4's bracket screen as BN6's main mode %#x (%u bytes written)\n", XBR_MODE, (unsigned)used);
 	return true;
 }

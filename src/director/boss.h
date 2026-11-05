@@ -44,6 +44,10 @@ bool boss_take_door(void);
 /* After a run saved mid-layer is loaded: the guardian's state from its
  * flags. */
 void boss_resume(void);
+/* The Navi MegaMan fights or is about to: the guardian's, or in a
+ * tournament's bracket the round's (docs/game/tournament.md) */
+int boss_foe(void);
+
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
 bool boss_goal(int *x, int *y, bool *talk);

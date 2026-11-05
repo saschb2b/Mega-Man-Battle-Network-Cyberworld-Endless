@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bracket.h"
 #include "fork_words.h"
 #include "guardians.h"
 #include "jobs.h"
@@ -81,6 +82,11 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool bo
 	if (beast) snprintf(signal, sizeof signal, "%s", known ? "@M The Cybeast's down there,Lan. Waiting." : "@M Something's growling down there...|@M Like the beast in me.");
 	else if (navi) snprintf(signal, sizeof signal, "@M That signal... It's %s!", guardian(navi)->name);
 	else snprintf(signal, sizeof signal, "@M And a strong Navi's signal...");
+	/* (three Navis waiting one after another, a tournament's: the last the
+	 * act's guardian, named where MegaMan knows him) */
+	bool bracket = !sealed && !beast && bracket_here(run.depth);
+	if (bracket && navi) snprintf(signal, sizeof signal, "@M Three strong signals,Lan!|@M And the last one... It's %s!", guardian(navi)->name);
+	else if (bracket) snprintf(signal, sizeof signal, "@M Whoa... Three strong signals!|@M One after another,Lan...");
 	if (sealed)
 		snprintf(words, sizeof words, "@M A dark way leads down here...|@M It's sealed. Clearing the Secret Area would open it.");
 	else if (dark)

@@ -206,6 +206,15 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	return i;
 }
 
+int ta_round_prize(TextArchive *t, int chip, const char *chip_name, int code) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_give_chip(t, chip, code, 1);
+	ta_got_chip(t, chip_name, code, &first);
+	ta_end(t);
+	return i;
+}
+
 int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v) {
 	char s[240];
 	if (have < need) {

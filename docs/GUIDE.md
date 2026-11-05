@@ -900,7 +900,9 @@ first battle. Helped runs count for everything.
 
 EXTRAS holds what the run adds to BN6, each on or off, all on unless you
 switch one off: Liberation (BN5's Liberation Missions on a dark layer),
-Tournament (three Navis in a row in act 3's arena, not in runs yet),
+Tournament (three Navis in a row in an act's arena from the third, once
+a run has reached the Nest, shown on BN4 Red Sun's own bracket: not in
+runs yet),
 Glitch (the rare Glitch layer), Virus Battler, DarkChips (the flames of
 darkness) and, where another game's ROM is read, Older nets (its areas,
 Navis and viruses in BN6's net). A run keeps what it was started with,

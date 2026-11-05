@@ -17,6 +17,7 @@
 #include "navicust.h"
 #include "jobs.h"
 #include "pacing.h"
+#include "pacing_bracket.h"
 #include "rom.h"
 #include "run.h"
 #include "shop.h"
@@ -580,7 +581,7 @@ int pacing_report_run(const char *path) {
 			for (int k = 0; k < 8 && acts[a].biomes[k] >= 0; ++k)
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
-	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out);
+	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out) + pacing_bracket_report(out);
 	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
 	super_report(out);
 	clock_report(out);

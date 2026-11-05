@@ -3,7 +3,7 @@ type: Tool
 title: "The bracket's differential"
 description: "`tools/xbracket.py` runs BN4 Red Sun's tournament bracket in romlab and its move into BN6 in the host build from the same entrants, and compares their frames pixel for pixel on the screen's own clock, with mutations of the comparator and of the move."
 tags: [devtools, multirom, bn4, differential]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:59:00Z }
 sources:
   - id: tool
     resource: "tools/xbracket.py, tools/xrecipe_bracket.py, src/emu/xbracket.c"
@@ -26,6 +26,7 @@ python3 tools/xbracket.py bn6 [CASE ...]       # BN6's in the host build (build.
 python3 tools/xbracket.py compare [CASE ...]   # PASS, FAIL or INCONCLUSIVE a case
 python3 tools/xbracket.py compare --mutation palette|plate|late       # the comparator's own check: must FAIL
 python3 tools/xbracket.py compare --move-mutation tournaments          # the move broken: must FAIL where the move passes
+python3 tools/bn4_faces.py check [--mutation facepal]                  # the faces' plates the move installs, against tools/bn4_faces.py's byte for byte
 ```
 
 Local only: both ROMs and the `cyberworld-romlab` image ([romlab](romlab.md)).

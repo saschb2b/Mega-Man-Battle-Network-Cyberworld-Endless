@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bn4_faces.py [report] | show [NAVI@ID ...]: faces for BN4 Red Sun's
+"""bn4_faces.py [report] | show [NAVI@ID ...] | check [--mutation NAME]: faces for BN4 Red Sun's
 tournament bracket from the Navis of BN6 Gregar and BN5 Team Colonel, made
 from the player's own ROMs (docs/multirom/bn4-tournament.md, Faces for every
 entrant; the names in src/emu/bn4_tournament.h).
@@ -20,14 +20,24 @@ own plate). Needs the cyberworld-romlab image, tools/romlab/romlab.bin and
 tools/bn4_lab.py boot's state. Nothing of the games is written to git: the
 faces exist only in memory and in the frames under .build/.
 
+check is the oracle for the faces' port to C (src/emu/xbracket_faces.c,
+which makes them as BN6's core starts): the host build run headless (build.py
+linux first) writes each plate it installed, read back from the core's ROM
+copy through the moved bracket's grown tables (CYBERWORLD_XBRACKET_FACES),
+and each is compared byte for byte with plate_from's: tiles and four
+palettes, all 22 where BN5's ROM is read. --mutation NAME runs the port
+broken on purpose (MUTATIONS), which the check must catch.
+
   python3 tools/bn4_faces.py
   python3 tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8
+  python3 tools/bn4_faces.py check [--mutation facepal]
 """
 import argparse
 import hashlib
 import glob
 import os
 import struct
+import subprocess
 import sys
 import zlib
 
@@ -62,8 +72,11 @@ NAVIS = {1: ('HeatMan', 'bn6', 0x47), 2: ('ElecMan', 'bn6', 0x49), 3: ('SlashMan
          24: ('Colonel', 'bn5', 69), 25: ('ShadowMan', 'bn5', 75), 26: ('NumberMan', 'bn5', 71),
          27: ('TomahawkMan', 'bn5', 72), 28: ('KnightMan', 'bn5', 73), 29: ('ToadMan', 'bn5', 74)}
 # Falzar's five in Gregar: an 18x26 window round the head of the battle sprite's standing frame, at its own scale (a
-# battle sprite's head is already about a plate's), its top left from his feet, chosen by eye on a grid of the frame
-HEAD_WINDOW = {6: (-11, -35), 7: (6, -46), 8: (-5, -72), 9: (-9, -58), 10: (-8, -53)}
+# battle sprite's head is already about a plate's), its top left from his feet, chosen by eye on a grid of the frame;
+# EraseMan's too, whose halved mugshot lost his face to its red visor (compared beside it, and beside his mugshot's own
+# scale); TomahawkMan's moved 3 left and 1 up from (6, -46), which cut his mask at its edge. ElecMan keeps his halved
+# mugshot: his battle sprite's head is small and dark, his mugshot's own scale a close-up the other plates are not
+HEAD_WINDOW = {4: (4, -55), 6: (-11, -35), 7: (3, -47), 8: (-5, -72), 9: (-9, -58), 10: (-8, -53)}
 DIMS = [[(8, 8), (16, 16), (32, 32), (64, 64)], [(16, 8), (32, 8), (32, 16), (64, 32)], [(8, 16), (8, 32), (16, 32), (32, 64)]]
 
 
@@ -220,7 +233,7 @@ def face_of(roms, navi):
     name, game, num = NAVIS[navi]
     if game not in roms:
         return None
-    if num is not None:
+    if num is not None and navi not in HEAD_WINDOW:
         return mugshot(roms[game], game, num)
     return portrait(roms['bn6'], navi)
 
@@ -237,7 +250,7 @@ def mugshot(d, game, num):
 
 
 def portrait(d, navi):
-    """Falzar's five in Gregar (no mugshot there): HEAD_WINDOW over the battle sprite's standing frame (list 0,
+    """Falzar's five in Gregar (no mugshot there) and EraseMan: HEAD_WINDOW over the battle sprite's standing frame (list 0,
     0x2E + the navi, animation 0's first frame), on a ground of the darkest of his own colours"""
     fr = Sprite(d, list_sprite(d, 'bn6', LIST_BATTLE, 0x2E + navi)).frame(0)
     px, minx, miny = pixels(fr)
@@ -257,9 +270,11 @@ def portrait(d, navi):
 
 def plate_from(face, frames):
     """face: (40x48 indexes, 16 colours); frames: BN4's own frame colours, outer and inner, per variant.
-    The face halved (each 2x2 block its commonest index, a tie to the darker), its middle 18 columns and 24
-    rows in the window, a row of its ground above and below; at most 13 colours (the least used merged into
-    the nearest); then the four palettes by the rules BN4's own plates follow (docs/multirom/bn4-tournament.md)"""
+    The face halved (each 2x2 block its commonest index, a tie to the darker, then to the lower index), its middle
+    18 columns and 24 rows in the window, a row of its ground (its edge's commonest index, a tie to the lower) above
+    and below; at most 13 colours (the least used, the first seen of a tie, merged into the nearest, the first seen
+    of a tie; a slot keeps its kept colour); then the four palettes by the rules BN4's own plates follow
+    (docs/multirom/bn4-tournament.md). src/emu/xbracket_faces.c is its port, checked byte for byte (check)"""
     px, pal = face
     lum = [sum(rgb(c)) for c in pal]
     if len(px[0]) == FACE_W:   # a head window at its own scale (Falzar's five)
@@ -270,10 +285,10 @@ def plate_from(face, frames):
             row = []
             for x in range(20):
                 block = [px[2 * y + j][2 * x + i] for j in (0, 1) for i in (0, 1)]
-                row.append(max(set(block), key=lambda c: (block.count(c), -lum[c])))
+                row.append(max(sorted(set(block)), key=lambda c: (block.count(c), -lum[c])))
             half.append(row)
         edge = [c for c in half[0] + half[-1] + [r[0] for r in half] + [r[-1] for r in half]]
-        ground = max(set(edge), key=edge.count)
+        ground = max(sorted(set(edge)), key=edge.count)
         win = [[ground] * FACE_W] + [r[1:1 + FACE_W] for r in half] + [[ground] * FACE_W]
         win = [[c if c else ground for c in r] for r in win]
     used = {}
@@ -309,8 +324,8 @@ def plate_from(face, frames):
                         X, Y = x0 + tx * 8 + p, ty * 8 + py
                         tiles.append(plate[Y][X] | plate[Y][X + 1] << 4)
     face_cols = [0] * 16
-    for c, i in slot.items():
-        face_cols[i] = pal[c]
+    for c in order:
+        face_cols[slot[c]] = pal[c]
     pals = []
     for v in range(PLATE_VARIANTS):
         cs = []
@@ -353,7 +368,8 @@ def report(roms):
                 bad.append(f'navi {navi}: no face')
             continue
         _, _, n, kept = plate_from(face, frames)
-        src = f'mugshot, list 8 #{num:#04x}, halved' if num is not None else 'head of the battle sprite, list 0 #%#04x, 1:1' % (0x2E + navi)
+        src = (f'mugshot, list 8 #{num:#04x}, halved' if navi not in HEAD_WINDOW else
+               'head of the battle sprite, list 0 #%#04x, 1:1' % (0x2E + navi))
         print(f'  {navi:2} {name:12} {game}: {src}, {n} colours, {kept} kept')
     for b in bad:
         print(f'  not as docs/multirom/bn4-tournament.md says: {b}')
@@ -416,16 +432,77 @@ def show(roms, pairs):
     return 0
 
 
+# ---- the port's check
+
+# the port broken on purpose (CYBERWORLD_XBRACKET_MUTATE, src/emu/xbracket_faces.c): check must FAIL with it
+MUTATIONS = {'facepal': 'HeatMan\'s plate keeps the palettes of the plate it is written over (BN4\'s GutsMan\'s): a face\'s palette '
+                        'left BN4\'s'}
+
+
+def oracle(roms):
+    """navi -> the plate plate_from makes (384 bytes of tiles, then the four palettes), for every face its game's ROM gives"""
+    frames = frame_colours(roms['bn4'])
+    out = {}
+    for navi in sorted(NAVIS):
+        face = face_of(roms, navi)
+        if face is not None:
+            tiles, pals, _, _ = plate_from(face, frames)
+            out[navi] = tiles + b''.join(pals)
+    return out
+
+
+def check(roms, mutation=None):
+    want = oracle(roms)
+    os.makedirs(OUT, exist_ok=True)
+    path, data = os.path.join(OUT, 'plates_c.txt'), os.path.join(OUT, 'data')
+    os.makedirs(data, exist_ok=True)
+    if os.path.exists(path):
+        os.remove(path)
+    env = dict(os.environ, CYBERWORLD_XBRACKET_FACES='/src/' + os.path.relpath(path, ROOT))
+    if mutation:
+        env['CYBERWORLD_XBRACKET_MUTATE'] = mutation
+    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--scene', 'emu', '--frames', '2', '--size', '240x160',
+           '--data-dir', '/src/' + os.path.relpath(data, ROOT)]
+    p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
+    if not os.path.exists(path):
+        sys.exit(f'bn4_faces: the host build wrote no plates ({path}): {(p.stdout + p.stderr)[-600:]}')
+    got = {}
+    for ln in open(path):
+        if ln.strip():
+            n, h = ln.split()
+            got[int(n)] = bytes.fromhex(h)
+    bad = 0
+    for navi in sorted(set(want) | set(got)):
+        name = NAVIS[navi][0] if navi in NAVIS else '?'
+        w, g = want.get(navi), got.get(navi)
+        if w is None or g is None:
+            print(f'  {navi:2} {name:12} {"not made by the port" if g is None else "not made by the oracle"}')
+            bad += 1
+            continue
+        diff = [i for i in range(max(len(w), len(g))) if i >= len(w) or i >= len(g) or w[i] != g[i]]
+        part = '' if not diff else ('its tiles' if diff[0] < PLATE_TILES * 32 else f'palette {(diff[0] - PLATE_TILES * 32) // 32}')
+        print(f'  {navi:2} {name:12} ' + ('SAME' if not diff else f'DIFF: {len(diff)} of {len(w)} bytes, the first at {diff[0]} ({part})'))
+        bad += bool(diff)
+    print(f'bn4_faces check{" (mutation " + mutation + ")" if mutation else ""}: {"PASS" if not bad else "FAIL"}: '
+          f'{len(want) - bad} of {len(want)} plates the same byte for byte, {PLATE_TILES * 32 + PLATE_VARIANTS * 32} bytes each')
+    if mutation:
+        return 0 if bad else 1
+    return 1 if bad else 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('cmd', nargs='?', default='report', choices=('report', 'show'))
+    ap.add_argument('cmd', nargs='?', default='report', choices=('report', 'show', 'check'))
     ap.add_argument('pairs', nargs='*', help='NAVI@ID: a navi number (or bn4:N, BN4 mugshot N) on entrant id ID')
+    ap.add_argument('--mutation', choices=sorted(MUTATIONS), help='check: the port broken on purpose; must FAIL')
     a = ap.parse_args()
     roms = find_roms()
     if 'bn4' not in roms:
         sys.exit(f'bn4_faces: no BN4 Red Sun (USA) in {ROMS}')
     if a.cmd == 'report':
         return report(roms)
+    if a.cmd == 'check':
+        return check(roms, a.mutation)
     pairs = []
     for p in a.pairs or ['1@1', '26@5', 'bn4:0x42@8']:
         navi, eid = p.rsplit('@', 1)

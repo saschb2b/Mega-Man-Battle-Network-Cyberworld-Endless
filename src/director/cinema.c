@@ -25,7 +25,7 @@ static struct {
 	int white_t, white_in, white_hold, white_out;   /* a slow fade to white and back, its frame and its parts */
 	int shake, shake_amp;
 	int card, card_t, card_len;
-	char top[48], name[48], line1[48], line2[48];
+	char top[48], name[48], line1[48], line2[48], line3[48];
 	SDL_Color accent;
 	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
 	bool arrow_heal;                     /* it leads to the Recovery Mr. Prog: green, the map's Heal */
@@ -67,8 +67,11 @@ static void card(int kind, const char *top, const char *name, const char *l1, co
 	snprintf(C.name, sizeof C.name, "%s", name ? name : "");
 	snprintf(C.line1, sizeof C.line1, "%s", l1 ? l1 : "");
 	snprintf(C.line2, sizeof C.line2, "%s", l2 ? l2 : "");
+	C.line3[0] = 0;
 	C.accent = accent;
 }
+
+void cinema_card_more(const char *line3) { snprintf(C.line3, sizeof C.line3, "%s", line3 ? line3 : ""); }
 
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames) {
 	card(CARD_TITLE, top, name, epithet, NULL, accent, frames);
@@ -205,7 +208,7 @@ static void draw_grand(int x0, int y0) {
 static void draw_area(int x0, int y0) {
 	int a = card_alpha();
 	int y = y0 + 44;
-	fill_rect(x0, y - 8, CORE_W, C.line2[0] ? 80 : 68, rgba(0, 0, 16, 150 * a / 255));
+	fill_rect(x0, y - 8, CORE_W, C.line3[0] ? 92 : C.line2[0] ? 80 : 68, rgba(0, 0, 16, 150 * a / 255));
 	text_draw(x0 + CORE_W / 2, y, C.top, with_alpha(C.accent, a * ease(C.card_t, 0) / 255), TEXT_CENTER);
 	int in = ease(C.card_t, 4);
 	int sc = name_scale(C.name);
@@ -214,6 +217,7 @@ static void draw_area(int x0, int y0) {
 	fill_rect(x0 + (CORE_W - line) / 2, y + 38, line, 1, with_alpha(C.accent, a));
 	text_draw(x0 + CORE_W / 2, y + 42, C.line1, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 14) / 255), TEXT_CENTER);
 	text_draw(x0 + CORE_W / 2, y + 42 + TEXT_H, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 18) / 255), TEXT_CENTER);
+	if (C.line3[0]) text_draw(x0 + CORE_W / 2, y + 42 + 2 * TEXT_H, C.line3, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 22) / 255), TEXT_CENTER);
 }
 
 /* A filled triangle, pixel by pixel on the canvas. */

@@ -168,6 +168,32 @@ extern bool run_debug_glitch;
  * a run whose extras leave the tournament out. Where the bracket hooks in
  * as it is built. */
 bool run_bracket_at(int depth);
+/* (dev: --dev tourney, a bracket in every act from the third that can
+ * hold one, whatever the profile and the coin; the switch still honoured) */
+extern bool run_debug_bracket;
+/* The bracket of an act (docs/game/tournament.md, The entrants): its
+ * three Navis in their rounds' order, the final last, each at the version
+ * and HP he is fought at, and four more to fill BN4's eight places, who
+ * lose their matches. The rounds are drawn from the seed and the act from
+ * `pool`, each Navi whose HP at his version fits his round's band as
+ * likely as another, none twice, none of the run's past acts' guardians
+ * and not the final wherever another fits (else the nearest by HP); the
+ * final is the act's guardian as drawn (`final`, at `final_version` and
+ * `final_hp`). The pool is the moved Navis of the games present, which
+ * the caller reads from the ROMs (layer/bracket.c). */
+#define BRACKET_POOL 32
+#define BRACKET_OTHERS 4
+typedef struct {
+	int n;
+	uint8_t navi[BRACKET_POOL];
+	bool older[BRACKET_POOL];      /* another game's: his versions V1-V3, held to a round's top */
+	int16_t hp[BRACKET_POOL][4];   /* his HP at each version, -1 none */
+} BracketPool;
+typedef struct {
+	int navi[3], version[3], hp[3];
+	int others[BRACKET_OTHERS];
+} RunBracket;
+void run_bracket_draw(int depth, int final, int final_version, int final_hp, const BracketPool *pool, RunBracket *b);
 /* The copy's forms at the Glitch layer of `depth` (docs/game/glitch-layer.md):
  * the guardians the run has beaten, the last first, then the one that
  * last deleted MegaMan in any run (rivals.sav), then guardians the run set

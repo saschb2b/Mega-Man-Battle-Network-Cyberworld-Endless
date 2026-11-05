@@ -78,9 +78,11 @@ offers NetBattles; not in a New 3DS's runs, which offer none (there for
 | `+0x710000`-`+0x710400` | BN6's Program Advances' list grown with BN5's (`FREE_CHIP_PAS`, issue #82; [The chip registry and BN5's chips' code](../../rom/chips-code.md), BN5's Program Advances in BN6's lists), written as the chips' code is installed, where BN5's ROM is read: BN5's recipes of the registry's in BN6's ids (`src/core/xchips_pas.c`, 6 bytes each), then at the end BN6's 43 recipes' words, BN5's after them and 0, the Custom screen's word (`0x080295B4`) pointed at it | `xchips_code.c` |
 | `+0x710400`-`+0x710440` | The player's chip AI's stub (`FREE_CHIP_AI`, issue #82): from BN6's idle state's hook, a call into BN5's chip AI for the player (moved with the Dark Soul's code) and the state left as BN5's leaves it (`movs r0,#1; pop {r4,r6,r7,pc}`), where BN5's ROM is read | `darkinvs.c` |
 | `+0x710440`-`+0x710460` | Where the swap's spawn returns mid-battle (`FREE_SWAP_RETURN`): a hook's instruction ([Hooks](hooks.md); [Navis moved into BN6's battle engine](../../rom/navis.md), A Navi swapped mid-battle) | |
-| `+0x710460`-`+0x720000` | Free | |
-| `+0x720000`-`+0x7A0000` | BN4's Navis in BN6's engine (`FREE_BN4_NAVIS`): their homes to `+0x730000`, their code and their objects' (`FREE_BN4_NAVI_CODE`) to `+0x750000`, what they draw (`FREE_BN4_NAVI_ART`), their battle sprites among it (`src/emu/xnavi_bn4.c`; [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), GutsMan built) | |
-| `+0x7A0000`-`+0x7FA000` | A liberation's teammates (`FREE_LIB_TEAM`): BN5's Navis' overworld sprites and mugshots | |
+| `+0x710460`-`+0x720000` | Free (`FREE_TAIL`) | |
+| `+0x720000`-`+0x78C000` | BN4's Navis in BN6's engine (`FREE_BN4_NAVIS`): their homes to `+0x730000`, their code and their objects' (`FREE_BN4_NAVI_CODE`) to `+0x750000`, what they draw (`FREE_BN4_NAVI_ART`), their battle sprites among it (`src/emu/xnavi_bn4.c`; [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), GutsMan built) | |
+| `+0x78C000`-`+0x790000` | BN6's and BN5's Navis' plates on BN4's moved bracket (`FREE_BRACKET_FACES`; [BN4's tournament screens](../../multirom/bn4-tournament.md), Faces for every entrant), written with the bracket where BN4's ROM is read: `+0x78C000` its id tables grown to 0x40 (frames, palettes, sheets, 0x40 apart), `+0x78C0C0` `BN4_PLATE_SPRITES` grown, `+0x78C0E0` `BN4_MENU_SPRITE_PTRS` grown to 8; `+0x78C128` the first sheet's copy (BN6's 16 faces), `+0x78E530` the second's (BN5's 6), each the same distance from 0x40 as BN4's | `xbracket_faces.c` |
+| `+0x790000`-`+0x7A0000` | BN4's bracket screen moved (`FREE_BRACKET`, its layout in `xbracket.h`) | `xbracket.c` |
+| `+0x7A0000`-`+0x7FA000` | A liberation's teammates' overworld sprites and mugshots (`FREE_LIB_TEAM`) | `xnavi.c` |
 | `+0x7FA000`-`+0x800000` | Free | |
 
 The guest core's ROM copy (BN5's: the differential's reference since the
