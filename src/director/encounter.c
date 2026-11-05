@@ -12,6 +12,7 @@
 #include "battle_spare.h"
 #include "bn6.h"
 #include "bn6_panels.h"
+#include "bn6_shop.h"
 #include "bytes.h"
 #include "darkbn6.h"
 #include "data.h"
@@ -44,7 +45,7 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
 /* What the hooks hand out, set between frames (the hooks only read it):
  * the record, and whether a battle starts now. */
 static uint32_t record;
-static bool forcing;
+static bool forcing, quiet;
 /* Whether each record is a guardian's battle, and the battle on is one
  * (emu_encounter_started): his Guardian Data gives his chip, and his
  * battle's own reward gave a second, which no folder can hold (one Mega
@@ -57,6 +58,11 @@ static bool boss_record[2], boss_on;
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
 	if (!r->r[0]) return HOOK_CONTINUE;
+	/* (held: past StartBattle to the check's end, as no roll had come) */
+	if (quiet) {
+		r->r[12] = BN6_ENCOUNTER_SKIP;
+		return HOOK_JUMP;
+	}
 	r->r[0] = record;
 	return HOOK_CONTINUE;
 }
@@ -100,6 +106,8 @@ void emu_battle_force_record(uint32_t settings) {
 void emu_battle_release(void) { forcing = false; }
 
 bool emu_battle_forcing(void) { return forcing; }
+
+void emu_encounters_hold(bool hold) { quiet = hold; }
 
 void emu_encounter_set(const Encounter *e) {
 	uint8_t list[4 * (MAX_FOES + 1 + MAX_FIELD_OBJS) + 1], *p = list;

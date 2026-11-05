@@ -209,6 +209,38 @@ int pacing_xguardian_hp(int hp, int act, int loop) {
 	return hp > hi ? hi : hp;
 }
 
+void pacing_round_band(int act, int round, int *lo, int *hi) {
+	pacing_guardian_band(act, lo, hi);
+	if (round == 0) { *lo /= 2; *hi = *hi * 3 / 5; }
+	else if (round == 1) { *lo = *lo * 7 / 10; *hi = *hi * 4 / 5; }
+}
+
+int pacing_round_version(const int hp[3], int act, int round, int loop) {
+	if (loop > 0) return 1;
+	int lo, hi;
+	pacing_round_band(act, round, &lo, &hi);
+	return act >= 3 && hp[1] >= lo && hp[1] <= hi ? 1 : 0;
+}
+
+int pacing_xround_version(const int hp[4], int act, int round, int loop) {
+	if (loop > 0) return 2;
+	int lo, hi, best = -1;
+	pacing_round_band(act, round, &lo, &hi);
+	for (int v = 0; v <= 2; ++v) {
+		if (hp[v] < 0) continue;
+		best = v;
+		if (hp[v] >= lo) break;
+	}
+	return best < 0 ? 0 : best;
+}
+
+int pacing_xround_hp(int hp, int act, int round, int loop) {
+	if (loop > 0) return hp;
+	int lo, hi;
+	pacing_round_band(act, round, &lo, &hi);
+	return hp > hi ? hi : hp;
+}
+
 int pacing_older_acts(int depth, int out[PACING_OLDER]) {
 	int p = (depth - 1) % CYCLE_LAYERS, cycle = (depth - 1) / CYCLE_LAYERS, act = p >= 18 ? 6 : p / 3, n = 0;
 	/* (back from the act before, into the cycle before; never the Nest's,

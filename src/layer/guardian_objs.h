@@ -6,6 +6,7 @@
 
 #include "mapslot.h"
 #include "net.h"
+#include "run.h"
 #include "text.h"
 
 /* Event flags of the sequence, after the layer's choices (layer_objs.h). */
@@ -31,6 +32,12 @@ typedef struct {
 	 * the area's theme fading out, BN6's rumble (0xE3), the white's sound
 	 * (0x100) and Bass's going (0xD7) */
 	int fade, rumble, reveal, depart;
+	/* the tournament's bracket in his place (docs/game/tournament.md): its
+	 * Navis, the final his, and the scripts of its two rounds' Navi chips
+	 * (-1 none) */
+	bool bracket;
+	RunBracket rounds;
+	int round_prize[2];
 } GuardianStage;
 
 /* The song a guardian's prelude plays as he logs in: BN6's before a

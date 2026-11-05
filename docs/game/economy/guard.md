@@ -3,7 +3,7 @@ type: Design
 title: "The guard"
 description: "The guard against economy drift: `build.py economy` holding the plan in play to bands a fifth either side (`econ_band`), `test_economy`'s curve tests, the run log's counts, the run-end statistics event and AGENTS.md's checks row."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 ---
 
 # The guard
@@ -16,7 +16,11 @@ generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
    plan in play's (the opening one's) are outside: 0. Run it wherever
    drops, prices, Mystery Data, the dealers' stock or the levers change.
    A change that moves a number on purpose sets its band's centre in the
-   same commit, with the report's before and after in its message.
+   same commit, with the report's before and after in its message. A
+   run measured is a profile's past the Nest: the tournament's two rounds
+   pay their results screens and Navi chips where its coin puts a bracket,
+   and acts 3 to 5's chips and zenny were set with them on 5 November 2026
+   ([the tournament](../tournament.md), As built).
    `--economy-plan flat` plays a game under the flat plan, to set beside
    the one in play ([Dev tools](../../devtools/overview.md)).
 2. **The curves' tests.** `tests/test_core.c`'s `test_economy`: the

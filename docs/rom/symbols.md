@@ -103,11 +103,11 @@ how to verify it.
 | ROM, code or data not told | 464 | 582 | 94 |
 | RAM (variables, structures) | 137 | 65 | 38 |
 | I/O registers | 3 | 0 | 0 |
-| Fields of structures | 172 | 42 | 3 |
+| Fields of structures | 176 | 42 | 3 |
 | Event flags | 34 | 3 | 1 |
 | Values of fields | 113 | 16 | 3 |
 | Constants, sizes and counts | 522 | 272 | 240 |
-| All | 2051 | 1274 | 509 |
+| All | 2055 | 1274 | 509 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -118,7 +118,7 @@ how to verify it.
 | Battle | 562 | 368 | 166 |
 | Text and fonts | 42 | 7 | 3 |
 | Sound | 19 | 25 | 14 |
-| Maps and the overworld | 131 | 41 | 21 |
+| Maps and the overworld | 135 | 41 | 21 |
 | Events and progress | 54 | 19 | 10 |
 | Engine core | 808 | 588 | 276 |
 

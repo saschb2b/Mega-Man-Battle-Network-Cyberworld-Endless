@@ -47,7 +47,7 @@ static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
-		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route }, { "glitch", &dev.glitch },
+		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "tourney", &dev.tourney },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
 		{ "feel", &dev.feel }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
@@ -97,6 +97,7 @@ void devtools_parse(const char *spec) {
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
 	run_debug_glitch = dev.glitch;
+	run_debug_bracket = dev.tourney;
 }
 
 void devtools_veteran(void) {
