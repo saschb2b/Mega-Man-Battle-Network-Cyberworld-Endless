@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -20,8 +20,8 @@ moving BN4 Red Sun's eighteen Navis new to a run into BN6's battle engine
 takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
-and spawn). GutsMan is built and under proof ([GutsMan built](#gutsman-built),
-below). BN5's Navis moved as
+and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
+below); WindMan is derived and held ([WindMan under way](#windman-under-way)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -407,6 +407,68 @@ MB, 15 refused in 2 of 3 runs (maps' mirror images, `area_src.c`), as
 him: his install writes the core's copy alone, not the heap.
 
 Then: the next Navi.
+
+## WindMan under way
+
+The third in the order: two companions of one kind set out at his spawn and
+the families' dying. `tools/xnavirecipe_bn4.py` derives him whole (no
+decision open; its init's reading in `tools/xnavirecipe_bn4_init.py`), and
+`src/emu/xnavi_bn4.c` holds his recipe, but held from the install
+(`xnavi_bn4_held`, the generator's `HELD`): with his companions set out,
+BN6's battle never reaches its fight. His numbers by his seat: BN6's Navi
+AI 50, ids 0x388-0x38B, his battle sprite at list 2 0x42. The control
+holds: BN4's battle with WindMan V1 alone against MegaMan idle (2000 HP),
+fought twice, is the same at every one of 1200 fight frames
+(`tests/xdiff/bn4_windman_control.json`, PASS). What he adds over GutsMan,
+each read in both games' code ([BN4 Red Sun's tables](../rom/bn4.md),
+WindMan derived):
+
+- **His own flinch and paralysis** (his table's 3 and 4): each ends his wind
+  (his object's +0x60, `BN4_WINDMAN_WIND`) and runs BN4's generic Navi
+  state of its place; walked as his own in BN6's place of that state, the
+  tail paired with BN6's Navi flinch and paralysis (`tools/bn4_twins.py`,
+  audited).
+- **His dying**, the families' (`BN4_DYING`), BN4's Navi dying without its
+  step before (a sound, +5 cleared): BN6's Navi object's dying stands in, as
+  for every Navi (his jump table is BN6's). No spec reaches it.
+- **His collision's flags** (`BN4_SET_FLAG`'s 0x30): BN6's struct2 flags 6,
+  which BN6's actor init turns into the same flags and the region 0x10 his
+  init passes.
+- **His palette**, `BN4_NAVI_PALETTE`'s step 2 (BN4's by +4: 2, 4, 2, 4):
+  BN6's actor init gives a Navi's V1-V3 palette 0 whatever its step
+  (`0x0800F334`, its table `0x0800F354`): an interim, unread against the
+  comparator.
+- **His wind**: his decision spawns the fourth kind's 0x41 of his side where
+  his +0x60 holds none (`BN4_WIND_SPAWN`), BN6's of the same steps
+  (`BN6_WIND_SPAWN`), its slot BattleState +0x88 in BN4 and +0xC0 in BN6
+  (`BN4_WIND_SLOTS`, `BN6_WIND_SLOTS`); BN6's also gives the wind its
+  spawner at +0x4C.
+- **His companions**, the first kind's 0x5C (`BN4_COMPANION`), kinds 2 and 3
+  by his init's two calls of its spawner (`BN4_COMPANION_SPAWN`), each one's
+  +0x60 the address of his +0x60, his +0x64 the second: the type moved with
+  him (its block walked from its routine, the dispatch's first-kind 0xE0),
+  its kinds' sprites copied (`BN4_COMPANION_KINDS` in `bn4_twins.TABLES`),
+  and his init's spawns made again by a companion start of his home
+  (`XnCompanion`, `xnavi_install.c` `companions_set`: the project's own
+  Thumb, BN6's Navi init calling it where it calls a Navi's companion). Its
+  state 4's first step (`BN4_COMPANION_AURA`, drawn again through BN4's
+  tile buffer) is kept as BN4's raw bytes, unported: its init takes it only
+  where the battle state's +0x32 lacks bit 0 and its settings' +6 has
+  0x20, assumed none of a plain battle.
+- **His sounds past 0xFF named by a `movs` and an `adds` of 0xFF** (0x126,
+  0x133): the `movs` given the pool's slot (0x63, 0xD0), the `adds` 0.
+
+**`windman_v1`** (WindMan V1 alone at (5,2) against MegaMan idle at (2,2)
+with 2000 HP, 1200 fight frames, `rng=replay`, lag 1, as `gutsman_v1`) is
+written but not yet in `tests/xdiff`: with his companions BN6's battle stops
+before its fight (game state 0x0C, battle phase 0, 7800 frames), so the run
+fails and gives no frame to compare; the cause, his companion start or the
+moved 0x5C in BN6's opening, is not yet found. With the companions left out
+(an experiment, not kept) the battle runs and parts at t1: the companions
+missing, and two of the wind's fields to settle, its +0x38 a pointer into
+each game's slot (BattleState +0x8C against +0xC4, a map the comparator's
+battle state lacks) and its +0x4C (BN4 0, BN6 WindMan). No mutation of his
+port is written while no spec of his runs.
 
 ### Battle sprites by battle, planned
 

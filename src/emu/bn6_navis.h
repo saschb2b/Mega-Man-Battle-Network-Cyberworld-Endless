@@ -56,6 +56,7 @@
 #define BN6_NAVI_HELD_REF     0x080B05E8u /* the held chips' (BN6_HELD_CHIPS_REF's triple): the Navis' lists' words at 0x080B067C */
 #define BN6_NAVI_COMPANION_REF 0x08010E10u /* the routine a Navi's companion begins by (BN6_AI_HOOKS_REF's triple): words at 0x08010EA4 */
 #define BN6_NAVI_COMPANION_END_REF 0x08011060u /* ... the one it ends by (BN6_AI_HOOKS2_REF's): words at 0x080110F4 */
+#define BN6_NAVI_NO_COMPANION 0x080114D5u /* the empty companion's start and end (mov pc, lr; BN6_AI_HOOKS' words), a BN4 Navi's with none */
 #define BN6_NAVI_HIDE_REF     0x0801146Cu /* the routine an attack of a Navi's hides its companion's overlay by, a word an AI (BN6_NAVIS):
                                              words at 0x08011470, read by AIData +1 for an actor type not 0 (0x08011450, from attack
                                              families' first steps; BN5's 0x0800F114, its words BN5_NAVI_HIDE) */
@@ -157,5 +158,9 @@
 #define BN6_HP_PLATE_SIZE     0x14        /* ... each this long: +0 its flags (bit 0 listed), */
 #define BN6_HP_PLATE_SHOWN    0x02        /* ... u16 the HP it shows, counted toward the object's a frame at a time, */
 #define BN6_HP_PLATE_OBJECT   0x0C        /* ... its object */
+
+/* A side's wind (the fourth kind's 0x41; BN4's WindMan's, docs/multirom/bn4-navis.md, WindMan under way) */
+#define BN6_WIND_SPAWN        0x080E666Cu /* spawned where the side's slot holds none of level 1 on: BN4_WIND_SPAWN's steps, its +0x4C its spawner */
+#define BN6_WIND_SLOTS        0xC0        /* BattleState +0xC0 + 4 x side: a side's wind, its level 8 past it (0x080E675A, 0x080E677C) */
 
 #endif

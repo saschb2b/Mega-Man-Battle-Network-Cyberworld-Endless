@@ -168,6 +168,54 @@ static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	table[7] = (f->home + place) | 1u;
 }
 
+/* its companions (XNavi.companions) set out by a companion start of its home, past its collision's shim (the project's own
+ * Thumb), as its game's init sets them out: for each, r4 its kind and its spawner called (mov lr,pc; bx r0: it returns by
+ * pop {pc}, Thumb on the GBA's ARMv4T), then where it spawned one the companion's +link_at given the Navi's address +
+ * link_from and the Navi's +keep_at given the companion; the routine BN6's Navi init calls for its companion
+ * (BN6_NAVI_COMPANION_REF's word at its AI), which must be the empty one; 0 where it fails */
+#define COMPANION_SHIM_MAX 0x60
+static uint32_t companions_set(const XNavi *n) {
+	const XVirusFamily *f = &n->code;
+	const uint32_t place = (XV_HOME_SHIMS + xvirus_shims_room(f) + 8u + 3u) & ~3u;
+	if (xv_move_ref(n->companion) != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its companions"); return 0; }
+	if (n->ncompanions > 4 || place + COMPANION_SHIM_MAX > XV_HOME_VENEERS) { xv_fail("no room in its home for its companions"); return 0; }
+	uint16_t h[COMPANION_SHIM_MAX / 2];
+	int k = 0;
+	h[k++] = 0xB510;   /* push {r4, lr} */
+	int lits[4];
+	for (int i = 0; i < n->ncompanions; ++i) {
+		const XnCompanion *c = &n->companions[i];
+		const int stores = (c->link_at ? 3 : 0) + (c->keep_at ? 1 : 0);
+		if ((c->link_at | c->keep_at) & 3 || c->link_at > 0x7C || c->keep_at > 0x7C) { xv_fail("its companion's words off a word"); return 0; }
+		h[k++] = (uint16_t)(0x2400u | c->kind);   /* movs r4,#kind */
+		lits[i] = k;
+		h[k++] = 0x4800;                          /* ldr r0,[pc,#lit] (its offset below) */
+		h[k++] = 0x46FE;                          /* mov lr,pc */
+		h[k++] = 0x4700;                          /* bx r0 */
+		h[k++] = 0x4200;                          /* tst r0,r0 */
+		h[k++] = (uint16_t)(0xD000u | (unsigned)(stores ? stores - 1 : 0));   /* beq past the stores */
+		if (c->link_at) {
+			h[k++] = (uint16_t)(0x2100u | c->link_from);                /* movs r1,#link_from */
+			h[k++] = 0x1949;                                            /* adds r1,r1,r5 */
+			h[k++] = (uint16_t)(0x6001u | (unsigned)(c->link_at / 4) << 6);   /* str r1,[r0,#link_at] */
+		}
+		if (c->keep_at) h[k++] = (uint16_t)(0x6028u | (unsigned)(c->keep_at / 4) << 6);   /* str r0,[r5,#keep_at] */
+		if (!stores) h[k++] = 0x46C0;   /* (nop: the beq's place past none) */
+	}
+	h[k++] = 0xBD10;   /* pop {r4, pc} */
+	if (k & 1) h[k++] = 0x46C0;
+	const uint32_t pool = place + 2u * (uint32_t)k, size = pool + 4u * (uint32_t)n->ncompanions - place;
+	if (size > COMPANION_SHIM_MAX) { xv_fail("its companions' shim past its room"); return 0; }
+	uint8_t *p = xv_put(f->home + place, size, true);
+	for (int i = 0; p && i < n->ncompanions; ++i) {
+		const uint32_t at = f->home + place + 2u * (uint32_t)lits[i], lit = f->home + pool + 4u * (uint32_t)i;
+		h[lits[i]] = (uint16_t)(0x4800u | (lit - ((at + 4u) & ~3u)) / 4u);
+		put32(p + (pool - place) + 4u * (uint32_t)i, xv_move_ref(n->companions[i].spawner) | 1u);
+	}
+	for (int i = 0; p && i < k; ++i) put16(p + 2 * i, h[i]);
+	return p ? (f->home + place) | 1u : 0;
+}
+
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi
  * words */
 static void records_set(const XNavi *n, const Game *g) {
@@ -201,7 +249,7 @@ static void records_set(const XNavi *n, const Game *g) {
 	const uint8_t ice = (uint8_t)f->ice;
 	if (!xv_failed()) xn_set(XN_T_ICE, (uint32_t)f->ai, &ice);
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);
-	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, xv_move_ref(n->companion));
+	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, n->ncompanions ? companions_set(n) : xv_move_ref(n->companion));
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION_END, (uint32_t)f->ai, xv_move_ref(n->companion_end));
 	if (!xv_failed()) xn_set_word(XN_T_HIDE, (uint32_t)f->ai, xv_move_ref(n->hide));
 }

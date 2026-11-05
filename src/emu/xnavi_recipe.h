@@ -111,6 +111,12 @@ typedef struct { uint32_t at, at2; uint16_t song; } XnSound;
  * sprites, or BN6's own): its list and number */
 typedef struct { uint32_t masks, masks_at, crc; uint16_t masks_len; uint8_t kind, list, number; } XnOverlay;
 
+/* A companion its game's init sets out at its spawn where BN6's Navi init has none to (BN4's WindMan's two; docs/multirom/
+ * bn4-navis.md, WindMan built): its game's spawner of it (its own code, moved with it) called with r4 its kind, then the
+ * companion's +link_at given the Navi's address + link_from (0 0 none) and the Navi's +keep_at given the companion (0 none),
+ * as its init does; all made again, in order, by a companion start of its home (xnavi_install.c) */
+typedef struct { XvRef spawner; uint8_t kind, link_from, link_at, keep_at; } XnCompanion;
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -132,6 +138,9 @@ typedef struct {
 	int nneeds;
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
+	const XnCompanion *companions;   /* the companions its init sets out, its companion start a shim of its home that spawns them
+	                                    (its .companion BN6's empty one), NULL none */
+	int ncompanions;
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in
