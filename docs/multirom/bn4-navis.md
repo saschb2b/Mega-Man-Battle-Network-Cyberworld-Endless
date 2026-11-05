@@ -309,8 +309,18 @@ the frame). What took it there, one root cause at a time:
 
 **At t265**, the first object his attack spawns, BN4's third-kind 0x1C
 (the dispatch's 0xE6), parts on +0x3C (BN4 a pointer to the battle state,
-BN6 3), +0x93, +0x9E and +0xB8, fields the engine routines its code calls
-write: the next unit, read in both games' routines it calls.
+BN6 3), +0x93, +0x9E and +0xB8. Read so far: +0x3C is the spawn's r3,
+which his spawner (`0x080D0894`: `push {r0,r1,r2,r5}`, `movs r0,#0x1c`,
+the spawn) never sets: BN4's spawn (`0x08003210`) stores r1-r3 at +0x34,
++0x38, +0x3C and r4 at +4, so each game keeps its caller's leftover
+register there (BN4's the battle state's pointer, BN6's 3), and no code of
+the object reads it, the kind of difference the comparator's
+`spawn_leftovers` explains for BN5's moved types (its rule to take BN4's
+battle-state leftover). +0x93, +0x9E and +0xB8 are its sprite state, the
+slot's last occupant's (its init and update set up no sprite), which the
+BN5 comparator marks as such (`Obj.leftover`, from the spawn and sprite
+events) and the BN4 one does not yet. Both are comparator work, in their
+own commits; the next unit.
 
 The attack's end's clear of his AI data's +9, +0xA, +0xB, +0x30 and +0x32
 (`BN4_ATTACK_END_CLEAR`, copied with BN4's offsets) is not settled: in
