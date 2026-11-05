@@ -1,0 +1,20 @@
+{
+  "about": "BN4 Red Sun's ThunderMan V1 (BN4's enemy 0x94, a Soul Navi with a companion his init sets out, the first-kind 0x33) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against his move into BN6's engine as a Navi of BN6's Navi object (BN6's 0x394, Navi AI 53; src/emu/xnavi_bn4.c, installed after BN4's families), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, his recipe's among them; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "94@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1,
+  "verdict": {
+    "is": "FAIL",
+    "at": 1,
+    "why": "the port under way (docs/multirom/bn4-navis.md, ThunderMan built): his companion (the first-kind 0x33, NameID 0 in both games) is read as MegaMan's second object in BN4's trace (the comparator's BN4 rule, xdiff_snap.py nid: enemy id 0 is MegaMan) and as NameID 0 in BN6's, so the run order parts at t1; his cloud (the third kind's 0x6A, the companion's) its counts and sprite place a step apart at t1 (+0x3A 5 | 6, +0x9A 0x55 | 0x56), and panel 5,1's +0x17 (BN4 0x40 | BN6 0) unread"
+  }
+}

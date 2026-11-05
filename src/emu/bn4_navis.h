@@ -105,5 +105,28 @@
 #define BN4_PAUSE_BYTE    0x080078ECu /* the battle's pause byte ([eToolkit +0x40] +9) in r0 (BN6_PAUSE_TEST's twin, flags unset) */
 #define BN4_T3_1A_KINDS   0x080D013Cu /* the third kind's 0x1A's kinds (FireMan's), 6 bytes each, its sprite's list 4 number first */
 #define BN4_FIREMAN_MASKS 0x080F1DB4u /* panels' masks by side his MegaMan state 0x080F1D98 reads (BN4_RANDOM_PANEL_MASKS' words) */
+/* ThunderMan, the second (tools/xnavirecipe_bn4.py, its companion's machinery tools/xnavirecipe_bn4_companion.py; docs/multirom/
+ * bn4-navis.md, ThunderMan built) */
+#define BN4_THUNDERMAN    0x080C37F4u /* his type's routine: jump table init 0x080C3819, update 0x080C388D, dying BN4_NAVI_DYING; his block
+                                       * to 0x080C3AF0; his init runs his update once at its end (0x080C387C), BN6's actor init none */
+#define BN4_THUNDERMAN_STATES 0x080C38A4u /* his state table: BN4's generic Navi 0 and 2-5, his own 1 (0x080C38CD: a call of BN4's generic
+                                       * 1 alone), his decision 6 (0x080C38D5), MegaMan's 85-87 as his 7-9 */
+#define BN4_THUNDERMAN_COMPANION 0x080C3D84u /* r0 its +0x2C, r1 its version: the first-kind 0x33 spawned (its +0x4C the Navi), called
+                                       * by his init after the collision setup (0x080C3874) with r0 0x14 << 16 | its byte of
+                                       * BN4_THUNDERMAN_DAMAGE by his version (+4), r1 his version */
+#define BN4_THUNDERMAN_DAMAGE 0x080C3888u /* ... 4 bytes: 20, 40, 60, 80 by version */
+#define BN4_THUNDERCLOUDS 0x080C3AF0u /* the first kind's 0x33 (his companion): jump table init 0x080C3B15, update 0x080C3B41, dying
+                                       * BN4_DYING; its variables from +0x70; it spawns the third kind's 0x6A (0x080DAC24) */
+#define BN4_THUNDERCLOUD  0x080DAA90u /* the third kind's 0x6A (the companion's), its block to 0x080DAC54 */
+/* The engine's routines ThunderMan's code reaches that the families' pairs lack */
+#define BN4_CAN_MOVE_KIN  0x0800AD54u /* BN4_CAN_MOVE's body (0x0800AD2A) with the flags' mask 0x1040 (its literal 0x0800B12C) */
+#define BN4_PANEL_BREAK   0x08009BF0u /* r0, r1 a panel: broken (type 1) where no occupant's flag (0x0F0A0080) is set, else cracked
+                                       * (type 3, 0 back), sound 0x95; BN6's twin 0x0800CA8C (BN6_PANEL_BREAK, audited) */
+#define BN4_SIDE_COUNT_DOWN 0x08007990u /* BattleState +4 + its side less one (BN4_DYING's); BN6's twin 0x0800A10C, the same body */
+#define BN4_FLAG_1187_TEST 0x080406A4u /* its event flag 0x1187 (0x0802509C on eToolkit +0x48's flags); paired by the symbol map with
+                                       * BN6's battle_isPaused (0x0800A03C), audited as an interim */
+#define BN4_PAUSED_BLINK  0x0801466Au /* an object blinked (+0 bit 2 by the clock) while [BattleState +0x3C]+6 has 0x20; called while
+                                       * the battle is not running; BN6's place a nullsub (0x0801BE28), audited as an interim */
+#define BN4_NUDGE_X       0x080D97F8u /* r0: its +0x36 moved by r0 toward its side's front (+0x16); a leaf of the third kind's 0x69 */
 
 #endif

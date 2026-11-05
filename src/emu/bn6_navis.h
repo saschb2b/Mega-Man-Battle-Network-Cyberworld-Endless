@@ -157,5 +157,14 @@
 #define BN6_HP_PLATE_SIZE     0x14        /* ... each this long: +0 its flags (bit 0 listed), */
 #define BN6_HP_PLATE_SHOWN    0x02        /* ... u16 the HP it shows, counted toward the object's a frame at a time, */
 #define BN6_HP_PLATE_OBJECT   0x0C        /* ... its object */
+/* What a BN4 Navi's companion and objects ask of BN6 (docs/multirom/bn4-navis.md, ThunderMan built) */
+#define BN6_COMPANION_BEGIN   0x08010DD0u /* r5 an actor: its companion begun by its id's triple (0x08010DDA: the table at
+                                             BN6_NAVI_COMPANION_REF's by actor type and AI index, r2 0, called by mov lr,pc and bx r0) */
+#define BN6_ACTOR_COMPANION_CALL 0x08017064u /* ... BN6's actor init's call of it, after its collision set up */
+#define BN6_NAVI_PALETTE_VERSIONS 0x0800F354u /* the actor init's palette (0x0800F334) for a Navi: this table's byte by its version (AI data
+                                             +0x16) times its step, 0 for versions 0-3 */
+#define BN6_PANEL_BREAK       0x0800CA8Cu /* r0, r1 a panel: broken (type 1) where no occupant's flag (0x0F880080) is set, else cracked
+                                             (type 3), sound 0x97, 1 back (BN4_PANEL_BREAK's twin) */
+#define BN6_SIDE_COUNT_DOWN   0x0800A10Cu /* BattleState +4 + its side less one (BN4_SIDE_COUNT_DOWN's twin, the same body) */
 
 #endif

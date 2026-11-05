@@ -38,6 +38,7 @@ import bn4_navis as N  # noqa: E402
 import bn4_twins  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
+import xnavirecipe_bn4_companion as C  # noqa: E402
 
 ROOT = X4.ROOT
 WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
@@ -45,7 +46,7 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
-NAVIS = ((0x0A, 'GutsMan', 132), (0x0C, 'FireMan', 144))
+NAVIS = ((0x0A, 'GutsMan', 132), (0x0C, 'FireMan', 144), (0x32, 'ThunderMan', 148))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -624,7 +625,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.megaman = [k for k, x in enumerate(f.own, 6) if N.PLAYER <= x & ~1 < N.PLAYER_END]
     f.state_entries = {x & ~1 for x in f.own}
     f.s1 = X4.struct1_of(b4, f, f.init)
-    navi_init(f)
+    C.companion_of(b4, f, navi_init(f))
     if f.s1['palette'] is not None:
         f.decisions = [d for d in f.decisions if not (d[0] == 'struct1' and d[1].endswith('gives no palette the generator reads'))]
     del f.walks[f.init]
@@ -632,11 +633,12 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     saved = dict(bn4_twins.COPIED)
     bn4_twins.COPIED.update(NAVI_COPIED)
+    bn4_twins.COPIED.update(C.COPIED)
     try:
         roots = [x & ~1 for x in f.own] + f.roots
         while roots:
             X4.walk_code(b4, f, roots, {f.type_table, f.st} | set(UNWALKED_TABLES), pairs)
-            roots = sorted(callbacks(b4, f) - set(f.walks))
+            roots = sorted((callbacks(b4, f) | C.copied_entries(f)) - set(f.walks))
     finally:
         bn4_twins.COPIED.clear()
         bn4_twins.COPIED.update(saved)
@@ -670,6 +672,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     navi_art(b4, b6, f, alloc)
     companion_art(b4, f, alloc)
     sprite_tables(b4, f, alloc)
+    C.list5_sprites(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
@@ -677,6 +680,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     try:
         X4.sounds_of(b4, b6, f)
         table_sounds(b4, b6, f)
+        C.wide_movs(f, pool)
         wide_sounds(f)
     finally:
         X4.SOUND_SLOTS.clear()
@@ -988,6 +992,7 @@ def c_navi(f):
     if f.sound_calls:
         arrays += f'static const XvSoundCall {n}_sound_calls[] = {{\n' + ''.join(
             f'\t{{ 0x{c["at"]:08X}, 0x{c["slot"]:X} }},   /* {c["why"]} */\n' for c in f.sound_calls) + '};\n'
+    arrays += C.c_companion(f, n)
     L = [head, rebase(arrays), '', f'static const XNavi bn4_{n} = {{', '\t.code = {', f'\t\t.name = "{f.name} (BN4\'s)",',
          '\t\t.game = XROM_BN4_RED_SUN_US,', f'\t\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */',
          f'\t\t.ai = {f.ai},', f'\t\t.first_id = XN_BN4_FIRST_ID + 0x{f.first_id - BN4_NAVI_ID0:X},',
@@ -1016,6 +1021,8 @@ def c_navi(f):
     L += ['\t},', f'\t.versions = {VERSIONS},', f'\t.prestep = BN6(0x{PRESTEP6:08X}), .hook_a = BN6(0x{NULLSUB_NAVI6:08X}),',
           f'\t.companion = BN6(0x{NO_COMPANION6:08X}), .companion_end = BN6(0x{NO_COMPANION6:08X}), .hide = BN6(0x{NO_COMPANION6:08X}),',
           '\t.sprite_of = -1,   /* (its battle sprite its recipe\'s first: list 2 at its seat\'s number, XNAVI_SPRITE_BN4) */']
+    if getattr(f, 'companion4', None):
+        L.append(f'\t.companion4 = &{n}_companion,   /* (its companion begun by a shim of its home: xnavi_install.c companion4_set) */')
     if f.coll_arg:
         L.append(f'\t.coll_arg = 0x{f.coll_arg:02X},   /* (its init\'s collision setup\'s r3, BN6\'s actor init\'s {COLL_ARG6:#x}: the hit bits '
                  f'its body gives, read alike by both games\' pre-steps) */')
@@ -1054,6 +1061,7 @@ def main():
     alloc = families_alloc(b4, b6, pairs)
     alloc.code, alloc.code_end, alloc.art, alloc.art_end, alloc.room = ROOM_CODE, ROOM_ART, ROOM_ART, SPRITE_ROOM, 'the proposed room'
     alloc.battle_place = battle_sprite_place
+    C.install(pairs)
     navis = [derive(b4, b6, pairs, ty, name, first, alloc) for ty, name, first in NAVIS]
     text = c_file([f for f in navis if not f.decisions])
     if a.check:
