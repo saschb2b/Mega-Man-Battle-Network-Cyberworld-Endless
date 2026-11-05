@@ -118,4 +118,17 @@
                                        * 10-19 at or below; bits 14-15 0 a chip, its id and code << 9, 1 zenny, 2 HP); 0x080F5F40's literal */
 #define BN4_BUSTING_TABLE 0x0801881Du /* the busting levels' rows of 16 entries' offsets (BN6's 0x08020B9C), read at 0x080F59D6 */
 
+/* What GutsMan's attack reaches of the engine (docs/rom/bn4.md, GutsMan's attack against BN6's engine): the camera's shake,
+ * the battle state's players, the rocks' debris */
+#define BN4_CAMERA_SHAKE  0x08025FE0u /* the shake each frame (BN6's 0x080301E8): two draws of GetRNG (BN4_RNG_PRIMARY's; BN6's of its */
+#define BN4_SHAKE_DRAW_X  0x0802600Cu /* ... second word) masked by BN4_SHAKE_TABLE into the camera's x (+0x38, BN6's +0x3C), then */
+#define BN4_SHAKE_DRAW_Y  0x08026032u /* ... its y (+0x3C, BN6's +0x40) */
+#define BN4_SHAKE_TABLE   0x08026068u /* ... 8 bytes a strength (mask, centre), the same 32 bytes as BN6's 0x08030284 */
+#define BN4_CAMERA_SHAKE_SET 0x0802608Cu /* its strength r0 and frames r1 into the camera's +0xE and +0xC (BN6's 0x080302A8, the same body) */
+#define BN4_BATTLE_PLAYERS 0x44       /* BattleState +0x44: MegaMan's side's player object, then the other side's, a word each
+                                       * (BN4_FIND_PLAYER's reads; BN6 keeps one a side 0x10 apart from +0xD0, BN6_BATTLE_PLAYERS) */
+#define BN4_T4_DEBRIS     0x09        /* the fourth kind's 0x09, a rock's debris: its spawner BN4_SPAWN_DEBRIS (r6, r7 its speeds into */
+#define BN4_SPAWN_DEBRIS  0x080E29F8u /* ... +0x40, +0x48; BN6's 0x080E23C0, the same bytes but the spawn's bl), its init */
+#define BN4_DEBRIS_INIT   0x080E2934u /* ... setting up sprite list 4 0x0E (0x080E2942), BN6's twin 0x080E22FC its own list 4 5 */
+
 #endif

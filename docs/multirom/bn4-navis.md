@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -208,7 +208,8 @@ what a Soul Navi has more:
   `adds` or a `movs` and `adds` (`movs r6,#0x64; adds r6,r6,r7`): +0x64 is
   BN6's +0x80 (`BN6_AI_NAVI_STATE`), +0x70 BN6's +0xA0. The attack's end's
   clear (`BN4_ATTACK_END_CLEAR`) writes +9, +0xA, +0xB, +0x30 and +0x32 out
-  of them, copied with its offsets (an interim, below).
+  of them, copied with its offsets (read and settled as inert on a Navi's
+  AI data, below).
 - **The engine's routines** with no BN6 body copied with him: the state set
   and the attack's end, the free panels of a side, one of them at random, a
   panel of his side at random (the callback his decision hands his step) and
@@ -219,8 +220,8 @@ what a Soul Navi has more:
   and one the dispatch's spawner.
 - **His numbers**: seat (V1 id - 128) / 4, AI 48 + seat, ids 0x380 + 4 x
   seat, past every family's ids; his home, code and art in BN4's Navis' own
-  room (`FREE_BN4_NAVIS`, `EMU_FREE + 0x720000` to FREE_LIB_TEAM: the
-  owner's call of 5 November 2026); his battle sprite at list 2 0x40 + seat
+  room (`FREE_BN4_NAVIS`, `EMU_FREE + 0x720000` to `FREE_BRACKET`, BN4's
+  bracket screen's room past it: the owner's call of 5 November 2026); his battle sprite at list 2 0x40 + seat
   (`XNAVI_SPRITE_BN4`, GutsMan's 0x41); his palette 0 for every version
   (`BN4_NAVI_PALETTE`'s step 0, as BN6's actor init gives a step of 0); his
   objects' list 3 sprite copied into list 4, its load's list offset made
@@ -250,9 +251,19 @@ what a Soul Navi has more:
   at another's. One battle holds one BN4 Navi, so Duo's 10 bound it (the
   measured most of one); the binding count is of sounds named by one
   `movs` or a byte, which only five slots take: TopMan and VideoMan name
-  six so, one short, the owner's to settle (a third of the themes' slots,
-  or one of theirs played as BN6's song of its number), and why 0x32 and
-  0x33 stay the pool's.
+  six so, one short, and why 0x32 and 0x33 stay the pool's. The owner's
+  call of 5 November 2026 settles it: such a sound whose slot is past
+  0xFF plays through a shim of its 16-bit number. Its design, not built
+  yet (no Navi derived so far needs it): a `movs r0` and its call to
+  PlaySound, the call aimed at a shim of the Navi's home (`XV_HOME_SHIMS`)
+  that loads the slot into r0 and branches on to the PlaySound veneer the
+  call had, as a NameID range's shim loads BN6's bounds (`XvRange`,
+  `xvirus_shim_range`); a table's byte read by a shared play (GutsMan's
+  third kind 0x1E's kinds), the byte made the sound's index in a short
+  list of the shim's that maps it to its slot, the play's call aimed at
+  that shim. The proof: a spec of a Navi with such a sound, or GutsMan's
+  pool given in another order for a run, its sounds paired at their high
+  slots.
 - **His arm points** (`BN6_ARM_POINTS` reads a list 2 number's record): BN4
   has none to bring, as far as a search reaches: no routine of BN5's arm
   points' body (`0x08015140`, BN6's `0x08018810`) in BN4's first MB,
@@ -317,29 +328,73 @@ cause at a time:
    is the slot's last occupant's (it sets up no sprite), now compared from
    its sprite's set-up on in BN4's comparator as in BN5's (`leftovers`).
 
-It is the same from t1 to t265 and FAILS at t266, recorded: a frame after
-his attack shakes the screen (`0x0802608C`, BN6's `0x080302A8` the same
-body: the shake's strength and frames at the toolkit's +0xC's +0xE and
-+0xC), his sprite state's screen place (+0x9C, +0x9E, +0x9F) takes each
-engine's shake offset, BN4's 0, -1, +2, -1, 0, +2 against BN6's 0, +1, +2,
--1, 0, +1: each game's shake applies its own pattern by frame. The next
-unit: the shake's per-frame routine read in both games (its pattern a
-table or a draw), then fixed where the port's is wrong or allowed where
-each engine's is its own (MegaMan's sprite moves with it too).
+6. **The screen's shake** (t266): his attack shakes the camera
+   (`BN4_CAMERA_SHAKE_SET`, `0x0802608C`, BN6's `0x080302A8` the same
+   body), and every sprite's screen place takes its offset. The shake each
+   frame is the same code in both (`BN4_CAMERA_SHAKE` `0x08025FE0`, BN6's
+   `0x080301E8`: two draws masked by the same table, `0x08026068` and
+   `0x08030284`), but BN4 draws from its first RNG word (GetRNG
+   `0x08001B00`) and BN6 from its second (`0x0800154C`), as BN5 does
+   against BN6. Not the port's: the comparator pairs the two draws as it
+   pairs BN5's (legit.json's bn4 rng_twins, with their word), and the
+   shake is the same in both.
+7. **A cracked panel's flags of the last frame** (t266): his attack cracks
+   panel 1,1, and each game's field step (BN4 `0x08009240`, BN6
+   `0x0800BFC4`) stores a cracked panel's flags after its update, BN4's at
+   +8 (`BN4_PANEL_FLAGS_LAST`), BN6's at +0x18 (`BN6_PANEL_FLAGS_LAST`,
+   which its update `0x0800C404` reads: a cracked panel left by what stood
+   on it breaks). A field the trace's map lacked, now mapped
+   (`src/dev/xdiff_bn4_trace.c`).
+8. **Sounds**: the panel crack's (BN4 0x95, BN6 0x97, each played by the
+   twin crack routines) and his copies at the pool's slots (0xA2 at 0x32,
+   0xA3 at 0x33, 0xA7 at 0xE0) paired by the routines that play them
+   (legit.json's bn4 sounds).
+9. **His rocks** (t295): his attack's object drops a rock on the panel of
+   the other side's player and two on free panels shuffled. It reads that
+   player inline from the battle state (`0x080D06C4`: [eToolkit +0x18]
+   +0x44 + 4 x (its side ^ MegaMan's ^ 1)); BN4 keeps the players a word
+   each from +0x44 (`BN4_BATTLE_PLAYERS`, MegaMan's side's first, as
+   `BN4_FIND_PLAYER` reads them), BN6 one a side 0x10 apart from +0xD0
+   (`BN6_BATTLE_PLAYERS`). The port's: the generator gives the index's
+   shift and base BN6's (`tools/xnavirecipe_bn4.py` battle_players: `lsls
+   #4`, `adds #0xD0`), which is the side wanted where MegaMan's side is 0,
+   as in every battle a BN4 Navi is fought in (none a NetBattle's). The
+   comparator then read a pointer into the rocks' sprite as the sprite
+   before it in BN4's ROM, whose copy's room (rounded up) reaches past its
+   end: a pointer is now the sprite's whose start is nearest below it.
+10. **The rocks' debris** (t361): each landing rock spawns four of the
+    fourth kind's 0x09 (twin spawners, `BN4_SPAWN_DEBRIS` and
+    `BN6_SPAWN_DEBRIS`), whose inits differ only in the sprite they set
+    up: BN4's list 4 0x0E (its rocks', which GutsMan's recipe copies as
+    0xCA for his rocks), BN6's list 4 5 (its own rock art). Each engine's
+    own art, allowed on its sprite state alone (legit.json's bn4 allowed,
+    "the rock's debris, each engine's own art"), as the hit's spark is.
 
-The attack's end's clear of his AI data's +9, +0xA, +0xB, +0x30 and +0x32
-(`BN4_ATTACK_END_CLEAR`, copied with BN4's offsets) is not settled: in
-BN6's AI data +9 is `BN6_AI_HP_BUG` (a player's HP bug's count, read by
-`0x08010230` for MegaMan alone), and +0xA, +0xB, +0x30 and +0x32 are not
-in the map. The one BN6 routine of the clear's shape (`ldr r3,[r5,#0x58]`,
-`movs r0,#0`, its stores), `0x08012EA8`, clears +0x1B, +0x1D and +0x1E and
-calls `0x0800FFEE`: a lead for the same fields at BN6's offsets, not read
-through. The spec has not reached an attack's end yet.
+**`gutsman_v1` PASSes** over its 1200 frames (his step, decision, machine
+gun, rocks and their debris, the cracked panel, his sounds), its recorded
+verdict removed. Five mutations break the port and each is caught: a
+CurAction off by one (t1), his AI block at BN4's +0x64 (t1), his attack's
+sound at another pool slot (t267), his collision argument BN6's 3 (t1) and
+his rocks' player read at BN4's +0x44 (t295); with the rest, 186 of 186.
 
-Then: t266 at its root and each divergence after, the spec worked to PASS,
-its recorded verdict removed, mutations that break the port (a CurAction,
-an AI data block, a sound's slot) each caught, and `tools/heap3ds.py` with
-BN4 present.
+**The attack's end's clear, read**: BN4's AI data +9, +0xA, +0xB, +0x30 and
++0x32 are MegaMan's buster charge (`0x0800BB52`-`0x0800BB7A`: +0x30 and
++0x32 the chip charge's and the shot's counts against the cached times at
++0x34 and +0x36, their levels into +0xA and +0xB; +9 read with his keys at
+`0x0800BBDA`), which a Soul Navi's attack's end clears because he runs
+MegaMan's states. BN6 keeps a player's charge elsewhere (+0x1B, +0x1D,
++0x1E, cleared by its own `0x08012EA8`), and its code reads AI data +9,
++0xA, +0xB and +0x32 only for a player (a search of every `ldr rX,[r5,#0x58]`
+and the ten instructions after it in BN6's first 1.1 MB: +9 the HP bug's
+count, `0x08010254`-`0x0801028E`, and +0xA, `0x080102DC`, both through
+`BN6_SIDE_PLAYER_GET`, which never returns a Navi; +0xB `0x08013DEA` and
++0x32 `0x08014442`-`0x0801445E` in the player's step), none +0x30. On a
+Navi's own AI data the clear writes zeros nothing reads, and GutsMan's code
+reads none of them (the generator's AI tracker): it stays copied with BN4's
+offsets, settled as inert. A Navi whose code reads them would need them
+mapped.
+
+Then: `tools/heap3ds.py` with BN4 present, and the next Navi.
 
 ### Battle sprites by battle, planned
 
@@ -365,7 +420,7 @@ holds any one of them decompressed. The plan, as the sounds' pool:
    event (`EV_BATTLE_START`) does; the differential's BN6 run sets up its
    battle the same way.
 
-Not built: GutsMan's sprite stays resident (60 KB of the 320 KB art room)
+Not built: GutsMan's sprite stays resident (60 KB of the 256 KB art room)
 until it is.
 
 ### Room for all eighteen, measured
@@ -374,9 +429,10 @@ Measured by the generator's walk of all eighteen (their recipes mostly
 open but GutsMan's, so the counts approximate the others'): their code and
 their objects' 0x18D52 bytes (about 100 KB); their battle sprites 0xAF000
 (700 KB, each rounded to 4 KB: GutsMan's and Duo's 60 KB, TopMan's 20 KB);
-their attacks' art 0x1D800 (118 KB). The room (512 KB) holds the code in
-its 128 KB and the attacks' art, but not the battle sprites: 320 KB of art
-holds about five of them. The rest would need their battle sprites loaded
+their attacks' art 0x1D800 (118 KB). The room (448 KB since BN4's bracket
+screen took its last 64 KB, `FREE_BRACKET`) holds the code in its 128 KB
+and the attacks' art, but not the battle sprites: 256 KB of art holds
+about four of them. The rest would need their battle sprites loaded
 by battle as their sounds are, into a shared room of a few sprites (the
 Navis a battle or a tournament's day holds), from the player's ROM: BN6's
 battle preload already copies a battle's compressed sprites into its

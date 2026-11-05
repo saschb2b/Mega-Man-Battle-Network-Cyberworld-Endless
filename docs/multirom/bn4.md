@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -591,4 +591,11 @@ sounds take from the themes' range are the owner's to confirm.
    built). Of them only five are at or below 0xFF (0x32, 0x33, 0x63,
    0xD0, 0xE0), which a sound its code names by one `movs` or a byte
    needs, so the themes' top two stay the pool's: TopMan and VideoMan
-   name six sounds so, one more than the pool holds.
+   name six sounds so, one more than the pool holds. **The owner's call
+   of 5 November 2026 for those:** a Navi's sound named by a single
+   `movs` or a table's byte whose pool slot is past 0xFF is routed
+   through a small shim that plays its 16-bit number, so every sound
+   plays right and no theme slot is lost; built in the recipe, for any
+   BN4 Navi. Not built yet (GutsMan's five sounds take the five low
+   slots): its design in [BN4's Navis in BN6's engine](bn4-navis.md),
+   GutsMan built, His sounds.

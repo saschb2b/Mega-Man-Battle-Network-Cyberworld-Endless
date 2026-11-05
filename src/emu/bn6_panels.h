@@ -77,6 +77,8 @@
 #define BN6_PANEL_COORDS      0x0800E276u /* panel (r0 column, r1 row) as the screen's x and y, 16.16, in r0 and r1 */
 #define BN6_PLACE_JITTER      0x0801BDDEu /* (r1, r3) moved by a random amount in r0's range, a random number drawn (0x0800151C) */
 #define BN6_SPAWN_SPARK       0x080E1C00u /* the fourth kind's type 4, the spark a buster shot strikes with, at (r1, r2, r3), r4 its parameter, r5 its owner */
+#define BN6_SPAWN_DEBRIS      0x080E23C0u /* the fourth kind's 9, a rock's debris (BN4_SPAWN_DEBRIS's twin); its init 0x080E22FC sets up */
+#define BN6_DEBRIS_SPRITE     0x080E230Au /* ... sprite list 4 number 5 (movs r2,#5), BN6's own rock art, where BN4's sets up 0x0E */
 #define BN6_BATTLE_FLAGS      (BN6_BATTLE_STATE + 0x32) /* u16, BN6_TIME_STOP while time is stopped (bn6f's test 0x0800A098, from 0x0800A2F0) */
 #define BN6_TIME_STOP         4           /* BN6_BATTLE_FLAGS: time stopped (a Navi chip's) */
 
