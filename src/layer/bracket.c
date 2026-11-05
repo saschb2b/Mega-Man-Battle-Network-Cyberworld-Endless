@@ -11,7 +11,6 @@
 #include "rom.h"
 #include "xbracket.h"
 #include "xguardian.h"
-#include "xguardian_bn4.h"
 
 /* A BN6 or BN5 Navi's plate on BN4's screen: XBR_PLATE_NAVI(n), the faces
  * composed for it at install (src/emu/xbracket_faces.c;

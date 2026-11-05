@@ -14,10 +14,8 @@
 
 #include "xvirus_recipe.h"
 
-/* Whether a recipe's sprite is a BN4 Navi's battle sprite in the room: then his install points his list 2 entry at it and
- * lists his sprite (xnavi_bn4_room_list), and copies nothing */
-bool xnavi_bn4_room_sprite(const XvSprite *s);
-/* At a BN4 Navi's install, staged (xvirus_tx.h): his battle sprite (`f`'s first, BN4's list 2) checked to fit the room in
+/* At a BN4 Navi's install, staged (xvirus_tx.h), his battle sprite (`f`'s first, BN4's list 2) at the room (XN_BN4_SPRITE,
+ * its whole size: the families' sprites_set copies none there and points his list 2 entry at it): checked to fit the room in
  * the player's BN4 ROM (`rom`, its sprite lists at `lists`), his BN4 number listed at his seat; the step failed (xv_fail)
  * where it does not fit or his seat is listed already */
 void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lists);

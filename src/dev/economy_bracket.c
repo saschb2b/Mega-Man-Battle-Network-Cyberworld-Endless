@@ -7,7 +7,6 @@
 #include "run.h"
 #include "save.h"
 #include "xguardian.h"
-#include "xguardian_bn4.h"
 
 int economy_bracket_rounds(int depth, int biome, Encounter enc[2], int chip[2], int code[2]) {
 	/* (a profile past the Nest's: where the coin puts a bracket for one,

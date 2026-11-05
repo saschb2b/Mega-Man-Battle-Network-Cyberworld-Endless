@@ -18,7 +18,6 @@
 #include "xchips.h"
 #include "xfields.h"
 #include "xnavi.h"
-#include "xnavi_bn4_room.h"
 #include "xvirus_bn4.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
@@ -576,9 +575,9 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 static void sprites_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->nsprites && !xv_failed(); ++i) {
 		const XvSprite *s = &f->sprites[i];
-		/* (a BN4 Navi's battle sprite: the room the battles share, filled for his battle, xnavi_bn4_room.h) */
-		if (xnavi_bn4_room_sprite(s)) {
-			xnavi_bn4_room_list(f, g->rom, g->sprite_lists);
+		/* (a BN4 Navi's battle sprite: the room the battles share, filled for his battle, its entry pointed at it alone; his
+		 * install lists his sprite and checks it fits, xnavi_bn4_room.h) */
+		if (s->at == FREE_BN4_NAVI_SPRITE) {
 			xg_set_word(XG_LIST + xvirus_list_slot(s->to_list), s->to_index, s->at);
 			continue;
 		}

@@ -28,7 +28,6 @@
 #include "rivals.h"
 #include "save.h"
 #include "xguardian.h"
-#include "xguardian_bn4.h"
 
 #define WALK_NEAR   52   /* world units from the guardian MegaMan walks up to, where he has no place beside him */
 #define WALK_FRAMES 100  /* his steps up to a guardian, at most */

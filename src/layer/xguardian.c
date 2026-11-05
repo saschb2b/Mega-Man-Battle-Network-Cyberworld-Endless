@@ -36,12 +36,12 @@ bool xguardian_fightable(int navi) {
 	return true;
 }
 
-Encounter xguardian_encounter(int navi, int version) {
+/* (a moved Navi's battle: his BN6 id `id` at `version`; none where -1) */
+static Encounter moved_encounter(int id, int version) {
 	Encounter e = { 0 };
 	e.biome = run.biome;
 	e.from_pick = -1;
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
-	int id = xguardian_id(navi, version);
 	if (id < 0) return e;
 	const uint8_t *t = enemy_triple(id);
 	e.boss = true;
@@ -51,6 +51,20 @@ Encounter xguardian_encounter(int navi, int version) {
 	 * engine's family his AI index there) */
 	e.foes[0] = (Foe){ FOE_NAVI, t ? t[2] : 0, version, 4, 1, id };
 	return e;
+}
+
+Encounter xguardian_encounter(int navi, int version) { return moved_encounter(xguardian_id(navi, version), version); }
+
+bool xguardian_bn4_fightable(int navi) {
+	int v1 = xguardian_bn4_v1(navi);
+	for (int v = 0; v1 >= 0 && v < 4; ++v)
+		if (xnavi_bn4_id(v1 + v) < 0) return false;
+	return v1 >= 0;
+}
+
+Encounter xguardian_bn4_encounter(int navi, int version) {
+	int v1 = xguardian_bn4_v1(navi);
+	return moved_encounter(v1 >= 0 && version >= 0 && version <= 3 ? xnavi_bn4_id(v1 + version) : -1, version);
 }
 
 int xguardian_hp(int navi, int version) {

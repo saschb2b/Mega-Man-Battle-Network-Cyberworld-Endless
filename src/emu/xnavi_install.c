@@ -10,11 +10,11 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
-#include "claims.h"
 #include "data.h"
 #include "emu.h"
 #include "rom.h"
 #include "xchips.h"
+#include "xnavi_bn4_room.h"
 #include "xnavi_bn4_sounds.h"
 #include "xnavi_bn5.h"
 #include "xnavi_objects.h"
@@ -412,6 +412,13 @@ static bool ready_for(const XNavi *n) {
 	return true;
 }
 
+/* A BN4 Navi's own, staged: his songs in the pool (xnavi_bn4_sounds.h), his battle sprite listed for the room the battles
+ * share (xnavi_bn4_room.h) */
+static void bn4_set(const XNavi *n, const Game *g) {
+	if (!xv_failed()) xnavi_bn4_songs_set(&n->code, n->versions);
+	if (!xv_failed()) xnavi_bn4_room_list(&n->code, g->rom, g->lists);
+}
+
 bool xnavi_install(const XNavi *n) {
 	const XVirusFamily *f = &n->code;
 	for (int i = 0; i < ninstalled; ++i)
@@ -430,7 +437,7 @@ bool xnavi_install(const XNavi *n) {
 		if (!xv_failed()) families_set(n);
 		xv_move_art();
 		sounds_set(n);
-		if (g.bn4 && !xv_failed()) xnavi_bn4_songs_set(f, n->versions);
+		if (g.bn4) bn4_set(n, &g);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xnavi: %s not installed: %s\n", f->name, xv_why());
