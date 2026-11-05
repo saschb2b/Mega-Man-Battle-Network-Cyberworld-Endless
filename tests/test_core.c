@@ -1062,6 +1062,58 @@ static void test_battler(void) {
 	run = before;
 }
 
+/* The run's extras switched off (docs/game/meta/extras.md): no Glitch
+ * warp, no bracket, and a layer without its Virus Battler the layer with
+ * him but for him; the tournament's acts where the owner's calls of 5
+ * November 2026 place them (docs/game/tournament.md) */
+static void test_extras(void) {
+	Run before = run;
+	int best = profile.best_depth, glitches = 0, shorts = 0, brackets = 0, dropped = 0;
+	for (uint32_t s = 1; s <= 600; ++s) {
+		memset(&run, 0, sizeof run);
+		run.seed = s * 2654435761u;
+		run.mode = s % 2 ? RUN_SHORT : RUN_ENDLESS;
+		int glitch = 0, held[3] = { 0 };
+		for (int d = 1; d <= 2 * CYCLE_LAYERS; ++d) glitch = run_glitch_at(d) ? d : glitch;
+		profile.best_depth = 9;
+		for (int d = 1; d <= 2 * CYCLE_LAYERS; ++d) CHECK(!run_bracket_at(d), "seed %u: a bracket on layer %d before the Nest was reached", (unsigned)s, d);
+		profile.best_depth = 10;
+		for (int d = 1; d <= 2 * CYCLE_LAYERS; ++d) {
+			if (!run_bracket_at(d)) continue;
+			int loop = (d - 1) / CYCLE_LAYERS, act = (d - 1) % CYCLE_LAYERS / 3;
+			CHECK(run.mode == RUN_SHORT ? !loop && act == 2 : act >= 2 && act <= 4, "seed %u: a bracket in act %d of cycle %d", (unsigned)s, act + 1, loop + 1);
+			CHECK(!glitch || (glitch - 1) / 3 != (d - 1) / 3, "seed %u: a bracket in the Glitch layer's act", (unsigned)s);
+			if (loop < 3 && (d - 1) % 3 == 0) ++held[loop];
+		}
+		if (run.mode == RUN_SHORT) { ++shorts; brackets += held[0]; }
+		else CHECK(held[1] == 1, "seed %u: %d brackets in the endless net's second cycle", (unsigned)s, held[1]);
+		run.extras_off = 1 << EXTRA_GLITCH | 1 << EXTRA_TOURNEY;
+		for (int d = 1; d <= 2 * CYCLE_LAYERS; ++d) {
+			CHECK(!run_glitch_at(d), "seed %u: a Glitch warp on layer %d with the Glitch layer off", (unsigned)s, d);
+			CHECK(!run_bracket_at(d), "seed %u: a bracket on layer %d with the tournament off", (unsigned)s, d);
+		}
+		glitches += glitch != 0;
+		/* (a Battler's layer made with him and without: the same but for him) */
+		run.extras_off = 0;
+		for (int d = 4; d <= 13 && dropped < 12 && s % 7 == 0; d += 3) {
+			if (!layer_battler(d, LAYER_NORMAL)) continue;
+			static NetObj with[MAX_OBJS];
+			layer_generate(run.seed ^ (uint32_t)d, d, biome_for_depth(d), LAYER_NORMAL, &kit);
+			int n = 0;
+			for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type != OBJ_BATTLER) with[n++] = layer.obj[i];
+			run.extras_off = 1 << EXTRA_BATTLER;
+			layer_generate(run.seed ^ (uint32_t)d, d, biome_for_depth(d), LAYER_NORMAL, &kit);
+			run.extras_off = 0;
+			CHECK(layer.nobj == n && !memcmp(with, layer.obj, (size_t)n * sizeof *with), "seed %u, layer %d: more than the Battler changed without him", (unsigned)s, d);
+			++dropped;
+		}
+	}
+	CHECK(brackets * 100 >= shorts * 30 && brackets * 100 <= shorts * 55, "brackets in %d short nets of %d, not about five in twelve", brackets, shorts);
+	CHECK(glitches > 0 && dropped == 12, "%d Glitch layers, %d Battlers' layers made without him", glitches, dropped);
+	profile.best_depth = best;
+	run = before;
+}
+
 static void test_layer_make(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
@@ -6652,6 +6704,7 @@ int main(void) {
 	test_layer_make();
 	test_fork_read();
 	test_glitch();
+	test_extras();
 	test_layouts_build();
 	test_identity();
 	test_arrivals();

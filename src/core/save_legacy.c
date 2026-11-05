@@ -23,6 +23,7 @@
 #define RUN_MAGIC_V7 0x43574537u /* "CWE7" */
 #define RUN_MAGIC_V8 0x43574538u /* "CWE8" */
 #define RUN_MAGIC_V9 0x43574539u /* "CWE9" */
+#define RUN_MAGIC_VA 0x43574541u /* "CWEA" */
 
 typedef struct {
 	bool active;
@@ -134,6 +135,16 @@ static bool load_v9(void) {
 	Run v;
 	if (!save_read_blob_upto("run.sav", RUN_MAGIC_V9, &v, sizeof v) || !v.active) return false;
 	v.route_found = v.route_way = 0;
+	v.extras_off = 0;
+	run = v;
+	return true;
+}
+
+/* (every extra on, as runs were) */
+static bool load_va(void) {
+	Run v;
+	if (!save_read_blob_upto("run.sav", RUN_MAGIC_VA, &v, sizeof v) || !v.active) return false;
+	v.extras_off = 0;
 	run = v;
 	return true;
 }
@@ -176,7 +187,7 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if (load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
+	if (load_va() || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

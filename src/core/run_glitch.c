@@ -14,7 +14,7 @@ bool run_debug_glitch;
 bool run_glitch_at(int depth) {
 	if (depth <= 3 || depth > CYCLE_LAYERS || (depth - 1) % 3) return false;
 	int act = (depth - 1) / 3, acts = run.mode == RUN_SHORT ? 2 : 4;
-	if (act > acts) return false;
+	if (act > acts || !run_extra(EXTRA_GLITCH)) return false;
 	if (run_debug_glitch) return true;
 	uint32_t h = (run.seed ^ 0x474C5443u) * 2654435761u;   /* "GLTC" */
 	if ((h >> 8) % 3) return false;

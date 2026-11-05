@@ -36,12 +36,16 @@ const char *summary_library(char *buf, size_t n, int count, int added) {
 	return buf;
 }
 
-const char *summary_helpers(char *buf, size_t n, const char *names) {
-	snprintf(buf, n, "HELP: %s", names);
+const char *summary_band(char *buf, size_t n, const char *helpers, const char *off) {
+	if (helpers && off) snprintf(buf, n, "HELP: %s  OFF: %s", helpers, off);
+	else if (helpers) snprintf(buf, n, "HELP: %s", helpers);
+	else snprintf(buf, n, "OFF: %s", off ? off : "");
 	return buf;
 }
 
-const char *summary_helpers_count(char *buf, size_t n, int on) {
-	snprintf(buf, n, "HELP: %d ON", on);
+const char *summary_band_count(char *buf, size_t n, int on, int off) {
+	if (on && off) snprintf(buf, n, "HELP: %d ON  OFF: %d", on, off);
+	else if (on) snprintf(buf, n, "HELP: %d ON", on);
+	else snprintf(buf, n, "OFF: %d", off);
 	return buf;
 }

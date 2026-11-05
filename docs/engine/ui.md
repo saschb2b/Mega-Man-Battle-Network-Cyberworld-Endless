@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -148,14 +148,17 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   one name between the arrows did not say there were other pages, nor
   which key turns them; Valhalla's tab row with its Q and E, Forza's LB
   and RB).
-- A section takes the band: the JACK-IN SETUP's helpers (its Help row
-  opens them, each On or Off as Options' lines).
-- The JACK-IN SETUP is Options' kin: its rows and their values in the
-  window, the row under the cursor in the information box (in three lines
-  at most, a folder still shut said only where its line fits whole),
-  JACK IN! at the list's foot as NaviCust's RUN! with the green triangle
-  before it, and what the last run opened marked NEW as E-Mail marks a
-  new mail (orange capitals over dark red, measured from it).
+- The JACK-IN SETUP is Options' kin (the owner's call, 5 November 2026):
+  its pages RUN, HELP and EXTRAS as Options' tabs (`look_tabs` draws
+  both), L and R between them, START:JACK IN on the band; each page's
+  rows and their values in the window, three in sight and the rest
+  scrolled, the helpers and the extras each On or Off as Options' lines;
+  the row under the cursor in the information box (in three lines at
+  most, a folder still shut said only where its line fits whole); NEXT at
+  each page's foot and JACK IN! at the last's, as NaviCust's RUN! with
+  the green triangle before it; and what the last run opened marked NEW
+  as E-Mail marks a new mail (orange capitals over dark red, measured
+  from it).
 - The run's summary is BN6's RESULT in two beats, as RESULT gives its
   record and then what it got, A turning from one to the next: RESULT
   (how the run ended and by whom in SubChip's flat panel, the layer

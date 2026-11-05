@@ -544,6 +544,7 @@ static void first_alone(Encounter *e) {
 bool loot_layer_nets(int biome, int tiles) {
 	loot_territory = loot_deep[0] = loot_deep[1] = -1;
 	loot_older_share = 0;
+	if (!run_extra(EXTRA_OLDER)) return false;   /* (a run without the older nets: BN6's own battles and finds, docs/game/meta/extras.md) */
 	if (biome == BIOME_UNDERNET || biome == BIOME_NEST) loot_deep[0] = xterritory_like(BIOME_UNDERNET);
 	if (biome == BIOME_GRAVEYARD || biome == BIOME_NEST) loot_deep[loot_deep[0] >= 0] = xterritory_like(BIOME_GRAVEYARD);
 	const NetAreaDef *a = tiles >= NET_AREAS ? net_area_def(tiles) : NULL;

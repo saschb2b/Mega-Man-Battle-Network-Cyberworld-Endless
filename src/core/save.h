@@ -129,6 +129,9 @@ typedef struct {
 	uint8_t folder_feats;
 	uint8_t recov_act;
 	uint32_t recov_run;
+	/* the extras the last run switched off (run.extras_off): the setup
+	 * starts from them */
+	uint16_t last_extras_off;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

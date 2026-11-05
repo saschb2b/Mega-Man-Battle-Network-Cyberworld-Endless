@@ -135,6 +135,14 @@ void look_choice(int x, int y);
  * 8 x 8 from (x, y), pointing right or left */
 #define LOOK_ARROW_W 8
 void look_arrow(int x, int y, bool right);
+/* A screen's pages as tabs over its list (Options', the JACK-IN SETUP's):
+ * STATUS's pills between the Library's green arrows with L and R at the
+ * row's ends, from `left` to `right`, the page `shown` lit as NaviCust's
+ * RUN!, each `names`' in a screen's heavy capitals; (x, y) the row's
+ * left end, `w` its width (docs/engine/ui.md) */
+#define LOOK_TABS_IN 18   /* the pills' row in from the row's ends, between the arrows */
+#define LOOK_TAB_GAP 3
+void look_tabs(int x, int y, int w, int count, int shown, const char *const *names);
 /* The PET's small arrow beside a value the d-pad turns (Options' lines, the
  * JACK-IN SETUP's rows), or a section's chevron: `size` pixels long,
  * pointing left or right from (x, y + 2) */

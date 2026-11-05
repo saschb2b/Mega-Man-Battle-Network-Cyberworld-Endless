@@ -3,7 +3,7 @@ type: Tool
 title: "build.py shot: a headless capture's options"
 description: "`build.py shot`'s options for a headless capture in the build image: the scenes, run depth, area, guardian, seed, setup and marks, `--talk`, scripted `--input` and `--taps`, and the frames saved."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
 ---
 
 # build.py shot: a headless capture's options
@@ -17,7 +17,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--scene launcher` the ROMs screen (the ROMs in `--rom-dir`; `--launcher auto`, `open` or `off` sets a start's own),
 `--scene saves` the SAVES screen,
 `--scene summary` the title's run summary (a win's with `--setup short` at
-`--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS]` the run's setup (CROSS the navi whose Cross it brings, 1-5),
+`--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS[,OFF]]` the run's setup (CROSS the navi whose Cross it brings, 1-5; OFF the extras switched off, a bit each: 1 Liberation, 2 Tournament, 4 Glitch, 8 Virus Battler, 16 DarkChips, 32 Older nets, [the extras](../game/meta/extras.md)),
 `--marks HEX` the title's marks, `--screen auto|whole|fill|stretch` the
 scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba|vba|nds|psp`,
 `--interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast` and

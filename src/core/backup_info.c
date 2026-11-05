@@ -28,9 +28,9 @@ static bool good_blob(const uint8_t *data, uint32_t size) {
 }
 
 static bool run_format(uint32_t magic, uint32_t size) {
-	/* ("CWE1" to "CWE9", then "CWEA") */
-	static const uint32_t sizes[] = { 0, 248, 56, 64, 0, 84, 88, 96, 100, 112, sizeof(Run) };
-	unsigned int c = magic & 255u, format = c >= '1' && c <= '9' ? c - '0' : c == 'A' ? 10 : 0;
+	/* ("CWE1" to "CWE9", then "CWEA" and "CWEB") */
+	static const uint32_t sizes[] = { 0, 248, 56, 64, 0, 84, 88, 96, 100, 112, 112, sizeof(Run) };
+	unsigned int c = magic & 255u, format = c >= '1' && c <= '9' ? c - '0' : c == 'A' ? 10 : c == 'B' ? 11 : 0;
 	if ((magic & 0xffffff00u) != (RUN_MAGIC & 0xffffff00u) || !format) return false;
 	return sizes[format] && size == sizes[format];
 }

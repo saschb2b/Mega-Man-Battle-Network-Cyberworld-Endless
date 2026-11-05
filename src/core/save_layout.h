@@ -15,9 +15,10 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
 
 
 /* (the profile grew at its end for issue #82, for the Virus Battler's
- * card and for the designed folders' milestones, read up to its size: an
- * older profile reads whole, the new fields zero) */
-_Static_assert(sizeof(Profile) == 228, "Profile save size changed");
+ * card, for the designed folders' milestones and for the extras the last
+ * run left out, read up to its size: an older profile reads whole, the new
+ * fields zero) */
+_Static_assert(sizeof(Profile) == 232, "Profile save size changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");
@@ -93,8 +94,9 @@ _Static_assert(offsetof(Profile, btlr_data) == 216, "Profile.btlr_data save offs
 _Static_assert(offsetof(Profile, folder_feats) == 220, "Profile.folder_feats save offset changed");
 _Static_assert(offsetof(Profile, recov_act) == 221, "Profile.recov_act save offset changed");
 _Static_assert(offsetof(Profile, recov_run) == 224, "Profile.recov_run save offset changed");
+_Static_assert(offsetof(Profile, last_extras_off) == 228, "Profile.last_extras_off save offset changed");
 
-_Static_assert(sizeof(Run) == 112, "Run save size changed");
+_Static_assert(sizeof(Run) == 116, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");
 _Static_assert(offsetof(Run, seed) == 4, "Run.seed save offset changed");
 _Static_assert(offsetof(Run, depth) == 8, "Run.depth save offset changed");
@@ -118,6 +120,7 @@ _Static_assert(offsetof(Run, clock) == 93, "Run.clock save offset changed");
 _Static_assert(offsetof(Run, back_spent) == 94, "Run.back_spent save offset changed");
 _Static_assert(offsetof(Run, home_depth) == 96, "Run.home_depth save offset changed");
 _Static_assert(offsetof(Run, job) == 98, "Run.job save offset changed");
+_Static_assert(offsetof(Run, extras_off) == 112, "Run.extras_off save offset changed");
 
 _Static_assert(sizeof(Rival) == 20, "Rival save size changed");
 _Static_assert(offsetof(Rival, met) == 0, "Rival.met save offset changed");

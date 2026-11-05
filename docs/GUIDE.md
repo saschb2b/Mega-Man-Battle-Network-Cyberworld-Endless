@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
 ---
 
 # The player's guide
@@ -846,7 +846,7 @@ it pays one of BN6's GigaChips.
 - **BeastOut.** Beat the Cybeast at the endless net's own Nest, and
   BeastOut joins the Custom screen for the rest of the run; the
   Graveyard's guardian only stirs the beast. Once the Cybeast has fallen
-  in any run, the setup's Help row can bring BeastOut from the first
+  in any run, the setup's HELP page can bring BeastOut from the first
   battle instead, in either net.
 - **Chips.** Mystery Data, shops and traders draw from the whole chip
   library by rarity: Megas deeper down and, rarely, a Giga. Green Mystery
@@ -872,7 +872,10 @@ it pays one of BN6's GigaChips.
 ### What carries over
 
 MegaMan starts every run as strong as the first time: what runs leave
-behind is options. From the second run, NEW GAME opens a setup:
+behind is options. From the second run, NEW GAME opens a setup in three
+pages, RUN, HELP and EXTRAS: L and R turn them, NEXT at a page's foot
+goes on to the next, JACK IN! at the last's starts the run, and START
+starts it from any page. RUN holds:
 
 - **Net:** the short net, or the endless net once a short one is won.
 - **Folder:** BN6's starting folder, or one opened in any run: Blade
@@ -889,11 +892,19 @@ behind is options. From the second run, NEW GAME opens a setup:
   Servers, Mystery Data of chips only, half the Chip Traders, drafts of two
   programs, four HPMemory a guardian, a second guardian below the short
   net's Nest), each opened by winning on the one below.
-- **Help:** A on the row opens the helpers, each on or off: two more
-  HPMemory at the start, a heal on every layer, gentler battles, and All *: every chip of the run in *, the wildcard, so any five
-  go in a hand and every Program Advance forms from its chips in order.
-  Once the endless net's own Nest has fallen, a fifth: BeastOut from the
-  first battle. Helped runs count for everything.
+HELP holds the helpers, each on or off: two more
+HPMemory at the start, a heal on every layer, gentler battles, and All *: every chip of the run in *, the wildcard, so any five
+go in a hand and every Program Advance forms from its chips in order.
+Once the endless net's own Nest has fallen, a fifth: BeastOut from the
+first battle. Helped runs count for everything.
+
+EXTRAS holds what the run adds to BN6, each on or off, all on unless you
+switch one off: Liberation (BN5's Liberation Missions on a dark layer),
+Tournament (three Navis in a row in act 3's arena, not in runs yet),
+Glitch (the rare Glitch layer), Virus Battler, DarkChips (the flames of
+darkness) and, where another game's ROM is read, Older nets (its areas,
+Navis and viruses in BN6's net). A run keeps what it was started with,
+counts for everything, and its summary names what was off.
 
 The BtlrCard carries over too: the viruses on it (Mettaur and Gunner, and
 each Rare virus deleted in any run, BN6's "You got new Virus Data") are
@@ -1412,7 +1423,7 @@ project page's:
 | When | What is sent |
 | --- | --- |
 | The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, PS5, the browser...), the version and the screen's size |
-| A run begins | its setup (net, folder, Cross, threat, helpers), whether BN5 joins, and how many runs you finished before |
+| A run begins | its setup (net, folder, Cross, threat, helpers, the extras switched off), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |
 | ... and beside it, what the run chose | won or lost, the layer, net and threat, the trips back home, how many requests were taken, kept and vowed, the orders made at AsterLand, the NaviCust drafts left for their BugFrags, the Undernet's and dark layers entered, ProtoMan's duels and netbattles taken and won, the folder's edits between layers, the Virus Battlers' series begun, rounds fought on after a win and pots taken, and the seconds on the net's maps against those in battle |

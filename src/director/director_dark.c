@@ -77,7 +77,7 @@ void dark_flame_setup(void) {
 	layer_objs_dark_does = "";
 	D.dark_kind = -1;
 	D.dark_given = false;
-	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1 || !run_extra(EXTRA_DARKCHIPS)) return;
 	bool five = D.layer_tiles >= NET_AREAS && dark_bn5_plays();
 	/* (DarkPlus by BN5's flame alone, where BN5's code plays it: the
 	 * owner's call of 13 October 2026; BN6's US DarkPlus does nothing) */

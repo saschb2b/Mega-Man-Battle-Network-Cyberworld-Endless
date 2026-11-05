@@ -154,7 +154,7 @@ void set_encounter(const Encounter *e, bool force) {
 	if (emu_debug_on()) {
 		fprintf(stderr, "encounter field %02x player %02x:", e->field, e->player);
 		for (int i = 0; i < e->nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e->foes[i].kind, e->foes[i].family, e->foes[i].version, e->foes[i].col, e->foes[i].row);
-		fprintf(stderr, "\n");
+		fprintf(stderr, "%s\n", e->visitor ? " visitor" : "");
 	}
 	if (force) emu_battle_force(e);
 	else emu_encounter_set(e);
@@ -354,6 +354,20 @@ static bool dark_again(int *tiles, int biome, LayerKit *kit) {
 	return netmap_build_layer(*tiles, run.layer_seed);
 }
 
+/* (what of the run's extras the layer holds, in the debug log: an
+ * autopilot run's check that one switched off never comes,
+ * docs/game/meta/extras.md) */
+static void extras_log(int tiles) {
+	int glitch = 0, battler = 0;
+	for (int i = 0; i < layer.nobj; ++i) {
+		glitch += layer.obj[i].type == OBJ_GLITCH;
+		battler += layer.obj[i].type == OBJ_BATTLER;
+	}
+	fprintf(stderr, "layer extras: off %d dark %d bracket %d glitch %d battler %d flame %d older area %d guardian %d\n", run.extras_off, layer.dark,
+		run.side_kind == LAYER_NORMAL && run_bracket_at(run.depth), glitch, battler, D.dark_kind >= 0, tiles >= NET_AREAS,
+		guardian_older(run_layer_guardian()));
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome(), tiles = layer_area(&biome);
 	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles, biome);
@@ -376,6 +390,7 @@ static bool build_layer(void) {
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over, their bystanders) */
+	if (emu_debug_on()) extras_log(tiles);
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */
