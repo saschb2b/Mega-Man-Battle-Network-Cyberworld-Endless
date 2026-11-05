@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:12:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -957,6 +957,24 @@ format, its game 4: the trace's header names it):
   data holds the pressed UP in one and not the other (PASS). Two BN5
   specs, `cangard_v1` and `handi_v1`, PASS as before, their traces the
   same byte for byte.
+- **The BN4 trace for a Navi** (`bn4_gutsman_control`): BN4's GutsMan V1
+  (BN4's 0x84, a Soul Navi) alone at (5,2) against MegaMan idle at (2,2)
+  with 2000 HP, fought twice: 1200 fight frames the same in every byte
+  (PASS), his objects from t265 and his machine gun's shots every 11
+  frames in them. A Navi's object carries an AI data of its own (his
+  side's, BN4's 0xC0 bytes), which the trace lays out as MegaMan's: the
+  attack's variables (+0x70) at BN6's +0xA0, the bytes no part names
+  from BN6's spare (+0xF0) on. Before `gutsman_v1` compares his move into
+  BN6's engine ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  GutsMan derived) the trace and `tools/xdiff_bn4.py` need, each in a
+  comparator commit of its own: a Navi's own block (BN4's +0x64, 12
+  bytes, `BN4_AI_NAVI`) at BN6's +0x80, where his port keeps it, checked
+  against MegaMan's AI data in the families' specs, which share the
+  layout; his object type (BN4's own 0x0A against BN6's Navi object, type
+  0 of the first kind, by his enemy id's triple, actor type 1); his
+  CurActions by his table (BN4's 6-10 BN6's 8-12, MegaMan's 67-70 among
+  them as his 7-10); and the virus masks (`BN4_LACKS`: a virus's AI data
+  and its pointer) left off a Navi, whose AI data both games keep.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and

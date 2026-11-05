@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:12:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -20,7 +20,8 @@ moving BN4 Red Sun's eighteen Navis new to a run into BN6's battle engine
 takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
-and spawn). Nothing is built. BN5's Navis moved as
+and spawn). GutsMan is derived, not yet built ([GutsMan derived](#gutsman-derived),
+below). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -179,6 +180,72 @@ a panel's data, a subsystem's byte), and 24 have no twin or one of another body:
 BN4's families call 71 engine routines with no twin; six of the Navis' 24
 are among them. The first BN4 Navi ports these 24 once, or each Navi the
 ones it calls, as the order above reaches them.
+
+## GutsMan derived
+
+`tools/xnavirecipe_bn4.py` derives a BN4 Navi's recipe from the two ROMs,
+GutsMan first, its report in `.build/xnavirecipe/bn4_report.md`. It walks him
+as `tools/xrecipe_bn4.py` walks a family (its functions reused: his block, the
+third-kind objects he spawns moved with him, each call paired by
+`tools/bn4_twins.py`), and what a Soul Navi has more:
+
+- **His place in BN6**: a Navi of BN6's one Navi object, by his AI index in
+  the grown Navi tables, as BN5's Navis run. BN6's Navi status dispatcher
+  (`0x0801AF44`) loads r6 and r7 from +0x54 and +0x58 before a state, as
+  BN4's Navi runner does; BN6's virus dispatcher (`0x0801B1C4`) loads r6
+  alone, so a Soul Navi cannot run as a family. BN6's Navi generic states
+  0-7 open his table, his decision (6) is BN6's 8 and MegaMan's 67-70 his
+  9-12.
+- **MegaMan's states** walked in MegaMan's block and copied as routines,
+  with what they reach: the callbacks they pass (`0x080F077D`, `0x080F0783`,
+  `0x080F07D1`) and the tables past their pools, 956 bytes.
+- **His AI data's blocks** as BN6 lays them out: a register tracker from the
+  runner's r7 and each +0x58 load finds every pointer into it, made by an
+  `adds` or a `movs` and `adds` (`movs r6,#0x64; adds r6,r6,r7`): +0x64 is
+  BN6's +0x80, +0x70 BN6's +0xA0 (7 immediates). The attack's end's clear
+  (`BN4_ATTACK_END_CLEAR`) writes +9, +0xA, +0xB, +0x30 and +0x32 out of
+  them, copied with its offsets (an interim, BN6's meaning of them unread).
+- **The engine's routines** with no BN6 body copied with him: the state set
+  and the attack's end, the free panels of a side, one of them at random, a
+  panel of his side at random (the callback his decision hands his step) and
+  its masks. Five new pairs, each body read: GetRNG, the status a hit gives,
+  a side's player (audited), the floor test and the panel crack (BN6's
+  object_crackPanel, audited: BN4's test of flag 0x20000 never holds on a BN6
+  panel). Of his 59 calls out, 35 are SAME, 7 LAYOUT, 16 DIFF (each audited)
+  and one the dispatch's spawner.
+- **His numbers** (a decision of the generator's): seat (V1 id - 128) / 4,
+  AI 48 + seat, ids 0x380 + 4 x seat, past every family's ids (GutsMan AI 49,
+  ids 0x384-0x387); his palette 0 for every version (`BN4_NAVI_PALETTE`'s
+  step 0, as BN6's actor init gives a step of 0); his objects' list 3 sprite
+  copied into list 4, its load's list offset made list 4's.
+
+The pipeline's control for a Navi holds: BN4's battle with GutsMan V1 alone
+against MegaMan idle (2000 HP), fought twice, is the same at every one of
+1200 fight frames (`tests/xdiff/bn4_gutsman_control.json`, PASS), his
+machine gun and his other objects in it ([The differential](../devtools/differential.md),
+The BN4 trace for a Navi).
+
+Seven decisions stay open, so no C file is written yet:
+
+1. **His room**: XN_MORE's four slots are the Darkloids'. Proposed: FREE_TAIL's
+   free bytes (`EMU_FREE + 0x720000` to FREE_LIB_TEAM), his home, code and
+   art; its region in `src/emu/free_space.h` and its installer to add. All
+   eighteen's art may not fit there (a battle sprite of tens of KB each).
+2. **His battle sprite** in BN6's Navis' list 2 at a number of its own, and
+   its arm points' record (`BN6_ARM_POINTS` reads a list 2 number's; BN4's
+   records unread): the Navis' numbering (`src/emu/xnavi_sprites.h`) to
+   extend for BN4's.
+3. **Four sounds** BN6 has no song of (0xA2, 0xA3, 0xA4, 0xA7) and no slot
+   left for them: BN4's families take all twelve of 0x34-0x3F. The owner's
+   call, as each BN4 sound's slot was.
+4. **A sound one of his objects plays** by a number its spawner passes
+   (`0x080D0B18`'s `ldrb r0,[r7,#4]`), to follow back to the states that
+   spawn it.
+
+Then the C file (`src/emu/xnavi_bn4.c`, an XNavi), a BN4 game in
+`xnavi_install.c` (no Navi tables: his records his four enemy records, his
+name from BN4's archive), the BN4 trace's map of a Navi's AI data and his
+object type in `tools/xdiff_bn4.py`, and `gutsman_v1` with its mutations.
 
 ## What tools/xnavirecipe.py needs for BN4
 
