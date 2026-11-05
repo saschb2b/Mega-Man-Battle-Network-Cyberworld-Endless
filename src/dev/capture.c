@@ -20,6 +20,7 @@
 #include "devtools.h"
 #include "director.h"
 #include "director_hold.h"
+#include "emu.h"
 #include "flags.h"
 #include "game.h"
 #include "netpass_screen.h"
@@ -30,11 +31,12 @@
 #include "screen_name.h"
 #include "soulproxy.h"
 #include "swap_dev.h"
+#include "xbracket.h"
 
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -70,6 +72,8 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "swap ", 5)) snprintf(s->swap, sizeof s->swap, "%s", tok + 5);
 	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
 	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
+	/* (BN4's bracket screen moved into BN6: xbracket.h) */
+	else if (!strncmp(tok, "bracket ", 8)) snprintf(s->bracket, sizeof s->bracket, "%s", tok + 8);
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
@@ -90,7 +94,7 @@ static bool text_step(const char *tok, InputStep *s) {
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
 		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0];
 }
 
@@ -199,6 +203,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->foes[0]) director_dev_foes(s->foes);
 	if (s->swap[0]) swap_dev_step(s->swap);
 	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
+	if (s->bracket[0]) xbracket_dev_step(s->bracket);
 	if (s->status[0]) director_dev_status(s->status);
 	if (s->chip[0]) director_dev_chip(s->chip);
 	if (s->folder) director_dev_folder(s->folder);
@@ -363,6 +368,9 @@ static int shot_count, screen_shot_count, second_shot_count;
  * number; --second-shot-range the second screen's alike (a clip of both) */
 typedef struct { uint64_t a, b; char prefix[200]; } Range;
 static Range range = { 1, 0, "" }, second_range = { 1, 0, "" };
+/* --watch ADDR:LEN: with --shot-range, these bytes of the core's memory after each frame of the range appended to
+ * PREFIX.w (romlab's watch: tools/xbracket.py aligns two games' frames by them) */
+static uint32_t watch_at, watch_len;
 
 static void parse_range(const char *spec, Range *r) {
 	unsigned long long ra = 0, rb = 0;
@@ -418,6 +426,10 @@ bool capture_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--taps")) parse_taps(v);
 	else if (!strcmp(a, "--shot-range")) parse_range(v, &range);
 	else if (!strcmp(a, "--second-shot-range")) parse_range(v, &second_range);
+	else if (!strcmp(a, "--watch")) {
+		unsigned at = 0, len = 0;
+		if (sscanf(v, "%x:%x", &at, &len) == 2 && len <= 0x400) { watch_at = at; watch_len = len; }
+	}
 #ifdef REMOTE_PLAY
 	else if (!strcmp(a, "--remote")) remote_dir = v;
 #endif
@@ -433,6 +445,16 @@ bool capture_start(void) {
 	return true;
 }
 
+/* the watched bytes appended to the range's PREFIX.w */
+static void watch_save(void) {
+	char path[220];
+	snprintf(path, sizeof path, "%s.w", range.prefix);
+	FILE *f = fopen(path, P.frame == range.a ? "wb" : "ab");
+	if (!f) return;
+	for (uint32_t i = 0; i < watch_len; ++i) fputc(emu_ready() ? emu_read8(watch_at + i) : 0, f);
+	fclose(f);
+}
+
 void capture_shots(void) {
 	for (int i = 0; i < shot_count; ++i)
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
@@ -441,7 +463,10 @@ void capture_shots(void) {
 	for (int i = 0; i < second_shot_count; ++i)
 		if (second_shots[i].frame == P.frame) platform_save_second_screen(second_shots[i].path);
 	char path[256];
-	if (range_path(&range, path, sizeof path)) platform_save_canvas(path);
+	if (range_path(&range, path, sizeof path)) {
+		platform_save_canvas(path);
+		if (watch_len) watch_save();
+	}
 	if (range_path(&second_range, path, sizeof path)) platform_save_second_screen(path);
 }
 

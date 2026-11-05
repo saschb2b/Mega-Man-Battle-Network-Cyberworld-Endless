@@ -1,9 +1,9 @@
 ---
 type: Research
 title: "BN4's tournament screens"
-description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run (BN4's own code on the guest core, or moved into BN6) measured, and the move recommended."
+description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, and the bracket moved into BN6 as its main mode 0x3C by a recipe, proved pixel for pixel against BN4's own."
 tags: [multirom, bn4, tournament, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -163,6 +163,86 @@ guest serves as its oracle, which is what the guest is kept for. In order:
 3. Until then, a bracket of BN6's and BN5's Navis has no BN4 presentation:
    which acts' brackets are BN4's Navis is the tournament's design's call
    (its numbers, [Battle Network 4 in a run](bn4.md), The tournament).
+
+## Moved into BN6
+
+The owner's call 6 ([The tournament](../game/tournament.md)) took way (b):
+BN4's bracket screen is moved into BN6 and runs there as a main mode of
+BN6's own, on every build the 3DS included, proved against BN4's own screen
+pixel for pixel.
+
+**How it was moved.** By a recipe of numbers, `src/emu/xbracket_bn4.c`,
+written by `tools/xrecipe_bracket.py` from both ROMs (`--check` says whether
+it is in step). The generator walks the screen from its roots
+(`BN4_BRACKET_SETUP`, `BN4_BRACKET_SCREEN` and its states,
+`BN4_BRACKET_PLATE`, the menu sprites' runner and spawn, the Free
+Tournament's two spawns) and takes its code with its literal pools, jump
+tables and the data it reads (the palette cycles' lists, `BN4_BRACKET_MAPS`,
+`BN4_MENU_SPRITE_TYPES`, the plates' byte tables) as blocks, each copied from
+the player's ROM at install with its CRC32 checked (`src/emu/xbracket.c`,
+through `xvirus_code_stage`, the virus families' own code mover). Its calls
+out:
+
+| Calls | How |
+| --- | --- |
+| 28 to BN6's routine of the same body | the project's pairs (`tools/bn4_twins.py`), the body search, a near-body search over BN6's mapped routines compared again (SAME): copies and fills, LZ77, BG maps, the sprite system, the fade, the palette cycle; the BG rect fill's veneer by its IWRAM routine (`BN4_BG_FILL_RECT` to BN6's `0x080018D0`: both games' IWRAM dumped in romlab, the same instructions; the body search alone took the copy's veneer, `0x080018C2`) |
+| 1 audited | the music's start (`0x08000568`, BN6's `0x080005D4`): BN4's song 0x09 copied into a BN6 slot by `src/audio/xsong.c` as the screen installs, its `movs r0,#9` given the slot |
+| 1 through a shim | `BN4_HBLANK_DMA_SET`: BN6's set (`BN6_HBLANK_DMA_SET`) takes a line buffer more |
+| 8 the host's | BN4's logic around the screen: the next opponent, the chat box twice, the script's return, the warp back, the map's re-entry, MegaMan's overworld lock, the map's OBJ palette |
+
+and three of BN4's engine routines moved with it, whose BN6 twins read other
+data: `BN4_MENU_SPRITE_SET` (BN6's reads BN6's sprite table),
+`BN4_BG_PRESETS_SET` (BN6's presets), the Free Tournament's spawns. Its 11
+reads of eToolkit +0x3C (BN4's tournaments; BN6 keeps its game state there,
+BN4's toolkit being BN6's from +0x3C shifted) are each made a call to a shim
+that loads the tournaments' place (each routine pushes lr, read). Its RAM is
+placed in `RAM_BRACKET`, which BN6's shop decompresses into as it runs while
+the map waits (`src/emu/free_space.h`); its RAM twins come from the paired
+bodies' literals (BN4's palette buffer `0x03002A50` is BN6's `0x03001960`,
+the palette cycles', the fade's). Its art (the tiles, palettes and six maps,
+`BN4_MENU_SPRITE_PTRS` 2-5: the lit lines' and the plates' sprites) is
+copied from the player's BN4 ROM into `FREE_BRACKET` at install; nothing of
+BN4's is in git.
+
+**Its host and entry.** BN6 Gregar's main mode 0x3C (`XBR_MODE`), empty in
+its table: the installer writes its entry. `xbracket_open(t, entrants)`
+(`src/emu/xbracket.h`) writes the eight entrants and the tournament into the
+moved RAM and makes a game call to `XBR_ENTER`, which leaves the map as BN6's
+shop does (`BN6_MAP_TO_SHOP`'s calls read from it in turn, its fade test
+skipped), then makes the calls `BN4_MAP_LEAVE` makes that BN6's way lacks
+(their twins; `BN4_BG_PRESETS_SET` with the bracket's preset 0x13; DISPCNT
+0x40), runs BN4's set-up and enters the mode. A, B or START fades it out;
+the leave's return writes BN6's game mode with its map entered again
+(`BN6_SUB_ENTER`). The mode's routine (`XBR_STUB_FRAME`) copies the line
+blend values the frame before wrote for the HBlank DMA, then runs BN4's:
+BN4's screen shows each frame the values written the frame before (measured:
+the values the same byte for byte each frame on both sides, BN6's picture a
+frame ahead on the blend's rows without the copy); why BN4's lags was not
+read in its interrupt handler. The dev step `0:bracket T IIFFSS/...`
+([A battle on demand](../devtools/battle-on-demand.md)) calls the entry.
+
+**Proved.** `tools/xbracket.py compare` against BN4's own screen in romlab
+from the same entrants, aligned on the screen's first frame in state 4: The
+Den Battle Tournament, The Eagle Tournament, The Red Sun Tournament and the
+Free Tournament at their first round, and The Den Battle Tournament after a
+settled round (four through, their lines lit), each PASS over 238 frames,
+every pixel, but the one allowed difference: the first frame, one colour on
+both sides, the backdrop of the map each was opened from (Lan's room, a net
+layer), every layer off until the screen's palette reaches PRAM. The
+comparator's mutations (a palette colour, a plate a pixel lower, a frame
+late) and the move's (`tournaments`: the shims give the next tournament's
+record) FAIL. The frames are in `.build/xbracket/` (`bn4/`, `bn6/`), nothing
+of them committed.
+
+**Not reached.** The return to the map after the screen (written as BN6's
+own screens return, not run past the fade); the song heard (its slot set, not
+listened to); a tournament's bracket in a run (the tournament's design calls
+the entry; faces for BN6's and BN5's Navis are their own unit, above); the
+screen opened from a script (`BN4_BRACKET_FROM_SCRIPT`, its return the
+host's stub); the Free Tournament's own list (`0x020014F0`) and its menu
+sprite types 0x3C and 0x3D, which the move gives a stub (BN4 draws no plate
+there either while the list is empty); why BN4's HBlank DMA shows the frame
+before's values.
 
 ## Not reached
 
