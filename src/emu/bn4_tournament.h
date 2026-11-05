@@ -97,6 +97,35 @@
                                        * MegaMan's, 6) */
 #define BN4_MENU_SPRITE_PTRS 0x080281D0u /* the menu sprites' sprite pointers (0x08002908's r0): the plates 0x084BB768 and 0x084BDB30 */
 
+/* A plate as BN4 draws it (docs/multirom/bn4-tournament.md, Faces for every entrant; tools/bn4_faces.py): an animation of
+ * one frame in a plate sheet, uncompressed, two objects (16x32 at -12,-16 and 8x32 at 4,-16, 1D tiles); its palette the
+ * sheet's palette BN4_PLATE_PALETTES[id] + its variant + its object's palette nibble (the animation's place in its four:
+ * 0, 4, 8, 12), so a sheet of 16 plates holds 64 palettes. Read in BN4_PLATE_INIT and BN4_PLATE_SET; a plate's tiles and
+ * palettes written over in romlab's ROM copy, BN4's bracket draws the new face in colour and grey */
+#define BN4_PLATE_SHEET_A 0x084BB768u /* BN4_MENU_SPRITE_PTRS[4]: ids 0x00-0x0F's plates, animations 0-15 */
+#define BN4_PLATE_SHEET_B 0x084BDB30u /* ... [5]: ids 0x10-0x15 and MegaMan's (animation 6), 28 palettes */
+#define BN4_PLATE_INIT    0x08104040u /* BN4_BRACKET_PLATE's kind 0 begun: the entrant's id from the tournament (0xFF:
+                                       * BN4_PLATE_EMPTY_ID), its animation (BN4_PLATE_FRAMES), its palette (below), its sheet */
+#define BN4_PLATE_SET     0x08104290u /* r6 the sheet (BN4_PLATE_SHEETS' value): the sprite loaded from BN4_PLATE_SPRITES'
+                                       * entry, its animation and palette set */
+#define BN4_PLATE_PALETTES 0x08104108u /* by entrant id, the plate's first palette in its sheet: 0x00, 0x10, 0x20, 0x30 */
+#define BN4_PLATE_SPECIAL 0x08104146u /* ids drawn in colour with BN4_PLATE_FRAMED, 0xFF-ended: 0x02, 0x03, 0x06, 0x07, 0x0A, 0x0B */
+#define BN4_PLATE_EMPTY_ID 0x17       /* the id an entrant 0xFF (none) is drawn as */
+#define BN4_PLATE_W       24          /* a plate's pixels, the frame's 22x30 in it from (1, 0) */
+#define BN4_PLATE_H       32          /* ... its height */
+#define BN4_PLATE_TILES   12          /* its 4bpp tiles: 8 the 16x32 object's, then 4 the 8x32's */
+#define BN4_PLATE_OUTER   14          /* the outer frame's colour index (all of ids 0x00-0x16 and MegaMan's but 0x04, 0x05) */
+#define BN4_PLATE_INNER   15          /* the inner frame's */
+#define BN4_PLATE_FACE_X  3           /* the face's window inside the frames: from (3, 2), 18x26, 13 colours (indexes 1-13) */
+#define BN4_PLATE_FACE_Y  2           /* ... its top */
+#define BN4_PLATE_FACE_W  18          /* ... its width */
+#define BN4_PLATE_FACE_H  26          /* ... its height */
+#define BN4_PLATE_VARIANTS 4          /* a plate's palettes, by BN4_PLATE_INIT's choice: */
+#define BN4_PLATE_COLOUR  0           /* ... an entrant in or out this round (BN4_ENTRANT_IN, BN4_ENTRANT_OUT), */
+#define BN4_PLATE_LIGHT   1           /* ... lighter, its outer frame green (not chosen by the init; its user not read), */
+#define BN4_PLATE_GREY    2           /* ... grey: out before (or out this round, opened from a script), */
+#define BN4_PLATE_FRAMED  3           /* ... its colours, its inner frame purple: BN4_PLATE_SPECIAL's ids in colour */
+
 /* What opens them in a script */
 #define BN4_CUTSCENE_COMMANDS 0x0802C140u /* the cutscene engine's command routines by command byte (dispatched at 0x0802D05C) */
 #define BN4_CS_START_TOURNAMENT 0x52  /* `52 t`: BN4_START_TOURNAMENT (0x0802CE1E) */
