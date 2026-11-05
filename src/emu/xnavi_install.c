@@ -152,6 +152,20 @@ static void records_bn4(const XNavi *n, const Game *g) {
 	}
 }
 
+/* its collision setup's own r3 (XNavi.coll_arg) written over BN6's actor init's at its spawn's end: a shim of its home (the
+ * project's own Thumb, XV_HOME_COLL_ARG) as its spawn end's entry (table 7), which must be the empty hook */
+#define XV_HOME_COLL_ARG XV_HOME_SHIMS
+static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
+	const XVirusFamily *f = &n->code;
+	if (table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its collision's r3"); return; }
+	/* ldr r0,[r5,#0x54]; movs r1,#arg; strb r1,[r0,#BN6_COLL_SETUP_ARG]; mov pc,lr (BN6 calls a hook by mov lr,pc and bx r0,
+	 * 0x0800F430: lr has no Thumb bit, so a bx lr would leave Thumb) */
+	const uint16_t shim[4] = { 0x6D68, (uint16_t)(0x2100u | n->coll_arg), (uint16_t)(0x7001u | BN6_COLL_SETUP_ARG << 6), 0x46F7 };
+	uint8_t *p = xv_put(f->home + XV_HOME_COLL_ARG, sizeof shim, true);
+	for (int i = 0; p && i < 4; ++i) put16(p + 2 * i, shim[i]);
+	table[7] = (f->home + XV_HOME_COLL_ARG) | 1u;
+}
+
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi
  * words */
 static void records_set(const XNavi *n, const Game *g) {
@@ -178,7 +192,10 @@ static void records_set(const XNavi *n, const Game *g) {
 		xv_move_ref(f->hooks[0]), xv_move_ref(f->hooks[1]), xv_move_ref(f->hooks[2]), xv_move_ref(f->hooks[3]), xv_move_ref(f->hooks[4]),
 		xv_move_ref(f->hooks[5]), xv_move_ref(f->hooks[6]), xv_move_ref(f->hooks[7]),
 	};
-	for (int k = 0; k < BN6_NAVI_TABLE_COUNT && !xv_failed(); ++k) xn_set_word(XN_TABLE + k, (uint32_t)f->ai, entry[k]);
+	uint32_t table[BN6_NAVI_TABLE_COUNT];
+	memcpy(table, entry, sizeof table);
+	if (n->coll_arg) coll_arg_set(n, table);
+	for (int k = 0; k < BN6_NAVI_TABLE_COUNT && !xv_failed(); ++k) xn_set_word(XN_TABLE + k, (uint32_t)f->ai, table[k]);
 	const uint8_t ice = (uint8_t)f->ice;
 	if (!xv_failed()) xn_set(XN_T_ICE, (uint32_t)f->ai, &ice);
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);

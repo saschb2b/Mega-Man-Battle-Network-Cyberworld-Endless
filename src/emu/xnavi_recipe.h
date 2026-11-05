@@ -121,6 +121,9 @@ typedef struct {
 	XvRef companion, companion_end;   /* the routines its companion starts and ends by (the triples' Navi words at its AI index) */
 	XvRef hide;                 /* the routine its attacks hide its companion's overlay by (BN6_NAVI_HIDE_REF's words at its AI index) */
 	int sprite_of;              /* BN5's Navi whose battle sprite it draws at its number (xnavi_sprites.h); -1 its struct1's own */
+	uint8_t coll_arg;           /* its collision setup's r3 (BN6_COLL_SETUP_ARG: the hit bits its body's hit ORs into the struck's) where
+	                               its game's init passes one BN6's actor init (3 for every actor, 0x08016FE8) does not: BN4's Navis'
+	                               0x21; written over at its spawn's end by a shim of its home (xnavi_install.c); 0 none */
 	uint16_t shown[XV_VERSIONS];   /* each version's name as its game shows it: an entry of its Navi names (BN5 shows Colonel V3 as V1) */
 	const XnSound *sounds;      /* the sounds BN6 numbers otherwise */
 	int nsounds;

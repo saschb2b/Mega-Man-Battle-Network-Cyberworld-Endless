@@ -98,6 +98,11 @@ BN4_NAVI_AI0, BN4_NAVI_ID0 = 48, 0x380
 ROOM_HOMES = 0x08800000 + 0x720000
 ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x7A0000
 VERSIONS = 4
+# The collision setup's r3 BN6's actor init gives every actor (0x08016FE8: movs r3,#3), the hit bits its body's hit ORs into
+# the struck's (BN6_COLL_SETUP_ARG); a Navi whose init passes another keeps its own (XNavi.coll_arg). The struck's pre-step
+# reads them alike in both games (BN4's Navi pre-step 0x080135E6, BN6's 0x0801AEB2): bit 1 its flag 4, bit 2 its flag 2, a
+# heavier bit (BN4's 0xFC, BN6's 0x3C, 0x20 among them) its flag 0x10 or, with bit 1, its flag 0x100
+COLL_ARG6 = 3
 # Their battle sprites in BN6's list 2, the Navis' (src/emu/xnavi_sprites.h XNAVI_SPRITE_BN4: past BN5's 0x20-0x2A): a seat each
 NAVI_SPRITE0 = 0x40
 # Their sounds BN6 has no song of (the owner's call of 5 November 2026, docs/multirom/bn4.md call 11): a shared pool of BN6's
@@ -283,7 +288,9 @@ def navi_init(f):
     navi_palette(f, w)
     setup = [s for s, t in w.bls.items() if t == X4.BN4['setup_coll']]
     args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)] if len(setup) == 1 else None
-    f.notes.append(f'its collision set up with {args} (BN6\'s Navi init sets up its own by its struct2)')
+    f.coll_arg = args[2] if args and args[2] is not None and args[2] != COLL_ARG6 else 0
+    f.notes.append(f'its collision set up with {args}: BN6\'s actor init passes r3 {COLL_ARG6}, so its own '
+                   f'{"is written over at its spawn\'s end (XNavi.coll_arg)" if f.coll_arg else "is the same"}')
     return w
 
 
@@ -707,7 +714,11 @@ def c_navi(f):
         L.append(f'\t\t.songs = {n}_songs, .nsongs = {count("songs")},   /* (its sounds in the pool: xnavi_bn4_sounds.c) */')
     L += ['\t},', f'\t.versions = {VERSIONS},', f'\t.prestep = BN6(0x{PRESTEP6:08X}), .hook_a = BN6(0x{NULLSUB_NAVI6:08X}),',
           f'\t.companion = BN6(0x{NO_COMPANION6:08X}), .companion_end = BN6(0x{NO_COMPANION6:08X}), .hide = BN6(0x{NO_COMPANION6:08X}),',
-          '\t.sprite_of = -1,   /* (its battle sprite its recipe\'s first: list 2 at its seat\'s number, XNAVI_SPRITE_BN4) */', '};']
+          '\t.sprite_of = -1,   /* (its battle sprite its recipe\'s first: list 2 at its seat\'s number, XNAVI_SPRITE_BN4) */']
+    if f.coll_arg:
+        L.append(f'\t.coll_arg = 0x{f.coll_arg:02X},   /* (its init\'s collision setup\'s r3, BN6\'s actor init\'s {COLL_ARG6:#x}: the hit bits '
+                 f'its body gives, read alike by both games\' pre-steps) */')
+    L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 
 

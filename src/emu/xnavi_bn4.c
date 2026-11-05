@@ -310,6 +310,7 @@ static const XNavi bn4_gutsman = {
 	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
 };
 const XNavi *const xnavi_bn4[] = { &bn4_gutsman };
 const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);
