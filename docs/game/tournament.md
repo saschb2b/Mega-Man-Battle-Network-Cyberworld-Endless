@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, and the owner's open calls; designed with the game-design skill on 5 November 2026, nothing built."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:01:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:00:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -382,25 +382,30 @@ the final a retry of the final at the HP carried, and needs the round in
 
 ## The owner's calls
 
-Open, each with its options, the recommendation first.
+Decided, 5 November 2026:
 
-1. **How often?** (a) The short net's act 3 in half the runs, and in the
-   endless net one of acts 3 to 5 each cycle (recommended). (b) Every
-   run's act 3, and every cycle's in the endless net: the bite in every
-   run, at the cost of the comparison and of the peak's rarity. (c) Only
-   in runs with BN4's ROM read: BN4's set piece kept to BN4, reaching only
-   the runs that bring a ROM players were first offered today.
-2. **From a profile's first run?** (a) Once the profile has reached the
-   Nest in any run (recommended). (b) From the first run.
-3. **A heal between the rounds?** (a) None (recommended). (b) A quarter
-   of max HP before the final. (c) A full heal before the final.
-4. **A round lost?** (a) The run ends, as at a guardian (recommended).
-   (b) Lan pulls MegaMan out at 1 HP, as from ProtoMan's netbattle: out of
-   the bracket, the way on open without the Guardian Data (its five
-   HPMemory, heal, chip and draft lost, never the run).
-5. **What the rounds pay?** (a) Their results screens and memory, the
-   prize the final's (recommended). (b) Each round's Navi chip as well.
-6. **The bracket's screen?** (a) The act's card, ours, in every run
-   (recommended). (b) BN4's own bracket screen where BN4's ROM is read,
-   driven as BN6's own screens are, once its mapping shows it can be; the
-   card elsewhere.
+1. **How often: the short net's act 3 in half the runs**, by a coin of
+   the seed, and in the endless net one of acts 3 to 5 each cycle; over
+   every run's act 3 and over runs with BN4's ROM alone.
+2. **From a profile's first run: no, once the profile has reached the
+   Nest** in any run; over from the first run.
+3. **A heal between the rounds: none**, the full heal before the arena
+   the only one; over a quarter or a full heal before the final. Should
+   the bracket bite past its target (75 to 90% won), a quarter heal before
+   the final is the lever, the owner's to pull.
+4. **A round lost: the run ends**, as at a guardian; over Lan pulling
+   MegaMan out at 1 HP.
+5. **What the rounds pay: each round's Navi chip as well**, beside its
+   results screen and memory, the final's Guardian Data the prize; over
+   the results screens alone. Three Navi chips an act where a bracket
+   stands: `build.py economy` and the Navi chips' prices are to be checked
+   against it when the tournament is built, its band in `economy.c` set
+   with it.
+6. **The bracket's screen: BN4's own, and no tournament until it can show
+   every entrant.** BN4's bracket (main mode 0x24, [The tournament's
+   screens in BN4](../multirom/bn4-tournament.md)) is moved into BN6 and
+   shown for every bracket; its plates hold BN4's own Navis and MegaMan
+   alone, so BN6's and BN5's Navis' faces for it are researched first
+   (their own games' art, read from the player's ROMs), and the tournament
+   waits for them. Over the act's card in our PET look for every bracket,
+   and over BN4's screen for BN4's Navis with our card for the rest.
