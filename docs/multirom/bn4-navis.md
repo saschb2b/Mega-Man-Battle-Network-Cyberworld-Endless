@@ -20,8 +20,8 @@ moving BN4 Red Sun's eighteen Navis new to a run into BN6's battle engine
 takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
-and spawn). GutsMan is built and under proof ([GutsMan built](#gutsman-built),
-below). BN5's Navis moved as
+and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
+below), FireMan built and under proof ([FireMan built](#fireman-built)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.

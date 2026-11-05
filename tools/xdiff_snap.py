@@ -649,10 +649,19 @@ def registry_ids(rel):
 
 # ---- roles ----
 
+# a first-kind object of a moved type (xvirus_recipe.h XvType of kind 1: a Navi's companion, an enemy of no id) told by its
+# type, its game's own, past every NameID (BN4's FireMan's companion 0x57: docs/multirom/bn4-navis.md, FireMan built)
+T1_MOVED = 0x10000
+
+
 def identity(game, o, canon):
     """what an object is, in BN6's numbers: an enemy by its id, an attack by its type, an effect by its type, and an
     effect object (the fourth kind's type 0) by its effect id too, so one spawned with the wrong id is another role"""
     if o.kind == 'T1':
+        moved = getattr(canon, 't1_moved', None)   # (a first-kind object of a moved type, no enemy: a Navi's companion)
+        ty = moved(game, o) if moved else None
+        if ty is not None:
+            return T1_MOVED | ty
         return canon.megaman_role(game, canon.nid(game, o.o16(OBJ_NAME_ID)))
     if o.kind == 'T3':
         return canon.t3(game, o.o8(OBJ_TYPE))

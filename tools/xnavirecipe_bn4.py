@@ -45,7 +45,7 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
-NAVIS = ((0x0A, 'GutsMan', 132),)
+NAVIS = ((0x0A, 'GutsMan', 132), (0x0C, 'FireMan', 144))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -68,6 +68,12 @@ NAVI_COPIED = {
     0x0800FAD0: 'a free panel of its side at random (0x0800A244, then the RNG): no BN6 routine of its body; copied',
     0x0800A244: 'the free panels of a side (r0 the side, r2 and r3 the flags wanted and refused, r7 a buffer: a byte each, column | '
                 'row << 4, r0 back their count): no BN6 routine of its body; copied, its panel\'s side read at BN6\'s +3 (BN4\'s +1)',
+    # (FireMan's: docs/multirom/bn4-navis.md, FireMan built)
+    0x0800C9FC: 'a Soul Navi\'s attack\'s end keeping the attack\'s +5 at its AI data\'s +0x3A (BN4_ATTACK_END_KEEP): no BN6 routine '
+                'of its body; copied, its CurAction BN6\'s 8, its +0x3A kept at its offset (BN6\'s code never reads a Navi\'s +0x3A)',
+    0x08014446: 'a moved object\'s sprite step (BN4_SPRITE_STEP: unless paused, a new animation set up and its +0x11 made its +0x10, '
+                'else the sprite updated): BN6\'s nearest (0x0801BBF4) updates the sprite in the frame its animation is set up too, '
+                'a frame ahead of BN4\'s; copied, its pause test BN6\'s',
 }
 # A table of its moved objects' kinds whose bytes name a sound their init plays (BN4_PLAY_SOUND with r0 a byte of it, not a
 # movs): its address -> its entries, their size, the kinds, the sound's place in an entry, the play it reaches, why; each
@@ -347,10 +353,11 @@ def navi_init(f):
     decision each, the AI data's take dropped (BN6's pool)"""
     w = T.walk(f.b4, f.init, region=(f.lo, f.hi))
     std = X4.INIT_STD | {NAVI4['take'], NAVI4['palette']}
+    f.companions, f.spawned_sprite, f.spawned_frame = [], False, False
     for site, t in sorted(w.bls.items()):
         if t == NAVI4['take']:
             f.notes.append(f'{site:08X}: its init takes its side\'s AI data (BN4_AI_TAKE): dropped, BN6\'s Navi init takes one from the pool')
-        elif t not in std:
+        elif not init_tail(f, w, site, t) and t not in std:
             f.decide('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s Navi init makes nothing of')
     navi_palette(f, w)
     setup = [s for s, t in w.bls.items() if t == X4.BN4['setup_coll']]
@@ -362,24 +369,232 @@ def navi_init(f):
 
 
 def navi_palette(f, w):
-    """its palette from its init's call of BN4's Navi palette (BN4_NAVI_PALETTE, r0 a number: its first table's byte for it
-    times its second's by the version, +4): a step of 0 a palette of 0 for every version, as BN6's actor init gives a step
-    of 0 (0x0800F334: its table by the version times AI data +3)"""
+    """its palette from its init's call of BN4's Navi palette (BN4_NAVI_PALETTE, r0 a number: the byte of
+    BN4_NAVI_PALETTE_NUMBERS for it times the byte of BN4_NAVI_PALETTE_VERSIONS for its version, +4): V1's palette 0 given
+    as BN6's step 0, which BN6's actor init (0x0800F334: its table by the version times AI data +3) makes 0 for every
+    version; a version whose BN4 palette is not 0 noted (an interim, docs/multirom/bn4-navis.md, FireMan built)"""
     sites = [s for s, t in w.bls.items() if t == NAVI4['palette']]
     if len(sites) != 1:
         return
     k, _ = T.back_value(w, sites[0], 0)
     pw = T.walk(f.b4, NAVI4['palette'], limit=0x10)
-    lits = [v for _, v in sorted(pw.lits.items())]
-    if k is None or len(lits) != 2:
+    if k is None or sorted(pw.lits.values()) != sorted(PALETTE4):
         f.decide('struct1', f'{sites[0]:08X}: its palette from BN4_NAVI_PALETTE with r0 {k}')
         return
-    step = f.b4.bytes(lits[0] + k, 1)[0]
-    if step:
-        f.decide('struct1', f'{sites[0]:08X}: its palette step {step} (BN4_NAVI_PALETTE\'s {k}): BN4\'s table by version against BN6\'s unread')
+    pal = [f.b4.bytes(PALETTE4[0] + k, 1)[0] * f.b4.bytes(PALETTE4[1] + v, 1)[0] for v in range(VERSIONS)]
+    if pal[0]:
+        f.decide('struct1', f'{sites[0]:08X}: its V1\'s palette {pal[0]} (BN4_NAVI_PALETTE\'s {k}), BN6\'s step 0 gives 0')
         return
     f.s1['palette'] = 0
-    f.notes.append(f'its palette: BN4_NAVI_PALETTE\'s {k}, step 0 ({lits[0]:08X} + {k}): palette 0 for every version, BN6\'s step 0')
+    odd = ', '.join(f'version {v} {p}' for v, p in enumerate(pal) if p)
+    f.notes.append(f'its palette: BN4_NAVI_PALETTE\'s {k}, V1\'s 0, BN6\'s step 0' +
+                   (f' (an interim: BN4 gives {odd}, BN6\'s step 0 none)' if odd else ' for every version'))
+
+
+# BN4_NAVI_PALETTE's tables (bn4_navis.h): the byte by its number, the byte by the version (+4) it is multiplied by
+PALETTE4 = (0x0800B9B1, 0x0800B9AC)
+
+
+# ---- FireMan's mechanisms (docs/multirom/bn4-navis.md, FireMan built): a call after the state runner, his own generic
+# states, his init's tail at BN6's spawn's end and a first-kind companion ----
+
+def navi_update(f, tw, uw):
+    """its type routine's and update's calls: BN4's Navi after-step after its jump table's entry (GutsMan's), or in its update
+    after its own call past the runner (FireMan's: pre-step, runner, his call, after-step, present); that call is BN6's post
+    hook (table 5, which BN6's Navi frame 0x080F36A8 runs after its status dispatcher, as BN4's runs it after the runner)"""
+    f.post = None
+    tcalls = [t for _, t in sorted(tw.bls.items())]
+    calls = [t for _, t in sorted(uw.bls.items())]
+    if tcalls == [NAVI4['after']] and calls == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']]:
+        return
+    if not tcalls and len(calls) == 5 and calls[:2] == [NAVI4['prestep'], NAVI4['runner']] and calls[3:] == \
+            [NAVI4['after'], NAVI4['present']] and f.lo <= calls[2] < f.hi:
+        f.post = calls[2]
+        f.notes.append(f'its update calls {calls[2]:08X} after its state runner: BN6\'s post hook (table 5); its after-step in its '
+                       'update, before the present, BN6\'s after its present in its Navi object\'s routine (0x080F3664)')
+        return
+    f.decide('pre-step', f'its type routine calls {tcalls} and its update {", ".join(f"{t:08X}" for t in calls)}, not BN4\'s '
+                         'Navi pre-step, runner and present, with its after-step in its type routine or after a call of its own')
+
+
+def own_generic(b4, f, states):
+    """its states 0-5: BN4's generic Navi state, BN6's of that place standing in; or its own whose code ends in a call of
+    BN4's generic of that place (FireMan's 3-5, his companion told first), walked as its own in BN6's place, that call
+    aimed at BN6's generic of the place"""
+    for k in range(6):
+        if k < len(states) and states[k] == N.NAVI_GENERIC[k]:
+            continue
+        x = states[k] & ~1 if k < len(states) else None
+        w = T.walk(b4, x, region=(f.lo, f.hi)) if x and f.lo <= x < f.hi else None
+        if w is None or N.NAVI_GENERIC[k] & ~1 not in w.bls.values():
+            f.decide('states', f'its state {k} is its own, not BN4\'s generic Navi state nor a call of it')
+            continue
+        f.states[k] = ('OWN', x | 1)
+        f.roots.append(x)
+        f.aim[N.NAVI_GENERIC[k] & ~1] = (GENERIC_NAVI6[k] & ~1, f'BN4\'s generic Navi state {k}, its own state {k}\'s tail: BN6\'s '
+                                                                 f'generic Navi state {k} ({GENERIC_NAVI6_NAMES[k]})')
+        f.notes.append(f'its state {k} ({x:08X}) its own, ending in BN4\'s generic {k}: BN6\'s {k} ({GENERIC_NAVI6_NAMES[k]}) at its tail')
+
+
+# BN6's Navi generic states' names (bn6_navis.h), for the reasons above
+GENERIC_NAVI6_NAMES = ('spawned', 'on to its first state', 'deleted', 'flinching', 'paralysed', 'dragged', 'frozen', 'bubbled')
+# BN4's sprite update (BN4_SPRITE_UPDATE, BN6's 0x080026C4) and BN6's Navi frame (BN6_NAVI_FRAME), which its spawn's end runs
+# where its init does them (XnSpawned)
+SPRITE_UPDATE4, SPRITE_UPDATE6, NAVI_FRAME6 = 0x0800285C, 0x080026C5, 0x080F367D
+# where its init keeps its companion (its object's +0x74: BN6's Navi object reads none of +0x60-+0x8F, its AI data its own)
+COMPANION_AT = 0x74
+
+
+def init_tail(f, w, site, t):
+    """a call of its init BN6's actor init makes nothing of that its spawn's end does in its place (XnSpawned): the sprite
+    updated, a companion of the first kind spawned (a routine of a first-kind type's region that spawns that type, r4 a
+    constant, its object stored at COMPANION_AT), its update run (BN6's Navi frame); True where so"""
+    if t == SPRITE_UPDATE4:
+        f.spawned_sprite = True
+        f.notes.append(f'{site:08X}: its init updates its sprite: its spawn\'s end updates it (BN6\'s 0x080026C4)')
+        return True
+    if t == f.update:
+        f.spawned_frame = True
+        f.notes.append(f'{site:08X}: its init runs its update: its spawn\'s end runs BN6\'s Navi frame ({NAVI_FRAME6 & ~1:08X})')
+        return True
+    ty = t1_of(f.b4, t)
+    if ty is None:
+        return False
+    lo, hi = X4.region_of(f.b4, ty)
+    sw = T.walk(f.b4, t, region=(lo, hi))
+    if not any(x == 0x080032B8 and T.back_value(sw, a, 0)[0] == ty for a, x in sw.bls.items()):
+        return False
+    word = const_chain(w, site, 4)
+    nxt = [w.insns[a] for a in sorted(w.insns) if a > site][:1]
+    if word is None or not nxt or nxt[0].form != 'str' or tuple(nxt[0].f) != (0, 5, COMPANION_AT):
+        f.decide('init', f'{site:08X}: its companion\'s spawn with r4 {word} not kept at +{COMPANION_AT:#x}')
+        return True
+    f.companions.append(dict(spawner=t, ty=ty, word=word, lo=lo, hi=hi, site=site))
+    f.regions.append((lo, hi, ('1', ty)))
+    f.regions_roots.append(lo)
+    f.notes.append(f'{site:08X}: its init spawns its companion, the first kind\'s {ty:#x} ({t:08X}, r4 {word:#x}), kept at its '
+                   f'+{COMPANION_AT:#x}: moved, spawned at its spawn\'s end')
+    return True
+
+
+def const_chain(w, site, reg):
+    """the number `reg` holds at `site` where the instructions before it make it by a movs, then lsls and adds of
+    immediates (FireMan's r4 0x810: movs #8, lsls #8, adds #0x10), else None"""
+    ops = []
+    for a in sorted((a for a in w.insns if a < site), reverse=True):
+        i = w.insns[a]
+        if not T.writes(i, reg):
+            continue
+        if i.form == 'movs' and i.f[0] == reg:
+            v = i.f[1]
+            for form, k in reversed(ops):
+                v = (v << k if form == 'lsls' else v + k) & 0xFFFFFFFF
+            return v
+        if i.form == 'lsls' and tuple(i.f[:2]) == (reg, reg) or i.form == 'adds8' and i.f[0] == reg:
+            ops.append((i.form, i.f[2] if i.form == 'lsls' else i.f[1]))
+            continue
+        return None
+    return None
+
+
+def t1_of(b4, t):
+    """the first-kind type whose region holds `t` (BN4_T1_TYPES), else None"""
+    types = [b4.u32(X4.BN4['t1'] + 4 * i) & ~1 for i in range(X4.BN4['nt1'])]
+    starts = sorted(set(types))
+    lo = max((a for a in starts if a <= t), default=None)
+    if lo is None or lo == starts[-1] or t - lo > 0x400 or types.count(lo) != 1:
+        return None
+    return types.index(lo)
+
+
+def spawns1_of(f, alloc):
+    """its spawns of its companion's first-kind type (moved, as the families' third-kind ones are: xrecipe_bn4.spawns_of, which
+    moves the third kind's alone), each at a number of the dispatch's first kind of its own, its spawner the dispatch's"""
+    moved = {c['ty']: c for c in f.companions}
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if X4.SPAWNERS4.get(t, (0,))[0] != 1:
+                continue
+            ty, chain = T.back_value(w, site, 0)
+            if ty not in moved or len(chain) != 1 or chain[0][1] != 'movs':
+                continue
+            c = moved[ty]
+            if 'as' not in c:
+                c['as'] = alloc.types[1]
+                alloc.types[1] += 1
+                f.types.append((1, c['as'], ty))
+            f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=c['as'],
+                               why=f'its companion\'s type {ty:#x} (the first kind): moved, the dispatch\'s {c["as"]:#x}'))
+            f.spawn_calls[t] = X4.SPAWNERS4[t][1]
+            f.decisions = [d for d in f.decisions if not (d[0] == 'type' and d[1].startswith(f'{site:08X}: it spawns a 1 type'))]
+
+
+def companion_art(b4, f, alloc):
+    """its companion's sprite, which its init loads by its spawn's word (+4 the list's offset, +5 the number: r4 at the
+    spawn): a list 4 sprite copied as its objects' are, the word given the copy's number"""
+    for c in f.companions:
+        lst, num = c['word'] & 0xFF, c['word'] >> 8 & 0xFF
+        s = X4.list4_sprite(b4, f, alloc, num) if lst == 0x10 else None
+        if s is None:
+            f.decide('sprite', f'{c["site"]:08X}: its companion\'s sprite {lst // 4}:{num:#x}, which the generator moves none of')
+            continue
+        c['word6'] = c['word'] & ~0xFF00 | s['to_index'] << 8
+        loads = [site for a, w in f.walks.items() if c['lo'] <= a < c['hi'] for site, t in w.bls.items() if t == X4.BN4['sprite_load']]
+        f.decisions = [d for d in f.decisions if not (d[0] == 'sprite' and any(d[1].startswith(f'{x:08X}:') for x in loads))]
+        f.notes.append(f'its companion\'s sprite 4:{num:#x} at list 4 {s["to_index"]:#x}: its spawn\'s word {c["word"]:#x} made {c["word6"]:#x}')
+
+
+# An interim (docs/multirom/bn4-navis.md, FireMan built): FireMan's companion's mode 4, set by its init where the battle
+# state's +0x32 bit 0 is clear and its settings' +6 has 0x20 (0x080CC440-0x080CC466), draws his flame's appear through BN4's
+# tile buffer (0x02037810, 0x0800087C, 0x08003578: no BN6 twin read) before its mode 8; run as its mode 0 instead (the
+# appear waited on, 0x080CC5B4, then mode 8), its sub-states' table not walked. Neither spec reaches it: in BN4's battle as
+# the differential sets it up the bit is set and the companion starts in mode 8 (bn4_fireman_control's trace: its +9 8)
+UNWALKED_TABLES = {0x080CC500: "FireMan's companion's mode 4's sub-states (0x080CC50C, 0x080CC584, 0x080CC5B4)"}
+COMPANION_MODES = ((0x080CC464, 2, 4, 0),)   # (the movs, its register, BN4's mode, the mode run in its place)
+
+
+def companion_modes(f):
+    """the companion's modes run otherwise (COMPANION_MODES): each movs checked and given the mode run in its place"""
+    for at, rd, was, now in COMPANION_MODES:
+        w = next((w for w in f.walks.values() if at in w.insns), None)
+        i = w.insns[at] if w else None
+        if i is None or i.form != 'movs' or tuple(i.f) != (rd, was):
+            if any(c['lo'] <= at < c['hi'] for c in f.companions):
+                f.decide('companion', f'{at:08X}: not the movs r{rd},#{was} its companion\'s modes name')
+            continue
+        f.imms.append(dict(at=at, form='THUMB_MOVS', rd=rd, rn=0, was=was, now=now,
+                           why=f'its companion\'s mode {was} (its appear through BN4\'s tile buffer, unported) run as its mode {now}'))
+
+
+# Tables of its moved objects' kinds whose bytes name a list 4 sprite their code loads (r1 a movs of 0x10, r2 a byte of the
+# entry): its address -> its entries' size, the number's place in an entry, the loads, why; each kind its code spawns (the
+# spawns' r4 of the type whose region holds the load) its sprite copied and its byte given the copy's
+SPRITE_TABLES = {
+    0x080D013C: dict(entry=6, number=0, loads=(0x080D019E,),
+                     why='the third kind\'s 0x1A\'s kinds (6 bytes each, its sprite\'s number first), read by its init by +4 '
+                         '(0x080D018C, kept at its +0x60)'),
+}
+
+
+def sprite_tables(b4, f, alloc):
+    """the kinds' sprites of SPRITE_TABLES its code loads, copied (list 4), each kind's byte the copy's"""
+    for v, t in SPRITE_TABLES.items():
+        ty = next((x for x, m in f.moved3.items() if all(m['lo'] <= a < m['hi'] for a in t['loads'])), None)
+        if ty is None:
+            continue
+        m = f.moved3[ty]
+        sp = {e for e, w in f.walks.items() if m['lo'] <= e < m['hi'] and any(x in X4.SPAWNERS4 for x in w.bls.values())}
+        kinds = sorted({T.back_value(w, site, 4)[0] for w in f.walks.values() for site, x in w.bls.items() if x in sp} - {None})
+        for k in kinds:
+            at = v + t['entry'] * (k & 0xFF) + t['number']
+            num = b4.u8(at)
+            s = X4.list4_sprite(b4, f, alloc, num)
+            if s is None:
+                f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws 4:{num:#x}, which the generator moves none of')
+                continue
+            f.bytes.append((at, num, s['to_index'], f'its table\'s kind {k & 0xFF}: list 4 {num:#x} in BN4, {s["to_index"]:#x} copied'))
+        f.notes.append(f'its third-kind {ty:#x}\'s kinds by its table {v:08X}: {", ".join(str(k & 0xFF) for k in kinds)} (its spawns\' r4)')
+        f.decisions = [d for d in f.decisions if not (d[0] == 'sprite' and any(d[1].startswith(f'{a:08X}:') for a in t['loads']))]
 
 
 def derive(b4, b6, pairs, ty, name, first, alloc):
@@ -397,19 +612,13 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.type_table, f.init, f.update = tt, ents[0] & ~1, ents[1] & ~1
     if ents[2] & ~1 != NAVI4['dying']:
         f.decide('type', f'its dying entry is {ents[2]:08X}, not BN4\'s Navis\' {NAVI4["dying"]:08X}')
-    if [t for _, t in sorted(tw.bls.items())] != [NAVI4['after']]:
-        f.decide('type', 'its type routine calls more than BN4\'s Navi after-step (BN6\'s Navi object does its work)')
     uw = T.walk(b4, f.update, region=(f.lo, f.hi))
-    calls = [t for _, t in sorted(uw.bls.items())]
-    if calls != [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']]:
-        f.decide('pre-step', f'its update calls {", ".join(f"{t:08X}" for t in calls)}, not BN4\'s Navi pre-step, runner and present alone')
+    navi_update(f, tw, uw)
     site = [s for s, t in uw.bls.items() if t == NAVI4['runner']]
     f.st = T.back_value(uw, site[0], 0)[0] if site else None
     states = X4.table_at(b4, f.st, f.lo, f.hi, 24) if f.st else []
     f.states = [('BN6', a) for a in GENERIC_NAVI6]
-    for k in range(6):
-        if k >= len(states) or states[k] != N.NAVI_GENERIC[k]:
-            f.decide('states', f'its state {k} is its own, not BN4\'s generic Navi state (its own generic: the next Navis\')')
+    own_generic(b4, f, states)
     f.own = states[6:]
     f.states += [('OWN', x | 1) for x in f.own]
     f.megaman = [k for k, x in enumerate(f.own, 6) if N.PLAYER <= x & ~1 < N.PLAYER_END]
@@ -419,13 +628,14 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     if f.s1['palette'] is not None:
         f.decisions = [d for d in f.decisions if not (d[0] == 'struct1' and d[1].endswith('gives no palette the generator reads'))]
     del f.walks[f.init]
+    f.roots += [r for r in (f.post,) if r] + [c['spawner'] for c in f.companions]
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     saved = dict(bn4_twins.COPIED)
     bn4_twins.COPIED.update(NAVI_COPIED)
     try:
         roots = [x & ~1 for x in f.own] + f.roots
         while roots:
-            X4.walk_code(b4, f, roots, {f.type_table, f.st}, pairs)
+            X4.walk_code(b4, f, roots, {f.type_table, f.st} | set(UNWALKED_TABLES), pairs)
             roots = sorted(callbacks(b4, f) - set(f.walks))
     finally:
         bn4_twins.COPIED.clear()
@@ -444,6 +654,8 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     battle_players(f)
     set_action_imms(f)
     X4.spawns_of(f, alloc)
+    spawns1_of(f, alloc)
+    companion_modes(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)
@@ -456,6 +668,8 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
         bn4_twins.COPIED_DATA.update(saved)
     X4.words_of(f, pairs)
     navi_art(b4, b6, f, alloc)
+    companion_art(b4, f, alloc)
+    sprite_tables(b4, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
@@ -546,8 +760,10 @@ def tables_of(b4, f):
                 continue
             if not N.PLAYER <= v < N.PLAYER_END:
                 continue
+            if any(lo <= v < hi for lo, hi, _ in f.navi_data.values()):
+                continue
             e = next((k for k, hi in ends.items() if hi == v), None)
-            nxt = next((a for a in code if a > v), None)
+            nxt = v + MM_TABLE_SIZES[v][0] if v in MM_TABLE_SIZES else next((a for a in code if a > v), None)
             if e is None or nxt is None:
                 f.decide('literal', f'{v:08X}: a table of MegaMan\'s block past no copied routine\'s end')
                 continue
@@ -555,6 +771,14 @@ def tables_of(b4, f):
     if below:
         f.regions.append((min(below), f.lo, None))
         f.notes.append(f'its tables below its routine, {min(below):08X}-{f.lo:08X}: a region of its own, raw')
+
+
+# The tables of MegaMan's block past the last code walked, by their size (a table past a copied routine is taken to the next
+# code walked): address -> (size, why)
+MM_TABLE_SIZES = {
+    0x080F1DB4: (0x10, 'FireMan\'s states\' (0x080F1D98, MegaMan\'s): panels\' masks by side, two words a side (0x10, 0x0F8800A0; '
+                       '0x30, 0x0F880080, BN4_RANDOM_PANEL_MASKS\' words)'),
+}
 
 
 # A sprite of a list the families' room does not grow (3), loaded by its moved objects, copied into list 4 (which it does):
@@ -772,7 +996,10 @@ def c_navi(f):
                          ('sides', f.sides), ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t\t.{field} = {n}_{field}, .n{field} = {count(field)},')
-    L.append('\t\t.hooks = { ' + ', '.join([f'BN6(0x{NULLSUB_NAVI6:08X})'] * 8) + ' },')
+    hooks = [f'BN6(0x{NULLSUB_NAVI6:08X})'] * 8
+    if f.post:
+        hooks[0] = f'OWN(0x{f.post | 1:08X})'
+    L.append('\t\t.hooks = { ' + ', '.join(hooks) + ' },' + ('   /* (its post hook its update\'s call after its state runner) */' if f.post else ''))
     rec = X4.BN4['stats'] + X4.BN4['stat_size'] * f.first
     L.append(f'\t\t.struct1 = 0x{rec:08X}, .struct2 = 0x{rec:08X},   /* (its V1\'s enemy record: BN4 has no struct1 or struct2) */')
     L.append('\t\t.names = { ' + ', '.join(f'0x{f.first + v:02X}' for v in range(VERSIONS)) + ' },')
@@ -792,6 +1019,13 @@ def c_navi(f):
     if f.coll_arg:
         L.append(f'\t.coll_arg = 0x{f.coll_arg:02X},   /* (its init\'s collision setup\'s r3, BN6\'s actor init\'s {COLL_ARG6:#x}: the hit bits '
                  f'its body gives, read alike by both games\' pre-steps) */')
+    if f.companions:
+        c = f.companions[0]
+        L.append(f'\t.spawned = &{n}_spawned,')
+        head_s = (f'static const XnSpawned {n}_spawned = {{ OWN(0x{c["spawner"] | 1:08X}), 0x{c["word6"]:X}, 0x{COMPANION_AT:X}, '
+                  f'{"true" if f.spawned_sprite else "false"}, {"true" if f.spawned_frame else "false"} }};   '
+                  f'/* (its init\'s tail at its spawn\'s end: its companion, the first kind\'s {c["ty"]:#x}, BN4\'s word {c["word"]:#x}) */')
+        L.insert(L.index(f'static const XNavi bn4_{n} = {{'), head_s + '\n')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 

@@ -68,8 +68,8 @@
                                        * previous type's pool (0x080B73A0-0x080B73AB) */
 /* The engine's routines GutsMan's states reach (tools/xnavirecipe_bn4.py's NAVI_COPIED and bn4_twins.py's pairs; docs/rom/bn4.md,
  * GutsMan derived) */
-#define BN4_NAVI_PALETTE  0x0800B950u /* r0 a number: its byte of 0x0800B9AC times the version's (+4) of 0x0800B9B1, a Navi's init's
-                                       * palette (GutsMan's 2: step 0, palette 0 for every version) */
+#define BN4_NAVI_PALETTE  0x0800B950u /* r0 a number: its byte of BN4_NAVI_PALETTE_NUMBERS times the version's (+4) of BN4_NAVI_PALETTE_VERSIONS, a
+                                       * Navi's init's palette (GutsMan's 2 and FireMan's 5: V1-V3 0, SP 2; BN6's step 0 gives 0 to all) */
 #define BN4_ATTACK_END_CLEAR 0x0800BDAAu /* BN4_ATTACK_END's: AI data +9, +0xA, +0xB, +0x30 and +0x32 zeroed */
 #define BN4_AI_REQUESTS_CLEAR 0x0800BFC0u /* r0 bits: cleared in AI data +0x44 (BN4_AI_REQUESTS; BN4_ATTACK_END's 0x3F) */
 #define BN4_SET_STATUS_GIVEN 0x08013212u /* r0 a status: the collision data's BN4_COLL_STATUS_GIVEN (BN6's twin 0x0801A258, +0x10) */
@@ -83,5 +83,27 @@
 #define BN4_T3_1E_KINDS   0x080D0A60u /* the third kind's 0x1E's kinds (GutsMan's objects), 6 bytes each to its code at 0x080D0A74: its
                                        * speed, its +0x64, animation, collision's, the sound its init plays (+4: 0xA5, 0xA6, 0xA6), the
                                        * status it gives; read by its init by +4 (0x080D0AAE) */
+#define BN4_NAVI_PALETTE_NUMBERS  0x0800B9B1u /* BN4_NAVI_PALETTE's byte by its r0 (GutsMan's 2 and FireMan's 5 give 1), ... */
+#define BN4_NAVI_PALETTE_VERSIONS 0x0800B9ACu /* ... times its byte by the version (+4): 0, 0, 0, 2 (V1-SP) */
+/* FireMan, the second BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, FireMan built) */
+#define BN4_FIREMAN       0x080B7DB4u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_FIREMAN]): its jump table alone, no after-step;
+                                       * init 0x080B7DD5 (its tail spawns his companion and runs his update), update 0x080B7E3F */
+#define BN4_FIREMAN_STATES 0x080B7E5Cu /* his state table: BN4's generic Navi 0-2, his own 3-5 (his companion told, then BN4's generic),
+                                       * his decision 6 (0x080B7EC9), MegaMan's 72-76 as his 7-11 */
+#define BN4_FIREMAN_POST  0x080B81B0u /* his update's call after the runner: his companion told (BN4_FIRE_COMPANION_TELL) where his
+                                       * animation changes (+0x10 against +0x11) */
+#define BN4_FIREMAN_TABLES 0x080B7D98u /* his tables of bytes below his routine, to BN4_FIREMAN */
+#define BN4_FIRE_COMPANION_TYPE 0x57  /* his companion: a first-kind type (no enemy) that draws list 4's 8 on him, his animation's + its +7 */
+#define BN4_FIRE_COMPANION 0x080CC3D8u /* ... its routine; its modes +9: 0 and 4 wait on the battle's appear (4 through BN4's tile buffer
+                                       * 0x02037810), 8 drawn; 8 where the battle state's +0x32 bit 0 is set */
+#define BN4_FIRE_COMPANION_SPAWN 0x080CC5F4u /* ... spawned (r4 its word: list offset, number), its parent at its +0x4C, back r0 */
+#define BN4_FIRE_COMPANION_TELL 0x080CC61Au /* r0 the companion: its +0x11 0xFF, its animation set up again */
+#define BN4_FIREMAN_COMPANION 0x74    /* FireMan's object: his companion */
+#define BN4_ATTACK_END_KEEP 0x0800C9FCu /* BN4_ATTACK_END's kin: the attack's +5 kept at AI data +0x3A first (FireMan's, WoodMan's) */
+#define BN4_SPRITE_STEP   0x08014446u /* unless paused: a new animation set up (+0x11 its +0x10), else the sprite updated; BN6's nearest
+                                       * 0x0801BBF4 updates it in the frame of the set-up too */
+#define BN4_PAUSE_BYTE    0x080078ECu /* the battle's pause byte ([eToolkit +0x40] +9) in r0 (BN6_PAUSE_TEST's twin, flags unset) */
+#define BN4_T3_1A_KINDS   0x080D013Cu /* the third kind's 0x1A's kinds (FireMan's), 6 bytes each, its sprite's list 4 number first */
+#define BN4_FIREMAN_MASKS 0x080F1DB4u /* panels' masks by side his MegaMan state 0x080F1D98 reads (BN4_RANDOM_PANEL_MASKS' words) */
 
 #endif
