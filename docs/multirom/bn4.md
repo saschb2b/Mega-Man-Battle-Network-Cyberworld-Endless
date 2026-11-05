@@ -596,6 +596,8 @@ sounds take from the themes' range are the owner's to confirm.
    `movs` or a table's byte whose pool slot is past 0xFF is routed
    through a small shim that plays its 16-bit number, so every sound
    plays right and no theme slot is lost; built in the recipe, for any
-   BN4 Navi. Not built yet (GutsMan's five sounds take the five low
-   slots): its design in [BN4's Navis in BN6's engine](bn4-navis.md),
-   GutsMan built, His sounds.
+   BN4 Navi. Built for a `movs` (`XvSoundCall`, the generator's
+   wide_sounds), proved on GutsMan's pool given in another order; a
+   table's byte past 0xFF stays a decision of the generator's until a
+   Navi needs it ([BN4's Navis in BN6's engine](bn4-navis.md), GutsMan
+   built, his sounds).

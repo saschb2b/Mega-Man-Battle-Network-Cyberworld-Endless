@@ -253,17 +253,22 @@ what a Soul Navi has more:
   `movs` or a byte, which only five slots take: TopMan and VideoMan name
   six so, one short, and why 0x32 and 0x33 stay the pool's. The owner's
   call of 5 November 2026 settles it: such a sound whose slot is past
-  0xFF plays through a shim of its 16-bit number. Its design, not built
-  yet (no Navi derived so far needs it): a `movs r0` and its call to
-  PlaySound, the call aimed at a shim of the Navi's home (`XV_HOME_SHIMS`)
-  that loads the slot into r0 and branches on to the PlaySound veneer the
-  call had, as a NameID range's shim loads BN6's bounds (`XvRange`,
-  `xvirus_shim_range`); a table's byte read by a shared play (GutsMan's
-  third kind 0x1E's kinds), the byte made the sound's index in a short
-  list of the shim's that maps it to its slot, the play's call aimed at
-  that shim. The proof: a spec of a Navi with such a sound, or GutsMan's
-  pool given in another order for a run, its sounds paired at their high
-  slots.
+  0xFF plays through a shim of its 16-bit number. Built for a `movs r0`
+  and its call to PlaySound (`XvSoundCall`, written by the generator's
+  wide_sounds where a sound's slot is past a byte): the `movs` left as
+  BN4's, the call aimed at a shim of the Navi's home (`xvirus_shim_sound`:
+  `movs r0,#hi; lsls r0,r0,#8; adds r0,#lo; b` the PlaySound veneer the
+  call had), as a NameID range's shim loads BN6's bounds; the song rows'
+  slot is a u16 (`XvSong`). Proved by an experiment (not kept): GutsMan's
+  recipe written with the pool's 0x104 first, his 0xA2 played through the
+  shim (the hooks' sound event 0x104 from his attack's object), and
+  `gutsman_v1` PASSes with his 0xA2 paired at 0x104. It showed a clash the
+  install had not: his collision argument's shim and his code's first
+  shim both at `XV_HOME_SHIMS` (a staged write is not seen by the next's
+  free test), now apart (the collision's past the most his code's shims
+  take, `xvirus_shims_room`). A table's byte past 0xFF (a shared play,
+  GutsMan's third kind 0x1E's kinds) stays a decision of the generator's:
+  its shim would map the byte, made the sound's index, to its slot.
 - **His arm points** (`BN6_ARM_POINTS` reads a list 2 number's record): BN4
   has none to bring, as far as a search reaches: no routine of BN5's arm
   points' body (`0x08015140`, BN6's `0x08018810`) in BN4's first MB,
@@ -394,7 +399,14 @@ reads none of them (the generator's AI tracker): it stays copied with BN4's
 offsets, settled as inert. A Navi whose code reads them would need them
 mapped.
 
-Then: `tools/heap3ds.py` with BN4 present, and the next Navi.
+The New 3DS's heap with GutsMan installed (`python3 tools/heap3ds.py
+--seeds 1-3 --cases bn4,all`): BN6 and BN4 peaked at 94.1 MB of 96 with
+no allocation refused and no crash; all three ROMs read at once at 96.0
+MB, 15 refused in 2 of 3 runs (maps' mirror images, `area_src.c`), as
+[the 3DS's memory](../engine/emulation/3ds-memory.md) measured before
+him: his install writes the core's copy alone, not the heap.
+
+Then: the next Navi.
 
 ### Battle sprites by battle, planned
 
