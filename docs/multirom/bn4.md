@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:01:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -141,17 +141,35 @@ HP carried from round to round with the arena's heal before the first
 alone. The act's card shows the bracket; the prize is the final's
 Guardian Data (his Navi chip, his Soul where Red Sun gives one). It keeps
 BN6's battle untouched and makes the act's last test one that can go the
-other way, which one guardian at 80% HP left no longer is. Its numbers
-(how often, the rounds' bands, a heal between) go through the game-design
-skill and `build.py pacing` when it is built.
+other way, which one guardian at 80% HP left no longer is.
 
 It needs no BN4 Navi to begin: its first bracket can draw from the Navis
 the run already moves (BN6's and BN5's), so its structure ships and is
 measured before BN4's are moved, and BN4's join its pool one by one.
 
+Its numbers went through the game-design skill on 5 November 2026, in a
+concept of their own, [The tournament](../game/tournament.md), nothing
+built. In brief, as recommended: the short net's act 3 in half the runs
+and one of acts 3 to 5 each endless cycle, once a profile has reached the
+Nest; round 1 at about 55% of the act's guardian band and round 2 at
+about 75% (in act 3, act 1's band and then about act 2's), each Navi at
+his own version's HP; no heal between the rounds; a round lost ends the
+run as a guardian does; the rounds paying their results screens and
+memory, the final his Guardian Data; the card naming all three, "???" for
+a Navi never met; the rounds drawn from every moved Navi of the games
+present, each as likely, ProtoMan never; the arena's door the only save.
+Projected for act 3: the final begun at about 75% of MegaMan's HP, one
+bracket in five lost where one guardian in fourteen is, against a target
+of 75 to 90% won. Six calls there are the owner's: how often, from a
+profile's first run, a heal between, a lost round, what the rounds pay,
+and BN4's own bracket screen.
+
 Not chosen: a tournament at home beside the Virus Battler, which would
 repeat its press-on-or-cash-out off the main path and add a walk and
 words where the review asks for fewer.
+
+What BN4 itself shows of a tournament (its bracket screen, driven in romlab)
+and the two ways to show it in a run: [BN4's tournament screens](bn4-tournament.md).
 
 ### Not taken
 
