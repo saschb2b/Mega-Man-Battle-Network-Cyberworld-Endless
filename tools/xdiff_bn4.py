@@ -30,28 +30,46 @@ from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_N
                         SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name, u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
+XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
+XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
+RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
+
+
+def recipes_text():
+    """BN4's recipes as the generators write them: the families' (tools/xrecipe_bn4.py) and the Navis'
+    (tools/xnavirecipe_bn4.py), one text"""
+    out = []
+    for name in RECIPES:
+        path = os.path.join(ROOT, 'src', 'emu', name)
+        if os.path.exists(path):
+            out.append(open(path).read())
+    return '\n'.join(out)
 
 
 def bn4_families():
     """BN4's families moved into BN6's engine, from their recipe (src/emu/xvirus_bn4.c, the generator's numbers): each its
     BN4 object type (.src_ai: its first-kind type, BN4 having no AI index) and its six BN4 enemy ids with BN6's for them
     (.names, .first_id: Billy's 13-18 BN6's 0x2C0-0x2C5)"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     # (each family's struct, `static const XVirusFamily bn4_NAME = { ... };`, and the rows it names: its effects, `.effects =
     # NAME_effects` and `static const XvId NAME_effects[] = { { 0x15, 0x90 }, ... }`, BN4's id and BN6's; a family naming
-    # none has none, so each family's are its own, never the next one's)
+    # none has none, so each family's are its own, never the next one's. A Navi's, `static const XNavi bn4_NAME = { .code =
+    # { ... }, ... };`, its ids from XN_BN4_FIRST_ID, four)
     rows = {k: v for k, v in re.findall(r'static const Xv\w+ (\w+)\[\] = \{(.*?)\};', text, re.S)}
     out = []
-    for body in re.findall(r'static const XVirusFamily \w+ = \{(.*?)\n\};', text, re.S):
-        src, first, names = (re.search(p, body, re.S) for p in (r'\.src_ai = (0x[0-9A-Fa-f]+)', r'\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+)',
+    for body in re.findall(r'static const (?:XVirusFamily|XNavi) \w+ = \{(.*?)\n\};', text, re.S):
+        navi = '.versions = ' in body
+        base = XN_BN4_FIRST_ID if navi else XV_FIRST_ID
+        src, first, names = (re.search(p, body, re.S) for p in (r'\.src_ai = (0x[0-9A-Fa-f]+)',
+                                                                 r'\.first_id = (?:XV_FIRST_ID|XN_BN4_FIRST_ID) \+ (0x[0-9A-Fa-f]+)',
                                                                  r'\.names = \{ ([^}]*) \}'))
         eff = re.search(r'\.effects = (\w+)', body)
         effects = {int(a, 0): int(b, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', rows.get(eff.group(1), ''))} \
             if eff else {}
         if src and first and names:
             ids = [int(x, 0) for x in names.group(1).split(',')]
-            out.append(dict(type=int(src.group(1), 0), ids={v: XV_FIRST_ID + int(first.group(1), 0) + k for k, v in enumerate(ids)},
-                            effects=effects))
+            out.append(dict(type=int(src.group(1), 0), ids={v: base + int(first.group(1), 0) + k for k, v in enumerate(ids)},
+                            effects=effects, navi=navi))
     return out
 
 
@@ -60,7 +78,7 @@ def bn4_moved_types():
     the dispatch's number, XV_TYPE_MOVED, BN4's own number): {(kind, the dispatch's number): BN4's own}, the thunder's copy
     (BN6's third-kind 0x2A) among them. A dispatched object's type reads in the BN6 trace as the dispatch's side-table
     number (xdiff_snap.dispatched: Spikey's moved 0x30 runs at 0xE0); read back as BN4's own, so each meets BN4's"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     return {(int(k), int(a, 0)): int(of, 0) for k, a, of in
             re.findall(r'\{ (\d), (0x[0-9A-Fa-f]+), XV_TYPE_MOVED, (0x[0-9A-Fa-f]+) \}', text)}
 
@@ -80,11 +98,11 @@ def bn4_sprites(rom4):
     if not lists or not rom4:
         return []
     out = []
-    for lst, idx, off, room in rows:
+    for lst, idx, room_base, off, room in rows:
         word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
         base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
         lz = bool(word & 0x80000000)
-        out.append((None if lz else base, XV_ART + int(off, 16), int(room, 16), key,
+        out.append((None if lz else base, (XN_BN4_ART if room_base == 'XN_BN4_ART' else XV_ART) + int(off, 16), int(room, 16), key,
                     (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
     return out
 
@@ -92,10 +110,10 @@ def bn4_sprites(rom4):
 def sprite_rows():
     """BN4's sprite lists (src/core/rom.c's BN4 layout, sprite_lists) and the recipe's XvSprite rows (src/emu/xvirus_bn4.c:
     BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites'"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
-    rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, XV_ART \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
+    rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (XV_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
     return (0x08000000 + int(m.group(1).rstrip('uU'), 0) if m else None), rows
 
 
@@ -1000,5 +1018,14 @@ def one(name, spec, a, canon, run_xdiff, work):
         if spec.get('again') else 'fought twice, its traces the same'
     if spec.get('again'):   # (the comparator's own test: the change must be found, at the frame it shows)
         verdict = 'PASS' if verdict == 'FAIL' else 'FAIL'
+    rec = spec.get('verdict')
+    if rec and not spec.get('poke') and not spec.get('call'):
+        # (a verdict the spec records while its port is under way, as tools/xdiff.py's own: held where the run ends the same,
+        # at the same frame; a change either way is the suite's to see, and a mutation's run, its pokes or calls, is judged
+        # as any other)
+        held = verdict == rec['is'] and at == rec.get('at')
+        print(f'{name}: {verdict}{f" at t{at}" if at is not None else ""} ({kind}: BN4\'s battle {what}; its recorded verdict, '
+              f'{rec["is"]} at t{rec.get("at")}, {"held" if held else "NOT HELD"}: {rec["why"]})')
+        return verdict, 'recorded' if held else kind
     print(f'{name}: {verdict}{f" at t{at}" if at is not None else ""} ({kind}: BN4\'s battle {what})')
     return verdict, kind

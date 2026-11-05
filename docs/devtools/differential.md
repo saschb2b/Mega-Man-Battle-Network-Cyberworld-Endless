@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:12:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:15:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -962,19 +962,29 @@ format, its game 4: the trace's header names it):
   with 2000 HP, fought twice: 1200 fight frames the same in every byte
   (PASS), his objects from t265 and his machine gun's shots every 11
   frames in them. A Navi's object carries an AI data of its own (his
-  side's, BN4's 0xC0 bytes), which the trace lays out as MegaMan's: the
-  attack's variables (+0x70) at BN6's +0xA0, the bytes no part names
-  from BN6's spare (+0xF0) on. Before `gutsman_v1` compares his move into
-  BN6's engine ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
-  GutsMan derived) the trace and `tools/xdiff_bn4.py` need, each in a
-  comparator commit of its own: a Navi's own block (BN4's +0x64, 12
-  bytes, `BN4_AI_NAVI`) at BN6's +0x80, where his port keeps it, checked
-  against MegaMan's AI data in the families' specs, which share the
-  layout; his object type (BN4's own 0x0A against BN6's Navi object, type
-  0 of the first kind, by his enemy id's triple, actor type 1); his
-  CurActions by his table (BN4's 6-10 BN6's 8-12, MegaMan's 67-70 among
-  them as his 7-10); and the virus masks (`BN4_LACKS`: a virus's AI data
-  and its pointer) left off a Navi, whose AI data both games keep.
+  side's, BN4's 0xC0 bytes), which the trace lays out as MegaMan's: a Soul
+  Navi's own block (BN4's +0x64, 12 bytes, `BN4_AI_NAVI`) at BN6's +0x80
+  (`BN6_AI_NAVI_STATE`), where his port keeps it, the attack's variables
+  (+0x70) at BN6's +0xA0, the bytes no part names from BN6's spare (+0xF0)
+  on; MegaMan's AI data shares the layout, and every BN4 family spec
+  PASSes with it. `tools/xdiff_bn4.py` reads the Navis' recipes
+  (`src/emu/xnavi_bn4.c`) beside the families': his ids (BN4's 0x84-0x87
+  BN6's 0x384-0x387, `src/dev/xdiff_bn4.c` `xd4_bn6_id` too), his effects,
+  sprites and moved types; his object type and CurActions read by the
+  families' rule (his type BN6's 0, his own from 6 BN6's from 8, MegaMan's
+  67-70 among them as his 7-10). `tools/xdiff_snap.py` reads a pointer
+  into a BN4 AI data by BN4's 0xC0 bytes a side (a Navi's after MegaMan's,
+  not within his), and a pointer into BN4's Navis' moved code
+  (`FREE_BN4_NAVI_CODE`) as the ROM's. The virus masks (`BN4_LACKS`) hold
+  only where BN4's side has none, so a Navi's AI data, which both games
+  keep, is compared whole. A BN4 spec may record its verdict while its
+  port is under way (`"verdict"`, as the chips' specs: held where the run
+  ends the same at the same frame, never for a mutation's run).
+  `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  GutsMan built) runs both battles to their 1200 frames and FAILS at t1,
+  recorded: his collision's setup argument (BN4's 0x21, BN6's actor init's
+  3), the AI data's fields BN6's Navi setup gives (+0x00, +0x0C, +0x0E,
+  +0x78, +0x7F) and BN4's +0x50, his sprite's count.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
