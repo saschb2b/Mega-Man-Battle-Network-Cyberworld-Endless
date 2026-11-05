@@ -106,4 +106,24 @@
 #define BN4_TEXT_COMMANDS 0x0804E900u /* the text engine's commands by byte - 0xE5 (0x0804E13C) */
 #define BN4_TEXT_TOURNAMENT 0xFC      /* its sub-commands by the next byte (0x08050434): `FC 01 t script argument` BN4_OPEN_BRACKET */
 
+/* The bracket moved into BN6 (src/emu/xbracket.h; docs/multirom/bn4-tournament.md, Moved into BN6): what the move reads besides the
+ * screen's own, found by tools/xrecipe_bracket.py's walk and proved by tools/xbracket.py */
+#define BN4_MAP_LEAVE     0x08005040u /* the map left for a screen (the sub-state BN4_GAMESTATE_TO_BRACKET's call before the set-up): its
+                                       * sounds stopped, BN4_BG_PRESETS_SET with BN4_BRACKET_BG_PRESET among its calls, DISPCNT 0x40 its last */
+#define BN4_BG_PRESETS_SET 0x08001BE8u /* r0 a preset: its 8 bytes (BG0CNT-BG3CNT) from BN4_BG_PRESETS into the render info ([eToolkit +8] +4) */
+#define BN4_BG_PRESETS    0x08001C04u /* the BG controls' presets, 8 bytes each */
+#define BN4_BRACKET_BG_PRESET 0x13    /* ... the bracket's (BN4_MAP_LEAVE's movs r0,#0x13) */
+#define BN4_BRACKET_BLEND 0x02009440u /* the bracket's line blend values, 0x140 bytes, sent to BLDALPHA line by line by the HBlank DMA */
+#define BN4_BRACKET_TILES_RAM 0x0202E000u /* BN4_BRACKET_TILES unpacked (its LZ77 header's size, 0x26C4), copied to 0x06008020 */
+#define BN4_HBLANK_DMA_SET 0x080060A4u /* an HBlank DMA set: r0 its source, r1 its register, r2 its count, r3 its control into BN4_HBLANK_DMA */
+#define BN4_HBLANK_DMA    0x02008920u /* ... its state (+0 on, +1 count, +2 control, +4 source, +8 register; 0x080060BC stops it) */
+#define BN4_MENU_SPRITE_SET 0x08002908u /* a menu sprite's sprite (r0 its index in BN4_MENU_SPRITE_PTRS, r5 the sprite) */
+#define BN4_BG_FILL_RECT  0x08001E18u /* a BG map's rect filled with r3 (r0, r1 its place, r2 the BG, r4, r5 its size): a veneer to IWRAM
+                                       * 0x03005A5D, whose body BN6's 0x03005EBB has (its veneer 0x080018D0) */
+#define BN4_BRACKET_CYCLES 0x08043814u /* the palette cycles' lists BN4_PALETTE_ANIM takes: the lit lines' flash, then the titles' (to 0x08043884) */
+#define BN4_BRACKET_SONG_SITE 0x08043A50u /* movs r0,#BN4_SONG_BRACKET before the music's start, in the screen's start */
+#define BN4_FREE_SPAWN_LISTS 0x08044844u /* the Free Tournament's menu sprites' spawn lists (types 0x3C and 0x3D), 4 bytes an entry, 0xFF ending */
+#define BN4_BRACKET_ART_END 0x086C792Cu /* the end of the bracket's art: BN4_BRACKET_TILES, BN4_BRACKET_PALETTE and its cycles' colours, the six
+                                       * maps of BN4_BRACKET_MAPS (0x4B0 bytes each) one after another */
+
 #endif
