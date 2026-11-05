@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:25:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -975,9 +975,11 @@ format, its game 4: the trace's header names it):
   67-70 among them as his 7-10). `tools/xdiff_snap.py` reads a pointer
   into a BN4 AI data by BN4's 0xC0 bytes a side (a Navi's after MegaMan's,
   not within his), and a pointer into BN4's Navis' moved code
-  (`FREE_BN4_NAVI_CODE`) as the ROM's. The virus masks (`BN4_LACKS`) hold
-  only where BN4's side has none, so a Navi's AI data, which both games
-  keep, is compared whole. A BN4 spec may record its verdict while its
+  (`FREE_BN4_NAVI_CODE`) as the ROM's. The virus masks (`BN4_LACKS`), whose
+  reasons are a virus's (BN4 keeps no AI data for one), never hold for a
+  Navi's AI data or its pointer (`NAVI_NAMES`, his recipe's ids): his AI
+  data both games keep is compared whole (his AI index read by the
+  comparator's own map). A BN4 spec may record its verdict while its
   port is under way (`"verdict"`, as the chips' specs: held where the run
   ends the same at the same frame, never for a mutation's run).
   `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),

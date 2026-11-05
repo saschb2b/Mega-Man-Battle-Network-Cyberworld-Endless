@@ -339,9 +339,23 @@ BN4_LACKS = [
 ]
 
 
+# BN6's NameIDs of BN4's moved Navis (their recipes', bn4_families' navi=True: one() sets them): a Navi's AI data is BN4's
+# too (his side's, BN4_AI_DATA), so the virus masks of BN4_LACKS, which explain a virus's AI data BN4 has none of, never
+# hold for his
+NAVI_NAMES = set()
+
+
+def navi_role(role):
+    """whether a role is one of BN4's moved Navis' objects (its role's NameID, 'T1:0x384#0', among NAVI_NAMES)"""
+    m = re.match(r'T1:0x([0-9a-fA-F]+)#', role) if isinstance(role, str) else None
+    return bool(m) and int(m.group(1), 16) in NAVI_NAMES
+
+
 def lacks(d, ta, tb):
     """the BN4_LACKS mask that explains d (BN4's side a, BN6's b), None where none does"""
     if ta['game'] != 4 or tb['game'] != 6:
+        return None
+    if navi_role(d.role) and (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
         return None
     for m in BN4_LACKS:
         if d.part != m['part']:
@@ -998,6 +1012,8 @@ def one(name, spec, a, canon, run_xdiff, work):
         fams = bn4_families()
         canon = Bn4Canon(canon, fams, [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x])
         canon.fams = fams
+        NAVI_NAMES.clear()
+        NAVI_NAMES.update(v for f in fams if f.get('navi') for v in f['ids'].values())
         rom4 = os.path.join(work, 'rom', 'bn4.gba')
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
         rom6 = os.path.join(work, 'rom', 'bn6.gba')
