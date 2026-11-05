@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "boss.h"
+#include "bracket.h"
 #include "cinema.h"
 #include "director_folder.h"
 #include "director_layer.h"
@@ -147,6 +148,37 @@ static const char *card_motto(int biome, SDL_Color *accent) {
 	return dark ? lib_card_line : guardian_area_motto(biome);
 }
 
+/* A Navi as the act's card names him: with his version's mark where
+ * MegaMan has met him in any run, "???" where he has not, and where only
+ * a Navi on the net named the final, his name and a "?" */
+static void card_navi(char *out, size_t n, int navi, int version, bool heard) {
+	static const char *const marks[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
+	const char *mark = guardian_older(navi) ? older[version < 0 || version > 3 ? 0 : version] : marks[version < 0 || version > 2 ? 0 : version];
+	bool known = guardian_known(navi);
+	if (!known && !heard) snprintf(out, n, "???");
+	else snprintf(out, n, "%s%s%s", guardian(navi)->name, known ? mark : "", known ? "" : "?");
+}
+
+const char *bracket_round_label(int round) {
+	static const char *const labels[3] = { "Round 1", "Round 2", "The final" };
+	return labels[round < 0 ? 0 : round > 2 ? 2 : round];
+}
+
+/* The tournament's bracket on the act's card in the guardian's place
+ * (docs/game/tournament.md, The card): its rounds in order, the final
+ * last; false where the act holds none */
+static bool bracket_card(int biome, char *rounds, size_t n, char *final, size_t m) {
+	RunBracket b;
+	if (run.side_kind != LAYER_NORMAL || !bracket_of(run.depth, run_guardian(biome), &b)) return false;
+	char one[20], two[20], last[32];
+	card_navi(one, sizeof one, b.navi[0], b.version[0], false);
+	card_navi(two, sizeof two, b.navi[1], b.version[1], false);
+	card_navi(last, sizeof last, b.navi[2], b.version[2], guardian_heard());
+	snprintf(rounds, n, "1: %s   2: %s", one, two);
+	snprintf(final, m, "Final: %s", last);
+	return true;
+}
+
 void area_card(void) {
 	char act[48];
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
@@ -181,7 +213,11 @@ void area_card(void) {
 	snprintf(act + k, sizeof act - k, "%s", nets_card(biome));
 	SDL_Color accent;
 	const char *motto = card_motto(biome, &accent);
-	cinema_card(act, guardian_area_name(biome), motto, ahead[0] ? ahead : NULL, accent, 200);
+	/* (a tournament in the guardian's place: its bracket, two lines) */
+	char final[48];
+	bool bracket = !(D.objs.guardian.navi && boss_beaten()) && bracket_card(biome, ahead, sizeof ahead, final, sizeof final);
+	cinema_card(act, guardian_area_name(biome), motto, ahead[0] ? ahead : NULL, accent, bracket ? 240 : 200);
+	if (bracket) cinema_card_more(final);
 }
 
 /* Leaving an area past its beaten guardian. */

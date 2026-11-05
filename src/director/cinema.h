@@ -59,6 +59,9 @@ void cinema_title_grand(const char *top, const char *name, const char *sub, cons
 void cinema_whiteout(int in, int hold, int out);
 /* A card between areas: `small` over `big`, then up to two lines. */
 void cinema_card(const char *small, const char *big, const char *line1, const char *line2, SDL_Color accent, int frames);
+/* ... and a third line under them, for the card just begun (a
+ * tournament's final: docs/game/tournament.md) */
+void cinema_card_more(const char *line3);
 /* A short note in the picture's top right corner for `frames` on the
  * map ("Run saved"). */
 void cinema_note(const char *text, int frames);

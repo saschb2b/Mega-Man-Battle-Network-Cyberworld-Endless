@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bracket.h"
 #include "data.h"
 #include "debug.h"
 #include "flags.h"
@@ -167,6 +168,19 @@ static void draft_make(ScriptsDraft *draft) {
 	}
 }
 
+/* The tournament's bracket where it stands in his place, its rounds' Navi
+ * chips' scripts (docs/game/tournament.md, The prize) */
+static void bracket_scripts(TextArchive *text, GuardianStage *g) {
+	g->round_prize[0] = g->round_prize[1] = -1;
+	g->bracket = run.side_kind == LAYER_NORMAL && layer.boss_layer && !super_boss(g->navi) && bracket_of(run.depth, g->navi, &g->rounds);
+	for (int r = 0; r < 2 && g->bracket; ++r) {
+		int code, chip = bracket_chip(g->rounds.navi[r], g->rounds.version[r], run.depth, &code);
+		ChipInfo ci = { 0 };
+		if (chip > 0) chip_info(chip, &ci);
+		if (chip > 0) g->round_prize[r] = ta_round_prize(text, chip, ci.name, code);
+	}
+}
+
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g) {
 	const Guardian *gd = guardian_faced(o->param);
 	g->navi = o->param;
@@ -191,6 +205,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
 		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);
+	bracket_scripts(text, g);
 	g->prelude = ta_music(text, super_boss(g->navi) ? GUARDIAN_PRELUDE : guardian_prelude_song);   /* (a super boss's staging BN6's: docs/game/bosses/) */
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);

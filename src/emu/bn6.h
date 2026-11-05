@@ -27,6 +27,12 @@
 #define BN6_MAP_ID            BN6_MAP_GROUP          /* (MapId: MapGroup and MapNumber as a u16) */
 #define BN6_LAST_MAP          (BN6_GAMESTATE + 0x0C) /* LastMapGroup and its number, a u16 map id */
 #define BN6_MAP_PAUSED        (BN6_GAMESTATE + 0x0A) /* BattlePaused: the map's objects stand still, MegaMan too (none updates without its pause flag) */
+#define BN6_ENTER_X           (BN6_GAMESTATE + 0x24) /* PlayerX, PlayerY, PlayerZ (16.16): where EnterMap puts MegaMan (bn6f
+                                                       * spawnOWPlayerObjectForEnterMap_809e064), the map entered again after a
+                                                       * screen of its own (the bracket moved, xbracket.h) too */
+#define BN6_ENTER_Y           (BN6_GAMESTATE + 0x28)
+#define BN6_ENTER_Z           (BN6_GAMESTATE + 0x2C)
+#define BN6_ENTER_FACING      (BN6_GAMESTATE + 0x30) /* FacingDirectionAfterWarp: the eighth he faces there (a u32, its byte read) */
 #define BN6_NPC_CHAT          (BN6_GAMESTATE + 0x10) /* Unk_10: 1 from A at an NPC till its chat ends (bn6f sub_809DF00, sub_809D7D8): START waits */
 #define BN6_SAVED_X           (BN6_GAMESTATE + 0x34) /* SavedRealWorldX: where Lan jacked in, 16.16, which BN6's jack-out returns him to */
 #define BN6_SAVED_Y           (BN6_GAMESTATE + 0x38) /* SavedRealWorldY, 16.16 */

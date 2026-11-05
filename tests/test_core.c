@@ -25,6 +25,7 @@
 #include "qr.h"
 #include "rom.h"
 #include "run.h"
+#include "bracket.h"
 #include "analytics.h"
 #include "audio_pace.h"
 #include "analytics_online.h"
@@ -114,6 +115,8 @@ Profile profile;
  * guardian is the run's pick) */
 int run_dress(int biome) { return biome; }
 int run_guardian(int biome) { return run.boss_order[biome]; }
+/* (no ROM, so no BN4 screen: no bracket where its words ask, bracket.h) */
+bool bracket_here(int depth) { (void)depth; return false; }
 static uint32_t rng_s = 1;
 /* (as the game's: the seed mixed first) */
 void rng_seed(uint32_t s) {
