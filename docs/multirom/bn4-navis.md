@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -271,9 +271,9 @@ against MegaMan idle (2000 HP), fought twice, is the same at every one of
 trace for a Navi): GutsMan V1 alone at (5,2) against MegaMan idle at (2,2)
 with 2000 HP, 1200 fight frames, his BN4 battle against his move. Both
 battles run their 1200 frames and are traced and compared, his object and
-AI data matched by role. It is the same from t1 to t264 and FAILS at
-t265, recorded so in the spec while the port is under way (the suite holds
-the frame). What took it there, one root cause at a time:
+AI data matched by role, its verdict recorded in the spec while the port
+is under way (the suite holds the frame). What took it to t266, one root
+cause at a time:
 
 1. **His collision's setup argument** (`BN6_COLL_SETUP_ARG`, the bits a hit
    of his body ORs into the struck's): BN4's init passes 0x21
@@ -307,20 +307,25 @@ the frame). What took it there, one root cause at a time:
    only once his code's room (`XN_BN4_CODE`) was among the spec's
    families' (`src/dev/xdiff_events.c`); 73 draws replayed since.
 
-**At t265**, the first object his attack spawns, BN4's third-kind 0x1C
-(the dispatch's 0xE6), parts on +0x3C (BN4 a pointer to the battle state,
-BN6 3), +0x93, +0x9E and +0xB8. Read so far: +0x3C is the spawn's r3,
-which his spawner (`0x080D0894`: `push {r0,r1,r2,r5}`, `movs r0,#0x1c`,
-the spawn) never sets: BN4's spawn (`0x08003210`) stores r1-r3 at +0x34,
-+0x38, +0x3C and r4 at +4, so each game keeps its caller's leftover
-register there (BN4's the battle state's pointer, BN6's 3), and no code of
-the object reads it, the kind of difference the comparator's
-`spawn_leftovers` explains for BN5's moved types (its rule to take BN4's
-battle-state leftover). +0x93, +0x9E and +0xB8 are its sprite state, the
-slot's last occupant's (its init and update set up no sprite), which the
-BN5 comparator marks as such (`Obj.leftover`, from the spawn and sprite
-events) and the BN4 one does not yet. Both are comparator work, in their
-own commits; the next unit.
+5. **His attack's object at t265**, BN4's third-kind 0x1C (the dispatch's
+   0xE6): its +0x3C is the spawn's r3, which his spawner (`0x080D0894`:
+   `push {r0,r1,r2,r5}`, `movs r0,#0x1c`, the spawn) never sets; BN4's
+   spawn (`0x08003210`) stores r1-r3 at +0x34, +0x38, +0x3C and r4 at +4,
+   so each game keeps its caller's leftover register there (BN4's the
+   battle state's pointer, BN6's 3), and no code of the object reads it:
+   allowed (legit.json's bn4 allowed, `spawn_leftover`). Its sprite state
+   is the slot's last occupant's (it sets up no sprite), now compared from
+   its sprite's set-up on in BN4's comparator as in BN5's (`leftovers`).
+
+It is the same from t1 to t265 and FAILS at t266, recorded: a frame after
+his attack shakes the screen (`0x0802608C`, BN6's `0x080302A8` the same
+body: the shake's strength and frames at the toolkit's +0xC's +0xE and
++0xC), his sprite state's screen place (+0x9C, +0x9E, +0x9F) takes each
+engine's shake offset, BN4's 0, -1, +2, -1, 0, +2 against BN6's 0, +1, +2,
+-1, 0, +1: each game's shake applies its own pattern by frame. The next
+unit: the shake's per-frame routine read in both games (its pattern a
+table or a draw), then fixed where the port's is wrong or allowed where
+each engine's is its own (MegaMan's sprite moves with it too).
 
 The attack's end's clear of his AI data's +9, +0xA, +0xB, +0x30 and +0x32
 (`BN4_ATTACK_END_CLEAR`, copied with BN4's offsets) is not settled: in
@@ -331,7 +336,7 @@ in the map. The one BN6 routine of the clear's shape (`ldr r3,[r5,#0x58]`,
 calls `0x0800FFEE`: a lead for the same fields at BN6's offsets, not read
 through. The spec has not reached an attack's end yet.
 
-Then: t265 at its root and each divergence after, the spec worked to PASS,
+Then: t266 at its root and each divergence after, the spec worked to PASS,
 its recorded verdict removed, mutations that break the port (a CurAction,
 an AI data block, a sound's slot) each caught, and `tools/heap3ds.py` with
 BN4 present.

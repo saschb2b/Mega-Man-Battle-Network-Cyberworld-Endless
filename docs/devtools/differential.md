@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:25:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -981,12 +981,20 @@ format, its game 4: the trace's header names it):
   data both games keep is compared whole (his AI index read by the
   comparator's own map). A BN4 spec may record its verdict while its
   port is under way (`"verdict"`, as the chips' specs: held where the run
-  ends the same at the same frame, never for a mutation's run).
+  ends the same at the same frame, never for a mutation's run). An object
+  spawned while the hooks watched that has set up no sprite since holds
+  the slot's last occupant's sprite state in each game, compared from its
+  sprite's set-up on (`leftovers`, as BN5's `Obj.leftover`), and a moved
+  object's word its spawn took from a register its caller never set is
+  each game's leftover, allowed by its rule with both paths
+  (`spawn_leftover`: GutsMan's attack's 0x1C's +0x3C).
   `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
-  GutsMan built) runs both battles to their 1200 frames and FAILS at t1,
-  recorded: his collision's setup argument (BN4's 0x21, BN6's actor init's
-  3), the AI data's fields BN6's Navi setup gives (+0x00, +0x0C, +0x0E,
-  +0x78, +0x7F) and BN4's +0x50, his sprite's count.
+  GutsMan built) runs both battles to their 1200 frames, the same from t1
+  to t265 (his own collision argument ported, each game's own AI
+  bookkeeping allowed on a Navi, `navi_ai`, his opening count by the
+  frame's clock, his draws keyed by his code's room), and FAILS at t266,
+  recorded: the screen's shake on his sprite's place, each engine's own
+  pattern, unread.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
