@@ -241,6 +241,42 @@ def panel_fields(f):
                     break
 
 
+# A side's player read inline from the battle state ([eToolkit +0x18], both games'): BN4's players a word each from +0x44
+# (BN4_BATTLE_PLAYERS: MegaMan's side's first, the other's next, as BN4's getter 0x0800C456 reads them), BN6's a word every
+# 0x10 bytes from +0xD0 by side (BN6_BATTLE_PLAYERS, BN6_BATTLE_PLAYER_STEP; its getter 0x080103BC). An index made by
+# lsls #2 and adds #0x44 is given BN6's shift and base: BN4's index (its side ^ MegaMan's ^ 1) is the side wanted where
+# MegaMan's side is 0, as in every battle a BN4 Navi is fought in (none a NetBattle's)
+PLAYERS4, PLAYERS6 = (0x44, 2), (0xD0, 4)
+
+
+def battle_players(f):
+    """a side's player read from the battle state by an index (PLAYERS4): its shift and base BN6's (PLAYERS6)"""
+    for e, w in sorted(f.walks.items()):
+        addrs = sorted(w.insns)
+        state = {}   # (a register holding eToolkit, then the battle state)
+        for k, a in enumerate(addrs):
+            i = w.insns[a]
+            if i.form == 'hi_mov' and i.f[1] == 10 and i.f[0] < 8:
+                state[i.f[0]] = 'toolkit'
+                continue
+            if i.form == 'ldr' and state.get(i.f[1]) == 'toolkit' and i.f[2] == 0x18:
+                state[i.f[0]] = 'battle'
+                continue
+            if i.form == 'ldr_r' and state.get(i.f[1]) == 'battle' and k >= 2:
+                sh, base = w.insns[addrs[k - 2]], w.insns[addrs[k - 1]]
+                ro = i.f[2]
+                if sh.form == 'lsls' and sh.f[:2] == (ro, ro) and base.form == 'adds8' and base.f[0] == ro and \
+                        (base.f[1], sh.f[2]) == PLAYERS4:
+                    why = 'a side\'s player read from the battle state: BN4 +0x44 a word each, BN6 +0xD0 0x10 bytes each'
+                    f.imms.append(dict(at=sh.at, form='THUMB_LSLS', rd=ro, rn=ro, was=PLAYERS4[1], now=PLAYERS6[1], why=why))
+                    f.imms.append(dict(at=base.at, form='THUMB_ADDS', rd=ro, rn=0, was=PLAYERS4[0], now=PLAYERS6[0], why=why))
+                else:
+                    f.decide('battle', f'{a:08X}: a word of the battle state read by an index BN4\'s players\' form does not make')
+            for r in range(8):
+                if T.writes(i, r):
+                    state.pop(r, None)
+
+
 def table_sounds(b4, b6, f):
     """its sounds named by a table's bytes (SOUND_TABLES): each kind's BN6's song of its number where the same, else its
     slot of BN6's (xrecipe_bn4.SOUND_SLOTS) as a byte of the table's copy, else the owner's call; the play's 'made otherwise'
@@ -374,6 +410,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.decisions = [d for d in f.decisions if not (d[0] == 'curaction' and d[1].startswith(f'{NAVI4["set_action"]:08X}:'))]
     ai_imms(f)
     panel_fields(f)
+    battle_players(f)
     set_action_imms(f)
     X4.spawns_of(f, alloc)
     X4.pair_calls(f, pairs)
