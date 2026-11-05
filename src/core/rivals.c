@@ -4,8 +4,10 @@
 
 #include "save_blob.h"
 
-#define RIVALS_MAGIC 0x43575232u /* "CWR2": a record with how the last battle ended */
-#define RIVALS_MAGIC_1 0x43575231u /* "CWR1": who won and how often, alone */
+#define RIVALS_MAGIC 0x43575233u /* "CWR3": BN4's Navis' records too (RIVAL_NAVIS) */
+#define RIVALS_MAGIC_2 0x43575232u /* "CWR2": a record with how the last battle ended, navis 0 to RIVAL_NAVIS_2 - 1 */
+#define RIVALS_MAGIC_1 0x43575231u /* "CWR1": who won and how often, alone, as many */
+#define RIVAL_NAVIS_2 32           /* the navis the first two versions kept */
 
 static Rival rivals[RIVAL_NAVIS];
 static bool loaded;
@@ -15,17 +17,28 @@ static void store(void) { save_write_blob("rivals.sav", RIVALS_MAGIC, rivals, si
 /* The first version's records, their counts kept and how their last
  * battles went not known; false where there is none */
 static bool load_first(void) {
-	struct { int met, megaman_won, navi_won, last; } old[RIVAL_NAVIS];
+	struct { int met, megaman_won, navi_won, last; } old[RIVAL_NAVIS_2];
 	if (!save_read_blob("rivals.sav", RIVALS_MAGIC_1, old, sizeof old)) return false;
 	memset(rivals, 0, sizeof rivals);
-	for (int i = 0; i < RIVAL_NAVIS; ++i)
+	for (int i = 0; i < RIVAL_NAVIS_2; ++i)
 		rivals[i] = (Rival){ old[i].met, old[i].megaman_won, old[i].navi_won, old[i].last, 0, 0, 0 };
 	store();
 	return true;
 }
 
+/* The second version's records, navis 0-31, each kept whole, none yet of
+ * the navis past them (BN4's); false where there is none */
+static bool load_second(void) {
+	Rival old[RIVAL_NAVIS_2];
+	if (!save_read_blob("rivals.sav", RIVALS_MAGIC_2, old, sizeof old)) return false;
+	memset(rivals, 0, sizeof rivals);
+	memcpy(rivals, old, sizeof old);
+	store();
+	return true;
+}
+
 void rivals_load(void) {
-	if (!save_read_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals) && !load_first()) memset(rivals, 0, sizeof rivals);
+	if (!save_read_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals) && !load_second() && !load_first()) memset(rivals, 0, sizeof rivals);
 	loaded = true;
 	/* Colonel was kept as navi 17, the enemy table's unnamed navi, before
 	 * this version: his record moves to 18 */
