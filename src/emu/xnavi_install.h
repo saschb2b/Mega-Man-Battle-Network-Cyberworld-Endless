@@ -34,5 +34,8 @@ bool xnavi_install(const XNavi *n);
 /* Enemy id `id` of BN5's (a Navi's version) as the engine has it once its
  * Navi is installed; -1 where it is not. */
 int xnavi_bn6_id(int id);
+/* ... and BN4 Red Sun's enemy id `id` (a Navi's version: his V1 the first of four, BN4_NAVI_FIRST_ID on) once his Navi is
+ * installed (where BN4's ROM is read, after its families: xinstall.c); -1 where it is not */
+int xnavi_bn4_id(int id);
 
 #endif

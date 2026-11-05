@@ -26,7 +26,7 @@ void boss_title(int navi, int version, int round) {
 	static const char *const suffix[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
 	char name[40], top[48];
 	/* (BN5's by its own versions' names) */
-	if (guardian_older(navi)) snprintf(name, sizeof name, "%s%s", gd->name, older[version < 0 || version > 3 ? 0 : version]);
+	if (guardian_older(navi) || guardian_bn4(navi)) snprintf(name, sizeof name, "%s%s", gd->name, older[version < 0 || version > 3 ? 0 : version]);
 	else snprintf(name, sizeof name, "%s%s", gd->name, suffix[version < 0 || version > 2 ? 0 : version]);
 	snprintf(top, sizeof top, "Guardian of %s", guardian_area_in_text(layer.biome, run.side_kind));
 	/* (a tournament's round over his name: docs/game/tournament.md, The card) */

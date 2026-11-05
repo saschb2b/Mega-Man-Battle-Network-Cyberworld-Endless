@@ -9,6 +9,7 @@
 #include "rom.h"
 #include "run.h"
 #include "text.h"
+#include "xguardian_bn4.h"
 
 /* Mugshots share their index with the Navi's overworld sprite (list 6);
  * Gregar has none for Falzar's Navis. Pose 24 is the signature move the
@@ -61,6 +62,8 @@ bool guardian_known(int navi) {
 
 const Guardian *guardian(int navi) {
 	static const Guardian unknown = { "???", "Guardian", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 200 };
+	/* (BN4's by the proved Navis' list, xguardian_bn4.h) */
+	if (guardian_bn4(navi)) return xguardian_bn4_look(navi) ? xguardian_bn4_look(navi) : &unknown;
 	return navi > 0 && navi < NGUARDIANS && guardians[navi].name ? &guardians[navi] : &unknown;
 }
 

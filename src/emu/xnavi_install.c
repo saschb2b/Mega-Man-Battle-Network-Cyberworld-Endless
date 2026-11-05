@@ -479,3 +479,10 @@ void xnavi_install_all(int which) {
 		if (dark >= 0) xnavi_dark_install(dark);
 	}
 }
+
+int xnavi_bn4_id(int id) {
+	for (int i = 0; i < ninstalled; ++i)
+		if (installed[i]->code.game == XROM_BN4_RED_SUN_US && id >= installed[i]->code.names[0] && id < installed[i]->code.names[0] + installed[i]->versions)
+			return installed[i]->code.first_id + (id - installed[i]->code.names[0]);
+	return -1;
+}
