@@ -217,9 +217,9 @@ static bool present_ok(const XVirusFamily *f) {
 
 /* the bytes its shims take in its home (XV_HOME_SHIMS on): a pre-step's at most, its ranges', chip compares' and
  * directions', two paused presents (its state 0's and its hook 5's) and its entries' */
-static uint32_t shims_room(const XVirusFamily *f) {
+uint32_t xvirus_shims_room(const XVirusFamily *f) {
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE +
-	                (uint32_t)f->nsides * XV_SHIM_SIDE_SIZE;
+	                (uint32_t)f->nsides * XV_SHIM_SIDE_SIZE + (uint32_t)f->nsound_calls * XV_SHIM_SOUND_SIZE;
 	room += 2u * XV_SHIM_PAUSED_SIZE * (f->present != 0);
 	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;
 	return room;
@@ -243,7 +243,7 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 		f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
 		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
 	if (!present_ok(f)) return no(why, n, "an after-state %08x none of its code", (unsigned)f->present);
-	uint32_t room = shims_room(f);
+	uint32_t room = xvirus_shims_room(f);
 	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
 	return true;
 }

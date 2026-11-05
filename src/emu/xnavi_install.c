@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -14,7 +15,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "xchips.h"
-#include "xnavi.h"
+#include "xnavi_bn4_sounds.h"
 #include "xnavi_bn5.h"
 #include "xnavi_objects.h"
 #include "xnavi_room.h"
@@ -39,6 +40,9 @@ typedef struct {
 	uint32_t names, rows;           /* its Navis' names archive, its reward rows */
 	bool bn5;                       /* its text and chips BN5's */
 	uint32_t lists;                 /* its sprite lists (a ROM offset, RomLayout.sprite_lists) */
+	bool bn4;                       /* BN4's: no Navi tables (a Navi its own object type), its records its enemy records, its names
+	                                   its enemy names' (ending BN4_TEXT_END) by enemy id, its ids past 0x200 named in the families'
+	                                   archive (XV_NAMES), its reward rows' chips BN4's (xchips.h) */
 } Game;
 
 static bool game_of(int game, Game *g) {
@@ -47,6 +51,12 @@ static bool game_of(int game, Game *g) {
 		*g = (Game){ R.data, BN6_NAVI_TABLES, BN6_NAVI_TABLE_STEP, BN6_NAVIS, { 0 }, get32(R.data + (BN6_NAVI_NAMES_REF - BUS)), BN6_DROP_ROWS, false,
 			R.layout ? R.layout->sprite_lists : 0 };
 		for (int k = 0; k < BN6_NAVI_TABLE_COUNT; ++k) g->of[k] = k;
+		return true;
+	}
+	if (game == XROM_BN4_RED_SUN_US && XR[game].data) {
+		*g = (Game){ XR[game].data, 0, 0, 0, { 0 }, BN4_ENEMY_NAMES, BN4_REWARD_ROWS, false, XR[game].layout ? XR[game].layout->sprite_lists : 0,
+			true };
+		for (int k = 0; k < BN6_NAVI_TABLE_COUNT; ++k) g->of[k] = -1;
 		return true;
 	}
 	if (game != XROM_BN5_COLONEL_US || !XR[game].data) return false;
@@ -69,6 +79,14 @@ static bool sane(const XNavi *n, const Game *g) {
 	const XVirusFamily *f = &n->code;
 	char why[200];
 	if (!xnavi_recipe_ok(n, why, sizeof why)) return xv_fail("%s", why);
+	if (g->bn4) {
+		/* (its records its V1's enemy record, naming its first-kind type: BN4 has no Navi tables) */
+		uint32_t at = BN4_ENEMY_STATS + BN4_ENEMY_STAT_SIZE * f->names[0];
+		if (f->struct1 != at || f->struct2 != at || !in_rom(at, BN4_ENEMY_STAT_SIZE * (uint32_t)n->versions) ||
+			g->rom[at - BUS + BN4_ENEMY_TYPE] != f->src_ai)
+			return xv_fail("its records are not its enemy records");
+		return true;
+	}
 	if (f->src_ai < 0 || (uint32_t)f->src_ai >= g->count) return xv_fail("its AI index in its game, %d", f->src_ai);
 	if (entry_of(g, XN_STRUCT1, f->src_ai) != f->struct1 || entry_of(g, XN_STRUCT2, f->src_ai) != f->struct2)
 		return xv_fail("its records are not where its game's tables have them");
@@ -106,14 +124,61 @@ static void traits_set(const XNavi *n, const uint8_t *src) {
 	rec.traits[BN6_TRAITS_SHADOW] = t->shadow;
 }
 
+/* a BN4 Navi's struct1 and struct2 BN6's way from its enemy records (BN4_ENEMY_STATS, a version each): its battle sprite the
+ * recipe's first (list 2 at its seat's number, its record naming BN4's), its palette, mode and shadow the recipe's; each
+ * version element << 12 | HP, the version, the recipe's flags, its attack's word (BN4's +0xA), as BN4's families' */
+static void records_bn4(const XNavi *n, const Game *g) {
+	const XVirusFamily *f = &n->code;
+	const XvSprite *s = &f->sprites[0];
+	const uint8_t *r = g->rom + (f->struct1 - BUS);
+	if (!f->nsprites || r[BN4_ENEMY_KIND] != 4u * s->list || r[BN4_ENEMY_FAMILY] != s->index || s->to_list != BN6_SPRITES_NAVIS) {
+		xv_fail("its enemy record names another sprite");
+		return;
+	}
+	memset(rec.traits, 0, BN6_TRAITS_SIZE);
+	rec.traits[BN6_TRAITS_LIST] = (uint8_t)(4u * s->to_list);
+	rec.traits[BN6_TRAITS_SPRITE] = s->to_index;
+	rec.traits[BN6_TRAITS_PALETTE] = f->traits.palette;
+	rec.traits[BN6_TRAITS_MODE] = f->traits.mode < BN6_TRAITS_MODE_COUNT ? f->traits.mode : XV_MODE_PAST;
+	rec.traits[BN6_TRAITS_SHADOW] = f->traits.shadow;
+	memset(rec.stats, 0, sizeof rec.stats);
+	for (int v = 0; v < n->versions; ++v) {
+		const uint8_t *e = g->rom + (BN4_ENEMY_STATS - BUS) + BN4_ENEMY_STAT_SIZE * f->names[v];
+		uint8_t *o = rec.stats + BN6_STATS_SIZE * v;
+		put16(o, get16(e + BN4_ENEMY_HP));
+		o[2] = (uint8_t)v;
+		o[3] = f->traits.flags;
+		put16(o + 4, get16(e + BN4_ENEMY_ATTACK));
+	}
+}
+
+/* its collision setup's own r3 (XNavi.coll_arg) written over BN6's actor init's at its spawn's end: a shim of its home (the
+ * project's own Thumb, past the most its code's shims take: xvirus_shims_room) as its spawn end's entry (table 7), which must
+ * be the empty hook */
+static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
+	const XVirusFamily *f = &n->code;
+	const uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
+	if (table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its collision's r3"); return; }
+	if (place + 8 > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return; }
+	/* ldr r0,[r5,#0x54]; movs r1,#arg; strb r1,[r0,#BN6_COLL_SETUP_ARG]; mov pc,lr (BN6 calls a hook by mov lr,pc and bx r0,
+	 * 0x0800F430: lr has no Thumb bit, so a bx lr would leave Thumb) */
+	const uint16_t shim[4] = { 0x6D68, (uint16_t)(0x2100u | n->coll_arg), (uint16_t)(0x7001u | BN6_COLL_SETUP_ARG << 6), 0x46F7 };
+	uint8_t *p = xv_put(f->home + place, sizeof shim, true);
+	for (int i = 0; p && i < 4; ++i) put16(p + 2 * i, shim[i]);
+	table[7] = (f->home + place) | 1u;
+}
+
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi
  * words */
 static void records_set(const XNavi *n, const Game *g) {
 	const XVirusFamily *f = &n->code;
 	uint8_t *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, true);
 	for (int i = 0; st && i < f->nstates; ++i) put32(st + 4 * i, xv_move_ref(f->states[i]));
-	traits_set(n, g->rom + (f->struct1 - BUS));
-	memcpy(rec.stats, g->rom + (f->struct2 - BUS), sizeof rec.stats);
+	if (g->bn4) records_bn4(n, g);
+	else {
+		traits_set(n, g->rom + (f->struct1 - BUS));
+		memcpy(rec.stats, g->rom + (f->struct2 - BUS), sizeof rec.stats);
+	}
 	uint8_t *s1 = xv_put(f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE, true), *s2 = xv_put(f->home + XV_HOME_STRUCT2, sizeof rec.stats, true);
 	if (s1) memcpy(s1, rec.traits, BN6_TRAITS_SIZE);
 	if (s2) memcpy(s2, rec.stats, sizeof rec.stats);
@@ -129,7 +194,10 @@ static void records_set(const XNavi *n, const Game *g) {
 		xv_move_ref(f->hooks[0]), xv_move_ref(f->hooks[1]), xv_move_ref(f->hooks[2]), xv_move_ref(f->hooks[3]), xv_move_ref(f->hooks[4]),
 		xv_move_ref(f->hooks[5]), xv_move_ref(f->hooks[6]), xv_move_ref(f->hooks[7]),
 	};
-	for (int k = 0; k < BN6_NAVI_TABLE_COUNT && !xv_failed(); ++k) xn_set_word(XN_TABLE + k, (uint32_t)f->ai, entry[k]);
+	uint32_t table[BN6_NAVI_TABLE_COUNT];
+	memcpy(table, entry, sizeof table);
+	if (n->coll_arg) coll_arg_set(n, table);
+	for (int k = 0; k < BN6_NAVI_TABLE_COUNT && !xv_failed(); ++k) xn_set_word(XN_TABLE + k, (uint32_t)f->ai, table[k]);
 	const uint8_t ice = (uint8_t)f->ice;
 	if (!xv_failed()) xn_set(XN_T_ICE, (uint32_t)f->ai, &ice);
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);
@@ -198,7 +266,24 @@ static bool script_word(const uint8_t *rom, uint32_t bus, uint32_t n) {
 /* its versions' names from its game's Navi archive (each version's as its
  * game shows it), BN6's codes, each ended; the Dark Soul's the word BN5's
  * script calls it by (BN5_DARK_SOUL_NAME), its id's entry being another's */
+static void names_bn4(const XNavi *n, const Game *g) {
+	for (int v = 0; v < n->versions && !xv_failed(); ++v) {
+		uint32_t at = g->names - BUS + 2u * n->code.names[v];
+		if (at + 2 > ROM_SIZE) { xv_fail("its name %d", v); return; }
+		uint32_t p = g->names - BUS + get16(g->rom + at), len = 0;
+		while (p + len < ROM_SIZE && len < NAME_BYTES && g->rom[p + len] != BN4_TEXT_END) ++len;
+		if (p + len >= ROM_SIZE || len >= NAME_BYTES) { xv_fail("its name %d has no end", v); return; }
+		uint32_t k = (uint32_t)xrom_text_bn6(XROM_BN4_RED_SUN_US, g->rom + p, len, rec.name[v], NAME_BYTES - 1);
+		rec.name[v][k] = TEXT_END;
+		rec.name_len[v] = k + 1;
+	}
+}
+
 static void names_of(const XNavi *n, const Game *g) {
+	if (g->bn4) {
+		names_bn4(n, g);
+		return;
+	}
 	for (int v = 0; v < n->versions && !xv_failed(); ++v) {
 		uint32_t i = (uint32_t)(n->shown[v] ? n->shown[v] : n->code.names[v]) - 0x100u, at = g->names - BUS + 2 * i;
 		if (i >= 0x100 || at + 2 > ROM_SIZE) { xv_fail("its name %d", v); return; }
@@ -218,18 +303,26 @@ static void names_of(const XNavi *n, const Game *g) {
 static void ids_set(const XNavi *n, const Game *g) {
 	const XVirusFamily *f = &n->code;
 	names_of(n, g);
-	uint32_t off = xn_names_end();
+	uint32_t off = xn_names_end(), end = xg_names_end();
 	for (int v = 0; v < n->versions && !xv_failed(); ++v) {
 		uint32_t id = (uint32_t)(f->first_id + v);
 		const uint8_t t[3] = { (uint8_t)v, 1, (uint8_t)f->ai };
 		xg_set(XG_IDS, id, t);
-		if (!xv_failed() && xn_name(id & 0xFF, off, rec.name[v], rec.name_len[v])) off += rec.name_len[v];
+		if (id >= XV_FIRST_ID) {
+			/* (an id past 0x1FF named by the families' archive, BN6_NAME_OF's third, as a family's: xvirus.c) */
+			if (end + rec.name_len[v] > XV_NAMES_ROOM) { xv_fail("no room for its name %d", v); return; }
+			uint8_t *p = xv_put(XV_NAMES + end, rec.name_len[v], true);
+			if (p) memcpy(p, rec.name[v], rec.name_len[v]);
+			xv_half(XV_NAMES + 2 * (id - XV_FIRST_ID), (uint16_t)XG_NAME_NONE, (uint16_t)end);
+			end += rec.name_len[v];
+		} else if (!xv_failed() && xn_name(id & 0xFF, off, rec.name[v], rec.name_len[v]))
+			off += rec.name_len[v];
 		uint32_t from = g->rows - BUS + 2u * ENEMY_DROPS * f->names[v];
 		if (from + 2u * ENEMY_DROPS > ROM_SIZE) { xv_fail("its reward row %d", v); return; }
 		uint8_t row[2 * ENEMY_DROPS];
 		for (uint32_t k = 0; k < ENEMY_DROPS; ++k) {
 			uint16_t e = get16(g->rom + from + 2 * k);
-			rec.drops[v][k] = g->bn5 ? xchips_reward_bn6(e) : e;
+			rec.drops[v][k] = g->bn5 ? xchips_reward_bn6(e) : g->bn4 ? xchips_reward_bn4(e) : e;
 			put16(row + 2 * k, rec.drops[v][k]);
 		}
 		if (!xv_failed()) xg_set(XG_ROWS, id, row);
@@ -301,7 +394,9 @@ static int ninstalled;
  * attack families grown where it moves one; false, told, where one is not */
 static bool ready_for(const XNavi *n) {
 	const char *name = n->code.name;
-	if (!xn_grow() || (n->sprite_of >= 0 && !xnavi_sprite_install(n->sprite_of))) {
+	bool bn4 = n->code.game == XROM_BN4_RED_SUN_US;
+	if (!xn_grow() || (n->sprite_of >= 0 && !xnavi_sprite_install(n->sprite_of)) ||
+		(bn4 && (!n->code.nsprites || !xnavi_sprite_arms_bn4(n->code.sprites[0].to_index)))) {
 		fprintf(stderr, "xnavi: %s not installed: BN6's tables not grown, or its battle sprite not placed\n", name);
 		return false;
 	}
@@ -335,6 +430,7 @@ bool xnavi_install(const XNavi *n) {
 		if (!xv_failed()) families_set(n);
 		xv_move_art();
 		sounds_set(n);
+		if (g.bn4 && !xv_failed()) xnavi_bn4_songs_set(f, n->versions);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xnavi: %s not installed: %s\n", f->name, xv_why());
@@ -349,13 +445,14 @@ bool xnavi_install(const XNavi *n) {
 	for (int i = 0; i < f->nclones; ++i) xv_moved_add(f->clones[i].start, f->clones[i].at, f->clones[i].end - f->clones[i].start);
 	xv_moved_add(f->struct1, f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE);
 	xv_moved_add(f->struct2, f->home + XV_HOME_STRUCT2, XV_VERSIONS * BN6_STATS_SIZE);
-	xv_moved_add(entry_of(&g, XN_STATES, f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
+	if (!g.bn4) xv_moved_add(entry_of(&g, XN_STATES, f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
 	if (n->overlay) xv_moved_add(n->overlay->masks, n->overlay->masks_at, n->overlay->masks_len);
 	/* (each routine of its game's a word of its code names, and BN6's twin in its place: a callback it keeps reads alike in
 	 * the differential's two traces) */
 	for (int i = 0; i < f->nwords; ++i)
 		if (f->words[i].from >= BUS && f->words[i].to >= BUS && f->words[i].to < EMU_FREE) xv_moved_add(f->words[i].from & ~1u, f->words[i].to & ~1u, 2);
 	installed[ninstalled++] = n;
+	if (g.bn4) xnavi_bn4_songs_noted();
 	enemies_tell(n);
 	printf("xnavi: %s as Navi AI %d, enemy ids %#x-%#x: %u bytes written, %d veneers\n", f->name, f->ai, f->first_id, f->first_id + n->versions - 1,
 		(unsigned)used, veneers);

@@ -9,6 +9,9 @@
 #include "xchips_code.h"
 #include "xchips_install.h"
 #include "xinstall_log.h"
+#include "xnavi_bn4.h"
+#include "xnavi_bn4_sounds.h"
+#include "xnavi_install.h"
 #include "xnavi_objects.h"
 #include "xsea.h"
 #include "xstrike.h"
@@ -25,6 +28,12 @@ void xinstall_core(int families, int navis) {
 	 * install, it does nothing) */
 	if (bn5) xchips_code_install();
 	xvirus_install(families);
+	/* (BN4's Navis where its ROM is read, after its families: their art's and the dispatch's numbers past theirs; each
+	 * installed once a core, xnavi_install's own) */
+	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data)
+		for (int i = 0; i < xnavi_bn4_count; ++i) xnavi_install(xnavi_bn4[i]);
+	/* (their sounds' pool pointed at the battle's Navi's before each frame, xnavi_bn4_sounds.h) */
+	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) emu_before_frame(xnavi_bn4_sounds_frame);
 	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
 	/* (BN5's obstacle strike, a Navi Colonel's side's as ColonelSoul's: the Souls' moved code first, its soldier among it, which
 	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */

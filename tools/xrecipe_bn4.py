@@ -166,6 +166,8 @@ class Alloc:
 
     def __init__(self):
         self.code, self.art, self.list1, self.list4, self.types = CODE0, ART0, LIST1_0, LIST4_0, {1: TYPE_0, 3: TYPE_0, 4: TYPE_0}
+        # (the room's ends and its name in a decision: the families'; tools/xnavirecipe_bn4.py gives the Navis' their own)
+        self.code_end, self.art_end, self.room = CODE_END, ART_END, 'the families'
         # (BN4's effects moved, by its id: BN6's; their sprites copied, by BN4's list and number: the copy, its family's name)
         self.effect, self.list5, self.effects, self.effect_sprites = EFFECT0, LIST5_0, {}, {}
 
@@ -804,8 +806,8 @@ def move_effect(b4, f, alloc, e4):
     else:
         alloc.list4 += 1
     alloc.art += s['room']
-    if alloc.art > ART_END:
-        f.decide('room', f'its effect {e4:#x}\'s sprite ends at {alloc.art:08X}, past the families\' art ({ART_END:08X})')
+    if alloc.art > alloc.art_end:
+        f.decide('room', f'its effect {e4:#x}\'s sprite ends at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
     return e6
 
 
@@ -941,8 +943,8 @@ def blocks_of(b4, f, alloc):
                 f.data.append((a, b, kd))
             a = b
     alloc.code = at
-    if at > CODE_END:
-        f.decide('room', f'its code ends at {at:08X}, past the families\' code ({CODE_END:08X})')
+    if at > alloc.code_end:
+        f.decide('room', f'its code ends at {at:08X}, past {alloc.room}\'s code ({alloc.code_end:08X})')
 
 
 def pointers(b4, f, lo, hi, kind_at):
@@ -965,8 +967,8 @@ def art_of(b4, b6, f, alloc):
     f.sprite = dict(list=f.s1['list'], index=f.s1['index'], to_list=1, to_index=alloc.list1, at=alloc.art, room=room, lz=bool(p & 0x80000000))
     alloc.list1 += 1
     alloc.art += room
-    if alloc.art > ART_END:
-        f.decide('room', f'its sprite ends at {alloc.art:08X}, past the families\' art ({ART_END:08X})')
+    if alloc.art > alloc.art_end:
+        f.decide('room', f'its sprite ends at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
     for e, w in sorted(f.walks.items()):
         reg = own_region(f, e)
         if not reg or reg[2] is None:

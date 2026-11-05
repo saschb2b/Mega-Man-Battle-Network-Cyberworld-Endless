@@ -28,6 +28,10 @@
  *    runs the state or the hook, then, where BN6's after-state skips for the
  *    pause alone (the BattleSettings' mode not 1, the battle paused), its
  *    game's after-state, copied with it: BN6's code untouched;
+ *  - a sound past a byte (XvSoundCall): a BN4 Navi's sound whose pool slot
+ *    is past what its `movs r0` names (the owner's call of 5 November 2026,
+ *    docs/multirom/bn4.md call 11): its call to PlaySoundEffect made a call
+ *    to a shim that makes r0 the slot and goes on to BN6's routine;
  *  - a pre-step (XVirusFamily.prestep): BN5's virus dispatcher acts for two
  *    families' NameIDs before their state each frame, as BN6's does for
  *    its own ids alone. A hook on BN6's dispatcher (BN6_VIRUS_NAMEID_CASES)
@@ -49,12 +53,18 @@
 #define XV_SHIM_ENTRY_SIZE   8    /* an entry's */
 #define XV_SHIM_SIDE_SIZE    24   /* a direction's (XVirusFamily.sides) */
 #define XV_SHIM_PAUSED_SIZE  28   /* a paused present's */
+#define XV_SHIM_SOUND_SIZE   8    /* a sound past a byte's (XvSoundCall) */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
  * (and `side` into r3 where it is 0 or more: BN4's look-up takes its side
  * for itself, BN6's in r3) and branches on to `veneer` (BN6_BY_NAME_RANGE's,
  * within a branch's reach): false where it is not. */
 bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo, uint16_t hi, uint32_t veneer, int side);
+
+/* The shim at `at` (halfword-aligned) that makes r0 `slot` (movs, lsls #8, adds)
+ * and branches on to `veneer` (BN6_PLAY_SOUND's, within a branch's reach):
+ * false where it is not. */
+bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer);
 
 /* The shim at `at` (word-aligned) that pushes lr and calls `to` (Thumb,
  * within a call's reach: a tail of a routine past its push {lr}), then pops

@@ -68,6 +68,10 @@ typedef struct { uint32_t at; uint8_t was, now; } XvByte;
  * makes, where BN6's ids are past an immediate's 255: the call aimed at a shim of its home (XV_HOME_SHIMS) that loads
  * BN6's bounds into r1 and r2 and goes on to BN6's routine (xvirus_shim.h) */
 typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
+/* A BN4 Navi's call to play a sound whose pool slot is past what its `movs r0` names (the owner's call of 5 November 2026,
+ * docs/multirom/bn4.md call 11): the call (its game's BN4_PLAY_SOUND) aimed at a shim of its home that makes r0 the slot
+ * and goes on to BN6's (xvirus_shim.h) */
+typedef struct { uint32_t at; uint16_t slot; } XvSoundCall;
 /* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
  * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
  * on where the branch would (lr is on its routine's stack there: the generator checks the routine pushes it) */
@@ -75,7 +79,7 @@ typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
 /* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
  * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
  * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST), on the music player its own game's entry names */
-typedef struct { uint16_t from; uint8_t slot; uint32_t at, room; } XvSong;
+typedef struct { uint16_t from, slot; uint32_t at, room; } XvSong;   /* (slot past a byte: a BN4 Navi's pool, xnavi_bn4_sounds.c) */
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
  * (imm.at 0: none): a status wrapper of its own given for BN6's states BN5 has no twin of (frozen, bubbled) */
@@ -147,6 +151,8 @@ typedef struct {
 	int nranges;
 	const XvCmp *cmps;         /* its compares of a held chip's id with BN6's id past an immediate, through a shim */
 	int ncmps;
+	const XvSoundCall *sound_calls;   /* its sounds whose slots are past a byte, each played through a shim */
+	int nsound_calls;
 	const uint32_t *sides;     /* its calls to its game's direction rule (BN4_DIRECTION, copied with it), each through a shim that
 	                              numbers left and right by the object's side, as BN6's rule does (xvirus_shim.h) */
 	int nsides;
@@ -263,6 +269,8 @@ uint32_t xvirus_crc32(const uint8_t *p, uint32_t n);
 /* Whether the recipe holds together (AI index, ids, home, its blocks, their
  * data, states, hooks, calls and immediates); where not, why, into `why`. */
 bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n);
+/* the most bytes its code's shims take in its home from XV_HOME_SHIMS (xvirus.c's, each a multiple of 4) */
+uint32_t xvirus_shims_room(const XVirusFamily *f);
 /* Where a recipe's code and art may go: the families' (XV_CODE to XV_ART,
  * XV_ART to XV_END), or another installer's region (a chip's code,
  * xchips_code.h), and the stubs of its own its calls may go to besides

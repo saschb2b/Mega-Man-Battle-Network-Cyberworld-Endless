@@ -64,11 +64,27 @@
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
 
-/* Whether `a` is in a Navi's code room (XN_CODE's or XN_MORE's) */
-static inline bool xn_code_at(uint32_t a) { return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART); }
+/* BN4 Red Sun's Navis (xnavi_bn4.c, tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, GutsMan built): BN4's Navi of V1 id n
+ * at seat (n - BN4_NAVI_FIRST_ID) / 4, a fixed place each, its AI XN_BN4_FIRST_AI + seat, its four ids from XN_BN4_FIRST_ID +
+ * 4 x seat (past every family's ids, XV_FIRST_ID + 6 x XV_FAMILIES, to XV_IDS), its home, code and art in a room of their
+ * own (FREE_BN4_NAVIS) */
+#define XN_BN4_SEATS     25
+#define XN_BN4_FIRST_AI  48
+#define XN_BN4_FIRST_ID  0x380
+#define XN_BN4_IDS_END   XV_IDS
+#define XN_BN4_HOMES     FREE_BN4_NAVIS
+#define XN_BN4_CODE      FREE_BN4_NAVI_CODE
+#define XN_BN4_ART       FREE_BN4_NAVI_ART
+#define XN_BN4_END       FREE_BRACKET
+
+/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
+static inline bool xn_code_at(uint32_t a) {
+	return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART) || (a >= XN_BN4_CODE && a < XN_BN4_ART);
+}
 /* ... or in one of their art's rooms (XN_ART's or XN_MORE_ART's) */
 static inline bool xn_art_room(uint32_t a, uint32_t n) {
-	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a);
+	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a) ||
+		(a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
 }
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at
@@ -105,6 +121,9 @@ typedef struct {
 	XvRef companion, companion_end;   /* the routines its companion starts and ends by (the triples' Navi words at its AI index) */
 	XvRef hide;                 /* the routine its attacks hide its companion's overlay by (BN6_NAVI_HIDE_REF's words at its AI index) */
 	int sprite_of;              /* BN5's Navi whose battle sprite it draws at its number (xnavi_sprites.h); -1 its struct1's own */
+	uint8_t coll_arg;           /* its collision setup's r3 (BN6_COLL_SETUP_ARG: the hit bits its body's hit ORs into the struck's) where
+	                               its game's init passes one BN6's actor init (3 for every actor, 0x08016FE8) does not: BN4's Navis'
+	                               0x21; written over at its spawn's end by a shim of its home (xnavi_install.c); 0 none */
 	uint16_t shown[XV_VERSIONS];   /* each version's name as its game shows it: an entry of its Navi names (BN5 shows Colonel V3 as V1) */
 	const XnSound *sounds;      /* the sounds BN6 numbers otherwise */
 	int nsounds;

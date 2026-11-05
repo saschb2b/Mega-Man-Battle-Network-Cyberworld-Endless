@@ -21,6 +21,8 @@
 #include "free_space.h"
 
 #define XNAVI_SPRITE_FIRST 0x20                        /* list 2's number of BN5's AI 7 (Colonel), the six's first */
+#define XNAVI_SPRITE_BN4   0x40                        /* list 2's numbers of BN4's Navis from here, a seat each (xnavi_recipe.h
+                                                          XN_BN4_*: GutsMan's 0x41), their sprites copied by their recipes */
 #define XNAVI_ARMS (FREE_NAVI_SPRITES + 0x7B000u)      /* the Navis' arm points' records grown, XNAVI_ARMS_COUNT of BN6_ARM_RECORD bytes */
 #define XNAVI_ARMS_COUNT 256                           /* (every number of list 2, a byte) */
 #define XNAVI_SPRITES_END (FREE_NAVI_SPRITES + 0x80000u)
@@ -38,5 +40,9 @@ int xnavi_sprite_number(int n);
  * before; false, nothing written, where BN5's ROM is not read or a check
  * failed (the log says which). Not within a staged step (xvirus_tx.h). */
 bool xnavi_sprite_install(int n);
+/* A BN4 Navi's arm points' record at list 2's `number` (XNAVI_SPRITE_BN4 on), the records grown first: BN4 keeps none to
+ * bring (docs/multirom/bn4-navis.md, GutsMan built), so BN6's MegaMan's record stands in, an interim until his own are read
+ * from his sprite; true once it is there (now or before), false where the records cannot grow. Not within a staged step. */
+bool xnavi_sprite_arms_bn4(int number);
 
 #endif

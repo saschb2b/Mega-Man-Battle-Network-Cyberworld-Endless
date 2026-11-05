@@ -47,6 +47,13 @@ TWINS = (
     # the after-state's (BN4_VIRUS_PRESENT, copied with each family: COPIED), its calls BN6's twin makes in the same places
     # (0x08016E64): the sprite update (BN4_SPRITE_UPDATE, BN6's 0x080026C4) and the struck word read (BN4's +0x68, BN6's +0x40)
     (0x0800285C, 0x080026C4, 'after-state'), (0x08012FB0, 0x0801A180, 'after-state'),
+    # GutsMan's (tools/xnavirecipe_bn4.py, each body read): GetRNG (BN4_GET_RNG, the same LCG step on BN6's word, one of three
+    # BN6 routines of its body: bn4.h's), the status a hit gives (BN4_COLL_STATUS_GIVEN +0xE, BN6's +0x10: the one BN6 routine
+    # of its three instructions with BN6's offset, found by its bytes), a side's player (BN4_FIND_PLAYER, BN6's own search)
+    (0x08001B00, 0x0800151C, 'gutsman'), (0x08013212, 0x0801A258, 'gutsman'), (0x0800C456, 0x080103BC, 'gutsman'),
+    # ... its own panel a floor (flag 0x10 of its flags, BN4's +4, BN6's +0x14), one of two BN6 routines of its outer body
+    # (0x0800CC66's inner test is the panel's place); a panel cracked (BN4_PANEL_CRACK)
+    (0x08009ECC, 0x0800CCA6, 'gutsman'), (0x08009AEC, 0x0800C938, 'gutsman'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -56,6 +63,15 @@ GENERIC4 = {0: 0x0800FCAC, 1: 0x0801013A, 2: 0x0801014C, 3: 0x08010276, 4: 0x080
 # (BN4, BN6) -> (verdict, why): a pair whose bodies differ judged against what BN4's code asks of it (Billy's code audit,
 # read from both games' code); any other DIFF pair a family reaches stays an open decision in the generator's report
 AUDITS = {
+    (0x08009AEC, 0x0800C938): ('ok', "a panel cracked (r0, r1): a floor (0x10) not yet cracked (0x40) made cracked (type 3, flags + 0x40), "
+                                     "a cracked one broken (type 1), the crack's sound, 1 back; BN6's the same at its offsets (flags "
+                                     "+0x14, type +2 and its drawn type +6) and its own sound, but BN4's test of flag 0x20000 first "
+                                     "(no crack), which only BN4's type 5 gives (BN4_PANEL_FLAGS_OF 0x30010): no BN6 panel type's word "
+                                     "has it (BN6's table at 0x081D7E1C), so the test never holds in BN6. Flags 0x10 and 0x40 are "
+                                     "the same in both tables (types 0-4 the same words)"),
+    (0x0800C456, 0x080103BC): ('ok', "a side's player object (r0 the side): BN4's the battle state's player where its side is r0's, else "
+                                     "the first of the other side's three; BN6's the first of the side's four whose name is a "
+                                     "MegaMan's (0x0800F29C): MegaMan for his side in a battle of one player a side, GutsMan's aim"),
     (0x080D2156, 0x080CADBC): ('ok', "Billy's attack spawned: BN6's spawner in its own third-kind 0x2A block, the same registers in; "
                                      "BN6's 0x2A runs Billy's thunder state by state for Billy's parameters (BN4's would write its "
                                      "element into BN6's flip at +0x17): BN6's object, not BN4's moved"),
@@ -198,6 +214,10 @@ NUMBERS = {
                 "tables (BN4's 0x0801268C, BN6's BN6_COLL_MASKS' 0x08019CA8)",
     0x0B800000: "a panel's flags it may not have (object_checkPanelParameters, BN6's 0x0800CC86 the same body): the support and "
                 "alliance bits, BN6's own code naming the same mask (0x0800E6D4)",
+    0x03800000: "a panel's flags it may not have (object_checkPanelParameters' r3, BN6's 0x0800CC86 the same body): 0x0B800000's "
+                "bits but 0x08000000 (GutsMan's objects, 0x080D07C4)",
+    0x04050601: "a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same "
+                "(five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606)",
     0x04080080: "a panel's flags (its panel's, 0x08009A86, BN6's 0x0800C8F8) CirKill waits on: 0x04000000 the enemy's alliance, "
                 "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "
