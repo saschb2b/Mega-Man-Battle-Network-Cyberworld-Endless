@@ -81,7 +81,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-04",
+  "updated": "2026-11-05",
   "previous": "2026-10-18",
   "features": [
     {
@@ -218,10 +218,23 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-04",
       "link": "../rom/navis.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN4's tournament presentation",
+      "state": "designed",
+      "now": "Located in BN4 Red Sun's ROM and driven in romlab (src/emu/bn4_tournament.h, docs/rom/bn4.md, The tournaments): the bracket screen is main mode 0x24 (0x0804395C), entered through the map's sub-state 0x1C (its opener 0x08005792: the tournament, a script's wait and argument into 0x0200ACC0 +5 to +7); it draws the tournament at eToolkit +0x3C (0x02001460, 0x20 bytes each: eight entrants of id, flags, seed and mark; MegaMan id 0x1E) with BN4's own title, plates and lit lines, song 0x09. From Lan's room with eight entrants poked, BN4 drew each of its four tournaments (Den, Eagle, Red Sun, Free), 3 frames to set up, held to a key, 23 frames out. The cutscene commands 0x52 (start: pool, draw), 0x53 (a round settled), 0x54 (the bracket) and 0x55 (the opponent's arena), and the text command FC 01, open and feed it; no versus screen among the 16 main modes or the tournament's commands. The two ways in measured (docs/multirom/bn4-tournament.md): the guest core (six writes; no 3DS, a 12,440-frame first boot, the browser's memory) or the screen moved into BN6 (3,728 bytes of Thumb, about 30 engine routines to twin, 2.4 KB of free RAM, BN6's empty main mode 0x3C or 0x40); the move recommended, the guest its oracle.",
+      "left": "Nothing moved. The plates show 20 of BN4's Navis and MegaMan only: BN6's and BN5's Navis need faces from their own games' art. Plates 0x01-0x02, 0x05-0x08, 0x0A-0x10 and 0x14-0x15 unnamed; the stage's cutscenes beyond their tournament commands undecoded; the draw's placement and the pools' filling read in part, not run; main modes 0x10, 0x28, 0x2C and 0x3C unidentified.",
+      "updated": "2026-11-05",
+      "link": "../multirom/bn4-tournament.md",
+      "state_text": "Designed, not built"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-11-05",
+      "what": "BN4's tournament presentation located (src/emu/bn4_tournament.h: the main modes 0x0800032C, the bracket screen 0x0804395C and its opener 0x08005792, the tournaments at 0x02001460, the cutscene commands 0x52-0x55 and the text command FC 01; docs/rom/bn4.md, The tournaments) and driven in romlab; the two ways into a run measured and the move into BN6 recommended (docs/multirom/bn4-tournament.md)."
+    },
     {
       "date": "2026-11-04",
       "what": "BN4's Navis mapped (src/emu/bn4.h, docs/rom/bn4.md's two rows, docs/multirom/bn4-navis.md, tools/bn4_navis.py): the eighteen's first-kind types, the Navi pre-step 0x080135A8 (Duo's 0x0801374A), runner 0x08013DB4, dying 0x08010F61 and generic states 0x08010D31-0x08010FAF, MegaMan's routine 0x080EAEA8 and state table 0x080EAEFC (116), the AI data taken 0x0800C09A by side 0x0800BFF4 (+0x64 the Navi's own block), the state set 0x0800C9AC and attack's end 0x0800CA28, the three spawns 0x080032B8/0x080032F0/0x08003344, an enemy's record 0x08011878 and spawn 0x080F00F4, the panel crack 0x08009AEC; tools/bn6f_match.py locates bn6f's functions in BN4 too (bn6f-bn4.csv)."
@@ -384,6 +397,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-05",
+      "name": "The bracket driven from Lan's room",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state: the game state's +0 written 0x10-0x2C in turn showed the jack-in, the PET, the city map, The Den Battle Tournament's bracket (0x1C; 0x2C the same screen through mode 0x34) and the Chip Trader (0x20 and 0x24 drawn wrong without their set-up). Eight entrants poked at 0x02001460 + t * 0x20 and 0x0200ACC5 = t: each of the four tournaments' brackets drawn with the plates by id (colour with 0x40, grey without, MegaMan's for 0x1E in the final with bits 1 and 2; 0x81 left 0x01 as the screen left), lines lit by the rounds' bits. Probes: setup f12441, start f12442, lines f12443, state 4 from f12444; A at f12840, state 8 f12863, the map again after. Mode 0x24 written from the title screen draws the plates and lines over broken backgrounds.",
+      "meaning": "BN4's bracket is driven by six writes on a booted game in its map mode: the screen needs no story state, only the tournament's 32 bytes and the screen's three. Its frames are the oracle a moved copy would be proved against. What it cannot show: an entrant BN4 has no plate for.",
+      "link": "../multirom/bn4-tournament.md"
+    },
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-04",

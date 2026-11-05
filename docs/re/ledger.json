@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-04",
+  "updated": "2026-11-05",
   "previous": "2026-10-18",
   "features": [
     {
@@ -123,6 +123,14 @@
       "left": "BN6's own Navis only (state 2 BN6_NAVI_DYING, or ProtoMan's that calls it); Navis moved from BN5 and AI 20-21's other dying untried. The Custom screen between forms is not forced; a time stop at the very frame of a form's removal is not waited out.",
       "updated": "2026-11-04",
       "link": "../rom/navis.md"
+    },
+    {
+      "name": "BN4's tournament presentation",
+      "state": "designed",
+      "now": "Located in BN4 Red Sun's ROM and driven in romlab (src/emu/bn4_tournament.h, docs/rom/bn4.md, The tournaments): the bracket screen is main mode 0x24 (0x0804395C), entered through the map's sub-state 0x1C (its opener 0x08005792: the tournament, a script's wait and argument into 0x0200ACC0 +5 to +7); it draws the tournament at eToolkit +0x3C (0x02001460, 0x20 bytes each: eight entrants of id, flags, seed and mark; MegaMan id 0x1E) with BN4's own title, plates and lit lines, song 0x09. From Lan's room with eight entrants poked, BN4 drew each of its four tournaments (Den, Eagle, Red Sun, Free), 3 frames to set up, held to a key, 23 frames out. The cutscene commands 0x52 (start: pool, draw), 0x53 (a round settled), 0x54 (the bracket) and 0x55 (the opponent's arena), and the text command FC 01, open and feed it; no versus screen among the 16 main modes or the tournament's commands. The two ways in measured (docs/multirom/bn4-tournament.md): the guest core (six writes; no 3DS, a 12,440-frame first boot, the browser's memory) or the screen moved into BN6 (3,728 bytes of Thumb, about 30 engine routines to twin, 2.4 KB of free RAM, BN6's empty main mode 0x3C or 0x40); the move recommended, the guest its oracle.",
+      "left": "Nothing moved. The plates show 20 of BN4's Navis and MegaMan only: BN6's and BN5's Navis need faces from their own games' art. Plates 0x01-0x02, 0x05-0x08, 0x0A-0x10 and 0x14-0x15 unnamed; the stage's cutscenes beyond their tournament commands undecoded; the draw's placement and the pools' filling read in part, not run; main modes 0x10, 0x28, 0x2C and 0x3C unidentified.",
+      "updated": "2026-11-05",
+      "link": "../multirom/bn4-tournament.md"
     }
   ],
   "decisions": [],
@@ -306,6 +314,10 @@
     {
       "date": "2026-11-04",
       "what": "BN4's reward rows located (BN4_REWARD_ROWS 0x080F5F50, BN4_REWARD_CHOOSER 0x080F57DC, BN4_REWARD_PICK 0x080F580C, BN4_REWARD_ROW_OF 0x080F5EC4, BN4_BUSTING_TABLE 0x0801881D; docs/rom/bn4.md, Its rewards) by BN6's chooser's bytes and read with the Thumb decoder; proved in romlab by Billy's row recoded (0x4123 paid) and the next id's (Thunder1 L as before). The six moved BN4 families' rows are BN4's now (src/emu/xvirus.c drops_set, src/core/xchips.c xchips_reward_bn4): zenny and HP as they are, chips BN6 lacks 200 zenny; the owner's call 6's condition met."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "BN4's tournament presentation located (src/emu/bn4_tournament.h: the main modes 0x0800032C, the bracket screen 0x0804395C and its opener 0x08005792, the tournaments at 0x02001460, the cutscene commands 0x52-0x55 and the text command FC 01; docs/rom/bn4.md, The tournaments) and driven in romlab; the two ways into a run measured and the move into BN6 recommended (docs/multirom/bn4-tournament.md)."
     }
   ],
   "experiments": [
@@ -723,6 +735,14 @@
       "result": "python3 tools/xdiff.py over billy, spikey, shrimpy, walla, elmperor and cirkill v1-v3, cangard_v1, handi_v1, bn4_mettaur_control and bn4_mettaur_broken, with legit.json's bn4 align (each BN4-against-BN6 run printing xdiff: poke 080163fc (080163fc) = 2003, unrelocated) and no opening allowance: all 22 PASS, bn4_mettaur_broken at t202. Without the alignment (--poke 080163FC:2002:2) spikey_v1 and shrimpy_v3 FAIL at t1 (+0x91 BN4 5 | BN6 6); with it two frames (the new mutation, 2004) shrimpy_v3 FAILS at t1 (+0x91 BN4 5 | BN6 4). python3 tools/xdiff.py --mutations: 181 of 181 caught, the two the allowance's checks caught before caught still (the idle animation's first frame from the next one's data at t12 on its +0xB0, the paused after-state's sprite update aimed elsewhere at t1).",
       "meaning": "The one paused update the openings left apart was the whole of the opening's difference: with BN6's opening a frame longer a moved BN4 family's sprite place is BN4's at every frame and no allowance is needed there; the alignment is exactly one frame (none and two both fail at t1). Its limit, unreached by any spec: a battle of two or more foes, where BN6's queue would put the frame on each foe's blink in turn.",
       "link": "../devtools/differential.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-05",
+      "name": "The bracket driven from Lan's room",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state: the game state's +0 written 0x10-0x2C in turn showed the jack-in, the PET, the city map, The Den Battle Tournament's bracket (0x1C; 0x2C the same screen through mode 0x34) and the Chip Trader (0x20 and 0x24 drawn wrong without their set-up). Eight entrants poked at 0x02001460 + t * 0x20 and 0x0200ACC5 = t: each of the four tournaments' brackets drawn with the plates by id (colour with 0x40, grey without, MegaMan's for 0x1E in the final with bits 1 and 2; 0x81 left 0x01 as the screen left), lines lit by the rounds' bits. Probes: setup f12441, start f12442, lines f12443, state 4 from f12444; A at f12840, state 8 f12863, the map again after. Mode 0x24 written from the title screen draws the plates and lines over broken backgrounds.",
+      "meaning": "BN4's bracket is driven by six writes on a booted game in its map mode: the screen needs no story state, only the tournament's 32 bytes and the screen's three. Its frames are the oracle a moved copy would be proved against. What it cannot show: an entrant BN4 has no plate for.",
+      "link": "../multirom/bn4-tournament.md"
     }
   ],
   "method": {
