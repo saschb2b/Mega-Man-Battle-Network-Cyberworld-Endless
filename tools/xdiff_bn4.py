@@ -28,6 +28,7 @@ import re
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
+                        sprite_numbers_of,
                         u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
@@ -156,6 +157,7 @@ class Bn4Canon:
         own = [f for f in fams if set(f['ids']) & set(foes)] or fams
         self.effects = {k: v for f in own for k, v in f['effects'].items()}
         self.moved_types = bn4_moved_types()
+        self.moved1_sprites = sprite_numbers_of([os.path.join('src', 'emu', 'xnavi_bn4.c')])
 
     def nid(self, game, v):
         return self.ids.get(v, self.canon.nid(game, v)) if game == 4 else self.canon.nid(game, v)
@@ -170,6 +172,13 @@ class Bn4Canon:
         """a third-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where the
         recipe moved it (bn4_moved_types); BN4's as it is"""
         return self.moved_types.get((3, v), v) if game == 6 else self.canon.t3(game, v)
+
+    def t1_moved(self, game, o):
+        """a first-kind object of a type the recipe moves (bn4_moved_types' kind 1: FireMan's companion 0x57), no enemy:
+        its type, BN6's dispatched one's side-table number read back as BN4's; else None (an enemy, by its NameID)"""
+        if game == 6:
+            return self.moved_types.get((1, o.o8(OBJ_TYPE))) if o.moved else None
+        return o.o8(OBJ_TYPE) if o.o8(OBJ_TYPE) in {v for (k, _), v in self.moved_types.items() if k == 1} else None
 
     def __getattr__(self, name):
         return getattr(self.canon, name)
@@ -383,11 +392,18 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
     for k, v in o.over.items():   # (the family's renderer places as its ranks: bn4_renderer)
         if k < len(rec):
             rec[k] = v
-    if o.kind == 'T1':
+    moved1 = o.kind == 'T1' and getattr(canon, 't1_moved', None) is not None and canon.t1_moved(game, o) is not None
+    if o.kind == 'T1' and not moved1:
         at = NODE + OBJ_NAME_ID
         rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
         if game == 4 and fams is not None:
             rec = bn4_as_bn6(rec, fams)
+    elif moved1 and game == 4:
+        # (a moved first-kind object's own code reads its record: no enemy id, no CurAction; its spawn's word at +4 its sprite's
+        # list offset and number, BN4's list 4 number read as the recipe's copy: FireMan's companion, xnavi_bn4.c)
+        copies = canon.moved1_sprites.get((rec[NODE + 4] // 4, rec[NODE + 5])) if rec[NODE + 4] & 3 == 0 else None
+        if copies:
+            rec[NODE + 5] = copies[0][1]
     if game == 4 and fams is not None and o.role in reserved:
         rec[NODE] |= OBJ_RESERVED
     if game == 4 and fams is not None and o.role in blinked:
