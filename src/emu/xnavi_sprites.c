@@ -133,6 +133,21 @@ static bool place_in(int i, int list, int index) {
 	return true;
 }
 
+bool xnavi_sprite_arms_bn4(int number) {
+	if (number < XNAVI_SPRITE_BN4 || number >= XNAVI_ARMS_COUNT || !R.data || !emu_ready()) return false;
+	uint32_t at = XNAVI_ARMS + (uint32_t)number * BN6_ARM_RECORD;
+	const uint8_t *mm = R.data + (BN6_MEGAMAN_ARMS - BUS);
+	claims_begin(XNAVI_SPRITES_CLAIMS);
+	bool ok = arms_grown();
+	if (ok) {
+		uint8_t rec[BN6_ARM_RECORD];
+		memcpy(rec, mm, BN6_ARM_RECORD);
+		emu_write(at, rec, BN6_ARM_RECORD);
+	}
+	claims_end();
+	return ok;
+}
+
 bool xnavi_sprite_install(int n) {
 	int i = place_of(n), list, index;
 	if (i < 0) return false;

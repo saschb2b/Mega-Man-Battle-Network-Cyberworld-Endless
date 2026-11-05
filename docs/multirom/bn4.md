@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T12:05:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -560,3 +560,17 @@ sounds take from the themes' range are the owner's to confirm.
    area as the walk's gate admits them. What the areas still lack (BN4's
    own battle records, guardians and bystanders, the boss theme's swell
    and BN4's mixing level, Its music) comes as before, phase by phase.
+11. **Decided, 5 November 2026: BN4's Navis' sounds by battle.** Their
+   sounds BN6 has no song of take a small shared pool of BN6's empty song
+   slots, copied from the player's ROM (xsong's copy) for the Navi a
+   battle holds, so the pool serves all eighteen and a tournament's three
+   in a row; the families keep their fixed slots 0x34-0x3F. The pool is
+   sized by the most sounds any three Navis need at once and taken from
+   BN6's empty slots without BN5's reserved 0x41-0x4B. Measured: the
+   worst three (Duo 10, VideoMan 8, TopMan 6, their sounds' walks
+   approximate while their recipes are open) need 24, or 21 with the
+   sounds they share; BN6's empty slots no other track takes are 16 (the
+   themes' top two, 0x32 and 0x33, and fourteen past 0x62), five of them
+   to 0xFF, which a sound named by a `movs` or a byte needs. The pool is
+   those 16 ([BN4's Navis in BN6's engine](bn4-navis.md), GutsMan
+   built); three Navis of 16 sounds or fewer fit it, the worst three not.

@@ -30,6 +30,7 @@ what a Soul Navi has more (docs/multirom/bn4-navis.md, How a BN4 Navi runs):
 Local only: both ROMs. Nothing of either is written: addresses, counts and CRC32s."""
 import argparse
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +41,7 @@ import xrecipe_thumb as T  # noqa: E402
 
 ROOT = X4.ROOT
 WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
+OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
@@ -91,12 +93,21 @@ AI_BLOCKS = ((0x64, 0x0C, 0x80), (0x70, 0x50, 0xA0))
 # Navi tables (past BN5's Navis' 32-42 and the room BN5's Darkloids keep: 48 on), its ids four from
 # BN4_NAVI_ID0 + 4 * seat, past every family's ids (XV_FIRST_ID + 6 * XV_FAMILIES = 0x380) and below XV_IDS (0x400)
 BN4_NAVI_AI0, BN4_NAVI_ID0 = 48, 0x380
-# The room proposed for them (a decision, docs/multirom/bn4-navis.md, GutsMan derived): in FREE_TAIL's free bytes
-# (src/emu/free_space.h: EMU_FREE + 0x710460 to FREE_LIB_TEAM, EMU_FREE + 0x7A0000), their homes (a seat each), their code
-# and objects', then what they draw
+# Their room (the owner's call of 5 November 2026; src/emu/free_space.h FREE_BN4_NAVIS, xnavi_recipe.h XN_BN4_*): their homes
+# (a seat each), their code and objects', then what they draw, to FREE_LIB_TEAM
 ROOM_HOMES = 0x08800000 + 0x720000
 ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x7A0000
 VERSIONS = 4
+# Their battle sprites in BN6's list 2, the Navis' (src/emu/xnavi_sprites.h XNAVI_SPRITE_BN4: past BN5's 0x20-0x2A): a seat each
+NAVI_SPRITE0 = 0x40
+# Their sounds BN6 has no song of (the owner's call of 5 November 2026, docs/multirom/bn4.md call 11): a shared pool of BN6's
+# empty song slots a Navi's take, its songs packed into its art's room at install and the pool's slots pointed at the songs
+# of the Navi its battle holds (src/emu/xnavi_bn4_sounds.c). The pool: BN6's empty song slots nothing else takes (docs/rom/
+# sound.md: 0x26-0x62 and fourteen past them, the families' 0x34-0x3F, BN5's 0x40-0x62 and the themes' 0x26-0x31 left
+# alone), the five a movs or a byte can name (to 0xFF) first. A Navi's k-th sound its k-th slot: the ones its code names by
+# a byte the low five
+SOUND_POOL = (0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D, 0x167, 0x16B, 0x16E, 0x172)
+SONG_STEP = 0x40
 
 
 def ai_tracker(w, entry_regs):
@@ -134,7 +145,7 @@ def ai_tracker(w, entry_regs):
                 regs.pop(rd, None)
             continue
         if f == 'adds8' and i.f[0] in regs:
-            makes.append((a, 'THUMB_ADDS8', i.f[0], i.f[0], i.f[1], regs[i.f[0]] + i.f[1]))
+            makes.append((a, 'THUMB_ADDS', i.f[0], 0, i.f[1], regs[i.f[0]] + i.f[1]))
             regs[i.f[0]] += i.f[1]
             continue
         if f == 'adds3' and i.f[1] in regs:
@@ -196,7 +207,10 @@ def ai_imms(f):
                 f.decide('AI data', f'{a:08X}: a pointer to its AI data\'s +{off:#x}, in no block BN6 lays out alike (AI_BLOCKS)')
                 continue
             now = imm + to - off
-            if form == 'THUMB_ADDS3' and now > 7 or now > 0xFF:
+            if form == 'THUMB_ADDS3' and now != imm:
+                f.decide('AI data', f'{a:08X}: its AI data\'s +{off:#x} made by adds rd,rn,#imm3, which the installer\'s forms do not rewrite')
+                continue
+            if now > 0xFF:
                 f.decide('AI data', f'{a:08X}: its AI data\'s +{off:#x} (BN6\'s +{to:#x}) made by an immediate too small for it')
                 continue
             if now != imm:
@@ -300,8 +314,6 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     seat = (first - 128) // 4
     f.slot, f.ai, f.first_id = seat, BN4_NAVI_AI0 + seat, BN4_NAVI_ID0 + 4 * seat
     f.home = ROOM_HOMES + X4.XV_HOME_SIZE * seat
-    f.decide('room', f'its home, code and art in a room of BN4\'s Navis\' own (XN_MORE\'s four slots are the Darkloids\'): proposed in '
-                     f'FREE_TAIL\'s free bytes, {ROOM_HOMES:08X} to {ROOM_END:08X} (src/emu/free_space.h; its installer\'s region to add)')
     f.lo, f.hi = X4.region_of(b4, ty)
     f.regions, f.roots, f.regions_roots = [(f.lo, f.hi, None), (N.PLAYER, N.PLAYER_END, 'MegaMan')], [], []
     tt, tw, ents = X4.type_table(b4, f)
@@ -370,8 +382,16 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     X4.words_of(f, pairs)
     navi_art(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
-    X4.sounds_of(b4, b6, f)
-    table_sounds(b4, b6, f)
+    pool = pool_of(b4, b6, f)
+    saved = dict(X4.SOUND_SLOTS)
+    X4.SOUND_SLOTS.update(pool)
+    try:
+        X4.sounds_of(b4, b6, f)
+        table_sounds(b4, b6, f)
+    finally:
+        X4.SOUND_SLOTS.clear()
+        X4.SOUND_SLOTS.update(saved)
+    songs_of(b4, f, pool, alloc)
     seen, out = set(), []
     for i in sorted(f.imms, key=lambda x: x['at']):
         if i['at'] not in seen:
@@ -379,6 +399,47 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
             out.append(i)
     f.imms = out
     return f
+
+
+def sound_ids(b4, f):
+    """every sound its code plays: a movs's before BN4_PLAY_SOUND, a kind's byte of SOUND_TABLES"""
+    ids = set()
+    for w in f.walks.values():
+        for site, t in w.bls.items():
+            if t == X4.BN4['sound']:
+                v, _ = T.back_value(w, site, 0)
+                if v is not None:
+                    ids.add(v)
+    for v, t in SOUND_TABLES.items():
+        if any(t['play'] in w.bls for w in f.walks.values()):
+            ids |= {b4.bytes(v + t['entry'] * k + t['sound'], 1)[0] for k in t['kinds']}
+    return ids
+
+
+def pool_of(b4, b6, f):
+    """its sounds that are no song of BN6's and no family's (xrecipe_bn4.SOUND_SLOTS), each its slot of SOUND_POOL in order;
+    one past what a movs or a byte can name (0xFF) refused, past the pool a decision"""
+    odd = sorted(v for v in sound_ids(b4, f) if X4.song_sig(b4, X4.BN4['songs'], v) != X4.song_sig(b6, X4.SONGS6, v)
+                 and v not in X4.SOUND_SLOTS)
+    if len(odd) > len(SOUND_POOL):
+        f.decide('sound', f'{len(odd)} sounds for the pool\'s {len(SOUND_POOL)}')
+    pool = dict(zip(odd, SOUND_POOL))
+    for v, slot in pool.items():
+        if slot > 0xFF:
+            f.decide('sound', f'its sound {v:#x} at the pool\'s {slot:#x}, which a movs or a byte cannot name')
+    f.notes.append('its sounds in the pool: ' + ', '.join(f'{v:#x} at {slot:#x}' for v, slot in pool.items()))
+    return pool
+
+
+def songs_of(b4, f, pool, alloc):
+    """its pool's songs, each packed into its art's room at install (xnavi_bn4_sounds.c), its bytes rounded up to SONG_STEP"""
+    f.songs = []
+    for v, slot in pool.items():
+        room = X4.rounded(X4.song_bytes(b4, v, X4.BN4['songs']), SONG_STEP)
+        f.songs.append(dict(song=v, slot=slot, at=alloc.art, room=room))
+        alloc.art += room
+    if alloc.art > alloc.art_end:
+        f.decide('room', f'its songs end at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
 
 
 def callbacks(b4, f):
@@ -494,6 +555,9 @@ def navi_art(b4, b6, f, alloc):
     moved = list_moves(b4, f, alloc)
     kinds = table_kinds(f)
     saved = {v: t['kinds'] for v, t in bn4_twins.TABLES.items()}
+    # (a list 4 sprite a family copied is his too, at its number: the mover finds it among the families installed before him,
+    # xvirus.c sprite_of, and an effect of the same sprite is the same entry; left out of his own sprites)
+    f.attack_sprites += [sp for (lst, _), sp in sorted(getattr(alloc, 'family_sprites', {}).items()) if lst == 4]
     try:
         for v, k in kinds.items():
             bn4_twins.TABLES[v]['kinds'] = k
@@ -501,12 +565,16 @@ def navi_art(b4, b6, f, alloc):
     finally:
         for v, k in saved.items():
             bn4_twins.TABLES[v]['kinds'] = k
+    for sp in f.attack_sprites:
+        if sp.get('shared') and any(sp['to_index'] in (i['now'],) and 'sprite' in i['why'] for i in f.imms) or \
+                sp.get('shared') and any(b[2] == sp['to_index'] and 'list 4' in b[3] for b in f.bytes):
+            f.notes.append(f'its sprite 4:{sp["index"]:#x} is {sp["shared"]}\'s copy (list 4 {sp["to_index"]:#x})')
+    f.attack_sprites = [sp for sp in f.attack_sprites if not sp.get('shared')]
     f.decisions = [d for d in f.decisions if not (d[0] == 'sprite' and any(d[1].startswith(f'{x:08X}:') for x in moved))]
     alloc.list1 -= 1
-    f.sprite.update(to_list=2, to_index=None)
-    f.decide('sprite', f'its battle sprite (list {f.s1["list"]} {f.s1["index"]:#x}): BN6\'s Navis\' list 2 at a number of its own and its '
-                       'arm points\' record there (BN6_ARM_POINTS reads a list 2 number\'s), the Navis\' numbering (src/emu/xnavi_sprites.h) '
-                       'to extend for BN4\'s; BN4 has no arm points\' routine to read one from (docs/multirom/bn4-navis.md, GutsMan derived)')
+    f.sprite.update(to_list=2, to_index=NAVI_SPRITE0 + f.slot)
+    f.notes.append(f'its battle sprite (list {f.s1["list"]} {f.s1["index"]:#x}) at BN6\'s list 2 {NAVI_SPRITE0 + f.slot:#x} (xnavi_sprites.h '
+                   'XNAVI_SPRITE_BN4), its arm points\' record the installer\'s')
 
 
 def navi_records(b4, f):
@@ -562,9 +630,96 @@ def families_alloc(b4, b6, pairs):
         alloc.code = X4.rounded(c.room_end, X4.CODE_STEP)
         if not c.decisions:
             pairs.copies[c.spawner] = c
+    alloc.family_sprites = {}
     for k, (ty, name, first) in enumerate(X4.FAMILIES):
-        X4.derive(b4, b6, pairs, ty, name, first, k, alloc)
+        fam = X4.derive(b4, b6, pairs, ty, name, first, k, alloc)
+        for sp in getattr(fam, 'attack_sprites', []):
+            alloc.family_sprites.setdefault((sp['list'], sp['index']), dict(sp, shared=fam.name))
     return alloc
+
+
+# BN6's Navi object's tables for a Navi of BN4's (src/emu/bn6_navis.h): the Navis' own pre-step (A), the empty hook A and
+# hooks, the empty companion (BN5's Navis' without one), its ice block's size (BN6_ICE_SIZES' 2, a Navi of his size)
+PRESTEP6, NULLSUB_NAVI6, NO_COMPANION6, ICE = 0x0801A9B9, 0x080F3BE9, 0x080114D5, 2
+# the room's bases the C file names its places by (src/emu/xnavi_recipe.h): the families' generator's text names XV_CODE's and
+# XV_ART's, given BN4's Navis' room's where they are in it
+XV_CODE_AT, XV_ART_AT = X4.XV_CODE, X4.XV_ART
+
+HEADER = '''/* xnavi_bn4.c: BN4 Red Sun's Navis' recipes, written by tools/xnavirecipe_bn4.py from BN4's and BN6's ROMs
+ * (python3 tools/xnavirecipe_bn4.py; --check says whether this is what it writes). Do not edit: change the generator (or
+ * tools/bn4_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/multirom/bn4-navis.md): addresses
+ * in BN4 Red Sun (USA) and BN6 Cybeast Gregar (USA), counts and CRC32s. The Navis here are the generator's whole ones (no
+ * decision open), each a Navi of BN6's Navi object at its seat's numbers (src/emu/xnavi_recipe.h XN_BN4_*), installed where
+ * BN4's ROM is read, after BN4's families (their art's and the dispatch's numbers continue past theirs). */
+#include "xnavi_bn4.h"
+
+#include "bn4.h"
+#include "bn6.h"
+#include "rom.h"
+#include "xvirus_dispatch.h"
+
+#define OWN(a) { (a), true, 0 }
+#define BN6(a) { (a), false, 0 }
+'''
+
+
+def rebase(text):
+    """the families' generator's places (XV_CODE + n, XV_ART + n) named by BN4's Navis' room where they are in it"""
+    def code(m):
+        a = XV_CODE_AT + int(m.group(1), 16)
+        return f'XN_BN4_CODE + 0x{a - ROOM_CODE:X}' if ROOM_CODE <= a < ROOM_ART else m.group(0)
+
+    def art(m):
+        a = XV_ART_AT + int(m.group(1), 16)
+        return f'XN_BN4_ART + 0x{a - ROOM_ART:X}' if ROOM_ART <= a < ROOM_END else m.group(0)
+    return re.sub(r'XV_ART \+ 0x([0-9A-F]+)', art, re.sub(r'XV_CODE \+ 0x([0-9A-F]+)', code, text))
+
+
+def c_navi(f):
+    """its recipe as an XNavi: the families' generator's arrays (xrecipe_bn4.c_recipe's), then its code as a family's and the
+    Navi's tables' entries"""
+    n = re.sub(r'[^a-z0-9]', '', f.name.lower())
+    arrays = X4.c_recipe(f)[0]
+    arrays = arrays[:arrays.index(f'\nstatic const XVirusFamily bn4_{n} = {{')]
+    arrays = arrays.split('\n', 1)[1]
+    head = (f'/* ---- BN4\'s {f.name} (its type {f.ty:#x} there, its enemy ids {f.first}-{f.first + VERSIONS - 1}), as Navi AI {f.ai} '
+            f'with ids {f.first_id:#x}-{f.first_id + VERSIONS - 1:#x} ---- */')
+    count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
+    L = [head, rebase(arrays), '', f'static const XNavi bn4_{n} = {{', '\t.code = {', f'\t\t.name = "{f.name} (BN4\'s)",',
+         '\t\t.game = XROM_BN4_RED_SUN_US,', f'\t\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */',
+         f'\t\t.ai = {f.ai},', f'\t\t.first_id = XN_BN4_FIRST_ID + 0x{f.first_id - BN4_NAVI_ID0:X},',
+         f'\t\t.home = XN_BN4_HOMES + 0x{f.home - ROOM_HOMES:X},']
+    for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
+                         ('sides', f.sides), ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
+        if there:
+            L.append(f'\t\t.{field} = {n}_{field}, .n{field} = {count(field)},')
+    L.append('\t\t.hooks = { ' + ', '.join([f'BN6(0x{NULLSUB_NAVI6:08X})'] * 8) + ' },')
+    rec = X4.BN4['stats'] + X4.BN4['stat_size'] * f.first
+    L.append(f'\t\t.struct1 = 0x{rec:08X}, .struct2 = 0x{rec:08X},   /* (its V1\'s enemy record: BN4 has no struct1 or struct2) */')
+    L.append('\t\t.names = { ' + ', '.join(f'0x{f.first + v:02X}' for v in range(VERSIONS)) + ' },')
+    L.append(f'\t\t.ice = {ICE},')
+    L.append(f'\t\t.traits = {{ .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = {"true" if f.s1["shadow"] else "false"}, '
+             f'.palette = {f.s1["palette"]}, .flags = 0x{f.flags:02X} }},')
+    L.append(f'\t\t.sprites = {n}_sprites, .nsprites = {count("sprites")},')
+    if f.effects:
+        L.append(f'\t\t.effects = {n}_effects, .neffects = {count("effects")},')
+    if f.songs:
+        L.append(f'\t\t.songs = {n}_songs, .nsongs = {count("songs")},   /* (its sounds in the pool: xnavi_bn4_sounds.c) */')
+    L += ['\t},', f'\t.versions = {VERSIONS},', f'\t.prestep = BN6(0x{PRESTEP6:08X}), .hook_a = BN6(0x{NULLSUB_NAVI6:08X}),',
+          f'\t.companion = BN6(0x{NO_COMPANION6:08X}), .companion_end = BN6(0x{NO_COMPANION6:08X}), .hide = BN6(0x{NO_COMPANION6:08X}),',
+          '\t.sprite_of = -1,   /* (its battle sprite its recipe\'s first: list 2 at its seat\'s number, XNAVI_SPRITE_BN4) */', '};']
+    return '\n'.join(L), f'&bn4_{n}'
+
+
+def c_file(whole):
+    parts, refs = [HEADER], []
+    for f in whole:
+        t, ref = c_navi(f)
+        parts.append(t)
+        refs.append(ref)
+    parts.append('const XNavi *const xnavi_bn4[] = { ' + ', '.join(refs) + ' };\n'
+                 'const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);\n')
+    return '\n'.join(parts)
 
 
 def main():
@@ -572,18 +727,29 @@ def main():
     ap.add_argument('--check', action='store_true')
     ap.add_argument('navi', nargs='*')
     a = ap.parse_args()
-    if a.check:
-        return 0   # (no C file yet: nothing to hold to the generator)
+    if a.check and not os.path.isdir(X4.ROM_DIR):
+        print('xnavirecipe_bn4: no ROMs here: not checked')
+        return 0
     b4, b6 = X4.find_roms()
     pairs = N.Pairs(b4, b6)
     alloc = families_alloc(b4, b6, pairs)
     alloc.code, alloc.code_end, alloc.art, alloc.art_end, alloc.room = ROOM_CODE, ROOM_ART, ROOM_ART, ROOM_END, 'the proposed room'
-    navis = [derive(b4, b6, pairs, ty, name, first, alloc) for ty, name, first in NAVIS if not a.navi or name in a.navi]
+    navis = [derive(b4, b6, pairs, ty, name, first, alloc) for ty, name, first in NAVIS]
+    text = c_file([f for f in navis if not f.decisions])
+    if a.check:
+        with open(OUT_C, encoding='utf-8') as fh:
+            if fh.read() != text:
+                print(f'xnavirecipe_bn4: {OUT_C} is not what the generator writes (python3 tools/xnavirecipe_bn4.py)')
+                return 1
+        return 0
+    with open(OUT_C, 'w', encoding='utf-8') as fh:
+        fh.write(text)
+    navis = [f for f in navis if not a.navi or f.name in a.navi]
     path = os.path.join(WORK, 'bn4_report.md')
     report(navis, path)
     for f in navis:
         print(f'{f.name}: {len(f.decisions)} decisions open, {len(f.imms)} immediates, {len(getattr(f, "pairs", []))} calls out')
-    print(f'wrote {path}')
+    print(f'wrote {OUT_C} ({sum(1 for f in navis if not f.decisions)} whole) and {path}')
     return 0
 
 

@@ -62,7 +62,8 @@ static bool code_ok(const XVirusFamily *f, char *why, size_t len) {
 		bool block = i < f->nblocks;
 		uint32_t start, end, at;
 		piece_of(f, i, &start, &end, &at);
-		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !(span_in(at, end - start, XN_CODE, XN_ART) || span_in(at, end - start, XN_MORE, XN_MORE_ART)))
+		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !(span_in(at, end - start, XN_CODE, XN_ART) ||
+			span_in(at, end - start, XN_MORE, XN_MORE_ART) || span_in(at, end - start, XN_BN4_CODE, XN_BN4_ART)))
 			return no(why, len, "%s %d at %08x", block ? "block" : "clone", block ? i : i - f->nblocks, (unsigned)at);
 		for (int k = 0; k < i; ++k) {
 			uint32_t ks, ke, ka;
@@ -88,7 +89,9 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 		const XvPair *c = &f->calls[i];
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = span_in(c->to, 2, XN_STUBS, XN_OBJECTS_END);
-		if (xvirus_block_of(f, c->from) || (c->to & 1) || (spawner ? c->to != spawner : !stub && !(c->to > BUS && c->to < BUS + ROM_SIZE)))
+		/* (a routine its blocks hold as code is its own; one whose bytes a block holds as dead data goes to its twin, as the
+		 * mover resolves it: xvirus.c, resolve) */
+		if (xvirus_is_code(f, c->from) || (c->to & 1) || (spawner ? c->to != spawner : !stub && !(c->to > BUS && c->to < BUS + ROM_SIZE)))
 			return no(why, len, "call %08x to %08x", (unsigned)c->from, (unsigned)c->to);
 	}
 	for (int i = 0; i < f->nimms; ++i)
@@ -101,7 +104,8 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 static bool art_ok(const XVirusFamily *f, char *why, size_t len) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
-		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !span_in(s->at, s->room, XN_SHARED_ART, XN_END))
+		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
+			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k)
 			if (spans_meet(s->at, s->room, f->sprites[k].at, f->sprites[k].room)) return no(why, len, "sprites %d and %d meet", k, i);
@@ -140,9 +144,20 @@ static bool needs_ok(const XNavi *n, char *why, size_t len) {
 	return true;
 }
 
+/* a BN4 Navi's AI index, ids and home: its seat's (XN_BN4_*) */
+static bool numbers_bn4_ok(const XNavi *n, char *why, size_t len) {
+	const XVirusFamily *f = &n->code;
+	int seat = f->ai - XN_BN4_FIRST_AI;
+	if (seat < 0 || seat >= XN_BN4_SEATS) return no(why, len, "AI index %d (BN4's Navis' are %d-%d)", f->ai, XN_BN4_FIRST_AI, XN_BN4_FIRST_AI + XN_BN4_SEATS - 1);
+	if (n->versions < 1 || n->versions > 4 || f->first_id != XN_BN4_FIRST_ID + 4 * seat || f->first_id + n->versions > XN_BN4_IDS_END)
+		return no(why, len, "ids from %#x, %d versions (its seat's from %#x)", f->first_id, n->versions, XN_BN4_FIRST_ID + 4 * seat);
+	if (f->home != XN_BN4_HOMES + XV_HOME_SIZE * (uint32_t)seat) return no(why, len, "home %08x", (unsigned)f->home);
+	return true;
+}
 /* its AI index, ids and home the Navis' */
 static bool numbers_ok(const XNavi *n, char *why, size_t len) {
 	const XVirusFamily *f = &n->code;
+	if (f->game == XROM_BN4_RED_SUN_US) return numbers_bn4_ok(n, why, len);
 	if (f->ai < XN_FIRST_AI || f->ai >= XN_AIS) return no(why, len, "AI index %d (the Navis' are %d-%d)", f->ai, XN_FIRST_AI, XN_AIS - 1);
 	if (n->versions < 1 || n->versions > XN_VERSIONS_MAX || f->first_id < XN_FIRST_ID || f->first_id + n->versions > XN_IDS_END)
 		return no(why, len, "ids from %#x, %d versions (the Navis' are %#x-%#x)", f->first_id, n->versions, XN_FIRST_ID, XN_IDS_END - 1);
@@ -188,7 +203,8 @@ static bool objects_refs_ok(const XVirusFamily *f, char *why, size_t len) {
 	}
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
-		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !span_in(s->at, s->room, XN_SHARED_ART, XN_END))
+		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
+			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 	}
 	for (int i = 0; i < f->ntypes; ++i)

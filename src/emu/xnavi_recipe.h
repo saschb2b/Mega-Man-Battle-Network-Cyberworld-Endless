@@ -64,11 +64,27 @@
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
 
-/* Whether `a` is in a Navi's code room (XN_CODE's or XN_MORE's) */
-static inline bool xn_code_at(uint32_t a) { return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART); }
+/* BN4 Red Sun's Navis (xnavi_bn4.c, tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, GutsMan built): BN4's Navi of V1 id n
+ * at seat (n - BN4_NAVI_FIRST_ID) / 4, a fixed place each, its AI XN_BN4_FIRST_AI + seat, its four ids from XN_BN4_FIRST_ID +
+ * 4 x seat (past every family's ids, XV_FIRST_ID + 6 x XV_FAMILIES, to XV_IDS), its home, code and art in a room of their
+ * own (FREE_BN4_NAVIS) */
+#define XN_BN4_SEATS     25
+#define XN_BN4_FIRST_AI  48
+#define XN_BN4_FIRST_ID  0x380
+#define XN_BN4_IDS_END   XV_IDS
+#define XN_BN4_HOMES     FREE_BN4_NAVIS
+#define XN_BN4_CODE      FREE_BN4_NAVI_CODE
+#define XN_BN4_ART       FREE_BN4_NAVI_ART
+#define XN_BN4_END       FREE_LIB_TEAM
+
+/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
+static inline bool xn_code_at(uint32_t a) {
+	return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART) || (a >= XN_BN4_CODE && a < XN_BN4_ART);
+}
 /* ... or in one of their art's rooms (XN_ART's or XN_MORE_ART's) */
 static inline bool xn_art_room(uint32_t a, uint32_t n) {
-	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a);
+	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a) ||
+		(a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
 }
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at
