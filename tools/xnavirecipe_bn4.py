@@ -290,11 +290,30 @@ def table_sounds(b4, b6, f):
             snd = b4.bytes(at, 1)[0]
             if X4.song_sig(b4, X4.BN4['songs'], snd) == X4.song_sig(b6, X4.SONGS6, snd):
                 f.notes.append(f'{at:08X}: its table\'s kind {k} plays {snd:#x}, BN6\'s of the same number the same song')
+            elif X4.SOUND_SLOTS.get(snd, 0) > 0xFF:
+                f.decide('sound', f'{at:08X}: its table\'s kind {k} plays {snd:#x} at the pool\'s {X4.SOUND_SLOTS[snd]:#x}, past a '
+                                  f'byte: its shim (the owner\'s call of 5 November 2026) is built for a movs alone')
             elif snd in X4.SOUND_SLOTS:
                 f.bytes.append((at, snd, X4.SOUND_SLOTS[snd], f'its table\'s kind {k}: its sound {snd:#x}, BN4\'s copied into BN6\'s slot '
                                                                f'{X4.SOUND_SLOTS[snd]:#x}'))
             else:
                 f.decide('sound', f'{at:08X}: its table\'s kind {k} plays {snd:#x}, no song of BN6\'s and no slot (SOUND_SLOTS): ask')
+
+
+def wide_sounds(f):
+    """its sounds named by a movs whose pool slot is past a byte (the owner's call of 5 November 2026, docs/multirom/bn4.md
+    call 11): the movs left as BN4's, its call to BN4_PLAY_SOUND aimed at a shim that makes r0 the slot (XvSoundCall)"""
+    f.sound_calls = []
+    wide = {i['at']: i for i in f.imms if i['form'] == 'THUMB_MOVS' and i['now'] > 0xFF and i['why'].startswith('its sound ')}
+    for _, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t != X4.BN4['sound']:
+                continue
+            v, chain = T.back_value(w, site, 0)
+            if len(chain) == 1 and chain[0][0] in wide:
+                i = wide[chain[0][0]]
+                f.sound_calls.append(dict(at=site, slot=i['now'], why=f'its sound {v:#x} at the pool\'s {i["now"]:#x}, past a byte'))
+    f.imms = [i for i in f.imms if i['at'] not in wide]
 
 
 def set_action_imms(f):
@@ -432,6 +451,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     try:
         X4.sounds_of(b4, b6, f)
         table_sounds(b4, b6, f)
+        wide_sounds(f)
     finally:
         X4.SOUND_SLOTS.clear()
         X4.SOUND_SLOTS.update(saved)
@@ -462,15 +482,12 @@ def sound_ids(b4, f):
 
 def pool_of(b4, b6, f):
     """its sounds that are no song of BN6's and no family's (xrecipe_bn4.SOUND_SLOTS), each its slot of SOUND_POOL in order;
-    one past what a movs or a byte can name (0xFF) refused, past the pool a decision"""
+    one past what a movs can name (0xFF) played through a shim (wide_sounds), past the pool a decision"""
     odd = sorted(v for v in sound_ids(b4, f) if X4.song_sig(b4, X4.BN4['songs'], v) != X4.song_sig(b6, X4.SONGS6, v)
                  and v not in X4.SOUND_SLOTS)
     if len(odd) > len(SOUND_POOL):
         f.decide('sound', f'{len(odd)} sounds for the pool\'s {len(SOUND_POOL)}')
     pool = dict(zip(odd, SOUND_POOL))
-    for v, slot in pool.items():
-        if slot > 0xFF:
-            f.decide('sound', f'its sound {v:#x} at the pool\'s {slot:#x}, which a movs or a byte cannot name')
     f.notes.append('its sounds in the pool: ' + ', '.join(f'{v:#x} at {slot:#x}' for v, slot in pool.items()))
     return pool
 
@@ -729,6 +746,9 @@ def c_navi(f):
     head = (f'/* ---- BN4\'s {f.name} (its type {f.ty:#x} there, its enemy ids {f.first}-{f.first + VERSIONS - 1}), as Navi AI {f.ai} '
             f'with ids {f.first_id:#x}-{f.first_id + VERSIONS - 1:#x} ---- */')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
+    if f.sound_calls:
+        arrays += f'static const XvSoundCall {n}_sound_calls[] = {{\n' + ''.join(
+            f'\t{{ 0x{c["at"]:08X}, 0x{c["slot"]:X} }},   /* {c["why"]} */\n' for c in f.sound_calls) + '};\n'
     L = [head, rebase(arrays), '', f'static const XNavi bn4_{n} = {{', '\t.code = {', f'\t\t.name = "{f.name} (BN4\'s)",',
          '\t\t.game = XROM_BN4_RED_SUN_US,', f'\t\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */',
          f'\t\t.ai = {f.ai},', f'\t\t.first_id = XN_BN4_FIRST_ID + 0x{f.first_id - BN4_NAVI_ID0:X},',
@@ -749,6 +769,8 @@ def c_navi(f):
         L.append(f'\t\t.effects = {n}_effects, .neffects = {count("effects")},')
     if f.songs:
         L.append(f'\t\t.songs = {n}_songs, .nsongs = {count("songs")},   /* (its sounds in the pool: xnavi_bn4_sounds.c) */')
+    if f.sound_calls:
+        L.append(f'\t\t.sound_calls = {n}_sound_calls, .nsound_calls = {count("sound_calls")},')
     L += ['\t},', f'\t.versions = {VERSIONS},', f'\t.prestep = BN6(0x{PRESTEP6:08X}), .hook_a = BN6(0x{NULLSUB_NAVI6:08X}),',
           f'\t.companion = BN6(0x{NO_COMPANION6:08X}), .companion_end = BN6(0x{NO_COMPANION6:08X}), .hide = BN6(0x{NO_COMPANION6:08X}),',
           '\t.sprite_of = -1,   /* (its battle sprite its recipe\'s first: list 2 at its seat\'s number, XNAVI_SPRITE_BN4) */']

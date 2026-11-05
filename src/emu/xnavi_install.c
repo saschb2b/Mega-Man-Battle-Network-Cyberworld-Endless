@@ -153,17 +153,19 @@ static void records_bn4(const XNavi *n, const Game *g) {
 }
 
 /* its collision setup's own r3 (XNavi.coll_arg) written over BN6's actor init's at its spawn's end: a shim of its home (the
- * project's own Thumb, XV_HOME_COLL_ARG) as its spawn end's entry (table 7), which must be the empty hook */
-#define XV_HOME_COLL_ARG XV_HOME_SHIMS
+ * project's own Thumb, past the most its code's shims take: xvirus_shims_room) as its spawn end's entry (table 7), which must
+ * be the empty hook */
 static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	const XVirusFamily *f = &n->code;
+	const uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
 	if (table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its collision's r3"); return; }
+	if (place + 8 > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return; }
 	/* ldr r0,[r5,#0x54]; movs r1,#arg; strb r1,[r0,#BN6_COLL_SETUP_ARG]; mov pc,lr (BN6 calls a hook by mov lr,pc and bx r0,
 	 * 0x0800F430: lr has no Thumb bit, so a bx lr would leave Thumb) */
 	const uint16_t shim[4] = { 0x6D68, (uint16_t)(0x2100u | n->coll_arg), (uint16_t)(0x7001u | BN6_COLL_SETUP_ARG << 6), 0x46F7 };
-	uint8_t *p = xv_put(f->home + XV_HOME_COLL_ARG, sizeof shim, true);
+	uint8_t *p = xv_put(f->home + place, sizeof shim, true);
 	for (int i = 0; p && i < 4; ++i) put16(p + 2 * i, shim[i]);
-	table[7] = (f->home + XV_HOME_COLL_ARG) | 1u;
+	table[7] = (f->home + place) | 1u;
 }
 
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi

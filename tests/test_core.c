@@ -4407,6 +4407,13 @@ static void test_xvirus_shims(void) {
 		get16(r + 4));
 	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer, -1) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000, -1),
 		"shims: a NameID range off its word, or its veneer out of a branch's reach, taken");
+	/* (a sound past a byte: movs r0,#1; lsls r0,r0,#8; adds r0,#4; b the veneer, r0 0x104) */
+	uint8_t s[XV_SHIM_SOUND_SIZE];
+	CHECK(xvirus_shim_sound(s, home, 0x104, veneer) && get16(s) == 0x2001 && get16(s + 2) == 0x0200 && get16(s + 4) == 0x3004 &&
+		(get16(s + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(s + 6) & 0x7FFu) == veneer,
+		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
+	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
+		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;
 	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");

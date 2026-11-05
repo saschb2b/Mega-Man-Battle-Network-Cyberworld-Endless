@@ -120,6 +120,19 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
 	return done(&a) && a.n == XV_SHIM_RANGE_SIZE;
 }
 
+/* ---- a sound past a byte ---- */
+
+bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer) {
+	Asm a = { out, XV_SHIM_SOUND_SIZE, 0, at, (at & 1) != 0, { 0 }, { { 0 } }, 0 };
+	half(&a, MOVS(0, slot >> 8));
+	half(&a, (uint16_t)(8 << 6));   /* lsls r0, r0, #8 */
+	half(&a, ADDS_I(0, slot & 0xFF));
+	int32_t off = (int32_t)(veneer - (at + 6 + 4));
+	if (off < -2048 || off > 2046 || (veneer & 1)) a.bad = true;
+	else half(&a, (uint16_t)(B_ | ((off >> 1) & 0x7FF)));
+	return done(&a) && a.n == XV_SHIM_SOUND_SIZE;
+}
+
 /* ---- a hook entered past its routine's push ---- */
 
 bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to) {
