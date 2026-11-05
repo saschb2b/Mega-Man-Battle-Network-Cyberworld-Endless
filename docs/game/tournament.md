@@ -520,7 +520,7 @@ act 3 round 1 at V1 63 times in 500, round 2 at V2 37 times. A forced
 bracket (`--dev tourney,god,onehit`, seed 6, autopilot from layer 9): BN4's
 screen with his plate beside MegaMan's, round 1's card "GutsMan, The
 Pounding Fist", his battle (enemy 0x384, 500 HP, his sprite put in the
-room), won; round 2 ShadowMan V2, the final GroundMan, won. `build.py economy` (300 runs, a
+room), won; round 2 ShadowMan V2, the final GroundMan, won. With him in the pool, `build.py economy` still has 0 numbers of the plan in play outside their bands (his rounds pay no Navi chip). `build.py economy` (300 runs, a
 profile past the Nest, the plan in play): the short net's act 3 14.5 to
 15.4 chips and 6,971 to 8,391 zenny a run, the endless net's act 3 12.5
 to 13.2 and 5,860 to 6,910, act 4 12.6 to 13.1 and 7,226 to 8,247, act 5

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -222,7 +222,7 @@ what a Soul Navi has more:
   seat, past every family's ids; his home, code and art in BN4's Navis' own
   room (`FREE_BN4_NAVIS`, `EMU_FREE + 0x720000` to `FREE_BRACKET`, BN4's
   bracket screen's room past it: the owner's call of 5 November 2026); his battle sprite at list 2 0x40 + seat
-  (`XNAVI_SPRITE_BN4`, GutsMan's 0x41); his palette 0 for every version
+  (`XNAVI_SPRITE_BN4`, GutsMan's 0x41; its bytes the room the battles share, [Battle sprites by battle](#battle-sprites-by-battle)); his palette 0 for every version
   (`BN4_NAVI_PALETTE`'s step 0, as BN6's actor init gives a step of 0); his
   objects' list 3 sprite copied into list 4, its load's list offset made
   list 4's. The art's and the dispatch's numbers continue past BN4's
@@ -406,34 +406,62 @@ MB, 15 refused in 2 of 3 runs (maps' mirror images, `area_src.c`), as
 [the 3DS's memory](../engine/emulation/3ds-memory.md) measured before
 him: his install writes the core's copy alone, not the heap.
 
+**In a run** he is a tournament's round ([The tournament](../game/tournament.md),
+As built): `src/layer/xguardian_bn4.c` lists the proved BN4 Navis, a line
+each (his V1 id, his own plate on BN4's bracket, his look on a card), and
+the bracket's pool takes each where his four versions are installed. A
+Navi joins it with his line once his spec PASSes and every mutation of it
+is caught.
+
 Then: the next Navi.
 
-### Battle sprites by battle, planned
+### Battle sprites by battle
 
-The same rule as the sounds: a BN4 Navi's battle sprite loaded for his
-battle from the player's ROM into one shared room, not all eighteen
-resident. Measured from BN4's list 2: the ten Soul Navis' sprites are raw
-in BN4 (their rooms 36-60 KB, GutsMan's 60 KB), the other eight LZ77'd
-(98 KB compressed, 264 KB decompressed, Duo's the largest at 61040
-bytes). One room of 64 KB (`0x10000`, GutsMan's and Duo's rounded up)
-holds any one of them decompressed. The plan, as the sounds' pool:
+Built on 5 November 2026, the same rule as the sounds: a BN4 Navi's battle
+sprite loaded for his battle from the player's ROM into one room the
+battles share, none resident. Measured from BN4's list 2: the ten Soul
+Navis' sprites are raw in BN4 (their rooms 36-60 KB, GutsMan's 60 KB), the
+other eight LZ77'd (98 KB compressed, 264 KB decompressed, Duo's the
+largest at 61040 bytes). The room is 64 KB (`FREE_BN4_NAVI_SPRITE`, the
+art's last `0x10000` before the bracket's faces; `XN_BN4_SPRITE` in
+`src/emu/xnavi_recipe.h`), and holds any one of them unpacked
+(`tests/test_core.c` holds it to Duo's).
 
-1. Every BN4 Navi's list 2 number (`XNAVI_SPRITE_BN4` + seat) and arm
-   points' record listed at install, his list 2 entry the shared room.
-2. Before each frame, the battle's BN4 Navi found as the sounds' pool finds
-   him; where the room holds another's, his sprite copied in from the
-   player's BN4 ROM (`xnavi_sprite_bytes`, decompressing an LZ77'd one).
-3. The copy must land before BN6 draws him: the object's sprite is set at
-   his init (`sprite_load` from his struct1's list and number), in the
-   frame he spawns, which the step before that frame cannot see. The
-   battle's record names its enemies before they spawn (BN6's battle
-   settings, `emu_encounter_record`), so the step reads the record at the
-   battle's setup instead of the objects, as the director's battle start
-   event (`EV_BATTLE_START`) does; the differential's BN6 run sets up its
-   battle the same way.
+1. **The generator** places every Navi's battle sprite there
+   (`tools/xnavirecipe_bn4.py battle_sprite_place`, which the families'
+   `art_of` asks through `alloc.battle_place`): his first sprite row reads
+   `XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE`, and his art (his attacks' sprites,
+   his songs) ends where the room begins. A Navi the other generators add
+   takes the room with no change of theirs. GutsMan's art fell from 75 KB to
+   15 KB.
+2. **His install** (`xvirus.c sprites_set`, `src/emu/xnavi_bn4_room.c`)
+   copies none of it: his list 2 entry (`XNAVI_SPRITE_BN4` + seat, 0x41) is
+   pointed at the room, the sprite checked to fit it, and BN4's list 2
+   number of it written at his seat in a table beside the homes
+   (`XN_BN4_SPRITES`, a byte a seat, 0xFF none; GutsMan's 0x02).
+3. **The fill**: as a battle's record is written (`emu_encounter_set`,
+   `src/director/encounter.c`), before BN6 sets the Navi up at his spawn
+   (his init's `sprite_load`), the room is filled with the sprite the table
+   names for the BN4 Navi among its entities, read from the player's BN4 ROM
+   (a raw one straight from its bytes, an LZ77'd one unpacked by
+   `xnavi_sprite_bytes`, 61 KB at most taken from the heap and let go at
+   once), in the core's copy alone.
+   BN6 draws a list 2 sprite whose pointer has no bit 31 straight from
+   where it points. Every battle a run fights and the differential's BN6
+   run write their record so (`emu_battle_force`).
 
-Not built: GutsMan's sprite stays resident (60 KB of the 256 KB art room)
-until it is.
+Proved: `gutsman_v1` PASSes with his sprite in the room, and the comparator
+reads a pointer into the room as the battle's Navi's sprite
+(`tools/xdiff_bn4.py sprite_rows`: a room row is his only where his
+recipe's ids are the spec's foes, so a second Navi's row there is left out).
+The mutation "GutsMan's battle sprite room filled with another's"
+(`tests/xdiff/mutations.json`: his seat's byte made BN4's list 2 number 3)
+is caught at t1, his sprite's frames. The New 3DS's heap (`python3
+tools/heap3ds.py --seeds 1-3 --cases bn4,all`, 5 November 2026) as before
+the room: BN6 and BN4 peak at 94.1 MB of 96 with none refused; all three
+ROMs at 95.98 MB, 15 refused in 2 of 3 runs (the maps' mirror images, as
+before). Those runs meet no BN4 Navi, so the fill's own unpacking is not
+in them; the ten Soul Navis' raw sprites take none.
 
 ### Room for all eighteen, measured
 
@@ -444,12 +472,10 @@ their objects' 0x18D52 bytes (about 100 KB); their battle sprites 0xAF000
 their attacks' art 0x1D800 (118 KB). The room (448 KB since BN4's bracket
 screen took its last 64 KB, `FREE_BRACKET`) holds the code in its 128 KB
 and the attacks' art, but not the battle sprites: 256 KB of art holds
-about four of them. The rest would need their battle sprites loaded
-by battle as their sounds are, into a shared room of a few sprites (the
-Navis a battle or a tournament's day holds), from the player's ROM: BN6's
-battle preload already copies a battle's compressed sprites into its
-cache, so a Navi's sprite copied at his battle's start serves as well as
-one kept; the 16 MB copy has no other room past FREE_LIB_TEAM (24 KB).
+about four of them. So their battle sprites are loaded by battle, as
+their sounds are, into one room ([Battle sprites by battle](#battle-sprites-by-battle),
+above): one battle holds one BN4 Navi, and a tournament's rounds are
+battles apart. The 16 MB copy has no other room past FREE_LIB_TEAM (24 KB).
 
 ## What tools/xnavirecipe.py needs for BN4
 
