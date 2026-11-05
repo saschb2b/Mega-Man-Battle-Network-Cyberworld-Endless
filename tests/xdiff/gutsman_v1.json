@@ -11,10 +11,5 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1,
-  "verdict": {
-    "is": "FAIL",
-    "at": 266,
-    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): t1-t265 the same (his collision's own setup argument, BN6's and BN4's own AI bookkeeping allowed, his opening count by the frame's clock, his draws replayed, his attack's object's spawn leftover allowed and its sprite state the slot's last occupant's); at t266, a frame after his attack shook the screen (0x0802608C, BN6's 0x080302A8 the same body: its strength and frames at the toolkit's +0xC's +0xE and +0xC), his sprite state's screen place (+0x9C, +0x9E, +0x9F) takes each engine's shake offset (BN4 0, -1, +2, -1 ... against BN6 0, +1, +2, -1 ...), each game's shake's own per-frame pattern, unread"
-  }
+  "lag": 1
 }
