@@ -305,7 +305,10 @@ Checked that day:
   all three, a battle asked for every 2500 frames (200000 frames,
   MegaMan kept alive; the visitors' build before the areas came): 281
   battles, every one won, 8 BN4 visitors (Billy 2, Shrimpy 1, Walla 1,
-  CirKill 4), 3 of BN5's, none lost or stuck.
+  CirKill 4), 3 of BN5's, none lost or stuck; again with the areas in
+  (100000 frames): 200 battles, every one won, 7 BN4 visitors, 3 of
+  BN5's, 2 of BN6's in BN5's battles. `build.py xdiff billy_v1` still
+  PASSES.
 - **Areas**: each of x15-x19 walked by the autopilot in a run (seed 1,
   30000 frames): two layers left each, 2 to 5 battles won; seed 4 with
   BN6 and BN4 fought act 2 in BN4's Park Area, its layers walked and
