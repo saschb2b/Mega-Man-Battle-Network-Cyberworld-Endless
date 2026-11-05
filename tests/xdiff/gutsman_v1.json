@@ -14,7 +14,7 @@
   "lag": 1,
   "verdict": {
     "is": "FAIL",
-    "at": 1,
-    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): at t1 his collision's setup argument (BN6_COLL_SETUP_ARG: BN4's init passes 0x21, BN6's actor init 0x08016FE8 passes 3 to every actor), the AI data's fields BN6's Navi setup gives and BN4's Navi keeps none of or elsewhere (+0x00, +0x0C, +0x0E, +0x78, +0x7F; BN4's +0x50 its side's control block) and his sprite's count (obj +0x91)"
+    "at": 265,
+    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): t1-t264 the same (his collision's own setup argument, BN6's and BN4's own AI bookkeeping allowed, his opening count by the frame's clock, his draws replayed); at t265 the first object his attack spawns, BN4's third-kind 0x1C (the dispatch's 0xE6), parts on +0x3C (BN4 a pointer to the battle state, BN6 3), +0x93, +0x9E and +0xB8, fields the engine's routines its code calls write, unread"
   }
 }
