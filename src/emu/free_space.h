@@ -80,7 +80,9 @@
 #define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
 #define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_LIB_TEAM */
+#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BRACKET */
+#define FREE_BRACKET        (EMU_FREE + 0x790000u)   /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c), to: */
+#define FREE_BRACKET_END    (EMU_FREE + 0x7A0000u)
 #define FREE_LIB_TEAM       (EMU_FREE + 0x7A0000u)   /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c), to: */
 #define FREE_LIB_TEAM_END   (EMU_FREE + 0x7FA000u)
 
@@ -97,6 +99,11 @@
 #define RAM_TEAM_CUSTOM     0x02011790u   /* ... each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c), to: */
 #define RAM_TEAM_CUSTOM_END 0x02011800u
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
+/* A main mode's own while the map waits (BN6's shop, mode 0x2C, decompresses into 0x02029A00, 0x0202BA00 and 0x0202DA00 as
+ * it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map */
+#define RAM_BRACKET         0x02029A00u   /* BN4's bracket screen moved: its state, tournaments, blend values, menu sprites and its tiles
+                                             unpacked (xbracket.h), to: */
+#define RAM_BRACKET_END     0x0202DA00u
 /* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
  * else of BN6's reads or writes 0x0203FB50 on */
 #define RAM_SEA             0x0203FB50u   /* BN5's sea's submerge (xsea.h: the submerged, their markers), to: */

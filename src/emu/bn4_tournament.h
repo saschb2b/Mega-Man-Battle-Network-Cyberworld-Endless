@@ -97,6 +97,35 @@
                                        * MegaMan's, 6) */
 #define BN4_MENU_SPRITE_PTRS 0x080281D0u /* the menu sprites' sprite pointers (0x08002908's r0): the plates 0x084BB768 and 0x084BDB30 */
 
+/* A plate as BN4 draws it (docs/multirom/bn4-tournament.md, Faces for every entrant; tools/bn4_faces.py): an animation of
+ * one frame in a plate sheet, uncompressed, two objects (16x32 at -12,-16 and 8x32 at 4,-16, 1D tiles); its palette the
+ * sheet's palette BN4_PLATE_PALETTES[id] + its variant + its object's palette nibble (the animation's place in its four:
+ * 0, 4, 8, 12), so a sheet of 16 plates holds 64 palettes. Read in BN4_PLATE_INIT and BN4_PLATE_SET; a plate's tiles and
+ * palettes written over in romlab's ROM copy, BN4's bracket draws the new face in colour and grey */
+#define BN4_PLATE_SHEET_A 0x084BB768u /* BN4_MENU_SPRITE_PTRS[4]: ids 0x00-0x0F's plates, animations 0-15 */
+#define BN4_PLATE_SHEET_B 0x084BDB30u /* ... [5]: ids 0x10-0x15 and MegaMan's (animation 6), 28 palettes */
+#define BN4_PLATE_INIT    0x08104040u /* BN4_BRACKET_PLATE's kind 0 begun: the entrant's id from the tournament (0xFF:
+                                       * BN4_PLATE_EMPTY_ID), its animation (BN4_PLATE_FRAMES), its palette (below), its sheet */
+#define BN4_PLATE_SET     0x08104290u /* r6 the sheet (BN4_PLATE_SHEETS' value): the sprite loaded from BN4_PLATE_SPRITES'
+                                       * entry, its animation and palette set */
+#define BN4_PLATE_PALETTES 0x08104108u /* by entrant id, the plate's first palette in its sheet: 0x00, 0x10, 0x20, 0x30 */
+#define BN4_PLATE_SPECIAL 0x08104146u /* ids drawn in colour with BN4_PLATE_FRAMED, 0xFF-ended: 0x02, 0x03, 0x06, 0x07, 0x0A, 0x0B */
+#define BN4_PLATE_EMPTY_ID 0x17       /* the id an entrant 0xFF (none) is drawn as */
+#define BN4_PLATE_W       24          /* a plate's pixels, the frame's 22x30 in it from (1, 0) */
+#define BN4_PLATE_H       32          /* ... its height */
+#define BN4_PLATE_TILES   12          /* its 4bpp tiles: 8 the 16x32 object's, then 4 the 8x32's */
+#define BN4_PLATE_OUTER   14          /* the outer frame's colour index (all of ids 0x00-0x16 and MegaMan's but 0x04, 0x05) */
+#define BN4_PLATE_INNER   15          /* the inner frame's */
+#define BN4_PLATE_FACE_X  3           /* the face's window inside the frames: from (3, 2), 18x26, 13 colours (indexes 1-13) */
+#define BN4_PLATE_FACE_Y  2           /* ... its top */
+#define BN4_PLATE_FACE_W  18          /* ... its width */
+#define BN4_PLATE_FACE_H  26          /* ... its height */
+#define BN4_PLATE_VARIANTS 4          /* a plate's palettes, by BN4_PLATE_INIT's choice: */
+#define BN4_PLATE_COLOUR  0           /* ... an entrant in or out this round (BN4_ENTRANT_IN, BN4_ENTRANT_OUT), */
+#define BN4_PLATE_LIGHT   1           /* ... lighter, its outer frame green (not chosen by the init; its user not read), */
+#define BN4_PLATE_GREY    2           /* ... grey: out before (or out this round, opened from a script), */
+#define BN4_PLATE_FRAMED  3           /* ... its colours, its inner frame purple: BN4_PLATE_SPECIAL's ids in colour */
+
 /* What opens them in a script */
 #define BN4_CUTSCENE_COMMANDS 0x0802C140u /* the cutscene engine's command routines by command byte (dispatched at 0x0802D05C) */
 #define BN4_CS_START_TOURNAMENT 0x52  /* `52 t`: BN4_START_TOURNAMENT (0x0802CE1E) */
@@ -105,5 +134,25 @@
 #define BN4_CS_OPPONENT_ARENA 0x55    /* `55 0`: the next opponent's net map into the game state's +6 and +7, kept; `55 1` back */
 #define BN4_TEXT_COMMANDS 0x0804E900u /* the text engine's commands by byte - 0xE5 (0x0804E13C) */
 #define BN4_TEXT_TOURNAMENT 0xFC      /* its sub-commands by the next byte (0x08050434): `FC 01 t script argument` BN4_OPEN_BRACKET */
+
+/* The bracket moved into BN6 (src/emu/xbracket.h; docs/multirom/bn4-tournament.md, Moved into BN6): what the move reads besides the
+ * screen's own, found by tools/xrecipe_bracket.py's walk and proved by tools/xbracket.py */
+#define BN4_MAP_LEAVE     0x08005040u /* the map left for a screen (the sub-state BN4_GAMESTATE_TO_BRACKET's call before the set-up): its
+                                       * sounds stopped, BN4_BG_PRESETS_SET with BN4_BRACKET_BG_PRESET among its calls, DISPCNT 0x40 its last */
+#define BN4_BG_PRESETS_SET 0x08001BE8u /* r0 a preset: its 8 bytes (BG0CNT-BG3CNT) from BN4_BG_PRESETS into the render info ([eToolkit +8] +4) */
+#define BN4_BG_PRESETS    0x08001C04u /* the BG controls' presets, 8 bytes each */
+#define BN4_BRACKET_BG_PRESET 0x13    /* ... the bracket's (BN4_MAP_LEAVE's movs r0,#0x13) */
+#define BN4_BRACKET_BLEND 0x02009440u /* the bracket's line blend values, 0x140 bytes, sent to BLDALPHA line by line by the HBlank DMA */
+#define BN4_BRACKET_TILES_RAM 0x0202E000u /* BN4_BRACKET_TILES unpacked (its LZ77 header's size, 0x26C4), copied to 0x06008020 */
+#define BN4_HBLANK_DMA_SET 0x080060A4u /* an HBlank DMA set: r0 its source, r1 its register, r2 its count, r3 its control into BN4_HBLANK_DMA */
+#define BN4_HBLANK_DMA    0x02008920u /* ... its state (+0 on, +1 count, +2 control, +4 source, +8 register; 0x080060BC stops it) */
+#define BN4_MENU_SPRITE_SET 0x08002908u /* a menu sprite's sprite (r0 its index in BN4_MENU_SPRITE_PTRS, r5 the sprite) */
+#define BN4_BG_FILL_RECT  0x08001E18u /* a BG map's rect filled with r3 (r0, r1 its place, r2 the BG, r4, r5 its size): a veneer to IWRAM
+                                       * 0x03005A5D, whose body BN6's 0x03005EBB has (its veneer 0x080018D0) */
+#define BN4_BRACKET_CYCLES 0x08043814u /* the palette cycles' lists BN4_PALETTE_ANIM takes: the lit lines' flash, then the titles' (to 0x08043884) */
+#define BN4_BRACKET_SONG_SITE 0x08043A50u /* movs r0,#BN4_SONG_BRACKET before the music's start, in the screen's start */
+#define BN4_FREE_SPAWN_LISTS 0x08044844u /* the Free Tournament's menu sprites' spawn lists (types 0x3C and 0x3D), 4 bytes an entry, 0xFF ending */
+#define BN4_BRACKET_ART_END 0x086C792Cu /* the end of the bracket's art: BN4_BRACKET_TILES, BN4_BRACKET_PALETTE and its cycles' colours, the six
+                                       * maps of BN4_BRACKET_MAPS (0x4B0 bytes each) one after another */
 
 #endif
