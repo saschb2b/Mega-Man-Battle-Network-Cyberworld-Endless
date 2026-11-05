@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -988,6 +988,12 @@ format, its game 4: the trace's header names it):
   object's word its spawn took from a register its caller never set is
   each game's leftover, allowed by its rule with both paths
   (`spawn_leftover`: GutsMan's attack's 0x1C's +0x3C).
+  A first-kind object of a type a Navi's recipe moves (its `XvType` of kind 1: FireMan's companion
+  0x57, an object of no enemy id) is told by its type, BN6's dispatched number read back as BN4's
+  (`xdiff_snap.py` `T1_MOVED`, `xdiff_bn4.py` `t1_moved`), not by its NameID, which BN4's 0 would read
+  as MegaMan's; its +9 and its id are its own code's, kept, and its spawn word's sprite number
+  (+5) is read as the recipe's copy (`fireman_v1`, [BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  FireMan built).
   `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
   GutsMan built) PASSes over its 1200 frames (his own collision argument
   ported, each game's own AI bookkeeping allowed on a Navi, `navi_ai`, his

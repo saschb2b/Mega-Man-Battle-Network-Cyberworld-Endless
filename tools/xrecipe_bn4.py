@@ -72,6 +72,7 @@ BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
             0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
 ELEMENT4, ELEMENT6 = 0x17, 0x0E   # an object's element (BN4_T1_ELEMENT), BN6's (BN6_T1_ELEMENT)
+KIND_NAMES = {1: 'first', 3: 'third', 4: 'fourth'}   # (a moved type's kind, as the C file's comments name it)
 
 # The numbers BN4's families take, past BN5's (tools/xrecipe.py's 25 in slots 0-24, their code to XV_CODE + 0x11000 and
 # their art to XV_ART + 0x54000): slot 32 on (AI 64, ids 0x2C0), their code and art apart from BN5's, one family's after
@@ -1117,7 +1118,7 @@ def c_recipe(f):
         L.append('};')
     if f.types:
         L.append(f'static const XvType {n}_types[] = {{')
-        L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED, 0x{t:02X} }},   /* BN4\'s third-kind {t:#x}, moved, the dispatch\'s {a:#x} */'
+        L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED, 0x{t:02X} }},   /* BN4\'s {KIND_NAMES[k]}-kind {t:#x}, moved, the dispatch\'s {a:#x} */'
               for k, a, t in f.types]
         L.append('};')
     L += [f'static const XvRef {n}_states[] = {{', '\t' + ', '.join(ref_text(x) for x in f.states) + ',', '};']

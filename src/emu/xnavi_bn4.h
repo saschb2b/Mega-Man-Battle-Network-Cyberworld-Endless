@@ -12,5 +12,8 @@
 
 extern const XNavi *const xnavi_bn4[];
 extern const int xnavi_bn4_count;
+/* ... and the whole ones held from the install while their spec cannot run (the generator's HELD): compiled, not installed */
+extern const XNavi *const xnavi_bn4_held[];
+extern const int xnavi_bn4_held_count;
 
 #endif

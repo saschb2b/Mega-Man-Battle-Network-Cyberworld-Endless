@@ -117,6 +117,21 @@ typedef struct { uint32_t at, at2; uint16_t song; } XnSound;
  * sprites, or BN6's own): its list and number */
 typedef struct { uint32_t masks, masks_at, crc; uint16_t masks_len; uint8_t kind, list, number; } XnOverlay;
 
+/* A spawn its game's init makes that BN6's actor init has none of (BN4's Navis' companions; xnavi_init.c; docs/multirom/
+ * bn4-navis.md, Companions): `spawner` (its own code, the first-kind type it spawns moved with it) called by a bl with r4
+ * `r4` (XN_R4_ANY: left), and where `table` (in its blocks) is not 0 with r0 `hi` << 16 | that table's byte by its version (its object's +4,
+ * as BN6's spawn keeps it), r2 that byte and r1 its version; then, where it spawned one (r0 not 0), the companion's
+ * +link_at given the Navi's address + link_from (link_at 0: none) and the Navi's +keep_at given the companion (0: none) */
+typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_at, keep_at; } XnSpawn;
+#define XN_R4_ANY 0xFFFFFFFFu   /* (its r4 as BN6 leaves it: its init sets none for the call) */
+/* What its game's init does past BN6's actor init (XNavi.init): its spawns, in its init's order, made by a shim of its home
+ * at its companion start (BN6's actor init's call after its collision set up, BN6_ACTOR_COMPANION_CALL, which its
+ * .companion must leave empty) or, `at_end`, at its spawn's end (its table 7, after the whole of BN6's actor init); and at
+ * its spawn's end, by a shim of its home there, its collision's own r3 (XNavi.coll_arg), its +0x11 its +0x10 (`anim`: its
+ * init's 0 where BN6's actor init writes 0xFF), then its spawns where `at_end`, its sprite updated (`sprite`, BN6's
+ * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order */
+typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame; } XnInit;
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -129,7 +144,7 @@ typedef struct {
 	int sprite_of;              /* BN5's Navi whose battle sprite it draws at its number (xnavi_sprites.h); -1 its struct1's own */
 	uint8_t coll_arg;           /* its collision setup's r3 (BN6_COLL_SETUP_ARG: the hit bits its body's hit ORs into the struck's) where
 	                               its game's init passes one BN6's actor init (3 for every actor, 0x08016FE8) does not: BN4's Navis'
-	                               0x21; written over at its spawn's end by a shim of its home (xnavi_install.c); 0 none */
+	                               0x21; written over at its spawn's end by a shim of its home (xnavi_init.c); 0 none */
 	uint16_t shown[XV_VERSIONS];   /* each version's name as its game shows it: an entry of its Navi names (BN5 shows Colonel V3 as V1) */
 	const XnSound *sounds;      /* the sounds BN6 numbers otherwise */
 	int nsounds;
@@ -138,6 +153,7 @@ typedef struct {
 	int nneeds;
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
+	const XnInit *init;         /* what its game's init does past BN6's actor init (BN4's Navis' companions), NULL nothing */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in
