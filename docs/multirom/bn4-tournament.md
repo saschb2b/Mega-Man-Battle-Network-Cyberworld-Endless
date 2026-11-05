@@ -1,16 +1,19 @@
 ---
 type: Research
 title: "BN4's tournament screens"
-description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, and the bracket moved into BN6 as its main mode 0x3C by a recipe, proved pixel for pixel against BN4's own."
+description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, the bracket moved into BN6 as its main mode 0x3C by a recipe and proved pixel for pixel against BN4's own, and how BN4 draws a plate, every BN6 and BN5 entrant's face made into one from his own game's art and proved on BN4's bracket."
 tags: [multirom, bn4, tournament, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T04:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
     title: "The owner's BN4 Red Sun ROM, read with a Thumb decoder and played in romlab"
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"
-    title: "The player's BN6 ROM, its main modes read for a free slot"
+    title: "The player's BN6 ROM, its main modes read for a free slot, its mugshots and battle sprites for the plates"
+  - id: bn5-rom
+    resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39"
+    title: "The player's BN5 ROM, its Navis' mugshots for the plates"
 ---
 
 # BN4's tournament screens
@@ -143,9 +146,109 @@ BN4's bracket draws BN4's plates only: 20 of its Navis and MegaMan. The
 design's first brackets draw from the Navis a run already moves, BN6's and
 BN5's, and neither game has a plate. Whichever way is taken, a bracket of
 those Navis needs their faces from their own games' art composed into the
-plates' places, a unit of research of its own (candidates to look for:
-BN5's Liberation team faces, BN6's Cross select faces). A bracket of BN4's
-own Navis needs nothing more.
+plates' places: found and proved below (Faces for every entrant). A
+bracket of BN4's own Navis needs nothing more.
+
+## Faces for every entrant
+
+The owner's call 6 ([The tournament](../game/tournament.md), The owner's
+calls): every bracket on BN4's screen, and no tournament until it can
+show every entrant. The entrants are every moved Navi of the games
+present (the same page, The entrants): BN6's sixteen (navis 1-10, 12-16
+and 18) and BN5's six (24-29). This is how BN4 draws a plate, what each
+of them is made from, the proof, and what the whole set costs.
+`tools/bn4_faces.py` does all of it from the player's ROMs; the names are
+in `src/emu/bn4_tournament.h` and the row in
+[BN4 Red Sun's tables](../rom/bn4.md) (The bracket's plates). Nothing of
+the games is committed: the faces exist in memory and the frames in
+`.build/bn4faces/`.
+
+### How BN4 draws a plate
+
+| Question | Answer (read in BN4's code, checked by `tools/bn4_faces.py`) |
+| --- | --- |
+| Which plate | `BN4_PLATE_INIT` (`0x08104040`, the plates' type's kind 0) takes the entrant's id from the tournament (0xFF is drawn as 0x17), its animation from `BN4_PLATE_FRAMES`, its palette from `BN4_PLATE_PALETTES` plus a variant, and its sheet through `BN4_PLATE_SHEETS` and `BN4_PLATE_SPRITES` to `BN4_PLATE_SET` (`0x08104290`). Sheet A (`0x084BB768`) holds ids 0x00-0x0F, sheet B (`0x084BDB30`) ids 0x10-0x15 and MegaMan's. |
+| Tiles, size, layout | BN's sprite format, an animation of one frame a plate: a 16x32 object at (-12, -16) and an 8x32 one at (4, -16), 12 tiles of 4 bits (384 bytes), 1D. The plate is 24x32: a frame of 22x30 from (1, 0), its outer line in colour index 14 and its inner in 15, the face an 18x26 window from (3, 2) in indexes 1-13 (11 to 13 colours on BN4's own). Plates 0x04 and 0x05 alone keep their frame in other indexes. |
+| Palette | Four a plate: the sheet's palette `BN4_PLATE_PALETTES`[id] + the variant + the object's palette nibble (0, 4, 8, 12 by the animation's place in its four), so sheet A holds 64 palettes and B 28. Variant 0 is colour, 1 lighter with a green outer line (no code read chooses it), 2 grey, 3 colour with a purple inner line (`BN4_PLATE_SPECIAL`'s ids 0x02, 0x03, 0x06, 0x07, 0x0A and 0x0B in colour). |
+| The grey "out" look | A palette, not a picture: the same tiles in variant 2, a sepia grey of the plate's own colours that BN4 made for each plate. Chosen where the entrant's flags hold neither `0x40` nor `0x80` (out before), or out this round when a script opened the screen. |
+| Compressed | No: both sheets are plain (pointer bit 31 clear) and read in place when a plate's sprite is set. BN6's mugshots and battle sprites used below are plain too; BN5's mugshots are decoded either way. |
+| An extra plate | Swapping an existing id's art needs no code: its 384 bytes of tiles and its four palettes (4 x 32 bytes) written at its place in the sheet (proved below). A new id needs an entry in each of `BN4_PLATE_FRAMES`, `BN4_PLATE_SHEETS` and `BN4_PLATE_PALETTES` (byte tables of 31 entries, ids 0x00-0x1E; 0x17-0x1D are drawn as 0x14's and 0x15's plates; past 0x1E they read the next routine's code), a value of `BN4_PLATE_SPRITES` naming a new entry of `BN4_MENU_SPRITE_PTRS`, and a sheet for it. Outside the plate, BN4's own round (`BN4_ADVANCE_ROUND`: ids under 0x14 over those above) and its opponents' battles (`BN4_OPPONENT_BATTLES`) go by id; a run settles its own rounds and reads neither. |
+
+BN4's plates are drawn for the plate, not cut from its mugshots: the best
+18x26 window of each mugshot matches its plate in 176 of 468 pixels for
+GutsMan (0x42), 133 for Roll (0x41), 33 for SearchMan (0x59) and 8 for
+AquaMan (0x51). They show the head about half the mugshot's size.
+
+### The faces' sources
+
+| Candidate | What it is | Taken |
+| --- | --- | --- |
+| Chat mugshots (sprite list 8) | 40x48, the face from the front filling it, on a ground of one colour, one palette of 16 | Yes, halved: the plates' look (a front face, the head filling the window) at the plates' scale. BN6 has them for 11 of its 16 entrants ([BN6's pictures](../rom/graphics.md), Mugshots), BN5 for its six (list 8, 69 and 71-75: [BN5's Navis](../rom/navis.md)). BN5's Liberation shows its Navis by these same faces; no other portrait sheet was searched for in either game. |
+| Navi chips' pictures (chip records +0x24, +0x28) | 56x48, the Navi's whole body posed over a busy ground (HeatMan's flames) | No: a body, not a face, and the ground fights the frame |
+| Battle sprites (list 0, 0x2E + the navi in BN6) | The whole Navi from the side, his head 16 to 27 pixels | For Falzar's five only: Gregar's mugshots for SpoutMan, TomahawkMan, TenguMan, GroundMan and DustMan are its black box (`mugshotBlack`). An 18x26 window round the head at its own scale (`HEAD_WINDOW` in the tool, chosen by eye on a grid of the standing frame) on a ground of his darkest colour. Halving the 40x48 portrait window of `src/layer/portrait.c` was tried first: SpoutMan came out whole and small. |
+
+The control, run through the same pipeline: BN4's own GutsMan's mugshot
+(0x42) halved into a plate sits beside BN4's own drawing of him at the
+same scale and framing (by eye; they cannot match, as BN4 redrew it).
+
+### The conversion
+
+On the ROMs' bytes in memory, for a 40x48 face: each 2x2 block becomes
+its commonest index (a tie goes to the darker); the middle 18 of the 20
+columns and the 24 rows go into the window, a row of the face's ground
+(its commonest edge index) above and below; at most 13 colours stay, the
+least used merged into its nearest (18 of the 22 faces lose one or two);
+the frame takes indexes 14 and 15. A head window at its own scale skips
+the halving. Then the four palettes: variant 0 the face's colours; 1 each
+channel plus 5 (against BN4's own plates' 269 face colours, a mean error
+of 1.2 of 31); 2 a sepia grey, o = 5 + 0.7 x (0.25 r + 0.6 g + 0.15 b),
+as (o + 1, o, o - 1) (a mean error of 2.2); 3 the colours again. The
+frame's colours are BN4's own, read from GutsMan's plate (id 0x00) for
+each variant. The 12 tiles are packed as the two objects read them. All
+22 faces convert in 26 ms in Python.
+
+### The proof
+
+```
+python3 tools/bn4_lab.py boot
+python3 tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8 6@0x0d
+```
+
+BN6's HeatMan (his mugshot 0x47) is written over plate 0x01, BN5's
+NumberMan (list 8's 71) over 0x05, the control over 0x08 and BN6's
+SpoutMan (his head window) over 0x0D, in romlab's copy of BN4's ROM. The
+Den Battle Tournament then opens from Lan's room with MegaMan, those four,
+GutsMan (0x00), AquaMan (0x03) and Roll (0x04). With every entrant in, BN4
+draws all eight plates in colour (`.build/bn4faces/all_in.png`). After the
+first round, MegaMan, NumberMan, SpoutMan and AquaMan stand one step up in
+colour, and HeatMan and the control are grey beside BN4's own grey GutsMan
+and Roll (`round1.png`). `tools/bn4_faces.py` alone (report) checks the
+sheets, their objects, tiles and frame indexes, and lists every entrant's
+source. There is no oracle for a face BN4 never had: the check is that
+BN4's own code draws each in both looks. The lighter and purple-lined
+variants were made but not seen on screen.
+
+### The whole set
+
+| | Estimate |
+| --- | --- |
+| Navis | 22: BN6's 16 (11 by mugshot, Falzar's 5 by head window) and BN5's 6 where its ROM is read. BN4's own Navis keep their plates (ids 0x00-0x16, GutsMan's 0x00 first) and MegaMan his (0x1E). |
+| Bytes | 512 a plate (384 tiles, 128 palettes). In sheets as BN4's: one of 16 for BN6's, as sheet A (9,156 bytes), and one of 6 for BN5's, as sheet B (4,008 for its 7): about 13 KB of BN6's free ROM, and no RAM, as the tiles are read in place. |
+| Time | Once at install, from the ROMs as read: a few hundred thousand operations for all 22, well under a millisecond in C. |
+| Where | Beside BN4's plate sheets in the moved screen's art, a region of about 16 KB in `FREE_TAIL` (575 KB unclaimed, `src/emu/free_space.h`), named and claimed with the move. |
+| Ids | The moved copy's tables grown (`BN4_PLATE_FRAMES`, `BN4_PLATE_SHEETS` and `BN4_PLATE_PALETTES` to 0x40 entries, `BN4_PLATE_SPRITES` and `BN4_MENU_SPRITE_PTRS` an entry for each new sheet): for example 0x20 + the run's navi number, BN6's 0x21-0x32 and BN5's 0x38-0x3D. The other way, seven of BN4's ids rewritten before each bracket (7 x 512 bytes) with no table grown, is an installer's write mid-run; the first keeps the install at boot. |
+
+What does not fit yet:
+
+- Halving loses fine lines: ElecMan's and EraseMan's faces read darker
+  than their mugshots. A window per face at its own scale, as Falzar's
+  five take, could replace the halving where it reads better.
+- The head windows are by eye; TomahawkMan's (BN6's) cuts his mask at its
+  edge.
+- The proof writes over BN4's own ids in BN4's ROM; the new ids and the
+  sheets in BN6's free space come with the screen's move, whose proof
+  against the guest's bracket covers BN4's own plates only.
+- What chooses the lighter variant (1) was not found.
 
 ## Recommendation
 
@@ -159,7 +262,8 @@ guest serves as its oracle, which is what the guest is kept for. In order:
 1. The bracket screen moved, BN4's own plates, MegaMan and BN4's Navis as
    they join (GutsMan's move is under way), proved against the guest's
    bracket frame by frame, in a free BN6 main mode.
-2. Faces for BN6's and BN5's Navis from their own games, once found.
+2. Faces for BN6's and BN5's Navis from their own games: found and proved
+   (Faces for every entrant), their sheets installed with the move.
 3. Until then, a bracket of BN6's and BN5's Navis has no BN4 presentation:
    which acts' brackets are BN4's Navis is the tournament's design's call
    (its numbers, [Battle Network 4 in a run](bn4.md), The tournament).
