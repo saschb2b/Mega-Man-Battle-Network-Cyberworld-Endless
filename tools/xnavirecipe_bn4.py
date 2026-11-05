@@ -105,6 +105,18 @@ VERSIONS = 4
 COLL_ARG6 = 3
 # Their battle sprites in BN6's list 2, the Navis' (src/emu/xnavi_sprites.h XNAVI_SPRITE_BN4: past BN5's 0x20-0x2A): a seat each
 NAVI_SPRITE0 = 0x40
+# ... their bytes in one room the battles share, none resident in their art (docs/multirom/bn4-navis.md, Battle sprites by
+# battle; src/emu/xnavi_bn4_room.h, free_space.h FREE_BN4_NAVI_SPRITE, xnavi_recipe.h XN_BN4_SPRITE): the coming battle's
+# Navi's copied in from the player's ROM, unpacked; the room holds the largest, Duo's 61040 bytes. Their art ends at it
+SPRITE_ROOM, SPRITE_ROOM_SIZE = 0x08800000 + 0x77C000, 0x10000
+
+
+def battle_sprite_place(f, raw):
+    """a Navi's battle sprite's place, as xrecipe_bn4.art_of asks it (alloc.battle_place): the room the battles share, not
+    his art (a decision where it does not fit)"""
+    if len(raw) > SPRITE_ROOM_SIZE:
+        f.decide('room', f'its battle sprite\'s {len(raw):#x} bytes past the sprite room\'s {SPRITE_ROOM_SIZE:#x}')
+    return dict(at=SPRITE_ROOM, room=SPRITE_ROOM_SIZE)
 # Their sounds BN6 has no song of (the owner's call of 5 November 2026, docs/multirom/bn4.md call 11): a shared pool of BN6's
 # empty song slots a Navi's take, its songs packed into its art's room at install and the pool's slots pointed at the songs
 # of the Navi its battle holds (src/emu/xnavi_bn4_sounds.c). The pool: BN6's empty song slots nothing else takes (docs/rom/
@@ -733,6 +745,9 @@ def rebase(text):
     def art(m):
         a = XV_ART_AT + int(m.group(1), 16)
         return f'XN_BN4_ART + 0x{a - ROOM_ART:X}' if ROOM_ART <= a < ROOM_END else m.group(0)
+    # (the battle sprite's room by its names: battle_sprite_place)
+    room = f'XV_ART + 0x{SPRITE_ROOM - XV_ART_AT:X}, 0x{SPRITE_ROOM_SIZE:X}'
+    text = text.replace(room, 'XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE')
     return re.sub(r'XV_ART \+ 0x([0-9A-F]+)', art, re.sub(r'XV_CODE \+ 0x([0-9A-F]+)', code, text))
 
 
@@ -803,7 +818,8 @@ def main():
     b4, b6 = X4.find_roms()
     pairs = N.Pairs(b4, b6)
     alloc = families_alloc(b4, b6, pairs)
-    alloc.code, alloc.code_end, alloc.art, alloc.art_end, alloc.room = ROOM_CODE, ROOM_ART, ROOM_ART, ROOM_END, 'the proposed room'
+    alloc.code, alloc.code_end, alloc.art, alloc.art_end, alloc.room = ROOM_CODE, ROOM_ART, ROOM_ART, SPRITE_ROOM, 'the proposed room'
+    alloc.battle_place = battle_sprite_place
     navis = [derive(b4, b6, pairs, ty, name, first, alloc) for ty, name, first in NAVIS]
     text = c_file([f for f in navis if not f.decisions])
     if a.check:

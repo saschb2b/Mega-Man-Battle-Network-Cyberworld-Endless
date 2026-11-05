@@ -100,12 +100,18 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 	return true;
 }
 
-/* what its attacks draw: each sprite at its place in the shared art, its effects past BN6's, its types the dispatch's kinds */
+/* (a BN4 Navi's battle sprite, his first and list 2's, in the room the battles share: xnavi_bn4_room.h) */
+static bool in_sprite_room(const XvSprite *s, int i) {
+	return i == 0 && s->to_list == 2 && s->at == XN_BN4_SPRITE && s->room == XN_BN4_SPRITE_SIZE;
+}
+
+/* what its attacks draw: each sprite at its place in the shared art (a BN4 Navi's battle sprite in its room), its effects past
+ * BN6's, its types the dispatch's kinds */
 static bool art_ok(const XVirusFamily *f, char *why, size_t len) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
 		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
-			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END)))
+			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END) || in_sprite_room(s, i)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k)
 			if (spans_meet(s->at, s->room, f->sprites[k].at, f->sprites[k].room)) return no(why, len, "sprites %d and %d meet", k, i);

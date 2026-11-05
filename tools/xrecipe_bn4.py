@@ -966,7 +966,13 @@ def art_of(b4, b6, f, alloc):
     room = rounded(len(raw), ROOM_BATTLE)
     f.sprite = dict(list=f.s1['list'], index=f.s1['index'], to_list=1, to_index=alloc.list1, at=alloc.art, room=room, lz=bool(p & 0x80000000))
     alloc.list1 += 1
-    alloc.art += room
+    # (a Navi's battle sprite where the Navis' generator places it, a room the battles share: tools/xnavirecipe_bn4.py
+    # battle_sprite_place; a family's resident in its art)
+    place = getattr(alloc, 'battle_place', None)
+    if place:
+        f.sprite.update(place(f, raw))
+    else:
+        alloc.art += room
     if alloc.art > alloc.art_end:
         f.decide('room', f'its sprite ends at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
     for e, w in sorted(f.walks.items()):
