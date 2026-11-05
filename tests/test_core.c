@@ -1065,6 +1065,69 @@ static void test_battler(void) {
 	run = before;
 }
 
+/* The tournament's draw (docs/game/tournament.md, The entrants): two rounds
+ * of Navis in their bands, apart from each other, the final and the run's
+ * past guardians wherever another fits, the same whichever final the way
+ * taken brings; the rounds' bands and versions as the design's table */
+static void test_bracket_draw(void) {
+	static const struct { int navi, hp[3]; } bn6[] = {
+		{ 1, { 400, 800, 1200 } }, { 2, { 500, 1000, 1500 } }, { 3, { 600, 1100, 1600 } }, { 4, { 700, 1200, 1700 } },
+		{ 5, { 700, 1200, 1700 } }, { 6, { 800, 1300, 1800 } }, { 7, { 800, 1300, 1800 } }, { 8, { 900, 1400, 1900 } },
+		{ 9, { 900, 1400, 1900 } }, { 10, { 900, 1400, 1900 } }, { 12, { 800, 1300, 1800 } }, { 13, { 900, 1400, 1900 } },
+		{ 14, { 800, 1300, 1800 } }, { 15, { 1000, 1500, 2000 } }, { 16, { 1000, 1500, 2000 } }, { 18, { 1200, 1700, 2200 } },
+	};
+	BracketPool pool = { 0 };
+	for (unsigned i = 0; i < sizeof bn6 / sizeof *bn6; ++i, ++pool.n) {
+		pool.navi[pool.n] = (uint8_t)bn6[i].navi;
+		for (int v = 0; v < 4; ++v) pool.hp[pool.n][v] = (int16_t)(v < 3 ? bn6[i].hp[v] : -1);
+	}
+	int lo, hi;
+	pacing_round_band(2, 0, &lo, &hi);
+	CHECK(lo == 400 && hi == 600, "act 3's round 1 band %d-%d, not 400-600", lo, hi);
+	pacing_round_band(2, 1, &lo, &hi);
+	CHECK(lo == 560 && hi == 800, "act 3's round 2 band %d-%d, not 560-800", lo, hi);
+	pacing_round_band(3, 1, &lo, &hi);
+	CHECK(lo == 700 && hi == 1040, "act 4's round 2 band %d-%d, not 700-1040", lo, hi);
+	const int dive[3] = { 500, 1000, 1500 };
+	CHECK(pacing_round_version(dive, 2, 1, 0) == 0 && pacing_round_version(dive, 3, 1, 0) == 1 && pacing_round_version(dive, 3, 0, 0) == 0,
+		"DiveMan V1 in act 3, EX in act 4's round 2 (1000 in 700-1040), V1 in its round 1");
+	Run before = run;
+	int seen[19] = { 0 };
+	for (uint32_t s = 1; s <= 600; ++s) {
+		memset(&run, 0, sizeof run);
+		run.seed = s * 2654435761u;
+		run.biome_order[0] = 0;
+		run.biome_order[1] = 1;
+		run.boss_order[0] = 1;   /* (act 1's guardian BlastMan, act 2's HeatMan) */
+		run.boss_order[1] = 5;
+		RunBracket b, other;
+		run_bracket_draw(9, 8, 0, 900, &pool, &b);
+		run_bracket_draw(9, 3, 0, 600, &pool, &other);
+		for (int r = 0; r < 2; ++r) {
+			int v = 0, hp = -1;
+			pacing_round_band(2, r, &lo, &hi);
+			for (int i = 0; i < pool.n; ++i)
+				if (pool.navi[i] == b.navi[r]) hp = pool.hp[i][b.version[r]], v = b.version[r];
+			CHECK(hp >= lo && hp <= hi && hp == b.hp[r] && v == 0, "seed %u: round %d's navi %d at %d HP, version %d, outside %d-%d", (unsigned)s, r + 1,
+				b.navi[r], hp, v, lo, hi);
+			CHECK(b.navi[r] != 1 && b.navi[r] != 5 && b.navi[r] != 8, "seed %u: round %d's navi %d a past guardian or the final", (unsigned)s, r + 1, b.navi[r]);
+			CHECK(other.navi[r] != 3, "seed %u: round %d drew the final", (unsigned)s, r + 1);
+			CHECK(b.navi[0] == 3 || b.navi[1] == 3 || other.navi[r] == b.navi[r], "seed %u: round %d's navi %d changed with the final (%d)", (unsigned)s, r + 1, b.navi[r],
+				other.navi[r]);
+			if (b.navi[r] > 0 && b.navi[r] < 19) seen[b.navi[r]]++;
+		}
+		CHECK(b.navi[0] != b.navi[1] && b.navi[2] == 8 && b.hp[2] == 900, "seed %u: the rounds %d and %d, the final %d", (unsigned)s, b.navi[0], b.navi[1], b.navi[2]);
+		for (int o = 0; o < BRACKET_OTHERS; ++o) {
+			CHECK(b.others[o] > 0 && b.others[o] != b.navi[0] && b.others[o] != b.navi[1] && b.others[o] != 8, "seed %u: the other %d is navi %d", (unsigned)s, o,
+				b.others[o]);
+			for (int k = 0; k < o; ++k) CHECK(b.others[k] != b.others[o], "seed %u: navi %d twice among the others", (unsigned)s, b.others[o]);
+		}
+	}
+	/* (each Navi that fits as likely as another: round 1's two, 2 and 3) */
+	CHECK(seen[2] > 150 && seen[3] > 150, "round 1 drew DiveMan %d and SpoutMan %d times in 600, not each about half", seen[2], seen[3]);
+	run = before;
+}
+
 /* The run's extras switched off (docs/game/meta/extras.md): no Glitch
  * warp, no bracket, and a layer without its Virus Battler the layer with
  * him but for him; the tournament's acts where the owner's calls of 5
@@ -6708,6 +6771,7 @@ int main(void) {
 	test_fork_read();
 	test_glitch();
 	test_extras();
+	test_bracket_draw();
 	test_layouts_build();
 	test_identity();
 	test_arrivals();

@@ -217,6 +217,16 @@ static void layer_guardian(LayerTally *t, int depth, int biome) {
 		t->g_chip += 1;
 	}
 	t->g_hpmem += 5;
+	/* (a tournament's two rounds before him: their results screens, as his,
+	 * and their Navis' chips) */
+	Encounter round[2];
+	int chips[2], codes[2], n = economy_bracket_rounds(depth, biome, round, chips, codes);
+	for (int r = 0; r < n; ++r) {
+		gain_reward(t, reward_pick(&round[r], bust_roll(), true, depth), FROM_GUARDIAN);
+		if (chips[r] <= 0) continue;
+		gain_chip(t, chips[r], codes[r] >= 26 ? '*' : (char)('A' + codes[r]));
+		t->g_chip += 1;
+	}
 	/* (his draft skipped, but the net's last: docs/game/navicust.md, 2) */
 	if (depth < net_layers) t->skip_frags += navicust_skip_frags(depth);
 }

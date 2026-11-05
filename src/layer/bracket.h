@@ -17,6 +17,9 @@ bool bracket_here(int depth);
 /* The act's bracket at `depth`, its final the act's guardian `final` as
  * the layer draws him; false where none stands */
 bool bracket_of(int depth, int final, RunBracket *b);
+/* ... drawn wherever it would stand, the coin and the gate aside (the
+ * pacing and economy reports') */
+void bracket_draw(int depth, int final, RunBracket *b);
 /* A round's Navi chip, as his Guardian Data would give it: his chip at the
  * version fought (BN5's xguardian_chip), its code into *code; 0 none */
 int bracket_chip(int navi, int version, int depth, int *code);
