@@ -36,4 +36,14 @@
 #define BN6_FADE_TEST         0x080062F8u /* Z clear while the screen fades (BN6_FADE_ACTIVE; bn6f IsScreenFadeActive) */
 #define BN6_MAP_TO_SHOP_END   0x080056B6u /* ... its end, past its pop {pc} */
 
+/* The map entered again after such a screen (BN6_SUB_ENTER): where EnterMap puts MegaMan, and the random battle its
+ * first frame may roll, which the game's flag (BN6_FLAG_NO_ENCOUNTERS, cleared by EnterMap) no longer holds */
+#define BN6_ENTER_X           (BN6_GAMESTATE + 0x24) /* PlayerX, PlayerY, PlayerZ (16.16): where EnterMap puts MegaMan (bn6f
+                                                       * spawnOWPlayerObjectForEnterMap_809e064), the map entered again after a
+                                                       * screen of its own (the bracket moved, xbracket.h) too */
+#define BN6_ENTER_Y           (BN6_GAMESTATE + 0x28) /* PlayerY, 16.16 */
+#define BN6_ENTER_Z           (BN6_GAMESTATE + 0x2C) /* PlayerZ, 16.16 */
+#define BN6_ENTER_FACING      (BN6_GAMESTATE + 0x30) /* FacingDirectionAfterWarp: the eighth he faces there (a u32, its byte read) */
+#define BN6_ENCOUNTER_SKIP    0x08005AF3u /* the check's pop {r5,pc} (Thumb): no battle this frame, the roll's counter reset */
+
 #endif

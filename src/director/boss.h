@@ -47,9 +47,7 @@ void boss_resume(void);
 /* The Navi MegaMan fights or is about to: the guardian's, or in a
  * tournament's bracket the round's (docs/game/tournament.md) */
 int boss_foe(void);
-/* The bracket's round under way (0, 1, 2 the final, 3 won), -1 where the
- * arena holds a single guardian */
-int boss_round(void);
+
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
 bool boss_goal(int *x, int *y, bool *talk);

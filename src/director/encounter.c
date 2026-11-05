@@ -12,6 +12,7 @@
 #include "battle_spare.h"
 #include "bn6.h"
 #include "bn6_panels.h"
+#include "bn6_shop.h"
 #include "bytes.h"
 #include "darkbn6.h"
 #include "data.h"

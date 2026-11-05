@@ -169,7 +169,9 @@ const char *bracket_round_label(int round) {
  * last; false where the act holds none */
 static bool bracket_card(int biome, char *rounds, size_t n, char *final, size_t m) {
 	RunBracket b;
-	if (run.side_kind != LAYER_NORMAL || !bracket_of(run.depth, run_guardian(biome), &b)) return false;
+	final[0] = 0;
+	/* (a CONTINUE by a final already deleted: the card says so, as a guardian's) */
+	if (run.side_kind != LAYER_NORMAL || (D.objs.guardian.navi && boss_beaten()) || !bracket_of(run.depth, run_guardian(biome), &b)) return false;
 	char one[20], two[20], last[32];
 	card_navi(one, sizeof one, b.navi[0], b.version[0], false);
 	card_navi(two, sizeof two, b.navi[1], b.version[1], false);
@@ -215,9 +217,9 @@ void area_card(void) {
 	const char *motto = card_motto(biome, &accent);
 	/* (a tournament in the guardian's place: its bracket, two lines) */
 	char final[48];
-	bool bracket = !(D.objs.guardian.navi && boss_beaten()) && bracket_card(biome, ahead, sizeof ahead, final, sizeof final);
-	cinema_card(act, guardian_area_name(biome), motto, ahead[0] ? ahead : NULL, accent, bracket ? 240 : 200);
-	if (bracket) cinema_card_more(final);
+	bool bracket = bracket_card(biome, ahead, sizeof ahead, final, sizeof final);
+	cinema_card(act, guardian_area_name(biome), motto, ahead[0] ? ahead : NULL, accent, 200 + 40 * bracket);
+	cinema_card_more(final);
 }
 
 /* Leaving an area past its beaten guardian. */

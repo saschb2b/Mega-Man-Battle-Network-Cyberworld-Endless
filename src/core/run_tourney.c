@@ -75,10 +75,15 @@ static int pool_at(const BracketPool *p, int navi) {
 	return -1;
 }
 
+/* A draw's act: its pool, the act and cycle, the final */
+typedef struct { const BracketPool *p; int act, loop, final; } Draw;
+
 /* Round `round`'s pick: first without regard to the final, so the same
  * whichever way the act took at Lan's HP, and again without him where he
  * was drawn; the run's past guardians left out wherever another fits */
-static int round_draw(const BracketPool *p, const bool *rounds, const bool *past, int final, int act, int round, int loop, uint32_t h) {
+static int round_draw(const Draw *d, const bool *rounds, const bool *past, int round, uint32_t h) {
+	const BracketPool *p = d->p;
+	int act = d->act, loop = d->loop, final = d->final;
 	bool out[BRACKET_POOL];
 	for (int i = 0; i < p->n; ++i) out[i] = rounds[i] || past[i];
 	int k = round_pick(p, out, act, round, loop, h, false);
@@ -101,7 +106,8 @@ void run_bracket_draw(int depth, int final, int final_version, int final_hp, con
 	}
 	uint32_t seed = run.seed ^ 0x42524B54u ^ (uint32_t)loop * 0x9E3779B9u ^ (uint32_t)act * 0x85EBCA6Bu;   /* "BRKT" */
 	for (int r = 0; r < 2; ++r) {
-		int k = round_draw(p, rounds, past, final, act, r, loop, mix(seed + (uint32_t)r * 0x27D4EB2Fu));
+		const Draw d = { p, act, loop, final };
+		int k = round_draw(&d, rounds, past, r, mix(seed + (uint32_t)r * 0x27D4EB2Fu));
 		b->navi[r] = k >= 0 ? p->navi[k] : 0;
 		b->version[r] = b->hp[r] = 0;
 		if (k < 0) continue;
