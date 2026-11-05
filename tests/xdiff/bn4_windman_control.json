@@ -1,0 +1,10 @@
+{
+  "about": "BN4 Red Sun's WindMan V1 (BN4's enemy 0x88, a Soul Navi: his side's AI data, MegaMan's states 63-66 as his own, two first-kind 0x5C companions set out at his spawn) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core fought twice, each in a process of its own, its traces in BN6's units the same at every frame (the BN4 pipeline's control for him, before windman_v1 compares his move into BN6's engine: tools/xdiff_bn4.py; docs/multirom/bn4-navis.md, WindMan built)",
+  "game": "bn4",
+  "kind": "control",
+  "foes": "88@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0"
+}
