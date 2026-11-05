@@ -188,10 +188,16 @@ typedef struct {
 	uint8_t navi[BRACKET_POOL];
 	bool older[BRACKET_POOL];      /* another game's: his versions V1-V3, held to a round's top */
 	int16_t hp[BRACKET_POOL][4];   /* his HP at each version, -1 none */
+	bool stand_in[BRACKET_POOL];   /* his round pays a stand-in's Navi chip (BN4's, until their own chips come: the owner's call of
+	                                  6 November 2026, docs/game/tournament.md) */
 } BracketPool;
 typedef struct {
 	int navi[3], version[3], hp[3];
 	int others[BRACKET_OTHERS];
+	/* the Navi whose chip a round pays and his version: the round's own,
+	 * or for one of `stand_in`, one of BN6's own Navis drawn from the
+	 * round's band as a round's Navi is (from the seed and the act) */
+	int prize[2], prize_version[2];
 } RunBracket;
 void run_bracket_draw(int depth, int final, int final_version, int final_hp, const BracketPool *pool, RunBracket *b);
 /* The copy's forms at the Glitch layer of `depth` (docs/game/glitch-layer.md):
