@@ -119,9 +119,8 @@ extern Rom R;
 
 /* Other Battle Network games whose data a layer can take beside BN6's
  * (docs/multirom/): found by their contents where the BN6 ROM is, read
- * and never run. Each is optional: BN6 alone is the whole game. BN4 Red
- * Sun lends a run nothing yet: it is read only when a dev tool asks
- * (xrom_research; docs/multirom/bn4.md). */
+ * and never run. Each is optional: BN6 alone is the whole game
+ * (docs/multirom/; BN4 Red Sun's, docs/multirom/bn4.md). */
 typedef enum { XROM_BN5_COLONEL_US, XROM_BN4_RED_SUN_US, XROM_COUNT } XRomId;
 typedef struct {
 	const char *name, *sha1, *code;
@@ -139,7 +138,7 @@ typedef struct {
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/rom/) */
 	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/multirom/) */
 	bool research;                          /* read only when a dev tool asks (xrom_research): it lends a run nothing yet, its areas
-	                                         * shown only as a dev tool reviews them (xarea_review) */
+	                                         * shown only as a dev tool reviews them (xarea_review); none is so today */
 	uint8_t bg_words;                       /* its backgrounds' records (BGAnimData), in words: 0 BN6's 7; BN4's 9, a buffer after its tiles
 	                                         * and after its map (src/gfx/xbackdrop.c) */
 	bool kit_keys_played;                   /* a song's drum kits copied for the keys its tracks play alone (src/audio/xsong.c):
@@ -162,9 +161,9 @@ bool xrom_load(const char *path);
 int xrom_of_code(const char *code);
 /* ... in the folder BN6's ROM was found in. */
 int xrom_find_beside(void);
-/* Set by a dev tool (the atlas, --dev bn4families, --dev showbn4): the
- * extra ROMs read for research alone (XRomLayout.research) are read too,
- * where they lie. */
+/* Set by a dev tool (the atlas, the differential's guest, --dev
+ * showbn4): the extra ROMs read for research alone (XRomLayout.research)
+ * are read too, where they lie. */
 extern bool xrom_research;
 /* Whether extra ROM `xrom` is offered to the player: looked for, read,
  * asked for and named everywhere a player brings ROMs (the ROMs screen,
@@ -179,16 +178,17 @@ const XRomLayout *xrom_layout(int xrom);
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
  * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
  * game's ROM is not read, or whose game is read for research and which no
- * dev tool reviews (xarea_review). */
+ * dev tool reviews (xarea_review); an area of a game read is there, and
+ * one NetAreaDef.held kept out of runs by run_dress alone. */
 #define XAREAS_MAX 24
 const NetAreaDef *net_area_def(int area);
 /* A dev tool's look at another game's area (--net-biome xN) or at all of
  * them (XAREA_ALL: the atlas): the extra ROMs read for research alone are
- * read then too (xrom_research), and their areas, every one held, are
- * shown to it (net_area_def). Everything else meets none of them: a run,
- * and a dev tool that reads such a ROM for something else (its families,
- * the differential's guest battles), go on as if its areas were not
- * there, no song, backdrop or bystander of theirs copied in. */
+ * read then too (xrom_research), and their areas are shown to it
+ * (net_area_def). Everything else meets none of a research game's areas:
+ * a run, and a dev tool that reads such a ROM for something else, go on
+ * as if its areas were not there, no song, backdrop or bystander of
+ * theirs copied in. */
 #define XAREA_ALL (-2)
 void xarea_review(int area);
 

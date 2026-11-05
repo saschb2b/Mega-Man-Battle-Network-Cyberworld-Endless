@@ -17,8 +17,8 @@ the 3DS's malloc does. Each case is a 3DS:
          learned maps kept alone (src/map/netmap.c): the host built with
          CW_HEAP_3DS
   bn5    the same with BN5's ROM beside BN6's, read whole
-  bn4    the same with BN4 Red Sun's beside BN6's (--dev showbn4: read as
-         once its research switch is off, its families installed)
+  bn4    the same with BN4 Red Sun's beside BN6's, read whole, its six
+         families installed (the visitors, docs/multirom/bn4.md)
   all    the same with both, BN5's and BN4's, beside BN6's
 
 Per case and seed: the heap's peak, the allocations refused (the first's
@@ -110,8 +110,7 @@ def one(bp, rom, case, seed, frames, cap):
     os.makedirs(data)
     mounts = [(os.path.join(rom, 'bn6.gba'), '/rom/bn6.gba:ro')]
     mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
-    # (BN4's read for research alone until it is offered: --dev showbn4 reads it as players' builds will)
-    dev = 'god,onehit' + (',showbn4' if 'bn4' in extras else '')
+    dev = 'god,onehit'
     env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
            ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')]
     rel = os.path.relpath(data, ROOT)

@@ -2,15 +2,15 @@
  * visitors (visitors.h; issue #82, docs/multirom/one-net.md):
  * BN6's from its areas' random battles, BN5's from the records of the
  * areas it lends a run (NetAreaDef.xbattles), fought in BN6's engine,
- * BN4 Red Sun's from its net's random records where its ROM is read for
- * research and its families are moved in (--dev bn4families;
- * docs/multirom/bn4.md, Its viruses as visitors). Each family's role
+ * BN4 Red Sun's from its net's random records where its ROM is read and
+ * its families are moved in (docs/multirom/bn4.md, Its viruses as
+ * visitors). Each family's role
  * (where its game sets it: the back, the front, or either), its stage
  * (the depth it first meets MegaMan in its own net), whether its game
  * sets it on special panels alone, and whether it may visit the other
  * nets' battles. Read from the ROM files and the families installed in
- * the core, once; none where BN5's ROM is not read or its families are
- * not in the engine. */
+ * the core, once; none where neither BN5's nor BN4's ROM is read, or
+ * neither's families are in the engine. */
 #ifndef CW_VISITOR_FAMILIES_H
 #define CW_VISITOR_FAMILIES_H
 
@@ -38,7 +38,8 @@ typedef struct {
 
 /* Net `net`'s families as its records set them (into *out), how many; 0
  * where BN5's ROM is not read or none of its families is installed, and
- * BN4's where its ROM is not read for research or none of its is */
+ * BN4's where its ROM is not read or none of its is; BN6's where
+ * neither other ROM is read */
 int visitor_kin(int net, const VisitorKin **out);
 /* The net family `family` (BN6's AI index) is of: BN5's or BN4's for a
  * family of theirs moved into the engine, BN6's else */

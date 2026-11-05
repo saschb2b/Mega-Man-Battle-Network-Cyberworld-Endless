@@ -154,7 +154,7 @@ void console_start(bool data_dir_given) {
 	buffer_give_back();
 }
 
-/* The extra ROMs offered (rom.h's xrom_offered: BN5's; BN4's once it is)
+/* The extra ROMs offered (rom.h's xrom_offered: BN5's, then BN4's)
  * read beside BN6's, in their order, where the heap holds one with room
  * left: its 8 MB, the core's 16 MB copy still to come and what a run takes
  * beside them, 50 MB at most where a layer's area is learned

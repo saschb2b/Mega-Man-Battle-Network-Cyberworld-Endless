@@ -295,10 +295,10 @@ static int run_option(const char *a, const char *v, Options *o) {
 	else if (!strcmp(a, "--marks")) o->marks_spec = (int)strtol(v, NULL, 16);
 	else if (!strcmp(a, "--talk")) director_dev_talks = v;
 	else if (!strcmp(a, "--dev")) {
+		/* (bn4families and showbn4 ask nothing of the ROMs now: BN4 Red Sun
+		 * is offered, its families installed wherever it is read, xvirus_bn4.h;
+		 * the differential still names the families' battles by the one) */
 		devtools_parse(v);
-		/* (BN4 Red Sun read for research, its families installed after BN5's:
-		 * xvirus_bn4.h; or offered for review as players will see it: rom.h) */
-		if (dev.bn4families || dev.showbn4) xrom_research = true;
 	}
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;

@@ -62,8 +62,8 @@ typedef struct {
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
 	bool arena_busy; /* arenabusy: --dev arena's second player steps, shoots and OKs the Custom screen by the frame's number alone (the rollback's guesses tried) */
 	bool arena_both; /* arenaboth: its first player a script too, the Custom screen's OK and charged shots; in the Net Square, Lan's Yes to a challenge at once and his keys the same script (a battle that plays itself, arena.h) */
-	bool bn4families; /* bn4families: BN4 Red Sun's ROM read for research and its whole families installed after BN5's (xvirus_bn4.h) */
-	bool showbn4;   /* showbn4: BN4 Red Sun offered as if its research switch were off: read, its cartridge on the ROMs screen, its pickers and the title's found line (rom.h's xrom_offered) */
+	bool bn4families; /* bn4families: the differential's BN4 families counted (xdiff_bn4.h); they install wherever BN4's ROM is read (xvirus_bn4.h) */
+	bool showbn4;   /* showbn4: once BN4 Red Sun offered before players had it; it is offered now (rom.h's xrom_offered), the flag kept for the browser's ?dev=showbn4 */
 	bool feel;      /* feel: each beat, rumble and trigger effect the controller's feel sends, on stdout (feel_out.h) */
 	bool quit_end;  /* quitend: the game quits once --dev rollbench and --dev arena are done (a run sent to a device, 3dslink's netloader back) */
 	int arena_delay; /* arenadelay=N: its input delay, N frames (1-60), and the delay a Net Square challenge or Yes asks for; 0 its own */

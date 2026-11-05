@@ -15,8 +15,8 @@ const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 // BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
 // optional, whose net areas, viruses, Navis and chips then join runs, fought in
 // BN6's engine (docs/multirom/). An extra ROM is taken where the game offers it
-// (offered: rom.c's xrom_offered): BN4 Red Sun's not yet, its cartridge hidden
-// and its file refused as another game's (?dev=showbn4 shows it for review).
+// (offered: rom.c's xrom_offered): BN5's and BN4 Red Sun's, whose viruses visit
+// a run's battles (?dev=showbn4, from before BN4 was offered, changes nothing now).
 // The names and words of Android's ROM page.
 const JA = LANG === 'ja';
 const ROMS = {

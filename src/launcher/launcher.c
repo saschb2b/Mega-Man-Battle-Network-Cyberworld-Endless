@@ -1,7 +1,7 @@
 /* The launcher (game.h's scene_launcher, issue #97): cartridge slots
  * before the game, BN6 Cybeast Gregar's (needed) and one each extra ROM
- * offered (optional: BN5 Team Colonel's; BN4 Red Sun's once it is offered,
- * rom.h's xrom_offered, or with --dev showbn4), each an open spot until
+ * offered (optional: BN5 Team Colonel's and BN4 Red Sun's, rom.h's
+ * xrom_offered), each an open spot until
  * its ROM is in, then the cartridge with its label; PLAY the moment BN6
  * is in. A start shows it where it is wanted (no BN6, the first start, an
  * extra ROM gone since the last; --launcher open, Android's ROMs
