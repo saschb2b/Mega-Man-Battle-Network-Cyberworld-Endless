@@ -28,6 +28,8 @@ XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the f
 XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and art (src/emu/xnavi_recipe.h, XN_STUBS to XN_END)
 EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
+XN_BN4_ROOM = (0x08F30000, 0x08F50000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
+BN4_AI_SIZE = 0xC0                                # BN4's AI data, one a side in a row (src/emu/bn4.h, BN4_AI_DATA_SIZE)
 XC_ART = 0x08EA0000                                # ... their copies of BN5's sprites from here (src/emu/xchips_code.h, XC_ART)
 
 
@@ -774,7 +776,8 @@ class Frame:
             if o.kind != 'T4':
                 ai, co = o.o32(0x58) if o.kind == 'T1' else 0, o.o32(0x54)
                 if o.ai is not None:
-                    self.spans.append((ai, ai + AI_SIZE, o.role, 'ai', 0))
+                    # (BN4's its own 0xC0 bytes, a side's: the next side's follows it, a Navi's after MegaMan's)
+                    self.spans.append((ai, ai + (BN4_AI_SIZE if self.game == 4 else AI_SIZE), o.role, 'ai', 0))
                 if o.coll is not None:
                     # (BN4's in RAM its own 0x90 bytes, bn4.h BN4_COLL_SIZE: its trace's in BN6's size, xdiff_bn4_trace.h)
                     self.spans.append((co, co + (BN4_COLL_SIZE if self.game == 4 else trace['coll']), o.role, 'coll', 0))
@@ -790,6 +793,7 @@ class Frame:
         self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ())
                                                             if XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
                                                             or XC_CODE[0] <= m[1] < XC_CODE[1] or m[1] < EMU_FREE
+                                                            or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]
                                                             or souls_code()[0] <= m[1] < souls_code()[1]]
 
     def ptr(self, v):

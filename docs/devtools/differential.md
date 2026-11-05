@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:58:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -957,6 +957,54 @@ format, its game 4: the trace's header names it):
   data holds the pressed UP in one and not the other (PASS). Two BN5
   specs, `cangard_v1` and `handi_v1`, PASS as before, their traces the
   same byte for byte.
+- **The BN4 trace for a Navi** (`bn4_gutsman_control`): BN4's GutsMan V1
+  (BN4's 0x84, a Soul Navi) alone at (5,2) against MegaMan idle at (2,2)
+  with 2000 HP, fought twice: 1200 fight frames the same in every byte
+  (PASS), his objects from t265 and his machine gun's shots every 11
+  frames in them. A Navi's object carries an AI data of its own (his
+  side's, BN4's 0xC0 bytes), which the trace lays out as MegaMan's: a Soul
+  Navi's own block (BN4's +0x64, 12 bytes, `BN4_AI_NAVI`) at BN6's +0x80
+  (`BN6_AI_NAVI_STATE`), where his port keeps it, the attack's variables
+  (+0x70) at BN6's +0xA0, the bytes no part names from BN6's spare (+0xF0)
+  on; MegaMan's AI data shares the layout, and every BN4 family spec
+  PASSes with it. `tools/xdiff_bn4.py` reads the Navis' recipes
+  (`src/emu/xnavi_bn4.c`) beside the families': his ids (BN4's 0x84-0x87
+  BN6's 0x384-0x387, `src/dev/xdiff_bn4.c` `xd4_bn6_id` too), his effects,
+  sprites and moved types; his object type and CurActions read by the
+  families' rule (his type BN6's 0, his own from 6 BN6's from 8, MegaMan's
+  67-70 among them as his 7-10). `tools/xdiff_snap.py` reads a pointer
+  into a BN4 AI data by BN4's 0xC0 bytes a side (a Navi's after MegaMan's,
+  not within his), and a pointer into BN4's Navis' moved code
+  (`FREE_BN4_NAVI_CODE`) as the ROM's. The virus masks (`BN4_LACKS`), whose
+  reasons are a virus's (BN4 keeps no AI data for one), never hold for a
+  Navi's AI data or its pointer (`NAVI_NAMES`, his recipe's ids): his AI
+  data both games keep is compared whole (his AI index read by the
+  comparator's own map). A BN4 spec may record its verdict while its
+  port is under way (`"verdict"`, as the chips' specs: held where the run
+  ends the same at the same frame, never for a mutation's run). An object
+  spawned while the hooks watched that has set up no sprite since holds
+  the slot's last occupant's sprite state in each game, compared from its
+  sprite's set-up on (`leftovers`, as BN5's `Obj.leftover`), and a moved
+  object's word its spawn took from a register its caller never set is
+  each game's leftover, allowed by its rule with both paths
+  (`spawn_leftover`: GutsMan's attack's 0x1C's +0x3C).
+  `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  GutsMan built) PASSes over its 1200 frames (his own collision argument
+  ported, each game's own AI bookkeeping allowed on a Navi, `navi_ai`, his
+  opening count by the frame's clock, his draws keyed by his code's room,
+  his rocks' read of a side's player made BN6's). What it took of the
+  comparator: the camera's shake's two draws a frame paired as BN5's are
+  (legit.json's bn4 rng_twins take a `word`: BN4's draws there from its
+  first RNG word, BN6's from its second, `tools/xdiff_bn4.py` rng_twins);
+  a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
+  +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
+  panel layout); the panel crack's sound and his copies at the pool's
+  slots paired by the routines that play them; a pointer into a moved
+  sprite read as the sprite's whose start is nearest below it (a copy's
+  room is rounded up, so in BN4's ROM it may reach into the next sprite:
+  list 4's 0x0D into 0x0E, his rocks'); and the rocks' debris, the fourth
+  kind's 0x09 whose twin inits set up each game's own rock art, allowed on
+  its sprite state alone ("the rock's debris, each engine's own art").
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and

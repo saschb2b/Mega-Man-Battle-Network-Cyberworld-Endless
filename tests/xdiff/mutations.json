@@ -1378,6 +1378,46 @@
     "080163FC:2004:2"
    ],
    "what": "BN6's plain appear's first blink step (BN6_APPEAR_BLINK_FIRST, 0x080163FC: movs r0,#2, which legit.json's bn4 align makes movs r0,#3 for every BN4 spec against BN6's) made movs r0,#4, written after the alignment's own: BN6's virus runs its appear and its paused present once more than BN4's, its sprite a step ahead of BN4's where the alignment has them the same (caught at t1)"
+  },
+  {
+   "name": "GutsMan's CurAction off by one",
+   "spec": "gutsman_v1",
+   "poke": [
+    "080B7512:200A"
+   ],
+   "what": "his decision's set of CurAction 7 (BN4 0x080B7512: movs r0,#7 before BN4_SET_ACTION, the recipe's BN6's 9, its copy at XN_BN4_CODE + 0x14A) written 10: his step's state left for another (caught at t1, his CurAction)"
+  },
+  {
+   "name": "GutsMan's AI block at BN4's place",
+   "spec": "gutsman_v1",
+   "poke": [
+    "080B7488:2664"
+   ],
+   "what": "his decision's pointer to his own block (BN4 0x080B7488: movs r6,#0x64, the recipe's BN6's +0x80, AI_BLOCKS) left at BN4's +0x64: his decision's sub-states written into BN6's AI data where no Navi's block is (caught at t1, his AI data's +0x65)"
+  },
+  {
+   "name": "GutsMan's sound at another pool slot",
+   "spec": "gutsman_v1",
+   "poke": [
+    "080D0596:2033"
+   ],
+   "what": "his attack's object's sound 0xA2 (BN4 0x080D0596: movs r0,#0xa2, the recipe's pool slot 0x32, its copy at XN_BN4_CODE + 0x65A) made the pool's second slot, 0x33: his rocks' landing sound where BN4 plays the attack's (caught at t267, the family's sounds)"
+  },
+  {
+   "name": "GutsMan's collision argument BN6's",
+   "spec": "gutsman_v1",
+   "poke": [
+    "08F20932:2103"
+   ],
+   "what": "the spawn end's shim of his home (XN_BN4_HOMES + 0x800 + XV_HOME_SHIMS: ldr r0,[r5,#0x54]; movs r1,#0x21; strb; mov pc,lr, xnavi_install.c coll_arg_set) writing BN6's actor init's 3 instead of his own 0x21: the hit bits his body gives BN6's (caught at t1, his collision's +0x0E)"
+  },
+  {
+   "name": "GutsMan's rocks' player read at BN4's place",
+   "spec": "gutsman_v1",
+   "poke": [
+    "080D06D4:3044"
+   ],
+   "what": "his attack's object's read of the other side's player from the battle state (BN4 0x080D06D4: adds r0,#0x44, the recipe's BN6's 0xD0, xnavirecipe_bn4.battle_players) left at BN4's +0x44: no player found there in BN6, the first rock not on MegaMan's panel (caught at t295, the rocks)"
   }
  ]
 }

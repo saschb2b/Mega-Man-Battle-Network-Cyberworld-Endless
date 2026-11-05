@@ -4089,12 +4089,14 @@ static void test_free_space(void) {
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
 		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
-		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
+		{ "BN4's Navis' homes", FREE_BN4_NAVIS, FREE_BN4_NAVI_CODE }, { "BN4's Navis' code", FREE_BN4_NAVI_CODE, FREE_BN4_NAVI_ART },
+		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BRACKET_FACES }, { "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
 		{ "BN4's bracket screen", FREE_BRACKET, FREE_BRACKET_END }, { "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
-	CHECK(FREE_TAIL <= FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
-	      "free space: the bracket's faces and room after the free tail, before the teammates'");
+	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
+	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
+	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
@@ -4472,6 +4474,13 @@ static void test_xvirus_shims(void) {
 		get16(r + 4));
 	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer, -1) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000, -1),
 		"shims: a NameID range off its word, or its veneer out of a branch's reach, taken");
+	/* (a sound past a byte: movs r0,#1; lsls r0,r0,#8; adds r0,#4; b the veneer, r0 0x104) */
+	uint8_t s[XV_SHIM_SOUND_SIZE];
+	CHECK(xvirus_shim_sound(s, home, 0x104, veneer) && get16(s) == 0x2001 && get16(s + 2) == 0x0200 && get16(s + 4) == 0x3004 &&
+		(get16(s + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(s + 6) & 0x7FFu) == veneer,
+		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
+	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
+		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;
 	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");

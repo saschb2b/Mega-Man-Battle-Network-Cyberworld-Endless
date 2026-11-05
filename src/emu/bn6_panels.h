@@ -59,6 +59,10 @@
 /* A panel's update each frame (0x0800C380, from the field's loop
  * 0x0800BFC4, r7 the panel), and what stands on one (0x0801A186, from each
  * actor's pre-step after its status step) */
+#define BN6_PANEL_FIELD_STEP  0x0800BFC4u /* the field's step each frame: each panel's update, then a cracked one's flags kept (its store */
+#define BN6_PANEL_FLAGS_LAST  0x18        /* ... at 0x0800C004, the flags from 0x0800C8F8): u32 a cracked panel's flags as of the last
+                                           * frame, 0 on any other, read by its update (0x0800C404: one left by what stood on it breaks);
+                                           * BN4's +8 (BN4_PANEL_FLAGS_LAST) */
 #define BN6_PANEL_UPDATE      0x0800C380u /* the per-panel update: holes close, cracks break, volcanoes erupt, conveyors run out; its */
 #define BN6_PANEL_UPDATE_CONVEYOR 0x0800C3B8u /* ... cmp r0,#9, r0 the type, where 9-12 go to their timer's count (0x0800C45C), the rest have 0x708 written */
 #define BN6_PANEL_STEP        0x0801A186u /* what the panel under an actor does to it (r5 the object): poison and grass; */
@@ -73,6 +77,8 @@
 #define BN6_PANEL_COORDS      0x0800E276u /* panel (r0 column, r1 row) as the screen's x and y, 16.16, in r0 and r1 */
 #define BN6_PLACE_JITTER      0x0801BDDEu /* (r1, r3) moved by a random amount in r0's range, a random number drawn (0x0800151C) */
 #define BN6_SPAWN_SPARK       0x080E1C00u /* the fourth kind's type 4, the spark a buster shot strikes with, at (r1, r2, r3), r4 its parameter, r5 its owner */
+#define BN6_SPAWN_DEBRIS      0x080E23C0u /* the fourth kind's 9, a rock's debris (BN4_SPAWN_DEBRIS's twin); its init 0x080E22FC sets up */
+#define BN6_DEBRIS_SPRITE     0x080E230Au /* ... sprite list 4 number 5 (movs r2,#5), BN6's own rock art, where BN4's sets up 0x0E */
 #define BN6_BATTLE_FLAGS      (BN6_BATTLE_STATE + 0x32) /* u16, BN6_TIME_STOP while time is stopped (bn6f's test 0x0800A098, from 0x0800A2F0) */
 #define BN6_TIME_STOP         4           /* BN6_BATTLE_FLAGS: time stopped (a Navi chip's) */
 

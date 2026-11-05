@@ -33,6 +33,9 @@
 #define BN6_AI_DAMAGE_TAKEN   0x20        /* u16 the damage he has taken, at most 0xFFFF (0x08010548 adds, 0x0801055E reads by side) */
 #define BN6_AI_STRUCK_FRAMES  0x4C        /* u32 the frames his collision flags hold 0xC00 (0x080143FC: counted by 0x08014432, cleared by
                                            * 0x08014424 and with his anger by 0x080143B4, read by 0x0801442C) */
+#define BN6_AI_NAVI_STATE     0x80        /* 0x20 bytes a Navi's own state before its attack's variables, its decision's sub-state first
+                                           * (BN6's HeatMan's decision reads it there; the take lays it out, BN6_AI_TAKE); BN4's Soul Navis'
+                                           * BN4_AI_NAVI, 12 bytes (bn4_navis.h; docs/multirom/bn4-navis.md, GutsMan built) */
 #define BN6_AI_SPARE          0xF0        /* the 16 bytes past the attack's variables (+0xA0 to +0xEF), which the take never lays out (its
                                            * three spans, BN6_AI_TAKE): BN4's trace keeps there what BN6 has no place for (xdiff_bn4_trace.c) */
 #define BN6_AI_SPARE_LAST     0xFC        /* ... its last word, where BN4's trace keeps BN4's charge-time cache (BN4_AI_CHARGE_TIMES) */

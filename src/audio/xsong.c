@@ -21,11 +21,12 @@
 #define XSONG_AT    FREE_SONGS              /* (docs/engine/emulation/) */
 #define XSONG_END   FREE_XNAVIS
 #define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/rom/), */
-#define SLOT_LAST   0x33    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each
+#define SLOT_LAST   0x31    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each
                                sound at a fixed slot whichever track copies it, XSOUNDS; a moved family's packed into its own
-                               room, xvirus.c's XvSong, the Navis' copied here; 0x34-0x3F BN4's families', the themes' top, as
-                               every theme copied today, 12 with BN5's and BN4's ROMs, fits below them) */
-#define SOUND_FIRST (SLOT_LAST + 1)          /* the tracks' sounds' fixed slots: from, */
+                               room, xvirus.c's XvSong, the Navis' copied here; 0x34-0x3F BN4's families', 0x32 and 0x33 the pool
+                               of BN4's Navis' sounds, xnavi_bn4_sounds.h; every theme copied today, 12 with BN5's and BN4's ROMs,
+                               fits below them) */
+#define SOUND_FIRST 0x34                     /* the tracks' sounds' fixed slots: from, */
 #define SOUND_LAST  BN6_SONGS_EMPTY_LAST     /* ... to */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
 #define TRACKS_MAX  8

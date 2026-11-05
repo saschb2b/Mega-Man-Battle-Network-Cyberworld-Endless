@@ -107,9 +107,9 @@
     {
       "name": "BN4's Navis in BN6's engine",
       "state": "proven",
-      "now": "Mapped Navi by Navi, nothing built (docs/multirom/bn4-navis.md; src/emu/bn4.h, docs/rom/bn4.md's BN4's Navis rows; tools/bn4_navis.py). Each of the eighteen is a first-kind type of its own (BN4_NAVI_TYPE_*), run by the Navi pre-step 0x080135A8 and runner 0x08013DB4 on a state table that opens with BN4's six generic Navi states. Ten Soul Navis take their side's AI data (0x0800C09A; +0x64 their own, BN6's +0x80; +0x70 the attack's, BN6's +0xA0) and run MegaMan's states 44-111 as theirs (BN4_PLAYER_STATES 0x080EAEFC); eight keep their variables in the object. 64 objects spawned, one with a BN6 twin by body; of 80 engine routines their states call, 24 have no twin or another body. Seen in romlab: GutsMan V1's CurAction 7, 8 and 10 are MegaMan's 67, 68 and 70 (a step, a dash, the machine gun).",
-      "left": "Which of MegaMan's own actions reach states 44-111 (the Souls', assumed); the AI data's fields +9 to +0x44 the attack's end touches against BN6's; Roll's summon against BN6's mid-battle spawn; the objects' code searched for field changes; tools/xnavirecipe.py's BN4 path, then GutsMan moved and proved by build.py xdiff against BN4's own battle.",
-      "updated": "2026-11-04",
+      "now": "Mapped Navi by Navi (docs/multirom/bn4-navis.md; src/emu/bn4.h and bn4_navis.h, docs/rom/bn4.md's BN4's Navis rows; tools/bn4_navis.py). Each of the eighteen is a first-kind type of its own (BN4_NAVI_TYPE_*), run by the Navi pre-step 0x080135A8 and runner 0x08013DB4 (r6 its collision data, r7 its AI data, as BN6's Navi status dispatcher 0x0801AF44 runs a Navi's state) on a state table that opens with BN4's six generic Navi states. Ten Soul Navis take their side's AI data (0x0800C09A; +0x64 their own, BN6's +0x80; +0x70 the attack's, BN6's +0xA0) and run MegaMan's states 44-111 as theirs (BN4_PLAYER_STATES 0x080EAEFC); eight keep their variables in the object. GutsMan derived by tools/xnavirecipe_bn4.py (BN4_GUTSMAN 0x080B73C8, his state table 0x080B7458): his own block, MegaMan's 67-70 and the MegaMan routines and callbacks they reach copied, four third-kind objects moved, 59 calls out paired (five new pairs in tools/bn4_twins.py, BN6's object_crackPanel 0x0800C938 among them, audited) or copied (the state set, the attack's end, four engine routines with no BN6 body), 43 immediates (his AI data's blocks, CurActions, the panel's side, the collision data, element, objects' types and sprites), his palette 0 (BN4_NAVI_PALETTE's step 0). BN4's battle with GutsMan V1 alone, fought twice, is the same at every one of 1200 fight frames (tests/xdiff/bn4_gutsman_control.json: PASS); his machine gun's shots and his other objects appear in it. GutsMan built (src/emu/xnavi_bn4.c, the generator's whole recipe): installed where BN4's ROM is read, after BN4's families, as BN6's Navi AI 49 (ids 0x384-0x387) in BN4's Navis' room (FREE_BN4_NAVIS), his battle sprite at list 2 0x41, his five sounds in the pool of BN6's empty song slots (the owner's call 11); seen in BN6's battle (foes 384@52); his own collision setup argument (0x21) kept by a spawn-end shim; his sounds' pool pointed by battle; gutsman_v1 PASSes over its 1200 frames (the shake's draws paired, a cracked panel's field mapped, his sounds paired, his rocks' player read at BN6's place, the rocks' debris each engine's own art), five mutations of his port caught; the attack's end's clear of AI data +9, +0xA, +0xB, +0x30, +0x32 read: MegaMan's buster charge, inert on a Navi's AI data in BN6.",
+      "left": "A sound past 0xFF named by a table's byte (the shim built for a movs alone); his battle sprite by battle (planned: one 64 KB room); his arm points from his sprite (BN6's MegaMan's record stands in); a battle-state player read assumes MegaMan's side 0 (every battle a BN4 Navi is fought in). The next Navi; which of MegaMan's own actions reach states 44-111; Roll's summon.",
+      "updated": "2026-11-05",
       "link": "../multirom/bn4-navis.md",
       "state_text": "Proven in research, not built"
     },
@@ -154,11 +154,31 @@
   "since": [
     {
       "date": "2026-11-05",
+      "what": "GutsMan's recipe derived from both ROMs (tools/xnavirecipe_bn4.py, its report .build/xnavirecipe/bn4_report.md): 7 decisions open, none of them a missing pair. Located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, GutsMan derived): BN4_GUTSMAN, BN4_GUTSMAN_STATES, BN4_GUTSMAN_TABLES, BN4_NAVI_PALETTE, BN4_ATTACK_END_CLEAR, BN4_AI_REQUESTS_CLEAR, BN4_SET_STATUS_GIVEN, BN4_ON_FLOOR, BN4_FREE_PANELS, BN4_RANDOM_FREE_PANEL, BN4_RANDOM_PANEL, BN4_RANDOM_PANEL_MASKS, BN4_T3_1E_KINDS; five pairs in tools/bn4_twins.py (GetRNG, the status given, a side's player, the floor test, the panel crack: BN4's and BN6's panel flags' 0x10 and 0x40 the same, read from both games' tables)."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "GutsMan built: src/emu/xnavi_bn4.c (tools/xnavirecipe_bn4.py's whole recipe), xnavi_install.c's BN4 game, BN4's Navis' room (FREE_BN4_NAVIS), the pool of their sounds (xnavi_bn4_sounds.c: 0x32, 0x33, 0x63, 0xD0, 0xE0 and eleven past 0xFF; the themes' range to 0x31), list 2 0x40 on for their battle sprites (XNAVI_SPRITE_BN4); the comparator reads the Navis' recipes, BN6_AI_NAVI_STATE (+0x80) for a Navi's own block; tests/xdiff/gutsman_v1.json FAIL at t1, recorded."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "GutsMan's collision setup argument kept (XNavi.coll_arg, a spawn-end shim returning by mov pc,lr); BN4's Navis' sound pool pointed by battle (emu_before_frame); the BN4 comparator's Navi rules (navi_ai, a Navi's opening count, his code's room keyed for the draws, spawn_leftover, leftovers); gutsman_v1 recorded FAIL at t266."
+    },
+    {
+      "date": "2026-11-05",
       "what": "BN4's tournament presentation located (src/emu/bn4_tournament.h: the main modes 0x0800032C, the bracket screen 0x0804395C and its opener 0x08005792, the tournaments at 0x02001460, the cutscene commands 0x52-0x55 and the text command FC 01; docs/rom/bn4.md, The tournaments) and driven in romlab; the two ways into a run measured and the move into BN6 recommended (docs/multirom/bn4-tournament.md)."
     },
     {
       "date": "2026-11-05",
       "what": "BN4's bracket plates mapped (src/emu/bn4_tournament.h: BN4_PLATE_SHEET_A 0x084BB768, BN4_PLATE_SHEET_B 0x084BDB30, BN4_PLATE_INIT 0x08104040, BN4_PLATE_SET 0x08104290, BN4_PLATE_PALETTES 0x08104108, BN4_PLATE_SPECIAL 0x08104146; docs/rom/bn4.md, The bracket's plates) and a face for every BN6 and BN5 entrant made from his own game's art (tools/bn4_faces.py; docs/multirom/bn4-tournament.md, Faces for every entrant)."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "GutsMan's attack against BN6's engine located and named (src/emu/bn4_battle.h: BN4_CAMERA_SHAKE 0x08025FE0, its draws 0x0802600C and 0x08026032, BN4_SHAKE_TABLE 0x08026068, BN4_CAMERA_SHAKE_SET 0x0802608C, BN4_BATTLE_PLAYERS +0x44, BN4_SPAWN_DEBRIS 0x080E29F8, BN4_DEBRIS_INIT 0x080E2934, BN4_PANEL_FLAGS_LAST +8 and BN4_PANEL_FIELD_STEP 0x08009240; src/emu/bn6_panels.h: BN6_SPAWN_DEBRIS 0x080E23C0, BN6_DEBRIS_SPRITE 0x080E230A, BN6_PANEL_FIELD_STEP 0x0800BFC4, BN6_PANEL_FLAGS_LAST +0x18; docs/rom/bn4.md, GutsMan's attack against BN6's engine); the comparator's shake twins by word, the panel's field, sounds and the debris's own art; his rocks' player read made BN6's by the generator (battle_players); the attack's end's clear read (MegaMan's buster charge, inert on a Navi's AI data in BN6); five mutations of his port; the owner's call for sounds past 0xFF recorded."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "The owner's call for BN4 Navis' sounds past 0xFF built for a movs: the generator's wide_sounds writes XvSoundCall rows, the installer aims the call at a shim of the Navi's home (xvirus_shim_sound: movs, lsls #8, adds, b the PlaySound veneer), XvSong's slot a u16; the Navi's collision argument's shim moved past the most its code's shims take (xvirus_shims_room), where it had shared XV_HOME_SHIMS with the first. Proved by GutsMan's pool reordered (0x104 first): his 0xA2 played at 0x104 through the shim, gutsman_v1 PASS with the pair at 0x104 (not kept)."
     },
     {
       "date": "2026-11-04",
@@ -323,6 +343,30 @@
   ],
   "experiments": [
     {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "BN4's battle with GutsMan V1 fought twice",
+      "result": "python3 tools/xdiff.py bn4_gutsman_control: GutsMan V1 (BN4's enemy 0x84) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS, the traces the same at every frame (masks none). His objects appear from t265 (third-kind types in the trace's numbers 0xB2, 0xC0, 0xC2, 0x7F; the machine gun's every 11 frames from t461 and t912).",
+      "meaning": "The BN4 pipeline holds for a Navi as it does for a virus: a Soul Navi's AI data (his side's) and his objects are traced the same in two runs, so gutsman_v1's BN4 side is a sound reference once his move is built.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1: GutsMan V1 in BN4's battle against his move into BN6's",
+      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 0x84 BN6's 0x384), FAIL at t1. With the trace's Navi block (BN4's +0x64 at BN6's +0x80), a pointer to his own AI data and his moved code read as such, the first differences: his collision's +0x0E (BN4 0x21, BN6 3), his AI data's +0x00 (0, 1), +0x0C (0, 0xA), +0x0E (0, 0xFF), +0x50 (BN4's control block pointer, 0), +0x78 (0, MegaMan's object), +0x7F (0, 0x40), his obj +0x91 (1, 0). The eighteen BN4 family specs, the controls, cangard_v1 and handi_v1 PASS with the comparator's changes.",
+      "meaning": "GutsMan's code runs in BN6's engine as a Navi and the comparator matches him; what parts first is what BN6's Navi actor gives every Navi at its spawn (the collision setup's argument, the AI data's fields) against BN4's init's, the next unit of the port.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1 from t1 to t265",
+      "result": "python3 tools/xdiff.py gutsman_v1: the same from t1 to t265 with his collision's own setup argument (0x21) ported and the comparator's Navi rules (navi_ai, the opening count by the frame's clock, his draws keyed by his code's room: 73 replayed, a spawn's leftover register, a slot's left sprite state); FAIL at t266, his sprite's screen place under the screen's shake (BN4 0xB3, BN6 0xB5 at +0x9C). The BN4 family specs, the controls, cangard_v1 and handi_v1 PASS; 181 of 181 mutations caught.",
+      "meaning": "GutsMan's step, decision, machine gun and his first attack's object run frame for frame as BN4's; what parts next is each engine's screen shake applied to sprites, the next unit.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
       "feature": "BN4's tournament presentation",
       "date": "2026-11-05",
       "name": "The bracket driven from Lan's room",
@@ -337,6 +381,14 @@
       "result": "tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8 6@0x0d on tools/bn4_lab.py boot's state: BN6's HeatMan (mugshot 0x47), BN5's NumberMan (list 8's 71), BN4's GutsMan's mugshot (the control) and BN6's SpoutMan (a head window of his battle sprite) converted into plates and written over plates 0x01, 0x05, 0x08 and 0x0D in romlab's ROM copy (384 bytes of tiles and four palettes each). The Den Battle Tournament opened with them: all eight in colour with every entrant in; after the first round HeatMan and the control grey, NumberMan and SpoutMan a step up in colour. tools/bn4_faces.py report: both sheets' 23 plates 12 tiles in the two objects, the frame in 14 and 15 but plates 0x04 and 0x05; all 22 entrants' faces found and converted (13 colours kept).",
       "meaning": "BN4's bracket shows another game's Navi by data alone: a plate's tiles and palettes, no code. Every entrant the design allows has a face from his own game; a moved screen needs only its plate tables grown and the faces' sheets, about 13 KB, installed beside BN4's own.",
       "link": "../multirom/bn4-tournament.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1 PASS",
+      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): PASS over every frame, its recorded verdict removed. Root causes one at a time: t266 the camera's shake (each game's draws from its own RNG word: paired as BN5's, legit.json's bn4 rng_twins with their word), then a cracked panel's flags of the last frame (BN4 +8, BN6 +0x18: mapped in the trace's layout; romlab's store watch on BN4's panels showed 0x0800927E the one writer), then the panel crack's sound and his pool's (paired), t295 his rocks' read of the other side's player (BN4's battle state +0x44, BN6's +0xD0 a side: the generator's battle_players, the port's), a moved sprite's pointer read by the nearest start (list 4's 0x0D's room reaching 0x0E), t361 the rocks' debris (the fourth kind's 0x09, each engine's own art: allowed on its sprite state). The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS; python3 tools/xdiff.py --mutations: 186 of 186 caught, five of GutsMan's new (a CurAction t1, his AI block t1, a sound slot t267, the collision argument t1, the rocks' player read t295).",
+      "meaning": "GutsMan V1's whole battle runs frame for frame as BN4's in BN6's engine; the BN4 Navi pipeline (recipe, install, sound pool, comparator) is proven on its first Navi, the base for the other seventeen.",
+      "link": "../multirom/bn4-navis.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",

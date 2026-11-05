@@ -27,31 +27,50 @@ import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
-                        SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name, u16, u32)
+                        SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
+                        u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
+XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
+XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
+RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
+
+
+def recipes_text():
+    """BN4's recipes as the generators write them: the families' (tools/xrecipe_bn4.py) and the Navis'
+    (tools/xnavirecipe_bn4.py), one text"""
+    out = []
+    for name in RECIPES:
+        path = os.path.join(ROOT, 'src', 'emu', name)
+        if os.path.exists(path):
+            out.append(open(path).read())
+    return '\n'.join(out)
 
 
 def bn4_families():
     """BN4's families moved into BN6's engine, from their recipe (src/emu/xvirus_bn4.c, the generator's numbers): each its
     BN4 object type (.src_ai: its first-kind type, BN4 having no AI index) and its six BN4 enemy ids with BN6's for them
     (.names, .first_id: Billy's 13-18 BN6's 0x2C0-0x2C5)"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     # (each family's struct, `static const XVirusFamily bn4_NAME = { ... };`, and the rows it names: its effects, `.effects =
     # NAME_effects` and `static const XvId NAME_effects[] = { { 0x15, 0x90 }, ... }`, BN4's id and BN6's; a family naming
-    # none has none, so each family's are its own, never the next one's)
+    # none has none, so each family's are its own, never the next one's. A Navi's, `static const XNavi bn4_NAME = { .code =
+    # { ... }, ... };`, its ids from XN_BN4_FIRST_ID, four)
     rows = {k: v for k, v in re.findall(r'static const Xv\w+ (\w+)\[\] = \{(.*?)\};', text, re.S)}
     out = []
-    for body in re.findall(r'static const XVirusFamily \w+ = \{(.*?)\n\};', text, re.S):
-        src, first, names = (re.search(p, body, re.S) for p in (r'\.src_ai = (0x[0-9A-Fa-f]+)', r'\.first_id = XV_FIRST_ID \+ (0x[0-9A-Fa-f]+)',
+    for body in re.findall(r'static const (?:XVirusFamily|XNavi) \w+ = \{(.*?)\n\};', text, re.S):
+        navi = '.versions = ' in body
+        base = XN_BN4_FIRST_ID if navi else XV_FIRST_ID
+        src, first, names = (re.search(p, body, re.S) for p in (r'\.src_ai = (0x[0-9A-Fa-f]+)',
+                                                                 r'\.first_id = (?:XV_FIRST_ID|XN_BN4_FIRST_ID) \+ (0x[0-9A-Fa-f]+)',
                                                                  r'\.names = \{ ([^}]*) \}'))
         eff = re.search(r'\.effects = (\w+)', body)
         effects = {int(a, 0): int(b, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', rows.get(eff.group(1), ''))} \
             if eff else {}
         if src and first and names:
             ids = [int(x, 0) for x in names.group(1).split(',')]
-            out.append(dict(type=int(src.group(1), 0), ids={v: XV_FIRST_ID + int(first.group(1), 0) + k for k, v in enumerate(ids)},
-                            effects=effects))
+            out.append(dict(type=int(src.group(1), 0), ids={v: base + int(first.group(1), 0) + k for k, v in enumerate(ids)},
+                            effects=effects, navi=navi))
     return out
 
 
@@ -60,7 +79,7 @@ def bn4_moved_types():
     the dispatch's number, XV_TYPE_MOVED, BN4's own number): {(kind, the dispatch's number): BN4's own}, the thunder's copy
     (BN6's third-kind 0x2A) among them. A dispatched object's type reads in the BN6 trace as the dispatch's side-table
     number (xdiff_snap.dispatched: Spikey's moved 0x30 runs at 0xE0); read back as BN4's own, so each meets BN4's"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     return {(int(k), int(a, 0)): int(of, 0) for k, a, of in
             re.findall(r'\{ (\d), (0x[0-9A-Fa-f]+), XV_TYPE_MOVED, (0x[0-9A-Fa-f]+) \}', text)}
 
@@ -80,11 +99,11 @@ def bn4_sprites(rom4):
     if not lists or not rom4:
         return []
     out = []
-    for lst, idx, off, room in rows:
+    for lst, idx, room_base, off, room in rows:
         word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
         base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
         lz = bool(word & 0x80000000)
-        out.append((None if lz else base, XV_ART + int(off, 16), int(room, 16), key,
+        out.append((None if lz else base, (XN_BN4_ART if room_base == 'XN_BN4_ART' else XV_ART) + int(off, 16), int(room, 16), key,
                     (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
     return out
 
@@ -92,10 +111,10 @@ def bn4_sprites(rom4):
 def sprite_rows():
     """BN4's sprite lists (src/core/rom.c's BN4 layout, sprite_lists) and the recipe's XvSprite rows (src/emu/xvirus_bn4.c:
     BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites'"""
-    text = open(os.path.join(ROOT, 'src', 'emu', 'xvirus_bn4.c')).read()
+    text = recipes_text()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
-    rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, XV_ART \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
+    rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (XV_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
     return (0x08000000 + int(m.group(1).rstrip('uU'), 0) if m else None), rows
 
 
@@ -114,14 +133,17 @@ def bn4_cache(fr):
 
 def sprite_ptr(sprites, game, v, cache=None):
     """a pointer into a moved family's sprite (bn4_sprites) as ('sprite', which, its offset); None where it is none. BN4's
-    LZ77'd sprite by the frame's cache (bn4_cache): where its key is not there, BN4 drew none of it"""
+    LZ77'd sprite by the frame's cache (bn4_cache): where its key is not there, BN4 drew none of it. A room is the copy's,
+    rounded up past the sprite's own end, so in BN4's ROM it may reach into the next sprite's (list 4's 0x0D, 0x520 bytes
+    in a room of 0x800, runs into 0x0E, GutsMan's rocks'): the pointer is the sprite's whose start is nearest below it"""
+    best = None
     for i, (b4, b6, room, key, room4) in enumerate(sprites):
         if game == 4 and b4 is None:
             b4, room = (cache or {}).get(key), room4
         base = b4 if game == 4 else b6 if game == 6 else None
-        if base is not None and base <= v < base + room:
-            return ('sprite', i, v - base)
-    return None
+        if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
+            best = ('sprite', i, v - base)
+    return best
 
 
 class Bn4Canon:
@@ -321,9 +343,26 @@ BN4_LACKS = [
 ]
 
 
+# BN6's NameIDs of BN4's moved Navis (their recipes', bn4_families' navi=True: one() sets them): a Navi's AI data is BN4's
+# too (his side's, BN4_AI_DATA), so the virus masks of BN4_LACKS, which explain a virus's AI data BN4 has none of, never
+# hold for his
+NAVI_NAMES = set()
+
+
+def navi_role(role):
+    """whether a role is one of BN4's moved Navis' objects (its role's NameID, ('T1', 0x384, ...) as 'T1:0x384#0' names it,
+    among NAVI_NAMES)"""
+    if isinstance(role, tuple):
+        return len(role) > 1 and role[0] == 'T1' and role[1] in NAVI_NAMES
+    m = re.match(r'T1:0x([0-9a-fA-F]+)#', role) if isinstance(role, str) else None
+    return bool(m) and int(m.group(1), 16) in NAVI_NAMES
+
+
 def lacks(d, ta, tb):
     """the BN4_LACKS mask that explains d (BN4's side a, BN6's b), None where none does"""
     if ta['game'] != 4 or tb['game'] != 6:
+        return None
+    if navi_role(d.role) and (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
         return None
     for m in BN4_LACKS:
         if d.part != m['part']:
@@ -645,9 +684,17 @@ def frame_diffs(fa, fb, fbt=None):
             continue
         # (from its node's +8: its links compared as the run order; BN4's numbers as BN6's only against BN6's)
         fams = getattr(fa.canon, 'fams', None) if fb.game == 6 else None
-        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ()),
-                                                                                     fa.fr.get('blinked', ())),
-                                                                 named(fb.canon, fb.game, ob), 8)]
+        na = named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ()), fa.fr.get('blinked', ()))
+        nb = named(fb.canon, fb.game, ob)
+        found = []
+        # (a sprite state that is the slot's last occupant's in either game, its object spawned and no sprite set up since:
+        # no state of the object's, compared from its sprite's set-up on, as xdiff_snap.obj_cells reads BN5's: leftovers)
+        if getattr(oa, 'leftover', False) != getattr(ob, 'leftover', False):
+            found.append(('obj', SPRITE[oa.kind], 'no sprite set up' if oa.leftover else 'its sprite set up',
+                          'no sprite set up' if ob.leftover else 'its sprite set up'))
+        if getattr(oa, 'leftover', False) or getattr(ob, 'leftover', False):
+            na, nb = na[:SPRITE[oa.kind] + NODE], nb[:SPRITE[oa.kind] + NODE]
+        found += [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', na, nb, 8)]
         alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
         before = getattr(fa, 'before', {}).get(role)   # (its record at the frame before: a move's old panel)
         ca = coll_as_bn6(oa.coll, alliance, role, before.coll if before else None) if alliance and oa.coll is not None else oa.coll
@@ -845,6 +892,55 @@ def allowed_bit(d, fam):
     return None
 
 
+def spawn_leftover(d):
+    """legit.json's bn4 allowed spawn leftovers: a word of a moved object's record its spawn took from a register its caller
+    never set, each game's caller's leftover there, which no code of the object reads: the allowance d is, None where none"""
+    if d.part != 'obj' or not isinstance(d.role, tuple) or len(d.role) < 2:
+        return None
+    for a in bn4_allowed():
+        r = a.get('spawn_leftover')
+        if r and d.role[0] == r['kind'] and d.role[1] == int(r['type'], 0) and d.off == int(r['word'], 0) and \
+                d.a == tuple(r['bn4']) and d.b == ('raw', int(r['bn6'], 0)):
+            return a['name']
+    return None
+
+
+def navi_ai(d):
+    """legit.json's bn4 allowed of a Navi's AI data (navi_ai: a range of its offsets, BN6's bookkeeping or BN4's, each with both
+    games' code): the allowance d is, on a moved Navi's AI data alone (NAVI_NAMES), None where none"""
+    if d.part != 'ai' or not navi_role(d.role):
+        return None
+    for a in bn4_allowed():
+        if 'navi_ai' in a and a.get('part') == 'ai':
+            lo, hi = (int(x, 0) for x in a['navi_ai'])
+            if lo <= d.off <= hi:
+                return a['name']
+    return None
+
+
+def leftovers(trace):
+    """{fight frame: the roles of the objects there that hold the slot's last occupant's sprite state}: an object spawned
+    while the hooks watched that has set up no sprite since, in each game (its spawn clears its record to its sprite state,
+    the first and third kinds' 0x8C bytes from +4: BN4 0x08003210's, BN6 0x080032AC; the state its last occupant's), as
+    tools/xdiff_events.py's Translations marks BN5's and BN6's (Obj.leftover, read by xdiff_snap.obj_cells: its sprite state
+    compared from its sprite's set-up on)"""
+    spawned, drawn, out = set(), set(), {}
+    for fr in trace['frames']:
+        for e in fr.get('setup', []) + fr['events']:
+            role = next((o.role for o in fr['objs'] if o.addr == e.object), None)
+            if role is not None and e.kind in (SPAWN, SPRITE_SET):
+                (spawned if e.kind == SPAWN else drawn).add(role)
+        out[fr['t']] = {o.role for o in fr['objs'] if o.role in spawned and o.role not in drawn}
+    return out
+
+
+def mark_leftovers(f, left):
+    """a frame's objects told whether their sprite state is the slot's last occupant's (leftovers)"""
+    roles = left.get(f.fr['t'], set())
+    for o in f.fr['objs']:
+        o.leftover = o.role in roles
+
+
 def compare(spec, ta, tb, canon, show=6):
     """('PASS'|'FAIL'|'INCONCLUSIVE', the frame of it, lines): against BN6's, the first frame with a difference no
     BN4_LACKS mask explains in the family's own records (family_roles) fails it; one in the world's alone (MegaMan, the
@@ -860,6 +956,7 @@ def compare(spec, ta, tb, canon, show=6):
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
     stop, lines, ranks, before = None, [], {}, None
+    left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()
     MOVES.clear()
     for fra in ta['frames']:
@@ -869,6 +966,9 @@ def compare(spec, ta, tb, canon, show=6):
         n += 1
         fa = Frame(ta, fra, canon)
         fb = Frame(tb, frb, canon)
+        if against:
+            mark_leftovers(fa, left_a)
+            mark_leftovers(fb, left_b)
         fa.before = {o.role: o for o in before['objs']} if before else {}
         before = fra
         if against:
@@ -894,7 +994,8 @@ def compare(spec, ta, tb, canon, show=6):
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or ("the hit's spark, each engine's own" if spark_own(d) and against else None)
+            d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
+                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
@@ -936,7 +1037,8 @@ def rng_twins():
             if h6 != h4:
                 raise SystemExit(f'legit.json\'s bn4 twin BN6 {a6:#x} / BN4 {a4:#x} differs at +{k:#x}: {h6:04x} | {h4:04x}')
             k += 2
-        items.append(f'twin={a6:08X}:{a4:08X}:{n:X}')
+        # (its word: the one BN4's draws there take where BN6's draws from its other, the camera's shake's)
+        items.append(f'twin={a6:08X}:{a4:08X}:{n:X}' + (f':{t["word"]}' if 'word' in t else ''))
     return items
 
 
@@ -980,6 +1082,8 @@ def one(name, spec, a, canon, run_xdiff, work):
         fams = bn4_families()
         canon = Bn4Canon(canon, fams, [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x])
         canon.fams = fams
+        NAVI_NAMES.clear()
+        NAVI_NAMES.update(v for f in fams if f.get('navi') for v in f['ids'].values())
         rom4 = os.path.join(work, 'rom', 'bn4.gba')
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
         rom6 = os.path.join(work, 'rom', 'bn6.gba')
@@ -1000,5 +1104,14 @@ def one(name, spec, a, canon, run_xdiff, work):
         if spec.get('again') else 'fought twice, its traces the same'
     if spec.get('again'):   # (the comparator's own test: the change must be found, at the frame it shows)
         verdict = 'PASS' if verdict == 'FAIL' else 'FAIL'
+    rec = spec.get('verdict')
+    if rec and not spec.get('poke') and not spec.get('call'):
+        # (a verdict the spec records while its port is under way, as tools/xdiff.py's own: held where the run ends the same,
+        # at the same frame; a change either way is the suite's to see, and a mutation's run, its pokes or calls, is judged
+        # as any other)
+        held = verdict == rec['is'] and at == rec.get('at')
+        print(f'{name}: {verdict}{f" at t{at}" if at is not None else ""} ({kind}: BN4\'s battle {what}; its recorded verdict, '
+              f'{rec["is"]} at t{rec.get("at")}, {"held" if held else "NOT HELD"}: {rec["why"]})')
+        return verdict, 'recorded' if held else kind
     print(f'{name}: {verdict}{f" at t{at}" if at is not None else ""} ({kind}: BN4\'s battle {what})')
     return verdict, kind

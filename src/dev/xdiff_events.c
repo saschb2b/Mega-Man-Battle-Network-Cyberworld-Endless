@@ -546,11 +546,13 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	log->g = game_of(game);
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
-	/* (the spec's families' code, the Navis' where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
+	/* (the spec's families' code, BN4's Navis' among them (xd4_families: their code in their own room, XN_BN4_CODE), the Navis'
+	 * where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
 	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams, navis)) || (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
+		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
+		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
 		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to))) {
 			if (log->nfam < FAMILY_MAX) log->fam[log->nfam++] = m[i];
 			else fprintf(stderr, "xdiff: the families' and Navis' code past %d blocks: %08x not watched\n", FAMILY_MAX, (unsigned)m[i].from);

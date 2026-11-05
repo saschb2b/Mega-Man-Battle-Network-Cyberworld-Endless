@@ -63,9 +63,11 @@ static const Seg coll_segs[] = {
 	 * pre-step holds it 0xFF, BN4 0x080C2870-0x080C2872, its copy's store at +8 by the recipe) */
 	{ BN4_COLL_POISON_TIMER, BN6_COLL_POISON_TIMER, 1 },
 };
-/* an AI's data: its attack's variables at BN6's +0xA0; MegaMan's power attacks, keys, flags, HP bug's count, damage taken
- * and frames struck, each paired by both games' code (bn4_battle.h, BN4_AI_*) */
+/* an AI's data: a Soul Navi's own block at BN6's +0x80 and its attack's variables at BN6's +0xA0 (the Navi's port moves both
+ * so: tools/xnavirecipe_bn4.py AI_BLOCKS); MegaMan's power attacks, keys, flags, HP bug's count, damage taken and frames
+ * struck, each paired by both games' code (bn4_battle.h, BN4_AI_*) */
 static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_DATA_SIZE - BN4_AI_ATTACK_VARS },
+	{ BN4_AI_NAVI, BN6_AI_NAVI_STATE, BN4_AI_ATTACK_VARS - BN4_AI_NAVI },
 	{ BN4_AI_POWER_A, BN6_AI_POWER_A, 1 }, { BN4_AI_POWER_CHARGE, BN6_AI_POWER_CHARGE, 1 }, { BN4_AI_POWER_C, BN6_AI_POWER_C, 1 },
 	{ BN4_AI_POWER_CHIP, BN6_AI_POWER_CHIP, 1 }, { BN4_AI_KEYS, BN6_AI_HELD, BN4_AI_KEYS_SIZE }, { BN4_AI_MODES, BN6_AI_MODES, 4 },
 	{ BN4_AI_HP_BUG, BN6_AI_HP_BUG, 1 }, { BN4_AI_DAMAGE_TAKEN, BN6_AI_DAMAGE_TAKEN, 2 }, { BN4_AI_STRUCK_FRAMES, BN6_AI_STRUCK_FRAMES, 4 },
@@ -74,7 +76,8 @@ static const Seg ai_segs[] = { { BN4_AI_ATTACK_VARS, BN6_AI_ATTACK_VARS, BN4_AI_
 /* MegaMan's pending form, BN6's outside his AI data: BN4's AI data +0x10 at BN6_CROSS_PENDING's +0 (the form, 0xFF none),
  * the record's other bytes BN6's own (docs/devtools/differential.md, MegaMan's AI data and his object) */
 static const Seg pending_segs[] = { { BN4_AI_PENDING_FORM, BN6_RECORD_FORM, 1 } };
-/* a panel's: its type, side, flags and reserver */
+/* a panel's: its type, side, flags and reserver; a cracked one's flags of the last frame (both fields' steps, BN4
+ * 0x08009240 and BN6 0x0800BFC4, store them so after each panel's update) */
 static const Seg panel_segs[] = {
 	{ BN4_PANEL_TYPE, BN6_PANEL_TYPE, 1 },
 	{ BN4_PANEL_ALLIANCE, BN6_PANEL_ALLIANCE, 1 },
@@ -83,6 +86,7 @@ static const Seg panel_segs[] = {
 	{ BN4_PANEL_STATE, BN6_PANEL_STATE, 2 },
 	{ BN4_PANEL_TIMER_A, BN6_PANEL_SIDE_TIMER, 2 },
 	{ BN4_PANEL_TIMER_B, BN6_PANEL_TIMER, 2 },
+	{ BN4_PANEL_FLAGS_LAST, BN6_PANEL_FLAGS_LAST, 4 },
 };
 
 /* (spare: where BN4's bytes left over begin, BN6's places left taken from there on and then from 0. An AI data's from
@@ -95,12 +99,12 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
 	[XD4_COLL] = { coll_segs, 32, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
-	[XD4_AI] = { ai_segs, 13, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
-	[XD4_PANEL] = { panel_segs, 7, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
+	[XD4_AI] = { ai_segs, 14, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
+	[XD4_PANEL] = { panel_segs, 8, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
 	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 32 &&
-	sizeof ai_segs / sizeof *ai_segs == 13 && sizeof panel_segs / sizeof *panel_segs == 7, "the layouts' counts");
+	sizeof ai_segs / sizeof *ai_segs == 14 && sizeof panel_segs / sizeof *panel_segs == 8, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
 

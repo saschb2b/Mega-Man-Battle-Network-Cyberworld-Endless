@@ -2323,6 +2323,18 @@
         "why": "The bit the object runner runs a paused object by (BN4 0x0800314C at 0x08003174, BN6 0x080031AC at 0x080031D8: tst r4,#4 while the pause byte is set), set on every first-kind object as it spawns (both games' kind 1 descriptors' flags byte 0x19, BN4 0x08003268, BN6 0x080032D0, then 0x17 once it appears). BN4's generic state 1 clears it (0x0801013A: ldrb r0,[r5]; movs r1,#4; bics r0,r1; strb r0,[r5]), as it hands a virus its first own state during the paused opening, so the virus waits for the fight; BN6's (0x080165B8) does not, BN6's state runner never running a state while paused (0x0801B21A, the family's timeline above). The same engine difference as the lag: BN6's own Mettaur keeps 0x04 too (0x17 at t1 against BN4's Mettaur's 0x13, game=bn4:bn6, foes=01@52)"
       },
       {
+        "name": "the rock's debris, each engine's own art",
+        "whose": "family",
+        "kind": "T4",
+        "type": "0x09",
+        "part": "obj",
+        "offsets": [
+          "0x80",
+          "0xBB"
+        ],
+        "why": "A falling rock's debris (GutsMan's rocks, BN4's third-kind 0x1D, moved: their code at BN4 0x080D09E8 spawns four on landing) is each engine's own fourth-kind 0x09, spawned by twin spawners (BN4 0x080E29F8, BN6 0x080E23C0: the same bytes but the spawn's bl, the symbol map's pair; its +0x40 and +0x48 the speeds of BN4's table 0x080D0A20, copied with the rock's code), its init the same instructions but for its sprite's number (BN4 0x080E2934, its jump table 0x080E2924; BN6 0x080E22FC): sprite_load of list 0x10 (4) with number 0x0E in BN4 (0x080E2942, its bl to 0x0800287C), BN4's rocks' own sprite, which GutsMan's recipe copies as list 4 0xCA for his rocks, and number 5 in BN6 (0x080E230A, its bl to 0x080026E4), BN6's own rock art (0x08353D1C). Its sprite state (+0x80 to +0xBB: its frames' pointers into its art, the frame's count and flags read from it) is its art's: gutsman_v1's at t361 (BN4) and t362 (BN6), the hooks' sprite events from 0x080E2949 and 0x080E2311. Its place, speeds, spawn, life and every other byte compared as ever"
+      },
+      {
         "name": "the thunder's sprite, BN6's own art",
         "whose": "family",
         "kind": "T3",
@@ -2537,6 +2549,73 @@
         "bit": "0x400000",
         "direction": "BN6 has, BN4 not",
         "why": "BN6's own bookkeeping in its own MegaMan's paralysis state, not the port's subject (the lead's call, 2026-11-04, the owner's to overturn). Its writer: BN6's paralysis state (his state 4, entry 4 of his table 0x080EB86C: 0x080175B8) sets 0x400000 in his collision flags as it begins (0x080175C4: ldr r0,=0x400000; bl 0x0801A152); its clearer: 0x08017828 (in 0x08017768, his state 7, entry 7 of that table: bl 0x0801A15C); its reader: 0x08010162, run for him each frame from 0x0801B12E, which clears the flags' 0x04 while 0x400000 stands and sets it else (0x08010182-0x08010192). BN4's paralysis state (0x080109FA, entry 4 of his table 0x080EAEFC) sets no 0x400000: as it begins it clears 0x100441 as BN6's does (0x08010A0A / 0x080175CA), and no load of 0x400000 is in its code. Both set and clear 0x800 alike (the status routines 0x0800AEB4 / 0x0800E798, the ends 0x0800AE6C / 0x0800E74C). BN6's struck state (his state 3, entry 3 of 0x080EB86C: 0x080174FE) sets it too, with 0x400, as it begins (0x0801750A: ldr r0,=0x400400; bl 0x0801A152) and clears both as it ends (0x0801758A: bl 0x0801A15C), where BN4's (0x08010960, entry 3 of 0x080EAEFC) sets and clears 0x400 alone (0x0801096C-0x08010970: movs r0,#1; lsls r0,#10; bl 0x08012F82; 0x080109DE-0x080109E2, bl 0x08012F8C): walla_v1-v3, MegaMan struck by Walla's rings, 23 frames a hit. Guarded: that bit alone, BN6's side holding it and BN4's not, every other bit of the word compared as ever, the 0x04 it acts on among them, so any effect it had on him would still fail the spec or keep it INCONCLUSIVE (tools/xdiff_bn4.py allowed_world)"
+      },
+      {
+        "name": "a Navi's actor type and AI index, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x00",
+          "0x01"
+        ],
+        "why": "BN6's battle actor setup writes the enemy id's triple +1, its actor type (1 a Navi), at AI data +0 and its +2, the AI index, at +1 (0x08007720-0x08007726, r4 the AI data), which BN6 reads to pick a triple's word (its spawn hooks, 0x0800F420: ldr r3,[r5,#0x58]; ldrb r1,[r3,#0]; ldrb r1,[r3,#1]) and its palette (0x0800F334), and its Navi frame reads its thirteen tables by (BN6_NAVI_FRAME, AIData +1: GutsMan's 49, src/emu/xnavi_recipe.h XN_BN4_FIRST_AI). BN4 has no triples and no Navi tables (a Navi its own first-kind type, BN4_T1_TYPES); its Navi's AI data is its side's (BN4_AI_OF_SIDE), whose +0 and +1 GutsMan's code and the engine's routines his states call never read (tools/xnavirecipe_bn4.py's AI tracker: his reads are his blocks, +0x64 on): BN6's own bookkeeping"
+      },
+      {
+        "name": "a Navi's level by its foe's HP, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x0C",
+          "0x0C"
+        ],
+        "why": "BN6's actor init writes AI data +0xC the other side's 0x080136E4(side ^ 1, 0x3E) / 100, 1 to 10 (0x08017068-0x08017088): MegaMan's 2000 HP gives 10 in gutsman_v1. BN4's AI data +0xC is a player's loadout (BN4_AI_LOADOUT), 0 on a Navi's side, never read by GutsMan's code (his AI tracker's reads): BN6's own"
+      },
+      {
+        "name": "a Navi's AI data +0xE, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x0E",
+          "0x0E"
+        ],
+        "why": "BN6's battle actor setup writes 0xFF at AI data +0xE (0x08007764-0x08007766). BN4's +0xE (a player's loadout's chip charge, BN4_AI_LOADOUT + 2) is 0 on a Navi's side and never read by GutsMan's code: BN6's own"
+      },
+      {
+        "name": "a Navi's target, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x78",
+          "0x7B"
+        ],
+        "why": "BN6 keeps an actor's target object at AI data +0x78 (0x0800F318: str r0,[r1,#0x78], r1 its AI data), MegaMan's for GutsMan. BN4's +0x78 is in his attack's variables (BN4_AI_ATTACK_VARS + 8), traced at BN6's +0xA8 (src/dev/xdiff_bn4_trace.c's ai_segs), so BN4's trace holds nothing at BN6's +0x78: BN6's own"
+      },
+      {
+        "name": "a Navi's AI data's pool bit, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x7C",
+          "0x7F"
+        ],
+        "why": "BN6's AI data comes from a pool of eight, each entry's own bit at +0x7C (bn6_ai.h BN6_AI_POOL_BIT: entry i bit 31 - i, laid out by the take 0x0800ED2C; GutsMan's entry 1, 0x40000000, +0x7F 0x40), which its let-go clears (0x0800ED80). BN4 has no pool, one AI data a side (BN4_AI_DATA): BN6's own"
+      },
+      {
+        "name": "a side's control block, BN4's",
+        "part": "ai",
+        "navi_ai": [
+          "0x50",
+          "0x53"
+        ],
+        "why": "BN4's AI data +0x50 points at its side's control block (BN4_AI_CONTROL, set as the battle clears each side's AI data, 0x0800B7CE), a Navi's side's as MegaMan's; BN6's AI pool entry for a Navi holds none (its take zeroes +0 to +0x7B, 0x0800ED2C), and GutsMan's code never reads it (his AI tracker's reads): BN4's own"
+      },
+      {
+        "name": "GutsMan's attack's spawn's r3, each game's leftover",
+        "spawn_leftover": {
+          "kind": "T3",
+          "type": "0x1C",
+          "word": "0x3C",
+          "bn4": [
+            "battle state"
+          ],
+          "bn6": "0x3"
+        },
+        "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r1, r2 and r3 at the object's +0x34, +0x38 and +0x3C and r4 at +4, as BN6's twin through the dispatch's spawner does; GutsMan's spawner of his attack's 0x1C (0x080D0894: push {r0,r1,r2,r5}; movs r0,#0x1c; the spawn) sets r0 alone, so +0x3C holds what r3 held before it: in BN4 the battle state's pointer, in BN6 3. No code of the 0x1C object reads +0x3C (its init 0x080D057C and update 0x080D058E and the routines they reach, walked by tools/xnavirecipe_bn4.py), nor do the engine's routines it calls"
       }
     ],
     "clocks": "Two clocks, each record's proven from the routine that writes it, never assumed (the lead's call, 2026-11-04, the owner's to overturn). What a state drives (an object's state routine, run by its state runner: BN4 0x08013C48, BN6 0x0801B1C4) is compared with the battle's offset, BN6's at t + 1 against BN4's at t (allowed, \"BN6's battle a fight frame behind BN4's\"); what the battle's timer or the frame counter drives (a routine the main loop runs each fight frame, not through a state) at the same fight frame. Each record of the second clock is named with its code path (bn4.sounds' clock \"timer\"); a record whose clock is not shown is compared with the offset, and where it differs there the spec stays INCONCLUSIVE",
@@ -2666,9 +2745,37 @@
         "clock": "state",
         "what": "MegaMan's HP low",
         "why": "Played by the HP gauge's step, twins from its HP test on (BN4 0x0801472C, entry 0 of the HUD's table 0x080146CC that 0x080146A8 runs by the bits of its word each frame; BN6 0x0801C840, entry 4 of its table 0x0801BF10): unless 0x08007A12 / 0x0800A18E or the pause (0x080078EC / 0x0800A03C) says not, his HP (+0x24) at a quarter of his maximum (+0x26 >> 2) or less counts a byte (BN4's +0x19, BN6's +6) each frame to 45 (cmp #0x2d), then 0 and the sound: movs r0,#0x82 at 0x0801475C, bl 0x08000560 (BN4_PLAY_SOUND); movs r0,#0x84 at 0x0801C880, bl 0x080005CC. The count starts on the frame a hit takes him to the quarter, so its clock is the hit's, a state's: cirkill_v3's CirKill takes him from 560 to 380 at t1062 in BN4 and t1063 in BN6, the sound played at t1106, t1151 and t1196 in BN4 and t1107, t1152 and t1197 in BN6 (begun a frame after each). Paired by the routines that play them, not by their samples"
+      },
+      {
+        "bn4": "0x95",
+        "bn6": "0x97",
+        "clock": "state",
+        "what": "a panel cracked or broken",
+        "why": "Played by the panel crack, twins but for BN4's test of flag 0x20000 (BN4_PANEL_CRACK 0x08009AEC; BN6's 0x0800C938, BN6_PANEL_CRACKED's, the pair tools/bn4_twins.py audits): movs r0,#0x95 at 0x08009B1A and 0x08009B36, each its bl to 0x08000560 (BN4_PLAY_SOUND); movs r0,#0x97 at 0x0800C960 and 0x0800C97E, each its bl to 0x080005CC. Called by GutsMan's attack's object (BN4's third-kind 0x1C, its code moved), a state's: gutsman_v1's crack of panel 1,1 at t266 in BN4 and t267 in BN6 (begun a frame after each). Paired by the routines that play them, not by their samples"
+      },
+      {
+        "bn4": "0xA2",
+        "bn6": "0x32",
+        "clock": "state",
+        "what": "GutsMan's sound 0xA2, its copy",
+        "why": "Played by his attack's object's code (BN4's third-kind 0x1C: movs r0,#0xa2 at 0x080D0596, its bl to PlaySoundEffect at 0x080D0598; BN6: its copy's movs r0,#0x32 at 0x08F3065A, the recipe's immediate, its bl through its veneer to BN6's), a state's: BN4's song 0xA2 copied into the pool's first slot, BN6's empty 0x32 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); gutsman_v1's at t266 in BN4 and t267 in BN6 (begun a frame after each). BN6's own song 0x32 is empty, so the copy is told by its slot"
+      },
+      {
+        "bn4": "0xA3",
+        "bn6": "0x33",
+        "clock": "state",
+        "what": "GutsMan's sound 0xA3, its copy",
+        "why": "Played by his rocks' code as one lands (BN4's third-kind 0x1D: movs r0,#0xa3 at 0x080D0A14, its bl to PlaySoundEffect at 0x080D0A16; BN6: its copy's movs r0,#0x33, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F30ADF), a state's: BN4's song 0xA3 copied into the pool's second slot, BN6's empty 0x33 (src/emu/xnavi_bn4_sounds.c); gutsman_v1's at t361 in BN4 and t362 in BN6 (begun a frame after each). BN6's own song 0x33 is empty, so the copy is told by its slot"
+      },
+      {
+        "bn4": "0xA7",
+        "bn6": "0xE0",
+        "clock": "state",
+        "what": "GutsMan's sound 0xA7, its copy",
+        "why": "Played by his machine gun's state (MegaMan's state 70 in BN4, copied with him: movs r0,#0xa7 at 0x080F0712, its bl to PlaySoundEffect at 0x080F0714; BN6: its copy's movs r0,#0xe0, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F31555), a state's: BN4's song 0xA7 copied into the pool's fifth slot, BN6's empty 0xE0 (src/emu/xnavi_bn4_sounds.c); gutsman_v1's at t461 in BN4 and t462 in BN6 (begun a frame after each). BN6's own song 0xE0 is empty, so the copy is told by its slot"
       }
     ],
-    "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset",
+    "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset A moved Navi's own the same (GutsMan's in gutsman_v1: his appear's animation set in the opening, 1 at t1 in both, then his state's at BN4's t2 and BN6's t3): his after-step, run after each of his states (BN4 0x080143FC, BN6's twin 0x0801BBAC, the same body but for the pause test's routine, BN4 0x080078EC, BN6 0x0800A03C), runs the sprite update (BN4 0x0800285C, BN6 0x080026C4) at every fight frame and at none of the paused opening's, so his opening animation's count is the frame's clock too; a moved family's own needs no rule, its paused present (XVirusFamily.present) animating it as BN4's after-state does",
     "paralysis_flash": "A first-kind object's colour shader (its sprite +6, u16; MegaMan's +0x96) while paralysed: twin routines (BN4 0x08010408, BN6 0x080168C8) read its collision flags (0x08012F96 / 0x0801A166) and, with 0x800 there (the paralysis's, set by both status routines as its timer runs, BN4 0x0800AEB4 and BN6 0x0800E798: a state's clock, BN6's a frame behind, at t432 against BN4's t431 in billy_v1, a probe of hooks), take the battle timer (BN4 0x08007BE4, BN6 0x0800A704: [eToolkit+0x18]+0x40) and 2, the shader from the same two words (BN4 0x0801042C, BN6 0x080168EC: 0, 0x3FF), set through the shader's setter (BN4 0x08002F22, BN6 0x08002ED0; zeroed each frame first, from 0x08013BEC / 0x0801B142). So its gate is a state's and its phase the timer's: BN4's at t and BN6's at t + 1 are each compared with what that code gives, the gate BN6's flags of t + 1 (compared themselves with the offset) and each game's own timer (tools/xdiff_bn4.py paralysis_flash)",
     "rng_twins": [
       {
@@ -2677,6 +2784,22 @@
         "len": "0x26",
         "what": "a hit's spark's place (the fourth kind's 0x04): GetRNG once, the spark moved from the striker's place by its low nibble less 7 in x and its third nibble less 7 in z",
         "evidence": "BN4 0x08014620-0x08014645 / BN6 0x0801BDDE-0x0801BE03: the same instructions but for the BL's target, GetRNG (BN4 0x08001B00 / BN6 0x0800151C) at +4; each called with r0 0xF by the hit's spark, twins (BN4 0x08012F44, its bl at 0x08012F66, then the spawner 0x080E2140; BN6's from 0x0801A0D8, its bl at 0x0801A0F6, then 0x080E1C00): the thunder's spark in billy_v1, BN4's draw at t431, BN6's at t432 (a probe of hooks on both spawners: the same striker's place, x 0xFFD7FFE2 and 0xFFD5FFE2, z 0x100000 and 0x50000 from the two words)"
+      },
+      {
+        "bn6": "0x08030226",
+        "bn4": "0x0802600C",
+        "len": "0x6",
+        "word": 0,
+        "what": "the camera's shake, its x: BN6's from its second word, BN4's from its first (as BN5's, legit.json's rng twins)",
+        "evidence": "BN6 0x080301E8 (bn6f camera_doShakeEffect) draws twice a shaking frame by GetRNGSecondary (BN6_RNG_DRAW_SECOND 0x0800154C, at 0x08030226 and 0x0803024C), BN4's twin 0x08025FE0 (the symbol map's, by calls) twice by GetRNG (0x08001B00, BN4_RNG_PRIMARY's, at 0x0802600C and 0x08026032); each draw masked by the same table (BN6 0x08030284, BN4 0x08026068, 8 bytes a strength, the same 32 bytes), shifted and centred alike into the camera's x (BN6 +0x3C, BN4 +0x38) and then y (+0x40, +0x3C): the same numbers make the same shake. Its frames and strength set by the same routine (camera_initShakeEffect, BN6 0x080302A8, BN4 0x0802608C): GutsMan's attack's shake in gutsman_v1, BN4's from t265, his sprite's screen place (+0x9C, +0x9E) each engine's pattern from its own word until the draws were paired"
+      },
+      {
+        "bn6": "0x0803024C",
+        "bn4": "0x08026032",
+        "len": "0x6",
+        "word": 0,
+        "what": "the camera's shake, its y",
+        "evidence": "as its x"
       }
     ]
   }

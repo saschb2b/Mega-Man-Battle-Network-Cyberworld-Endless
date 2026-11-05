@@ -11,6 +11,7 @@
 #include "emu.h"
 #include "guest.h"
 #include "rom.h"
+#include "xnavi_bn4.h"
 #include "xvirus_bn4.h"
 
 #define BUDGET 9000   /* the guest's frames its battle may take, from its asking to its map or GAME OVER */
@@ -79,13 +80,25 @@ static void foes_say(const Spec *s) {
 	}
 }
 
+/* BN4's k-th moved recipe whose ids a foe may be: its families' (k < xvirus_bn4_count), then its Navis' code (xnavi_bn4.h),
+ * and how many versions it has */
+static const XVirusFamily *moved_bn4(int k, int *versions) {
+	if (k < xvirus_bn4_count) {
+		*versions = XV_VERSIONS;
+		return xvirus_bn4[k];
+	}
+	*versions = xnavi_bn4[k - xvirus_bn4_count]->versions;
+	return &xnavi_bn4[k - xvirus_bn4_count]->code;
+}
+
 int xd4_families(const Spec *s, const XVirusFamily **fams) {
 	int n = 0;
 	for (int i = 0; i < s->nfoes; ++i)
-		for (int k = 0; k < xvirus_bn4_count; ++k) {
-			const XVirusFamily *f = xvirus_bn4[k];
+		for (int k = 0; k < xvirus_bn4_count + xnavi_bn4_count; ++k) {
+			int versions;
+			const XVirusFamily *f = moved_bn4(k, &versions);
 			bool mine = false, had = false;
-			for (int v = 0; v < XV_VERSIONS; ++v) mine = mine || f->names[v] == s->foes[i].id;
+			for (int v = 0; v < versions; ++v) mine = mine || f->names[v] == s->foes[i].id;
 			for (int j = 0; j < n; ++j) had = had || fams[j] == f;
 			if (mine && !had) fams[n++] = f;
 		}
@@ -97,9 +110,12 @@ int xd4_family_count(void) { return dev.bn4families ? xvirus_bn4_count : 0; }
 const XVirusFamily *xd4_family(int k) { return xvirus_bn4[k]; }
 
 int xd4_bn6_id(int id) {
-	for (int k = 0; k < xvirus_bn4_count; ++k)
-		for (int v = 0; v < XV_VERSIONS; ++v)
-			if (xvirus_bn4[k]->names[v] == id) return xvirus_bn4[k]->first_id + v;
+	for (int k = 0; k < xvirus_bn4_count + xnavi_bn4_count; ++k) {
+		int versions;
+		const XVirusFamily *f = moved_bn4(k, &versions);
+		for (int v = 0; v < versions; ++v)
+			if (f->names[v] == id) return f->first_id + v;
+	}
 	return id;
 }
 
