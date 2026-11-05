@@ -153,6 +153,9 @@ Not chosen: a tournament at home beside the Virus Battler, which would
 repeat its press-on-or-cash-out off the main path and add a walk and
 words where the review asks for fewer.
 
+What BN4 itself shows of a tournament (its bracket screen, driven in romlab)
+and the two ways to show it in a run: [BN4's tournament screens](bn4-tournament.md).
+
 ### Not taken
 
 The three playthroughs and their version locks; the tournaments'
