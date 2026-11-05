@@ -59,6 +59,10 @@
 /* A panel's update each frame (0x0800C380, from the field's loop
  * 0x0800BFC4, r7 the panel), and what stands on one (0x0801A186, from each
  * actor's pre-step after its status step) */
+#define BN6_PANEL_FIELD_STEP  0x0800BFC4u /* the field's step each frame: each panel's update, then a cracked one's flags kept (its store */
+#define BN6_PANEL_FLAGS_LAST  0x18        /* ... at 0x0800C004, the flags from 0x0800C8F8): u32 a cracked panel's flags as of the last
+                                           * frame, 0 on any other, read by its update (0x0800C404: one left by what stood on it breaks);
+                                           * BN4's +8 (BN4_PANEL_FLAGS_LAST) */
 #define BN6_PANEL_UPDATE      0x0800C380u /* the per-panel update: holes close, cracks break, volcanoes erupt, conveyors run out; its */
 #define BN6_PANEL_UPDATE_CONVEYOR 0x0800C3B8u /* ... cmp r0,#9, r0 the type, where 9-12 go to their timer's count (0x0800C45C), the rest have 0x708 written */
 #define BN6_PANEL_STEP        0x0801A186u /* what the panel under an actor does to it (r5 the object): poison and grass; */

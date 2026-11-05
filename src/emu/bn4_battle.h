@@ -14,6 +14,9 @@
                                        * keeps one timer at +0x12, 0x708 idle (BN6_PANEL_TIMER, BN6_PANEL_TIMER_IDLE) */
 #define BN4_PANEL_TIMER_A_IDLE 0x3C0
 #define BN4_PANEL_TIMER_B_IDLE 0x80BE
+#define BN4_PANEL_FLAGS_LAST 0x08     /* u32: a cracked panel's flags (BN4_PANEL_FLAGS) as of the last frame, 0 on any other: the */
+#define BN4_PANEL_FIELD_STEP 0x08009240u /* ... field's step each frame (r7 the panel; its store at 0x0800927E, the flags from
+                                          * 0x08009A86), BN6's +0x18 (BN6_PANEL_FLAGS_LAST) from its twin loop */
 #define BN4_PANEL_SIDES   0x08009218u /* a panel's side at the field's start, a byte a panel (0x080091FA's literal): 0 on the border
                                        * columns, where BN6's per-column side reads 0xFF (0x0800C8C2's table) */
 

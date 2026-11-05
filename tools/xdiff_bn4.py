@@ -133,14 +133,17 @@ def bn4_cache(fr):
 
 def sprite_ptr(sprites, game, v, cache=None):
     """a pointer into a moved family's sprite (bn4_sprites) as ('sprite', which, its offset); None where it is none. BN4's
-    LZ77'd sprite by the frame's cache (bn4_cache): where its key is not there, BN4 drew none of it"""
+    LZ77'd sprite by the frame's cache (bn4_cache): where its key is not there, BN4 drew none of it. A room is the copy's,
+    rounded up past the sprite's own end, so in BN4's ROM it may reach into the next sprite's (list 4's 0x0D, 0x520 bytes
+    in a room of 0x800, runs into 0x0E, GutsMan's rocks'): the pointer is the sprite's whose start is nearest below it"""
+    best = None
     for i, (b4, b6, room, key, room4) in enumerate(sprites):
         if game == 4 and b4 is None:
             b4, room = (cache or {}).get(key), room4
         base = b4 if game == 4 else b6 if game == 6 else None
-        if base is not None and base <= v < base + room:
-            return ('sprite', i, v - base)
-    return None
+        if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
+            best = ('sprite', i, v - base)
+    return best
 
 
 class Bn4Canon:
@@ -1034,7 +1037,8 @@ def rng_twins():
             if h6 != h4:
                 raise SystemExit(f'legit.json\'s bn4 twin BN6 {a6:#x} / BN4 {a4:#x} differs at +{k:#x}: {h6:04x} | {h4:04x}')
             k += 2
-        items.append(f'twin={a6:08X}:{a4:08X}:{n:X}')
+        # (its word: the one BN4's draws there take where BN6's draws from its other, the camera's shake's)
+        items.append(f'twin={a6:08X}:{a4:08X}:{n:X}' + (f':{t["word"]}' if 'word' in t else ''))
     return items
 
 
