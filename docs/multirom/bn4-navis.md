@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T18:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -407,6 +407,83 @@ MB, 15 refused in 2 of 3 runs (maps' mirror images, `area_src.c`), as
 him: his install writes the core's copy alone, not the heap.
 
 Then: the next Navi.
+
+## ThunderMan built
+
+The second in the order, under proof. `tools/xnavirecipe_bn4.py` derives
+him (`NAVIS`' second row, his type 0x32) with what he adds in
+`tools/xnavirecipe_bn4_companion.py`, and his recipe is whole in
+`src/emu/xnavi_bn4.c`: Navi AI 53, ids 0x394-0x397 (`foes 394@52`), his
+battle sprite at list 2 0x45, his sounds 0xAD and 0x143 at the pool's 0x32
+and 0x33. The addresses and how each was read are in
+[BN4 Red Sun's tables](../rom/bn4.md) (ThunderMan derived). What he adds
+to GutsMan's path:
+
+- **His state 1**, a routine of his own that only calls BN4's generic 1
+  (`push {lr}`, the call, `pop {pc}`): read as that generic state, BN6's of
+  its place standing in (`wraps_generic`).
+- **His companion**, the first kind's 0x33 (`BN4_THUNDERCLOUDS`: his
+  clouds' keeper, which spawns the third kind's 0x6A), set out by his init
+  after its collision setup with r0 0x14 << 16 | his version's byte of
+  20, 40, 60, 80 and r1 his version. BN6's actor init begins a Navi's
+  companion at the same place (`BN6_ACTOR_COMPANION_CALL`, through the word
+  of his AI index, `BN6_COMPANION_BEGIN`), so his word is a shim of his
+  home that does what BN4's init does there and calls his moved spawner
+  (`XnCompanion4`, `xnavi_install.c` companion4_set: the project's own
+  Thumb, returning by `pop {pc}` as BN6 calls it by `mov lr,pc` and
+  `bx r0`). BN6's spawn keeps the version at +4 as BN4's does. The type
+  moves through the first kind's dispatch (0xE0), as the third kind's
+  have for the families, its dying (`BN4_DYING`, its jump table's +8)
+  copied with him, its count's twin BN6's `0x0800A10C`. This is the form
+  ThunderMan's init has; WindMan's two companions and FireMan's are their
+  own forms.
+- **His objects**: the third kind's 0x6A, 0x6F, 0x70 and 0x71 moved; the
+  spawn word 0x04050301 a number (BN6's pools hold it too); 0x71's sprite of
+  list 5 (`list5_sprites`: BN6's of the same bytes, else copied); his
+  sound 0x143, made by `movs #0x44` and `adds #0xFF`, at its slot 0x33 (the
+  movs the slot, the adds 0: `wide_movs`).
+- **The engine's routines** the families' pairs lacked: the can-move check's
+  kin (`BN4_CAN_MOVE_KIN`) and an x nudge (`BN4_NUDGE_X`) copied; the panel
+  break (`BN4_PANEL_BREAK`) against BN6's `0x0800CA8C`, audited (BN4's
+  0x20000 test that no BN6 panel holds, its occupants' mask without BN6's
+  0x00800000, its 0 back after a crack that its one caller drops). Two
+  pairs the symbol map made by their calls alone are audited as interims,
+  each assumed inert where it is called and left to the differential: BN4's
+  test of its event flag 0x1187 (`BN4_FLAG_1187_TEST`) against BN6's
+  battle_isPaused, and BN4's blink of an object while the battle is not
+  running (`BN4_PAUSED_BLINK`) against BN6's nullsub.
+- **His palette**, an interim: BN4 gives him its step 2 times 1, 2, 1, 2
+  by version (`BN4_NAVI_PALETTE_VERSIONS`), BN6's actor init gives every
+  Navi version 0-3 palette 0 whatever the step (`BN6_NAVI_PALETTE_VERSIONS`),
+  so no struct1 of BN6's gives his. Palette 0 until a shim sets it at his
+  spawn.
+- **His init's update**: BN4's runs his update once at its end (his state
+  0 in his spawn's frame); BN6's actor init does not. Noted, not yet
+  measured.
+
+The control holds: BN4's battle with ThunderMan V1 alone against MegaMan
+idle (2000 HP), fought twice, is the same at every one of 1200 fight frames
+(`tests/xdiff/bn4_thunderman_control.json`, PASS). **`thunderman_v1`**
+(as `gutsman_v1`) installs and fights both battles to their 1200 frames,
+and FAILs at t1, its verdict recorded while the port is under way. Its
+first differences, not yet settled:
+
+1. His companion has NameID 0 in both games, and the comparator reads a
+   BN4 first-kind object of enemy id 0 as MegaMan (`tools/xdiff_snap.py`
+   nid), so in BN4's trace the companion is MegaMan's second object and in
+   BN6's NameID 0: the run order parts at t1. The comparator needs a BN4
+   first-kind object read by its type where it is not MegaMan's.
+2. His cloud (the third kind's 0x6A) a step apart at t1: its counts (+0x3A
+   5 against 6, +0x9A 0x55 against 0x56) and its sprite's place.
+3. Panel 5,1's +0x17, 0x40 in BN4 and 0 in BN6.
+
+The other specs hold with him installed: the eighteen family specs,
+`gutsman_v1`, both GutsMan's and the Mettaur's controls and its broken
+twin, `cangard_v1` and `handi_v1` PASS. No mutation of his port is added
+while `thunderman_v1` fails: a break of a failing spec proves nothing.
+The tournament's draw has no list of proved BN4 Navis yet
+(`src/layer/bracket.c` says they join as each is proved), and he is not
+proved.
 
 ### Battle sprites by battle, planned
 

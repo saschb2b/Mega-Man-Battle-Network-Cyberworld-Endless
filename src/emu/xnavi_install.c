@@ -168,6 +168,29 @@ static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	table[7] = (f->home + place) | 1u;
 }
 
+/* its companion's start (XNavi.companion4): a shim of its home past its shims and its collision's (the project's own Thumb):
+ * push {lr}; ldrb r1,[r5,#4]; ldr r3,=table; ldrb r2,[r3,r1]; movs r0,#hi; lsls r0,r0,#16; orrs r0,r2; bl spawner; pop {pc}
+ * (BN6 calls it by mov lr,pc and bx r0: pop {pc} stays in Thumb), the table's word after it; the companion's word its place */
+#define COMPANION4_SIZE 24u
+static uint32_t companion4_set(const XNavi *n) {
+	const XVirusFamily *f = &n->code;
+	const XnCompanion4 *c = n->companion4;
+	const uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f) + (n->coll_arg ? 8u : 0u), at = f->home + place;
+	const XvBlock *b = xvirus_block_of(f, c->table);
+	const uint32_t spawner = xv_move_ref(c->spawner) & ~1u;
+	if (place + COMPANION4_SIZE > XV_HOME_VENEERS || (at & 3u) || !b || !spawner) {
+		xv_fail("no room or no place for its companion's start");
+		return 0;
+	}
+	const int32_t off = (int32_t)(spawner - (at + 14u + 4u));
+	const uint16_t shim[10] = { 0xB500, 0x7929, 0x4B03, 0x5C5A, (uint16_t)(0x2000u | c->hi), 0x0400, 0x4310,
+		(uint16_t)(0xF000u | ((uint32_t)(off >> 12) & 0x7FFu)), (uint16_t)(0xF800u | ((uint32_t)(off >> 1) & 0x7FFu)), 0xBD00 };
+	uint8_t *p = xv_put(at, COMPANION4_SIZE, true);
+	for (int i = 0; p && i < 10; ++i) put16(p + 2 * i, shim[i]);
+	if (p) put32(p + 20, b->at + (c->table - b->start));
+	return at | 1u;
+}
+
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi
  * words */
 static void records_set(const XNavi *n, const Game *g) {
@@ -201,7 +224,8 @@ static void records_set(const XNavi *n, const Game *g) {
 	const uint8_t ice = (uint8_t)f->ice;
 	if (!xv_failed()) xn_set(XN_T_ICE, (uint32_t)f->ai, &ice);
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);
-	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, xv_move_ref(n->companion));
+	const uint32_t companion = n->companion4 ? companion4_set(n) : xv_move_ref(n->companion);
+	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, companion);
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION_END, (uint32_t)f->ai, xv_move_ref(n->companion_end));
 	if (!xv_failed()) xn_set_word(XN_T_HIDE, (uint32_t)f->ai, xv_move_ref(n->hide));
 }
