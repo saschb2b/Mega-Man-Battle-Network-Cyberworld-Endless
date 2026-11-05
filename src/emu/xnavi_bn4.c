@@ -152,10 +152,10 @@ static const XvPair gutsman_calls[] = {
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
 	{ 0x08009AEC, 0x0800C938 },   /* project:gutsman, DIFF (audited) */
 	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
-	{ 0x08009E98, 0x0800CC72 },   /* search, SAME */
+	{ 0x08009E98, 0x0800CC72 },   /* map:bytes, SAME */
 	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
 	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
-	{ 0x08009ED8, 0x0800CCB2 },   /* search, SAME */
+	{ 0x08009ED8, 0x0800CCB2 },   /* map:calls+bytes, SAME */
 	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
 	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
 	{ 0x0800A17A, 0x0800D048 },   /* project:spikey, DIFF (audited) */
@@ -170,7 +170,7 @@ static const XvPair gutsman_calls[] = {
 	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
 	{ 0x0800AE10, 0x0800E6E8 },   /* project:families-2, SAME */
 	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
-	{ 0x0800BFC0, 0x0800FFEE },   /* search, SAME */
+	{ 0x0800BFC0, 0x0800FFEE },   /* map:bytes, SAME */
 	{ 0x0800C456, 0x080103BC },   /* project:gutsman, DIFF (audited) */
 	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
 	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
@@ -191,7 +191,7 @@ static const XvPair gutsman_calls[] = {
 	{ 0x0802608C, 0x080302A8 },   /* project:research, SAME */
 	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
 	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
-	{ 0x080E29F8, 0x080E23C0 },   /* search, SAME */
+	{ 0x080E29F8, 0x080E23C0 },   /* map:bytes, SAME */
 };
 static const XvImm gutsman_imms[] = {
 	{ 0x0800A27A, THUMB_LDRB, 1, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */

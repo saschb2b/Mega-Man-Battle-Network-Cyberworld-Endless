@@ -5,6 +5,7 @@
 #include "rom.h"
 #include "soulproxy.h"
 #include "soulunite.h"
+#include "xbracket.h"
 #include "xchips_code.h"
 #include "xchips_install.h"
 #include "xinstall_log.h"
@@ -38,6 +39,8 @@ void xinstall_core(int families, int navis) {
 	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */
 	if (bn5 && navis == XNAVI_BN5) xstrike_install();
 	xlog_end();
+	/* (BN4's bracket screen, where its ROM is read: a main mode of its own, outside the battles' installs) */
+	if (emu_ready() && XR[XROM_BN4_RED_SUN_US].data) xbracket_install();
 }
 
 bool xinstall_bn5(void) {

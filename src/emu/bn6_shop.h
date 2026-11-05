@@ -24,4 +24,16 @@
 #define BN6_SHOP_KIND_CHIP    2      /* ... a chip in its code */
 #define BN6_SHOP_KIND_PROGRAM 3      /* ... a NaviCust program, its id program * 4 */
 
+/* The map left for the shop, which a moved screen's entry follows (xbracket.c), and the engine's routines that screen calls by name */
+#define BN6_MAP_TO_SHOP       0x08005642u /* the map's sub-state that leaves it for a shop: its objects freed, the fade waited out (a call
+                                           * to 0x080062F8, then beq to its end), the chat box closed, the map left (a call with r0 0x21
+                                           * first), BN6_MODE_SHOP written (movs r1,#0x2C; strb r1,[r0]): read, its calls a moved screen's
+                                           * entry makes in turn (xbracket.c) */
+#define BN6_COPY_WORDS        0x0800093Cu /* r2 bytes copied from r0 to r1 a word at a time (BN4's 0x08000994, the same body) */
+#define BN6_HBLANK_DMA_SET    0x080068E8u /* an HBlank DMA set (r0 its source, r1 its register, r2 its count, r3 its control; r4 and r5 a
+                                           * line buffer and its bytes, which BN6's own caller 0x080068EC gives as 0x02008E80 and 0x500)
+                                           * at 0x020081B0, BN4's 0x080060A4 at 0x02008920 of the first four */
+#define BN6_FADE_TEST         0x080062F8u /* Z clear while the screen fades (BN6_FADE_ACTIVE; bn6f IsScreenFadeActive) */
+#define BN6_MAP_TO_SHOP_END   0x080056B6u /* ... its end, past its pop {pc} */
+
 #endif

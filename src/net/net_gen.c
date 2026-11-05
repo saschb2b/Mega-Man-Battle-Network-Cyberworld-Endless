@@ -784,6 +784,18 @@ static void place_battler(int battler, uint8_t *taken, const int *order, int n, 
 	if (o) o->param = battler;
 }
 
+/* ... taken away once the layer is whole, where the run's extras have no
+ * Virus Battler (docs/game/meta/extras.md): every other object stands
+ * where his layer would have it */
+static void drop_battler(void) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_BATTLER) {
+			memmove(&layer.obj[i], &layer.obj[i + 1], (size_t)(layer.nobj - i - 1) * sizeof *layer.obj);
+			--layer.nobj;
+			return;
+		}
+}
+
 /* Blue data where the detours end, more of them deeper and in the Undernet
  * (a dark warp's, or the short net's dark way's act), the farthest a tier
  * up where it is a long walk; in a room where the layer has too few
@@ -919,6 +931,7 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 	npcs_held = 0;
 	place_last(&gap, pieces, rise, kit, order, n);
 	if (kind == LAYER_GLITCH) ng_glitch_deep();
+	if (!run_extra(EXTRA_BATTLER)) drop_battler();
 }
 
 bool layer_make_dark;

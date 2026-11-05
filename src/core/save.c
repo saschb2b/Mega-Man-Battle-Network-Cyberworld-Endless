@@ -20,7 +20,7 @@
 
 /* (Run is saved as it lies in memory: a change to it does not compile
  * until someone decides about the saves before it, issue #19) */
-_Static_assert(sizeof(Run) == 112, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
+_Static_assert(sizeof(Run) == 116, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
 	"previous one where it can carry over), then set this size");
 
 Profile profile;

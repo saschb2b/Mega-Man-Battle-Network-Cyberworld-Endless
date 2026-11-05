@@ -8,17 +8,20 @@
 /* (in SetupWord's order, its name beside each) */
 static const char *const words[] = {
 	"JACK-IN SETUP",   /* SW_TITLE */
-	"Help",   /* SW_HELP_TITLE */
+	"JACK IN",   /* SW_START_HINT */
+	"RUN",   /* SW_TAB_RUN */
+	"HELP",   /* SW_TAB_HELP */
+	"EXTRAS",   /* SW_TAB_EXTRAS */
 	"Net",   /* SW_NET */
 	"Folder",   /* SW_FOLDER */
 	"Cross",   /* SW_CROSS */
 	"Threat",   /* SW_THREAT */
-	"Help",   /* SW_HELP */
 	"Short",   /* SW_SHORT */
 	"Endless",   /* SW_ENDLESS */
 	"None",   /* SW_NONE */
 	"On",   /* SW_ON */
 	"Off",   /* SW_OFF */
+	"NEXT",   /* SW_NEXT */
 	"JACK IN!",   /* SW_JACK_IN */
 	"INFORMATION",   /* SW_INFORMATION */
 	"NEW",   /* SW_NEW */
@@ -32,7 +35,8 @@ static const char *const words[] = {
 	"From the first battle",   /* SW_CROSS_CHOSEN_NOTE */
 	"No other Cross this run",   /* SW_CROSS_ONE */
 	"Start in more: delete Navis",   /* SW_CROSS_MORE */
-	"Helpers, each on or off. A helped run's summary names them",   /* SW_HELP_NOTE */
+	"Next, the helpers: each on or off. A helped run's summary names them",   /* SW_NEXT_HELP_NOTE */
+	"Next, the extras: what the run adds to BN6, each on or off",   /* SW_NEXT_EXTRAS_NOTE */
 	"Into the net with these. They stay for the next run",   /* SW_GO_NOTE */
 };
 const char *setup_word(SetupWord w) {
@@ -56,10 +60,5 @@ const char *setup_helper_note(char *buf, size_t n, const char *about, const char
 
 const char *setup_shut_folder(char *buf, size_t n, const char *name, const char *opens) {
 	snprintf(buf, n, "%s: %s", name, opens);
-	return buf;
-}
-
-const char *setup_helpers_on(char *buf, size_t n, int on) {
-	snprintf(buf, n, "%d on", on);
 	return buf;
 }

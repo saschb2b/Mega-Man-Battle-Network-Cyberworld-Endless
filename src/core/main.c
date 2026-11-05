@@ -229,8 +229,9 @@ typedef struct {
 	int smooth_arg;   /* --smooth-motion on|off, over settings.ini */
 	SoundArgs sound;  /* --sound gba|soft|mgba, --low-pass 5-95, --output speakers|headphones|mono, --music and --effects 0-10|on|off, over settings.ini */
 	const char *screen_arg;   /* --screen auto|whole|fill|stretch, over settings.ini */
-	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
-	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
+	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS[,OFF]] (short or endless,
+	 * then numbers; CROSS the navi whose Cross the run brings, 1-5; OFF the
+	 * extras switched off, a bit each, docs/game/meta/extras.md):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
 	 * short net) for --scene town, the endless net otherwise */
 	const char *setup_spec;
@@ -399,11 +400,11 @@ static void start_scene(const Options *o) {
 	 * exit takes it (docs/world/home/) */
 	bool home = !strcmp(o->start_scene, "home");
 	const Scene *s = town || home ? &scene_emu : scene_by_name(o->start_scene);
-	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
+	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0, off = 0;
 	if (o->setup_spec) {
 		net = !strncmp(o->setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
 		const char *c = strchr(o->setup_spec, ',');
-		if (c) sscanf(c + 1, "%d,%d,%d,%d", &folder, &threat, &helpers, &cross);
+		if (c) sscanf(c + 1, "%d,%d,%d,%d,%d", &folder, &threat, &helpers, &cross, &off);
 	}
 	/* "setup": the title with the setup after NEW GAME open */
 	if (!strcmp(o->start_scene, "setup")) { title_setup = true; s = &scene_title; }
@@ -413,6 +414,7 @@ static void start_scene(const Options *o) {
 	if (!strcmp(o->start_scene, "summary")) {
 		run_new(o->seed ? o->seed : 1);
 		run_setup(net, folder, threat, helpers, cross);
+		run_setup_extras(off);
 		run.depth = o->run_depth > 0 ? o->run_depth : 12;
 		run.viruses_deleted = run.depth * 6;
 		run.bosses_beaten = run.depth / 3;
@@ -425,7 +427,10 @@ static void start_scene(const Options *o) {
 		title_summary = true;
 		s = &scene_title;
 	}
-	if (s == &scene_emu) start_run(o, home, net, folder, threat, helpers, cross);
+	if (s == &scene_emu) {
+		start_run(o, home, net, folder, threat, helpers, cross);
+		run_setup_extras(off);
+	}
 	/* (later NEW GAMEs take the next seeds, so a session replays) */
 	title_seed = !o->seed ? 0 : !s || s == &scene_title ? o->seed : o->seed + 1;
 	if (town) emu_start_in_town = true;

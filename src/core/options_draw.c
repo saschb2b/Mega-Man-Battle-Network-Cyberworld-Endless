@@ -39,9 +39,8 @@
 #define BOX_H     (CORE_H - 6 - BOX_Y)
 #define SCENE_W   106             /* the scene's slot, where KeyItem's box holds its tag */
 #define TEXT_IN   8               /* the note's letters in from the page's left, as KeyItem's */
-#define TABS_L    (WIN_X + 18)    /* the tabs' row, between the arrows */
-#define TABS_R    (WIN_X + WIN_W - 18)
-#define TAB_GAP   3
+#define TABS_L    (WIN_X + LOOK_TABS_IN)   /* the tabs' row, between the arrows (look_tabs') */
+#define TABS_R    (WIN_X + WIN_W - LOOK_TABS_IN)
 
 /* the hint's words and where it lies (look_band_hint's) */
 static SDL_Rect hint_rect(int x0, int y0) {
@@ -182,18 +181,9 @@ static const char *note_words(int kind) {
  * green arrows at the row's ends with L and R in a hint's small capitals
  * (Valhalla's tab row and its Q and E: docs/engine/settings-screens.md) */
 static void tabs_draw(int x0, int y0) {
-	int y = y0 + TABS_Y, w = (TABS_R - TABS_L - (PAGE_COUNT - 1) * TAB_GAP) / PAGE_COUNT;
-	for (int p = 0; p < PAGE_COUNT; ++p) {
-		int x = x0 + TABS_L + p * (w + TAB_GAP);
-		if (p == O.page) look_button(x, y, w - 1, LOOK_PILL_H - 1);
-		else look_pill(x, y, w);
-		const char *name = page_word(p);
-		look_title(x + (w - look_title_width(name)) / 2, y + 4, name, p == O.page ? LOOK_PAGE : LOOK_TEXT);
-	}
-	look_caps(x0 + WIN_X + 1, y + 5, "L", LOOK_PAGE, LOOK_GREEN_LO);
-	look_arrow(x0 + WIN_X + 7, y + 4, false);
-	look_arrow(x0 + TABS_R + 3, y + 4, true);
-	look_caps(x0 + WIN_X + WIN_W - 6, y + 5, "R", LOOK_PAGE, LOOK_GREEN_LO);
+	const char *names[PAGE_COUNT];
+	for (int p = 0; p < PAGE_COUNT; ++p) names[p] = page_word(p);
+	look_tabs(x0 + WIN_X, y0 + TABS_Y, WIN_W, PAGE_COUNT, O.page, names);
 }
 
 /* the pages' tabs, then the page's lines in their window */

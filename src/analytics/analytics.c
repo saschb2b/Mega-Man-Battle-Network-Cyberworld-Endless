@@ -14,6 +14,7 @@
 
 #include "analytics_payload.h"
 #include "analytics_text.h"
+#include "extras.h"
 #include "guardians.h"
 #include "meta.h"
 #include "net.h"
@@ -255,16 +256,19 @@ static void helpers_words(char *s, size_t n) {
 	if (!s[0]) snprintf(s, n, "none");
 }
 
-/* What the player brought, as the setup's rows name it */
+/* What the player brought, as the setup's rows name it, and the extras
+ * left out ("Glitch, DarkChips", "none": docs/game/meta/extras.md) */
 static void setup_json(Json *j) {
-	char helpers[64];
+	char helpers[64], off[96];
 	const char *cross = run.cross ? powers_cross_name(run.cross) : NULL;
 	helpers_words(helpers, sizeof helpers);
+	if (!extras_off_names(off, sizeof off, run.extras_off, ", ")) snprintf(off, sizeof off, "none");
 	json_member(j, "net", net_name());
 	json_member(j, "folder", meta_folder(run.folder < FOLDER_COUNT ? run.folder : FOLDER_STANDARD)->name);
 	json_member(j, "cross", cross ? cross : "none");
 	json_int(j, "threat", run.threat);
 	json_member(j, "helpers", helpers);
+	json_member(j, "off", off);
 }
 
 void analytics_count_chip(AnalyticsEconomy *e, bool good, bool act1) {

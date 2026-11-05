@@ -26,10 +26,11 @@ const char *summary_text(SummaryText w);
 const char *summary_layer(char *buf, size_t n, int layer);
 /* the Library's count and what the run added: "12 (+2)", or "12" */
 const char *summary_library(char *buf, size_t n, int count, int added);
-/* a helped run's helpers on the band, small capitals: by their `names`,
- * one after another ("HELP: HP+ All *"), or how many are on where the
- * names run long ("HELP: 5 ON") */
-const char *summary_helpers(char *buf, size_t n, const char *names);
-const char *summary_helpers_count(char *buf, size_t n, int on);
+/* a helped run's helpers on the band, small capitals, and the extras it
+ * left out: by their names, one after another ("HELP: HP+ All *  OFF:
+ * Glitch"; NULL for none), or how many where the names run long ("HELP: 5
+ * ON  OFF: 2"; 0 for none) */
+const char *summary_band(char *buf, size_t n, const char *helpers, const char *off);
+const char *summary_band_count(char *buf, size_t n, int on, int off);
 
 #endif

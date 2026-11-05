@@ -360,7 +360,7 @@ static void open_crosses(bool tell) {
 }
 
 /* the BeastOut helper, once the endless net's Nest falls: open, and NEW
- * on the setup's Help row */
+ * on the setup's HELP page */
 static void open_beast(bool tell) {
 	if ((profile.beast & BEAST_OPEN) || !beast_earned()) return;
 	profile.beast |= BEAST_OPEN;

@@ -94,9 +94,9 @@ AI_BLOCKS = ((0x64, 0x0C, 0x80), (0x70, 0x50, 0xA0))
 # BN4_NAVI_ID0 + 4 * seat, past every family's ids (XV_FIRST_ID + 6 * XV_FAMILIES = 0x380) and below XV_IDS (0x400)
 BN4_NAVI_AI0, BN4_NAVI_ID0 = 48, 0x380
 # Their room (the owner's call of 5 November 2026; src/emu/free_space.h FREE_BN4_NAVIS, xnavi_recipe.h XN_BN4_*): their homes
-# (a seat each), their code and objects', then what they draw, to FREE_LIB_TEAM
+# (a seat each), their code and objects', then what they draw, to FREE_BRACKET
 ROOM_HOMES = 0x08800000 + 0x720000
-ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x7A0000
+ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x790000
 VERSIONS = 4
 # The collision setup's r3 BN6's actor init gives every actor (0x08016FE8: movs r3,#3), the hit bits its body's hit ORs into
 # the struck's (BN6_COLL_SETUP_ARG); a Navi whose init passes another keeps its own (XNavi.coll_arg). The struck's pre-step

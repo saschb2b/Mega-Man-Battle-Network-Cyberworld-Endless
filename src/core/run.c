@@ -55,6 +55,7 @@ int run_dress(int biome) {
 	 * names and guardian with its look) */
 	const NetAreaDef *d = run_debug_area >= NET_AREAS ? net_area_def(run_debug_area) : NULL;
 	if (d && d->like == biome) return run_debug_area;
+	if (!run_extra(EXTRA_OLDER)) return biome;
 	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
 		if (x && !x->held && x->like == biome && dress_coin(k)) return NET_AREAS + k;
@@ -107,6 +108,7 @@ static int deep_xguardian(int act, int biome) {
 }
 
 int run_xguardian_at(int act, int biome) {
+	if (!run_extra(EXTRA_OLDER)) return 0;
 	bool deep = biome == BIOME_UNDERNET || biome == BIOME_GRAVEYARD;
 	/* (a test's Navi of BN5's in every act BN5's areas dress and the deep's: --guardian 24-29) */
 	if (guardian_older(run_debug_xguardian) && xguardian_fightable(run_debug_xguardian) && (deep || run_dress(biome) >= NET_AREAS))
@@ -240,7 +242,7 @@ static int planned_area(int act) {
 }
 
 int run_dark_area(int act) {
-	if (act < 1) return -1;
+	if (act < 1 || !run_extra(EXTRA_LIBERATION)) return -1;
 	uint32_t h = ((run.seed ^ 0x4C494245u) + (uint32_t)act * 0x9E3779B9u) * 2654435761u;   /* "LIBE" */
 	if ((h >> 8) % 3 == 0) return -1;
 	/* (the fork as offered: the act's own area, and the other way beside it) */
@@ -273,7 +275,7 @@ static int bn5_darkloid(int act) {
 int run_darkloid(int act, int biome) {
 	uint32_t keep = rng_state();
 	rng_seed(run.seed ^ 0x444C4F44u ^ (uint32_t)act * 2654435761u);   /* "DLOD" */
-	int g = bn5_darkloid(act);
+	int g = run_extra(EXTRA_OLDER) ? bn5_darkloid(act) : 0;
 	for (int tries = 0; !bn5_darkloid_is(g) && tries < 8; ++tries) {
 		g = pacing_guardian_pick(pools[biome >= 0 && biome < BIOME_COUNT ? biome : 0], navis, (int)sizeof navis, act, 0, false, navi_hp);
 		if (!guardian_taken(g)) break;
@@ -425,6 +427,8 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 	}
 	run.boss_order[BIOME_NEST] = (uint8_t)g;
 }
+
+void run_setup_extras(int off) { run.extras_off = (uint16_t)(off & ((1 << EXTRAS) - 1)); }
 
 int navi_hp(int navi, int version) {
 	int hp, damage, id = enemy_id(1, navi, version);
