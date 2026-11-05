@@ -29,7 +29,7 @@ static void pool_bn4(BracketPool *p) {
 		int navi = xguardian_bn4_navi(k);
 		if (!xguardian_bn4_fightable(navi)) continue;
 		p->navi[p->n] = (uint8_t)navi;
-		p->older[p->n] = true;
+		p->older[p->n] = p->stand_in[p->n] = true;   /* (a BN6 Navi chip for his round till his own comes: the owner's call) */
 		for (int v = 0; v < 4; ++v) p->hp[p->n][v] = (int16_t)xguardian_bn4_hp(navi, v);
 		++p->n;
 	}
@@ -77,7 +77,7 @@ void bracket_draw(int depth, int final, RunBracket *b) {
 int bracket_chip(int navi, int version, int depth, int *code) {
 	*code = 26;
 	if (guardian_older(navi)) return xguardian_chip(navi, depth, code);
-	/* (BN4's: no Navi chip of theirs plays in BN6's battles yet) */
+	/* (BN4's own: none plays in BN6's battles yet; his round pays a stand-in's, RunBracket.prize) */
 	if (guardian_bn4(navi)) return 0;
 	int chip = navi_chip(navi, version);
 	if (chip <= 0) return 0;

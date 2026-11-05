@@ -25,7 +25,7 @@ int economy_bracket_rounds(int depth, int biome, Encounter enc[2], int chip[2], 
 		enc[r] = guardian_older(navi) ? xguardian_encounter(navi, b.version[r])
 			: guardian_bn4(navi) ? xguardian_bn4_encounter(navi, b.version[r]) : make_boss(depth, biome, navi);
 		if (!other && enc[r].nfoes) enc[r].foes[0].version = b.version[r];
-		chip[r] = bracket_chip(navi, b.version[r], depth, &code[r]);
+		chip[r] = bracket_chip(b.prize[r], b.prize_version[r], depth, &code[r]);
 	}
 	return 2;
 }

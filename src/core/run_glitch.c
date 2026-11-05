@@ -25,7 +25,7 @@ bool run_glitch_at(int depth) {
  * another net, whose deletion the swap has not been proven on,
  * docs/rom/navis.md, A Navi swapped mid-battle) */
 static int form_add(int forms[GLITCH_FORMS], int n, int navi, int ahead) {
-	if (n >= GLITCH_FORMS || navi <= 0 || navi == ahead || super_boss(navi) || guardian_older(navi)) return n;
+	if (n >= GLITCH_FORMS || navi <= 0 || navi == ahead || super_boss(navi) || guardian_older(navi) || guardian_bn4(navi)) return n;
 	for (int k = 0; k < n; ++k) if (forms[k] == navi) return n;
 	forms[n] = navi;
 	return n + 1;
