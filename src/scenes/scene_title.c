@@ -413,8 +413,7 @@ static void update(void) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
 			else {
 				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
-				const SetupChoice *c = title_setup_choice();
-				run_setup(c->net, c->folder, c->threat, c->helpers, c->cross);
+				title_setup_apply();
 				meta_run_begun();
 				emu_start_in_town = true;
 			}

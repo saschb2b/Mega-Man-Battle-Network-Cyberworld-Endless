@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, and the owner's open calls; designed with the game-design skill on 5 November 2026, nothing built."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -368,6 +368,14 @@ the final a retry of the final at the HP carried, and needs the round in
 - `build.py economy` for the rounds' rows (The prize, above).
 
 ## How it would be built
+
+Where it hooks in is built: `run_bracket_at` (`src/core/run_tourney.c`)
+answers whether an act's arena holds the bracket, by calls 1 and 2 below
+(the short net's act 3 by a coin, one of acts 3 to 5 each endless cycle,
+never the Glitch layer's act, once the profile has reached the Nest), and
+never in a run whose setup switched the tournament off
+([the extras](meta/extras.md)); `test_extras` holds it to them. What
+follows calls it.
 
 1. The bracket on BN6's and BN5's Navis behind a dev switch (a bracket in
    every act from 3 that can hold one): the draw from the seed, the card,

@@ -60,6 +60,10 @@ typedef struct {
 	 * the same, for its card */
 	uint8_t route_found;
 	uint8_t route_way;
+	/* (new since the "CWEA" save, which reads it as 0, every extra on) the
+	 * extras the setup switched off (docs/game/meta/extras.md), a bit each
+	 * (1 << EXTRA_*): set as the run begins, never changed after */
+	uint16_t extras_off;
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
@@ -76,7 +80,20 @@ enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4, HELP_ALL_STAR = 8, 
 #define HELPERS 5
 #define HELPER_BEAST 4   /* (its index: the last, shown once open) */
 
+/* The extras (docs/game/meta/extras.md): what the run adds to BN6 that a
+ * player may leave out, a bit each in run.extras_off, all on by default:
+ * BN5's Liberation Missions (the dark layer), the tournament (a bracket
+ * of three Navis in an act's arena), the Glitch layer, the Virus Battler,
+ * the DarkChips' flames of darkness, and the older nets (BN5's and BN4's
+ * areas, Navis and viruses in BN6's). A run's are chosen in the setup's
+ * EXTRAS and kept. */
+enum { EXTRA_LIBERATION, EXTRA_TOURNEY, EXTRA_GLITCH, EXTRA_BATTLER, EXTRA_DARKCHIPS, EXTRA_OLDER, EXTRAS };
+
 extern Run run;
+
+/* Whether the run has extra `e` (EXTRA_*): on unless its setup switched
+ * it off */
+static inline bool run_extra(int e) { return !(run.extras_off >> e & 1); }
 
 /* Whether every chip of the run comes in * alone (the All * helper): in
  * the game, whose chip records then hold * alone, and in chip_info. */
@@ -117,6 +134,8 @@ void run_debug_guardian(int navi);
 /* The setup chosen for the run just made: in the short net its Nest's
  * guardian is picked as a fourth act's. */
 void run_setup(int mode, int folder, int threat, int helpers, int cross);
+/* ... and the extras it switched off (1 << EXTRA_* each) */
+void run_setup_extras(int off);
 /* The other way act `act` (0-based) may take, offered where the act before
  * it ends (docs/game/meta/phase-two.md, routes): an area of its tier the run has not
  * taken, and `navi` its guardian, fit for the act and no other act's; -1
@@ -141,6 +160,14 @@ int run_dark_area(int act);
  * first layer from the second holds one, run_debug_glitch) */
 bool run_glitch_at(int depth);
 extern bool run_debug_glitch;
+/* Whether the act of the run's layer at `depth` (a normal layer's) ends in
+ * the tournament's bracket of three Navis in place of its guardian
+ * (docs/game/tournament.md): once the profile has reached the Nest in any
+ * run, the short net's act 3 in half the runs and the endless net's act
+ * 3, 4 or 5 each cycle, from the seed; never the Glitch layer's act, nor
+ * a run whose extras leave the tournament out. Where the bracket hooks in
+ * as it is built. */
+bool run_bracket_at(int depth);
 /* The copy's forms at the Glitch layer of `depth` (docs/game/glitch-layer.md):
  * the guardians the run has beaten, the last first, then the one that
  * last deleted MegaMan in any run (rivals.sav), then guardians the run set

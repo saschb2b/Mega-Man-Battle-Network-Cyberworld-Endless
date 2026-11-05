@@ -98,7 +98,7 @@ void lib_way_tint(uint32_t *px) {
 }
 
 bool lib_way_dark(int act, int biome) {
-	if (act < 1 || act >= 6) return false;
+	if (act < 1 || act >= 6 || !run_extra(EXTRA_LIBERATION)) return false;
 	if (dev.dark) return true;
 	int area = run_dark_area(act);
 	return area >= 0 && biome == area;

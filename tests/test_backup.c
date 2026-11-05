@@ -173,7 +173,7 @@ static void test_weekly_slot(void) {
 	snprintf(path, sizeof path, "%s/savedata", from);
 	mkdir(path, 0755);
 	int prof[16] = { 12, 9, 0, 0, 0, 0, 0, 4, 5 }, dive_prof[16] = { 0, 0, 0, 0, 0, 0, 0, 4, 5 };
-	int runbuf[28] = { 1, 7, 4 }, dive[28] = { 1, 0x5eed, 6 };
+	int runbuf[sizeof(Run) / sizeof(int)] = { 1, 7, 4 }, dive[sizeof(Run) / sizeof(int)] = { 1, 0x5eed, 6 };
 	WeeklyRecord w = { .week = 2963, .running = 1, .seed = 0x5eed, .r_week = 2962, .r_depth = 3, .r_act = 1, .pending = 1, .r_hash = 9 };
 	static const char *const names[] = { "profile.sav", "run.sav", "weekly.sav", "weekly-profile.sav", "weekly-run.sav", "weekly-run.state", "run.state" };
 	snprintf(path, sizeof path, "%s/savedata/%s", from, names[0]);

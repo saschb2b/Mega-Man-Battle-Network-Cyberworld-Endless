@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "audio.h"
+#include "extras.h"
 #include "game.h"
 #include "meta.h"
 #include "pet_panel.h"
@@ -61,19 +62,20 @@ bool title_summary_update(void) {
 /* ---- the run ---- */
 
 /* a helped run's helpers on the band's right, by name where they fit
- * (docs/game/meta/: the summary names a helped run) */
+ * (docs/game/meta/: the summary names a helped run), and the extras it
+ * left out after them (docs/game/meta/extras.md) */
 static void helpers_draw(int x0, int y0) {
-	if (!(run.helpers & ((1 << HELPERS) - 1))) return;
-	char names[64] = "", s[80];
-	int on = 0;
+	char names[64] = "", off[96], s[160];
+	int on = 0, out = extras_off_names(off, sizeof off, run.extras_off, " ");
 	for (int h = 0; h < HELPERS; ++h)
 		if (run.helpers >> h & 1) {
 			size_t m = strlen(names);
 			snprintf(names + m, sizeof names - m, "%s%s", m ? " " : "", meta_helper(h)->name);
 			++on;
 		}
-	summary_helpers(s, sizeof s, names);
-	if (look_caps_width(s) > CORE_W - 24) summary_helpers_count(s, sizeof s, on);
+	if (!on && !out) return;
+	summary_band(s, sizeof s, on ? names : NULL, out ? off : NULL);
+	if (look_caps_width(s) > CORE_W - 24) summary_band_count(s, sizeof s, on, out);
 	look_band_note(x0, y0, CORE_W, s, LOOK_PAGE);
 }
 

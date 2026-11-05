@@ -31,7 +31,7 @@ bool visitor_gate(uint32_t layer_seed, int index) {
 }
 
 bool visitors_here(int depth, int biome) {
-	if (depth < 4 || (run.helpers & HELP_GENTLE)) return false;
+	if (depth < 4 || (run.helpers & HELP_GENTLE) || !run_extra(EXTRA_OLDER)) return false;
 	if (biome == BIOME_UNDERNET || biome == BIOME_GRAVEYARD || biome == BIOME_NEST) return false;
 	const VisitorKin *k;
 	return visitor_kin(VISIT_BN5, &k) > 0 || visitor_kin(VISIT_BN4, &k) > 0;

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Leave out what you don't want.** The setup after NEW GAME now comes
+  in three pages, RUN, HELP and a new EXTRAS, turned with L and R; NEXT
+  at a page's foot goes on to the next and JACK IN! is on the last
+  (START still starts the run from any page). EXTRAS switches off, for
+  one run, the things this game adds to BN6: Liberation Missions, the
+  Tournament (listed now, coming in a later version), Glitch layers, the
+  Virus Battler, DarkChips and, with BN5 or BN4 beside BN6, the Older
+  nets (their areas, Navis and viruses). Everything is on unless you
+  switch it off, the run keeps what it started with, and it counts like
+  any other run; its summary names what was off. A run saved before this
+  version continues with everything on.
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
   Red Sun (USA)** beside BN6's (on the ROMs screen it has a third
   cartridge, red, with Duo's face) and its five net areas turn up in

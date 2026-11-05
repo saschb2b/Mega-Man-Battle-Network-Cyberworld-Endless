@@ -369,6 +369,20 @@ void look_arrow(int x, int y, bool right) {
 	picture(x, y, rows, 8, pal, !right);
 }
 
+void look_tabs(int x, int y, int w, int count, int shown, const char *const *names) {
+	int l = x + LOOK_TABS_IN, r = x + w - LOOK_TABS_IN, tw = (r - l - (count - 1) * LOOK_TAB_GAP) / count;
+	for (int p = 0; p < count; ++p) {
+		int tx = l + p * (tw + LOOK_TAB_GAP);
+		if (p == shown) look_button(tx, y, tw - 1, LOOK_PILL_H - 1);
+		else look_pill(tx, y, tw);
+		look_title(tx + (tw - look_title_width(names[p])) / 2, y + 4, names[p], p == shown ? LOOK_PAGE : LOOK_TEXT);
+	}
+	look_caps(x + 1, y + 5, "L", LOOK_PAGE, LOOK_GREEN_LO);
+	look_arrow(x + 7, y + 4, false);
+	look_arrow(r + 3, y + 4, true);
+	look_caps(x + w - 6, y + 5, "R", LOOK_PAGE, LOOK_GREEN_LO);
+}
+
 void look_pointer(int x, int y, int size, bool left, SDL_Color c) {
 	for (int i = 0; i < size; ++i) fill_rect(left ? x - i : x + i, y + 2 + i, 1, 2 * size - 2 * i, c);
 }

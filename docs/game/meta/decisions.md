@@ -3,7 +3,7 @@ type: Design
 title: "Decisions and phase one"
 description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen), phase one as built (unlocks, threat rungs 1-5, helpers, the Blade and Storm folders) and the designed Z-Canon, Busting and Lean folders."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
@@ -64,6 +64,9 @@ Built as planned, with these particulars:
 - `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's (HELPERS a bit
   each: 1 HP+, 2 Heals, 4 Gentle, 8 All *, 16 BeastOut); the weak
   autopilot wins a short net (layers 1-10).
+- Since 5 November 2026 the setup is three pages under tabs, RUN, HELP
+  and EXTRAS, the last holding what the run adds to BN6, each on or off
+  ([the extras](extras.md)).
 
 ## The designed three (26 October 2026)
 
