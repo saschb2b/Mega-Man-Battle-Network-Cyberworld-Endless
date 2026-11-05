@@ -36,6 +36,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_navis as N  # noqa: E402
 import bn4_twins  # noqa: E402
+import xnavirecipe_bn4_init as I  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 import xnavirecipe_bn4_companion as C  # noqa: E402
@@ -52,6 +53,10 @@ NAVIS = ((0x0A, 'GutsMan', 132), (0x0C, 'FireMan', 144), (0x32, 'ThunderMan', 14
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
 NAVI4 = dict(prestep=0x080135A8, runner=0x08013DB4, present=0x08012D62, dying=0x08010F60, after=0x080143FC, take=0x0800C09A,
              set_action=0x0800C9AC, attack_end=0x0800CA28, palette=0x0800B950)
+# BN4's dyings a Navi's jump table may name (BN6's Navi object's dying stands in for each: its jump table is BN6's): the
+# Navis' (BN4_NAVI_DYING: a step of its own, then the families'), and the families' alone (BN4_DYING: WindMan's)
+DYINGS4 = {NAVI4['dying']: 'BN4\'s Navis\' dying', 0x0801052C: 'the families\' dying (BN4_DYING), without the Navis\' step before it '
+                                                             '(0x08010F60: a sound by 0x080083E8\'s table, +5 cleared)'}
 # BN6's Navi generic states 0-7 (src/emu/bn6_navis.h BN6_NAVI_SPAWN_STATE to BN6_NAVI_BUBBLED), its table's first eight
 GENERIC_NAVI6 = (0x08016381, 0x08017889, 0x080170C5, 0x080174FF, 0x080175B9, 0x080178B7, 0x08017689, 0x08017769)
 # The engine's routines a Soul Navi's states call that BN6 has no twin of, copied with it (docs/multirom/bn4-navis.md,
@@ -356,13 +361,13 @@ def navi_init(f):
     std = X4.INIT_STD | {NAVI4['take'], NAVI4['palette']}
     f.companions, f.spawned_sprite, f.spawned_frame = [], False, False
     for site, t in sorted(w.bls.items()):
+        if site in done:
+            continue
         if t == NAVI4['take']:
             f.notes.append(f'{site:08X}: its init takes its side\'s AI data (BN4_AI_TAKE): dropped, BN6\'s Navi init takes one from the pool')
         elif not init_tail(f, w, site, t) and t not in std:
             f.decide('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s Navi init makes nothing of')
     navi_palette(f, w)
-    setup = [s for s, t in w.bls.items() if t == X4.BN4['setup_coll']]
-    args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)] if len(setup) == 1 else None
     f.coll_arg = args[2] if args and args[2] is not None and args[2] != COLL_ARG6 else 0
     f.notes.append(f'its collision set up with {args}: BN6\'s actor init passes r3 {COLL_ARG6}, so its own '
                    f'{"is written over at its spawn\'s end (XNavi.coll_arg)" if f.coll_arg else "is the same"}')
@@ -611,7 +616,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
         f.decide('type', f'its routine ({f.lo:08X}) names no jump table of three')
         return f
     f.type_table, f.init, f.update = tt, ents[0] & ~1, ents[1] & ~1
-    if ents[2] & ~1 != NAVI4['dying']:
+    if ents[2] & ~1 not in DYINGS4:
         f.decide('type', f'its dying entry is {ents[2]:08X}, not BN4\'s Navis\' {NAVI4["dying"]:08X}')
     uw = T.walk(b4, f.update, region=(f.lo, f.hi))
     navi_update(f, tw, uw)
@@ -622,8 +627,9 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     own_generic(b4, f, states)
     f.own = states[6:]
     f.states += [('OWN', x | 1) for x in f.own]
+    f.roots += I.own_generic(f, states, N.NAVI_GENERIC, GENERIC_NAVI6)
     f.megaman = [k for k, x in enumerate(f.own, 6) if N.PLAYER <= x & ~1 < N.PLAYER_END]
-    f.state_entries = {x & ~1 for x in f.own}
+    f.state_entries = {x & ~1 for x in f.own} | {x[1] & ~1 for x in f.states[:6] if x[0] == 'OWN'}
     f.s1 = X4.struct1_of(b4, f, f.init)
     C.companion_of(b4, f, navi_init(f))
     if f.s1['palette'] is not None:
@@ -636,6 +642,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     bn4_twins.COPIED.update(C.COPIED)
     try:
         roots = [x & ~1 for x in f.own] + f.roots
+        I.cut_before(b4, f)
         while roots:
             X4.walk_code(b4, f, roots, {f.type_table, f.st} | set(UNWALKED_TABLES), pairs)
             roots = sorted((callbacks(b4, f) | C.copied_entries(f)) - set(f.walks))
@@ -679,6 +686,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     X4.SOUND_SLOTS.update(pool)
     try:
         X4.sounds_of(b4, b6, f)
+        I.sounds_wide(f, pool)
         table_sounds(b4, b6, f)
         C.wide_movs(f, pool)
         wide_sounds(f)
@@ -771,7 +779,8 @@ def tables_of(b4, f):
             if e is None or nxt is None:
                 f.decide('literal', f'{v:08X}: a table of MegaMan\'s block past no copied routine\'s end')
                 continue
-            f.navi_data[e] = (v, nxt, 'a table of MegaMan\'s block its copied routine reads, to the next code walked')
+            lo = min(v, f.navi_data[e][0]) if e in f.navi_data else v
+            f.navi_data[e] = (lo, nxt, 'a table of MegaMan\'s block its copied routine reads, to the next code walked')
     if below:
         f.regions.append((min(below), f.lo, None))
         f.notes.append(f'its tables below its routine, {min(below):08X}-{f.lo:08X}: a region of its own, raw')
@@ -942,6 +951,8 @@ def families_alloc(b4, b6, pairs):
 # BN6's Navi object's tables for a Navi of BN4's (src/emu/bn6_navis.h): the Navis' own pre-step (A), the empty hook A and
 # hooks, the empty companion (BN5's Navis' without one), its ice block's size (BN6_ICE_SIZES' 2, a Navi of his size)
 PRESTEP6, NULLSUB_NAVI6, NO_COMPANION6, ICE = 0x0801A9B9, 0x080F3BE9, 0x080114D5, 2
+# MegaMan's states (BN4_PLAYER_STATE_COUNT, bn4_navis.h), whose entries bound a table of his block past his walked code
+PLAYER_STATE_COUNT = 116
 # the room's bases the C file names its places by (src/emu/xnavi_recipe.h): the families' generator's text names XV_CODE's and
 # XV_ART's, given BN4's Navis' room's where they are in it
 XV_CODE_AT, XV_ART_AT = X4.XV_CODE, X4.XV_ART
@@ -1037,14 +1048,26 @@ def c_navi(f):
     return '\n'.join(L), f'&bn4_{n}'
 
 
+# The whole Navis held from the install while their spec cannot run (written and compiled, xnavi_bn4_held, not installed):
+# name -> why (docs/multirom/bn4-navis.md)
+HELD = {
+    'WindMan': 'with his companions set out (his companion start, xnavi_install.c) BN6\'s battle never reaches its fight '
+               '(windman_v1: the run fails at the opening); without them it does',
+}
+
+
 def c_file(whole):
-    parts, refs = [HEADER], []
+    parts, refs, held = [HEADER], [], []
     for f in whole:
         t, ref = c_navi(f)
         parts.append(t)
-        refs.append(ref)
+        (held if f.name in HELD else refs).append(ref)
     parts.append('const XNavi *const xnavi_bn4[] = { ' + ', '.join(refs) + ' };\n'
                  'const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);\n')
+    if held:
+        parts.append('/* held from the install (tools/xnavirecipe_bn4.py HELD): ' + '; '.join(f'{k}: {v}' for k, v in HELD.items()) + ' */\n'
+                     'const XNavi *const xnavi_bn4_held[] = { ' + ', '.join(held) + ' };\n'
+                     'const int xnavi_bn4_held_count = (int)(sizeof xnavi_bn4_held / sizeof *xnavi_bn4_held);\n')
     return '\n'.join(parts)
 
 

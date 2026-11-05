@@ -58,6 +58,10 @@ TWINS = (
     # BN6's places), his objects' collision setters, the pause test his copied sprite step calls
     (0x08002E20, 0x08002DB4, 'fireman'), (0x08002F54, 0x08002F02, 'fireman'), (0x08012886, 0x08019F86, 'fireman'),
     (0x08012F7A, 0x0801A146, 'fireman'), (0x080078EC, 0x0800A03C, 'fireman'),
+    # WindMan's (tools/xnavirecipe_bn4.py, each body read): his flinch's and paralysis' tails (BN4's generic Navi states 3 and
+    # 4, BN6's Navi states of those places) and his wind's spawn (the fourth kind's 0x41 of his side, BN6's routine of the
+    # same steps); his companions' sprite steps are FireMan's pairs above
+    (0x08010E88, 0x080174FE, 'windman'), (0x08010F08, 0x080175B8, 'windman'), (0x080E68F8, 0x080E666C, 'windman'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -142,6 +146,15 @@ AUDITS = {
     (0x080078EC, 0x0800A03C): ('ok', "the battle's pause byte (BN4's [eToolkit +0x40] +9, BN6's [eToolkit +0x3C] +0xA) back in r0, "
                                      "BN6's with its flags set by a tst its callers branch on (BN4's callers test r0 themselves): "
                                      "the after-steps' pause tests, the pair 0x080143FC / 0x0801BBAC's"),
+    # (WindMan's, read from both games' code)
+    (0x08010E88, 0x080174FE): ('ok', "the generic Navi flinch WindMan's own state 3 wraps (his wind, +0x60, told to end first, "
+                                     "0x080E69BC): BN6's Navi flinch in its place, as every Navi's state 3 is BN6's"),
+    (0x08010F08, 0x080175B8): ('ok', "the generic Navi paralysis WindMan's own state 4 wraps (his wind told to end first): BN6's "
+                                     "Navi paralysis in its place, as every Navi's state 4 is BN6's"),
+    (0x080E68F8, 0x080E666C): ('ok', "a side's wind spawned (the fourth kind's 0x41, r0 back; none where the side's slot holds one "
+                                     "of level 1 or more): the slot BN4's battle state +0x88 + 4 x side (its level 8 past it, "
+                                     "0x080E69E8), BN6's +0xC0 (0x080E677C), each game's 0x41 its own code; BN6's also gives its "
+                                     "wind's +0x4C its spawner (0x080E6692), which BN4's leaves as the slot had it"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }
@@ -268,6 +281,10 @@ OWN_STATES = {
 # address -> its size, an entry's, the kinds its families spawn (bn4_twins.TYPES' spawns' r4), the places of a kind's sprite
 # (list offset, number) and the loads of them (the sprite load whose r1 and r2 come from an entry), why
 TABLES = {
+    0x080CCC94: dict(size=8, entry=2, kinds=(2, 3), sprite=(0, 1), loads=(0x080CCCCC,),
+                     why="the first kind's 0x5C's kinds (a Navi's companions: 2 bytes each, its sprite's list offset and "
+                         "number), read by its init (0x080CCCBC, r0 its kind by +4); WindMan spawns kinds 2 and 3 at his "
+                         "spawn (0x080C328C, 0x080C32A0)"),
     0x080CE5B0: dict(size=0x130, entry=0x10, kinds=(10, 11, 12), sprite=(5, 6), loads=(0x080CE718,),
                      why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
                          "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "
