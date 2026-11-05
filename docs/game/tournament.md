@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The tournament"
-description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, and the owner's open calls; designed with the game-design skill on 5 November 2026, nothing built."
+description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's six calls, and as built (behind the faces for BN4's screen, `--dev tourney` till then)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -18,6 +18,9 @@ sources:
   - id: bn6f
     resource: "~/.cache/mmbn-ref/bn6f: asm/ searched for 'tourn' and 'bracket' (nothing); data/textscript/compressed/CompText87EBDDC.s (a tournament Netopia once held)"
     title: "bn6f, searched for a tournament"
+  - id: built
+    resource: "src/core/run_tourney.c, src/layer/bracket.c, src/director/boss.c, src/dev/pacing_bracket.c, src/dev/economy_bracket.c; build.py pacing and economy, autopilot runs, 5 November 2026"
+    title: "The tournament as built"
 ---
 
 # The tournament
@@ -30,7 +33,7 @@ HP carried from round to round with the arena's heal before the first
 alone; the act's card shows the bracket; the prize is the final's
 Guardian Data. This page is its design, reasoned with the game-design
 skill and checked against [the core loop's review](core-loop.md), with
-the calls left to the owner at the end. Nothing is built.
+the owner's calls at the end, and how it was built (As built, below).
 
 ## The experience
 
@@ -387,6 +390,127 @@ follows calls it.
 2. Into players' runs, by the owner's call.
 3. BN4's Navis join as each is moved and proved, and BN4's tournament
    song where its ROM is read.
+
+## As built
+
+Built on 5 November 2026 as the owner's six calls say, with the
+deviations below; behind one gate the owner's call 6 sets, so no player
+meets it yet.
+
+**Waiting for the faces.** BN4's screen draws a plate from its own tables,
+whose 31 entries end at MegaMan's `0x1E`: an entrant of the faces'
+contract (`0x20` + the Navi's number, [Faces for every
+entrant](../multirom/bn4-tournament.md)) reads past them, and the screen,
+and the map entered again after it, are drawn in stripes (measured with
+the dev step `bracket` on layer 9: BN4's own ids draw and return cleanly,
+ids from `0x20` do not). So a bracket stands in a player's run only once
+`src/emu/xbracket.h` defines `XBR_PLATE_NAVI` (the faces' work, built
+apart), and only where BN4's ROM is read, as its screen shows every
+bracket (`bracket_here`, `src/layer/bracket.c`). Until then the dev route
+`--dev tourney` forces one in every act from the third that can hold one
+(the gate and the coin aside, the switch and the Glitch layer's act
+honoured: `run_debug_bracket`) and shows BN4's own plates in the places,
+so the whole bracket can be played and checked.
+
+**Where it hooks in.** `run_bracket_at` (`src/core/run_tourney.c`) as
+before; the draw is `run_bracket_draw` beside it, from the seed, the act
+and a pool the layer reads from the ROMs (`src/layer/bracket.c`: BN6's
+navis 1-10, 12-16 and 18, BN5's 24-29 where they are fightable and the
+older nets are on; BN4's join there as each is proved). Each round's
+Navi is drawn without regard to the final, then again without him where
+the two met, so the rounds are the same whichever way the act took at
+Lan's HP unless one was that way's guardian. The rounds' bands, versions
+and HP are `pacing_round_band`, `pacing_round_version`,
+`pacing_xround_version` and `pacing_xround_hp` (`src/core/pacing.c`).
+`Run` and the profile are unchanged (no `RUN_MAGIC`), and so is what a
+layer seed makes (no `LAYER_MAKE`): the bracket's two prize scripts join
+the layer's text archive only where a bracket stands.
+
+**The sequence** (`src/director/boss.c`; [The sequence](bosses/sequence.md)).
+MegaMan steps in, the door saves, he steps up beside the final's place,
+and BN4's screen opens with every entrant in. Back on the map: round 1's
+title card ("Round 1" over his name), no words, his battle at once. Won:
+his Navi chip in BN6's own "MegaMan got:" box (`ta_round_prize`,
+`src/layer/reward_words.c`), the bracket with the round settled, round
+2 the same way. After round 2's bracket the final logs in as a guardian
+does (the prelude, his beam, his card marked "The final", his intro), and
+after his battle BN4's screen shows MegaMan the winner of all three
+before the final's last word, his log-out and his Guardian Data, whole.
+Deviations: rounds 1 and 2 have no sprite on the map (the arena's one
+actor is the final's, and only his logs in); the bracket is shown a
+fourth time after the final.
+
+**The bracket's eight.** BN4's three-round bracket: MegaMan first (`0x1E`),
+round 1's Navi beside him, round 2's Navi in the next pair, the final's
+in the other half; the four places left are four more of the pool, by
+the seed, none of the three, who lose their matches (the second pair's
+other to round 2's Navi, the other half's three to the final's and one
+of them). Their flags are the rounds settled (`bracket_entrants`): a bit
+a round won, in while still in, out the round he fell. The title is The
+Den Battle Tournament in act 3, The Eagle Tournament in act 4, The Red Sun
+Tournament in act 5.
+
+**The screen's return to the map** (the move's report left it unrun):
+it works. BN6's EnterMap puts MegaMan where GameState's PlayerX, Y and Z
+say (bn6f `spawnOWPlayerObjectForEnterMap_809e064`), which the leave did
+not set, so he came back at the layer's arrival; the bracket now writes
+his place there before it opens and puts the old values back after
+(`BN6_ENTER_X` to `BN6_ENTER_FACING`, `src/emu/bn6.h`). EnterMap also
+clears BN6's no-battle flag (`BN6_FLAG_NO_ENCOUNTERS`) and starts the
+map's theme: a random battle began on the first frame back in one run in
+four, so random battles are held from the screen's opening to the round's
+battle (`emu_encounters_hold`, `src/director/encounter.c`), and the theme
+is hushed again.
+
+**HP, a loss, the door.** No heal between rounds: each is BN6's battle
+with the HP the last left. A round lost is BN6's GAME OVER and the run's
+end, the round's Navi named as what ended it (`boss_foe`). Nothing of the
+bracket is saved: a quit or a crash anywhere in it comes back at the
+arena's door, round 1 again with the HP walked in with.
+
+**What it pays.** Each round's results screen as a guardian battle's (his
+Navi chip's entries the act's guardian zenny, `loot_guardian_zenny`), his
+Navi chip at the version fought (`bracket_chip`), and his meeting
+(`rival_met`, `rival_result`): named on later cards. Not given: a
+first meeting's battle data for a round's Navi (Dad's mail comes with
+the Guardian Data only).
+
+**The card and the words.** The act's card lists "1: X   2: Y" and
+"Final: Z" in the guardian's place, "???" for a Navi never met (the
+final's "?" where a Navi on the net named him), a third line
+(`cinema_card_more`). MegaMan's read at a portal whose act holds one:
+"Three strong signals,Lan!" and the final by name where he knows him,
+else "Whoa... Three strong signals! One after another,Lan..."
+(`src/director/home_words.c`). The dealer is unchanged: he names the act's
+guardian's weakness, the final's.
+
+**Not built.** BN4's tournament song for the rounds (they play the boss
+theme, as a guardian's battle); the statistics' round (the guardian
+event names the round's Navi, not the round); the faces (built apart).
+
+**Measured.** `build.py pacing`: 0 past their band, the rounds included
+(each round's Navis over 500 drawn runs, the short net's act 3 and the
+endless net's acts 3 to 5 on two cycles). `build.py economy` (300 runs, a
+profile past the Nest, the plan in play): the short net's act 3 14.5 to
+15.4 chips and 6,971 to 8,391 zenny a run, the endless net's act 3 12.5
+to 13.2 and 5,860 to 6,910, act 4 12.6 to 13.1 and 7,226 to 8,247, act 5
+16.7 to 17.3 and 10,751 to 12,101; the bands' centres set to them
+(`src/core/economy.c`), the short net's act 3 zenny past its old band.
+Autopilot runs (`CYBERWORLD_AUTOPILOT=1`, fresh data folders, the short
+net from layer 9 unless said): with the tournament not rolled (a fresh
+profile, from layer 7, 9,000 frames, seeds 1 to 4) this build and
+`01cb5284` draw the same frames at 3,000, 6,000 and 8,999 and log the same
+frame lines; switched off (`--setup short,0,0,0,0,2`) under `--dev
+tourney`, no bracket on seeds 1 to 4, act 3's single guardian fought;
+forced (`--dev tourney,god,onehit`), seed 1 won all three rounds and went
+on to the Nest, seed 3 won both rounds and was deleted in the final
+(GAME OVER, the run ended), seed 2's act 3 holds its Glitch layer and kept
+its guardian, seed 4's autopilot stuck in a random battle before the arena
+(as seed 2's does with the tournament off); placed at the arena with
+`fragile`, round 1 lost and the run ended. The door: round 1 won at 70 HP
+of 100, round 2 begun at 70; a CONTINUE from the title came back "From the
+arena's door", the card ("1: ShadowMan", now met), the bracket, round 1
+at 100.
 
 ## The owner's calls
 

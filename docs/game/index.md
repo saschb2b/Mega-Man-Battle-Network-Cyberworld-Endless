@@ -6,7 +6,7 @@
 * [The NaviCust](navicust.md) - The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs, readable bugs, and what is built (`src/layer/navicust.c`).
 * [The PET](pet.md) - The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over.
 * [The rival: Chaud and ProtoMan](rival.md) - The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates.
-* [The tournament](tournament.md) - The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, and the owner's open calls; designed with the game-design skill on 5 November 2026, nothing built.
+* [The tournament](tournament.md) - The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's six calls, and as built (behind the faces for BN4's screen, `--dev tourney` till then).
 
 # Subdirectories
 

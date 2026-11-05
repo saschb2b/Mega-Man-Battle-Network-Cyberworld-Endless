@@ -3,7 +3,7 @@ type: Feature
 title: "The extras"
 description: "The extras: what a run adds to BN6 that a player may leave out (Liberation Missions, the tournament, the Glitch layer, the Virus Battler, the DarkChips' flames, the older nets), each on or off on the JACK-IN SETUP's EXTRAS page, all on by default, kept for the run and named on its summary; the owner's calls of 5 November 2026."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief and calls, given in the project's sessions on 5 November 2026"
@@ -27,7 +27,7 @@ page of their own, EXTRAS, beside the run's choices and the
 | Extra | What it brings | Off: where it is held back |
 | --- | --- | --- |
 | Liberation | BN5's Liberation Missions on a dark layer past some forks ([Liberation Missions](../liberation/overview.md)) | `run_dark_area` (`src/core/run.c`) and `lib_way_dark` (`src/director/liberation_way.c`): the act's second layer is a plain one, as in the acts that hold no dark layer; no special route can be found |
-| Tournament | Three Navis in a row in act 3's arena, in some runs ([the tournament](../tournament.md)) | `run_bracket_at` (`src/core/run_tourney.c`), where the bracket hooks in as it is built: the owner's calls 1 and 2 placed there, and none with the switch off |
+| Tournament | Three Navis in a row in act 3's arena, in some runs ([the tournament](../tournament.md)) | `run_bracket_at` (`src/core/run_tourney.c`), which the bracket asks (`bracket_here`, `src/layer/bracket.c`): the owner's calls 1 and 2 placed there, and none with the switch off, `--dev tourney`'s force included |
 | Glitch | The rare glitching warp to a [Glitch layer](../glitch-layer.md) | `run_glitch_at` (`src/core/run_glitch.c`): the layer keeps the dark warp its seed rolled |
 | Virus Battler | BN6's [Virus Battler](../../world/level-design/virus-battler.md) at a side path's end | `fill_layer` (`src/net/net_gen.c`): placed as ever, then taken away, so every other object stands where it would (`test_extras`) |
 | DarkChips | The flame of darkness offering a DarkChip on each act's middle layer ([DarkChips](darkchips.md), [BN6's own](bn6-darkchips.md)) | `dark_flame_setup` (`src/director/director_dark.c`): no flame, BN5's or BN6's |

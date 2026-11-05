@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The sequence (src/director/boss.c)"
-description: "The guardian fight's states in `src/director/boss.c` (enter, title card, talk, battle, last word, log-out, Guardian Data, open exit), its event flags, BN6's no-song 0x63 for silence, and MegaMan stepping up beside the guardian (`guardian_stand`)."
+description: "The guardian fight's states in `src/director/boss.c` (enter, title card, talk, battle, last word, log-out, Guardian Data, open exit; a tournament's bracket, rounds and prizes between), its event flags, BN6's no-song 0x63 for silence, and MegaMan stepping up beside the guardian (`guardian_stand`)."
 tags: [game, bosses]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T18:14:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 ---
 
 # The sequence (`src/director/boss.c`)
@@ -20,6 +20,14 @@ generated: { by: claude-code/unrecorded, at: 2026-10-06T18:14:19Z }
 | Log out | His sprite's own log-out (`0x21` + his facing: a frame in his lighter colours, then gone) beside BN6's beam and its sound, about a quarter of a second, as BN6's Navis log out on the net; no flash and no fading by alpha, which BN6 never does (the owner saw the old fade as a "blup"); then a beat, 45 frames from its start |
 | Reward | The Guardian Data shows (sound 0x94), BN6's Mystery Data crystal turning (its sprite's animation 0); the area's theme returns and MegaMan walks to it. Taken, it gives in BN6's own "MegaMan got:" boxes, MegaMan's one word on a Cross and on a first meeting's battle data, the heal, and the draft: one box and its menu |
 | Open | Taken: the exit pad appears and its warp works |
+
+Where the tournament's bracket stands in the guardian's place
+([the tournament](../tournament.md), As built), Enter shows BN4's bracket
+screen first (Bracket, off the map), and each round comes back to it:
+Round in (a round's Navi straight to his card; the final's log-in as
+above), the title card, the battle, Prize (a round's Navi chip) and the
+bracket again, until the final's battle, after which the bracket shows
+MegaMan the winner before After. A round has no talk and no last word.
 
 Event flags `0x1448`-`0x144C` drive the NPCs: the guardian leaves, logs in,
 the Guardian Data shows, it was taken, the exit shows. While the exit is
