@@ -54,6 +54,10 @@ TWINS = (
     # ... its own panel a floor (flag 0x10 of its flags, BN4's +4, BN6's +0x14), one of two BN6 routines of its outer body
     # (0x0800CC66's inner test is the panel's place); a panel cracked (BN4_PANEL_CRACK)
     (0x08009ECC, 0x0800CCA6, 'gutsman'), (0x08009AEC, 0x0800C938, 'gutsman'),
+    # FireMan's (docs/multirom/bn4-navis.md, FireMan built; each body read): his companion's sprite setters (the same bodies at
+    # BN6's places), his objects' collision setters, the pause test his copied sprite step calls
+    (0x08002E20, 0x08002DB4, 'fireman'), (0x08002F54, 0x08002F02, 'fireman'), (0x08012886, 0x08019F86, 'fireman'),
+    (0x08012F7A, 0x0801A146, 'fireman'), (0x080078EC, 0x0800A03C, 'fireman'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -131,6 +135,13 @@ AUDITS = {
     (0x080CDCE4, 0x0801156A): ('ok', "an object's hit taken from its HP (r0 0: off its +0x24, -1 back where none is left, else a white "
                                      "flash): BN6's basicHandleBattleObjectDamage, its r0 0 path the same, its sound BN6's (0x85, BN4's "
                                      "0xC8)"),
+    (0x08012F7A, 0x0801A146): ('ok', "its collision data's hit kind (BN4's +7, BN6's +9) given its object's element (BN4's +0x17, "
+                                     "BN6's +0xE): BN6's keeps the element's low four bits, where BN6's actor init ORs its "
+                                     "struct1's flags into +0xE's high ones (0x08016FA0); FireMan's moved objects' +0xE is the "
+                                     "element alone (their spawns' element store, rewritten to +0xE), so both store the same"),
+    (0x080078EC, 0x0800A03C): ('ok', "the battle's pause byte (BN4's [eToolkit +0x40] +9, BN6's [eToolkit +0x3C] +0xA) back in r0, "
+                                     "BN6's with its flags set by a tst its callers branch on (BN4's callers test r0 themselves): "
+                                     "the after-steps' pause tests, the pair 0x080143FC / 0x0801BBAC's"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }

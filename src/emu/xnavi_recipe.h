@@ -111,6 +111,13 @@ typedef struct { uint32_t at, at2; uint16_t song; } XnSound;
  * sprites, or BN6's own): its list and number */
 typedef struct { uint32_t masks, masks_at, crc; uint16_t masks_len; uint8_t kind, list, number; } XnOverlay;
 
+/* A BN4 Navi's init's work past BN6's actor init's, done at its spawn's end (its table 7, a shim of its home: xnavi_install.c
+ * spawned_set; docs/multirom/bn4-navis.md, FireMan built): its collision's own r3 (XNavi.coll_arg), its animation's +0x11
+ * its +0x10 (BN4's init's 0, BN6's actor init's 0xFF), its companion of the first kind spawned by `spawner` (its moved
+ * routine, r4 `word`: BN6's list offset and number of its sprite) and kept at its object's +`at`, then, where its init
+ * does them, its sprite updated (BN6's 0x080026C4) and its update run (BN6's Navi frame, BN6_NAVI_FRAME) */
+typedef struct { XvRef spawner; uint32_t word; uint8_t at; bool sprite, frame; } XnSpawned;
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -132,6 +139,7 @@ typedef struct {
 	int nneeds;
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
+	const XnSpawned *spawned;   /* a BN4 Navi's init's tail at its spawn's end (FireMan's companion), NULL none */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in
