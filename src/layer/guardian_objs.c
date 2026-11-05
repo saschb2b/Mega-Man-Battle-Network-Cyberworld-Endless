@@ -174,7 +174,7 @@ static void bracket_scripts(TextArchive *text, GuardianStage *g) {
 	g->round_prize[0] = g->round_prize[1] = -1;
 	g->bracket = run.side_kind == LAYER_NORMAL && layer.boss_layer && !super_boss(g->navi) && bracket_of(run.depth, g->navi, &g->rounds);
 	for (int r = 0; r < 2 && g->bracket; ++r) {
-		int code, chip = bracket_chip(g->rounds.navi[r], g->rounds.version[r], run.depth, &code);
+		int code, chip = bracket_chip(g->rounds.prize[r], g->rounds.prize_version[r], run.depth, &code);
 		ChipInfo ci = { 0 };
 		if (chip > 0) chip_info(chip, &ci);
 		if (chip > 0) g->round_prize[r] = ta_round_prize(text, chip, ci.name, code);

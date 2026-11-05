@@ -96,6 +96,19 @@ static int round_draw(const Draw *d, const bool *rounds, const bool *past, int r
 	return round_pick(p, out, act, round, loop, h, true);
 }
 
+/* A stand-in's chip for round `round` of a draw whose Navi is a stand_in
+ * one: BN6's own Navis (neither another game's nor a stand-in), drawn from
+ * the round's band as its Navi is, by `h`; into prize and prize_version */
+static void prize_draw(const Draw *d, RunBracket *b, int round, uint32_t h) {
+	const BracketPool *p = d->p;
+	bool out[BRACKET_POOL];
+	for (int i = 0; i < p->n; ++i) out[i] = p->older[i] || p->stand_in[i];
+	int k = round_pick(p, out, d->act, round, d->loop, h, true), hp;
+	b->prize[round] = k >= 0 ? p->navi[k] : 0;
+	b->prize_version[round] = 0;
+	if (k >= 0) round_miss(p, k, d->act, round, d->loop, &b->prize_version[round], &hp);
+}
+
 void run_bracket_draw(int depth, int final, int final_version, int final_hp, const BracketPool *p, RunBracket *b) {
 	int loop = (depth - 1) / CYCLE_LAYERS, act = (depth - 1) % CYCLE_LAYERS / 3;
 	bool rounds[BRACKET_POOL] = { false }, past[BRACKET_POOL] = { false };
@@ -108,11 +121,14 @@ void run_bracket_draw(int depth, int final, int final_version, int final_hp, con
 	for (int r = 0; r < 2; ++r) {
 		const Draw d = { p, act, loop, final };
 		int k = round_draw(&d, rounds, past, r, mix(seed + (uint32_t)r * 0x27D4EB2Fu));
-		b->navi[r] = k >= 0 ? p->navi[k] : 0;
-		b->version[r] = b->hp[r] = 0;
+		b->navi[r] = b->prize[r] = k >= 0 ? p->navi[k] : 0;
+		b->version[r] = b->hp[r] = b->prize_version[r] = 0;
 		if (k < 0) continue;
 		rounds[k] = true;
 		round_miss(p, k, act, r, loop, &b->version[r], &b->hp[r]);
+		b->prize_version[r] = b->version[r];
+		/* (a stand-in's chip: its own draw, "PRZE", the rounds' unchanged) */
+		if (p->stand_in[k]) prize_draw(&d, b, r, mix(seed ^ 0x50525A45u ^ (uint32_t)r * 0x27D4EB2Fu));
 	}
 	b->navi[2] = final;
 	b->version[2] = final_version;

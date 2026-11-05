@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The tournament"
-description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's six calls, and as built (behind the faces for BN4's screen, `--dev tourney` till then)."
+description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (behind the faces for BN4's screen, `--dev tourney` till then)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -315,7 +315,9 @@ instead.
   moved about half the rounds' Navis would be BN4's.
 - **Nothing saved**: the draw is the seed's, so `Run` does not change;
   the arena's layer is made as now, the final standing where the
-  guardian stands (`LAYER_MAKE` unchanged, to be checked when built).
+  guardian stands. The draw is part of what the arena's layer makes (its
+  rounds' prize scripts), so a change of the pool bumps `LAYER_MAKE` (As
+  built).
 
 ### The arena's door
 
@@ -416,15 +418,22 @@ so the whole bracket can be played and checked.
 before; the draw is `run_bracket_draw` beside it, from the seed, the act
 and a pool the layer reads from the ROMs (`src/layer/bracket.c`: BN6's
 navis 1-10, 12-16 and 18, BN5's 24-29 where they are fightable and the
-older nets are on; BN4's join there as each is proved). Each round's
+older nets are on; BN4's proved Navis on the same terms, below). Each round's
 Navi is drawn without regard to the final, then again without him where
 the two met, so the rounds are the same whichever way the act took at
 Lan's HP unless one was that way's guardian. The rounds' bands, versions
 and HP are `pacing_round_band`, `pacing_round_version`,
 `pacing_xround_version` and `pacing_xround_hp` (`src/core/pacing.c`).
-`Run` and the profile are unchanged (no `RUN_MAGIC`), and so is what a
-layer seed makes (no `LAYER_MAKE`): the bracket's two prize scripts join
-the layer's text archive only where a bracket stands.
+`Run` and the profile are unchanged (no `RUN_MAGIC`). What a layer seed
+makes was unchanged while no player met a bracket; the bracket's two prize
+scripts join the arena layer's text archive where one stands, and its
+draw comes from the pool, so a change of the pool is a change of what the
+arena's layer makes: `LAYER_MAKE` 112 for GutsMan's joining (5 November
+2026). Without it a run saved at an arena door by an older build would
+come back on CONTINUE to rounds drawn otherwise, its saved RAM over a text
+archive made otherwise; with it the layer is made afresh from its start
+(`src/net/layer_make.h`). Every BN4 Navi who joins the pool bumps it again
+(merged with others, one bump).
 
 **The sequence** (`src/director/boss.c`; [The sequence](bosses/sequence.md)).
 MegaMan steps in, the door saves, he steps up beside the final's place,
@@ -439,6 +448,25 @@ before the final's last word, his log-out and his Guardian Data, whole.
 Deviations: rounds 1 and 2 have no sprite on the map (the arena's one
 actor is the final's, and only his logs in); the bracket is shown a
 fourth time after the final.
+
+**BN4's Navis** join through one list, `src/layer/xguardian_bn4.c`'s
+`proved`: a line a Navi (his BN4 V1 id, his plate on BN4's bracket, his
+name, epithet and colour), added once his spec PASSes with every mutation
+caught ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md)). GutsMan
+is the first: navi 35 (`GUARDIAN_BN4_FIRST` 34 + his seat, `src/layer/guardians.h`),
+in the pool where BN4's ROM is read, his four versions installed and the
+older nets on (`pool_bn4`); BN4's HP ladder (V1 500, V2 900, V3 1300, SP
+1700, read from BN4's records) held to a round's top as BN5's are, so V1
+in round 1 and V2 held to the band's top in round 2. On BN4's bracket he
+stands on BN4's own plate, `0x00`, not a composed face. His battle is his
+moved id (0x384 on) at the round's version (`xguardian_bn4_encounter`),
+his battle sprite filled into the room BN4's Navis share as its record is
+written ([Battle sprites by battle](../multirom/bn4-navis.md#battle-sprites-by-battle)).
+He is never a final: the final is the act's guardian as drawn
+(`run_guardian`, by the act's area), and BN4's Navis guard no area yet
+(BN4's viruses come first, [Battle Network 4 in a run](../multirom/bn4.md)),
+so the guardian code draws from no pool he is in; he joins the finals when
+BN4's areas bring their guardians.
 
 **The bracket's eight.** BN4's three-round bracket: MegaMan first (`0x1E`),
 round 1's Navi beside him, round 2's Navi in the next pair, the final's
@@ -487,10 +515,28 @@ guardian's weakness, the final's.
 **Not built.** BN4's tournament song for the rounds (they play the boss
 theme, as a guardian's battle); the statistics' round (the guardian
 event names the round's Navi, not the round); the faces (built apart).
+For BN4's Navis, their own Navi chips: until Phase 4 brings BN4's chips,
+a round against one pays a stand-in, one of BN6's own Navis' chips drawn
+from that round's band as a round's Navi is (the owner's call 7, below):
+the pool marks him `stand_in`, and `run_bracket_draw` draws the chip's
+Navi and version (`RunBracket.prize`) from the seed apart from the rounds,
+which are drawn as without it (`tests/test_core.c`, the stand-in's test).
+His meetings are kept: `rivals.sav`'s third version ("CWR3") holds every
+navi number to BN4's last seat (`RIVAL_NAVIS` 59), a second version's 32
+records read whole into it, so the card names him once MegaMan has
+battled him.
 
 **Measured.** `build.py pacing`: 0 past their band, the rounds included
 (each round's Navis over 500 drawn runs, the short net's act 3 and the
-endless net's acts 3 to 5 on two cycles). `build.py economy` (300 runs, a
+endless net's acts 3 to 5 on two cycles); with GutsMan in the pool (5
+November 2026) still 0, he drawn in every round's band: the short net's
+act 3 round 1 at V1 63 times in 500, round 2 at V2 37 times. A forced
+bracket (`--dev tourney,god,onehit`, seed 6, autopilot from layer 9): BN4's
+screen with his plate beside MegaMan's, round 1's card "GutsMan, The
+Pounding Fist", his battle (enemy 0x384, 500 HP, his sprite put in the
+room), won; round 2 ShadowMan V2, the final GroundMan, won. With him in
+the pool and his rounds paying a stand-in's chip, `build.py economy` still
+has 0 numbers of the plan in play outside their bands. `build.py economy` (300 runs, a
 profile past the Nest, the plan in play): the short net's act 3 14.5 to
 15.4 chips and 6,971 to 8,391 zenny a run, the endless net's act 3 12.5
 to 13.2 and 5,860 to 6,910, act 4 12.6 to 13.1 and 7,226 to 8,247, act 5
@@ -541,3 +587,10 @@ Decided, 5 November 2026:
    (their own games' art, read from the player's ROMs), and the tournament
    waits for them. Over the act's card in our PET look for every bracket,
    and over BN4's screen for BN4's Navis with our card for the rest.
+
+Decided, 6 November 2026:
+
+7. **A BN4 Navi's round pays a BN6 Navi chip until Phase 4 brings BN4's
+   chips**, drawn from that round's band as BN6's own rounds' chips are,
+   so every round pays a Navi chip; his own chip replaces the stand-in
+   when BN4's chips come. Over a round that pays its results screen alone.

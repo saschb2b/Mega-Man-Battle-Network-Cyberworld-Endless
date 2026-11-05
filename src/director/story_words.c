@@ -153,7 +153,7 @@ static const char *card_motto(int biome, SDL_Color *accent) {
  * a Navi on the net named the final, his name and a "?" */
 static void card_navi(char *out, size_t n, int navi, int version, bool heard) {
 	static const char *const marks[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
-	const char *mark = guardian_older(navi) ? older[version < 0 || version > 3 ? 0 : version] : marks[version < 0 || version > 2 ? 0 : version];
+	const char *mark = guardian_older(navi) || guardian_bn4(navi) ? older[version < 0 || version > 3 ? 0 : version] : marks[version < 0 || version > 2 ? 0 : version];
 	bool known = guardian_known(navi);
 	if (!known && !heard) snprintf(out, n, "???");
 	else snprintf(out, n, "%s%s%s", guardian(navi)->name, known ? mark : "", known ? "" : "?");

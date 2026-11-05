@@ -264,22 +264,23 @@ static void fight_begin(void) {
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
 	/* (BN5's in BN6's engine as BN6's are, his moved id at the version his
-	 * act's band takes: docs/game/bosses/bn5-navis.md) */
-	bool older = guardian_older(B.foe), round = B.g.bracket && B.round < 2;
-	Encounter e = older ? xguardian_encounter(B.foe, B.foe_version) : make_boss(run.depth, run.biome, B.foe);
+	 * act's band takes: docs/game/bosses/bn5-navis.md; BN4's a round's
+	 * alone, xguardian_bn4.h) */
+	bool older = guardian_older(B.foe), bn4 = guardian_bn4(B.foe), round = B.g.bracket && B.round < 2;
+	Encounter e = older ? xguardian_encounter(B.foe, B.foe_version)
+		: bn4 ? xguardian_bn4_encounter(B.foe, B.foe_version) : make_boss(run.depth, run.biome, B.foe);
 	emu_encounters_hold(false);
 	/* (a bracket's round at its own version: run_bracket_draw) */
-	if (round && !older) e.foes[0].version = B.foe_version;
+	if (round && !older && !bn4) e.foes[0].version = B.foe_version;
 	/* (no running from a guardian, as from BN6's story bosses: a
 	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
 	 * came back to a fresh fight) */
 	e.held = true;
 	/* (a tenth more HP each notch of the Net's clock, docs/world/home/: on his
 	 * own HP, or on BN5's held to the act's band, as he spawns) */
-	int own = navi_hp(e.foes[0].family, e.foes[0].version);
-	if (older) own = xguardian_hp(B.foe, B.foe_version);
+	int own = older ? xguardian_hp(B.foe, B.foe_version) : bn4 ? xguardian_bn4_hp(B.foe, B.foe_version) : navi_hp(e.foes[0].family, e.foes[0].version);
 	int fought = older ? xguardian_hp_fought(B.foe, B.foe_version, run.depth) : own;
-	if (round && older) fought = B.g.rounds.hp[B.round];
+	if (round && (older || bn4)) fought = B.g.rounds.hp[B.round];
 	/* (a special route's last boss at the endless Nest: the Cybeast's HP) */
 	if (run.biome == BIOME_NEST && run.side_kind == LAYER_NORMAL) fought = run_nest_hp(run.depth, B.g.navi, fought);
 	B.fought_hp = pacing_clock_hp(fought, run.clock);

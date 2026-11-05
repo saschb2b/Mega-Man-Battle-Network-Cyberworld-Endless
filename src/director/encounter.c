@@ -12,7 +12,6 @@
 #include "battle_spare.h"
 #include "bn6.h"
 #include "bn6_panels.h"
-#include "bn6_shop.h"
 #include "bytes.h"
 #include "darkbn6.h"
 #include "data.h"
@@ -21,12 +20,12 @@
 #include "events.h"
 #include "liberation_battle.h"
 #include "loot.h"
-#include "pacing.h"
 #include "rom.h"
 #include "run.h"
 #include "souls.h"
 #include "soulunite.h"
 #include "xguardian.h"
+#include "xnavi_bn4_room.h"
 #include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
@@ -163,6 +162,8 @@ void emu_encounter_set(const Encounter *e) {
 	slot = next;
 	uint32_t settings = settings_of(slot);
 	emu_write(settings + 0x20, list, (size_t)(p - list));
+	/* (the room of BN4's Navis' battle sprites holding the one this record names, before BN6 sets him up: xnavi_bn4_room.h) */
+	xnavi_bn4_room_for(list, (size_t)(p - list));
 	/* the values of a Central Area random battle, with the formation's
 	 * battlefield, the area's background and the virus or boss theme */
 	int bg = biome_bg(e->biome);   /* (rolled either way) */

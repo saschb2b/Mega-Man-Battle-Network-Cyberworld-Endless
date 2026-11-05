@@ -3,7 +3,7 @@ type: Research
 title: "What Hades does, and what was taken"
 description: "What was taken from Hades' boss staging: safe antechamber, locked arena, the music's drop, intro lines by history, title card, log-out, Guardian Data, area-clear card, `rivals.sav`; changing arenas and extra phases left out."
 tags: [game, bosses]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T22:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
 ---
 
 # What Hades does, and what was taken
@@ -19,7 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T22:00:00Z }
 | A defeat line, a flash, the boss leaves | A last word, and the guardian logs out as BN6's Navis do on the net: his sprite's own log-out beside BN6's beam and its sound |
 | A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross with MegaMan's words, at the first Graveyard the beast stirring in him, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
 | Stairs into the next region, its name on screen | An area-clear card (guardian, viruses, time) over the jack-out, then the next area's title card |
-| Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi, and since its second version (`CWR2`, 26 October 2026; a first version's file loads whole, its battles' endings unknown) how the last one ended: MegaMan's form in it (`BN6_BATTLE_FORM`, sampled each frame while he stands), the winner's HP left in 64ths of his max, and the run it was fought in |
+| Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi, and since its second version (`CWR2`, 26 October 2026; a first version's file loads whole, its battles' endings unknown) how the last one ended: MegaMan's form in it (`BN6_BATTLE_FORM`, sampled each frame while he stands), the winner's HP left in 64ths of his max, and the run it was fought in; since its third (`CWR3`, 5 November 2026) for every navi number to BN4's last seat (59, `RIVAL_NAVIS`), a second version's 32 records read whole into it (`tests/test_legacy.c`) |
 | The Codex fills as you meet things | MegaMan briefs a guardian's moves, and when a hit lands, only once they have fought that copy in any run (its `rivals.sav` record); a first meeting says they have no battle data, and to watch the yellow panels ([What MegaMan knows](../meta/what-megaman-knows.md)) |
 
 Not taken: arenas that change during the fight and extra phases, which

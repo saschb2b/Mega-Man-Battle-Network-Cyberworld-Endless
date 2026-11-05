@@ -1069,6 +1069,7 @@ static void test_battler(void) {
  * of Navis in their bands, apart from each other, the final and the run's
  * past guardians wherever another fits, the same whichever final the way
  * taken brings; the rounds' bands and versions as the design's table */
+static void test_bracket_stand_in(const BracketPool *pool);
 static void test_bracket_draw(void) {
 	static const struct { int navi, hp[3]; } bn6[] = {
 		{ 1, { 400, 800, 1200 } }, { 2, { 500, 1000, 1500 } }, { 3, { 600, 1100, 1600 } }, { 4, { 700, 1200, 1700 } },
@@ -1125,7 +1126,47 @@ static void test_bracket_draw(void) {
 	}
 	/* (each Navi that fits as likely as another: round 1's two, 2 and 3) */
 	CHECK(seen[2] > 150 && seen[3] > 150, "round 1 drew DiveMan %d and SpoutMan %d times in 600, not each about half", seen[2], seen[3]);
+	test_bracket_stand_in(&pool);
 	run = before;
+}
+
+/* A stand-in's round (BN4's GutsMan, navi 35, until BN4's chips come: the
+ * owner's call of 6 November 2026) pays one of BN6's own Navis' chips
+ * drawn from its band; the rounds are drawn as without it */
+static void test_bracket_stand_in(const BracketPool *pool) {
+	int lo, hi;
+	BracketPool with = *pool, plain;
+	with.navi[with.n] = 35;
+	with.older[with.n] = with.stand_in[with.n] = true;
+	const int16_t guts[4] = { 500, 900, 1300, 1700 };
+	memcpy(with.hp[with.n], guts, sizeof guts);
+	++with.n;
+	plain = with;
+	plain.stand_in[plain.n - 1] = false;
+	int stood = 0;
+	for (uint32_t s = 1; s <= 300; ++s) {
+		memset(&run, 0, sizeof run);
+		run.seed = s * 2654435761u;
+		RunBracket b, c;
+		run_bracket_draw(9, 8, 0, 900, &with, &b);
+		run_bracket_draw(9, 8, 0, 900, &plain, &c);
+		for (int r = 0; r < 2; ++r) {
+			CHECK(b.navi[r] == c.navi[r] && b.version[r] == c.version[r] && b.hp[r] == c.hp[r], "seed %u: round %d drawn otherwise with a stand-in", (unsigned)s, r + 1);
+			CHECK(c.prize[r] == c.navi[r] && c.prize_version[r] == c.version[r], "seed %u: round %d's own chip not its Navi's", (unsigned)s, r + 1);
+			if (b.navi[r] != 35) {
+				CHECK(b.prize[r] == b.navi[r] && b.prize_version[r] == b.version[r], "seed %u: round %d's chip not its Navi's", (unsigned)s, r + 1);
+				continue;
+			}
+			++stood;
+			int hp = -1;
+			pacing_round_band(2, r, &lo, &hi);
+			for (int i = 0; i < pool->n; ++i)
+				if (pool->navi[i] == b.prize[r] && b.prize_version[r] >= 0 && b.prize_version[r] < 3) hp = pool->hp[i][b.prize_version[r]];
+			CHECK(hp >= lo && hp <= hi, "seed %u: GutsMan's round %d pays navi %d's chip at version %d (%d HP), outside %d-%d", (unsigned)s, r + 1,
+				b.prize[r], b.prize_version[r], hp, lo, hi);
+		}
+	}
+	CHECK(stood > 20, "GutsMan drawn in %d rounds of 600, too few to check his stand-in", stood);
 }
 
 /* The run's extras switched off (docs/game/meta/extras.md): no Glitch
@@ -4090,11 +4131,13 @@ static void test_free_space(void) {
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
 		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
 		{ "BN4's Navis' homes", FREE_BN4_NAVIS, FREE_BN4_NAVI_CODE }, { "BN4's Navis' code", FREE_BN4_NAVI_CODE, FREE_BN4_NAVI_ART },
-		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BRACKET_FACES }, { "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
+		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BN4_NAVI_SPRITE }, { "BN4's Navis' sprite room", FREE_BN4_NAVI_SPRITE, FREE_BRACKET_FACES },
+		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
 		{ "BN4's bracket screen", FREE_BRACKET, FREE_BRACKET_END }, { "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
+	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);

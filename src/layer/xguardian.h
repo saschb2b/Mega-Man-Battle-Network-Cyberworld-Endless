@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "foes.h"
+#include "xguardian_bn4.h"
 
 /* Whether BN5's guardian `navi` is fought here: his Navi moved into BN6's
  * engine at every version a run fights him at (xnavi_install.h), which
@@ -19,6 +20,11 @@ bool xguardian_fightable(int navi);
  * at `version` where BN6's guardians stand, the boss theme, no running;
  * none (nfoes 0) where he is not fightable */
 Encounter xguardian_encounter(int navi, int version);
+
+/* ... and BN4's Navi `navi` (xguardian_bn4.h's proved): whether he is fought here, installed at every version (V1, V2, V3,
+ * SP), which BN4's ROM read brings; his battle as BN5's, at his moved id */
+bool xguardian_bn4_fightable(int navi);
+Encounter xguardian_bn4_encounter(int navi, int version);
 
 /* The version (0 V1, 1 V2, 2 V3, 3 SP) BN5's guardian `navi` is fought at
  * on layer `depth` (pacing_xguardian_version, from his HP in his game) */

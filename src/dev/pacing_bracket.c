@@ -9,7 +9,7 @@
 /* The acts a bracket can stand in: the short net's third, the endless
  * net's third to fifth, each cycle (run_bracket_at) */
 static int bracket_act(FILE *out, int mode, int act, int loop) {
-	int seen[3][34][4] = { { { 0 } } }, outside[3] = { 0 }, flagged = 0;
+	int seen[3][GUARDIAN_BN4_LAST + 1][4] = { { { 0 } } }, outside[3] = { 0 }, flagged = 0;
 	int depth = loop * CYCLE_LAYERS + act * 3 + 3;
 	for (uint32_t seed = 1; seed <= 500; ++seed) {
 		run_new(seed * 2654435761u);
@@ -23,7 +23,7 @@ static int bracket_act(FILE *out, int mode, int act, int loop) {
 		for (int r = 0; r < 3; ++r) {
 			int lo, hi;
 			pacing_round_band(act, r, &lo, &hi);
-			if (b.navi[r] > 0 && b.navi[r] < 34 && b.version[r] >= 0 && b.version[r] < 4) seen[r][b.navi[r]][b.version[r]]++;
+			if (b.navi[r] > 0 && b.navi[r] <= GUARDIAN_BN4_LAST && b.version[r] >= 0 && b.version[r] < 4) seen[r][b.navi[r]][b.version[r]]++;
 			/* (the rounds held to their bands on the first cycle, as the
 			 * guardians are; later ones fight a version under SP) */
 			if (loop == 0 && (b.hp[r] < lo || b.hp[r] > hi || b.navi[r] == b.navi[(r + 1) % 3])) ++outside[r];
@@ -35,9 +35,9 @@ static int bracket_act(FILE *out, int mode, int act, int loop) {
 		pacing_round_band(act, r, &lo, &hi);
 		fprintf(out, "%s act %d cycle %d %s (band %d-%d):", mode == RUN_SHORT ? "short" : "endless", act + 1, loop + 1,
 			r == 2 ? "final" : r == 0 ? "round 1" : "round 2", lo, hi);
-		for (int n = 0; n < 34; ++n)
+		for (int n = 0; n <= GUARDIAN_BN4_LAST; ++n)
 			for (int v = 0; v < 4; ++v)
-				if (seen[r][n][v]) fprintf(out, " %s%s (%d)", guardian(n)->name, guardian_older(n) ? older[v] : marks[v], seen[r][n][v]);
+				if (seen[r][n][v]) fprintf(out, " %s%s (%d)", guardian(n)->name, guardian_older(n) || guardian_bn4(n) ? older[v] : marks[v], seen[r][n][v]);
 		fprintf(out, "%s\n", outside[r] ? "  OUTSIDE" : "");
 		flagged += outside[r];
 	}

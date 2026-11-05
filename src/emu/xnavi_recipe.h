@@ -75,7 +75,13 @@
 #define XN_BN4_HOMES     FREE_BN4_NAVIS
 #define XN_BN4_CODE      FREE_BN4_NAVI_CODE
 #define XN_BN4_ART       FREE_BN4_NAVI_ART
-#define XN_BN4_END       FREE_BRACKET_FACES
+#define XN_BN4_END       XN_BN4_SPRITE
+/* ... their battle sprites in one room, the coming battle's Navi's copied in from the player's BN4 ROM (xnavi_bn4_room.h), each
+ * Navi's list 2 entry pointed at it; the room holds the largest (Duo's, 61040 bytes unpacked) */
+#define XN_BN4_SPRITE      FREE_BN4_NAVI_SPRITE
+#define XN_BN4_SPRITE_SIZE (FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE)
+/* ... and which sprite each seat's is: BN4's list 2 number of his battle sprite, a byte a seat (0xFF none), past the homes */
+#define XN_BN4_SPRITES     (XN_BN4_HOMES + XN_BN4_SEATS * XV_HOME_SIZE)
 
 /* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {

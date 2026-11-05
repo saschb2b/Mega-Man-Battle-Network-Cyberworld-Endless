@@ -40,6 +40,12 @@ static inline int guardian_of_older(int ai) { return ai - BN5_NAVI_COLONEL + GUA
 #define GUARDIAN_DARKLOID_FIRST 30
 #define GUARDIAN_DARKLOID_LAST  33
 static inline bool guardian_darkloid(int navi) { return navi >= GUARDIAN_DARKLOID_FIRST && navi <= GUARDIAN_DARKLOID_LAST; }
+/* BN4 Red Sun's Navis (docs/game/tournament.md, The entrants; docs/multirom/bn4-navis.md): the Navi of seat s in BN6's
+ * engine (xnavi_recipe.h XN_BN4_*: BN4's V1 id 128 + 4s) as navi GUARDIAN_BN4_FIRST + s here, met as a tournament's round
+ * once proved (xguardian_bn4.h), no territory's guardian yet */
+#define GUARDIAN_BN4_FIRST 34
+#define GUARDIAN_BN4_LAST  58
+static inline bool guardian_bn4(int navi) { return navi >= GUARDIAN_BN4_FIRST && navi <= GUARDIAN_BN4_LAST; }
 /* ... BN5's AI index of one of its Navis here (the six or a Darkloid), -1 another's */
 static inline int guardian_bn5_ai(int navi) {
 	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN : -1;
