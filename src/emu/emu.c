@@ -360,12 +360,18 @@ void emu_quit(void) {
 
 void emu_frame(uint32_t keys) { emu_frame_as(keys, 0); }
 
+static void (*before_frame)(void);
+void emu_before_frame(void (*step)(void)) { before_frame = step; }
+
 void emu_frame_as(uint32_t keys, unsigned how) {
 	if (!core) return;
 	wait_frame();
 	frame_how = how;
 	/* (the music or effects turned off or on: Options' Audio, sound_quiet.h) */
 	sound_quiet_frame();
+	/* (an install's own step before the frame: the pool of BN4's Navis' sounds pointed at the battle's Navi's,
+	 * xnavi_bn4_sounds.h) */
+	if (before_frame) before_frame();
 	core->setKeys(core, keys);
 	if (threaded) {
 		in_flight = true;

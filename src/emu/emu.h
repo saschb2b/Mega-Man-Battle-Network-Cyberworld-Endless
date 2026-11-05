@@ -40,6 +40,10 @@ void emu_frame(uint32_t keys);
  * keeps its pitch as it plays faster */
 enum { EMU_FRAME_UNSHOWN = 1, EMU_FRAME_UNHEARD = 2 };
 void emu_frame_as(uint32_t keys, unsigned how);
+/* A step run before each frame of BN6's core, its game's memory read and
+ * written as the frame's own (an install's: BN4's Navis' sound pool,
+ * xnavi_bn4_sounds.h); NULL none. One at a time. */
+void emu_before_frame(void (*step)(void));
 bool emu_threaded(void);
 /* Waits for a frame the core runs on its own thread: what its hooks left
  * is the main thread's to read after it. */

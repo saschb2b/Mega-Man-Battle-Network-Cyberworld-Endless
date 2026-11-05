@@ -428,7 +428,7 @@ bool xnavi_install(const XNavi *n) {
 		if (!xv_failed()) families_set(n);
 		xv_move_art();
 		sounds_set(n);
-		if (g.bn4 && !xv_failed()) xnavi_bn4_songs_set(f);
+		if (g.bn4 && !xv_failed()) xnavi_bn4_songs_set(f, n->versions);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xnavi: %s not installed: %s\n", f->name, xv_why());
@@ -450,6 +450,7 @@ bool xnavi_install(const XNavi *n) {
 	for (int i = 0; i < f->nwords; ++i)
 		if (f->words[i].from >= BUS && f->words[i].to >= BUS && f->words[i].to < EMU_FREE) xv_moved_add(f->words[i].from & ~1u, f->words[i].to & ~1u, 2);
 	installed[ninstalled++] = n;
+	if (g.bn4) xnavi_bn4_songs_noted();
 	enemies_tell(n);
 	printf("xnavi: %s as Navi AI %d, enemy ids %#x-%#x: %u bytes written, %d veneers\n", f->name, f->ai, f->first_id, f->first_id + n->versions - 1,
 		(unsigned)used, veneers);
