@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T19:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -21,7 +21,8 @@ takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
 and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
-below), FireMan built and under proof ([FireMan built](#fireman-built)). BN5's Navis moved as
+below); ThunderMan, WindMan and FireMan are built and under proof, their
+companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -476,6 +477,191 @@ about four of them. So their battle sprites are loaded by battle, as
 their sounds are, into one room ([Battle sprites by battle](#battle-sprites-by-battle),
 above): one battle holds one BN4 Navi, and a tournament's rounds are
 battles apart. The 16 MB copy has no other room past FREE_LIB_TEAM (24 KB).
+
+## Companions
+
+ThunderMan, WindMan and FireMan each spawn companions in their inits,
+which BN6's actor init has none of. Three ports began with three ways to
+make them again. One mechanism now covers all three, and the next Navis
+(SearchMan's, AquaMan's) take it as it stands:
+
+- **The generator reads every init the same way**
+  (`tools/xnavirecipe_bn4_init.py` `init_calls`). A spawn is a call of a
+  routine in a first-kind type's block that spawns that type
+  (`BN4_SPAWN_1`, r0 a `movs`). Its registers are read: r4 a constant made
+  by a `movs`, `lsls` and `adds` (FireMan's sprite word 0x810, WindMan's
+  kinds 2 and 3), or r0 `hi` << 16 | a table's byte by the version with r1
+  the version (ThunderMan's). So are the words the init keeps after it:
+  the companion's +o given the Navi's address + v (WindMan's +0x60), the
+  Navi's +o given the companion (FireMan's +0x74, WindMan's +0x64). The
+  type moves with the Navi through the dispatch's first kind. The rest of
+  the init is read too: its +0x11 written (FireMan's), its sprite updated
+  (FireMan's), its update run (all three), its collision's flags
+  (WindMan's).
+- **Where the spawns are made.** Where the init spawns after its
+  collision's set-up (ThunderMan's), they go at BN6's companion start,
+  which follows the actor init's collision set-up
+  (`BN6_ACTOR_COMPANION_CALL`). Where it spawns before (WindMan's, FireMan's)
+  or updates its sprite, they go at the spawn's end (table 7), past the
+  whole of BN6's actor init. The spawn's end also takes the init's other
+  work, in this order: the collision's own r3 (`XNavi.coll_arg`), +0x11
+  given +0x10, the spawns, the sprite update, BN6's Navi frame. A Navi
+  whose init runs its update gets BN6's Navi frame there; running it or
+  not leaves ThunderMan's first difference where it is.
+- **The installer writes one or two shims of the Navi's home**
+  (`src/emu/xnavi_init.c`, `XnSpawn` and `XnInit` in
+  `src/emu/xnavi_recipe.h`): the project's own Thumb with a literal pool.
+  A spawn is a `bl` to its moved spawner, so lr carries the Thumb bit.
+  BN6's own routines, past a `bl`'s reach, are called by `mov r1,pc;
+  adds r1,#5; mov lr,r1; bx r0`. The shims return by `pop {r4, pc}`, as
+  BN6 calls both places by `mov lr,pc; bx r0`. GutsMan, with no init work
+  past his collision's r3, keeps that shim alone, byte for byte as before.
+  The three mechanisms before it are gone: `XnSpawned` and `spawned_set`
+  (FireMan's), `XnCompanion4` and `companion4_set` (ThunderMan's),
+  `XnCompanion` and `companions_set` (WindMan's).
+- **Dispatch numbers.** Each moved first-kind type takes the dispatch's
+  next number, after the families', in the order the generator derives the
+  Navis. That order is the order by cost (`NAVIS`: GutsMan, ThunderMan,
+  WindMan, FireMan): ThunderMan's 0x33 is 0xE0, WindMan's 0x5C 0xE1,
+  FireMan's 0x57 0xE2. The three branches had each taken 0xE0.
+- **Their battle sprites** are in the room the battles share
+  (`battle_sprite_place`, `XN_BN4_SPRITE`), none resident: list 2 0x41
+  GutsMan, 0x42 WindMan, 0x44 FireMan, 0x45 ThunderMan. The comparator's
+  `sprite_rows` keeps the room's row only for the Navi whose ids
+  (`.names`) the spec's foes name, so each spec reads its own Navi's
+  sprite there.
+- **Companions' interims**, kept by the module: the routines no battle of
+  theirs reaches are left as BN4's bytes (`CUT`, `UNWALKED_TABLES`), and
+  a mode is run as another (`COMPANION_MODES`). WindMan's companions'
+  init (the first kind's 0x5C, `0x080CCD0A`-`0x080CCD30`) is the same
+  choice FireMan's companion makes: 8 where `0x08007A8C`'s bit 0 is set,
+  else 4 where its settings' +6 has 0x20, else 0. Its state 4 is BN4's raw
+  bytes (`CUT`), and with them BN6's battle never reached its fight. Run
+  as its state 0 (`movs r2,#4` at `0x080CCD2E` made 0, as FireMan's at
+  `0x080CC464`), it does.
+
+The comparator tells a moved first-kind object by its type, not its NameID
+(`xdiff_snap.identity`, `T1_MOVED`; `xdiff_bn4.Bn4Canon.t1_moved`): BN4's
+companions have id 0, which read as MegaMan's. Its record keeps its own +9
+and id, and a spawn word's sprite number is read as the recipe's copy.
+Where a mutation pokes BN5's code (`poke5`), the comparator no longer
+looks among BN4's Navis' moved ranges (`src/dev/xdiff.c` pokes_put). A
+BN4 block covering the same address, moved after BN5's, had taken
+HotBody's sound mutation off its copy.
+
+## ThunderMan built
+
+The second in the order, under proof: his type 0x32, Navi AI 53, ids
+0x394-0x397 (`foes 394@52`), his sounds 0xAD and 0x143 at the pool's
+0x32 and 0x33. The addresses and how each was read are in
+[BN4 Red Sun's tables](../rom/bn4.md) (ThunderMan derived). What he adds
+to GutsMan's path:
+
+- **His state 1** only calls BN4's generic 1 (`push {lr}`, the call,
+  `pop {pc}`), so BN6's generic 1 stands in (`own_generic`'s `wraps`).
+- **His companion**, the first kind's 0x33 (`BN4_THUNDERCLOUDS`, which
+  spawns his clouds, the third kind's 0x6A), set out after his collision's
+  set-up with r0 0x14 << 16 | his version's byte of 20, 40, 60, 80 and r1
+  his version: one `XnSpawn` at his companion start. BN6's spawn keeps the
+  version at +4 as BN4's does. Its dying (`BN4_DYING`) is copied with him.
+- **His objects** (`tools/xnavirecipe_bn4_objects.py`): the third kind's
+  0x6A, 0x6F, 0x70 and 0x71 moved; the spawn word 0x04050301 a number;
+  0x71's list 5 sprite (`list5_sprites`); his sound 0x143, made by a
+  `movs` and an `adds` of 0xFF, at its slot (`wide_movs`). The can-move
+  check's kin and an x nudge copied; the panel break against BN6's
+  `0x0800CA8C`, audited; BN4's flag 0x1187 test and paused blink against
+  BN6's battle_isPaused and a nullsub, audited as interims.
+- **His palette**: read as FireMan's (below), V1-V3 0, as BN6's step 0
+  gives. His branch had read BN4's two tables the other way round and
+  called it an interim; that interim is gone.
+
+`bn4_thunderman_control` PASSes. **`thunderman_v1`** FAILs at t1, its
+verdict re-recorded after the merge: the comparator's fix moved his first
+difference. His companion is now told by its type and matches at t1.
+What parts is his cloud (the third kind's 0x6A), a step ahead in BN6: its
+counts (+0x3A 5 against 6, +0x9A and +0x9E 0x55 against 0x56), its
+sprite's frame, its +7 (1 against 2) and its collision's +1. Panel 5,1's
++0x17 (0x40 against 0) is still unread. No mutation of his port is added
+while the spec fails.
+
+## WindMan built
+
+The third in the order, under proof: his type 0x30, Navi AI 50, ids
+0x388-0x38B (`foes 388@52`). He was held from the install while his
+battle could not reach its fight; with the companions' mechanism above it
+does, and he is installed (`xnavi_bn4[]`; the generator's `HELD` is
+empty). What he adds:
+
+- **His own flinch and paralysis** (his table's 3 and 4): each ends his
+  wind (his +0x60, `BN4_WINDMAN_WIND`) and runs BN4's generic state of its
+  place, walked as his own with the tail aimed at BN6's.
+- **His dying**, the families' (`BN4_DYING`): BN6's Navi object's dying
+  stands in, as for every Navi (`DYINGS4`).
+- **His collision's flags** (`BN4_SET_FLAG`'s 0x30): BN6's struct2 flags
+  6, which BN6's actor init turns into the same flags and region 0x10.
+- **His wind**: his decision spawns the fourth kind's 0x41 of his side
+  (`BN4_WIND_SPAWN`), BN6's of the same steps (`BN6_WIND_SPAWN`); its slot
+  is BattleState +0x88 in BN4 and +0xC0 in BN6.
+- **His companions**, the first kind's 0x5C (`BN4_COMPANION`), kinds 2
+  and 3, each one's +0x60 the address of his +0x60, his +0x64 the second:
+  two `XnSpawn`s at his spawn's end (his init spawns them before its
+  collision's set-up). Their kinds' sprites are copied by
+  `bn4_twins.TABLES`. Their state 4 runs as 0 (Companions, above).
+- **His sounds past 0xFF** (0x126, 0x133), made by a `movs` and an `adds`
+  of 0xFF: the `movs` given the pool's slot, the `adds` 0 (`wide_movs`).
+
+`bn4_windman_control` PASSes. **`windman_v1`** (WindMan V1 alone at (5,2)
+against MegaMan idle at (2,2) with 2000 HP, as `gutsman_v1`) reaches its
+fight and FAILs at t1, its verdict recorded. His wind parts on two fields,
+as his branch found with the companions left out: its +0x38 points into
+each game's slot (BattleState +0x8C against +0xC4, a map the comparator's
+battle state lacks), and its +0x4C is 0 in BN4 and WindMan in BN6 (BN6's
+wind spawn gives its spawner). The world parts at t1 on the third kind's
+0x49 (+0x93 0xE against 0x8E, its +0xA8-+0xB4). No mutation of his port is
+added while the spec fails.
+
+## FireMan built
+
+The fourth in the order, under proof: his type 0x0C, Navi AI 52, ids
+0x390-0x393 (`foes 390@52`). His addresses are in
+[BN4 Red Sun's tables](../rom/bn4.md) (FireMan derived). What he adds
+over GutsMan:
+
+- **A call after the runner** (`navi_update`): his update calls the
+  pre-step, the runner, his own `0x080B81B0`, the after-step and the
+  present. His call is BN6's post hook (table 5), which BN6's Navi frame
+  runs after its status dispatcher (`0x080F36A8`). It tells his companion
+  to set its animation up again where his own changed. His after-step runs
+  before his present in BN4 and after it in BN6; no spec has shown the
+  order to matter.
+- **His own generic states 3-5** (`own_generic`): each tells his companion
+  and ends in BN4's generic state of its place, its tail aimed at BN6's.
+- **His init's work at his spawn's end** (one `XnInit`): his collision's
+  own r3 (0x21), his +0x11 his +0x10 (BN4's init writes 0, BN6's actor
+  init 0xFF), his companion spawned (r4 0xD710: list 4, the copy of BN4's
+  sprite 8) and kept at his +0x74, his sprite updated, BN6's Navi frame.
+- **His companion**, the first kind's 0x57: a sprite drawn on him (list
+  4's 8), its sprite setters paired, its sprite step copied (BN6's
+  nearest, `0x0801BBF4`, updates the sprite in the frame a new animation
+  is set up, a frame ahead of BN4's). Its mode 4, his flame's appear
+  through BN4's tile buffer, runs as mode 0 (`COMPANION_MODES`): an
+  interim neither spec reaches.
+- **The rest, as GutsMan's machinery takes it**: six third-kind objects
+  moved (0x09, 0x0A, 0x19, 0x1A, 0x1F, 0x21); the attack's end that keeps
+  the attack's +5 at AI data +0x3A copied (`BN4_ATTACK_END_KEEP`); five
+  new pairs in `tools/bn4_twins.py`, two audited; the third kind's 0x1A's
+  kinds' sprite table (`SPRITE_TABLES`); a table in MegaMan's block past
+  the last code walked (`MM_TABLE_SIZES`).
+- **The palette, read right**: `BN4_NAVI_PALETTE` takes its number's byte
+  at `0x0800B9B1` times the version's at `0x0800B9AC` (0, 0, 0, 2). Every
+  Navi so far gives 1 or 2 by its number, so V1-V3 have palette 0, as
+  BN6's step 0 gives; their SP palettes are an interim.
+
+`bn4_fireman_control` PASSes. **`fireman_v1`** FAILs at t1, its verdict
+held through the merge: his own record, AI data and collision match BN4's;
+his companion's sprite count (+0x91) is BN4 2, BN6 1, not yet explained.
+No mutation of his port is added while the spec fails. Of the four, only
+GutsMan is in the tournament's list of proved BN4 Navis.
 
 ## What tools/xnavirecipe.py needs for BN4
 

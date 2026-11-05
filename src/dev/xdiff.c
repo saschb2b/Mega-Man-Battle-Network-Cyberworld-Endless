@@ -621,9 +621,11 @@ static void pokes_put(const Spec *s, bool ram) {
 			continue;
 		}
 		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too; the chips' moved code
-		 * for a poke5 alone, its BN5 addresses lying among BN6's own attack families' code) */
+		 * for a poke5 alone, its BN5 addresses lying among BN6's own attack families' code; never BN4's Navis' for a
+		 * poke5, BN4's addresses of their blocks lying among BN5's: ThunderMan's, WindMan's and FireMan's, moved after it) */
 		for (int k = n - 1; k >= 0; --k)
-			if (at >= m[k].from && at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL))) {
+			if (at >= m[k].from && at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
+			    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE)) {
 				at = at - m[k].from + m[k].to;
 				break;
 			}

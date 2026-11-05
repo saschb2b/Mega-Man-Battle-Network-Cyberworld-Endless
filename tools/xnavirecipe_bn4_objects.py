@@ -1,7 +1,7 @@
-"""xnavirecipe_bn4_companion.py: what ThunderMan adds to tools/xnavirecipe_bn4.py's walk of a BN4 Navi (docs/multirom/bn4-navis.md,
-ThunderMan built): a companion his init sets out (a first-kind object of its own type, moved through the first kind's dispatch),
-a generic state his table names through a wrapper of his own, his objects' sprite of list 5, a sound past a byte named by a
-movs and an adds, and the routines his objects call that the families' pairs lack.
+"""xnavirecipe_bn4_objects.py: what BN4's Navis' moved objects ask of tools/xnavirecipe_bn4.py's walk past the families'
+machinery (docs/multirom/bn4-navis.md, ThunderMan built): the routines they call that the families' pairs lack (their twins,
+audits and copies), their sprites of list 5, a sound past a byte named by a movs and an adds, the routines their jump tables
+name that are copied with them. A Navi's init and the companions it spawns are tools/xnavirecipe_bn4_init.py's.
 
 Imported by tools/xnavirecipe_bn4.py alone. Numbers only: BN4's and BN6's addresses, read from both ROMs and each said why."""
 import os
@@ -67,80 +67,6 @@ def install(pairs):
     bn4_twins.NUMBERS.update(NUMBERS)
 
 
-def wraps_generic(b4, x, k):
-    """whether state `x` is only a call of BN4's generic Navi state k (push {lr}; bl; pop {pc}): that state, BN6's of its place
-    in his table (ThunderMan's 1, 0x080C38CC)"""
-    w = T.walk(b4, x & ~1, limit=0x10)
-    forms = [w.insns[a].form for a in sorted(w.insns)]
-    return forms == ['push', 'bl', 'pop'] and list(w.bls.values()) == [N.NAVI_GENERIC[k] & ~1]
-
-
-# His init's companion's form (ThunderMan's, 0x080C3868-0x080C3874): after the collision setup, r0 = hi << 16 | a byte of a table
-# of his block by his version (+4), r1 his version, then the call of his spawner, a routine that spawns a first-kind type
-FORM = ('movs', 'lsls', 'ldr_lit', 'ldrb', 'ldrb_r', 'orrs', 'bl')
-
-
-def companion_of(b4, f, w):
-    """his init's companion (FORM after the collision setup's call): its spawner a root of his walk, its type's region his (a
-    first-kind type moved through the dispatch), f.companion4 what the installer's shim needs (xnavi_install.c companion_set);
-    his init's call of his update noted (BN6's actor init makes none, 0x08017092)"""
-    f.companion4, f.moved1 = None, {}
-    addrs = sorted(w.insns)
-    setup = [s for s, t in w.bls.items() if t == X4.BN4['setup_coll']]
-    for site, t in sorted(w.bls.items()):
-        if t == f.update:
-            f.notes.append(f'{site:08X}: its init runs its update once (its state 0 in its spawn\'s frame); BN6\'s actor init does not')
-            drop(f, site, t)
-    if len(setup) != 1:
-        return
-    k = addrs.index(setup[0]) + 1
-    run = [w.insns[a] for a in addrs[k:k + len(FORM)]]
-    forms = tuple(i.form for i in run)
-    if forms != FORM:
-        return
-    sp = run[-1].target
-    sw = T.walk(b4, sp, limit=0x40)
-    spawn = [(a, X4.SPAWNERS4[s]) for a, s in sw.bls.items() if s in X4.SPAWNERS4]
-    ty = T.back_value(sw, spawn[0][0], 0)[0] if len(spawn) == 1 and spawn[0][1][0] == 1 else None
-    hi, table = run[0].f[1], b4.u32(run[2].lit)
-    if ty is None or run[1].f[2] != 16 or run[3].f[1:] != (5, 4) or table is None:
-        f.decide('companion', f'{run[-1].at:08X}: its init\'s companion in a form the generator does not read')
-        return
-    lo, end = X4.region_of(b4, ty)
-    f.moved1[ty] = dict(lo=lo, hi=end, routine=lo)
-    f.regions.append((lo, end, ty))
-    f.roots += [sp, lo]
-    f.companion4 = dict(spawner=sp, table=table, hi=hi, ty=ty)
-    drop(f, run[-1].at, sp)
-    f.notes.append(f'{run[-1].at:08X}: its companion, the first-kind {ty:#x} ({lo:08X}-{end:08X}) its spawner {sp:08X} sets out with r0 '
-                   f'{hi:#x} << 16 | its table {table:08X}\'s byte by its version: begun by BN6\'s actor init\'s companion word '
-                   '(0x08017064), a shim of its home (XnCompanion4)')
-
-
-def drop(f, site, t):
-    f.decisions = [d for d in f.decisions if d != ('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s Navi init makes nothing of')]
-
-
-def spawns1_of(f, alloc):
-    """his code's spawns of the first-kind types it moves (f.moved1): at a number of the dispatch's of their own, as
-    xrecipe_bn4.spawns_of moves the third kind's"""
-    for e, w in sorted(f.walks.items()):
-        for site, t in sorted(w.bls.items()):
-            kind, name = X4.SPAWNERS4.get(t, (None, None))
-            ty, chain = T.back_value(w, site, 0)
-            if kind != 1 or ty not in f.moved1 or len(chain) != 1 or chain[0][1] != 'movs':
-                continue
-            f.decisions = [d for d in f.decisions if d != ('type', f'{site:08X}: it spawns a 1 type {ty:#x} which it does not move')]
-            m = f.moved1[ty]
-            if 'as' not in m:
-                m['as'] = alloc.types[1]
-                alloc.types[1] += 1
-                f.types.append((1, m['as'], ty))
-            f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
-                               why=f'its first-kind object\'s type {ty:#x}: moved, the dispatch\'s {m["as"]:#x}'))
-            f.spawn_calls[t] = name
-
-
 def list5_sprites(b4, b6, f, alloc):
     """his objects' loads of a list 5 sprite (r1 0x14, r2 its number, each a movs): BN6's of the same bytes, else copied into
     list 5 at a number of its own (the families' list 5 range, an effect's sprite the same entry)"""
@@ -192,15 +118,6 @@ def wide_movs(f, pool):
             f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=0, rn=0, was=0xFF, now=0, why=why))
 
 
-def c_companion(f, n):
-    """its companion's shim's numbers as C (XnCompanion4), or ''"""
-    c = f.companion4
-    if not c:
-        return ''
-    return (f'static const XnCompanion4 {n}_companion = {{ OWN(0x{c["spawner"] | 1:08X}), 0x{c["table"]:08X}, 0x{c["hi"]:02X} }};   '
-            f'/* its init\'s companion: the first-kind {c["ty"]:#x} */\n')
-
-
 def copied_entries(f):
     """the entries of his moved objects' jump tables out of their regions that are routines copied with him (COPIED: his
     companion's dying, BN4_DYING): walked as his own, so the table's word names the copy, not a twin"""
@@ -210,17 +127,3 @@ def copied_entries(f):
             out.add(x & ~1)
             del f.outs[x]
     return out
-
-
-def palette_interim(b4, f):
-    """his palette by version where BN4's step is not 0 (BN4_NAVI_PALETTE: its byte of 0x0800B9AC times the version's of
-    0x0800B9B1, ThunderMan's 2 x 1, 2, 1, 2): BN6's actor init gives a Navi its table's 0x0800F354 by its version times the
-    step, 0 for versions 0-3 whatever the step (0x0800F346), so no step of BN6's gives his; palette 0 as an interim, said so"""
-    steps = [d for d in f.decisions if d[0] == 'struct1' and 'its palette step' in d[1]]
-    if not steps:
-        return
-    f.decisions = [d for d in f.decisions if d[0] != 'struct1' or not ('its palette step' in d[1] or 'gives no palette' in d[1])]
-    f.s1['palette'] = 0
-    pals = [2 * b4.u8(0x0800B9B1 + v) for v in range(4)]
-    f.interim.append(f'its palette by version is BN4\'s {pals} (BN4_NAVI_PALETTE\'s step 2), which BN6\'s actor init has no step for '
-                     '(0 for every Navi version 0-3, 0x0800F346): palette 0 until a shim sets it at its spawn')

@@ -17,11 +17,11 @@
 #include "xnavi_bn4_room.h"
 #include "xnavi_bn4_sounds.h"
 #include "xnavi_bn5.h"
+#include "xnavi_init.h"
 #include "xnavi_objects.h"
 #include "xnavi_room.h"
 #include "xnavi_sprites.h"
 #include "xsong.h"
-#include "xvirus.h"
 #include "xvirus_grow.h"
 #include "xvirus_move.h"
 #include "xvirus_tx.h"
@@ -152,70 +152,6 @@ static void records_bn4(const XNavi *n, const Game *g) {
 	}
 }
 
-/* its collision setup's own r3 (XNavi.coll_arg) written over BN6's actor init's at its spawn's end: a shim of its home (the
- * project's own Thumb, past the most its code's shims take: xvirus_shims_room) as its spawn end's entry (table 7), which must
- * be the empty hook */
-static void coll_arg_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
-	const XVirusFamily *f = &n->code;
-	const uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
-	if (table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its collision's r3"); return; }
-	if (place + 8 > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return; }
-	/* ldr r0,[r5,#0x54]; movs r1,#arg; strb r1,[r0,#BN6_COLL_SETUP_ARG]; mov pc,lr (BN6 calls a hook by mov lr,pc and bx r0,
-	 * 0x0800F430: lr has no Thumb bit, so a bx lr would leave Thumb) */
-	const uint16_t shim[4] = { 0x6D68, (uint16_t)(0x2100u | n->coll_arg), (uint16_t)(0x7001u | BN6_COLL_SETUP_ARG << 6), 0x46F7 };
-	uint8_t *p = xv_put(f->home + place, sizeof shim, true);
-	for (int i = 0; p && i < 4; ++i) put16(p + 2 * i, shim[i]);
-	table[7] = (f->home + place) | 1u;
-}
-
-/* a BN4 Navi's init's tail (XNavi.spawned) at its spawn's end: a shim of its home where coll_arg_set's would go, as its table
- * 7, which must be the empty hook. Each call by mov r1,pc; adds r1,#5; mov lr,r1; bx r0 (lr with its Thumb bit, as a bl
- * gives); the shim's own return pop {pc}, to the hook caller's lr (0x0800F430: mov lr,pc, no Thumb bit; pop stays Thumb) */
-#define SPAWNED_SHIM 0x40u
-#define SPAWNED_COLL_ARG 3u   /* BN6's actor init's r3 (BN6_NAVI_REGION's movs r3,#3), where its own is the same */
-static void spawned_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
-	const XVirusFamily *f = &n->code;
-	const XnSpawned *s = n->spawned;
-	const uint32_t place = (XV_HOME_SHIMS + xvirus_shims_room(f) + 3u) & ~3u;
-	if (table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's tail"); return; }
-	if (place + SPAWNED_SHIM > XV_HOME_VENEERS) { xv_fail("no room in its home for its init's tail past its shims"); return; }
-	if (s->at > 0x7Cu || s->at & 3u) { xv_fail("its companion kept where a str cannot reach"); return; }
-	const uint16_t call = 0x4679, ret = 0x3105, lr = 0x468E, bx = 0x4700, nop = 0x46C0;
-	const uint16_t shim[24] = {
-		0xB510, 0x6D68, (uint16_t)(0x2100u | (n->coll_arg ? n->coll_arg : SPAWNED_COLL_ARG)),
-		(uint16_t)(0x7001u | BN6_COLL_SETUP_ARG << 6), 0x7C28, 0x7468,                /* its r3; +0x11 its +0x10 */
-		0x4C08, 0x4809, call, ret, lr, bx, (uint16_t)(0x6028u | (s->at / 4u) << 6),   /* r4 its word; the spawner; str r0 */
-		s->sprite ? 0x4807 : nop, s->sprite ? call : nop, s->sprite ? ret : nop, s->sprite ? lr : nop, s->sprite ? bx : nop,
-		s->frame ? 0x4805 : nop, s->frame ? call : nop, s->frame ? ret : nop, s->frame ? lr : nop, s->frame ? bx : nop, 0xBD10,
-	};
-	const uint32_t lits[4] = { s->word, xv_move_ref(s->spawner), BN6_SPRITE_UPDATE | 1u, BN6_NAVI_FRAME | 1u };
-	uint8_t *p = xv_put(f->home + place, SPAWNED_SHIM, true);
-	for (int i = 0; p && i < 24; ++i) put16(p + 2 * i, shim[i]);
-	for (int i = 0; p && i < 4; ++i) put32(p + 0x30 + 4 * i, lits[i]);
-	table[7] = (f->home + place) | 1u;
-/* its companion's start (XNavi.companion4): a shim of its home past its shims and its collision's (the project's own Thumb):
- * push {lr}; ldrb r1,[r5,#4]; ldr r3,=table; ldrb r2,[r3,r1]; movs r0,#hi; lsls r0,r0,#16; orrs r0,r2; bl spawner; pop {pc}
- * (BN6 calls it by mov lr,pc and bx r0: pop {pc} stays in Thumb), the table's word after it; the companion's word its place */
-#define COMPANION4_SIZE 24u
-static uint32_t companion4_set(const XNavi *n) {
-	const XVirusFamily *f = &n->code;
-	const XnCompanion4 *c = n->companion4;
-	const uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f) + (n->coll_arg ? 8u : 0u), at = f->home + place;
-	const XvBlock *b = xvirus_block_of(f, c->table);
-	const uint32_t spawner = xv_move_ref(c->spawner) & ~1u;
-	if (place + COMPANION4_SIZE > XV_HOME_VENEERS || (at & 3u) || !b || !spawner) {
-		xv_fail("no room or no place for its companion's start");
-		return 0;
-	}
-	const int32_t off = (int32_t)(spawner - (at + 14u + 4u));
-	const uint16_t shim[10] = { 0xB500, 0x7929, 0x4B03, 0x5C5A, (uint16_t)(0x2000u | c->hi), 0x0400, 0x4310,
-		(uint16_t)(0xF000u | ((uint32_t)(off >> 12) & 0x7FFu)), (uint16_t)(0xF800u | ((uint32_t)(off >> 1) & 0x7FFu)), 0xBD00 };
-	uint8_t *p = xv_put(at, COMPANION4_SIZE, true);
-	for (int i = 0; p && i < 10; ++i) put16(p + 2 * i, shim[i]);
-	if (p) put32(p + 20, b->at + (c->table - b->start));
-	return at | 1u;
-}
-
 /* its state table, struct1, struct2 and held chips in its home; its entries of BN6's thirteen tables and the triples' Navi
  * words */
 static void records_set(const XNavi *n, const Game *g) {
@@ -244,13 +180,11 @@ static void records_set(const XNavi *n, const Game *g) {
 	};
 	uint32_t table[BN6_NAVI_TABLE_COUNT];
 	memcpy(table, entry, sizeof table);
-	if (n->spawned) spawned_set(n, table);
-	else if (n->coll_arg) coll_arg_set(n, table);
+	const uint32_t companion = xnavi_init_set(n, table);   /* (its collision's r3 and its init's work past BN6's actor init) */
 	for (int k = 0; k < BN6_NAVI_TABLE_COUNT && !xv_failed(); ++k) xn_set_word(XN_TABLE + k, (uint32_t)f->ai, table[k]);
 	const uint8_t ice = (uint8_t)f->ice;
 	if (!xv_failed()) xn_set(XN_T_ICE, (uint32_t)f->ai, &ice);
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);
-	const uint32_t companion = n->companion4 ? companion4_set(n) : xv_move_ref(n->companion);
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, companion);
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION_END, (uint32_t)f->ai, xv_move_ref(n->companion_end));
 	if (!xv_failed()) xn_set_word(XN_T_HIDE, (uint32_t)f->ai, xv_move_ref(n->hide));

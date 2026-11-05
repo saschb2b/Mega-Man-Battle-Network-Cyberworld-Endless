@@ -1,0 +1,20 @@
+{
+  "about": "BN4 Red Sun's WindMan V1 (BN4's enemy 0x88, a Soul Navi, two first-kind 0x5C companions his init sets out, made at his spawn's end) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against his move into BN6's engine as a Navi of BN6's Navi object (BN6's 0x388, Navi AI 50; src/emu/xnavi_bn4.c, installed after BN4's families), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, his recipe's among them; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "88@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1,
+  "verdict": {
+    "is": "FAIL",
+    "at": 1,
+    "why": "his port under way (docs/multirom/bn4-navis.md, WindMan built): his battle reaches its fight with his companions (the first kind's 0x5C, their state 4 run as 0); at t1 his wind (the fourth kind's 0x41) parts on two fields: its +0x38 a pointer into each game's slot (BattleState +0x8C | +0xC4, a map the comparator's battle state lacks) and its +0x4C (BN4 0 | BN6 WindMan, BN6's wind spawn gives its spawner); the world parts at t1 on the third kind's 0x49 (+0x93 0xE | 0x8E, its +0xA8-+0xB4)"
+  }
+}

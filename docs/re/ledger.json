@@ -358,6 +358,10 @@
     {
       "date": "2026-11-05",
       "what": "WindMan derived whole (tools/xnavirecipe_bn4.py and xnavirecipe_bn4_init.py) and held from the install (xnavi_bn4_held): located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, WindMan derived): BN4_WINDMAN 0x080C3234, BN4_WINDMAN_STATES 0x080C32F4, BN4_WINDMAN_WIND +0x60, BN4_T1_COMPANION 0x5C, BN4_COMPANION 0x080CCC9C, BN4_COMPANION_SPAWN 0x080CCF34, BN4_COMPANION_KINDS 0x080CCC94, BN4_COMPANION_AURA 0x080CCDC8, BN4_SET_FLAG 0x08012F82, BN4_WIND_SPAWN 0x080E68F8, BN4_WIND_END 0x080E69BC, BN4_WIND_SLOTS +0x88; BN6_WIND_SPAWN 0x080E666C and BN6_WIND_SLOTS +0xC0 in bn6_navis.h; five pairs in tools/bn4_twins.py (his flinch's and paralysis' tails, the wind's spawn, two sprite steps), three audited; bn4_windman_control PASS; windman_v1 not yet runnable (BN6's battle stops before its fight with his companions set out)."
+    },
+    {
+      "date": "2026-11-05",
+      "what": "BN4's Navis' companions by one mechanism: the ThunderMan, WindMan and FireMan branches merged, their three companion mechanisms (XnCompanion4, XnCompanion, XnSpawned) made one (XnSpawn and XnInit, src/emu/xnavi_init.c; tools/xnavirecipe_bn4_init.py reads every init: a spawn's r4 constant or r0 by a table of its version, the words kept after, the spawns at the companion start where the init makes them after its collision's set-up, else at the spawn's end with its +0x11, sprite and update); the moved first-kind types numbered in NAVIS' order by cost (ThunderMan's 0x33 0xE0, WindMan's 0x5C 0xE1, FireMan's 0x57 0xE2); WindMan installed (his companions' state 4 run as 0, 0x080CCD2E); the four battle sprites in the shared room."
     }
   ],
   "experiments": [
@@ -846,6 +850,14 @@
       "name": "fireman_v1: FireMan V1 in BN4's battle against his move into BN6's",
       "result": "python3 tools/xdiff.py fireman_v1 (FireMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 1200, BN6's 1201); FAIL at t1, recorded: FireMan's own record, AI data and collision the same, his companion's sprite count (+0x91) BN4 2, BN6 1.",
       "meaning": "His move runs in BN6's engine to his battle's end; the first difference left is his companion's sprite count, not yet explained (GutsMan's own opening count, legit.json's opening_count, is a lead to verify, not an allowance).",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "windman_v1 reaches its fight",
+      "result": "python3 tools/xdiff.py windman_v1 with his companions spawned at his spawn's end: still no fight (game state 0x0C, phase 0, 7800 frames) while the 0x5C's state 4 is BN4's raw bytes; with its movs r2,#4 at 0x080CCD2E made 0 (state 0, as FireMan's companion's mode 4) both battles run to their end and FAIL at t1 on his wind's +0x38 (BattleState +0x8C | +0xC4) and +0x4C (0 | WindMan). thunderman_v1 FAIL at t1 on his cloud (0x6A a step ahead), the same with or without BN6's Navi frame at his spawn's end; fireman_v1 FAIL at t1 unchanged (+0x91). gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; 187 of 187 mutations caught.",
+      "meaning": "The companions' state 4 (their appear through BN4's tile buffer) is taken in BN6's battle and hangs it: the interim that runs it as state 0 lets WindMan fight, and his wind's two fields are what is left at t1.",
       "link": "../multirom/bn4-navis.md"
     }
   ],
