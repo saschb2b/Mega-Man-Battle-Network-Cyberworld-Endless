@@ -242,9 +242,15 @@ sprite, the five sounds):
    art; its region in `src/emu/free_space.h` and its installer to add. All
    eighteen's art may not fit there (a battle sprite of tens of KB each).
 2. **His battle sprite** in BN6's Navis' list 2 at a number of its own, and
-   its arm points' record (`BN6_ARM_POINTS` reads a list 2 number's; BN4's
-   records unread): the Navis' numbering (`src/emu/xnavi_sprites.h`) to
-   extend for BN4's.
+   its arm points' record (`BN6_ARM_POINTS` reads a list 2 number's): the
+   Navis' numbering (`src/emu/xnavi_sprites.h`) to extend for BN4's. BN4
+   has no arm points to bring, as far as a search reaches: no routine of
+   BN5's arm points' body (`0x08015140`, BN6's `0x08018810`) in BN4's first
+   MB, searched by its opening's bytes, its record finder's tail
+   (`0x080151A0`) and BN6's record finder's shape (`ldr r0,[r2,r0]`, a
+   record size, `muls`, `mov pc,lr`), which finds BN5's (`0x080151AA`, 0x3C
+   a record) and nothing in BN4. His record is a decision: one of BN6's
+   Navis' of his build, or points read from his sprite.
 3. **Five sounds** BN6 has no song of (0xA2, 0xA3, 0xA4 and 0xA7 his
    states', 0xA5 his third kind's 0x1E's kind 0) and no slot left for them:
    BN4's families take all twelve of 0x34-0x3F. The owner's call, as each

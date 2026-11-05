@@ -505,8 +505,8 @@ def navi_art(b4, b6, f, alloc):
     alloc.list1 -= 1
     f.sprite.update(to_list=2, to_index=None)
     f.decide('sprite', f'its battle sprite (list {f.s1["list"]} {f.s1["index"]:#x}): BN6\'s Navis\' list 2 at a number of its own and its '
-                       'arm points\' record there (BN6_ARM_POINTS reads a list 2 number\'s; BN4\'s records unread), the Navis\' numbering '
-                       '(src/emu/xnavi_sprites.h) to extend for BN4\'s')
+                       'arm points\' record there (BN6_ARM_POINTS reads a list 2 number\'s), the Navis\' numbering (src/emu/xnavi_sprites.h) '
+                       'to extend for BN4\'s; BN4 has no arm points\' routine to read one from (docs/multirom/bn4-navis.md, GutsMan derived)')
 
 
 def navi_records(b4, f):
