@@ -1,0 +1,406 @@
+---
+type: Design
+title: "The tournament"
+description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, and the owner's open calls; designed with the game-design skill on 5 November 2026, nothing built."
+tags: [game, design, tournament, bn4]
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:01:00Z }
+sources:
+  - id: owner
+    resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
+    title: "The tournament as an act's climax"
+    author: human:saschb2b
+  - id: umami
+    resource: "umami.saschb2b.com, site Cyberworld Endless: run-start, run-end and guardian events, 6 to 26 October 2026, as docs/game/core-loop.md reads them"
+    title: "The players' own statistics"
+  - id: code
+    resource: "src/core/pacing.c (pacing_guardian_band, pacing_guardian_version, pacing_xguardian_hp), src/core/save.h (Profile.best_depth)"
+    title: "The guardian bands and versions as built"
+  - id: bn6f
+    resource: "~/.cache/mmbn-ref/bn6f: asm/ searched for 'tourn' and 'bracket' (nothing); data/textscript/compressed/CompText87EBDDC.s (a tournament Netopia once held)"
+    title: "bn6f, searched for a tournament"
+---
+
+# The tournament
+
+BN4's tournaments as a run's set piece. The owner's call 2 (4 November
+2026, [Battle Network 4 in a run](../multirom/bn4.md), The tournament):
+in some acts the arena holds a bracket of three Navis instead of one
+guardian, two rounds below the act's band and the final at it, MegaMan's
+HP carried from round to round with the arena's heal before the first
+alone; the act's card shows the bracket; the prize is the final's
+Guardian Data. This page is its design, reasoned with the game-design
+skill and checked against [the core loop's review](core-loop.md), with
+the calls left to the owner at the end. Nothing is built.
+
+## The experience
+
+> "Three of them, one after another, and every hit I take now I'll still
+> have taken in the final."
+
+Challenge first (the act's last test, one that can go the other way),
+fantasy second (a netbattler's tournament, Lan's own past in BN4, fought
+in one sitting), and for a veteran the old guard: BN4's Navis as they
+join. The dynamics that make them: one HP bar across three reads, a ramp
+inside one climax, and a folder judged on breadth and endurance where a
+single guardian judges it on one answer.
+
+What players said of BN4, and what the bracket keeps of it
+([Sources](../research/sources.md), Battle Network 4):
+
+- **The fights liked, the pattern around each round not** (an opponent's
+  trouble, Lan's errand, then the fight): only the fights come, one after
+  another in the arena, with no scenario, no errand and no line between
+  them.
+- **Random brackets hid the Navis wanted**, and players reset to steer
+  them: here the bracket is the run's seed's, fixed before the act
+  begins and shown whole on its card; a reset or a CONTINUE changes
+  nothing.
+- **Three clears to see everything**: BN4's Navis join the bracket's pool
+  as each is moved, behind no clear and no version (Red Sun's ROM fights
+  Blue Moon's Navis too).
+
+## The dialectic and the loop
+
+- **The dialectic** is the run's, what you bring against what you find:
+  one folder, and the HP walked in with, against three Navis shown
+  before. It is restated at three scales: the act (the dealer's answer
+  for the final against chips that keep HP through the rounds, an
+  HPMemory bought or not), the bracket (every hit taken in round 1 is
+  still taken in the final), the battle (finish fast and take a hit, or
+  slow and whole).
+- **The loop layer** is the act's: its climax, feeding the run's (the
+  final's Guardian Data, as any guardian's) and the meta only by memory
+  (each Navi met, named on later cards, his battle data and rival
+  record), never by power.
+- **Against the core loop**: it answers the review's second lack, a
+  climax that bites (522 of 561 guardian battles won, a median 81 to 85%
+  of MegaMan's HP left), and its third, danger in the right places
+  (viruses end 23 of 45 lost short nets, spread over layers 1 to 9): the
+  danger moves to the act's peak, where the player prepared for it. It
+  risks the first, pace: about a minute more in an act that holds one, no
+  walk and no word added (The numbers, below). It is not Phase 2's work on
+  single guardians (their HP left brought to a band with BN6's own
+  versions), which stands; it lands alone, as a change that tightens the
+  run must, and its coin makes its own comparison (Measured, below).
+
+## The patterns
+
+- **Rest-point spacing as the dial** (the catalog's bonfire-rest-point:
+  "spacing is the whole tuning problem"): the heal before the arena is
+  the rest, the three rounds its spacing. One number tunes the bracket
+  (the rounds' share of the band); a second (a heal before the final) is
+  held in reserve.
+- **A sawtooth inside one climax** (sawtooth difficulty): a warm-up, a
+  rise, the peak. In act 3 it is the run's own ladder in a row: act 1's
+  tier, act 2's, then act 3's.
+- **The honest telegraph**: the three Navis and their order on the act's
+  card before its first layer, "???" only for a Navi never met in any
+  run, as for any guardian.
+- **Two bosses as a peak**: Slay the Spire's twentieth Ascension ends its
+  third act with two bosses in a row. Here not a rung of the staircase,
+  which few climb (62 of 119 players never left threat 0), but an act the
+  seed picks.
+- **Meta as variety, not power**: the prize is a guardian's; the rounds
+  pay their results screens and memory.
+
+The smells, checked:
+
+- *Dominant strategy:* stacking the final's weakness alone (the dealer's
+  answer) leaves the rounds, drawn without regard to it, to the rest of
+  the folder; a folder of Recovery chips fights each round longer and is
+  hit more; a DarkChip in every round costs 60 max HP
+  ([DarkChips](meta/darkchips.md): 20 for each battle a dark power ran
+  in); a quit in the final restarts the bracket at round 1 (The arena's
+  door, below).
+- *No opportunity cost:* the folder's thirty chips are the budget, three
+  reads to cover.
+- *Hollow loop:* the final pays the run, the rounds the memory; nothing
+  dead-ends.
+- *Complexity over depth:* one rule ("three in a row, the HP carries,
+  the heal before the first"); no new screen, item, currency or menu;
+  BN6's battle untouched.
+- *Treadmill:* the same prize as a guardian's, the bands the act's.
+- *Ethics:* nothing to grind, nothing timed.
+
+## The numbers
+
+### Where, and how often
+
+**Recommended (call 1):** the short net's act 3 in half the runs, by a
+coin of the run's seed; in the endless net one act a cycle, act 3, 4 or
+5, each as likely, by the seed. Never act 1 or 2, act 6 (the Graveyard,
+before the Nest), the Nest, the Secret Area, a dark layer's board, or the
+act of the run's Glitch layer (Beside the rival and the Glitch layer,
+below): there the act keeps its single guardian.
+
+- **Act 3 first**, because the short net's last act before the Nest is
+  its peak, and its band is the first to leave room below it for two
+  rounds of BN6's Navis at their own HP: act 2's band (600-700) would
+  leave its rounds 300-420 and 420-560 HP, BlastMan and DiveMan alone of
+  BN6's, the same two every time. Act 1 stays every run's gentle opening
+  (its guardian falls 91 times in 95), where half the players decide.
+- **Half the runs, not every one**: the bracket stays a peak, not the
+  act's shape (the same guardian four runs running is a veteran's
+  complaint), and the statistics see a bracket and a single guardian at
+  the same act, from the same players.
+- **Every endless cycle**: the endless net's runs are winners', whom
+  guardians rarely end (ProtoMan ends 24 of 43, Gregar 3), so its deep
+  climaxes need the bite most.
+- With the Glitch layer's act left out (one run in three holds one, on
+  act 2 or 3 in the short net), a short net holds a bracket in about five
+  runs in twelve.
+
+**And who (call 2):** a profile meets its first bracket once it has
+reached the Nest in any run (`Profile.best_depth` 10 or more, an act 3
+guardian beaten); until then act 3 keeps its single guardian. A new
+system meets a player gentle or opt-in first (the core loop: the first
+rival duel, KnightMan in act 1 and BN5's blank chips each cost a run
+before they were tuned), and 63 of 119 players started one run only.
+
+### Each round's band
+
+From the act's guardian band, lo to hi (`pacing_guardian_band`):
+
+| Round | Its band | Its share of the band's middle |
+| --- | --- | --- |
+| 1 | lo/2 to 3hi/5 | about 55% |
+| 2 | 7lo/10 to 4hi/5 | about 75% |
+| Final | lo to hi | the act's guardian, drawn as today |
+
+| Act | Round 1 | Round 2 | Final | BN6's Navis that fit the rounds |
+| --- | --- | --- | --- | --- |
+| 3 | 400-600 | 560-800 | 800-1000, V1 | Round 1: BlastMan 400, DiveMan 500, SpoutMan 600 at V1 (act 1's band exactly). Round 2: SpoutMan 600, HeatMan and CircusMan 700, SlashMan, EraseMan, TenguMan and JudgeMan 800 |
+| 4 | 500-780 | 700-1040 | 1000-1300, EX first | Round 1: DiveMan, SpoutMan, HeatMan and CircusMan at V1. Round 2: BlastMan EX 800, DiveMan EX 1000, and the V1s from 700 to 1000 whose EX is past the band |
+| 5 | 550-900 | 770-1200 | 1100-1500, EX first | Round 1: BlastMan EX 800, the V1s from SpoutMan's 600 to the 900s. Round 2: BlastMan EX, DiveMan EX, the V1s from 800 to 1000 and Colonel 1200 |
+
+- **Versions** as a guardian's (`pacing_guardian_version`): V1 through
+  act 3, EX first from act 4 where it fits the round's band, else V1.
+  BN5's Navis at the lowest version whose HP reaches the round's floor,
+  held to its top as they spawn (`pacing_xguardian_hp`, as at a
+  guardian's); BN4's by the same rule as they come. No Navi of BN6's has
+  his HP cut: BN6 scales by choice, and only the other games' Navis,
+  whose versions are coarser, are held to a top, as they are now.
+- **Later cycles**, where every guardian is SP: the rounds a version
+  under, EX (BN5's and BN4's V3).
+- **A threat rung's rule** for guardians (EX from act 2) is the final's;
+  the rounds keep their bands.
+- **Where no Navi fits a round** (none of BN6's acts 3 to 5 today), the
+  nearest by HP, as for a guardian's pool.
+
+**What it makes**, projected for act 3 from the statistics (act 3's
+guardian: about 900 HP fought in 32 seconds for 19% of MegaMan's HP; the
+HP lost taken to grow with the seconds fought, assumed): round 1 about
+500 HP, 18 seconds and 11%; round 2 about 680 HP, 24 seconds and 14%;
+the final begun at about 75% of max HP and left at about 56%, where a
+single guardian leaves 81%. About 2.3 guardians' HP in 74 seconds of
+battle, 42 more than the guardian's, about a minute with the rounds'
+log-ins. If what a player loses also grows with the HP fought through
+(one guardian battle in fourteen lost at one band's worth), about one
+bracket in five is lost, and a short net that holds one is won about 39
+times in 100 rather than 45 (assumed; the statistics measure it, below).
+
+**The target**, the band the statistics hold it to: the bracket won 75
+to 90% of the time, its final begun at a median 60 to 80% of max HP.
+Over 90%, the rounds' shares rise by a tenth (to about 65% and 85%);
+under 75%, a heal of a quarter before the final (call 3's second answer)
+before the shares come down. BN6's battle is never the lever.
+
+### The HP carried, and no heal between
+
+**Recommended (call 3): no heal between the rounds.** The arena's heal
+(full, before the arena, as every act's third layer gives it) is the
+bracket's one; MegaMan begins each round with the HP the last one's
+results screen left him. The folder's Recovery chips, a Soul's UNITE, a
+Cross and Beast Out come anew each round, as each round is BN6's battle
+with its own Custom screen, so they are the heal the player brings. No
+PET between the rounds: the next Navi logs in as the results screen
+closes, and the bracket is fought with the folder walked in with.
+
+A heal between every round makes each round a guardian fought at full
+HP, three tests of the kind that has stopped testing (81 to 85% left
+after each); a heal before the final alone makes the rounds a toll that
+ends no run but through the final. Both stay levers if the statistics
+ask for them.
+
+### A loss
+
+**Recommended (call 4):** a round lost ends the run, as a guardian lost
+does (BN6's GAME OVER), whichever round. The bracket is the act's way on,
+as a guardian is, and a climax that cannot end the run does not bite.
+The rival's netbattle keeps its own rule (his deleting blow leaves 1 HP,
+an optional fight: [The rival](rival.md)); here the stake is said by the
+card, as a guardian's is.
+
+### The prize
+
+**Recommended (call 5):** the final's Guardian Data, whole and as any
+guardian's: his Navi chip at the version fought, his Soul where BN5 gives
+one (and Red Sun, once its Souls are moved), five HPMemory, the full heal
+and the NaviCust's draft; a BN4 Navi beaten with dark power gives his DS
+chip, as Battle Network 4 in a run plans.
+
+The rounds pay their results screens as a guardian's battle does (his
+row's zenny, his Navi chip's entry paid as the act's zenny,
+`loot_guardian_zenny`: about 1,260 zenny a battle on average in act 1,
+[Measuring it](economy/measuring.md)), by BN6's busting level, so a
+clean round pays better and the carried HP is paid for twice. And they
+pay memory: each round's Navi counts as met ([What MegaMan
+knows](meta/what-megaman-knows.md)), named on later cards, his moves in
+MegaMan's battle data, a rival record of his own. No Navi chip a round
+(three a bracket would rival the Glitch copy's pick, and Navi chips are
+Mega chips, five to a folder), and no cash-out between the rounds (the
+Virus Battler's verb).
+
+`build.py economy` runs when it is built: two guardian rows more in
+about five act 3s of twelve. Zenny is in surplus for winners already (a
+median 17,431 in a won short net), so if the rounds' rows put an act's
+zenny out of its band, their chip entries pay the act's battle zenny
+instead.
+
+### The card
+
+- **The act's card**, the reveal on the act's first layer as now: the
+  area, and in the guardian's place the bracket, three lines in order
+  (round 1, round 2, the final), each Navi's name with his version's
+  mark, "???" for a Navi never met in any run. A CONTINUE shows it again,
+  as the door does.
+- **Lan's HP**: beside a portal whose act holds a bracket, MegaMan's read
+  of a strong signal reads three, once, its words through
+  [the voice rules](../voice/rules.md). The rounds are the act's, so both
+  ways read it, and the home shop is the last decision before the act.
+- **The dealer** names the final's weakness and stocks his answer, as for
+  a guardian: one channel per fact. The rounds are not named again; a
+  veteran knows BN6's Navis.
+- **Each round's title card** (`cinema.c`'s) marks round 1, round 2 or
+  the final over the Navi's name. Rounds 1 and 2 have no intro and no
+  last word; the final has a guardian's (his intro keyed to the last
+  fight, his last word). MegaMan says one box at the door at most.
+- **The screen** (call 6): the card is ours, as the act's card already
+  is, since BN6 has no bracket screen (bn6f's code names none: `asm/`
+  searched for "tourn" and "bracket", nothing; its text names a
+  tournament once, as one Netopia once held). BN4 has its own, being
+  mapped beside this design ([BN4 Red Sun's tables](../rom/bn4.md)).
+- **The music**: the area's boss theme; where BN4's ROM is read, its
+  tournament song (0x17, copied into BN6 and proved with its other 33;
+  its role assumed) for rounds 1 and 2, and the boss theme for the final.
+
+### The entrants
+
+- **The final** is the act's guardian as drawn today
+  ([The structure](progression/structure.md), Choosing guardians; BN5's
+  by his coin where BN5 dresses the area, [BN5's
+  Navis](bosses/bn5-navis.md); BN4's as they come to guard BN4's areas),
+  so the act's chain (the card, the dealer's answer, the way chosen at
+  Lan's HP) is untouched.
+- **The rounds** are drawn from the run's seed and the act, never the
+  game's RAM, the same two whichever way is taken at Lan's HP, from every
+  Navi moved of the games present: BN6's guardians (navis 1-16 and 18,
+  ProtoMan's 11 apart), BN5's six (24-29) where its ROM is read, BN4's as
+  each is moved and proved (GutsMan first, [BN4's Navis in BN6's
+  engine](../multirom/bn4-navis.md)). Each Navi whose HP at a version
+  fits the round's band is as likely as any other, as the deep's shared
+  pool weighs them; the area's own are not favoured, as a tournament
+  gathers Navis from all over.
+- **Three apart**: none twice in a bracket, none the run has met as a
+  guardian, and not the final, wherever another fits. A round's Navi
+  stays free to guard a later act, where his Guardian Data and his Soul
+  still come.
+- **Never**: ProtoMan (the rival's, Chaud's own), Bass, the Cybeast,
+  navi 17, the Darkloids, Duo.
+- **With BN6 alone** every round has three Navis or more that fit (the
+  table above); BN5's and BN4's widen the pool, and with BN4's eighteen
+  moved about half the rounds' Navis would be BN4's.
+- **Nothing saved**: the draw is the seed's, so `Run` does not change;
+  the arena's layer is made as now, the final standing where the
+  guardian stands (`LAYER_MAKE` unchanged, to be checked when built).
+
+### The arena's door
+
+The door is the bracket's only save ([The arena's door](meta/arena-door.md)):
+the frame MegaMan steps in, after the heal and before round 1. A quit or
+a crash anywhere in the bracket comes back "From the arena's door", with
+the card, and round 1 with the HP and chips MegaMan walked in with.
+Nothing between the rounds is saved: no `Run` change, and no moment where
+a carried HP is frozen for a retry to start from. A crash in the final
+costs the rounds' minute, not their HP; a quit wins nothing a loss would
+not but the knowledge, as at a guardian, and replays the rounds with
+their risk. Not chosen: a save after each round, which makes a quit in
+the final a retry of the final at the HP carried, and needs the round in
+`Run` (`RUN_MAGIC`).
+
+### Beside the rival and the Glitch layer
+
+| | The rival's duels | The Glitch layer's copy | The tournament |
+| --- | --- | --- | --- |
+| Its verb | a race against BN6's DeleteTime; at the top a netbattle | one battle, forms swapped mid-fight on one pool of HP | three battles, MegaMan's HP carried |
+| Where | each act's duel layer, never a guardian's | a side layer behind a warp, an act's first layer from act 2 | the guardian's arena, acts 3 to 5 |
+| Chosen | yes, its choice starting on No | yes, behind a Yes | no: the act's way on, shown on its card |
+| Its Navis | ProtoMan, Chaud's | the run's beaten guardians, the last first | Navis the run has not met, the act's guardian last |
+| A loss costs | the HP (the netbattle's blow leaves 1) | the run, as any battle | the run, as a guardian |
+| It pays | standing and access | a pick of its forms' Navi chips | the final's Guardian Data |
+
+- **The rival** ([The rival](rival.md)) keeps his verb and his layer.
+  ProtoMan is never an entrant, so the rivalry's record stays the real
+  one's; a netbattle on act 3's duel layer (layer 8) costs the bracket
+  nothing, as the heal before the arena on layer 9 comes between.
+- **The Glitch copy** ([The Glitch layer](glitch-layer.md)) is memory and
+  chaos: the run's own guardians, swapped without a seam, on a chosen
+  detour. The bracket is a ramp known before: Navis new to the run, three
+  reads, a fresh hand for each. Two set pieces of several Navis in one act
+  would be one idea twice, with two Navi chips' prizes in one act, so the
+  bracket gives way where a Glitch layer stands. Its act is a fact of
+  layer making (`run_glitch_at`) and the bracket's is not, so the bracket
+  moves and no layer changes.
+- **The Virus Battler** presses on or cashes out at home; the bracket has
+  no cash-out. **A Server** is one fight a band up, and chosen.
+
+## Measured
+
+- `build.py pacing` ([Measuring it](progression/measuring.md)): 500
+  drawn runs' brackets, each round's Navi in its round's band and the
+  final in the act's (0 past), listed per act beside the guardians.
+- The statistics: the guardian event with its round (1, 2, the final)
+  and MegaMan's HP as each begins; the run-choices event with the
+  brackets met and the rounds reached; a run's end naming the round that
+  ended it. With the coin, act 3's brackets and act 3's single guardians
+  are read side by side, among profiles past the gate, against the target
+  above.
+- `build.py economy` for the rounds' rows (The prize, above).
+
+## How it would be built
+
+1. The bracket on BN6's and BN5's Navis behind a dev switch (a bracket in
+   every act from 3 that can hold one): the draw from the seed, the card,
+   the rounds one after another in the guardian's sequence
+   ([The sequence](bosses/sequence.md)), the pacing rows and the
+   statistics' round. `build.py test`, `build.py pacing`, captures of each
+   round's title card and of the final's Guardian Data, an autopilot run
+   through a bracket.
+2. Into players' runs, by the owner's call.
+3. BN4's Navis join as each is moved and proved, and BN4's tournament
+   song where its ROM is read.
+
+## The owner's calls
+
+Open, each with its options, the recommendation first.
+
+1. **How often?** (a) The short net's act 3 in half the runs, and in the
+   endless net one of acts 3 to 5 each cycle (recommended). (b) Every
+   run's act 3, and every cycle's in the endless net: the bite in every
+   run, at the cost of the comparison and of the peak's rarity. (c) Only
+   in runs with BN4's ROM read: BN4's set piece kept to BN4, reaching only
+   the runs that bring a ROM players were first offered today.
+2. **From a profile's first run?** (a) Once the profile has reached the
+   Nest in any run (recommended). (b) From the first run.
+3. **A heal between the rounds?** (a) None (recommended). (b) A quarter
+   of max HP before the final. (c) A full heal before the final.
+4. **A round lost?** (a) The run ends, as at a guardian (recommended).
+   (b) Lan pulls MegaMan out at 1 HP, as from ProtoMan's netbattle: out of
+   the bracket, the way on open without the Guardian Data (its five
+   HPMemory, heal, chip and draft lost, never the run).
+5. **What the rounds pay?** (a) Their results screens and memory, the
+   prize the final's (recommended). (b) Each round's Navi chip as well.
+6. **The bracket's screen?** (a) The act's card, ours, in every run
+   (recommended). (b) BN4's own bracket screen where BN4's ROM is read,
+   driven as BN6's own screens are, once its mapping shows it can be; the
+   card elsewhere.
