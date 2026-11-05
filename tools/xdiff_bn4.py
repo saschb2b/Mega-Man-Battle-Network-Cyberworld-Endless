@@ -33,6 +33,7 @@ from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_N
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
 XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
+XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE = 0x08800000 + 0x77C000, 0x10000   # (FREE_BN4_NAVI_SPRITE: the battle's Navi's battle sprite, xnavi_bn4_room.h)
 RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
 
 
@@ -87,7 +88,7 @@ def bn4_moved_types():
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
 
 
-def bn4_sprites(rom4):
+def bn4_sprites(rom4, foes=None):
     """the sprites BN4's moved families copied (src/emu/xvirus_bn4.c's XvSprite rows: BN4's list and number, BN6's copy's
     place and room): each (BN4's sprite's address, BN6's copy's, its room, its cache key, its room in BN4's RAM), BN4's from
     its sprite lists (src/core/rom.c's BN4 layout, sprite_lists) in its ROM; a pointer into either read by its offset in the
@@ -95,7 +96,7 @@ def bn4_sprites(rom4):
     from RAM, where BN4's battle preload put it (src/emu/bn4.h BN4_SPRITE_PRELOAD): its address None, found by its key
     (BN4_SPRITE_CACHED's, its list's offset << 8 | its number) in the frame's cache (bn4_cache), its room there the LZ77
     header's size less the size word the cache's pointer passes (the recipe's copy drops it too: tools/xrecipe.py sprite)"""
-    lists, rows = sprite_rows()
+    lists, rows = sprite_rows(foes)
     if not lists or not rom4:
         return []
     out = []
@@ -103,18 +104,29 @@ def bn4_sprites(rom4):
         word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
         base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
         lz = bool(word & 0x80000000)
-        out.append((None if lz else base, (XN_BN4_ART if room_base == 'XN_BN4_ART' else XV_ART) + int(off, 16), int(room, 16), key,
-                    (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
+        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE}.get(room_base, XV_ART) + int(off, 16),
+                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
     return out
 
 
-def sprite_rows():
+def sprite_rows(foes=None):
     """BN4's sprite lists (src/core/rom.c's BN4 layout, sprite_lists) and the recipe's XvSprite rows (src/emu/xvirus_bn4.c:
-    BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites'"""
+    BN4's list and number, BN6's copy's place and room, as text), in the recipe's order: bn4_sprites'. A Navi's battle sprite
+    in the room the battles share (XN_BN4_SPRITE, src/emu/xnavi_bn4_room.h) is his only where his ids (his recipe's .names)
+    are among the battle's `foes` (BN4's ids), the room holding his alone: every other Navi's there left out"""
     text = recipes_text()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
-    rows = re.findall(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (XV_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+) \}', text)
+    row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
+                     r'(XN_BN4_SPRITE), XN_BN4_SPRITE_SIZE) \}')
+    rows = []
+    for arr in re.finditer(r'static const XvSprite (\w+)\[\] = \{(.*?)\n\};', text, re.S):
+        names = re.search(r'\.names = \{ ([^}]*) \},[^;]*?\.sprites = ' + arr.group(1) + r',', text, re.S)
+        ids = {int(x, 0) for x in names.group(1).split(',')} if names else set()
+        for r in row.finditer(arr.group(2)):
+            if r.group(6) and foes is not None and not ids & set(foes):
+                continue
+            rows.append(r.groups()[:5] if not r.group(6) else (r.group(1), r.group(2), 'XN_BN4_SPRITE', '0', f'{XN_BN4_SPRITE_SIZE:X}'))
     return (0x08000000 + int(m.group(1).rstrip('uU'), 0) if m else None), rows
 
 
@@ -1087,7 +1099,7 @@ def one(name, spec, a, canon, run_xdiff, work):
         rom4 = os.path.join(work, 'rom', 'bn4.gba')
         rom4b = open(rom4, 'rb').read() if os.path.exists(rom4) else b''
         rom6 = os.path.join(work, 'rom', 'bn6.gba')
-        canon.sprites = bn4_sprites(rom4b)
+        canon.sprites = bn4_sprites(rom4b, [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x])
         rom6b = open(rom6, 'rb').read() if os.path.exists(rom6) else b''
         canon.alliance = bn4_alliance(rom4b, rom6b)
         canon.panels = panel_tables(rom4b, rom6b)

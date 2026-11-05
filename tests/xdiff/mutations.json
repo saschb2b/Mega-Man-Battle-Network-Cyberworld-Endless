@@ -1418,6 +1418,14 @@
     "080D06D4:3044"
    ],
    "what": "his attack's object's read of the other side's player from the battle state (BN4 0x080D06D4: adds r0,#0x44, the recipe's BN6's 0xD0, xnavirecipe_bn4.battle_players) left at BN4's +0x44: no player found there in BN6, the first rock not on MegaMan's panel (caught at t295, the rocks)"
+  },
+  {
+   "name": "GutsMan's battle sprite room filled with another's",
+   "spec": "gutsman_v1",
+   "poke": [
+    "08F2C801:03:1"
+   ],
+   "what": "the room BN4's Navis' battle sprites share (XN_BN4_SPRITE, src/emu/xnavi_bn4_room.c), filled as his battle's record is written from his seat's byte of the room's table (XN_BN4_SPRITES + 1: BN4's list 2 number of his sprite, 0x02), that byte made 0x03: another Navi's battle sprite loaded for him (caught at t1, his sprite's frames)"
   }
  ]
 }
