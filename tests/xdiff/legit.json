@@ -2591,6 +2591,19 @@
           "0x53"
         ],
         "why": "BN4's AI data +0x50 points at its side's control block (BN4_AI_CONTROL, set as the battle clears each side's AI data, 0x0800B7CE), a Navi's side's as MegaMan's; BN6's AI pool entry for a Navi holds none (its take zeroes +0 to +0x7B, 0x0800ED2C), and GutsMan's code never reads it (his AI tracker's reads): BN4's own"
+      },
+      {
+        "name": "GutsMan's attack's spawn's r3, each game's leftover",
+        "spawn_leftover": {
+          "kind": "T3",
+          "type": "0x1C",
+          "word": "0x3C",
+          "bn4": [
+            "battle state"
+          ],
+          "bn6": "0x3"
+        },
+        "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r1, r2 and r3 at the object's +0x34, +0x38 and +0x3C and r4 at +4, as BN6's twin through the dispatch's spawner does; GutsMan's spawner of his attack's 0x1C (0x080D0894: push {r0,r1,r2,r5}; movs r0,#0x1c; the spawn) sets r0 alone, so +0x3C holds what r3 held before it: in BN4 the battle state's pointer, in BN6 3. No code of the 0x1C object reads +0x3C (its init 0x080D057C and update 0x080D058E and the routines they reach, walked by tools/xnavirecipe_bn4.py), nor do the engine's routines it calls"
       }
     ],
     "clocks": "Two clocks, each record's proven from the routine that writes it, never assumed (the lead's call, 2026-11-04, the owner's to overturn). What a state drives (an object's state routine, run by its state runner: BN4 0x08013C48, BN6 0x0801B1C4) is compared with the battle's offset, BN6's at t + 1 against BN4's at t (allowed, \"BN6's battle a fight frame behind BN4's\"); what the battle's timer or the frame counter drives (a routine the main loop runs each fight frame, not through a state) at the same fight frame. Each record of the second clock is named with its code path (bn4.sounds' clock \"timer\"); a record whose clock is not shown is compared with the offset, and where it differs there the spec stays INCONCLUSIVE",

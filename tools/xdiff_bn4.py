@@ -27,7 +27,8 @@ import re
 
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
-                        SOUND, SPAWN, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name, u16, u32)
+                        SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
+                        u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
@@ -680,9 +681,17 @@ def frame_diffs(fa, fb, fbt=None):
             continue
         # (from its node's +8: its links compared as the run order; BN4's numbers as BN6's only against BN6's)
         fams = getattr(fa.canon, 'fams', None) if fb.game == 6 else None
-        found = [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ()),
-                                                                                     fa.fr.get('blinked', ())),
-                                                                 named(fb.canon, fb.game, ob), 8)]
+        na = named(fa.canon, fa.game, oa, fams, fa.fr.get('reserved', ()), fa.fr.get('blinked', ()))
+        nb = named(fb.canon, fb.game, ob)
+        found = []
+        # (a sprite state that is the slot's last occupant's in either game, its object spawned and no sprite set up since:
+        # no state of the object's, compared from its sprite's set-up on, as xdiff_snap.obj_cells reads BN5's: leftovers)
+        if getattr(oa, 'leftover', False) != getattr(ob, 'leftover', False):
+            found.append(('obj', SPRITE[oa.kind], 'no sprite set up' if oa.leftover else 'its sprite set up',
+                          'no sprite set up' if ob.leftover else 'its sprite set up'))
+        if getattr(oa, 'leftover', False) or getattr(ob, 'leftover', False):
+            na, nb = na[:SPRITE[oa.kind] + NODE], nb[:SPRITE[oa.kind] + NODE]
+        found += [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', na, nb, 8)]
         alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
         before = getattr(fa, 'before', {}).get(role)   # (its record at the frame before: a move's old panel)
         ca = coll_as_bn6(oa.coll, alliance, role, before.coll if before else None) if alliance and oa.coll is not None else oa.coll
@@ -880,6 +889,19 @@ def allowed_bit(d, fam):
     return None
 
 
+def spawn_leftover(d):
+    """legit.json's bn4 allowed spawn leftovers: a word of a moved object's record its spawn took from a register its caller
+    never set, each game's caller's leftover there, which no code of the object reads: the allowance d is, None where none"""
+    if d.part != 'obj' or not isinstance(d.role, tuple) or len(d.role) < 2:
+        return None
+    for a in bn4_allowed():
+        r = a.get('spawn_leftover')
+        if r and d.role[0] == r['kind'] and d.role[1] == int(r['type'], 0) and d.off == int(r['word'], 0) and \
+                d.a == tuple(r['bn4']) and d.b == ('raw', int(r['bn6'], 0)):
+            return a['name']
+    return None
+
+
 def navi_ai(d):
     """legit.json's bn4 allowed of a Navi's AI data (navi_ai: a range of its offsets, BN6's bookkeeping or BN4's, each with both
     games' code): the allowance d is, on a moved Navi's AI data alone (NAVI_NAMES), None where none"""
@@ -891,6 +913,29 @@ def navi_ai(d):
             if lo <= d.off <= hi:
                 return a['name']
     return None
+
+
+def leftovers(trace):
+    """{fight frame: the roles of the objects there that hold the slot's last occupant's sprite state}: an object spawned
+    while the hooks watched that has set up no sprite since, in each game (its spawn clears its record to its sprite state,
+    the first and third kinds' 0x8C bytes from +4: BN4 0x08003210's, BN6 0x080032AC; the state its last occupant's), as
+    tools/xdiff_events.py's Translations marks BN5's and BN6's (Obj.leftover, read by xdiff_snap.obj_cells: its sprite state
+    compared from its sprite's set-up on)"""
+    spawned, drawn, out = set(), set(), {}
+    for fr in trace['frames']:
+        for e in fr.get('setup', []) + fr['events']:
+            role = next((o.role for o in fr['objs'] if o.addr == e.object), None)
+            if role is not None and e.kind in (SPAWN, SPRITE_SET):
+                (spawned if e.kind == SPAWN else drawn).add(role)
+        out[fr['t']] = {o.role for o in fr['objs'] if o.role in spawned and o.role not in drawn}
+    return out
+
+
+def mark_leftovers(f, left):
+    """a frame's objects told whether their sprite state is the slot's last occupant's (leftovers)"""
+    roles = left.get(f.fr['t'], set())
+    for o in f.fr['objs']:
+        o.leftover = o.role in roles
 
 
 def compare(spec, ta, tb, canon, show=6):
@@ -908,6 +953,7 @@ def compare(spec, ta, tb, canon, show=6):
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
     stop, lines, ranks, before = None, [], {}, None
+    left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()
     MOVES.clear()
     for fra in ta['frames']:
@@ -917,6 +963,9 @@ def compare(spec, ta, tb, canon, show=6):
         n += 1
         fa = Frame(ta, fra, canon)
         fb = Frame(tb, frb, canon)
+        if against:
+            mark_leftovers(fa, left_a)
+            mark_leftovers(fb, left_b)
         fa.before = {o.role: o for o in before['objs']} if before else {}
         before = fra
         if against:
@@ -942,7 +991,7 @@ def compare(spec, ta, tb, canon, show=6):
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or navi_ai(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
+            d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
