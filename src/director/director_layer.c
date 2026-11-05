@@ -358,6 +358,7 @@ static bool dark_again(int *tiles, int biome, LayerKit *kit) {
  * autopilot run's check that one switched off never comes,
  * docs/game/meta/extras.md) */
 static void extras_log(int tiles) {
+	if (!emu_debug_on()) return;
 	int glitch = 0, battler = 0;
 	for (int i = 0; i < layer.nobj; ++i) {
 		glitch += layer.obj[i].type == OBJ_GLITCH;
@@ -390,7 +391,7 @@ static bool build_layer(void) {
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over, their bystanders) */
-	if (emu_debug_on()) extras_log(tiles);
+	extras_log(tiles);
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */
