@@ -199,6 +199,7 @@ static void bracket_show(int won) {
 	XbrEntrant e[BN4_ENTRANTS];
 	bracket_entrants(&B.g.rounds, won, e);
 	cinema_letterbox(false);
+	emu_encounters_hold(true);
 	B.opened = P.frame;
 	/* (the map entered again after it brings MegaMan back where he stands,
 	 * not to the layer's arrival: measured, he came back at its start) */
@@ -229,6 +230,7 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 		fprintf(stderr, "guardian %d at %d %d, arena entered along %d, MegaMan meets him at %d %d facing %d\n", g->navi, g->x, g->y,
 			layer.arena_dir, g->stand_x, g->stand_y, g->stand_face);
 	B.door = B.door_taken = false;
+	emu_encounters_hold(false);
 	round_set(g->bracket ? 0 : 2);
 	to(g->navi ? B_WAIT : B_NONE);
 	cinema_input(CINEMA_FREE);
@@ -310,6 +312,7 @@ static void fight_begin(void) {
 	 * act's band takes: docs/game/bosses/bn5-navis.md) */
 	bool older = guardian_older(B.foe), round = B.g.bracket && B.round < 2;
 	Encounter e = older ? xguardian_encounter(B.foe, B.foe_version) : make_boss(run.depth, run.biome, B.foe);
+	emu_encounters_hold(false);
 	/* (a bracket's round at its own version: run_bracket_draw) */
 	if (round && !older) e.foes[0].version = B.foe_version;
 	/* (no running from a guardian, as from BN6's story bosses: a
@@ -447,6 +450,7 @@ void boss_update(void) {
 		emu_write32(BN6_ENTER_Y, B.enter[1]);
 		emu_write32(BN6_ENTER_Z, B.enter[2]);
 		emu_write32(BN6_ENTER_FACING, B.enter[3]);
+		if (B.round > 2) emu_encounters_hold(false);
 		to(B.round > 2 ? B_AFTER : B_ROUND_IN);
 		break;
 	case B_ROUND_IN: round_in_update(); break;

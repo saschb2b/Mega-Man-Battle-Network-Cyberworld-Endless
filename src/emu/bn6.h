@@ -30,8 +30,8 @@
 #define BN6_ENTER_X           (BN6_GAMESTATE + 0x24) /* PlayerX, PlayerY, PlayerZ (16.16): where EnterMap puts MegaMan (bn6f
                                                        * spawnOWPlayerObjectForEnterMap_809e064), the map entered again after a
                                                        * screen of its own (the bracket moved, xbracket.h) too */
-#define BN6_ENTER_Y           (BN6_GAMESTATE + 0x28)
-#define BN6_ENTER_Z           (BN6_GAMESTATE + 0x2C)
+#define BN6_ENTER_Y           (BN6_GAMESTATE + 0x28) /* PlayerY, 16.16 */
+#define BN6_ENTER_Z           (BN6_GAMESTATE + 0x2C) /* PlayerZ, 16.16 */
 #define BN6_ENTER_FACING      (BN6_GAMESTATE + 0x30) /* FacingDirectionAfterWarp: the eighth he faces there (a u32, its byte read) */
 #define BN6_NPC_CHAT          (BN6_GAMESTATE + 0x10) /* Unk_10: 1 from A at an NPC till its chat ends (bn6f sub_809DF00, sub_809D7D8): START waits */
 #define BN6_SAVED_X           (BN6_GAMESTATE + 0x34) /* SavedRealWorldX: where Lan jacked in, 16.16, which BN6's jack-out returns him to */
@@ -346,6 +346,7 @@
 #define BN6_ENCOUNTER_CHECK   0x08005A98u /* its first test after the map's */
 #define BN6_ENCOUNTER_ROLLED  0x08005AE2u /* the beq after the roll's bl: r0 the roll's BattleSettings* */
 #define BN6_ENCOUNTER_START   0x08005AE5u /* movs r1,#1; bl StartBattle, r0 the record (Thumb) */
+#define BN6_ENCOUNTER_SKIP    0x08005AF3u /* the check's pop {r5,pc} (Thumb): no battle this frame, the roll's counter reset */
 #define BN6_ENCOUNTER_SKIP    0x08005AF3u /* the check's pop {r5,pc}: its battle not begun (Thumb) */
 /* Battles, by hook (src/director/encounter.c, src/emu/protoman_cross.c; Gregar's as Falzar's where not said) */
 #define BN6_START_BATTLE      0x08005BC8u /* StartBattle: r0 the BattleSettings*, every battle's */

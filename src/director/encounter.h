@@ -58,5 +58,10 @@ void emu_battle_force(const Encounter *e);
 void emu_battle_force_record(uint32_t settings);
 void emu_battle_release(void);
 bool emu_battle_forcing(void);
+/* No random battle while held, whatever the game's roll gives (a forced
+ * one still starts): a tournament's bracket between its rounds, where the
+ * map entered again after BN4's screen lifts the game's own flag
+ * (BN6_FLAG_NO_ENCOUNTERS) before the director's next frame */
+void emu_encounters_hold(bool hold);
 
 #endif
