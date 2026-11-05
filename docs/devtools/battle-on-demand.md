@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "A battle on demand"
-description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
+description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:20:00Z }
 ---
 
 # A battle on demand
@@ -86,6 +86,16 @@ one whose deletion is not BN6's generic Navi's, and fights nothing.
 CYBERWORLD_AUTOPILOT=1 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --net-biome 0 --seed 15 --dev god,onehit,quiet --frames 4900 \
   --input "300:,0:swap 101/107/10D" --shot 1468:/src/.build/out.bmp,1500:/src/.build/in.bmp   # HeatMan glitching out, ElecMan logging in
 ```
+
+The `bracket` step (`--input`'s `0:bracket 0 1e4000/004001/034002/044003/094004/114005/014006/024007`)
+shows BN4 Red Sun's tournament bracket, moved into BN6 (`src/emu/xbracket.h`;
+[BN4's tournament screens](../multirom/bn4-tournament.md), Moved into BN6), from the
+map MegaMan stands on: the tournament (0 The Den Battle Tournament to 3 Free
+Tournament), then its eight entrants in bracket order, each its id, flags
+and seed in hex (`BN4_ENTRANT_*`: 1E MegaMan, 40 still in, 80 out this
+round, 1 to 4 the rounds won), '/' between them. It needs BN4's ROM beside
+BN6's; A, B or START fades it out and the map is entered again.
+[The bracket's differential](bracket-diff.md) runs it against BN4's own.
 
 The `xrecord` step (`--input`'s `0:xrecord 811DE10`, play.py's `xrecord
 811DE10`; issue #82) starts one of BN5's battle records at the same first

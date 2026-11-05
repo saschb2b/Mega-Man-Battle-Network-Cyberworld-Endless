@@ -267,7 +267,10 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n);
  * XV_ART to XV_END), or another installer's region (a chip's code,
  * xchips_code.h), and the stubs of its own its calls may go to besides
  * BN6's routines (stubs to stubs_end; the families' none) */
-typedef struct { uint32_t code, code_end, art, art_end, stubs, stubs_end; } XvRegion;
+typedef struct {
+	uint32_t code, code_end, art, art_end, stubs, stubs_end;
+	bool screen;   /* code of a screen's, no battle object's: its r5 a state of its own, whose +1 no object type */
+} XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
  * within `r`; where not, why. */

@@ -132,13 +132,17 @@ static uint32_t resolve(uint32_t target, void *user) {
 	return 0;
 }
 
+/* (the region of the code alone being staged, xvirus_code_stage's: a screen's reads no object's type) */
+static const XvRegion *move_ctx_region;
+
 /* One instruction of a block's code checked: a load from its literal pool
  * must find a word of the recipe's pools, a branch stay in the block, and
  * no read of its object's type (ldrb rX,[r5,#1]: a moved object's is the
  * dispatch's, its game's number in the side table, xvirus_dispatch.h). */
 static bool insn_ok(const XVirusFamily *f, const XvBlock *b, uint32_t a, uint16_t op) {
 	uint32_t pc4 = (a + 4) & ~3u;
-	if ((op & 0xFFF8) == 0x7868) return xv_fail("its object's type read at %08x (the dispatch's, its number in the side table)", (unsigned)a);
+	if ((op & 0xFFF8) == 0x7868 && !(move_ctx_region && move_ctx_region->screen))
+		return xv_fail("its object's type read at %08x (the dispatch's, its number in the side table)", (unsigned)a);
 	if ((op & 0xF800) == 0x4800) {   /* ldr rd,[pc,#imm]: a pool of its own block (a clone has none) */
 		uint32_t t = pc4 + (op & 0xFFu) * 4;
 		const XvData *d = xvirus_data_at(f, t);
@@ -915,7 +919,7 @@ bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneer
 	memset(&c, 0, sizeof c);
 	c.f = f;
 	c.rom = g.rom;
-	c.region = r;
+	c.region = move_ctx_region = r;
 	int cap = (int)(sizeof c.veneers / THUMB_VENEER_SIZE);
 	c.pool = (ThumbVeneers){ c.veneers, veneers, nveneers < cap ? nveneers : cap, 0 };
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(&c, &f->blocks[i]);
@@ -925,6 +929,7 @@ bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneer
 	if (!xv_failed()) sprites_set(f, &g);
 	if (!xv_failed()) effects_set(f, &g);
 	if (!xv_failed()) types_set(f, &g);
+	move_ctx_region = NULL;
 	return !xv_failed();
 }
 
