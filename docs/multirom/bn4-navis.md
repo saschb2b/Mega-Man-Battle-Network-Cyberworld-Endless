@@ -217,7 +217,16 @@ third-kind objects he spawns moved with him, each call paired by
   AI 48 + seat, ids 0x380 + 4 x seat, past every family's ids (GutsMan AI 49,
   ids 0x384-0x387); his palette 0 for every version (`BN4_NAVI_PALETTE`'s
   step 0, as BN6's actor init gives a step of 0); his objects' list 3 sprite
-  copied into list 4, its load's list offset made list 4's.
+  copied into list 4, its load's list offset made list 4's. The art's and
+  the dispatch's numbers continue past BN4's families' (the generator
+  derives theirs first: list 4 from 0xC9, effects from 0x99, the dispatch's
+  types from 0xE5), an effect a family already moved shared (0x15,
+  Billy's 0x90).
+- **A moved object's kinds' table** (`bn4_twins.TABLES`) read by the kinds
+  he spawns, not the family's that names it: the third kind's 0x0B, CirKill's
+  shot, is his machine gun's too, its kind 5 (his spawn's r4), whose sprite
+  (list 4 0x15) is copied and its byte given the copy's number; the 0x1E's
+  kinds' sounds likewise (`BN4_T3_1E_KINDS`).
 
 The pipeline's control for a Navi holds: BN4's battle with GutsMan V1 alone
 against MegaMan idle (2000 HP), fought twice, is the same at every one of
@@ -225,7 +234,8 @@ against MegaMan idle (2000 HP), fought twice, is the same at every one of
 machine gun and his other objects in it ([The differential](../devtools/differential.md),
 The BN4 trace for a Navi).
 
-Seven decisions stay open, so no C file is written yet:
+Seven decisions stay open, so no C file is written yet (the room, the
+sprite, the five sounds):
 
 1. **His room**: XN_MORE's four slots are the Darkloids'. Proposed: FREE_TAIL's
    free bytes (`EMU_FREE + 0x720000` to FREE_LIB_TEAM), his home, code and
@@ -235,12 +245,12 @@ Seven decisions stay open, so no C file is written yet:
    its arm points' record (`BN6_ARM_POINTS` reads a list 2 number's; BN4's
    records unread): the Navis' numbering (`src/emu/xnavi_sprites.h`) to
    extend for BN4's.
-3. **Four sounds** BN6 has no song of (0xA2, 0xA3, 0xA4, 0xA7) and no slot
-   left for them: BN4's families take all twelve of 0x34-0x3F. The owner's
-   call, as each BN4 sound's slot was.
-4. **A sound one of his objects plays** by a number its spawner passes
-   (`0x080D0B18`'s `ldrb r0,[r7,#4]`), to follow back to the states that
-   spawn it.
+3. **Five sounds** BN6 has no song of (0xA2, 0xA3, 0xA4 and 0xA7 his
+   states', 0xA5 his third kind's 0x1E's kind 0) and no slot left for them:
+   BN4's families take all twelve of 0x34-0x3F. The owner's call, as each
+   BN4 sound's slot was. The 0x1E's sounds are its kinds' bytes
+   (`BN4_T3_1E_KINDS`, `SOUND_TABLES`), its other two 0xA6, the families'
+   slot 0x38.
 
 Then the C file (`src/emu/xnavi_bn4.c`, an XNavi), a BN4 game in
 `xnavi_install.c` (no Navi tables: his records his four enemy records, his
