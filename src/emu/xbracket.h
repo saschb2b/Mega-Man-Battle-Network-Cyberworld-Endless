@@ -47,8 +47,14 @@
 #define XBR_BLEND_DMA   (RAM_BRACKET + 0xC00u)   /* ... the HBlank DMA's source: them as the frame before wrote them (XBR_STUB_FRAME) */
 #define XBR_TILES       (RAM_BRACKET + 0x1000u)  /* its tiles unpacked (BN4's 0x0202E000, 0x26C4 bytes), to RAM_BRACKET_END */
 
-/* An entrant as the entry takes it */
+/* An entrant as the entry takes it: `id` BN4's own plate (BN4_ENTRANT_ID: 0x00-0x16, BN4_ENTRANT_MEGAMAN, 0xFF none), or
+ * XBR_PLATE_NAVI(n) for BN6's and BN5's Navis */
 typedef struct { uint8_t id, flags, seed; } XbrEntrant;
+/* The plate of the run's Navi `n`, his number in src/layer/guardians.c (guardian(n): BN6's 1-10, 12-16 and 18, BN5's
+ * GUARDIAN_OLDER_FIRST to GUARDIAN_OLDER_LAST, 24-29), as the moved bracket draws him: his face made from his own
+ * game's ROM at install (xbracket_faces.h), ids 0x21-0x32 and 0x38-0x3D; one whose face was not made (BN5's ROM not
+ * read) draws as an empty plate (BN4_PLATE_EMPTY_ID) */
+#define XBR_PLATE_NAVI(n) (0x20 + (n))
 
 /* The bracket into the core's copy, once a core, where BN4's ROM is read:
  * true once it is there; false, nothing of it written, where a check

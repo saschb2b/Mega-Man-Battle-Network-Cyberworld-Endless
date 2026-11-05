@@ -80,7 +80,8 @@
 #define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
 #define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BRACKET */
+#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BRACKET_FACES */
+#define FREE_BRACKET_FACES  (EMU_FREE + 0x78C000u)   /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c), to: */
 #define FREE_BRACKET        (EMU_FREE + 0x790000u)   /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c), to: */
 #define FREE_BRACKET_END    (EMU_FREE + 0x7A0000u)
 #define FREE_LIB_TEAM       (EMU_FREE + 0x7A0000u)   /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c), to: */

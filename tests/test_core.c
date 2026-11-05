@@ -4023,10 +4023,12 @@ static void test_free_space(void) {
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
 		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
+		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
 		{ "BN4's bracket screen", FREE_BRACKET, FREE_BRACKET_END }, { "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
-	CHECK(FREE_TAIL <= FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM, "free space: the bracket's room after the free tail, before the teammates'");
+	CHECK(FREE_TAIL <= FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
+	      "free space: the bracket's faces and room after the free tail, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */

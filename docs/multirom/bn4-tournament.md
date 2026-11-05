@@ -1,9 +1,9 @@
 ---
 type: Research
 title: "BN4's tournament screens"
-description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, the bracket moved into BN6 as its main mode 0x3C by a recipe and proved pixel for pixel against BN4's own, and how BN4 draws a plate, every BN6 and BN5 entrant's face made into one from his own game's art and proved on BN4's bracket."
+description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, the bracket moved into BN6 as its main mode 0x3C by a recipe and proved pixel for pixel against BN4's own, and how BN4 draws a plate, every BN6 and BN5 entrant's face made into one from his own game's art, proved on BN4's bracket and built into the moved one at install."
 tags: [multirom, bn4, tournament, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T04:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:59:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -230,25 +230,56 @@ variants were made but not seen on screen.
 
 ### The whole set
 
-| | Estimate |
+| | As built |
 | --- | --- |
-| Navis | 22: BN6's 16 (11 by mugshot, Falzar's 5 by head window) and BN5's 6 where its ROM is read. BN4's own Navis keep their plates (ids 0x00-0x16, GutsMan's 0x00 first) and MegaMan his (0x1E). |
-| Bytes | 512 a plate (384 tiles, 128 palettes). In sheets as BN4's: one of 16 for BN6's, as sheet A (9,156 bytes), and one of 6 for BN5's, as sheet B (4,008 for its 7): about 13 KB of BN6's free ROM, and no RAM, as the tiles are read in place. |
-| Time | Once at install, from the ROMs as read: a few hundred thousand operations for all 22, well under a millisecond in C. |
-| Where | Beside BN4's plate sheets in the moved screen's art, a region of about 16 KB in `FREE_TAIL` (575 KB unclaimed, `src/emu/free_space.h`), named and claimed with the move. |
-| Ids | The moved copy's tables grown (`BN4_PLATE_FRAMES`, `BN4_PLATE_SHEETS` and `BN4_PLATE_PALETTES` to 0x40 entries, `BN4_PLATE_SPRITES` and `BN4_MENU_SPRITE_PTRS` an entry for each new sheet): for example 0x20 + the run's navi number, BN6's 0x21-0x32 and BN5's 0x38-0x3D. The other way, seven of BN4's ids rewritten before each bracket (7 x 512 bytes) with no table grown, is an installer's write mid-run; the first keeps the install at boot. |
+| Navis | 22: BN6's 16 (10 by mugshot; Falzar's 5 and EraseMan by a head window) and BN5's 6 where its ROM is read. BN4's own Navis keep their plates (ids 0x00-0x16, GutsMan's 0x00 first) and MegaMan his (0x1E). |
+| Bytes | 512 a plate (384 tiles, 128 palettes), in two copies of BN4's sheets: the first (9,160 bytes) for BN6's 16 on its animations 0-15, the second (4,012) for BN5's 6 on its animations 0-5; with the grown tables 13.5 KB of BN6's free ROM, and no RAM, as the tiles are read in place. |
+| Time | Once at install, from the ROMs as read. |
+| Where | `FREE_BRACKET_FACES` (`EMU_FREE` + `0x78C000`, 16 KB before `FREE_BRACKET`, `src/emu/free_space.h`; its layout in `src/emu/xbracket_faces.h`), staged and claimed with the screen's move. |
+| Ids | `XBR_PLATE_NAVI(n)` (`src/emu/xbracket.h`): 0x20 + the run's navi number (`src/layer/guardians.c`), BN6's 0x21-0x32 and BN5's 0x38-0x3D. The moved copy's `BN4_PLATE_FRAMES`, `BN4_PLATE_PALETTES` and `BN4_PLATE_SHEETS` grown to 0x40 entries (BN4's 0x00-0x1E, a face's id its template's animation and first palette in its copy, every other id the empty plate's, 0x17), `BN4_PLATE_SPRITES` to 0x14 (sheet values 0x12 and 0x13 the copies'), `BN4_MENU_SPRITE_PTRS` to 8 (6 and 7 the copies), each read through its one literal in the moved code, aimed at the grown table. A Navi of BN5's whose ROM is not read draws as the empty plate. |
+
+### Built
+
+`src/emu/xbracket_faces.c` is `tools/bn4_faces.py`'s conversion in C, run
+as the bracket installs (`xbracket_install`, in the same staged step, all or
+nothing): each face read from the player's ROMs, made a plate, written over
+its template's plate in its sheet's copy, and the tables and literals above.
+The Python stays the oracle: `python3 tools/bn4_faces.py check` runs the
+host build headless, which reads every plate it installed back from the
+core's ROM copy the way the bracket reads it (the moved literals, the grown
+tables, the sheet's pointer, the animation's tiles and the palettes at its
+base, variant and nibble), and compares each with the oracle's: all 22 the
+same byte for byte. `--mutation facepal` leaves HeatMan's palettes as BN4's
+GutsMan's, and the check FAILS on it (palette 0, 101 of 512 bytes).
+`tools/xbracket.py compare` still PASSes all five cases with the tables
+grown, BN4's own plates drawn through them.
+
+Making the oracle portable took three of its rules stated: a 2x2 block's
+or the edge's full tie (the same count and darkness) goes to the lower
+index (it went by the order of Python's sets of small numbers: 4 blocks of
+the 22 faces changed); and a merged colour's slot keeps the kept colour
+(the oracle gave it the merged one's, against its own rule). The grey
+variant's float rounds the same as an exact half-to-even of
+5 + 7s / 1000 (s = 25 r + 60 g + 15 b) for every colour, which the port
+computes in whole numbers.
+
+The rough heads, compared side by side in colour and grey: EraseMan's
+halved mugshot lost his face to its red visor, and a head window of his
+battle sprite at (4, -55) reads as his head; TomahawkMan's window moved to
+(3, -47) keeps his mask whole. ElecMan keeps his halved mugshot: his battle
+sprite's head is small and dark, his mugshot at its own scale a close-up
+the other plates are not.
+
+Seen in BN6 (the dev step `0:bracket T IIFFSS/...`, frames in
+`.build/faces/`): The Den Battle Tournament with MegaMan, HeatMan, SpoutMan,
+BN5's Colonel, NumberMan, BN6's Colonel, ToadMan and GutsMan, every plate
+in colour, then after its first round the four winners a step up in colour
+and the four losers grey; and three brackets holding all 22.
 
 What does not fit yet:
 
-- Halving loses fine lines: ElecMan's and EraseMan's faces read darker
-  than their mugshots. A window per face at its own scale, as Falzar's
-  five take, could replace the halving where it reads better.
-- The head windows are by eye; TomahawkMan's (BN6's) cuts his mask at its
-  edge.
-- The proof writes over BN4's own ids in BN4's ROM; the new ids and the
-  sheets in BN6's free space come with the screen's move, whose proof
-  against the guest's bracket covers BN4's own plates only.
-- What chooses the lighter variant (1) was not found.
+- What chooses the lighter variant (1) was not found; the faces carry it.
+- The rest of the head windows and ElecMan's halving are by eye.
 
 ## Recommendation
 
@@ -262,8 +293,8 @@ guest serves as its oracle, which is what the guest is kept for. In order:
 1. The bracket screen moved, BN4's own plates, MegaMan and BN4's Navis as
    they join (GutsMan's move is under way), proved against the guest's
    bracket frame by frame, in a free BN6 main mode.
-2. Faces for BN6's and BN5's Navis from their own games: found and proved
-   (Faces for every entrant), their sheets installed with the move.
+2. Faces for BN6's and BN5's Navis from their own games: found, proved
+   and installed with the move (Faces for every entrant, Built).
 3. Until then, a bracket of BN6's and BN5's Navis has no BN4 presentation:
    which acts' brackets are BN4's Navis is the tournament's design's call
    (its numbers, [Battle Network 4 in a run](bn4.md), The tournament).
@@ -341,7 +372,7 @@ of them committed.
 **Not reached.** The return to the map after the screen (written as BN6's
 own screens return, not run past the fade); the song heard (its slot set, not
 listened to); a tournament's bracket in a run (the tournament's design calls
-the entry; faces for BN6's and BN5's Navis are their own unit, above); the
+the entry; faces for BN6's and BN5's Navis installed with it, above); the
 screen opened from a script (`BN4_BRACKET_FROM_SCRIPT`, its return the
 host's stub); the Free Tournament's own list (`0x020014F0`) and its menu
 sprite types 0x3C and 0x3D, which the move gives a stub (BN4 draws no plate
