@@ -1,9 +1,9 @@
 ---
 type: ROM Map
 title: "BN4 Red Sun's tables"
-description: "Addresses in BN4 Red Sun's ROM, read for research alone: its map, coordinate, song and sprite tables, its net's five large areas and their 256-colour maps as BN6 shows them, its sound engine against BN6's, battle records and the encounter check that starts one, enemy and chip records and names, its reward rows, its virus families' and Navis' code, its Souls in battle, how much of bn6f's code it shares, and the romlab tool that checks them."
+description: "Addresses in BN4 Red Sun's ROM, read for its visitors and for research: its map, coordinate, song and sprite tables, its net's five large areas and their 256-colour maps as BN6 shows them, its sound engine against BN6's, battle records and the encounter check that starts one, enemy and chip records and names, its reward rows, its virus families' and Navis' code, its Souls in battle, how much of bn6f's code it shares, and the romlab tool that checks them."
 tags: [rom, bn4, multirom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T23:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), game code B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, 8 MB"
@@ -23,11 +23,13 @@ its tables found by the shapes BN5's were found by ([BN5's maps, songs, text and
 each checked on BN5's ROM as the control where BN5's address is known.
 The names are `src/emu/bn4.h`'s and `XRomLayout`'s (`src/core/rom.c`,
 `XROM_BN4_RED_SUN_US`); BN4's symbol files are written from them
-([Symbols](symbols.md)). The engine reads BN4's ROM only when a dev tool
-asks (`xrom_research`: the atlas's `x1`), as it lends a run nothing yet;
-its five net areas dress BN6's for a dev tool's review alone
-(`xarea_review`: `--net-biome x15` to `x19`, the atlas), held out of runs
-([Status](../multirom/status.md), BN4 Red Sun's areas).
+([Symbols](symbols.md)). The engine reads BN4's ROM wherever a player
+brings it, for its six moved virus families, which visit a run's battles
+([Battle Network 4 in a run](../multirom/bn4.md), Its viruses as
+visitors), and for its five net areas, which dress BN6's in runs by the
+seed (since 5 November 2026) and for a dev tool's review
+(`xarea_review`: `--net-biome x15` to `x19`, the atlas;
+[Status](../multirom/status.md), BN4 Red Sun's areas).
 
 `python3 tools/bn4_lab.py` checks the tables below against the ROM
 (report), plays it from power-on to Lan's room in romlab (boot) and

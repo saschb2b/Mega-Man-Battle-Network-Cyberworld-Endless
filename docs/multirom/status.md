@@ -3,7 +3,7 @@ type: Status
 title: "Status"
 description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
 
 # Status
@@ -205,15 +205,16 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
 
 ## BN4 Red Sun's areas
 
-Its net's five large areas dress BN6's as BN5's do, each held out of runs
-(`NetAreaDef.held`) until the owner admits it, as the walk's gate of
-[the core loop](../game/core-loop.md) asks of every area, and how three
-games share BN6's areas is the owner's call ([Battle Network 4 in a run](bn4.md),
+Its net's five large areas dress BN6's as BN5's do, held out of runs
+(`NetAreaDef.held`) until the owner admitted all five at once on 5
+November 2026 (over the walk's gate of [the core loop](../game/core-loop.md),
+area by area), and how three games share BN6's areas is the owner's call ([Battle Network 4 in a run](bn4.md),
 The owner's calls). Their tables in [BN4 Red Sun's tables](../rom/bn4.md).
 
-- [x] Read for review alone: BN4's ROM is read for research
-  (`XRomLayout.research`), and its areas are shown only to a dev tool that
-  reviews them (`xarea_review`): `--net-biome x15` (ACDC Area) to `x19`
+- [x] Read for review alone: BN4's ROM was read for research
+  (`XRomLayout.research`) until the owner turned BN4 on (5 November 2026),
+  and its areas were shown only to a dev tool that reviews them
+  (`xarea_review`; still so, and in runs now): `--net-biome x15` (ACDC Area) to `x19`
   (the Undernet), numbered after BN5's fifteen, and the atlas
   (`--atlas DIR:a15:3`, `build.py tiles`). A run, or a dev tool reading BN4
   for its families or the differential, meets none of them: no song,

@@ -3,7 +3,7 @@ type: Tool
 title: "The 3DS's heap on a computer"
 description: "`tools/heap3ds.py` plays long headless runs of the host build with every allocation counted as the New 3DS's 96 MB heap holds it, reporting the peak, refused allocations and run depth, BN6 alone, with BN5, with BN4 Red Sun, or with both."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:25:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
 
 # The 3DS's heap on a computer
@@ -26,9 +26,9 @@ the buffer held, every area's learned maps kept: the host build as it is);
 `bn6` and `bn5`, the 3DS now (the buffer given back, the layer's own
 area's learned maps kept alone: the host built with `CW_HEAP_3DS` into
 `build/heap3ds`), BN6's ROM alone and with BN5's read; `bn4` and `all`
-the same with BN4 Red Sun's read, alone and beside BN5's (`--dev
-showbn4`: read as players' builds will once its research switch is off,
-[The 3DS's memory](../engine/emulation/3ds-memory.md), A third ROM).
+the same with BN4 Red Sun's read, alone and beside BN5's, its six
+families installed as in players' builds ([The 3DS's
+memory](../engine/emulation/3ds-memory.md), A third ROM).
 `--as-3ds PATH` runs those four on another build of the host (`make TARGET=host
 OUT=build/k2 "EXTRA_CFLAGS=-DCW_HEAP_3DS -DAREAS_KEPT=2"`: two areas
 kept). Per run: the peak, the allocations refused,

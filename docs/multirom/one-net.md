@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:33:24Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -60,7 +60,7 @@ The calls:
      into the engine, share this one battle in four rather than take one
      of their own; its visitor is drawn among both other nets' fitting
      families, each as likely, by the rules above, BN4's roles and stages
-     from its own records; for now behind BN4's research switch
+     from its own records; in players' runs since 5 November 2026
      ([Battle Network 4 in a run](bn4.md), Its viruses as visitors).
 3. **Guardians:** BN5's Navis fight in BN6's engine. Where they stand
    stays (half the runs on the acts BN5 dresses, where BN5 sets them

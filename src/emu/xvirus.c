@@ -70,7 +70,7 @@ static bool game_of(int game, Game *g) {
 			{ BN5_TYPES_T1_COUNT, BN5_TYPES_T3_COUNT, BN5_TYPES_T4_COUNT }, BN5_REWARD_ROWS, true, false };
 		return true;
 	}
-	if (game == XROM_BN4_RED_SUN_US && xrom_research && XR[game].data && XR[game].layout) {
+	if (game == XROM_BN4_RED_SUN_US && XR[game].data && XR[game].layout) {
 		/* (no per-family tables, no ice; its reward rows its own, BN6's format, their chips given as BN6's: xchips_reward_bn4) */
 		*g = (Game){ XR[game].data, 0, 0, 0, BN4_ENEMY_NAMES - BUS, 0, 0, XR[game].layout->sprite_lists, BN4_EFFECTS, BN4_EFFECT_COUNT,
 			{ BN4_T1_TYPES, BN4_T3_TYPES, BN4_T4_TYPES }, { BN4_TYPES_T1_COUNT, BN4_TYPES_T3_COUNT, BN4_TYPES_T4_COUNT }, BN4_REWARD_ROWS, false,
@@ -939,10 +939,11 @@ const XVirusFamily *xvirus_installed(int game, int src_ai) {
 void xvirus_install(int which) {
 	static bool done;
 	if (done || !emu_ready()) return;
-	/* (BN5's families and battlefields where its ROM is read: none latched
-	 * before it is, so a ROM put in on the ROMs screen within a session
-	 * comes in as the next run's core starts) */
-	if (which == XVIRUS_FAMILIES && !XR[XROM_BN5_COLONEL_US].data) return;
+	/* (BN5's families and battlefields where its ROM is read, BN4's where
+	 * its is: none latched before one is, so a ROM put in on the ROMs
+	 * screen within a session comes in as the next run's core starts) */
+	bool bn5 = XR[XROM_BN5_COLONEL_US].data, bn4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (which == XVIRUS_FAMILIES && !bn5 && !bn4) return;
 	done = true;
 	/* (the families' room and the families claim what they write; the
 	 * battlefields theirs, within: claims.h) */
@@ -951,13 +952,12 @@ void xvirus_install(int which) {
 	else if (which == XVIRUS_FAMILIES) {
 		/* (a virus's support chip, BN5's support family's timing: its family's entry, which the dispatch's chip writer names, set
 		 * before a family whose code calls it; none of them where the table cannot grow) */
-		if (!xg_grow() || !xattack_grow() || !xattack_set(XV_SUPPORT_FAMILY, XV_SUPPORT | 1u))
-			fprintf(stderr, "xvirus: BN5's support family's timing not placed: no family installed\n");
-		else
-			for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
+		bool placed = bn5 && xg_grow() && xattack_grow() && xattack_set(XV_SUPPORT_FAMILY, XV_SUPPORT | 1u);
+		if (bn5 && !placed) fprintf(stderr, "xvirus: BN5's support family's timing not placed: no family installed\n");
+		for (int i = 0; placed && i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
 		xfields_install(XROM_BN5_COLONEL_US);
-		/* (BN4 Red Sun's, where its ROM is read for research alone: --dev bn4families) */
-		if (xrom_research && XR[XROM_BN4_RED_SUN_US].data && xvirus_bn4_copy_install())
+		/* (BN4 Red Sun's, where its ROM is read, after BN5's: the visitors, docs/multirom/bn4.md) */
+		if (bn4 && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
 	}
 	claims_end();

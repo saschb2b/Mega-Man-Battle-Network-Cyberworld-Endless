@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
 
 # The player's guide
@@ -60,6 +60,20 @@ statistics, troubleshooting and building the game yourself.
   iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
   on the title also opens the [ROMs screen](#the-roms-screen) to add it,
   and in the browser its slot on the player's screen does.
+- Optional: **Mega Man Battle Network 4: Red Sun (USA)**, unmodified, in
+  the same folder (SHA-1 `a97e96a7da03abd70f7953328e511b9fa29179f1`). Its
+  five net areas then turn up in runs, in place of the BN6 areas they
+  resemble (ACDC Area, Town Area, Park Area, the net of far countries and
+  its Undernet), each in about half the runs that come there (a quarter
+  where BN5 has an area there too), in BN4's own tiles, music and battle
+  backgrounds; their battles and guardians are BN6's. From the second
+  act, six of its virus families (Billy, Spikey, Shrimpy, Walla, Elmperor
+  and CirKill) visit BN6's battles, and BN5's where BN5 is there too, in
+  the same one battle in four that BN5's viruses visit, MegaMan naming
+  them as the older Net's. Each pays from its own game's rewards (a chip
+  BN6 has not got pays 200 zenny). The title's note says "BN4 found" as
+  the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
+  New 3DS reads one of them, BN5's where both are there.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -96,9 +110,9 @@ and the website's files `cyberworld-endless-web.zip`.
 ### The ROMs screen
 
 On a PC, a Mac, an Android device, an iPhone or an iPad the game first
-opens on its ROMs screen: two cartridge slots, BN6 Cybeast Gregar
-(needed) and BN5 Team Colonel (optional), each an open spot until its
-ROM is in. Choose a slot (a tap, a click, or A) and pick the file in the
+opens on its ROMs screen: three cartridge slots, BN6 Cybeast Gregar
+(needed), BN5 Team Colonel and BN4 Red Sun (both optional), each an open
+spot until its ROM is in. Choose a slot (a tap, a click, or A) and pick the file in the
 system's own file chooser (on Linux, `zenity` or `kdialog`), or drop it
 on the window; on a phone or tablet, pick the folder your ROMs are in. A
 ROM the game finds by itself (in Downloads, EmuDeck's or RetroDECK's
@@ -112,7 +126,7 @@ your ROM as the screen opens; the cartridge around it is the project's
 own drawing. **PLAY** starts the game as soon as BN6 is in.
 
 Later starts go straight to the game: the screen comes back by itself
-only when BN6 is missing or BN5 has gone. To add BN5 later, press R on
+only when BN6 is missing or BN5 or BN4 has gone. To add one later, press R on
 the title (the small line by its menu names the key) and choose it; **DONE**
 goes back to the title.
 
@@ -247,13 +261,13 @@ on the phone, tablet or handheld and open it (Android asks once to allow
 installs from your browser or file manager). The first start opens the
 [ROMs screen](#the-roms-screen): tap BN6's slot and choose the folder your
 ROMs are in, with Android's own folder picker. The app opens only the
-`.gba` files there and keeps copies of BN6's and, if it is there, BN5's
-in its own storage, beside your saves. It names any `.gba` it refuses,
+`.gba` files there and keeps copies of BN6's and, if they are there,
+BN5's and BN4's in its own storage, beside your saves. It names any `.gba` it refuses,
 and why ("BN6 Cybeast Falzar, not Gregar"). Android 11 and later keep apps
 out of Download itself: put the ROMs in a folder in it, such as
-Download/ROMs, or tap **FILES INSTEAD** and pick BN6 and BN5 together
-(hold one to select both). The folder is looked in again at each start,
-so BN5 put there later comes in by itself; R on the title, or holding the
+Download/ROMs, or tap **FILES INSTEAD** and pick BN6 and the others
+together (hold one to select more). The folder is looked in again at each
+start, so BN5 or BN4 put there later comes in by itself; R on the title, or holding the
 app's icon and tapping **ROMs** (Android 7.1 and later), opens the ROMs
 screen again. A handheld's own controls, a Bluetooth or USB
 controller (two Joy-Cons as one) and the touch screen all work: the game
@@ -292,9 +306,9 @@ marketplaceID").
    app lasts seven days: SideStore renews it, and offers each new version.
 4. Start it: the [ROMs screen](#the-roms-screen) opens. Tap BN6's slot
    and pick the folder your ROMs are in, in Files. The app opens only the
-   `.gba` files there, copies BN6's and, if it is there, BN5's in, and
-   looks in the folder again at each start, so BN5 put there later comes
-   in by itself. A file in iCloud Drive that is not on the phone yet is
+   `.gba` files there, copies BN6's and, if they are there, BN5's and
+   BN4's in, and looks in the folder again at each start, so BN5 or BN4
+   put there later comes in by itself. A file in iCloud Drive that is not on the phone yet is
    downloaded first (in a big folder, download BN6's in Files yourself).
    Or tap **FILES INSTEAD** and pick the ROMs, or put them in Files, **On
    My iPhone › Cyberworld**, where the app keeps your saves too and looks
@@ -343,7 +357,9 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
-name works. BN5 Team Colonel's goes beside it, or in any of those folders.
+name works. BN5 Team Colonel's goes beside it, or in any of those folders,
+and BN4 Red Sun's the same way: the 3DS has room for one of them, BN5's
+where both are there.
 The first NEW GAME boots BN6 once, about 15 seconds of black
 screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
@@ -370,8 +386,8 @@ Album it runs with less.
 
 Put your ROM in `sdmc:/switch/cyberworld-endless/rom/`, or leave it where
 you keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any
-file name works. BN5 Team Colonel's goes beside it, or in any of those
-folders. The GBA's buttons are on the Switch's buttons of the same names,
+file name works. BN5 Team Colonel's and BN4 Red Sun's go beside it, or in
+any of those folders. The GBA's buttons are on the Switch's buttons of the same names,
 Plus for START and Minus for SELECT. Online is as everywhere, NetBattles
 included. [switch/README.md](../switch/README.md) has the rest.
 
@@ -383,8 +399,8 @@ from VitaShell; the game gets its bubble on the home screen.
 
 Put your ROM in `ux0:data/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`ux0:roms/gba/`, `ux0:roms/`, `ux0:data/gba/`): any file
-name works. BN5 Team Colonel's goes beside it, or in any of those folders.
-Cross is the GBA's A and Circle its B; a touch on the front screen shows
+name works. BN5 Team Colonel's and BN4 Red Sun's go beside it, or in any of
+those folders. Cross is the GBA's A and Circle its B; a touch on the front screen shows
 the touch controls. Closing the game from the LiveArea ends it at once, so
 a run goes on from its last checkpoint. Online is as everywhere.
 [vita/README.md](../vita/README.md) has the rest.
@@ -397,9 +413,9 @@ package. The game gets its tile on the home screen.
 
 Put your ROM in `/data/cyberworld-endless/rom/` on the internal drive
 (GoldHEN's FTP reaches it), or leave it on a USB drive (`roms/gba/`,
-`gba/` or the drive's top): any file name works. BN5 Team Colonel's goes
-beside it, or in any of those folders. Cross is the GBA's A and Circle
-its B. Online is as everywhere; this build sends no statistics and never
+`gba/` or the drive's top): any file name works. BN5 Team Colonel's and
+BN4 Red Sun's go beside it, or in any of those folders. Cross is the GBA's
+A and Circle its B. Online is as everywhere; this build sends no statistics and never
 asks. [ps4/README.md](../ps4/README.md) has the rest.
 
 ### On a PS5
@@ -415,10 +431,10 @@ everywhere. [ps5/README.md](../ps5/README.md) has the rest.
 
 ### In a browser
 
-Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: the two cartridge slots on its screen,
-BN6 and BN5, take your ROM files (tap one to choose them, or drop them on
-the page); Battle Network 5: Team Colonel's beside BN6's if you have it
-(both at once, or BN5 later in its slot). The page checks each file by
+Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: the three cartridge slots on its screen,
+BN6, BN5 and BN4, take your ROM files (tap one to choose them, or drop them on
+the page); Battle Network 5: Team Colonel's and Battle Network 4: Red Sun's
+beside BN6's if you have them (all at once, or later in their slots). The page checks each file by
 its SHA-1, says why it refuses one, shows each game's face on its
 cartridge, and keeps them, with your saves, in the browser's own storage
 (IndexedDB); they are never uploaded. Next time **Play** starts straight

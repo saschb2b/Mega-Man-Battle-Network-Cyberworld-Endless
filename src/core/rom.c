@@ -384,9 +384,10 @@ static const NetAreaDef bn5_areas[] = {
 
 /* Battle Network 4 Red Sun's five large net areas (docs/rom/bn4.md: its
  * groups 0x90-0x94, each a group of its own, not run on as BN5's are),
- * each held out of runs until the owner admits it (docs/multirom/bn4.md,
- * the walk's gate of docs/game/core-loop.md): --net-biome xN draws one,
- * BN4's areas numbered after BN5's (x15 ACDC Area to x19 the Undernet).
+ * each dressing the BN6 area it is like in runs by the seed (run_dress;
+ * admitted by the owner's call of 5 November 2026, docs/multirom/bn4.md):
+ * --net-biome xN draws one, BN4's areas numbered after BN5's (x15 ACDC
+ * Area to x19 the Undernet).
  * Their battles are BN6's (no xbattles: BN4's records are its own,
  * docs/rom/bn4.md, Battle records), their guardians BN6's, their
  * bystanders BN6's; their battle backgrounds the map's own (BN4_MAP_BACKDROPS),
@@ -394,19 +395,19 @@ static const NetAreaDef bn5_areas[] = {
 static const NetAreaDef bn4_areas[] = {
 	{ BN4_GROUP_ACDC, 2, 0x2008000, 0x8000, false, 0x13, 0, 0, 0, { { BN4_GROUP_ACDC, 0 }, { BN4_GROUP_ACDC, 1 } }, .pad_rooms = 64, .apart = NET_APART_PLATFORMS,
 		.skip_styles = 0x8040, .xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x90, 0 }, .like = 0,
-		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of the old ACDC Town", .xsong = 0x12, .xbg = 4, .held = true },   /* ACDC Area 3, 1 and 2: white walkways in green rims, rounded at their turns, and framed squares of four by four, told by shape; its squares its pads (TILES_SQUARE_PADS), so every room up to 64 panels and the arena drawn as one, their frames framing them; its cyan roads and its hubs, ringed in azure, lend no tiles (SKIP_ANY_PIXEL | hue bucket 6): a second walkway look, laid tile by tile among the white */
+		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of the old ACDC Town", .xsong = 0x12, .xbg = 4 },   /* ACDC Area 3, 1 and 2: white walkways in green rims, rounded at their turns, and framed squares of four by four, told by shape; its squares its pads (TILES_SQUARE_PADS), so every room up to 64 panels and the arena drawn as one, their frames framing them; its cyan roads and its hubs, ringed in azure, lend no tiles (SKIP_ANY_PIXEL | hue bucket 6): a second walkway look, laid tile by tile among the white */
 	{ BN4_GROUP_TOWN, 2, 0x3008000, 0x8000, false, 0x13, 0, 0, 0, { { BN4_GROUP_TOWN, 0 } }, .skip_styles = 0x008C,
 		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x91, 1 }, .like = 1,
-		.name = "Town Area", .short_name = "Town Area", .motto = "The net between the towns", .xsong = 0x12, .xbg = 5, .held = true },   /* Town Area 3 and 1: pale cyan walkways a panel wide in blue rims, told by shape, and Town Area 3's blue-framed squares, its pads (TILES_SQUARE_PADS); its maps lay no floor wider than a walkway but those squares (Town Area 1 a lattice of walkways round holes, whose hole rims a field took), so every room is drawn as one and the way kept one wide (TILES_ONE_WIDE); its yellow roads and lower blue paths lend no tiles (hue buckets 2, 3 and 7 in their middles) */
+		.name = "Town Area", .short_name = "Town Area", .motto = "The net between the towns", .xsong = 0x12, .xbg = 5 },   /* Town Area 3 and 1: pale cyan walkways a panel wide in blue rims, told by shape, and Town Area 3's blue-framed squares, its pads (TILES_SQUARE_PADS); its maps lay no floor wider than a walkway but those squares (Town Area 1 a lattice of walkways round holes, whose hole rims a field took), so every room is drawn as one and the way kept one wide (TILES_ONE_WIDE); its yellow roads and lower blue paths lend no tiles (hue buckets 2, 3 and 7 in their middles) */
 	{ BN4_GROUP_PARK, 0, 0x8008001, 0x1000, false, 0x13, 0, 0, 0, { { 0 } }, .skip_styles = 0x8006,
 		.xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x92, 1 }, .like = 3,
-		.name = "Park Area", .short_name = "Park Area", .motto = "The net under the park", .xsong = 0x12, .xbg = 6, .held = true },   /* Park Area 1: pink walkways in blue rims, peach framed platforms, told by shape, the pale pink walkway floor however wide (TILES_WALK_HUE: grey, the peach hue bucket 0); its orange and yellow conveyors lend no tiles (SKIP_ANY_PIXEL | hue buckets 1-2); its other maps' looks, mixed in, doubled the seams */
+		.name = "Park Area", .short_name = "Park Area", .motto = "The net under the park", .xsong = 0x12, .xbg = 6 },   /* Park Area 1: pink walkways in blue rims, peach framed platforms, told by shape, the pale pink walkway floor however wide (TILES_WALK_HUE: grey, the peach hue bucket 0); its orange and yellow conveyors lend no tiles (SKIP_ANY_PIXEL | hue buckets 1-2); its other maps' looks, mixed in, doubled the seams */
 	{ BN4_GROUP_COUNTRIES, 2, 0x8008006, 0x0008, false, 0x13, 0, 0, 0, { { 0 } }, .apart = NET_APART_PLATFORMS,
 		.skip_styles = 0x8040, .xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x94, 1 }, .like = 2,
-		.name = "Net countries", .short_name = "Countries", .motto = "The nets of far countries", .xsong = 0x12, .xbg = 0x14, .held = true },   /* the countries' third map: green floor in red and yellow rims, cream framed platforms drawn apart, told by shape, the green walkway floor however wide (TILES_WALK_HUE: hue bucket 3, the cream and its frames 1 and 2), where its middles stood in the platforms' as green blotches; its cyan arrows lend no tiles (SKIP_ANY_PIXEL | hue bucket 6); the four countries are four looks, so one is learned (which country is which map is not traced) */
+		.name = "Net countries", .short_name = "Countries", .motto = "The nets of far countries", .xsong = 0x12, .xbg = 0x14 },   /* the countries' third map: green floor in red and yellow rims, cream framed platforms drawn apart, told by shape, the green walkway floor however wide (TILES_WALK_HUE: hue bucket 3, the cream and its frames 1 and 2), where its middles stood in the platforms' as green blotches; its cyan arrows lend no tiles (SKIP_ANY_PIXEL | hue bucket 6); the four countries are four looks, so one is learned (which country is which map is not traced) */
 	{ BN4_GROUP_UNDERNET, 4, 0x8000, 0x8000, false, 0x14, 0, 0, 0, { { BN4_GROUP_UNDERNET, 2 } }, .apart = NET_APART_PLATFORMS,
 		.joint_hues = 0x1000, .emblem = 0x75C0, .xrom = 1 + XROM_BN4_RED_SUN_US, .over = { 0x92, 0 }, .like = 5,
-		.name = "Undernet", .short_name = "Undernet", .motto = "Older depths, darker still", .xsong = 0x13, .xbg = 8, .held = true },   /* the Undernet 5 and 3: orange cushions a panel each on paths a panel wide, grey square plates framed in steel with orange corners, drawn apart, told by shape; its steel joints, grey among the cushions, in a look of their own at the paths' ends, turns and crossings (JOINT_GREY, 0x1000, src/map/tiles.h); its plates plain, as the Undernet 5 lays them, the Undernet 3's blue cross its emblem (its middle's blue, 0x75C0, shown nowhere else); Black Earth (0x94:6-7) not drawn */
+		.name = "Undernet", .short_name = "Undernet", .motto = "Older depths, darker still", .xsong = 0x13, .xbg = 8 },   /* the Undernet 5 and 3: orange cushions a panel each on paths a panel wide, grey square plates framed in steel with orange corners, drawn apart, told by shape; its steel joints, grey among the cushions, in a look of their own at the paths' ends, turns and crossings (JOINT_GREY, 0x1000, src/map/tiles.h); its plates plain, as the Undernet 5 lays them, the Undernet 3's blue cross its emblem (its middle's blue, 0x75C0, shown nowhere else); Black Earth (0x94:6-7) not drawn */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {
@@ -419,12 +420,13 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	[XROM_BN4_RED_SUN_US] = { .name = "Mega Man Battle Network 4: Red Sun (USA)", .sha1 = "a97e96a7da03abd70f7953328e511b9fa29179f1", .code = "B4WE",
 		.map_table_rw = 0x028304u, .map_table = 0x02831Cu, .coord_table_rw = 0x028F04u, .coord_table = 0x028F1Cu,
 		.rw_groups = 6, .net_groups = 21, .song_table = 0x155FF8u, .sprite_lists = 0x02793Cu,
-		/* (its battle themes, BN4_SONG_BATTLE and BN4_SONG_BOSS, named here once
-		 * an area of its is admitted: a game that lends areas has them copied
-		 * as a run's music starts, src/audio/xsong.c) */
+		/* (its battle themes, copied as a run's music starts, as a game's that
+		 * lends areas: src/audio/xsong.c; its prelude BN6's, BN4 has none of
+		 * its own named) */
+		.battle_songs = { BN4_SONG_BATTLE, BN4_SONG_BOSS },
 		.areas = bn4_areas, .nareas = (int)(sizeof bn4_areas / sizeof *bn4_areas),
 		.battle_bgs = 0x08563Cu, .battle_bg_anims = 0x085A50u, .battle_bg_scroll = 0x085488u, .bg_words = 9,
-		.map_enters = 0x026634u, .map_anims = 0x026688u, .tag = "BN4", .face = BN4_MUGSHOT_FACE, .file = "bn4rs.gba", .research = true,
+		.map_enters = 0x026634u, .map_anims = 0x026688u, .tag = "BN4", .face = BN4_MUGSHOT_FACE, .file = "bn4rs.gba",
 		.kit_keys_played = true },
 };
 
@@ -446,7 +448,9 @@ const NetAreaDef *net_area_def(int area) {
 	if (area < 0) return NULL;
 	if (area < NET_AREAS) return R.layout ? &R.layout->net_area[area] : NULL;
 	int k, i = xrom_of_area(area, &k);
-	if (i < 0 || !XR[i].data || (xlayouts[i].research && reviewed != XAREA_ALL && reviewed != area)) return NULL;
+	if (i < 0 || !XR[i].data) return NULL;
+	/* (a game read for research: its areas only as a dev tool reviews them) */
+	if (xlayouts[i].research && reviewed != XAREA_ALL && reviewed != area) return NULL;
 	return &xlayouts[i].areas[k];
 }
 

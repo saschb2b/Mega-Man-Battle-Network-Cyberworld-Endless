@@ -42,6 +42,14 @@ static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 
 
 int run_debug_xguardian, run_debug_area = -1;
 
+/* (the seed's coin for another game's area k: BN5's fifteen by the bits
+ * 16-30 of one word as ever, so a run with BN5 alone dresses as it did;
+ * past them, BN4's, a second word's from bit 16 on, every shift under 32) */
+static bool dress_coin(int k) {
+	uint32_t h = k < 16 ? run.seed * 2654435761u : (run.seed ^ 0x44525332u) * 2654435761u;   /* ("DRS2") */
+	return h >> (16 + (k & 15)) & 1;
+}
+
 int run_dress(int biome) {
 	/* (--net-biome xN's area for its BN6 area, whatever the seed says: its
 	 * names and guardian with its look) */
@@ -49,7 +57,7 @@ int run_dress(int biome) {
 	if (d && d->like == biome) return run_debug_area;
 	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
-		if (x && !x->held && x->like == biome && (run.seed * 2654435761u) >> (16 + k) & 1) return NET_AREAS + k;
+		if (x && !x->held && x->like == biome && dress_coin(k)) return NET_AREAS + k;
 	}
 	return biome;
 }

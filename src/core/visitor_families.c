@@ -120,7 +120,7 @@ static void tally_bn5(Tally *t) {
 }
 
 /* ---- BN4's: its net's random records, each list of viruses once (its
- * story stages repeat them), where its ROM is read for research: a
+ * story stages repeat them), where its ROM is read: a
  * family moved into the engine by its object type. Its stage by the
  * group: the Undernet's 1, Black Earth's 2, the rest of the net 0. Its
  * fields are not read (a record's +1 is not mapped), so every placement
@@ -199,8 +199,8 @@ static void moved(const XVirusFamily *f, int net) {
 	if (net == VISIT_BN4 && f->src_ai > 0 && f->src_ai < 256) K.type_ai[f->src_ai] = (uint8_t)f->ai;
 }
 
-/* (net `net`'s families in BN6's engine, BN5's or BN4's (only where its
- * ROM is read for research), how many) */
+/* (net `net`'s families in BN6's engine, BN5's or BN4's, each where its
+ * ROM is read, how many) */
 static int installed(int net) {
 	int n = 0;
 	if (net == VISIT_BN5)
@@ -209,7 +209,7 @@ static int installed(int net) {
 			if (f && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
 		}
 	else
-		for (int i = 0; XR[XROM4].data && xrom_research && i < xvirus_bn4_count; ++i) {
+		for (int i = 0; XR[XROM4].data && i < xvirus_bn4_count; ++i) {
 			const XVirusFamily *f = xvirus_installed(XROM4, xvirus_bn4[i]->src_ai);
 			if (f && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
 		}
@@ -226,7 +226,7 @@ static void make(void) {
 	memset(K.net, 0, sizeof K.net);
 	memset(K.type_ai, 0, sizeof K.type_ai);
 	memset(K.role, 0, sizeof K.role);
-	if (!R.data || !XR[XROM].data) return;
+	if (!R.data || (!XR[XROM].data && !XR[XROM4].data)) return;
 	int bn5 = installed(VISIT_BN5), bn4 = installed(VISIT_BN4);
 	if (!bn5 && !bn4) return;
 	static Tally t;

@@ -1040,8 +1040,8 @@ HEADER = '''/* xvirus_bn4.c: BN4 Red Sun's virus families' recipes, written by t
  * (python3 tools/xrecipe_bn4.py; --check says whether this is what it writes). Do not edit: change the generator (or
  * tools/bn4_twins.py, its pairs and their audits) and write it again. Numbers alone (docs/multirom/families.md): addresses
  * in BN4 Red Sun (USA) and BN6 Cybeast Gregar (USA), counts and CRC32s. The families here are the generator's whole ones
- * (no decision open; its interims named over each), installed only where BN4's ROM is read for research (xrom_research:
- * --dev bn4families); what stays open is in its report (.build/xrecipe/bn4_report.md). First, BN6's own types copied for
+ * (no decision open; its interims named over each), installed wherever BN4's ROM is read, as the nets' visitors
+ * (docs/multirom/bn4.md); what stays open is in its report (.build/xrecipe/bn4_report.md). First, BN6's own types copied for
  * them with a number BN4's (tools/xrecipe_bn4_copy.py; xvirus_bn4_copy.h installs them before the families). */
 #include "xvirus_bn4.h"
 

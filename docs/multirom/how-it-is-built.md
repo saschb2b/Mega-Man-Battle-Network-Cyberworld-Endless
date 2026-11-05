@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "How it is built"
-description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space (BN4's 256-colour ones shown so), areas dressed by `run_dress` or held for review, songs copied by `xsong.c`, and the extra ROMs offered on each platform (BN4's held behind its research switch)."
+description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space (BN4's 256-colour ones shown so), areas dressed by `run_dress` or held for review, songs copied by `xsong.c`, and the extra ROMs offered on each platform (BN4's whole since 5 November 2026)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
 
 # How it is built
@@ -12,13 +12,17 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
    their header's game code and SHA-1, read and never run
    (`xrom_find`). Each has its layout (`XRomLayout`): its tables, found by
    their structure (`tools/rom_tables.py`) and noted in [ROM data](../rom/overview.md).
-   A layout marked `research` (BN4 Red Sun's, [Battle Network 4 in a run](bn4.md)) is
-   read only when a dev tool sets `xrom_research` (the atlas's `x1`,
-   `--dev bn4families`, `--dev showbn4`), so a run, the ROMs screen and
-   the 3DS's heap never meet a ROM that lends nothing yet; its areas,
-   held, are shown only to a dev tool reviewing them (`xarea_review`:
-   `--net-biome xN`, the atlas), so one reading it for anything else
-   copies nothing of them.
+   A layout marked `research` is read only when a dev tool sets
+   `xrom_research` (the atlas, the differential's guest, `--dev
+   showbn4`), so a run, the ROMs screen and the 3DS's heap never meet a
+   ROM that lends nothing yet, and its areas are shown only to a dev tool
+   reviewing them (`xarea_review`: `--net-biome xN`, the atlas). No game
+   is so marked today: BN4 Red Sun's mark went on 5 November 2026, when
+   the owner turned BN4 on whole ([Battle Network 4 in a run](bn4.md)),
+   its ROM offered, its families installed and its areas dressing BN6's
+   with their themes and battle backgrounds. One area can still be held
+   alone (`NetAreaDef.held`, the walk's gate), which `run_dress` passes
+   over.
 2. **A map from any of them** (`area_src_load_x`): the map reader takes
    its maps from the game's ROM; what learns from a map (`tiles_learn.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever
@@ -55,14 +59,20 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
    engine plays it as one of its own; its battles name its game's battle
    themes, copied the same way (`encounter_song`), and its areas' battle
    backgrounds (`encounter_backdrop`). The run's seed picks it,
-   with the ROMs present, so nothing is saved: a run continued without
+   with the ROMs present, so nothing is saved (`run_dress`: a coin per
+   area, BN5's by the bits 16-30 of one word as ever, BN4's by a second
+   word's, BN5's first where both dress one BN6 area, so with all three
+   BN4's dresses such an area in a quarter of the runs, and one BN5 has
+   none for in half): a run continued without
    the other ROM goes on in the BN6 area's tiles.
 6. **Platforms**: desktop first. Every place a player brings ROMs takes
    the extra ROMs as data, the list `XRomId` names, each offered or not
-   (`xrom_offered`): one whose layout is marked `research` (BN4 Red
-   Sun's) is neither read, shown, copied nor named for a player until the
-   mark goes, which is then the one line that offers it everywhere;
-   `--dev showbn4` (the browser's `?dev=showbn4`) shows it for review. The
+   (`xrom_offered`): one whose layout is marked `research` is neither
+   read, shown, copied nor named for a player until the mark goes, which
+   is then the one line that offers it everywhere; `--dev showbn4` (the
+   browser's `?dev=showbn4`) shows such a one for review. BN4 Red Sun's
+   mark went on 5 November 2026, so its cartridge, pickers, file and
+   found lines are a player's on every platform. The
    ROMs screen (`src/launcher/`) has a cartridge for BN6's and one each
    extra ROM offered, its label in its game's colours and its face from
    its own ROM (`XRomLayout.face`: BN5's Colonel, BN4's Duo), three side
@@ -75,9 +85,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T05:30:00Z }
    player chose, and look in it again at each start, so BN5 put there
    later comes in (issue #66). On the desktops, Android and iOS, R on the
    title opens the ROMs screen again to add one (issue #97). The
-   browser's play page (`web/play/app.js`) takes BN5's file beside BN6's,
-   either told by its header's game code and checked by its SHA-1, and
-   keeps it in IndexedDB beside BN6's (`rom/bn5c.gba`), where
+   browser's play page (`web/play/app.js`) takes BN5's and BN4's files
+   beside BN6's, each told by its header's game code and checked by its
+   SHA-1, and keeps them in IndexedDB beside BN6's (`rom/bn5c.gba`,
+   `rom/bn4rs.gba`), where
    `xrom_find_beside` reads it (issue #68); it asks the engine which extra
    ROMs it offers (`cw_rom_offered`) and hides the others' cartridges,
    refusing their files as another game's. The New 3DS reads one extra
