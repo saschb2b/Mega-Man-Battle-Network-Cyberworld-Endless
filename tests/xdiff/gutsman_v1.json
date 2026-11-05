@@ -1,0 +1,20 @@
+{
+  "about": "BN4 Red Sun's GutsMan V1 (BN4's enemy 0x84, a Soul Navi) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against his move into BN6's engine as a Navi of BN6's Navi object (BN6's 0x384, Navi AI 49; src/emu/xnavi_bn4.c, installed after BN4's families), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, his recipe's among them; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "84@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1,
+  "verdict": {
+    "is": "FAIL",
+    "at": 1,
+    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): at t1 his collision's setup argument (BN6_COLL_SETUP_ARG: BN4's init passes 0x21, BN6's actor init 0x08016FE8 passes 3 to every actor), the AI data's fields BN6's Navi setup gives and BN4's Navi keeps none of or elsewhere (+0x00, +0x0C, +0x0E, +0x78, +0x7F; BN4's +0x50 its side's control block) and his sprite's count (obj +0x91)"
+  }
+}
