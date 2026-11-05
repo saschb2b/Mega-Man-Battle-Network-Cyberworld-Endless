@@ -15,6 +15,6 @@
   "verdict": {
     "is": "FAIL",
     "at": 265,
-    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): t1-t264 the same (his collision's own setup argument, BN6's and BN4's own AI bookkeeping allowed, his opening count by the frame's clock, his draws replayed); at t265 the first object his attack spawns, BN4's third-kind 0x1C (the dispatch's 0xE6), parts on +0x3C (BN4 a pointer to the battle state, BN6 3), +0x93, +0x9E and +0xB8, fields the engine's routines its code calls write, unread"
+    "why": "GutsMan's port under way (docs/multirom/bn4-navis.md, GutsMan built): t1-t264 the same (his collision's own setup argument, BN6's and BN4's own AI bookkeeping allowed, his opening count by the frame's clock, his draws replayed); at t265 the first object his attack spawns, BN4's third-kind 0x1C (the dispatch's 0xE6), parts on +0x3C, the spawn's r3 his spawner never sets (BN4's spawn 0x08003210 stores r1-r3 at +0x34-+0x3C: BN4's leftover the battle state's pointer, BN6's 3; no code of the object reads it), and on +0x93, +0x9E and +0xB8 of its sprite state, the slot's last occupant's (the object sets up no sprite), which the BN4 comparator does not yet mark as BN5's does (Obj.leftover)"
   }
 }
