@@ -831,11 +831,10 @@ def move_effect(b4, f, alloc, e4):
         f.decide('effect', f'its effect {e4:#x}\'s sprite {row[0]:#x}:{idx:#x}: the generator moves lists 3, 4 and 5\'s alone')
         return None
     e6 = alloc.effects.get(e4)
-    if e6 is not None and alloc.effect_owner.get(e4) not in (None, f.name) and alloc.room.startswith('the families'):
-        # (a family's, moved by a family installed before it, which lists it: its id that family's, listed once, as a sound
-        # is; a Navi lists it again, its own install apart: tools/xnavirecipe_bn4.py)
-        f.notes.append(f'its effect {e4:#x}: {e6:#x}, moved by {alloc.effect_owner[e4]}: installed with it')
-        return e6
+    if e6 is not None and alloc.effect_owner.get(e4) not in (None, f.name):
+        # (moved by one installed before it, its id and row the same: listed by each that spawns it, so each recipe names
+        # every effect it draws, test_core's numbers apart but for such a pair)
+        f.notes.append(f'its effect {e4:#x}: {e6:#x}, as {alloc.effect_owner[e4]} moved it')
     if e6 is None:
         if alloc.effect >= EFFECT_END:
             f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
