@@ -244,7 +244,7 @@ def segments():
 # the recap: (scene, sample, played or held), its line, at 2x (the setup's
 # page held on its first line: its Tournament line's own words say what a
 # build without the faces says)
-TILES = [(('glitch', 140, 1), 'GLITCH LAYERS'),
+TILES = [(('glitch', 104, 1), 'GLITCH LAYERS'),
          (('setup', 70, 0), 'EXTRAS: SWITCH THEM OFF')]
 RECAP_CAPTION = 'AND MORE IN THE CHANGELOG'
 SYSTEMS = ('PortMaster handhelds · Linux · Windows · macOS · Android',

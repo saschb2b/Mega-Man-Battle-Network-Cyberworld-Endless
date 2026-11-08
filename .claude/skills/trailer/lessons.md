@@ -532,3 +532,29 @@ build, so its tile is held on the page's first line.
 Devices now used up: the bracket as the frame, plates turning grey to
 red to gold, the line running in as the cut, the ROUND tab, the lines
 meeting in the logo as the stinger.
+
+The owner on the cut's music and both sketches (8 November 2026): "the
+music sounds flat and not complex. I miss the mmbn dna and good use of
+the soundfont"; he chose neither. The first round had matched 0x17's
+calmest numbers too well: a bass on one note a bar, one arpeggio, bare
+fifths, few voices; "busier than the source: none" had become the goal
+instead of the floor. Read against BN4's battles (0x14: a 32nd sampled
+arpeggio of 960 notes thrown hard left and right, the wave's staccato
+sixteenths across two octaves, bent 48 times; 0x15: a sixteenth
+arpeggio over three octaves re-panned 135 times, two sampled
+counter-voices, sus4 and m7b5 colours), a BN battle track is busy and
+layered. The second round, three sketches on `sketch_red_lib.py` (A
+"Battle Drive", D minor at 150; B "Tournament Day", F major at 144 with
+a semitone's lift; C "Final Round", E minor at 160 with the augmented V
+and a break): the lead with vibrato, scoops, falls and an echo; a
+counter-melody on the chords' guide tones (brass, violin or vibraphone a
+section); 32nd pairs over the chord and a three-octave sweep on Electric
+Piano 2; the bass in octave-jumping sixteenths or walking into the next
+chord, the wave doubling it in unison; strings' chord samples
+recoloured, brass struck on the syncopations, the guitar's 3-3-2 with
+chugs, the orchestra hit, the bell on the lifted hook; fills, a snare
+roll, a break. The piece grew A to 25 bars at 150 (the cut's bars
+unchanged, 48 frames each), with B's four-on-the-floor under the
+tournament's anthem and the hook lifted a tone for BN4's Navis. A part
+doubled on the wave an octave up read to `music_check.py` as one bass
+leaping every note: double in unison.
