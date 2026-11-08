@@ -5,12 +5,14 @@
 #include "xnavi_init.h"
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "bn6_families.h"
 #include "bn6_panels.h"
 #include "bytes.h"
 #include "xvirus.h"
+#include "xvirus_shim.h"
 #include "xvirus_move.h"
 #include "xvirus_tx.h"
 
@@ -156,10 +158,26 @@ static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
 		put32(p + off + 4, xv_move_ref(f->states[i]));
 		put32(st + 4 * i, (at + off) | 1u);
 	}
+/* its summon's shim at its place in its code room (XNavi.summon): false where it does not fit or reach */
+#define SUMMON_IDS  12
+#define SUMMON_ROOM 0x100  /* (the generator's room for it, tools/xnavirecipe_bn4_summon.py SHIM_ROOM) */
+static bool summon_set(const XNavi *n) {
+	const XnSummon *m = n->summon;
+	uint32_t ids[SUMMON_IDS];
+	uint8_t code[SUMMON_ROOM];
+	if (m->nids > SUMMON_IDS) { xv_fail("its summon names %d ids, past %d", m->nids, SUMMON_IDS); return false; }
+	for (int k = 0; k < m->nids; ++k) ids[k] = m->ids[k].from | (uint32_t)m->ids[k].to << 16;
+	const XvSummonShim s = { xv_move_ref(m->panels), BN6_RNG_DRAW_POSITIVE, BN6_SPAWN_ENEMY_1, BN6_PLAY_SOUND,
+	                         { m->masks[0], m->masks[1], m->masks[2], m->masks[3] }, ids, m->nids, m->sound };
+	const int size = xvirus_shim_summon(code, (int)sizeof code, m->at, &s);
+	uint8_t *p = size ? xv_put(m->at, (uint32_t)size, true) : NULL;
+	if (!p) { xv_fail("its summon's shim does not fit its room or reach its calls"); return false; }
+	memcpy(p, code, (size_t)size);
 	return true;
 }
 
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
+	if (n->summon && !summon_set(n)) return 0;
 	const XVirusFamily *f = &n->code;
 	const XnInit *in = n->init;
 	const uint32_t companion = xv_move_ref(n->companion);

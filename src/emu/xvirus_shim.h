@@ -100,4 +100,16 @@ bool xvirus_shim_cmp(uint8_t out[XV_SHIM_CMP_SIZE], uint32_t at, int reg, uint16
  * where `which` is no case ported or it does not fit in `max`. */
 int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint32_t clear_veneer, uint32_t sound_veneer);
 
+/* A summon's shim at `at` (word-aligned), in a BN4 Navi's code room
+ * (xnavi_init.c; docs/multirom/bn4-navis.md, Roll built): r0 its game's
+ * enemy id, r5 the Navi. A free panel of its side by `panels` (its copy of
+ * BN4_FREE_PANELS, within a call's reach) with `masks` (wanted and refused:
+ * side 0's, then side 1's) and one draw of `rng` (BN6's GetRNG twin), as
+ * BN4_SPAWN_ENEMY picks it; its id BN6's by `ids` (its game's | BN6's << 16;
+ * BN6's 0, or none listed: no spawn), spawned there on its side by `spawn`
+ * (BN6_SPAWN_ENEMY_1), and `sound` played by `play` where one was: r0 the
+ * object, 0 none. Its size, 0 where it does not fit in `max`. */
+typedef struct { uint32_t panels, rng, spawn, play; uint32_t masks[4]; const uint32_t *ids; int nids; uint16_t sound; } XvSummonShim;
+int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s);
+
 #endif

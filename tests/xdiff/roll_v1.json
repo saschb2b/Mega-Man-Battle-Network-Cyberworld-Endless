@@ -1,0 +1,20 @@
+{
+  "about": "BN4 Red Sun's Roll V1 (BN4's enemy 0x80, a Soul Navi) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against her move into BN6's engine as a Navi of BN6's Navi object, her summon by BN6's spawn of an enemy into a fight under way (BN6's 0x380, Navi AI 48; src/emu/xnavi_bn4.c, installed after BN4's families), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, her recipe's among them; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "80@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1,
+  "verdict": {
+    "is": "FAIL",
+    "at": 1008,
+    "why": "her port under way (docs/multirom/bn4-navis.md, Roll built): t1-t1007 the same (her decision, her MegaMan's states 44-48, her flash, her shots and their hits, her pool sounds, her draws replayed); at t1008 her summon puts its enemy on the same panel with the same id, HP and side, but the enemy is each engine's own Mettaur (BN4's id 1, BN4's own code; BN6's id 1, BN6's own Mettaur standing in by name, docs/multirom/bn4.md, Only what is new visits): its record (+1 its type, +5, +0xB, +0xF, +0x20, its sprite), its collision's +0x28 and its panel's reservation are each engine's, unmapped until BN4's Mettaur is mapped or moved"
+  }
+}

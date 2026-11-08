@@ -1487,12 +1487,12 @@ static const XvImm searchman_imms[] = {
 	{ 0x080D980A, THUMB_MOVS, 0, 0, 0x60, 0xF8 },   /* its object's type 0x60: moved, the dispatch's 0xf8 */
 	{ 0x080DF33E, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080E55BC, THUMB_MOVS, 2, 0, 0x22, 0xDB },   /* its object's sprite: list 4 0x22 in BN4, list 4 0xdb in BN6 (copied) */
-	{ 0x080E572A, THUMB_MOVS, 0, 0, 0x2E, 0xE0 },   /* its object's type 0x2e (the fourth kind): moved, the dispatch's 0xe0 */
+	{ 0x080E572A, THUMB_MOVS, 0, 0, 0x2E, 0xE0 },   /* its object's type 0x2e: moved, the dispatch's 0xe0 */
 	{ 0x080E5A30, THUMB_MOVS, 0, 0, 0xC1, 0x63 },   /* its sound 0xc1: BN4's copied into BN6's empty slot 0x63, on its player 8 */
-	{ 0x080E5B38, THUMB_MOVS, 0, 0, 0x31, 0xE1 },   /* its object's type 0x31 (the fourth kind): moved, the dispatch's 0xe1 */
+	{ 0x080E5B38, THUMB_MOVS, 0, 0, 0x31, 0xE1 },   /* its object's type 0x31: moved, the dispatch's 0xe1 */
 	{ 0x080E652A, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
 	{ 0x080E652C, THUMB_MOVS, 2, 0, 0x2D, 0xD8 },   /* its object's sprite: list 3 0x2d in BN4, list 4 0xd8 in BN6 (copied) */
-	{ 0x080E65C6, THUMB_MOVS, 0, 0, 0x3E, 0xE2 },   /* its object's type 0x3e (the fourth kind): moved, the dispatch's 0xe2 */
+	{ 0x080E65C6, THUMB_MOVS, 0, 0, 0x3E, 0xE2 },   /* its object's type 0x3e: moved, the dispatch's 0xe2 */
 	{ 0x080F0F68, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080F1034, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080F1152, THUMB_MOVS, 0, 0, 0x90, 0x32 },   /* its sound 0x90: BN4's copied into BN6's empty slot 0x32, on its player 8 */

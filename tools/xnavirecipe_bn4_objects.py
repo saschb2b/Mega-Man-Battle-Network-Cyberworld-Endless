@@ -126,6 +126,14 @@ NUMBERS = {
                 "0x0405FF01",
     0x04050201: "a collision region's spawn word (AquaMan's third kind 0x27's, 0x080D1B60, its r4 to 0x080CD7E2): BN6's own "
                 "attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA)",
+    0x04050001: "a collision region's spawn word (object_spawnCollisionRegion's r4, Roll's MegaMan's state 44 at 0x080EF9EC, as "
+                "0x04050301): its bytes as 0x04050301's, its third byte 0",
+}
+# the kinds a moved object's code spawns of a type whose kinds' table bn4_twins.TABLES reads, where r4 is no constant but a
+# byte of a table by the Navi's version: the spawn's site -> (the table, why)
+KINDS_BY_VERSION = {
+    0x080EFB20: (0x080BC300, "Roll's MegaMan's state 45 spawns the third kind's 0x0B with r4 her attack's +0xC, set by her "
+                             "decision (0x080BC2D8) from this table by her version (6, 7, 8, 9)"),
 }
 
 
@@ -485,3 +493,34 @@ def facing_effects(b4, b6, f, alloc):
                 f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=4, rn=0, was=e4, now=e6,
                                    why=f'its effect (its side in r4\'s second byte): {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
             f.notes.append(f'{site:08X}: its effect {e4:#x} spawned with its side: BN6\'s {e6:#x} ({how})')
+def list_tables(b4, f, alloc, kinds):
+    """a table of bn4_twins.TABLES whose kind's sprite is of a list the families' room does not grow (LIST_MOVES: list 3):
+    copied into list 4 at a number of its own, the entry's list offset and number BN6's (bytes); kinds: the table -> its
+    kinds (the Navi's spawns')"""
+    for v, ks in kinds.items():
+        t = bn4_twins.TABLES[v]
+        for k in ks:
+            at = v + t['entry'] * k
+            lst, num = b4.u8(at + t['sprite'][0]), b4.u8(at + t['sprite'][1])
+            if lst & 3 or lst // 4 not in LIST_MOVES:
+                continue
+            to = LIST_MOVES[lst // 4]
+            p, raw = X4.sprite(b4, X4.BN4['sprites'], lst // 4, num)
+            if raw is None:
+                continue
+            sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None)
+            if sp is None:
+                sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art,
+                          room=X4.rounded(len(raw), X4.ROOM_ATTACK), lz=bool(p & 0x80000000))
+                f.attack_sprites.append(sp)
+                alloc.list4 += 1
+                alloc.art += sp['room']
+            f.bytes.append((at + t['sprite'][0], lst, 4 * to, f'its table\'s kind {k}: its sprite\'s list {lst // 4} in BN4, copied into {to}'))
+            f.bytes.append((at + t['sprite'][1], num, sp['to_index'], f'its table\'s kind {k}: list {lst // 4} {num:#x} in BN4, list {to} '
+                                                                     f'{sp["to_index"]:#x} copied'))
+            f.decisions = [d for d in f.decisions if not (d[0] == 'sprite' and d[1].startswith(f'{at:08X}:'))]
+
+
+# A sprite of a list the families' room does not grow (3), loaded by its moved objects, copied into list 4 (which it does), as
+# tools/xnavirecipe_bn4.py's LIST_MOVES
+LIST_MOVES = {3: 4}

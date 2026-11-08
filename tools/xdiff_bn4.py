@@ -194,7 +194,7 @@ class Bn4Canon:
 
     def t4(self, game, o):
         """a fourth-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where a
-        recipe moved it (bn4_moved_types' kind 4: SearchMan's scope 0x2E and his marker 0x3E); BN4's as it is"""
+        recipe moved it (bn4_moved_types' kind 4: SearchMan's scope 0x2E and his marker 0x3E, Roll's flash 0x17); BN4's as it is"""
         v = o.o8(OBJ_TYPE)
         return self.moved_types.get((4, v), v) if game == 6 and o.moved else v
 

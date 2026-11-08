@@ -285,6 +285,10 @@ TABLES = {
                      why="the first kind's 0x5C's kinds (a Navi's companions: 2 bytes each, its sprite's list offset and "
                          "number), read by its init (0x080CCCBC, r0 its kind by +4); WindMan spawns kinds 2 and 3 at his "
                          "spawn (0x080C328C, 0x080C32A0)"),
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(7,), sprite=(0, 1), loads=(0x080CD628,),
+                     why="the third kind's 0x02's kinds (53 of 4 bytes, to its block: its sprite's list offset and number, its "
+                         "palette, its +0xC), read by its init (0x080CD61E, r4 its kind by +4); Roll's MegaMan's state 44 spawns "
+                         "kind 7 (0x080EF9B0), list 3's 0xF (tools/xnavirecipe_bn4_objects.py list_tables)"),
     0x080CE5B0: dict(size=0x130, entry=0x10, kinds=(10, 11, 12), sprite=(5, 6), loads=(0x080CE718,),
                      why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
                          "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "

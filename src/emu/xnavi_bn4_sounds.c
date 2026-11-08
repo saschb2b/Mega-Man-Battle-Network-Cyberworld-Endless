@@ -67,6 +67,7 @@ void xnavi_bn4_songs_set(const XVirusFamily *f, int versions) {
 		uint32_t header = p ? xsong_pack(f->game, s->from, s->at, p, s->room) : 0;
 		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
 		uint32_t player = get32(x->data + x->layout->song_table + 8u * s->from + 4);
+		if (s->player) player = s->player | (uint32_t)s->player << 16;   /* (BN6's player for it: its ms and me, tools/xnavirecipe_bn4.py song_player) */
 		xv_word(BUS + slot, now, header);
 		xv_word(BUS + slot + 4, emu_read32(BUS + slot + 4), player);
 		pending.slot[pending.n] = s->slot;

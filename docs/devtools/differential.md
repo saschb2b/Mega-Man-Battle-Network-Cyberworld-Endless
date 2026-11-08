@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1035,6 +1035,14 @@ format, its game 4: the trace's header names it):
   Sun's tables](../rom/bn4.md), What a hit leaves the struck, by element);
   and BN6's own Elec tally for its freeze (+0x78), allowed on MegaMan's
   collision data where BN4's holds nothing.
+  `roll_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md), Roll
+  built) holds a recorded FAIL at t1008, the same in t1-t1007: a moved
+  fourth-kind object (her flash, the fourth kind's 0x17) is told by its
+  type read back as BN4's (`xdiff_snap.py` `identity`, `xdiff_bn4.py`
+  `Bn4Canon.t4`), as a moved third-kind one is; her flash's +4, its spawn's
+  r4, is a spawn leftover; her pool sounds pair in her battles alone
+  (`foes`). At t1008 the enemy her summon spawns is each engine's own
+  Mettaur, which the comparator does not map.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and

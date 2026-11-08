@@ -79,7 +79,9 @@ typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
 /* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
  * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
  * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST), on the music player its own game's entry names */
-typedef struct { uint16_t from, slot; uint32_t at, room; } XvSong;   /* (slot past a byte: a BN4 Navi's pool, xnavi_bn4_sounds.c) */
+typedef struct { uint16_t from, slot; uint32_t at, room; uint8_t player; } XvSong;   /* (slot past a byte: a BN4 Navi's pool,
+                                                                     * xnavi_bn4_sounds.c; player, where not 0, BN6's music player
+                                                                     * for it in place of its game's) */
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
  * (imm.at 0: none): a status wrapper of its own given for BN6's states BN5 has no twin of (frozen, bubbled) */

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -25,7 +25,9 @@ below), ThunderMan, WindMan, FireMan, SearchMan and AquaMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
 [FireMan built](#fireman-built), [SearchMan built](#searchman-built),
 [AquaMan built](#aquaman-built)), the six in
-the tournament's pool on their plates; their companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
+the tournament's pool on their plates; their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
+([Roll built](#roll-built)): the enemy she summons is BN6's own Mettaur,
+not yet compared with BN4's. BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -86,7 +88,7 @@ DIFF, none).
 
 | Navi | Ids (HP V1-SP) | Build | States: own, MegaMan's | Bytes: own + MegaMan's + objects | Objects | Calls S/L/D/none | Unusual |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Roll | 128-131 (700-1500) | Soul | 1, 2, 6; 44-48 | 570 + 2148 + 736 | 4 | 14/4/4/6 | her own decision and dying states; MegaMan's 48 spawns an enemy by its id on a free panel (a summon); reads an enemy's record; a call before the runner |
+| Roll | 128-131 (700-1500) | Soul | 1, 2, 6; 44-48 | 570 + 2148 + 736 | 4 | 14/4/4/6 | her own decision and dying states; MegaMan's 47 spawns an enemy by its id on a free panel (a summon); reads an enemy's record; a call before the runner |
 | GutsMan | 132-135 (500-1700) | Soul | 6; 67-70 | 634 + 956 + 1544 | 4 | 10/4/4/5 | seen in romlab |
 | WindMan | 136-139 (800-1800) | Soul | 3, 4, 6; 63-66 | 616 + 944 + 2880 | 5 | 5/4/3/5 | two first-kind objects (0x5C) set out at his spawn; the families' dying |
 | SearchMan | 140-143 (900-1800) | Soul | 1, 6; 58-61 | 632 + 1646 + 1868 | 4 | 11/4/4/7 | his collision data's +0x1A and flag 4 set and cleared (his hiding, assumed): three routines of his alone |
@@ -1048,6 +1050,93 @@ in a water blue (the owner's to change). `LAYER_MAKE` stays 112.
 Interims left, none reached by `aquaman_v1`: the 0x5C's state 4 run as 0
 (WindMan's, Companions); his SP's palette; sounds past a byte his code names
 none of.
+
+## Roll built
+
+The seventh in the order, built on 8 November 2026 and proved to her summon:
+her type 0x1D, Navi AI 48, ids 0x380-0x383 (`foes 380@52`), her seat 0.
+Her addresses and how each was read are in [BN4 Red Sun's
+tables](../rom/bn4.md) (Roll derived). What she adds:
+
+- **A call before her pre-step** (`navi_update`): her update calls
+  `0x080BC340` (her summons' words, +0x60 and +0x64, let go where their HP
+  is 0), then the pre-step, the runner and the present; her type routine
+  runs the after-step. Her call is BN6's hook A (table 2), which BN6's Navi
+  frame runs after its pre-step (`0x080F368C`); the pre-step reads and
+  writes her own collision and statuses, her call her words and her
+  summons' HP, so the order is not seen.
+- **Her own states 1 and 2**: each does a little (+6 cleared; her
+  summons' HP made 0 as she is deleted) and ends in BN4's generic state of
+  its place, its tail aimed at BN6's (`own_generic`).
+- **MegaMan's 44-48** as her 7-11: 44 her attack with the third kind's
+  0x02 (kind 7, its sprite in a kinds' table of list 3, copied into list 4:
+  `tools/xnavirecipe_bn4_objects.py` `list_tables`), 45 a shot (the third
+  kind's 0x0B, CirKill's shot, its kind her version's byte of `0x080BC300`:
+  `KINDS_BY_VERSION`), 46 her warp, 47 her summon, 48 a move with her
+  callback. 46 and 47 spawn her flash, the fourth kind's 0x17, which BN6
+  has no type of: moved with her through the dispatch's fourth kind (the
+  first moved fourth-kind type: `tools/xnavirecipe_bn4_summon.py`
+  `MOVED4`, `xrecipe_bn4.spawns_of` taking a `moved4`), its effect 0x2E
+  named by `lsls #8` and `adds` (its parameter a draw), moved as BN6's 0x9C
+  (`xrecipe_bn4.effects_of`).
+- **Her summon** (`tools/xnavirecipe_bn4_summon.py`): MegaMan's 47 calls
+  `BN4_SPAWN_ENEMY` with an enemy id from her version's list
+  (`BN4_ROLL_SUMMONS`: V1 1; V2 2 and 0xE; V3 3, 0xF and 0x39; SP 4 and
+  0x10). BN4's picks a free panel of her side (its masks by side and one
+  draw), spawns the record's first-kind type with +5 2 (BN4's summoned
+  appear, `0x0801002A`) and writes its fields from the record. BN6's spawn
+  of an enemy into a fight under way, `BN6_SPAWN_ENEMY_1`, does the same
+  from BN6's records (its AI data's +2 1, BN6's summoned appear
+  `0x080164A0`), so the routine is not copied: the call is aimed at a shim
+  in her code room (`XnSummon`, written by `src/emu/xnavi_init.c` with
+  `xvirus_shim_summon`) that picks the panel as BN4's does (her copy of
+  `BN4_FREE_PANELS`, the same masks, one draw of BN6's GetRNG twin), gives
+  the id BN6's and calls BN6's routine, then plays her summon's sound. Its
+  twin audited: the panel, id, HP and side the same at t1008. The ids:
+  Billy's are moved (0xE-0x10 as 0x2C1-0x2C3, its recipe's); Mettaur's
+  (1-4) are BN6's own Mettaur by name, as a run's visitors take them
+  ([Battle Network 4 in a run](bn4.md), Only what is new visits); 0x39
+  (V3's, its type 0x11) is moved by no recipe and summons nothing yet, an
+  interim. Her +0x60 and +0x64 hold BN6's objects as BN4's.
+- **Her sounds' player**: BN4 plays 0x96 and 0x131 on its player 22 and
+  its hit sound 0x6B on 10; BN6 keeps its 22 for its hit sound 0x6B alone.
+  On BN4's player, BN6's hit sound cut her attack's 0x131 (`roll_v1` at
+  t204), so a pooled song whose BN4 player BN6 keeps for one song of its
+  own goes on the BN6 player most of that BN4 player's numbers take in BN6,
+  9 (`tools/xnavirecipe_bn4.py` `song_player`, `XvSong.player`). No other
+  BN4 Navi's pooled song is on such a player.
+
+`bn4_roll_control` PASSes (her summon at t1008 among it). **`roll_v1`**
+(Roll V1 alone at (5,2) against MegaMan idle at (2,2) with 2000 HP, as
+`gutsman_v1`) is the same in t1-t1007: her decision, MegaMan's 44-48, her
+flash and its effects, her shots and their hits, her pool sounds, every
+draw replayed. What the comparator took: her flash's +4, the spawn's r4
+that her states never set (`spawn_leftover`, BN4 0x13, BN6 her AI data's
+address); a moved fourth-kind type read back as BN4's (`Bn4Canon.t4`,
+`xdiff_snap.identity`); her pool sounds paired (0x96 at 0x32, 0xCE at
+0x33, 0x131 at 0x63, 0x132 at 0xD0, in her battles alone).
+
+**At t1008 her summon's Mettaur is each engine's own**: the same panel,
+id, HP and side, but BN4's Mettaur runs BN4's code (its type 2, +5 2, its
++0xB, +0xF and +0x20, its sprite, its collision's +0x28, its panel
+reserved) and BN6's runs BN6's. Neither the port nor the comparator can
+make them one: BN4's Mettaur has not been mapped onto BN6's
+(`bn4_mettaur_control` against BN6's own parts at t1), and moving it as a
+family takes twelve decisions of the families' generator (four own
+states, five calls with no twin, a literal, a sprite and a sound). Read
+from the two traces after t1008: both Mettaurs step from (4,1) to (4,2),
+but on different clocks, and BN6's shockwave strikes MegaMan at t1195
+(1880 to 1870 HP), BN4's not by t1200. So a native's reading would end
+INCONCLUSIVE there too. `roll_v1` records FAIL at t1008, and Roll is not
+in the tournament's proved list: the owner's call is whether her summon
+brings BN6's Mettaur (then the differential compares it as a native, the
+world from then on) or BN4's moved for her.
+
+Seven mutations break her port and each is caught: her decision's
+CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
+effect another (t66), her warp's sound at another pool slot (t67), her
+attack's sprite at BN4's list (t195), her player-22 sound on BN6's
+hit player (t204) and her shot of another kind (t385).
 
 ## What tools/xnavirecipe.py needs for BN4
 

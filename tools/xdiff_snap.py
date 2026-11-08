@@ -667,7 +667,7 @@ def identity(game, o, canon):
         return canon.t3(game, o.o8(OBJ_TYPE))
     if o.o8(OBJ_TYPE) == 0:
         return (0, canon.fx(game, o.o8(OBJ_EFFECT)))
-    t4 = getattr(canon, 't4', None)   # (a fourth-kind type a recipe moved, read back as its game's own: SearchMan's scope and marker)
+    t4 = getattr(canon, 't4', None)   # (a fourth-kind type a recipe moved, read back as its game's own: SearchMan's scope and marker, Roll's flash)
     return t4(game, o) if t4 else o.o8(OBJ_TYPE)
 
 
