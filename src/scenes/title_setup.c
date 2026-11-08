@@ -260,8 +260,8 @@ static const char *row_note(char *buf, size_t n, char shut[][SHUT_MAX], int *nsh
 	int row = row_at();
 	if (row < 0) return setup_word(feet[S.tab]);
 	if (S.tab == TAB_RUN) return run_note(row, buf, n, shut, nshut);
-	/* (and what else it changes: All *'s Program Advances, the tournament
-	 * not in runs yet) */
+	/* (and what else it changes: All *'s Program Advances; an extra's
+	 * note where it has one) */
 	const HelperInfo *h = S.tab == TAB_HELP ? meta_helper(row) : extra_words(row);
 	if (h->more && S.tab == TAB_EXTRAS) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", h->more);
 	return S.tab == TAB_HELP ? setup_helper_note(buf, n, h->about, h->more) : h->about;

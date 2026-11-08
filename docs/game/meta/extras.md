@@ -3,7 +3,7 @@ type: Feature
 title: "The extras"
 description: "The extras: what a run adds to BN6 that a player may leave out (Liberation Missions, the tournament, the Glitch layer, the Virus Battler, the DarkChips' flames, the older nets), each on or off on the JACK-IN SETUP's EXTRAS page, all on by default, kept for the run and named on its summary; the owner's calls of 5 November 2026."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:40:00Z }
 sources:
   - id: owner
     resource: "The owner's brief and calls, given in the project's sessions on 5 November 2026"
@@ -35,8 +35,9 @@ page of their own, EXTRAS, beside the run's choices and the
 
 Older nets is shown only where another game's ROM is read (`extra_shown`,
 `src/core/extras.c`): without one there is nothing of theirs to leave out.
-The tournament's line is shown though the bracket is not in runs yet, its
-note saying so (the owner's call).
+The tournament's line was shown before the bracket reached runs, a dim
+note under it saying so (the owner's call); with the bracket in runs
+(0.20.0) the note is gone.
 
 ## The calls (5 November 2026)
 
