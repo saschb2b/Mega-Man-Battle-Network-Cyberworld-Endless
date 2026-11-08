@@ -30,6 +30,8 @@ uint32_t xd4_record(const Spec *s, uint8_t *rec);
  * (xnavi_bn4.h), those its foes (BN4's enemy ids) are versions of, and the families a Navi of them summons, into fams
  * (MAX_FOES at most): how many */
 int xd4_families(const Spec *s, const XVirusFamily **fams);
+/* The pool of BN4's Navis' songs pointed at the spec's foe's (xnavi_bn4_sounds_point), before its pokes */
+void xd4_pool_point(const Spec *s);
 /* The draws of the summons of the BN4 Navis among fams (their shims' in their code rooms, xvirus_shim_summon) keyed as
  * BN4_SPAWN_ENEMY's (BN4_SPAWN_ENEMY_DRAW): into out (max at most), each as a moved range of two bytes, how many */
 int xd4_summon_draws(const XVirusFamily *const *fams, int n, XvMoved *out, int max);

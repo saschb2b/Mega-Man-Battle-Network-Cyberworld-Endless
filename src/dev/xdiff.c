@@ -717,6 +717,7 @@ static bool subject(Side *g, const Spec *s) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}
+	if (s->bn4) xd4_pool_point(s);   /* (the pool his battle points at its first frame, before a poke of a slot's entry) */
 	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();

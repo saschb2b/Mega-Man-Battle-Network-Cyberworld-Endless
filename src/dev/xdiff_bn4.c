@@ -12,6 +12,7 @@
 #include "guest.h"
 #include "rom.h"
 #include "xnavi_bn4.h"
+#include "xnavi_bn4_sounds.h"
 #include "xvirus_bn4.h"
 #include "xvirus_shim.h"
 
@@ -108,6 +109,10 @@ static int summoned(const XNavi *x, const XVirusFamily **fams, int n) {
 			if (x->summon->ids[j].to >= f->first_id && x->summon->ids[j].to < f->first_id + XV_VERSIONS) n = with(fams, n, f);
 		}
 	return n;
+}
+
+void xd4_pool_point(const Spec *s) {
+	for (int k = 0; k < s->nfoes; ++k) xnavi_bn4_sounds_point((uint32_t)xd4_bn6_id(s->foes[k].id));
 }
 
 int xd4_families(const Spec *s, const XVirusFamily **fams) {
