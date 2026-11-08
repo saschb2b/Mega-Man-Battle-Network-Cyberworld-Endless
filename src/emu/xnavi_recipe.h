@@ -132,6 +132,14 @@ typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_
  * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order */
 typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame; } XnInit;
 
+/* A summon its game's code makes (BN4's Roll: her MegaMan's state 47 calls BN4_SPAWN_ENEMY, an enemy by its id on a free panel
+ * of her side; docs/multirom/bn4-navis.md, Roll built): that call aimed at a shim at `at` (its code room) that picks the panel
+ * as BN4's does, by `panels` (its copy of BN4_FREE_PANELS) with `masks` (wanted, refused: side 0's, then side 1's) and one
+ * draw, gives its game's id BN6's by `ids` (to 0: none spawned) and spawns it by BN6_SPAWN_ENEMY_1, then plays `sound`
+ * (xnavi_init.c, xvirus_shim_summon) */
+typedef struct { uint8_t from; uint16_t to; } XnSummonId;
+typedef struct { uint32_t at; XvRef panels; uint32_t masks[4]; const XnSummonId *ids; int nids; uint16_t sound; } XnSummon;
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -154,6 +162,7 @@ typedef struct {
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
 	const XnInit *init;         /* what its game's init does past BN6's actor init (BN4's Navis' companions), NULL nothing */
+	const XnSummon *summon;     /* its summon's shim (BN4's Roll's), NULL none */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

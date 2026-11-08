@@ -7,8 +7,8 @@
 #include "bytes.h"
 #include "thumb_reloc.h"
 
-#define LABELS 8
-#define FIXES  16
+#define LABELS 16
+#define FIXES  24
 
 /* A shim as it is written: halfwords from `at` (its bus address), labels by
  * their offset, branches and literal loads fixed once all is written */
@@ -307,5 +307,92 @@ int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint
 	half(&a, BX(0));
 	word(&a, STEP, BN6_VIRUS_STATE_STEP | 1);
 	word(&a, MASK, 0x1FE);
+	return done(&a) ? a.n : 0;
+}
+
+/* ---- a summon (a BN4 Navi's: BN4_SPAWN_ENEMY's place) ---- */
+
+/* a call of `label`'s word (Thumb) past a bl's reach through `reg`, lr made in `link` (with its Thumb bit, as a bl gives) */
+static void far(Asm *a, int reg, int link, int label) {
+	to_label(a, LDR_PC(reg), label, 'l');
+	half(a, (uint16_t)(0x4678 | link));        /* mov link, pc */
+	half(a, ADDS_I(link, 5));
+	half(a, MOV_LR(link));
+	half(a, BX(reg));
+}
+
+int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s) {
+	enum { M0, M1, M2, M3, RNG, SPAWN, SOUND, IDS, L1, L2, LOOP, NONE, END, SLOT };
+	Asm a = { out, max, 0, at, (at & 3) != 0 || s->nids < 0, { 0 }, { { 0 } }, 0 };
+	half(&a, 0xB590);                            /* push {r4, r7, lr} */
+	half(&a, 0xB084);                            /* sub sp, #16 */
+	half(&a, 0x9001);                            /* str r0, [sp, #4]: its game's id */
+	half(&a, LDRB_I(0, 5, 0x16));                /* its side */
+	to_label(&a, LDR_PC(2), M0, 'l');            /* the masks wanted and refused, by side */
+	to_label(&a, LDR_PC(3), M1, 'l');
+	half(&a, CMP_I(0, 0));
+	to_label(&a, BCC(EQ), L1, 'c');
+	to_label(&a, LDR_PC(2), M2, 'l');
+	to_label(&a, LDR_PC(3), M3, 'l');
+	here(&a, L1);
+	half(&a, 0xAF00);                            /* add r7, sp, #0: the panels' buffer */
+	bl(&a, s->panels);
+	half(&a, 0x1C07);                            /* adds r7, r0, #0: their count */
+	to_label(&a, BCC(NE), L2, 'c');
+	half(&a, MOVS(0, 0));
+	to_label(&a, B_, END, 'b');
+	here(&a, L2);
+	far(&a, 0, 1, RNG);                          /* a draw */
+	half(&a, 0x1C39);                            /* adds r1, r7, #0 */
+	half(&a, 0xDF06);                            /* swi 6: r1 the draw modulo the count */
+	half(&a, 0xA800);                            /* add r0, sp, #0 */
+	half(&a, 0x5C40);                            /* ldrb r0, [r0, r1]: column | row << 4 */
+	half(&a, 0x0901);                            /* lsrs r1, r0, #4 */
+	half(&a, 0x0740);                            /* lsls r0, r0, #29 */
+	half(&a, 0x0F40);                            /* lsrs r0, r0, #29 */
+	half(&a, 0x9002);                            /* str r0, [sp, #8] */
+	half(&a, 0x9103);                            /* str r1, [sp, #12] */
+	half(&a, 0x9801);                            /* ldr r0, [sp, #4] */
+	to_label(&a, 0xA300, IDS, 'l');              /* add r3, pc, #ids: its game's id | BN6's << 16, 0 ending */
+	here(&a, LOOP);
+	half(&a, 0xCB04);                            /* ldmia r3!, {r2} */
+	half(&a, CMP_I(2, 0));
+	to_label(&a, BCC(EQ), NONE, 'c');
+	half(&a, 0x0411);                            /* lsls r1, r2, #16 */
+	half(&a, 0x0C09);                            /* lsrs r1, r1, #16 */
+	half(&a, CMP_R(1, 0));
+	to_label(&a, BCC(NE), LOOP, 'c');
+	half(&a, 0x0C10);                            /* lsrs r0, r2, #16: BN6's id (0: none) */
+	to_label(&a, BCC(EQ), NONE, 'c');
+	half(&a, 0x9902);                            /* ldr r1, [sp, #8] */
+	half(&a, 0x9A03);                            /* ldr r2, [sp, #12] */
+	half(&a, LDRB_I(3, 5, 0x16));
+	far(&a, 4, 7, SPAWN);
+	half(&a, 0x1C04);                            /* adds r4, r0, #0 */
+	to_label(&a, BCC(EQ), END, 'c');
+	if (s->sound <= 0xFF) half(&a, MOVS(0, s->sound));
+	else to_label(&a, LDR_PC(0), SLOT, 'l');
+	far(&a, 3, 7, SOUND);
+	half(&a, 0x1C20);                            /* adds r0, r4, #0 */
+	to_label(&a, B_, END, 'b');
+	here(&a, NONE);
+	half(&a, MOVS(0, 0));
+	here(&a, END);
+	half(&a, 0xB004);                            /* add sp, #16 */
+	half(&a, 0xBD90);                            /* pop {r4, r7, pc} */
+	word(&a, M0, s->masks[0]);
+	word(&a, M1, s->masks[1]);
+	word(&a, M2, s->masks[2]);
+	word(&a, M3, s->masks[3]);
+	word(&a, RNG, s->rng | 1u);
+	word(&a, SPAWN, s->spawn | 1u);
+	word(&a, SOUND, s->play | 1u);
+	word(&a, SLOT, s->sound);
+	word(&a, IDS, s->nids ? s->ids[0] : 0);
+	for (int k = 1; k <= s->nids; ++k) {
+		const uint32_t v = k < s->nids ? s->ids[k] : 0;
+		half(&a, (uint16_t)v);
+		half(&a, (uint16_t)(v >> 16));
+	}
 	return done(&a) ? a.n : 0;
 }

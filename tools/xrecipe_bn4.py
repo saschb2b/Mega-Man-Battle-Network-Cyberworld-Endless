@@ -570,10 +570,12 @@ def spawns_of(f, alloc):
                 continue
             kind, name = SPAWNERS4[t]
             ty, chain = T.back_value(w, site, 0)
-            if kind != 3 or ty not in f.moved3 or len(chain) != 1 or chain[0][1] != 'movs':
+            # (a fourth-kind type a Navi's recipe moves: f.moved4, tools/xnavirecipe_bn4_summon.py's)
+            moved = f.moved3 if kind == 3 else getattr(f, 'moved4', {}) if kind == 4 else {}
+            if ty not in moved or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('type', f'{site:08X}: it spawns a {kind} type {ty if ty is None else hex(ty)} which it does not move')
                 continue
-            m = f.moved3[ty]
+            m = moved[ty]
             if 'as' not in m:
                 m['as'] = alloc.types[kind]
                 alloc.types[kind] += 1
