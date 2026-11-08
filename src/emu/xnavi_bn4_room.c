@@ -11,8 +11,10 @@
 #include "emu.h"
 #include "rom.h"
 #include "xnavi.h"
+#include "xnavi_bn4_art.h"
 #include "xnavi_recipe.h"
 #include "xnavi_room.h"
+#include "xvirus_grow.h"
 #include "xvirus_tx.h"
 
 #define BUS   0x08000000u
@@ -45,9 +47,10 @@ void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lis
 	if (p) *p = s->index;
 }
 
-/* a raw sprite's bytes in BN4's ROM (its list 2 word's bit 31 clear), *len of them; NULL where it is LZ77'd or unread */
-static const uint8_t *raw_of(const XRom *x, int number, uint32_t *len) {
-	uint32_t lists = x->layout->sprite_lists, at = lists + 4u * LIST2 + 4 <= ROM_SIZE ? get32(x->data + lists + 4u * LIST2) - BUS : ROM_SIZE;
+const uint8_t *xnavi_bn4_raw(int list, int number, uint32_t *len) {
+	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
+	if (!x->data || !x->layout || !x->layout->sprite_lists) return NULL;
+	uint32_t lists = x->layout->sprite_lists, at = lists + 4u * (uint32_t)list + 4 <= ROM_SIZE ? get32(x->data + lists + 4u * (uint32_t)list) - BUS : ROM_SIZE;
 	uint32_t p = at + 4u * (uint32_t)number + 4 <= ROM_SIZE ? get32(x->data + at + 4u * (uint32_t)number) : 0x80000000u;
 	if ((p & 0x80000000u) || p < BUS || p - BUS >= ROM_SIZE) return NULL;
 	*len = xnavi_sprite_len(x->data + (p - BUS), ROM_SIZE - (p - BUS));
@@ -60,7 +63,7 @@ static bool fill(int number) {
 	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
 	if (!x->data || !x->layout || !x->layout->sprite_lists) return false;
 	uint32_t len = 0;
-	const uint8_t *raw = raw_of(x, number, &len);
+	const uint8_t *raw = xnavi_bn4_raw(LIST2, number, &len);
 	uint8_t *d = raw ? NULL : xnavi_sprite_bytes(x->data, x->layout->sprite_lists, LIST2, number, &len);
 	bool ok = (raw || d) && len <= XN_BN4_SPRITE_SIZE;
 	if (ok) {
@@ -74,12 +77,21 @@ static bool fill(int number) {
 	return ok;
 }
 
+bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists) {
+	if (s->at != XN_BN4_SPRITE) return xnavi_bn4_art_row(s, rom, lists);
+	xg_set_word(XG_LIST + xvirus_list_slot(s->to_list), s->to_index, s->at);
+	return true;
+}
+
 bool xnavi_bn4_room_for(const uint8_t *entities, size_t len) {
 	if (!emu_ready() || !XR[XROM_BN4_RED_SUN_US].data) return false;
 	for (size_t i = 0; i + 4 <= len && entities[i] != 0xF0; i += 4) {
 		int seat = entities[i] == 0x11 ? seat_of((uint32_t)(entities[i + 2] | entities[i + 3] << 8)) : -1;
 		int number = seat >= 0 ? emu_read8(XN_BN4_SPRITES + (uint32_t)seat) : NONE;
-		if (number != NONE) return fill(number);
+		if (number == NONE) continue;
+		/* (his attacks' art and songs in theirs: xnavi_bn4_art.h) */
+		bool art = xnavi_bn4_art_for(seat);
+		return fill(number) && art;
 	}
 	return false;
 }

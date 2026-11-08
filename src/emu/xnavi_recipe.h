@@ -82,6 +82,9 @@
 #define XN_BN4_SPRITE_SIZE (FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE)
 /* ... and which sprite each seat's is: BN4's list 2 number of his battle sprite, a byte a seat (0xFF none), past the homes */
 #define XN_BN4_SPRITES     (XN_BN4_HOMES + XN_BN4_SEATS * XV_HOME_SIZE)
+/* ... their attacks' art and pool songs (XN_BN4_ART to XN_BN4_END) one room too, the coming battle's Navi's filled in
+ * (xnavi_bn4_art.h); whose each seat's battle fills it with, a byte a seat (his own seat, 0xFF none), past the sprites' */
+#define XN_BN4_ARTS        (XN_BN4_SPRITES + XN_BN4_SEATS)
 
 /* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {
