@@ -72,7 +72,7 @@ uint32_t xvirus_code_at(const XVirusFamily *f, uint32_t a);
  * address range of a family's game, or of one of BN6's tables, and its
  * copy */
 typedef struct { uint32_t from, to, len; } XvMoved;
-#define XV_MOVED_MAX 1024
+#define XV_MOVED_MAX 2048
 /* the ranges moved so far (at most max), how many */
 int xvirus_moved(XvMoved *out, int max);
 

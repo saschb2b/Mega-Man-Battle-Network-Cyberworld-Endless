@@ -144,6 +144,13 @@ typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, 
 typedef struct { uint8_t from; uint16_t to; } XnSummonId;
 typedef struct { uint32_t at; XvRef panels; uint32_t masks[4]; const XnSummonId *ids; int nids; uint16_t sound; } XnSummon;
 
+/* A call its game's update makes between its pre-step and its state runner, past one (BN4's JunkMan's two; docs/multirom/
+ * bn4-navis.md, JunkMan built): `call` (its own code) made by a bl from a shim of its home its hook A (table 2, which BN6's
+ * Navi frame runs after its pre-step, 0x080F368C) is aimed at, each in its update's order, r0 given `r0` before it
+ * (XN_R0_ANY: left as the call before leaves it) (xnavi_init.c) */
+typedef struct { XvRef call; uint32_t r0; } XnPreCall;
+#define XN_R0_ANY 0xFFFFFFFFu
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -170,6 +177,11 @@ typedef struct {
 	                               invisible and keeps their marker before every state, 0x08013F12, where BN6's status step calls its
 	                               twin nowhere), through stubs of its home (xnavi_init.c); addr 0 none. SearchMan's, who hides */
 	const XnSummon *summon;     /* its summon's shim (BN4's Roll's), NULL none */
+	const XnPreCall *pre;       /* its update's calls between its pre-step and its runner, made by its hook A's shim (its .hook_a then
+	                               BN6's empty hook), NULL none */
+	int npre;
+	uint8_t record_list;        /* the list its BN4 records name its battle sprite in where it is not the list its init loads it from
+	                               (JunkMan's 1: read by BN4's preload alone, which passes a raw sprite over), 0 that list */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

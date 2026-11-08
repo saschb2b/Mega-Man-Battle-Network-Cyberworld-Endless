@@ -95,6 +95,10 @@ COPIED = {
                 "routine of its body (a search of BN6 by its bytes); copied, its fields none but the object's side",
     0x0800C0A6: "the invisible not drawn and its marker kept (BN4_HIDE_STEP, run by BN4's runners before every state): BN6's twin "
                 "(0x0801012C) spawns BN6's own marker, another object (MOVE4); copied, its marker BN4's moved, its +0x7C BN6's +0x50",
+    0x080DFF44: "JunkMan's junk's test (the third kind 0x97's update, 0x080E0058): its collision data's hits word (BN4's +0x54, "
+                "BN6's +0x70) against its table by its side (0x00550000 side 0's, 0x00AA0000 side 1's: the alliance bits of "
+                "BN4_COLL_MASKS' words of regions 2, 13 and 20, BN6_COLL_MASKS' the same); a leaf before the third kind 0x96's "
+                "spawner, no BN6 routine of its body; copied, its +0x54 BN6's +0x70, its table with it (NAVI_COPIED_DATA)",
     0x080DF332: "SearchMan's shot's test: its collision data's hits word (BN4's +0x54, BN6's +0x70) against the other side's "
                 "bits (0x0A800000 a side 1 object's, 0x05800000 a side 0 one's, BN6's alliance bits the same: BN4_COLL_MASKS); "
                 "a leaf in the third kind's 0x5F's block, no BN6 routine of its body; copied, its +0x54 BN6's +0x70",
@@ -126,6 +130,8 @@ NUMBERS = {
                 "0x0405FF01",
     0x04050201: "a collision region's spawn word (AquaMan's third kind 0x27's, 0x080D1B60, its r4 to 0x080CD7E2): BN6's own "
                 "attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA)",
+    0x06050A01: "a collision region's spawn word (JunkMan's third kind 0x98's, 0x080E02D8, its r4 to 0x080CD7E2): BN6's own "
+                "attacks pass the same to its twin 0x080C6BDA (seven of its pools, 0x080BD3A0 the first)",
     0x04050001: "a collision region's spawn word (object_spawnCollisionRegion's r4, Roll's MegaMan's state 44 at 0x080EF9EC, as "
                 "0x04050301): its bytes as 0x04050301's, its third byte 0",
 }
@@ -135,6 +141,21 @@ KINDS_BY_VERSION = {
     0x080EFB20: (0x080BC300, "Roll's MegaMan's state 45 spawns the third kind's 0x0B with r4 her attack's +0xC, set by her "
                              "decision (0x080BC2D8) from this table by her version (6, 7, 8, 9)"),
 }
+
+
+# The dispatch's numbers a kind's moved types take (xrecipe_bn4.TYPE_0 on; a byte, an object's +1, XV_TYPES_MAX): past 0xFF
+# from the first past every BN5 type of that kind (bn5.h BN5_TYPES_T1_COUNT, _T3_, _T4_: BN5's tracks move theirs at their own
+# numbers, which tests/test_core.c holds BN4's apart from) up to TYPE_0. The third kind's 0xE0-0xFF were all taken at JunkMan
+BN5_TYPES = {1: 95, 3: 204, 4: 145}
+
+
+class DispatchNumbers(dict):
+    """alloc.types: a kind's next number, past 0xFF its BN5 count's (BN5_TYPES); none left past TYPE_0 again"""
+    def __setitem__(self, kind, n):
+        n = BN5_TYPES[kind] if n == 0x100 else n
+        if n == X4.TYPE_0:
+            sys.exit(f'xnavirecipe_bn4: the dispatch\'s {X4.KIND_NAMES[kind]}-kind numbers are all taken')
+        super().__setitem__(kind, n)
 
 
 def install(pairs):

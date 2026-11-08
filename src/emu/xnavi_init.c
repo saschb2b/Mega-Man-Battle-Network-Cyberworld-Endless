@@ -161,6 +161,21 @@ static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
 	return true;
 }
 
+/* its hook A's shim (XNavi.pre): its update's calls between its pre-step and its runner, in turn, each with its r0. BN6's Navi
+ * frame keeps the AI index in r4 across hook A (0x080F3682-0x080F36A2), pushed here too */
+static uint32_t pre_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *size) {
+	Shim s = { .at = at };
+	op(&s, 0xB510);   /* push {r4, lr} */
+	for (int i = 0; i < n->npre; ++i) {
+		const uint32_t r0 = n->pre[i].r0;
+		if (r0 != XN_R0_ANY && r0 <= 0xFFu) op(&s, 0x2000u | r0);   /* movs r0,#r0 */
+		else if (r0 != XN_R0_ANY) lit(&s, 0, r0);
+		bl(&s, xv_move_ref(n->pre[i].call));
+	}
+	op(&s, 0xBD10);   /* pop {r4, pc} */
+	return shim_put(&s, room, "hook A", size);
+}
+
 /* its summon's shim at its place in its code room (XNavi.summon): false where it does not fit or reach */
 #define SUMMON_IDS  12
 #define SUMMON_ROOM 0x100  /* (the generator's room for it, tools/xnavirecipe_bn4_summon.py SHIM_ROOM) */
@@ -193,6 +208,14 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 		place = (place + 3u) & ~3u;
 		if (!hide_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0)) return 0;
 		place += XN_HIDE_SIZE(f);
+	}
+	if (n->npre) {   /* (its hook A's shim next: a Navi with none leaves its shims where they were) */
+		uint32_t size = 0;
+		if (table[2] != BN6_NAVI_NULLSUB) { xv_fail("its hook A is its own: no room for its update's calls"); return 0; }
+		place = (place + 3u) & ~3u;
+		table[2] = pre_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0, &size);
+		if (!table[2]) return 0;
+		place += size;
 	}
 	if (end && !in) {
 		if (place + 8u > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return 0; }
