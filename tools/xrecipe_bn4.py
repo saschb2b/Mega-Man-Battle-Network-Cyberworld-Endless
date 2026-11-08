@@ -167,7 +167,7 @@ class Family:
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
         self.sides = []   # (its calls to BN4's direction rule, each through a shim: side_sites)
-        self.sound_calls = []   # (its calls to BN4's appear queue, each through a shim that gives r0 the queue: queued_sites)
+        self.queue_calls = []   # (its calls to BN4's appear queue, each through a shim that gives r0 the queue: queued_sites)
         self.after = None
 
     def decide(self, kind, detail):  # noqa: D401
@@ -623,7 +623,7 @@ def side_sites(f):
 def queued_sites(f):
     """its calls to BN4's appear queue's routines (bn4_twins.QUEUED; one queue, BN6's by r0): each through a shim that makes r0
     the queue's number and goes on to BN6's twin (XvSoundCall, xvirus.c's r0 calls)"""
-    f.sound_calls = [dict(at=s, slot=q, why=f'its call to {t:08X}: BN6\'s twin of queue {q} (bn4_twins.QUEUED)')
+    f.queue_calls = [dict(at=s, slot=q, why=f'its call to {t:08X}: BN6\'s twin of queue {q} (bn4_twins.QUEUED)')
                      for t, q in sorted(bn4_twins.QUEUED.items()) for s in sorted(f.calls.get(t, []))]
 
 
@@ -1167,9 +1167,9 @@ def c_recipe(f):
         L.append(f'static const uint32_t {n}_sides[] = {{')
         L += [f'\t0x{at:08X},   /* {why} */' for at, why in f.sides]
         L.append('};')
-    if f.sound_calls:
+    if getattr(f, "queue_calls", None):
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
-        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.sound_calls]
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.queue_calls]
         L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
@@ -1208,7 +1208,7 @@ def c_family(f, n):
          f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
          f'\t.first_id = XV_FIRST_ID + 0x{f.first_id - XV_FIRST_ID:X},', f'\t.home = XV_HOMES + 0x{f.home - XV_HOMES:X},']
     for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
-                         ('sides', f.sides), ('sound_calls', f.sound_calls), ('numbers', f.numbers), ('bytes', f.bytes),
+                         ('sides', f.sides), ('sound_calls', getattr(f, 'queue_calls', None)), ('numbers', f.numbers), ('bytes', f.bytes),
                          ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t.{field} = {n}_{field}, .n{field} = {count(field)},')

@@ -1501,15 +1501,6 @@ static const XvImm searchman_imms[] = {
 	{ 0x080F144C, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080F166C, THUMB_LDRH, 1, 0, 0x1A, 0x26 },   /* collision data +0x1a in BN4, +0x26 in BN6 */
 };
-static const XvSoundCall searchman_sound_calls[] = {
-	{ 0x080D966C, 0x104 },   /* its sound 0x105 (movs and adds #0xff) at the pool's 0x104, past a byte */
-	{ 0x080E5678, 0x148 },   /* its sound 0x128 (movs and adds #0xff) at the pool's 0x148, past a byte */
-	{ 0x080E56F8, 0x150 },   /* its sound 0x12f (movs and adds #0xff) at the pool's 0x150, past a byte */
-	{ 0x080E5976, 0x148 },   /* its sound 0x128 (movs and adds #0xff) at the pool's 0x148, past a byte */
-	{ 0x080E5998, 0x150 },   /* its sound 0x12f (movs and adds #0xff) at the pool's 0x150, past a byte */
-	{ 0x080F10C4, 0x117 },   /* its sound 0x109 (movs and adds #0xff) at the pool's 0x117, past a byte */
-	{ 0x080F14D2, 0x117 },   /* its sound 0x109 (movs and adds #0xff) at the pool's 0x117, past a byte */
-};
 static const XvNumber searchman_numbers[] = {
 	{ 0x080D7D6C, 0x0405FF09, 0x0405FF09 },   /* a collision region's spawn word (SearchMan's shot's, 0x080D7D56, r4 of 0x080CD7E2: BN6's 0x080C6BDA), as 0x0405FF01 */
 	{ 0x080DF364, 0x0A800000, 0x0A800000 },   /* the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), where the thunder's update tests the same mask, 0xFF800000, in both games */
