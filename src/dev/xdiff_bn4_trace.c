@@ -57,6 +57,7 @@ static const Seg coll_segs[] = {
 	{ BN4_COLL_HOLD, BN6_COLL_IMMOBILE, 2 },
 	{ BN4_COLL_FLASH, BN6_COLL_FLASH, 2 },
 	{ BN4_COLL_INVULNERABLE, BN6_COLL_INVULNERABLE, 2 },
+	{ BN4_COLL_INVISIBLE, BN6_COLL_INVISIBLE, 2 },   /* (the invisibility's timer: BN4_INVISIBLE_STEP, BN6_INVISIBLE_STEP) */
 	{ BN4_COLL_FINAL_DAMAGE, BN6_COLL_FINAL_DAMAGE, 2 },
 	/* (a frame of hits by element, five u16 each: the hit passes' adds, BN4 0x08012C74, BN6's image 0x081D7906, and the
 	 * sums, BN4_ELEM_DAMAGES_SUM, BN6_ELEM_DAMAGES_SUM; thunderman_v1's Elec hit at t278) */

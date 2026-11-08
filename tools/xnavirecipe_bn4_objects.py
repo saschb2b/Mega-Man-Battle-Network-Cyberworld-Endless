@@ -13,6 +13,9 @@ import bn4_twins  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 
+# the fourth kind's types (bn4.h BN4_T4_TYPES, 130) and its spawner (BN4_SPAWN_4)
+T4_TYPES, NT4, SPAWN4 = 0x08003F78, 130, 0x08003344
+
 # BN4's routines his code calls with a BN6 twin the families' pairs did not find (tools/bn4_twins.py's way: BN4 -> BN6, its
 # source), each body read in both ROMs (tools/xrecipe_thumb.py's walk)
 TWINS = {
@@ -21,6 +24,19 @@ TWINS = {
     0x08007990: (0x0800A10C, 'thunderman'),
     # a panel broken where it stands free, else cracked (his 0x71's, at 080DB6B0): BN6's 0x0800CA8C (audited, AUDITS)
     0x08009BF0: (0x0800CA8C, 'thunderman'),
+    # SearchMan's hiding (docs/multirom/bn4-navis.md, SearchMan built): an object made invisible for r0 frames (its collision
+    # data's +0x1A, flag 4, its +0 bit 2 cleared), and shown again (+0x1A 0, flag 4 cleared): BN6's 0x080101AE and 0x080101C4
+    # the same bodies at BN6's +0x26 (its invisibility's timer, BN6's 0x08010162 against BN4's 0x0800C0DA): LAYOUT
+    0x0800C126: (0x080101AE, 'searchman'),
+    0x0800C13C: (0x080101C4, 'searchman'),
+}
+# the collision data's offsets his code names that the families' (xrecipe_bn4.COLL4TO6) lack: BN4's -> BN6's, each from both
+# games' code
+COLL4TO6 = {
+    # the invisibility's timer: BN4's 0x0800C0DA (from the Navi and player runners, 0x08013EF2 and 0x08013BE4) and BN6's
+    # 0x08010162 (from the status step, 0x0801B12E) the same body, 0xFFFF for ever, else less 1 a frame and flag 4 cleared
+    # under 0 (sound 0xB0 and 0x94 as it ends); a hit clears it (BN4's 0x0800C110, BN6's 0x08010198)
+    0x1A: 0x26,
 }
 AUDITS = {
     (0x08009BF0, 0x0800CA8C): ('ok', "a panel (r0, r1) of a floor (0x10) broken (type 1, its flags' low bits 1, the crack's sound) "
@@ -51,6 +67,18 @@ COPIED = {
     0x0801052C: "the families' dying (BN4_DYING), his companion's jump table's +8: its collision data let go (BN6's 0x080198CE, "
                 "LAYOUT), its object freed and its side's count less one (0x08007990, BN6's 0x0800A10C); no BN6 routine of its "
                 "body (BN6's virus object keeps its own); copied",
+    0x0800A2E4: "SearchMan's: the panels of the rows 3 to 1 and the columns from his side's edge whose flags (0x08009A86, BN6's "
+                "0x0800C8F8) have r2 and none of r3, into r7's bytes (column | row << 4), r1's flags met first counted; no BN6 "
+                "routine of its body (a search of BN6 by its bytes); copied, its fields none but the object's side",
+    0x080DF332: "SearchMan's shot's test: its collision data's hits word (BN4's +0x54, BN6's +0x70) against the other side's "
+                "bits (0x0A800000 a side 1 object's, 0x05800000 a side 0 one's, BN6's alliance bits the same: BN4_COLL_MASKS); "
+                "a leaf in the third kind's 0x5F's block, no BN6 routine of its body; copied, its +0x54 BN6's +0x70",
+}
+# effects his code spawns by an id ORed with a flip (r4 = movs id | bit 9 drawn: BN4_SPAWN_EFFECT's r4 high byte its flags):
+# the effect's site -> (the movs of its id, the orrs, why); the id given BN6's as xrecipe_bn4.effects_of gives a movs's
+FLIPPED_EFFECTS = {
+    0x080D8840: (0x080D8830, 0x080D8832, "his shot's hit (the third kind's 0x57): r4 8 ORed with the RNG's bit 1 shifted to bit 9, "
+                                         "BN4_SPAWN_EFFECT's flip, the id its low byte"),
 }
 # the battle's flags (BN4's 0x08007A8C, BN6's 0x0800A2F0 the same body) where a moved object no state runs gates its update on
 # their bit 0, the fight's: BN4's state runner runs the Navi's states through the paused opening, so his first own state and
@@ -67,6 +95,10 @@ FIGHT_GATED = {
 NUMBERS = {
     0x04050301: "a collision region's spawn word (object_spawnCollisionRegion's r4, as 0x04050601 and 0x0405FF01): BN6's own "
                 "attacks pass the same (its pools at 0x080E4A44 and 0x08101400)",
+    0x05800000: "SearchMan's shot's test (0x080DF332): the hits word's bits of a side 0 object's foes (0x0A800000 a side 1 "
+                "one's), as BN4_COLL_MASKS' and BN6_COLL_MASKS' alliance bits",
+    0x0405FF09: "a collision region's spawn word (SearchMan's shot's, 0x080D7D56, r4 of 0x080CD7E2: BN6's 0x080C6BDA), as "
+                "0x0405FF01",
 }
 
 
@@ -76,6 +108,129 @@ def install(pairs):
     pairs.twin_src.update({a: 'project:' + s for a, (_, s) in TWINS.items()})
     bn4_twins.AUDITS.update(AUDITS)
     bn4_twins.NUMBERS.update(NUMBERS)
+    for k, v in COLL4TO6.items():
+        X4.COLL4TO6.setdefault(k, v)
+
+
+def t4_of(b4, t):
+    """the fourth-kind type whose code holds `t` (its routine to the next type's): (type, lo, hi), else None"""
+    types = [b4.u32(T4_TYPES + 4 * i) & ~1 for i in range(NT4)]
+    starts = sorted(set(a for a in types if T.is_code_ptr(a | 1, b4)))
+    lo = max((a for a in starts if a <= t), default=None)
+    if lo is None or lo == starts[-1] or t - lo > 0x1000:
+        return None
+    tys = [k for k, a in enumerate(types) if a == lo]
+    return (tys[0] if len(tys) == 1 else None), lo, starts[starts.index(lo) + 1]
+
+
+def moved4(b4, f, pairs):
+    """his calls into a fourth-kind type's spawner BN6 has no twin of (SearchMan's scope, 0x2E): the type moved with him, its
+    region one of his (walked from its routine), the call his own; the new roots"""
+    roots = set()
+    for t in sorted(f.calls):
+        if t in X4.SPAWNERS4 or pairs.twin(t)[0] is not None:
+            continue   # (a spawner with a twin of BN6's: GutsMan's debris, BN4_SPAWN_DEBRIS)
+        hit = t4_of(b4, t)
+        if hit is None or hit[0] is None:
+            continue
+        ty, lo, hi = hit
+        w = T.walk(b4, t, region=(lo, hi))
+        if not any(s == SPAWN4 and T.back_value(w, a, 0)[0] == ty for a, s in w.bls.items()):
+            continue
+        moved = getattr(f, 'moved4', {})
+        f.moved4 = moved
+        if ty not in moved:
+            moved[ty] = dict(lo=lo, hi=hi, routine=lo)
+            f.regions.append((lo, hi, ('4', ty)))
+            f.notes.append(f'its fourth-kind {ty:#x} ({lo:08X}-{hi:08X}): no BN6 type of its body, moved with him')
+        del f.calls[t]
+        roots |= {t, lo}
+    return roots
+
+
+def spawns4(f, alloc):
+    """each spawn of a fourth-kind type he moves: the dispatch's number of its own (alloc.types[4], distinct across the Navis),
+    the movs that names it changed, its call to the dispatch's spawner; xrecipe_bn4.spawns_of's decision answered"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t != SPAWN4:
+                continue
+            ty, chain = T.back_value(w, site, 0)
+            if ty not in getattr(f, 'moved4', {}) or len(chain) != 1 or chain[0][1] != 'movs':
+                continue
+            m = f.moved4[ty]
+            if 'as' not in m:
+                m['as'] = alloc.types[4]
+                alloc.types[4] += 1
+                f.types.append((4, m['as'], ty))
+            f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
+                               why=f'its object\'s type {ty:#x} (the fourth kind): moved, the dispatch\'s {m["as"]:#x}'))
+            f.spawn_calls[t] = X4.SPAWNERS4[t][1]
+            f.decisions = [d for d in f.decisions if d != ('type', f'{site:08X}: it spawns a 4 type {ty:#x} which it does not move')]
+
+
+def flipped_effects(b4, b6, f, alloc):
+    """his effects of FLIPPED_EFFECTS: the id's movs read, BN6's effect of its look (xrecipe_bn4.effect_twin) given it; the
+    decision effects_of left open answered"""
+    for site, (at, orr, why) in FLIPPED_EFFECTS.items():
+        if not any(site in w.bls for w in f.walks.values()):
+            continue
+        i, o = T.decode(b4, at), T.decode(b4, orr)
+        if i.form != 'movs' or i.f[0] != 4 or o.form != 'orrs' or o.f[0] != 4:
+            continue
+        v = i.f[1]
+        e6, how = X4.effect_twin(b4, b6, v), 'the same look'
+        if e6 is None:
+            e6, how = X4.move_effect(b4, f, alloc, v), 'moved'
+        if e6 is None:
+            continue
+        f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and d[1].startswith(f'an effect spawned at {site:08X} '))]
+        if e6 != v:
+            f.imms.append(dict(at=at, form='THUMB_MOVS', rd=4, rn=0, was=v, now=e6, why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 '
+                               f'({how}; {why})'))
+        f.notes.append(f'its effect {v:#x} at {site:08X} (an id ORed with a flip): BN6\'s {e6:#x} ({how})')
+
+
+# the tables of a moved fourth-kind type's kinds its init reads its sprite from (its +4, r4's low byte at its spawn): table ->
+# its type, its entries' size, the sprite's list offset's and number's places, the kinds his code spawns (each site read), why;
+# the table, before the type's routine, copied with its region (its lo moved down to it)
+T4_SPRITE_TABLES = {
+    0x080E589C: dict(ty=0x31, entry=4, sprite=(0, 1), kinds=(0, 1, 2),
+                     why="the fourth kind's 0x31's kinds (4 bytes each: its sprite's list offset and number, its animation, its "
+                         "palette), read by its init (0x080E58E2, by +4); SearchMan's states spawn kind 0 (0x080F13C4), the "
+                         "third kind's 0x60 kinds 1 and 2 (0x080D972A, 0x080D97E4: movs, then its side ORed in above the byte)"),
+}
+
+
+def t4_regions(f):
+    """a moved fourth-kind type whose kinds' table lies before its routine (T4_SPRITE_TABLES): its region from the table on"""
+    for v, t in T4_SPRITE_TABLES.items():
+        m = getattr(f, 'moved4', {}).get(t['ty'])
+        if m is None or m['lo'] <= v:
+            continue
+        f.regions = [(v, r[1], r[2]) if r[2] == ('4', t['ty']) else r for r in f.regions]
+        m['lo'] = v
+
+
+def t4_sprite_tables(b4, f, alloc):
+    """the kinds' sprites of T4_SPRITE_TABLES his moved fourth-kind types load, copied (list 4), each kind's byte the copy's; the
+    sprite decision art_of left at the type's load answered"""
+    for v, t in T4_SPRITE_TABLES.items():
+        m = getattr(f, 'moved4', {}).get(t['ty'])
+        if m is None:
+            continue
+        for k in t['kinds']:
+            at = v + t['entry'] * k
+            lst, num = b4.u8(at + t['sprite'][0]), b4.u8(at + t['sprite'][1])
+            s = X4.list4_sprite(b4, f, alloc, num) if lst == 0x10 else None
+            if s is None:
+                f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws {lst // 4}:{num:#x}, which the generator moves none of')
+                continue
+            f.bytes.append((at + t['sprite'][1], num, s['to_index'], f'its fourth-kind {t["ty"]:#x}\'s kind {k}: list 4 {num:#x} in '
+                                                                    f'BN4, {s["to_index"]:#x} copied'))
+        loads = {site for e, w in f.walks.items() if m['lo'] <= e < m['hi'] for site, x in w.bls.items() if x == X4.BN4['sprite_load']}
+        f.decisions = [d for d in f.decisions if not (d[0] == 'sprite' and any(d[1].startswith(f'{a:08X}:') for a in loads))]
+        f.notes.append(f'its fourth-kind {t["ty"]:#x}\'s kinds by its table {v:08X}: {", ".join(map(str, t["kinds"]))}')
 
 
 def list5_sprites(b4, b6, f, alloc):
@@ -114,16 +269,22 @@ def list5_sprites(b4, b6, f, alloc):
 
 def wide_movs(f, pool):
     """his sounds past a byte named by movs r0,#lo and adds r0,#0xFF (BN4's 0x143 so): where the pool's slot fits a movs, the
-    movs its slot and the adds 0"""
+    movs its slot and the adds 0; where it is past a byte (SearchMan's 0x105, 0x109, 0x128, 0x12F), the call aimed at the shim
+    that makes r0 the slot (f.wide_calls, which wide_sounds makes XvSoundCalls of), its movs and adds left as BN4's"""
+    f.wide_calls = []
     for e, w in sorted(f.walks.items()):
         for site, t in sorted(w.bls.items()):
             if t != X4.BN4['sound']:
                 continue
             v, chain = T.back_value(w, site, 0)
             if v is None or v not in pool or len(chain) != 2 or chain[0][1] != 'adds8' or chain[1][1] != 'movs' \
-                    or chain[0][2] != 0xFF or pool[v] > 0xFF:
+                    or chain[0][2] != 0xFF:
                 continue
             f.decisions = [d for d in f.decisions if not (d[0] == 'sound' and d[1].startswith(f'its sound {v:#x} at {site:08X} named otherwise'))]
+            if pool[v] > 0xFF:
+                f.wide_calls.append(dict(at=site, slot=pool[v], why=f'its sound {v:#x} (movs and adds #0xff) at the pool\'s '
+                                                                    f'{pool[v]:#x}, past a byte'))
+                continue
             why = f'its sound {v:#x} (movs and adds #0xff) at the pool\'s {pool[v]:#x}'
             f.imms.append(dict(at=chain[1][0], form='THUMB_MOVS', rd=0, rn=0, was=chain[1][2], now=pool[v], why=why))
             f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=0, rn=0, was=0xFF, now=0, why=why))
