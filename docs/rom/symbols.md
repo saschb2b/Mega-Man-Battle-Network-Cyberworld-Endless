@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:55:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -98,16 +98,16 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Code (routines, hooks, instructions) | 317 | 27 | 81 |
-| ROM data (tables, text, literals) | 298 | 267 | 88 |
-| ROM, code or data not told | 474 | 582 | 125 |
+| Code (routines, hooks, instructions) | 317 | 27 | 83 |
+| ROM data (tables, text, literals) | 298 | 267 | 91 |
+| ROM, code or data not told | 474 | 582 | 127 |
 | RAM (variables, structures) | 137 | 65 | 38 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 177 | 42 | 3 |
 | Event flags | 34 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
-| Constants, sizes and counts | 528 | 272 | 251 |
-| All | 2081 | 1274 | 591 |
+| Constants, sizes and counts | 528 | 272 | 273 |
+| All | 2081 | 1274 | 620 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -115,12 +115,12 @@ how to verify it.
 | Shops and traders | 39 | 0 | 0 |
 | NaviCust | 23 | 1 | 0 |
 | Chips and folders | 301 | 224 | 18 |
-| Battle | 572 | 368 | 186 |
+| Battle | 572 | 368 | 194 |
 | Text and fonts | 42 | 7 | 3 |
 | Sound | 19 | 25 | 14 |
-| Maps and the overworld | 135 | 41 | 22 |
+| Maps and the overworld | 135 | 41 | 23 |
 | Events and progress | 54 | 19 | 13 |
-| Engine core | 825 | 588 | 334 |
+| Engine core | 825 | 588 | 354 |
 
 <!-- end of what tools/symbols.py writes -->
 
@@ -164,12 +164,12 @@ Made from bn6f at commit `d57c196`.
 | Graphics | 83 of 83 (100.0%) | 74 of 83 (89.2%) | 59 of 83 (71.1%) |
 | Chips and folders | 18 of 18 (100.0%) | 17 of 18 (94.4%) | 9 of 18 (50.0%) |
 
-- BN6 Gregar: 99 times an address of ours names a bn6f function or label the matcher located: 78 at the same place, 18 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
+- BN6 Gregar: 95 times an address of ours names a bn6f function or label the matcher located: 74 at the same place, 18 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
 - BN6 Gregar: of the 895 RAM labels the located functions' literals hold, 895 read bn6f's (Falzar's) address.
 - BN6 Gregar: 13,162 located functions laid out as in Falzar, 0 lying over another; 0 that a located reference names elsewhere.
 - BN5 Team Colonel: 19 times an address of ours names a bn6f function or label the matcher located: 12 at the same place, 7 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
 - BN5 Team Colonel: 3,574 located functions laid out as in Falzar, 0 lying over another; 40 that a located reference names elsewhere.
-- BN4 Red Sun: 11 times an address of ours names a bn6f function or label the matcher located: 11 at the same place, 0 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
+- BN4 Red Sun: 2 times an address of ours names a bn6f function or label the matcher located: 2 at the same place, 0 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
 - BN4 Red Sun: 1,219 located functions laid out as in Falzar, 0 lying over another; 54 that a located reference names elsewhere.
 
 <!-- end of what tools/symbols.py writes -->

@@ -2,7 +2,7 @@
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
   "updated": "2026-11-08",
-  "previous": "2026-10-18",
+  "previous": "2026-11-05",
   "features": [
     {
       "name": "Net Square",
@@ -374,6 +374,10 @@
     {
       "date": "2026-11-08",
       "what": "FireMan proved: fireman_v1 PASSes over its 1200 frames, its recorded verdict removed. His companion's opening count read by the fight's frames (its mode 0's tail 0x080CC5D0 runs the after-step 0x080143FC, BN6's twin 0x0801BBAC: legit.json's bn4 companion_opening_count); his flame's palette (the third kind's 0x09, BN4's +0xE, its spawner's store 0x080CE4BC) moved to BN6's +0xF so its element stays at BN6's +0xE (tools/xrecipe_bn4.py palette_imms, BN4_T3_PALETTE, BN6_T3_PALETTE); his pool sounds (0xA8, 0x8F, 0xA9, 0xC0) paired; the family's renderer ranks read without a hit's spark (spark_ranks). Six mutations of his port caught (193 of 193). Held from the tournament's pool: his plate on BN4's bracket is not named."
+    },
+    {
+      "date": "2026-11-08",
+      "what": "BN4's bracket plates tied to their Navis (src/emu/bn4_tournament.h: BN4_PLATE_GUTSMAN to BN4_PLATE_HEALNAVI; BN4_OPPONENT_PROGRESS 0x0802C2DD, BN4_CS_BATTLE 0x51, BN4_STORY_BATTLE 0x08007BEC, BN4_STORY_BATTLES 0x080FA900, BN4_START_BATTLE 0x08005490, BN4_START_CUTSCENE 0x0802BD10, BN4_CS_IF_BATTLE 0x23; docs/rom/bn4.md, Each plate's Navi)."
     }
   ],
   "experiments": [
@@ -895,6 +899,14 @@
       "result": "python3 tools/xdiff.py fireman_v1: FAIL at t1 (his companion's +0x91 BN4 2 | BN6 1; BN6's t1 2, the same fight frame), at t237 with the companion's count read by the fight's frames (his flame's +0x0E and its collision's hit kind BN4 1 | BN6 0), at t238 with his flame's palette at BN6's +0xF (the family's sounds, BN4 0xA8 | BN6 0x33), at t271 with his sounds paired (his companion's renderer rank BN4 3 | BN6 2, BN4's spark drawn at place 0x40 where BN6's had ended), PASS with the spark unranked. Every spec run: the 18 BN4 family specs, gutsman_v1, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; thunderman_v1 and windman_v1 hold their recorded verdicts; --mutations 193 of 193 caught.",
       "meaning": "FireMan's port matches BN4's battle over 1200 frames once his flame keeps its element: the opening count and the spark's rank were each game's clock and art, the palette store the port's.",
       "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-08",
+      "name": "Each plate's battle index and story bytes",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state, each id 0x00-0x16 but 0x12 and 0x13: MegaMan and the id The Den Battle Tournament's first pair, the bracket opened (its set-up calls BN4_NEXT_OPPONENT), a probe on 0x080447CC reading the battle index (BN4_OPPONENT_BATTLES[id]: 0x04, 0x08, 0x0C, 0x10, 0x1C, 0x20, 0x24, 0x28, 0x34, 0x3C, 0x40, 0x44, 0x14, 0x18, 0x38, 0x2C, 0x30, 0x48, 0x4C, 0x50, 0x54); then the Den round's cutscene from its 55 00 (0x08087689, started by a stub through 0x0802BD10), probes on command 0x55's stores 0x0802CE94 and 0x0802CE98 reading the story bytes each id leads to (0x30 GutsMan's to 0x7B ProtoMan's). The record each progress's opponent starts read from the story scripts (the first 51 r 01 of the block the map list's person opens), not run.",
+      "meaning": "Every plate's Navi named from BN4's data: the five named by sight and the owner's three readings held (FireMan 0x01, ThunderMan 0x08, WindMan 0x05); the last step derived.",
+      "link": "../multirom/bn4-tournament.md#each-plates-navi"
     }
   ],
   "method": {

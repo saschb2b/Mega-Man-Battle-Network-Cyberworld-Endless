@@ -11,13 +11,16 @@
 #define BUS 0x08000000u
 
 /* The proved: BN4's V1 enemy id (his seat (id - BN4_NAVI_FIRST_ID) / 4), his plate on BN4's bracket (BN4_ENTRANT_ID, named
- * by sight: docs/multirom/bn4-tournament.md) and his look on a card. A Navi joins with his line once his spec PASSes
+ * BN4_PLATE_*, tied to his Navi from BN4's data: docs/multirom/bn4-tournament.md, Each plate's Navi) and his look on a card. A Navi joins with his line once his spec PASSes
  * (docs/multirom/bn4-navis.md), every mutation of it caught. */
 static const struct {
 	uint8_t v1, plate;
 	Guardian look;
 } proved[] = {
-	{ 0x84, 0x00, { "GutsMan", "The Pounding Fist", GUARDIAN_NO_MUGSHOT, -1, 232, 152, 56 } },   /* tests/xdiff/gutsman_v1.json */
+	{ 0x84, BN4_PLATE_GUTSMAN, { "GutsMan", "The Pounding Fist", GUARDIAN_NO_MUGSHOT, -1, 232, 152, 56 } },   /* tests/xdiff/gutsman_v1.json */
+	{ 0x88, BN4_PLATE_WINDMAN, { "WindMan", "Master of the Wind", GUARDIAN_NO_MUGSHOT, -1, 120, 200, 168 } },   /* tests/xdiff/windman_v1.json */
+	{ 0x90, BN4_PLATE_FIREMAN, { "FireMan", "The Blazing Furnace", GUARDIAN_NO_MUGSHOT, -1, 232, 80, 48 } },   /* tests/xdiff/fireman_v1.json */
+	{ 0x94, BN4_PLATE_THUNDERMAN, { "ThunderMan", "The Thundering Cloud", GUARDIAN_NO_MUGSHOT, -1, 240, 200, 48 } },   /* tests/xdiff/thunderman_v1.json */
 };
 #define NPROVED ((int)(sizeof proved / sizeof *proved))
 
