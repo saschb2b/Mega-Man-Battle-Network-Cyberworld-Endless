@@ -336,7 +336,7 @@ int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s
 	to_label(&a, LDR_PC(3), M3, 'l');
 	here(&a, L1);
 	half(&a, 0xAF00);                            /* add r7, sp, #0: the panels' buffer */
-	bl(&a, s->panels);
+	bl(&a, s->panels & ~1u);
 	half(&a, 0x1C07);                            /* adds r7, r0, #0: their count */
 	to_label(&a, BCC(NE), L2, 'c');
 	half(&a, MOVS(0, 0));

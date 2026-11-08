@@ -467,7 +467,7 @@ def sprite_tables(b4, f, alloc):
 
 def derive(b4, b6, pairs, ty, name, first, alloc):
     f = X4.Family(ty, name, first)
-    f.b4, f.navi_data, f.ai_fields = b4, {}, {}
+    f.b4, f.b6, f.navi_data, f.ai_fields = b4, b6, {}, {}
     seat = (first - 128) // 4
     f.slot, f.ai, f.first_id = seat, BN4_NAVI_AI0 + seat, BN4_NAVI_ID0 + 4 * seat
     f.home = ROOM_HOMES + X4.XV_HOME_SIZE * seat
@@ -603,14 +603,35 @@ def pool_of(b4, b6, f):
 
 
 def songs_of(b4, f, pool, alloc):
-    """its pool's songs, each packed into its art's room at install (xnavi_bn4_sounds.c), its bytes rounded up to SONG_STEP"""
+    """its pool's songs, each packed into its art's room at install (xnavi_bn4_sounds.c), its bytes rounded up to SONG_STEP,
+    each on BN4's player but where BN6 keeps that player for one song of its own (song_player)"""
     f.songs = []
     for v, slot in pool.items():
         room = X4.rounded(X4.song_bytes(b4, v, X4.BN4['songs']), SONG_STEP)
-        f.songs.append(dict(song=v, slot=slot, at=alloc.art, room=room))
+        f.songs.append(dict(song=v, slot=slot, at=alloc.art, room=room, player=song_player(b4, f, v)))
         alloc.art += room
     if alloc.art > alloc.art_end:
         f.decide('room', f'its songs end at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
+
+
+# The sound effects' numbers whose players are compared (BN4's and BN6's song tables, 0x60 on: their music below)
+SFX_FIRST, SFX_END = 0x60, 0x180
+
+
+def song_player(b4, f, v):
+    """BN6's player for its pooled song v, 0 where BN4's own number serves: where BN6 keeps BN4's player number for one song
+    alone (its 22, its hit's 0x6B alone, which BN4 plays on its 10: a pooled song of BN4's 22 would be cut by BN6's hit
+    sound, as BN4's is not), the BN6 player most of the numbers of BN4's songs on that player take in BN6 (BN4's 22: 9)"""
+    b6 = f.b6
+    p4 = b4.u16(X4.BN4['songs'] + 8 * v + 4)
+    on6 = [n for n in range(SFX_FIRST, SFX_END) if b6.u16(X4.SONGS6 + 8 * n + 4) == p4]
+    if len(on6) != 1:
+        return 0
+    took = [b6.u16(X4.SONGS6 + 8 * n + 4) for n in range(SFX_FIRST, SFX_END) if b4.u16(X4.BN4['songs'] + 8 * n + 4) == p4]
+    p6 = max(sorted(set(took)), key=took.count)
+    f.notes.append(f'its sound {v:#x} on BN6\'s player {p6}: BN4\'s player {p4} is one BN6 keeps for its song {on6[0]:#x} alone, '
+                   f'and most of BN4\'s songs of that player take {p6} in BN6 by their numbers')
+    return p6
 
 
 def callbacks(b4, f):
@@ -666,6 +687,8 @@ def tables_of(b4, f):
 # The tables of MegaMan's block past the last code walked, by their size (a table past a copied routine is taken to the next
 # code walked): address -> (size, why)
 MM_TABLE_SIZES = {
+    0x080F00E4: (0x10, 'Roll\'s MegaMan\'s state 47\'s panel pick (0x080F00A4): panels\' masks by side, two words a side, up to '
+                       'BN4_SPAWN_ENEMY (0x080F00F4), which her summon\'s shim stands in for (tools/xnavirecipe_bn4_summon.py)'),
     0x080F1DB4: (0x10, 'FireMan\'s states\' (0x080F1D98, MegaMan\'s): panels\' masks by side, two words a side (0x10, 0x0F8800A0; '
                        '0x30, 0x0F880080, BN4_RANDOM_PANEL_MASKS\' words)'),
 }

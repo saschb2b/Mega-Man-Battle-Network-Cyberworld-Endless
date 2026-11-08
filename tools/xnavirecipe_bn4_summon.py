@@ -21,7 +21,7 @@ import xrecipe_thumb as T  # noqa: E402
 # movs, the free panels it asks (BN4_FREE_PANELS, copied: xnavirecipe_bn4.NAVI_COPIED)
 SUMMON4, SUMMON_END, SUMMON_MASKS, SUMMON_SOUND_AT, FREE_PANELS4 = 0x080F00F4, 0x080F01B8, 0x080F01A8, 0x080F0196, 0x0800A244
 # the shim's room in the Navi's code room (src/emu/xnavi_summon.c XN_SUMMON_ROOM: its code and pool)
-SHIM_ROOM = 0xA0
+SHIM_ROOM = 0x100
 # a Navi's lists of the ids it summons: its BN4 type -> its table of pointers by version (each list a count, then the ids), read
 # by its routine that picks the next (Roll's 0x080BC3B4: its literal 0x080BC3D8, [r5 +4] the version)
 SUMMON_LISTS = {0x1D: 0x080BC3D8}
@@ -60,6 +60,7 @@ def split_regions(f):
         for ty, (lo, hi, _) in MOVED4.items():
             f.moved4[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.regions.append((lo, hi, ty))
+            f.roots.append(lo)
             f.notes.append(f'its fourth-kind {ty:#x} moved ({lo:08X}-{hi:08X}): ' + MOVED4[ty][2])
 
 
@@ -102,6 +103,8 @@ def summon(b4, f, alloc, pool, families):
         f.decide('summon', f'{SUMMON4:08X}: not BN4_SPAWN_ENEMY\'s body as read (its free panels, masks and sound)')
         return
     sound = snd.f[1]
+    # (its bytes dead where a block holds them, MegaMan's state 48's pool past them: the call goes to the shim, xnavi_recipe.c)
+    f.dead.append((SUMMON4, w))
     ids = summon_ids(b4, f, families)
     f.summon = dict(at=at, masks=masks, ids=ids, sound=pool.get(sound, X4.SOUND_SLOTS.get(sound, sound)), sound4=sound)
     f.notes.append(f'its summon (BN4_SPAWN_ENEMY) by a shim at {at:08X}: ' + ', '.join(f'{a:#x} as {b:#x} ({why})' for a, b, why in ids) +

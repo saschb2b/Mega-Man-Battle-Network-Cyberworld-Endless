@@ -134,7 +134,7 @@ static uint32_t coll_arg_set(const XNavi *n, uint32_t at) {
 
 /* its summon's shim at its place in its code room (XNavi.summon): false where it does not fit or reach */
 #define SUMMON_IDS  12
-#define SUMMON_ROOM 0xA0   /* (the generator's room for it, tools/xnavirecipe_bn4_summon.py SHIM_ROOM) */
+#define SUMMON_ROOM 0x100  /* (the generator's room for it, tools/xnavirecipe_bn4_summon.py SHIM_ROOM) */
 static bool summon_set(const XNavi *n) {
 	const XnSummon *m = n->summon;
 	uint32_t ids[SUMMON_IDS];

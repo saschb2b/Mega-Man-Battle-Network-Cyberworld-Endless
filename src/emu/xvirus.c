@@ -121,11 +121,11 @@ static uint32_t resolve(uint32_t target, void *user) {
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
 			/* (one of BN6's routines, one of the second-level dispatch's spawners, one of the Navis' stubs in their code's room,
-			 * xnavi_install.c, or the moved objects'; or a stub or a helper of the installer's region, xvirus_code_stage's: the
+			 * xnavi_install.c, or the moved objects'; a BN4 Navi's shim in its code's room, its summon's (xnavi_init.c); or a stub or a helper of the installer's region, xvirus_code_stage's: the
 			 * chips', xchips_code.h) */
 			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
 			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && to != XV_FIGHT_FLAGS &&
-				!(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) &&
+				!(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) && !(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART) &&
 				!own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
