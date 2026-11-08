@@ -114,20 +114,39 @@ static void palette(Shim *s, uint32_t palettes) {
 
 /* its spawn's end where its init needs one: its collision's r3, its palette, +0x11, its panel at +6, its spawns where at_end,
  * its sprite, its update */
-static uint32_t end_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *size) {
+static void end_build(const XNavi *n, Shim *s) {
 	static const XnInit none;
 	const XnInit *in = n->init ? n->init : &none;
-	Shim s = { .at = at };
-	op(&s, 0xB510);   /* push {r4, lr} */
-	if (n->coll_arg) op(&s, 0x6D68), op(&s, 0x2100u | n->coll_arg), op(&s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
-	if (n->palettes) palette(&s, n->palettes);
-	if (in->anim) op(&s, 0x7C28), op(&s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
-	if (in->home) op(&s, 0x8A68), op(&s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
-	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(&s, n, &in->spawns[i]);
-	if (in->sprite) far_call(&s, BN6_SPRITE_UPDATE);
-	if (in->frame) far_call(&s, BN6_NAVI_FRAME);
-	op(&s, 0xBD10);   /* pop {r4, pc} */
-	return shim_put(&s, room, "spawn end", size);
+	op(s, 0xB510);   /* push {r4, lr} */
+	if (n->coll_arg) op(s, 0x6D68), op(s, 0x2100u | n->coll_arg), op(s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
+	if (n->palettes) palette(s, n->palettes);
+	if (in->anim) op(s, 0x7C28), op(s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
+	if (in->home) op(s, 0x8A68), op(s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
+	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(s, n, &in->spawns[i]);
+	if (in->sprite) far_call(s, BN6_SPRITE_UPDATE);
+	if (in->frame) far_call(s, BN6_NAVI_FRAME);
+	op(s, 0xBD10);   /* pop {r4, pc} */
+}
+
+/* ... written at `place` in its home past its shims where they leave it room, else at its home's top past its veneers
+ * (SearchMan's hide step's stubs and seven sound shims leave 28 bytes, his palette by version takes more); its address,
+ * `place` moved past it where it went there, 0 where it failed */
+static uint32_t end_put(const XNavi *n, uint32_t *place) {
+	const XVirusFamily *f = &n->code;
+	Shim probe = { .at = f->home + *place };
+	end_build(n, &probe);
+	const uint32_t need = 2u * (uint32_t)(probe.k + (probe.k & 1)) + 4u * (uint32_t)probe.nlit;
+	const uint32_t room = XV_HOME_VENEERS > *place ? XV_HOME_VENEERS - *place : 0, top = (XV_HOME_SIZE - need) & ~3u;
+	uint32_t size = 0;
+	if (need > room && top < XV_HOME_VENEERS + (uint32_t)xv_move_veneers() * THUMB_VENEER_SIZE) {
+		xv_fail("no room in its home for its spawn end's shim");
+		return 0;
+	}
+	Shim s = { .at = f->home + (need > room ? top : *place) };
+	end_build(n, &s);
+	const uint32_t at = shim_put(&s, need > room ? need : room, "spawn end", &size);
+	if (need <= room) *place = (*place + size + 3u) & ~3u;
+	return at;
 }
 
 /* its companion start: its spawns, where not at_end */
@@ -225,12 +244,6 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 		return companion;
 	}
 	place = (place + 3u) & ~3u;
-	if (end) {
-		uint32_t size = 0;
-		const uint32_t at = end_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0, &size);
-		if (!at) return 0;
-		table[7] = at;
-		place = (place + size + 3u) & ~3u;
-	}
+	if (end && !(table[7] = end_put(n, &place))) return 0;
 	return start ? start_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0) : companion;
 }
