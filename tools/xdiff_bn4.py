@@ -186,6 +186,11 @@ class Bn4Canon:
         recipe moved it (bn4_moved_types); BN4's as it is"""
         return self.moved_types.get((3, v), v) if game == 6 else self.canon.t3(game, v)
 
+    def t4(self, game, v):
+        """a fourth-kind type as BN4 numbers it, as t3: BN6's dispatched one read back as BN4's own where a recipe moved it
+        (Roll's flash, the fourth kind's 0x17: docs/multirom/bn4-navis.md, Roll built)"""
+        return self.moved_types.get((4, v), v) if game == 6 else v
+
     def t1_moved(self, game, o):
         """a first-kind object of a type the recipe moves (bn4_moved_types' kind 1: FireMan's companion 0x57), no enemy:
         its type, BN6's dispatched one's side-table number read back as BN4's; else None (an enemy, by its NameID)"""

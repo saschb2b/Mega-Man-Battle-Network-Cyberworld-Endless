@@ -667,7 +667,8 @@ def identity(game, o, canon):
         return canon.t3(game, o.o8(OBJ_TYPE))
     if o.o8(OBJ_TYPE) == 0:
         return (0, canon.fx(game, o.o8(OBJ_EFFECT)))
-    return o.o8(OBJ_TYPE)
+    t4 = getattr(canon, 't4', None)   # (a moved fourth-kind type read back as its game's: BN4's Navis', xdiff_bn4.Bn4Canon.t4)
+    return t4(game, o.o8(OBJ_TYPE)) if t4 else o.o8(OBJ_TYPE)
 
 
 def assign_roles(trace, canon):
