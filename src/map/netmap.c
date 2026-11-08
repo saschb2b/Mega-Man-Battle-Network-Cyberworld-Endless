@@ -31,6 +31,7 @@
 #include "netmap_learn.h"
 #include "netmap_paste.h"
 #include "tilemap.h"
+#include "xbackdrop.h"
 
 /* Generated layers as game maps.
  *
@@ -334,6 +335,32 @@ void netmap_colours(void) {
 		}
 }
 
+/* Where the layer's tiles lie in VRAM, [tiles_lo, tiles_hi) bus addresses:
+ * its tile set's two blocks as their header places them (a word count, the
+ * LZ77's offset, an offset into VRAM), read from the core's ROM copy as
+ * BN6 will */
+#define VRAM_BUS 0x06000000u
+static uint32_t tiles_lo, tiles_hi;
+
+static void tiles_vram(const Learned *L) {
+	uint32_t h = emu_read32(0x08000000u + L->desc);
+	tiles_lo = UINT32_MAX;
+	tiles_hi = 0;
+	for (uint32_t k = 0; k < 2; ++k) {
+		uint32_t words = emu_read32(h + 12 * k), vram = VRAM_BUS | emu_read32(h + 12 * k + 8);
+		if (!words) continue;
+		if (vram < tiles_lo) tiles_lo = vram;
+		if (vram + 4 * words > tiles_hi) tiles_hi = vram + 4 * words;
+	}
+}
+
+bool netmap_backdrop_over(int area, uint32_t *lo, uint32_t *hi) {
+	const NetAreaDef *a = net_area_def(area);
+	if (!a) return false;
+	int group = a->xrom ? a->over[0] : a->group, number = a->xrom ? a->over[1] : a->host ? a->host - 1 : a->number;
+	return xbackdrop_map_vram(group, number, lo, hi) && *hi > tiles_lo && *lo < tiles_hi;
+}
+
 /* Another game's area: its tile set and colours copied into the core's
  * ROM, where BN6 loads them from the map the layers take over. */
 static bool install_gfx(const Learned *L) {
@@ -435,6 +462,7 @@ static bool write_tilemap(const Learned *L) {
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	if (L->other && !install_gfx(L)) { free(out); return false; }
 	in_256 = L->other && area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
+	tiles_vram(L);
 	free(out);
 	free(nm_last.map);
 	nm_last.map = map;
