@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-08
+* **Update**: game/tournament.md, As built: the tournament in players' runs (BN4's ROM read, a profile past the Nest; `bracket_here`, `run_bracket_at`), the faces built (`XBR_PLATE_NAVI`), BN4's seven proved Navis in the pool (ThunderMan, WindMan, FireMan, SearchMan, AquaMan and Roll after GutsMan), `--dev tourney` now a force for any profile; its description and its line in game/index.md in step.
 * **Update**: game/meta/extras.md and GUIDE.md: the tournament is in runs, so its EXTRAS line no longer carries the dim "Not in runs yet" (`src/core/extras_text.c`); the GUIDE's line names BN4 Red Sun's ROM beside BN6's as the tournament's need. releases/v0.20.0.md, 0.20.0's players' notes, with its line in releases/overview.md.
 * **Update**: multirom/bn4.md, Its sounds and call 12, multirom/bn4-navis.md, Roll built, and rom/sound.md: Mettaur's 0x8B plays from Roll's per-battle pool (her slot 0xE0), not slot 0x46, so 0x41-0x4B stay BN5's (call 8).
 * **Update**: multirom/bn4-navis.md, Roll built: her summoned Mettaur arrives by BN4's own summoned appear (its generic state 0 and `0x0801002A` copied with it; the summon's shim marks +5 2 and runs `BN6_VIRUS_INIT` in the spawn frame), `roll_v1` PASSes over 1200 frames, three summon mutations caught, Roll in the tournament's proved list; devtools/differential.md, a Navi's summoned families hers; rom/bn4.md, Mettaur's row: its summoned appear; multirom/bn4.md, call 12: Roll proved.

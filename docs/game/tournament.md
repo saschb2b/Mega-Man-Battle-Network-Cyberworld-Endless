@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The tournament"
-description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (behind the faces for BN4's screen, `--dev tourney` till then)."
+description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (in runs where BN4's ROM is read, for a profile that has reached the Nest; BN6's and BN5's Navis and BN4's seven proved ones its entrants)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:05:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -396,23 +396,26 @@ follows calls it.
 ## As built
 
 Built on 5 November 2026 as the owner's six calls say, with the
-deviations below; behind one gate the owner's call 6 sets, so no player
-meets it yet.
+deviations below, and in players' runs since the faces came (the gate the
+owner's call 6 set; 0.20.0).
 
-**Waiting for the faces.** BN4's screen draws a plate from its own tables,
-whose 31 entries end at MegaMan's `0x1E`: an entrant of the faces'
-contract (`0x20` + the Navi's number, [Faces for every
-entrant](../multirom/bn4-tournament.md)) reads past them, and the screen,
-and the map entered again after it, are drawn in stripes (measured with
-the dev step `bracket` on layer 9: BN4's own ids draw and return cleanly,
-ids from `0x20` do not). So a bracket stands in a player's run only once
-`src/emu/xbracket.h` defines `XBR_PLATE_NAVI` (the faces' work, built
-apart), and only where BN4's ROM is read, as its screen shows every
-bracket (`bracket_here`, `src/layer/bracket.c`). Until then the dev route
-`--dev tourney` forces one in every act from the third that can hold one
-(the gate and the coin aside, the switch and the Glitch layer's act
-honoured: `run_debug_bracket`) and shows BN4's own plates in the places,
-so the whole bracket can be played and checked.
+**The faces, and where it stands.** BN4's screen draws a plate from its
+own tables, whose 31 entries end at MegaMan's `0x1E`: an entrant of the
+faces' contract (`0x20` + the Navi's number, [Faces for every
+entrant](../multirom/bn4-tournament.md)) read past them before the faces
+were built, the screen and the map entered again after it drawn in
+stripes (measured with the dev step `bracket` on layer 9). The faces'
+work grew those tables and defines `XBR_PLATE_NAVI` (`src/emu/xbracket.h`):
+every BN6 and BN5 Navi of the pool stands on a face of his own, made at
+install from the player's ROMs, and BN4's Navis on BN4's own plates. A
+bracket stands in a player's run where BN4's ROM is read, as its screen
+shows every bracket (`bracket_here`, `src/layer/bracket.c`), and where
+`run_bracket_at` puts one: a profile that has reached the Nest, the coin
+of the owner's call 1, the setup's switch on, never the act of the run's
+Glitch layer. The dev route `--dev tourney` forces one in every act from
+the third that can hold one (the gate and the coin aside, the switch and
+the Glitch layer's act honoured: `run_debug_bracket`), so the whole
+bracket can be played and checked on any profile.
 
 **Where it hooks in.** `run_bracket_at` (`src/core/run_tourney.c`) as
 before; the draw is `run_bracket_draw` beside it, from the seed, the act
@@ -466,7 +469,11 @@ He is never a final: the final is the act's guardian as drawn
 (`run_guardian`, by the act's area), and BN4's Navis guard no area yet
 (BN4's viruses come first, [Battle Network 4 in a run](../multirom/bn4.md)),
 so the guardian code draws from no pool he is in; he joins the finals when
-BN4's areas bring their guardians.
+BN4's areas bring their guardians. Six more joined on 8 November 2026,
+each on his own plate of BN4's bracket once his spec passed: ThunderMan,
+WindMan, FireMan, SearchMan, AquaMan and Roll, whose summon brings BN4's
+own Mettaur, moved into BN6 for her alone and never a visitor. The pool's
+BN4 Navis are the list's seven, all of them rounds 1 and 2 only.
 
 **The bracket's eight.** BN4's three-round bracket: MegaMan first (`0x1E`),
 round 1's Navi beside him, round 2's Navi in the next pair, the final's
@@ -514,7 +521,7 @@ guardian's weakness, the final's.
 
 **Not built.** BN4's tournament song for the rounds (they play the boss
 theme, as a guardian's battle); the statistics' round (the guardian
-event names the round's Navi, not the round); the faces (built apart).
+event names the round's Navi, not the round).
 For BN4's Navis, their own Navi chips: until Phase 4 brings BN4's chips,
 a round against one pays a stand-in, one of BN6's own Navis' chips drawn
 from that round's band as a round's Navi is (the owner's call 7, below):
