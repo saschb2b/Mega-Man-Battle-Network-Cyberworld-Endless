@@ -1290,9 +1290,9 @@ static const XvBlock melody_blocks[] = {
 static const XvData melody_data[] = {
 	{ 0x080B8BB8, 0x080B8BCA, XV_ZERO },
 	{ 0x080B8BCA, 0x080B8BCC, XV_RAW },
-	{ 0x080B8BCC, 0x080B8C1E, XV_ZERO },
+	{ 0x080B8BCC, 0x080B8C08, XV_ZERO },
 	{ 0x080B8C32, 0x080B8C34, XV_RAW },
-	{ 0x080B8C34, 0x080B8C38, XV_ZERO },
+	{ 0x080B8C34, 0x080B8C38, XV_POOL },
 	{ 0x080B8C38, 0x080B8C3E, XV_RAW },
 	{ 0x080B8C3E, 0x080B8C44, XV_ZERO },
 	{ 0x080B8C66, 0x080B8C68, XV_RAW },
@@ -1360,6 +1360,7 @@ static const XvPair melody_calls[] = {
 	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
 	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
 	{ 0x08002F3A, 0x08002EE8 },   /* search, SAME */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
 	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
 	{ 0x08007E46, 0x080011EC },   /* project:mettaur, DIFF (audited) */
@@ -1379,7 +1380,8 @@ static const XvPair melody_calls[] = {
 	{ 0x0800FCDE, 0x08016396 },   /* project:mettaur, SAME (audited) */
 	{ 0x0800FE00, 0x08016396 },   /* project:mettaur, SAME (audited) */
 	{ 0x0800FF26, 0x080164A0 },   /* project:mettaur, SAME (audited) */
-	{ 0x080129AC, 0x0801A082 },   /* its init's set-up again at its spawn's end, region 0x35: BN6's region change, AIMED (audited) */
+	{ 0x08012496, 0x0801A074 },   /* its collision data as BN6's init took it: BN6's 0x0801A074 gives back its +0x54 and clears its +1, which BN6's set-up after it writes 1 again (0x08019FD6), AIMED (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
 	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
 	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
 	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
@@ -1452,8 +1454,8 @@ static const XVirusFamily bn4_melody = {
 	.sound_calls = melody_sound_calls, .nsound_calls = (int)(sizeof melody_sound_calls / sizeof *melody_sound_calls),
 	.numbers = melody_numbers, .nnumbers = (int)(sizeof melody_numbers / sizeof *melody_numbers),
 	.states = melody_states, .nstates = (int)(sizeof melody_states / sizeof *melody_states),
-	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), ENTERED(0x080B8C1F), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
-	/* hook 5: Melody's init from its collision's set-up's arguments (BN6's virus init sets up region 1, BN4's init 0x35: region 1's words with bit 2): its set-up's call aimed at BN6's region change (0x0801A082, its fields set again from region 0x35 and 2, as its states set them with BN4's 0x08012ED0), then +8 4, as BN6's init sets it, and its update's call (a nullsub: its update runs as its pre-step) */
+	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), ENTERED(0x080B8C09), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
+	/* hook 5: Melody's init from its own step on (INIT_AGAIN): its +0x2E by its version (0x080B8C38's byte, 30 each), its collision data, its set-up with region 0x35, +8 4 and its update's call (a nullsub: its update runs as its pre-step) */
 	.struct1 = 0x08011B1C, .struct2 = 0x08011B1C,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
 	.names = { 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C },
 	.ice = 0,

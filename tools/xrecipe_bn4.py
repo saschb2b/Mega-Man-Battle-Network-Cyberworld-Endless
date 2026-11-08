@@ -71,7 +71,6 @@ SPAWNERS4 = {0x080032B8: (1, 'XV_SPAWN_1'), 0x080032D4: (1, 'XV_SPAWN_1_LAST'), 
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
 BN6_PRESENT = 0x08016E64   # BN6_VIRUS_PRESENT, BN4's after-state's twin but for its pause test
 BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
-REGION_SET6 = 0x0801A082   # BN6_COLL_REGION_SET: a collision's region changed (r1, r2 and r3 as the set-up's), BN4's twin's
 
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
@@ -297,8 +296,11 @@ def init_of(f):
         f.decide('init', f'its init calls the collision setup {len(setup)} times')
         return
     args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)]
-    if args[0] not in (1, 0x10) and args[1:] == [2, 3]:
-        region_again(f, w, setup[0], args[0])
+    # (its own fields before its set-up: what BN6's virus init writes of none, past its sprite's +0x10 and +0x11)
+    own = [a for a in addrs if a < setup[0] and w.insns[a].form in ('str', 'strb', 'strh') and w.insns[a].f[1] == 5
+           and w.insns[a].f[2] not in (0x10, 0x11)]
+    if (args[0] not in (1, 0x10) and args[1:] == [2, 3]) or own:
+        init_again(f, setup[0], f'its collision set up with {args}' + (f', its own +{w.insns[own[0]].f[2]:#x} before' if own else ''))
     elif args not in ([1, 2, 3], [0x10, 2, 3]):
         f.decide('init', f'its collision set up with {args}, which BN6\'s virus init makes of no flags')
     used, after = set(), [a for a in addrs if a > setup[0]]
@@ -336,15 +338,19 @@ def init_of(f):
         enter(f, 2, tail[0], 'its init')
 
 
-def region_again(f, w, site, region):
-    """its collision set up with a region BN6's virus init gives none (its 1, or 0x10 for struct2's flag 4): set again at its
-    spawn's end, hook 5 entered at the set-up's first argument (bn4_twins.ENTRIES), the set-up's call aimed at BN6's region
-    change (REGION_SET6, the twin of BN4's, BN4_COLL_REGION_SET), which takes the same r1-r3 and reads its collision data by
-    r5 where the set-up takes it in r0"""
-    at = min(T.back_value(w, site, r)[1][0][0] for r in (1, 2, 3))
-    f.aim[BN4['setup_coll']] = (REGION_SET6, f'its init\'s set-up again at its spawn\'s end, region {region:#x}: BN6\'s region change')
-    f.region = (site, region)
-    enter(f, 2, at, f'its init\'s set-up of region {region:#x}')
+def init_again(f, site, what):
+    """its init's own step before its collision's set-up (a field of its object BN6's virus init writes none of), or its
+    set-up of a region BN6's virus init gives none of (its 1, or 0x10 for struct2's flag 4): its init from that step run
+    again at its spawn's end, hook 5 entered there (bn4_twins.INIT_AGAIN: its entry, the calls of its tail aimed so its
+    collision data is the one BN6's init took and its set-up BN6's run again with its arguments)"""
+    again = bn4_twins.INIT_AGAIN.get(f.init)
+    if again is None:
+        f.decide('init', f'{what}, which BN6\'s virus init does not (bn4_twins.INIT_AGAIN reads none of its init)')
+        return
+    f.aim.update(again['aims'])
+    f.again = (again['at'], site)
+    f.notes.append(f'its init again at its spawn\'s end from {again["at"]:08X} ({what}): {again["why"]}')
+    enter(f, 2, again['at'], 'its init')
 
 
 def after_of(f, tw):
@@ -766,8 +772,9 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
-    if getattr(f, 'region', None) and f.calls.get(BN4['setup_coll']) != [f.region[0]]:
-        f.decide('init', f'its set-up called past its init ({f.calls.get(BN4["setup_coll"])}): its aim at BN6\'s region change is its init\'s alone')
+    for t in (bn4_twins.INIT_AGAIN[f.init]['aims'] if getattr(f, 'again', None) else ()):
+        if any(not f.again[0] <= s < f.again[1] for s in f.calls.get(t, ())):
+            f.decide('init', f'{t:08X} called past its init\'s step again ({f.calls[t]}): its aim (bn4_twins.INIT_AGAIN) is that step\'s alone')
     queued_sites(f)
     records_of(b4, f)
     blocks_of(b4, f, alloc)
