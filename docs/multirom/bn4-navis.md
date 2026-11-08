@@ -1207,9 +1207,11 @@ twelve decisions settled so:
   Network 4 in a run](bn4.md), call 8), and Mettaur fights only beside
   Roll, so it plays from her per-battle pool: her fifth slot, 0xE0
   (`tools/xrecipe_bn4.py` `SUMMONER_POOL`; her recipe lists the song,
-  `tools/xnavirecipe_bn4_sounds.py` `pool_of`). In `mettaur4_v1`, where
-  he fights alone, no Navi points the pool: the slot holds what the last
-  install left it, and the sound is told by its number.
+  `tools/xnavirecipe_bn4_sounds.py` `pool_of`). A battle of his without
+  her (`mettaur4_v1`) takes her art's room and her pool as hers would
+  (`xnavi_bn4_summoner`: `xnavi_bn4_room_for`, `xnavi_bn4_sounds_frame`),
+  so his sound plays her copy there too; without it, the slot pointed at
+  songs whose bytes no art room held, and BN6's battle stopped at t724.
 - **Its room**: the families' code and art were full, so the families
   past the first six take a second room (`ROOM2_FROM`): code from BN5's
   families' end (`XV_CODE + 0x11000`) to BN4's first room, art from

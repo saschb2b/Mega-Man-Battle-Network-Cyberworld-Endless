@@ -492,7 +492,8 @@ twelve fill 0x34-0x3F and call 8 keeps 0x41-0x4B for BN5, and Mettaur
 fights only where Roll brings him, so 0x8B takes a slot of her per-battle
 pool, her fifth, 0xE0 (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
 lists the song, packed into her art's room and pointed in her battles as
-her own sounds are (the owner's call 11). As a family installs, each of its sounds is
+her own sounds are (the owner's call 11), and in a battle of his alone,
+which takes her art and pool (`xnavi_bn4_summoner`). As a family installs, each of its sounds is
 copied from the player's ROM (`xsong_pack`, its sequence, voice group and
 samples, none of it in the repository) into a room of the families' art
 below their sprites (from `XV_ART + 0x5A000`, the sprites' own room full)

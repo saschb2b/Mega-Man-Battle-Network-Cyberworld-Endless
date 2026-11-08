@@ -29,7 +29,8 @@ void xnavi_bn4_songs_set(const XVirusFamily *f, int versions);
 /* Its songs as its install made them, kept for the pool's pointing (once the install is done) */
 void xnavi_bn4_songs_noted(void);
 /* Before each frame of BN6's core (emu_frame): the pool pointed at the songs of the BN4 Navi among the battle's first-kind
- * objects, where it points at another's */
+ * objects, or where none is, of the Navi a family among them is summoned by alone (xnavi_bn4_summoner: Roll's Mettaur's
+ * 0x8B at her 0xE0), where it points at another's */
 void xnavi_bn4_sounds_frame(void);
 
 #endif

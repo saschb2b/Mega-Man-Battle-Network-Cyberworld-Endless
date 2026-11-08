@@ -11,10 +11,12 @@
 #include "emu.h"
 #include "rom.h"
 #include "xnavi.h"
+#include "xnavi_bn4.h"
 #include "xnavi_bn4_art.h"
 #include "xnavi_recipe.h"
 #include "xnavi_room.h"
 #include "xvirus_grow.h"
+#include "xvirus_bn4.h"
 #include "xvirus_tx.h"
 
 #define BUS   0x08000000u
@@ -84,15 +86,34 @@ bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists) {
 	return true;
 }
 
+uint32_t xnavi_bn4_summoner(uint32_t id) {
+	for (int i = 0; i < xvirus_bn4_count; ++i) {
+		const XVirusFamily *f = xvirus_bn4[i];
+		if (!f->summoned || id < (uint32_t)f->first_id || id >= (uint32_t)f->first_id + XV_VERSIONS) continue;
+		for (int k = 0; k < xnavi_bn4_count; ++k)
+			for (int j = 0; xnavi_bn4[k]->summon && j < xnavi_bn4[k]->summon->nids; ++j)
+				if (xnavi_bn4[k]->summon->ids[j].to == id) return (uint32_t)xnavi_bn4[k]->code.first_id;
+	}
+	return 0;
+}
+
+/* (the seat of the battle's BN4 Navi among its entities, or where there is none, of the Navi a family of it is summoned by
+ * alone: -1 none) */
+static int battle_seat(const uint8_t *entities, size_t len, bool summoned) {
+	for (size_t i = 0; i + 4 <= len && entities[i] != 0xF0; i += 4) {
+		uint32_t id = (uint32_t)(entities[i + 2] | entities[i + 3] << 8);
+		int seat = entities[i] == 0x11 ? seat_of(summoned ? xnavi_bn4_summoner(id) : id) : -1;
+		if (seat >= 0 && emu_read8(XN_BN4_SPRITES + (uint32_t)seat) != NONE) return seat;
+	}
+	return -1;
+}
+
 bool xnavi_bn4_room_for(const uint8_t *entities, size_t len) {
 	if (!emu_ready() || !XR[XROM_BN4_RED_SUN_US].data) return false;
-	for (size_t i = 0; i + 4 <= len && entities[i] != 0xF0; i += 4) {
-		int seat = entities[i] == 0x11 ? seat_of((uint32_t)(entities[i + 2] | entities[i + 3] << 8)) : -1;
-		int number = seat >= 0 ? emu_read8(XN_BN4_SPRITES + (uint32_t)seat) : NONE;
-		if (number == NONE) continue;
-		/* (his attacks' art and songs in theirs: xnavi_bn4_art.h) */
-		bool art = xnavi_bn4_art_for(seat);
-		return fill(number) && art;
-	}
-	return false;
+	int seat = battle_seat(entities, len, false);
+	if (seat < 0) seat = battle_seat(entities, len, true);
+	if (seat < 0) return false;
+	/* (his attacks' art and songs in theirs: xnavi_bn4_art.h) */
+	bool art = xnavi_bn4_art_for(seat);
+	return fill(emu_read8(XN_BN4_SPRITES + (uint32_t)seat)) && art;
 }
