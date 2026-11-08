@@ -34,7 +34,7 @@ from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_N
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
-XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
+XN_BN4_ART = 0x08800000 + 0x748000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
 XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE = 0x08800000 + 0x77C000, 0x10000   # (FREE_BN4_NAVI_SPRITE: the battle's Navi's battle sprite, xnavi_bn4_room.h)
 RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
 
@@ -185,6 +185,12 @@ class Bn4Canon:
         """a third-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where the
         recipe moved it (bn4_moved_types); BN4's as it is"""
         return self.moved_types.get((3, v), v) if game == 6 else self.canon.t3(game, v)
+
+    def t4(self, game, o):
+        """a fourth-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where a
+        recipe moved it (bn4_moved_types' kind 4: SearchMan's scope 0x2E and his marker 0x3E); BN4's as it is"""
+        v = o.o8(OBJ_TYPE)
+        return self.moved_types.get((4, v), v) if game == 6 and o.moved else v
 
     def t1_moved(self, game, o):
         """a first-kind object of a type the recipe moves (bn4_moved_types' kind 1: FireMan's companion 0x57), no enemy:
