@@ -49,10 +49,10 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
-            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1))
+            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55))
 # the families moved for a Navi's summon alone, which BN6 has by name (the owner's call of 8 November 2026: Roll's summon
 # brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits): never a net's kin nor a visitor (XVirusFamily.summoned)
-SUMMONED = {'Mettaur'}
+SUMMONED = {'Mettaur', 'Melody'}
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
@@ -71,6 +71,8 @@ SPAWNERS4 = {0x080032B8: (1, 'XV_SPAWN_1'), 0x080032D4: (1, 'XV_SPAWN_1_LAST'), 
 NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
 BN6_PRESENT = 0x08016E64   # BN6_VIRUS_PRESENT, BN4's after-state's twin but for its pause test
 BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
+REGION_SET6 = 0x0801A082   # BN6_COLL_REGION_SET: a collision's region changed (r1, r2 and r3 as the set-up's), BN4's twin's
+
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
             0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
@@ -89,7 +91,7 @@ XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0, 0xC0, 0xE0
 # the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
 # families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
-# families' art's end (XV_ART + 0x54000) to the sounds' room (SONG_ART0)
+# families' art's end (XV_ART + 0x54000) up, their sounds' copies after it, to BN4's first room (ART0: songs_room)
 ROOM2_FROM, CODE2, ART2 = 6, XV_CODE + 0x11000, XV_ART + 0x54000
 CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
 CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
@@ -106,11 +108,12 @@ SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70:
 # src/emu/xnavi_bn4_sounds.h; the owner's call 8 keeps 0x41-0x4B BN5's): sound -> (its pool slot, its summoner), the slot
 # the summoner's next past its own (tools/xnavirecipe_bn4_sounds.py pool_of checks it), the song listed with the summoner's
 # songs and pointed in her battles alone, which are the only ones the family is in (SUMMONED)
-SUMMONER_POOL = {0x8B: (0xE0, 'Roll')}
-# their copies' rooms: below their families' sprites (ART0), above BN5's families' art (to XV_ART + 0x54000 today,
-# bn5_ranges_clear checks), as the families' sprites leave no room past theirs (ART_END); each its bytes rounded up to
-# SONG_STEP (song_bytes, an upper bound)
-SONG_ART0, SONG_ART_END, SONG_STEP = XV_ART + 0x5A000, ART0, 0x40
+# (a slot past a byte, the pool's sixth on, played through a shim that makes r0 the slot: XvSoundCall, the owner's call 11)
+SUMMONER_POOL = {0x8B: (0xE0, 'Roll'), 0xC2: (0x104, 'Roll'), 0xC3: (0x117, 'Roll')}
+# their copies' rooms: in the families' second room past its families' art (ART2 on), below the first six's sprites
+# (ART0), as their sprites leave no room past theirs (ART_END); each its bytes rounded up to SONG_STEP (song_bytes, an upper
+# bound)
+SONG_ART_END, SONG_STEP = ART0, 0x40
 # BN4's effects BN6 has no effect of the same look of, at ids of their own and their sprites at numbers of their own: the
 # families' ranges' top (0x90-0x9F of the effects, list 5's 0x98-0x9F), below the Navis' (0xA0 on), where BN5's families
 # take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
@@ -294,7 +297,9 @@ def init_of(f):
         f.decide('init', f'its init calls the collision setup {len(setup)} times')
         return
     args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)]
-    if args not in ([1, 2, 3], [0x10, 2, 3]):
+    if args[0] not in (1, 0x10) and args[1:] == [2, 3]:
+        region_again(f, w, setup[0], args[0])
+    elif args not in ([1, 2, 3], [0x10, 2, 3]):
         f.decide('init', f'its collision set up with {args}, which BN6\'s virus init makes of no flags')
     used, after = set(), [a for a in addrs if a > setup[0]]
     store = next((a for a in after if w.insns[a].form == 'str' and w.insns[a].f[1:] == (5, 8)), None)
@@ -318,6 +323,9 @@ def init_of(f):
             f.decide('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s virus init makes nothing of')
     if not tail:
         return
+    if f.hooks[2] != ('BN6', NULLSUB6):
+        f.decide('init', f'{tail[0]:08X}: its init\'s own step past its region\'s, both its hook 5')
+        return
     if any(a > tail[0] for a in used):
         f.decide('init', f'{tail[0]:08X}: its init\'s own step comes before flags it sets (BN6\'s init sets them first)')
     first = w.insns[tail[0]]
@@ -326,6 +334,17 @@ def init_of(f):
         f.roots.append(first.target)
     else:
         enter(f, 2, tail[0], 'its init')
+
+
+def region_again(f, w, site, region):
+    """its collision set up with a region BN6's virus init gives none (its 1, or 0x10 for struct2's flag 4): set again at its
+    spawn's end, hook 5 entered at the set-up's first argument (bn4_twins.ENTRIES), the set-up's call aimed at BN6's region
+    change (REGION_SET6, the twin of BN4's, BN4_COLL_REGION_SET), which takes the same r1-r3 and reads its collision data by
+    r5 where the set-up takes it in r0"""
+    at = min(T.back_value(w, site, r)[1][0][0] for r in (1, 2, 3))
+    f.aim[BN4['setup_coll']] = (REGION_SET6, f'its init\'s set-up again at its spawn\'s end, region {region:#x}: BN6\'s region change')
+    f.region = (site, region)
+    enter(f, 2, at, f'its init\'s set-up of region {region:#x}')
 
 
 def after_of(f, tw):
@@ -702,7 +721,7 @@ def records_of(b4, f):
 def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     if slot == ROOM2_FROM and alloc.room == 'the families':
         # (the families past the first six in their second room; tools/xnavirecipe_bn4.py's families_alloc derives them too)
-        alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART0
+        alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART_END
         alloc.room = 'the families\' second room'
     f = Family(ty, name, first)
     f.slot = SLOT0 + slot
@@ -747,6 +766,8 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
+    if getattr(f, 'region', None) and f.calls.get(BN4['setup_coll']) != [f.region[0]]:
+        f.decide('init', f'its set-up called past its init ({f.calls.get(BN4["setup_coll"])}): its aim at BN6\'s region change is its init\'s alone')
     queued_sites(f)
     records_of(b4, f)
     blocks_of(b4, f, alloc)
@@ -914,9 +935,12 @@ def sounds_of(b4, b6, f):
             for site, chain in sorted(ids[v]):
                 if len(chain) != 1 or chain[0][1] != 'movs':
                     f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
-                    continue
-                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
-                                   why=f'its sound {v:#x}: at {who}\'s pool slot {slot:#x}, her songs\' (her battles alone)'))
+                elif slot > 0xFF:
+                    # (past what a movs names: its call through a shim that makes r0 the slot, the movs left as it is)
+                    f.queue_calls.append(dict(at=site, slot=slot, why=f'its sound {v:#x} at {who}\'s pool slot {slot:#x}, past a byte'))
+                else:
+                    f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
+                                       why=f'its sound {v:#x}: at {who}\'s pool slot {slot:#x}, her songs\' (her battles alone)'))
             f.notes.append(f'its sound {v:#x}: {who}\'s pool slot {slot:#x} (SUMMONER_POOL), her recipe\'s song')
             continue
         if slot is None:
@@ -940,10 +964,10 @@ def sounds_of(b4, b6, f):
                              f'starts no more tracks than its player has')
 
 
-def songs_room(b4, whole):
-    """each whole family's copied sounds a room in the families' art below their sprites (SONG_ART0 to ART0), one after
+def songs_room(b4, whole, alloc):
+    """each whole family's copied sounds a room in the families' second room past its families' art (to ART0), one after
     another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
-    done, at = set(), SONG_ART0
+    done, at = set(), rounded(alloc.art if alloc.room != 'the families' else ART2, SONG_STEP)
     for f in whole:
         f.songs = []
         for v, slot in getattr(f, 'sounds', []):
@@ -1319,7 +1343,7 @@ def main():
             pairs.copies[c.spawner] = c
     fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
-    songs_room(b4, whole)
+    songs_room(b4, whole, alloc)
     for c in copies:
         for d in c.decisions:
             print(f'xrecipe_bn4: BN6\'s {c.ty:#x}\'s copy: {d}')
