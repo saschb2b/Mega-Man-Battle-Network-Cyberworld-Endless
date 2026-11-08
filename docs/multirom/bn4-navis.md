@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -21,7 +21,7 @@ takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
 and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
-below); ThunderMan, WindMan and FireMan are built and under proof, their
+below), ThunderMan too; WindMan and FireMan are built and under proof, their
 companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
@@ -551,7 +551,7 @@ HotBody's sound mutation off its copy.
 
 ## ThunderMan built
 
-The second in the order, under proof: his type 0x32, Navi AI 53, ids
+The second in the order, proved: his type 0x32, Navi AI 53, ids
 0x394-0x397 (`foes 394@52`), his sounds 0xAD and 0x143 at the pool's
 0x32 and 0x33. The addresses and how each was read are in
 [BN4 Red Sun's tables](../rom/bn4.md) (ThunderMan derived). What he adds
@@ -575,14 +575,57 @@ to GutsMan's path:
   gives. His branch had read BN4's two tables the other way round and
   called it an interim; that interim is gone.
 
-`bn4_thunderman_control` PASSes. **`thunderman_v1`** FAILs at t1, its
-verdict re-recorded after the merge: the comparator's fix moved his first
-difference. His companion is now told by its type and matches at t1.
-What parts is his cloud (the third kind's 0x6A), a step ahead in BN6: its
-counts (+0x3A 5 against 6, +0x9A and +0x9E 0x55 against 0x56), its
-sprite's frame, its +7 (1 against 2) and its collision's +1. Panel 5,1's
-+0x17 (0x40 against 0) is still unread. No mutation of his port is added
-while the spec fails.
+- **His companion and cloud start with his states** (`XV_FIGHT_FLAGS`,
+  `src/emu/xvirus_dispatch.c`; `tools/xnavirecipe_bn4_objects.py`
+  `FIGHT_GATED`): neither runs a state. Each update runs where the battle's
+  flags have bit 0, the fight's (BN4 `0x08007A8C`, BN6's `0x0800A2F0` the
+  same body), else calls the paused blink alone (his companion's
+  `0x080C3B42`, his cloud's `0x080DAB26`). BN4's state runner runs his
+  states through the paused opening, so his first own state and his cloud's
+  first gated frame are the fight's first in BN4. BN6's runs none there
+  (the pause test in `0x0801B1C4`), so his first own state comes a frame
+  into the fight, the battle's offset every BN4 spec allows. Before this,
+  his cloud ran from the fight's first frame and was a step ahead of
+  everything else in BN6 (`thunderman_v1` at t1: its +7 2 against 1, +0x3A
+  6 against 5). His two gate calls now go to the dispatch's stub: the
+  battle's flags, with bit 0 only once the battle timer is past 1. BN6's
+  fight routine (`0x080080D2`) sets bit 0 and ticks the timer
+  (`0x0800A6A6`) before the objects run, so the stub opens a frame later,
+  together with his first own state, as BN4 has them. With that, his
+  cloud's bolts, their hits on MegaMan, their sparks, sounds and draws all
+  land at the battle's offset as everything else does. The gate is aimed by
+  his BN4 type, so WindMan's and FireMan's companions keep theirs.
+- **His cloud's animation from the opening** (legit.json's bn4
+  `opening_animation`, `tools/xdiff_bn4_opening.py`): the cloud sets its
+  animation in its init. The third kind's after-state (BN4 `0x080144FE`,
+  BN6 `0x0801BCA6`) then runs the sprite update every frame with no pause
+  test, its +0 0x04 keeping it running through the paused opening. A probe
+  of hooks (temporary) saw BN4's opening 227 frames from the cloud's spawn
+  to the fight and BN6's 206, from each engine's banner and each game's
+  Custom screen. Each cloud enters the fight at its own place in its
+  18-frame loop, BN4's 21 frames on. The comparator holds that place to the
+  openings' lengths modulo the loop, exactly from the first animation set
+  in the fight (t12).
+- **What the comparator took besides**: his sounds paired by the routines
+  that play them (0x148, 0xB8, 0x143; his 0x70's 0xAD at the pool's 0x32 in
+  his battles alone, a row's `foes`, since Billy's thunder plays BN4's 0xAD
+  as BN6's own 0xBA); his 0x70's +4 and his 0x71's +5 and +6, each its
+  spawn's r4 that his states never set (`spawn_leftover`, both walked for a
+  reader); a hit's spark taking no rank in the family's renderer places (its
+  life is each engine's art); a frame of hits by element laid out in the
+  BN4 trace (BN4's +0x2A and +0x3C, BN6's +0x82 and +0x94, by both hit
+  passes and their sums); and BN6's own Elec tally for its freeze (+0x78),
+  which BN4 has none of.
+
+`bn4_thunderman_control` PASSes. **`thunderman_v1` PASSes** over its 1200
+fight frames: his records, his companion's, his cloud's, every object he
+spawns and MegaMan's HP alike. Four mutations of his port are caught: the
+gate a frame early, his clouds' strength by another version, his bolt's
+sound at another pool slot, and his cloud on another animation. He is
+not yet in the tournament's list of proved BN4 Navis. A line there takes
+his plate on BN4's bracket (`BN4_ENTRANT_ID`), and of ids 0x00-0x16 only
+GutsMan's, AquaMan's, Roll's, SearchMan's and KendoMan's are named
+([BN4's tournament screens](bn4-tournament.md)).
 
 ## WindMan built
 

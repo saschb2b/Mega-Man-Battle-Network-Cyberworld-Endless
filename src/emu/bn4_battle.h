@@ -131,4 +131,11 @@
 #define BN4_SPAWN_DEBRIS  0x080E29F8u /* ... +0x40, +0x48; BN6's 0x080E23C0, the same bytes but the spawn's bl), its init */
 #define BN4_DEBRIS_INIT   0x080E2934u /* ... setting up sprite list 4 0x0E (0x080E2942), BN6's twin 0x080E22FC its own list 4 5 */
 
+/* A collision data's frame of hits, by the attack's element (0 none, 1 Fire, 2 Aqua, 3 Elec, 4 Wood), five u16 each, BN6's
+ * twins by the code that writes and sums them (docs/rom/bn4.md, What a hit leaves the struck, by element): */
+#define BN4_COLL_HIT_DAMAGES 0x2A     /* the hit pass adds each hit's damage, shifted by its multiplier, at +0x2A + 2 * its
+                                       * element (0x08012C74-0x08012C82; BN6's +0x82, BN6_COLL_HIT_DAMAGES) */
+#define BN4_COLL_ELEM_DAMAGES 0x3C    /* the frame's damage by element, the five summed at BN4_ELEM_DAMAGES_SUM (BN6's +0x94) */
+#define BN4_ELEM_DAMAGES_SUM 0x08012E60u /* ldrh r0,[r4,#0x3c]; ldrh r1,[r4,#0x3e]; adds ... to +0x44 (BN6_ELEM_DAMAGES_SUM's twin) */
+
 #endif

@@ -436,7 +436,7 @@ static const XvPair thunderman_calls[] = {
 	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007990, 0x0800A10C },   /* project:project:thunderman, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
-	{ 0x08007A8C, 0x0800A2F0 },   /* map:bytes, SAME */
+	{ 0x08007A8C, XV_FIGHT_FLAGS },   /* the battle's flags, bit 0 from the fight's second frame: his objects no state runs begin with his first own state, a frame into BN6's fight (FIGHT_GATED) */
 	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
 	{ 0x08009BF0, 0x0800CA8C },   /* project:project:thunderman, DIFF (audited) */

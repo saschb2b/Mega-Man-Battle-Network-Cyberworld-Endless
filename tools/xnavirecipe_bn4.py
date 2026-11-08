@@ -518,6 +518,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     X4.spawns_of(f, alloc)
     I.spawns1(f, alloc)
     I.companion_modes(f)
+    C.fight_gates(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)

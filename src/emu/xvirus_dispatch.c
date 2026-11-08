@@ -9,6 +9,7 @@
 #include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
+#include "bn6_panels.h"
 #include "bytes.h"
 #include "rom.h"
 
@@ -105,6 +106,7 @@ static uint32_t bx(int rm) { return 0x4700u | (uint32_t)rm << 3; }
 static uint32_t b_cond(int cond, uint32_t from, uint32_t to) { return 0xD000u | (uint32_t)cond << 8 | ((to - from - 4) / 2 & 0xFF); }
 #define NE 1
 #define EQ 0
+#define HI 8
 
 #define PUSH_R0_LR  0xB501u   /* push {r0,lr} */
 #define PUSH_R0_R1  0xB403u   /* push {r0,r1} */
@@ -235,6 +237,28 @@ static void chip_writer(uint8_t *out) {
 	word(out, lit, BN6_CHIP_WRITER | 1);
 }
 
+/* XV_FIGHT_FLAGS (BN4's 0x08007A8C from a moved Navi's object no state runs: his companion's and his cloud's updates, which
+ * run only where bit 0, the fight's, is set): BN6's battle flags (0x0800A2F0's: [eToolkit +0x18] +0x32) with bit 0 only from
+ * the fight's second frame (the battle timer past 1: the fight's routine 0x080080D2 sets bit 0 and ticks the timer,
+ * 0x0800A6A6, before the objects run), so the object starts with the Navi's first own state, a frame into the fight in
+ * BN6's engine (its state runner, 0x0801B1C4, runs none in the paused opening) and at its first in BN4's, as BN4 has them:
+ *   mov r1,r10; ldr r1,[r1,#0x18]; ldr r0,[r1,#0x40]; cmp r0,#1; ldrh r0,[r1,#0x32]; bhi 1f; lsrs r0,#1; lsls r0,#1; 1: mov pc,lr
+ * (r0 and r1 alone, as BN4's routine) */
+static void fight_flags(uint8_t *out) {
+	Asm a = { out, XV_FIGHT_FLAGS - XV_STUBS };
+	op(&a, 0x4651u);   /* mov r1,r10 */
+	op(&a, 0x6989u);   /* ldr r1,[r1,#0x18] */
+	op(&a, 0x6800u | (BN6_BATTLE_TIMER - BN6_BATTLE_STATE) / 4 << 6 | 1 << 3);   /* ldr r0,[r1,#0x40] */
+	op(&a, 0x2801u);   /* cmp r0,#1 */
+	op(&a, 0x8800u | (BN6_BATTLE_FLAGS - BN6_BATTLE_STATE) / 2 << 6 | 1 << 3);   /* ldrh r0,[r1,#0x32] */
+	uint32_t bhi = a.at;
+	op(&a, 0);
+	op(&a, lsrs(0, 0, 1));
+	op(&a, lsls(0, 0, 1));
+	put16(out + bhi, b_cond(HI, bhi, a.at));
+	op(&a, 0x46F7u);   /* mov pc,lr */
+}
+
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	memset(out, 0, XV_STUBS_SIZE);
 	none(out);
@@ -242,4 +266,5 @@ void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	for (int i = 0; i < XV_SPAWNERS; ++i) spawner(out, i);
 	support(out);
 	chip_writer(out);
+	fight_flags(out);
 }
