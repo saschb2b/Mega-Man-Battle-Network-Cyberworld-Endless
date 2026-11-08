@@ -1426,6 +1426,54 @@
     "08F2C801:03:1"
    ],
    "what": "the room BN4's Navis' battle sprites share (XN_BN4_SPRITE, src/emu/xnavi_bn4_room.c), filled as his battle's record is written from his seat's byte of the room's table (XN_BN4_SPRITES + 1: BN4's list 2 number of his sprite, 0x02), that byte made 0x03: another Navi's battle sprite loaded for him (caught at t1, his sprite's frames)"
+  },
+  {
+   "name": "FireMan's flame's palette at BN4's place",
+   "spec": "fireman_v1",
+   "poke": [
+    "080CE4BC:7387"
+   ],
+   "what": "his flame's spawner's store of its palette (BN4 0x080CE4BC: strb r7,[r0,#0xe], the recipe's BN6's +0xF, xrecipe_bn4.palette_imms) left at BN4's +0xE: in BN6 it falls on the element the spawner stored just before (caught at t237, the flame's +0x0E and its collision's hit kind)"
+  },
+  {
+   "name": "FireMan's flame's element at BN4's place",
+   "spec": "fireman_v1",
+   "poke": [
+    "080CE4B0:75C3"
+   ],
+   "what": "his flame's spawner's store of its element (BN4 0x080CE4B0: strb r3,[r0,#0x17], the recipe's BN6's +0xE) left at BN4's +0x17, BN6's flip: the flame of no element, facing turned (caught at t237, its +0x0E and +0x17)"
+  },
+  {
+   "name": "FireMan's flame's palette read at BN4's place",
+   "spec": "fireman_v1",
+   "poke": [
+    "080CE358:7BA8"
+   ],
+   "what": "his flame's init's read of its palette for its sprite (BN4 0x080CE358: ldrb r0,[r5,#0xe] into BN4_SPRITE_PALETTE_SET, the recipe's BN6's +0xF) left at BN4's +0xE, BN6's element: the flame drawn in palette 1 (caught at t237, its sprite's +4)"
+  },
+  {
+   "name": "FireMan's sound at another pool slot",
+   "spec": "fireman_v1",
+   "poke": [
+    "080F198E:2032"
+   ],
+   "what": "his flame's state's sound 0xA8 (BN4 0x080F198E: movs r0,#0xa8, the recipe's pool slot 0x33) made the pool's first slot, 0x32: his sound 0x8F where BN4 plays 0xA8 (caught at t238, the family's sounds)"
+  },
+  {
+   "name": "FireMan's CurAction off by one",
+   "spec": "fireman_v1",
+   "poke": [
+    "080B7F40:200A"
+   ],
+   "what": "his decision's set of CurAction 7 (BN4 0x080B7F40: movs r0,#7 before BN4_SET_ACTION, the recipe's BN6's 9) written 10: his first state left for another (caught at t1, his CurAction)"
+  },
+  {
+   "name": "FireMan's companion told at another field",
+   "spec": "fireman_v1",
+   "poke": [
+    "080CC620:7401"
+   ],
+   "what": "the tell that sets his companion's animation up again where his own changed (BN4_FIRE_COMPANION_TELL, 0x080CC620: strb r1,[r0,#0x11], its 0xFF) written to its +0x10: its animation made 0xFF instead (caught at t335, the companion's sprite)"
   }
  ]
 }
