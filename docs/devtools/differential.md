@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:40:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1011,6 +1011,26 @@ format, its game 4: the trace's header names it):
   list 4's 0x0D into 0x0E, his rocks'); and the rocks' debris, the fourth
   kind's 0x09 whose twin inits set up each game's own rock art, allowed on
   its sprite state alone ("the rock's debris, each engine's own art").
+  `thunderman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  ThunderMan built) PASSes over its 1200 frames once his companion and cloud,
+  which run no state, are gated a frame into BN6's fight with his first own
+  state (`XV_FIGHT_FLAGS`), so his whole battle keeps the one offset. What it
+  took of the comparator: an animation run through the paused opening
+  compared by the two openings' lengths (legit.json's bn4
+  `opening_animation`, `tools/xdiff_bn4_opening.py`: his cloud's, BN4's 227
+  frames from its spawn to the fight against BN6's 206, its place in its
+  18-frame loop as far apart, modulo the loop, until an animation is set in
+  the fight); a sound row that holds in one Navi's battles alone (`foes`: his
+  0x70's BN4 0xAD at the pool's 0x32, where Billy's thunder's 0xAD is BN6's
+  own 0xBA); a spawn's leftover read as a named pointer or by its bytes
+  (`spawn_leftover`'s `bn6` a list, or `bytes`: his 0x70's +4, his 0x71's +5
+  and +6); a hit's spark taking no rank in the family's renderer places, its
+  life each engine's art (`bn4_renderer`); a frame of hits by element laid
+  out in the BN4 trace at BN6's places (BN4's +0x2A and +0x3C, BN6's +0x82
+  and +0x94, five u16 each: `src/dev/xdiff_bn4_trace.c`, [BN4 Red
+  Sun's tables](../rom/bn4.md), What a hit leaves the struck, by element);
+  and BN6's own Elec tally for its freeze (+0x78), allowed on MegaMan's
+  collision data where BN4's holds nothing.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
