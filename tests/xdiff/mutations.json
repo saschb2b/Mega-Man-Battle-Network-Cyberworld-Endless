@@ -1615,9 +1615,9 @@
    "name": "AquaMan's companion drawn with another sprite",
    "spec": "aquaman_v1",
    "poke": [
-    "080CCC97:D9:1"
+    "080CCC97:E0:1"
    ],
-   "what": "his companion's kind 1 row of the first kind's 0x5C's kinds' table (BN4 0x080CCC97: list 4 0x0C, the recipe's copy 0xD8, xnavirecipe_bn4_init.table_kinds1) made 0xD9, his third kind 0x23's sprite: the companion's art another's from its init on, which the companion's clock (legit.json's bn4 companion_clock) compares at the same fight frame (caught at t1, its sprite's frames)"
+   "what": "his companion's kind 1 row of the first kind's 0x5C's kinds' table (BN4 0x080CCC97: list 4 0x0C, the recipe's copy 0xDF, xnavirecipe_bn4_init.table_kinds1) made 0xE0, his third kind 0x23's sprite: the companion's art another's from its init on, which the companion's clock (legit.json's bn4 companion_clock) compares at the same fight frame (caught at t1, its sprite's frames)"
   },
   {
    "name": "AquaMan's panels' effect left BN4's",
@@ -1633,7 +1633,7 @@
    "poke": [
     "080F45A0:3423"
    ],
-   "what": "his copied MegaMan state's effect spawned with his side in r4's second byte (BN4 0x080F45A0: adds r4,#0x23, the recipe's moved 0x9C, xnavirecipe_bn4_objects.facing_effects) left at BN4's 0x23: BN6's own effect 0x23 spawned (caught at t31, the effect in play)"
+   "what": "his copied MegaMan state's effect spawned with his side in r4's second byte (BN4 0x080F45A0: adds r4,#0x23, the recipe's moved 0x9D, xnavirecipe_bn4_objects.facing_effects) left at BN4's 0x23: BN6's own effect 0x23 spawned (caught at t31, the effect in play)"
   },
   {
    "name": "AquaMan's sound at another pool slot",
@@ -1681,7 +1681,7 @@
    "poke": [
     "080E3ABE:349B"
    ],
-   "what": "her flash's effect (the fourth kind's 0x17 moved with her, BN4 0x080E3ABE: adds r4,#0x2e after lsls #8, the recipe's moved effect 0x9C) made BN6's 0x9B: another effect where her flash sparkles (caught at t66, the flash's effect)"
+   "what": "her flash's effect (the fourth kind's 0x17 moved with her, BN4 0x080E3ABE: adds r4,#0x2e after lsls #8, the recipe's moved effect 0x9E) made BN6's 0x9B: another effect where her flash sparkles (caught at t66, the flash's effect)"
   },
   {
    "name": "Roll's attack's sprite at BN4's list",
