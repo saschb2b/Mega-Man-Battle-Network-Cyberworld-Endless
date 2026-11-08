@@ -33,8 +33,9 @@ const uint8_t *xnavi_bn4_raw(int list, int number, uint32_t *len);
  * family of them is summoned by alone (xnavi_bn4_summoner: Roll's, for her Mettaur's sound in her pool); true where both
  * were. Between frames. */
 bool xnavi_bn4_room_for(const uint8_t *entities, size_t len);
-/* The first id of the BN4 Navi whose summon brings enemy `id` (BN6's) of a family moved for it alone
- * (XVirusFamily.summoned: Roll's Mettaur), 0 none: his songs and art serve its battle without him */
+/* The first id of the BN4 Navi whose summon brings a version of enemy `id`'s family (BN6's ids), a family moved for it
+ * alone (XVirusFamily.summoned: Roll's Mettaur and Melody), 0 none: his songs and art serve its battle without him,
+ * whichever of its versions it is */
 uint32_t xnavi_bn4_summoner(uint32_t id);
 
 #endif

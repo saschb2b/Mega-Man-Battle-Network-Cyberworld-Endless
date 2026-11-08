@@ -173,6 +173,17 @@ static bool numbers_ok(const XNavi *n, char *why, size_t len) {
 	return true;
 }
 
+/* its loads past an immediate's reach (XnFar): each an ldrh and its compare with 0 in its code, BN6's place an even byte */
+static bool fars_ok(const XNavi *n, char *why, size_t len) {
+	for (int i = 0; i < n->nfars; ++i) {
+		const XnFar *k = &n->fars[i];
+		if ((k->at & 1) || !xvirus_is_code(&n->code, k->at) || !xvirus_is_code(&n->code, k->at + 2) || k->rd > 7 || k->rb > 7 ||
+			(k->was & 1) || k->was > 0x3E || (k->now & 1) || k->now > 0xFF || k->now <= 0x3E)
+			return no(why, len, "load past an immediate %d at %08x", i, (unsigned)k->at);
+	}
+	return true;
+}
+
 bool xnavi_recipe_ok(const XNavi *n, char *why, size_t len) {
 	const XVirusFamily *f = &n->code;
 	if (!f->name) return no(why, len, "no name");
@@ -181,7 +192,8 @@ bool xnavi_recipe_ok(const XNavi *n, char *why, size_t len) {
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BUS + ROM_SIZE)) || (f->held && f->held_chips))
 		return no(why, len, "its records");
 	if (f->ice < 0 || f->ice > XV_ICE_MAX) return no(why, len, "an ice block of size %d", f->ice);
-	return code_ok(f, why, len) && refs_ok(n, why, len) && art_ok(f, why, len) && overlay_ok(n, why, len) && needs_ok(n, why, len);
+	return code_ok(f, why, len) && refs_ok(n, why, len) && art_ok(f, why, len) && overlay_ok(n, why, len) && needs_ok(n, why, len) &&
+	       fars_ok(n, why, len);
 }
 
 /* the moved objects' blocks in XN_OBJECTS, their data and bytes in them */

@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:46:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -498,7 +498,9 @@ pool, her fifth, 0xE0, and Melody's 0xC2 and 0xC3 her sixth and seventh,
 0x104 and 0x117, through her shim (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
 lists the song, packed into her art's room and pointed in her battles as
 her own sounds are (the owner's call 11), and in a battle of his alone,
-which takes her art and pool (`xnavi_bn4_summoner`). As a family installs, each of its sounds is
+which takes her art and pool (`xnavi_bn4_summoner`, by the family: any
+version of it, as Melody's V1, which she never brings, plays the same
+two sounds). As a family installs, each of its sounds is
 copied from the player's ROM (`xsong_pack`, its sequence, voice group and
 samples, none of it in the repository) into a room of the families' art
 below their sprites (from `XV_ART + 0x5A000`, the sprites' own room full)

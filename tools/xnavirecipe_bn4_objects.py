@@ -128,12 +128,22 @@ NUMBERS = {
                 "attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA)",
     0x04050001: "a collision region's spawn word (object_spawnCollisionRegion's r4, Roll's MegaMan's state 44 at 0x080EF9EC, as "
                 "0x04050301): its bytes as 0x04050301's, its third byte 0",
+    # (WoodMan's: docs/multirom/bn4-navis.md, WoodMan built)
+    0x03840000: "a panel's occupants' bits WoodMan's third kind 0x07 may not stand on (0x080CDF82, its panel's flags by "
+                "0x08009A86, BN6's 0x0800C8F8): each game's panel flags OR in their occupants' alliance words' high halves "
+                "(BN4's collision +0x58 at 0x0800A410, BN6's +0x30 at IWRAM 0x03007974), the same words of both games' "
+                "collision masks' tables (BN4_COLL_MASKS, BN6_COLL_MASKS: 0x2A80, 0x5584 alike)",
+    0x0C000000: "the hits word's bits WoodMan's third kind 0x95 tests (0x080DFB78, its collision's +0x54, BN6's +0x70): the "
+                "attackers' alliance words ORed in by both games' hit passes (0x08012BE8, BN6's 0x081D7840), as 0x0A800000",
 }
 # the kinds a moved object's code spawns of a type whose kinds' table bn4_twins.TABLES reads, where r4 is no constant but a
 # byte of a table by the Navi's version: the spawn's site -> (the table, why)
 KINDS_BY_VERSION = {
     0x080EFB20: (0x080BC300, "Roll's MegaMan's state 45 spawns the third kind's 0x0B with r4 her attack's +0xC, set by her "
                              "decision (0x080BC2D8) from this table by her version (6, 7, 8, 9)"),
+    0x080F50B6: (0x080F50E4, "WoodMan's MegaMan's state 108 spawns the third kind's 0x0B with r4 this table's byte by his "
+                             "attack's +0xC, his version (0x080C9018, the one decision that sets CurAction 10): 0x10, 0x11, "
+                             "0x12, 0x12"),
 }
 
 
@@ -195,8 +205,7 @@ def spawns4(f, alloc):
                 continue
             m = f.moved4[ty]
             if 'as' not in m:
-                m['as'] = alloc.types[4]
-                alloc.types[4] += 1
+                m['as'] = X4.type_number(f, alloc, 4)
                 f.types.append((4, m['as'], ty))
             f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
                                why=f'its object\'s type {ty:#x} (the fourth kind): moved, the dispatch\'s {m["as"]:#x}'))

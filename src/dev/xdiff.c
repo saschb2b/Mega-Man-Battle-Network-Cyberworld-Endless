@@ -732,6 +732,7 @@ static bool subject(Side *g, const Spec *s) {
 	int nmoved;
 	if (!xvirus_moved(&nmoved)) return false;
 	printf("xdiff: %d ranges moved\n", nmoved);
+	if (s->bn4) xd4_pool_point(s);
 	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();

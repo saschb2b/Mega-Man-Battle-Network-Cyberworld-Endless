@@ -832,6 +832,8 @@ class Frame:
                     return ('panel', off // self.trace['psize'], panel_off(self.canon, self.game, off % self.trace['psize']))
                 if part == 'state':
                     return ('battle state', state_off(self.canon, self.game, off))
+                if part == 'ai':
+                    off = ai_off(self.canon, self.game, off)
                 return (role_name(role), part, off)
         for kind, base, size, n in self.slots:
             if base <= v < base + size * n:
@@ -864,6 +866,18 @@ def state_off(canon, game, off):
     if game != 4:
         return off
     for seg in getattr(canon, 'legit', {}).get('bn4', {}).get('battle_state', []):
+        a, b, n = (int(seg[k], 0) for k in ('bn4', 'bn6', 'size'))
+        if a <= off < a + n:
+            return off - a + b
+    return off
+
+
+def ai_off(canon, game, off):
+    """an offset in an AI's data as BN6's layout has it: BN4's where legit.json's bn4 ai_data maps its place (a Soul Navi's own
+    block and his attack's variables, moved to BN6's places by his port: tools/xnavirecipe_bn4.py AI_BLOCKS), else as it is"""
+    if game != 4:
+        return off
+    for seg in getattr(canon, 'legit', {}).get('bn4', {}).get('ai_data', []):
         a, b, n = (int(seg[k], 0) for k in ('bn4', 'bn6', 'size'))
         if a <= off < a + n:
             return off - a + b

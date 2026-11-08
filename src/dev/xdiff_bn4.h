@@ -36,6 +36,9 @@ int xd4_summon_draws(const XVirusFamily *const *fams, int n, XvMoved *out, int m
 /* A BN4 enemy id as BN6's engine numbers it: a moved family's or Navi's version its first_id + the version (the recipe's
  * numbers, Billy's 13-18 BN6's 0x2C0-0x2C5, GutsMan's 132-135 0x384-0x387); any other id as it is */
 int xd4_bn6_id(int id);
+/* BN4's Navis' sound pool pointed at the spec's foes' (xnavi_bn4_sounds_for), as their battle's first frame points it: before
+ * BN6's run's pokes, so a poke of a pool slot's entry holds in the battle whichever Navi was installed last */
+void xd4_pool_point(const Spec *s);
 /* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
  * mutation's call= aims their veneers as BN5's */
 int xd4_family_count(void);

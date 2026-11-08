@@ -1850,6 +1850,54 @@
     "0815A264:00090009:4"
    ],
    "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its players), where her install put her 0x131 (BN4's player 22) on BN6's player 10, made 9, the player her summoned Mettaur's 0x8B (slot 0xE0) keeps from BN4: the two begun in one frame, the 0x8B cuts her 0x131 (caught at t1880, the family's sounds)"
+  },
+  {
+   "name": "WoodMan's CurAction off by one",
+   "spec": "woodman_v1",
+   "poke": [
+    "080C9078:200B"
+   ],
+   "what": "his decision's set of CurAction 8 (BN4 0x080C9078: movs r0,#8 before BN4_SET_ACTION, the recipe's BN6's 0xA) written 0xB: his step's state (MegaMan's 106) left for his 107 (caught at t1, his CurAction)"
+  },
+  {
+   "name": "WoodMan's AI block at BN4's +0x64",
+   "spec": "woodman_v1",
+   "poke": [
+    "080C8F88:3664"
+   ],
+   "what": "his decision's pointer to his own block (BN4 0x080C8F88: adds r6,#0x64, the recipe's BN6's +0x80, AI_BLOCKS) left BN4's: his sub-states read and written among BN6's AI data's fields (caught at t1, his AI data's +0x65, +0x6C and +0x81)"
+  },
+  {
+   "name": "WoodMan's attack's end with another CurAction",
+   "spec": "woodman_v1",
+   "poke": [
+    "0800CA56:2009"
+   ],
+   "what": "his copy of the attack's end with its CurAction alone (BN4_ATTACK_END_BARE, 0x0800CA4A, copied with him: its movs r0,#6 at 0x0800CA56, the recipe's BN6's 8) written 9: his step's end sends him to his MegaMan's 77 where BN4's goes back to his decision (caught at t113, his CurAction)"
+  },
+  {
+   "name": "WoodMan's shot of another kind",
+   "spec": "woodman_v1",
+   "poke": [
+    "080F50E4:11:1"
+   ],
+   "what": "his copied MegaMan state 108's kinds' table (BN4 0x080F50E4, raw with its routine 0x080F509C: 0x10, 0x11, 0x12, 0x12 by his version, the third kind's 0x0B's r4) V1's byte made 0x11, V2's: his shot spawned as another kind (caught at t199, the shot's +4, +0x35 and +0x36)"
+  },
+  {
+   "name": "WoodMan's sound at another pool slot",
+   "spec": "woodman_v1",
+   "poke": [
+    "080F4D42:2032"
+   ],
+   "what": "his copied MegaMan state 106's sound 0xA2 (BN4 0x080F4D42: movs r0,#0xa2, the recipe's pool slot 0x33) made the pool's first slot, 0x32: his sound 0x8F where BN4 plays 0xA2 (caught at t44, the family's sounds)"
+  },
+  {
+   "name": "WoodMan's shot spawned as his 0x94",
+   "spec": "woodman_v1",
+   "poke": [
+    "080CE812:20CD"
+   ],
+   "what": "the spawn of his third kind's 0x0B (BN4 0x080CE812: movs r0,#0xb, the recipe's dispatch number 0xCC, the first of the third kind's numbers past 0xFF, xrecipe_bn4.TYPE_MORE) made 0xCD, his 0x94's: the dispatch runs his 0x94's copy for it (caught at t199, the objects in play and the run order)"
   }
  ]
 }
