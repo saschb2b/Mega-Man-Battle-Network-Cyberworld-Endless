@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T18:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -904,10 +904,10 @@ tables](../rom/bn4.md) (Roll derived). What she adds:
   the id BN6's and calls BN6's routine, then plays her summon's sound. Its
   twin audited: the panel, id, HP and side the same at t1008. The ids:
   Billy's are moved (0xE-0x10 as 0x2C1-0x2C3, its recipe's); Mettaur's
-  (1-4) are BN6's own Mettaur by name, as a run's visitors take them
-  ([Battle Network 4 in a run](bn4.md), Only what is new visits); 0x39
-  (V3's, its type 0x11) is moved by no recipe and summons nothing yet, an
-  interim. Her +0x60 and +0x64 hold BN6's objects as BN4's.
+  (1-4) are BN4's own Mettaur, moved for her (0x2E4-0x2E7; the owner's
+  call of 8 November 2026, below); 0x39 (V3's, its type 0x11) is moved by
+  no recipe and summons nothing yet, an interim. Her +0x60 and +0x64 hold
+  BN6's objects as BN4's.
 - **Her sounds' player**: BN4 plays 0x96 and 0x131 on its player 22 and
   its hit sound 0x6B on 10; BN6 keeps its 22 for its hit sound 0x6B alone.
   On BN4's player, BN6's hit sound cut her attack's 0x131 (`roll_v1` at
@@ -926,21 +926,70 @@ address); a moved fourth-kind type read back as BN4's (`Bn4Canon.t4`,
 `xdiff_snap.identity`); her pool sounds paired (0x96 at 0x32, 0xCE at
 0x33, 0x131 at 0x63, 0x132 at 0xD0, in her battles alone).
 
-**At t1008 her summon's Mettaur is each engine's own**: the same panel,
-id, HP and side, but BN4's Mettaur runs BN4's code (its type 2, +5 2, its
-+0xB, +0xF and +0x20, its sprite, its collision's +0x28, its panel
-reserved) and BN6's runs BN6's. Neither the port nor the comparator can
-make them one: BN4's Mettaur has not been mapped onto BN6's
-(`bn4_mettaur_control` against BN6's own parts at t1), and moving it as a
-family takes twelve decisions of the families' generator (four own
-states, five calls with no twin, a literal, a sprite and a sound). Read
-from the two traces after t1008: both Mettaurs step from (4,1) to (4,2),
-but on different clocks, and BN6's shockwave strikes MegaMan at t1195
-(1880 to 1870 HP), BN4's not by t1200. So a native's reading would end
-INCONCLUSIVE there too. `roll_v1` records FAIL at t1008, and Roll is not
-in the tournament's proved list: the owner's call is whether her summon
-brings BN6's Mettaur (then the differential compares it as a native, the
-world from then on) or BN4's moved for her.
+**Her Mettaur, BN4's own (the owner's call of 8 November 2026,
+[Battle Network 4 in a run](bn4.md) call 12).** Her summon brings BN4's
+Mettaur moved into BN6 as a family, the way Billy was, so her battle can
+play as BN4's; it moves for her summon alone and visits no battle
+(`XVirusFamily.summoned`; Only what is new visits). `tools/xrecipe_bn4.py`
+moves it (BN4's type 2, ids 1-6, as AI 70 with ids 0x2E4-0x2E9), its
+twelve decisions settled so:
+
+- **Its generic states 1, 2, 4 and 5 are wrappers of its own**
+  (`bn4_twins.OWN_STATES`): each enters or leaves the appear queue on its
+  first frame, then runs BN4's generic state of its place, BN6's in its
+  place; the generic 1 and 4 pairs audited (BN4's 1 also clears +0's bit
+  2, BN6's 4 calls two routines of its own where BN4's calls one), as
+  every family's states 1 and 4 are BN6's.
+- **Its turn waits in the appear queue** (`BN4_QUEUE_HEAD`,
+  `BN4_QUEUE_ENTER`, `BN4_QUEUE_LEAVE`), the one queue BN4's plain appear
+  and its Mettaurs share, 8 bytes of objects' +0xE. BN6's twins
+  (`BN6_QUEUE_*`) keep queues of object pointers and take the queue's
+  number in r0 (its appear's 0), where BN4's call sites leave r0 as it
+  happens to be: each of its seven calls is aimed at a shim of its home
+  that makes r0 0 and goes on to BN6's twin (`bn4_twins.QUEUED`, the
+  sound shim's `XvSoundCall` with its slot the queue's number; xvirus.c's
+  `sound_set`, `xvirus_shim_r0_to`).
+- **Its held chips' two attacks** (`0x080E45F6`, `0x080E8ADA`) are dead
+  while +0x2A stays 0xFFFF: BN6's family nullsub, as Billy's and Walla's.
+- **Its shockwave** (the third kind's 0x16) is moved with it, its kinds'
+  table (`0x080CFB8C`, by its version) copied (`bn4_twins.TABLES`, a
+  table with no list byte: list 4 by its load's `movs`), its sprite
+  copied into list 4.
+- **Its sound 0x8B** (the shockwave's) is no song of BN6's: copied to
+  slot 0x46 (`XV_BN4_SONG_SLOT_MORE`, the gap between the Darkloids' and
+  BN5's chips' slots, the families' twelve full).
+- **Its room**: the families' code and art were full, so the families
+  past the first six take a second room (`ROOM2_FROM`): code from BN5's
+  families' end (`XV_CODE + 0x11000`) to BN4's first room, art from
+  `XV_ART + 0x54000` to the sounds' room.
+
+Its list 4 sprite and the dispatch's number for its shockwave come
+before the Navis' (the families install first), so every Navi's list 4
+and dispatch numbers moved up by one (`src/emu/xnavi_bn4.c` written
+again; its art's room unchanged).
+
+**`mettaur4_v1`** (BN4's Mettaur V1 alone at (5,2) against MegaMan idle
+at (2,2) with 2000 HP) PASSes over its 1200 fight frames, its shockwave's
+sound paired with its copy (`legit.json`). Four mutations are caught: its
+CurAction off by one (t1), its queue's head test aimed at the nullsub
+(t1), its shockwave's sprite left at BN4's number (t72) and its
+shockwave's sound another (t73).
+
+**`roll_v1` still parts at t1008**, now on the summoned appear: both
+battles put BN4's Mettaur (0x2E4 in BN6) on the same panel with the same
+id, HP and side, but BN4's runs BN4's summoned appear (its generic state
+0 by +5 2, `0x0801002A`: hidden, falling in from +0x3E 0xA0 eight a frame
+with its flash effects 0x2E, then a white blink), and runs it in its
+spawn frame, where BN6's spawn of an enemy into a fight under way
+(`BN6_SPAWN_ENEMY_1`: +5 1, AI data +2 1) sends BN6's generic state 0 to
+BN6's own (`0x080164A0`, a Navi plate's arrival) from the next frame. So
+its +5, +0xB, +0xF, +0x20, +0x3E, sprite, collision +0x28, flash and
+panel reservation are each engine's from t1008, and `roll_v1` records
+FAIL there. Next: move BN4's summoned appear with the family (its
+generic state 0 as an own state, `0x0801002A` and its three steps copied,
+its nine calls paired, BN4's battle kind 0x44 as BN6's 6), the summon's
+shim writing +5 2 and running the object's first state in its spawn
+frame. Roll joins the tournament's proved list once `roll_v1` PASSes.
 
 Seven mutations break her port and each is caught: her decision's
 CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
