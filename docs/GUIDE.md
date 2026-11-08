@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:40:00Z }
 ---
 
 # The player's guide
@@ -901,8 +901,8 @@ first battle. Helped runs count for everything.
 EXTRAS holds what the run adds to BN6, each on or off, all on unless you
 switch one off: Liberation (BN5's Liberation Missions on a dark layer),
 Tournament (three Navis in a row in an act's arena from the third, once
-a run has reached the Nest, shown on BN4 Red Sun's own bracket: not in
-runs yet),
+a run has reached the Nest and with BN4 Red Sun's ROM beside BN6's, shown
+on BN4's own bracket),
 Glitch (the rare Glitch layer), Virus Battler, DarkChips (the flames of
 darkness) and, where another game's ROM is read, Older nets (its areas,
 Navis and viruses in BN6's net). A run keeps what it was started with,
