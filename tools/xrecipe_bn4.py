@@ -183,6 +183,7 @@ class Alloc:
         self.code_end, self.art_end, self.room = CODE_END, ART_END, 'the families'
         # (BN4's effects moved, by its id: BN6's; their sprites copied, by BN4's list and number: the copy, its family's name)
         self.effect, self.list5, self.effects, self.effect_sprites = EFFECT0, LIST5_0, {}, {}
+        self.effect_owner = {}   # (BN4's effect moved: the family that moved it and lists it)
 
 
 def region_of(b4, ty, table=None, n=None):
@@ -825,11 +826,17 @@ def move_effect(b4, f, alloc, e4):
         f.decide('effect', f'its effect {e4:#x}\'s sprite {row[0]:#x}:{idx:#x}: the generator moves lists 3, 4 and 5\'s alone')
         return None
     e6 = alloc.effects.get(e4)
+    if e6 is not None and alloc.effect_owner.get(e4) not in (None, f.name) and alloc.room.startswith('the families'):
+        # (a family's, moved by a family installed before it, which lists it: its id that family's, listed once, as a sound
+        # is; a Navi lists it again, its own install apart: tools/xnavirecipe_bn4.py)
+        f.notes.append(f'its effect {e4:#x}: {e6:#x}, moved by {alloc.effect_owner[e4]}: installed with it')
+        return e6
     if e6 is None:
         if alloc.effect >= EFFECT_END:
             f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
             return None
         e6 = alloc.effects[e4] = alloc.effect
+        alloc.effect_owner[e4] = f.name
         alloc.effect += 1
     f.effects.append((e4, e6))
     have = alloc.effect_sprites.get((lst, idx))

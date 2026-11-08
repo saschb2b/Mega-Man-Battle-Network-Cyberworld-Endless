@@ -1230,7 +1230,6 @@ static const XvSprite mettaur_sprites[] = {
 	{ 1, 0x01, 1, 0xC6, XV_ART + 0x54000, 0x3000 },
 	{ 4, 0x04, 4, 0xC9, XV_ART + 0x57000, 0x1800 },
 };
-static const XvId mettaur_effects[] = { { 0x07, 0x96 }, { 0x15, 0x90 } };
 static const XvSong mettaur_songs[] = {
 	{ 0x8B, 0x46, XV_ART + 0x5DAC0, 0x40 },   /* its sound 0x8b, BN4's song copied */
 };
@@ -1257,7 +1256,6 @@ static const XVirusFamily bn4_mettaur = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
-	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
 	.songs = mettaur_songs, .nsongs = (int)(sizeof mettaur_songs / sizeof *mettaur_songs),
 	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
