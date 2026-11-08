@@ -933,11 +933,14 @@ reserved) and BN6's runs BN6's. Neither the port nor the comparator can
 make them one: BN4's Mettaur has not been mapped onto BN6's
 (`bn4_mettaur_control` against BN6's own parts at t1), and moving it as a
 family takes twelve decisions of the families' generator (four own
-states, five calls with no twin, a literal, a sprite and a sound). So
-`roll_v1` records FAIL at t1008, and Roll is not in the tournament's
-proved list: the owner's call is whether her summon brings BN6's Mettaur
-(then the differential compares it as a native, the world from then on)
-or BN4's moved for her.
+states, five calls with no twin, a literal, a sprite and a sound). Read
+from the two traces after t1008: both Mettaurs step from (4,1) to (4,2),
+but on different clocks, and BN6's shockwave strikes MegaMan at t1195
+(1880 to 1870 HP), BN4's not by t1200. So a native's reading would end
+INCONCLUSIVE there too. `roll_v1` records FAIL at t1008, and Roll is not
+in the tournament's proved list: the owner's call is whether her summon
+brings BN6's Mettaur (then the differential compares it as a native, the
+world from then on) or BN4's moved for her.
 
 Seven mutations break her port and each is caught: her decision's
 CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
