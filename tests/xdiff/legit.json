@@ -2880,6 +2880,44 @@
         "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0xe0 at 0x08B798CC, the recipe's immediate, its bl at 0x08B798CE through its veneer to BN6's), its init's. Mettaur is moved for Roll's summon alone (XVirusFamily.summoned), so his sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her fifth, 0xE0, her recipe listing BN4's song 0x8B there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In his battles and hers alone (foes); BN4's first at t73 in mettaur4_v1, a battle of his alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
       },
       {
+        "bn4": "0xC2",
+        "bn6": "0x104",
+        "clock": "state",
+        "foes": [
+          "0x37",
+          "0x38",
+          "0x39",
+          "0x3A",
+          "0x3B",
+          "0x3C",
+          "0x80",
+          "0x81",
+          "0x82",
+          "0x83"
+        ],
+        "what": "Melody's sound 0xC2, Roll's pool's",
+        "why": "Played by its own state (BN4: movs r0,#0xc2 at 0x080B8FEA, its bl to PlaySoundEffect at 0x080B8FEC; BN6: that bl aimed at its home's shim making r0 the pool's 0x104, XvSoundCall, the movs left as BN4's), a state's. Melody is moved for Roll's summon alone (XVirusFamily.summoned), so its sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her sixth, 0x104, past what a movs names (the owner's call 11), her recipe listing BN4's song 0xC2 there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In its battles and hers alone (foes); BN4's first at t20, BN6's at t21, each on player 8, in melody4_v1, a battle of its alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
+      },
+      {
+        "bn4": "0xC3",
+        "bn6": "0x117",
+        "clock": "state",
+        "foes": [
+          "0x37",
+          "0x38",
+          "0x39",
+          "0x3A",
+          "0x3B",
+          "0x3C",
+          "0x80",
+          "0x81",
+          "0x82",
+          "0x83"
+        ],
+        "what": "Melody's sound 0xC3, Roll's pool's",
+        "why": "Played by its own state (BN4: movs r0,#0xc3 at 0x080B90E6, its bl to PlaySoundEffect at 0x080B90E8; BN6: that bl aimed at its home's shim making r0 the pool's 0x117, XvSoundCall, the movs left as BN4's), a state's. Melody is moved for Roll's summon alone (XVirusFamily.summoned), so its sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her seventh, 0x117, past what a movs names (the owner's call 11), her recipe listing BN4's song 0xC3 there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In its battles and hers alone (foes); BN4's first at t226, BN6's at t227, each on player 8, in melody4_v1, a battle of its alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
+      },
+      {
         "bn4": "0xA6",
         "bn6": "0x38",
         "clock": "state",

@@ -1740,6 +1740,38 @@
    "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's Roll's pool slot 0xE0) made her pool's fourth slot, 0xD0 (her 0x132's): another of her sounds where the shockwave sets out (caught at t73, the family's sounds)"
   },
   {
+   "name": "Melody's CurAction off by one",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8D02:200A"
+   ],
+   "what": "its state 6's set of CurAction 7 (BN4 0x080B8D02: movs r0,#7, the recipe's BN6's 9) written 0xA: its next state left for another (caught at t1, its CurAction)"
+  },
+  {
+   "name": "Melody's region left as BN6's init's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8C1E:2101"
+   ],
+   "what": "its init's set-up run again at its spawn's end (BN4 0x080B8C1E: movs r1,#0x35, hook 5 entered there, bn4_twins.INIT_AGAIN) made movs r1,#1: its collision's alliance word BN6's virus init's region 1, without BN4's bit 2 (caught at t1, its collision's +0x30)"
+  },
+  {
+   "name": "Melody's +0x2E left as its spawn's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8C38:0A:1"
+   ],
+   "what": "its init's table of +0x2E by version (BN4 0x080B8C38, copied with it, its version 0's byte 30) made 10, what BN6's and BN4's spawns give: as if its init's own step were not run again (caught at t1, its +0x2E and its collision's +7)"
+  },
+  {
+   "name": "Melody's CurAction compared as BN4's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8FE6:2808"
+   ],
+   "what": "its state's compare of its CurAction with 8 (BN4 0x080B8FE6: cmp r0,#8, the recipe's BN6's 0xA) left at BN4's 8: its sound 0xC2 never played where it reads BN6's 0xA (caught at t20, the family's sounds)"
+  },
+  {
    "name": "Roll's summoned Mettaur arriving as BN6's",
    "spec": "roll_v1",
    "poke": [

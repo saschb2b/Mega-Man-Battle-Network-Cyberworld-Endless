@@ -94,6 +94,9 @@
 #define BN4_QUEUE_HEAD    0x08007F04u /* r0 1 where r5 heads the queue, else 0 */
 #define BN4_QUEUE_ENTER   0x08007F1Cu /* r5 put at its end where it is not in it: r0 1 where it was put */
 #define BN4_QUEUE_LEAVE   0x08007F46u /* r5 taken out, the rest moved up (0x08007F6A) */
+#define BN4_COLL_REGION_SET 0x08012ED0u /* a collision's region changed by r5's (r1 what it is, r2 what it strikes, r3 the set-up's
+                                       * arg): BN6_COLL_REGION_SET's twin but for its second word, stored at r4's +0x5C, r4 the
+                                       * region's number (0x08012EEC: a write to the BIOS), so its +0x5C keeps the set-up's */
 
 /* The sounds BN4's moved families play that are no BN6 song (xrecipe.song_sig): each a movs r0,#N before its bl to
  * BN4_PLAY_SOUND in the family's code; its song read by its number through BN4's song table
