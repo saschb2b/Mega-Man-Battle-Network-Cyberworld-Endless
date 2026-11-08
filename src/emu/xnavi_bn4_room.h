@@ -16,7 +16,8 @@
 
 /* At a BN4 Navi's install, staged (xvirus_tx.h), his battle sprite (`f`'s first, BN4's list 2) at the room (XN_BN4_SPRITE,
  * its whole size: the families' sprites_set copies none there and points his list 2 entry at it): checked to fit the room in
- * the player's BN4 ROM (`rom`, its sprite lists at `lists`), his BN4 number listed at his seat; the step failed (xv_fail)
+ * the player's BN4 ROM (`rom`, its sprite lists at `lists`), his BN4 number listed at his seat, his art's byte too
+ * (xnavi_bn4_art_list); the step failed (xv_fail)
  * where it does not fit or his seat is listed already */
 void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lists);
 /* A row of a BN4 Navi's sprites in one of the rooms the battles share, staged at his install (xvirus.c sprites_set): his

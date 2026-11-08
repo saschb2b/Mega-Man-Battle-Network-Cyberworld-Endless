@@ -45,6 +45,7 @@ void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lis
 	}
 	uint8_t *p = xv_put(XN_BN4_SPRITES + (uint32_t)seat, 1, true);
 	if (p) *p = s->index;
+	xnavi_bn4_art_list(f);   /* (and his art's: xnavi_bn4_art.h) */
 }
 
 const uint8_t *xnavi_bn4_raw(int list, int number, uint32_t *len) {

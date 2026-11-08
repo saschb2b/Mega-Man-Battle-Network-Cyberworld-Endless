@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Memory the engine writes"
 description: "The free space plan for the core's ROM copy past BN6's 8 MB, region by region from `EMU_FREE` (`src/emu/free_space.h`, `claims.c`), BN6's tables patched in place, and the EWRAM BN6 leaves alone (`RAM_*`)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:40:00Z }
 ---
 
 # Memory the engine writes
@@ -79,7 +79,7 @@ offers NetBattles; not in a New 3DS's runs, which offer none (there for
 | `+0x710400`-`+0x710440` | The player's chip AI's stub (`FREE_CHIP_AI`, issue #82): from BN6's idle state's hook, a call into BN5's chip AI for the player (moved with the Dark Soul's code) and the state left as BN5's leaves it (`movs r0,#1; pop {r4,r6,r7,pc}`), where BN5's ROM is read | `darkinvs.c` |
 | `+0x710440`-`+0x710460` | Where the swap's spawn returns mid-battle (`FREE_SWAP_RETURN`): a hook's instruction ([Hooks](hooks.md); [Navis moved into BN6's battle engine](../../rom/navis.md), A Navi swapped mid-battle) | |
 | `+0x710460`-`+0x720000` | Free (`FREE_TAIL`) | |
-| `+0x720000`-`+0x78C000` | BN4's Navis in BN6's engine (`FREE_BN4_NAVIS`): their homes to `+0x730000` (a seat's `0x800`, then `+0x72C800` the table of each seat's battle sprite, BN4's list 2 number, `XN_BN4_SPRITES`), their code and their objects' (`FREE_BN4_NAVI_CODE`) to `+0x748000`, what their attacks draw and their songs (`FREE_BN4_NAVI_ART`, from `+0x750000` until SearchMan's, an interim: [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), SearchMan built) to `+0x77C000`, then one room of `0x10000` for the coming battle's Navi's battle sprite, filled as its record is written (`FREE_BN4_NAVI_SPRITE`, `src/emu/xnavi_bn4_room.c`; [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), Battle sprites by battle) | |
+| `+0x720000`-`+0x78C000` | BN4's Navis in BN6's engine (`FREE_BN4_NAVIS`): their homes to `+0x730000` (a seat's `0x800`, then `+0x72C800` the table of each seat's battle sprite, BN4's list 2 number, `XN_BN4_SPRITES`), their code and their objects' (`FREE_BN4_NAVI_CODE`) to `+0x750000`, then one room to `+0x77C000` for the coming battle's Navi's attacks' art and pool songs, filled as its record is written (`FREE_BN4_NAVI_ART`, `src/emu/xnavi_bn4_art.c`, each seat's byte of whose art at `+0x72C819`, `XN_BN4_ARTS`; [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), Art and songs by battle), then one room of `0x10000` for the coming battle's Navi's battle sprite, filled as its record is written (`FREE_BN4_NAVI_SPRITE`, `src/emu/xnavi_bn4_room.c`; [BN4's Navis in BN6's engine](../../multirom/bn4-navis.md), Battle sprites by battle) | |
 | `+0x78C000`-`+0x790000` | BN6's and BN5's Navis' plates on BN4's moved bracket (`FREE_BRACKET_FACES`; [BN4's tournament screens](../../multirom/bn4-tournament.md), Faces for every entrant), written with the bracket where BN4's ROM is read: `+0x78C000` its id tables grown to 0x40 (frames, palettes, sheets, 0x40 apart), `+0x78C0C0` `BN4_PLATE_SPRITES` grown, `+0x78C0E0` `BN4_MENU_SPRITE_PTRS` grown to 8; `+0x78C128` the first sheet's copy (BN6's 16 faces), `+0x78E530` the second's (BN5's 6), each the same distance from 0x40 as BN4's | `xbracket_faces.c` |
 | `+0x790000`-`+0x7A0000` | BN4's bracket screen moved (`FREE_BRACKET`, its layout in `xbracket.h`) | `xbracket.c` |
 | `+0x7A0000`-`+0x7FA000` | A liberation's teammates' overworld sprites and mugshots (`FREE_LIB_TEAM`) | `xnavi.c` |

@@ -12,7 +12,6 @@
 #include "bytes.h"
 #include "claims.h"
 #include "data.h"
-#include "hook.h"
 #include "rom.h"
 #include "xattack_grow.h"
 #include "xchips.h"

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -468,6 +468,56 @@ the room: BN6 and BN4 peak at 94.1 MB of 96 with none refused; all three
 ROMs at 95.98 MB, 15 refused in 2 of 3 runs (the maps' mirror images, as
 before). Those runs meet no BN4 Navi, so the fill's own unpacking is not
 in them; the ten Soul Navis' raw sprites take none.
+
+### Art and songs by battle
+
+Built on 8 November 2026, the battle sprites' rule for the rest of what a
+BN4 Navi draws and plays: his attacks' and effects' sprites and his pool's
+songs loaded for his battle from the player's ROM into one room the
+battles share, none resident. The art's room (`FREE_BN4_NAVI_ART`,
+`XN_BN4_ART` to `XN_BN4_END`) ran out at SearchMan (below, SearchMan
+built) and again at Roll, whose songs ended 0x5740 past it with seven
+Navis in. Measured by the generator (`.build/xnavirecipe/bn4_report.md`,
+The art's room, by battle), each Navi's sprites and songs, rounded to
+their rooms: GutsMan 15.0 KB, ThunderMan 27.8, WindMan 40.8, FireMan 28.4,
+SearchMan 71.8 (WindMan's effect sprite 5:0x00 among it, his own copy
+now), AquaMan 34.2, Roll 29.8; the largest,
+SearchMan's 0x11F00 bytes, in a room of 0x2C000. So the code and art
+split SearchMan moved is back where it was (`+0x750000`): the code's room
+0x20000, the art's 0x2C000 (the eleven Navis to come take the code's
+room's rest, about 6 KB each so far).
+
+1. **The generator** (`tools/xnavirecipe_bn4_art.py`) lays each Navi's art
+   and songs out from the room's start, the Navis over one another. A
+   sprite another Navi copied first (his list number: `navi_sprite`,
+   `navi_effect_sprites`, `navi_shared`, as the fold kept them) is listed by
+   each at a place of his own layout, past his own (`own_rows`): the list's
+   number stays one, its place each Navi's. What a family copied stays in
+   the families' art, resident, and is listed by none of them.
+2. **His install** writes no byte of the room (`src/emu/xnavi_bn4_art.c`
+   `xnavi_bn4_art_row`, from `xvirus.c sprites_set` through
+   `xnavi_bn4_room_row`): each sprite checked to fit its room, its list
+   entry pointed at his place where it is free (one a Navi before him
+   pointed into the room kept); his songs packed only to name their
+   headers for the pool's slots (`xnavi_bn4_sounds.c`); his seat's byte of
+   a second table beside the homes made his own (`XN_BN4_ARTS`, past
+   `XN_BN4_SPRITES`, 0xFF none; SearchMan's at `0x08F2C81C`, 0x03).
+3. **The fill**: as a battle's record is written, with his battle sprite
+   (`xnavi_bn4_room_for`), the room is filled with the art and songs of the
+   Navi his seat's byte names (`xnavi_bn4_art_for`): each sprite read from
+   the player's BN4 ROM (a raw one straight from its bytes, an LZ77'd one
+   unpacked and let go), each song packed (`xsong_pack`, its header where
+   the install named it), and each of his sprites' list entries pointed at
+   his place, in the core's copy alone. The pool's slots are pointed at his
+   songs before each frame as before (`xnavi_bn4_sounds_frame`).
+
+The comparator reads a pointer into the art's room as the battle's Navi's
+sprite alone (`tools/xdiff_bn4.py sprite_rows`: an `XN_BN4_ART` row is his
+only where his recipe's ids are the spec's foes, as a battle sprite's
+row). The mutation "SearchMan's art's room filled with another's" (his
+seat's byte of `XN_BN4_ARTS` made AquaMan's seat, 0x0A: AquaMan's sprites
+and songs loaded, SearchMan's entries left on another's bytes) is caught
+at t216, his marker's sprite's frames. HEAP_RESULT
 
 ### Room for all eighteen, measured
 
@@ -961,7 +1011,8 @@ all eighteen](#room-for-all-eighteen-measured) underestimated the art
 (songs uncounted, small sprites rounded to 0x800): at about 40 KB a Navi
 the eighteen need more than the room holds, so a Navi's attacks' art and
 songs will have to be loaded by battle, as the battle sprites are; the
-owner's call.
+owner's call. Done since ([Art and songs by battle](#art-and-songs-by-battle)):
+the split is back at `+0x750000`.
 
 ## AquaMan built
 
@@ -1137,6 +1188,39 @@ CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
 effect another (t66), her warp's sound at another pool slot (t67), her
 attack's sprite at BN4's list (t195), her player-22 sound on BN6's
 hit player (t204) and her shot of another kind (t385).
+
+## SearchMan, AquaMan and Roll folded
+
+On 8 November 2026 the three branches built side by side from the same
+`dev` were merged into one: `NAVIS` reads GutsMan, ThunderMan, WindMan,
+FireMan, SearchMan, AquaMan, Roll, which numbers their moved types, list
+copies and effects in that order (AquaMan's third kinds from the dispatch's
+0xF9, his companion's sprite copy 4:0xDF, his side's effect 0x9D; Roll's
+types 0xFC, 0xFD and 4:0xE3, her flash's effect 0x9E); their seats, homes,
+AI indices and ids are by their BN4 ids and did not move. What the merge
+settled:
+
+- **Effects passed in a register.** SearchMan's `EFFECT_ARGS` and
+  AquaMan's `EFFECT_CALLS` read the same engine routine's calls
+  (`0x0801457E`, the pattern spawner): one is kept, AquaMan's
+  `pattern_effects`, run inside `effects_of` after the side's and the
+  flipped effects (`facing_effects`, SearchMan's `flipped_effects`), so
+  SearchMan's recipe is the same bytes as on his branch.
+- **The comparator's fourth kind**: SearchMan's `t4` (a moved object's
+  type read back as BN4's) kept, which takes Roll's flash too.
+- **The generated files** written again, never merged by hand:
+  `src/emu/xnavi_bn4.c`, the symbol files, the status; `docs/re/ledger.json`
+  merged by hand, every entry kept.
+- **The generator's file** passed 1000 lines with Roll: its sounds (the
+  pool, the tables' sounds, the calls past a byte, the songs and their
+  players) are `tools/xnavirecipe_bn4_sounds.py` now, and the art's room
+  `tools/xnavirecipe_bn4_art.py` ([Art and songs by battle](#art-and-songs-by-battle)).
+- **The mutations' numbers**: AquaMan's companion's poke follows his copy
+  (0xE0, his third kind 0x23's sprite), his and Roll's texts their moved
+  effects' new ids; SearchMan's numbers did not move.
+
+Roll's songs ended past the art's room with the seven in, and the room
+was made one by battle before any spec ran on the fold.
 
 ## What tools/xnavirecipe.py needs for BN4
 
