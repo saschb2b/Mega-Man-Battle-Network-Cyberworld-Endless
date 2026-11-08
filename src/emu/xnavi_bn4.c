@@ -2449,7 +2449,6 @@ static const XvImm woodman_imms[] = {
 	{ 0x080DFA6A, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080DFAA0, THUMB_MOVS, 2, 0, 0x20, 0xE8 },   /* its object's sprite: list 4 0x20 in BN4, list 4 0xe8 in BN6 (copied) */
 	{ 0x080DFB76, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
-	{ 0x080DFB8E, THUMB_LDRH, 0, 7, 0x28, 0x80 },   /* collision data +0x28 in BN4, +0x80 in BN6 */
 	{ 0x080DFBF6, THUMB_MOVS, 4, 0, 0xF, 0x97 },   /* its effect: 0xf in BN4, 0x97 in BN6 (moved) */
 	{ 0x080DFBFC, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's empty slot 0x3a, on its player 9 */
 	{ 0x080DFC2C, THUMB_MOVS, 0, 0, 0xC7, 0x63 },   /* its sound 0xc7: BN4's copied into BN6's empty slot 0x63, on its player 9 */
@@ -2503,6 +2502,9 @@ static const XvSong woodman_songs[] = {
 	{ 0x14B, 0xE0, XN_BN4_ART + 0x53C0, 0xB40 },   /* its sound 0x14b, BN4's song copied */
 };
 static const XnInit woodman_init = { NULL, 0, false, true, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
+static const XnFar woodman_fars[] = {
+	{ 0x080DFB8E, 0, 7, 0x28, 0x80 },   /* collision data +0x28 in BN4, +0x80 in BN6, past an ldrh's reach: its load and compare with 0 a shim's (its routine 080DFB58 pushes lr) */
+};
 
 
 static const XNavi bn4_woodman = {
@@ -2536,6 +2538,7 @@ static const XNavi bn4_woodman = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
 	.init = &woodman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
+	.fars = woodman_fars, .nfars = (int)(sizeof woodman_fars / sizeof *woodman_fars),   /* (its loads past an immediate's reach, through shims of its home) */
 };
 const XNavi *const xnavi_bn4[] = { &bn4_gutsman, &bn4_thunderman, &bn4_windman, &bn4_fireman, &bn4_searchman, &bn4_aquaman, &bn4_roll, &bn4_woodman };
 const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);

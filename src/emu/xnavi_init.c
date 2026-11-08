@@ -20,6 +20,7 @@
 #define SHIM_LITS   8
 #define COLL_ARG6   3u   /* BN6's actor init's r3 (movs r3,#3 at 0x08016FE8) */
 #define BL_REACH    0x400000
+#define BUS         0x08000000u   /* (the ROM's bus address: its game's bytes by an address of it) */
 
 typedef struct {
 	uint32_t at;                   /* where it goes (a word's start) */
@@ -179,6 +180,31 @@ static bool summon_set(const XNavi *n) {
 	return true;
 }
 
+/* its loads of a field past an immediate's reach (XNavi.fars): each site's `ldrh rd,[rb,#was]; cmp rd,#0` in its game made a
+ * call to a shim of its home at `place` on, `movs rd,#now; ldrh rd,[rb,rd]; cmp rd,#0; bx lr` (the call's lr with its Thumb
+ * bit); the place past them, 0 where one is not the one expected or does not fit */
+static uint32_t fars_set(const XNavi *n, uint32_t place) {
+	const XVirusFamily *f = &n->code;
+	const uint8_t *rom = xv_move_rom();
+	for (int i = 0; i < n->nfars; ++i, place += XN_FAR_SIZE) {
+		const XnFar *k = &n->fars[i];
+		const XvBlock *b = xvirus_block_of(f, k->at);
+		const uint16_t ld = (uint16_t)(0x8800u | (unsigned)(k->was / 2u) << 6 | (unsigned)k->rb << 3 | k->rd);
+		if (!rom || !b || get16(rom + (k->at - BUS)) != ld || get16(rom + (k->at + 2 - BUS)) != (0x2800u | (unsigned)k->rd << 8)) {
+			xv_fail("its load at %08x is not the one expected", (unsigned)k->at);
+			return 0;
+		}
+		const uint32_t at = f->home + place, site = b->at + (k->at - b->start);
+		uint8_t *p = place + XN_FAR_SIZE <= XV_HOME_VENEERS ? xv_put(at, XN_FAR_SIZE, true) : NULL, *q = p ? xv_put(site, 4, false) : NULL;
+		if (!q || !thumb_bl_write(q, 0, site, at)) { xv_fail("its load at %08x's shim does not fit its home", (unsigned)k->at); return 0; }
+		put16(p, (uint16_t)(0x2000u | (unsigned)k->rd << 8 | k->now));                            /* movs rd,#now */
+		put16(p + 2, (uint16_t)(0x5A00u | (unsigned)k->rd << 6 | (unsigned)k->rb << 3 | k->rd));   /* ldrh rd,[rb,rd] */
+		put16(p + 4, (uint16_t)(0x2800u | (unsigned)k->rd << 8));                                 /* cmp rd,#0 */
+		put16(p + 6, 0x4770);                                                                      /* bx lr */
+	}
+	return place;
+}
+
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	if (n->summon && !summon_set(n)) return 0;
 	const XVirusFamily *f = &n->code;
@@ -187,6 +213,7 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	const bool end = in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
 	const bool start = in && !in->at_end && in->nspawns;
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
+	if (n->nfars && !(place = fars_set(n, (place + 3u) & ~3u))) return 0;
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
 	if (start && companion != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its init's spawns"); return 0; }
 	if (n->hide_step.addr) {   /* (its hide step's stubs first: a Navi that hides none leaves its shims where they were) */
