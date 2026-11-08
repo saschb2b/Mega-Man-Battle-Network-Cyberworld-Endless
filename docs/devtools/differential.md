@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1011,6 +1011,26 @@ format, its game 4: the trace's header names it):
   list 4's 0x0D into 0x0E, his rocks'); and the rocks' debris, the fourth
   kind's 0x09 whose twin inits set up each game's own rock art, allowed on
   its sprite state alone ("the rock's debris, each engine's own art").
+  `thunderman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
+  ThunderMan built) PASSes over its 1200 frames once his companion and cloud,
+  which run no state, are gated a frame into BN6's fight with his first own
+  state (`XV_FIGHT_FLAGS`), so his whole battle keeps the one offset. What it
+  took of the comparator: an animation run through the paused opening
+  compared by the two openings' lengths (legit.json's bn4
+  `opening_animation`, `tools/xdiff_bn4_opening.py`: his cloud's, BN4's 227
+  frames from its spawn to the fight against BN6's 206, its place in its
+  18-frame loop as far apart, modulo the loop, until an animation is set in
+  the fight); a sound row that holds in one Navi's battles alone (`foes`: his
+  0x70's BN4 0xAD at the pool's 0x32, where Billy's thunder's 0xAD is BN6's
+  own 0xBA); a spawn's leftover read as a named pointer or by its bytes
+  (`spawn_leftover`'s `bn6` a list, or `bytes`: his 0x70's +4, his 0x71's +5
+  and +6); a hit's spark taking no rank in the family's renderer places, its
+  life each engine's art (`bn4_renderer`); a frame of hits by element laid
+  out in the BN4 trace at BN6's places (BN4's +0x2A and +0x3C, BN6's +0x82
+  and +0x94, five u16 each: `src/dev/xdiff_bn4_trace.c`, [BN4 Red
+  Sun's tables](../rom/bn4.md), What a hit leaves the struck, by element);
+  and BN6's own Elec tally for its freeze (+0x78), allowed on MegaMan's
+  collision data where BN4's holds nothing.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
@@ -1531,3 +1551,51 @@ format, its game 4: the trace's header names it):
     low").
   - With these, **`cirkill_v1`, `cirkill_v2` and `cirkill_v3` PASS**: 1200
     fight frames each, the family's records and the world's the same.
+- **WindMan's readings** (`windman_v1`, 8 November 2026; [BN4's Navis in BN6's
+  engine](../multirom/bn4-navis.md), WindMan built): what the comparator
+  gained for his battle, each reading or allowance from both games' code
+  in `legit.json`'s `bn4`; with them **`windman_v1` PASSES**, 1200 fight
+  frames:
+  - **The battle state by its place** (`bn4.battle_state`,
+    `tools/xdiff_snap.py` `state_off`): a pointer into BN4's battle state
+    read as BN6's where a segment maps it, the sides' winds and their levels
+    (BN4 +0x88, BN6 +0xC0, 0x10 bytes); every other offset as it is.
+  - **A spawner one engine keeps** (`spawner` rows, `spawner_kept`): a word
+    of an engine's object where BN6's spawn stores its spawner and BN4's
+    twin nothing, only BN4's 0 against a moved Navi's object in BN6.
+  - **A native's own art** (`own_art`): a world object each engine runs as
+    its own, its sprite state's words into its sprite read by their offset
+    from the sprite's start, where both games' last sprite events name the
+    same bytes, list and number (`arts_set`).
+  - **An engine's own bit** (`allowed_engine`): a bit of a world object's
+    byte one engine's code sets (the gust's sprite flag 0x80), by its kind,
+    type, offset and direction.
+  - **The renderer's ranks** (`bn4_renderer`, `ranks_into`): a hit's spark
+    takes none (its life is its own art's), and the world's natives
+    (`is_native`: each engine's own third- and fourth-kind objects, not
+    moved, not a spark, not BN6's MegaMan's companion) are ranked among
+    themselves as the family is among its own.
+  - **A slot let go, by its last occupant** (`let_go`, `occupants`): a
+    pointer to a slot let go named by the role last in it, as each game
+    numbers its slots by what else it holds.
+  - **A slide's direction by each engine's clock** (`slide_direction`):
+    MegaMan's collision's last move's direction where one side holds 0 and
+    the other his last move's, read as BN6's (`MOVES`); with it MegaMan's
+    step's kind (+0x0F, BN6's) and a blocked slide's step (+0x1B to +0x1D,
+    BN4's) allowed by their directions.
+- **FireMan's readings** (`fireman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), FireMan built), with which
+  **`fireman_v1` PASSes**, 1200 fight frames:
+  - **A Navi's companion's opening count** (`companion_count`,
+    `legit.json`'s `bn4` `companion_opening_count`): a companion his
+    recipe moves (a first-kind role of a moved type: his 0x57) counts the
+    animation its init set up in the paused opening by the fight's frames,
+    as the Navi's own (`opening_count`), its mode's after-step (BN4
+    `0x080143FC`, BN6's `0x0801BBAC`) running the sprite update at every
+    fight frame and none of the opening's.
+  - **The spark out of the ranks**: the same rule ThunderMan's and WindMan's
+    battles found (`ranks_into`, `legit.json`'s `bn4` `spark_ranks`): his
+    flame's hit's spark drawn on in BN4 where BN6's had ended moved his
+    companion's rank at t271. The three branches each left the spark out;
+    merged, one rule takes it out of the drawn a group ranks, the family's
+    and the natives' alike.

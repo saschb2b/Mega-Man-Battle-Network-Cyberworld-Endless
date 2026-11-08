@@ -88,7 +88,7 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
-		bool stub = span_in(c->to, 2, XN_STUBS, XN_OBJECTS_END);
+		bool stub = span_in(c->to, 2, XN_STUBS, XN_OBJECTS_END) || c->to == XV_FIGHT_FLAGS;   /* (or the dispatch's, its gates') */
 		/* (a routine its blocks hold as code is its own; one whose bytes a block holds as dead data goes to its twin, as the
 		 * mover resolves it: xvirus.c, resolve) */
 		if (xvirus_is_code(f, c->from) || (c->to & 1) || (spawner ? c->to != spawner : !stub && !(c->to > BUS && c->to < BUS + ROM_SIZE)))

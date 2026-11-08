@@ -824,7 +824,7 @@ class Frame:
                 if part == 'panel':
                     return ('panel', off // self.trace['psize'], panel_off(self.canon, self.game, off % self.trace['psize']))
                 if part == 'state':
-                    return ('battle state', off)
+                    return ('battle state', state_off(self.canon, self.game, off))
                 return (role_name(role), part, off)
         for kind, base, size, n in self.slots:
             if base <= v < base + size * n:
@@ -849,6 +849,18 @@ def coll_off(canon, game, off):
         if a <= off < a + n:
             return off - a + b
     return ('bn5 only', off)
+
+
+def state_off(canon, game, off):
+    """an offset in the battle state as BN6's layout has it: BN4's where legit.json's bn4 battle_state maps its place
+    (a side's wind and its level, read and written by twin routines at each game's own place), else as it is"""
+    if game != 4:
+        return off
+    for seg in getattr(canon, 'legit', {}).get('bn4', {}).get('battle_state', []):
+        a, b, n = (int(seg[k], 0) for k in ('bn4', 'bn6', 'size'))
+        if a <= off < a + n:
+            return off - a + b
+    return off
 
 
 def panel_off(canon, game, off):

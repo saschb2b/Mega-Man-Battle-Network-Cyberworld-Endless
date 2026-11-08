@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "bn4.h"
+#include "bn4_battle.h"
 #include "bn6.h"
 #include "bn6_ai.h"
 #include "bn6_forms.h"
@@ -57,6 +58,10 @@ static const Seg coll_segs[] = {
 	{ BN4_COLL_FLASH, BN6_COLL_FLASH, 2 },
 	{ BN4_COLL_INVULNERABLE, BN6_COLL_INVULNERABLE, 2 },
 	{ BN4_COLL_FINAL_DAMAGE, BN6_COLL_FINAL_DAMAGE, 2 },
+	/* (a frame of hits by element, five u16 each: the hit passes' adds, BN4 0x08012C74, BN6's image 0x081D7906, and the
+	 * sums, BN4_ELEM_DAMAGES_SUM, BN6_ELEM_DAMAGES_SUM; thunderman_v1's Elec hit at t278) */
+	{ BN4_COLL_HIT_DAMAGES, BN6_COLL_HIT_DAMAGES, 10 },
+	{ BN4_COLL_ELEM_DAMAGES, BN6_COLL_ELEM_DAMAGES, 10 },
 	{ BN4_COLL_FLAGS, BN6_COLL_FLAGS, 4 },
 	{ BN4_COLL_STRUCK, BN6_COLL_STRUCK, 4 },
 	/* (the poison panel's step, twins: BN4 0x0801301E-0x08013034 at its +6, BN6 0x0801A1B8-0x0801A1D0 at its +8; Elmperor's
@@ -98,12 +103,12 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
-	[XD4_COLL] = { coll_segs, 32, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
+	[XD4_COLL] = { coll_segs, 34, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
 	[XD4_AI] = { ai_segs, 14, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
 	[XD4_PANEL] = { panel_segs, 8, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
 	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 32 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 34 &&
 	sizeof ai_segs / sizeof *ai_segs == 14 && sizeof panel_segs / sizeof *panel_segs == 8, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */

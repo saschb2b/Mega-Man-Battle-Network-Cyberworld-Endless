@@ -11,10 +11,5 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1,
-  "verdict": {
-    "is": "FAIL",
-    "at": 1,
-    "why": "the port under way (docs/multirom/bn4-navis.md, ThunderMan built): his companion (the first-kind 0x33, moved) now told by its type, its record the same at t1; his cloud (the third kind's 0x6A, the companion's) a step ahead in BN6 at t1 (+0x3A 5 | 6, +0x9A and +0x9E 0x55 | 0x56, its sprite's frame), its +7 (+4's word 0x01000000 | 0x02000000) and its collision's +1 apart, and panel 5,1's +0x17 (BN4 0x40 | BN6 0) unread"
-  }
+  "lag": 1
 }

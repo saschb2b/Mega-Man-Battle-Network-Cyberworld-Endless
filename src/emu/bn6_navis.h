@@ -171,5 +171,20 @@
 /* A side's wind (the fourth kind's 0x41; BN4's WindMan's, docs/multirom/bn4-navis.md, WindMan under way) */
 #define BN6_WIND_SPAWN        0x080E666Cu /* spawned where the side's slot holds none of level 1 on: BN4_WIND_SPAWN's steps, its +0x4C its spawner */
 #define BN6_WIND_SLOTS        0xC0        /* BattleState +0xC0 + 4 x side: a side's wind, its level 8 past it (0x080E675A, 0x080E677C) */
+#define BN6_WIND_TYPE         0x080E6584u /* the wind's routine (BN6_T4_TYPES[0x41]): init 0x080E65A4 (sound 0xAD), state 4 BN6_WIND_HOLD */
+#define BN6_WIND_HOLD         0x080E65BAu /* its state 4: its step (0x080E65D6, which spawns its gust) skipped while its spawner (+0x4C) has
+                                             CurAction 4 or its collision data's +0x3C holds 0x80010000 (0x080E65BC-0x080E65CE) */
+#define BN6_GUST_SPAWN        0x080CECF8u /* a wind's gust spawned (the third kind's 0x49, its routine 0x080CEB5C) */
+#define BN6_GUST_INIT         0x080CEB80u /* the gust's init: sprite_load of list 0xC's 0x2E with r0 0x80 (0x080CEB90), the sprite state's +3 */
+#define BN6_STEP_BEGIN        0x0801AD12u /* an object's step onto a panel begun: collision flags 0x100 and 4 and its +0x0F 1 (0x0801AD4E-0x0801AD5E;
+                                             BN4_STEP_BEGIN sets no byte); five such steps write +0x0F 1 (0x0801AC2E, 0x0801ADEE, 0x0801AE4A,
+                                             0x0801AEF2 too) */
+
+/* What FireMan's port asks of BN6 (docs/multirom/bn4-navis.md, FireMan built) */
+#define BN6_AFTER_STEP        0x0801BBACu /* an object's sprite each fight frame: unless paused (BN6_PAUSE_TEST) or time stopped, a new
+                                             animation set up, then the sprite updated (0x080026C4); BN4's twin 0x080143FC */
+#define BN6_SPRITE_PALETTE_SET 0x08002D80u /* r0 into the sprite's +4 (BN4_SPRITE_PALETTE_SET's twin) */
+#define BN6_T3_PALETTE        0x0F        /* a moved BN4 third-kind object's palette (BN4_T3_PALETTE): BN6's +0xF, which BN6's engine reads
+                                             only on its actors (0x0800E468, 0x08016716-0x080167E6, 0x0801A3DA-0x0801AEF8) */
 
 #endif

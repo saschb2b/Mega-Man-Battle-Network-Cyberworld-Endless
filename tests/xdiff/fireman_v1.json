@@ -11,10 +11,5 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1,
-  "verdict": {
-    "is": "FAIL",
-    "at": 1,
-    "why": "his port under way (docs/multirom/bn4-navis.md, FireMan built): at t1 FireMan's own record, AI data and collision match BN4's; his companion (BN4's first-kind 0x57, moved, spawned at his spawn's end) is one sprite count apart (+0x91 BN4 2, BN6 1), unexplained yet"
-  }
+  "lag": 1
 }

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's tournament screens"
 description: "BN4 Red Sun's tournament presentation located in its ROM and driven in romlab: the bracket screen (main mode 0x24) and the RAM it draws from, the four tournaments, how a round's result shows, what opens it in a script, no versus screen found; the two ways into a run measured, the bracket moved into BN6 as its main mode 0x3C by a recipe and proved pixel for pixel against BN4's own, and how BN4 draws a plate, every BN6 and BN5 entrant's face made into one from his own game's art, proved on BN4's bracket and built into the moved one at install."
 tags: [multirom, bn4, tournament, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:59:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -53,10 +53,79 @@ mark (what the screen last showed). MegaMan is id 0x1E; ids 0x00-0x16 are
 BN4's plates, 20 Navis' in two sprites of its own (`BN4_PLATE_SPRITES`: 16
 plates, then 7, MegaMan's the last): 0x12 and 0x13 are numbered
 placeholders ("18", "19") with no battle (`BN4_OPPONENT_BATTLES`), and 0x16
-shows 0x14's plate. By
-sight, 0x00 is GutsMan, 0x03 AquaMan, 0x04 Roll, 0x09 SearchMan and 0x11
-KendoMan; the rest are not named yet (their battles through
-`BN4_OPPONENT_BATTLES` would name them).
+shows 0x14's plate. Which Navi each plate stands for is below (Each
+plate's Navi).
+
+### Each plate's Navi
+
+An entrant's id leads to his battle in three steps, BN4's own:
+
+1. `BN4_NEXT_OPPONENT` (`0x08044744`) finds MegaMan's pair and writes
+   `BN4_OPPONENT_BATTLES`[id] + 0-2 (the playthrough's, assumed) to
+   [eToolkit +0x44] +0xA, the battle index.
+2. The round's cutscene runs `55 00` (`BN4_CS_OPPONENT_ARENA`), which
+   writes `BN4_OPPONENT_PROGRESS` (`0x0802C2DD`)[index], two bytes, to the
+   game state's +6 and +7, the story's progress the map's people are read
+   by (BN4's map lists branch `02 lo hi` on +6), and keeps the old pair.
+3. At that progress the stage's opponent runs his story script, which
+   starts his record with `51 r 01` (`BN4_CS_BATTLE`: `BN4_STORY_BATTLE`,
+   `0x080FA900` + 12 r, then `BN4_START_BATTLE`).
+
+Steps 1 and 2 were run in romlab for every id: from `tools/bn4_lab.py
+boot`'s Lan's room, MegaMan (0x1E) and the id poked as The Den Battle
+Tournament's first pair, both in, the rest 0xFF; the bracket opened
+(the game state's +0 0x1C), whose set-up calls `BN4_NEXT_OPPONENT`, a
+probe on its store (`0x080447CC`) reading the index; A pressed; then the
+encounter check made to start the Den round's cutscene from its `55 00`
+(`0x08087689`, through `BN4_START_CUTSCENE`), probes on command 0x55's
+two stores (`0x0802CE94`, `0x0802CE98`) reading the pair. Step 3 is read
+from BN4's data, not run: the map lists that branch on each of the
+twenty progress values (`02 p p`, an entry each, at `0x08059860` for The
+Den Battle Tournament's and beside it for the others) name a person whose
+script (`1b 0c ff 23` and its pointer) opens a block of the story
+scripts, and the first `51 r 01` in that block, before the next value's
+script, is a record with song 0x17 and one Navi. The record's enemy id is
+the Navi's V1 (`src/emu/bn4_navis.h`).
+
+| Plate | Battle index | Progress (+6, +7) | Record | Navi (enemy id) | How |
+| --- | --- | --- | --- | --- | --- |
+| 0x00 | 0x04 | 0x30, 0x30 | 0x0D | GutsMan (132) | Index and progress run; the record derived. Sight agrees. |
+| 0x01 | 0x08 | 0x33, 0x33 | 0x16 | FireMan (144) | Index and progress run; the record derived |
+| 0x02 | 0x0C | 0x42, 0x41 | 0x2F | NumberMan (156) | Index and progress run; the record derived |
+| 0x03 | 0x10 | 0x3A, 0x38 | 0x1F | AquaMan (168) | Index and progress run; the record derived. Sight agrees. |
+| 0x04 | 0x1C | 0x4B, 0x46 | 0x40 | Roll (128) | Index and progress run; the record derived. Sight agrees. |
+| 0x05 | 0x20 | 0x4D, 0x4E | 0x44 | WindMan (136) | Index and progress run; the record derived |
+| 0x06 | 0x24 | 0x4F, 0x48 | 0x45 | MetalMan (160) | Index and progress run; the record derived |
+| 0x07 | 0x28 | 0x54, 0x4A | 0x42 | WoodMan (172) | Index and progress run; the record derived |
+| 0x08 | 0x34 | 0x65, 0x65 | 0x61 | ThunderMan (148) | Index and progress run; the record derived |
+| 0x09 | 0x3C | 0x78, 0x6F | 0x78 | SearchMan (140) | Index and progress run; the record derived. Sight agrees. |
+| 0x0A | 0x40 | 0x7B, 0x70 | 0xA8 | ProtoMan (152) | Index and progress run; the record derived |
+| 0x0B | 0x44 | 0x6B, 0x67 | 0x67 | JunkMan (164) | Index and progress run; the record derived |
+| 0x0C | 0x14 | 0x36, 0x36 | 0x0E | SparkMan (192) | Index and progress run; the record derived |
+| 0x0D | 0x18 | 0x38, 0x37 | 0x1E | TopMan (176) | Index and progress run; the record derived |
+| 0x0E | 0x38 | 0x75, 0x6C | 0x68 | ColdMan (188) | Index and progress run; the record derived |
+| 0x0F | 0x2C | 0x56, 0x4B | 0x47 | BurnerMan (184) | Index and progress run; the record derived |
+| 0x10 | 0x30 | 0x52, 0x49 | 0x46 | VideoMan (216) | Index and progress run; the record derived |
+| 0x11 | 0x48 | 0x6E, 0x68 | 0x89 | KendoMan (212) | Index and progress run; the record derived. Sight agrees. |
+| 0x12, 0x13 | none (0xFF) | | | none: numbered placeholders | `BN4_OPPONENT_BATTLES` read |
+| 0x14 | 0x4C | 0x3D, 0x3B | 0x24 | a NormalNavi (200) | Index and progress run; the record derived |
+| 0x15 | 0x50 | 0x40, 0x40 | 0x2E | a HealNavi (204) | Index and progress run; the record derived |
+| 0x16 | 0x54 | 0x3D, 0x3B | 0x24 | as 0x14 (200) | Index and progress run (0x14's pair); the record derived |
+
+Each of the five plates named by sight came out as named, and the
+owner's three readings held: FireMan 0x01, ThunderMan 0x08, WindMan
+0x05. The progress values fall into three runs, one a tournament: The
+Den Battle Tournament's 0x30-0x42 (0x00-0x03, 0x0C, 0x0D, 0x14-0x16),
+The Eagle Tournament's 0x4B-0x56 (0x04-0x07, 0x0F, 0x10) and The Red Sun
+Tournament's 0x65-0x7B (0x08-0x0B, 0x0E, 0x11). The plates' names are
+`BN4_PLATE_GUTSMAN` to `BN4_PLATE_HEALNAVI` in
+`src/emu/bn4_tournament.h`. What was not done: a battle started in
+romlab from the stage itself (the jack-in, the walk to the opponent, his
+talk), which would turn step 3 from derived to verified; the record
+`BN4_START_BATTLE` received would be read by a probe on it. The same
+progress blocks hold a second song-0x17 battle after the Navi's in four
+of them (records 0x3F, 0x4C, 0x84 and 0xA1, a NormalNavi or HealNavi);
+whose they are was not read.
 
 The screen's own state is `BN4_BRACKET` (`0x0200ACC0`): +5 the tournament,
 +6 whether a script waits on it, +7 what it hands back. Its opener
@@ -383,7 +452,8 @@ before's values.
 
 - The cutscene scripts beyond their tournament commands: the stage's
   intro and the announcer's lines were not decoded or watched.
-- The plates' ids 0x01-0x02, 0x05-0x08, 0x0A-0x10 and 0x14-0x15 by name.
+- A tournament battle started from the stage in romlab: each plate's
+  record is derived from the scripts (Each plate's Navi), not watched.
 - The draw's placement rules and the pools' filling (`0x08043FE4`,
   `0x08044058`, `0x0804422C`, `0x0804428C`): read in part, not run.
 - Main modes 0x10, 0x28, 0x2C and 0x3C; the Free Tournament's own flow.

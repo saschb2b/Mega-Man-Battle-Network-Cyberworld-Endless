@@ -105,6 +105,15 @@
 #define BN4_PAUSE_BYTE    0x080078ECu /* the battle's pause byte ([eToolkit +0x40] +9) in r0 (BN6_PAUSE_TEST's twin, flags unset) */
 #define BN4_T3_1A_KINDS   0x080D013Cu /* the third kind's 0x1A's kinds (FireMan's), 6 bytes each, its sprite's list 4 number first */
 #define BN4_FIREMAN_MASKS 0x080F1DB4u /* panels' masks by side his MegaMan state 0x080F1D98 reads (BN4_RANDOM_PANEL_MASKS' words) */
+/* FireMan proved (docs/multirom/bn4-navis.md, FireMan built: fireman_v1) */
+#define BN4_FIRE_COMPANION_SPRITE 0x080CC5D0u /* his companion's modes' tail: its parent's sprite fields copied, then, where its +6 is 0,
+                                       * the after-step (0x080143FC, BN6's twin BN6_AFTER_STEP) unless time is stopped (BN4_TIME_STOP) */
+#define BN4_FIRE_FLAME    0x080CE2D8u /* the third kind's 0x09 (his flame): its init (0x080CE309) gives its palette (BN4_T3_PALETTE) to
+                                       * its sprite (0x080CE358, BN4_SPRITE_PALETTE_SET) */
+#define BN4_FIRE_FLAME_SPAWN 0x080CE49Cu /* ... spawned: r0-r2 its column, row and element (+0x12, +0x13, +0x17), r7 its palette, r6 +0x2C */
+#define BN4_T3_PALETTE    0x0E        /* a third-kind object's palette, its sprite's +4: BN6's +0xE is its element (BN4's +0x17), so a moved
+                                       * object keeps it at BN6_T3_PALETTE (tools/xrecipe_bn4.py palette_imms) */
+#define BN4_SPRITE_PALETTE_SET 0x08002DECu /* r0 into the sprite's +4 (BN6_SPRITE_PALETTE_SET, the same body) */
 /* ThunderMan, the second (tools/xnavirecipe_bn4.py, his companion read by tools/xnavirecipe_bn4_init.py, his objects' needs
  * by tools/xnavirecipe_bn4_objects.py; docs/multirom/bn4-navis.md, ThunderMan built) */
 #define BN4_THUNDERMAN    0x080C37F4u /* his type's routine: jump table init 0x080C3819, update 0x080C388D, dying BN4_NAVI_DYING; his block
@@ -148,5 +157,12 @@
 #define BN4_WIND_SPAWN    0x080E68F8u /* a side's wind spawned (the fourth kind's 0x41) where the side's slot holds none of level 1 on */
 #define BN4_WIND_END      0x080E69BCu /* r0 a wind: told to end (+8 8, +0x60 0) */
 #define BN4_WIND_SLOTS    0x88        /* BattleState +0x88 + 4 x side: a side's wind, its level 8 past it (0x080E69C6, 0x080E69E8) */
+#define BN4_WIND_TYPE     0x080E6820u /* the wind's routine (BN4_T4_TYPES[0x41]): init 0x080E6840 (sound 0x121), its state 4 0x080E6858
+                                       * runs its step unasked (BN6_WIND_HOLD's twin), which spawns its gust (bl BN4_GUST_SPAWN at 0x080E68C2) */
+#define BN4_GUST_SPAWN    0x080D68ACu /* a wind's gust spawned (the third kind's 0x49, its routine 0x080D6724) */
+#define BN4_GUST_INIT     0x080D6748u /* the gust's init: sprite_load of list 0xC's 0x2E with the r0 its +0 flags left (0x080D6750-0x080D675C),
+                                       * the sprite state's +3 (BN6_GUST_INIT passes 0x80) */
+#define BN4_STEP_BEGIN    0x0801393Eu /* an object's step onto a panel begun: collision flags 0x100 and 4 (0x0801398C, 0x08013992), and no
+                                       * byte of the object's (BN6_STEP_BEGIN's twin, which sets its +0x0F) */
 
 #endif

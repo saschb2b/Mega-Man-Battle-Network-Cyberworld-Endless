@@ -220,7 +220,10 @@ typedef struct {
 #define XV_CHIP_WRITER (XV_STUBS + 0x220u)   /* ... the chip writer a moved family's code calls (BN5's 0x0800FE6A): BN6's, its support family
                                                 XV_SUPPORT_FAMILY */
 #define XV_SUPPORT_FAMILY 0x65               /* BN5's support family 0x15 moved by the shared numbering (0x50 + F: xattack_grow.h's chips' range) */
-#define XV_STUBS_END (XV_STUBS + 0x240u)
+#define XV_FIGHT_FLAGS (XV_STUBS + 0x240u)   /* ... the battle's flags (BN4's 0x08007A8C) with bit 0 from the fight's second frame on: a moved
+                                                Navi's object no state runs gated a frame later, with his first own state (BN6's
+                                                engine runs none in the paused opening; docs/multirom/bn4-navis.md, ThunderMan built) */
+#define XV_STUBS_END (XV_STUBS + 0x260u)
 #define XV_PRESTEP  (XV_DISPATCH + 0x1200u) /* the families' pre-steps by AI index, XV_AIS words (0 none): the hook on BN6's dispatcher
                                               (BN6_VIRUS_NAMEID_CASES) runs one before the family's state each frame (xvirus_shim.h);
                                               past the dispatch's code, sprite list 3 at its old place */

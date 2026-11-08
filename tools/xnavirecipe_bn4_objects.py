@@ -52,6 +52,17 @@ COPIED = {
                 "LAYOUT), its object freed and its side's count less one (0x08007990, BN6's 0x0800A10C); no BN6 routine of its "
                 "body (BN6's virus object keeps its own); copied",
 }
+# the battle's flags (BN4's 0x08007A8C, BN6's 0x0800A2F0 the same body) where a moved object no state runs gates its update on
+# their bit 0, the fight's: BN4's state runner runs the Navi's states through the paused opening, so his first own state and
+# that object's first gated frame are the fight's first in BN4; BN6's runs none there (0x0801B1C4's pause test), his first
+# own state a frame into the fight. Aimed at the dispatch's XV_FIGHT_FLAGS (bit 0 from the fight's second frame,
+# src/emu/xvirus_dispatch.c), the object starts with his first own state as in BN4. By the Navi's BN4 type, its sites read
+FIGHT_FLAGS4 = 0x08007A8C
+FIGHT_GATED = {
+    0x32: "ThunderMan's companion's update (0x080C3B42) and his cloud's (0x080DAB26): each gated on bit 0, else the paused "
+          "blink alone; thunderman_v1's cloud a step ahead at the battle's offset before (+7 2 against 1 at t1)",
+}
+
 # its pools' words that look like addresses and are numbers (bn4_twins.NUMBERS' way)
 NUMBERS = {
     0x04050301: "a collision region's spawn word (object_spawnCollisionRegion's r4, as 0x04050601 and 0x0405FF01): BN6's own "
@@ -127,3 +138,11 @@ def copied_entries(f):
             out.add(x & ~1)
             del f.outs[x]
     return out
+
+
+def fight_gates(f):
+    """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type): a fight frame later in
+    BN6, with his first own state"""
+    if f.ty in FIGHT_GATED and FIGHT_FLAGS4 in f.calls:
+        f.aim[FIGHT_FLAGS4] = ('XV_FIGHT_FLAGS', 'the battle\'s flags, bit 0 from the fight\'s second frame: his objects no state '
+                                                 'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')

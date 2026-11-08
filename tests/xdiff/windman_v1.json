@@ -11,10 +11,5 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1,
-  "verdict": {
-    "is": "FAIL",
-    "at": 1,
-    "why": "his port under way (docs/multirom/bn4-navis.md, WindMan built): his battle reaches its fight with his companions (the first kind's 0x5C, their state 4 run as 0); at t1 his wind (the fourth kind's 0x41) parts on two fields: its +0x38 a pointer into each game's slot (BattleState +0x8C | +0xC4, a map the comparator's battle state lacks) and its +0x4C (BN4 0 | BN6 WindMan, BN6's wind spawn gives its spawner); the world parts at t1 on the third kind's 0x49 (+0x93 0xE | 0x8E, its +0xA8-+0xB4)"
-  }
+  "lag": 1
 }
