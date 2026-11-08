@@ -158,6 +158,9 @@ static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
 		put32(p + off + 4, xv_move_ref(f->states[i]));
 		put32(st + 4 * i, (at + off) | 1u);
 	}
+	return true;
+}
+
 /* its summon's shim at its place in its code room (XNavi.summon): false where it does not fit or reach */
 #define SUMMON_IDS  12
 #define SUMMON_ROOM 0x100  /* (the generator's room for it, tools/xnavirecipe_bn4_summon.py SHIM_ROOM) */
