@@ -29,6 +29,11 @@ TWINS = {
     # the same bodies at BN6's +0x26 (its invisibility's timer, BN6's 0x08010162 against BN4's 0x0800C0DA): LAYOUT
     0x0800C126: (0x080101AE, 'searchman'),
     0x0800C13C: (0x080101C4, 'searchman'),
+    # his marker's (the fourth kind's 0x3E, moved: MOVE4): its end (+8 8, BN6's of the same bytes at 0x080E60E2, its twin
+    # marker's), its dying (the object freed, BN6's 0x08016C9C the same), and whether a side's object is seen (audited, AUDITS)
+    0x080E65DA: (0x080E60E2, 'searchman'),
+    0x0801056E: (0x08016C9C, 'searchman'),
+    0x0800B0CA: (0x0800EB6C, 'searchman'),
 }
 # the collision data's offsets his code names that the families' (xrecipe_bn4.COLL4TO6) lack: BN4's -> BN6's, each from both
 # games' code
@@ -37,6 +42,18 @@ COLL4TO6 = {
     # 0x08010162 (from the status step, 0x0801B12E) the same body, 0xFFFF for ever, else less 1 a frame and flag 4 cleared
     # under 0 (sound 0xB0 and 0x94 as it ends); a hit clears it (BN4's 0x0800C110, BN6's 0x08010198)
     0x1A: 0x26,
+    # the invisible's marker, kept by the hide step (BN4's 0x0800C0A6 at +0x7C, BN6's twin 0x0801012C at +0x50, BN5's sea's
+    # marker's place too)
+    0x7C: 0x50,
+}
+# fourth-kind types moved with him though a twin of BN6's spawns one of that number: the reason each (a type of BN6's of
+# another body)
+MOVE4 = {
+    0x3E: "the invisible's marker: BN6's 0x3E (0x080E5FF8) spawns effect 0x5D on its first update (its +0xB the flag) and "
+          "draws list 3's 0, BN4's (0x080E64FC) neither, drawing list 3's 0x2D",
+    0x31: "his shots' trails (his state 60's kind 0, the third kind's 0x60's kinds 1 and 2): BN6's 0x31 (0x080E50A8) runs its kinds "
+          "by its own tables (its sprites at 0x080E5084, its kinds' routines at its +4's table) as other objects; BN4's kind 1 ran "
+          "its state 0x28 where BN6's ran 0 (searchman_v1 at t741, +9)",
 }
 AUDITS = {
     (0x08009BF0, 0x0800CA8C): ('ok', "a panel (r0, r1) of a floor (0x10) broken (type 1, its flags' low bits 1, the crack's sound) "
@@ -47,6 +64,12 @@ AUDITS = {
                                      "0x0F880080 (BN6 counts 0x00800000 an occupant's, BN4's break does not); and BN4 returns 0 "
                                      "after a crack where BN6 returns 1, which his one call (080DB6B0) drops (movs r0,#1 next). "
                                      "The mask's bit is the differential's to show: his panels' flags are compared each frame"),
+    (0x0800B0CA, 0x0800EB6C): ('ok', "whether side r0's object is seen (his marker's update, 0x080E65B0): 1 where r0 is MegaMan's "
+                                     "side (the battle state's +0xD; BN6's 0x0800A9EC the same test), else 0 where that side's "
+                                     "player has collision flag 0x2000, else 1. BN4 reads the player at the battle state's +0x44 "
+                                     "(MegaMan's side's, BN4_BATTLE_PLAYERS' first), BN6 the other side's by 0x080103BC: the same "
+                                     "object wherever r0 is not MegaMan's side, the only case either reads it (two sides). Only r0 "
+                                     "is read after the call (tst r0,r0 at 0x080E65B4)"),
     # (the symbol map's pairs by their calls alone, bn6f's names: each body read in both ROMs, and judged where they are called)
     (0x0801466A, 0x0801BE28): ('ok', "called by his companion's and his cloud's (the third kind's 0x6A) updates only while the battle "
                                      "is not running (0x08007A8C's bit 0 clear, BN6's 0x0800A0F0 the same body), in its place: "
@@ -70,6 +93,8 @@ COPIED = {
     0x0800A2E4: "SearchMan's: the panels of the rows 3 to 1 and the columns from his side's edge whose flags (0x08009A86, BN6's "
                 "0x0800C8F8) have r2 and none of r3, into r7's bytes (column | row << 4), r1's flags met first counted; no BN6 "
                 "routine of its body (a search of BN6 by its bytes); copied, its fields none but the object's side",
+    0x0800C0A6: "the invisible not drawn and its marker kept (BN4_HIDE_STEP, run by BN4's runners before every state): BN6's twin "
+                "(0x0801012C) spawns BN6's own marker, another object (MOVE4); copied, its marker BN4's moved, its +0x7C BN6's +0x50",
     0x080DF332: "SearchMan's shot's test: its collision data's hits word (BN4's +0x54, BN6's +0x70) against the other side's "
                 "bits (0x0A800000 a side 1 object's, 0x05800000 a side 0 one's, BN6's alliance bits the same: BN4_COLL_MASKS); "
                 "a leaf in the third kind's 0x5F's block, no BN6 routine of its body; copied, its +0x54 BN6's +0x70",
@@ -128,12 +153,12 @@ def moved4(b4, f, pairs):
     region one of his (walked from its routine), the call his own; the new roots"""
     roots = set()
     for t in sorted(f.calls):
-        if t in X4.SPAWNERS4 or pairs.twin(t)[0] is not None:
-            continue   # (a spawner with a twin of BN6's: GutsMan's debris, BN4_SPAWN_DEBRIS)
-        hit = t4_of(b4, t)
+        hit = None if t in X4.SPAWNERS4 else t4_of(b4, t)
         if hit is None or hit[0] is None:
             continue
         ty, lo, hi = hit
+        if pairs.twin(t)[0] is not None and ty not in MOVE4:
+            continue   # (a spawner with a twin of BN6's: GutsMan's debris, BN4_SPAWN_DEBRIS)
         w = T.walk(b4, t, region=(lo, hi))
         if not any(s == SPAWN4 and T.back_value(w, a, 0)[0] == ty for a, s in w.bls.items()):
             continue
@@ -169,6 +194,49 @@ def spawns4(f, alloc):
             f.decisions = [d for d in f.decisions if d != ('type', f'{site:08X}: it spawns a 4 type {ty:#x} which it does not move')]
 
 
+# the engine's routines his code calls that spawn an effect by an id it passes (not BN4_SPAWN_EFFECT's r4): the routine -> the
+# register of the id, why; each call's id (a movs) given BN6's as xrecipe_bn4.effects_of gives a movs's (the routine BN6's twin)
+EFFECT_ARGS = {
+    0x0801457E: (2, "effects in a pattern about a panel (r3 the pattern's index in 0x080125B0's table, each place a free panel's "
+                    "by 0x08009E98), each BN4_SPAWN_EFFECT with r4 its r2 (0x080145CA): BN6's twin 0x0801BD3C the same bytes"),
+}
+
+
+def navi_shared(b4, f, alloc, e4):
+    """effect e4's sprite where another Navi copied it (xrecipe_bn4.move_effect shares it, "installed with it"): its row listed
+    in his sprites too, the same place and number, which the installer finds written the same and keeps (xvirus.c sprites_set),
+    so his effect finds its sprite among his own (a family's it finds among the families installed before)"""
+    row = b4.bytes(X4.BN4['effects'] + 4 * e4, 4)
+    have = alloc.effect_sprites.get((row[0] // 4, row[1]))
+    if have is None or have[1] == f.name or have[1] in {name for _, name, _ in X4.FAMILIES}:
+        return
+    if not any(s['to_list'] == have[0]['to_list'] and s['to_index'] == have[0]['to_index'] for s in f.attack_sprites):
+        f.attack_sprites.append(dict(have[0]))
+
+
+def effect_args(b4, b6, f, alloc):
+    """his calls of EFFECT_ARGS: each effect id (a movs into its register) BN6's of the same look, else moved, the movs BN6's"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t not in EFFECT_ARGS:
+                continue
+            reg, why = EFFECT_ARGS[t]
+            v, chain = T.back_value(w, site, reg)
+            if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= X4.BN4['neffects']:
+                f.decide('effect', f'{site:08X}: an effect of {t:08X} by an id made otherwise ({chain})')
+                continue
+            e6, how = X4.effect_twin(b4, b6, v), 'the same look'
+            if e6 is None:
+                e6, how = X4.move_effect(b4, f, alloc, v), 'moved'
+                navi_shared(b4, f, alloc, v)
+            if e6 is None:
+                continue
+            if e6 != v:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=reg, rn=0, was=v, now=e6,
+                                   why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 ({how}; by {t:08X}: {why})'))
+            f.notes.append(f'{site:08X}: its effect {v:#x} by {t:08X}: BN6\'s {e6:#x} ({how})')
+
+
 def flipped_effects(b4, b6, f, alloc):
     """his effects of FLIPPED_EFFECTS: the id's movs read, BN6's effect of its look (xrecipe_bn4.effect_twin) given it; the
     decision effects_of left open answered"""
@@ -182,6 +250,7 @@ def flipped_effects(b4, b6, f, alloc):
         e6, how = X4.effect_twin(b4, b6, v), 'the same look'
         if e6 is None:
             e6, how = X4.move_effect(b4, f, alloc, v), 'moved'
+            navi_shared(b4, f, alloc, v)
         if e6 is None:
             continue
         f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and d[1].startswith(f'an effect spawned at {site:08X} '))]
@@ -299,6 +368,29 @@ def copied_entries(f):
             out.add(x & ~1)
             del f.outs[x]
     return out
+
+
+# his hiding (BN4_HIDE, its twin BN6_HIDE): BN4's Navi runner hides the invisible before every state (BN4_HIDE_STEP at
+# 0x08013F12: its +0 bit 2 cleared after the blink step set it, the marker kept at the collision data's +0x7C), where BN6's
+# status step calls its twin (BN6_HIDE_STEP, its marker at +0x50) nowhere (BN6_STATUS_HIDE its place, a flag read): run before
+# each of his states by stubs of his home (XNavi.hide_step, src/emu/xnavi_init.c)
+# BN4's own hide step is copied with him, its marker (the fourth kind's 0x3E) moved: BN6's twin step spawns BN6's own 0x3E,
+# another object of that number (BN6 0x080E5FF8: its update spawns effect 0x5D once, its +0xB the flag, and it draws list 3's
+# 0, where BN4's 0x080E64FC draws list 3's 0x2D and spawns none: searchman_v1 at t216)
+HIDE4, HIDE_STEP4 = 0x0800C126, 0x0800C0A6
+
+
+def hide_roots(f):
+    """his hide step walked as his own where his code hides"""
+    return {HIDE_STEP4} if HIDE4 in f.calls and HIDE_STEP4 not in f.walks else set()
+
+
+def hide_steps(f):
+    """a Navi whose code hides (a call of BN4_HIDE): his copy of BN4's hide step before each of his states (f.hide_step)"""
+    if HIDE4 in f.calls:
+        f.hide_step = HIDE_STEP4
+        f.notes.append(f'it hides (BN4_HIDE, {len(f.calls[HIDE4])} calls): its copy of BN4\'s hide step ({HIDE_STEP4:08X}) before each '
+                       'of its states, as BN4\'s Navi runner runs it (at 0x08013F12)')
 
 
 def fight_gates(f):

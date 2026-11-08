@@ -106,9 +106,10 @@ AI_BLOCKS = ((0x64, 0x0C, 0x80), (0x70, 0x50, 0xA0))
 # BN4_NAVI_ID0 + 4 * seat, past every family's ids (XV_FIRST_ID + 6 * XV_FAMILIES = 0x380) and below XV_IDS (0x400)
 BN4_NAVI_AI0, BN4_NAVI_ID0 = 48, 0x380
 # Their room (the owner's call of 5 November 2026; src/emu/free_space.h FREE_BN4_NAVIS, xnavi_recipe.h XN_BN4_*): their homes
-# (a seat each), their code and objects', then what they draw, to FREE_BRACKET
+# (a seat each), their code and objects', then what they draw, to FREE_BRACKET; the code's room 0x18000, the art's from +0x28000 (an
+# interim since SearchMan: the art's 0x2C000 held four Navis' attacks and songs and not his, docs/multirom/bn4-navis.md, SearchMan built)
 ROOM_HOMES = 0x08800000 + 0x720000
-ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x790000
+ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x28000, 0x08800000 + 0x790000
 VERSIONS = 4
 # The collision setup's r3 BN6's actor init gives every actor (0x08016FE8: movs r3,#3), the hit bits its body's hit ORs into
 # the struck's (BN6_COLL_SETUP_ARG); a Navi whose init passes another keeps its own (XNavi.coll_arg). The struck's pre-step
@@ -497,7 +498,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
         I.cut_before(b4, f)
         while roots:
             X4.walk_code(b4, f, roots, {f.type_table, f.st} | set(I.UNWALKED_TABLES), pairs)
-            roots = sorted((callbacks(b4, f) | C.copied_entries(f) | C.moved4(b4, f, pairs)) - set(f.walks))
+            roots = sorted((callbacks(b4, f) | C.copied_entries(f) | C.moved4(b4, f, pairs) | C.hide_roots(f)) - set(f.walks))
         I.cut_after(f)
         C.t4_regions(f)
     finally:
@@ -523,6 +524,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     C.spawns4(f, alloc)
     I.companion_modes(f)
     C.fight_gates(f)
+    C.hide_steps(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)
@@ -541,6 +543,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     C.list5_sprites(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
     C.flipped_effects(b4, b6, f, alloc)
+    C.effect_args(b4, b6, f, alloc)
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
     X4.SOUND_SLOTS.update(pool)
@@ -902,6 +905,9 @@ def c_navi(f):
                  f'its body gives, read alike by both games\' pre-steps) */')
     if init_line:
         L.append(init_line)
+    if getattr(f, 'hide_step', None):
+        L.append(f'\t.hide_step = OWN(0x{f.hide_step | 1:08X}),   /* (its copy of BN4\'s hide step before each of its states, as BN4\'s Navi '
+                 'runner runs it: xnavirecipe_bn4_objects.hide_steps) */')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 

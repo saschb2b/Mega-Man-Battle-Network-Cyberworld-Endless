@@ -83,7 +83,7 @@
 #define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BN4_NAVIS */
 #define FREE_BN4_NAVIS      (EMU_FREE + 0x720000u)   /* BN4's Navis in BN6's engine (xnavi_bn4.c; xnavi_recipe.h XN_BN4_*): their homes, */
 #define FREE_BN4_NAVI_CODE  (EMU_FREE + 0x730000u)   /* ... their code and their objects', block by block, */
-#define FREE_BN4_NAVI_ART   (EMU_FREE + 0x750000u)   /* ... what their attacks draw and their songs, to: */
+#define FREE_BN4_NAVI_ART   (EMU_FREE + 0x748000u)   /* ... what their attacks draw and their songs, to: */
 #define FREE_BN4_NAVI_SPRITE (EMU_FREE + 0x77C000u)  /* ... the coming battle's BN4 Navi's battle sprite, one room (xnavi_bn4_room.c), to FREE_BRACKET_FACES */
 #define FREE_BRACKET_FACES  (EMU_FREE + 0x78C000u)   /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c), to: */
 #define FREE_BRACKET        (EMU_FREE + 0x790000u)   /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c), to: */

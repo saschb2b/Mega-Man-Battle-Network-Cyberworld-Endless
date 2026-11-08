@@ -154,6 +154,9 @@ typedef struct {
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
 	const XnInit *init;         /* what its game's init does past BN6's actor init (BN4's Navis' companions), NULL nothing */
+	XvRef hide_step;            /* the routine run before each of its states (BN4_HIDE_STEP, copied with it: BN4's Navi runner hides the
+	                               invisible and keeps their marker before every state, 0x08013F12, where BN6's status step calls its
+	                               twin nowhere), through stubs of its home (xnavi_init.c); addr 0 none. SearchMan's, who hides */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

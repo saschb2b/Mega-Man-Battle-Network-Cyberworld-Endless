@@ -130,6 +130,33 @@ static uint32_t coll_arg_set(const XNavi *n, uint32_t at) {
 	return p ? at | 1u : 0;
 }
 
+/* its states each entered through a stub (ldr r0,=the state; b the shared part) whose shared part runs its hide step first:
+ * push {r0, lr}; ldr r1,=hide_step; mov lr,pc; bx r1; pop {r0, r1}; mov lr,r1; bx r0. BN6's status dispatcher calls a state
+ * by mov lr,pc and bx r0 (0x0801AF44), so the state returns to it as before, r5-r7 as it gave them (the hide step keeps
+ * them). Its state table's words aimed at the stubs (staged after the table's own, so written over them) */
+#define XN_HIDE_SHARED 20u
+#define XN_HIDE_STUB   8u
+#define XN_HIDE_SIZE(f) (XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)(f)->nstates)
+static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
+	static const uint16_t shared[7] = { 0xB501, 0x4903, 0x46FE, 0x4708, 0xBC03, 0x468E, 0x4700 };   /* (its ldr's word at +16) */
+	const XVirusFamily *f = &n->code;
+	if (at & 3u || XN_HIDE_SIZE(f) > room) { xv_fail("no room in its home for its hide step's stubs"); return false; }
+	uint8_t *p = xv_put(at, XN_HIDE_SIZE(f), true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
+	if (!p || !st) return false;
+	for (int i = 0; i < 7; ++i) put16(p + 2 * i, shared[i]);
+	put16(p + 14, 0x46C0);   /* (nop: its word aligned) */
+	put32(p + 16, xv_move_ref(n->hide_step));
+	for (int i = 0; i < f->nstates; ++i) {
+		const uint32_t off = XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)i;
+		const int32_t back = -(int32_t)(off + 2u + 4u);   /* (the b at off + 2 back to the shared part, pc 4 past it) */
+		put16(p + off, 0x4800);                           /* ldr r0,[pc,#0]: the word past the b */
+		put16(p + off + 2, (uint16_t)(0xE000u | ((uint32_t)back >> 1 & 0x7FFu)));
+		put32(p + off + 4, xv_move_ref(f->states[i]));
+		put32(st + 4 * i, (at + off) | 1u);
+	}
+	return true;
+}
+
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	const XVirusFamily *f = &n->code;
 	const XnInit *in = n->init;
@@ -139,6 +166,11 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
 	if (start && companion != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its init's spawns"); return 0; }
+	if (n->hide_step.addr) {   /* (its hide step's stubs first: a Navi that hides none leaves its shims where they were) */
+		place = (place + 3u) & ~3u;
+		if (!hide_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0)) return 0;
+		place += XN_HIDE_SIZE(f);
+	}
 	if (end && !in) {
 		if (place + 8u > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return 0; }
 		table[7] = coll_arg_set(n, f->home + place);

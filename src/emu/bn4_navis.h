@@ -178,7 +178,8 @@
 #define BN4_HIDE_STEP     0x0800C0A6u /* the invisible not drawn (its +0 bit 2 cleared), its marker (the fourth kind's 0x3E, 0x080E65C2)
                                        * kept at the collision data's +0x7C, from the runners before the state (0x08013F12, 0x08013C14):
                                        * BN6's twin BN6_HIDE_STEP, its marker at +0x50, called by nothing */
-#define BN4_T4_SCOPE      0x2E        /* the fourth kind's: his scope, walked over the panels toward MegaMan, its lock told to his AI
+#define BN4_COLL_HIDE_MARKER 0x7C     /* collision data: u32 the invisible's marker (BN6_COLL_HIDE_MARKER, +0x50) */
+#define BN4_T4_SCOPE      0x2E       /* the fourth kind's: his scope, walked over the panels toward MegaMan, its lock told to his AI
                                        * data's attack variables +0xC (0x080E571A); moved with him (no BN6 type of its body) */
 #define BN4_SCOPE_SPAWN   0x080E5728u /* ... its spawner: r0 its kind (+4), r1 its +0x2C, its owner r5 at +0x4C */
 
