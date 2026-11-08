@@ -3,13 +3,14 @@ type: Overview
 title: "Release notes"
 description: "The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with."
 tags: [releases]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:55:00Z }
 ---
 
 # Release notes
 
 The players' notes of each release, which the site's versions page renders (`tools/site_versions.py`) and each GitHub release opens with; a release without notes shows its CHANGELOG section instead.
 
+- [Cyberworld Endless 0.20.0](v0.20.0.md): Red Sun joins the run.
 - [Cyberworld Endless 0.19.0](v0.19.0.md): Your screen, your sound.
 - [Cyberworld Endless 0.18.1](v0.18.1.md): The PS5 app starts.
 - [Cyberworld Endless 0.18.0](v0.18.0.md): Four more systems.
