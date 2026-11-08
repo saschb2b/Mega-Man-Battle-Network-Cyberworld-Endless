@@ -34,7 +34,7 @@ from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_N
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
-XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
+XN_BN4_ART = 0x08800000 + 0x748000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what BN4's moved Navis draw)
 XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE = 0x08800000 + 0x77C000, 0x10000   # (FREE_BN4_NAVI_SPRITE: the battle's Navi's battle sprite, xnavi_bn4_room.h)
 RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
 
@@ -101,13 +101,17 @@ def bn4_sprites(rom4, foes=None):
     lists, rows = sprite_rows(foes)
     if not lists or not rom4:
         return []
+    import xrecipe as X   # (its sprite_len, xnavi.c's: as tools/xdiff_snap.py reads it)
     out = []
     for lst, idx, room_base, off, room in rows:
         word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
         base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
         lz = bool(word & 0x80000000)
+        # (a raw one's room in BN4's ROM its own bytes, not the copy's rounded room, which may reach into the next sprite: the
+        # wind's gust's list 3 0x2E past SearchMan's marker's 0x2D)
+        own = X.sprite_len(rom4[base - 0x08000000:base - 0x08000000 + 0x40000], 0x40000) if not lz else 0
         out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE}.get(room_base, XV_ART) + int(off, 16),
-                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
+                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
     return out
 
 
@@ -153,7 +157,9 @@ def sprite_ptr(sprites, game, v, cache=None):
     best = None
     for i, (b4, b6, room, key, room4) in enumerate(sprites):
         if game == 4 and b4 is None:
-            b4, room = (cache or {}).get(key), room4
+            b4 = (cache or {}).get(key)
+        if game == 4:
+            room = room4   # (BN4's own sprite's bytes: bn4_sprites)
         base = b4 if game == 4 else b6 if game == 6 else None
         if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
             best = ('sprite', i, v - base)
@@ -185,6 +191,12 @@ class Bn4Canon:
         """a third-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where the
         recipe moved it (bn4_moved_types); BN4's as it is"""
         return self.moved_types.get((3, v), v) if game == 6 else self.canon.t3(game, v)
+
+    def t4(self, game, o):
+        """a fourth-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where a
+        recipe moved it (bn4_moved_types' kind 4: SearchMan's scope 0x2E and his marker 0x3E); BN4's as it is"""
+        v = o.o8(OBJ_TYPE)
+        return self.moved_types.get((4, v), v) if game == 6 and o.moved else v
 
     def t1_moved(self, game, o):
         """a first-kind object of a type the recipe moves (bn4_moved_types' kind 1: FireMan's companion 0x57), no enemy:

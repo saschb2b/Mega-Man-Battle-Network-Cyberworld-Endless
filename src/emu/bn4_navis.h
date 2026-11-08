@@ -165,4 +165,22 @@
 #define BN4_STEP_BEGIN    0x0801393Eu /* an object's step onto a panel begun: collision flags 0x100 and 4 (0x0801398C, 0x08013992), and no
                                        * byte of the object's (BN6_STEP_BEGIN's twin, which sets its +0x0F) */
 
+/* SearchMan, the fifth BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, SearchMan built): his hiding,
+ * the engine's invisibility as BN6 has it at other offsets (bn6_panels.h BN6_COLL_INVISIBLE) */
+#define BN4_SEARCHMAN     0x080C11F8u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_SEARCHMAN]): jump table 0x080C1210, init
+                                       * 0x080C121C, update 0x080C1276, state table 0x080C128C (his decision 6, MegaMan's 58-61 his 7-10) */
+#define BN4_COLL_INVISIBLE 0x1A       /* collision data: u16 the invisibility's frames, 0xFFFF for ever (BN6_COLL_INVISIBLE, +0x26) */
+#define BN4_INVISIBLE_STEP 0x0800C0DAu /* its timer, from the Navi and player runners (0x08013EF2, 0x08013BE4): less 1 a frame,
+                                       * flag 4 cleared under 0, sound 0xB0 as it ends (BN6_INVISIBLE_STEP, sound 0x94) */
+#define BN4_INVISIBLE_HIT 0x0800C110u /* ... cleared where its hits word (+0x54) is not 0, from the pre-steps (BN6's 0x08010198) */
+#define BN4_HIDE          0x0800C126u /* r0 frames: invisible (+0x1A, flag 4, the object's +0 bit 2 cleared; BN6_HIDE, LAYOUT) */
+#define BN4_SHOW          0x0800C13Cu /* shown (+0x1A 0, flag 4 cleared; BN6_SHOW, LAYOUT) */
+#define BN4_HIDE_STEP     0x0800C0A6u /* the invisible not drawn (its +0 bit 2 cleared), its marker (the fourth kind's 0x3E, 0x080E65C2)
+                                       * kept at the collision data's +0x7C, from the runners before the state (0x08013F12, 0x08013C14):
+                                       * BN6's twin BN6_HIDE_STEP, its marker at +0x50, called by nothing */
+#define BN4_COLL_HIDE_MARKER 0x7C     /* collision data: u32 the invisible's marker (BN6_COLL_HIDE_MARKER, +0x50) */
+#define BN4_T4_SCOPE      0x2E       /* the fourth kind's: his scope, walked over the panels toward MegaMan, its lock told to his AI
+                                       * data's attack variables +0xC (0x080E571A); moved with him (no BN6 type of its body) */
+#define BN4_SCOPE_SPAWN   0x080E5728u /* ... its spawner: r0 its kind (+4), r1 its +0x2C, its owner r5 at +0x4C */
+
 #endif

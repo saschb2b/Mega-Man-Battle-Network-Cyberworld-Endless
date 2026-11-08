@@ -47,7 +47,7 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
-NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144))
+NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -106,9 +106,10 @@ AI_BLOCKS = ((0x64, 0x0C, 0x80), (0x70, 0x50, 0xA0))
 # BN4_NAVI_ID0 + 4 * seat, past every family's ids (XV_FIRST_ID + 6 * XV_FAMILIES = 0x380) and below XV_IDS (0x400)
 BN4_NAVI_AI0, BN4_NAVI_ID0 = 48, 0x380
 # Their room (the owner's call of 5 November 2026; src/emu/free_space.h FREE_BN4_NAVIS, xnavi_recipe.h XN_BN4_*): their homes
-# (a seat each), their code and objects', then what they draw, to FREE_BRACKET
+# (a seat each), their code and objects', then what they draw, to FREE_BRACKET; the code's room 0x18000, the art's from +0x28000 (an
+# interim since SearchMan: the art's 0x2C000 held four Navis' attacks and songs and not his, docs/multirom/bn4-navis.md, SearchMan built)
 ROOM_HOMES = 0x08800000 + 0x720000
-ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x30000, 0x08800000 + 0x790000
+ROOM_CODE, ROOM_ART, ROOM_END = ROOM_HOMES + 0x10000, ROOM_HOMES + 0x28000, 0x08800000 + 0x790000
 VERSIONS = 4
 # The collision setup's r3 BN6's actor init gives every actor (0x08016FE8: movs r3,#3), the hit bits its body's hit ORs into
 # the struck's (BN6_COLL_SETUP_ARG); a Navi whose init passes another keeps its own (XNavi.coll_arg). The struck's pre-step
@@ -327,7 +328,7 @@ def table_sounds(b4, b6, f):
 def wide_sounds(f):
     """its sounds named by a movs whose pool slot is past a byte (the owner's call of 5 November 2026, docs/multirom/bn4.md
     call 11): the movs left as BN4's, its call to BN4_PLAY_SOUND aimed at a shim that makes r0 the slot (XvSoundCall)"""
-    f.sound_calls = []
+    f.sound_calls = list(getattr(f, 'wide_calls', []))   # (a movs and an adds past a byte: xnavirecipe_bn4_objects.wide_movs)
     wide = {i['at']: i for i in f.imms if i['form'] == 'THUMB_MOVS' and i['now'] > 0xFF and i['why'].startswith('its sound ')}
     for _, w in sorted(f.walks.items()):
         for site, t in sorted(w.bls.items()):
@@ -497,14 +498,17 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
         I.cut_before(b4, f)
         while roots:
             X4.walk_code(b4, f, roots, {f.type_table, f.st} | set(I.UNWALKED_TABLES), pairs)
-            roots = sorted((callbacks(b4, f) | C.copied_entries(f)) - set(f.walks))
+            roots = sorted((callbacks(b4, f) | C.copied_entries(f) | C.moved4(b4, f, pairs) | C.hide_roots(f)) - set(f.walks))
         I.cut_after(f)
+        C.t4_regions(f)
     finally:
         bn4_twins.COPIED.clear()
         bn4_twins.COPIED.update(saved)
     # (MegaMan's routines its states reach are copied as routines, not his block whole)
     f.copied = sorted(set(f.copied) | {e for e in f.walks if N.PLAYER <= e < N.PLAYER_END})
     f.regions = [r for r in f.regions if r[2] != 'MegaMan']
+    # (a copied routine within a region it moves is that region's code: ThunderMan's leaf 0x080D97F8 in SearchMan's third-kind 0x60)
+    f.copied = [e for e in f.copied if X4.own_region(f, e) is None]
     tables_of(b4, f)
     f.mm_bytes = sum(i.size for e, w in f.walks.items() if N.PLAYER <= e < N.PLAYER_END for i in w.insns.values())
     X4.side_sites(f)
@@ -517,8 +521,10 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     set_action_imms(f)
     X4.spawns_of(f, alloc)
     I.spawns1(f, alloc)
+    C.spawns4(f, alloc)
     I.companion_modes(f)
     C.fight_gates(f)
+    C.hide_steps(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)
@@ -533,8 +539,11 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     navi_art(b4, b6, f, alloc)
     I.companion_art(b4, f, alloc)
     sprite_tables(b4, f, alloc)
+    C.t4_sprite_tables(b4, f, alloc)
     C.list5_sprites(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
+    C.flipped_effects(b4, b6, f, alloc)
+    C.effect_args(b4, b6, f, alloc)
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
     X4.SOUND_SLOTS.update(pool)
@@ -896,6 +905,9 @@ def c_navi(f):
                  f'its body gives, read alike by both games\' pre-steps) */')
     if init_line:
         L.append(init_line)
+    if getattr(f, 'hide_step', None):
+        L.append(f'\t.hide_step = OWN(0x{f.hide_step | 1:08X}),   /* (its copy of BN4\'s hide step before each of its states, as BN4\'s Navi '
+                 'runner runs it: xnavirecipe_bn4_objects.hide_steps) */')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 

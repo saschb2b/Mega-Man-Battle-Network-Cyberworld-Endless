@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:45:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -21,10 +21,10 @@ takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
 and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
-below), ThunderMan, WindMan and FireMan too
+below), ThunderMan, WindMan, FireMan and SearchMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
-[FireMan built](#fireman-built)), the three's plates on the bracket not yet
-named; their companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
+[FireMan built](#fireman-built), [SearchMan built](#searchman-built)), the five in
+the tournament's pool on their plates; their companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -858,6 +858,105 @@ the readers of `[eToolkit +0x44] +0xA` (one, a script's comparison at
 A palette-distance match of the Navis' battle sprites against the plates
 named none of the known five right, so it names none. Of the four, GutsMan
 alone is in the pool.
+
+## SearchMan built
+
+The fifth in the order, proved by `searchman_v1`: his type 0x2B, Navi AI 51,
+ids 0x38C-0x38F (`foes 38C@52`), in the tournament's pool on his plate
+0x09 (`BN4_PLATE_SEARCHMAN`, named by sight). His addresses are in
+[BN4 Red Sun's tables](../rom/bn4.md) (SearchMan derived and his hiding in
+both engines). What he adds over the four before him:
+
+- **His hiding, the engine's invisibility at BN6's places.** BN4's
+  collision data keeps the invisibility's frames at +0x1A
+  (`BN4_COLL_INVISIBLE`) where BN6 keeps them at +0x26
+  (`BN6_COLL_INVISIBLE`): each game's timer is the same routine at its
+  offset (`BN4_INVISIBLE_STEP`, `BN6_INVISIBLE_STEP`), so are the clear on
+  a hit and the two setters his states call (`BN4_HIDE`, `BN4_SHOW`; BN6's
+  twins `BN6_HIDE`, `BN6_SHOW`, LAYOUT pairs in
+  `tools/xnavirecipe_bn4_objects.py`). His own code's read of +0x1A is
+  given BN6's +0x26 (the generator's collision map, `COLL4TO6`).
+- **The hide step, run before each of his states.** BN4's Navi and
+  player runners call the hide step before every state
+  (`BN4_HIDE_STEP`, at `0x08013F12`), after the blink step has set the
+  object's drawn bit: the invisible is not drawn, and a marker (the fourth
+  kind's 0x3E) is kept at the collision data's +0x7C. BN6's status step
+  has the same place but calls nothing there (`BN6_STATUS_HIDE`, a flag
+  read); its own twin, `BN6_HIDE_STEP`, has no caller. Before the port
+  BN6's SearchMan stayed drawn while hidden (`searchman_v1` at t216, his
+  +0 0x37 against 0x31). The port: BN4's hide step is copied with him
+  (its +0x7C BN6's +0x50, `BN6_COLL_HIDE_MARKER`) and run by stubs of his
+  home before each of his states (`XNavi.hide_step`, `src/emu/xnavi_init.c`
+  `hide_set`: each state's stub loads the state and branches to a shared
+  part that calls the hide step and goes on to the state with the
+  dispatcher's return). BN6's own hide step would not do: its marker, BN6's
+  0x3E, draws other art and spawns effect 0x5D on its first update
+  (`0x080E60B2`), so BN4's 0x3E is moved with him (`MOVE4`).
+- **Fourth-kind objects moved.** His scope (the fourth kind's 0x2E,
+  `BN4_T4_SCOPE`: it walks over the panels toward MegaMan and tells his
+  AI data's attack variables its lock, `0x080E571A`, at BN6's +0xA0), his
+  shots' trails (0x31, its kinds' sprites in a table before its routine,
+  `T4_SPRITE_TABLES`; BN6's 0x31 runs its kinds by its own tables) and his
+  marker are the first fourth-kind types a BN4 Navi moves: the generator's
+  `moved4` takes a call into a fourth-kind type's spawner with no BN6
+  twin, or one of `MOVE4`, and its type the dispatch's fourth kind's next
+  number (0xE0 on). The comparator reads them back as BN4's
+  (`tools/xdiff_bn4.py` `t4`, `tools/xdiff_snap.py` `identity`).
+- **Effects by other routes.** His shot's hit spawns effect 8 with a flip
+  ORed into r4 (`FLIPPED_EFFECTS`), and his shot's burst passes effect 0
+  in r2 to the engine's pattern spawner (`0x0801457E`, BN6's
+  `0x0801BD3C` the same bytes; `EFFECT_ARGS`): both moved, BN4's look in
+  BN6 (0x9C, and WindMan's 0x9B, whose sprite he lists too so his install
+  finds it, `navi_shared`).
+- **Sounds past a byte.** Nine pool sounds, four of them made by a `movs`
+  and an `adds` at slots past a byte (0x105, 0x109, 0x128, 0x12F at
+  0x104, 0x117, 0x148, 0x150): their calls go through the shim
+  (`XvSoundCall`), the `movs` and `adds` left as BN4's.
+- **Copied leaves**: a side's panels by flags (`0x0800A2E4`) and his
+  shot's hits test (`0x080DF332`, its +0x54 BN6's +0x70); the visibility
+  test his marker calls (`0x0800B0CA`) paired with BN6's `0x0800EB6C`,
+  audited (the same answer wherever the side is not MegaMan's).
+
+`bn4_searchman_control` PASSes. **`searchman_v1` PASSes** over its 1200
+frames (his decision, hiding, shots, bursts, trails and sounds; not his scope, below).
+What took it there from t1, one cause at a time: the install refused (two
+copied routines overlapping his moved regions: a copied routine inside a
+moved region is that region's code now); his invisibility's frames and
+marker unmapped in the BN4 trace (`src/dev/xdiff_bn4_trace.c`, t215 and
+t216); the hide step (t216, above); BN6's own marker (t216); his pool
+sounds (legit.json's bn4 sounds, his ids alone by `foes`); BN6's own
+effect 0 for his burst (t384); BN6's own 0x31 for his trails (t741); and
+one engine difference, allowed: his trail's kind 0 keeps what
+PlaySoundEffect leaves in r0 as its begun byte (+9, `0x080E597A`) and only
+tests it against 0, and each game's MP2K leaves its own there (BN4 0x28,
+BN6 0x48; legit.json's bn4 `spawn_leftover` bytes, that pair alone).
+
+Seven mutations break his port and each is caught: his hide step's marker
+read at BN4's +0x7C (t217), its clear of the drawn bit made a set (t216),
+his invisibility read at BN4's +0x1A (t218), his trail spawned as another
+kind (t741), his sound 0x90 at the pool's second slot (t250), his burst's
+effect left at BN4's id (t384), his decision's CurAction 8 off by one
+(t211); with the rest, 208 of 208.
+
+**What `searchman_v1` does not reach.** In its 1200 frames, MegaMan idle,
+SearchMan runs his decision and MegaMan's states 58-60 (BN4's CurActions
+6-9), never 61 (his 10): his scope (the fourth kind's 0x2E), the third
+kind's 0x60 and the trails' kinds 1 and 2 it spawns are moved and
+installed but unproved. Two first mutations, on his scope's lock and his
+CurAction 10, were not caught for that, and were replaced by the two
+above. A spec where his decision takes state 61 (MegaMan moving, or his
+SP) is the next to write.
+
+**The art room ran out with him.** The generator's art room (attacks'
+sprites and songs, `FREE_BN4_NAVI_ART`, 0x2C000) held the four Navis
+before him and not his 49 KB (his songs ended 0x300 past it), while the
+code room (0x20000) holds the five's code in about 30 KB. The split moved, an interim:
+the art from `+0x748000` (0x34000), the code room 0x18000. The [room for
+all eighteen](#room-for-all-eighteen-measured) underestimated the art
+(songs uncounted, small sprites rounded to 0x800): at about 40 KB a Navi
+the eighteen need more than the room holds, so a Navi's attacks' art and
+songs will have to be loaded by battle, as the battle sprites are; the
+owner's call.
 
 ## What tools/xnavirecipe.py needs for BN4
 
