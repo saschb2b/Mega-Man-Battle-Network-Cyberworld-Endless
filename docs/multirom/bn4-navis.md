@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T18:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T18:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -975,23 +975,53 @@ CurAction off by one (t1), its queue's head test aimed at the nullsub
 (t1), its shockwave's sprite left at BN4's number (t72) and its
 shockwave's sound another (t73).
 
-**`roll_v1` still parts at t1008**, now on the summoned appear: both
-battles put BN4's Mettaur (0x2E4 in BN6) on the same panel with the same
-id, HP and side, but BN4's runs BN4's summoned appear (its generic state
-0 by +5 2, `0x0801002A`: hidden, falling in from +0x3E 0xA0 eight a frame
-with its flash effects 0x2E, then a white blink), and runs it in its
-spawn frame, where BN6's spawn of an enemy into a fight under way
+**Her summoned Mettaur arrives as BN4's.** `roll_v1` first parted at
+t1008 on the summoned appear: BN4's spawn of an enemy into a fight under
+way marks it +5 2, which BN4's generic state 0 sends to BN4's summoned
+appear (`0x0801002A`: hidden, falling in from +0x3E 0xA0 eight a frame
+with its flash effects 0x2E, then a white blink), and BN4's init runs it
+in its spawn frame (a family's init ends in its update); BN6's
 (`BN6_SPAWN_ENEMY_1`: +5 1, AI data +2 1) sends BN6's generic state 0 to
-BN6's own (`0x080164A0`, a Navi plate's arrival) from the next frame. So
-its +5, +0xB, +0xF, +0x20, +0x3E, sprite, collision +0x28, flash and
-panel reservation are each engine's from t1008, and `roll_v1` records
-FAIL there. Next: move BN4's summoned appear with the family (its
-generic state 0 as an own state, `0x0801002A` and its three steps copied,
-its nine calls paired, BN4's battle kind 0x44 as BN6's 6), the summon's
-shim writing +5 2 and running the object's first state in its spawn
-frame. Roll joins the tournament's proved list once `roll_v1` PASSes.
+BN6's own (`0x080164A0`) from the next frame. Settled so:
 
-Seven mutations break her port and each is caught: her decision's
+- **Its state 0 its own** (`bn4_twins.SUMMON_APPEAR`, for a family moved
+  for a summon): BN4's generic state 0 (`0x0800FCAC`) and its summoned
+  appear (`0x0801002A`, its table and three steps) copied with it; the
+  plain appear and the settings' one paired with BN6's plain appear, as
+  every family's state 0 runs it (`mettaur4_v1` still PASSes), the +5 1
+  one with BN6's `0x080164A0`; the appear's calls paired and audited (its
+  collision word set and cleared at BN6's +0x28, its HP shown by BN6's
+  routine, BN4's battle kind 0x44 answered 0 by BN6's routine that
+  returns 0, as no battle of BN6's is BN4's 0x44). Its flash, effect 0x2E,
+  moved as the families' 0x9A.
+- **The summon's shim** marks the object +5 2 after BN6's spawn and runs
+  BN6's virus init on it there (`BN6_VIRUS_INIT`, the type's present not
+  run), so its first state runs in its turn of the same frame, as BN4's
+  init runs it (`xvirus_shim_summon`).
+- **The comparison** counts the families a Navi summons as hers (their
+  code keyed and their effects mapped: `src/dev/xdiff_bn4.c`
+  `xd4_families`, `tools/xdiff_bn4.py` `summoned_foes`), keys her
+  summon's draw as `BN4_SPAWN_ENEMY`'s (`XV_SHIM_SUMMON_DRAW`), and allows
+  two engine differences with their evidence: the summoned Mettaur's
+  +0xF (BN4's spawn writes its enemy id there for BN4's HP display, BN6's
+  its NameID at +0x28: 1 against 0 alone) and her flash's spawn's r4 where
+  her turn began hidden (BN4's object runner's read of her +0, 0x11, as
+  0x13 where she began it visible).
+
+**`roll_v1` PASSes over its 1200 fight frames**, her summon at t1008 and
+her Mettaur's appear, turn and shockwave after it the same in both. Three
+mutations of the summon are caught: the copied state 0's +5 test made 2,
+its summoned Mettaur arriving as BN6's (t1008), the appear's fall 4 a
+frame (t1008), and its queue's head test aimed at the nullsub (t1060).
+She joins the tournament's proved list (`src/layer/xguardian_bn4.c`:
+plate `BN4_PLATE_ROLL`, "The Summoning Petal", pink; the owner's to
+change). Left: her V2-SP summons (Billy2 and Billy3, BN4's summoned
+appear not theirs, as Billy is a visitor; 0x39, V3's type 0x11, moved by
+no recipe: six decisions of the families' generator, a pre-step, a
+collision setup, a call with no twin, two sounds and room), proved by no
+spec yet.
+
+Seven mutations break her port before her summon and each is caught: her decision's
 CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
 effect another (t66), her warp's sound at another pool slot (t67), her
 attack's sprite at BN4's list (t195), her player-22 sound on BN6's

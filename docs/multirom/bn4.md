@@ -618,4 +618,6 @@ sounds take from the themes' range are the owner's to confirm.
     visitors and what a run's battles hold would change with it. Built
     the same day: BN4's ids 1-6 as BN6's 0x2E4-0x2E9 (AI 70), proved
     alone by `mettaur4_v1` ([BN4's Navis in BN6's engine](bn4-navis.md),
-    Roll built); her summon's map points at them.
+    Roll built); her summon's map points at them, the summoned one
+    arrives by BN4's own summoned appear, and `roll_v1` PASSes her whole
+    fight, so she joins the tournament's proved Navis.
