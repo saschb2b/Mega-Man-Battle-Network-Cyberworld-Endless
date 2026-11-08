@@ -11,10 +11,5 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1,
-  "verdict": {
-    "is": "FAIL",
-    "at": 1008,
-    "why": "her port under way (docs/multirom/bn4-navis.md, Roll built): t1-t1007 the same (her decision, her MegaMan's states 44-48, her flash, her shots and their hits, her pool sounds, her draws replayed); at t1008 her summon puts BN4's own Mettaur in both (BN4's id 1, BN6's 0x2E4: BN4's Mettaur moved for her summon, the owner's call of 8 November 2026, proved alone by mettaur4_v1) on the same panel with the same id, HP and side, but each engine's summoned appear runs it: BN4's (its generic state 0 by +5 2, 0x0801002A: falling in from +0x3E 0xA0, its flash effects 0x2E, run in its spawn frame) and BN6's (BN6_SPAWN_ENEMY_1's +5 1 and AI data +2 1, BN6's generic state 0's 0x080164A0, from the frame after): its +5, +0xB, +0xF, +0x20, +0x3E, sprite, collision +0x28, its flash and its panel's reservation each engine's until BN4's summoned appear is moved with the family"
-  }
+  "lag": 1
 }

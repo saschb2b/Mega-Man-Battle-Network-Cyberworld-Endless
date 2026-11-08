@@ -77,6 +77,22 @@ def bn4_families():
     return out
 
 
+def summoned_foes(foes):
+    """the BN4 enemy ids the spec's Navis summon (src/emu/xnavi_bn4.c: a Navi's `.summon = &NAME_summon`, its NAME_summon_ids
+    rows of BN4's id and BN6's), each a family of her fight's as her own is: Roll's Mettaurs and Billys (docs/multirom/bn4-navis.md,
+    Roll built)"""
+    text = recipes_text()
+    rows = {k: v for k, v in re.findall(r'static const XnSummonId (\w+)\[\] = \{(.*?)\};', text, re.S)}
+    out = []
+    for body in re.findall(r'static const XNavi \w+ = \{(.*?)\n\};', text, re.S):
+        names, summon = re.search(r'\.names = \{ ([^}]*) \}', body), re.search(r'\.summon = &(\w+),', body)
+        if not names or not summon or not {int(x, 0) for x in names.group(1).split(',')} & set(foes):
+            continue
+        ids = rows.get(f'{summon.group(1)}_ids', '')
+        out += [int(a, 0) for a, b in re.findall(r'\{ (0x[0-9A-Fa-f]+), (0x[0-9A-Fa-f]+) \}', ids) if int(b, 0)]
+    return out
+
+
 def bn4_moved_types():
     """the object types the recipe moves into BN6's engine, run by the second-level dispatch (xvirus_recipe.h XvType: kind,
     the dispatch's number, XV_TYPE_MOVED, BN4's own number): {(kind, the dispatch's number): BN4's own}, the thunder's copy
@@ -1263,7 +1279,8 @@ def one(name, spec, a, canon, run_xdiff, work):
         ta['code'] = tb['moved']
     if not control:   # (BN4's moved families' ids as BN6's, their recipe's: bn4_families)
         fams = bn4_families()
-        canon = Bn4Canon(canon, fams, [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x])
+        foes = [int(x.split("@")[0], 16) for x in spec.get("foes", "").split(",") if x]
+        canon = Bn4Canon(canon, fams, foes + summoned_foes(foes))
         canon.fams = fams
         NAVI_NAMES.clear()
         NAVI_NAMES.update(v for f in fams if f.get('navi') for v in f['ids'].values())
