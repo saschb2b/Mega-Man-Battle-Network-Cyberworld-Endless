@@ -19,8 +19,10 @@ static const struct {
 } proved[] = {
 	{ 0x84, BN4_PLATE_GUTSMAN, { "GutsMan", "The Pounding Fist", GUARDIAN_NO_MUGSHOT, -1, 232, 152, 56 } },   /* tests/xdiff/gutsman_v1.json */
 	{ 0x88, BN4_PLATE_WINDMAN, { "WindMan", "Master of the Wind", GUARDIAN_NO_MUGSHOT, -1, 120, 200, 168 } },   /* tests/xdiff/windman_v1.json */
+	{ 0x8C, BN4_PLATE_SEARCHMAN, { "SearchMan", "The Unseen Marksman", GUARDIAN_NO_MUGSHOT, -1, 136, 168, 80 } },   /* tests/xdiff/searchman_v1.json */
 	{ 0x90, BN4_PLATE_FIREMAN, { "FireMan", "The Blazing Furnace", GUARDIAN_NO_MUGSHOT, -1, 232, 80, 48 } },   /* tests/xdiff/fireman_v1.json */
 	{ 0x94, BN4_PLATE_THUNDERMAN, { "ThunderMan", "The Thundering Cloud", GUARDIAN_NO_MUGSHOT, -1, 240, 200, 48 } },   /* tests/xdiff/thunderman_v1.json */
+	{ 0xA8, BN4_PLATE_AQUAMAN, { "AquaMan", "The Rushing Tide", GUARDIAN_NO_MUGSHOT, -1, 72, 152, 240 } },   /* tests/xdiff/aquaman_v1.json */
 	{ 0x80, BN4_PLATE_ROLL, { "Roll", "The Summoning Petal", GUARDIAN_NO_MUGSHOT, -1, 248, 120, 176 } },   /* tests/xdiff/roll_v1.json */
 };
 #define NPROVED ((int)(sizeof proved / sizeof *proved))

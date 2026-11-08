@@ -82,6 +82,9 @@
 #define XN_BN4_SPRITE_SIZE (FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE)
 /* ... and which sprite each seat's is: BN4's list 2 number of his battle sprite, a byte a seat (0xFF none), past the homes */
 #define XN_BN4_SPRITES     (XN_BN4_HOMES + XN_BN4_SEATS * XV_HOME_SIZE)
+/* ... their attacks' art and pool songs (XN_BN4_ART to XN_BN4_END) one room too, the coming battle's Navi's filled in
+ * (xnavi_bn4_art.h); whose each seat's battle fills it with, a byte a seat (his own seat, 0xFF none), past the sprites' */
+#define XN_BN4_ARTS        (XN_BN4_SPRITES + XN_BN4_SEATS)
 
 /* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {
@@ -129,8 +132,9 @@ typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_
  * .companion must leave empty) or, `at_end`, at its spawn's end (its table 7, after the whole of BN6's actor init); and at
  * its spawn's end, by a shim of its home there, its collision's own r3 (XNavi.coll_arg), its +0x11 its +0x10 (`anim`: its
  * init's 0 where BN6's actor init writes 0xFF), then its spawns where `at_end`, its sprite updated (`sprite`, BN6's
- * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order */
-typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame; } XnInit;
+ * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order; its panel (+0x12) kept at its +6
+ * before its spawns (`home`: AquaMan's, his decision's last panel, which BN6's spawn leaves 0) */
+typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home; } XnInit;
 
 /* A summon its game's code makes (BN4's Roll: her MegaMan's state 47 calls BN4_SPAWN_ENEMY, an enemy by its id on a free panel
  * of her side; docs/multirom/bn4-navis.md, Roll built): that call aimed at a shim at `at` (its code room) that picks the panel
@@ -162,6 +166,9 @@ typedef struct {
 	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
 	int nfamilies;
 	const XnInit *init;         /* what its game's init does past BN6's actor init (BN4's Navis' companions), NULL nothing */
+	XvRef hide_step;            /* the routine run before each of its states (BN4_HIDE_STEP, copied with it: BN4's Navi runner hides the
+	                               invisible and keeps their marker before every state, 0x08013F12, where BN6's status step calls its
+	                               twin nowhere), through stubs of its home (xnavi_init.c); addr 0 none. SearchMan's, who hides */
 	const XnSummon *summon;     /* its summon's shim (BN4's Roll's), NULL none */
 } XNavi;
 

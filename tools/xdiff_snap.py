@@ -28,7 +28,7 @@ XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the f
 XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and art (src/emu/xnavi_recipe.h, XN_STUBS to XN_END)
 EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
-XN_BN4_ROOM = (0x08F30000, 0x08F50000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
+XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
 XV_CODE_BN4 = (0x08B79000, 0x08B80000)            # ... BN4's families' code in the families' (tools/xrecipe_bn4.py CODE2 to XV_ART: BN5's end
                                                   # before it, its bn5_ranges_clear): a BN5 reference reads none of it, nor BN4's Navis'
 BN4_AI_SIZE = 0xC0                                # BN4's AI data, one a side in a row (src/emu/bn4.h, BN4_AI_DATA_SIZE)
@@ -669,8 +669,8 @@ def identity(game, o, canon):
         return canon.t3(game, o.o8(OBJ_TYPE))
     if o.o8(OBJ_TYPE) == 0:
         return (0, canon.fx(game, o.o8(OBJ_EFFECT)))
-    t4 = getattr(canon, 't4', None)   # (a moved fourth-kind type read back as its game's: BN4's Navis', xdiff_bn4.Bn4Canon.t4)
-    return t4(game, o.o8(OBJ_TYPE)) if t4 else o.o8(OBJ_TYPE)
+    t4 = getattr(canon, 't4', None)   # (a fourth-kind type a recipe moved, read back as its game's own: SearchMan's scope and marker, Roll's flash)
+    return t4(game, o) if t4 else o.o8(OBJ_TYPE)
 
 
 def assign_roles(trace, canon):

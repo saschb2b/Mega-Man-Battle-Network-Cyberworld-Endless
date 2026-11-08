@@ -396,8 +396,8 @@ static bool ready_for(const XNavi *n) {
 	return true;
 }
 
-/* A BN4 Navi's own, staged: his songs in the pool (xnavi_bn4_sounds.h), his battle sprite listed for the room the battles
- * share (xnavi_bn4_room.h) */
+/* A BN4 Navi's own, staged: his songs in the pool (xnavi_bn4_sounds.h), his battle sprite and art listed for the rooms the
+ * battles share (xnavi_bn4_room.h) */
 static void bn4_set(const XNavi *n, const Game *g) {
 	if (!xv_failed()) xnavi_bn4_songs_set(&n->code, n->versions);
 	if (!xv_failed()) xnavi_bn4_room_list(&n->code, g->rom, g->lists);
