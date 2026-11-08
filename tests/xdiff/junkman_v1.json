@@ -11,5 +11,10 @@
   "frames": 1200,
   "seed": "12345678:9ABCDEF0",
   "rng": "replay",
-  "lag": 1
+  "lag": 1,
+  "verdict": {
+    "is": "FAIL",
+    "at": 347,
+    "why": "his port under way (docs/multirom/bn4-navis.md, JunkMan built): t1-t346 the same (his state 1's draw, his decision, MegaMan's states 109-111 as his, his junk (the third kind's 0x96) and its draws and sounds, his pool sounds); at t347 the third kind's 0x97, spawned by his copied MegaMan state (0x080F41B4 to its spawner 0x080E0170, which sets r0 alone), keeps the r4 his state was run with at +4 as a word: BN4's Navi runner's (0x00020013), BN6's status dispatcher's (0x02023A80). Its state 0x080E00E8 reads +7 (0x080E0130) where its own code may not have written it (0x080E010A), so +7's 0x00 against 0x02 is not inert: the port's to settle (the r4 a moved state is run with), not an allowance"
+  }
 }
