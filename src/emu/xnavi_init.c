@@ -194,6 +194,24 @@ static bool summon_set(const XNavi *n) {
 	return true;
 }
 
+/* its hide step's stubs, then its hook A's shim (table[2]), past its own shims at *place, which goes on past them: a Navi with
+ * neither leaves its shims where they were; false where one failed */
+static bool stubs_place(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT], uint32_t *place) {
+	const XVirusFamily *f = &n->code;
+	if (n->hide_step.addr) {
+		*place = (*place + 3u) & ~3u;
+		if (!hide_set(n, f->home + *place, XV_HOME_VENEERS > *place ? XV_HOME_VENEERS - *place : 0)) return false;
+		*place += XN_HIDE_SIZE(f);
+	}
+	if (!n->npre) return true;
+	uint32_t size = 0;
+	if (table[2] != BN6_NAVI_NULLSUB) { xv_fail("its hook A is its own: no room for its update's calls"); return false; }
+	*place = (*place + 3u) & ~3u;
+	table[2] = pre_set(n, f->home + *place, XV_HOME_VENEERS > *place ? XV_HOME_VENEERS - *place : 0, &size);
+	*place += size;
+	return table[2] != 0;
+}
+
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	if (n->summon && !summon_set(n)) return 0;
 	const XVirusFamily *f = &n->code;
@@ -204,19 +222,7 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
 	if (start && companion != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its init's spawns"); return 0; }
-	if (n->hide_step.addr) {   /* (its hide step's stubs first: a Navi that hides none leaves its shims where they were) */
-		place = (place + 3u) & ~3u;
-		if (!hide_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0)) return 0;
-		place += XN_HIDE_SIZE(f);
-	}
-	if (n->npre) {   /* (its hook A's shim next: a Navi with none leaves its shims where they were) */
-		uint32_t size = 0;
-		if (table[2] != BN6_NAVI_NULLSUB) { xv_fail("its hook A is its own: no room for its update's calls"); return 0; }
-		place = (place + 3u) & ~3u;
-		table[2] = pre_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0, &size);
-		if (!table[2]) return 0;
-		place += size;
-	}
+	if (!stubs_place(n, table, &place)) return 0;
 	if (end && !in) {
 		if (place + 8u > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return 0; }
 		table[7] = coll_arg_set(n, f->home + place);
