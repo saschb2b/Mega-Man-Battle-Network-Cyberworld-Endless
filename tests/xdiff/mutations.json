@@ -1538,6 +1538,54 @@
     "080CC620:7401"
    ],
    "what": "the tell that sets his companion's animation up again where his own changed (BN4_FIRE_COMPANION_TELL, 0x080CC620: strb r1,[r0,#0x11], its 0xFF) written to its +0x10: its animation made 0xFF instead (caught at t335, the companion's sprite)"
+  },
+  {
+   "name": "AquaMan's panel not kept at his +6",
+   "spec": "aquaman_v1",
+   "poke": [
+    "08F2513A:46C0"
+   ],
+   "what": "the spawn end's shim of his home (XN_BN4_HOMES + 0x5000 + XV_HOME_SHIMS: push; his collision's r3; ldrh r0,[r5,#0x12]; strh r0,[r5,#6], xnavi_init.c end_set's `home`, his init's 0x080B8264-0x080B8266) with its store made a nop: his +6 and +7 left 0 where BN4's init keeps his panel, the last panel his decision reads (caught at t1, his +0x06 and +0x07)"
+  },
+  {
+   "name": "AquaMan's companion drawn with another sprite",
+   "spec": "aquaman_v1",
+   "poke": [
+    "080CCC97:D9:1"
+   ],
+   "what": "his companion's kind 1 row of the first kind's 0x5C's kinds' table (BN4 0x080CCC97: list 4 0x0C, the recipe's copy 0xD8, xnavirecipe_bn4_init.table_kinds1) made 0xD9, his third kind 0x23's sprite: the companion's art another's from its init on, which the companion's clock (legit.json's bn4 companion_clock) compares at the same fight frame (caught at t1, its sprite's frames)"
+  },
+  {
+   "name": "AquaMan's panels' effect left BN4's",
+   "spec": "aquaman_v1",
+   "poke": [
+    "080D13C8:2225"
+   ],
+   "what": "his third kind 0x23's effect handed the panels' pattern routine (BN4 0x080D13C8: movs r2,#0x25 before bl 0x0801457E, the recipe's moved 0x95, xnavirecipe_bn4_objects.pattern_effects) left at BN4's 0x25: BN6's own effect 0x25 spawned around it (caught at t51, the effects in play)"
+  },
+  {
+   "name": "AquaMan's effect with his side left BN4's",
+   "spec": "aquaman_v1",
+   "poke": [
+    "080F45A0:3423"
+   ],
+   "what": "his copied MegaMan state's effect spawned with his side in r4's second byte (BN4 0x080F45A0: adds r4,#0x23, the recipe's moved 0x9C, xnavirecipe_bn4_objects.facing_effects) left at BN4's 0x23: BN6's own effect 0x23 spawned (caught at t31, the effect in play)"
+  },
+  {
+   "name": "AquaMan's sound at another pool slot",
+   "spec": "aquaman_v1",
+   "poke": [
+    "080D132E:2032"
+   ],
+   "what": "his third kind 0x23's sound 0x9E (BN4 0x080D132E: movs r0,#0x9e, the recipe's pool slot 0x33) made the pool's first slot, 0x32: his sound 0x90 where BN4 plays 0x9E (caught at t32, the family's sounds)"
+  },
+  {
+   "name": "AquaMan's CurAction off by one",
+   "spec": "aquaman_v1",
+   "poke": [
+    "080B834A:200A"
+   ],
+   "what": "his decision's set of CurAction 7 (BN4 0x080B834A: movs r0,#7 before BN4_SET_ACTION, the recipe's BN6's 9) written 10: his step's state left for another (caught at t125, his CurAction)"
   }
  ]
 }
