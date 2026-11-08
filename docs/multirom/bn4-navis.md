@@ -1360,6 +1360,14 @@ generator, and of the engine as the eighth BN4 Navi:
   ids (`ENEMIES_MOVED_MAX`, 256, now 384: his SP's id fell off) and the
   moved ranges a trace is told of (`XV_MOVED_MAX`, 1024, now 2048: his
   draws went unkeyed).
+- **Roll no longer the last installed.** The pool's songs stand as the
+  last installed Navi's until a battle's first frame points them at its
+  own (`xnavi_bn4_sounds_frame`), so in `roll_v1` the pool is now pointed
+  at hers at its first frame, over the poke of her player-22 mutation,
+  which went uncaught. The differential's BN6 run points the pool at the
+  spec's Navi before its pokes (`xnavi_bn4_sounds_for`,
+  `src/dev/xdiff_bn4.c` `xd4_pool_point`), as that first frame would, and
+  the mutation is caught at t204 again.
 
 `bn4_woodman_control` PASSes. **`woodman_v1` PASSes** over its 1200 fight
 frames: his decision, MegaMan's 106-108, his 0x07, 0x0B, 0x94 and 0x95,
