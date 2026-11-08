@@ -84,7 +84,7 @@
   {
    "name": "a region number",
    "spec": "cangard_v1",
-   "poke": [
+   "poke5": [
     "080C95DE:2106"
    ],
    "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
