@@ -182,6 +182,13 @@ def docs_rom_mounts(bn5=False):
     return [(rom_dir, '/rom:ro')]
 
 
+def whole_rom_folder(name):
+    """A picture or clip that sees the whole ROM folder (docs_rom_mounts):
+    one named for BN5 or BN4, whose areas, Navis or bracket it shows, and
+    the Glitch layer's, whose flips were timed with every ROM beside BN6's."""
+    return 'bn5' in name or 'bn4' in name or name.startswith('glitch')
+
+
 DOCKER_RUNS = [0]
 
 
@@ -1260,6 +1267,23 @@ MAP_SKY = ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '
 # blending's scene MegaMan hit and flickering, Simple, Smart and LCD)
 OPTIONS_LIVE = ('60:,4:SELECT,150:,' + '4:DOWN,6:,40:,' + '4:DOWN,6:,100:,' + '4:DOWN,6:,60:,' + '4:RIGHT,6:,50:,' * 5 +
                 '4:DOWN,6:,100:,' + '4:RIGHT,6:,70:,' * 3)
+# 0.20.0's: the tournament forced on seed 6's act 3 (layer 9), the autopilot
+# in god mode with one hit a deletion: the door's save at 1000, BN4's
+# bracket with every entrant's face from 1050, round 1's card (GutsMan),
+# his battle; round 1's chip and the bracket again, the beaten grey, at 2930
+TOURNEY = ['--scene', 'emu', '--run-depth', '9', '--seed', '6', '--dev', 'tourney,god,onehit,quiet']
+# (a battle against one of BN4's Navis, started on BN4's ACDC Area's first
+# layer by the foes step, the autopilot fighting in god mode)
+BN4_NAVI = ['--scene', 'emu', '--net-biome', 'x15', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,god']
+# (BN4's areas' first layers, the weak autopilot walking past the words)
+BN4_AREA = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--seed', '4']
+# (the Glitch layer forced: the warp on seed 2's layer 4, MegaMan put two
+# panels from it; a Glitch layer held at its last stage, MegaMan walked
+# round its floor as other areas' looks flip in)
+GLITCH_WARP = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'glitch,quiet',
+               '--input', '150:,' + '4:A,6:,' * 30 + '40:,0:glitch,400:']
+GLITCH_LAYER = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'glitch,side=4,glitchstage=5,quiet',
+                '--input', '150:,' + '4:A,6:,' * 30 + '40:,100:RIGHT,100:DOWN,100:LEFT,100:UP,400:']
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1693,6 +1717,37 @@ SCREENSHOTS = [
     # down to 7; then down to Output, Headphones, explained)
     ('options-sound', ['--scene', 'title', '--input', '60:,4:SELECT,6:,40:,4:R,6:,60:,' + '4:LEFT,6:,10:,' * 3 + '40:,' +
                        '4:DOWN,6:,20:,' * 2 + '4:RIGHT,6:,50:'], [(275, 'options-levels'), (395, 'options-output')], {}),
+    # 0.20.0's notes. (the setup's EXTRAS page, BN4's ROM beside BN6's so
+    # Older nets is on it: Glitch and DarkChips switched off, the cursor on
+    # Older nets)
+    ('setup-extras-bn4', ['--scene', 'setup', '--input', '60:,6:R,30:,6:R,40:,' + '6:DOWN,10:,' * 3 + '6:A,10:,' + '6:DOWN,10:,' * 2 +
+                      '6:A,10:,6:DOWN,40:'], [(420, 'setup-extras')], {}),
+    # (BN4 Red Sun's tournament, its ROM beside BN6's: the bracket before
+    # round 1 and after it, the round's chip between)
+    ('bn4-bracket', TOURNEY, [(1060, 'bn4-bracket'), (2912, 'bn4-round-chip'), (2930, 'bn4-bracket-after')],
+     {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (BN4's seven Navis, each in a BN6 battle on BN4's ACDC Area, at a
+    # frame of his attack; Roll with the Mettaur her summon brought)
+    ('bn4-gutsman', BN4_NAVI + ['--input', '460:,0:foes 384@52'], [(1275, 'bn4-gutsman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-thunderman', BN4_NAVI + ['--input', '460:,0:foes 394@52'], [(1725, 'bn4-thunderman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-windman', BN4_NAVI + ['--input', '460:,0:foes 388@52'], [(975, 'bn4-windman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-fireman', BN4_NAVI + ['--input', '460:,0:foes 390@52'], [(2025, 'bn4-fireman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-searchman', BN4_NAVI + ['--input', '460:,0:foes 38C@52'], [(1725, 'bn4-searchman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-aquaman', BN4_NAVI + ['--input', '460:,0:foes 3A8@52'], [(1950, 'bn4-aquaman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn4-roll', BN4_NAVI + ['--input', '460:,0:foes 380@52'], [(2550, 'bn4-roll')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (BN4's areas, each its first layer: ACDC, Town and the countries; its
+    # Park Area (x17) and Undernet (x19) left out while some of their
+    # walkways' edges and pads draw wrong tiles)
+    ('bn4-acdc', BN4_AREA + ['--net-biome', 'x15'], [(700, 'bn4-acdc')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    ('bn4-town', BN4_AREA + ['--net-biome', 'x16'], [(400, 'bn4-town')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    ('bn4-countries', BN4_AREA + ['--net-biome', 'x18'], [(650, 'bn4-countries')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (BN4's Billy, Walla and CirKill in a BN6 battle of Central Area, named
+    # on BN6's Custom screen, then Walla's ring and Billy's thunder)
+    ('bn4-visitors', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '4', '--seed', '4', '--dev', 'quiet,god',
+                      '--input', '460:,0:foes 2C0@41/2D2@52/2DE@63'], [(700, 'bn4-visitors'), (1300, 'bn4-visitors-fight')],
+     {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (the Glitch layer at its last stage, another area's look flipped in)
+    ('glitch-layer', GLITCH_LAYER, [(950, 'glitch-flip')], {}),
 ]
 
 # pictures of others side by side for a release's notes (made after the
@@ -1702,6 +1757,9 @@ SCREENSHOT_SHEETS = {
     'gba-colour': [[('gba-off', 'Off'), ('gba-gba', 'Colour correction: GBA')]],
     'gba-profiles': [[('gba-gba', 'GBA'), ('gba-vba', 'VBA')], [('gba-nds', 'DS'), ('gba-psp', 'PSP')]],
     'gba-map': [[('map-off', 'Off'), ('map-psp', 'Colour correction: PSP')]],
+    'bn4-navis': [[('bn4-gutsman', 'GutsMan'), ('bn4-thunderman', 'ThunderMan'), ('bn4-windman', 'WindMan'), ('bn4-fireman', 'FireMan')],
+                  [('bn4-searchman', 'SearchMan'), ('bn4-aquaman', 'AquaMan'), ('bn4-roll', 'Roll')]],
+    'bn4-areas': [[('bn4-acdc', 'ACDC Area'), ('bn4-town', 'Town Area'), ('bn4-countries', 'The countries')]],
 }
 SHEET_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -1838,7 +1896,7 @@ def screenshots(only=None):
         data = home + '/.local/share/cyberworld-endless' if rom_screen else '/src/.build/screenshots/data'
         # (SAVES: two devices' saves, this one's player's home a neutral one)
         saves = name == 'saves'
-        mounts = docs_rom_mounts(bn5='bn5' in name or rom_screen)
+        mounts = docs_rom_mounts(bn5=whole_rom_folder(name) or rom_screen)
         if saves:
             code = saves_devices(tmp)
             if code:
@@ -1989,6 +2047,18 @@ CLIPS = [
     ('options-live', ['--scene', 'title'], {}, OPTIONS_LIVE, 200, 1100),
     ('gba-blend', GBA_SCREEN, {}, None, 1200, 1420,
      'beside', [('Off', []), ('Frame blending: LCD', ['--interframe-blending', 'lcd_ghosting'])]),
+    # (0.20.0's: the tournament's door, BN4's bracket with every face, round
+    # 1's card and GutsMan's battle starting; Roll's summon bringing BN4's
+    # Mettaur; BN4's ACDC Area walked; the Glitch warp switching looks under
+    # BN6's mosaic; a Glitch layer's floor flipping through other areas'; a
+    # copy's first form glitching out and the next arriving on its panel)
+    ('bn4-tourney', TOURNEY, {'CYBERWORLD_AUTOPILOT': '1'}, None, 1000, 1560),
+    ('bn4-roll-summon', BN4_NAVI, {'CYBERWORLD_AUTOPILOT': '1'}, '460:,0:foes 380@52', 2290, 2550),
+    ('acdc-bn4', BN4_AREA + ['--net-biome', 'x15'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 700),
+    ('glitch-warp', GLITCH_WARP, {}, None, 500, 900),
+    ('glitch-layer', GLITCH_LAYER, {}, None, 600, 1300),
+    ('glitch-copy', ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'god,onehit,quiet'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, '300:,0:swap 101/107/10D', 1360, 1660),
 ]
 
 
@@ -2004,7 +2074,9 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
                'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
                'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15),
-               'floor-pad': (None, 15), 'options-live': (None, 15), 'gba-blend': (None, 15)}
+               'floor-pad': (None, 15), 'options-live': (None, 15), 'gba-blend': (None, 15),
+               'bn4-tourney': (None, 15), 'bn4-roll-summon': (None, 15), 'acdc-bn4': (4, 12), 'glitch-warp': (None, 15),
+               'glitch-layer': (None, 10), 'glitch-copy': (None, 15)}
 
 
 def clips(only=None):
@@ -2036,7 +2108,7 @@ def clips(only=None):
             os.makedirs(os.path.join(tmp, 'data'))
             code = code or docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
                                   *args, *more, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f{i}_',
-                                  mounts=docs_rom_mounts(bn5='bn5' in name or name.startswith('trade-')))
+                                  mounts=docs_rom_mounts(bn5=whole_rom_folder(name) or name.startswith('trade-')))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)

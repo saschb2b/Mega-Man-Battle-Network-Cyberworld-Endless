@@ -360,8 +360,8 @@ static const XvSprite spikey_sprites[] = {
 };
 static const XvId spikey_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 }, { 0x2A, 0x94 } };
 static const XvSong spikey_songs[] = {
-	{ 0xBC, 0x3F, XV_ART + 0x5A000, 0x40 },   /* its sound 0xbc, BN4's song copied */
-	{ 0xC4, 0x3E, XV_ART + 0x5A040, 0x40 },   /* its sound 0xc4, BN4's song copied */
+	{ 0xBC, 0x3F, XV_ART + 0x5B000, 0x40 },   /* its sound 0xbc, BN4's song copied */
+	{ 0xC4, 0x3E, XV_ART + 0x5B040, 0x40 },   /* its sound 0xc4, BN4's song copied */
 };
 
 static const XVirusFamily bn4_spikey = {
@@ -535,9 +535,9 @@ static const XvSprite shrimpy_sprites[] = {
 };
 static const XvId shrimpy_effects[] = { { 0x25, 0x95 } };
 static const XvSong shrimpy_songs[] = {
-	{ 0x9F, 0x3D, XV_ART + 0x5A080, 0x1CC0 },   /* its sound 0x9f, BN4's song copied */
-	{ 0xC9, 0x3C, XV_ART + 0x5BD40, 0x40 },   /* its sound 0xc9, BN4's song copied */
-	{ 0xCA, 0x3B, XV_ART + 0x5BD80, 0x40 },   /* its sound 0xca, BN4's song copied */
+	{ 0x9F, 0x3D, XV_ART + 0x5B080, 0x1CC0 },   /* its sound 0x9f, BN4's song copied */
+	{ 0xC9, 0x3C, XV_ART + 0x5CD40, 0x40 },   /* its sound 0xc9, BN4's song copied */
+	{ 0xCA, 0x3B, XV_ART + 0x5CD80, 0x40 },   /* its sound 0xca, BN4's song copied */
 };
 
 static const XVirusFamily bn4_shrimpy = {
@@ -688,10 +688,10 @@ static const XvSprite walla_sprites[] = {
 };
 static const XvId walla_effects[] = { { 0x07, 0x96 }, { 0x0F, 0x97 } };
 static const XvSong walla_songs[] = {
-	{ 0x70, 0x3A, XV_ART + 0x5BDC0, 0x40 },   /* its sound 0x70, BN4's song copied */
-	{ 0x9A, 0x39, XV_ART + 0x5BE00, 0x80 },   /* its sound 0x9a, BN4's song copied */
-	{ 0xA6, 0x38, XV_ART + 0x5BE80, 0x40 },   /* its sound 0xa6, BN4's song copied */
-	{ 0xB7, 0x37, XV_ART + 0x5BEC0, 0x40 },   /* its sound 0xb7, BN4's song copied */
+	{ 0x70, 0x3A, XV_ART + 0x5CDC0, 0x40 },   /* its sound 0x70, BN4's song copied */
+	{ 0x9A, 0x39, XV_ART + 0x5CE00, 0x80 },   /* its sound 0x9a, BN4's song copied */
+	{ 0xA6, 0x38, XV_ART + 0x5CE80, 0x40 },   /* its sound 0xa6, BN4's song copied */
+	{ 0xB7, 0x37, XV_ART + 0x5CEC0, 0x40 },   /* its sound 0xb7, BN4's song copied */
 };
 
 static const XVirusFamily bn4_walla = {
@@ -843,8 +843,8 @@ static const XvSprite elmperor_sprites[] = {
 	{ 4, 0x38, 4, 0xC5, XV_ART + 0x76E00, 0x1800 },
 };
 static const XvSong elmperor_songs[] = {
-	{ 0x9D, 0x36, XV_ART + 0x5BF00, 0x80 },   /* its sound 0x9d, BN4's song copied */
-	{ 0xFC, 0x35, XV_ART + 0x5BF80, 0x1AC0 },   /* its sound 0xfc, BN4's song copied */
+	{ 0x9D, 0x36, XV_ART + 0x5CF00, 0x80 },   /* its sound 0x9d, BN4's song copied */
+	{ 0xFC, 0x35, XV_ART + 0x5CF80, 0x1AC0 },   /* its sound 0xfc, BN4's song copied */
 };
 
 static const XVirusFamily bn4_elmperor = {
@@ -1023,7 +1023,7 @@ static const XvSprite cirkill_sprites[] = {
 };
 static const XvId cirkill_effects[] = { { 0x46, 0x98 }, { 0x56, 0x99 } };
 static const XvSong cirkill_songs[] = {
-	{ 0xF9, 0x34, XV_ART + 0x5DA40, 0x80 },   /* its sound 0xf9, BN4's song copied */
+	{ 0xF9, 0x34, XV_ART + 0x5EA40, 0x80 },   /* its sound 0xf9, BN4's song copied */
 };
 
 static const XVirusFamily bn4_cirkill = {
@@ -1274,8 +1274,197 @@ static const XVirusFamily bn4_mettaur = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
 	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
-	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
+	.summoned = true,   /* (moved for Roll's summon alone: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
-const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur };
+/* ---- BN4's Melody (its type 0x11 there, its enemy ids 55-60), as AI 71 with ids 0x2ea-0x2ef ---- */
+
+static const XvBlock melody_blocks[] = {
+	{ 0x080B8BB8, 0x080B92A2, XV_CODE + 0x11E90, 0x74EF157Cu },
+	{ 0x0800FCAC, 0x0800FCDE, XV_CODE + 0x12580, 0xADF5FC45u },
+	{ 0x0801002A, 0x0801013A, XV_CODE + 0x125C2, 0x66328F22u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x126E2, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x12AF2, 0x7631C49Cu },
+	{ 0x080B552A, 0x080B5594, XV_CODE + 0x12B62, 0x29597AFDu },
+};
+static const XvData melody_data[] = {
+	{ 0x080B8BB8, 0x080B8BCA, XV_ZERO },
+	{ 0x080B8BCA, 0x080B8BCC, XV_RAW },
+	{ 0x080B8BCC, 0x080B8C08, XV_ZERO },
+	{ 0x080B8C32, 0x080B8C34, XV_RAW },
+	{ 0x080B8C34, 0x080B8C38, XV_POOL },
+	{ 0x080B8C38, 0x080B8C3E, XV_RAW },
+	{ 0x080B8C3E, 0x080B8C44, XV_ZERO },
+	{ 0x080B8C66, 0x080B8C68, XV_RAW },
+	{ 0x080B8C68, 0x080B8C6C, XV_POOL },
+	{ 0x080B8C6C, 0x080B8C94, XV_ZERO },
+	{ 0x080B8C94, 0x080B8C98, XV_POOL },
+	{ 0x080B8CBA, 0x080B8CBC, XV_RAW },
+	{ 0x080B8CBC, 0x080B8CC0, XV_POOL },
+	{ 0x080B8CC0, 0x080B8CCC, XV_TABLE },
+	{ 0x080B8CDA, 0x080B8CDC, XV_RAW },
+	{ 0x080B8CDC, 0x080B8CE0, XV_POOL },
+	{ 0x080B8CE0, 0x080B8CE8, XV_TABLE },
+	{ 0x080B8D0C, 0x080B8D10, XV_POOL },
+	{ 0x080B8D10, 0x080B8D16, XV_RAW },
+	{ 0x080B8DAC, 0x080B8DB0, XV_POOL },
+	{ 0x080B8DB0, 0x080B8DC0, XV_TABLE },
+	{ 0x080B8E1E, 0x080B8E20, XV_RAW },
+	{ 0x080B8E20, 0x080B8E24, XV_POOL },
+	{ 0x080B8EA4, 0x080B8EAC, XV_POOL },
+	{ 0x080B8EAC, 0x080B8EB4, XV_RAW },
+	{ 0x080B8EB4, 0x080B8EB8, XV_POOL },
+	{ 0x080B8EB8, 0x080B8EBE, XV_RAW },
+	{ 0x080B8F12, 0x080B8F14, XV_RAW },
+	{ 0x080B8F14, 0x080B8F18, XV_POOL },
+	{ 0x080B8F18, 0x080B8F20, XV_TABLE },
+	{ 0x080B8F58, 0x080B8F5C, XV_POOL },
+	{ 0x080B8F5C, 0x080B8F62, XV_RAW },
+	{ 0x080B90C0, 0x080B90C4, XV_POOL },
+	{ 0x080B90C4, 0x080B90CC, XV_TABLE },
+	{ 0x080B9156, 0x080B9158, XV_RAW },
+	{ 0x080B9158, 0x080B915C, XV_POOL },
+	{ 0x080B915C, 0x080B9164, XV_RAW },
+	{ 0x080B9164, 0x080B916C, XV_POOL },
+	{ 0x080B91B6, 0x080B91B8, XV_RAW },
+	{ 0x080B91B8, 0x080B91BC, XV_POOL },
+	{ 0x080B91BC, 0x080B91C4, XV_RAW },
+	{ 0x080B91C4, 0x080B91C8, XV_POOL },
+	{ 0x080B91C8, 0x080B91D0, XV_RAW },
+	{ 0x080B91D0, 0x080B91D4, XV_POOL },
+	{ 0x080B91D4, 0x080B91D6, XV_RAW },
+	{ 0x080B925E, 0x080B9260, XV_RAW },
+	{ 0x080B9260, 0x080B9264, XV_POOL },
+	{ 0x080B9264, 0x080B9274, XV_RAW },
+	{ 0x080B9296, 0x080B9298, XV_RAW },
+	{ 0x080B9298, 0x080B929C, XV_POOL },
+	{ 0x080B929C, 0x080B92A2, XV_RAW },
+	{ 0x08010038, 0x0801003C, XV_POOL },
+	{ 0x0801003C, 0x08010048, XV_TABLE },
+	{ 0x080100BA, 0x080100BC, XV_RAW },
+	{ 0x080100BC, 0x080100C0, XV_POOL },
+	{ 0x0800AD54, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
+	{ 0x080B557E, 0x080B5580, XV_ZERO },
+	{ 0x080B5580, 0x080B5584, XV_POOL },
+	{ 0x080B5584, 0x080B5594, XV_RAW },
+};
+static const XvPair melody_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
+	{ 0x08002F3A, 0x08002EE8 },   /* search, SAME */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08007E46, 0x080011EC },   /* project:mettaur, DIFF (audited) */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009DA0, 0x0800CBD8 },   /* project:families-2, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
+	{ 0x0800A0A2, 0x0800CFA6 },   /* project:spikey, SAME */
+	{ 0x0800A10E, 0x0800D012 },   /* project:research, SAME */
+	{ 0x0800A192, 0x0800D06A },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800B018, 0x0800EAFA },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800B026, 0x0800EB08 },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800FCDE, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FE00, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FF26, 0x080164A0 },   /* project:mettaur, SAME (audited) */
+	{ 0x08012496, 0x0801A074 },   /* its collision data as BN6's init took it: BN6's 0x0801A074 gives back its +0x54 and clears its +1, which BN6's set-up after it writes 1 again (0x08019FD6), AIMED (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012ED0, 0x0801A082 },   /* project:melody, DIFF (audited) */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
+	{ 0x08013C48, 0x08148864 },   /* its pre-step's way on: a bx r0 of BN6's, r0 BN6's state step, AIMED (audited) */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x08014620, 0x0801BDDE },   /* search, SAME */
+	{ 0x08015ABC, 0x0801DC7C },   /* project:mettaur, DIFF (audited) */
+	{ 0x08044AEC, 0x080011EC },   /* project:billy, DIFF (audited) */
+	{ 0x080B3878, 0x0800EC48 },   /* project:research, SAME */
+	{ 0x080B6568, 0x0800EBD4 },   /* project:billy, DIFF (audited) */
+	{ 0x080B8C3E, 0x0810A952 },   /* its update: BN6's dispatcher runs its state and present, its own step is hook 3 */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvImm melody_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x080100A0, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
+	{ 0x080100D8, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
+	{ 0x080B8C4A, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080B8D02, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B8D88, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080B8DE8, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B8E5E, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080B8E96, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080B8EFA, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B8F9C, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B8FE6, THUMB_CMP, 0, 0, 0x8, 0xA },   /* its CurAction 8 compared */
+	{ 0x080B90A2, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B90D8, THUMB_CMP, 0, 0, 0x7, 0x9 },   /* its CurAction 7 compared */
+	{ 0x080B9120, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
+};
+static const XvRange melody_ranges[] = {
+	{ 0x080B8D30, 0x2EA, 0x2EF },   /* BN4's ids 0x37-0x3c, its own */
+};
+static const XvSoundCall melody_sound_calls[] = {
+	{ 0x080B8FEC, 0x104 },   /* its sound 0xc2 at Roll's pool slot 0x104, past a byte */
+	{ 0x080B90E8, 0x117 },   /* its sound 0xc3 at Roll's pool slot 0x117, past a byte */
+};
+static const XvNumber melody_numbers[] = {
+	{ 0x080B8C68, 0x080B8C6C, 0x0810A349 },   /* its pre-step's way on: BN6's state step, not its state table */
+};
+static const XvRef melody_states[] = {
+	OWN(0x0800FCAD), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080B8C99), OWN(0x080B8EBF), OWN(0x080B8F05), OWN(0x080B90B3),
+};
+static const XvSprite melody_sprites[] = {
+	{ 1, 0x0A, 1, 0xC7, XV_ART + 0x59000, 0x2000 },
+};
+static const XvId melody_effects[] = { { 0x13, 0x92 }, { 0x2E, 0x9A } };
+
+static const XVirusFamily bn4_melody = {
+	.name = "Melody (BN4's)",
+	.game = XROM_BN4_RED_SUN_US,
+	.src_ai = 0x11,   /* (its first-kind type: BN4 has no AI index) */
+	.ai = 71,
+	.first_id = XV_FIRST_ID + 0xEA,
+	.home = XV_HOMES + 0x13800,
+	.blocks = melody_blocks, .nblocks = (int)(sizeof melody_blocks / sizeof *melody_blocks),
+	.data = melody_data, .ndata = (int)(sizeof melody_data / sizeof *melody_data),
+	.calls = melody_calls, .ncalls = (int)(sizeof melody_calls / sizeof *melody_calls),
+	.imms = melody_imms, .nimms = (int)(sizeof melody_imms / sizeof *melody_imms),
+	.ranges = melody_ranges, .nranges = (int)(sizeof melody_ranges / sizeof *melody_ranges),
+	.sound_calls = melody_sound_calls, .nsound_calls = (int)(sizeof melody_sound_calls / sizeof *melody_sound_calls),
+	.numbers = melody_numbers, .nnumbers = (int)(sizeof melody_numbers / sizeof *melody_numbers),
+	.states = melody_states, .nstates = (int)(sizeof melody_states / sizeof *melody_states),
+	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), ENTERED(0x080B8C09), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
+	/* hook 5: Melody's init from its own step on (INIT_AGAIN): its +0x2E by its version (0x080B8C38's byte, 30 each), its collision data, its set-up with region 0x35, +8 4 and its update's call (a nullsub: its update runs as its pre-step) */
+	.struct1 = 0x08011B1C, .struct2 = 0x08011B1C,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
+	.names = { 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C },
+	.ice = 0,
+	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x00 },
+	.sprites = melody_sprites, .nsprites = (int)(sizeof melody_sprites / sizeof *melody_sprites),
+	.effects = melody_effects, .neffects = (int)(sizeof melody_effects / sizeof *melody_effects),
+	.prestep = 0x080B8C44,   /* its update's own work on, run as its pre-step (bn4_twins.PRESTEP) */
+	.summoned = true,   /* (moved for Roll's summon alone: no kin of its net's, no visitor) */
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
+};
+const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);
