@@ -55,7 +55,7 @@
                                        * 0x0800C9FC the same with the attack's +5 kept at +0x3A, 0x0800CA4A the CurAction alone */
 /* (their spawns: BN4_SPAWN_1, BN4_SPAWN_3 and BN4_SPAWN_4 above, r0 the type, r1 to r3 the place, r4 the parameters) */
 #define BN4_ENEMY_RECORD  0x08011878u /* r0 an enemy id: its BN4_ENEMY_STATS record */
-#define BN4_SPAWN_ENEMY   0x080F00F4u /* r0 an enemy id: its type spawned on a free panel of the side (Roll's state 11, MegaMan's 48) */
+#define BN4_SPAWN_ENEMY   0x080F00F4u /* r0 an enemy id: its type spawned on a free panel of the side (Roll's state 10, MegaMan's 47) */
 #define BN4_PANEL_CRACK   0x08009AECu /* r0, r1 a panel: cracked (its type 3), or broken (1) where it was cracked, sound 0x95 (ColdMan, Duo;
                                        * GutsMan's moved objects call it too, tools/xnavirecipe_bn4.py) */
 /* GutsMan, the first BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, GutsMan derived): found by his
@@ -164,5 +164,28 @@
                                        * the sprite state's +3 (BN6_GUST_INIT passes 0x80) */
 #define BN4_STEP_BEGIN    0x0801393Eu /* an object's step onto a panel begun: collision flags 0x100 and 4 (0x0801398C, 0x08013992), and no
                                        * byte of the object's (BN6_STEP_BEGIN's twin, which sets its +0x0F) */
+
+/* Roll, the fifth BN4 Navi derived (tools/xnavirecipe_bn4.py, xnavirecipe_bn4_summon.py; docs/multirom/bn4-navis.md, Roll built):
+ * found by her type, each checked by the generator against her ROM */
+#define BN4_ROLL          0x080BC0E4u /* her type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_ROLL]): jump table init 0x080BC109, update
+                                       * 0x080BC169, dying BN4_NAVI_DYING, then the after-step; her block to 0x080BC3FC */
+#define BN4_ROLL_STATES   0x080BC184u /* her state table: BN4's generic Navi 0 and 3-5, her own 1 (0x080BC1B5: +6 0, then the generic
+                                       * 1) and 2 (0x080BC309: her summons' HP made 0, then the generic 2), her decision 6 (0x080BC1C1),
+                                       * MegaMan's 44-48 as her 7-11 (47 her summon, BN4_SPAWN_ENEMY's caller) */
+#define BN4_ROLL_PRE      0x080BC340u /* her update's call before the pre-step: her summons' words (+0x60, +0x64) let go where their HP
+                                       * (+0x24) is 0 (BN6's hook A in the port) */
+#define BN4_ROLL_SUMMONS  0x080BC3D8u /* by version, her summon list (a count, then BN4 enemy ids): V1 1; V2 2, 0xE; V3 3, 0xF, 0x39;
+                                       * SP 4, 0x10; read in turn by 0x080BC3B4 (+6 the place) */
+#define BN4_ROLL_SHOT_KINDS 0x080BC300u /* by version, her shot's kind (the third kind's 0x0B, BN4_SHOT_KINDS's): 6, 7, 8, 9 */
+#define BN4_SUMMON_PANEL  0x080F00A4u /* MegaMan's state 47's panel for her to stand on: a free panel by 0x0800A0D8 and its masks by side
+                                       * (0x080F00E4, two words a side), else her own */
+#define BN4_SPAWN_ENEMY_MASKS 0x080F01A8u /* BN4_SPAWN_ENEMY's masks by side (wanted, refused; two words a side), BN4_FREE_PANELS' r2, r3 */
+#define BN4_SUMMONED_APPEAR 0x0801002Au /* BN4's generic state 0's appear where the object's +5 is 2 (BN4_SPAWN_ENEMY's spawn word) */
+#define BN4_T4_FLASH      0x17        /* the fourth kind's flash (MegaMan's states 46 and 47: her warp and summon), moved with her */
+#define BN4_FLASH         0x080E3A98u /* ... its routine (BN4_T4_TYPES[0x17]): 30 frames, every 8th the effect 0x2E at its place
+                                       * jittered (0x08014620), its parameter a draw & 3 */
+#define BN4_FLASH_SPAWN   0x080E3AD8u /* ... its spawner: r1-r3 its place */
+#define BN4_T3_02_KINDS   0x080CD524u /* the third kind's 0x02's kinds (4 bytes each: its sprite's list offset and number, its palette,
+                                       * its +0xC), read by its init by its +4; Roll's kind 7 list 3's 0xF */
 
 #endif
