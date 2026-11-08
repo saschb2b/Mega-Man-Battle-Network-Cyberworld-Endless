@@ -184,6 +184,13 @@
                                              0x43-0x48): the families' pre-step hook (xvirus_shim.h) */
 #define BN6_VIRUS_STATE_STEP  0x0810A348u /* ... past those cases, the state's step (ldr r0,[r5,#0x58]: the AI index, its state table,
                                              0x0801B1C4), where a family's pre-step goes on (r5 the virus, nothing else live) */
+#define BN6_VIRUS_STATE_CALL  0x0810A352u /* ... its call of the state runner (bl 0x0801B1C4), r0 the state table by the AI index
+                                             (BN6_FAMILY_TABLES' first, 0x0810A350), r5 the virus: a summoned enemy's state 0
+                                             taken from the summon's table there (xnavi_summoned.c) */
+#define BN6_T1_SPAWN_KIND     0x05        /* u8 how it came: the battle actor setup writes its argument here and at its AI data's
+                                             +2 (0x080076F0-0x080076F2): 0 one a battle begins with, 1 one spawned into a fight
+                                             under way (BN6_SPAWN_ENEMY_1), which BN6's generic state 0 (0x08016380) reads at +2;
+                                             2 a summon's, BN4's mark (BN4_SUMMON_MARK), written by the summon's shim alone */
 #define BN6_AI_INDEX          1           /* an AI's data's (BN6_T1_AI_DATA) +1: its AI index, the third byte of its enemy id's triple */
 #define BN6_CLEAR_FLAG2       0x0801A176u /* object_clearFlag2: r0 the bits cleared from its collision data's BN6_COLL_STRUCK (+0x40) */
 #define BN6_SONGS_EMPTY_FIRST 0x26        /* BN6's empty song slots (RomLayout.song_table), each a shared header of no tracks: from, */

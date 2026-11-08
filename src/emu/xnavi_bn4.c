@@ -313,6 +313,7 @@ static const XNavi bn4_gutsman = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
 	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
+	.palettes = 0x02000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 };
 /* ---- BN4's ThunderMan (its type 0x32 there, its enemy ids 148-151), as Navi AI 53 with ids 0x394-0x397 ---- */
 
@@ -582,6 +583,7 @@ static const XNavi bn4_thunderman = {
 	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.palettes = 0x04000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &thunderman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 };
 /* ---- BN4's WindMan (its type 0x30 there, its enemy ids 136-139), as Navi AI 50 with ids 0x388-0x38b ---- */
@@ -869,6 +871,7 @@ static const XNavi bn4_windman = {
 	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.palettes = 0x04000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &windman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 };
 /* ---- BN4's FireMan (its type 0xc there, its enemy ids 144-147), as Navi AI 52 with ids 0x390-0x393 ---- */
@@ -1237,6 +1240,7 @@ static const XNavi bn4_fireman = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
 	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
+	.palettes = 0x02000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &fireman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 };
 /* ---- BN4's SearchMan (its type 0x2b there, its enemy ids 140-143), as Navi AI 51 with ids 0x38c-0x38f ---- */
@@ -1594,6 +1598,7 @@ static const XNavi bn4_searchman = {
 	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.palettes = 0x04000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &searchman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 	.hide_step = OWN(0x0800C0A7),   /* (its copy of BN4's hide step before each of its states, as BN4's Navi runner runs it: xnavirecipe_bn4_objects.hide_steps) */
 };
@@ -1946,6 +1951,7 @@ static const XNavi bn4_aquaman = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
 	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
+	.palettes = 0x02000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &aquaman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 };
 /* ---- BN4's Roll (its type 0x1d there, its enemy ids 128-131), as Navi AI 48 with ids 0x380-0x383 ---- */
@@ -2186,9 +2192,9 @@ static const XvSprite roll_sprites[] = {
 };
 static const XvId roll_effects[] = { { 0x2E, 0x9A }, { 0x56, 0x99 } };
 static const XvSong roll_songs[] = {
-	{ 0x96, 0x32, XN_BN4_ART + 0x1800, 0x21C0, 9 },   /* its sound 0x96, BN4's song copied, on BN6's player 9 */
+	{ 0x96, 0x32, XN_BN4_ART + 0x1800, 0x21C0, 10 },   /* its sound 0x96, BN4's song copied, on BN6's player 10 */
 	{ 0xCE, 0x33, XN_BN4_ART + 0x39C0, 0x21C0 },   /* its sound 0xce, BN4's song copied */
-	{ 0x131, 0x63, XN_BN4_ART + 0x5B80, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
+	{ 0x131, 0x63, XN_BN4_ART + 0x5B80, 0x740, 10 },   /* its sound 0x131, BN4's song copied, on BN6's player 10 */
 	{ 0x132, 0xD0, XN_BN4_ART + 0x62C0, 0xC80 },   /* its sound 0x132, BN4's song copied */
 	{ 0x8B, 0xE0, XN_BN4_ART + 0x6F40, 0x40 },   /* its sound 0x8b, BN4's song copied */
 };
@@ -2236,6 +2242,7 @@ static const XNavi bn4_roll = {
 	.prestep = BN6(0x0801A9B9), .hook_a = OWN(0x080BC341),   /* (its hook A its update's call before its pre-step) */
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.palettes = 0x04000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &roll_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 	.summon = &roll_summon,   /* (its summon: xnavi_init.c) */
 };

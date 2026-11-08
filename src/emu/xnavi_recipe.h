@@ -170,6 +170,8 @@ typedef struct {
 	                               invisible and keeps their marker before every state, 0x08013F12, where BN6's status step calls its
 	                               twin nowhere), through stubs of its home (xnavi_init.c); addr 0 none. SearchMan's, who hides */
 	const XnSummon *summon;     /* its summon's shim (BN4's Roll's), NULL none */
+	uint32_t palettes;          /* its palette by version (BN4's Navis': BN4_NAVI_PALETTE's, a byte each, V1's the lowest), set at its
+	                               spawn's end over BN6's actor init's (0 for versions 0-3, BN6_NAVI_PALETTE_VERSIONS); 0 none */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in
