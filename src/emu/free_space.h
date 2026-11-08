@@ -52,7 +52,7 @@
 #define FREE_BACKDROPS      (EMU_FREE + 0x2A0000u)   /* other games' battle backgrounds (xbackdrop.c), to: */
 #define FREE_FLAME          (EMU_FREE + 0x2E0000u)   /* BN6's own flame of darkness (xnavi.c), to: */
 #define FREE_FLAME_END      (EMU_FREE + 0x2E1000u)
-#define FREE_MAP_BACKDROPS  (EMU_FREE + 0x310000u)   /* other games' net maps' backdrops (xbackdrop.c), to: */
+#define FREE_MAP_BACKDROPS  (EMU_FREE + 0x2F0000u)   /* other games' net maps' backdrops (xbackdrop.c), to: */
 #define FREE_INDOORS        (EMU_FREE + 0x320000u)   /* home's other places (mapslot.c), to: */
 /* issue #82's, fixed places the same at every boot with the same ROMs */
 #define FREE_VIRUS_ROOM     (EMU_FREE + 0x330000u)   /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c), to: */
