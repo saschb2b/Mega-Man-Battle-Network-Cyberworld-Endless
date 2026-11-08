@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -21,10 +21,10 @@ takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
 and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
-below), ThunderMan, WindMan and FireMan too
+below), ThunderMan, WindMan, FireMan and AquaMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
-[FireMan built](#fireman-built)), the three's plates on the bracket not yet
-named; their companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
+[FireMan built](#fireman-built), [AquaMan built](#aquaman-built)), their
+companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -485,7 +485,8 @@ battles apart. The 16 MB copy has no other room past FREE_LIB_TEAM (24 KB).
 ThunderMan, WindMan and FireMan each spawn companions in their inits,
 which BN6's actor init has none of. Three ports began with three ways to
 make them again. One mechanism now covers all three, and the next Navis
-(SearchMan's, AquaMan's) take it as it stands:
+take it as it stands (AquaMan's did, with his panel kept at his +6 and his
+companion's kind read from its spawn, [AquaMan built](#aquaman-built)):
 
 - **The generator reads every init the same way**
   (`tools/xnavirecipe_bn4_init.py` `init_calls`). A spawn is a call of a
@@ -858,6 +859,94 @@ the readers of `[eToolkit +0x44] +0xA` (one, a script's comparison at
 A palette-distance match of the Navis' battle sprites against the plates
 named none of the known five right, so it names none. Of the four, GutsMan
 alone is in the pool.
+
+## AquaMan built
+
+The fifth proved, the first of Blue Moon's four, by `aquaman_v1`: his type
+0x0D, Navi AI 58, ids 0x3A8-0x3AB (`foes 3A8@52`), his seat 10 by his BN4
+id (168). His addresses are in [BN4 Red Sun's tables](../rom/bn4.md)
+(AquaMan derived). He adds no new machinery to the Soul Navis' path; what
+his recipe asked of the generator:
+
+- **His panel at his +6** (`BN4_AQUAMAN_PANEL`): his init stores his
+  column and row there (`0x080B8264`: `ldrh r0,[r5,#0x12]; strh
+  r0,[r5,#6]`), his decision reads it as his last panel and writes it anew
+  (`0x080B833E`, `0x080B8344`); BN6's spawn leaves a Navi's +6 0. The
+  generator reads the pair in his init (`tools/xnavirecipe_bn4_init.py`
+  `HOME_FORM`), and his spawn's end makes it (`XnInit.home`,
+  `src/emu/xnavi_init.c`: `ldrh r0,[r5,#0x12]; strh r0,[r5,#6]` after his
+  collision's r3, before his companion's spawn, where BN4's init makes it).
+- **His companion**, the first kind's 0x5C as WindMan's, its kind 1 (his
+  spawn's r4): the kinds' table (`BN4_COMPANION_KINDS`) is read by the kinds
+  his spawns name (`table_kinds1`), so kind 1's sprite, list 4's 0x0C, is
+  copied and its byte given the copy's. He moves his own copy of the type,
+  at the dispatch's 0xE3. Kind 1's routine (`BN4_COMPANION_KIND1`) hides it
+  while his animation is not 0 and sets its animation up again once it is.
+- **His effects**: 0x23 spawned with his side in r4's second byte (his
+  copied MegaMan state, `lsls r4,r0,#8; adds r4,#0x23` at `0x080F459E`:
+  the `adds` given the moved id, `facing_effects`); 0x25 handed in r2 to an
+  engine routine that spawns it on the panels around a place by a pattern
+  (`BN4_EFFECT_PATTERN`, BN6's twin `BN6_EFFECT_PATTERN` the same body:
+  `EFFECT_CALLS`, `pattern_effects`). An effect's sprite another Navi
+  copied (WindMan's 5:0x00) is listed by him too at its place, as are his
+  objects' sprites another copied (FireMan's list 3's 0x02 for his third
+  kind 0x24, `navi_sprite`): the installer finds an effect's sprite only
+  among the recipe's and the families' rows (`xvirus.c` `sprite_of`), and
+  without it his install was refused. An effect of a sprite his objects
+  draw takes their copy (his 0x23, list 4's 0x0F), not a second.
+- **The rest, as GutsMan's machinery takes it**: three third-kind objects
+  moved (0x23, 0x24, 0x27); the spawn word `0x04050201` a number (the
+  collision region's, BN6's own attacks pass it too); his five sounds in
+  the pool (0x90 at 0x32, 0x9E at 0x33, 0xA0 at 0x63, 0xA1 at 0xD0, 0xC8 at
+  0xE0); his collision's own r3 0x21; his palette 0 for V1-V3 (SP's 2 the
+  interim GutsMan's and FireMan's share).
+
+`bn4_aquaman_control` PASSes. **`aquaman_v1` PASSes** over its 1200
+frames (his decision, his attacks' three objects and their effects, his
+companion, his sounds). What took it there, one root cause at a time:
+
+1. **His install refused** ("its effect 0 draws none of its sprites"): his
+   effect 0's sprite was WindMan's copy, which the installer does not look
+   among; his recipe lists it now (above).
+2. **His +6 and +7 at t1** (BN4 5 and 2, BN6 0 and 0): his panel, kept by
+   his init (above).
+3. **His companion's sprite at t2** (its count, BN4 0 and BN6 2, and its
+   frame): its init sets its animation up in the paused opening, and its
+   mode 8 runs the after-step (BN4 `0x080143FC` at `0x080CCEB0`, BN6's twin
+   `0x0801BBAC`), whose pause test opens at the fight's first frame in both
+   games: its animation runs by the fight's frames, not by his state runner,
+   which BN6 opens a frame later (the battle's offset). FireMan's companion
+   copies his animation from his first state on (`companion_opening_count`,
+   two frames); AquaMan's keeps its own until kind 1's routine sets it up
+   again from his state (BN4's t11, BN6's t12). The comparator compares a
+   held companion's sprite state at the same fight frame until it first
+   steps with the battle's offset (legit.json's bn4 `companion_clock`,
+   `tools/xdiff_bn4_opening.py` `CompanionClock`); in `aquaman_v1` its count
+   reads 1, 0, 2, 1, 0, 2, 1, 0, 2, 1 at BN4's t1-t10 and BN6's of the same
+   fight frames.
+4. **His sounds** (t32): his copies at the pool's slots paired by the
+   routines that play them, in his battles alone (`foes`: the pool's slot
+   is each Navi's own; WindMan's 0xC8 is at 0x33).
+5. **His effect 0x25 on the panels** (t51): BN6's own effect 0x25 around
+   his third kind 0x23, where the effect his code hands
+   `BN4_EFFECT_PATTERN` is moved (above).
+6. **His third kind 0x24's sprite** (t525): his copy of list 3's 0x02
+   and FireMan's, two rows of one BN4 sprite, read by the comparator as the
+   first; FireMan's copy is his too now (above).
+
+Six mutations break his port and each is caught: his panel's store at his
+spawn's end a nop (t1), his companion's kind 1 sprite another's (t1, through
+the companion's clock), his panels' effect left BN4's 0x25 (t51), his
+side's effect left BN4's 0x23 (t31), his sound 0x9E at the pool's first slot
+(t32) and his decision's CurAction off by one (t125).
+
+**In the tournament's pool**: `src/layer/xguardian_bn4.c`'s line, his V1
+id 0xA8 on his own plate (`BN4_PLATE_AQUAMAN`, 0x03), "The Rushing Tide"
+in a water blue (the owner's to change). `LAYER_MAKE` stays 112.
+
+Interims left, none reached by `aquaman_v1`: the 0x5C's state 4 run as 0
+(WindMan's, Companions); his SP's palette; sounds past a byte his code names
+none of.
 
 ## What tools/xnavirecipe.py needs for BN4
 
