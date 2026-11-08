@@ -25,7 +25,7 @@ import json
 import os
 import re
 
-from xdiff_bn4_opening import Opening
+from xdiff_bn4_opening import CompanionClock, Opening
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
@@ -1130,6 +1130,7 @@ def compare(spec, ta, tb, canon, show=6):
     MOVES.clear()
     # (legit.json's bn4 opening_animation: a moved object's animation run through the paused opening, by the openings' lengths)
     opening = Opening(ta, tb, getattr(canon, 'sprites', []), getattr(canon, 'roms', {}).get(4, b'')) if against else None
+    clock = CompanionClock() if against else None   # (legit.json's bn4 companion_clock)
     for fra in ta['frames']:
         frb = bt.get(fra['t'] + lag)
         if frb is None:
@@ -1168,9 +1169,12 @@ def compare(spec, ta, tb, canon, show=6):
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
             d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or spawner_kept(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
-                ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None)
+                ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None) or \
+                (clock.holds(d, fa, ft) if clock else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
+        if clock:
+            clock.see(fa, fb)
         if opening:
             opening.see(fa, fb)
             for d in [d for d in mine if not d.mask and opening.phase(d, fa, fb)]:

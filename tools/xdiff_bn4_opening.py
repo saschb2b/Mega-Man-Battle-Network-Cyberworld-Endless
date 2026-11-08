@@ -1,6 +1,7 @@
 """xdiff_bn4_opening.py: a moved object's animation run through the paused opening, for tools/xdiff_bn4.py's compare
 (legit.json's bn4 opening_animation; docs/devtools/differential.md, The BN4 trace; docs/multirom/bn4-navis.md, ThunderMan
-built).
+built); and a Navi's companion's animation its init set in the paused opening, run by the fight's frames until a state sets
+it again (legit.json's bn4 companion_clock, CompanionClock; docs/multirom/bn4-navis.md, AquaMan built).
 
 An object whose init sets its animation in the battle's set-up and whose after-state runs the sprite update every frame its
 routine runs, with its +0 0x04 through the pause (ThunderMan's cloud), animates through the whole opening in both games.
@@ -13,7 +14,7 @@ Imported by tools/xdiff_bn4.py alone. Numbers only."""
 import json
 import os
 
-from xdiff_snap import ROOT, SPAWN, SPRITE
+from xdiff_snap import ROOT, SPAWN, SPRITE, T1_MOVED, obj_cells
 
 ANIM, ANIM_SET, COUNT, ANIM_ART, ANIM_FRAME = 0x90, 0x11, 0x91, 0xA8, 0xAC   # (a sprite state's fields: tools/xdiff_bn4.py's)
 FRAME_SIZE, FRAME_DURATION, FRAME_FLAGS, LAST = 20, 16, 18, 0x80
@@ -100,3 +101,49 @@ class Opening:
             return None
         ran = (ra + fa.fr['t']) - (rb + fb.fr['t'])
         return self.name if (pa[1] - pb[1] - ran) % pa[2] == 0 else None
+
+
+def clock_rule():
+    """legit.json's bn4 companion_clock: its name and the BN4 first-kind types of the companions it holds for; None where none"""
+    r = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('companion_clock')
+    return (r['name'], {int(o['type'], 0) for o in r['objects'] if o['kind'] == 'T1'}) if r else None
+
+
+class CompanionClock:
+    """legit.json's bn4 companion_clock: a held Navi's companion (a first-kind object of a type his recipe moves, its role
+    T1_MOVED | its BN4 type) whose sprite update its mode runs through the after-step at every fight frame (whose pause
+    test skips the paused opening in both games), not through its Navi's state runner: its sprite state compared at the same
+    fight frame until it first steps with the battle's offset (its animation set up again from its Navi's state), exactly
+    from then on"""
+
+    def __init__(self):
+        self.name, self.types = clock_rule() or (None, set())
+        self.done = set()
+
+    def held(self, role):
+        return isinstance(role, tuple) and len(role) > 1 and role[0] == 'T1' and isinstance(role[1], int) and \
+            bool(role[1] & T1_MOVED) and role[1] & ~T1_MOVED in self.types
+
+    @staticmethod
+    def state_cells(fa, fb, oa, ob):
+        lo = SPRITE[oa.kind]
+        return [c for c in obj_cells(fa, fb, oa, ob) if c[0] == 'obj' and lo <= c[1] < lo + SPRITE_STATE]
+
+    def see(self, fa, fb):
+        """each held companion whose sprite state is the same at the battle's offset (fa, fb): its clock the state's from here"""
+        for oa in fa.fr['objs']:
+            ob = fb.by_role.get(oa.role)
+            if self.held(oa.role) and oa.role not in self.done and ob is not None and not self.state_cells(fa, fb, oa, ob):
+                self.done.add(oa.role)
+
+    def holds(self, d, fa, fbt):
+        """its name where d is a held companion's sprite state before it stepped with the offset, BN6's of BN4's fight frame
+        (fbt) the same there"""
+        if not self.name or fbt is None or d.part != 'obj' or not self.held(d.role) or d.role in self.done:
+            return None
+        if not SPRITE['T1'] <= d.off < SPRITE['T1'] + SPRITE_STATE:
+            return None
+        oa, ob = fa.by_role.get(d.role), fbt.by_role.get(d.role)
+        if oa is None or ob is None:
+            return None
+        return None if any(c[1] == d.off for c in self.state_cells(fa, fbt, oa, ob)) else self.name
