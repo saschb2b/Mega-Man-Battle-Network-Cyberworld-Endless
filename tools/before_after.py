@@ -145,6 +145,11 @@ SCENES = [
                               ['--scene', 'title', '--input', '60:,4:SELECT,150:']), {}, 210),
     ('options-sound', (['--scene', 'title', '--input', '60:,4:SELECT,40:,4:DOWN,10:,4:DOWN,10:,4:A,70:'],
                        ['--scene', 'title', '--input', '60:,4:SELECT,40:,4:R,94:']), {}, 200),
+    # (0.20.0's: the setup after NEW GAME as it opens, one list before and
+    # its RUN page under the tabs after; the ROMs screen with BN6's, BN5's
+    # and BN4 Red Sun's ROMs in the folder, BN4's cartridge the third)
+    ('setup-tabs', ['--scene', 'setup', '--input', '60:'], {}, 100),
+    ('launcher-bn4', ['--scene', 'launcher'], {}, 90),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -167,7 +172,8 @@ def old_binary(tag, picks=()):
 def frame(binary, args, env, at, out, whole=0):
     """Frame `at` of a headless run of `binary` (relative to ROOT), the game's 240 x 160;
     or with `whole`, the whole screen (--screen-shot: the touch controls on it), shrunk by it.
-    On BN6's ROM alone, but a scene named for BN5 (`out`) with BN5's beside it."""
+    On BN6's ROM alone, but a scene named for BN5 or BN4 (`out`, build.whole_rom_folder) or the ROMs screen with
+    the whole folder."""
     from PIL import Image
     tmp = os.path.join(ROOT, '.build', 'before', 'shot')
     shutil.rmtree(tmp, ignore_errors=True)
@@ -177,7 +183,7 @@ def frame(binary, args, env, at, out, whole=0):
     try:
         code = build.docker(binary, '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/before/shot/data', *args,
                             '--frames', str(at + 1), '--screen-shot' if whole else '--shot', f'{at}:/src/.build/before/shot/f.bmp',
-                            mounts=build.docs_rom_mounts(bn5='bn5' in out))
+                            mounts=build.docs_rom_mounts(bn5=build.whole_rom_folder(out) or out.startswith('launcher')))
     finally:
         for k, v in saved.items():
             if v is None:
