@@ -1477,25 +1477,27 @@ static const XvImm aquaman_imms[] = {
 	{ 0x080B8492, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 set (BN4_SET_ACTION's r0) */
 	{ 0x080CCD2E, THUMB_MOVS, 2, 0, 0x4, 0x0 },   /* its companion's mode 4 (its appear through BN4's tile buffer, unported) run as its mode 0 */
 	{ 0x080CCF38, THUMB_MOVS, 0, 0, 0x5C, 0xE3 },   /* its companion's type 0x5c (the first kind): moved, the dispatch's 0xe3 */
-	{ 0x080D12E4, THUMB_MOVS, 2, 0, 0xF, 0xDA },   /* its object's sprite: list 4 0xf in BN4, list 4 0xda in BN6 (copied) */
+	{ 0x080D12E4, THUMB_MOVS, 2, 0, 0xF, 0xD9 },   /* its object's sprite: list 4 0xf in BN4, list 4 0xd9 in BN6 (copied) */
 	{ 0x080D132E, THUMB_MOVS, 0, 0, 0x9E, 0x33 },   /* its sound 0x9e: BN4's copied into BN6's empty slot 0x33, on its player 8 */
 	{ 0x080D134A, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D13AA, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D13C8, THUMB_MOVS, 2, 0, 0x25, 0x95 },   /* its effect (r2 of 0801457E): 0x25 in BN4, 0x95 in BN6 (moved) */
 	{ 0x080D13DA, THUMB_MOVS, 0, 0, 0x9F, 0x3D },   /* its sound 0x9f: BN4's copied into BN6's empty slot 0x3d, on its player 28 */
 	{ 0x080D1424, THUMB_MOVS, 0, 0, 0x23, 0xF6 },   /* its object's type 0x23: moved, the dispatch's 0xf6 */
 	{ 0x080D143A, THUMB_STRB, 1, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D146E, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
-	{ 0x080D1470, THUMB_MOVS, 2, 0, 0x2, 0xD8 },   /* its object's sprite: list 3 0x2 in BN4, list 4 0xd8 in BN6 (copied) */
+	{ 0x080D1470, THUMB_MOVS, 2, 0, 0x2, 0xD5 },   /* its object's sprite: list 3 0x2 in BN4, list 4 0xd5 in BN6 (copied) */
 	{ 0x080D14D8, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D14F4, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D155C, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D1582, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D159C, THUMB_MOVS, 4, 0, 0x25, 0x95 },   /* its effect: 0x25 in BN4, 0x95 in BN6 (moved) */
 	{ 0x080D1618, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D162E, THUMB_MOVS, 2, 0, 0x25, 0x95 },   /* its effect (r2 of 0801457E): 0x25 in BN4, 0x95 in BN6 (moved) */
 	{ 0x080D1638, THUMB_MOVS, 0, 0, 0x9F, 0x3D },   /* its sound 0x9f: BN4's copied into BN6's empty slot 0x3d, on its player 28 */
 	{ 0x080D165C, THUMB_MOVS, 0, 0, 0x24, 0xF7 },   /* its object's type 0x24: moved, the dispatch's 0xf7 */
 	{ 0x080D166E, THUMB_STRB, 1, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080D1970, THUMB_MOVS, 2, 0, 0x10, 0xDB },   /* its object's sprite: list 4 0x10 in BN4, list 4 0xdb in BN6 (copied) */
+	{ 0x080D1970, THUMB_MOVS, 2, 0, 0x10, 0xDA },   /* its object's sprite: list 4 0x10 in BN4, list 4 0xda in BN6 (copied) */
 	{ 0x080D1A10, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D1A1E, THUMB_MOVS, 4, 0, 0x0, 0x9B },   /* its effect: 0x0 in BN4, 0x9b in BN6 (moved) */
 	{ 0x080D1A24, THUMB_MOVS, 0, 0, 0xC8, 0xE0 },   /* its sound 0xc8: BN4's copied into BN6's empty slot 0xe0, on its player 11 */
@@ -1522,7 +1524,7 @@ static const XvPair aquaman_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvByte aquaman_bytes[] = {
-	{ 0x080CCC97, 0x0C, 0xD9 },   /* its table's kind 1: list 4 0xc in BN4, 0xd9 copied */
+	{ 0x080CCC97, 0x0C, 0xD8 },   /* its table's kind 1: list 4 0xc in BN4, 0xd8 copied */
 };
 static const XvType aquaman_types[] = {
 	{ 3, 0xF6, XV_TYPE_MOVED, 0x23 },   /* BN4's third-kind 0x23, moved, the dispatch's 0xf6 */
@@ -1535,19 +1537,19 @@ static const XvRef aquaman_states[] = {
 };
 static const XvSprite aquaman_sprites[] = {
 	{ 2, 0x0B, 2, 0x4A, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 3, 0x02, 4, 0xD8, XN_BN4_ART + 0x1C000, 0x1000 },
-	{ 4, 0x0C, 4, 0xD9, XN_BN4_ART + 0x1D000, 0x800 },
-	{ 4, 0x0F, 4, 0xDA, XN_BN4_ART + 0x1D800, 0x800 },
-	{ 4, 0x10, 4, 0xDB, XN_BN4_ART + 0x1E000, 0x3800 },
+	{ 3, 0x02, 4, 0xD5, XN_BN4_ART + 0x16E80, 0x1000 },
+	{ 4, 0x0C, 4, 0xD8, XN_BN4_ART + 0x1C000, 0x800 },
+	{ 4, 0x0F, 4, 0xD9, XN_BN4_ART + 0x1C800, 0x800 },
+	{ 4, 0x10, 4, 0xDA, XN_BN4_ART + 0x1D000, 0x3800 },
 	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0xDB40, 0x1C00 },
 };
 static const XvId aquaman_effects[] = { { 0x00, 0x9B }, { 0x15, 0x90 }, { 0x25, 0x95 }, { 0x23, 0x9C } };
 static const XvSong aquaman_songs[] = {
-	{ 0x90, 0x32, XN_BN4_ART + 0x21800, 0x40 },   /* its sound 0x90, BN4's song copied */
-	{ 0x9E, 0x33, XN_BN4_ART + 0x21840, 0x40 },   /* its sound 0x9e, BN4's song copied */
-	{ 0xA0, 0x63, XN_BN4_ART + 0x21880, 0x900 },   /* its sound 0xa0, BN4's song copied */
-	{ 0xA1, 0xD0, XN_BN4_ART + 0x22180, 0x40 },   /* its sound 0xa1, BN4's song copied */
-	{ 0xC8, 0xE0, XN_BN4_ART + 0x221C0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
+	{ 0x90, 0x32, XN_BN4_ART + 0x20800, 0x40 },   /* its sound 0x90, BN4's song copied */
+	{ 0x9E, 0x33, XN_BN4_ART + 0x20840, 0x40 },   /* its sound 0x9e, BN4's song copied */
+	{ 0xA0, 0x63, XN_BN4_ART + 0x20880, 0x900 },   /* its sound 0xa0, BN4's song copied */
+	{ 0xA1, 0xD0, XN_BN4_ART + 0x21180, 0x40 },   /* its sound 0xa1, BN4's song copied */
+	{ 0xC8, 0xE0, XN_BN4_ART + 0x211C0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
 };
 static const XnSpawn aquaman_spawns[] = {
 	{ OWN(0x080CCF35), 0x1, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B826A: its first-kind 0x5c */

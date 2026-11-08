@@ -158,7 +158,69 @@ def effects_of(b4, b6, f, alloc, navis):
         alloc.effect_sprites.setdefault((sp['list'], sp['index']), (sp, f.name))
     X4.effects_of(b4, b6, f, alloc)
     facing_effects(b4, b6, f, alloc)
+    pattern_effects(b4, b6, f, alloc)
     navi_effect_sprites(b4, f, alloc, navis)
+    f.effects = list(dict.fromkeys(f.effects))
+
+
+def navi_sprite_add(f, alloc, sp):
+    """a sprite of another list a Navi's objects load copied into list 4 (tools/xnavirecipe_bn4.py list_moves), kept for the Navis
+    after him: BN4's (list, number) -> (the copy, his name)"""
+    if not hasattr(alloc, 'navi_sprites'):
+        alloc.navi_sprites = {}
+    alloc.navi_sprites.setdefault((sp['list'], sp['index']), (sp, f.name))
+
+
+def navi_sprite(f, alloc, lst, num):
+    """another Navi's copy of BN4's (lst, num) (navi_sprite_add), listed by him too at its place and number, its bytes checked
+    the same there where that Navi installed first (xvirus.c sprites_set; AquaMan's third kind 0x24's 3:0x02, FireMan's copy):
+    the copy's row, else None"""
+    have = getattr(alloc, 'navi_sprites', {}).get((lst, num))
+    if have is None or have[1] == f.name:
+        return None
+    sp = dict(have[0])
+    f.attack_sprites.append(sp)
+    f.notes.append(f'its sprite {lst}:{num:#x} is {have[1]}\'s copy (list {sp["to_list"]} {sp["to_index"]:#x}): listed by him too, at its place')
+    return sp
+
+
+# The engine's routines that spawn an effect his code names in another register than the effect spawner's r4: routine -> its
+# register, why (each pair's body the same in both games, tools/bn4_twins.py)
+EFFECT_CALLS = {
+    0x0801457E: (2, "a pattern of effects on the panels around (r0, r1), r3 the pattern (its table 0x080125B0), r4 the side: each "
+                    "a call of the effect spawner (0x080E18EE at 0x080145D2) with r4 its r2; BN6's twin 0x0801BD3C the same body "
+                    "(map:bytes, SAME)"),
+}
+
+
+def effect_of(b4, b6, f, alloc, e4):
+    """BN4's effect e4 as BN6's: BN6's of the same look, else moved (xrecipe_bn4.effects_of's way): (BN6's id, how), None"""
+    if e4 >= X4.BN4['neffects']:
+        return None
+    e6 = X4.effect_twin(b4, b6, e4)
+    if e6 is not None:
+        return e6, 'the same look'
+    e6 = X4.move_effect(b4, f, alloc, e4)
+    return (e6, 'moved') if e6 is not None and e6 <= 0xFF else None
+
+
+def pattern_effects(b4, b6, f, alloc):
+    """the effects his code hands an engine routine of EFFECT_CALLS (AquaMan's third kind 0x23's movs r2,#0x25 at
+    0x080D13C8 to 0x0801457E): each BN6's id, the movs given it"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t not in EFFECT_CALLS:
+                continue
+            reg, why = EFFECT_CALLS[t]
+            v, chain = T.back_value(w, site, reg)
+            got = effect_of(b4, b6, f, alloc, v) if v is not None and len(chain) == 1 and chain[0][1] == 'movs' else None
+            if got is None:
+                f.decide('effect', f'{site:08X}: an effect handed {t:08X} in r{reg} made otherwise ({chain})')
+                continue
+            if got[0] != v:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=reg, rn=0, was=v, now=got[0],
+                                   why=f'its effect (r{reg} of {t:08X}): {v:#x} in BN4, {got[0]:#x} in BN6 ({got[1]})'))
+            f.notes.append(f'{site:08X}: its effect {v:#x} handed {t:08X} ({why}): BN6\'s {got[0]:#x} ({got[1]})')
 
 
 def navi_effect_sprites(b4, f, alloc, navis):
@@ -189,13 +251,12 @@ def facing_effects(b4, b6, f, alloc):
                 continue
             sh = w.insns[chain[1][0]]
             e4 = chain[0][2]
-            if tuple(sh.f[::2]) != (4, 8) or e4 >= X4.BN4['neffects']:
+            if tuple(sh.f[::2]) != (4, 8):
                 continue
-            e6, how = X4.effect_twin(b4, b6, e4), 'the same look'
-            if e6 is None:
-                e6, how = X4.move_effect(b4, f, alloc, e4), 'moved'
-            if e6 is None or e6 > 0xFF:
+            got = effect_of(b4, b6, f, alloc, e4)
+            if got is None:
                 continue
+            e6, how = got
             f.decisions = [d for d in f.decisions if d != ('effect', f'an effect spawned at {site:08X} by an id made otherwise ({chain})')]
             if e6 != e4:
                 f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=4, rn=0, was=e4, now=e6,

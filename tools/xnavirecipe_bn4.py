@@ -676,13 +676,14 @@ def list_moves(b4, f, alloc):
             if raw is None:
                 f.decide('sprite', f'{site:08X}: its sprite {lst // 4}:{num:#x} is not one the generator reads')
                 continue
-            sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None)
+            sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None) or C.navi_sprite(f, alloc, lst // 4, num)
             if sp is None:
                 room = X4.rounded(len(raw), X4.ROOM_ATTACK)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)
                 alloc.list4 += 1
                 alloc.art += room
+                C.navi_sprite_add(f, alloc, sp)
             f.imms.append(dict(at=c1[0][0], form='THUMB_MOVS', rd=1, rn=0, was=lst, now=4 * to,
                                why=f'its object\'s sprite\'s list: {lst // 4} in BN4, copied into {to} (LIST_MOVES)'))
             f.imms.append(dict(at=c2[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=sp['to_index'],
