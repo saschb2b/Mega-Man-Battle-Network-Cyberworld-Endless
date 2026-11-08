@@ -100,7 +100,7 @@ how to verify it.
 | --- | ---: | ---: | ---: |
 | Code (routines, hooks, instructions) | 317 | 27 | 78 |
 | ROM data (tables, text, literals) | 296 | 267 | 88 |
-| ROM, code or data not told | 469 | 582 | 120 |
+| ROM, code or data not told | 471 | 582 | 122 |
 | RAM (variables, structures) | 137 | 65 | 38 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 177 | 42 | 3 |

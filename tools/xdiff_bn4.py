@@ -29,7 +29,7 @@ from xdiff_bn4_opening import Opening
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
-                        sprite_numbers_of,
+                        sprite_numbers_of, T1_MOVED,
                         u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
@@ -641,6 +641,16 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
+def companion_count(d, fa, fbt):
+    """legit.json's bn4 companion_opening_count: a Navi's companion (a first-kind object of a type his recipe moves, its role
+    T1_MOVED | its type: FireMan's 0x57) counts the animation its init set up in the paused opening by the fight's frames,
+    its mode's after-step (BN4 0x080143FC, BN6's twin 0x0801BBAC) running the sprite update at every fight frame, as the
+    Navi's own (opening_count): True where BN6's of BN4's t holds the same at the same fight frame"""
+    r = d.role
+    return (isinstance(r, tuple) and len(r) > 1 and r[0] == 'T1' and isinstance(r[1], int) and bool(r[1] & T1_MOVED)
+            and opening_count(d, fa, fbt))
+
+
 # MegaMan's animation in each game's own art (legit.json's bn4 allowed, "MegaMan's own art's animation"): a first-kind
 # object's sprite state holds its animation (+0x90), its frame's count (+0x91), its flags (+0x92: 0x80 as its last frame
 # runs), its art (+0xA8, the sprite + 4, its animations' table) and its frame's record (+0xAC: 20 bytes a frame, its
@@ -839,8 +849,8 @@ def bn4_renderer(fa, fb, fam, last):
     it, so what else each game draws (MegaMan's own art, BN6's thunder's own art, BN6's opening effect) moves the numbers:
     a family object drawn this frame reads its rank among those the family's drawn objects take, in the order they ran;
     one not drawn keeps its last rank where its place stayed; one never drawn none. Into each object's `over`. A hit's
-    spark takes no rank (spark_own): its life is its own art's (legit.json's bn4 allowed, the hit's spark), so one drawn
-    in one game alone would move the ranks of the family's drawn after it. The world's natives (native_drawn: each
+    spark takes no rank (legit.json's bn4 spark_ranks): its life is its own art's (legit.json's bn4 allowed, the hit's spark),
+    so one drawn in one game alone would move the ranks of the family's drawn after it. The world's natives (is_native: each
     engine's own objects of the third and fourth kinds, the wind's gust) are ranked so among themselves"""
     for f in (fa, fb):
         for group in ([o for o in f.fr['objs'] if o.role in fam], [o for o in f.fr['objs'] if is_native(o, fam)]):
@@ -1157,7 +1167,8 @@ def compare(spec, ta, tb, canon, show=6):
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
             d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or spawner_kept(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
-                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
+                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
+                ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         if opening:

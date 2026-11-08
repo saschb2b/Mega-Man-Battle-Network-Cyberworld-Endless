@@ -105,6 +105,15 @@
 #define BN4_PAUSE_BYTE    0x080078ECu /* the battle's pause byte ([eToolkit +0x40] +9) in r0 (BN6_PAUSE_TEST's twin, flags unset) */
 #define BN4_T3_1A_KINDS   0x080D013Cu /* the third kind's 0x1A's kinds (FireMan's), 6 bytes each, its sprite's list 4 number first */
 #define BN4_FIREMAN_MASKS 0x080F1DB4u /* panels' masks by side his MegaMan state 0x080F1D98 reads (BN4_RANDOM_PANEL_MASKS' words) */
+/* FireMan proved (docs/multirom/bn4-navis.md, FireMan built: fireman_v1) */
+#define BN4_FIRE_COMPANION_SPRITE 0x080CC5D0u /* his companion's modes' tail: its parent's sprite fields copied, then, where its +6 is 0,
+                                       * the after-step (0x080143FC, BN6's twin BN6_AFTER_STEP) unless time is stopped (BN4_TIME_STOP) */
+#define BN4_FIRE_FLAME    0x080CE2D8u /* the third kind's 0x09 (his flame): its init (0x080CE309) gives its palette (BN4_T3_PALETTE) to
+                                       * its sprite (0x080CE358, BN4_SPRITE_PALETTE_SET) */
+#define BN4_FIRE_FLAME_SPAWN 0x080CE49Cu /* ... spawned: r0-r2 its column, row and element (+0x12, +0x13, +0x17), r7 its palette, r6 +0x2C */
+#define BN4_T3_PALETTE    0x0E        /* a third-kind object's palette, its sprite's +4: BN6's +0xE is its element (BN4's +0x17), so a moved
+                                       * object keeps it at BN6_T3_PALETTE (tools/xrecipe_bn4.py palette_imms) */
+#define BN4_SPRITE_PALETTE_SET 0x08002DECu /* r0 into the sprite's +4 (BN6_SPRITE_PALETTE_SET, the same body) */
 /* ThunderMan, the second (tools/xnavirecipe_bn4.py, his companion read by tools/xnavirecipe_bn4_init.py, his objects' needs
  * by tools/xnavirecipe_bn4_objects.py; docs/multirom/bn4-navis.md, ThunderMan built) */
 #define BN4_THUNDERMAN    0x080C37F4u /* his type's routine: jump table init 0x080C3819, update 0x080C388D, dying BN4_NAVI_DYING; his block
