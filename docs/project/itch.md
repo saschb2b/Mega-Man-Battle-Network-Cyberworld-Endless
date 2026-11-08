@@ -3,7 +3,7 @@ type: Process
 title: "itch.io"
 description: "The itch.io page's source, changed here first: its title, tagline, settings, tags, pictures (`tools/itch_art.py`) and theme, the files `tools/itch.py` pushes to butler channels, the browser build there, and each release's steps."
 tags: [project, itch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-31T01:15:12Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:40:00Z }
 ---
 
 # itch.io
@@ -56,7 +56,7 @@ The title is the site's brand. The tagline, shown under the cover in
 listings and search results, names the series and BN6 for the players
 who look for it, and says the rest of the site's pitch in fewer words;
 itch takes 120 characters at most. The description says first what the game is and what it needs,
-then a run, Liberation Missions, BN5, online, where it runs, the browser
+then a run, Liberation Missions, BN5 and BN4, online, where it runs, the browser
 player's controls and saves, the links and the legal line, each with a
 whole-frame GIF of the game from `docs/clips/`. It keeps the README's
 plain voice and claims only what the README and the guide say. It names

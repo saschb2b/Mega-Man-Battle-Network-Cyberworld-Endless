@@ -16,7 +16,8 @@ installs PS4 packages can take the PS4 build's PKG instead, ps4/README.md.)
 - The ROM, Mega Man Battle Network 6: Cybeast Gregar (USA), goes in
   `/data/cyberworld-endless/rom/`, or stays on a USB drive:
   `/mnt/usb0/roms/gba`, `/mnt/usb0/gba` or the drive's top. Any file name
-  works. BN5 Team Colonel's goes beside it, or in any of those folders.
+  works. BN5 Team Colonel's and BN4 Red Sun's go beside it, or in any of
+  those folders.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `/data/cyberworld-endless/`, outside the app's folder, so an update
   keeps them; the PS4 build keeps its own there too.

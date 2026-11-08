@@ -16,9 +16,10 @@ signed title.
   `sdmc:/switch/cyberworld-endless/rom/`, or stays where Switch players
   keep GBA games (`sdmc:/roms/gba`, `sdmc:/roms`, `sdmc:/gba`). Any file
   name works: the game reads the header and checks the contents.
-- Mega Man Battle Network 5: Team Colonel (USA), if you have it, goes
-  beside BN6's ROM, or in any of those folders. Its net joins the runs as
-  on every other system (docs/GUIDE.md, What you need).
+- Mega Man Battle Network 5: Team Colonel (USA) and Mega Man Battle
+  Network 4: Red Sun (USA), if you have them, go beside BN6's ROM, or in
+  any of those folders. Their nets join the runs as on every other system
+  (docs/GUIDE.md, What you need).
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/switch/cyberworld-endless/`.
 - The GBA's buttons are on the Switch's buttons of the same names: A, B,
@@ -79,7 +80,8 @@ run, on a Switch with Atmosphère:
   first layer, A on the button marked A, the picture docked and in the
   console's hands (and a dock or an undock while playing), HOME and
   closing it, then CONTINUE on the same layer.
-- BN5's ROM beside BN6's: the title's "BN5 found", a layer of its areas.
+- BN5's ROM beside BN6's: the title's "BN5 found", a layer of its areas;
+  and the same with BN4's ("BN4 found").
 - Online: the gate in Lan's HP reaches the Net Square, a trade, and a
   NetBattle; `--dev rollbench` says whether the pair's two GBAs run in a
   frame's time (docs/online/arena/rollback/new-3ds.md measured the New

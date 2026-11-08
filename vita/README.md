@@ -14,9 +14,10 @@ signed title.
   `ux0:data/cyberworld-endless/rom/`, or stays where Vita players keep
   GBA games (`ux0:roms/gba`, `ux0:roms`, `ux0:data/gba`). Any file name
   works: the game reads the header and checks the contents.
-- Mega Man Battle Network 5: Team Colonel (USA), if you have it, goes
-  beside BN6's ROM, or in any of those folders. Its net joins the runs as
-  on every other system (docs/GUIDE.md, What you need).
+- Mega Man Battle Network 5: Team Colonel (USA) and Mega Man Battle
+  Network 4: Red Sun (USA), if you have them, go beside BN6's ROM, or in
+  any of those folders. Their nets join the runs as on every other system
+  (docs/GUIDE.md, What you need).
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `ux0:data/cyberworld-endless/`.
 - The GBA's buttons are on the Vita's: Cross is A, Circle B, L and R,
@@ -82,7 +83,8 @@ run, on a Vita with HENkaku or h-encore and VitaShell:
   title, NEW GAME to the first layer at full speed (`frame_log = on` in
   `settings.ini`: a line a second of the frames' times), Cross as A, the
   touch controls on a touch, a close from the LiveArea and CONTINUE.
-- BN5's ROM beside BN6's: the title's "BN5 found", a layer of its areas.
+- BN5's ROM beside BN6's: the title's "BN5 found", a layer of its areas;
+  and the same with BN4's ("BN4 found").
 - Online: the gate in Lan's HP reaches the Net Square, a trade, and a
   NetBattle, whose frames' times `frame_log` gives: whether the pair's
   two GBAs run in a frame's time on its cores

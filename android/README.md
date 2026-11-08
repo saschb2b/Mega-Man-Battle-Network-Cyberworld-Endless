@@ -20,12 +20,13 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   several at once (`EXTRA_ALLOW_MULTIPLE`, for Download itself, which
   Android 11 and later keep from the folder picker), and `romsResult`
   hands back what `RomLook` found there. It opens only `.gba` files, tells
-  each by its header's game code, checks BN6 Cybeast Gregar's and BN5 Team
-  Colonel's by their SHA-1 and copies those two alone into the app's files
-  (`files/rom/bn6g.gba`, `bn5c.gba`), where the game finds BN5 beside BN6;
-  every other `.gba` is named with why it was refused. The folder is kept
-  (a persisted grant, read and write) and looked in again at each start
-  while BN5 is missing (`romsLook`); a file seen before (its document, size
+  each by its header's game code, checks BN6 Cybeast Gregar's, BN5 Team
+  Colonel's and BN4 Red Sun's by their SHA-1 and copies those alone into
+  the app's files (`files/rom/bn6g.gba`, `bn5c.gba`, `bn4rs.gba`), where
+  the game finds BN5 and BN4 beside BN6; every other `.gba` is named with
+  why it was refused. The folder is kept (a persisted grant, read and
+  write) and looked in again at each start while BN5 or BN4 is missing
+  (`romsLook`); a file seen before (its document, size
   and date) is not opened again. Nothing of them leaves the device.
 - The anonymous play statistics (docs/GUIDE.md, Anonymous statistics), once
   the player said yes, are posted by `GameActivity.statsSend` with
@@ -165,13 +166,14 @@ from the file manager or browser), or with a cable: `adb install -r
 cyberworld-endless.apk`. The first start opens the ROMs screen, whose BN6
 slot asks for the folder the ROMs are in: Mega Man Battle Network 6:
 Cybeast Gregar (USA), unmodified, the same file every other build takes,
-and optionally Mega Man Battle Network 5: Team Colonel (USA).
+and optionally Mega Man Battle Network 5: Team Colonel (USA) and Mega Man
+Battle Network 4: Red Sun (USA).
 
 To try it in the emulator, push copies of the ROMs into its storage, for
 instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
 Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
 ROMs: 3 .gba, kept 3, refused [Falzar.gba: BN6 Cybeast Falzar, not Gregar]`)
-and the game's own line, `BN5 found: ...`. The game's standard output and
+and the game's own lines, `BN5 found: ...` and `BN4 found: ...`. The game's standard output and
 errors, which Android throws away for an app, go to logcat a line at a
 time under `Cyberworld` too (`startup_output`): the Net Square's
 `online:` lines, the Arena's `arena:` hashes and stalls, and with
