@@ -35,6 +35,10 @@
                                              into the appear queue (0x0800AA1A) and hidden, waiting for BN6_APPEAR_BITS' bit 0 and the
                                              queue's head; 0x0801641A the 2 x 16 frame blink, then out of the queue (0x0800AA40);
                                              0x08016460 waiting for bit 1, then CurAction 1 (BN4_APPEAR's steps, bn4_battle.h) */
+#define BN6_QUEUE_HEAD        0x0800AA06u /* the appear queue r0 (8 words of objects, 0x20 bytes a queue from 0x02038170, by
+                                             0x0800AAAE; BN6_APPEAR's 0, 0x080163D6): r0 1 where r5 heads it (BN4_QUEUE_HEAD's twin) */
+#define BN6_QUEUE_ENTER       0x0800AA1Au /* ... r5 put at queue r0's end where it is not in it: r0 1 where it was put */
+#define BN6_QUEUE_LEAVE       0x0800AA40u /* ... r5 taken out of queue r0, the rest moved up (0x0800AA64) */
 #define BN6_APPEAR_BLINK_FIRST 0x080163FCu /* movs r0,#2 (0x2002), its first blink step's count stored to +0x20 as BN6_APPEAR's
                                              step 0 ends (0x080163FE); the blink (0x0801641A) counts it down and puts 2 back at
                                              0x08016424 each step. The BN4 differential's opening alignment makes it 3

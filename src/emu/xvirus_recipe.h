@@ -70,7 +70,8 @@ typedef struct { uint32_t at; uint8_t was, now; } XvByte;
 typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
 /* A BN4 Navi's call to play a sound whose pool slot is past what its `movs r0` names (the owner's call of 5 November 2026,
  * docs/multirom/bn4.md call 11): the call (its game's BN4_PLAY_SOUND) aimed at a shim of its home that makes r0 the slot
- * and goes on to BN6's (xvirus_shim.h) */
+ * and goes on to BN6's (xvirus_shim.h); or a BN4 family's call to its appear queue (BN4_QUEUE_*), `slot` the number of
+ * BN6's queue its twin takes in r0 (bn4_twins.QUEUED) */
 typedef struct { uint32_t at; uint16_t slot; } XvSoundCall;
 /* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
  * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
@@ -167,6 +168,9 @@ typedef struct {
 	uint32_t present;          /* its game's after-state, one of its blocks (BN4's BN4_VIRUS_PRESENT, which has no pause test), run after
 	                              its state 0 and its hook 5 where BN6's own (BN6_VIRUS_PRESENT) skips it for the pause alone (xvirus_shim.h,
 	                              a paused present): it animates from its spawn through its appear as in its game; 0 none */
+	bool summoned;             /* moved for a Navi's summon alone (BN4's Mettaur, Roll's; the owner's call of 8 November 2026): a
+	                              family BN6 has by name, never its net's kin nor a visitor (docs/multirom/bn4.md, Only what is new
+	                              visits; src/core/visitor_families.c) */
 } XVirusFamily;
 
 #define XV_ICE_OWN (-1)
@@ -251,6 +255,8 @@ typedef struct {
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
 #define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
 #define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
+#define XV_BN4_SONG_SLOT_MORE  0x46       /* ... and one past the twelve (Mettaur's shockwave's): the middle of the gap between the
+                                             Darkloids' slots (0x40 up) and BN5's chips' own (0x4B down) */
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */

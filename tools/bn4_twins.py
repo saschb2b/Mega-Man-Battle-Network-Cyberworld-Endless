@@ -62,6 +62,11 @@ TWINS = (
     # 4, BN6's Navi states of those places) and his wind's spawn (the fourth kind's 0x41 of his side, BN6's routine of the
     # same steps); his companions' sprite steps are FireMan's pairs above
     (0x08010E88, 0x080174FE, 'windman'), (0x08010F08, 0x080175B8, 'windman'), (0x080E68F8, 0x080E666C, 'windman'),
+    # Mettaur's (docs/multirom/bn4-navis.md, Roll built: her summon's; each body read): the appear queue its turn waits in
+    # (BN4's one queue of +0xE bytes, BN6's queues of pointers by r0: each call made through a shim that gives r0 the appear's
+    # queue, 0, QUEUED), and its held chips' attacks, dead while it holds none
+    (0x08007F04, 0x0800AA06, 'mettaur'), (0x08007F1C, 0x0800AA1A, 'mettaur'), (0x08007F46, 0x0800AA40, 'mettaur'),
+    (0x080E45F6, 0x0810A952, 'mettaur'), (0x080E8ADA, 0x0810A952, 'mettaur'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -155,6 +160,25 @@ AUDITS = {
                                      "of level 1 or more): the slot BN4's battle state +0x88 + 4 x side (its level 8 past it, "
                                      "0x080E69E8), BN6's +0xC0 (0x080E677C), each game's 0x41 its own code; BN6's also gives its "
                                      "wind's +0x4C its spawner (0x080E6692), which BN4's leaves as the slot had it"),
+    # (Mettaur's, read from both games' code)
+    (0x08007F04, 0x0800AA06): ('ok', "the appear queue's head tested (1 back where it is the object): BN4's one queue, 8 bytes of "
+                                     "objects' +0xE at [[r10+0x18]+0x58]; BN6's queue r0 of four, 8 words of objects at 0x0800AAAE's "
+                                     "place, the appear's 0 (0x080163D6), through QUEUED's shim"),
+    (0x08007F1C, 0x0800AA1A): ('ok', "the object put at the appear queue's end where it is not in it (1 back where it was put): "
+                                     "BN4's by its +0xE, BN6's by its pointer in queue r0, through QUEUED's shim (0, the queue "
+                                     "BN4's appear and Mettaurs share, as BN4's one queue is both)"),
+    (0x08007F46, 0x0800AA40): ('ok', "the object taken out of the appear queue and the rest moved up (BN4's 0x08007F6A, BN6's "
+                                     "0x0800AA64, the same steps on bytes and words): r0 the queue, through QUEUED's shim"),
+    (0x0801013A, 0x080165B8): ('ok', "the generic state 1 Mettaur's own state 1 wraps (its first own state begun: CurAction 6, BN6's "
+                                     "8, +0xA 0): BN6's in its place, as every family's state 1 is BN6's; BN4's also clears +0's bit "
+                                     "2, which BN6's leaves"),
+    (0x080104AC, 0x08016B02): ('ok', "the generic state 4 Mettaur's own state 4 wraps (its hit's reaction until it ends, then its "
+                                     "state back from +0x5C): BN6's in its place, as every family's state 4 is BN6's; BN6's calls "
+                                     "its own two routines where BN4's calls one (0x0800C13C; BN6's 0x0800F394, 0x080101C4)"),
+    (0x080E45F6, 0x0810A952): ('ok', "Mettaur's held chip's attack spawned (the fourth kind's 0x20; its state 9's case by the chip, "
+                                     "0x080B399C): dead while its +0x2A stays 0xFFFF (it holds none): BN6's family nullsub"),
+    (0x080E8ADA, 0x0810A952): ('ok', "Mettaur's held chip's other attack spawned (0x080B3C1A, its state 9's case 0x080B3A2A): dead "
+                                     "while it holds none: BN6's family nullsub"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }
@@ -273,6 +297,12 @@ PRESTEP = {
 # A family's generic state of its own (its state table's entry 0-5 another routine than BN4's): a wrapper of the generic
 # state, run in BN6's place, its call to BN4's generic state paired with BN6's: entry -> why
 OWN_STATES = {
+    0x080B3658: "Mettaur's state 1: on its first frame (+0xA 0) into the appear queue (its turn's, QUEUED) and +7 0, then BN4's "
+                "generic state 1, BN6's in its place",
+    0x080B366E: "Mettaur's state 2 (deletion's): on its first frame out of the appear queue, then BN4's generic state 2, BN6's",
+    0x080B3680: "Mettaur's state 4: BN4's generic state 4, BN6's in its place, then where its CurAction is 6 (its turn) and +0x60 "
+                "set, out of the appear queue and in at its end again, +0x60 and +7 0",
+    0x080B36A2: "Mettaur's state 5: on its first frame +7 0, then BN4's generic state 5, BN6's in its place",
     0x080C2850: "Elmperor's state 2 (deletion's): on its first frame its companion (+0x6C) told to end (0x080E770C) and let go, "
                 "then BN4's generic state 2, BN6's in its place",
 }
@@ -289,11 +319,20 @@ TABLES = {
                      why="the third kind's 0x02's kinds (53 of 4 bytes, to its block: its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, r4 its kind by +4); Roll's MegaMan's state 44 spawns "
                          "kind 7 (0x080EF9B0), list 3's 0xF (tools/xnavirecipe_bn4_objects.py list_tables)"),
+    0x080CFB8C: dict(size=0x24, entry=4, kinds=(0, 1, 2, 3, 4, 5), sprite=(None, 0), loads=(0x080CFBFE,),
+                     why="the third kind's 0x16's kinds (9 of 4 bytes, to its routine: its sprite's number in list 4, its +0x10, "
+                         "its step's frames, its crack), read by its init (0x080CFBF2, r4 its kind by +4); Mettaur spawns its kind "
+                         "by its version (its +4, 0x080B3ACE), its shockwave's sprite list 4 by a movs (None: no list in the table)"),
     0x080CE5B0: dict(size=0x130, entry=0x10, kinds=(10, 11, 12), sprite=(5, 6), loads=(0x080CE718,),
                      why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
                          "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "
                          "(0x080BD3E0-0x080BD3E4), as BN5's records of its own 0x0B are read"),
 }
+
+# BN4's appear queue's routines (bn4_battle.h BN4_QUEUE_*), one queue where BN6's (BN6_QUEUE_*) take its number in r0: each
+# call of a family's code to one made a call to a shim of its home that makes r0 that number and goes on to BN6's twin
+# (XvSoundCall, its slot the queue's number; xvirus.c's r0 calls): BN4's routine -> the queue
+QUEUED = {0x08007F04: 0, 0x08007F1C: 0, 0x08007F46: 0}
 
 # What a family keeps of BN4's for now, named over its recipe beside the generator's own interims: family -> lines
 INTERIMS = {

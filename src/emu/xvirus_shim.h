@@ -66,6 +66,10 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
  * false where it is not. */
 bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer);
 
+/* The BN6 routine a BN4 call made through that shim goes on to (XvSoundCall): BN6_PLAY_SOUND for BN4_PLAY_SOUND, BN6's
+ * appear queue's routines for BN4's (BN4_QUEUE_*: BN4's one queue, BN6's r0 its number); 0 any other */
+uint32_t xvirus_shim_r0_to(uint32_t was);
+
 /* The shim at `at` (word-aligned) that pushes lr and calls `to` (Thumb,
  * within a call's reach: a tail of a routine past its push {lr}), then pops
  * pc: false where it is not. */

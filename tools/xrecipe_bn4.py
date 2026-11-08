@@ -49,7 +49,10 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
-            (0x20, 'CirKill', 91))
+            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1))
+# the families moved for a Navi's summon alone, which BN6 has by name (the owner's call of 8 November 2026: Roll's summon
+# brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits): never a net's kin nor a visitor (XVirusFamily.summoned)
+SUMMONED = {'Mettaur'}
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
@@ -84,6 +87,10 @@ XV_AT = 0x08800000 + 0x330000
 XV_HOMES, XV_CODE, XV_ART = XV_AT + 0x18000, XV_AT + 0x38000, XV_AT + 0x50000
 XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0, 0xC0, 0xE0
+# the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
+# families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
+# families' art's end (XV_ART + 0x54000) to the sounds' room (SONG_ART0)
+ROOM2_FROM, CODE2, ART2 = 6, XV_CODE + 0x11000, XV_ART + 0x54000
 CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
 CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
 SONGS6 = 0x08159F48   # BN6's song table (RomLayout.song_table)
@@ -94,7 +101,10 @@ MPLAYS4, MPLAYS6 = 0x08155E78, 0x08159DC8   # the music players' tables (BN4_MPL
 # order from 0x3F down; each played on the player BN4's entry names (BN6's 32 players by BN4's numbers, BN4_MPLAYS); a
 # sound not here is a decision
 SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70: 0x3A, 0x9A: 0x39, 0xA6: 0x38, 0xB7: 0x37,
-               0x9D: 0x36, 0xFC: 0x35, 0xF9: 0x34}
+               0x9D: 0x36, 0xFC: 0x35, 0xF9: 0x34,
+               # (past the twelve: XV_BN4_SONG_SLOT_MORE, the middle of the gap between the Darkloids' slots, 0x40 up, and BN5's
+               # chips' own, 0x4B down: Mettaur's shockwave's, docs/multirom/bn4.md, Its sounds)
+               0x8B: 0x46}
 # their copies' rooms: below their families' sprites (ART0), above BN5's families' art (to XV_ART + 0x54000 today,
 # bn5_ranges_clear checks), as the families' sprites leave no room past theirs (ART_END); each its bytes rounded up to
 # SONG_STEP (song_bytes, an upper bound)
@@ -157,6 +167,7 @@ class Family:
         self.flags, self.spawn_calls, self.entries = 0, {}, []
         self.aim, self.prestep, self.outs, self.bytes = {}, None, {}, []
         self.sides = []   # (its calls to BN4's direction rule, each through a shim: side_sites)
+        self.sound_calls = []   # (its calls to BN4's appear queue, each through a shim that gives r0 the queue: queued_sites)
         self.after = None
 
     def decide(self, kind, detail):  # noqa: D401
@@ -608,6 +619,13 @@ def side_sites(f):
                 f.sides.append((site, f'its call to {t:08X} (bn4_twins.SIDED): its left and right by the object\'s side, BN6\'s way'))
 
 
+def queued_sites(f):
+    """its calls to BN4's appear queue's routines (bn4_twins.QUEUED; one queue, BN6's by r0): each through a shim that makes r0
+    the queue's number and goes on to BN6's twin (XvSoundCall, xvirus.c's r0 calls)"""
+    f.sound_calls = [dict(at=s, slot=q, why=f'its call to {t:08X}: BN6\'s twin of queue {q} (bn4_twins.QUEUED)')
+                     for t, q in sorted(bn4_twins.QUEUED.items()) for s in sorted(f.calls.get(t, []))]
+
+
 def pair_calls(f, pairs):
     f.pairs = []
     for t, sites in sorted(f.calls.items()):
@@ -679,6 +697,10 @@ def records_of(b4, f):
 
 
 def derive(b4, b6, pairs, ty, name, first, slot, alloc):
+    if slot == ROOM2_FROM and alloc.room == 'the families':
+        # (the families past the first six in their second room; tools/xnavirecipe_bn4.py's families_alloc derives them too)
+        alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART0
+        alloc.room = 'the families\' second room'
     f = Family(ty, name, first)
     f.slot = SLOT0 + slot
     f.ai, f.first_id, f.home = XV_FIRST_AI + f.slot, XV_FIRST_ID + 6 * f.slot, XV_HOMES + XV_HOME_SIZE * f.slot
@@ -717,6 +739,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
+    queued_sites(f)
     records_of(b4, f)
     blocks_of(b4, f, alloc)
     words_of(f, pairs)
@@ -845,8 +868,13 @@ def bn5_ranges_clear():
         sys.exit(f'xrecipe_bn4: BN5\'s families take BN4\'s numbers ({", ".join(f"{x:#x}" for x in clash)}): move EFFECT0 or LIST5_0')
     # (nor BN4's sounds' room, below BN4's sprites: BN5's art spans, a sprite's or a song's, ending at or before it)
     art_end = max((int(a, 16) + int(r, 16) for a, r in re.findall(r'XV_ART \+ 0x([0-9A-F]+), 0x([0-9A-F]+)', text)), default=0)
-    if XV_ART + art_end > SONG_ART0:
-        sys.exit(f'xrecipe_bn4: BN5\'s families\' art ends at {XV_ART + art_end:08X}, past BN4\'s sounds\' room ({SONG_ART0:08X}): move SONG_ART0')
+    if XV_ART + art_end > ART2:
+        sys.exit(f'xrecipe_bn4: BN5\'s families\' art ends at {XV_ART + art_end:08X}, past BN4\'s second room ({ART2:08X}): move ART2')
+    code = [(int(lo, 16), int(hi, 16), int(at, 16)) for lo, hi, at in
+            re.findall(r'\{ 0x([0-9A-F]+), 0x([0-9A-F]+), XV_CODE \+ 0x([0-9A-F]+)', text)]
+    code_end = max((at + hi - lo for lo, hi, at in code), default=0)
+    if XV_CODE + code_end > CODE2:
+        sys.exit(f'xrecipe_bn4: BN5\'s families\' code ends at {XV_CODE + code_end:08X}, past BN4\'s second room ({CODE2:08X}): move CODE2')
 
 
 def sounds_of(b4, b6, f):
@@ -1031,7 +1059,9 @@ def table_art(b4, f, alloc, v):
     t = bn4_twins.TABLES[v]
     for k in t['kinds']:
         at = v + t['entry'] * k
-        lst, num = b4.u8(at + t['sprite'][0]), b4.u8(at + t['sprite'][1])
+        # (a table that holds no list: its object's sprite list 4 by a movs, its load's r1)
+        lst = 0x10 if t['sprite'][0] is None else b4.u8(at + t['sprite'][0])
+        num = b4.u8(at + t['sprite'][1])
         s = list4_sprite(b4, f, alloc, num) if lst == 0x10 else None
         if s is None:
             f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws {lst // 4}:{num:#x}, which the generator moves none of')
@@ -1126,6 +1156,10 @@ def c_recipe(f):
         L.append(f'static const uint32_t {n}_sides[] = {{')
         L += [f'\t0x{at:08X},   /* {why} */' for at, why in f.sides]
         L.append('};')
+    if f.sound_calls:
+        L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.sound_calls]
+        L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
@@ -1163,7 +1197,8 @@ def c_family(f, n):
          f'\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */', f'\t.ai = {f.ai},',
          f'\t.first_id = XV_FIRST_ID + 0x{f.first_id - XV_FIRST_ID:X},', f'\t.home = XV_HOMES + 0x{f.home - XV_HOMES:X},']
     for field, there in (('blocks', True), ('data', True), ('calls', True), ('words', f.words), ('imms', True), ('ranges', f.ranges),
-                         ('sides', f.sides), ('numbers', f.numbers), ('bytes', f.bytes), ('types', f.types), ('states', True)):
+                         ('sides', f.sides), ('sound_calls', f.sound_calls), ('numbers', f.numbers), ('bytes', f.bytes),
+                         ('types', f.types), ('states', True)):
         if there:
             L.append(f'\t.{field} = {n}_{field}, .n{field} = {count(field)},')
     L.append('\t.hooks = { ' + ', '.join(ref_text(h) for h in f.hooks) + ' },')
@@ -1181,6 +1216,8 @@ def c_family(f, n):
         L.append(f'\t.songs = {n}_songs, .nsongs = {count("songs")},')
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
+    if f.name in SUMMONED:
+        L.append('\t.summoned = true,   /* (moved for Roll\'s summon alone, BN6\'s by name: no kin of its net\'s, no visitor) */')
     if f.after:
         L.append(f'\t.present = 0x{f.after:08X},   /* its after-state, copied: run after its state 0 and its hook 5 while BN6\'s battle is paused */')
     L.append('};')

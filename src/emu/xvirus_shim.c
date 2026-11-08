@@ -2,6 +2,8 @@
  * branch and literal load resolved within the shim. */
 #include "xvirus_shim.h"
 
+#include "bn4.h"
+#include "bn4_battle.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -120,7 +122,17 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
 	return done(&a) && a.n == XV_SHIM_RANGE_SIZE;
 }
 
-/* ---- a sound past a byte ---- */
+/* ---- a sound past a byte, or a queue's number ---- */
+
+uint32_t xvirus_shim_r0_to(uint32_t was) {
+	switch (was) {
+	case BN4_PLAY_SOUND: return BN6_PLAY_SOUND;
+	case BN4_QUEUE_HEAD: return BN6_QUEUE_HEAD;
+	case BN4_QUEUE_ENTER: return BN6_QUEUE_ENTER;
+	case BN4_QUEUE_LEAVE: return BN6_QUEUE_LEAVE;
+	default: return 0;
+	}
+}
 
 bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer) {
 	Asm a = { out, XV_SHIM_SOUND_SIZE, 0, at, (at & 1) != 0, { 0 }, { { 0 } }, 0 };
