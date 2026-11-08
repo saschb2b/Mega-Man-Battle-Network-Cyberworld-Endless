@@ -56,7 +56,7 @@
 #define BN4_TOURNAMENT_EAGLE 1        /* ... The Eagle Tournament, */
 #define BN4_TOURNAMENT_RED_SUN 2      /* ... The Red Sun Tournament, */
 #define BN4_TOURNAMENT_FREE 3         /* ... Free Tournament (its plates and lines BN4_BRACKET_LINES' kin 0x080455C0, 0x080455D0) */
-#define BN4_ENTRANT_ID    0x00        /* an entrant: its id: 0x00-0x16 a Navi's plate (0x12 and 0x13 numbered
+#define BN4_ENTRANT_ID    0x00        /* an entrant: its id: 0x00-0x16 a Navi's plate (BN4_PLATE_GUTSMAN and on; 0x12 and 0x13 numbered
                                        * placeholders with no battle, 0x16 0x14's plate), BN4_ENTRANT_MEGAMAN, 0xFF none */
 #define BN4_ENTRANT_FLAGS 0x01        /* ... its rounds won (BN4_ENTRANT_ROUNDS) and BN4_ENTRANT_IN or BN4_ENTRANT_OUT */
 #define BN4_ENTRANT_RANK  0x02        /* ... its seed: of two Navis the lower wins their match (BN4_ADVANCE_ROUND) */
@@ -82,6 +82,42 @@
                                        * playthrough) into [eToolkit +0x44] +0xA, which BN4_CS_OPPONENT_ARENA and his battle read */
 #define BN4_OPPONENT_BATTLES 0x080447DCu /* by entrant id, the first of its three battles (0xFF for ids 0x12 and 0x13) */
 #define BN4_MEGAMAN_ROUNDS 0x08043F4Cu /* r0 the tournament: MegaMan's rounds won, 0-3, 4 where it was never entered */
+
+/* From an entrant to his battle (docs/multirom/bn4-tournament.md, Each plate's Navi): BN4_NEXT_OPPONENT's battle index,
+ * then BN4_CS_OPPONENT_ARENA's pair of story bytes by it, which the stage's people read as the story they stand in; the
+ * opponent's script there starts his record by BN4_CS_BATTLE */
+#define BN4_OPPONENT_PROGRESS 0x0802C2DDu /* by battle index, 2 bytes: the game state's +6 (the story's progress) and +7 that
+                                       * BN4_CS_OPPONENT_ARENA writes (the old pair kept at [eToolkit +0x44] +0xE, +0xF) */
+#define BN4_CS_BATTLE     0x51        /* `51 r f`: the story battle r (BN4_STORY_BATTLE) started with flags f (0x0802CDEE) */
+#define BN4_STORY_BATTLE  0x08007BECu /* r0 an index: BN4_STORY_BATTLES + 12 r0, a battle record (BN4_RECORD_SIZE) */
+#define BN4_STORY_BATTLES 0x080FA900u /* the scripts' battle records, 12 bytes each; the tournament's carry song 0x17 */
+#define BN4_START_BATTLE  0x08005490u /* r0 a record: into the game state's BN4_GAMESTATE_RECORD, +0 made 8 (the battle) */
+#define BN4_START_CUTSCENE 0x0802BD10u /* r0 a script, r1 its argument: the cutscene engine's first thread ([eToolkit +0x10] +0x1C) */
+#define BN4_CS_IF_BATTLE  0x23        /* `23 n a`: to a where [eToolkit +0x44] +0xA (BN4_NEXT_OPPONENT's index) is not n (0x0802C67E) */
+
+/* The plates by the Navi each draws, BN4_ENTRANT_ID's values (docs/multirom/bn4-tournament.md, Each plate's Navi): the id's
+ * battle index and story bytes run in romlab through BN4's own BN4_NEXT_OPPONENT and BN4_CS_OPPONENT_ARENA, the record his
+ * story's script starts read from the scripts (derived); the comment his V1's enemy id (src/emu/bn4_navis.h) */
+#define BN4_PLATE_GUTSMAN    0x00     /* 132 */
+#define BN4_PLATE_FIREMAN    0x01     /* 144 */
+#define BN4_PLATE_NUMBERMAN  0x02     /* 156 */
+#define BN4_PLATE_AQUAMAN    0x03     /* 168 */
+#define BN4_PLATE_ROLL       0x04     /* 128 */
+#define BN4_PLATE_WINDMAN    0x05     /* 136 */
+#define BN4_PLATE_METALMAN   0x06     /* 160 */
+#define BN4_PLATE_WOODMAN    0x07     /* 172 */
+#define BN4_PLATE_THUNDERMAN 0x08     /* 148 */
+#define BN4_PLATE_SEARCHMAN  0x09     /* 140 */
+#define BN4_PLATE_PROTOMAN   0x0A     /* 152 */
+#define BN4_PLATE_JUNKMAN    0x0B     /* 164 */
+#define BN4_PLATE_SPARKMAN   0x0C     /* 192 */
+#define BN4_PLATE_TOPMAN     0x0D     /* 176 */
+#define BN4_PLATE_COLDMAN    0x0E     /* 188 */
+#define BN4_PLATE_BURNERMAN  0x0F     /* 184 */
+#define BN4_PLATE_VIDEOMAN   0x10     /* 216 */
+#define BN4_PLATE_KENDOMAN   0x11     /* 212 */
+#define BN4_PLATE_NORMALNAVI 0x14     /* 200, a NormalNavi (0x16 draws this plate and leads to the same story bytes) */
+#define BN4_PLATE_HEALNAVI   0x15     /* 204, a HealNavi */
 
 /* The bracket's plates: menu sprites (24 of 0x58 at BN4_MENU_SPRITES, run by 0x08053FA8 and drawn by 0x08053FE4), the
  * entrants' its type 1 */

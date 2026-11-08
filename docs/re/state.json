@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-05",
-  "previous": "2026-10-18",
+  "updated": "2026-11-08",
+  "previous": "2026-11-05",
   "features": [
     {
       "name": "Net Square",
@@ -153,215 +153,19 @@
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-05",
-      "what": "GutsMan's recipe derived from both ROMs (tools/xnavirecipe_bn4.py, its report .build/xnavirecipe/bn4_report.md): 7 decisions open, none of them a missing pair. Located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, GutsMan derived): BN4_GUTSMAN, BN4_GUTSMAN_STATES, BN4_GUTSMAN_TABLES, BN4_NAVI_PALETTE, BN4_ATTACK_END_CLEAR, BN4_AI_REQUESTS_CLEAR, BN4_SET_STATUS_GIVEN, BN4_ON_FLOOR, BN4_FREE_PANELS, BN4_RANDOM_FREE_PANEL, BN4_RANDOM_PANEL, BN4_RANDOM_PANEL_MASKS, BN4_T3_1E_KINDS; five pairs in tools/bn4_twins.py (GetRNG, the status given, a side's player, the floor test, the panel crack: BN4's and BN6's panel flags' 0x10 and 0x40 the same, read from both games' tables)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "GutsMan built: src/emu/xnavi_bn4.c (tools/xnavirecipe_bn4.py's whole recipe), xnavi_install.c's BN4 game, BN4's Navis' room (FREE_BN4_NAVIS), the pool of their sounds (xnavi_bn4_sounds.c: 0x32, 0x33, 0x63, 0xD0, 0xE0 and eleven past 0xFF; the themes' range to 0x31), list 2 0x40 on for their battle sprites (XNAVI_SPRITE_BN4); the comparator reads the Navis' recipes, BN6_AI_NAVI_STATE (+0x80) for a Navi's own block; tests/xdiff/gutsman_v1.json FAIL at t1, recorded."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "GutsMan's collision setup argument kept (XNavi.coll_arg, a spawn-end shim returning by mov pc,lr); BN4's Navis' sound pool pointed by battle (emu_before_frame); the BN4 comparator's Navi rules (navi_ai, a Navi's opening count, his code's room keyed for the draws, spawn_leftover, leftovers); gutsman_v1 recorded FAIL at t266."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "BN4's tournament presentation located (src/emu/bn4_tournament.h: the main modes 0x0800032C, the bracket screen 0x0804395C and its opener 0x08005792, the tournaments at 0x02001460, the cutscene commands 0x52-0x55 and the text command FC 01; docs/rom/bn4.md, The tournaments) and driven in romlab; the two ways into a run measured and the move into BN6 recommended (docs/multirom/bn4-tournament.md)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "BN4's bracket plates mapped (src/emu/bn4_tournament.h: BN4_PLATE_SHEET_A 0x084BB768, BN4_PLATE_SHEET_B 0x084BDB30, BN4_PLATE_INIT 0x08104040, BN4_PLATE_SET 0x08104290, BN4_PLATE_PALETTES 0x08104108, BN4_PLATE_SPECIAL 0x08104146; docs/rom/bn4.md, The bracket's plates) and a face for every BN6 and BN5 entrant made from his own game's art (tools/bn4_faces.py; docs/multirom/bn4-tournament.md, Faces for every entrant)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "GutsMan's attack against BN6's engine located and named (src/emu/bn4_battle.h: BN4_CAMERA_SHAKE 0x08025FE0, its draws 0x0802600C and 0x08026032, BN4_SHAKE_TABLE 0x08026068, BN4_CAMERA_SHAKE_SET 0x0802608C, BN4_BATTLE_PLAYERS +0x44, BN4_SPAWN_DEBRIS 0x080E29F8, BN4_DEBRIS_INIT 0x080E2934, BN4_PANEL_FLAGS_LAST +8 and BN4_PANEL_FIELD_STEP 0x08009240; src/emu/bn6_panels.h: BN6_SPAWN_DEBRIS 0x080E23C0, BN6_DEBRIS_SPRITE 0x080E230A, BN6_PANEL_FIELD_STEP 0x0800BFC4, BN6_PANEL_FLAGS_LAST +0x18; docs/rom/bn4.md, GutsMan's attack against BN6's engine); the comparator's shake twins by word, the panel's field, sounds and the debris's own art; his rocks' player read made BN6's by the generator (battle_players); the attack's end's clear read (MegaMan's buster charge, inert on a Navi's AI data in BN6); five mutations of his port; the owner's call for sounds past 0xFF recorded."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "The owner's call for BN4 Navis' sounds past 0xFF built for a movs: the generator's wide_sounds writes XvSoundCall rows, the installer aims the call at a shim of the Navi's home (xvirus_shim_sound: movs, lsls #8, adds, b the PlaySound veneer), XvSong's slot a u16; the Navi's collision argument's shim moved past the most its code's shims take (xvirus_shims_room), where it had shared XV_HOME_SHIMS with the first. Proved by GutsMan's pool reordered (0x104 first): his 0xA2 played at 0x104 through the shim, gutsman_v1 PASS with the pair at 0x104 (not kept)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "BN4's Navis' battle sprites by battle: one 64 KB room (FREE_BN4_NAVI_SPRITE) filled for the battle's BN4 Navi as its record is written, his list 2 entry pointed at it at install, his BN4 sprite number in a seat table (XN_BN4_SPRITES); the generator's battle_sprite_place puts every Navi's there; GutsMan's art 75 KB to 15 KB. GutsMan in the tournament's pool through xguardian_bn4.c's list of proved BN4 Navis (navi 35, his BN4 plate 0x00, BN4's HP ladder held to a round's top)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "FireMan derived and built (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 52, ids 0x390-0x393): his post call (0x080B81B0, BN6's post hook), his own states 3-5 (his companion told, then BN4's generic, aimed at BN6's flinch, paralysed and dragged), his init's tail at BN6's spawn's end (XnSpawned, xnavi_install.c spawned_set: his collision's r3, +0x11, his companion spawned and kept at +0x74, his sprite updated, BN6's Navi frame run), his companion the first kind's 0x57 moved (the dispatch's first kind 0xE0; its mode 4, its appear through BN4's tile buffer, run as its mode 0: an interim neither spec reaches), two routines copied (BN4_ATTACK_END_KEEP 0x0800C9FC, BN4_SPRITE_STEP 0x08014446), five pairs (two audited); BN4_NAVI_PALETTE read the right way round (its number's byte at 0x0800B9B1, the version's at 0x0800B9AC: V1 0, SP 2, an interim for GutsMan and FireMan both); the comparator tells a moved first-kind object by its type. bn4_fireman_control PASS; fireman_v1 FAIL at t1, recorded (his companion's +0x91)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "ThunderMan derived and built, under proof (tools/xnavirecipe_bn4.py with tools/xnavirecipe_bn4_companion.py; src/emu/xnavi_bn4.c; docs/multirom/bn4-navis.md, ThunderMan built): located and named in src/emu/bn4_navis.h (BN4_THUNDERMAN 0x080C37F4, BN4_THUNDERMAN_STATES 0x080C38A4, BN4_THUNDERMAN_COMPANION 0x080C3D84, BN4_THUNDERMAN_DAMAGE 0x080C3888, BN4_THUNDERCLOUDS 0x080C3AF0, BN4_THUNDERCLOUD 0x080DAA90, BN4_CAN_MOVE_KIN 0x0800AD54, BN4_PANEL_BREAK 0x08009BF0, BN4_SIDE_COUNT_DOWN 0x08007990, BN4_FLAG_1187_TEST 0x080406A4, BN4_PAUSED_BLINK 0x0801466A, BN4_NUDGE_X 0x080D97F8, BN4_NAVI_PALETTE_VERSIONS 0x0800B9B1) and src/emu/bn6_navis.h (BN6_COMPANION_BEGIN 0x08010DD0, BN6_ACTOR_COMPANION_CALL 0x08017064, BN6_NAVI_PALETTE_VERSIONS 0x0800F354, BN6_PANEL_BREAK 0x0800CA8C, BN6_SIDE_COUNT_DOWN 0x0800A10C; docs/rom/bn4.md, ThunderMan derived). His companion (the first kind's 0x33) moved through the first kind's dispatch and begun by a shim of his home on BN6's companion word (XnCompanion4); his state 1 a wrapper of BN4's generic 1, BN6's in its place; his palette by version (2, 4, 2, 4) an interim at 0. tests/xdiff/bn4_thunderman_control.json PASS; tests/xdiff/thunderman_v1.json FAIL at t1, recorded (his companion read as MegaMan's by the comparator's BN4 NameID rule; his cloud a step apart)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "WindMan derived whole (tools/xnavirecipe_bn4.py and xnavirecipe_bn4_init.py) and held from the install (xnavi_bn4_held): located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, WindMan derived): BN4_WINDMAN 0x080C3234, BN4_WINDMAN_STATES 0x080C32F4, BN4_WINDMAN_WIND +0x60, BN4_T1_COMPANION 0x5C, BN4_COMPANION 0x080CCC9C, BN4_COMPANION_SPAWN 0x080CCF34, BN4_COMPANION_KINDS 0x080CCC94, BN4_COMPANION_AURA 0x080CCDC8, BN4_SET_FLAG 0x08012F82, BN4_WIND_SPAWN 0x080E68F8, BN4_WIND_END 0x080E69BC, BN4_WIND_SLOTS +0x88; BN6_WIND_SPAWN 0x080E666C and BN6_WIND_SLOTS +0xC0 in bn6_navis.h; five pairs in tools/bn4_twins.py (his flinch's and paralysis' tails, the wind's spawn, two sprite steps), three audited; bn4_windman_control PASS; windman_v1 not yet runnable (BN6's battle stops before its fight with his companions set out)."
-    },
-    {
-      "date": "2026-11-05",
-      "what": "BN4's Navis' companions by one mechanism: the ThunderMan, WindMan and FireMan branches merged, their three companion mechanisms (XnCompanion4, XnCompanion, XnSpawned) made one (XnSpawn and XnInit, src/emu/xnavi_init.c; tools/xnavirecipe_bn4_init.py reads every init: a spawn's r4 constant or r0 by a table of its version, the words kept after, the spawns at the companion start where the init makes them after its collision's set-up, else at the spawn's end with its +0x11, sprite and update); the moved first-kind types numbered in NAVIS' order by cost (ThunderMan's 0x33 0xE0, WindMan's 0x5C 0xE1, FireMan's 0x57 0xE2); WindMan installed (his companions' state 4 run as 0, 0x080CCD2E); the four battle sprites in the shared room."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's Navis mapped (src/emu/bn4.h, docs/rom/bn4.md's two rows, docs/multirom/bn4-navis.md, tools/bn4_navis.py): the eighteen's first-kind types, the Navi pre-step 0x080135A8 (Duo's 0x0801374A), runner 0x08013DB4, dying 0x08010F61 and generic states 0x08010D31-0x08010FAF, MegaMan's routine 0x080EAEA8 and state table 0x080EAEFC (116), the AI data taken 0x0800C09A by side 0x0800BFF4 (+0x64 the Navi's own block), the state set 0x0800C9AC and attack's end 0x0800CA28, the three spawns 0x080032B8/0x080032F0/0x08003344, an enemy's record 0x08011878 and spawn 0x080F00F4, the panel crack 0x08009AEC; tools/bn6f_match.py locates bn6f's functions in BN4 too (bn6f-bn4.csv)."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4 Red Sun's Souls: the reason no form was taken found (BN4's chip gate), all twelve forms taken in Red Sun's ROM, Blue Moon's six too, each one's tables, abilities and code against BN6's twins mapped, and an order to move them, ThunSoul first."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "A Navi swapped mid-battle: a later form's battle sprite put in the battle's sprite cache by BN6's sprite_decompress (0x08002A64, BN6_SPRITE_DECOMPRESS) before its spawn; a compressed one drew as BN6's white dot (docs/rom/navis.md's row)."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's battle sprite cache mapped (BN4_SPRITE_CACHE 0x0200F720, its look-up 0x08002ACA and the battle's preload 0x08002AEC, docs/rom/bn4.md's row): the BN4 differential maps a pointer into a sprite BN4 keeps LZ77'd by the cache's entry for its list and number, carried in the trace (src/dev/xdiff.c apart4_out)."
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's virus after-state (BN4_VIRUS_PRESENT 0x08010736, no pause test) against BN6's (BN6_VIRUS_PRESENT 0x08016E64, its pause test at 0x08016E84-0x08016E90), BN4's sprite update (BN4_SPRITE_UPDATE 0x0800285C), Spikey's init and its moves' draw (BN4_SPIKEY_INIT 0x080BA428, BN4_SPIKEY_MOVES 0x080BA5BC) and CirKill's shot's table literal (BN4_SHOT_KINDS_LIT 0x080CE83C) mapped (docs/rom/bn4.md's row): the BN4 differential replays the families' draws before the fight, holds the opening's idle animation to BN4's lead and reads a diagonal step's direction and a pointer into BN4's moved code as BN6's"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "Walla's fight proven against BN4's own (walla_v1-v3 PASS) and Elmperor's collision data mapped: MegaMan's struck state (BN4_PLAYER_STRUCK 0x08010960, BN6's 0x080174FE setting 0x400000 with its 0x400), the effect an attack's hits make (BN4_HIT_EFFECT 0x08012F44, which Walla's ring calls, spawning the spark), the poison panel's step (BN4_POISON_STEP 0x08013010: BN4's collision data +6 is BN6's +8, BN6_COLL_POISON_TIMER) and the sprite update (BN4_SPRITE_UPDATE 0x0800285C), docs/rom/bn4.md's row; the blink's phase opposite in the two (BN4_BLINK_FLASHING), MegaMan's struck animation cut otherwise by each game's art (24 frames each)"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's families' sounds BN6 has no song of copied into BN6 as BN4's own: 12 songs (BN4's song table, BN4_MPLAYS' players 8, 9, 19, 28 and 29) at fixed slots 0x3F-0x34 of BN6's empty songs (src/audio/xsong.c XSOUNDS, tools/xrecipe_bn4.py SOUND_SLOTS; xsong's per-run themes now 0x26-0x33, 12 copied today), packed below the families' sprites (XV_ART + 0x5A000, the sprites' room full); the differential names a BN4 copy by its slot and pairs it by routine (legit.json's bn4 sounds), a frame's sounds line the family's where its code played one (tools/xdiff_bn4.py family_sounds); their sites named (BN4_SOUND_* in bn4_battle.h), docs/rom/bn4.md's row"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's direction rule (BN4_DIRECTION 0x0800AF90: left and right by the screen) against BN6's (BN6_DIRECTION 0x0800E994: by the object's side, r4 its +0x16) and the HP gauge's low-HP step in both (BN4_HP_LOW_STEP 0x0801472C, its sound 0x82; BN6_HP_LOW_STEP 0x0801C840, its 0x84) mapped (docs/rom/bn4.md's row): a moved family's calls to BN4's rule go through a shim that numbers its answer BN6's way (bn4_twins.SIDED, src/emu/xvirus_shim.h), and cirkill_v1-v3 PASS"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's virus after-state ported through BN6's paused opening (XVirusFamily.present; src/emu/xvirus_shim.h's paused present): each moved BN4 family runs BN4's after-state (BN4_VIRUS_PRESENT 0x08010736, copied with it) after its spawn's done and each run of its state 0 where BN6's (BN6_VIRUS_PRESENT, at BN6_VIRUS_TYPE 0x0810A278's tail) skips it for the pause alone (BN6_SETTINGS_MODE_READ 0x0802D234, BN6_PAUSE_TEST 0x0800A03C; BN6_SPRITE_UPDATE 0x080026C4 its twin call), BN6's code untouched; docs/rom/bn4.md's row. The opening's phase from 152 updates apart to one, the engines' appears (BN4's generic state 0 runs 52 times in the paused opening, BN6's twin 50): the allowance held to that one (OPENING_LEAD), its mutation caught; shrimpy_v3 still FAILS at t65 on it"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "A virus's appear and the engines' appear bits mapped (BN4_STATE_GENERIC_0 0x0800FCAC, BN4_APPEAR 0x0800FE00, BN4_APPEAR_BITS 0x080019C0, BN4_APPEAR_BITS_SET 0x080019A8; BN6_NAVI_SPAWN_STATE 0x08016380, BN6_APPEAR 0x08016396, BN6_APPEAR_BITS 0x0800139A, BN6_APPEAR_BITS_SET 0x08001382; docs/rom/bn4.md's row): the owner's call 7 (BN4's appear moved with the families) measured before it was built: a plain battle's virus takes BN4's plain appear, BN6's twin's steps but for BN4's battle kind 0x44 and its sound, and the one update shrimpy_v3 parts on is the engines' openings' (bit 0 set 18 frames after a virus's init in BN4, 17 in BN6), not the appear's code; the port not built, the opening's allowance kept, the owner's to decide how a visitor's opening meets it"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "The owner's call 7, revised, built: every BN4 spec against BN6's (game=bn4:bn6) runs BN6's opening a frame longer, a named alignment beside the lag (tests/xdiff/legit.json's bn4 align, \"BN6's battle opening a frame longer\"): BN6's first blink step (BN6_APPEAR_BLINK_FIRST 0x080163FC, movs r0,#2, named in src/emu/bn6_families.h and docs/rom/bn4.md's row) written as movs r0,#3 into BN6's copy by tools/xdiff_bn4.py alignments, checked against BN6's ROM first; BN4's side, the controls and BN5's specs untouched, a spec of more than one foe refused. The opening's allowance (\"the opening's idle animation, BN4's appear a run longer\": opening_animation, OPENING_LEAD, anim_steps, bn4_sprite_data) removed with its code. All 18 BN4 specs PASS, cangard_v1 and handi_v1 PASS, bn4_mettaur_control PASS and bn4_mettaur_broken PASS at t202; a mutation added (shrimpy_v3, the step made movs r0,#4: caught at t1), 181 of 181 caught"
-    },
-    {
-      "date": "2026-11-04",
-      "what": "BN4's reward rows located (BN4_REWARD_ROWS 0x080F5F50, BN4_REWARD_CHOOSER 0x080F57DC, BN4_REWARD_PICK 0x080F580C, BN4_REWARD_ROW_OF 0x080F5EC4, BN4_BUSTING_TABLE 0x0801881D; docs/rom/bn4.md, Its rewards) by BN6's chooser's bytes and read with the Thumb decoder; proved in romlab by Billy's row recoded (0x4123 paid) and the next id's (Thunder1 L as before). The six moved BN4 families' rows are BN4's now (src/emu/xvirus.c drops_set, src/core/xchips.c xchips_reward_bn4): zenny and HP as they are, chips BN6 lacks 200 zenny; the owner's call 6's condition met."
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's board HP mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the units' HP +0x14, max +0x16 and shown +0x18 (stepped 4 a frame toward it, 0x080533D8), the digits under the team (0x080533A0, not the Navi in play) and the enemies (0x0805341A) drawn by 0x08053482 (OBJ tile 664 + 2d, palette 14, centred, 8 apart, their top at the unit's place); a fought unit's HP and max for its battle's marked enemy (0x08053B9E from 0x08006862) and its HP back as the battle ends (0x08009050, 0x08053BF4); the Darkloid's heal 0x080560AC / 0x08053D04 (max / 10 per dark panel round him by 0x08050334's weights, 20 frames' wait), its effect list 7's 120 in palette 2 (0x08300268); a rest's heal 0x08053CBE (max / 10 times 2-5 by flags 0x300-0x308)"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "Each Liberation Mission's own look mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): group 0x86's GFXAnim lists while a mission is on 0x08073E70 (BN5_LIB_MISSION_ANIMS), the board's colours each loads over its map's to 0x03003980, 0x180 bytes (missions 1-5 0x08614DD4 by script 0x08073AA0, 6-9 0x08615100 by 0x08073D10), the BGAnimData records while a mission is on 0x0807416C (BN5_LIB_MISSION_BACKDROPS: five backdrops); BN5_LIB_PALETTE's 0x08614DB4 replaced by the loader's own source; the nine maps' shared tile set 0x085A7DE4"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's board words and banners mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the L view's keys' help 0x087E4294 and its WIN0 panel, the board's text archives 0x0804FB04 (the Darkloids' 13-15, entry 0 his first turn's), the common archive 0x087E866C (the tally 32-40, MegaMan's 38-40), the clear's routine 0x0804E9F4 (SUCCESS! as the phases' banner's kind 2, song 0x18, its frames), the tier 0x08052DD0"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/rom/liberation.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation Missions hold no special route (docs/game/liberation/special-routes.md; docs/research/sources.md): the item kinds' table 0x08051924 ends after six records (BN5_LIB_ITEM_KIND_COUNT; its seventh, 0x08051954, is Thumb code), the nine missions' item lists hold kinds 0-5 alone and their panel lists kinds 0, 1, 3, 5-7 and 9-0x0C alone; the route a sealed region holds is ours, kept for the run and opening a third way at the next fork"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation team mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the Navi in play at the liberation state's +6, a team unit's +2 its turn yet to come, the HP box's cap 0x086D5964, digits 0x086D59A4 and blank 0x086D5C64 on palette 12, the others' HP under them, Pass a fifth of max HP; BN6's player spawn's sprite load 0x0809E7EA and OK's hand 0x08029110 named (src/emu/bn6.h, bn6_forms.h), Gregar's list-6 numbers 0x07, 0x28, 0x29, 0x31 and 0x35 found empty in both versions"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN6's Virus Battler mapped (src/emu/bn6_battler.h, docs/rom/virus-battler.md's three rows, docs/research/sources.md, tools/virus_battler.py): the card's flags 0x1D8 and 0x196 + AI and their one writer 0x08736058, battle mode 6's loop 0x0800961C, VIRUS LIST state 0x020364C0, family data 0x0802B5FC, spawn 0x0802AEEA, the 50 MB check, the time limit on the Custom gauge, results 1/2/7, the Battlers' records 0x080B06E0's 0x1A-0x3A and their start cutscene 0x0809A5F0"
-    },
-    {
-      "date": "2026-10-25",
-      "what": "BN5's Liberation commands mapped (src/emu/bn5_liberation_cmds.h, docs/rom/liberation.md's row): command ids 0-15, the masks 0x08050048, the window 0x0200A7D0 and checks 0x08055778, steps 0x0804C428 and 0x0804D308, the shapes 0x08050344 applied by 0x08052060, PanelSearch's line 0x0805221C, MagnetBarrier 0x08054518/0x0805455C, the walk masks 0x0804FF5C, Team ProtoMan's Navi ids 1-6. Corrected: BN5_LIB_UNITS' +5 is the facing, the Navi id is +1 (found by poking +1, which changed the window's commands; +5 read as the facing by 0x080537CE)."
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/game/pet.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "A liberation's battle on BN6's loop (src/emu/bn6_battle_loop.h, src/director/liberation_battle.c, docs/rom/battle.md's row BN6's battle loop and banners): BN6's loop state 0x0203CA70, its turn banner 0x080080A0, the fight's frame 0x08008144, the win's banner 0x0800822C, the draw 0x080082DC (its banner 0x080082F8, past it 0x0800830C), the message table 0x0801EF84; BN5's rules named (BN5_LIB_TURN_BANNER, BN5_LIB_TIME_ASK, BN5_LIB_TIME_UP, BN5_LIB_WIN_BANNER, BN5_BATTLE_MESSAGES, BN5_LIB_DOUBLE_HIT)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Liberation board's phases' banners (the words' LZ77 tiles 0x087E5A10, their load list 0x08052FF4, palettes 0x087E5500 and 0x087E5520, the band's WIN1 rows, blend and frames, sound 0xD6 from 0x08054DAE), the L view's panels, the guardians' sprites (list 6's 83-85), the board's songs 0x22 and 0x1C and the item jingle 0x16D mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row); BN6's PlayMusic 0x080005D4"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "The NaviCust's compressed shapes compared with their full ones in the program records (0x13B22C, +0xC against +8): each of the 64 colour variants with one is a subset, cell for cell; BN6's compression flags (0x2660 + variant) set as a run begins for the codes the profile knows (codes_bring, docs/rom/navicust.md's NaviCust compression row, docs/game/meta/)"
-    },
-    {
-      "date": "2026-10-23",
-      "what": "BN5's Darkloids' phase mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): a guardian's warp 0x080AF3F8 (sprite list 7's 59, sound 0xB4 out and in, 0x94 as it shows), the Darkloid's heal 0x08055208 (sound 0x8A), the reach's blink 0x080529F0 (look 0x0D, sound 0x91), a blow on a Navi 0x08053EBA (0x6B, 0x6E), BigBrute's flame list 7's 56, the HP digits 0x086F7DEC in white 0x086CCD24 and a harm's yellow 0x087E4678, the guardians' standing and strike animations, the units' world place +0x1C/+0x20"
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: a partner's record takes his loadout's HP and buster (teambuster=N); the full-rules audit of what a partner meets (docs/online/arena/), DarkInvs left out for a MegaMan without BN5's AI block (src/emu/darkinvs.c) and BN5's green flash counted by a side's player alone (src/emu/xchips_flash.c)."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "BN6's and BN5's ways to show a mood named for the Square's emotes: src/emu/bn6_expression.h and bn5_expression.h, docs/rom/online.md's Expression rows, docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "--dev arena2v2: a partner's whole MegaMan (issue #181): his NaviCust compiled by BN6's reload on a core of his client (src/online/arena_team_navicust.c, teamcust=N), his Cross by BN6's crossing controller run for his object (src/online/arena_team_cross.c, teamcross=N), a Program Advance from his own screen joined in his hand (arena_team_screen.c, arena_team_custom.c, teampa=N); docs/rom/'s three rows."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #182 and the full-rules audit made right (src/emu/darkinvs.c, darkinvs_room.h, bn6_ai.h, soullife.c, soulchaos.c, soulchips.c, soullook.c, soulmood.c, src/online/arena_team_rules.c): BN5's chip AI's rooms, the Souls and the mood by object; BN6's AI data's pool and its side-player getter named (docs/rom/), docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #181 integrated (twoaside-net, twoaside-megaman, twoaside-rules): a partner's words carried in his side's GBA's own link packets (src/online/arena_team_link.c, RAM_TEAM_LINK; BN6_LINK_OUT, BN6_LINK_IN and the pad's stores in src/emu/bn6_link.h, docs/rom/online.md's row), his turn worked out on each GBA from them; the GBAs' drift past the rings' delay ended by construction; a partner's whole MegaMan over the network (src/online/arena_seats.c, arena_team_client.c); docs/symbols written again."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "A partner's UNITE (src/online/arena_team_soul.c, arena_pair_open_screen, HOOK_CORES 5): his copy's GBA with BN5's installs' hooks and his Souls, TEAM_SOUL in his stream, soullife.c's Soul taken up, counted and ended by object, the Souls' modules (soulchaos, soulchips, soulpower, soulpassive, soullook, soulcode, soulmood, soulcolonel) reading the MegaMan's own Souls state; the Souls' differential passing as before."
-    },
-    {
-      "date": "2026-10-22",
-      "what": "Issue #181's review: a partner's NaviCust compiled over the way in's own state, never a game's checkpoint (0x08138A00 keeps NaviStats +0x0E, +0x22, +0x2C, +0x2D, +0x2F, +0x30, +0x58-+0x5B from the state it runs on; arena_seats_compile); his messages checked on every GBA by his screen's rules (team_check.c: the hand dealt, one code or one chip, the PA lists' recipes 0x080295B4 and 0x080295B8, his Crosses, Souls and ColonelSoul's chip); sub_801FFD6's read path hooked (0x0802001C, BN6_LINK_TAKES_ANY 0x0203F7D8); the outbox of twelve (team_outbox.c); the server's OVER from seat 0 alone; the packet's other readers and writers named (0x0813F8D4, the library's getters 0x0803EF48 and 0x0803EF50, setter 0x0803EF58)"
-    },
-    {
-      "date": "2026-10-21",
-      "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
-    },
-    {
-      "date": "2026-10-21",
-      "what": "--dev arena2v2: each partner's own battle NaviStats and hand (src/online/arena_team_navi.c), answered by object, kept in two effect slots taken in BN6's own pool; teamhp=N and arenaother for their proof."
-    },
-    {
-      "date": "2026-10-21",
-      "what": "The bout's seed and the kept pair (src/online/arena_boot.c's BOUT_STEP, arena_keep, arena_new_bout; --dev arena's arenaseed=N and arenaagain=N); protocol v13 keeps a pair of players' sides for their rematch."
+      "date": "2026-11-08",
+      "what": "BN4's bracket plates tied to their Navis (src/emu/bn4_tournament.h: BN4_PLATE_GUTSMAN to BN4_PLATE_HEALNAVI; BN4_OPPONENT_PROGRESS 0x0802C2DD, BN4_CS_BATTLE 0x51, BN4_STORY_BATTLE 0x08007BEC, BN4_STORY_BATTLES 0x080FA900, BN4_START_BATTLE 0x08005490, BN4_START_CUTSCENE 0x0802BD10, BN4_CS_IF_BATTLE 0x23; docs/rom/bn4.md, Each plate's Navi)."
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-08",
+      "name": "Each plate's battle index and story bytes",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state, each id 0x00-0x16 but 0x12 and 0x13: MegaMan and the id The Den Battle Tournament's first pair, the bracket opened (its set-up calls BN4_NEXT_OPPONENT), a probe on 0x080447CC reading the battle index (BN4_OPPONENT_BATTLES[id]: 0x04, 0x08, 0x0C, 0x10, 0x1C, 0x20, 0x24, 0x28, 0x34, 0x3C, 0x40, 0x44, 0x14, 0x18, 0x38, 0x2C, 0x30, 0x48, 0x4C, 0x50, 0x54); then the Den round's cutscene from its 55 00 (0x08087689, started by a stub through 0x0802BD10), probes on command 0x55's stores 0x0802CE94 and 0x0802CE98 reading the story bytes each id leads to (0x30 GutsMan's to 0x7B ProtoMan's). The record each progress's opponent starts read from the story scripts (the first 51 r 01 of the block the map list's person opens), not run.",
+      "meaning": "Every plate's Navi named from BN4's data: the five named by sight and the owner's three readings held (FireMan 0x01, ThunderMan 0x08, WindMan 0x05); the last step derived.",
+      "link": "../multirom/bn4-tournament.md#each-plates-navi"
+    },
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-05",

@@ -1,8 +1,8 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-05",
-  "previous": "2026-10-18",
+  "updated": "2026-11-08",
+  "previous": "2026-11-05",
   "features": [
     {
       "name": "Net Square",
@@ -362,6 +362,10 @@
     {
       "date": "2026-11-05",
       "what": "BN4's Navis' companions by one mechanism: the ThunderMan, WindMan and FireMan branches merged, their three companion mechanisms (XnCompanion4, XnCompanion, XnSpawned) made one (XnSpawn and XnInit, src/emu/xnavi_init.c; tools/xnavirecipe_bn4_init.py reads every init: a spawn's r4 constant or r0 by a table of its version, the words kept after, the spawns at the companion start where the init makes them after its collision's set-up, else at the spawn's end with its +0x11, sprite and update); the moved first-kind types numbered in NAVIS' order by cost (ThunderMan's 0x33 0xE0, WindMan's 0x5C 0xE1, FireMan's 0x57 0xE2); WindMan installed (his companions' state 4 run as 0, 0x080CCD2E); the four battle sprites in the shared room."
+    },
+    {
+      "date": "2026-11-08",
+      "what": "BN4's bracket plates tied to their Navis (src/emu/bn4_tournament.h: BN4_PLATE_GUTSMAN to BN4_PLATE_HEALNAVI; BN4_OPPONENT_PROGRESS 0x0802C2DD, BN4_CS_BATTLE 0x51, BN4_STORY_BATTLE 0x08007BEC, BN4_STORY_BATTLES 0x080FA900, BN4_START_BATTLE 0x08005490, BN4_START_CUTSCENE 0x0802BD10, BN4_CS_IF_BATTLE 0x23; docs/rom/bn4.md, Each plate's Navi)."
     }
   ],
   "experiments": [
@@ -859,6 +863,14 @@
       "result": "python3 tools/xdiff.py windman_v1 with his companions spawned at his spawn's end: still no fight (game state 0x0C, phase 0, 7800 frames) while the 0x5C's state 4 is BN4's raw bytes; with its movs r2,#4 at 0x080CCD2E made 0 (state 0, as FireMan's companion's mode 4) both battles run to their end and FAIL at t1 on his wind's +0x38 (BattleState +0x8C | +0xC4) and +0x4C (0 | WindMan). thunderman_v1 FAIL at t1 on his cloud (0x6A a step ahead), the same with or without BN6's Navi frame at his spawn's end; fireman_v1 FAIL at t1 unchanged (+0x91). gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; 187 of 187 mutations caught.",
       "meaning": "The companions' state 4 (their appear through BN4's tile buffer) is taken in BN6's battle and hangs it: the interim that runs it as state 0 lets WindMan fight, and his wind's two fields are what is left at t1.",
       "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-08",
+      "name": "Each plate's battle index and story bytes",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state, each id 0x00-0x16 but 0x12 and 0x13: MegaMan and the id The Den Battle Tournament's first pair, the bracket opened (its set-up calls BN4_NEXT_OPPONENT), a probe on 0x080447CC reading the battle index (BN4_OPPONENT_BATTLES[id]: 0x04, 0x08, 0x0C, 0x10, 0x1C, 0x20, 0x24, 0x28, 0x34, 0x3C, 0x40, 0x44, 0x14, 0x18, 0x38, 0x2C, 0x30, 0x48, 0x4C, 0x50, 0x54); then the Den round's cutscene from its 55 00 (0x08087689, started by a stub through 0x0802BD10), probes on command 0x55's stores 0x0802CE94 and 0x0802CE98 reading the story bytes each id leads to (0x30 GutsMan's to 0x7B ProtoMan's). The record each progress's opponent starts read from the story scripts (the first 51 r 01 of the block the map list's person opens), not run.",
+      "meaning": "Every plate's Navi named from BN4's data: the five named by sight and the owner's three readings held (FireMan 0x01, ThunderMan 0x08, WindMan 0x05); the last step derived.",
+      "link": "../multirom/bn4-tournament.md#each-plates-navi"
     }
   ],
   "method": {
