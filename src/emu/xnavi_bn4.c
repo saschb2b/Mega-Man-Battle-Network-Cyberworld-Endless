@@ -223,14 +223,14 @@ static const XvImm gutsman_imms[] = {
 	{ 0x080D0874, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D0898, THUMB_MOVS, 0, 0, 0x1C, 0xE7 },   /* its object's type 0x1c: moved, the dispatch's 0xe7 */
 	{ 0x080D08A8, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080D090A, THUMB_MOVS, 2, 0, 0xE, 0xCB },   /* its object's sprite: list 4 0xe in BN4, list 4 0xcb in BN6 (copied) */
+	{ 0x080D090A, THUMB_MOVS, 2, 0, 0xE, 0xCC },   /* its object's sprite: list 4 0xe in BN4, list 4 0xcc in BN6 (copied) */
 	{ 0x080D0968, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D09D4, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D0A14, THUMB_MOVS, 0, 0, 0xA3, 0x33 },   /* its sound 0xa3: BN4's copied into BN6's empty slot 0x33, on its player 9 */
 	{ 0x080D0A44, THUMB_MOVS, 0, 0, 0x1D, 0xE8 },   /* its object's type 0x1d: moved, the dispatch's 0xe8 */
 	{ 0x080D0A54, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D0AA0, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
-	{ 0x080D0AA2, THUMB_MOVS, 2, 0, 0x4, 0xCA },   /* its object's sprite: list 3 0x4 in BN4, list 4 0xca in BN6 (copied) */
+	{ 0x080D0AA2, THUMB_MOVS, 2, 0, 0x4, 0xCB },   /* its object's sprite: list 3 0x4 in BN4, list 4 0xcb in BN6 (copied) */
 	{ 0x080D0B3C, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D0B5C, THUMB_STRB, 0, 7, 0x8, 0xA },   /* collision data +0x8 in BN4, +0xa in BN6 */
 	{ 0x080D0B5E, THUMB_STRB, 1, 7, 0x9, 0xB },   /* collision data +0x9 in BN4, +0xb in BN6 */
@@ -269,8 +269,8 @@ static const XvRef gutsman_states[] = {
 };
 static const XvSprite gutsman_sprites[] = {
 	{ 2, 0x02, 2, 0x41, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 3, 0x04, 4, 0xCA, XN_BN4_ART + 0x0, 0x1000 },
-	{ 4, 0x0E, 4, 0xCB, XN_BN4_ART + 0x1000, 0x800 },
+	{ 3, 0x04, 4, 0xCB, XN_BN4_ART + 0x0, 0x1000 },
+	{ 4, 0x0E, 4, 0xCC, XN_BN4_ART + 0x1000, 0x800 },
 };
 static const XvId gutsman_effects[] = { { 0x15, 0x90 }, { 0x56, 0x99 } };
 static const XvSong gutsman_songs[] = {
@@ -491,17 +491,17 @@ static const XvImm thunderman_imms[] = {
 	{ 0x080C3A4E, THUMB_MOVS, 0, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080C3ABC, THUMB_MOVS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080C3D86, THUMB_MOVS, 0, 0, 0x33, 0xE0 },   /* its companion's type 0x33 (the first kind): moved, the dispatch's 0xe0 */
-	{ 0x080DAAB8, THUMB_MOVS, 2, 0, 0x2D, 0xCC },   /* its object's sprite: list 4 0x2d in BN4, list 4 0xcc in BN6 (copied) */
+	{ 0x080DAAB8, THUMB_MOVS, 2, 0, 0x2D, 0xCD },   /* its object's sprite: list 4 0x2d in BN4, list 4 0xcd in BN6 (copied) */
 	{ 0x080DAAF2, THUMB_STRB, 1, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080DAC28, THUMB_MOVS, 0, 0, 0x6A, 0xEA },   /* its object's type 0x6a: moved, the dispatch's 0xea */
-	{ 0x080DB2AC, THUMB_MOVS, 2, 0, 0x11, 0xCD },   /* its object's sprite: list 4 0x11 in BN4, list 4 0xcd in BN6 (copied) */
+	{ 0x080DB2AC, THUMB_MOVS, 2, 0, 0x11, 0xCE },   /* its object's sprite: list 4 0x11 in BN4, list 4 0xce in BN6 (copied) */
 	{ 0x080DB2F0, THUMB_STRB, 1, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080DB342, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DB39C, THUMB_MOVS, 0, 0, 0x49, 0xD0 },   /* its sound 0x148 (movs and adds #0xff) at the pool's 0xd0 */
 	{ 0x080DB39E, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x148 (movs and adds #0xff) at the pool's 0xd0 */
 	{ 0x080DB3B0, THUMB_MOVS, 0, 0, 0xB8, 0x33 },   /* its sound 0xb8: BN4's copied into BN6's empty slot 0x33, on its player 17 */
 	{ 0x080DB3D2, THUMB_MOVS, 0, 0, 0x6F, 0xEB },   /* its object's type 0x6f: moved, the dispatch's 0xeb */
-	{ 0x080DB420, THUMB_MOVS, 2, 0, 0x2E, 0xCE },   /* its object's sprite: list 4 0x2e in BN4, list 4 0xce in BN6 (copied) */
+	{ 0x080DB420, THUMB_MOVS, 2, 0, 0x2E, 0xCF },   /* its object's sprite: list 4 0x2e in BN4, list 4 0xcf in BN6 (copied) */
 	{ 0x080DB4A8, THUMB_MOVS, 0, 0, 0xAD, 0x32 },   /* its sound 0xad: BN4's copied into BN6's empty slot 0x32, on its player 26 */
 	{ 0x080DB528, THUMB_MOVS, 0, 0, 0x70, 0xEC },   /* its object's type 0x70: moved, the dispatch's 0xec */
 	{ 0x080DB568, THUMB_MOVS, 2, 0, 0x14, 0x9B },   /* its object's sprite: list 5 0x14 in BN4, 0x9b in BN6 (copied) */
@@ -509,7 +509,7 @@ static const XvImm thunderman_imms[] = {
 	{ 0x080DB5E2, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DB672, THUMB_MOVS, 0, 0, 0x44, 0x63 },   /* its sound 0x143 (movs and adds #0xff) at the pool's 0x63 */
 	{ 0x080DB674, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x143 (movs and adds #0xff) at the pool's 0x63 */
-	{ 0x080DB692, THUMB_MOVS, 4, 0, 0x47, 0x9A },   /* its effect: 0x47 in BN4, 0x9a in BN6 (moved) */
+	{ 0x080DB692, THUMB_MOVS, 4, 0, 0x47, 0x9B },   /* its effect: 0x47 in BN4, 0x9b in BN6 (moved) */
 	{ 0x080DB6D2, THUMB_MOVS, 0, 0, 0x71, 0xED },   /* its object's type 0x71: moved, the dispatch's 0xed */
 	{ 0x080F2100, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080F21B4, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
@@ -534,13 +534,13 @@ static const XvRef thunderman_states[] = {
 };
 static const XvSprite thunderman_sprites[] = {
 	{ 2, 0x06, 2, 0x45, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 4, 0x2D, 4, 0xCC, XN_BN4_ART + 0x3C00, 0x2000 },
-	{ 4, 0x11, 4, 0xCD, XN_BN4_ART + 0x5C00, 0x1000 },
-	{ 4, 0x2E, 4, 0xCE, XN_BN4_ART + 0x6C00, 0x800 },
+	{ 4, 0x2D, 4, 0xCD, XN_BN4_ART + 0x3C00, 0x2000 },
+	{ 4, 0x11, 4, 0xCE, XN_BN4_ART + 0x5C00, 0x1000 },
+	{ 4, 0x2E, 4, 0xCF, XN_BN4_ART + 0x6C00, 0x800 },
 	{ 5, 0x14, 5, 0x9B, XN_BN4_ART + 0x7400, 0x700 },
 	{ 5, 0x13, 5, 0x9C, XN_BN4_ART + 0x7B00, 0xC00 },
 };
-static const XvId thunderman_effects[] = { { 0x47, 0x9A } };
+static const XvId thunderman_effects[] = { { 0x47, 0x9B } };
 static const XvSong thunderman_songs[] = {
 	{ 0xAD, 0x32, XN_BN4_ART + 0x8700, 0xB80 },   /* its sound 0xad, BN4's song copied */
 	{ 0xB8, 0x33, XN_BN4_ART + 0x9280, 0x840 },   /* its sound 0xb8, BN4's song copied */
@@ -770,25 +770,25 @@ static const XvImm windman_imms[] = {
 	{ 0x080C3530, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 set (BN4_SET_ACTION's r0) */
 	{ 0x080CCD2E, THUMB_MOVS, 2, 0, 0x4, 0x0 },   /* its companion's mode 4 (its appear through BN4's tile buffer, unported) run as its mode 0 */
 	{ 0x080CCF38, THUMB_MOVS, 0, 0, 0x5C, 0xE1 },   /* its companion's type 0x5c (the first kind): moved, the dispatch's 0xe1 */
-	{ 0x080D9C84, THUMB_MOVS, 2, 0, 0x2A, 0xD1 },   /* its object's sprite: list 4 0x2a in BN4, list 4 0xd1 in BN6 (copied) */
+	{ 0x080D9C84, THUMB_MOVS, 2, 0, 0x2A, 0xD2 },   /* its object's sprite: list 4 0x2a in BN4, list 4 0xd2 in BN6 (copied) */
 	{ 0x080D9CC0, THUMB_MOVS, 0, 0, 0xB2, 0x32 },   /* its sound 0xb2: BN4's copied into BN6's empty slot 0x32, on its player 21 */
 	{ 0x080D9D1A, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D9D48, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
-	{ 0x080D9D56, THUMB_MOVS, 4, 0, 0x0, 0x9B },   /* its effect: 0x0 in BN4, 0x9b in BN6 (moved) */
+	{ 0x080D9D56, THUMB_MOVS, 4, 0, 0x0, 0x9C },   /* its effect: 0x0 in BN4, 0x9c in BN6 (moved) */
 	{ 0x080D9D5C, THUMB_MOVS, 0, 0, 0xC8, 0x33 },   /* its sound 0xc8: BN4's copied into BN6's empty slot 0x33, on its player 11 */
 	{ 0x080D9DB6, THUMB_MOVS, 0, 0, 0x63, 0xEE },   /* its object's type 0x63: moved, the dispatch's 0xee */
 	{ 0x080D9DC8, THUMB_STRB, 2, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080D9FCC, THUMB_MOVS, 2, 0, 0x2B, 0xD2 },   /* its object's sprite: list 4 0x2b in BN4, list 4 0xd2 in BN6 (copied) */
+	{ 0x080D9FCC, THUMB_MOVS, 2, 0, 0x2B, 0xD3 },   /* its object's sprite: list 4 0x2b in BN4, list 4 0xd3 in BN6 (copied) */
 	{ 0x080DA054, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DA082, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
-	{ 0x080DA090, THUMB_MOVS, 4, 0, 0x0, 0x9B },   /* its effect: 0x0 in BN4, 0x9b in BN6 (moved) */
+	{ 0x080DA090, THUMB_MOVS, 4, 0, 0x0, 0x9C },   /* its effect: 0x0 in BN4, 0x9c in BN6 (moved) */
 	{ 0x080DA096, THUMB_MOVS, 0, 0, 0xC8, 0x33 },   /* its sound 0xc8: BN4's copied into BN6's empty slot 0x33, on its player 11 */
 	{ 0x080DA0D4, THUMB_MOVS, 0, 0, 0x34, 0xD0 },   /* its sound 0x133 (movs and adds #0xff) at the pool's 0xd0 */
 	{ 0x080DA0D6, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x133 (movs and adds #0xff) at the pool's 0xd0 */
 	{ 0x080DA1E6, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080DA1FA, THUMB_MOVS, 0, 0, 0x65, 0xEF },   /* its object's type 0x65: moved, the dispatch's 0xef */
 	{ 0x080DA20A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080DA46A, THUMB_MOVS, 2, 0, 0x2F, 0xD3 },   /* its object's sprite: list 4 0x2f in BN4, list 4 0xd3 in BN6 (copied) */
+	{ 0x080DA46A, THUMB_MOVS, 2, 0, 0x2F, 0xD4 },   /* its object's sprite: list 4 0x2f in BN4, list 4 0xd4 in BN6 (copied) */
 	{ 0x080DA4A4, THUMB_MOVS, 0, 0, 0x27, 0x63 },   /* its sound 0x126 (movs and adds #0xff) at the pool's 0x63 */
 	{ 0x080DA4A6, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x126 (movs and adds #0xff) at the pool's 0x63 */
 	{ 0x080DA4E6, THUMB_LDR, 0, 2, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
@@ -805,8 +805,8 @@ static const XvPair windman_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvByte windman_bytes[] = {
-	{ 0x080CCC99, 0x28, 0xCF },   /* its table's kind 2: list 4 0x28 in BN4, 0xcf copied */
-	{ 0x080CCC9B, 0x29, 0xD0 },   /* its table's kind 3: list 4 0x29 in BN4, 0xd0 copied */
+	{ 0x080CCC99, 0x28, 0xD0 },   /* its table's kind 2: list 4 0x28 in BN4, 0xd0 copied */
+	{ 0x080CCC9B, 0x29, 0xD1 },   /* its table's kind 3: list 4 0x29 in BN4, 0xd1 copied */
 };
 static const XvType windman_types[] = {
 	{ 3, 0xEE, XV_TYPE_MOVED, 0x63 },   /* BN4's third-kind 0x63, moved, the dispatch's 0xee */
@@ -819,14 +819,14 @@ static const XvRef windman_states[] = {
 };
 static const XvSprite windman_sprites[] = {
 	{ 2, 0x03, 2, 0x42, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 4, 0x28, 4, 0xCF, XN_BN4_ART + 0xAB40, 0x800 },
-	{ 4, 0x29, 4, 0xD0, XN_BN4_ART + 0xB340, 0x800 },
-	{ 4, 0x2A, 4, 0xD1, XN_BN4_ART + 0xBB40, 0x800 },
-	{ 4, 0x2B, 4, 0xD2, XN_BN4_ART + 0xC340, 0x800 },
-	{ 4, 0x2F, 4, 0xD3, XN_BN4_ART + 0xCB40, 0x1000 },
+	{ 4, 0x28, 4, 0xD0, XN_BN4_ART + 0xAB40, 0x800 },
+	{ 4, 0x29, 4, 0xD1, XN_BN4_ART + 0xB340, 0x800 },
+	{ 4, 0x2A, 4, 0xD2, XN_BN4_ART + 0xBB40, 0x800 },
+	{ 4, 0x2B, 4, 0xD3, XN_BN4_ART + 0xC340, 0x800 },
+	{ 4, 0x2F, 4, 0xD4, XN_BN4_ART + 0xCB40, 0x1000 },
 	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0xDB40, 0x1C00 },
 };
-static const XvId windman_effects[] = { { 0x00, 0x9B }, { 0x15, 0x90 } };
+static const XvId windman_effects[] = { { 0x00, 0x9C }, { 0x15, 0x90 } };
 static const XvSong windman_songs[] = {
 	{ 0xB2, 0x32, XN_BN4_ART + 0xF740, 0x1640 },   /* its sound 0xb2, BN4's song copied */
 	{ 0xC8, 0x33, XN_BN4_ART + 0x10D80, 0xB40 },   /* its sound 0xc8, BN4's song copied */
@@ -1126,7 +1126,7 @@ static const XvImm fireman_imms[] = {
 	{ 0x080CC464, THUMB_MOVS, 2, 0, 0x4, 0x0 },   /* its companion's mode 4 (its appear through BN4's tile buffer, unported) run as its mode 0 */
 	{ 0x080CC5F8, THUMB_MOVS, 0, 0, 0x57, 0xE2 },   /* its companion's type 0x57 (the first kind): moved, the dispatch's 0xe2 */
 	{ 0x080CE31C, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
-	{ 0x080CE31E, THUMB_MOVS, 2, 0, 0xE, 0xD4 },   /* its object's sprite: list 3 0xe in BN4, list 4 0xd4 in BN6 (copied) */
+	{ 0x080CE31E, THUMB_MOVS, 2, 0, 0xE, 0xD5 },   /* its object's sprite: list 3 0xe in BN4, list 4 0xd5 in BN6 (copied) */
 	{ 0x080CE358, THUMB_LDRB, 0, 5, 0xE, 0xF },   /* its palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element) */
 	{ 0x080CE3D2, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE47E, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
@@ -1135,12 +1135,12 @@ static const XvImm fireman_imms[] = {
 	{ 0x080CE4B0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080CE4BC, THUMB_STRB, 7, 0, 0xE, 0xF },   /* the object it spawned: palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element) */
 	{ 0x080CE4F6, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
-	{ 0x080CE4F8, THUMB_MOVS, 2, 0, 0x11, 0xD5 },   /* its object's sprite: list 3 0x11 in BN4, list 4 0xd5 in BN6 (copied) */
+	{ 0x080CE4F8, THUMB_MOVS, 2, 0, 0x11, 0xD6 },   /* its object's sprite: list 3 0x11 in BN4, list 4 0xd6 in BN6 (copied) */
 	{ 0x080CE544, THUMB_MOVS, 0, 0, 0xA9, 0x63 },   /* its sound 0xa9: BN4's copied into BN6's empty slot 0x63, on its player 9 */
 	{ 0x080CE570, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE592, THUMB_MOVS, 0, 0, 0xA, 0xF2 },   /* its object's type 0xa: moved, the dispatch's 0xf2 */
 	{ 0x080CE5A2, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080CFFAE, THUMB_MOVS, 2, 0, 0xA, 0xD7 },   /* its object's sprite: list 4 0xa in BN4, list 4 0xd7 in BN6 (copied) */
+	{ 0x080CFFAE, THUMB_MOVS, 2, 0, 0xA, 0xD8 },   /* its object's sprite: list 4 0xa in BN4, list 4 0xd8 in BN6 (copied) */
 	{ 0x080CFFF8, THUMB_MOVS, 0, 0, 0x9D, 0x36 },   /* its sound 0x9d: BN4's copied into BN6's empty slot 0x36, on its player 9 */
 	{ 0x080D0014, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D00BC, THUMB_MOVS, 0, 0, 0x19, 0xF3 },   /* its object's type 0x19: moved, the dispatch's 0xf3 */
@@ -1150,7 +1150,7 @@ static const XvImm fireman_imms[] = {
 	{ 0x080D0248, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D02DE, THUMB_MOVS, 0, 0, 0x1A, 0xF4 },   /* its object's type 0x1a: moved, the dispatch's 0xf4 */
 	{ 0x080D0BE2, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
-	{ 0x080D0BE4, THUMB_MOVS, 2, 0, 0x2, 0xD6 },   /* its object's sprite: list 3 0x2 in BN4, list 4 0xd6 in BN6 (copied) */
+	{ 0x080D0BE4, THUMB_MOVS, 2, 0, 0x2, 0xD7 },   /* its object's sprite: list 3 0x2 in BN4, list 4 0xd7 in BN6 (copied) */
 	{ 0x080D0C64, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D0C80, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
 	{ 0x080D0CE0, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
@@ -1189,11 +1189,11 @@ static const XvRef fireman_states[] = {
 };
 static const XvSprite fireman_sprites[] = {
 	{ 2, 0x05, 2, 0x44, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 3, 0x0E, 4, 0xD4, XN_BN4_ART + 0x14E80, 0x1000 },
-	{ 3, 0x11, 4, 0xD5, XN_BN4_ART + 0x15E80, 0x1000 },
-	{ 3, 0x02, 4, 0xD6, XN_BN4_ART + 0x16E80, 0x1000 },
-	{ 4, 0x0A, 4, 0xD7, XN_BN4_ART + 0x17E80, 0x2000 },
-	{ 4, 0x08, 4, 0xD8, XN_BN4_ART + 0x19E80, 0x1800 },
+	{ 3, 0x0E, 4, 0xD5, XN_BN4_ART + 0x14E80, 0x1000 },
+	{ 3, 0x11, 4, 0xD6, XN_BN4_ART + 0x15E80, 0x1000 },
+	{ 3, 0x02, 4, 0xD7, XN_BN4_ART + 0x16E80, 0x1000 },
+	{ 4, 0x0A, 4, 0xD8, XN_BN4_ART + 0x17E80, 0x2000 },
+	{ 4, 0x08, 4, 0xD9, XN_BN4_ART + 0x19E80, 0x1800 },
 };
 static const XvId fireman_effects[] = { { 0x15, 0x90 } };
 static const XvSong fireman_songs[] = {
@@ -1203,7 +1203,7 @@ static const XvSong fireman_songs[] = {
 	{ 0xC0, 0xD0, XN_BN4_ART + 0x1B780, 0x880 },   /* its sound 0xc0, BN4's song copied */
 };
 static const XnSpawn fireman_spawns[] = {
-	{ OWN(0x080CC5F5), 0xD810, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B7E16: its first-kind 0x57, BN4 r4 0x810 */
+	{ OWN(0x080CC5F5), 0xD910, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B7E16: its first-kind 0x57, BN4 r4 0x810 */
 };
 static const XnInit fireman_init = { fireman_spawns, 1, true, true, true, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
 
@@ -1429,7 +1429,7 @@ static const XvImm roll_imms[] = {
 	{ 0x080CE79A, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE7D6, THUMB_MOVS, 4, 0, 0x56, 0x99 },   /* its effect: 0x56 in BN4, 0x99 in BN6 (moved) */
 	{ 0x080CE812, THUMB_MOVS, 0, 0, 0xB, 0xF8 },   /* its object's type 0xb: moved, the dispatch's 0xf8 */
-	{ 0x080E3ABE, THUMB_ADDS, 4, 0, 0x2E, 0x9C },   /* its effect: 0x2e in BN4, 0x9c in BN6 (moved) */
+	{ 0x080E3ABE, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
 	{ 0x080E3ADC, THUMB_MOVS, 0, 0, 0x17, 0xE0 },   /* its object's type 0x17: moved, the dispatch's 0xe0 */
 	{ 0x080EF880, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
 	{ 0x080EF99A, THUMB_MOVS, 0, 0, 0x32, 0x63 },   /* its sound 0x131 (movs and adds #0xff) at the pool's 0x63 */
@@ -1452,15 +1452,15 @@ static const XvPair roll_words[] = {
 };
 static const XvByte roll_bytes[] = {
 	{ 0x080CD540, 0x0C, 0x10 },   /* its table's kind 7: its sprite's list 3 in BN4, copied into 4 */
-	{ 0x080CD541, 0x0F, 0xD9 },   /* its table's kind 7: list 3 0xf in BN4, list 4 0xd9 copied */
+	{ 0x080CD541, 0x0F, 0xDA },   /* its table's kind 7: list 3 0xf in BN4, list 4 0xda copied */
 	{ 0x080CE615, 0x0C, 0x10 },   /* its table's kind 6: its sprite's list 3 in BN4, copied into 4 */
-	{ 0x080CE616, 0x10, 0xDA },   /* its table's kind 6: list 3 0x10 in BN4, list 4 0xda copied */
+	{ 0x080CE616, 0x10, 0xDB },   /* its table's kind 6: list 3 0x10 in BN4, list 4 0xdb copied */
 	{ 0x080CE625, 0x0C, 0x10 },   /* its table's kind 7: its sprite's list 3 in BN4, copied into 4 */
-	{ 0x080CE626, 0x10, 0xDA },   /* its table's kind 7: list 3 0x10 in BN4, list 4 0xda copied */
+	{ 0x080CE626, 0x10, 0xDB },   /* its table's kind 7: list 3 0x10 in BN4, list 4 0xdb copied */
 	{ 0x080CE635, 0x0C, 0x10 },   /* its table's kind 8: its sprite's list 3 in BN4, copied into 4 */
-	{ 0x080CE636, 0x10, 0xDA },   /* its table's kind 8: list 3 0x10 in BN4, list 4 0xda copied */
+	{ 0x080CE636, 0x10, 0xDB },   /* its table's kind 8: list 3 0x10 in BN4, list 4 0xdb copied */
 	{ 0x080CE645, 0x0C, 0x10 },   /* its table's kind 9: its sprite's list 3 in BN4, copied into 4 */
-	{ 0x080CE646, 0x10, 0xDA },   /* its table's kind 9: list 3 0x10 in BN4, list 4 0xda copied */
+	{ 0x080CE646, 0x10, 0xDB },   /* its table's kind 9: list 3 0x10 in BN4, list 4 0xdb copied */
 };
 static const XvType roll_types[] = {
 	{ 3, 0xF7, XV_TYPE_MOVED, 0x02 },   /* BN4's third-kind 0x2, moved, the dispatch's 0xf7 */
@@ -1472,16 +1472,15 @@ static const XvRef roll_states[] = {
 };
 static const XvSprite roll_sprites[] = {
 	{ 2, 0x01, 2, 0x40, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 3, 0x0F, 4, 0xD9, XN_BN4_ART + 0x1C000, 0x1000 },
-	{ 3, 0x10, 4, 0xDA, XN_BN4_ART + 0x1D000, 0x800 },
-	{ 4, 0x17, 4, 0xDB, XN_BN4_ART + 0x1D800, 0x800 },
+	{ 3, 0x0F, 4, 0xDA, XN_BN4_ART + 0x1C000, 0x1000 },
+	{ 3, 0x10, 4, 0xDB, XN_BN4_ART + 0x1D000, 0x800 },
 };
-static const XvId roll_effects[] = { { 0x2E, 0x9C }, { 0x56, 0x99 } };
+static const XvId roll_effects[] = { { 0x2E, 0x9A }, { 0x56, 0x99 } };
 static const XvSong roll_songs[] = {
-	{ 0x96, 0x32, XN_BN4_ART + 0x1E000, 0x21C0, 9 },   /* its sound 0x96, BN4's song copied, on BN6's player 9 */
-	{ 0xCE, 0x33, XN_BN4_ART + 0x201C0, 0x21C0 },   /* its sound 0xce, BN4's song copied */
-	{ 0x131, 0x63, XN_BN4_ART + 0x22380, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
-	{ 0x132, 0xD0, XN_BN4_ART + 0x22AC0, 0xC80 },   /* its sound 0x132, BN4's song copied */
+	{ 0x96, 0x32, XN_BN4_ART + 0x1D800, 0x21C0, 9 },   /* its sound 0x96, BN4's song copied, on BN6's player 9 */
+	{ 0xCE, 0x33, XN_BN4_ART + 0x1F9C0, 0x21C0 },   /* its sound 0xce, BN4's song copied */
+	{ 0x131, 0x63, XN_BN4_ART + 0x21B80, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
+	{ 0x132, 0xD0, XN_BN4_ART + 0x222C0, 0xC80 },   /* its sound 0x132, BN4's song copied */
 };
 static const XnInit roll_init = { NULL, 0, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
 static const XnSummonId roll_summon_ids[] = {

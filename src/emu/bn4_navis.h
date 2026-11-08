@@ -179,6 +179,8 @@
 #define BN4_ROLL_SHOT_KINDS 0x080BC300u /* by version, her shot's kind (the third kind's 0x0B, BN4_SHOT_KINDS's): 6, 7, 8, 9 */
 #define BN4_SUMMON_PANEL  0x080F00A4u /* MegaMan's state 47's panel for her to stand on: a free panel by 0x0800A0D8 and its masks by side
                                        * (0x080F00E4, two words a side), else her own */
+#define BN4_SPAWN_ENEMY_DRAW 0x080F0118u /* BN4_SPAWN_ENEMY's draw's return (its bl to GetRNG at 0x080F0114: the free panel's
+                                       * pick), the differential's key of the summon shim's draw (XV_SHIM_SUMMON_DRAW) */
 #define BN4_SPAWN_ENEMY_MASKS 0x080F01A8u /* BN4_SPAWN_ENEMY's masks by side (wanted, refused; two words a side), BN4_FREE_PANELS' r2, r3 */
 #define BN4_SUMMONED_APPEAR 0x0801002Au /* BN4's generic state 0's appear where the object's +5 is 2 (BN4_SPAWN_ENEMY's spawn word) */
 #define BN4_T4_FLASH      0x17        /* the fourth kind's flash (MegaMan's states 46 and 47: her warp and summon), moved with her */

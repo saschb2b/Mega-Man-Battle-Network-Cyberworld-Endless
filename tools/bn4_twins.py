@@ -67,6 +67,10 @@ TWINS = (
     # queue, 0, QUEUED), and its held chips' attacks, dead while it holds none
     (0x08007F04, 0x0800AA06, 'mettaur'), (0x08007F1C, 0x0800AA1A, 'mettaur'), (0x08007F46, 0x0800AA40, 'mettaur'),
     (0x080E45F6, 0x0810A952, 'mettaur'), (0x080E8ADA, 0x0810A952, 'mettaur'),
+    # ... its generic state 0 and BN4's summoned appear copied with it (SUMMON_APPEAR): their calls out
+    (0x0800FE00, 0x08016396, 'mettaur'), (0x0800FCDE, 0x08016396, 'mettaur'), (0x0800FF26, 0x080164A0, 'mettaur'),
+    (0x0800B018, 0x0800EAFA, 'mettaur'), (0x0800B026, 0x0800EB08, 'mettaur'), (0x08007E46, 0x080011EC, 'mettaur'),
+    (0x08015ABC, 0x0801DC7C, 'mettaur'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -175,6 +179,24 @@ AUDITS = {
     (0x080104AC, 0x08016B02): ('ok', "the generic state 4 Mettaur's own state 4 wraps (its hit's reaction until it ends, then its "
                                      "state back from +0x5C): BN6's in its place, as every family's state 4 is BN6's; BN6's calls "
                                      "its own two routines where BN4's calls one (0x0800C13C; BN6's 0x0800F394, 0x080101C4)"),
+    (0x0800FE00, 0x08016396): ('ok', "BN4's plain appear (BN4_APPEAR), which its copied generic state 0 runs at +5 0: BN6's "
+                                     "(BN6_APPEAR), as every family's state 0 runs it, the same steps but for BN4's battle kind "
+                                     "0x44, its sound and step 2's end (docs/rom/bn4.md, A virus's appear)"),
+    (0x0800FCDE, 0x08016396): ('ok', "BN4's appear of a battle whose settings' +6 has bit 0x20 (read at 0x0800FCBA, its copy reading "
+                                     "BN6's settings there): BN6's plain appear, which BN6's generic state 0 runs for every virus a "
+                                     "battle begins with, whatever its settings"),
+    (0x0800FF26, 0x080164A0): ('ok', "BN4's appear of +5 1, which no spawn of the family gives (BN6_SPAWN_ENEMY_1's 1 made 2 by the "
+                                     "summon's shim): BN6's appear of an enemy spawned into a fight under way in its place"),
+    (0x0800B018, 0x0800EAFA): ('ok', "its collision data's word +0x1C set from r0 and its flag 8 set: BN6's, the word at BN6's +0x28 "
+                                     "(COLL4TO6) and its flag by BN6's twin (0x08012F82 / 0x0801A152)"),
+    (0x0800B026, 0x0800EB08): ('ok', "... the word cleared and the flag cleared: BN6's, at BN6's +0x28 (0x08012F8C / 0x0801A15C)"),
+    (0x08007E46, 0x080011EC): ('ok', "BN4's battle kind ([[r10+0x18]+0xF]) its summoned appear's step 2 tests against 0x44 alone "
+                                     "(0x08010114), both ways then showing the HP of a virus of the enemies' side (0x08010118-0x08010122; "
+                                     "BN6's battle state +0xD and the object's +0x16 the same): 0 back, BN6's routine that returns 0, "
+                                     "as no battle of BN6's is BN4's 0x44"),
+    (0x08015ABC, 0x0801DC7C): ('ok', "an enemy's HP shown (r0, r1 its offset: an entry of BN4's 0x0203DC90, BN6's 0x0203EB50): BN6's, "
+                                     "which BN6's own appears call in the same place (0x08016598), BN6's also giving its NameIDs "
+                                     "0xEB and 0x49-0x4E a kind of their own"),
     (0x080E45F6, 0x0810A952): ('ok', "Mettaur's held chip's attack spawned (the fourth kind's 0x20; its state 9's case by the chip, "
                                      "0x080B399C): dead while its +0x2A stays 0xFFFF (it holds none): BN6's family nullsub"),
     (0x080E8ADA, 0x0810A952): ('ok', "Mettaur's held chip's other attack spawned (0x080B3C1A, its state 9's case 0x080B3A2A): dead "
@@ -327,6 +349,15 @@ TABLES = {
                      why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
                          "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "
                          "(0x080BD3E0-0x080BD3E4), as BN5's records of its own 0x0B are read"),
+}
+
+# A family moved for a summon alone (tools/xrecipe_bn4.py SUMMONED): its generic state 0 run as its own, BN4's
+# (BN4_STATE_GENERIC_0) copied with BN4's summoned appear (BN4_SUMMONED_APPEAR, its +5 2, which the summon's shim writes after
+# BN6's spawn), so a summoned virus arrives as BN4's does; its other appears paired with BN6's (AUDITS): region -> its end, why
+SUMMON_APPEAR = {
+    0x0800FCAC: (0x0800FCDE, "BN4's generic state 0: its appear by its +5 (0 the plain, 1, 2 or more the summoned) and the "
+                             "battle settings' +6 bit 0x20"),
+    0x0801002A: (0x0801013A, "BN4's summoned appear, its table (0x0801003C) and its three steps"),
 }
 
 # BN4's appear queue's routines (bn4_battle.h BN4_QUEUE_*), one queue where BN6's (BN6_QUEUE_*) take its number in r0: each

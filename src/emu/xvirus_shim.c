@@ -334,7 +334,7 @@ static void far(Asm *a, int reg, int link, int label) {
 }
 
 int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s) {
-	enum { M0, M1, M2, M3, RNG, SPAWN, SOUND, IDS, L1, L2, LOOP, NONE, END, SLOT };
+	enum { M0, M1, M2, M3, RNG, SPAWN, SOUND, IDS, L1, L2, LOOP, NONE, END, SLOT, INIT };
 	Asm a = { out, max, 0, at, (at & 3) != 0 || s->nids < 0, { 0 }, { { 0 } }, 0 };
 	half(&a, 0xB590);                            /* push {r4, r7, lr} */
 	half(&a, 0xB084);                            /* sub sp, #16 */
@@ -355,6 +355,7 @@ int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s
 	to_label(&a, B_, END, 'b');
 	here(&a, L2);
 	far(&a, 0, 1, RNG);                          /* a draw */
+	if (a.n != XV_SHIM_SUMMON_DRAW) a.bad = true;   /* (its return where the differential keys it) */
 	half(&a, 0x1C39);                            /* adds r1, r7, #0 */
 	half(&a, 0xDF06);                            /* swi 6: r1 the draw modulo the count */
 	half(&a, 0xA800);                            /* add r0, sp, #0 */
@@ -382,6 +383,12 @@ int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s
 	far(&a, 4, 7, SPAWN);
 	half(&a, 0x1C04);                            /* adds r4, r0, #0 */
 	to_label(&a, BCC(EQ), END, 'c');
+	half(&a, MOVS(0, 2));
+	half(&a, (uint16_t)(0x7000 | 5 << 6 | 4 << 3));   /* strb r0, [r4, #5]: BN4's summon's mark */
+	half(&a, 0xB420);                            /* push {r5} */
+	half(&a, 0x1C25);                            /* adds r5, r4, #0 */
+	far(&a, 3, 7, INIT);                         /* its init now: its first state in its turn this frame */
+	half(&a, 0xBC20);                            /* pop {r5} */
 	if (s->sound <= 0xFF) half(&a, MOVS(0, s->sound));
 	else to_label(&a, LDR_PC(0), SLOT, 'l');
 	far(&a, 3, 7, SOUND);
@@ -400,6 +407,7 @@ int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s
 	word(&a, SPAWN, s->spawn | 1u);
 	word(&a, SOUND, s->play | 1u);
 	word(&a, SLOT, s->sound);
+	word(&a, INIT, s->init | 1u);
 	word(&a, IDS, s->nids ? s->ids[0] : 0);
 	for (int k = 1; k <= s->nids; ++k) {
 		const uint32_t v = k < s->nids ? s->ids[k] : 0;

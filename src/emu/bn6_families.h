@@ -35,6 +35,9 @@
                                              into the appear queue (0x0800AA1A) and hidden, waiting for BN6_APPEAR_BITS' bit 0 and the
                                              queue's head; 0x0801641A the 2 x 16 frame blink, then out of the queue (0x0800AA40);
                                              0x08016460 waiting for bit 1, then CurAction 1 (BN4_APPEAR's steps, bn4_battle.h) */
+#define BN6_VIRUS_INIT        0x08016F56u /* BN6_VIRUS_TYPE's +8 0 (its table 0x0810A290): a virus's init by its AI index, its +8
+                                             made 4, the spawn-end hook (5) last; the type's present not run (a summon's shim runs
+                                             it alone in the spawn frame: xvirus_shim_summon) */
 #define BN6_QUEUE_HEAD        0x0800AA06u /* the appear queue r0 (8 words of objects, 0x20 bytes a queue from 0x02038170, by
                                              0x0800AAAE; BN6_APPEAR's 0, 0x080163D6): r0 1 where r5 heads it (BN4_QUEUE_HEAD's twin) */
 #define BN6_QUEUE_ENTER       0x0800AA1Au /* ... r5 put at queue r0's end where it is not in it: r0 1 where it was put */

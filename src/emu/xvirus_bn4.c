@@ -1059,11 +1059,13 @@ static const XVirusFamily bn4_cirkill = {
 
 static const XvBlock mettaur_blocks[] = {
 	{ 0x080B3594, 0x080B3C44, XV_CODE + 0x11000, 0xE3BE1138u },
-	{ 0x080CFBB0, 0x080CFD48, XV_CODE + 0x116B0, 0xBDC5644Eu },
-	{ 0x080CFB8C, 0x080CFBB0, XV_CODE + 0x11850, 0x2D6E2192u },
-	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x11882, 0x793106FEu },
-	{ 0x08010736, 0x0801079C, XV_CODE + 0x11C92, 0x7631C49Cu },
-	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x11D00, 0xB6A58CE9u },
+	{ 0x0800FCAC, 0x0800FCDE, XV_CODE + 0x116B0, 0xADF5FC45u },
+	{ 0x0801002A, 0x0801013A, XV_CODE + 0x116F2, 0x66328F22u },
+	{ 0x080CFBB0, 0x080CFD48, XV_CODE + 0x11810, 0xBDC5644Eu },
+	{ 0x080CFB8C, 0x080CFBB0, XV_CODE + 0x119B0, 0x2D6E2192u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x119E2, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x11DF2, 0x7631C49Cu },
+	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x11E60, 0xB6A58CE9u },
 };
 static const XvData mettaur_data[] = {
 	{ 0x080B3594, 0x080B35A6, XV_ZERO },
@@ -1101,6 +1103,10 @@ static const XvData mettaur_data[] = {
 	{ 0x080B3B40, 0x080B3B44, XV_POOL },
 	{ 0x080B3B44, 0x080B3B50, XV_TABLE },
 	{ 0x080B3C42, 0x080B3C44, XV_RAW },
+	{ 0x08010038, 0x0801003C, XV_POOL },
+	{ 0x0801003C, 0x08010048, XV_TABLE },
+	{ 0x080100BA, 0x080100BC, XV_RAW },
+	{ 0x080100BC, 0x080100C0, XV_POOL },
 	{ 0x080CFBC2, 0x080CFBC4, XV_RAW },
 	{ 0x080CFBC4, 0x080CFBC8, XV_POOL },
 	{ 0x080CFBC8, 0x080CFBD4, XV_TABLE },
@@ -1124,6 +1130,8 @@ static const XvPair mettaur_calls[] = {
 	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
 	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
 	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
+	{ 0x08002F3A, 0x08002EE8 },   /* search, SAME */
 	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
 	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
 	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
@@ -1131,6 +1139,7 @@ static const XvPair mettaur_calls[] = {
 	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
 	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
 	{ 0x08007BE4, 0x0800A704 },   /* project:research, SAME */
+	{ 0x08007E46, 0x080011EC },   /* project:mettaur, DIFF (audited) */
 	{ 0x08007F04, 0x0800AA06 },   /* project:mettaur, DIFF (audited) */
 	{ 0x08007F1C, 0x0800AA1A },   /* project:mettaur, DIFF (audited) */
 	{ 0x08007F46, 0x0800AA40 },   /* project:mettaur, DIFF (audited) */
@@ -1147,6 +1156,11 @@ static const XvPair mettaur_calls[] = {
 	{ 0x0800ABCA, 0x0810A952 },   /* project:families-2, DIFF (audited) */
 	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
 	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800B018, 0x0800EAFA },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800B026, 0x0800EB08 },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800FCDE, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FE00, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FF26, 0x080164A0 },   /* project:mettaur, SAME (audited) */
 	{ 0x0801013A, 0x080165B8 },   /* project:research, DIFF (audited) */
 	{ 0x0801014C, 0x080165C2 },   /* project:families-2, DIFF (audited) */
 	{ 0x080104AC, 0x08016B02 },   /* project:research, DIFF (audited) */
@@ -1166,6 +1180,8 @@ static const XvPair mettaur_calls[] = {
 	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
 	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x08014620, 0x0801BDDE },   /* search, SAME */
+	{ 0x08015ABC, 0x0801DC7C },   /* project:mettaur, DIFF (audited) */
 	{ 0x080164B4, 0x0810A952 },   /* project:families-2, DIFF (audited) */
 	{ 0x080190D0, 0x08021AA4 },   /* project:billy, SAME */
 	{ 0x08044AEC, 0x080011EC },   /* project:billy, DIFF (audited) */
@@ -1177,6 +1193,8 @@ static const XvPair mettaur_calls[] = {
 static const XvImm mettaur_imms[] = {
 	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
 	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x080100A0, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
+	{ 0x080100D8, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
 	{ 0x080B3688, THUMB_CMP, 0, 0, 0x6, 0x8 },   /* its CurAction 6 compared */
 	{ 0x080B36F8, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 written */
 	{ 0x080B370E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
@@ -1224,12 +1242,14 @@ static const XvType mettaur_types[] = {
 	{ 3, 0xE5, XV_TYPE_MOVED, 0x16 },   /* BN4's third-kind 0x16, moved, the dispatch's 0xe5 */
 };
 static const XvRef mettaur_states[] = {
-	BN6(0x08016381), OWN(0x080B3659), OWN(0x080B366F), BN6(0x080166AF), OWN(0x080B3681), OWN(0x080B36A3), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080B36B5), OWN(0x080B3889), OWN(0x080B38B1), OWN(0x080B398B), OWN(0x080B3B33),
+	OWN(0x0800FCAD), OWN(0x080B3659), OWN(0x080B366F), BN6(0x080166AF), OWN(0x080B3681), OWN(0x080B36A3), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080B36B5), OWN(0x080B3889), OWN(0x080B38B1), OWN(0x080B398B), OWN(0x080B3B33),
 };
 static const XvSprite mettaur_sprites[] = {
 	{ 1, 0x01, 1, 0xC6, XV_ART + 0x54000, 0x3000 },
 	{ 4, 0x04, 4, 0xC9, XV_ART + 0x57000, 0x1800 },
+	{ 4, 0x17, 4, 0xCA, XV_ART + 0x58800, 0x800 },
 };
+static const XvId mettaur_effects[] = { { 0x2E, 0x9A } };
 static const XvSong mettaur_songs[] = {
 	{ 0x8B, 0x46, XV_ART + 0x5DAC0, 0x40 },   /* its sound 0x8b, BN4's song copied */
 };
@@ -1256,6 +1276,7 @@ static const XVirusFamily bn4_mettaur = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
+	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
 	.songs = mettaur_songs, .nsongs = (int)(sizeof mettaur_songs / sizeof *mettaur_songs),
 	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */

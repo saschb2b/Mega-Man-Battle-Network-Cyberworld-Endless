@@ -111,9 +111,15 @@ int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint
  * side 0's, then side 1's) and one draw of `rng` (BN6's GetRNG twin), as
  * BN4_SPAWN_ENEMY picks it; its id BN6's by `ids` (its game's | BN6's << 16;
  * BN6's 0, or none listed: no spawn), spawned there on its side by `spawn`
- * (BN6_SPAWN_ENEMY_1), and `sound` played by `play` where one was: r0 the
- * object, 0 none. Its size, 0 where it does not fit in `max`. */
-typedef struct { uint32_t panels, rng, spawn, play; uint32_t masks[4]; const uint32_t *ids; int nids; uint16_t sound; } XvSummonShim;
+ * (BN6_SPAWN_ENEMY_1), its +5 made BN4's summon's 2 (its game's generic
+ * state 0 sends it to its summoned appear) and its init `init`
+ * (BN6_VIRUS_INIT) run on it there, so its first state runs in this
+ * frame's turn of it as BN4's init runs it, and `sound` played by
+ * `play` where one was: r0 the object, 0 none. Its size, 0 where it does
+ * not fit in `max`. */
+#define XV_SHIM_SUMMON_DRAW 0x2C   /* its draw's return in a summon's shim, as BN4_SPAWN_ENEMY_DRAW is in its game's (the
+                                      differential keys the one as the other: src/dev/xdiff_bn4.c xd4_summon_draws) */
+typedef struct { uint32_t panels, rng, spawn, play, init; uint32_t masks[4]; const uint32_t *ids; int nids; uint16_t sound; } XvSummonShim;
 int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s);
 
 #endif

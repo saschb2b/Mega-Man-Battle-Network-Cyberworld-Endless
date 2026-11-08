@@ -727,6 +727,11 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
             f.roots.append(states[k] & ~1)
         elif k >= len(states) or states[k] & ~1 != bn4_twins.GENERIC4[k]:
             f.decide('states', f'its state {k} is not BN4\'s generic one')
+    if name in SUMMONED:
+        # (its generic state 0 its own, BN4's copied with BN4's summoned appear: bn4_twins.SUMMON_APPEAR)
+        f.states[0] = ('OWN', bn4_twins.GENERIC4[0] | 1)
+        f.roots.append(bn4_twins.GENERIC4[0])
+        f.regions += [(lo, hi, 'appear') for lo, (hi, _) in sorted(bn4_twins.SUMMON_APPEAR.items())]
     f.own = states[6:]
     f.states += [('OWN', x | 1) for x in f.own]
     f.s1 = struct1_of(b4, f, f.init)

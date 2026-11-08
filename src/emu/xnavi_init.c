@@ -141,7 +141,7 @@ static bool summon_set(const XNavi *n) {
 	uint8_t code[SUMMON_ROOM];
 	if (m->nids > SUMMON_IDS) { xv_fail("its summon names %d ids, past %d", m->nids, SUMMON_IDS); return false; }
 	for (int k = 0; k < m->nids; ++k) ids[k] = m->ids[k].from | (uint32_t)m->ids[k].to << 16;
-	const XvSummonShim s = { xv_move_ref(m->panels), BN6_RNG_DRAW_POSITIVE, BN6_SPAWN_ENEMY_1, BN6_PLAY_SOUND,
+	const XvSummonShim s = { xv_move_ref(m->panels), BN6_RNG_DRAW_POSITIVE, BN6_SPAWN_ENEMY_1, BN6_PLAY_SOUND, BN6_VIRUS_INIT,
 	                         { m->masks[0], m->masks[1], m->masks[2], m->masks[3] }, ids, m->nids, m->sound };
 	const int size = xvirus_shim_summon(code, (int)sizeof code, m->at, &s);
 	uint8_t *p = size ? xv_put(m->at, (uint32_t)size, true) : NULL;
