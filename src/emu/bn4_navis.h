@@ -148,5 +148,12 @@
 #define BN4_WIND_SPAWN    0x080E68F8u /* a side's wind spawned (the fourth kind's 0x41) where the side's slot holds none of level 1 on */
 #define BN4_WIND_END      0x080E69BCu /* r0 a wind: told to end (+8 8, +0x60 0) */
 #define BN4_WIND_SLOTS    0x88        /* BattleState +0x88 + 4 x side: a side's wind, its level 8 past it (0x080E69C6, 0x080E69E8) */
+#define BN4_WIND_TYPE     0x080E6820u /* the wind's routine (BN4_T4_TYPES[0x41]): init 0x080E6840 (sound 0x121), its state 4 0x080E6858
+                                       * runs its step unasked (BN6_WIND_HOLD's twin), which spawns its gust (bl BN4_GUST_SPAWN at 0x080E68C2) */
+#define BN4_GUST_SPAWN    0x080D68ACu /* a wind's gust spawned (the third kind's 0x49, its routine 0x080D6724) */
+#define BN4_GUST_INIT     0x080D6748u /* the gust's init: sprite_load of list 0xC's 0x2E with the r0 its +0 flags left (0x080D6750-0x080D675C),
+                                       * the sprite state's +3 (BN6_GUST_INIT passes 0x80) */
+#define BN4_STEP_BEGIN    0x0801393Eu /* an object's step onto a panel begun: collision flags 0x100 and 4 (0x0801398C, 0x08013992), and no
+                                       * byte of the object's (BN6_STEP_BEGIN's twin, which sets its +0x0F) */
 
 #endif

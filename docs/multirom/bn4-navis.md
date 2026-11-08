@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T15:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -21,8 +21,10 @@ takes, read from the two ROMs by `tools/bn4_navis.py` (its report in
 `.build/bn4-navis/report.md`), the addresses and how each was found in
 [BN4 Red Sun's tables](../rom/bn4.md) (BN4's Navis; What BN4's Navis call
 and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
-below); ThunderMan, WindMan and FireMan are built and under proof, their
-companions made by one mechanism ([Companions](#companions)). BN5's Navis moved as
+below), WindMan built and proved, his plate on the bracket not yet named
+([WindMan built](#windman-built)); ThunderMan and FireMan are built and
+under proof, the three's companions made by one mechanism
+([Companions](#companions)). BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
 families by a path of their own ([Transplanted families](families.md), Billy
 first). BN4's Navis need both.
@@ -586,7 +588,7 @@ while the spec fails.
 
 ## WindMan built
 
-The third in the order, under proof: his type 0x30, Navi AI 50, ids
+The third in the order, proved by `windman_v1`: his type 0x30, Navi AI 50, ids
 0x388-0x38B (`foes 388@52`). He was held from the install while his
 battle could not reach its fight; with the companions' mechanism above it
 does, and he is installed (`xnavi_bn4[]`; the generator's `HELD` is
@@ -611,14 +613,87 @@ empty). What he adds:
   of 0xFF: the `movs` given the pool's slot, the `adds` 0 (`wide_movs`).
 
 `bn4_windman_control` PASSes. **`windman_v1`** (WindMan V1 alone at (5,2)
-against MegaMan idle at (2,2) with 2000 HP, as `gutsman_v1`) reaches its
-fight and FAILs at t1, its verdict recorded. His wind parts on two fields,
-as his branch found with the companions left out: its +0x38 points into
-each game's slot (BattleState +0x8C against +0xC4, a map the comparator's
-battle state lacks), and its +0x4C is 0 in BN4 and WindMan in BN6 (BN6's
-wind spawn gives its spawner). The world parts at t1 on the third kind's
-0x49 (+0x93 0xE against 0x8E, its +0xA8-+0xB4). No mutation of his port is
-added while the spec fails.
+against MegaMan idle at (2,2) with 2000 HP, as `gutsman_v1`) runs his
+whole battle: his own records, his companions', his winds', his shots'
+and their sounds are the same in BN4's and BN6's in all 1200 fight frames.
+What it took, each from both games' code
+([BN4 Red Sun's tables](../rom/bn4.md), WindMan's wind and its gust in
+both engines; `tests/xdiff/legit.json`'s `bn4`):
+
+- **The battle state's wind slots, mapped.** His wind's +0x38 is the r2
+  the slot's reader leaves (BN4 `0x080E69E8`, BN6 `0x080E677C`), a pointer
+  to his side's slot: BattleState +0x8C in BN4, +0xC4 in BN6. The
+  comparator reads a pointer into BN4's battle state from +0x88 to +0x97
+  as BN6's from +0xC0 (`bn4.battle_state`, `tools/xdiff_snap.py`
+  `state_off`).
+- **BN6's wind keeps its spawner.** BN6's spawn stores it at the wind's
+  +0x4C (`0x080E6692`), BN4's has no such store, and BN6's wind reads it:
+  its state 4 (`BN6_WIND_HOLD`) skips its step while the spawner's
+  CurAction is 4 or his collision holds 0x80010000. Allowed on that word
+  alone, BN4's 0 against a moved Navi in BN6 (`spawner_kept`). The hold
+  differs from BN4's wind only in a frame where his CurAction is 4 before
+  his state 4 has ended the wind, which no spec reaches yet.
+- **His second wind's +0x3C**, the r3 his attack's state was run with
+  (BN4 the battle state's pointer, BN6 3), is a spawn leftover as
+  GutsMan's attack's is. No code of either wind reads it.
+- **His sounds' copies paired**: 0xB2 (his air shot, the third kind's
+  0x63) BN6's pool slot 0x32, 0x133 (the third kind's 0x65) slot 0xD0, as
+  GutsMan's are; the wind's own start sound pairs BN4's 0x121 with BN6's
+  0xAD by the two winds' inits.
+- **A hit's spark takes no renderer rank.** Its life is each engine's own
+  art's (allowed), so one still drawn in BN4 alone had moved his
+  companions' tile places' ranks (t183).
+- **The gust, each engine's own.** Each wind's step spawns the third
+  kind's 0x49 (`BN4_GUST_SPAWN`, `BN6_GUST_SPAWN`), whose inits differ in
+  one immediate: BN6's passes 0x80 to sprite_load (`0x080CEB90`), stored
+  at its sprite state's +3 (+0x93 0x8E against 0x0E). With that immediate
+  made 0 (`--poke 080CEB90:2000:2`) +0x93 is alike and nothing else
+  moves: that bit allowed. Its frames' pointers are each game's own
+  address of the same art (list 0xC's 0x2E, one CRC32 in both), read by
+  their offset into it where both games' sprite events name the same
+  bytes (`own_art`).
+
+- **The gust pushing MegaMan, each engine's own slide.** BN6 keeps a
+  step's kind at the object's +0x0F (`BN6_STEP_BEGIN` sets it, its slide's
+  end clears it, its slide's step reads it), which BN4's twin
+  (`BN4_STEP_BEGIN`) keeps nowhere: allowed on MegaMan, BN6's side alone.
+  A push against the field's edge leaves BN4's slide step (+0x1B to +0x1D)
+  where BN6's step routine returns zeros (it tests the panel inside,
+  `0x0800E480`; BN4's after, `0x080102CC`): allowed, BN4's side alone. His
+  collision's last move's direction (+0x0C) is the same move's in both but
+  held by another clock (BN4's collision panels' update writes it on the
+  frame his panel changes, BN6's slide once at its end and keeps it):
+  allowed only where one side holds 0 and the other his last move's
+  direction (`slide_direction`).
+- **The world's natives ranked as the family is.** The gusts' renderer
+  places are read as their ranks among the natives drawn (`is_native`,
+  `ranks_into`), MegaMan's own art having moved their raw places.
+- **A slot let go, named by its last occupant** (`let_go`): a gust keeps a
+  pointer to its wind after the wind is let go, and BN6's slots are one on
+  (its MegaMan's companion holds a fourth-kind slot BN4's has free).
+
+So **`windman_v1` PASSES**: 1200 fight frames, the family's records and the
+world's the same, its recorded verdict removed. Four mutations of his port
+are caught (`tests/xdiff/mutations.json`): his air shot's sound at another
+pool slot (t105), his wind spawned with another r4 (t1), his air shot's
+collision word left at BN4's place (t179), his air shot's speed shifted
+(t104).
+
+His companions' state 4 is not reached here: both games' companions run
+CurAction 8 from the fight's first frame, their init's choice where
+`0x08007A8C`'s bit 0 is set (`0x080CCD0A`-`0x080CCD14`); their first state
+made 0 in BN6's copy (`--poke 080CCD0E:2200`) still PASSes, the state 0
+they begin in leading to the same 8 before the fight. The interim that runs
+4 as 0 stays as the Companions section says, unproved either way.
+
+**Not yet in the tournament's `proved[]`**: a line there needs his plate on
+BN4's bracket (`BN4_ENTRANT_ID`), and [BN4's tournament
+screens](bn4-tournament.md) names five plates by sight, his not among them.
+A match of each plate's colours against the Navis' battle sprites' failed
+its controls (GutsMan's, Roll's and KendoMan's plates were not their best
+match), so it names nothing. His plate can be read from his battles
+(`BN4_OPPONENT_BATTLES`: entrant 0x00's first battle 4, 0x01's 8, and so
+on) once the battle a number starts is located, or named by sight.
 
 ## FireMan built
 

@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-05",
+  "updated": "2026-11-08",
   "previous": "2026-10-18",
   "features": [
     {
@@ -362,6 +362,10 @@
     {
       "date": "2026-11-05",
       "what": "BN4's Navis' companions by one mechanism: the ThunderMan, WindMan and FireMan branches merged, their three companion mechanisms (XnCompanion4, XnCompanion, XnSpawned) made one (XnSpawn and XnInit, src/emu/xnavi_init.c; tools/xnavirecipe_bn4_init.py reads every init: a spawn's r4 constant or r0 by a table of its version, the words kept after, the spawns at the companion start where the init makes them after its collision's set-up, else at the spawn's end with its +0x11, sprite and update); the moved first-kind types numbered in NAVIS' order by cost (ThunderMan's 0x33 0xE0, WindMan's 0x5C 0xE1, FireMan's 0x57 0xE2); WindMan installed (his companions' state 4 run as 0, 0x080CCD2E); the four battle sprites in the shared room."
+    },
+    {
+      "date": "2026-11-08",
+      "what": "WindMan proved: windman_v1 PASSES (1200 fight frames, its recorded verdict removed), four mutations of his port caught (tests/xdiff/mutations.json). His wind and its gust located in both engines and named (docs/rom/bn4.md, WindMan's wind and its gust in both engines): BN4_WIND_TYPE 0x080E6820, BN4_GUST_SPAWN 0x080D68AC, BN4_GUST_INIT 0x080D6748, BN4_STEP_BEGIN 0x0801393E in src/emu/bn4_navis.h; BN6_WIND_TYPE 0x080E6584, BN6_WIND_HOLD 0x080E65BA, BN6_GUST_SPAWN 0x080CECF8, BN6_GUST_INIT 0x080CEB80, BN6_STEP_BEGIN 0x0801AD12 in src/emu/bn6_navis.h. The comparator (tools/xdiff_snap.py state_off; tools/xdiff_bn4.py spawner_kept, own_art, arts_set, allowed_engine, slide_direction, let_go, occupants, is_native and ranks_into, the spark out of the ranks) and legit.json's bn4 (battle_state; the wind's spawner, his second wind's r3, the gust's sprite flag, a native's own art, MegaMan's step's kind, his blocked slide's step, a slide's direction; sounds 0xB2, 0x133 and 0x121). Not yet in the tournament's proved[]: his bracket plate (BN4_ENTRANT_ID) is not named."
     }
   ],
   "experiments": [
@@ -859,6 +863,13 @@
       "result": "python3 tools/xdiff.py windman_v1 with his companions spawned at his spawn's end: still no fight (game state 0x0C, phase 0, 7800 frames) while the 0x5C's state 4 is BN4's raw bytes; with its movs r2,#4 at 0x080CCD2E made 0 (state 0, as FireMan's companion's mode 4) both battles run to their end and FAIL at t1 on his wind's +0x38 (BattleState +0x8C | +0xC4) and +0x4C (0 | WindMan). thunderman_v1 FAIL at t1 on his cloud (0x6A a step ahead), the same with or without BN6's Navi frame at his spawn's end; fireman_v1 FAIL at t1 unchanged (+0x91). gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; 187 of 187 mutations caught.",
       "meaning": "The companions' state 4 (their appear through BN4's tile buffer) is taken in BN6's battle and hangs it: the interim that runs it as state 0 lets WindMan fight, and his wind's two fields are what is left at t1.",
       "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-08",
+      "name": "windman_v1 PASSES",
+      "result": "python3 tools/xdiff.py windman_v1: the family's first difference moved from t1 (his wind's +0x38 and +0x4C) through t103 (his second wind's +0x3C), t105 (sound 0xB2), t183 (his companions' renderer ranks, a spark drawn in BN4 alone) and t497 (sound 0x133) to none; the world's from t1 (the gust's +0x93, alike with --poke 080CEB90:2000:2, and its frames' pointers into list 0xC's 0x2E, one CRC32 0xE0F284B6) through t4 (MegaMan's +0x0F, BN6's step's kind), t7 (his collision's direction, by each engine's clock), t9 (his blocked slide's step, BN4's), t181 and t498 (the gusts' renderer places) and t446 (a gust's pointer to a let-go slot) to none: PASS. Mutations caught: his air shot's sound at slot 0x33 (t105), his wind's r4 1 (t1), the shot's collision word at BN4's +0x54 (t179), its speed shifted (t104); his companions' first state made 0 (--poke 080CCD0E:2200) still PASSes. Every spec exits as recorded, every mutation caught. A colour match of BN4's bracket plates against the Navis' battle sprites failed its controls (GutsMan, Roll, KendoMan not their best match).",
+      "meaning": "His port is BN4's own over the whole battle; the engines' differences around it (BN6's wind keeping its spawner, the gust's sprite flag, MegaMan's slide bookkeeping) are allowed with both code paths, and the comparator reads the battle state, natives' art and ranks, and let-go slots by what they name. He joins the tournament's proved[] once his plate is named (BN4_OPPONENT_BATTLES' battles read, or by sight)."
     }
   ],
   "method": {
