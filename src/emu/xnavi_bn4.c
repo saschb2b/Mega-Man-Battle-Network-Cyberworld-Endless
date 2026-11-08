@@ -1127,10 +1127,13 @@ static const XvImm fireman_imms[] = {
 	{ 0x080CC5F8, THUMB_MOVS, 0, 0, 0x57, 0xE2 },   /* its companion's type 0x57 (the first kind): moved, the dispatch's 0xe2 */
 	{ 0x080CE31C, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
 	{ 0x080CE31E, THUMB_MOVS, 2, 0, 0xE, 0xD3 },   /* its object's sprite: list 3 0xe in BN4, list 4 0xd3 in BN6 (copied) */
+	{ 0x080CE358, THUMB_LDRB, 0, 5, 0xE, 0xF },   /* its palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element) */
 	{ 0x080CE3D2, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE47E, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CE486, THUMB_LDRB, 7, 5, 0xE, 0xF },   /* its palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element) */
 	{ 0x080CE4A0, THUMB_MOVS, 0, 0, 0x9, 0xF0 },   /* its object's type 0x9: moved, the dispatch's 0xf0 */
 	{ 0x080CE4B0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CE4BC, THUMB_STRB, 7, 0, 0xE, 0xF },   /* the object it spawned: palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element) */
 	{ 0x080CE4F6, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
 	{ 0x080CE4F8, THUMB_MOVS, 2, 0, 0x11, 0xD4 },   /* its object's sprite: list 3 0x11 in BN4, list 4 0xd4 in BN6 (copied) */
 	{ 0x080CE544, THUMB_MOVS, 0, 0, 0xA9, 0x63 },   /* its sound 0xa9: BN4's copied into BN6's empty slot 0x63, on its player 9 */

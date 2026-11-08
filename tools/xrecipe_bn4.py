@@ -72,6 +72,7 @@ BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address
 COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
             0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
 ELEMENT4, ELEMENT6 = 0x17, 0x0E   # an object's element (BN4_T1_ELEMENT), BN6's (BN6_T1_ELEMENT)
+T3_PALETTE4, T3_PALETTE6 = 0x0E, 0x0F   # a third-kind object's palette (BN4_T3_PALETTE), BN6's place for it (BN6_T3_PALETTE)
 KIND_NAMES = {1: 'first', 3: 'third', 4: 'fourth'}   # (a moved type's kind, as the C file's comments name it)
 
 # The numbers BN4's families take, past BN5's (tools/xrecipe.py's 25 in slots 0-24, their code to XV_CODE + 0x11000 and
@@ -520,6 +521,20 @@ def field_imms(f, a, i, coll, objs):
                                why=f'collision data +{i.f[2]:#x} in BN4, +{to:#x} in BN6'))
 
 
+def palette_imms(f, a, i, objs):
+    """a moved third-kind type's palette (BN4's +0xE, its sprite's +4 by 0x08002DEC, BN6's 0x08002D80): BN6's +0xE is the
+    element (BN4's +0x17, field_imms), so in a moved third-kind type's code its own +0xE and that of the object it spawned
+    are BN6's +0xF, which BN6's engine reads only on its actors (FireMan's 0x09: its init 0x080CE358, its spawner's store
+    0x080CE4BC and its chain's load 0x080CE486)"""
+    reg = own_region(f, a)
+    if i.form not in FORMS or not reg or not isinstance(reg[2], int) or i.f[2] != T3_PALETTE4:
+        return
+    if i.f[1] == 5 or i.f[1] in objs:
+        who = 'its' if i.f[1] == 5 else 'the object it spawned:'
+        f.imms.append(dict(at=a, form=FORMS[i.form], rd=i.f[0], rn=i.f[1], was=T3_PALETTE4, now=T3_PALETTE6,
+                           why=f'{who} palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element)'))
+
+
 def scan(f):
     """CurAction (in its own code: an attack's states are its own), a copied routine's panel type, the element's place, its
     collision data's offsets"""
@@ -533,6 +548,7 @@ def scan(f):
                 curaction(f, w, addrs, k, i)
             panel_type(f, w, addrs, k, i)
             field_imms(f, a, i, coll, objs)
+            palette_imms(f, a, i, objs)
             if i.form == 'ldr' and i.f[1:] == (5, 0x54):
                 coll.add(i.f[0])
                 continue
