@@ -68,8 +68,8 @@
                                        * previous type's pool (0x080B73A0-0x080B73AB) */
 /* The engine's routines GutsMan's states reach (tools/xnavirecipe_bn4.py's NAVI_COPIED and bn4_twins.py's pairs; docs/rom/bn4.md,
  * GutsMan derived) */
-#define BN4_NAVI_PALETTE  0x0800B950u /* r0 a number: its byte of 0x0800B9AC times the version's (+4) of 0x0800B9B1, a Navi's init's
-                                       * palette (GutsMan's 2: step 0, palette 0 for every version) */
+#define BN4_NAVI_PALETTE  0x0800B950u /* r0 a number: its byte of BN4_NAVI_PALETTE_NUMBERS times the version's (+4) of BN4_NAVI_PALETTE_VERSIONS, a
+                                       * Navi's init's palette (GutsMan's 2 and FireMan's 5: V1-V3 0, SP 2; BN6's step 0 gives 0 to all) */
 #define BN4_ATTACK_END_CLEAR 0x0800BDAAu /* BN4_ATTACK_END's: AI data +9, +0xA, +0xB, +0x30 and +0x32 zeroed */
 #define BN4_AI_REQUESTS_CLEAR 0x0800BFC0u /* r0 bits: cleared in AI data +0x44 (BN4_AI_REQUESTS; BN4_ATTACK_END's 0x3F) */
 #define BN4_SET_STATUS_GIVEN 0x08013212u /* r0 a status: the collision data's BN4_COLL_STATUS_GIVEN (BN6's twin 0x0801A258, +0x10) */
@@ -83,5 +83,70 @@
 #define BN4_T3_1E_KINDS   0x080D0A60u /* the third kind's 0x1E's kinds (GutsMan's objects), 6 bytes each to its code at 0x080D0A74: its
                                        * speed, its +0x64, animation, collision's, the sound its init plays (+4: 0xA5, 0xA6, 0xA6), the
                                        * status it gives; read by its init by +4 (0x080D0AAE) */
+#define BN4_NAVI_PALETTE_NUMBERS  0x0800B9B1u /* BN4_NAVI_PALETTE's byte by its r0 (GutsMan's 2 and FireMan's 5 give 1), ... */
+#define BN4_NAVI_PALETTE_VERSIONS 0x0800B9ACu /* ... times its byte by the version (+4): 0, 0, 0, 2 (V1-SP) */
+/* FireMan, the second BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, FireMan built) */
+#define BN4_FIREMAN       0x080B7DB4u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_FIREMAN]): its jump table alone, no after-step;
+                                       * init 0x080B7DD5 (its tail spawns his companion and runs his update), update 0x080B7E3F */
+#define BN4_FIREMAN_STATES 0x080B7E5Cu /* his state table: BN4's generic Navi 0-2, his own 3-5 (his companion told, then BN4's generic),
+                                       * his decision 6 (0x080B7EC9), MegaMan's 72-76 as his 7-11 */
+#define BN4_FIREMAN_POST  0x080B81B0u /* his update's call after the runner: his companion told (BN4_FIRE_COMPANION_TELL) where his
+                                       * animation changes (+0x10 against +0x11) */
+#define BN4_FIREMAN_TABLES 0x080B7D98u /* his tables of bytes below his routine, to BN4_FIREMAN */
+#define BN4_FIRE_COMPANION_TYPE 0x57  /* his companion: a first-kind type (no enemy) that draws list 4's 8 on him, his animation's + its +7 */
+#define BN4_FIRE_COMPANION 0x080CC3D8u /* ... its routine; its modes +9: 0 and 4 wait on the battle's appear (4 through BN4's tile buffer
+                                       * 0x02037810), 8 drawn; 8 where the battle state's +0x32 bit 0 is set */
+#define BN4_FIRE_COMPANION_SPAWN 0x080CC5F4u /* ... spawned (r4 its word: list offset, number), its parent at its +0x4C, back r0 */
+#define BN4_FIRE_COMPANION_TELL 0x080CC61Au /* r0 the companion: its +0x11 0xFF, its animation set up again */
+#define BN4_FIREMAN_COMPANION 0x74    /* FireMan's object: his companion */
+#define BN4_ATTACK_END_KEEP 0x0800C9FCu /* BN4_ATTACK_END's kin: the attack's +5 kept at AI data +0x3A first (FireMan's, WoodMan's) */
+#define BN4_SPRITE_STEP   0x08014446u /* unless paused: a new animation set up (+0x11 its +0x10), else the sprite updated; BN6's nearest
+                                       * 0x0801BBF4 updates it in the frame of the set-up too */
+#define BN4_PAUSE_BYTE    0x080078ECu /* the battle's pause byte ([eToolkit +0x40] +9) in r0 (BN6_PAUSE_TEST's twin, flags unset) */
+#define BN4_T3_1A_KINDS   0x080D013Cu /* the third kind's 0x1A's kinds (FireMan's), 6 bytes each, its sprite's list 4 number first */
+#define BN4_FIREMAN_MASKS 0x080F1DB4u /* panels' masks by side his MegaMan state 0x080F1D98 reads (BN4_RANDOM_PANEL_MASKS' words) */
+/* ThunderMan, the second (tools/xnavirecipe_bn4.py, his companion read by tools/xnavirecipe_bn4_init.py, his objects' needs
+ * by tools/xnavirecipe_bn4_objects.py; docs/multirom/bn4-navis.md, ThunderMan built) */
+#define BN4_THUNDERMAN    0x080C37F4u /* his type's routine: jump table init 0x080C3819, update 0x080C388D, dying BN4_NAVI_DYING; his block
+                                       * to 0x080C3AF0; his init runs his update once at its end (0x080C387C), BN6's actor init none */
+#define BN4_THUNDERMAN_STATES 0x080C38A4u /* his state table: BN4's generic Navi 0 and 2-5, his own 1 (0x080C38CD: a call of BN4's generic
+                                       * 1 alone), his decision 6 (0x080C38D5), MegaMan's 85-87 as his 7-9 */
+#define BN4_THUNDERMAN_COMPANION 0x080C3D84u /* r0 its +0x2C, r1 its version: the first-kind 0x33 spawned (its +0x4C the Navi), called
+                                       * by his init after the collision setup (0x080C3874) with r0 0x14 << 16 | its byte of
+                                       * BN4_THUNDERMAN_DAMAGE by his version (+4), r1 his version */
+#define BN4_THUNDERMAN_DAMAGE 0x080C3888u /* ... 4 bytes: 20, 40, 60, 80 by version */
+#define BN4_THUNDERCLOUDS 0x080C3AF0u /* the first kind's 0x33 (his companion): jump table init 0x080C3B15, update 0x080C3B41, dying
+                                       * BN4_DYING; its variables from +0x70; it spawns the third kind's 0x6A (0x080DAC24) */
+#define BN4_THUNDERCLOUD  0x080DAA90u /* the third kind's 0x6A (the companion's), its block to 0x080DAC54 */
+/* The engine's routines ThunderMan's code reaches that the families' pairs lack */
+#define BN4_CAN_MOVE_KIN  0x0800AD54u /* BN4_CAN_MOVE's body (0x0800AD2A) with the flags' mask 0x1040 (its literal 0x0800B12C) */
+#define BN4_PANEL_BREAK   0x08009BF0u /* r0, r1 a panel: broken (type 1) where no occupant's flag (0x0F0A0080) is set, else cracked
+                                       * (type 3, 0 back), sound 0x95; BN6's twin 0x0800CA8C (BN6_PANEL_BREAK, audited) */
+#define BN4_SIDE_COUNT_DOWN 0x08007990u /* BattleState +4 + its side less one (BN4_DYING's); BN6's twin 0x0800A10C, the same body */
+#define BN4_FLAG_1187_TEST 0x080406A4u /* its event flag 0x1187 (0x0802509C on eToolkit +0x48's flags); paired by the symbol map with
+                                       * BN6's battle_isPaused (0x0800A03C), audited as an interim */
+#define BN4_PAUSED_BLINK  0x0801466Au /* an object blinked (+0 bit 2 by the clock) while [BattleState +0x3C]+6 has 0x20; called while
+                                       * the battle is not running; BN6's place a nullsub (0x0801BE28), audited as an interim */
+#define BN4_NUDGE_X       0x080D97F8u /* r0: its +0x36 moved by r0 toward its side's front (+0x16); a leaf of the third kind's 0x69 */
+
+/* WindMan, the third BN4 Navi derived (tools/xnavirecipe_bn4.py, xnavirecipe_bn4_init.py; docs/multirom/bn4-navis.md, WindMan
+ * under way): found by his type, each checked by the generator against his ROM */
+#define BN4_WINDMAN       0x080C3234u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_WINDMAN]): jump table init 0x080C3259, update
+                                       * 0x080C32DF, dying BN4_DYING (the families'); his block to 0x080C355C */
+#define BN4_WINDMAN_STATES 0x080C32F4u /* his state table: BN4's generic Navi 0-2 and 5, his own 3 and 4 (0x080C3321, 0x080C333D: his
+                                       * wind, +0x60, told to end, then the generic flinch and paralysis), his decision 6 (0x080C3359),
+                                       * MegaMan's 63-66 as his 7-10 */
+#define BN4_WINDMAN_WIND  0x60        /* his object's wind (the fourth kind's 0x41 his decision spawns where none is); +0x64 his second
+                                       * companion; each companion's +0x60 the address of his +0x60 */
+#define BN4_T1_COMPANION  0x5C        /* the first kind's type a Navi's companions are (WindMan's two, kinds 2 and 3; AquaMan's): */
+#define BN4_COMPANION     0x080CCC9Cu /* ... its routine: init by its kind's sprite (BN4_COMPANION_KINDS), its owner (+0x4C) followed */
+#define BN4_COMPANION_SPAWN 0x080CCF34u /* ... its spawner: r4 its kind, its owner r5, its side his */
+#define BN4_COMPANION_KINDS 0x080CCC94u /* ... its kinds' sprites, two bytes a kind (list offset, number): 4:0x06, 4:0x0C, 4:0x28, 4:0x29 */
+#define BN4_COMPANION_AURA 0x080CCDC8u /* ... its state 4's first step: drawn again through BN4's tile buffer 0x02037810 (its init takes it
+                                       * where the battle state's +0x32 lacks bit 0 and its settings' +6 has 0x20) */
+#define BN4_SET_FLAG      0x08012F82u /* r0 ORed into the collision data's +0x64 (BN6's twin 0x0801A152, LAYOUT): WindMan's init's 0x30 */
+#define BN4_WIND_SPAWN    0x080E68F8u /* a side's wind spawned (the fourth kind's 0x41) where the side's slot holds none of level 1 on */
+#define BN4_WIND_END      0x080E69BCu /* r0 a wind: told to end (+8 8, +0x60 0) */
+#define BN4_WIND_SLOTS    0x88        /* BattleState +0x88 + 4 x side: a side's wind, its level 8 past it (0x080E69C6, 0x080E69E8) */
 
 #endif
