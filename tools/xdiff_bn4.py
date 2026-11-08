@@ -25,6 +25,7 @@ import json
 import os
 import re
 
+from xdiff_bn4_opening import Opening
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
@@ -549,11 +550,18 @@ def allowed_world(d, fb):
     return None
 
 
+SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its "foes", holds in their battles alone; compare sets it)
+
+
 def bn4_sounds():
     """legit.json's bn4 sounds: {BN4's sound: (BN6's, its clock)}, each pair by the routines that play them in both games;
-    a BN4 sound not there is compared as its own number, by the state's clock"""
+    a BN4 sound not there is compared as its own number, by the state's clock. A row naming "foes" (a moved Navi's copy of
+    a number another row pairs otherwise: ThunderMan's 0xAD, the thunder's launch's in BN4's own code) holds only in a battle
+    of one of them, over the other"""
     rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', [])
-    return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state')) for r in rows}
+    mine = lambda r: bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
+    return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
+            for r in sorted(rows, key=lambda r: 'foes' in r) if 'foes' not in r or mine(r)}
 
 
 def sounds_diff(fa, fb, fbt, t):
@@ -813,7 +821,10 @@ def bn4_renderer(fa, fb, fam, last):
     one not drawn keeps its last rank where its place stayed; one never drawn none. Into each object's `over`"""
     for f in (fa, fb):
         own = [o for o in f.fr['objs'] if o.role in fam]
-        drawn = [o for o in own if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
+        # (a hit's spark drawn or not by its own art's life, each engine's: legit.json's bn4 allowed, the hit's spark; so it
+        # takes no rank from the others, thunderman_v1's cloud at t787 behind BN4's spark still drawn and BN6's gone)
+        drawn = [o for o in own if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)
+                 and not is_spark(o.role)]
         run = {}
         for n, a in enumerate(f.fr['order']):
             for o in drawn:
@@ -927,8 +938,14 @@ def spawn_leftover(d):
         return None
     for a in bn4_allowed():
         r = a.get('spawn_leftover')
-        if r and d.role[0] == r['kind'] and d.role[1] == int(r['type'], 0) and d.off == int(r['word'], 0) and \
-                d.a == tuple(r['bn4']) and d.b == ('raw', int(r['bn6'], 0)):
+        # (a word's bytes compared one by one: each byte's pair, BN4's and BN6's, as numbers; ThunderMan's 0x71's +5 and +6)
+        if r and 'bytes' in r and d.role[0] == r['kind'] and d.role[1] == int(r['type'], 0) and \
+                [d.a, d.b] == [int(x, 0) for x in r['bytes'].get(f'{d.off:#04x}', ['-1', '-1'])]:
+            return a['name']
+        # (BN6's a number, or a pointer as the comparator names it: ThunderMan's 0x70's +4, his AI data's address)
+        b6 = (('raw', int(r['bn6'], 0)) if isinstance(r.get('bn6'), str) else tuple(r.get('bn6', ()))) if r else None
+        if r and 'word' in r and d.role[0] == r['kind'] and d.role[1] == int(r['type'], 0) and d.off == int(r['word'], 0) and \
+                d.a == tuple(r['bn4']) and d.b == b6:
             return a['name']
     return None
 
@@ -983,10 +1000,14 @@ def compare(spec, ta, tb, canon, show=6):
         sounds_played(tb)
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
+    SPEC_FOES.clear()
+    SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
     stop, lines, ranks, before = None, [], {}, None
     left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()
     MOVES.clear()
+    # (legit.json's bn4 opening_animation: a moved object's animation run through the paused opening, by the openings' lengths)
+    opening = Opening(ta, tb, getattr(canon, 'sprites', []), getattr(canon, 'roms', {}).get(4, b'')) if against else None
     for fra in ta['frames']:
         frb = bt.get(fra['t'] + lag)
         if frb is None:
@@ -1025,6 +1046,11 @@ def compare(spec, ta, tb, canon, show=6):
             d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
             if d.mask:
+                used[d.mask] = used.get(d.mask, 0) + 1
+        if opening:
+            opening.see(fa, fb)
+            for d in [d for d in mine if not d.mask and opening.phase(d, fa, fb)]:
+                d.mask = opening.name
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
         SPARKS_SEEN.update({o.role for o in fa.fr['objs'] if is_spark(o.role)} & {o.role for o in fb.fr['objs'] if is_spark(o.role)})

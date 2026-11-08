@@ -100,6 +100,14 @@
 #define BN6_COLL_POISON_TIMER 0x08        /* u8, the frames to poison's next point on a poison panel: BN6_PANEL_STEP_POISON's ldrb [r7,#8], less 1
                                            * a frame, 6 again with a point (0x0801A1B8-0x0801A1C2), 0 off poison (0x0801A1D0); BN4's +6 */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */
+#define BN6_COLL_ELEM_DAMAGES 0x94        /* five u16, the frame's damage by element (0 none, 1 Fire, 2 Aqua, 3 Elec, 4 Wood), */
+#define BN6_ELEM_DAMAGES_SUM  0x0801A916u /* ... summed here (movs r0,#0x94; ldrh ... to +0x9C; BN4's +0x3C at BN4_ELEM_DAMAGES_SUM) */
+#define BN6_COLL_HIT_DAMAGES  0x82        /* five u16, a frame's hits' damage by the attack's element: the hit pass (its image
+                                           * 0x081D7906-0x081D7910) adds each hit's, times its multiplier, at +0x82 + 2 * its element
+                                           * (BN4's +0x2A, its hit pass 0x08012C74; lava's Fire, BN6_COLL_DAMAGE_ADD, the second) */
+#define BN6_COLL_ELEC_TALLY   0x78        /* u16 an Elec hit's damage again, BN6's own: the hit pass adds it where the attack's
+                                           * element is 3 (0x081D78F8-0x081D7904), and the frame's step adds it to the Elec hit
+                                           * damage while the struck's +6 is 8 (0x0801A8E0-0x0801A8F6); BN4's hit pass keeps none */
 
 /* BN5's sea's submerge (bn5.h, BN5_SEA_SUBMERGE), which BN6's engine dropped
  * (its bubble took the collision data's flag and timer), made again by
