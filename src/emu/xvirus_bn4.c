@@ -1274,7 +1274,7 @@ static const XVirusFamily bn4_mettaur = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
 	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
-	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
+	.summoned = true,   /* (moved for Roll's summon alone: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 /* ---- BN4's Melody (its type 0x11 there, its enemy ids 55-60), as AI 71 with ids 0x2ea-0x2ef ---- */
@@ -1463,7 +1463,7 @@ static const XVirusFamily bn4_melody = {
 	.sprites = melody_sprites, .nsprites = (int)(sizeof melody_sprites / sizeof *melody_sprites),
 	.effects = melody_effects, .neffects = (int)(sizeof melody_effects / sizeof *melody_effects),
 	.prestep = 0x080B8C44,   /* its update's own work on, run as its pre-step (bn4_twins.PRESTEP) */
-	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
+	.summoned = true,   /* (moved for Roll's summon alone: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
 const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody };

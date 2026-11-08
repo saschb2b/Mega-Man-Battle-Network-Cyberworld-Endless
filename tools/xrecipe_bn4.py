@@ -50,8 +50,9 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
             (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55))
-# the families moved for a Navi's summon alone, which BN6 has by name (the owner's call of 8 November 2026: Roll's summon
-# brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits): never a net's kin nor a visitor (XVirusFamily.summoned)
+# the families moved for a Navi's summon alone: Mettaur, which BN6 has by name (the owner's call of 8 November 2026: Roll's
+# summon brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits), and Melody, Roll V3's 0x39, whose sounds
+# live in her pool (SUMMONER_POOL): never a net's kin nor a visitor (XVirusFamily.summoned)
 SUMMONED = {'Mettaur', 'Melody'}
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
@@ -1271,7 +1272,7 @@ def c_family(f, n):
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
     if f.name in SUMMONED:
-        L.append('\t.summoned = true,   /* (moved for Roll\'s summon alone, BN6\'s by name: no kin of its net\'s, no visitor) */')
+        L.append('\t.summoned = true,   /* (moved for Roll\'s summon alone: no kin of its net\'s, no visitor) */')
     if f.after:
         L.append(f'\t.present = 0x{f.after:08X},   /* its after-state, copied: run after its state 0 and its hook 5 while BN6\'s battle is paused */')
     L.append('};')
