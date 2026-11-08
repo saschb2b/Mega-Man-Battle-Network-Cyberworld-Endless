@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1321,6 +1321,26 @@ was settled at its root:
   0x41-0x4B (call 8): her sixth and seventh slots, 0x104 and 0x117, past
   what a `movs` names, so each call goes through her home's shim that
   makes r0 the slot (`XvSoundCall`, call 11). Her recipe lists both songs.
+  A battle of the family without Roll takes her art's room and pool by
+  `xnavi_bn4_summoner`, which finds her by the family, any version of it
+  (8 November 2026): it had matched the exact ids her summon brings, V3's
+  0x2EC alone, so `melody4_v1`'s V1 (0x2EA) filled no room and pointed no
+  pool. Her sounds' slots then named Roll's room unfilled, a song header
+  of the free space's 0xFF padding, and BN6's MP2K played it, its track
+  and voice pointers running through unmapped memory (track pointers
+  read `0x00004C1C`, `0x0007C1BA` mid-stall): after each of her eleven
+  sounds the CPU stayed in MPlayMain, ply_note and CgbSound
+  (`0x0814F5B6`-`0x08150F7A`) for 5 to 793 frames with the battle's
+  timer held, 7546 core frames for 681 of the fight's. What it read was
+  open bus, so a harness-side read of the cart changed it: the same
+  build was frame for frame the same from any data folder, while two
+  builds differing only by a debug read of the room before the battle
+  reached t100 at core frame 1365 and 1285, the first running out of the
+  differential's 7800 frames at t681 (FAIL), the second through its 1200
+  (PASS). Roll V3's own battle was never touched: there she fills the
+  room, and V3's id found her before; with Hellody on the field beside
+  her (BN4's 0x82 and 0x39), the 0.20.0 build played the two sounds 176
+  times over 8819 fight frames, one core frame each.
 - **Its room**: the families' second room held Mettaur's art and the
   families' copied sounds from a fixed `XV_ART + 0x5A000`, and Melody's
   sprite was 0x5D bytes past it. The sounds now follow the second room's
@@ -1328,9 +1348,9 @@ was settled at its root:
   `XV_ART + 0x54000` to the first room: the sounds moved up 0x1000.
 
 **`melody4_v1`** (BN4's Melody V1 alone at (5,2) against MegaMan idle at
-(2,2) with 2000 HP) PASSes over its 1200 fight frames, its two sounds
-paired with her pool's slots (`legit.json`; 0xC2 first at t20, 0xC3 at
-t226). Four mutations are caught: its CurAction off by one (t1), its
+(2,2) with 2000 HP) PASSes over its 1200 fight frames, one core frame
+each, its two sounds paired with her pool's slots (`legit.json`; 0xC2
+first at t20, 0xC3 at t226), five runs in a row from one data folder. Four mutations are caught: its CurAction off by one (t1), its
 region left as BN6's init's (t1), its +0x2E left as its spawn's (t1) and
 its CurAction compared as BN4's (t20). Unreached: no spec hits it, so
 its pre-step's hit effect and its region's clear on a hit run in none.
