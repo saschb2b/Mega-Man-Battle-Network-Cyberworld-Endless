@@ -2946,6 +2946,71 @@
         "clock": "state",
         "what": "FireMan's sound 0xC0, its copy",
         "why": "Played by his copied MegaMan state (BN4: movs r0,#0xc0 at 0x080F1B02, its bl to PlaySoundEffect at 0x080F1B04; BN6: its copy's movs r0,#0xd0, the recipe's immediate, its bl through its veneer to BN6's), a state's: BN4's song 0xC0 copied into the pool's fourth slot, BN6's empty 0xD0 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); begun in none of fireman_v1's 1200 frames. BN6's own song 0xD0 is empty, so the copy is told by its slot"
+      },
+      {
+        "bn4": "0x9E",
+        "bn6": "0x33",
+        "clock": "state",
+        "foes": [
+          "0xA8",
+          "0xA9",
+          "0xAA",
+          "0xAB"
+        ],
+        "what": "AquaMan's sound 0x9E, its copy",
+        "why": "Played by his third kind's 0x23 (BN4: movs r0,#0x9e at 0x080D132E, its bl to PlaySoundEffect at 0x080D1330; BN6: its copy's movs r0,#0x33, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F36A49), a state's: BN4's song 0x9E copied into the pool's second slot, BN6's empty 0x33 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); aquaman_v1's first at t31 in BN4 and t32 in BN6, 9 in each. BN6's own song 0x33 is empty, so the copy is told by its slot; the row holds in his battles alone (his ids, \"foes\": the pool's slot is each Navi's own)"
+      },
+      {
+        "bn4": "0x90",
+        "bn6": "0x32",
+        "clock": "state",
+        "foes": [
+          "0xA8",
+          "0xA9",
+          "0xAA",
+          "0xAB"
+        ],
+        "what": "AquaMan's sound 0x90, its copy",
+        "why": "Played by his copied MegaMan state (BN4: movs r0,#0x90 at 0x080F462A, its bl to PlaySoundEffect at 0x080F462C; BN6: its copy's movs r0,#0x32, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F37645), a state's: BN4's song 0x90 copied into the pool's first slot, BN6's empty 0x32 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); aquaman_v1's at t522 in BN4 and t523 in BN6, 1 in each. BN6's own song 0x32 is empty, so the copy is told by its slot; the row holds in his battles alone (his ids, \"foes\": the pool's slot is each Navi's own)"
+      },
+      {
+        "bn4": "0xA0",
+        "bn6": "0x63",
+        "clock": "state",
+        "foes": [
+          "0xA8",
+          "0xA9",
+          "0xAA",
+          "0xAB"
+        ],
+        "what": "AquaMan's sound 0xA0, its copy",
+        "why": "Played by his third kind's 0x27 (BN4: movs r0,#0xa0 at 0x080D1A84, its bl to PlaySoundEffect at 0x080D1A86; BN6: its copy's movs r0,#0x63, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F36607), a state's: BN4's song 0xA0 copied into the pool's third slot, BN6's empty 0x63 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); aquaman_v1's first at t936 in BN4 and t937 in BN6, 2 in each. BN6's own song 0x63 is empty, so the copy is told by its slot; the row holds in his battles alone (his ids, \"foes\": the pool's slot is each Navi's own)"
+      },
+      {
+        "bn4": "0xA1",
+        "bn6": "0xD0",
+        "clock": "state",
+        "foes": [
+          "0xA8",
+          "0xA9",
+          "0xAA",
+          "0xAB"
+        ],
+        "what": "AquaMan's sound 0xA1, its copy",
+        "why": "Played by his third kind's 0x27 (BN4: movs r0,#0xa1 at 0x080D1B3A, its bl to PlaySoundEffect at 0x080D1B3C; BN6: its copy's movs r0,#0xd0, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F366BD), a state's: BN4's song 0xA1 copied into the pool's fourth slot, BN6's empty 0xD0 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); aquaman_v1's first at t1052 in BN4 and t1053 in BN6, 2 in each. BN6's own song 0xD0 is empty, so the copy is told by its slot; the row holds in his battles alone (his ids, \"foes\": the pool's slot is each Navi's own)"
+      },
+      {
+        "bn4": "0xC8",
+        "bn6": "0xE0",
+        "clock": "state",
+        "foes": [
+          "0xA8",
+          "0xA9",
+          "0xAA",
+          "0xAB"
+        ],
+        "what": "AquaMan's sound 0xC8, its copy",
+        "why": "Played by his third kind's 0x27 (BN4: movs r0,#0xc8 at 0x080D1A24, its bl to PlaySoundEffect at 0x080D1A26; BN6: its copy's movs r0,#0xe0, the recipe's immediate, its bl through its veneer to BN6's), a state's: BN4's song 0xC8 copied into the pool's fifth slot, BN6's empty 0xE0 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); begun in none of aquaman_v1's 1200 frames. BN6's own song 0xE0 is empty, so the copy is told by its slot; the row holds in his battles alone (his ids, \"foes\": the pool's slot is each Navi's own)"
       }
     ],
     "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset A moved Navi's own the same (GutsMan's in gutsman_v1: his appear's animation set in the opening, 1 at t1 in both, then his state's at BN4's t2 and BN6's t3): his after-step, run after each of his states (BN4 0x080143FC, BN6's twin 0x0801BBAC, the same body but for the pause test's routine, BN4 0x080078EC, BN6 0x0800A03C), runs the sprite update (BN4 0x0800285C, BN6 0x080026C4) at every fight frame and at none of the paused opening's, so his opening animation's count is the frame's clock too; a moved family's own needs no rule, its paused present (XVirusFamily.present) animating it as BN4's after-state does",
