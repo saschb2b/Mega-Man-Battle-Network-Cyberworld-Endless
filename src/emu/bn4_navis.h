@@ -223,4 +223,20 @@
 #define BN4_T3_02_KINDS   0x080CD524u /* the third kind's 0x02's kinds (4 bytes each: its sprite's list offset and number, its palette,
                                        * its +0xC), read by its init by its +4; Roll's kind 7 list 3's 0xF */
 
+/* JunkMan, derived after Roll (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, JunkMan built): found by his type, each
+ * checked by the generator against his ROM */
+#define BN4_JUNKMAN       0x080C91A8u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_JUNKMAN]): jump table 0x080C91C0 (init
+                                       * 0x080C91CD, update 0x080C9227, dying BN4_NAVI_DYING), then the after-step; his block to 0x080C95E8 */
+#define BN4_JUNKMAN_STATES 0x080C9248u /* his state table: BN4's generic Navi 0 and 2-5, his own 1 (0x080C9271: the generic 1, then his
+                                        * variables at +0x60 to +0x73 set, a draw among them), his decision 6 (0x080C92AF), MegaMan's 109-111 */
+#define BN4_JUNKMAN_CLEAR 0x080C9498u /* his update's first call between his pre-step and his runner (r0 9, a CurAction of BN4's): his +0x73
+                                       * cleared where it is set and his CurAction (+9) is not r0 */
+#define BN4_JUNKMAN_JUNK  0x080C94AEu /* ... its second: while the fight runs (0x08007A8C's bit 0), his +0x64 counted down, at 0 set again
+                                       * by his version (0x080C9570) and his junk (the third kind's 0x96) spawned on a panel at random */
+#define BN4_JUNK_SPAWN    0x080DFF60u /* the third kind's 0x96's spawner (his junk): r0-r3 its place and words, the caller's r4 at its +4 */
+#define BN4_JUNK_HITS     0x080DFF44u /* the junk's test of its collision data's hits word (+0x54) against 0x080DFF58's bits by side */
+#define BN4_JUNK_SPAWN2   0x080E0170u /* the third kind's 0x97's spawner, from his copied MegaMan state 110 (0x080F41B4) */
+/* (his records name list 1's 0x0A, raw, where his init loads list 2's: BN4_SPRITE_PRELOAD, their sprite's one reader (0x08002B0E),
+ * unpacks an LZ77'd one alone, its bit 31 tested at 0x08002B44, and passes a raw one over) */
+
 #endif
