@@ -28,7 +28,6 @@
 #include "xvirus.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
-#include "xdiff_bn4.h"
 #include "xdiff_sprite.h"
 #include "xnavi_bn5.h"
 #include "xsong.h"
@@ -564,9 +563,11 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 		const XvBlock *b = i < xvirus_control.nblocks ? &xvirus_control.blocks[i] : &xnavi_control.code.blocks[i - xvirus_control.nblocks];
 		log->fam[log->nfam++] = (XvMoved){ b->start, b->start, b->end - b->start };
 	}
-	/* (a BN4 Navi's summon's draw, its shim's, keyed as BN4_SPAWN_ENEMY's, whose panel pick it is: xdiff_bn4.h) */
-	log->nfam += xd4_summon_draws(fams, nfams, log->fam + log->nfam, FAMILY_MAX - log->nfam);
 	return log;
+}
+
+void xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len) {
+	if (log && log->nfam < FAMILY_MAX) log->fam[log->nfam++] = (XvMoved){ from, to, len };
 }
 
 

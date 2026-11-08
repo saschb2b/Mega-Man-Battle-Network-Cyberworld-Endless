@@ -870,6 +870,15 @@ static int spec_families(const Spec *s, const XVirusFamily **fams) {
 	return n;
 }
 
+/* (a BN4 Navi's summon's draw keyed as BN4_SPAWN_ENEMY's in both logs: xdiff_bn4.h xd4_summon_draws) */
+static void summon_keys(XdLog *a, XdLog *b, const XVirusFamily *const *fams, int n) {
+	XvMoved keys[4];
+	for (int k = 0, nk = xd4_summon_draws(fams, n, keys, 4); k < nk; ++k) {
+		xd_log_key(a, keys[k].from, keys[k].to, keys[k].len);
+		xd_log_key(b, keys[k].from, keys[k].to, keys[k].len);
+	}
+}
+
 static bool logs_start(Side *a, Side *b, const Spec *s) {
 	const XVirusFamily *fams[MAX_FOES];
 	int n = spec_families(s, fams);
@@ -886,6 +895,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (a->v.game == 4) xd_log_bn4(&xd4_routines);
 	a->log = a->out && hooked ? xd_log_start(a->v.game, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
+	if (s->bn4) summon_keys(a->log, b->log, fams, n);
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
