@@ -1735,9 +1735,9 @@
    "name": "Mettaur's shockwave's sound another",
    "spec": "mettaur4_v1",
    "poke": [
-    "080CFC6C:2039"
+    "080CFC6C:20D0"
    ],
-   "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's copy at slot 0x46) made Walla's copy at 0x39: another sound where the shockwave sets out (caught at t73, the family's sounds)"
+   "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's Roll's pool slot 0xE0) made her pool's fourth slot, 0xD0 (her 0x132's): another of her sounds where the shockwave sets out (caught at t73, the family's sounds)"
   },
   {
    "name": "Roll's summoned Mettaur arriving as BN6's",
