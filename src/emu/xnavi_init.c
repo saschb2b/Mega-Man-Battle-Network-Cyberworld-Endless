@@ -112,16 +112,16 @@ static void palette(Shim *s, uint32_t palettes) {
 	op(s, 0x4679), op(s, 0x3105), op(s, 0x468E), op(s, 0x4710);
 }
 
-/* its spawn's end where its init needs one: its collision's r3, its palette, +0x11, its panel at +6, its spawns where at_end,
+/* its spawn's end where its init needs one: its collision's r3, +0x11, its panel at +6, its palette, its spawns where at_end,
  * its sprite, its update */
 static void end_build(const XNavi *n, Shim *s) {
 	static const XnInit none;
 	const XnInit *in = n->init ? n->init : &none;
 	op(s, 0xB510);   /* push {r4, lr} */
 	if (n->coll_arg) op(s, 0x6D68), op(s, 0x2100u | n->coll_arg), op(s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
-	if (n->palettes) palette(s, n->palettes);
 	if (in->anim) op(s, 0x7C28), op(s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
 	if (in->home) op(s, 0x8A68), op(s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
+	if (n->palettes) palette(s, n->palettes);   /* (after them: their places in the shim as before it, a mutation's poke) */
 	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(s, n, &in->spawns[i]);
 	if (in->sprite) far_call(s, BN6_SPRITE_UPDATE);
 	if (in->frame) far_call(s, BN6_NAVI_FRAME);
