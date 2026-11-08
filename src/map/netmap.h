@@ -107,6 +107,12 @@ int netmap_rise(void);
  * them 16-colour as it enters one (docs/rom/bn4.md, Net maps in 256
  * colours); nothing on any other. */
 void netmap_colours(void);
+/* Whether the backdrop of the map area `area`'s layers take over, as set
+ * now (xbackdrop_map), loads its tiles over those of the layer last built,
+ * as its tile set's header places them; where, in VRAM [*lo, *hi). BN6
+ * draws such a backdrop's tiles and turns them over the layer's floor
+ * (docs/rom/bn4.md, Net maps in 256 colours). */
+bool netmap_backdrop_over(int area, uint32_t *lo, uint32_t *hi);
 /* Walls of the caller's beside the floor's own (a liberation's fence,
  * docs/game/liberation/), after netmap_build_layer: written with the pads. */
 void netmap_add_walls(const CoordCell *c, int n);

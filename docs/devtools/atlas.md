@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
 ---
 
 # Atlas: every layer drawn
@@ -68,7 +68,10 @@ Output in `.build/atlas`:
   [the generator](../world/level-design/generator.md), Navigation).
 
 The build prints the report and flags layers that were not built, guardian
-layers without an arena and fallbacks above 1%. Objects are marked: blue the
+layers without an arena and fallbacks above 1%. A layer whose map's backdrop, as the game would
+set it (`xbackdrop_map`), loads its tiles over the layer's own is reported
+`BACKDROP OVER TILES` and fails the atlas: no picture here shows a backdrop,
+which BN6 draws and turns over the floor in the game ([BN4 Red Sun's tables](../rom/bn4.md), Net maps in 256 colours). Objects are marked: blue the
 arrival, green the exit, red the guardian, yellow shops and program
 traders, pink the heal pad, white Mystery Data.
 
