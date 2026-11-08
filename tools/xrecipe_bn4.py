@@ -101,10 +101,12 @@ MPLAYS4, MPLAYS6 = 0x08155E78, 0x08159DC8   # the music players' tables (BN4_MPL
 # order from 0x3F down; each played on the player BN4's entry names (BN6's 32 players by BN4's numbers, BN4_MPLAYS); a
 # sound not here is a decision
 SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70: 0x3A, 0x9A: 0x39, 0xA6: 0x38, 0xB7: 0x37,
-               0x9D: 0x36, 0xFC: 0x35, 0xF9: 0x34,
-               # (past the twelve: XV_BN4_SONG_SLOT_MORE, the middle of the gap between the Darkloids' slots, 0x40 up, and BN5's
-               # chips' own, 0x4B down: Mettaur's shockwave's, docs/multirom/bn4.md, Its sounds)
-               0x8B: 0x46}
+               0x9D: 0x36, 0xFC: 0x35, 0xF9: 0x34}
+# A summoned family's sounds BN6 has no song of, in its summoner's per-battle pool instead (the BN4 Navis' pool,
+# src/emu/xnavi_bn4_sounds.h; the owner's call 8 keeps 0x41-0x4B BN5's): sound -> (its pool slot, its summoner), the slot
+# the summoner's next past its own (tools/xnavirecipe_bn4_sounds.py pool_of checks it), the song listed with the summoner's
+# songs and pointed in her battles alone, which are the only ones the family is in (SUMMONED)
+SUMMONER_POOL = {0x8B: (0xE0, 'Roll')}
 # their copies' rooms: below their families' sprites (ART0), above BN5's families' art (to XV_ART + 0x54000 today,
 # bn5_ranges_clear checks), as the families' sprites leave no room past theirs (ART_END); each its bytes rounded up to
 # SONG_STEP (song_bytes, an upper bound)
@@ -907,6 +909,16 @@ def sounds_of(b4, b6, f):
     f.sounds = []
     for v in odd:
         slot = SOUND_SLOTS.get(v)
+        if slot is None and f.name in SUMMONED and v in SUMMONER_POOL:
+            slot, who = SUMMONER_POOL[v]
+            for site, chain in sorted(ids[v]):
+                if len(chain) != 1 or chain[0][1] != 'movs':
+                    f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
+                    continue
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
+                                   why=f'its sound {v:#x}: at {who}\'s pool slot {slot:#x}, her songs\' (her battles alone)'))
+            f.notes.append(f'its sound {v:#x}: {who}\'s pool slot {slot:#x} (SUMMONER_POOL), her recipe\'s song')
+            continue
         if slot is None:
             f.decide('sound', f'its sound {v:#x} is no song of BN6\'s and has no slot (SOUND_SLOTS): ask')
             continue

@@ -87,9 +87,14 @@ def pool_of(b4, b6, f):
     one past what a movs can name (0xFF) played through a shim (wide_sounds), past the pool a decision"""
     odd = sorted(v for v in sound_ids(b4, f) if X4.song_sig(b4, X4.BN4['songs'], v) != X4.song_sig(b6, X4.SONGS6, v)
                  and v not in X4.SOUND_SLOTS)
-    if len(odd) > len(SOUND_POOL):
-        f.decide('sound', f'{len(odd)} sounds for the pool\'s {len(SOUND_POOL)}')
-    pool = dict(zip(odd, SOUND_POOL))
+    # (then the sounds of the families it summons whose slot is its pool's: xrecipe_bn4.SUMMONER_POOL, each the next slot)
+    extra = sorted(v for v, (_, who) in X4.SUMMONER_POOL.items() if who == f.name and v not in odd)
+    if len(odd) + len(extra) > len(SOUND_POOL):
+        f.decide('sound', f'{len(odd) + len(extra)} sounds for the pool\'s {len(SOUND_POOL)}')
+    pool = dict(zip(odd + extra, SOUND_POOL))
+    for v in extra:
+        if pool.get(v) != X4.SUMMONER_POOL[v][0]:
+            f.decide('sound', f'its summoned family\'s sound {v:#x} at {pool.get(v)}, where its recipe names {X4.SUMMONER_POOL[v][0]:#x}')
     f.notes.append('its sounds in the pool: ' + ', '.join(f'{v:#x} at {slot:#x}' for v, slot in pool.items()))
     return pool
 

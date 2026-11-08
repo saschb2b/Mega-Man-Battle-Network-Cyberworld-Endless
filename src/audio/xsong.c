@@ -452,7 +452,6 @@ static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
 	{ XROM_BN4_RED_SUN_US, 0xC9, 0x3C }, { XROM_BN4_RED_SUN_US, 0xCA, 0x3B }, { XROM_BN4_RED_SUN_US, 0x70, 0x3A },
 	{ XROM_BN4_RED_SUN_US, 0x9A, 0x39 }, { XROM_BN4_RED_SUN_US, 0xA6, 0x38 }, { XROM_BN4_RED_SUN_US, 0xB7, 0x37 },
 	{ XROM_BN4_RED_SUN_US, 0x9D, 0x36 }, { XROM_BN4_RED_SUN_US, 0xFC, 0x35 }, { XROM_BN4_RED_SUN_US, 0xF9, 0x34 },
-	{ XROM_BN4_RED_SUN_US, 0x8B, 0x46 },   /* (Mettaur's, past the twelve: xvirus_recipe.h's XV_BN4_SONG_SLOT_MORE) */
 };
 
 int xsong_sound_slot(int xrom, int song) {

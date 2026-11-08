@@ -2190,6 +2190,7 @@ static const XvSong roll_songs[] = {
 	{ 0xCE, 0x33, XN_BN4_ART + 0x39C0, 0x21C0 },   /* its sound 0xce, BN4's song copied */
 	{ 0x131, 0x63, XN_BN4_ART + 0x5B80, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
 	{ 0x132, 0xD0, XN_BN4_ART + 0x62C0, 0xC80 },   /* its sound 0x132, BN4's song copied */
+	{ 0x8B, 0xE0, XN_BN4_ART + 0x6F40, 0x40 },   /* its sound 0x8b, BN4's song copied */
 };
 static const XnInit roll_init = { NULL, 0, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
 static const XnSummonId roll_summon_ids[] = {

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1202,9 +1202,14 @@ twelve decisions settled so:
   table (`0x080CFB8C`, by its version) copied (`bn4_twins.TABLES`, a
   table with no list byte: list 4 by its load's `movs`), its sprite
   copied into list 4.
-- **Its sound 0x8B** (the shockwave's) is no song of BN6's: copied to
-  slot 0x46 (`XV_BN4_SONG_SLOT_MORE`, the gap between the Darkloids' and
-  BN5's chips' slots, the families' twelve full).
+- **Its sound 0x8B** (the shockwave's) is no song of BN6's. The
+  families' twelve slots are full and 0x41-0x4B stay BN5's ([Battle
+  Network 4 in a run](bn4.md), call 8), and Mettaur fights only beside
+  Roll, so it plays from her per-battle pool: her fifth slot, 0xE0
+  (`tools/xrecipe_bn4.py` `SUMMONER_POOL`; her recipe lists the song,
+  `tools/xnavirecipe_bn4_sounds.py` `pool_of`). In `mettaur4_v1`, where
+  he fights alone, no Navi points the pool: the slot holds what the last
+  install left it, and the sound is told by its number.
 - **Its room**: the families' code and art were full, so the families
   past the first six take a second room (`ROOM2_FROM`): code from BN5's
   families' end (`XV_CODE + 0x11000`) to BN4's first room, art from

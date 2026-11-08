@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T18:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -487,10 +487,12 @@ its number (`tools/xrecipe.py`'s `song_sig`) stays BN6's; the other 12
 are no song of BN6's under any number (Spikey's 0xBC and 0xC4, Shrimpy's
 0x9F, 0xC9 and 0xCA, Walla's 0x70, 0x9A, 0xA6 and 0xB7, Elmperor's 0x9D
 and 0xFC, CirKill's 0xF9). Mettaur, moved for Roll's summon (the owner's
-call 12), plays Walla's 0x9A and a 13th, its shockwave's 0x8B, which
-takes slot 0x46 (`XV_BN4_SONG_SLOT_MORE`): the middle of the gap between
-the Darkloids' slots (0x40 up) and BN5's chips' own (0x4B down), as the
-twelve fill 0x34-0x3F; the owner's to confirm with the others. As a family installs, each of its sounds is
+call 12), plays Walla's 0x9A and a 13th, its shockwave's 0x8B. The
+twelve fill 0x34-0x3F and call 8 keeps 0x41-0x4B for BN5, and Mettaur
+fights only where Roll brings him, so 0x8B takes a slot of her per-battle
+pool, her fifth, 0xE0 (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
+lists the song, packed into her art's room and pointed in her battles as
+her own sounds are (the owner's call 11). As a family installs, each of its sounds is
 copied from the player's ROM (`xsong_pack`, its sequence, voice group and
 samples, none of it in the repository) into a room of the families' art
 below their sprites (from `XV_ART + 0x5A000`, the sprites' own room full)
@@ -618,6 +620,8 @@ sounds take from the themes' range are the owner's to confirm.
     visitors and what a run's battles hold would change with it. Built
     the same day: BN4's ids 1-6 as BN6's 0x2E4-0x2E9 (AI 70), proved
     alone by `mettaur4_v1` ([BN4's Navis in BN6's engine](bn4-navis.md),
-    Roll built); her summon's map points at them, the summoned one
+    Roll built). His one sound BN6 has no song of, his shockwave's 0x8B,
+    plays from her per-battle pool (her slot 0xE0), not a slot of its own,
+    so 0x41-0x4B stay BN5's (call 8). Her summon's map points at them, the summoned one
     arrives by BN4's own summoned appear, and `roll_v1` PASSes her whole
     fight, so she joins the tournament's proved Navis.

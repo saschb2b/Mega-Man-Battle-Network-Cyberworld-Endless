@@ -255,8 +255,6 @@ typedef struct {
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
 #define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
 #define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
-#define XV_BN4_SONG_SLOT_MORE  0x46       /* ... and one past the twelve (Mettaur's shockwave's): the middle of the gap between the
-                                             Darkloids' slots (0x40 up) and BN5's chips' own (0x4B down) */
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */

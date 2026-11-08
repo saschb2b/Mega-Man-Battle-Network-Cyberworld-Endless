@@ -1211,7 +1211,7 @@ static const XvImm mettaur_imms[] = {
 	{ 0x080B3A08, THUMB_MOVS, 0, 0, 0x9A, 0x39 },   /* its sound 0x9a: BN4's copied into BN6's empty slot 0x39, on its player 8 */
 	{ 0x080B3B28, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080B3BA4, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
-	{ 0x080CFC6C, THUMB_MOVS, 0, 0, 0x8B, 0x46 },   /* its sound 0x8b: BN4's copied into BN6's empty slot 0x46, on its player 9 */
+	{ 0x080CFC6C, THUMB_MOVS, 0, 0, 0x8B, 0xE0 },   /* its sound 0x8b: at Roll's pool slot 0xe0, her songs' (her battles alone) */
 	{ 0x080CFCA6, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CFD2E, THUMB_MOVS, 0, 0, 0x16, 0xE5 },   /* its object's type 0x16: moved, the dispatch's 0xe5 */
 };
@@ -1250,9 +1250,6 @@ static const XvSprite mettaur_sprites[] = {
 	{ 4, 0x17, 4, 0xCA, XV_ART + 0x58800, 0x800 },
 };
 static const XvId mettaur_effects[] = { { 0x07, 0x96 }, { 0x15, 0x90 }, { 0x2E, 0x9A } };
-static const XvSong mettaur_songs[] = {
-	{ 0x8B, 0x46, XV_ART + 0x5DAC0, 0x40 },   /* its sound 0x8b, BN4's song copied */
-};
 
 static const XVirusFamily bn4_mettaur = {
 	.name = "Mettaur (BN4's)",
@@ -1277,7 +1274,6 @@ static const XVirusFamily bn4_mettaur = {
 	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
 	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
 	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
-	.songs = mettaur_songs, .nsongs = (int)(sizeof mettaur_songs / sizeof *mettaur_songs),
 	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
