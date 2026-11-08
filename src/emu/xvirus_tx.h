@@ -1,7 +1,7 @@
 /* The installer's staged writes (xvirus.h, issue #82): a step's writes into
  * the core's ROM copy are kept until every one of its checks has passed,
  * then made at once, or none where any failed; and what was moved where,
- * for a trace's reader. Shared by the engine's room grown once a core
+ * for a trace's reader (xvirus_moved.h). Shared by the engine's room grown once a core
  * (xvirus_grow.c) and each family's install (xvirus.c). */
 #ifndef CW_XVIRUS_TX_H
 #define CW_XVIRUS_TX_H
@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "thumb_reloc.h"
+#include "xvirus_moved.h"   /* (xv_moved_add: what was moved where, for a trace's reader) */
 
 /* A step begun: nothing staged, nothing failed (its buffer taken where
  * none is held); and ended, the buffer let go. */
@@ -44,8 +45,5 @@ void xv_commit_by(const char *(*writer)(uint32_t at));
  * own (claims.h); the parts together every write once. */
 void xv_commit_where(bool (*part)(uint32_t at));
 
-/* What was moved where (xvirus.h's xvirus_moved): an address range of a
- * family's game, or of BN6's own table, and its copy. */
-void xv_moved_add(uint32_t from, uint32_t to, uint32_t len);
 
 #endif

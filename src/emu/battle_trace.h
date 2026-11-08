@@ -3,8 +3,8 @@
  * before, for tools/xcontrol.py: the control family's differential (issue
  * #82; --dev xcontrol, docs/multirom/families.md).
  *
- * The file: "BTRC", a version (1), the count of ranges moved (xvirus.h,
- * XvMoved: from, to, len, three u32 each) and the ranges; then a record a
+ * The file: "BTRC", a version (1), the count of ranges moved (xvirus_moved.h,
+ * XvMoved: from, to, len, three u32 each; every one, or no trace) and the ranges; then a record a
  * frame: "FRAM", its number among the traced frames, the battle's timer
  * (BN6_BATTLE_TIMER), the count of runs, and the runs (an offset into the
  * image, its length, its bytes), where the image is EWRAM's 0x40000 bytes

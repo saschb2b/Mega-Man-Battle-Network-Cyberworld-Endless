@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "emu.h"
 #include "xdiff_events.h"
-#include "xvirus.h"
+#include "xvirus_moved.h"
 
 #define IWRAM      0x03000000u   /* (the GBA's) */
 #define IWRAM_SIZE 0x8000u
@@ -27,13 +27,18 @@ static void u32_out(uint32_t v) {
 }
 
 static bool open_trace(void) {
+	static bool refused;
 	if (out) return true;
+	if (refused) return false;
+	/* (every range moved, or no trace: one with a part of them would leave moved code unread, xvirus_moved.h) */
+	int n;
+	const XvMoved *m = xvirus_moved(&n);
+	refused = !m;
+	if (refused) return false;
 	was = calloc(1, IMAGE);
 	now = malloc(IMAGE);
 	out = was && now ? emu_debug_file("btrace.bin") : NULL;
 	if (!out) { free(was); free(now); was = now = NULL; return false; }
-	static XvMoved m[XV_MOVED_MAX];
-	int n = xvirus_moved(m, XV_MOVED_MAX);
 	fwrite("BTRC", 1, 4, out);
 	u32_out(1);
 	u32_out((uint32_t)n);
