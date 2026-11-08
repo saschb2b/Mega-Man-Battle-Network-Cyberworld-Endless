@@ -101,7 +101,7 @@ bool xvirus_shim_cmp(uint8_t out[XV_SHIM_CMP_SIZE], uint32_t at, int reg, uint16
 int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint32_t clear_veneer, uint32_t sound_veneer);
 
 /* A summon's shim at `at` (word-aligned), in a BN4 Navi's code room
- * (xnavi_summon.c; docs/multirom/bn4-navis.md, Roll built): r0 its game's
+ * (xnavi_init.c; docs/multirom/bn4-navis.md, Roll built): r0 its game's
  * enemy id, r5 the Navi. A free panel of its side by `panels` (its copy of
  * BN4_FREE_PANELS, within a call's reach) with `masks` (wanted and refused:
  * side 0's, then side 1's) and one draw of `rng` (BN6's GetRNG twin), as

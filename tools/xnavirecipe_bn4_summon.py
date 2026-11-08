@@ -5,8 +5,8 @@ enemy's record (BN4_ENEMY_RECORD) and its first-kind type spawned there (BN4_SPA
 state 0 takes its summoned appear, 0x0801002A), its fields from the record, its sound. BN6 spawns an enemy into a fight under
 way by BN6_SPAWN_ENEMY_1 (r0 its id, r1 and r2 its panel, r3 its side: its AI data's +2 1, which BN6's appear state
 0x08016380 reads to take its own summoned appear, 0x080164A0), so the routine is not copied: the call is aimed at a shim of
-her code room (src/emu/xnavi_summon.c, XnSummon) that picks the panel as BN4's does (her copy of BN4_FREE_PANELS, the same
-masks, one draw of BN6's GetRNG twin), gives the id BN6's (a moved family's by its recipe, a native by its name: SUMMON_IDS),
+her code room (src/emu/xnavi_init.c, xvirus_shim_summon; XnSummon) that picks the panel as BN4's does (her copy of BN4_FREE_PANELS, the same
+masks, one draw of BN6's GetRNG twin), gives the id BN6's (a moved family's by its recipe, a native by its name: SUMMON_NATIVES),
 spawns it by BN6's routine and plays the sound at its pool's slot.
 
 Imported by tools/xnavirecipe_bn4.py alone. Numbers only: BN4's and BN6's addresses, read from both ROMs and each said why."""
@@ -20,7 +20,7 @@ import xrecipe_thumb as T  # noqa: E402
 # BN4_SPAWN_ENEMY (bn4_navis.h): its routine, its pool's end (its masks' table, two words a side, at SUMMON_MASKS), its sound's
 # movs, the free panels it asks (BN4_FREE_PANELS, copied: xnavirecipe_bn4.NAVI_COPIED)
 SUMMON4, SUMMON_END, SUMMON_MASKS, SUMMON_SOUND_AT, FREE_PANELS4 = 0x080F00F4, 0x080F01B8, 0x080F01A8, 0x080F0196, 0x0800A244
-# the shim's room in the Navi's code room (src/emu/xnavi_summon.c XN_SUMMON_ROOM: its code and pool)
+# the shim's room in the Navi's code room (src/emu/xnavi_init.c SUMMON_ROOM: its code and pool)
 SHIM_ROOM = 0x100
 # a Navi's lists of the ids it summons: its BN4 type -> its table of pointers by version (each list a count, then the ids), read
 # by its routine that picks the next (Roll's 0x080BC3B4: its literal 0x080BC3D8, [r5 +4] the version)
@@ -38,9 +38,9 @@ SUMMON_NATIVES = {
 # The fourth-kind types a Navi's code spawns that BN6 has no twin of, moved with it (the dispatch's fourth kind, XV_SPAWN_4):
 # BN4's type -> (its block: its routine, then its spawner; why)
 MOVED4 = {
-    0x17: (0x080E3A98, 0x080E3AE6, "a flash where it was spawned (r1-r3): 30 frames, every 8th an effect 0x2E-0x31's kind by a "
-                                   "draw (BN4_SPAWN_EFFECT's r4, its high byte the draw's & 3); spawned by its own spawner "
-                                   "(0x080E3AD8: movs r0,#0x17, BN4_SPAWN_4) in MegaMan's states 46 and 47, Roll's heal and "
+    0x17: (0x080E3A98, 0x080E3AE6, "a flash where it was spawned (r1-r3): 30 frames, every 8th the effect 0x2E, its parameter "
+                                   "(r4's high byte) a draw & 3 (BN4_SPAWN_EFFECT); spawned by its own spawner "
+                                   "(0x080E3AD8: movs r0,#0x17, BN4_SPAWN_4) in MegaMan's states 46 and 47, Roll's warp and "
                                    "summon; no BN6 type of its body (0x080042C8's 0x00-0x5F compared)"),
 }
 
@@ -94,7 +94,7 @@ def summon(b4, f, alloc, pool, families):
     alloc.code = X4.rounded(alloc.code, 4)
     at = alloc.code
     alloc.code += SHIM_ROOM
-    f.aim[SUMMON4] = (f'XV_CODE + 0x{at - X4.XV_CODE:X}', 'BN4_SPAWN_ENEMY: the summon\'s shim (xnavi_summon.c), BN6\'s '
+    f.aim[SUMMON4] = (f'XV_CODE + 0x{at - X4.XV_CODE:X}', 'BN4_SPAWN_ENEMY: the summon\'s shim (xnavi_init.c), BN6\'s '
                                                          'BN6_SPAWN_ENEMY_1 by the id BN6 numbers it')
     w = T.walk(b4, SUMMON4, region=(SUMMON4, SUMMON_END))
     snd = T.decode(b4, SUMMON_SOUND_AT)
@@ -122,5 +122,5 @@ def c_summon(f, n):
     text += (f'static const XnSummon {n}_summon = {{ XV_CODE + 0x{s["at"] - X4.XV_CODE:X}, OWN(0x{FREE_PANELS4 | 1:08X}), {{ {masks} }}, '
              f'{n}_summon_ids, (int)(sizeof {n}_summon_ids / sizeof *{n}_summon_ids), 0x{s["sound"]:X} }};   /* (BN4_SPAWN_ENEMY\'s '
              f'masks by side, {SUMMON_MASKS:08X}; its sound {s["sound4"]:#x}) */\n')
-    return text, f'\t.summon = &{n}_summon,   /* (its summon: xnavi_summon.c) */'
+    return text, f'\t.summon = &{n}_summon,   /* (its summon: xnavi_init.c) */'
 

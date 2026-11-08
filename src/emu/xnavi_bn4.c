@@ -1409,7 +1409,7 @@ static const XvPair roll_calls[] = {
 	{ 0x08014620, 0x0801BDDE },   /* map:bytes, SAME */
 	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
 	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
-	{ 0x080F00F4, XN_BN4_CODE + 0x5EDC },   /* BN4_SPAWN_ENEMY: the summon's shim (xnavi_summon.c), BN6's BN6_SPAWN_ENEMY_1 by the id BN6 numbers it */
+	{ 0x080F00F4, XN_BN4_CODE + 0x5EDC },   /* BN4_SPAWN_ENEMY: the summon's shim (xnavi_init.c), BN6's BN6_SPAWN_ENEMY_1 by the id BN6 numbers it */
 };
 static const XvImm roll_imms[] = {
 	{ 0x0800A27A, THUMB_LDRB, 1, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
@@ -1528,7 +1528,7 @@ static const XNavi bn4_roll = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
 	.init = &roll_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
-	.summon = &roll_summon,   /* (its summon: xnavi_summon.c) */
+	.summon = &roll_summon,   /* (its summon: xnavi_init.c) */
 };
 const XNavi *const xnavi_bn4[] = { &bn4_gutsman, &bn4_thunderman, &bn4_windman, &bn4_fireman, &bn4_roll };
 const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);
