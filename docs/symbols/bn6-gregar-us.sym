@@ -357,6 +357,7 @@
 080076C0 bn6_ai_data_3
 080076DE bn6_ai_data_4
 08007740 BN6_SPAWN_HP
+0800774C BN6_SPAWN_ENEMY_2E
 080077A0 raised_by_spawn_0_entry
 08007800 BN6_BATTLE_MAIN
 0800795E bn5_chips_code.from
@@ -714,7 +715,8 @@
 0801A00E object_presence_on_panels
 0801A018 what_hit_object_cleared
 0801A022 hit_clear_store
-0801A082 collision_data_updated
+0801A074 BN6_COLL_REGION_CLEAR
+0801A082 BN6_COLL_REGION_SET
 0801A0D4 hit_effect_spawned
 0801A146 object_element_into_collision_data
 0801A176 BN6_CLEAR_FLAG2

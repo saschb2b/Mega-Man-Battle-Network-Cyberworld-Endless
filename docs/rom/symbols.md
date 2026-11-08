@@ -98,16 +98,16 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Code (routines, hooks, instructions) | 319 | 27 | 89 |
-| ROM data (tables, text, literals) | 300 | 267 | 105 |
-| ROM, code or data not told | 482 | 582 | 154 |
+| Code (routines, hooks, instructions) | 322 | 27 | 91 |
+| ROM data (tables, text, literals) | 299 | 267 | 108 |
+| ROM, code or data not told | 482 | 582 | 155 |
 | RAM (variables, structures) | 138 | 65 | 38 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 177 | 42 | 3 |
 | Event flags | 34 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
 | Constants, sizes and counts | 530 | 272 | 279 |
-| All | 2096 | 1274 | 673 |
+| All | 2098 | 1274 | 679 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -115,12 +115,12 @@ how to verify it.
 | Shops and traders | 39 | 0 | 0 |
 | NaviCust | 23 | 1 | 0 |
 | Chips and folders | 301 | 224 | 18 |
-| Battle | 572 | 368 | 206 |
+| Battle | 573 | 368 | 206 |
 | Text and fonts | 42 | 7 | 3 |
 | Sound | 19 | 25 | 14 |
 | Maps and the overworld | 136 | 41 | 25 |
 | Events and progress | 54 | 19 | 13 |
-| Engine core | 839 | 588 | 393 |
+| Engine core | 840 | 588 | 399 |
 
 <!-- end of what tools/symbols.py writes -->
 
@@ -135,28 +135,28 @@ Made from bn6f at commit `d57c196`.
 
 | bn6f's functions | BN6 Gregar | BN5 Team Colonel (partial) | BN4 Red Sun (partial) |
 | --- | ---: | ---: | ---: |
-| All (thumb_func_start, thumb_local_start, arm_func_start, arm_local_start) | 13,386 of 13,646 (98.1%) | 4,350 of 13,646 (31.9%) | 1,650 of 13,646 (12.1%) |
-| ... global (thumb_func_start, arm_func_start) | 2,688 of 2,751 (97.7%) | 1,322 of 2,751 (48.1%) | 604 of 2,751 (22.0%) |
-| ... named by bn6f (not sub_ and an address) | 2,306 of 2,323 (99.3%) | 1,297 of 2,323 (55.8%) | 683 of 2,323 (29.4%) |
-| ... of them with no address in the name | 1,062 of 1,072 (99.1%) | 780 of 1,072 (72.8%) | 390 of 1,072 (36.4%) |
+| All (thumb_func_start, thumb_local_start, arm_func_start, arm_local_start) | 13,386 of 13,646 (98.1%) | 4,329 of 13,646 (31.7%) | 1,650 of 13,646 (12.1%) |
+| ... global (thumb_func_start, arm_func_start) | 2,688 of 2,751 (97.7%) | 1,304 of 2,751 (47.4%) | 604 of 2,751 (22.0%) |
+| ... named by bn6f (not sub_ and an address) | 2,306 of 2,323 (99.3%) | 1,290 of 2,323 (55.5%) | 683 of 2,323 (29.4%) |
+| ... of them with no address in the name | 1,062 of 1,072 (99.1%) | 776 of 1,072 (72.4%) | 390 of 1,072 (36.4%) |
 | Located by `bytes` | 9,837 | 3,009 | 998 |
 | Located by `calls+bytes` | 1,905 | 570 | 223 |
 | Located by `neighbours` | 1,525 | 0 | 0 |
-| Located by `calls` | 108 | 744 | 429 |
+| Located by `calls` | 108 | 750 | 429 |
 | Located by `shift` | 11 | 0 | 0 |
-| Located by `twin` | 0 | 27 | 0 |
+| Located by `twin` | 0 | 0 | 0 |
 | Data labels the located functions name | 2,734 | 215 | 51 |
 | RAM labels their literals hold at Falzar's address | 895 | 10 | 0 |
 | RAM labels their literals hold elsewhere | 0 | 341 | 111 |
 
 | Part of the game (bn6f's files) | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Battle | 9,096 of 9,210 (98.8%) | 2,506 of 9,210 (27.2%) | 955 of 9,210 (10.4%) |
+| Battle | 9,096 of 9,210 (98.8%) | 2,486 of 9,210 (27.0%) | 955 of 9,210 (10.4%) |
 | Menus and screens | 1,581 of 1,581 (100.0%) | 432 of 1,581 (27.3%) | 68 of 1,581 (4.3%) |
 | Maps and the overworld | 1,009 of 1,061 (95.1%) | 348 of 1,061 (32.8%) | 243 of 1,061 (22.9%) |
 | Sound and libraries (m4a, link cable, wireless) | 407 of 407 (100.0%) | 373 of 407 (91.6%) | 109 of 407 (26.8%) |
 | Shops and traders | 296 of 296 (100.0%) | 171 of 296 (57.8%) | 42 of 296 (14.2%) |
-| Engine core | 278 of 286 (97.2%) | 162 of 286 (56.6%) | 109 of 286 (38.1%) |
+| Engine core | 278 of 286 (97.2%) | 161 of 286 (56.3%) | 109 of 286 (38.1%) |
 | NaviCust | 204 of 204 (100.0%) | 111 of 204 (54.4%) | 0 of 204 (0.0%) |
 | Text and fonts | 202 of 202 (100.0%) | 127 of 202 (62.9%) | 53 of 202 (26.2%) |
 | Minigames and their maps | 66 of 152 (43.4%) | 3 of 152 (2.0%) | 1 of 152 (0.7%) |
@@ -164,12 +164,12 @@ Made from bn6f at commit `d57c196`.
 | Graphics | 83 of 83 (100.0%) | 74 of 83 (89.2%) | 59 of 83 (71.1%) |
 | Chips and folders | 18 of 18 (100.0%) | 17 of 18 (94.4%) | 9 of 18 (50.0%) |
 
-- BN6 Gregar: 95 times an address of ours names a bn6f function or label the matcher located: 74 at the same place, 18 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
+- BN6 Gregar: 99 times an address of ours names a bn6f function or label the matcher located: 78 at the same place, 18 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
 - BN6 Gregar: of the 895 RAM labels the located functions' literals hold, 895 read bn6f's (Falzar's) address.
 - BN6 Gregar: 13,162 located functions laid out as in Falzar, 0 lying over another; 0 that a located reference names elsewhere.
 - BN5 Team Colonel: 19 times an address of ours names a bn6f function or label the matcher located: 12 at the same place, 7 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
 - BN5 Team Colonel: 3,574 located functions laid out as in Falzar, 0 lying over another; 40 that a located reference names elsewhere.
-- BN4 Red Sun: 2 times an address of ours names a bn6f function or label the matcher located: 2 at the same place, 0 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
+- BN4 Red Sun: 11 times an address of ours names a bn6f function or label the matcher located: 11 at the same place, 0 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
 - BN4 Red Sun: 1,219 located functions laid out as in Falzar, 0 lying over another; 54 that a located reference names elsewhere.
 
 <!-- end of what tools/symbols.py writes -->
