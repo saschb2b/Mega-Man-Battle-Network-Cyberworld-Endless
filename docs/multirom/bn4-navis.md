@@ -1408,12 +1408,13 @@ generator, and of the engine as the eighth BN4 Navi:
   reading its flags; his routine pushes lr, which the generator checks
   (`far_loads`, `XnFar` in `src/emu/xnavi_recipe.h`, `src/emu/xnavi_init.c`
   `fars_set`).
-- **Three caps he was the first past**, each raised: the Navis installed
-  (16, BN5's homes; now those and BN4's 25 seats: he was refused as the
-  seventeenth, and his id read BN6's Mettaur's record), the moved enemy
-  ids (`ENEMIES_MOVED_MAX`, 256, now 384: his SP's id fell off) and the
-  moved ranges a trace is told of (`XV_MOVED_MAX`, 1024, now 2048: his
-  draws went unkeyed).
+- **Caps he was the first past**: the Navis installed (16, BN5's homes;
+  now those and BN4's 25 seats: he was refused as the seventeenth, and his
+  id read BN6's Mettaur's record) and the moved enemy ids
+  (`ENEMIES_MOVED_MAX`, 256, now 384: his SP's id fell off), each raised.
+  The moved ranges a trace is told of (1024) cut his draws off it too;
+  that list is on the heap now, every range kept ([The
+  differential](../devtools/differential.md), The trace's moved ranges).
 - **Roll no longer the last installed.** The pool's songs stand as the
   last installed Navi's until a battle's first frame points them at its
   own (`xnavi_bn4_sounds_frame`), so in `roll_v1` the pool is now pointed

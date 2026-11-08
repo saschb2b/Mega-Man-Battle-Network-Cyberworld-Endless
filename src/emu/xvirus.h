@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "xvirus_moved.h"    /* (what was moved where, for a trace's reader) */
 #include "xvirus_recipe.h"
 
 /* What xvirus_install puts in */
@@ -67,13 +68,5 @@ bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneer
 /* Where an address of a recipe's blocks is moved to (its Thumb bit kept), 0
  * for one outside them. */
 uint32_t xvirus_code_at(const XVirusFamily *f, uint32_t a);
-
-/* What was moved where, for a trace's reader (battle_trace.c, xdiff.c): an
- * address range of a family's game, or of one of BN6's tables, and its
- * copy */
-typedef struct { uint32_t from, to, len; } XvMoved;
-#define XV_MOVED_MAX 2048   /* (1024 until BN4's eighth Navi, WoodMan, took the ranges past it) */
-/* the ranges moved so far (at most max), how many */
-int xvirus_moved(XvMoved *out, int max);
 
 #endif

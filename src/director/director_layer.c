@@ -330,9 +330,13 @@ static void layer_host(int tiles, int *group, int *number) {
 	if (emu_debug_on()) fprintf(stderr, "layer nets: territory %d deep %d %d, older chips %d%%\n", loot_territory, loot_deep[0], loot_deep[1],
 		loot_older_share);
 	dark_flame_setup();
-	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
-	*group = a->group;
-	*number = a->host ? a->host - 1 : a->number;
+	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; }
+	else { *group = a->group; *number = a->host ? a->host - 1 : a->number; }
+	/* (a backdrop's tiles land clear of the layer's, or BN6 draws them and
+	 * turns them over its floor: said whatever the log, docs/rom/bn4.md) */
+	uint32_t lo, hi;
+	if (netmap_backdrop_over(tiles, &lo, &hi))
+		fprintf(stderr, "layer: map %#x:%d's backdrop loads its tiles at %08x-%08x, over the layer's own\n", (unsigned)*group, *number, (unsigned)lo, (unsigned)hi);
 }
 
 /* A dark layer no board fits on its mission's map (`*tiles`): made again on

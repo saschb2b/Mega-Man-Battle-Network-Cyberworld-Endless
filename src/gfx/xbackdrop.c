@@ -479,7 +479,13 @@ static void copy_map(int k, const NetAreaDef *a) {
 	 * theirs: BN5's 0x03003960, BN4's 0x03002A50, BN6's 0x03001960) */
 	if (!get32(hr + 16) || !get32(tr + 16)) return;
 	uint32_t to = copy_record(rec, hr), list = to ? copy_anims(entry_at(xr, theirs.lists, m), get32(hr + 20) - get32(tr + 20)) : 0;
-	if (!list) return;
+	/* (said whatever the log: its layers keep BN6's backdrop, which draws
+	 * over a 256-colour tile set, docs/rom/bn4.md) */
+	if (!list) {
+		fprintf(stderr, "xbackdrop: %s map %#x:%d's backdrop not copied for %#x:%d, %u of %u bytes taken\n", l->name, (unsigned)group, number,
+			(unsigned)a->over[0], a->over[1], M.sp.next - XMAP_AT, XMAP_END - XMAP_AT);
+		return;
+	}
 	__typeof__(M.area[0]) *e = &M.area[k];
 	e->list_at = own.lists - BUS + 4 * h;
 	e->record_at = own.records - BUS + 4 * h;
@@ -522,4 +528,17 @@ void xbackdrop_map(int area) {
 		if (M.area[k].ok) map_point(k, false);
 	int k = area - NET_AREAS;
 	if (k >= 0 && k < XAREAS_MAX && M.area[k].ok) map_point(k, true);
+}
+
+bool xbackdrop_map_vram(int group, int number, uint32_t *lo, uint32_t *hi) {
+	MapTables own;
+	if (!R.data || !R.layout || !R.layout->map_anims || number < 0
+		|| !map_tables(R.data, R.layout->map_enters, R.layout->map_anims, group, &own)) return false;
+	/* (the record as the core's ROM copy has it: another game's copy or
+	 * BN6's own; its tiles a word count, then their LZ77's offset) */
+	uint32_t rec = emu_read32(own.records + 4u * (uint32_t)number), gfx = xptr(rec, 28) ? emu_read32(rec) : 0;
+	if (!xptr(gfx, 8)) return false;
+	*lo = 0x06000000u | emu_read32(rec + 4);
+	*hi = *lo + 4 * emu_read32(gfx);
+	return true;
 }
