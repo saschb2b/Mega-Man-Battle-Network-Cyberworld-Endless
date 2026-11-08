@@ -101,13 +101,17 @@ def bn4_sprites(rom4, foes=None):
     lists, rows = sprite_rows(foes)
     if not lists or not rom4:
         return []
+    import xrecipe as X   # (its sprite_len, xnavi.c's: as tools/xdiff_snap.py reads it)
     out = []
     for lst, idx, room_base, off, room in rows:
         word = u32(rom4, u32(rom4, lists - 0x08000000 + 4 * int(lst)) - 0x08000000 + 4 * int(idx, 16))
         base, key = word & 0x7FFFFFFF, (4 * int(lst)) << 8 | int(idx, 16)
         lz = bool(word & 0x80000000)
+        # (a raw one's room in BN4's ROM its own bytes, not the copy's rounded room, which may reach into the next sprite: the
+        # wind's gust's list 3 0x2E past SearchMan's marker's 0x2D)
+        own = X.sprite_len(rom4[base - 0x08000000:base - 0x08000000 + 0x40000], 0x40000) if not lz else 0
         out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE}.get(room_base, XV_ART) + int(off, 16),
-                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else int(room, 16)))
+                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
     return out
 
 
@@ -153,7 +157,9 @@ def sprite_ptr(sprites, game, v, cache=None):
     best = None
     for i, (b4, b6, room, key, room4) in enumerate(sprites):
         if game == 4 and b4 is None:
-            b4, room = (cache or {}).get(key), room4
+            b4 = (cache or {}).get(key)
+        if game == 4:
+            room = room4   # (BN4's own sprite's bytes: bn4_sprites)
         base = b4 if game == 4 else b6 if game == 6 else None
         if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
             best = ('sprite', i, v - base)
