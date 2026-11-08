@@ -99,8 +99,8 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | Code (routines, hooks, instructions) | 317 | 27 | 86 |
-| ROM data (tables, text, literals) | 298 | 267 | 94 |
-| ROM, code or data not told | 474 | 582 | 133 |
+| ROM data (tables, text, literals) | 298 | 267 | 95 |
+| ROM, code or data not told | 474 | 582 | 132 |
 | RAM (variables, structures) | 137 | 65 | 38 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 177 | 42 | 3 |

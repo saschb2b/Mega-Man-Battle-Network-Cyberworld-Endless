@@ -167,7 +167,7 @@
 
 /* Roll, the fifth BN4 Navi derived (tools/xnavirecipe_bn4.py, xnavirecipe_bn4_summon.py; docs/multirom/bn4-navis.md, Roll built):
  * found by her type, each checked by the generator against her ROM */
-#define BN4_ROLL          0x080BC0E4u /* her type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_ROLL]): jump table init 0x080BC109, update
+#define BN4_ROLL_NAVI     0x080BC0E4u /* her type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_ROLL]): jump table init 0x080BC109, update
                                        * 0x080BC169, dying BN4_NAVI_DYING, then the after-step; her block to 0x080BC3FC */
 #define BN4_ROLL_STATES   0x080BC184u /* her state table: BN4's generic Navi 0 and 3-5, her own 1 (0x080BC1B5: +6 0, then the generic
                                        * 1) and 2 (0x080BC309: her summons' HP made 0, then the generic 2), her decision 6 (0x080BC1C1),
