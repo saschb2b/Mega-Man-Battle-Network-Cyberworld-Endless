@@ -197,12 +197,19 @@ static bool summon_set(const XNavi *n) {
 	return xnavi_summoned_set(m, m->at + word);
 }
 
+/* whether its spawn's end has work of its own: its palette by version, its init's work there, or its collision's r3 alone */
+static bool end_wanted(const XNavi *n) {
+	const XnInit *in = n->init;
+	if (n->palettes) return true;
+	return in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
+}
+
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	if (n->summon && !summon_set(n)) return 0;
 	const XVirusFamily *f = &n->code;
 	const XnInit *in = n->init;
 	const uint32_t companion = xv_move_ref(n->companion);
-	const bool end = (in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0) || n->palettes;
+	const bool end = end_wanted(n);
 	const bool start = in && !in->at_end && in->nspawns;
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
