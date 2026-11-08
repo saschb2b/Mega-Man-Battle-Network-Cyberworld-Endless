@@ -1055,5 +1055,227 @@ static const XVirusFamily bn4_cirkill = {
 	.prestep = 0x080BD112,   /* its update's own work on, run as its pre-step (bn4_twins.PRESTEP) */
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
-const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill };
+/* ---- BN4's Mettaur (its type 0x2 there, its enemy ids 1-6), as AI 70 with ids 0x2e4-0x2e9 ---- */
+
+static const XvBlock mettaur_blocks[] = {
+	{ 0x080B3594, 0x080B3C44, XV_CODE + 0x11000, 0xE3BE1138u },
+	{ 0x0800FCAC, 0x0800FCDE, XV_CODE + 0x116B0, 0xADF5FC45u },
+	{ 0x0801002A, 0x0801013A, XV_CODE + 0x116F2, 0x66328F22u },
+	{ 0x080CFBB0, 0x080CFD48, XV_CODE + 0x11810, 0xBDC5644Eu },
+	{ 0x080CFB8C, 0x080CFBB0, XV_CODE + 0x119B0, 0x2D6E2192u },
+	{ 0x0800AD2A, 0x0800B12C, XV_CODE + 0x119E2, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_CODE + 0x11DF2, 0x7631C49Cu },
+	{ 0x080B54D0, 0x080B54F4, XV_CODE + 0x11E60, 0xB6A58CE9u },
+};
+static const XvData mettaur_data[] = {
+	{ 0x080B3594, 0x080B35A6, XV_ZERO },
+	{ 0x080B35A6, 0x080B35A8, XV_RAW },
+	{ 0x080B35A8, 0x080B3626, XV_ZERO },
+	{ 0x080B3626, 0x080B3628, XV_RAW },
+	{ 0x080B3628, 0x080B3658, XV_ZERO },
+	{ 0x080B36D6, 0x080B36D8, XV_RAW },
+	{ 0x080B36D8, 0x080B36DC, XV_POOL },
+	{ 0x080B36DC, 0x080B36E8, XV_TABLE },
+	{ 0x080B3752, 0x080B3754, XV_RAW },
+	{ 0x080B3754, 0x080B3758, XV_POOL },
+	{ 0x080B3794, 0x080B3798, XV_POOL },
+	{ 0x080B3798, 0x080B37A0, XV_TABLE },
+	{ 0x080B385A, 0x080B385C, XV_RAW },
+	{ 0x080B385C, 0x080B3860, XV_POOL },
+	{ 0x080B3860, 0x080B3870, XV_RAW },
+	{ 0x080B3870, 0x080B3874, XV_POOL },
+	{ 0x080B3874, 0x080B3878, XV_RAW },
+	{ 0x080B3886, 0x080B3888, XV_RAW },
+	{ 0x080B38BE, 0x080B38C0, XV_RAW },
+	{ 0x080B38C0, 0x080B38C4, XV_POOL },
+	{ 0x080B38C4, 0x080B38D4, XV_TABLE },
+	{ 0x080B3966, 0x080B3968, XV_RAW },
+	{ 0x080B3968, 0x080B396C, XV_POOL },
+	{ 0x080B396C, 0x080B3972, XV_RAW },
+	{ 0x080B3998, 0x080B399C, XV_POOL },
+	{ 0x080B399C, 0x080B39AC, XV_TABLE },
+	{ 0x080B3A66, 0x080B3A68, XV_RAW },
+	{ 0x080B3A68, 0x080B3A6C, XV_POOL },
+	{ 0x080B3AEC, 0x080B3AF0, XV_POOL },
+	{ 0x080B3AF0, 0x080B3AF8, XV_RAW },
+	{ 0x080B3AF8, 0x080B3AFC, XV_POOL },
+	{ 0x080B3AFC, 0x080B3B02, XV_RAW },
+	{ 0x080B3B40, 0x080B3B44, XV_POOL },
+	{ 0x080B3B44, 0x080B3B50, XV_TABLE },
+	{ 0x080B3C42, 0x080B3C44, XV_RAW },
+	{ 0x08010038, 0x0801003C, XV_POOL },
+	{ 0x0801003C, 0x08010048, XV_TABLE },
+	{ 0x080100BA, 0x080100BC, XV_RAW },
+	{ 0x080100BC, 0x080100C0, XV_POOL },
+	{ 0x080CFBC2, 0x080CFBC4, XV_RAW },
+	{ 0x080CFBC4, 0x080CFBC8, XV_POOL },
+	{ 0x080CFBC8, 0x080CFBD4, XV_TABLE },
+	{ 0x080CFC7E, 0x080CFC80, XV_RAW },
+	{ 0x080CFC80, 0x080CFC84, XV_POOL },
+	{ 0x080CFCC4, 0x080CFCC8, XV_POOL },
+	{ 0x080CFCC8, 0x080CFCD0, XV_TABLE },
+	{ 0x080CFD46, 0x080CFD48, XV_RAW },
+	{ 0x080CFB8C, 0x080CFBB0, XV_RAW },
+	{ 0x0800AD54, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
+};
+static const XvPair mettaur_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
+	{ 0x08002F3A, 0x08002EE8 },   /* search, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08007BE4, 0x0800A704 },   /* project:research, SAME */
+	{ 0x08007E46, 0x080011EC },   /* project:mettaur, DIFF (audited) */
+	{ 0x08007F04, 0x0800AA06 },   /* project:mettaur, DIFF (audited) */
+	{ 0x08007F1C, 0x0800AA1A },   /* project:mettaur, DIFF (audited) */
+	{ 0x08007F46, 0x0800AA40 },   /* project:mettaur, DIFF (audited) */
+	{ 0x080090B8, 0x0800BF16 },   /* project:research, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009AEC, 0x0800C938 },   /* project:gutsman, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
+	{ 0x0800A17A, 0x0800D048 },   /* project:spikey, DIFF (audited) */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ABCA, 0x0810A952 },   /* project:families-2, DIFF (audited) */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800B018, 0x0800EAFA },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800B026, 0x0800EB08 },   /* project:mettaur, LAYOUT (audited) */
+	{ 0x0800FCDE, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FE00, 0x08016396 },   /* project:mettaur, SAME (audited) */
+	{ 0x0800FF26, 0x080164A0 },   /* project:mettaur, SAME (audited) */
+	{ 0x0801013A, 0x080165B8 },   /* project:research, DIFF (audited) */
+	{ 0x0801014C, 0x080165C2 },   /* project:families-2, DIFF (audited) */
+	{ 0x080104AC, 0x08016B02 },   /* project:research, DIFF (audited) */
+	{ 0x080105BC, 0x08016CE8 },   /* project:research, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x08014620, 0x0801BDDE },   /* search, SAME */
+	{ 0x08015ABC, 0x0801DC7C },   /* project:mettaur, DIFF (audited) */
+	{ 0x080164B4, 0x0810A952 },   /* project:families-2, DIFF (audited) */
+	{ 0x080190D0, 0x08021AA4 },   /* project:billy, SAME */
+	{ 0x08044AEC, 0x080011EC },   /* project:billy, DIFF (audited) */
+	{ 0x080BE634, 0x0810A952 },   /* project:billy, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+	{ 0x080E45F6, 0x0810A952 },   /* project:mettaur, DIFF (audited) */
+	{ 0x080E8ADA, 0x0810A952 },   /* project:mettaur, DIFF (audited) */
+};
+static const XvImm mettaur_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x080100A0, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
+	{ 0x080100D8, THUMB_ADDS, 4, 0, 0x2E, 0x9A },   /* its effect: 0x2e in BN4, 0x9a in BN6 (moved) */
+	{ 0x080B3688, THUMB_CMP, 0, 0, 0x6, 0x8 },   /* its CurAction 6 compared */
+	{ 0x080B36F8, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 written */
+	{ 0x080B370E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080B3748, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080B3762, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080B3770, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080B37AE, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080B37D8, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080B38A6, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B38FE, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080B390E, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B3980, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B39FA, THUMB_MOVS, 4, 0, 0x7, 0x96 },   /* its effect: 0x7 in BN4, 0x96 in BN6 (moved) */
+	{ 0x080B3A08, THUMB_MOVS, 0, 0, 0x9A, 0x39 },   /* its sound 0x9a: BN4's copied into BN6's empty slot 0x39, on its player 8 */
+	{ 0x080B3B28, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B3BA4, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080CFC6C, THUMB_MOVS, 0, 0, 0x8B, 0xE0 },   /* its sound 0x8b: at Roll's pool slot 0xe0, her songs' (her battles alone) */
+	{ 0x080CFCA6, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080CFD2E, THUMB_MOVS, 0, 0, 0x16, 0xE5 },   /* its object's type 0x16: moved, the dispatch's 0xe5 */
+};
+static const XvSoundCall mettaur_sound_calls[] = {
+	{ 0x080B36EA, 0x0 },   /* its call to 08007F04: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3B7E, 0x0 },   /* its call to 08007F04: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3660, 0x0 },   /* its call to 08007F1C: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3696, 0x0 },   /* its call to 08007F1C: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B389C, 0x0 },   /* its call to 08007F1C: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3B1E, 0x0 },   /* its call to 08007F1C: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3676, 0x0 },   /* its call to 08007F46: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3692, 0x0 },   /* its call to 08007F46: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3898, 0x0 },   /* its call to 08007F46: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+	{ 0x080B3B1A, 0x0 },   /* its call to 08007F46: BN6's twin of queue 0 (bn4_twins.QUEUED) */
+};
+static const XvPair mettaur_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvByte mettaur_bytes[] = {
+	{ 0x080CFB8C, 0x04, 0xC9 },   /* its table's kind 0: list 4 0x4 in BN4, 0xc9 copied */
+	{ 0x080CFB90, 0x04, 0xC9 },   /* its table's kind 1: list 4 0x4 in BN4, 0xc9 copied */
+	{ 0x080CFB94, 0x04, 0xC9 },   /* its table's kind 2: list 4 0x4 in BN4, 0xc9 copied */
+	{ 0x080CFB98, 0x04, 0xC9 },   /* its table's kind 3: list 4 0x4 in BN4, 0xc9 copied */
+	{ 0x080CFB9C, 0x04, 0xC9 },   /* its table's kind 4: list 4 0x4 in BN4, 0xc9 copied */
+	{ 0x080CFBA0, 0x04, 0xC9 },   /* its table's kind 5: list 4 0x4 in BN4, 0xc9 copied */
+};
+static const XvType mettaur_types[] = {
+	{ 3, 0xE5, XV_TYPE_MOVED, 0x16 },   /* BN4's third-kind 0x16, moved, the dispatch's 0xe5 */
+};
+static const XvRef mettaur_states[] = {
+	OWN(0x0800FCAD), OWN(0x080B3659), OWN(0x080B366F), BN6(0x080166AF), OWN(0x080B3681), OWN(0x080B36A3), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080B36B5), OWN(0x080B3889), OWN(0x080B38B1), OWN(0x080B398B), OWN(0x080B3B33),
+};
+static const XvSprite mettaur_sprites[] = {
+	{ 1, 0x01, 1, 0xC6, XV_ART + 0x54000, 0x3000 },
+	{ 4, 0x04, 4, 0xC9, XV_ART + 0x57000, 0x1800 },
+	{ 4, 0x17, 4, 0xCA, XV_ART + 0x58800, 0x800 },
+};
+static const XvId mettaur_effects[] = { { 0x07, 0x96 }, { 0x15, 0x90 }, { 0x2E, 0x9A } };
+
+static const XVirusFamily bn4_mettaur = {
+	.name = "Mettaur (BN4's)",
+	.game = XROM_BN4_RED_SUN_US,
+	.src_ai = 0x02,   /* (its first-kind type: BN4 has no AI index) */
+	.ai = 70,
+	.first_id = XV_FIRST_ID + 0xE4,
+	.home = XV_HOMES + 0x13000,
+	.blocks = mettaur_blocks, .nblocks = (int)(sizeof mettaur_blocks / sizeof *mettaur_blocks),
+	.data = mettaur_data, .ndata = (int)(sizeof mettaur_data / sizeof *mettaur_data),
+	.calls = mettaur_calls, .ncalls = (int)(sizeof mettaur_calls / sizeof *mettaur_calls),
+	.words = mettaur_words, .nwords = (int)(sizeof mettaur_words / sizeof *mettaur_words),
+	.imms = mettaur_imms, .nimms = (int)(sizeof mettaur_imms / sizeof *mettaur_imms),
+	.sound_calls = mettaur_sound_calls, .nsound_calls = (int)(sizeof mettaur_sound_calls / sizeof *mettaur_sound_calls),
+	.bytes = mettaur_bytes, .nbytes = (int)(sizeof mettaur_bytes / sizeof *mettaur_bytes),
+	.types = mettaur_types, .ntypes = (int)(sizeof mettaur_types / sizeof *mettaur_types),
+	.states = mettaur_states, .nstates = (int)(sizeof mettaur_states / sizeof *mettaur_states),
+	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
+	.struct1 = 0x08011894, .struct2 = 0x08011894,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
+	.names = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 },
+	.ice = 0,
+	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x08 },
+	.sprites = mettaur_sprites, .nsprites = (int)(sizeof mettaur_sprites / sizeof *mettaur_sprites),
+	.effects = mettaur_effects, .neffects = (int)(sizeof mettaur_effects / sizeof *mettaur_effects),
+	.summoned = true,   /* (moved for Roll's summon alone, BN6's by name: no kin of its net's, no visitor) */
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
+};
+const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);

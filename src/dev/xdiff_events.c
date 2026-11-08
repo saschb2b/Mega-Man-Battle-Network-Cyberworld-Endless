@@ -566,6 +566,10 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	return log;
 }
 
+void xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len) {
+	if (log && log->nfam < FAMILY_MAX) log->fam[log->nfam++] = (XvMoved){ from, to, len };
+}
+
 
 XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis) {
 	XdLog *log = log_make(game, false, fams, n, navis);

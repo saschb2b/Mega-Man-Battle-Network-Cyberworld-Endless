@@ -2665,6 +2665,38 @@
         "why": "The fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC, through 0x08003210 / 0x08003278) stores the caller's r4 at the object's +4, as the third kind's does (ThunderMan's 0x70's spawn's r4, above). Roll's flash, the fourth kind's 0x17 moved with her, is spawned by its own spawner (0x080E3AD8: push {lr}; push {r5}; movs r0,#0x17; the spawn) from MegaMan's states 46 and 47 of BN4 (her warp and her summon), copied with her (their bls at 0x080EFC74, 0x080EFDD2 and 0x080EFE8C, each after r1-r3 from her +0x34 and an adds to r3, r4 untouched), so +4 holds what r4 held as each game's state runner called the state: in BN4 0x13, in BN6 her AI data's address (as ThunderMan's 0x70's). No code of the flash reads its +4 to +7: its routine (0x080E3A98-0x080E3AD6) loads +0xB, +0x20 and +0x34 to +0x3C alone, and the routines it calls take their registers alone (0x08014620, a jitter of r1 and r3 by a draw; BN4_SPAWN_EFFECT 0x080E18EE, BN6's twin 0x080E1932, r4 its effect; the object's free 0x080033D4). roll_v1 at t66 (BN4) and t67 (BN6)"
       },
       {
+        "name": "Roll's flash's spawn's r4 where her turn began hidden, each game's leftover",
+        "spawn_leftover": {
+          "kind": "T4",
+          "type": "0x17",
+          "word": "0x04",
+          "bn4": [
+            "raw",
+            17
+          ],
+          "bn6": [
+            "T1:0x380#0",
+            "ai",
+            0
+          ]
+        },
+        "why": "As her flash's spawn's r4 above (0x13), whose BN4 number is the object's +0 byte as BN4's object runner reads it into r4 before it runs her type routine (0x08003166: ldrb r4,[r5,#0]), which her states leave in r4 to the flash's spawn: 0x13 where she began her turn visible, 0x11 where her visible bit (0x02) was clear, as after her warp's hide (roll_v1's BN4 trace: her +0 0x11 at t1068 and t1069, 0x13 again at t1070, the flash spawned at t1070 with +4 0x11). BN6's r4 there her AI data's address, as above; no code of the flash reads its +4 to +7 (above)"
+      },
+      {
+        "name": "a summoned Mettaur's +0xF, BN4's spawn's enemy id",
+        "spawn_leftover": {
+          "kind": "T1",
+          "type": "0x2E4",
+          "bytes": {
+            "0x0f": [
+              "0x01",
+              "0x00"
+            ]
+          }
+        },
+        "why": "BN4's spawn of an enemy into a fight under way (BN4_SPAWN_ENEMY, Roll's summon) writes the enemy's id at its +0xF (BN4_T1_NAME_ID: strb r0,[r4,#0xf] at 0x080F0158), which BN4's HP display reads as the enemy appears (0x08015ADC: ldrb r2,[r5,#0xf], the summoned appear's step 2, 0x08010128); BN6's spawn of one (BN6_SPAWN_ENEMY_1, the summon's shim's) writes its NameID at +0x28 instead, which BN6's HP display reads (0x0801DC98: ldrh r2,[r5,#0x28]), and leaves +0xF 0, a byte BN6's own generic states keep a count in (0x08016716). No code of BN4's Mettaur, moved, reads its +0xF (tools/xrecipe_bn4.py's walks of its states, its appear and its shockwave): BN4's 1 against BN6's 0 alone, so a write of either engine's after the spawn still parts"
+      },
+      {
         "name": "the wind's gust's sprite flag 0x80, BN6's",
         "whose": "engine",
         "kind": "T3",
@@ -2812,6 +2844,23 @@
         "clock": "state",
         "what": "Walla's sound 0x9A, its copy",
         "why": "Played by Walla's code (BN4: movs r0,#0x9a at 0x080BEA88, its bl to PlaySoundEffect at 0x080BEA8A; BN6: its copy's movs r0,#0x39 at 0x08B7E430, the recipe's immediate, its bl at 0x08B7E432 through its veneer to BN6's), a state's: BN4's song 0x9A copied into BN6's empty slot 0x39 on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0x9A is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
+        "bn4": "0x8B",
+        "bn6": "0xE0",
+        "clock": "state",
+        "foes": [
+          "0x01",
+          "0x02",
+          "0x03",
+          "0x04",
+          "0x80",
+          "0x81",
+          "0x82",
+          "0x83"
+        ],
+        "what": "Mettaur's sound 0x8B, Roll's pool's",
+        "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0xe0 at 0x08B798CC, the recipe's immediate, its bl at 0x08B798CE through its veneer to BN6's), its init's. Mettaur is moved for Roll's summon alone (XVirusFamily.summoned), so his sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her fifth, 0xE0, her recipe listing BN4's song 0x8B there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In his battles and hers alone (foes); BN4's first at t73 in mettaur4_v1, a battle of his alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
       },
       {
         "bn4": "0xA6",

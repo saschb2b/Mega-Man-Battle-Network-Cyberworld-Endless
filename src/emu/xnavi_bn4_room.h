@@ -29,7 +29,12 @@ bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists);
 const uint8_t *xnavi_bn4_raw(int list, int number, uint32_t *len);
 /* A battle's record written: its entities (4 bytes each, BN6's BattleSettings' from +0x20: byte 0 0x11 an enemy, bytes 2-3
  * its id; 0xF0 the end), `len` bytes. Where one is a BN4 Navi's id, the room filled with his battle sprite and the art's
- * room with his attacks' art and songs (xnavi_bn4_art.h; the core's copy alone); true where both were. Between frames. */
+ * room with his attacks' art and songs (xnavi_bn4_art.h; the core's copy alone); where none is, the same for the Navi a
+ * family of them is summoned by alone (xnavi_bn4_summoner: Roll's, for her Mettaur's sound in her pool); true where both
+ * were. Between frames. */
 bool xnavi_bn4_room_for(const uint8_t *entities, size_t len);
+/* The first id of the BN4 Navi whose summon brings enemy `id` (BN6's) of a family moved for it alone
+ * (XVirusFamily.summoned: Roll's Mettaur), 0 none: his songs and art serve its battle without him */
+uint32_t xnavi_bn4_summoner(uint32_t id);
 
 #endif

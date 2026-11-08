@@ -66,6 +66,10 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
  * false where it is not. */
 bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer);
 
+/* The BN6 routine a BN4 call made through that shim goes on to (XvSoundCall): BN6_PLAY_SOUND for BN4_PLAY_SOUND, BN6's
+ * appear queue's routines for BN4's (BN4_QUEUE_*: BN4's one queue, BN6's r0 its number); 0 any other */
+uint32_t xvirus_shim_r0_to(uint32_t was);
+
 /* The shim at `at` (word-aligned) that pushes lr and calls `to` (Thumb,
  * within a call's reach: a tail of a routine past its push {lr}), then pops
  * pc: false where it is not. */
@@ -107,9 +111,15 @@ int xvirus_shim_prestep(uint8_t *out, int max, uint32_t at, uint32_t which, uint
  * side 0's, then side 1's) and one draw of `rng` (BN6's GetRNG twin), as
  * BN4_SPAWN_ENEMY picks it; its id BN6's by `ids` (its game's | BN6's << 16;
  * BN6's 0, or none listed: no spawn), spawned there on its side by `spawn`
- * (BN6_SPAWN_ENEMY_1), and `sound` played by `play` where one was: r0 the
- * object, 0 none. Its size, 0 where it does not fit in `max`. */
-typedef struct { uint32_t panels, rng, spawn, play; uint32_t masks[4]; const uint32_t *ids; int nids; uint16_t sound; } XvSummonShim;
+ * (BN6_SPAWN_ENEMY_1), its +5 made BN4's summon's 2 (its game's generic
+ * state 0 sends it to its summoned appear) and its init `init`
+ * (BN6_VIRUS_INIT) run on it there, so its first state runs in this
+ * frame's turn of it as BN4's init runs it, and `sound` played by
+ * `play` where one was: r0 the object, 0 none. Its size, 0 where it does
+ * not fit in `max`. */
+#define XV_SHIM_SUMMON_DRAW 0x2C   /* its draw's return in a summon's shim, as BN4_SPAWN_ENEMY_DRAW is in its game's (the
+                                      differential keys the one as the other: src/dev/xdiff_bn4.c xd4_summon_draws) */
+typedef struct { uint32_t panels, rng, spawn, play, init; uint32_t masks[4]; const uint32_t *ids; int nids; uint16_t sound; } XvSummonShim;
 int xvirus_shim_summon(uint8_t *out, int max, uint32_t at, const XvSummonShim *s);
 
 #endif

@@ -16,6 +16,7 @@
 
 #include "xdiff_bn4_trace.h"   /* (the module's other part: its trace in BN6's units) */
 #include "xdiff_spec.h"
+#include "xvirus.h"   /* (XvMoved: a summon's draw keyed as a moved range) */
 
 /* 0 when its battle reached its end, won or lost; 1 where it did not; 2
  * where BN4's ROM is not beside BN6's or its guest did not boot */
@@ -26,8 +27,12 @@ int xdiff_bn4_run(const Spec *s);
 uint32_t xd4_record(const Spec *s, uint8_t *rec);
 
 /* The spec's BN4 families moved into BN6's engine (xvirus_bn4.h: installed with --dev bn4families) and its Navis' code
- * (xnavi_bn4.h), those its foes (BN4's enemy ids) are versions of, into fams (MAX_FOES at most): how many */
+ * (xnavi_bn4.h), those its foes (BN4's enemy ids) are versions of, and the families a Navi of them summons, into fams
+ * (MAX_FOES at most): how many */
 int xd4_families(const Spec *s, const XVirusFamily **fams);
+/* The draws of the summons of the BN4 Navis among fams (their shims' in their code rooms, xvirus_shim_summon) keyed as
+ * BN4_SPAWN_ENEMY's (BN4_SPAWN_ENEMY_DRAW): into out (max at most), each as a moved range of two bytes, how many */
+int xd4_summon_draws(const XVirusFamily *const *fams, int n, XvMoved *out, int max);
 /* A BN4 enemy id as BN6's engine numbers it: a moved family's or Navi's version its first_id + the version (the recipe's
  * numbers, Billy's 13-18 BN6's 0x2C0-0x2C5, GutsMan's 132-135 0x384-0x387); any other id as it is */
 int xd4_bn6_id(int id);

@@ -25,14 +25,10 @@ SHIM_ROOM = 0x100
 # a Navi's lists of the ids it summons: its BN4 type -> its table of pointers by version (each list a count, then the ids), read
 # by its routine that picks the next (Roll's 0x080BC3B4: its literal 0x080BC3D8, [r5 +4] the version)
 SUMMON_LISTS = {0x1D: 0x080BC3D8}
-# The ids a summon gives that no moved family's recipe names: BN4's id -> (BN6's, why). A family BN6 has by its name is not
-# moved (docs/multirom/bn4.md, Only what is new visits): BN6's own stands in, its versions in BN6's order (V1, V2, V3, SP)
-SUMMON_NATIVES = {
-    0x01: (0x01, 'Mettaur (BN4\'s 40 HP), BN6\'s own Mettaur'),
-    0x02: (0x02, 'Mettaur2, BN6\'s own Mettaur2'),
-    0x03: (0x03, 'Mettaur3, BN6\'s own Mettaur3'),
-    0x04: (0x04, 'MettaurSP, BN6\'s own MettaurSP'),
-}
+# The ids a summon gives that no moved family's recipe names: BN4's id -> (BN6's, why), BN6's own family of its name standing
+# in. None today: Roll's Mettaurs (1-4) are BN4's own, moved for her summon (the owner's call of 8 November 2026, which
+# replaced BN6's Mettaur standing in by name; tools/xrecipe_bn4.py SUMMONED, never a net's kin nor a visitor)
+SUMMON_NATIVES = {}
 
 
 # The fourth-kind types a Navi's code spawns that BN6 has no twin of, moved with it (the dispatch's fourth kind, XV_SPAWN_4):

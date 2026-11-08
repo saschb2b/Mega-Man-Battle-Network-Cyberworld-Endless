@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T13:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -236,8 +236,11 @@ November 2026 (Turned on, below).
   panels; a visitor still takes only a plain or cracked panel of the
   battle it visits.
 - **Only what is new visits.** A family BN6 or BN5 has by name (Mettaur,
-  Trumpy, Lark, BomBoy, WindBox) is not moved; the 17 above are, so every
-  BN4 visitor is a virus a run had not met.
+  Trumpy, Lark, BomBoy, WindBox) is not moved for the visitors; the 17
+  above are, so every BN4 visitor is a virus a run had not met. BN4's
+  Mettaur is moved for Roll's summon alone (the owner's call 12), and
+  never visits: its recipe is marked `summoned`, which keeps it out of
+  BN4's net's kin and the visitors (`src/core/visitor_families.c`).
 - **The deep acts draw as now**: BN6's and BN5's late areas by the coin,
   no visitor, as they mix already and the card says "Both Nets". BN4's
   records would join the deep with its areas; the areas came on 5
@@ -483,7 +486,14 @@ plays (`BN4_PLAY_SOUND`, r0 a `movs`) that is the same song as BN6's of
 its number (`tools/xrecipe.py`'s `song_sig`) stays BN6's; the other 12
 are no song of BN6's under any number (Spikey's 0xBC and 0xC4, Shrimpy's
 0x9F, 0xC9 and 0xCA, Walla's 0x70, 0x9A, 0xA6 and 0xB7, Elmperor's 0x9D
-and 0xFC, CirKill's 0xF9). As a family installs, each of its sounds is
+and 0xFC, CirKill's 0xF9). Mettaur, moved for Roll's summon (the owner's
+call 12), plays Walla's 0x9A and a 13th, its shockwave's 0x8B. The
+twelve fill 0x34-0x3F and call 8 keeps 0x41-0x4B for BN5, and Mettaur
+fights only where Roll brings him, so 0x8B takes a slot of her per-battle
+pool, her fifth, 0xE0 (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
+lists the song, packed into her art's room and pointed in her battles as
+her own sounds are (the owner's call 11), and in a battle of his alone,
+which takes her art and pool (`xnavi_bn4_summoner`). As a family installs, each of its sounds is
 copied from the player's ROM (`xsong_pack`, its sequence, voice group and
 samples, none of it in the repository) into a room of the families' art
 below their sprites (from `XV_ART + 0x5A000`, the sprites' own room full)
@@ -601,3 +611,18 @@ sounds take from the themes' range are the owner's to confirm.
    table's byte past 0xFF stays a decision of the generator's until a
    Navi needs it ([BN4's Navis in BN6's engine](bn4-navis.md), GutsMan
    built, his sounds).
+12. **Decided, 8 November 2026: Roll's summon brings BN4's own Mettaur.**
+    Her summon brings BN4's Mettaur, moved into BN6 as a family the way
+    Billy was, not BN6's Mettaur standing in by name, so her battle plays
+    as BN4's and her spec can prove her whole fight. "Only what is new
+    visits" still holds for the random battles' visitors: the move is for
+    her summon alone. Letting it visit too would not cost nothing: BN4's
+    net's records hold Mettaurs in most of its battles, so its kin, its
+    visitors and what a run's battles hold would change with it. Built
+    the same day: BN4's ids 1-6 as BN6's 0x2E4-0x2E9 (AI 70), proved
+    alone by `mettaur4_v1` ([BN4's Navis in BN6's engine](bn4-navis.md),
+    Roll built). His one sound BN6 has no song of, his shockwave's 0x8B,
+    plays from her per-battle pool (her slot 0xE0), not a slot of its own,
+    so 0x41-0x4B stay BN5's (call 8). Her summon's map points at them, the summoned one
+    arrives by BN4's own summoned appear, and `roll_v1` PASSes her whole
+    fight, so she joins the tournament's proved Navis.

@@ -88,6 +88,12 @@
 #define BN4_APPEAR_BITS   0x080019C0u /* [[r10+0x18]+0x64] into r0: the battle state's appear bits (bit 0 the viruses may appear,
                                        * set by the opening at 0x080E1F0E after its fade; bit 1 all have); BN6_APPEAR_BITS' twin */
 #define BN4_APPEAR_BITS_SET 0x080019A8u /* ... r0's bits set in it (BN6_APPEAR_BITS_SET's twin) */
+/* The appear queue (docs/rom/bn4.md, Mettaur's appear queue): one queue, 8 bytes of objects' +0xE at [[r10+0x18]+0x58], which
+ * BN4_APPEAR's objects and Mettaur's turns share; BN6's (BN6_QUEUE_*, bn6_families.h) are queues of 8 words of objects, r0
+ * their number, its appear's 0: a moved family's call made through a shim that makes r0 0 (XvSoundCall) */
+#define BN4_QUEUE_HEAD    0x08007F04u /* r0 1 where r5 heads the queue, else 0 */
+#define BN4_QUEUE_ENTER   0x08007F1Cu /* r5 put at its end where it is not in it: r0 1 where it was put */
+#define BN4_QUEUE_LEAVE   0x08007F46u /* r5 taken out, the rest moved up (0x08007F6A) */
 
 /* The sounds BN4's moved families play that are no BN6 song (xrecipe.song_sig): each a movs r0,#N before its bl to
  * BN4_PLAY_SOUND in the family's code; its song read by its number through BN4's song table

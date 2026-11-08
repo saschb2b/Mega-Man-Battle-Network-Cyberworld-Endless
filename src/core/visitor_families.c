@@ -211,7 +211,8 @@ static int installed(int net) {
 	else
 		for (int i = 0; XR[XROM4].data && i < xvirus_bn4_count; ++i) {
 			const XVirusFamily *f = xvirus_installed(XROM4, xvirus_bn4[i]->src_ai);
-			if (f && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
+			/* (a family moved for a summon alone, BN6's by name: no kin of the net's, docs/multirom/bn4.md) */
+			if (f && !f->summoned && f->ai < VISITOR_KIN_MAX) { moved(f, net); ++n; }
 		}
 	return n;
 }

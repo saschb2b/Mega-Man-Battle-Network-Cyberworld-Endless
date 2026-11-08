@@ -3843,8 +3843,9 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 		for (int k = 0; k < g->nsprites; ++k)
 			bad += spans_meet(f->sprites[i].at, f->sprites[i].room, g->sprites[k].at, g->sprites[k].room) ||
 				(f->sprites[i].to_list == g->sprites[k].to_list && f->sprites[i].to_index == g->sprites[k].to_index);
+	/* (an effect two families spawn, one number for one effect of their game's: Mettaur's 0x15, Billy's) */
 	for (int i = 0; i < f->neffects; ++i)
-		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to && f->effects[i].from != g->effects[k].from;
 	/* (a type both move: two routines for one entry; or both name, with another twin; one moved by a family before the
 	 * other, g, and shared by f, is one routine) */
 	for (int i = 0; i < f->ntypes; ++i)

@@ -10,6 +10,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "xnavi_bn4_room.h"
 #include "xnavi_room.h"
 #include "xsong.h"
 #include "xvirus_tx.h"
@@ -97,11 +98,16 @@ static int navi_of(uint32_t id) {
 
 void xnavi_bn4_sounds_frame(void) {
 	if (!nnavis || !R.layout || !R.layout->song_table) return;
-	int which = -1;
+	int which = -1, summoner = -1;
 	for (uint32_t k = 0; k < BN6_T1_COUNT && which < 0; ++k) {
-		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
-		if (emu_read8(o) & 1) which = navi_of(emu_read16(o + BN6_T1_NAME_ID));
+		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE, id = emu_read16(o + BN6_T1_NAME_ID);
+		if (!(emu_read8(o) & 1)) continue;
+		which = navi_of(id);
+		/* (a family a Navi summons alone, in a battle without him: his pool, as his art's room holds his songs then,
+		 * xnavi_bn4_room_for) */
+		if (summoner < 0 && xnavi_bn4_summoner(id)) summoner = navi_of(xnavi_bn4_summoner(id));
 	}
+	if (which < 0) which = summoner;
 	if (which < 0 || which == pointed) return;
 	/* (the battle holds another BN4 Navi than the pool's: his songs at its slots, the core's copy of the song table only) */
 	claims_begin(XN_CLAIMS);

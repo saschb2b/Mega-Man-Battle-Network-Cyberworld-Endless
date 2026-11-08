@@ -1706,6 +1706,62 @@
     "080BC300:07:1"
    ],
    "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9, copied with her as raw data; tools/xnavirecipe_bn4_objects.py KINDS_BY_VERSION) V1's made 7: her decision gives MegaMan's state 45 V2's shot (caught at t385, her AI data's +0xAC)"
+  },
+  {
+   "name": "Mettaur's CurAction off by one",
+   "spec": "mettaur4_v1",
+   "poke": [
+    "080B370E:200A"
+   ],
+   "what": "its state 6's set of CurAction 7 where it heads the appear queue (BN4 0x080B370E: movs r0,#7, the recipe's BN6's 9) written 0xA: its turn's next state left for another (caught at t1, its CurAction)"
+  },
+  {
+   "name": "Mettaur's queue's head aimed elsewhere",
+   "spec": "mettaur4_v1",
+   "call": [
+    "0800AA06:0810A952"
+   ],
+   "what": "its test of the appear queue's head (BN4_QUEUE_HEAD, made BN6_QUEUE_HEAD of queue 0 through its r0 shim) aimed at BN6's family nullsub, which returns the shim's 0: never its turn, it waits (caught at t1, its +7, CurAction and +0x20)"
+  },
+  {
+   "name": "Mettaur's shockwave's sprite at BN4's number",
+   "spec": "mettaur4_v1",
+   "poke": [
+    "080CFB8C:04:1"
+   ],
+   "what": "the third kind's 0x16's kinds' table (BN4 0x080CFB8C, bn4_twins.TABLES, copied with Mettaur) at its kind 0: its sprite's number left at BN4's list 4 0x04 where the recipe gives its copy's: the shockwave drawn from BN6's own list 4 0x04 (caught at t72, its sprite)"
+  },
+  {
+   "name": "Mettaur's shockwave's sound another",
+   "spec": "mettaur4_v1",
+   "poke": [
+    "080CFC6C:20D0"
+   ],
+   "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's Roll's pool slot 0xE0) made her pool's fourth slot, 0xD0 (her 0x132's): another of her sounds where the shockwave sets out (caught at t73, the family's sounds)"
+  },
+  {
+   "name": "Roll's summoned Mettaur arriving as BN6's",
+   "spec": "roll_v1",
+   "poke": [
+    "0800FCCE:2802"
+   ],
+   "what": "the summoned Mettaur's copied generic state 0's test of +5 (BN4 0x0800FCCE: cmp r0,#1 before 0x0801002A's bl) made cmp r0,#2: the summon's +5 2 sent to BN4's 0x0800FF26, paired with BN6's own appear of an enemy spawned into a fight (0x080164A0) where BN4's summoned appear runs (caught at t1008, its +0, +0xA and +0x20)"
+  },
+  {
+   "name": "Roll's summoned Mettaur falling another way",
+   "spec": "roll_v1",
+   "poke": [
+    "080100B4:3804"
+   ],
+   "what": "BN4's summoned appear's fall (0x080100B4: subs r0,#8 on its +0x3E, copied with Mettaur) made 4 a frame: the summoned Mettaur drawn higher as it falls in (caught at t1008, its +0x3E)"
+  },
+  {
+   "name": "Roll's summoned Mettaur never its turn",
+   "spec": "roll_v1",
+   "call": [
+    "0800AA06:0810A952"
+   ],
+   "what": "the summoned Mettaur's test of the appear queue's head (BN6_QUEUE_HEAD through its r0 shim) aimed at BN6's family nullsub: once it has appeared it never heads the queue (caught at t1060, its +7, CurAction and +0x20)"
   }
  ]
 }

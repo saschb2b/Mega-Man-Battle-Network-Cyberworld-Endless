@@ -29,6 +29,8 @@ XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and 
 EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
 XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
+XV_CODE_BN4 = (0x08B79000, 0x08B80000)            # ... BN4's families' code in the families' (tools/xrecipe_bn4.py CODE2 to XV_ART: BN5's end
+                                                  # before it, its bn5_ranges_clear): a BN5 reference reads none of it, nor BN4's Navis'
 BN4_AI_SIZE = 0xC0                                # BN4's AI data, one a side in a row (src/emu/bn4.h, BN4_AI_DATA_SIZE)
 XC_ART = 0x08EA0000                                # ... their copies of BN5's sprites from here (src/emu/xchips_code.h, XC_ART)
 
@@ -800,11 +802,15 @@ class Frame:
         self.list, self.list_end = g['list'], g['list_end']
         self.battle = g['battle']   # (BattleState, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer to it as such)
         self.by_role = {o.role: o for o in fr['objs']}
+        # (a reference's own game's blocks alone: BN4's, whose places in BN4 are no BN5 address, left out of a BN5 reference,
+        # where a word of BN5's at such a place read as moved code, TinHawk's AI +0xAC 0x08010101 in BN4's Mettaur's appear)
         self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ())
-                                                            if XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
-                                                            or XC_CODE[0] <= m[1] < XC_CODE[1] or m[1] < EMU_FREE
-                                                            or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]
-                                                            or souls_code()[0] <= m[1] < souls_code()[1]]
+                                                            if not (self.game == 5 and (XV_CODE_BN4[0] <= m[1] < XV_CODE_BN4[1]
+                                                                                        or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]))
+                                                            and (XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
+                                                                 or XC_CODE[0] <= m[1] < XC_CODE[1] or m[1] < EMU_FREE
+                                                                 or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]
+                                                                 or souls_code()[0] <= m[1] < souls_code()[1])]
 
     def ptr(self, v):
         """a pointer as what it names"""

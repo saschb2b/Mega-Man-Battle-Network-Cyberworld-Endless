@@ -327,15 +327,15 @@ static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
 	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its direction's call at %08x aimed at its shim", (unsigned)site);
 }
 
-/* A call to play a sound whose pool slot is past a byte (XvSoundCall: the owner's call of 5 November 2026, docs/multirom/
- * bn4.md call 11): its game's call to PlaySoundEffect aimed at a shim that makes r0 the slot and goes on to BN6's through
- * the family's veneer for it, the call's own target after the rebase */
+/* A call that takes r0 BN6's way (XvSoundCall: a sound past a byte, the owner's call of 5 November 2026, docs/multirom/bn4.md
+ * call 11; the appear queue's number): its game's call aimed at a shim that makes r0 the slot and goes on to BN6's twin
+ * (xvirus_shim_r0_to) through the family's veneer for it, the call's own target after the rebase */
 static void sound_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvSoundCall *k) {
-	uint32_t was = 0, t = 0, at = 0;
+	uint32_t was = 0, t = 0, at = 0, to = 0;
 	const uint8_t *orig = c->rom + (k->at - BUS);
 	uint8_t shim[XV_SHIM_SOUND_SIZE];
-	if (!thumb_bl_decode(k->at, get16(orig), get16(orig + 2), &was) || was != BN4_PLAY_SOUND || !thumb_bl_read(code, k->at - b->start, b->at, &t) ||
-		t != thumb_veneer_get(&c->pool, BN6_PLAY_SOUND) || !(at = shim_room(c, sizeof shim)) || !xvirus_shim_sound(shim, at, k->slot, t)) {
+	if (!thumb_bl_decode(k->at, get16(orig), get16(orig + 2), &was) || !(to = xvirus_shim_r0_to(was)) || !thumb_bl_read(code, k->at - b->start, b->at, &t) ||
+		t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, sizeof shim)) || !xvirus_shim_sound(shim, at, k->slot, t)) {
 		xv_fail("its sound's call at %08x", (unsigned)k->at);
 		return;
 	}
