@@ -124,6 +124,8 @@ NUMBERS = {
                 "one's), as BN4_COLL_MASKS' and BN6_COLL_MASKS' alliance bits",
     0x0405FF09: "a collision region's spawn word (SearchMan's shot's, 0x080D7D56, r4 of 0x080CD7E2: BN6's 0x080C6BDA), as "
                 "0x0405FF01",
+    0x04050201: "a collision region's spawn word (AquaMan's third kind 0x27's, 0x080D1B60, its r4 to 0x080CD7E2): BN6's own "
+                "attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA)",
 }
 
 
@@ -194,14 +196,6 @@ def spawns4(f, alloc):
             f.decisions = [d for d in f.decisions if d != ('type', f'{site:08X}: it spawns a 4 type {ty:#x} which it does not move')]
 
 
-# the engine's routines his code calls that spawn an effect by an id it passes (not BN4_SPAWN_EFFECT's r4): the routine -> the
-# register of the id, why; each call's id (a movs) given BN6's as xrecipe_bn4.effects_of gives a movs's (the routine BN6's twin)
-EFFECT_ARGS = {
-    0x0801457E: (2, "effects in a pattern about a panel (r3 the pattern's index in 0x080125B0's table, each place a free panel's "
-                    "by 0x08009E98), each BN4_SPAWN_EFFECT with r4 its r2 (0x080145CA): BN6's twin 0x0801BD3C the same bytes"),
-}
-
-
 def navi_shared(b4, f, alloc, e4):
     """effect e4's sprite where another Navi copied it (xrecipe_bn4.move_effect shares it, "installed with it"): its row listed
     in his sprites too, the same place and number, which the installer finds written the same and keeps (xvirus.c sprites_set),
@@ -212,29 +206,6 @@ def navi_shared(b4, f, alloc, e4):
         return
     if not any(s['to_list'] == have[0]['to_list'] and s['to_index'] == have[0]['to_index'] for s in f.attack_sprites):
         f.attack_sprites.append(dict(have[0]))
-
-
-def effect_args(b4, b6, f, alloc):
-    """his calls of EFFECT_ARGS: each effect id (a movs into its register) BN6's of the same look, else moved, the movs BN6's"""
-    for e, w in sorted(f.walks.items()):
-        for site, t in sorted(w.bls.items()):
-            if t not in EFFECT_ARGS:
-                continue
-            reg, why = EFFECT_ARGS[t]
-            v, chain = T.back_value(w, site, reg)
-            if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= X4.BN4['neffects']:
-                f.decide('effect', f'{site:08X}: an effect of {t:08X} by an id made otherwise ({chain})')
-                continue
-            e6, how = X4.effect_twin(b4, b6, v), 'the same look'
-            if e6 is None:
-                e6, how = X4.move_effect(b4, f, alloc, v), 'moved'
-                navi_shared(b4, f, alloc, v)
-            if e6 is None:
-                continue
-            if e6 != v:
-                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=reg, rn=0, was=v, now=e6,
-                                   why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 ({how}; by {t:08X}: {why})'))
-            f.notes.append(f'{site:08X}: its effect {v:#x} by {t:08X}: BN6\'s {e6:#x} ({how})')
 
 
 def flipped_effects(b4, b6, f, alloc):
@@ -399,3 +370,118 @@ def fight_gates(f):
     if f.ty in FIGHT_GATED and FIGHT_FLAGS4 in f.calls:
         f.aim[FIGHT_FLAGS4] = ('XV_FIGHT_FLAGS', 'the battle\'s flags, bit 0 from the fight\'s second frame: his objects no state '
                                                  'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')
+
+
+def effects_of(b4, b6, f, alloc, navis):
+    """the effects his code spawns, as xrecipe_bn4.effects_of gives a family's, and what a Navi's ask past it: an effect of a
+    sprite he copies for his objects draws his copy, not a second (AquaMan's 0x23, his third kind 0x23's 4:0x0F); one spawned
+    with his side in r4 (facing_effects) or ORed with a flip (flipped_effects); one handed an engine routine (pattern_effects); one whose sprite another Navi copied listed by him too (navi_effect_sprites)"""
+    for sp in f.attack_sprites:
+        alloc.effect_sprites.setdefault((sp['list'], sp['index']), (sp, f.name))
+    X4.effects_of(b4, b6, f, alloc)
+    facing_effects(b4, b6, f, alloc)
+    flipped_effects(b4, b6, f, alloc)
+    pattern_effects(b4, b6, f, alloc)
+    navi_effect_sprites(b4, f, alloc, navis)
+    f.effects = list(dict.fromkeys(f.effects))
+
+
+def navi_sprite_add(f, alloc, sp):
+    """a sprite of another list a Navi's objects load copied into list 4 (tools/xnavirecipe_bn4.py list_moves), kept for the Navis
+    after him: BN4's (list, number) -> (the copy, his name)"""
+    if not hasattr(alloc, 'navi_sprites'):
+        alloc.navi_sprites = {}
+    alloc.navi_sprites.setdefault((sp['list'], sp['index']), (sp, f.name))
+
+
+def navi_sprite(f, alloc, lst, num):
+    """another Navi's copy of BN4's (lst, num) (navi_sprite_add), listed by him too at its place and number, its bytes checked
+    the same there where that Navi installed first (xvirus.c sprites_set; AquaMan's third kind 0x24's 3:0x02, FireMan's copy):
+    the copy's row, else None"""
+    have = getattr(alloc, 'navi_sprites', {}).get((lst, num))
+    if have is None or have[1] == f.name:
+        return None
+    sp = dict(have[0])
+    f.attack_sprites.append(sp)
+    f.notes.append(f'its sprite {lst}:{num:#x} is {have[1]}\'s copy (list {sp["to_list"]} {sp["to_index"]:#x}): listed by him too, at its place')
+    return sp
+
+
+# The engine's routines that spawn an effect his code names in another register than the effect spawner's r4: routine -> its
+# register, why (each pair's body the same in both games, tools/bn4_twins.py)
+EFFECT_CALLS = {
+    0x0801457E: (2, "a pattern of effects on the panels around (r0, r1), r3 the pattern (its table 0x080125B0), r4 the side: each "
+                    "a call of the effect spawner (0x080E18EE at 0x080145D2) with r4 its r2; BN6's twin 0x0801BD3C the same body "
+                    "(map:bytes, SAME)"),
+}
+
+
+def effect_of(b4, b6, f, alloc, e4):
+    """BN4's effect e4 as BN6's: BN6's of the same look, else moved (xrecipe_bn4.effects_of's way): (BN6's id, how), None"""
+    if e4 >= X4.BN4['neffects']:
+        return None
+    e6 = X4.effect_twin(b4, b6, e4)
+    if e6 is not None:
+        return e6, 'the same look'
+    e6 = X4.move_effect(b4, f, alloc, e4)
+    return (e6, 'moved') if e6 is not None and e6 <= 0xFF else None
+
+
+def pattern_effects(b4, b6, f, alloc):
+    """the effects his code hands an engine routine of EFFECT_CALLS (AquaMan's third kind 0x23's movs r2,#0x25 at
+    0x080D13C8 to 0x0801457E): each BN6's id, the movs given it"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t not in EFFECT_CALLS:
+                continue
+            reg, why = EFFECT_CALLS[t]
+            v, chain = T.back_value(w, site, reg)
+            got = effect_of(b4, b6, f, alloc, v) if v is not None and len(chain) == 1 and chain[0][1] == 'movs' else None
+            if got is None:
+                f.decide('effect', f'{site:08X}: an effect handed {t:08X} in r{reg} made otherwise ({chain})')
+                continue
+            if got[0] != v:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=reg, rn=0, was=v, now=got[0],
+                                   why=f'its effect (r{reg} of {t:08X}): {v:#x} in BN4, {got[0]:#x} in BN6 ({got[1]})'))
+            f.notes.append(f'{site:08X}: its effect {v:#x} handed {t:08X} ({why}): BN6\'s {got[0]:#x} ({got[1]})')
+
+
+def navi_effect_sprites(b4, f, alloc, navis):
+    """an effect's sprite another Navi copied (xrecipe_bn4.move_effect's 'listed by'): the installer finds one a family
+    installed before him (xvirus.c sprite_of), not a Navi, so its row is his too at the same place, its bytes checked the
+    same there where that Navi installed first (xvirus.c sprites_set; AquaMan's effect 0x0, WindMan's 5:0x0)"""
+    for e4, _ in f.effects:
+        row = b4.bytes(X4.BN4['effects'] + 4 * e4, 4)
+        key = (row[0] // 4, row[1])
+        have = alloc.effect_sprites.get(key)
+        if have is None or have[1] == f.name or have[1] not in navis or any((s['list'], s['index']) == key for s in f.attack_sprites):
+            continue
+        f.attack_sprites.append(dict(have[0]))
+        f.notes.append(f'its effect {e4:#x}\'s sprite {key[0]}:{key[1]:#x} is {have[1]}\'s copy ({have[0]["to_list"]}:'
+                       f'{have[0]["to_index"]:#x}): listed by him too, at its place')
+
+
+def facing_effects(b4, b6, f, alloc):
+    """his effects spawned with his side in r4's second byte (lsls r4,r0,#8 of 0x0800ACA6's, then adds r4,#id: AquaMan's
+    0x080F459E): the id the adds's, BN6's of the same look or moved as xrecipe_bn4.effects_of gives a movs's, the adds given
+    BN6's id; effects_of's decision for it answered"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t != X4.BN4['effect']:
+                continue
+            v, chain = T.back_value(w, site, 4)
+            if v is not None or len(chain) != 2 or chain[0][1] != 'adds8' or chain[1][1] != 'lsls':
+                continue
+            sh = w.insns[chain[1][0]]
+            e4 = chain[0][2]
+            if tuple(sh.f[::2]) != (4, 8):
+                continue
+            got = effect_of(b4, b6, f, alloc, e4)
+            if got is None:
+                continue
+            e6, how = got
+            f.decisions = [d for d in f.decisions if d != ('effect', f'an effect spawned at {site:08X} by an id made otherwise ({chain})')]
+            if e6 != e4:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=4, rn=0, was=e4, now=e6,
+                                   why=f'its effect (its side in r4\'s second byte): {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+            f.notes.append(f'{site:08X}: its effect {e4:#x} spawned with its side: BN6\'s {e6:#x} ({how})')

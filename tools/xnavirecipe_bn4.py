@@ -47,7 +47,8 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
-NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140))
+NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140),
+         (0x0D, 'AquaMan', 168))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -541,9 +542,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     sprite_tables(b4, f, alloc)
     C.t4_sprite_tables(b4, f, alloc)
     C.list5_sprites(b4, b6, f, alloc)
-    X4.effects_of(b4, b6, f, alloc)
-    C.flipped_effects(b4, b6, f, alloc)
-    C.effect_args(b4, b6, f, alloc)
+    C.effects_of(b4, b6, f, alloc, {x[1] for x in NAVIS})
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
     X4.SOUND_SLOTS.update(pool)
@@ -685,13 +684,14 @@ def list_moves(b4, f, alloc):
             if raw is None:
                 f.decide('sprite', f'{site:08X}: its sprite {lst // 4}:{num:#x} is not one the generator reads')
                 continue
-            sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None)
+            sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None) or C.navi_sprite(f, alloc, lst // 4, num)
             if sp is None:
                 room = X4.rounded(len(raw), X4.ROOM_ATTACK)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)
                 alloc.list4 += 1
                 alloc.art += room
+                C.navi_sprite_add(f, alloc, sp)
             f.imms.append(dict(at=c1[0][0], form='THUMB_MOVS', rd=1, rn=0, was=lst, now=4 * to,
                                why=f'its object\'s sprite\'s list: {lst // 4} in BN4, copied into {to} (LIST_MOVES)'))
             f.imms.append(dict(at=c2[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=sp['to_index'],
@@ -722,6 +722,7 @@ def table_kinds(f):
                         kinds.add(k & 0xFF)
         out[v] = tuple(sorted(kinds))
         f.notes.append(f'its third-kind {ty:#x}\'s kinds by its table {v:08X}: {", ".join(str(k) for k in out[v])} (its spawns\' r4)')
+    out.update(I.table_kinds1(f))
     return out
 
 
