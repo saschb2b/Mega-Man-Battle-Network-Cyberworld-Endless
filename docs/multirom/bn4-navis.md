@@ -1350,6 +1350,16 @@ the port's to settle (the r4 a moved state is run with), not an allowance.
 Until it PASSes he has no mutations and no line in the tournament's proved
 list (`BN4_PLATE_JUNKMAN`, 0x0B, waits for him).
 
+**Two mutations his install let through, settled in the differential**:
+Roll's player-22 sound, a poke of the pool slot 0x63's entry, held only
+while she was installed last (the pool points at the battle's Navi where
+it points at another's, `xnavi_bn4_sounds_frame`): the differential now
+points the pool at the spec's foe before its pokes
+(`xnavi_bn4_sounds_point`). CanGard's region number pokes BN5's
+`0x080C95DE`, inside JunkMan's BN4 block, which a plain poke's range
+search took first: it is a BN5 poke now (`poke5`). Every spec holds its
+verdict and `--mutations` catches 229 of 229.
+
 ## SearchMan, AquaMan and Roll folded
 
 On 8 November 2026 the three branches built side by side from the same
