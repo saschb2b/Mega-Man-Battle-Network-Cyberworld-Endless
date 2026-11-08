@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -831,6 +831,19 @@ Two interims stay, neither reached by a spec: his companion's mode 4 (its
 appear through BN4's tile buffer, where the battle's settings' +6 has
 0x20) runs as mode 0, as WindMan's companions' state 4; his SP's palette
 (`BN4_NAVI_PALETTE` gives SP 2, BN6's step 0 none).
+
+**The three merged** (8 November 2026): ThunderMan's, WindMan's and
+FireMan's proofs, each made apart from the same start, in one tree, every
+spec passing together. Each had left a hit's spark out of the renderer's
+ranks; one rule does it now (`ranks_into`, legit.json's bn4 `spark_ranks`).
+ThunderMan's gate (`XV_FIGHT_FLAGS`, `FIGHT_GATED`) stays his type's
+alone: WindMan's and FireMan's code reads the same battle flags
+(`0x08007A8C`, called at BN6's `0x0800A2F0`; WindMan's companions' init
+chooses their first state by its bit 0) and their specs pass without the
+gate, no object of theirs a step ahead. Every row the three added to
+legit.json and every mutation is kept: merged, every spec holds its
+verdict (the eighteen BN4 family specs, the four Navis' and every BN4
+control PASS) and `--mutations` catches 201 of 201.
 
 **Not yet in the tournament's pool**: `src/layer/xguardian_bn4.c`'s line
 needs his plate on BN4's bracket (`BN4_ENTRANT_ID`), and his is not named.

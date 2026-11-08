@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1583,3 +1583,19 @@ format, its game 4: the trace's header names it):
     the other his last move's, read as BN6's (`MOVES`); with it MegaMan's
     step's kind (+0x0F, BN6's) and a blocked slide's step (+0x1B to +0x1D,
     BN4's) allowed by their directions.
+- **FireMan's readings** (`fireman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), FireMan built), with which
+  **`fireman_v1` PASSes**, 1200 fight frames:
+  - **A Navi's companion's opening count** (`companion_count`,
+    `legit.json`'s `bn4` `companion_opening_count`): a companion his
+    recipe moves (a first-kind role of a moved type: his 0x57) counts the
+    animation its init set up in the paused opening by the fight's frames,
+    as the Navi's own (`opening_count`), its mode's after-step (BN4
+    `0x080143FC`, BN6's `0x0801BBAC`) running the sprite update at every
+    fight frame and none of the opening's.
+  - **The spark out of the ranks**: the same rule ThunderMan's and WindMan's
+    battles found (`ranks_into`, `legit.json`'s `bn4` `spark_ranks`): his
+    flame's hit's spark drawn on in BN4 where BN6's had ended moved his
+    companion's rank at t271. The three branches each left the spark out;
+    merged, one rule takes it out of the drawn a group ranks, the family's
+    and the natives' alike.

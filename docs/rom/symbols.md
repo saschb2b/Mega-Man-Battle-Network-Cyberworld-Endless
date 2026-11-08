@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
