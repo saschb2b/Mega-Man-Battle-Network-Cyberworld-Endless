@@ -47,7 +47,7 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 
 # The Navis derived, in the order of docs/multirom/bn4-navis.md (The order, by cost): (its first-kind type, the
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
-NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144))
+NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x0D, 'AquaMan', 168))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -535,6 +535,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     sprite_tables(b4, f, alloc)
     C.list5_sprites(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
+    C.facing_effects(b4, b6, f, alloc)
     pool = pool_of(b4, b6, f)
     saved = dict(X4.SOUND_SLOTS)
     X4.SOUND_SLOTS.update(pool)
@@ -713,6 +714,7 @@ def table_kinds(f):
                         kinds.add(k & 0xFF)
         out[v] = tuple(sorted(kinds))
         f.notes.append(f'its third-kind {ty:#x}\'s kinds by its table {v:08X}: {", ".join(str(k) for k in out[v])} (its spawns\' r4)')
+    out.update(I.table_kinds1(f))
     return out
 
 

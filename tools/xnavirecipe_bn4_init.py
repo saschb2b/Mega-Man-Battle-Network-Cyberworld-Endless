@@ -243,6 +243,19 @@ def companion_art(b4, f, alloc):
         f.notes.append(f'its companion\'s sprite 4:{num:#x} at list 4 {sp["to_index"]:#x}: its spawn\'s r4 {s["r4"]:#x} made {s["r4_6"]:#x}')
 
 
+def table_kinds1(f):
+    """the kinds its companions are spawned with (their r4) of a first-kind type whose kinds' table bn4_twins.TABLES reads
+    (the type's init loads it; AquaMan's 0x5C kind 1, WindMan's 2 and 3): table -> kinds"""
+    out = {}
+    for v, tab in bn4_twins.TABLES.items():
+        mine = [s for s in f.spawns if s['lo'] <= tab['loads'][0] < s['hi_end'] and s['r4'] is not None]
+        if mine:
+            out[v] = tuple(sorted({s['r4'] & 0xFF for s in mine}))
+            f.notes.append(f'its first-kind {mine[0]["ty"]:#x}\'s kinds by its table {v:08X}: {", ".join(str(k) for k in out[v])} '
+                           '(its spawns\' r4)')
+    return out
+
+
 # ---- its own generic states ----
 
 def wraps(b4, x, generic):

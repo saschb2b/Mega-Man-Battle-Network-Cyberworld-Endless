@@ -67,6 +67,8 @@ FIGHT_GATED = {
 NUMBERS = {
     0x04050301: "a collision region's spawn word (object_spawnCollisionRegion's r4, as 0x04050601 and 0x0405FF01): BN6's own "
                 "attacks pass the same (its pools at 0x080E4A44 and 0x08101400)",
+    0x04050201: "a collision region's spawn word (AquaMan's third kind 0x27's, 0x080D1B60, its r4 to 0x080CD7E2): BN6's own "
+                "attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA)",
 }
 
 
@@ -146,3 +148,30 @@ def fight_gates(f):
     if f.ty in FIGHT_GATED and FIGHT_FLAGS4 in f.calls:
         f.aim[FIGHT_FLAGS4] = ('XV_FIGHT_FLAGS', 'the battle\'s flags, bit 0 from the fight\'s second frame: his objects no state '
                                                  'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')
+
+
+def facing_effects(b4, b6, f, alloc):
+    """his effects spawned with his side in r4's second byte (lsls r4,r0,#8 of 0x0800ACA6's, then adds r4,#id: AquaMan's
+    0x080F459E): the id the adds's, BN6's of the same look or moved as xrecipe_bn4.effects_of gives a movs's, the adds given
+    BN6's id; effects_of's decision for it answered"""
+    for e, w in sorted(f.walks.items()):
+        for site, t in sorted(w.bls.items()):
+            if t != X4.BN4['effect']:
+                continue
+            v, chain = T.back_value(w, site, 4)
+            if v is not None or len(chain) != 2 or chain[0][1] != 'adds8' or chain[1][1] != 'lsls':
+                continue
+            sh = w.insns[chain[1][0]]
+            e4 = chain[0][2]
+            if tuple(sh.f[::2]) != (4, 8) or e4 >= X4.BN4['neffects']:
+                continue
+            e6, how = X4.effect_twin(b4, b6, e4), 'the same look'
+            if e6 is None:
+                e6, how = X4.move_effect(b4, f, alloc, e4), 'moved'
+            if e6 is None or e6 > 0xFF:
+                continue
+            f.decisions = [d for d in f.decisions if d != ('effect', f'an effect spawned at {site:08X} by an id made otherwise ({chain})')]
+            if e6 != e4:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=4, rn=0, was=e4, now=e6,
+                                   why=f'its effect (its side in r4\'s second byte): {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+            f.notes.append(f'{site:08X}: its effect {e4:#x} spawned with its side: BN6\'s {e6:#x} ({how})')
