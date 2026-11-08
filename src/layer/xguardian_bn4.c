@@ -21,6 +21,7 @@ static const struct {
 	{ 0x88, BN4_PLATE_WINDMAN, { "WindMan", "Master of the Wind", GUARDIAN_NO_MUGSHOT, -1, 120, 200, 168 } },   /* tests/xdiff/windman_v1.json */
 	{ 0x90, BN4_PLATE_FIREMAN, { "FireMan", "The Blazing Furnace", GUARDIAN_NO_MUGSHOT, -1, 232, 80, 48 } },   /* tests/xdiff/fireman_v1.json */
 	{ 0x94, BN4_PLATE_THUNDERMAN, { "ThunderMan", "The Thundering Cloud", GUARDIAN_NO_MUGSHOT, -1, 240, 200, 48 } },   /* tests/xdiff/thunderman_v1.json */
+	{ 0x80, BN4_PLATE_ROLL, { "Roll", "The Summoning Petal", GUARDIAN_NO_MUGSHOT, -1, 248, 120, 176 } },   /* tests/xdiff/roll_v1.json */
 };
 #define NPROVED ((int)(sizeof proved / sizeof *proved))
 
