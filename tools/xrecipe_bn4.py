@@ -87,6 +87,10 @@ XV_AT = 0x08800000 + 0x330000
 XV_HOMES, XV_CODE, XV_ART = XV_AT + 0x18000, XV_AT + 0x38000, XV_AT + 0x50000
 XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0, 0xC0, 0xE0
+# ... and once a kind's 0xE0-0xFF are spent (the third kind's at WoodMan, the eighth BN4 Navi), its numbers below them that no
+# BN5 track can name, BN5 having no type of them (its third kind's 204, bn5.h BN5_TYPES_T3_COUNT: 0xCC-0xDF; the most a BN5
+# track names is 0xC1): kind -> (first, past the last)
+TYPE_MORE = {3: (0xCC, TYPE_0)}
 # the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
 # families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
 # families' art's end (XV_ART + 0x54000) to the sounds' room (SONG_ART0)
@@ -575,6 +579,20 @@ def scan(f):
     f.imms = out
 
 
+def type_number(f, alloc, kind):
+    """the dispatch's next number of a kind, taken (alloc.types: TYPE_0 to 0xFF, a byte, then TYPE_MORE's); a decision past
+    them"""
+    n = alloc.types[kind]
+    alloc.types[kind] += 1
+    if n <= 0xFF:
+        return n
+    lo, hi = TYPE_MORE.get(kind, (0, 0))
+    if lo + n - 0x100 >= hi:
+        f.decide('type', f'the dispatch\'s numbers of the {kind} kind are spent ({n:#x} wanted)')
+        return 0
+    return lo + n - 0x100
+
+
 def spawns_of(f, alloc):
     """each spawn of its code (a BN4 spawner, r0 the type): a type it moves, at a number of the dispatch's of its own (the
     immediate that names it changed), its call to the dispatch's spawner"""
@@ -591,8 +609,7 @@ def spawns_of(f, alloc):
                 continue
             m = moved[ty]
             if 'as' not in m:
-                m['as'] = alloc.types[kind]
-                alloc.types[kind] += 1
+                m['as'] = type_number(f, alloc, kind)
                 f.types.append((kind, m['as'], ty))
             f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
                                why=f'its object\'s type {ty:#x}: moved, the dispatch\'s {m["as"]:#x}'))

@@ -52,7 +52,8 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
 NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140),
          (0x0D, 'AquaMan', 168),
-         (0x1D, 'Roll', 128))
+         (0x1D, 'Roll', 128),
+         (0x46, 'WoodMan', 172))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -85,6 +86,10 @@ NAVI_COPIED = {
     0x08014446: 'a moved object\'s sprite step (BN4_SPRITE_STEP: unless paused, a new animation set up and its +0x11 made its +0x10, '
                 'else the sprite updated): BN6\'s nearest (0x0801BBF4) updates the sprite in the frame its animation is set up too, '
                 'a frame ahead of BN4\'s; copied, its pause test BN6\'s',
+    # (WoodMan's: docs/multirom/bn4-navis.md, WoodMan built)
+    0x0800CA4A: 'a Soul Navi\'s attack\'s end with its CurAction alone (BN4_ATTACK_END_BARE: +0x10 0, CurAction 6, the attack\'s '
+                'variables\' first u16 0; none of BN4_ATTACK_END\'s requests, clear or flag): no BN6 routine of its body; copied, its '
+                'CurAction BN6\'s 8, its AI data\'s +0x70 BN6\'s +0xA0',
 }
 # A panel's fields a copied routine reads after BN4's getPanel (bn4_twins.GET_PANEL) past its type (xrecipe_bn4.panel_type's):
 # BN4's offset -> BN6's (bn4.h BN4_PANEL_ALLIANCE, BN6's +3)
@@ -565,6 +570,11 @@ def tables_of(b4, f):
                 continue
             if any(lo <= v < hi for lo, hi, _ in f.navi_data.values()):
                 continue
+            # (a table between a copied routine's own pool words, its size known: raw with that routine, WoodMan's 0x080F50E4)
+            inner = next((k for k, hi in ends.items() if k <= v < hi), None)
+            if inner is not None and v in MM_TABLE_SIZES:
+                f.navi_data[inner] = (v, v + MM_TABLE_SIZES[v][0], MM_TABLE_SIZES[v][1])
+                continue
             # (the copied routine nearest below it, no code walked between its end and the table: WindMan's tables past
             # their pools' last word, two of them past one routine; to the next code walked or the next of MegaMan's states,
             # where his walked code ends before it, unless its size is known)
@@ -589,6 +599,8 @@ MM_TABLE_SIZES = {
                        'BN4_SPAWN_ENEMY (0x080F00F4), which her summon\'s shim stands in for (tools/xnavirecipe_bn4_summon.py)'),
     0x080F1DB4: (0x10, 'FireMan\'s states\' (0x080F1D98, MegaMan\'s): panels\' masks by side, two words a side (0x10, 0x0F8800A0; '
                        '0x30, 0x0F880080, BN4_RANDOM_PANEL_MASKS\' words)'),
+    0x080F50E4: (0x04, 'WoodMan\'s MegaMan\'s state 108\'s (0x080F509C): the third kind 0x0B\'s kind by the attack\'s +0xC (0x10, 0x11, '
+                       '0x12, 0x12), between its pool\'s words'),
 }
 
 
