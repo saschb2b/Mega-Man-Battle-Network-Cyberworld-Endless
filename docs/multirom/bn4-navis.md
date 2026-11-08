@@ -693,7 +693,11 @@ A match of each plate's colours against the Navis' battle sprites' failed
 its controls (GutsMan's, Roll's and KendoMan's plates were not their best
 match), so it names nothing. His plate can be read from his battles
 (`BN4_OPPONENT_BATTLES`: entrant 0x00's first battle 4, 0x01's 8, and so
-on) once the battle a number starts is located, or named by sight.
+on) once the battle a number starts is located, or named by sight. Two
+searches for that came up empty (8 November 2026): no run of 12-byte battle
+records in BN4's ROM indexed by those numbers puts GutsMan, AquaMan, Roll,
+SearchMan and KendoMan at their plates' battles, and no table of pointers
+to battle records puts GutsMan at 4, AquaMan at 0x10 and Roll at 0x1C.
 
 ## FireMan built
 
