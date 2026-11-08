@@ -2813,6 +2813,13 @@
         "why": "Played by Walla's code (BN4: movs r0,#0x9a at 0x080BEA88, its bl to PlaySoundEffect at 0x080BEA8A; BN6: its copy's movs r0,#0x39 at 0x08B7E430, the recipe's immediate, its bl at 0x08B7E432 through its veneer to BN6's), a state's: BN4's song 0x9A copied into BN6's empty slot 0x39 on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0x9A is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
       },
       {
+        "bn4": "0x8B",
+        "bn6": "0x46",
+        "clock": "state",
+        "what": "Mettaur's sound 0x8B, its copy",
+        "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0x46 at 0x08B7976C, the recipe's immediate, its bl at 0x08B7976E through its veneer to BN6's), its init's: BN4's song 0x8B copied into BN6's empty slot 0x46 on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS, xvirus_recipe.h XV_BN4_SONG_SLOT_MORE; docs/multirom/bn4.md, Its sounds); BN4's first at t73 in mettaur4_v1. BN6's own song 0x8B is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+      },
+      {
         "bn4": "0xA6",
         "bn6": "0x38",
         "clock": "state",
