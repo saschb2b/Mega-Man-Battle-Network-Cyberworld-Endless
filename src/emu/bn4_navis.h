@@ -222,5 +222,14 @@
 #define BN4_FLASH_SPAWN   0x080E3AD8u /* ... its spawner: r1-r3 its place */
 #define BN4_T3_02_KINDS   0x080CD524u /* the third kind's 0x02's kinds (4 bytes each: its sprite's list offset and number, its palette,
                                        * its +0xC), read by its init by its +4; Roll's kind 7 list 3's 0xF */
+/* Melody, the family of her V3's 0x39 (BN4's type 0x11, enemy ids 0x37-0x3C), moved for her summon (docs/multirom/bn4-navis.md,
+ * Her Melody; tools/xrecipe_bn4.py) */
+#define BN4_MELODY_TYPE   0x080B8BB8u /* its type routine (BN4_T1_TYPES[0x11]): its jump table 0x080B8BD0, init 0x080B8BDC, update
+                                       * 0x080B8C3E (its pre-step from 0x080B8C44), the after-state */
+#define BN4_MELODY_STATES 0x080B8C6Cu /* its state table: BN4's generic 0-5, its own 6-9 (0x080B8C99, 0x080B8EBF, 0x080B8F05,
+                                       * 0x080B90B3) */
+#define BN4_MELODY_OWN_STEP 0x080B8C08u /* its init's own step: its +0x2E by its version (BN4_MELODY_2E), its collision data, its
+                                       * set-up with region 0x35 (0x080B8C1E), +8 4 (hook 5 entered here: bn4_twins.INIT_AGAIN) */
+#define BN4_MELODY_2E     0x080B8C38u /* its +0x2E by version, 6 bytes (30 each), which the set-up copies into its collision's +5 */
 
 #endif

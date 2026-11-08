@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:52:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -210,7 +210,9 @@ and traces both:
   Dark Soul's chip AI takes them).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
-  copy; one in RAM once the game has booted, over what it copied there,
+  copy, to each copy where more than one family copies the block, as
+  Mettaur and Melody both copy BN4's summoned appear; one in RAM once the
+  game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
   engine (`SOULUNITE_BREAK_*`: a Soul's turns 4, its used bit not set, a

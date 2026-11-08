@@ -49,10 +49,11 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
-            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1))
-# the families moved for a Navi's summon alone, which BN6 has by name (the owner's call of 8 November 2026: Roll's summon
-# brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits): never a net's kin nor a visitor (XVirusFamily.summoned)
-SUMMONED = {'Mettaur'}
+            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55))
+# the families moved for a Navi's summon alone: Mettaur, which BN6 has by name (the owner's call of 8 November 2026: Roll's
+# summon brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits), and Melody, Roll V3's 0x39, whose sounds
+# live in her pool (SUMMONER_POOL): never a net's kin nor a visitor (XVirusFamily.summoned)
+SUMMONED = {'Mettaur', 'Melody'}
 
 # ---- BN4's tables (src/emu/bn4.h; docs/rom/bn4.md) ----
 BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat_size=12, names=0x0874A780,
@@ -89,7 +90,7 @@ XV_HOME_SIZE, XV_FIRST_ID, XV_FIRST_AI = 0x800, 0x200, 32
 SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0x60000, 0xC0, 0xC0, 0xE0
 # the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
 # families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
-# families' art's end (XV_ART + 0x54000) to the sounds' room (SONG_ART0)
+# families' art's end (XV_ART + 0x54000) up, their sounds' copies after it, to BN4's first room (ART0: songs_room)
 ROOM2_FROM, CODE2, ART2 = 6, XV_CODE + 0x11000, XV_ART + 0x54000
 CODE_STEP, ROOM_BATTLE, ROOM_ATTACK = 0x10, 0x1000, 0x800   # (its blocks packed: BN4's code has 0x4000 bytes to XV_ART)
 CODE_END, ART_END = XV_ART, 0x08800000 + 0x400000 - 256 * 0x44   # (xvirus_recipe.h: XV_ART, XV_ARMS)
@@ -106,11 +107,12 @@ SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70:
 # src/emu/xnavi_bn4_sounds.h; the owner's call 8 keeps 0x41-0x4B BN5's): sound -> (its pool slot, its summoner), the slot
 # the summoner's next past its own (tools/xnavirecipe_bn4_sounds.py pool_of checks it), the song listed with the summoner's
 # songs and pointed in her battles alone, which are the only ones the family is in (SUMMONED)
-SUMMONER_POOL = {0x8B: (0xE0, 'Roll')}
-# their copies' rooms: below their families' sprites (ART0), above BN5's families' art (to XV_ART + 0x54000 today,
-# bn5_ranges_clear checks), as the families' sprites leave no room past theirs (ART_END); each its bytes rounded up to
-# SONG_STEP (song_bytes, an upper bound)
-SONG_ART0, SONG_ART_END, SONG_STEP = XV_ART + 0x5A000, ART0, 0x40
+# (a slot past a byte, the pool's sixth on, played through a shim that makes r0 the slot: XvSoundCall, the owner's call 11)
+SUMMONER_POOL = {0x8B: (0xE0, 'Roll'), 0xC2: (0x104, 'Roll'), 0xC3: (0x117, 'Roll')}
+# their copies' rooms: in the families' second room past its families' art (ART2 on), below the first six's sprites
+# (ART0), as their sprites leave no room past theirs (ART_END); each its bytes rounded up to SONG_STEP (song_bytes, an upper
+# bound)
+SONG_ART_END, SONG_STEP = ART0, 0x40
 # BN4's effects BN6 has no effect of the same look of, at ids of their own and their sprites at numbers of their own: the
 # families' ranges' top (0x90-0x9F of the effects, list 5's 0x98-0x9F), below the Navis' (0xA0 on), where BN5's families
 # take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
@@ -294,7 +296,12 @@ def init_of(f):
         f.decide('init', f'its init calls the collision setup {len(setup)} times')
         return
     args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)]
-    if args not in ([1, 2, 3], [0x10, 2, 3]):
+    # (its own fields before its set-up: what BN6's virus init writes of none, past its sprite's +0x10 and +0x11)
+    own = [a for a in addrs if a < setup[0] and w.insns[a].form in ('str', 'strb', 'strh') and w.insns[a].f[1] == 5
+           and w.insns[a].f[2] not in (0x10, 0x11)]
+    if (args[0] not in (1, 0x10) and args[1:] == [2, 3]) or own:
+        init_again(f, setup[0], f'its collision set up with {args}' + (f', its own +{w.insns[own[0]].f[2]:#x} before' if own else ''))
+    elif args not in ([1, 2, 3], [0x10, 2, 3]):
         f.decide('init', f'its collision set up with {args}, which BN6\'s virus init makes of no flags')
     used, after = set(), [a for a in addrs if a > setup[0]]
     store = next((a for a in after if w.insns[a].form == 'str' and w.insns[a].f[1:] == (5, 8)), None)
@@ -318,6 +325,9 @@ def init_of(f):
             f.decide('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s virus init makes nothing of')
     if not tail:
         return
+    if f.hooks[2] != ('BN6', NULLSUB6):
+        f.decide('init', f'{tail[0]:08X}: its init\'s own step past its region\'s, both its hook 5')
+        return
     if any(a > tail[0] for a in used):
         f.decide('init', f'{tail[0]:08X}: its init\'s own step comes before flags it sets (BN6\'s init sets them first)')
     first = w.insns[tail[0]]
@@ -326,6 +336,21 @@ def init_of(f):
         f.roots.append(first.target)
     else:
         enter(f, 2, tail[0], 'its init')
+
+
+def init_again(f, site, what):
+    """its init's own step before its collision's set-up (a field of its object BN6's virus init writes none of), or its
+    set-up of a region BN6's virus init gives none of (its 1, or 0x10 for struct2's flag 4): its init from that step run
+    again at its spawn's end, hook 5 entered there (bn4_twins.INIT_AGAIN: its entry, the calls of its tail aimed so its
+    collision data is the one BN6's init took and its set-up BN6's run again with its arguments)"""
+    again = bn4_twins.INIT_AGAIN.get(f.init)
+    if again is None:
+        f.decide('init', f'{what}, which BN6\'s virus init does not (bn4_twins.INIT_AGAIN reads none of its init)')
+        return
+    f.aim.update(again['aims'])
+    f.again = (again['at'], site)
+    f.notes.append(f'its init again at its spawn\'s end from {again["at"]:08X} ({what}): {again["why"]}')
+    enter(f, 2, again['at'], 'its init')
 
 
 def after_of(f, tw):
@@ -702,7 +727,7 @@ def records_of(b4, f):
 def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     if slot == ROOM2_FROM and alloc.room == 'the families':
         # (the families past the first six in their second room; tools/xnavirecipe_bn4.py's families_alloc derives them too)
-        alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART0
+        alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART_END
         alloc.room = 'the families\' second room'
     f = Family(ty, name, first)
     f.slot = SLOT0 + slot
@@ -747,6 +772,9 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     scan(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
+    for t in (bn4_twins.INIT_AGAIN[f.init]['aims'] if getattr(f, 'again', None) else ()):
+        if any(not f.again[0] <= s < f.again[1] for s in f.calls.get(t, ())):
+            f.decide('init', f'{t:08X} called past its init\'s step again ({f.calls[t]}): its aim (bn4_twins.INIT_AGAIN) is that step\'s alone')
     queued_sites(f)
     records_of(b4, f)
     blocks_of(b4, f, alloc)
@@ -914,9 +942,12 @@ def sounds_of(b4, b6, f):
             for site, chain in sorted(ids[v]):
                 if len(chain) != 1 or chain[0][1] != 'movs':
                     f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
-                    continue
-                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
-                                   why=f'its sound {v:#x}: at {who}\'s pool slot {slot:#x}, her songs\' (her battles alone)'))
+                elif slot > 0xFF:
+                    # (past what a movs names: its call through a shim that makes r0 the slot, the movs left as it is)
+                    f.queue_calls.append(dict(at=site, slot=slot, why=f'its sound {v:#x} at {who}\'s pool slot {slot:#x}, past a byte'))
+                else:
+                    f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
+                                       why=f'its sound {v:#x}: at {who}\'s pool slot {slot:#x}, her songs\' (her battles alone)'))
             f.notes.append(f'its sound {v:#x}: {who}\'s pool slot {slot:#x} (SUMMONER_POOL), her recipe\'s song')
             continue
         if slot is None:
@@ -940,10 +971,10 @@ def sounds_of(b4, b6, f):
                              f'starts no more tracks than its player has')
 
 
-def songs_room(b4, whole):
-    """each whole family's copied sounds a room in the families' art below their sprites (SONG_ART0 to ART0), one after
+def songs_room(b4, whole, alloc):
+    """each whole family's copied sounds a room in the families' second room past its families' art (to ART0), one after
     another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
-    done, at = set(), SONG_ART0
+    done, at = set(), rounded(alloc.art if alloc.room != 'the families' else ART2, SONG_STEP)
     for f in whole:
         f.songs = []
         for v, slot in getattr(f, 'sounds', []):
@@ -1240,7 +1271,7 @@ def c_family(f, n):
     if f.prestep:
         L.append(f'\t.prestep = 0x{f.prestep:08X},   /* its update\'s own work on, run as its pre-step (bn4_twins.PRESTEP) */')
     if f.name in SUMMONED:
-        L.append('\t.summoned = true,   /* (moved for Roll\'s summon alone, BN6\'s by name: no kin of its net\'s, no visitor) */')
+        L.append('\t.summoned = true,   /* (moved for Roll\'s summon alone: no kin of its net\'s, no visitor) */')
     if f.after:
         L.append(f'\t.present = 0x{f.after:08X},   /* its after-state, copied: run after its state 0 and its hook 5 while BN6\'s battle is paused */')
     L.append('};')
@@ -1319,7 +1350,7 @@ def main():
             pairs.copies[c.spawner] = c
     fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
-    songs_room(b4, whole)
+    songs_room(b4, whole, alloc)
     for c in copies:
         for d in c.decisions:
             print(f'xrecipe_bn4: BN6\'s {c.ty:#x}\'s copy: {d}')

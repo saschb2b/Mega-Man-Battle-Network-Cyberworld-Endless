@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:46:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1152,8 +1152,8 @@ tables](../rom/bn4.md) (Roll derived). What she adds:
   twin audited: the panel, id, HP and side the same at t1008. The ids:
   Billy's are moved (0xE-0x10 as 0x2C1-0x2C3, its recipe's); Mettaur's
   (1-4) are BN4's own Mettaur, moved for her (0x2E4-0x2E7; the owner's
-  call of 8 November 2026, below); 0x39 (V3's, its type 0x11) is moved by
-  no recipe and summons nothing yet, an interim. Her +0x60 and +0x64 hold
+  call of 8 November 2026, below); 0x39 (V3's, its type 0x11) is BN4's
+  Melody family's Hellody, moved for her ([Her Melody](#her-melody)). Her +0x60 and +0x64 hold
   BN6's objects as BN4's.
 - **Her sounds' player**: BN4 plays 0x96 and 0x131 on its player 22 and
   its hit sound 0x6B on 10; BN6 keeps its 22 for its hit sound 0x6B alone.
@@ -1270,16 +1270,70 @@ frame (t1008), and its queue's head test aimed at the nullsub (t1060).
 She joins the tournament's proved list (`src/layer/xguardian_bn4.c`:
 plate `BN4_PLATE_ROLL`, "The Summoning Petal", pink; the owner's to
 change). Left: her V2-SP summons (Billy2 and Billy3, BN4's summoned
-appear not theirs, as Billy is a visitor; 0x39, V3's type 0x11, moved by
-no recipe: six decisions of the families' generator, a pre-step, a
-collision setup, a call with no twin, two sounds and room), proved by no
-spec yet.
+appear not theirs, as Billy is a visitor; 0x39, V3's, moved since: [Her
+Melody](#her-melody)), proved by no spec yet.
 
 Seven mutations break her port before her summon and each is caught: her decision's
 CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
 effect another (t66), her warp's sound at another pool slot (t67), her
 attack's sprite at BN4's list (t195), her player-22 sound on BN6's
 hit player (t204) and her shot of another kind (t385).
+
+## Her Melody
+
+Roll V3's third summon, BN4's enemy 0x39, is of the family BN4's type
+0x11 runs, ids 0x37-0x3C: BN4's enemy names give them as Melody,
+MelodyEX, Hellody, HellodyEX, Felony and FelonyEX, each record type 0x11
+and sprite 1:0xA ([BN4 Red Sun's tables](../rom/bn4.md), Melody moved for
+Roll's summon), so V3 brings Hellody, the family's third. Moved on
+8 November 2026 as Mettaur was, for her summon alone (`summoned`; BN4's
+ids 0x37-0x3C as BN6's 0x2EA-0x2EF, AI 71), its summon map's entry
+pointing at it (`roll_summon_ids`: 0x39 as 0x2EC). The families'
+generator left six decisions on it, and a seventh its spec found; each
+was settled at its root:
+
+- **Its init's own step, run again at its spawn's end.** BN6's virus
+  init sets a collision up with region 1 (or 0x10 for a floating one);
+  Melody's sets up 0x35, region 1's words with bit 2, and before it
+  writes its +0x2E from a table by its version (30, where every spawn
+  gives 10), which the set-up copies into its collision's +7. No other
+  family's init does either. `melody4_v1` parted at t1 on the +0x2E. Its
+  hook 5 is entered at that step (`bn4_twins.INIT_AGAIN`, `ENTRIES`), so
+  after BN6's init it writes its +0x2E and runs BN6's set-up again with
+  its own arguments, its call to take a collision data aimed at BN6's
+  region clear (`0x0801A074`), which hands back the one BN6's init took;
+  the set-up writes its +1 back to 1 and everything else as BN6's init
+  did. The generator now reads an init's stores before its set-up
+  (`tools/xrecipe_bn4.py` `init_again`).
+- **Its pre-step**: its update runs the hit effect and, where the flags
+  its hits left it hold 0x0F800000, clears its region and sets its +0x68,
+  between the pre-step and the runner: run as its pre-step
+  (`bn4_twins.PRESTEP`), as Elmperor's and CirKill's are.
+- **The call with no twin**: its states change its region between 0x10
+  and 0x35 by `0x08012ED0` (`BN4_COLL_REGION_SET`), BN6's twin
+  `0x0801A082` (`BN6_COLL_REGION_SET`, the set-up's tail), audited: BN4's
+  stores its second word at r4's +0x5C, r4 the region's number, a write
+  to the BIOS that keeps nothing, where BN6's writes +0x34; Melody passes
+  2 there at every call, so BN6's writes what it holds. BN6's also ORs
+  the time stop's bit, which no spec reaches (assumed).
+- **Its two sounds**, 0xC2 and 0xC3, no songs of BN6's, go in Roll's
+  per-battle pool as Mettaur's 0x8B does (`SUMMONER_POOL`), never in
+  0x41-0x4B (call 8): her sixth and seventh slots, 0x104 and 0x117, past
+  what a `movs` names, so each call goes through her home's shim that
+  makes r0 the slot (`XvSoundCall`, call 11). Her recipe lists both songs.
+- **Its room**: the families' second room held Mettaur's art and the
+  families' copied sounds from a fixed `XV_ART + 0x5A000`, and Melody's
+  sprite was 0x5D bytes past it. The sounds now follow the second room's
+  art wherever it ends (`songs_room`), so the room is one span from
+  `XV_ART + 0x54000` to the first room: the sounds moved up 0x1000.
+
+**`melody4_v1`** (BN4's Melody V1 alone at (5,2) against MegaMan idle at
+(2,2) with 2000 HP) PASSes over its 1200 fight frames, its two sounds
+paired with her pool's slots (`legit.json`; 0xC2 first at t20, 0xC3 at
+t226). Four mutations are caught: its CurAction off by one (t1), its
+region left as BN6's init's (t1), its +0x2E left as its spawn's (t1) and
+its CurAction compared as BN4's (t20). Unreached: no spec hits it, so
+its pre-step's hit effect and its region's clear on a hit run in none.
 
 ## SearchMan, AquaMan and Roll folded
 

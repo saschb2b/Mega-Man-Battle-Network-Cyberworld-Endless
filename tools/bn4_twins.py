@@ -71,6 +71,9 @@ TWINS = (
     (0x0800FE00, 0x08016396, 'mettaur'), (0x0800FCDE, 0x08016396, 'mettaur'), (0x0800FF26, 0x080164A0, 'mettaur'),
     (0x0800B018, 0x0800EAFA, 'mettaur'), (0x0800B026, 0x0800EB08, 'mettaur'), (0x08007E46, 0x080011EC, 'mettaur'),
     (0x08015ABC, 0x0801DC7C, 'mettaur'),
+    # Melody's (docs/multirom/bn4-navis.md, Roll's summons; each body read): its collision's region changed (its states'), BN6's
+    # routine of the same steps at BN6's offsets
+    (0x08012ED0, 0x0801A082, 'melody'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -201,6 +204,14 @@ AUDITS = {
                                      "0x080B399C): dead while its +0x2A stays 0xFFFF (it holds none): BN6's family nullsub"),
     (0x080E8ADA, 0x0810A952): ('ok', "Mettaur's held chip's other attack spawned (0x080B3C1A, its state 9's case 0x080B3A2A): dead "
                                      "while it holds none: BN6's family nullsub"),
+    (0x08012ED0, 0x0801A082): ('ok', "its collision's region changed (r1 what it is, r2 what it strikes, r3 its setup's arg): "
+                                     "BN6's, the setup's tail (0x08019FB4 from 0x08019FDC), its fields at BN6's offsets (+0xE, "
+                                     "+0x2E, +0x30, +0x34; BN4's +0xC, +0x1E, +0x58, +0x5C); BN6's stores the second word at its "
+                                     "+0x34 where BN4's stores it at r4's +0x5C, r4 the region's number (0x08012EEC: a write to the "
+                                     "BIOS, which keeps nothing), so BN4's +0x5C keeps the setup's: Melody passes r2 2 at each of its "
+                                     "calls, as its init's setup does, so BN6's +0x34 is written what it holds. BN6's also ORs the "
+                                     "time stop's bit into +0x30 (0x0801A0A0), as both setups do and BN4's change does not: its calls "
+                                     "are its states', which no spec reaches with time stopped (assumed)"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
 }
@@ -273,6 +284,9 @@ ENTRIES = {
                 "0 at its last frame",
     0x080BA13E: "Shrimpy's update past its pre-step, state and present (BN6's dispatcher runs each): its animation 1 back "
                 "to 0 at its last frame",
+    0x080B8C08: "Melody's init from its own step on (INIT_AGAIN): its +0x2E by its version (0x080B8C38's byte, 30 each), its "
+                "collision data, its set-up with region 0x35, +8 4 and its update's call (a nullsub: its update runs as its "
+                "pre-step)",
     0x080BA11A: "Shrimpy's init past BN6's virus init's work (its sprite, its collision and its float, struct2's flag 4): "
                 "its first way, up or down, at random (+7), then +8 4, as BN6's init sets it after, and its update's call (a "
                 "nullsub: its tail is hook 3)",
@@ -312,6 +326,9 @@ PRESTEP = {
     0x080C2808: "Elmperor's: unless time stops (battle_isTimeStop, BN6's 0x0800A098), 0x080C286C: its collision data's poison "
                 "timer (+6, BN6's +8) held at 0xFF, poison panels never striking it, and while its +0x60 is set 1 HP back "
                 "every few frames (object_addHP)",
+    0x080B8C3E: "Melody's: the effect its hits make (BN4_HIT_EFFECT, BN6's 0x0801A0D4), then, where the flags its hits left it "
+                "(its collision's +0x54, BN6's +0x70) hold 0x0F800000, its collision's region cleared (0x08012DC0, BN6's "
+                "0x0801A074) and its +0x68 made 1",
     0x080BD10C: "CirKill's: its +0x64 and +0x68 (the objects it spawned) let go once that object is no longer in play "
                 "(its +0 byte 0, as BN6's objects' first byte)",
 }
@@ -358,6 +375,22 @@ SUMMON_APPEAR = {
     0x0800FCAC: (0x0800FCDE, "BN4's generic state 0: its appear by its +5 (0 the plain, 1, 2 or more the summoned) and the "
                              "battle settings' +6 bit 0x20"),
     0x0801002A: (0x0801013A, "BN4's summoned appear, its table (0x0801003C) and its three steps"),
+}
+
+# An init whose own step comes before its collision's set-up, or whose set-up names a region BN6's virus init gives none of
+# (tools/xrecipe_bn4.py init_again): its init from that step run again at its spawn's end as hook 5 (entered: ENTRIES), BN6's
+# init's work done; its tail's call to take a collision data aimed at a routine of BN6's that gives back the one BN6's init
+# took (and nothing its set-up does not write again), its set-up BN6's run again with its own arguments: init -> its entry,
+# those aims (BN4 -> (BN6, why)), why
+INIT_AGAIN = {
+    0x080B8BDC: dict(at=0x080B8C08, aims={
+        0x08012496: (0x0801A074, "its collision data as BN6's init took it: BN6's 0x0801A074 gives back its +0x54 and clears its "
+                                 "+1, which BN6's set-up after it writes 1 again (0x08019FD6)")},
+        why="Melody's (BN4's 0x080B8BDC): its +0x2E from 0x080B8C38 by its version (30, where BN6's and BN4's spawns give 10, "
+            "BN6's 0x0800774C), which the set-up copies into its collision's +7 (BN4's +5), and its set-up with region 0x35 (BN6's "
+            "init's 1 with bit 2 in its alliance word, BN6_COLL_MASKS' 0x35 at its +0x30), BN6's set-up (0x08019FB4) run again: "
+            "its other fields written as BN6's init wrote them (its owner, side, element, panel, damage and region 2), and "
+            "nothing BN6's init wrote after it (+0x18, +0x3C's flags)"),
 }
 
 # BN4's appear queue's routines (bn4_battle.h BN4_QUEUE_*), one queue where BN6's (BN6_QUEUE_*) take its number in r0: each

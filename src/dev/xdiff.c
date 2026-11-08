@@ -604,8 +604,20 @@ static void call_aim(uint32_t at, uint32_t v) {
 	}
 }
 
+/* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
+ * among the ranges too); the chips' moved code for a poke5 alone, its BN5 addresses lying among BN6's own attack families'
+ * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
+ * FireMan's, moved after it) */
+static int poke_range(const XvMoved *m, int n, const Poke *p) {
+	for (int k = n - 1; k >= 0; --k)
+		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
+		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE))
+			return k;
+	return -1;
+}
+
 /* the comparator's own test: bytes written into BN6's copy after the
- * install (an address of BN5's moved, to its copy), or a call's veneer
+ * install (an address of BN5's moved, to its copy; each copy of a block more than one family copies), or a call's veneer
  * aimed at another routine; those in RAM (`ram`) once the game has booted,
  * over what it copied there (IWRAM's routines, from their image) */
 static void pokes_put(const Spec *s, bool ram) {
@@ -620,15 +632,8 @@ static void pokes_put(const Spec *s, bool ram) {
 			call_aim(p->at, p->v);
 			continue;
 		}
-		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too; the chips' moved code
-		 * for a poke5 alone, its BN5 addresses lying among BN6's own attack families' code; never BN4's Navis' for a
-		 * poke5, BN4's addresses of their blocks lying among BN5's: ThunderMan's, WindMan's and FireMan's, moved after it) */
-		for (int k = n - 1; k >= 0; --k)
-			if (at >= m[k].from && at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
-			    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE)) {
-				at = at - m[k].from + m[k].to;
-				break;
-			}
+		int k = poke_range(m, n, p);
+		if (k >= 0) at = at - m[k].from + m[k].to;
 		if (p->bn5 && at == p->at) {
 			fprintf(stderr, "xdiff: poke5 %08x is in no moved range\n", (unsigned)p->at);
 			continue;
@@ -636,6 +641,12 @@ static void pokes_put(const Spec *s, bool ram) {
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
+		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's) */
+		for (int j = 0; k >= 0 && j < k; ++j)
+			if (m[j].from == m[k].from && m[j].len == m[k].len && m[j].to != m[k].to) {
+				emu_write(p->at - m[j].from + m[j].to, b, (size_t)p->size);
+				printf("xdiff: poke %08x (%08x, a copy) = %0*x\n", (unsigned)p->at, (unsigned)(p->at - m[j].from + m[j].to), 2 * p->size, (unsigned)p->v);
+			}
 	}
 }
 

@@ -2191,6 +2191,8 @@ static const XvSong roll_songs[] = {
 	{ 0x131, 0x63, XN_BN4_ART + 0x5B80, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
 	{ 0x132, 0xD0, XN_BN4_ART + 0x62C0, 0xC80 },   /* its sound 0x132, BN4's song copied */
 	{ 0x8B, 0xE0, XN_BN4_ART + 0x6F40, 0x40 },   /* its sound 0x8b, BN4's song copied */
+	{ 0xC2, 0x104, XN_BN4_ART + 0x6F80, 0x40 },   /* its sound 0xc2, BN4's song copied */
+	{ 0xC3, 0x117, XN_BN4_ART + 0x6FC0, 0x40 },   /* its sound 0xc3, BN4's song copied */
 };
 static const XnInit roll_init = { NULL, 0, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
 static const XnSummonId roll_summon_ids[] = {
@@ -2201,7 +2203,7 @@ static const XnSummonId roll_summon_ids[] = {
 	{ 0x0E, 0x2C1 },   /* Billy's, moved (its recipe's ids) */
 	{ 0x0F, 0x2C2 },   /* Billy's, moved (its recipe's ids) */
 	{ 0x10, 0x2C3 },   /* Billy's, moved (its recipe's ids) */
-	{ 0x39, 0x000 },   /* its type 0x11 moved by no recipe and no native of BN6's by name: the shim spawns none (an interim) */
+	{ 0x39, 0x2EC },   /* Melody's, moved (its recipe's ids) */
 };
 static const XnSummon roll_summon = { XN_BN4_CODE + 0x94E8, OWN(0x0800A245), { 0x00000010, 0x0F8800A0, 0x00000030, 0x0F880080 }, roll_summon_ids, (int)(sizeof roll_summon_ids / sizeof *roll_summon_ids), 0x33 };   /* (BN4_SPAWN_ENEMY's masks by side, 080F01A8; its sound 0xce) */
 
