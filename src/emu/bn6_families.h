@@ -42,6 +42,11 @@
                                              0x0800AAAE; BN6_APPEAR's 0, 0x080163D6): r0 1 where r5 heads it (BN4_QUEUE_HEAD's twin) */
 #define BN6_QUEUE_ENTER       0x0800AA1Au /* ... r5 put at queue r0's end where it is not in it: r0 1 where it was put */
 #define BN6_QUEUE_LEAVE       0x0800AA40u /* ... r5 taken out of queue r0, the rest moved up (0x0800AA64) */
+#define BN6_COLL_REGION_SET   0x0801A082u /* r5's collision's region changed (r1 what it is, r2 what it strikes, r3 its +0xE): the
+                                             set-up's tail (0x08019FB4 from 0x08019FDC), the time stop's bit in +0x30 (BN4_COLL_REGION_SET's twin) */
+#define BN6_COLL_REGION_CLEAR 0x0801A074u /* r5's collision's +1 cleared, r0 its collision data back (BN4's 0x08012DC0's twin) */
+#define BN6_SPAWN_ENEMY_2E    0x0800774Cu /* movs r0,#0xa; strh r0,[r5,#0x2e]: an enemy's +0x2E at its spawn (BN4's spawn gives the
+                                             same), which the collision set-up copies into its +7 (BN6_COLL_OBJ_2E) */
 #define BN6_APPEAR_BLINK_FIRST 0x080163FCu /* movs r0,#2 (0x2002), its first blink step's count stored to +0x20 as BN6_APPEAR's
                                              step 0 ends (0x080163FE); the blink (0x0801641A) counts it down and puts 2 back at
                                              0x08016424 each step. The BN4 differential's opening alignment makes it 3

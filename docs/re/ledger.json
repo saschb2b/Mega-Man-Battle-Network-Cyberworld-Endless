@@ -409,6 +409,10 @@
     },
     {
       "date": "2026-11-08",
+      "what": "BN4's Melody (type 0x11, ids 0x37-0x3C) moved as a summoned family for Roll V3's 0x39 (bn4_navis.h BN4_MELODY_*, bn4_battle.h BN4_COLL_REGION_SET, bn6_families.h BN6_COLL_REGION_SET, BN6_COLL_REGION_CLEAR, BN6_SPAWN_ENEMY_2E; docs/rom/bn4.md, Melody moved for Roll's summon)."
+    },
+    {
+      "date": "2026-11-08",
       "what": "Roll's versions (docs/multirom/bn4-navis.md, Roll's versions; docs/rom/bn4.md, Roll's versions: BN4_SUMMON_MARK in bn4_navis.h, BN6_VIRUS_STATE_CALL and BN6_T1_SPAWN_KIND in bn6_families.h, BN6_AI_VERSION in bn6_ai.h): a summoned visitor (Billy) arrives by BN4's summoned appear; her pool's songs apart; the BN4 Navis' SP palettes; roll_v2, roll_v3, roll_sp and roll_v2_summons PASS."
     }
   ],
@@ -978,6 +982,14 @@
       "name": "roll_v1: Roll V1 in BN4's battle against her move into BN6's",
       "result": "python3 tools/xdiff.py roll_v1 (rng replay, lag 1): t1-t1007 the same (her decision, MegaMan's states 44-48, her shots and their hits, her flash and its effects, her pool sounds, 201 draws replayed), after her flash's +4 read as a spawn leftover, a moved fourth-kind type read back as BN4's, her pool sounds paired and her player-22 sounds put on BN6's player 9 (BN6's hit sound 0x6B, alone on its player 22, had cut her 0x131 at t204). At t1008 her summon's Mettaur is on the same panel with the same id, HP and side, but each engine's own Mettaur (its type, +5, +0xB, +0xF, +0x20, sprite, collision +0x28, its panel's reservation): FAIL, recorded. Seven mutations caught (t1, t1, t66, t67, t195, t204, t385).",
       "meaning": "Her port holds to her summon; the summoned enemy needs BN4's Mettaur mapped onto BN6's or moved before she is proved.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-08",
+      "name": "melody4_v1: BN4's Melody V1 (Roll V3's summon's family) in BN4's battle against its move into BN6's",
+      "result": "python3 tools/xdiff.py melody4_v1 (rng replay, lag 1): PASS over 1200 fight frames, its two sounds (0xC2 from t20, 0xC3 from t226) paired with Roll's pool's 0x104 and 0x117. First FAIL at t1 on its +0x2E (BN4 0x1E, BN6 0xA: its init's own step before its set-up), settled by its init run again from that step at its spawn's end (bn4_twins.INIT_AGAIN). Four mutations caught (t1, t1, t1, t20).",
+      "meaning": "Roll V3's third summon has a proved family to spawn (her summon map's 0x39 as 0x2EC); her V3 spec can prove it in her battle.",
       "link": "../multirom/bn4-navis.md"
     }
   ],

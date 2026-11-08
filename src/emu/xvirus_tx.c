@@ -1,5 +1,5 @@
 /* xvirus_tx.h: the staged writes, kept in a buffer of their own while a
- * step lasts, and the ranges moved. */
+ * step lasts (the ranges moved are xvirus_moved.c's). */
 #include "xvirus_tx.h"
 
 #include <stdarg.h>
@@ -107,22 +107,4 @@ void xv_commit_by(const char *(*writer)(uint32_t at)) {
 void xv_commit_where(bool (*part)(uint32_t at)) {
 	for (int i = 0; i < tx.n; ++i)
 		if (part(tx.w[i].at)) emu_write(tx.w[i].at, tx.bytes + tx.w[i].off, tx.w[i].len);
-}
-
-/* ---- what was moved where ---- */
-
-static XvMoved moved[XV_MOVED_MAX];
-static int nmoved;
-
-int xvirus_moved(XvMoved *out, int max) {
-	int n = nmoved < max ? nmoved : max;
-	memcpy(out, moved, (size_t)n * sizeof *out);
-	return n;
-}
-
-void xv_moved_add(uint32_t from, uint32_t to, uint32_t len) {
-	for (int i = 0; i < nmoved; ++i)
-		if (moved[i].from == from && moved[i].to == to) return;
-	if (nmoved < XV_MOVED_MAX) moved[nmoved++] = (XvMoved){ from, to, len };
-	else fprintf(stderr, "xvirus: %08x moved to %08x past the %d ranges a trace is told of\n", (unsigned)from, (unsigned)to, XV_MOVED_MAX);
 }

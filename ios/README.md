@@ -28,15 +28,16 @@ has notarized: it refuses the source with "missing a marketplaceID"
 2. Install **Cyberworld Endless** from the source. A free Apple ID's apps
    last seven days; SideStore and AltStore renew them, and offer each new
    release the source lists.
-3. Start it: the ROMs screen opens, its two cartridge slots open spots
+3. Start it: the ROMs screen opens, its three cartridge slots open spots
    until their ROMs are in (the guide's The ROMs screen, docs/GUIDE.md). BN6's slot (a
    tap, or A) opens Files' picker for the folder the ROMs are in. The app
    opens only its `.gba` files (and those of the folders directly in
    it), copies Mega Man Battle Network 6: Cybeast Gregar (USA) and, if
-   it is there, Mega Man Battle Network 5: Team Colonel (USA) in, each checked by
-   its SHA-1, and names every other `.gba` with why it was refused. The
-   folder is kept (a bookmark) and looked in again at each start, so BN5
-   put there later comes in by itself; R on the title opens the ROMs
+   they are there, Mega Man Battle Network 5: Team Colonel (USA) and Mega
+   Man Battle Network 4: Red Sun (USA) in, each checked by its SHA-1, and
+   names every other `.gba` with why it was refused. The folder is kept (a
+   bookmark) and looked in again at each start, so BN5 or BN4 put there
+   later comes in by itself; R on the title opens the ROMs
    screen again. **FILES INSTEAD** picks the files instead, more than one
    at once. Or put the ROMs in Files, **On My iPhone › Cyberworld** (the
    app's Documents folder), any file name; the app looks there, and in
@@ -48,7 +49,8 @@ another installer (it is signed ad hoc: the installer signs it again).
 ## What it keeps where
 
 The app's Documents folder, which Files shows as **On My iPhone ›
-Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`),
+Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`,
+`rom/bn4rs.gba`),
 the saves and `settings.ini`,
 `keys.ini` and `touch.ini`, as a desktop's data folder does; a player can
 copy the saves off there. Uninstalling the app deletes it, so the game

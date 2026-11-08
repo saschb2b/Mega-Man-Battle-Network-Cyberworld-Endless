@@ -18,8 +18,9 @@ cannot be a signed title.
   reaches it), or stays on a USB drive: `/mnt/usb0/roms/gba`,
   `/mnt/usb0/gba` or the drive's top. Any file name works: the game reads
   the header and checks the contents.
-- Mega Man Battle Network 5: Team Colonel (USA), if you have it, goes
-  beside BN6's ROM, or in any of those folders.
+- Mega Man Battle Network 5: Team Colonel (USA) and Mega Man Battle
+  Network 4: Red Sun (USA), if you have them, go beside BN6's ROM, or in
+  any of those folders.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `/data/cyberworld-endless/`.
 - The GBA's buttons are on the controller's: Cross is A, Circle B, L1 and

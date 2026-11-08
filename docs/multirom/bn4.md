@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:46:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -241,6 +241,10 @@ November 2026 (Turned on, below).
   Mettaur is moved for Roll's summon alone (the owner's call 12), and
   never visits: its recipe is marked `summoned`, which keeps it out of
   BN4's net's kin and the visitors (`src/core/visitor_families.c`).
+  Melody, one of the 17, came first for her V3's summon and is marked
+  `summoned` as well: its two sounds live in her per-battle pool, which
+  plays in her battles alone, so it visits no net until they have slots
+  of their own ([BN4's Navis in BN6's engine](bn4-navis.md), Her Melody).
 - **The deep acts draw as now**: BN6's and BN5's late areas by the coin,
   no visitor, as they mix already and the card says "Both Nets". BN4's
   records would join the deep with its areas; the areas came on 5
@@ -490,7 +494,8 @@ and 0xFC, CirKill's 0xF9). Mettaur, moved for Roll's summon (the owner's
 call 12), plays Walla's 0x9A and a 13th, its shockwave's 0x8B. The
 twelve fill 0x34-0x3F and call 8 keeps 0x41-0x4B for BN5, and Mettaur
 fights only where Roll brings him, so 0x8B takes a slot of her per-battle
-pool, her fifth, 0xE0 (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
+pool, her fifth, 0xE0, and Melody's 0xC2 and 0xC3 her sixth and seventh,
+0x104 and 0x117, through her shim (`tools/xrecipe_bn4.py` `SUMMONER_POOL`): her recipe
 lists the song, packed into her art's room and pointed in her battles as
 her own sounds are (the owner's call 11), and in a battle of his alone,
 which takes her art and pool (`xnavi_bn4_summoner`). As a family installs, each of its sounds is

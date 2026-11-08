@@ -99,6 +99,7 @@
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
+#include "xvirus_moved.h"
 #include "xvirus_shim.h"
 #include "soul_room.h"
 #include "soulcode.h"
@@ -4336,6 +4337,31 @@ static uint32_t stub_literal(const uint8_t *code, uint32_t at) {
 	return (op & 0xF800) == 0x4800 && lit + 4 <= XV_STUBS_END ? get32(code + (lit - XV_STUBS)) : 0;
 }
 
+/* The moved ranges a trace reads (xvirus_moved.h): all of them however many the installs move (the old list's 1024 overflowed
+ * with BN4's Navis, dropping their last ranges from the traces), or none, said, where they were never kept: a player's run keeps
+ * none, a reader never gets a part */
+static void test_xvirus_moved(void) {
+	enum { MANY = 3000 };   /* (past the old cap, and past the list's first room doubled twice) */
+	unsetenv("CYBERWORLD_BTRACE");
+	unsetenv("CYBERWORLD_XDRAWS");
+	xvirus_moved_reset();
+	int n = -1;
+	xv_moved_add(0x08000000, 0x09000000, 4);
+	CHECK(!xvirus_moved(&n) && n == 0, "the moved ranges never kept refuse a reader: n %d", n);
+	xvirus_moved_reset();
+	xvirus_moved_keep();
+	const XvMoved *m = xvirus_moved(&n);
+	CHECK(m && n == 0, "kept, none moved yet: an empty list, %d", n);
+	for (uint32_t i = 0; i < MANY; ++i) xv_moved_add(0x08000000 + 8 * i, 0x09000000 + 4 * i, 2 + i);
+	xv_moved_add(0x08000000 + 8, 0x09000000 + 4, 99);   /* (one held again: ignored) */
+	m = xvirus_moved(&n);
+	int wrong = 0;
+	for (int i = 0; m && i < n; ++i)
+		wrong += m[i].from != 0x08000000 + 8u * (uint32_t)i || m[i].to != 0x09000000 + 4u * (uint32_t)i || m[i].len != 2u + (uint32_t)i;
+	CHECK(m && n == MANY && !wrong, "every range moved kept in order: %d of %d, %d wrong", n, MANY, wrong);
+	xvirus_moved_reset();
+}
+
 static void test_xvirus_dispatch(void) {
 	static const struct { uint32_t bn5, to; int kind; uint32_t bn6; } spawners[7] = {
 		{ BN5_SPAWN_1, XV_SPAWN_1, 1, BN6_SPAWN_1 }, { BN5_SPAWN_1_LAST, XV_SPAWN_1_LAST, 1, BN6_SPAWN_1_LAST },
@@ -6871,6 +6897,7 @@ int main(void) {
 	test_chip_ai_rooms();
 	test_claims();
 	test_xvirus_dispatch();
+	test_xvirus_moved();
 	test_xvirus_generated();
 	test_xvirus_shims();
 	test_enemy_moved();

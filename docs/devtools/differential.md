@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:25:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -210,7 +210,9 @@ and traces both:
   Dark Soul's chip AI takes them).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
-  copy; one in RAM once the game has booted, over what it copied there,
+  copy, to each copy where more than one family copies the block, as
+  Mettaur and Melody both copy BN4's summoned appear; one in RAM once the
+  game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
   engine (`SOULUNITE_BREAK_*`: a Soul's turns 4, its used bit not set, a
@@ -705,6 +707,24 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## The trace's moved ranges
+
+Every range the installs move (a family's, a Navi's, a chip's, a Soul's
+code, BN4's bracket, BN6's grown tables) reaches the traces, which read
+them as code: `src/emu/xvirus_moved.c` keeps them on the heap, as many as
+there are, and only where a reader asked before the installs (`--xdiff`,
+`CYBERWORLD_BTRACE`, `CYBERWORLD_XDRAWS`), so a player's run keeps none.
+A reader gets the whole list or none: a list never kept, or a range the
+heap could not hold, refuses the battle (`xdiff: a battle could not be
+begun`) or the trace, said on stderr; a log with no room for a block of
+the spec's code (`FAMILY_MAX`, 4096) is refused the same way. The run
+prints the count (`xdiff: N ranges moved`: 1054 in `melody4_v1`'s run,
+8 November 2026). The list it replaced held 1024: once the BN4 Navis and
+families pushed the count past it, the last ranges installed (in that run
+30: most of the Souls' code, BN4's bracket screen and BN6's chip records
+moved) dropped out of the traces with only a line on stderr, which
+`--quiet` hides. `test_xvirus_moved` in `tests/test_core.c` holds 3000.
 
 ## The BN4 trace
 

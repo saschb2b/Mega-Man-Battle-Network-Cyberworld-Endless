@@ -1,30 +1,7 @@
 # Changelog
 
-## Unreleased
+## 0.20.0 (2026-11-08)
 
-- **The tournament is built, waiting for its faces.** Once a run has
-  reached the Nest, act 3's arena in half the short runs (and one of acts
-  3 to 5 each endless cycle) holds three Navis in a row instead of one
-  guardian: two rounds below the act's guardian and the final at it, the
-  HP carried with no heal between, a round lost the run's end. Each round
-  pays its results screen and its Navi's chip, the final his Guardian
-  Data; the act's card lists the three ("???" for a Navi you never met),
-  MegaMan reads three signals at the portal, and BN4 Red Sun's own bracket
-  screen shows the rounds between them. A quit comes back at the arena's
-  door, round 1 again. It reaches runs once BN4's bracket can show the
-  faces of BN6's and BN5's Navis, with BN4's ROM beside BN6's; the
-  Tournament switch in EXTRAS turns it off.
-- **Leave out what you don't want.** The setup after NEW GAME now comes
-  in three pages, RUN, HELP and a new EXTRAS, turned with L and R; NEXT
-  at a page's foot goes on to the next and JACK IN! is on the last
-  (START still starts the run from any page). EXTRAS switches off, for
-  one run, the things this game adds to BN6: Liberation Missions, the
-  Tournament (listed now, coming in a later version), Glitch layers, the
-  Virus Battler, DarkChips and, with BN5 or BN4 beside BN6, the Older
-  nets (their areas, Navis and viruses). Everything is on unless you
-  switch it off, the run keeps what it started with, and it counts like
-  any other run; its summary names what was off. A run saved before this
-  version continues with everything on.
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
   Red Sun (USA)** beside BN6's (on the ROMs screen it has a third
   cartridge, red, with Duo's face) and its five net areas turn up in
@@ -38,11 +15,55 @@
   that BN5's viruses visit; MegaMan names them as the older Net's. Each
   was moved into BN6's battle and checked against BN4's own frame by
   frame, and pays from BN4's own rewards (a chip BN6 has not got pays 200
-  zenny). Battles, guardians and the people on its maps are still
-  BN6's. Without BN4 a run is exactly as before; a run saved with BN4 goes
-  on without it, a layer of BN4's starting again in BN6's tiles. On every
-  system that takes BN5; the New 3DS has room for one of the two, BN5's
-  first.
+  zenny). Without BN4 a run is exactly as before; a run saved with BN4
+  goes on without it, a layer of BN4's starting again in BN6's tiles. On
+  every system that takes BN5; the New 3DS has room for one of the two,
+  BN5's first.
+- **The tournament.** Once a profile has reached the Nest, and with BN4
+  Red Sun's ROM beside BN6's, act 3's arena in half the short runs (and
+  one of acts 3 to 5 each endless cycle) holds three Navis in a row
+  instead of one guardian: two rounds below the act's guardian and the
+  final at it, the HP carried with no heal between, a round lost the
+  run's end. BN4's own bracket screen shows the rounds between them,
+  every entrant on it with his own face (BN6's and BN5's Navis' made
+  from your ROMs as the game starts). Each round pays its results screen
+  and its Navi's chip, the final his Guardian Data; the act's card lists
+  the three ("???" for a Navi you never met), and MegaMan reads three
+  signals at the portal. A quit comes back at the arena's door, round 1
+  again. With the rounds' pay, the short net's act 3 hands out about
+  8,400 zenny a run where it handed out about 7,000. The Tournament
+  switch in EXTRAS turns it off.
+- **BN4's Navis fight in BN6.** GutsMan, ThunderMan, WindMan, FireMan,
+  SearchMan, AquaMan and Roll, each moved into BN6's battle engine and
+  checked against BN4's own battle frame by frame, enter the tournament's
+  first two rounds on their own plates of BN4's bracket. Roll's summon
+  brings BN4's own Mettaur, moved for her. A round against one of them
+  pays a BN6 Navi chip of the round's strength until BN4's chips come.
+- **The Glitch layer.** In one run in three, a warp glitches on an act's
+  first layer from act 2 on: a pad that switches looks under BN6's
+  mosaic, its colours turned and torn. Step on and say Yes, and it leads
+  to a layer of the same area that comes apart as MegaMan takes its
+  data, other areas' looks flipping onto the same floor, its data from
+  up to two acts deeper. At its heart stands a copy, the guardians
+  you have fought written over each other: it fights as three of them
+  in one battle, each glitching out in BN6's sprite mosaic as the next
+  arrives on its panel, and pays a pick of their Navi chips in your
+  folder's codes. Its exit leads on to the act's next layer. The Glitch
+  switch in EXTRAS turns it off.
+- **Leave out what you don't want.** The setup after NEW GAME now comes
+  in three pages, RUN, HELP and a new EXTRAS, turned with L and R; NEXT
+  at a page's foot goes on to the next and JACK IN! is on the last
+  (START still starts the run from any page). EXTRAS switches off, for
+  one run, the things this game adds to BN6: Liberation Missions, the
+  Tournament, Glitch layers, the Virus Battler, DarkChips and, with BN5
+  or BN4 beside BN6, the Older nets (their areas, Navis and viruses).
+  Everything is on unless you switch it off, the run keeps what it
+  started with, and it counts like any other run; its summary names what
+  was off. A run saved before this version continues with everything on.
+- **Nobody stands in a walkway's mouth.** A Mr.Prog's service or a navi
+  no longer stands where a walkway meets a small room (BN5's Nebula Area
+  had its Recovery Mr.Prog block one); where a room has no other spot,
+  he moves to the next room.
 
 ## 0.19.0 (2026-11-02)
 

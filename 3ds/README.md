@@ -28,6 +28,11 @@ GBA core alone takes longer than a frame there.
   says "BN5 found" in its top right corner. A 3DS whose memory had no room
   for it would leave it unread and play BN6's net alone, and say so (the
   PET's home and `log.txt`); a New 3DS has room (Memory, below).
+- Mega Man Battle Network 4: Red Sun (USA) goes there the same way, and
+  its net joins the runs too: BN4's areas and six of its virus families,
+  the title saying "BN4 found". A New 3DS reads one extra ROM beside
+  BN6's, BN5's where both are there; the other is left unread, and the
+  PET's home says it was found with no room for it.
 - The first NEW GAME boots BN6 from power-on once, about 15 seconds of black
   screen; later starts load what it kept (`boot-3.state`).
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
@@ -58,7 +63,7 @@ GBA core alone takes longer than a frame there.
   collection, E-Mail the mail's sender by face and name; in a shop it
   shows the entry under the cursor with what the run holds of it, at a
   trader what it takes and gives; on the title, the PET at rest with
-  the profile's record, and whether BN5's net joins the runs.
+  the profile's record, and whether BN5's or BN4's net joins the runs.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad

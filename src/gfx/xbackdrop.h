@@ -9,6 +9,9 @@
 #ifndef CW_XBACKDROP_H
 #define CW_XBACKDROP_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /* Background `bg` (its number in extra ROM `xrom`'s own tables) in BN6:
  * the number a battle's record gives it, or `fallback` where it cannot be.
  * The first call copies in every background the other games' areas bring
@@ -23,5 +26,9 @@ int xbackdrop_install(int xrom, int bg, int fallback);
  * areas take over set back. The first call copies in every other game's
  * area's, in their order; again where the core's ROM copy was made anew. */
 void xbackdrop_map(int area);
+
+/* Where BN6 loads the backdrop of map (group, number) as set now, its
+ * tiles' VRAM [*lo, *hi) (bus addresses); false where it has none. */
+bool xbackdrop_map_vram(int group, int number, uint32_t *lo, uint32_t *hi);
 
 #endif
