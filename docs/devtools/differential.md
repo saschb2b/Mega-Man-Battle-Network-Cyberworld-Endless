@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1599,3 +1599,18 @@ format, its game 4: the trace's header names it):
     companion's rank at t271. The three branches each left the spark out;
     merged, one rule takes it out of the drawn a group ranks, the family's
     and the natives' alike.
+- **SearchMan's readings** (`searchman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), SearchMan built), with which
+  **`searchman_v1` PASSes**, 1200 fight frames:
+  - **The invisibility in the BN4 trace**: the collision data's frames
+    (BN4's +0x1A, BN6's +0x26) and the hide step's marker (BN4's +0x7C,
+    BN6's +0x50) laid out at BN6's places (`src/dev/xdiff_bn4_trace.c`,
+    `BN4_COLL_INVISIBLE`, `BN4_COLL_HIDE_MARKER`).
+  - **A moved fourth-kind type read back as BN4's** (`tools/xdiff_bn4.py`
+    `t4`, called by `tools/xdiff_snap.py` `identity` for an object of the
+    fourth kind that is no effect): his scope 0x2E, trails 0x31 and marker
+    0x3E run at the dispatch's numbers 0xE0 on and meet BN4's own.
+  - **His pool sounds** paired by slot (`legit.json`'s `bn4` sounds, his
+    ids alone by `foes`), and one leftover allowed: his trail's begun byte
+    (+9), what each game's PlaySoundEffect leaves in r0 (`spawn_leftover`'s
+    bytes, BN4 0x28 and BN6 0x48 alone).
