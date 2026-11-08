@@ -1330,7 +1330,10 @@ is her third. What they took:
   Navi's palettes by version (`XNavi.palettes`) and its spawn's end sets
   its version's (`BN6_AI_VERSION`, AI data +0x16) through
   `BN6_SPRITE_PALETTE_SET` (`src/emu/xnavi_init.c` `palette`): `roll_sp`
-  the same from t1, every other BN4 Navi's V1 as before.
+  the same from t1, every other BN4 Navi's V1 as before. SearchMan's home
+  had no room for the longer shim (his hide step's stubs and seven sound
+  shims leave 28 bytes): a spawn end's shim its home's shims leave no room
+  for goes to the home's top, past its veneers (`end_put`).
 - **The comparator**, additions alone: a Navi's version at AI data +0x16
   and +0x17, BN6's (its actor setup's, from the id's triple: V1's 0 met
   BN4's 0); a word read whole because its value looks like a pointer held
