@@ -97,13 +97,15 @@ static uint32_t shim_put(Shim *s, uint32_t room, const char *what, uint32_t *siz
 	return p ? s->at | 1u : 0;
 }
 
-/* its spawn's end where its init needs one: its collision's r3, +0x11, its spawns where at_end, its sprite, its update */
+/* its spawn's end where its init needs one: its collision's r3, +0x11, its panel at +6, its spawns where at_end, its sprite,
+ * its update */
 static uint32_t end_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *size) {
 	const XnInit *in = n->init;
 	Shim s = { .at = at };
 	op(&s, 0xB510);   /* push {r4, lr} */
 	if (n->coll_arg) op(&s, 0x6D68), op(&s, 0x2100u | n->coll_arg), op(&s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
 	if (in->anim) op(&s, 0x7C28), op(&s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
+	if (in->home) op(&s, 0x8A68), op(&s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
 	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(&s, n, &in->spawns[i]);
 	if (in->sprite) far_call(&s, BN6_SPRITE_UPDATE);
 	if (in->frame) far_call(&s, BN6_NAVI_FRAME);
@@ -134,7 +136,7 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	const XVirusFamily *f = &n->code;
 	const XnInit *in = n->init;
 	const uint32_t companion = xv_move_ref(n->companion);
-	const bool end = in ? in->at_end || in->anim || in->sprite || in->frame : n->coll_arg != 0;
+	const bool end = in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
 	const bool start = in && !in->at_end && in->nspawns;
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }

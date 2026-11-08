@@ -129,8 +129,9 @@ typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_
  * .companion must leave empty) or, `at_end`, at its spawn's end (its table 7, after the whole of BN6's actor init); and at
  * its spawn's end, by a shim of its home there, its collision's own r3 (XNavi.coll_arg), its +0x11 its +0x10 (`anim`: its
  * init's 0 where BN6's actor init writes 0xFF), then its spawns where `at_end`, its sprite updated (`sprite`, BN6's
- * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order */
-typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame; } XnInit;
+ * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order; its panel (+0x12) kept at its +6
+ * before its spawns (`home`: AquaMan's, his decision's last panel, which BN6's spawn leaves 0) */
+typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home; } XnInit;
 
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,

@@ -1539,20 +1539,20 @@ static const XvSprite aquaman_sprites[] = {
 	{ 4, 0x0C, 4, 0xD9, XN_BN4_ART + 0x1D000, 0x800 },
 	{ 4, 0x0F, 4, 0xDA, XN_BN4_ART + 0x1D800, 0x800 },
 	{ 4, 0x10, 4, 0xDB, XN_BN4_ART + 0x1E000, 0x3800 },
-	{ 4, 0x0F, 4, 0xDC, XN_BN4_ART + 0x21800, 0x600 },
+	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0xDB40, 0x1C00 },
 };
 static const XvId aquaman_effects[] = { { 0x00, 0x9B }, { 0x15, 0x90 }, { 0x25, 0x95 }, { 0x23, 0x9C } };
 static const XvSong aquaman_songs[] = {
-	{ 0x90, 0x32, XN_BN4_ART + 0x21E00, 0x40 },   /* its sound 0x90, BN4's song copied */
-	{ 0x9E, 0x33, XN_BN4_ART + 0x21E40, 0x40 },   /* its sound 0x9e, BN4's song copied */
-	{ 0xA0, 0x63, XN_BN4_ART + 0x21E80, 0x900 },   /* its sound 0xa0, BN4's song copied */
-	{ 0xA1, 0xD0, XN_BN4_ART + 0x22780, 0x40 },   /* its sound 0xa1, BN4's song copied */
-	{ 0xC8, 0xE0, XN_BN4_ART + 0x227C0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
+	{ 0x90, 0x32, XN_BN4_ART + 0x21800, 0x40 },   /* its sound 0x90, BN4's song copied */
+	{ 0x9E, 0x33, XN_BN4_ART + 0x21840, 0x40 },   /* its sound 0x9e, BN4's song copied */
+	{ 0xA0, 0x63, XN_BN4_ART + 0x21880, 0x900 },   /* its sound 0xa0, BN4's song copied */
+	{ 0xA1, 0xD0, XN_BN4_ART + 0x22180, 0x40 },   /* its sound 0xa1, BN4's song copied */
+	{ 0xC8, 0xE0, XN_BN4_ART + 0x221C0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
 };
 static const XnSpawn aquaman_spawns[] = {
 	{ OWN(0x080CCF35), 0x1, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B826A: its first-kind 0x5c */
 };
-static const XnInit aquaman_init = { aquaman_spawns, 1, true, false, false, false };   /* (at its spawn's end, its +0x11, its sprite, its update) */
+static const XnInit aquaman_init = { aquaman_spawns, 1, true, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update, its panel at its +6) */
 
 
 static const XNavi bn4_aquaman = {

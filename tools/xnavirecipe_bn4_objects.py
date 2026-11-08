@@ -150,6 +150,32 @@ def fight_gates(f):
                                                  'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')
 
 
+def effects_of(b4, b6, f, alloc, navis):
+    """the effects his code spawns, as xrecipe_bn4.effects_of gives a family's, and what a Navi's ask past it: an effect of a
+    sprite he copies for his objects draws his copy, not a second (AquaMan's 0x23, his third kind 0x23's 4:0x0F); one spawned
+    with his side in r4 (facing_effects); one whose sprite another Navi copied listed by him too (navi_effect_sprites)"""
+    for sp in f.attack_sprites:
+        alloc.effect_sprites.setdefault((sp['list'], sp['index']), (sp, f.name))
+    X4.effects_of(b4, b6, f, alloc)
+    facing_effects(b4, b6, f, alloc)
+    navi_effect_sprites(b4, f, alloc, navis)
+
+
+def navi_effect_sprites(b4, f, alloc, navis):
+    """an effect's sprite another Navi copied (xrecipe_bn4.move_effect's 'listed by'): the installer finds one a family
+    installed before him (xvirus.c sprite_of), not a Navi, so its row is his too at the same place, its bytes checked the
+    same there where that Navi installed first (xvirus.c sprites_set; AquaMan's effect 0x0, WindMan's 5:0x0)"""
+    for e4, _ in f.effects:
+        row = b4.bytes(X4.BN4['effects'] + 4 * e4, 4)
+        key = (row[0] // 4, row[1])
+        have = alloc.effect_sprites.get(key)
+        if have is None or have[1] == f.name or have[1] not in navis or any((s['list'], s['index']) == key for s in f.attack_sprites):
+            continue
+        f.attack_sprites.append(dict(have[0]))
+        f.notes.append(f'its effect {e4:#x}\'s sprite {key[0]}:{key[1]:#x} is {have[1]}\'s copy ({have[0]["to_list"]}:'
+                       f'{have[0]["to_index"]:#x}): listed by him too, at its place')
+
+
 def facing_effects(b4, b6, f, alloc):
     """his effects spawned with his side in r4's second byte (lsls r4,r0,#8 of 0x0800ACA6's, then adds r4,#id: AquaMan's
     0x080F459E): the id the adds's, BN6's of the same look or moved as xrecipe_bn4.effects_of gives a movs's, the adds given

@@ -13,7 +13,8 @@ reading for every Navi (docs/multirom/bn4-navis.md, Companions):
   init's reads), or where its init updates its sprite (which BN6's actor init does after its companion start);
 - its init's other work: its +0x11 written (FireMan's 0, BN6's actor init's 0xFF: its +0x10 given at its spawn's end), its
   sprite updated, its update run (BN6's Navi frame at its spawn's end), its collision's flags (BN4's set_flag, r0 a
-  constant: BN6's struct2 flags that make the same, bn4_twins.INIT_FLAGS, its region the setup's r1);
+  constant: BN6's struct2 flags that make the same, bn4_twins.INIT_FLAGS, its region the setup's r1), its panel kept at its
+  +6 (AquaMan's, his decision's last panel: HOME_FORM);
 - its own generic states (its table's 0-5 where BN4's generic Navi state is not), each in its place of BN6's table;
 - its companions' interims: their routines no battle of theirs reaches kept as BN4's bytes (CUT, UNWALKED_TABLES), a mode
   run as another (COMPANION_MODES).
@@ -37,6 +38,9 @@ GENERIC_NAVI6_NAMES = ('spawned', 'on to its first state', 'deleted', 'flinching
 # ThunderMan's form of its spawn's r0 (0x080C3868-0x080C3872), the instructions before the call: movs r0,#hi; lsls r0,#16;
 # ldr r3,=table; ldrb r1,[r5,#4] (its version); ldrb r2,[r3,r1]; orrs r0,r2
 TABLE_FORM = ('movs', 'lsls', 'ldr_lit', 'ldrb', 'ldrb_r', 'orrs')
+# AquaMan's init's panel kept (0x080B8264): ldrh r0,[r5,#0x12] (its column and row, BN6's +0x12 too); strh r0,[r5,#6] (its
+# spawn's +6 and +7, which BN6's spawn leaves 0 for a Navi and his decision reads as his last panel, 0x080B833E)
+HOME_FORM = (('ldrh', (0, 5, 0x12)), ('strh', (0, 5, 6)))
 
 
 # ---- its spawns ----
@@ -151,7 +155,7 @@ def init_calls(b4, f, w, setup, setup_sites):
     """its init's calls past BN6's actor init's (tools/xnavirecipe_bn4.py navi_init): its companions' spawns, its collision's
     flags, its sprite updated, its update; f.init4 what its shims make (XnInit); the sites it answers"""
     done, f.spawns, f.moved1 = set(), [], getattr(f, 'moved1', {})
-    work = dict(anim=False, sprite=False, frame=False)
+    work = dict(anim=False, sprite=False, frame=False, home=False)
     sites = sorted(w.bls)
     for k, site in enumerate(sites):
         t = w.bls[site]
@@ -174,6 +178,10 @@ def init_calls(b4, f, w, setup, setup_sites):
         work['anim'] = True
         f.notes.append('its init writes its +0x11 (its animation set up again by its sprite step), where BN6\'s actor init writes '
                        '0xFF: its spawn\'s end gives it its +0x10')
+    addrs = sorted(w.insns)
+    if any(tuple((w.insns[b].form, tuple(w.insns[b].f)) for b in addrs[k:k + 2]) == HOME_FORM for k in range(len(addrs) - 1)):
+        work['home'] = True
+        f.notes.append('its init keeps its panel at its +6 (HOME_FORM), which BN6\'s spawn leaves 0: its spawn\'s end keeps it')
     coll = min(setup_sites) if setup_sites else None
     early = [s['site'] for s in f.spawns if coll is None or s['site'] < coll]
     at_end = bool(f.spawns) and (bool(early) or work['sprite'])
@@ -344,7 +352,7 @@ def c_init(f, n):
         f'{s["ty"]:#x}{f", BN4 r4 {s["r4"]:#x}" if s["r4"] not in (None, s["r4_6"]) else ""} */\n' for s in f.spawns)
     spawns = f'{n}_spawns' if f.spawns else 'NULL'
     text = f'static const XnSpawn {n}_spawns[] = {{\n{rows}}};\n' if f.spawns else ''
-    flags = ', '.join('true' if i[k] else 'false' for k in ('at_end', 'anim', 'sprite', 'frame'))
+    flags = ', '.join('true' if i[k] else 'false' for k in ('at_end', 'anim', 'sprite', 'frame') + (('home',) if i['home'] else ()))
     text += (f'static const XnInit {n}_init = {{ {spawns}, {len(f.spawns)}, {flags} }};   /* (at its spawn\'s end, its +0x11, its '
-             'sprite, its update) */\n')
+             f'sprite, its update{", its panel at its +6" if i["home"] else ""}) */\n')
     return text, f'\t.init = &{n}_init,   /* (its init\'s work past BN6\'s actor init: xnavi_init.c) */'
