@@ -517,7 +517,13 @@ only where his recipe's ids are the spec's foes, as a battle sprite's
 row). The mutation "SearchMan's art's room filled with another's" (his
 seat's byte of `XN_BN4_ARTS` made AquaMan's seat, 0x0A: AquaMan's sprites
 and songs loaded, SearchMan's entries left on another's bytes) is caught
-at t216, his marker's sprite's frames. HEAP_RESULT
+at t216, his marker's sprite's frames. The New 3DS's heap (`python3 tools/heap3ds.py --seeds 1-3 --cases
+bn4,all`, 8 November 2026) as before: BN6 and BN4 peak at 94.12 MB of 96
+with none refused; all three ROMs at 95.98 MB, 15 refused in 2 of 3 runs
+(the maps' mirror images, as on 5 November). The fill takes from the heap
+one sprite's unpacking at a time (the largest row's room 0x5500 bytes) and
+one song's packing (0x22C0 at most), each let go at once, and the room
+itself is the core's ROM copy, none of the heap.
 
 ### Room for all eighteen, measured
 
