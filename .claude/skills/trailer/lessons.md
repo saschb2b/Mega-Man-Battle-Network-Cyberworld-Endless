@@ -558,3 +558,8 @@ unchanged, 48 frames each), with B's four-on-the-floor under the
 tournament's anthem and the hook lifted a tone for BN4's Navis. A part
 doubled on the wave an octave up read to `music_check.py` as one bass
 leaping every note: double in unison.
+
+The owner on the second round (8 November 2026): "A, the full cut". The
+piece grown from A and the cut as rendered went out with 0.20.0. What
+turned it: reading the source game's battle tracks, not only the theme
+the look comes from, and holding the busier numbers as the floor.
