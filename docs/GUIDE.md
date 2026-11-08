@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:10:00Z }
 ---
 
 # The player's guide
@@ -71,8 +71,10 @@ statistics, troubleshooting and building the game yourself.
   and CirKill) visit BN6's battles, and BN5's where BN5 is there too, in
   the same one battle in four that BN5's viruses visit, MegaMan naming
   them as the older Net's. Each pays from its own game's rewards (a chip
-  BN6 has not got pays 200 zenny). The title's note says "BN4 found" as
-  the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
+  BN6 has not got pays 200 zenny). Once a run has reached the Nest, it
+  also brings a tournament to act 3's arena in half the runs: three Navis
+  in a row on BN4's own bracket, BN4's among them ([A run](#a-run)). The
+  title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
   New 3DS reads one of them, BN5's where both are there.
 
 No download and no page contains Capcom data. Without the ROM there is no
@@ -786,6 +788,16 @@ the next Navi yet to act. A teammate's battles are MegaMan's in that
 Navi's Soul from the first turn, on that Navi's own HP: if it runs out,
 he leaves the board, not the run.
 
+With BN4 Red Sun's ROM beside BN6's, once a run has reached the Nest, act
+3's arena in half the runs holds a tournament instead of one guardian (in
+the endless net, one of acts 3 to 5 each cycle): three Navis in a row,
+shown on BN4's own bracket screen, the act's card listing all three.
+They come from BN6's and BN5's Navis and BN4's own (GutsMan, ThunderMan,
+WindMan, FireMan, SearchMan, AquaMan and Roll). MegaMan's HP carries from
+round to round. Each round pays a Navi chip (its Navi's own, or for one
+of BN4's a BN6 Navi's) and the final his Guardian Data; a round lost
+ends the run.
+
 A run is **the short net**: three acts, then the Cybeast Nest on layer 10,
 about an hour. When the Nest's guardian falls, the run is won, and that
 opens **the endless net**: the long dive described below, repeating
@@ -901,8 +913,8 @@ first battle. Helped runs count for everything.
 EXTRAS holds what the run adds to BN6, each on or off, all on unless you
 switch one off: Liberation (BN5's Liberation Missions on a dark layer),
 Tournament (three Navis in a row in an act's arena from the third, once
-a run has reached the Nest, shown on BN4 Red Sun's own bracket: not in
-runs yet),
+a run has reached the Nest, with BN4 Red Sun's ROM, on BN4's own bracket;
+[A run](#a-run)),
 Glitch (the rare Glitch layer), Virus Battler, DarkChips (the flames of
 darkness) and, where another game's ROM is read, Older nets (its areas,
 Navis and viruses in BN6's net). A run keeps what it was started with,

@@ -113,7 +113,8 @@ and UNITE with it in every battle after. Online, it fills your NetPass.
 
 <p align="center">
 Put <i>Red Sun (USA)</i> there too, and BN4's five areas join the runs in its own tiles, music and battle
-backgrounds; from the second act six of its virus families visit the battles.
+backgrounds; from the second act six of its virus families visit the battles. Once you have reached
+the Nest, half the runs hold a tournament in act 3's arena: three Navis in a row on BN4's own bracket.
 </p>
 
 <h2 align="center">Runs leave options, not power</h2>
@@ -158,7 +159,7 @@ the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworl
 > [!IMPORTANT]
 > **You need your own ROM:** *Mega Man Battle Network 6: Cybeast Gregar (USA)*, unmodified.
 > *Battle Network 5: Team Colonel (USA)* and *Battle Network 4: Red Sun (USA)* beside it are optional: their
-> areas and viruses join the runs, and online BN5 fills the NetPass (NetBattles, trades, the week's DeepNet). No download and no page contains Capcom data; without the ROM there is
+> areas and viruses join the runs, BN4's tournament too, and online BN5 fills the NetPass (NetBattles, trades, the week's DeepNet). No download and no page contains Capcom data; without the ROM there is
 > no game. [What the game checks](docs/GUIDE.md#what-you-need).
 
 <p align="center">
