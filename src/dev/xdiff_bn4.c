@@ -13,6 +13,7 @@
 #include "rom.h"
 #include "xnavi_bn4.h"
 #include "xvirus_bn4.h"
+#include "xvirus_shim.h"
 
 #define BUDGET 9000   /* the guest's frames its battle may take, from its asking to its map or GAME OVER */
 
@@ -91,18 +92,46 @@ static const XVirusFamily *moved_bn4(int k, int *versions) {
 	return &xnavi_bn4[k - xvirus_bn4_count]->code;
 }
 
+/* (fams with f, where it is not there yet and there is room: its count) */
+static int with(const XVirusFamily **fams, int n, const XVirusFamily *f) {
+	for (int j = 0; j < n; ++j)
+		if (fams[j] == f) return n;
+	if (n < MAX_FOES) fams[n++] = f;
+	return n;
+}
+
+/* (a Navi's summons' families too, her fight's: Roll's Mettaurs, docs/multirom/bn4-navis.md, Roll built) */
+static int summoned(const XNavi *x, const XVirusFamily **fams, int n) {
+	for (int j = 0; x->summon && j < x->summon->nids; ++j)
+		for (int k = 0; k < xvirus_bn4_count; ++k) {
+			const XVirusFamily *f = xvirus_bn4[k];
+			if (x->summon->ids[j].to >= f->first_id && x->summon->ids[j].to < f->first_id + XV_VERSIONS) n = with(fams, n, f);
+		}
+	return n;
+}
+
 int xd4_families(const Spec *s, const XVirusFamily **fams) {
 	int n = 0;
 	for (int i = 0; i < s->nfoes; ++i)
 		for (int k = 0; k < xvirus_bn4_count + xnavi_bn4_count; ++k) {
 			int versions;
 			const XVirusFamily *f = moved_bn4(k, &versions);
-			bool mine = false, had = false;
+			bool mine = false;
 			for (int v = 0; v < versions; ++v) mine = mine || f->names[v] == s->foes[i].id;
-			for (int j = 0; j < n; ++j) had = had || fams[j] == f;
-			if (mine && !had) fams[n++] = f;
+			if (!mine) continue;
+			n = with(fams, n, f);
+			if (k >= xvirus_bn4_count) n = summoned(xnavi_bn4[k - xvirus_bn4_count], fams, n);
 		}
 	return n;
+}
+
+int xd4_summon_draws(const XVirusFamily *const *fams, int n, XvMoved *out, int max) {
+	int k = 0;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < xnavi_bn4_count && k < max; ++j)
+			if (fams[i] == &xnavi_bn4[j]->code && xnavi_bn4[j]->summon)
+				out[k++] = (XvMoved){ BN4_SPAWN_ENEMY_DRAW, xnavi_bn4[j]->summon->at + XV_SHIM_SUMMON_DRAW, 2 };
+	return k;
 }
 
 int xd4_family_count(void) { return dev.bn4families ? xvirus_bn4_count : 0; }

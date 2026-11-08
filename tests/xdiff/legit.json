@@ -2664,6 +2664,20 @@
         "why": "The fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC, through 0x08003210 / 0x08003278) stores the caller's r4 at the object's +4, as the third kind's does (ThunderMan's 0x70's spawn's r4, above). Roll's flash, the fourth kind's 0x17 moved with her, is spawned by its own spawner (0x080E3AD8: push {lr}; push {r5}; movs r0,#0x17; the spawn) from MegaMan's states 46 and 47 of BN4 (her warp and her summon), copied with her (their bls at 0x080EFC74, 0x080EFDD2 and 0x080EFE8C, each after r1-r3 from her +0x34 and an adds to r3, r4 untouched), so +4 holds what r4 held as each game's state runner called the state: in BN4 0x13, in BN6 her AI data's address (as ThunderMan's 0x70's). No code of the flash reads its +4 to +7: its routine (0x080E3A98-0x080E3AD6) loads +0xB, +0x20 and +0x34 to +0x3C alone, and the routines it calls take their registers alone (0x08014620, a jitter of r1 and r3 by a draw; BN4_SPAWN_EFFECT 0x080E18EE, BN6's twin 0x080E1932, r4 its effect; the object's free 0x080033D4). roll_v1 at t66 (BN4) and t67 (BN6)"
       },
       {
+        "name": "a summoned Mettaur's +0xF, BN4's spawn's enemy id",
+        "spawn_leftover": {
+          "kind": "T1",
+          "type": "0x2E4",
+          "bytes": {
+            "0x0f": [
+              "0x01",
+              "0x00"
+            ]
+          }
+        },
+        "why": "BN4's spawn of an enemy into a fight under way (BN4_SPAWN_ENEMY, Roll's summon) writes the enemy's id at its +0xF (BN4_T1_NAME_ID: strb r0,[r4,#0xf] at 0x080F0158), which BN4's HP display reads as the enemy appears (0x08015ADC: ldrb r2,[r5,#0xf], the summoned appear's step 2, 0x08010128); BN6's spawn of one (BN6_SPAWN_ENEMY_1, the summon's shim's) writes its NameID at +0x28 instead, which BN6's HP display reads (0x0801DC98: ldrh r2,[r5,#0x28]), and leaves +0xF 0, a byte BN6's own generic states keep a count in (0x08016716). No code of BN4's Mettaur, moved, reads its +0xF (tools/xrecipe_bn4.py's walks of its states, its appear and its shockwave): BN4's 1 against BN6's 0 alone, so a write of either engine's after the spawn still parts"
+      },
+      {
         "name": "the wind's gust's sprite flag 0x80, BN6's",
         "whose": "engine",
         "kind": "T3",
