@@ -165,4 +165,21 @@
 #define BN4_STEP_BEGIN    0x0801393Eu /* an object's step onto a panel begun: collision flags 0x100 and 4 (0x0801398C, 0x08013992), and no
                                        * byte of the object's (BN6_STEP_BEGIN's twin, which sets its +0x0F) */
 
+/* AquaMan, derived after FireMan (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, AquaMan built): found by his type, each
+ * checked by the generator against his ROM */
+#define BN4_AQUAMAN       0x080B820Cu /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_AQUAMAN]): jump table 0x080B8224 (init
+                                       * 0x080B8231, update 0x080B8293, dying BN4_NAVI_DYING), then the after-step; his block to 0x080B8520 */
+#define BN4_AQUAMAN_STATES 0x080B82A8u /* his state table: BN4's generic Navi 0-5, his decision 6 (0x080B82D5), MegaMan's 81-84 as his 7-10 */
+#define BN4_AQUAMAN_TABLES 0x080B81F8u /* his tables below his routine, to BN4_AQUAMAN */
+#define BN4_AQUAMAN_PANEL 0x06        /* his object's +6 (u16): his panel, which his init keeps there (0x080B8264) and his decision reads as
+                                       * his last (0x080B833E) and writes anew (0x080B8344); BN6's spawn leaves a Navi's 0 */
+#define BN4_AQUAMAN_COMPANION 0x74    /* his object's companion (the first kind's 0x5C, BN4_T1_COMPANION, kind 1) */
+#define BN4_COMPANION_UPDATE 0x080CCD3Cu /* the 0x5C's update: its owner's place, flag 2 and sprite fields copied, then its mode (+9) */
+#define BN4_COMPANION_MODE8 0x080CCE8Cu /* ... its mode 8: its kind's routine (+4), then the after-step (0x080143FC) unless time is stopped */
+#define BN4_COMPANION_KIND1 0x080CCECCu /* ... kind 1's (AquaMan's): +0xC set and flag 2 cleared while its owner's +0x10 is not 0, then
+                                         * +0xC cleared and +0x11 0xFF (its animation set up again by the after-step) once it is */
+#define BN4_EFFECT_PATTERN 0x0801457Eu /* effects spawned on the panels around (r0, r1) by a pattern (r3, BN4_EFFECT_PATTERNS'), r2 the
+                                        * effect (each a call of BN4_SPAWN_EFFECT with r4 its r2), r4 the side: BN6_EFFECT_PATTERN the same body */
+#define BN4_EFFECT_PATTERNS 0x080125B0u /* ... its patterns' pointers (its literal at 0x080146A0) */
+
 #endif
