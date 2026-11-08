@@ -1,0 +1,15 @@
+{
+  "about": "BN4 Red Sun's Roll V3 (BN4's enemy 0x82, a Soul Navi) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, as roll_v1: BN4's own battle on the guest core against her move into BN6's engine (src/emu/xnavi_bn4.c, installed after BN4's families), her summons by her version's list (Mettaur3, Billy3 and BN4's 0x39: 0x03 and 0x0F moved as 0x2E6 and 0x2C2, 0x39 by its own recipe) spawned by BN6's spawn of an enemy into a fight under way and arriving by BN4's summoned appear (bn4_twins.SUMMON_APPEAR; docs/multirom/bn4-navis.md, Roll's versions), BN6's draws replayed from BN4's; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "82@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1
+}
