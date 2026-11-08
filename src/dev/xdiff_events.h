@@ -96,8 +96,9 @@ void xd_log_bn4(const XdGame *g);
  * which are no foe's code in a spec without one). */
 XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis);
 /* A range of code keyed as its game's, beside the families' (`to` its place in BN6's ROM, `from` its game's): a BN4
- * Navi's summon's draw, its shim's, as BN4_SPAWN_ENEMY's (xdiff_bn4.h xd4_summon_draws) */
-void xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len);
+ * Navi's summon's draw, its shim's, as BN4_SPAWN_ENEMY's (xdiff_bn4.h xd4_summon_draws); false, said on stderr, where
+ * the log has no room for it: the log is not to be read then, a block of code unwatched */
+bool xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len);
 /* The spec's foes' BN5 ids, for the logs started after: a Navi's code is a foe's where `navis` and its Navi is one of them
  * (another Navi's copy of BN5's engine code is its engine's there) */
 #define XD_NAVI_IDS_MAX 8

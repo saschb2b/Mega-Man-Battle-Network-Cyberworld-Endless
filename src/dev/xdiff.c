@@ -208,12 +208,12 @@ static void header_out(Side *g) {
 	w32(g, (uint32_t)g->v.game);
 	w32(g, g->v.coll_size);
 	w32(g, g->v.panel_size);
-	static XvMoved m[XV_MOVED_MAX];
-	int n = g->v.game == 6 ? xvirus_moved(m, XV_MOVED_MAX) : 0, kept = 0;
-	for (int i = 0; i < n; ++i)
-		if (xd_moved_kept(m[i].to)) m[kept++] = m[i];
+	int n = 0, kept = 0;
+	const XvMoved *m = g->v.game == 6 ? xvirus_moved(&n) : NULL;   /* (whole: subject() begins no battle without them) */
+	for (int i = 0; i < n; ++i) kept += xd_moved_kept(m[i].to);
 	w32(g, (uint32_t)kept);
-	for (int i = 0; i < kept; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
+	for (int i = 0; i < n; ++i)
+		if (xd_moved_kept(m[i].to)) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
 	w32(g, PLAYER_SIZE);
 	w32(g, APART_SIZE);
 }
@@ -621,8 +621,8 @@ static int poke_range(const XvMoved *m, int n, const Poke *p) {
  * aimed at another routine; those in RAM (`ram`) once the game has booted,
  * over what it copied there (IWRAM's routines, from their image) */
 static void pokes_put(const Spec *s, bool ram) {
-	static XvMoved m[XV_MOVED_MAX];
-	int n = xvirus_moved(m, XV_MOVED_MAX);
+	int n;
+	const XvMoved *m = xvirus_moved(&n);
 	for (int i = 0; i < s->npokes; ++i) {
 		const Poke *p = &s->pokes[i];
 		uint32_t at = p->at;
@@ -728,6 +728,10 @@ static bool subject(Side *g, const Spec *s) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}
+	/* (every range the installs moved, or no battle: with a part of them some moved code goes uncompared, xvirus_moved.h) */
+	int nmoved;
+	if (!xvirus_moved(&nmoved)) return false;
+	printf("xdiff: %d ranges moved\n", nmoved);
 	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();
@@ -881,13 +885,16 @@ static int spec_families(const Spec *s, const XVirusFamily **fams) {
 	return n;
 }
 
-/* (a BN4 Navi's summon's draw keyed as BN4_SPAWN_ENEMY's in both logs: xdiff_bn4.h xd4_summon_draws) */
-static void summon_keys(XdLog *a, XdLog *b, const XVirusFamily *const *fams, int n) {
+/* (a BN4 Navi's summon's draw keyed as BN4_SPAWN_ENEMY's in both logs, a BN4 spec's: xdiff_bn4.h xd4_summon_draws; false
+ * where a log had no room for one) */
+static bool summon_keys(const Spec *s, XdLog *a, XdLog *b, const XVirusFamily *const *fams, int n) {
 	XvMoved keys[4];
-	for (int k = 0, nk = xd4_summon_draws(fams, n, keys, 4); k < nk; ++k) {
-		xd_log_key(a, keys[k].from, keys[k].to, keys[k].len);
-		xd_log_key(b, keys[k].from, keys[k].to, keys[k].len);
+	bool ok = true;
+	for (int k = 0, nk = s->bn4 ? xd4_summon_draws(fams, n, keys, 4) : 0; k < nk; ++k) {
+		ok = xd_log_key(a, keys[k].from, keys[k].to, keys[k].len) && ok;
+		ok = xd_log_key(b, keys[k].from, keys[k].to, keys[k].len) && ok;
 	}
+	return ok;
 }
 
 static bool logs_start(Side *a, Side *b, const Spec *s) {
@@ -906,7 +913,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (a->v.game == 4) xd_log_bn4(&xd4_routines);
 	a->log = a->out && hooked ? xd_log_start(a->v.game, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
-	if (s->bn4) summon_keys(a->log, b->log, fams, n);
+	if (!summon_keys(s, a->log, b->log, fams, n)) return false;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
@@ -937,6 +944,7 @@ static void summary(const Side *a, const Side *b, const Spec *s) {
 int xdiff_run(const char *text) {
 	static Spec s;
 	static Side a, b;
+	xvirus_moved_keep();   /* (before any install: the traces' moved ranges, xvirus_moved.h) */
 	if (!xd_spec_parse(text, &s)) {
 		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/devtools/differential.md)\n");
 		return 2;
