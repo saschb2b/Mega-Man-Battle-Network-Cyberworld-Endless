@@ -7,9 +7,9 @@ pitch classes, the drums' places in the bar and the form, bar by bar.
 
     python3 .claude/skills/trailer/scripts/song_habits.py GAME SONG [--offset TICKS] [--bars] [--detail] [--theory]
 
-GAME is bn6 or bn5 (the ROMs told by their SHA-1 in build.py's ROM folder),
+GAME is bn6, bn5 or bn4 (the ROMs told by their SHA-1 in build.py's ROM folder),
 SONG the song's number in its game's table (docs/rom/: BN6's at
-0x159F48, BN5's at 0x155BF4; a title's or battle's number from the
+0x159F48, BN5's at 0x155BF4, BN4's at 0x155FF8; a title's or battle's number from the
 disassembly or by listening with `build.py shot --render-song`). A song
 that starts on a pickup counts its bars late: --offset TICKS moves the bar
 line (the first track's first downbeat, read off the first notes printed),
@@ -33,7 +33,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..',
 sys.path.insert(0, ROOT)
 import build  # noqa: E402  (the ROM folder and the ROMs' SHA-1)
 
-TABLES = {'bn6': (build.BN6_SHA1, 0x159F48), 'bn5': (build.BN5_SHA1, 0x155BF4)}
+TABLES = {'bn6': (build.BN6_SHA1, 0x159F48), 'bn5': (build.BN5_SHA1, 0x155BF4),
+          'bn4': (build.BN4_SHA1, 0x155FF8)}   # (docs/rom/bn4.md, Songs)
 LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 28, 30, 32, 36, 40,
        42, 44, 48, 52, 54, 56, 60, 64, 66, 68, 72, 76, 78, 80, 84, 88, 90, 92, 96]
 KINDS = {0: 'Direct Sound', 8: 'Direct Sound (fixed)', 1: 'square 1', 2: 'square 2', 3: 'wave', 4: 'noise',

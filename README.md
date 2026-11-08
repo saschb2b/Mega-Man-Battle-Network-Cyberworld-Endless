@@ -22,7 +22,7 @@ Jack MegaMan into a net that is new every run, and meet other players' MegaMen i
 <p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク、オンライン対応。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
 
 <p align="center">
-<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.19.0 trailer, 51 seconds with sound: its title card as an Options page in BN6's PET look, the Cyberworld Endless logo over SEE IT AS YOU SET IT and a 0.19.0 · OUT NOW pill. Watch the 0.19.0 trailer"></a>
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.20.0 trailer, 44 seconds with sound: its title card in the manner of BN4 Red Sun's tournament bracket, the Cyberworld Endless logo over RED SUN JOINS and a red 0.20.0 · OUT NOW tab. Watch the 0.20.0 trailer"></a>
 </p>
 
 <p align="center">

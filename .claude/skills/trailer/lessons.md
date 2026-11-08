@@ -484,3 +484,51 @@ section each, the hats up, the kick for the lows: 6.0% above 3 kHz against
 the recording's 6.0%, 35/38/26/2 against 44/33/21/2, punch 7.4 dB against
 5.1. Gate 3 now asks for the squares' doubling and the highs within a
 point of the recording's.
+
+## 0.20.0: Red Sun joins (2026-11-08), `tools/trailers/v0_20_0.py`
+
+The release: BN4 Red Sun beside BN6 (its ROM on the ROMs screen, its five
+net areas, six of its virus families visiting battles), the tournament
+as an act's climax on BN4's own bracket screen, and BN4's Navis in its
+draw; Glitch layers and the setup's EXTRAS page lesser. Made by an agent
+in one time box, footage, sketches, piece and cut together; the owner's
+gates 4 and 5 (his pick of a sketch, his word on the cut) still wait.
+
+The music: BN4's song 0x17, the tournament's own theme
+(docs/multirom/bn4.md), read with `song_habits.py bn4 0x17 --offset 12`
+(BN4's song table added to the script): 140 beats a minute, bare fifths
+rocking a semitone over a bass that repeats the bar's root (88% of its
+moves, 1.1 pitches a bar), the kick on every beat, the lead on both
+squares with an echo four ticks later from the other side, a busy
+four-tick sampled arpeggio right of centre, a held sample left. Two
+sketches in the soundfont (`sketch_sun_a.py`, "Bracket", the song's A;
+`sketch_sun_b.py`, "Final", its held B), both "busier than the source:
+none" once the bass kept the bar's root and the arpeggio the bar's first
+chord (their first drafts walked the bass to each half bar's root and
+leapt octaves: 3.6 pitches a bar against 1.1). A grown into 25 bars at
+144 with B's anthem as the tournament's segment; the piece's lead first
+read 5.4 pitches a bar against 3.2 and was calmed by repeating notes
+before its leaps. Highs above 3 kHz 6.8%; there is no recording of 0x17
+to hold them against.
+
+The look: the release as a tournament, the trailer its bracket. Four
+plates in the right column, one a segment, each with its segment's
+picture small, grey until its round, red while it plays, gold once won,
+their lines climbing to the semis and the final; the game's window at 3x
+beside it, every cut the bracket's red line running in from the right
+with the new picture drawn behind it; the section label a red ROUND tab;
+Nimbus Sans Narrow Bold upright; a faint red sun behind the bracket; the
+stinger the bracket's lines meeting in the logo. The cold open is BN4's
+own bracket with every entrant's face, then ThunderMan's fight.
+
+What went wrong on the way: the ROMs screen's canvas is larger than the
+240 x 160 the capture keeps, so its frame is the screen's middle and
+showed the dev run's data folder (covered in the cut); a forced
+tournament from a run is a long autopilot (seed 6 from layer 9), so the
+bracket came from the `bracket` dev step and the Navis from `foes`; the
+setup's EXTRAS page says of the Tournament "Not in runs yet" on this
+build, so its tile is held on the page's first line.
+
+Devices now used up: the bracket as the frame, plates turning grey to
+red to gold, the line running in as the cut, the ROUND tab, the lines
+meeting in the logo as the stinger.
