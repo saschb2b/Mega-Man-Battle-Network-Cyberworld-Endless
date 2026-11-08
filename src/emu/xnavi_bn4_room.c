@@ -89,10 +89,16 @@ bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists) {
 uint32_t xnavi_bn4_summoner(uint32_t id) {
 	for (int i = 0; i < xvirus_bn4_count; ++i) {
 		const XVirusFamily *f = xvirus_bn4[i];
-		if (!f->summoned || id < (uint32_t)f->first_id || id >= (uint32_t)f->first_id + XV_VERSIONS) continue;
+		uint32_t first = (uint32_t)f->first_id;
+		if (!f->summoned || id < first || id >= first + XV_VERSIONS) continue;
+		/* (the Navi who summons any version of the family: its sounds are the family's, in his pool whichever version he
+		 * brings, so a version he never brings, fought alone (Melody's V1, where Roll brings her V3), takes his room and pool
+		 * too; without them its sounds' slots name his room unfilled, and MP2K plays the free space's padding as a song) */
 		for (int k = 0; k < xnavi_bn4_count; ++k)
-			for (int j = 0; xnavi_bn4[k]->summon && j < xnavi_bn4[k]->summon->nids; ++j)
-				if (xnavi_bn4[k]->summon->ids[j].to == id) return (uint32_t)xnavi_bn4[k]->code.first_id;
+			for (int j = 0; xnavi_bn4[k]->summon && j < xnavi_bn4[k]->summon->nids; ++j) {
+				uint32_t to = xnavi_bn4[k]->summon->ids[j].to;
+				if (to >= first && to < first + XV_VERSIONS) return (uint32_t)xnavi_bn4[k]->code.first_id;
+			}
 	}
 	return 0;
 }
