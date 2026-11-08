@@ -1586,6 +1586,14 @@
     "0815A264:00160016:4"
    ],
    "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its music players, ms and me), where her install put her sound 0x131 on BN6's player 9 (tools/xnavirecipe_bn4.py song_player, XvSong.player), made BN4's player 22, which BN6 keeps for its hit sound 0x6B alone: her attack's sound cut where MegaMan is struck (caught at t204, the family's sounds)"
+  },
+  {
+   "name": "Roll's shot of another kind",
+   "spec": "roll_v1",
+   "poke": [
+    "080BC300:07:1"
+   ],
+   "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9, copied with her as raw data; tools/xnavirecipe_bn4_objects.py KINDS_BY_VERSION) V1's made 7: her decision gives MegaMan's state 45 V2's shot (caught at t385, her AI data's +0xAC)"
   }
  ]
 }

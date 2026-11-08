@@ -15,6 +15,6 @@
   "verdict": {
     "is": "FAIL",
     "at": 1008,
-    "why": "her port under way (docs/multirom/bn4-navis.md, Roll built): t1-t1007 the same (her decision, her MegaMan's states 44-47, her flash, her pool sounds, her draws replayed); at t1008 her summon puts its enemy on the same panel with the same id, HP and side, but the enemy is each engine's own Mettaur (BN4's id 1, BN4's own code; BN6's id 1, BN6's own Mettaur standing in by name, docs/multirom/bn4.md, Only what is new visits): its record (+1 its type, +5, +0xB, +0xF, +0x20, its sprite), its collision's +0x28 and its panel's reservation are each engine's, unmapped until BN4's Mettaur is mapped or moved"
+    "why": "her port under way (docs/multirom/bn4-navis.md, Roll built): t1-t1007 the same (her decision, her MegaMan's states 44-48, her flash, her shots and their hits, her pool sounds, her draws replayed); at t1008 her summon puts its enemy on the same panel with the same id, HP and side, but the enemy is each engine's own Mettaur (BN4's id 1, BN4's own code; BN6's id 1, BN6's own Mettaur standing in by name, docs/multirom/bn4.md, Only what is new visits): its record (+1 its type, +5, +0xB, +0xF, +0x20, its sprite), its collision's +0x28 and its panel's reservation are each engine's, unmapped until BN4's Mettaur is mapped or moved"
   }
 }
