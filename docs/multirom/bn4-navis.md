@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1160,8 +1160,11 @@ tables](../rom/bn4.md) (Roll derived). What she adds:
   On BN4's player, BN6's hit sound cut her attack's 0x131 (`roll_v1` at
   t204), so a pooled song whose BN4 player BN6 keeps for one song of its
   own goes on the BN6 player most of that BN4 player's numbers take in BN6,
-  9 (`tools/xnavirecipe_bn4.py` `song_player`, `XvSong.player`). No other
-  BN4 Navi's pooled song is on such a player.
+  9 (`tools/xnavirecipe_bn4.py` `song_player`, `XvSong.player`), past the
+  players her pool's other songs keep: 10 for hers since her summoned
+  Mettaur's 0x8B, on BN4's 9, joined her pool ([Roll's
+  versions](#rolls-versions)). No other BN4 Navi's pooled song is on such a
+  player.
 
 `bn4_roll_control` PASSes (her summon at t1008 among it). **`roll_v1`**
 (Roll V1 alone at (5,2) against MegaMan idle at (2,2) with 2000 HP, as
@@ -1257,8 +1260,9 @@ BN6's own (`0x080164A0`) from the next frame. Settled so:
   `xd4_families`, `tools/xdiff_bn4.py` `summoned_foes`), keys her
   summon's draw as `BN4_SPAWN_ENEMY`'s (`XV_SHIM_SUMMON_DRAW`), and allows
   two engine differences with their evidence: the summoned Mettaur's
-  +0xF (BN4's spawn writes its enemy id there for BN4's HP display, BN6's
-  its NameID at +0x28: 1 against 0 alone) and her flash's spawn's r4 where
+  +0xF (BN4's +0xE as the trace moves it, its appear queue's number, 1
+  against BN6's 0 alone; read as its enemy id at first, which Mettaur V1's
+  1 matched: [Roll's versions](#rolls-versions)) and her flash's spawn's r4 where
   her turn began hidden (BN4's object runner's read of her +0, 0x11, as
   0x13 where she began it visible).
 
@@ -1269,17 +1273,88 @@ its summoned Mettaur arriving as BN6's (t1008), the appear's fall 4 a
 frame (t1008), and its queue's head test aimed at the nullsub (t1060).
 She joins the tournament's proved list (`src/layer/xguardian_bn4.c`:
 plate `BN4_PLATE_ROLL`, "The Summoning Petal", pink; the owner's to
-change). Left: her V2-SP summons (Billy2 and Billy3, BN4's summoned
-appear not theirs, as Billy is a visitor; 0x39, V3's type 0x11, moved by
-no recipe: six decisions of the families' generator, a pre-step, a
-collision setup, a call with no twin, two sounds and room), proved by no
-spec yet.
+change). Her V2, V3 and SP, their summoned Billys among them, are
+[Roll's versions](#rolls-versions).
 
 Seven mutations break her port before her summon and each is caught: her decision's
 CurAction off by one (t1), her AI block at BN4's +0x64 (t1), her flash's
 effect another (t66), her warp's sound at another pool slot (t67), her
 attack's sprite at BN4's list (t195), her player-22 sound on BN6's
 hit player (t204) and her shot of another kind (t385).
+
+## Roll's versions
+
+Built and proved on 8 November 2026: Roll V2, V3 and SP (BN4's 0x81-0x83,
+BN6's 0x381-0x383), each alone at (5,2) against MegaMan idle at (2,2)
+with 2000 HP, as `roll_v1` (`roll_v2`, `roll_v3`, `roll_sp`), and V2 over
+2400 fight frames to reach her second summon (`roll_v2_summons`). Her
+summon takes her version's list in order (her +6 the next, `0x080BC3B4`),
+so each version's first summon is its Mettaur (V2 at t998, V3 at t988, SP
+at t978) and its second its Billy (V2 at t2050, SP at t2026); V3's 0x39
+is her third. What they took:
+
+- **A summoned Billy arrives by BN4's summoned appear.** Billy is a
+  visitor family: its state 0 is BN6's generic one (`0x08016380`), which
+  takes BN6's own appear of an enemy spawned into a fight under way
+  (`0x080164A0`) by its AI data's +2, so the summon's +5 2 meant nothing
+  to it. BN6's battle actor setup writes +5 and that +2 from one argument
+  (`0x080076F0`-`0x080076F2`, `BN6_T1_SPAWN_KIND`), 0 or 1; only the
+  summon's shim writes 2 (`BN4_SUMMON_MARK`). Settled at the summon,
+  where it belongs, not in each family: BN6's virus dispatcher's call of
+  its state runner (`BN6_VIRUS_STATE_CALL`, `0x0810A352`, r0 the state
+  table by AI index) is hooked (`src/emu/xnavi_summoned.c`), and a moved
+  family's enemy so marked, in its state 0, runs from the table a word
+  past the summon's shim names: the family moved for the summon's
+  (Mettaur's), whose state 0 is BN4's generic one with its summoned
+  appear (`bn4_twins.SUMMON_APPEAR`). One copy of the appear serves every
+  family a summon spawns (0x39's family too, once moved), no family's
+  recipe changes, and a visitor's own state 0, its arrival in a battle,
+  stays BN6's (`billy_v1`-`billy_v3` PASS as before). Weighed and left:
+  BN4's generic state 0 copied into every family a summon names, as
+  Mettaur's is, would have moved its flash's effect (0x2E) and sprite
+  with Billy, the first family, renumbering every family's moved effects
+  after it and growing the first room; a wrapper state 0 in Billy's home
+  would have needed the copy's address from another family's recipe.
+- **Her pool's songs on players apart.** Her 0x96 and 0x131 (BN4's
+  player 22) went on BN6's 9, where her summoned Mettaur's 0x8B (pool
+  slot 0xE0) keeps BN4's 9; at t1880 of V2 both begin in one frame and the
+  0x8B cut her 0x131, as BN4's two players never do. A song moved off its
+  player now passes the players its pool's other songs keep
+  (`tools/xnavirecipe_bn4_sounds.py` `songs_of`, `song_player`): 10.
+- **SP's palette.** BN4 gives a Navi's palette by `BN4_NAVI_PALETTE`
+  (`0x0800B950`: its number's byte, `0x0800B9B1`, times its version's,
+  `0x0800B9AC`: 0, 0, 0, 2): V1-V3 0, SP 2 or 4 (Roll's 4). BN6's actor
+  init gives a Navi 0 for versions 0-3 (`0x0800F334`,
+  `BN6_NAVI_PALETTE_VERSIONS`), so every BN4 Navi's SP had V1's colours
+  (the interim FireMan's section noted). The generator writes each
+  Navi's palettes by version (`XNavi.palettes`) and its spawn's end sets
+  its version's (`BN6_AI_VERSION`, AI data +0x16) through
+  `BN6_SPRITE_PALETTE_SET` (`src/emu/xnavi_init.c` `palette`): `roll_sp`
+  the same from t1, every other BN4 Navi's V1 as before.
+- **The comparator**, additions alone: a Navi's version at AI data +0x16
+  and +0x17, BN6's (its actor setup's, from the id's triple: V1's 0 met
+  BN4's 0); a word read whole because its value looks like a pointer held
+  to the bytes of it that differ (V3's 0x02020000 at +0x14); her flash's
+  spawn's r4 for V2, V3 and SP, as V1's; and a summoned enemy's +0xF read
+  right: on BN4's side it is BN4's +0xE as the trace moves it, its appear
+  queue's number (the battle state's +9 counted up: 1 her first summon, 2
+  her second), not its enemy id, as the V1 entry had it from Mettaur V1's
+  id 1; each summoned version's pair (a Billy's read as the word at +0xC,
+  its 0x02030000 looking like a pointer).
+
+**`roll_v2`, `roll_v3` and `roll_sp` PASS over their 1200 fight frames
+and `roll_v2_summons` over its 2400**, Billy2's summoned appear, turns and
+attacks after it the same in both. `roll_v3` stands as a PASS that
+reaches her Mettaur3 alone: Billy3 and 0x39 come later in her battle and
+no spec proves them yet. Seven mutations are caught: her V2's summon
+list's first id another (BN4 `0x080BC3EB`, t963), her V2's shot of V1's
+kind (BN4 `0x080BC301`, t380), her SP's shot of V3's kind (BN4
+`0x080BC303`, t370), her SP's summon list's first id another (BN4
+`0x080BC3F2`, t943), her V2's second summon Billy3 (BN4 `0x080BC3EC`,
+t2015), the summon's word made 0 so the summoned Billy arrives by its own
+state 0, BN6's appear (standing for BN4's `0x0800FCCE` branch to
+`0x0801002A`, t2050), and her 0x131 back on BN6's player 9 (BN6's song
+table, t1880).
 
 ## SearchMan, AquaMan and Roll folded
 

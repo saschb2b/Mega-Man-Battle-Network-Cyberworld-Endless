@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:20:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1046,10 +1046,18 @@ format, its game 4: the trace's header names it):
   in the comparison: their code keyed as hers (`src/dev/xdiff_bn4.c`
   `xd4_families`), their effects mapped (`xdiff_bn4.py` `summoned_foes`),
   her summon's draw, its shim's, keyed as `BN4_SPAWN_ENEMY`'s
-  (`xd4_summon_draws`, `XV_SHIM_SUMMON_DRAW`), and the summoned Mettaur's
-  +0xF, BN4's spawn's enemy id where BN6's spawn writes its NameID at
-  +0x28, allowed as BN4's 1 against BN6's 0 alone. `mettaur4_v1` fights
-  that Mettaur alone and PASSes.
+  (`xd4_summon_draws`, `XV_SHIM_SUMMON_DRAW`), and a summoned enemy's
+  +0xF, BN4's +0xE as the trace moves it (its appear queue's number: 1
+  her first summon, 2 her second), allowed against BN6's 0 alone, each
+  summoned version's own pair (a Billy's read as the word at +0xC, as its
+  value looks like a pointer). `mettaur4_v1` fights that Mettaur alone and
+  PASSes. Her other versions (`roll_v2`, `roll_v3`, `roll_sp`; V2 over
+  2400 frames, both her summons, in `roll_v2_summons`) add a Navi's version
+  at AI data +0x16 and +0x17, BN6's (its actor setup's, from the id's
+  triple), a word read whole held to its differing bytes (V3's 0x02020000
+  at +0x14), and her flash's spawn's r4 for each version
+  ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md), Roll's
+  versions).
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
