@@ -186,5 +186,7 @@
 #define BN6_SPRITE_PALETTE_SET 0x08002D80u /* r0 into the sprite's +4 (BN4_SPRITE_PALETTE_SET's twin) */
 #define BN6_T3_PALETTE        0x0F        /* a moved BN4 third-kind object's palette (BN4_T3_PALETTE): BN6's +0xF, which BN6's engine reads
                                              only on its actors (0x0800E468, 0x08016716-0x080167E6, 0x0801A3DA-0x0801AEF8) */
+#define BN6_EFFECT_PATTERN    0x0801BD3Cu /* effects spawned on the panels around (r0, r1) by a pattern (r3), r2 the effect, r4 the side
+                                             (BN4_EFFECT_PATTERN's twin by body; its patterns' pointers at 0x08019B78) */
 
 #endif

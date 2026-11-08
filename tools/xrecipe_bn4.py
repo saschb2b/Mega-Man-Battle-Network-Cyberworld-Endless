@@ -570,10 +570,12 @@ def spawns_of(f, alloc):
                 continue
             kind, name = SPAWNERS4[t]
             ty, chain = T.back_value(w, site, 0)
-            if kind != 3 or ty not in f.moved3 or len(chain) != 1 or chain[0][1] != 'movs':
+            # (a fourth-kind type a Navi's recipe moves: f.moved4, tools/xnavirecipe_bn4_summon.py's)
+            moved = f.moved3 if kind == 3 else getattr(f, 'moved4', {}) if kind == 4 else {}
+            if ty not in moved or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('type', f'{site:08X}: it spawns a {kind} type {ty if ty is None else hex(ty)} which it does not move')
                 continue
-            m = f.moved3[ty]
+            m = moved[ty]
             if 'as' not in m:
                 m['as'] = alloc.types[kind]
                 alloc.types[kind] += 1
@@ -736,10 +738,14 @@ def effects_of(b4, b6, f, alloc):
         for site, t in w.bls.items():
             if t == BN4['effect']:
                 v, chain = T.back_value(w, site, 4)
+                # (an id with a parameter in its high byte, lsls #8 then adds #id: Roll's flash's, the fourth kind's 0x17)
+                if v is not None and len(chain) == 2 and chain[0][1] == 'adds8' and chain[1][1] == 'lsls' and chain[1][2] == 8:
+                    ids.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
+                    continue
                 if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= BN4['neffects']:
                     f.decide('effect', f'an effect spawned at {site:08X} by an id made otherwise ({chain})')
                     continue
-                ids.setdefault(v, []).append(chain[0][0])
+                ids.setdefault(v, []).append((chain[0][0], 'THUMB_MOVS'))
     for v, at in sorted(ids.items()):
         e6, how = effect_twin(b4, b6, v), 'the same look'
         if e6 is None:
@@ -747,8 +753,8 @@ def effects_of(b4, b6, f, alloc):
         if e6 is None:
             continue
         if e6 != v:
-            for a in sorted(set(at)):
-                f.imms.append(dict(at=a, form='THUMB_MOVS', rd=4, rn=0, was=v, now=e6, why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 ({how})'))
+            for a, form in sorted(set(at)):
+                f.imms.append(dict(at=a, form=form, rd=4, rn=0, was=v, now=e6, why=f'its effect: {v:#x} in BN4, {e6:#x} in BN6 ({how})'))
         f.notes.append(f'its effect {v:#x}: BN6\'s {e6:#x}, ' + ('BN6\'s own of the same sprite, animation and palette' if how != 'moved' else
                        'moved (no effect of BN6\'s draws its sprite\'s bytes)'))
 
@@ -1143,8 +1149,9 @@ def c_recipe(f):
         L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
     if getattr(f, 'songs', None):
         L.append(f'static const XvSong {n}_songs[] = {{')
-        L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, XV_ART + 0x{x["at"] - XV_ART:X}, 0x{x["room"]:X} }},   /* its sound {x["song"]:#x}, '
-              f'BN4\'s song copied */' for x in f.songs]
+        L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, XV_ART + 0x{x["at"] - XV_ART:X}, 0x{x["room"]:X}'
+              f'{f", {x["player"]}" if x.get("player") else ""} }},   /* its sound {x["song"]:#x}, BN4\'s song copied'
+              f'{f", on BN6\'s player {x["player"]}" if x.get("player") else ""} */' for x in f.songs]
         L.append('};')
     L += c_family(f, n)
     return '\n'.join(L), f'&bn4_{n}'

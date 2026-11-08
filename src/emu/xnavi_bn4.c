@@ -534,18 +534,18 @@ static const XvRef thunderman_states[] = {
 };
 static const XvSprite thunderman_sprites[] = {
 	{ 2, 0x06, 2, 0x45, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 4, 0x2D, 4, 0xCB, XN_BN4_ART + 0x3C00, 0x2000 },
-	{ 4, 0x11, 4, 0xCC, XN_BN4_ART + 0x5C00, 0x1000 },
-	{ 4, 0x2E, 4, 0xCD, XN_BN4_ART + 0x6C00, 0x800 },
-	{ 5, 0x14, 5, 0x9B, XN_BN4_ART + 0x7400, 0x700 },
-	{ 5, 0x13, 5, 0x9C, XN_BN4_ART + 0x7B00, 0xC00 },
+	{ 4, 0x2D, 4, 0xCB, XN_BN4_ART + 0x0, 0x2000 },
+	{ 4, 0x11, 4, 0xCC, XN_BN4_ART + 0x2000, 0x1000 },
+	{ 4, 0x2E, 4, 0xCD, XN_BN4_ART + 0x3000, 0x800 },
+	{ 5, 0x14, 5, 0x9B, XN_BN4_ART + 0x3800, 0x700 },
+	{ 5, 0x13, 5, 0x9C, XN_BN4_ART + 0x3F00, 0xC00 },
 };
 static const XvId thunderman_effects[] = { { 0x47, 0x9A } };
 static const XvSong thunderman_songs[] = {
-	{ 0xAD, 0x32, XN_BN4_ART + 0x8700, 0xB80 },   /* its sound 0xad, BN4's song copied */
-	{ 0xB8, 0x33, XN_BN4_ART + 0x9280, 0x840 },   /* its sound 0xb8, BN4's song copied */
-	{ 0x143, 0x63, XN_BN4_ART + 0x9AC0, 0x840 },   /* its sound 0x143, BN4's song copied */
-	{ 0x148, 0xD0, XN_BN4_ART + 0xA300, 0x840 },   /* its sound 0x148, BN4's song copied */
+	{ 0xAD, 0x32, XN_BN4_ART + 0x4B00, 0xB80 },   /* its sound 0xad, BN4's song copied */
+	{ 0xB8, 0x33, XN_BN4_ART + 0x5680, 0x840 },   /* its sound 0xb8, BN4's song copied */
+	{ 0x143, 0x63, XN_BN4_ART + 0x5EC0, 0x840 },   /* its sound 0x143, BN4's song copied */
+	{ 0x148, 0xD0, XN_BN4_ART + 0x6700, 0x840 },   /* its sound 0x148, BN4's song copied */
 };
 static const XnSpawn thunderman_spawns[] = {
 	{ OWN(0x080C3D85), XN_R4_ANY, 0x080C3888, 0x14, 0x00, 0x00, 0x00 },   /* 080C3874: its first-kind 0x33 */
@@ -819,19 +819,19 @@ static const XvRef windman_states[] = {
 };
 static const XvSprite windman_sprites[] = {
 	{ 2, 0x03, 2, 0x42, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 4, 0x28, 4, 0xCE, XN_BN4_ART + 0xAB40, 0x800 },
-	{ 4, 0x29, 4, 0xCF, XN_BN4_ART + 0xB340, 0x800 },
-	{ 4, 0x2A, 4, 0xD0, XN_BN4_ART + 0xBB40, 0x800 },
-	{ 4, 0x2B, 4, 0xD1, XN_BN4_ART + 0xC340, 0x800 },
-	{ 4, 0x2F, 4, 0xD2, XN_BN4_ART + 0xCB40, 0x1000 },
-	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0xDB40, 0x1C00 },
+	{ 4, 0x28, 4, 0xCE, XN_BN4_ART + 0x0, 0x800 },
+	{ 4, 0x29, 4, 0xCF, XN_BN4_ART + 0x800, 0x800 },
+	{ 4, 0x2A, 4, 0xD0, XN_BN4_ART + 0x1000, 0x800 },
+	{ 4, 0x2B, 4, 0xD1, XN_BN4_ART + 0x1800, 0x800 },
+	{ 4, 0x2F, 4, 0xD2, XN_BN4_ART + 0x2000, 0x1000 },
+	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0x3000, 0x1C00 },
 };
 static const XvId windman_effects[] = { { 0x00, 0x9B }, { 0x15, 0x90 } };
 static const XvSong windman_songs[] = {
-	{ 0xB2, 0x32, XN_BN4_ART + 0xF740, 0x1640 },   /* its sound 0xb2, BN4's song copied */
-	{ 0xC8, 0x33, XN_BN4_ART + 0x10D80, 0xB40 },   /* its sound 0xc8, BN4's song copied */
-	{ 0x126, 0x63, XN_BN4_ART + 0x118C0, 0x1F00 },   /* its sound 0x126, BN4's song copied */
-	{ 0x133, 0xD0, XN_BN4_ART + 0x137C0, 0x16C0 },   /* its sound 0x133, BN4's song copied */
+	{ 0xB2, 0x32, XN_BN4_ART + 0x4C00, 0x1640 },   /* its sound 0xb2, BN4's song copied */
+	{ 0xC8, 0x33, XN_BN4_ART + 0x6240, 0xB40 },   /* its sound 0xc8, BN4's song copied */
+	{ 0x126, 0x63, XN_BN4_ART + 0x6D80, 0x1F00 },   /* its sound 0x126, BN4's song copied */
+	{ 0x133, 0xD0, XN_BN4_ART + 0x8C80, 0x16C0 },   /* its sound 0x133, BN4's song copied */
 };
 static const XnSpawn windman_spawns[] = {
 	{ OWN(0x080CCF35), 0x2, 0x00000000, 0x00, 0x60, 0x60, 0x00 },   /* 080C3292: its first-kind 0x5c */
@@ -1189,18 +1189,18 @@ static const XvRef fireman_states[] = {
 };
 static const XvSprite fireman_sprites[] = {
 	{ 2, 0x05, 2, 0x44, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
-	{ 3, 0x0E, 4, 0xD3, XN_BN4_ART + 0x14E80, 0x1000 },
-	{ 3, 0x11, 4, 0xD4, XN_BN4_ART + 0x15E80, 0x1000 },
-	{ 3, 0x02, 4, 0xD5, XN_BN4_ART + 0x16E80, 0x1000 },
-	{ 4, 0x0A, 4, 0xD6, XN_BN4_ART + 0x17E80, 0x2000 },
-	{ 4, 0x08, 4, 0xD7, XN_BN4_ART + 0x19E80, 0x1800 },
+	{ 3, 0x0E, 4, 0xD3, XN_BN4_ART + 0x0, 0x1000 },
+	{ 3, 0x11, 4, 0xD4, XN_BN4_ART + 0x1000, 0x1000 },
+	{ 3, 0x02, 4, 0xD5, XN_BN4_ART + 0x2000, 0x1000 },
+	{ 4, 0x0A, 4, 0xD6, XN_BN4_ART + 0x3000, 0x2000 },
+	{ 4, 0x08, 4, 0xD7, XN_BN4_ART + 0x5000, 0x1800 },
 };
 static const XvId fireman_effects[] = { { 0x15, 0x90 } };
 static const XvSong fireman_songs[] = {
-	{ 0x8F, 0x32, XN_BN4_ART + 0x1B680, 0x80 },   /* its sound 0x8f, BN4's song copied */
-	{ 0xA8, 0x33, XN_BN4_ART + 0x1B700, 0x40 },   /* its sound 0xa8, BN4's song copied */
-	{ 0xA9, 0x63, XN_BN4_ART + 0x1B740, 0x40 },   /* its sound 0xa9, BN4's song copied */
-	{ 0xC0, 0xD0, XN_BN4_ART + 0x1B780, 0x880 },   /* its sound 0xc0, BN4's song copied */
+	{ 0x8F, 0x32, XN_BN4_ART + 0x6800, 0x80 },   /* its sound 0x8f, BN4's song copied */
+	{ 0xA8, 0x33, XN_BN4_ART + 0x6880, 0x40 },   /* its sound 0xa8, BN4's song copied */
+	{ 0xA9, 0x63, XN_BN4_ART + 0x68C0, 0x40 },   /* its sound 0xa9, BN4's song copied */
+	{ 0xC0, 0xD0, XN_BN4_ART + 0x6900, 0x880 },   /* its sound 0xc0, BN4's song copied */
 };
 static const XnSpawn fireman_spawns[] = {
 	{ OWN(0x080CC5F5), 0xD710, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B7E16: its first-kind 0x57, BN4 r4 0x810 */
@@ -1239,7 +1239,1007 @@ static const XNavi bn4_fireman = {
 	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
 	.init = &fireman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 };
-const XNavi *const xnavi_bn4[] = { &bn4_gutsman, &bn4_thunderman, &bn4_windman, &bn4_fireman };
+/* ---- BN4's SearchMan (its type 0x2b there, its enemy ids 140-143), as Navi AI 51 with ids 0x38c-0x38f ---- */
+
+static const XvBlock searchman_blocks[] = {
+	{ 0x080C11F8, 0x080C151C, XN_BN4_CODE + 0x5EE0, 0xCC5717E1u },
+	{ 0x080D87B0, 0x080D8878, XN_BN4_CODE + 0x6210, 0xEE768607u },
+	{ 0x080D7B64, 0x080D7D94, XN_BN4_CODE + 0x62E0, 0x71045A30u },
+	{ 0x080E5588, 0x080E5740, XN_BN4_CODE + 0x6510, 0x008C5168u },
+	{ 0x080E589C, 0x080E5B50, XN_BN4_CODE + 0x66D0, 0xE26AEFB0u },
+	{ 0x080D95CC, 0x080D9828, XN_BN4_CODE + 0x6990, 0x80642A2Du },
+	{ 0x080E64FC, 0x080E65E0, XN_BN4_CODE + 0x6BF0, 0x26BA0CAAu },
+	{ 0x0800A2E4, 0x0800A34E, XN_BN4_CODE + 0x6CE0, 0x2EEEEC12u },
+	{ 0x0800AD2A, 0x0800B130, XN_BN4_CODE + 0x6D52, 0x2BC6F75Du },
+	{ 0x0800BDAA, 0x0800BDBC, XN_BN4_CODE + 0x7162, 0xFBBA31FBu },
+	{ 0x0800C0A6, 0x0800C0DA, XN_BN4_CODE + 0x7182, 0xC1233806u },
+	{ 0x0800C9AC, 0x0800C9BA, XN_BN4_CODE + 0x71C0, 0xA9D6138Du },
+	{ 0x0800CA28, 0x0800CA4A, XN_BN4_CODE + 0x71D0, 0xDCE85B3Du },
+	{ 0x080DF332, 0x080DF36C, XN_BN4_CODE + 0x7202, 0x060C3CC2u },
+	{ 0x080F0F64, 0x080F0F88, XN_BN4_CODE + 0x7240, 0xF15BEE4Bu },
+	{ 0x080F0F88, 0x080F0FB2, XN_BN4_CODE + 0x7270, 0xAB725CCEu },
+	{ 0x080F0FB2, 0x080F0FF0, XN_BN4_CODE + 0x72A2, 0xBC2BF68Cu },
+	{ 0x080F0FF0, 0x080F1030, XN_BN4_CODE + 0x72E0, 0x9B39EAC0u },
+	{ 0x080F1030, 0x080F1068, XN_BN4_CODE + 0x7320, 0x98B3FF6Bu },
+	{ 0x080F1068, 0x080F1096, XN_BN4_CODE + 0x7360, 0x1BFFD103u },
+	{ 0x080F1096, 0x080F10F0, XN_BN4_CODE + 0x7392, 0x95725CEDu },
+	{ 0x080F10F0, 0x080F1110, XN_BN4_CODE + 0x73F0, 0xB0175748u },
+	{ 0x080F1110, 0x080F1142, XN_BN4_CODE + 0x7410, 0xACE83B61u },
+	{ 0x080F1142, 0x080F1178, XN_BN4_CODE + 0x7452, 0x4D9911A4u },
+	{ 0x080F1178, 0x080F1244, XN_BN4_CODE + 0x7490, 0x4A890B06u },
+	{ 0x080F1244, 0x080F124A, XN_BN4_CODE + 0x7560, 0xBE868227u },
+	{ 0x080F124A, 0x080F1262, XN_BN4_CODE + 0x7572, 0x4083D653u },
+	{ 0x080F1262, 0x080F1274, XN_BN4_CODE + 0x7592, 0x4ACE48F9u },
+	{ 0x080F1274, 0x080F1290, XN_BN4_CODE + 0x75B0, 0x123F8351u },
+	{ 0x080F1290, 0x080F12BC, XN_BN4_CODE + 0x75D0, 0x3140D1B0u },
+	{ 0x080F12BC, 0x080F12E6, XN_BN4_CODE + 0x7600, 0x179E9893u },
+	{ 0x080F12E6, 0x080F1314, XN_BN4_CODE + 0x7632, 0xE1FBF794u },
+	{ 0x080F1314, 0x080F133E, XN_BN4_CODE + 0x7660, 0xD34E8B99u },
+	{ 0x080F133E, 0x080F137C, XN_BN4_CODE + 0x7692, 0xF79D5787u },
+	{ 0x080F137C, 0x080F13AE, XN_BN4_CODE + 0x76D0, 0x9694EB11u },
+	{ 0x080F13AE, 0x080F13CC, XN_BN4_CODE + 0x7712, 0xD03724DCu },
+	{ 0x080F13CC, 0x080F1416, XN_BN4_CODE + 0x7730, 0xA24EF4A5u },
+	{ 0x080F1416, 0x080F1426, XN_BN4_CODE + 0x7782, 0x33B00DC5u },
+	{ 0x080F1428, 0x080F1448, XN_BN4_CODE + 0x77A0, 0x91801A37u },
+	{ 0x080F1448, 0x080F1480, XN_BN4_CODE + 0x77C0, 0x704BC5EFu },
+	{ 0x080F1480, 0x080F14AE, XN_BN4_CODE + 0x7800, 0x1295256Du },
+	{ 0x080F14AE, 0x080F1664, XN_BN4_CODE + 0x7832, 0xFE2DE1D7u },
+	{ 0x080F1664, 0x080F1674, XN_BN4_CODE + 0x79F0, 0x1D710FF0u },
+};
+static const XvData searchman_data[] = {
+	{ 0x080C11F8, 0x080C120A, XV_ZERO },
+	{ 0x080C120A, 0x080C120C, XV_RAW },
+	{ 0x080C120C, 0x080C12B8, XV_ZERO },
+	{ 0x080C12B8, 0x080C12C0, XV_RAW },
+	{ 0x080C12D2, 0x080C12D4, XV_RAW },
+	{ 0x080C12D4, 0x080C12D8, XV_POOL },
+	{ 0x080C12D8, 0x080C12DC, XV_TABLE },
+	{ 0x080C13B8, 0x080C13BC, XV_POOL },
+	{ 0x080C13EC, 0x080C13F0, XV_POOL },
+	{ 0x080C13F0, 0x080C13F4, XV_RAW },
+	{ 0x080C1410, 0x080C141C, XV_POOL },
+	{ 0x080C141C, 0x080C1428, XV_RAW },
+	{ 0x080C1428, 0x080C142C, XV_POOL },
+	{ 0x080C142C, 0x080C1430, XV_RAW },
+	{ 0x080C1478, 0x080C147C, XV_POOL },
+	{ 0x080C147C, 0x080C148C, XV_RAW },
+	{ 0x080C14FC, 0x080C1500, XV_POOL },
+	{ 0x080C1500, 0x080C1518, XV_RAW },
+	{ 0x080C1518, 0x080C151C, XV_POOL },
+	{ 0x080D87BE, 0x080D87C0, XV_RAW },
+	{ 0x080D87C0, 0x080D87C4, XV_POOL },
+	{ 0x080D87C4, 0x080D87D0, XV_TABLE },
+	{ 0x080D7B76, 0x080D7B78, XV_RAW },
+	{ 0x080D7B78, 0x080D7B7C, XV_POOL },
+	{ 0x080D7B7C, 0x080D7B88, XV_TABLE },
+	{ 0x080D7C54, 0x080D7C58, XV_POOL },
+	{ 0x080D7C58, 0x080D7C64, XV_TABLE },
+	{ 0x080D7CE4, 0x080D7CE8, XV_POOL },
+	{ 0x080D7D6C, 0x080D7D70, XV_POOL },
+	{ 0x080E55A8, 0x080E55AC, XV_POOL },
+	{ 0x080E55AC, 0x080E55B8, XV_TABLE },
+	{ 0x080E562E, 0x080E5630, XV_RAW },
+	{ 0x080E5630, 0x080E5634, XV_POOL },
+	{ 0x080E5634, 0x080E5640, XV_TABLE },
+	{ 0x080E5682, 0x080E5684, XV_RAW },
+	{ 0x080E5684, 0x080E5688, XV_POOL },
+	{ 0x080E5688, 0x080E56A0, XV_RAW },
+	{ 0x080E56DC, 0x080E56E0, XV_POOL },
+	{ 0x080E56E0, 0x080E56E4, XV_RAW },
+	{ 0x080E589C, 0x080E58B4, XV_RAW },
+	{ 0x080E58CC, 0x080E58D0, XV_POOL },
+	{ 0x080E58D0, 0x080E58DC, XV_TABLE },
+	{ 0x080E593C, 0x080E5944, XV_RAW },
+	{ 0x080E5944, 0x080E5948, XV_POOL },
+	{ 0x080E5948, 0x080E5960, XV_TABLE },
+	{ 0x080E5A1C, 0x080E5A24, XV_POOL },
+	{ 0x080E5A98, 0x080E5A9C, XV_POOL },
+	{ 0x080E5A9C, 0x080E5AA0, XV_RAW },
+	{ 0x080E5B44, 0x080E5B4C, XV_RAW },
+	{ 0x080E5B4C, 0x080E5B50, XV_POOL },
+	{ 0x080D95DE, 0x080D95E0, XV_RAW },
+	{ 0x080D95E0, 0x080D95E4, XV_POOL },
+	{ 0x080D95E4, 0x080D95F0, XV_TABLE },
+	{ 0x080D96A6, 0x080D96AC, XV_RAW },
+	{ 0x080D96AC, 0x080D96B0, XV_POOL },
+	{ 0x080D96B0, 0x080D96C4, XV_TABLE },
+	{ 0x080D9822, 0x080D9824, XV_RAW },
+	{ 0x080D9824, 0x080D9828, XV_POOL },
+	{ 0x080E650E, 0x080E6510, XV_RAW },
+	{ 0x080E6510, 0x080E6514, XV_POOL },
+	{ 0x080E6514, 0x080E6520, XV_TABLE },
+	{ 0x080E65DA, 0x080E65E0, XV_RAW },
+	{ 0x0800AD7E, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B130, XV_POOL },
+	{ 0x080DF344, 0x080DF364, XV_ZERO },
+	{ 0x080DF364, 0x080DF36C, XV_POOL },
+	{ 0x080F0F78, 0x080F0F7C, XV_POOL },
+	{ 0x080F0F7C, 0x080F0F88, XV_TABLE },
+	{ 0x080F102A, 0x080F102C, XV_ZERO },
+	{ 0x080F102C, 0x080F1030, XV_POOL },
+	{ 0x080F104E, 0x080F1050, XV_ZERO },
+	{ 0x080F1050, 0x080F1054, XV_POOL },
+	{ 0x080F1054, 0x080F1068, XV_TABLE },
+	{ 0x080F10EA, 0x080F10EC, XV_ZERO },
+	{ 0x080F10EC, 0x080F10F0, XV_POOL },
+	{ 0x080F10FE, 0x080F1100, XV_ZERO },
+	{ 0x080F1100, 0x080F1104, XV_POOL },
+	{ 0x080F1104, 0x080F1110, XV_TABLE },
+	{ 0x080F1236, 0x080F1238, XV_ZERO },
+	{ 0x080F1238, 0x080F123C, XV_POOL },
+	{ 0x080F123C, 0x080F1244, XV_RAW },
+	{ 0x080F12FA, 0x080F12FC, XV_ZERO },
+	{ 0x080F12FC, 0x080F1300, XV_POOL },
+	{ 0x080F1300, 0x080F1314, XV_TABLE },
+	{ 0x080F1466, 0x080F1468, XV_ZERO },
+	{ 0x080F1468, 0x080F146C, XV_POOL },
+	{ 0x080F146C, 0x080F1480, XV_TABLE },
+	{ 0x080F164E, 0x080F1650, XV_ZERO },
+	{ 0x080F1650, 0x080F1654, XV_POOL },
+	{ 0x080F1654, 0x080F1664, XV_RAW },
+};
+static const XvPair searchman_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002CEA, 0x08002C7E },   /* map:bytes, SAME */
+	{ 0x08002D4C, 0x08002CE0 },   /* map:bytes, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E1C, 0x08002DB0 },   /* map:bytes, SAME */
+	{ 0x08002E44, 0x08002DD8 },   /* map:bytes, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002F54, 0x08002F02 },   /* project:fireman, SAME */
+	{ 0x08002F90, 0x08002F3E },   /* map:bytes, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x08003058, 0x08003006 },   /* map:bytes, SAME */
+	{ 0x0800307C, 0x0800302A },   /* map:bytes, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08007A8C, 0x0800A2F0 },   /* map:bytes, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009AEC, 0x0800C938 },   /* project:gutsman, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009E98, 0x0800CC72 },   /* map:bytes, SAME */
+	{ 0x08009ED8, 0x0800CCB2 },   /* map:calls+bytes, SAME */
+	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
+	{ 0x0800A0A2, 0x0800CFA6 },   /* project:spikey, SAME */
+	{ 0x0800A0D8, 0x0800CFDC },   /* project:research, SAME */
+	{ 0x0800A10E, 0x0800D012 },   /* project:research, SAME */
+	{ 0x0800A192, 0x0800D06A },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800B0CA, 0x0800EB6C },   /* project:project:searchman, DIFF (audited) */
+	{ 0x0800BFC0, 0x0800FFEE },   /* map:bytes, SAME */
+	{ 0x0800C126, 0x080101AE },   /* project:project:searchman, LAYOUT */
+	{ 0x0800C13C, 0x080101C4 },   /* project:project:searchman, LAYOUT */
+	{ 0x0800C456, 0x080103BC },   /* project:gutsman, DIFF (audited) */
+	{ 0x0800D772, 0x080136CC },   /* search, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080124C8, 0x080198CE },   /* map:calls, LAYOUT */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x0801457E, 0x0801BD3C },   /* map:bytes, SAME */
+	{ 0x08014620, 0x0801BDDE },   /* map:bytes, SAME */
+	{ 0x0801466A, 0x0801BE28 },   /* map:calls, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080CDCE4, 0x0801156A },   /* project:families-2, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+	{ 0x080E65DA, 0x080E60E2 },   /* project:project:searchman, SAME */
+};
+static const XvImm searchman_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800AD6A, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD6C, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800C0BC, THUMB_LDR, 0, 4, 0x7C, 0x50 },   /* collision data +0x7c in BN4, +0x50 in BN6 */
+	{ 0x0800C0C6, THUMB_STR, 0, 4, 0x7C, 0x50 },   /* collision data +0x7c in BN4, +0x50 in BN6 */
+	{ 0x0800C0CA, THUMB_LDR, 0, 4, 0x7C, 0x50 },   /* collision data +0x7c in BN4, +0x50 in BN6 */
+	{ 0x0800C0D6, THUMB_STR, 0, 4, 0x7C, 0x50 },   /* collision data +0x7c in BN4, +0x50 in BN6 */
+	{ 0x0800C9B4, THUMB_ADDS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x0800CA40, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080C1306, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 set (BN4_SET_ACTION's r0) */
+	{ 0x080C1336, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 set (BN4_SET_ACTION's r0) */
+	{ 0x080C1370, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 set (BN4_SET_ACTION's r0) */
+	{ 0x080C13AC, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 set (BN4_SET_ACTION's r0) */
+	{ 0x080C13BE, THUMB_MOVS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080C13CA, THUMB_MOVS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080C13DE, THUMB_MOVS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080C1408, THUMB_MOVS, 2, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080D7B8C, THUMB_MOVS, 2, 0, 0x24, 0xD9 },   /* its object's sprite: list 4 0x24 in BN4, list 4 0xd9 in BN6 (copied) */
+	{ 0x080D7C1A, THUMB_MOVS, 0, 0, 0xC8, 0xD0 },   /* its sound 0xc8: BN4's copied into BN6's empty slot 0xd0, on its player 11 */
+	{ 0x080D7D3E, THUMB_MOVS, 2, 0, 0x0, 0x9B },   /* its effect (r2 of 0801457E): 0x0 in BN4, 0x9b in BN6 (moved) */
+	{ 0x080D7D52, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D7D60, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's empty slot 0x3a, on its player 9 */
+	{ 0x080D7D74, THUMB_MOVS, 0, 0, 0x52, 0xF6 },   /* its object's type 0x52: moved, the dispatch's 0xf6 */
+	{ 0x080D8820, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D8830, THUMB_MOVS, 4, 0, 0x8, 0x9C },   /* its effect: 0x8 in BN4, 0x9c in BN6 (moved; his shot's hit (the third kind's 0x57): r4 8 ORed with the RNG's bit 1 shifted to bit 9, BN4_SPAWN_EFFECT's flip, the id its low byte) */
+	{ 0x080D8858, THUMB_MOVS, 0, 0, 0x57, 0xF7 },   /* its object's type 0x57: moved, the dispatch's 0xf7 */
+	{ 0x080D95F4, THUMB_MOVS, 2, 0, 0x1E, 0xDA },   /* its object's sprite: list 4 0x1e in BN4, list 4 0xda in BN6 (copied) */
+	{ 0x080D9634, THUMB_STRB, 1, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D9686, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D970C, THUMB_MOVS, 0, 0, 0x5, 0xE0 },   /* its sound 0x104 (movs and adds #0xff) at the pool's 0xe0 */
+	{ 0x080D970E, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x104 (movs and adds #0xff) at the pool's 0xe0 */
+	{ 0x080D980A, THUMB_MOVS, 0, 0, 0x60, 0xF8 },   /* its object's type 0x60: moved, the dispatch's 0xf8 */
+	{ 0x080DF33E, THUMB_LDR, 0, 3, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080E55BC, THUMB_MOVS, 2, 0, 0x22, 0xDB },   /* its object's sprite: list 4 0x22 in BN4, list 4 0xdb in BN6 (copied) */
+	{ 0x080E572A, THUMB_MOVS, 0, 0, 0x2E, 0xE0 },   /* its object's type 0x2e: moved, the dispatch's 0xe0 */
+	{ 0x080E5A30, THUMB_MOVS, 0, 0, 0xC1, 0x63 },   /* its sound 0xc1: BN4's copied into BN6's empty slot 0x63, on its player 8 */
+	{ 0x080E5B38, THUMB_MOVS, 0, 0, 0x31, 0xE1 },   /* its object's type 0x31: moved, the dispatch's 0xe1 */
+	{ 0x080E652A, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
+	{ 0x080E652C, THUMB_MOVS, 2, 0, 0x2D, 0xD8 },   /* its object's sprite: list 3 0x2d in BN4, list 4 0xd8 in BN6 (copied) */
+	{ 0x080E65C6, THUMB_MOVS, 0, 0, 0x3E, 0xE2 },   /* its object's type 0x3e: moved, the dispatch's 0xe2 */
+	{ 0x080F0F68, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F1034, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F1152, THUMB_MOVS, 0, 0, 0x90, 0x32 },   /* its sound 0x90: BN4's copied into BN6's empty slot 0x32, on its player 8 */
+	{ 0x080F12EA, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F13DC, THUMB_MOVS, 0, 0, 0xBB, 0x33 },   /* its sound 0xbb: BN4's copied into BN6's empty slot 0x33, on its player 14 */
+	{ 0x080F144C, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F166C, THUMB_LDRH, 1, 0, 0x1A, 0x26 },   /* collision data +0x1a in BN4, +0x26 in BN6 */
+};
+static const XvNumber searchman_numbers[] = {
+	{ 0x080D7D6C, 0x0405FF09, 0x0405FF09 },   /* a collision region's spawn word (SearchMan's shot's, 0x080D7D56, r4 of 0x080CD7E2: BN6's 0x080C6BDA), as 0x0405FF01 */
+	{ 0x080DF364, 0x0A800000, 0x0A800000 },   /* the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), where the thunder's update tests the same mask, 0xFF800000, in both games */
+	{ 0x080DF368, 0x05800000, 0x05800000 },   /* SearchMan's shot's test (0x080DF332): the hits word's bits of a side 0 object's foes (0x0A800000 a side 1 one's), as BN4_COLL_MASKS' and BN6_COLL_MASKS' alliance bits */
+};
+static const XvPair searchman_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+	{ 0x0801056F, 0x08016C9D },   /* project:project:searchman, SAME */
+};
+static const XvByte searchman_bytes[] = {
+	{ 0x080E589D, 0x23, 0xDC },   /* its fourth-kind 0x31's kind 0: list 4 0x23 in BN4, 0xdc copied */
+	{ 0x080E58A1, 0x1F, 0xDD },   /* its fourth-kind 0x31's kind 1: list 4 0x1f in BN4, 0xdd copied */
+	{ 0x080E58A5, 0x21, 0xDE },   /* its fourth-kind 0x31's kind 2: list 4 0x21 in BN4, 0xde copied */
+};
+static const XvType searchman_types[] = {
+	{ 3, 0xF6, XV_TYPE_MOVED, 0x52 },   /* BN4's third-kind 0x52, moved, the dispatch's 0xf6 */
+	{ 3, 0xF7, XV_TYPE_MOVED, 0x57 },   /* BN4's third-kind 0x57, moved, the dispatch's 0xf7 */
+	{ 3, 0xF8, XV_TYPE_MOVED, 0x60 },   /* BN4's third-kind 0x60, moved, the dispatch's 0xf8 */
+	{ 4, 0xE0, XV_TYPE_MOVED, 0x2E },   /* BN4's fourth-kind 0x2e, moved, the dispatch's 0xe0 */
+	{ 4, 0xE1, XV_TYPE_MOVED, 0x31 },   /* BN4's fourth-kind 0x31, moved, the dispatch's 0xe1 */
+	{ 4, 0xE2, XV_TYPE_MOVED, 0x3E },   /* BN4's fourth-kind 0x3e, moved, the dispatch's 0xe2 */
+};
+static const XvRef searchman_states[] = {
+	BN6(0x08016381), BN6(0x08017889), BN6(0x080170C5), BN6(0x080174FF), BN6(0x080175B9), BN6(0x080178B7), BN6(0x08017689), BN6(0x08017769), OWN(0x080C12C1), OWN(0x080F0F65), OWN(0x080F1031), OWN(0x080F12E7), OWN(0x080F1449),
+};
+static const XvSprite searchman_sprites[] = {
+	{ 2, 0x04, 2, 0x43, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
+	{ 3, 0x2D, 4, 0xD8, XN_BN4_ART + 0x0, 0x800 },
+	{ 4, 0x24, 4, 0xD9, XN_BN4_ART + 0x800, 0x800 },
+	{ 4, 0x1E, 4, 0xDA, XN_BN4_ART + 0x1000, 0x1800 },
+	{ 4, 0x22, 4, 0xDB, XN_BN4_ART + 0x2800, 0x800 },
+	{ 4, 0x23, 4, 0xDC, XN_BN4_ART + 0x3000, 0x800 },
+	{ 4, 0x1F, 4, 0xDD, XN_BN4_ART + 0x3800, 0x1800 },
+	{ 4, 0x21, 4, 0xDE, XN_BN4_ART + 0x5000, 0x1000 },
+	{ 5, 0x05, 5, 0x9E, XN_BN4_ART + 0x6000, 0x5500 },
+	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0xB500, 0x1C00 },
+};
+static const XvId searchman_effects[] = { { 0x08, 0x9C }, { 0x00, 0x9B } };
+static const XvSong searchman_songs[] = {
+	{ 0x90, 0x32, XN_BN4_ART + 0xD100, 0x40 },   /* its sound 0x90, BN4's song copied */
+	{ 0xBB, 0x33, XN_BN4_ART + 0xD140, 0x900 },   /* its sound 0xbb, BN4's song copied */
+	{ 0xC1, 0x63, XN_BN4_ART + 0xDA40, 0x80 },   /* its sound 0xc1, BN4's song copied */
+	{ 0xC8, 0xD0, XN_BN4_ART + 0xDAC0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
+	{ 0x104, 0xE0, XN_BN4_ART + 0xE600, 0x14C0 },   /* its sound 0x104, BN4's song copied */
+	{ 0x105, 0x104, XN_BN4_ART + 0xFAC0, 0x1480 },   /* its sound 0x105, BN4's song copied */
+	{ 0x109, 0x117, XN_BN4_ART + 0x10F40, 0xF40 },   /* its sound 0x109, BN4's song copied */
+	{ 0x128, 0x148, XN_BN4_ART + 0x11E80, 0x40 },   /* its sound 0x128, BN4's song copied */
+	{ 0x12F, 0x150, XN_BN4_ART + 0x11EC0, 0x40 },   /* its sound 0x12f, BN4's song copied */
+};
+static const XvSoundCall searchman_sound_calls[] = {
+	{ 0x080D966C, 0x104 },   /* its sound 0x105 (movs and adds #0xff) at the pool's 0x104, past a byte */
+	{ 0x080E5678, 0x148 },   /* its sound 0x128 (movs and adds #0xff) at the pool's 0x148, past a byte */
+	{ 0x080E56F8, 0x150 },   /* its sound 0x12f (movs and adds #0xff) at the pool's 0x150, past a byte */
+	{ 0x080E5976, 0x148 },   /* its sound 0x128 (movs and adds #0xff) at the pool's 0x148, past a byte */
+	{ 0x080E5998, 0x150 },   /* its sound 0x12f (movs and adds #0xff) at the pool's 0x150, past a byte */
+	{ 0x080F10C4, 0x117 },   /* its sound 0x109 (movs and adds #0xff) at the pool's 0x117, past a byte */
+	{ 0x080F14D2, 0x117 },   /* its sound 0x109 (movs and adds #0xff) at the pool's 0x117, past a byte */
+};
+static const XnInit searchman_init = { NULL, 0, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
+
+
+static const XNavi bn4_searchman = {
+	.code = {
+		.name = "SearchMan (BN4's)",
+		.game = XROM_BN4_RED_SUN_US,
+		.src_ai = 0x2B,   /* (its first-kind type: BN4 has no AI index) */
+		.ai = 51,
+		.first_id = XN_BN4_FIRST_ID + 0xC,
+		.home = XN_BN4_HOMES + 0x1800,
+		.blocks = searchman_blocks, .nblocks = (int)(sizeof searchman_blocks / sizeof *searchman_blocks),
+		.data = searchman_data, .ndata = (int)(sizeof searchman_data / sizeof *searchman_data),
+		.calls = searchman_calls, .ncalls = (int)(sizeof searchman_calls / sizeof *searchman_calls),
+		.words = searchman_words, .nwords = (int)(sizeof searchman_words / sizeof *searchman_words),
+		.imms = searchman_imms, .nimms = (int)(sizeof searchman_imms / sizeof *searchman_imms),
+		.numbers = searchman_numbers, .nnumbers = (int)(sizeof searchman_numbers / sizeof *searchman_numbers),
+		.bytes = searchman_bytes, .nbytes = (int)(sizeof searchman_bytes / sizeof *searchman_bytes),
+		.types = searchman_types, .ntypes = (int)(sizeof searchman_types / sizeof *searchman_types),
+		.states = searchman_states, .nstates = (int)(sizeof searchman_states / sizeof *searchman_states),
+		.hooks = { BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9) },
+		.struct1 = 0x08011F18, .struct2 = 0x08011F18,   /* (its V1's enemy record: BN4 has no struct1 or struct2) */
+		.names = { 0x8C, 0x8D, 0x8E, 0x8F },
+		.ice = 2,
+		.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 0, .flags = 0x00 },
+		.sprites = searchman_sprites, .nsprites = (int)(sizeof searchman_sprites / sizeof *searchman_sprites),
+		.effects = searchman_effects, .neffects = (int)(sizeof searchman_effects / sizeof *searchman_effects),
+		.songs = searchman_songs, .nsongs = (int)(sizeof searchman_songs / sizeof *searchman_songs),   /* (its sounds in the pool: xnavi_bn4_sounds.c) */
+		.sound_calls = searchman_sound_calls, .nsound_calls = (int)(sizeof searchman_sound_calls / sizeof *searchman_sound_calls),
+	},
+	.versions = 4,
+	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
+	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
+	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.init = &searchman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
+	.hide_step = OWN(0x0800C0A7),   /* (its copy of BN4's hide step before each of its states, as BN4's Navi runner runs it: xnavirecipe_bn4_objects.hide_steps) */
+};
+/* ---- BN4's AquaMan (its type 0xd there, its enemy ids 168-171), as Navi AI 58 with ids 0x3a8-0x3ab ---- */
+/* interim: 080CCDC8: the first kind's 0x5C's state 4, step 0 (WindMan's companions': its sprite drawn again through BN4's tile buffer 0x02037810, a copy of 0x0800087C's and 0x08003578's): its init takes state 4 only where the battle state's +0x32 has no bit 0 (0x08007A8C) and its settings' +6 has 0x20 (0x080CCD1E-0x080CCD2E), else 0 or 8; kept as BN4's bytes, unported (assumed unreached in a plain battle) */
+
+static const XvBlock aquaman_blocks[] = {
+	{ 0x080B820C, 0x080B8520, XN_BN4_CODE + 0x7A00, 0xBFB28341u },
+	{ 0x080CCC9C, 0x080CCF5C, XN_BN4_CODE + 0x7D20, 0xBEC868D2u },
+	{ 0x080D1944, 0x080D1C24, XN_BN4_CODE + 0x7FE0, 0x60EF8AA0u },
+	{ 0x080D1448, 0x080D1678, XN_BN4_CODE + 0x82C0, 0xC707CE0Cu },
+	{ 0x080D12BC, 0x080D1448, XN_BN4_CODE + 0x84F0, 0x96330CF8u },
+	{ 0x080B81F8, 0x080B820C, XN_BN4_CODE + 0x8680, 0x16031ECDu },
+	{ 0x080CCC94, 0x080CCC9C, XN_BN4_CODE + 0x86A0, 0xD258FE18u },
+	{ 0x0800AD2A, 0x0800B12C, XN_BN4_CODE + 0x86B2, 0x793106FEu },
+	{ 0x0800BDAA, 0x0800BDBC, XN_BN4_CODE + 0x8AC2, 0xFBBA31FBu },
+	{ 0x0800C9AC, 0x0800C9BA, XN_BN4_CODE + 0x8AE0, 0xA9D6138Du },
+	{ 0x0800CA28, 0x0800CA4A, XN_BN4_CODE + 0x8AF0, 0xDCE85B3Du },
+	{ 0x0800F734, 0x0800F780, XN_BN4_CODE + 0x8B20, 0x0198FB6Eu },
+	{ 0x080F077C, 0x080F0782, XN_BN4_CODE + 0x8B70, 0x4A7133B7u },
+	{ 0x080F1D4C, 0x080F20FC, XN_BN4_CODE + 0x8B80, 0x21BAD96Bu },
+	{ 0x080F4434, 0x080F4458, XN_BN4_CODE + 0x8F30, 0xD1CF0A2Cu },
+	{ 0x080F4458, 0x080F44AC, XN_BN4_CODE + 0x8F60, 0xB1754E0Cu },
+	{ 0x080F44AC, 0x080F44EA, XN_BN4_CODE + 0x8FC0, 0x010F79DAu },
+	{ 0x080F44EA, 0x080F450E, XN_BN4_CODE + 0x9002, 0x100463F8u },
+	{ 0x080F450E, 0x080F4534, XN_BN4_CODE + 0x9032, 0xC7D8F46Fu },
+	{ 0x080F4534, 0x080F4564, XN_BN4_CODE + 0x9060, 0x3475FF94u },
+	{ 0x080F4564, 0x080F45C2, XN_BN4_CODE + 0x9090, 0xADCC312Au },
+	{ 0x080F45C2, 0x080F45EC, XN_BN4_CODE + 0x90F2, 0xDC486C48u },
+	{ 0x080F45EC, 0x080F460C, XN_BN4_CODE + 0x9120, 0xE25DA5D6u },
+	{ 0x080F460C, 0x080F4676, XN_BN4_CODE + 0x9140, 0x6A7D35B1u },
+	{ 0x080F4676, 0x080F46A0, XN_BN4_CODE + 0x91B2, 0xAC6A70A8u },
+	{ 0x080F46A0, 0x080F46C0, XN_BN4_CODE + 0x91E0, 0xCA0081BFu },
+	{ 0x080F46C0, 0x080F4760, XN_BN4_CODE + 0x9200, 0x77546C4Eu },
+	{ 0x080F4760, 0x080F478A, XN_BN4_CODE + 0x92A0, 0x11A1E57Fu },
+	{ 0x080F478A, 0x080F484C, XN_BN4_CODE + 0x92D2, 0xA57326AAu },
+	{ 0x080F484C, 0x080F48C8, XN_BN4_CODE + 0x93A0, 0xD8D80A54u },
+	{ 0x080F48C8, 0x080F4960, XN_BN4_CODE + 0x9420, 0xB6692C5Bu },
+	{ 0x080F4960, 0x080F4970, XN_BN4_CODE + 0x94C0, 0x9ED15F9Au },
+	{ 0x080F4970, 0x080F4986, XN_BN4_CODE + 0x94D0, 0x924767E1u },
+};
+static const XvData aquaman_data[] = {
+	{ 0x080B820C, 0x080B821E, XV_ZERO },
+	{ 0x080B821E, 0x080B8220, XV_RAW },
+	{ 0x080B8220, 0x080B82D4, XV_ZERO },
+	{ 0x080B82EA, 0x080B82EC, XV_RAW },
+	{ 0x080B82EC, 0x080B82F0, XV_POOL },
+	{ 0x080B82F0, 0x080B82FC, XV_TABLE },
+	{ 0x080B83A4, 0x080B83A8, XV_POOL },
+	{ 0x080B83B6, 0x080B83B8, XV_RAW },
+	{ 0x080B83B8, 0x080B83BC, XV_POOL },
+	{ 0x080B83BC, 0x080B83C4, XV_TABLE },
+	{ 0x080B83F4, 0x080B83F8, XV_POOL },
+	{ 0x080B8426, 0x080B8428, XV_RAW },
+	{ 0x080B8428, 0x080B842C, XV_POOL },
+	{ 0x080B842C, 0x080B8434, XV_TABLE },
+	{ 0x080B8464, 0x080B8468, XV_POOL },
+	{ 0x080B849A, 0x080B849C, XV_RAW },
+	{ 0x080B849C, 0x080B84A0, XV_POOL },
+	{ 0x080B84A0, 0x080B84E0, XV_RAW },
+	{ 0x080B84E8, 0x080B84EC, XV_POOL },
+	{ 0x080B84EC, 0x080B84F0, XV_RAW },
+	{ 0x080B84F0, 0x080B8520, XV_POOL },
+	{ 0x080CCCAA, 0x080CCCAC, XV_RAW },
+	{ 0x080CCCAC, 0x080CCCB0, XV_POOL },
+	{ 0x080CCCB0, 0x080CCCBC, XV_TABLE },
+	{ 0x080CCD38, 0x080CCD3C, XV_POOL },
+	{ 0x080CCD88, 0x080CCD8C, XV_POOL },
+	{ 0x080CCD8C, 0x080CCD98, XV_TABLE },
+	{ 0x080CCDB8, 0x080CCDBC, XV_POOL },
+	{ 0x080CCDBC, 0x080CCDC8, XV_TABLE },
+	{ 0x080CCDC8, 0x080CCE40, XV_RAW },
+	{ 0x080CCEB6, 0x080CCEB8, XV_RAW },
+	{ 0x080CCEB8, 0x080CCEBC, XV_POOL },
+	{ 0x080CCEBC, 0x080CCECC, XV_TABLE },
+	{ 0x080CCF54, 0x080CCF5C, XV_RAW },
+	{ 0x080D195C, 0x080D1960, XV_POOL },
+	{ 0x080D1960, 0x080D196C, XV_TABLE },
+	{ 0x080D1A3A, 0x080D1A3C, XV_RAW },
+	{ 0x080D1A3C, 0x080D1A40, XV_POOL },
+	{ 0x080D1A40, 0x080D1A58, XV_TABLE },
+	{ 0x080D1B84, 0x080D1B88, XV_POOL },
+	{ 0x080D1C20, 0x080D1C24, XV_POOL },
+	{ 0x080D145A, 0x080D145C, XV_RAW },
+	{ 0x080D145C, 0x080D1460, XV_POOL },
+	{ 0x080D1460, 0x080D146C, XV_TABLE },
+	{ 0x080D1504, 0x080D1508, XV_POOL },
+	{ 0x080D1508, 0x080D1510, XV_TABLE },
+	{ 0x080D15DC, 0x080D15E0, XV_POOL },
+	{ 0x080D15E0, 0x080D15E4, XV_RAW },
+	{ 0x080D1644, 0x080D1648, XV_POOL },
+	{ 0x080D1648, 0x080D1658, XV_RAW },
+	{ 0x080D1674, 0x080D1678, XV_POOL },
+	{ 0x080D12CE, 0x080D12D0, XV_RAW },
+	{ 0x080D12D0, 0x080D12D4, XV_POOL },
+	{ 0x080D12D4, 0x080D12E0, XV_TABLE },
+	{ 0x080D136A, 0x080D136C, XV_RAW },
+	{ 0x080D136C, 0x080D1370, XV_POOL },
+	{ 0x080D1370, 0x080D1378, XV_TABLE },
+	{ 0x080D140A, 0x080D140C, XV_RAW },
+	{ 0x080D140C, 0x080D1410, XV_POOL },
+	{ 0x080D1410, 0x080D1414, XV_RAW },
+	{ 0x080D1440, 0x080D1448, XV_POOL },
+	{ 0x080B81F8, 0x080B820C, XV_RAW },
+	{ 0x080CCC94, 0x080CCC9C, XV_RAW },
+	{ 0x0800AD54, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0800F76C, 0x0800F770, XV_POOL },
+	{ 0x0800F770, 0x0800F780, XV_RAW },
+	{ 0x080F1D84, 0x080F1D88, XV_POOL },
+	{ 0x080F1D88, 0x080F1DB0, XV_RAW },
+	{ 0x080F1DB0, 0x080F1DB4, XV_POOL },
+	{ 0x080F1DB4, 0x080F1E0C, XV_RAW },
+	{ 0x080F1E0C, 0x080F1E10, XV_POOL },
+	{ 0x080F1E10, 0x080F1E24, XV_POOL },
+	{ 0x080F1E24, 0x080F1EE4, XV_RAW },
+	{ 0x080F1EE4, 0x080F1EE8, XV_POOL },
+	{ 0x080F1EE8, 0x080F1EF0, XV_POOL },
+	{ 0x080F1EF0, 0x080F1F48, XV_RAW },
+	{ 0x080F1F48, 0x080F1F4C, XV_POOL },
+	{ 0x080F1F4C, 0x080F1F5C, XV_RAW },
+	{ 0x080F1F5C, 0x080F1F60, XV_POOL },
+	{ 0x080F1F60, 0x080F1F68, XV_POOL },
+	{ 0x080F1F68, 0x080F1FC8, XV_RAW },
+	{ 0x080F1FC8, 0x080F1FD0, XV_POOL },
+	{ 0x080F1FD0, 0x080F1FE0, XV_RAW },
+	{ 0x080F1FE0, 0x080F1FE4, XV_POOL },
+	{ 0x080F1FE4, 0x080F1FEC, XV_POOL },
+	{ 0x080F1FEC, 0x080F204C, XV_RAW },
+	{ 0x080F204C, 0x080F2050, XV_POOL },
+	{ 0x080F2050, 0x080F2058, XV_POOL },
+	{ 0x080F2058, 0x080F20C0, XV_RAW },
+	{ 0x080F20C0, 0x080F20C4, XV_POOL },
+	{ 0x080F20C4, 0x080F20D0, XV_RAW },
+	{ 0x080F20D0, 0x080F20D4, XV_POOL },
+	{ 0x080F20D4, 0x080F20D8, XV_RAW },
+	{ 0x080F20D8, 0x080F20E0, XV_POOL },
+	{ 0x080F20E0, 0x080F20E4, XV_RAW },
+	{ 0x080F20E4, 0x080F20FC, XV_POOL },
+	{ 0x080F4448, 0x080F444C, XV_POOL },
+	{ 0x080F444C, 0x080F4458, XV_TABLE },
+	{ 0x080F4522, 0x080F4524, XV_ZERO },
+	{ 0x080F4524, 0x080F4528, XV_POOL },
+	{ 0x080F4528, 0x080F4534, XV_TABLE },
+	{ 0x080F4600, 0x080F4604, XV_POOL },
+	{ 0x080F4604, 0x080F460C, XV_TABLE },
+	{ 0x080F46B4, 0x080F46B8, XV_POOL },
+	{ 0x080F46B8, 0x080F46C0, XV_TABLE },
+	{ 0x080F4752, 0x080F4754, XV_ZERO },
+	{ 0x080F4754, 0x080F4760, XV_POOL },
+	{ 0x080F482A, 0x080F482C, XV_ZERO },
+	{ 0x080F482C, 0x080F4834, XV_POOL },
+	{ 0x080F4834, 0x080F484C, XV_RAW },
+	{ 0x080F48B2, 0x080F48B4, XV_ZERO },
+	{ 0x080F48B4, 0x080F48B8, XV_POOL },
+	{ 0x080F48B8, 0x080F48C8, XV_RAW },
+	{ 0x080F4948, 0x080F4950, XV_POOL },
+	{ 0x080F4950, 0x080F4960, XV_RAW },
+};
+static const XvPair aquaman_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001956, 0x08001330 },   /* map:bytes, SAME */
+	{ 0x080019C0, 0x0800139A },   /* map:calls, LAYOUT */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002CEA, 0x08002C7E },   /* map:bytes, SAME */
+	{ 0x08002D4C, 0x08002CE0 },   /* map:bytes, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002DF8, 0x08002D8C },   /* map:bytes, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E20, 0x08002DB4 },   /* project:fireman, SAME */
+	{ 0x08002E34, 0x08002DC8 },   /* map:bytes, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* map:bytes, SAME */
+	{ 0x08002F2E, 0x08002EDC },   /* map:bytes, SAME */
+	{ 0x08002F54, 0x08002F02 },   /* project:fireman, SAME */
+	{ 0x08002F90, 0x08002F3E },   /* map:bytes, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032B8, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x080078A8, 0x08009FF8 },   /* map:bytes, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08007A8C, 0x0800A2F0 },   /* map:bytes, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009AEC, 0x0800C938 },   /* project:gutsman, DIFF (audited) */
+	{ 0x08009E98, 0x0800CC72 },   /* map:bytes, SAME */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
+	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
+	{ 0x0800A0D8, 0x0800CFDC },   /* project:research, SAME */
+	{ 0x0800A1AE, 0x0800D086 },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800BFC0, 0x0800FFEE },   /* map:bytes, SAME */
+	{ 0x0800C456, 0x080103BC },   /* project:gutsman, DIFF (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x0801457E, 0x0801BD3C },   /* map:bytes, SAME */
+	{ 0x080406A4, 0x0800A03C },   /* map:calls, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080CDCE4, 0x0801156A },   /* project:families-2, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvImm aquaman_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800C9B4, THUMB_ADDS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x0800CA40, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080B82D8, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080B82DC, THUMB_ADDS, 6, 0, 0x64, 0x80 },   /* its AI data's +0x64 in BN4, +0x80 in BN6 (AI_BLOCKS) */
+	{ 0x080B834A, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 set (BN4_SET_ACTION's r0) */
+	{ 0x080B839C, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 set (BN4_SET_ACTION's r0) */
+	{ 0x080B83EC, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 set (BN4_SET_ACTION's r0) */
+	{ 0x080B8410, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 set (BN4_SET_ACTION's r0) */
+	{ 0x080B845C, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 set (BN4_SET_ACTION's r0) */
+	{ 0x080B8492, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 set (BN4_SET_ACTION's r0) */
+	{ 0x080CCD2E, THUMB_MOVS, 2, 0, 0x4, 0x0 },   /* its companion's mode 4 (its appear through BN4's tile buffer, unported) run as its mode 0 */
+	{ 0x080CCF38, THUMB_MOVS, 0, 0, 0x5C, 0xE3 },   /* its companion's type 0x5c (the first kind): moved, the dispatch's 0xe3 */
+	{ 0x080D12E4, THUMB_MOVS, 2, 0, 0xF, 0xE0 },   /* its object's sprite: list 4 0xf in BN4, list 4 0xe0 in BN6 (copied) */
+	{ 0x080D132E, THUMB_MOVS, 0, 0, 0x9E, 0x33 },   /* its sound 0x9e: BN4's copied into BN6's empty slot 0x33, on its player 8 */
+	{ 0x080D134A, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D13AA, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D13C8, THUMB_MOVS, 2, 0, 0x25, 0x95 },   /* its effect (r2 of 0801457E): 0x25 in BN4, 0x95 in BN6 (moved) */
+	{ 0x080D13DA, THUMB_MOVS, 0, 0, 0x9F, 0x3D },   /* its sound 0x9f: BN4's copied into BN6's empty slot 0x3d, on its player 28 */
+	{ 0x080D1424, THUMB_MOVS, 0, 0, 0x23, 0xF9 },   /* its object's type 0x23: moved, the dispatch's 0xf9 */
+	{ 0x080D143A, THUMB_STRB, 1, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D146E, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its object's sprite's list: 3 in BN4, copied into 4 (LIST_MOVES) */
+	{ 0x080D1470, THUMB_MOVS, 2, 0, 0x2, 0xD5 },   /* its object's sprite: list 3 0x2 in BN4, list 4 0xd5 in BN6 (copied) */
+	{ 0x080D14D8, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D14F4, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D155C, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D1582, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D159C, THUMB_MOVS, 4, 0, 0x25, 0x95 },   /* its effect: 0x25 in BN4, 0x95 in BN6 (moved) */
+	{ 0x080D1618, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D162E, THUMB_MOVS, 2, 0, 0x25, 0x95 },   /* its effect (r2 of 0801457E): 0x25 in BN4, 0x95 in BN6 (moved) */
+	{ 0x080D1638, THUMB_MOVS, 0, 0, 0x9F, 0x3D },   /* its sound 0x9f: BN4's copied into BN6's empty slot 0x3d, on its player 28 */
+	{ 0x080D165C, THUMB_MOVS, 0, 0, 0x24, 0xFA },   /* its object's type 0x24: moved, the dispatch's 0xfa */
+	{ 0x080D166E, THUMB_STRB, 1, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D1970, THUMB_MOVS, 2, 0, 0x10, 0xE1 },   /* its object's sprite: list 4 0x10 in BN4, list 4 0xe1 in BN6 (copied) */
+	{ 0x080D1A10, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D1A1E, THUMB_MOVS, 4, 0, 0x0, 0x9B },   /* its effect: 0x0 in BN4, 0x9b in BN6 (moved) */
+	{ 0x080D1A24, THUMB_MOVS, 0, 0, 0xC8, 0xE0 },   /* its sound 0xc8: BN4's copied into BN6's empty slot 0xe0, on its player 11 */
+	{ 0x080D1A84, THUMB_MOVS, 0, 0, 0xA0, 0x63 },   /* its sound 0xa0: BN4's copied into BN6's empty slot 0x63, on its player 29 */
+	{ 0x080D1AAA, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D1B22, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D1B3A, THUMB_MOVS, 0, 0, 0xA1, 0xD0 },   /* its sound 0xa1: BN4's copied into BN6's empty slot 0xd0, on its player 9 */
+	{ 0x080D1B5A, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D1BE2, THUMB_MOVS, 4, 0, 0x15, 0x90 },   /* its effect: 0x15 in BN4, 0x90 in BN6 (moved) */
+	{ 0x080D1BF8, THUMB_MOVS, 0, 0, 0x27, 0xFB },   /* its object's type 0x27: moved, the dispatch's 0xfb */
+	{ 0x080D1C08, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080F4438, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F4512, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F45A0, THUMB_ADDS, 4, 0, 0x23, 0x9D },   /* its effect (its side in r4's second byte): 0x23 in BN4, 0x9d in BN6 (moved) */
+	{ 0x080F45F0, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080F462A, THUMB_MOVS, 0, 0, 0x90, 0x32 },   /* its sound 0x90: BN4's copied into BN6's empty slot 0x32, on its player 8 */
+	{ 0x080F46A4, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+};
+static const XvNumber aquaman_numbers[] = {
+	{ 0x080D1B84, 0x04050201, 0x04050201 },   /* a collision region's spawn word (AquaMan's third kind 0x27's, 0x080D1B60, its r4 to 0x080CD7E2): BN6's own attacks pass the same to its twin (0x080CABAC's to 0x080C6BDA) */
+};
+static const XvPair aquaman_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvByte aquaman_bytes[] = {
+	{ 0x080CCC97, 0x0C, 0xDF },   /* its table's kind 1: list 4 0xc in BN4, 0xdf copied */
+};
+static const XvType aquaman_types[] = {
+	{ 3, 0xF9, XV_TYPE_MOVED, 0x23 },   /* BN4's third-kind 0x23, moved, the dispatch's 0xf9 */
+	{ 3, 0xFA, XV_TYPE_MOVED, 0x24 },   /* BN4's third-kind 0x24, moved, the dispatch's 0xfa */
+	{ 3, 0xFB, XV_TYPE_MOVED, 0x27 },   /* BN4's third-kind 0x27, moved, the dispatch's 0xfb */
+	{ 1, 0xE3, XV_TYPE_MOVED, 0x5C },   /* BN4's first-kind 0x5c, moved, the dispatch's 0xe3 */
+};
+static const XvRef aquaman_states[] = {
+	BN6(0x08016381), BN6(0x08017889), BN6(0x080170C5), BN6(0x080174FF), BN6(0x080175B9), BN6(0x080178B7), BN6(0x08017689), BN6(0x08017769), OWN(0x080B82D5), OWN(0x080F4435), OWN(0x080F450F), OWN(0x080F45ED), OWN(0x080F46A1),
+};
+static const XvSprite aquaman_sprites[] = {
+	{ 2, 0x0B, 2, 0x4A, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
+	{ 3, 0x02, 4, 0xD5, XN_BN4_ART + 0x4800, 0x1000 },
+	{ 4, 0x0C, 4, 0xDF, XN_BN4_ART + 0x0, 0x800 },
+	{ 4, 0x0F, 4, 0xE0, XN_BN4_ART + 0x800, 0x800 },
+	{ 4, 0x10, 4, 0xE1, XN_BN4_ART + 0x1000, 0x3800 },
+	{ 5, 0x00, 5, 0x9D, XN_BN4_ART + 0x5800, 0x1C00 },
+};
+static const XvId aquaman_effects[] = { { 0x00, 0x9B }, { 0x15, 0x90 }, { 0x25, 0x95 }, { 0x23, 0x9D } };
+static const XvSong aquaman_songs[] = {
+	{ 0x90, 0x32, XN_BN4_ART + 0x7400, 0x40 },   /* its sound 0x90, BN4's song copied */
+	{ 0x9E, 0x33, XN_BN4_ART + 0x7440, 0x40 },   /* its sound 0x9e, BN4's song copied */
+	{ 0xA0, 0x63, XN_BN4_ART + 0x7480, 0x900 },   /* its sound 0xa0, BN4's song copied */
+	{ 0xA1, 0xD0, XN_BN4_ART + 0x7D80, 0x40 },   /* its sound 0xa1, BN4's song copied */
+	{ 0xC8, 0xE0, XN_BN4_ART + 0x7DC0, 0xB40 },   /* its sound 0xc8, BN4's song copied */
+};
+static const XnSpawn aquaman_spawns[] = {
+	{ OWN(0x080CCF35), 0x1, 0x00000000, 0x00, 0x00, 0x00, 0x74 },   /* 080B826A: its first-kind 0x5c */
+};
+static const XnInit aquaman_init = { aquaman_spawns, 1, true, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update, its panel at its +6) */
+
+
+static const XNavi bn4_aquaman = {
+	.code = {
+		.name = "AquaMan (BN4's)",
+		.game = XROM_BN4_RED_SUN_US,
+		.src_ai = 0x0D,   /* (its first-kind type: BN4 has no AI index) */
+		.ai = 58,
+		.first_id = XN_BN4_FIRST_ID + 0x28,
+		.home = XN_BN4_HOMES + 0x5000,
+		.blocks = aquaman_blocks, .nblocks = (int)(sizeof aquaman_blocks / sizeof *aquaman_blocks),
+		.data = aquaman_data, .ndata = (int)(sizeof aquaman_data / sizeof *aquaman_data),
+		.calls = aquaman_calls, .ncalls = (int)(sizeof aquaman_calls / sizeof *aquaman_calls),
+		.words = aquaman_words, .nwords = (int)(sizeof aquaman_words / sizeof *aquaman_words),
+		.imms = aquaman_imms, .nimms = (int)(sizeof aquaman_imms / sizeof *aquaman_imms),
+		.numbers = aquaman_numbers, .nnumbers = (int)(sizeof aquaman_numbers / sizeof *aquaman_numbers),
+		.bytes = aquaman_bytes, .nbytes = (int)(sizeof aquaman_bytes / sizeof *aquaman_bytes),
+		.types = aquaman_types, .ntypes = (int)(sizeof aquaman_types / sizeof *aquaman_types),
+		.states = aquaman_states, .nstates = (int)(sizeof aquaman_states / sizeof *aquaman_states),
+		.hooks = { BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9) },
+		.struct1 = 0x08012068, .struct2 = 0x08012068,   /* (its V1's enemy record: BN4 has no struct1 or struct2) */
+		.names = { 0xA8, 0xA9, 0xAA, 0xAB },
+		.ice = 2,
+		.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 0, .flags = 0x00 },
+		.sprites = aquaman_sprites, .nsprites = (int)(sizeof aquaman_sprites / sizeof *aquaman_sprites),
+		.effects = aquaman_effects, .neffects = (int)(sizeof aquaman_effects / sizeof *aquaman_effects),
+		.songs = aquaman_songs, .nsongs = (int)(sizeof aquaman_songs / sizeof *aquaman_songs),   /* (its sounds in the pool: xnavi_bn4_sounds.c) */
+	},
+	.versions = 4,
+	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
+	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
+	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.coll_arg = 0x21,   /* (its init's collision setup's r3, BN6's actor init's 0x3: the hit bits its body gives, read alike by both games' pre-steps) */
+	.init = &aquaman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
+};
+/* ---- BN4's Roll (its type 0x1d there, its enemy ids 128-131), as Navi AI 48 with ids 0x380-0x383 ---- */
+
+static const XvBlock roll_blocks[] = {
+	{ 0x080BC0E4, 0x080BC3FC, XN_BN4_CODE + 0x95F0, 0x6626EF64u },
+	{ 0x080E3A98, 0x080E3AE6, XN_BN4_CODE + 0x9910, 0xFF36B97Eu },
+	{ 0x080CE6E0, 0x080CE840, XN_BN4_CODE + 0x9960, 0x5AA41525u },
+	{ 0x080CD5F8, 0x080CD728, XN_BN4_CODE + 0x9AC0, 0x0069BF7Du },
+	{ 0x080CD524, 0x080CD5F8, XN_BN4_CODE + 0x9BF0, 0x40F51A6Du },
+	{ 0x080CE5B0, 0x080CE6E0, XN_BN4_CODE + 0x9CD0, 0x69329294u },
+	{ 0x0800A244, 0x0800A2BE, XN_BN4_CODE + 0x9E00, 0x6300CCC3u },
+	{ 0x0800AD2A, 0x0800B12C, XN_BN4_CODE + 0x9E82, 0x793106FEu },
+	{ 0x0800BDAA, 0x0800BDBC, XN_BN4_CODE + 0xA292, 0xFBBA31FBu },
+	{ 0x0800C9AC, 0x0800C9BA, XN_BN4_CODE + 0xA2B0, 0xA9D6138Du },
+	{ 0x0800CA28, 0x0800CA4A, XN_BN4_CODE + 0xA2C0, 0xDCE85B3Du },
+	{ 0x080EF87C, 0x080EF8B4, XN_BN4_CODE + 0xA2F0, 0x909D30CEu },
+	{ 0x080EF8B4, 0x080EF90A, XN_BN4_CODE + 0xA330, 0xD447727Cu },
+	{ 0x080EF90A, 0x080EF944, XN_BN4_CODE + 0xA392, 0x97D23364u },
+	{ 0x080EF944, 0x080EF962, XN_BN4_CODE + 0xA3D0, 0x3F481C11u },
+	{ 0x080EF962, 0x080EF990, XN_BN4_CODE + 0xA3F2, 0xC28BAFD0u },
+	{ 0x080EF990, 0x080EFA14, XN_BN4_CODE + 0xA420, 0x976788CDu },
+	{ 0x080EFA14, 0x080EFA3E, XN_BN4_CODE + 0xA4B0, 0x2375C002u },
+	{ 0x080EFA3E, 0x080EFA7C, XN_BN4_CODE + 0xA4E2, 0xFCC783F9u },
+	{ 0x080EFA7C, 0x080EFA9A, XN_BN4_CODE + 0xA520, 0xB4138418u },
+	{ 0x080EFA9A, 0x080EFAC0, XN_BN4_CODE + 0xA542, 0x597DAEFFu },
+	{ 0x080EFAC0, 0x080EFAF0, XN_BN4_CODE + 0xA570, 0xE180FD23u },
+	{ 0x080EFAF0, 0x080EFB3E, XN_BN4_CODE + 0xA5A0, 0x7A26BE4Du },
+	{ 0x080EFB3E, 0x080EFB60, XN_BN4_CODE + 0xA5F2, 0x246CC93Eu },
+	{ 0x080EFB60, 0x080EFB90, XN_BN4_CODE + 0xA620, 0xDACF03A9u },
+	{ 0x080EFB90, 0x080EFBD2, XN_BN4_CODE + 0xA650, 0xB6CCB635u },
+	{ 0x080EFBD2, 0x080EFC10, XN_BN4_CODE + 0xA6A2, 0x78707E9Fu },
+	{ 0x080EFC10, 0x080EFC42, XN_BN4_CODE + 0xA6E0, 0xB0FF32BEu },
+	{ 0x080EFC42, 0x080EFC9E, XN_BN4_CODE + 0xA722, 0x5F56DDE2u },
+	{ 0x080EFC9E, 0x080EFCE2, XN_BN4_CODE + 0xA782, 0x6F46462Au },
+	{ 0x080EFCE2, 0x080EFD06, XN_BN4_CODE + 0xA7D2, 0x74AE3F84u },
+	{ 0x080EFD06, 0x080EFD3C, XN_BN4_CODE + 0xA802, 0x485979B8u },
+	{ 0x080EFD3C, 0x080EFD72, XN_BN4_CODE + 0xA840, 0xF963E758u },
+	{ 0x080EFD72, 0x080EFDB0, XN_BN4_CODE + 0xA882, 0xBA320A81u },
+	{ 0x080EFDB0, 0x080EFE00, XN_BN4_CODE + 0xA8C0, 0x58062622u },
+	{ 0x080EFE00, 0x080EFE36, XN_BN4_CODE + 0xA910, 0xED4CA13Au },
+	{ 0x080EFE36, 0x080EFE62, XN_BN4_CODE + 0xA952, 0x9B23EB05u },
+	{ 0x080EFE62, 0x080EFEA4, XN_BN4_CODE + 0xA982, 0x3B90D376u },
+	{ 0x080EFEA4, 0x080EFEC8, XN_BN4_CODE + 0xA9D0, 0x81B2DD96u },
+	{ 0x080EFEC8, 0x080EFEEC, XN_BN4_CODE + 0xAA00, 0xBAE07B24u },
+	{ 0x080EFEEC, 0x080EFF74, XN_BN4_CODE + 0xAA30, 0xB6435623u },
+	{ 0x080EFF74, 0x080EFF98, XN_BN4_CODE + 0xAAC0, 0x6540E1D4u },
+	{ 0x080EFF98, 0x080F01C0, XN_BN4_CODE + 0xAAF0, 0x1D5C7220u },
+};
+static const XvData roll_data[] = {
+	{ 0x080BC0E4, 0x080BC0F6, XV_ZERO },
+	{ 0x080BC0F6, 0x080BC0F8, XV_RAW },
+	{ 0x080BC0F8, 0x080BC17E, XV_ZERO },
+	{ 0x080BC17E, 0x080BC180, XV_RAW },
+	{ 0x080BC180, 0x080BC1B4, XV_ZERO },
+	{ 0x080BC1D6, 0x080BC1D8, XV_RAW },
+	{ 0x080BC1D8, 0x080BC1DC, XV_POOL },
+	{ 0x080BC1DC, 0x080BC1E8, XV_TABLE },
+	{ 0x080BC1F6, 0x080BC1F8, XV_RAW },
+	{ 0x080BC1F8, 0x080BC1FC, XV_POOL },
+	{ 0x080BC1FC, 0x080BC204, XV_TABLE },
+	{ 0x080BC282, 0x080BC284, XV_RAW },
+	{ 0x080BC284, 0x080BC288, XV_POOL },
+	{ 0x080BC288, 0x080BC298, XV_RAW },
+	{ 0x080BC2C0, 0x080BC2C8, XV_POOL },
+	{ 0x080BC2C8, 0x080BC2D0, XV_RAW },
+	{ 0x080BC2F8, 0x080BC300, XV_POOL },
+	{ 0x080BC300, 0x080BC308, XV_RAW },
+	{ 0x080BC39E, 0x080BC3A0, XV_RAW },
+	{ 0x080BC3A0, 0x080BC3A4, XV_POOL },
+	{ 0x080BC3A4, 0x080BC3B4, XV_RAW },
+	{ 0x080BC3D2, 0x080BC3D4, XV_RAW },
+	{ 0x080BC3D4, 0x080BC3D8, XV_POOL },
+	{ 0x080BC3D8, 0x080BC3E8, XV_POOL },
+	{ 0x080BC3E8, 0x080BC3F8, XV_RAW },
+	{ 0x080BC3F8, 0x080BC3FC, XV_POOL },
+	{ 0x080CE6F2, 0x080CE6F4, XV_RAW },
+	{ 0x080CE6F4, 0x080CE6F8, XV_POOL },
+	{ 0x080CE6F8, 0x080CE704, XV_TABLE },
+	{ 0x080CE828, 0x080CE83C, XV_RAW },
+	{ 0x080CE83C, 0x080CE840, XV_POOL },
+	{ 0x080CD606, 0x080CD608, XV_RAW },
+	{ 0x080CD608, 0x080CD60C, XV_POOL },
+	{ 0x080CD60C, 0x080CD618, XV_TABLE },
+	{ 0x080CD708, 0x080CD720, XV_RAW },
+	{ 0x080CD720, 0x080CD728, XV_POOL },
+	{ 0x080CD524, 0x080CD5F8, XV_RAW },
+	{ 0x080CE5B0, 0x080CE6E0, XV_RAW },
+	{ 0x0800AD54, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x080EF890, 0x080EF894, XV_POOL },
+	{ 0x080EF894, 0x080EF8B4, XV_TABLE },
+	{ 0x080EFA08, 0x080EFA10, XV_POOL },
+	{ 0x080EFA10, 0x080EFA14, XV_RAW },
+	{ 0x080EFAAE, 0x080EFAB0, XV_ZERO },
+	{ 0x080EFAB0, 0x080EFAB4, XV_POOL },
+	{ 0x080EFAB4, 0x080EFAC0, XV_TABLE },
+	{ 0x080EFB74, 0x080EFB78, XV_POOL },
+	{ 0x080EFB78, 0x080EFB90, XV_TABLE },
+	{ 0x080EFD1A, 0x080EFD1C, XV_ZERO },
+	{ 0x080EFD1C, 0x080EFD20, XV_POOL },
+	{ 0x080EFD20, 0x080EFD3C, XV_TABLE },
+	{ 0x080EFEDC, 0x080EFEE0, XV_POOL },
+	{ 0x080EFEE0, 0x080EFEEC, XV_TABLE },
+	{ 0x080EFF2C, 0x080EFF34, XV_ZERO },
+	{ 0x080F0062, 0x080F0064, XV_ZERO },
+	{ 0x080F0064, 0x080F0068, XV_POOL },
+	{ 0x080F0068, 0x080F0078, XV_RAW },
+	{ 0x080F00E0, 0x080F00E4, XV_POOL },
+	{ 0x080F00E4, 0x080F00F4, XV_RAW },
+	{ 0x080F00F4, 0x080F01B8, XV_ZERO },
+	{ 0x080F01B8, 0x080F01C0, XV_POOL },
+};
+static const XvPair roll_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002CEA, 0x08002C7E },   /* map:bytes, SAME */
+	{ 0x08002D4C, 0x08002CE0 },   /* map:bytes, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E20, 0x08002DB4 },   /* project:fireman, SAME */
+	{ 0x08002E34, 0x08002DC8 },   /* map:bytes, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* map:bytes, SAME */
+	{ 0x08002F2E, 0x08002EDC },   /* map:bytes, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FD0, 0x08002F7E },   /* map:bytes, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
+	{ 0x0800A000, 0x0800CEA0 },   /* map:bytes, SAME */
+	{ 0x0800A0A2, 0x0800CFA6 },   /* project:spikey, SAME */
+	{ 0x0800A0D8, 0x0800CFDC },   /* project:research, SAME */
+	{ 0x0800A10E, 0x0800D012 },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800AB8A, 0x0800E2C2 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800AE10, 0x0800E6E8 },   /* project:families-2, SAME */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800BFC0, 0x0800FFEE },   /* map:bytes, SAME */
+	{ 0x0800C456, 0x080103BC },   /* project:gutsman, DIFF (audited) */
+	{ 0x08010D4C, 0x080170C4 },   /* BN4's generic Navi state 2, its own state 2's tail: BN6's generic Navi state 2 (deleted), AIMED (audited) */
+	{ 0x08010FA6, 0x08017888 },   /* BN4's generic Navi state 1, its own state 1's tail: BN6's generic Navi state 1 (on to its first state), AIMED (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x08014620, 0x0801BDDE },   /* map:bytes, SAME */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+	{ 0x080F00F4, XN_BN4_CODE + 0x94E8 },   /* BN4_SPAWN_ENEMY: the summon's shim (xnavi_init.c), BN6's BN6_SPAWN_ENEMY_1 by the id BN6 numbers it */
+};
+static const XvImm roll_imms[] = {
+	{ 0x0800A27A, THUMB_LDRB, 1, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800C9B4, THUMB_ADDS, 1, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x0800CA40, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080BC1C4, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080BC1C8, THUMB_ADDS, 6, 0, 0x64, 0x80 },   /* its AI data's +0x64 in BN4, +0x80 in BN6 (AI_BLOCKS) */
+	{ 0x080BC210, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 set (BN4_SET_ACTION's r0) */
+	{ 0x080BC228, THUMB_MOVS, 0, 0, 0xB, 0xD },   /* CurAction 11 set (BN4_SET_ACTION's r0) */
+	{ 0x080BC24A, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 set (BN4_SET_ACTION's r0) */
+	{ 0x080BC2B4, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 set (BN4_SET_ACTION's r0) */
+	{ 0x080BC2EC, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 set (BN4_SET_ACTION's r0) */
+	{ 0x080CD6E4, THUMB_MOVS, 0, 0, 0x2, 0xFC },   /* its object's type 0x2: moved, the dispatch's 0xfc */
+	{ 0x080CE74A, THUMB_STRB, 0, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CE79A, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080CE7D6, THUMB_MOVS, 4, 0, 0x56, 0x99 },   /* its effect: 0x56 in BN4, 0x99 in BN6 (moved) */
+	{ 0x080CE812, THUMB_MOVS, 0, 0, 0xB, 0xFD },   /* its object's type 0xb: moved, the dispatch's 0xfd */
+	{ 0x080E3ABE, THUMB_ADDS, 4, 0, 0x2E, 0x9E },   /* its effect: 0x2e in BN4, 0x9e in BN6 (moved) */
+	{ 0x080E3ADC, THUMB_MOVS, 0, 0, 0x17, 0xE3 },   /* its object's type 0x17: moved, the dispatch's 0xe3 */
+	{ 0x080EF880, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080EF99A, THUMB_MOVS, 0, 0, 0x32, 0x63 },   /* its sound 0x131 (movs and adds #0xff) at the pool's 0x63 */
+	{ 0x080EF99C, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x131 (movs and adds #0xff) at the pool's 0x63 */
+	{ 0x080EFA9E, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080EFB24, THUMB_MOVS, 0, 0, 0x33, 0xD0 },   /* its sound 0x132 (movs and adds #0xff) at the pool's 0xd0 */
+	{ 0x080EFB26, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x132 (movs and adds #0xff) at the pool's 0xd0 */
+	{ 0x080EFB64, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080EFC7E, THUMB_MOVS, 0, 0, 0x96, 0x32 },   /* its sound 0x96: BN4's copied into BN6's empty slot 0x32, on its player 22 */
+	{ 0x080EFD0A, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+	{ 0x080EFDD6, THUMB_MOVS, 0, 0, 0x96, 0x32 },   /* its sound 0x96: BN4's copied into BN6's empty slot 0x32, on its player 22 */
+	{ 0x080EFECC, THUMB_MOVS, 7, 0, 0x70, 0xA0 },   /* its AI data's +0x70 in BN4, +0xa0 in BN6 (AI_BLOCKS) */
+};
+static const XvNumber roll_numbers[] = {
+	{ 0x080EFA08, 0x04050001, 0x04050001 },   /* a collision region's spawn word (object_spawnCollisionRegion's r4, Roll's MegaMan's state 44 at 0x080EF9EC, as 0x04050301): its bytes as 0x04050301's, its third byte 0 */
+};
+static const XvPair roll_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvByte roll_bytes[] = {
+	{ 0x080CD540, 0x0C, 0x10 },   /* its table's kind 7: its sprite's list 3 in BN4, copied into 4 */
+	{ 0x080CD541, 0x0F, 0xE2 },   /* its table's kind 7: list 3 0xf in BN4, list 4 0xe2 copied */
+	{ 0x080CE615, 0x0C, 0x10 },   /* its table's kind 6: its sprite's list 3 in BN4, copied into 4 */
+	{ 0x080CE616, 0x10, 0xE3 },   /* its table's kind 6: list 3 0x10 in BN4, list 4 0xe3 copied */
+	{ 0x080CE625, 0x0C, 0x10 },   /* its table's kind 7: its sprite's list 3 in BN4, copied into 4 */
+	{ 0x080CE626, 0x10, 0xE3 },   /* its table's kind 7: list 3 0x10 in BN4, list 4 0xe3 copied */
+	{ 0x080CE635, 0x0C, 0x10 },   /* its table's kind 8: its sprite's list 3 in BN4, copied into 4 */
+	{ 0x080CE636, 0x10, 0xE3 },   /* its table's kind 8: list 3 0x10 in BN4, list 4 0xe3 copied */
+	{ 0x080CE645, 0x0C, 0x10 },   /* its table's kind 9: its sprite's list 3 in BN4, copied into 4 */
+	{ 0x080CE646, 0x10, 0xE3 },   /* its table's kind 9: list 3 0x10 in BN4, list 4 0xe3 copied */
+};
+static const XvType roll_types[] = {
+	{ 3, 0xFC, XV_TYPE_MOVED, 0x02 },   /* BN4's third-kind 0x2, moved, the dispatch's 0xfc */
+	{ 3, 0xFD, XV_TYPE_MOVED, 0x0B },   /* BN4's third-kind 0xb, moved, the dispatch's 0xfd */
+	{ 4, 0xE3, XV_TYPE_MOVED, 0x17 },   /* BN4's fourth-kind 0x17, moved, the dispatch's 0xe3 */
+};
+static const XvRef roll_states[] = {
+	BN6(0x08016381), OWN(0x080BC1B5), OWN(0x080BC309), BN6(0x080174FF), BN6(0x080175B9), BN6(0x080178B7), BN6(0x08017689), BN6(0x08017769), OWN(0x080BC1C1), OWN(0x080EF87D), OWN(0x080EFA9B), OWN(0x080EFB61), OWN(0x080EFD07), OWN(0x080EFEC9),
+};
+static const XvSprite roll_sprites[] = {
+	{ 2, 0x01, 2, 0x40, XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE },
+	{ 3, 0x0F, 4, 0xE2, XN_BN4_ART + 0x0, 0x1000 },
+	{ 3, 0x10, 4, 0xE3, XN_BN4_ART + 0x1000, 0x800 },
+	{ 4, 0x17, 4, 0xE4, XN_BN4_ART + 0x1800, 0x800 },
+};
+static const XvId roll_effects[] = { { 0x2E, 0x9E }, { 0x56, 0x99 } };
+static const XvSong roll_songs[] = {
+	{ 0x96, 0x32, XN_BN4_ART + 0x2000, 0x21C0, 9 },   /* its sound 0x96, BN4's song copied, on BN6's player 9 */
+	{ 0xCE, 0x33, XN_BN4_ART + 0x41C0, 0x21C0 },   /* its sound 0xce, BN4's song copied */
+	{ 0x131, 0x63, XN_BN4_ART + 0x6380, 0x740, 9 },   /* its sound 0x131, BN4's song copied, on BN6's player 9 */
+	{ 0x132, 0xD0, XN_BN4_ART + 0x6AC0, 0xC80 },   /* its sound 0x132, BN4's song copied */
+};
+static const XnInit roll_init = { NULL, 0, false, false, false, true };   /* (at its spawn's end, its +0x11, its sprite, its update) */
+static const XnSummonId roll_summon_ids[] = {
+	{ 0x01, 0x001 },   /* Mettaur (BN4's 40 HP), BN6's own Mettaur */
+	{ 0x02, 0x002 },   /* Mettaur2, BN6's own Mettaur2 */
+	{ 0x03, 0x003 },   /* Mettaur3, BN6's own Mettaur3 */
+	{ 0x04, 0x004 },   /* MettaurSP, BN6's own MettaurSP */
+	{ 0x0E, 0x2C1 },   /* Billy's, moved (its recipe's ids) */
+	{ 0x0F, 0x2C2 },   /* Billy's, moved (its recipe's ids) */
+	{ 0x10, 0x2C3 },   /* Billy's, moved (its recipe's ids) */
+	{ 0x39, 0x000 },   /* its type 0x11 moved by no recipe and no native of BN6's by name: the shim spawns none (an interim) */
+};
+static const XnSummon roll_summon = { XN_BN4_CODE + 0x94E8, OWN(0x0800A245), { 0x00000010, 0x0F8800A0, 0x00000030, 0x0F880080 }, roll_summon_ids, (int)(sizeof roll_summon_ids / sizeof *roll_summon_ids), 0x33 };   /* (BN4_SPAWN_ENEMY's masks by side, 080F01A8; its sound 0xce) */
+
+
+static const XNavi bn4_roll = {
+	.code = {
+		.name = "Roll (BN4's)",
+		.game = XROM_BN4_RED_SUN_US,
+		.src_ai = 0x1D,   /* (its first-kind type: BN4 has no AI index) */
+		.ai = 48,
+		.first_id = XN_BN4_FIRST_ID + 0x0,
+		.home = XN_BN4_HOMES + 0x0,
+		.blocks = roll_blocks, .nblocks = (int)(sizeof roll_blocks / sizeof *roll_blocks),
+		.data = roll_data, .ndata = (int)(sizeof roll_data / sizeof *roll_data),
+		.calls = roll_calls, .ncalls = (int)(sizeof roll_calls / sizeof *roll_calls),
+		.words = roll_words, .nwords = (int)(sizeof roll_words / sizeof *roll_words),
+		.imms = roll_imms, .nimms = (int)(sizeof roll_imms / sizeof *roll_imms),
+		.numbers = roll_numbers, .nnumbers = (int)(sizeof roll_numbers / sizeof *roll_numbers),
+		.bytes = roll_bytes, .nbytes = (int)(sizeof roll_bytes / sizeof *roll_bytes),
+		.types = roll_types, .ntypes = (int)(sizeof roll_types / sizeof *roll_types),
+		.states = roll_states, .nstates = (int)(sizeof roll_states / sizeof *roll_states),
+		.hooks = { BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9) },
+		.struct1 = 0x08011E88, .struct2 = 0x08011E88,   /* (its V1's enemy record: BN4 has no struct1 or struct2) */
+		.names = { 0x80, 0x81, 0x82, 0x83 },
+		.ice = 2,
+		.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 0, .flags = 0x04 },
+		.sprites = roll_sprites, .nsprites = (int)(sizeof roll_sprites / sizeof *roll_sprites),
+		.effects = roll_effects, .neffects = (int)(sizeof roll_effects / sizeof *roll_effects),
+		.songs = roll_songs, .nsongs = (int)(sizeof roll_songs / sizeof *roll_songs),   /* (its sounds in the pool: xnavi_bn4_sounds.c) */
+	},
+	.versions = 4,
+	.prestep = BN6(0x0801A9B9), .hook_a = OWN(0x080BC341),   /* (its hook A its update's call before its pre-step) */
+	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
+	.sprite_of = -1,   /* (its battle sprite its recipe's first: list 2 at its seat's number, XNAVI_SPRITE_BN4) */
+	.init = &roll_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
+	.summon = &roll_summon,   /* (its summon: xnavi_init.c) */
+};
+const XNavi *const xnavi_bn4[] = { &bn4_gutsman, &bn4_thunderman, &bn4_windman, &bn4_fireman, &bn4_searchman, &bn4_aquaman, &bn4_roll };
 const int xnavi_bn4_count = (int)(sizeof xnavi_bn4 / sizeof *xnavi_bn4);
 
 /* held from the install (tools/xnavirecipe_bn4.py HELD): none */

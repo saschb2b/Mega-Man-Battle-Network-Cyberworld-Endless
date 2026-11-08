@@ -171,6 +171,13 @@
 #define BN6_OBJ_FLOATS        0x20        /* BN6_COLL_FLAGS: it floats (bn6f OBJECT_FLAGS_FLOATSHOE) */
 #define BN6_SEA_HOLD          0x14        /* the frames BN5's sea holds it (movs r0,#0x14 at 0x080171D4) */
 #define BN6_OBJ_HIDDEN        0x04        /* BN6_COLL_FLAGS: invisible (BN5's 0x80000004 the invisible and the submerged) */
+#define BN6_COLL_INVISIBLE    0x26        /* u16 the invisibility's frames, 0xFFFF for ever (BN4_COLL_INVISIBLE, +0x1A) */
+#define BN6_INVISIBLE_STEP    0x08010162u /* its timer, from the status step (0x0801B12E): BN4_INVISIBLE_STEP's twin, sound 0x94 */
+#define BN6_HIDE              0x080101AEu /* r0 frames: invisible (+0x26, flag 4, +0 bit 2 cleared; BN4_HIDE's twin) */
+#define BN6_SHOW              0x080101C4u /* shown (+0x26 0, flag 4 cleared; BN4_SHOW's twin) */
+#define BN6_COLL_HIDE_MARKER  0x50        /* u32 the invisible's marker (BN4_COLL_HIDE_MARKER, +0x7C; BN5's sea's marker's place too) */
+#define BN6_HIDE_STEP         0x0801012Cu /* the invisible not drawn, its marker (the fourth kind's 0x3E) at the collision data's +0x50:
+                                             BN4_HIDE_STEP's twin, which nothing calls (BN6_STATUS_HIDE its place) */
 
 /* How the panels are drawn: each frame (0x0800C5E0, from the battle's
  * three loops) the panel palettes' animations step (0x0800C192), then

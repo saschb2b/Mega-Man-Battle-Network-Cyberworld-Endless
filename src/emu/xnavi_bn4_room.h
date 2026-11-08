@@ -16,12 +16,20 @@
 
 /* At a BN4 Navi's install, staged (xvirus_tx.h), his battle sprite (`f`'s first, BN4's list 2) at the room (XN_BN4_SPRITE,
  * its whole size: the families' sprites_set copies none there and points his list 2 entry at it): checked to fit the room in
- * the player's BN4 ROM (`rom`, its sprite lists at `lists`), his BN4 number listed at his seat; the step failed (xv_fail)
+ * the player's BN4 ROM (`rom`, its sprite lists at `lists`), his BN4 number listed at his seat, his art's byte too
+ * (xnavi_bn4_art_list); the step failed (xv_fail)
  * where it does not fit or his seat is listed already */
 void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lists);
+/* A row of a BN4 Navi's sprites in one of the rooms the battles share, staged at his install (xvirus.c sprites_set): his
+ * battle sprite's (XN_BN4_SPRITE) its list 2 entry pointed at the room, one of the art's room's as xnavi_bn4_art_row
+ * takes it; true. False for any other row. */
+bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists);
+/* A raw sprite's bytes in the player's BN4 ROM (its list word's bit 31 clear), *len of them; NULL where it is LZ77'd or
+ * unread */
+const uint8_t *xnavi_bn4_raw(int list, int number, uint32_t *len);
 /* A battle's record written: its entities (4 bytes each, BN6's BattleSettings' from +0x20: byte 0 0x11 an enemy, bytes 2-3
- * its id; 0xF0 the end), `len` bytes. Where one is a BN4 Navi's id, the room filled with his battle sprite (the core's copy
- * alone); true where it was. Between frames. */
+ * its id; 0xF0 the end), `len` bytes. Where one is a BN4 Navi's id, the room filled with his battle sprite and the art's
+ * room with his attacks' art and songs (xnavi_bn4_art.h; the core's copy alone); true where both were. Between frames. */
 bool xnavi_bn4_room_for(const uint8_t *entities, size_t len);
 
 #endif

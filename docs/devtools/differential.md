@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -993,7 +993,11 @@ format, its game 4: the trace's header names it):
   (`xdiff_snap.py` `T1_MOVED`, `xdiff_bn4.py` `t1_moved`), not by its NameID, which BN4's 0 would read
   as MegaMan's; its +9 and its id are its own code's, kept, and its spawn word's sprite number
   (+5) is read as the recipe's copy (`fireman_v1`, [BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
-  FireMan built).
+  FireMan built). A Navi's companion whose own animation, set in the paused opening, its after-step
+  runs at every fight frame (AquaMan's 0x5C, kind 1) is compared at the same fight frame until its sprite
+  state first steps with the battle's offset, exactly from then (legit.json's bn4 `companion_clock`,
+  `tools/xdiff_bn4_opening.py` `CompanionClock`; `aquaman_v1`, [BN4's Navis in BN6's
+  engine](../multirom/bn4-navis.md), AquaMan built).
   `gutsman_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md),
   GutsMan built) PASSes over its 1200 frames (his own collision argument
   ported, each game's own AI bookkeeping allowed on a Navi, `navi_ai`, his
@@ -1031,6 +1035,14 @@ format, its game 4: the trace's header names it):
   Sun's tables](../rom/bn4.md), What a hit leaves the struck, by element);
   and BN6's own Elec tally for its freeze (+0x78), allowed on MegaMan's
   collision data where BN4's holds nothing.
+  `roll_v1` ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md), Roll
+  built) holds a recorded FAIL at t1008, the same in t1-t1007: a moved
+  fourth-kind object (her flash, the fourth kind's 0x17) is told by its
+  type read back as BN4's (`xdiff_snap.py` `identity`, `xdiff_bn4.py`
+  `Bn4Canon.t4`), as a moved third-kind one is; her flash's +4, its spawn's
+  r4, is a spawn leftover; her pool sounds pair in her battles alone
+  (`foes`). At t1008 the enemy her summon spawns is each engine's own
+  Mettaur, which the comparator does not map.
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
@@ -1599,3 +1611,18 @@ format, its game 4: the trace's header names it):
     companion's rank at t271. The three branches each left the spark out;
     merged, one rule takes it out of the drawn a group ranks, the family's
     and the natives' alike.
+- **SearchMan's readings** (`searchman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), SearchMan built), with which
+  **`searchman_v1` PASSes**, 1200 fight frames:
+  - **The invisibility in the BN4 trace**: the collision data's frames
+    (BN4's +0x1A, BN6's +0x26) and the hide step's marker (BN4's +0x7C,
+    BN6's +0x50) laid out at BN6's places (`src/dev/xdiff_bn4_trace.c`,
+    `BN4_COLL_INVISIBLE`, `BN4_COLL_HIDE_MARKER`).
+  - **A moved fourth-kind type read back as BN4's** (`tools/xdiff_bn4.py`
+    `t4`, called by `tools/xdiff_snap.py` `identity` for an object of the
+    fourth kind that is no effect): his scope 0x2E, trails 0x31 and marker
+    0x3E run at the dispatch's numbers 0xE0 on and meet BN4's own.
+  - **His pool sounds** paired by slot (`legit.json`'s `bn4` sounds, his
+    ids alone by `foes`), and one leftover allowed: his trail's begun byte
+    (+9), what each game's PlaySoundEffect leaves in r0 (`spawn_leftover`'s
+    bytes, BN4 0x28 and BN6 0x48 alone).
