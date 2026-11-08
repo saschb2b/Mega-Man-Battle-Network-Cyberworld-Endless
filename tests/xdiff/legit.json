@@ -2774,6 +2774,22 @@
         "why": "Each side's wind (the fourth kind's 0x41) is kept in the battle state at +0x88 + 4 x side in BN4 and +0xC0 + 4 x side in BN6, its level 8 bytes past it: the slot's setter (BN4 0x080E69C6, BN6 0x080E675A: [r10 +0x18] + 4 x r1 + 0x88 | 0xC0, an old wind there told to end, the new one stored at +0 and r2 at +8) and its reader (BN4 0x080E69E8, BN6 0x080E677C: the same address left in r2, +0 in r0 and +8 in r1) are the same steps but for that constant. The wind's spawn (BN4 0x080E68F8, BN6 0x080E666C) calls the reader and then the fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC), which keeps the caller's r1 to r3 at the object's +0x34 to +0x3C, so the wind's +0x38 points at its side's slot in each game's own place (windman_v1 at t1: +0x8C | +0xC4, WindMan's side 1). A pointer into BN4's battle state between +0x88 and +0x97 is read as BN6's of the same place from +0xC0 (tools/xdiff_snap.py state_off); every other offset of it as it is"
       }
     ],
+    "ai_data": [
+      {
+        "name": "a Soul Navi's own block",
+        "bn4": "0x64",
+        "bn6": "0x80",
+        "size": "0x0C",
+        "why": "A Soul Navi's own block of his AI data is BN4's +0x64 (BN4_AI_NAVI) and BN6's +0x80 (BN6_AI_NAVI_STATE), where his port moves it (tools/xnavirecipe_bn4.py AI_BLOCKS: each pointer his code makes into it given BN6's offset) and the trace lays BN4's out (src/dev/xdiff_bn4_trace.c ai_segs). A pointer his code keeps to a byte of it is read as BN6's of the same byte: WoodMan's step's callback state (0x080C9178: movs r0,#0xb; adds r0,r0,r6; str r0,[r7,#0x20], r6 his block, BN4 0x080C8F88 adds r6,#0x64 and his copy's #0x80) points at his block's +0xB in both, BN4's AI +0x6F and BN6's +0x8B (woodman_v1 at t1: ai+0xC0 'ai' 111 | 139). A pointer to any other offset of an AI's data is read as it is"
+      },
+      {
+        "name": "a Soul Navi's attack's variables",
+        "bn4": "0x70",
+        "bn6": "0xA0",
+        "size": "0x50",
+        "why": "His attack's variables are BN4's +0x70 (BN4_AI_ATTACK_VARS) and BN6's +0xA0 (BN6_AI_ATTACK_VARS), moved and laid out as his own block is (tools/xnavirecipe_bn4.py AI_BLOCKS, src/dev/xdiff_bn4_trace.c ai_segs): a pointer into them is read as BN6's of the same byte"
+      }
+    ],
     "sounds": [
       {
         "bn4": "0xAD",
