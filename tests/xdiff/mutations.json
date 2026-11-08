@@ -1545,7 +1545,7 @@
    "poke": [
     "080BC210:200C"
    ],
-   "what": "her decision's set of CurAction 9 (BN4 0x080BC210: movs r0,#9 before BN4_SET_ACTION, the recipe's BN6's 0xB) written 0xC: her heal (MegaMan's state 46) left for another state (caught at t1, her CurAction)"
+   "what": "her decision's set of CurAction 9 (BN4 0x080BC210: movs r0,#9 before BN4_SET_ACTION, the recipe's BN6's 0xB) written 0xC: her warp (MegaMan's state 46) left for another state (caught at t1, her CurAction)"
   },
   {
    "name": "Roll's AI block at BN4's place",
@@ -1561,7 +1561,7 @@
    "poke": [
     "080EFC7E:2033"
    ],
-   "what": "her heal's sound 0x96 (BN4 0x080EFC7E: movs r0,#0x96, the recipe's pool slot 0x32) made the pool's second slot, 0x33: her summon's sound where BN4 plays her flash's (caught at t67, the family's sounds)"
+   "what": "her warp's sound 0x96 (BN4 0x080EFC7E: movs r0,#0x96, the recipe's pool slot 0x32) made the pool's second slot, 0x33: her summon's sound where BN4 plays her flash's (caught at t67, the family's sounds)"
   },
   {
    "name": "Roll's flash's effect another",
