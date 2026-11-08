@@ -1596,6 +1596,14 @@
    "what": "his decision's set of CurAction 8 (BN4 0x080C1370: movs r0,#8 before BN4_SET_ACTION, the recipe's BN6's 0xA) written 0xB: his state left for another (caught at t211, his CurAction)"
   },
   {
+   "name": "SearchMan's art's room filled with another's",
+   "spec": "searchman_v1",
+   "poke": [
+    "08F2C81C:0A:1"
+   ],
+   "what": "the room BN4's Navis' attacks' art and pool songs share (XN_BN4_ART, src/emu/xnavi_bn4_art.c), filled as his battle's record is written with the art of the seat his seat's byte of its table names (XN_BN4_ARTS + 3: his own, 0x03), that byte made 0x0A: AquaMan's sprites and songs loaded and his list entries pointed at them, SearchMan's entries left on another's bytes (caught at t216, his marker's sprite's frames)"
+  },
+  {
    "name": "AquaMan's panel not kept at his +6",
    "spec": "aquaman_v1",
    "poke": [
