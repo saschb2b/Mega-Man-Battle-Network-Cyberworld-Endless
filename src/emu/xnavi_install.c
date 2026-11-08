@@ -370,7 +370,7 @@ static void families_set(const XNavi *n) {
 
 /* ---- a Navi ---- */
 
-#define INSTALLED_MAX XN_HOMES_MAX
+#define INSTALLED_MAX (XN_HOMES_MAX + XN_BN4_SEATS)   /* (BN5's Navis' homes, then BN4's seats: WoodMan the seventeenth installed) */
 static const XNavi *installed[INSTALLED_MAX];
 static int ninstalled;
 

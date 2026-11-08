@@ -34,7 +34,7 @@
   8,400 zenny a run where it handed out about 7,000. The Tournament
   switch in EXTRAS turns it off.
 - **BN4's Navis fight in BN6.** GutsMan, ThunderMan, WindMan, FireMan,
-  SearchMan, AquaMan and Roll, each moved into BN6's battle engine and
+  SearchMan, AquaMan, WoodMan and Roll, each moved into BN6's battle engine and
   checked against BN4's own battle frame by frame, enter the tournament's
   first two rounds on their own plates of BN4's bracket. Roll's summon
   brings BN4's own Mettaur, moved for her. A round against one of them

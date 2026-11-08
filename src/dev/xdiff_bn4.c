@@ -12,6 +12,7 @@
 #include "guest.h"
 #include "rom.h"
 #include "xnavi_bn4.h"
+#include "xnavi_bn4_sounds.h"
 #include "xvirus_bn4.h"
 #include "xvirus_shim.h"
 
@@ -146,6 +147,10 @@ int xd4_bn6_id(int id) {
 			if (f->names[v] == id) return f->first_id + v;
 	}
 	return id;
+}
+
+void xd4_pool_point(const Spec *s) {
+	for (int i = 0; i < s->nfoes; ++i) xnavi_bn4_sounds_for((uint32_t)xd4_bn6_id(s->foes[i].id));
 }
 
 int xdiff_bn4_run(const Spec *s) {

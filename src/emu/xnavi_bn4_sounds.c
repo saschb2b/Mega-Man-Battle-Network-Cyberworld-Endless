@@ -96,6 +96,20 @@ static int navi_of(uint32_t id) {
 	return -1;
 }
 
+/* the pool pointed at Navi `which`'s songs where it points at another's (-1: none to point at) */
+static void point(int which) {
+	if (which < 0 || which == pointed) return;
+	/* (the battle holds another BN4 Navi than the pool's: his songs at its slots, the core's copy of the song table only) */
+	claims_begin(XN_CLAIMS);
+	for (int k = 0; k < navis[which].n; ++k) {
+		uint32_t slot = BUS + R.layout->song_table + 8u * navis[which].slot[k];
+		emu_write32(slot, navis[which].entry[k][0]);
+		emu_write32(slot + 4, navis[which].entry[k][1]);
+	}
+	claims_end();
+	pointed = which;
+}
+
 void xnavi_bn4_sounds_frame(void) {
 	if (!nnavis || !R.layout || !R.layout->song_table) return;
 	int which = -1, summoner = -1;
@@ -107,15 +121,11 @@ void xnavi_bn4_sounds_frame(void) {
 		 * xnavi_bn4_room_for) */
 		if (summoner < 0 && xnavi_bn4_summoner(id)) summoner = navi_of(xnavi_bn4_summoner(id));
 	}
-	if (which < 0) which = summoner;
-	if (which < 0 || which == pointed) return;
-	/* (the battle holds another BN4 Navi than the pool's: his songs at its slots, the core's copy of the song table only) */
-	claims_begin(XN_CLAIMS);
-	for (int k = 0; k < navis[which].n; ++k) {
-		uint32_t slot = BUS + R.layout->song_table + 8u * navis[which].slot[k];
-		emu_write32(slot, navis[which].entry[k][0]);
-		emu_write32(slot + 4, navis[which].entry[k][1]);
-	}
-	claims_end();
-	pointed = which;
+	point(which < 0 ? summoner : which);
+}
+
+void xnavi_bn4_sounds_for(uint32_t id) {
+	if (!nnavis || !R.layout || !R.layout->song_table) return;
+	int which = navi_of(id);
+	point(which < 0 && xnavi_bn4_summoner(id) ? navi_of(xnavi_bn4_summoner(id)) : which);
 }

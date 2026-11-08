@@ -52,7 +52,8 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 # project's name, its V1's enemy id), its V2, V3 and SP after it (BN4_NAVI_FIRST_ID's rows)
 NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140),
          (0x0D, 'AquaMan', 168),
-         (0x1D, 'Roll', 128))
+         (0x1D, 'Roll', 128),
+         (0x46, 'WoodMan', 172))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -85,6 +86,10 @@ NAVI_COPIED = {
     0x08014446: 'a moved object\'s sprite step (BN4_SPRITE_STEP: unless paused, a new animation set up and its +0x11 made its +0x10, '
                 'else the sprite updated): BN6\'s nearest (0x0801BBF4) updates the sprite in the frame its animation is set up too, '
                 'a frame ahead of BN4\'s; copied, its pause test BN6\'s',
+    # (WoodMan's: docs/multirom/bn4-navis.md, WoodMan built)
+    0x0800CA4A: 'a Soul Navi\'s attack\'s end with its CurAction alone (BN4_ATTACK_END_BARE: +0x10 0, CurAction 6, the attack\'s '
+                'variables\' first u16 0; none of BN4_ATTACK_END\'s requests, clear or flag): no BN6 routine of its body; copied, its '
+                'CurAction BN6\'s 8, its AI data\'s +0x70 BN6\'s +0xA0',
 }
 # A panel's fields a copied routine reads after BN4's getPanel (bn4_twins.GET_PANEL) past its type (xrecipe_bn4.panel_type's):
 # BN4's offset -> BN6's (bn4.h BN4_PANEL_ALLIANCE, BN6's +3)
@@ -473,6 +478,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.mm_bytes = sum(i.size for e, w in f.walks.items() if N.PLAYER <= e < N.PLAYER_END for i in w.insns.values())
     X4.side_sites(f)
     X4.scan(f)
+    far_loads(f)
     # (the state set's own store of r0 is its callers' CurAction: set_action_imms gives each call's)
     f.decisions = [d for d in f.decisions if not (d[0] == 'curaction' and d[1].startswith(f'{NAVI4["set_action"]:08X}:'))]
     ai_imms(f)
@@ -565,6 +571,11 @@ def tables_of(b4, f):
                 continue
             if any(lo <= v < hi for lo, hi, _ in f.navi_data.values()):
                 continue
+            # (a table between a copied routine's own pool words, its size known: raw with that routine, WoodMan's 0x080F50E4)
+            inner = next((k for k, hi in ends.items() if k <= v < hi), None)
+            if inner is not None and v in MM_TABLE_SIZES:
+                f.navi_data[inner] = (v, v + MM_TABLE_SIZES[v][0], MM_TABLE_SIZES[v][1])
+                continue
             # (the copied routine nearest below it, no code walked between its end and the table: WindMan's tables past
             # their pools' last word, two of them past one routine; to the next code walked or the next of MegaMan's states,
             # where his walked code ends before it, unless its size is known)
@@ -589,7 +600,36 @@ MM_TABLE_SIZES = {
                        'BN4_SPAWN_ENEMY (0x080F00F4), which her summon\'s shim stands in for (tools/xnavirecipe_bn4_summon.py)'),
     0x080F1DB4: (0x10, 'FireMan\'s states\' (0x080F1D98, MegaMan\'s): panels\' masks by side, two words a side (0x10, 0x0F8800A0; '
                        '0x30, 0x0F880080, BN4_RANDOM_PANEL_MASKS\' words)'),
+    0x080F50E4: (0x04, 'WoodMan\'s MegaMan\'s state 108\'s (0x080F509C): the third kind 0x0B\'s kind by the attack\'s +0xC (0x10, 0x11, '
+                       '0x12, 0x12), between its pool\'s words'),
 }
+
+
+# The offsets an immediate's load or store reaches, by its form (Thumb's imm5 scaled by the access): BN6's place of a field
+# past it is no immediate's (src/emu/thumb_reloc.h)
+REACH = {'THUMB_LDR': 0x7C, 'THUMB_STR': 0x7C, 'THUMB_LDRH': 0x3E, 'THUMB_STRH': 0x3E, 'THUMB_LDRB': 0x1F, 'THUMB_STRB': 0x1F}
+
+
+def far_loads(f):
+    """its loads of a field BN6 keeps past the immediate's reach (xrecipe_bn4.field_imms' offsets: BN4's collision data's final
+    damage +0x28, BN6's +0x80; WoodMan's third kind 0x95 at 0x080DFB8E): an ldrh the instruction after compares with 0, in a
+    routine that pushes lr, made a call to a shim of his home (XnFar, src/emu/xnavi_init.c fars_set); any other a decision"""
+    f.fars, keep = [], []
+    for i in f.imms:
+        if i['now'] <= REACH.get(i['form'], 0xFFFF):
+            keep.append(i)
+            continue
+        w = next((w for w in f.walks.values() if i['at'] in w.insns), None)
+        nxt, first = (w.insns.get(i['at'] + 2), w.insns.get(w.entry)) if w else (None, None)
+        if i['form'] != 'THUMB_LDRH' or not nxt or nxt.form != 'cmp' or nxt.f != (i['rd'], 0) or not first or \
+                first.form != 'push' or not first.f[1] or i['now'] > 0xFF:
+            f.decide('collision', f'{i["at"]:08X}: {i["why"]}, past its form\'s reach ({i["form"]}) and no load and compare a shim takes')
+            keep.append(i)
+            continue
+        f.fars.append(dict(at=i['at'], rd=i['rd'], rb=i['rn'], was=i['was'], now=i['now'],
+                           why=f'{i["why"]}, past an ldrh\'s reach: its load and compare with 0 a shim\'s (its routine '
+                               f'{w.entry:08X} pushes lr)'))
+    f.imms = keep
 
 
 # A sprite of a list the families' room does not grow (3), loaded by its moved objects, copied into list 4 (which it does):
@@ -810,6 +850,9 @@ def c_navi(f):
     arrays += init_text
     summon_text, summon_line = S.c_summon(f, n)
     arrays += summon_text
+    if f.fars:
+        arrays += f'static const XnFar {n}_fars[] = {{\n' + ''.join(
+            f'\t{{ 0x{k["at"]:08X}, {k["rd"]}, {k["rb"]}, 0x{k["was"]:X}, 0x{k["now"]:X} }},   /* {k["why"]} */\n' for k in f.fars) + '};\n'
     L = [head, rebase(arrays), '', f'static const XNavi bn4_{n} = {{', '\t.code = {', f'\t\t.name = "{f.name} (BN4\'s)",',
          '\t\t.game = XROM_BN4_RED_SUN_US,', f'\t\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */',
          f'\t\t.ai = {f.ai},', f'\t\t.first_id = XN_BN4_FIRST_ID + 0x{f.first_id - BN4_NAVI_ID0:X},',
@@ -850,6 +893,8 @@ def c_navi(f):
                  'runner runs it: xnavirecipe_bn4_objects.hide_steps) */')
     if summon_line:
         L.append(summon_line)
+    if f.fars:
+        L.append(f'\t.fars = {n}_fars, .nfars = {count("fars")},   /* (its loads past an immediate\'s reach, through shims of its home) */')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 

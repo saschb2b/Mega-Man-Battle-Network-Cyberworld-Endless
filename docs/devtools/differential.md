@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:15:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1653,3 +1653,18 @@ format, its game 4: the trace's header names it):
     ids alone by `foes`), and one leftover allowed: his trail's begun byte
     (+9), what each game's PlaySoundEffect leaves in r0 (`spawn_leftover`'s
     bytes, BN4 0x28 and BN6 0x48 alone).
+- **WoodMan's readings** (`woodman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), WoodMan built): with them
+  **`woodman_v1` PASSES**, 1200 fight frames:
+  - **A pointer into a Soul Navi's AI data by its place**
+    (`legit.json`'s `bn4` `ai_data`, `tools/xdiff_snap.py` `ai_off`): a
+    pointer into BN4's AI data read as BN6's where his port moves the block
+    (his own block, BN4 +0x64 at BN6 +0x80; his attack's variables, +0x70 at
+    +0xA0), as the trace lays the fields out (`ai_segs`); his step's
+    callback state keeps a pointer to his block's +0xB (BN4's +0x6F, BN6's
+    +0x8B); every other offset as it is.
+  - **His 0x94's spawn's r2** (`spawn_leftover`, its word +0x38): each
+    game's camera, which the shake set before its spawner leaves in r2
+    (BN4 0x02009B80, BN6 0x02009180); no code of the 0x94 reads it.
+  - **His pool sounds** paired by slot in his battles alone (`foes`), his
+    0xA2 the pool's second slot over GutsMan's first.

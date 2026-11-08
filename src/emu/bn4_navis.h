@@ -231,5 +231,25 @@
 #define BN4_MELODY_OWN_STEP 0x080B8C08u /* its init's own step: its +0x2E by its version (BN4_MELODY_2E), its collision data, its
                                        * set-up with region 0x35 (0x080B8C1E), +8 4 (hook 5 entered here: bn4_twins.INIT_AGAIN) */
 #define BN4_MELODY_2E     0x080B8C38u /* its +0x2E by version, 6 bytes (30 each), which the set-up copies into its collision's +5 */
+/* WoodMan, the eighth BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, WoodMan built): found by his type,
+ * each checked by the generator against his ROM */
+#define BN4_WOODMAN       0x080C8EC0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_WOODMAN]): jump table 0x080C8ED8 (init
+                                       * 0x080C8EE5, update 0x080C8F3F, dying BN4_NAVI_DYING), then the after-step; his block to 0x080C91A8 */
+#define BN4_WOODMAN_STATES 0x080C8F54u /* his state table: BN4's generic Navi 0-5, his decision 6 (0x080C8F81), MegaMan's 77 and 106-108
+                                       * as his 7-10 */
+#define BN4_ATTACK_END_BARE 0x0800CA4Au /* BN4_ATTACK_END's kin with its CurAction alone: +0x10 0, CurAction 6, the attack's +0 0
+                                       * (WoodMan's MegaMan's 106 and 107, at 0x080F4C8E and 0x080F4D9A) */
+#define BN4_WOODMAN_SHOT_KINDS 0x080F50E4u /* by his attack's +0xC (his version), his MegaMan state 108's shot's kind (the third kind's
+                                       * 0x0B, BN4_T3_0B_KINDS'): 0x10, 0x11, 0x12, 0x12, between that state's pool words */
+#define BN4_T3_07         0x080CDEB8u /* the third kind's 0x07 (his MegaMan's 107 spawns it, 0x080F4FE8; each spawns the next,
+                                       * 0x080CE076): its routine; its spawner 0x080CE052 (r1-r3 its panel and element) */
+#define BN4_T3_07_PANEL_TEST 0x080CDF78u /* ... its panel's flags (0x08009A86): let go unless they have 0x10 and none of 0x03840000
+                                       * (its literal: occupants' alliance bits, the collision masks' high halves, BN6's alike) */
+#define BN4_T3_94         0x080DF9B0u /* the third kind's 0x94 (his MegaMan's 106 spawns it after his slam's shake, 0x080F4D3C): its
+                                       * routine; its spawner 0x080DFA38 sets r0 alone (r1-r3 the caller's: its +0x34 to +0x3C), it
+                                       * spawns the third kind's 0x95 (0x080DFA64) */
+#define BN4_T3_95         0x080DFA78u /* the third kind's 0x95: its routine; its spawner 0x080DFCA4 */
+#define BN4_T3_95_HIT     0x080DFB74u /* ... its hits read: its collision's hits word (+0x54) against 0x0C000000, then 0xA0000000 with
+                                       * its final damage (+0x28, BN4_COLL_FINAL_DAMAGE, at 0x080DFB8E: BN6's +0x80, past an ldrh's reach) */
 
 #endif

@@ -32,5 +32,9 @@ void xnavi_bn4_songs_noted(void);
  * objects, or where none is, of the Navi a family among them is summoned by alone (xnavi_bn4_summoner: Roll's Mettaur's
  * 0x8B at her 0xE0), where it points at another's */
 void xnavi_bn4_sounds_frame(void);
+/* The pool pointed at once at the songs of the BN4 Navi enemy `id` (BN6's) is, or of the Navi it is summoned by, as the battle's
+ * first frame would point it: the differential's BN6 run, before its pokes, so a poke of a pool slot's entry holds in the
+ * battle (src/dev/xdiff_bn4.c) */
+void xnavi_bn4_sounds_for(uint32_t id);
 
 #endif

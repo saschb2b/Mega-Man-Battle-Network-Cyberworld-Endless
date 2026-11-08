@@ -24,7 +24,7 @@ and spawn). GutsMan is built and proved ([GutsMan built](#gutsman-built),
 below), ThunderMan, WindMan, FireMan, SearchMan and AquaMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
 [FireMan built](#fireman-built), [SearchMan built](#searchman-built),
-[AquaMan built](#aquaman-built)), the six in
+[AquaMan built](#aquaman-built)), and WoodMan ([WoodMan built](#woodman-built)), in
 the tournament's pool on their plates; their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
 ([Roll built](#roll-built)): the enemy she summons is BN6's own Mettaur,
 not yet compared with BN4's. BN5's Navis moved as
@@ -1387,6 +1387,86 @@ settled:
 
 Roll's songs ended past the art's room with the seven in, and the room
 was made one by battle before any spec ran on the fold.
+
+## WoodMan built
+
+The eighth proved, the second of Blue Moon's four, by `woodman_v1`: his
+type 0x46, Navi AI 59, ids 0x3AC-0x3AF (`foes AC@52`), his seat 11 by his
+BN4 id (172). His addresses and how each was read are in [BN4 Red Sun's
+tables](../rom/bn4.md) (WoodMan derived). He adds no new mechanism to a
+Soul Navi's path, as the order said; what his recipe asked of the
+generator, and of the engine as the eighth BN4 Navi:
+
+- **His states**: his decision (6), MegaMan's 77 and 106-108 as his 7-10.
+  106 slams and spawns the third kind's 0x94, which sets out 0x95s; 107
+  sets out the third kind's 0x07, each spawning the next along the row;
+  108 shoots the third kind's 0x0B (CirKill's shot) of a kind by his
+  version (`BN4_WOODMAN_SHOT_KINDS`, `0x080F50E4`: 0x10, 0x11, 0x12, 0x12,
+  copied raw with the routine that reads it, between its pool's words:
+  `tools/xnavirecipe_bn4.py` `MM_TABLE_SIZES`, `KINDS_BY_VERSION`).
+- **His attack's end with its CurAction alone** (`BN4_ATTACK_END_BARE`,
+  `0x0800CA4A`), the kin the order named: no BN6 body, copied
+  (`NAVI_COPIED`), its CurAction BN6's 8.
+- **Two masks that look like addresses**, numbers of the same meaning in
+  both engines (`xnavirecipe_bn4_objects.NUMBERS`): his 0x07's panel test
+  (`0x03840000`, occupants' alliance bits each game's panel flags OR in
+  from the same collision masks' words) and his 0x95's hits word
+  (`0x0C000000`).
+- **The third kind's dispatch numbers ran out.** BN4's take 0xE0 to 0xFF
+  of a kind's 256 (an object's type is a byte); with his four moved third
+  kinds the families' and Navis' reached 0xFF. Past it the generator takes
+  0xCC to 0xDF (`tools/xrecipe_bn4.py` `TYPE_MORE`, `type_number`): BN5's
+  third kind has 204 types (`BN5_TYPES_T3_COUNT`), so no BN5 code can
+  name one of them, and the most any BN5 track names is 0xC1. His 0x0B,
+  0x94 and 0x95 run at 0xCC, 0xCD and 0xCE; the next Navis take 0xCF on.
+- **A field past an immediate's reach.** His 0x95 reads its final damage
+  by `ldrh r0,[r7,#0x28]` and compares it with 0 (`0x080DFB8E`); BN6
+  keeps it at +0x80, past the 0x3E an ldrh reaches, and the installer
+  refused the immediate. The two instructions are made a call to a shim
+  of his home that loads +0x80 by a register and compares
+  (`movs r0,#0x80; ldrh r0,[r7,r0]; cmp r0,#0; bx lr`), the branch after
+  reading its flags; his routine pushes lr, which the generator checks
+  (`far_loads`, `XnFar` in `src/emu/xnavi_recipe.h`, `src/emu/xnavi_init.c`
+  `fars_set`).
+- **Caps he was the first past**: the Navis installed (16, BN5's homes;
+  now those and BN4's 25 seats: he was refused as the seventeenth, and his
+  id read BN6's Mettaur's record) and the moved enemy ids
+  (`ENEMIES_MOVED_MAX`, 256, now 384: his SP's id fell off), each raised.
+  The moved ranges a trace is told of (1024) cut his draws off it too;
+  that list is on the heap now, every range kept ([The
+  differential](../devtools/differential.md), The trace's moved ranges).
+- **Roll no longer the last installed.** The pool's songs stand as the
+  last installed Navi's until a battle's first frame points them at its
+  own (`xnavi_bn4_sounds_frame`), so in `roll_v1` the pool is now pointed
+  at hers at its first frame, over the poke of her player-22 mutation,
+  which went uncaught. The differential's BN6 run points the pool at the
+  spec's Navi before its pokes (`xnavi_bn4_sounds_for`,
+  `src/dev/xdiff_bn4.c` `xd4_pool_point`), as that first frame would, and
+  the mutation is caught at t204 again.
+
+`bn4_woodman_control` PASSes. **`woodman_v1` PASSes** over its 1200 fight
+frames: his decision, MegaMan's 106-108, his 0x07, 0x0B, 0x94 and 0x95,
+their hits on MegaMan and his sounds. What the comparator took
+([The differential](../devtools/differential.md), WoodMan's readings): a
+pointer into a Soul Navi's AI data read by BN6's places of his blocks (his
+step's callback state points at his block's +0xB: BN4's +0x6F, BN6's
++0x8B); his 0x94's spawn's r2, each game's camera, which no code of it
+reads; his pool sounds (0x8F at 0x32, 0xA2 at 0x33, 0xC7 at 0x63, 0x13E at
+0xD0, 0x14B at 0xE0) in his battles alone.
+
+Six mutations break his port and each is caught: his decision's CurAction
+off by one (t1), his AI block at BN4's +0x64 (t1), his attack's end's
+CurAction (t113), his shot's kinds' table (t199), his sound at another
+pool slot (t44) and his shot spawned at his 0x94's dispatch number (t199).
+
+**In the tournament's pool**: `src/layer/xguardian_bn4.c`'s line, his V1
+id 0xAC on his own plate (`BN4_PLATE_WOODMAN`, 0x07), "The Towering
+Timber" in a leaf green (the owner's to change). `LAYER_MAKE` stays 112.
+
+Not reached by `woodman_v1`, MegaMan idle: his MegaMan's 77 (his CurAction
+7, where `0x08012F96`'s flags have 0x4000) and his 0x95's hits read, the
+far load's shim among it. His sound 0x8F plays one of its two tracks
+(BN6's player 30 has one), as FireMan's.
 
 ## What tools/xnavirecipe.py needs for BN4
 
