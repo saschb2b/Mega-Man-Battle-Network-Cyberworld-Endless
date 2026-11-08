@@ -28,7 +28,7 @@ import re
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
-                        sprite_numbers_of,
+                        sprite_numbers_of, T1_MOVED,
                         u16, u32)
 
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
@@ -613,6 +613,16 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
+def companion_count(d, fa, fbt):
+    """legit.json's bn4 companion_opening_count: a Navi's companion (a first-kind object of a type his recipe moves, its role
+    T1_MOVED | its type: FireMan's 0x57) counts the animation its init set up in the paused opening by the fight's frames,
+    its mode's after-step (BN4 0x080143FC, BN6's twin 0x0801BBAC) running the sprite update at every fight frame, as the
+    Navi's own (opening_count): True where BN6's of BN4's t holds the same at the same fight frame"""
+    r = d.role
+    return (isinstance(r, tuple) and len(r) > 1 and r[0] == 'T1' and isinstance(r[1], int) and bool(r[1] & T1_MOVED)
+            and opening_count(d, fa, fbt))
+
+
 # MegaMan's animation in each game's own art (legit.json's bn4 allowed, "MegaMan's own art's animation"): a first-kind
 # object's sprite state holds its animation (+0x90), its frame's count (+0x91), its flags (+0x92: 0x80 as its last frame
 # runs), its art (+0xA8, the sprite + 4, its animations' table) and its frame's record (+0xAC: 20 bytes a frame, its
@@ -804,6 +814,14 @@ def replayed_world(fa, fb):
                                                  for fr in fb.trace['frames'][:64] for e in fr['events'])
 
 
+def ranked(o, fam):
+    """legit.json's bn4 spark_ranks: whether a family object takes a rank among the family's renderer places (bn4_renderer):
+    a hit's spark its attack struck with (is_spark) is each engine's own effect, its sprite state and its life its own art's
+    (spark_own), so where one game's still draws it and the other's has ended it takes no rank, as each game's own art takes
+    none (legit.json's renderer)"""
+    return o.role in fam and not is_spark(o.role)
+
+
 def bn4_renderer(fa, fb, fam, last):
     """the family's renderer places read as its own, as BN5's are (legit.json, maps, renderer; tools/xdiff_masks.py
     renderer_ranks, whose reading this is with the family's roles given): the renderer hands each object it draws its tile
@@ -812,7 +830,7 @@ def bn4_renderer(fa, fb, fam, last):
     a family object drawn this frame reads its rank among those the family's drawn objects take, in the order they ran;
     one not drawn keeps its last rank where its place stayed; one never drawn none. Into each object's `over`"""
     for f in (fa, fb):
-        own = [o for o in f.fr['objs'] if o.role in fam]
+        own = [o for o in f.fr['objs'] if ranked(o, fam)]
         drawn = [o for o in own if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
         run = {}
         for n, a in enumerate(f.fr['order']):
@@ -1023,7 +1041,8 @@ def compare(spec, ta, tb, canon, show=6):
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
             d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
-                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None)
+                ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
+                ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         mine = [d for d in mine if not d.mask]
