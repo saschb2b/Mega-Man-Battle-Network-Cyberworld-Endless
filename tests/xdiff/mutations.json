@@ -1457,7 +1457,9 @@
    "poke": [
     "080DAAC8:2001"
    ],
-   "what": "his cloud's init's animation (BN4 0x080DAAC8: movs r0,#0 into +0x10 and +0x11 before the animation setter) made 1: the cloud on another animation from its spawn, which legit.json's bn4 opening_animation (by the openings' lengths) must not explain (caught at t1, its sprite state)",
+   "what": "his cloud's init's animation (BN4 0x080DAAC8: movs r0,#0 into +0x10 and +0x11 before the animation setter) made 1: the cloud on another animation from its spawn, which legit.json's bn4 opening_animation (by the openings' lengths) must not explain (caught at t1, its sprite state)"
+  },
+  {
    "name": "WindMan's sound at another pool slot",
    "spec": "windman_v1",
    "poke": [
