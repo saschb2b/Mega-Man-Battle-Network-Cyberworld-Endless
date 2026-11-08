@@ -3,12 +3,23 @@ type: Overview
 title: "Release notes"
 description: "The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with."
 tags: [releases]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:30:00Z }
 ---
 
 # Release notes
 
 The players' notes of each release, which the site's versions page renders (`tools/site_versions.py`) and each GitHub release opens with; a release without notes shows its CHANGELOG section instead.
+
+
+## How a release's notes are written
+
+- They open with the release's trailer where it has one (`../clips/trailer-play.png` linking `../clips/trailer.mp4`), then the release's title and one short paragraph of its news.
+- That paragraph says what changed for the player, nothing else: never "the Nth beta" or "this is the Xth beta version" (the owner's direction, 8 November 2026). The beta label is the GitHub release's title, set by `.github/workflows/release.yml`.
+- Every CHANGELOG entry of the release is shown, a `###` each with its own picture or GIF, grouped into player-facing sections; where something visible changed, a before/after pair against the last release (`tools/before_after.py`).
+- Pictures are whole frames of the game or pages of the site from scripted runs (`build.py screenshots`, `build.py clips`), never a sprite cropped out; paths are relative (`../screenshots/`), which `tools/release_notes.py` rewrites to the tag's raw files.
+- The words are the CHANGELOG's voice: short, for players who know Battle Network, never explaining BN6's own mechanics.
+
+## The releases
 
 - [Cyberworld Endless 0.20.0](v0.20.0.md): Red Sun joins the run.
 - [Cyberworld Endless 0.19.0](v0.19.0.md): Your screen, your sound.

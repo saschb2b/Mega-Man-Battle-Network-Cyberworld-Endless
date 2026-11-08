@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-08
+* **Update**: code/tools.md, the release skill (`.claude/skills/release/`): a release cut in order, from the notes to the PS5 catalog, written down from the releases so far.
+* **Update**: releases/overview.md, How a release's notes are written: the trailer first, the news in one paragraph (never "the Nth beta", the owner's direction), every CHANGELOG entry with its picture, before/after pairs, whole frames only.
 * **Update**: game/tournament.md, As built: the tournament in players' runs (BN4's ROM read, a profile past the Nest; `bracket_here`, `run_bracket_at`), the faces built (`XBR_PLATE_NAVI`), BN4's seven proved Navis in the pool (ThunderMan, WindMan, FireMan, SearchMan, AquaMan and Roll after GutsMan), `--dev tourney` now a force for any profile; its description and its line in game/index.md in step.
 * **Update**: game/meta/extras.md and GUIDE.md: the tournament is in runs, so its EXTRAS line no longer carries the dim "Not in runs yet" (`src/core/extras_text.c`); the GUIDE's line names BN4 Red Sun's ROM beside BN6's as the tournament's need. releases/v0.20.0.md, 0.20.0's players' notes, with its line in releases/overview.md.
 * **Update**: multirom/bn4.md, Its sounds and call 12, multirom/bn4-navis.md, Roll built, and rom/sound.md: Mettaur's 0x8B plays from Roll's per-battle pool (her slot 0xE0), not slot 0x46, so 0x41-0x4B stay BN5's (call 8).
