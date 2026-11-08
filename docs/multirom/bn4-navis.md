@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -657,11 +657,71 @@ over GutsMan:
   Navi so far gives 1 or 2 by its number, so V1-V3 have palette 0, as
   BN6's step 0 gives; their SP palettes are an interim.
 
-`bn4_fireman_control` PASSes. **`fireman_v1`** FAILs at t1, its verdict
-held through the merge: his own record, AI data and collision match BN4's;
-his companion's sprite count (+0x91) is BN4 2, BN6 1, not yet explained.
-No mutation of his port is added while the spec fails. Of the four, only
-GutsMan is in the tournament's list of proved BN4 Navis.
+`bn4_fireman_control` PASSes. **`fireman_v1` PASSes** over its 1200
+frames (his decision, his flames and their chain, his companion, his
+sounds), its recorded verdict removed. What took it there from t1, one
+root cause at a time:
+
+1. **His companion's sprite count at t1** (`obj +0x91`, BN4 2, BN6 1): its
+   init (`0x080CC3F8`, run by his at his spawn, in the paused opening) sets
+   its animation up and runs the sprite update once; its mode 0
+   (`0x080CC4D4`) ends in `BN4_FIRE_COMPANION_SPRITE` (`0x080CC5D0`), which
+   runs the after-step (`0x080143FC`, BN6's twin `BN6_AFTER_STEP`
+   `0x0801BBAC`, the same but for the pause test's routine) unless time is
+   stopped. The after-step runs the sprite update at every fight frame and
+   none of the paused opening's, so the count is the frame's clock, as
+   GutsMan's own (`opening_count`): 2 at t1 in BN4 and at BN6's t1, 1 at
+   BN6's t2. Not the port's: the comparator reads a Navi's companion's
+   opening count at the same fight frame, BN4's t1 and t2 alone
+   (legit.json's bn4 `companion_opening_count`, `tools/xdiff_bn4.py`
+   `companion_count`). The animation it copies from him from his first
+   state's on is a state's and follows with the battle's offset.
+2. **His flame's element** (t237, the third kind's 0x09: its +0xE BN4 1,
+   BN6 0, and its collision's hit kind): its spawner
+   (`BN4_FIRE_FLAME_SPAWN`, `0x080CE49C`) stores its element at BN4's +0x17
+   (the recipe's BN6's +0xE) and then its palette at BN4's +0xE
+   (`0x080CE4BC`), which in BN6 fell on the element. The port's: a moved
+   third-kind type's palette (`BN4_T3_PALETTE`, its sprite's +4 by
+   `BN4_SPRITE_PALETTE_SET`) is BN6's +0xF (`BN6_T3_PALETTE`), which BN6's
+   engine reads only on its actors and the trace lays BN4's +0xE at:
+   `tools/xrecipe_bn4.py` `palette_imms`, its init's read (`0x080CE358`), its
+   chain's (`0x080CE486`) and the spawner's store. No family's code is
+   changed by it.
+3. **His sounds** (t238): his copies at the pool's slots (0xA8 at 0x33,
+   0x8F at 0x32, 0xA9 at 0x63, 0xC0 at 0xD0) paired by the routines that
+   play them (legit.json's bn4 sounds), as GutsMan's.
+4. **The renderer's ranks** (t271, his companion's tile place, BN4 rank 3,
+   BN6 2): the spark of his flame's hit on MegaMan is each engine's own art
+   and life (allowed); BN4's was still drawn, between his flames and his
+   companion, where BN6's had ended, and took a rank in BN4 alone. The
+   family's renderer ranks are read without a hit's spark (legit.json's bn4
+   `spark_ranks`, `tools/xdiff_bn4.py` `ranked`).
+
+The order of his after-step and present (BN4 before, BN6 after) made no
+difference in the 1200 frames. Six mutations break his port and each is
+caught: his flame's palette stored at BN4's +0xE (t237), its element at
+BN4's +0x17 (t237), its palette read at BN4's +0xE (t237), his sound 0xA8
+at the pool's first slot (t238), his decision's CurAction off by one (t1)
+and his companion's tell at its +0x10 (t335); with the rest, 193 of 193.
+
+Two interims stay, neither reached by a spec: his companion's mode 4 (its
+appear through BN4's tile buffer, where the battle's settings' +6 has
+0x20) runs as mode 0, as WindMan's companions' state 4; his SP's palette
+(`BN4_NAVI_PALETTE` gives SP 2, BN6's step 0 none).
+
+**Not yet in the tournament's pool**: `src/layer/xguardian_bn4.c`'s line
+needs his plate on BN4's bracket (`BN4_ENTRANT_ID`), and his is not named.
+By sight only GutsMan's 0x00, AquaMan's 0x03, Roll's 0x04, SearchMan's
+0x09 and KendoMan's 0x11 are ([BN4's tournament screens](bn4-tournament.md));
+his V1's battle record is `0x080FAA08` (number 22 of the records
+`0x08007A94` reads at `0x080FA900` + 12 x n), but how
+`BN4_OPPONENT_BATTLES`' numbers (GutsMan's plate 0x00 gives 4, his record's
+number 13) reach a record is not read: neither a search for
+the readers of `[eToolkit +0x44] +0xA` (one, a script's comparison at
+`0x0802C688`) nor for a table from the numbers to the records found it.
+A palette-distance match of the Navis' battle sprites against the plates
+named none of the known five right, so it names none. Of the four, GutsMan
+alone is in the pool.
 
 ## What tools/xnavirecipe.py needs for BN4
 
