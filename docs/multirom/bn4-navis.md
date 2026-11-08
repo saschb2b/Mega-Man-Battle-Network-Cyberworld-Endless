@@ -918,7 +918,7 @@ both engines). What he adds over the four before him:
   audited (the same answer wherever the side is not MegaMan's).
 
 `bn4_searchman_control` PASSes. **`searchman_v1` PASSes** over its 1200
-frames (his decision, hiding, scope, shots, bursts, trails and sounds).
+frames (his decision, hiding, shots, bursts, trails and sounds; not his scope, below).
 What took it there from t1, one cause at a time: the install refused (two
 copied routines overlapping his moved regions: a copied routine inside a
 moved region is that region's code now); his invisibility's frames and
@@ -932,10 +932,20 @@ tests it against 0, and each game's MP2K leaves its own there (BN4 0x28,
 BN6 0x48; legit.json's bn4 `spawn_leftover` bytes, that pair alone).
 
 Seven mutations break his port and each is caught: his hide step's marker
-read at BN4's +0x7C, his hide step's clear of the drawn bit made a set,
-his state's read of his invisibility at BN4's +0x1A, his scope's lock
-told at another field, his sound 0x90 at the pool's second slot, his
-burst's effect left at BN4's id, his decision's CurAction off by one.
+read at BN4's +0x7C (t217), its clear of the drawn bit made a set (t216),
+his invisibility read at BN4's +0x1A (t218), his trail spawned as another
+kind (t741), his sound 0x90 at the pool's second slot (t250), his burst's
+effect left at BN4's id (t384), his decision's CurAction 8 off by one
+(t211); with the rest, 208 of 208.
+
+**What `searchman_v1` does not reach.** In its 1200 frames, MegaMan idle,
+SearchMan runs his decision and MegaMan's states 58-60 (BN4's CurActions
+6-9), never 61 (his 10): his scope (the fourth kind's 0x2E), the third
+kind's 0x60 and the trails' kinds 1 and 2 it spawns are moved and
+installed but unproved. Two first mutations, on his scope's lock and his
+CurAction 10, were not caught for that, and were replaced by the two
+above. A spec where his decision takes state 61 (MegaMan moving, or his
+SP) is the next to write.
 
 **The art room ran out with him.** The generator's art room (attacks'
 sprites and songs, `FREE_BN4_NAVI_ART`, 0x2C000) held the four Navis

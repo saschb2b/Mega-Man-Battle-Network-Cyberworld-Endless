@@ -1561,7 +1561,7 @@
    "poke": [
     "080F166C:8B41"
    ],
-   "what": "his state 61's test of his invisibility's frames (MegaMan's in BN4, copied: 0x080F166C ldrh r1,[r0,#0x1a], the recipe's BN6's +0x26, BN6_COLL_INVISIBLE) left at BN4's +0x1A (caught at t218, his state)"
+   "what": "the test of his invisibility's frames in a helper of MegaMan's states 59 and 61 he runs (0x080F1664, copied: 0x080F166C ldrh r1,[r0,#0x1a], the recipe's BN6's +0x26, BN6_COLL_INVISIBLE) left at BN4's +0x1A (caught at t218, his state)"
   },
   {
    "name": "SearchMan's trail spawned as another kind",
