@@ -1626,6 +1626,30 @@
     "080CFC6C:2039"
    ],
    "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's copy at slot 0x46) made Walla's copy at 0x39: another sound where the shockwave sets out (caught at t73, the family's sounds)"
+  },
+  {
+   "name": "Roll's summoned Mettaur arriving as BN6's",
+   "spec": "roll_v1",
+   "poke": [
+    "0800FCCE:2802"
+   ],
+   "what": "the summoned Mettaur's copied generic state 0's test of +5 (BN4 0x0800FCCE: cmp r0,#1 before 0x0801002A's bl) made cmp r0,#2: the summon's +5 2 sent to BN4's 0x0800FF26, paired with BN6's own appear of an enemy spawned into a fight (0x080164A0) where BN4's summoned appear runs (caught at t1008, its +0, +0xA and +0x20)"
+  },
+  {
+   "name": "Roll's summoned Mettaur falling another way",
+   "spec": "roll_v1",
+   "poke": [
+    "080100B4:3804"
+   ],
+   "what": "BN4's summoned appear's fall (0x080100B4: subs r0,#8 on its +0x3E, copied with Mettaur) made 4 a frame: the summoned Mettaur drawn higher as it falls in (caught at t1008, its +0x3E)"
+  },
+  {
+   "name": "Roll's summoned Mettaur never its turn",
+   "spec": "roll_v1",
+   "call": [
+    "0800AA06:0810A952"
+   ],
+   "what": "the summoned Mettaur's test of the appear queue's head (BN6_QUEUE_HEAD through its r0 shim) aimed at BN6's family nullsub: once it has appeared it never heads the queue (caught at t1060, its +7, CurAction and +0x20)"
   }
  ]
 }
