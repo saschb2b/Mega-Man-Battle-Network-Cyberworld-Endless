@@ -372,14 +372,16 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c \
-	src/jukebox/jukebox_text.c src/core/fast_forward.c src/core/feel.c
+	src/jukebox/jukebox_text.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
 $(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
+# (a map's views, tests/test_core.c's test_area_views: area_src.c reads gfx.h's colours, and gfx.h includes SDL's header)
+$(TEST_OBJ_DIR)/src/map/area_src.o: TEST_OBJ_SDL = $(TEST_SDL)
 build/host/test_core: $(TEST_OBJS)
 	@mkdir -p build/host
 	$(CC_host) $(TEST_SAN) -o $@ $(TEST_OBJS) -lm

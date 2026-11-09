@@ -6933,8 +6933,73 @@ static void test_liberation_heal(void) {
 	CHECK(lib_darkloid_heal(&b, 700, 700) == 700, "heal at full HP: %d", lib_darkloid_heal(&b, 700, 700));
 }
 
+/* A map's mirror image and raised views made in place (area_src_mirror_in,
+ * area_src_raise_in: docs/engine/emulation/3ds-memory.md) hold what the
+ * copies hold, a raised view's mirror too, and the map is as it was, byte
+ * for byte, once each view is ended */
+static void view_map(AreaSrc *a, int tw, int th, int layers, unsigned seed) {
+	memset(a, 0, sizeof *a);
+	a->tw = tw; a->th = th; a->layers = layers; a->ex = 12; a->ey = 20; a->group = 0x90;
+	size_t cells = (size_t)tw * th, n = cells * 64;
+	for (int l = 0; l < layers; ++l) a->tile[l] = malloc(cells * 2);
+	a->px = malloc(n * 4); a->px0 = malloc(n * 4); a->front = malloc(n); a->idx = malloc(n);
+	a->hw = 3; a->hh = 5; a->hx0 = -2; a->hy0 = 1; a->hz = malloc(15);
+	a->rw = 4; a->rh = 2; a->rx0 = 3; a->ry0 = -1; a->rings = malloc(8);
+	a->sec[0] = calloc(2, sizeof(CoordCell)); a->nsec[0] = 1;
+	CHECK(a->px && a->px0 && a->front && a->idx && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
+	for (int l = 0; l < layers; ++l)
+		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)((seed = seed * 1103515245u + 12345u) >> 8);
+	for (size_t i = 0; i < n; ++i) {
+		seed = seed * 1103515245u + 12345u;
+		a->px[i] = seed; a->px0[i] = seed ^ 0x5A5A5A5Au; a->front[i] = (uint8_t)(seed >> 24); a->idx[i] = (uint8_t)(seed >> 16);
+	}
+	for (int i = 0; i < 15; ++i) a->hz[i] = (uint8_t)(i * 8);
+	for (int i = 0; i < 8; ++i) a->rings[i] = (uint8_t)(i + 1);
+}
+
+static bool same_bytes(const void *x, const void *y, size_t n) { return (!x && !y) || (x && y && !memcmp(x, y, n)); }
+
+/* Whether views x and y hold the same: their fields, tiles and pixels */
+static bool same_view(const AreaSrc *x, const AreaSrc *y) {
+	size_t cells = (size_t)x->tw * x->th, n = cells * 64;
+	bool ok = x->tw == y->tw && x->th == y->th && x->ex == y->ex && x->ey == y->ey && x->level == y->level && x->hw == y->hw && x->hh == y->hh
+		&& x->hx0 == y->hx0 && x->hy0 == y->hy0 && x->rw == y->rw && x->rh == y->rh && x->rx0 == y->rx0 && x->ry0 == y->ry0
+		&& same_bytes(x->hz, y->hz, (size_t)x->hw * x->hh) && same_bytes(x->rings, y->rings, (size_t)x->rw * x->rh);
+	for (int l = 0; l < 2; ++l) ok = ok && same_bytes(x->tile[l], y->tile[l], cells * 2);
+	for (int k = 0; k < 4; ++k) ok = ok && x->nsec[k] == y->nsec[k];
+	return ok && same_bytes(x->px, y->px, n * 4) && same_bytes(x->px0, y->px0, n * 4) && same_bytes(x->front, y->front, n) && same_bytes(x->idx, y->idx, n);
+}
+
+static void test_area_views(void) {
+	static const int z[] = { 8, 16, 48, 56, 64 };
+	for (int layers = 1; layers <= 2; ++layers) {
+		AreaSrc a, was, c, v, cm, vm;
+		view_map(&a, 5, 7, layers, 7u + (unsigned)layers);
+		view_map(&was, 5, 7, layers, 7u + (unsigned)layers);
+		CHECK(area_src_mirror(&a, &c) && area_src_mirror_in(&a, &v), "views: a mirror image made (%d layers)", layers);
+		CHECK(same_view(&c, &v), "views: the mirror made in place is the copy's (%d layers)", layers);
+		area_src_mirror_end(&a, &v);
+		area_src_free(&c);
+		CHECK(same_view(&a, &was), "views: the map as it was after its mirror (%d layers)", layers);
+		for (size_t k = 0; k < sizeof z / sizeof *z; ++k) {
+			CHECK(area_src_raise(&a, z[k], &c) && area_src_raise_in(&a, z[k], &v), "views: raised %d made (%d layers)", z[k], layers);
+			CHECK(same_view(&c, &v), "views: raised %d in place is the copy's (%d layers)", z[k], layers);
+			CHECK(area_src_mirror(&c, &cm) && area_src_mirror_in(&v, &vm), "views: raised %d's mirror made", z[k]);
+			CHECK(same_view(&cm, &vm), "views: raised %d's mirror in place is the copy's (%d layers)", z[k], layers);
+			area_src_mirror_end(&v, &vm);
+			area_src_free(&cm);
+			area_src_raise_end(&a, &v);
+			area_src_free(&c);
+			CHECK(same_view(&a, &was), "views: the map as it was after raised %d (%d layers)", z[k], layers);
+		}
+		area_src_free(&a);
+		area_src_free(&was);
+	}
+}
+
 int main(void) {
 	test_sha1();
+	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
 	test_liberation_team();

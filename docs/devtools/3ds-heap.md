@@ -3,7 +3,7 @@ type: Tool
 title: "The 3DS's heap on a computer"
 description: "`tools/heap3ds.py` plays long headless runs of the host build with every allocation counted as the New 3DS's 96 MB heap holds it, reporting the peak, refused allocations and run depth, BN6 alone, with BN5, with BN4 Red Sun, or with both."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:20:00Z }
 ---
 
 # The 3DS's heap on a computer
@@ -12,6 +12,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 python3 tools/heap3ds.py                     # seeds 1-12, the five cases below
 python3 tools/heap3ds.py --seeds 1-24 --cases bn5 --no-build
 python3 tools/heap3ds.py --cases bn5 --cap 90   # a heap 6 MB short: what a refusal does where fragmentation took that much
+python3 tools/heap3ds.py --cases bn6,bn5,bn4 --cap 86   # the margin rule: 10 MB short, nothing refused
+python3 tools/heap3ds.py --cases bn5 --seeds 1 --frames 40000 --shots 1000 --refuse tiles_keep_begin --no-build
 ```
 
 `tools/heap3ds.py` plays long runs of the host build headless (the test
@@ -35,3 +37,13 @@ kept). Per run: the peak, the allocations refused,
 how deep the run went, how often an area was learned again. It models the
 bytes, not the 3DS's fragmentation: the device's own numbers are
 `log.txt`'s heap lines.
+
+What a refusal costs is seen rather than argued. `--refuse FUNC,...`
+refuses every allocation those functions of the game ask for themselves
+(`tools/heap3ds.c`'s `HEAP3DS_REFUSE`: the first frame of the game's that
+asked, its range from `nm`; a function the compiler inlined has none, and
+the tool says so), whatever the heap holds; `--shots N` keeps a picture
+every N frames in each run's folder (`.build/heap3ds/CASE/sSEED/`), to set
+beside a run without the refusal. The same pictures: the refusal cost time
+alone, a cache's; others: it cost the picture ([The 3DS's
+memory](../engine/emulation/3ds-memory.md), What a refusal costs).

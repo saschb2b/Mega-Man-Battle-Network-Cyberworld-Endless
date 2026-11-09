@@ -21,6 +21,10 @@
 #define COORD_AT FREE_COORDS          /* generated coordinate data */
 #define TOWN_COORD_AT FREE_TOWN_COORDS      /* the town's */
 
+/* (the bytes the last coordinate data took, a layer's or the town's: the
+ * layers' sizes) */
+static size_t layer_bytes;
+
 /* One cell's shape: key, then lowest z, value, height, type. */
 typedef struct { uint16_t key; uint8_t shape[4]; } Cell;
 
@@ -159,16 +163,18 @@ static int gap_mouths(Cell *w, int cap, int rise, const Cell *open, int nopen) {
 	return n;
 }
 
-static bool write_at(uint32_t at, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra);
+static bool write_at(uint32_t at, uint32_t end, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra);
 
 bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
 	town_floor = NULL;
-	return write_at(COORD_AT, slot, pads, npads, extra);
+	return write_at(COORD_AT, FREE_COORDS_END, slot, pads, npads, extra);
 }
+
+size_t coords_layer_bytes(void) { return layer_bytes; }
 
 bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const CoordExtra *extra) {
 	town_floor = floor;
-	bool ok = write_at(TOWN_COORD_AT, slot, NULL, 0, extra);
+	bool ok = write_at(TOWN_COORD_AT, FREE_TOWN_COORDS_END, slot, NULL, 0, extra);
 	town_floor = NULL;
 	return ok;
 }
@@ -177,12 +183,27 @@ static bool raw_only;
 
 bool coords_write_raw(uint32_t slot, const CoordExtra *extra) {
 	raw_only = true;
-	bool ok = write_at(TOWN_COORD_AT, slot, NULL, 0, extra);
+	bool ok = write_at(TOWN_COORD_AT, FREE_TOWN_COORDS_END, slot, NULL, 0, extra);
 	raw_only = false;
 	return ok;
 }
 
-static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
+/* The data written and the map's pointer at it, within its region; told
+ * always where it is not: the layers' region is sized by the largest layer
+ * over 300 seeds, and one past it is not built
+ * (docs/engine/emulation/free-space.md, Fail loudly). */
+static bool put(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const uint8_t *data, size_t n) {
+	if (n > end_bus - at_bus) {
+		fprintf(stderr, "coords: %u bytes of coordinate data, past their region's %u at %08x: not written\n", (unsigned)n,
+			(unsigned)(end_bus - at_bus), (unsigned)at_bus);
+		return false;
+	}
+	emu_write(at_bus, data, n);
+	emu_write32(0x08000000u + slot, at_bus);
+	return true;
+}
+
+static bool write_at(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
 	enum { WALLS_MAX = 16384, TRIGGERS_MAX = PAD_CELLS * 16 };
 	static Cell sec[4][WALLS_MAX];
 	int n[4] = { 0 };
@@ -216,9 +237,9 @@ static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int n
 	uint8_t *out = malloc(16 + len + len / 8 + 16);
 	for (int s = 0; s < 4; ++s) put32(out + s * 4, (uint32_t)at[s]);
 	size_t lz = lz_literal(d, len, out + 16);
-	emu_write(at_bus, out, 16 + lz);
-	emu_write32(0x08000000u + slot, at_bus);
+	layer_bytes = 16 + lz;
+	bool fits = put(at_bus, end_bus, slot, out, 16 + lz);
 	free(out);
 	free(d);
-	return true;
+	return fits;
 }

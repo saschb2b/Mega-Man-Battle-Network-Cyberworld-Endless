@@ -39,34 +39,38 @@ static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 }
 
 /* Learns the tiles of map `src` and its mirror image, where their tiles
- * line up with the layer's grid (`grid_of`). */
-static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+ * line up with the layer's grid (`grid_of`, src itself or another's: its
+ * fields alone are read). The mirror is src turned in place and back
+ * (area_src_mirror_in): a copy of it took the New 3DS's heap past its size
+ * (docs/engine/emulation/3ds-memory.md). */
+static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
 	}
 	AreaSrc m;
-	if (!area_src_mirror(src, &m)) return;
+	if (!area_src_mirror_in(src, &m)) return;
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
 		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
 	}
-	area_src_free(&m);
+	area_src_mirror_end(src, &m);
 }
 
 /* ... at each of its floor heights: raised floors are drawn higher, so each
- * is learned in a view that brings it down to the ground. */
-static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+ * is learned in a view that brings it down to the ground (made in place,
+ * as the mirror is). */
+static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	int count[256] = { 0 };
 	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
 	learn_view(src, grid_of, area, L);
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
 		if (count[z] < NETMAP_LEVEL_MIN_CELLS) continue;
 		AreaSrc r;
-		if (!area_src_raise(src, z, &r)) continue;
+		if (!area_src_raise_in(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, L);
-		area_src_free(&r);
+		area_src_raise_end(src, &r);
 	}
 }
 
@@ -78,7 +82,8 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 	AreaSrc src, m;
 	if (!area_src_load(c[0], c[1], &src)) return;
 	props_learn_counter(&src, c[2], c[3], FACES_X, &L->counter[FACES_X]);
-	if (area_src_mirror(&src, &m)) {
+	/* (its mirror made in place, src not read again till it is let go) */
+	if (area_src_mirror_in(&src, &m)) {
 		props_mirror_walls(&src, &m);
 		props_learn_counter(&m, -c[3], -c[2], FACES_Y, &L->counter[FACES_Y]);
 	}
@@ -106,7 +111,7 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 				L->counter[f].ntiles, L->counter[f].nwalls, L->counter[f].navi_x, L->counter[f].navi_y);
 	if (emu_debug_on())
 		for (int f = 0; f < 2; ++f) fprintf(stderr, "counter faces %d moved %d,%d onto the lattice\n", f, L->counter_dx[f], L->counter_dy[f]);
-	area_src_free(&m);
+	area_src_mirror_end(&src, &m);
 	area_src_free(&src);
 }
 

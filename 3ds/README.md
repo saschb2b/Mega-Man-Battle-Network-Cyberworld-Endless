@@ -191,7 +191,9 @@ What differs from the other builds:
   refused), as the 3DS before mGBA's buffer was given back, with BN6
   alone, and with BN5 read; per run its peak, the allocations refused
   and how deep it went. Before a device run of a change to what a layer
-  allocates.
+  allocates or a run keeps: the margin rule, `--cases bn6,bn5,bn4 --cap
+  86` refusing nothing over seeds 1-12 (docs/engine/emulation/3ds-memory.md, The
+  budget and the margin rule).
 - **BN5 on the 3DS**, on a New 3DS with both ROMs (BN5's beside BN6's):
   `log.txt` says "mGBA's ROM buffer given back to the heap, 16384 KB",
   "BN5 found: Mega Man Battle Network 5: Team Colonel (USA)", "BN5 read
