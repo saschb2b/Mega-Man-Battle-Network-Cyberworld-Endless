@@ -822,7 +822,9 @@ class Deriver:
 
     def rom_twin(self, v):
         """BN6's twin of a table of BN5's: the project's (bn5_twins.DATA_TWINS); the same bytes once in BN6 (64 at most);
-        or a table of pointers whose targets' bytes BN6 keeps, moved alike"""
+        or a table of pointers whose targets' bytes BN6 keeps, moved alike; none for a word past the ROM's bytes"""
+        if not BUS <= v < BUS + len(self.b5.data) - 64:
+            return None, 'past the ROM\'s bytes'
         for lo, n, to, why in bn5_twins.DATA_TWINS:
             if lo <= v < lo + n:
                 return to + (v - lo), why

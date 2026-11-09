@@ -209,10 +209,23 @@ static int bn5_code(uint8_t c) {
 	}
 }
 
+/* ... and of BN4 Red Sun's (its chips' names read against BN6's: M-Cannon,
+ * Heat-V, Bub-V and H-Burst's dash 0x40, Atk+10, Navi+20, Atk+30 and
+ * TimeBom+'s plus 0x46, P.Driver's dot 0x4E; docs/multirom/bn4-chips.md,
+ * The census): the same to 0x3F, those three as BN6's, the rest as they are */
+static int bn4_code(uint8_t c) {
+	switch (c) {
+	case 0x40: return 0x98;   /* - */
+	case 0x46: return 0x9E;   /* + */
+	case 0x4E: return 0xA6;   /* . */
+	default: return c;
+	}
+}
+
 size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
 	size_t k = 0;
 	for (size_t i = 0; i < n && src[i] < 0xE5; ++i) {
-		int c = xrom == XROM_BN5_COLONEL_US ? bn5_code(src[i]) : src[i];
+		int c = xrom == XROM_BN5_COLONEL_US ? bn5_code(src[i]) : xrom == XROM_BN4_RED_SUN_US ? bn4_code(src[i]) : src[i];
 		/* (the DS mark spelt as BN6 can: D and S) */
 		const uint8_t ds[2] = { 0x0B + 'D' - 'A', 0x0B + 'S' - 'A' }, one[1] = { (uint8_t)c };
 		const uint8_t *put = c == XTEXT_DS ? ds : one;

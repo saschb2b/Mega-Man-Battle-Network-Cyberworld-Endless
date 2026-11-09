@@ -494,6 +494,7 @@
 0800F418 BN6_NAVI_REF_DRAG
 0800F46E BN6_SIDES_FACING
 0800F4B2 bugfrag_spent
+0800F884 bn5_darkloids_navi.twin
 0800FB74 soul_chips.on
 0800FBA4 BN6_CHARGED_RELEASE
 0800FBEC BN6_CHARGED_CHIP_USE
@@ -1143,6 +1144,7 @@
 080DA27C dead_code
 080DA5FA BN6_STEP_OBJECT
 080DAE74 bn5_chips_code.effect_tables
+080DD3F0 bn5_darkloids_navi
 080E0ADE bn5_chips_code.status_mark_spawned
 080E10F8 navis_engine_twins.rock_fragments_fourth_kind_9_2
 080E16D4 BN6_EFFECTS

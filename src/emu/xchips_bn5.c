@@ -139,7 +139,7 @@ static const XvPair powercusvolt_calls[] = {
 
 static const XvBlock powersp_blocks[] = {
 	{ 0x0800E8D6, 0x0800EC38, XC_HELPERS + 0x552, 0xB626432Bu },
-	{ 0x0801D27A, 0x0801D39A, XC_HELPERS + 0x8C2, 0xE261AFDBu },
+	{ 0x0801D27A, 0x0801D3C4, XC_HELPERS + 0x8C2, 0xB5A68D56u },
 };
 static const XvData powersp_data[] = {
 	{ 0x0800E92A, 0x0800E92C, XV_RAW },
@@ -151,7 +151,7 @@ static const XvData powersp_data[] = {
 	{ 0x0800EB90, 0x0800EB94, XV_POOL },
 	{ 0x0800EB94, 0x0800EC28, XV_RAW },
 	{ 0x0800EC28, 0x0800EC38, XV_POOL },
-	{ 0x0801D27A, 0x0801D39A, XV_RAW },
+	{ 0x0801D27A, 0x0801D3C4, XV_RAW },
 };
 static const XvPair powersp_calls[] = {
 	{ 0x0801DF0C, 0x08021AA4 },   /* map:bytes, SAME */
@@ -174,8 +174,8 @@ static const XvNumber powersp_numbers[] = {
 /* ---- PowerDS: BN5's 0800E9A9, a helper (installed once, before the units) ---- */
 
 static const XvBlock powerds_blocks[] = {
-	{ 0x0800E9A8, 0x0800EC44, XC_HELPERS + 0x9F0, 0xF5055B73u },
-	{ 0x0801D27A, 0x0801D39A, XC_HELPERS + 0xC92, 0xE261AFDBu },
+	{ 0x0800E9A8, 0x0800EC44, XC_HELPERS + 0xA10, 0xF5055B73u },
+	{ 0x0801D27A, 0x0801D3C4, XC_HELPERS + 0xCB2, 0xB5A68D56u },
 };
 static const XvData powerds_data[] = {
 	{ 0x0800E9E6, 0x0800E9E8, XV_RAW },
@@ -188,7 +188,7 @@ static const XvData powerds_data[] = {
 	{ 0x0800EC34, 0x0800EC38, XV_POOL },
 	{ 0x0800EC38, 0x0800EC3C, XV_RAW },
 	{ 0x0800EC3C, 0x0800EC44, XV_POOL },
-	{ 0x0801D27A, 0x0801D39A, XV_RAW },
+	{ 0x0801D27A, 0x0801D3C4, XV_RAW },
 };
 static const XvPair powerds_calls[] = {
 	{ 0x0801DF0C, 0x08021AA4 },   /* map:bytes, SAME */
@@ -4164,6 +4164,165 @@ static const XvType darkinvs_types[] = { { 1, 0x09, XV_TYPE_MOVED }, { 4, 0x18, 
 	.calls = darkinvs_calls, .ncalls = (int)(sizeof darkinvs_calls / sizeof *darkinvs_calls), \
 	.words = darkinvs_words, .nwords = (int)(sizeof darkinvs_words / sizeof *darkinvs_words), \
 	.types = darkinvs_types, .ntypes = (int)(sizeof darkinvs_types / sizeof *darkinvs_types) }
+/* ---- ShadeMan: BN5's navi 0x1 (080BD371) as BN6's 0x1e ---- */
+
+static const XvBlock shademan_blocks[] = {
+	{ 0x080BD1D0, 0x080BD3E8, XC_CODE + 0xCBE0, 0xE4729992u },
+	{ 0x080CB594, 0x080CB6B0, XC_CODE + 0xCE00, 0xFF4AD7D5u },
+};
+static const XvData shademan_data[] = {
+	{ 0x080BD1E2, 0x080BD1E4, XV_RAW },
+	{ 0x080BD1E4, 0x080BD1E8, XV_POOL },
+	{ 0x080BD1E8, 0x080BD1F4, XV_TABLE },
+	{ 0x080BD276, 0x080BD278, XV_RAW },
+	{ 0x080BD278, 0x080BD27C, XV_POOL },
+	{ 0x080BD27C, 0x080BD284, XV_RAW },
+	{ 0x080BD284, 0x080BD288, XV_POOL },
+	{ 0x080BD288, 0x080BD290, XV_RAW },
+	{ 0x080BD290, 0x080BD294, XV_POOL },
+	{ 0x080BD294, 0x080BD298, XV_RAW },
+	{ 0x080BD2A6, 0x080BD2A8, XV_RAW },
+	{ 0x080BD2A8, 0x080BD2AC, XV_POOL },
+	{ 0x080BD2AC, 0x080BD2BC, XV_TABLE },
+	{ 0x080BD3E0, 0x080BD3E8, XV_POOL },
+	{ 0x080CB5A6, 0x080CB5A8, XV_RAW },
+	{ 0x080CB5A8, 0x080CB5AC, XV_POOL },
+	{ 0x080CB5AC, 0x080CB5B8, XV_TABLE },
+	{ 0x080CB6AA, 0x080CB6AC, XV_RAW },
+	{ 0x080CB6AC, 0x080CB6B0, XV_POOL },
+};
+static const XvPair shademan_calls[] = {
+	{ 0x080186F0, 0x0801BBF4 },   /* map:bytes, SAME */
+	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
+	{ 0x080029B8, 0x08E00C00 },   /* a stub, STUB */
+	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
+	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
+	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
+	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
+	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
+	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
+	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
+	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
+	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
+	{ BN5_SPAWN_1, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
+	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
+	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
+	{ 0x0800B392, 0x0800CCD4 },   /* map:bytes, SAME */
+	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
+	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080C4EAE, 0x080C6C16 },   /* map:calls+bytes, SAME */
+};
+static const XvPair shademan_words[] = {
+	{ 0x080138EB, 0x08016C8B },
+	{ 0x0B05FF00, 0x0B05FF00 },
+};
+static const XvImm shademan_imms[] = {
+	{ 0x080BD210, THUMB_MOVS, 2, 0, 0xD, 0x27 },   /* BN5's Navi 13's battle sprite: list 2 0xd in BN5, 0x27 in BN6 (the Navis') */
+	{ 0x080CB5BC, THUMB_MOVS, 2, 0, 0xD, 0x27 },   /* BN5's Navi 13's battle sprite: list 2 0xd in BN5, 0x27 in BN6 (the Navis') */
+};
+static const XvType shademan_types[] = { { 1, 0x19, XV_TYPE_MOVED }, { 3, 0x34, XV_TYPE_MOVED } };
+
+#define SHADEMAN_CODE { .name = "ShadeMan (BN5's)", .game = XROM_BN5_COLONEL_US, \
+	.blocks = shademan_blocks, .nblocks = (int)(sizeof shademan_blocks / sizeof *shademan_blocks), \
+	.data = shademan_data, .ndata = (int)(sizeof shademan_data / sizeof *shademan_data), \
+	.calls = shademan_calls, .ncalls = (int)(sizeof shademan_calls / sizeof *shademan_calls), \
+	.words = shademan_words, .nwords = (int)(sizeof shademan_words / sizeof *shademan_words), \
+	.imms = shademan_imms, .nimms = (int)(sizeof shademan_imms / sizeof *shademan_imms), \
+	.types = shademan_types, .ntypes = (int)(sizeof shademan_types / sizeof *shademan_types) }
+/* ---- BlizzardMan: BN5's navi 0xe (080BC39F) as BN6's 0x2b ---- */
+
+static const XvBlock blizzardman_blocks[] = {
+	{ 0x0800D7B8, 0x0800D7E0, XC_CODE + 0xCF20, 0x94ABB890u },
+	{ 0x080BC1E8, 0x080BC2DE, XC_CODE + 0xCF50, 0x2DFB13ABu },
+	{ 0x080BC2EC, 0x080BC3C8, XC_CODE + 0xD050, 0xE653662Du },
+	{ 0x080DC968, 0x080DCAF8, XC_CODE + 0xD130, 0x8E374B23u },
+	{ 0x080DD31C, 0x080DD472, XC_CODE + 0xD2C0, 0x919B41DEu },
+};
+static const XvData blizzardman_data[] = {
+	{ 0x0800D7CC, 0x0800D7DC, XV_RAW },
+	{ 0x0800D7DC, 0x0800D7E0, XV_POOL },
+	{ 0x080BC1FA, 0x080BC1FC, XV_RAW },
+	{ 0x080BC1FC, 0x080BC200, XV_POOL },
+	{ 0x080BC200, 0x080BC20C, XV_TABLE },
+	{ 0x080BC25A, 0x080BC25C, XV_RAW },
+	{ 0x080BC25C, 0x080BC260, XV_POOL },
+	{ 0x080BC260, 0x080BC268, XV_RAW },
+	{ 0x080BC276, 0x080BC278, XV_RAW },
+	{ 0x080BC278, 0x080BC27C, XV_POOL },
+	{ 0x080BC27C, 0x080BC28C, XV_TABLE },
+	{ 0x080DC97A, 0x080DC97C, XV_RAW },
+	{ 0x080DC97C, 0x080DC980, XV_POOL },
+	{ 0x080DC980, 0x080DC98C, XV_TABLE },
+	{ 0x080DCA28, 0x080DCA34, XV_RAW },
+	{ 0x080DCA34, 0x080DCA38, XV_POOL },
+	{ 0x080DCA38, 0x080DCA3C, XV_TABLE },
+	{ 0x080DCAB2, 0x080DCABC, XV_RAW },
+	{ 0x080DCABC, 0x080DCAC0, XV_POOL },
+	{ 0x080DCAC0, 0x080DCAC4, XV_RAW },
+	{ 0x080DCAF2, 0x080DCAF4, XV_RAW },
+	{ 0x080DCAF4, 0x080DCAF8, XV_POOL },
+	{ 0x080DD32E, 0x080DD330, XV_RAW },
+	{ 0x080DD330, 0x080DD334, XV_POOL },
+	{ 0x080DD334, 0x080DD340, XV_TABLE },
+	{ 0x080DD3C6, 0x080DD3C8, XV_RAW },
+	{ 0x080DD3C8, 0x080DD3CC, XV_POOL },
+	{ 0x080DD3CC, 0x080DD3D0, XV_TABLE },
+};
+static const XvPair blizzardman_calls[] = {
+	{ 0x08016C5C, 0x0801A16C },   /* map:bytes, SAME */
+	{ 0x080186F0, 0x0801BBF4 },   /* map:bytes, SAME */
+	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
+	{ 0x080029B8, 0x08E00C00 },   /* a stub, STUB */
+	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
+	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
+	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
+	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
+	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
+	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
+	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
+	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
+	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
+	{ BN5_SPAWN_1, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
+	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
+	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
+	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
+	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
+	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
+	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
+	{ 0x08016B90, 0x0801A07C },   /* project:cangard, SAME */
+	{ 0x0800AFB0, 0x0800C8F8 },   /* map:calls, LAYOUT */
+	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
+	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
+	{ 0x080DD472, 0x080DDC22 },   /* map:bytes, SAME */
+};
+static const XvPair blizzardman_words[] = {
+	{ 0x0800325D, 0x08003459 },
+	{ 0x080138EB, 0x08016C8B },
+};
+static const XvImm blizzardman_imms[] = {
+	{ 0x080BC220, THUMB_MOVS, 2, 0, 0xE, 0x28 },   /* BN5's Navi 14's battle sprite: list 2 0xe in BN5, 0x28 in BN6 (the Navis') */
+	{ 0x080DC994, THUMB_MOVS, 2, 0, 0xE, 0x28 },   /* BN5's Navi 14's battle sprite: list 2 0xe in BN5, 0x28 in BN6 (the Navis') */
+	{ 0x080DCA42, THUMB_LDR, 0, 4, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080DD3DA, THUMB_LDR, 6, 4, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+};
+static const XvType blizzardman_types[] = { { 1, 0x14, XV_TYPE_MOVED }, { 3, 0xB2, XV_TYPE_MOVED }, { 3, 0xB7, XV_TYPE_MOVED } };
+
+#define BLIZZARDMAN_CODE { .name = "BlizzardMan (BN5's)", .game = XROM_BN5_COLONEL_US, \
+	.blocks = blizzardman_blocks, .nblocks = (int)(sizeof blizzardman_blocks / sizeof *blizzardman_blocks), \
+	.data = blizzardman_data, .ndata = (int)(sizeof blizzardman_data / sizeof *blizzardman_data), \
+	.calls = blizzardman_calls, .ncalls = (int)(sizeof blizzardman_calls / sizeof *blizzardman_calls), \
+	.words = blizzardman_words, .nwords = (int)(sizeof blizzardman_words / sizeof *blizzardman_words), \
+	.imms = blizzardman_imms, .nimms = (int)(sizeof blizzardman_imms / sizeof *blizzardman_imms), \
+	.types = blizzardman_types, .ntypes = (int)(sizeof blizzardman_types / sizeof *blizzardman_types) }
 const XChipUnit xchips_bn5[] = {
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080EBB97, XC_HOMES + 0x0, BUSTERARM_CODE, NULL, 0, 0x00 },
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080D3287, XC_HOMES + 0x400, SHAKE_CODE, NULL, 0, 0x00 },
@@ -4216,5 +4375,7 @@ const XChipUnit xchips_bn5[] = {
 	{ XCHIP_SUPPORT, 0x23, 0x4D, 0x080E6F61, XC_HOMES + 0xC000, HOLYDREM_CODE, NULL, 0, 0x00 },
 	{ XCHIP_SUPPORT, 0x31, 0x5B, 0x080E8DC3, XC_HOMES + 0xC400, POLTRGST_CODE, NULL, 0, 0x00 },
 	{ XCHIP_SUPPORT, 0x3B, 0x65, 0x080E2421, XC_HOMES + 0xC800, DARKINVS_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x01, 0x1E, 0x080BD371, XC_HOMES + 0xCC00, SHADEMAN_CODE, NULL, 0, 0x80 },
+	{ XCHIP_NAVI, 0x0E, 0x2B, 0x080BC39F, XC_HOMES + 0xD000, BLIZZARDMAN_CODE, NULL, 0, 0x100 },
 };
 const int xchips_bn5_count = (int)(sizeof xchips_bn5 / sizeof *xchips_bn5);

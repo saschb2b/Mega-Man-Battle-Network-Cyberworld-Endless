@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, nothing built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0) and BN5's first batch built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:40:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -19,8 +19,8 @@ sources:
 # BN4's chips in a run
 
 Phase 4 of [Battle Network 4 in a run](bn4.md): BN4 Red Sun's own chips
-in BN6's tables, designed and scoped so building can start. Nothing is
-built. The census is read from both ROMs (scratch reads, not kept;
+in BN6's tables, designed and scoped so building can start. Built so far:
+the pairings (unit 0) and BN5's first batch in the free ids (Past 511). The census is read from both ROMs (scratch reads, not kept;
 How the census was made, below), the design reasoned with the
 game-design skill and checked against [the core loop](../game/core-loop.md),
 the scoping by the reverse-engineering skill's Locate and Understand.
@@ -29,12 +29,48 @@ and [the chips' code](chips-code.md).
 
 ## Where things stand
 
-A BN4 virus's reward chip that BN6 has by name and kind pays as BN6's
-own; one BN6 lacks pays 200 zenny (`xchips_reward_bn4`, the owner's call
-9 of [Battle Network 4 in a run](bn4.md)). A tournament round against a
-BN4 Navi pays a BN6 Navi chip of the round's band as a stand-in
-([the tournament](../game/tournament.md), call 7). No BN4 chip has an id
-in BN6's tables.
+A BN4 virus's reward chip pays the run's chip it is (`xchips_bn4_paid`,
+unit 0, built 9 November 2026), by three rules in turn, each one chip per
+name as the registry's:
+
+1. **By name, BN6's own, whatever the class**: BN6's folder chip of its
+   name (BN4's names in BN6's codes first: its dash 0x40, plus 0x46 and
+   dot 0x4E are BN6's 0x98, 0x9E and 0xA6, `rom.c`'s `bn4_code`). 78
+   chips: the 65 paid before, 3 more now that the punctuation reads
+   (M-Cannon, Atk+10, Navi+20), and the 10 BN4 calls Mega where BN6's are
+   standard (Muramasa, Guardian, Anubis, Atk+30, BugFix, DblPoint,
+   Snctuary, FullCust, NeoVari, SuprVulc).
+2. **By name, the registry's own id** (BN5's ROM read): BN5's chip of its
+   name where the registry gives it an id of its own and it is no Program
+   Advance (no reward names one). 34 chips: the 26 moved (Z Saver,
+   NumberMan's V1 and ShadeMan's among them), the 7 playing over BN6's
+   code, a DarkChip (DrkLance).
+3. **By Navi and version**: BN4's SP and DS (its record's first parameter
+   3 and 4, as BN5's; spelt with letters, "ProtoMSP", where BN6 and BN5
+   mark the version) whose V1, one or two ids before with its family and
+   subfamily, paired: the registry's row of BN5's id as many after the
+   V1's, its record of that version; else BN6's own chip of the V1's
+   family and subfamily named with the SP mark. 5 chips: NumberMan's SP
+   and DS, ShadeMan's SP and DS (the registry's), ProtoMan's SP (BN6's).
+   ProtoMan's DS pays none: BN6's Navi chips are V1, EX and SP. Roll's SP
+   and DS wait for theirs (unit 4).
+
+A BN4 pseudo-chip or Program Advance pairs none; BN4's Giga FinalGun
+neither, BN6's of the name being a pseudo-chip (it waits for an id of its
+own). One the run lacks, or that sits out, pays 200 zenny as before (the
+owner's call 9 of [Battle Network 4 in a run](bn4.md)). With BN5's ROM,
+117 of BN4's chips pay a chip, 52 more than the 65 before; without it 79
+(a scratch mirror of the rules over the three ROMs). The eight moved families'
+reward rows (Billy, Spikey, Shrimpy, Walla, Elmperor, CirKill, Mettaur,
+Melody) name 276 chip entries, of 26 chips, all BN4's own but Guard1-3:
+none paid a chip before; with BN5's ROM Mettaur's 38 Guard entries now
+do (a scratch tally of the ROM's rows, numbers only). Mettaur is moved for
+Roll's summon alone, no visitor: the six visitors' rows name only BN4's
+own chips, so a player meets the pairings as BN4's chips come (unit 2 on)
+and as more of its families visit. A tournament round
+against a BN4 Navi pays a BN6 Navi chip of the round's band as a
+stand-in ([the tournament](../game/tournament.md), call 7). No chip of
+BN4's own has an id in BN6's tables yet.
 
 ## The census
 
@@ -228,7 +264,9 @@ code from an entry, among other uses).
   registry and compare the installs' record, as now; the ids change
   nothing there.
 
-**The first batch, in the ten free ids, before ten bits:** BN5's
+**The first batch, in the ten free ids, before ten bits** (built 9
+November 2026 for ShadeMan's and BlizzardMan's six, at 505-510, each
+`chip_*` spec PASS; BigNoise not yet: [The chips' code](chips-code.md)): BN5's
 ShadeMan and BlizzardMan Navi chips, V1, SP and DS (six, their Navis
 moved already, a chip unit each as NumbrMan's, the gap audit's M), at
 505-510, and BigNoise (Pulsar3 and ShadeMan's SP or DS, BN5's recipe) at
@@ -461,7 +499,7 @@ Asked and answered on 9 November 2026:
    as they are proved, and BN4 Red Sun's ROM becomes part of the
    common ground the Arena and Trade Central ask of a pair. A player
    without BN4's ROM loses them, so the change is announced ahead as the
-   NetPass asks (unit 8; [Online](../online/index.md)).
+   NetPass asks (unit 8; [the NetPass](../online/netpass.md)).
 2. **Ten-bit chip ids first, for both games**, as recommended: the
    pairings (unit 0) ship before them, and BN5's ShadeMan and BlizzardMan
    chips take the free ids meanwhile.
