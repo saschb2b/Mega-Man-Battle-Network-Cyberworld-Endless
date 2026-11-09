@@ -89,4 +89,8 @@ typedef struct {
  * one is not understood or no foe is given */
 bool xd_spec_parse(const char *text, Spec *s);
 
+/* The opening's draws of the spec's keys paired from its end (xd_replay_setup_skip): with rng=replay against BN4's alone;
+ * false where the log has no room for them */
+bool xd_setup_skips(const Spec *s, XdLog *a, XdLog *b);
+
 #endif
