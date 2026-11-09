@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Navis"
 description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:15:00Z }
 ---
 
 # Transplanted Navis
@@ -249,6 +249,12 @@ into the battle engine).
   copy goes to the Navis' track, which installs first of those that spawn
   it (the rule of TYPES), its rows' sprites given BN6's numbers as
   `xchiprecipe.py`'s TABLE_SPRITES gives them now, and the chips spawn the
-  Navis' copy. That moves the chips' copy of the type and its five sprites
-  (their numbers 0xF7-0xFB) out of `xchips_bn5.c`, so the chips' and the
-  families' specs that spawn it run again with it.
+  Navis' copy. Tried on 9 November (the Navis' `kind_table_art`, built
+  for NapalmMan's 0x00, fixes its twelve rows; the chips' copy and its
+  five sprites leave `xchips_bn5.c`): `chip_sidebub1`, `chip_darkinvs*`,
+  `marina_*` and NapalmMan's specs PASS with it, but CloudMan's own three
+  FAIL at t9 (a cloud, the 0x37, at CurAction 8 in BN5 and 4 in BN6; the
+  0x5F's +0x64 0x32 and 0), so neither he nor the 0x0B's new owner is in
+  yet: the cloud's states (its routine 0x080CBB68, through 0x080186A8's
+  tables) and the panel pick that calls the search (`BN5_CLOUD_PANEL`)
+  are the next to trace.
