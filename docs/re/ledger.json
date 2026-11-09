@@ -55,10 +55,10 @@
     {
       "name": "BN5's Darkloids",
       "state": "works",
-      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan and ShadeMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; both on the dark boards in BN5's own sprites and faces, their battles at the act's version.",
-      "left": "CloudMan and CosmoMan (decisions open in the generator: their object types, a RAM table, a sprite loaded by a number made otherwise), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan and CosmoMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CosmoMan the later acts' own.",
+      "left": "CloudMan (his three decisions settled in writing, not built: his object types recorded as CosmoMan's were; his search for his clouds, 0x080CBFBC, a stub of the Navis' that reads the dispatch's side table for type 0x37; the third kind's 0x0B he spawns, the chips' copy, owned by the Navis' track as the first to install, its rows' sprites as xchiprecipe.py's TABLE_SPRITES give them), CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
       "link": "../game/liberation/overview.md",
-      "updated": "2026-10-25"
+      "updated": "2026-11-09"
     },
     {
       "name": "BN6's Virus Battler",
@@ -446,6 +446,10 @@
     {
       "date": "2026-11-09",
       "what": "BN4's VolGear (type 0x08, ids 7-12) moved, the first late family (AI 72, ids 0x2F0-0x2F5): its art in a room of its own (free_space.h FREE_LATE_FAMILIES, xvirus_recipe.h XV_LATE_ART), its numbers from the tops down (the third kind's 0xDF and 0xDE, list 4's 0xBF) so BN4's Navis' stay theirs; bn4_battle.h BN4_VOLGEAR_*, BN4_T3_VOLGEAR_*, BN4_*_HELD_*, BN4_HELD_CHIP_TEST (docs/rom/bn4.md, VolGear moved)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "CosmoMan moved (docs/multirom/navis.md, The Darkloids; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_COSMO_SPAWN_6C, _6D, _79 and BN5_COSMO_HALF_HP, and CloudMan's BN5_CLOUD_FIND_37, BN5_CLOUD_PANEL, BN5_CLOUD_KINDS_0B): cosmoman_v1, cosmoman_v1_keys and cosmoman_sp PASS; the comparator's spawn_leftovers learn a word part of which the spawner writes (compares), and the engine's spark takes its struck attack's rule for its Z."
     }
   ],
   "experiments": [
@@ -1047,6 +1051,13 @@
       "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
       "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
       "link": "../multirom/families.md"
+    },
+    {
+      "feature": "BN5's Darkloids",
+      "date": "2026-11-09",
+      "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
+      "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
+      "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
     }
   ],
   "method": {
