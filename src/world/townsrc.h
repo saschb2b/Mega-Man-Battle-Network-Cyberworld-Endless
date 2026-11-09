@@ -29,8 +29,9 @@ typedef struct TownBook TownBook;
 typedef int (*TownMatOf)(int colour);
 
 /* Learns map (group, number) of game `rom` (0 BN6, 1 + XRomId another's,
- * area_src_load_as) and its mirror image. */
-TownBook *townsrc_learn(int rom, int group, int number, TownMatOf mat_of);
+ * area_src_load_as) and, with `mirror`, its mirror image (a town copied
+ * whole needs none). */
+TownBook *townsrc_learn(int rom, int group, int number, TownMatOf mat_of, bool mirror);
 void townsrc_free(TownBook *b);
 
 /* The source's own size in tiles: a generated map keeps its parity. */

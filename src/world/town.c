@@ -533,6 +533,16 @@ static int port_middle(void) {
 	return nj;
 }
 
+/* The learned sources but `keep`'s let go (-1 all): another game's town
+ * is learned with no other kept, and let go once installed, as the New
+ * 3DS's heap has no room for both at the stop on the way (tools/heap3ds.py
+ * --stop); home's is learned again at its next visit */
+static void forget_books(int keep) {
+	for (int k = 0; k < TOWN_STYLES; ++k)
+		if (k != keep && T.books[k]) { townsrc_free(T.books[k]); T.books[k] = NULL; }
+	if (keep < 0) T.book = NULL;
+}
+
 static int coin(void) { return rnd_range(0, 1); }
 static const TownKit kit = { copy, tile, more_tree, coin };
 
@@ -543,6 +553,7 @@ static int plan_once(uint32_t seed) {
 	int si = wanted_style();
 	T.style = &town_styles[si];
 	T.lines = &town_lines[si];
+	if (T.style->rom) forget_books(si);
 	if (!T.books[si] && !(T.books[si] = town_style_learn(T.style))) return -1;
 	T.book = T.books[si];
 	townsrc_size(T.book, &T.stw, &T.sth);
@@ -854,5 +865,6 @@ bool town_install(int to_group, int to_number, int x, int y) {
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
 		mapslot_music(g, n, town_style_song(T.style));
 	mapslot_town(false);
+	if (T.style->rom) forget_books(-1);
 	return ok;
 }

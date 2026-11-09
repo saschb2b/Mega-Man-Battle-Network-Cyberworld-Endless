@@ -161,7 +161,7 @@ const TownStyle town_styles[TOWN_STYLES] = {
 };
 
 TownBook *town_style_learn(const TownStyle *s) {
-	return townsrc_learn(s->rom, s->rom ? s->src_group : s->group, s->rom ? s->src_number : s->number, s->mat_of);
+	return townsrc_learn(s->rom, s->rom ? s->src_group : s->group, s->rom ? s->src_number : s->number, s->mat_of, !s->whole);
 }
 
 bool town_style_take(const TownStyle *s, const TownBook *book, uint32_t *desc, uint32_t *coord_slot) {
