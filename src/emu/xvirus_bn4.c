@@ -1666,5 +1666,161 @@ static const XVirusFamily bn4_volgear = {
 	.effects = volgear_effects, .neffects = (int)(sizeof volgear_effects / sizeof *volgear_effects),
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
-const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody, &bn4_volgear };
+/* ---- BN4's Kilby (its type 0x1e there, its enemy ids 67-72), as AI 73 with ids 0x2f6-0x2fb ---- */
+
+static const XvBlock kilby_blocks[] = {
+	{ 0x080BC3FC, 0x080BCA20, XV_LATE_CODE + 0x0, 0x6A958AF2u },
+	{ 0x0800AD2A, 0x0800B12C, XV_LATE_CODE + 0x632, 0x793106FEu },
+	{ 0x08010736, 0x0801079C, XV_LATE_CODE + 0xA42, 0x7631C49Cu },
+	{ 0x080B56A4, 0x080B56E4, XV_LATE_CODE + 0xAB0, 0x67EEC233u },
+};
+static const XvData kilby_data[] = {
+	{ 0x080BC3FC, 0x080BC40E, XV_ZERO },
+	{ 0x080BC40E, 0x080BC410, XV_RAW },
+	{ 0x080BC410, 0x080BC48A, XV_ZERO },
+	{ 0x080BC48A, 0x080BC48C, XV_RAW },
+	{ 0x080BC48C, 0x080BC4B8, XV_ZERO },
+	{ 0x080BC4CA, 0x080BC4CC, XV_RAW },
+	{ 0x080BC4CC, 0x080BC4D0, XV_POOL },
+	{ 0x080BC4D0, 0x080BC4D4, XV_TABLE },
+	{ 0x080BC4E2, 0x080BC4E4, XV_RAW },
+	{ 0x080BC4E4, 0x080BC4E8, XV_POOL },
+	{ 0x080BC4E8, 0x080BC4F0, XV_TABLE },
+	{ 0x080BC5B2, 0x080BC5B4, XV_RAW },
+	{ 0x080BC5B4, 0x080BC5B8, XV_POOL },
+	{ 0x080BC5B8, 0x080BC5BE, XV_RAW },
+	{ 0x080BC5F0, 0x080BC5F8, XV_POOL },
+	{ 0x080BC5F8, 0x080BC604, XV_RAW },
+	{ 0x080BC604, 0x080BC60C, XV_POOL },
+	{ 0x080BC634, 0x080BC63C, XV_POOL },
+	{ 0x080BC672, 0x080BC674, XV_RAW },
+	{ 0x080BC674, 0x080BC678, XV_POOL },
+	{ 0x080BC678, 0x080BC690, XV_RAW },
+	{ 0x080BC690, 0x080BC694, XV_POOL },
+	{ 0x080BC694, 0x080BC6AC, XV_RAW },
+	{ 0x080BC6CE, 0x080BC6D0, XV_RAW },
+	{ 0x080BC6D0, 0x080BC6D4, XV_POOL },
+	{ 0x080BC6D4, 0x080BC6DC, XV_TABLE },
+	{ 0x080BC73C, 0x080BC740, XV_POOL },
+	{ 0x080BC740, 0x080BC758, XV_RAW },
+	{ 0x080BC758, 0x080BC75C, XV_POOL },
+	{ 0x080BC75C, 0x080BC774, XV_RAW },
+	{ 0x080BC774, 0x080BC778, XV_POOL },
+	{ 0x080BC778, 0x080BC77E, XV_RAW },
+	{ 0x080BC7EE, 0x080BC7F0, XV_RAW },
+	{ 0x080BC7F0, 0x080BC7F4, XV_POOL },
+	{ 0x080BC7F4, 0x080BC810, XV_TABLE },
+	{ 0x080BC880, 0x080BC884, XV_POOL },
+	{ 0x080BC8DA, 0x080BC8DC, XV_RAW },
+	{ 0x080BC8DC, 0x080BC8E0, XV_POOL },
+	{ 0x080BC8E0, 0x080BC8E6, XV_RAW },
+	{ 0x080BC972, 0x080BC974, XV_RAW },
+	{ 0x080BC974, 0x080BC97C, XV_POOL },
+	{ 0x080BC97C, 0x080BC982, XV_RAW },
+	{ 0x0800AD54, 0x0800AF90, XV_ZERO },
+	{ 0x0800AFBC, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
+	{ 0x080B56D0, 0x080B56D4, XV_POOL },
+	{ 0x080B56D4, 0x080B56E4, XV_RAW },
+};
+static const XvPair kilby_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
+	{ 0x0800A17A, 0x0800D048 },   /* project:spikey, DIFF (audited) */
+	{ 0x0800A192, 0x0800D06A },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x0800F83C, 0x08015D80 },   /* project:research, SAME */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DB2, 0x0801A066 },   /* project:families-2, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080B3878, 0x0800EC48 },   /* project:research, SAME */
+	{ 0x080B6568, 0x0800EBD4 },   /* project:billy, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvImm kilby_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800AFB8, THUMB_STRB, 0, 1, 0xA, 0xC },   /* collision data +0xa in BN4, +0xc in BN6 */
+	{ 0x080BC51C, THUMB_CMP, 2, 0, 0x9, 0xB },   /* another of its family's (its NameID range's) CurAction 9 compared */
+	{ 0x080BC532, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080BC578, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080BC58A, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080BC6B6, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080BC732, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080BC7D6, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080BC85E, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
+	{ 0x080BC89A, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
+	{ 0x080BC8BC, THUMB_ADDS, 4, 0, 0x2D, 0x8F },   /* its effect: 0x2d in BN4, 0x8f in BN6 (moved) */
+	{ 0x080BC8F4, THUMB_ADDS, 4, 0, 0x2D, 0x8F },   /* its effect: 0x2d in BN4, 0x8f in BN6 (moved) */
+	{ 0x080BC90C, THUMB_MOVS, 0, 0, 0xCD, 0x32 },   /* its sound 0xcd: BN4's copied into BN6's empty slot 0x32, on its player 9 */
+	{ 0x080BC9B0, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
+	{ 0x080BC9E4, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
+	{ 0x080BCA16, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+};
+static const XvRange kilby_ranges[] = {
+	{ 0x080BC50E, 0x2F6, 0x2FB },   /* BN4's ids 0x43-0x48, its own */
+};
+static const uint32_t kilby_sides[] = {
+	0x0800AFB2,   /* its call to 0800AF90 (bn4_twins.SIDED): its left and right by the object's side, BN6's way */
+};
+static const XvNumber kilby_numbers[] = {
+	{ 0x080BC974, 0x04050401, 0x04050401 },   /* a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word too (0x080E4A4C) */
+};
+static const XvRef kilby_states[] = {
+	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080BC4B9), OWN(0x080BC6AD), OWN(0x080BC6C1), OWN(0x080BC7E1),
+};
+static const XvSprite kilby_sprites[] = {
+	{ 1, 0x0C, 1, 0xC9, XV_LATE_ART + 0x5000, 0x4000 },
+	{ 4, 0x16, 4, 0xBE, XV_LATE_ART + 0x9000, 0x300 },
+};
+static const XvId kilby_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 }, { 0x2D, 0x8F } };
+static const XvSong kilby_songs[] = {
+	{ 0xCD, 0x32, XV_LATE_ART + 0x9300, 0x40 },   /* its sound 0xcd, BN4's song copied (the pool's, by battle) */
+};
+
+static const XVirusFamily bn4_kilby = {
+	.name = "Kilby (BN4's)",
+	.game = XROM_BN4_RED_SUN_US,
+	.src_ai = 0x1E,   /* (its first-kind type: BN4 has no AI index) */
+	.ai = 73,
+	.first_id = XV_FIRST_ID + 0xF6,
+	.home = XV_HOMES + 0x14800,
+	.blocks = kilby_blocks, .nblocks = (int)(sizeof kilby_blocks / sizeof *kilby_blocks),
+	.data = kilby_data, .ndata = (int)(sizeof kilby_data / sizeof *kilby_data),
+	.calls = kilby_calls, .ncalls = (int)(sizeof kilby_calls / sizeof *kilby_calls),
+	.imms = kilby_imms, .nimms = (int)(sizeof kilby_imms / sizeof *kilby_imms),
+	.ranges = kilby_ranges, .nranges = (int)(sizeof kilby_ranges / sizeof *kilby_ranges),
+	.sides = kilby_sides, .nsides = (int)(sizeof kilby_sides / sizeof *kilby_sides),
+	.numbers = kilby_numbers, .nnumbers = (int)(sizeof kilby_numbers / sizeof *kilby_numbers),
+	.states = kilby_states, .nstates = (int)(sizeof kilby_states / sizeof *kilby_states),
+	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
+	.struct1 = 0x08011BAC, .struct2 = 0x08011BAC,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
+	.names = { 0x43, 0x44, 0x45, 0x46, 0x47, 0x48 },
+	.ice = 0,
+	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = false, .palette = 1, .flags = 0x08 },
+	.sprites = kilby_sprites, .nsprites = (int)(sizeof kilby_sprites / sizeof *kilby_sprites),
+	.effects = kilby_effects, .neffects = (int)(sizeof kilby_effects / sizeof *kilby_effects),
+	.songs = kilby_songs, .nsongs = (int)(sizeof kilby_songs / sizeof *kilby_songs),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
+};
+const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody, &bn4_volgear, &bn4_kilby };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);

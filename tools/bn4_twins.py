@@ -318,6 +318,9 @@ NUMBERS = {
                 "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "
                 "pass the same (eight of its pools)",
+    0x04050401: "a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, "
+                "whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word "
+                "too (0x080E4A4C)",
     0x0A800000: "the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), "
                 "where the thunder's update tests the same mask, 0xFF800000, in both games",
 }
