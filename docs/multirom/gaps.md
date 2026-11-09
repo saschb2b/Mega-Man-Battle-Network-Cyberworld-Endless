@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T23:08:32Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:04:45Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -115,7 +115,7 @@ this audit: the names at `BN5_CHIP_NAMES_LOW`/`HIGH`, the records at
 | The Darkloids' and Nebula's Navi chips: ShadeMan, BlizMan, CloudMan, CosmoMan, LarkMan, GridMan, Django, each V1, SP and DS | 260-280 | Their records: Mega, attack family 0x41 (the Navi chips'), subfamilies 0x01, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13; the SP's power computed (1014-1019, 1022), the DS dark-gated (+0x15 = 2) | **None left** (9 November 2026): ShadeMan's and BlizzardMan's at 505-510, the other fifteen at 512-526, each unit moved, 28 `chip_*` specs PASS ([The chips' code](chips-code.md)). CloudMan's, LarkMan's and GridMan's chips play though their Navis are not moved (each unit copies its Navi's sprite) |
 | Team ProtoMan's Navi chips, Roll's, GunDelEX, Otenko | 215, 219, 221-241 | The registry's header leaves out "Team ProtoMan's version chips"; their records family 0x41, subfamilies 0x02, 0x03, 0x06-0x09, 0x19 | With Team ProtoMan's Navis, if ever |
 | Program Advances: BigNoise, CsmoPris, WildBird, Football, PileDrvr | 343-349 | BN5's list of recipes (`0x08028020`): each is two of a standard chip and a Navi chip's SP or DS (Pulsar3 and ShadeMan's, Astroid3 and CosmoMan's, Katana1 and LarkMan's, MrkCan2 and GridMan's, GunDelS3 and Django's) | **M** each, their Navi chips registered since: BN6's list grows with BN5's recipes already (`xchips_pas.c`), but each has a routine of its own (read 9 November 2026 in their records: the Navi family's subfamilies 0x16 CsmoPris, 0x17 WildBird, 0x18 Football and 0x14 BigNoise, the support family's 0x2F PileDrvr), so a unit each; three fit the ids 365-367, two need the battle's Program Advance bits past 383 read |
-| Gigas: FinalGun, Bass, DeltaRay, BugCurse, MetrKnuk, OmegaRkt, BugCharg, Phoenix, DethPhnx | 290, 301-305, 310, 313-314 | Traced, 9 November 2026 ([Chips, folders and the Library](../rom/chips.md), The Gigas' version marks): their records' version bit (+0x16: 0x04 on Bass, DeltaRay, BugCurse, MetrKnuk and OmegaRkt; 0x08 on the registry's four and BugCharg; neither on Phoenix and DethPhnx; FinalGun unlisted), and Team Colonel's reward rows, which give BassAnly and BigHook alone and none of the 0x04 five | **None to build now; a cut list.** FinalGun: a pseudo-chip of BN5's battles, as BN6's of the name. Bass, DeltaRay, MetrKnuk: Team ProtoMan's, and BN6's chips by name, which a run hands out as BN6's (one chip per name). BugCurse, OmegaRkt: Team ProtoMan's, new names: with Team ProtoMan's Navi chips below, the owner's call (**M** each: support 0x21 and 0x3E). BugCharg: out, it reads BN5's NaviCust's bugs ([One net](one-net.md)). Phoenix, DethPhnx: no version, no row gives them: out, as before |
+| Gigas: FinalGun, Bass, DeltaRay, BugCurse, MetrKnuk, OmegaRkt, BugCharg, Phoenix, DethPhnx | 290, 301-305, 310, 313-314 | The registry's header names BugCharg, Phoenix and DethPhnx out; which of the others Team Colonel hands out, and how, is not traced (assumed version or post-game chips) | Traced first (**S**), then a unit each |
 | Pseudo-chips no folder holds: the Mode chips and their like, BatCan1-4, the capsules and other copies, the Liberation teammates' chips (C-Cannon, T-Swing, S-Melody, KCrusher, NumTrap, DieBomb, SplitUp, Team ProtoMan's seven) | 281-289, 315-318, 369-388, 401-422 | Library type 3 or codes A, B, C and * alike; read by name, what each runs not traced (Soul charged shots and Liberation pieces, assumed) | Only 401-422 are felt: Liberation, below |
 
 Two things bound this work:
@@ -248,8 +248,8 @@ meta power, and none touches BN6's battle (the core loop's "Not
 proposed").
 
 1. **The Darkloids' chips and BN5's par prize** (**M**, built 9 November
-   2026: all seven Navis' chips, CosmoMan's board paying his own;
-   BigNoise and the other four Program Advances not yet). ShadeMan's and
+   2026: all seven Navis' chips, CosmoMan's board paying his own, and
+   the five Program Advances made with them). ShadeMan's and
    BlizzardMan's V1, SP and DS registered in the ten free ids, their two
    Navi chip units moved and proved, the dark layer's par paying his SP
    two under par and his V1 at par as BN5's did. Depends on nothing

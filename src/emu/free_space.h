@@ -143,7 +143,7 @@
 #define RAM_TEAM_TICK        0x0203FFF0u             /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c) */
 #define RAM_CHIP_AI_ROOMS    0x0203FFF4u             /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's bits; darkinvs_room.h, issue #182) (darkinvs.c) */
 #define RAM_TEAM_CLOCK       0x0203FFF8u             /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h) (arena_team_custom.c) */
-#define RAM_BATTLE_SPARE     0x0203FFFCu             /* spare (the game call's old mark, unused since issue #33) (free) */
+#define RAM_PA_WIDE          0x0203FFFCu             /* u32 the Program Advances past nine bits formed this battle, a bit an id from BN6_PA_WIDE_FIRST (side 0's: BN6's own bits end at id 383) (xchips_wide.c) */
 #define RAM_BATTLE_END       0x02040000u
 
 /* The plan as tables: X(name, start, end, parent, zone), in address order,
@@ -235,7 +235,7 @@
 	X("RAM_TEAM_TICK", 0x0203FFF0u, 0x0203FFF4u, "", "battle") \
 	X("RAM_CHIP_AI_ROOMS", 0x0203FFF4u, 0x0203FFF8u, "", "battle") \
 	X("RAM_TEAM_CLOCK", 0x0203FFF8u, 0x0203FFFCu, "", "battle") \
-	X("RAM_BATTLE_SPARE", 0x0203FFFCu, 0x02040000u, "", "battle")
+	X("RAM_PA_WIDE", 0x0203FFFCu, 0x02040000u, "", "battle")
 #define FREE_SPACE_RAM_ZONES(X) \
 	X("persistent", 0x02010CE0u, 0x02011800u) \
 	X("mode", 0x02029A00u, 0x0202DA00u) \

@@ -667,8 +667,9 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     if spec.get('kind') == 'engine':
         return engine_only(run_name or name, spec, a, legit, canon)
     run_name = run_name or name
+    # (a spec's own poke= items first, as a BN4 spec's: a record's byte the run stands on, pa_piledrvr's)
     paths = [os.path.join(WORK, 'runs', f'{run_name}.{g}') for g in ('bn5', 'bn6')] if a.no_run else \
-        run(run_name, spec, list(pokes), list(calls), a.quiet, twins_check(legit))
+        run(run_name, spec, list(spec.get('poke', [])) + list(pokes), list(calls), a.quiet, twins_check(legit))
     ta, tb = read_trace(paths[0]), read_trace(paths[1])
     ta['code'] = tb['moved']   # (the families' blocks: BN5's code where the install found it)
     for tr in (ta, tb):

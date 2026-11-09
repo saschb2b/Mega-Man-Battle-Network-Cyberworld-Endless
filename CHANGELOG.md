@@ -20,6 +20,13 @@
   Darkloid two phases under par and you get his SP chip, at par his own
   chip, as BN5's missions paid (a Darkloid of BN6's, without BN5, pays as
   before). They turn up among BN5's chips in the finds too.
+- **BN5's last Program Advances.** With BN5 Team Colonel's ROM, the
+  five Program Advances made with a Darkloid's or Nebula Navi's chip
+  form on the Custom screen: BigNoise (Pulsar3 twice and ShadeMan's SP
+  or DS), CsmoPris (Astroid3 and CosmoMan's), WildBird (Katana1 and
+  LarkMan's), Football (MrkCan2 and GridMan's) and PileDrvr (GunDelS3
+  and Django's). PileDrvr needs every chip in \*, the All \* helper:
+  BN6's GunDelS3 shares no code with Django.
 - **Five more Navi chips from BN5.** With BN5 Team Colonel's ROM, the
   Navi chips of CloudMan, CosmoMan, LarkMan, GridMan and Django are in
   the game, each as V1, SP and DS, moved from BN5 and checked against

@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:54:19Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:27:28Z }
 ---
 
 # The chips' code
@@ -125,7 +125,7 @@ of. The registry's ids, records and art stay C1's (above).
     0x5F, 0xBA 0x60, 0xC0 0x62; their second amendment: 0x105 0x59, 0x115
     0x5A, 0x117 0x5E, 0x119 0x4D, 0x8E 0x4C, the fixed ones from 0x40 up,
     the per-run themes 0x26-0x33, BN4's families' sounds 0x34-0x3F; the chips' own from 0x52 down: 0x12E 0x52,
-    0xA6 0x51, 0xC6 0x50, 0xBD 0x4F, 0x10E 0x4E, 0xE1 0x4B, 0x4A next),
+    0xA6 0x51, 0xC6 0x50, 0xBD 0x4F, 0x10E 0x4E, PileDrvr's 0x148 0x4B, 0x4A next),
     taken only where the slot still holds BN6's empty header; the
     immediates name the slot, a table's row its bytes (`TABLE_SOUNDS`: the
     Anti chips' counter's, the seeds', the crack bombs', the spread
@@ -288,7 +288,22 @@ of. The registry's ids, records and art stay C1's (above).
   copy (`marina_v1_keys` FAIL at t408, found by the whole suite, not his
   specs); the spawner, the object and its kinds' table are a helper now
   (`Bubbles`, `HELPER_TYPES`), one copy for both units, and the helpers'
-  room, the powers and the homes moved 0x400 up for it (80 homes). Twenty
+  room, the powers and the homes moved 0x400 up for it (80 homes). BN5's
+  last five Program Advances, each made of two of a chip and one of
+  those Navi chips' SP or DS, have routines of their own and are units
+  too ([The chip registry and BN5's chips' code](../rom/chips-code.md),
+  BN5's last Program Advances): BigNoise (365), CsmoPris (366) and
+  WildBird (367) in the spare ids, Football (603) and PileDrvr (604) past
+  nine bits, where the bit BN6 keeps for a Program Advance formed this
+  battle is the engine's own (`RAM_PA_WIDE`). Each forms on BN6's Custom
+  screen as on BN5's but PileDrvr, whose GunDelS3 is BN6's chip, in
+  other codes than Django: it forms only with every chip in \*.
+  WildBird spawns LarkMan's Navi object: its unit shares LarkMan's four
+  types (`UNIT_SHARES`, `XV_TYPE_SHARED`) and is its entry alone, since
+  the dispatch moves a type once (a second copy of LarkMan's blocks ran
+  for LarkMan's own chips, unwatched: three of his specs FAILed).
+  `pa_bignoise`, `pa_csmopris`, `pa_wildbird`, `pa_football` and
+  `pa_piledrvr` PASS, six mutations caught. Twenty
   `chip_*` specs PASS (each Navi's V1, SP, DS and DS dark), twenty
   mutations caught. Not reached by a spec: an obstacle beside CosmoMan,
   and the identity of a sprite BN5 keeps LZ77 (the comparison has no
