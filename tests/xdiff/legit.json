@@ -70,6 +70,7 @@
       "evidence": [
         "DarkInvs's object (BN5's fourth kind's 0x18, spawned by its support routine 0x080E2420: str r7,[r0,#0x30], the chip used) keeps its chip at +0x30 as the support objects of BN6's do (chip_darkinvs: BN5's 189, BN6's 289)",
         "zomon_v1 t1: Zomon's +0x2A 0x75 in BN5's (its set-up's movs r0,#0x75; strh r0,[r5,#0x2A], BN5 0x08108932-0x08108934: chip 117, AreaGrab) and 0xA3 in BN6's (163, AreaGrab: the registry's row 117 to 163, SAME); t390 its AttackVars +0x14 the same chip, its CurAction the chip's family 0x15 by each game's record (BN5 0x0801E210 + 0x2C x 117, BN6 0x08021DA8 + 0x2C x 163, +0x0B 0x15 in both)",
+        "PileDrvr's object (BN5's fourth kind's 0x6F, spawned by its support routine 0x080E8994: str r7,[r0,#0x30] at 0x080E89B2, the chip used) keeps its chip at +0x30 as DarkInvs's does (pa_piledrvr t33: BN5's 349, the registry's 604)",
         "zomon_v1: setAttack 0x15 in BN5 and 0x65 in BN6 at t390, Zomon's state back in both at t391 (BN6's 0x15 alone ended it at t392); BN5 0x080EC400-0x080EC448, BN6 0x080ED0DC-0x080ED130 (phase 1: 0x08011714)"
       ],
       "places": {
@@ -78,6 +79,9 @@
         ],
         "t4": {
           "0x18": [
+            "0x30"
+          ],
+          "0x6F": [
             "0x30"
           ],
           "0x03": [
