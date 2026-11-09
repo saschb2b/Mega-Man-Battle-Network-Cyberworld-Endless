@@ -6,8 +6,6 @@
  * 4-byte entries (kind, panel y<<4|x, id) ending with 0xF0. */
 #include "encounter.h"
 
-#include "chip_entry.h"
-
 #include <stdbool.h>
 #include <string.h>
 
