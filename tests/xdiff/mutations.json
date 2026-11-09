@@ -2062,6 +2062,78 @@
     "08DF4E5A:3802"
    ],
    "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
+  },
+  {
+   "name": "Kilby's sound at the pool's second slot",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC90C:2033:2"
+   ],
+   "what": "its sound 0xCD (BN4 0x080BC90C: movs r0,#0xcd, the recipe's immediate the pool's first slot 0x32, tools/xrecipe_bn4.py pool_song) made 0x33, the pool's second, which holds no song of its: BN6's copy begins another slot's song where BN4 begins 0xCD (caught at t163, the family's sounds)"
+  },
+  {
+   "name": "Kilby's effect 0x2D left at BN4's number",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC8BC:342D:2"
+   ],
+   "what": "its effect's id (BN4 0x080BC8BC: adds r4,#0x2d after lsls r4,rN,#16, the recipe's immediate the late families' 0x8F, xrecipe_bn4.LATE_EFFECTS) left at BN4's 0x2D: BN6's copy spawns BN6's own effect 0x2D, another picture and another kind (caught at t129, the objects in play and the run order)"
+  },
+  {
+   "name": "Kilby's CurAction 6 written as BN4's",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC6B6:2006:2"
+   ],
+   "what": "the CurAction its state writes (BN4 0x080BC6B6: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t42, its +0x09)"
+  },
+  {
+   "name": "Kilby's battle sprite drawn from VolGear's copy",
+   "spec": "kilby_v1",
+   "poke": [
+    "08B34324:08CD0000:4"
+   ],
+   "what": "BN6's grown list 1's 0xC9 (XV_LISTS + 4 * 0xC9), Kilby's copy of BN4's 1:0x0C in the late families' art room (XV_LATE_ART + 0x5000), aimed at VolGear's (XV_LATE_ART, BN4's 1:0x02): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+  },
+  {
+   "name": "MagTect's sound 0xF8 at the pool's first slot",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BEF34:2032:2"
+   ],
+   "what": "its sound 0xF8 (BN4 0x080BEF34: movs r0,#0xf8, the recipe's immediate the pool's second slot 0x33, tools/xrecipe_bn4.py pool_song) made 0x32, the pool's first, which holds its 0xB8: BN6's copy begins its other sound where BN4 begins 0xF8 (caught at t239, the family's sounds)"
+  },
+  {
+   "name": "MagTect's CurAction 6 written as BN4's",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BED72:2006:2"
+   ],
+   "what": "the CurAction its state writes (BN4 0x080BED72: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t39, its +0x09)"
+  },
+  {
+   "name": "MagTect's shake every other frame",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BF076:2101:2"
+   ],
+   "what": "its shake's gate (BN4 0x080BF076: movs r1,#3, its +0x20 a multiple of 4, in its update's tail entered as hook 3) made movs r1,#1: BN6's copy shakes, and draws, every other frame of its +0x20 where BN4's shakes every fourth (caught at t1, its +0x36, +0x64 and +0x9C: its opening's draws more than BN4's, some without a twin, so no pairing from the opening's end holds)"
+  },
+  {
+   "name": "MagTect's battle sprite drawn from Kilby's copy",
+   "spec": "magtect_v1",
+   "poke": [
+    "08B34328:08CD5000:4"
+   ],
+   "what": "BN6's grown list 1's 0xCA (XV_LISTS + 4 * 0xCA), MagTect's copy of BN4's 1:0x09 in the late families' art room (XV_LATE_ART + 0x9340), aimed at Kilby's (XV_LATE_ART + 0x5000, BN4's 1:0x0C): its idle animation's frames read from another sprite (caught at t1, its +0x91 and its sprite's data)"
+  },
+  {
+   "name": "MagTect's opening one shake short",
+   "spec": "magtect_v1",
+   "poke": [
+    "080E19F4:2112:2"
+   ],
+   "what": "BN6's opening fade begun with 0x12 where it begins with 0x10 (BN6 0x080E19F4: movs r1,#0x10 before bl 0x08006270, the fade the appear's bit 0 waits on): BN6's wait before bit 0 a frame shorter for its family, so MagTect's copy shakes, and draws, 15 times in the opening (frames 72-86) where it shakes 16, BN4's 18. The gap of the counts is then 3, not the 2 draws BN4's trace makes in the frames BN6's opening has no twin of (its init's frame and the frame before bit 0): no pairing from the opening's end holds (legit.json's bn4 opening_draws), where a pairing by the gap alone would pair BN6's 15 with BN4's last 15 and pass (caught at t1: the run prints the pairing refused, BN4's 18 against BN6's 15 with 2 in the twinless frames, then its +0x36 and +0x64, its last shake BN6's own, and +0x91, the opening a frame shorter)"
   }
  ]
 }

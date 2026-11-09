@@ -911,7 +911,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	if (s->replay && s->bn4 && a->log && b->log) xd_replay_setup(b->log, a->log);   /* (the family's init draws: BN4's alone) */
-	return true;
+	return xd_setup_skips(s, a->log, b->log);
 }
 
 /* what was traced, and what became of each core's draws */

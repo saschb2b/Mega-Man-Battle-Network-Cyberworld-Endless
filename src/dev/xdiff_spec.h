@@ -80,6 +80,9 @@ typedef struct {
 	int lag;            /* (lag=N) BN6's battle N fight frames behind BN4's: BN6's engine runs no state while the opening is paused
 	                     * (docs/devtools/differential.md, The BN4 trace), so BN6's is traced N frames more, its keys by the timer N
 	                     * later, and with rng=replay the family's own draws given the reference's of N frames before; 0 none */
+	uint32_t skip_key[XD_SETUP_SKIPS];   /* (setupskip=KEY:N,...) with rng=replay against BN4's: the reference's first N setup */
+	int skip_n[XD_SETUP_SKIPS], nskips;  /* draws of KEY left without a twin, BN6's paired from the opening's end
+	                                      * (tools/xdiff_bn4.py opening_skips; legit.json's bn4 opening_draws) */
 } Spec;
 
 /* SPEC's items into s (its defaults first): false, said on stderr, where
@@ -101,5 +104,9 @@ typedef struct {
 void xd_folder_put(const FolderPlaces *p, const uint16_t *folder);
 /* The folder's chips owned in BN6's pack, one of each chip and code */
 void xd_pack_own(const uint16_t *folder);
+
+/* The opening's draws of the spec's keys paired from its end (xd_replay_setup_skip): with rng=replay against BN4's alone;
+ * false where the log has no room for them */
+bool xd_setup_skips(const Spec *s, XdLog *a, XdLog *b);
 
 #endif

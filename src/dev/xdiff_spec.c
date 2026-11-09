@@ -136,6 +136,22 @@ static int dark_parse(Spec *s, const char *name, char *v) {
 
 /* the spec's numbers: MegaMan's panel, HP and element, the frames, the seed, the foes held, the field's column
  * pattern; -1 where `name` is none of them */
+/* setupskip=KEY:N,...: the opening's draws of each KEY paired from its end (Spec.skip_key); -1 where `name` is not it */
+static int skips_parse(Spec *s, const char *name, const char *v) {
+	if (strcmp(name, "setupskip")) return -1;
+	for (const char *p = v; *p && s->nskips < XD_SETUP_SKIPS; ++s->nskips) {
+		unsigned key;
+		int n, used = 0;
+		if (sscanf(p, "%x:%d%n", &key, &n, &used) != 2 || n <= 0 || n > 64) return 0;
+		s->skip_key[s->nskips] = key;
+		s->skip_n[s->nskips] = n;
+		p += used;
+		if (*p == ',') ++p;
+		else if (*p) return 0;
+	}
+	return s->nskips > 0;
+}
+
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
@@ -206,6 +222,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (r < 0) r = dark_parse(s, name, v);
 	if (r < 0) r = souls_parse(s, name, v);
 	if (r < 0) r = film_parse(s, name, v);
+	if (r < 0) r = skips_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
@@ -270,4 +287,12 @@ void xd_pack_own(const uint16_t *folder) {
 		if (k == 4) k = 0;
 		if (!emu_read8(at + k)) emu_write8(at + k, 1);
 	}
+}
+
+/* (the opening's draws of the spec's keys paired from its end, xd_replay_setup_skip: with rng=replay against BN4's alone; false
+ * where the log has no room for them) */
+bool xd_setup_skips(const Spec *s, XdLog *a, XdLog *b) {
+	for (int i = 0; s->replay && s->bn4 && a && b && i < s->nskips; ++i)
+		if (!xd_replay_setup_skip(b, s->skip_key[i], s->skip_n[i])) return false;
+	return true;
 }

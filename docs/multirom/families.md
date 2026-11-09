@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted families"
-description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms and numbers."
+description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
 ---
 
 # Transplanted families
@@ -512,26 +512,34 @@ and its calls aimed again (`src/emu/xvirus.c`):
 ## BN4's late families
 
 BN4's families past its first eight (`tools/xrecipe_bn4.py` LATE_FROM),
-VolGear first (9 November 2026), are moved after BN4's Navis took their
-numbers past the first eight's, and after the families' rooms filled:
+VolGear first, then Kilby and MagTect (9 November 2026), are moved after BN4's
+Navis took their numbers past the first eight's, and after the families'
+rooms filled:
 
 - **Their numbers from the tops down**, so the Navis' (from the first
   eight's last, up) stay what they were and a Navi moved later still finds
   his: the third kind's dispatch numbers from 0xDF down (VolGear's 0x19
   and 0x1A at 0xDF and 0xDE; the Navis' from 0xCC up, to below the lowest
   a late family took), list 4's from 0xBF down to 0xB6 (below the first
-  eight's 0xC0, past BN5's Navis' 0xA0-0xB5; VolGear's fire at 0xBF). An
-  effect id or a list 5 number of the families' ranges, which the Navis
-  continue, is a decision in the generator's report; none of a late
-  family's sprites is shared with a Navi who draws the same (FireMan
-  keeps his own copy of VolGear's fire).
+  eight's 0xC0, past BN5's Navis' 0xA0-0xB5; VolGear's fire at 0xBF,
+  Kilby's effect's sprite at 0xBE), their effects' ids from 0x8F down to
+  0x78 and list 5's numbers from 0x97 down to 0x83 (`LATE_EFFECTS`,
+  `LATE_LIST5`: below BN4's own 0x90-0x9F and 0x98-0x9F, which its Navis
+  continue, above BN5's families'; Kilby's effect 0x2D at 0x8F). An effect
+  a first eight's family moved already keeps its number (Kilby's 0x13 and
+  0x14 are Spikey's 0x92 and 0x93); none of a late family's sprites is
+  shared with a Navi who draws the same (FireMan keeps his own copy of
+  VolGear's fire).
 - **Their art in a room of their own**, `XV_LATE_ART` (`FREE_LATE_FAMILIES`,
   `+0x4D0000`-`+0x500000`, past BN5's lava and sea: [Memory the engine
   writes](../engine/emulation/memory.md), its row), the families' second
   room holding its sounds' copies to its end; their code in that second
   room while it has room (VolGear's ends at `0x08B7BAB4`, the room's end
-  `0x08B7C000`), then in a code room of their own (`FREE_LATE_CODE`,
-  `+0x711000`-`+0x720000`). Both are rows of the free space's plan, placed
+  `0x08B7C000`), then in a code room of their own (`XV_LATE_CODE`,
+  `FREE_LATE_CODE`, `+0x711000`-`+0x720000`: a late family whose blocks
+  pass the second room's end goes there, and every late family after it,
+  Kilby the first; `XvRegion.code2`, and the differential counts the room
+  as the families' code). Both are rows of the free space's plan, placed
   where its `--fit` found room ([Free space](../engine/emulation/free-space.md)):
   the art's first place (`+0x711000`-`+0x720000`, 60 KB) held VolGear's
   but not the other nine's sprites. The recipe's check takes a sprite in
@@ -547,18 +555,41 @@ numbers past the first eight's, and after the families' rooms filled:
   held-chip calls are dead while it holds none, as Billy's, Mettaur's and
   Walla's are. `volgear_v1`-`v3` PASS ([the differential](../devtools/differential.md),
   VolGear's readings), four mutations caught; it visits as the others do.
+- **Their sounds in the per-battle pool** (the owner's call 13, 9
+  November 2026, [Battle Network 4 in a run](bn4.md)): a late family's
+  sounds BN6 has no song of take the pool BN4's Navis share by battle, the
+  k-th such sound the pool's k-th slot from 0x32 (`tools/xrecipe_bn4.py`
+  `SOUND_POOL` and `pool_song`; `src/emu/xvirus_recipe.h` `xv_bn4_pool`,
+  one list for the Navis and the families), its song packed into the
+  family's art as it installs (`src/emu/xvirus_songs.c`) and the pool's
+  slots pointed at its songs before each frame of a battle it is in, as a
+  Navi's are (`src/emu/xnavi_bn4_sounds.c`): one BN4 family a visited
+  battle holds, and no BN4 Navi a random battle. The first eight keep
+  their fixed slots 0x34-0x3F. A sound whose pool slot would be past 0xFF
+  (the sixth on) is a decision in the generator's report, its shim built
+  for the Navis alone; no late family measured plays more than five.
+- **Kilby** ([BN4 Red Sun's tables](../rom/bn4.md), Kilby moved): AI 73,
+  ids 0x2F6-0x2FB, its code the first in the late code room, its sound
+  0xCD the pool's 0x32, its effect's id made by arithmetic (`lsls r4,r0,#16;
+  adds r4,#0x2d`, its version in the third byte) read by its adds.
+  `kilby_v1`-`v3` PASS (Kilby's readings), four mutations caught; it
+  visits as the others do.
+- **MagTect** ([BN4 Red Sun's tables](../rom/bn4.md), MagTect moved): AI
+  74, ids 0x2FC-0x301, its code in the late code room, its sounds 0xB8 and
+  0xF8 the pool's 0x32 and 0x33 (ThunderMan's copy of the same 0xB8 plays
+  at 0x33 in his battles, each battle pointing the pool at its own), its
+  update's shake past the pre-step, the state and the present entered as
+  hook 3, the can-move check's third form copied with it. Its shake draws
+  in every unpaused frame of the opening, which BN4's has two more of than
+  BN6's; the differential pairs those draws from the opening's end (the
+  game unchanged, the owner's call 7's rule). `magtect_v1`-`v3` PASS
+  (MagTect's readings), four mutations caught; it visits as the others do.
 
-The other nine (Gaia, Boomer, MagTect, Dharma, Kilby, Weather, Spidy,
-Moloko, and Black Earth's NavShado and NavBlack) wait first on their
-sounds: each of the eight measured plays one to five BN6 has no song of
-(NavShado's and NavBlack's not measured), and the families' 12
-slots (0x34-0x3F) are spent, BN5's 0x41-0x4B kept for BN5 (the owner's
-call 8, [Battle Network 4 in a run](bn4.md)) and the Navis' 16 their
-per-battle pool's. Where their sounds go is the owner's call: the Navis'
-pool by battle (one BN4 family a visited battle holds) or slots of their
-own. Measured by the generator on 9 November 2026 (a scratch run with
-each added): Kilby one sound, an I/O word and its effects' ids made by
-arithmetic; MagTect two, an I/O word and its update's own step; Spidy
-two, its init's region 57 and floating, its update's order; Boomer one,
-its states 4 and 5 its own, its init's flags; Dharma three, Gaia two,
-Weather five and Moloko two, with more of the engine's work their own.
+The other seven (Gaia, Boomer, Dharma, Weather, Spidy, Moloko, and
+Black Earth's NavShado and NavBlack) wait on their own work, their sounds'
+place decided (the pool). Measured by the generator on 9 November 2026 (a
+scratch run with each added): Spidy two sounds, its init's region 57 and
+floating, its update's order; Boomer one, its states 4 and 5 its own, its
+init's flags; Dharma three, Gaia two, Weather five (the pool's five
+slots a movs names, all of them) and Moloko two, with more of the
+engine's work their own.

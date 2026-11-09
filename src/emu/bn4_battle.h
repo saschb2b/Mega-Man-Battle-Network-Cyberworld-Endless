@@ -175,4 +175,32 @@
 #define BN4_PA_RECIPES    0x080211B0u /* the recipes: n, kind, the PA's id (u16), its chips (u16 id | code << 9) */
 #define BN4_PA_KIND_LISTED 1          /* a recipe of n chips listed, each its own (BN6's kind 4); kind 0 one chip n times, codes in a row */
 
+/* Kilby, the second late family (BN4's type 0x1E, enemy ids 0x43-0x48; docs/rom/bn4.md, Kilby moved): found by its type, each
+ * checked by the generator against the ROM */
+#define BN4_KILBY_TYPE    0x080BC3FCu /* its type routine (BN4_T1_TYPES[0x1E]): jump table 0x080BC414 (init 0x080BC420, update
+                                       * 0x080BC478), the after-state; its region to 0x080BCA20 */
+#define BN4_KILBY_STATES  0x080BC490u /* its state table: BN4's generic 0-5, its own 6-9 (0x080BC4B9, 0x080BC6AD, 0x080BC6C1,
+                                       * 0x080BC7E1) */
+#define BN4_KILBY_EFFECT  0x080BC8BAu /* its effect's id made by arithmetic: lsls r4,r0,#16 (its +4) then adds r4,#0x2D, the
+                                       * effect's own byte past its parameter (again at 0x080BC8F2): the generator reads the adds */
+#define BN4_KILBY_SOUND   0x080BC90Cu /* its sound 0xCD (movs r0,#0xcd; bl BN4_PLAY_SOUND at 0x080BC90E), BN6 has no song of: the
+                                       * per-battle pool's first slot, 0x32 (xvirus_recipe.h xv_bn4_pool) */
+#define BN4_KILBY_REGION_WORD 0x080BC946u /* its ldr r4 of a collision region's spawn word, 0x04050401, before bl 0x080CD7E2
+                                       * (the collision region's spawn, whose twin BN6's 0x080C6BDA takes r4 the same) */
+
+/* MagTect, the third late family (BN4's type 0x26, enemy ids 0x31-0x36; docs/rom/bn4.md, MagTect moved): found by its type,
+ * each checked by the generator against the ROM */
+#define BN4_MAGTECT_TYPE  0x080BEB68u /* its type routine (BN4_T1_TYPES[0x26]): jump table 0x080BEB80 (init 0x080BEB8C, update
+                                       * 0x080BEBE6), the after-state; its region to 0x080BF0E0 */
+#define BN4_MAGTECT_STATES 0x080BEC00u /* its state table: BN4's generic 0-5, its own 6-9 (0x080BEC29, 0x080BED69, 0x080BED85,
+                                       * 0x080BEE6B) */
+#define BN4_MAGTECT_TAIL  0x080BEBF6u /* its update past the pre-step, the state runner and the present: bl BN4_MAGTECT_SHAKE,
+                                       * entered as hook 3 (bn4_twins.ENTRIES) */
+#define BN4_MAGTECT_SHAKE 0x080BF064u /* its shake: unless the battle is paused (0x08007948) or BN4_CAN_MOVE_THIRD says not, while its
+                                       * +0x20 is a multiple of 4, a draw picks a pair of its table's signed bytes for its sprite's
+                                       * offsets +0x36 and +0x3E, kept at +0x64 and +0x68: every unpaused frame of the opening too */
+#define BN4_CAN_MOVE_THIRD 0x0800AD7Eu /* BN4_CAN_MOVE's body with the flags' mask 0x105040 (its literal 0x0800B130): copied */
+#define BN4_MAGTECT_SOUNDS 0x080BEF34u /* its sounds BN6 has no song of: 0xF8 here (movs r0,#0xf8) and 0xB8 at 0x080BEFAA, each
+                                       * before bl BN4_PLAY_SOUND: the per-battle pool's 0x33 and 0x32 (xvirus_recipe.h xv_bn4_pool) */
+
 #endif

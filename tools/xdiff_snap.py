@@ -31,6 +31,8 @@ XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved cod
 XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
 XV_CODE_BN4 = (0x08B79000, 0x08B80000)            # ... BN4's families' code in the families' (tools/xrecipe_bn4.py CODE2 to XV_ART: BN5's end
                                                   # before it, its bn5_ranges_clear): a BN5 reference reads none of it, nor BN4's Navis'
+XV_LATE_CODE = (0x08F11000, 0x08F20000)           # ... BN4's late families' code past the families' (src/emu/free_space.plan FREE_LATE_CODE,
+                                                  # xvirus_recipe.h XV_LATE_CODE; tools/xrecipe_bn4.py LATE_CODE): a BN5 reference reads none
 BN4_AI_SIZE = 0xC0                                # BN4's AI data, one a side in a row (src/emu/bn4.h, BN4_AI_DATA_SIZE)
 XC_ART = 0x08EA0000                                # ... their copies of BN5's sprites from here (src/emu/xchips_code.h, XC_ART)
 
@@ -809,8 +811,10 @@ class Frame:
         # where a word of BN5's at such a place read as moved code, TinHawk's AI +0xAC 0x08010101 in BN4's Mettaur's appear)
         self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ())
                                                             if not (self.game == 5 and (XV_CODE_BN4[0] <= m[1] < XV_CODE_BN4[1]
+                                                                                        or XV_LATE_CODE[0] <= m[1] < XV_LATE_CODE[1]
                                                                                         or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]))
                                                             and (XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
+                                                                 or XV_LATE_CODE[0] <= m[1] < XV_LATE_CODE[1]
                                                                  or XC_CODE[0] <= m[1] < XC_CODE[1] or m[1] < EMU_FREE
                                                                  or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]
                                                                  or souls_code()[0] <= m[1] < souls_code()[1])]
