@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16

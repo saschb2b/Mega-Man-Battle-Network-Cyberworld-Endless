@@ -176,23 +176,62 @@ static uint32_t coll_arg_set(const XNavi *n, uint32_t at) {
 #define XN_HIDE_SHARED 20u
 #define XN_HIDE_STUB   8u
 #define XN_HIDE_SIZE(f) (XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)(f)->nstates)
-static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
-	static const uint16_t shared[7] = { 0xB501, 0x4903, 0x46FE, 0x4708, 0xBC03, 0x468E, 0x4700 };   /* (its ldr's word at +16) */
-	const XVirusFamily *f = &n->code;
-	if (at & 3u || XN_HIDE_SIZE(f) > room) { xv_fail("no room in its home for its hide step's stubs"); return false; }
-	uint8_t *p = xv_put(at, XN_HIDE_SIZE(f), true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
-	if (!p || !st) return false;
-	for (int i = 0; i < 7; ++i) put16(p + 2 * i, shared[i]);
-	put16(p + 14, 0x46C0);   /* (nop: its word aligned) */
-	put32(p + 16, xv_move_ref(n->hide_step));
+/* a stub a state at `at` past `shared` bytes of its shared part, each `ldr r0,[pc,#0]; b at; .word the state`, its state table's
+ * words aimed at them; back where the shared part goes (the caller writes it), NULL where they do not fit (xv_fail) */
+static uint8_t *stubs_put(const XVirusFamily *f, uint32_t at, uint32_t shared, uint32_t room) {
+	const uint32_t size = shared + XN_HIDE_STUB * (uint32_t)f->nstates;
+	if (at & 3u || size > room) { xv_fail("no room in its home for its states' stubs"); return NULL; }
+	uint8_t *p = xv_put(at, size, true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
+	if (!p || !st) return NULL;
 	for (int i = 0; i < f->nstates; ++i) {
-		const uint32_t off = XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)i;
+		const uint32_t off = shared + XN_HIDE_STUB * (uint32_t)i;
 		const int32_t back = -(int32_t)(off + 2u + 4u);   /* (the b at off + 2 back to the shared part, pc 4 past it) */
 		put16(p + off, 0x4800);                           /* ldr r0,[pc,#0]: the word past the b */
 		put16(p + off + 2, (uint16_t)(0xE000u | ((uint32_t)back >> 1 & 0x7FFu)));
 		put32(p + off + 4, xv_move_ref(f->states[i]));
 		put32(st + 4 * i, (at + off) | 1u);
 	}
+	return p;
+}
+
+static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
+	static const uint16_t shared[7] = { 0xB501, 0x4903, 0x46FE, 0x4708, 0xBC03, 0x468E, 0x4700 };   /* (its ldr's word at +16) */
+	uint8_t *p = stubs_put(&n->code, at, XN_HIDE_SHARED, room);
+	if (!p) return false;
+	for (int i = 0; i < 7; ++i) put16(p + 2 * i, shared[i]);
+	put16(p + 14, 0x46C0);   /* (nop: its word aligned) */
+	put32(p + 16, xv_move_ref(n->hide_step));
+	return true;
+}
+
+/* its hook A's shim (XNavi.pre): its update's calls between its pre-step and its runner, in turn, each with its r0. BN6's Navi
+ * frame keeps the AI index in r4 across hook A (0x080F3682-0x080F36A2), pushed here too */
+static uint32_t pre_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *size) {
+	Shim s = { .at = at };
+	op(&s, 0xB510);   /* push {r4, lr} */
+	for (int i = 0; i < n->npre; ++i) {
+		const uint32_t r0 = n->pre[i].r0;
+		if (r0 != XN_R0_ANY && r0 <= 0xFFu) op(&s, 0x2000u | r0);   /* movs r0,#r0 */
+		else if (r0 != XN_R0_ANY) lit(&s, 0, r0);
+		bl(&s, xv_move_ref(n->pre[i].call));
+	}
+	op(&s, 0xBD10);   /* pop {r4, pc} */
+	return shim_put(&s, room, "hook A", size);
+}
+
+/* its states each entered through a stub (ldr r0,=the state; b the shared part) whose shared part loads r4 as BN4's Navi runner
+ * leaves it, its +0 byte (BN4's object runner's ldrb r4,[r5,#0] at 0x08003166) without BN6's own bits there: BN6_OBJ_RESERVED
+ * (0x20, which BN4 has not) and 0x04 (run while paused: BN4's generic state 1 clears it, 0x0801013A, BN6's keeps it,
+ * 0x08017888): ldrb r4,[r5,#0]; movs r1,#0x24; bics r4,r1; bx r0 (r1 at a state's entry is each runner's own: BN4's its
+ * table, BN6's its CurAction times four). BN6's state caller (0x0801B9E6) pushes r4 and pops it after the state, so the state
+ * returns to it as before. Its state table's words aimed at the stubs (XNavi.runner_r4) */
+#define XN_R4_SHARED 8u
+#define XN_R4_BN6_BITS (BN6_OBJ_RESERVED | 0x04u)
+#define XN_R4_SIZE(f) (XN_R4_SHARED + XN_HIDE_STUB * (uint32_t)(f)->nstates)
+static bool r4_set(const XNavi *n, uint32_t at, uint32_t room) {
+	uint8_t *p = stubs_put(&n->code, at, XN_R4_SHARED, room);
+	if (!p) return false;
+	put16(p, 0x782C), put16(p + 2, (uint16_t)(0x2100u | XN_R4_BN6_BITS)), put16(p + 4, 0x438C), put16(p + 6, 0x4700);
 	return true;
 }
 
@@ -251,6 +290,26 @@ static uint32_t fars_set(const XNavi *n, uint32_t place) {
 	return place;
 }
 
+/* its hide step's or its runner's r4's stubs, then its hook A's shim (table[2]), past its own shims at *place, which goes on past them: a Navi with
+ * neither leaves its shims where they were; false where one failed */
+static bool stubs_place(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT], uint32_t *place) {
+	const XVirusFamily *f = &n->code;
+	if (n->hide_step.addr || n->runner_r4) {   /* (one stub a state: its hide step's, or its runner's r4) */
+		const uint32_t room = XV_HOME_VENEERS > ((*place + 3u) & ~3u) ? XV_HOME_VENEERS - ((*place + 3u) & ~3u) : 0;
+		*place = (*place + 3u) & ~3u;
+		if (n->hide_step.addr && n->runner_r4) { xv_fail("its states' stubs are its hide step's and its r4's"); return false; }
+		if (!(n->hide_step.addr ? hide_set(n, f->home + *place, room) : r4_set(n, f->home + *place, room))) return false;
+		*place += n->hide_step.addr ? XN_HIDE_SIZE(f) : XN_R4_SIZE(f);
+	}
+	if (!n->npre) return true;
+	uint32_t size = 0;
+	if (table[2] != BN6_NAVI_NULLSUB) { xv_fail("its hook A is its own: no room for its update's calls"); return false; }
+	*place = (*place + 3u) & ~3u;
+	table[2] = pre_set(n, f->home + *place, XV_HOME_VENEERS > *place ? XV_HOME_VENEERS - *place : 0, &size);
+	*place += size;
+	return table[2] != 0;
+}
+
 uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	if (n->summon && !summon_set(n)) return 0;
 	const XVirusFamily *f = &n->code;
@@ -262,11 +321,7 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	place = fars_set(n, place);   /* (a refusal fails the install: xnavi_install's xv_failed) */
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
 	if (start && companion != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its init's spawns"); return 0; }
-	if (n->hide_step.addr) {   /* (its hide step's stubs first: a Navi that hides none leaves its shims where they were) */
-		place = (place + 3u) & ~3u;
-		if (!hide_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0)) return 0;
-		place += XN_HIDE_SIZE(f);
-	}
+	if (!stubs_place(n, table, &place)) return 0;
 	if (end && !in && !n->palettes) {
 		if (place + 8u > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return 0; }
 		table[7] = coll_arg_set(n, f->home + place);

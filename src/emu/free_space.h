@@ -73,6 +73,8 @@
 #define FREE_SOULS           (EMU_FREE + 0x480000u)  /* BN5's Souls in BN6's engine (soul_room.h lays it out) (soulproxy.c, soulunite.c, soullife.c, ...) */
 #define FREE_PANELS          (EMU_FREE + 0x4C0000u)  /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c) */
 #define FREE_PANELS_END      (EMU_FREE + 0x4D0000u)
+#define FREE_LATE_FAMILIES   (EMU_FREE + 0x4D0000u)  /* the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds (xvirus.c) */
+#define FREE_LATE_FAMILIES_END (EMU_FREE + 0x500000u)
 #define FREE_NAVIS           (EMU_FREE + 0x500000u)  /* BN5's Navis in BN6's engine (xnavi_sprites.c, xnavi_room.c, xnavi_install.c, ...) */
 #define FREE_NAVI_SPRITES    (EMU_FREE + 0x500000u)  /* their battle sprites, a fixed place each, and the arm points grown (the Navi chips' and the Souls' one copy of each Navi's sprite there too) (xnavi_sprites.c) */
 #define FREE_NAVI_SPRITES_END (EMU_FREE + 0x580000u)
@@ -92,7 +94,9 @@
 #define FREE_CHIP_AI_END     (EMU_FREE + 0x710440u)
 #define FREE_SWAP_RETURN     (EMU_FREE + 0x710440u)  /* where the swap's spawn returns mid-battle: a hook (battle_swap.c) */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL            (EMU_FREE + 0x710460u)  /* free to FREE_BN4_NAVIS (free) */
+#define FREE_TAIL            (EMU_FREE + 0x710460u)  /* free to FREE_LATE_CODE (free) */
+#define FREE_LATE_CODE       (EMU_FREE + 0x711000u)  /* the late families' code, block by block, past the families' own room (xvirus.c) */
+#define FREE_LATE_CODE_END   (EMU_FREE + 0x720000u)
 #define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_CODE   (EMU_FREE + 0x730000u)  /* BN4's Navis' code and their objects', block by block (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_ART    (EMU_FREE + 0x750000u)  /* the coming battle's BN4 Navi's attacks' art and songs, one room (xnavi_bn4_art.c) */
@@ -178,6 +182,7 @@
 	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
 	X("FREE_SOULS", (EMU_FREE + 0x480000u), (EMU_FREE + 0x4C0000u), "", "code") \
 	X("FREE_PANELS", (EMU_FREE + 0x4C0000u), (EMU_FREE + 0x4D0000u), "", "code") \
+	X("FREE_LATE_FAMILIES", (EMU_FREE + 0x4D0000u), (EMU_FREE + 0x500000u), "", "code") \
 	X("FREE_NAVIS", (EMU_FREE + 0x500000u), (EMU_FREE + 0x600000u), "", "code") \
 	X("FREE_NAVI_SPRITES", (EMU_FREE + 0x500000u), (EMU_FREE + 0x580000u), "FREE_NAVIS", "code") \
 	X("FREE_NAVI_ROOM", (EMU_FREE + 0x580000u), (EMU_FREE + 0x588000u), "FREE_NAVIS", "code") \
@@ -191,7 +196,8 @@
 	X("FREE_CHIP_PAS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710400u), "", "code") \
 	X("FREE_CHIP_AI", (EMU_FREE + 0x710400u), (EMU_FREE + 0x710440u), "", "code") \
 	X("FREE_SWAP_RETURN", (EMU_FREE + 0x710440u), (EMU_FREE + 0x710460u), "", "code") \
-	X("FREE_TAIL", (EMU_FREE + 0x710460u), (EMU_FREE + 0x720000u), "", "code") \
+	X("FREE_TAIL", (EMU_FREE + 0x710460u), (EMU_FREE + 0x711000u), "", "code") \
+	X("FREE_LATE_CODE", (EMU_FREE + 0x711000u), (EMU_FREE + 0x720000u), "", "code") \
 	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
 	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \
 	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x77C000u), "", "code") \

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:17:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:40:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -707,6 +707,24 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## A spawn's leftovers (BN5)
+
+A word of a moved object that its spawn took from a register its caller
+never set is each engine's own: legit.json's layouts' `spawn_leftovers`
+names it by kind, type and word, with its evidence read in BN5's ROM
+(the object's code and the engine's it calls, none reading the word).
+A rule's `bn6` reads BN5's as an AI data's start and BN6's as that number
+(BlizzardMan's 0x2F's Z). Where the spawner or its caller then writes
+part of the word itself, the rule names the bytes it `compares` and lets
+the rest be each engine's (`tools/xdiff_snap.py` `obj_cells`): CosmoMan's
+third kind's 0x79's +4, a count's byte over each engine's r4 (`[0]`), his
+0x6C's and 0x6D's Z, its upper half 0x10 over each engine's r3 (`[2, 3]`).
+The engine's spark where an attack struck (the fourth kind's 0x04) takes
+its place from that attack, so its Z is read by the struck attack's rule
+(`struck_leftovers`) and by no rule of its own. Each rule's compared bytes
+have a mutation that breaks them (`cosmoman_v1`'s height and count:
+[Transplanted Navis](../multirom/navis.md), CosmoMan).
 
 ## The trace's moved ranges
 
@@ -1598,6 +1616,26 @@ format, its game 4: the trace's header names it):
     low").
   - With these, **`cirkill_v1`, `cirkill_v2` and `cirkill_v3` PASS**: 1200
     fight frames each, the family's records and the world's the same.
+- **VolGear's readings** (`volgear_v1`-`volgear_v3`: VolGear V1-V3, BN4's
+  0x07, 0x09 and 0x0B, BN6's 0x2F0, 0x2F2 and 0x2F4, 9 November 2026;
+  [Transplanted families](../multirom/families.md), BN4's late families):
+  the comparator reads a sprite in the late families' art room as one in
+  the families' (`tools/xdiff_bn4.py` `XV_LATE_ART`, its rows'
+  `XV_LATE_ART + n`). Two firsts settled in the generator, never in the
+  comparison: the install refused its NameID range's call while BN4's
+  look-up, lying in its region, was walked as its own; then `volgear_v1`
+  failed at t214 on its flame's +0x4C (BN4's MegaMan, BN6's 0) and +0x64,
+  its aim read at BN4's players' +0x44 in BN6's battle state ([BN4 Red
+  Sun's tables](../rom/bn4.md), VolGear moved). Each PASSes over 1200
+  fight frames, its flame (the third kind's 0x1A at the dispatch's 0xDE)
+  from t214, no allowance added. Its four mutations (tests/xdiff/mutations.json):
+  the aim's base left at +0x44 (t214), the flame's kinds' table byte left
+  at BN4's list 4 0x0A (t214, its sprite state), the flame spawned as its
+  0x19's number (t214, the run order) and its list 1 entry aimed at
+  Billy's copy (t1). Not reached: its fire on a list of panels (the third
+  kind's 0x19 at 0xDF, from its state `0x080B66E3`'s step at
+  `0x080B67A0`), with MegaMan idle in row 2 or row 1 over 1200 to 3600
+  frames, so its sprite's immediate (`0x080CFFAE`) is unproved.
 - **WindMan's readings** (`windman_v1`, 8 November 2026; [BN4's Navis in BN6's
   engine](../multirom/bn4-navis.md), WindMan built): what the comparator
   gained for his battle, each reading or allowance from both games' code
