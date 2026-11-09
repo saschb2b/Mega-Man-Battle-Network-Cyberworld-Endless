@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Creation**: engine/emulation/free-space.md, the free space's one plan: every region in `src/emu/free_space.plan` (name, place, zone, writers, concept), from which `tools/free_space.py` writes `src/emu/free_space.h` (every name's value unchanged), memory.md's two tables (a Region column; the rows by region, the PET's words and BN4's Navis split) and the zones' table with their headroom; `build.py lint` holds them in step, `tests/test_core.c` checks the compiled tables, `src/emu/free_space_watch.c` tells a write past its region; the copiers' silent fallbacks found, and a move proposed for the next `LAYER_MAKE` bump. Also engine/emulation/memory.md, index.md, code/emu.md and code/tools.md.
 * **Update**: multirom/gaps.md, the owner's calls: Team ProtoMan as enemies with their Souls, a BN5 town as a place visited.
 * **Creation**: multirom/gaps.md, what is not ported yet: BN5 Team Colonel's ROM against a run kind by kind (its Navi tables read for AI 1-22, its story records scanned for their ids, its 105 named chips the registry leaves out, its Program Advances' list, its forms 1-6, its NaviCust programs' names against BN6's), BN4 Red Sun's open phases, a ranked list for a content-filler version and two calls for the owner.
 
