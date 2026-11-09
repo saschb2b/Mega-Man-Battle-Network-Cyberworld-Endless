@@ -1898,6 +1898,46 @@
     "080CE812:20CD"
    ],
    "what": "the spawn of his third kind's 0x0B (BN4 0x080CE812: movs r0,#0xb, the recipe's dispatch number 0xCC, the first of the third kind's numbers past 0xFF, xrecipe_bn4.TYPE_MORE) made 0xCD, his 0x94's: the dispatch runs his 0x94's copy for it (caught at t199, the objects in play and the run order)"
+  },
+  {
+   "name": "CosmoMan's object spawned as another of his",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4428:206C"
+   ],
+   "what": "the 0x6C's spawn of his third kind's 0x6D (BN5 0x080D3968: movs r0,#0x6D, its copy at XN_MORE + 0xC100 + 0x328) made 0x6C: the dispatch runs the 0x6C's copy for it (caught at t438, the objects in play)"
+  },
+  {
+   "name": "CosmoMan's object's collision offset not moved",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF41C4:6E80"
+   ],
+   "what": "the third kind's 0x6C's read of its hit flags (BN5 0x080D3704: ldr r0,[r0,#0x68], its copy at XN_MORE + 0xC100 + 0xC4) left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "CosmoMan's object's sprite not renumbered",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4134:2210"
+   ],
+   "what": "the third kind's 0x6C's sprite (BN5 0x080D3674: movs r2,#0x10, list 2's 0x10, its copy at XN_MORE + 0xC100 + 0x34) left at BN5's number where the recipe makes it list 2's 0x2A, his battle sprite in BN6"
+  },
+  {
+   "name": "CosmoMan's object's height one more",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF42FC:2211"
+   ],
+   "what": "the third kind's 0x6C's spawner's Z upper half (BN5 0x080D383C: movs r2,#0x10; strh r2,[r0,#0x3E], its copy at XN_MORE + 0xC100 + 0x1FC) made 0x11: the half the leftover rule still compares (legit.json's spawn_leftovers, 0x6C's compares 2 and 3)"
+  },
+  {
+   "name": "CosmoMan's object's count run down twice as fast",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4E5A:3802"
+   ],
+   "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   }
  ]
 }

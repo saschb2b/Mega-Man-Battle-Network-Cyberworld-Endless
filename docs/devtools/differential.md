@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:17:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:40:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -707,6 +707,24 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## A spawn's leftovers (BN5)
+
+A word of a moved object that its spawn took from a register its caller
+never set is each engine's own: legit.json's layouts' `spawn_leftovers`
+names it by kind, type and word, with its evidence read in BN5's ROM
+(the object's code and the engine's it calls, none reading the word).
+A rule's `bn6` reads BN5's as an AI data's start and BN6's as that number
+(BlizzardMan's 0x2F's Z). Where the spawner or its caller then writes
+part of the word itself, the rule names the bytes it `compares` and lets
+the rest be each engine's (`tools/xdiff_snap.py` `obj_cells`): CosmoMan's
+third kind's 0x79's +4, a count's byte over each engine's r4 (`[0]`), his
+0x6C's and 0x6D's Z, its upper half 0x10 over each engine's r3 (`[2, 3]`).
+The engine's spark where an attack struck (the fourth kind's 0x04) takes
+its place from that attack, so its Z is read by the struck attack's rule
+(`struck_leftovers`) and by no rule of its own. Each rule's compared bytes
+have a mutation that breaks them (`cosmoman_v1`'s height and count:
+[Transplanted Navis](../multirom/navis.md), CosmoMan).
 
 ## The trace's moved ranges
 
