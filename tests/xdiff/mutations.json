@@ -691,7 +691,7 @@
    "name": "the image object's kind left at BN5's sprite",
    "spec": "colonel_v1",
    "poke": [
-    "08D90110:00:1"
+    "08D90210:00:1"
    ],
    "what": "the moved image object's kind 3 (BN5's kinds table 0x080B9A5C + 0x10, its copy at XN_OBJECTS + 0x0 + 0x10) left naming list 4's number 0, BN6's another sprite, where tools/bn5_objects.py's copy makes it 0xB5 (BN5's sprite 3:0x00, Colonel's image at t254): the sprite's bytes compared, never its number"
   },
@@ -699,7 +699,7 @@
    "name": "the image object's twin kind at another sprite",
    "spec": "colonel_v1",
    "poke": [
-    "08D901BA:09:1"
+    "08D902BA:09:1"
    ],
    "what": "the moved image object's kind 0x25 (its copy's entry at XN_OBJECTS + 0x0 + 0xBA) naming BN6's list 3 number 9 where tools/bn5_objects.py's twin is number 8, the same bytes as BN5's 3:0x08: the sprite's bytes compared"
   },
@@ -715,8 +715,8 @@
    "name": "the submerged hit by any attack",
    "spec": "toadman_sea",
    "poke": [
-    "08D9008E:2400",
-    "08D900C2:2400"
+    "08D900CE:2400",
+    "08D90102:2400"
    ],
    "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
   },
@@ -724,8 +724,8 @@
    "name": "Elec stopped by the submerged",
    "spec": "toadman_sea_elec",
    "poke": [
-    "08D90084:2C07",
-    "08D900B6:2C07"
+    "08D900C4:2C07",
+    "08D900F6:2C07"
    ],
    "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
   },
@@ -733,7 +733,7 @@
    "name": "the sea's marker not kept",
    "spec": "toadman_sp",
    "poke": [
-    "08D9006A:46C0"
+    "08D900AA:46C0"
    ],
    "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
   },
@@ -741,7 +741,7 @@
    "name": "the sea's splash another effect",
    "spec": "tomahawkman_sea",
    "poke": [
-    "08D900DA:2414"
+    "08D9011A:2414"
    ],
    "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
   },
