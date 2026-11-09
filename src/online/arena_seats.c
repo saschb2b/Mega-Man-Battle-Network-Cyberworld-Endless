@@ -1,6 +1,8 @@
 /* Two MegaMen a side over the network (arena_seats.h). */
 #include "arena_seats.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,13 +25,13 @@ bool arena_seats_net(void) { return four; }
 
 void arena_seats_unite_folder(OnlineLoadout *l) {
 	l->souls |= 1u << 2;   /* (NumberSoul: BN5's Soul 9, bit k Soul 7 + k) */
-	l->folder[0] = (uint16_t)(BN6_CHIP_ATK10 | 26u << 9);   /* (Atk+10 *: a Plus chip, NumberSoul's kind) */
+	l->folder[0] = chip_entry(BN6_CHIP_ATK10, 26);   /* (Atk+10 *: a Plus chip, NumberSoul's kind) */
 	l->regular = 0;
 	l->tag[0] = l->tag[1] = 0xFF;
 }
 
 void arena_seats_pa_folder(OnlineLoadout *l) {
-	for (unsigned i = 0; i < 3; ++i) l->folder[i] = (uint16_t)(BN6_CHIP_CANNON | i << 9);
+	for (unsigned i = 0; i < 3; ++i) l->folder[i] = chip_entry(BN6_CHIP_CANNON, i);
 	l->regular = 0;
 	l->tag[0] = 1;
 	l->tag[1] = 2;

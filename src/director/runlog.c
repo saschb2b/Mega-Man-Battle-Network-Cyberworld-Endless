@@ -2,6 +2,8 @@
  * beside the saves; past 512 KB the log moves to runlog.old. */
 #include "runlog.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -123,7 +125,7 @@ void runlog_md_opened(uint32_t find) {
 	AnalyticsEconomy *e = tally(&act1);
 	int kind = (int)(find >> 16), value = (int)(find & 0xFFFF);
 	analytics_count_md(e, act1);
-	if (kind == 1) analytics_count_chip(e, econ_chip_good(chip_pool_tier(value & 0x1FF)), act1);
+	if (kind == 1) analytics_count_chip(e, econ_chip_good(chip_pool_tier((int)((unsigned)value & CHIP_ID_MASK))), act1);
 	else if (kind == 3) analytics_count_zenny(e, value, act1);
 }
 
@@ -165,7 +167,7 @@ static void count_reward(bool guardian) {
 	bool act1;
 	AnalyticsEconomy *e = tally(&act1);
 	uint16_t r = emu_read16(BN6_BATTLE_REWARD);
-	if (r != 0xFFFF && r >> 14 == 0) analytics_count_chip(e, econ_chip_good(chip_pool_tier(r & 0x1FF)), act1);
+	if (r != 0xFFFF && r >> 14 == 0) analytics_count_chip(e, econ_chip_good(chip_pool_tier((int)chip9_id(r))), act1);
 	else if (r != 0xFFFF && r >> 14 == 1) analytics_count_zenny(e, r & 0x3FFF, act1);
 	if (guardian) analytics_count_chip(e, true, act1);
 }

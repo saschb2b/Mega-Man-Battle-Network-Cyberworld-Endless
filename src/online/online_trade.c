@@ -1,5 +1,7 @@
 #include "online_trade.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -121,7 +123,7 @@ static int in_folders(TradeChip c) {
 	int n = 0;
 	for (unsigned i = 0; i < FOLDERS * BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = emu_read16(folders + 2 * i);
-		n += (e & 0x1FF) == c.id && e >> 9 == c.code;
+		n += chip_entry_id(e) == c.id && chip_entry_code(e) == c.code;
 	}
 	return n;
 }

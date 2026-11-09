@@ -72,6 +72,7 @@
 #include "claims.h"
 #include "xattack_grow.h"
 #include "xchips.h"
+#include "chip_entry.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -5057,6 +5058,43 @@ static void test_chip_code(void) {
  * chip registry, issue #82): the table as decided (Team Colonel's chips a
  * run can meet, one chip per name, the rest in BN6's free ids), its checks
  * failing on made-up rows that break each rule, and its lookups both ways. */
+/* A folder entry's form (src/core/chip_entry.h): nine bits as BN6 has
+ * them, ten for ten-bit chip ids, and the converter a run saved with
+ * nine-bit folders goes through once (docs/engine/saves.md) */
+static void test_chip_entry(void) {
+	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
+	 * gives it, id 511 *, none, empty) */
+	const uint16_t nine[6] = { 0x0001, 0x0201, 0x3785, 0x35FF, 0xFFFF, 0x0000 };
+	const uint16_t ten[6] = { 0x0001, 0x0401, 0x6D85, 0x69FF, 0xFFFF, 0x0000 };
+	bool same = true;
+	for (int i = 0; i < 6; ++i) {
+		same = same && chip_entry_widen(nine[i], 10) == ten[i] && chip_entry_widen(nine[i], 9) == nine[i];
+		uint16_t e = chip_entry_from9(nine[i]);
+		if (nine[i] != CHIP_ENTRY_NONE) same = same && chip_entry_id(e) == chip9_id(nine[i]) && chip_entry_code(e) == chip9_code(nine[i]);
+	}
+	CHECK(same, "chip entry: nine-bit entries widened to ten bits, and read alike in this build's form");
+	uint16_t folder[30];
+	for (int i = 0; i < 30; ++i) folder[i] = nine[i % 6];
+	chip_entries_from9(folder, 30);
+	bool all = true;
+	for (int i = 0; i < 30; ++i) all = all && folder[i] == chip_entry_widen(nine[i % 6], CHIP_ID_BITS);
+	CHECK(all, "chip entry: a folder converted in place");
+	/* (an id past 511 in ten bits: 600 in code C, and in *) */
+	uint16_t c600 = (uint16_t)(600u | 2u << 10), s600 = (uint16_t)(600u | 26u << 10);
+	CHECK(c600 == 0x0A58 && (c600 & 0x3FFu) == 600 && c600 >> 10 == 2 && (s600 & 0x3FFu) == 600 && s600 >> 10 == 26,
+		"chip entry: id 600 holds in ten bits beside its code");
+	CHECK(CHIP_ENTRY(1, 1) == chip_entry(1, 1) && chip_entry_id(chip_entry(CHIP_ID_MASK, 26)) == CHIP_ID_MASK,
+		"chip entry: the constant form and the function agree");
+	/* (the profile's Library to 1023: 600 in its own bytes, past BN6's flags) */
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	bool lib = meta_library_add(600) && meta_library_has(600) && !meta_library_has(601) && !meta_library_add(600) &&
+		profile.library_w[(600 - 512) / 8] && meta_library_add(1023) && meta_library_add(511) && profile.library_x[(511 - 320) / 8] &&
+		!meta_library_add(1024) && !meta_library_has(1024);
+	profile = keep;
+	CHECK(lib, "chip entry: the profile's Library holds ids to 1023");
+}
+
 static void test_chip_registry(void) {
 	char why[96] = "";
 	int bad = xreg_check(xreg_rows, xreg_count, why, sizeof why);
@@ -6912,6 +6950,7 @@ int main(void) {
 	test_xchips();
 	test_xtext();
 	test_chip_code();
+	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();
 	test_chips_image();

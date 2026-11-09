@@ -2,6 +2,8 @@
  * gifts, MegaMan placed or moved on, and where the test autopilot heads. */
 #include "director_dev.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -291,7 +293,7 @@ int director_dev_chip(const char *spec) {
 		printf("chip: %s is none (an id 1-511, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec);
 		return 0;
 	}
-	uint16_t e = (uint16_t)(id | c << 9);
+	uint16_t e = chip_entry((unsigned)id, (unsigned)c);
 	uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
 	for (uint32_t i = 0; i < (uint32_t)n; ++i) emu_write(data + 2 * i, b, sizeof b);
 	own_folder_chips();

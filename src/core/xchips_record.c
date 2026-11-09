@@ -1,6 +1,8 @@
 /* A registered chip's record in BN6's layout (xchips_record.h). */
 #include "xchips_record.h"
 
+#include "chip_entry.h"
+
 #include <string.h>
 
 #include "bytes.h"
@@ -142,7 +144,7 @@ int xrec_deck_sit_out(uint16_t *deck, int n, const uint8_t sits[64], int keep, u
 	*first = 0;
 	for (int i = 0; i < n; ++i) {
 		uint16_t e = deck[i];
-		unsigned id = e & 0x1FFu;
+		unsigned id = chip_entry_id(e);
 		if (e != 0xFFFF && sits[id >> 3] & (1u << (id & 7))) {
 			++taken;
 			if (i < keep && i < 8) *first |= 1u << i;

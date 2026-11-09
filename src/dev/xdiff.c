@@ -30,6 +30,7 @@
  * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
 
+
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -668,6 +669,7 @@ static bool open_out(Side *g, const Spec *s, const char *game) {
  * TagChips: the folders' pointer and marks' at their eToolkit places (game's own read and write) */
 typedef struct {
 	uint32_t toolkit, folders, marks, keys, key_xor, regular, tags;   /* (the NaviStats' Folder1Reg, its two TagChips; 0 none) */
+	uint32_t id_mask;   /* (an entry's id: chip_entry.h's in BN6, nine bits in BN5) */
 	uint8_t (*rd8)(uint32_t);
 	uint32_t (*rd32)(uint32_t);
 	void (*wr8)(uint32_t, uint8_t);
@@ -678,7 +680,7 @@ static void folder_put(const FolderPlaces *p, const uint16_t *folder) {
 	uint32_t folders = p->rd32(p->toolkit + p->folders), marks = p->rd32(p->toolkit + p->marks);
 	if (!in_ewram(folders) || !in_ewram(marks)) { fprintf(stderr, "xdiff: no folder in this game's state\n"); return; }
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		uint32_t id = folder[i] & 0x1FF;
+		uint32_t id = folder[i] & p->id_mask;
 		p->wr16(folders + 2 * i, folder[i]);
 		p->wr8(marks + id, (uint8_t)(p->rd8(p->keys + id) ^ p->key_xor));
 	}
@@ -694,7 +696,7 @@ static void bn6_wr16(uint32_t a, uint16_t v) { const uint8_t b[2] = { (uint8_t)v
 static void pack_own(const uint16_t *folder) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), records = emu_read32(BN6_CHIP_TABLE_REF);
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && in_ewram(pack); ++i) {
-		uint32_t id = folder[i] & 0x1FFu, code = folder[i] >> 9, k = 0;
+		uint32_t id = chip_entry_id(folder[i]), code = chip_entry_code(folder[i]), k = 0;
 		uint32_t at = id < BN6_PACK_IDS ? pack + BN6_PACK_ENTRY * id : BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
 		while (k < 4 && emu_read8(records + BN6_CHIP_RECORD_SIZE * id + BN6_CHIP_CODES + k) != code) ++k;
 		if (k == 4) k = 0;
@@ -706,10 +708,13 @@ static void pack_own(const uint16_t *folder) {
 static void subject_setup(const Spec *s) {
 	for (int i = 0; i < s->nflags[1]; ++i) flag_set(s->flags[1][i]);
 	static const FolderPlaces places = { BN6_TOOLKIT, BN6_TOOLKIT_CHIPS, BN6_TOOLKIT_CHIP_MARKS, BN6_CHIP_KEYS, BN6_CHIP_KEY_XOR, BN6_NAVI_FOLDER1_REG,
-		BN6_NAVI_FOLDER1_TAG, emu_read8, emu_read32, emu_write8, bn6_wr16 };
+		BN6_NAVI_FOLDER1_TAG, CHIP_ID_MASK, emu_read8, emu_read32, emu_write8, bn6_wr16 };
 	if (s->nfolder[1]) {
-		folder_put(&places, s->folder[1]);
-		pack_own(s->folder[1]);
+		/* (a spec's folders are nine-bit, xdiff.h: BN6's in this build's form) */
+		uint16_t f6[BN6_FOLDER_ENTRIES];
+		for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) f6[i] = chip_entry_from9(s->folder[1][i]);
+		folder_put(&places, f6);
+		pack_own(f6);
 	}
 	static const uint32_t buster[3] = { BN6_NAVI_ATTACK, BN6_NAVI_SPEED, BN6_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)
@@ -787,7 +792,7 @@ static void reference_setup(const Spec *s) {
 		guest_wr8(a, (uint8_t)(guest_read8(a) | 0x80u >> (f & 7)));
 	}
 	static const FolderPlaces places = { BN5_TOOLKIT, BN5_TOOLKIT_CHIPS, BN5_TOOLKIT_CHIP_MARKS, BN5_CHIP_KEYS, BN5_CHIP_KEY_XOR, BN5_NAVI_FOLDER1_REG,
-		0, guest_read8, guest_read32, guest_wr8, guest_write16 };
+		0, CHIP9_MASK, guest_read8, guest_read32, guest_wr8, guest_write16 };
 	if (s->nfolder[0]) folder_put(&places, s->folder[0]);
 	static const uint32_t buster[3] = { BN5_NAVI_ATTACK, BN5_NAVI_SPEED, BN5_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)

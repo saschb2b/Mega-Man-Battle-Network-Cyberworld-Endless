@@ -1,6 +1,8 @@
 /* --dev arena2v2: a partner's own folder, deck and picks in the pair (arena_team_custom.h). */
 #include "arena_team_custom.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -94,7 +96,7 @@ void arena_team_custom_begin(void) {
 	for (uint32_t a = RAM_TEAM_CUSTOM; a < RAM_TEAM_CUSTOM_END; a += 4) hook_write32(a, 0);
 }
 
-static unsigned chip_id(uint16_t e) { return e & 0x1FFu; }
+static unsigned chip_id(uint16_t e) { return chip_entry_id(e); }
 
 /* an entry a deck takes: a chip, and one BN6's battles hold */
 static bool dealable(uint16_t e) { return e != NONE16 && chip_id(e) && !chips_sits_out((int)chip_id(e)); }
@@ -132,7 +134,7 @@ static void deal(unsigned side, bool second) {
 	/* (teampa=1: side 0's partner's folder opens with Cannon A, B and C as its Regular chip and TagChips, dealt first: a Program
 	 * Advance in his first hand; over the network his own game gives his folder so instead, arena_seats_pa_folder) */
 	if (dev.team_pa && side == 0 && !arena_seats_net()) {
-		for (unsigned i = 0; i < 3; ++i) C.folder[side][i] = (uint16_t)(BN6_CHIP_CANNON | i << 9);
+		for (unsigned i = 0; i < 3; ++i) C.folder[side][i] = chip_entry(BN6_CHIP_CANNON, i);
 		C.regular[side] = 0;
 		C.tags[side][0] = 1;
 		C.tags[side][1] = 2;
@@ -140,7 +142,7 @@ static void deal(unsigned side, bool second) {
 	/* (teamunite=2: each stood-in partner's folder opens with Atk+10 *, a Plus chip that lights NumberSoul: a UNITE of three
 	 * turns where the Souls held have it; 3 with RockCube *, an Obstacle, ColonelSoul's) */
 	if ((dev.team_unite == 2 || dev.team_unite == 3) && !arena_seats_net()) {
-		C.folder[side][0] = (uint16_t)((dev.team_unite == 2 ? BN6_CHIP_ATK10 : BN6_CHIP_ROCKCUBE) | 26u << 9);
+		C.folder[side][0] = chip_entry(dev.team_unite == 2 ? BN6_CHIP_ATK10 : BN6_CHIP_ROCKCUBE, 26);
 		C.regular[side] = 0;
 		C.tags[side][0] = C.tags[side][1] = NONE8;
 	}

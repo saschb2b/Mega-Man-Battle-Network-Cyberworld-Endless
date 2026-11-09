@@ -12,6 +12,8 @@
  * folder's draw, not an enemy's next move. */
 #include "second_battle.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -55,7 +57,7 @@ static void chip_row(uint16_t chip, char code, const char *power, SDL_Rect r, SD
 	text_draw(r.x + r.w, r.y + 3, power, c, TEXT_RIGHT);
 }
 
-static char code_of(uint16_t e) { return (e >> 9) >= 26 ? '*' : (char)('A' + (e >> 9)); }
+static char code_of(uint16_t e) { return chip_entry_code(e) >= 26 ? '*' : (char)('A' + chip_entry_code(e)); }
 
 /* On OK: the chips picked, a line each in their order */
 static void card_picks(int x, int y, int w) {
@@ -65,9 +67,9 @@ static void card_picks(int x, int y, int w) {
 		uint16_t e = S2.hand[S2.picks[k]];
 		ChipInfo ci;
 		char power[16];
-		chip_info(e & 0x1FF, &ci);
+		chip_info((int)chip_entry_id(e), &ci);
 		power_text(power, sizeof power, ci.power, 0);
-		chip_row(e & 0x1FF, code_of(e), power, (SDL_Rect){ x, y + 16 + k * ROW_H, w, ROW_H }, PET_WHITE);
+		chip_row((int)chip_entry_id(e), code_of(e), power, (SDL_Rect){ x, y + 16 + k * ROW_H, w, ROW_H }, PET_WHITE);
 	}
 }
 
@@ -78,7 +80,7 @@ static void picks_row(int x, int y) {
 	x += text_width("Picked") + 8;
 	for (int k = 0; k < S2.npicks; ++k, x += 22) {
 		fill_rect(x, y, 18, 18, PET_SLOT_EDGE);
-		second_chip_icon(S2.hand[S2.picks[k]] & 0x1FF, x + 1, y + 1);
+		second_chip_icon((int)chip_entry_id(S2.hand[S2.picks[k]]), x + 1, y + 1);
 	}
 }
 
@@ -120,7 +122,7 @@ static int hand(int x, int y, int w) {
 	for (int k = 0; k < S2.nqueue; ++k, y += ROW_H) {
 		char power[16];
 		power_text(power, sizeof power, S2.queue_power[k], S2.queue_bonus[k]);
-		chip_row(S2.queue[k] & 0x1FF, 0, power, (SDL_Rect){ x, y, w, ROW_H },
+		chip_row((int)chip_entry_id(S2.queue[k]), 0, power, (SDL_Rect){ x, y, w, ROW_H },
 			k < S2.queue_at ? PET_DIM : k == S2.queue_at ? PET_GOLD : PET_WHITE);
 	}
 	return y;

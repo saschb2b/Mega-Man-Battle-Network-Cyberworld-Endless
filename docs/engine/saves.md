@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:25:53Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:10:00Z }
 ---
 
 # Portable saves
@@ -86,6 +86,16 @@ The file holds only the progress files under `savedata/`:
 | `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md)) |
 | `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
+
+The profile's Library holds chip ids to 1023 (`library_w` after the
+rest: a profile saved before reads them 0, and a build before it reads
+a newer profile's `.cwsave` as made by a newer version), for [ten-bit
+chip ids](../multirom/bn4-chips.md). `run.state` holds BN6's RAM and so
+its folders' entries, nine bits to this day; the build that installs ten
+bits bumps `RUN_MAGIC` with it and reads a run saved before through the
+converter (`chip_entries_from9` in `src/core/chip_entry.h`, unit-tested),
+its three folders' entries rewritten once the state is loaded, so no run
+is lost.
 
 ROMs, boot states and any other file are never packed. Controls, keys,
 the touch layout, screen settings, the volumes and the statistics answer

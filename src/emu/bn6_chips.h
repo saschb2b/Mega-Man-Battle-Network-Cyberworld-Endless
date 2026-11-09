@@ -9,6 +9,8 @@
 #ifndef CW_BN6_CHIPS_H
 #define CW_BN6_CHIPS_H
 
+#include "chip_entry.h"   /* a folder entry's form: its id's bits */
+
 #define BN6_CHIP_TABLE_REF    0x08021AB0u /* getChip8021DA8's literal: the chip records (0x08021DA8, 411 of them), the one word that names them */
 #define BN6_PACK_OFFSET_TAIL  0x08021C9Au /* getOffsetToQuantityOfChipCode's tail: mov r7,sl; ldr r7,[r7,#0x4c] (the pack) ... pop {r4,r7,pc} */
 #define BN6_PACK_TOTAL_TAIL   0x08021BE4u /* GetTotalChipCount's: the same, then the chip's four counts summed, pop {r7,pc} */
@@ -104,6 +106,16 @@
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
 #define BN6_TAKE_CHIPS        0x08021B93u /* TakeChips (chip, code, count): a settled Net Square trade's chip out of the Pack */
+
+/* Where BN6's code takes a chip's id in nine bits (tools/chip_ids.py's census, docs/rom/chips-code.md, Ten-bit chip ids) */
+#define BN6_ENTRY_SPLIT       0x08021AE0u /* a folder entry split: r1 its code (lsrs #9), r0 its id (ands with its literal's low half, 0x01FF) */
+#define BN6_ENTRY_SPLIT_MASK  0x08021AECu /* ... that literal: 0x01FF, its high half the next routine's first instruction */
+#define BN6_ENTRY_CHEAT       0x0802A55Cu /* the entry the Custom screen's two getters give for a chip the cheat test refuses: 0x3785, 389 in code 27 */
+#define BN6_REWARD_SPLIT      0x0802C54Cu /* a battle's reward split (0xFFFF none): kind from bit 14, code from bit 9, id in 9 bits; stays nine bits */
+#define BN6_LINK_CHIP_BOUND   0x0802E1B4u /* the link battle's real-time chip (battle flag 0x40): an id past 0x139 read as 0 */
+#define BN6_EDITOR_LIST_OUT   0x081224A0u /* the folder editor's list given back (GiveChips): its items id << 7 | code (a halfword) */
+#define BN6_EDITOR_LIST_IN    0x081224D4u /* ... the list into the folder (eToolkit +0x48): an entry made of each item, code << 9 | id */
+#define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
 
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */

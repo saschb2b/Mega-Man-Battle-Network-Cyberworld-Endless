@@ -6,6 +6,8 @@
  * says what it takes and gives, and how many chips the Pack holds. */
 #include "second_shop.h"
 
+#include "chip_entry.h"
+
 #include "bn6.h"
 #include "second_card.h"
 #include "second_frame.h"
@@ -27,7 +29,7 @@ void second_shop_draw(SDL_Rect b) {
 	int x = b.x + 6, y = b.y + 6, w = b.w - 12;
 	if (!S2.sh_kind) return;
 	if (S2.sh_kind == BN6_SHOP_KIND_CHIP) {
-		second_chip_card((uint16_t)(S2.sh_id | S2.sh_code << 9), x, y, w);
+		second_chip_card(chip_entry((unsigned)S2.sh_id, (unsigned)S2.sh_code), x, y, w);
 		y += SECOND_CARD_H;
 	} else if (S2.sh_kind == BN6_SHOP_KIND_PROGRAM) y = program(x, y, w);
 	else {

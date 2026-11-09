@@ -1,5 +1,7 @@
 #include "data.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -231,7 +233,7 @@ void program_name(int program, char *out, size_t outlen) {
 }
 
 uint16_t chip_entry_star(uint16_t entry) {
-	return entry == 0xFFFF || !(entry & 0x1FF) ? entry : (uint16_t)((entry & 0x1FF) | CHIP_CODE_STAR << 9);
+	return entry == 0xFFFF || !chip_entry_id(entry) ? entry : chip_entry(chip_entry_id(entry), CHIP_CODE_STAR);
 }
 
 void chip_pack_star(uint8_t e[CHIP_PACK_ENTRY]) {

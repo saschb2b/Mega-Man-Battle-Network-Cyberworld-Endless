@@ -1,6 +1,8 @@
 /* Another game's chips as BN6's, by name (xchips.h). */
 #include "xchips.h"
 
+#include "chip_entry.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,10 +45,10 @@ int xchips_code(const uint8_t codes[4], int code) {
 int xchips_out(const uint16_t *folder, int n, const uint16_t *to_x, int n6, uint16_t *out, int max) {
 	int k = 0;
 	for (int i = 0; i < n; ++i) {
-		int id = folder[i] & 0x1FF;
+		int id = (int)chip_entry_id(folder[i]);
 		if (folder[i] == 0xFFFF || !id || (id < n6 && to_x[id])) continue;
 		bool again = false;
-		for (int e = 0; e < i && !again; ++e) again = folder[e] != 0xFFFF && (folder[e] & 0x1FF) == id;
+		for (int e = 0; e < i && !again; ++e) again = folder[e] != 0xFFFF && (int)chip_entry_id(folder[e]) == id;
 		if (again) continue;
 		if (k < max) out[k] = (uint16_t)id;
 		++k;
@@ -141,7 +143,7 @@ static uint16_t reward_as(int id, uint16_t v) {
 	if (!id || chips_sits_out(id)) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);
 	uint8_t codes[4];
 	codes_of(id, codes);
-	return (uint16_t)(id | xchips_code(codes, v >> 9 & 0x1F) << 9);
+	return chip9_entry((unsigned)id, (unsigned)xchips_code(codes, (int)(chip9_code(v) & 0x1F)));
 }
 
 uint16_t xchips_reward_bn6(uint16_t v) {
@@ -150,7 +152,7 @@ uint16_t xchips_reward_bn6(uint16_t v) {
 	 * otherwise; none, or one that sits out of BN6's battles, the
 	 * stand-in's zenny: docs/multirom/one-net.md, BN5's viruses' own
 	 * rewards) */
-	return reward_as(xchips_run_chip(v & 0x1FF), v);
+	return reward_as(xchips_run_chip((int)chip9_id(v)), v);
 }
 
 /* ---- BN4 Red Sun's chips as BN6's (docs/multirom/bn4.md, Its viruses'
@@ -183,6 +185,6 @@ static void pair_bn4(void) {
 uint16_t xchips_reward_bn4(uint16_t v) {
 	if (v == 0xFFFF || v >> 14) return v;
 	pair_bn4();
-	int x = v & 0x1FF;
+	int x = (int)chip9_id(v);
 	return reward_as(bn4_paired && x < BN4_CHIP_COUNT ? from_bn4[x] : 0, v);
 }

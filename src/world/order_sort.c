@@ -21,6 +21,8 @@
  * screen of its own since issue #145). */
 #include "order_sort.h"
 
+#include "chip_entry.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -159,7 +161,7 @@ static uint32_t key_of(const uint8_t *rec, int chip, int code) {
 		uint8_t e = rec[BN6_CHIP_ELEMENT];
 		return e < BN6_SORT_ELEMENT_COUNT ? emu_read8(BN6_SORT_ELEMENTS + e) : e;
 	}
-	case SORT_NO: return held((uint16_t)(chip | code << 9));
+	case SORT_NO: return held(chip_entry((unsigned)chip, (unsigned)code));
 	case SORT_MB: return rec[BN6_CHIP_MB];
 	default: return get16(rec + BN6_CHIP_ID_SORT);
 	}

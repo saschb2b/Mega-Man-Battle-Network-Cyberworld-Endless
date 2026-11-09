@@ -5,6 +5,8 @@
  * fall, with MegaMan's word on each that matters. */
 #include "director_jobs.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -52,7 +54,7 @@ static void bring_chips(JobTalk *jt, int element) {
 	uint16_t folder[BN6_FOLDER_ENTRIES];
 	folder_now(folder);
 	for (int i = 0; i < BN6_FOLDER_ENTRIES && jt->nbring < JOB_BRING_MAX; ++i) {
-		int id = folder[i] & 0x1FF, code = folder[i] >> 9;
+		int id = (int)chip_entry_id(folder[i]), code = (int)chip_entry_code(folder[i]);
 		bool known = false;
 		for (int c = 0; c < jt->nbring; ++c) known |= jt->bring_chip[c] == id && jt->bring_code[c] == code;
 		if (id && !known && chip_hits_with(id) == element) {

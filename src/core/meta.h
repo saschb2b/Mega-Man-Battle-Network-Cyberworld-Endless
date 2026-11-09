@@ -67,9 +67,11 @@ enum {
 };
 
 /* The profile's Library: every chip MegaMan has held, in any run (BN6's
- * own Library, which each run's game is given), ids 1-511 (META_LIBRARY_IDS:
- * the registry's chips of BN5's among them, issue #82). */
-#define META_LIBRARY_IDS 512
+ * own Library, which each run's game is given), ids 1-1023 (META_LIBRARY_IDS:
+ * the registry's chips of BN5's among them, issue #82, and ten-bit chip
+ * ids', docs/multirom/bn4-chips.md); BN6's own flags hold 1-511
+ * (BN6_FLAG_LIBRARY_IDS). */
+#define META_LIBRARY_IDS 1024
 bool meta_library_has(int id);
 /* Adds chip `id`; whether it was new. */
 bool meta_library_add(int id);

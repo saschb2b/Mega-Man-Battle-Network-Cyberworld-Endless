@@ -9,6 +9,7 @@
  * the first in a family's code the family's. */
 #include "xdiff_events.h"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -441,13 +442,13 @@ static void units_of(int id) {
 
 static bool in_folder(const uint16_t *folder, int n, int id) {
 	for (int i = 0; i < n; ++i)
-		if ((folder[i] & 0x1FF) == id) return true;
+		if ((int)chip9_id(folder[i]) == id) return true;   /* (a spec's folder, nine-bit: xdiff.h) */
 	return false;
 }
 
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
-	for (int i = 0; i < n; ++i) units_of(folder[i] & 0x1FF);
+	for (int i = 0; i < n; ++i) units_of((int)chip9_id(folder[i]));
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;

@@ -132,6 +132,10 @@ typedef struct {
 	/* the extras the last run switched off (run.extras_off): the setup
 	 * starts from them */
 	uint16_t last_extras_off;
+	/* the Library's ids 512-1023, a bit each, beside `library_x`: ten-bit
+	 * chip ids' (docs/multirom/bn4-chips.md, Past 511); a profile saved
+	 * before reads them 0 */
+	uint8_t library_w[64];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

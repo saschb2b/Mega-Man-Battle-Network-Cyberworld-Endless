@@ -10,6 +10,7 @@
  * director_state.h); its parts are director_*.c, what they say *_words.c. */
 #include "director.h"
 
+
 #include <stdio.h>
 
 #include "battle_floor.h"
@@ -444,7 +445,7 @@ static void after_battle(void) {
 		int r = emu_read16(BN6_BATTLE_REWARD);
 		if (r >> 14 == 0 && r != 0xFFFF) {
 			ChipInfo ci;
-			chip_info(r & 0x1FF, &ci);
+			chip_info((int)chip9_id(r), &ci);
 			fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, (r >> 9 & 0x1F) >= 26 ? '*' : 'A' + (r >> 9 & 0x1F),
 				run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
 		} else fprintf(stderr, "battle reward %04x\n", r);
