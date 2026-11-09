@@ -104,6 +104,7 @@ def bn4_moved_types():
 
 
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
+XV_LATE_ART = 0x08800000 + 0x711000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
 
 
 def bn4_sprites(rom4, foes=None):
@@ -126,7 +127,7 @@ def bn4_sprites(rom4, foes=None):
         # (a raw one's room in BN4's ROM its own bytes, not the copy's rounded room, which may reach into the next sprite: the
         # wind's gust's list 3 0x2E past SearchMan's marker's 0x2D)
         own = X.sprite_len(rom4[base - 0x08000000:base - 0x08000000 + 0x40000], 0x40000) if not lz else 0
-        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE}.get(room_base, XV_ART) + int(off, 16),
+        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE, 'XV_LATE_ART': XV_LATE_ART}.get(room_base, XV_ART) + int(off, 16),
                     int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
     return out
 
@@ -141,7 +142,7 @@ def sprite_rows(foes=None):
     text = recipes_text()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
-    row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
+    row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XV_LATE_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
                      r'(XN_BN4_SPRITE), XN_BN4_SPRITE_SIZE) \}')
     rows = []
     for arr in re.finditer(r'static const XvSprite (\w+)\[\] = \{(.*?)\n\};', text, re.S):
