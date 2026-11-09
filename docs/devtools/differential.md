@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:55:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1618,6 +1618,40 @@ format, its game 4: the trace's header names it):
   kind's 0x19 at 0xDF, from its state `0x080B66E3`'s step at
   `0x080B67A0`), with MegaMan idle in row 2 or row 1 over 1200 to 3600
   frames, so its sprite's immediate (`0x080CFFAE`) is unproved.
+- **Kilby's readings** (`kilby_v1`-`kilby_v3`: Kilby V1-V3, BN4's 0x43,
+  0x45 and 0x47, BN6's 0x2F6, 0x2F8 and 0x2FA, 9 November 2026;
+  [Transplanted families](../multirom/families.md), BN4's late families):
+  the first family whose code lies in the late families' code room
+  (`XV_LATE_CODE`), which the comparator counts as the families' code
+  (`src/dev/xdiff_events.c`'s keys, `tools/xdiff_snap.py` `XV_LATE_CODE`:
+  moved code, and none of a BN5 reference's), and the first family sound
+  in the per-battle pool: `kilby_v1` failed at t163 on its sound (BN4's
+  0xCD, BN6's 0x32) until `legit.json`'s `bn4` `sounds` named the pool's
+  slot, a row whose `foes` are its ids 0x43-0x48, so the slot is read as
+  its own in its battles alone (another owner's songs fill it in others').
+  Each then PASSes over 1200 fight frames, its effects (0x8F, and Spikey's
+  0x92 and 0x93) from t129, no allowance added. Its four mutations
+  (tests/xdiff/mutations.json): its sound at the pool's second slot
+  (t163), its effect's id left at BN4's 0x2D (t129, the objects in play),
+  a CurAction left at BN4's (t42) and its list 1 entry aimed at VolGear's
+  copy (t1).
+- **MagTect's first reading** (`magtect_v1`-`v3`, not kept: MagTect V1-V3,
+  BN4's 0x31, 0x33 and 0x35 as BN6's 0x2FC, 0x2FE and 0x300, 9 November
+  2026): its recipe whole, each FAILs at t1 on its +0x36, +0x64 and +0x9C.
+  Its update's tail (`0x080BF064`, hook 3) shakes it whenever the battle
+  is not paused, the can-move check's third form allows and its +0x20 is
+  a multiple of 4, drawing a number for the shake's offsets each time; in
+  the opening before the appear's bit 0 that is every frame, and the
+  traces' setup draws show BN4's 18 (frames 132-149, the first in its
+  init's frame) against BN6's 16 (frames 72-87): BN4's update runs in its
+  init's frame and its bit 0 comes a frame later, the two frames the
+  opening's alignment and the battle's offset name. The setup's replay
+  (`xd_replay_setup`) gives BN6's k-th setup draw BN4's k-th, so BN6's
+  last shake takes BN4's sixteenth number where BN4's took its
+  eighteenth. Paired from the opening's end instead (BN6's sixteen with
+  BN4's last sixteen), the state at t1 would be the same: a change of the
+  comparator's setup pairing, not of the game, left for its own reviewed
+  change.
 - **WindMan's readings** (`windman_v1`, 8 November 2026; [BN4's Navis in BN6's
   engine](../multirom/bn4-navis.md), WindMan built): what the comparator
   gained for his battle, each reading or allowance from both games' code

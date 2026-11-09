@@ -17,6 +17,10 @@
   battles BN4's viruses visit, its flame running down MegaMan's row as
   in BN4. Moved into BN6's battle and checked against BN4's own frame by
   frame, it pays from BN4's own rewards.
+- **Kilby visits.** Kilby and its versions join the BN4 viruses that
+  turn up in BN6's and BN5's battles, checked against BN4's own battle
+  frame by frame like the rest. Its sound is BN4's own, loaded for the
+  battle it is in, the way BN4's Navis bring theirs.
 
 ## 0.20.0 (2026-11-09)
 

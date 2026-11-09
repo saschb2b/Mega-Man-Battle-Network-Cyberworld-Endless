@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -283,8 +283,10 @@ once proved (call 6's rule: the others join as each is): `volgear_v1`-`v3`
 PASS, its rewards read from BN4's rows as the others' are, its role and
 stage from BN4's records by the same count, the first family moved past
 the first eight's rooms and numbers ([Transplanted families](families.md),
-BN4's late families). The other nine wait on where their sounds go (the
-same, measured there).
+BN4's late families). Kilby, the eighth, joined the same day the same
+way (`kilby_v1`-`v3` PASS), its one sound BN6 has no song of in the
+per-battle pool (call 13). The other eight wait on their own work, their
+sounds' place decided (the same, measured there).
 
 Before BN4's visitors reached players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
@@ -536,6 +538,17 @@ BN6's player 29 one (BN4's two), so BN6 plays its first track alone (13
 frames, its second's 23 not), an interim the recipe names; and the slots BN4's
 sounds take from the themes' range are the owner's to confirm.
 
+The families moved after the first eight (BN4's late families, VolGear
+on) find those twelve slots spent, so their sounds BN6 has no song of take
+the per-battle pool BN4's Navis share (call 13): the k-th such sound of a
+family the pool's k-th slot from 0x32, its song copied from the player's
+ROM into the family's art as it installs, and the pool pointed at its
+songs in the battles it is in, as at a Navi's (one BN4 family a visited
+battle holds; [Transplanted families](families.md), BN4's late families).
+Kilby's 0xCD plays at 0x32; MagTect's 0xB8, which ThunderMan plays at
+0x33 in his battles, would play at 0x32 in its own, each battle pointing
+the pool at its own songs.
+
 ## The owner's calls
 
 1. **Decided, 4 November 2026: BN4 comes, its viruses first** (chosen over
@@ -641,3 +654,13 @@ sounds take from the themes' range are the owner's to confirm.
     so 0x41-0x4B stay BN5's (call 8). Her summon's map points at them, the summoned one
     arrives by BN4's own summoned appear, and `roll_v1` PASSes her whole
     fight, so she joins the tournament's proved Navis.
+13. **Decided, 9 November 2026: a late family's sounds take the Navis'
+    pool by battle.** The families moved after the first eight find the
+    twelve slots of call 8 spent; their sounds BN6 has no song of load per
+    battle into the shared pool of call 11, as a BN4 Navi's do, while the
+    first eight keep their fixed slots 0x34-0x3F. Chosen over slots of
+    their own, which the per-run themes' range and BN5's 0x41-0x4B
+    (call 8) no longer hold. One BN4 family a visited battle holds, and no
+    random battle holds a BN4 Navi, so a battle points the pool at one
+    owner's songs. Built the same day: Kilby's 0xCD at 0x32 (`kilby_v1`-`v3`
+    PASS; [Transplanted families](families.md), BN4's late families).

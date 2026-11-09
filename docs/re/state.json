@@ -168,6 +168,10 @@
     {
       "date": "2026-11-09",
       "what": "BN4's VolGear (type 0x08, ids 7-12) moved, the first late family (AI 72, ids 0x2F0-0x2F5): its art in a room of its own (free_space.h FREE_LATE_FAMILIES, xvirus_recipe.h XV_LATE_ART), its numbers from the tops down (the third kind's 0xDF and 0xDE, list 4's 0xBF) so BN4's Navis' stay theirs; bn4_battle.h BN4_VOLGEAR_*, BN4_T3_VOLGEAR_*, BN4_*_HELD_*, BN4_HELD_CHIP_TEST (docs/rom/bn4.md, VolGear moved)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "The pool for BN4's late families (the owner's call 13): a late family's sounds BN6 has no song of take the per-battle pool's slots in order as a BN4 Navi's do (src/emu/xvirus_recipe.h xv_bn4_pool, the Navis' and the families' one list; src/emu/xvirus_songs.c packs them into its art at install, src/emu/xnavi_bn4_sounds.c points the pool at them in its battles); their code past the families' second room in a room of their own (free_space.plan FREE_LATE_CODE, xvirus_recipe.h XV_LATE_CODE). BN4's Kilby (type 0x1E, ids 0x43-0x48) moved, the second late family (AI 73, ids 0x2F6-0x2FB): its code the first in the late code room, its sound 0xCD the pool's 0x32, its effect 0x2D the late families' 0x8F; bn4_battle.h BN4_KILBY_* (docs/rom/bn4.md, Kilby moved)."
     }
   ],
   "experiments": [
@@ -177,6 +181,14 @@
       "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
       "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
       "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
+      "link": "../multirom/families.md"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-09",
+      "name": "kilby_v1-v3: BN4's Kilby V1, V2 and V3 in BN4's battle against its move into BN6's",
+      "result": "python3 build.py xdiff kilby_v1 kilby_v2 kilby_v3 (rng replay, lag 1): each PASS over 1200 fight frames once its sound's row named the pool's slot (FAIL at t163 before it: BN4's 0xCD against BN6's 0x32, legit.json's bn4 sounds, a row for its battles alone); its effects 0x8F, 0x92 and 0x93 spawned from t129. Four mutations each FAIL kilby_v1: its sound at the pool's second slot (t163), its effect 0x2D left at BN4's number (t129), a CurAction left at BN4's (t42), its battle sprite's list entry aimed at VolGear's (t1).",
+      "meaning": "Kilby joins the visitors (BN4's eighth), the first late family with a sound in the pool and code in the late code room.",
       "link": "../multirom/families.md"
     },
     {

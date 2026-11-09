@@ -168,4 +168,17 @@
                                        * (0x080B63F0): dead while it holds none */
 #define BN4_HELD_CHIP_TEST 0x080B52E4u /* a held chip's test (+0x2A + 1): copied with the families that call it (bn4_twins.COPIED) */
 
+/* Kilby, the second late family (BN4's type 0x1E, enemy ids 0x43-0x48; docs/rom/bn4.md, Kilby moved): found by its type, each
+ * checked by the generator against the ROM */
+#define BN4_KILBY_TYPE    0x080BC3FCu /* its type routine (BN4_T1_TYPES[0x1E]): jump table 0x080BC414 (init 0x080BC420, update
+                                       * 0x080BC478), the after-state; its region to 0x080BCA20 */
+#define BN4_KILBY_STATES  0x080BC490u /* its state table: BN4's generic 0-5, its own 6-9 (0x080BC4B9, 0x080BC6AD, 0x080BC6C1,
+                                       * 0x080BC7E1) */
+#define BN4_KILBY_EFFECT  0x080BC8BAu /* its effect's id made by arithmetic: lsls r4,r0,#16 (its +4) then adds r4,#0x2D, the
+                                       * effect's own byte past its parameter (again at 0x080BC8F2): the generator reads the adds */
+#define BN4_KILBY_SOUND   0x080BC90Cu /* its sound 0xCD (movs r0,#0xcd; bl BN4_PLAY_SOUND at 0x080BC90E), BN6 has no song of: the
+                                       * per-battle pool's first slot, 0x32 (xvirus_recipe.h xv_bn4_pool) */
+#define BN4_KILBY_REGION_WORD 0x080BC946u /* its ldr r4 of a collision region's spawn word, 0x04050401, before bl 0x080CD7E2
+                                       * (the collision region's spawn, whose twin BN6's 0x080C6BDA takes r4 the same) */
+
 #endif
