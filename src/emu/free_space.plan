@@ -24,16 +24,32 @@ FREE_NO_MYSTERY        +0x000180  +0x000200  -    mapslot.c                 rom/
 FREE_RECORDS           +0x000200  +0x000300  end  encounter.c               engine/emulation/memory.md  two battle records in turn, 0x80 apart
 FREE_RUSH              +0x000400  +0x000640  end  rush.c                    engine/emulation/memory.md  Rush's gaps
 FREE_BLOCKERS          +0x000700  +0x0012E0  end  blockers.c                engine/emulation/memory.md  map-object handler 3's records
+FREE_CHIP_PAS          +0x001300  +0x001700  end  xchips_code.c             rom/chips-code.md           BN6's Program Advances' list grown with BN5's: their recipes, then the list
+FREE_CHIP_AI           +0x001700  +0x001740  end  darkinvs.c                engine/emulation/memory.md  the player's chip AI's stub
+FREE_SWAP_RETURN       +0x001740  +0x001760  end  battle_swap.c             rom/navis.md                where the swap's spawn returns mid-battle: a hook
 
-zone layers  rom  +0x002F00  +0x150000  -  layers and the town: their maps, rewritten as a layer or the town is entered
+# (the layers' regions sized by their largest, November 2026: the tile
+# maps by BN6's buffer, BN6_TILEMAP_MAX as literal blocks, the layers'
+# coordinates by the largest layer over runs of seeds 1-300 with a quarter
+# to spare, build.py sizes; the zone's end the next layer's or town's
+# kind's, and the room past it code-low's)
+zone layers  rom  +0x002F00  +0x090000  -  layers and the town: their maps, rewritten as a layer or the town is entered; home's other places
 FREE_WARP_LIST         +0x002F00  +0x003000  -    mapslot.c                 engine/emulation/layer.md   the layer map's warp list
 FREE_LAYER             +0x003000  +0x010000  -    mapslot.c                 engine/emulation/layer.md   layer data in two halves
-FREE_TILE_MAP          +0x010000  +0x060000  end  netmap.c                  engine/emulation/layer.md   the generated tile map
-FREE_COORDS            +0x060000  +0x100000  end  coords.c                  engine/emulation/layer.md   the generated coordinate data
-FREE_TOWN_TILE_MAP     +0x100000  +0x130000  end  town.c                    world/overworld.md          the town's tile map
-FREE_TOWN_COORDS       +0x130000  +0x140000  end  coords.c                  world/overworld.md          the town's coordinate data
-FREE_TOWN              +0x140000  +0x148000  -    mapslot.c                 world/overworld.md          the town's scripts, text and tables
-FREE_LAN_HP            +0x148000  +0x150000  -    mapslot.c,lanhp.c,lan_house.c  world/home/overview.md  Lan's HP's, then Lan's house's in its second half
+FREE_TILE_MAP          +0x010000  +0x028000  end  netmap.c                  engine/emulation/layer.md   the generated tile map
+FREE_COORDS            +0x028000  +0x030000  end  coords.c                  engine/emulation/layer.md   the generated coordinate data
+FREE_TOWN_TILE_MAP     +0x030000  +0x048000  end  town.c                    world/overworld.md          the town's tile map
+FREE_TOWN_COORDS       +0x048000  +0x058000  end  coords.c                  world/overworld.md          the town's coordinate data
+FREE_TOWN              +0x058000  +0x060000  -    mapslot.c                 world/overworld.md          the town's scripts, text and tables
+FREE_LAN_HP            +0x060000  +0x068000  -    mapslot.c,lanhp.c,lan_house.c  world/home/overview.md  Lan's HP's, then Lan's house's in its second half
+FREE_INDOORS           +0x068000  +0x078000  -    mapslot.c,indoors.c,aster_land.c,academy.c  world/home/asterland-and-academy.md  home's other places
+
+# (the room the layers' regions gave up: one span for what the code zone
+# has no room for, the next features' to take from its front with --fit.
+# A BL from here reaches 4 MB: the code zone's first regions, not its
+# Navis' or chips'; a call further goes through a veneer,
+# src/emu/thumb_reloc.h)
+zone code-low  rom  +0x090000  +0x150000  -  other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs
 
 zone words  rom  +0x150000  +0x170000  -  the director's and the PET's words: text archives, labels, lists
 FREE_TALK              +0x150000  +0x152000  -    talk.c                    engine/emulation/layer.md   the director's conversations
@@ -48,14 +64,13 @@ FREE_TRADER_LIST       +0x168000  +0x169000  end  trader.c                  mult
 FREE_PET_OPTIONS       +0x169000  +0x16A000  end  pet_options.c             game/pet.md                 the PET menu's labels with Comm's made Options
 FREE_BBS               +0x16A000  +0x16B000  end  request_bbs.c             world/home/jobs.md          the visit's requests on BN6's Request BBS: their titles and posts, LZ77
 
-zone world  rom  +0x170000  +0x330000  -  other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds; home's other places
+zone world  rom  +0x170000  +0x330000  -  other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds
 FREE_XAREA             +0x170000  +0x1A0000  -    netmap.c                  multirom/overview.md        another game's net area
 FREE_SONGS             +0x1A0000  +0x260000  -    xsong.c                   multirom/music.md           other games' songs
 FREE_XNAVIS            +0x260000  +0x2A0000  -    xnavi.c                   multirom/overview.md        other games' Navis and map objects
 FREE_BACKDROPS         +0x2A0000  +0x2E0000  -    xbackdrop.c               multirom/overview.md        other games' battle backgrounds
 FREE_FLAME             +0x2E0000  +0x2E1000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
 FREE_MAP_BACKDROPS     +0x2F0000  +0x320000  end  xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
-FREE_INDOORS           +0x320000  +0x330000  -    mapslot.c,indoors.c,aster_land.c,academy.c  world/home/asterland-and-academy.md  home's other places
 
 zone code  rom  +0x330000  +0x7A0000  -  other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs
 FREE_VIRUS_ROOM        +0x330000  +0x348000  -    xvirus_grow.c             multirom/families.md        BN6's tables grown for the families, the second-level dispatch
@@ -74,10 +89,7 @@ FREE_CHIP_CODE         +0x600000  +0x700000  -    xattack_grow.c,xchips_code.c,x
 FREE_ATTACK_FAMILIES   +0x600000  +0x600400  end,in=FREE_CHIP_CODE  xattack_grow.c  multirom/chips-code.md  BN6's attack families grown to 240 (the chips' and the Souls' one copy)
 FREE_CHIP_MOVED        +0x600400  +0x700000  in=FREE_CHIP_CODE  xchips_code.c  multirom/chips-code.md      the chips' moved code, its tables and what it draws
 FREE_SOULS_ART         +0x700000  +0x710000  end  soulcode.c,soulcolonel.c  multirom/souls.md  the Souls' art past their room: BN5's effects BN6 redrew, copied
-FREE_CHIP_PAS          +0x710000  +0x710400  end  xchips_code.c             rom/chips-code.md           BN6's Program Advances' list grown with BN5's: their recipes, then the list
-FREE_CHIP_AI           +0x710400  +0x710440  end  darkinvs.c                engine/emulation/memory.md  the player's chip AI's stub
-FREE_SWAP_RETURN       +0x710440  +0x710460  end  battle_swap.c             rom/navis.md                where the swap's spawn returns mid-battle: a hook
-FREE_TAIL              +0x710460  +0x711000  free  -                        engine/emulation/free-space.md  free to FREE_LATE_CODE
+FREE_TAIL              +0x710000  +0x711000  free  -                        engine/emulation/free-space.md  free to FREE_LATE_CODE
 FREE_LATE_CODE         +0x711000  +0x720000  end  xvirus.c                  multirom/families.md        the late families' code, block by block, past the families' own room
 FREE_BN4_NAVIS         +0x720000  +0x730000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes
 FREE_BN4_NAVI_CODE     +0x730000  +0x750000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis' code and their objects', block by block

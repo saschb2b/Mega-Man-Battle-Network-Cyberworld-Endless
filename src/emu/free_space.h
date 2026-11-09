@@ -26,20 +26,29 @@
 #define FREE_RUSH_END        (EMU_FREE + 0x000640u)
 #define FREE_BLOCKERS        (EMU_FREE + 0x000700u)  /* map-object handler 3's records (blockers.c) */
 #define FREE_BLOCKERS_END    (EMU_FREE + 0x0012E0u)
+#define FREE_CHIP_PAS        (EMU_FREE + 0x001300u)  /* BN6's Program Advances' list grown with BN5's: their recipes, then the list (xchips_code.c) */
+#define FREE_CHIP_PAS_END    (EMU_FREE + 0x001700u)
+#define FREE_CHIP_AI         (EMU_FREE + 0x001700u)  /* the player's chip AI's stub (darkinvs.c) */
+#define FREE_CHIP_AI_END     (EMU_FREE + 0x001740u)
+#define FREE_SWAP_RETURN     (EMU_FREE + 0x001740u)  /* where the swap's spawn returns mid-battle: a hook (battle_swap.c) */
+#define FREE_SWAP_RETURN_END (EMU_FREE + 0x001760u)
 
-/* ---- layers: +0x002F00-+0x150000, layers and the town: their maps, rewritten as a layer or the town is entered ---- */
+/* ---- layers: +0x002F00-+0x090000, layers and the town: their maps, rewritten as a layer or the town is entered; home's other places ---- */
 #define FREE_WARP_LIST       (EMU_FREE + 0x002F00u)  /* the layer map's warp list (mapslot.c) */
 #define FREE_LAYER           (EMU_FREE + 0x003000u)  /* layer data in two halves (mapslot.c) */
 #define FREE_TILE_MAP        (EMU_FREE + 0x010000u)  /* the generated tile map (netmap.c) */
-#define FREE_TILE_MAP_END    (EMU_FREE + 0x060000u)
-#define FREE_COORDS          (EMU_FREE + 0x060000u)  /* the generated coordinate data (coords.c) */
-#define FREE_COORDS_END      (EMU_FREE + 0x100000u)
-#define FREE_TOWN_TILE_MAP   (EMU_FREE + 0x100000u)  /* the town's tile map (town.c) */
-#define FREE_TOWN_TILE_MAP_END (EMU_FREE + 0x130000u)
-#define FREE_TOWN_COORDS     (EMU_FREE + 0x130000u)  /* the town's coordinate data (coords.c) */
-#define FREE_TOWN_COORDS_END (EMU_FREE + 0x140000u)
-#define FREE_TOWN            (EMU_FREE + 0x140000u)  /* the town's scripts, text and tables (mapslot.c) */
-#define FREE_LAN_HP          (EMU_FREE + 0x148000u)  /* Lan's HP's, then Lan's house's in its second half (mapslot.c, lanhp.c, lan_house.c) */
+#define FREE_TILE_MAP_END    (EMU_FREE + 0x028000u)
+#define FREE_COORDS          (EMU_FREE + 0x028000u)  /* the generated coordinate data (coords.c) */
+#define FREE_COORDS_END      (EMU_FREE + 0x030000u)
+#define FREE_TOWN_TILE_MAP   (EMU_FREE + 0x030000u)  /* the town's tile map (town.c) */
+#define FREE_TOWN_TILE_MAP_END (EMU_FREE + 0x048000u)
+#define FREE_TOWN_COORDS     (EMU_FREE + 0x048000u)  /* the town's coordinate data (coords.c) */
+#define FREE_TOWN_COORDS_END (EMU_FREE + 0x058000u)
+#define FREE_TOWN            (EMU_FREE + 0x058000u)  /* the town's scripts, text and tables (mapslot.c) */
+#define FREE_LAN_HP          (EMU_FREE + 0x060000u)  /* Lan's HP's, then Lan's house's in its second half (mapslot.c, lanhp.c, lan_house.c) */
+#define FREE_INDOORS         (EMU_FREE + 0x068000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
+
+/* ---- code-low: +0x090000-+0x150000, other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs ---- */
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -58,7 +67,7 @@
 #define FREE_BBS             (EMU_FREE + 0x16A000u)  /* the visit's requests on BN6's Request BBS: their titles and posts, LZ77 (request_bbs.c) */
 #define FREE_BBS_END         (EMU_FREE + 0x16B000u)
 
-/* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds; home's other places ---- */
+/* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds ---- */
 #define FREE_XAREA           (EMU_FREE + 0x170000u)  /* another game's net area (netmap.c) */
 #define FREE_SONGS           (EMU_FREE + 0x1A0000u)  /* other games' songs (xsong.c) */
 #define FREE_XNAVIS          (EMU_FREE + 0x260000u)  /* other games' Navis and map objects (xnavi.c) */
@@ -67,7 +76,6 @@
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
 #define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
-#define FREE_INDOORS         (EMU_FREE + 0x320000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
 
 /* ---- code: +0x330000-+0x7A0000, other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs ---- */
 #define FREE_VIRUS_ROOM      (EMU_FREE + 0x330000u)  /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c) */
@@ -91,13 +99,7 @@
 #define FREE_CHIP_MOVED      (EMU_FREE + 0x600400u)  /* the chips' moved code, its tables and what it draws (xchips_code.c) */
 #define FREE_SOULS_ART       (EMU_FREE + 0x700000u)  /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c, soulcolonel.c) */
 #define FREE_SOULS_ART_END   (EMU_FREE + 0x710000u)
-#define FREE_CHIP_PAS        (EMU_FREE + 0x710000u)  /* BN6's Program Advances' list grown with BN5's: their recipes, then the list (xchips_code.c) */
-#define FREE_CHIP_PAS_END    (EMU_FREE + 0x710400u)
-#define FREE_CHIP_AI         (EMU_FREE + 0x710400u)  /* the player's chip AI's stub (darkinvs.c) */
-#define FREE_CHIP_AI_END     (EMU_FREE + 0x710440u)
-#define FREE_SWAP_RETURN     (EMU_FREE + 0x710440u)  /* where the swap's spawn returns mid-battle: a hook (battle_swap.c) */
-#define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL            (EMU_FREE + 0x710460u)  /* free to FREE_LATE_CODE (free) */
+#define FREE_TAIL            (EMU_FREE + 0x710000u)  /* free to FREE_LATE_CODE (free) */
 #define FREE_LATE_CODE       (EMU_FREE + 0x711000u)  /* the late families' code, block by block, past the families' own room (xvirus.c) */
 #define FREE_LATE_CODE_END   (EMU_FREE + 0x720000u)
 #define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
@@ -153,14 +155,18 @@
 	X("FREE_RECORDS", (EMU_FREE + 0x000200u), (EMU_FREE + 0x000300u), "", "engine") \
 	X("FREE_RUSH", (EMU_FREE + 0x000400u), (EMU_FREE + 0x000640u), "", "engine") \
 	X("FREE_BLOCKERS", (EMU_FREE + 0x000700u), (EMU_FREE + 0x0012E0u), "", "engine") \
+	X("FREE_CHIP_PAS", (EMU_FREE + 0x001300u), (EMU_FREE + 0x001700u), "", "engine") \
+	X("FREE_CHIP_AI", (EMU_FREE + 0x001700u), (EMU_FREE + 0x001740u), "", "engine") \
+	X("FREE_SWAP_RETURN", (EMU_FREE + 0x001740u), (EMU_FREE + 0x001760u), "", "engine") \
 	X("FREE_WARP_LIST", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x003000u), "", "layers") \
 	X("FREE_LAYER", (EMU_FREE + 0x003000u), (EMU_FREE + 0x010000u), "", "layers") \
-	X("FREE_TILE_MAP", (EMU_FREE + 0x010000u), (EMU_FREE + 0x060000u), "", "layers") \
-	X("FREE_COORDS", (EMU_FREE + 0x060000u), (EMU_FREE + 0x100000u), "", "layers") \
-	X("FREE_TOWN_TILE_MAP", (EMU_FREE + 0x100000u), (EMU_FREE + 0x130000u), "", "layers") \
-	X("FREE_TOWN_COORDS", (EMU_FREE + 0x130000u), (EMU_FREE + 0x140000u), "", "layers") \
-	X("FREE_TOWN", (EMU_FREE + 0x140000u), (EMU_FREE + 0x148000u), "", "layers") \
-	X("FREE_LAN_HP", (EMU_FREE + 0x148000u), (EMU_FREE + 0x150000u), "", "layers") \
+	X("FREE_TILE_MAP", (EMU_FREE + 0x010000u), (EMU_FREE + 0x028000u), "", "layers") \
+	X("FREE_COORDS", (EMU_FREE + 0x028000u), (EMU_FREE + 0x030000u), "", "layers") \
+	X("FREE_TOWN_TILE_MAP", (EMU_FREE + 0x030000u), (EMU_FREE + 0x048000u), "", "layers") \
+	X("FREE_TOWN_COORDS", (EMU_FREE + 0x048000u), (EMU_FREE + 0x058000u), "", "layers") \
+	X("FREE_TOWN", (EMU_FREE + 0x058000u), (EMU_FREE + 0x060000u), "", "layers") \
+	X("FREE_LAN_HP", (EMU_FREE + 0x060000u), (EMU_FREE + 0x068000u), "", "layers") \
+	X("FREE_INDOORS", (EMU_FREE + 0x068000u), (EMU_FREE + 0x078000u), "", "layers") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
@@ -178,7 +184,6 @@
 	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
 	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
 	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
-	X("FREE_INDOORS", (EMU_FREE + 0x320000u), (EMU_FREE + 0x330000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \
 	X("FREE_FAMILIES", (EMU_FREE + 0x348000u), (EMU_FREE + 0x400000u), "", "code") \
 	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
@@ -195,10 +200,7 @@
 	X("FREE_ATTACK_FAMILIES", (EMU_FREE + 0x600000u), (EMU_FREE + 0x600400u), "FREE_CHIP_CODE", "code") \
 	X("FREE_CHIP_MOVED", (EMU_FREE + 0x600400u), (EMU_FREE + 0x700000u), "FREE_CHIP_CODE", "code") \
 	X("FREE_SOULS_ART", (EMU_FREE + 0x700000u), (EMU_FREE + 0x710000u), "", "code") \
-	X("FREE_CHIP_PAS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710400u), "", "code") \
-	X("FREE_CHIP_AI", (EMU_FREE + 0x710400u), (EMU_FREE + 0x710440u), "", "code") \
-	X("FREE_SWAP_RETURN", (EMU_FREE + 0x710440u), (EMU_FREE + 0x710460u), "", "code") \
-	X("FREE_TAIL", (EMU_FREE + 0x710460u), (EMU_FREE + 0x711000u), "", "code") \
+	X("FREE_TAIL", (EMU_FREE + 0x710000u), (EMU_FREE + 0x711000u), "", "code") \
 	X("FREE_LATE_CODE", (EMU_FREE + 0x711000u), (EMU_FREE + 0x720000u), "", "code") \
 	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
 	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \
@@ -209,7 +211,8 @@
 	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art")
 #define FREE_SPACE_ROM_ZONES(X) \
 	X("engine", (EMU_FREE + 0x000000u), (EMU_FREE + 0x002F00u)) \
-	X("layers", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x150000u)) \
+	X("layers", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x090000u)) \
+	X("code-low", (EMU_FREE + 0x090000u), (EMU_FREE + 0x150000u)) \
 	X("words", (EMU_FREE + 0x150000u), (EMU_FREE + 0x170000u)) \
 	X("world", (EMU_FREE + 0x170000u), (EMU_FREE + 0x330000u)) \
 	X("code", (EMU_FREE + 0x330000u), (EMU_FREE + 0x7A0000u)) \

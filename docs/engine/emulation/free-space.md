@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Free space: zones, headroom and placing a region"
-description: "The free space's one plan (`src/emu/free_space.plan`): its zones by kind and their headroom, `tools/free_space.py`'s header, tables and report, how a new region is placed, how an overrun is told, and a proposed move for more headroom."
+description: "The free space's one plan (`src/emu/free_space.plan`): its zones by kind and their headroom, `tools/free_space.py`'s header, tables and report, how a new region is placed, how an overrun is told, and the move that sized the layers' regions by their largest and freed `code-low`."
 tags: [engine, emulation, free-space]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:30:00Z }
 sources:
   - id: plan
     resource: "src/emu/free_space.plan"
@@ -50,11 +50,12 @@ moved from another game beside the other moved code. The plan's numbers:
 <!-- tools/free_space.py writes this table from src/emu/free_space.plan -->
 | Zone | Span | Holds | Regions | Headroom | Largest gap |
 | --- | --- | --- | --- | --- | --- |
-| `engine` | `+0x000000`-`+0x002F00` (11.8 KB) | the engine's own records, hooks and stubs, and BN6's small tables grown | 6 | 7.5 KB (63%) | 7.0 KB |
-| `layers` | `+0x002F00`-`+0x150000` (1332.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered | 8 | 0 B (0%) | 0 B |
+| `engine` | `+0x000000`-`+0x002F00` (11.8 KB) | the engine's own records, hooks and stubs, and BN6's small tables grown | 9 | 6.4 KB (54%) | 5.9 KB |
+| `layers` | `+0x002F00`-`+0x090000` (564.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered; home's other places | 9 | 96.0 KB (17%) | 96.0 KB |
+| `code-low` | `+0x090000`-`+0x150000` (768.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 0 | 768.0 KB (100%) | 768.0 KB |
 | `words` | `+0x150000`-`+0x170000` (128.0 KB) | the director's and the PET's words: text archives, labels, lists | 11 | 21.8 KB (16%) | 20.0 KB |
-| `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds; home's other places | 7 | 60.0 KB (3%) | 60.0 KB |
-| `code` | `+0x330000`-`+0x7A0000` (4544.0 KB) | other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs | 27 | 2.9 KB (0%) | 2.9 KB |
+| `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds | 6 | 124.0 KB (6%) | 64.0 KB |
+| `code` | `+0x330000`-`+0x7A0000` (4544.0 KB) | other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs | 24 | 4.0 KB (0%) | 4.0 KB |
 | `art` | `+0x7A0000`-`+0x800000` (384.0 KB) | art copied whole, a place each | 1 | 24.0 KB (6%) | 24.0 KB |
 | `persistent` | `0x02010CE0`-`0x02011800` (2.8 KB) | persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) | 5 | 0 B (0%) | 0 B |
 | `mode` | `0x02029A00`-`0x0202DA00` (16.0 KB) | a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map | 1 | 0 B (0%) | 0 B |
@@ -62,10 +63,11 @@ moved from another game beside the other moved code. The plan's numbers:
 <!-- end of the table tools/free_space.py writes -->
 
 Headroom is the zone's spans no region holds and its regions marked `free`
-(`FREE_TAIL`, `RAM_BATTLE_SPARE`). The ROM copy has about 360 KB free of
-its 8 MB, most of it in `code`'s two gaps (`+0x4D0000`, 192 KB, and
-`FREE_TAIL`, 63 KB): the zones were laid out as features came, and the
-large regions were sized generously. What a region holds is measured, not
+(`FREE_TAIL`, `RAM_BATTLE_SPARE`). The ROM copy has about 1 MB free of
+its 8 MB since the layers' regions were sized by their largest (Moving
+regions, below): most of it `code-low`'s one span, 768 KB, the room for
+the moved code, art and per-battle rooms the `code` zone has none left
+for, and the layers' own 96 KB. What a region holds is measured, not
 its size: `CYBERWORLD_FREE_SPACE=.build/usage.txt` on any run (`build.py
 shot` passes it into its container) writes, as the program ends, each
 region's last byte that is not the copy's `0xFF` fill, and `python3
@@ -92,6 +94,14 @@ not its worst case.
    always and not under `CYBERWORLD_EMU_DEBUG` alone, when what it copies
    does not fit; an installer at the core's start writes inside
    `claims_begin`/`claims_end` (`src/emu/claims.h`).
+
+`code-low` is the `code` zone's kind in a second span: a moved Navi's,
+chip's or family's region that `code` has no room for takes its front
+(`--fit SIZE --zone code-low`, or `--fit SIZE` alone). A BL from there
+reaches 4 MB, `code`'s first regions (the families' room and homes, the
+chips' records, the Souls) and not its Navis' or chips' code; a call
+further goes through a veneer (`src/emu/thumb_reloc.h`), as calls into
+BN6's own code already do from every zone.
 
 Where no zone of its kind has room, the region does not go into another
 kind's gap: the plan moves first (Moving regions, below), with the
@@ -122,30 +132,76 @@ What the review of the copiers found (November 2026), and what stands:
   (`showcase.c`) is written at `FREE_RECORDS_END`, outside its region. The
   watch above now tells each as it happens.
 
-## Moving regions (a proposal, not applied)
+## Moving regions (applied, November 2026)
 
-A move changes ROM addresses that players' saved emulator states point
-into (`run.state` holds pointers into the layers' and the installers'
-regions), so it rides with a release that bumps `LAYER_MAKE`
-(`src/net/layer_make.h`), the owner's to schedule. Moving a region is a
-change of its row's numbers alone, and lint holds the rest.
+The proposal of 9 November 2026, applied the same day for the release
+after 0.20.0, whose `LAYER_MAKE` (113) was bumped already: the regions sized far past what they hold shrunk to
+their worst case, and what they freed gathered into one span. Moving a
+region is a change of its row's numbers alone, and lint holds the rest.
 
-The proposal, measured with `--usage` on the release's scripted runs
-before it is applied: shrink the regions sized far past what they hold to
-their worst case with a quarter to spare, and gather what they free into
-one gap per zone at the zone's end, so that each kind's headroom is one
-span a new region takes from the front:
+The layers' sizes were measured first, with `build.py sizes` (the atlas's
+`sizes`, `src/dev/layer_sizes.c`), on 9 November 2026: BN6's 19 areas,
+BN5's six (`x0`-`x5`) and BN4's five (`x15`-`x19`), on runs of seeds
+1-300, at every depth of the net's cycle and one past it (1-20: every size
+of layout and every guardian's layer) and in each of the four side layers'
+kinds at the largest size: 7,200 layers an area, 216,000 in all, every one
+built (the nine areas between, `x6`-`x14`, which `build.py sizes` builds
+too, were not measured that day). The coordinate data counts the most
+warp pads a layer's coordinates take (784 trigger cells, 7,056 bytes as
+literal blocks), which the layers built there have none of; a dark
+layer's board and the Net Square's plaza, built otherwise, are not among
+them, and are held by their writers' bounds alone:
 
-| Zone | Now | Proposed | Why |
+| Region | Before | Measured largest | Now |
 | --- | --- | --- | --- |
-| `layers` | `FREE_TILE_MAP` 320 KB (45 KB used), `FREE_COORDS` 640 KB (7.5 KB used) | the tile map to `0x18000` (`BN6_TILEMAP_MAX`, 80 KB, as literal blocks), the coordinates to their largest layer's over seeds 1-300 with a quarter to spare | the largest gain, some 750 KB: the zone's one gap for the next layer's or town's kind |
-| `world` | `FREE_INDOORS` (home's places) at its end | into `layers`, after `FREE_LAN_HP` | a home's maps are a layer's kind |
-| `code` | `FREE_CHIP_PAS`, `FREE_CHIP_AI`, `FREE_SWAP_RETURN` (small stubs) between the Souls' art and `FREE_TAIL` | into `engine`'s 7 KB gap | hooks and stubs are the engine's kind, and `FREE_TAIL` joins the 192 KB gap's side |
-| `code` | BN4's Navis' per-battle rooms (`FREE_BN4_NAVI_ART`, `FREE_BN4_NAVI_SPRITE`) between their code and the bracket | kept, with BN4's chips' code and data placed from `+0x4D0000` | BN4's chips take the zone's largest gap, before BN4's further Navis need theirs |
-| `art` | `FREE_LIB_TEAM` 360 KB, 24 KB free | kept | a place each, sized by the teammates |
+| `FREE_TILE_MAP` | 320 KB | 87,712 bytes (BN6's area 4, seed 260, depth 14) | 96 KB: the largest BN6's buffer takes (`BN6_TILEMAP_MAX`) as literal blocks, 92,164 bytes, held by a static assertion |
+| `FREE_COORDS` | 640 KB | 24,240 bytes with the pads (BN6's area 5, seed 15, depth 20, its Glitch layer); BN5's largest 21,856, BN4's 20,200 | 32 KB (`0x8000`): the largest with a quarter to spare (30,300), rounded up to 4 KB |
+| `FREE_TOWN_TILE_MAP` | 192 KB | (`town_plan` refuses a town past BN6's buffer) | 96 KB, the layers' bound |
 
-Until it is applied, new regions take the gaps `--fit` names in their
-kind's zone, and the zones' table above says what is left.
+What moved, each into its kind's zone:
+
+| Region | From | To | Why |
+| --- | --- | --- | --- |
+| `FREE_COORDS` and the town's regions (`FREE_TOWN_TILE_MAP`, `FREE_TOWN_COORDS`, `FREE_TOWN`, `FREE_LAN_HP`) | `+0x60000`-`+0x150000` | `+0x28000`-`+0x68000` | packed after the shrunk tile map |
+| `FREE_INDOORS` (home's other places) | the `world` zone's end, `+0x320000` | `layers`, after `FREE_LAN_HP` | a home's maps are a layer's kind |
+| `FREE_CHIP_PAS`, `FREE_CHIP_AI`, `FREE_SWAP_RETURN` (small stubs) | between the Souls' art and `FREE_TAIL`, `+0x710000` | `engine`'s gap, `+0x1300` | hooks and stubs are the engine's kind; `FREE_TAIL` is `+0x710000`-`+0x711000` |
+
+The room by zone:
+
+| Zone | Headroom before | Headroom now |
+| --- | --- | --- |
+| `engine` | 7.5 KB | 6.4 KB (the stubs in) |
+| `layers` | 0 B | 96 KB at its end, `+0x78000`-`+0x90000`: the next layer's or town's kind |
+| `code-low` (new) | | 768 KB, `+0x90000`-`+0x150000`, one span: the `code` zone's kind |
+| `world` | 60 KB | 124 KB (`FREE_INDOORS` out: 64 KB at its end) |
+| `code` | 2.9 KB | 4 KB (`FREE_TAIL`) |
+
+`code-low` is for what the `code` zone has no room for and the next
+features' to take from its front: Team ProtoMan's five remaining Navis
+(about `0x22000` bytes of battle sprites and their code), BN4's chips'
+moved code ([BN4's chips](../../multirom/bn4-chips.md)) and BN4's further
+late families (about `0x5000` bytes of art and `0x1000` of code each). None
+is placed here: each takes its row with `--fit`.
+
+A move changes ROM addresses that a saved emulator state's RAM can point
+into. None of those pointers outlives a CONTINUE: every one re-enters its
+map through BN6's own enter-map routine (`emu_warp`, a game call that runs
+it whole before any frame of the state's: `layer_reenter` for a layer,
+`home_resume` for Lan's HP, the town and home's places), which reads the
+map's tables, scripts, tile map and coordinate data from the ROM copy at
+their new places, the copy being built again before the state is loaded;
+a run saved by 0.20.0 has another `LAYER_MAKE` and continues its layer
+afresh besides. The stubs moved are pointed at only mid-battle (a hook's
+return, the Program Advances' list on the Custom screen), and a checkpoint
+is never taken in a battle (`boss_idle`). The rest of the plan, the `code`
+zone's fixed places among it, did not move.
+
+Every writer of a region shrunk checks its bound and tells on stderr where
+what it writes does not fit, then writes nothing (`coords.c`, `netmap.c`,
+`town.c`): a layer past its region is not built, as one past BN6's buffer
+was not before. `build.py sizes` fails where the largest layer over the
+300 runs' seeds outgrows its region; it is run again when generation
+grows its layers (a `LAYER_MAKE` bump that makes them larger).
 
 What one run used (a layer at depth 2 with BN5's and BN4's ROMs, 9
 November 2026, `--usage`): the regions written once at the core's start
