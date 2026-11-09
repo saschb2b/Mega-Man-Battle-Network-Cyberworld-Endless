@@ -49,7 +49,8 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
-            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55), (0x08, 'VolGear', 7), (0x1E, 'Kilby', 67))
+            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55), (0x08, 'VolGear', 7), (0x1E, 'Kilby', 67),
+            (0x26, 'MagTect', 49))
 # the families moved for a Navi's summon alone: Mettaur, which BN6 has by name (the owner's call of 8 November 2026: Roll's
 # summon brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits), and Melody, Roll V3's 0x39, whose sounds
 # live in her pool (SUMMONER_POOL): never a net's kin nor a visitor (XVirusFamily.summoned)

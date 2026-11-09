@@ -1822,5 +1822,143 @@ static const XVirusFamily bn4_kilby = {
 	.songs = kilby_songs, .nsongs = (int)(sizeof kilby_songs / sizeof *kilby_songs),
 	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
 };
-const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody, &bn4_volgear, &bn4_kilby };
+/* ---- BN4's MagTect (its type 0x26 there, its enemy ids 49-54), as AI 74 with ids 0x2fc-0x301 ---- */
+
+static const XvBlock magtect_blocks[] = {
+	{ 0x080BEB68, 0x080BF0E0, XV_LATE_CODE + 0xAF0, 0x403A68CCu },
+	{ 0x0800AD2A, 0x0800B134, XV_LATE_CODE + 0x1072, 0x24DE8062u },
+	{ 0x08010736, 0x0801079C, XV_LATE_CODE + 0x1482, 0x7631C49Cu },
+};
+static const XvData magtect_data[] = {
+	{ 0x080BEB68, 0x080BEB7A, XV_ZERO },
+	{ 0x080BEB7A, 0x080BEB7C, XV_RAW },
+	{ 0x080BEB7C, 0x080BEBF6, XV_ZERO },
+	{ 0x080BEBFC, 0x080BEC28, XV_ZERO },
+	{ 0x080BEC3A, 0x080BEC3C, XV_RAW },
+	{ 0x080BEC3C, 0x080BEC40, XV_POOL },
+	{ 0x080BEC40, 0x080BEC44, XV_TABLE },
+	{ 0x080BEC52, 0x080BEC54, XV_RAW },
+	{ 0x080BEC54, 0x080BEC58, XV_POOL },
+	{ 0x080BEC58, 0x080BEC5C, XV_TABLE },
+	{ 0x080BECFC, 0x080BED04, XV_POOL },
+	{ 0x080BED5C, 0x080BED64, XV_POOL },
+	{ 0x080BED64, 0x080BED68, XV_RAW },
+	{ 0x080BED92, 0x080BED94, XV_RAW },
+	{ 0x080BED94, 0x080BED98, XV_POOL },
+	{ 0x080BED98, 0x080BEDA0, XV_TABLE },
+	{ 0x080BEDE2, 0x080BEDE4, XV_RAW },
+	{ 0x080BEDE4, 0x080BEDE8, XV_POOL },
+	{ 0x080BEE58, 0x080BEE64, XV_POOL },
+	{ 0x080BEE64, 0x080BEE6A, XV_RAW },
+	{ 0x080BEE96, 0x080BEE98, XV_RAW },
+	{ 0x080BEE98, 0x080BEE9C, XV_POOL },
+	{ 0x080BEE9C, 0x080BEEB4, XV_TABLE },
+	{ 0x080BEEB4, 0x080BEEB8, XV_POOL },
+	{ 0x080BEFDC, 0x080BEFE4, XV_POOL },
+	{ 0x080BEFE4, 0x080BEFEA, XV_RAW },
+	{ 0x080BF060, 0x080BF064, XV_POOL },
+	{ 0x080BF0AA, 0x080BF0AC, XV_RAW },
+	{ 0x080BF0AC, 0x080BF0B0, XV_POOL },
+	{ 0x080BF0B0, 0x080BF0D0, XV_RAW },
+	{ 0x080BF0DE, 0x080BF0E0, XV_RAW },
+	{ 0x0800AD54, 0x0800AD7E, XV_ZERO },
+	{ 0x0800ADA8, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+	{ 0x0800B12C, 0x0800B130, XV_ZERO },
+	{ 0x0800B130, 0x0800B134, XV_POOL },
+	{ 0x0801077A, 0x08010798, XV_ZERO },
+	{ 0x08010798, 0x0801079C, XV_POOL },
+};
+static const XvPair magtect_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x0800A192, 0x0800D06A },   /* project:research, SAME */
+	{ 0x0800A1AE, 0x0800D086 },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800AFBC, 0x0800E9DC },   /* project:billy, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x08012FB0, 0x0801A180 },   /* project:after-state, LAYOUT */
+	{ 0x080143A8, 0x0801BB1C },   /* project:billy, DIFF (audited) */
+	{ 0x080143CA, 0x0801BB46 },   /* project:research, LAYOUT */
+	{ 0x080B6568, 0x0800EBD4 },   /* project:billy, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvImm magtect_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800AD94, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD96, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x080BEC7A, THUMB_CMP, 1, 0, 0x9, 0xB },   /* another of its family's (its NameID range's) CurAction 9 compared */
+	{ 0x080BECA8, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080BECBC, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 written */
+	{ 0x080BED1C, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 written */
+	{ 0x080BED72, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080BEDD8, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
+	{ 0x080BEE4E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+	{ 0x080BEEE6, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
+	{ 0x080BEF16, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
+	{ 0x080BEF34, THUMB_MOVS, 0, 0, 0xF8, 0x33 },   /* its sound 0xf8: BN4's copied into BN6's empty slot 0x33, on its player 8 */
+	{ 0x080BEFAA, THUMB_MOVS, 0, 0, 0xB8, 0x32 },   /* its sound 0xb8: BN4's copied into BN6's empty slot 0x32, on its player 17 */
+	{ 0x080BEFCC, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
+	{ 0x080BF000, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
+	{ 0x080BF040, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
+};
+static const XvRange magtect_ranges[] = {
+	{ 0x080BEC6C, 0x2FC, 0x301 },   /* BN4's ids 0x31-0x36, its own */
+};
+static const XvNumber magtect_numbers[] = {
+	{ 0x080BEFDC, 0x04050301, 0x04050301 },   /* a collision region's spawn word (MagTect's: its ldr r4 at 0x080BEF94, then bl 0x080CD7E2, object_spawnCollisionRegion, whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601; BN6's ROM holds the word too (0x080E4A44, 0x08101400) */
+	{ 0x080BF060, 0x0405FF08, 0x0405FF08 },   /* a collision region's spawn word (MagTect's: its ldr r4 at 0x080BF052, then bl 0x080CD7E2, object_spawnCollisionRegion, BN6's twin 0x080C6BDA), the form of 0x0405FF01 */
+};
+static const XvRef magtect_states[] = {
+	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x080BEC29), OWN(0x080BED69), OWN(0x080BED85), OWN(0x080BEE6B),
+};
+static const XvSprite magtect_sprites[] = {
+	{ 1, 0x09, 1, 0xCA, XV_LATE_ART + 0x9340, 0x3000 },   /* (LZ77 in BN4) */
+};
+static const XvId magtect_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 } };
+static const XvSong magtect_songs[] = {
+	{ 0xB8, 0x32, XV_LATE_ART + 0xC340, 0x840 },   /* its sound 0xb8, BN4's song copied (the pool's, by battle) */
+	{ 0xF8, 0x33, XV_LATE_ART + 0xCB80, 0x40 },   /* its sound 0xf8, BN4's song copied (the pool's, by battle) */
+};
+
+static const XVirusFamily bn4_magtect = {
+	.name = "MagTect (BN4's)",
+	.game = XROM_BN4_RED_SUN_US,
+	.src_ai = 0x26,   /* (its first-kind type: BN4 has no AI index) */
+	.ai = 74,
+	.first_id = XV_FIRST_ID + 0xFC,
+	.home = XV_HOMES + 0x15000,
+	.blocks = magtect_blocks, .nblocks = (int)(sizeof magtect_blocks / sizeof *magtect_blocks),
+	.data = magtect_data, .ndata = (int)(sizeof magtect_data / sizeof *magtect_data),
+	.calls = magtect_calls, .ncalls = (int)(sizeof magtect_calls / sizeof *magtect_calls),
+	.imms = magtect_imms, .nimms = (int)(sizeof magtect_imms / sizeof *magtect_imms),
+	.ranges = magtect_ranges, .nranges = (int)(sizeof magtect_ranges / sizeof *magtect_ranges),
+	.numbers = magtect_numbers, .nnumbers = (int)(sizeof magtect_numbers / sizeof *magtect_numbers),
+	.states = magtect_states, .nstates = (int)(sizeof magtect_states / sizeof *magtect_states),
+	.hooks = { ENTERED(0x080BEBF7), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
+	/* hook 3: MagTect's update past its pre-step, state and present (BN6's dispatcher runs each): its shake (0x080BF064): unless the battle is paused (0x08007948) or the can-move check says not (0x0800AD7E, copied), every fourth frame of its +0x20 its sprite's offsets +0x36 and +0x3E moved to a random pair of its table's signed bytes, kept at +0x64 and +0x68 */
+	.struct1 = 0x08011AD4, .struct2 = 0x08011AD4,   /* (its first version's enemy record: BN4 has no struct1 or struct2) */
+	.names = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
+	.ice = 0,
+	.traits = { .laid = true, .mode = 0x00, .element = 0, .weakness = 0, .shadow = true, .palette = 1, .flags = 0x06 },
+	.sprites = magtect_sprites, .nsprites = (int)(sizeof magtect_sprites / sizeof *magtect_sprites),
+	.effects = magtect_effects, .neffects = (int)(sizeof magtect_effects / sizeof *magtect_effects),
+	.songs = magtect_songs, .nsongs = (int)(sizeof magtect_songs / sizeof *magtect_songs),
+	.present = 0x08010736,   /* its after-state, copied: run after its state 0 and its hook 5 while BN6's battle is paused */
+};
+const XVirusFamily *const xvirus_bn4[] = { &bn4_billy, &bn4_spikey, &bn4_shrimpy, &bn4_walla, &bn4_elmperor, &bn4_cirkill, &bn4_mettaur, &bn4_melody, &bn4_volgear, &bn4_kilby, &bn4_magtect };
 const int xvirus_bn4_count = (int)(sizeof xvirus_bn4 / sizeof *xvirus_bn4);
