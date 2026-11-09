@@ -4131,14 +4131,14 @@ static void test_free_space(void) {
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
-		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
+		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END }, { "the late families' art", FREE_LATE_FAMILIES, FREE_BN4_NAVIS },
 		{ "BN4's Navis' homes", FREE_BN4_NAVIS, FREE_BN4_NAVI_CODE }, { "BN4's Navis' code", FREE_BN4_NAVI_CODE, FREE_BN4_NAVI_ART },
 		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BN4_NAVI_SPRITE }, { "BN4's Navis' sprite room", FREE_BN4_NAVI_SPRITE, FREE_BRACKET_FACES },
 		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
 		{ "BN4's bracket screen", FREE_BRACKET, FREE_BRACKET_END }, { "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
-	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
+	CHECK(FREE_TAIL <= FREE_LATE_FAMILIES && FREE_LATE_FAMILIES < FREE_BN4_NAVIS, "free space: the late families' art after the free tail, before BN4's Navis' room");
 	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");

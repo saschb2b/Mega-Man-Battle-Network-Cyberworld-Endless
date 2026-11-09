@@ -74,6 +74,9 @@ TWINS = (
     # Melody's (docs/multirom/bn4-navis.md, Roll's summons; each body read): its collision's region changed (its states'), BN6's
     # routine of the same steps at BN6's offsets
     (0x08012ED0, 0x0801A082, 'melody'),
+    # VolGear's (each body read): its held chips' attacks, each behind its held chip's test (0x080B52E4 at 0x080B6362 and
+    # 0x080B6384; its +0x2A against 0xFFFF at 0x080B63BE), dead while it holds none
+    (0x080E50AE, 0x0810A952, 'volgear'), (0x080B9704, 0x0810A952, 'volgear'), (0x080B3C1A, 0x0810A952, 'volgear'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -214,6 +217,15 @@ AUDITS = {
                                      "are its states', which no spec reaches with time stopped (assumed)"),
     (0x080CD7E2, 0x080C6BDA): ('ok', "a collision region spawned (a third-kind object: its panel, element, damage and words): "
                                      "BN6's, the element at BN6's +0xE where BN4's +0x17, its side copied with the flip"),
+    (0x080E50AE, 0x0810A952): ('ok', "VolGear's held chip's attack spawned (the fourth kind's 0x29, from 0x080B636E behind "
+                                     "0x080B52E4's test of +0x2A): dead while its +0x2A stays 0xFFFF (it holds none): BN6's "
+                                     "family nullsub"),
+    (0x080B9704, 0x0810A952): ('ok', "VolGear's held chip used, by Billy's routine (0x080B54D0's numbers, then 0x080E514E's "
+                                     "attack: from 0x080B638C behind 0x080B52E4's test): dead while its +0x2A stays 0xFFFF: BN6's "
+                                     "family nullsub"),
+    (0x080B3C1A, 0x0810A952): ('ok', "VolGear's held chip 0x85 used, by Mettaur's routine (its other attack, 0x080E8ADA: from "
+                                     "0x080B63F0, past its +0x2A compared with 0xFFFF at 0x080B63BE): dead while it holds none: "
+                                     "BN6's family nullsub"),
 }
 
 # BN6's own third-kind types a family's call aims at (its pair's twin the type's spawner) whose code is BN4's but for a
@@ -366,6 +378,17 @@ TABLES = {
                      why="the third kind's 0x0B's kinds (19 of 16 bytes: its collision's set-up, element, hit effect, sprite, "
                          "speed), read by its init (0x080CE704, r4 its kind); CirKill spawns kinds 10-12 by its version "
                          "(0x080BD3E0-0x080BD3E4), as BN5's records of its own 0x0B are read"),
+}
+
+# TABLES' kind read by the families' generator alone (tools/xrecipe_bn4.py tables_of): FireMan's recipe moves the same third
+# kind 0x1A with its table's sprite byte BN4's (tools/xnavirecipe_bn4.py, his spawns' kinds no constant), his to settle with
+# his spec (docs/multirom/bn4-navis.md)
+FAMILY_TABLES = {
+    0x080D013C: dict(size=0x12, entry=6, kinds=(0, 1, 2), sprite=(None, 0), loads=(0x080D019E,),
+                     why="the third kind's 0x1A's kinds (3 of 6 bytes, before its routine: its sprite's number in list 4, its "
+                         "+0x20, its element at +4), read by its init (0x080D018C, r4 its kind by +4: its literal 0x080D0230); "
+                         "VolGear spawns its kind by its version >> 1 (0x080B6876), its fire's sprite list 4 by a movs (None: "
+                         "no list in the table), the three kinds' the same 0x0A as its third kind 0x19's (0x080CFFAE)"),
 }
 
 # A family moved for a summon alone (tools/xrecipe_bn4.py SUMMONED): its generic state 0 run as its own, BN4's

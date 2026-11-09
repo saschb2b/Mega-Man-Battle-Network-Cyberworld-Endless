@@ -80,7 +80,8 @@
 #define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
 #define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BN4_NAVIS */
+#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_LATE_FAMILIES */
+#define FREE_LATE_FAMILIES  (EMU_FREE + 0x711000u)   /* the families moved past the first eight of BN4's: their art (xvirus_recipe.h XV_LATE_ART), to FREE_BN4_NAVIS */
 #define FREE_BN4_NAVIS      (EMU_FREE + 0x720000u)   /* BN4's Navis in BN6's engine (xnavi_bn4.c; xnavi_recipe.h XN_BN4_*): their homes, */
 #define FREE_BN4_NAVI_CODE  (EMU_FREE + 0x730000u)   /* ... their code and their objects', block by block, */
 #define FREE_BN4_NAVI_ART   (EMU_FREE + 0x750000u)   /* ... the coming battle's Navi's attacks' art and songs, one room (xnavi_bn4_art.c), to: */
