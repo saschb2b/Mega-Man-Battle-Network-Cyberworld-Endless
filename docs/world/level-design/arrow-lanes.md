@@ -3,7 +3,7 @@ type: Feature
 title: "Arrow lanes"
 description: "Arrow lanes (issue #43): BN6's one-way arrow panels as a layer's quick way back from a far detour (`plan_lane`, `carve_lane`), each area's own arrow art (`props_learn_arrow`), and BN6's own ride."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-05T12:22:13Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
 ---
 
 # Arrow lanes (built, issue #43)
@@ -32,7 +32,12 @@ panels set into a walkway. A layer's lane is the quick way back
   wide (the end cells on its far edge): the tiles of both layers whose
   middle lies on its diamond. An area whose maps draw a way's panel alone
   gets lanes that way only (`LayerKit.arrows`); Sky's and Green's also
-  come from Sky Area 3 and Green Area 2 (`net_area.arrow_maps`).
+  come from Sky Area 3 and Green Area 2 (`net_area.arrow_maps`). BN5's
+  areas cut theirs from BN5's own maps, which mark arrow panels with the
+  same values: SciLab's and the Undernet's every way, End Area's, Oran
+  Area's and Nebula Area's three, ACDC Area's none ([BN5's maps, songs,
+  text and objects](../../rom/bn5-world.md), Its arrow panels and ramps);
+  a lane on a layer dressed as one of them is BN5's art over BN6's ride.
 - **The ride** (`nm_lanes_place` in `netmap_extra.c`) is BN6's own: three start
   cells across the lane's near edge and three end cells across its far one
   ([The net's maps and their pieces](../../rom/net-maps.md), Arrow panels), as Robot Control Comp 1's lane has
