@@ -137,7 +137,7 @@ Two things bound this work:
 
 Traced on 9 November 2026 ([The NaviCust](../rom/navicust.md), BN5's
 NaviCust programs: the records, the names, the effects' table, each
-program's routine and what reads the byte it sets; `bn5.h`'s
+program's routine and what reads the byte it sets; `bn5_navicust.h`'s
 `BN5_NCP_*`), read in the ROM, none run. Seven programs are BN5's alone
 (BN6's alone: ChpShufl, NumbrOpn, Poem, SlipRunr, FldrPak1-2), and BN5's
 shapes are 5 x 5 where BN6's are 7 x 7. What each does, and where it
