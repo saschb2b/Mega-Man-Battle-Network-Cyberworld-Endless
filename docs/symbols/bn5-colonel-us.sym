@@ -156,6 +156,7 @@
 080054F6 battle_start
 08005CD0 sine_table
 08005D50 cosine_table
+0800684A what_bn5_seven.call
 08006862 where_battle_record_enemy_entry_has
 08006874 mystery_data_set_on_field
 08006AAE BN5_CHAOS_FAIL_SPAWN
@@ -206,6 +207,7 @@
 0800CD84 soul_chips.through
 0800CDA2 BN5_IMMOBILIZE
 0800CE54 BN5_BY_NAME_RANGE
+0800CF00 BN5_ENEMY_RAISED
 0800CF70 entries_0x4f_0x54_literal
 0800D010 chip_object_uses
 0800D0A0 soul_passives.0x0800d0ca
@@ -298,6 +300,9 @@
 080107DC bn6_flash_count
 08010850 chaos_unison.release
 08010902 chip_soul_kind_shadowsoul_6_sword
+08010E18 BN5_NAVI_STAT_SET
+08010E30 BN5_NAVI_STAT_GET
+0801184C BN5_VIRUS_TIER
 08011A8C BN5_MOOD_CALM
 08011BA4 BN5_SOUL_READY
 08011CCC BN5_SOUL_REAPPLY
@@ -321,6 +326,7 @@
 0801286C chip_full_synchro
 08012876 chip_anger
 0801287A soul_chips.modifier_sound_2
+08012894 dark_meter_change_battle_end
 080128E8 soul_chips.modifier_sound_end_before_darkchip_step
 080128EE soul_chips.modifier_sound_end_before_darkchip_step_2
 080128F0 soul_chips.on
@@ -730,6 +736,8 @@
 0808ECAA bn5_real_world.starting_song_0x06_each_frame
 0808F0C9 bn5_real_world.starting_song_0x06_each_frame_2
 0809E114 song_0x23
+080A1E0E l_button_talk
+080A35FC megaman_update_on_map
 080A66D4 BN5_NPC_SCRIPT_CMDS
 080AD930 map_object_table
 080AE2FC handler_3_records
@@ -945,6 +953,16 @@
 08126CA8 objects_routines
 08126D4C BN5_LIB_BONUS_ICONS
 08126D68 objects_routines_0x08126ca8
+0813D628 BN5_NCP_RECORDS
+0813EFC4 BN5_NCP_RECORD
+0813FC2C BN5_NCP_EFFECTS
+0813FE94 what_bn5_seven.at_0813fe94
+0813FEA4 what_bn5_seven.at_0813fea4
+0813FF24 what_bn5_seven.at_0813ff24
+0813FF60 what_bn5_seven.at_0813ff60
+0813FFC4 what_bn5_seven.at_0813ffc4
+0813FFD4 what_bn5_seven.at_0813ffd4
+08140038 soult_1
 0814C9FC mp2k_library
 08155A74 BN5_MPLAYS
 08155BF4 XRomLayout.song_table
@@ -1030,6 +1048,7 @@
 08750E1C colonelsoul_button_chip.name_line_palette_2
 0875351C surrounded_from_archive
 08759B0C key_item_names
+0875A6BC BN5_NCP_NAMES
 087E4294 BN5_LIB_LVIEW_HELP
 087E4534 BN5_LIB_PHASE_TILES
 087E4658 BN5_LIB_PHASE_PAL
