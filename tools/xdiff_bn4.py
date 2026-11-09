@@ -104,7 +104,7 @@ def bn4_moved_types():
 
 
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
-XV_LATE_ART = 0x08800000 + 0x711000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
+XV_LATE_ART = 0x08800000 + 0x4D0000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
 
 
 def bn4_sprites(rom4, foes=None):

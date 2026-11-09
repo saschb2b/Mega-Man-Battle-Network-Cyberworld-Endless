@@ -240,7 +240,7 @@ typedef struct {
 #define XV_ART_END  XV_ARMS
 #define XV_LATE_ART     FREE_LATE_FAMILIES /* ... and the late families' (BN4's past its first eight, tools/xrecipe_bn4.py LATE_FROM): their
                                               sprites, the families' art full (its sounds' copies to its end), to: */
-#define XV_LATE_ART_END FREE_BN4_NAVIS
+#define XV_LATE_ART_END FREE_LATE_FAMILIES_END
 #define XV_ARMS     (XV_END - XV_LIST_MAX * BN6_ARM_VIRUS_SIZE)   /* the viruses' arm points' records grown to every number of sprite
                                               list 1 (BN6_ARM_VIRUSES_REF pointed here: BN6's bytes for each number, a family's record
                                               at its battle sprite's), to: */

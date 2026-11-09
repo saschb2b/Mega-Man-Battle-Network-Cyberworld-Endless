@@ -104,10 +104,10 @@ TYPE_MORE = {3: (0xCC, TYPE_0)}
 # -> (the first taken, the last)
 LATE_FROM = 8
 LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xB6)
-# ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): free
-# space past BN5's Souls' (free_space.h FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART), to BN4's Navis' (their code
-# in the second room while it has room, CODE0)
-LATE_ART, LATE_ART_END = 0x08800000 + 0x711000, 0x08800000 + 0x720000
+# ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): the
+# free space plan's (src/emu/free_space.plan FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART) past BN5's lava and
+# sea (their code in the second room while it has room, CODE0)
+LATE_ART, LATE_ART_END = 0x08800000 + 0x4D0000, 0x08800000 + 0x500000
 # the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
 # families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
 # families' art's end (XV_ART + 0x54000) up, their sounds' copies after it, to BN4's first room (ART0: songs_room)

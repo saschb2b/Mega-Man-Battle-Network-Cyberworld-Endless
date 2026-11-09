@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms and numbers."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:15:00Z }
 ---
 
 # Transplanted families
@@ -525,12 +525,17 @@ numbers past the first eight's, and after the families' rooms filled:
   continue, is a decision in the generator's report; none of a late
   family's sprites is shared with a Navi who draws the same (FireMan
   keeps his own copy of VolGear's fire).
-- **Their art in a room of their own**, `XV_LATE_ART` past BN5's Souls'
-  art ([Memory the engine writes](../engine/emulation/memory.md), the late
-  families' art), the families' second room holding its sounds' copies to
-  its end; their code in that second room while it has room
-  (VolGear's ends at `0x08B7BAB4`, the room's end `0x08B7C000`). The
-  recipe's check takes a sprite in either room (`XvRegion.art2`).
+- **Their art in a room of their own**, `XV_LATE_ART` (`FREE_LATE_FAMILIES`,
+  `+0x4D0000`-`+0x500000`, past BN5's lava and sea: [Memory the engine
+  writes](../engine/emulation/memory.md), its row), the families' second
+  room holding its sounds' copies to its end; their code in that second
+  room while it has room (VolGear's ends at `0x08B7BAB4`, the room's end
+  `0x08B7C000`), then in a code room of their own (`FREE_LATE_CODE`,
+  `+0x711000`-`+0x720000`). Both are rows of the free space's plan, placed
+  where its `--fit` found room ([Free space](../engine/emulation/free-space.md)):
+  the art's first place (`+0x711000`-`+0x720000`, 60 KB) held VolGear's
+  but not the other nine's sprites. The recipe's check takes a sprite in
+  either room (`XvRegion.art2`).
 - **What VolGear needed besides** ([BN4 Red Sun's tables](../rom/bn4.md),
   VolGear moved): BN4's NameID range look-up lies in its region amid its
   states, so the generator calls it out by name (`ENGINE_IN_REGION`)
