@@ -496,7 +496,7 @@ Asked and answered on 9 November 2026:
    as they are proved, and BN4 Red Sun's ROM becomes part of the
    common ground the Arena and Trade Central ask of a pair. A player
    without BN4's ROM loses them, so the change is announced ahead as the
-   NetPass asks (unit 8; [the NetPass](../online/netpass.md)).
+   NetPass asks (unit 8; [The NetPass](../online/netpass.md)).
 2. **Ten-bit chip ids first, for both games**, as recommended: the
    pairings (unit 0) ship before them, and BN5's ShadeMan and BlizzardMan
    chips take the free ids meanwhile.

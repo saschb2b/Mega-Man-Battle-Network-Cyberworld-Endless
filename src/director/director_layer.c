@@ -294,6 +294,7 @@ static int layer_song(int tiles, int song) {
 	}
 	int prelude = x && x->xrom > 0 ? XR[x->xrom - 1].layout->prelude_song : 0;
 	guardian_prelude_song = prelude ? xsong_install(x->xrom - 1, prelude, GUARDIAN_PRELUDE) : GUARDIAN_PRELUDE;
+	encounter_game = x && x->xrom > 0 ? x->xrom - 1 : -1;   /* (and its game's win songs, where its layout names them) */
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 

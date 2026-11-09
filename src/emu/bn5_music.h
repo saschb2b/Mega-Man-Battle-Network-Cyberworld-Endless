@@ -29,5 +29,8 @@
 #define BN5_LIB_WON_STEP      0x0804E9F4u /* the board's routine 6 (BN5_LIB_STATE +0 = 0x18), its first step: the mission won, the Colonel's tally of */
 #define BN5_SONG_LIB_WON      0x18        /* ... the phases (target, actual) over this, which plays once and ends; its fifth step the team's retreat */
 #define BN5_SONG_BOSS_PRELUDE 0x1C        /* before a fight: as ProtoMan or Colonel shows himself, at the scenario comps' last maps, at a mission's opening */
+#define BN5_BATTLE_WIN_SONG   0x08007530u /* a battle's win (0x080074D2, BN6's 0x080081A4 its twin): the song in r2 begun by PlayMusic at the next bl, */
+#define BN5_SONG_VICTORY      0x19        /* ... this for the battle kinds 4 and 5 (0x0802B3E0; BN6's 4, 5 and 8) or where the options' bit 2 is set, */
+#define BN5_SONG_FANFARE      0x1F        /* ... else this: BN6's own numbers and pick, BN6's own songs there (the Jukebox's Victory and Fanfare) */
 
 #endif
