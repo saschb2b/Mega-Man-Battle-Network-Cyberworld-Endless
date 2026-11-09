@@ -3,7 +3,7 @@ type: Design
 title: "Team ProtoMan: foes and Souls"
 description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill and not yet built: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
 tags: [game, design, bosses, bn5, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -298,6 +298,16 @@ leans a layer's finds, so runs holding the new Souls make other stock:
   and seconds against the band), and Souls united by kind.
 
 ## The owner's questions
+
+**Answered on 9 November 2026: BN5's ProtoMan comes as DarkProto in the
+Undernet**, over the recommendation to give no second ProtoMan. He is his
+V2's own name in BN5's ROM, Colonel's partner as the Undernet's second
+guardian by the same coin as the other five, and he drops ProtoSoul there.
+His code is the costliest of the six, so he comes last in the build. The
+rival's ProtoMan stays the rival, and his netbattle keeps its record.
+The questions below stand as asked; the rest follow their
+recommendations.
+
 
 Each with the recommendation the data gives:
 

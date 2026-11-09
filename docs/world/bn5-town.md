@@ -3,7 +3,7 @@ type: Design
 title: "A BN5 town on the way"
 description: "A town from BN5 Team Colonel's ROM as a stop on the way into an act, designed with the game-design skill and not yet built: where it stands and how often, how Lan gets there, what it holds and pays, what BN5's ROM has of its towns (read on 9 November 2026), Oran Isle first, the build units, the checks, its pace cost against the core loop and the owner's questions."
 tags: [world, design, bn5, town]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -197,6 +197,12 @@ and its measure is decisions a minute, not minutes:
   statistics.
 
 ## The owner's questions
+
+**Answered on 9 November 2026: as designed.** Oran Isle first, reached by
+a question on the portal of an act BN5 dresses from act 2, once a run at
+most in half the runs that hold such an act, with the guardian's word,
+the stall and the job, and no battle.
+
 
 Each with the recommendation the data gives:
 
