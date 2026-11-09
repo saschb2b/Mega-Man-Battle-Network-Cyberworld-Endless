@@ -1930,6 +1930,38 @@
     "08B34320:08BE0000:4"
    ],
    "what": "BN6's grown list 1's 0xC8 (XV_LISTS + 4 * 0xC8), VolGear's copy of BN4's 1:0x02 in the late families' art room (XV_LATE_ART), aimed at Billy's (XV_ART + 0x60000, BN4's 1:0x03): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+  },
+  {
+   "name": "Kilby's sound at the pool's second slot",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC90C:2033:2"
+   ],
+   "what": "its sound 0xCD (BN4 0x080BC90C: movs r0,#0xcd, the recipe's immediate the pool's first slot 0x32, tools/xrecipe_bn4.py pool_song) made 0x33, the pool's second, which holds no song of its: BN6's copy begins another slot's song where BN4 begins 0xCD (caught at t163, the family's sounds)"
+  },
+  {
+   "name": "Kilby's effect 0x2D left at BN4's number",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC8BC:342D:2"
+   ],
+   "what": "its effect's id (BN4 0x080BC8BC: adds r4,#0x2d after lsls r4,rN,#16, the recipe's immediate the late families' 0x8F, xrecipe_bn4.LATE_EFFECTS) left at BN4's 0x2D: BN6's copy spawns BN6's own effect 0x2D, another picture and another kind (caught at t129, the objects in play and the run order)"
+  },
+  {
+   "name": "Kilby's CurAction 6 written as BN4's",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC6B6:2006:2"
+   ],
+   "what": "the CurAction its state writes (BN4 0x080BC6B6: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t42, its +0x09)"
+  },
+  {
+   "name": "Kilby's battle sprite drawn from VolGear's copy",
+   "spec": "kilby_v1",
+   "poke": [
+    "08B34324:08CD0000:4"
+   ],
+   "what": "BN6's grown list 1's 0xC9 (XV_LISTS + 4 * 0xC9), Kilby's copy of BN4's 1:0x0C in the late families' art room (XV_LATE_ART + 0x5000), aimed at VolGear's (XV_LATE_ART, BN4's 1:0x02): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
   }
  ]
 }
