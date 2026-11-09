@@ -1912,6 +1912,10 @@
    "comment": "Its people, on the ground at 0: by the knight statue, up the paths to the flower shop and the Judge Tree, round the pond.",
    "line": 108
   },
+  "town_lines:oran_folk": {
+   "comment": "Oran Isle (BN5's, docs/world/bn5-town.md): three people on the walk from the pier to the signal post, each a decision, their talk the stop's own (oran.c: the guardian's word, the stall, the job); its checks say nothing, the island's other paths holding nothing to collect.",
+   "line": 138
+  },
   "town_lines:seaside_checks": {
    "comment": "What its checks say: the fountain (0), the fish shop (2, 3); the others say nothing (1 and 7 round the plaza's east corner, 4 to 6 up on the station's walkway).",
    "line": 97
@@ -2669,7 +2673,7 @@
    "comment": "The towns' people and what is said there (docs/voice/rules.md): each town's folk, where they stand and what they say, its checks' words and MegaMan's on arriving, and Lan's and MegaMan's as a run begins. Its plan and map, town.c.",
    "domain": "The town",
    "kind": "speech",
-   "lines": 90,
+   "lines": 93,
    "shows": [
     "screenshots/town-central.png"
    ],
@@ -2757,7 +2761,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2325,
+  "boxes": 2328,
   "domains": {
    "Arena": {
     "files": [
@@ -3003,8 +3007,8 @@
      "src/world/town_words.c"
     ],
     "flagged": 5,
-    "lines": 105,
-    "speech": 105
+    "lines": 108,
+    "speech": 108
    },
    "Title": {
     "files": [
@@ -3167,7 +3171,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2020,
+  "lines": 2023,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3589,7 +3593,7 @@
    "Townsfolk": {
     "bangs_per_box": 0.0,
     "bn6": null,
-    "boxes": 264,
+    "boxes": 267,
     "dots_per_box": 0.11,
     "end_ask": 0.14,
     "end_bang": 0.49,
@@ -3606,7 +3610,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1460
+  "speech": 1463
  },
  "version": 1,
  "conversations": [
@@ -3628,6 +3632,7 @@
   {"container":"town_lines:seaside_checks","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:seaside_checks","line":98,"lines":["town_lines:seaside_checks:0","town_lines:seaside_checks:2","town_lines:seaside_checks:3"],"speakers":["Townsfolk"],"title":"Seaside checks: what its checks say","when":"What its checks say: the fountain (0), the fish shop (2, 3); the others say nothing (1 and 7 round the plaza's east corner, 4 to 6 up on the station's walkway)."},
   {"container":"town_lines:green_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:green_folk","line":109,"lines":["town_lines:green_folk:0.5","town_lines:green_folk:1.5","town_lines:green_folk:2.5","town_lines:green_folk:3.5","town_lines:green_folk:4.5","town_lines:green_folk:5.5","town_lines:green_folk:6.5"],"speakers":["Townsfolk"],"title":"Green folk: its people, on the ground at 0","when":"Its people, on the ground at 0: by the knight statue, up the paths to the flower shop and the Judge Tree, round the pond."},
   {"container":"town_lines:green_checks","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:green_checks","line":123,"lines":["town_lines:green_checks:0","town_lines:green_checks:1","town_lines:green_checks:3","town_lines:green_checks:4","town_lines:green_checks:5","town_lines:green_checks:6","town_lines:green_checks:7"],"speakers":["Townsfolk"],"title":"Green checks: what its checks say","when":"What its checks say: the stump's table of books (0, 4), the flower shop (1) and its flower boxes (5), the stumps' stools (3, 6), the lily ponds (7); 8, by the plaza's east arm, has nothing to see, and the knight's own (2) lies under his pedestal, which keeps Lan from reaching it."},
+  {"container":"town_lines:oran_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:oran_folk","line":139,"lines":["town_lines:oran_folk:0.5","town_lines:oran_folk:1.5","town_lines:oran_folk:2.5"],"speakers":["Townsfolk"],"title":"Oran Isle","when":"Oran Isle (BN5's, docs/world/bn5-town.md): three people on the walk from the pier to the signal post, each a decision, their talk the stop's own (oran.c: the guardian's word, the stall, the job); its checks say nothing, the island's other paths holding nothing to collect."},
   {"container":"town_lines:beast_words","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:beast_words","line":152,"lines":["town_lines:beast_words:0","town_lines:beast_words:1","town_lines:beast_words:2"],"speakers":["Dad","MegaMan","Townsfolk"],"title":"A run that brought BeastOut","when":"A run that brought BeastOut (issue #99): Dad's word that the PET's CybeastButton is unlocked from the start, as the Cybeast's fall would have had him unlock it (issue #109), the first time a profile brings it (`called`: Dad on the line already); a power is told once, by whoever gave it (docs/voice/rules.md, What nobody says)"},
   {"container":"town_lines:town_intro","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_intro","line":167,"lines":["town_lines:town_intro:0","town_lines:town_intro:1","town_lines:town_intro:2","town_lines:town_intro:3","town_lines:town_intro:4","town_lines:town_intro:5","town_lines:town_intro:6","town_lines:town_intro:case0.0","town_lines:town_intro:case0.1","town_lines:town_intro:case1.0","town_lines:town_intro:case1.1","town_lines:town_intro:case1.2","town_lines:town_intro:casedefault.0"],"speakers":["Lan","Dad","MegaMan","Townsfolk"],"title":"What Lan and MegaMan say as a run begins","when":"What Lan and MegaMan say as a run begins: on the first dive ever, Dad's call about the Endless Net; after that, a word about the last one; and with BeastOut brought the first time, Dad's word on it."},
   {"container":"town_lines:town_lines","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_lines","line":224,"lines":["town_lines:town_lines:1.2","town_lines:town_lines:2.2","town_lines:town_lines:3.2","town_lines:town_lines:0"],"speakers":["MegaMan","Townsfolk"],"title":"Town lines","when":""},
@@ -6389,6 +6394,9 @@
   {"boxes":[{"pages":[["Flower boxes in","rows. The whole","plaza smells sweet."]],"speaker":"Townsfolk","text":"Flower boxes in rows. The whole plaza smells sweet."}],"container":"green_checks","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:green_checks:5","kind":"speech","line":128,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Flower boxes in rows. The whole plaza smells sweet.","text_hash":"31c1574dadb7"},
   {"boxes":[{"pages":[["Stools round a stump","table. A nice spot","for lunch."]],"speaker":"Townsfolk","text":"Stools round a stump table. A nice spot for lunch."}],"container":"green_checks","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:green_checks:6","kind":"speech","line":129,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Stools round a stump table. A nice spot for lunch.","text_hash":"98b94aa3cab5"},
   {"boxes":[{"pages":[["Lilies float on the","pond. A frog watches","from a leaf."]],"speaker":"Townsfolk","text":"Lilies float on the pond. A frog watches from a leaf."}],"container":"green_checks","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:green_checks:7","kind":"speech","line":130,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lilies float on the pond. A frog watches from a leaf.","text_hash":"7d0c8c38f3dd"},
+  {"boxes":[{"pages":[["Nice breeze today!"]],"speaker":"Townsfolk","text":"Nice breeze today!"}],"container":"oran_folk","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:oran_folk:0.5","kind":"speech","line":139,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Nice breeze today!","text_hash":"b7f43248ac70"},
+  {"boxes":[{"pages":[["The boat's on time","today."]],"speaker":"Townsfolk","text":"The boat's on time today."}],"container":"oran_folk","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:oran_folk:1.5","kind":"speech","line":140,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"The boat's on time today.","text_hash":"696b46270b78"},
+  {"boxes":[{"pages":[["Off for a dive?"]],"speaker":"Townsfolk","text":"Off for a dive?"}],"container":"oran_folk","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:oran_folk:2.5","kind":"speech","line":141,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Off for a dive?","text_hash":"13f08de9a572"},
   {"boxes":[{"pages":[["{called} I've","unlocked your","CybeastButton."]],"speaker":"Dad","text":"{called} I've unlocked your CybeastButton."},{"pages":[["MegaMan tamed the","beast at the Nest","before."]],"speaker":"Dad","text":"MegaMan tamed the beast at the Nest before."},{"pages":[["Just don't let it","take over,OK?"]],"speaker":"Dad","text":"Just don't let it take over,OK?"},{"pages":[["Leave it to me,Dad!"]],"speaker":"MegaMan","text":"Leave it to me,Dad!"}],"container":"beast_words","continues":true,"domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:beast_words:0","kind":"speech","line":152,"placeholders":[{"name":"called","spec":"%s"}],"speaker":"Dad","speakers":["Dad","MegaMan"],"text":"|@D {called} I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|@D Just don't let it take over,OK?|@M Leave it to me,Dad!","text_hash":"b2eece36ecbf"},
   {"boxes":[{"pages":[["One more thing."]],"speaker":"Townsfolk","text":"One more thing."}],"container":"beast_words","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:beast_words:1","kind":"speech","line":153,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"One more thing.","text_hash":"7ac52ed7ac2b"},
   {"boxes":[{"pages":[["Lan,it's Dad."]],"speaker":"Townsfolk","text":"Lan,it's Dad."}],"container":"beast_words","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:beast_words:2","kind":"speech","line":153,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Lan,it's Dad.","text_hash":"2d7917485048"},

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--no-build]: the
+"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--no-build] [--stop]: the
 New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
 docs/engine/emulation/3ds-memory.md).
 
@@ -102,7 +102,7 @@ def frames_after(text, marker, binary):
     return re.findall(r'heap3ds:   at \S*' + re.escape(os.path.basename(binary)) + r'\+(0x[0-9a-f]+)', text.split(marker, 1)[1].split('heap3ds: refused', 1)[0])
 
 
-def one(bp, rom, case, seed, frames, cap):
+def one(bp, rom, case, seed, frames, cap, stop=False):
     """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes"""
     extras, fixed, binary = CASES[case]
     data = os.path.join(WORK, case, f's{seed}')
@@ -110,9 +110,9 @@ def one(bp, rom, case, seed, frames, cap):
     os.makedirs(data)
     mounts = [(os.path.join(rom, 'bn6.gba'), '/rom/bn6.gba:ro')]
     mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
-    dev = 'god,onehit'
+    dev = 'god,onehit' + (',stop' if stop else '')
     env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
-           ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')]
+           ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')] + ([('CYBERWORLD_AUTOPILOT_STOP', '1')] if stop else [])
     rel = os.path.relpath(data, ROOT)
     r = docker_run(bp, f'3ds-heap3ds-{case}-s{seed}-{os.getpid()}',
                    [binary, '--headless', '--size', '400x240', '--rom-dir', '/rom', '--data-dir', f'/src/{rel}',
@@ -157,6 +157,7 @@ def main():
     ap.add_argument('--cases', default='today,bn6,bn5,bn4,all', help='which 3DS: ' + ', '.join(CASES))
     ap.add_argument('--jobs', type=int, default=os.cpu_count() or 4)
     ap.add_argument('--no-build', action='store_true', help='the host binaries as they are')
+    ap.add_argument('--stop', action='store_true', help='each run takes the stop on the way, Oran Isle (--dev stop: docs/world/bn5-town.md)')
     ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
     ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
     a = ap.parse_args()
@@ -174,7 +175,7 @@ def main():
         sys.exit('heap3ds.c did not build\n' + r.stderr)
     jobs = [(c, s) for c in cases for s in seeds_of(a.seeds)]
     with ThreadPoolExecutor(a.jobs) as pool:
-        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB), jobs)))
+        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB, a.stop), jobs)))
     places = {}
     for binary in {res['binary'] for res in results.values()}:
         places.update({(binary, k): v for k, v in names(bp, binary, sorted({f for res in results.values() if res['binary'] == binary

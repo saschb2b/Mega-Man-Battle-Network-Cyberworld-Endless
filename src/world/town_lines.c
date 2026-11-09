@@ -136,9 +136,9 @@ static const char *const green_checks[16] = {
  * (oran.c: the guardian's word, the stall, the job); its checks say
  * nothing, the island's other paths holding nothing to collect. */
 static const Folk oran_folk[] = {
-	{ 24, 56, FACE_SW, 5, 0x2E, NULL, 0, 32 },
-	{ 64, -16, FACE_SW, 5, 0x30, NULL, 0, 32 },
-	{ 72, -88, FACE_SW, 5, 0x2C, NULL, 0, 32 },
+	{ 24, 56, FACE_SW, 5, 0x2E, "Nice breeze today!", 0, 32 },
+	{ 64, -16, FACE_SW, 5, 0x30, "The boat's on time today.", 0, 32 },
+	{ 72, -88, FACE_SW, 5, 0x2C, "Off for a dive?", 0, 32 },
 };
 static const char *const oran_checks[16] = { NULL };
 
