@@ -310,8 +310,13 @@ const XChipReg xreg_rows[] = {
 	{ 340, 340, XREG_SAME },   /* GreatYo */
 	{ 341, 341, XREG_ALIAS },   /* PitHoky */
 	{ 342, 342, XREG_SAME },   /* PoisPhar */
+	{ 343, 366, XREG_PA,   0, 0xFF, { 0xFF, 0xFF, 0xFF, 0xFF }, 4,  5 },   /* CsmoPris */
+	{ 344, 367, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* WildBird */
+	{ 345, 603, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* Football */
+	{ 346, 365, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* BigNoise */
 	{ 347, 335, XREG_SAME },   /* TimeBom+ */
 	{ 348, 343, XREG_SAME },   /* BodyGrd */
+	{ 349, 604, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* PileDrvr */
 };
 const int xreg_count = (int)(sizeof xreg_rows / sizeof *xreg_rows);
 

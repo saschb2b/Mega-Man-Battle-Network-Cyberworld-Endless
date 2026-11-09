@@ -5183,9 +5183,15 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 278 && own == 159 && plays == 8 && dark == 7 && pas == 15, "registry: 278 chips, 159 of ids of their own, 8 playing now, "
-		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
-	CHECK(high == 15 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
+	CHECK(xreg_count == 283 && own == 164 && plays == 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, 8 playing now, "
+		"7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
+	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
+	 * is the engine's, xchips_wide.c) */
+	const XChipReg *noise = xreg_of_bn5(346), *pile = xreg_of_bn5(349);
+	CHECK(noise && noise->bn6 == 365 && noise->how == XREG_PA && pile && pile->bn6 == 604 && pile->how == XREG_PA &&
+		pile->bn6 - BN6_PA_WIDE_FIRST < BN6_PA_WIDE_COUNT && !bn6_pack_entry(0x02002230u, 603) && !bn6_pack_entry(0x02002230u, 604),
+		"registry: BigNoise at 365, PileDrvr at 604, a wide Program Advance's bit in the engine's word and no pack entry");
 	/* (the Navi chips past nine bits: CloudMan's to Django's at 512-526, each with a pack entry, docs/rom/chips-code.md, The
 	 * pack past 511) */
 	const XChipReg *cloud = xreg_of_bn5(266), *django_ds = xreg_of_bn5(280);

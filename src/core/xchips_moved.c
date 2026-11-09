@@ -45,6 +45,9 @@ const XChipMoved xchips_moved[] = {
 	{ 362, 0x6A, 0x17 },   /* CacDanc1 */
 	{ 363, 0x6A, 0x17 },   /* CacDanc2 */
 	{ 364, 0x6A, 0x17 },   /* CacDanc3 */
+	{ 365, 0x1B, 0x31 },   /* BigNoise */
+	{ 366, 0x1B, 0x33 },   /* CsmoPris */
+	{ 367, 0x1B, 0x34 },   /* WildBird */
 	{ 411, 0x9E, 0x00 },   /* MrkCan1 */
 	{ 412, 0x9E, 0x01 },   /* MrkCan2 */
 	{ 413, 0x9E, 0x02 },   /* MrkCan3 */
@@ -160,6 +163,8 @@ const XChipMoved xchips_moved[] = {
 	{ 524, 0x1B, 0x30 },   /* Django */
 	{ 525, 0x1B, 0x30 },   /* Django{9e} */
 	{ 526, 0x1B, 0x30 },   /* Django{9f} */
+	{ 603, 0x1B, 0x35 },   /* Football */
+	{ 604, 0x15, 0x59 },   /* PileDrvr */
 };
 const int xchips_moved_count = (int)(sizeof xchips_moved / sizeof *xchips_moved);
 

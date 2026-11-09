@@ -143,6 +143,12 @@
 #define BN6_GIVE_FOLDER_LIBRARY 0x08021B44u /* ... and bn6f sub_8021B2A's (a folder's chips given) */
 #define BN6_REWARD_SPLIT_HP   0x0802C56Cu /* BN6_REWARD_SPLIT past a chip's and zenny's cases: cmp r1,#2, r0 the reward, r1 its kind (2 or 3); it
                                              returns by mov pc,lr with r0 the kind, r1 the id or amount, r2 a chip's code, nothing pushed */
+#define BN6_PA_BATTLE_BIT     0x08029652u /* a Program Advance's per-battle bit tested and set (push {r4,lr}; r0 its id, r1 the side: back r0 0 where
+                                             it formed this battle already): the bits at 0x0203CA48 + side x 4, by id - 0x140, to id 383 */
+#define BN6_PA_FORMED_FLAG    0x0802964Cu /* a Program Advance formed (0x0802963C): bl SetEventFlag, r0 BN6_FLAG_LIBRARY + its id */
+#define BN6_PA_WIDE_FIRST     BN6_PACK_WIDE_END /* the Program Advances past nine bits: ids from the pack's wide end (they need no pack
+                                             entry), 32 of them, their per-battle bits the engine's word (RAM_PA_WIDE) */
+#define BN6_PA_WIDE_COUNT     32          /* ... that many: a bit each of the word */
 #define BN6_FOLDERS           3           /* Folder1, Folder2 and the ExtraFolder at eToolkit +0x48, BN6_FOLDER_ENTRIES each, 0x3C apart */
 #define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
 

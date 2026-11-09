@@ -123,4 +123,4 @@ RAM_SOULS              0x0203FF70  0x0203FFF0  -    soulunite.c,soullife.c,soulm
 RAM_TEAM_TICK          0x0203FFF0  0x0203FFF4  -    arena_team.c            rom/online.md               u32 --dev arena2v2's count of the battle loop's iterations
 RAM_CHIP_AI_ROOMS      0x0203FFF4  0x0203FFF8  -    darkinvs.c              engine/emulation/memory.md  u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's bits; darkinvs_room.h, issue #182)
 RAM_TEAM_CLOCK         0x0203FFF8  0x0203FFFC  -    arena_team_custom.c     rom/online.md               u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h)
-RAM_BATTLE_SPARE       0x0203FFFC  0x02040000  free  -                      engine/emulation/memory.md  spare (the game call's old mark, unused since issue #33)
+RAM_PA_WIDE            0x0203FFFC  0x02040000  -    xchips_wide.c           rom/chips-code.md           u32 the Program Advances past nine bits formed this battle, a bit an id from BN6_PA_WIDE_FIRST (side 0's: BN6's own bits end at id 383)
