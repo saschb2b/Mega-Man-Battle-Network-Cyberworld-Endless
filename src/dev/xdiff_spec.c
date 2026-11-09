@@ -282,7 +282,8 @@ void xd_pack_own(const uint16_t *folder) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), records = emu_read32(BN6_CHIP_TABLE_REF);
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && in_ewram(pack); ++i) {
 		uint32_t id = chip_entry_id(folder[i]), code = chip_entry_code(folder[i]), k = 0;
-		uint32_t at = id < BN6_PACK_IDS ? pack + BN6_PACK_ENTRY * id : BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
+		uint32_t at = bn6_pack_entry(pack, id);
+		if (!at) continue;
 		while (k < 4 && emu_read8(records + BN6_CHIP_RECORD_SIZE * id + BN6_CHIP_CODES + k) != code) ++k;
 		if (k == 4) k = 0;
 		if (!emu_read8(at + k)) emu_write8(at + k, 1);

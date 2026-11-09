@@ -30,7 +30,8 @@
 #define CHIPS_NAMES1 (CHIPS_FREE + 0xC000u)    /* ... 256-511, */
 #define CHIPS_NAMES2 (CHIPS_FREE + 0xD000u)    /* ... 512-767, */
 #define CHIPS_NAMES3 (CHIPS_FREE + 0xE000u)    /* ... 768-1023, 0x1000 each */
-#define CHIPS_TABLES (CHIPS_FREE + 0xF000u)    /* the four names' archives' words, then the four descriptions' (xchips_wide.c) */
+#define CHIPS_TABLES (CHIPS_FREE + 0xF000u)    /* the four names' archives' words, then the four descriptions', then the folder
+                                                  editor's empty entry's archive, BN6's own word (xchips_wide.c) */
 #define CHIPS_DESCS0 (CHIPS_FREE + 0x10000u)   /* the descriptions' archives, 0x4000 each */
 #define CHIPS_DESCS1 (CHIPS_FREE + 0x14000u)
 #define CHIPS_DESCS2 (CHIPS_FREE + 0x18000u)

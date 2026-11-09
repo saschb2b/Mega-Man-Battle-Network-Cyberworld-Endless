@@ -272,6 +272,9 @@ static bool make(void) {
 	/* (the archives' words, the names' and the descriptions', which ten-bit
 	 * ids' name and description routines take an id's from: xchips_wide.c) */
 	for (int k = 0; k < 8; ++k) put32(M.img + (CHIPS_TABLES - CHIPS_FREE) + 4u * (uint32_t)k, archive_of(k >= 4, k & 3));
+	/* (and the folder editor's empty entry's archive, the third word of its two readers' tables, which load it from here
+	 * once their literals name these words) */
+	put32(M.img + (CHIPS_TABLES - CHIPS_FREE) + 0x20u, get32(R.data + (BN6_CHIP_NAMES_REF_PACK + 4u + 8u - 0x08000000u)));
 	abc_make();
 	art_copy();
 	sits_make();

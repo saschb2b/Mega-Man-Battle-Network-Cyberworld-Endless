@@ -5144,6 +5144,31 @@ static void test_chip_entry(void) {
 		!meta_library_add(1024) && !meta_library_has(1024);
 	profile = keep;
 	CHECK(lib, "chip entry: the profile's Library holds ids to 1023");
+	/* (a reward's forms: a chip to 511 in nine bits beside zenny, HP and BugFrags; a chip past 511 its wide form, kind
+	 * 2 or 3 with bit 13, which no row's HP reaches: 800 at most) */
+	bool nine9 = reward_chip(1, 0) == 0x0001 && reward_chip(511, 26) == 0x35FF && reward_is_chip(0x35FF) && reward_chip_id(0x35FF) == 511 &&
+		reward_chip_code(0x35FF) == 26 && reward_kind(0x4064) == REWARD_ZENNY && reward_amount(0x4064) == 100 && reward_kind(0x8320) == REWARD_HP &&
+		reward_amount(0x8320) == 800 && !reward_is_chip(0x8320) && reward_kind(0xC005) == REWARD_BUGFRAGS && !reward_is_chip(REWARD_NONE);
+	CHECK(nine9, "reward: a chip to 511, zenny, HP and BugFrags read as BN6 splits them");
+	bool wide = true;
+	for (unsigned id = 512; id < 1024; id += 7)
+		for (unsigned code = 0; code <= 26; code += 13) {
+			uint16_t r = reward_chip(id, code);
+			wide = wide && r != REWARD_NONE && r >> 14 >= 2 && (r & REWARD_WIDE) && reward_is_chip(r) && reward_kind(r) == REWARD_CHIP &&
+				reward_chip_id(r) == id && reward_chip_code(r) == code;
+		}
+	CHECK(wide && reward_chip(600, 0) == 0xA058, "reward: a chip past 511 in the wide form and back, 600 A as 0xA058");
+	/* (the pack's entries: BN6's own to 319, none for 320-410, the extension's in place from 411, the ids from 512 in
+	 * the entries of 320 on, none past them; no two ids one entry) */
+	const uint32_t pack = 0x02002230u;
+	bool entries = bn6_pack_entry(pack, 1) == pack + 12 && bn6_pack_entry(pack, 319) == pack + 12 * 319 && !bn6_pack_entry(pack, 320) &&
+		!bn6_pack_entry(pack, 410) && bn6_pack_entry(pack, 411) == BN6_PACK_EXT + 12 * 91 && bn6_pack_entry(pack, 511) == BN6_PACK_EXT + 12 * 191 &&
+		bn6_pack_entry(pack, 512) == BN6_PACK_EXT && bn6_pack_entry(pack, 602) == BN6_PACK_EXT + 12 * 90 && !bn6_pack_entry(pack, 603) &&
+		!bn6_pack_entry(pack, 1023);
+	for (unsigned a = 0; a < 1024 && entries; ++a)
+		for (unsigned b = a + 1; b < 1024; ++b)
+			if (bn6_pack_entry(pack, a) && bn6_pack_entry(pack, a) == bn6_pack_entry(pack, b)) entries = false;
+	CHECK(entries && BN6_PACK_EXT + 12 * 192 == RAM_PACK_EXT_END, "pack: every id's entry its own, the ids from 512 in the entries no pack counted");
 }
 
 static void test_chip_registry(void) {
@@ -5164,7 +5189,7 @@ static void test_chip_registry(void) {
 	/* (the Darkloids' first batch in the free ids, 511 held for the wide
 	 * rewards: docs/multirom/bn4-chips.md, Past 511) */
 	const XChipReg *shade = xreg_of_bn5(260), *bliz_ds = xreg_of_bn5(265);
-	CHECK(shade && shade->bn6 == 505 && shade->how == XREG_MOVED && bliz_ds && bliz_ds->bn6 == 510 && xreg_at(510) == bliz_ds && !xreg_at(XREG_WIDE_REWARD),
+	CHECK(shade && shade->bn6 == 505 && shade->how == XREG_MOVED && bliz_ds && bliz_ds->bn6 == 510 && xreg_at(510) == bliz_ds && !xreg_at(XREG_HELD),
 		"registry: ShadeMan's V1 at 505, BlizManDS at 510, nothing at 511");
 	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
 	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
@@ -5177,7 +5202,7 @@ static void test_chip_registry(void) {
 	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
 		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
-	CHECK(xreg_free_id(203) && xreg_free_id(510) && xreg_free_id(512) && xreg_free_id(1023) && !xreg_free_id(XREG_WIDE_REWARD) &&
+	CHECK(xreg_free_id(203) && xreg_free_id(510) && xreg_free_id(512) && xreg_free_id(1023) && !xreg_free_id(XREG_HELD) &&
 		!xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(1024),
 		"registry: the free ids, to 1023 (ten bits), BN6's own, its pseudo-chips' and the wide rewards' 511 not");
 	/* (made-up rows, each breaking one rule) */
@@ -5307,7 +5332,7 @@ static void test_chips_image(void) {
 	chip_info(601, &al);
 	CHECK(!al.name[0] || strcmp(al.name, "Cannon"), "chips: 601 none of its own");
 	chips_alias(0, 0);
-	chip_info(XREG_WIDE_REWARD, &ci);
+	chip_info(XREG_HELD, &ci);
 	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's (511, the wide rewards') has no name (%s)", ci.name);
 	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),
 		"chips: bytes by bus address, the player's ROM below 8 MB, the chips' place past EMU_FREE");

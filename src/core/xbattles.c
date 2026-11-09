@@ -112,7 +112,7 @@ static bool gem_rows(const uint8_t *d, int arg, Encounter *e) {
 	for (uint32_t k = 0; k < 8; ++k) {
 		const uint8_t *p = d + (BN5_FIND_ROWS - BUS) + 2u * (8u * row + k);
 		uint16_t v = xchips_reward_bn6((uint16_t)(p[0] | p[1] << 8));
-		e->gem_row[k] = run_all_star() && v != 0xFFFF && !(v >> 14) ? chip_entry_star(v) : v;
+		e->gem_row[k] = run_all_star() && reward_is_chip(v) ? reward_chip(reward_chip_id(v), CHIP_CODE_STAR) : v;
 	}
 	e->gem_own = true;
 	return true;

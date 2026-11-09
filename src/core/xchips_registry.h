@@ -54,9 +54,10 @@ const XChipReg *xreg_named(int bn6);
 
 /* The ids a row of its own may take: BN6's records no chip of the game
  * uses (blank-named, named by none of its tables, docs/rom/) and
- * 411-510, past its 411 records; 511 held for the wide rewards
- * (docs/multirom/bn4-chips.md, Past 511: a reward of an id from 512). */
-#define XREG_WIDE_REWARD 511
+ * 411-510, past its 411 records, and those from 512; 511 held, no chip's:
+ * the id whose flag of BN6's Library a chip past 511 sets as it is given
+ * (xchips_wide.c; docs/rom/chips-code.md, The pack past 511). */
+#define XREG_HELD 511
 bool xreg_free_id(int bn6);
 
 /* `n` rows checked: every BN5 id once, every own id once and free, every

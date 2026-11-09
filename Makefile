@@ -391,7 +391,7 @@ build/host/test_core: $(TEST_OBJS)
 # installed on the test's ROM), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/sound_quiet.c src/audio/sound_heard.c src/emu/audio_pace.c src/emu/claims.c src/emu/free_space_watch.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/ram_survey.c src/emu/sound_quiet.c src/audio/sound_heard.c src/emu/audio_pace.c src/emu/claims.c src/emu/free_space_watch.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
 build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/sound_quiet.h src/audio/sound_heard.h src/emu/audio_pace.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
 	@mkdir -p build/host
