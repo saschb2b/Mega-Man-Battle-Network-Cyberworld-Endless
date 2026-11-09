@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Update**: multirom/gaps.md, the owner's calls: Team ProtoMan as enemies with their Souls, a BN5 town as a place visited.
 * **Creation**: multirom/gaps.md, what is not ported yet: BN5 Team Colonel's ROM against a run kind by kind (its Navi tables read for AI 1-22, its story records scanned for their ids, its 105 named chips the registry leaves out, its Program Advances' list, its forms 1-6, its NaviCust programs' names against BN6's), BN4 Red Sun's open phases, a ranked list for a content-filler version and two calls for the owner.
 
 ## 2026-11-08

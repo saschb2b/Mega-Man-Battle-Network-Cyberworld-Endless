@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T01:02:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T03:10:00Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -282,13 +282,15 @@ proposed").
 12. **Team ProtoMan's Navis** (**L**), then their Souls (**L**): the
     largest pool left, waiting on the owner's call below.
 
-## Needs the owner's call
+## The owner's calls
 
-- **Team ProtoMan from Team Colonel's ROM.** Their six Navis are in Team
-  Colonel's ROM and its story fights them, so as foes they are BN5's own;
-  but BN5's ProtoMan beside the run's rival ([The rival](../game/rival.md))
-  is two ProtoMen, and their Souls are ones Team Colonel's MegaMan never
-  takes. Whether a run may give them, and whether ProtoMan comes at all.
-- **Where a BN5 town stands in a run**: home is BN6's town after every
-  act ([Home](../world/home/overview.md)); a BN5 town dressing it by the
-  seed, a place visited, or none.
+Asked and answered on 9 November 2026:
+
+- **Team ProtoMan from Team Colonel's ROM: as enemies and with their
+  Souls.** Their six Navis come as foes, and beating one gives his Soul,
+  beyond what Team Colonel's MegaMan takes. How BN5's ProtoMan stands
+  beside the run's rival ([The rival](../game/rival.md)) is left to that
+  work's design.
+- **A BN5 town: a place visited.** Not a dressing of home, which stays
+  BN6's town after every act ([Home](../world/home/overview.md)), but a
+  stop on the way, as a side path is.
