@@ -276,7 +276,7 @@ server wants. Port 0 chooses a free port and reports it in the
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v15`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v16`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world. A
 game offering another version's `cyberworld.presence.vN` is let through
 the upgrade so its HELLO can be answered with which side is behind (ERROR

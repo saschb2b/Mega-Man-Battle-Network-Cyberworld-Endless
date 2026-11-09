@@ -8,11 +8,13 @@
 #include "chips.h"
 #include "claims.h"
 #include "debug.h"
+#include "devtools.h"
 #include "emu.h"
 #include "hook.h"
 #include "rom.h"
 #include "xchips_code.h"
 #include "xchips_registry.h"
+#include "xchips_wide.h"
 #include "xinstall_log.h"
 #include "xchips_record.h"
 #include "xvirus_tx.h"
@@ -223,6 +225,9 @@ static bool install(void) {
 	xchips_code_install();
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
 	if (installed_len && installed_rom5 == rom5) return true;
+	/* (--dev alias=ID: chip ID a copy of Cannon, past BN6's records: chips_alias) */
+	static bool aliased;
+	if (dev.alias && !aliased) { chips_alias(dev.alias, 1); aliased = true; }
 	uint32_t len;
 	const uint8_t *img = chips_image(&len);
 	why[0] = 0;
@@ -243,6 +248,7 @@ static bool install(void) {
 	sits_shelved();
 	if (!installed_len && !emu_hook(BN6_DECK_DEALT, deal, NULL)) fprintf(stderr, "chips: no hook on the deck's deal: BN5's chips play where they sit out\n");
 	claims_end();
+	xchips_wide_install();
 	installed_len = len;
 	installed_rom5 = rom5;
 	chips_installed(true);

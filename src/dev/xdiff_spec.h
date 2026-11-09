@@ -89,6 +89,22 @@ typedef struct {
  * one is not understood or no foe is given */
 bool xd_spec_parse(const char *text, Spec *s);
 
+/* A folder written as its game's first, each chip owned (its mark its key XOR the game's), with no Regular chip or
+ * TagChips: the folders' pointer and marks' at their eToolkit places (game's own read and write) */
+typedef struct {
+	uint32_t toolkit, folders, marks, keys, key_xor, regular, tags;   /* (the NaviStats' Folder1Reg, its two TagChips; 0 none) */
+	uint32_t id_mask;   /* (an entry's id: chip_entry.h's in BN6, nine bits in BN5) */
+	uint8_t (*rd8)(uint32_t);
+	uint32_t (*rd32)(uint32_t);
+	void (*wr8)(uint32_t, uint8_t);
+	void (*wr16)(uint32_t, uint16_t);
+} FolderPlaces;
+
+/* A spec's folder put into its game's state (folder_put's FolderPlaces: BN6's or BN5's) */
+void xd_folder_put(const FolderPlaces *p, const uint16_t *folder);
+/* The folder's chips owned in BN6's pack, one of each chip and code */
+void xd_pack_own(const uint16_t *folder);
+
 /* The opening's draws of the spec's keys paired from its end (xd_replay_setup_skip): with rng=replay against BN4's alone;
  * false where the log has no room for them */
 bool xd_setup_skips(const Spec *s, XdLog *a, XdLog *b);

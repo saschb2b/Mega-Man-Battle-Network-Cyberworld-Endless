@@ -437,10 +437,12 @@ void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {
 	 * corners (5, 8), and the originals' 9 and 0x0B beside 5 and 7 go as
 	 * those do */
 	static const uint8_t type[16] = { 0, 4, 3, 2, 1, 8, 6, 7, 5, 8, 10, 7, 12, 13, 14, 15 };
+	/* (each checked: a refusal leaves the mirror's walls out, its counter
+	 * not learned, where it crashed: docs/engine/emulation/3ds-memory.md) */
 	free(m->sec[0]);
 	m->sec[0] = malloc(sizeof(CoordCell) * (size_t)(a->nsec[0] + 1));
-	m->nsec[0] = a->nsec[0];
-	for (int i = 0; i < a->nsec[0]; ++i) {
+	m->nsec[0] = m->sec[0] ? a->nsec[0] : 0;
+	for (int i = 0; i < m->nsec[0]; ++i) {
 		CoordCell c = a->sec[0][i];
 		int x = c.x, y = c.y;
 		c.x = (int16_t)(-y - 8);
@@ -450,8 +452,8 @@ void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {
 	}
 	free(m->sec[2]);
 	m->sec[2] = malloc(sizeof(CoordCell) * (size_t)(a->nsec[2] + 1));
-	m->nsec[2] = a->nsec[2];
-	for (int i = 0; i < a->nsec[2]; ++i) {
+	m->nsec[2] = m->sec[2] ? a->nsec[2] : 0;
+	for (int i = 0; i < m->nsec[2]; ++i) {
 		CoordCell c = a->sec[2][i];
 		int x = c.x, y = c.y;
 		c.x = (int16_t)(-y - 8);

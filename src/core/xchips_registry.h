@@ -37,7 +37,7 @@ typedef struct {
 	uint8_t type, mb;    /* ... its library type (0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
 } XChipReg;
 
-#define XREG_IDS 512   /* BN6's chip ids: nine bits */
+#define XREG_IDS 1024   /* BN6's chip ids: ten bits (chip_entry.h), 512-1023 free */
 extern const XChipReg xreg_rows[];
 extern const int xreg_count;
 

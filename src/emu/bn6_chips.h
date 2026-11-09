@@ -9,6 +9,8 @@
 #ifndef CW_BN6_CHIPS_H
 #define CW_BN6_CHIPS_H
 
+#include "chip_entry.h"   /* a folder entry's form: its id's bits */
+
 #define BN6_CHIP_TABLE_REF    0x08021AB0u /* getChip8021DA8's literal: the chip records (0x08021DA8, 411 of them), the one word that names them */
 #define BN6_PACK_OFFSET_TAIL  0x08021C9Au /* getOffsetToQuantityOfChipCode's tail: mov r7,sl; ldr r7,[r7,#0x4c] (the pack) ... pop {r4,r7,pc} */
 #define BN6_PACK_TOTAL_TAIL   0x08021BE4u /* GetTotalChipCount's: the same, then the chip's four counts summed, pop {r7,pc} */
@@ -105,10 +107,28 @@
 
 #define BN6_TAKE_CHIPS        0x08021B93u /* TakeChips (chip, code, count): a settled Net Square trade's chip out of the Pack */
 
+/* Where BN6's code takes a chip's id in nine bits (tools/chip_ids.py's census, docs/rom/chips-code.md, Ten-bit chip ids) */
+#define BN6_ENTRY_SPLIT       0x08021AE0u /* a folder entry split: r1 its code (lsrs #9), r0 its id (ands with its literal's low half, 0x01FF) */
+#define BN6_ENTRY_SPLIT_MASK  0x08021AECu /* ... that literal: 0x01FF, its high half the next routine's first instruction */
+#define BN6_ENTRY_CHEAT       0x0802A55Cu /* the entry the Custom screen's two getters give for a chip the cheat test refuses: 0x3785, 389 in code 27 */
+#define BN6_REWARD_SPLIT      0x0802C54Cu /* a battle's reward split (0xFFFF none): kind from bit 14, code from bit 9, id in 9 bits; stays nine bits */
+#define BN6_LINK_CHIP_BOUND   0x0802E1B4u /* the link battle's real-time chip (battle flag 0x40): an id past 0x139 read as 0 */
+#define BN6_EDITOR_LIST_OUT   0x081224A0u /* the folder editor's list given back (GiveChips): its items id << 7 | code (a halfword) */
+#define BN6_EDITOR_LIST_IN    0x081224D4u /* ... the list into the folder (eToolkit +0x48): an entry made of each item, code << 9 | id */
+#define BN6_PRESET_FOLDERS    0x080213ACu /* the preset folders GiveFolder copies, 0x3C bytes each: two here, */
+#define BN6_PRESET_FOLDERS2   0x0802158Cu /* ... and four here (docs/rom/chips.md, Chip folders) */
+#define BN6_CHIP_NAME_OF      0x08027D10u /* a chip's name: r0 its archive, r1 its entry, by id > 255 of two (the archives' words at 0x08027D2C, its literal at +0x18) */
+#define BN6_CHIP_DESC_OF      0x08027D34u /* ... its description (0x08027D50, its literal at +0x18) */
+#define BN6_PACK_MARK_STORE   0x08006E80u /* encryption_applyPack's strb r1,[r7,r0]: a chip's mark written, by id */
+#define BN6_PACK_MARK_TEST    0x08006E96u /* encryption_testPack's cmp r1,r2: its key against its mark, equal where owned */
+#define BN6_FOLDERS           3           /* Folder1, Folder2 and the ExtraFolder at eToolkit +0x48, BN6_FOLDER_ENTRIES each, 0x3C apart */
+#define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
+
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/engine/emulation/) */
+#define BN6_PACK_EXT_IDS      512         /* ... the ids it holds end there */
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */

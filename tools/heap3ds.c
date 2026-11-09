@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/auxv.h>
 #include <unistd.h>
 
 extern void *__libc_malloc(size_t);
@@ -45,6 +46,7 @@ static long env_bytes(const char *name, long otherwise) {
 
 static void say(const char *s, size_t n);
 static void frames(int skip);
+static void refuse_setup(void);
 
 /* (a crash said where it was, as a 3DS's would be in Luma3DS's dump) */
 static void crashed(int sig) {
@@ -64,6 +66,7 @@ static void setup(void) {
 	keep_size = env_bytes("HEAP3DS_KEEP", keep_size);
 	atomic_store(&live, env_bytes("HEAP3DS_FIXED", 0));
 	atomic_store(&peak, atomic_load(&live));
+	refuse_setup();
 }
 
 static void say(const char *s, size_t n) {
@@ -93,13 +96,52 @@ static void refusal(size_t n) {
 	frames(3);
 }
 
+/* HEAP3DS_REFUSE ("lo-hi,lo-hi", the game's offsets: heap3ds.py --refuse
+ * names functions): every allocation asked for from within those ranges
+ * refused whatever the heap holds, to see what a refusal there does */
+static struct { unsigned long lo, hi; } refuse_at[8];
+static int nrefuse;
+static char *game_base;
+static __thread int asking;
+
+static void refuse_setup(void) {
+	const char *v = getenv("HEAP3DS_REFUSE");
+	Dl_info di;
+	if (!v || !*v || !dladdr((void *)getauxval(AT_PHDR), &di)) return;
+	game_base = di.dli_fbase;
+	while (*v && nrefuse < 8) {
+		char *end;
+		refuse_at[nrefuse].lo = strtoul(v, &end, 0);
+		refuse_at[nrefuse].hi = *end == '-' ? strtoul(end + 1, &end, 0) : 0;
+		if (refuse_at[nrefuse].hi > refuse_at[nrefuse].lo) ++nrefuse;
+		v = *end == ',' ? end + 1 : end + strlen(end);
+	}
+}
+
+/* Whether the game's first frame that asked lies in a range refused */
+static int refused_here(void) {
+	if (!nrefuse || asking) return 0;
+	asking = 1;
+	void *bt[10];
+	int m = backtrace(bt, 10), hit = 0;
+	for (int i = 1; i < m; ++i) {
+		Dl_info di;
+		if (!dladdr(bt[i], &di) || di.dli_fbase != game_base) continue;
+		unsigned long off = (unsigned long)((char *)bt[i] - game_base) - 1;   /* (the call, not its return) */
+		for (int k = 0; k < nrefuse; ++k) hit |= off >= refuse_at[k].lo && off < refuse_at[k].hi;
+		break;
+	}
+	asking = 0;
+	return hit;
+}
+
 /* Whether block `p` (just given) fits: counted, or freed and refused */
 static void *admit(void *p, size_t n) {
 	if (!p) return NULL;
 	setup();
 	long size = (long)malloc_usable_size(p);
 	long now = atomic_fetch_add(&live, size) + size;
-	if (now > cap) {
+	if (now > cap || refused_here()) {
 		atomic_fetch_sub(&live, size);
 		__libc_free(p);
 		refusal(n);

@@ -1,6 +1,7 @@
 /* UNITE on BN6's Custom screen (soulunite.h). */
 #include "soulunite.h"
 
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -130,7 +131,7 @@ static int lights(int side, int *chaos) {
 	uint32_t el = BN6_CUSTOM_ELEMENTS + (uint32_t)hook_read8(BN6_CUSTOM_PICKS + n - 1) * BN6_ELEMENT_SIZE;
 	if (hook_read8(el + BN6_ELEMENT_TYPE) || (hook_read8(el + BN6_ELEMENT_SLOT) & 1) || hook_read8(el + BN6_ELEMENT_SOUL)) return 0;
 	/* (the chip as the deck has it: BN6 shows a Mega or Giga as "?" in link battles alone, 0x0802A54A, where UNITE stands not) */
-	int chip = hook_read16(hook_read32(el + BN6_ELEMENT_DECK)) & 0x1FF, kind = soulkinds_of(chip);
+	int chip = (int)chip_entry_id(hook_read16(hook_read32(el + BN6_ELEMENT_DECK))), kind = soulkinds_of(chip);
 	bool dark = soulkinds_dark(chip);
 	for (int s = 1; s <= SOULS_BN5; ++s) {
 		if (kinds5[s - 1] + ((breaks & SOULUNITE_BREAK_KIND) ? 1 : 0) != kind) continue;
@@ -228,7 +229,7 @@ static HookAct emblem_b(HookRegs *r, void *user) {
 	uint8_t given = hook_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_SLOT);
 	hook_write8(BN6_CUSTOM_PICKS + picks - 1, given);
 	uint32_t el = BN6_CUSTOM_ELEMENTS + (uint32_t)given * BN6_ELEMENT_SIZE;
-	int chip = hook_read16(hook_read32(el + BN6_ELEMENT_DECK)) & 0x1FF;
+	int chip = (int)chip_entry_id(hook_read16(hook_read32(el + BN6_ELEMENT_DECK)));
 	uint32_t icon = hook_read32(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_ICON_PTR);   /* (the records the game reads: chips.h) */
 	for (uint32_t i = 0; icon >= BUS && i < PICTURE_SIZE; i += 4)
 		hook_write32(BN6_CUSTOM_PICK_ICONS + (uint32_t)(picks - 1) * PICTURE_SIZE + i, hook_read32(icon + i));

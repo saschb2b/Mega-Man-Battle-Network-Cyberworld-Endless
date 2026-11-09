@@ -1,6 +1,8 @@
 /* Chaos Unison in BN6's engine (soulchaos.h). */
 #include "soulchaos.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -222,7 +224,7 @@ int soulchaos_list_make(const uint16_t folder[], uint16_t chips[SOULCHAOS_LIST_C
 	uint8_t count[BN6_FOLDER_ENTRIES];
 	int n = 0;
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		uint16_t id = folder[i] & 0x1FFu;
+		uint16_t id = (uint16_t)chip_entry_id(folder[i]);
 		if (!id || (!xreg_at(id) && !xreg_named(id))) continue;
 		int k = 0;
 		while (k < n && ids[k] != id) ++k;

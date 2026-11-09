@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "chip_entry.h"
 #include "emu.h"
 
 /* ---- the spec ---- */
@@ -257,6 +258,35 @@ bool xd_spec_parse(const char *text, Spec *s) {
 		if (!item_parse(s, t, eq + 1)) { fprintf(stderr, "xdiff: %s=%s is not understood\n", t, eq + 1); return false; }
 	}
 	return s->nfoes > 0;
+}
+
+/* (a GBA address in EWRAM) */
+static bool in_ewram(uint32_t a) { return a >= BN6_EWRAM && a < BN6_EWRAM_END; }
+
+void xd_folder_put(const FolderPlaces *p, const uint16_t *folder) {
+	uint32_t folders = p->rd32(p->toolkit + p->folders), marks = p->rd32(p->toolkit + p->marks);
+	if (!in_ewram(folders) || !in_ewram(marks)) { fprintf(stderr, "xdiff: no folder in this game's state\n"); return; }
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
+		uint32_t id = folder[i] & p->id_mask;
+		p->wr16(folders + 2 * i, folder[i]);
+		p->wr8(marks + id, (uint8_t)(p->rd8(p->keys + id) ^ p->key_xor));
+	}
+	p->wr8(p->regular, 0xFF);
+	for (uint32_t i = 0; p->tags && i < 2; ++i) p->wr8(p->tags + i, 0xFF);
+}
+
+/* The folder's chips in BN6's pack too, one of each chip and code at least: the battle's deal takes a chip of the folder only
+ * where its code is one of its record's and the pack counts one so (0x08006EA4), and gives BN6's junk chip 389 for it else
+ * (the chips' specs use codes BN6's records have) */
+void xd_pack_own(const uint16_t *folder) {
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), records = emu_read32(BN6_CHIP_TABLE_REF);
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && in_ewram(pack); ++i) {
+		uint32_t id = chip_entry_id(folder[i]), code = chip_entry_code(folder[i]), k = 0;
+		uint32_t at = id < BN6_PACK_IDS ? pack + BN6_PACK_ENTRY * id : BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
+		while (k < 4 && emu_read8(records + BN6_CHIP_RECORD_SIZE * id + BN6_CHIP_CODES + k) != code) ++k;
+		if (k == 4) k = 0;
+		if (!emu_read8(at + k)) emu_write8(at + k, 1);
+	}
 }
 
 /* (the opening's draws of the spec's keys paired from its end, xd_replay_setup_skip: with rng=replay against BN4's alone; false

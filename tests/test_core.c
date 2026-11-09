@@ -73,6 +73,7 @@
 #include "free_space_watch.h"
 #include "xattack_grow.h"
 #include "xchips.h"
+#include "chip_entry.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -4066,7 +4067,7 @@ static void test_xnavi_static(void) {
 	const XVirusFamily *o = &xnavi_objects_bn5;
 	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
 		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
-		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XN_DARK_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
@@ -4203,8 +4204,12 @@ static void test_free_space(void) {
 	const Region chips[] = {
 		{ "the records", CHIPS_RECORDS, CHIPS_RECORDS + CHIPS_IDS * BN6_CHIP_RECORD_SIZE },
 		{ "the names, 0-255", CHIPS_NAMES0, CHIPS_NAMES0 + CHIPS_NAMES_ROOM }, { "the names, 256-511", CHIPS_NAMES1, CHIPS_NAMES1 + CHIPS_NAMES_ROOM },
+		{ "the names, 512-767", CHIPS_NAMES2, CHIPS_NAMES2 + CHIPS_NAMES_ROOM }, { "the names, 768-1023", CHIPS_NAMES3, CHIPS_NAMES3 + CHIPS_NAMES_ROOM },
+		{ "the archives' words", CHIPS_TABLES, CHIPS_TABLES + 0x20u },
 		{ "the descriptions, 0-255", CHIPS_DESCS0, CHIPS_DESCS0 + CHIPS_DESCS_ROOM },
 		{ "the descriptions, 256-511", CHIPS_DESCS1, CHIPS_DESCS1 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 512-767", CHIPS_DESCS2, CHIPS_DESCS2 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 768-1023", CHIPS_DESCS3, CHIPS_DESCS3 + CHIPS_DESCS_ROOM },
 		{ "the routines", CHIPS_CODE, CHIPS_CODE + 0x400u }, { "the art", CHIPS_ART, CHIPS_FREE_END },
 	};
 	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
@@ -4279,8 +4284,8 @@ static void test_free_space(void) {
 		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
 		"the Souls' room: a grown table's entries past its room");
 	/* (BN6's RAM: its regions checked above, FREE_SPACE_RAM) */
-	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
-		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
+	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (BN6_PACK_EXT_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
+		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (BN6_PACK_EXT_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
 		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
 	CHECK(BN6_DARK_LISTS == RAM_DARK_LISTS && RAM_DARK_LISTS + 2u * BN5_DARK_LIST_SIZE == RAM_NAVIS && BN6_COLONEL_SIDES == RAM_NAVIS &&
@@ -4705,8 +4710,8 @@ static void test_all_star(void) {
 	free(R.data);
 	R.data = NULL;
 	R.layout = NULL;
-	CHECK(chip_entry_star(1 | 0 << 9) == (1 | 26 << 9) && chip_entry_star(72 | 18 << 9) == (72 | 26 << 9), "all star: a folder entry in *");
-	CHECK(chip_entry_star(0xFFFF) == 0xFFFF && chip_entry_star(0) == 0 && chip_entry_star(1 | 26 << 9) == (1 | 26 << 9), "all star: an empty entry, or one in *, kept");
+	CHECK(chip_entry_star(1 | 0 << CHIP_ID_BITS) == (1 | 26 << CHIP_ID_BITS) && chip_entry_star(72 | 18 << CHIP_ID_BITS) == (72 | 26 << CHIP_ID_BITS), "all star: a folder entry in *");
+	CHECK(chip_entry_star(0xFFFF) == 0xFFFF && chip_entry_star(0) == 0 && chip_entry_star(1 | 26 << CHIP_ID_BITS) == (1 | 26 << CHIP_ID_BITS), "all star: an empty entry, or one in *, kept");
 	uint8_t a[CHIP_PACK_ENTRY] = { 2, 1, 0, 3, 0x10, 0x7F, 0x20, 0x7F, 0, 0, 0x30, 0x7F };
 	chip_pack_star(a);
 	static const uint8_t a_want[CHIP_PACK_ENTRY] = { 6, 0, 0, 0, 0x10, 0x7F, 0, 0, 0, 0, 0, 0 };
@@ -4742,7 +4747,7 @@ static void test_folders(void) {
 		if (!c) continue;
 		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
 		for (int k = 0; k < 30; ++k) {
-			int id = c[k] & 0x1FF, code = c[k] >> 9;
+			int id = (int)chip_entry_id(c[k]), code = (int)chip_entry_code(c[k]);
 			const char *given = NULL;
 			for (unsigned q = 0; q < sizeof bn6_codes / sizeof *bn6_codes; ++q)
 				if (bn6_codes[q].id == id) given = bn6_codes[q].codes;
@@ -4938,7 +4943,7 @@ static void test_xchips(void) {
 	CHECK(xchips_code(none, 7) == 7, "xchips: a record of no codes leaves the code (%d)", xchips_code(none, 7));
 	/* (WhiCapsl twice, HiCannon, an empty slot both ways, and an id past
 	 * the table: three sit out, the first two named) */
-	const uint16_t folder[8] = { 1 | 0 << 9, 2 | 26 << 9, 2 | 26 << 9, 5 | 7 << 9, 0xFFFF, 0, 400 | 1 << 9, 3 | 4 << 9 };
+	const uint16_t folder[8] = { 1 | 0 << CHIP_ID_BITS, 2 | 26 << CHIP_ID_BITS, 2 | 26 << CHIP_ID_BITS, 5 | 7 << CHIP_ID_BITS, 0xFFFF, 0, 400 | 1 << CHIP_ID_BITS, 3 | 4 << CHIP_ID_BITS };
 	uint16_t out[2] = { 0, 0 };
 	int n = xchips_out(folder, 8, to_x, 6, out, 2);
 	CHECK(n == 3 && out[0] == 2 && out[1] == 5, "xchips: three of the folder's chips sit out, WhiCapsl and HiCannon first (%d: %d %d)", n, out[0], out[1]);
@@ -5104,6 +5109,43 @@ static void test_chip_code(void) {
  * chip registry, issue #82): the table as decided (Team Colonel's chips a
  * run can meet, one chip per name, the rest in BN6's free ids), its checks
  * failing on made-up rows that break each rule, and its lookups both ways. */
+/* A folder entry's form (src/core/chip_entry.h): nine bits as BN6 has
+ * them, ten for ten-bit chip ids, and the converter a run saved with
+ * nine-bit folders goes through once (docs/engine/saves.md) */
+static void test_chip_entry(void) {
+	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
+	 * gives it, id 511 *, none, empty) */
+	const uint16_t nine[6] = { 0x0001, 0x0201, 0x3785, 0x35FF, 0xFFFF, 0x0000 };
+	const uint16_t ten[6] = { 0x0001, 0x0401, 0x6D85, 0x69FF, 0xFFFF, 0x0000 };
+	bool same = true;
+	for (int i = 0; i < 6; ++i) {
+		same = same && chip_entry_widen(nine[i], 10) == ten[i] && chip_entry_widen(nine[i], 9) == nine[i];
+		uint16_t e = chip_entry_from9(nine[i]);
+		if (nine[i] != CHIP_ENTRY_NONE) same = same && chip_entry_id(e) == chip9_id(nine[i]) && chip_entry_code(e) == chip9_code(nine[i]);
+	}
+	CHECK(same, "chip entry: nine-bit entries widened to ten bits, and read alike in this build's form");
+	uint16_t folder[30];
+	for (int i = 0; i < 30; ++i) folder[i] = nine[i % 6];
+	chip_entries_from9(folder, 30);
+	bool all = true;
+	for (int i = 0; i < 30; ++i) all = all && folder[i] == chip_entry_widen(nine[i % 6], CHIP_ID_BITS);
+	CHECK(all, "chip entry: a folder converted in place");
+	/* (an id past 511 in ten bits: 600 in code C, and in *) */
+	uint16_t c600 = (uint16_t)(600u | 2u << 10), s600 = (uint16_t)(600u | 26u << 10);
+	CHECK(c600 == 0x0A58 && (c600 & 0x3FFu) == 600 && c600 >> 10 == 2 && (s600 & 0x3FFu) == 600 && s600 >> 10 == 26,
+		"chip entry: id 600 holds in ten bits beside its code");
+	CHECK(CHIP_ENTRY(1, 1) == chip_entry(1, 1) && chip_entry_id(chip_entry(CHIP_ID_MASK, 26)) == CHIP_ID_MASK,
+		"chip entry: the constant form and the function agree");
+	/* (the profile's Library to 1023: 600 in its own bytes, past BN6's flags) */
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	bool lib = meta_library_add(600) && meta_library_has(600) && !meta_library_has(601) && !meta_library_add(600) &&
+		profile.library_w[(600 - 512) / 8] && meta_library_add(1023) && meta_library_add(511) && profile.library_x[(511 - 320) / 8] &&
+		!meta_library_add(1024) && !meta_library_has(1024);
+	profile = keep;
+	CHECK(lib, "chip entry: the profile's Library holds ids to 1023");
+}
+
 static void test_chip_registry(void) {
 	char why[96] = "";
 	int bad = xreg_check(xreg_rows, xreg_count, why, sizeof why);
@@ -5135,8 +5177,9 @@ static void test_chip_registry(void) {
 	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
 		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
-	CHECK(xreg_free_id(203) && xreg_free_id(510) && !xreg_free_id(XREG_WIDE_REWARD) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) &&
-		!xreg_free_id(512), "registry: the free ids, BN6's own, its pseudo-chips' and the wide rewards' 511 not");
+	CHECK(xreg_free_id(203) && xreg_free_id(510) && xreg_free_id(512) && xreg_free_id(1023) && !xreg_free_id(XREG_WIDE_REWARD) &&
+		!xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(1024),
+		"registry: the free ids, to 1023 (ten bits), BN6's own, its pseudo-chips' and the wide rewards' 511 not");
 	/* (made-up rows, each breaking one rule) */
 	static const XChipReg twice[] = { { 9, 204, XREG_RECORD, 23, 0xFF, { 0 }, 0, 0 }, { 9, 205, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
 	static const XChipReg taken[] = { { 12, 221, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
@@ -5213,9 +5256,9 @@ static void test_chip_records(void) {
 	memset(ic, 0xC9, sizeof ic);
 	xrec_icon_recolour(ic, map);
 	CHECK(ic[0] == 0x39 && ic[0x7F] == 0x39, "records: an icon's two pixels a byte recoloured (%02X)", ic[0]);
-	uint8_t sits[64] = { 0 };
+	uint8_t sits[XREG_IDS / 8] = { 0 };
 	sits[204 >> 3] |= 1u << (204 & 7);
-	uint16_t deck[8] = { 1, 204 | 11 << 9, 5, 204 | 11 << 9, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+	uint16_t deck[8] = { 1, CHIP_ENTRY(204, 11), 5, CHIP_ENTRY(204, 11), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
 	unsigned first;
 	int taken = xrec_deck_sit_out(deck, 8, sits, 3, &first);
 	CHECK(taken == 2 && deck[0] == 1 && deck[1] == 5 && deck[2] == 0xFFFF && first == 2u, "records: two chips sit out of the deck, the second of its first "
@@ -5253,7 +5296,17 @@ static void test_chips_image(void) {
 	CHECK(!strcmp(ci.name, "BN5-9") && !strcmp(ci.codes, "LMN") && ci.mb == 10 && chips_sits_out(204) && !chips_sits_out(1) && chips_bn5(204) && !chips_from_bn5(),
 		"chips: BN5's WideSht1 without its ROM a placeholder of its codes, sitting out (%s %s %d)", ci.name, ci.codes, ci.mb);
 	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
-	CHECK(chips_record(511) && !chips_record(512) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204, "chips: 512 records, the registry's its id's sort place");
+	CHECK(chips_record(511) && chips_record(1023) && !chips_record(1024) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204,
+		"chips: 1024 records, the registry's its id's sort place");
+	/* (--dev alias=600: chip 600 a copy of Cannon, its record, name and description: ten-bit ids' proof) */
+	chips_alias(600, 1);
+	ChipInfo al;
+	chip_info(600, &al);
+	CHECK(!strcmp(al.name, "Cannon") && !strcmp(al.codes, "ABC*") && al.power == 40 && !memcmp(chips_record(600), chips_record(1), 0x2C),
+		"chips: an alias at 600 is Cannon, record and name (%s %s %d)", al.name, al.codes, al.power);
+	chip_info(601, &al);
+	CHECK(!al.name[0] || strcmp(al.name, "Cannon"), "chips: 601 none of its own");
+	chips_alias(0, 0);
 	chip_info(XREG_WIDE_REWARD, &ci);
 	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's (511, the wide rewards') has no name (%s)", ci.name);
 	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),
@@ -6885,8 +6938,73 @@ static void test_liberation_heal(void) {
 	CHECK(lib_darkloid_heal(&b, 700, 700) == 700, "heal at full HP: %d", lib_darkloid_heal(&b, 700, 700));
 }
 
+/* A map's mirror image and raised views made in place (area_src_mirror_in,
+ * area_src_raise_in: docs/engine/emulation/3ds-memory.md) hold what the
+ * copies hold, a raised view's mirror too, and the map is as it was, byte
+ * for byte, once each view is ended */
+static void view_map(AreaSrc *a, int tw, int th, int layers, unsigned seed) {
+	memset(a, 0, sizeof *a);
+	a->tw = tw; a->th = th; a->layers = layers; a->ex = 12; a->ey = 20; a->group = 0x90;
+	size_t cells = (size_t)tw * th, n = cells * 64;
+	for (int l = 0; l < layers; ++l) a->tile[l] = malloc(cells * 2);
+	a->px = malloc(n * 4); a->px0 = malloc(n * 4); a->front = malloc(n); a->idx = malloc(n);
+	a->hw = 3; a->hh = 5; a->hx0 = -2; a->hy0 = 1; a->hz = malloc(15);
+	a->rw = 4; a->rh = 2; a->rx0 = 3; a->ry0 = -1; a->rings = malloc(8);
+	a->sec[0] = calloc(2, sizeof(CoordCell)); a->nsec[0] = 1;
+	CHECK(a->px && a->px0 && a->front && a->idx && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
+	for (int l = 0; l < layers; ++l)
+		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)((seed = seed * 1103515245u + 12345u) >> 8);
+	for (size_t i = 0; i < n; ++i) {
+		seed = seed * 1103515245u + 12345u;
+		a->px[i] = seed; a->px0[i] = seed ^ 0x5A5A5A5Au; a->front[i] = (uint8_t)(seed >> 24); a->idx[i] = (uint8_t)(seed >> 16);
+	}
+	for (int i = 0; i < 15; ++i) a->hz[i] = (uint8_t)(i * 8);
+	for (int i = 0; i < 8; ++i) a->rings[i] = (uint8_t)(i + 1);
+}
+
+static bool same_bytes(const void *x, const void *y, size_t n) { return (!x && !y) || (x && y && !memcmp(x, y, n)); }
+
+/* Whether views x and y hold the same: their fields, tiles and pixels */
+static bool same_view(const AreaSrc *x, const AreaSrc *y) {
+	size_t cells = (size_t)x->tw * x->th, n = cells * 64;
+	bool ok = x->tw == y->tw && x->th == y->th && x->ex == y->ex && x->ey == y->ey && x->level == y->level && x->hw == y->hw && x->hh == y->hh
+		&& x->hx0 == y->hx0 && x->hy0 == y->hy0 && x->rw == y->rw && x->rh == y->rh && x->rx0 == y->rx0 && x->ry0 == y->ry0
+		&& same_bytes(x->hz, y->hz, (size_t)x->hw * x->hh) && same_bytes(x->rings, y->rings, (size_t)x->rw * x->rh);
+	for (int l = 0; l < 2; ++l) ok = ok && same_bytes(x->tile[l], y->tile[l], cells * 2);
+	for (int k = 0; k < 4; ++k) ok = ok && x->nsec[k] == y->nsec[k];
+	return ok && same_bytes(x->px, y->px, n * 4) && same_bytes(x->px0, y->px0, n * 4) && same_bytes(x->front, y->front, n) && same_bytes(x->idx, y->idx, n);
+}
+
+static void test_area_views(void) {
+	static const int z[] = { 8, 16, 48, 56, 64 };
+	for (int layers = 1; layers <= 2; ++layers) {
+		AreaSrc a, was, c, v, cm, vm;
+		view_map(&a, 5, 7, layers, 7u + (unsigned)layers);
+		view_map(&was, 5, 7, layers, 7u + (unsigned)layers);
+		CHECK(area_src_mirror(&a, &c) && area_src_mirror_in(&a, &v), "views: a mirror image made (%d layers)", layers);
+		CHECK(same_view(&c, &v), "views: the mirror made in place is the copy's (%d layers)", layers);
+		area_src_mirror_end(&a, &v);
+		area_src_free(&c);
+		CHECK(same_view(&a, &was), "views: the map as it was after its mirror (%d layers)", layers);
+		for (size_t k = 0; k < sizeof z / sizeof *z; ++k) {
+			CHECK(area_src_raise(&a, z[k], &c) && area_src_raise_in(&a, z[k], &v), "views: raised %d made (%d layers)", z[k], layers);
+			CHECK(same_view(&c, &v), "views: raised %d in place is the copy's (%d layers)", z[k], layers);
+			CHECK(area_src_mirror(&c, &cm) && area_src_mirror_in(&v, &vm), "views: raised %d's mirror made", z[k]);
+			CHECK(same_view(&cm, &vm), "views: raised %d's mirror in place is the copy's (%d layers)", z[k], layers);
+			area_src_mirror_end(&v, &vm);
+			area_src_free(&cm);
+			area_src_raise_end(&a, &v);
+			area_src_free(&c);
+			CHECK(same_view(&a, &was), "views: the map as it was after raised %d (%d layers)", z[k], layers);
+		}
+		area_src_free(&a);
+		area_src_free(&was);
+	}
+}
+
 int main(void) {
 	test_sha1();
+	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
 	test_liberation_team();
@@ -6964,6 +7082,7 @@ int main(void) {
 	test_xchips();
 	test_xtext();
 	test_chip_code();
+	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();
 	test_chips_image();

@@ -343,7 +343,9 @@
 08006660 cosine_table_twin
 080068E8 BN6_HBLANK_DMA_SET
 08006AAE souls_track
+08006E80 BN6_PACK_MARK_STORE
 08006E84 deck_ownership_test
+08006E96 BN6_PACK_MARK_TEST
 08006EA4 pack_count_read
 08007280 bn6_ai_data.from
 08007368 BN6_SPAWN_ENTITIES
@@ -397,6 +399,7 @@
 0800A152 win_side_1_0
 0800A2F0 battle_flags
 0800A4D2 BN6_DECK_DEALT
+0800A584 marks_cheat_test
 0800A71E read_by
 0800A8F8 gate_twin
 0800AA06 BN6_QUEUE_HEAD
@@ -772,6 +775,7 @@
 0801BDDE BN6_PLACE_JITTER
 0801BE2A bn5_chips_code_4
 0801BF10 entry_4
+0801C050 ten_bit_chip.chips_icons_letters
 0801C168 dropped_hp_0_by
 0801C840 BN6_HP_LOW_STEP
 0801CBFE BN6_FACE_DIGITS
@@ -779,6 +783,8 @@
 0801CD04 BN6_FACES_REF
 0801CD08 BN6_FACES
 0801CD74 BN6_FACE_PALS_REF
+0801D348 ten_bit_chip.chips_icons_letters_2
+0801D354 ten_bit_chip.chips_icons_letters_3
 0801D814 BN6_FACE_COUNTER
 0801DC7C object_put_four_slot_table
 0801E666 BN6_FACE_OF_FORM2
@@ -807,13 +813,16 @@
 08020E54 BN6_NAVI_POWERS
 080210DD navi_base_stats
 080211A0 RomLayout.battle_gem_rewards
-080213AC starting_state.folder
+080213AC BN6_PRESET_FOLDERS
 080213E8 chip_folders.rom_foldertable_6_preset_folders
-0802158C chip_folders.rom_foldertable_6_preset_folders_2
-080215C8 chip_folders.rom_foldertable_6_preset_folders_3
-08021604 chip_folders.rom_foldertable_6_preset_folders_4
-08021640 chip_folders.rom_foldertable_6_preset_folders_5
+0802158C BN6_PRESET_FOLDERS2
+080215C8 chip_folders.rom_foldertable_6_preset_folders_2
+08021604 chip_folders.rom_foldertable_6_preset_folders_3
+08021640 chip_folders.rom_foldertable_6_preset_folders_4
 08021AB0 BN6_CHIP_TABLE_REF
+08021AE0 BN6_ENTRY_SPLIT
+08021AE2 folder_own
+08021AEC BN6_ENTRY_SPLIT_MASK
 08021AEE BN6_GIVE_CHIPS
 08021B92 BN6_TAKE_CHIPS
 08021BE4 BN6_PACK_TOTAL_TAIL
@@ -831,6 +840,7 @@
 080254F8 souls_code_bn6_3
 08026840 bn6f_sub_8026840_screen_state_cleared
 08026954 BN6_COMPACT_CALL
+0802696E custom_screen
 08026A28 partner_own_custom
 08026AA4 third_entry
 08026BF4 partner_own_custom_2
@@ -847,8 +857,12 @@
 08027310 BN6_MOOD_FROM_SCRIPT
 08027410 BN6_DUST_PHASES
 08027412 BN6_DUST_PHASES_NEXT
+08027D10 BN6_CHIP_NAME_OF
+08027D12 ten_bit_chip.names_descriptions_archives
 08027D2C chip_registry.names_words
 08027D30 chip_registry_7
+08027D34 BN6_CHIP_DESC_OF
+08027D36 ten_bit_chip.names_descriptions_archives_2
 08027D50 chip_registry.descriptions
 08027D54 chip_registry.0x0811b3bc
 08027EC6 BN6_UNITE_STAND
@@ -899,6 +913,7 @@
 0802A408 soul_passives.6
 0802A440 into_bn6_hand_size_set
 0802A494 BN6_HAND_SIZE_SET
+0802A55C BN6_ENTRY_CHEAT
 0802A57A BN6_EMBLEM_LIT
 0802A87C BN6_VB_PICK
 0802AB54 virus_battler
@@ -918,6 +933,9 @@
 0802C10A ds_chip_ai_test_bn5_chip
 0802C114 entry_bn5_chip_ai_enter
 0802C2D0 BN6_NEW_VIRUS_DATA
+0802C54C BN6_REWARD_SPLIT
+0802C556 ten_bit_chip.reward
+0802C558 ten_bit_chip.reward_2
 0802C7C4 chip_registry.names_words_2
 0802C7C8 chip_registry_10
 0802CCB4 BN6_CHIP_ROUTINES
@@ -930,6 +948,7 @@
 0802D65E BN6_DELETE_RARE
 0802E09A bn5_chips_code.bit
 0802E112 one_setter
+0802E1B4 BN6_LINK_CHIP_BOUND
 0802E3DC with_battle_flag_0x40
 0802E4B8 dark_invis_control
 0802E4E4 dark_invis_start
@@ -1080,6 +1099,7 @@
 080ABF5C BN6_RARE_BATTLES
 080AC180 BN6_REWARD_PICK
 080AC45A chip_registry_13
+080AC4DA link_battle
 080AC59A chip_registry_14
 080AC60E chip_registry_15
 080AC6CA chip_registry_16
@@ -1257,6 +1277,7 @@
 0810AF2C mettaur_held_chips
 0810AFEC mettaur_code
 0810B224 mettaur_state_table
+0810B466 chips_attacks
 08113C78 bn5_navi_held
 0811A9BC chip_registry.descriptions_2
 0811A9C0 chip_registry.0x0811b3bc_2
@@ -1285,6 +1306,10 @@
 08121FF8 chip_registry_24
 0812204C chip_registry.names_words_8
 08122050 chip_registry_25
+081224A0 BN6_EDITOR_LIST_OUT
+081224C2 kept_editor_items_shifts
+081224D4 BN6_EDITOR_LIST_IN
+08122502 folder_editor
 0812260C chip_registry_26
 081226CE chip_registry_27
 081265FC BN6_KEY_NAMES_PTRS.2

@@ -24,6 +24,7 @@
  * them; the plan in play's count is the report's verdict. */
 #include "economy_report.h"
 
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -143,12 +144,12 @@ static uint16_t reward_pick(const Encounter *e, int bust, bool guardian, int dep
 	int k = pair * 2 + rng_range(0, 1) + (rng_range(0, 99) < LOW_HP_SHARE ? 10 : 0);
 	uint16_t v = enemy_drop(id, k);
 	if (v == 0xFFFF || v >> 14) return v;
-	int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+	int chip = (int)chip9_id(v), code = (int)(chip9_code(v) & 0x1F);
 	if (guardian && (chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip))) return (uint16_t)(1 << 14 | loot_guardian_zenny(depth));
 	char c = code >= 26 ? '*' : (char)('A' + code);
 	if ((k & 1) && econ_keep_by(ECON_LEVER_LEAN, depth, run.layer_seed ^ (uint32_t)id * 2654435761u ^ (uint32_t)k * 40503u))
 		c = loot_fit_code(chip, c, true);
-	return (uint16_t)(chip | (c == '*' ? 26 : c - 'A') << 9);
+	return chip9_entry((unsigned)chip, (unsigned)(c == '*' ? 26 : c - 'A'));
 }
 
 /* A busting level by the assumed mix (econ_bust_weight), or the fixed one */
@@ -171,7 +172,7 @@ static void gain_reward(LayerTally *t, uint16_t v, int from) {
 	double *chips = from == FROM_GEM ? &t->gem_chip : from == FROM_GUARDIAN ? &t->g_chip : &t->bt_chip;
 	double *zenny = from == FROM_GEM ? &t->gem_zenny : from == FROM_GUARDIAN ? &t->g_zenny : &t->bt_zenny;
 	if (kind == 0) {
-		gain_chip(t, v & 0x1FF, (v >> 9 & 0x1F) >= 26 ? '*' : (char)('A' + (v >> 9 & 0x1F)));
+		gain_chip(t, (int)chip9_id(v), (chip9_code(v) & 0x1F) >= 26 ? '*' : (char)('A' + (chip9_code(v) & 0x1F)));
 		*chips += 1;
 	} else if (kind == 1) {
 		*zenny += amount;
@@ -254,7 +255,7 @@ static void layer_mystery(LayerTally *t, int depth, int *fragments) {
 		if (reg && o->param >= 1) { reg = false; t->md_keys += 1; continue; }
 		if (frag) { frag = false; ++*fragments; t->md_keys += 1; continue; }
 		LootFind f = loot_mystery_roll(o->param, depth);
-		if (f.kind == LOOT_FIND_CHIP) { gain_chip(t, f.value, f.code); t->md_chip += 1; t->md_id[f.value & 0x1FF] += 1; }
+		if (f.kind == LOOT_FIND_CHIP) { gain_chip(t, f.value, f.code); t->md_chip += 1; t->md_id[(unsigned)f.value & CHIP_ID_MASK] += 1; }
 		else if (f.kind == LOOT_FIND_ZENNY) { t->md_zenny += f.value; zenny_run += f.value; }
 		else if (f.kind == LOOT_FIND_BUGFRAGS) t->md_frags += f.value;
 		else t->md_hpmem += 1;

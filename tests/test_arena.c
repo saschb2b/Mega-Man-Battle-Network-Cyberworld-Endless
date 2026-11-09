@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "arena_format.h"
+#include "chip_entry.h"
 #include "arena_input.h"
 #include "arena_link.h"
 #include "arena_link_net.h"
@@ -194,7 +195,7 @@ static void link_latency(void) {
 static OnlineLoadout starter(void) {
 	OnlineLoadout l;
 	memset(&l, 0, sizeof l);
-	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) l.folder[i] = (uint16_t)((1 + i % 20) | (i % 27) << 9);
+	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) l.folder[i] = (uint16_t)((1 + i % 20) | (i % 27) << CHIP_ID_BITS);
 	l.pack[5][0] = 3;
 	l.board[0] = 0x2A;
 	l.grid[24] = 1;
@@ -214,7 +215,7 @@ static void check(void) {
 	assert(arena_loadout_check(&l, why, sizeof why));
 	l.folder[7] = 0xFFFF;   /* (an empty entry is no chip) */
 	assert(arena_loadout_check(&l, NULL, 0));
-	l.folder[8] = (uint16_t)(1 | 27u << 9);
+	l.folder[8] = (uint16_t)(1 | 27u << CHIP_ID_BITS);
 	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "code 27"));
 	l = starter();
 	l.max_hp = 0;
@@ -222,13 +223,13 @@ static void check(void) {
 	/* full rules, every NetBattle's (no ROM here, as on either game): BN5's chips in the folder, BN6's blanks the registry
 	 * fills, the pack's extension and the Souls go; the codes and HP are held as BN6 holds them */
 	l = starter();
-	l.folder[7] = (uint16_t)(411 | 12u << 9);   /* MrkCan1 M */
+	l.folder[7] = (uint16_t)(411 | 12u << CHIP_ID_BITS);   /* MrkCan1 M */
 	l.folder[8] = 205;                         /* WideSht2, a blank of BN6's */
 	l.pack[411][0] = 2;
 	l.pack[511][3] = 1;
 	l.souls = 0x04;
 	assert(arena_loadout_check(&l, why, sizeof why));
-	l.folder[9] = (uint16_t)(411 | 27u << 9);
+	l.folder[9] = (uint16_t)(411 | 27u << CHIP_ID_BITS);
 	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "code 27"));
 	l.folder[9] = 0xFFFF;
 	l.max_hp = 10000;
@@ -272,7 +273,7 @@ static void install(void) {
 	assert(!arena_loadout_install(&m, &l, why, sizeof why) && strstr(why, "folder"));
 	put32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS, 0x02002178u);
 	put32(BN6_TOOLKIT + BN6_TOOLKIT_PACK, 0x02002230u);
-	l.folder[8] = (uint16_t)(1 | 27u << 9);
+	l.folder[8] = (uint16_t)(1 | 27u << CHIP_ID_BITS);
 	assert(!arena_loadout_install(&m, &l, why, sizeof why) && at16(0x02002178u) == 0xEEEE);
 	l = starter();
 	assert(arena_loadout_install(&m, &l, why, sizeof why) && !outside);
@@ -415,7 +416,7 @@ static void loadout_bytes(void) {
 	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "HP"));
 	l.hp = 400;
 	/* the receiver's refusals are the local ones */
-	l.folder[8] = (uint16_t)(1 | 27u << 9);
+	l.folder[8] = (uint16_t)(1 | 27u << CHIP_ID_BITS);
 	n = arena_loadout_pack(&l, b, sizeof b);
 	assert(arena_loadout_unpack(b, n, &back, &carried, NULL, 0) && !arena_loadout_check(&back, why, sizeof why) && strstr(why, "code 27"));
 	/* a NaviCust past what the message holds does not go */
@@ -776,7 +777,7 @@ static void formats(void) {
 	static OnlineLoadout l, out;
 	memset(&l, 0, sizeof l);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		l.folders[0][i] = (uint16_t)(411 | 12u << 9);      /* BN5's MrkCan1 M */
+		l.folders[0][i] = (uint16_t)(411 | 12u << CHIP_ID_BITS);      /* BN5's MrkCan1 M */
 		l.folders[1][i] = (uint16_t)(1 + i);                 /* BN6's own, in A */
 	}
 	l.folders[0][3] = 5;
@@ -792,7 +793,7 @@ static void formats(void) {
 	assert(!memcmp(out.folder, l.folders[1], sizeof out.folder) && out.regular == 4 && out.tag[0] == 2 && out.tag[1] == 7);
 	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.pack[214][1] == 1 && out.pack[5][2] == 2);
 	arena_format_carry(&l, 0, &out);
-	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
+	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << CHIP_ID_BITS));
 	/* (what full rules carry, both games check alike) */
 	char why[160];
 	out.max_hp = 100;
@@ -939,7 +940,7 @@ static void outbox(void) {
 /* a partner's messages checked (team_check.h): BN6's picks (the hand dealt, once each, one code with '*' or one chip, five at
  * most), the forms his MegaMan holds, his Souls once a battle, ColonelSoul's chip, and a Program Advance against made-up
  * lists in BN6's recipe layout (n, kind, its id, its chips) */
-#define E(chip, code) ((uint16_t)((chip) | (code) << 9))
+#define E(chip, code) ((uint16_t)((chip) | (code) << CHIP_ID_BITS))
 static uint8_t pa_rom[0x80];
 static uint32_t pa_read(void *c, uint32_t at, unsigned bytes) {
 	(void)c;

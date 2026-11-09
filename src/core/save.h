@@ -132,6 +132,10 @@ typedef struct {
 	/* the extras the last run switched off (run.extras_off): the setup
 	 * starts from them */
 	uint16_t last_extras_off;
+	/* the Library's ids 512-1023, a bit each, beside `library_x`: ten-bit
+	 * chip ids' (docs/multirom/bn4-chips.md, Past 511); a profile saved
+	 * before reads them 0 */
+	uint8_t library_w[64];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
@@ -167,6 +171,11 @@ void profile_load(void);
 bool save_exists(void);
 bool save_run(void);
 bool load_run(void);
+/* The run load_run read was saved with nine-bit folders where this build's
+ * are ten (chip_entry.h): its run.folder and its state's folders are
+ * converted once (director_folder.c), and then it is done */
+bool save_state_nine(void);
+void save_state_nine_done(void);
 /* The saved run without loading it (none from before the current save format). */
 bool peek_run(Run *out);
 /* Deletes the run's save and its game state. */

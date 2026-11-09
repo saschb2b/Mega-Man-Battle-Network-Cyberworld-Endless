@@ -280,6 +280,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-09",
       "what": "BN4's MagTect (type 0x26, ids 0x31-0x36) moved, the third late family (AI 74, ids 0x2FC-0x301): its update's shake entered as hook 3, the can-move check's third form copied, its sounds 0xB8 and 0xF8 the pool's 0x32 and 0x33; bn4_battle.h BN4_MAGTECT_*, BN4_CAN_MOVE_THIRD (docs/rom/bn4.md, MagTect moved). The differential pairs a family's draws in the opening from its end where BN4's opening made more (legit.json's bn4 opening_draws; tools/xdiff_bn4.py opening_skips, the spec item setupskip)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids, unit 1's first part (docs/multirom/bn4-chips.md): the census of BN6's nine-bit sites read and kept by tools/chip_ids.py (docs/rom/chips-code.md, Ten-bit chip ids: BN6_ENTRY_SPLIT, BN6_ENTRY_SPLIT_MASK, BN6_ENTRY_CHEAT, BN6_REWARD_SPLIT, BN6_LINK_CHIP_BOUND, BN6_EDITOR_LIST_OUT, BN6_EDITOR_LIST_IN in bn6_chips.h; BN6_FLAG_LIBRARY_IDS in bn6.h); src/core/chip_entry.h; the profile's Library to 1023; protocol v16."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids' installer (src/emu/xchips_wide.c: the census's 116 halfwords and the preset folders, BN6_PRESET_FOLDERS and BN6_PRESET_FOLDERS2 in bn6_chips.h), inert at nine bits; tried at ten bits: the autopilot, the folder editor and the differential as at nine."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids and the saves (docs/engine/saves.md): RUN_MAGIC \"CWEC\" at ten bits, a run saved with nine-bit folders converted once after its state loads (BN6_FOLDERS in bn6_chips.h)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids live (docs/rom/chips-code.md, Ten-bit chip ids: BN6_CHIP_NAME_OF, BN6_CHIP_DESC_OF, BN6_PACK_MARK_STORE, BN6_PACK_MARK_TEST in bn6_chips.h; docs/engine/saves.md: RUN_MAGIC CWED)."
     }
   ],
   "experiments": [
@@ -321,6 +337,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "python3 build.py xdiff magtect_v1 magtect_v2 magtect_v3 (rng replay, lag 1): each PASS over 1200 fight frames. First FAIL at t1 on its +0x36, +0x64 and +0x9C: its shake draws in every unpaused frame of the opening, BN4's 18 (frames 132-149) against BN6's 16 (72-87), and the setup's replay gave BN6's last BN4's sixteenth; with the opening's draws paired from its end, FAIL at t143-t239 on its sounds until their rows named the pool's slots, then INCONCLUSIVE at t177-t273 on MegaMan's collision word +0x0C (his slide's direction, which the comparator explains, read as a pointer while his hit bits were 3) until that word was held to its byte. Four mutations each FAIL magtect_v1: its 0xF8 at the pool's first slot (t239), a CurAction left at BN4's (t39), its shake every other frame (t1), its battle sprite's list entry aimed at Kilby's (t1).",
       "meaning": "MagTect joins the visitors (BN4's ninth); a family whose update draws in the opening is proved, the engines' two opening frames named in the comparison.",
       "link": "../multirom/families.md"
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-09",
+      "name": "Ten bits against nine",
+      "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
+      "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
+      "link": "../multirom/bn4-chips.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",

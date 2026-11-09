@@ -7,6 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "chip_entry.h"
+
 /* Elements: BN6's first wheel (Aqua beats Fire, Elec Aqua, Wood Elec, Fire
  * Wood), an enemy's HP word and a chip's attack element; then its second
  * (Sword beats Wind, Wind Cursor, Cursor Breaker, Breaker Sword), an

@@ -32,6 +32,7 @@ typedef struct {
 	bool mapall;    /* the layer's map whole, as if every panel were seen (a capture of the map: tools/before_after.py) */
 	int folder;     /* folder=ID: the run's folder all chip ID in * (a capture of one chip's battles, the first hand all of it); 0 none */
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
+	int alias;      /* alias=ID: chip ID a copy of Cannon, BN6's chip 1 (chips_alias: ten-bit chip ids' proof past 511) */
 	int pack;       /* pack=N: a copy of each of the first N chips in the pack, in its first code (the folder editor's pack, issue #75) */
 	int programs;   /* programs=N: a copy of each of the first N NaviCust programs, in a colour the ROM draws (the NaviCustomizer, issue #76) */
 	int program;    /* program=P: a copy of program P too, in the first colour the ROM draws (a draft's held count, docs/game/navicust.md) */

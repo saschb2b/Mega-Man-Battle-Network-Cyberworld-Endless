@@ -1,15 +1,15 @@
 ---
 type: Feature
 title: "The server and the wire"
-description: "Protocol v15, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
+description: "Protocol v16, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
 ---
 
 # The server and the wire
 
-Protocol v15 ([shared/online/README.md](../../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v15`; v7 added the
+Protocol v16 ([shared/online/README.md](../../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v16`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
 BYE, maintenance and which side is behind: A dropped link, above; v11
@@ -20,7 +20,8 @@ and link bars in SNAPSHOT, its round trip in PING; v14 the emotes: an
 emote aimed, its answer flagged, the beat it starts on, twelve emotes and
 a burst of three then one a second: [Emotes](square/emotes.md); v15 a team
 challenge's format and two MegaMen a side, four seats in one battle:
-[Team NetBattles](arena-in-brief.md#team-netbattles)). The
+[Team NetBattles](arena-in-brief.md#team-netbattles); v16 chip ids to 1023, for
+[ten-bit chip ids](../multirom/bn4-chips.md)). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of

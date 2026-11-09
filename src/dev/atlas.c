@@ -4,6 +4,7 @@
  * own tiles and colours, with its objects marked; a report line per layer
  * says how the tile picks went. */
 #include "atlas.h"
+#include "layer_sizes.h"
 #include "navstudy.h"
 #include "town.h"
 
@@ -479,6 +480,7 @@ int atlas_run(const char *spec) {
 	tiles_measure = true;
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
+	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);
 	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
 	if (biomes[0] == 'x') { xrom_sources(dir, atoi(biomes + 1)); return 0; }
 	if (biomes[0] == 'a' && biomes[1] >= '0' && biomes[1] <= '9') { xrom_area(dir, atoi(biomes + 1), seeds); return 0; }

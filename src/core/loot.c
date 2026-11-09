@@ -1,5 +1,7 @@
 #include "loot.h"
 
+#include "chip_entry.h"
+
 #include <string.h>
 
 #include "data.h"
@@ -153,7 +155,7 @@ void loot_gem_rewards(int depth, uint16_t out[4]) {
 		int id = roll_chip(depth, 2, &code);
 		char c = loot_folder_code(id, true);
 		if (c) code = c;
-		out[k] = (uint16_t)((id & 0x1FF) | (code == '*' ? 26 : code - 'A') << 9);
+		out[k] = chip_entry((unsigned)id & CHIP_ID_MASK, (unsigned)(code == '*' ? 26 : code - 'A'));
 	}
 	int zenny = 1600 + depth * 120;
 	if (run.threat < 6) out[3] = (uint16_t)(0x4000 | (zenny > 0x3FFF ? 0x3FFF : zenny));
@@ -751,18 +753,18 @@ char loot_folder_code(int id, bool star) {
 	return star && memchr(ci.codes, '*', (size_t)ci.ncodes) ? '*' : 0;
 }
 
-static uint8_t folder_copies[512];
+static uint8_t folder_copies[CHIPS_IDS];
 
 void loot_folder_counts(const uint16_t *folder, int n) {
 	memset(folder_copies, 0, sizeof folder_copies);
 	for (int i = 0; folder && i < n; ++i)
-		if (folder_copies[folder[i] & 0x1FF] < 255) ++folder_copies[folder[i] & 0x1FF];
+		if (folder_copies[chip_entry_id(folder[i])] < 255) ++folder_copies[chip_entry_id(folder[i])];
 }
 
-int loot_folder_copies(int id) { return id >= 0 && id < 512 ? folder_copies[id] : 0; }
+int loot_folder_copies(int id) { return id >= 0 && id < CHIPS_IDS ? folder_copies[id] : 0; }
 
 bool loot_folder_full(int id) {
-	if (id < 0 || id >= 512 || !folder_copies[id]) return false;
+	if (id < 0 || id >= CHIPS_IDS || !folder_copies[id]) return false;
 	ChipInfo ci;
 	chip_info(id, &ci);
 	int most = ci.mb < 20 ? 5 : ci.mb < 30 ? 4 : ci.mb < 40 ? 3 : ci.mb < 50 ? 2 : 1;
@@ -772,7 +774,7 @@ bool loot_folder_full(int id) {
 void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]) {
 	int count[26] = { 0 };
 	for (int i = 0; i < n; ++i) {
-		int c = folder[i] >> 9;
+		int c = (int)chip_entry_code(folder[i]);
 		if (c < 26) ++count[c];
 	}
 	/* (a code three chips hold: one a hand can be built on) */

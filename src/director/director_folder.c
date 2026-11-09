@@ -4,6 +4,8 @@
  * Trader's trade. */
 #include "director_folder.h"
 
+#include "chip_entry.h"
+
 #include <string.h>
 
 #include "bytes.h"
@@ -45,7 +47,7 @@ bool folder_old_chips_out(void) {
 	uint16_t folder[BN6_FOLDER_ENTRIES];
 	folder_now(folder);
 	for (int i = 0; i < BN6_FOLDER_ENTRIES && !chips_from_bn5(); ++i)
-		if (folder[i] != 0xFFFF && chips_bn5(folder[i] & 0x1FF)) return true;
+		if (folder[i] != 0xFFFF && chips_bn5((int)chip_entry_id(folder[i]))) return true;
 	return false;
 }
 
@@ -62,6 +64,7 @@ void folder_made_save(void) { save_write_blob("run.folder", FOLDER_MADE_MAGIC, f
 
 void folder_made_load(void) {
 	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
+	else if (save_state_nine()) chip_entries_from9(folder_made, BN6_FOLDER_ENTRIES);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
@@ -102,11 +105,25 @@ void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
  * where the Standard folder's chips, given at NEW GAME, played (session
  * 30). Every fresh layer and CONTINUE mark the folder's chips again, so a
  * run saved before this is mended. */
+/* A run saved with nine-bit folders, its state just loaded where this
+ * build's are ten (save_state_nine): Folder1, Folder2 and the ExtraFolder
+ * (eToolkit +0x48, 30 entries each) in this build's form, once */
+static void folders_from9(uint32_t data) {
+	if (!save_state_nine()) return;
+	save_state_nine_done();
+	for (uint32_t i = 0; i < BN6_FOLDERS * BN6_FOLDER_ENTRIES; ++i) {
+		uint16_t e = chip_entry_from9(emu_read16(data + 2 * i));
+		const uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
+		emu_write(data + 2 * i, b, 2);
+	}
+}
+
 void own_folder_chips(void) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
+	folders_from9(data);
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		int id = emu_read16(data + 2u * (uint32_t)i) & 0x1FF;
+		int id = (int)chip_entry_id(emu_read16(data + 2u * (uint32_t)i));
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
 	}
 }
@@ -148,7 +165,7 @@ void dev_folder(void) {
 /* A folder entry's count in the pack (bn6f getOffsetToQuantityOfChipCode:
  * the code's place among the chip record's four, else the first) */
 static uint32_t pack_count_at(int entry) {
-	int id = entry & 0x1FF, code = entry >> 9, slot = 0;
+	int id = (int)chip_entry_id(entry), code = (int)chip_entry_code(entry), slot = 0;
 	const uint8_t *rec = chips_record(id);
 	for (int k = 0; rec && k < 4; ++k) if (rec[BN6_CHIP_CODES + k] == code) { slot = k; break; }
 	uint32_t at = pack_entry(id);
@@ -179,7 +196,7 @@ void set_start_folder(void) {
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint8_t b[2] = { (uint8_t)chips[i], (uint8_t)(chips[i] >> 8) };
 		emu_write(data + 2u * (uint32_t)i, b, 2);
-		flag_set(BN6_FLAG_LIBRARY + (chips[i] & 0x1FF));   /* (in the Library, as GiveFolder puts them) */
+		flag_set(BN6_FLAG_LIBRARY + chip_entry_id(chips[i]));   /* (in the Library, as GiveFolder puts them) */
 	}
 	own_folder_chips();
 }
@@ -237,7 +254,7 @@ void star_folder_pack(void) {
  * shows every chip held in any run, and a Chip Trader's prize, new to the
  * Library first, is new across runs. */
 void library_to_game(void) {
-	for (int id = 1; id < META_LIBRARY_IDS; ++id)
+	for (int id = 1; id < BN6_FLAG_LIBRARY_IDS; ++id)
 		if (meta_library_has(id)) flag_set(BN6_FLAG_LIBRARY + id);
 	own_library_chips();
 }
@@ -251,7 +268,7 @@ void library_to_game(void) {
 void own_library_chips(void) {
 	uint32_t marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
-	for (uint32_t id = 1; id < META_LIBRARY_IDS; ++id)
+	for (uint32_t id = 1; id < BN6_FLAG_LIBRARY_IDS; ++id)
 		if (flag_get(BN6_FLAG_LIBRARY + (int)id)) emu_write8(marks + id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + id) ^ BN6_CHIP_KEY_XOR));
 }
 
@@ -267,7 +284,7 @@ void library_from_game(void) {
 	}
 	/* (BN6's chips a run can hold, and the older net's own: issue #82, the
 	 * run's collection counts every registered chip) */
-	for (int id = 1; id < META_LIBRARY_IDS; ++id)
+	for (int id = 1; id < BN6_FLAG_LIBRARY_IDS; ++id)
 		if ((chip_pool_class(id) >= 0 || chip_pool_older(id)) && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
 	if (added) profile_save();
 }
@@ -301,7 +318,7 @@ int director_pack_now(uint16_t *entry, uint8_t *count, int most) {
 			if (!known) chip_info((int)id, &ci);
 			known = true;
 			int code = (int)k < ci.ncodes ? (ci.codes[k] == '*' ? 26 : ci.codes[k] - 'A') : 26;
-			entry[n] = (uint16_t)(id | (unsigned)code << 9);
+			entry[n] = chip_entry((unsigned)id, (unsigned)code);
 			count[n++] = (uint8_t)c;
 		}
 	}
