@@ -28,10 +28,6 @@ typedef struct {
  * offset `slot` at them. */
 bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra);
 
-/* The bytes the layer's last coordinate data took, written or past its
- * region (the layers' sizes, src/dev/layer_sizes.c). */
-size_t coords_layer_bytes(void);
-
 /* The same for the town (its own space): walls around the cells `floor`
  * says are walkable (8-unit world cells), and `extra` (its triggers). */
 bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const CoordExtra *extra);
@@ -39,5 +35,10 @@ bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const Coord
 /* ... or only `extra`: a town copied whole brings its original's own walls
  * and heights. */
 bool coords_write_raw(uint32_t slot, const CoordExtra *extra);
+
+/* The bytes the last coordinate data took, written or past its region:
+ * the layer's, after coords_write (the layers' sizes,
+ * src/dev/layer_sizes.c). */
+size_t coords_layer_bytes(void);
 
 #endif

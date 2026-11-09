@@ -951,17 +951,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
 	put32(out + 8, (uint32_t)(12 + cells * 2));
-	/* (its region holds the largest map BN6's buffer takes as literal
-	 * blocks, town_plan's bound, and says so where it would not:
-	 * docs/engine/emulation/free-space.md) */
-	_Static_assert(12 + 4 + BN6_TILEMAP_MAX + (BN6_TILEMAP_MAX + 7) / 8 + 3 <= FREE_TOWN_TILE_MAP_END - FREE_TOWN_TILE_MAP,
-		"the largest town map past its region");
-	if (12 + lz > FREE_TOWN_TILE_MAP_END - FREE_TOWN_TILE_MAP) {
-		fprintf(stderr, "town: a tile map of %u bytes, past its region's %u: not written\n", (unsigned)(12 + lz),
-			(unsigned)(FREE_TOWN_TILE_MAP_END - FREE_TOWN_TILE_MAP));
-		free(out);
-		return false;
-	}
+	if (12 + lz > FREE_TOWN_TILE_MAP_END - TOWN_TILEMAP_AT) { fprintf(stderr, "town: a tile map of %u bytes past its region: not written\n", (unsigned)(12 + lz)); free(out); return false; }
 	emu_write(TOWN_TILEMAP_AT, out, 12 + lz);
 	free(out);
 	emu_write32(0x08000000u + desc + 8, TOWN_TILEMAP_AT);

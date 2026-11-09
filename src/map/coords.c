@@ -21,7 +21,8 @@
 #define COORD_AT FREE_COORDS          /* generated coordinate data */
 #define TOWN_COORD_AT FREE_TOWN_COORDS      /* the town's */
 
-/* (the bytes the layer's last coordinate data took: the layers' sizes) */
+/* (the bytes the last coordinate data took, a layer's or the town's: the
+ * layers' sizes) */
 static size_t layer_bytes;
 
 /* One cell's shape: key, then lowest z, value, height, type. */
@@ -187,6 +188,21 @@ bool coords_write_raw(uint32_t slot, const CoordExtra *extra) {
 	return ok;
 }
 
+/* The data written and the map's pointer at it, within its region; told
+ * always where it is not: the layers' region is sized by the largest layer
+ * over 300 seeds, and one past it is not built
+ * (docs/engine/emulation/free-space.md, Fail loudly). */
+static bool put(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const uint8_t *data, size_t n) {
+	if (n > end_bus - at_bus) {
+		fprintf(stderr, "coords: %u bytes of coordinate data, past their region's %u at %08x: not written\n", (unsigned)n,
+			(unsigned)(end_bus - at_bus), (unsigned)at_bus);
+		return false;
+	}
+	emu_write(at_bus, data, n);
+	emu_write32(0x08000000u + slot, at_bus);
+	return true;
+}
+
 static bool write_at(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
 	enum { WALLS_MAX = 16384, TRIGGERS_MAX = PAD_CELLS * 16 };
 	static Cell sec[4][WALLS_MAX];
@@ -221,18 +237,8 @@ static bool write_at(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const Coo
 	uint8_t *out = malloc(16 + len + len / 8 + 16);
 	for (int s = 0; s < 4; ++s) put32(out + s * 4, (uint32_t)at[s]);
 	size_t lz = lz_literal(d, len, out + 16);
-	if (at_bus == COORD_AT) layer_bytes = 16 + lz;
-	/* (within its region, told always where it is not: the layers' region
-	 * is sized by the largest layer over 300 seeds, and one past it is not
-	 * built; docs/engine/emulation/free-space.md, Fail loudly) */
-	bool fits = 16 + lz <= end_bus - at_bus;
-	if (!fits)
-		fprintf(stderr, "coords: %u bytes of coordinate data, past their region's %u at %08x: not written\n", (unsigned)(16 + lz),
-			(unsigned)(end_bus - at_bus), (unsigned)at_bus);
-	else {
-		emu_write(at_bus, out, 16 + lz);
-		emu_write32(0x08000000u + slot, at_bus);
-	}
+	layer_bytes = 16 + lz;
+	bool fits = put(at_bus, end_bus, slot, out, 16 + lz);
 	free(out);
 	free(d);
 	return fits;

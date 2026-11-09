@@ -145,8 +145,8 @@ BN5's six (`x0`-`x5`) and BN4's five (`x15`-`x19`), on runs of seeds
 1-300, at every depth of the net's cycle and one past it (1-20: every size
 of layout and every guardian's layer) and in each of the four side layers'
 kinds at the largest size: 7,200 layers an area, 216,000 in all, every one
-built (the nine areas between, `x6`-`x14`, which `build.py sizes` builds
-too, were not measured that day). The coordinate data counts the most
+built; the nine areas between, BN5's dark layers' looks (`x6`-`x14`),
+over seeds 1-30 alone that day, their largest coordinates 18,536 bytes. The coordinate data counts the most
 warp pads a layer's coordinates take (784 trigger cells, 7,056 bytes as
 literal blocks), which the layers built there have none of; a dark
 layer's board and the Net Square's plaza, built otherwise, are not among

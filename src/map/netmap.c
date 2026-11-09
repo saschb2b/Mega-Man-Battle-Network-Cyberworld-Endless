@@ -452,9 +452,11 @@ static bool write_tilemap(const Learned *L) {
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
 	put32(out + 8, (uint32_t)(12 + cells * 2)); /* the second layer, in the decompressed buffer */
-	/* (its region holds the largest map BN6's buffer takes as literal
-	 * blocks, and says so where it would not: docs/engine/emulation/free-space.md) */
-	_Static_assert(12 + 4 + BN6_TILEMAP_MAX + (BN6_TILEMAP_MAX + 7) / 8 + 3 <= FREE_TILE_MAP_END - FREE_TILE_MAP, "the largest tile map past its region");
+	/* (its region, and the town's, hold the largest map BN6's buffer takes
+	 * as literal blocks, and say so where one would not:
+	 * docs/engine/emulation/free-space.md) */
+	_Static_assert(12 + LZ_LITERAL_MAX(BN6_TILEMAP_MAX) <= FREE_TILE_MAP_END - FREE_TILE_MAP, "the largest tile map past its region");
+	_Static_assert(12 + LZ_LITERAL_MAX(BN6_TILEMAP_MAX) <= FREE_TOWN_TILE_MAP_END - FREE_TOWN_TILE_MAP, "the largest town map past its region");
 	tilemap_bytes = 12 + lz;
 	if (12 + lz > FREE_TILE_MAP_END - FREE_TILE_MAP) {
 		fprintf(stderr, "netmap: a tile map of %u bytes, past its region's %u: not written\n", (unsigned)(12 + lz), (unsigned)(FREE_TILE_MAP_END - FREE_TILE_MAP));
