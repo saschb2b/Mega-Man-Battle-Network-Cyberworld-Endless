@@ -37,8 +37,9 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  XV_MOVED_MAX   /* the families', the Navis' and the played chips' blocks of code (BN5's 25 families' 80 or so, and
-                                      * their clones; the Navis'; the chips' units') */
+#define FAMILY_MAX  4096    /* the spec's families', the Navis' and the played chips' blocks of code (BN5's 25 families' 80 or so, and
+                               their clones; the Navis', BN4's too; the chips' units'): of the ranges moved, past 1000, those a spec
+                               watches; more refuse the log, never drop a block unwatched (xvirus_moved.h) */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -547,14 +548,14 @@ static bool navi_code(const XvMoved *m) {
 }
 
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {
-	XdLog *log = game_of(game) ? log_of(game) : NULL;
+	int n;
+	const XvMoved *m = xvirus_moved(&n);   /* (every range moved, or no log: xvirus_moved.h) */
+	XdLog *log = m && game_of(game) ? log_of(game) : NULL;
 	if (!log) return NULL;
 	log->game = game;
 	log->alone = alone;
 	log->navis = navis;
 	log->g = game_of(game);
-	static XvMoved m[XV_MOVED_MAX];
-	int n = xvirus_moved(m, XV_MOVED_MAX);
 	/* (the spec's families' code, BN4's Navis' among them (xd4_families: their code in their own room, XN_BN4_CODE), the Navis'
 	 * where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
@@ -562,21 +563,25 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	for (int i = 0; i < n; ++i)
 		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
 		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
-		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to))) {
-			if (log->nfam < FAMILY_MAX) log->fam[log->nfam++] = m[i];
-			else fprintf(stderr, "xdiff: the families' and Navis' code past %d blocks: %08x not watched\n", FAMILY_MAX, (unsigned)m[i].from);
-		}
+		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to)))
+			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */
-	for (int i = 0; alone && i < xvirus_control.nblocks + xnavi_control.code.nblocks && log->nfam < FAMILY_MAX; ++i) {
+	for (int i = 0; alone && i < xvirus_control.nblocks + xnavi_control.code.nblocks; ++i) {
 		const XvBlock *b = i < xvirus_control.nblocks ? &xvirus_control.blocks[i] : &xnavi_control.code.blocks[i - xvirus_control.nblocks];
-		log->fam[log->nfam++] = (XvMoved){ b->start, b->start, b->end - b->start };
+		if (!xd_log_key(log, b->start, b->start, b->end - b->start)) return NULL;
 	}
 	return log;
 }
 
-void xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len) {
-	if (log && log->nfam < FAMILY_MAX) log->fam[log->nfam++] = (XvMoved){ from, to, len };
+bool xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len) {
+	if (!log) return true;
+	if (log->nfam == FAMILY_MAX) {
+		fprintf(stderr, "xdiff: the code a log watches past %d blocks (%08x): the log is refused\n", FAMILY_MAX, (unsigned)from);
+		return false;
+	}
+	log->fam[log->nfam++] = (XvMoved){ from, to, len };
+	return true;
 }
 
 

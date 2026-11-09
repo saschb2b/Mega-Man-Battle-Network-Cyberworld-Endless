@@ -2067,7 +2067,7 @@
    "comment": "extras_text.h. Menu words, short and plain: what each extra brings to a run, as KeyItem's box says what an item is, two lines at most.",
    "domain": "Other",
    "kind": "speech",
-   "lines": 9,
+   "lines": 8,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "extras_text"
@@ -2705,7 +2705,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2302,
+  "boxes": 2301,
   "domains": {
    "Arena": {
     "files": [
@@ -2859,8 +2859,8 @@
      "src/online/emote_strip_text.c"
     ],
     "flagged": 15,
-    "lines": 264,
-    "speech": 249
+    "lines": 263,
+    "speech": 248
    },
    "Powers": {
     "files": [
@@ -3114,7 +3114,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2007,
+  "lines": 2006,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3553,7 +3553,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1447
+  "speech": 1446
  },
  "version": 1,
  "conversations": [
@@ -4072,7 +4072,7 @@
   {"container":"emote_strip_text:strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_on_l","line":10,"lines":["emote_strip_text:strip_text_on_l:0"],"speakers":["Mr.Prog"],"title":"Strip text on l","when":""},
   {"container":"emote_strip_text:strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_aim","line":14,"lines":["emote_strip_text:strip_text_aim:0","emote_strip_text:strip_text_aim:1"],"speakers":["MegaMan","Mr.Prog"],"title":"Whom it goes to","when":"whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not"},
   {"container":"emote_strip_text:strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_kept","line":22,"lines":["emote_strip_text:strip_text_kept:0"],"speakers":["MegaMan"],"title":"A favourite just kept","when":"a favourite just kept: \"ON L+UP\" for way 0-3"},
-  {"container":"extras_text:extra_words.extras","domain":"Other","file":"src/core/extras_text.c","id":"extras_text:extra_words.extras","line":13,"lines":["extras_text:extra_words.extras:0.1","extras_text:extra_words.extras:1.1","extras_text:extra_words.extras:1.2","extras_text:extra_words.extras:2.1","extras_text:extra_words.extras:3.0","extras_text:extra_words.extras:3.1","extras_text:extra_words.extras:4.1","extras_text:extra_words.extras:5.0","extras_text:extra_words.extras:5.1"],"speakers":["MegaMan"],"title":"Extra words: extras","when":""},
+  {"container":"extras_text:extra_words.extras","domain":"Other","file":"src/core/extras_text.c","id":"extras_text:extra_words.extras","line":13,"lines":["extras_text:extra_words.extras:0.1","extras_text:extra_words.extras:1.1","extras_text:extra_words.extras:2.1","extras_text:extra_words.extras:3.0","extras_text:extra_words.extras:3.1","extras_text:extra_words.extras:4.1","extras_text:extra_words.extras:5.0","extras_text:extra_words.extras:5.1"],"speakers":["MegaMan"],"title":"Extra words: extras","when":""},
   {"container":"fork_words:calls","domain":"Other","file":"src/layer/fork_words.c","id":"fork_words:calls","line":15,"lines":["fork_words:calls:0.first","fork_words:calls:1.first","fork_words:calls:1.too","fork_words:calls:2.first","fork_words:calls:2.too","fork_words:calls:3.first","fork_words:calls:3.too","fork_words:calls:4.first","fork_words:calls:4.too"],"speakers":["MegaMan"],"title":"What he can sense, strongest first","when":"What he can sense, strongest first: a call each (`first`, `too` when it follows another)"},
   {"container":"fork_words:fork_words","domain":"Other","file":"src/layer/fork_words.c","id":"fork_words:fork_words","line":25,"lines":["fork_words:fork_words:0","fork_words:fork_words:1","fork_words:fork_words:2","fork_words:fork_words:3"],"speakers":["MegaMan"],"title":"Fork words: his read of a layer that holds `holds`","when":"His read of a layer that holds `holds` (HOLDS_* bits, net.h), `dark` a dark layer's board: its two strongest calls, boxes marked as ta_talk's; NULL at a portal with nothing to tell (the Net Dealer waits on every act's first layer)"},
   {"container":"glitch_words:ta_glitch_warp","domain":"Other","file":"src/layer/glitch_words.c","id":"glitch_words:ta_glitch_warp","line":17,"lines":["glitch_words:ta_glitch_warp:0","glitch_words:ta_glitch_warp:1"],"speakers":["MegaMan"],"title":"Glitch warp","when":""},
@@ -4344,10 +4344,9 @@
   {"boxes":[{"pages":[["a word for each","AnalyticsWord"]],"speaker":"Screen","text":"a word for each AnalyticsWord"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"fragment":true,"id":"analytics_text:words:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"a word for each AnalyticsWord","text_hash":"8883b5b4b78a"},
   {"boxes":[{"pages":[["Change it any time","in Options."]],"speaker":"Screen","text":"Change it any time in Options."}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":23,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options.","text_hash":"e37b9887522a"},
   {"boxes":[{"pages":[["# statistics: on","sends anonymous play","statistics to the"],["game's own Umami","#","(umami.saschb2b.com):"],["the system and","version, the setups","runs take, how"],["# far they get and","which guardians win.","No names, no IDs."],["off sends nothing.","# The game asks at","its first start"],["(README.md,","Anonymous","statistics)."]],"speaker":"Screen","text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n"}],"container":"analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_setting_note:0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n","text_hash":"921b2dee734d"},
-  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"Missions, on","code":"comma-space"}],"pages":[["BN5's Liberation","Missions, on a dark"],["layer past some","forks"]],"speaker":"MegaMan","text":"BN5's Liberation Missions, on a dark layer past some forks"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space","pages"],"fragment":true,"id":"extras_text:extra_words.extras:0.1","kind":"speech","line":13,"note":"(in EXTRA_*'s order; the tournament's \"not in runs yet\" goes once its bracket reaches runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"BN5's Liberation Missions, on a dark layer past some forks","text_hash":"53afbc2c66c7"},
-  {"boxes":[{"flags":[{"at":"arena, in","code":"comma-space"}],"pages":[["Three Navis in a row","in act 3's arena, in","some runs"]],"speaker":"MegaMan","text":"Three Navis in a row in act 3's arena, in some runs"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space"],"fragment":true,"id":"extras_text:extra_words.extras:1.1","kind":"speech","line":14,"note":"(in EXTRA_*'s order; the tournament's \"not in runs yet\" goes once its bracket reaches runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"Three Navis in a row in act 3's arena, in some runs","text_hash":"13d1ee100379"},
-  {"boxes":[{"pages":[["Not in runs yet"]],"speaker":"MegaMan","text":"Not in runs yet"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:1.2","kind":"speech","line":14,"note":"(in EXTRA_*'s order; the tournament's \"not in runs yet\" goes once its bracket reaches runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"Not in runs yet","text_hash":"536db943a70f"},
-  {"boxes":[{"pages":[["A rare glitching","warp to a layer that","comes apart"]],"speaker":"MegaMan","text":"A rare glitching warp to a layer that comes apart"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:2.1","kind":"speech","line":15,"note":"(in EXTRA_*'s order; the tournament's \"not in runs yet\" goes once its bracket reaches runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"A rare glitching warp to a layer that comes apart","text_hash":"be5d56215dda"},
+  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"Missions, on","code":"comma-space"}],"pages":[["BN5's Liberation","Missions, on a dark"],["layer past some","forks"]],"speaker":"MegaMan","text":"BN5's Liberation Missions, on a dark layer past some forks"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space","pages"],"fragment":true,"id":"extras_text:extra_words.extras:0.1","kind":"speech","line":13,"note":"(in EXTRA_*'s order; the third, a note dim under the line, none now that the tournament is in runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"BN5's Liberation Missions, on a dark layer past some forks","text_hash":"53afbc2c66c7"},
+  {"boxes":[{"flags":[{"at":"arena, in","code":"comma-space"}],"pages":[["Three Navis in a row","in act 3's arena, in","some runs"]],"speaker":"MegaMan","text":"Three Navis in a row in act 3's arena, in some runs"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space"],"fragment":true,"id":"extras_text:extra_words.extras:1.1","kind":"speech","line":14,"note":"(in EXTRA_*'s order; the third, a note dim under the line, none now that the tournament is in runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"Three Navis in a row in act 3's arena, in some runs","text_hash":"13d1ee100379"},
+  {"boxes":[{"pages":[["A rare glitching","warp to a layer that","comes apart"]],"speaker":"MegaMan","text":"A rare glitching warp to a layer that comes apart"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:2.1","kind":"speech","line":15,"note":"(in EXTRA_*'s order; the third, a note dim under the line, none now that the tournament is in runs, docs/game/tournament.md)","speaker":"MegaMan","speakers":["MegaMan"],"text":"A rare glitching warp to a layer that comes apart","text_hash":"be5d56215dda"},
   {"boxes":[{"pages":[["Virus Battler"]],"speaker":"MegaMan","text":"Virus Battler"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:3.0","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Virus Battler","text_hash":"3ced1f77bba6"},
   {"boxes":[{"flags":[{"at":"end, in","code":"comma-space"}],"pages":[["BN6's Virus Battler","at a side path's","end, in some acts"]],"speaker":"MegaMan","text":"BN6's Virus Battler at a side path's end, in some acts"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space"],"fragment":true,"id":"extras_text:extra_words.extras:3.1","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"BN6's Virus Battler at a side path's end, in some acts","text_hash":"14173709d5d1"},
   {"boxes":[{"pages":[["A flame of darkness","offers a DarkChip in","each act"]],"speaker":"MegaMan","text":"A flame of darkness offers a DarkChip in each act"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:4.1","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A flame of darkness offers a DarkChip in each act","text_hash":"3e0786dfb032"},

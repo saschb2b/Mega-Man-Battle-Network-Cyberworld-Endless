@@ -42,6 +42,11 @@
                                              0x0800AAAE; BN6_APPEAR's 0, 0x080163D6): r0 1 where r5 heads it (BN4_QUEUE_HEAD's twin) */
 #define BN6_QUEUE_ENTER       0x0800AA1Au /* ... r5 put at queue r0's end where it is not in it: r0 1 where it was put */
 #define BN6_QUEUE_LEAVE       0x0800AA40u /* ... r5 taken out of queue r0, the rest moved up (0x0800AA64) */
+#define BN6_COLL_REGION_SET   0x0801A082u /* r5's collision's region changed (r1 what it is, r2 what it strikes, r3 its +0xE): the
+                                             set-up's tail (0x08019FB4 from 0x08019FDC), the time stop's bit in +0x30 (BN4_COLL_REGION_SET's twin) */
+#define BN6_COLL_REGION_CLEAR 0x0801A074u /* r5's collision's +1 cleared, r0 its collision data back (BN4's 0x08012DC0's twin) */
+#define BN6_SPAWN_ENEMY_2E    0x0800774Cu /* movs r0,#0xa; strh r0,[r5,#0x2e]: an enemy's +0x2E at its spawn (BN4's spawn gives the
+                                             same), which the collision set-up copies into its +7 (BN6_COLL_OBJ_2E) */
 #define BN6_APPEAR_BLINK_FIRST 0x080163FCu /* movs r0,#2 (0x2002), its first blink step's count stored to +0x20 as BN6_APPEAR's
                                              step 0 ends (0x080163FE); the blink (0x0801641A) counts it down and puts 2 back at
                                              0x08016424 each step. The BN4 differential's opening alignment makes it 3
@@ -184,6 +189,13 @@
                                              0x43-0x48): the families' pre-step hook (xvirus_shim.h) */
 #define BN6_VIRUS_STATE_STEP  0x0810A348u /* ... past those cases, the state's step (ldr r0,[r5,#0x58]: the AI index, its state table,
                                              0x0801B1C4), where a family's pre-step goes on (r5 the virus, nothing else live) */
+#define BN6_VIRUS_STATE_CALL  0x0810A352u /* ... its call of the state runner (bl 0x0801B1C4), r0 the state table by the AI index
+                                             (BN6_FAMILY_TABLES' first, 0x0810A350), r5 the virus: a summoned enemy's state 0
+                                             taken from the summon's table there (xnavi_summoned.c) */
+#define BN6_T1_SPAWN_KIND     0x05        /* u8 how it came: the battle actor setup writes its argument here and at its AI data's
+                                             +2 (0x080076F0-0x080076F2): 0 one a battle begins with, 1 one spawned into a fight
+                                             under way (BN6_SPAWN_ENEMY_1), which BN6's generic state 0 (0x08016380) reads at +2;
+                                             2 a summon's, BN4's mark (BN4_SUMMON_MARK), written by the summon's shim alone */
 #define BN6_AI_INDEX          1           /* an AI's data's (BN6_T1_AI_DATA) +1: its AI index, the third byte of its enemy id's triple */
 #define BN6_CLEAR_FLAG2       0x0801A176u /* object_clearFlag2: r0 the bits cleared from its collision data's BN6_COLL_STRUCK (+0x40) */
 #define BN6_SONGS_EMPTY_FIRST 0x26        /* BN6's empty song slots (RomLayout.song_table), each a shared header of no tracks: from, */

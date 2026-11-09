@@ -1,6 +1,6 @@
 {
  "page": {
-  "description.html": "19958791760d5a5ecb3da448f23ff451fbc50613",
+  "description.html": "d8b6747c8ae4b78ec044005b91a4597f983dc0f8",
   "cover.png": "49dc58c693b187b9ff3d61a112027bd99759b347",
   "banner.png": "86fa03db0e5920a1540ebd3c2e5f4c7831579fa1",
   "embed.png": "c03e168ec2175596d53a882277532d2b7dffa4a6",
@@ -18,6 +18,11 @@
  "devlog": {
   "since": "0.1.0",
   "posts": [
+   {
+    "version": "0.20.0",
+    "title": "0.20.0: Red Sun joins the run",
+    "url": "https://saschb2b.itch.io/cyberworld-endless/devlog/1764135/0200-red-sun-joins-the-run"
+   },
    {
     "version": "0.19.0",
     "title": "0.19.0: Your screen, your sound",

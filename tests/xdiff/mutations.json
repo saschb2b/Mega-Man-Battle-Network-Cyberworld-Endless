@@ -1740,6 +1740,38 @@
    "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's Roll's pool slot 0xE0) made her pool's fourth slot, 0xD0 (her 0x132's): another of her sounds where the shockwave sets out (caught at t73, the family's sounds)"
   },
   {
+   "name": "Melody's CurAction off by one",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8D02:200A"
+   ],
+   "what": "its state 6's set of CurAction 7 (BN4 0x080B8D02: movs r0,#7, the recipe's BN6's 9) written 0xA: its next state left for another (caught at t1, its CurAction)"
+  },
+  {
+   "name": "Melody's region left as BN6's init's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8C1E:2101"
+   ],
+   "what": "its init's set-up run again at its spawn's end (BN4 0x080B8C1E: movs r1,#0x35, hook 5 entered there, bn4_twins.INIT_AGAIN) made movs r1,#1: its collision's alliance word BN6's virus init's region 1, without BN4's bit 2 (caught at t1, its collision's +0x30)"
+  },
+  {
+   "name": "Melody's +0x2E left as its spawn's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8C38:0A:1"
+   ],
+   "what": "its init's table of +0x2E by version (BN4 0x080B8C38, copied with it, its version 0's byte 30) made 10, what BN6's and BN4's spawns give: as if its init's own step were not run again (caught at t1, its +0x2E and its collision's +7)"
+  },
+  {
+   "name": "Melody's CurAction compared as BN4's",
+   "spec": "melody4_v1",
+   "poke": [
+    "080B8FE6:2808"
+   ],
+   "what": "its state's compare of its CurAction with 8 (BN4 0x080B8FE6: cmp r0,#8, the recipe's BN6's 0xA) left at BN4's 8: its sound 0xC2 never played where it reads BN6's 0xA (caught at t20, the family's sounds)"
+  },
+  {
    "name": "Roll's summoned Mettaur arriving as BN6's",
    "spec": "roll_v1",
    "poke": [
@@ -1762,6 +1794,110 @@
     "0800AA06:0810A952"
    ],
    "what": "the summoned Mettaur's test of the appear queue's head (BN6_QUEUE_HEAD through its r0 shim) aimed at BN6's family nullsub: once it has appeared it never heads the queue (caught at t1060, its +7, CurAction and +0x20)"
+  },
+  {
+   "name": "Roll V2's summon list's first id another",
+   "spec": "roll_v2",
+   "poke": [
+    "080BC3EB:01:1"
+   ],
+   "what": "her V2's summon list (BN4_ROLL_SUMMONS' second pointer, BN4 0x080BC3EA: 2, then 0x02 and 0x0E, copied with her as raw data) its first id 0x02 made 0x01: her decision picks Mettaur V1 where BN4's picks Mettaur2 (caught at t963, her AI data's +0xAC, the id picked)"
+  },
+  {
+   "name": "Roll V2's shot of V1's kind",
+   "spec": "roll_v2",
+   "poke": [
+    "080BC301:06:1"
+   ],
+   "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9) V2's 7 made 6: her decision gives MegaMan's state 45 V1's shot (caught at t380, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll SP's shot of V3's kind",
+   "spec": "roll_sp",
+   "poke": [
+    "080BC303:08:1"
+   ],
+   "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS) SP's 9 made 8: her decision gives MegaMan's state 45 V3's shot (caught at t370, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll SP's summon list's first id another",
+   "spec": "roll_sp",
+   "poke": [
+    "080BC3F2:03:1"
+   ],
+   "what": "her SP's summon list (BN4 0x080BC3F1: 2, then 0x04 and 0x10) its first id 0x04 made 0x03: her decision picks Mettaur3 where BN4's picks MettaurSP (caught at t943, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll V2's second summon Billy3",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "080BC3EC:0F:1"
+   ],
+   "what": "her V2's summon list's second id (BN4 0x080BC3EC) 0x0E made 0x0F: her second summon Billy3 where BN4's is Billy2 (caught at t2015, her AI data's +0xAC as she picks it)"
+  },
+  {
+   "name": "Roll V2's summoned Billy arriving as BN6's",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "08F395C4:00000000:4"
+   ],
+   "what": "the summon's word past her summon's shim (src/emu/xnavi_summoned.c; it stands for BN4's generic state 0's branch at 0x0800FCCE, +5 2 or more on to BN4_SUMMONED_APPEAR 0x0801002A) made 0: no table, each summoned enemy runs its own state 0; her Mettaur2's is BN4's, its arrival at t998 alike, her Billy2's BN6's generic one, BN6's own appear of an enemy spawned into a fight under way (0x080164A0): caught at t2050, its flash effects missing and its +0, +0xA, +0x20)"
+  },
+  {
+   "name": "Roll's pool song on her Mettaur's player",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "0815A264:00090009:4"
+   ],
+   "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its players), where her install put her 0x131 (BN4's player 22) on BN6's player 10, made 9, the player her summoned Mettaur's 0x8B (slot 0xE0) keeps from BN4: the two begun in one frame, the 0x8B cuts her 0x131 (caught at t1880, the family's sounds)"
+  },
+  {
+   "name": "WoodMan's CurAction off by one",
+   "spec": "woodman_v1",
+   "poke": [
+    "080C9078:200B"
+   ],
+   "what": "his decision's set of CurAction 8 (BN4 0x080C9078: movs r0,#8 before BN4_SET_ACTION, the recipe's BN6's 0xA) written 0xB: his step's state (MegaMan's 106) left for his 107 (caught at t1, his CurAction)"
+  },
+  {
+   "name": "WoodMan's AI block at BN4's +0x64",
+   "spec": "woodman_v1",
+   "poke": [
+    "080C8F88:3664"
+   ],
+   "what": "his decision's pointer to his own block (BN4 0x080C8F88: adds r6,#0x64, the recipe's BN6's +0x80, AI_BLOCKS) left BN4's: his sub-states read and written among BN6's AI data's fields (caught at t1, his AI data's +0x65, +0x6C and +0x81)"
+  },
+  {
+   "name": "WoodMan's attack's end with another CurAction",
+   "spec": "woodman_v1",
+   "poke": [
+    "0800CA56:2009"
+   ],
+   "what": "his copy of the attack's end with its CurAction alone (BN4_ATTACK_END_BARE, 0x0800CA4A, copied with him: its movs r0,#6 at 0x0800CA56, the recipe's BN6's 8) written 9: his step's end sends him to his MegaMan's 77 where BN4's goes back to his decision (caught at t113, his CurAction)"
+  },
+  {
+   "name": "WoodMan's shot of another kind",
+   "spec": "woodman_v1",
+   "poke": [
+    "080F50E4:11:1"
+   ],
+   "what": "his copied MegaMan state 108's kinds' table (BN4 0x080F50E4, raw with its routine 0x080F509C: 0x10, 0x11, 0x12, 0x12 by his version, the third kind's 0x0B's r4) V1's byte made 0x11, V2's: his shot spawned as another kind (caught at t199, the shot's +4, +0x35 and +0x36)"
+  },
+  {
+   "name": "WoodMan's sound at another pool slot",
+   "spec": "woodman_v1",
+   "poke": [
+    "080F4D42:2032"
+   ],
+   "what": "his copied MegaMan state 106's sound 0xA2 (BN4 0x080F4D42: movs r0,#0xa2, the recipe's pool slot 0x33) made the pool's first slot, 0x32: his sound 0x8F where BN4 plays 0xA2 (caught at t44, the family's sounds)"
+  },
+  {
+   "name": "WoodMan's shot spawned as his 0x94",
+   "spec": "woodman_v1",
+   "poke": [
+    "080CE812:20CD"
+   ],
+   "what": "the spawn of his third kind's 0x0B (BN4 0x080CE812: movs r0,#0xb, the recipe's dispatch number 0xCC, the first of the third kind's numbers past 0xFF, xrecipe_bn4.TYPE_MORE) made 0xCD, his 0x94's: the dispatch runs his 0x94's copy for it (caught at t199, the objects in play and the run order)"
   }
  ]
 }

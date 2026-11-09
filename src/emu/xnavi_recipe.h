@@ -143,6 +143,13 @@ typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, 
  * (xnavi_init.c, xvirus_shim_summon) */
 typedef struct { uint8_t from; uint16_t to; } XnSummonId;
 typedef struct { uint32_t at; XvRef panels; uint32_t masks[4]; const XnSummonId *ids; int nids; uint16_t sound; } XnSummon;
+/* A field its code loads by an immediate BN6's place of it is past (`ldrh rd,[rb,#was]` where BN6 keeps the field at `now`,
+ * past the 0x3E an ldrh reaches: BN4's collision data's final damage +0x28, BN6's +0x80), then compares with 0 (`cmp rd,#0`):
+ * the two instructions made a call to a shim of its home (`movs rd,#now; ldrh rd,[rb,rd]; cmp rd,#0; bx lr`), whose flags
+ * the branch after reads (xnavi_init.c; lr on its routine's stack there: the generator checks the routine pushes it;
+ * docs/multirom/bn4-navis.md, WoodMan built) */
+typedef struct { uint32_t at; uint8_t rd, rb; uint16_t was, now; } XnFar;
+#define XN_FAR_SIZE 8u
 
 /* A call its game's update makes between its pre-step and its state runner, past one (BN4's JunkMan's two; docs/multirom/
  * bn4-navis.md, JunkMan built): `call` (its own code) made by a bl from a shim of its home its hook A (table 2, which BN6's
@@ -177,6 +184,10 @@ typedef struct {
 	                               invisible and keeps their marker before every state, 0x08013F12, where BN6's status step calls its
 	                               twin nowhere), through stubs of its home (xnavi_init.c); addr 0 none. SearchMan's, who hides */
 	const XnSummon *summon;     /* its summon's shim (BN4's Roll's), NULL none */
+	uint32_t palettes;          /* its palette by version (BN4's Navis': BN4_NAVI_PALETTE's, a byte each, V1's the lowest), set at its
+	                               spawn's end over BN6's actor init's (0 for versions 0-3, BN6_NAVI_PALETTE_VERSIONS); 0 none */
+	const XnFar *fars;          /* its loads of a field past an immediate's reach in BN6, through shims of its home (BN4's WoodMan's) */
+	int nfars;
 	const XnPreCall *pre;       /* its update's calls between its pre-step and its runner, made by its hook A's shim (its .hook_a then
 	                               BN6's empty hook), NULL none */
 	int npre;

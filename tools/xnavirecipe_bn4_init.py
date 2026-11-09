@@ -225,8 +225,7 @@ def spawns1(f, alloc):
                 continue
             m = f.moved1[ty]
             if 'as' not in m:
-                m['as'] = alloc.types[kind]
-                alloc.types[kind] += 1
+                m['as'] = X4.type_number(f, alloc, kind)
                 f.types.append((kind, m['as'], ty))
             f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
                                why=f'its companion\'s type {ty:#x} (the first kind): moved, the dispatch\'s {m["as"]:#x}'))

@@ -2578,6 +2578,15 @@
         "why": "BN6's battle actor setup writes 0xFF at AI data +0xE (0x08007764-0x08007766). BN4's +0xE (a player's loadout's chip charge, BN4_AI_LOADOUT + 2) is 0 on a Navi's side and never read by GutsMan's code: BN6's own"
       },
       {
+        "name": "a Navi's version, BN6's",
+        "part": "ai",
+        "navi_ai": [
+          "0x16",
+          "0x17"
+        ],
+        "why": "BN6's battle actor setup writes its enemy id's triple +0 (0x080182B4, r0 the id) at AI data +0x16 and +0x17 (0x0800771A-0x0800771E), which for a moved Navi's ids is its version (src/emu/xnavi_install.c ids_set: { v, 1, ai }): 0 for V1, so no V1 spec saw it; roll_v2 shows 1, roll_v3 2, roll_sp 3. BN6's code that reads it for a Navi: the actor init's palette (0x0800F334: BN6_NAVI_PALETTE_VERSIONS, 0x0800F354, its byte by the version times the step, 0 for versions 0-3, so V1's palette for every one) and the per-version table reads 0x0800FE12 and 0x0800FE36, which BN6's own Navis call and no call of a BN4 Navi's recipe names (src/emu/xnavi_bn4.c); a scan of BN6's ROM for ldrb at +0x16 or +0x17 within eight halfwords of a load from the object's +0x58 found those three engine routines and per-Navi and per-virus code past 0x0809E000 alone. BN4's +0x16 and +0x17 of a Navi's side's AI data (BN4_AI_OF_SIDE) stay 0, and Roll's code reads her AI data out of its blocks at +0x9-+0xB, +0x30 and +0x32 alone (tools/xnavirecipe_bn4.py's AI tracker), its blocks from +0x64: BN6's own"
+      },
+      {
         "name": "a Navi's target, BN6's",
         "part": "ai",
         "navi_ai": [
@@ -2621,6 +2630,7 @@
       {"name": "ThunderMan's 0x71's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T3", "type": "0x71", "bytes": {"0x05": ["0x00", "0x41"], "0x06": ["0x00", "0x03"]}}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4 as a word; ThunderMan's spawner of his 0x71 (0x080DB6CE: push {r4,lr}; push {r0-r3,r5}; movs r0,#0x71; the spawn) then writes +4's byte alone from the caller's r3 (0x080DB6E0, strb r4,[r0,#4] after pop {r1-r5}), and its one caller, his state 85 (MegaMan's in BN4, copied with him: its bl at 0x080F22B2, r3 0 at 0x080F22B0) leaves r4 what the state runner held (its pop {r4} at 0x080F22A6), so +5 to +7 hold its upper bytes: in BN4 0 (0x13), in BN6 his AI data's address's (0x41, 0x03 at +5 and +6). No code 0x71 runs reads its +5 to +7: its type routine (0x080DB540), init (0x080DB564), update (0x080DB5CE) and dying (0x08010560) and the 61 routines they call, walked (tools/xrecipe_thumb.py) for a load of +4 to +7 from any register, find only other records' (its collision data's +5 and +7, a panel's +4, a list node's +4, the spawn's descriptor's +4). thunderman_v1 from t740 (BN4) and t741 (BN6)"},
       {"name": "JunkMan's junk's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T3", "type": "0x96", "bytes": {"0x04": ["0x13", "0xE4"]}}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4 as a word, as BN6's twin through the dispatch's spawner does; JunkMan's spawner of his junk, the third kind's 0x96 (0x080DFF60: push {r4,lr}; push {r0-r3,r5}; movs r0,#0x96; the spawn), sets r0 alone, and its one caller, his update's call before his state runner (0x080C94AE, its bl at 0x080C9562), leaves r4 as his update was entered: in BN4 his +0 byte as BN4's object runner read it (0x13), in BN6 his AI index times four as BN6's Navi frame keeps it across his hook A (0x080F3682: lsls r4,r0,#2; AI 57, 0xE4; his hook A's shim pushes and pops r4, src/emu/xnavi_init.c pre_set). +5 to +7 hold r4's upper bytes, 0 in both. No code 0x96 runs reads its +4 to +7: its block (0x080DFD54-0x080DFF8C: its type routine 0x080DFD54, init 0x080DFD74, update 0x080DFDF2, the hits test and the spawner past them), read for a load or store of +4 to +7 through r5, has none, and its dying is the families' (0x08010560, ThunderMan's 0x70's walk). This byte pair alone, on that object; junkman_v1 at t1 (BN4) and t2 (BN6)"},
       {"name": "SearchMan's trail's 'begun', each game's PlaySound's leftover r0", "spawn_leftover": {"kind": "T4", "type": "0x31", "bytes": {"0x09": ["0x28", "0x48"]}}, "why": "His shots' trail, the fourth kind's 0x31 moved with him, runs its kind 0 (0x080E5960) by a 'begun' byte at its +9: where it reads 0 (0x080E5968-0x080E596C) it plays its sound (movs r0,#0x29; adds r0,#0xff; bl PlaySoundEffect at 0x080E5976) and stores the r0 that call leaves at +9 (strb r0,[r5,#9] at 0x080E597A), then never reads +9 but for that test. PlaySoundEffect (BN4 0x08000560, BN6 0x080005CC: push {r1-r7,lr}, the song's start, pop) restores every register but r0, which holds what each game's own MP2K song start left (BN4's through 0x08112849, BN6's through 0x08150475; BN6's call through his home's sound shim, XvSoundCall, to the same routine): 0x28 in BN4, 0x48 in BN6, both not 0, so the trail's kind 0 runs alike. This byte pair alone, on that object; searchman_v1 at t740 (BN4) and t741 (BN6)"},
+      {"name": "WoodMan's 0x94's spawn's r2, each game's camera", "spawn_leftover": {"kind": "T3", "type": "0x94", "word": "0x38", "bn4": ["raw", 33596288], "bn6": ["raw", 33593728]}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r1, r2 and r3 at the object's +0x34, +0x38 and +0x3C, as BN6's twin through the dispatch's spawner does; WoodMan's spawner of his 0x94 (0x080DFA38: push {lr}; push {r5}; movs r0,#0x94; the spawn) sets r0 alone, and its one caller, his state 106 (MegaMan's in BN4, copied with him: its bl at 0x080F4D3C), calls the camera's shake set just before it (0x080F4D2A, BN4_CAMERA_SHAKE_SET 0x0802608C, BN6's 0x080302A8 the same body: mov r2,r10; ldr r2,[r2,#0xc], its stores), so +0x38 holds each game's camera, [r10 +0xC]: 0x02009B80 in BN4, 0x02009180 in BN6. No code 0x94 runs reads its +0x34 to +0x3F: its block (0x080DF9B0-0x080DFA78, its type routine, states and spawner of 0x95) walked for a load of them finds none, and its calls (GetRNG 0x08001B16, the pause test 0x08007A12, the after-step 0x080143FC, 0x080DFA64 and the 0x95 spawner 0x080DFCA4) read its +4, +0x16, +0x17, +0x2C and +0x4C alone (the loads of +0x34 and +0x38 at 0x080DFBC6-0x080DFD18 are 0x95's own states', on a 0x95). This word alone, on that object; woodman_v1 at t43"},
       {"name": "BN6's Elec tally of a hit, its freeze's", "whose": "megaman", "kind": "T1", "type": "0x1A0", "part": "coll", "offsets": ["0x78", "0x79"], "direction": "BN6 has, BN4 not", "why": "BN6's own bookkeeping for its freeze, which BN4 has none of: BN6's hit pass (its image 0x081D78F6-0x081D7904) adds the attack's damage (+0x2E) to the struck's +0x78 where the attack's element (+2) is 3, Elec, before its damage by element (BN6_COLL_HIT_DAMAGES, +0x82 + 2 * element: 0x081D7906-0x081D7910), and the frame's step adds +0x78 to the Elec hit damage (+0x88) while the struck's +6 is 8 (0x0801A8E0-0x0801A8F6: an Elec hit on a frozen one counts twice). BN4's hit pass (0x08012C74-0x08012C82) has the damage by element alone (BN4_COLL_HIT_DAMAGES, +0x2A + 2 * element), no test of the element 3 and no store of a tally. thunderman_v1 at t278 (BN4) and t279 (BN6): his 0x70's Elec hit, 0x32 at BN6's +0x78 alone, the damage by element the same in both (+0x88 and +0x9A, BN4's +0x30 and +0x42); MegaMan's HP the same in all 1200 fight frames. Guarded: those two bytes, BN6's side holding something and BN4's 0, every other field compared"},
       {
         "name": "the wind's spawner, BN6's",
@@ -2683,8 +2693,14 @@
         },
         "why": "As her flash's spawn's r4 above (0x13), whose BN4 number is the object's +0 byte as BN4's object runner reads it into r4 before it runs her type routine (0x08003166: ldrb r4,[r5,#0]), which her states leave in r4 to the flash's spawn: 0x13 where she began her turn visible, 0x11 where her visible bit (0x02) was clear, as after her warp's hide (roll_v1's BN4 trace: her +0 0x11 at t1068 and t1069, 0x13 again at t1070, the flash spawned at t1070 with +4 0x11). BN6's r4 there her AI data's address, as above; no code of the flash reads its +4 to +7 (above)"
       },
+      {"name": "Roll V2's flash's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 19], "bn6": ["T1:0x381#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4, each game's leftover (above), her V2's (BN6's NameID 0x381): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x13 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
+      {"name": "Roll V2's flash's spawn's r4 where her turn began hidden, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 17], "bn6": ["T1:0x381#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4 where her turn began hidden, each game's leftover (above), her V2's (BN6's NameID 0x381): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x11 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
+      {"name": "Roll V3's flash's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 19], "bn6": ["T1:0x382#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4, each game's leftover (above), her V3's (BN6's NameID 0x382): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x13 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
+      {"name": "Roll V3's flash's spawn's r4 where her turn began hidden, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 17], "bn6": ["T1:0x382#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4 where her turn began hidden, each game's leftover (above), her V3's (BN6's NameID 0x382): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x11 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
+      {"name": "Roll SP's flash's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 19], "bn6": ["T1:0x383#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4, each game's leftover (above), her SP's (BN6's NameID 0x383): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x13 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
+      {"name": "Roll SP's flash's spawn's r4 where her turn began hidden, each game's leftover", "spawn_leftover": {"kind": "T4", "type": "0x17", "word": "0x04", "bn4": ["raw", 17], "bn6": ["T1:0x383#0", "ai", 0]}, "why": "As Roll's flash's spawn's r4 where her turn began hidden, each game's leftover (above), her SP's (BN6's NameID 0x383): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x11 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"},
       {
-        "name": "a summoned Mettaur's +0xF, BN4's spawn's enemy id",
+        "name": "a summoned Mettaur's +0xF, BN4's appear queue's number",
         "spawn_leftover": {
           "kind": "T1",
           "type": "0x2E4",
@@ -2695,8 +2711,13 @@
             ]
           }
         },
-        "why": "BN4's spawn of an enemy into a fight under way (BN4_SPAWN_ENEMY, Roll's summon) writes the enemy's id at its +0xF (BN4_T1_NAME_ID: strb r0,[r4,#0xf] at 0x080F0158), which BN4's HP display reads as the enemy appears (0x08015ADC: ldrb r2,[r5,#0xf], the summoned appear's step 2, 0x08010128); BN6's spawn of one (BN6_SPAWN_ENEMY_1, the summon's shim's) writes its NameID at +0x28 instead, which BN6's HP display reads (0x0801DC98: ldrh r2,[r5,#0x28]), and leaves +0xF 0, a byte BN6's own generic states keep a count in (0x08016716). No code of BN4's Mettaur, moved, reads its +0xF (tools/xrecipe_bn4.py's walks of its states, its appear and its shockwave): BN4's 1 against BN6's 0 alone, so a write of either engine's after the spawn still parts"
+        "why": "BN4's spawn of an enemy into a fight under way (BN4_SPAWN_ENEMY, Roll's summon) writes its enemy id at its +0xF (0x080F0158), which the BN4 trace moves to BN6's NameID (+0x28, src/dev/xdiff_bn4_trace.c obj_segs), and its appear queue's number at its +0xE (0x080F015A-0x080F0164: the battle state's +9, then that counter one up; BN4_QUEUE_ENTER keeps objects' +0xE bytes), which the trace moves to the first place its layout leaves, +0xF (xd4_translate's second pass: BN6's element takes +0xE, BN4's +0x17). So BN4's side reads the summon's number in the battle there: 1 for her first summon, 2 for her second (roll_v2_summons: Mettaur2 1 at t998, Billy2 2 at t2050; not the enemy id, which roll_v1's Mettaur V1, id 1, read as 1 by chance). BN6's spawn of one (BN6_SPAWN_ENEMY_1, the summon's shim's) keeps its appear queue as object pointers (BN6_QUEUE_*) and leaves +0xF 0, a byte BN6's own generic states keep a count in (0x08016716). No code of BN4's Mettaur or Billy, moved, reads its +0xE (their appear queue calls go through the queue shims to BN6's queues of pointers, bn4_twins.QUEUED) nor +0xF: this pair alone, so a write of either engine's after the spawn still parts"
       },
+      {"name": "a summoned Mettaur2's +0xF, BN4's appear queue's number", "spawn_leftover": {"kind": "T1", "type": "0x2E5", "bytes": {"0x0f": ["0x01", "0x00"]}}, "why": "As a summoned Mettaur's +0xF (above): Roll V2's summon number 1 of her battle, BN4's 1 against BN6's 0 at +0xF"},
+      {"name": "a summoned Billy2's +0xF, BN4's appear queue's number", "spawn_leftover": {"kind": "T1", "type": "0x2C1", "word": "0x0C", "bn4": ["raw", 33751040], "bn6": "0x30000"}, "why": "As a summoned Mettaur's +0xF (above): Roll V2's summon number 2 of her battle, the word at +0xC, BN4's 0x02030000 against BN6's 0x30000 (read whole, as it looks like a pointer into EWRAM: its +0xE the element, 3 in both, Billy's electricity, and its +0xF BN4's 2 against 0)"},
+      {"name": "a summoned Mettaur3's +0xF, BN4's appear queue's number", "spawn_leftover": {"kind": "T1", "type": "0x2E6", "bytes": {"0x0f": ["0x01", "0x00"]}}, "why": "As a summoned Mettaur's +0xF (above): Roll V3's summon number 1 of her battle, BN4's 1 against BN6's 0 at +0xF"},
+      {"name": "a summoned MettaurSP's +0xF, BN4's appear queue's number", "spawn_leftover": {"kind": "T1", "type": "0x2E7", "bytes": {"0x0f": ["0x01", "0x00"]}}, "why": "As a summoned Mettaur's +0xF (above): Roll SP's summon number 1 of her battle, BN4's 1 against BN6's 0 at +0xF"},
+      {"name": "a summoned BillySP's +0xF, BN4's appear queue's number", "spawn_leftover": {"kind": "T1", "type": "0x2C3", "word": "0x0C", "bn4": ["raw", 33751040], "bn6": "0x30000"}, "why": "As a summoned Mettaur's +0xF (above): Roll SP's summon number 2 of her battle, the word at +0xC, BN4's 0x02030000 against BN6's 0x30000 (read whole, as it looks like a pointer into EWRAM: its +0xE the element, 3 in both, Billy's electricity, and its +0xF BN4's 2 against 0)"},
       {
         "name": "the wind's gust's sprite flag 0x80, BN6's",
         "whose": "engine",
@@ -2773,6 +2794,22 @@
         "bn6": "0xC0",
         "size": "0x10",
         "why": "Each side's wind (the fourth kind's 0x41) is kept in the battle state at +0x88 + 4 x side in BN4 and +0xC0 + 4 x side in BN6, its level 8 bytes past it: the slot's setter (BN4 0x080E69C6, BN6 0x080E675A: [r10 +0x18] + 4 x r1 + 0x88 | 0xC0, an old wind there told to end, the new one stored at +0 and r2 at +8) and its reader (BN4 0x080E69E8, BN6 0x080E677C: the same address left in r2, +0 in r0 and +8 in r1) are the same steps but for that constant. The wind's spawn (BN4 0x080E68F8, BN6 0x080E666C) calls the reader and then the fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC), which keeps the caller's r1 to r3 at the object's +0x34 to +0x3C, so the wind's +0x38 points at its side's slot in each game's own place (windman_v1 at t1: +0x8C | +0xC4, WindMan's side 1). A pointer into BN4's battle state between +0x88 and +0x97 is read as BN6's of the same place from +0xC0 (tools/xdiff_snap.py state_off); every other offset of it as it is"
+      }
+    ],
+    "ai_data": [
+      {
+        "name": "a Soul Navi's own block",
+        "bn4": "0x64",
+        "bn6": "0x80",
+        "size": "0x0C",
+        "why": "A Soul Navi's own block of his AI data is BN4's +0x64 (BN4_AI_NAVI) and BN6's +0x80 (BN6_AI_NAVI_STATE), where his port moves it (tools/xnavirecipe_bn4.py AI_BLOCKS: each pointer his code makes into it given BN6's offset) and the trace lays BN4's out (src/dev/xdiff_bn4_trace.c ai_segs). A pointer his code keeps to a byte of it is read as BN6's of the same byte: WoodMan's step's callback state (0x080C9178: movs r0,#0xb; adds r0,r0,r6; str r0,[r7,#0x20], r6 his block, BN4 0x080C8F88 adds r6,#0x64 and his copy's #0x80) points at his block's +0xB in both, BN4's AI +0x6F and BN6's +0x8B (woodman_v1 at t1: ai+0xC0 'ai' 111 | 139). A pointer to any other offset of an AI's data is read as it is"
+      },
+      {
+        "name": "a Soul Navi's attack's variables",
+        "bn4": "0x70",
+        "bn6": "0xA0",
+        "size": "0x50",
+        "why": "His attack's variables are BN4's +0x70 (BN4_AI_ATTACK_VARS) and BN6's +0xA0 (BN6_AI_ATTACK_VARS), moved and laid out as his own block is (tools/xnavirecipe_bn4.py AI_BLOCKS, src/dev/xdiff_bn4_trace.c ai_segs): a pointer into them is read as BN6's of the same byte"
       }
     ],
     "sounds": [
@@ -2862,6 +2899,44 @@
         ],
         "what": "Mettaur's sound 0x8B, Roll's pool's",
         "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0xe0 at 0x08B798CC, the recipe's immediate, its bl at 0x08B798CE through its veneer to BN6's), its init's. Mettaur is moved for Roll's summon alone (XVirusFamily.summoned), so his sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her fifth, 0xE0, her recipe listing BN4's song 0x8B there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In his battles and hers alone (foes); BN4's first at t73 in mettaur4_v1, a battle of his alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
+      },
+      {
+        "bn4": "0xC2",
+        "bn6": "0x104",
+        "clock": "state",
+        "foes": [
+          "0x37",
+          "0x38",
+          "0x39",
+          "0x3A",
+          "0x3B",
+          "0x3C",
+          "0x80",
+          "0x81",
+          "0x82",
+          "0x83"
+        ],
+        "what": "Melody's sound 0xC2, Roll's pool's",
+        "why": "Played by its own state (BN4: movs r0,#0xc2 at 0x080B8FEA, its bl to PlaySoundEffect at 0x080B8FEC; BN6: that bl aimed at its home's shim making r0 the pool's 0x104, XvSoundCall, the movs left as BN4's), a state's. Melody is moved for Roll's summon alone (XVirusFamily.summoned), so its sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her sixth, 0x104, past what a movs names (the owner's call 11), her recipe listing BN4's song 0xC2 there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In its battles and hers alone (foes); BN4's first at t20, BN6's at t21, each on player 8, in melody4_v1, a battle of its alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
+      },
+      {
+        "bn4": "0xC3",
+        "bn6": "0x117",
+        "clock": "state",
+        "foes": [
+          "0x37",
+          "0x38",
+          "0x39",
+          "0x3A",
+          "0x3B",
+          "0x3C",
+          "0x80",
+          "0x81",
+          "0x82",
+          "0x83"
+        ],
+        "what": "Melody's sound 0xC3, Roll's pool's",
+        "why": "Played by its own state (BN4: movs r0,#0xc3 at 0x080B90E6, its bl to PlaySoundEffect at 0x080B90E8; BN6: that bl aimed at its home's shim making r0 the pool's 0x117, XvSoundCall, the movs left as BN4's), a state's. Melody is moved for Roll's summon alone (XVirusFamily.summoned), so its sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her seventh, 0x117, past what a movs names (the owner's call 11), her recipe listing BN4's song 0xC3 there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In its battles and hers alone (foes); BN4's first at t226, BN6's at t227, each on player 8, in melody4_v1, a battle of its alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
       },
       {
         "bn4": "0xA6",
@@ -3255,6 +3330,71 @@
         ],
         "what": "Roll's sound 0x132, its copy",
         "why": "Played by her copied MegaMan state 45 as it spawns her shot, the third kind's 0x0B (BN4: movs r0,#0x33 and adds r0,#0xff at 0x080EFB24, its bl to PlaySoundEffect at 0x080EFB28; BN6: its copy's movs r0,#0xd0 and adds r0,#0, the recipe's immediates), a state's: BN4's song 0x132 copied into the pool's fourth slot, BN6's empty 0xD0 (the owner's call 11). In her battles alone (foes)"
+      },
+      {
+        "bn4": "0x8F",
+        "bn6": "0x32",
+        "clock": "state",
+        "foes": [
+          "0xAC",
+          "0xAD",
+          "0xAE",
+          "0xAF"
+        ],
+        "what": "WoodMan's sound 0x8F, its copy",
+        "why": "Played by his copied MegaMan state 108 as it spawns his third kind's 0x0B (BN4: movs r0,#0x8f at 0x080F50BA, its bl to PlaySoundEffect at 0x080F50BC; BN6: its copy's movs r0,#0x32, the recipe's immediate), a state's: BN4's song 0x8F copied into the pool's first slot, BN6's empty 0x32 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11). In his battles alone (foes)"
+      },
+      {
+        "bn4": "0xA2",
+        "bn6": "0x33",
+        "clock": "state",
+        "foes": [
+          "0xAC",
+          "0xAD",
+          "0xAE",
+          "0xAF"
+        ],
+        "what": "WoodMan's sound 0xA2, its copy",
+        "why": "Played by his copied MegaMan states 106 and 107 (BN4: movs r0,#0xa2 at 0x080F4D42 and 0x080F4EE0, each with its bl to PlaySoundEffect after it; BN6: their copies' movs r0,#0x33, the recipe's immediates), a state's: BN4's song 0xA2 copied into the pool's second slot, BN6's empty 0x33 (the owner's call 11). GutsMan's 0xA2 is the pool's first slot in his battles (a row of no foes); in WoodMan's battles alone (foes) this row holds over it"
+      },
+      {
+        "bn4": "0xC7",
+        "bn6": "0x63",
+        "clock": "state",
+        "foes": [
+          "0xAC",
+          "0xAD",
+          "0xAE",
+          "0xAF"
+        ],
+        "what": "WoodMan's sound 0xC7, its copy",
+        "why": "Played by his third kind's 0x95 (BN4: movs r0,#0xc7 at 0x080DFC2C, its bl to PlaySoundEffect after it; BN6: its copy's movs r0,#0x63, the recipe's immediate), a state's: BN4's song 0xC7 copied into the pool's third slot, BN6's empty 0x63 (the owner's call 11). In his battles alone (foes)"
+      },
+      {
+        "bn4": "0x13E",
+        "bn6": "0xD0",
+        "clock": "state",
+        "foes": [
+          "0xAC",
+          "0xAD",
+          "0xAE",
+          "0xAF"
+        ],
+        "what": "WoodMan's sound 0x13E, its copy",
+        "why": "Played by his third kind's 0x07 (BN4: movs r0,#0x3f and adds r0,#0xff at 0x080CDFF8, its bl to PlaySoundEffect after them; BN6: its copy's movs r0,#0xd0 and adds r0,#0, the recipe's immediates), a state's: BN4's song 0x13E copied into the pool's fourth slot, BN6's empty 0xD0 (the owner's call 11). In his battles alone (foes)"
+      },
+      {
+        "bn4": "0x14B",
+        "bn6": "0xE0",
+        "clock": "state",
+        "foes": [
+          "0xAC",
+          "0xAD",
+          "0xAE",
+          "0xAF"
+        ],
+        "what": "WoodMan's sound 0x14B, its copy",
+        "why": "Played by his third kind's 0x95 (BN4: movs r0,#0x4c and adds r0,#0xff at 0x080DFC52, its bl to PlaySoundEffect after them; BN6: its copy's movs r0,#0xe0 and adds r0,#0, the recipe's immediates), a state's: BN4's song 0x14B copied into the pool's fifth slot, BN6's empty 0xE0 (the owner's call 11). In his battles alone (foes)"
       }
     ],
     "opening_count": "An object's sprite +1 (a first kind's +0x91): its animation's count. Both games' animation setter (BN4 0x08002E10, BN6 0x08002DA4) is called for MegaMan in the opening (fight frame 0, before the first state: a probe of hooks on both and on both sprite updates, BN4 0x0800285C and BN6 0x080026C4, in billy_v1), the count reads 2 when the first fight frame's sprite update begins in both, and the sprite update, run at every fight frame and at none of the paused opening's, counts it down (1 at t1's end, 0 at t2's): the frame's clock, not a state's, so BN4's t1 and t2 are compared with BN6's of the same fight frame (tools/xdiff_bn4.py opening_count). An animation a state sets in the fight (his paralysis's at t431, t520 in BN4 and t432, t521 in BN6) starts a count a frame behind with it, compared with the battle's offset A moved Navi's own the same (GutsMan's in gutsman_v1: his appear's animation set in the opening, 1 at t1 in both, then his state's at BN4's t2 and BN6's t3): his after-step, run after each of his states (BN4 0x080143FC, BN6's twin 0x0801BBAC, the same body but for the pause test's routine, BN4 0x080078EC, BN6 0x0800A03C), runs the sprite update (BN4 0x0800285C, BN6 0x080026C4) at every fight frame and at none of the paused opening's, so his opening animation's count is the frame's clock too; a moved family's own needs no rule, its paused present (XVirusFamily.present) animating it as BN4's after-state does",

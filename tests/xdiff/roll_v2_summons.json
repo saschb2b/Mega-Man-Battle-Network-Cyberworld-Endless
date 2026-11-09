@@ -1,0 +1,15 @@
+{
+  "about": "BN4 Red Sun's Roll V2 (BN4's enemy 0x81) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, as roll_v2 but over 2400 fight frames: both her summons, Mettaur2 at t998 (BN4's 0x02, 0x2E5) and Billy2 at t2050 (BN4's 0x0E, 0x2C1, a visitor family), each spawned by BN6's spawn of an enemy into a fight under way and arriving by BN4's summoned appear (its state 0 from the summon's table, src/emu/xnavi_summoned.c; docs/multirom/bn4-navis.md, Roll's versions), and Billy2's turns after; her pool's songs on players apart (tools/xnavirecipe_bn4_sounds.py song_player); BN6's draws replayed from BN4's; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "81@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 2400,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1
+}

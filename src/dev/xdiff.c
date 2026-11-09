@@ -208,12 +208,12 @@ static void header_out(Side *g) {
 	w32(g, (uint32_t)g->v.game);
 	w32(g, g->v.coll_size);
 	w32(g, g->v.panel_size);
-	static XvMoved m[XV_MOVED_MAX];
-	int n = g->v.game == 6 ? xvirus_moved(m, XV_MOVED_MAX) : 0, kept = 0;
-	for (int i = 0; i < n; ++i)
-		if (xd_moved_kept(m[i].to)) m[kept++] = m[i];
+	int n = 0, kept = 0;
+	const XvMoved *m = g->v.game == 6 ? xvirus_moved(&n) : NULL;   /* (whole: subject() begins no battle without them) */
+	for (int i = 0; i < n; ++i) kept += xd_moved_kept(m[i].to);
 	w32(g, (uint32_t)kept);
-	for (int i = 0; i < kept; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
+	for (int i = 0; i < n; ++i)
+		if (xd_moved_kept(m[i].to)) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
 	w32(g, PLAYER_SIZE);
 	w32(g, APART_SIZE);
 }
@@ -604,13 +604,25 @@ static void call_aim(uint32_t at, uint32_t v) {
 	}
 }
 
+/* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
+ * among the ranges too); the chips' moved code for a poke5 alone, its BN5 addresses lying among BN6's own attack families'
+ * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
+ * FireMan's, moved after it) */
+static int poke_range(const XvMoved *m, int n, const Poke *p) {
+	for (int k = n - 1; k >= 0; --k)
+		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
+		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE))
+			return k;
+	return -1;
+}
+
 /* the comparator's own test: bytes written into BN6's copy after the
- * install (an address of BN5's moved, to its copy), or a call's veneer
+ * install (an address of BN5's moved, to its copy; each copy of a block more than one family copies), or a call's veneer
  * aimed at another routine; those in RAM (`ram`) once the game has booted,
  * over what it copied there (IWRAM's routines, from their image) */
 static void pokes_put(const Spec *s, bool ram) {
-	static XvMoved m[XV_MOVED_MAX];
-	int n = xvirus_moved(m, XV_MOVED_MAX);
+	int n;
+	const XvMoved *m = xvirus_moved(&n);
 	for (int i = 0; i < s->npokes; ++i) {
 		const Poke *p = &s->pokes[i];
 		uint32_t at = p->at;
@@ -620,15 +632,8 @@ static void pokes_put(const Spec *s, bool ram) {
 			call_aim(p->at, p->v);
 			continue;
 		}
-		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too; the chips' moved code
-		 * for a poke5 alone, its BN5 addresses lying among BN6's own attack families' code; never BN4's Navis' for a
-		 * poke5, BN4's addresses of their blocks lying among BN5's: ThunderMan's, WindMan's and FireMan's, moved after it) */
-		for (int k = n - 1; k >= 0; --k)
-			if (at >= m[k].from && at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
-			    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE)) {
-				at = at - m[k].from + m[k].to;
-				break;
-			}
+		int k = poke_range(m, n, p);
+		if (k >= 0) at = at - m[k].from + m[k].to;
 		if (p->bn5 && at == p->at) {
 			fprintf(stderr, "xdiff: poke5 %08x is in no moved range\n", (unsigned)p->at);
 			continue;
@@ -636,6 +641,12 @@ static void pokes_put(const Spec *s, bool ram) {
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
+		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's) */
+		for (int j = 0; k >= 0 && j < k; ++j)
+			if (m[j].from == m[k].from && m[j].len == m[k].len && m[j].to != m[k].to) {
+				emu_write(p->at - m[j].from + m[j].to, b, (size_t)p->size);
+				printf("xdiff: poke %08x (%08x, a copy) = %0*x\n", (unsigned)p->at, (unsigned)(p->at - m[j].from + m[j].to), 2 * p->size, (unsigned)p->v);
+			}
 	}
 }
 
@@ -717,7 +728,11 @@ static bool subject(Side *g, const Spec *s) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}
-	if (s->bn4) xd4_pool_point(s);   /* (the pool his battle points at its first frame, before a poke of a slot's entry) */
+	/* (every range the installs moved, or no battle: with a part of them some moved code goes uncompared, xvirus_moved.h) */
+	int nmoved;
+	if (!xvirus_moved(&nmoved)) return false;
+	printf("xdiff: %d ranges moved\n", nmoved);
+	if (s->bn4) xd4_pool_point(s);
 	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();
@@ -871,13 +886,16 @@ static int spec_families(const Spec *s, const XVirusFamily **fams) {
 	return n;
 }
 
-/* (a BN4 Navi's summon's draw keyed as BN4_SPAWN_ENEMY's in both logs: xdiff_bn4.h xd4_summon_draws) */
-static void summon_keys(XdLog *a, XdLog *b, const XVirusFamily *const *fams, int n) {
+/* (a BN4 Navi's summon's draw keyed as BN4_SPAWN_ENEMY's in both logs, a BN4 spec's: xdiff_bn4.h xd4_summon_draws; false
+ * where a log had no room for one) */
+static bool summon_keys(const Spec *s, XdLog *a, XdLog *b, const XVirusFamily *const *fams, int n) {
 	XvMoved keys[4];
-	for (int k = 0, nk = xd4_summon_draws(fams, n, keys, 4); k < nk; ++k) {
-		xd_log_key(a, keys[k].from, keys[k].to, keys[k].len);
-		xd_log_key(b, keys[k].from, keys[k].to, keys[k].len);
+	bool ok = true;
+	for (int k = 0, nk = s->bn4 ? xd4_summon_draws(fams, n, keys, 4) : 0; k < nk; ++k) {
+		ok = xd_log_key(a, keys[k].from, keys[k].to, keys[k].len) && ok;
+		ok = xd_log_key(b, keys[k].from, keys[k].to, keys[k].len) && ok;
 	}
+	return ok;
 }
 
 static bool logs_start(Side *a, Side *b, const Spec *s) {
@@ -896,7 +914,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (a->v.game == 4) xd_log_bn4(&xd4_routines);
 	a->log = a->out && hooked ? xd_log_start(a->v.game, fams, n, navis) : NULL;
 	b->log = b->out ? xd_log_start(6, fams, n, navis) : NULL;
-	if (s->bn4) summon_keys(a->log, b->log, fams, n);
+	if (!summon_keys(s, a->log, b->log, fams, n)) return false;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && hooked && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
@@ -927,6 +945,7 @@ static void summary(const Side *a, const Side *b, const Spec *s) {
 int xdiff_run(const char *text) {
 	static Spec s;
 	static Side a, b;
+	xvirus_moved_keep();   /* (before any install: the traces' moved ranges, xvirus_moved.h) */
 	if (!xd_spec_parse(text, &s)) {
 		fprintf(stderr, "xdiff: a spec names foes=ID@CR,... (docs/devtools/differential.md)\n");
 		return 2;

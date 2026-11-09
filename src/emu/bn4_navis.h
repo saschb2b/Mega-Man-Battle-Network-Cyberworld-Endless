@@ -215,6 +215,8 @@
 #define BN4_SPAWN_ENEMY_DRAW 0x080F0118u /* BN4_SPAWN_ENEMY's draw's return (its bl to GetRNG at 0x080F0114: the free panel's
                                        * pick), the differential's key of the summon shim's draw (XV_SHIM_SUMMON_DRAW) */
 #define BN4_SPAWN_ENEMY_MASKS 0x080F01A8u /* BN4_SPAWN_ENEMY's masks by side (wanted, refused; two words a side), BN4_FREE_PANELS' r2, r3 */
+#define BN4_SUMMON_MARK   2           /* BN4_SPAWN_ENEMY's +5 (its spawn word's high byte, movs r4,#2 at 0x080F0140), which BN4's
+                                       * generic state 0 sends on to BN4_SUMMONED_APPEAR (2 or more, 0x0800FCCE) */
 #define BN4_SUMMONED_APPEAR 0x0801002Au /* BN4's generic state 0's appear where the object's +5 is 2 (BN4_SPAWN_ENEMY's spawn word) */
 #define BN4_T4_FLASH      0x17        /* the fourth kind's flash (MegaMan's states 46 and 47: her warp and summon), moved with her */
 #define BN4_FLASH         0x080E3A98u /* ... its routine (BN4_T4_TYPES[0x17]): 30 frames, every 8th the effect 0x2E at its place
@@ -222,6 +224,35 @@
 #define BN4_FLASH_SPAWN   0x080E3AD8u /* ... its spawner: r1-r3 its place */
 #define BN4_T3_02_KINDS   0x080CD524u /* the third kind's 0x02's kinds (4 bytes each: its sprite's list offset and number, its palette,
                                        * its +0xC), read by its init by its +4; Roll's kind 7 list 3's 0xF */
+/* Melody, the family of her V3's 0x39 (BN4's type 0x11, enemy ids 0x37-0x3C), moved for her summon (docs/multirom/bn4-navis.md,
+ * Her Melody; tools/xrecipe_bn4.py) */
+#define BN4_MELODY_TYPE   0x080B8BB8u /* its type routine (BN4_T1_TYPES[0x11]): its jump table 0x080B8BD0, init 0x080B8BDC, update
+                                       * 0x080B8C3E (its pre-step from 0x080B8C44), the after-state */
+#define BN4_MELODY_STATES 0x080B8C6Cu /* its state table: BN4's generic 0-5, its own 6-9 (0x080B8C99, 0x080B8EBF, 0x080B8F05,
+                                       * 0x080B90B3) */
+#define BN4_MELODY_OWN_STEP 0x080B8C08u /* its init's own step: its +0x2E by its version (BN4_MELODY_2E), its collision data, its
+                                       * set-up with region 0x35 (0x080B8C1E), +8 4 (hook 5 entered here: bn4_twins.INIT_AGAIN) */
+#define BN4_MELODY_2E     0x080B8C38u /* its +0x2E by version, 6 bytes (30 each), which the set-up copies into its collision's +5 */
+/* WoodMan, the eighth BN4 Navi derived (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, WoodMan built): found by his type,
+ * each checked by the generator against his ROM */
+#define BN4_WOODMAN       0x080C8EC0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_WOODMAN]): jump table 0x080C8ED8 (init
+                                       * 0x080C8EE5, update 0x080C8F3F, dying BN4_NAVI_DYING), then the after-step; his block to 0x080C91A8 */
+#define BN4_WOODMAN_STATES 0x080C8F54u /* his state table: BN4's generic Navi 0-5, his decision 6 (0x080C8F81), MegaMan's 77 and 106-108
+                                       * as his 7-10 */
+#define BN4_ATTACK_END_BARE 0x0800CA4Au /* BN4_ATTACK_END's kin with its CurAction alone: +0x10 0, CurAction 6, the attack's +0 0
+                                       * (WoodMan's MegaMan's 106 and 107, at 0x080F4C8E and 0x080F4D9A) */
+#define BN4_WOODMAN_SHOT_KINDS 0x080F50E4u /* by his attack's +0xC (his version), his MegaMan state 108's shot's kind (the third kind's
+                                       * 0x0B, BN4_T3_0B_KINDS'): 0x10, 0x11, 0x12, 0x12, between that state's pool words */
+#define BN4_T3_07         0x080CDEB8u /* the third kind's 0x07 (his MegaMan's 107 spawns it, 0x080F4FE8; each spawns the next,
+                                       * 0x080CE076): its routine; its spawner 0x080CE052 (r1-r3 its panel and element) */
+#define BN4_T3_07_PANEL_TEST 0x080CDF78u /* ... its panel's flags (0x08009A86): let go unless they have 0x10 and none of 0x03840000
+                                       * (its literal: occupants' alliance bits, the collision masks' high halves, BN6's alike) */
+#define BN4_T3_94         0x080DF9B0u /* the third kind's 0x94 (his MegaMan's 106 spawns it after his slam's shake, 0x080F4D3C): its
+                                       * routine; its spawner 0x080DFA38 sets r0 alone (r1-r3 the caller's: its +0x34 to +0x3C), it
+                                       * spawns the third kind's 0x95 (0x080DFA64) */
+#define BN4_T3_95         0x080DFA78u /* the third kind's 0x95: its routine; its spawner 0x080DFCA4 */
+#define BN4_T3_95_HIT     0x080DFB74u /* ... its hits read: its collision's hits word (+0x54) against 0x0C000000, then 0xA0000000 with
+                                       * its final damage (+0x28, BN4_COLL_FINAL_DAMAGE, at 0x080DFB8E: BN6's +0x80, past an ldrh's reach) */
 
 /* JunkMan, derived after Roll (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, JunkMan built): found by his type, each
  * checked by the generator against his ROM */

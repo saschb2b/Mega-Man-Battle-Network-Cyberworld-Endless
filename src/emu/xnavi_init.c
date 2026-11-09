@@ -8,9 +8,11 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_ai.h"
 #include "bn6_families.h"
 #include "bn6_panels.h"
 #include "bytes.h"
+#include "xnavi_summoned.h"
 #include "xvirus.h"
 #include "xvirus_shim.h"
 #include "xvirus_move.h"
@@ -20,6 +22,7 @@
 #define SHIM_LITS   8
 #define COLL_ARG6   3u   /* BN6's actor init's r3 (movs r3,#3 at 0x08016FE8) */
 #define BL_REACH    0x400000
+#define BUS         0x08000000u   /* (the ROM's bus address: its game's bytes by an address of it) */
 
 typedef struct {
 	uint32_t at;                   /* where it goes (a word's start) */
@@ -99,20 +102,52 @@ static uint32_t shim_put(Shim *s, uint32_t room, const char *what, uint32_t *siz
 	return p ? s->at | 1u : 0;
 }
 
-/* its spawn's end where its init needs one: its collision's r3, +0x11, its panel at +6, its spawns where at_end, its sprite,
- * its update */
-static uint32_t end_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *size) {
-	const XnInit *in = n->init;
-	Shim s = { .at = at };
-	op(&s, 0xB510);   /* push {r4, lr} */
-	if (n->coll_arg) op(&s, 0x6D68), op(&s, 0x2100u | n->coll_arg), op(&s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
-	if (in->anim) op(&s, 0x7C28), op(&s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
-	if (in->home) op(&s, 0x8A68), op(&s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
-	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(&s, n, &in->spawns[i]);
-	if (in->sprite) far_call(&s, BN6_SPRITE_UPDATE);
-	if (in->frame) far_call(&s, BN6_NAVI_FRAME);
-	op(&s, 0xBD10);   /* pop {r4, pc} */
-	return shim_put(&s, room, "spawn end", size);
+/* its palette by its version set (XNavi.palettes' byte by its AI data's BN6_AI_VERSION): ldr r0,[r5,#0x58]; ldrb r0,[r0,#ver];
+ * lsls r0,r0,#3; ldr r1,=palettes; lsrs r1,r0; lsls r0,r1,#24; lsrs r0,r0,#24; then BN6_SPRITE_PALETTE_SET through r2 (mov r1,pc;
+ * adds r1,#5; mov lr,r1; bx r2), which takes r0 alone */
+static void palette(Shim *s, uint32_t palettes) {
+	op(s, 0x6DA8), op(s, 0x7800u | BN6_AI_VERSION << 6), op(s, 0x00C0);
+	lit(s, 1, palettes);
+	op(s, 0x40C1), op(s, 0x0608), op(s, 0x0E00);
+	lit(s, 2, BN6_SPRITE_PALETTE_SET | 1u);
+	op(s, 0x4679), op(s, 0x3105), op(s, 0x468E), op(s, 0x4710);
+}
+
+/* its spawn's end where its init needs one: its collision's r3, +0x11, its panel at +6, its palette, its spawns where at_end,
+ * its sprite, its update */
+static void end_build(const XNavi *n, Shim *s) {
+	static const XnInit none;
+	const XnInit *in = n->init ? n->init : &none;
+	op(s, 0xB510);   /* push {r4, lr} */
+	if (n->coll_arg) op(s, 0x6D68), op(s, 0x2100u | n->coll_arg), op(s, 0x7001u | BN6_COLL_SETUP_ARG << 6);   /* [[r5,#0x54]+0xE] = arg */
+	if (in->anim) op(s, 0x7C28), op(s, 0x7468);   /* ldrb r0,[r5,#0x10]; strb r0,[r5,#0x11] */
+	if (in->home) op(s, 0x8A68), op(s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
+	if (n->palettes) palette(s, n->palettes);   /* (after them: their places in the shim as before it, a mutation's poke) */
+	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(s, n, &in->spawns[i]);
+	if (in->sprite) far_call(s, BN6_SPRITE_UPDATE);
+	if (in->frame) far_call(s, BN6_NAVI_FRAME);
+	op(s, 0xBD10);   /* pop {r4, pc} */
+}
+
+/* ... written at `place` in its home past its shims where they leave it room, else at its home's top past its veneers
+ * (SearchMan's hide step's stubs and seven sound shims leave 28 bytes, his palette by version takes more); its address,
+ * `place` moved past it where it went there, 0 where it failed */
+static uint32_t end_put(const XNavi *n, uint32_t *place) {
+	const XVirusFamily *f = &n->code;
+	Shim probe = { .at = f->home + *place };
+	end_build(n, &probe);
+	const uint32_t need = 2u * (uint32_t)(probe.k + (probe.k & 1)) + 4u * (uint32_t)probe.nlit;
+	const uint32_t room = XV_HOME_VENEERS > *place ? XV_HOME_VENEERS - *place : 0, top = (XV_HOME_SIZE - need) & ~3u;
+	uint32_t size = 0;
+	if (need > room && top < XV_HOME_VENEERS + (uint32_t)xv_move_veneers() * THUMB_VENEER_SIZE) {
+		xv_fail("no room in its home for its spawn end's shim");
+		return 0;
+	}
+	Shim s = { .at = f->home + (need > room ? top : *place) };
+	end_build(n, &s);
+	const uint32_t at = shim_put(&s, need > room ? need : room, "spawn end", &size);
+	if (need <= room) *place = (*place + size + 3u) & ~3u;
+	return at;
 }
 
 /* its companion start: its spawns, where not at_end */
@@ -191,7 +226,44 @@ static bool summon_set(const XNavi *n) {
 	uint8_t *p = size ? xv_put(m->at, (uint32_t)size, true) : NULL;
 	if (!p) { xv_fail("its summon's shim does not fit its room or reach its calls"); return false; }
 	memcpy(p, code, (size_t)size);
-	return true;
+	/* (past it, word-aligned, the state table its summoned enemies' state 0 is run from: xnavi_summoned.h) */
+	const uint32_t word = (uint32_t)(size + 3) & ~3u;
+	if (word + 4u > SUMMON_ROOM) { xv_fail("no room past its summon's shim for its word"); return false; }
+	return xnavi_summoned_set(m, m->at + word);
+}
+
+/* whether its spawn's end has work of its own: its palette by version, its init's work there, or its collision's r3 alone */
+static bool end_wanted(const XNavi *n) {
+	const XnInit *in = n->init;
+	if (n->palettes) return true;
+	return in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
+}
+
+/* its loads of a field past an immediate's reach (XNavi.fars): each site's `ldrh rd,[rb,#was]; cmp rd,#0` in its game made a
+ * call to a shim of its home at `place` on (word-aligned), `movs rd,#now; ldrh rd,[rb,rd]; cmp rd,#0; bx lr` (the call's lr
+ * with its Thumb bit); the place past them (`place` as it is where it has none; where one is not the one expected or does not
+ * fit, the install failed, xv_fail, and its place as it was) */
+static uint32_t fars_set(const XNavi *n, uint32_t place) {
+	const XVirusFamily *f = &n->code;
+	const uint8_t *rom = xv_move_rom();
+	if (n->nfars) place = (place + 3u) & ~3u;
+	for (int i = 0; i < n->nfars; ++i, place += XN_FAR_SIZE) {
+		const XnFar *k = &n->fars[i];
+		const XvBlock *b = xvirus_block_of(f, k->at);
+		const uint16_t ld = (uint16_t)(0x8800u | (unsigned)(k->was / 2u) << 6 | (unsigned)k->rb << 3 | k->rd);
+		if (!rom || !b || get16(rom + (k->at - BUS)) != ld || get16(rom + (k->at + 2 - BUS)) != (0x2800u | (unsigned)k->rd << 8)) {
+			xv_fail("its load at %08x is not the one expected", (unsigned)k->at);
+			return place;
+		}
+		const uint32_t at = f->home + place, site = b->at + (k->at - b->start);
+		uint8_t *p = place + XN_FAR_SIZE <= XV_HOME_VENEERS ? xv_put(at, XN_FAR_SIZE, true) : NULL, *q = p ? xv_put(site, 4, false) : NULL;
+		if (!q || !thumb_bl_write(q, 0, site, at)) { xv_fail("its load at %08x's shim does not fit its home", (unsigned)k->at); return place; }
+		put16(p, (uint16_t)(0x2000u | (unsigned)k->rd << 8 | k->now));                            /* movs rd,#now */
+		put16(p + 2, (uint16_t)(0x5A00u | (unsigned)k->rd << 6 | (unsigned)k->rb << 3 | k->rd));   /* ldrh rd,[rb,rd] */
+		put16(p + 4, (uint16_t)(0x2800u | (unsigned)k->rd << 8));                                 /* cmp rd,#0 */
+		put16(p + 6, 0x4770);                                                                      /* bx lr */
+	}
+	return place;
 }
 
 /* its hide step's stubs, then its hook A's shim (table[2]), past its own shims at *place, which goes on past them: a Navi with
@@ -217,24 +289,19 @@ uint32_t xnavi_init_set(const XNavi *n, uint32_t table[BN6_NAVI_TABLE_COUNT]) {
 	const XVirusFamily *f = &n->code;
 	const XnInit *in = n->init;
 	const uint32_t companion = xv_move_ref(n->companion);
-	const bool end = in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
+	const bool end = end_wanted(n);
 	const bool start = in && !in->at_end && in->nspawns;
 	uint32_t place = XV_HOME_SHIMS + xvirus_shims_room(f);
+	place = fars_set(n, place);   /* (a refusal fails the install: xnavi_install's xv_failed) */
 	if (end && table[7] != BN6_NAVI_NULLSUB) { xv_fail("its spawn end's hook is its own: no room for its init's work"); return 0; }
 	if (start && companion != BN6_NAVI_NO_COMPANION) { xv_fail("its companion start is its own: no room for its init's spawns"); return 0; }
 	if (!stubs_place(n, table, &place)) return 0;
-	if (end && !in) {
+	if (end && !in && !n->palettes) {
 		if (place + 8u > XV_HOME_VENEERS) { xv_fail("no room in its home for its collision's r3 past its shims"); return 0; }
 		table[7] = coll_arg_set(n, f->home + place);
 		return companion;
 	}
 	place = (place + 3u) & ~3u;
-	if (end) {
-		uint32_t size = 0;
-		const uint32_t at = end_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0, &size);
-		if (!at) return 0;
-		table[7] = at;
-		place = (place + size + 3u) & ~3u;
-	}
+	if (end && !(table[7] = end_put(n, &place))) return 0;
 	return start ? start_set(n, f->home + place, XV_HOME_VENEERS > place ? XV_HOME_VENEERS - place : 0) : companion;
 }

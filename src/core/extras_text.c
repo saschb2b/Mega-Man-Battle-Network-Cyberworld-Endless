@@ -7,11 +7,11 @@
 #include "run.h"
 
 const HelperInfo *extra_words(int e) {
-	/* (in EXTRA_*'s order; the tournament's "not in runs yet" goes once
-	 * its bracket reaches runs, docs/game/tournament.md) */
+	/* (in EXTRA_*'s order; the third, a note dim under the line, none
+	 * now that the tournament is in runs, docs/game/tournament.md) */
 	static const HelperInfo extras[EXTRAS] = {
 		{ "Liberation", "BN5's Liberation Missions, on a dark layer past some forks", NULL },
-		{ "Tournament", "Three Navis in a row in act 3's arena, in some runs", "Not in runs yet" },
+		{ "Tournament", "Three Navis in a row in act 3's arena, in some runs", NULL },
 		{ "Glitch", "A rare glitching warp to a layer that comes apart", NULL },
 		{ "Virus Battler", "BN6's Virus Battler at a side path's end, in some acts", NULL },
 		{ "DarkChips", "A flame of darkness offers a DarkChip in each act", NULL },

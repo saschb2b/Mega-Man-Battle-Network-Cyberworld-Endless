@@ -157,8 +157,9 @@ typedef struct {
 	uint16_t drops[ENEMY_DROPS];
 } EnemyMoved;
 /* The ids another game's families may take (BN5's families of six versions,
- * 32 of them at most, and their Navis to come, issue #82) */
-#define ENEMIES_MOVED_MAX 256
+ * 32 of them at most, and their Navis, issue #82; BN4's families and Navis:
+ * 261 with WoodMan, BN4's eighth Navi, past the 256 this was) */
+#define ENEMIES_MOVED_MAX 384
 /* ... ids below this (the families' to 0x400, src/emu/xvirus_recipe.h XV_IDS) */
 #define ENEMY_IDS_MAX 0x400
 /* Enemy `id` read from `e` from now on (copied); NULL: from the ROM again.

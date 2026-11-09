@@ -23,6 +23,7 @@
 #include "rom.h"
 #include "run.h"
 #include "tiles.h"
+#include "xbackdrop.h"
 
 #define VOID_ARGB 0xFF282830u
 #define SEAM_ARGB 0xFFFF2040u
@@ -133,6 +134,22 @@ static void walk_counts(int *lineups, int *walked, int *junctions) {
 	}
 }
 
+/* A layer not built, reported so; one built, its backdrop as the game sets
+ * it, clear of its tiles: BN6 would draw one over them in the game, which
+ * no picture here shows (docs/rom/bn4.md, Net maps in 256 colours). False
+ * where it was not built. */
+static bool layer_checked(FILE *report, bool built, int area, int layout, int depth, uint32_t seed) {
+	if (!built) {
+		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", area, layout, depth, seed);
+		return false;
+	}
+	uint32_t lo, hi;
+	xbackdrop_map(area);
+	if (netmap_backdrop_over(area, &lo, &hi))
+		fprintf(report, "biome %2d layout %d depth %d seed %u: BACKDROP OVER TILES at %08x-%08x\n", area, layout, depth, seed, (unsigned)lo, (unsigned)hi);
+	return true;
+}
+
 /* A layer of `area` (a BN6 biome's own, or another game's), laid out by
  * `biome`'s rules. */
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
@@ -153,10 +170,7 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	bool built = netmap_build_layer(area, seed);
-	if (!built) {
-		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", area, layout, depth, seed);
-		return;
-	}
+	if (!layer_checked(report, built, area, layout, depth, seed)) return;
 	int tw, th;
 	const uint16_t *tiles = netmap_last_tiles(&tw, &th);
 	const NetAreaDef *a = net_area_def(area);

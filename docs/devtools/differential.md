@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:17:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -210,7 +210,9 @@ and traces both:
   Dark Soul's chip AI takes them).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
-  copy; one in RAM once the game has booted, over what it copied there,
+  copy, to each copy where more than one family copies the block, as
+  Mettaur and Melody both copy BN4's summoned appear; one in RAM once the
+  game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
   engine (`SOULUNITE_BREAK_*`: a Soul's turns 4, its used bit not set, a
@@ -706,6 +708,24 @@ code at BN6's own place and as its moved copy alike), and
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
 
+## The trace's moved ranges
+
+Every range the installs move (a family's, a Navi's, a chip's, a Soul's
+code, BN4's bracket, BN6's grown tables) reaches the traces, which read
+them as code: `src/emu/xvirus_moved.c` keeps them on the heap, as many as
+there are, and only where a reader asked before the installs (`--xdiff`,
+`CYBERWORLD_BTRACE`, `CYBERWORLD_XDRAWS`), so a player's run keeps none.
+A reader gets the whole list or none: a list never kept, or a range the
+heap could not hold, refuses the battle (`xdiff: a battle could not be
+begun`) or the trace, said on stderr; a log with no room for a block of
+the spec's code (`FAMILY_MAX`, 4096) is refused the same way. The run
+prints the count (`xdiff: N ranges moved`: 1054 in `melody4_v1`'s run,
+8 November 2026). The list it replaced held 1024: once the BN4 Navis and
+families pushed the count past it, the last ranges installed (in that run
+30: most of the Souls' code, BN4's bracket screen and BN6's chip records
+moved) dropped out of the traces with only a line on stderr, which
+`--quiet` hides. `test_xvirus_moved` in `tests/test_core.c` holds 3000.
+
 ## The BN4 trace
 
 ```bash
@@ -1046,10 +1066,18 @@ format, its game 4: the trace's header names it):
   in the comparison: their code keyed as hers (`src/dev/xdiff_bn4.c`
   `xd4_families`), their effects mapped (`xdiff_bn4.py` `summoned_foes`),
   her summon's draw, its shim's, keyed as `BN4_SPAWN_ENEMY`'s
-  (`xd4_summon_draws`, `XV_SHIM_SUMMON_DRAW`), and the summoned Mettaur's
-  +0xF, BN4's spawn's enemy id where BN6's spawn writes its NameID at
-  +0x28, allowed as BN4's 1 against BN6's 0 alone. `mettaur4_v1` fights
-  that Mettaur alone and PASSes.
+  (`xd4_summon_draws`, `XV_SHIM_SUMMON_DRAW`), and a summoned enemy's
+  +0xF, BN4's +0xE as the trace moves it (its appear queue's number: 1
+  her first summon, 2 her second), allowed against BN6's 0 alone, each
+  summoned version's own pair (a Billy's read as the word at +0xC, as its
+  value looks like a pointer). `mettaur4_v1` fights that Mettaur alone and
+  PASSes. Her other versions (`roll_v2`, `roll_v3`, `roll_sp`; V2 over
+  2400 frames, both her summons, in `roll_v2_summons`) add a Navi's version
+  at AI data +0x16 and +0x17, BN6's (its actor setup's, from the id's
+  triple), a word read whole held to its differing bytes (V3's 0x02020000
+  at +0x14), and her flash's spawn's r4 for each version
+  ([BN4's Navis in BN6's engine](../multirom/bn4-navis.md), Roll's
+  versions).
 - **Against BN6's own Mettaur** (`game=bn4:bn6`, foes by BN6's ids): both
   battles trace their 600 frames; they part at t1, as they must until
   BN4's numbers are mapped: BN4's object flags (+0 0x13, BN6's 0x17) and
@@ -1633,3 +1661,18 @@ format, its game 4: the trace's header names it):
     ids alone by `foes`), and one leftover allowed: his trail's begun byte
     (+9), what each game's PlaySoundEffect leaves in r0 (`spawn_leftover`'s
     bytes, BN4 0x28 and BN6 0x48 alone).
+- **WoodMan's readings** (`woodman_v1`, 8 November 2026; [BN4's Navis in
+  BN6's engine](../multirom/bn4-navis.md), WoodMan built): with them
+  **`woodman_v1` PASSES**, 1200 fight frames:
+  - **A pointer into a Soul Navi's AI data by its place**
+    (`legit.json`'s `bn4` `ai_data`, `tools/xdiff_snap.py` `ai_off`): a
+    pointer into BN4's AI data read as BN6's where his port moves the block
+    (his own block, BN4 +0x64 at BN6 +0x80; his attack's variables, +0x70 at
+    +0xA0), as the trace lays the fields out (`ai_segs`); his step's
+    callback state keeps a pointer to his block's +0xB (BN4's +0x6F, BN6's
+    +0x8B); every other offset as it is.
+  - **His 0x94's spawn's r2** (`spawn_leftover`, its word +0x38): each
+    game's camera, which the shake set before its spawner leaves in r2
+    (BN4 0x02009B80, BN6 0x02009180); no code of the 0x94 reads it.
+  - **His pool sounds** paired by slot in his battles alone (`foes`), his
+    0xA2 the pool's second slot over GutsMan's first.
