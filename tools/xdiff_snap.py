@@ -268,9 +268,12 @@ class Canon:
                 self.obj_pointer_bytes.setdefault((rule['kind'], int(rule['type'], 0)), {}).update(spans)
         # (a word of an object of a moved type that its spawn took from a register the caller never set, each game's engine's
         # leftover, which neither its code nor the engine's routines it runs read: BN5's an AI data's word, BN6's a number)
+        # (or, a rule naming the bytes it `compares`, a word part of which the spawner or its caller writes as its own, the
+        # rest each engine's leftover: those bytes compared alone)
         self.spawn_leftovers = {}
         for rule in legit['layouts'].get('spawn_leftovers', {}).get('rules', []):
-            self.spawn_leftovers.setdefault((rule['kind'], int(rule['type'], 0)), {})[int(rule['word'], 0)] = int(rule['bn6'], 0)
+            self.spawn_leftovers.setdefault((rule['kind'], int(rule['type'], 0)), {})[int(rule['word'], 0)] = \
+                tuple(rule['compares']) if 'compares' in rule else int(rule['bn6'], 0)
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
         self.attack_families = num(m['action'].get('families', {}))   # (BN5's attack families BN6 numbers otherwise)
@@ -1075,6 +1078,21 @@ def art_chosen(canon, oa, ob):
     return ob.kind == 'T1' and t == T1_OVERLAY and ob.o8(OBJ_OVERLAY_KIND) >= OVERLAY_KINDS6
 
 
+SPARK_TYPE = 0x04   # (the fourth kind's type of the engine's spark where an attack struck: xdiff_masks.SPARK)
+OBJ_Z = 0x3C        # (an object's Z, its height, 16.16)
+
+
+def struck_leftovers(f, o):
+    """the leftover rules (layouts' spawn_leftovers) of the attack an engine's spark struck with (its +0x4C), which
+    the spark takes its place from: its Z's, as the attack's Z holds the same leftover"""
+    v = f.ptr(o.o32(0x4C))
+    if not isinstance(v, tuple) or len(v) != 3 or v[1:] != ('obj', 0):
+        return {}
+    by = next((x for x in f.fr['objs'] if role_name(x.role) == v[0]), None)
+    rules = f.canon.spawn_leftovers.get((by.kind, by.o8(OBJ_TYPE)), {}) if by is not None else {}
+    return {OBJ_Z: rules[OBJ_Z]} if isinstance(rules.get(OBJ_Z), tuple) else {}
+
+
 def obj_cells(fa, fb, oa, ob):
     """(part, offset as BN6 has it, BN5's value, BN6's) for each place they differ, their numbers BN6's"""
     out = []
@@ -1121,8 +1139,13 @@ def obj_cells(fa, fb, oa, ob):
         if view is not None and view[0] != view[1] and rel is None:
             view = (stale(fa, oa, view[0]), stale(fb, ob, view[1]))
         left = canon.spawn_leftovers.get((kind, oa.o8(OBJ_TYPE)), {})
+        if kind == 'T4' and oa.o8(OBJ_TYPE) == SPARK_TYPE and w - NODE == OBJ_Z:
+            left = struck_leftovers(fa, oa)
         if w - NODE in left and isinstance(view, tuple) and view[0][1:] == ('ai', 0) and view[1] == ('raw', left[w - NODE]):
             continue   # (the spawn's leftover register: layouts' spawn_leftovers)
+        part = left.get(w - NODE)
+        if isinstance(part, tuple) and all(ra[w + k] == rb[w + k] for k in part):
+            continue   # (the leftover's other bytes, the bytes the rule compares the same: layouts' spawn_leftovers)
         if view is not None:
             if view[0] != view[1]:
                 out.append(('obj', w - NODE, view[0], view[1]))

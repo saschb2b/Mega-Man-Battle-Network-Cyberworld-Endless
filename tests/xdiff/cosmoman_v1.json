@@ -1,0 +1,11 @@
+{
+ "about": "CosmoMan V1 (BN5's 0x15B, BN6's 0x1EC) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Darkloid in BN6's engine, his own states (BN6's from 8) and his objects (the third kind's 0x6C, 0x6D, 0x70, 0x74, 0x79, 0x85, 0x86 and the fourth kind's 0x45) through the dispatch",
+ "kind": "differential",
+ "foes": "15B@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

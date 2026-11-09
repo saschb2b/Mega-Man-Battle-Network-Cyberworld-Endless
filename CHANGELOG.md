@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **CosmoMan on the dark boards.** With BN5 Team Colonel's ROM beside
+  BN6's, a dark layer's Darkloid can now be CosmoMan, BN5's own, moved
+  into BN6's battle and checked against BN5's frame by frame like
+  BlizzardMan and ShadeMan before him. The later acts' dark layers bring
+  him as their own Darkloid, as BN5's fifth mission does; before them he
+  is a third choice beside the first two, so a board repeats them less.
+  He stands on the board in his own sprite and speaks with his own face,
+  at the version the act's band takes. CloudMan is not in yet. A run
+  saved on a layer starts that layer again.
+- **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
+  battle engine and checked against BN4's own battle frame by frame, now
+  enters the tournament's first two rounds on his own plate of BN4's
+  bracket, his junk raining down as in BN4.
 - **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
   beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
   Area or BN5's Undernet now gets the quick way back BN6's areas have: a
