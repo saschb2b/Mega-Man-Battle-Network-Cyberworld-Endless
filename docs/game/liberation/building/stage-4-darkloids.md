@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "Stage 4, as built: BN5's Darkloids"
-description: "Stage 4, BN5's Darkloids: each mission's, BlizzardMan and ShadeMan moved into BN6's engine and proven frame by frame, the board's Darkloid picked by act (`run_darkloid`) in his own sprite, fought at the act's band."
+description: "Stage 4, BN5's Darkloids: each mission's, BlizzardMan, ShadeMan and CosmoMan moved into BN6's engine and proven frame by frame, the board's Darkloid picked by act (`run_darkloid`) in his own sprite, fought at the act's band."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:29:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:45:00Z }
 ---
 
 # Stage 4, as built: BN5's Darkloids (25 October 2026)
@@ -21,10 +21,11 @@ are BN5's but no mission's.
 **In BN6's engine** ([Transplanted Navis](../../../multirom/navis.md), The Darkloids):
 BlizzardMan and ShadeMan, each proven against BN5's own battle frame by
 frame (`blizzardman_v1`, `_v1_keys`, `_sp`; `shademan_v1`, `_v1_keys`,
-`_sp`: PASS). CloudMan and CosmoMan are derived but not yet moved (their
-object types, a RAM table of CloudMan's and a sprite loaded by a number
-made otherwise are open decisions); DarkMegaMan, a MegaMan on BN5's chip
-AI as the Dark Soul is, is left.
+`_sp`: PASS), and since 9 November CosmoMan (`cosmoman_v1`, `_v1_keys`,
+`_sp`: PASS). CloudMan is derived but not yet moved: his three decisions
+are settled in writing ([Transplanted Navis](../../../multirom/navis.md),
+CloudMan), not built; DarkMegaMan, a MegaMan on BN5's chip AI as the Dark
+Soul is, is left.
 
 **On the board.** A dark layer's Darkloid (`run_darkloid`, the guardians'
 navis 30-33 here: ShadeMan, BlizzardMan, CloudMan, CosmoMan) is BN5's own
@@ -58,7 +59,17 @@ board (BlizzardMan V2, deleted at par 12, the exit taken) and seed 2's
 act 3 board (ShadeMan V2, deleted two under par), each meeting his strike
 in DARKLOID PHASE.
 
-**Left:** CloudMan, CosmoMan and DarkMegaMan in BN6's engine; the
+**CosmoMan on the board** (9 November): moved, he is fightable, so the
+later acts' dark layers bring him as their own Darkloid (BN5's mission 5,
+`run_darkloid`'s fourth), twice as likely as each other one moved, and
+before them he is a third choice where BlizzardMan and ShadeMan were the
+only two. His sprite and face are list 6's and 8's 78, already copied in.
+The act whose own is CloudMan (mission 3) still draws among the moved
+three. A dark layer's Darkloid now differs where he is drawn, so
+`LAYER_MAKE` is 113.
+
+**Left:** CloudMan and DarkMegaMan in BN6's engine; CosmoMan's attack
+below half his HP, which no spec reaches; the
 Darkloids' poses (their strike animations: BlizzardMan's in BN5 19-52
 frames after the box) and BN5's own strike effects (his Snowball over the
 Navi); his entrance's words.

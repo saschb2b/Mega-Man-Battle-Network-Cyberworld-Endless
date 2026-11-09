@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (in runs where BN4's ROM is read, for a profile that has reached the Nest; BN6's and BN5's Navis and BN4's seven proved ones its entrants)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -472,8 +472,10 @@ so the guardian code draws from no pool he is in; he joins the finals when
 BN4's areas bring their guardians. Seven more joined on 8 November 2026,
 each on his own plate of BN4's bracket once his spec passed: ThunderMan,
 WindMan, FireMan, SearchMan, AquaMan, WoodMan and Roll, whose summon brings BN4's
-own Mettaur, moved into BN6 for her alone and never a visitor. The pool's
-BN4 Navis are the list's eight, all of them rounds 1 and 2 only.
+own Mettaur, moved into BN6 for her alone and never a visitor. JunkMan
+joined on 9 November 2026 on his plate, 0x0B ([BN4's Navis in BN6's
+engine](../multirom/bn4-navis.md), JunkMan built). The pool's BN4 Navis are
+the list's nine, all of them rounds 1 and 2 only.
 
 **The bracket's eight.** BN4's three-round bracket: MegaMan first (`0x1E`),
 round 1's Navi beside him, round 2's Navi in the next pair, the final's

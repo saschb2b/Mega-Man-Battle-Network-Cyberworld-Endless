@@ -238,6 +238,9 @@ typedef struct {
 #define XV_CODE     (XV_AT + 0x38000u)     /* their code, block by block */
 #define XV_ART      (XV_AT + 0x50000u)     /* what they draw: their sprites and sounds, to: */
 #define XV_ART_END  XV_ARMS
+#define XV_LATE_ART     FREE_LATE_FAMILIES /* ... and the late families' (BN4's past its first eight, tools/xrecipe_bn4.py LATE_FROM): their
+                                              sprites, the families' art full (its sounds' copies to its end), to: */
+#define XV_LATE_ART_END FREE_LATE_FAMILIES_END
 #define XV_ARMS     (XV_END - XV_LIST_MAX * BN6_ARM_VIRUS_SIZE)   /* the viruses' arm points' records grown to every number of sprite
                                               list 1 (BN6_ARM_VIRUSES_REF pointed here: BN6's bytes for each number, a family's record
                                               at its battle sprite's), to: */
@@ -287,6 +290,7 @@ uint32_t xvirus_shims_room(const XVirusFamily *f);
 typedef struct {
 	uint32_t code, code_end, art, art_end, stubs, stubs_end;
 	bool screen;   /* code of a screen's, no battle object's: its r5 a state of its own, whose +1 no object type */
+	uint32_t art2, art2_end;   /* a second room its sprites may go to besides art to art_end (the families': the late ones'; 0 none) */
 } XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
