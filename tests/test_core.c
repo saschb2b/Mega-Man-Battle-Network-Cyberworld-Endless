@@ -3835,6 +3835,9 @@ static void test_xvirus_cangard(void) {
  * or an attack's type */
 static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
 
+/* whether `slot` is the per-battle pool's in a BN4 family's songs, pointed in its battles alone (xvirus_recipe.h xv_bn4_pool) */
+static bool pooled(const XVirusFamily *f, int slot) { return f->game == XROM_BN4_RED_SUN_US && xv_bn4_pool_slot(slot); }
+
 static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 	int bad = f->ai == g->ai || spans_meet((uint32_t)f->first_id, XV_VERSIONS, (uint32_t)g->first_id, XV_VERSIONS) ||
 		spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE);
@@ -3857,10 +3860,12 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 			bool shared = (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_SHARED);
 			bad += !shared && (a->to == XV_TYPE_MOVED || a->to != b->to);
 		}
-	/* (a song slot, or a song's bytes over the other's art) */
+	/* (a song slot, but the per-battle pool's two late BN4 families each take in their own battles, the owner's call 13; or a
+	 * song's bytes over the other's art) */
 	for (int i = 0; i < f->nsongs; ++i) {
 		for (int k = 0; k < g->nsongs; ++k)
-			bad += f->songs[i].slot == g->songs[k].slot || spans_meet(f->songs[i].at, f->songs[i].room, g->songs[k].at, g->songs[k].room);
+			bad += (f->songs[i].slot == g->songs[k].slot && !(pooled(f, f->songs[i].slot) && pooled(g, g->songs[k].slot))) ||
+				spans_meet(f->songs[i].at, f->songs[i].room, g->songs[k].at, g->songs[k].room);
 		for (int k = 0; k < g->nsprites; ++k) bad += spans_meet(f->songs[i].at, f->songs[i].room, g->sprites[k].at, g->sprites[k].room);
 	}
 	for (int i = 0; i < g->nsongs; ++i)
