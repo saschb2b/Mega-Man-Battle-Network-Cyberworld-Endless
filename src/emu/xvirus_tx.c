@@ -72,6 +72,16 @@ uint8_t *xv_put(uint32_t at, uint32_t len, bool fresh) {
 	return p;
 }
 
+uint8_t xv_read8(uint32_t at) {
+	for (int i = tx.n - 1; i >= 0; --i)
+		if (at >= tx.w[i].at && at - tx.w[i].at < tx.w[i].len) return tx.bytes[tx.w[i].off + (at - tx.w[i].at)];
+	return emu_read8(at);
+}
+
+uint32_t xv_read32(uint32_t at) {
+	return (uint32_t)xv_read8(at) | (uint32_t)xv_read8(at + 1) << 8 | (uint32_t)xv_read8(at + 2) << 16 | (uint32_t)xv_read8(at + 3) << 24;
+}
+
 void xv_word(uint32_t at, uint32_t old, uint32_t v) {
 	uint32_t now = emu_read32(at);
 	if (now != old) { xv_fail("%08x reads %08x, not %08x", (unsigned)at, (unsigned)now, (unsigned)old); return; }

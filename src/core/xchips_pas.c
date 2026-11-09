@@ -4,6 +4,16 @@
 #include "xchips_pas.h"
 
 const XChipPa xchips_pas[] = {
+	{ 0x08027E16, 3, 4, 366, { 453, 453, 516, 0 } },   /* CsmoPris: Astroid3 + Astroid3 + CosmoMn{9e} */
+	{ 0x08027E20, 3, 4, 366, { 453, 453, 517, 0 } },   /* CsmoPris: Astroid3 + Astroid3 + CosmoMn{9f} */
+	{ 0x08027E2A, 3, 4, 367, { 435, 435, 519, 0 } },   /* WildBird: Katana1 + Katana1 + LarkMan{9e} */
+	{ 0x08027E34, 3, 4, 367, { 435, 435, 520, 0 } },   /* WildBird: Katana1 + Katana1 + LarkMan{9f} */
+	{ 0x08027E3E, 3, 4, 603, { 412, 412, 522, 0 } },   /* Football: MrkCan2 + MrkCan2 + GridMan{9e} */
+	{ 0x08027E48, 3, 4, 603, { 412, 412, 523, 0 } },   /* Football: MrkCan2 + MrkCan2 + GridMan{9f} */
+	{ 0x08027E52, 3, 4, 604, { 17, 17, 525, 0 } },   /* PileDrvr: GunDelS3 + GunDelS3 + Django{9e}; never formed: two GunDelS3 and Django's SP or DS: BN6's GunDelS3 is in N, Q and W, Django in D, so the Custom screen never lets the three be picked together; formed only where every chip is in * (the All * helper) */
+	{ 0x08027E5C, 3, 4, 604, { 17, 17, 526, 0 } },   /* PileDrvr: GunDelS3 + GunDelS3 + Django{9f}; never formed: two GunDelS3 and Django's SP or DS: BN6's GunDelS3 is in N, Q and W, Django in D, so the Custom screen never lets the three be picked together; formed only where every chip is in * (the All * helper) */
+	{ 0x08027E66, 3, 4, 365, { 416, 416, 506, 0 } },   /* BigNoise: Pulsar3 + Pulsar3 + ShadeMn{9e} */
+	{ 0x08027E70, 3, 4, 365, { 416, 416, 507, 0 } },   /* BigNoise: Pulsar3 + Pulsar3 + ShadeMn{9f} */
 	{ 0x08027E8C, 3, 0, 356, { 204, 0, 0, 0 } },   /* SuprSpr1: 3 WideSht1 of codes in a row */
 	{ 0x08027E92, 3, 0, 357, { 205, 0, 0, 0 } },   /* SuprSpr2: 3 WideSht2 of codes in a row */
 	{ 0x08027E98, 3, 0, 358, { 206, 0, 0, 0 } },   /* SuprSpr3: 3 WideSht3 of codes in a row */

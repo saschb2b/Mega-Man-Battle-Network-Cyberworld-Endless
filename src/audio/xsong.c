@@ -443,8 +443,8 @@ static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
 	{ XROM_BN5_COLONEL_US, 0xCF, 0x56 }, { XROM_BN5_COLONEL_US, 0xBC, 0x55 }, { XROM_BN5_COLONEL_US, 0x6F, 0x54 },
 	{ XROM_BN5_COLONEL_US, 0xE4, 0x53 }, { XROM_BN5_COLONEL_US, 0x12E, 0x52 }, { XROM_BN5_COLONEL_US, 0xA6, 0x51 },
 	{ XROM_BN5_COLONEL_US, 0xC6, 0x50 }, { XROM_BN5_COLONEL_US, 0xBD, 0x4F }, { XROM_BN5_COLONEL_US, 0x10E, 0x4E },
-	{ XROM_BN5_COLONEL_US, 0x119, 0x4D }, { XROM_BN5_COLONEL_US, 0x8E, 0x4C },
-	/* (the Darkloids', from the first slot up: the chips' own go down from 0x4B) */
+	{ XROM_BN5_COLONEL_US, 0x119, 0x4D }, { XROM_BN5_COLONEL_US, 0x8E, 0x4C }, { XROM_BN5_COLONEL_US, 0x148, 0x4B },
+	/* (the Darkloids', from the first slot up: the chips' own go down, PileDrvr's 0x148 at 0x4B, from 0x4A) */
 	{ XROM_BN5_COLONEL_US, 0xE3, 0x40 },
 	/* (BN5's battles' win songs, its Victory and Fanfare, on its areas' layers: src/director/win_song.c; the Darkloids' next from 0x43) */
 	{ XROM_BN5_COLONEL_US, BN5_SONG_VICTORY, 0x41 }, { XROM_BN5_COLONEL_US, BN5_SONG_FANFARE, 0x42 },

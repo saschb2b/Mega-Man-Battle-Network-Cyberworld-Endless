@@ -483,6 +483,7 @@
 08027410 mode_0x38_phases_table_read
 08027412 colonelsoul_button_chip.on
 08027DE4 program_advances
+08027E16 bn5_list
 08027E8C bn5_program_advances.323_337_registry_350_364
 08027F10 elements_set_up
 08028020 bn5_program_advances.323_337_registry_350_364_list_2
@@ -758,13 +759,17 @@
 080BC21A bn5_darkloids_navi_2
 080BC58E cloudman_navi_chip_routine
 080BD208 bn5_darkloids_navi_3
+080BD7EA bignoise_routine
 080BD834 set_up
 080BD86A bn5_last_chips_2
 080BDC5E cosmoman_navi_chip_routine
 080BDC84 cosmoman_chip_gathering_obstacles_beside_him
 080BDE88 larkman_navi_chip_routine
+080BDEB2 wildbird_routine
 080BE23C gridman_navi_chip_routine
 080BF604 django_navi_chip_routine
+080BF8D4 football_routine
+080BFB32 csmopris_routine
 080C02F0 word_for_navi_routines
 080C1D40 soul_look.dead_twin_bn5_first_kind_type
 080C1D42 soul_look.on
@@ -811,6 +816,7 @@
 080D3828 BN5_COSMO_SPAWN_6C
 080D3964 BN5_COSMO_SPAWN_6D
 080D56E0 BN5_COSMO_SPAWN_79
+080D951C football_burst_effect_id
 080DB608 find_kept_as_battle_is_won
 080DCC5A cloudman_chip_attack_spawned
 080DDB4C larkman_chip_first_object_spawned
@@ -836,6 +842,8 @@
 080E4C4C bn5_engine_objects.module
 080E4D1E BN5_SEA_MARKER_SPAWN
 080E6EBC gridman_chip_effect_spawned
+080E8994 piledrvr_routine
+080E89B2 piledrvr_object_given_chip
 080E8DC3 bn5_last_chips_5
 080E998A django_chip_first_effect_spawned
 080E9AFC django_chip_second_effect_spawned

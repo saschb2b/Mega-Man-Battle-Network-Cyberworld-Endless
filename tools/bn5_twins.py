@@ -512,6 +512,17 @@ TYPES = {
                                         "(list 2's 0x2A)"),
     (4, 0x86): ('moved', None, 'chips', "the Navi chip CosmoMan's gate (spawned at 0x080EA3F2): " + NO_TWIN),
     (3, 0xBF): ('moved', None, 'chips', "the Navi chip CosmoMan's thrown object (spawned by his gate, 0x080DE9BC): " + NO_TWIN),
+    (1, 0x1B): ('moved', None, 'chips', "the Program Advance BigNoise's ShadeMan: " + NO_TWIN + "; his battle sprite the Navis' "
+                                        "(list 2's 0x27)"),
+    (3, 0x04): ('moved', None, 'chips', "the Program Advance BigNoise's attack's object: " + NO_TWIN),
+    (1, 0x26): ('moved', None, 'chips', "the Program Advance CsmoPris's CosmoMan: " + NO_TWIN + "; his battle sprite the Navis' "
+                                        "(list 2's 0x2A)"),
+    (1, 0x25): ('moved', None, 'chips', "the Program Advance Football's GridMan: " + NO_TWIN + "; his battle sprite BN5's, copied"),
+    (3, 0x95): ('moved', None, 'chips', "the Program Advance Football's ball: " + NO_TWIN),
+    (3, 0x99): ('moved', None, 'chips', "the Program Advance PileDrvr's object: " + NO_TWIN),
+    (3, 0x9A): ('moved', None, 'chips', "the Program Advance PileDrvr's second object: " + NO_TWIN),
+    (4, 0x6F): ('moved', None, 'chips', "the Program Advance PileDrvr's effect: BN6's twin of its spawner would spawn BN6's own 0x6F, "
+                                        "whose code differs"),
     (1, 0x15): ('moved', None, 'chips', "the Navi chip CloudMan's CloudMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
                                         "at a number of the chips' in list 2 (his Navi is not moved)"),
     (3, 0xB3): ('moved', None, 'chips', "the Navi chip CloudMan's attack's object (spawned at 0x080DCC5A): " + NO_TWIN),

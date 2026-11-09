@@ -197,6 +197,13 @@ UNIT_STUBS = {
 }
 # The object types a helper moves, for every unit (the units spawn them through the dispatch, the helper's copy run)
 HELPER_TYPES = {(3, 0x68): 'Shake', (3, 0x0B): 'Bubbles'}
+
+# A unit that plays the object types of a unit derived before it (a Program Advance of a Navi chip's attack: WildBird spawns
+# LarkMan's Navi object, the first kind's 0x1E, and that one its three): those types that unit's copy, shared
+# (XV_TYPE_SHARED), their code copied once. The dispatch moves a type once: WildBird's unit copied LarkMan's blocks again
+# and LarkMan's own chips ran the later copy, their own unwatched (chip_larkman, chip_larkmansp and chip_larkmands_dark
+# FAILed at t34, BN6's calls none)
+UNIT_SHARES = {'WildBird': 'LarkMan'}
 # Raw data whose extent no walk tells (a table read by a number made elsewhere): its bytes
 # Routines a unit hands a table of routines to, in a register (its number): the table's every entry walked and moved or
 # aimed at its twin, as a jump table's (the family deriver stops a table at its first entry far from it)
@@ -427,6 +434,11 @@ UNITS = (
     ('navi', 0x11, 'LarkMan'),
     ('navi', 0x13, 'Django'),
     ('navi', 0x10, 'CosmoMan'),
+    ('navi', 0x14, 'BigNoise'),
+    ('navi', 0x16, 'CsmoPris'),
+    ('navi', 0x17, 'WildBird'),
+    ('navi', 0x18, 'Football'),
+    ('support', 0x2F, 'PileDrvr'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
 # chips' differential's finding where a spec ran it (docs/multirom/chips-code.md: what remains)
@@ -882,8 +894,8 @@ def navi_modules(b5, pairs):
     return _navi_modules
 
 
-def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None):
-    d = ChipDeriver(b5, b6, pairs, moved_before_chips())
+def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None, shares=None):
+    d = ChipDeriver(b5, b6, pairs, {**moved_before_chips(), **(shares or {})})
     d.navi_modules = navi_modules(b5, pairs)
     # (a number its code keeps is not audited by bn5_twins.KEPT, the families' rule: the chips' units are proven frame for
     # frame by tools/xdiff.py instead, as the Navis' are)
@@ -1057,8 +1069,9 @@ def chip_actions(u, d):
 SOUND_SLOTS = {
     0xBC: 0x55, 0xB7: 0x61, 0x6F: 0x54, 0xE4: 0x53, 0x70: 0x5F, 0xBA: 0x60, 0xC0: 0x62,   # (the plan's)
     0x105: 0x59, 0x115: 0x5A, 0x117: 0x5E, 0x119: 0x4D, 0x8E: 0x4C,                        # (its second amendment's)
-    0xA6: 0x51, 0xC6: 0x50, 0xBD: 0x4F, 0x10E: 0x4E, 0x12E: 0x52,                          # (the chips' own, down: 0x4B next)
+    0xA6: 0x51, 0xC6: 0x50, 0xBD: 0x4F, 0x10E: 0x4E, 0x12E: 0x52,                          # (the chips' own, down)
     0xE1: 0x5B,                                                                            # (the Navis' ToadMan's, theirs)
+    0x148: 0x4B,                                                                           # (the chips' own, down: PileDrvr's; 0x4A next)
 }
 
 
@@ -1687,11 +1700,24 @@ def chip_effect_calls(u):
                 f.effects.setdefault(None if v is None else v & 0xFF, []).append((site, chain))
 
 
+# Effect ids made by an immediate added, through a register, to a value shifted past its byte (BN5's call site: (the
+# immediate's site, the id, why)): the id given BN6's at its immediate
+EFFECT_IMMS = {
+    0x080D9526: (0x080D951C, 0x5F, "the Program Advance Football's ball's burst: r4 = the side << 8 (lsls r4,r0,#8 at 0x080D951A) plus "
+                                   "0x5F through r0 (movs r0,#0x5f; adds r4,r4,r0), handed to 0x080DFFD2"),
+}
+
+
 def shifted_effects(f):
     """an effect id made by a number added to a value shifted past its byte (r4 = x << 8 + n: Slasher's 0x16 at
     0x080ED536-0x080ED538, its high byte the side's): its id the number, its chain the immediate's (effect_imm's)"""
     insns = {a: i for w in f.walks.values() for a, i in w.insns.items()}
     for site, chain in list(f.effects.get(None, [])):
+        if site in EFFECT_IMMS:
+            at, e, _ = EFFECT_IMMS[site]
+            f.effects[None].remove((site, chain))
+            f.effects.setdefault(e, []).append((site, [(at, 'movs', e)]))
+            continue
         last = insns.get(chain[-1][0]) if chain else None
         adds = [x for x in chain[:-1] if x[1] == 'adds8']
         if (last is None or last.form != 'lsls' or len(last.f) < 3 or last.f[2] < 8 or not adds
@@ -1991,6 +2017,8 @@ PA_UNFORMED = {
     326: "three FireHit1 in a row, BN6's own FlmHook1's recipe, first in BN6's list (0x0802BB0E), which wins",
     327: "three FireHit2, BN6's FlmHook2's recipe, first",
     328: "three FireHit3, BN6's FlmHook3's recipe, first",
+    349: "two GunDelS3 and Django's SP or DS: BN6's GunDelS3 is in N, Q and W, Django in D, so the Custom screen never lets the "
+         "three be picked together; formed only where every chip is in * (the All * helper)",
 }
 
 
@@ -2114,6 +2142,8 @@ def dispatch_disagrees(units):
             want = bn5_twins.TYPES.get((kind, t5))
             if want is None or want[0] != got:
                 out.append(f'{u.label}: the {kind_name(kind)} kind\'s {t5:#x} {got} ({why})' + (f', where it says {want[0]}' if want else ''))
+            elif got == 'moved' and t6 == 'SHARED' and want[2] == 'chips' and u.label in UNIT_SHARES:
+                pass   # (the chips' copy, a unit's before it: UNIT_SHARES)
             elif got == 'moved' and (t6 == 'SHARED') != (want[2] in BEFORE_CHIPS):
                 out.append(f'{u.label}: the {kind_name(kind)} kind\'s {t5:#x} {"spawned as" if t6 == "SHARED" else "moved, where TYPES gives"} '
                            f'the {want[2]}\' copy')
@@ -2146,7 +2176,11 @@ def main():
     order = list(UNITS) + list(CANDIDATES) + [(k, int(n, 0), name) for k, n, name in (x.split(':') for x in a.unit)]
     units = []
     for k, (kind, n, label) in enumerate(order):
-        units.append(derive(b5, b6, pairs, kind, n, label, alloc, number_of(kind, n), helper_at))
+        of = next((u for u in units if u.label == UNIT_SHARES.get(label)), None)
+        if label in UNIT_SHARES and of is None:
+            sys.exit(f'xchiprecipe: {label} shares the types of {UNIT_SHARES[label]}, which no unit before it is')
+        shares = {(tk, t5): f"{of.label}'s unit" for tk, t5, to, _ in of.types if to is None} if of else None
+        units.append(derive(b5, b6, pairs, kind, n, label, alloc, number_of(kind, n), helper_at, shares))
     flash_kinds(helpers, units[:len(UNITS)])
     units = helpers + units
     shared_rows(units, b5)
