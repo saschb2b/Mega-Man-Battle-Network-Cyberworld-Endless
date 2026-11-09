@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Update**: multirom/bn4-navis.md, JunkMan built: the New 3DS's heap with him in (heap3ds, seeds 1-3, bn4 and all: 94.62 MB and 95.98 MB, the mirror images' refusals as before).
 * **Update**: multirom/bn4-navis.md, JunkMan built: `junkman_v1` PASSes over its 1200 frames, his states run with BN4's runner's r4 by stubs of his home (`XNavi.runner_r4`), his types at the dispatch's 0xCF-0xD2, four mutations caught; he joins the tournament's proved list on his plate (`BN4_PLATE_JUNKMAN`); game/tournament.md and GUIDE.md, the pool's nine BN4 Navis; rom/bn4.md, JunkMan derived; re/ledger.json; the symbol files written again.
 
 ## 2026-11-08

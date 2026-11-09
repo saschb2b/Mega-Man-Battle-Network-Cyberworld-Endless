@@ -1511,6 +1511,10 @@ spawned as his 0x97 (t1) and his sound 0xC0 at the pool's first slot
 was not caught: `junkman_v1` never strikes his junk, so that test is
 unreached, as is 0x97's read of its +7 (it changes no frame there).
 
+The New 3DS's heap with him in (`python3 tools/heap3ds.py --seeds 1-3 --cases bn4,all`, 9 November 2026): BN6 and
+BN4 peak at 94.62 MB of 96 with none refused; all three ROMs at 95.98 MB, 15 refused in 2 of 3 runs (the maps' mirror images,
+`area_src.c`, as before him). His install writes the core's copy alone; the registry and moved-range caps he met are dev's.
+
 **Two mutations his install let through, settled in the differential**:
 Roll's player-22 sound, a poke of the pool slot 0x63's entry, held only
 while she was installed last (dev's pointing of the pool at the spec's
