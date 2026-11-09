@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:25:53Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
 ---
 
 # Portable saves
@@ -86,6 +86,23 @@ The file holds only the progress files under `savedata/`:
 | `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md)) |
 | `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
+
+The profile's Library holds chip ids to 1023 (`library_w` after the
+rest: a profile saved before reads them 0, and a build before it reads
+a newer profile's `.cwsave` as made by a newer version), for [ten-bit
+chip ids](../multirom/bn4-chips.md). `run.state` holds BN6's RAM and so
+its folders' entries, in ten bits since ten-bit chip ids (`chip_entry.h`):
+`RUN_MAGIC` is "CWED" (`save_format.h`; "CWEC" is Oran Isle's run.stop,
+nine-bit too); a run saved before ("CWEC", "CWEB", or an older format)
+is read as ever, and its folders go through the converter
+(`chip_entries_from9`, unit-tested; `tests/test_legacy.c` reads a "CWEB"
+and a "CWEC" run as today's) once: `run.folder` as
+it loads, the state's three folders (eToolkit `+0x48`) as soon as the
+state is in (`own_folder_chips`, `director_folder.c`). Tried with a run
+the nine-bit build saved at a guardian's door: the ten-bit build's
+CONTINUE the same picture for picture as the nine-bit build's, and
+without the converter not, from the battle on. A ten-bit run's `.cwsave`
+reads as made by a newer version in a build before it.
 
 ROMs, boot states and any other file are never packed. Controls, keys,
 the touch layout, screen settings, the volumes and the statistics answer

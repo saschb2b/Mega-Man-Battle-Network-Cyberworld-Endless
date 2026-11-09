@@ -3,6 +3,8 @@
  * frame, where the draw never reads the game. */
 #include "second_read.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -287,7 +289,7 @@ static int pack_copies(int chip, bool fresh) {
 	static int n;
 	if (fresh) n = pack_now(pack, count, 400, false);
 	int copies = 0;
-	for (int i = 0; i < n; ++i) copies += (pack[i] & 0x1FF) == chip ? count[i] : 0;
+	for (int i = 0; i < n; ++i) copies += (int)chip_entry_id(pack[i]) == chip ? count[i] : 0;
 	return copies;
 }
 
@@ -309,7 +311,7 @@ void second_read_library(void) {
 	if (!S2.lib_chip) return;
 	uint16_t folder[BN6_FOLDER_ENTRIES];
 	director_folder_now(folder);
-	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) S2.lib_folder += (folder[i] & 0x1FF) == S2.lib_chip;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) S2.lib_folder += (int)chip_entry_id(folder[i]) == S2.lib_chip;
 }
 
 /* Script `i` of the text archive at bus address `a` (u16 offsets, then
@@ -413,7 +415,7 @@ void second_read_shop(void) {
 	S2.sh_id = emu_read16(e + 2);
 	S2.sh_code = emu_read8(e + 4);
 	S2.sh_currency = (int)emu_read32(desc);
-	if (S2.sh_kind == BN6_SHOP_KIND_CHIP) shop_chip((uint16_t)(S2.sh_id | S2.sh_code << 9));
+	if (S2.sh_kind == BN6_SHOP_KIND_CHIP) shop_chip(chip_entry((unsigned)S2.sh_id, (unsigned)S2.sh_code));
 	else if (S2.sh_kind == BN6_SHOP_KIND_PROGRAM) shop_program(S2.sh_id / 4, S2.sh_code);
 	else if (S2.sh_kind == BN6_SHOP_KIND_ITEM) {
 		item_name(S2.sh_id, S2.sh_name, sizeof S2.sh_name);

@@ -147,4 +147,60 @@
 #define BN4_COLL_ELEM_DAMAGES 0x3C    /* the frame's damage by element, the five summed at BN4_ELEM_DAMAGES_SUM (BN6's +0x94) */
 #define BN4_ELEM_DAMAGES_SUM 0x08012E60u /* ldrh r0,[r4,#0x3c]; ldrh r1,[r4,#0x3e]; adds ... to +0x44 (BN6_ELEM_DAMAGES_SUM's twin) */
 
+/* VolGear, the first late family (BN4's type 0x08, enemy ids 7-12; tools/xrecipe_bn4.py LATE_FROM; docs/rom/bn4.md, VolGear
+ * moved): found by its type, each checked by the generator against the ROM */
+#define BN4_VOLGEAR_TYPE  0x080B6208u /* its type routine (BN4_T1_TYPES[0x08]): jump table 0x080B6220 (init 0x080B622C, update
+                                       * 0x080B6284), the after-state; its region to 0x080B68B0, BN4_BY_NAME_RANGE amid it
+                                       * (0x080B6568-0x080B6594, called out: xrecipe_bn4.ENGINE_IN_REGION) */
+#define BN4_VOLGEAR_STATES 0x080B629Cu /* its state table: BN4's generic 0-5, its own 6-10 (0x080B62C9 its choice, 0x080B6595,
+                                       * 0x080B65A9, 0x080B67F9, 0x080B66E3) */
+#define BN4_VOLGEAR_AIM   0x080B6850u /* its flame's aim: the other side's player read inline from the battle state (lsls r0,#2;
+                                       * adds r0,#BN4_BATTLE_PLAYERS; ldr r2,[r0,r1] past [eToolkit +0x18]), BN6's +0xD0 a side 0x10 */
+#define BN4_T3_VOLGEAR_FIRE 0x19      /* the third kind's: VolGear's fire on each panel of a list (its routine 0x080CFF80, spawner
+                                       * 0x080D00B8), spawned from its state 0x080B66E3's step (0x080B67A0) */
+#define BN4_T3_VOLGEAR_FLAME 0x1A     /* ... its flame along the row, which spawns the next panel's (its routine 0x080D014E, spawner
+                                       * 0x080D02DA, its kinds BN4_T3_1A_KINDS by its version >> 1 from 0x080B6876) */
+#define BN4_VOLGEAR_HELD_ATTACK 0x080E50AEu /* its held chip's attack: the fourth kind's 0x29 spawned (from 0x080B636E, behind
+                                       * BN4_HELD_CHIP_TEST): dead while its +0x2A stays 0xFFFF, BN6's family nullsub */
+#define BN4_BILLY_HELD_USE 0x080B9704u /* Billy's held chip used (its numbers, 0x080B54D0, then its attack, 0x080E514E), which
+                                       * VolGear calls too (0x080B638C): dead while it holds none */
+#define BN4_METTAUR_HELD_OTHER 0x080B3C1Au /* Mettaur's held chip's other attack (0x080E8ADA), which VolGear calls for its chip 0x85
+                                       * (0x080B63F0): dead while it holds none */
+#define BN4_HELD_CHIP_TEST 0x080B52E4u /* a held chip's test (+0x2A + 1): copied with the families that call it (bn4_twins.COPIED) */
+/* Its Program Advances (docs/rom/bn4.md, Its Program Advances; docs/multirom/bn4-chips.md): BN6's recipes' format, read for
+ * Phase 4's grown list (BN6_PA_LIST's twin) */
+#define BN4_PA_LIST       0x080212B0u /* the recipes' addresses, BN4_PA_COUNT of them, then 0 (BN6_PA_LIST's shape) */
+#define BN4_PA_LIST_REF   0x0801F4E0u /* ... the one word that names it, loaded at 0x0801F3BE (r6) */
+#define BN4_PA_COUNT      37          /* ... how many recipes: 30 Program Advances, LifeSrd, DarkNeo and HeatSprd by two or more */
+#define BN4_PA_RECIPES    0x080211B0u /* the recipes: n, kind, the PA's id (u16), its chips (u16 id | code << 9) */
+#define BN4_PA_KIND_LISTED 1          /* a recipe of n chips listed, each its own (BN6's kind 4); kind 0 one chip n times, codes in a row */
+
+/* Kilby, the second late family (BN4's type 0x1E, enemy ids 0x43-0x48; docs/rom/bn4.md, Kilby moved): found by its type, each
+ * checked by the generator against the ROM */
+#define BN4_KILBY_TYPE    0x080BC3FCu /* its type routine (BN4_T1_TYPES[0x1E]): jump table 0x080BC414 (init 0x080BC420, update
+                                       * 0x080BC478), the after-state; its region to 0x080BCA20 */
+#define BN4_KILBY_STATES  0x080BC490u /* its state table: BN4's generic 0-5, its own 6-9 (0x080BC4B9, 0x080BC6AD, 0x080BC6C1,
+                                       * 0x080BC7E1) */
+#define BN4_KILBY_EFFECT  0x080BC8BAu /* its effect's id made by arithmetic: lsls r4,r0,#16 (its +4) then adds r4,#0x2D, the
+                                       * effect's own byte past its parameter (again at 0x080BC8F2): the generator reads the adds */
+#define BN4_KILBY_SOUND   0x080BC90Cu /* its sound 0xCD (movs r0,#0xcd; bl BN4_PLAY_SOUND at 0x080BC90E), BN6 has no song of: the
+                                       * per-battle pool's first slot, 0x32 (xvirus_recipe.h xv_bn4_pool) */
+#define BN4_KILBY_REGION_WORD 0x080BC946u /* its ldr r4 of a collision region's spawn word, 0x04050401, before bl 0x080CD7E2
+                                       * (the collision region's spawn, whose twin BN6's 0x080C6BDA takes r4 the same) */
+
+/* MagTect, the third late family (BN4's type 0x26, enemy ids 0x31-0x36; docs/rom/bn4.md, MagTect moved): found by its type,
+ * each checked by the generator against the ROM */
+#define BN4_MAGTECT_TYPE  0x080BEB68u /* its type routine (BN4_T1_TYPES[0x26]): jump table 0x080BEB80 (init 0x080BEB8C, update
+                                       * 0x080BEBE6), the after-state; its region to 0x080BF0E0 */
+#define BN4_MAGTECT_STATES 0x080BEC00u /* its state table: BN4's generic 0-5, its own 6-9 (0x080BEC29, 0x080BED69, 0x080BED85,
+                                       * 0x080BEE6B) */
+#define BN4_MAGTECT_TAIL  0x080BEBF6u /* its update past the pre-step, the state runner and the present: bl BN4_MAGTECT_SHAKE,
+                                       * entered as hook 3 (bn4_twins.ENTRIES) */
+#define BN4_MAGTECT_SHAKE 0x080BF064u /* its shake: unless the battle is paused (0x08007948) or BN4_CAN_MOVE_THIRD says not, while its
+                                       * +0x20 is a multiple of 4, a draw picks a pair of its table's signed bytes for its sprite's
+                                       * offsets +0x36 and +0x3E, kept at +0x64 and +0x68: every unpaused frame of the opening too */
+#define BN4_CAN_MOVE_THIRD 0x0800AD7Eu /* BN4_CAN_MOVE's body with the flags' mask 0x105040 (its literal 0x0800B130): copied */
+#define BN4_MAGTECT_SOUNDS 0x080BEF34u /* its sounds BN6 has no song of: 0xF8 here (movs r0,#0xf8) and 0xB8 at 0x080BEFAA, each
+                                       * before bl BN4_PLAY_SOUND: the per-battle pool's 0x33 and 0x32 (xvirus_recipe.h xv_bn4_pool) */
+
 #endif

@@ -39,34 +39,38 @@ static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 }
 
 /* Learns the tiles of map `src` and its mirror image, where their tiles
- * line up with the layer's grid (`grid_of`). */
-static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+ * line up with the layer's grid (`grid_of`, src itself or another's: its
+ * fields alone are read). The mirror is src turned in place and back
+ * (area_src_mirror_in): a copy of it took the New 3DS's heap past its size
+ * (docs/engine/emulation/3ds-memory.md). */
+static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
 	}
 	AreaSrc m;
-	if (!area_src_mirror(src, &m)) return;
+	if (!area_src_mirror_in(src, &m)) return;
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
 		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
 	}
-	area_src_free(&m);
+	area_src_mirror_end(src, &m);
 }
 
 /* ... at each of its floor heights: raised floors are drawn higher, so each
- * is learned in a view that brings it down to the ground. */
-static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+ * is learned in a view that brings it down to the ground (made in place,
+ * as the mirror is). */
+static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	int count[256] = { 0 };
 	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
 	learn_view(src, grid_of, area, L);
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
 		if (count[z] < NETMAP_LEVEL_MIN_CELLS) continue;
 		AreaSrc r;
-		if (!area_src_raise(src, z, &r)) continue;
+		if (!area_src_raise_in(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, L);
-		area_src_free(&r);
+		area_src_raise_end(src, &r);
 	}
 }
 
@@ -78,7 +82,8 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 	AreaSrc src, m;
 	if (!area_src_load(c[0], c[1], &src)) return;
 	props_learn_counter(&src, c[2], c[3], FACES_X, &L->counter[FACES_X]);
-	if (area_src_mirror(&src, &m)) {
+	/* (its mirror made in place, src not read again till it is let go) */
+	if (area_src_mirror_in(&src, &m)) {
 		props_mirror_walls(&src, &m);
 		props_learn_counter(&m, -c[3], -c[2], FACES_Y, &L->counter[FACES_Y]);
 	}
@@ -106,7 +111,7 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 				L->counter[f].ntiles, L->counter[f].nwalls, L->counter[f].navi_x, L->counter[f].navi_y);
 	if (emu_debug_on())
 		for (int f = 0; f < 2; ++f) fprintf(stderr, "counter faces %d moved %d,%d onto the lattice\n", f, L->counter_dx[f], L->counter_dy[f]);
-	area_src_free(&m);
+	area_src_mirror_end(&src, &m);
 	area_src_free(&src);
 }
 
@@ -135,10 +140,13 @@ static void learn_report(int area, const Learned *L) {
 	for (int d = 0; d < 4; ++d) fprintf(stderr, "arrow panel area %d way %d ok %d tiles %d\n", area, d, L->arrow[d].ok, L->arrow[d].ntiles);
 }
 
-/* Map a's arrow panels, the ways not learned yet (BN6's maps alone: another
- * game's sections are its own). */
-static void learn_arrows(const AreaSrc *a, const NetAreaDef *na, Learned *L) {
-	for (int d = 0; d < 4 && !na->xrom; ++d) props_learn_arrow(a, d, &L->arrow[d]);
+/* Map a's arrow panels, the ways not learned yet: BN6's, and BN5's, whose
+ * maps mark theirs with the same section-3 values 0x48-0x4F (SciLab 4, End
+ * Area 1-3, Oran Area 2, the Undernet 1-3 and Nebula Area 2 and 4:
+ * docs/rom/bn5-world.md, Its arrow panels and ramps); the lane on a layer
+ * is BN6's own ride either way, its art the area's. */
+static void learn_arrows(const AreaSrc *a, Learned *L) {
+	for (int d = 0; d < 4; ++d) props_learn_arrow(a, d, &L->arrow[d]);
 }
 
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
@@ -157,14 +165,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		/* (its emblem, where its own map draws none: BN4's Undernet's
 		 * plain plates, crossed in another of its maps) */
 		if (na->emblem && !L->emblem.ok && aligned(grid, &b)) props_learn_floor_emblem(&b, na->emblem, &L->emblem);
-		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		if (aligned(grid, &b)) learn_arrows(&b, L);
 		area_src_free(&b);
 	}
 	/* (and the arrow panels of its maps listed for them alone) */
 	for (int k = 0; k < 2 && na->arrow_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
-		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		if (aligned(grid, &b)) learn_arrows(&b, L);
 		area_src_free(&b);
 	}
 }
@@ -189,7 +197,7 @@ bool nm_learn(int area, Learned *L) {
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, nm_ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
 	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
-	learn_arrows(&a, na, L);
+	learn_arrows(&a, L);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
 	rebank_seen(&a, na->rebank[1], L);

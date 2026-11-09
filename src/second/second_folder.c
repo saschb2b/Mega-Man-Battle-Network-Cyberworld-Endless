@@ -8,6 +8,8 @@
  * pack. */
 #include "second_folder.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 
 #include "second_art.h"
@@ -39,7 +41,7 @@ static void corner(int x, int y, SDL_Color c) {
 /* Chip entry `e` in the cell at (x, y): its icon in its rank's frame, its
  * code under it; the cursor's in a gold frame */
 static void cell(int x, int y, uint16_t e, int count, bool cursor, int mark) {
-	int chip = e & 0x1FF, code = e >> 9;
+	int chip = (int)chip_entry_id(e), code = (int)chip_entry_code(e);
 	if (cursor) {
 		fill_rect(x - 1, y - 1, 20, 20, PET_GOLD);
 		fill_rect(x, y, 18, 18, PET_NAVY);
@@ -72,7 +74,7 @@ static void folder_grid(int x, int y) {
 static void codes_line(int x, int y, int right) {
 	int count[27] = { 0 };
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i)
-		if (S2.folder[i] & 0x1FF) ++count[S2.folder[i] >> 9 < 27 ? S2.folder[i] >> 9 : 26];
+		if (chip_entry_id(S2.folder[i])) ++count[chip_entry_code(S2.folder[i]) < 27 ? chip_entry_code(S2.folder[i]) : 26];
 	x = label(x, y, "Codes");
 	for (int left = 1; left;) {
 		int best = -1;
@@ -92,7 +94,7 @@ static void codes_line(int x, int y, int right) {
 static void elements_line(int x, int y, int right) {
 	int count[11] = { 0 };
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		int el = (S2.folder[i] & 0x1FF) ? second_chip_element(S2.folder[i] & 0x1FF) : -1;
+		int el = chip_entry_id(S2.folder[i]) ? second_chip_element((int)chip_entry_id(S2.folder[i])) : -1;
 		if (el >= 0) ++count[el];
 	}
 	for (int el = 0; el < 11; ++el) {
@@ -110,7 +112,7 @@ static void elements_line(int x, int y, int right) {
 static void ranks_line(int x, int y) {
 	int mega = 0, giga = 0;
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		int r = (S2.folder[i] & 0x1FF) ? second_chip_rank(S2.folder[i] & 0x1FF) : -1;
+		int r = chip_entry_id(S2.folder[i]) ? second_chip_rank((int)chip_entry_id(S2.folder[i])) : -1;
 		mega += r == RANK_MEGA;
 		giga += r == RANK_GIGA;
 	}

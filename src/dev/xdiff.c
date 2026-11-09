@@ -30,6 +30,7 @@
  * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
 
+
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -117,6 +118,7 @@ typedef struct Side_ {
 	int behind;                     /* (BN6's, lag=N) the fight frames its battle runs behind the reference's: its keys by the timer
 	                                 * taken that much later, that many more frames traced (docs/devtools/differential.md, The BN4 trace) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
+	uint32_t still;                 /* the core's frames run since its timer last read otherwise (a hold's: a Navi chip's, a turn's change) */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
 	bool seeded, fought, done, decked, held;
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
@@ -430,7 +432,9 @@ static void keep_safe(const View *v) {
 static void deck_put(Side *g, const Spec *s) {
 	int k = g->v.game == 5 ? 0 : 1;
 	g->decked = true;
-	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
+	/* (a spec's deck is nine-bit, xdiff.h: BN6's in this build's form, chip_entry.h) */
+	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i)
+		g->v.wr16(g->v.deck + 2 * (uint32_t)i, k ? chip_entry_from9(s->deck[k][i]) : s->deck[k][i]);
 }
 
 /* BN6's chip AI's lists written from BN5's (dslist=1), its chip ids BN6's (xnavi_dark.h), after BN6's fight's first frame
@@ -500,6 +504,9 @@ static void film_take(Side *g, const Spec *s, uint32_t t) {
  * written after its first frame; a new value of its timer while it fights
  * traced. Done after `frames` of them, its end, or its frames' budget.
  * True where this frame was traced. */
+/* (its frames at its timer's value, from the seed: each game's opening its own length) */
+static void held_count(Side *g, uint32_t t, bool seeding) { g->still = t == g->last && !seeding ? g->still + 1 : 0; }
+
 static bool step(Side *g, const Spec *s) {
 	const View *v = &g->v;
 	if (g->done) return false;
@@ -529,8 +536,10 @@ static bool step(Side *g, const Spec *s) {
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
 	if (fighting) film_take(g, s, t);
-	if (fighting && !g->seeded) seed(g, s);
+	bool seeding = fighting && !g->seeded;
+	if (seeding) seed(g, s);
 	sounds(g);
+	held_count(g, t, seeding);
 	if (fighting && t != g->last) {
 		frame_out(g);
 		g->fought = traced = true;
@@ -546,21 +555,36 @@ static bool step(Side *g, const Spec *s) {
  * whose timer has gone on waiting while the other's still holds (a turn's
  * change, a unison's crossing: each game takes frames of its own there), so
  * each game's frames of a timer value run with the other's at it too, the
- * reference's first (the replay finds its draws made); with `follow`, BN6's
- * RNG words written from BN5's once both have traced a timer value
- * (rng=follow) */
+ * reference's first (the replay finds its draws made), and through a hold
+ * up to LEAD frames ahead: a frame the reference's game spends without its
+ * loop (BN5 loading a Darkloid's LZ77 sprite as his Navi chip comes,
+ * three frames, where BN6's copy is whole) leaves its draws still made
+ * before the subject's ask for them; with `follow`, BN6's RNG words written
+ * from BN5's once both have traced a timer value (rng=follow) */
+#define LEAD 8
+/* (whether the reference `a`, or the subject, steps next while both run) */
+static bool goes(const Side *a, const Side *b, bool reference) {
+	if (a->last != b->last) return reference ? a->last < b->last : b->last < a->last;
+	return reference ? a->still < b->still + LEAD : b->still + LEAD <= a->still;
+}
+
+/* (rng=follow: BN6's RNG words written from BN5's once both have traced a timer value) */
+static void follow(const Side *a, Side *b, const Spec *s, uint32_t *followed) {
+	if (!s->follow || a->last != b->last || a->last == *followed) return;
+	*followed = a->last;
+	b->v.wr32(b->v.rng[0], a->v.rd32(a->v.rng[0]));
+	b->v.wr32(b->v.rng[1], a->v.rd32(a->v.rng[1]));
+}
+
 static void fight(Side *a, Side *b, const Spec *s) {
 	while (a && !a->seeded && !a->done) step(a, s);
 	while (b && !b->seeded && !b->done) step(b, s);
 	uint32_t followed = 0;
 	while ((a && !a->done) || (b && !b->done)) {
-		bool both = a && b && !a->done && !b->done, go_a = a && (!both || a->last <= b->last), go_b = b && (!both || b->last <= a->last);
+		bool both = a && b && !a->done && !b->done;
+		bool go_a = a && (!both || goes(a, b, true)), go_b = b && (!both || goes(a, b, false));
 		bool ta = go_a && step(a, s), tb = go_b && step(b, s);
-		if (s->follow && both && (ta || tb) && a->last == b->last && a->last != followed) {
-			followed = a->last;
-			b->v.wr32(b->v.rng[0], a->v.rd32(a->v.rng[0]));
-			b->v.wr32(b->v.rng[1], a->v.rd32(a->v.rng[1]));
-		}
+		if (both && (ta || tb)) follow(a, b, s, &followed);
 	}
 }
 
@@ -664,52 +688,19 @@ static bool open_out(Side *g, const Spec *s, const char *game) {
 	return g->out != NULL;
 }
 
-/* A folder written as its game's first, each chip owned (its mark its key XOR the game's), with no Regular chip or
- * TagChips: the folders' pointer and marks' at their eToolkit places (game's own read and write) */
-typedef struct {
-	uint32_t toolkit, folders, marks, keys, key_xor, regular, tags;   /* (the NaviStats' Folder1Reg, its two TagChips; 0 none) */
-	uint8_t (*rd8)(uint32_t);
-	uint32_t (*rd32)(uint32_t);
-	void (*wr8)(uint32_t, uint8_t);
-	void (*wr16)(uint32_t, uint16_t);
-} FolderPlaces;
-
-static void folder_put(const FolderPlaces *p, const uint16_t *folder) {
-	uint32_t folders = p->rd32(p->toolkit + p->folders), marks = p->rd32(p->toolkit + p->marks);
-	if (!in_ewram(folders) || !in_ewram(marks)) { fprintf(stderr, "xdiff: no folder in this game's state\n"); return; }
-	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		uint32_t id = folder[i] & 0x1FF;
-		p->wr16(folders + 2 * i, folder[i]);
-		p->wr8(marks + id, (uint8_t)(p->rd8(p->keys + id) ^ p->key_xor));
-	}
-	p->wr8(p->regular, 0xFF);
-	for (uint32_t i = 0; p->tags && i < 2; ++i) p->wr8(p->tags + i, 0xFF);
-}
-
 static void bn6_wr16(uint32_t a, uint16_t v) { const uint8_t b[2] = { (uint8_t)v, (uint8_t)(v >> 8) }; emu_write(a, b, 2); }
-
-/* The folder's chips in BN6's pack too, one of each chip and code at least: the battle's deal takes a chip of the folder only
- * where its code is one of its record's and the pack counts one so (0x08006EA4), and gives BN6's junk chip 389 for it else
- * (the chips' specs use codes BN6's records have) */
-static void pack_own(const uint16_t *folder) {
-	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), records = emu_read32(BN6_CHIP_TABLE_REF);
-	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && in_ewram(pack); ++i) {
-		uint32_t id = folder[i] & 0x1FFu, code = folder[i] >> 9, k = 0;
-		uint32_t at = id < BN6_PACK_IDS ? pack + BN6_PACK_ENTRY * id : BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
-		while (k < 4 && emu_read8(records + BN6_CHIP_RECORD_SIZE * id + BN6_CHIP_CODES + k) != code) ++k;
-		if (k == 4) k = 0;
-		if (!emu_read8(at + k)) emu_write8(at + k, 1);
-	}
-}
 
 /* MegaMan in BN6 as the spec has him: its event flags, its folder, his buster */
 static void subject_setup(const Spec *s) {
 	for (int i = 0; i < s->nflags[1]; ++i) flag_set(s->flags[1][i]);
 	static const FolderPlaces places = { BN6_TOOLKIT, BN6_TOOLKIT_CHIPS, BN6_TOOLKIT_CHIP_MARKS, BN6_CHIP_KEYS, BN6_CHIP_KEY_XOR, BN6_NAVI_FOLDER1_REG,
-		BN6_NAVI_FOLDER1_TAG, emu_read8, emu_read32, emu_write8, bn6_wr16 };
+		BN6_NAVI_FOLDER1_TAG, CHIP_ID_MASK, emu_read8, emu_read32, emu_write8, bn6_wr16 };
 	if (s->nfolder[1]) {
-		folder_put(&places, s->folder[1]);
-		pack_own(s->folder[1]);
+		/* (a spec's folders are nine-bit, xdiff.h: BN6's in this build's form) */
+		uint16_t f6[BN6_FOLDER_ENTRIES];
+		for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) f6[i] = chip_entry_from9(s->folder[1][i]);
+		xd_folder_put(&places, f6);
+		xd_pack_own(f6);
 	}
 	static const uint32_t buster[3] = { BN6_NAVI_ATTACK, BN6_NAVI_SPEED, BN6_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)
@@ -787,8 +778,8 @@ static void reference_setup(const Spec *s) {
 		guest_wr8(a, (uint8_t)(guest_read8(a) | 0x80u >> (f & 7)));
 	}
 	static const FolderPlaces places = { BN5_TOOLKIT, BN5_TOOLKIT_CHIPS, BN5_TOOLKIT_CHIP_MARKS, BN5_CHIP_KEYS, BN5_CHIP_KEY_XOR, BN5_NAVI_FOLDER1_REG,
-		0, guest_read8, guest_read32, guest_wr8, guest_write16 };
-	if (s->nfolder[0]) folder_put(&places, s->folder[0]);
+		0, CHIP9_MASK, guest_read8, guest_read32, guest_wr8, guest_write16 };
+	if (s->nfolder[0]) xd_folder_put(&places, s->folder[0]);
 	static const uint32_t buster[3] = { BN5_NAVI_ATTACK, BN5_NAVI_SPEED, BN5_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)
 		if (s->buster[i] >= 0) guest_wr8(buster[i], (uint8_t)s->buster[i]);
@@ -920,7 +911,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	if (s->replay && s->bn4 && a->log && b->log) xd_replay_setup(b->log, a->log);   /* (the family's init draws: BN4's alone) */
-	return true;
+	return xd_setup_skips(s, a->log, b->log);
 }
 
 /* what was traced, and what became of each core's draws */

@@ -3,13 +3,15 @@
  * a bn6.h name (docs/rom/). */
 #include "arena_loadout.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 
 #include "bn6.h"
 #include "protocol.h"
 
-#define CHIP_ID(e)   ((unsigned)(e) & 0x1FFu)   /* a folder entry: chip | code << 9 */
-#define CHIP_CODE(e) ((unsigned)(e) >> 9 & 0x1Fu)
+#define CHIP_ID(e)   chip_entry_id(e)   /* a folder entry (chip_entry.h) */
+#define CHIP_CODE(e) (chip_entry_code(e) & 0x1Fu)
 #define CODE_STAR    26                          /* '*', the last code */
 #define HP_MOST      9999
 

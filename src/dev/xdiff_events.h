@@ -130,6 +130,11 @@ void xd_replay_lag(XdLog *subject, int lag);
  * attack in the opening, 0x080BA46C): the reference's kept as its setup's, in order, and the subject's k-th of a key in its
  * setup given the reference's k-th of that key in its, whatever the frame (docs/devtools/differential.md, The BN4 trace) */
 void xd_replay_setup(XdLog *subject, XdLog *reference);
+#define XD_SETUP_SKIPS 4   /* (xd_replay_setup_skip) the keys a spec's opening may pair from its end */
+/* (with xd_replay_setup) the subject's setup draws of `key` given the reference's from its (n + 1)-th on: the reference's
+ * first n of the key left without a twin, the opening's draws paired from its end (legit.json's bn4 opening_draws); false where
+ * the log has no room for another key */
+bool xd_replay_setup_skip(XdLog *subject, uint32_t key, int n);
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);

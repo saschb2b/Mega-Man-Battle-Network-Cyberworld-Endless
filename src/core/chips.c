@@ -23,6 +23,7 @@
 #define PALETTE_BYTES 0x20
 
 static struct {
+	int alias, alias_from;        /* chips_alias's */
 	const uint8_t *rom6, *rom5;   /* the ROMs it was made from */
 	bool made, installed;
 	uint8_t *img;                 /* the place's bytes from CHIPS_FREE */
@@ -156,29 +157,41 @@ static void own_text(const XChipReg *r, bool desc, Entries *e) {
 	entry_add(e, b, n);
 }
 
+/* the names' (`desc` false) or descriptions' archive of ids 256 * half on */
+static uint32_t archive_of(bool desc, int half) {
+	static const uint32_t names[4] = { CHIPS_NAMES0, CHIPS_NAMES1, CHIPS_NAMES2, CHIPS_NAMES3 };
+	static const uint32_t descs[4] = { CHIPS_DESCS0, CHIPS_DESCS1, CHIPS_DESCS2, CHIPS_DESCS3 };
+	return desc ? descs[half & 3] : names[half & 3];
+}
+
 /* names (`desc` false) or descriptions for ids 256 * half on: an own id's
  * its own, BN6's id's BN6's, an id past BN6's archives' none */
 static bool texts_make(bool desc, int half) {
 	static Entries e;
 	memset(e.at, 0, sizeof e.at);
 	e.n = 0;
-	uint32_t arch = desc ? R.layout->chip_descs[half] : R.layout->chip_names[half];
-	uint32_t count = get16(R.data + arch) / 2u;
+	/* (BN6's own archives hold ids 0-511; past them, the registry's alone) */
+	uint32_t arch = half > 1 ? 0 : desc ? R.layout->chip_descs[half] : R.layout->chip_names[half];
+	uint32_t count = arch ? get16(R.data + arch) / 2u : 0;
 	for (int i = 0; i < 256; ++i) {
 		const XChipReg *r = xreg_at(256 * half + i);
 		const uint8_t *s = NULL;
 		uint32_t len = 0;
 		if (r) { own_text(r, desc, &e); continue; }
+		if (M.alias && 256 * half + i == M.alias) {
+			uint32_t from = desc ? R.layout->chip_descs[M.alias_from >> 8] : R.layout->chip_names[M.alias_from >> 8];
+			entry_add(&e, s, entry_at(R.data, from, (uint32_t)M.alias_from & 0xFFu, &s));
+			continue;
+		}
 		if ((uint32_t)i < count) len = entry_at(R.data, arch, (uint32_t)i, &s);
 		entry_add(&e, s, len);
 	}
-	uint32_t at = desc ? (half ? CHIPS_DESCS1 : CHIPS_DESCS0) : (half ? CHIPS_NAMES1 : CHIPS_NAMES0);
-	return archive_write(&e, at - CHIPS_FREE, desc ? CHIPS_DESCS_ROOM : CHIPS_NAMES_ROOM);
+	return archive_write(&e, archive_of(desc, half) - CHIPS_FREE, desc ? CHIPS_DESCS_ROOM : CHIPS_NAMES_ROOM);
 }
 
 /* entry `id` of the made names (`desc` false) or descriptions */
 static const uint8_t *text_of(int id, bool desc, uint32_t *n) {
-	uint32_t at = (desc ? (id < 256 ? CHIPS_DESCS0 : CHIPS_DESCS1) : (id < 256 ? CHIPS_NAMES0 : CHIPS_NAMES1)) - CHIPS_FREE;
+	uint32_t at = archive_of(desc, id >> 8) - CHIPS_FREE;
 	uint32_t room = desc ? CHIPS_DESCS_ROOM : CHIPS_NAMES_ROOM, p = at + get16(M.img + at + 2u * (uint32_t)(id & 0xFF));
 	*n = p < at + room ? at + room - p : 0;
 	if (*n > ENTRY_MAX) *n = ENTRY_MAX;
@@ -214,6 +227,7 @@ static void records_make(const uint32_t blank[3]) {
 	for (int id = 0; id < CHIPS_IDS; ++id) {
 		uint8_t *out = M.img + XREC_SIZE * (uint32_t)id;
 		const XChipReg *r = xreg_at(id);
+		if (!r && M.alias && id == M.alias) { memcpy(out, table + XREC_SIZE * (uint32_t)M.alias_from, XREC_SIZE); continue; }
 		if (!r) {
 			memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
 			/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
@@ -253,8 +267,11 @@ static bool make(void) {
 	if (!M.img) return false;
 	records_make(blank);
 	bool fit = true;
-	for (int k = 0; k < 4; ++k) fit &= texts_make(k >= 2, k & 1);
+	for (int k = 0; k < 8; ++k) fit &= texts_make(k >= 4, k & 3);
 	if (!fit) fprintf(stderr, "chips: a text archive past its room\n");
+	/* (the archives' words, the names' and the descriptions', which ten-bit
+	 * ids' name and description routines take an id's from: xchips_wide.c) */
+	for (int k = 0; k < 8; ++k) put32(M.img + (CHIPS_TABLES - CHIPS_FREE) + 4u * (uint32_t)k, archive_of(k >= 4, k & 3));
 	abc_make();
 	art_copy();
 	sits_make();
@@ -316,3 +333,10 @@ uint32_t chips_table_bus(void) { return M.installed ? CHIPS_RECORDS : BUS + (R.l
 void chips_installed(bool on) { M.installed = on; }
 
 void chips_forget(void) { M.made = false; }
+
+void chips_alias(int id, int from) {
+	bool ok = id >= CHIPS_BN6_RECORDS && id < CHIPS_IDS && !xreg_at(id) && from > 0 && from < CHIPS_BN6_RECORDS;
+	M.alias = ok ? id : 0;
+	M.alias_from = ok ? from : 0;
+	M.made = false;
+}

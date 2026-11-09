@@ -86,6 +86,8 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 	const XvRef more[5] = { n->prestep, n->hook_a, n->companion, n->companion_end, n->hide };
 	for (int i = 0; i < 5; ++i)
 		if (!ref_ok(f, more[i])) return no(why, len, "its pre-step, hook A or companion (%08x)", (unsigned)more[i].addr);
+	for (int i = 0; i < n->npre; ++i)   /* (its hook A's shim's calls: its own code) */
+		if (!n->pre[i].call.own || !ref_ok(f, n->pre[i].call)) return no(why, len, "its call before its runner (%08x)", (unsigned)n->pre[i].call.addr);
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);

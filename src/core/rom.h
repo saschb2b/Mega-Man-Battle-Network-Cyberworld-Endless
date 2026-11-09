@@ -145,6 +145,9 @@ typedef struct {
 	                                           BN4's one kit holds other data under keys 0-35; BN5's are copied whole as they
 	                                           always were, a saved state's music player pointing into the copies */
 	const char *file;                       /* its copy's name where a phone or the browser keeps one ("bn5c.gba") */
+	uint8_t win_songs[2];                   /* its battles' win songs, the numbers BN6's win picks between (its Victory, its Fanfare: the
+	                                           same numbers and the same pick, docs/multirom/music.md); a battle won on its areas plays its
+	                                           own (src/director/win_song.c); 0 none */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -222,9 +225,9 @@ void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
  * otherwise, BN6 having put its five version marks at 0x40-0x44. `n`
  * bytes of `src`, to its first command (0xE5 on), into `dst` (`max` at
  * most), each as BN6's code of the same glyph: BN5's DS mark, which BN6
- * has none of, as the letters D and S; a glyph BN6's font lacks left out.
- * How many were written. Every BN5 string read as text or copied into
- * BN6's archives goes through it. */
+ * has none of, as the letters D and S; a glyph BN6's font lacks left out;
+ * BN4's dash, plus and dot as BN6's. How many were written. Every BN5
+ * string read as text or copied into BN6's archives goes through it. */
 size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max);
 /* ... a script of extra ROM `xrom`'s (a chip's description) in BN6's
  * codes: its text as xrom_text_bn6's, its commands kept with their

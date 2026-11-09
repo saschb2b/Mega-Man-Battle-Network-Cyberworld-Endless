@@ -84,7 +84,7 @@
   {
    "name": "a region number",
    "spec": "cangard_v1",
-   "poke": [
+   "poke5": [
     "080C95DE:2106"
    ],
    "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
@@ -1197,7 +1197,7 @@
    "name": "a Program Advance's id",
    "spec": "pa_suprspr1",
    "poke": [
-    "08F10002:0165:2"
+    "08801302:0165:2"
    ],
    "what": "the grown list's first recipe of BN5's (FREE_CHIP_PAS, src/core/xchips_pas.c's SuprSpr1) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
   },
@@ -1250,6 +1250,66 @@
    "spec": "chip_numbrmnds",
    "soulbreak": 268435456,
    "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_shademan",
+   "poke": [
+    "08E00878:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0x1E (XC_NAVI + 0x78) left at their stub (XC_STUBS + 4) where the install points it at ShadeMan's moved routine (BN5's Navi routine 0x01): no ShadeMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip ShadeMan's attack's type",
+   "spec": "chip_shademan",
+   "poke5": [
+    "080CB668:2033"
+   ],
+   "what": "ShadeMan's attack spawned as BN5's third kind's 0x33 (movs r0,#0x34 at BN5's 0x080CB668, written at its copy) where its own moved 0x34 runs"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_blizman",
+   "poke": [
+    "08E008AC:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0x2B (XC_NAVI + 0xAC) left at their stub (XC_STUBS + 4) where the install points it at BlizzardMan's moved routine (BN5's Navi routine 0x0E): no BlizzardMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip BlizMan's snowball's type",
+   "spec": "chip_blizman",
+   "poke5": [
+    "080DCAC8:20B1"
+   ],
+   "what": "BlizzardMan's snowball spawned as BN5's third kind's 0xB1 (movs r0,#0xB2 at BN5's 0x080DCAC8, written at its copy) where its own moved 0xB2 runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_shademnsp",
+   "poke": [
+    "08E00C4A:0100:2"
+   ],
+   "what": "ShadeMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 13, ShadeMn[SP]'s record's power less 1001; src/emu/xchips_code.c) 256 frames where BN6 keeps none (0xFFFF) and BN5's save none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_blizmansp",
+   "poke": [
+    "08E00C4C:0100:2"
+   ],
+   "what": "BlizzardMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 14, BlizMan[SP]'s record's power less 1001) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_shademnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets ShadeMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: ShadeMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_blizmands",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets BlizManDS through while MegaMan is not dark where BN5's dark gate refuses it: BlizzardMan's snowball where BN5's is the chip of nothing (0x185)"
   },
   {
    "name": "DarkInvs's time a frame short",
@@ -1900,6 +1960,70 @@
    "what": "the spawn of his third kind's 0x0B (BN4 0x080CE812: movs r0,#0xb, the recipe's dispatch number 0xCC, the first of the third kind's numbers past 0xFF, xrecipe_bn4.TYPE_MORE) made 0xCD, his 0x94's: the dispatch runs his 0x94's copy for it (caught at t199, the objects in play and the run order)"
   },
   {
+   "name": "JunkMan's decision's CurAction off by one",
+   "spec": "junkman_v1",
+   "poke": [
+    "080C933A:200A"
+   ],
+   "what": "his decision's movs r0,#7 before the state set (BN4 0x080C933A, the recipe's CurAction 9, MegaMan's state 109 as his) made 10: his 110 run where BN4 runs his 109 (caught at t1)"
+  },
+  {
+   "name": "JunkMan's attack's variables at BN4's +0x70",
+   "spec": "junkman_v1",
+   "poke": [
+    "080C9280:2070"
+   ],
+   "what": "his state 1's own setting of his variables (BN4 0x080C9280: movs r0,#0x70 adds r7, the recipe's BN6 +0xA0, AI_BLOCKS) left at BN4's +0x70: his +0x68 read from another field of BN6's AI data (caught at t1)"
+  },
+  {
+   "name": "JunkMan's junk spawned as his 0x97",
+   "spec": "junkman_v1",
+   "poke": [
+    "080DFF64:20D0"
+   ],
+   "what": "the spawn of his junk, the third kind's 0x96 (BN4 0x080DFF64: movs r0,#0x96, the recipe's dispatch number 0xCF, the Navis' from 0xCF up, xrecipe_bn4.TYPE_MORE) made 0xD0, his 0x97's: the dispatch runs his 0x97's copy for it (caught at t1)"
+  },
+  {
+   "name": "JunkMan's sound 0xC0 at the pool's first slot",
+   "spec": "junkman_v1",
+   "poke": [
+    "080F41B8:2032"
+   ],
+   "what": "his copied MegaMan state 110's sound 0xC0 (BN4 0x080F41B8: movs r0,#0xc0, the recipe's pool slot 0xD0) made the pool's first slot, 0x32: his junk's 0xA0 where BN4 plays 0xC0 (caught at t348, the family's sounds)"
+  },
+  {
+   "name": "VolGear's target read at BN4's players' base",
+   "spec": "volgear_v1",
+   "poke": [
+    "080B6852:3044:2"
+   ],
+   "what": "its fire's aim, the other side's player read from the battle state (BN4 0x080B6850-0x080B6858: lsls r0,#2; adds r0,#0x44; ldr r2,[r0,r1] past [eToolkit +0x18], tools/xrecipe_bn4.py battle_players, its copy's adds made #0xD0) left at BN4's +0x44: BN6's copy reads a word of BN6's battle state that holds no player, its fire's +0x4C 0 where BN4's names MegaMan (caught at t214, the fire's +0x4C and +0x64)"
+  },
+  {
+   "name": "VolGear's fire drawn from BN6's own list 4 0x0A",
+   "spec": "volgear_v1",
+   "poke": [
+    "080D013C:500A:2"
+   ],
+   "what": "the third kind's 0x1A's kinds' table (BN4 0x080D013C, bn4_twins.FAMILY_TABLES), its kind 0's sprite number, given its copy's 0xBF by the recipe (XvByte), left at BN4's 0x0A: the fire VolGear V1 spawns draws BN6's own list 4 0x0A, another picture of other frames (caught at t214, the fire's sprite state)"
+  },
+  {
+   "name": "VolGear's fire spawned as its 0x19",
+   "spec": "volgear_v1",
+   "poke": [
+    "080D02DE:20DF:2"
+   ],
+   "what": "the spawn of the third kind's 0x1A (BN4 0x080D02DE: movs r0,#0x1a, the recipe's dispatch number 0xDE, the late families' from 0xDF down, xrecipe_bn4.LATE_TYPES) made 0xDF, its 0x19's: the dispatch runs its 0x19's copy for it (caught at t214, the objects in play and the run order)"
+  },
+  {
+   "name": "VolGear's battle sprite drawn from Billy's copy",
+   "spec": "volgear_v1",
+   "poke": [
+    "08B34320:08BE0000:4"
+   ],
+   "what": "BN6's grown list 1's 0xC8 (XV_LISTS + 4 * 0xC8), VolGear's copy of BN4's 1:0x02 in the late families' art room (XV_LATE_ART), aimed at Billy's (XV_ART + 0x60000, BN4's 1:0x03): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+  },
+  {
    "name": "CosmoMan's object spawned as another of his",
    "spec": "cosmoman_v1",
    "poke": [
@@ -1940,10 +2064,82 @@
    "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   },
   {
+   "name": "Kilby's sound at the pool's second slot",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC90C:2033:2"
+   ],
+   "what": "its sound 0xCD (BN4 0x080BC90C: movs r0,#0xcd, the recipe's immediate the pool's first slot 0x32, tools/xrecipe_bn4.py pool_song) made 0x33, the pool's second, which holds no song of its: BN6's copy begins another slot's song where BN4 begins 0xCD (caught at t163, the family's sounds)"
+  },
+  {
+   "name": "Kilby's effect 0x2D left at BN4's number",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC8BC:342D:2"
+   ],
+   "what": "its effect's id (BN4 0x080BC8BC: adds r4,#0x2d after lsls r4,rN,#16, the recipe's immediate the late families' 0x8F, xrecipe_bn4.LATE_EFFECTS) left at BN4's 0x2D: BN6's copy spawns BN6's own effect 0x2D, another picture and another kind (caught at t129, the objects in play and the run order)"
+  },
+  {
+   "name": "Kilby's CurAction 6 written as BN4's",
+   "spec": "kilby_v1",
+   "poke": [
+    "080BC6B6:2006:2"
+   ],
+   "what": "the CurAction its state writes (BN4 0x080BC6B6: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t42, its +0x09)"
+  },
+  {
+   "name": "Kilby's battle sprite drawn from VolGear's copy",
+   "spec": "kilby_v1",
+   "poke": [
+    "08B34324:08CD0000:4"
+   ],
+   "what": "BN6's grown list 1's 0xC9 (XV_LISTS + 4 * 0xC9), Kilby's copy of BN4's 1:0x0C in the late families' art room (XV_LATE_ART + 0x5000), aimed at VolGear's (XV_LATE_ART, BN4's 1:0x02): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+  },
+  {
+   "name": "MagTect's sound 0xF8 at the pool's first slot",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BEF34:2032:2"
+   ],
+   "what": "its sound 0xF8 (BN4 0x080BEF34: movs r0,#0xf8, the recipe's immediate the pool's second slot 0x33, tools/xrecipe_bn4.py pool_song) made 0x32, the pool's first, which holds its 0xB8: BN6's copy begins its other sound where BN4 begins 0xF8 (caught at t239, the family's sounds)"
+  },
+  {
+   "name": "MagTect's CurAction 6 written as BN4's",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BED72:2006:2"
+   ],
+   "what": "the CurAction its state writes (BN4 0x080BED72: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t39, its +0x09)"
+  },
+  {
+   "name": "MagTect's shake every other frame",
+   "spec": "magtect_v1",
+   "poke": [
+    "080BF076:2101:2"
+   ],
+   "what": "its shake's gate (BN4 0x080BF076: movs r1,#3, its +0x20 a multiple of 4, in its update's tail entered as hook 3) made movs r1,#1: BN6's copy shakes, and draws, every other frame of its +0x20 where BN4's shakes every fourth (caught at t1, its +0x36, +0x64 and +0x9C: its opening's draws more than BN4's, some without a twin, so no pairing from the opening's end holds)"
+  },
+  {
+   "name": "MagTect's battle sprite drawn from Kilby's copy",
+   "spec": "magtect_v1",
+   "poke": [
+    "08B34328:08CD5000:4"
+   ],
+   "what": "BN6's grown list 1's 0xCA (XV_LISTS + 4 * 0xCA), MagTect's copy of BN4's 1:0x09 in the late families' art room (XV_LATE_ART + 0x9340), aimed at Kilby's (XV_LATE_ART + 0x5000, BN4's 1:0x0C): its idle animation's frames read from another sprite (caught at t1, its +0x91 and its sprite's data)"
+  },
+  {
+   "name": "MagTect's opening one shake short",
+   "spec": "magtect_v1",
+   "poke": [
+    "080E19F4:2112:2"
+   ],
+   "what": "BN6's opening fade begun with 0x12 where it begins with 0x10 (BN6 0x080E19F4: movs r1,#0x10 before bl 0x08006270, the fade the appear's bit 0 waits on): BN6's wait before bit 0 a frame shorter for its family, so MagTect's copy shakes, and draws, 15 times in the opening (frames 72-86) where it shakes 16, BN4's 18. The gap of the counts is then 3, not the 2 draws BN4's trace makes in the frames BN6's opening has no twin of (its init's frame and the frame before bit 0): no pairing from the opening's end holds (legit.json's bn4 opening_draws), where a pairing by the gap alone would pair BN6's 15 with BN4's last 15 and pass (caught at t1: the run prints the pairing refused, BN4's 18 against BN6's 15 with 2 in the twinless frames, then its +0x36 and +0x64, its last shake BN6's own, and +0x91, the opening a frame shorter)"
+  },
+  {
    "name": "NapalmMan's object's effect not renumbered",
    "spec": "napalmman_v1",
    "poke": [
-    "08CDB6EE:244C"
+    "0889B6EE:244C"
    ],
    "what": "the third kind's 0x33's effect (BN5 0x080CB4A6: movs r4,#0x4C, its copy at XN_TEAM_CODE + 0x8500 + 0x1EE) left at BN5's 0x4C where the recipe makes it the Navis' 0xAE (caught at t32)"
   },
@@ -1951,7 +2147,7 @@
    "name": "NapalmMan's object's collision offset not moved",
    "spec": "napalmman_v1_keys",
    "poke": [
-    "08CDB5DC:6EB8"
+    "0889B5DC:6EB8"
    ],
    "what": "the third kind's 0x33's read of its hit flags (BN5 0x080CB394: ldr r0,[r7,#0x68], its copy at XN_TEAM_CODE + 0x8500 + 0xDC) left at BN5's +0x68 where BN6 keeps them at +0x70"
   },
@@ -1959,7 +2155,7 @@
    "name": "NapalmMan's object's sprite not renumbered",
    "spec": "napalmman_v1",
    "poke": [
-    "08CDB54C:221A"
+    "0889B54C:221A"
    ],
    "what": "the third kind's 0x33's sprite (BN5 0x080CB304: movs r2,#0x1A, list 4's 0x1A, its copy at XN_TEAM_CODE + 0x8500 + 0x4C) left at BN5's number where the recipe makes it list 4's 0xB6, BN5's copied there"
   },
@@ -1967,7 +2163,7 @@
    "name": "NapalmMan's flames' effect not renumbered",
    "spec": "napalmman_v1",
    "poke": [
-    "08CDBA16:224B"
+    "0889BA16:224B"
    ],
    "what": "the effect the third kind's 0x38 spawns over a pattern of panels (BN5 0x080CC2A2: movs r2,#0x4B, handed to 0x08018838 in r2, its copy at XN_TEAM_CODE + 0x8800 + 0x216) left at BN5's 0x4B where the recipe makes it the Navis' 0xAD"
   },
@@ -1975,7 +2171,7 @@
    "name": "NapalmMan's overlay's kind not moved",
    "spec": "napalmman_v1",
    "poke": [
-    "08CDAF04:2404"
+    "0889AF04:2404"
    ],
    "what": "his companion's overlay kind (BN5 0x0800EE84: movs r4,#4, its copy at XN_TEAM_CODE + 0x7F02 + 2) left at BN5's 4, BN6's another kind, where the recipe makes it his own 33 (XN_KIND_OF)"
   }

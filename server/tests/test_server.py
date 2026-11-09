@@ -250,6 +250,17 @@ class ContractTests(unittest.TestCase):
             self.assertIn(str(low), blank)
             self.assertIn(str(high), blank)
 
+    def test_ten_bit_chip_ids(self):
+        """Protocol v16: a chip past BN6's 511 (ten-bit chip ids, to 1023) is
+        a trade's and an offer's as any other; 1024 is none."""
+        trade = protocol.TRADE.pack(protocol.SPEC["trade"], 3, 7, 600, 2, 1023, 26)
+        self.assertEqual(protocol.read_trade(trade), (3, 7, (600, 2), (1023, 26)))
+        self.assertEqual(protocol.read_offer(protocol.OFFER.pack(protocol.SPEC["offer"], 600, 2, 0)), ((600, 2), 0))
+        self.assertTrue(protocol.chip_bn5(600))
+        for bad in (protocol.TRADE.pack(protocol.SPEC["trade"], 3, 7, 1024, 0, 1, 0), protocol.OFFER.pack(protocol.SPEC["offer"], 1024, 0, 0)):
+            with self.assertRaises(protocol.ProtocolError):
+                (protocol.read_trade if bad[0] == protocol.SPEC["trade"] else protocol.read_offer)(bad)
+
     def test_invalid_payloads(self):
         for data in (b"", b"\x03", protocol.STATE.pack(3, 0, 0, 0, 8)):
             with self.assertRaises(protocol.ProtocolError):

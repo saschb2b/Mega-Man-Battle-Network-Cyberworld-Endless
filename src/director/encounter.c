@@ -26,9 +26,11 @@
 #include "soulunite.h"
 #include "xguardian.h"
 #include "xnavi_bn4_room.h"
+#include "win_song.h"
 #include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
+int encounter_game = -1;
 int encounter_backdrop = -1;
 /* Two records in turn, each BattleSettings and 0x20 on its entity list: the
  * next battle is written to the one not handed out, and the hooks turned to
@@ -111,6 +113,7 @@ void emu_encounters_hold(bool hold) { quiet = hold; }
 void emu_encounter_set(const Encounter *e) {
 	uint8_t list[4 * (MAX_FOES + 1 + MAX_FIELD_OBJS) + 1], *p = list;
 	int next = slot ^ 1;
+	win_song_area(encounter_game);   /* (its win's songs, the layer's area's game's) */
 	/* MegaMan where the battle's field has him: column 2 row 2, or beside
 	 * it where that panel is a hole (he started in one) */
 	*p++ = 0x00; *p++ = (uint8_t)(e->player ? e->player : 0x22); *p++ = 0; *p++ = 0;
@@ -228,7 +231,7 @@ static void lean_row(int id) {
 	for (uint32_t k = 0; k < 20; ++k) {
 		uint16_t v = enemy_drop(id, (int)k);
 		if (v == 0xFFFF || v >> 14) continue;
-		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+		int chip = (int)chip9_id(v), code = (int)(chip9_code(v) & 0x1F);
 		bool navi = chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip);   /* (BN5's Navi chips by the registry: their families BN5's) */
 		if (boss_on && navi) {
 			hook_write16(row + 2 * k, boss_zenny());

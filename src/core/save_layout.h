@@ -18,7 +18,7 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
  * card, for the designed folders' milestones and for the extras the last
  * run left out, read up to its size: an older profile reads whole, the new
  * fields zero) */
-_Static_assert(sizeof(Profile) == 232, "Profile save size changed");
+_Static_assert(sizeof(Profile) == 296, "Profile save size changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");
@@ -95,6 +95,7 @@ _Static_assert(offsetof(Profile, folder_feats) == 220, "Profile.folder_feats sav
 _Static_assert(offsetof(Profile, recov_act) == 221, "Profile.recov_act save offset changed");
 _Static_assert(offsetof(Profile, recov_run) == 224, "Profile.recov_run save offset changed");
 _Static_assert(offsetof(Profile, last_extras_off) == 228, "Profile.last_extras_off save offset changed");
+_Static_assert(offsetof(Profile, library_w) == 230, "Profile.library_w save offset changed");
 
 _Static_assert(sizeof(Run) == 116, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");

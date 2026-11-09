@@ -73,16 +73,17 @@
 #define XN_MORE_END   (XN_MORE_ART + 0x1000u)   /* (before XN_DARK_RECORDS) */
 #define XN_SLOT_CODE  0x3C00u             /* a Navi's code room */
 #define XN_SLOT_ART   0x400u              /* ... and its art's */
-/* Team ProtoMan's (seats 11-16, slots 12-17 past the Darkloids') in a room of their own (FREE_TEAM_NAVIS): a home, a code
+/* Team ProtoMan's (seats 11-16, slots 12-17 past the Darkloids') in a room of their own in code-low (FREE_TEAM_NAVIS): a home, a code
  * room (XN_TEAM_SLOT_CODE: their largest walk, ProtoMan's, 8648 bytes) and an art room each, the shared art's second room
  * (a sprite of any Navi's once XN_SHARED_ART's is full: NapalmMan's first), then their battle sprites (xnavi_sprites.c) */
 #define XN_TEAM_SEATS   6
 #define XN_TEAM_SLOT_CODE 0x2800u
-#define XN_TEAM_HOMES   FREE_TEAM_NAVIS
+#define XN_TEAM_HOMES   FREE_TEAM_HOMES
 #define XN_TEAM_CODE    FREE_TEAM_NAVI_CODE
 #define XN_TEAM_ART     FREE_TEAM_NAVI_ART
 #define XN_TEAM_SHARED  FREE_TEAM_SHARED
 #define XN_TEAM_END     FREE_TEAM_SPRITES
+#define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
 
@@ -174,6 +175,13 @@ typedef struct { uint32_t at; XvRef panels; uint32_t masks[4]; const XnSummonId 
 typedef struct { uint32_t at; uint8_t rd, rb; uint16_t was, now; } XnFar;
 #define XN_FAR_SIZE 8u
 
+/* A call its game's update makes between its pre-step and its state runner, past one (BN4's JunkMan's two; docs/multirom/
+ * bn4-navis.md, JunkMan built): `call` (its own code) made by a bl from a shim of its home its hook A (table 2, which BN6's
+ * Navi frame runs after its pre-step, 0x080F368C) is aimed at, each in its update's order, r0 given `r0` before it
+ * (XN_R0_ANY: left as the call before leaves it) (xnavi_init.c) */
+typedef struct { XvRef call; uint32_t r0; } XnPreCall;
+#define XN_R0_ANY 0xFFFFFFFFu
+
 typedef struct {
 	XVirusFamily code;          /* its code and records as a family's: .ai its Navi AI index, .first_id its first id, .home its home,
 	                               .src_ai its AI index in its game's Navi tables, .names its versions' ids there (its reward rows'),
@@ -204,6 +212,14 @@ typedef struct {
 	                               spawn's end over BN6's actor init's (0 for versions 0-3, BN6_NAVI_PALETTE_VERSIONS); 0 none */
 	const XnFar *fars;          /* its loads of a field past an immediate's reach in BN6, through shims of its home (BN4's WoodMan's) */
 	int nfars;
+	const XnPreCall *pre;       /* its update's calls between its pre-step and its runner, made by its hook A's shim (its .hook_a then
+	                               BN6's empty hook), NULL none */
+	int npre;
+	bool runner_r4;             /* its states run with r4 its +0 byte, as BN4's Navi runner runs them (the object runner's ldrb r4,[r5,#0]
+	                               at 0x08003166 kept), through stubs of its home (xnavi_init.c), where BN6's state caller (0x0801B9E6)
+	                               gives r4 its AI data: BN4's JunkMan's, whose state's spawn keeps r4 at the object's +4 */
+	uint8_t record_list;        /* the list its BN4 records name its battle sprite in where it is not the list its init loads it from
+	                               (JunkMan's 1: read by BN4's preload alone, which passes a raw sprite over), 0 that list */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

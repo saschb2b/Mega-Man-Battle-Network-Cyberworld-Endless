@@ -1,6 +1,8 @@
 /* The Souls across the Arena's cable (arena_souls.h). */
 #include "arena_souls.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 
 #include <mgba/core/core.h>
@@ -20,7 +22,7 @@ static void carry_chip(struct mCore *from, struct mCore *to, unsigned side) {
 	uint16_t chip = (uint16_t)from->rawRead16(from, field(side, BN6_SOUL_NEXT_CHIP), -1);
 	if (chip == (uint16_t)to->rawRead16(to, field(side, BN6_SOUL_NEXT_CHIP), -1)) return;
 	to->rawWrite16(to, field(side, BN6_SOUL_NEXT_CHIP), -1, chip);
-	printf("arena: side %u's ColonelSoul chip %u carried to the other GBA\n", side, chip & 0x1FFu);
+	printf("arena: side %u's ColonelSoul chip %u carried to the other GBA\n", side, chip & CHIP_ID_MASK);
 }
 
 void arena_souls_carry(struct mCore *core[2], ArenaSoulCarried carried[2]) {

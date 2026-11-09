@@ -49,7 +49,8 @@ SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn4': 'a97e96a7da03a
 # BN4's families, in install order: (its first-kind type, the project's name, its first enemy id); each its six
 # versions' ids from there (BN4_ENEMY_STATS' records name the type, checked)
 FAMILIES = ((0x13, 'Billy', 13), (0x17, 'Spikey', 25), (0x16, 'Shrimpy', 31), (0x25, 'Walla', 103), (0x2E, 'Elmperor', 109),
-            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55))
+            (0x20, 'CirKill', 91), (0x02, 'Mettaur', 1), (0x11, 'Melody', 55), (0x08, 'VolGear', 7), (0x1E, 'Kilby', 67),
+            (0x26, 'MagTect', 49))
 # the families moved for a Navi's summon alone: Mettaur, which BN6 has by name (the owner's call of 8 November 2026: Roll's
 # summon brings BN4's own Mettaur; docs/multirom/bn4.md, Only what is new visits), and Melody, Roll V3's 0x39, whose sounds
 # live in her pool (SUMMONER_POOL): never a net's kin nor a visitor (XVirusFamily.summoned)
@@ -62,6 +63,10 @@ BN4 = dict(t1=0x08003A24, nt1=95, t3=0x08003C40, nt3=165, stats=0x08011888, stat
            byname=0x080B6568, sprites=0x0802793C, songs=0x08155FF8, effect=0x080E18EE, sound=0x08000560,
            effects=0x080E1698, neffects=111,
            create_coll=0x08012496, setup_coll=0x080129AC, set_flag=0x08012F82)
+# the engine's routines that lie in a family's region (between its code and the next type's routine), every family's to
+# call: called out to BN6's twin, never walked as its own (BN4_BY_NAME_RANGE in VolGear's, 0x080B6568-0x080B6594 amid its
+# states)
+ENGINE_IN_REGION = {BN4['byname']}
 # the calls BN6's virus init (0x08016F56) makes its own of: an init's that are none of these, or of INIT_ENGINE's, are its own
 INIT_STD = {BN4['sprite_load'], BN4['shadow'], BN4['no_shadow'], BN4['palette'], BN4['create_coll'], BN4['setup_coll'],
             0x08002E10, 0x0800283C, 0x0800ACA6, 0x08002FAE, 0x080033D4}
@@ -92,6 +97,23 @@ SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0
 # BN5 track can name, BN5 having no type of them (its third kind's 204, bn5.h BN5_TYPES_T3_COUNT: 0xCC-0xDF; the most a BN5
 # track names is 0xC1): kind -> (first, past the last)
 TYPE_MORE = {3: (0xCC, TYPE_0)}
+# The families past the first eight (VolGear on: LATE_FROM), moved after BN4's Navis had taken their numbers past the first
+# eight's: theirs from the top of a range down, so the Navis' (from the first eight's last, up) stay what they were: the third
+# kind's dispatch numbers from 0xDF down (the Navis' from 0xCC up, TYPE_MORE, to below the lowest a late family took), list
+# 4's from 0xBF down to 0xB6 (below the first eight's 0xC0, past BN5's Navis' 0xA0-0xB5, tools/xnavirecipe.py
+# NAVI_LIST_NUMBERS); their effects' ids from 0x8F down to 0x78 (the families' effects' range 0x6C-0x9F, tools/xnavirecipe.py:
+# below BN4's 0x90-0x9F, which its Navis continue, above BN5's families' 0x6C-0x77) and their list 5 numbers from 0x97 down to
+# 0x83 (below BN4's 0x98-0x9F, above BN5's families' 0x80-0x82; bn5_ranges_clear checks both): kind or list -> (the first
+# taken, the last)
+LATE_FROM = 8
+LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xB6)
+LATE_EFFECTS, LATE_LIST5 = (0x8F, 0x78), (0x97, 0x83)
+# ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): the
+# free space plan's (src/emu/free_space.plan FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART) past BN5's lava and
+# sea; their code in the second room while it has room (CODE0), then in a code room of their own (FREE_LATE_CODE,
+# xvirus_recipe.h XV_LATE_CODE), every late family's after the first that passes it
+LATE_ART, LATE_ART_END = 0x08800000 + 0x4D0000, 0x08800000 + 0x500000
+LATE_CODE, LATE_CODE_END = 0x08800000 + 0x711000, 0x08800000 + 0x720000
 # the families past the first six (Mettaur on: ROOM2_FROM), as the first six fill their rooms: their code from BN5's
 # families' code's end (to XV_CODE + 0x11000, bn5_ranges_clear checks) to BN4's first room (CODE0), their art from BN5's
 # families' art's end (XV_ART + 0x54000) up, their sounds' copies after it, to BN4's first room (ART0: songs_room)
@@ -113,6 +135,12 @@ SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70:
 # songs and pointed in her battles alone, which are the only ones the family is in (SUMMONED)
 # (a slot past a byte, the pool's sixth on, played through a shim that makes r0 the slot: XvSoundCall, the owner's call 11)
 SUMMONER_POOL = {0x8B: (0xE0, 'Roll'), 0xC2: (0x104, 'Roll'), 0xC3: (0x117, 'Roll')}
+# The pool of BN6's empty song slots BN4's sounds share by battle (src/emu/xvirus_recipe.h xv_bn4_pool, the same list; the
+# Navis' by the owner's call 11, tools/xnavirecipe_bn4_sounds.py): a late family's sounds BN6 has no song of and no family's
+# slot holds take it in order too (the owner's call 13, 9 November 2026: one BN4 family a visited battle holds), each song
+# packed into its art at install (pool_songs) and the pool pointed at its songs in its battles (src/emu/xnavi_bn4_sounds.c);
+# one past a byte a decision (its shim is built for the Navis)
+SOUND_POOL = (0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D, 0x167, 0x16B, 0x16E, 0x172)
 # their copies' rooms: in the families' second room past its families' art (ART2 on), below the first six's sprites
 # (ART0), as their sprites leave no room past theirs (ART_END); each its bytes rounded up to SONG_STEP (song_bytes, an upper
 # bound)
@@ -192,6 +220,9 @@ class Alloc:
         # (BN4's effects moved, by its id: BN6's; their sprites copied, by BN4's list and number: the copy, its family's name)
         self.effect, self.list5, self.effects, self.effect_sprites = EFFECT0, LIST5_0, {}, {}
         self.effect_owner = {}   # (BN4's effect moved: the family that moved it and lists it)
+        # (the late families' next numbers, each taken from the top down: LATE_TYPES, LATE_LIST4)
+        self.late_types, self.late_list4 = {k: top for k, (top, _) in LATE_TYPES.items()}, LATE_LIST4[0]
+        self.late_effect, self.late_list5 = LATE_EFFECTS[0], LATE_LIST5[0]
 
 
 def region_of(b4, ty, table=None, n=None):
@@ -429,7 +460,9 @@ def walk_code(b4, f, roots, skip, pairs):
         w = T.walk(b4, e, region=reg[:2] if reg else None)
         f.walks[e] = w
         for site, t in w.bls.items():
-            if t == f.update or (own_region(f, t) is None and t not in bn4_twins.COPIED and moved3_of(b4, f, t, pairs) is None):
+            # (a routine of the engine's that lies in its region, a call out all the same: ENGINE_IN_REGION)
+            if t == f.update or t in ENGINE_IN_REGION or \
+                    (own_region(f, t) is None and t not in bn4_twins.COPIED and moved3_of(b4, f, t, pairs) is None):
                 f.calls.setdefault(t, []).append(site)
             else:
                 todo.append(t)
@@ -578,6 +611,57 @@ def palette_imms(f, a, i, objs):
                            why=f'{who} palette: BN4 +0x0E, BN6 +0x0F (its +0x0E the element)'))
 
 
+# A side's player read inline from the battle state ([eToolkit +0x18], both games'): BN4's players a word each from +0x44
+# (BN4_BATTLE_PLAYERS: MegaMan's side's first, the other's next, as BN4's getter 0x0800C456 reads them), BN6's a word every
+# 0x10 bytes from +0xD0 by side (BN6_BATTLE_PLAYERS, BN6_BATTLE_PLAYER_STEP; its getter 0x080103BC). An index made by
+# lsls #2 and adds #0x44 is given BN6's shift and base: BN4's index (its side ^ MegaMan's ^ 1) is the side wanted where
+# MegaMan's side is 0, as in every battle a BN4 Navi or family is fought in (none a NetBattle's; VolGear's fire aimed at
+# the other side's player so, 0x080B6850)
+PLAYERS4, PLAYERS6 = (0x44, 2), (0xD0, 4)
+
+
+def battle_players(f):
+    """a side's player read from the battle state by an index (PLAYERS4): its shift and base BN6's (PLAYERS6); the index
+    made in its register before the read (lsls #2, then adds #0x44, nothing else written to it between), the battle state
+    either register of the read (BN6's Navis' [state, index], VolGear's [index, state] at 0x080B6858), the second form a
+    family's alone: FireMan's MegaMan state reads so too (0x080F1A5A), his recipe's to settle with his spec"""
+    done, either = {m['at'] for m in f.imms}, getattr(f, 'family', False)
+    for e, w in sorted(f.walks.items()):
+        addrs = sorted(w.insns)
+        state = {}   # (a register holding eToolkit, then the battle state)
+        index = {}   # (a register holding an index in the making: its lsls, then its adds)
+        for k, a in enumerate(addrs):
+            i = w.insns[a]
+            if i.form == 'hi_mov' and i.f[1] == 10 and i.f[0] < 8:
+                state[i.f[0]] = 'toolkit'
+                index.pop(i.f[0], None)
+                continue
+            if i.form == 'ldr' and state.get(i.f[1]) == 'toolkit' and i.f[2] == 0x18:
+                state[i.f[0]] = 'battle'
+                index.pop(i.f[0], None)
+                continue
+            if i.form == 'ldr_r' and (state.get(i.f[1]) == 'battle' or (either and state.get(i.f[2]) == 'battle')):
+                ro = i.f[2] if state.get(i.f[1]) == 'battle' else i.f[1]
+                made = index.get(ro)
+                if made and len(made) == 2:
+                    sh, base = made
+                    why = 'a side\'s player read from the battle state: BN4 +0x44 a word each, BN6 +0xD0 0x10 bytes each'
+                    if sh.at not in done:
+                        f.imms.append(dict(at=sh.at, form='THUMB_LSLS', rd=ro, rn=ro, was=PLAYERS4[1], now=PLAYERS6[1], why=why))
+                        f.imms.append(dict(at=base.at, form='THUMB_ADDS', rd=ro, rn=0, was=PLAYERS4[0], now=PLAYERS6[0], why=why))
+                        done |= {sh.at, base.at}
+                else:
+                    f.decide('battle', f'{a:08X}: a word of the battle state read by an index BN4\'s players\' form does not make')
+            for r in range(8):
+                if T.writes(i, r):
+                    state.pop(r, None)
+                    made = index.pop(r, None)
+                    if i.form == 'lsls' and i.f[:2] == (r, r) and i.f[2] == PLAYERS4[1]:
+                        index[r] = (i,)
+                    elif i.form == 'adds8' and i.f[0] == r and i.f[1] == PLAYERS4[0] and made and len(made) == 1:
+                        index[r] = (made[0], i)
+
+
 def scan(f):
     """CurAction (in its own code: an attack's states are its own), a copied routine's panel type, the element's place, its
     collision data's offsets"""
@@ -607,11 +691,20 @@ def scan(f):
 def type_number(f, alloc, kind):
     """the dispatch's next number of a kind, taken (alloc.types: TYPE_0 to 0xFF, a byte, then TYPE_MORE's); a decision past
     them"""
+    if getattr(f, 'late', False) and kind in LATE_TYPES:
+        n, floor = alloc.late_types[kind], LATE_TYPES[kind][1]
+        if n < floor:
+            f.decide('type', f'the late families\' dispatch numbers of the {kind} kind are spent ({n:#x} wanted)')
+            return 0
+        alloc.late_types[kind] -= 1
+        return n
     n = alloc.types[kind]
     alloc.types[kind] += 1
     if n <= 0xFF:
         return n
     lo, hi = TYPE_MORE.get(kind, (0, 0))
+    # (below the lowest a late family took)
+    hi = min(hi, getattr(alloc, 'late_types', {}).get(kind, hi - 1) + 1)
     if lo + n - 0x100 >= hi:
         f.decide('type', f'the dispatch\'s numbers of the {kind} kind are spent ({n:#x} wanted)')
         return 0
@@ -746,8 +839,14 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
         # (the families past the first six in their second room; tools/xnavirecipe_bn4.py's families_alloc derives them too)
         alloc.code, alloc.code_end, alloc.art, alloc.art_end = CODE2, CODE0, ART2, SONG_ART_END
         alloc.room = 'the families\' second room'
+    if slot == LATE_FROM and alloc.room == 'the families\' second room':
+        # (the late families' art in their own room, the second room's art kept for its sounds' copies: late_art_back)
+        alloc.room2_art = alloc.art
+        alloc.art, alloc.art_end, alloc.room = LATE_ART, LATE_ART_END, 'the late families\' room'
     f = Family(ty, name, first)
     f.slot = SLOT0 + slot
+    f.late = slot >= LATE_FROM and alloc.room == 'the late families\' room'
+    f.family, f.alloc = True, alloc
     f.ai, f.first_id, f.home = XV_FIRST_AI + f.slot, XV_FIRST_ID + 6 * f.slot, XV_HOMES + XV_HOME_SIZE * f.slot
     f.lo, f.hi = region_of(b4, ty)
     f.regions, f.roots, f.regions_roots = [(f.lo, f.hi, None)], [], []
@@ -787,6 +886,7 @@ def derive(b4, b6, pairs, ty, name, first, slot, alloc):
     name_ranges(f)
     side_sites(f)
     scan(f)
+    battle_players(f)
     spawns_of(f, alloc)
     pair_calls(f, pairs)
     for t in (bn4_twins.INIT_AGAIN[f.init]['aims'] if getattr(f, 'again', None) else ()):
@@ -816,6 +916,13 @@ def effects_of(b4, b6, f, alloc):
                 v, chain = T.back_value(w, site, 4)
                 # (an id with a parameter in its high byte, lsls #8 then adds #id: Roll's flash's, the fourth kind's 0x17)
                 if v is not None and len(chain) == 2 and chain[0][1] == 'adds8' and chain[1][1] == 'lsls' and chain[1][2] == 8:
+                    ids.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
+                    continue
+                # (... or a parameter of another register's shifted to the third byte, lsls r4,rN,#16 then adds #id: Kilby's
+                # version, 0x080BC8BA)
+                sh = w.insns.get(chain[1][0]) if len(chain) == 2 else None
+                if v is None and sh is not None and chain[0][1] == 'adds8' and sh.form == 'lsls' and sh.f[0] == 4 and \
+                        sh.f[2] in (16, 24) and chain[0][2] < BN4['neffects']:
                     ids.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
                     continue
                 if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= BN4['neffects']:
@@ -882,6 +989,14 @@ def move_effect(b4, f, alloc, e4):
         # (moved by one installed before it, its id and row the same: listed by each that spawns it, so each recipe names
         # every effect it draws, test_core's numbers apart but for such a pair)
         f.notes.append(f'its effect {e4:#x}: {e6:#x}, as {alloc.effect_owner[e4]} moved it')
+    if e6 is None and getattr(f, 'late', False):
+        # (a late family's from the top of its own range down: LATE_EFFECTS)
+        if alloc.late_effect < LATE_EFFECTS[1]:
+            f.decide('effect', f'its effect {e4:#x}: the late families\' effect ids ({LATE_EFFECTS[1]:#x}-{LATE_EFFECTS[0]:#x}) all taken')
+            return None
+        e6 = alloc.effects[e4] = alloc.late_effect
+        alloc.effect_owner[e4] = f.name
+        alloc.late_effect -= 1
     if e6 is None:
         if alloc.effect >= EFFECT_END:
             f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
@@ -898,15 +1013,20 @@ def move_effect(b4, f, alloc, e4):
         return e6
     p, raw = sprite(b4, BN4['sprites'], lst, idx)
     to_list = 5 if lst == 5 else EFFECT_LIST
-    num = alloc.list5 if to_list == 5 else alloc.list4
-    if raw is None or (to_list == 5 and num >= LIST5_END):
+    late = getattr(f, 'late', False)
+    num = (alloc.late_list5 if late else alloc.list5) if to_list == 5 else (alloc.late_list4 if late else alloc.list4)
+    if raw is None or (to_list == 5 and (num < LATE_LIST5[1] if late else num >= LIST5_END)) or (late and to_list != 5 and num < LATE_LIST4[1]):
         f.decide('effect', f'its effect {e4:#x}\'s sprite {lst}:{idx:#x} could not be read or numbered')
         return e6
     s = dict(list=lst, index=idx, to_list=to_list, to_index=num, at=alloc.art, room=rounded(len(raw), ROOM_EFFECT), lz=bool(p & 0x80000000))
     f.attack_sprites.append(s)
     alloc.effect_sprites[(lst, idx)] = (s, f.name)
-    if to_list == 5:
+    if to_list == 5 and late:
+        alloc.late_list5 -= 1
+    elif to_list == 5:
         alloc.list5 += 1
+    elif late:
+        alloc.late_list4 -= 1
     else:
         alloc.list4 += 1
     alloc.art += s['room']
@@ -921,7 +1041,8 @@ def bn5_ranges_clear():
         text = fh.read()
     effects = {int(x, 16) for m in re.finditer(r'_effects\[\] = \{([^;]*)\};', text) for x in re.findall(r'0x([0-9A-F]+) \}', m.group(1))}
     list5 = {int(x, 16) for x in re.findall(r'\{ \d, 0x[0-9A-F]+, 5, 0x([0-9A-F]+),', text)}
-    clash = sorted(e for e in effects if EFFECT0 <= e < EFFECT_END) + sorted(n for n in list5 if LIST5_0 <= n < LIST5_END)
+    clash = sorted(e for e in effects if EFFECT0 <= e < EFFECT_END or LATE_EFFECTS[1] <= e <= LATE_EFFECTS[0]) + \
+        sorted(n for n in list5 if LIST5_0 <= n < LIST5_END or LATE_LIST5[1] <= n <= LATE_LIST5[0])
     if clash:
         sys.exit(f'xrecipe_bn4: BN5\'s families take BN4\'s numbers ({", ".join(f"{x:#x}" for x in clash)}): move EFFECT0 or LIST5_0')
     # (nor BN4's sounds' room, below BN4's sprites: BN5's art spans, a sprite's or a song's, ending at or before it)
@@ -951,9 +1072,13 @@ def sounds_of(b4, b6, f):
     same = sorted(v for v in ids if v is not None and v not in odd)
     if same:
         f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
-    f.sounds = []
+    f.sounds, f.pool_songs = [], []
     for v in odd:
         slot = SOUND_SLOTS.get(v)
+        if slot is None and getattr(f, 'late', False):
+            slot = pool_song(b4, f, v)
+            if slot is None:
+                continue
         if slot is None and f.name in SUMMONED and v in SUMMONER_POOL:
             slot, who = SUMMONER_POOL[v]
             for site, chain in sorted(ids[v]):
@@ -973,7 +1098,8 @@ def sounds_of(b4, b6, f):
         hp = b4.u32(BN4['songs'] + 8 * v)
         player = b4.u16(BN4['songs'] + 8 * v + 4)
         tracks, room6 = b4.u8(hp), b6.u8(MPLAYS6 + 12 * player + 8)
-        f.sounds.append((v, slot))
+        if slot not in SOUND_POOL:
+            f.sounds.append((v, slot))
         for site, chain in sorted(ids[v]):
             if len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
@@ -988,12 +1114,29 @@ def sounds_of(b4, b6, f):
                              f'starts no more tracks than its player has')
 
 
+def pool_song(b4, f, v):
+    """a late family's sound v at the pool's next slot (SOUND_POOL), its song packed into its art (the late families' room) at
+    install: the slot, None where it is past a byte or the pool"""
+    k = len(f.pool_songs)
+    if k >= len(SOUND_POOL) or SOUND_POOL[k] > 0xFF:
+        f.decide('sound', f'its sound {v:#x}: the pool\'s slot {k} past a byte or the pool (its shim built for the Navis alone)')
+        return None
+    alloc = f.alloc
+    room = rounded(song_bytes(b4, v, BN4['songs']), SONG_STEP)
+    f.pool_songs.append(dict(song=v, slot=SOUND_POOL[k], at=alloc.art, room=room))
+    alloc.art += room
+    if alloc.art > alloc.art_end:
+        f.decide('room', f'its sound {v:#x}\'s song ends at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
+    f.notes.append(f'its sound {v:#x}: the pool\'s slot {SOUND_POOL[k]:#x} (its {k}th), its song in its art, pointed in its battles')
+    return SOUND_POOL[k]
+
+
 def songs_room(b4, whole, alloc):
     """each whole family's copied sounds a room in the families' second room past its families' art (to ART0), one after
     another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
     done, at = set(), rounded(alloc.art if alloc.room != 'the families' else ART2, SONG_STEP)
     for f in whole:
-        f.songs = []
+        f.songs = list(getattr(f, 'pool_songs', []))
         for v, slot in getattr(f, 'sounds', []):
             if v in done:
                 continue
@@ -1005,14 +1148,39 @@ def songs_room(b4, whole, alloc):
                 sys.exit(f'xrecipe_bn4: {f.name}\'s sound {v:#x} ends at {at:08X}, past the sounds\' room ({SONG_ART_END:08X})')
 
 
+def late_code(f, alloc, spans):
+    """a late family whose blocks pass the families' second room's code: its code, and every late family's after it, in the
+    late families' code room (LATE_CODE)"""
+    if not getattr(f, 'late', False) or alloc.code_end == LATE_CODE_END:
+        return
+    need = 0
+    for lo, hi in spans:
+        need = rounded(need, CODE_STEP) + 4 + hi - lo
+    if alloc.code + need > alloc.code_end:
+        alloc.code, alloc.code_end = LATE_CODE, LATE_CODE_END
+
+
+def code_place(at):
+    """a place in the families' code (XV_CODE) or the late families' (XV_LATE_CODE) as the C file names it"""
+    return f'XV_LATE_CODE + 0x{at - LATE_CODE:X}' if LATE_CODE <= at < LATE_CODE_END else f'XV_CODE + 0x{at - XV_CODE:X}'
+
+
+def tables_of(f):
+    """the kinds' tables its moved objects read (bn4_twins.TABLES), a family's with the families' own (FAMILY_TABLES)"""
+    return {**bn4_twins.TABLES, **bn4_twins.FAMILY_TABLES} if getattr(f, 'family', False) else bn4_twins.TABLES
+
+
 def blocks_of(b4, f, alloc):
     """its region, each type it moves and each copied routine, at its code's place (each the distance from a word its own);
     each block's bytes classed: the code its states reach, their pools and jump tables, the dead (its type's routine, jump
     table, init and update but for a tail entered, its state table: BN6's virus code does their work; a copied routine's
     neighbours) zeroed, the rest raw, a word of it that points into a block a pool's"""
     spans = [(r[0], r[1]) for r in f.regions]
-    named = sorted({v for w in f.walks.values() for v in w.lits.values() if v in bn4_twins.TABLES})
-    spans += [(v, v + bn4_twins.TABLES[v]['size']) for v in named]
+    tables = tables_of(f)
+    named = sorted({v for w in f.walks.values() for v in w.lits.values() if v in tables})
+    # (a table within a span already, the type before its reader's: copied with that span, its bytes raw there)
+    named = [v for v in named if not any(lo <= v and v + tables[v]['size'] <= hi for lo, hi in spans)]
+    spans += [(v, v + tables[v]['size']) for v in named]
     copied = []
     for e in f.copied:
         w = f.walks[e]
@@ -1044,6 +1212,7 @@ def blocks_of(b4, f, alloc):
     for e, (lo, hi, _) in bn4_twins.COPIED_DATA.items():
         if e in f.copied:
             raw.update(range(lo, hi))
+    late_code(f, alloc, spans)
     f.blocks, f.data, at = [], [], alloc.code
     for k, (lo, hi) in enumerate(spans):
         at = rounded(at, CODE_STEP) + (lo & 3)
@@ -1102,11 +1271,24 @@ def art_of(b4, b6, f, alloc):
         if not reg or reg[2] is None:
             continue
         for site, t in sorted(w.bls.items()):
-            tab = next((v for v, x in bn4_twins.TABLES.items() if site in x['loads']), None)
+            tab = next((v for v, x in tables_of(f).items() if site in x['loads']), None)
             if t == BN4['sprite_load'] and tab is not None:
                 table_art(b4, f, alloc, tab)
             elif t == BN4['sprite_load']:
                 attack_sprite(b4, f, alloc, w, site)
+
+
+def list4_number(f, alloc):
+    """list 4's next number of its own: the families' and Navis' next (alloc.list4), a late family's from the top of its range
+    down (LATE_LIST4)"""
+    if getattr(f, 'late', False):
+        n = alloc.late_list4
+        if n < LATE_LIST4[1]:
+            f.decide('sprite', f'the late families\' list 4 numbers are spent ({n:#x} wanted)')
+        alloc.late_list4 -= 1
+        return n
+    alloc.list4 += 1
+    return alloc.list4 - 1
 
 
 def list4_sprite(b4, f, alloc, num):
@@ -1117,9 +1299,8 @@ def list4_sprite(b4, f, alloc, num):
     s = next((x for x in f.attack_sprites if x['index'] == num), None)
     if s is None:
         room = rounded(len(raw), ROOM_ATTACK)
-        s = dict(list=4, index=num, to_list=4, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
+        s = dict(list=4, index=num, to_list=4, to_index=list4_number(f, alloc), at=alloc.art, room=room, lz=bool(p & 0x80000000))
         f.attack_sprites.append(s)
-        alloc.list4 += 1
         alloc.art += room
     return s
 
@@ -1127,7 +1308,7 @@ def list4_sprite(b4, f, alloc, num):
 def table_art(b4, f, alloc, v):
     """a table its moved object reads its sprite from (bn4_twins.TABLES): each kind it spawns, its sprite copied and its
     number's byte in the table's copy given the copy's"""
-    t = bn4_twins.TABLES[v]
+    t = tables_of(f)[v]
     for k in t['kinds']:
         at = v + t['entry'] * k
         # (a table that holds no list: its object's sprite list 4 by a movs, its load's r1)
@@ -1154,9 +1335,8 @@ def attack_sprite(b4, f, alloc, w, site):
     s = next((x for x in f.attack_sprites if x['index'] == num), None)
     if s is None:
         room = rounded(len(raw), ROOM_ATTACK)
-        s = dict(list=4, index=num, to_list=4, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
+        s = dict(list=4, index=num, to_list=4, to_index=list4_number(f, alloc), at=alloc.art, room=room, lz=bool(p & 0x80000000))
         f.attack_sprites.append(s)
-        alloc.list4 += 1
         alloc.art += room
     f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=s['to_index'],
                        why=f'its object\'s sprite: list 4 {num:#x} in BN4, list 4 {s["to_index"]:#x} in BN6 (copied)'))
@@ -1199,8 +1379,19 @@ def pair_text(t, tw, how, cls, audited):
     return f'\t{{ 0x{t:08X}, 0x{tw:08X} }},   /* {how}, {cls}{" (audited)" if audited else ""} */'
 
 
+def late_art_back(alloc):
+    """the second room's art again after the late families' (their sounds' copies past it, songs_room)"""
+    if hasattr(alloc, 'room2_art'):
+        alloc.art, alloc.art_end, alloc.room = alloc.room2_art, SONG_ART_END, 'the families\' second room'
+
+
+def art_place(at):
+    """a place in the families' art (XV_ART) or the late families' (XV_LATE_ART) as the C file names it"""
+    return f'XV_LATE_ART + 0x{at - LATE_ART:X}' if LATE_ART <= at < LATE_ART_END else f'XV_ART + 0x{at - XV_ART:X}'
+
+
 def sprite_text(s):
-    return (f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, XV_ART + 0x{s["at"] - XV_ART:X}, 0x{s["room"]:X} }},'
+    return (f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, {art_place(s["at"])}, 0x{s["room"]:X} }},'
             + ('   /* (LZ77 in BN4) */' if s['lz'] else ''))
 
 
@@ -1210,7 +1401,7 @@ def c_recipe(f):
          f'{f.first_id:#x}-{f.first_id + 5:#x} ---- */']
     L += [f'/* interim: {x} */' for x in f.interim]
     L += ['', f'static const XvBlock {n}_blocks[] = {{']
-    L += [f'\t{{ 0x{lo:08X}, 0x{hi:08X}, XV_CODE + 0x{at - XV_CODE:X}, 0x{crc:08X}u }},' for lo, hi, at, crc in f.blocks]
+    L += [f'\t{{ 0x{lo:08X}, 0x{hi:08X}, {code_place(at)}, 0x{crc:08X}u }},' for lo, hi, at, crc in f.blocks]
     L += ['};', f'static const XvData {n}_data[] = {{']
     L += [f'\t{{ 0x{lo:08X}, 0x{hi:08X}, XV_{k} }},' for lo, hi, k in f.data]
     L += ['};', f'static const XvPair {n}_calls[] = {{']
@@ -1254,8 +1445,9 @@ def c_recipe(f):
         L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
     if getattr(f, 'songs', None):
         L.append(f'static const XvSong {n}_songs[] = {{')
-        L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, XV_ART + 0x{x["at"] - XV_ART:X}, 0x{x["room"]:X}'
+        L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, {art_place(x["at"])}, 0x{x["room"]:X}'
               f'{f", {x["player"]}" if x.get("player") else ""} }},   /* its sound {x["song"]:#x}, BN4\'s song copied'
+              f'{" (the pool\'s, by battle)" if x["slot"] in SOUND_POOL and getattr(f, "family", False) and f.name not in SUMMONED else ""}'
               f'{f", on BN6\'s player {x["player"]}" if x.get("player") else ""} */' for x in f.songs]
         L.append('};')
     L += c_family(f, n)
@@ -1367,6 +1559,7 @@ def main():
             pairs.copies[c.spawner] = c
     fams = [derive(b4, b6, pairs, ty, name, first, k, alloc) for k, (ty, name, first) in enumerate(FAMILIES)]
     whole = [f for f in fams if not f.decisions]
+    late_art_back(alloc)
     songs_room(b4, whole, alloc)
     for c in copies:
         for d in c.decisions:

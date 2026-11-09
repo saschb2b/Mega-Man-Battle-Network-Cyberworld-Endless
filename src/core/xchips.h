@@ -6,6 +6,7 @@
 #ifndef CW_XCHIPS_H
 #define CW_XCHIPS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define XCHIP_NAME 20   /* a name's room, as ChipInfo's */
@@ -21,6 +22,11 @@ int xchips_bn6_of(int x);
  * name both games have) and it plays in BN6's battles (chips.h,
  * chips_sits_out), else BN6's of its name; 0 none (0 without BN5's ROM) */
 int xchips_run_chip(int x);
+/* The run's chip of BN5's Darkloid of AI `ai` (bn5.h BN5_NAVI_SHADEMAN
+ * and on) in `version` (0 V1, XCHIPS_VERSION_SP, XCHIPS_VERSION_DS): the
+ * registry's where it holds him and the chip plays (BN5's ROM read), 0
+ * otherwise (docs/game/liberation/building/par-prize.md) */
+int xchips_darkloid_chip(int ai, int version);
 /* BN6's standard chips whose namesake in BN5 is of kind `kind` (its chip
  * records' BN5_CHIP_KIND), their ids into `out`, in BN6's order; how many */
 int xchips_kind(int kind, uint16_t *out, int max);
@@ -35,12 +41,34 @@ int xchips_kind(int kind, uint16_t *out, int max);
 #define XCHIPS_STAND_IN 200
 uint16_t xchips_reward_bn6(uint16_t v);
 /* ... and one of BN4 Red Sun's (its reward rows', BN4_REWARD_ROWS: BN6's
- * encoding) as BN6's: a chip as BN6's own of its name and kind (standard,
- * Mega or Giga), in its code where that record has it, else its *, else
- * its first; XCHIPS_STAND_IN zenny where BN6 has none (none of BN4's
- * chips is in BN6's tables yet) or where it sits out; the others as they
- * are (docs/multirom/bn4.md, Its viruses' rewards) */
+ * encoding) as BN6's: a chip as the run's chip it is (xchips_bn4_paid),
+ * in its code where that record has it, else its *, else its first;
+ * XCHIPS_STAND_IN zenny where the run has none (none of BN4's own chips
+ * is in BN6's tables yet) or where it sits out; the others as they are
+ * (docs/multirom/bn4.md, Its viruses' rewards) */
 uint16_t xchips_reward_bn4(uint16_t v);
+/* The run's chip BN4's chip `x` is, 0 none (docs/multirom/bn4-chips.md,
+ * the build plan's unit 0): BN6's own of its name, whatever their classes;
+ * else the registry's own id of BN5's chip of its name (BN5's ROM read);
+ * else, for an SP or DS, the run's chip of its V1's Navi in that version
+ * (xchips_v1_of, xchips_sp_named); a pseudo-chip or Program Advance none.
+ * Read once both ROMs are (0 without BN4's). */
+int xchips_bn4_paid(int x);
+
+/* A Navi chip's version, its record's first parameter in BN4 and BN5 alike
+ * (BN6 numbers its own otherwise: its SP is named with the mark) */
+#define XCHIPS_VERSION_SP 3
+#define XCHIPS_VERSION_DS 4
+#define XCHIPS_GIGA 2        /* a record's class (BN4's +8, BN6's library type): 0 standard, 1 Mega, 2 Giga, more no folder chip */
+#define XCHIPS_SP_MARK '\x04' /* BN6's SP mark as a name decodes it (rom.c's glyph: the version marks as bytes 1-5) */
+/* The V1 of BN4's Navi chip `x` of n (its records' versions, family <<
+ * 8 | subfamily and classes): where `x` is an SP or DS Mega, the Mega one
+ * (SP) or two (DS) ids before it of version 0 and the same family and
+ * subfamily, as BN4 orders them; 0 otherwise. */
+int xchips_v1_of(const uint8_t *version, const uint16_t *navi, const uint8_t *cls, int n, int x);
+/* Whether a run's chip's name (as chips.h's ChipInfo decodes it) ends with
+ * BN6's SP mark */
+bool xchips_sp_named(const char *name);
 
 /* Pairs BN6's chips 1 to n6 - 1 with the other game's 1 to nx - 1 whose
  * names match (names6[i] and namesx[j], "" for none): to_x[i] the other

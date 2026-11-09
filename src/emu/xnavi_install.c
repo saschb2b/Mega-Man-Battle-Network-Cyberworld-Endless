@@ -131,7 +131,8 @@ static void records_bn4(const XNavi *n, const Game *g) {
 	const XVirusFamily *f = &n->code;
 	const XvSprite *s = &f->sprites[0];
 	const uint8_t *r = g->rom + (f->struct1 - BUS);
-	if (!f->nsprites || r[BN4_ENEMY_KIND] != 4u * s->list || r[BN4_ENEMY_FAMILY] != s->index || s->to_list != BN6_SPRITES_NAVIS) {
+	if (!f->nsprites || r[BN4_ENEMY_KIND] != 4u * (n->record_list ? n->record_list : s->list) || r[BN4_ENEMY_FAMILY] != s->index ||
+	    s->to_list != BN6_SPRITES_NAVIS) {
 		xv_fail("its enemy record names another sprite");
 		return;
 	}

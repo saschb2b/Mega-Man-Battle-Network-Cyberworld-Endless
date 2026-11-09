@@ -1,6 +1,8 @@
 /* Two MegaMen a side: a partner's messages checked (team_check.h). */
 #include "team_check.h"
 
+#include "chip_entry.h"
+
 #include <stddef.h>
 
 #define CODES        26      /* A-Z */
@@ -13,8 +15,8 @@
 #define KIND_IN_A_ROW 0      /* a recipe's kind: one chip n times, codes in a row */
 #define KIND_CHIPS   4       /* ... its chips in order */
 
-static unsigned id_of(uint16_t e) { return e & 0x1FFu; }
-static unsigned code_of(uint16_t e) { return e >> 9; }
+static unsigned id_of(uint16_t e) { return chip_entry_id(e); }
+static unsigned code_of(uint16_t e) { return chip_entry_code(e); }
 
 const char *team_check_picks(const uint16_t *hand, unsigned dealt, const uint8_t *slots, unsigned n) {
 	if (n > TEAM_CHECK_PICKS) return "more than five picks";
@@ -79,10 +81,10 @@ static bool in_a_row(unsigned part, const uint16_t *e, unsigned n) {
 static bool recipe_forms(TeamRead read, void *context, uint32_t at, unsigned id, const uint16_t *entries, unsigned took) {
 	unsigned n = read(context, at, 1), kind = read(context, at + 1, 1);
 	if (read(context, at + 2, 2) != id || n != took) return false;
-	if (kind == KIND_IN_A_ROW) return in_a_row(read(context, at + 4, 2) & 0x1FFu, entries, n);
+	if (kind == KIND_IN_A_ROW) return in_a_row(read(context, at + 4, 2) & CHIP_ID_MASK, entries, n);
 	if (kind != KIND_CHIPS) return false;
 	for (unsigned i = 0; i < n; ++i)
-		if (id_of(entries[i]) != (read(context, at + 4 + 2 * i, 2) & 0x1FFu)) return false;
+		if (id_of(entries[i]) != (read(context, at + 4 + 2 * i, 2) & CHIP_ID_MASK)) return false;
 	return true;
 }
 

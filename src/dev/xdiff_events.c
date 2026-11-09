@@ -9,6 +9,7 @@
  * the first in a family's code the family's. */
 #include "xdiff_events.h"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -105,6 +106,8 @@ struct XdLog {
 	int nsetup_keys;
 	uint32_t engines[ENGINE_OBJS_MAX];   /* objects whose spawn was none of the family's (megamans_objects), their places */
 	int nengines;
+	Keyed setup_skips[XD_SETUP_SKIPS];   /* (xd_replay_setup_skip) each key's reference's first n setup draws, without a twin */
+	int nsetup_skips;
 };
 
 /* (made as a dev tool first asks for one: their megabyte or two stays out of every other run) */
@@ -242,6 +245,8 @@ static int nth(XdLog *log, uint32_t key, uint32_t which) {
 /* The reference's draw of this key in this frame, the k-th: its word
  * written into the RNG word the draw reads, before it reads it; or none,
  * drawn as it is and said so */
+static void replay_setup(XdLog *log, XdEvent *e, uint32_t own);
+
 static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	uint32_t which = own, key = key_of(log, e, &which);
 	if (!key) {
@@ -250,6 +255,13 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 		return;
 	}
 	const XdLog *ref = log->ref;
+	/* (a draw of the family's that the lag puts before the reference's first seeded frame, t - lag below 0: one of its opening's,
+	 * its setup draws, xd_replay_setup's way. BN4's Navi runner runs his states through the paused opening, BN6's from the
+	 * fight on, its frame of the fight before its timer's first tick seeded: JunkMan's state 1 draws there) */
+	if (log->setup_draws && e->family && log->t < (uint32_t)log->lag) {
+		replay_setup(log, e, own);
+		return;
+	}
 	int k = nth(log, key, which);
 	/* (with a lag, every keyed draw, the family's own and its twins': the reference's of that many fight frames before,
 	 * xd_replay_lag; the engine's per-frame steps have no key) */
@@ -278,7 +290,11 @@ static void replay_setup(XdLog *log, XdEvent *e, uint32_t own) {
 	for (int i = 0; i < log->nsetup_keys && k < 0; ++i)
 		if (log->setup_keys[i].key == key && log->setup_keys[i].which == which) k = log->setup_keys[i].n++;
 	if (k < 0 && log->nsetup_keys < KEYS_MAX) log->setup_keys[log->nsetup_keys++] = (Keyed){ key, which, 1 };
-	for (int i = 0, n = k < 0 ? 0 : k; i < log->ref->ndraws && log->ref->draws[i].setup; ++i) {
+	/* (the opening's draws of a key paired from its end: the reference's first ones of it skipped, xd_replay_setup_skip) */
+	int skip = 0;
+	for (int i = 0; i < log->nsetup_skips; ++i)
+		if (log->setup_skips[i].key == key) skip = log->setup_skips[i].n;
+	for (int i = 0, n = (k < 0 ? 0 : k) + skip; i < log->ref->ndraws && log->ref->draws[i].setup; ++i) {
 		const Draw *d = &log->ref->draws[i];
 		if (d->key != key || d->which != which || n-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
@@ -474,13 +490,13 @@ static void units_of(int id) {
 
 static bool in_folder(const uint16_t *folder, int n, int id) {
 	for (int i = 0; i < n; ++i)
-		if ((folder[i] & 0x1FF) == id) return true;
+		if ((int)chip9_id(folder[i]) == id) return true;   /* (a spec's folder, nine-bit: xdiff.h) */
 	return false;
 }
 
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
-	for (int i = 0; i < n; ++i) units_of(folder[i] & 0x1FF);
+	for (int i = 0; i < n; ++i) units_of((int)chip9_id(folder[i]));
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;
@@ -580,12 +596,14 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	log->alone = alone;
 	log->navis = navis;
 	log->g = game_of(game);
-	/* (the spec's families' code, BN4's Navis' among them (xd4_families: their code in their own room, XN_BN4_CODE), the Navis'
-	 * where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
+	/* (the spec's families' code, BN4's late families' in their own room (XV_LATE_CODE) and BN4's Navis' among them
+	 * (xd4_families: their code in their own room, XN_BN4_CODE), the Navis' where a foe is one, xnavi_recipe.h, and the moved
+	 * code of the chips the spec plays,
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
 	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
+		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XV_LATE_CODE && m[i].to < XV_LATE_CODE_END) ||
+		      (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
 		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
 		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to)))
 			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
@@ -636,7 +654,13 @@ void xd_replay_lag(XdLog *subject, int lag) { subject->lag = lag; }
 
 void xd_replay_setup(XdLog *subject, XdLog *reference) {
 	subject->setup_draws = reference->setup_draws = true;
-	subject->nsetup_keys = 0;
+	subject->nsetup_keys = subject->nsetup_skips = 0;
+}
+
+bool xd_replay_setup_skip(XdLog *subject, uint32_t key, int n) {
+	if (!subject || subject->nsetup_skips >= XD_SETUP_SKIPS) return false;
+	subject->setup_skips[subject->nsetup_skips++] = (Keyed){ key & ~1u, 0, n };
+	return true;
 }
 
 void xd_setup(XdLog *log, bool setup) { log->setup = setup; }

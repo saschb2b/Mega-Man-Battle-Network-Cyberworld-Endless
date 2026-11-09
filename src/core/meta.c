@@ -1,6 +1,8 @@
 /* The meta layer (meta.h, docs/game/meta/). */
 #include "meta.h"
 
+#include "chip_entry.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +48,7 @@ const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
 /* The folders' chips by BN6's record numbers (docs/rom/chips.md, chip
  * records): no more than five of a chip, as the game's folders hold; codes
  * gathered so a hand can be picked together. */
-#define C(id, code) (uint16_t)((id) | (((code) == '*' ? 26 : (code) - 'A') << 9))
+#define C(id, code) CHIP_ENTRY((id), (code) == '*' ? 26 : (code) - 'A')
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
 	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
 	HICANNON = 2, TANKCAN1 = 12, CRAKSHOT = 89, DUBLSHOT = 90, RFLECTR1 = 131, HOLYPANL = 168 };
@@ -235,11 +237,12 @@ static void say(const char *fmt, ...) {
 }
 
 /* (a chip id's byte in the profile: BN6's pack ids in `library`, the
- * extension's past them in `library_x`) */
+ * extension's past them to 511 in `library_x`, ten bits' from 512 in
+ * `library_w`) */
 static uint8_t *library_byte(int id) {
-	int low = 8 * (int)sizeof profile.library;
-	if (id <= 0 || id >= META_LIBRARY_IDS || (id >= low && id - low >= 8 * (int)sizeof profile.library_x)) return NULL;
-	return id < low ? &profile.library[id / 8] : &profile.library_x[(id - low) / 8];
+	int low = 8 * (int)sizeof profile.library, mid = low + 8 * (int)sizeof profile.library_x;
+	if (id <= 0 || id >= META_LIBRARY_IDS || id - mid >= 8 * (int)sizeof profile.library_w) return NULL;
+	return id < low ? &profile.library[id / 8] : id < mid ? &profile.library_x[(id - low) / 8] : &profile.library_w[(id - mid) / 8];
 }
 
 bool meta_library_has(int id) {

@@ -93,7 +93,8 @@ static HookAct plate(HookRegs *r, void *user) {
 
 /* the bytes of a record its chip AI reads as BN5 means them */
 static const uint8_t ds_bytes[] = { BN5_CHIP_DS_FLAGS, BN5_CHIP_DS_USAGE, BN5_CHIP_DS_PICKS, BN5_CHIP_DS_REGION };
-#define RECORDS_SIZE (XREG_IDS * BN6_CHIP_RECORD_SIZE)
+#define DARK_IDS XN_DARK_IDS
+#define RECORDS_SIZE (DARK_IDS * BN6_CHIP_RECORD_SIZE)
 _Static_assert(XN_DARK_RECORDS + RECORDS_SIZE <= FREE_CHIP_CODE, "the Dark Soul's records past their room (xnavi_recipe.h)");
 
 /* The records XN_STUB_CHIPDATA hands its chip AI, by BN6's id: BN6's own as the core's copy holds them now (the chips'
@@ -103,13 +104,14 @@ static const char *records_make(uint8_t *out) {
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
 	if (!rom5) return "BN5's ROM";
 	uint32_t base = emu_read32(BN6_CHIP_TABLE_REF);
-	uint32_t n = base == CHIPS_RECORDS ? XREG_IDS : base == get32(R.data + (BN6_CHIP_TABLE_REF - BUS)) ? CHIPS_BN6_RECORDS : 0;
+	uint32_t n = base == CHIPS_RECORDS ? DARK_IDS : base == get32(R.data + (BN6_CHIP_TABLE_REF - BUS)) ? CHIPS_BN6_RECORDS : 0;
 	if (!n) return "BN6's chip records' word";
 	memset(out, 0, RECORDS_SIZE);
 	for (uint32_t i = 0; i < n * BN6_CHIP_RECORD_SIZE; ++i) out[i] = emu_read8(base + i);
 	for (int k = 0; k < xreg_count; ++k) {
 		const XChipReg *r = &xreg_rows[k];
-		if (r->bn5 >= BN5_CHIPS || r->bn6 >= XREG_IDS) return "a registry row";
+		if (r->bn5 >= BN5_CHIPS) return "a registry row";
+		if (r->bn6 >= DARK_IDS) continue;   /* (past what its chip AI reads) */
 		const uint8_t *from = rom5 + BN5_CHIP_RECORDS + BN6_CHIP_RECORD_SIZE * r->bn5;
 		for (size_t b = 0; b < sizeof ds_bytes; ++b) out[BN6_CHIP_RECORD_SIZE * r->bn6 + ds_bytes[b]] = from[ds_bytes[b]];
 	}

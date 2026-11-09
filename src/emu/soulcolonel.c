@@ -1,6 +1,8 @@
 /* ColonelSoul's own in BN6's engine (soulcolonel.h). */
 #include "soulcolonel.h"
 
+#include "chip_entry.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -81,7 +83,7 @@ static bool lit(uint32_t screen, uint32_t b) {
 	int slot = hook_read8(screen + PICKS_FIRST + (uint32_t)n);
 	uint32_t el = element(slot);
 	if (hook_read8(el + BN6_ELEMENT_TYPE) != 0) return false;
-	int chip = hook_read16(hook_read32(el + BN6_ELEMENT_DECK)) & 0x1FF;
+	int chip = (int)chip_entry_id(hook_read16(hook_read32(el + BN6_ELEMENT_DECK)));
 	uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
 	uint8_t fx = hook_read8(rec + BN6_CHIP_EFFECT_FLAGS);
 	if (!(breaks & SOULCOLONEL_BREAK_RULE) &&

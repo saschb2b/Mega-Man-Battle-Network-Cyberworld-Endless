@@ -573,6 +573,27 @@ static bool copy_parts(const AreaSrc *a, AreaSrc *c, bool zeroed) {
 	return ok;
 }
 
+/* The mirror's panel edges, heights and rings, from a's (into m's hz and
+ * rings, each a's size): cell (x, y) becomes (-y - 1, -x - 1) */
+static void mirror_cells(const AreaSrc *a, AreaSrc *m) {
+	m->ex = (32 - a->ey) & 31;
+	m->ey = (32 - a->ex) & 31;
+	if (a->hz) {
+		m->hw = a->hh; m->hh = a->hw;
+		m->hx0 = -(a->hy0 + a->hh); m->hy0 = -(a->hx0 + a->hw);
+		for (int y = 0; y < a->hh; ++y)
+			for (int x = 0; x < a->hw; ++x)
+				m->hz[(size_t)(a->hw - 1 - x) * m->hw + (a->hh - 1 - y)] = a->hz[(size_t)y * a->hw + x];
+	}
+	if (a->rings) {
+		m->rw = a->rh; m->rh = a->rw;
+		m->rx0 = -(a->ry0 + a->rh); m->ry0 = -(a->rx0 + a->rw);
+		for (int y = 0; y < a->rh; ++y)
+			for (int x = 0; x < a->rw; ++x)
+				m->rings[(size_t)(a->rw - 1 - x) * m->rw + (a->rh - 1 - y)] = a->rings[(size_t)y * a->rw + x];
+	}
+}
+
 bool area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 	*m = *a;
 	if (!copy_parts(a, m, false)) return false;   /* (the mirror is for tiles only: no sections) */
@@ -590,23 +611,7 @@ bool area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
 			if (m->idx) m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
 		}
-	m->ex = (32 - a->ey) & 31;
-	m->ey = (32 - a->ex) & 31;
-	/* heights: cell (x, y) becomes (-y - 1, -x - 1) */
-	if (a->hz) {
-		m->hw = a->hh; m->hh = a->hw;
-		m->hx0 = -(a->hy0 + a->hh); m->hy0 = -(a->hx0 + a->hw);
-		for (int y = 0; y < a->hh; ++y)
-			for (int x = 0; x < a->hw; ++x)
-				m->hz[(size_t)(a->hw - 1 - x) * m->hw + (a->hh - 1 - y)] = a->hz[(size_t)y * a->hw + x];
-	}
-	if (a->rings) {
-		m->rw = a->rh; m->rh = a->rw;
-		m->rx0 = -(a->ry0 + a->rh); m->ry0 = -(a->rx0 + a->rw);
-		for (int y = 0; y < a->rh; ++y)
-			for (int x = 0; x < a->rw; ++x)
-				m->rings[(size_t)(a->rw - 1 - x) * m->rw + (a->rh - 1 - y)] = a->rings[(size_t)y * a->rw + x];
-	}
+	mirror_cells(a, m);
 	return true;
 }
 
@@ -629,4 +634,130 @@ bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
 	if (a->rings) memcpy(r->rings, a->rings, (size_t)a->rw * a->rh);
 	r->level = z;
 	return true;
+}
+
+/* ---- the same views made in place (docs/engine/emulation/3ds-memory.md) ----
+ * A map learned and let go needs no copy of its tiles and pixels for its
+ * mirror image or a raised view: they are turned in place and turned back.
+ * A copy was a whole map's pixels twice, and the New 3DS's heap held a
+ * map, a raised view and that view's mirror at once only just. */
+
+/* (a map's tiles and pixels flipped left-right, as area_src_mirror's copy
+ * holds them; again, back as they were) */
+static void flip_in_place(const AreaSrc *a) {
+	int W = a->tw * 8, H = a->th * 8;
+	for (int l = 0; l < 2; ++l) {
+		if (!a->tile[l]) continue;
+		for (int ty = 0; ty < a->th; ++ty) {
+			uint16_t *row = a->tile[l] + (size_t)ty * a->tw;
+			for (int i = 0, j = a->tw - 1; i <= j; ++i, --j) {
+				uint16_t t = row[i];
+				row[i] = row[j] ^ 0x400;
+				row[j] = t ^ 0x400;
+			}
+		}
+	}
+	for (int y = 0; y < H; ++y) {
+		size_t at = (size_t)y * W;
+		for (int i = 0, j = W - 1; i < j; ++i, --j) {
+			uint32_t p = a->px[at + i], p0 = a->px0[at + i];
+			uint8_t f = a->front[at + i];
+			a->px[at + i] = a->px[at + j]; a->px[at + j] = p;
+			a->px0[at + i] = a->px0[at + j]; a->px0[at + j] = p0;
+			a->front[at + i] = a->front[at + j]; a->front[at + j] = f;
+			if (a->idx) { uint8_t c = a->idx[at + i]; a->idx[at + i] = a->idx[at + j]; a->idx[at + j] = c; }
+		}
+	}
+}
+
+bool area_src_mirror_in(AreaSrc *a, AreaSrc *m) {
+	*m = *a;
+	for (int k = 0; k < 4; ++k) { m->sec[k] = NULL; m->nsec[k] = 0; }   /* (tiles only, as area_src_mirror's) */
+	m->hz = m->rings = NULL;
+	m->held = NULL;
+	if ((a->hz && !(m->hz = malloc((size_t)a->hw * a->hh))) || (a->rings && !(m->rings = malloc((size_t)a->rw * a->rh)))) {
+		free(m->hz);
+		memset(m, 0, sizeof *m);
+		return false;
+	}
+	flip_in_place(a);
+	mirror_cells(a, m);
+	return true;
+}
+
+void area_src_mirror_end(AreaSrc *a, AreaSrc *m) {
+	if (!m->px) return;
+	flip_in_place(a);
+	for (int k = 0; k < 4; ++k) free(m->sec[k]);
+	free(m->hz);
+	free(m->rings);
+	memset(m, 0, sizeof *m);
+}
+
+/* (the rows a raised view moves past the map's foot, kept to put back:
+ * each layer's tile rows, then each pixel plane's rows) */
+static size_t raise_rows(const AreaSrc *a, int z, int *rows, int *zz) {
+	int H = a->th * 8;
+	*zz = z < H ? z : H;
+	*rows = z / 8 < a->th ? z / 8 : a->th;
+	return (size_t)*rows * a->tw * 2 * 2 + (size_t)*zz * a->tw * 8 * (4 + 4 + 1 + 1);
+}
+
+bool area_src_raise_in(AreaSrc *a, int z, AreaSrc *r) {
+	*r = *a;
+	for (int k = 0; k < 4; ++k) { r->sec[k] = NULL; r->nsec[k] = 0; }   /* (as area_src_raise's) */
+	int rows, zz, W = a->tw * 8, H = a->th * 8;
+	uint8_t *held = malloc(raise_rows(a, z, &rows, &zz) + 1), *at = held;
+	if (!held) { memset(r, 0, sizeof *r); return false; }
+	size_t trow = (size_t)a->tw * 2;
+	for (int l = 0; l < 2; ++l) {
+		if (a->tile[l]) memcpy(at, a->tile[l] + (size_t)(a->th - rows) * a->tw, (size_t)rows * trow);
+		at += (size_t)rows * trow;
+		if (!a->tile[l]) continue;
+		memmove(a->tile[l] + (size_t)rows * a->tw, a->tile[l], (size_t)(a->th - rows) * trow);
+		memset(a->tile[l], 0, (size_t)rows * trow);
+	}
+	void *plane[4] = { a->px, a->px0, a->front, a->idx };
+	const size_t bpp[4] = { 4, 4, 1, 1 };
+	for (int k = 0; k < 4; ++k) {
+		size_t row = (size_t)W * bpp[k];
+		uint8_t *p = plane[k];
+		if (p) {
+			memcpy(at, p + (size_t)(H - zz) * row, (size_t)zz * row);
+			memmove(p + (size_t)zz * row, p, (size_t)(H - zz) * row);
+			memset(p, 0, (size_t)zz * row);
+		}
+		at += (size_t)zz * row;
+	}
+	r->held = held;
+	r->level = z;
+	return true;
+}
+
+void area_src_raise_end(AreaSrc *a, AreaSrc *r) {
+	uint8_t *at = r->held;
+	if (!at) return;
+	int rows, zz, W = a->tw * 8, H = a->th * 8;
+	raise_rows(a, r->level, &rows, &zz);
+	size_t trow = (size_t)a->tw * 2;
+	for (int l = 0; l < 2; ++l) {
+		if (a->tile[l]) {
+			memmove(a->tile[l], a->tile[l] + (size_t)rows * a->tw, (size_t)(a->th - rows) * trow);
+			memcpy(a->tile[l] + (size_t)(a->th - rows) * a->tw, at, (size_t)rows * trow);
+		}
+		at += (size_t)rows * trow;
+	}
+	void *plane[4] = { a->px, a->px0, a->front, a->idx };
+	const size_t bpp[4] = { 4, 4, 1, 1 };
+	for (int k = 0; k < 4; ++k) {
+		size_t row = (size_t)W * bpp[k];
+		uint8_t *p = plane[k];
+		if (p) {
+			memmove(p, p + (size_t)zz * row, (size_t)(H - zz) * row);
+			memcpy(p + (size_t)(H - zz) * row, at, (size_t)zz * row);
+		}
+		at += (size_t)zz * row;
+	}
+	free(r->held);
+	memset(r, 0, sizeof *r);
 }

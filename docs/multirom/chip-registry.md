@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The chip registry"
-description: "BN5's 257 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
+description: "BN5's 263 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T09:50:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:40:00Z }
 ---
 
 # The chip registry
@@ -16,15 +16,15 @@ finer calls' subset ([One net](one-net.md)). Those that play in BN6's battles
 come into runs' finds, shops, traders and rewards since D1 (One net); the
 chip step gives any one ([Dev tools](../devtools/overview.md)).
 
-- **The registry** (`src/core/xchips_registry.c`, numbers only): 257 of
+- **The registry** (`src/core/xchips_registry.c`, numbers only): 263 of
   BN5's chips, each with its id in BN6's tables and how it comes in. One
   chip per name: the 116 BN6 has by name are BN6's own (its id, record
   and code), and so are three its US release names otherwise (Attck+10
   and Attck+30, BN6's Atk+10 and Atk+30, which BN6's hand merges into the
-  chip before them by their ids; PitHoky, BN6's PitHocky). The other 138
+  chip before them by their ids; PitHoky, BN6's PitHocky). The other 144
   take ids of their own: BN6's records no chip uses (203-220, 291-300,
   314 and 350-367: blank-named, named by none of its tables, docs/
-  [The chip registry and BN5's chips' code](../rom/chips-code.md), The chip registry) and 411-511, past its 411 records.
+  [The chip registry and BN5's chips' code](../rom/chips-code.md), The chip registry) and 411-510, past its 411 records (511 held for the wide rewards, `XREG_WIDE_REWARD`: [BN4's chips in a run](bn4-chips.md), Past 511).
   203-207 and 211-213 are the eight BN6's code already plays under other
   names (AirHoc over AirHocky's family; WideSht1-3 over WideSht's;
   Spreader over Spreadr1's; Geddon1-3 over Geddon's, which cracks, breaks
@@ -37,8 +37,11 @@ chip step gives any one ([Dev tools](../devtools/overview.md)).
   TripCrak: the three crack chips moved, [The chips' code](chips-code.md)), 314
   HolyDrem beside BN6's Gigas, 350-364 the fifteen
   Program Advances beside BN6's, 411-504 the rest, the Navi chips last
-  (489-504; Colonel and Colonel SP are BN6's). 365-367 and 505-511 stay
-  free. A row of its own keeps its codes, library type and MB: what its
+  (489-504; Colonel and Colonel SP are BN6's), then the Darkloids' first
+  batch at 505-510: ShadeMan's and BlizzardMan's V1, SP and DS (BN5's
+  260-265), their Navis moved already, their code moved as NumbrMan's
+  ([The chips' code](chips-code.md)). 365-367 stay free; 511 is held.
+  A row of its own keeps its codes, library type and MB: what its
   placeholder needs. The pairs were made by name from both ROMs, which
   their SHA-1s fix; the unit tests hold the table to its rules
   (`xreg_check`: every BN5 id once, every own id once and free, every
@@ -135,6 +138,22 @@ its one other chip, and a run saved with BN5's chips continued without BN5's ROM
 (its placeholders in the folder, three sitting out of a battle, MegaMan's
 words); the autopilot's seeds 1-12 the same, run log for run log, as
 before the tables moved.
+
+Past 511: the registry's ids end at BN6's nine bits, every free one
+taken but ten; [BN4's chips in a run](bn4-chips.md) answers both older
+games' remaining chips with ten-bit ids. Where it stands: the census of
+BN6's code that takes an id in nine bits (`tools/chip_ids.py`, [The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip ids),
+every C reader and writer of a folder entry through
+`src/core/chip_entry.h`, the profile's Library to 1023 and the wire's
+chips to 1023 (protocol v16), and BN6's code patched (`src/emu/xchips_wide.c`):
+ten bits are live. The image holds 1024 records and four archives of
+names and of descriptions (`CHIPS_TABLES` their words), ids 512-1023
+free for the registry, blank records until a row takes one (`--dev
+alias=ID` makes one a copy of Cannon, the proof of an id past 511). Not
+yet past 511: the pack (its extension ends at 511), the Library's flags
+(`0x1E20` + id ends at 511), the other name readers, the folder editor's
+items, the wide rewards.
 
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood

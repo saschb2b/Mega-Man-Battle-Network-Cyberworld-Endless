@@ -53,7 +53,14 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 in .build/atlas/defects_bNN.png; fails where a
                                 layer got worse than tests/atlas_baseline.txt
                                 (docs/devtools/)
-  python3 build.py pacing       every act's battles and guardians against
+  python3 build.py sizes [SEEDS]
+                                the layers' sizes: every area's layers over
+                                runs of seeds 1 to SEEDS (300), every depth
+                                and side layer's kind, the largest tile map
+                                and coordinate data against their regions;
+                                fails where one is past it
+                                (docs/engine/emulation/free-space.md)
+  python3 build.py pacing      every act's battles and guardians against
                                 their bands, and the battles per layer and
                                 act played, in .build/pacing.txt
   python3 build.py economy [RUNS]  what a run hands out by act (chips, good
@@ -209,7 +216,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -942,6 +949,46 @@ def tiles(seeds='2', baseline=False):
     print('off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
           ' seams: tiles meeting as no original map sets them (red)')
     return code
+
+
+def layer_sizes(seeds='300'):
+    """The layers' sizes against their regions (src/dev/layer_sizes.c): every area's layers over
+    runs of seeds 1 to SEEDS, at every depth and side layer's kind, an area a container, side by
+    side; the largest tile map and coordinate data, nonzero where either is past its region
+    (docs/engine/emulation/free-space.md, Moving regions)."""
+    import concurrent.futures
+    import glob
+    import re
+    out = os.path.join(ROOT, '.build', 'sizes')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    rom_dir = default_rom_dir()
+
+    def one(area):
+        with open(os.path.join(out, f'log{area}.txt'), 'w') as log:
+            args = docker_run() + ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src',
+                                   '-v', f'{rom_dir}:/rom:ro', IMAGE, 'build/host/cyberworld', '--headless', '--rom-dir', '/rom',
+                                   '--data-dir', f'/src/.build/sizes/data{area}', '--atlas', f'/src/.build/sizes:sizes={area}:{seeds}']
+            return subprocess.call(args, stdout=log, stderr=log)
+    # (BN6's areas, then the other games' read beside it: 39 at most, those absent written as none)
+    with concurrent.futures.ThreadPoolExecutor(os.cpu_count() or 4) as ex:
+        codes = list(ex.map(one, range(39)))
+    largest = [0, 0, '', '']
+    for path in sorted(glob.glob(os.path.join(out, 'sizes=*.txt')), key=lambda p: int(re.search(r'=(\d+)', p)[1])):
+        for line in open(path):
+            m = re.match(r'area +(\d+): (\d+) layers built, (\d+) not; tile map (\d+) .*coordinates (\d+) with pads', line)
+            if m and int(m[2]):
+                print(line.rstrip())
+                if int(m[4]) > largest[0]:
+                    largest[0], largest[2] = int(m[4]), line.split(';')[1].split(',')[0].strip()
+                if int(m[5]) > largest[1]:
+                    largest[1], largest[3] = int(m[5]), line.split(',', 2)[-1].strip()
+            m = re.match(r'largest: tile map \d+ of (\d+), coordinates \d+ of (\d+)', line)
+            if m:
+                rooms = int(m[1]), int(m[2])
+    print(f'largest: tile map {largest[0]} of {rooms[0]}, coordinates {largest[1]} of {rooms[1]} '
+          f'(a quarter more: {largest[1] * 5 // 4})')
+    return 1 if any(codes) or largest[0] > rooms[0] or largest[1] > rooms[1] else 0
 
 
 def bmp_sheet(paths, out, cols=3):
@@ -2620,6 +2667,14 @@ def lint_symbols():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
 
+def lint_free_space():
+    """src/emu/free_space.h and docs/engine/emulation/memory.md's and
+    free-space.md's tables as tools/free_space.py writes them from the free
+    space's plan, and the plan whole (docs/engine/emulation/free-space.md)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'free_space.py'), '--check']) == 0
+
+
 def lint_voice():
     """docs/voice/catalog.json as tools/voice_catalog.py writes it from the
     words files: every line the voice review's dashboard shows, in step
@@ -2849,6 +2904,7 @@ def lint(update=False):
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
+    ok = lint_free_space() and ok
     ok = lint_voice() and ok
     ok = lint_docs() and ok
     ok = lint_itch() and ok
@@ -2886,7 +2942,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3041,6 +3097,9 @@ def main():
         build('host')
         rest = [r for r in a.rest if r != '--baseline']
         sys.exit(tiles(*rest[:1], baseline='--baseline' in a.rest))
+    if a.action == 'sizes':
+        build('host')
+        sys.exit(layer_sizes(*a.rest[:1]))
     if a.action in ('all', 'host', 'shot'):
         build('host')
     if a.action == 'all':

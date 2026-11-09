@@ -37,7 +37,7 @@ typedef struct {
 	uint8_t type, mb;    /* ... its library type (0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
 } XChipReg;
 
-#define XREG_IDS 512   /* BN6's chip ids: nine bits */
+#define XREG_IDS 1024   /* BN6's chip ids: ten bits (chip_entry.h), 512-1023 free */
 extern const XChipReg xreg_rows[];
 extern const int xreg_count;
 
@@ -54,7 +54,9 @@ const XChipReg *xreg_named(int bn6);
 
 /* The ids a row of its own may take: BN6's records no chip of the game
  * uses (blank-named, named by none of its tables, docs/rom/) and
- * 411-511, past its 411 records. */
+ * 411-510, past its 411 records; 511 held for the wide rewards
+ * (docs/multirom/bn4-chips.md, Past 511: a reward of an id from 512). */
+#define XREG_WIDE_REWARD 511
 bool xreg_free_id(int bn6);
 
 /* `n` rows checked: every BN5 id once, every own id once and free, every

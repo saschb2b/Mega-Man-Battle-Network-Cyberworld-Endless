@@ -14,6 +14,7 @@
 #include "xchips_flash.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
+#include "xnavi_recipe.h"
 #include "xnavi_sprites.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -217,9 +218,9 @@ static void commit(void) {
  * step, which they are not written in): false where one is not there */
 static bool navi_sprites(void) {
 	for (int i = 0; i < xchips_bn5_count; ++i)
-		for (int n = BN5_NAVI_COLONEL; n <= BN5_NAVI_TOADMAN; ++n)
-			if ((xchips_bn5[i].navis >> (n - BN5_NAVI_COLONEL) & 1) &&
-				(xnavi_sprite_number(n) != XNAVI_SPRITE_FIRST + n - BN5_NAVI_COLONEL || !xnavi_sprite_install(n))) {
+		for (int n = BN5_NAVI_COLONEL; n <= BN5_NAVI_COSMOMAN; ++n)
+			if ((xchips_bn5[i].navis >> XN_SEAT(n) & 1) &&
+				(xnavi_sprite_number(n) != XNAVI_SPRITE_FIRST + XN_SEAT(n) || !xnavi_sprite_install(n))) {
 				fprintf(stderr, "xchips_code: BN5's chips' code not installed (%s): BN5's Navi %d's battle sprite\n", xchips_bn5[i].code.name, n);
 				return false;
 			}

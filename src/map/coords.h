@@ -3,6 +3,7 @@
 #define CW_COORDS_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "area_src.h"   /* CoordCell */
@@ -34,5 +35,10 @@ bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const Coord
 /* ... or only `extra`: a town copied whole brings its original's own walls
  * and heights. */
 bool coords_write_raw(uint32_t slot, const CoordExtra *extra);
+
+/* The bytes the last coordinate data took, written or past its region:
+ * the layer's, after coords_write (the layers' sizes,
+ * src/dev/layer_sizes.c). */
+size_t coords_layer_bytes(void);
 
 #endif

@@ -3,6 +3,8 @@
  * NaviCust program as BN6's board draws its blocks. */
 #include "second_card.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 
 #include "data.h"
@@ -36,9 +38,9 @@ static void card(int chip, const ChipInfo *ci, const char *codes, int x, int y, 
 
 void second_chip_card(uint16_t e, int x, int y, int w) {
 	ChipInfo ci;
-	char code[2] = { (char)((e >> 9) >= 26 ? '*' : 'A' + (e >> 9)), 0 };
-	chip_info(e & 0x1FF, &ci);
-	card(e & 0x1FF, &ci, code, x, y, w);
+	char code[2] = { (char)(chip_entry_code(e) >= 26 ? '*' : 'A' + chip_entry_code(e)), 0 };
+	chip_info((int)chip_entry_id(e), &ci);
+	card((int)chip_entry_id(e), &ci, code, x, y, w);
 }
 
 void second_library_card(int chip, int x, int y, int w) {

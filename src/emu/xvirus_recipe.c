@@ -76,14 +76,17 @@ static bool ref_ok(const XVirusFamily *f, XvRef r) {
 
 /* the families' region: their code from XV_CODE, their art from XV_ART; their one stub the chip writer's (XV_CHIP_WRITER,
  * their support chips' family BN5's: xvirus_dispatch.c) */
-static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, XV_CHIP_WRITER, XV_STUBS_END };
+static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, XV_CHIP_WRITER, XV_STUBS_END, false, XV_LATE_ART, XV_LATE_ART_END,
+	XV_LATE_CODE, XV_LATE_CODE_END };
 
 static bool blocks_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (f->nblocks < 1) return no(why, n, "no blocks");
 	for (int i = 0; i < f->nblocks; ++i) {
 		const XvBlock *b = &f->blocks[i];
 		if (b->start >= b->end || b->start < BUS || (b->start & 1) || (b->end & 1)) return no(why, n, "block %d's range", i);
-		if (b->at < r->code || b->at + (b->end - b->start) > r->code_end || ((b->at ^ b->start) & 3)) return no(why, n, "block %d placed at %08x", i, (unsigned)b->at);
+		uint32_t len = b->end - b->start;
+		bool placed = (b->at >= r->code && b->at + len <= r->code_end) || (r->code2 && b->at >= r->code2 && b->at + len <= r->code2_end);
+		if (!placed || ((b->at ^ b->start) & 3)) return no(why, n, "block %d placed at %08x", i, (unsigned)b->at);
 		for (int k = 0; k < i; ++k) {
 			const XvBlock *o = &f->blocks[k];
 			bool src = b->start < o->end && o->start < b->end;
@@ -195,12 +198,18 @@ uint32_t xvirus_list_entry(int list, uint32_t index) {
 	return (list == BN6_SPRITES_LIST3 ? XV_LIST3 : XV_LISTS + (uint32_t)slot * XV_STEP) + 4u * index;
 }
 
-/* its sprites each in its own room past XV_ART, at a number of its own in a grown list */
+/* a span wholly within lo to hi */
+static bool span_in(uint32_t at, uint32_t room, uint32_t lo, uint32_t hi) {
+	return at >= lo && at < hi && room <= hi - at;
+}
+
+/* its sprites each in its own room past XV_ART (or in the region's second room), at a number of its own in a grown list */
 static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
-		if (s->at < r->art || (s->at & 3) || !s->room || s->at >= r->art_end || s->room > r->art_end - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		bool placed = span_in(s->at, s->room, r->art, r->art_end) || (r->art2 && span_in(s->at, s->room, r->art2, r->art2_end));
+		if ((s->at & 3) || !s->room || !placed) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
 			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
@@ -248,13 +257,28 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 	return true;
 }
 
-/* its songs in BN6's empty slots the families take and in the art's room, apart from its sprites and each other */
+/* (BN6's empty song slots, each its shared header of no tracks in the player's ROM, that no other track takes: the themes'
+ * 0x26-0x31 and the families' 0x34-0x3F below and above the first two, BN5's 0x40-0x62 left alone; the five to 0xFF a movs
+ * or a byte names, then those past it; docs/rom/sound.md) */
+const uint16_t xv_bn4_pool[XV_BN4_POOL_SLOTS] = { 0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D,
+	0x167, 0x16B, 0x16E, 0x172 };
+
+bool xv_bn4_pool_slot(int slot) {
+	for (int i = 0; i < XV_BN4_POOL_SLOTS; ++i)
+		if (xv_bn4_pool[i] == slot) return true;
+	return false;
+}
+
+/* its songs in BN6's empty slots the families take (a BN4 family's fixed one, or the pool's for a late one) and in the art's
+ * room or the late families', apart from its sprites and each other */
 static bool songs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nsongs; ++i) {
 		const XvSong *g = &f->songs[i];
 		bool bn4 = f->game == XROM_BN4_RED_SUN_US;
-		if (g->slot < (bn4 ? XV_BN4_SONG_SLOT_FIRST : XV_SONG_SLOT_FIRST) || g->slot > (bn4 ? XV_BN4_SONG_SLOT_LAST : BN6_SONGS_EMPTY_LAST) ||
-			g->at < XV_ART || (g->at & 3) || !g->room || g->room > XV_ART_END - g->at)
+		bool slot = bn4 ? (g->slot >= XV_BN4_SONG_SLOT_FIRST && g->slot <= XV_BN4_SONG_SLOT_LAST) || xv_bn4_pool_slot(g->slot) :
+		                  g->slot >= XV_SONG_SLOT_FIRST && g->slot <= BN6_SONGS_EMPTY_LAST;
+		bool room = span_in(g->at, g->room, XV_ART, XV_ART_END) || span_in(g->at, g->room, XV_LATE_ART, XV_LATE_ART_END);
+		if (!slot || !room || (g->at & 3) || !g->room)
 			return no(why, n, "song %d (slot %#x at %08x)", i, g->slot, (unsigned)g->at);
 		for (int k = 0; k < f->nsprites; ++k)
 			if (spans_meet(g->at, g->room, f->sprites[k].at, f->sprites[k].room)) return no(why, n, "song %d over sprite %d", i, k);

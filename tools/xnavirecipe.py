@@ -93,13 +93,13 @@ XN_MORE = XN_END
 XN_MORE_ART = XN_MORE + 4 * XN_SLOT_CODE
 
 
-# Team ProtoMan's room (slots 12-17: src/emu/free_space.h FREE_TEAM_NAVIS, xnavi_recipe.h XN_TEAM_*): a home, a code room
+# Team ProtoMan's room in code-low (slots 12-17: src/emu/free_space.plan FREE_TEAM_NAVIS, xnavi_recipe.h XN_TEAM_*): a home, a code room
 # and an art room each (their code rooms XN_TEAM_SLOT_CODE: the largest of their walks, ProtoMan's, 8648 bytes), then the
 # shared art's second room (XN_TEAM_SHARED, to XN_TEAM_END), where a sprite goes once the first is full
 TEAM_SLOT = 12
-XN_TEAM_HOMES, XN_TEAM_CODE, XN_TEAM_ART = EMU_FREE + 0x4D0000, EMU_FREE + 0x4D3000, EMU_FREE + 0x4E2000
+XN_TEAM_HOMES, XN_TEAM_CODE, XN_TEAM_ART = EMU_FREE + 0x090000, EMU_FREE + 0x093000, EMU_FREE + 0x0A2000
 XN_TEAM_SLOT_CODE = 0x2800
-XN_TEAM_SHARED, XN_TEAM_END = XN_TEAM_ART + 6 * XN_SLOT_ART, EMU_FREE + 0x4EB000
+XN_TEAM_SHARED, XN_TEAM_END = XN_TEAM_ART + 6 * XN_SLOT_ART, EMU_FREE + 0x0AB000
 
 
 def slot_code(slot):

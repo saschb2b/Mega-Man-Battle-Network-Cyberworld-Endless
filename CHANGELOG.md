@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **Online: protocol v16.** The Net Square, Trade Central and the Arena
+  now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
+  last ones, which need ids past BN6's 511. Games of this version meet
+  only games of this version and a server that speaks v16; an older game
+  hears that it is behind, as with every new protocol. Someone hosting
+  their own Square updates the server with the game.
+- **Chip ids past 511.** BN6's chip ids grew from nine bits to ten inside
+  the game, ground for BN4 Red Sun's chips. Nothing plays differently.
+  A run saved by an earlier version goes on as before (its folders are
+  converted once as it loads); a save from this version moved to an
+  earlier one is refused there as a newer version's.
+- **ShadeMan's and BlizzardMan's chips.** With BN5 Team Colonel's ROM,
+  the two Darkloids' Navi chips are in the game: ShadeMan, ShadeMan SP
+  and DS, BlizMan, BlizMan SP and DS, each moved from BN5 and checked
+  against BN5's own battle frame by frame. Beat a dark board's
+  Darkloid two phases under par and you get his SP chip, at par his own
+  chip, as BN5's missions paid (a Darkloid of BN6's, without BN5, pays as
+  before). They turn up among BN5's chips in the finds too.
 - **CosmoMan on the dark boards.** With BN5 Team Colonel's ROM beside
   BN6's, a dark layer's Darkloid can now be CosmoMan, BN5's own, moved
   into BN6's battle and checked against BN5's frame by frame like
@@ -18,6 +36,30 @@
   joins the guardians once more of his team are in. Their records and
   Souls already have their room in the saves, and older saves read as
   before.
+- **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
+  battle engine and checked against BN4's own battle frame by frame, now
+  enters the tournament's first two rounds on his own plate of BN4's
+  bracket, his junk raining down as in BN4.
+- **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
+  beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
+  Area or BN5's Undernet now gets the quick way back BN6's areas have: a
+  lane of one-way arrow panels from a far detour to the way, drawn in
+  that area's own arrows, read from BN5's maps. ACDC Area has none in
+  BN5, so its layers have none. A layer in progress from an older build
+  starts afresh.
+- **BN5's win music.** A battle won on one of BN5's areas, or on a dark
+  layer, ends with BN5's own victory music where BN6's played, picked the
+  way both games pick it.
+- **VolGear visits.** With BN4 Red Sun's ROM beside BN6's, VolGear and
+  its versions up to ValGearEX join Billy, Spikey and the rest in the
+  battles BN4's viruses visit, its flame running down MegaMan's row as
+  in BN4. Moved into BN6's battle and checked against BN4's own frame by
+  frame, it pays from BN4's own rewards.
+- **Kilby and MagTect visit.** Kilby and MagTect, with their versions,
+  join the BN4 viruses that turn up in BN6's and BN5's battles, each
+  checked against BN4's own battle frame by frame like the rest. Their
+  sounds are BN4's own, loaded for the battle they are in, the way BN4's
+  Navis bring theirs.
 
 ## 0.20.0 (2026-11-09)
 

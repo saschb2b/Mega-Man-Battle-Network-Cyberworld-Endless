@@ -1,0 +1,132 @@
+# The free space's plan: every region the engine writes past BN6's 8 MB in
+# the core's ROM copy, and in the RAM BN6 leaves alone, in one place.
+# tools/free_space.py writes src/emu/free_space.h (the names, and the
+# tables tests/test_core.c and free_space.c read) and the tables of
+# docs/engine/emulation/memory.md from it, and reports what is used and
+# what is free; build.py lint fails while they differ. How a region is
+# placed: docs/engine/emulation/free-space.md.
+#
+# zone KEY  rom|ram  START  END  [start=NAME,end=NAME]  title
+#   a span of one kind; its regions follow it, in address order.
+# NAME  START  END  FLAGS  OWNER  CONCEPT  what it holds
+#   START and END: +0x... from EMU_FREE in the ROM copy, 0x... a RAM
+#   address; [START, END) is the region's own.
+#   FLAGS (comma-joined, - for none): end (NAME_END is defined too),
+#   in=PARENT (a part of PARENT, laid out inside it), free (a named span
+#   nothing writes yet).
+#   OWNER: the files that write it (comma-joined), - for none.
+#   CONCEPT: the docs/ concept that explains it.
+
+zone engine  rom  +0x000000  +0x002F00  -  the engine's own records, hooks and stubs, and BN6's small tables grown
+FREE_WARP              +0x000000  +0x000100  -    gamecall.c                engine/emulation/memory.md  a warp record and a one-entry warp list
+FREE_CALL_RETURN       +0x000100  +0x000180  -    gamecall.c                engine/emulation/hooks.md   where a game call's routine returns: a hook
+FREE_NO_MYSTERY        +0x000180  +0x000200  -    mapslot.c                 rom/net-maps.md             an empty Mystery Data list
+FREE_RECORDS           +0x000200  +0x000300  end  encounter.c               engine/emulation/memory.md  two battle records in turn, 0x80 apart
+FREE_RUSH              +0x000400  +0x000640  end  rush.c                    engine/emulation/memory.md  Rush's gaps
+FREE_BLOCKERS          +0x000700  +0x0012E0  end  blockers.c                engine/emulation/memory.md  map-object handler 3's records
+FREE_CHIP_PAS          +0x001300  +0x001700  end  xchips_code.c             rom/chips-code.md           BN6's Program Advances' list grown with BN5's: their recipes, then the list
+FREE_CHIP_AI           +0x001700  +0x001740  end  darkinvs.c                engine/emulation/memory.md  the player's chip AI's stub
+FREE_SWAP_RETURN       +0x001740  +0x001760  end  battle_swap.c             rom/navis.md                where the swap's spawn returns mid-battle: a hook
+
+# (the layers' regions sized by their largest, November 2026: the tile
+# maps by BN6's buffer, BN6_TILEMAP_MAX as literal blocks, the layers'
+# coordinates by the largest layer over runs of seeds 1-300 with a quarter
+# to spare, build.py sizes; the zone's end the next layer's or town's
+# kind's, and the room past it code-low's)
+zone layers  rom  +0x002F00  +0x090000  -  layers and the town: their maps, rewritten as a layer or the town is entered; home's other places
+FREE_WARP_LIST         +0x002F00  +0x003000  -    mapslot.c                 engine/emulation/layer.md   the layer map's warp list
+FREE_LAYER             +0x003000  +0x010000  -    mapslot.c                 engine/emulation/layer.md   layer data in two halves
+FREE_TILE_MAP          +0x010000  +0x028000  end  netmap.c                  engine/emulation/layer.md   the generated tile map
+FREE_COORDS            +0x028000  +0x030000  end  coords.c                  engine/emulation/layer.md   the generated coordinate data
+FREE_TOWN_TILE_MAP     +0x030000  +0x048000  end  town.c                    world/overworld.md          the town's tile map
+FREE_TOWN_COORDS       +0x048000  +0x058000  end  coords.c                  world/overworld.md          the town's coordinate data
+FREE_TOWN              +0x058000  +0x060000  -    mapslot.c                 world/overworld.md          the town's scripts, text and tables
+FREE_LAN_HP            +0x060000  +0x068000  -    mapslot.c,lanhp.c,lan_house.c  world/home/overview.md  Lan's HP's, then Lan's house's in its second half
+FREE_INDOORS           +0x068000  +0x078000  -    mapslot.c,indoors.c,aster_land.c,academy.c  world/home/asterland-and-academy.md  home's other places
+
+# (the room the layers' regions gave up: one span for what the code zone
+# has no room for, the next features' to take from its front with --fit.
+# A BL from here reaches 4 MB: the code zone's first regions, not its
+# Navis' or chips'; a call further goes through a veneer,
+# src/emu/thumb_reloc.h)
+zone code-low  rom  +0x090000  +0x150000  -  other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs
+FREE_TEAM_NAVIS        +0x090000  +0x0EF000  -    xnavi_install.c,xnavi_sprites.c  multirom/navis.md  BN5's Team ProtoMan in BN6's engine (xnavi_recipe.h XN_TEAM_*, seats 11-16): homes, code, art and sprites in a room of their own
+FREE_TEAM_HOMES        +0x090000  +0x093000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   their homes, XV_HOME_SIZE each
+FREE_TEAM_NAVI_CODE    +0x093000  +0x0A2000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   their code, a room of XN_TEAM_SLOT_CODE each (the largest walk, ProtoMan's, 8648 bytes)
+FREE_TEAM_NAVI_ART     +0x0A2000  +0x0A3800  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   what their attacks draw, a room each
+FREE_TEAM_SHARED       +0x0A3800  +0x0AB000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full)
+FREE_TEAM_SPRITES      +0x0AB000  +0x0EF000  end,in=FREE_TEAM_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes)
+
+zone words  rom  +0x150000  +0x170000  -  the director's and the PET's words: text archives, labels, lists
+FREE_TALK              +0x150000  +0x152000  -    talk.c                    engine/emulation/layer.md   the director's conversations
+FREE_LABEL             +0x152000  +0x153000  -    director_layer.c          engine/emulation/memory.md  the map-name label's archive
+FREE_PET_LABEL         +0x153000  +0x154000  -    director_layer.c          game/pet.md                 the PET's PLACE
+FREE_PET_TEXT          +0x154000  +0x155000  -    pet_text.c                game/pet.md                 the PET's words: the key items' names
+FREE_PET_DESCS         +0x155000  +0x158000  -    pet_text.c                game/pet.md                 the key items' descriptions
+FREE_PET_MAILS         +0x158000  +0x15A000  -    pet_text.c                game/pet.md                 the mails' senders and subjects
+FREE_PET_BODIES        +0x15A000  +0x166000  -    pet_text.c                game/pet.md                 the mails' bodies
+FREE_PORTRAITS         +0x166000  +0x167900  end  portrait.c                game/bosses/overview.md     portraits of Falzar's Navis
+FREE_TRADER_LIST       +0x168000  +0x169000  end  trader.c                  multirom/one-net.md         a layer's Chip Trader's prizes of both nets
+FREE_PET_OPTIONS       +0x169000  +0x16A000  end  pet_options.c             game/pet.md                 the PET menu's labels with Comm's made Options
+FREE_BBS               +0x16A000  +0x16B000  end  request_bbs.c             world/home/jobs.md          the visit's requests on BN6's Request BBS: their titles and posts, LZ77
+
+zone world  rom  +0x170000  +0x330000  -  other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds
+FREE_XAREA             +0x170000  +0x1A0000  -    netmap.c                  multirom/overview.md        another game's net area
+FREE_SONGS             +0x1A0000  +0x260000  -    xsong.c                   multirom/music.md           other games' songs
+FREE_XNAVIS            +0x260000  +0x2A0000  -    xnavi.c                   multirom/overview.md        other games' Navis and map objects
+FREE_BACKDROPS         +0x2A0000  +0x2E0000  -    xbackdrop.c               multirom/overview.md        other games' battle backgrounds
+FREE_FLAME             +0x2E0000  +0x2E1000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
+FREE_MAP_BACKDROPS     +0x2F0000  +0x320000  end  xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
+
+zone code  rom  +0x330000  +0x7A0000  -  other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs
+FREE_VIRUS_ROOM        +0x330000  +0x348000  -    xvirus_grow.c             multirom/families.md        BN6's tables grown for the families, the second-level dispatch
+FREE_FAMILIES          +0x348000  +0x400000  -    xvirus.c,xvirus_families.c  multirom/families.md  the families: their homes, code and art
+FREE_CHIPS             +0x400000  +0x480000  -    chips.c,xchips_install.c  multirom/chip-registry.md   the chip registry: records, names, routines, art
+FREE_SOULS             +0x480000  +0x4C0000  -    soulproxy.c,soulunite.c,soullife.c,soulcode.c,soullook.c,soulpower.c,soulpassive.c,soulchips.c,soulcolonel.c,xstrike.c,soulchaos.c  multirom/souls.md  BN5's Souls in BN6's engine (soul_room.h lays it out)
+FREE_PANELS            +0x4C0000  +0x4D0000  end  xpanels.c,xpanels_look.c  multirom/one-net.md         BN5's lava and sea as BN6's panels
+FREE_LATE_FAMILIES     +0x4D0000  +0x500000  end  xvirus.c                  multirom/families.md        the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds
+FREE_NAVIS             +0x500000  +0x600000  -    xnavi_sprites.c,xnavi_room.c,xnavi_install.c,xnavi_objects.c,xsea.c,xnavi_dark.c  multirom/navis.md  BN5's Navis in BN6's engine
+FREE_NAVI_SPRITES      +0x500000  +0x580000  end,in=FREE_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a fixed place each, and the arm points grown (the Navi chips' and the Souls' one copy of each Navi's sprite there too)
+FREE_NAVI_ROOM         +0x580000  +0x588000  in=FREE_NAVIS  xnavi_room.c    multirom/navis.md           BN6's Navi tables grown for them
+FREE_NAVI_HOMES        +0x588000  +0x590000  in=FREE_NAVIS  xnavi_install.c  multirom/navis.md          their homes: state table, records, veneers
+FREE_NAVI_CODE         +0x590000  +0x5B0000  in=FREE_NAVIS  xnavi_install.c  multirom/navis.md          their code and their objects', block by block
+FREE_NAVI_ART          +0x5B0000  +0x600000  in=FREE_NAVIS  xnavi_install.c  multirom/navis.md          what their attacks draw
+FREE_CHIP_CODE         +0x600000  +0x700000  -    xattack_grow.c,xchips_code.c,xchips_bn5.c  multirom/chips-code.md  the code of BN5's chips
+FREE_ATTACK_FAMILIES   +0x600000  +0x600400  end,in=FREE_CHIP_CODE  xattack_grow.c  multirom/chips-code.md  BN6's attack families grown to 240 (the chips' and the Souls' one copy)
+FREE_CHIP_MOVED        +0x600400  +0x700000  in=FREE_CHIP_CODE  xchips_code.c  multirom/chips-code.md      the chips' moved code, its tables and what it draws
+FREE_SOULS_ART         +0x700000  +0x710000  end  soulcode.c,soulcolonel.c  multirom/souls.md  the Souls' art past their room: BN5's effects BN6 redrew, copied
+FREE_TAIL              +0x710000  +0x711000  free  -                        engine/emulation/free-space.md  free to FREE_LATE_CODE
+FREE_LATE_CODE         +0x711000  +0x720000  end  xvirus.c                  multirom/families.md        the late families' code, block by block, past the families' own room
+FREE_BN4_NAVIS         +0x720000  +0x730000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes
+FREE_BN4_NAVI_CODE     +0x730000  +0x750000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis' code and their objects', block by block
+FREE_BN4_NAVI_ART      +0x750000  +0x77C000  -    xnavi_bn4_art.c           multirom/bn4-navis.md       the coming battle's BN4 Navi's attacks' art and songs, one room
+FREE_BN4_NAVI_SPRITE   +0x77C000  +0x78C000  -    xnavi_bn4_room.c          multirom/bn4-navis.md       the coming battle's BN4 Navi's battle sprite, one room
+FREE_BRACKET_FACES     +0x78C000  +0x790000  -    xbracket_faces.c          multirom/bn4-tournament.md  BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets
+FREE_BRACKET           +0x790000  +0x7A0000  end  xbracket.c                multirom/bn4-tournament.md  BN4's bracket screen moved: its stubs, veneers, code and art
+
+zone art  rom  +0x7A0000  +0x800000  -  art copied whole, a place each
+FREE_LIB_TEAM          +0x7A0000  +0x7FA000  end  xnavi.c                   game/liberation/index.md    a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each
+
+zone persistent  ram  0x02010CE0  0x02011800  end=RAM_PERSISTENT_END  persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end)
+RAM_PACK_EXT           0x02010CE0  0x020115E0  end  xchips_install.c        multirom/chip-registry.md   the chip pack's extension, ids 320-511 (BN6_PACK_EXT)
+RAM_PLAYER_AI          0x020115E0  0x02011730  end  darkinvs.c              engine/emulation/memory.md  MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place
+RAM_TEAM               0x02011730  0x02011750  end  arena_team.c            rom/online.md               --dev arena2v2's list of what the Practice NetBattle spawns (epic #167)
+RAM_TEAM_LINK          0x02011750  0x02011790  end  arena_team_link.c       rom/online.md               the partners' words for and from BN6's packets, 0x20 bytes a side
+RAM_TEAM_CUSTOM        0x02011790  0x02011800  end  arena_team_custom.c     rom/online.md               each partner's deck and own Custom screen, 0x38 bytes a side
+
+zone mode  ram  0x02029A00  0x0202DA00  -  a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map
+RAM_BRACKET            0x02029A00  0x0202DA00  end  xbracket.c              multirom/bn4-tournament.md  BN4's bracket screen moved: its state, tournaments, blend values, menu sprites and its tiles unpacked (xbracket.h)
+
+zone battle  ram  0x0203FB50  0x02040000  end=RAM_BATTLE_END  per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing else of BN6's reads or writes 0x0203FB50 on
+RAM_SEA                0x0203FB50  0x0203FBE0  -    xsea.c                  rom/bn5-world.md            BN5's sea's submerge (xsea.h: the submerged, their markers)
+RAM_DARK_LISTS         0x0203FBE0  0x0203FDA0  -    xnavi_dark.c,xnavi_bn5.c  multirom/souls.md         the Dark Soul's chip AI's lists, 0xE0 a side (BN6_DARK_LISTS)
+RAM_NAVIS              0x0203FDA0  0x0203FDB0  -    xnavi_room.c,xnavi_dark.c  multirom/navis.md  the moved Navis' own state: Colonel's sides' bits (BN6_COLONEL_SIDES), the Dark Soul's AI data's holder (BN6_DARK_AI_OWNER, BN6_DARK_AI_POOL)
+RAM_DARK_AI            0x0203FDB0  0x0203FEF0  -    xnavi_dark.c            multirom/souls.md           the Dark Soul's AI data, BN5's 0x140 bytes (BN6_DARK_AI)
+RAM_BATTLE             0x0203FEF0  0x0203FF00  -    xchips_flash.c          rom/chips-code.md           kept for the moved families' and Navis' own state
+RAM_DISPATCH_SIDE      0x0203FF00  0x0203FF60  -    xvirus_dispatch.c       rom/virus-families.md       the second-level dispatch's side tables (BN6_DISPATCH_SIDE)
+RAM_COLONEL            0x0203FF60  0x0203FF70  -    xnavi_bn5.c  rom/navis.md  BN5's Colonel's table moved (BN6_COLONEL_TABLE)
+RAM_SOULS              0x0203FF70  0x0203FFF0  -    soulunite.c,soullife.c,soulmood.c,soulcolonel.c,soulchaos.c  multirom/souls.md  kept for the Souls' state and BN5's mood (the Souls' track)
+RAM_TEAM_TICK          0x0203FFF0  0x0203FFF4  -    arena_team.c            rom/online.md               u32 --dev arena2v2's count of the battle loop's iterations
+RAM_CHIP_AI_ROOMS      0x0203FFF4  0x0203FFF8  -    darkinvs.c              engine/emulation/memory.md  u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's bits; darkinvs_room.h, issue #182)
+RAM_TEAM_CLOCK         0x0203FFF8  0x0203FFFC  -    arena_team_custom.c     rom/online.md               u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h)
+RAM_BATTLE_SPARE       0x0203FFFC  0x02040000  free  -                      engine/emulation/memory.md  spare (the game call's old mark, unused since issue #33)

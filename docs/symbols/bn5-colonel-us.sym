@@ -124,6 +124,7 @@
 080014C0 BN5_RNG_DRAW_SECOND
 080014D6 BN5_RNG_DRAW_SECOND_POSITIVE
 08002650 BN5_SPRITE_LOAD
+080029B8 sprite_lz77_data_queued_for_decompression
 08002AE6 over_16_frames
 08002D5A bn5_lib_return_rise_obj_mosaic
 08002ED0 object_2_sprite_state_block_6
@@ -160,6 +161,9 @@
 08006AAE BN5_CHAOS_FAIL_SPAWN
 08006D2A bn5_chips_code.from
 08007120 bn5_lib_foe_hp_back_0x08009050
+080074D2 battle_win
+08007530 BN5_BATTLE_WIN_SONG
+08007532 battle_win_song.at_08007532
 08007954 BN5_LIB_TURN_BANNER
 08007A50 BN5_LIB_WIN_BANNER
 08007A82 BN5_WIN_SONG
@@ -207,6 +211,7 @@
 0800D0A0 soul_passives.0x0800d0ca
 0800D0CA soul_passives
 0800D17C BN5_ENEMY_STATS
+0800D7B8 status_bit_ored_into_what_struck
 0800D9C4 soul_chips.empty_power_attacks_name_charge_time
 0800DA32 bn5_last_chips.0x080c39f4_his_own_sprite_by
 0800DBD8 bn5_darkinvs_bn6
@@ -367,6 +372,7 @@
 08016B96 collision_data_updated
 08016C04 hit_effect_spawned
 08016C3A pairs_bn5
+08016C5C bn5_darkloids_navi
 08016C76 BN5_PANEL_STEP
 08016D0C BN5_PANEL_HIT
 08016D78 BN5_LAVA_STEP
@@ -506,6 +512,7 @@
 08029CD4 colonelsoul_button_chip.slot_drawn_2
 08029D34 mode_4_last_draw_call
 0802B3E0 BN5_BATTLE_TYPE
+0802B3F2 battle_win_song.options
 0802B4B0 player_chip_ai
 0802B804 BN5_CHIP_AI_RUN
 0802BA18 BN5_CHIP_AI_DARK
@@ -745,6 +752,8 @@
 080B9D04 bn5_engine_objects.named
 080B9D0C named_0x080b9d04
 080BA6A8 first_kind_0x09
+080BC21A bn5_darkloids_navi_2
+080BD208 bn5_darkloids_navi_3
 080BD834 set_up
 080BD86A bn5_last_chips_2
 080C02F0 word_for_navi_routines
@@ -765,6 +774,7 @@
 080C39F4 his_own_sprite_by
 080C3A2A bn5_last_chips_3
 080C4782 bn5_sea_submerge_4
+080C4EAE bn5_darkloids_navi.to
 080C643C bn5_sea_submerge.bn6_child_hidden
 080C6C08 souls_code_bn6.6_bytes_entry
 080C9518 reticle_code
@@ -781,6 +791,7 @@
 080CAC98 colonelsoul_button_chip.searches_2
 080CAD06 BN5_COLONEL_SIDE_SET
 080CB4FC BN5_NAPALM_FLAME_SPAWN
+080CB68A bn5_darkloids_navi_4
 080CBD78 BN5_CLOUD_KINDS_0B
 080CBEF6 BN5_CLOUD_PANEL
 080CBFBC BN5_CLOUD_FIND_37

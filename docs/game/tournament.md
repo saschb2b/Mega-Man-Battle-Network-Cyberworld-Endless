@@ -472,8 +472,10 @@ so the guardian code draws from no pool he is in; he joins the finals when
 BN4's areas bring their guardians. Seven more joined on 8 November 2026,
 each on his own plate of BN4's bracket once his spec passed: ThunderMan,
 WindMan, FireMan, SearchMan, AquaMan, WoodMan and Roll, whose summon brings BN4's
-own Mettaur, moved into BN6 for her alone and never a visitor. The pool's
-BN4 Navis are the list's eight, all of them rounds 1 and 2 only.
+own Mettaur, moved into BN6 for her alone and never a visitor. JunkMan
+joined on 9 November 2026 on his plate, 0x0B ([BN4's Navis in BN6's
+engine](../multirom/bn4-navis.md), JunkMan built). The pool's BN4 Navis are
+the list's nine, all of them rounds 1 and 2 only.
 
 **The bracket's eight.** BN4's three-round bracket: MegaMan first (`0x1E`),
 round 1's Navi beside him, round 2's Navi in the next pair, the final's

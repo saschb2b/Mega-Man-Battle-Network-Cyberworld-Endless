@@ -1,11 +1,13 @@
 /* The MegaMan a NetBattle carries (arena_format.h). */
 #include "arena_format.h"
 
+#include "chip_entry.h"
+
 #include <string.h>
 
 #include "bn6.h"
 
-#define CHIP_ID(e) ((unsigned)(e) & 0x1FFu)   /* a folder entry: chip | code << 9 */
+#define CHIP_ID(e) chip_entry_id(e)   /* a folder entry (chip_entry.h) */
 
 static bool folder_holds(const OnlineLoadout *l, int k) {
 	if (!l || k < 0 || k >= ONLINE_FOLDERS) return false;
