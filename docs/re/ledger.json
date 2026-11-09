@@ -422,6 +422,10 @@
     {
       "date": "2026-11-08",
       "what": "Roll's versions (docs/multirom/bn4-navis.md, Roll's versions; docs/rom/bn4.md, Roll's versions: BN4_SUMMON_MARK in bn4_navis.h, BN6_VIRUS_STATE_CALL and BN6_T1_SPAWN_KIND in bn6_families.h, BN6_AI_VERSION in bn6_ai.h): a summoned visitor (Billy) arrives by BN4's summoned appear; her pool's songs apart; the BN4 Navis' SP palettes; roll_v2, roll_v3, roll_sp and roll_v2_summons PASS."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "BN5's net maps' arrow panels (section-3 values 0x48-0x4F, as BN6's) learned and laid as lanes on its areas' layers, its ramps measured (four panels long, 64 high: no BN6 stair shape); BN5's battle win (0x080074D2, its song at 0x08007530: src/emu/bn5_music.h BN5_BATTLE_WIN_SONG) decoded beside BN6's, the same pick, so its Victory 0x19 and Fanfare 0x1F play on its areas (src/director/win_song.c; docs/rom/bn5-world.md, A battle's win's song and Its arrow panels and ramps)."
     }
   ],
   "experiments": [
