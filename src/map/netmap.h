@@ -58,6 +58,9 @@ extern int netmap_scenery;
 extern LegalStats netmap_legal;
 /* The last tile map written: tw x th entries of layer 0, then layer 1. */
 const uint16_t *netmap_last_tiles(int *tw, int *th);
+/* ... and the bytes it took in the ROM copy (the layers' sizes,
+ * src/dev/layer_sizes.c). */
+size_t netmap_tilemap_bytes(void);
 /* ... and where its tiles meet as no original map shows (per tile: bit 0
  * with the one to the right, bit 1 with the one below), in bits 2-3 how far
  * its pair was seen from its own neighbourhood (tiles_pick_off), in bits 4-6

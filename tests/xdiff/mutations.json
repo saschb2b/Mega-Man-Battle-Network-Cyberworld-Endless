@@ -1197,7 +1197,7 @@
    "name": "a Program Advance's id",
    "spec": "pa_suprspr1",
    "poke": [
-    "08F10002:0165:2"
+    "08801302:0165:2"
    ],
    "what": "the grown list's first recipe of BN5's (FREE_CHIP_PAS, src/core/xchips_pas.c's SuprSpr1) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
   },
