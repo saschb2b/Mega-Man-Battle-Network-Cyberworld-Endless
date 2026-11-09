@@ -176,23 +176,31 @@ static uint32_t coll_arg_set(const XNavi *n, uint32_t at) {
 #define XN_HIDE_SHARED 20u
 #define XN_HIDE_STUB   8u
 #define XN_HIDE_SIZE(f) (XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)(f)->nstates)
-static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
-	static const uint16_t shared[7] = { 0xB501, 0x4903, 0x46FE, 0x4708, 0xBC03, 0x468E, 0x4700 };   /* (its ldr's word at +16) */
-	const XVirusFamily *f = &n->code;
-	if (at & 3u || XN_HIDE_SIZE(f) > room) { xv_fail("no room in its home for its hide step's stubs"); return false; }
-	uint8_t *p = xv_put(at, XN_HIDE_SIZE(f), true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
-	if (!p || !st) return false;
-	for (int i = 0; i < 7; ++i) put16(p + 2 * i, shared[i]);
-	put16(p + 14, 0x46C0);   /* (nop: its word aligned) */
-	put32(p + 16, xv_move_ref(n->hide_step));
+/* a stub a state at `at` past `shared` bytes of its shared part, each `ldr r0,[pc,#0]; b at; .word the state`, its state table's
+ * words aimed at them; back where the shared part goes (the caller writes it), NULL where they do not fit (xv_fail) */
+static uint8_t *stubs_put(const XVirusFamily *f, uint32_t at, uint32_t shared, uint32_t room) {
+	const uint32_t size = shared + XN_HIDE_STUB * (uint32_t)f->nstates;
+	if (at & 3u || size > room) { xv_fail("no room in its home for its states' stubs"); return NULL; }
+	uint8_t *p = xv_put(at, size, true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
+	if (!p || !st) return NULL;
 	for (int i = 0; i < f->nstates; ++i) {
-		const uint32_t off = XN_HIDE_SHARED + XN_HIDE_STUB * (uint32_t)i;
+		const uint32_t off = shared + XN_HIDE_STUB * (uint32_t)i;
 		const int32_t back = -(int32_t)(off + 2u + 4u);   /* (the b at off + 2 back to the shared part, pc 4 past it) */
 		put16(p + off, 0x4800);                           /* ldr r0,[pc,#0]: the word past the b */
 		put16(p + off + 2, (uint16_t)(0xE000u | ((uint32_t)back >> 1 & 0x7FFu)));
 		put32(p + off + 4, xv_move_ref(f->states[i]));
 		put32(st + 4 * i, (at + off) | 1u);
 	}
+	return p;
+}
+
+static bool hide_set(const XNavi *n, uint32_t at, uint32_t room) {
+	static const uint16_t shared[7] = { 0xB501, 0x4903, 0x46FE, 0x4708, 0xBC03, 0x468E, 0x4700 };   /* (its ldr's word at +16) */
+	uint8_t *p = stubs_put(&n->code, at, XN_HIDE_SHARED, room);
+	if (!p) return false;
+	for (int i = 0; i < 7; ++i) put16(p + 2 * i, shared[i]);
+	put16(p + 14, 0x46C0);   /* (nop: its word aligned) */
+	put32(p + 16, xv_move_ref(n->hide_step));
 	return true;
 }
 
@@ -221,19 +229,9 @@ static uint32_t pre_set(const XNavi *n, uint32_t at, uint32_t room, uint32_t *si
 #define XN_R4_BN6_BITS (BN6_OBJ_RESERVED | 0x04u)
 #define XN_R4_SIZE(f) (XN_R4_SHARED + XN_HIDE_STUB * (uint32_t)(f)->nstates)
 static bool r4_set(const XNavi *n, uint32_t at, uint32_t room) {
-	const XVirusFamily *f = &n->code;
-	if (at & 3u || XN_R4_SIZE(f) > room) { xv_fail("no room in its home for its states' stubs"); return false; }
-	uint8_t *p = xv_put(at, XN_R4_SIZE(f), true), *st = xv_put(f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates, false);
-	if (!p || !st) return false;
+	uint8_t *p = stubs_put(&n->code, at, XN_R4_SHARED, room);
+	if (!p) return false;
 	put16(p, 0x782C), put16(p + 2, (uint16_t)(0x2100u | XN_R4_BN6_BITS)), put16(p + 4, 0x438C), put16(p + 6, 0x4700);
-	for (int i = 0; i < f->nstates; ++i) {
-		const uint32_t off = XN_R4_SHARED + XN_HIDE_STUB * (uint32_t)i;
-		const int32_t back = -(int32_t)(off + 2u + 4u);
-		put16(p + off, 0x4800);
-		put16(p + off + 2, (uint16_t)(0xE000u | ((uint32_t)back >> 1 & 0x7FFu)));
-		put32(p + off + 4, xv_move_ref(f->states[i]));
-		put32(st + 4 * i, (at + off) | 1u);
-	}
 	return true;
 }
 
