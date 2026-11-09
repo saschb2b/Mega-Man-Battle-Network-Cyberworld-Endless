@@ -38,7 +38,7 @@ void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]) {
 uint32_t pack_entry(int id) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (id < 0 || id >= PACK_CHIPS || pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * BN6_PACK_IDS > BN6_EWRAM_END) return 0;
-	return id < BN6_PACK_IDS ? pack + CHIP_PACK_ENTRY * (uint32_t)id : BN6_PACK_EXT + CHIP_PACK_ENTRY * (uint32_t)(id - BN6_PACK_IDS);
+	return bn6_pack_entry(pack, (unsigned)id);
 }
 
 bool pack_listed(int id) { return (id > 0 && id <= 314) || chips_bn5(id); }
@@ -137,7 +137,7 @@ static void dev_pack(void) {
 	uint32_t marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	for (int id = 1; id <= dev.pack && id < PACK_CHIPS; ++id) {
 		uint32_t at = pack_entry(id);
-		if (!at) return;
+		if (!at) continue;
 		int c = emu_read8(at);
 		if (c < 99) emu_write8(at, (uint8_t)(c + 1));
 		if (marks >= BN6_EWRAM && marks < BN6_EWRAM_END) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
@@ -151,13 +151,15 @@ static void dev_pack(void) {
  * first hand all of it; folder=ID/N its first N entries; pack=N, dev_pack) */
 void dev_folder(void) {
 	dev_pack();
+	enemy_drops_all(dev.reward);   /* (reward=ID: every battle's reward that chip) */
 	if (dev.zenny > 0) game_call(BN6_GIVE_ZENNY, (uint32_t)dev.zenny, 0);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	if (dev.folder <= 0 || dev.folder >= 0x200 || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
+	if (dev.folder <= 0 || dev.folder >= CHIPS_IDS || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	ChipInfo ci;
 	chip_info(dev.folder, &ci);
 	int code = !ci.ncodes || strchr(ci.codes, '*') || ci.codes[0] < 'A' || ci.codes[0] > 'Z' ? CHIP_CODE_STAR : ci.codes[0] - 'A';
-	uint8_t e[2] = { (uint8_t)dev.folder, (uint8_t)(dev.folder >> 8 | code << 1) };
+	uint16_t entry = chip_entry((unsigned)dev.folder, (unsigned)code);
+	uint8_t e[2] = { (uint8_t)entry, (uint8_t)(entry >> 8) };
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && (int)i < dev.folder_n; ++i) emu_write(data + 2 * i, e, sizeof e);
 	own_folder_chips();
 }
@@ -196,7 +198,9 @@ void set_start_folder(void) {
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint8_t b[2] = { (uint8_t)chips[i], (uint8_t)(chips[i] >> 8) };
 		emu_write(data + 2u * (uint32_t)i, b, 2);
-		flag_set(BN6_FLAG_LIBRARY + chip_entry_id(chips[i]));   /* (in the Library, as GiveFolder puts them) */
+		/* (in the Library, as GiveFolder puts them) */
+		if (chip_entry_id(chips[i]) < BN6_FLAG_LIBRARY_IDS) flag_set(BN6_FLAG_LIBRARY + (int)chip_entry_id(chips[i]));
+		else library_chip_given((int)chip_entry_id(chips[i]));
 	}
 	own_folder_chips();
 }
@@ -242,7 +246,7 @@ void star_folder_pack(void) {
 	}
 	for (int id = 1; id < PACK_CHIPS; ++id) {
 		uint32_t at = pack_entry(id);
-		if (!at) return;
+		if (!at) continue;
 		uint8_t e[CHIP_PACK_ENTRY], was[CHIP_PACK_ENTRY];
 		for (uint32_t k = 0; k < CHIP_PACK_ENTRY; ++k) e[k] = was[k] = emu_read8(at + k);
 		chip_pack_star(e);
@@ -287,6 +291,12 @@ void library_from_game(void) {
 	for (int id = 1; id < BN6_FLAG_LIBRARY_IDS; ++id)
 		if ((chip_pool_class(id) >= 0 || chip_pool_older(id)) && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
 	if (added) profile_save();
+}
+
+/* A chip past 511 as BN6 gives it (EV_CHIP_GIVEN_WIDE): into the Library
+ * at once, as no flag of BN6's holds it for library_from_game. */
+void library_chip_given(int id) {
+	if ((chip_pool_class(id) >= 0 || chip_pool_older(id)) && meta_library_add(id)) profile_save();
 }
 
 /* ... and the programs MegaMan has, into the programs found, which later

@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "job_words.h"
 #include "layer_objs.h"
+#include "xchips_wide.h"
 
 /* SetEventFlag runs for every flag the game sets, many a frame: an event
  * only for a layer's choice, which a Yes in its chat sets (the chat's
@@ -31,4 +32,5 @@ void events_install(void) {
 	emu_hook_event(BN6_ENTER_MAP, EV_MAP_ENTER);
 	emu_hook(BN6_SET_EVENT_FLAG, flag_set, NULL);
 	emu_hook_event(BN6_GIVE_ITEM, EV_ITEM_GIVEN);
+	xchips_wide_given(EV_CHIP_GIVEN_WIDE);
 }

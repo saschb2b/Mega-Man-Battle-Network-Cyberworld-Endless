@@ -206,9 +206,17 @@ bool enemy_moved_set(int id, const EnemyMoved *e) {
 	return true;
 }
 
+static int drops_all;   /* (enemy_drops_all) */
+
+void enemy_drops_all(int chip) { drops_all = chip > 0 && chip < CHIPS_IDS ? chip : 0; }
+
 uint16_t enemy_drop(int id, int k) {
 	const EnemyMoved *m = moved_of(id);
 	if (k < 0 || k >= ENEMY_DROPS) return 0xFFFF;
+	if (drops_all) {
+		const uint8_t *rec = chips_record(drops_all);
+		return reward_chip((unsigned)drops_all, rec && rec[BN6_CHIP_CODES] <= CHIP_CODE_STAR ? rec[BN6_CHIP_CODES] : CHIP_CODE_STAR);
+	}
 	if (m && m->drops_own) return m->drops[k];
 	return R.data && id > 0 && id < BN6_DROP_ROW_COUNT ? rom_u16(rom_off(BN6_DROP_ROWS) + (uint32_t)id * 2u * ENEMY_DROPS + 2u * (uint32_t)k) : 0xFFFF;
 }

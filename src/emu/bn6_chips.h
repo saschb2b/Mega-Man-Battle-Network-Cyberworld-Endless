@@ -121,14 +121,50 @@
 #define BN6_CHIP_DESC_OF      0x08027D34u /* ... its description (0x08027D50, its literal at +0x18) */
 #define BN6_PACK_MARK_STORE   0x08006E80u /* encryption_applyPack's strb r1,[r7,r0]: a chip's mark written, by id */
 #define BN6_PACK_MARK_TEST    0x08006E96u /* encryption_testPack's cmp r1,r2: its key against its mark, equal where owned */
+/* Ids past 511 where BN6's code takes a name or a description of two archives, marks a chip for the Library or splits a
+ * reward (docs/rom/chips-code.md, The pack past 511) */
+#define BN6_CHIP_NAMES_REF_RESULTS 0x0802C7C0u /* a literal naming the names' two archives' words, which its reader indexes by the id's high
+                                             byte: the battle results' (0x0802C76C), */
+#define BN6_CHIP_NAMES_REF_LINE 0x080476B0u /* ... a chip's name drawn as a line of tiles (0x0804763E), */
+#define BN6_CHIP_NAMES_REF_LIST 0x08121F50u /* ... the folder editor's lists' (0x08121EEE), */
+#define BN6_CHIP_NAMES_REF_PACK 0x08121FF0u /* ... its two more (0x08121FC0 and BN6_CHIP_NAMES_REF_PACK2's 0x08122028), whose third word is */
+#define BN6_CHIP_NAMES_REF_PACK2 0x08122048u /* ... the archive of an empty entry's text, a RAM address (0x0201BA20), */
+#define BN6_CHIP_NAMES_NONE   0x08121FBAu /* ... which each loads by ldr r0,[r0,#8] (0x6880), here and */
+#define BN6_CHIP_NAMES_NONE2  0x08122022u /* ... here */
+#define BN6_CHIP_NAMES_REF_LIBRARY 0x08128190u /* ... and the PET's Library's (0x0812807A, 0x08128134) */
+#define BN6_CHIP_DESC_READ    0x0811A88Cu /* a description's archive picked of two by id > 255, five instructions (ldr; ldrh r1,[r5,#0xe]; cmp
+                                             r1,#0xff; bgt; ldr), its first archive's literal at +0x130: a chip's card in the PET, */
+#define BN6_CHIP_DESC_READ2   0x0811B280u /* ... and a second (its literal at +0x13C) */
+#define BN6_CHAT_NAME_ARCHIVE 0x08041FEAu /* the chat box's buffer command taking its archive, ldr r0,[r0,r2]: r2 four times the command's kind
+                                             (its +3's low four bits) plus the value's bits 8-11, into the table at 0x08042034, whose 1 and 2
+                                             are the chip names' archives; r4 the command */
+#define BN6_CHAT_CHIP_NAME    1           /* ... the kind that prints a chip's name */
+#define BN6_GIVE_CHIPS_LIBRARY 0x08021B08u /* GiveChips' bl SetEventFlag, r0 BN6_FLAG_LIBRARY + the chip, */
+#define BN6_GIVE_FOLDER_LIBRARY 0x08021B44u /* ... and bn6f sub_8021B2A's (a folder's chips given) */
+#define BN6_REWARD_SPLIT_HP   0x0802C56Cu /* BN6_REWARD_SPLIT past a chip's and zenny's cases: cmp r1,#2, r0 the reward, r1 its kind (2 or 3); it
+                                             returns by mov pc,lr with r0 the kind, r1 the id or amount, r2 a chip's code, nothing pushed */
 #define BN6_FOLDERS           3           /* Folder1, Folder2 and the ExtraFolder at eToolkit +0x48, BN6_FOLDER_ENTRIES each, 0x3C apart */
 #define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
 
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
-#define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/engine/emulation/) */
-#define BN6_PACK_EXT_IDS      512         /* ... the ids it holds end there */
+#define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, 192 entries of 12 bytes to 0x020115E0: EWRAM BN6 leaves alone (docs/engine/emulation/) */
+#define BN6_PACK_EXT_IDS      512         /* ... as if ids BN6_PACK_IDS on followed, to here: the marks' and their keys' ids end here too */
+#define BN6_PACK_EXT_FIRST    411         /* ... the first id a pack holds there: 320-410 are Program Advances and BN6's pseudo-chips, which no
+                                             pack counts, their entries the wide ids' */
+#define BN6_PACK_WIDE_FIRST   512         /* the ids past nine bits a pack counts: these, in the entries of ids BN6_PACK_IDS on, */
+#define BN6_PACK_WIDE_END     (BN6_PACK_WIDE_FIRST + BN6_PACK_EXT_FIRST - BN6_PACK_IDS) /* ... to here, 603 (docs/rom/chips-code.md, The
+                                             pack past 511); an id past them has no entry: counted 0, a chip given lost */
+
+/* Chip `id`'s entry of the pack at `pack` (eToolkit +0x4C's address), 0 where it has none: as the engine's routine at
+ * CHIPS_CODE answers BN6's own (xchips_install.c) */
+static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
+	if (id < BN6_PACK_IDS) return pack + BN6_PACK_ENTRY * id;
+	if (id >= BN6_PACK_EXT_FIRST && id < BN6_PACK_EXT_IDS) return BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
+	if (id >= BN6_PACK_WIDE_FIRST && id < BN6_PACK_WIDE_END) return BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_WIDE_FIRST);
+	return 0;
+}
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */

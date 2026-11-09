@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 263 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
 ---
 
 # The chip registry
@@ -24,7 +24,7 @@ chip step gives any one ([Dev tools](../devtools/overview.md)).
   chip before them by their ids; PitHoky, BN6's PitHocky). The other 144
   take ids of their own: BN6's records no chip uses (203-220, 291-300,
   314 and 350-367: blank-named, named by none of its tables, docs/
-  [The chip registry and BN5's chips' code](../rom/chips-code.md), The chip registry) and 411-510, past its 411 records (511 held for the wide rewards, `XREG_WIDE_REWARD`: [BN4's chips in a run](bn4-chips.md), Past 511).
+  [The chip registry and BN5's chips' code](../rom/chips-code.md), The chip registry) and 411-510, past its 411 records (511 held, no chip's, `XREG_HELD`: the id whose Library flag a chip past 511 sets in BN6's block of them; [BN4's chips in a run](bn4-chips.md), Past 511).
   203-207 and 211-213 are the eight BN6's code already plays under other
   names (AirHoc over AirHocky's family; WideSht1-3 over WideSht's;
   Spreader over Spreadr1's; Geddon1-3 over Geddon's, which cracks, breaks
@@ -150,10 +150,20 @@ chips to 1023 (protocol v16), and BN6's code patched (`src/emu/xchips_wide.c`):
 ten bits are live. The image holds 1024 records and four archives of
 names and of descriptions (`CHIPS_TABLES` their words), ids 512-1023
 free for the registry, blank records until a row takes one (`--dev
-alias=ID` makes one a copy of Cannon, the proof of an id past 511). Not
-yet past 511: the pack (its extension ends at 511), the Library's flags
-(`0x1E20` + id ends at 511), the other name readers, the folder editor's
-items, the wide rewards.
+alias=ID` makes one a copy of Cannon, the proof of an id past 511). An
+id from 512 is whole since ([The chip registry and BN5's chips'
+code](../rom/chips-code.md), The pack past 511): the pack counts ids
+512-602 in the extension's entries of ids 320-410, which no pack ever
+counted (Program Advances and BN6's pseudo-chips; `bn6_pack_entry`), the
+folder editor's items hold ten bits (id << 6 | code), every reader of a
+name or a description takes one of the four archives, a chip given goes
+into the profile's Library without a flag of BN6's (`EV_CHIP_GIVEN_WIDE`),
+and a reward names it in a wide form BN6's split is hooked to read
+(`reward_chip`, `chip_entry.h`). Open: the ids from 603 have no pack
+entry until more RAM is found (91 serve BN5's remaining chips and BN4's
+first units; a Program Advance needs none), and a NetBattle's loadout
+carries the pack to 511 (`ONLINE_PACK_IDS`, with BN4's chips' online
+rule).
 
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood

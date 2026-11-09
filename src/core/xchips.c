@@ -154,7 +154,7 @@ static uint16_t reward_as(int id, uint16_t v) {
 	if (!id || chips_sits_out(id)) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);
 	uint8_t codes[4];
 	codes_of(id, codes);
-	return chip9_entry((unsigned)id, (unsigned)xchips_code(codes, (int)(chip9_code(v) & 0x1F)));
+	return reward_chip((unsigned)id, (unsigned)xchips_code(codes, (int)(chip9_code(v) & 0x1F)));
 }
 
 uint16_t xchips_reward_bn6(uint16_t v) {

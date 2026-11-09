@@ -20,8 +20,8 @@
  * 291-294 the Megas, 295-300 the first chips to be moved (Guard1-3,
  * CrakOut, DublCrak, TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364
  * the Program Advances beside BN6's, 411 on the rest, the Navi chips last
- * (ShadeMan's and BlizzardMan's at 505-510; 511 held for the wide
- * rewards, 365-367 spare).
+ * (ShadeMan's and BlizzardMan's at 505-510; 511 held, XREG_HELD,
+ * 365-367 spare).
  * Generated once from both ROMs, paired by their names (the ROMs are told
  * by their SHA-1s, so the pairs hold for every player's); xreg_check
  * holds its rules in the unit tests, which have no ROM to read names in. */
@@ -335,7 +335,7 @@ const XChipReg *xreg_named(int bn6) {
 bool xreg_free_id(int id) {
 	/* (BN6's blank records: docs/rom/chips-code.md, The chip registry; 365-367
 	 * too, the end of 350-368, whose 368 is BN6's pseudo-chips' bound) */
-	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS && id != XREG_WIDE_REWARD);
+	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS && id != XREG_HELD);
 }
 
 static int bad(int i, char *why, size_t len, const char *what) {

@@ -24,36 +24,48 @@
 /* The engine's own Thumb routines, at CHIPS_CODE (numbers: written for
  * this, assembled with devkitARM's as for the ARM7TDMI; docs/engine/emulation/):
  * +0x00 getOffsetToQuantityOfChipCode's tail (r2 the chip, r3 its code's
- * place: the count's address in BN6's pack below 320, in its extension
- * from 320, as if those ids followed on; pop {r4,r7,pc}); +0x16
- * GetTotalChipCount's (r0 the chip: its four counts summed; pop {r7,pc});
- * +0x38 the pack totals' count (r2, r3: r1 the count; mov pc,lr); +0x50
+ * place: the count's address; pop {r4,r7,pc}); +0x0A GetTotalChipCount's
+ * (r0 the chip: its four counts summed; pop {r7,pc}); +0x1E the pack
+ * totals' count (r2, r3: r1 the count, r0 kept; back by pop {pc}); +0x2C
  * the pack's clear (BN6's ZeroFillByWord on the pack, then on the
- * extension's 0x900 bytes; pop {pc}); +0x62 the pseudo-chips' test (r2 the
+ * extension's 0x900 bytes; pop {pc}); +0x3E the pseudo-chips' test (r2 the
  * chip: r1 1 for 0x170-0x19A, BN6's own pseudo-chips, else 0; mov pc,lr);
- * from +0x70 their literals: 320, the extension less 320 x 12, the
- * extension, 0x900, ZeroFillByWord (0x080008E1), 0x170. As they read:
- *   00 mov r7,r10; ldr r7,[r7,#0x4C]; ldr r1,=320; cmp r2,r1; blt 0c; ldr r7,=ext-320*12
- *   0c movs r1,#12; muls r1,r2; adds r7,r7,r1; adds r0,r7,r3; pop {r4,r7,pc}
- *   16 mov r7,r10; ldr r7,[r7,#0x4C]; ldr r1,=320; cmp r0,r1; blt 22; ldr r7,=ext-320*12
- *   22 movs r1,#12; muls r1,r0; adds r7,r7,r1; ldrb r0,[r7]; ldrb r1,[r7,#1]; adds r0,r0,r1;
- *      ldrb r1,[r7,#2]; adds r0,r0,r1; ldrb r1,[r7,#3]; adds r0,r0,r1; pop {r7,pc}
- *   38 mov r7,r10; ldr r7,[r7,#0x4C]; ldr r1,=320; cmp r2,r1; blt 44; ldr r7,=ext-320*12
- *   44 movs r1,#12; muls r1,r2; adds r7,r7,r1; adds r1,r7,r3; ldrb r1,[r1]; mov pc,lr
- *   50 bl 5e; ldr r0,=ext; ldr r1,=0x900; bl 5e; pop {pc}
- *   5e ldr r3,=ZeroFillByWord; bx r3
- *   62 movs r1,#0; ldr r3,=0x170; subs r3,r2,r3; cmp r3,#0x2B; bcs 6e; movs r1,#1
- *   6e mov pc,lr */
-static const uint8_t code[136] = {
-	0x57, 0x46, 0xff, 0x6c, 0x1a, 0x49, 0x8a, 0x42, 0x00, 0xdb, 0x1a, 0x4f, 0x0c, 0x21, 0x51, 0x43, 0x7f, 0x18, 0xf8, 0x18, 0x90, 0xbd,
-	0x57, 0x46, 0xff, 0x6c, 0x15, 0x49, 0x88, 0x42, 0x00, 0xdb, 0x14, 0x4f, 0x0c, 0x21, 0x41, 0x43, 0x7f, 0x18, 0x38, 0x78, 0x79, 0x78,
-	0x40, 0x18, 0xb9, 0x78, 0x40, 0x18, 0xf9, 0x78, 0x40, 0x18, 0x80, 0xbd, 0x57, 0x46, 0xff, 0x6c, 0x0c, 0x49, 0x8a, 0x42, 0x00, 0xdb,
-	0x0c, 0x4f, 0x0c, 0x21, 0x51, 0x43, 0x7f, 0x18, 0xf9, 0x18, 0x09, 0x78, 0xf7, 0x46, 0x00, 0xf0, 0x05, 0xf8, 0x08, 0x48, 0x09, 0x49,
-	0x00, 0xf0, 0x01, 0xf8, 0x00, 0xbd, 0x08, 0x4b, 0x18, 0x47, 0x00, 0x21, 0x07, 0x4b, 0xd3, 0x1a, 0x2b, 0x2b, 0x00, 0xd2, 0x01, 0x21,
-	0xf7, 0x46, 0x40, 0x01, 0x00, 0x00, 0xe0, 0xfd, 0x00, 0x02, 0xe0, 0x0c, 0x01, 0x02, 0x00, 0x09, 0x00, 0x00, 0xe1, 0x08, 0x00, 0x08,
-	0x70, 0x01, 0x00, 0x00,
+ * +0x4C a chip's pack entry (r0 the chip: its 12 bytes' address, r1 and r7
+ * its own; bn6_pack_entry: BN6's pack below 320, the extension as if 320 on
+ * followed from 411, the ids from 512 in the entries of 320 on, and for any
+ * other the 12 zero bytes at +0x7C, in the ROM, where a write is lost);
+ * from +0x88 their literals (code_pool, written from bn6_chips.h's numbers).
+ * As they read:
+ *   00 movs r0,r2; bl 4c; adds r0,r0,r3; pop {r4,r7,pc}
+ *   0a bl 4c; ldrb r1,[r0]; ldrb r7,[r0,#1]; adds r1,r1,r7; ldrb r7,[r0,#2]; adds r1,r1,r7;
+ *      ldrb r7,[r0,#3]; adds r0,r1,r7; pop {r7,pc}
+ *   1e push {r0,lr}; movs r0,r2; bl 4c; ldrb r1,[r0,r3]; pop {r0,pc}; nop
+ *   2c bl 3a; ldr r0,=ext; ldr r1,=0x900; bl 3a; pop {pc}
+ *   3a ldr r3,=ZeroFillByWord; bx r3
+ *   3e movs r1,#0; ldr r3,=0x170; subs r3,r2,r3; cmp r3,#0x2B; bcs 4a; movs r1,#1
+ *   4a mov pc,lr
+ *   4c ldr r1,=320; cmp r0,r1; bge 58; mov r7,r10; ldr r7,[r7,#0x4C]; b 74
+ *   58 ldr r7,=ext-320*12; ldr r1,=411; cmp r0,r1; blt 70; ldr r1,=512; cmp r0,r1; blt 74;
+ *      ldr r1,=603; cmp r0,r1; bge 70; subs r0,#192; b 74
+ *   70 adr r7,7c; movs r0,#0
+ *   74 movs r1,#12; muls r0,r1; adds r0,r7,r0; bx lr
+ *   7c .word 0, 0, 0 */
+static const uint8_t code[0x88] = {
+	0x10, 0x00, 0x00, 0xf0, 0x23, 0xf8, 0xc0, 0x18, 0x90, 0xbd, 0x00, 0xf0, 0x1f, 0xf8, 0x01, 0x78, 0x47, 0x78, 0xc9, 0x19, 0x87, 0x78,
+	0xc9, 0x19, 0xc7, 0x78, 0xc8, 0x19, 0x80, 0xbd, 0x01, 0xb5, 0x10, 0x00, 0x00, 0xf0, 0x13, 0xf8, 0xc1, 0x5c, 0x01, 0xbd, 0xc0, 0x46,
+	0x00, 0xf0, 0x05, 0xf8, 0x15, 0x48, 0x16, 0x49, 0x00, 0xf0, 0x01, 0xf8, 0x00, 0xbd, 0x15, 0x4b, 0x18, 0x47, 0x00, 0x21, 0x14, 0x4b,
+	0xd3, 0x1a, 0x2b, 0x2b, 0x00, 0xd2, 0x01, 0x21, 0xf7, 0x46, 0x12, 0x49, 0x88, 0x42, 0x02, 0xda, 0x57, 0x46, 0xff, 0x6c, 0x0d, 0xe0,
+	0x10, 0x4f, 0x11, 0x49, 0x88, 0x42, 0x07, 0xdb, 0x10, 0x49, 0x88, 0x42, 0x06, 0xdb, 0x10, 0x49, 0x88, 0x42, 0x01, 0xda, 0xc0, 0x38,
+	0x01, 0xe0, 0x02, 0xa7, 0x00, 0x20, 0x0c, 0x21, 0x48, 0x43, 0x38, 0x18, 0x70, 0x47, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
 };
-enum { CODE_OFFSET = 0x00, CODE_TOTAL = 0x16, CODE_COUNT = 0x38, CODE_CLEAR = 0x50, CODE_PSEUDO = 0x62 };
+/* ... their literals, after them */
+static const uint32_t code_pool[] = {
+	BN6_PACK_EXT, (BN6_PACK_EXT_IDS - BN6_PACK_IDS) * BN6_PACK_ENTRY, 0x080008E1u, 0x170,
+	BN6_PACK_IDS, BN6_PACK_EXT - BN6_PACK_IDS * BN6_PACK_ENTRY, BN6_PACK_EXT_FIRST, BN6_PACK_WIDE_FIRST, BN6_PACK_WIDE_END,
+};
+_Static_assert(BN6_PACK_WIDE_FIRST - BN6_PACK_IDS == 192, "the routine's subs r0,#192 (+0x6C)");
+enum { CODE_OFFSET = 0x00, CODE_TOTAL = 0x0A, CODE_COUNT = 0x1E, CODE_CLEAR = 0x2C, CODE_PSEUDO = 0x3E };
 #define ROUTINE(at) (CHIPS_CODE + (at) + 1u)   /* (Thumb) */
 #define LO(v) (uint16_t)((v) & 0xFFFF)
 #define HI(v) (uint16_t)((v) >> 16)
@@ -73,8 +85,9 @@ static const Change code_changes[] = {
 	/* ldr r7,[pc,#8]; mov lr,pc; bx r7; b past the word; nop; .word */
 	{ BN6_PACK_SUM_COUNT, 7, { 0x4657, 0x6CFF, 0x210C, 0x4351, 0x187F, 0x18F9, 0x7809 },
 		{ 0x4F02, MOV_LR_PC, 0x4738, 0xE002, NOP, LO(ROUTINE(CODE_COUNT)), HI(ROUTINE(CODE_COUNT)) } },
-	{ BN6_PACK_SUM_END, 2, { 0x0140, 0 }, { 0x0200, 0 } },
-	{ BN6_PACK_LIST_END, 2, { 0x013A, 0 }, { 0x01FF, 0 } },
+	/* (every id, to 1023: one a pack counts none of reads 0 through the routines) */
+	{ BN6_PACK_SUM_END, 2, { 0x0140, 0 }, { CHIPS_IDS, 0 } },
+	{ BN6_PACK_LIST_END, 2, { 0x013A, 0 }, { CHIPS_IDS - 1, 0 } },
 	/* ldr r2,[pc,#0]; bx r2; .word, for bl ZeroFillByWord; pop {pc} */
 	{ BN6_PACK_CLEAR_CALL, 4, { 0xF7DE, 0xFE36, 0xBD00, 0x0000 }, { 0x4A00, 0x4710, LO(ROUTINE(CODE_CLEAR)), HI(ROUTINE(CODE_CLEAR)) } },
 	/* (its ldr r3 now loads the routine) mov lr,pc; bx r3; nop for cmp; blt; movs r1,#1 */
@@ -91,14 +104,17 @@ static const Change code_changes[] = {
 /* The words that name the chip records and the names' and descriptions'
  * archives (each found by a scan of Gregar for the word; docs/rom/chips-code.md,
  * The chip registry): which (0 the records, 1-2 the names' archives, 3-4
- * the descriptions'), where */
+ * the descriptions', 5 the descriptions' first where the PET's two readers
+ * of a description load it: the four archives' words, CHIPS_TABLES + 0x10,
+ * which xchips_wide.c's change of each reader indexes by the id's high
+ * byte), where */
 static const struct { uint8_t which; uint32_t at; } refs[] = {
 	{ 0, BN6_CHIP_TABLE_REF },
 	{ 1, 0x08027D2Cu }, { 1, 0x0802C7C4u }, { 1, 0x08042038u }, { 1, 0x08042050u }, { 1, 0x080476B4u }, { 1, 0x08121F54u },
 	{ 1, 0x08121FF4u }, { 1, 0x0812204Cu }, { 1, 0x08128194u },
 	{ 2, 0x08027D30u }, { 2, 0x0802C7C8u }, { 2, 0x0804203Cu }, { 2, 0x080476B8u }, { 2, 0x08121F58u }, { 2, 0x08121FF8u },
 	{ 2, 0x08122050u }, { 2, 0x08128198u },
-	{ 3, 0x08027D50u }, { 3, 0x0811A9BCu }, { 3, 0x0811B3BCu },
+	{ 3, 0x08027D50u }, { 5, BN6_CHIP_DESC_READ + 0x130u }, { 5, BN6_CHIP_DESC_READ2 + 0x13Cu },
 	{ 4, 0x08027D54u }, { 4, 0x0811A9C0u }, { 4, 0x0811B3C0u },
 };
 #define NREFS (int)(sizeof refs / sizeof *refs)
@@ -106,10 +122,11 @@ static const struct { uint8_t which; uint32_t at; } refs[] = {
 /* a word's value in BN6 (`own`) or the install's */
 static uint32_t ref_value(int which, bool own) {
 	if (own) {
-		const uint32_t bn6[5] = { R.layout->chip_data, R.layout->chip_names[0], R.layout->chip_names[1], R.layout->chip_descs[0], R.layout->chip_descs[1] };
+		const uint32_t bn6[6] = { R.layout->chip_data, R.layout->chip_names[0], R.layout->chip_names[1], R.layout->chip_descs[0], R.layout->chip_descs[1],
+			R.layout->chip_descs[0] };
 		return BUS + bn6[which];
 	}
-	static const uint32_t ours[5] = { CHIPS_RECORDS, CHIPS_NAMES0, CHIPS_NAMES1, CHIPS_DESCS0, CHIPS_DESCS1 };
+	static const uint32_t ours[6] = { CHIPS_RECORDS, CHIPS_NAMES0, CHIPS_NAMES1, CHIPS_DESCS0, CHIPS_DESCS1, CHIPS_TABLES + 0x10u };
 	return ours[which];
 }
 
@@ -206,6 +223,10 @@ static uint32_t installed_len;          /* the image's bytes in the core's copy,
 static void write_all(const uint8_t *img, uint32_t len) {
 	emu_write(CHIPS_FREE, img, len);
 	emu_write(CHIPS_CODE, code, sizeof code);
+	for (uint32_t i = 0; i < sizeof code_pool / sizeof *code_pool; ++i) {
+		uint8_t b[4] = { (uint8_t)code_pool[i], (uint8_t)(code_pool[i] >> 8), (uint8_t)(code_pool[i] >> 16), (uint8_t)(code_pool[i] >> 24) };
+		emu_write(CHIPS_CODE + sizeof code + 4u * i, b, sizeof b);
+	}
 	for (int i = 0; i < NCODE; ++i)
 		for (int k = 0; k < code_changes[i].n; ++k) {
 			uint16_t v = code_changes[i].now[k];
