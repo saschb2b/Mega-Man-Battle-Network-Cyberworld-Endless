@@ -91,11 +91,16 @@ The profile's Library holds chip ids to 1023 (`library_w` after the
 rest: a profile saved before reads them 0, and a build before it reads
 a newer profile's `.cwsave` as made by a newer version), for [ten-bit
 chip ids](../multirom/bn4-chips.md). `run.state` holds BN6's RAM and so
-its folders' entries, nine bits to this day; the build that installs ten
-bits bumps `RUN_MAGIC` with it and reads a run saved before through the
-converter (`chip_entries_from9` in `src/core/chip_entry.h`, unit-tested),
-its three folders' entries rewritten once the state is loaded, so no run
-is lost.
+its folders' entries, nine bits to this day. Where `chip_entry.h` says
+ten bits, `RUN_MAGIC` is "CWEC" (`save_format.h`); a run saved before
+("CWEB", or an older format) is read as ever, and its folders go through
+the converter (`chip_entries_from9`, unit-tested) once: `run.folder` as
+it loads, the state's three folders (eToolkit `+0x48`) as soon as the
+state is in (`own_folder_chips`, `director_folder.c`). Tried with a run
+the nine-bit build saved at a guardian's door: the ten-bit build's
+CONTINUE the same picture for picture as the nine-bit build's, and
+without the converter not, from the battle on. A ten-bit run's `.cwsave`
+reads as made by a newer version in a build before it.
 
 ROMs, boot states and any other file are never packed. Controls, keys,
 the touch layout, screen settings, the volumes and the statistics answer

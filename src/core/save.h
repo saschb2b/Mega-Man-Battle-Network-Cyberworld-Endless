@@ -171,6 +171,11 @@ void profile_load(void);
 bool save_exists(void);
 bool save_run(void);
 bool load_run(void);
+/* The run load_run read was saved with nine-bit folders where this build's
+ * are ten (chip_entry.h): its run.folder and its state's folders are
+ * converted once (director_folder.c), and then it is done */
+bool save_state_nine(void);
+void save_state_nine_done(void);
 /* The saved run without loading it (none from before the current save format). */
 bool peek_run(Run *out);
 /* Deletes the run's save and its game state. */

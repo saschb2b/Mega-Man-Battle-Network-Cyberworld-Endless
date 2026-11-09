@@ -48,9 +48,8 @@ picture for picture, every differential spec its nine-bit verdict.
 Before the flip: the engine's tables sized by `CHIPS_IDS` and
 `XREG_IDS` (512: the records, the sit-out bits, the chip pool, the
 folder's copies) grown, an entry's id of 1023 being 0xFFFF's;
-`RUN_MAGIC` bumped with the converter wired after a state loads (the
-three folders at eToolkit `+0x48` and `run.folder`, read in nine bits
-from a run saved before); BN5's chips' and Souls' moved code read for
+`RUN_MAGIC`'s "CWEC" and the converter after a state loads (wired, inert
+at nine bits; [Portable saves](../engine/saves.md)); BN5's chips' and Souls' moved code read for
 entries it splits itself (the differential passes, but no spec holds a
 code past A in every moved unit). Then ids from 512: the folder
 editor's items as id << 6 | code (about 30 shifts by 7 and 0x7F masks),

@@ -152,10 +152,19 @@ static void load_battle(void) {
 	loot_memory_set(&m);
 }
 
+/* (a run an older format holds: its state's folders nine-bit, every build's
+ * before ten-bit chip ids; converted once its state is loaded) */
+static bool state_nine;
+
+bool save_state_nine(void) { return state_nine; }
+void save_state_nine_done(void) { state_nine = false; }
+
 bool load_run(void) {
 	Run tmp;
+	state_nine = false;
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); return true; }
 	if (!legacy_load_run()) return false;
+	state_nine = CHIP_ID_BITS != 9;
 	upgrade_run();
 	load_battle();
 	return true;

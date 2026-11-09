@@ -64,6 +64,7 @@ void folder_made_save(void) { save_write_blob("run.folder", FOLDER_MADE_MAGIC, f
 
 void folder_made_load(void) {
 	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
+	else if (save_state_nine()) chip_entries_from9(folder_made, BN6_FOLDER_ENTRIES);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
@@ -104,9 +105,23 @@ void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
  * where the Standard folder's chips, given at NEW GAME, played (session
  * 30). Every fresh layer and CONTINUE mark the folder's chips again, so a
  * run saved before this is mended. */
+/* A run saved with nine-bit folders, its state just loaded where this
+ * build's are ten (save_state_nine): Folder1, Folder2 and the ExtraFolder
+ * (eToolkit +0x48, 30 entries each) in this build's form, once */
+static void folders_from9(uint32_t data) {
+	if (!save_state_nine()) return;
+	save_state_nine_done();
+	for (uint32_t i = 0; i < BN6_FOLDERS * BN6_FOLDER_ENTRIES; ++i) {
+		uint16_t e = chip_entry_from9(emu_read16(data + 2 * i));
+		const uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
+		emu_write(data + 2 * i, b, 2);
+	}
+}
+
 void own_folder_chips(void) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
+	folders_from9(data);
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		int id = (int)chip_entry_id(emu_read16(data + 2u * (uint32_t)i));
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
