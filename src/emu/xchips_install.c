@@ -13,6 +13,7 @@
 #include "rom.h"
 #include "xchips_code.h"
 #include "xchips_registry.h"
+#include "xchips_wide.h"
 #include "xinstall_log.h"
 #include "xchips_record.h"
 #include "xvirus_tx.h"
@@ -243,6 +244,7 @@ static bool install(void) {
 	sits_shelved();
 	if (!installed_len && !emu_hook(BN6_DECK_DEALT, deal, NULL)) fprintf(stderr, "chips: no hook on the deck's deal: BN5's chips play where they sit out\n");
 	claims_end();
+	xchips_wide_install();
 	installed_len = len;
 	installed_rom5 = rom5;
 	chips_installed(true);

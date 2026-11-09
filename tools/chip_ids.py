@@ -37,8 +37,9 @@ CODE_END = 0x08150000
 # The verdicts, by the shape's address: (verdict, what it is). Patched: 'entry' (a folder entry's id or code, taken in
 # ten bits), 'id' (an id's mask, ten bits), 'none' (0x1FF as no chip: 0x3FF); 'make' (a code put into an entry at bit
 # 10); kept: 'reward' (a reward entry, nine bits), 'link' (the link battle's, which no run reaches); 'other' (no chip);
-# 'open' (a chip's, not read yet); 'keys' (the folder editor's items, id << 7 | code in a halfword: ten bits make them
-# id << 6 | code, with the editor's shifts by 7 and 0x7F masks, not read yet).
+# 'open' (a chip's, not read yet); 'keys' (the folder editor's items, id << 7 | code in a halfword, which hold ids to
+# 511 whatever an entry's form: an id past 511 makes them id << 6 | code, with the editor's shifts by 7 and 0x7F masks,
+# not read yet; the entries made from them are 'make').
 SITES = {
     # the battle's deck: the folder shuffled into it, the marks, the Mega and Giga counts, the cheat test
     0x0800A584: ('entry', 'the deck shuffled from the folder: an entry\'s id, its record\'s library type'),
@@ -118,9 +119,9 @@ SITES = {
     # the folder editor: its list's items are id << 7 | code (a halfword), an entry made from one with bit 15 set
     0x081224C2: ('keys', 'the folder editor\'s list: an item\'s code (bits 0-6 of id << 7 | code)'),
     0x081224F4: ('keys', 'the same, the list into the folder'),
-    0x08122502: ('keys', 'the same: the entry made, code << 9 | id'),
+    0x08122502: ('make', 'the folder editor\'s list into the folder: the entry made, code << 9 | id (the item\'s code from its low 7 bits)'),
     0x081225B8: ('keys', 'the same, the second form: an item\'s code'),
-    0x081225C0: ('keys', 'the same: the entry made'),
+    0x081225C0: ('make', 'the same, the second form: the entry made'),
     0x0812EA88: ('entry', 'the folder editor\'s chip shown: an entry\'s id'),
     0x0812EAB2: ('entry', 'the same, the other side'),
     0x0812EB8E: ('entry', 'the folder editor: a chip moved, an entry\'s id'),
@@ -129,7 +130,7 @@ SITES = {
     0x0812EBAC: ('entry', 'the same: its code'),
     0x0812F3B4: ('entry', 'the folder editor: an entry\'s id'),
     0x0812F3BA: ('entry', 'the same: its code, bits 9-14'),
-    0x0812F64C: ('keys', 'the folder editor: an entry made from an item (id << 7 | code), code << 9, bit 15 set'),
+    0x0812F64C: ('make', 'the folder editor: an entry made from an item (id << 7 | code), code << 9, bit 15 its mark'),
     # no chip
     0x08001468: ('other', 'a coordinate wrapped to 9 bits'),
     0x0801C0F6: ('other', 'an object\'s screen x (OAM, 9 bits)'),

@@ -115,6 +115,8 @@
 #define BN6_LINK_CHIP_BOUND   0x0802E1B4u /* the link battle's real-time chip (battle flag 0x40): an id past 0x139 read as 0 */
 #define BN6_EDITOR_LIST_OUT   0x081224A0u /* the folder editor's list given back (GiveChips): its items id << 7 | code (a halfword) */
 #define BN6_EDITOR_LIST_IN    0x081224D4u /* ... the list into the folder (eToolkit +0x48): an entry made of each item, code << 9 | id */
+#define BN6_PRESET_FOLDERS    0x080213ACu /* the preset folders GiveFolder copies, 0x3C bytes each: two here, */
+#define BN6_PRESET_FOLDERS2   0x0802158Cu /* ... and four here (docs/rom/chips.md, Chip folders) */
 #define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
 
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
