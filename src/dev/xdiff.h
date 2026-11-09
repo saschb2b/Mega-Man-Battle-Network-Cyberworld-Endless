@@ -34,7 +34,8 @@
  *                      Unison's 0236); flags6= BN6's
  *   folder5=342C,...   each game's first folder (hex chip | code << 9, the
  *   folder6=3401       list repeated to 30), each chip owned, no Regular
- *                      chip or TagChips
+ *                      chip or TagChips; a BN6 chip past nine bits hex
+ *                      chip:code (258:12, chip 600 in S), as in deck6=
  *   buster=A:S:C       MegaMan's Attack, Speed and Charge in both (levels
  *                      less one, 0-4)
  *   safe=1             MegaMan kept from harm: his collision data's
