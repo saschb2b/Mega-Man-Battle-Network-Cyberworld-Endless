@@ -39,6 +39,7 @@ typedef struct {
 	/* inside how many rings of walls each wall cell lies, odd on floor */
 	uint8_t *rings;
 	int rx0, ry0, rw, rh;
+	void *held;            /* a view made in place: what it moved aside (area_src_raise_in) */
 } AreaSrc;
 
 #define HEIGHT_UNEVEN 255
@@ -66,6 +67,20 @@ bool area_src_mirror(const AreaSrc *a, AreaSrc *m);
  * height z lies where ground floor would: a view of that level. False,
  * and `r` empty, where the memory for it could not be had. */
 bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
+/* The same two views made in place, for a map learned and let go: `a`'s
+ * own tiles and pixels turned or moved (a raised view keeps the rows it
+ * moves past the map's foot), `m` or `r` a view sharing them, a's own
+ * fields as they were. Until the view's _end turns them back and frees
+ * what the view holds alone, `a` reads as the view does; views ended in
+ * the reverse order of their making, and never area_src_free'd. False,
+ * and the view empty and `a` as it was, where memory could not be had.
+ * The copies (area_src_mirror, area_src_raise) took a whole map's pixels
+ * twice each, and a New 3DS's heap held a map, a raised view and its
+ * mirror at once only just (docs/engine/emulation/3ds-memory.md). */
+bool area_src_mirror_in(AreaSrc *a, AreaSrc *m);
+void area_src_mirror_end(AreaSrc *a, AreaSrc *m);
+bool area_src_raise_in(AreaSrc *a, int z, AreaSrc *r);
+void area_src_raise_end(AreaSrc *a, AreaSrc *r);
 /* Tile maps (tw x th entries of layer 0, then layer 1) drawn with map
  * (group, number)'s tiles and colours as the game shows them, layer 1 in
  * front: ARGB pixels, alpha 0 where empty (free them). The map is BN6's
