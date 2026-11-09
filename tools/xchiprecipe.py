@@ -140,6 +140,10 @@ HELPERS = (
                               "form, through the image object's spawner; one copy, so that BN5's own buster's calls are no unit's"),
     ((0x080D3286,), 'Shake', "the shake's spawner (the third kind's 0x68: SpShake's, and the misc family's ShakPar's), the shake's "
                              "code with it: the dispatch moves a type once, so one copy for both units"),
+    ((0x080C5FCE, 0x080C5FE8), 'Bubbles', "the bubbles' spawner, its two entries (the third kind's 0x0B: SideBub's, and the Navi chip "
+                                          "CloudMan's clouds, its kinds 2-5), the object's code and its kinds' table with it: one copy "
+                                          "for both units (CloudMan's unit copied the block again and Marina's bubbles, the families', "
+                                          "ran the later copy: marina_v1_keys FAILed at t408)"),
     # (the computed powers, POWERS: each a routine BN5's table of computed powers names, 0x0800E728 by the record's power - 1000)
     ((0x0800EA18,), 'PowerCustSwrd', "CustSwrd's power (1045): by the Custom gauge (BN5 0x0801A8D0)"),
     ((0x0800EB06, 0x0800EB0C, 0x0800EB12), 'PowerCusVolt', "CusVolt1-3's powers (1073-1075): by the Custom gauge, from 10, 30, 50"),
@@ -148,6 +152,9 @@ HELPERS = (
                                "table of none (XC_SP_TIMES, WORDS_TO), BN5's power for a save without one; its bit 0x40 test (a "
                                "Liberation Mission's in BN5) BN6's twin 0x0800A8F8, a link battle's, clear in a run's"),
     ((0x0800E9A8,), 'PowerDS', "a Navi chip DS's power (1023-1044): by the side's battle counter 3 (BN5 0x0800931C, BN6 0x0800AB3A)"),
+    ((0x0800E982,), 'PowerDjangoSP', "Django[SP]'s power (1022): by the battle's turn (BattleState +7, BN5 0x08009016, BN6 0x0800A84E), 150 "
+                                     "at the first and 10 more a turn to 250 (its table 0x0801D448, DATA_COPY); 200 in a link battle "
+                                     "(its gate 0x080090E8, BN6's twin 0x0800A8F8)"),
 )
 # BN6's table of computed powers (a chip's power of 1000 and up: the routine by power - 1000, BN6 0x080109A4 with 45 of its
 # own at 0x080109DC) grown to 256 at XC_POWERS: BN5's entry i at BN6's POWER_FIRST + i, its routine one of the helpers'
@@ -189,7 +196,7 @@ UNIT_STUBS = {
                                     "(r2 side, r3 flip, as 0x0800C6CE): BN5's numbers")},
 }
 # The object types a helper moves, for every unit (the units spawn them through the dispatch, the helper's copy run)
-HELPER_TYPES = {(3, 0x68): 'Shake'}
+HELPER_TYPES = {(3, 0x68): 'Shake', (3, 0x0B): 'Bubbles'}
 # Raw data whose extent no walk tells (a table read by a number made elsewhere): its bytes
 # Routines a unit hands a table of routines to, in a register (its number): the table's every entry walked and moved or
 # aimed at its twin, as a jump table's (the family deriver stops a table at its first entry far from it)
@@ -204,8 +211,10 @@ DEAD_CODE = {
 }
 # ROM data a unit's literal names that BN6 keeps none of, copied with the unit (moved as its block's): its bytes
 DATA_COPY = {
-    0x0801D27A: (15 * 0x16, "the Navi chips' SP and DS powers by time and by counter (rows of 11 u16 by the record's power less "
-                            "1001 or 1023: the registry's rows 0-14, ShadeMan's 13 and BlizzardMan's 14 the last), BN5's alone"),
+    0x0801D27A: (22 * 0x16, "the Navi chips' SP and DS powers by time and by counter (rows of 11 u16 by the record's power less "
+                            "1001 or 1023: the registry's rows 0-21, ShadeMan's 13 to GridMan's 18 and Django's 21 the last), "
+                            "BN5's alone"),
+    0x0801D448: (11 * 2, "Django[SP]'s powers by the battle's turn (11 u16, 250 down to 150, read from its end), BN5's alone"),
 }
 # Literal words a unit's code holds that no BN6 run reads (their path a stub makes dead): kept as they are, by the unit
 # CurActions a unit's object writes that index its own states' table, not the engine's (no status states before them): BN5's
@@ -238,6 +247,13 @@ TABLE_SPRITES = {
     0x080CDAB6: (0x080CDA78, 2, 0, 1, 1, None),   # the geyser's (the bombs' 0x5), its one kind: list 3's 2
     0x080D0C6C: (0x080D0C0C, 6, None, 0, 6, 3),   # the misc family's third kind at 0x080D0C30, by kind: list 3's 0x31 each    # the shield's kinds (Guard's, CrsShld's): 10 rows to its code at 0x080CA314
     0x080C4244: (0x080C4214, 2, 0, 1, 1, None),   # NumberMan's object (the first kind's 0x5C, NumbrMan's): its one kind, list 4's 6, its code from 0x080C4216
+}
+# Sprite loads whose list and number come off the stack, set there by immediates before a branch that may replace them
+# (BN5's load site: (the list's offset, the number, the number's immediate's site, why)): the default's number given BN6's
+STACK_LOADS = {
+    0x080DE84A: (8, 0x10, 0x080DE81C, "the Navi chip CosmoMan's thrown object (the third kind's 0xBF): CosmoMan's own sprite, list 2's "
+                                      "0x10, its animation 0xA, unless its gate handed it an obstacle's NameID (+0x60), whose sprite "
+                                      "0x0800D188 answers, each game's own (BN6's twin 0x0800F26C)"),
 }
 # Sprite loads of MegaMan's own sprite, whatever it is (0x0800DA6A's list and number: his body's), each game's own: BN5's
 # load site: why
@@ -337,9 +353,9 @@ XC_AT = FREE_CHIP_CODE + 0x400            # FREE_CHIP_MOVED
 XC_STUBS = XC_AT + 0x800                  # the stubs (STUBS), then
 XC_SP_TIMES = XC_STUBS + 0x30             # ... the SP powers' deletion times, none (WORDS_TO), then
 XC_HELPERS = XC_STUBS + 0x90              # ... the helpers' code (HELPERS), to
-XC_POWERS = XC_AT + 0x1C00                # BN6's computed powers grown (256 words), then
-XC_HOMES = XC_AT + 0x2000                 # a unit's veneers, XC_HOME_SIZE each
-XC_HOME_SIZE, XC_UNITS = 0x400, 64
+XC_POWERS = XC_AT + 0x2000                # BN6's computed powers grown (256 words), then
+XC_HOMES = XC_AT + 0x2400                 # a unit's veneers, XC_HOME_SIZE each
+XC_HOME_SIZE, XC_UNITS = 0x400, 80
 XC_CODE = XC_HOMES + XC_HOME_SIZE * XC_UNITS
 XC_ART = FREE_CHIP_CODE + 0xA0000
 XC_END = FREE_CHIP_CODE + 0x100000
@@ -406,6 +422,11 @@ UNITS = (
     ('support', 0x3B, 'DarkInvs'),
     ('navi', 0x01, 'ShadeMan'),
     ('navi', 0x0E, 'BlizzardMan'),
+    ('navi', 0x12, 'GridMan'),
+    ('navi', 0x0F, 'CloudMan'),
+    ('navi', 0x11, 'LarkMan'),
+    ('navi', 0x13, 'Django'),
+    ('navi', 0x10, 'CosmoMan'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
 # chips' differential's finding where a spec ran it (docs/multirom/chips-code.md: what remains)
@@ -1687,10 +1708,10 @@ def shifted_effects(f):
 # (xnavi_sprite_install), which a unit's install asks for first (its `navis`)
 NAVI_SIX = range(7, 13)
 NAVI_SPRITE_FIRST = 0x20
-# ... and the Darkloids whose Navis are moved (ShadeMan 13, BlizzardMan 14): each Navi's seat (src/emu/xnavi_recipe.h, XN_SEAT:
+# ... and the Darkloids whose Navis are moved (ShadeMan 13, BlizzardMan 14, CosmoMan 16): each Navi's seat (src/emu/xnavi_recipe.h, XN_SEAT:
 # the six 0-5, the Dark Soul 6, the Darkloids 7 on) numbers its sprite (0x20 + seat), its AI index in BN6 (32 + seat) and its
 # bit in a unit's `navis`
-NAVI_MOVED = tuple(NAVI_SIX) + (13, 14)
+NAVI_MOVED = tuple(NAVI_SIX) + (13, 14, 16)
 
 
 def navi_seat(n):
@@ -1754,6 +1775,17 @@ def art_of(u, b5, b6, alloc):
             u.navis.add(v)
             for site, chain in sites:
                 load_rewrite(u, site, chain, v, to, f'BN5\'s Navi {v}\'s battle sprite: list 2 {v:#x} in BN5, {to:#x} in BN6 (the Navis\')')
+            continue
+        if (l is None or v is None) and all(s in STACK_LOADS for s, _ in sites):
+            for site in sorted({s for s, _ in sites}):
+                sl, sv, at, why = STACK_LOADS[site]
+                if sl != 4 * 2 or sv not in NAVI_MOVED:
+                    f.decide('sprite', f'a sprite off the stack at {site:08X}: {sl // 4}:{sv:#x} is no moved Navi\'s')
+                    continue
+                to = NAVI_SPRITE_FIRST + navi_seat(sv)
+                u.navis.add(sv)
+                u.more_imms.append(dict(at=at, form='THUMB_MOVS', rd=0, rn=0, was=sv, now=to,
+                                        why=f'BN5\'s Navi {sv}\'s battle sprite, off the stack: list 2 {sv:#x} in BN5, {to:#x} in BN6 (the Navis\')'))
             continue
         if (l is None or v is None) and all(s in MEGAMAN_LOADS for s, _ in sites):
             f.notes.append(f'MegaMan\'s own sprite at {", ".join(f"{s:08X}" for s, _ in sites)}: {MEGAMAN_LOADS[sites[0][0]]}')

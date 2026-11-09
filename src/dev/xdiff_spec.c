@@ -83,18 +83,35 @@ static bool script_parse(Spec *s, int game, char *v) {
 	return c->nsteps > 0;
 }
 
+/* "342C,0001" or "258:12": a folder's or a deck's entries into out (at most max), each hex chip | code << 9 or, for a chip
+ * past nine bits, hex chip:code; BN6's (`bn6`) kept in this build's form (chip_entry.h), BN5's as they are, nine-bit; how
+ * many, -1 where one is not */
+static int entry_list(char *v, int *out, int max, bool bn6) {
+	int n = 0;
+	char *save = NULL;
+	for (char *t = strtok_r(v, ",", &save); t; t = strtok_r(NULL, ",", &save)) {
+		char *end;
+		long x = strtol(t, &end, 16), code = *end == ':' ? strtol(end + 1, &end, 16) : -1;
+		if (*end || x < 0 || x > 0xFFFF || n >= max) return -1;
+		if (code < 0) out[n++] = bn6 ? chip_entry_from9((uint16_t)x) : (int)x;
+		else if (!bn6 || x > (long)CHIP_ID_MASK || code > 0x1F) return -1;
+		else out[n++] = chip_entry((unsigned)x, (unsigned)code);
+	}
+	return n;
+}
+
 /* MegaMan's setup in each game: event flags, a folder, his buster, kept from harm, the Custom screens' keys; -1 where
  * `name` is none of them */
 static int megaman_parse(Spec *s, const char *name, char *v) {
 	int k = name[strlen(name) - 1] == '5' ? 0 : 1, got[BN6_FOLDER_ENTRIES];
 	if (!strcmp(name, "flags5") || !strcmp(name, "flags6")) return (s->nflags[k] = hex_list(v, s->flags[k], MAX_FLAGS)) > 0;
 	if (!strcmp(name, "folder5") || !strcmp(name, "folder6")) {
-		int n = hex_list(v, got, BN6_FOLDER_ENTRIES);
+		int n = entry_list(v, got, BN6_FOLDER_ENTRIES, k == 1);
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->folder[k][i] = (uint16_t)got[i % n];
 		return (s->nfolder[k] = n) > 0;
 	}
 	if (!strcmp(name, "deck5") || !strcmp(name, "deck6")) {
-		int n = hex_list(v, got, BN6_FOLDER_ENTRIES);
+		int n = entry_list(v, got, BN6_FOLDER_ENTRIES, k == 1);
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->deck[k][i] = (uint16_t)got[i % n];
 		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;
 	}

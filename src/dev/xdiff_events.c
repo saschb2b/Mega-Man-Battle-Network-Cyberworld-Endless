@@ -490,13 +490,13 @@ static void units_of(int id) {
 
 static bool in_folder(const uint16_t *folder, int n, int id) {
 	for (int i = 0; i < n; ++i)
-		if ((int)chip9_id(folder[i]) == id) return true;   /* (a spec's folder, nine-bit: xdiff.h) */
+		if ((int)chip_entry_id(folder[i]) == id) return true;   /* (a spec's folder, BN6's: this build's form) */
 	return false;
 }
 
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
-	for (int i = 0; i < n; ++i) units_of((int)chip9_id(folder[i]));
+	for (int i = 0; i < n; ++i) units_of((int)chip_entry_id(folder[i]));
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;

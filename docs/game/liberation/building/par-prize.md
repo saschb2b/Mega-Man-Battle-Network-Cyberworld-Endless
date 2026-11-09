@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The par's prize, as built"
-description: "The par prize as built, BN5's tiers exactly, with its game-design reasoning: the Darkloid's own SP two under par and his V1 at par where the registry holds his chips (ShadeMan's, BlizzardMan's), else a Server's chip and one a tier lower, zenny over par from 1000 to 2000 by act (`lib_prizes.c`)."
+description: "The par prize as built, BN5's tiers exactly, with its game-design reasoning: the Darkloid's own SP two under par and his V1 at par where the registry holds his chips (ShadeMan's, BlizzardMan's, CosmoMan's), else a Server's chip and one a tier lower, zenny over par from 1000 to 2000 by act (`lib_prizes.c`)."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:38:00Z }
 ---
 
 # The par's prize, as built (25 October 2026)
@@ -25,7 +25,9 @@ game-design skill (`src/layer/lib_prizes.c`, `lib_par_zenny` in
   second copy, not a better one.
 - **The Darkloid's own chips (9 November 2026):** BN5's Darkloids' Navi
   chips registered and moved ([BN4's chips in a run](../../../multirom/bn4-chips.md),
-  Past 511), a board whose Darkloid is ShadeMan or BlizzardMan pays as
+  Past 511), a board whose Darkloid is ShadeMan or BlizzardMan (and,
+  since his chips play at 515-517, CosmoMan; CloudMan's are ready at
+  512-514 for when he stands on a board) pays as
   BN5's missions do: his SP two under par, his V1 at par
   (`lib_darkloid_prize`; the act's Darkloid is `run_darkloid`'s, from the
   run's seed, so the layer's make reads no RAM; `LAYER_MAKE` 113). The

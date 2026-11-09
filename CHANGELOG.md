@@ -20,6 +20,14 @@
   Darkloid two phases under par and you get his SP chip, at par his own
   chip, as BN5's missions paid (a Darkloid of BN6's, without BN5, pays as
   before). They turn up among BN5's chips in the finds too.
+- **Five more Navi chips from BN5.** With BN5 Team Colonel's ROM, the
+  Navi chips of CloudMan, CosmoMan, LarkMan, GridMan and Django are in
+  the game, each as V1, SP and DS, moved from BN5 and checked against
+  BN5's own battle frame by frame. They turn up among BN5's chips in the
+  finds; a dark board whose Darkloid is CosmoMan pays his own chip, his
+  SP two phases under par and his chip at par, as ShadeMan's and
+  BlizzardMan's boards do. The DS chips answer only to a dark MegaMan,
+  as in BN5.
 - **CosmoMan on the dark boards.** With BN5 Team Colonel's ROM beside
   BN6's, a dark layer's Darkloid can now be CosmoMan, BN5's own, moved
   into BN6's battle and checked against BN5's frame by frame like

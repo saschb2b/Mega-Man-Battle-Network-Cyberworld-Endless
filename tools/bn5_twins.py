@@ -161,6 +161,10 @@ AUDITS = {
                                      "+0x70: the collision layout); BN5's alone a dark hole spawned (0x08018002-0x0801802E) where its "
                                      "panel's side's bit 0x10 or 0x20 of BattleState +0x5C is set, which BN5 sets to 0x0C as each "
                                      "battle is set up (0x08008F64): none of the two in a battle of a run", ()),
+    (0x0800D36A, 0x0800F486): ('ok', "an obstacle the Navi chip CosmoMan's gate leaves where it stands (r0 its NameID, 0 for one of the "
+                                     "list): each game's own obstacles by its own ids (BN5 0xD2, 0xD3, 0xDA, 0xE4, 0xE5, 0xE7 and 0xE8; "
+                                     "BN6 0xD3, 0xDA, 0xE9 and 0xEA), as the sprite its gate throws for one is each game's own by that "
+                                     "id (0x0800D188, BN6's twin 0x0800F26C the same code); in BN6's battle the obstacles are BN6's", ()),
     (0x0800931C, 0x0800AB3A): ('ok', "a side's battle counter read: BN5 keeps 8 a side at 0x0203E540, BN6 16 at 0x0203EAE0, each its own; "
                                      "counter 3 the one both games' flinch, paralysis and drag raise (the Navis' audit of its writer, "
                                      "0x08009326 / 0x0800AB46), the DS chips' power read by it", ()),
@@ -517,6 +521,27 @@ TYPES = {
                                         "(list 2's 0x28)"),
     (3, 0xB2): ('moved', None, 'chips', "the Navi chip BlizMan's snowball: " + NO_TWIN),
     (3, 0xB7): ('moved', None, 'chips', "the Navi chip BlizMan's snowball's trail: " + NO_TWIN),
+    (1, 0x1F): ('moved', None, 'chips', "the Navi chip GridMan's GridMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
+                                        "at a number of the chips' in list 2 (his Navi is not moved)"),
+    (4, 0x58): ('moved', None, 'chips', "the Navi chip GridMan's tackle's effect: " + NO_TWIN),
+    (1, 0x1D): ('moved', None, 'chips', "the Navi chip CosmoMan's CosmoMan: " + NO_TWIN + "; his battle sprite the Navis' "
+                                        "(list 2's 0x2A)"),
+    (4, 0x86): ('moved', None, 'chips', "the Navi chip CosmoMan's gate (spawned at 0x080EA3F2): " + NO_TWIN),
+    (3, 0xBF): ('moved', None, 'chips', "the Navi chip CosmoMan's thrown object (spawned by his gate, 0x080DE9BC): " + NO_TWIN),
+    (1, 0x15): ('moved', None, 'chips', "the Navi chip CloudMan's CloudMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
+                                        "at a number of the chips' in list 2 (his Navi is not moved)"),
+    (3, 0xB3): ('moved', None, 'chips', "the Navi chip CloudMan's attack's object (spawned at 0x080DCC5A): " + NO_TWIN),
+    (1, 0x1E): ('moved', None, 'chips', "the Navi chip LarkMan's LarkMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
+                                        "at a number of the chips' in list 2 (his Navi is not moved)"),
+    (3, 0xBA): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DDB4C): " + NO_TWIN),
+    (3, 0xC7): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DF8CA): " + NO_TWIN),
+    (3, 0xCB): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DFD4C): " + NO_TWIN),
+    (1, 0x24): ('moved', None, 'chips', "the Navi chip Django's Django: " + NO_TWIN + "; no Navi of BN5's id table his "
+                                        "(his chip's code alone)"),
+    (3, 0xBC): ('moved', None, 'chips', "the Navi chip Django's attack's object (spawned at 0x080DE198): " + NO_TWIN),
+    (4, 0x7B): ('moved', None, 'chips', "the Navi chip Django's effect (spawned at 0x080E998A): " + NO_TWIN),
+    (4, 0x7D): ('moved', None, 'chips', "the Navi chip Django's effect (spawned at 0x080E9AFC): " + NO_TWIN),
+    (4, 0x84): ('moved', None, 'chips', "the Navi chip Django's effect (spawned at 0x080EA1B6): " + NO_TWIN),
     (1, 0x5C): ('moved', None, 'chips', "NumberMan's object at 0x080C4214 (the Navi chip NumbrMan's): BN6's 0x5C "
                                         "(0x080B9A5D) other code, no BN6 type runs BN5's; its battle sprite the Navis' "
                                         "(list 2's 0x20 on)"),

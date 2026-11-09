@@ -2,10 +2,9 @@
  * meet (docs/multirom/one-net.md, the finer calls: its standard chips, Megas and
  * DarkChips, Team Colonel's Gigas, the Navi chips of the six Navis who
  * guard runs, V1, SP and DS, and its Program Advances whose parts are
- * registered; not Team ProtoMan's version chips, the Darkloids' and
- * Django's Navi chips, BugCharg, Phoenix or DethPhnx), in BN5's order;
- * the Darkloids' Navi chips whose Navis are moved, ShadeMan's and
- * BlizzardMan's (docs/multirom/bn4-chips.md, Past 511: the first batch).
+ * registered; not Team ProtoMan's version chips, BugCharg, Phoenix or
+ * DethPhnx), in BN5's order; the Darkloids' and Nebula's Navi chips,
+ * ShadeMan's to Django's (docs/multirom/bn4-chips.md, Past 511).
  *
  * Paired by name with BN6's chips (BN5's names in BN6's text codes, rom.h's
  * xrom_text_bn6): one chip per name, BN6's, but where BN6's of the name is
@@ -21,7 +20,9 @@
  * CrakOut, DublCrak, TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364
  * the Program Advances beside BN6's, 411 on the rest, the Navi chips last
  * (ShadeMan's and BlizzardMan's at 505-510; 511 held, XREG_HELD,
- * 365-367 spare).
+ * 365-367 spare), then, past nine bits, CloudMan's, CosmoMan's, LarkMan's,
+ * GridMan's and Django's at 512-526 (docs/rom/chips-code.md, The pack
+ * past 511: ids 512-602 have a pack entry).
  * Generated once from both ROMs, paired by their names (the ROMs are told
  * by their SHA-1s, so the pairs hold for every player's); xreg_check
  * holds its rules in the unit tests, which have no ROM to read names in. */
@@ -267,6 +268,21 @@ const XChipReg xreg_rows[] = {
 	{ 263, 508, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 27 },   /* BlizMan */
 	{ 264, 509, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 55 },   /* BlizMan[SP] */
 	{ 265, 510, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 55 },   /* BlizManDS */
+	{ 266, 512, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 60 },   /* CloudMan */
+	{ 267, 513, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 74 },   /* CloudMn[SP] */
+	{ 268, 514, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 74 },   /* CloudMnDS */
+	{ 269, 515, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 50 },   /* CosmoMan */
+	{ 270, 516, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* CosmoMn[SP] */
+	{ 271, 517, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* CosmoMnDS */
+	{ 272, 518, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 45 },   /* LarkMan */
+	{ 273, 519, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 77 },   /* LarkMan[SP] */
+	{ 274, 520, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 77 },   /* LarkManDS */
+	{ 275, 521, XREG_MOVED,     0, 0xFF, { 0x05, 0xFF, 0xFF, 0xFF }, 1, 46 },   /* GridMan */
+	{ 276, 522, XREG_MOVED,     0, 0xFF, { 0x05, 0xFF, 0xFF, 0xFF }, 1, 72 },   /* GridMan[SP] */
+	{ 277, 523, XREG_MOVED,     0, 0xFF, { 0x05, 0xFF, 0xFF, 0xFF }, 1, 72 },   /* GridManDS */
+	{ 278, 524, XREG_MOVED,     0, 0xFF, { 0x03, 0xFF, 0xFF, 0xFF }, 1, 40 },   /* Django */
+	{ 279, 525, XREG_MOVED,     0, 0xFF, { 0x03, 0xFF, 0xFF, 0xFF }, 1, 68 },   /* Django[SP] */
+	{ 280, 526, XREG_MOVED,     0, 0xFF, { 0x03, 0xFF, 0xFF, 0xFF }, 1, 68 },   /* DjangoDS */
 	{ 306, 306, XREG_SAME },   /* BassAnly */
 	{ 307, 314, XREG_MOVED,     0, 0xFF, { 0x07, 0xFF, 0xFF, 0xFF }, 2, 92 },   /* HolyDrem */
 	{ 308, 302, XREG_SAME },   /* BigHook */

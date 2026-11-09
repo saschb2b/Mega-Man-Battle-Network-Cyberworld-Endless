@@ -893,7 +893,7 @@
    "name": "a computed power's routine",
    "spec": "chip_cusvolt1",
    "poke": [
-    "08E02324:08E00C01:4"
+    "08E02724:08E00C01:4"
    ],
    "what": "BN6's grown table of computed powers' entry 0xC9 (CusVolt1's 1073 as 1201, XC_POWERS + 4 x 0xC9) aimed at the stub (power 0, returning by mov pc, lr as the reader's mov lr, pc needs) where the install gives it the PowerCusVolt helper's copy: its damage 0"
   },
@@ -1310,6 +1310,156 @@
    "spec": "chip_blizmands",
    "soulbreak": 268435456,
    "what": "the chip use's end (soulmood_chip_refused) lets BlizManDS through while MegaMan is not dark where BN5's dark gate refuses it: BlizzardMan's snowball where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_gridman",
+   "poke": [
+    "08E008BC:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X2F (XC_NAVI + 0xbc) left at their stub (XC_STUBS + 4) where the install points it at GridMan's moved routine (BN5's Navi routine 0X12): no GridMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip GridMan's effect's type",
+   "spec": "chip_gridman",
+   "poke5": [
+    "080E6EBC:2057"
+   ],
+   "what": "GridMan's tackle's effect spawned as BN5's fourth kind's 0x57 (movs r0,#0x58 at BN5's 0x080E6EBC, written at its copy) where its own moved 0x58 runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_gridmansp",
+   "poke": [
+    "08E00C54:0100:2"
+   ],
+   "what": "GridMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 18, BN5's AI index) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_gridmands",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets GridManDS through while MegaMan is not dark where BN5's dark gate refuses it: GridMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_cloudman",
+   "poke": [
+    "08E008B0:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X2C (XC_NAVI + 0xb0) left at their stub (XC_STUBS + 4) where the install points it at CloudMan's moved routine (BN5's Navi routine 0X0F): no CloudMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip CloudMan's attack's type",
+   "spec": "chip_cloudman",
+   "poke5": [
+    "080DCC5A:20B2"
+   ],
+   "what": "CloudMan's attack's object spawned as BN5's third kind's 0xB2 (movs r0,#0xB3 at BN5's 0x080DCC5A, written at its copy) where its own moved 0xB3 runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_cloudmnsp",
+   "poke": [
+    "08E00C4E:0100:2"
+   ],
+   "what": "CloudMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 15, BN5's AI index) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_cloudmnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets CloudMnDS through while MegaMan is not dark where BN5's dark gate refuses it: CloudMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_larkman",
+   "poke": [
+    "08E008B8:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X2E (XC_NAVI + 0xb8) left at their stub (XC_STUBS + 4) where the install points it at LarkMan's moved routine (BN5's Navi routine 0X11): no LarkMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip LarkMan's attack's type",
+   "spec": "chip_larkman",
+   "poke5": [
+    "080DDB4C:20B9"
+   ],
+   "what": "LarkMan's attack's object spawned as BN5's third kind's 0xB9 (movs r0,#0xBA at BN5's 0x080DDB4C, written at its copy) where its own moved 0xBA runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_larkmansp",
+   "poke": [
+    "08E00C52:0100:2"
+   ],
+   "what": "LarkMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 17, BN5's AI index) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_larkmands",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets LarkManDS through while MegaMan is not dark where BN5's dark gate refuses it: LarkMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_django",
+   "poke": [
+    "08E008C0:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X30 (XC_NAVI + 0xc0) left at their stub (XC_STUBS + 4) where the install points it at Django's moved routine (BN5's Navi routine 0X13): no Django, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip Django's attack's type",
+   "spec": "chip_django",
+   "poke5": [
+    "080DE198:20BB"
+   ],
+   "what": "Django's attack's object spawned as BN5's third kind's 0xBB (movs r0,#0xBC at BN5's 0x080DE198, written at its copy) where its own moved 0xBC runs"
+  },
+  {
+   "name": "Django[SP]'s power a turn on",
+   "spec": "chip_djangosp",
+   "poke5": [
+    "0800E99A:3009"
+   ],
+   "what": "the moved power of Django[SP] (BN5's 0x0800E982, by the battle's turn) taking its table's entry 9 at the first turn (adds r0,#9 at BN5's 0x0800E99A, written at its copy) where BN5's takes its tenth: 160 where BN5's is 150"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_djangods",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets DjangoDS through while MegaMan is not dark where BN5's dark gate refuses it: Django's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_cosmoman",
+   "poke": [
+    "08E008B4:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X2D (XC_NAVI + 0xb4) left at their stub (XC_STUBS + 4) where the install points it at CosmoMan's moved routine (BN5's Navi routine 0X10): no CosmoMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip CosmoMan's gate's type",
+   "spec": "chip_cosmoman",
+   "poke5": [
+    "080EA3F2:2085"
+   ],
+   "what": "CosmoMan's gate spawned as BN5's fourth kind's 0x85 (movs r0,#0x86 at BN5's 0x080EA3F2, written at its copy) where its own moved 0x86 runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_cosmomnsp",
+   "poke": [
+    "08E00C50:0100:2"
+   ],
+   "what": "CosmoMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 16, BN5's AI index) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_cosmomnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets CosmoMnDS through while MegaMan is not dark where BN5's dark gate refuses it: CosmoMan's attack where BN5's is the chip of nothing (0x185)"
   },
   {
    "name": "DarkInvs's time a frame short",

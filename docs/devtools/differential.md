@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T14:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:38:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -94,7 +94,9 @@ and traces both:
   eToolkit +0x44: Double Soul's 0000, a Soul's 0008 + k, Chaos Unison's
   0236; `flags6=` BN6's), each game's first folder (`folder5=`,
   `folder6=`: chip | code << 9, the list repeated to 30, each chip marked
-  owned, no Regular chip, no TagChips), each game's battle deck in an
+  owned, no Regular chip, no TagChips; a BN6 chip past nine bits is
+  written hex chip:code, `209:5` chip 521 in F, in `folder6=` and
+  `deck6=` alike), each game's battle deck in an
   order (`deck5=`, `deck6=`, the list repeated to 30, written as the
   battle's phase first reads the Custom screen's: each game makes and
   shuffles its deck as the first turn begins, so without it each hand
@@ -655,7 +657,8 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
 `--story` prints each game's battle, `--survey` every difference over
 every frame by whose and where, `--no-run` compares the last traces,
 `--poke` and `--call` break the subject for one run, and `--mutations`
-runs `tests/xdiff/mutations.json`, the breaks a transplant bug would make
+runs `tests/xdiff/mutations.json` (with specs named, their mutations
+alone, by their numbers in the file), the breaks a transplant bug would make
 (CanGard's: an immediate, a state number and an offset left as BN5's, a
 call aimed at nothing or at the wrong twin, a table's entry, a number in
 its data, an effect id left as BN5's alone and beside a native, a

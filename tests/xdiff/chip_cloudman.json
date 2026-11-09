@@ -1,0 +1,197 @@
+{
+ "about": "A Navi chip of BN5's whose code moved into BN6's engine (issue #82's C3; docs/multirom/chips-code.md, the Navi chips past nine bits): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of one CloudMan C and 29 Cannon A in both games, the CloudMan dealt first (a Mega chip: a folder of them alone never deals), BN5's chip 266 by BN5's own code and the registry's 512 by the same code moved (BN5's Navi routine 0x0f as BN6's 0x2c: his battle sprite BN5's own, list 2's 0x0F, LZ77 there and queued, copied whole at a number of the chips' in BN6's list 2; his attack's objects, the third kind's 0xB3 and his clouds, the 0x0B's kinds, moved with it), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/multirom/chips-code.md).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "050A",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "folder6": [
+  "200:2",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "deck5": [
+  "050A",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "deck6": [
+  "200:2",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "sprites": "bytes"
+}
