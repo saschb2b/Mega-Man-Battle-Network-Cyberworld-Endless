@@ -2823,6 +2823,7 @@ static const XNavi bn4_junkman = {
 	.palettes = 0x04000000,   /* (its palette by version, BN4_NAVI_PALETTE's, a byte each from V1's: set at its spawn's end over BN6's actor init's 0, xnavi_init.c) */
 	.init = &junkman_init,   /* (its init's work past BN6's actor init: xnavi_init.c) */
 	.pre = junkman_pre, .npre = 2,   /* (its update's calls between its pre-step and its runner, its hook A's shim) */
+	.runner_r4 = true,   /* (its states run with r4 its +0 byte, as BN4's Navi runner: xnavirecipe_bn4_objects.RUNNER_R4) */
 	.record_list = 1,   /* (its records' sprite list, BN4's preload's alone: its battle sprite its init's) */
 };
 const XNavi *const xnavi_bn4[] = { &bn4_gutsman, &bn4_thunderman, &bn4_windman, &bn4_fireman, &bn4_searchman, &bn4_aquaman, &bn4_roll, &bn4_woodman, &bn4_junkman };

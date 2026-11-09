@@ -387,6 +387,26 @@ def hide_steps(f):
                        'of its states, as BN4\'s Navi runner runs it (at 0x08013F12)')
 
 
+# BN4's Navi runner runs a state with r4 as BN4's object runner left it (ldrb r4,[r5,#0] at 0x08003166: the object's +0, kept by
+# every routine before the state), where BN6's state caller (0x0801B9E6) runs it with r4 the object's AI data. A state that
+# spawns with r4 unset gives the spawned object +4 as a word (BN4's spawn, 0x08003210), and where that object reads +4 to +7
+# before its own code writes them its state differs. By the Navi's BN4 type: his states run through stubs of his home that
+# load r4 so (XNavi.runner_r4, src/emu/xnavi_init.c), its reason each
+RUNNER_R4 = {
+    0x47: "JunkMan's MegaMan state 110 (0x080F41B4) spawns the third kind's 0x97 (0x080E0170: push {r0,r1,r2,r5}, movs r0,#0x97, "
+          "the spawn) with r4 his state's; 0x97's state 0x080E00E8 reads its +7 (0x080E0130) where only that state writes it "
+          "(0x080E010A): BN4's 0, BN6's the AI data's address's top byte 0x02 (junkman_v1 at t347)",
+}
+
+
+def runner_r4(f):
+    """his states run with BN4's runner's r4 (RUNNER_R4, by his BN4 type): f.runner_r4"""
+    f.runner_r4 = f.ty in RUNNER_R4
+    if f.runner_r4:
+        f.notes.append('its states run with r4 its +0 byte, as BN4\'s Navi runner leaves the object runner\'s (RUNNER_R4): ' +
+                       RUNNER_R4[f.ty])
+
+
 def fight_gates(f):
     """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type): a fight frame later in
     BN6, with his first own state"""

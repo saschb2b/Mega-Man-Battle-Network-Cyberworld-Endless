@@ -379,7 +379,7 @@ def navi_update(f, tw, uw):
         return
     if tcalls == [NAVI4['after']] and len(calls) > 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
             and all(f.lo <= t < f.hi for t in calls[1:-2]):
-        navi_pres(f, uw)
+        I.navi_pres(f, uw)
         return
     if tcalls == [NAVI4['after']] and calls[1:] == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']] and f.lo <= calls[0] < f.hi:
         # (Roll's 0x080BC340: her summons' words let go where their HP is 0. BN6's hook A runs after its pre-step, BN4's call
@@ -397,29 +397,6 @@ def navi_update(f, tw, uw):
         return
     f.decide('pre-step', f'its type routine calls {tcalls} and its update {", ".join(f"{t:08X}" for t in calls)}, not BN4\'s '
                          'Navi pre-step, runner and present, with its after-step in its type routine or after a call of its own')
-
-
-def navi_pres(f, uw):
-    """its update's calls of its own between its pre-step and its runner (JunkMan's two): BN6's hook A (table 2, run after its
-    pre-step, 0x080F368C, before its status dispatcher) aimed at a shim of its home that makes them in turn (XNavi.pre,
-    src/emu/xnavi_init.c), each with its r0 where a movs gives it (a CurAction BN6's where the call compares it with its +9),
-    else left as the call before leaves it"""
-    for site, t in sorted(uw.bls.items())[1:-2]:
-        v, chain = T.back_value(uw, site, 0)
-        if v is not None and (len(chain) != 1 or chain[0][1] != 'movs'):
-            f.decide('pre-step', f'{site:08X}: its call of {t:08X} with r0 from {chain}')
-            continue
-        if v is not None:
-            w = T.walk(f.b4, t, region=(f.lo, f.hi))
-            cur = {i.f[0] for i in w.insns.values() if i.form == 'ldrb' and tuple(i.f[1:]) == (5, 9)}
-            if not any(i.form == 'cmp' and len(i.f) == 2 and 0 in i.f and set(i.f) & cur for i in w.insns.values()):
-                f.decide('pre-step', f'{site:08X}: its call of {t:08X} with r0 {v:#x}, which it reads as no CurAction')
-                continue
-            v = v + 2 if v >= 6 else v
-        f.pres.append((t, v))
-    f.notes.append('its update calls ' + ', '.join(f'{t:08X}' + ('' if v is None else f' (r0 BN6\'s CurAction {v})') for t, v in f.pres) +
-                   ' between its pre-step and its runner: BN6\'s hook A (table 2, which BN6\'s Navi frame runs after its pre-step, '
-                   '0x080F368C), a shim of its home making them in turn (XNavi.pre)')
 
 
 # Tables of its moved objects' kinds whose bytes name a list 4 sprite their code loads (r1 a movs of 0x10, r2 a byte of the
@@ -525,6 +502,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     I.companion_modes(f)
     C.fight_gates(f)
     C.hide_steps(f)
+    C.runner_r4(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)
@@ -766,14 +744,7 @@ def navi_records(b4, f):
     """its four enemy records (V1, V2, V3, SP): its type, its battle sprite (list 2, BN4_NAVI_SPRITES), each version"""
     st = X4.BN4['stats']
     f.recs = [b4.bytes(st + X4.BN4['stat_size'] * (f.first + v), X4.BN4['stat_size']) for v in range(VERSIONS)]
-    # (records naming list 1 at its sprite's number, JunkMan's: BN4's preload, the records' sprite's one reader (0x08002B0E),
-    # unpacks an LZ77'd sprite alone (0x08002B44, bit 31), and list 1's of that number is raw, so nothing reads it)
-    f.record_list = 0
-    p1, _ = X4.sprite(b4, X4.BN4['sprites'], 1, f.s1['index'])
-    if all(r[3] == 4 and r[4] == f.s1['index'] for r in f.recs) and f.s1['list'] != 1 and p1 is not None and not p1 & 0x80000000:
-        f.record_list = 1
-        f.notes.append(f'its records name list 1 {f.s1["index"]:#x}, raw, which BN4\'s preload passes over (0x08002B44): its battle '
-                       f'sprite its init\'s, list {f.s1["list"]} (XNavi.record_list)')
+    I.record_list(b4, f)
     for v, r in enumerate(f.recs):
         if r[2] != f.ty or r[5] != v or r[3] != 4 * (f.record_list or f.s1['list']) or r[4] != f.s1['index']:
             f.decide('records', f'enemy id {f.first + v}\'s record names type {r[2]:#x}, sprite {r[3]}:{r[4]}, version {r[5]}')
@@ -944,6 +915,8 @@ def c_navi(f):
         L.append(f'\t.fars = {n}_fars, .nfars = {count("fars")},   /* (its loads past an immediate\'s reach, through shims of its home) */')
     if f.pres:
         L.append(f'\t.pre = {n}_pre, .npre = {len(f.pres)},   /* (its update\'s calls between its pre-step and its runner, its hook A\'s shim) */')
+    if f.runner_r4:
+        L.append('\t.runner_r4 = true,   /* (its states run with r4 its +0 byte, as BN4\'s Navi runner: xnavirecipe_bn4_objects.RUNNER_R4) */')
     if f.record_list:
         L.append(f'\t.record_list = {f.record_list},   /* (its records\' sprite list, BN4\'s preload\'s alone: its battle sprite its init\'s) */')
     L.append('};')

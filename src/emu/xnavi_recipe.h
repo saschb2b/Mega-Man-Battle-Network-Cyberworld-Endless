@@ -191,6 +191,9 @@ typedef struct {
 	const XnPreCall *pre;       /* its update's calls between its pre-step and its runner, made by its hook A's shim (its .hook_a then
 	                               BN6's empty hook), NULL none */
 	int npre;
+	bool runner_r4;             /* its states run with r4 its +0 byte, as BN4's Navi runner runs them (the object runner's ldrb r4,[r5,#0]
+	                               at 0x08003166 kept), through stubs of its home (xnavi_init.c), where BN6's state caller (0x0801B9E6)
+	                               gives r4 its AI data: BN4's JunkMan's, whose state's spawn keeps r4 at the object's +4 */
 	uint8_t record_list;        /* the list its BN4 records name its battle sprite in where it is not the list its init loads it from
 	                               (JunkMan's 1: read by BN4's preload alone, which passes a raw sprite over), 0 that list */
 } XNavi;
