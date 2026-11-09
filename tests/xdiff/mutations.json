@@ -1202,6 +1202,54 @@
    "what": "the grown list's first recipe of BN5's (FREE_CHIP_PAS, src/core/xchips_pas.c's SuprSpr1) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
   },
   {
+   "name": "a Program Advance's moved routine's entry",
+   "spec": "pa_bignoise",
+   "poke": [
+    "08E008C4:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X31 (XC_NAVI + 0xc4) left at their stub (XC_STUBS + 4) where the install points it at BigNoise's moved routine (BN5's Navi routine 0X14): the Program Advance formed, nothing played"
+  },
+  {
+   "name": "a Program Advance's moved routine's entry",
+   "spec": "pa_csmopris",
+   "poke": [
+    "08E008CC:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X33 (XC_NAVI + 0xcc) left at their stub (XC_STUBS + 4) where the install points it at CsmoPris's moved routine (BN5's Navi routine 0X16): the Program Advance formed, nothing played"
+  },
+  {
+   "name": "a Program Advance's moved routine's entry",
+   "spec": "pa_wildbird",
+   "poke": [
+    "08E008D0:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X34 (XC_NAVI + 0xd0) left at their stub (XC_STUBS + 4) where the install points it at WildBird's moved routine (BN5's Navi routine 0X17): the Program Advance formed, nothing played"
+  },
+  {
+   "name": "a Program Advance's moved routine's entry",
+   "spec": "pa_football",
+   "poke": [
+    "08E008D4:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0X35 (XC_NAVI + 0xd4) left at their stub (XC_STUBS + 4) where the install points it at Football's moved routine (BN5's Navi routine 0X18): the Program Advance formed, nothing played"
+  },
+  {
+   "name": "a Program Advance's moved routine's entry",
+   "spec": "pa_piledrvr",
+   "poke": [
+    "08E00564:08E00C01:4"
+   ],
+   "what": "the grown support routines' entry 0X59 (XC_SUPPORT + 0x164) left at their stub (XC_STUBS) where the install points it at PileDrvr's moved routine (BN5's support routine 0X2F): the Program Advance formed, nothing played"
+  },
+  {
+   "name": "Football's burst's effect",
+   "spec": "pa_football",
+   "poke5": [
+    "080D951C:205E"
+   ],
+   "what": "the effect Football's ball bursts in (movs r0,#0x5f at BN5's 0x080D951C, added to the side's shifted byte: EFFECT_IMMS) 0x5E at its copy where BN6's id of BN5's 0x5F is given"
+  },
+  {
    "name": "no DarkChip dealt into the first worried hand",
    "spec": "soul_mood_first",
    "soulbreak": 33554432,
