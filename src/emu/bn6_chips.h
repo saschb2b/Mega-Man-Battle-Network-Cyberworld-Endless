@@ -73,6 +73,8 @@
 #define BN6_CHIP_PALETTE_PTR  0x28
 #define BN6_CHIP_DARK_CLASS   0x20
 #define BN6_CHIP_UNLISTED     0x20
+#define BN6_CHIP_VERSION_ONE  0x04        /* LibraryFlags: a chip of the pair's first version alone (Gregar's Gigas; in BN5's records Team ProtoMan's) */
+#define BN6_CHIP_VERSION_TWO  0x08        /* ... of its second (Falzar's; BN5's Team Colonel's: its reward rows give two of them, BN5_REWARD_ROW_COUNT) */
 #define BN6_CHIP_NOTHING      0x185       /* the chip of nothing: OK's in a hand for a chip not owned (0x0800B090), its family 0x1C's spawner
                                              BN6_SPAWNER_NOTHING (0x08010488); BN5's 0x185 the same (family 0x1A, spawner 3 0x0800E190), its dud */
 #define BN6_SPAWNER_NOTHING   3
