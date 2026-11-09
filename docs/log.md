@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-09
+* **Update**: multirom/bn4-navis.md, JunkMan built: `junkman_v1` PASSes over its 1200 frames, his states run with BN4's runner's r4 by stubs of his home (`XNavi.runner_r4`), his types at the dispatch's 0xCF-0xD2, four mutations caught; he joins the tournament's proved list on his plate (`BN4_PLATE_JUNKMAN`); game/tournament.md and GUIDE.md, the pool's nine BN4 Navis; rom/bn4.md, JunkMan derived; re/ledger.json; the symbol files written again.
+
 ## 2026-11-08
 * **Update**: multirom/bn4-navis.md, JunkMan built: BN4's JunkMan derived and installed under proof (Navi AI 57, ids 0x3A4-0x3A7): his update's two calls before his runner through his hook A's shim (`XNavi.pre`), his records' list 1 (`record_list`), the dispatch's third-kind numbers past 0xFF from BN5's count, the Navis' registry counting BN4's seats, the trace's moved ranges 2048; `bn4_junkman_control` PASSes, `junkman_v1` the same in t1-t346 and records FAIL at t347 (his 0x97's +7 the r4 his state ran with); a family's draw the lag puts before the reference's fight replayed from its setup draws; the song pool pointed at the spec's foe before the pokes and CanGard's region mutation a `poke5` (229 of 229 caught); rom/bn4.md, JunkMan derived; re/ledger.json; the symbol files written again.
 * **Update**: multirom/bn4-navis.md, Roll's versions and Roll built, brought onto dev's Her Melody: 0x39, her V3's third summon, linked from both; a summoned Melody runs the same copy of BN4's generic state 0 in its state 0 (the summon's table, Mettaur's); her pool's players with Melody's 0xC2 and 0xC3 in it (BN4's 8) unchanged, hers on 10; rom/bn4.md and re/ledger.json keep both rows and entries; the symbol files and research status written again.
