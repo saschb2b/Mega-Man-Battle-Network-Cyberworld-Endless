@@ -33,7 +33,7 @@
 #include "town.h"
 
 #define PAD_ENTRY 2   /* the pink pad's warp entry (lanhp.c's portal 0) */
-#define STOP_OPEN 0   /* offered to players (by the coin), not the dev switch alone */
+#define STOP_OPEN 1   /* offered to players by the coin (0: the dev switch alone), docs/world/bn5-town.md, As built */
 
 static struct {
 	bool said, saved, job_seen;
@@ -52,8 +52,6 @@ static bool older_way(void) {
 bool stop_due(void) {
 	if (!D.home || D.home_back || (run.stop & STOP_SPENT) || run.side_kind != LAYER_NORMAL || !XR[XROM_BN5_COLONEL_US].data) return false;
 	if (dev.stop) return true;
-	/* (players are offered it once the trip lands on the pier: it lands in the
-	 * act's first layer yet, docs/world/bn5-town.md, As built) */
 	if (!STOP_OPEN) return false;
 	int acts = run.mode == RUN_SHORT ? 3 : 6, act = (run.depth - 1) % CYCLE_LAYERS / 3;
 	return run_extra(EXTRA_OLDER) && run_stop_coin(run.seed) && run_stop_fits(act, acts, older_way());
@@ -127,18 +125,20 @@ static void job_taken(void) {
 	runlog_choice(CHOICE_JOB);
 }
 
-void stop_frame(void) {
-	if (!stop_here()) return;
-	const TownInfo *ti = town_info();
-	bool there = emu_read8(BN6_MAP_GROUP) == ti->group && emu_read8(BN6_MAP_NUMBER) == ti->number;
-	/* (set down on the pier's walk: the map-enter code takes the saved place's x and y, not its height) */
-	if (there && S.frames < 20 && !emu_read8(BN6_WARP_PENDING)) emu_write32(BN6_PLAYER_Z, (uint32_t)BN5_ORAN_DOCK_Z << 16);
-	if (there) ++S.frames;
-	if (there && !S.said && S.frames > 40 && !emu_read8(BN6_WARP_PENDING) && talk_start(oran_arrival_words(), FACE_MEGAMAN)) S.said = true;
-	if (there && S.said && !S.saved && !talk_busy() && !emu_read8(BN6_CHATBOX)) {
+/* Lan on the pier: set down on its walk (the map-enter code takes the
+ * saved place's x and y, not its height), his two boxes, then the save */
+static void arrival(void) {
+	if (S.frames < 20 && !emu_read8(BN6_WARP_PENDING)) emu_write32(BN6_PLAYER_Z, (uint32_t)BN5_ORAN_DOCK_Z << 16);
+	++S.frames;
+	if (!S.said && S.frames > 40 && !emu_read8(BN6_WARP_PENDING) && talk_start(oran_arrival_words(), FACE_MEGAMAN)) S.said = true;
+	if (S.said && !S.saved && !talk_busy() && !emu_read8(BN6_CHATBOX)) {
 		S.saved = true;
 		D.home_save_due = true;
 	}
+}
+
+/* the stall's chip bought, the job taken: the stop's decisions */
+static void decisions(void) {
 	if (flag_get(ORAN_JOB_FLAG) && !S.job_seen) {
 		S.job_seen = true;
 		++S.decisions;
@@ -146,6 +146,14 @@ void stop_frame(void) {
 	}
 	static bool bought;
 	if (flag_get(ORAN_STALL_FLAG) != bought) { bought = !bought; S.decisions += bought; }
+}
+
+void stop_frame(void) {
+	if (!stop_here()) return;
+	const TownInfo *ti = town_info();
+	bool there = emu_read8(BN6_MAP_GROUP) == ti->group && emu_read8(BN6_MAP_NUMBER) == ti->number;
+	if (there) arrival();
+	decisions();
 	/* (the act's first layer reached by the island's jack-in) */
 	if (!there && S.frames && emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number) {
 		run.stop &= (uint8_t)~STOP_HERE;

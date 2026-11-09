@@ -2,13 +2,16 @@
 
 ## Unreleased
 
-- **Oran Isle, on the way (in progress, a dev switch only).** With BN5
-  Team Colonel's ROM, Oran Isle stands in BN6's real world, copied
-  whole from the player's cartridge: the beach, the seawall, the pier
-  with its boat, the signal post's port, Beach Day playing. MegaMan asks
-  on the act's pink pad whether to go in from there, the cursor on No.
-  The trip itself does not land on the island yet, so runs do not offer
-  it; `--dev stop` shows the question.
+- **Oran Isle, on the way.** With BN5 Team Colonel's ROM, half the runs
+  get a stop before the first act from act 2 whose way runs through an
+  area the older Net dresses: on the pink pad MegaMan reads its data as
+  old, and Lan asks to go in from Oran Isle, the cursor on No. Yes jacks
+  out to the island's pier, copied whole from your cartridge with Beach
+  Day playing, and saves the run there. On the walk to the signal post's
+  port, three of the island's people: one passes on word of the act's
+  guardian, one sells one of three older Net chips at a Net Dealer's
+  price, one offers a job for the act. The port jacks in to the act as
+  the pad would have. Once a run at most, no battle on the island.
 - **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
   beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
   Area or BN5's Undernet now gets the quick way back BN6's areas have: a

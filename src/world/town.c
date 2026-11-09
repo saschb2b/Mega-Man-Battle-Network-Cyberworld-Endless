@@ -543,6 +543,12 @@ static void forget_books(int keep) {
 	if (keep < 0) T.book = NULL;
 }
 
+/* Style `si`'s source, learned once (another game's alone) */
+static bool learned(int si) {
+	if (T.style->rom) forget_books(si);
+	return T.books[si] || (T.books[si] = town_style_learn(T.style)) != NULL;
+}
+
 static int coin(void) { return rnd_range(0, 1); }
 static const TownKit kit = { copy, tile, more_tree, coin };
 
@@ -553,8 +559,7 @@ static int plan_once(uint32_t seed) {
 	int si = wanted_style();
 	T.style = &town_styles[si];
 	T.lines = &town_lines[si];
-	if (T.style->rom) forget_books(si);
-	if (!T.books[si] && !(T.books[si] = town_style_learn(T.style))) return -1;
+	if (!learned(si)) return -1;
 	T.book = T.books[si];
 	townsrc_size(T.book, &T.stw, &T.sth);
 	T.nsrc_obj = townsrc_objects(T.book, T.src_obj, 32);

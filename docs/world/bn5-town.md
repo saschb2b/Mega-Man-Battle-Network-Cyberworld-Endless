@@ -216,8 +216,16 @@ Units 1 to 5 of the order below, for Oran Isle:
   theirs keep their slots; played as the island's map's.
 - **The share**: `run_stop.c`'s coin and the acts it fits, held over 300
   seeds by `test_stop` (half the runs: 120 to 180; one act at most, from
-  act 2, never the Nest's). `--dev stop` offers it at the next pink pad
-  whatever the seed; `CYBERWORLD_AUTOPILOT_STOP` has the autopilot take it.
+  act 2, never the Nest's), offered to players (`STOP_OPEN` in
+  `director_stop.c`). `--dev stop` offers it at the next pink pad whatever
+  the seed; `CYBERWORLD_AUTOPILOT_STOP` has the autopilot take it.
+- **The New 3DS's heap** (`tools/heap3ds.py --cases bn5 --seeds 1-4
+  --frames 40000`, `--stop` for runs that take it): without the stop 0
+  allocations refused, peak 95.69 MB of 96; the first build's stop had 3
+  runs of 4 refuse the island's mirror at its learn. A town copied whole
+  picks no tile, so it is learned without its mirror, and home's learned
+  source is let go while the island's is learned and installed, the
+  island's after it: with the stop, 0 refused, peak 85.78 MB.
 - **The pace**, on the run log's `stop:` line (frames on the island and
   decisions): the autopilot, walking from the pier to the signal post and
   talking to no one, 26.1 s (some 5 s of it pushing at the pier's end
