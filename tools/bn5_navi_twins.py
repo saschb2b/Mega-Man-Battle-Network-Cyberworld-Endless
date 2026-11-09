@@ -43,7 +43,12 @@ STUBS = {0x080EA08C: 'XN_STUB_ZERO', 0x080EA0BA: 'XN_STUB_ZERO', 0x0802C10A: 'XN
          # +0xD the kind of approach, +0xE bits 0-1, +0x17 the region it aims from; BN6's +0x17 its lock-on type), its attack
          # (0x0802C098) BN6's own (+4, +0xA-+0xC, +0x10, +0x14: BN6's action for the chip): the Dark Soul's records, BN6's
          # with BN5's four bytes, by BN6's id (src/emu/xnavi_dark.c)
-         0x0801DF0C: 'XN_STUB_CHIPDATA'}
+         0x0801DF0C: 'XN_STUB_CHIPDATA',
+         # CloudMan's search for his clouds (BN5_CLOUD_FIND_37, 0x080CBFBC: the third kind's objects of type 0x37 on side r1 but
+         # slot r2 into the list r0, each its address less 0x10, their count returned), whose literal 0x0203CA30 is BN5's
+         # third kind's objects less 0x10: a moved type's object holds the dispatch's type and BN5's number in the dispatch's
+         # side table, which the stub reads (docs/multirom/navis.md, CloudMan), never a wider literal
+         0x080CBFBC: 'XN_STUB_CLOUDS'}
 # The one number each stub serves where the stubbed routine takes one (r0 at every call): the generator's check
 STUB_ARGS = {0x0800F350: 0x3E}
 

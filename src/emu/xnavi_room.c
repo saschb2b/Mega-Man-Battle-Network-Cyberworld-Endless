@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
@@ -13,6 +14,7 @@
 #include "xattack_grow.h"
 #include "xnavi_recipe.h"
 #include "xvirus.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_grow.h"
 #include "xvirus_tx.h"
 
@@ -153,6 +155,45 @@ static const uint16_t chipdata_code[] = {
 };
 _Static_assert(XN_STUB_CHIPDATA + 0x10u <= XN_STUBS_END && !(XN_STUB_CHIPDATA & 3), "the records' stub in the stubs' room, its literal on a word");
 
+/* CloudMan's search for his clouds, BN5's 0x080CBFBC (BN5_CLOUD_FIND_37; docs/multirom/navis.md, CloudMan) in BN6's engine:
+ * r0 a list, r1 a side, r2 a slot. Each of the third kind's 32 objects whose type is BN5's 0x37, on side r1 (+0x16) and
+ * not of slot r2 (+3), goes into the list as BN5 writes it, its address less 0x10; r0 their count, r1-r3 clobbered as
+ * the original's. BN5 reads the type at +1; a moved type's object holds the dispatch's type there (XV_T3_DISPATCH) and
+ * BN5's number in the dispatch's side table by its slot, which is read instead. Like BN5's, it tests no object's flags */
+static const uint16_t clouds_code[] = {
+	0xB5F0,           /* +00 push {r4-r7,lr} */
+	0x4C0D,           /* +02 ldr r4,[pc,#0x34]: the objects (+0x38) */
+	0x4D0D,           /* +04 ldr r5,[pc,#0x34]: the side table (+0x3C) */
+	0x2300,           /* +06 movs r3,#0: the count */
+	0x2600,           /* +08 movs r6,#0: the object */
+	0x7867,           /* +0A ldrb r7,[r4,#1]: its type */
+	0x2F00 | XV_T3_DISPATCH,   /* +0C cmp r7,#dispatch */
+	0xD10D,           /* +0E bne +2C */
+	0x78E7,           /* +10 ldrb r7,[r4,#3]: its slot */
+	0x5DEF,           /* +12 ldrb r7,[r5,r7]: its number */
+	0x2F37,           /* +14 cmp r7,#0x37 */
+	0xD109,           /* +16 bne +2C */
+	0x7DA7,           /* +18 ldrb r7,[r4,#0x16]: its side */
+	0x428F,           /* +1A cmp r7,r1 */
+	0xD106,           /* +1C bne +2C */
+	0x78E7,           /* +1E ldrb r7,[r4,#3] */
+	0x4297,           /* +20 cmp r7,r2 */
+	0xD003,           /* +22 beq +2C */
+	0x1C27,           /* +24 adds r7,r4,#0 */
+	0x3F10,           /* +26 subs r7,#0x10 */
+	0xC080,           /* +28 stmia r0!,{r7} */
+	0x3301,           /* +2A adds r3,#1 */
+	0x34D8,           /* +2C adds r4,#0xD8: the next */
+	0x3601,           /* +2E adds r6,#1 */
+	0x2E20,           /* +30 cmp r6,#0x20 */
+	0xDBEA,           /* +32 blt +0A */
+	0x1C18,           /* +34 adds r0,r3,#0 */
+	0xBDF0,           /* +36 pop {r4-r7,pc} */
+};
+_Static_assert(sizeof clouds_code == 0x38 && XN_STUB_CLOUDS + 0x40u <= XN_STUBS_END && !(XN_STUB_CLOUDS & 3), "the clouds' stub in the stubs' room, its literals on words");
+_Static_assert(BN6_T1_SIZE == 0xD8 && BN6_T3_COUNT == 0x20 && BN6_T1_TYPE == 1 && BN6_T1_SLOT == 3 && BN6_T1_ALLIANCE == 0x16 && XV_T3_DISPATCH <= 0xFF,
+	"the clouds' stub's fields");
+
 static void stubs_make(void) {
 	uint8_t *p = xv_put(XN_STUBS, XN_STUBS_END - XN_STUBS, true);
 	if (!p) return;
@@ -169,6 +210,10 @@ static void stubs_make(void) {
 	uint8_t *d = p + (XN_STUB_CHIPDATA - XN_STUBS);
 	for (size_t i = 0; i < sizeof chipdata_code / 2; ++i) put16(d + 2 * i, chipdata_code[i]);
 	put32(d + 0x0C, XN_DARK_RECORDS);
+	uint8_t *e = p + (XN_STUB_CLOUDS - XN_STUBS);
+	for (size_t i = 0; i < sizeof clouds_code / 2; ++i) put16(e + 2 * i, clouds_code[i]);
+	put32(e + 0x38, BN6_T3_OBJECTS);
+	put32(e + 0x3C, xvirus_dispatch_side(3));
 }
 
 /* ---- BN5's attack families a Navi runs, in BN6's attack families grown ---- */

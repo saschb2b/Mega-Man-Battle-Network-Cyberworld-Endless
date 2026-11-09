@@ -55,9 +55,11 @@
                                              its buster's level + 1, +0xA 0, r0 its family XN_FAMILY_OF(0x16)), 0x20 bytes */
 #define XN_STUB_SIDES (XN_STUBS + 0x40u)  /* ... BattleState +0x5C's bits r0 ORed into the moved Colonel's own (BN6_COLONEL_SIDES) */
 #define XN_STUB_CHIPDATA (XN_STUBS + 0x50u) /* ... the Dark Soul's chip AI's record of BN6's chip r0 (BN5's 0x0801DF0C): XN_DARK_RECORDS' */
-#define XN_STUBS_END  (XN_STUBS + 0x60u)
+#define XN_STUB_CLOUDS (XN_STUBS + 0x60u) /* ... CloudMan's search for his clouds (BN5_CLOUD_FIND_37) over BN6's third kind's objects, a
+                                             moved type's number read in the dispatch's side table, 0x40 bytes */
+#define XN_STUBS_END  (XN_STUBS + 0xA0u)
 #define XN_SEA        XN_STUBS_END        /* BN5's sea's submerge's code (xsea.c), to: */
-#define XN_SEA_END    (XN_STUBS + 0x100u)
+#define XN_SEA_END    (XN_STUBS + 0x200u)
 #define XN_OBJECTS    XN_SEA_END          /* BN5's engine objects moved once for every track (xnavi_objects.h), to: */
 #define XN_OBJECTS_END (FREE_NAVI_CODE + 0x2000u)
 #define XN_OBJECTS_HOME (XN_HOMES + (XN_HOMES_MAX - 1) * XV_HOME_SIZE)   /* ... their home (their veneers), the last of the homes */

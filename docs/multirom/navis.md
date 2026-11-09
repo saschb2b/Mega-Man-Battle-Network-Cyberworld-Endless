@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Navis"
 description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul and three Darkloids moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:10:00Z }
 ---
 
 # Transplanted Navis
@@ -204,19 +204,26 @@ into the battle engine).
   formula's 0x1B0-0x1C3 are BN6's player's forms), their homes, code and
   art in `FREE_TEAM_NAVIS` (`XN_TEAM_*`), their battle sprites at list 2's
   0x2B-0x30; none moved yet.
-- **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved; his
-  three decisions are settled in writing, not yet built: *his object
-  types* are recorded as CosmoMan's were (the generator derives each
-  moved); *his RAM table at 0x0203CA30* is no table but BN5's third kind's
-  objects less 0x10, read by his search for his clouds
-  (`BN5_CLOUD_FIND_37`: type 0x37 on a side but a slot), which BN6's
-  engine cannot answer by the same bytes: a moved type's object holds the
-  dispatch's type (0xD2) and BN5's number in the dispatch's side table, so
-  the search becomes a stub of the Navis' (`bn5_navi_twins.py`'s STUBS)
-  that reads the side table, never a wider literal; *the sprite loaded by
-  a number made otherwise (0x080C5EEC)* is the third kind's 0x0B's, whose
-  record by its kind gives the sprite (kinds 2-5 his,
-  `BN5_CLOUD_KINDS_0B`): its one copy goes to the Navis' track, which
-  installs first of those that spawn it (the rule of TYPES), its rows'
-  sprites given BN6's numbers as `xchiprecipe.py`'s TABLE_SPRITES gives
-  them now, and the chips spawn the Navis' copy.
+- **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
+  his three decisions are built, one left. *His object types* (the third
+  kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES
+  as CosmoMan's were, each moved as the generator derives it. *His RAM
+  table at 0x0203CA30* is no table but BN5's third kind's objects less
+  0x10, read by his search for his clouds (`BN5_CLOUD_FIND_37`: type 0x37
+  on a side but a slot), which BN6's engine cannot answer by the same
+  bytes: a moved type's object holds the dispatch's type (0xD2) and BN5's
+  number in the dispatch's side table, so the search is the Navis' stub
+  `XN_STUB_CLOUDS` (`bn5_navi_twins.py`'s STUBS; `src/emu/xnavi_room.c`):
+  BN6's 32 objects, the type at +1 the dispatch's and the side table's
+  number by the slot 0x37, the list and count BN5's, never a wider
+  literal. The stubs' room grew to 0xA0 bytes for it, the sea's code and
+  the moved objects one 0x100 on (`XN_OBJECTS` at `FREE_NAVI_CODE` +
+  0x200, `tools/bn5_objects.py`). *Left: the sprite loaded by a number
+  made otherwise (0x080C5EEC)*, the third kind's 0x0B's, whose record by
+  its kind gives the sprite (kinds 2-5 his, `BN5_CLOUD_KINDS_0B`): its one
+  copy goes to the Navis' track, which installs first of those that spawn
+  it (the rule of TYPES), its rows' sprites given BN6's numbers as
+  `xchiprecipe.py`'s TABLE_SPRITES gives them now, and the chips spawn the
+  Navis' copy. That moves the chips' copy of the type and its five sprites
+  (their numbers 0xF7-0xFB) out of `xchips_bn5.c`, so the chips' and the
+  families' specs that spawn it run again with it.
