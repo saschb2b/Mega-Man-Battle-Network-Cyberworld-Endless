@@ -22,7 +22,7 @@ SOUND_TABLES = {
 # sound.md: 0x26-0x62 and fourteen past them, the families' 0x34-0x3F, BN5's 0x40-0x62 and the themes' 0x26-0x31 left
 # alone), the five a movs or a byte can name (to 0xFF) first. A Navi's k-th sound its k-th slot: the ones its code names by
 # a byte the low five
-SOUND_POOL = (0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D, 0x167, 0x16B, 0x16E, 0x172)
+SOUND_POOL = X4.SOUND_POOL   # (the families' generator's list, a late family's sounds taking it too: the owner's call 13)
 SONG_STEP = 0x40
 
 

@@ -1,5 +1,5 @@
-/* xnavi_bn4_sounds.h: BN4's Navis' sounds in the pool of BN6's empty song
- * slots they share, pointed at the battle's Navi's. */
+/* xnavi_bn4_sounds.h: BN4's Navis' sounds, and its late families', in the
+ * pool of BN6's empty song slots they share, pointed at the battle's. */
 #include "xnavi_bn4_sounds.h"
 
 #include <stdlib.h>
@@ -18,13 +18,8 @@
 #define BUS 0x08000000u
 #define NAVIS_MAX 32   /* (BN4's Navis' seats, xnavi_recipe.h XN_BN4_SEATS, and room to spare) */
 
-/* (BN6's empty song slots, each its shared header of no tracks in the player's ROM, that no other track takes: the themes'
- * 0x26-0x31 and the families' 0x34-0x3F below and above the first two, BN5's 0x40-0x62 left alone; the five to 0xFF a movs
- * or a byte names, then those past it; docs/rom/sound.md) */
-const uint16_t xnavi_bn4_pool[XNAVI_BN4_POOL_SLOTS] = { 0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D,
-	0x167, 0x16B, 0x16E, 0x172 };
-
-/* a Navi's songs in the pool: his ids, and each song's slot and its entry (its packed header, its player's word) */
+/* a Navi's songs in the pool, or a late family's: its ids, and each song's slot and its entry (its packed header, its player's
+ * word) */
 typedef struct {
 	int first_id, versions, n;
 	uint16_t slot[XNAVI_BN4_POOL_SLOTS];
@@ -32,12 +27,6 @@ typedef struct {
 } Navi;
 static Navi navis[NAVIS_MAX], pending;
 static int nnavis, pointed = -1;
-
-static bool pool_slot(int slot) {
-	for (int i = 0; i < XNAVI_BN4_POOL_SLOTS; ++i)
-		if (xnavi_bn4_pool[i] == slot) return true;
-	return false;
-}
 
 /* whether `header` is one of the pool's Navis' songs at `slot` */
 static bool pool_song(uint32_t slot, uint32_t header) {
@@ -60,7 +49,7 @@ void xnavi_bn4_songs_set(const XVirusFamily *f, int versions) {
 		uint32_t slot = R.layout->song_table + 8u * s->slot, empty = slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0, now = emu_read32(BUS + slot);
 		/* (a pool slot whose entry, in the player's ROM, is BN6's empty song, a header of no tracks; in the core's copy still
 		 * that, or another BN4 Navi's song of the pool) */
-		if (!pool_slot(s->slot) || empty < BUS || empty - BUS >= ROM_SIZE || R.data[empty - BUS] != 0 ||
+		if (!xv_bn4_pool_slot(s->slot) || empty < BUS || empty - BUS >= ROM_SIZE || R.data[empty - BUS] != 0 ||
 			(now != empty && !pool_song(s->slot, now)) || (uint32_t)s->from * 8 + 8 > ROM_SIZE - x->layout->song_table) {
 			xv_fail("its sound %#x's slot %#x, no free slot of the pool", s->from, s->slot);
 			return;
@@ -89,7 +78,20 @@ void xnavi_bn4_songs_noted(void) {
 	memset(&pending, 0, sizeof pending);
 }
 
-/* the pool's Navi whose ids hold `id`, -1 none */
+void xnavi_bn4_family_songs(int first_id, int versions, int n, const uint16_t *slots, const uint32_t (*entries)[2]) {
+	if (n <= 0 || n > XNAVI_BN4_POOL_SLOTS || nnavis >= NAVIS_MAX) return;
+	for (int i = 0; i < nnavis; ++i)
+		if (navis[i].first_id == first_id) return;   /* (noted once: a core's install runs once) */
+	Navi *v = &navis[nnavis++];
+	*v = (Navi){ first_id, versions, n, { 0 }, { { 0 } } };
+	for (int k = 0; k < n; ++k) {
+		v->slot[k] = slots[k];
+		v->entry[k][0] = entries[k][0];
+		v->entry[k][1] = entries[k][1];
+	}
+}
+
+/* the pool's Navi or family whose ids hold `id`, -1 none */
 static int navi_of(uint32_t id) {
 	for (int i = 0; i < nnavis; ++i)
 		if (id >= (uint32_t)navis[i].first_id && id < (uint32_t)(navis[i].first_id + navis[i].versions)) return i;

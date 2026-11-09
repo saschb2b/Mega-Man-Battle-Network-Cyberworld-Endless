@@ -241,6 +241,9 @@ typedef struct {
 #define XV_LATE_ART     FREE_LATE_FAMILIES /* ... and the late families' (BN4's past its first eight, tools/xrecipe_bn4.py LATE_FROM): their
                                               sprites, the families' art full (its sounds' copies to its end), to: */
 #define XV_LATE_ART_END FREE_LATE_FAMILIES_END
+#define XV_LATE_CODE     FREE_LATE_CODE    /* ... and their code past the families' (XV_CODE to XV_ART) once that is full, block by
+                                              block (tools/xrecipe_bn4.py LATE_CODE), to: */
+#define XV_LATE_CODE_END FREE_LATE_CODE_END
 #define XV_ARMS     (XV_END - XV_LIST_MAX * BN6_ARM_VIRUS_SIZE)   /* the viruses' arm points' records grown to every number of sprite
                                               list 1 (BN6_ARM_VIRUSES_REF pointed here: BN6's bytes for each number, a family's record
                                               at its battle sprite's), to: */
@@ -258,6 +261,13 @@ typedef struct {
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
 #define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
 #define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
+/* The pool of BN6's empty song slots BN4's sounds share by battle (the owner's calls 11 and 13, docs/multirom/bn4.md): a
+ * BN4 Navi's sounds and a late family's, each its k-th sound at the k-th slot, the five a movs or a byte names first; pointed
+ * at the battle's BN4 Navi's or family's songs before each frame (xnavi_bn4_sounds.h) */
+#define XV_BN4_POOL_SLOTS 16
+extern const uint16_t xv_bn4_pool[XV_BN4_POOL_SLOTS];
+/* Whether `slot` is one of the pool's */
+bool xv_bn4_pool_slot(int slot);
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */
@@ -291,6 +301,7 @@ typedef struct {
 	uint32_t code, code_end, art, art_end, stubs, stubs_end;
 	bool screen;   /* code of a screen's, no battle object's: its r5 a state of its own, whose +1 no object type */
 	uint32_t art2, art2_end;   /* a second room its sprites may go to besides art to art_end (the families': the late ones'; 0 none) */
+	uint32_t code2, code2_end; /* ... and its code besides code to code_end (the families': the late ones'; 0 none) */
 } XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
