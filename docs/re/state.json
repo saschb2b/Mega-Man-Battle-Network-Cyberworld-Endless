@@ -62,10 +62,10 @@
     {
       "name": "BN5's Darkloids",
       "state": "works",
-      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan and ShadeMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; both on the dark boards in BN5's own sprites and faces, their battles at the act's version.",
-      "left": "CloudMan and CosmoMan (decisions open in the generator: their object types, a RAM table, a sprite loaded by a number made otherwise), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan and CosmoMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CosmoMan the later acts' own.",
+      "left": "CloudMan (his three decisions settled in writing, not built: his object types recorded as CosmoMan's were; his search for his clouds, 0x080CBFBC, a stub of the Navis' that reads the dispatch's side table for type 0x37; the third kind's 0x0B he spawns, the chips' copy, owned by the Navis' track as the first to install, its rows' sprites as xchiprecipe.py's TABLE_SPRITES give them), CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
       "link": "../game/liberation/overview.md",
-      "updated": "2026-10-25",
+      "updated": "2026-11-09",
       "state_text": "Works"
     },
     {
@@ -153,6 +153,10 @@
   "decisions": [],
   "since": [
     {
+      "date": "2026-11-09",
+      "what": "CosmoMan moved (docs/multirom/navis.md, The Darkloids; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_COSMO_SPAWN_6C, _6D, _79 and BN5_COSMO_HALF_HP, and CloudMan's BN5_CLOUD_FIND_37, BN5_CLOUD_PANEL, BN5_CLOUD_KINDS_0B): cosmoman_v1, cosmoman_v1_keys and cosmoman_sp PASS; the comparator's spawn_leftovers learn a word part of which the spawner writes (compares), and the engine's spark takes its struck attack's rule for its Z."
+    },
+    {
       "date": "2026-11-08",
       "what": "ThunderMan proved: his companion's and cloud's gates on the battle's flags aimed at the dispatch's XV_FIGHT_FLAGS (src/emu/xvirus_dispatch.c; tools/xnavirecipe_bn4_objects.py FIGHT_GATED); the BN4 trace lays out a frame of hits by element (src/dev/xdiff_bn4_trace.c); the comparator's opening_animation (tools/xdiff_bn4_opening.py), Navi-scoped sound rows, spawn leftovers by pointer or bytes, sparks out of the renderer's ranks; thunderman_v1 PASS, four mutations. Not in the tournament's proved list: his plate on BN4's bracket unnamed"
     },
@@ -206,6 +210,13 @@
     }
   ],
   "experiments": [
+    {
+      "feature": "BN5's Darkloids",
+      "date": "2026-11-09",
+      "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
+      "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
+      "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
+    },
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-08",
