@@ -135,25 +135,28 @@ static int dark_parse(Spec *s, const char *name, char *v) {
 
 /* the spec's numbers: MegaMan's panel, HP and element, the frames, the seed, the foes held, the field's column
  * pattern; -1 where `name` is none of them */
+/* setupskip=KEY:N,...: the opening's draws of each KEY paired from its end (Spec.skip_key); -1 where `name` is not it */
+static int skips_parse(Spec *s, const char *name, const char *v) {
+	if (strcmp(name, "setupskip")) return -1;
+	for (const char *p = v; *p && s->nskips < XD_SETUP_SKIPS; ++s->nskips) {
+		unsigned key;
+		int n, used = 0;
+		if (sscanf(p, "%x:%d%n", &key, &n, &used) != 2 || n <= 0 || n > 64) return 0;
+		s->skip_key[s->nskips] = key;
+		s->skip_n[s->nskips] = n;
+		p += used;
+		if (*p == ',') ++p;
+		else if (*p) return 0;
+	}
+	return s->nskips > 0;
+}
+
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
 	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
-	if (!strcmp(name, "setupskip")) {
-		for (const char *p = v; *p && s->nskips < XD_SETUP_SKIPS; ++s->nskips) {
-			unsigned key;
-			int n, used = 0;
-			if (sscanf(p, "%x:%d%n", &key, &n, &used) != 2 || n <= 0 || n > 64) return 0;
-			s->skip_key[s->nskips] = key;
-			s->skip_n[s->nskips] = n;
-			p += used;
-			if (*p == ',') ++p;
-			else if (*p) return 0;
-		}
-		return s->nskips > 0;
-	}
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "sides")) return sscanf(v, "%x", &a) == 1 && a && a < 0x40 && (s->sides = (int)a) > 0;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");
@@ -218,6 +221,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (r < 0) r = dark_parse(s, name, v);
 	if (r < 0) r = souls_parse(s, name, v);
 	if (r < 0) r = film_parse(s, name, v);
+	if (r < 0) r = skips_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);

@@ -898,6 +898,14 @@ static bool summon_keys(const Spec *s, XdLog *a, XdLog *b, const XVirusFamily *c
 	return ok;
 }
 
+/* (the opening's draws of the spec's keys paired from its end, xd_replay_setup_skip: with rng=replay against BN4's alone; false
+ * where the log has no room for them) */
+static bool setup_skips(const Spec *s, XdLog *a, XdLog *b) {
+	for (int i = 0; s->replay && s->bn4 && a && b && i < s->nskips; ++i)
+		if (!xd_replay_setup_skip(b, s->skip_key[i], s->skip_n[i])) return false;
+	return true;
+}
+
 static bool logs_start(Side *a, Side *b, const Spec *s) {
 	const XVirusFamily *fams[MAX_FOES];
 	int n = spec_families(s, fams);
@@ -920,9 +928,7 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	if (s->replay && s->bn4 && a->log && b->log) xd_replay_setup(b->log, a->log);   /* (the family's init draws: BN4's alone) */
-	for (int i = 0; s->replay && s->bn4 && a->log && b->log && i < s->nskips; ++i)   /* (the opening's paired from its end) */
-		if (!xd_replay_setup_skip(b->log, s->skip_key[i], s->skip_n[i])) return false;
-	return true;
+	return setup_skips(s, a->log, b->log);
 }
 
 /* what was traced, and what became of each core's draws */
