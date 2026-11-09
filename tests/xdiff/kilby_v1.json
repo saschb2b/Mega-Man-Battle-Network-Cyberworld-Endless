@@ -1,0 +1,15 @@
+{
+  "about": "BN4 Red Sun's Kilby V1 (BN4's enemy 0x43) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against its BN6 twin moved into BN6's engine (--dev bn4families: BN6's 0x2F6, AI 73; src/emu/xvirus_bn4.c, a late family: its code in the late families' code room, XV_LATE_CODE, its sound 0xCD in the per-battle pool's 0x32), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, each with its evidence; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "43@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1
+}
