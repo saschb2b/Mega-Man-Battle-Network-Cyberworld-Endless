@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:38:57Z }
 ---
 
 # Sources
@@ -211,6 +211,32 @@ records, as `tools/liberation_bn5.py` reads them. A sealed region's route
 to another way is ours, from the player's request the design began with
 ([Liberation Missions](../game/liberation/overview.md)); BN5's own detours are its BarrierPanels and their
 keys, which ours keep.
+
+## BN5's version Gigas and its seven NaviCust programs
+
+**Verified in the ROM** (9 November 2026, for [What is not ported
+yet](../multirom/gaps.md), Chips and NaviCust programs), Team Colonel's
+alone; its rows and how each was read are in [Chips, folders and the
+Library](../rom/chips.md) (The Gigas' version marks) and [The
+NaviCust](../rom/navicust.md) (BN5's NaviCust programs).
+
+- **Which Gigas are Team Colonel's.** BN5's Giga records carry one of two
+  bits (+0x16: 0x04 or 0x08), five and five, as BN6's do. Team Colonel's
+  reward rows give two Gigas, BassAnly and BigHook, both of the 0x08 five
+  (with HolyDrem, CrossDiv and BugCharg); none of the 0x04 five (Bass,
+  DeltaRay, BugCurse, MetrKnuk, OmegaRkt) is in a reward row, a Liberation
+  reward or anywhere in the ROM as a row of rewards. So the 0x04 five are
+  read as Team ProtoMan's: **assumed** for the three whose hand-out was not
+  found (no ROM of Team ProtoMan's is at hand to read the other side).
+  Phoenix and DethPhnx carry neither bit and no row gives them; FinalGun's
+  record is an unlisted pseudo-chip's.
+- **What the seven programs do.** Each sets a byte of MegaMan's NaviStats,
+  read in one place each: SoulT+1 a Soul's turns (3 + it); MegaVirs and
+  GigaVirs raise every enemy of a battle a version or two; SoulClen speeds
+  the dark meter's rise after a battle; Chivalry picks the L button's talk;
+  AutoRun runs MegaMan unheld on the net; HubBatc calls eight other
+  programs' routines. Read as code, none played: what a player sees of
+  each (a message, an icon) was not looked at.
 
 ## The Virus Battler (BN6)
 

@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:04:45Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T23:08:32Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -115,7 +115,7 @@ this audit: the names at `BN5_CHIP_NAMES_LOW`/`HIGH`, the records at
 | The Darkloids' and Nebula's Navi chips: ShadeMan, BlizMan, CloudMan, CosmoMan, LarkMan, GridMan, Django, each V1, SP and DS | 260-280 | Their records: Mega, attack family 0x41 (the Navi chips'), subfamilies 0x01, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13; the SP's power computed (1014-1019, 1022), the DS dark-gated (+0x15 = 2) | **None left** (9 November 2026): ShadeMan's and BlizzardMan's at 505-510, the other fifteen at 512-526, each unit moved, 28 `chip_*` specs PASS ([The chips' code](chips-code.md)). CloudMan's, LarkMan's and GridMan's chips play though their Navis are not moved (each unit copies its Navi's sprite) |
 | Team ProtoMan's Navi chips, Roll's, GunDelEX, Otenko | 215, 219, 221-241 | The registry's header leaves out "Team ProtoMan's version chips"; their records family 0x41, subfamilies 0x02, 0x03, 0x06-0x09, 0x19 | With Team ProtoMan's Navis, if ever |
 | Program Advances: BigNoise, CsmoPris, WildBird, Football, PileDrvr | 343-349 | BN5's list of recipes (`0x08028020`): each is two of a standard chip and a Navi chip's SP or DS (Pulsar3 and ShadeMan's, Astroid3 and CosmoMan's, Katana1 and LarkMan's, MrkCan2 and GridMan's, GunDelS3 and Django's) | **Built** (9 November 2026): a unit each, at 365-367, 603 and 604, five `pa_*` specs PASS ([The chips' code](chips-code.md)). PileDrvr forms only with every chip in \* (BN6's GunDelS3 shares no code with Django): the owner's call whether that stands |
-| Gigas: FinalGun, Bass, DeltaRay, BugCurse, MetrKnuk, OmegaRkt, BugCharg, Phoenix, DethPhnx | 290, 301-305, 310, 313-314 | The registry's header names BugCharg, Phoenix and DethPhnx out; which of the others Team Colonel hands out, and how, is not traced (assumed version or post-game chips) | Traced first (**S**), then a unit each |
+| Gigas: FinalGun, Bass, DeltaRay, BugCurse, MetrKnuk, OmegaRkt, BugCharg, Phoenix, DethPhnx | 290, 301-305, 310, 313-314 | Traced, 9 November 2026 ([Chips, folders and the Library](../rom/chips.md), The Gigas' version marks): their records' version bit (+0x16: 0x04 on Bass, DeltaRay, BugCurse, MetrKnuk and OmegaRkt; 0x08 on the registry's four and BugCharg; neither on Phoenix and DethPhnx; FinalGun unlisted), and Team Colonel's reward rows, which give BassAnly and BigHook alone and none of the 0x04 five | **None to build now; a cut list.** FinalGun: a pseudo-chip of BN5's battles, as BN6's of the name. Bass, DeltaRay, MetrKnuk: Team ProtoMan's, and BN6's chips by name, which a run hands out as BN6's (one chip per name). BugCurse, OmegaRkt: Team ProtoMan's, new names: with Team ProtoMan's Navi chips below, the owner's call (**M** each: support 0x21 and 0x3E). BugCharg: out, it reads BN5's NaviCust's bugs ([One net](one-net.md)). Phoenix, DethPhnx: no version, no row gives them: out, as before |
 | Pseudo-chips no folder holds: the Mode chips and their like, BatCan1-4, the capsules and other copies, the Liberation teammates' chips (C-Cannon, T-Swing, S-Melody, KCrusher, NumTrap, DieBomb, SplitUp, Team ProtoMan's seven) | 281-289, 315-318, 369-388, 401-422 | Library type 3 or codes A, B, C and * alike; read by name, what each runs not traced (Soul charged shots and Liberation pieces, assumed) | Only 401-422 are felt: Liberation, below |
 
 Two things bound this work:
@@ -135,22 +135,22 @@ Two things bound this work:
 
 ## NaviCust programs
 
-Nothing of BN5's NaviCust is in a run or the project's map (no row in
-`docs/rom/navicust.md` or `docs/rom/bn5-*.md`, no name in `bn5.h`).
-Located for this audit: BN5's programs' names in its text beside BN6's
-(BN5 near `0x75A77E`, BN6 near `0x73CA83`, found by encoding AirShoes,
-UnderSht and BugStop), decoded and compared. Seven are BN5's alone:
-**Chivalry, AutoRun, HubBatc, SoulClen, MegaVirs, GigaVirs and SoulT+1**
-(BN6's alone: ChpShufl, NumbrOpn, Poem, SlipRunr, FldrPak1-2). Their
-records, shapes and effects are not located; that SoulT+1 lengthens a
-Soul's turns and MegaVirs and GigaVirs harden viruses is assumed from
-the names. **S** to locate the records and trace each in romlab, then
-**M** each that needs an effect BN6's code lacks (BN6's NaviCust table
-grown, the effect hooked). These are the run's own draft and the
-[BugFrag workshop](../game/navicust.md)'s stock: horizontal choices
-within a run, never power across runs (the owner's call on the buster).
-The new offsets get their `docs/rom/` rows and `bn5.h` names when the work
-starts.
+Traced on 9 November 2026 ([The NaviCust](../rom/navicust.md), BN5's
+NaviCust programs: the records, the names, the effects' table, each
+program's routine and what reads the byte it sets; `bn5_navicust.h`'s
+`BN5_NCP_*`), read in the ROM, none run. Seven programs are BN5's alone
+(BN6's alone: ChpShufl, NumbrOpn, Poem, SlipRunr, FldrPak1-2), and BN5's
+shapes are 5 x 5 where BN6's are 7 x 7. What each does, and where it
+stands:
+
+| Program | What it does in BN5 (verified in its code) | In a run |
+| --- | --- | --- |
+| SoulT+1 (38, a plus part of four cells) | NaviStats +0x32 one more, 6 at most; a Soul's turns are 3 + it | **To build** (**M** to **L**): the one effect BN6's code lacks that a run can use. BN6 keeps the byte and reads it as BN5 does (`BN6_NAVI_TURN_EXTRA`: a Beast Out's turns too), and the engine's Souls with it (`src/emu/soulunite.c`). It takes a program number of its own, 48: BN6's 48 numbers are all taken, 47 being the NaviCust's list's own RUN item (seen in play: a name written for 47 names RUN), so BN6's records, effects' table, names and descriptions grow by one ([The NaviCust](../rom/navicust.md), BN6's program numbers). A plus part that costs board space for a longer Soul is the NaviCust's own tension ([The NaviCust](../game/navicust.md), fit it, or force it); in the workshop's stock only while the run holds a Soul, as the pool leaves out the inert |
+| MegaVirs (33), GigaVirs (34) | Every enemy of a battle one version higher, or two (a virus two ids a tier to its family's last, a Navi one to its third), as BN5's own later levels do | **Cut, the owner's to reverse**: a harder battle for a better chip is the run's own tension already, chosen battle by battle at a Server challenge and run by run on the threat's rungs ([The meta layer](../game/meta/design.md)); a program that raises every battle while it sits on the board is a third lever on the same curve, and the pacing's and the economy's bands are measured without it |
+| HubBatc (27, thirteen cells) | The routines of SprArmr, Custom1, MegFldr1, FstBarr, Shield, FlotShoe, AirShoes and UnderSht in turn, and a flag of its own | **Cut**: eight of the pool's programs, of three of its four builds, in thirteen cells: the board stops being a budget, and it would be the pick whenever it is offered. BN6 dropped the program and kept the name as a Giga chip, which a run hands out |
+| SoulClen (29) | The dark meter's change at a battle's end 1 or 3 up in place of its plain rule | **Cut**: no run has BN5's dark meter (a DarkChip's price in a run is max HP, the owner's call) |
+| Chivalry (22) | Picks the L button's talk, another archive of BN5's text, as Humor does | **Cut**: the L button's talk in a run is the run's own; inert, as Humor and Poem, which the pool leaves out |
+| AutoRun (23) | On the net MegaMan runs with B unheld (a flag set each frame) | **Cut, the owner's to reverse**: it changes how he moves, and MegaMan walks as BN6 walks him ([What is original](../game/fidelity.md)) |
 
 ## Liberation Missions
 
@@ -273,10 +273,11 @@ proposed").
    to the walk's measure (lack 1).
 6. **BN5's comps** (**M**, with BN5's comp theme 0x10). Variety where a
    run's comps repeat. Depends on the tile learning per look.
-7. **BN5's NaviCust programs, SoulT+1 first** (**S** to trace, **M** to
-   build). New picks for the draft and the BugFrag workshop, SoulT+1
-   making the run's Souls a build choice. Depends on locating their
-   records; through the game-design skill before numbers.
+7. **BN5's NaviCust program SoulT+1** (**M** to build; all seven
+   traced, the other six cut, NaviCust programs above). A pick for the
+   draft and the BugFrag workshop that makes the run's Souls a build
+   choice. Depends on BN6's program tables grown by a number (47 is its
+   RUN item); its tier and price through the game-design skill.
 8. **The teammates' own chips on a dark board** (**M**), with Colonel's
    Save traced (**S**). A teammate's battle as BN5's, his Soul and his
    chip. Depends on tracing the pseudo-chips and on ids.

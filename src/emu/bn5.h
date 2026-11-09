@@ -26,6 +26,7 @@
 #define BN5_REWARD_FIND   (BN5_BATTLE_RESULT + 6) /* u16: the screen's second reward, the find of a green Mystery Data still on the field as the battle is won
                                        * (BN5_FIND_ROWS; its BattleState +0x36, 0x080DB616), set as the first is (0x08028690) and given after it (0x08028E5A) */
 #define BN5_REWARD_ROWS   0x081100D4u /* the reward rows: 20 u16 per enemy id, 0x28 apart, as BN6's are (its chooser 0x0810FB18 matches BN6's 0x080AC150) */
+#define BN5_REWARD_ROW_COUNT 377      /* ... its rows, enemy ids 0-376: 367's is BassAnly F in all twenty and 372's BigHook G, the only Gigas a row gives */
 #define BN5_FIND_ROWS     0x0801D62Cu /* the battlefield Mystery Data's finds: a row of eight u16 per its entity's byte 2 >> 4, one drawn by RNG & 0xE as it appears (0x080DB692) */
 #define BN5_FIND_ROW_COUNT 6          /* ... the rows its records name: 1000-3000 zenny, 1-3 BugFrags, from row 1 a chip or two */
 #define BN5_ENTITY_FIND   2           /* a BattleSettings entity's kind (byte 0 >> 4): a green Mystery Data, there where its byte 2 beats RNG % 15 (0x08006874) */
@@ -63,9 +64,7 @@
 #define BN5_NAVI_FOLDER   (BN5_NAVI_STATS + 0x2D) /* u8: the folder MegaMan fights with (0 the first) */
 #define BN5_NAVI_FOLDER1_REG (BN5_NAVI_STATS + 0x2E) /* u8: the first folder's Regular chip, its entry, 0xFF none (BN6_NAVI_FOLDER1_REG's: read as the
                                        * battle builds its deck, 0x08008D64); BN5 has no TagChips (no reader of its NaviStats +0x56) */
-#define BN5_NAVI_ATTACK   (BN5_NAVI_STATS + 0x01) /* u8 Attack, Speed and Charge: the buster's levels less one (0-4), as BN6's (BN6_NAVI_ATTACK): */
-#define BN5_NAVI_SPEED    (BN5_NAVI_STATS + 0x02) /* a shot does Attack + 1 (0x0800F538), a charged one ten times that (0x0800F5B4); Charge picks */
-#define BN5_NAVI_CHARGE   (BN5_NAVI_STATS + 0x03) /* the charge's frames, 100 down to 60 (0x08010682, its table 0x0801CA68); its boot state 0, 0, 0 */
+#include "bn5_navicust.h"   /* (its NaviCust: the programs BN6 has none of, and what each sets) */
 #define BN5_BUSTER_MAX    4           /* the buster's highest level less one */
 #define BN5_BATTLE_NAVI   0x0203C880u /* the battle's copies of the NaviStats, BN5_BATTLE_NAVI_SIZE a side (0x08010D18), made from them as it begins: */
 #define BN5_BATTLE_NAVI_SIZE 0x60     /* ... its buster read from there (0x08010DEE, the object's side), its fields at the NaviStats' offsets */

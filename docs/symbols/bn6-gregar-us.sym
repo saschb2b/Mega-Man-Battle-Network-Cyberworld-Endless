@@ -613,6 +613,7 @@
 08013782 partners_own_battle.to
 08013790 partners_own_battle.to_2
 0801379E BN6_NAVI_BY_OBJECT_END
+080137B6 navistats_byte_set_read
 08013AD8 twin_bn6_0x0801469c_from
 080141F4 BN6_SIDES_TURNER
 080142A4 soul_passives.same
@@ -1356,7 +1357,9 @@
 0813E178 pointer_to_it
 0813E18C BN6_NAVICUST_RELOAD
 0813E238 for_pet_megaman_it_calls
-0813E464 applynavicustprograms_813c684_running_each_program_routine
+0813E464 apply_routine
+0813E528 word_that_names_it
+0813E52C effects_table
 0813F8D4 link_out_pad_copy
 0813FE2C BN6_BBS_ARCHIVES
 0814112C reqBBS_textualPointers
@@ -1420,6 +1423,7 @@
 0873BD88 BN6_KEY_DESCS
 0873C978 ids_from_0x100
 0873C98C RomLayout.navicust_names
+0873CC04 descriptions_archive
 0874BDBC icons_palette
 08782844 BN6_VB_TEXT_5
 0879B9B0 BN6_VB_TEXT_1
