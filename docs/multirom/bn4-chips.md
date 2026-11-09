@@ -55,7 +55,17 @@ battle's real-time chip settled (capped at 0x139 before its mask). An id
 past 511 plays: `--dev alias=600` makes chip 600 a copy of Cannon's
 record, name and description, and the chip step `chip 600 A 30` puts it
 in the folder; the Custom screen deals and draws it (Cannon A 40),
-picked and fired it deletes a Mettaur.
+picked and fired it deletes a Mettaur; the run saved so (`run.sav`
+"CWED") and CONTINUEd deals it again. Proved against nine bits: the
+autopilot's seeds 1-12 from fresh data folders the same run log (66
+battles) and the same pictures at frames 5000, 10000 and 14990; every
+differential spec its nine-bit verdict (421 PASS on dev merged, the two
+recorded FAILs and two smoke INCONCLUSIVEs as before), 246 of 246
+mutations caught; the server's contract tests take a trade and an offer
+of 600 and 1023. The New 3DS's heap modelled (`tools/heap3ds.py`, seeds
+1-3): BN6 alone 85.9 MB, none refused; with BN4 94.7 MB, none refused;
+with BN5 95.8 MB, a few of the tiles' learning caches refused as on 4
+November (docs/engine/emulation/3ds-memory.md), the image 64 KB larger.
 
 Not yet past 511: the pack (its extension in EWRAM ends at 511, and no
 RAM BN6 leaves alone is known for 6 KB more: a chip from 512 is not given
