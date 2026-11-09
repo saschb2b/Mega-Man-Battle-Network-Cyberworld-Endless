@@ -3,6 +3,7 @@
 #define CW_COORDS_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "area_src.h"   /* CoordCell */
@@ -26,6 +27,10 @@ typedef struct {
  * height), pads and `extra`, and points the coordinate-data pointer at ROM
  * offset `slot` at them. */
 bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra);
+
+/* The bytes the layer's last coordinate data took, written or past its
+ * region (the layers' sizes, src/dev/layer_sizes.c). */
+size_t coords_layer_bytes(void);
 
 /* The same for the town (its own space): walls around the cells `floor`
  * says are walkable (8-unit world cells), and `extra` (its triggers). */

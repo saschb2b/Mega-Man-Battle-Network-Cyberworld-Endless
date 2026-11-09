@@ -31,9 +31,13 @@
 #define FREE_WARP_LIST       (EMU_FREE + 0x002F00u)  /* the layer map's warp list (mapslot.c) */
 #define FREE_LAYER           (EMU_FREE + 0x003000u)  /* layer data in two halves (mapslot.c) */
 #define FREE_TILE_MAP        (EMU_FREE + 0x010000u)  /* the generated tile map (netmap.c) */
+#define FREE_TILE_MAP_END    (EMU_FREE + 0x060000u)
 #define FREE_COORDS          (EMU_FREE + 0x060000u)  /* the generated coordinate data (coords.c) */
+#define FREE_COORDS_END      (EMU_FREE + 0x100000u)
 #define FREE_TOWN_TILE_MAP   (EMU_FREE + 0x100000u)  /* the town's tile map (town.c) */
+#define FREE_TOWN_TILE_MAP_END (EMU_FREE + 0x130000u)
 #define FREE_TOWN_COORDS     (EMU_FREE + 0x130000u)  /* the town's coordinate data (coords.c) */
+#define FREE_TOWN_COORDS_END (EMU_FREE + 0x140000u)
 #define FREE_TOWN            (EMU_FREE + 0x140000u)  /* the town's scripts, text and tables (mapslot.c) */
 #define FREE_LAN_HP          (EMU_FREE + 0x148000u)  /* Lan's HP's, then Lan's house's in its second half (mapslot.c, lanhp.c, lan_house.c) */
 
@@ -62,6 +66,7 @@
 #define FREE_FLAME           (EMU_FREE + 0x2E0000u)  /* BN6's own flame of darkness (xnavi.c) */
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
+#define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
 #define FREE_INDOORS         (EMU_FREE + 0x320000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
 
 /* ---- code: +0x330000-+0x7A0000, other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs ---- */

@@ -50,6 +50,10 @@
 #define XGFX_AT     FREE_XAREA              /* another game's area: its tile set and palette (docs/engine/emulation/) */
 #define XGFX_SIZE   0x30000
 
+/* (the bytes the last layer's tile map took: the layers' sizes) */
+static size_t tilemap_bytes;
+size_t netmap_tilemap_bytes(void) { return tilemap_bytes; }
+
 /* the centrepieces' tiles (the four surface areas share their tile set) */
 const int nm_ornament_tile[3] = { 0x379, 0x372, 0x375 };
 
@@ -448,6 +452,16 @@ static bool write_tilemap(const Learned *L) {
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
 	put32(out + 8, (uint32_t)(12 + cells * 2)); /* the second layer, in the decompressed buffer */
+	/* (its region holds the largest map BN6's buffer takes as literal
+	 * blocks, and says so where it would not: docs/engine/emulation/free-space.md) */
+	_Static_assert(12 + 4 + BN6_TILEMAP_MAX + (BN6_TILEMAP_MAX + 7) / 8 + 3 <= FREE_TILE_MAP_END - FREE_TILE_MAP, "the largest tile map past its region");
+	tilemap_bytes = 12 + lz;
+	if (12 + lz > FREE_TILE_MAP_END - FREE_TILE_MAP) {
+		fprintf(stderr, "netmap: a tile map of %u bytes, past its region's %u: not written\n", (unsigned)(12 + lz), (unsigned)(FREE_TILE_MAP_END - FREE_TILE_MAP));
+		free(out);
+		free(map);
+		return false;
+	}
 	emu_write(TILEMAP_AT, out, 12 + lz);
 	if (emu_debug_on()) {
 		FILE *f = emu_debug_file("gen_tilemap.bin");

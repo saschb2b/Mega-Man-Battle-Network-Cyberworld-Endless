@@ -26,7 +26,7 @@
 #define XBG_AT   FREE_BACKDROPS          /* (docs/engine/emulation/) */
 #define XBG_END  FREE_FLAME
 #define XMAP_AT  FREE_MAP_BACKDROPS      /* the net maps' (docs/engine/emulation/) */
-#define XMAP_END FREE_INDOORS
+#define XMAP_END FREE_MAP_BACKDROPS_END
 #define BUS      0x08000000u
 #define BN6_BGS  22                      /* BN6's own, 0x00-0x15 */
 #define XBGS_MAX 8                       /* room after them in the tables' copies */
