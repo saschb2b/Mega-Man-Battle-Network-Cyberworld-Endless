@@ -1,7 +1,7 @@
 /* The stop on the way into an act (docs/world/bn5-town.md): on the act's
  * pink pad in Lan's HP, where the older Net dresses its area, MegaMan asks
  * whether to go in from Oran Isle, the cursor on No (No: the pad's warp, as
- * ever). Yes: the island installed in Seaside Town's map (town.c's Oran
+ * ever). Yes: the island installed in ACDC Town's map (town_styles.c's Oran
  * style), BN6's own jack-out to it, Lan set down on the pier, the run saved
  * there; its jack-in point starts the act's first layer, built at the exit
  * as the pad's. Once a run at most (run.stop), in half the runs
@@ -66,7 +66,7 @@ bool stop_ask(void) {
 
 static bool stop_here(void) { return (run.stop & STOP_HERE) != 0; }
 
-/* the island in Seaside Town's map, its jack-in to the act's first layer */
+/* the island in ACDC Town's map, its jack-in to the act's first layer */
 static bool install(void) {
 	int n = 1;
 	bool sealed = false;

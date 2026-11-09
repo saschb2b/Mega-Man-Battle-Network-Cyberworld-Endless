@@ -137,7 +137,8 @@ static void design_seaside(const TownKit *k) { k->copy(-62, -62, 62, 62, 0, 0, F
  * its plaza, paths and the pond by the Judge Tree at 0) */
 static int green_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
 static void design_green(const TownKit *k) { k->copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
-/* (Oran Isle, BN5's, copied whole in Seaside Town's map: docs/world/bn5-town.md) */
+/* (Oran Isle, BN5's, copied whole in ACDC Town's map, whose colours stay still: Seaside Town's
+ * animates its sea's over the island's trees; docs/world/bn5-town.md) */
 
 const TownStyle town_styles[TOWN_STYLES] = {
 	{ 0x01, 0x00, 0x03, 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
@@ -154,7 +155,7 @@ const TownStyle town_styles[TOWN_STYLES] = {
 	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW,
 	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
 	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
-	{ 0x03, 0x00, BN5_SONG_BEACH_DAY, 1 << 0, { 999, 999, 0, 0 }, { 999, 999, 0, 0 }, green_mat, design_green, BN5_ORAN_DOCK_X, BN5_ORAN_DOCK_Y, FACE_NW,
+	{ 0x00, 0x00, BN5_SONG_BEACH_DAY, 1 << 0, { 999, 999, 0, 0 }, { 999, 999, 0, 0 }, green_mat, design_green, BN5_ORAN_DOCK_X, BN5_ORAN_DOCK_Y, FACE_NW,
 	  { { BN5_ORAN_DOCK_X, BN5_ORAN_DOCK_Y }, { 40, 40 }, { 104, -160 }, { -120, 120 }, { 160, 0 }, { -40, -200 } }, true,
 	  "Oran Isle", "signal post", "signal post on the plaza", { 0, 0 }, 0, 0, 1 + XROM_BN5_COLONEL_US, BN5_ORAN_GROUP, BN5_ORAN_MAP },
 };

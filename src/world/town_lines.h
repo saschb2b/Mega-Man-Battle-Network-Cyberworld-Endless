@@ -17,6 +17,7 @@ typedef struct {
 	int x, y, face, cat, sprite;
 	const char *words;
 	int walk;
+	int z;   /* the floor's height they stand on (a town copied whole: Oran Isle's plaza at 32) */
 } Folk;
 
 /* A town's people and words, by its style (town.c's styles, in their

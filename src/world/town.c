@@ -793,7 +793,7 @@ static uint32_t install_folk(NpcList *npcs) {
 		if (T.folk_at[i][0] == 1 << 20 || fv.out[i]) continue;
 		npc_need_sprite(npcs, who->cat, who->sprite);
 		npcs->script[npcs->n++] = f->walk ? npc_walker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->face, f->walk, archive, script[i]) :
-			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], 0, f->face, archive, script[i], -1, false);
+			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->z, f->face, archive, script[i], -1, false);
 	}
 	return archive;
 }
