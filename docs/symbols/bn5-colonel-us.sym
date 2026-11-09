@@ -89,6 +89,7 @@
 0203C88E BN5_BATTLE_MOOD
 0203C8AC BN5_BATTLE_SOUL
 0203C940 colonelsoul_button_chip
+0203CA30 read_from
 0203CA40 BN5_T3_OBJECTS
 0203E000 BN5_LIB_UNITS
 0203E400 bn5_liberation_board.0x887e5a10_to_ram
@@ -160,6 +161,9 @@
 08006AAE BN5_CHAOS_FAIL_SPAWN
 08006D2A bn5_chips_code.from
 08007120 bn5_lib_foe_hp_back_0x08009050
+080074D2 battle_win
+08007530 BN5_BATTLE_WIN_SONG
+08007532 battle_win_song.at_08007532
 08007954 BN5_LIB_TURN_BANNER
 08007A50 BN5_LIB_WIN_BANNER
 08007A82 BN5_WIN_SONG
@@ -505,6 +509,7 @@
 08029CD4 colonelsoul_button_chip.slot_drawn_2
 08029D34 mode_4_last_draw_call
 0802B3E0 BN5_BATTLE_TYPE
+0802B3F2 battle_win_song.options
 0802B4B0 player_chip_ai
 0802B804 BN5_CHIP_AI_RUN
 0802BA18 BN5_CHIP_AI_DARK
@@ -540,6 +545,12 @@
 08032D04 BN5_LIB_SPRITES_7
 080331B4 XRomLayout.map_table_rw
 080331CC XRomLayout.map_table
+08033220 acdc_town
+08033280 bn5_real_world.at_08033280
+080332BC oran_isle
+0803334C bn5_real_world.harbour
+08033394 castle_town
+080333D0 nebula_base
 080334F0 descriptors_from
 08033FAC XRomLayout.coord_table_rw
 08033FC4 XRomLayout.coord_table
@@ -706,6 +717,9 @@
 0808C39C XRomLayout.battle_bg_scroll
 0808C5E8 XRomLayout.battle_bgs
 0808C9DC XRomLayout.battle_bg_anims
+0808ECAA bn5_real_world.starting_song_0x06_each_frame
+0808F0C9 bn5_real_world.starting_song_0x06_each_frame_2
+0809E114 song_0x23
 080A66D4 BN5_NPC_SCRIPT_CMDS
 080AD930 map_object_table
 080AE2FC handler_3_records
@@ -774,11 +788,17 @@
 080CAC98 colonelsoul_button_chip.searches_2
 080CAD06 BN5_COLONEL_SIDE_SET
 080CB68A bn5_darkloids_navi_4
+080CBD78 BN5_CLOUD_KINDS_0B
+080CBEF6 BN5_CLOUD_PANEL
+080CBFBC BN5_CLOUD_FIND_37
 080CEFCC kinds_bn5
 080CF118 state_table_bn5
 080CF37E spawner_bn5
 080CF6CC anti_trap_sum_into_collision_data
 080D1068 bn5_last_chips_4
+080D3828 BN5_COSMO_SPAWN_6C
+080D3964 BN5_COSMO_SPAWN_6D
+080D56E0 BN5_COSMO_SPAWN_79
 080DB608 find_kept_as_battle_is_won
 080DFD7C BN5_EFFECTS
 080DFFD2 BN5_SPAWN_EFFECT
@@ -838,6 +858,8 @@
 080FAA88 bn5_navis_3
 080FB678 bn5_navis_4
 080FC2AC bn5_navis_5
+080FF87A BN5_COSMO_HALF_HP
+080FF8AC setattack0_with_curaction_11
 08103928 shademan_states_9_12
 08103D62 shademan_states_9_12_0x08103928
 0810436C chaos_unison_5

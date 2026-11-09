@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:17:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -25,7 +25,7 @@ below), ThunderMan, WindMan, FireMan, SearchMan and AquaMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
 [FireMan built](#fireman-built), [SearchMan built](#searchman-built),
 [AquaMan built](#aquaman-built)), and WoodMan ([WoodMan built](#woodman-built)), in
-the tournament's pool on their plates; their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
+the tournament's pool on their plates, JunkMan too ([JunkMan built](#junkman-built)); their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
 ([Roll built](#roll-built)): the enemy she summons is BN6's own Mettaur,
 not yet compared with BN4's. BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
@@ -1436,6 +1436,91 @@ t2015), the summon's word made 0 so the summoned Billy arrives by its own
 state 0, BN6's appear (standing for BN4's `0x0800FCCE` branch to
 `0x0801002A`, t2050), and her 0x131 back on BN6's player 9 (BN6's song
 table, t1880).
+## JunkMan built
+
+The ninth, proved by `junkman_v1` on 9 November 2026: his type 0x47, Navi
+AI 57, ids 0x3A4-0x3A7 (`foes 3A4@52`), his seat 9 by his BN4 id (164), in
+the tournament's pool on his plate 0x0B (`BN4_PLATE_JUNKMAN`). His
+addresses and how each was read are in [BN4 Red Sun's
+tables](../rom/bn4.md) (JunkMan derived). What he asked of the generator
+and the installer:
+
+- **Two calls between his pre-step and his runner** (`navi_pres`,
+  `tools/xnavirecipe_bn4_init.py`): his update runs the pre-step, `movs
+  r0,#9` and `BN4_JUNKMAN_CLEAR` (his +0x73 cleared unless his CurAction
+  is r0), `BN4_JUNKMAN_JUNK` (his junk's count-down and spawn), then the
+  runner and the present. BN6's hook A runs in the same place (after the
+  pre-step, `0x080F368C`), so it is aimed at a shim of his home that makes
+  both calls in turn (`XNavi.pre`, `XnPreCall`; `src/emu/xnavi_init.c`
+  `pre_set`), the first with r0 11, BN6's number of his CurAction 9 (the
+  generator reads the call's `ldrb r1,[r5,#9]; cmp r0,r1` to know r0 is
+  one). BN6's Navi frame keeps the AI index times four in r4 across hook A
+  (`0x080F3682`), which the shim pushes and pops.
+- **His states run with BN4's runner's r4** (`XNavi.runner_r4`,
+  `RUNNER_R4` by his type in `tools/xnavirecipe_bn4_objects.py`). BN4's
+  object runner loads r4 with the object's +0 byte (`ldrb r4,[r5,#0]` at
+  `0x08003166`) and every routine before his state keeps it; BN6's state
+  caller (`0x0801B9E6`) runs a state with r4 its AI data. His MegaMan state
+  110 spawns the third kind's 0x97 (`BN4_JUNK_SPAWN2`) with r4 unset, and
+  BN4's spawn keeps r4 at the object's +4 as a word, which 0x97's state
+  reads at +7 (`0x080E0130`) where only that state writes it. So each of his
+  states is entered through a stub of his home that loads r4 so, without
+  BN6's own bits of +0 (`BN6_OBJ_RESERVED` 0x20, which BN4 has not, and
+  0x04, which BN4's generic state 1 clears, `0x0801013A`, and BN6's keeps,
+  `0x08017888`): `ldrb r4,[r5,#0]; movs r1,#0x24; bics r4,r1; bx r0`
+  (`r4_set`, beside SearchMan's hide stubs; BN6's state caller pushes r4
+  and pops it after the state). Without the stubs `junkman_v1` fails at
+  t347 on 0x97's +4 to +7 (BN4 `0x00020013`, BN6 `0x02023A80`); with
+  BN6's bits kept, at t347 on its +4 alone (0x13 against 0x37).
+- **His records name list 1** (`record_list`): `BN4_ENEMY_KIND` 4 and his
+  sprite's number 0x0A, where his init loads list 2's 0x0A. Their one
+  reader, `BN4_SPRITE_PRELOAD` (`0x08002B0E`), unpacks only an LZ77'd
+  sprite (bit 31, `0x08002B44`) and list 1's 0x0A is raw, so nothing
+  reads them; the install checks them against list 1 for him alone.
+- **His junk**, the third kind's 0x96, and three more of his third-kind
+  objects moved, at the dispatch's numbers the Navis take past WoodMan's
+  (`xrecipe_bn4.TYPE_MORE`, from 0xCF up): 0x96 0xCF, 0x97 0xD0, 0x98
+  0xD1, 0x9B 0xD2. His junk's hits test (`BN4_JUNK_HITS`) copied, its
+  collision data's +0x54 BN6's +0x70, its table of side bits with it; the
+  spawn word `0x06050A01` a number (BN6's own attacks pass it).
+
+`bn4_junkman_control` PASSes. **`junkman_v1`** (JunkMan V1 alone at (5,2)
+against MegaMan idle at (2,2) with 2000 HP) **PASSes** over its 1200
+fight frames: his decision, MegaMan's 109-111, his junk, its draws and
+sounds, his 0x97 and its kin. What the comparator took, each with both
+games' code (`tests/xdiff/legit.json`'s `bn4`):
+
+1. **His state 1's draw** (`0x080C9290`, his +0x72's +1 or -1): BN4's Navi
+   runner runs his states through the paused opening, so BN4 draws it in
+   the opening, before the seed (a setup draw); BN6's runs it in the fight,
+   in its frame before its timer's first tick, seeded. A family's draw the
+   lag puts before the reference's first seeded frame is given the
+   reference's setup draw of its key (`src/dev/xdiff_events.c` `replay`).
+2. **His junk's +4** (`spawn_leftover`): the spawn's r4 from his update's
+   call before his runner, which his junk's spawner never sets: BN4's
+   object runner's 0x13, BN6's AI index times four as his hook A keeps it
+   (0xE4). No code of the junk reads +4 to +7.
+3. **His pool sounds**: 0xA0 at 0x32, 0xA2 at 0x33, 0xBF at 0x63, 0xC0 at
+   0xD0, 0xC8 at 0xE0, 0x14A at 0x104 (through the shim), in his battles
+   alone (`foes`).
+
+Four mutations break his port and each is caught: his decision's CurAction
+off by one (t1), his attack's variables at BN4's +0x70 (t1), his junk
+spawned as his 0x97 (t1) and his sound 0xC0 at the pool's first slot
+(t348). A mutation of his junk's hits test (its +0x70 left at BN4's +0x54)
+was not caught: `junkman_v1` never strikes his junk, so that test is
+unreached, as is 0x97's read of its +7 (it changes no frame there).
+
+The New 3DS's heap with him in (`python3 tools/heap3ds.py --seeds 1-3 --cases bn4,all`, 9 November 2026): BN6 and
+BN4 peak at 94.62 MB of 96 with none refused; all three ROMs at 95.98 MB, 15 refused in 2 of 3 runs (the maps' mirror images,
+`area_src.c`, as before him). His install writes the core's copy alone; the registry and moved-range caps he met are dev's.
+
+**Two mutations his install let through, settled in the differential**:
+Roll's player-22 sound, a poke of the pool slot 0x63's entry, held only
+while she was installed last (dev's pointing of the pool at the spec's
+foe before the pokes, `xd4_pool_point`, settles it); CanGard's region
+number pokes BN5's `0x080C95DE`, inside JunkMan's BN4 block, which a plain
+poke's range search took first: it is a BN5 poke now (`poke5`).
 
 ## SearchMan, AquaMan and Roll folded
 

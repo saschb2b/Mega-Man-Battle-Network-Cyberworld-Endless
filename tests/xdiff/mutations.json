@@ -84,7 +84,7 @@
   {
    "name": "a region number",
    "spec": "cangard_v1",
-   "poke": [
+   "poke5": [
     "080C95DE:2106"
    ],
    "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
@@ -1958,6 +1958,110 @@
     "080CE812:20CD"
    ],
    "what": "the spawn of his third kind's 0x0B (BN4 0x080CE812: movs r0,#0xb, the recipe's dispatch number 0xCC, the first of the third kind's numbers past 0xFF, xrecipe_bn4.TYPE_MORE) made 0xCD, his 0x94's: the dispatch runs his 0x94's copy for it (caught at t199, the objects in play and the run order)"
+  },
+  {
+   "name": "JunkMan's decision's CurAction off by one",
+   "spec": "junkman_v1",
+   "poke": [
+    "080C933A:200A"
+   ],
+   "what": "his decision's movs r0,#7 before the state set (BN4 0x080C933A, the recipe's CurAction 9, MegaMan's state 109 as his) made 10: his 110 run where BN4 runs his 109 (caught at t1)"
+  },
+  {
+   "name": "JunkMan's attack's variables at BN4's +0x70",
+   "spec": "junkman_v1",
+   "poke": [
+    "080C9280:2070"
+   ],
+   "what": "his state 1's own setting of his variables (BN4 0x080C9280: movs r0,#0x70 adds r7, the recipe's BN6 +0xA0, AI_BLOCKS) left at BN4's +0x70: his +0x68 read from another field of BN6's AI data (caught at t1)"
+  },
+  {
+   "name": "JunkMan's junk spawned as his 0x97",
+   "spec": "junkman_v1",
+   "poke": [
+    "080DFF64:20D0"
+   ],
+   "what": "the spawn of his junk, the third kind's 0x96 (BN4 0x080DFF64: movs r0,#0x96, the recipe's dispatch number 0xCF, the Navis' from 0xCF up, xrecipe_bn4.TYPE_MORE) made 0xD0, his 0x97's: the dispatch runs his 0x97's copy for it (caught at t1)"
+  },
+  {
+   "name": "JunkMan's sound 0xC0 at the pool's first slot",
+   "spec": "junkman_v1",
+   "poke": [
+    "080F41B8:2032"
+   ],
+   "what": "his copied MegaMan state 110's sound 0xC0 (BN4 0x080F41B8: movs r0,#0xc0, the recipe's pool slot 0xD0) made the pool's first slot, 0x32: his junk's 0xA0 where BN4 plays 0xC0 (caught at t348, the family's sounds)"
+  },
+  {
+   "name": "VolGear's target read at BN4's players' base",
+   "spec": "volgear_v1",
+   "poke": [
+    "080B6852:3044:2"
+   ],
+   "what": "its fire's aim, the other side's player read from the battle state (BN4 0x080B6850-0x080B6858: lsls r0,#2; adds r0,#0x44; ldr r2,[r0,r1] past [eToolkit +0x18], tools/xrecipe_bn4.py battle_players, its copy's adds made #0xD0) left at BN4's +0x44: BN6's copy reads a word of BN6's battle state that holds no player, its fire's +0x4C 0 where BN4's names MegaMan (caught at t214, the fire's +0x4C and +0x64)"
+  },
+  {
+   "name": "VolGear's fire drawn from BN6's own list 4 0x0A",
+   "spec": "volgear_v1",
+   "poke": [
+    "080D013C:500A:2"
+   ],
+   "what": "the third kind's 0x1A's kinds' table (BN4 0x080D013C, bn4_twins.FAMILY_TABLES), its kind 0's sprite number, given its copy's 0xBF by the recipe (XvByte), left at BN4's 0x0A: the fire VolGear V1 spawns draws BN6's own list 4 0x0A, another picture of other frames (caught at t214, the fire's sprite state)"
+  },
+  {
+   "name": "VolGear's fire spawned as its 0x19",
+   "spec": "volgear_v1",
+   "poke": [
+    "080D02DE:20DF:2"
+   ],
+   "what": "the spawn of the third kind's 0x1A (BN4 0x080D02DE: movs r0,#0x1a, the recipe's dispatch number 0xDE, the late families' from 0xDF down, xrecipe_bn4.LATE_TYPES) made 0xDF, its 0x19's: the dispatch runs its 0x19's copy for it (caught at t214, the objects in play and the run order)"
+  },
+  {
+   "name": "VolGear's battle sprite drawn from Billy's copy",
+   "spec": "volgear_v1",
+   "poke": [
+    "08B34320:08BE0000:4"
+   ],
+   "what": "BN6's grown list 1's 0xC8 (XV_LISTS + 4 * 0xC8), VolGear's copy of BN4's 1:0x02 in the late families' art room (XV_LATE_ART), aimed at Billy's (XV_ART + 0x60000, BN4's 1:0x03): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+  },
+  {
+   "name": "CosmoMan's object spawned as another of his",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4428:206C"
+   ],
+   "what": "the 0x6C's spawn of his third kind's 0x6D (BN5 0x080D3968: movs r0,#0x6D, its copy at XN_MORE + 0xC100 + 0x328) made 0x6C: the dispatch runs the 0x6C's copy for it (caught at t438, the objects in play)"
+  },
+  {
+   "name": "CosmoMan's object's collision offset not moved",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF41C4:6E80"
+   ],
+   "what": "the third kind's 0x6C's read of its hit flags (BN5 0x080D3704: ldr r0,[r0,#0x68], its copy at XN_MORE + 0xC100 + 0xC4) left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "CosmoMan's object's sprite not renumbered",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4134:2210"
+   ],
+   "what": "the third kind's 0x6C's sprite (BN5 0x080D3674: movs r2,#0x10, list 2's 0x10, its copy at XN_MORE + 0xC100 + 0x34) left at BN5's number where the recipe makes it list 2's 0x2A, his battle sprite in BN6"
+  },
+  {
+   "name": "CosmoMan's object's height one more",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF42FC:2211"
+   ],
+   "what": "the third kind's 0x6C's spawner's Z upper half (BN5 0x080D383C: movs r2,#0x10; strh r2,[r0,#0x3E], its copy at XN_MORE + 0xC100 + 0x1FC) made 0x11: the half the leftover rule still compares (legit.json's spawn_leftovers, 0x6C's compares 2 and 3)"
+  },
+  {
+   "name": "CosmoMan's object's count run down twice as fast",
+   "spec": "cosmoman_v1",
+   "poke": [
+    "08DF4E5A:3802"
+   ],
+   "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   }
  ]
 }

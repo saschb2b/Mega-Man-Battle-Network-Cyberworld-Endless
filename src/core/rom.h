@@ -145,6 +145,9 @@ typedef struct {
 	                                           BN4's one kit holds other data under keys 0-35; BN5's are copied whole as they
 	                                           always were, a saved state's music player pointing into the copies */
 	const char *file;                       /* its copy's name where a phone or the browser keeps one ("bn5c.gba") */
+	uint8_t win_songs[2];                   /* its battles' win songs, the numbers BN6's win picks between (its Victory, its Fanfare: the
+	                                           same numbers and the same pick, docs/multirom/music.md); a battle won on its areas plays its
+	                                           own (src/director/win_song.c); 0 none */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;

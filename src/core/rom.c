@@ -427,7 +427,8 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/rom/) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
-		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5", 0x45, 0x1C, .file = "bn5c.gba" },
+		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5", 0x45, 0x1C, .file = "bn5c.gba",
+		.win_songs = { BN5_SONG_VICTORY, BN5_SONG_FANFARE } },
 	/* (its tables as docs/rom/bn4.md found them; its battle backgrounds and
 	 * map routines named in bn4.h, as their records are 9 words to BN5's 7) */
 	[XROM_BN4_RED_SUN_US] = { .name = "Mega Man Battle Network 4: Red Sun (USA)", .sha1 = "a97e96a7da03abd70f7953328e511b9fa29179f1", .code = "B4WE",
