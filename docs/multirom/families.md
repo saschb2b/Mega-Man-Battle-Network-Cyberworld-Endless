@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
 ---
 
 # Transplanted families
@@ -512,7 +512,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
 ## BN4's late families
 
 BN4's families past its first eight (`tools/xrecipe_bn4.py` LATE_FROM),
-VolGear first and Kilby second (9 November 2026), are moved after BN4's
+VolGear first, then Kilby and MagTect (9 November 2026), are moved after BN4's
 Navis took their numbers past the first eight's, and after the families'
 rooms filled:
 
@@ -574,22 +574,22 @@ rooms filled:
   adds r4,#0x2d`, its version in the third byte) read by its adds.
   `kilby_v1`-`v3` PASS (Kilby's readings), four mutations caught; it
   visits as the others do.
+- **MagTect** ([BN4 Red Sun's tables](../rom/bn4.md), MagTect moved): AI
+  74, ids 0x2FC-0x301, its code in the late code room, its sounds 0xB8 and
+  0xF8 the pool's 0x32 and 0x33 (ThunderMan's copy of the same 0xB8 plays
+  at 0x33 in his battles, each battle pointing the pool at its own), its
+  update's shake past the pre-step, the state and the present entered as
+  hook 3, the can-move check's third form copied with it. Its shake draws
+  in every unpaused frame of the opening, which BN4's has two more of than
+  BN6's; the differential pairs those draws from the opening's end (the
+  game unchanged, the owner's call 7's rule). `magtect_v1`-`v3` PASS
+  (MagTect's readings), four mutations caught; it visits as the others do.
 
-The other eight (Gaia, Boomer, MagTect, Dharma, Weather, Spidy, Moloko,
-and Black Earth's NavShado and NavBlack) wait on their own work, their
-sounds' place decided (the pool). Measured by the generator on 9 November
-2026 (a scratch run with each added): MagTect two sounds (0xB8 and 0xF8,
-the pool's 0x32 and 0x33), an I/O word and its update's own step; Spidy
-two, its init's region 57 and floating, its update's order; Boomer one,
-its states 4 and 5 its own, its init's flags; Dharma three, Gaia two,
-Weather five and Moloko two, with more of the engine's work their own.
-MagTect's recipe is whole (no decision open), but `magtect_v1`-`v3` FAIL
-at t1 on its shake's place (+0x36, +0x64): its update's tail shakes it
-every frame of the opening before the appear's bit 0, drawing a number
-each time, and BN4's opening has two such frames more than BN6's (its
-update in its init's frame, bit 0 a frame later; [the
-differential](../devtools/differential.md), The BN4 trace), so BN6's
-copy makes 16 draws where BN4 makes 18, and the replay pairs the k-th
-with the k-th, leaving BN6's last shake on BN4's sixteenth number. The
-game is right as it is (a visitor keeps BN6's opening, the owner's call
-7); the comparison's pairing of the opening's draws is what waits.
+The other seven (Gaia, Boomer, Dharma, Weather, Spidy, Moloko, and
+Black Earth's NavShado and NavBlack) wait on their own work, their sounds'
+place decided (the pool). Measured by the generator on 9 November 2026 (a
+scratch run with each added): Spidy two sounds, its init's region 57 and
+floating, its update's order; Boomer one, its states 4 and 5 its own, its
+init's flags; Dharma three, Gaia two, Weather five (the pool's five
+slots a movs names, all of them) and Moloko two, with more of the
+engine's work their own.

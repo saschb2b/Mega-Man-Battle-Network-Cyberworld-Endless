@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -283,10 +283,11 @@ once proved (call 6's rule: the others join as each is): `volgear_v1`-`v3`
 PASS, its rewards read from BN4's rows as the others' are, its role and
 stage from BN4's records by the same count, the first family moved past
 the first eight's rooms and numbers ([Transplanted families](families.md),
-BN4's late families). Kilby, the eighth, joined the same day the same
-way (`kilby_v1`-`v3` PASS), its one sound BN6 has no song of in the
-per-battle pool (call 13). The other eight wait on their own work, their
-sounds' place decided (the same, measured there).
+BN4's late families). Kilby, the eighth, and MagTect, the ninth, joined
+the same day the same way (`kilby_v1`-`v3`, `magtect_v1`-`v3` PASS),
+their sounds BN6 has no song of in the per-battle pool (call 13). The
+other seven wait on their own work, their sounds' place decided (the
+same, measured there).
 
 Before BN4's visitors reached players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
@@ -545,9 +546,9 @@ family the pool's k-th slot from 0x32, its song copied from the player's
 ROM into the family's art as it installs, and the pool pointed at its
 songs in the battles it is in, as at a Navi's (one BN4 family a visited
 battle holds; [Transplanted families](families.md), BN4's late families).
-Kilby's 0xCD plays at 0x32; MagTect's 0xB8, which ThunderMan plays at
-0x33 in his battles, would play at 0x32 in its own, each battle pointing
-the pool at its own songs.
+Kilby's 0xCD plays at 0x32; MagTect's 0xB8 and 0xF8 at 0x32 and 0x33,
+its 0xB8 the song ThunderMan plays at 0x33 in his battles, each battle
+pointing the pool at its own owner's songs.
 
 ## The owner's calls
 
@@ -662,5 +663,6 @@ the pool at its own songs.
     their own, which the per-run themes' range and BN5's 0x41-0x4B
     (call 8) no longer hold. One BN4 family a visited battle holds, and no
     random battle holds a BN4 Navi, so a battle points the pool at one
-    owner's songs. Built the same day: Kilby's 0xCD at 0x32 (`kilby_v1`-`v3`
-    PASS; [Transplanted families](families.md), BN4's late families).
+    owner's songs. Built the same day: Kilby's 0xCD at 0x32, MagTect's 0xB8
+    and 0xF8 at 0x32 and 0x33 (`kilby_v1`-`v3`, `magtect_v1`-`v3` PASS;
+    [Transplanted families](families.md), BN4's late families).

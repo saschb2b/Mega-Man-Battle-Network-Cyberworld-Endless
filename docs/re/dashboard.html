@@ -251,6 +251,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-09",
       "what": "The pool for BN4's late families (the owner's call 13): a late family's sounds BN6 has no song of take the per-battle pool's slots in order as a BN4 Navi's do (src/emu/xvirus_recipe.h xv_bn4_pool, the Navis' and the families' one list; src/emu/xvirus_songs.c packs them into its art at install, src/emu/xnavi_bn4_sounds.c points the pool at them in its battles); their code past the families' second room in a room of their own (free_space.plan FREE_LATE_CODE, xvirus_recipe.h XV_LATE_CODE). BN4's Kilby (type 0x1E, ids 0x43-0x48) moved, the second late family (AI 73, ids 0x2F6-0x2FB): its code the first in the late code room, its sound 0xCD the pool's 0x32, its effect 0x2D the late families' 0x8F; bn4_battle.h BN4_KILBY_* (docs/rom/bn4.md, Kilby moved)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "BN4's MagTect (type 0x26, ids 0x31-0x36) moved, the third late family (AI 74, ids 0x2FC-0x301): its update's shake entered as hook 3, the can-move check's third form copied, its sounds 0xB8 and 0xF8 the pool's 0x32 and 0x33; bn4_battle.h BN4_MAGTECT_*, BN4_CAN_MOVE_THIRD (docs/rom/bn4.md, MagTect moved). The differential pairs a family's draws in the opening from its end where BN4's opening made more (legit.json's bn4 opening_draws; tools/xdiff_bn4.py opening_skips, the spec item setupskip)."
     }
   ],
   "experiments": [
@@ -268,6 +272,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "kilby_v1-v3: BN4's Kilby V1, V2 and V3 in BN4's battle against its move into BN6's",
       "result": "python3 build.py xdiff kilby_v1 kilby_v2 kilby_v3 (rng replay, lag 1): each PASS over 1200 fight frames once its sound's row named the pool's slot (FAIL at t163 before it: BN4's 0xCD against BN6's 0x32, legit.json's bn4 sounds, a row for its battles alone); its effects 0x8F, 0x92 and 0x93 spawned from t129. Four mutations each FAIL kilby_v1: its sound at the pool's second slot (t163), its effect 0x2D left at BN4's number (t129), a CurAction left at BN4's (t42), its battle sprite's list entry aimed at VolGear's (t1).",
       "meaning": "Kilby joins the visitors (BN4's eighth), the first late family with a sound in the pool and code in the late code room.",
+      "link": "../multirom/families.md"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-09",
+      "name": "magtect_v1-v3: BN4's MagTect V1, V2 and V3 in BN4's battle against its move into BN6's",
+      "result": "python3 build.py xdiff magtect_v1 magtect_v2 magtect_v3 (rng replay, lag 1): each PASS over 1200 fight frames. First FAIL at t1 on its +0x36, +0x64 and +0x9C: its shake draws in every unpaused frame of the opening, BN4's 18 (frames 132-149) against BN6's 16 (72-87), and the setup's replay gave BN6's last BN4's sixteenth; with the opening's draws paired from its end, FAIL at t143-t239 on its sounds until their rows named the pool's slots, then INCONCLUSIVE at t177-t273 on MegaMan's collision word +0x0C (his slide's direction, which the comparator explains, read as a pointer while his hit bits were 3) until that word was held to its byte. Four mutations each FAIL magtect_v1: its 0xF8 at the pool's first slot (t239), a CurAction left at BN4's (t39), its shake every other frame (t1), its battle sprite's list entry aimed at Kilby's (t1).",
+      "meaning": "MagTect joins the visitors (BN4's ninth); a family whose update draws in the opening is proved, the engines' two opening frames named in the comparison.",
       "link": "../multirom/families.md"
     },
     {

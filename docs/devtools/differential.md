@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1635,9 +1635,10 @@ format, its game 4: the trace's header names it):
   (t163), its effect's id left at BN4's 0x2D (t129, the objects in play),
   a CurAction left at BN4's (t42) and its list 1 entry aimed at VolGear's
   copy (t1).
-- **MagTect's first reading** (`magtect_v1`-`v3`, not kept: MagTect V1-V3,
-  BN4's 0x31, 0x33 and 0x35 as BN6's 0x2FC, 0x2FE and 0x300, 9 November
-  2026): its recipe whole, each FAILs at t1 on its +0x36, +0x64 and +0x9C.
+- **MagTect's readings** (`magtect_v1`-`magtect_v3`: MagTect V1-V3, BN4's
+  0x31, 0x33 and 0x35, BN6's 0x2FC, 0x2FE and 0x300, 9 November 2026;
+  [Transplanted families](../multirom/families.md), BN4's late families):
+  its recipe whole, each first FAILed at t1 on its +0x36, +0x64 and +0x9C.
   Its update's tail (`0x080BF064`, hook 3) shakes it whenever the battle
   is not paused, the can-move check's third form allows and its +0x20 is
   a multiple of 4, drawing a number for the shake's offsets each time; in
@@ -1645,13 +1646,28 @@ format, its game 4: the trace's header names it):
   traces' setup draws show BN4's 18 (frames 132-149, the first in its
   init's frame) against BN6's 16 (frames 72-87): BN4's update runs in its
   init's frame and its bit 0 comes a frame later, the two frames the
-  opening's alignment and the battle's offset name. The setup's replay
-  (`xd_replay_setup`) gives BN6's k-th setup draw BN4's k-th, so BN6's
-  last shake takes BN4's sixteenth number where BN4's took its
-  eighteenth. Paired from the opening's end instead (BN6's sixteen with
-  BN4's last sixteen), the state at t1 would be the same: a change of the
-  comparator's setup pairing, not of the game, left for its own reviewed
-  change.
+  opening's alignment and the battle's offset name (The BN4 trace, above).
+  The setup's replay (`xd_replay_setup`) gave BN6's k-th setup draw BN4's
+  k-th, so BN6's last shake took BN4's sixteenth number where BN4's took
+  its eighteenth. **The opening's draws paired from its end**
+  (`legit.json`'s `bn4` `opening_draws`): where BN4's opening made more of
+  a key's draws than BN6's, `tools/xdiff_bn4.py` `opening_skips` runs the
+  battle again with `setupskip=KEY:N`, BN6's k-th setup draw of the key
+  given BN4's (k + N)-th (`src/dev/xdiff_events.c` `replay_setup`), BN4's
+  first N without a twin, and holds BN6's count the same in both runs
+  (else INCONCLUSIVE); the run prints `xdiff: the opening's draws paired
+  from its end`. Shrimpy's and Spikey's one init draw each, the same count
+  in both, keep the k-th pairing. Then FAIL at t143 to t239 on its sounds
+  until `legit.json`'s `bn4` `sounds` named the pool's 0x32 and 0x33 for
+  its ids, and INCONCLUSIVE at t177 to t273 on MegaMan's collision word
+  +0x0C, his pull's direction, which the slide's allowance explains,
+  read whole as a pointer while his hit bits at +0x0F were 3
+  (0x03000004): `slide_direction` holds such a word to the direction's
+  byte, every other byte the same. Each PASSes over 1200 fight frames. Its
+  four mutations (tests/xdiff/mutations.json): its 0xF8 at the pool's first
+  slot (t239), a CurAction left at BN4's (t39), its shake every other frame
+  (t1: its opening's draws more than BN4's, some without a twin, so no
+  pairing holds) and its list 1 entry aimed at Kilby's copy (t1).
 - **WindMan's readings** (`windman_v1`, 8 November 2026; [BN4's Navis in BN6's
   engine](../multirom/bn4-navis.md), WindMan built): what the comparator
   gained for his battle, each reading or allowance from both games' code
