@@ -151,12 +151,12 @@
     },
     {
       "name": "BN4's chips in BN6's tables",
-      "state": "designed",
-      "now": "Designed and scoped, nothing built (docs/multirom/bn4-chips.md): BN4's 388 chip records against BN6's and the registry's, 191 new to a run (100 standard, 12 Mega, 4 Giga, 51 Navi chips, 5 DarkChips, 19 Program Advances), 6 of them on BN6's code (Hole, DrkLine, TimeBomb, LifeAura, BlakBarr, Ball), the rest in 48 units and 18 Navi chips' units sized by a scratch walk against the pairs' index of BN6's routine bodies (an engine base of 340 routines, 13.6 KB, reached by four or more units). Its Program Advance list located (BN4_PA_LIST 0x080212B0, 37 recipes, its kind 1 BN6's kind 4). Chip ids past 511 answered once for BN4's and BN5's chips: ten bits (BN6's code: 47 nine-bit shift pairs, 18 literals 0x1FF, 119 shifts by 9, counted, not read).",
-      "left": "Everything built: the pairings (unit 0), ten-bit ids, the registry rows, the chips' differential against BN4 and the generator's BN4 path, the units. Not read: the nine-bit sites, BN4's PA checker (BN4_PA_LIST_REF's reader assumed), BN4's computed powers' table. The owner's calls: online (stay home or the full set), ten bits first, all or a cut.",
+      "state": "building",
+      "now": "Designed and scoped (docs/multirom/bn4-chips.md); unit 1, ten-bit chip ids, under way. The census of BN6's code that takes a chip's id in nine bits read: of 625 shapes, 128 the code reaches, 85 to patch (113 halfwords: tools/chip_ids.py --table), 2 the reward's (stays nine bits), 6 the link battle's, 37 no chip, the folder editor's 8 item keys and the link battle's real-time chip open (docs/rom/chips-code.md, Ten-bit chip ids; BN6_ENTRY_SPLIT and the rest in bn6_chips.h). The engine's C reads and writes every folder entry through src/core/chip_entry.h (nine bits still), its converter from nine bits unit-tested; the profile's Library holds ids to 1023; the wire's chips go to 1023 (protocol v16).",
+      "left": "Unit 1: the folder editor's item keys (id << 7 | code, about 30 shifts by 7 and 0x7F masks unread), the installer of the census's table, the names' and descriptions' archives 2 and 3, the records and the pack's extension past 511, the marks', keys' and Library flags' tables, the wide rewards at 511, the flip with RUN_MAGIC bumped and run.state's folders converted, and its proofs (xdiff, the autopilot frame for frame, a chip at 600 through the Custom screen, a battle, a save and a trade). Then the registry rows, the chips' differential against BN4, the units.",
       "updated": "2026-11-09",
       "link": "../multirom/bn4-chips.md",
-      "state_text": "Designed, not built"
+      "state_text": "Being built"
     }
   ],
   "decisions": [],
@@ -164,6 +164,10 @@
     {
       "date": "2026-11-09",
       "what": "BN4's chips designed and scoped (docs/multirom/bn4-chips.md): the census, ids past 511 by ten bits for both older games, BN4's Program Advance list (docs/rom/bn4.md, Its Program Advances: BN4_PA_LIST, BN4_PA_LIST_REF, BN4_PA_COUNT, BN4_PA_RECIPES, BN4_PA_KIND_LISTED in bn4_battle.h)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids, unit 1's first part (docs/multirom/bn4-chips.md): the census of BN6's nine-bit sites read and kept by tools/chip_ids.py (docs/rom/chips-code.md, Ten-bit chip ids: BN6_ENTRY_SPLIT, BN6_ENTRY_SPLIT_MASK, BN6_ENTRY_CHEAT, BN6_REWARD_SPLIT, BN6_LINK_CHIP_BOUND, BN6_EDITOR_LIST_OUT, BN6_EDITOR_LIST_IN in bn6_chips.h; BN6_FLAG_LIBRARY_IDS in bn6.h); src/core/chip_entry.h; the profile's Library to 1023; protocol v16."
     }
   ],
   "experiments": [

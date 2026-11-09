@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 257 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T09:50:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:10:00Z }
 ---
 
 # The chip registry
@@ -135,6 +135,16 @@ its one other chip, and a run saved with BN5's chips continued without BN5's ROM
 (its placeholders in the folder, three sitting out of a battle, MegaMan's
 words); the autopilot's seeds 1-12 the same, run log for run log, as
 before the tables moved.
+
+Past 511: the registry's ids end at BN6's nine bits, every free one
+taken but ten; [BN4's chips in a run](bn4-chips.md) answers both older
+games' remaining chips with ten-bit ids. Where it stands: the census of
+BN6's code that takes an id in nine bits (`tools/chip_ids.py`, [The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip ids),
+every C reader and writer of a folder entry through
+`src/core/chip_entry.h`, the profile's Library to 1023 and the wire's
+chips to 1023 (protocol v16); BN6's code patched, the records, names and
+pack past 511 and the registry's rows there are to come.
 
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood

@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, nothing built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, unit 1 (ten-bit chip ids) under way: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,22 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**Unit 1, ten-bit chip ids, under way** (below, The build plan): the
+census of BN6's code is read and kept by `tools/chip_ids.py` ([The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip
+ids): of 625 shapes 128 are code, 85 of them to patch (113 halfwords,
+`--table`), 2 a reward's, 6 the link battle's, 37 no chip, 8 the folder
+editor's item keys and 1 the link battle's real-time chip open. Built:
+every reader and writer of a folder entry in the engine's C through
+`src/core/chip_entry.h` (nine bits still, one number to change), its
+converter from nine bits unit-tested, the profile's Library to 1023, the
+wire's chips to 1023 (protocol v16). Not yet: the installer of the
+table, the folder editor's keys (its shifts by 7, about 30 sites), the
+names' and descriptions' archives 2 and 3, the records and the pack's
+extension past 511, the marks', keys' and Library flags' tables, the
+wide rewards at 511, the flip with `RUN_MAGIC` and the converter wired,
+and the proofs.
 
 A BN4 virus's reward chip that BN6 has by name and kind pays as BN6's
 own; one BN6 lacks pays 200 zenny (`xchips_reward_bn4`, the owner's call
@@ -188,10 +204,17 @@ The three ways, measured:
   rule kept, every row of either game from 512 at an id fixed once.
   Its cost is one audit, done once for both games.
 
-What ten bits take. Located, not yet read: in BN6's code (to
-`0x08150000`) 47 places take the low nine bits by a shift pair (`lsls
-#23`, `lsrs #23`), 18 load 0x1FF as a literal, 119 shift right by 9 (a
-code from an entry, among other uses).
+What ten bits take. Located, then read (unit 1's census, [The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip
+ids): in BN6's code (to `0x08150000`) 47 places take the low nine bits
+by a shift pair (`lsls #23`, `lsrs #23`), 26 load a literal whose low
+half is 0x1FF (18 plain), 119 shift right by 9 and 402 left by 9; of all
+of them 128 are code the game reaches, the rest data read as Thumb. The
+census's verdicts below stand: the hand past the Custom screen holds id
+and code apart, so a chip's attack takes an id, never an entry; the
+reward splits its own entry at `BN6_REWARD_SPLIT`; the folder editor
+keeps its items as id << 7 | code in a halfword, ten bits id << 6 | code
+(the codes to 28 fit six bits).
 
 - **Folders:** an entry becomes the id in its low 10 bits and the code
   from bit 10 (the code needs 5 of the 6 left; bit 15 spare). Every
@@ -461,7 +484,7 @@ Asked and answered on 9 November 2026:
    as they are proved, and BN4 Red Sun's ROM becomes part of the
    common ground the Arena and Trade Central ask of a pair. A player
    without BN4's ROM loses them, so the change is announced ahead as the
-   NetPass asks (unit 8; [Online](../online/index.md)).
+   NetPass asks (unit 8; [the NetPass](../online/netpass.md)).
 2. **Ten-bit chip ids first, for both games**, as recommended: the
    pairings (unit 0) ship before them, and BN5's ShadeMan and BlizzardMan
    chips take the free ids meanwhile.
