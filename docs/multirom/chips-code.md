@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:38:00Z }
 ---
 
 # The chips' code
@@ -265,7 +265,29 @@ of. The registry's ids, records and art stay C1's (above).
   `chip_blizman`, `chip_blizmansp`, `chip_blizmands`,
   `chip_blizmands_dark` PASS; eight mutations caught (each Navi
   routine's grown entry, each attack's object type, each SP's deletion
-  time, each DS let through undark). Skully's spec holds a
+  time, each DS let through undark). Past nine bits (9 November 2026;
+  [The chip registry and BN5's chips' code](../rom/chips-code.md), BN5's
+  Navi chips past nine bits): CloudMan's, CosmoMan's, LarkMan's, GridMan's
+  and Django's V1, SP and DS at 512-526 (BN5's Navi routines 0x0F to 0x13
+  as 0x2C to 0x30). CosmoMan's draws the Navis' copy of his sprite (list
+  2's 0x2A, his seat's); CloudMan's, LarkMan's and GridMan's Navis are
+  not moved, so each unit copies its Navi's battle sprite from BN5 at a
+  number of the chips' in list 2 (0xFD, 0xFC, 0xFE), and Django, who is no
+  Navi of BN5's id table, brings list 3's three. CosmoMan's gate throws
+  three objects of its own and one for each obstacle beside him, drawn as
+  that obstacle: the routines that refuse an obstacle and give its sprite
+  are BN6's twins by BN6's own ids, and the thrown object's default
+  sprite, whose number BN5 sets on the stack, is given the Navis' copy
+  (`STACK_LOADS`). Django[SP]'s power is its own routine, by the battle's
+  turn (150 at the first, 10 more a turn to 250), moved as a helper
+  (`PowerDjangoSP`); the SP and DS powers' table is copied to row 21. The
+  chips' units' install passed 512 writes (`TX_WRITES` 1024). Twenty
+  `chip_*` specs PASS (each Navi's V1, SP, DS and DS dark), twenty
+  mutations caught. Not reached by a spec: an obstacle beside CosmoMan,
+  and the identity of a sprite BN5 keeps LZ77 (the comparison has no
+  bytes of BN5's to hold BN6's whole copy to: a break of CosmoMan's
+  thrown object's sprite number passed); each chip was watched in the
+  game instead, used on a Gunner. Skully's spec holds a
   recorded FAIL (`verdict`): the engine's status mark over the foe (the
   fourth kind's 0x06, the same code in both) drawn from each game's own
   list 5's 0x0B; `--survey`: nothing else differs. Blinder's recorded

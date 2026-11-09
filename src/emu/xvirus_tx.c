@@ -14,7 +14,8 @@
 
 #define TX_BYTES  0x80000   /* a step's bytes at most: the engine's room grown (its reward rows 40 KB), a family with its sprites,
                                or the chips' units with theirs (past 245 KB with ElemRage's), held while the step lasts */
-#define TX_WRITES 512       /* (the chips' units' writes past 256 with CusVolt's: each unit's blocks, veneers, entry, sounds and art) */
+#define TX_WRITES 1024      /* (the chips' units' writes past 256 with CusVolt's and past 512 with the Navi chips past nine bits: each unit's blocks, veneers,
+                               entry, sounds and art) */
 
 static struct {
 	uint8_t *bytes;

@@ -640,7 +640,7 @@ static int dark_table(FILE *out) {
 	/* (BN5's Darkloids' own chips, the prize where the act's Darkloid is one
 	 * of theirs: the runs above meet BN6's Navis, the Darkloids being met only
 	 * once the core has installed them; each act's over par against his V1) */
-	for (int ai = BN5_NAVI_SHADEMAN; ai <= BN5_NAVI_BLIZZARDMAN; ++ai) {
+	for (int ai = BN5_NAVI_SHADEMAN; ai <= BN5_NAVI_COSMOMAN; ++ai) {
 		int sp = lib_darkloid_prize(ai, 0), v1 = lib_darkloid_prize(ai, 1);
 		if (!sp || !v1) continue;
 		int over = 0;

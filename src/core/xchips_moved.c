@@ -145,6 +145,21 @@ const XChipMoved xchips_moved[] = {
 	{ 508, 0x1B, 0x2B },   /* BlizMan */
 	{ 509, 0x1B, 0x2B },   /* BlizMan{9e} */
 	{ 510, 0x1B, 0x2B },   /* BlizMan{9f} */
+	{ 512, 0x1B, 0x2C },   /* CloudMan */
+	{ 513, 0x1B, 0x2C },   /* CloudMn{9e} */
+	{ 514, 0x1B, 0x2C },   /* CloudMn{9f} */
+	{ 515, 0x1B, 0x2D },   /* CosmoMan */
+	{ 516, 0x1B, 0x2D },   /* CosmoMn{9e} */
+	{ 517, 0x1B, 0x2D },   /* CosmoMn{9f} */
+	{ 518, 0x1B, 0x2E },   /* LarkMan */
+	{ 519, 0x1B, 0x2E },   /* LarkMan{9e} */
+	{ 520, 0x1B, 0x2E },   /* LarkMan{9f} */
+	{ 521, 0x1B, 0x2F },   /* GridMan */
+	{ 522, 0x1B, 0x2F },   /* GridMan{9e} */
+	{ 523, 0x1B, 0x2F },   /* GridMan{9f} */
+	{ 524, 0x1B, 0x30 },   /* Django */
+	{ 525, 0x1B, 0x30 },   /* Django{9e} */
+	{ 526, 0x1B, 0x30 },   /* Django{9f} */
 };
 const int xchips_moved_count = (int)(sizeof xchips_moved / sizeof *xchips_moved);
 
@@ -163,6 +178,11 @@ const XChipPower xchips_powers[] = {
 	{ 13, 0x8D },   /* PowerSP: BN5 0800E8D6 */
 	{ 14, 0x8E },   /* PowerSP: BN5 0800E8D6 */
 	{ 15, 0x8F },   /* PowerSP: BN5 0800E8D6 */
+	{ 16, 0x90 },   /* PowerSP: BN5 0800E8D6 */
+	{ 17, 0x91 },   /* PowerSP: BN5 0800E8D6 */
+	{ 18, 0x92 },   /* PowerSP: BN5 0800E8D6 */
+	{ 19, 0x93 },   /* PowerSP: BN5 0800E8D6 */
+	{ 22, 0x96 },   /* PowerDjangoSP: BN5 0800E982 */
 	{ 30, 0x9E },   /* PowerDS: BN5 0800E9A8 */
 	{ 31, 0x9F },   /* PowerDS: BN5 0800E9A8 */
 	{ 32, 0xA0 },   /* PowerDS: BN5 0800E9A8 */
@@ -171,6 +191,11 @@ const XChipPower xchips_powers[] = {
 	{ 35, 0xA3 },   /* PowerDS: BN5 0800E9A8 */
 	{ 36, 0xA4 },   /* PowerDS: BN5 0800E9A8 */
 	{ 37, 0xA5 },   /* PowerDS: BN5 0800E9A8 */
+	{ 38, 0xA6 },   /* PowerDS: BN5 0800E9A8 */
+	{ 39, 0xA7 },   /* PowerDS: BN5 0800E9A8 */
+	{ 40, 0xA8 },   /* PowerDS: BN5 0800E9A8 */
+	{ 41, 0xA9 },   /* PowerDS: BN5 0800E9A8 */
+	{ 44, 0xAC },   /* PowerDS: BN5 0800E9A8 */
 	{ 45, 0xAD },   /* PowerCustSwrd: BN5 0800EA18 */
 	{ 73, 0xC9 },   /* PowerCusVolt: BN5 0800EB06 */
 	{ 74, 0xCA },   /* PowerCusVolt: BN5 0800EB0C */
