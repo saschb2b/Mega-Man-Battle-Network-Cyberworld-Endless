@@ -36,6 +36,10 @@
 #include "indoors.h"
 #include "job_words.h"
 #include "townsrc.h"
+#include "xsong.h"
+#include "xtown.h"
+#include "bn5_world.h"
+#include "oran.h"
 
 #define TOWN_TILEMAP_AT FREE_TOWN_TILE_MAP    /* the town's tile map (LZ77) */
 
@@ -72,7 +76,8 @@ typedef struct TownStyle Style;
 static struct {
 	const Style *style;
 	const TownLines *lines;   /* its people and words */
-	TownBook *books[4], *book;   /* each style's source, learned once; the current one */
+	TownBook *books[TOWN_ORAN + 1], *book;   /* each style's source, learned once; the current one */
+	int want;             /* the style town_plan_style asks for (+ 1), 0 home's */
 	int stw, sth;
 	uint8_t src_obj[32][20];
 	int nsrc_obj;
@@ -221,6 +226,7 @@ struct TownStyle {
 	                                     * (docs/world/home/: Lan jacks in from his PC there); 0 none */
 	unsigned doors;                     /* its other doors kept open, bit n its warp trigger n:
 	                                     * home's AsterLand and Cyber Academy (indoors.c) */
+	int rom, src_group, src_number;     /* another game's town (1 + XRomId, xtown.c): its map, in BN6's (group, number) */
 };
 
 static int env_or(const char *name, int value) {
@@ -340,6 +346,7 @@ static void design_seaside(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
  * its plaza, paths and the pond by the Judge Tree at 0) */
 static int green_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
 static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
+/* (Oran Isle, BN5's, copied whole in Seaside Town's map: docs/world/bn5-town.md) */
 
 static const Style styles[] = {
 	{ 0x01, 0x00, 0x03, 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
@@ -356,10 +363,13 @@ static const Style styles[] = {
 	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW,
 	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
 	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
+	{ 0x03, 0x00, BN5_SONG_BEACH_DAY, 1 << 0, { 999, 999, 0, 0 }, { 999, 999, 0, 0 }, green_mat, design_green, BN5_ORAN_DOCK_X, BN5_ORAN_DOCK_Y, FACE_NW,
+	  { { BN5_ORAN_DOCK_X, BN5_ORAN_DOCK_Y }, { 40, 40 }, { 104, -160 }, { -120, 120 }, { 160, 0 }, { -40, -200 } }, true,
+	  "Oran Isle", "signal post", "signal post on the plaza", { 0, 0 }, 0, 0, 1 + XROM_BN5_COLONEL_US, BN5_ORAN_GROUP, BN5_ORAN_MAP },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
 #define HOME_STYLE 0   /* Central Town, every run's (docs/world/home/) */
-_Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_lines.c)");
+_Static_assert(STYLES == TOWN_LINES && STYLES == TOWN_ORAN + 1, "each style its people and words (town_lines.c)");
 
 /* ---- what the copied pieces bring ---- */
 
@@ -683,11 +693,12 @@ static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
 	T.seed = seed;
 	/* the style (home's, docs/world/home/), its source learned once */
-	int si = env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
+	int si = T.want ? T.want - 1 : env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
 	T.lines = &town_lines[si];
-	if (!T.books[si] && !(T.books[si] = townsrc_learn(T.style->group, T.style->number, T.style->mat_of))) return -1;
+	if (!T.books[si] && !(T.books[si] = townsrc_learn(T.style->rom, T.style->rom ? T.style->src_group : T.style->group,
+		T.style->rom ? T.style->src_number : T.style->number, T.style->mat_of))) return -1;
 	T.book = T.books[si];
 	townsrc_size(T.book, &T.stw, &T.sth);
 	T.nsrc_obj = townsrc_objects(T.book, T.src_obj, 32);
@@ -757,8 +768,10 @@ static int plan_once(uint32_t seed) {
 	moved(sx, sy, &T.info.start_x, &T.info.start_y);
 	T.info.start_face = T.style->start_face;
 	int jx = 0, jy = 0, nj = 0;
-	for (int i = 0; i < T.ntrig; ++i)
-		if (T.trig[i].value == port_trigger()) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
+	/* (the front's cells; a town without one, its own point's: Oran Isle's) */
+	for (int pass = 0; pass < 2 && !nj; ++pass)
+		for (int i = 0; i < T.ntrig; ++i)
+			if (T.trig[i].value == (port_trigger() | pass * 0x80)) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
 	if (nj) { T.info.port_x = jx / nj; T.info.port_y = jy / nj; }
 	for (int i = 0; i < T.ntrig; ++i) if (T.trig[i].value == (JACK_IN_TRIGGER | 0x80)) T.trig[i].value = JACK_IN_TRIGGER;
 	for (int i = 0; i < T.lines->nfolk; ++i) {
@@ -796,7 +809,10 @@ static int plan_once(uint32_t seed) {
 	return st.near;
 }
 
-bool town_plan(uint32_t seed) {
+bool town_plan(uint32_t seed) { return town_plan_style(seed, -1); }
+
+bool town_plan_style(uint32_t seed, int style) {
+	T.want = style + 1;
 	return plan_once(seed) >= 0;
 }
 
@@ -846,7 +862,8 @@ uint32_t *town_render(int *w, int *h) {
 	if (!T.tiles) return NULL;
 	*w = T.info.tw * 8;
 	*h = T.info.th * 8;
-	return area_src_render(0, T.style->group, T.style->number, T.tiles, T.info.tw, T.info.th);
+	return area_src_render(T.style->rom, T.style->rom ? T.style->src_group : T.style->group, T.style->rom ? T.style->src_number : T.style->number,
+		T.tiles, T.info.tw, T.info.th);
 }
 
 int town_triggers(const CoordCell **cells) {
@@ -920,6 +937,8 @@ static uint32_t install_folk(NpcList *npcs) {
 		/* (the man from the lab posts requests at home, and is never out) */
 		bool asks = town_is_home() && who->cat == 5 && who->sprite == LAB_SPRITE;
 		if (asks) fv.out[i] = false;
+		/* (a stop's people, each a decision, are always in: oran.c) */
+		if (T.style->rom && (script[i] = oran_script(&text, i, folk_face(who))) >= 0) { fv.out[i] = false; continue; }
 		script[i] = job_script(&text, asks ? JOB_LAB : -1, folk_face(who), town_folk_words(who->cat, who->sprite, T.lines->folk[i].words));
 	}
 	/* what Lan and MegaMan say when they step out (the director runs it) */
@@ -943,6 +962,10 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	if (!T.tiles || (T.style->door && !indoors_bn6_warps(T.style->group, T.style->number))) return false;
 	uint32_t desc, coord_slot;
 	townsrc_slots(T.book, &desc, &coord_slot);
+	/* (another game's town: in its BN6 map, its tiles and colours copied in;
+	 * a BN6 town's own put back) */
+	if (T.style->rom && !area_src_slots(T.style->group, T.style->number, &desc, &coord_slot)) return false;
+	if (!xtown_gfx(desc, T.style->rom, T.style->src_group, T.style->src_number)) return false;
 	int tw = T.info.tw, th = T.info.th;
 	/* the tile map */
 	size_t cells = (size_t)tw * th, raw = cells * 4;
@@ -993,7 +1016,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 		town_warps(g, n) &&
 		mapslot_checks(g, n, check_script, archive_bytes, archive_len) &&
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
-		mapslot_music(g, n, T.style->song);
+		mapslot_music(g, n, T.style->rom ? xsong_install(T.style->rom - 1, T.style->song, 0x06) : T.style->song);
 	mapslot_town(false);
 	return ok;
 }

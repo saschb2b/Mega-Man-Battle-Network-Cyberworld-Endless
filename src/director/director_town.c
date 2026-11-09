@@ -16,6 +16,7 @@
 #include "director_layer.h"
 #include "director_save.h"
 #include "director_state.h"
+#include "director_stop.h"
 #include "director_way.h"
 #include "emu.h"
 #include "flags.h"
@@ -67,6 +68,7 @@ bool home_counter(uint32_t *archive, int *script) {
 void home_entered(void) {
 	if (!home_in_hp()) return;
 	lanhp_lit(home_lit(), home_lit_back());
+	if (stop_due()) lanhp_hold(0);
 	flag_clear(BN6_FLAG_NO_JACK);
 }
 
@@ -226,14 +228,22 @@ static void link_portal(void) {
 	if (!home_in_hp()) { link_asked = link_on = -1; return; }
 	bool idle = !talk_busy() && !emu_read8(BN6_CHATBOX);
 	if (link_asked >= 0 && idle) {
-		if (flag_get(HOME_LINK_FLAG)) lanhp_take(link_asked);
+		bool yes = flag_get(HOME_LINK_FLAG);
 		flag_clear(HOME_LINK_FLAG);
+		/* (the pink pad's question is the stop's: director_stop.c) */
+		if (link_asked == 0) stop_answer(yes);
+		else if (yes) lanhp_take(link_asked);
 		link_asked = -1;
 		return;
 	}
 	/* (the pink pad, portal 0, is BN6's own warp; on its art in front of
-	 * BN6's trigger, the same warp: lanhp_pad_take) */
+	 * BN6's trigger, the same warp: lanhp_pad_take; held off while the
+	 * stop on the way asks first) */
 	int x = bn6_player_x(), y = bn6_player_y(), k = lanhp_portal_near(x, y, 0);
+	if (k == 0 && stop_due()) {
+		if (link_on != 0 && idle && settled() && stop_ask()) link_asked = link_on = 0;
+		return;
+	}
 	if (k == 0 && idle && settled() && lanhp_pad_take(x, y)) return;
 	if (k <= 0) link_on = -1;
 	else if (k != link_on && idle && settled() && ask_link(k)) link_on = k;
@@ -296,6 +306,7 @@ void home_update(void) {
 	home_saves();
 	link_portal();
 	portal_taken();
+	stop_frame();
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
 		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
 	if (!arrived) return;

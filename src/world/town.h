@@ -31,6 +31,9 @@ static inline uint32_t town_seed(uint32_t run_seed) { return run_seed ^ 0x70776E
 
 /* Plans the town for `seed` and picks its tiles (no core needed). */
 bool town_plan(uint32_t seed);
+/* ... in style `style` (town_lines.h: TOWN_ORAN, Oran Isle, a stop on the
+ * way: docs/world/bn5-town.md); -1 home's, or CYBERWORLD_TOWN_STYLE's */
+bool town_plan_style(uint32_t seed, int style);
 const TownInfo *town_info(void);
 /* Whether the planned town is home: Central Town with Lan's house, his PC
  * the jack-in (docs/world/home/), its port his front door. */

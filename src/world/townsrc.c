@@ -380,11 +380,11 @@ static void learn_profiles(TownBook *b, int vi, bool only_new) {
 	free(line);
 }
 
-TownBook *townsrc_learn(int group, int number, TownMatOf mat_of) {
+TownBook *townsrc_learn(int rom, int group, int number, TownMatOf mat_of) {
 	TownBook *b = calloc(1, sizeof *b);
 	mat_of_index = mat_of;
 	if (!b) return NULL;
-	if (!area_src_load(group, number, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
+	if (!area_src_load_as(rom, group, number, 0, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
 	if (!area_src_mirror(&b->v[0].a, &b->v[1].a)) { area_src_free(&b->v[0].a); free(b); return NULL; }
 	b->tw = b->v[0].a.tw;
 	b->th = b->v[0].a.th;
@@ -474,6 +474,8 @@ int townsrc_parts(const TownBook *b, const int **part, const TownFoot **foot) {
 #define RW_OBJ_SPAWNERS 0x034654u /* RealWorldSpawnMapObjectJumptable */
 
 int townsrc_objects(const TownBook *b, uint8_t (*rec)[20], int max) {
+	/* (another game's town: its objects are its own game's, left out) */
+	if (b->v[0].a.rom) return 0;
 	/* the group's spawner loads its per-map table with its first
 	 * "ldr r1, [pc, #imm]" */
 	uint32_t fn = rom_u32(RW_OBJ_SPAWNERS + (uint32_t)b->v[0].a.group * 4);

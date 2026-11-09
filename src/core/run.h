@@ -64,7 +64,12 @@ typedef struct {
 	 * extras the setup switched off (docs/game/meta/extras.md), a bit each
 	 * (1 << EXTRA_*): set as the run begins, never changed after */
 	uint16_t extras_off;
+	/* (new since the "CWEB" save, which reads it as 0) the stop on the way
+	 * into an act (docs/world/bn5-town.md): STOP_* bits */
+	uint8_t stop;
 } Run;
+/* run.stop: offered (taken or not, once a run), Lan at the island now */
+enum { STOP_SPENT = 1, STOP_HERE = 2 };
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
 /* The short net: three acts, then the Nest on layer 10, whose fall wins

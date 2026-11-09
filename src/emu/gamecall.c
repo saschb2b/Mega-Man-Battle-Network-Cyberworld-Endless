@@ -119,3 +119,14 @@ void emu_warp_link(int entry) {
 }
 
 void emu_warp_out(void) { emu_warp_link(1); }
+
+void emu_warp_jack_out(int entry) {
+	restart_music();
+	/* (internet to real world, bn6f MAP_GROUP_TRANSITION_TYPE_INTERNET_TO_REAL_WORLD:
+	 * the map-enter code takes the saved real-world place) */
+	emu_write8(BN6_WARP_PENDING, 1);
+	emu_write8(BN6_WARP_INDEX, (uint8_t)entry);
+	emu_write8(BN6_WARP_GROUP_KIND, 1);
+	game_call(BN6_WARP_DEPART_JACK_OUT, 0, 0);
+	emu_write8(BN6_WARP_GROUP_KIND, 1);
+}

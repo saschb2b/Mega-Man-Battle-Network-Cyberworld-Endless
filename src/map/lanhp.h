@@ -52,6 +52,8 @@ int lanhp_portal_of(int entry);
  * (issue #110). The blue pad stays BN6's jack-out. */
 void lanhp_lit(unsigned lit, unsigned back);
 /* Portal `k` taken: BN6's link warp to where it points, as its cells'. */
+/* Portal `k`'s own warp held off this frame (the stop on the way asks first). */
+void lanhp_hold(int k);
 void lanhp_take(int k);
 /* The portal MegaMan at world (x, y) faces (`face` 0-7) for A; -1 none. */
 int lanhp_portal_ahead(int x, int y, int face);

@@ -13,6 +13,7 @@
 #include "bn5_liberation.h"
 #include "bn5_music.h"
 #include "bn6.h"
+#include "bn5_world.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -392,6 +393,10 @@ int xsong_install(int xrom, int song, int fallback) {
 		static const uint8_t board_songs[] = { BN5_SONG_LIBERATION, BN5_SONG_MISSION_OPEN, BN5_SONG_LIB_WON, BN5_SONG_ONE_TURN_WIN };
 		for (size_t k = 0; XR[XROM_BN5_COLONEL_US].data && k < sizeof board_songs; ++k)
 			if (slot_of(XROM_BN5_COLONEL_US, board_songs[k]) < 0) copy_in(XROM_BN5_COLONEL_US, board_songs[k], false, SLOT_FIRST + X.nsongs);
+		/* then Oran Isle's Beach Day, the island's song on a stop on the
+		 * way (docs/world/bn5-town.md), after the rest, which keep their places */
+		if (XR[XROM_BN5_COLONEL_US].data && slot_of(XROM_BN5_COLONEL_US, BN5_SONG_BEACH_DAY) < 0)
+			copy_in(XROM_BN5_COLONEL_US, BN5_SONG_BEACH_DAY, false, SLOT_FIRST + X.nsongs);
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;
