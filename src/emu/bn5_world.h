@@ -23,7 +23,7 @@
  * (the paths up to the mine and down to the dock's maps) lead to its other
  * maps, which the run leaves out. The dock: the pier's walk, where the boat
  * lies. */
-#define BN5_ORAN_DOCK_X     (-24)       /* where Lan arrives: on the pier, the boat behind him */
+#define BN5_ORAN_DOCK_X     (-48)       /* where Lan arrives: on the pier (x -56..-40 between its walls, height 32), the boat behind him */
 #define BN5_ORAN_DOCK_Y     152
 #define BN5_ORAN_DOCK_Z     32
 #define BN5_ORAN_PORT_X     104         /* the jack-in point's middle */
