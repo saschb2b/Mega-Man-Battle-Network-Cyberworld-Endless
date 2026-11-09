@@ -24,6 +24,7 @@
 #define RUN_MAGIC_V8 0x43574538u /* "CWE8" */
 #define RUN_MAGIC_V9 0x43574539u /* "CWE9" */
 #define RUN_MAGIC_VA 0x43574541u /* "CWEA" */
+#define RUN_MAGIC_VB 0x43574542u /* "CWEB" */
 
 typedef struct {
 	bool active;
@@ -149,6 +150,15 @@ static bool load_va(void) {
 	return true;
 }
 
+/* (no stop on the way yet) */
+static bool load_vb(void) {
+	Run v;
+	if (!save_read_blob_upto("run.sav", RUN_MAGIC_VB, &v, sizeof v) || !v.active) return false;
+	v.stop = 0;
+	run = v;
+	return true;
+}
+
 static void old_route(uint32_t seed, int depth, int biome, int side, uint32_t layer_seed, const uint8_t *biomes) {
 	uint32_t keep = rng_state();
 	run_new(seed);   /* the new areas' guardians */
@@ -187,7 +197,7 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if (load_va() || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
+	if (load_vb() || load_va() || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

@@ -267,7 +267,8 @@ bool home_return(void) { return home_arrive(NULL, true); }
 
 bool home_rebuild(void) {
 	work_out_ways();
-	return home_install();
+	/* (saved on the stop's island: it installed after home: director_stop.c) */
+	return home_install() && stop_rebuild();
 }
 
 void home_resume(void) {

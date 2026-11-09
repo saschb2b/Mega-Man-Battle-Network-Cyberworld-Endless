@@ -25,6 +25,7 @@
 #include "qr.h"
 #include "rom.h"
 #include "run.h"
+#include "run_stop.h"
 #include "bracket.h"
 #include "analytics.h"
 #include "audio_pace.h"
@@ -6836,6 +6837,28 @@ static void test_liberation_floor(void) {
 /* The Darkloid's heal in his phase, BN5's (BN5_LIB_HEAL): a tenth of his
  * max for each dark panel round him (dark, an item's, a DarkHole, his
  * ring), his max at most, none at full HP or with none dark round him */
+/* The stop on the way (docs/world/bn5-town.md): over 300 seeds, half the
+ * runs hold it, at one act at most, from act 2 and never the Nest's, and
+ * only where the older Net dresses the act's way */
+static void test_stop(void) {
+	int coins = 0;
+	for (uint32_t seed = 1; seed <= 300; ++seed) {
+		bool coin = run_stop_coin(seed * 2654435761u);
+		coins += coin;
+		for (int acts = 3; acts <= 6; acts += 3) {
+			int stands = 0, first = -1;
+			for (int act = 0; act <= acts; ++act) {
+				bool older = ((seed >> act) & 3) != 0;   /* (a mix of dressed acts) */
+				bool fits = coin && run_stop_fits(act, acts, older);
+				if (fits && first < 0) { first = act; ++stands; }
+				CHECK(!fits || (act >= 1 && act < acts && older), "seed %u: the stop before act %d of %d", seed, act + 1, acts);
+			}
+			CHECK(stands <= 1, "seed %u: the stop stands %d times", seed, stands);
+		}
+	}
+	CHECK(coins >= 120 && coins <= 180, "the stop in %d runs of 300 (half: 120-180)", coins);
+}
+
 static void test_liberation_heal(void) {
 	static LibBoard b;
 	memset(&b, 0, sizeof b);
@@ -6870,6 +6893,7 @@ int main(void) {
 	test_layer_make();
 	test_fork_read();
 	test_glitch();
+	test_stop();
 	test_extras();
 	test_bracket_draw();
 	test_layouts_build();

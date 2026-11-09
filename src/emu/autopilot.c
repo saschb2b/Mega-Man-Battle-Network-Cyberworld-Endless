@@ -566,6 +566,14 @@ static bool route_wanted(void) {
 	return want;
 }
 
+/* (CYBERWORLD_AUTOPILOT_STOP: the stop on the way taken, its question
+ * answered Yes: docs/world/bn5-town.md) */
+static bool stop_wanted(void) {
+	static int want = -1;
+	if (want < 0) want = getenv("CYBERWORLD_AUTOPILOT_STOP") != NULL;
+	return want;
+}
+
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	/* (a liberation's board, docs/game/liberation/: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
@@ -592,11 +600,11 @@ static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t 
 	return HOME_WALK;
 }
 
-/* A chat paged with A; the route's link's question, the cursor on No: one
- * press across to Yes first, as LEFT goes round the two */
+/* A chat paged with A; the route's link's question or the stop's, the
+ * cursor on No: one press across to Yes first, as LEFT goes round the two */
 static uint32_t chat_keys(uint32_t frame) {
 	static int asked;
-	if (route_wanted() && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
+	if ((route_wanted() || stop_wanted()) && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
 		if (++asked < 20) return asked >= 8 && asked < 10 ? KEY_LEFT : 0;
 	} else asked = 0;
 	return (frame / 4) & 1 ? KEY_A : 0;

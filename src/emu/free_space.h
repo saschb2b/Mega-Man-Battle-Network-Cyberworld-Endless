@@ -61,6 +61,8 @@
 #define FREE_BACKDROPS       (EMU_FREE + 0x2A0000u)  /* other games' battle backgrounds (xbackdrop.c) */
 #define FREE_FLAME           (EMU_FREE + 0x2E0000u)  /* BN6's own flame of darkness (xnavi.c) */
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
+#define FREE_XTOWN           (EMU_FREE + 0x2E1000u)  /* another game's town's tile set and 256 colours (Oran Isle's, 60 KB) (xtown.c) */
+#define FREE_XTOWN_END       (EMU_FREE + 0x2F0000u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
 #define FREE_INDOORS         (EMU_FREE + 0x320000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
 
@@ -172,6 +174,7 @@
 	X("FREE_XNAVIS", (EMU_FREE + 0x260000u), (EMU_FREE + 0x2A0000u), "", "world") \
 	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
 	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
+	X("FREE_XTOWN", (EMU_FREE + 0x2E1000u), (EMU_FREE + 0x2F0000u), "", "world") \
 	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
 	X("FREE_INDOORS", (EMU_FREE + 0x320000u), (EMU_FREE + 0x330000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \

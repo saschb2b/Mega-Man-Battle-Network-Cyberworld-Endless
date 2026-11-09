@@ -64,6 +64,7 @@ typedef struct { uint64_t key; int first, n; } Key;
 
 struct TownBook {
 	View v[2];
+	bool alias;            /* v[1]'s map is v[0]'s (no mirror learned: a town copied whole picks no tile) */
 	int tw, th;
 	Entry *e;
 	int ne;
@@ -380,12 +381,16 @@ static void learn_profiles(TownBook *b, int vi, bool only_new) {
 	free(line);
 }
 
-TownBook *townsrc_learn(int group, int number, TownMatOf mat_of) {
+TownBook *townsrc_learn(int rom, int group, int number, TownMatOf mat_of, bool mirror) {
 	TownBook *b = calloc(1, sizeof *b);
 	mat_of_index = mat_of;
 	if (!b) return NULL;
-	if (!area_src_load(group, number, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
-	if (!area_src_mirror(&b->v[0].a, &b->v[1].a)) { area_src_free(&b->v[0].a); free(b); return NULL; }
+	if (!area_src_load_as(rom, group, number, 0, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
+	/* (a town copied whole takes every tile as it stands: its mirror, as
+	 * large as the map, would teach it nothing, and the New 3DS's heap
+	 * refused it at the stop on the way, tools/heap3ds.py --stop) */
+	if (!mirror) { b->v[1].a = b->v[0].a; b->alias = true; }
+	else if (!area_src_mirror(&b->v[0].a, &b->v[1].a)) { area_src_free(&b->v[0].a); free(b); return NULL; }
 	b->tw = b->v[0].a.tw;
 	b->th = b->v[0].a.th;
 	for (int vi = 0; vi < 2; ++vi) classify(&b->v[vi]);
@@ -436,7 +441,7 @@ TownBook *townsrc_learn(int group, int number, TownMatOf mat_of) {
 void townsrc_free(TownBook *b) {
 	if (!b) return;
 	for (int vi = 0; vi < 2; ++vi) {
-		area_src_free(&b->v[vi].a);
+		if (!(vi && b->alias)) area_src_free(&b->v[vi].a);
 		free(b->v[vi].cell);
 		free(b->v[vi].entry);
 		free(b->v[vi].walk);
@@ -474,6 +479,8 @@ int townsrc_parts(const TownBook *b, const int **part, const TownFoot **foot) {
 #define RW_OBJ_SPAWNERS 0x034654u /* RealWorldSpawnMapObjectJumptable */
 
 int townsrc_objects(const TownBook *b, uint8_t (*rec)[20], int max) {
+	/* (another game's town: its objects are its own game's, left out) */
+	if (b->v[0].a.rom) return 0;
 	/* the group's spawner loads its per-map table with its first
 	 * "ldr r1, [pc, #imm]" */
 	uint32_t fn = rom_u32(RW_OBJ_SPAWNERS + (uint32_t)b->v[0].a.group * 4);

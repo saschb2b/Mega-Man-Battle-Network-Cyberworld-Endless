@@ -64,6 +64,7 @@ typedef struct {
 	bool arena_busy; /* arenabusy: --dev arena's second player steps, shoots and OKs the Custom screen by the frame's number alone (the rollback's guesses tried) */
 	bool arena_both; /* arenaboth: its first player a script too, the Custom screen's OK and charged shots; in the Net Square, Lan's Yes to a challenge at once and his keys the same script (a battle that plays itself, arena.h) */
 	bool bn4families; /* bn4families: the differential's BN4 families counted (xdiff_bn4.h); they install wherever BN4's ROM is read (xvirus_bn4.h) */
+	bool stop;      /* stop: the stop on the way (docs/world/bn5-town.md) at the next act's pink pad, whatever the seed and the area */
 	bool showbn4;   /* showbn4: once BN4 Red Sun offered before players had it; it is offered now (rom.h's xrom_offered), the flag kept for the browser's ?dev=showbn4 */
 	bool feel;      /* feel: each beat, rumble and trigger effect the controller's feel sends, on stdout (feel_out.h) */
 	bool quit_end;  /* quitend: the game quits once --dev rollbench and --dev arena are done (a run sent to a device, 3dslink's netloader back) */

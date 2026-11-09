@@ -267,6 +267,10 @@ int lanhp_portal_ahead(int x, int y, int face) {
 	return -1;
 }
 
+void lanhp_hold(int k) {
+	if (k >= 0 && k < LANHP_PORTALS) flag_set(BN6_FLAG_WARP_OFF + portal_entry[k]);
+}
+
 void lanhp_take(int k) {
 	if (k >= 0 && k < LANHP_PORTALS) emu_warp_link(portal_entry[k]);
 }

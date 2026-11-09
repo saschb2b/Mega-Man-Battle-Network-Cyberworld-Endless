@@ -131,6 +131,17 @@ static const char *const green_checks[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
+/* Oran Isle (BN5's, docs/world/bn5-town.md): three people on the walk from
+ * the pier to the signal post, each a decision, their talk the stop's own
+ * (oran.c: the guardian's word, the stall, the job); its checks say
+ * nothing, the island's other paths holding nothing to collect. */
+static const Folk oran_folk[] = {
+	{ 24, 56, FACE_SW, 5, 0x2E, "Nice breeze today!", 0, 32 },
+	{ 64, -16, FACE_SW, 5, 0x30, "The boat's on time today.", 0, 32 },
+	{ 72, -88, FACE_SW, 5, 0x2C, "Off for a dive?", 0, 32 },
+};
+static const char *const oran_checks[16] = { NULL };
+
 /* A run that brought BeastOut (issue #99): Dad's word that the PET's
  * CybeastButton is unlocked from the start, as the Cybeast's fall would
  * have had him unlock it (issue #109), the first time a profile brings it
@@ -213,6 +224,7 @@ const TownLines town_lines[TOWN_LINES] = {
 	{ FOLK(acdc_folk), acdc_checks, "@M ACDC Town,Lan! The Metroline's so fast!|" },
 	{ FOLK(seaside_folk), seaside_checks, "@M Seaside Town,Lan! Smell that sea air!|" },
 	{ FOLK(green_folk), green_checks, "@M Green Town,Lan! Smell those flowers!|" },
+	{ FOLK(oran_folk), oran_checks, NULL },
 };
 
 _Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK &&

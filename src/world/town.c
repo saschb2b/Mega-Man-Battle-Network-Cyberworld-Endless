@@ -35,6 +35,7 @@
 #include "townmath.h"
 #include "indoors.h"
 #include "job_words.h"
+#include "town_style.h"
 #include "townsrc.h"
 
 #define TOWN_TILEMAP_AT FREE_TOWN_TILE_MAP    /* the town's tile map (LZ77) */
@@ -58,7 +59,6 @@
 #define LAB_SPRITE 0x2D   /* the man from the lab, of list 5 */
 
 enum { P_COPY, P_TILE };
-enum { F_JACK_IN = 1 };
 
 typedef struct {
 	uint8_t kind, flags;
@@ -67,12 +67,13 @@ typedef struct {
 	int sw, sh;           /* P_TILE: the source strip, repeated */
 } Piece;
 
-typedef struct TownStyle Style;
+typedef TownStyle Style;
 
 static struct {
 	const Style *style;
 	const TownLines *lines;   /* its people and words */
-	TownBook *books[4], *book;   /* each style's source, learned once; the current one */
+	TownBook *books[TOWN_STYLES], *book;   /* each style's source, learned once; the current one */
+	int want;             /* the style town_plan_style asks for (+ 1), 0 home's */
 	int stw, sth;
 	uint8_t src_obj[32][20];
 	int nsrc_obj;
@@ -196,170 +197,6 @@ static void raster(void) {
 			}
 	}
 }
-
-/* ---- the styles ---- */
-
-/* A town's style: the original it is cut from (and whose map it takes
- * over), its plan, and what is said there. Points are in the original's
- * world units, moved with the piece they lie in. */
-struct TownStyle {
-	int group, number, song;
-	unsigned jack_ins;                  /* the original's jack-in points kept: bit n for 0x40 + n */
-	int front[4];                       /* the landmark's front (the original's cells x0, y0, x1, y1):
-	                                     * R jacks in anywhere Lan stands there */
-	int statue[4];                      /* the statue's own cells: R jacks in all round it too */
-	TownMatOf mat_of;
-	void (*design)(void);
-	int start_x, start_y, start_face;   /* where Lan arrives */
-	int look[TOWN_SPOTS][2];            /* places worth a look */
-	bool whole;                         /* copied whole, with its own walls and heights (not the
-	                                     * plan's walls round flat walkable cells) */
-	const char *name, *landmark, *landmark_at;
-	int port_src[2];                    /* the act's second and third ways' ports: the original's
-	                                     * jack-in point (0x40 + n) or check (0xF0 + n) made one */
-	int door;                           /* the original's warp trigger into Lan's house, home's front door
-	                                     * (docs/world/home/: Lan jacks in from his PC there); 0 none */
-	unsigned doors;                     /* its other doors kept open, bit n its warp trigger n:
-	                                     * home's AsterLand and Cyber Academy (indoors.c) */
-};
-
-static int env_or(const char *name, int value) {
-	const char *v = getenv(name);
-	return v ? atoi(v) : value;
-}
-
-/* -- Central Town (0x01:0) -- */
-
-static int central_mat(int i) {
-	if (i == 0) return TM_VOID;
-	if (i == 10) return TM_ROAD;
-	if (i >= 1 && i <= 3) return TM_MARK;
-	if (i == 4) return TM_SIDE;
-	if (i >= 5 && i <= 8) return TM_COBB;
-	if (i >= 80 && i <= 84) return TM_BRICK;
-	if ((i >= 32 && i <= 39) || i == 15 || i == 17 || i == 18 || i == 20 || i == 97 || i == 98)
-		return TM_GRASS;   /* (the pinks 106-109 are the houses' walls) */
-	return TM_EDGE;
-}
-
-/* The original's cells, generously: the slab spans x -25..20, y -25..40;
- * past it hang its faces and the backs of the tall pieces. */
-#define SX0 (-31)
-#define SX1 24
-#define SY0 (-33)
-#define SY1 45
-
-/* The plan: the original, widened by w cells (0 or 8): the Expo gates
- * stand further from the Academy, the plaza, the main road and the houses'
- * cobbled court grow wider. The cuts run through ground that is the same
- * all along them: the north-west road's middle (row -18|-17) splits the
- * gates' band, stretched in the gap between the Expo gates and the Academy
- * (x -5|-4), from the middle, stretched through the plaza's brick and the
- * main road (x 5|6); the main road's near curb (row 10|11) splits that from
- * the houses', stretched through their court (x -22|-21). */
-static void design_central(void) {
-	int w = env_or("CYBERWORLD_TOWN_VARIANT", 0) ? 8 : 0;   /* (home: the same each run) */
-	/* the gates' band */
-	copy(SX0, SY0, -5, -18, 0, 0, 0);
-	tile(-4, SY0, -5 + w, -18, -5, SY0, 1, -18 - SY0 + 1);
-	copy(-4, SY0, SX1, -18, w, 0, 0);
-	/* Aster Land, the plaza, the main road */
-	copy(SX0, -17, 5, 10, 0, 0, F_JACK_IN);
-	tile(6, -17, 5 + w, 10, 5, -17, 1, 28);
-	copy(6, -17, SX1, 10, w, 0, F_JACK_IN);
-	/* the houses and the bus stop */
-	copy(SX0, 11, -22, SY1, 0, 0, 0);
-	tile(-21, 11, -22 + w, SY1, -22, 11, 1, SY1 - 11 + 1);
-	copy(-21, 11, SX1, SY1, w, 0, 0);
-	/* the trees on the verge between the gates, a row 4 cells apart (where
-	 * in their cells the original's stand) */
-	for (int x = -3; x < -3 + w; x += 4) more_tree(x * 8 + 4, -24 * 8 + 4);
-}
-
-/* -- ACDC Town (0x00:0) -- */
-
-static int acdc_mat(int i) {
-	if (i == 0) return TM_VOID;
-	if (i == 6 || (i >= 182 && i <= 186)) return TM_ROAD;   /* (with its joints) */
-	if (i == 10) return TM_MARK;                             /* the crossings */
-	if (i >= 1 && i <= 3) return TM_SIDE;
-	if (i >= 11 && i <= 15) return TM_GRASS;                 /* lawn, walkable in its rims */
-	if (i >= 89 && i <= 92) return TM_GRASS;                 /* bushes */
-	if (i >= 121 && i <= 123) return TM_COBB;                /* the park's dirt */
-	return TM_EDGE;
-}
-
-/* The original's cells: the slab spans x -39..39, y -23..22. */
-#define AX0 (-45)
-#define AX1 46
-#define AY0 (-31)
-#define AY1 29
-
-/* The plan: ACDC Town's blocks in one row between its roads: the park and
- * Higsby's (x -33..-14), the L of houses round the Metroline with Dex's
- * block in its notch (x -9..22), the mansion at the end. The first two
- * trade places half the time, and the road between them (4 cells) goes
- * with them, stretched from the original's. The cuts run down the roads
- * from the back road to the avenue's near curb (row 10|11); below it they
- * run down the avenue and the promenade clear of each block's crossing, so
- * a crossing and its landing go with the block at whose corner they lie. */
-static void design_acdc(void) {
-	if (!env_or("CYBERWORLD_TOWN_VARIANT", rnd_range(0, 1))) {
-		copy(AX0, AY0, AX1, AY1, 0, 0, F_JACK_IN);
-		return;
-	}
-	/* the blocks and the road between them */
-	copy(AX0, AY0, -34, 10, 0, 0, 0);
-	copy(-9, AY0, 22, 10, -24, 0, F_JACK_IN);
-	tile(-1, AY0, 2, 10, -12, AY0, 1, 10 - AY0 + 1);
-	copy(-33, AY0, -14, 10, 36, 0, F_JACK_IN);
-	copy(23, AY0, AX1, 10, 0, 0, 0);
-	/* the avenue, the promenade and the slab's face below them */
-	copy(AX0, 11, -36, AY1, 0, 0, 0);
-	copy(-11, 11, 22, AY1, -24, 0, 0);
-	tile(-1, 11, 0, AY1, -12, 11, 1, AY1 - 11 + 1);
-	copy(-35, 11, -14, AY1, 36, 0, 0);
-	copy(23, 11, AX1, AY1, 0, 0, 0);
-}
-
-/* -- Seaside Town (0x03:0) -- */
-
-/* (its ground is copied whole: the materials only tell sky from the rest) */
-static int seaside_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
-
-/* The plan: the original as it stands, with its own walls and heights (the
- * plaza at 0, the walkway over the whale and the station at 64, the pier
- * at -32), which the other towns' flat plans do not model; the whole of
- * it, since the roofs' and the whale's art stands on cells far up the
- * picture. */
-static void design_seaside(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
-
-/* -- Green Town (0x04:0) -- */
-
-/* (copied whole, as Seaside Town: its planks, ponds and stumps stand at 16,
- * its plaza, paths and the pond by the Judge Tree at 0) */
-static int green_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
-static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
-
-static const Style styles[] = {
-	{ 0x01, 0x00, 0x03, 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
-	  { { -40, 266 }, { 100, -30 }, { -150, -16 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
-	  "Central Town", "bird statue", "bird statue on the plaza", { 0, 0 }, 1, 1u << 2 | 1u << 4 },
-	{ 0x00, 0x00, 0x24, 1 << 0, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW,
-	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
-	  "ACDC Town", "squirrel statue", "squirrel statue in the park", { 0x41, 0xF7 } },
-	/* (its own two ports the act's other ways: the fountain is the landmark) */
-	{ 0x03, 0x00, 0x06, 0, { -8, -15, -6, -8 }, { -18, -16, -9, -7 }, seaside_mat, design_seaside, 4, -100, FACE_SW,
-	  { { 4, -100 }, { -100, -100 }, { -120, -170 }, { 40, -70 }, { 150, 40 }, { 300, 0 } }, true,
-	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", { 0x40, 0x41 } },
-	/* (its port the original's own, round the knight statue) */
-	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW,
-	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
-	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
-};
-#define STYLES ((int)(sizeof styles / sizeof *styles))
-#define HOME_STYLE 0   /* Central Town, every run's (docs/world/home/) */
-_Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_lines.c)");
 
 /* ---- what the copied pieces bring ---- */
 
@@ -679,21 +516,56 @@ static bool folk_spot_ok(int cx, int cy, int x, int y, bool port) {
 	return true;
 }
 
+/* the style asked for (town_plan_style), else the dev switch's, else home's */
+static int wanted_style(void) {
+	int si = T.want ? T.want - 1 : town_env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
+	return si < 0 || si >= TOWN_STYLES ? 0 : si;
+}
+
+/* The port's middle: its front's cells, else (a town without one: Oran
+ * Isle's) its own point's; how many cells */
+static int port_middle(void) {
+	int jx = 0, jy = 0, nj = 0;
+	for (int pass = 0; pass < 2 && !nj; ++pass)
+		for (int i = 0; i < T.ntrig; ++i)
+			if (T.trig[i].value == (port_trigger() | pass * 0x80)) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
+	if (nj) { T.info.port_x = jx / nj; T.info.port_y = jy / nj; }
+	return nj;
+}
+
+/* The learned sources but `keep`'s let go (-1 all): another game's town
+ * is learned with no other kept, and let go once installed, as the New
+ * 3DS's heap has no room for both at the stop on the way (tools/heap3ds.py
+ * --stop); home's is learned again at its next visit */
+static void forget_books(int keep) {
+	for (int k = 0; k < TOWN_STYLES; ++k)
+		if (k != keep && T.books[k]) { townsrc_free(T.books[k]); T.books[k] = NULL; }
+	if (keep < 0) T.book = NULL;
+}
+
+/* Style `si`'s source, learned once (another game's alone) */
+static bool learned(int si) {
+	if (T.style->rom) forget_books(si);
+	return T.books[si] || (T.books[si] = town_style_learn(T.style)) != NULL;
+}
+
+static int coin(void) { return rnd_range(0, 1); }
+static const TownKit kit = { copy, tile, more_tree, coin };
+
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
 	T.seed = seed;
 	/* the style (home's, docs/world/home/), its source learned once */
-	int si = env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
-	if (si < 0 || si >= STYLES) si = 0;
-	T.style = &styles[si];
+	int si = wanted_style();
+	T.style = &town_styles[si];
 	T.lines = &town_lines[si];
-	if (!T.books[si] && !(T.books[si] = townsrc_learn(T.style->group, T.style->number, T.style->mat_of))) return -1;
+	if (!learned(si)) return -1;
 	T.book = T.books[si];
 	townsrc_size(T.book, &T.stw, &T.sth);
 	T.nsrc_obj = townsrc_objects(T.book, T.src_obj, 32);
 	T.npieces = 0;
 	T.nmore = 0;
-	T.style->design();
+	T.style->design(&kit);
 	/* the map's size: the floor with room for the camera, and every copied
 	 * tile (roofs rise past the floor); then the whole plan moved to sit
 	 * in the map's middle, by steps that keep the tile grid and the brick */
@@ -756,10 +628,7 @@ static int plan_once(uint32_t seed) {
 	if (getenv("CYBERWORLD_TOWN_START")) sscanf(getenv("CYBERWORLD_TOWN_START"), "%d,%d", &sx, &sy);   /* (the original's world units) */
 	moved(sx, sy, &T.info.start_x, &T.info.start_y);
 	T.info.start_face = T.style->start_face;
-	int jx = 0, jy = 0, nj = 0;
-	for (int i = 0; i < T.ntrig; ++i)
-		if (T.trig[i].value == port_trigger()) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
-	if (nj) { T.info.port_x = jx / nj; T.info.port_y = jy / nj; }
+	int nj = port_middle();
 	for (int i = 0; i < T.ntrig; ++i) if (T.trig[i].value == (JACK_IN_TRIGGER | 0x80)) T.trig[i].value = JACK_IN_TRIGGER;
 	for (int i = 0; i < T.lines->nfolk; ++i) {
 		int fx, fy;
@@ -796,7 +665,10 @@ static int plan_once(uint32_t seed) {
 	return st.near;
 }
 
-bool town_plan(uint32_t seed) {
+bool town_plan(uint32_t seed) { return town_plan_style(seed, -1); }
+
+bool town_plan_style(uint32_t seed, int style) {
+	T.want = style + 1;
 	return plan_once(seed) >= 0;
 }
 
@@ -846,7 +718,8 @@ uint32_t *town_render(int *w, int *h) {
 	if (!T.tiles) return NULL;
 	*w = T.info.tw * 8;
 	*h = T.info.th * 8;
-	return area_src_render(0, T.style->group, T.style->number, T.tiles, T.info.tw, T.info.th);
+	return area_src_render(T.style->rom, T.style->rom ? T.style->src_group : T.style->group, T.style->rom ? T.style->src_number : T.style->number,
+		T.tiles, T.info.tw, T.info.th);
 }
 
 int town_triggers(const CoordCell **cells) {
@@ -920,6 +793,8 @@ static uint32_t install_folk(NpcList *npcs) {
 		/* (the man from the lab posts requests at home, and is never out) */
 		bool asks = town_is_home() && who->cat == 5 && who->sprite == LAB_SPRITE;
 		if (asks) fv.out[i] = false;
+		/* (a stop's people, each a decision, are always in: oran.c) */
+		if ((script[i] = town_style_folk(T.style, &text, i, folk_face(who))) >= 0) { fv.out[i] = false; continue; }
 		script[i] = job_script(&text, asks ? JOB_LAB : -1, folk_face(who), town_folk_words(who->cat, who->sprite, T.lines->folk[i].words));
 	}
 	/* what Lan and MegaMan say when they step out (the director runs it) */
@@ -934,7 +809,7 @@ static uint32_t install_folk(NpcList *npcs) {
 		if (T.folk_at[i][0] == 1 << 20 || fv.out[i]) continue;
 		npc_need_sprite(npcs, who->cat, who->sprite);
 		npcs->script[npcs->n++] = f->walk ? npc_walker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->face, f->walk, archive, script[i]) :
-			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], 0, f->face, archive, script[i], -1, false);
+			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->z, f->face, archive, script[i], -1, false);
 	}
 	return archive;
 }
@@ -942,7 +817,7 @@ static uint32_t install_folk(NpcList *npcs) {
 bool town_install(int to_group, int to_number, int x, int y) {
 	if (!T.tiles || (T.style->door && !indoors_bn6_warps(T.style->group, T.style->number))) return false;
 	uint32_t desc, coord_slot;
-	townsrc_slots(T.book, &desc, &coord_slot);
+	if (!town_style_take(T.style, T.book, &desc, &coord_slot)) return false;
 	int tw = T.info.tw, th = T.info.th;
 	/* the tile map */
 	size_t cells = (size_t)tw * th, raw = cells * 4;
@@ -991,9 +866,10 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	int g = T.style->group, n = T.style->number;
 	bool ok = archive && mapslot_install(g, n, &npcs, NULL, 0) &&
 		town_warps(g, n) &&
-		mapslot_checks(g, n, check_script, archive_bytes, archive_len) &&
+		(archive_len <= 0 || mapslot_checks(g, n, check_script, archive_bytes, archive_len)) &&   /* (a town with none: Oran Isle) */
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
-		mapslot_music(g, n, T.style->song);
+		mapslot_music(g, n, town_style_song(T.style));
 	mapslot_town(false);
+	if (T.style->rom) forget_books(-1);
 	return ok;
 }

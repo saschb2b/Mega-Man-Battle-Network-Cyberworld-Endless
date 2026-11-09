@@ -54,6 +54,7 @@ FREE_SONGS             +0x1A0000  +0x260000  -    xsong.c                   mult
 FREE_XNAVIS            +0x260000  +0x2A0000  -    xnavi.c                   multirom/overview.md        other games' Navis and map objects
 FREE_BACKDROPS         +0x2A0000  +0x2E0000  -    xbackdrop.c               multirom/overview.md        other games' battle backgrounds
 FREE_FLAME             +0x2E0000  +0x2E1000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
+FREE_XTOWN             +0x2E1000  +0x2F0000  end  xtown.c                   world/bn5-town.md           another game's town's tile set and 256 colours (Oran Isle's, 60 KB)
 FREE_MAP_BACKDROPS     +0x2F0000  +0x320000  -    xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
 FREE_INDOORS           +0x320000  +0x330000  -    mapslot.c,indoors.c,aster_land.c,academy.c  world/home/asterland-and-academy.md  home's other places
 

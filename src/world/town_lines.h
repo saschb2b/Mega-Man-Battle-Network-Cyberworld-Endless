@@ -17,6 +17,7 @@ typedef struct {
 	int x, y, face, cat, sprite;
 	const char *words;
 	int walk;
+	int z;   /* the floor's height they stand on (a town copied whole: Oran Isle's plaza at 32) */
 } Folk;
 
 /* A town's people and words, by its style (town.c's styles, in their
@@ -27,7 +28,7 @@ typedef struct {
 	const char *const *checks;
 	const char *arrival;
 } TownLines;
-#define TOWN_LINES 4
+#define TOWN_LINES 5
 extern const TownLines town_lines[TOWN_LINES];
 
 /* What Lan and MegaMan say as a run begins, in Lan's room: on the first

@@ -31,5 +31,8 @@ void emu_warp(int group, int number, int x, int y, int facing);
 void emu_warp_out(void);
 /* ... to entry `entry` of it, as its trigger cells would. */
 void emu_warp_link(int entry);
+/* ... out of the internet to the real world: Lan set down where the saved
+ * real-world place says (BN6_SAVED_MAP and the rest), as BN6's jack-out does */
+void emu_warp_jack_out(int entry);
 
 #endif

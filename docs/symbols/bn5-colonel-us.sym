@@ -551,6 +551,7 @@
 080334F0 descriptors_from
 08033FAC XRomLayout.coord_table_rw
 08033FC4 XRomLayout.coord_table
+0803404C coordinate_data_list
 08034E44 BN5_MAP_SCRIPTS
 08034EA4 bn5_map_objects.real_world
 08034EBC BN5_NET_MAP_SCRIPTS
@@ -924,6 +925,9 @@
 08492EF8 order_points_41
 0849D508 chip_83
 084A3300 bn5_darkchips.lz77
+084F82D8 island_tile_set
+084FD48C oran_isle_read.palette
+084FD630 tile_map
 085A7DE4 each_liberation_mission_5
 085AB6C0 map_0
 085AE0B0 each_liberation_mission_6
@@ -950,6 +954,7 @@
 0861C5AC each_liberation_mission_15
 08623130 BN5_LIB_PANEL_TILES
 08624310 BN5_LIB_LOOKS
+0862BB5C coordinate_data
 086BA484 BN5_LIB_CURSOR_TILES
 086CCD24 BN5_LIB_CURSOR_PAL
 086CCD24 BN5_LIB_DIGITS_PAL
