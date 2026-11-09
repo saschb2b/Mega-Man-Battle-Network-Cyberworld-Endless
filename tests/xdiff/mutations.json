@@ -1252,6 +1252,66 @@
    "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
   },
   {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_shademan",
+   "poke": [
+    "08E00878:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0x1E (XC_NAVI + 0x78) left at their stub (XC_STUBS + 4) where the install points it at ShadeMan's moved routine (BN5's Navi routine 0x01): no ShadeMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip ShadeMan's attack's type",
+   "spec": "chip_shademan",
+   "poke5": [
+    "080CB668:2033"
+   ],
+   "what": "ShadeMan's attack spawned as BN5's third kind's 0x33 (movs r0,#0x34 at BN5's 0x080CB668, written at its copy) where its own moved 0x34 runs"
+  },
+  {
+   "name": "a moved Navi routine's entry",
+   "spec": "chip_blizman",
+   "poke": [
+    "08E008AC:08E00C05:4"
+   ],
+   "what": "the grown Navi routines' entry 0x2B (XC_NAVI + 0xAC) left at their stub (XC_STUBS + 4) where the install points it at BlizzardMan's moved routine (BN5's Navi routine 0x0E): no BlizzardMan, the foe keeps its 280"
+  },
+  {
+   "name": "the Navi chip BlizMan's snowball's type",
+   "spec": "chip_blizman",
+   "poke5": [
+    "080DCAC8:20B1"
+   ],
+   "what": "BlizzardMan's snowball spawned as BN5's third kind's 0xB1 (movs r0,#0xB2 at BN5's 0x080DCAC8, written at its copy) where its own moved 0xB2 runs"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_shademnsp",
+   "poke": [
+    "08E00C4A:0100:2"
+   ],
+   "what": "ShadeMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 13, ShadeMn[SP]'s record's power less 1001; src/emu/xchips_code.c) 256 frames where BN6 keeps none (0xFFFF) and BN5's save none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_blizmansp",
+   "poke": [
+    "08E00C4C:0100:2"
+   ],
+   "what": "BlizzardMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 14, BlizMan[SP]'s record's power less 1001) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_shademnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets ShadeMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: ShadeMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_blizmands",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets BlizManDS through while MegaMan is not dark where BN5's dark gate refuses it: BlizzardMan's snowball where BN5's is the chip of nothing (0x185)"
+  },
+  {
    "name": "DarkInvs's time a frame short",
    "spec": "chip_darkinvs",
    "poke5": [

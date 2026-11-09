@@ -4965,6 +4965,29 @@ static void test_xchips(void) {
 	uint16_t to5[3], from5[3];
 	CHECK(xchips_pair(names6b, 3, (const char (*)[XCHIP_NAME])names5, 3, to5, from5) == 1 && to5[1] == 1 && !to5[2] && !from5[2],
 		"xchips: BN5's M-Cannon pairs with BN6's, its Roll DS (%s) not with Roll", names5[2]);
+	/* (BN4's names in BN6's codes: its dash 0x40, plus 0x46 and dot 0x4E,
+	 * each its own code, BN6's 0x98, 0x9E and 0xA6; docs/multirom/bn4-chips.md,
+	 * The census) */
+	static const uint8_t atk4[] = { 0x0B, 0x39, 0x30, 0x46, 0x02, 0x01, 0xE6 }, mcannon4[] = { 0x17, 0x40, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33, 0xE6 },
+		driver4[] = { 0x1A, 0x4E, 0x0E, 0x37, 0x2E, 0x3B, 0x2A, 0x37 };
+	char bn4name[3][XCHIP_NAME];
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN4_RED_SUN_US, atk4, sizeof atk4, bn6, sizeof bn6), bn4name[0], XCHIP_NAME);
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN4_RED_SUN_US, mcannon4, sizeof mcannon4, bn6, sizeof bn6), bn4name[1], XCHIP_NAME);
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN4_RED_SUN_US, driver4, sizeof driver4, bn6, sizeof bn6), bn4name[2], XCHIP_NAME);
+	CHECK(!strcmp(bn4name[0], "Atk+10") && !strcmp(bn4name[1], "M-Cannon") && !strcmp(bn4name[2], "P.Driver"), "xchips: BN4's Atk+10, M-Cannon and "
+		"P.Driver spelt as BN6's (%s %s %s)", bn4name[0], bn4name[1], bn4name[2]);
+	/* (BN4's Navi chips by Navi and version, made-up records: ids 1-3 a
+	 * Navi's V1, SP and DS, 4 another's V1, 5 an SP of another family, 6 a
+	 * standard chip whose first parameter is 3, 7 a DS whose V1 is an SP) */
+	static const uint8_t ver[8] = { 0, 0, 3, 4, 0, 3, 3, 4 }, cls4[8] = { 0, 1, 1, 1, 1, 1, 0, 1 };
+	static const uint16_t navi[8] = { 0, 0x0C2F, 0x0C2F, 0x0C2F, 0x0C02, 0x0C06, 0x0C02, 0x0C06 };
+	CHECK(xchips_v1_of(ver, navi, cls4, 8, 2) == 1 && xchips_v1_of(ver, navi, cls4, 8, 3) == 1, "xchips: BN4's SP and DS by their V1 (%d %d)",
+		xchips_v1_of(ver, navi, cls4, 8, 2), xchips_v1_of(ver, navi, cls4, 8, 3));
+	CHECK(!xchips_v1_of(ver, navi, cls4, 8, 1) && !xchips_v1_of(ver, navi, cls4, 8, 5) && !xchips_v1_of(ver, navi, cls4, 8, 6) &&
+		!xchips_v1_of(ver, navi, cls4, 8, 7) && !xchips_v1_of(ver, navi, cls4, 8, 0), "xchips: a V1, another Navi's, a standard chip, a DS after an SP: none");
+	CHECK(xchips_sp_named("ProtoMn\x04") && !xchips_sp_named("ProtoMan") && !xchips_sp_named("ProtoMn\x03") && !xchips_sp_named(""),
+		"xchips: BN6's SP by its mark, its EX and V1 not");
+	CHECK(!xchips_bn4_paid(205) && xchips_reward_bn4(205 | 18 << 9) == (0x4000 | XCHIPS_STAND_IN), "xchips: no BN4 chip paired without the ROMs, the stand-in");
 	/* (a reward entry of BN5's as BN6's: no chip paired without the ROMs,
 	 * the stand-in's zenny; zenny, BugFrags and none as they are) */
 	CHECK(xchips_reward_bn6(0x0001) == (0x4000 | XCHIPS_STAND_IN) && xchips_reward_bn6(0x43E8) == 0x43E8 && xchips_reward_bn6(0xC003) == 0xC003 &&
@@ -5093,9 +5116,14 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 257 && own == 138 && plays == 8 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 8 playing now, "
+	CHECK(xreg_count == 263 && own == 144 && plays == 8 && dark == 7 && pas == 15, "registry: 263 chips, 144 of ids of their own, 8 playing now, "
 		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
-	CHECK(high == 15 + 94, "registry: the Program Advances and 94 chips past 319, in the pack's extension (%d)", high);
+	CHECK(high == 15 + 100, "registry: the Program Advances and 100 chips past 319, in the pack's extension (%d)", high);
+	/* (the Darkloids' first batch in the free ids, 511 held for the wide
+	 * rewards: docs/multirom/bn4-chips.md, Past 511) */
+	const XChipReg *shade = xreg_of_bn5(260), *bliz_ds = xreg_of_bn5(265);
+	CHECK(shade && shade->bn6 == 505 && shade->how == XREG_MOVED && bliz_ds && bliz_ds->bn6 == 510 && xreg_at(510) == bliz_ds && !xreg_at(XREG_WIDE_REWARD),
+		"registry: ShadeMan's V1 at 505, BlizManDS at 510, nothing at 511");
 	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
 	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
 	CHECK(!xreg_check(moved_row, 1, why, sizeof why) && xreg_check(no_way, 1, why, sizeof why) == 1, "registry: a moved chip's row taken, a way past it refused");
@@ -5107,8 +5135,8 @@ static void test_chip_registry(void) {
 	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
 		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
-	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
-		"registry: the free ids, BN6's own and its pseudo-chips' not");
+	CHECK(xreg_free_id(203) && xreg_free_id(510) && !xreg_free_id(XREG_WIDE_REWARD) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) &&
+		!xreg_free_id(512), "registry: the free ids, BN6's own, its pseudo-chips' and the wide rewards' 511 not");
 	/* (made-up rows, each breaking one rule) */
 	static const XChipReg twice[] = { { 9, 204, XREG_RECORD, 23, 0xFF, { 0 }, 0, 0 }, { 9, 205, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
 	static const XChipReg taken[] = { { 12, 221, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
@@ -5226,8 +5254,8 @@ static void test_chips_image(void) {
 		"chips: BN5's WideSht1 without its ROM a placeholder of its codes, sitting out (%s %s %d)", ci.name, ci.codes, ci.mb);
 	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
 	CHECK(chips_record(511) && !chips_record(512) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204, "chips: 512 records, the registry's its id's sort place");
-	chip_info(509, &ci);
-	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's has no name (%s)", ci.name);
+	chip_info(XREG_WIDE_REWARD, &ci);
+	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's (511, the wide rewards') has no name (%s)", ci.name);
 	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),
 		"chips: bytes by bus address, the player's ROM below 8 MB, the chips' place past EMU_FREE");
 	free(R.data);

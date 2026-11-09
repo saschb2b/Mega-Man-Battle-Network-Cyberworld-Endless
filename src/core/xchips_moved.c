@@ -139,6 +139,12 @@ const XChipMoved xchips_moved[] = {
 	{ 502, 0x1B, 0x2A },   /* ToadMan */
 	{ 503, 0x1B, 0x2A },   /* ToadMan{9e} */
 	{ 504, 0x1B, 0x2A },   /* ToadMan{9f} */
+	{ 505, 0x1B, 0x1E },   /* ShadeMan */
+	{ 506, 0x1B, 0x1E },   /* ShadeMn{9e} */
+	{ 507, 0x1B, 0x1E },   /* ShadeMn{9f} */
+	{ 508, 0x1B, 0x2B },   /* BlizMan */
+	{ 509, 0x1B, 0x2B },   /* BlizMan{9e} */
+	{ 510, 0x1B, 0x2B },   /* BlizMan{9f} */
 };
 const int xchips_moved_count = (int)(sizeof xchips_moved / sizeof *xchips_moved);
 
@@ -155,12 +161,16 @@ const XChipPower xchips_powers[] = {
 	{ 11, 0x8B },   /* PowerSP: BN5 0800E8D6 */
 	{ 12, 0x8C },   /* PowerSP: BN5 0800E8D6 */
 	{ 13, 0x8D },   /* PowerSP: BN5 0800E8D6 */
+	{ 14, 0x8E },   /* PowerSP: BN5 0800E8D6 */
+	{ 15, 0x8F },   /* PowerSP: BN5 0800E8D6 */
 	{ 30, 0x9E },   /* PowerDS: BN5 0800E9A8 */
 	{ 31, 0x9F },   /* PowerDS: BN5 0800E9A8 */
 	{ 32, 0xA0 },   /* PowerDS: BN5 0800E9A8 */
 	{ 33, 0xA1 },   /* PowerDS: BN5 0800E9A8 */
 	{ 34, 0xA2 },   /* PowerDS: BN5 0800E9A8 */
 	{ 35, 0xA3 },   /* PowerDS: BN5 0800E9A8 */
+	{ 36, 0xA4 },   /* PowerDS: BN5 0800E9A8 */
+	{ 37, 0xA5 },   /* PowerDS: BN5 0800E9A8 */
 	{ 45, 0xAD },   /* PowerCustSwrd: BN5 0800EA18 */
 	{ 73, 0xC9 },   /* PowerCusVolt: BN5 0800EB06 */
 	{ 74, 0xCA },   /* PowerCusVolt: BN5 0800EB0C */

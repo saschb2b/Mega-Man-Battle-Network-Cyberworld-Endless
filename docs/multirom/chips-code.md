@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T19:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
 ---
 
 # The chips' code
@@ -203,7 +203,7 @@ of. The registry's ids, records and art stay C1's (above).
   grown to 256 entries each, BN6's own first; BN5's support subfamily S
   is BN6's 0x2A + S, its Navi subfamily S BN6's 0x1D + S. Fixed by BN5's
   numbers, the same at every boot and in every build.
-- **Moved** (94 chips, each family's spec PASS, its objects' pictures
+- **Moved** (100 chips, each family's spec PASS, its objects' pictures
   compared by their bytes, the registry's `XREG_MOVED`, playing where
   BN5's ROM is read): CrakOut, DublCrak, TripCrak (BN5's family 0x1B as
   0x6B: its crack moved with its sprite), HotBody1-3 (0x58 as 0xA8),
@@ -240,7 +240,32 @@ of. The registry's ids, records and art stay C1's (above).
   copies of their attacks' objects: NumberMan's dice, KnightMan's
   wrecking ball, ToadMan's notes; KnightMan's companion begun and ended
   by BN6's AI index for him, 0x24, `NAVI_AI_CALLS`, and his object's own
-  states kept BN5's numbers, `OWN_STATES`). Skully's spec holds a
+  states kept BN5's numbers, `OWN_STATES`), and the Darkloids' first
+  batch ([BN4's chips in a run](bn4-chips.md), Past 511): ShadeMan's and
+  BlizzardMan's V1, SP and DS at 505-510 (BN5's Navi routines 0x01 and
+  0x0E as 0x1E and 0x2B, their Navis' sprites the Navis' copies at list
+  2's 0x20 + the Navi's seat, 0x27 and 0x28, a unit's `navis` a bit a
+  seat; their attacks' objects, the first kind's 0x19 and 0x14 and the
+  third kind's 0x34, 0xB2 and 0xB7, moved with them). BN5 keeps both
+  Navis' sprites LZ77 and queues one for decompression as the chip comes
+  (`0x080029B8`), three frames without its loop: BN6's copies are whole,
+  so the queue is a stub (`STUBS`) and the differential lets the
+  reference's game lead through a hold (Holds, in [The
+  differential](../devtools/differential.md)). BlizzardMan's snowball
+  sets a struck foe's bit through `0x0800D7B8`, whose BN6 twin sets
+  0x8000 where BN5's 0x10000: its body copied (`bn5_twins.py`'s audit),
+  the freeze bit the same in both games, not proved by a spec (the held
+  foe shows no difference either way). ShadeMan's spawn hands a packed
+  word, `0x0B05FF00` and the attack's kind, which the generator keeps
+  (`UNREAD_WORDS`). The SP and DS powers' table (`0x0801D27A`, 11 u16 a
+  row by the power less 1001 or 1023) is copied to row 14 (`DATA_COPY`):
+  ShadeMan's rows are 13, BlizzardMan's 14 (BN6's Custom screen never
+  opened while their rows read past the copy). `chip_shademan`,
+  `chip_shademnsp`, `chip_shademnds`, `chip_shademnds_dark`,
+  `chip_blizman`, `chip_blizmansp`, `chip_blizmands`,
+  `chip_blizmands_dark` PASS; eight mutations caught (each Navi
+  routine's grown entry, each attack's object type, each SP's deletion
+  time, each DS let through undark). Skully's spec holds a
   recorded FAIL (`verdict`): the engine's status mark over the foe (the
   fourth kind's 0x06, the same code in both) drawn from each game's own
   list 5's 0x0B; `--survey`: nothing else differs. Blinder's recorded

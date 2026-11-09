@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The par's prize, as built"
-description: "The par prize as built, BN5's tiers exactly, with its game-design reasoning: a Server's chip two under par, one a tier lower at par, zenny over par from 1000 to 2000 by act (`lib_prizes.c`)."
+description: "The par prize as built, BN5's tiers exactly, with its game-design reasoning: the Darkloid's own SP two under par and his V1 at par where the registry holds his chips (ShadeMan's, BlizzardMan's), else a Server's chip and one a tier lower, zenny over par from 1000 to 2000 by act (`lib_prizes.c`)."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T01:28:59Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
 ---
 
 # The par's prize, as built (25 October 2026)
@@ -23,6 +23,21 @@ game-design skill (`src/layer/lib_prizes.c`, `lib_par_zenny` in
   as stage 1 had them: our Darkloid is a BN6 Navi whose own battle pays
   BN6's rows for him beside the prize, so his chip again would be a
   second copy, not a better one.
+- **The Darkloid's own chips (9 November 2026):** BN5's Darkloids' Navi
+  chips registered and moved ([BN4's chips in a run](../../../multirom/bn4-chips.md),
+  Past 511), a board whose Darkloid is ShadeMan or BlizzardMan pays as
+  BN5's missions do: his SP two under par, his V1 at par
+  (`lib_darkloid_prize`; the act's Darkloid is `run_darkloid`'s, from the
+  run's seed, so the layer's make reads no RAM; `LAYER_MAKE` 113). The
+  dialectic is BN5's own, racing the par against playing the board safe;
+  the loop layer the act, the board its climax; the pattern a trophy of
+  the boss beaten, the signature reward. Both are Megas of tier 3, a
+  dealer's 4,000 each (`build.py economy`'s dark table, BN5's Darkloids'
+  lines), where the Server's chips they replace were worth 1,677 to
+  2,863: the board's prize is richer, as BN5's is, and over par (653 to
+  2,000) stays below either. SP and V1 differ in power, not in tier. A
+  Darkloid of BN6's (no BN5 ROM, or none fightable) keeps the Server's
+  chips below.
 - **The zenny:** BN5 pays 1000 a mission, 5000 from the fifth. The run
   pays BN5's first mission's 1000 at the second act, where a board first
   stands, and a quarter of it more each act, to 2000 at the sixth; dearer

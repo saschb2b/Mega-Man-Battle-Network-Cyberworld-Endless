@@ -14,9 +14,11 @@
 #include "liberation_board.h"
 #include "loot.h"
 #include "game.h"
+#include "guardians.h"
 #include "run.h"
 #include "scripts.h"
 #include "text.h"
+#include "xchips.h"
 
 _Static_assert(LIB_LOOT == sizeof ((LayerObjs *)0)->lib_loot / sizeof (int), "a board's loot, a script each");
 _Static_assert(LIB_BONUS_CHIPS == sizeof ((LayerObjs *)0)->lib_bonus / sizeof (int), "a board's BonusPanels' chips, a script each");
@@ -35,11 +37,25 @@ static int roll(int depth, int bonus, uint32_t salt, ChipInfo *ci, int *code) {
 	return chip;
 }
 
-/* (BN5's better chip and its lesser one: a Server's prize, a tier lower) */
+int lib_darkloid_prize(int ai, int tier) { return xchips_darkloid_chip(ai, tier ? 0 : XCHIPS_VERSION_SP); }
+
+/* (BN5's better chip and its lesser one: the board's Darkloid's own, his
+ * SP two under par and his V1 at par, as BN5's missions pay, where the
+ * registry holds his chips and they play; else a Server's prize and one a
+ * tier lower, as when the Darkloid was a BN6 Navi. The act's Darkloid is
+ * the run's seed's, never the game's RAM: docs/game/liberation/building/par-prize.md) */
 int lib_prize_chip(int tier, int depth, int *code) {
 	static const int tiers[2][2] = { { 2, 4 }, { 1, 2 } };
 	ChipInfo ci;
 	tier = tier ? 1 : 0;
+	int own = lib_darkloid_prize(guardian_bn5_ai(run_darkloid((depth - 1) % CYCLE_LAYERS / 3, run.biome)), tier);
+	if (own) {
+		chip_info(own, &ci);
+		char fit = loot_folder_code(own, true);
+		char c = fit ? fit : strchr(ci.codes, '*') ? '*' : ci.codes[0];
+		*code = c == '*' ? 26 : c - 'A';
+		return own;
+	}
 	return roll(depth + tiers[tier][0], tiers[tier][1], 0x180u + (uint32_t)tier, &ci, code);
 }
 
