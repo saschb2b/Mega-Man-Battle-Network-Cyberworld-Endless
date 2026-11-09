@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Update**: multirom/bn4-chips.md, the owner's calls: BN4 joins the NetPass now, ten-bit ids first, all of BN4's chips as proved.
 * **Create**: multirom/bn4-chips.md, Phase 4 of BN4 Red Sun designed and scoped, nothing built: the census of BN4's 388 chip records (191 new to a run: 100 standard, 12 Mega, 4 Giga, 51 Navi chips, 5 DarkChips, 19 Program Advances; 6 on BN6's code; 16 already a run's a pairing away; the rest in 48 units and 18 Navi chips' units, sized), chip ids past 511 answered once for BN4's and BN5's chips (ten bits; reuse and remapping measured and not chosen; BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design, the online rule, the build plan and three owner's calls; linked from multirom/bn4.md's plan. rom/bn4.md, Its Program Advances (`BN4_PA_LIST`, `BN4_PA_LIST_REF`, `BN4_PA_COUNT`, `BN4_PA_RECIPES`, `BN4_PA_KIND_LISTED` in `bn4_battle.h`); re/ledger.json, BN4's chips designed.
 
 ## 2026-11-08

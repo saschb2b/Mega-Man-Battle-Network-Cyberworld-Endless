@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, nothing built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -454,28 +454,19 @@ release it is proved by.
 
 ## The owner's calls
 
-1. **Online: BN4's chips stay home, or BN4 joins the NetPass's full
-   set.** Recommended: stay home until BN4's share of run starts is
-   measured near the 87% BN5's was when the full set was made; then join,
-   announced ahead as the NetPass asks. Joining now would take the Arena
-   and trades from every player without BN4's ROM, a share no one has
-   measured.
-2. **Ten-bit chip ids first, for both games.** Neither BN4's 195 nor
-   BN5's Darkloid and Nebula chips fit the 10 free ids; ten bits are the
-   largest unit (3 to 5 days) and delay the first of BN4's own chips by
-   that much. Recommended: build them first, beside the registry rows and
-   the differential's BN4 path, ship the pairings (unit 0) before, and
-   let BN5's ShadeMan and BlizzardMan chips take the free ids meanwhile
-   (Past 511, the first batch). Not chosen: reusing ids a run never gives
-   (26, Falzar's among them) or remapping a window per save (148 at
-   most, ids no longer the same at every boot).
-3. **All of BN4's chips, or a cut.** BN4's numbered chips beside a run's
-   own of another name (Thunder1-3 beside Thunder, Boomer1-3 beside
-   Boomer, AirHoc1-3 beside AirHoc) are other code (the census: their
-   families pair with none of BN6's) and other chips by the registry's
-   rule. Recommended: all, as each is proved, since the net's half keeps
-   them to BN4's ground and BN6's draft as it is; a cut list stays open
-   for what the statistics show unused.
+Asked and answered on 9 November 2026:
+
+1. **Online: BN4 joins the NetPass's full set now**, over the
+   recommendation to wait. BN4's chips go into NetBattles and trades
+   as they are proved, and BN4 Red Sun's ROM becomes part of the
+   common ground the Arena and Trade Central ask of a pair. A player
+   without BN4's ROM loses them, so the change is announced ahead as the
+   NetPass asks (unit 8; [Online](../online/index.md)).
+2. **Ten-bit chip ids first, for both games**, as recommended: the
+   pairings (unit 0) ship before them, and BN5's ShadeMan and BlizzardMan
+   chips take the free ids meanwhile.
+3. **All of BN4's chips, as each is proved**, as recommended, with a cut
+   list kept open for what the statistics show unused.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
