@@ -1305,13 +1305,45 @@ def opening_draws(ta, tb):
     return {k: (n4.get(k, 0), n) for k, n in n6.items()}
 
 
+def twinless_draws(ta, key):
+    """BN4's draws of `key` in the two unpaused frames of its opening BN6's has no twin of (legit.json's bn4 opening_draws): its
+    family's object's init frame, whose init ends in its update, and the frame before the appear's bit 0, which BN4 sets a frame
+    later; each read from BN4's trace by its frame: the object's spawn (SPAWN) and the appear's sound (BN4_APPEAR's step 0 as
+    it sees bit 0, the frame it leaves the wait). None where the trace holds either anchor not, or more than one of a kind"""
+    appear = c_defines(os.path.join('src', 'emu', 'bn4_battle.h'))['BN4_APPEAR']
+    first4 = ta['frames'][0]['f'] - 1
+    opening = [e for fr in ta['frames'] for e in fr['events'] + fr['setup'] if e.frame < first4]
+    draws = [e for e in opening if e.kind == DRAW and e.flags & KEPT and (e.family or e.caller) & ~1 == key]
+    objs = {e.object for e in draws}
+    if len(objs) != 1:
+        return None
+    obj = objs.pop()
+    spawns = sorted({e.frame for e in opening if e.kind == SPAWN and e.object == obj})
+    seen = sorted({e.frame for e in opening if e.kind == SOUND and e.object == obj and appear <= e.caller < appear + 0x100})
+    if len(spawns) != 1 or len(seen) != 1:
+        return None
+    frames = {spawns[0], seen[0] - 1}
+    return sum(e.frame in frames for e in draws)
+
+
 def opening_skips(ta, tb):
     """the setupskip= items of a second run where BN4's opening made more of a key's draws than BN6's (legit.json's bn4
-    opening_draws): KEY:N, BN4's first N of the key with no twin of BN6's; [] none (or the rule not in legit.json)"""
+    opening_draws): KEY:N, BN4's first N of the key with no twin of BN6's, N exactly BN4's draws of it in the two frames BN6's
+    opening has no twin of (twinless_draws); [] none, the rule not in legit.json, or a key whose gap is not those draws (a
+    draw of BN6's dropped or added: the spec runs as it is and fails where the family's state parts)"""
     if not json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('opening_draws'):
         return []
-    counts = opening_draws(ta, tb) or {}
-    return [f'{k:08X}:{n4 - n6}' for k, (n4, n6) in sorted(counts.items()) if n4 > n6][:4]
+    out = []
+    for k, (n4, n6) in sorted((opening_draws(ta, tb) or {}).items()):
+        if n4 <= n6:
+            continue
+        twinless = twinless_draws(ta, k)
+        if twinless != n4 - n6:
+            print(f'  xdiff: the opening\'s draws of {k:08X} not paired from its end: BN4\'s {n4} against BN6\'s {n6}, '
+                  f'{twinless} of BN4\'s in the frames BN6\'s has no twin of')
+            return []
+        out.append(f'{k:08X}:{n4 - n6}')
+    return out[:4]
 
 
 def dev_args(spec):
