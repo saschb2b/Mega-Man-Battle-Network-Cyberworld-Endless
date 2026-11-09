@@ -61,6 +61,10 @@
 #define FREE_SOULS          (EMU_FREE + 0x480000u)   /* BN5's Souls in BN6's engine (soulunite.c, soullook.c, soulcode.c; soul_room.h lays it out), to: */
 #define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
+#define FREE_TEAM_NAVIS     (EMU_FREE + 0x4D0000u)   /* BN5's Team ProtoMan (AI 1-6) in BN6's engine (xnavi_recipe.h XN_TEAM_*): homes, */
+#define FREE_TEAM_NAVI_CODE (EMU_FREE + 0x4D3000u)   /* ... their code, a room each, */
+#define FREE_TEAM_NAVI_ART  (EMU_FREE + 0x4E9800u)   /* ... what their attacks draw, a room each, */
+#define FREE_TEAM_SPRITES   (EMU_FREE + 0x4EB000u)   /* ... their battle sprites, a place each (xnavi_sprites.c), to FREE_NAVIS */
 #define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
 #define FREE_NAVI_SPRITES   (EMU_FREE + 0x500000u)   /* ... their battle sprites, a fixed place each, and the arm points grown (xnavi_sprites.c), to: */
 #define FREE_NAVI_SPRITES_END (EMU_FREE + 0x580000u) /* ... (the Navi chips' and the Souls' one copy of each Navi's sprite there too) */
@@ -80,7 +84,8 @@
 #define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
 #define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BN4_NAVIS */
+#define FREE_TEAM_SPRITES_MORE (EMU_FREE + 0x710800u) /* Team ProtoMan's battle sprites past their room's, a place each (xnavi_sprites.c), to: */
+#define FREE_TAIL           (EMU_FREE + 0x71C800u)   /* free to FREE_BN4_NAVIS */
 #define FREE_BN4_NAVIS      (EMU_FREE + 0x720000u)   /* BN4's Navis in BN6's engine (xnavi_bn4.c; xnavi_recipe.h XN_BN4_*): their homes, */
 #define FREE_BN4_NAVI_CODE  (EMU_FREE + 0x730000u)   /* ... their code and their objects', block by block, */
 #define FREE_BN4_NAVI_ART   (EMU_FREE + 0x750000u)   /* ... the coming battle's Navi's attacks' art and songs, one room (xnavi_bn4_art.c), to: */

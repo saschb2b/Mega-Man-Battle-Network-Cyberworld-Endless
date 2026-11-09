@@ -54,8 +54,8 @@ static const Guardian guardians[] = {
 	[33] = { "CosmoMan", "Darkloid of the Stars", GUARDIAN_NO_MUGSHOT, -1, 144, 112, 224 },
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
-/* (every navi a record is kept for, BN4's seats the last: rivals.h) */
-_Static_assert(GUARDIAN_BN4_LAST + 1 == RIVAL_NAVIS, "rivals.sav keeps every navi number");
+/* (every navi a record is kept for, Team ProtoMan's the last: rivals.h) */
+_Static_assert(GUARDIAN_BN4_LAST + 1 == GUARDIAN_TEAM_FIRST && GUARDIAN_TEAM_LAST + 1 == RIVAL_NAVIS, "rivals.sav keeps every navi number");
 
 bool guardian_known(int navi) {
 	const Rival *rv = rival(navi);

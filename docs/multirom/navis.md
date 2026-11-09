@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Navis"
 description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul and three Darkloids moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:20:00Z }
 ---
 
 # Transplanted Navis
@@ -198,6 +198,12 @@ into the battle engine).
   sprite's number, the 0x6C's height, the 0x79's count) and FAIL. His
   attack below half his HP (`BN5_COSMO_HALF_HP`) is reached by no spec:
   no spec brings him under half.
+- **Team ProtoMan's room** (BN5's AI 1-6; [Team ProtoMan: foes and Souls](../game/team-protoman.md),
+  The build, unit 1): seats 11-16, Navi AI 26-31, ids 0x1F0-0x1FF for
+  ProtoMan to NapalmMan and 0x3E4-0x3EB for MagnetMan and Meddy (the
+  formula's 0x1B0-0x1C3 are BN6's player's forms), their homes, code and
+  art in `FREE_TEAM_NAVIS` (`XN_TEAM_*`), their battle sprites at list 2's
+  0x2B-0x30; none moved yet.
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved; his
   three decisions are settled in writing, not yet built: *his object
   types* are recorded as CosmoMan's were (the generator derives each

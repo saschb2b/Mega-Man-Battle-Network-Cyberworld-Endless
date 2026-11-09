@@ -51,17 +51,33 @@ SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
 # BN5's Darkloids, the Liberation Missions' (docs/game/liberation/building/stage-4-darkloids.md): ShadeMan, BlizzardMan, CloudMan, CosmoMan
 DARKLOIDS = (13, 14, 15, 16)
-MOVED = SIX + (DARK_SOUL,) + DARKLOIDS
+# Team ProtoMan's, the other version's (docs/game/team-protoman.md): ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy
+TEAM = (1, 2, 3, 4, 5, 6)
+MOVED = SIX + (DARK_SOUL,) + DARKLOIDS + TEAM
 
 
 def seat(ai):
-    """its seat among the moved Navis (src/emu/xnavi_recipe.h, XN_SEAT): the six 0-5, the Dark Soul 6, the Darkloids 7-10"""
-    return 6 if ai == DARK_SOUL else ai - 6 if ai in DARKLOIDS else ai - 7
+    """its seat among the moved Navis (src/emu/xnavi_recipe.h, XN_SEAT): the six 0-5, the Dark Soul 6, the Darkloids 7-10,
+    Team ProtoMan's 11-16"""
+    return 6 if ai == DARK_SOUL else ai - 6 if ai in DARKLOIDS else ai + 10 if ai in TEAM else ai - 7
 
 
 def slot_of(ai):
-    """its home's, code's and art's slot: its seat, past the control's 7 for the Darkloids"""
-    return seat(ai) + (1 if ai in DARKLOIDS else 0)
+    """its home's, code's and art's slot: its seat, past the control's 7 for the Darkloids and Team ProtoMan (slots 12-17,
+    their own room's)"""
+    return seat(ai) + (1 if ai in DARKLOIDS or ai in TEAM else 0)
+
+
+def ai_of(ai):
+    """its Navi AI index in BN6 (xnavi_recipe.h, XN_AI_OF): Team ProtoMan's the control's 25 + its AI (26-31), every
+    other's 32 + its seat"""
+    return XN_FIRST_AI + ai if ai in TEAM else 32 + seat(ai)
+
+
+def id_of(ai):
+    """its V1 id in BN6 (xnavi_recipe.h, XN_ID_OF): seats 0-14 from XN_FIRST_ID, 15-16 from XN_MORE_IDS (past BN4's)"""
+    s = seat(ai)
+    return XN_FIRST_ID + 4 * s if s < 15 else XN_MORE_IDS + 4 * (s - 15)
 
 # The static layout's places (src/emu/free_space.h, xnavi_recipe.h)
 BUS = 0x08000000
@@ -70,21 +86,39 @@ FREE_NAVI_CODE, FREE_NAVI_ART, FREE_NAVI_HOMES = EMU_FREE + 0x590000, EMU_FREE +
 XN_OBJECTS, XN_CODE = FREE_NAVI_CODE + 0x100, FREE_NAVI_CODE + 0x2000
 XN_SLOT_CODE, XN_SLOT_ART, XN_HOME_SIZE = 0x3C00, 0x400, 0x800
 XN_FIRST_ID, XN_FIRST_AI = 0x1C4, 25
+XN_MORE_IDS = 0x380 + 4 * 25   # (past BN4's 25 seats: XN_BN4_FIRST_ID + 4 XN_BN4_SEATS)
 XN_SHARED_ART, XN_END = FREE_NAVI_ART + 8 * XN_SLOT_ART, FREE_NAVI_ART + 0x38000   # (to XN_MORE)
 # the Darkloids' rooms (slots 8 on: xnavi_recipe.h's XN_MORE, XN_MORE_ART), past the shared art
 XN_MORE = XN_END
 XN_MORE_ART = XN_MORE + 4 * XN_SLOT_CODE
 
 
+# Team ProtoMan's room (slots 12-17: src/emu/free_space.h FREE_TEAM_NAVIS, xnavi_recipe.h XN_TEAM_*): a home, a code room
+# and an art room each
+TEAM_SLOT = 12
+XN_TEAM_HOMES, XN_TEAM_CODE, XN_TEAM_ART = EMU_FREE + 0x4D0000, EMU_FREE + 0x4D3000, EMU_FREE + 0x4E9800
+
+
 def code_at(slot):
     """its slot's code room and the name the C file gives its base"""
+    if slot >= TEAM_SLOT:
+        return XN_TEAM_CODE + XN_SLOT_CODE * (slot - TEAM_SLOT), XN_TEAM_CODE, 'XN_TEAM_CODE'
     return (XN_CODE + XN_SLOT_CODE * slot, XN_CODE, 'XN_CODE') if slot < 8 else (XN_MORE + XN_SLOT_CODE * (slot - 8), XN_MORE, 'XN_MORE')
 
 
 def art_at(slot):
     """its slot's art room and the name the C file gives its base"""
+    if slot >= TEAM_SLOT:
+        return XN_TEAM_ART + XN_SLOT_ART * (slot - TEAM_SLOT), XN_TEAM_ART, 'XN_TEAM_ART'
     return (FREE_NAVI_ART + XN_SLOT_ART * slot, FREE_NAVI_ART, 'XN_ART') if slot < 8 else \
         (XN_MORE_ART + XN_SLOT_ART * (slot - 8), XN_MORE_ART, 'XN_MORE_ART')
+
+
+def home_at(slot):
+    """its slot's home and the name the C file gives its base"""
+    if slot >= TEAM_SLOT:
+        return XN_TEAM_HOMES + XN_HOME_SIZE * (slot - TEAM_SLOT), XN_TEAM_HOMES, 'XN_TEAM_HOMES'
+    return FREE_NAVI_HOMES + XN_HOME_SIZE * slot, FREE_NAVI_HOMES, 'XN_HOMES'
 XN_OBJECTS_HOME = FREE_NAVI_HOMES + 15 * XN_HOME_SIZE
 CONTROL_SLOT = 7
 CODE_STEP = 0x100
@@ -105,7 +139,7 @@ HIDE_TWINS = {0x0800F194: 0x080114D4, 0x080C3836: 0x080C5D42}
 HELD_CHIP = 0x2A   # an object's chip it uses next (BN6_T1_CHIP), 0xFFFF none
 VIDEO_PAST = ((0x05000400, 0x06000000), (0x06018000, 0x07000000), (0x07000400, 0x08000000))
 NAVI_LIST = 2
-NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS}
+NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
 # a sprite of a list the families' room does not grow, copied into one it does: its load's list offset made the other's
 # (a sprite's list is read as it is loaded, from the lists' table by the offset, and nowhere after)
 NAVI_LIST_MOVES = {3: 4}
@@ -392,9 +426,9 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     r.f, r.ai5, r.slot, r.control = f, ai, slot, control
     r.companion_start = companion_start
     r.name = X.text(src, game['names'], f.ids5[0] - 0x100) if f.ids5[0] is not None else ''
-    r.ai = XN_FIRST_AI if control else 32 + seat(ai)
-    r.first_id = XN_FIRST_ID + (0 if control else 4 * seat(ai))
-    r.home = FREE_NAVI_HOMES + XN_HOME_SIZE * slot
+    r.ai = XN_FIRST_AI if control else ai_of(ai)
+    r.first_id = XN_FIRST_ID if control else id_of(ai)
+    r.home = home_at(slot)[0]
     r.versions = 6 if control else (1 if ai == DARK_SOUL else 4)
     room = code_at(slot)[0]
     r.blocks, at = [], room
@@ -790,7 +824,7 @@ def navi_ai_cmps(r):
             if v not in MOVED:
                 r.f.decide('navi ai', f'{a:08X}: not a compare with a moved Navi\'s AI index ({x.form})')
                 continue
-            to = 32 + seat(v)
+            to = ai_of(v)
             r.more_imms.append(dict(at=a, form='THUMB_CMP', rd=x.f[0], rn=0, was=v, now=to,
                                     why=f'{NT.NAVI_AI_CMPS[a]}: BN5\'s AI index {v:#x}, BN6\'s {to:#x}'))
 
@@ -1405,7 +1439,9 @@ def c_recipe(r, label):
     game = 'XV_GAME_BN6' if r.control else 'XROM_BN5_COLONEL_US'
     L += ['', f'{"const" if r.control else "static const"} XNavi {"xnavi_control" if r.control else "bn5_" + n} = {{', '\t.code = {',
           f'\t\t.name = "{label} ({who})",', f'\t\t.game = {game},', f'\t\t.src_ai = {r.ai5},', f'\t\t.ai = {r.ai},',
-          f'\t\t.first_id = XN_FIRST_ID + 0x{r.first_id - XN_FIRST_ID:X},', f'\t\t.home = XN_HOMES + 0x{r.home - FREE_NAVI_HOMES:X},']
+          (f'\t\t.first_id = XN_FIRST_ID + 0x{r.first_id - XN_FIRST_ID:X},' if r.first_id < XN_MORE_IDS else
+           f'\t\t.first_id = XN_MORE_IDS + 0x{r.first_id - XN_MORE_IDS:X},'),
+          f'\t\t.home = {home_at(r.slot)[2]} + 0x{r.home - home_at(r.slot)[1]:X},']
     L += c_fields(r, n, (('blocks', True), ('data', True), ('calls', True), ('words', r.words), ('imms', r.imms), ('numbers', r.numbers),
                          ('bytes', r.bytes), ('states', True)))
     L.append('\t\t.hooks = { ' + ', '.join(ref_text(x) for x in r.hooks) + ' },')

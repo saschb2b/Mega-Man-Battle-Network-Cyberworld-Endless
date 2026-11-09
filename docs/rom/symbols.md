@@ -106,8 +106,8 @@ how to verify it.
 | Fields of structures | 178 | 42 | 3 |
 | Event flags | 34 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
-| Constants, sizes and counts | 531 | 272 | 280 |
-| All | 2107 | 1292 | 691 |
+| Constants, sizes and counts | 531 | 278 | 280 |
+| All | 2107 | 1298 | 691 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -115,7 +115,7 @@ how to verify it.
 | Shops and traders | 39 | 0 | 0 |
 | NaviCust | 23 | 1 | 0 |
 | Chips and folders | 301 | 224 | 18 |
-| Battle | 580 | 372 | 213 |
+| Battle | 580 | 378 | 213 |
 | Text and fonts | 42 | 7 | 3 |
 | Sound | 19 | 28 | 14 |
 | Maps and the overworld | 136 | 41 | 25 |

@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Team ProtoMan: foes and Souls"
-description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill and not yet built: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
+description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill, its room built (seats, ids, free space, rivals.sav, Soul bits) and no Navi yet: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
 tags: [game, design, bosses, bn5, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:20:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -31,7 +31,8 @@ NapalmMan, MagnetMan, Meddy), whose battle code Team Colonel's ROM holds,
 come into runs as foes, and beating one gives his Soul, beyond what Team
 Colonel's MegaMan ever gets. This is the design, reasoned with the
 game-design skill and checked against [the core loop](core-loop.md);
-nothing of it is built. Every number below was read from the owner's BN5
+its first unit, the room, is built (The build, below); the Navis are not
+yet. Every number below was read from the owner's BN5
 ROM (its rows in [BN5's battles, records and rewards](../rom/bn5-battles.md), Team ProtoMan's six)
 unless it says otherwise.
 
@@ -260,7 +261,7 @@ and own states); each Navi is M, as each of Team Colonel's was:
 
 | Unit | What | Size |
 | --- | --- | --- |
-| 1. The room | Seats for five: Navi AI 27-31 are what `XN_SEAT`'s formula gives BN5's AI 2-6 and lie between the control's 25 and Team Colonel's 32 (to check free); their ids by the same formula, 0x1B0-0x1C3, lie below `XN_FIRST_ID` and must be checked against BN6's, else the Navis' range holds four more seats (0x1F0-0x1FF) and the fifth goes elsewhere; their code and art in a free-space region of their own (`XN_MORE`'s four slots are the Darkloids'), about 0x14000 bytes; `rivals.sav`'s navis to 64 (its fourth version); the held Souls' bits for forms 1-6 | S |
+| 1. The room (built) | Seats for the six, DarkProto's among them (`src/emu/xnavi_recipe.h` `XN_SEAT`, `XN_AI_OF`, `XN_ID_OF`; `tools/xnavirecipe.py` `seat`, `ai_of`, `id_of`): BN5's AI n of 1-6 at seat 10 + n (11-16), Navi AI 25 + n (26-31: between the control's 25 and Team Colonel's 32, no track's; the families' AI indexes a namespace of their own). Their ids: the formula's 0x1B0-0x1C3 are BN6's own, the player's forms (its ids table's type 2 from 0x1A0 to 0x1C3, read in the ROM), so ProtoMan, GyroMan, SearchMan and NapalmMan take the Navis' last four seats, 0x1F0-0x1FF, and MagnetMan and Meddy 0x3E4-0x3EB past BN4's 25 seats (`XN_MORE_IDS`, past every id BN6's code tests: [Virus families moved into BN6's battle engine](../rom/virus-families.md)), named by the families' archive as BN4's are. Their homes, code and art in a region of their own, `FREE_TEAM_NAVIS` (`+0x4D0000`-`+0x4EB000`, [The free space map](../engine/emulation/memory.md)), slots 12-17, and their battle sprites at list 2's 0x2B-0x30 (0x20 + seat): NapalmMan's and Meddy's after their room (`+0x4EB000`), GyroMan's in `FREE_TEAM_SPRITES_MORE` (`+0x710800`); ProtoMan's, SearchMan's and MagnetMan's, `0x22000` bytes in all, still need a place. `rivals.sav` to 65 navis, its fourth version ("CWR4", the third's 59 read into it): DarkProto and the five as navis 59-64 (`GUARDIAN_TEAM_FIRST`). Their Souls' bits, BN5's forms 1-6, in `run.souls`' two spare bytes (`soul_held` and `soul_give` for navis 59-64; the six's byte, what BN6's engine and the finds' lean read, unchanged; `RUN_MAGIC` unchanged, the `Run` untouched) | S |
 | 2. NapalmMan | His recipe and `build.py xdiff`'s three specs (`napalmman_v1`, `_v1_keys`, `_sp`), mutations failing; his lava on BN6's panel 13 | M |
 | 3. GyroMan | The same; his two hooks | M |
 | 4. SearchMan | The same | M |

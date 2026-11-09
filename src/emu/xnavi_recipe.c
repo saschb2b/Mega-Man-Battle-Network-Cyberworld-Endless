@@ -63,7 +63,8 @@ static bool code_ok(const XVirusFamily *f, char *why, size_t len) {
 		uint32_t start, end, at;
 		piece_of(f, i, &start, &end, &at);
 		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !(span_in(at, end - start, XN_CODE, XN_ART) ||
-			span_in(at, end - start, XN_MORE, XN_MORE_ART) || span_in(at, end - start, XN_BN4_CODE, XN_BN4_ART)))
+			span_in(at, end - start, XN_MORE, XN_MORE_ART) || span_in(at, end - start, XN_TEAM_CODE, XN_TEAM_ART) ||
+			span_in(at, end - start, XN_BN4_CODE, XN_BN4_ART)))
 			return no(why, len, "%s %d at %08x", block ? "block" : "clone", block ? i : i - f->nblocks, (unsigned)at);
 		for (int k = 0; k < i; ++k) {
 			uint32_t ks, ke, ka;
@@ -166,10 +167,15 @@ static bool numbers_ok(const XNavi *n, char *why, size_t len) {
 	const XVirusFamily *f = &n->code;
 	if (f->game == XROM_BN4_RED_SUN_US) return numbers_bn4_ok(n, why, len);
 	if (f->ai < XN_FIRST_AI || f->ai >= XN_AIS) return no(why, len, "AI index %d (the Navis' are %d-%d)", f->ai, XN_FIRST_AI, XN_AIS - 1);
-	if (n->versions < 1 || n->versions > XN_VERSIONS_MAX || f->first_id < XN_FIRST_ID || f->first_id + n->versions > XN_IDS_END)
-		return no(why, len, "ids from %#x, %d versions (the Navis' are %#x-%#x)", f->first_id, n->versions, XN_FIRST_ID, XN_IDS_END - 1);
-	if (f->home < XN_HOMES || (f->home - XN_HOMES) % XV_HOME_SIZE || (f->home - XN_HOMES) / XV_HOME_SIZE >= XN_HOMES_MAX)
-		return no(why, len, "home %08x", (unsigned)f->home);
+	bool ids = (f->first_id >= XN_FIRST_ID && f->first_id + n->versions <= XN_IDS_END) ||
+		(f->first_id >= XN_MORE_IDS && f->first_id + n->versions <= XN_MORE_IDS_END);
+	if (n->versions < 1 || n->versions > XN_VERSIONS_MAX || !ids)
+		return no(why, len, "ids from %#x, %d versions (the Navis' are %#x-%#x and %#x-%#x)", f->first_id, n->versions, XN_FIRST_ID,
+			XN_IDS_END - 1, XN_MORE_IDS, XN_MORE_IDS_END - 1);
+	/* (a home of the Navis' room's, or of Team ProtoMan's) */
+	bool home = (f->home >= XN_HOMES && (f->home - XN_HOMES) % XV_HOME_SIZE == 0 && (f->home - XN_HOMES) / XV_HOME_SIZE < XN_HOMES_MAX) ||
+		(f->home >= XN_TEAM_HOMES && (f->home - XN_TEAM_HOMES) % XV_HOME_SIZE == 0 && (f->home - XN_TEAM_HOMES) / XV_HOME_SIZE < XN_TEAM_SEATS);
+	if (!home) return no(why, len, "home %08x", (unsigned)f->home);
 	return true;
 }
 

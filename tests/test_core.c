@@ -4062,6 +4062,20 @@ static void test_xnavi_static(void) {
 		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
 		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
+	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_SLOT_CODE <= XN_TEAM_ART &&
+		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_END && XN_TEAM_END <= FREE_NAVIS,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, then their sprites)");
+	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
+	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
+	for (int n = 1; n <= 6; ++n) {
+		int id = XN_ID_OF(n), seat = XN_SEAT(n);
+		CHECK(seat == 10 + n && XN_AI_OF(n) == XN_FIRST_AI + n && XN_AI_OF(n) < XN_AI_OF(BN5_NAVI_COLONEL) && XN_KIND_OF(n) < 64,
+			"xnavi: Team ProtoMan's AI %d off its seat", n);
+		CHECK(id >= BN6_ENEMY_IDS_COUNT && ((id >= XN_FIRST_ID && id + 4 <= XN_IDS_END) ||
+			(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END)), "xnavi: Team ProtoMan's AI %d's ids from %#x", n, id);
+		for (int m = 1; m <= 16; ++m)
+			CHECK(m == n || (XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m)), "xnavi: AI %d's ids meet AI %d's", n, m);
+	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
 	CHECK(xnavi_bn5_count == 10, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan and CosmoMan)", xnavi_bn5_count);
@@ -4128,10 +4142,13 @@ static void test_free_space(void) {
 		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
 		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
+		{ "Team ProtoMan's homes", FREE_TEAM_NAVIS, FREE_TEAM_NAVI_CODE }, { "Team ProtoMan's code", FREE_TEAM_NAVI_CODE, FREE_TEAM_NAVI_ART },
+		{ "Team ProtoMan's art", FREE_TEAM_NAVI_ART, FREE_TEAM_SPRITES }, { "Team ProtoMan's sprites", FREE_TEAM_SPRITES, FREE_NAVIS },
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
 		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
+		{ "Team ProtoMan's sprites past their room", FREE_TEAM_SPRITES_MORE, FREE_TAIL },
 		{ "BN4's Navis' homes", FREE_BN4_NAVIS, FREE_BN4_NAVI_CODE }, { "BN4's Navis' code", FREE_BN4_NAVI_CODE, FREE_BN4_NAVI_ART },
 		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BN4_NAVI_SPRITE }, { "BN4's Navis' sprite room", FREE_BN4_NAVI_SPRITE, FREE_BRACKET_FACES },
 		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },

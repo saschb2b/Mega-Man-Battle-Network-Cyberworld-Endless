@@ -18,11 +18,15 @@ static int failures;
 #define CHECK(test, message) do { if (!(test)) { fprintf(stderr, "%s\n", message); ++failures; } } while (0)
 
 /* rivals.sav as its first version wrote it ("CWR1": four ints a navi),
- * as its second did ("CWR2": a Rival each), both for navis 0-31, and
- * what was written over them */
+ * as its second did ("CWR2": a Rival each), both for navis 0-31, as its
+ * third did ("CWR3": navis 0-58, BN4's too), and what was written over
+ * them */
 #define RIVALS_OLD 32
+#define RIVALS_THIRD 59
+#define RIVALS_NOW 0x43575234u   /* "CWR4" */
 static int rivals_v1[RIVALS_OLD][4];
 static Rival rivals_v2[RIVALS_OLD];
+static Rival rivals_v3[RIVALS_THIRD];
 static uint32_t rivals_magic;
 static Rival rivals_written[RIVAL_NAVIS];
 
@@ -38,6 +42,7 @@ bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 		if (magic != rivals_magic) return false;
 		if (rivals_magic == 0x43575231u && n == sizeof rivals_v1) memcpy(data, rivals_v1, n);
 		else if (rivals_magic == 0x43575232u && n == sizeof rivals_v2) memcpy(data, rivals_v2, n);
+		else if (rivals_magic == 0x43575233u && n == sizeof rivals_v3) memcpy(data, rivals_v3, n);
 		else return false;
 		return true;
 	}
@@ -108,7 +113,7 @@ static void check_rivals(void) {
 	rivals_v1[18][0] = 0;
 	rivals_magic = 0x43575231u;
 	rivals_load();
-	CHECK(rivals_magic == 0x43575233u, "rivals: the first version was not written anew");
+	CHECK(rivals_magic == RIVALS_NOW, "rivals: the first version was not written anew");
 	for (int i = RIVALS_OLD; i < RIVAL_NAVIS; ++i)
 		CHECK(!memcmp(rival(i), &(Rival){ 0 }, sizeof(Rival)) && !memcmp(&rivals_written[i], &(Rival){ 0 }, sizeof(Rival)),
 			"rivals: a navi past the first version's not blank");
@@ -140,7 +145,7 @@ static void check_rivals_second(void) {
 	memset(rivals_written, 0xA5, sizeof rivals_written);
 	rivals_magic = 0x43575232u;
 	rivals_load();
-	CHECK(rivals_magic == 0x43575233u, "rivals: the second version was not written anew");
+	CHECK(rivals_magic == RIVALS_NOW, "rivals: the second version was not written anew");
 	for (int i = 0; i < RIVAL_NAVIS; ++i) {
 		CHECK(!memcmp(rival(i), i < RIVALS_OLD ? &rivals_v2[i] : &(Rival){ 0 }, sizeof(Rival)), "rivals: a second version's record changed");
 		CHECK(!memcmp(&rivals_written[i], rival(i), sizeof(Rival)), "rivals: the second version written other than loaded");
@@ -152,11 +157,34 @@ static void check_rivals_second(void) {
 	CHECK(!memcmp(rival(RIVAL_NAVIS), &(Rival){ 0 }, sizeof(Rival)), "rivals: a navi past them not blank");
 }
 
+/* The third version's rivals.sav (navis 0-58, BN4's among them) loads
+ * whole into the fourth's (Team ProtoMan's past them, from
+ * GUARDIAN_TEAM_FIRST, blank), written anew at its size, and a Team
+ * ProtoMan Navi's battle is kept after it */
+static void check_rivals_third(void) {
+	for (int i = 0; i < RIVALS_THIRD; ++i)
+		rivals_v3[i] = (Rival){ i + 2, i * 3, i % 7, i % 3, (uint8_t)(i % 9), (uint8_t)(i % RIVAL_LEFT_FULL + 1), (uint16_t)(200 + i) };
+	rivals_v3[17].met = 0;   /* (Colonel's old place met never: nothing moves) */
+	memset(rivals_written, 0xA5, sizeof rivals_written);
+	rivals_magic = 0x43575233u;
+	rivals_load();
+	CHECK(rivals_magic == RIVALS_NOW, "rivals: the third version was not written anew");
+	for (int i = 0; i < RIVAL_NAVIS; ++i) {
+		CHECK(!memcmp(rival(i), i < RIVALS_THIRD ? &rivals_v3[i] : &(Rival){ 0 }, sizeof(Rival)), "rivals: a third version's record changed");
+		CHECK(!memcmp(&rivals_written[i], rival(i), sizeof(Rival)), "rivals: the third version written other than loaded");
+	}
+	rival_met(62);
+	rival_result(62, RIVAL_NAVI_WON, &(RivalEnd){ 0, 500, 1000 }, 14);
+	CHECK(rival(62)->met == 1 && rival(62)->navi_won == 1 && rival(62)->run == 14 && rivals_written[62].navi_won == 1,
+		"rivals: Team ProtoMan's NapalmMan (navi 62) not kept");
+}
+
 int main(void) {
 	check_format(8);
 	check_format(16);
 	check_rivals();
 	check_rivals_second();
-	if (!failures) puts("legacy: CWE2 and CWE3 route, progress, guardian bounds and RNG, CWR1's and CWR2's rivals passed");
+	check_rivals_third();
+	if (!failures) puts("legacy: CWE2 and CWE3 route, progress, guardian bounds and RNG, CWR1's, CWR2's and CWR3's rivals passed");
 	return failures ? 1 : 0;
 }
