@@ -611,7 +611,7 @@ def battle_players(f):
     """a side's player read from the battle state by an index (PLAYERS4): its shift and base BN6's (PLAYERS6); the index
     made in its register before the read (lsls #2, then adds #0x44, nothing else written to it between), the battle state
     either register of the read (BN6's Navis' [state, index], VolGear's [index, state] at 0x080B6858), the second form a
-    family's alone: FireMan's MegaMan state reads so too (0x080F1A58), his recipe's to settle with his spec"""
+    family's alone: FireMan's MegaMan state reads so too (0x080F1A5A), his recipe's to settle with his spec"""
     done, either = {m['at'] for m in f.imms}, getattr(f, 'family', False)
     for e, w in sorted(f.walks.items()):
         addrs = sorted(w.insns)
