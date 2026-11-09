@@ -24,12 +24,13 @@ void folder_milestone_guardian(void);
 
 /* The pack's ids: BN6's pack holds 0-319 (eToolkit +0x4C, 12 bytes an id;
  * past it lie the key items' counts: a BblStar2 bought once read as no
- * change), its extension 320-511 (BN6_PACK_EXT, which the engine points
- * BN6's pack routines at: docs/engine/emulation/, src/emu/xchips_install.c). */
-#define PACK_CHIPS 512
+ * change), its extension 411-511 and, in the entries of 320-410, which no
+ * pack counts, the ids from 512 (BN6_PACK_EXT, which the engine points
+ * BN6's pack routines at: bn6_pack_entry, src/emu/xchips_install.c). */
+#define PACK_CHIPS BN6_PACK_WIDE_END
 /* Chip `id`'s pack entry, a bus address (12 bytes: a count per code of its
  * record's four, then four u16 order stamps), 0 where the pack cannot be
- * read */
+ * read or counts none of the id (a Program Advance, a pseudo-chip) */
 uint32_t pack_entry(int id);
 /* Whether the pack lists chip `id`: BN6's 1-314, as its list does (0x13A,
  * BN6_PACK_LIST_END), and the registry's of BN5's */
@@ -43,6 +44,8 @@ void star_records(bool on);
 void star_folder_pack(void);
 void library_to_game(void);
 void library_from_game(void);
+/* A chip past 511 given (EV_CHIP_GIVEN_WIDE): into the Library at once. */
+void library_chip_given(int id);
 void programs_from_game(void);
 void bugfrag_trade(void);
 

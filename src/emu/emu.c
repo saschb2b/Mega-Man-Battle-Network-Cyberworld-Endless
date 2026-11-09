@@ -5,6 +5,7 @@
 #include "compat.h"
 #include "free_space_watch.h"
 #include "platform.h"
+#include "ram_survey.h"
 #include "save_queue.h"
 #include "sound_quiet.h"
 #include "xinstall_log.h"
@@ -38,6 +39,7 @@
 #endif
 #define LAT_MAX    6144
 
+static bool surveying;   /* (ram_survey.h) */
 static struct mCore *core;
 static bool layout_ok;   /* the core's struct GBA reads as expected (emu_init) */
 static uint32_t video[EMU_W * EMU_H];
@@ -114,6 +116,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	emu_audio_open();
 	start_worker();
 	if (getenv("CYBERWORLD_FREE_SPACE")) atexit(usage_at_exit);
+	surveying = ram_survey_open();
 #ifndef MINIMAL_CORE
 	/* (with the core on a thread of its own, its picture is drawn on one
 	 * more, mGBA's threaded video, which runs beside the emulation: on the
@@ -275,6 +278,8 @@ int emu_core_unshown;
 static void run_frame(bool unshown) {
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	core->runFrame(core);
+	/* (a dev tool's look at the work RAM, off without its variables: ram_survey.h) */
+	if (surveying) ram_survey_frame((uint8_t *)((struct GBA *)core->board)->memory.wram, (uint8_t *)((struct GBA *)core->board)->memory.iwram);
 	uint64_t dt = SDL_GetPerformanceCounter() - t0;
 	emu_core_ticks += dt;
 	if (unshown) { emu_core_unshown_ticks += dt; ++emu_core_unshown; }

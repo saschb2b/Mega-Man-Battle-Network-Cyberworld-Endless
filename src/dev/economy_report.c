@@ -143,13 +143,13 @@ static uint16_t reward_pick(const Encounter *e, int bust, bool guardian, int dep
 	int pair = R.data[BUSTING_TABLE + (uint32_t)bust * 16u + (uint32_t)rng_range(0, 15)] / 4;
 	int k = pair * 2 + rng_range(0, 1) + (rng_range(0, 99) < LOW_HP_SHARE ? 10 : 0);
 	uint16_t v = enemy_drop(id, k);
-	if (v == 0xFFFF || v >> 14) return v;
-	int chip = (int)chip9_id(v), code = (int)(chip9_code(v) & 0x1F);
+	if (!reward_is_chip(v)) return v;
+	int chip = (int)reward_chip_id(v), code = (int)reward_chip_code(v);
 	if (guardian && (chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip))) return (uint16_t)(1 << 14 | loot_guardian_zenny(depth));
 	char c = code >= 26 ? '*' : (char)('A' + code);
 	if ((k & 1) && econ_keep_by(ECON_LEVER_LEAN, depth, run.layer_seed ^ (uint32_t)id * 2654435761u ^ (uint32_t)k * 40503u))
 		c = loot_fit_code(chip, c, true);
-	return chip9_entry((unsigned)chip, (unsigned)(c == '*' ? 26 : c - 'A'));
+	return reward_chip((unsigned)chip, (unsigned)(c == '*' ? 26 : c - 'A'));
 }
 
 /* A busting level by the assumed mix (econ_bust_weight), or the fixed one */
@@ -168,11 +168,11 @@ static int bust_roll(void) {
 /* A reward of BN6's encoding into the layer's tally */
 static void gain_reward(LayerTally *t, uint16_t v, int from) {
 	if (v == 0xFFFF) return;
-	int kind = v >> 14, amount = v & 0x3FFF;
+	int kind = (int)reward_kind(v), amount = (int)reward_amount(v);
 	double *chips = from == FROM_GEM ? &t->gem_chip : from == FROM_GUARDIAN ? &t->g_chip : &t->bt_chip;
 	double *zenny = from == FROM_GEM ? &t->gem_zenny : from == FROM_GUARDIAN ? &t->g_zenny : &t->bt_zenny;
 	if (kind == 0) {
-		gain_chip(t, (int)chip9_id(v), (chip9_code(v) & 0x1F) >= 26 ? '*' : (char)('A' + (chip9_code(v) & 0x1F)));
+		gain_chip(t, (int)reward_chip_id(v), reward_chip_code(v) >= 26 ? '*' : (char)('A' + reward_chip_code(v)));
 		*chips += 1;
 	} else if (kind == 1) {
 		*zenny += amount;

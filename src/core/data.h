@@ -171,5 +171,7 @@ bool enemy_moved_set(int id, const EnemyMoved *e);
  * it: a moved id's own where the install wrote one, else the player's ROM's
  * (BN6_DROP_ROWS); 0xFFFF none */
 uint16_t enemy_drop(int id, int k);
+/* (dev: reward=ID, every entry of every row chip `chip` in its first code; 0 the rows' own) */
+void enemy_drops_all(int chip);
 
 #endif

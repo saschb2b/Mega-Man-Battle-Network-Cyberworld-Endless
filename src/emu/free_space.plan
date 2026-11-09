@@ -102,7 +102,7 @@ zone art  rom  +0x7A0000  +0x800000  -  art copied whole, a place each
 FREE_LIB_TEAM          +0x7A0000  +0x7FA000  end  xnavi.c                   game/liberation/index.md    a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each
 
 zone persistent  ram  0x02010CE0  0x02011800  end=RAM_PERSISTENT_END  persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end)
-RAM_PACK_EXT           0x02010CE0  0x020115E0  end  xchips_install.c        multirom/chip-registry.md   the chip pack's extension, ids 320-511 (BN6_PACK_EXT)
+RAM_PACK_EXT           0x02010CE0  0x020115E0  end  xchips_install.c        multirom/chip-registry.md   the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry)
 RAM_PLAYER_AI          0x020115E0  0x02011730  end  darkinvs.c              engine/emulation/memory.md  MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place
 RAM_TEAM               0x02011730  0x02011750  end  arena_team.c            rom/online.md               --dev arena2v2's list of what the Practice NetBattle spawns (epic #167)
 RAM_TEAM_LINK          0x02011750  0x02011790  end  arena_team_link.c       rom/online.md               the partners' words for and from BN6's packets, 0x20 bytes a side

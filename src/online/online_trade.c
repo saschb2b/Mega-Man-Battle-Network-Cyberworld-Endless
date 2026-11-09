@@ -108,12 +108,12 @@ bool online_trade_cancel(void) {
 
 /* ---- the Pack ---- */
 
-/* (ids from BN6_PACK_IDS in the pack's extension, where a game with BN5's
- * ROM counts its chips: docs/engine/emulation/) */
+/* (an older game's chip in the pack's extension, 0 where a pack counts none
+ * of the id: bn6_pack_entry) */
 static uint32_t pack_entry(unsigned id) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY || id > ONLINE_CHIP_LAST) return 0;
-	return id < BN6_PACK_IDS ? pack + id * BN6_PACK_ENTRY : BN6_PACK_EXT + (id - BN6_PACK_IDS) * BN6_PACK_ENTRY;
+	return bn6_pack_entry(pack, id);
 }
 
 /* how many copies of (id, code) MegaMan's three folders hold */

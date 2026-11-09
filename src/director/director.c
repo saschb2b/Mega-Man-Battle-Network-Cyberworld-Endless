@@ -263,6 +263,8 @@ static void take_events(void) {
 		/* (a Program Advance or a Recovery chip in a run's battle: the
 		 * Z-Canon and Busting folders' milestones, docs/game/meta/) */
 		case EV_CHIP_WATCHED: folder_milestone_chip((int)ev[i].r[0]); break;
+		/* (a chip past 511 into the pack: the Library's, which BN6's flags hold to 511) */
+		case EV_CHIP_GIVEN_WIDE: library_chip_given((int)ev[i].r[0]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
 		 * lost before he could act, session 65) */
@@ -442,11 +444,11 @@ static void after_battle(void) {
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
 	bug_pay_battle(won);
 	if (emu_debug_on() && won) {
-		int r = emu_read16(BN6_BATTLE_REWARD);
-		if (r >> 14 == 0 && r != 0xFFFF) {
+		uint16_t r = emu_read16(BN6_BATTLE_REWARD);
+		if (reward_is_chip(r)) {
 			ChipInfo ci;
-			chip_info((int)chip9_id(r), &ci);
-			fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, (r >> 9 & 0x1F) >= 26 ? '*' : 'A' + (r >> 9 & 0x1F),
+			chip_info((int)reward_chip_id(r), &ci);
+			fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, reward_chip_code(r) >= 26 ? '*' : (int)('A' + reward_chip_code(r)),
 				run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
 		} else fprintf(stderr, "battle reward %04x\n", r);
 	}

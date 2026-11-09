@@ -328,6 +328,37 @@ def changes(rom, found):
     return sorted(set(out), key=lambda c: c[0])
 
 
+def item_changes(rom):
+    """the folder editor's items (EDITOR_KEYS) taken as id << 6 | code where BN6 has id << 7 | code, each site's
+    halfwords: (address, was, now, kind). An item made or a sort key's low half (lsls #7 to #6), its id taken (lsrs #7
+    to #6; after lsls #16, lsrs #23 to #22), its code taken (movs #0x7F to #0x3F; lsls #9 and lsrs #25 to #10 and #26).
+    A site whose instruction is none of these stops the tool: its verdict was read otherwise."""
+    out = []
+
+    def imm(h, n):
+        return (h & ~(31 << 6)) | (n << 6)
+    for a in sorted(EDITOR_KEYS):
+        k = EDITOR_KEYS[a]
+        if k == 'other':
+            continue
+        h = rom.u16(a)
+        shift, n = h & 0xF800, (h >> 6) & 31
+        if k in ('build', 'read') and shift == 0x0000 and n == 7:
+            out.append((a, h, imm(h, 6), k))
+        elif k == 'id' and shift == 0x0800 and n == 7:
+            out.append((a, h, imm(h, 6), k))
+        elif k == 'id' and shift == 0x0800 and n == 23 and rom.u16(a - 2) & 0xF800 == 0x0000 and (rom.u16(a - 2) >> 6) & 31 == 16:
+            out.append((a, h, imm(h, 22), k))
+        elif k == 'code' and h & 0xF8FF == 0x207F:
+            out.append((a, h, (h & 0xFF00) | 0x3F, k))
+        elif k == 'code' and shift == 0x0800 and n == 25 and rom.u16(a - 2) & 0xF800 == 0x0000 and (rom.u16(a - 2) >> 6) & 31 == 9:
+            out.append((a - 2, rom.u16(a - 2), imm(rom.u16(a - 2), 10), k))
+            out.append((a, h, imm(h, 26), k))
+        else:
+            sys.exit('%08x: %04x is no %s of an item' % (a, h, k))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--all', action='store_true', help='every site reached, with its verdict')
@@ -346,6 +377,11 @@ def main():
         for at, was, now, v, what in rows:
             print('\t{ 0x%08Xu, 0x%04X, 0x%04X },' % (at, was, now))
         print('/* %d changes */' % len(rows))
+        items = item_changes(rom)
+        print('/* the folder editor\'s items, id << 6 | code: */')
+        for at, was, now, k in items:
+            print('\t{ 0x%08Xu, 0x%04X, 0x%04X },' % (at, was, now))
+        print('/* %d changes */' % len(items))
         return
     counts = {}
     loose = []
