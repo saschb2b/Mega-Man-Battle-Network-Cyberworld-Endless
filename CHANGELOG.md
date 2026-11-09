@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
+  battle engine and checked against BN4's own battle frame by frame, now
+  enters the tournament's first two rounds on his own plate of BN4's
+  bracket, his junk raining down as in BN4.
+
 ## 0.20.0 (2026-11-09)
 
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:

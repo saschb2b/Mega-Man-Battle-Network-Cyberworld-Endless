@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T23:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
 ---
 
 # The player's guide
@@ -793,7 +793,7 @@ With BN4 Red Sun's ROM beside BN6's, once a run has reached the Nest, act
 the endless net, one of acts 3 to 5 each cycle): three Navis in a row,
 shown on BN4's own bracket screen, the act's card listing all three.
 They come from BN6's and BN5's Navis and BN4's own (GutsMan, ThunderMan,
-WindMan, FireMan, SearchMan, AquaMan, WoodMan and Roll). MegaMan's HP carries from
+WindMan, FireMan, SearchMan, AquaMan, WoodMan, JunkMan and Roll). MegaMan's HP carries from
 round to round. Each round pays a Navi chip (its Navi's own, or for one
 of BN4's a BN6 Navi's) and the final his Guardian Data; a round lost
 ends the run.
