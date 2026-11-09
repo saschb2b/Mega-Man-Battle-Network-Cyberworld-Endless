@@ -46,7 +46,8 @@ typedef struct {
 	int sides;           /* whose each column is, both records' +6 (bn6_panels.h's BN6_SIDES_*): 0 the plain three and three */
 	int mm_element;      /* MegaMan's element as the fight begins, in both (-1 his own) */
 	int flags[2][MAX_FLAGS], nflags[2];        /* event flags set before the battle: [0] BN5's, [1] BN6's */
-	uint16_t folder[2][BN6_FOLDER_ENTRIES];    /* its first folder, each game's (0 none given) */
+	uint16_t folder[2][BN6_FOLDER_ENTRIES];    /* its first folder, each game's (0 none given): BN5's nine-bit, BN6's in this build's
+	                                              form (chip_entry.h), as its deck */
 	int nfolder[2];
 	uint16_t deck[2][BN6_FOLDER_ENTRIES];      /* each game's battle deck in this order, written as its battle runs (0 none given) */
 	int ndeck[2];

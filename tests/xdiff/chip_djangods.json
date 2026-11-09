@@ -1,0 +1,203 @@
+{
+ "about": "A Navi chip of BN5's whose code moved into BN6's engine (issue #82's C3; docs/multirom/chips-code.md, the Navi chips past nine bits): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of one DjangoDS D and 29 Cannon A in both games, the DjangoDS dealt first (a Mega chip: a folder of them alone never deals), BN5's chip 280 by BN5's own code and the registry's 526 by the same code moved (BN5's Navi routine 0x13 as BN6's 0x30: his sprites BN5's own, list 3's 0x41, 0x44 and 0x45, copied at numbers of the chips' in BN6's list 3; his attack's objects, the third kind's 0xBC and the fourth kind's 0x7B, 0x7D and 0x84, moved with it), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/multirom/chips-code.md). MegaMan not dark (BN5's meter at its neutral 500): BN5's dark gate refuses the DS (its record's +0x15 2, 0x08010110) and his chip is the chip of nothing, as BN6's engine does with the Souls installed (KnightSoul held: flags5, souls6; src/emu/soulmood.c's gate).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0718",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "folder6": [
+  "20E:3",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "deck5": [
+  "0718",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "deck6": [
+  "20E:3",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "sprites": "bytes",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10"
+}

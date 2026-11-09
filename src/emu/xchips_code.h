@@ -40,13 +40,13 @@
 #define XC_SP_SIDE   0x2Cu
 #define XC_STUBS_END (XC_STUBS + 0x90u)
 #define XC_HELPERS   (XC_STUBS + 0x90u)    /* the helpers' code (XCHIP_HELPER: BN5's code several units call, installed once), to: */
-#define XC_POWERS    (XC_AT + 0x1C00u)     /* BN6's computed powers' routines grown to 256 (BN6_CHIP_POWERS' 45 as the ROM has them,
+#define XC_POWERS    (XC_AT + 0x2000u)     /* BN6's computed powers' routines grown to 256 (BN6_CHIP_POWERS' 45 as the ROM has them,
                                               BN5's entry i at XC_POWER_FIRST + i where a helper moved its routine, the rest the
                                               stub: power 0), BN6_CHIP_POWERS_REF pointed at them */
 #define XC_POWER_FIRST 0x80
-#define XC_HOMES     (XC_AT + 0x2000u)     /* each unit's veneers, XC_HOME_SIZE apart, */
+#define XC_HOMES     (XC_AT + 0x2400u)     /* each unit's veneers, XC_HOME_SIZE apart, */
 #define XC_HOME_SIZE 0x400u
-#define XC_UNITS     64                    /* ... this many units */
+#define XC_UNITS     80                    /* ... this many units (64 until the bubbles' helper and BN5's last Program Advances) */
 #define XC_CODE      (XC_HOMES + XC_HOME_SIZE * XC_UNITS)   /* the units' code, block by block, to: */
 #define XC_ART       (FREE_CHIP_CODE + 0xA0000u)            /* what they draw, to XC_END */
 #define XC_END       FREE_SOULS_ART

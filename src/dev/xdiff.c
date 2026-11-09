@@ -432,9 +432,7 @@ static void keep_safe(const View *v) {
 static void deck_put(Side *g, const Spec *s) {
 	int k = g->v.game == 5 ? 0 : 1;
 	g->decked = true;
-	/* (a spec's deck is nine-bit, xdiff.h: BN6's in this build's form, chip_entry.h) */
-	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i)
-		g->v.wr16(g->v.deck + 2 * (uint32_t)i, k ? chip_entry_from9(s->deck[k][i]) : s->deck[k][i]);
+	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
 }
 
 /* BN6's chip AI's lists written from BN5's (dslist=1), its chip ids BN6's (xnavi_dark.h), after BN6's fight's first frame
@@ -696,11 +694,8 @@ static void subject_setup(const Spec *s) {
 	static const FolderPlaces places = { BN6_TOOLKIT, BN6_TOOLKIT_CHIPS, BN6_TOOLKIT_CHIP_MARKS, BN6_CHIP_KEYS, BN6_CHIP_KEY_XOR, BN6_NAVI_FOLDER1_REG,
 		BN6_NAVI_FOLDER1_TAG, CHIP_ID_MASK, emu_read8, emu_read32, emu_write8, bn6_wr16 };
 	if (s->nfolder[1]) {
-		/* (a spec's folders are nine-bit, xdiff.h: BN6's in this build's form) */
-		uint16_t f6[BN6_FOLDER_ENTRIES];
-		for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) f6[i] = chip_entry_from9(s->folder[1][i]);
-		xd_folder_put(&places, f6);
-		xd_pack_own(f6);
+		xd_folder_put(&places, s->folder[1]);
+		xd_pack_own(s->folder[1]);
 	}
 	static const uint32_t buster[3] = { BN6_NAVI_ATTACK, BN6_NAVI_SPEED, BN6_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)

@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The chip registry"
-description: "BN5's 263 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
+description: "BN5's 278 chips in BN6's chip tables grown to 1024 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:37:27Z }
 ---
 
 # The chip registry
@@ -16,12 +16,12 @@ finer calls' subset ([One net](one-net.md)). Those that play in BN6's battles
 come into runs' finds, shops, traders and rewards since D1 (One net); the
 chip step gives any one ([Dev tools](../devtools/overview.md)).
 
-- **The registry** (`src/core/xchips_registry.c`, numbers only): 263 of
+- **The registry** (`src/core/xchips_registry.c`, numbers only): 278 of
   BN5's chips, each with its id in BN6's tables and how it comes in. One
   chip per name: the 116 BN6 has by name are BN6's own (its id, record
   and code), and so are three its US release names otherwise (Attck+10
   and Attck+30, BN6's Atk+10 and Atk+30, which BN6's hand merges into the
-  chip before them by their ids; PitHoky, BN6's PitHocky). The other 144
+  chip before them by their ids; PitHoky, BN6's PitHocky). The other 159
   take ids of their own: BN6's records no chip uses (203-220, 291-300,
   314 and 350-367: blank-named, named by none of its tables, docs/
   [The chip registry and BN5's chips' code](../rom/chips-code.md), The chip registry) and 411-510, past its 411 records (511 held, no chip's, `XREG_HELD`: the id whose Library flag a chip past 511 sets in BN6's block of them; [BN4's chips in a run](bn4-chips.md), Past 511).
@@ -40,7 +40,10 @@ chip step gives any one ([Dev tools](../devtools/overview.md)).
   (489-504; Colonel and Colonel SP are BN6's), then the Darkloids' first
   batch at 505-510: ShadeMan's and BlizzardMan's V1, SP and DS (BN5's
   260-265), their Navis moved already, their code moved as NumbrMan's
-  ([The chips' code](chips-code.md)). 365-367 stay free; 511 is held.
+  ([The chips' code](chips-code.md)), and past nine bits the Darkloids'
+  and Nebula's other fifteen at 512-526: CloudMan's, CosmoMan's, LarkMan's,
+  GridMan's and Django's V1, SP and DS (BN5's 266-280), each with a pack
+  entry (ids 512-602 have one). 365-367 stay free; 511 is held.
   A row of its own keeps its codes, library type and MB: what its
   placeholder needs. The pairs were made by name from both ROMs, which
   their SHA-1s fix; the unit tests hold the table to its rules
