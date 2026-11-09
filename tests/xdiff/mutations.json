@@ -1796,6 +1796,62 @@
    "what": "the summoned Mettaur's test of the appear queue's head (BN6_QUEUE_HEAD through its r0 shim) aimed at BN6's family nullsub: once it has appeared it never heads the queue (caught at t1060, its +7, CurAction and +0x20)"
   },
   {
+   "name": "Roll V2's summon list's first id another",
+   "spec": "roll_v2",
+   "poke": [
+    "080BC3EB:01:1"
+   ],
+   "what": "her V2's summon list (BN4_ROLL_SUMMONS' second pointer, BN4 0x080BC3EA: 2, then 0x02 and 0x0E, copied with her as raw data) its first id 0x02 made 0x01: her decision picks Mettaur V1 where BN4's picks Mettaur2 (caught at t963, her AI data's +0xAC, the id picked)"
+  },
+  {
+   "name": "Roll V2's shot of V1's kind",
+   "spec": "roll_v2",
+   "poke": [
+    "080BC301:06:1"
+   ],
+   "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9) V2's 7 made 6: her decision gives MegaMan's state 45 V1's shot (caught at t380, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll SP's shot of V3's kind",
+   "spec": "roll_sp",
+   "poke": [
+    "080BC303:08:1"
+   ],
+   "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS) SP's 9 made 8: her decision gives MegaMan's state 45 V3's shot (caught at t370, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll SP's summon list's first id another",
+   "spec": "roll_sp",
+   "poke": [
+    "080BC3F2:03:1"
+   ],
+   "what": "her SP's summon list (BN4 0x080BC3F1: 2, then 0x04 and 0x10) its first id 0x04 made 0x03: her decision picks Mettaur3 where BN4's picks MettaurSP (caught at t943, her AI data's +0xAC)"
+  },
+  {
+   "name": "Roll V2's second summon Billy3",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "080BC3EC:0F:1"
+   ],
+   "what": "her V2's summon list's second id (BN4 0x080BC3EC) 0x0E made 0x0F: her second summon Billy3 where BN4's is Billy2 (caught at t2015, her AI data's +0xAC as she picks it)"
+  },
+  {
+   "name": "Roll V2's summoned Billy arriving as BN6's",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "08F395C4:00000000:4"
+   ],
+   "what": "the summon's word past her summon's shim (src/emu/xnavi_summoned.c; it stands for BN4's generic state 0's branch at 0x0800FCCE, +5 2 or more on to BN4_SUMMONED_APPEAR 0x0801002A) made 0: no table, each summoned enemy runs its own state 0; her Mettaur2's is BN4's, its arrival at t998 alike, her Billy2's BN6's generic one, BN6's own appear of an enemy spawned into a fight under way (0x080164A0): caught at t2050, its flash effects missing and its +0, +0xA, +0x20)"
+  },
+  {
+   "name": "Roll's pool song on her Mettaur's player",
+   "spec": "roll_v2_summons",
+   "poke": [
+    "0815A264:00090009:4"
+   ],
+   "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its players), where her install put her 0x131 (BN4's player 22) on BN6's player 10, made 9, the player her summoned Mettaur's 0x8B (slot 0xE0) keeps from BN4: the two begun in one frame, the 0x8B cuts her 0x131 (caught at t1880, the family's sounds)"
+  },
+  {
    "name": "WoodMan's CurAction off by one",
    "spec": "woodman_v1",
    "poke": [

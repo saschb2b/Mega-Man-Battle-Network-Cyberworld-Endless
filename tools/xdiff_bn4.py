@@ -1054,10 +1054,14 @@ def navi_ai(d):
     games' code): the allowance d is, on a moved Navi's AI data alone (NAVI_NAMES), None where none"""
     if d.part != 'ai' or not navi_role(d.role):
         return None
+    # (a word read whole, as its value looks like a pointer, held to the bytes of it that differ: roll_v3's version, BN6's
+    # 0x02020000 at +0x14 against BN4's 0, its +0x16 and +0x17 alone)
+    raw = isinstance(d.a, tuple) and isinstance(d.b, tuple) and None not in (raw_int(d.a), raw_int(d.b))
+    span = [d.off + k for k in range(4) if raw and (raw_int(d.a) ^ raw_int(d.b)) >> 8 * k & 0xFF]
     for a in bn4_allowed():
         if 'navi_ai' in a and a.get('part') == 'ai':
             lo, hi = (int(x, 0) for x in a['navi_ai'])
-            if lo <= d.off <= hi:
+            if lo <= d.off <= hi or (span and lo <= span[0] and span[-1] <= hi):
                 return a['name']
     return None
 

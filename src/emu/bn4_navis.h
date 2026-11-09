@@ -215,6 +215,8 @@
 #define BN4_SPAWN_ENEMY_DRAW 0x080F0118u /* BN4_SPAWN_ENEMY's draw's return (its bl to GetRNG at 0x080F0114: the free panel's
                                        * pick), the differential's key of the summon shim's draw (XV_SHIM_SUMMON_DRAW) */
 #define BN4_SPAWN_ENEMY_MASKS 0x080F01A8u /* BN4_SPAWN_ENEMY's masks by side (wanted, refused; two words a side), BN4_FREE_PANELS' r2, r3 */
+#define BN4_SUMMON_MARK   2           /* BN4_SPAWN_ENEMY's +5 (its spawn word's high byte, movs r4,#2 at 0x080F0140), which BN4's
+                                       * generic state 0 sends on to BN4_SUMMONED_APPEAR (2 or more, 0x0800FCCE) */
 #define BN4_SUMMONED_APPEAR 0x0801002Au /* BN4's generic state 0's appear where the object's +5 is 2 (BN4_SPAWN_ENEMY's spawn word) */
 #define BN4_T4_FLASH      0x17        /* the fourth kind's flash (MegaMan's states 46 and 47: her warp and summon), moved with her */
 #define BN4_FLASH         0x080E3A98u /* ... its routine (BN4_T4_TYPES[0x17]): 30 frames, every 8th the effect 0x2E at its place

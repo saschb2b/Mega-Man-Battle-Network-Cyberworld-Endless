@@ -336,7 +336,9 @@ def navi_palette(f, w):
     """its palette from its init's call of BN4's Navi palette (BN4_NAVI_PALETTE, r0 a number: the byte of
     BN4_NAVI_PALETTE_NUMBERS for it times the byte of BN4_NAVI_PALETTE_VERSIONS for its version, +4): V1's palette 0 given
     as BN6's step 0, which BN6's actor init (0x0800F334: its table by the version times AI data +3) makes 0 for every
-    version; a version whose BN4 palette is not 0 noted (an interim, docs/multirom/bn4-navis.md, FireMan built)"""
+    version; a version whose BN4 palette is not 0 (SP's) set at its spawn's end over that 0 (XNavi.palettes, a byte a
+    version: xnavi_init.c; docs/multirom/bn4-navis.md, Roll's versions)"""
+    f.palettes = 0
     sites = [s for s, t in w.bls.items() if t == NAVI4['palette']]
     if len(sites) != 1:
         return
@@ -350,9 +352,10 @@ def navi_palette(f, w):
         f.decide('struct1', f'{sites[0]:08X}: its V1\'s palette {pal[0]} (BN4_NAVI_PALETTE\'s {k}), BN6\'s step 0 gives 0')
         return
     f.s1['palette'] = 0
+    f.palettes = sum(p << 8 * v for v, p in enumerate(pal)) if max(pal) <= 0xFF else 0
     odd = ', '.join(f'version {v} {p}' for v, p in enumerate(pal) if p)
     f.notes.append(f'its palette: BN4_NAVI_PALETTE\'s {k}, V1\'s 0, BN6\'s step 0' +
-                   (f' (an interim: BN4 gives {odd}, BN6\'s step 0 none)' if odd else ' for every version'))
+                   (f' (BN4 gives {odd}: set at its spawn\'s end, XNavi.palettes)' if odd else ' for every version'))
 
 
 # BN4_NAVI_PALETTE's tables (bn4_navis.h): the byte by its number, the byte by the version (+4) it is multiplied by
@@ -886,6 +889,9 @@ def c_navi(f):
     if f.coll_arg:
         L.append(f'\t.coll_arg = 0x{f.coll_arg:02X},   /* (its init\'s collision setup\'s r3, BN6\'s actor init\'s {COLL_ARG6:#x}: the hit bits '
                  f'its body gives, read alike by both games\' pre-steps) */')
+    if getattr(f, 'palettes', 0):
+        L.append(f'\t.palettes = 0x{f.palettes:08X},   /* (its palette by version, BN4_NAVI_PALETTE\'s, a byte each from V1\'s: set at its '
+                 f'spawn\'s end over BN6\'s actor init\'s 0, xnavi_init.c) */')
     if init_line:
         L.append(init_line)
     if getattr(f, 'hide_step', None):

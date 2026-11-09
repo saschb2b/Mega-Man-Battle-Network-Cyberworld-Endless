@@ -103,9 +103,12 @@ def songs_of(b4, f, pool, alloc):
     """its pool's songs, each packed into its art's room at install (xnavi_bn4_sounds.c), its bytes rounded up to SONG_STEP,
     each on BN4's player but where BN6 keeps that player for one song of its own (song_player)"""
     f.songs = []
+    # (the players its pool's songs keep, BN4's numbers, which a song moved off its player must not take: in BN4 none shares
+    # one with another, as Roll's 0x131 on its 22 and her summoned Mettaur's 0x8B on its 9)
+    kept = {b4.u16(X4.BN4['songs'] + 8 * v + 4) for v in pool}
     for v, slot in pool.items():
         room = X4.rounded(X4.song_bytes(b4, v, X4.BN4['songs']), SONG_STEP)
-        f.songs.append(dict(song=v, slot=slot, at=alloc.art, room=room, player=song_player(b4, f, v)))
+        f.songs.append(dict(song=v, slot=slot, at=alloc.art, room=room, player=song_player(b4, f, v, kept)))
         alloc.art += room
     if alloc.art > alloc.art_end:
         f.decide('room', f'its songs end at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
@@ -115,16 +118,20 @@ def songs_of(b4, f, pool, alloc):
 SFX_FIRST, SFX_END = 0x60, 0x180
 
 
-def song_player(b4, f, v):
+def song_player(b4, f, v, kept=()):
     """BN6's player for its pooled song v, 0 where BN4's own number serves: where BN6 keeps BN4's player number for one song
     alone (its 22, its hit's 0x6B alone, which BN4 plays on its 10: a pooled song of BN4's 22 would be cut by BN6's hit
-    sound, as BN4's is not), the BN6 player most of the numbers of BN4's songs on that player take in BN6 (BN4's 22: 9)"""
+    sound, as BN4's is not), the BN6 player most of the numbers of BN4's songs on that player take in BN6, past the players
+    its pool's other songs keep (`kept`, BN4's numbers: BN4's 22 takes 9 three times in BN6, but Roll's pool holds her
+    summoned Mettaur's 0x8B on its 9, which would cut her 0x131 as BN4's never does, roll_v2 at t1880: 10, the first of
+    the next)"""
     b6 = f.b6
     p4 = b4.u16(X4.BN4['songs'] + 8 * v + 4)
     on6 = [n for n in range(SFX_FIRST, SFX_END) if b6.u16(X4.SONGS6 + 8 * n + 4) == p4]
     if len(on6) != 1:
         return 0
     took = [b6.u16(X4.SONGS6 + 8 * n + 4) for n in range(SFX_FIRST, SFX_END) if b4.u16(X4.BN4['songs'] + 8 * n + 4) == p4]
+    took = [p for p in took if p not in kept] or took
     p6 = max(sorted(set(took)), key=took.count)
     f.notes.append(f'its sound {v:#x} on BN6\'s player {p6}: BN4\'s player {p4} is one BN6 keeps for its song {on6[0]:#x} alone, '
                    f'and most of BN4\'s songs of that player take {p6} in BN6 by their numbers')
