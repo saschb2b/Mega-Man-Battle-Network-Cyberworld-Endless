@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **ShadeMan's and BlizzardMan's chips.** With BN5 Team Colonel's ROM,
+  the two Darkloids' Navi chips are in the game: ShadeMan, ShadeMan SP
+  and DS, BlizMan, BlizMan SP and DS, each moved from BN5 and checked
+  against BN5's own battle frame by frame. Beat a dark board's
+  Darkloid two phases under par and you get his SP chip, at par his own
+  chip, as BN5's missions paid (a Darkloid of BN6's, without BN5, pays as
+  before). They turn up among BN5's chips in the finds too.
 - **CosmoMan on the dark boards.** With BN5 Team Colonel's ROM beside
   BN6's, a dark layer's Darkloid can now be CosmoMan, BN5's own, moved
   into BN6's battle and checked against BN5's frame by frame like

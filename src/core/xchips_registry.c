@@ -3,7 +3,9 @@
  * DarkChips, Team Colonel's Gigas, the Navi chips of the six Navis who
  * guard runs, V1, SP and DS, and its Program Advances whose parts are
  * registered; not Team ProtoMan's version chips, the Darkloids' and
- * Django's Navi chips, BugCharg, Phoenix or DethPhnx), in BN5's order.
+ * Django's Navi chips, BugCharg, Phoenix or DethPhnx), in BN5's order;
+ * the Darkloids' Navi chips whose Navis are moved, ShadeMan's and
+ * BlizzardMan's (docs/multirom/bn4-chips.md, Past 511: the first batch).
  *
  * Paired by name with BN6's chips (BN5's names in BN6's text codes, rom.h's
  * xrom_text_bn6): one chip per name, BN6's, but where BN6's of the name is
@@ -17,7 +19,9 @@
  * drill, moved as Z Saver is), 214-220 the seven DarkChips,
  * 291-294 the Megas, 295-300 the first chips to be moved (Guard1-3,
  * CrakOut, DublCrak, TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364
- * the Program Advances beside BN6's, 411 on the rest, the Navi chips last.
+ * the Program Advances beside BN6's, 411 on the rest, the Navi chips last
+ * (ShadeMan's and BlizzardMan's at 505-510; 511 held for the wide
+ * rewards, 365-367 spare).
  * Generated once from both ROMs, paired by their names (the ROMs are told
  * by their SHA-1s, so the pairs hold for every player's); xreg_check
  * holds its rules in the unit tests, which have no ROM to read names in. */
@@ -257,6 +261,12 @@ const XChipReg xreg_rows[] = {
 	{ 257, 502, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 53 },   /* ToadMan */
 	{ 258, 503, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadMan[SP] */
 	{ 259, 504, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadManDS */
+	{ 260, 505, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 44 },   /* ShadeMan */
+	{ 261, 506, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 74 },   /* ShadeMn[SP] */
+	{ 262, 507, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 74 },   /* ShadeMnDS */
+	{ 263, 508, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 27 },   /* BlizMan */
+	{ 264, 509, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 55 },   /* BlizMan[SP] */
+	{ 265, 510, XREG_MOVED,     0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 1, 55 },   /* BlizManDS */
 	{ 306, 306, XREG_SAME },   /* BassAnly */
 	{ 307, 314, XREG_MOVED,     0, 0xFF, { 0x07, 0xFF, 0xFF, 0xFF }, 2, 92 },   /* HolyDrem */
 	{ 308, 302, XREG_SAME },   /* BigHook */
@@ -325,7 +335,7 @@ const XChipReg *xreg_named(int bn6) {
 bool xreg_free_id(int id) {
 	/* (BN6's blank records: docs/rom/chips-code.md, The chip registry; 365-367
 	 * too, the end of 350-368, whose 368 is BN6's pseudo-chips' bound) */
-	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS);
+	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS && id != XREG_WIDE_REWARD);
 }
 
 static int bad(int i, char *why, size_t len, const char *what) {
