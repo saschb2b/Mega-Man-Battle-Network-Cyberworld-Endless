@@ -4,7 +4,16 @@ title: "Free space: zones, headroom and placing a region"
 description: "The free space's one plan (`src/emu/free_space.plan`): its zones by kind and their headroom, `tools/free_space.py`'s header, tables and report, how a new region is placed, how an overrun is told, and a proposed move for more headroom."
 tags: [engine, emulation, free-space]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:30:00Z }
-sources: [src/emu/free_space.plan, tools/free_space.py, src/emu/free_space_watch.c, tests/test_core.c]
+sources:
+  - id: plan
+    resource: "src/emu/free_space.plan"
+    title: "The free space's plan, every region's row"
+  - id: tool
+    resource: "tools/free_space.py"
+    title: "The plan's header, tables, report and fit"
+  - id: watch
+    resource: "src/emu/free_space_watch.c"
+    title: "The run-time watch of writes past a region"
 ---
 
 # Free space: zones, headroom and placing a region
