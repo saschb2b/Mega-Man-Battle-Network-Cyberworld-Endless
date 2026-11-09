@@ -138,7 +138,7 @@ span a new region takes from the front:
 
 | Zone | Now | Proposed | Why |
 | --- | --- | --- | --- |
-| `layers` | `FREE_TILE_MAP` 320 KB, `FREE_COORDS` 640 KB | each to its largest layer's, measured, with a quarter to spare | the largest gain: a layer's maps are bounded by `BN6_TILEMAP_MAX` |
+| `layers` | `FREE_TILE_MAP` 320 KB (45 KB used), `FREE_COORDS` 640 KB (7.5 KB used) | the tile map to `0x18000` (`BN6_TILEMAP_MAX`, 80 KB, as literal blocks), the coordinates to their largest layer's over seeds 1-300 with a quarter to spare | the largest gain, some 750 KB: the zone's one gap for the next layer's or town's kind |
 | `world` | `FREE_INDOORS` (home's places) at its end | into `layers`, after `FREE_LAN_HP` | a home's maps are a layer's kind |
 | `code` | `FREE_CHIP_PAS`, `FREE_CHIP_AI`, `FREE_SWAP_RETURN` (small stubs) between the Souls' art and `FREE_TAIL` | into `engine`'s 7 KB gap | hooks and stubs are the engine's kind, and `FREE_TAIL` joins the 192 KB gap's side |
 | `code` | BN4's Navis' per-battle rooms (`FREE_BN4_NAVI_ART`, `FREE_BN4_NAVI_SPRITE`) between their code and the bracket | kept, with BN4's chips' code and data placed from `+0x4D0000` | BN4's chips take the zone's largest gap, before BN4's further Navis need theirs |
@@ -146,3 +146,13 @@ span a new region takes from the front:
 
 Until it is applied, new regions take the gaps `--fit` names in their
 kind's zone, and the zones' table above says what is left.
+
+What one run used (a layer at depth 2 with BN5's and BN4's ROMs, 9
+November 2026, `--usage`): the regions written once at the core's start
+are near full, so the moved content's next families, Navis and chips need
+the `code` zone's gaps, not their own regions' tails. `FREE_FAMILIES`,
+`FREE_NAVI_ROOM`, `FREE_CHIP_PAS` and `FREE_BLOCKERS` read 100%,
+`FREE_NAVI_SPRITES`, `FREE_NAVI_ART`, `FREE_SOULS`, `FREE_SOULS_ART` and
+`FREE_RUSH` 97-99% (a region with a table at its end reads full however
+much is free before it, so these are upper bounds); `FREE_CHIPS` used a
+third, `FREE_SONGS` 42% and `FREE_XNAVIS` a third.
