@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul and two Darkloids moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul and three Darkloids moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:29:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
 ---
 
 # Transplanted Navis
@@ -180,7 +180,37 @@ into the battle engine).
   spec has MegaMan at (1,2): from (2,2) BlizzardMan's Snowball lands on
   his ice, which BN6's engine answers with its own freeze, and two of
   ShadeMan's bats strike in one frame, which the two engines' hit passes
-  take in their own order; the battle the same otherwise. CloudMan and
-  CosmoMan are derived (`--report --ai 15 16`) with decisions open: their
-  object types, CloudMan's RAM table at 0x0203CA30 and a sprite loaded by a
-  number made otherwise (0x080C5EEC).
+  take in their own order; the battle the same otherwise.
+- **CosmoMan** (AI 16, AI 42 in BN6, ids 0x1EC-0x1EF; `cosmoman_v1`,
+  `cosmoman_v1_keys`, `cosmoman_sp`: PASS): his eight object types moved,
+  each recorded in `bn5_twins.py`'s TYPES as the generator derived it (no
+  BN6 type runs the same code on the same data and art), the one decision
+  his recipe had. Three of his objects take a word from a register their
+  spawn's caller never set, part of which the spawner then writes itself,
+  so `spawn_leftovers` rules may name the bytes they compare
+  (`compares`): the third kind's 0x79's +4 its count's byte over each
+  engine's r4, the 0x6C's Z its upper half 0x10 over each engine's r3
+  (BN5's 0x41D0 below it, BN6's 3), the 0x6D's Z its 0x6C's, each read in
+  the ROM (`src/emu/bn5_darkloids.h`; [BN5's Liberation Missions](../rom/liberation.md),
+  BN5's Darkloids); the engine's spark where one of them struck takes its
+  Z from it, so its Z is read by the struck attack's rule. Five mutations
+  break his copy (a type spawned as another of his, a hit's offset, a
+  sprite's number, the 0x6C's height, the 0x79's count) and FAIL. His
+  attack below half his HP (`BN5_COSMO_HALF_HP`) is reached by no spec:
+  no spec brings him under half.
+- **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved; his
+  three decisions are settled in writing, not yet built: *his object
+  types* are recorded as CosmoMan's were (the generator derives each
+  moved); *his RAM table at 0x0203CA30* is no table but BN5's third kind's
+  objects less 0x10, read by his search for his clouds
+  (`BN5_CLOUD_FIND_37`: type 0x37 on a side but a slot), which BN6's
+  engine cannot answer by the same bytes: a moved type's object holds the
+  dispatch's type (0xD2) and BN5's number in the dispatch's side table, so
+  the search becomes a stub of the Navis' (`bn5_navi_twins.py`'s STUBS)
+  that reads the side table, never a wider literal; *the sprite loaded by
+  a number made otherwise (0x080C5EEC)* is the third kind's 0x0B's, whose
+  record by its kind gives the sprite (kinds 2-5 his,
+  `BN5_CLOUD_KINDS_0B`): its one copy goes to the Navis' track, which
+  installs first of those that spawn it (the rule of TYPES), its rows'
+  sprites given BN6's numbers as `xchiprecipe.py`'s TABLE_SPRITES gives
+  them now, and the chips spawn the Navis' copy.

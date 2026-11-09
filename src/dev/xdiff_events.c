@@ -212,6 +212,8 @@ static int nth(XdLog *log, uint32_t key, uint32_t which) {
 /* The reference's draw of this key in this frame, the k-th: its word
  * written into the RNG word the draw reads, before it reads it; or none,
  * drawn as it is and said so */
+static void replay_setup(XdLog *log, XdEvent *e, uint32_t own);
+
 static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	uint32_t which = own, key = key_of(log, e, &which);
 	if (!key) {
@@ -220,6 +222,13 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 		return;
 	}
 	const XdLog *ref = log->ref;
+	/* (a draw of the family's that the lag puts before the reference's first seeded frame, t - lag below 0: one of its opening's,
+	 * its setup draws, xd_replay_setup's way. BN4's Navi runner runs his states through the paused opening, BN6's from the
+	 * fight on, its frame of the fight before its timer's first tick seeded: JunkMan's state 1 draws there) */
+	if (log->setup_draws && e->family && log->t < (uint32_t)log->lag) {
+		replay_setup(log, e, own);
+		return;
+	}
 	int k = nth(log, key, which);
 	/* (with a lag, every keyed draw, the family's own and its twins': the reference's of that many fight frames before,
 	 * xd_replay_lag; the engine's per-frame steps have no key) */

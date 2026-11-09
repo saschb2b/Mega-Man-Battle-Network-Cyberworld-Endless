@@ -53,7 +53,8 @@ OUT_C = os.path.join(ROOT, 'src', 'emu', 'xnavi_bn4.c')
 NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 136), (0x0C, 'FireMan', 144), (0x2B, 'SearchMan', 140),
          (0x0D, 'AquaMan', 168),
          (0x1D, 'Roll', 128),
-         (0x46, 'WoodMan', 172))
+         (0x46, 'WoodMan', 172),
+         (0x47, 'JunkMan', 164))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -98,6 +99,7 @@ PANEL4TO6_FIELDS = {0x01: 0x03}
 # hi, why), read from the ROM
 NAVI_COPIED_DATA = {
     0x0800F734: (0x0800F770, 0x0800F780, 'its table of panels\' masks by side (two words a side: 0x10, 0x0F8800A0; 0x30, 0x0F880080)'),
+    0x080DFF44: (0x080DFF58, 0x080DFF60, 'its table of the hits word\'s bits by side (0x00550000, 0x00AA0000)'),
 }
 # The AI data's blocks a Soul Navi's code names (bn4.h BN4_AI_NAVI, BN4_AI_ATTACK_VARS) and BN6's in their place
 # (bn6.h BN6_T1_AI_DATA: +0x80 its state, +0xA0 its attack's variables): (BN4's first, its size, BN6's first)
@@ -260,40 +262,8 @@ def panel_fields(f):
                     break
 
 
-# A side's player read inline from the battle state ([eToolkit +0x18], both games'): BN4's players a word each from +0x44
-# (BN4_BATTLE_PLAYERS: MegaMan's side's first, the other's next, as BN4's getter 0x0800C456 reads them), BN6's a word every
-# 0x10 bytes from +0xD0 by side (BN6_BATTLE_PLAYERS, BN6_BATTLE_PLAYER_STEP; its getter 0x080103BC). An index made by
-# lsls #2 and adds #0x44 is given BN6's shift and base: BN4's index (its side ^ MegaMan's ^ 1) is the side wanted where
-# MegaMan's side is 0, as in every battle a BN4 Navi is fought in (none a NetBattle's)
-PLAYERS4, PLAYERS6 = (0x44, 2), (0xD0, 4)
-
-
-def battle_players(f):
-    """a side's player read from the battle state by an index (PLAYERS4): its shift and base BN6's (PLAYERS6)"""
-    for e, w in sorted(f.walks.items()):
-        addrs = sorted(w.insns)
-        state = {}   # (a register holding eToolkit, then the battle state)
-        for k, a in enumerate(addrs):
-            i = w.insns[a]
-            if i.form == 'hi_mov' and i.f[1] == 10 and i.f[0] < 8:
-                state[i.f[0]] = 'toolkit'
-                continue
-            if i.form == 'ldr' and state.get(i.f[1]) == 'toolkit' and i.f[2] == 0x18:
-                state[i.f[0]] = 'battle'
-                continue
-            if i.form == 'ldr_r' and state.get(i.f[1]) == 'battle' and k >= 2:
-                sh, base = w.insns[addrs[k - 2]], w.insns[addrs[k - 1]]
-                ro = i.f[2]
-                if sh.form == 'lsls' and sh.f[:2] == (ro, ro) and base.form == 'adds8' and base.f[0] == ro and \
-                        (base.f[1], sh.f[2]) == PLAYERS4:
-                    why = 'a side\'s player read from the battle state: BN4 +0x44 a word each, BN6 +0xD0 0x10 bytes each'
-                    f.imms.append(dict(at=sh.at, form='THUMB_LSLS', rd=ro, rn=ro, was=PLAYERS4[1], now=PLAYERS6[1], why=why))
-                    f.imms.append(dict(at=base.at, form='THUMB_ADDS', rd=ro, rn=0, was=PLAYERS4[0], now=PLAYERS6[0], why=why))
-                else:
-                    f.decide('battle', f'{a:08X}: a word of the battle state read by an index BN4\'s players\' form does not make')
-            for r in range(8):
-                if T.writes(i, r):
-                    state.pop(r, None)
+# A side's player read inline from the battle state: the families' generator's port (xrecipe_bn4.battle_players), his too
+PLAYERS4, PLAYERS6, battle_players = X4.PLAYERS4, X4.PLAYERS6, X4.battle_players
 
 
 def set_action_imms(f):
@@ -370,9 +340,14 @@ def navi_update(f, tw, uw):
     after its own call past the runner (FireMan's: pre-step, runner, his call, after-step, present); that call is BN6's post
     hook (table 5, which BN6's Navi frame 0x080F36A8 runs after its status dispatcher, as BN4's runs it after the runner)"""
     f.post = f.pre = None
+    f.pres = []
     tcalls = [t for _, t in sorted(tw.bls.items())]
     calls = [t for _, t in sorted(uw.bls.items())]
     if tcalls == [NAVI4['after']] and calls == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']]:
+        return
+    if tcalls == [NAVI4['after']] and len(calls) > 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
+            and all(f.lo <= t < f.hi for t in calls[1:-2]):
+        I.navi_pres(f, uw)
         return
     if tcalls == [NAVI4['after']] and calls[1:] == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']] and f.lo <= calls[0] < f.hi:
         # (Roll's 0x080BC340: her summons' words let go where their HP is 0. BN6's hook A runs after its pre-step, BN4's call
@@ -455,7 +430,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     if f.s1['palette'] is not None:
         f.decisions = [d for d in f.decisions if not (d[0] == 'struct1' and d[1].endswith('gives no palette the generator reads'))]
     del f.walks[f.init]
-    f.roots += [r for r in (f.post, f.pre) if r]
+    f.roots += [r for r in (f.post, f.pre) if r] + [t for t, _ in f.pres]
     S.split_regions(f)
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     saved = dict(bn4_twins.COPIED)
@@ -495,6 +470,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     I.companion_modes(f)
     C.fight_gates(f)
     C.hide_steps(f)
+    C.runner_r4(f)
     X4.pair_calls(f, pairs)
     navi_records(b4, f)
     saved = dict(bn4_twins.COPIED_DATA)
@@ -736,8 +712,9 @@ def navi_records(b4, f):
     """its four enemy records (V1, V2, V3, SP): its type, its battle sprite (list 2, BN4_NAVI_SPRITES), each version"""
     st = X4.BN4['stats']
     f.recs = [b4.bytes(st + X4.BN4['stat_size'] * (f.first + v), X4.BN4['stat_size']) for v in range(VERSIONS)]
+    I.record_list(b4, f)
     for v, r in enumerate(f.recs):
-        if r[2] != f.ty or r[5] != v or r[3] != 4 * f.s1['list'] or r[4] != f.s1['index']:
+        if r[2] != f.ty or r[5] != v or r[3] != 4 * (f.record_list or f.s1['list']) or r[4] != f.s1['index']:
             f.decide('records', f'enemy id {f.first + v}\'s record names type {r[2]:#x}, sprite {r[3]}:{r[4]}, version {r[5]}')
     f.hp = [int.from_bytes(r[0:2], 'little') & 0xFFF for r in f.recs]
     f.element = min(int.from_bytes(r[0:2], 'little') >> 12 for r in f.recs)
@@ -789,7 +766,8 @@ def families_alloc(b4, b6, pairs):
     for k, (ty, name, first) in enumerate(X4.FAMILIES):
         fam = X4.derive(b4, b6, pairs, ty, name, first, k, alloc)
         alloc.families.append(fam)
-        for sp in getattr(fam, 'attack_sprites', []):
+        # (a late family's, moved after the Navis took their numbers, none of theirs: their own copies kept, X4.LATE_FROM)
+        for sp in [] if fam.late else getattr(fam, 'attack_sprites', []):
             alloc.family_sprites.setdefault((sp['list'], sp['index']), dict(sp, shared=fam.name))
     return alloc
 
@@ -856,6 +834,9 @@ def c_navi(f):
     if f.fars:
         arrays += f'static const XnFar {n}_fars[] = {{\n' + ''.join(
             f'\t{{ 0x{k["at"]:08X}, {k["rd"]}, {k["rb"]}, 0x{k["was"]:X}, 0x{k["now"]:X} }},   /* {k["why"]} */\n' for k in f.fars) + '};\n'
+    if f.pres:
+        arrays += f'static const XnPreCall {n}_pre[] = {{\n' + ''.join(
+            f'\t{{ OWN(0x{t | 1:08X}), {"XN_R0_ANY" if v is None else v} }},\n' for t, v in f.pres) + '};\n'
     L = [head, rebase(arrays), '', f'static const XNavi bn4_{n} = {{', '\t.code = {', f'\t\t.name = "{f.name} (BN4\'s)",',
          '\t\t.game = XROM_BN4_RED_SUN_US,', f'\t\t.src_ai = 0x{f.ty:02X},   /* (its first-kind type: BN4 has no AI index) */',
          f'\t\t.ai = {f.ai},', f'\t\t.first_id = XN_BN4_FIRST_ID + 0x{f.first_id - BN4_NAVI_ID0:X},',
@@ -901,6 +882,12 @@ def c_navi(f):
         L.append(summon_line)
     if f.fars:
         L.append(f'\t.fars = {n}_fars, .nfars = {count("fars")},   /* (its loads past an immediate\'s reach, through shims of its home) */')
+    if f.pres:
+        L.append(f'\t.pre = {n}_pre, .npre = {len(f.pres)},   /* (its update\'s calls between its pre-step and its runner, its hook A\'s shim) */')
+    if f.runner_r4:
+        L.append('\t.runner_r4 = true,   /* (its states run with r4 its +0 byte, as BN4\'s Navi runner: xnavirecipe_bn4_objects.RUNNER_R4) */')
+    if f.record_list:
+        L.append(f'\t.record_list = {f.record_list},   /* (its records\' sprite list, BN4\'s preload\'s alone: its battle sprite its init\'s) */')
     L.append('};')
     return '\n'.join(L), f'&bn4_{n}'
 
