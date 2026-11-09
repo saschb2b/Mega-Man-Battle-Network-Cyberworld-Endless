@@ -98,7 +98,7 @@ SITES = {
     0x0802B846: ('id', 'the P.A. screen\'s parts: a part\'s id, its letter below BN6_PA_LETTERS'),
     0x0802B850: ('entry', 'the same: its code'),
     0x0802C558: ('reward', 'a battle\'s reward given: id, code from bit 9, kind from bit 14 (the wide rewards\' place)'),
-    0x0802E2E0: ('open', 'the link battle\'s real-time chip (battle flag 0x40): an id kept at +0x24, ids past 313 read as 0 (0x139); the Arena\'s pair cores'),
+    0x0802E2E0: ('link', 'the link battle\'s real-time chip (battle flag 0x40, the Arena\'s pair cores): an id BN6_LINK_CHIP_BOUND caps at 0x139 before this mask, 0 past it, nine bits or ten'),
     0x0802855C: ('entry', 'a chip\'s card: its entry\'s code (27 and 28 the pseudo-chips\')'),
     0x0802C556: ('reward', 'a battle\'s reward given: its code from bit 9'),
     0x081224F0: ('keys', 'the folder editor\'s list into the folder: an item\'s id (bits 7-15 of id << 7 | code)'),

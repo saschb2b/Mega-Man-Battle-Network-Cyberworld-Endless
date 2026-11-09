@@ -139,7 +139,7 @@ void xrec_icon_recolour(uint8_t icon[0x80], const uint8_t map[16]) {
 	for (int i = 0; i < 0x80; ++i) icon[i] = (uint8_t)(map[icon[i] & 15] | map[icon[i] >> 4] << 4);
 }
 
-int xrec_deck_sit_out(uint16_t *deck, int n, const uint8_t sits[64], int keep, unsigned *first) {
+int xrec_deck_sit_out(uint16_t *deck, int n, const uint8_t sits[XREG_IDS / 8], int keep, unsigned *first) {
 	int w = 0, taken = 0;
 	*first = 0;
 	for (int i = 0; i < n; ++i) {

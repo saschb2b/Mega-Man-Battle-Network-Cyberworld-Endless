@@ -61,6 +61,7 @@
 #define XN_MORE_END   (XN_MORE_ART + 0x1000u)   /* (before XN_DARK_RECORDS) */
 #define XN_SLOT_CODE  0x3C00u             /* a Navi's code room */
 #define XN_SLOT_ART   0x400u              /* ... and its art's */
+#define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
 

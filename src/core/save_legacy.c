@@ -142,8 +142,8 @@ static bool load_v9(void) {
 }
 
 /* (a Run as it lies today under `magic`: "CWEA" every extra on, as runs
- * were; "CWEB" where this build's folders are ten bits, its state's
- * nine-bit, save_format.h) */
+ * were; "CWEB" and "CWEC" where this build's folders are ten bits, their
+ * state's nine-bit, save_format.h) */
 static bool load_today(uint32_t magic, bool extras_on) {
 	Run v;
 	if (!save_read_blob_upto("run.sav", magic, &v, sizeof v) || !v.active) return false;
@@ -190,7 +190,8 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if ((RUN_MAGIC != RUN_MAGIC_NINE && load_today(RUN_MAGIC_NINE, false)) || load_today(RUN_MAGIC_VA, true) || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
+	if ((RUN_MAGIC != RUN_MAGIC_NINE_STOP && load_today(RUN_MAGIC_NINE_STOP, false)) || (RUN_MAGIC != RUN_MAGIC_NINE && load_today(RUN_MAGIC_NINE, false)) ||
+	    load_today(RUN_MAGIC_VA, true) || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

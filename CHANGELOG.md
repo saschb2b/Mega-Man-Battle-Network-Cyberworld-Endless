@@ -8,6 +8,11 @@
   only games of this version and a server that speaks v16; an older game
   hears that it is behind, as with every new protocol. Someone hosting
   their own Square updates the server with the game.
+- **Chip ids past 511.** BN6's chip ids grew from nine bits to ten inside
+  the game, ground for BN4 Red Sun's chips. Nothing plays differently.
+  A run saved by an earlier version goes on as before (its folders are
+  converted once as it loads); a save from this version moved to an
+  earlier one is refused there as a newer version's.
 - **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
   beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
   Area or BN5's Undernet now gets the quick way back BN6's areas have: a

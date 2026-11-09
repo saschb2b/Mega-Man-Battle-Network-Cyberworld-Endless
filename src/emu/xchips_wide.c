@@ -5,9 +5,11 @@
 
 #include "bn6.h"
 #include "chip_entry.h"
+#include "chips.h"
 #include "claims.h"
 #include "debug.h"
 #include "emu.h"
+#include "hook.h"
 #include "rom.h"
 
 #define BUS 0x08000000u
@@ -17,6 +19,12 @@
  * 26 to 27), the 0x01FF literal's low half (0x03FF), BN6_ENTRY_CHEAT's
  * entry. Numbers only, as tools/chip_ids.py --table writes them from the
  * census's verdicts (docs/rom/chips-code.md, Ten-bit chip ids). */
+#define ARCHIVE_LOOP(r) \
+	{ (r) + 0x08u, 0x29FF, 0x29FF }, { (r) + 0x0Au, 0xDD02, 0xDD03 }, { (r) + 0x0Cu, 0x3004, 0x3004 }, { (r) + 0x0Eu, 0x0609, 0x39FF }, \
+	{ (r) + 0x10u, 0x0E09, 0x3901 }, { (r) + 0x12u, 0x6800, 0xE7F9 }, { (r) + 0x14u, 0x46F7, 0x6800 }, { (r) + 0x16u, 0x0000, 0x46F7 }
+#define ARCHIVE_WORD(r, was, now) \
+	{ (r) + 0x18u, (uint16_t)((was) & 0xFFFFu), (uint16_t)((now) & 0xFFFFu) }, { (r) + 0x1Au, (uint16_t)((was) >> 16), (uint16_t)((now) >> 16) }
+
 static const struct { uint32_t at; uint16_t was, now; } changes[] = {
 	{ 0x0800A584u, 0x05C0, 0x0580 },
 	{ 0x0800A586u, 0x0DC0, 0x0D80 },
@@ -134,6 +142,14 @@ static const struct { uint32_t at; uint16_t was, now; } changes[] = {
 	{ 0x0812F3B6u, 0x0DC0, 0x0D80 },
 	{ 0x0812F3BCu, 0x0E89, 0x0EC9 },
 	{ 0x0812F64Cu, 0x0240, 0x0280 },
+	/* (then, by hand, not the census's: the names' and descriptions'
+	 * routines, BN6_CHIP_NAME_OF and BN6_CHIP_DESC_OF, taking an id's
+	 * archive as id >> 8 of four (CHIPS_TABLES) where BN6 picks one of two
+	 * by id > 255: cmp r1,#0xff; ble 1f; adds r0,#4; subs r1,#0xff; subs
+	 * r1,#1; b 0b; 1: ldr r0,[r0]; mov pc,lr, over its padding, and its
+	 * literal pointed at the four words) */
+	ARCHIVE_LOOP(BN6_CHIP_NAME_OF), ARCHIVE_WORD(BN6_CHIP_NAME_OF, 0x08027D2Cu, CHIPS_TABLES),
+	ARCHIVE_LOOP(BN6_CHIP_DESC_OF), ARCHIVE_WORD(BN6_CHIP_DESC_OF, 0x08027D50u, CHIPS_TABLES + 0x10u),
 };
 #define NCHANGES (int)(sizeof changes / sizeof *changes)
 
@@ -165,6 +181,23 @@ static int changes_state(void) {
 	return own == NCHANGES ? 0 : ours == NCHANGES ? 1 : -1;
 }
 
+/* The ownership marks and their keys hold ids to 511 (docs/rom/chips.md,
+ * Chips owned): a chip past them is neither marked (BN6_PACK_MARK_STORE's
+ * store skipped) nor taken for a cheat's (BN6_PACK_MARK_TEST's compare
+ * made equal), where BN6 would write and read the bytes past the tables */
+static HookAct mark_store(HookRegs *r, void *user) {
+	(void)user;
+	if (r->r[0] < BN6_PACK_EXT_IDS) return HOOK_CONTINUE;
+	r->r[12] = (BN6_PACK_MARK_STORE + 2u) | 1u;   /* (on to its pop) */
+	return HOOK_JUMP;
+}
+
+static HookAct mark_test(HookRegs *r, void *user) {
+	(void)user;
+	if (r->r[0] >= BN6_PACK_EXT_IDS) r->r[1] = r->r[2];
+	return HOOK_CONTINUE;
+}
+
 bool xchips_wide_install(void) {
 	if (CHIP_ID_BITS == 9) return true;
 	int state = changes_state();
@@ -177,6 +210,9 @@ bool xchips_wide_install(void) {
 			uint32_t a = presets[f] + 2 * k;
 			put16(a, chip_entry_from9(rom_u16(a - BUS)));
 		}
+	/* (a core's own hooks, set with its copy's changes) */
+	if (!emu_hook(BN6_PACK_MARK_STORE, mark_store, NULL) || !emu_hook(BN6_PACK_MARK_TEST, mark_test, NULL))
+		fprintf(stderr, "chips: no hooks on the marks: a chip past 511 is taken for a cheat's\n");
 	claims_end();
 	if (emu_debug_on()) fprintf(stderr, "chips: ten-bit ids, %d of BN6's halfwords and %d preset folders\n", NCHANGES, NPRESETS);
 	return true;

@@ -117,6 +117,10 @@
 #define BN6_EDITOR_LIST_IN    0x081224D4u /* ... the list into the folder (eToolkit +0x48): an entry made of each item, code << 9 | id */
 #define BN6_PRESET_FOLDERS    0x080213ACu /* the preset folders GiveFolder copies, 0x3C bytes each: two here, */
 #define BN6_PRESET_FOLDERS2   0x0802158Cu /* ... and four here (docs/rom/chips.md, Chip folders) */
+#define BN6_CHIP_NAME_OF      0x08027D10u /* a chip's name: r0 its archive, r1 its entry, by id > 255 of two (the archives' words at 0x08027D2C, its literal at +0x18) */
+#define BN6_CHIP_DESC_OF      0x08027D34u /* ... its description (0x08027D50, its literal at +0x18) */
+#define BN6_PACK_MARK_STORE   0x08006E80u /* encryption_applyPack's strb r1,[r7,r0]: a chip's mark written, by id */
+#define BN6_PACK_MARK_TEST    0x08006E96u /* encryption_testPack's cmp r1,r2: its key against its mark, equal where owned */
 #define BN6_FOLDERS           3           /* Folder1, Folder2 and the ExtraFolder at eToolkit +0x48, BN6_FOLDER_ENTRIES each, 0x3C apart */
 #define BN6_FLAG_LIBRARY_IDS  512         /* BN6_FLAG_LIBRARY + chip id holds ids 0-511: 0x2020 on is another block */
 
@@ -124,6 +128,7 @@
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/engine/emulation/) */
+#define BN6_PACK_EXT_IDS      512         /* ... the ids it holds end there */
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */

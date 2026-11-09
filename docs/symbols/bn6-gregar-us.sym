@@ -343,7 +343,9 @@
 08006660 cosine_table_twin
 080068E8 BN6_HBLANK_DMA_SET
 08006AAE souls_track
+08006E80 BN6_PACK_MARK_STORE
 08006E84 deck_ownership_test
+08006E96 BN6_PACK_MARK_TEST
 08006EA4 pack_count_read
 08007280 bn6_ai_data.from
 08007368 BN6_SPAWN_ENTITIES
@@ -854,9 +856,11 @@
 08027310 BN6_MOOD_FROM_SCRIPT
 08027410 BN6_DUST_PHASES
 08027412 BN6_DUST_PHASES_NEXT
+08027D10 BN6_CHIP_NAME_OF
 08027D12 ten_bit_chip.names_descriptions_archives
 08027D2C chip_registry.names_words
 08027D30 chip_registry_7
+08027D34 BN6_CHIP_DESC_OF
 08027D36 ten_bit_chip.names_descriptions_archives_2
 08027D50 chip_registry.descriptions
 08027D54 chip_registry.0x0811b3bc

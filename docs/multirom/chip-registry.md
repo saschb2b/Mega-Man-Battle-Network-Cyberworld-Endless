@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 257 chips in BN6's chip tables grown to 512 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
 ---
 
 # The chip registry
@@ -143,9 +143,14 @@ BN6's code that takes an id in nine bits (`tools/chip_ids.py`, [The chip
 registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip ids),
 every C reader and writer of a folder entry through
 `src/core/chip_entry.h`, the profile's Library to 1023 and the wire's
-chips to 1023 (protocol v16), and BN6's code's patch written
-(`src/emu/xchips_wide.c`), inert until the flip; the records, names and
-pack past 511 and the registry's rows there are to come.
+chips to 1023 (protocol v16), and BN6's code patched (`src/emu/xchips_wide.c`):
+ten bits are live. The image holds 1024 records and four archives of
+names and of descriptions (`CHIPS_TABLES` their words), ids 512-1023
+free for the registry, blank records until a row takes one (`--dev
+alias=ID` makes one a copy of Cannon, the proof of an id past 511). Not
+yet past 511: the pack (its extension ends at 511), the Library's flags
+(`0x1E20` + id ends at 511), the other name readers, the folder editor's
+items, the wide rewards.
 
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood

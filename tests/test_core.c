@@ -4062,7 +4062,7 @@ static void test_xnavi_static(void) {
 	const XVirusFamily *o = &xnavi_objects_bn5;
 	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
 		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
-		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XN_DARK_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
@@ -4199,8 +4199,12 @@ static void test_free_space(void) {
 	const Region chips[] = {
 		{ "the records", CHIPS_RECORDS, CHIPS_RECORDS + CHIPS_IDS * BN6_CHIP_RECORD_SIZE },
 		{ "the names, 0-255", CHIPS_NAMES0, CHIPS_NAMES0 + CHIPS_NAMES_ROOM }, { "the names, 256-511", CHIPS_NAMES1, CHIPS_NAMES1 + CHIPS_NAMES_ROOM },
+		{ "the names, 512-767", CHIPS_NAMES2, CHIPS_NAMES2 + CHIPS_NAMES_ROOM }, { "the names, 768-1023", CHIPS_NAMES3, CHIPS_NAMES3 + CHIPS_NAMES_ROOM },
+		{ "the archives' words", CHIPS_TABLES, CHIPS_TABLES + 0x20u },
 		{ "the descriptions, 0-255", CHIPS_DESCS0, CHIPS_DESCS0 + CHIPS_DESCS_ROOM },
 		{ "the descriptions, 256-511", CHIPS_DESCS1, CHIPS_DESCS1 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 512-767", CHIPS_DESCS2, CHIPS_DESCS2 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 768-1023", CHIPS_DESCS3, CHIPS_DESCS3 + CHIPS_DESCS_ROOM },
 		{ "the routines", CHIPS_CODE, CHIPS_CODE + 0x400u }, { "the art", CHIPS_ART, CHIPS_FREE_END },
 	};
 	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
@@ -4275,8 +4279,8 @@ static void test_free_space(void) {
 		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
 		"the Souls' room: a grown table's entries past its room");
 	/* (BN6's RAM: its regions checked above, FREE_SPACE_RAM) */
-	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
-		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
+	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (BN6_PACK_EXT_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
+		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (BN6_PACK_EXT_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
 		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
 	CHECK(BN6_DARK_LISTS == RAM_DARK_LISTS && RAM_DARK_LISTS + 2u * BN5_DARK_LIST_SIZE == RAM_NAVIS && BN6_COLONEL_SIDES == RAM_NAVIS &&
@@ -4701,8 +4705,8 @@ static void test_all_star(void) {
 	free(R.data);
 	R.data = NULL;
 	R.layout = NULL;
-	CHECK(chip_entry_star(1 | 0 << 9) == (1 | 26 << 9) && chip_entry_star(72 | 18 << 9) == (72 | 26 << 9), "all star: a folder entry in *");
-	CHECK(chip_entry_star(0xFFFF) == 0xFFFF && chip_entry_star(0) == 0 && chip_entry_star(1 | 26 << 9) == (1 | 26 << 9), "all star: an empty entry, or one in *, kept");
+	CHECK(chip_entry_star(1 | 0 << CHIP_ID_BITS) == (1 | 26 << CHIP_ID_BITS) && chip_entry_star(72 | 18 << CHIP_ID_BITS) == (72 | 26 << CHIP_ID_BITS), "all star: a folder entry in *");
+	CHECK(chip_entry_star(0xFFFF) == 0xFFFF && chip_entry_star(0) == 0 && chip_entry_star(1 | 26 << CHIP_ID_BITS) == (1 | 26 << CHIP_ID_BITS), "all star: an empty entry, or one in *, kept");
 	uint8_t a[CHIP_PACK_ENTRY] = { 2, 1, 0, 3, 0x10, 0x7F, 0x20, 0x7F, 0, 0, 0x30, 0x7F };
 	chip_pack_star(a);
 	static const uint8_t a_want[CHIP_PACK_ENTRY] = { 6, 0, 0, 0, 0x10, 0x7F, 0, 0, 0, 0, 0, 0 };
@@ -4738,7 +4742,7 @@ static void test_folders(void) {
 		if (!c) continue;
 		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
 		for (int k = 0; k < 30; ++k) {
-			int id = c[k] & 0x1FF, code = c[k] >> 9;
+			int id = (int)chip_entry_id(c[k]), code = (int)chip_entry_code(c[k]);
 			const char *given = NULL;
 			for (unsigned q = 0; q < sizeof bn6_codes / sizeof *bn6_codes; ++q)
 				if (bn6_codes[q].id == id) given = bn6_codes[q].codes;
@@ -4934,7 +4938,7 @@ static void test_xchips(void) {
 	CHECK(xchips_code(none, 7) == 7, "xchips: a record of no codes leaves the code (%d)", xchips_code(none, 7));
 	/* (WhiCapsl twice, HiCannon, an empty slot both ways, and an id past
 	 * the table: three sit out, the first two named) */
-	const uint16_t folder[8] = { 1 | 0 << 9, 2 | 26 << 9, 2 | 26 << 9, 5 | 7 << 9, 0xFFFF, 0, 400 | 1 << 9, 3 | 4 << 9 };
+	const uint16_t folder[8] = { 1 | 0 << CHIP_ID_BITS, 2 | 26 << CHIP_ID_BITS, 2 | 26 << CHIP_ID_BITS, 5 | 7 << CHIP_ID_BITS, 0xFFFF, 0, 400 | 1 << CHIP_ID_BITS, 3 | 4 << CHIP_ID_BITS };
 	uint16_t out[2] = { 0, 0 };
 	int n = xchips_out(folder, 8, to_x, 6, out, 2);
 	CHECK(n == 3 && out[0] == 2 && out[1] == 5, "xchips: three of the folder's chips sit out, WhiCapsl and HiCannon first (%d: %d %d)", n, out[0], out[1]);
@@ -5140,8 +5144,8 @@ static void test_chip_registry(void) {
 	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
 		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
-	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
-		"registry: the free ids, BN6's own and its pseudo-chips' not");
+	CHECK(xreg_free_id(203) && xreg_free_id(511) && xreg_free_id(512) && xreg_free_id(1023) && !xreg_free_id(221) && !xreg_free_id(368) &&
+		!xreg_free_id(410) && !xreg_free_id(1024), "registry: the free ids, to 1023 (ten bits), BN6's own and its pseudo-chips' not");
 	/* (made-up rows, each breaking one rule) */
 	static const XChipReg twice[] = { { 9, 204, XREG_RECORD, 23, 0xFF, { 0 }, 0, 0 }, { 9, 205, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
 	static const XChipReg taken[] = { { 12, 221, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
@@ -5218,9 +5222,9 @@ static void test_chip_records(void) {
 	memset(ic, 0xC9, sizeof ic);
 	xrec_icon_recolour(ic, map);
 	CHECK(ic[0] == 0x39 && ic[0x7F] == 0x39, "records: an icon's two pixels a byte recoloured (%02X)", ic[0]);
-	uint8_t sits[64] = { 0 };
+	uint8_t sits[XREG_IDS / 8] = { 0 };
 	sits[204 >> 3] |= 1u << (204 & 7);
-	uint16_t deck[8] = { 1, 204 | 11 << 9, 5, 204 | 11 << 9, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+	uint16_t deck[8] = { 1, CHIP_ENTRY(204, 11), 5, CHIP_ENTRY(204, 11), 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
 	unsigned first;
 	int taken = xrec_deck_sit_out(deck, 8, sits, 3, &first);
 	CHECK(taken == 2 && deck[0] == 1 && deck[1] == 5 && deck[2] == 0xFFFF && first == 2u, "records: two chips sit out of the deck, the second of its first "
@@ -5258,7 +5262,17 @@ static void test_chips_image(void) {
 	CHECK(!strcmp(ci.name, "BN5-9") && !strcmp(ci.codes, "LMN") && ci.mb == 10 && chips_sits_out(204) && !chips_sits_out(1) && chips_bn5(204) && !chips_from_bn5(),
 		"chips: BN5's WideSht1 without its ROM a placeholder of its codes, sitting out (%s %s %d)", ci.name, ci.codes, ci.mb);
 	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
-	CHECK(chips_record(511) && !chips_record(512) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204, "chips: 512 records, the registry's its id's sort place");
+	CHECK(chips_record(511) && chips_record(1023) && !chips_record(1024) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204,
+		"chips: 1024 records, the registry's its id's sort place");
+	/* (--dev alias=600: chip 600 a copy of Cannon, its record, name and description: ten-bit ids' proof) */
+	chips_alias(600, 1);
+	ChipInfo al;
+	chip_info(600, &al);
+	CHECK(!strcmp(al.name, "Cannon") && !strcmp(al.codes, "ABC*") && al.power == 40 && !memcmp(chips_record(600), chips_record(1), 0x2C),
+		"chips: an alias at 600 is Cannon, record and name (%s %s %d)", al.name, al.codes, al.power);
+	chip_info(601, &al);
+	CHECK(!al.name[0] || strcmp(al.name, "Cannon"), "chips: 601 none of its own");
+	chips_alias(0, 0);
 	chip_info(509, &ci);
 	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's has no name (%s)", ci.name);
 	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),

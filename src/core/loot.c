@@ -753,7 +753,7 @@ char loot_folder_code(int id, bool star) {
 	return star && memchr(ci.codes, '*', (size_t)ci.ncodes) ? '*' : 0;
 }
 
-static uint8_t folder_copies[512];
+static uint8_t folder_copies[CHIPS_IDS];
 
 void loot_folder_counts(const uint16_t *folder, int n) {
 	memset(folder_copies, 0, sizeof folder_copies);
@@ -761,10 +761,10 @@ void loot_folder_counts(const uint16_t *folder, int n) {
 		if (folder_copies[chip_entry_id(folder[i])] < 255) ++folder_copies[chip_entry_id(folder[i])];
 }
 
-int loot_folder_copies(int id) { return id >= 0 && id < 512 ? folder_copies[id] : 0; }
+int loot_folder_copies(int id) { return id >= 0 && id < CHIPS_IDS ? folder_copies[id] : 0; }
 
 bool loot_folder_full(int id) {
-	if (id < 0 || id >= 512 || !folder_copies[id]) return false;
+	if (id < 0 || id >= CHIPS_IDS || !folder_copies[id]) return false;
 	ChipInfo ci;
 	chip_info(id, &ci);
 	int most = ci.mb < 20 ? 5 : ci.mb < 30 ? 4 : ci.mb < 40 ? 3 : ci.mb < 50 ? 2 : 1;

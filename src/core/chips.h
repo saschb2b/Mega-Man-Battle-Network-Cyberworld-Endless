@@ -21,22 +21,27 @@
 #include "emu.h"
 #include "xchips_registry.h"
 
-#define CHIPS_IDS 512                          /* the records: ids 0-511 (nine bits) */
+#define CHIPS_IDS 1024                         /* the records: ids 0-1023 (ten-bit chip ids, chip_entry.h) */
 #define CHIPS_BN6_RECORDS 411                  /* BN6's own, 0-410 */
 #define CHIPS_FREE FREE_CHIPS                  /* the chips' place in the core's copy (free_space.h; docs/engine/emulation/), to: */
 #define CHIPS_FREE_END FREE_SOULS
-#define CHIPS_RECORDS (CHIPS_FREE + 0x0000u)   /* 512 records, 0x2C each */
-#define CHIPS_NAMES0 (CHIPS_FREE + 0x6000u)    /* the names' text archives: ids 0-255, */
-#define CHIPS_NAMES1 (CHIPS_FREE + 0x7000u)    /* ... 256-511, 0x1000 each */
-#define CHIPS_DESCS0 (CHIPS_FREE + 0x8000u)    /* the descriptions' archives, 0x4000 each */
-#define CHIPS_DESCS1 (CHIPS_FREE + 0xC000u)
-#define CHIPS_CODE (CHIPS_FREE + 0x10000u)     /* the engine's own Thumb routines (xchips_install.c), 0x400 */
-#define CHIPS_ART (CHIPS_FREE + 0x11000u)      /* BN5's icons, pictures and palettes, to CHIPS_FREE_END */
+#define CHIPS_RECORDS (CHIPS_FREE + 0x0000u)   /* CHIPS_IDS records, 0x2C each */
+#define CHIPS_NAMES0 (CHIPS_FREE + 0xB000u)    /* the names' text archives: ids 0-255, */
+#define CHIPS_NAMES1 (CHIPS_FREE + 0xC000u)    /* ... 256-511, */
+#define CHIPS_NAMES2 (CHIPS_FREE + 0xD000u)    /* ... 512-767, */
+#define CHIPS_NAMES3 (CHIPS_FREE + 0xE000u)    /* ... 768-1023, 0x1000 each */
+#define CHIPS_TABLES (CHIPS_FREE + 0xF000u)    /* the four names' archives' words, then the four descriptions' (xchips_wide.c) */
+#define CHIPS_DESCS0 (CHIPS_FREE + 0x10000u)   /* the descriptions' archives, 0x4000 each */
+#define CHIPS_DESCS1 (CHIPS_FREE + 0x14000u)
+#define CHIPS_DESCS2 (CHIPS_FREE + 0x18000u)
+#define CHIPS_DESCS3 (CHIPS_FREE + 0x1C000u)
+#define CHIPS_CODE (CHIPS_FREE + 0x20000u)     /* the engine's own Thumb routines (xchips_install.c), 0x400 */
+#define CHIPS_ART (CHIPS_FREE + 0x21000u)      /* BN5's icons, pictures and palettes, to CHIPS_FREE_END */
 #define CHIPS_NAMES_ROOM 0x1000u
 #define CHIPS_DESCS_ROOM 0x4000u
 
 /* Chip `id`'s record (0x2C bytes, BN6's layout) as the core's copy holds
- * it, NULL without BN6's ROM or past 511 */
+ * it, NULL without BN6's ROM or past CHIPS_IDS */
 const uint8_t *chips_record(int id);
 /* ... its name ("WideSht1"; a placeholder's "BN5-9"), "" for none */
 void chips_name(int id, char *out, size_t n);
@@ -74,5 +79,10 @@ void chips_installed(bool on);
 /* Made again at the next read, from the ROMs read then (the tests' made-up
  * ROMs, which may take a freed one's memory) */
 void chips_forget(void);
+/* --dev alias=ID: chip `id` (past BN6's records, no registry row's) made
+ * a copy of chip `from`, its record, name and description, the next time
+ * the image is made: ten-bit chip ids' proof of an id past 511 (docs/
+ * multirom/bn4-chips.md, unit 1); 0 none */
+void chips_alias(int id, int from);
 
 #endif

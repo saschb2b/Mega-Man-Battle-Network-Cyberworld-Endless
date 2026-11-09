@@ -7,6 +7,7 @@
 #include "rivals.h"
 #include "run.h"
 #include "save_blob.h"
+#include "save_format.h"
 
 Run run;
 char g_data_dir[512] = ".";
@@ -46,9 +47,14 @@ bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 	return true;
 }
 
+/* (a Run as it lies today, under `today_magic`) */
+static Run today_fixture;
+static uint32_t today_magic;
+
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) {
-	(void)name; (void)magic; (void)data; (void)n;
-	return false;
+	if (strcmp(name, "run.sav") || !today_magic || magic != today_magic || n != sizeof today_fixture) return false;
+	memcpy(data, &today_fixture, n);
+	return true;
 }
 
 void save_queue_wait(void) {}
@@ -152,11 +158,36 @@ static void check_rivals_second(void) {
 	CHECK(!memcmp(rival(RIVAL_NAVIS), &(Rival){ 0 }, sizeof(Rival)), "rivals: a navi past them not blank");
 }
 
+/* Ten-bit chip ids (save_format.h): a run of "CWEB" or "CWEC", its state's
+ * folders nine-bit, read as today's Run (load_run converts them once); one
+ * of RUN_MAGIC is no older format's */
+static void check_nine_bit_runs(void) {
+	const uint32_t nine[2] = { RUN_MAGIC_NINE, RUN_MAGIC_NINE_STOP };
+	fixture_magic = 0;
+	for (int k = 0; k < 2; ++k) {
+		memset(&today_fixture, 0, sizeof today_fixture);
+		today_fixture.active = true;
+		today_fixture.seed = 9u + (uint32_t)k;
+		today_fixture.depth = 4;
+		today_fixture.extras_off = 2;
+		today_magic = nine[k];
+		memset(&run, 0, sizeof run);
+		CHECK(legacy_load_run() && run.seed == 9u + (uint32_t)k && run.depth == 4 && run.extras_off == 2,
+			"ten bits: a CWEB or CWEC run read as today's, its extras kept");
+	}
+	today_magic = RUN_MAGIC;
+	memset(&run, 0, sizeof run);
+	CHECK(RUN_MAGIC == RUN_MAGIC_TEN || !legacy_load_run(), "ten bits: RUN_MAGIC's run is no older format's");
+	CHECK(RUN_MAGIC != RUN_MAGIC_TEN || !legacy_load_run(), "ten bits: CWED is no older format's");
+	today_magic = 0;
+}
+
 int main(void) {
+	check_nine_bit_runs();
 	check_format(8);
 	check_format(16);
 	check_rivals();
 	check_rivals_second();
-	if (!failures) puts("legacy: CWE2 and CWE3 route, progress, guardian bounds and RNG, CWR1's and CWR2's rivals passed");
+	if (!failures) puts("legacy: CWE2 and CWE3 route, progress, guardian bounds and RNG, CWR1's and CWR2's rivals, CWEB and CWEC as nine-bit runs passed");
 	return failures ? 1 : 0;
 }

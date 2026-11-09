@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
 ---
 
 # Portable saves
@@ -91,10 +91,12 @@ The profile's Library holds chip ids to 1023 (`library_w` after the
 rest: a profile saved before reads them 0, and a build before it reads
 a newer profile's `.cwsave` as made by a newer version), for [ten-bit
 chip ids](../multirom/bn4-chips.md). `run.state` holds BN6's RAM and so
-its folders' entries, nine bits to this day. Where `chip_entry.h` says
-ten bits, `RUN_MAGIC` is "CWEC" (`save_format.h`); a run saved before
-("CWEB", or an older format) is read as ever, and its folders go through
-the converter (`chip_entries_from9`, unit-tested) once: `run.folder` as
+its folders' entries, in ten bits since ten-bit chip ids (`chip_entry.h`):
+`RUN_MAGIC` is "CWED" (`save_format.h`; "CWEC" is Oran Isle's run.stop,
+nine-bit too); a run saved before ("CWEC", "CWEB", or an older format)
+is read as ever, and its folders go through the converter
+(`chip_entries_from9`, unit-tested; `tests/test_legacy.c` reads a "CWEB"
+and a "CWEC" run as today's) once: `run.folder` as
 it loads, the state's three folders (eToolkit `+0x48`) as soon as the
 state is in (`own_folder_chips`, `director_folder.c`). Tried with a run
 the nine-bit build saved at a guardian's door: the ten-bit build's

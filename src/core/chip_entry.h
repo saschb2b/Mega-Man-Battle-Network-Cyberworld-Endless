@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#define CHIP_ID_BITS 9
+#define CHIP_ID_BITS 10
 #define CHIP_ID_MASK ((1u << CHIP_ID_BITS) - 1u)
 #define CHIP_ENTRY_NONE 0xFFFFu
 

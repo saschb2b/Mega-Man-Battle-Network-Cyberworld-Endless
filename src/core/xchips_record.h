@@ -81,6 +81,6 @@ void xrec_icon_recolour(uint8_t icon[0x80], const uint8_t map[16]);
  * the rest in their order, 0xFFFF after them; how many were taken, and in
  * `first` a bit for each of the deck's first `keep` entries (the Regular
  * chip's and the TagChips' places, 8 at most) taken. */
-int xrec_deck_sit_out(uint16_t *deck, int n, const uint8_t sits[64], int keep, unsigned *first);
+int xrec_deck_sit_out(uint16_t *deck, int n, const uint8_t sits[XREG_IDS / 8], int keep, unsigned *first);
 
 #endif

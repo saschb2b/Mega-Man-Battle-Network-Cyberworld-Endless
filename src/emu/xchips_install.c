@@ -8,6 +8,7 @@
 #include "chips.h"
 #include "claims.h"
 #include "debug.h"
+#include "devtools.h"
 #include "emu.h"
 #include "hook.h"
 #include "rom.h"
@@ -224,6 +225,9 @@ static bool install(void) {
 	xchips_code_install();
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
 	if (installed_len && installed_rom5 == rom5) return true;
+	/* (--dev alias=ID: chip ID a copy of Cannon, past BN6's records: chips_alias) */
+	static bool aliased;
+	if (dev.alias && !aliased) { chips_alias(dev.alias, 1); aliased = true; }
 	uint32_t len;
 	const uint8_t *img = chips_image(&len);
 	why[0] = 0;
