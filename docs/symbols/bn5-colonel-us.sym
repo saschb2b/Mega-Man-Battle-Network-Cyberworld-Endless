@@ -542,6 +542,12 @@
 08032D04 BN5_LIB_SPRITES_7
 080331B4 XRomLayout.map_table_rw
 080331CC XRomLayout.map_table
+08033220 acdc_town
+08033280 bn5_real_world.at_08033280
+080332BC oran_isle
+0803334C bn5_real_world.harbour
+08033394 castle_town
+080333D0 nebula_base
 080334F0 descriptors_from
 08033FAC XRomLayout.coord_table_rw
 08033FC4 XRomLayout.coord_table
@@ -708,6 +714,9 @@
 0808C39C XRomLayout.battle_bg_scroll
 0808C5E8 XRomLayout.battle_bgs
 0808C9DC XRomLayout.battle_bg_anims
+0808ECAA bn5_real_world.starting_song_0x06_each_frame
+0808F0C9 bn5_real_world.starting_song_0x06_each_frame_2
+0809E114 song_0x23
 080A66D4 BN5_NPC_SCRIPT_CMDS
 080AD930 map_object_table
 080AE2FC handler_3_records

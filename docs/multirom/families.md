@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted families"
-description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, and all 25 families proved by `build.py xdiff`."
+description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms and numbers."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T23:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:15:00Z }
 ---
 
 # Transplanted families
@@ -410,7 +410,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
   grown, in list 4), and an effect of other art takes an id from 0x6C
   (BN4's families, `tools/xrecipe_bn4.py`: lists 1 and 4 from 0xC0, and
   the types they move at the dispatch's numbers from 0xE0, apart from
-  every BN5 type's). Every object type a family's
+  every BN5 type's; the late ones, below, from the tops down). Every object type a family's
   code spawns is decided once for every track (`bn5_twins.TYPES`): moved
   through the dispatch unless BN6's type of the number runs the same code
   and draws the same sprites by their bytes (19 moved, 6 twins, the
@@ -508,3 +508,57 @@ and its calls aimed again (`src/emu/xvirus.c`):
   after two of BN6's battles, [Testing](../engine/emulation/testing.md)): the install
   stands in the way of no run continued with BN5's ROM taken away or put
   in.
+
+## BN4's late families
+
+BN4's families past its first eight (`tools/xrecipe_bn4.py` LATE_FROM),
+VolGear first (9 November 2026), are moved after BN4's Navis took their
+numbers past the first eight's, and after the families' rooms filled:
+
+- **Their numbers from the tops down**, so the Navis' (from the first
+  eight's last, up) stay what they were and a Navi moved later still finds
+  his: the third kind's dispatch numbers from 0xDF down (VolGear's 0x19
+  and 0x1A at 0xDF and 0xDE; the Navis' from 0xCC up, to below the lowest
+  a late family took), list 4's from 0xBF down to 0xB6 (below the first
+  eight's 0xC0, past BN5's Navis' 0xA0-0xB5; VolGear's fire at 0xBF). An
+  effect id or a list 5 number of the families' ranges, which the Navis
+  continue, is a decision in the generator's report; none of a late
+  family's sprites is shared with a Navi who draws the same (FireMan
+  keeps his own copy of VolGear's fire).
+- **Their art in a room of their own**, `XV_LATE_ART` (`FREE_LATE_FAMILIES`,
+  `+0x4D0000`-`+0x500000`, past BN5's lava and sea: [Memory the engine
+  writes](../engine/emulation/memory.md), its row), the families' second
+  room holding its sounds' copies to its end; their code in that second
+  room while it has room (VolGear's ends at `0x08B7BAB4`, the room's end
+  `0x08B7C000`), then in a code room of their own (`FREE_LATE_CODE`,
+  `+0x711000`-`+0x720000`). Both are rows of the free space's plan, placed
+  where its `--fit` found room ([Free space](../engine/emulation/free-space.md)):
+  the art's first place (`+0x711000`-`+0x720000`, 60 KB) held VolGear's
+  but not the other nine's sprites. The recipe's check takes a sprite in
+  either room (`XvRegion.art2`).
+- **What VolGear needed besides** ([BN4 Red Sun's tables](../rom/bn4.md),
+  VolGear moved): BN4's NameID range look-up lies in its region amid its
+  states, so the generator calls it out by name (`ENGINE_IN_REGION`)
+  rather than walking it as its own; its flame aims at the other side's
+  player read inline from the battle state, its index register first,
+  made BN6's as the Navis' reads are (`battle_players`); its flame's kinds'
+  table (`bn4_twins.FAMILY_TABLES`, the families' alone while FireMan's
+  recipe moves the same type without it) gives its copy's sprite; its three
+  held-chip calls are dead while it holds none, as Billy's, Mettaur's and
+  Walla's are. `volgear_v1`-`v3` PASS ([the differential](../devtools/differential.md),
+  VolGear's readings), four mutations caught; it visits as the others do.
+
+The other nine (Gaia, Boomer, MagTect, Dharma, Kilby, Weather, Spidy,
+Moloko, and Black Earth's NavShado and NavBlack) wait first on their
+sounds: each of the eight measured plays one to five BN6 has no song of
+(NavShado's and NavBlack's not measured), and the families' 12
+slots (0x34-0x3F) are spent, BN5's 0x41-0x4B kept for BN5 (the owner's
+call 8, [Battle Network 4 in a run](bn4.md)) and the Navis' 16 their
+per-battle pool's. Where their sounds go is the owner's call: the Navis'
+pool by battle (one BN4 family a visited battle holds) or slots of their
+own. Measured by the generator on 9 November 2026 (a scratch run with
+each added): Kilby one sound, an I/O word and its effects' ids made by
+arithmetic; MagTect two, an I/O word and its update's own step; Spidy
+two, its init's region 57 and floating, its update's order; Boomer one,
+its states 4 and 5 its own, its init's flags; Dharma three, Gaia two,
+Weather five and Moloko two, with more of the engine's work their own.

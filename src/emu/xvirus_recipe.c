@@ -76,7 +76,7 @@ static bool ref_ok(const XVirusFamily *f, XvRef r) {
 
 /* the families' region: their code from XV_CODE, their art from XV_ART; their one stub the chip writer's (XV_CHIP_WRITER,
  * their support chips' family BN5's: xvirus_dispatch.c) */
-static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, XV_CHIP_WRITER, XV_STUBS_END };
+static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, XV_CHIP_WRITER, XV_STUBS_END, false, XV_LATE_ART, XV_LATE_ART_END };
 
 static bool blocks_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (f->nblocks < 1) return no(why, n, "no blocks");
@@ -195,12 +195,18 @@ uint32_t xvirus_list_entry(int list, uint32_t index) {
 	return (list == BN6_SPRITES_LIST3 ? XV_LIST3 : XV_LISTS + (uint32_t)slot * XV_STEP) + 4u * index;
 }
 
-/* its sprites each in its own room past XV_ART, at a number of its own in a grown list */
+/* a span wholly within lo to hi */
+static bool span_in(uint32_t at, uint32_t room, uint32_t lo, uint32_t hi) {
+	return at >= lo && at < hi && room <= hi - at;
+}
+
+/* its sprites each in its own room past XV_ART (or in the region's second room), at a number of its own in a grown list */
 static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
-		if (s->at < r->art || (s->at & 3) || !s->room || s->at >= r->art_end || s->room > r->art_end - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		bool placed = span_in(s->at, s->room, r->art, r->art_end) || (r->art2 && span_in(s->at, s->room, r->art2, r->art2_end));
+		if ((s->at & 3) || !s->room || !placed) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
 			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))

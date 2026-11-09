@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T22:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:45:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -278,6 +278,14 @@ November 2026 (Turned on, below).
   run without BN4 from the first visitor on; layers (their layouts,
   objects and loot) do not change.
 
+VolGear, the seventh BN4 family to visit, joined on 9 November 2026
+once proved (call 6's rule: the others join as each is): `volgear_v1`-`v3`
+PASS, its rewards read from BN4's rows as the others' are, its role and
+stage from BN4's records by the same count, the first family moved past
+the first eight's rooms and numbers ([Transplanted families](families.md),
+BN4's late families). The other nine wait on where their sounds go (the
+same, measured there).
+
 Before BN4's visitors reached players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
 CirKill proved by `build.py xdiff` and their reward rows read, both
@@ -458,6 +466,10 @@ battle frame by frame, as BN5's were.
    battle records, guardians and bystanders are still to come.
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
+   Designed and scoped (9 November 2026), nothing built, in [BN4's chips
+   in a run](bn4-chips.md): the census (191 new to a run, 6 on BN6's
+   code), chip ids of ten bits for BN4's chips and BN5's alike, the
+   online rule and the build plan in units.
 
 ## Its music
 

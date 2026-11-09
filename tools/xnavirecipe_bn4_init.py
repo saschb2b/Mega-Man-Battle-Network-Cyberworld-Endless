@@ -355,3 +355,40 @@ def c_init(f, n):
     text += (f'static const XnInit {n}_init = {{ {spawns}, {len(f.spawns)}, {flags} }};   /* (at its spawn\'s end, its +0x11, its '
              f'sprite, its update{", its panel at its +6" if i["home"] else ""}) */\n')
     return text, f'\t.init = &{n}_init,   /* (its init\'s work past BN6\'s actor init: xnavi_init.c) */'
+
+
+# ---- its update's calls before its runner, its records' list (JunkMan's; docs/multirom/bn4-navis.md, JunkMan built) ----
+
+def navi_pres(f, uw):
+    """its update's calls of its own between its pre-step and its runner (JunkMan's two): BN6's hook A (table 2, run after its
+    pre-step, 0x080F368C, before its status dispatcher) aimed at a shim of its home that makes them in turn (XNavi.pre,
+    src/emu/xnavi_init.c), each with its r0 where a movs gives it (a CurAction BN6's where the call compares it with its +9),
+    else left as the call before leaves it"""
+    f.pres = []
+    for site, t in sorted(uw.bls.items())[1:-2]:
+        v, chain = T.back_value(uw, site, 0)
+        if v is not None and (len(chain) != 1 or chain[0][1] != 'movs'):
+            f.decide('pre-step', f'{site:08X}: its call of {t:08X} with r0 from {chain}')
+            continue
+        if v is not None:
+            w = T.walk(f.b4, t, region=(f.lo, f.hi))
+            cur = {i.f[0] for i in w.insns.values() if i.form == 'ldrb' and tuple(i.f[1:]) == (5, 9)}
+            if not any(i.form == 'cmp' and len(i.f) == 2 and 0 in i.f and set(i.f) & cur for i in w.insns.values()):
+                f.decide('pre-step', f'{site:08X}: its call of {t:08X} with r0 {v:#x}, which it reads as no CurAction')
+                continue
+            v = v + 2 if v >= 6 else v
+        f.pres.append((t, v))
+    f.notes.append('its update calls ' + ', '.join(f'{t:08X}' + ('' if v is None else f' (r0 BN6\'s CurAction {v})') for t, v in f.pres) +
+                   ' between its pre-step and its runner: BN6\'s hook A (table 2, which BN6\'s Navi frame runs after its pre-step, '
+                   '0x080F368C), a shim of its home making them in turn (XNavi.pre)')
+
+
+def record_list(b4, f):
+    """records naming list 1 at its sprite's number, JunkMan's (f.record_list): BN4's preload, the records' sprite's one reader
+    (0x08002B0E), unpacks an LZ77'd sprite alone (0x08002B44, bit 31), and list 1's of that number is raw, so nothing reads it"""
+    f.record_list = 0
+    p1, _ = X4.sprite(b4, X4.BN4['sprites'], 1, f.s1['index'])
+    if all(r[3] == 4 and r[4] == f.s1['index'] for r in f.recs) and f.s1['list'] != 1 and p1 is not None and not p1 & 0x80000000:
+        f.record_list = 1
+        f.notes.append(f'its records name list 1 {f.s1["index"]:#x}, raw, which BN4\'s preload passes over (0x08002B44): its battle '
+                       f'sprite its init\'s, list {f.s1["list"]} (XNavi.record_list)')

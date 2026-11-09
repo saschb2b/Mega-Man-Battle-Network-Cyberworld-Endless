@@ -1616,6 +1616,26 @@ format, its game 4: the trace's header names it):
     low").
   - With these, **`cirkill_v1`, `cirkill_v2` and `cirkill_v3` PASS**: 1200
     fight frames each, the family's records and the world's the same.
+- **VolGear's readings** (`volgear_v1`-`volgear_v3`: VolGear V1-V3, BN4's
+  0x07, 0x09 and 0x0B, BN6's 0x2F0, 0x2F2 and 0x2F4, 9 November 2026;
+  [Transplanted families](../multirom/families.md), BN4's late families):
+  the comparator reads a sprite in the late families' art room as one in
+  the families' (`tools/xdiff_bn4.py` `XV_LATE_ART`, its rows'
+  `XV_LATE_ART + n`). Two firsts settled in the generator, never in the
+  comparison: the install refused its NameID range's call while BN4's
+  look-up, lying in its region, was walked as its own; then `volgear_v1`
+  failed at t214 on its flame's +0x4C (BN4's MegaMan, BN6's 0) and +0x64,
+  its aim read at BN4's players' +0x44 in BN6's battle state ([BN4 Red
+  Sun's tables](../rom/bn4.md), VolGear moved). Each PASSes over 1200
+  fight frames, its flame (the third kind's 0x1A at the dispatch's 0xDE)
+  from t214, no allowance added. Its four mutations (tests/xdiff/mutations.json):
+  the aim's base left at +0x44 (t214), the flame's kinds' table byte left
+  at BN4's list 4 0x0A (t214, its sprite state), the flame spawned as its
+  0x19's number (t214, the run order) and its list 1 entry aimed at
+  Billy's copy (t1). Not reached: its fire on a list of panels (the third
+  kind's 0x19 at 0xDF, from its state `0x080B66E3`'s step at
+  `0x080B67A0`), with MegaMan idle in row 2 or row 1 over 1200 to 3600
+  frames, so its sprite's immediate (`0x080CFFAE`) is unproved.
 - **WindMan's readings** (`windman_v1`, 8 November 2026; [BN4's Navis in BN6's
   engine](../multirom/bn4-navis.md), WindMan built): what the comparator
   gained for his battle, each reading or allowance from both games' code
