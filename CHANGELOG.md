@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Online: protocol v16.** The Net Square, Trade Central and the Arena
+  now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
+  last ones, which need ids past BN6's 511. Games of this version meet
+  only games of this version and a server that speaks v16; an older game
+  hears that it is behind, as with every new protocol. Someone hosting
+  their own Square updates the server with the game.
+
 ## 0.20.0 (2026-11-09)
 
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
