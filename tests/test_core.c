@@ -4062,9 +4062,9 @@ static void test_xnavi_static(void) {
 		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
 		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
-	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_SLOT_CODE <= XN_TEAM_ART &&
-		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_END && XN_TEAM_END <= FREE_NAVIS,
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, then their sprites)");
+	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
+		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_NAVIS,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4078,7 +4078,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 10, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan and CosmoMan)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 11, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan and NapalmMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -4143,7 +4143,8 @@ static void test_free_space(void) {
 		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
 		{ "Team ProtoMan's homes", FREE_TEAM_NAVIS, FREE_TEAM_NAVI_CODE }, { "Team ProtoMan's code", FREE_TEAM_NAVI_CODE, FREE_TEAM_NAVI_ART },
-		{ "Team ProtoMan's art", FREE_TEAM_NAVI_ART, FREE_TEAM_SPRITES }, { "Team ProtoMan's sprites", FREE_TEAM_SPRITES, FREE_NAVIS },
+		{ "Team ProtoMan's art", FREE_TEAM_NAVI_ART, FREE_TEAM_SHARED },
+		{ "the Navis' shared art's second room", FREE_TEAM_SHARED, FREE_TEAM_SPRITES }, { "Team ProtoMan's sprites", FREE_TEAM_SPRITES, FREE_NAVIS },
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },

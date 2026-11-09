@@ -75,8 +75,9 @@ IMAGE6 = dict(kinds=0x080BA444, count=52)
 # BN5's companion routines (BN5_NAVI_COMPANION's and BN5_NAVI_COMPANION_END's words) that spawn or end what BN6 runs
 # otherwise, copied with their Navi: an overlay of a kind BN6 lacks, Colonel's start (kind 3) and end, KnightMan's (kind
 # 1); NumberMan's companion, the first kind's 0x54 (its spawner below, SPAWNS_OTHER), and its end (BN6's twin of the
-# end, 0x080111DD, ends BN6's 0x55)
-COMPANIONS = (0x0800EE56, 0x0800EFE4, 0x0800EE72, 0x0800F000, 0x0800EE66, 0x0800EFF2)
+# end, 0x080111DD, ends BN6's 0x55); NapalmMan's start (kind 4: movs r4,#4 at 0x0800EE84) and end (0x0800F00E, the
+# body of KnightMan's)
+COMPANIONS = (0x0800EE56, 0x0800EFE4, 0x0800EE72, 0x0800F000, 0x0800EE66, 0x0800EFF2, 0x0800EE82, 0x0800F00E)
 
 # BN5's routines whose twin in BN6 (the same bytes) spawns an object of the same type number that BN6 runs otherwise:
 # copied with the Navi, so that its spawn goes through the dispatch with BN5's type moved (tools/xnavirecipe.py)

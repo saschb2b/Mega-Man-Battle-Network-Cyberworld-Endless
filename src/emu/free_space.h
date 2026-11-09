@@ -63,7 +63,8 @@
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
 #define FREE_TEAM_NAVIS     (EMU_FREE + 0x4D0000u)   /* BN5's Team ProtoMan (AI 1-6) in BN6's engine (xnavi_recipe.h XN_TEAM_*): homes, */
 #define FREE_TEAM_NAVI_CODE (EMU_FREE + 0x4D3000u)   /* ... their code, a room each, */
-#define FREE_TEAM_NAVI_ART  (EMU_FREE + 0x4E9800u)   /* ... what their attacks draw, a room each, */
+#define FREE_TEAM_NAVI_ART  (EMU_FREE + 0x4E2000u)   /* ... what their attacks draw, a room each, */
+#define FREE_TEAM_SHARED    (EMU_FREE + 0x4E3800u)   /* ... the Navis' shared art's second room (their sprites past XN_END's), */
 #define FREE_TEAM_SPRITES   (EMU_FREE + 0x4EB000u)   /* ... their battle sprites, a place each (xnavi_sprites.c), to FREE_NAVIS */
 #define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
 #define FREE_NAVI_SPRITES   (EMU_FREE + 0x500000u)   /* ... their battle sprites, a fixed place each, and the arm points grown (xnavi_sprites.c), to: */

@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul and three Darkloids moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:40:00Z }
 ---
 
 # Transplanted Navis
@@ -203,7 +203,32 @@ into the battle engine).
   ProtoMan to NapalmMan and 0x3E4-0x3EB for MagnetMan and Meddy (the
   formula's 0x1B0-0x1C3 are BN6's player's forms), their homes, code and
   art in `FREE_TEAM_NAVIS` (`XN_TEAM_*`), their battle sprites at list 2's
-  0x2B-0x30; none moved yet.
+  0x2B-0x30. Their code rooms are `XN_TEAM_SLOT_CODE` (0x2800: the
+  largest walk, ProtoMan's, 8648 bytes), which leaves the shared art a
+  second room (`XN_TEAM_SHARED`, 0x7800 bytes to `FREE_TEAM_SPRITES`): a
+  sprite of any Navi's goes there once `XN_SHARED_ART`'s is full, as it was
+  for NapalmMan's 5:0x05; the Navis' numbers grew with him to list 4's
+  0xA0-0xBF (to BN4's families' 0xC0) and list 5's 0xA0-0xAF, the moved
+  objects' still taken before Team ProtoMan's (the sea's splash 0xAC).
+  The five after him need more art room than is left (open).
+- **NapalmMan** (AI 4, Navi AI 29, ids 0x1FC-0x1FF; `napalmman_v1`,
+  `napalmman_v1_keys`, `napalmman_sp`: PASS): his five object types moved
+  (the third kind's 0x33, 0x38, 0x39, 0x3A, the fourth's 0x12), his
+  companion's start and end copied (`COMPANIONS`: BN5's overlay kind 4, his
+  own 33), his chip below half his HP the one he holds next (BN5's "the
+  chip an object uses", `CHIP_OBJECT_USES`), his flames over a pattern of
+  panels given the Navis' 0xAD in r2 (`EFFECT_CALLS`), each fact in
+  `src/emu/bn5_team_protoman.h`. His 0x33 spawns the third kind's 0x00,
+  which MegaMan's buster's hit is in both engines too: by the rule of TYPES
+  its one copy is now the Navis' (installed before the chips'), its kinds'
+  rows fixed in it as `xchiprecipe.py`'s TABLE_SPRITES and TABLE_PANELS fix
+  them (`kind_table_art`, `kind_table_panels`; the table copied whole, its
+  31 rows), and Guard's unit spawns it. Five mutations break his copy and
+  FAIL (two effects' numbers, the flames' among them, a hit's offset, a
+  sprite's number, his overlay's kind). His 0x38's spawn of his 0x39 and his
+  CurAction 9 are reached by no spec. No spec of his sets a lava
+  panel: his flames are the 0x00's kind 0x11, which sets none; the table's
+  lava row (26) is BN6's 13 in the copy, as the chips' was.
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved; his
   three decisions are settled in writing, not yet built: *his object
   types* are recorded as CosmoMan's were (the generator derives each
