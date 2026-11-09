@@ -147,4 +147,12 @@
 #define BN4_COLL_ELEM_DAMAGES 0x3C    /* the frame's damage by element, the five summed at BN4_ELEM_DAMAGES_SUM (BN6's +0x94) */
 #define BN4_ELEM_DAMAGES_SUM 0x08012E60u /* ldrh r0,[r4,#0x3c]; ldrh r1,[r4,#0x3e]; adds ... to +0x44 (BN6_ELEM_DAMAGES_SUM's twin) */
 
+/* Its Program Advances (docs/rom/bn4.md, Its Program Advances; docs/multirom/bn4-chips.md): BN6's recipes' format, read for
+ * Phase 4's grown list (BN6_PA_LIST's twin) */
+#define BN4_PA_LIST       0x080212B0u /* the recipes' addresses, BN4_PA_COUNT of them, then 0 (BN6_PA_LIST's shape) */
+#define BN4_PA_LIST_REF   0x0801F4E0u /* ... the one word that names it, loaded at 0x0801F3BE (r6) */
+#define BN4_PA_COUNT      37          /* ... how many recipes: 30 Program Advances, LifeSrd, DarkNeo and HeatSprd by two or more */
+#define BN4_PA_RECIPES    0x080211B0u /* the recipes: n, kind, the PA's id (u16), its chips (u16 id | code << 9) */
+#define BN4_PA_KIND_LISTED 1          /* a recipe of n chips listed, each its own (BN6's kind 4); kind 0 one chip n times, codes in a row */
+
 #endif
