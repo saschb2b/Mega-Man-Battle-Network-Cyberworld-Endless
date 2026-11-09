@@ -280,7 +280,7 @@ every track follows (its numbers `RAM_*` in the same plan, `src/emu/free_space.h
 | `0x0203FFF0`-`0x0203FFF3` | `RAM_TEAM_TICK` | Per battle: two MegaMen a side's count of the battle loop's iterations (`RAM_TEAM_TICK`, a u32 the battle's setup zeroes), which both GBAs keep alike: a partner's picks go into his hand at the iteration after his side's screen closed, and the GBAs are compared by it | `arena_team.c` |
 | `0x0203FFF4`-`0x0203FFF7` | `RAM_CHIP_AI_ROOMS` | Per battle: the entries of BN6's AI data's pool BN5's chip AI took for its rooms (`RAM_CHIP_AI_ROOMS`, a u32 of `BN6_AI_POOL_USED`'s bits, zero as each battle is set up; issue #182, below) | `darkinvs.c` |
 | `0x0203FFF8`-`0x0203FFFB` | `RAM_TEAM_CLOCK` | Per battle: two MegaMen a side's turn's clock (`RAM_TEAM_CLOCK`: a u16 of frames since the first OK of the turn the core has seen, then a byte 1 once seen; zero outside the Custom screen and with the battle's RAM), each core's own ([The leads wait for their partners](../../online/arena/two-a-side/leads-wait.md)) | `arena_team_custom.c` |
-| `0x0203FFFC`-`0x0203FFFF` | `RAM_BATTLE_SPARE` | Spare (the game call's old mark, unused since issue #33) |  |
+| `0x0203FFFC`-`0x0203FFFF` | `RAM_PA_WIDE` | Per battle: the Program Advances past nine bits formed this battle (`RAM_PA_WIDE`: a u32, a bit an id from `BN6_PA_WIDE_FIRST`, side 0's; BN6's own per-battle bits at `0x0203CA48` end at id 383: [The chip registry and BN5's chips' code](../../rom/chips-code.md), BN5's last Program Advances) | `xchips_wide.c` |
 
 BN5's chip AI's rooms (issue #182; `src/emu/darkinvs_room.h`): in a
 NetBattle a MegaMan other than side 0's player whom BN5's chip AI takes

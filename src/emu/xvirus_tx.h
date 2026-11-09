@@ -25,6 +25,11 @@ const char *xv_why(void);
  * core's copy must still be free there (0xFF, as emu.c pads it). NULL once
  * the step has failed. */
 uint8_t *xv_put(uint32_t at, uint32_t len, bool fresh);
+/* A byte (a word) as the step would leave it: its last write there, else
+ * the core's (a unit's check of what a unit before it in the same step set:
+ * a type it shares, xvirus.c's types_set) */
+uint8_t xv_read8(uint32_t at);
+uint32_t xv_read32(uint32_t at);
 /* A word (a halfword) of BN6's own, or of what is already installed,
  * changed: it must read `old` in the core's copy now. */
 void xv_word(uint32_t at, uint32_t old, uint32_t v);

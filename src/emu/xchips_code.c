@@ -193,7 +193,7 @@ static void pas_stage(void) {
 	}
 	put32(l + 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count), 0);
 	xv_word(BN6_PA_LIST_REF, BN6_PA_LIST, list);
-	xv_word(BN6_PA_LETTERS, 0x160, 0x200);
+	xv_word(BN6_PA_LETTERS, 0x160, CHIP_ID_MASK + 1u);   /* (a part of any id its letter: a Navi chip past nine bits too) */
 }
 
 /* ---- the step's writes, each part under its own claims ---- */

@@ -658,9 +658,10 @@ static void types_set(const XVirusFamily *f, const Game *g) {
 		int k = xvirus_dispatch_slot(t->kind);
 		uint32_t routine = 0;
 		if (t->to == XV_TYPE_SHARED) {
-			/* (moved by a family installed before it: its MOVED entry must name that family's copy, its TWIN entry moved) */
+			/* (moved by a family installed before it, or a unit before it in this step, xv_read32: its MOVED entry must name
+			 * that one's copy, its TWIN entry moved) */
 			uint32_t moved = xvirus_dispatch_moved_at(t->kind, t->from), twin = xvirus_dispatch_twin_at(t->kind, t->from);
-			if (!moved || emu_read32(moved) == (XV_STUB_NONE | 1) || emu_read8(twin) != XV_TYPE_MOVED)
+			if (!moved || xv_read32(moved) == (XV_STUB_NONE | 1) || xv_read8(twin) != XV_TYPE_MOVED)
 				xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
 			continue;
 		}

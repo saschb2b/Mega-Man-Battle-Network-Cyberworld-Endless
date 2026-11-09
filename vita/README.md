@@ -39,7 +39,10 @@ It builds in `docker/Dockerfile.vita`: VitaSDK with its packages (SDL2
 2.32, libcurl 8 with OpenSSL), and mGBA's library (`docker/mgba.sh vita`:
 the whole core, as on the 3DS and the Switch, not position-independent,
 whose relocations `vita-elf-create` refuses). The Makefile turns the ELF
-into `eboot.bin` (`vita-elf-create`, `vita-make-fself`), writes its
+into `eboot.bin` (`vita-elf-create`, `vita-make-fself`; where the code
+ends within 4592 bytes of the data's 64 KB boundary that tool finds no
+room for the module's data and falls over, and the ELF is linked again
+with `vita/pad.c`, 8 KB that carry the end past it), writes its
 `param.sfo` (title ID `CWEN00001`, the version's major and minor as its
 APP_VER) and packs the VPK with the bubble (`vita/icon0.png`,
 `tools/app_icon.py`) and the LiveArea (`vita/bg.png` and

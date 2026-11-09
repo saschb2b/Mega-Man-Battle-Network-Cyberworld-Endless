@@ -209,8 +209,16 @@ CFLAGS := $(filter-out -g,$(CFLAGS)) -ffunction-sections -isystem $(VITASDK)/arm
 LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(PKGCONF) --static --libs libcurl) $(shell $(PKGCONF) --libs sdl2) \
           -lScePower_stub -lSceShaccCgExt -ltaihen_stub -lstdc++ -lm -Wl,-q -Wl,--gc-sections
 all: $(OUT)/cyberworld-endless.vpk
-$(OUT)/eboot.bin: $(BIN)
-	$(VITA_BIN)/vita-elf-create $(BIN) $(OUT)/cyberworld-endless.velf
+# (vita-elf-create writes the module's data, 4592 bytes, after the code's segment and before the data's, which starts
+# on the next 64 KB: where the code ends closer to it than that the tool finds no room and falls over, as it did at
+# 0x815BEF08. The ELF is then linked again with vita/pad.c, 8 KB that carry the code's end past the boundary)
+$(OUT)/obj/vita_pad.o: vita/pad.c
+	@mkdir -p $(dir $@)
+	$(CC) -c -o $@ $<
+$(OUT)/eboot.bin: $(BIN) $(OUT)/obj/vita_pad.o
+	$(VITA_BIN)/vita-elf-create $(BIN) $(OUT)/cyberworld-endless.velf || \
+	 { $(LINK) -o $(BIN) $(OBJS) $(OUT)/obj/vita_pad.o -Wl,-u,cw_vita_pad $(LDLIBS) && \
+	   $(VITA_BIN)/vita-elf-create $(BIN) $(OUT)/cyberworld-endless.velf; }
 	$(VITA_BIN)/vita-make-fself -s $(OUT)/cyberworld-endless.velf $@
 $(OUT)/param.sfo: $(GEN)/version.h
 	$(VITA_BIN)/vita-mksfoex -s TITLE_ID=$(VITA_TITLE) -s APP_VER=$(APP_VER) "Cyberworld Endless" $@

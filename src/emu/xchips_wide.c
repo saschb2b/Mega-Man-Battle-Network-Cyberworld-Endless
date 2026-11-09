@@ -272,6 +272,23 @@ static HookAct library_flag(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* A Program Advance past nine bits, as BN6 tests and sets its per-battle
+ * bit (BN6's own bits hold ids to 383, and from 512 the byte it would
+ * take is another's): its bit in the engine's own word, side 0's (side 1
+ * forms from the link battles' list, BN6's own); formed already this
+ * battle, r0 0, as BN6 answers */
+static HookAct pa_bit(HookRegs *r, void *user) {
+	(void)user;
+	uint32_t id = r->r[0], bit = id - BN6_PA_WIDE_FIRST;
+	if (id < BN6_PACK_WIDE_FIRST) return HOOK_CONTINUE;
+	if (r->r[1] == 0 && bit < BN6_PA_WIDE_COUNT) {
+		uint32_t formed = hook_read32(RAM_PA_WIDE);
+		if (formed >> bit & 1u) r->r[0] = 0;
+		else hook_write32(RAM_PA_WIDE, formed | 1u << bit);
+	}
+	return HOOK_RETURN;
+}
+
 /* The chat box's chip name: its command's kind 1 takes the names' archive
  * as its table's entry 1 plus the id's high byte, entries 3 and 4 other
  * texts' archives; an id from 512 its own archive of the four */
@@ -310,7 +327,8 @@ bool xchips_wide_install(void) {
 	if (!emu_hook(BN6_PACK_MARK_STORE, mark_store, NULL) || !emu_hook(BN6_PACK_MARK_TEST, mark_test, NULL))
 		fprintf(stderr, "chips: no hooks on the marks: a chip past 511 is taken for a cheat's\n");
 	if (!emu_hook(BN6_GIVE_CHIPS_LIBRARY, library_flag, NULL) || !emu_hook(BN6_GIVE_FOLDER_LIBRARY, library_flag, NULL) ||
-		!emu_hook(BN6_CHAT_NAME_ARCHIVE, chat_name, NULL) || !emu_hook(BN6_REWARD_SPLIT_HP, reward_wide, NULL))
+		!emu_hook(BN6_CHAT_NAME_ARCHIVE, chat_name, NULL) || !emu_hook(BN6_REWARD_SPLIT_HP, reward_wide, NULL) ||
+		!emu_hook(BN6_PA_FORMED_FLAG, library_flag, NULL) || !emu_hook(BN6_PA_BATTLE_BIT, pa_bit, NULL))
 		fprintf(stderr, "chips: no hooks for a chip past 511: given it sets another's flag, a chat names and a battle rewards another\n");
 	claims_end();
 	if (emu_debug_on()) fprintf(stderr, "chips: ten-bit ids, %d of BN6's halfwords and %d preset folders\n", NCHANGES, NPRESETS);
