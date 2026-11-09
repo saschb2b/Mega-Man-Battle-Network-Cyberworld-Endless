@@ -3,12 +3,14 @@
 #include "audio_pace.h"
 #include "claims.h"
 #include "compat.h"
+#include "free_space_watch.h"
 #include "platform.h"
 #include "save_queue.h"
 #include "sound_quiet.h"
 #include "xinstall_log.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <SDL.h>
@@ -64,6 +66,13 @@ void emu_log_quiet(void) {
 
 static void start_worker(void);
 
+/* (CYBERWORLD_FREE_SPACE=FILE: what each region of the free space holds as
+ * the program ends, for tools/free_space.py --usage) */
+static void usage_at_exit(void) {
+	const char *path = getenv("CYBERWORLD_FREE_SPACE");
+	if (core && path && !free_space_usage(path, emu_read8)) fprintf(stderr, "free space: %s not written\n", path);
+}
+
 bool emu_init(const uint8_t *rom, size_t len) {
 	if (core) return true;
 	emu_log_quiet();
@@ -104,6 +113,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	emu_audio_rate(out_rate);
 	emu_audio_open();
 	start_worker();
+	if (getenv("CYBERWORLD_FREE_SPACE")) atexit(usage_at_exit);
 #ifndef MINIMAL_CORE
 	/* (with the core on a thread of its own, its picture is drawn on one
 	 * more, mGBA's threaded video, which runs beside the emulation: on the
@@ -412,6 +422,7 @@ uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(co
 void emu_write8(uint32_t a, uint8_t v) {
 	wait_frame();
 	claims_note(a, 1);
+	free_space_write(a, 1);
 	xlog_write(a, &v, 1);
 	if (core) core->rawWrite8(core, a, -1, v);
 }
@@ -419,6 +430,7 @@ void emu_write8(uint32_t a, uint8_t v) {
 void emu_write32(uint32_t a, uint32_t v) {
 	wait_frame();
 	claims_note(a, 4);
+	free_space_write(a, 4);
 	const uint8_t b[4] = { (uint8_t)v, (uint8_t)(v >> 8), (uint8_t)(v >> 16), (uint8_t)(v >> 24) };
 	xlog_write(a, b, sizeof b);
 	if (core) core->rawWrite32(core, a, -1, v);
@@ -428,6 +440,7 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
 	wait_frame();
 	claims_note(a, (uint32_t)len);
+	free_space_write(a, (uint32_t)len);
 	xlog_write(a, data, len);
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
