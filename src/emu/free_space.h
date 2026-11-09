@@ -1,133 +1,233 @@
 /* The free space past the game's 8 MB in the core's ROM copy, and the RAM
- * BN6 leaves alone: one plan every part of the engine and every track of
- * issue #82 follows (docs/engine/emulation/memory.md and BN6's
- * RAM). Each region is its own writer's, [its start, its end); a span no
- * region names is free. tests/test_core.c checks the regions in order and
- * apart, and each installer's own layout inside its region; what the
- * installers write as the core starts is claimed byte by byte as they
- * write it (claims.h), so that no two write the same bytes. emu.h includes
- * this: the places are bus addresses of the core's copy. */
+ * BN6 leaves alone: one plan every part of the engine follows. WRITTEN BY
+ * tools/free_space.py FROM src/emu/free_space.plan: edit the plan, run the
+ * tool, and build.py lint keeps the two in step (docs/engine/emulation/
+ * free-space.md: the zones, their headroom and how a region is placed).
+ * Each region is its writer's, [its start, its end), inside its zone; a span
+ * no region names is free. tests/test_core.c checks the regions in order
+ * and apart from FREE_SPACE_ROM and FREE_SPACE_RAM, emu.c's writes into the
+ * ROM copy's free space are told where they run past a region (free_space.c),
+ * and what the installers write as the core starts is claimed byte by byte
+ * as they write it (claims.h). emu.h includes this: the places are bus
+ * addresses of the core's copy. */
 #ifndef CW_FREE_SPACE_H
 #define CW_FREE_SPACE_H
 
-#define EMU_FREE 0x08800000u      /* first free bus address past an 8 MB game */
-#define FREE_END (EMU_FREE + 0x800000u)   /* the copy's end: 16 MB (EMU_ROM_SIZE) */
+#define EMU_FREE             0x08800000u             /* first free bus address past an 8 MB game */
+#define FREE_END             (EMU_FREE + 0x800000u)  /* the copy's end: 16 MB (EMU_ROM_SIZE) */
 
-/* ---- the ROM copy, by its writers ---- */
-#define FREE_WARP           (EMU_FREE + 0x000000u)   /* a warp record and a one-entry warp list (gamecall.c), to: */
-#define FREE_CALL_RETURN    (EMU_FREE + 0x000100u)   /* where a game call's routine returns: a hook (gamecall.c), to: */
-#define FREE_NO_MYSTERY     (EMU_FREE + 0x000180u)   /* an empty Mystery Data list (mapslot.c), to: */
-#define FREE_RECORDS        (EMU_FREE + 0x000200u)   /* two battle records in turn, 0x80 apart (encounter.c), to: */
-#define FREE_RECORDS_END    (EMU_FREE + 0x000300u)
-#define FREE_RUSH           (EMU_FREE + 0x000400u)   /* Rush's gaps (rush.c), to: */
-#define FREE_RUSH_END       (EMU_FREE + 0x000640u)
-#define FREE_BLOCKERS       (EMU_FREE + 0x000700u)   /* map-object handler 3's records (blockers.c), to: */
-#define FREE_BLOCKERS_END   (EMU_FREE + 0x0012E0u)
-#define FREE_WARP_LIST      (EMU_FREE + 0x002F00u)   /* the layer map's warp list (mapslot.c), to: */
-#define FREE_LAYER          (EMU_FREE + 0x003000u)   /* layer data in two halves (mapslot.c), to: */
-#define FREE_TILE_MAP       (EMU_FREE + 0x010000u)   /* the generated tile map (netmap.c), to: */
-#define FREE_COORDS         (EMU_FREE + 0x060000u)   /* the generated coordinate data (coords.c), to: */
-#define FREE_TOWN_TILE_MAP  (EMU_FREE + 0x100000u)   /* the town's tile map (town.c), to: */
-#define FREE_TOWN_COORDS    (EMU_FREE + 0x130000u)   /* the town's coordinate data (coords.c), to: */
-#define FREE_TOWN           (EMU_FREE + 0x140000u)   /* the town's scripts, text and tables (mapslot.c), to: */
-#define FREE_LAN_HP         (EMU_FREE + 0x148000u)   /* Lan's HP's, then Lan's house's in its second half (mapslot.c), to: */
-#define FREE_TALK           (EMU_FREE + 0x150000u)   /* the director's conversations (talk.c), to: */
-#define FREE_LABEL          (EMU_FREE + 0x152000u)   /* the map-name label's archive (director_layer.c), to: */
-#define FREE_PET_LABEL      (EMU_FREE + 0x153000u)   /* the PET's PLACE (director_layer.c), to: */
-#define FREE_PET_TEXT       (EMU_FREE + 0x154000u)   /* the PET's words (pet_text.c): the key items' names, */
-#define FREE_PET_DESCS      (EMU_FREE + 0x155000u)   /* ... their descriptions, */
-#define FREE_PET_MAILS      (EMU_FREE + 0x158000u)   /* ... the mails' senders and subjects, */
-#define FREE_PET_BODIES     (EMU_FREE + 0x15A000u)   /* ... their bodies, to: */
-#define FREE_PORTRAITS      (EMU_FREE + 0x166000u)   /* portraits of Falzar's Navis (portrait.c), to: */
-#define FREE_PORTRAITS_END  (EMU_FREE + 0x167900u)
-#define FREE_TRADER_LIST    (EMU_FREE + 0x168000u)   /* a layer's Chip Trader's prizes of both nets (trader.c), to: */
+/* ---- engine: +0x000000-+0x002F00, the engine's own records, hooks and stubs, and BN6's small tables grown ---- */
+#define FREE_WARP            (EMU_FREE + 0x000000u)  /* a warp record and a one-entry warp list (gamecall.c) */
+#define FREE_CALL_RETURN     (EMU_FREE + 0x000100u)  /* where a game call's routine returns: a hook (gamecall.c) */
+#define FREE_NO_MYSTERY      (EMU_FREE + 0x000180u)  /* an empty Mystery Data list (mapslot.c) */
+#define FREE_RECORDS         (EMU_FREE + 0x000200u)  /* two battle records in turn, 0x80 apart (encounter.c) */
+#define FREE_RECORDS_END     (EMU_FREE + 0x000300u)
+#define FREE_RUSH            (EMU_FREE + 0x000400u)  /* Rush's gaps (rush.c) */
+#define FREE_RUSH_END        (EMU_FREE + 0x000640u)
+#define FREE_BLOCKERS        (EMU_FREE + 0x000700u)  /* map-object handler 3's records (blockers.c) */
+#define FREE_BLOCKERS_END    (EMU_FREE + 0x0012E0u)
+
+/* ---- layers: +0x002F00-+0x150000, layers and the town: their maps, rewritten as a layer or the town is entered ---- */
+#define FREE_WARP_LIST       (EMU_FREE + 0x002F00u)  /* the layer map's warp list (mapslot.c) */
+#define FREE_LAYER           (EMU_FREE + 0x003000u)  /* layer data in two halves (mapslot.c) */
+#define FREE_TILE_MAP        (EMU_FREE + 0x010000u)  /* the generated tile map (netmap.c) */
+#define FREE_COORDS          (EMU_FREE + 0x060000u)  /* the generated coordinate data (coords.c) */
+#define FREE_TOWN_TILE_MAP   (EMU_FREE + 0x100000u)  /* the town's tile map (town.c) */
+#define FREE_TOWN_COORDS     (EMU_FREE + 0x130000u)  /* the town's coordinate data (coords.c) */
+#define FREE_TOWN            (EMU_FREE + 0x140000u)  /* the town's scripts, text and tables (mapslot.c) */
+#define FREE_LAN_HP          (EMU_FREE + 0x148000u)  /* Lan's HP's, then Lan's house's in its second half (mapslot.c, lanhp.c, lan_house.c) */
+
+/* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
+#define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
+#define FREE_LABEL           (EMU_FREE + 0x152000u)  /* the map-name label's archive (director_layer.c) */
+#define FREE_PET_LABEL       (EMU_FREE + 0x153000u)  /* the PET's PLACE (director_layer.c) */
+#define FREE_PET_TEXT        (EMU_FREE + 0x154000u)  /* the PET's words: the key items' names (pet_text.c) */
+#define FREE_PET_DESCS       (EMU_FREE + 0x155000u)  /* the key items' descriptions (pet_text.c) */
+#define FREE_PET_MAILS       (EMU_FREE + 0x158000u)  /* the mails' senders and subjects (pet_text.c) */
+#define FREE_PET_BODIES      (EMU_FREE + 0x15A000u)  /* the mails' bodies (pet_text.c) */
+#define FREE_PORTRAITS       (EMU_FREE + 0x166000u)  /* portraits of Falzar's Navis (portrait.c) */
+#define FREE_PORTRAITS_END   (EMU_FREE + 0x167900u)
+#define FREE_TRADER_LIST     (EMU_FREE + 0x168000u)  /* a layer's Chip Trader's prizes of both nets (trader.c) */
 #define FREE_TRADER_LIST_END (EMU_FREE + 0x169000u)
-#define FREE_PET_OPTIONS    (EMU_FREE + 0x169000u)   /* the PET menu's labels with Comm's made Options (pet_options.c), to: */
+#define FREE_PET_OPTIONS     (EMU_FREE + 0x169000u)  /* the PET menu's labels with Comm's made Options (pet_options.c) */
 #define FREE_PET_OPTIONS_END (EMU_FREE + 0x16A000u)
-#define FREE_BBS            (EMU_FREE + 0x16A000u)   /* the visit's requests on BN6's Request BBS: their titles and posts, LZ77 (request_bbs.c), to: */
-#define FREE_BBS_END        (EMU_FREE + 0x16B000u)
-#define FREE_XAREA          (EMU_FREE + 0x170000u)   /* another game's net area (netmap.c), to: */
-#define FREE_SONGS          (EMU_FREE + 0x1A0000u)   /* other games' songs (xsong.c), to: */
-#define FREE_XNAVIS         (EMU_FREE + 0x260000u)   /* other games' Navis and map objects (xnavi.c), to: */
-#define FREE_BACKDROPS      (EMU_FREE + 0x2A0000u)   /* other games' battle backgrounds (xbackdrop.c), to: */
-#define FREE_FLAME          (EMU_FREE + 0x2E0000u)   /* BN6's own flame of darkness (xnavi.c), to: */
-#define FREE_FLAME_END      (EMU_FREE + 0x2E1000u)
-#define FREE_XTOWN          (EMU_FREE + 0x2E1000u)   /* another game's town's tile set and colours (xtown.c), to: */
-#define FREE_XTOWN_END      (EMU_FREE + 0x2F0000u)
-#define FREE_MAP_BACKDROPS  (EMU_FREE + 0x2F0000u)   /* other games' net maps' backdrops (xbackdrop.c), to: */
-#define FREE_INDOORS        (EMU_FREE + 0x320000u)   /* home's other places (mapslot.c), to: */
-/* issue #82's, fixed places the same at every boot with the same ROMs */
-#define FREE_VIRUS_ROOM     (EMU_FREE + 0x330000u)   /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c), to: */
-#define FREE_FAMILIES       (EMU_FREE + 0x348000u)   /* the families: their homes, code and art (xvirus.c), to: */
-#define FREE_CHIPS          (EMU_FREE + 0x400000u)   /* the chip registry: records, names, routines, art (chips.c, xchips_install.c), to: */
-#define FREE_SOULS          (EMU_FREE + 0x480000u)   /* BN5's Souls in BN6's engine (soulunite.c, soullook.c, soulcode.c; soul_room.h lays it out), to: */
-#define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
-#define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
-#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
-#define FREE_NAVI_SPRITES   (EMU_FREE + 0x500000u)   /* ... their battle sprites, a fixed place each, and the arm points grown (xnavi_sprites.c), to: */
-#define FREE_NAVI_SPRITES_END (EMU_FREE + 0x580000u) /* ... (the Navi chips' and the Souls' one copy of each Navi's sprite there too) */
-#define FREE_NAVI_ROOM      FREE_NAVI_SPRITES_END    /* ... BN6's Navi tables grown for them (xnavi_room.c), to: */
-#define FREE_NAVI_HOMES     (EMU_FREE + 0x588000u)   /* ... their homes: state table, records, veneers (xnavi_install.c), to: */
-#define FREE_NAVI_CODE      (EMU_FREE + 0x590000u)   /* ... their code and their objects', block by block, to: */
-#define FREE_NAVI_ART       (EMU_FREE + 0x5B0000u)   /* ... what their attacks draw, to FREE_CHIP_CODE */
-#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* the code of BN5's chips: first */
-#define FREE_ATTACK_FAMILIES FREE_CHIP_CODE          /* ... BN6's attack families grown to 240 (xattack_grow.c: the chips' and the Souls' one copy), */
-#define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x400u)
-#define FREE_CHIP_MOVED     FREE_ATTACK_FAMILIES_END /* ... then the chips' moved code, its tables and what it draws (xchips_code.c), to: */
-#define FREE_SOULS_ART      (EMU_FREE + 0x700000u)   /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c), to: */
-#define FREE_SOULS_ART_END  (EMU_FREE + 0x710000u)
-#define FREE_CHIP_PAS       (EMU_FREE + 0x710000u)   /* BN6's Program Advances' list grown with BN5's (xchips_code.c): their recipes, then the list, to: */
-#define FREE_CHIP_PAS_END   (EMU_FREE + 0x710400u)
-#define FREE_CHIP_AI        (EMU_FREE + 0x710400u)   /* the player's chip AI's stub (darkinvs.c), to: */
-#define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
-#define FREE_SWAP_RETURN    (EMU_FREE + 0x710440u)   /* where the swap's spawn returns mid-battle: a hook (battle_swap.c), to: */
-#define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
-#define FREE_TAIL           (EMU_FREE + 0x710460u)   /* free to FREE_BN4_NAVIS */
-#define FREE_BN4_NAVIS      (EMU_FREE + 0x720000u)   /* BN4's Navis in BN6's engine (xnavi_bn4.c; xnavi_recipe.h XN_BN4_*): their homes, */
-#define FREE_BN4_NAVI_CODE  (EMU_FREE + 0x730000u)   /* ... their code and their objects', block by block, */
-#define FREE_BN4_NAVI_ART   (EMU_FREE + 0x750000u)   /* ... the coming battle's Navi's attacks' art and songs, one room (xnavi_bn4_art.c), to: */
-#define FREE_BN4_NAVI_SPRITE (EMU_FREE + 0x77C000u)  /* ... the coming battle's BN4 Navi's battle sprite, one room (xnavi_bn4_room.c), to FREE_BRACKET_FACES */
-#define FREE_BRACKET_FACES  (EMU_FREE + 0x78C000u)   /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c), to: */
-#define FREE_BRACKET        (EMU_FREE + 0x790000u)   /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c), to: */
-#define FREE_BRACKET_END    (EMU_FREE + 0x7A0000u)
-#define FREE_LIB_TEAM       (EMU_FREE + 0x7A0000u)   /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c), to: */
-#define FREE_LIB_TEAM_END   (EMU_FREE + 0x7FA000u)
+#define FREE_BBS             (EMU_FREE + 0x16A000u)  /* the visit's requests on BN6's Request BBS: their titles and posts, LZ77 (request_bbs.c) */
+#define FREE_BBS_END         (EMU_FREE + 0x16B000u)
 
-/* ---- BN6's RAM it leaves alone (docs/engine/emulation/memory.md, BN6's RAM) ---- */
-/* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */
-#define RAM_PACK_EXT        0x02010CE0u   /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT; xchips_install.c), to: */
-#define RAM_PACK_EXT_END    0x020115E0u   /* ... then: */
-#define RAM_PLAYER_AI       0x020115E0u   /* MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place (darkinvs.c), to: */
-#define RAM_PLAYER_AI_END   0x02011730u   /* ... then: */
-#define RAM_TEAM            0x02011730u   /* --dev arena2v2's list of what the Practice NetBattle spawns (arena_team.c, epic #167), to: */
-#define RAM_TEAM_END        0x02011750u   /* ... then: */
-#define RAM_TEAM_LINK       0x02011750u   /* ... the partners' words for and from BN6's packets, 0x20 bytes a side (arena_team_link.c), to: */
-#define RAM_TEAM_LINK_END   0x02011790u   /* ... then: */
-#define RAM_TEAM_CUSTOM     0x02011790u   /* ... each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c), to: */
-#define RAM_TEAM_CUSTOM_END 0x02011800u
-#define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
-/* A main mode's own while the map waits (BN6's shop, mode 0x2C, decompresses into 0x02029A00, 0x0202BA00 and 0x0202DA00 as
- * it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map */
-#define RAM_BRACKET         0x02029A00u   /* BN4's bracket screen moved: its state, tournaments, blend values, menu sprites and its tiles
-                                             unpacked (xbracket.h), to: */
-#define RAM_BRACKET_END     0x0202DA00u
-/* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
- * else of BN6's reads or writes 0x0203FB50 on */
-#define RAM_SEA             0x0203FB50u   /* BN5's sea's submerge (xsea.h: the submerged, their markers), to: */
-#define RAM_DARK_LISTS      0x0203FBE0u   /* the Dark Soul's chip AI's lists, 0xE0 a side (BN6_DARK_LISTS), to: */
-#define RAM_NAVIS           0x0203FDA0u   /* the moved Navis' own state: Colonel's sides' bits (BN6_COLONEL_SIDES), the Dark Soul's AI
-                                             data's holder (BN6_DARK_AI_OWNER, BN6_DARK_AI_POOL), to: */
-#define RAM_DARK_AI         0x0203FDB0u   /* the Dark Soul's AI data, BN5's 0x140 bytes (BN6_DARK_AI), to: */
-#define RAM_BATTLE          0x0203FEF0u   /* kept for the moved families' and Navis' own state, to: */
-#define RAM_DISPATCH_SIDE   0x0203FF00u   /* the second-level dispatch's side tables (BN6_DISPATCH_SIDE; xvirus_dispatch.c), to: */
-#define RAM_COLONEL         0x0203FF60u   /* BN5's Colonel's table moved (BN6_COLONEL_TABLE; xnavi_install.c), to: */
-#define RAM_SOULS           0x0203FF70u   /* kept for the Souls' state and BN5's mood (the Souls' track), to: */
-#define RAM_TEAM_TICK       0x0203FFF0u   /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c), to: */
-#define RAM_CHIP_AI_ROOMS   0x0203FFF4u   /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's
-                                             bits; darkinvs_room.h, issue #182), to: */
-#define RAM_TEAM_CLOCK      0x0203FFF8u   /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core
-                                             has seen, then u8 1 once seen (arena_team_custom.c, team_hurry.h), to: */
-#define RAM_BATTLE_SPARE    0x0203FFFCu   /* spare (the game call's old mark, unused since issue #33), to: */
-#define RAM_BATTLE_END      0x02040000u
+/* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds; home's other places ---- */
+#define FREE_XAREA           (EMU_FREE + 0x170000u)  /* another game's net area (netmap.c) */
+#define FREE_SONGS           (EMU_FREE + 0x1A0000u)  /* other games' songs (xsong.c) */
+#define FREE_XNAVIS          (EMU_FREE + 0x260000u)  /* other games' Navis and map objects (xnavi.c) */
+#define FREE_BACKDROPS       (EMU_FREE + 0x2A0000u)  /* other games' battle backgrounds (xbackdrop.c) */
+#define FREE_FLAME           (EMU_FREE + 0x2E0000u)  /* BN6's own flame of darkness (xnavi.c) */
+#define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
+#define FREE_XTOWN           (EMU_FREE + 0x2E1000u)  /* another game's town's tile set and 256 colours (Oran Isle's, 60 KB) (xtown.c) */
+#define FREE_XTOWN_END       (EMU_FREE + 0x2F0000u)
+#define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
+#define FREE_INDOORS         (EMU_FREE + 0x320000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
+
+/* ---- code: +0x330000-+0x7A0000, other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs ---- */
+#define FREE_VIRUS_ROOM      (EMU_FREE + 0x330000u)  /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c) */
+#define FREE_FAMILIES        (EMU_FREE + 0x348000u)  /* the families: their homes, code and art (xvirus.c, xvirus_families.c) */
+#define FREE_CHIPS           (EMU_FREE + 0x400000u)  /* the chip registry: records, names, routines, art (chips.c, xchips_install.c) */
+#define FREE_SOULS           (EMU_FREE + 0x480000u)  /* BN5's Souls in BN6's engine (soul_room.h lays it out) (soulproxy.c, soulunite.c, soullife.c, ...) */
+#define FREE_PANELS          (EMU_FREE + 0x4C0000u)  /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c) */
+#define FREE_PANELS_END      (EMU_FREE + 0x4D0000u)
+#define FREE_NAVIS           (EMU_FREE + 0x500000u)  /* BN5's Navis in BN6's engine (xnavi_sprites.c, xnavi_room.c, xnavi_install.c, ...) */
+#define FREE_NAVI_SPRITES    (EMU_FREE + 0x500000u)  /* their battle sprites, a fixed place each, and the arm points grown (the Navi chips' and the Souls' one copy of each Navi's sprite there too) (xnavi_sprites.c) */
+#define FREE_NAVI_SPRITES_END (EMU_FREE + 0x580000u)
+#define FREE_NAVI_ROOM       (EMU_FREE + 0x580000u)  /* BN6's Navi tables grown for them (xnavi_room.c) */
+#define FREE_NAVI_HOMES      (EMU_FREE + 0x588000u)  /* their homes: state table, records, veneers (xnavi_install.c) */
+#define FREE_NAVI_CODE       (EMU_FREE + 0x590000u)  /* their code and their objects', block by block (xnavi_install.c) */
+#define FREE_NAVI_ART        (EMU_FREE + 0x5B0000u)  /* what their attacks draw (xnavi_install.c) */
+#define FREE_CHIP_CODE       (EMU_FREE + 0x600000u)  /* the code of BN5's chips (xattack_grow.c, xchips_code.c, xchips_bn5.c) */
+#define FREE_ATTACK_FAMILIES (EMU_FREE + 0x600000u)  /* BN6's attack families grown to 240 (the chips' and the Souls' one copy) (xattack_grow.c) */
+#define FREE_ATTACK_FAMILIES_END (EMU_FREE + 0x600400u)
+#define FREE_CHIP_MOVED      (EMU_FREE + 0x600400u)  /* the chips' moved code, its tables and what it draws (xchips_code.c) */
+#define FREE_SOULS_ART       (EMU_FREE + 0x700000u)  /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c, soulcolonel.c) */
+#define FREE_SOULS_ART_END   (EMU_FREE + 0x710000u)
+#define FREE_CHIP_PAS        (EMU_FREE + 0x710000u)  /* BN6's Program Advances' list grown with BN5's: their recipes, then the list (xchips_code.c) */
+#define FREE_CHIP_PAS_END    (EMU_FREE + 0x710400u)
+#define FREE_CHIP_AI         (EMU_FREE + 0x710400u)  /* the player's chip AI's stub (darkinvs.c) */
+#define FREE_CHIP_AI_END     (EMU_FREE + 0x710440u)
+#define FREE_SWAP_RETURN     (EMU_FREE + 0x710440u)  /* where the swap's spawn returns mid-battle: a hook (battle_swap.c) */
+#define FREE_SWAP_RETURN_END (EMU_FREE + 0x710460u)
+#define FREE_TAIL            (EMU_FREE + 0x710460u)  /* free to FREE_BN4_NAVIS (free) */
+#define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
+#define FREE_BN4_NAVI_CODE   (EMU_FREE + 0x730000u)  /* BN4's Navis' code and their objects', block by block (xnavi_bn4.c) */
+#define FREE_BN4_NAVI_ART    (EMU_FREE + 0x750000u)  /* the coming battle's BN4 Navi's attacks' art and songs, one room (xnavi_bn4_art.c) */
+#define FREE_BN4_NAVI_SPRITE (EMU_FREE + 0x77C000u)  /* the coming battle's BN4 Navi's battle sprite, one room (xnavi_bn4_room.c) */
+#define FREE_BRACKET_FACES   (EMU_FREE + 0x78C000u)  /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c) */
+#define FREE_BRACKET         (EMU_FREE + 0x790000u)  /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c) */
+#define FREE_BRACKET_END     (EMU_FREE + 0x7A0000u)
+
+/* ---- art: +0x7A0000-+0x800000, art copied whole, a place each ---- */
+#define FREE_LIB_TEAM        (EMU_FREE + 0x7A0000u)  /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c) */
+#define FREE_LIB_TEAM_END    (EMU_FREE + 0x7FA000u)
+
+/* ---- persistent: 0x02010CE0-0x02011800, persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) ---- */
+#define RAM_PACK_EXT         0x02010CE0u             /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT) (xchips_install.c) */
+#define RAM_PACK_EXT_END     0x020115E0u
+#define RAM_PLAYER_AI        0x020115E0u             /* MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place (darkinvs.c) */
+#define RAM_PLAYER_AI_END    0x02011730u
+#define RAM_TEAM             0x02011730u             /* --dev arena2v2's list of what the Practice NetBattle spawns (epic #167) (arena_team.c) */
+#define RAM_TEAM_END         0x02011750u
+#define RAM_TEAM_LINK        0x02011750u             /* the partners' words for and from BN6's packets, 0x20 bytes a side (arena_team_link.c) */
+#define RAM_TEAM_LINK_END    0x02011790u
+#define RAM_TEAM_CUSTOM      0x02011790u             /* each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c) */
+#define RAM_TEAM_CUSTOM_END  0x02011800u
+#define RAM_PERSISTENT_END   0x02011800u
+
+/* ---- mode: 0x02029A00-0x0202DA00, a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map ---- */
+#define RAM_BRACKET          0x02029A00u             /* BN4's bracket screen moved: its state, tournaments, blend values, menu sprites and its tiles unpacked (xbracket.h) (xbracket.c) */
+#define RAM_BRACKET_END      0x0202DA00u
+
+/* ---- battle: 0x0203FB50-0x02040000, per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing else of BN6's reads or writes 0x0203FB50 on ---- */
+#define RAM_SEA              0x0203FB50u             /* BN5's sea's submerge (xsea.h: the submerged, their markers) (xsea.c) */
+#define RAM_DARK_LISTS       0x0203FBE0u             /* the Dark Soul's chip AI's lists, 0xE0 a side (BN6_DARK_LISTS) (xnavi_dark.c, xnavi_bn5.c) */
+#define RAM_NAVIS            0x0203FDA0u             /* the moved Navis' own state: Colonel's sides' bits (BN6_COLONEL_SIDES), the Dark Soul's AI data's holder (BN6_DARK_AI_OWNER, BN6_DARK_AI_POOL) (xnavi_room.c, xnavi_dark.c) */
+#define RAM_DARK_AI          0x0203FDB0u             /* the Dark Soul's AI data, BN5's 0x140 bytes (BN6_DARK_AI) (xnavi_dark.c) */
+#define RAM_BATTLE           0x0203FEF0u             /* kept for the moved families' and Navis' own state (xchips_flash.c) */
+#define RAM_DISPATCH_SIDE    0x0203FF00u             /* the second-level dispatch's side tables (BN6_DISPATCH_SIDE) (xvirus_dispatch.c) */
+#define RAM_COLONEL          0x0203FF60u             /* BN5's Colonel's table moved (BN6_COLONEL_TABLE) (xnavi_bn5.c) */
+#define RAM_SOULS            0x0203FF70u             /* kept for the Souls' state and BN5's mood (the Souls' track) (soulunite.c, soullife.c, soulmood.c, ...) */
+#define RAM_TEAM_TICK        0x0203FFF0u             /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c) */
+#define RAM_CHIP_AI_ROOMS    0x0203FFF4u             /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's bits; darkinvs_room.h, issue #182) (darkinvs.c) */
+#define RAM_TEAM_CLOCK       0x0203FFF8u             /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h) (arena_team_custom.c) */
+#define RAM_BATTLE_SPARE     0x0203FFFCu             /* spare (the game call's old mark, unused since issue #33) (free) */
+#define RAM_BATTLE_END       0x02040000u
+
+/* The plan as tables: X(name, start, end, parent, zone), in address order,
+ * a part after its parent ("" none); X(key, start, end) the zones */
+#define FREE_SPACE_ROM(X) \
+	X("FREE_WARP", (EMU_FREE + 0x000000u), (EMU_FREE + 0x000100u), "", "engine") \
+	X("FREE_CALL_RETURN", (EMU_FREE + 0x000100u), (EMU_FREE + 0x000180u), "", "engine") \
+	X("FREE_NO_MYSTERY", (EMU_FREE + 0x000180u), (EMU_FREE + 0x000200u), "", "engine") \
+	X("FREE_RECORDS", (EMU_FREE + 0x000200u), (EMU_FREE + 0x000300u), "", "engine") \
+	X("FREE_RUSH", (EMU_FREE + 0x000400u), (EMU_FREE + 0x000640u), "", "engine") \
+	X("FREE_BLOCKERS", (EMU_FREE + 0x000700u), (EMU_FREE + 0x0012E0u), "", "engine") \
+	X("FREE_WARP_LIST", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x003000u), "", "layers") \
+	X("FREE_LAYER", (EMU_FREE + 0x003000u), (EMU_FREE + 0x010000u), "", "layers") \
+	X("FREE_TILE_MAP", (EMU_FREE + 0x010000u), (EMU_FREE + 0x060000u), "", "layers") \
+	X("FREE_COORDS", (EMU_FREE + 0x060000u), (EMU_FREE + 0x100000u), "", "layers") \
+	X("FREE_TOWN_TILE_MAP", (EMU_FREE + 0x100000u), (EMU_FREE + 0x130000u), "", "layers") \
+	X("FREE_TOWN_COORDS", (EMU_FREE + 0x130000u), (EMU_FREE + 0x140000u), "", "layers") \
+	X("FREE_TOWN", (EMU_FREE + 0x140000u), (EMU_FREE + 0x148000u), "", "layers") \
+	X("FREE_LAN_HP", (EMU_FREE + 0x148000u), (EMU_FREE + 0x150000u), "", "layers") \
+	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
+	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
+	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
+	X("FREE_PET_TEXT", (EMU_FREE + 0x154000u), (EMU_FREE + 0x155000u), "", "words") \
+	X("FREE_PET_DESCS", (EMU_FREE + 0x155000u), (EMU_FREE + 0x158000u), "", "words") \
+	X("FREE_PET_MAILS", (EMU_FREE + 0x158000u), (EMU_FREE + 0x15A000u), "", "words") \
+	X("FREE_PET_BODIES", (EMU_FREE + 0x15A000u), (EMU_FREE + 0x166000u), "", "words") \
+	X("FREE_PORTRAITS", (EMU_FREE + 0x166000u), (EMU_FREE + 0x167900u), "", "words") \
+	X("FREE_TRADER_LIST", (EMU_FREE + 0x168000u), (EMU_FREE + 0x169000u), "", "words") \
+	X("FREE_PET_OPTIONS", (EMU_FREE + 0x169000u), (EMU_FREE + 0x16A000u), "", "words") \
+	X("FREE_BBS", (EMU_FREE + 0x16A000u), (EMU_FREE + 0x16B000u), "", "words") \
+	X("FREE_XAREA", (EMU_FREE + 0x170000u), (EMU_FREE + 0x1A0000u), "", "world") \
+	X("FREE_SONGS", (EMU_FREE + 0x1A0000u), (EMU_FREE + 0x260000u), "", "world") \
+	X("FREE_XNAVIS", (EMU_FREE + 0x260000u), (EMU_FREE + 0x2A0000u), "", "world") \
+	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
+	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
+	X("FREE_XTOWN", (EMU_FREE + 0x2E1000u), (EMU_FREE + 0x2F0000u), "", "world") \
+	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
+	X("FREE_INDOORS", (EMU_FREE + 0x320000u), (EMU_FREE + 0x330000u), "", "world") \
+	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \
+	X("FREE_FAMILIES", (EMU_FREE + 0x348000u), (EMU_FREE + 0x400000u), "", "code") \
+	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
+	X("FREE_SOULS", (EMU_FREE + 0x480000u), (EMU_FREE + 0x4C0000u), "", "code") \
+	X("FREE_PANELS", (EMU_FREE + 0x4C0000u), (EMU_FREE + 0x4D0000u), "", "code") \
+	X("FREE_NAVIS", (EMU_FREE + 0x500000u), (EMU_FREE + 0x600000u), "", "code") \
+	X("FREE_NAVI_SPRITES", (EMU_FREE + 0x500000u), (EMU_FREE + 0x580000u), "FREE_NAVIS", "code") \
+	X("FREE_NAVI_ROOM", (EMU_FREE + 0x580000u), (EMU_FREE + 0x588000u), "FREE_NAVIS", "code") \
+	X("FREE_NAVI_HOMES", (EMU_FREE + 0x588000u), (EMU_FREE + 0x590000u), "FREE_NAVIS", "code") \
+	X("FREE_NAVI_CODE", (EMU_FREE + 0x590000u), (EMU_FREE + 0x5B0000u), "FREE_NAVIS", "code") \
+	X("FREE_NAVI_ART", (EMU_FREE + 0x5B0000u), (EMU_FREE + 0x600000u), "FREE_NAVIS", "code") \
+	X("FREE_CHIP_CODE", (EMU_FREE + 0x600000u), (EMU_FREE + 0x700000u), "", "code") \
+	X("FREE_ATTACK_FAMILIES", (EMU_FREE + 0x600000u), (EMU_FREE + 0x600400u), "FREE_CHIP_CODE", "code") \
+	X("FREE_CHIP_MOVED", (EMU_FREE + 0x600400u), (EMU_FREE + 0x700000u), "FREE_CHIP_CODE", "code") \
+	X("FREE_SOULS_ART", (EMU_FREE + 0x700000u), (EMU_FREE + 0x710000u), "", "code") \
+	X("FREE_CHIP_PAS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710400u), "", "code") \
+	X("FREE_CHIP_AI", (EMU_FREE + 0x710400u), (EMU_FREE + 0x710440u), "", "code") \
+	X("FREE_SWAP_RETURN", (EMU_FREE + 0x710440u), (EMU_FREE + 0x710460u), "", "code") \
+	X("FREE_TAIL", (EMU_FREE + 0x710460u), (EMU_FREE + 0x720000u), "", "code") \
+	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
+	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \
+	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x77C000u), "", "code") \
+	X("FREE_BN4_NAVI_SPRITE", (EMU_FREE + 0x77C000u), (EMU_FREE + 0x78C000u), "", "code") \
+	X("FREE_BRACKET_FACES", (EMU_FREE + 0x78C000u), (EMU_FREE + 0x790000u), "", "code") \
+	X("FREE_BRACKET", (EMU_FREE + 0x790000u), (EMU_FREE + 0x7A0000u), "", "code") \
+	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art")
+#define FREE_SPACE_ROM_ZONES(X) \
+	X("engine", (EMU_FREE + 0x000000u), (EMU_FREE + 0x002F00u)) \
+	X("layers", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x150000u)) \
+	X("words", (EMU_FREE + 0x150000u), (EMU_FREE + 0x170000u)) \
+	X("world", (EMU_FREE + 0x170000u), (EMU_FREE + 0x330000u)) \
+	X("code", (EMU_FREE + 0x330000u), (EMU_FREE + 0x7A0000u)) \
+	X("art", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x800000u))
+#define FREE_SPACE_RAM(X) \
+	X("RAM_PACK_EXT", 0x02010CE0u, 0x020115E0u, "", "persistent") \
+	X("RAM_PLAYER_AI", 0x020115E0u, 0x02011730u, "", "persistent") \
+	X("RAM_TEAM", 0x02011730u, 0x02011750u, "", "persistent") \
+	X("RAM_TEAM_LINK", 0x02011750u, 0x02011790u, "", "persistent") \
+	X("RAM_TEAM_CUSTOM", 0x02011790u, 0x02011800u, "", "persistent") \
+	X("RAM_BRACKET", 0x02029A00u, 0x0202DA00u, "", "mode") \
+	X("RAM_SEA", 0x0203FB50u, 0x0203FBE0u, "", "battle") \
+	X("RAM_DARK_LISTS", 0x0203FBE0u, 0x0203FDA0u, "", "battle") \
+	X("RAM_NAVIS", 0x0203FDA0u, 0x0203FDB0u, "", "battle") \
+	X("RAM_DARK_AI", 0x0203FDB0u, 0x0203FEF0u, "", "battle") \
+	X("RAM_BATTLE", 0x0203FEF0u, 0x0203FF00u, "", "battle") \
+	X("RAM_DISPATCH_SIDE", 0x0203FF00u, 0x0203FF60u, "", "battle") \
+	X("RAM_COLONEL", 0x0203FF60u, 0x0203FF70u, "", "battle") \
+	X("RAM_SOULS", 0x0203FF70u, 0x0203FFF0u, "", "battle") \
+	X("RAM_TEAM_TICK", 0x0203FFF0u, 0x0203FFF4u, "", "battle") \
+	X("RAM_CHIP_AI_ROOMS", 0x0203FFF4u, 0x0203FFF8u, "", "battle") \
+	X("RAM_TEAM_CLOCK", 0x0203FFF8u, 0x0203FFFCu, "", "battle") \
+	X("RAM_BATTLE_SPARE", 0x0203FFFCu, 0x02040000u, "", "battle")
+#define FREE_SPACE_RAM_ZONES(X) \
+	X("persistent", 0x02010CE0u, 0x02011800u) \
+	X("mode", 0x02029A00u, 0x0202DA00u) \
+	X("battle", 0x0203FB50u, 0x02040000u)
 
 #endif

@@ -9,6 +9,16 @@
   on the act's pink pad whether to go in from there, the cursor on No.
   The trip itself does not land on the island yet, so runs do not offer
   it; `--dev stop` shows the question.
+- **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
+  beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
+  Area or BN5's Undernet now gets the quick way back BN6's areas have: a
+  lane of one-way arrow panels from a far detour to the way, drawn in
+  that area's own arrows, read from BN5's maps. ACDC Area has none in
+  BN5, so its layers have none. A layer in progress from an older build
+  starts afresh.
+- **BN5's win music.** A battle won on one of BN5's areas, or on a dark
+  layer, ends with BN5's own victory music where BN6's played, picked the
+  way both games pick it.
 
 ## 0.20.0 (2026-11-09)
 

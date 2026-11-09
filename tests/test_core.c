@@ -71,6 +71,7 @@
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
+#include "free_space_watch.h"
 #include "xattack_grow.h"
 #include "xchips.h"
 #include "xchips_bn5.h"
@@ -4108,43 +4109,74 @@ static void regions_apart(const char *plan, const Region *r, int n, uint32_t lo,
 			(unsigned)hi, i ? r[i - 1].what : "nothing");
 }
 
+/* The plan's tables (free_space.h, written from free_space.plan by
+ * tools/free_space.py): its zones in order and apart inside [lo, hi), each
+ * region inside its zone (a part inside its parent) and past the one before
+ * it there; the problems found, told unless `quiet` */
+typedef struct { const char *what; uint32_t at, end; const char *parent, *zone; } PlanRegion;
+typedef struct { const char *key; uint32_t at, end; } PlanZone;
+#define PLAN_REGION(name, at, end, parent, zone) { name, at, end, parent, zone },
+#define PLAN_ZONE(key, at, end) { key, at, end },
+
+/* the zone or parent a region lies in, and the region before it there */
+static bool plan_within(const PlanRegion *r, int i, const PlanZone *z, int nz, uint32_t *at, uint32_t *end, int *before) {
+	const char *in = NULL;
+	for (int k = 0; k < nz; ++k)
+		if (!strcmp(z[k].key, r[i].zone)) *at = z[k].at, *end = z[k].end, in = z[k].key;
+	for (int j = 0; *r[i].parent && j < i; ++j)
+		if (!strcmp(r[j].what, r[i].parent)) *at = r[j].at, *end = r[j].end, in = r[j].what;
+	*before = -1;
+	for (int j = 0; j < i; ++j)
+		if (!strcmp(r[j].zone, r[i].zone) && !strcmp(r[j].parent, r[i].parent)) *before = j;
+	return in != NULL;
+}
+
+static int plan_problems(const char *plan, const PlanRegion *r, int n, const PlanZone *z, int nz, uint32_t lo, uint32_t hi, bool quiet) {
+	int bad = 0;
+	for (int k = 0; k < nz; ++k)
+		if (!(z[k].at < z[k].end && z[k].at >= lo && z[k].end <= hi && (!k || z[k].at >= z[k - 1].end))) {
+			if (!quiet) printf("  %s: zone %s %08x-%08x is empty, outside %08x-%08x or over the one before\n", plan, z[k].key, (unsigned)z[k].at, (unsigned)z[k].end, (unsigned)lo, (unsigned)hi);
+			++bad;
+		}
+	for (int i = 0; i < n; ++i) {
+		uint32_t at = 0, end = 0;
+		int before;
+		bool in = plan_within(r, i, z, nz, &at, &end, &before);
+		if (!in || !(r[i].at < r[i].end && r[i].at >= at && r[i].end <= end && (before < 0 || r[i].at >= r[before].end))) {
+			if (!quiet) printf("  %s: %s %08x-%08x is empty, outside its zone or parent %08x-%08x, or over %s\n", plan, r[i].what, (unsigned)r[i].at, (unsigned)r[i].end, (unsigned)at, (unsigned)end, before < 0 ? "nothing" : r[before].what);
+			++bad;
+		}
+	}
+	return bad;
+}
+
 static void test_free_space(void) {
-	static const Region rom[] = {
-		{ "a direct warp", FREE_WARP, FREE_CALL_RETURN }, { "a game call's return", FREE_CALL_RETURN, FREE_NO_MYSTERY },
-		{ "the empty Mystery Data list", FREE_NO_MYSTERY, FREE_RECORDS }, { "the battle records", FREE_RECORDS, FREE_RECORDS_END },
-		{ "Rush's gaps", FREE_RUSH, FREE_RUSH_END }, { "handler 3's records", FREE_BLOCKERS, FREE_BLOCKERS_END },
-		{ "the layer's warp list", FREE_WARP_LIST, FREE_LAYER }, { "the layers' data", FREE_LAYER, FREE_TILE_MAP },
-		{ "the tile map", FREE_TILE_MAP, FREE_COORDS }, { "the coordinate data", FREE_COORDS, FREE_TOWN_TILE_MAP },
-		{ "the town's tile map", FREE_TOWN_TILE_MAP, FREE_TOWN_COORDS }, { "the town's coordinate data", FREE_TOWN_COORDS, FREE_TOWN },
-		{ "the town's data", FREE_TOWN, FREE_LAN_HP }, { "Lan's HP's and house's", FREE_LAN_HP, FREE_TALK },
-		{ "the conversations", FREE_TALK, FREE_LABEL }, { "the map-name label", FREE_LABEL, FREE_PET_LABEL },
-		{ "the PET's PLACE", FREE_PET_LABEL, FREE_PET_TEXT }, { "the key items' names", FREE_PET_TEXT, FREE_PET_DESCS },
-		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
-		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
-		{ "a Chip Trader's prizes of both nets", FREE_TRADER_LIST, FREE_TRADER_LIST_END },
-		{ "the PET menu's labels", FREE_PET_OPTIONS, FREE_PET_OPTIONS_END }, { "the Request BBS's posts", FREE_BBS, FREE_BBS_END },
-		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
-		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
-		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "another game's town", FREE_XTOWN, FREE_XTOWN_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },
-		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
-		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
-		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
-		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
-		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
-		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
-		{ "the swap's return", FREE_SWAP_RETURN, FREE_SWAP_RETURN_END },
-		{ "BN4's Navis' homes", FREE_BN4_NAVIS, FREE_BN4_NAVI_CODE }, { "BN4's Navis' code", FREE_BN4_NAVI_CODE, FREE_BN4_NAVI_ART },
-		{ "BN4's Navis' art", FREE_BN4_NAVI_ART, FREE_BN4_NAVI_SPRITE }, { "BN4's Navis' sprite room", FREE_BN4_NAVI_SPRITE, FREE_BRACKET_FACES },
-		{ "the bracket's faces", FREE_BRACKET_FACES, FREE_BRACKET },
-		{ "BN4's bracket screen", FREE_BRACKET, FREE_BRACKET_END }, { "a liberation's teammates", FREE_LIB_TEAM, FREE_LIB_TEAM_END },
-	};
+	static const PlanRegion rom[] = { FREE_SPACE_ROM(PLAN_REGION) }, ram[] = { FREE_SPACE_RAM(PLAN_REGION) };
+	static const PlanZone romz[] = { FREE_SPACE_ROM_ZONES(PLAN_ZONE) }, ramz[] = { FREE_SPACE_RAM_ZONES(PLAN_ZONE) };
+	CHECK(!plan_problems("the free space", rom, (int)(sizeof rom / sizeof *rom), romz, (int)(sizeof romz / sizeof *romz), EMU_FREE, FREE_END, false),
+		"free space: the plan's regions in the ROM copy not whole");
+	CHECK(!plan_problems("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), ramz, (int)(sizeof ramz / sizeof *ramz), 0x02010CDCu, 0x02040000u, false),
+		"free space: the plan's regions in BN6's RAM not whole");
+	/* (the check sees a region over the one before it, one outside its zone and a part outside its parent) */
+	const PlanRegion wrong[] = { { "a", 0x100, 0x200, "", "z" }, { "b", 0x1F0, 0x300, "", "z" }, { "c", 0x300, 0x500, "", "z" },
+		{ "d", 0x380, 0x480, "c", "z" }, { "e", 0x480, 0x600, "c", "z" } };
+	const PlanZone zone[] = { { "z", 0x100, 0x400 } };
+	CHECK(plan_problems("a plan made wrong", wrong, 5, zone, 1, 0, 0x1000, true) == 3, "free space: a plan's three faults not all seen");
+	/* (and at run time, free_space_watch.c: a write inside a region passes, one past its end is told) */
+	free_space_quiet(true);
+	int strays = free_space_strays();
+	CHECK(free_space_write(FREE_TALK, 0x2000u) && free_space_write(0x02000000u, 0x100u) && free_space_write(FREE_NAVI_ROOM + 0x10u, 0x100u) &&
+		!free_space_write(FREE_TALK, 0x2001u) && !free_space_write(FREE_RECORDS_END, 1) && free_space_strays() == strays + 2,
+		"free space: a write past its region's end not told");
+	CHECK(free_space_region(FREE_NAVI_ROOM + 4u) && !strcmp(free_space_region(FREE_NAVI_ROOM + 4u), "FREE_NAVI_ROOM") &&
+		!free_space_region(FREE_RECORDS_END) && !free_space_region(EMU_FREE - 1u), "free space: a place's region not the innermost");
+	free_space_quiet(false);
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
 	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
-	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
 	const Region room[] = {
 		{ "the per-family tables", XV_GROWN, XV_GROWN + XV_TABLES * XV_STEP }, { "the ice sizes", XV_ICE, XV_ICE + XV_AIS },
@@ -4242,20 +4274,7 @@ static void test_free_space(void) {
 		SOULS_FACE_TILES + 6u * 0x100 <= SOULS_DIGITS && SOULS_DIGITS + 11u * 0x80 <= SOULS_DIGITS_END && SOULS_DIGITS_END <= SOULS_ART_END &&
 		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
 		"the Souls' room: a grown table's entries past its room");
-	/* (BN6's RAM: persistent, then per battle) */
-	static const Region ram[] = {
-		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
-		{ "--dev arena2v2's list", RAM_TEAM, RAM_TEAM_END }, { "--dev arena2v2's partners' words", RAM_TEAM_LINK, RAM_TEAM_LINK_END },
-		{ "--dev arena2v2's partners' decks and Custom screens", RAM_TEAM_CUSTOM, RAM_TEAM_CUSTOM_END },
-		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
-		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
-		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
-		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_TEAM_TICK },
-		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_CHIP_AI_ROOMS }, { "the chip AI's rooms", RAM_CHIP_AI_ROOMS, RAM_TEAM_CLOCK },
-		{ "two a side's turn's clock", RAM_TEAM_CLOCK, RAM_BATTLE_SPARE },
-		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
-	};
-	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
+	/* (BN6's RAM: its regions checked above, FREE_SPACE_RAM) */
 	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
 		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,

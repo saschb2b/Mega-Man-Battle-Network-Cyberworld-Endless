@@ -209,7 +209,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -2620,6 +2620,14 @@ def lint_symbols():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
 
+def lint_free_space():
+    """src/emu/free_space.h and docs/engine/emulation/memory.md's and
+    free-space.md's tables as tools/free_space.py writes them from the free
+    space's plan, and the plan whole (docs/engine/emulation/free-space.md)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'free_space.py'), '--check']) == 0
+
+
 def lint_voice():
     """docs/voice/catalog.json as tools/voice_catalog.py writes it from the
     words files: every line the voice review's dashboard shows, in step
@@ -2849,6 +2857,7 @@ def lint(update=False):
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
+    ok = lint_free_space() and ok
     ok = lint_voice() and ok
     ok = lint_docs() and ok
     ok = lint_itch() and ok

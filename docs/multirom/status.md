@@ -3,7 +3,7 @@ type: Status
 title: "Status"
 description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
 ---
 
 # Status
@@ -58,12 +58,23 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
   ACDC Area 132, SciLab 126 (192 before, held), End Area 172, Oran Area
   168 (480 to 500 as first tuned), the Undernet 167 (310 to 440),
   Nebula Area 205.
-- [ ] A dressed layer laid out as the BN6 area's own would be: the layer
-  generator takes the kit of the area it draws in (`netmap_kit`: stairs,
-  arrow lanes, the teleports' gem, the Net Dealer's counter, scenery),
-  and BN5's areas learn no stairs, arrow panels, gem or counter, so their
-  layers have no raised rooms, arrow lanes, teleports or counter where
-  the BN6 area's would, and a run saved with BN5's ROM beside BN6's and
+- [x] Its arrow lanes: BN5's maps mark their arrow panels as BN6's do
+  (section-3 values 0x48-0x4F), so its areas learn them as BN6's
+  (`learn_arrows`, `LAYER_MAKE` 113) and lay [arrow lanes](../world/level-design/arrow-lanes.md)
+  in their own art where the act's plan has one: SciLab's, the Undernet's
+  every way, End Area's and Oran Area's three, Nebula Area's three (none
+  found room over 22 seeds at depth 2); ACDC Area's maps have none
+  ([BN5's maps, songs, text and objects](../rom/bn5-world.md), Its arrow
+  panels and ramps).
+- [ ] A dressed layer laid out as the BN6 area's own would be, the rest of
+  the kit: the layer generator takes the kit of the area it draws in
+  (`netmap_kit`: stairs, arrow lanes, the teleports' gem, the Net
+  Dealer's counter, scenery). BN5's ramps are four panels long, under a
+  panel wide and 64 units high where BN6's stairs are two panels by two
+  (`stairs_learn` takes no other), so its areas have no raised rooms until
+  the generator lays a ramp of that shape; the gem is BN6's tile and BN5's
+  warp lists were not read for a teleport, nor its maps for a counter, so
+  none of those yet. A run saved with BN5's ROM beside BN6's and
   continued without it builds its layer afresh, not the same. Such a
   CONTINUE starts that layer again from its arrival (the checkpoint keeps
   the area it was drawn in, `run.area`, and stops the saved song, which
