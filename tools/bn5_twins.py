@@ -405,6 +405,15 @@ TYPES = {
     (3, 0x41): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x44): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x5F): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
+    (3, 0x33): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (3, 0x38): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (3, 0x39): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (3, 0x3A): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (4, 0x12): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (3, 0x00): ('moved', None, 'navis', "Guard's: no BN6 type runs its code; NapalmMan's 0x33 spawns it too (kind 0x11, BN5 "
+                                        "0x080CB4FC): the Navis' copy, installed before the chips', fixes its kinds' rows (its "
+                                        "sprites by xchiprecipe.py's TABLE_SPRITES, its panels by TABLE_PANELS), so the chips "
+                                        "spawn it"),
     (3, 0x8B): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (3, 0x8C): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (3, 0x93): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
@@ -498,7 +507,6 @@ TYPES = {
     (1, 0x5C): ('moved', None, 'chips', "NumberMan's object at 0x080C4214 (the Navi chip NumbrMan's): BN6's 0x5C "
                                         "(0x080B9A5D) other code, no BN6 type runs BN5's; its battle sprite the Navis' "
                                         "(list 2's 0x20 on)"),
-    (3, 0x00): ('moved', None, 'chips', "Guard's: no BN6 type runs its code"),
     (3, 0x12): ('moved', None, 'chips', "the spread shot (the Vulcan family's shots: InfVulc's): no BN6 type runs BN5's "
                                         "code to its depth (the pairs' search), BN6's own Spreader and Vulcans its own "
                                         "0x12"),

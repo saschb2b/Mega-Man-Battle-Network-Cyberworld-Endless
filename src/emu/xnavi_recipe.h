@@ -74,11 +74,14 @@
 #define XN_SLOT_CODE  0x3C00u             /* a Navi's code room */
 #define XN_SLOT_ART   0x400u              /* ... and its art's */
 /* Team ProtoMan's (seats 11-16, slots 12-17 past the Darkloids') in a room of their own (FREE_TEAM_NAVIS): a home, a code
- * room and an art room each, then their battle sprites (xnavi_sprites.c) */
+ * room (XN_TEAM_SLOT_CODE: their largest walk, ProtoMan's, 8648 bytes) and an art room each, the shared art's second room
+ * (a sprite of any Navi's once XN_SHARED_ART's is full: NapalmMan's first), then their battle sprites (xnavi_sprites.c) */
 #define XN_TEAM_SEATS   6
+#define XN_TEAM_SLOT_CODE 0x2800u
 #define XN_TEAM_HOMES   FREE_TEAM_NAVIS
 #define XN_TEAM_CODE    FREE_TEAM_NAVI_CODE
 #define XN_TEAM_ART     FREE_TEAM_NAVI_ART
+#define XN_TEAM_SHARED  FREE_TEAM_SHARED
 #define XN_TEAM_END     FREE_TEAM_SPRITES
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
@@ -113,7 +116,7 @@ static inline bool xn_code_at(uint32_t a) {
 /* ... or in one of their art's rooms (XN_ART's, XN_MORE_ART's or XN_TEAM_ART's) */
 static inline bool xn_art_room(uint32_t a, uint32_t n) {
 	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a) ||
-		(a >= XN_TEAM_ART && a <= XN_TEAM_END && n <= XN_TEAM_END - a) || (a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
+		(a >= XN_TEAM_ART && a <= XN_TEAM_SHARED && n <= XN_TEAM_SHARED - a) || (a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
 }
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at

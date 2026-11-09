@@ -418,6 +418,10 @@
     {
       "date": "2026-11-09",
       "what": "CosmoMan moved (docs/multirom/navis.md, The Darkloids; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_COSMO_SPAWN_6C, _6D, _79 and BN5_COSMO_HALF_HP, and CloudMan's BN5_CLOUD_FIND_37, BN5_CLOUD_PANEL, BN5_CLOUD_KINDS_0B): cosmoman_v1, cosmoman_v1_keys and cosmoman_sp PASS; the comparator's spawn_leftovers learn a word part of which the spawner writes (compares), and the engine's spark takes its struck attack's rule for its Z."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "NapalmMan moved, Team ProtoMan's first (docs/multirom/navis.md, NapalmMan; docs/rom/navis.md, Team ProtoMan's NapalmMan: src/emu/bn5_team_protoman.h's BN5_NAPALM_COMPANION, _COMPANION_END, _HALF_HP_CHIP, _FLAME_SPAWN, _PANEL_FLAMES): napalmman_v1, napalmman_v1_keys and napalmman_sp PASS, five mutations caught; the third kind's 0x00 the Navis' one copy (TYPES), its kinds' rows fixed by the Navis' generator; the comparator reads Team ProtoMan's code room and keys no Navi's code to an object no family spawned."
     }
   ],
   "experiments": [
