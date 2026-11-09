@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
+  battle engine and checked against BN4's own battle frame by frame, now
+  enters the tournament's first two rounds on his own plate of BN4's
+  bracket, his junk raining down as in BN4.
 - **BN5's areas lay their own arrow lanes.** With BN5 Team Colonel's ROM
   beside BN6's, a layer dressed as SciLab, End Area, Oran Area, Nebula
   Area or BN5's Undernet now gets the quick way back BN6's areas have: a

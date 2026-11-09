@@ -1,0 +1,15 @@
+{
+  "about": "BN4 Red Sun's JunkMan V1 (BN4's enemy 0xA4, a Soul Navi, two calls of his own between his pre-step and his state runner made by his hook A's shim) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core against his move into BN6's engine as a Navi of BN6's Navi object (BN6's 0x3A4, Navi AI 57; src/emu/xnavi_bn4.c, installed after BN4's families), BN6's draws replayed from BN4's; BN4's numbers read as BN6's by tools/xdiff_bn4.py's maps, his recipe's among them; BN6's whole battle a fight frame behind BN4's allowed (lag 1, as every BN4 spec: tests/xdiff/legit.json, bn4, allowed)",
+  "game": "bn4",
+  "against": "bn6",
+  "dev": [
+    "bn4families"
+  ],
+  "foes": "A4@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0",
+  "rng": "replay",
+  "lag": 1
+}

@@ -167,5 +167,12 @@
 #define BN4_METTAUR_HELD_OTHER 0x080B3C1Au /* Mettaur's held chip's other attack (0x080E8ADA), which VolGear calls for its chip 0x85
                                        * (0x080B63F0): dead while it holds none */
 #define BN4_HELD_CHIP_TEST 0x080B52E4u /* a held chip's test (+0x2A + 1): copied with the families that call it (bn4_twins.COPIED) */
+/* Its Program Advances (docs/rom/bn4.md, Its Program Advances; docs/multirom/bn4-chips.md): BN6's recipes' format, read for
+ * Phase 4's grown list (BN6_PA_LIST's twin) */
+#define BN4_PA_LIST       0x080212B0u /* the recipes' addresses, BN4_PA_COUNT of them, then 0 (BN6_PA_LIST's shape) */
+#define BN4_PA_LIST_REF   0x0801F4E0u /* ... the one word that names it, loaded at 0x0801F3BE (r6) */
+#define BN4_PA_COUNT      37          /* ... how many recipes: 30 Program Advances, LifeSrd, DarkNeo and HeatSprd by two or more */
+#define BN4_PA_RECIPES    0x080211B0u /* the recipes: n, kind, the PA's id (u16), its chips (u16 id | code << 9) */
+#define BN4_PA_KIND_LISTED 1          /* a recipe of n chips listed, each its own (BN6's kind 4); kind 0 one chip n times, codes in a row */
 
 #endif

@@ -466,6 +466,10 @@ battle frame by frame, as BN5's were.
    battle records, guardians and bystanders are still to come.
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
+   Designed and scoped (9 November 2026), nothing built, in [BN4's chips
+   in a run](bn4-chips.md): the census (191 new to a run, 6 on BN6's
+   code), chip ids of ten bits for BN4's chips and BN5's alike, the
+   online rule and the build plan in units.
 
 ## Its music
 
