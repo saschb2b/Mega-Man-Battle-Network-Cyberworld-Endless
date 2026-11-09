@@ -102,10 +102,14 @@ typedef struct {
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny
  * its board's item panels hold: their scripts into `out` (docs/game/liberation/) */
 void lib_prizes_install(LayerObjs *out, TextArchive *text);
-/* ... the chip of par tier `tier` (0 two under par, 1 at par: a Server's
- * prize and a tier lower) at `depth` from the layer's seed, its code
- * (0-25, 26 '*'); over par is zenny, liberation_board.h's lib_par_zenny */
+/* ... the chip of par tier `tier` (0 two under par, 1 at par: the act's
+ * Darkloid's own SP and V1 where the registry holds his chips, else a
+ * Server's prize and a tier lower) at `depth` from the layer's seed, its
+ * code (0-25, 26 '*'); over par is zenny, liberation_board.h's lib_par_zenny */
 int lib_prize_chip(int tier, int depth, int *code);
+/* ... the chip of par tier `tier` BN5's Darkloid of AI `ai` pays as his
+ * own (bn5.h BN5_NAVI_SHADEMAN on: his SP, then his V1), 0 where none plays */
+int lib_darkloid_prize(int ai, int tier);
 
 /* The layer's shop stock written (again after a state load, whose RAM
  * holds the shop data as it was saved: `saved`, what was bought there

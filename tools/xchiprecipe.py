@@ -123,6 +123,9 @@ STUBS = {
     0x080EA08C: (STUB_ZERO, "a panel claim's spawner: its gate (0x080090E8, the battle's bit 0x40) clear in every battle a run "
                             "fights, r0 0 as BN5 answers then"),
     0x080EA0BA: (STUB_ZERO, "a panel claim's other spawner, the same"),
+    0x080029B8: (STUB_ZERO, "a sprite's LZ77 data queued for decompression (r0 its list offset, r1 its number: the Darkloids' Navi chips' "
+                            "own, list 2's 0x0D and 0x0E, LZ77 in BN5), its answer unread: in BN6 the Navis' copy of each is whole "
+                            "(src/emu/xnavi_sprites.c), nothing to queue"),
 }
 # Helpers: BN5's code more than one unit calls, whose object only one copy may move (the dispatch moves a type once):
 # installed once, before the units, from XC_HELPERS; a unit's call to its routine aimed at its copy. (BN5's routine, the
@@ -201,7 +204,8 @@ DEAD_CODE = {
 }
 # ROM data a unit's literal names that BN6 keeps none of, copied with the unit (moved as its block's): its bytes
 DATA_COPY = {
-    0x0801D27A: (0x120, "the Navi chips' SP and DS powers by time and by counter (13 rows of 11 u16), BN5's alone"),
+    0x0801D27A: (15 * 0x16, "the Navi chips' SP and DS powers by time and by counter (rows of 11 u16 by the record's power less "
+                            "1001 or 1023: the registry's rows 0-14, ShadeMan's 13 and BlizzardMan's 14 the last), BN5's alone"),
 }
 # Literal words a unit's code holds that no BN6 run reads (their path a stub makes dead): kept as they are, by the unit
 # CurActions a unit's object writes that index its own states' table, not the engine's (no status states before them): BN5's
@@ -211,7 +215,11 @@ OWN_STATES = {
                 "four entries at 0x080B9DAC, its update 0x080B9D10's), 0xC its fourth; BN6's 0xE would read between two (chip_knightmn: "
                 "BN6's battle frozen from t33, the Navi chip's object never let go)",
 }
-UNREAD_WORDS = {}
+# Literal words a unit hands on as numbers that look like addresses, kept as they are: (unit, the word): why
+UNREAD_WORDS = {
+    ('ShadeMan', 0x0B05FF00): "a spawn's packed word, not an address: 0x080CB68A's r4, 0x0B05FF00 plus the attack's kind, handed to "
+                              "the spawner 0x080C4EAE (BN6's twin 0x080C6C16, the same code) as its object's numbers",
+}
 # Literal words of BN5's RAM a unit names that BN6's engine keeps at a place of the chips' own: (unit, BN5's word): (BN6's, why)
 WORDS_TO = {
     ('PowerSP', 0x0203E560): (None, "BN5's best deletion times of its Navis' SPs (u16 frames by the Navi's AI index, 0x2C a side, "
@@ -396,6 +404,8 @@ UNITS = (
     ('support', 0x23, 'HolyDrem'),
     ('support', 0x31, 'Poltrgst'),
     ('support', 0x3B, 'DarkInvs'),
+    ('navi', 0x01, 'ShadeMan'),
+    ('navi', 0x0E, 'BlizzardMan'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
 # chips' differential's finding where a spec ran it (docs/multirom/chips-code.md: what remains)
@@ -1677,6 +1687,14 @@ def shifted_effects(f):
 # (xnavi_sprite_install), which a unit's install asks for first (its `navis`)
 NAVI_SIX = range(7, 13)
 NAVI_SPRITE_FIRST = 0x20
+# ... and the Darkloids whose Navis are moved (ShadeMan 13, BlizzardMan 14): each Navi's seat (src/emu/xnavi_recipe.h, XN_SEAT:
+# the six 0-5, the Dark Soul 6, the Darkloids 7 on) numbers its sprite (0x20 + seat), its AI index in BN6 (32 + seat) and its
+# bit in a unit's `navis`
+NAVI_MOVED = tuple(NAVI_SIX) + (13, 14)
+
+
+def navi_seat(n):
+    return n - 6 if n >= 13 else n - 7
 # Routines a Navi chip's object calls with a Navi's AI index, reading a table by it (BN5's routine: (the register holding the
 # table's kind, the kind the Navis' table is, the register holding the AI index, why)): BN5's Navi of AI n is BN6's
 # XN_AI_OF(n) = 32 + n - 7 there (src/emu/xnavi_recipe.h), whose entries the Navis' install grows the tables with
@@ -1715,10 +1733,10 @@ def navi_ai_calls(u, b5=None, b6=None):
             if k != kind and not also:
                 continue   # (another table: BN6's own of the same index)
             v, chain = T.back_value(w, site, reg)
-            if v not in NAVI_SIX:
-                f.decide('navi ai', f'{site:08X}: {why}, its AI index {v} made otherwise or none of the six\'s')
+            if v not in NAVI_MOVED:
+                f.decide('navi ai', f'{site:08X}: {why}, its AI index {v} made otherwise or none of the moved Navis\'')
                 continue
-            X.imm_for(u, chain, reg, v, 32 + v - 7, f'{why}: BN5\'s AI index {v:#x}, BN6\'s {32 + v - 7:#x}')
+            X.imm_for(u, chain, reg, v, 32 + navi_seat(v), f'{why}: BN5\'s AI index {v:#x}, BN6\'s {32 + navi_seat(v):#x}')
             if also:
                 X.imm_for(u, kchain, kreg, k, kind, f'{why}: its table {k}, the same as {kind} in both games, {kind} in BN6 (the Navis\' '
                                                     f'grown, NAVI_TRIPLES)')
@@ -1731,8 +1749,8 @@ def art_of(u, b5, b6, alloc):
     f = u.f
     packed_loads(f)
     for (l, v), sites in sorted(f.loads.items(), key=lambda x: str(x[0])):
-        if l == 4 * 2 and v in NAVI_SIX:
-            to = NAVI_SPRITE_FIRST + v - 7
+        if l == 4 * 2 and v in NAVI_MOVED:
+            to = NAVI_SPRITE_FIRST + navi_seat(v)
             u.navis.add(v)
             for site, chain in sites:
                 load_rewrite(u, site, chain, v, to, f'BN5\'s Navi {v}\'s battle sprite: list 2 {v:#x} in BN5, {to:#x} in BN6 (the Navis\')')
@@ -1871,7 +1889,7 @@ def c_unit(u, slot):
     L += ['', f'#define {n.upper()}_CODE {{ .name = "{u.label} (BN5\'s)", .game = XROM_BN5_COLONEL_US, \\']
     L += [f'\t{f}, \\' for f in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if u.songs else 'NULL, 0'
-    navis = sum(1 << (v - NAVI_SIX[0]) for v in u.navis)
+    navis = sum(1 << navi_seat(v) for v in u.navis)
     return '\n'.join(L), (f'\t{{ {KIND_C[u.kind]}, 0x{u.n5 & 0xFF if u.kind != "helper" else 0:02X}, 0x{u.number:02X}, 0x{u.entry | 1:08X}, XC_HOMES + 0x{XC_HOME_SIZE * slot:X}, '
                           f'{n.upper()}_CODE, {songs}, 0x{navis:02X} }},')
 

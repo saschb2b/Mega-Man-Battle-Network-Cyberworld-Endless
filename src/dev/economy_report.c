@@ -637,6 +637,18 @@ static int dark_table(FILE *out) {
 				tier[1][k] / runs, price[0][k] / runs, price[1][k] / runs);
 		fprintf(out, "   %4d -> %4d%s\n", zenny[0], zenny[1], over ? "!" : "");
 	}
+	/* (BN5's Darkloids' own chips, the prize where the act's Darkloid is one
+	 * of theirs: the runs above meet BN6's Navis, the Darkloids being met only
+	 * once the core has installed them; each act's over par against his V1) */
+	for (int ai = BN5_NAVI_SHADEMAN; ai <= BN5_NAVI_BLIZZARDMAN; ++ai) {
+		int sp = lib_darkloid_prize(ai, 0), v1 = lib_darkloid_prize(ai, 1);
+		if (!sp || !v1) continue;
+		int over = 0;
+		for (int a = 1; a < 6; ++a) over += lib_par_zenny(3 * a + 2) >= chip_price(v1);
+		flagged += over;
+		fprintf(out, "BN5's Darkloid %d's own: two under par his SP (%d), tier %d, %d; at par his V1 (%d), tier %d, %d; over par as much or more in %d act(s)%s\n",
+			ai, sp, chip_pool_tier(sp), chip_price(sp), v1, chip_pool_tier(v1), chip_price(v1), over, over ? "!" : "");
+	}
 	return flagged;
 }
 

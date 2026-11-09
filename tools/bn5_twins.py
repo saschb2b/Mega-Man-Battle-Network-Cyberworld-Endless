@@ -124,6 +124,12 @@ AUDITS = {
                                        "through r4, the region number its caller passed: into the BIOS's ROM, where a write does "
                                        "nothing, so BN5's object keeps the target word its setup gave it) and ORs in the time stop's "
                                        "bit as BN6's setup does: BN5's own body copied, its two calls through their twins", ()),
+    # (the chips': BlizzardMan's Navi chip, its snowball's object 0x080DD3F0)
+    (0x0800D7B8, 0x0800F884): ('copy', "a status bit set in what struck an object (its collision data's +0x40, through 0x08016C5C, BN6's "
+                                       "twin 0x0801A16C the same code): BN5's 0x10000, BN6's twin 0x8000; the struck bits are the same "
+                                       "in both games (the differential's hold: each game's own status step, the same bits), 0x10000 the "
+                                       "freeze (BN6_STRUCK_FREEZE), so BN5's body is copied, its call through its twin. chip_blizman PASSes "
+                                       "with it, but its held foe shows no difference with 0x8000 either: the bit is not proved by a spec", ()),
     (0x080133C4, 0x080165B8): ('ok', "on to the decide state: CurAction 8 where BN5's 6, BN6's two status states first", ()),
     (0x0801A5BC, 0x0801DC7C): ('ok', "an object put in a four-slot table (BN5 0x0203E5C0, BN6 0x0203EB50, each its own): BN6 marks its "
                                      "own ids 0x49-0x4E and 0xEB otherwise (0x1B); every other id the same (3)", ()),
@@ -488,6 +494,13 @@ TYPES = {
                                         "type runs BN5's; its battle sprite the Navis' (list 2's 0x20 on)"),
     (1, 0x17): ('moved', None, 'chips', "the Navi chip ToadMan's ToadMan: BN6's 0x17 (0x080BD409) other code, no BN6 type "
                                         "runs BN5's; its battle sprite the Navis' (list 2's 0x20 on)"),
+    (1, 0x19): ('moved', None, 'chips', "the Navi chip ShadeMan's ShadeMan: " + NO_TWIN + "; its battle sprite the Navis' "
+                                        "(list 2's 0x27)"),
+    (3, 0x34): ('moved', None, 'chips', "the Navi chip ShadeMan's attack (spawned at 0x080CB664): " + NO_TWIN),
+    (1, 0x14): ('moved', None, 'chips', "the Navi chip BlizMan's BlizzardMan: " + NO_TWIN + "; its battle sprite the Navis' "
+                                        "(list 2's 0x28)"),
+    (3, 0xB2): ('moved', None, 'chips', "the Navi chip BlizMan's snowball: " + NO_TWIN),
+    (3, 0xB7): ('moved', None, 'chips', "the Navi chip BlizMan's snowball's trail: " + NO_TWIN),
     (1, 0x5C): ('moved', None, 'chips', "NumberMan's object at 0x080C4214 (the Navi chip NumbrMan's): BN6's 0x5C "
                                         "(0x080B9A5D) other code, no BN6 type runs BN5's; its battle sprite the Navis' "
                                         "(list 2's 0x20 on)"),

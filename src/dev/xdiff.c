@@ -118,6 +118,7 @@ typedef struct Side_ {
 	int behind;                     /* (BN6's, lag=N) the fight frames its battle runs behind the reference's: its keys by the timer
 	                                 * taken that much later, that many more frames traced (docs/devtools/differential.md, The BN4 trace) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
+	uint32_t still;                 /* the core's frames run since its timer last read otherwise (a hold's: a Navi chip's, a turn's change) */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
 	bool seeded, fought, done, decked, held;
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
@@ -503,6 +504,9 @@ static void film_take(Side *g, const Spec *s, uint32_t t) {
  * written after its first frame; a new value of its timer while it fights
  * traced. Done after `frames` of them, its end, or its frames' budget.
  * True where this frame was traced. */
+/* (its frames at its timer's value, from the seed: each game's opening its own length) */
+static void held_count(Side *g, uint32_t t, bool seeding) { g->still = t == g->last && !seeding ? g->still + 1 : 0; }
+
 static bool step(Side *g, const Spec *s) {
 	const View *v = &g->v;
 	if (g->done) return false;
@@ -532,8 +536,10 @@ static bool step(Side *g, const Spec *s) {
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
 	if (fighting) film_take(g, s, t);
-	if (fighting && !g->seeded) seed(g, s);
+	bool seeding = fighting && !g->seeded;
+	if (seeding) seed(g, s);
 	sounds(g);
+	held_count(g, t, seeding);
 	if (fighting && t != g->last) {
 		frame_out(g);
 		g->fought = traced = true;
@@ -549,21 +555,36 @@ static bool step(Side *g, const Spec *s) {
  * whose timer has gone on waiting while the other's still holds (a turn's
  * change, a unison's crossing: each game takes frames of its own there), so
  * each game's frames of a timer value run with the other's at it too, the
- * reference's first (the replay finds its draws made); with `follow`, BN6's
- * RNG words written from BN5's once both have traced a timer value
- * (rng=follow) */
+ * reference's first (the replay finds its draws made), and through a hold
+ * up to LEAD frames ahead: a frame the reference's game spends without its
+ * loop (BN5 loading a Darkloid's LZ77 sprite as his Navi chip comes,
+ * three frames, where BN6's copy is whole) leaves its draws still made
+ * before the subject's ask for them; with `follow`, BN6's RNG words written
+ * from BN5's once both have traced a timer value (rng=follow) */
+#define LEAD 8
+/* (whether the reference `a`, or the subject, steps next while both run) */
+static bool goes(const Side *a, const Side *b, bool reference) {
+	if (a->last != b->last) return reference ? a->last < b->last : b->last < a->last;
+	return reference ? a->still < b->still + LEAD : b->still + LEAD <= a->still;
+}
+
+/* (rng=follow: BN6's RNG words written from BN5's once both have traced a timer value) */
+static void follow(const Side *a, Side *b, const Spec *s, uint32_t *followed) {
+	if (!s->follow || a->last != b->last || a->last == *followed) return;
+	*followed = a->last;
+	b->v.wr32(b->v.rng[0], a->v.rd32(a->v.rng[0]));
+	b->v.wr32(b->v.rng[1], a->v.rd32(a->v.rng[1]));
+}
+
 static void fight(Side *a, Side *b, const Spec *s) {
 	while (a && !a->seeded && !a->done) step(a, s);
 	while (b && !b->seeded && !b->done) step(b, s);
 	uint32_t followed = 0;
 	while ((a && !a->done) || (b && !b->done)) {
-		bool both = a && b && !a->done && !b->done, go_a = a && (!both || a->last <= b->last), go_b = b && (!both || b->last <= a->last);
+		bool both = a && b && !a->done && !b->done;
+		bool go_a = a && (!both || goes(a, b, true)), go_b = b && (!both || goes(a, b, false));
 		bool ta = go_a && step(a, s), tb = go_b && step(b, s);
-		if (s->follow && both && (ta || tb) && a->last == b->last && a->last != followed) {
-			followed = a->last;
-			b->v.wr32(b->v.rng[0], a->v.rd32(a->v.rng[0]));
-			b->v.wr32(b->v.rng[1], a->v.rd32(a->v.rng[1]));
-		}
+		if (both && (ta || tb)) follow(a, b, s, &followed);
 	}
 }
 
