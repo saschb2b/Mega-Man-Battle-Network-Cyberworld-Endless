@@ -1,8 +1,8 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-08",
-  "previous": "2026-11-05",
+  "updated": "2026-11-09",
+  "previous": "2026-11-08",
   "features": [
     {
       "name": "Net Square",
@@ -414,6 +414,10 @@
     {
       "date": "2026-11-08",
       "what": "Roll's versions (docs/multirom/bn4-navis.md, Roll's versions; docs/rom/bn4.md, Roll's versions: BN4_SUMMON_MARK in bn4_navis.h, BN6_VIRUS_STATE_CALL and BN6_T1_SPAWN_KIND in bn6_families.h, BN6_AI_VERSION in bn6_ai.h): a summoned visitor (Billy) arrives by BN4's summoned appear; her pool's songs apart; the BN4 Navis' SP palettes; roll_v2, roll_v3, roll_sp and roll_v2_summons PASS."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "BN4's VolGear (type 0x08, ids 7-12) moved, the first late family (AI 72, ids 0x2F0-0x2F5): its art in a room of its own past BN5's Souls' (free_space.h FREE_LATE_FAMILIES, xvirus_recipe.h XV_LATE_ART), its numbers from the tops down (the third kind's 0xDF and 0xDE, list 4's 0xBF) so BN4's Navis' stay theirs; bn4_battle.h BN4_VOLGEAR_*, BN4_T3_VOLGEAR_*, BN4_*_HELD_*, BN4_HELD_CHIP_TEST (docs/rom/bn4.md, VolGear moved)."
     }
   ],
   "experiments": [
@@ -991,6 +995,14 @@
       "result": "python3 tools/xdiff.py melody4_v1 (rng replay, lag 1): PASS over 1200 fight frames, its two sounds (0xC2 from t20, 0xC3 from t226) paired with Roll's pool's 0x104 and 0x117. First FAIL at t1 on its +0x2E (BN4 0x1E, BN6 0xA: its init's own step before its set-up), settled by its init run again from that step at its spawn's end (bn4_twins.INIT_AGAIN). Four mutations caught (t1, t1, t1, t20).",
       "meaning": "Roll V3's third summon has a proved family to spawn (her summon map's 0x39 as 0x2EC); her V3 spec can prove it in her battle.",
       "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-09",
+      "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
+      "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
+      "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
+      "link": "../multirom/families.md"
     }
   ],
   "method": {
