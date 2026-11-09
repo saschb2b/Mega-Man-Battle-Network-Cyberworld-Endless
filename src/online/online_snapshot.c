@@ -38,8 +38,8 @@ bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsign
 	memset(out, 0, sizeof *out);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) out->folder[i] = read16(m, folder + 2 * i);
 	for (unsigned i = 0; i < ONLINE_PACK_IDS; ++i) {
-		uint32_t at = i < BN6_PACK_IDS ? pack + i * BN6_PACK_ENTRY : BN6_PACK_EXT + (i - BN6_PACK_IDS) * BN6_PACK_ENTRY;
-		read_bytes(m, out->pack[i], at, BN6_PACK_ENTRY);
+		uint32_t at = bn6_pack_entry(pack, i);
+		if (at) read_bytes(m, out->pack[i], at, BN6_PACK_ENTRY);
 	}
 	read_bytes(m, out->board, BN6_NAVICUST_PLACED, ONLINE_BOARD_BYTES);
 	read_bytes(m, out->grid, BN6_NAVICUST_GRID, ONLINE_BOARD_CELLS);

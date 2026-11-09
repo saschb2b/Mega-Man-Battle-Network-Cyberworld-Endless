@@ -1,12 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, unit 1 (ten-bit chip ids) live, ids past 511 in part: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0) and BN5's first batch built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
-tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -70,21 +67,33 @@ of 600 and 1023. The New 3DS's heap modelled (`tools/heap3ds.py`, seeds
 with BN5 95.8 MB, a few of the tiles' learning caches refused as on 4
 November (docs/engine/emulation/3ds-memory.md), the image 64 KB larger.
 
-Not yet past 511: the pack (its extension in EWRAM ends at 511, and no
-RAM BN6 leaves alone is known for 6 KB more: a chip from 512 is not given
-to the pack, `GiveChips` would write past it), the Library's flags
-(`0x1E20` + id ends at 511), the 21 other name readers (an id from 512
-named as id - 256 there), the folder editor's items as id << 6 | code
-(about 30 shifts by 7 and 0x7F masks), the wide rewards at 511 and their
-table, and BN5's chips' and Souls' moved code read for entries it splits
-itself (the differential passes at ten bits).
+**An id past 511 is whole, to 602** (built 9 November 2026; [The chip
+registry and BN5's chips' code](../rom/chips-code.md), The pack past 511).
+The pack: a survey of the work RAM ([The RAM survey](../devtools/ram-survey.md),
+54 runs) found no 6 KB BN6 leaves alone, nor 1 KB outside the persistent
+zone, which is full; but the extension's entries of ids 320-410 are
+Program Advances' and BN6's pseudo-chips', which no pack counts, so ids
+512-602 take them (`bn6_pack_entry`; a canary over them changed by the
+power-on clear alone). 91 ids: BN5's remaining chips and BN4's first
+units. The folder editor's items are id << 6 | code (35 halfwords), every
+reader of a name or a description takes one of four archives (six tables'
+literals, two readers rewritten, the chat box's buffer command hooked), a
+chip from 512 given enters the profile's Library by an event, where BN6
+would set another block's flag, and a reward names one in a wide form
+(kind 2 or 3 with bit 13, `reward_chip`) that a hook at BN6's split reads:
+no table, no reserved id (511 stays out of the registry's reach all the
+same). Proved with chip 600 (`--dev alias=600`, `reward=600`): given,
+listed and swapped in the folder editor, counted again as it is left,
+named on the results screen and in a Mystery Data's chat (another
+archive's text with the chat's hook out), the autopilot's seeds 1-12 the
+base build's run logs and pictures.
 
-A BN4 virus's reward chip that BN6 has by name and kind pays as BN6's
-own; one BN6 lacks pays 200 zenny (`xchips_reward_bn4`, the owner's call
-9 of [Battle Network 4 in a run](bn4.md)). A tournament round against a
-BN4 Navi pays a BN6 Navi chip of the round's band as a stand-in
-([the tournament](../game/tournament.md), call 7). No BN4 chip has an id
-in BN6's tables.
+Not yet: a pack entry for the ids from 603 (BN4's later units: RAM to be
+found, or its single-code chips, Navi chips and Gigas, packed closer), a
+NetBattle's loadout past 511 (unit 8), and BN5's chips' and Souls' moved
+code read for entries it splits itself (the differential passes at ten
+bits).
+
 A BN4 virus's reward chip pays the run's chip it is (`xchips_bn4_paid`,
 unit 0, built 9 November 2026), by three rules in turn, each one chip per
 name as the registry's:
@@ -300,10 +309,12 @@ keeps its items as id << 7 | code in a halfword, ten bits id << 6 | code
   the tables the registry's audit already listed), the grown recipe list
   written in the new form.
 - **Rewards:** a reward entry cannot hold ten bits beside its code and
-  kind (17 bits). An id from 512 is written as one reserved id of the
-  ten free (511), its code field the entry's index into the battle's
-  table of wide rewards, which a hook at the reward's give reads (as the
-  rows are ours to write today, `drops_set`).
+  kind (17 bits). An id from 512 is written in a wide form: kind 2 or 3
+  (HP, BugFrags) with bit 13, which no row's amount reaches, the kind its
+  id's block of 256, the id's low byte and the code below; a hook at BN6's
+  split of a reward reads it (built; the first plan, a reserved id 511
+  and a table by battle, would have made a saved state's reward depend on
+  the table's order).
 - **The engine's tables:** the ownership marks and their keys, the
   Library's flags (moved past `0x2020`'s block to flags BN6 leaves
   alone), the per-side use counts and the Program Advance bits sized for
@@ -562,7 +573,6 @@ Asked and answered on 9 November 2026:
    as they are proved, and BN4 Red Sun's ROM becomes part of the
    common ground the Arena and Trade Central ask of a pair. A player
    without BN4's ROM loses them, so the change is announced ahead as the
-   NetPass asks (unit 8; [the NetPass](../online/netpass.md)).
    NetPass asks (unit 8; [The NetPass](../online/netpass.md)).
 2. **Ten-bit chip ids first, for both games**, as recommended: the
    pairings (unit 0) ship before them, and BN5's ShadeMan and BlizzardMan

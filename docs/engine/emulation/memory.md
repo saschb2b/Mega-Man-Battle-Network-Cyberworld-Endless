@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Memory the engine writes"
 description: "The free space plan for the core's ROM copy past BN6's 8 MB, region by region from `EMU_FREE` (`src/emu/free_space.h`, `claims.c`), BN6's tables patched in place, and the EWRAM BN6 leaves alone (`RAM_*`)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T19:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
 ---
 
 # Memory the engine writes
@@ -263,7 +263,7 @@ every track follows (its numbers `RAM_*` in the same plan, `src/emu/free_space.h
 
 | Range | Region | Contents | Code |
 | --- | --- | --- | --- |
-| `0x02010CE0`-`0x020115DF` | `RAM_PACK_EXT` | Persistent: the chip pack's extension, ids 320-511, 12 bytes an id (`BN6_PACK_EXT`; [The chip registry](../../multirom/chip-registry.md)) | `xchips_install.c` |
+| `0x02010CE0`-`0x020115DF` | `RAM_PACK_EXT` | Persistent: the chip pack's extension, 192 entries of 12 bytes: ids 411-511 in place and ids 512-602 in the entries of 320-410, which no pack counts (`BN6_PACK_EXT`, `bn6_pack_entry`; [The chip registry](../../multirom/chip-registry.md); [The chip registry and BN5's chips' code](../../rom/chips-code.md), The pack past 511) | `xchips_install.c` |
 | `0x020115E0`-`0x0201172F` | `RAM_PLAYER_AI` | Persistent: MegaMan's AI data, BN5's 0x140 bytes, where BN5's ROM is read (`RAM_PLAYER_AI`: his object's +0x58 pointed here as he is set up, `0x080172F6`, his pool's 0x100 bytes copied first, the rest zero; BN5's chip AI keeps its state from +0xF0 to +0x13F, past BN6's 0x100), then at `0x02011720` his place in BN6's pool; DarkInvs's machine, [The chips' code](../../multirom/chips-code.md) | `darkinvs.c` |
 | `0x02011730`-`0x0201174F` | `RAM_TEAM` | Persistent: `--dev arena2v2`'s list of what a NetBattle spawns, two MegaMen a side (`RAM_TEAM`; epic #167's spike, [Online: the Square, the Arena and the link battle](../../rom/online.md), Two MegaMen a side) | `arena_team.c` |
 | `0x02011750`-`0x0201178F` | `RAM_TEAM_LINK` | Persistent: two MegaMen a side's partners' words (`RAM_TEAM_LINK`, `0x20` bytes a side, each core's own): a side's GBA's outbox of its partner's messages (12 u16 at +0, its head +0x18 and count +0x19: `team_outbox.h`), his keys for its next packet (+0x1A), and his keys and word as his side's last packet brought them (+0x1C, +0x1E), which `BN6_KEY_COPY` gives him; written by the pair before the GBA's frame and where the battle reads the packets and stores its pad (`BN6_LINK_PAD_STORE`; in sub_801FFD6 `BN6_LINK_READ_B` and `BN6_LINK_PAD_STORE_B`), emptied by the battle's spawn ([The partners' words in BN6's packet](../../online/arena/two-a-side/partners-words.md)) | `arena_team_link.c` |

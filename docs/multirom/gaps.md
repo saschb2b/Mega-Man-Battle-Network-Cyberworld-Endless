@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -126,7 +126,10 @@ Two things bound this work:
   and BlizzardMan's six fit; the other fifteen Navi chips and five
   Program Advances do not, nor BN4's chips (Phase 4, being designed now).
   Whatever answers BN4's past 512 answers these too: the two pieces of
-  work share one decision.
+  work share one decision. Answered since: ten-bit ids, and an id from
+  512 whole in the pack, the folder editor, names, the Library and
+  rewards, to 602 ([BN4's chips in a run](bn4-chips.md), Where things
+  stand); BN5's remaining chips take ids from 512.
 - **Formed or not.** InfVulc2-3 and Boxer1-3 never form under BN6's codes
   and recipes, by decision ([The chips' code](chips-code.md)); not a gap.
 

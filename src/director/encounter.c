@@ -230,8 +230,8 @@ static void lean_row(int id) {
 	if (!row) return;
 	for (uint32_t k = 0; k < 20; ++k) {
 		uint16_t v = enemy_drop(id, (int)k);
-		if (v == 0xFFFF || v >> 14) continue;
-		int chip = (int)chip9_id(v), code = (int)(chip9_code(v) & 0x1F);
+		if (!reward_is_chip(v)) continue;
+		int chip = (int)reward_chip_id(v), code = (int)reward_chip_code(v);
 		bool navi = chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip);   /* (BN5's Navi chips by the registry: their families BN5's) */
 		if (boss_on && navi) {
 			hook_write16(row + 2 * k, boss_zenny());
@@ -251,7 +251,7 @@ static void lean_row(int id) {
 			chip_info(chip, &ci);
 			if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 		}
-		hook_write16(row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
+		hook_write16(row + 2 * k, reward_chip((unsigned)chip, (unsigned)(c == '*' ? 26 : c - 'A')));
 	}
 }
 

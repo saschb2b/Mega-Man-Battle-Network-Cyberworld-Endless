@@ -161,8 +161,8 @@
     {
       "name": "BN4's chips in BN6's tables",
       "state": "building",
-      "now": "Unit 0 built: a BN4 chip pays the run's chip it is by name (BN6's own whatever the class; BN4's dash, plus and dot read as BN6's), else the registry's own id of BN5's chip of its name, else by Navi and version (BN4's SP and DS by their records' first parameter, 3 and 4, as BN5's): 117 of BN4's chips with BN5's ROM, 79 without, 65 before. Designed and scoped (docs/multirom/bn4-chips.md): BN4's 388 chip records against BN6's and the registry's, 191 new to a run (100 standard, 12 Mega, 4 Giga, 51 Navi chips, 5 DarkChips, 19 Program Advances), 6 of them on BN6's code (Hole, DrkLine, TimeBomb, LifeAura, BlakBarr, Ball), the rest in 48 units and 18 Navi chips' units sized by a scratch walk against the pairs' index of BN6's routine bodies (an engine base of 340 routines, 13.6 KB, reached by four or more units). Its Program Advance list located (BN4_PA_LIST 0x080212B0, 37 recipes, its kind 1 BN6's kind 4). Chip ids past 511 answered once for BN4's and BN5's chips: ten bits (BN6's code: 47 nine-bit shift pairs, 18 literals 0x1FF, 119 shifts by 9, counted, not read).",
-      "left": "Ten-bit ids, the registry rows, the chips' differential against BN4 and the generator's BN4 path, the units. Not read: the nine-bit sites, BN4's PA checker (BN4_PA_LIST_REF's reader assumed), BN4's computed powers' table. The owner's calls: online (stay home or the full set), ten bits first, all or a cut.",
+      "now": "Unit 0 (pairings) and unit 1 (ten-bit chip ids) built, and an id from 512 whole to 602: the pack counts ids 512-602 in its extension's entries of ids 320-410, which no pack counted (bn6_pack_entry; a survey of the work RAM over 54 runs found no other room, a canary over the entries met the power-on clear alone), the folder editor's items hold ten bits (id << 6 | code, 35 halfwords), every reader of a name or a description takes one of four archives (six tables' literals, two readers rewritten, the chat box's buffer command hooked), a chip from 512 given enters the Library by an event, and a reward names one in a wide form (kind 2 or 3 with bit 13) that a hook at BN6's split reads. Designed and scoped (docs/multirom/bn4-chips.md): BN4's 388 chip records against BN6's and the registry's, 191 new to a run, 6 on BN6's code, the rest in 48 units and 18 Navi chips' units.",
+      "left": "The registry rows (unit 2), the chips' differential against BN4 and the generator's BN4 path (unit 3), the units (4-6), into runs (7), online (8: BN4 joins the NetPass's full set, the owner's call). A pack entry for the ids from 603; a NetBattle's loadout past 511. Not read: BN4's PA checker (BN4_PA_LIST_REF's reader assumed), BN4's computed powers' table.",
       "updated": "2026-11-09",
       "link": "../multirom/bn4-chips.md",
       "state_text": "Being built"
@@ -220,6 +220,10 @@
     },
     {
       "date": "2026-11-09",
+      "what": "An id from 512 whole to 602 (docs/rom/chips-code.md, The pack past 511: BN6_PACK_EXT_FIRST, BN6_PACK_WIDE_FIRST, BN6_PACK_WIDE_END, BN6_CHIP_NAMES_REF_RESULTS and its five fellows, BN6_CHIP_NAMES_NONE, BN6_CHIP_DESC_READ, BN6_CHAT_NAME_ARCHIVE, BN6_GIVE_CHIPS_LIBRARY, BN6_GIVE_FOLDER_LIBRARY, BN6_REWARD_SPLIT_HP in bn6_chips.h); tools/ram_survey.py (docs/devtools/ram-survey.md)."
+    },
+    {
+      "date": "2026-11-09",
       "what": "NapalmMan moved, Team ProtoMan's first (docs/multirom/navis.md, NapalmMan; docs/rom/navis.md, Team ProtoMan's NapalmMan: src/emu/bn5_team_protoman.h's BN5_NAPALM_COMPANION, _COMPANION_END, _HALF_HP_CHIP, _FLAME_SPAWN, _PANEL_FLAMES): napalmman_v1, napalmman_v1_keys and napalmman_sp PASS, five mutations caught; the third kind's 0x00 the Navis' one copy (TYPES), its kinds' rows fixed by the Navis' generator; the comparator reads Team ProtoMan's code room and keys no Navi's code to an object no family spawned."
     }
   ],
@@ -270,6 +274,14 @@
       "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
       "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
       "link": "../multirom/bn4-chips.md"
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-09",
+      "name": "Chip 600 past the pack, the editor, names and rewards",
+      "result": "--dev alias=600 (chip 600 a copy of Cannon): the chip step gives it (its counts 2, the entry of id 408), the folder editor's pack lists it with its name and description, a swap into the folder and the editor left count it again (4 at the next step); --dev reward=600: the results screen reads Cannon A with its picture, the run log's reward a058; a green Mystery Data made to hold it (a scratch change) says MegaMan got: \"Cannon A\", and another archive's text with the chat's hook left out. The autopilot's seeds 1-12: the base build's run logs (66 battles) and pictures at frames 5000, 10000 and 14990. python3 tools/ram_survey.py: 54 runs, no stretch of 1 KB that stayed zero without a symbol of bn6f's but the persistent zone; --canary 0x02010CE0:0x444: 1092 bytes changed once a run, the power-on clear's (frames 14-15).",
+      "meaning": "An id from 512 can be found, held, edited into a folder, named and rewarded: BN5's remaining chips and BN4's first units have ids. 91 pack entries; the ids from 603 wait for RAM.",
+      "link": "../rom/chips-code.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",

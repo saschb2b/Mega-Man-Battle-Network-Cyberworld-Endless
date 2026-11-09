@@ -122,7 +122,7 @@
 #define FREE_LIB_TEAM_END    (EMU_FREE + 0x7FA000u)
 
 /* ---- persistent: 0x02010CE0-0x02011800, persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) ---- */
-#define RAM_PACK_EXT         0x02010CE0u             /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT) (xchips_install.c) */
+#define RAM_PACK_EXT         0x02010CE0u             /* the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry) (xchips_install.c) */
 #define RAM_PACK_EXT_END     0x020115E0u
 #define RAM_PLAYER_AI        0x020115E0u             /* MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place (darkinvs.c) */
 #define RAM_PLAYER_AI_END    0x02011730u
