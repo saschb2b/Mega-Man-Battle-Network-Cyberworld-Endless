@@ -929,8 +929,8 @@
 0802C114 entry_bn5_chip_ai_enter
 0802C2D0 BN6_NEW_VIRUS_DATA
 0802C54C BN6_REWARD_SPLIT
-0802C556 ten_bit_chip.kept_reward
-0802C558 ten_bit_chip.kept_reward_2
+0802C556 ten_bit_chip.reward
+0802C558 ten_bit_chip.reward_2
 0802C7C4 chip_registry.names_words_2
 0802C7C8 chip_registry_10
 0802CCB4 BN6_CHIP_ROUTINES
@@ -1300,8 +1300,9 @@
 0812204C chip_registry.names_words_8
 08122050 chip_registry_25
 081224A0 BN6_EDITOR_LIST_OUT
-081224C2 folder_editor
+081224C2 kept_editor_items_shifts
 081224D4 BN6_EDITOR_LIST_IN
+08122502 folder_editor
 0812260C chip_registry_26
 081226CE chip_registry_27
 081265FC BN6_KEY_NAMES_PTRS.2

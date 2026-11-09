@@ -143,7 +143,8 @@ BN6's code that takes an id in nine bits (`tools/chip_ids.py`, [The chip
 registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip ids),
 every C reader and writer of a folder entry through
 `src/core/chip_entry.h`, the profile's Library to 1023 and the wire's
-chips to 1023 (protocol v16); BN6's code patched, the records, names and
+chips to 1023 (protocol v16), and BN6's code's patch written
+(`src/emu/xchips_wide.c`), inert until the flip; the records, names and
 pack past 511 and the registry's rows there are to come.
 
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,

@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, unit 1 (ten-bit chip ids) under way: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, unit 1 (ten-bit chip ids) under way, its installer inert until the flip: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
 sources:
@@ -32,18 +32,31 @@ and [the chips' code](chips-code.md).
 **Unit 1, ten-bit chip ids, under way** (below, The build plan): the
 census of BN6's code is read and kept by `tools/chip_ids.py` ([The chip
 registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip
-ids): of 625 shapes 128 are code, 85 of them to patch (113 halfwords,
-`--table`), 2 a reward's, 6 the link battle's, 37 no chip, 8 the folder
-editor's item keys and 1 the link battle's real-time chip open. Built:
-every reader and writer of a folder entry in the engine's C through
-`src/core/chip_entry.h` (nine bits still, one number to change), its
-converter from nine bits unit-tested, the profile's Library to 1023, the
-wire's chips to 1023 (protocol v16). Not yet: the installer of the
-table, the folder editor's keys (its shifts by 7, about 30 sites), the
-names' and descriptions' archives 2 and 3, the records and the pack's
-extension past 511, the marks', keys' and Library flags' tables, the
-wide rewards at 511, the flip with `RUN_MAGIC` and the converter wired,
-and the proofs.
+ids): of 625 shapes 128 are code, 77 of them to patch (116 halfwords,
+`--table`), 2 a reward's, 6 the link battle's, 37 no chip, the folder
+editor's 5 item-key shifts kept (its items, id << 7 | code, hold ids to
+511 whatever an entry's form) and 1 the link battle's real-time chip
+open. Built: every reader and writer of a folder entry in the engine's
+C through `src/core/chip_entry.h` (nine bits still, one number to
+change), its converter from nine bits unit-tested, the installer of the
+census's table and the preset folders (`src/emu/xchips_wide.c`, inert at
+nine bits), the profile's Library to 1023, the wire's chips to 1023
+(protocol v16). Tried at ten bits, not shipped: the autopilot's seeds 1-3
+the same run log and pictures as at nine, the folder editor the same
+picture for picture, every differential spec its nine-bit verdict.
+
+Before the flip: the engine's tables sized by `CHIPS_IDS` and
+`XREG_IDS` (512: the records, the sit-out bits, the chip pool, the
+folder's copies) grown, an entry's id of 1023 being 0xFFFF's;
+`RUN_MAGIC` bumped with the converter wired after a state loads (the
+three folders at eToolkit `+0x48` and `run.folder`, read in nine bits
+from a run saved before); BN5's chips' and Souls' moved code read for
+entries it splits itself (the differential passes, but no spec holds a
+code past A in every moved unit). Then ids from 512: the folder
+editor's items as id << 6 | code (about 30 shifts by 7 and 0x7F masks),
+the names' and descriptions' archives 2 and 3, the records and the
+pack's extension past 511, the marks', keys' and Library flags' tables,
+the wide rewards at 511, and the proofs of a chip at 600.
 
 A BN4 virus's reward chip that BN6 has by name and kind pays as BN6's
 own; one BN6 lacks pays 200 zenny (`xchips_reward_bn4`, the owner's call
