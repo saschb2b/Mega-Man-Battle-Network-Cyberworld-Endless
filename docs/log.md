@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-10
+* **Update**: rom/navicust.md (BN6's program numbers, new row) and multirom/gaps.md (SoulT+1): BN6's program 47 is the NaviCust's RUN item, seen in play; SoulT+1 takes a number of its own.
+
 ## 2026-11-09
 * **Update**: rom/navicust.md (BN5's NaviCust programs, two new rows), rom/chips.md (The Gigas' version marks, new row), research/sources.md (BN5's version Gigas and its seven NaviCust programs), multirom/gaps.md (the Gigas' cut list; the programs traced, SoulT+1 to build, six cut): traced in BN5's ROM. code/emu.md (`bn5_navicust.h`).
 * **Creation**: world/step-out.md, a proposal for the real world in a run (discussion #323), designed with the game-design skill, nothing built: MegaMan leaves a layer through a CopyBot link into its area's own town and goes back in through one of its devices; BN6's CopyBot walker (event flag `0x1729`, `owPlayer_toggleUsingCopybot_809e4bc`) and the 43 jack-in destinations read in bn6f. world/bn5-town.md: held back, with a link to it.

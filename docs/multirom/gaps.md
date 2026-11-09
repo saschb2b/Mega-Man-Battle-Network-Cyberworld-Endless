@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:46:45Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T23:08:32Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -145,7 +145,7 @@ stands:
 
 | Program | What it does in BN5 (verified in its code) | In a run |
 | --- | --- | --- |
-| SoulT+1 (38, a plus part of four cells) | NaviStats +0x32 one more, 6 at most; a Soul's turns are 3 + it | **To build** (**M**): the one effect BN6's code lacks that a run can use. The engine counts a Soul's turns itself (`src/emu/soulunite.c`, `TURNS_SOUL`); BN6's table of 48 programs has number 47 with no shape, to be read as the slot. A plus part that costs board space for a longer Soul is the NaviCust's own tension ([The NaviCust](../game/navicust.md), fit it, or force it); in the workshop's stock only while the run holds a Soul, as the pool leaves out the inert |
+| SoulT+1 (38, a plus part of four cells) | NaviStats +0x32 one more, 6 at most; a Soul's turns are 3 + it | **To build** (**M** to **L**): the one effect BN6's code lacks that a run can use. BN6 keeps the byte and reads it as BN5 does (`BN6_NAVI_TURN_EXTRA`: a Beast Out's turns too), and the engine's Souls with it (`src/emu/soulunite.c`). It takes a program number of its own, 48: BN6's 48 numbers are all taken, 47 being the NaviCust's list's own RUN item (seen in play: a name written for 47 names RUN), so BN6's records, effects' table, names and descriptions grow by one ([The NaviCust](../rom/navicust.md), BN6's program numbers). A plus part that costs board space for a longer Soul is the NaviCust's own tension ([The NaviCust](../game/navicust.md), fit it, or force it); in the workshop's stock only while the run holds a Soul, as the pool leaves out the inert |
 | MegaVirs (33), GigaVirs (34) | Every enemy of a battle one version higher, or two (a virus two ids a tier to its family's last, a Navi one to its third), as BN5's own later levels do | **Cut, the owner's to reverse**: a harder battle for a better chip is the run's own tension already, chosen battle by battle at a Server challenge and run by run on the threat's rungs ([The meta layer](../game/meta/design.md)); a program that raises every battle while it sits on the board is a third lever on the same curve, and the pacing's and the economy's bands are measured without it |
 | HubBatc (27, thirteen cells) | The routines of SprArmr, Custom1, MegFldr1, FstBarr, Shield, FlotShoe, AirShoes and UnderSht in turn, and a flag of its own | **Cut**: eight of the pool's programs, of three of its four builds, in thirteen cells: the board stops being a budget, and it would be the pick whenever it is offered. BN6 dropped the program and kept the name as a Giga chip, which a run hands out |
 | SoulClen (29) | The dark meter's change at a battle's end 1 or 3 up in place of its plain rule | **Cut**: no run has BN5's dark meter (a DarkChip's price in a run is max HP, the owner's call) |
@@ -276,8 +276,8 @@ proposed").
 7. **BN5's NaviCust program SoulT+1** (**M** to build; all seven
    traced, the other six cut, NaviCust programs above). A pick for the
    draft and the BugFrag workshop that makes the run's Souls a build
-   choice. Depends on BN6's program 47 read as a free slot; its tier and
-   price through the game-design skill.
+   choice. Depends on BN6's program tables grown by a number (47 is its
+   RUN item); its tier and price through the game-design skill.
 8. **The teammates' own chips on a dark board** (**M**), with Colonel's
    Save traced (**S**). A teammate's battle as BN5's, his Soul and his
    chip. Depends on tracing the pseudo-chips and on ids.

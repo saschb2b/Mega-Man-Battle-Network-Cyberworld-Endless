@@ -180,8 +180,8 @@
       "name": "BN5's NaviCust programs",
       "state": "designed",
       "now": "The seven programs BN5 has alone are located and read in its ROM: the records (5 x 5 shapes), the names, the effects' table, each program's routine and what reads the NaviStats byte it sets. SoulT+1 adds to a Soul's turns; MegaVirs and GigaVirs raise a battle's enemies a version or two; SoulClen changes the dark meter's rise; Chivalry the L button's talk; AutoRun the run on the net; HubBatc calls eight programs' routines.",
-      "left": "SoulT+1 to build as BN6's program 47 (its effects' table grown by an entry, the name beside the RUN label's, the engine's count of a Soul's turns); the other six cut (docs/multirom/gaps.md). None was run in romlab: read as code.",
-      "updated": "2026-11-09",
+      "left": "SoulT+1 to build as a program number of its own in BN6's tables, 48 (47 is the NaviCust's RUN item, seen in play): the records, the effects' table (47 routines), the names' archive (entries past 46 are other labels) and the descriptions' (compressed, 48 entries) each grown by one; BN6 keeps the byte it sets and the engine's Souls read it. The other six cut (docs/multirom/gaps.md). BN5's side was read as code, none run in romlab.",
+      "updated": "2026-11-10",
       "link": "../rom/navicust.md",
       "state_text": "Designed, not built"
     }
