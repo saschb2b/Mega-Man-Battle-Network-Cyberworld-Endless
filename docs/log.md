@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-10
+* **Update**: code/platforms.md (`vita/pad.c`: the Vita's ELF linked again with a pad where `vita-elf-create` finds no room after the code).
+
 ## 2026-11-09
 * **Update**: multirom/chips-code.md (Moved): WildBird's unit shares LarkMan's object types (`UNIT_SHARES`), one copy of their code.
 * **Update**: rom/chips-code.md (BN5's last Program Advances, new row), multirom/chips-code.md, multirom/chip-registry.md (283 chips; 365-367, 603, 604), multirom/gaps.md (the Program Advances built), engine/emulation/memory.md (`RAM_PA_WIDE`): BigNoise, CsmoPris, WildBird, Football and PileDrvr moved as units, five `pa_*` specs PASS; a Program Advance past nine bits its per-battle bit the engine's (`BN6_PA_BATTLE_BIT`, `BN6_PA_FORMED_FLAG`); PileDrvr formed only with every chip in *.
