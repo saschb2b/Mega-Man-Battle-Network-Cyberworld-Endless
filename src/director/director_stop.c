@@ -6,7 +6,8 @@
  * there; its jack-in point starts the act's first layer, built at the exit
  * as the pad's. Once a run at most (run.stop), in half the runs
  * (run_stop.c). */
-#include "director_stop.h"
+
+#include "director_home.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -16,7 +17,6 @@
 #include "bn6.h"
 #include "debug.h"
 #include "devtools.h"
-#include "director_home.h"
 #include "director_state.h"
 #include "emu.h"
 #include "flags.h"
@@ -31,7 +31,6 @@
 #include "runlog.h"
 #include "talk.h"
 #include "town.h"
-#include "town_lines.h"
 
 #define PAD_ENTRY 2   /* the pink pad's warp entry (lanhp.c's portal 0) */
 #define STOP_OPEN 0   /* offered to players (by the coin), not the dev switch alone */
@@ -65,7 +64,7 @@ bool stop_ask(void) {
 	return talk_ask(oran_portal_words(), FACE_MEGAMAN, oran_portal_question(), HOME_LINK_FLAG);
 }
 
-bool stop_here(void) { return (run.stop & STOP_HERE) != 0; }
+static bool stop_here(void) { return (run.stop & STOP_HERE) != 0; }
 
 /* the island in Seaside Town's map, its jack-in to the act's first layer */
 static bool install(void) {
@@ -132,6 +131,8 @@ void stop_frame(void) {
 	if (!stop_here()) return;
 	const TownInfo *ti = town_info();
 	bool there = emu_read8(BN6_MAP_GROUP) == ti->group && emu_read8(BN6_MAP_NUMBER) == ti->number;
+	/* (set down on the pier's walk: the map-enter code takes the saved place's x and y, not its height) */
+	if (there && S.frames < 20 && !emu_read8(BN6_WARP_PENDING)) emu_write32(BN6_PLAYER_Z, (uint32_t)BN5_ORAN_DOCK_Z << 16);
 	if (there) ++S.frames;
 	if (there && !S.said && S.frames > 40 && !emu_read8(BN6_WARP_PENDING) && talk_start(oran_arrival_words(), FACE_MEGAMAN)) S.said = true;
 	if (there && S.said && !S.saved && !talk_busy() && !emu_read8(BN6_CHATBOX)) {

@@ -22,8 +22,6 @@ typedef struct {
  * begins on and the run's seed (the stall and the job the same at a
  * CONTINUE); set before town.c installs the island. */
 void oran_prepare(int biome, int navi, int depth, uint32_t seed);
-/* ... its stall, as oran_prepare rolled it */
-const OranStall *oran_stall(void);
 /* Folk `i`'s talk (TownLines' script): the guardian's word, the stall,
  * the job; -1 none. */
 int oran_script(void *text, int i, int face);

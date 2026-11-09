@@ -19,7 +19,6 @@
 #include "director.h"
 #include "director_layer.h"
 #include "director_state.h"
-#include "director_stop.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"

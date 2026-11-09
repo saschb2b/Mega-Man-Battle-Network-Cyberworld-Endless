@@ -16,7 +16,6 @@
 #include "director_layer.h"
 #include "director_save.h"
 #include "director_state.h"
-#include "director_stop.h"
 #include "director_way.h"
 #include "emu.h"
 #include "flags.h"

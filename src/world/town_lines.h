@@ -28,7 +28,6 @@ typedef struct {
 	const char *arrival;
 } TownLines;
 #define TOWN_LINES 5
-#define TOWN_ORAN 4   /* Oran Isle's style, BN5's (docs/world/bn5-town.md) */
 extern const TownLines town_lines[TOWN_LINES];
 
 /* What Lan and MegaMan say as a run begins, in Lan's room: on the first

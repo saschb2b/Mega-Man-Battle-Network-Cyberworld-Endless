@@ -58,7 +58,6 @@ void oran_prepare(int biome, int navi, int depth, uint32_t seed) {
 	roll_stall(seed ^ (uint32_t)depth * 0x9E3779B9u);
 }
 
-const OranStall *oran_stall(void) { return &O.stall; }
 
 /* the word: who guards the act, and his manner, as the net tells it */
 static int word(TextArchive *t, int face) {
