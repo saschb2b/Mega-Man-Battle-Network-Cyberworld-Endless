@@ -288,19 +288,27 @@ static void copy_all(void) {
 	memcpy(anims, R.data + R.layout->battle_bg_anims, 4 * BN6_BGS);
 	memcpy(scroll, R.data + R.layout->battle_bg_scroll, 16 * BN6_BGS);
 	const uint8_t *own = R.data + (get32(bgs) - BUS);   /* (BN6's first record: the map offset and palette RAM its records name) */
-	for (int k = 0; k < XAREAS_MAX && X.n < XBGS_MAX; ++k) {
+	int left = 0;   /* (areas whose background found no slot past XBGS_MAX: told, never silent) */
+	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *a = net_area_def(NET_AREAS + k);
 		int xi = a ? a->xrom - 1 : -1;
 		if (xi < 0 || xi >= XROM_COUNT || !a->xbg || !XR[xi].data || !XR[xi].layout->battle_bgs) continue;
 		bool have = false;
 		for (int i = 0; i < X.n; ++i) have |= X.bg[i].rom == xi && X.bg[i].bg == a->xbg;
 		if (have) continue;
+		if (X.n >= XBGS_MAX) {
+			++left;
+			continue;
+		}
 		from_rom(xi);
 		const XRomLayout *l = XR[xi].layout;
 		uint32_t rec = get32(xr + l->battle_bgs + 4u * a->xbg), list = get32(xr + l->battle_bg_anims + 4u * a->xbg);
 		uint8_t theirs[28];
 		uint32_t to = copy_record(rec, own), an = to && record_as_bn6(rec, theirs) ? copy_anims(list, get32(own + 20) - get32(theirs + 20)) : 0;
-		if (!an) continue;
+		if (!an) {
+			fprintf(stderr, "xbackdrop: background %d of %s not copied (FREE_BACKDROPS full, or not as BN6's): its battles take BN6's\n", a->xbg, l->name);
+			continue;
+		}
 		int id = BN6_BGS + X.n;
 		put32(bgs + 4 * id, to);
 		put32(anims + 4 * id, an);
@@ -308,12 +316,17 @@ static void copy_all(void) {
 		X.bg[X.n++] = (__typeof__(X.bg[0])){ xi, a->xbg, id };
 		if (emu_debug_on()) fprintf(stderr, "xbackdrop: background %d of %s as %#x, %u bytes so far\n", a->xbg, l->name, id, X.sp.next - XBG_AT);
 	}
+	if (left) fprintf(stderr, "xbackdrop: %d more areas' backgrounds past the %d slots (XBGS_MAX): their battles take BN6's\n", left, XBGS_MAX);
 	if (!X.n) return;
 	uint32_t n = BN6_BGS + (uint32_t)X.n;
 	X.tables[0] = put(bgs, 4 * n);
 	X.tables[1] = put(anims, 4 * n);
 	X.tables[2] = put(scroll, 16 * n);
-	if (!X.tables[0] || !X.tables[1] || !X.tables[2]) { X.n = 0; return; }
+	if (!X.tables[0] || !X.tables[1] || !X.tables[2]) {
+		fprintf(stderr, "xbackdrop: no room in FREE_BACKDROPS for the grown background tables: every battle takes BN6's\n");
+		X.n = 0;
+		return;
+	}
 	for (int t = 0; t < 3; ++t) emu_write32(BUS + R.layout->battle_bg_refs[t], X.tables[t]);
 }
 
