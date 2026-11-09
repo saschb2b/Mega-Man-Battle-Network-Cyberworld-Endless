@@ -18,7 +18,8 @@ addresses and verdicts.
   python3 tools/chip_ids.py           # the counts and the sites without a verdict
   python3 tools/chip_ids.py --all     # every site reached, with its verdict
   python3 tools/chip_ids.py --check   # exit 1 while a site reached has no verdict
-  python3 tools/chip_ids.py --table   # the changes for ten bits, as src/emu/xchips_wide.c's table (was and now)
+  python3 tools/chip_ids.py --table   # the changes for ten bits as src/emu/xchips_wide.c's table (was and now)
+  python3 tools/chip_ids.py --moved [--check]   # the same shapes in BN5's code the moved units copy (BN5's ROM too)
 """
 import argparse
 import hashlib
@@ -31,6 +32,15 @@ import xrecipe_thumb as T  # noqa: E402
 
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 GREGAR_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
+COLONEL_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# BN5's code the moved chips' and Souls' units copy into BN6's engine (src/emu/xchips_bn5.c, src/emu/soulcode_bn5.c: their
+# blocks), its shapes and their verdicts: none of them splits an entry, the units handed ids by BN6's hand (--moved).
+MOVED_SITES = {
+    0x080C5E6A: 'SideBub\'s table of words, read as code', 0x080C5E7A: 'the same', 0x080C5E8A: 'the same', 0x080C5E9A: 'the same',
+    0x080E2444: 'DarkInvs\'s time, the literal 600 (docs/rom/chips-code.md, its end)',
+}
 BUS = 0x08000000
 CODE_END = 0x08150000
 
@@ -151,21 +161,71 @@ for _a in (0x0801431C, 0x08014354, 0x0801437A, 0x08014394, 0x0801A63A, 0x0801A67
     SITES[_a] = SITES[_a + 2] = ('other', 'a battle flag, 0x200')
 
 
-def find_rom():
-    for name in sorted(os.listdir(ROM_DIR)):
-        path = os.path.join(ROM_DIR, name)
-        if name.lower().endswith('.gba') and os.path.isfile(path):
+# The folder editor's items (0x20 bytes each, their word at +0x1C: the low half id << 7 | code, the high half a count or
+# stamp), read where its shifts by 7 and 0x7F masks are (a scan of the reached code from 0x0811F000 and 0x0812C000): what
+# ids from 512 need, id << 6 | code (the codes to 28 fit six bits), not patched yet (the pack past 511 comes first, which a
+# chip moved there needs). 'build' an item made (lsls #7 to #6), 'id' its id taken (lsrs #7 to #6; lsls #16, lsrs #23
+# to #22), 'code' its code taken (0x7F to 0x3F; lsls #9, lsrs #25 to #10, #26), 'read' an id-like halfword at +0x1C of
+# a list not read yet, 'other' no item (the input's repeat timers, sound 0x7F, a byte).
+EDITOR_KEYS = {
+    0x08121AC4: 'build', 0x08121CB4: 'build', 0x08121B00: 'read', 0x08121CC2: 'read',
+    0x08121EE8: 'id', 0x08121F94: 'id', 0x08122192: 'id', 0x081221E6: 'id', 0x0812225A: 'id', 0x08122260: 'code',
+    0x081222B4: 'id', 0x08122408: 'id', 0x081224BC: 'id', 0x081224C4: 'code', 0x081224F2: 'id', 0x081224F6: 'code',
+    0x081225B6: 'id', 0x081225BA: 'code', 0x0812F396: 'id', 0x0812F398: 'code', 0x0812F646: 'id', 0x0812F648: 'code',
+    0x08135EFA: 'id', 0x08135EFC: 'code', 0x081367DA: 'id', 0x08136936: 'id', 0x0813693C: 'id', 0x08136B8E: 'id',
+    0x08136F24: 'id', 0x08136F7A: 'id', 0x08136FB2: 'id', 0x081372FC: 'id',
+    0x0812160E: 'other', 0x08121624: 'other', 0x08121658: 'other', 0x0812166E: 'other', 0x08121728: 'other',
+    0x08121762: 'other', 0x08120C1E: 'other', 0x08120C36: 'other', 0x081216CE: 'other', 0x081217C0: 'other',
+    0x08121866: 'other', 0x08137E7C: 'other', 0x08137FD6: 'other', 0x0813835E: 'other', 0x081376B8: 'other',
+    0x081394DE: 'other',
+}
+
+
+def find_rom(sha1=GREGAR_SHA1, name='BN6 Cybeast Gregar (USA)'):
+    for fname in sorted(os.listdir(ROM_DIR)):
+        path = os.path.join(ROM_DIR, fname)
+        if fname.lower().endswith('.gba') and os.path.isfile(path):
             with open(path, 'rb') as f:
                 data = f.read()
-            if hashlib.sha1(data).hexdigest() == GREGAR_SHA1:
-                return T.Rom(data, 'bn6-gregar')
-    sys.exit('BN6 Cybeast Gregar (USA) not found in %s' % ROM_DIR)
+            if hashlib.sha1(data).hexdigest() == sha1:
+                return T.Rom(data, name)
+    sys.exit('%s not found in %s' % (name, ROM_DIR))
 
 
-def shapes(rom):
-    """every shape in the code region: (address, shape)"""
+def moved_blocks():
+    """the BN5 ranges the moved chips' and Souls' units copy: (unit, from, to)"""
+    import re
     out = []
-    for a in range(BUS, CODE_END, 2):
+    for f in ('src/emu/xchips_bn5.c', 'src/emu/soulcode_bn5.c'):
+        with open(os.path.join(ROOT, f)) as fh:
+            text = fh.read()
+        for m in re.finditer(r'static const XvBlock (\w+)\[\] = \{(.*?)\};', text, re.S):
+            for b in re.finditer(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}),', m.group(2)):
+                out.append((m.group(1), int(b.group(1), 16), int(b.group(2), 16)))
+    return out
+
+
+def moved(check):
+    """the shapes in BN5's moved code, each with its verdict (MOVED_SITES)"""
+    rom5 = find_rom(COLONEL_SHA1, 'BN5 Team Colonel (USA)')
+    blocks = moved_blocks()
+    hits = {}
+    for unit, lo, hi in blocks:
+        for s, k in shapes(rom5, lo, hi):
+            hits[s] = (unit, k)
+    loose = [s for s in hits if s not in MOVED_SITES]
+    print('%d blocks of BN5\'s code (%d bytes) the moved units copy: %d shapes, %d without a verdict' % (
+        len(blocks), sum(hi - lo for _, lo, hi in blocks), len(hits), len(loose)))
+    for s in sorted(hits):
+        print('%08x %-24s %-6s %s' % (s, hits[s][0], hits[s][1], MOVED_SITES.get(s, '-')))
+    if check and loose:
+        sys.exit(1)
+
+
+def shapes(rom, lo=BUS, hi=CODE_END):
+    """every shape from `lo` to `hi` (the code region): (address, shape)"""
+    out = []
+    for a in range(lo, hi, 2):
         h = rom.u16(a)
         if h & 0xF800 == 0x0000 and (h >> 6) & 31:   # lsls rd, rm, #n
             n, rd = (h >> 6) & 31, h & 7
@@ -273,7 +333,10 @@ def main():
     ap.add_argument('--all', action='store_true', help='every site reached, with its verdict')
     ap.add_argument('--check', action='store_true', help='exit 1 while a site reached has no verdict')
     ap.add_argument('--table', action='store_true', help="the changes for ten bits as xchips_wide.c's table")
+    ap.add_argument('--moved', action='store_true', help="BN5's code the moved chips' and Souls' units copy, its shapes (BN5's ROM)")
     a = ap.parse_args()
+    if a.moved:
+        return moved(a.check)
     rom = find_rom()
     code = reached(rom)
     found = shapes(rom)
