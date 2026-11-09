@@ -11,6 +11,7 @@
  * per flag (placement, content) lives at 0x02004348 + 2 * (flag - 0x1400). */
 #include "mapslot.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "bn6.h"
@@ -73,7 +74,11 @@ void mapslot_indoors(int part) {
 
 uint32_t mapslot_alloc(const void *bytes, int len) {
 	uint32_t at = next;
-	if (at + (uint32_t)len > end) return 0;
+	if (at + (uint32_t)len > end) {
+		/* (some callers write the 0 into BN6's tables: told, never silent; docs/engine/emulation/free-space.md) */
+		fprintf(stderr, "mapslot: %d bytes past the room's end %08x, %u left (src/emu/free_space.plan)\n", len, (unsigned)end, (unsigned)(end - at));
+		return 0;
+	}
 	emu_write(at, bytes, (size_t)len);
 	next = (at + (uint32_t)len + 3) & ~3u;
 	return at;
