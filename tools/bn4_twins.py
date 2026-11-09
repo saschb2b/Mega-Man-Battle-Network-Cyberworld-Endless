@@ -254,6 +254,9 @@ COPIED = {
     0x080B54D0: "a held chip's numbers read for its attack (getChip, BN6's twin): self-contained",
     0x0800AD2A: "the can-move check (its flags, then its panel's type): no BN6 routine of its body; ported, its panel's type read "
                 "at BN6's +2 (BN4's +0)",
+    0x0800AD7E: "the can-move check's third form, the same steps as 0x0800AD2A's with its own mask (the pool word at 0x0800B130 "
+                "where 0x0800AD2A's reads 0x0800B128; 0x0800AD54 the second, 0x0800B12C): MagTect's shake's gate; copied with it, its "
+                "panel's type read at BN6's +2",
     0x080B552A: "a panel of its side but its own at random, its row's first (its table of panels' masks by side): no BN6 routine "
                 "of its body (BN6's families each keep their own); copied, its table with it",
     0x080B56A4: "a panel of its side but its own at random (its table of panels' masks by side): BN6's nearest (0x08015C48) "
@@ -299,6 +302,10 @@ ENTRIES = {
     0x080B8C08: "Melody's init from its own step on (INIT_AGAIN): its +0x2E by its version (0x080B8C38's byte, 30 each), its "
                 "collision data, its set-up with region 0x35, +8 4 and its update's call (a nullsub: its update runs as its "
                 "pre-step)",
+    0x080BEBF6: "MagTect's update past its pre-step, state and present (BN6's dispatcher runs each): its shake (0x080BF064): "
+                "unless the battle is paused (0x08007948) or the can-move check says not (0x0800AD7E, copied), every fourth frame "
+                "of its +0x20 its sprite's offsets +0x36 and +0x3E moved to a random pair of its table's signed bytes, kept at "
+                "+0x64 and +0x68",
     0x080BA11A: "Shrimpy's init past BN6's virus init's work (its sprite, its collision and its float, struct2's flag 4): "
                 "its first way, up or down, at random (+7), then +8 4, as BN6's init sets it after, and its update's call (a "
                 "nullsub: its tail is hook 3)",
@@ -318,6 +325,11 @@ NUMBERS = {
                 "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "
                 "pass the same (eight of its pools)",
+    0x04050301: "a collision region's spawn word (MagTect's: its ldr r4 at 0x080BEF94, then bl 0x080CD7E2, object_spawnCollisionRegion, "
+                "whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601; BN6's ROM holds the word too (0x080E4A44, "
+                "0x08101400)",
+    0x0405FF08: "a collision region's spawn word (MagTect's: its ldr r4 at 0x080BF052, then bl 0x080CD7E2, object_spawnCollisionRegion, "
+                "BN6's twin 0x080C6BDA), the form of 0x0405FF01",
     0x04050401: "a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, "
                 "whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word "
                 "too (0x080E4A4C)",
