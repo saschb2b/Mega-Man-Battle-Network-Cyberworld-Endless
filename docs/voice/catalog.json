@@ -1145,7 +1145,7 @@
    "line": 8
   },
   "oran_words:oran_arrival_words": {
-   "line": 40
+   "line": 42
   },
   "oran_words:oran_job_held": {
    "line": 35
@@ -1163,10 +1163,11 @@
    "line": 34
   },
   "oran_words:oran_portal_question": {
-   "line": 39
+   "line": 41
   },
   "oran_words:oran_portal_words": {
-   "line": 38
+   "comment": "(MegaMan reads the pad's data, never where it leads; Lan, who knows the real world, names the island: docs/voice/rules.md, what MegaMan knows)",
+   "line": 40
   },
   "oran_words:oran_stall_ask": {
    "line": 17
@@ -2756,7 +2757,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2324,
+  "boxes": 2325,
   "domains": {
    "Arena": {
     "files": [
@@ -2910,7 +2911,7 @@
      "src/online/emote_strip_text.c",
      "src/world/oran_words.c"
     ],
-    "flagged": 17,
+    "flagged": 15,
     "lines": 277,
     "speech": 262
    },
@@ -3034,20 +3035,20 @@
     "speech": 7
    }
   },
-  "flagged": 132,
+  "flagged": 130,
   "flags": {
    "beats": 4,
    "box-words": 4,
    "button": 5,
    "colon": 39,
    "comma-space": 4,
-   "line-long": 15,
+   "line-long": 14,
    "long-speech": 49,
    "meta": 2,
    "pages": 13,
    "prog-caps": 1,
    "rule-talk": 8,
-   "spelling": 6,
+   "spelling": 4,
    "summary": 1
   },
   "groups": {
@@ -3092,26 +3093,26 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 79,
-    "dots_per_box": 0.19,
+    "boxes": 82,
+    "dots_per_box": 0.2,
     "end_ask": 0.16,
-    "end_bang": 0.71,
+    "end_bang": 0.7,
     "end_dots": 0.06,
     "openers": [
      "Then",
      "The",
      "Alright",
      "And",
-     "*gulp*",
-     "Battle"
+     "We",
+     "*gulp*"
     ],
-    "stutters": "1 box in 40",
+    "stutters": "1 box in 41",
     "words_per_box": 5.7
    },
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 838,
+    "boxes": 836,
     "dots_per_box": 0.23,
     "end_ask": 0.05,
     "end_bang": 0.56,
@@ -3124,7 +3125,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 140",
+    "stutters": "1 box in 139",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3390,26 +3391,26 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 79,
-    "dots_per_box": 0.19,
+    "boxes": 82,
+    "dots_per_box": 0.2,
     "end_ask": 0.16,
-    "end_bang": 0.71,
+    "end_bang": 0.7,
     "end_dots": 0.06,
     "openers": [
      "Then",
      "The",
      "Alright",
      "And",
-     "*gulp*",
-     "Battle"
+     "We",
+     "*gulp*"
     ],
-    "stutters": "1 box in 40",
+    "stutters": "1 box in 41",
     "words_per_box": 5.7
    },
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 838,
+    "boxes": 836,
     "dots_per_box": 0.23,
     "end_ask": 0.05,
     "end_bang": 0.56,
@@ -3422,7 +3423,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 140",
+    "stutters": "1 box in 139",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -4184,9 +4185,9 @@
   {"container":"oran_words:oran_job_taken","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_job_taken","line":34,"lines":["oran_words:oran_job_taken:0"],"speakers":["MegaMan"],"title":"Oran job taken","when":""},
   {"container":"oran_words:oran_job_held","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_job_held","line":35,"lines":["oran_words:oran_job_held:0"],"speakers":["MegaMan"],"title":"Oran job held","when":""},
   {"container":"oran_words:oran_job_no","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_job_no","line":36,"lines":["oran_words:oran_job_no:0"],"speakers":["MegaMan"],"title":"Oran job no","when":""},
-  {"container":"oran_words:oran_portal_words","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_portal_words","line":38,"lines":["oran_words:oran_portal_words:0"],"speakers":["MegaMan"],"title":"Oran portal words","when":""},
-  {"container":"oran_words:oran_portal_question","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_portal_question","line":39,"lines":["oran_words:oran_portal_question:0"],"speakers":["MegaMan"],"title":"Oran portal question","when":""},
-  {"container":"oran_words:oran_arrival_words","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_arrival_words","line":40,"lines":["oran_words:oran_arrival_words:0"],"speakers":["Lan","MegaMan"],"title":"Oran arrival words","when":""},
+  {"container":"oran_words:oran_portal_words","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_portal_words","line":40,"lines":["oran_words:oran_portal_words:0"],"speakers":["MegaMan","Lan"],"title":"Oran portal words","when":"(MegaMan reads the pad's data, never where it leads; Lan, who knows the real world, names the island: docs/voice/rules.md, what MegaMan knows)"},
+  {"container":"oran_words:oran_portal_question","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_portal_question","line":41,"lines":["oran_words:oran_portal_question:0"],"speakers":["MegaMan"],"title":"Oran portal question","when":""},
+  {"container":"oran_words:oran_arrival_words","domain":"Other","file":"src/world/oran_words.c","id":"oran_words:oran_arrival_words","line":42,"lines":["oran_words:oran_arrival_words:0"],"speakers":["Lan"],"title":"Oran arrival words","when":""},
   {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":11,"lines":["options_text:words:2","options_text:words:6","options_text:words:8","options_text:words:12","options_text:words:13","options_text:words:19","options_text:words:20","options_text:words:21","options_text:words:22","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:30","options_text:words:31","options_text:words:33","options_text:words:34","options_text:words:35","options_text:words:36","options_text:words:37","options_text:words:42","options_text:words:43","options_text:words:44","options_text:words:45","options_text:words:46","options_text:words:47","options_text:words:48","options_text:words:49","options_text:words:53","options_text:words:54","options_text:words:55","options_text:words:56","options_text:words:60","options_text:words:61","options_text:words:62","options_text:words:63","options_text:words:64","options_text:words:65","options_text:words:66","options_text:words:67","options_text:words:68","options_text:words:70","options_text:words:71","options_text:words:72","options_text:words:74","options_text:words:79","options_text:words:80","options_text:words:81","options_text:words:82","options_text:words:83","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
   {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":104,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
   {"container":"options_text:options_low_pass_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_low_pass_note","line":113,"lines":["options_text:options_low_pass_note:0"],"speakers":["Screen"],"title":"Options low pass note","when":"... before mGBA's filter's level and the output's"},
@@ -6281,8 +6282,8 @@
   {"boxes":[{"pages":[["Give up on it?"]],"speaker":"Townsfolk","text":"Give up on it?\n"}],"container":"bring_script","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:bring_script:2","kind":"speech","line":292,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Give up on it?\n","text_hash":"fe9c454151a1"},
   {"boxes":[{"pages":[["Diving in from here?"]],"speaker":"MegaMan","text":"Diving in from here?"},{"pages":[["Folks say {navi}","guards {area}."]],"speaker":"MegaMan","text":"Folks say {navi} guards {area}."},{"pages":[["Word is,{rumor}"]],"speaker":"MegaMan","text":"Word is,{rumor}"}],"container":"oran_word_words","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_word_words:0","kind":"speech","line":11,"placeholders":[{"name":"navi","spec":"%s"},{"name":"area","spec":"%s"},{"name":"rumor","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Diving in from here?|Folks say {navi} guards {area}.|Word is,{rumor}","text_hash":"53b4d2041776"},
   {"boxes":[{"pages":[["Chips from the older","Net!"]],"speaker":"MegaMan","text":"Chips from the older Net!"},{"pages":[["One per customer!"]],"speaker":"MegaMan","text":"One per customer!"}],"container":"oran_stall_lead","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_stall_lead:0","kind":"speech","line":15,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Chips from the older Net!|One per customer!","text_hash":"857fa908c363"},
-  {"boxes":[{"flags":[{"at":"{chip} {code} for {price} zenny?","code":"line-long"},{"at":"zenny -> Zenny","code":"spelling"}],"pages":[["{chip} {code} for {price}","zenny?"]],"speaker":"MegaMan","text":"{chip} {code} for {price} zenny?\n"}],"container":"oran_stall_ask","domain":"Other","file":"src/world/oran_words.c","flags":["line-long","spelling"],"id":"oran_words:oran_stall_ask:0","kind":"speech","line":19,"placeholders":[{"name":"chip","spec":"%s"},{"name":"code","spec":"%c"},{"name":"price","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{chip} {code} for {price} zenny?\n","text_hash":"8fe7c27eae18"},
-  {"boxes":[{"flags":[{"at":"zenny -> Zenny","code":"spelling"}],"pages":[["Not enough zenny?","Aww..."]],"speaker":"MegaMan","text":"Not enough zenny? Aww..."}],"container":"oran_stall_broke","domain":"Other","file":"src/world/oran_words.c","flags":["spelling"],"id":"oran_words:oran_stall_broke:0","kind":"speech","line":23,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Not enough zenny? Aww...","text_hash":"a5d54a2687b0"},
+  {"boxes":[{"pages":[["{chip} {code}","for {price} Zenny?"]],"speaker":"MegaMan","text":"{chip} {code}\nfor {price} Zenny?\n"}],"container":"oran_stall_ask","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_stall_ask:0","kind":"speech","line":19,"placeholders":[{"name":"chip","spec":"%s"},{"name":"code","spec":"%c"},{"name":"price","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{chip} {code}\nfor {price} Zenny?\n","text_hash":"e6a24d5dbc7d"},
+  {"boxes":[{"pages":[["Not enough Zenny?","Aww..."]],"speaker":"MegaMan","text":"Not enough Zenny? Aww..."}],"container":"oran_stall_broke","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_stall_broke:0","kind":"speech","line":23,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Not enough Zenny? Aww...","text_hash":"97ebafc90738"},
   {"boxes":[{"pages":[["Sold out for you!"]],"speaker":"MegaMan","text":"Sold out for you!"},{"pages":[["Good luck down","there!"]],"speaker":"MegaMan","text":"Good luck down there!"}],"container":"oran_stall_sold","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_stall_sold:0","kind":"speech","line":24,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sold out for you!|Good luck down there!","text_hash":"5926eb2a8598"},
   {"boxes":[{"pages":[["Suit yourself!"]],"speaker":"MegaMan","text":"Suit yourself!"}],"container":"oran_stall_leave","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_stall_leave:0","kind":"speech","line":25,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Suit yourself!","text_hash":"10d516a9930f"},
   {"boxes":[{"pages":[["Hey,you're diving?","Got a job."]],"speaker":"MegaMan","text":"Hey,you're diving? Got a job."},{"pages":[["Win {battles} battles","without a scratch."]],"speaker":"MegaMan","text":"Win {battles} battles without a scratch."},{"pages":[["Your PET's courier","gets the pay."]],"speaker":"MegaMan","text":"Your PET's courier gets the pay."}],"container":"oran_job_offer","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_job_offer:0","kind":"speech","line":29,"placeholders":[{"name":"battles","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Hey,you're diving? Got a job.|Win {battles} battles without a scratch.|Your PET's courier gets the pay.","text_hash":"38b48defb8a7"},
@@ -6290,9 +6291,9 @@
   {"boxes":[{"pages":[["Thanks! Pay's","waiting after the","guardian."]],"speaker":"MegaMan","text":"Thanks! Pay's waiting after the guardian."}],"container":"oran_job_taken","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_job_taken:0","kind":"speech","line":34,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Thanks! Pay's waiting after the guardian.","text_hash":"5b7680e9e104"},
   {"boxes":[{"pages":[["You've got a job","going?"]],"speaker":"MegaMan","text":"You've got a job going?"},{"pages":[["One at a time,then!"]],"speaker":"MegaMan","text":"One at a time,then!"}],"container":"oran_job_held","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_job_held:0","kind":"speech","line":35,"speaker":"MegaMan","speakers":["MegaMan"],"text":"You've got a job going?|One at a time,then!","text_hash":"3b4935f27d38"},
   {"boxes":[{"pages":[["No worries. Ask","anytime!"]],"speaker":"MegaMan","text":"No worries. Ask anytime!"}],"container":"oran_job_no","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_job_no:0","kind":"speech","line":36,"speaker":"MegaMan","speakers":["MegaMan"],"text":"No worries. Ask anytime!","text_hash":"a97deb89c1a8"},
-  {"boxes":[{"pages":[["Lan,the older Net","runs from Oran Isle","too!"]],"speaker":"MegaMan","text":"Lan,the older Net runs from Oran Isle too!"},{"pages":[["We could go in from","there."]],"speaker":"MegaMan","text":"We could go in from there."}],"container":"oran_portal_words","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_portal_words:0","kind":"speech","line":38,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,the older Net runs from Oran Isle too!|We could go in from there.","text_hash":"8a7d9236d8d6"},
-  {"boxes":[{"pages":[["Go by Oran Isle?"]],"speaker":"MegaMan","text":"Go by Oran Isle?\n"}],"container":"oran_portal_question","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_portal_question:0","kind":"speech","line":39,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Go by Oran Isle?\n","text_hash":"3f79a4ef5372"},
-  {"boxes":[{"pages":[["Oran Isle! It's been","a while!"]],"speaker":"Lan","text":"Oran Isle! It's been a while!"},{"pages":[["The port's by the","signal post,Lan!"]],"speaker":"MegaMan","text":"The port's by the signal post,Lan!"}],"container":"oran_arrival_words","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_arrival_words:0","kind":"speech","line":40,"speaker":"Lan","speakers":["Lan","MegaMan"],"text":"@L Oran Isle! It's been a while!|@M The port's by the signal post,Lan!","text_hash":"7cd49555d55b"},
+  {"boxes":[{"pages":[["The data past this","pad is old,Lan."]],"speaker":"MegaMan","text":"The data past this pad is old,Lan."},{"pages":[["Old... Oran Isle's","got a port!"]],"speaker":"Lan","text":"Old... Oran Isle's got a port!"},{"pages":[["We could jack in","from there."]],"speaker":"Lan","text":"We could jack in from there."}],"container":"oran_portal_words","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_portal_words:0","kind":"speech","line":40,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M The data past this pad is old,Lan.|@L Old... Oran Isle's got a port!|@L We could jack in from there.","text_hash":"656179a77d66"},
+  {"boxes":[{"pages":[["Go by Oran Isle?"]],"speaker":"MegaMan","text":"Go by Oran Isle?\n"}],"container":"oran_portal_question","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_portal_question:0","kind":"speech","line":41,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Go by Oran Isle?\n","text_hash":"3f79a4ef5372"},
+  {"boxes":[{"pages":[["Oran Isle! Listen to","those waves!"]],"speaker":"Lan","text":"Oran Isle! Listen to those waves!"},{"pages":[["The port's up by the","signal post."]],"speaker":"Lan","text":"The port's up by the signal post."}],"container":"oran_arrival_words","domain":"Other","file":"src/world/oran_words.c","flags":[],"id":"oran_words:oran_arrival_words:0","kind":"speech","line":42,"speaker":"Lan","speakers":["Lan"],"text":"@L Oran Isle! Listen to those waves!|@L The port's up by the signal post.","text_hash":"219ecff1ceef"},
   {"boxes":[{"pages":[["Welcome to","AsterLand!"]],"speaker":"Townsfolk","text":"Welcome to AsterLand!"},{"pages":[["Any chip you've","had,I can order!"]],"speaker":"Townsfolk","text":"Any chip you've had,I can order!"},{"pages":[["One order a","visit,OK?"]],"speaker":"Townsfolk","text":"One order a visit,OK?"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:0.2.5","kind":"speech","line":22,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Welcome to AsterLand!|Any chip you've had,I can order!|One order a visit,OK?","text_hash":"089d10d7d0ec"},
   {"boxes":[{"pages":[["SubChips! Energy and","keys!"]],"speaker":"Townsfolk","text":"SubChips! Energy and keys!"},{"pages":[["Take a look!"]],"speaker":"Townsfolk","text":"Take a look!"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:1.2.5","kind":"speech","line":23,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"SubChips! Energy and keys!|Take a look!","text_hash":"6f1f5f043851"},
   {"boxes":[{"pages":[["Hmm... The request","board's empty."]],"speaker":"Townsfolk","text":"Hmm... The request board's empty."},{"pages":[["Doesn't anybody need","a NetBattler?"]],"speaker":"Townsfolk","text":"Doesn't anybody need a NetBattler?"}],"container":"place_folk","domain":"AsterLand and the Academy","file":"src/world/place_lines.c","flags":[],"id":"place_lines:place_folk:2.2.5","kind":"speech","line":25,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?","text_hash":"c590f78743b6"},

@@ -61,7 +61,7 @@ bool stop_due(void) {
 
 bool stop_ask(void) {
 	flag_clear(HOME_LINK_FLAG);
-	return talk_ask(oran_portal_words(), FACE_MEGAMAN, oran_portal_question(), HOME_LINK_FLAG);
+	return talk_ask(oran_portal_words(), FACE_LAN, oran_portal_question(), HOME_LINK_FLAG);
 }
 
 static bool stop_here(void) { return (run.stop & STOP_HERE) != 0; }
