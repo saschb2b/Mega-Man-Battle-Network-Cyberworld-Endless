@@ -920,6 +920,8 @@ static bool logs_start(Side *a, Side *b, const Spec *s) {
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
 	if (s->replay && b->log) xd_replay_lag(b->log, s->lag);
 	if (s->replay && s->bn4 && a->log && b->log) xd_replay_setup(b->log, a->log);   /* (the family's init draws: BN4's alone) */
+	for (int i = 0; s->replay && s->bn4 && a->log && b->log && i < s->nskips; ++i)   /* (the opening's paired from its end) */
+		if (!xd_replay_setup_skip(b->log, s->skip_key[i], s->skip_n[i])) return false;
 	return true;
 }
 

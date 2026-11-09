@@ -141,6 +141,19 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
 	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
+	if (!strcmp(name, "setupskip")) {
+		for (const char *p = v; *p && s->nskips < XD_SETUP_SKIPS; ++s->nskips) {
+			unsigned key;
+			int n, used = 0;
+			if (sscanf(p, "%x:%d%n", &key, &n, &used) != 2 || n <= 0 || n > 64) return 0;
+			s->skip_key[s->nskips] = key;
+			s->skip_n[s->nskips] = n;
+			p += used;
+			if (*p == ',') ++p;
+			else if (*p) return 0;
+		}
+		return s->nskips > 0;
+	}
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "sides")) return sscanf(v, "%x", &a) == 1 && a && a < 0x40 && (s->sides = (int)a) > 0;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");

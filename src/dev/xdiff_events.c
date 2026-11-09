@@ -101,6 +101,8 @@ struct XdLog {
 	                                replayed (the subject's), the k-th of a key in the whole setup the reference's k-th */
 	Keyed setup_keys[KEYS_MAX];  /* ... the subject's setup draws of each key met so far */
 	int nsetup_keys;
+	Keyed setup_skips[XD_SETUP_SKIPS];   /* (xd_replay_setup_skip) each key's reference's first n setup draws, without a twin */
+	int nsetup_skips;
 };
 
 /* (made as a dev tool first asks for one: their megabyte or two stays out of every other run) */
@@ -247,7 +249,11 @@ static void replay_setup(XdLog *log, XdEvent *e, uint32_t own) {
 	for (int i = 0; i < log->nsetup_keys && k < 0; ++i)
 		if (log->setup_keys[i].key == key && log->setup_keys[i].which == which) k = log->setup_keys[i].n++;
 	if (k < 0 && log->nsetup_keys < KEYS_MAX) log->setup_keys[log->nsetup_keys++] = (Keyed){ key, which, 1 };
-	for (int i = 0, n = k < 0 ? 0 : k; i < log->ref->ndraws && log->ref->draws[i].setup; ++i) {
+	/* (the opening's draws of a key paired from its end: the reference's first ones of it skipped, xd_replay_setup_skip) */
+	int skip = 0;
+	for (int i = 0; i < log->nsetup_skips; ++i)
+		if (log->setup_skips[i].key == key) skip = log->setup_skips[i].n;
+	for (int i = 0, n = (k < 0 ? 0 : k) + skip; i < log->ref->ndraws && log->ref->draws[i].setup; ++i) {
 		const Draw *d = &log->ref->draws[i];
 		if (d->key != key || d->which != which || n-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
@@ -605,7 +611,13 @@ void xd_replay_lag(XdLog *subject, int lag) { subject->lag = lag; }
 
 void xd_replay_setup(XdLog *subject, XdLog *reference) {
 	subject->setup_draws = reference->setup_draws = true;
-	subject->nsetup_keys = 0;
+	subject->nsetup_keys = subject->nsetup_skips = 0;
+}
+
+bool xd_replay_setup_skip(XdLog *subject, uint32_t key, int n) {
+	if (!subject || subject->nsetup_skips >= XD_SETUP_SKIPS) return false;
+	subject->setup_skips[subject->nsetup_skips++] = (Keyed){ key & ~1u, 0, n };
+	return true;
 }
 
 void xd_setup(XdLog *log, bool setup) { log->setup = setup; }

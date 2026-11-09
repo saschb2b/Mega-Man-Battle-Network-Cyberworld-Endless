@@ -27,7 +27,7 @@ import re
 
 from xdiff_bn4_opening import CompanionClock, Opening
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
-from xdiff_snap import (BLINK, DRAW, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
+from xdiff_snap import (BLINK, DRAW, KEPT, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
                         sprite_numbers_of, T1_MOVED,
                         u16, u32)
@@ -1032,8 +1032,15 @@ def slide_direction(d):
     the next, BN6's slide once at its end, kept; True where so"""
     if d.part != 'coll' or d.off != COLL_DIRECTION or not isinstance(d.role, tuple) or d.role[:2] != ('T1', 0x1A0):
         return False
+    a, b = d.a, d.b
+    if isinstance(a, tuple) and isinstance(b, tuple) and len(a) == len(b) == 2 and a[0] == b[0] == 'raw':
+        # (a word read whole, its bytes looking like a pointer: his hit bits at +0x0F 3, struck, over the direction's byte,
+        # 0x03000004 an IWRAM address in magtect_v1 at t273; held to the direction's byte alone, every other byte the same)
+        if (a[1] ^ b[1]) & ~0xFF:
+            return False
+        a, b = a[1] & 0xFF, b[1] & 0xFF
     last = MOVES.get(d.role, (None, None, None))[2]
-    return bool(last) and sorted((d.a, d.b)) == sorted((0, last))
+    return bool(last) and sorted((a, b)) == sorted((0, last))
 
 
 def spawner_kept(d):
@@ -1274,6 +1281,39 @@ def spec_text(spec, out, game):
     return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
 
+def opening_draws(ta, tb):
+    """(legit.json's bn4 opening_draws: the engines' openings, a family's draws before the fight paired from the opening's end)
+    each key's setup draws in both traces, BN4's kept and BN6's replayed (the reference's k-th of its key, xd_replay_setup):
+    {key: (BN4's, BN6's)}, the key BN4's place as the replay keys it; None where a draw of BN6's had no twin"""
+    # (a draw before the fight: one of a frame before the first fight frame's, whose own draws come in its record at the frame
+    # before its record's, timer 0 as the opening's)
+    keyed, n4, n6 = {}, {}, {}
+    first4, first6 = ta['frames'][0]['f'] - 1, tb['frames'][0]['f'] - 1
+    for fr in ta['frames']:
+        for e in fr['events'] + fr['setup']:
+            if e.kind == DRAW and e.frame < first4 and e.flags & KEPT:
+                key = (e.family or e.caller) & ~1
+                keyed[e.ref] = key
+                n4[key] = n4.get(key, 0) + 1
+    for fr in tb['frames']:
+        for e in fr['events'] + fr['setup']:
+            if e.kind != DRAW or e.frame >= first6 or not e.family:
+                continue
+            if not e.flags & REPLAYED or e.ref not in keyed:
+                return None
+            n6[keyed[e.ref]] = n6.get(keyed[e.ref], 0) + 1
+    return {k: (n4.get(k, 0), n) for k, n in n6.items()}
+
+
+def opening_skips(ta, tb):
+    """the setupskip= items of a second run where BN4's opening made more of a key's draws than BN6's (legit.json's bn4
+    opening_draws): KEY:N, BN4's first N of the key with no twin of BN6's; [] none (or the rule not in legit.json)"""
+    if not json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('opening_draws'):
+        return []
+    counts = opening_draws(ta, tb) or {}
+    return [f'{k:08X}:{n4 - n6}' for k, (n4, n6) in sorted(counts.items()) if n4 > n6][:4]
+
+
 def dev_args(spec):
     """the host build's arguments a spec asks for (its "dev": --dev bn4families, BN4's families moved into BN6's engine)"""
     return ['--dev', ','.join(spec['dev'])] if spec.get('dev') else []
@@ -1291,7 +1331,20 @@ def one(name, spec, a, canon, run_xdiff, work):
     else:
         paths = [os.path.join(runs, f'{name}.{g}') for g in ('bn4', 'bn6')]
         if not a.no_run:
-            run_xdiff(spec_text(spec, f'/src/.build/xdiff/runs/{name}', 'bn4:bn6'), dev_args(spec))
+            text = spec_text(spec, f'/src/.build/xdiff/runs/{name}', 'bn4:bn6')
+            run_xdiff(text, dev_args(spec))
+            # (the engines' openings: where BN4's made more of a family's draws before the fight than BN6's, the battle again
+            # with BN6's paired from the opening's end, BN4's first ones of the key left without a twin; legit.json's bn4
+            # opening_draws. BN6's count must be what it was: its opening's draws do not hang on the words they draw)
+            skips = opening_skips(read_trace(paths[0]), read_trace(paths[1])) if spec.get('rng') == 'replay' else []
+            if skips:
+                before = opening_draws(read_trace(paths[0]), read_trace(paths[1]))
+                print(f'  xdiff: the opening\'s draws paired from its end, BN4\'s first left without a twin: {", ".join(skips)}')
+                run_xdiff(f'{text};setupskip={",".join(skips)}', dev_args(spec))
+                after = opening_draws(read_trace(paths[0]), read_trace(paths[1]))
+                if after is None or {k: n for k, (_, n) in after.items()} != {k: n for k, (_, n) in (before or {}).items()}:
+                    print(f'{name}: INCONCLUSIVE (bn4: the opening\'s draws of BN6\'s changed with their pairing: {before} then {after})')
+                    return 'INCONCLUSIVE', 'bn4'
     ta, tb = read_trace(paths[0]), read_trace(paths[1])
     if not control:   # (a pointer into BN4's ROM where BN6's install moved it, as BN5's: its blocks, xdiff_snap.Frame.ptr's 'rom')
         ta['code'] = tb['moved']
