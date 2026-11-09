@@ -260,6 +260,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-09",
       "what": "JunkMan derived, built and proved (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 57, ids 0x3A4-0x3A7; BN4_JUNKMAN 0x080C91A8, BN4_JUNKMAN_STATES 0x080C9248, BN4_JUNKMAN_CLEAR 0x080C9498, BN4_JUNKMAN_JUNK 0x080C94AE, BN4_JUNK_SPAWN 0x080DFF60, BN4_JUNK_HITS 0x080DFF44, BN4_JUNK_SPAWN2 0x080E0170; BN4's object runner's r4 0x08003166, BN6's state caller 0x0801B9E6; docs/rom/bn4.md, JunkMan derived): junkman_v1 PASS, four mutations caught; in the tournament's proved list on BN4_PLATE_JUNKMAN."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "BN4's VolGear (type 0x08, ids 7-12) moved, the first late family (AI 72, ids 0x2F0-0x2F5): its art in a room of its own (free_space.h FREE_LATE_FAMILIES, xvirus_recipe.h XV_LATE_ART), its numbers from the tops down (the third kind's 0xDF and 0xDE, list 4's 0xBF) so BN4's Navis' stay theirs; bn4_battle.h BN4_VOLGEAR_*, BN4_T3_VOLGEAR_*, BN4_*_HELD_*, BN4_HELD_CHIP_TEST (docs/rom/bn4.md, VolGear moved)."
     }
   ],
   "experiments": [
@@ -270,6 +274,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "python3 tools/xdiff.py junkman_v1 (rng replay, lag 1): PASS over 1200 fight frames. Settled before it: his install refused (the Navis' registry, past 16); his state 1's draw, made in BN4's paused opening and in BN6's fight before its timer's first tick, replayed from BN4's setup draws; his junk's +4 the spawn's r4 (BN4 0x13, BN6 his AI index times four), read by no code of it; his pool sounds paired; at t347 his 0x97's +4 to +7, the r4 his MegaMan state 110 ran with (BN4's runner's 0x00020013, BN6's state caller's AI data 0x02023A80): his states run through stubs loading his +0 byte without BN6's bits 0x24 (with them kept, t347 on +4 alone, 0x13 against 0x37). Four mutations caught: his CurAction 7 written 10 (t1), his variables at BN4's +0x70 (t1), his junk spawned as his 0x97 (t1), his 0xC0 at the pool's 0x32 (t348); his junk's hits test at BN4's +0x54 not caught (unreached: MegaMan never strikes it).",
       "meaning": "JunkMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
       "link": "../multirom/bn4-navis.md#junkman-built"
+    },
+    {
+      "feature": "BN4's virus families in BN6's engine",
+      "date": "2026-11-09",
+      "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
+      "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
+      "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
+      "link": "../multirom/families.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",

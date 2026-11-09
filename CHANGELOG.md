@@ -16,6 +16,11 @@
 - **BN5's win music.** A battle won on one of BN5's areas, or on a dark
   layer, ends with BN5's own victory music where BN6's played, picked the
   way both games pick it.
+- **VolGear visits.** With BN4 Red Sun's ROM beside BN6's, VolGear and
+  its versions up to ValGearEX join Billy, Spikey and the rest in the
+  battles BN4's viruses visit, its flame running down MegaMan's row as
+  in BN4. Moved into BN6's battle and checked against BN4's own frame by
+  frame, it pays from BN4's own rewards.
 
 ## 0.20.0 (2026-11-09)
 

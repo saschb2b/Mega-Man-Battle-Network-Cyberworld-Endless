@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Update**: multirom/families.md (BN4's late families) and engine/emulation/memory.md: VolGear's branch brought onto the free space's plan; the late families' art moved to its own row, `FREE_LATE_FAMILIES` at `+0x4D0000`-`+0x500000` (192 KB, the plan's largest gap; its first place, 60 KB at `+0x711000`, held VolGear's but not the nine's), and their code a room of its own, `FREE_LATE_CODE` at `+0x711000`-`+0x720000`; `volgear_v1`-`v3` run again.
+* **Update**: multirom/families.md (BN4's late families, new section), multirom/bn4.md, rom/bn4.md (VolGear moved, new row), devtools/differential.md (VolGear's readings), engine/emulation/memory.md (the late families' art): BN4's VolGear moved and proved (`volgear_v1`-`v3` PASS, four mutations caught), the seventh BN4 family to visit; the late families' numbers from the tops down and their art in a room of their own; the other nine wait on where their sounds go.
 * **Update**: multirom/bn4-navis.md, JunkMan built: the New 3DS's heap with him in (heap3ds, seeds 1-3, bn4 and all: 94.62 MB and 95.98 MB, the mirror images' refusals as before).
 * **Update**: multirom/bn4-navis.md, JunkMan built: `junkman_v1` PASSes over its 1200 frames, his states run with BN4's runner's r4 by stubs of his home (`XNavi.runner_r4`), his types at the dispatch's 0xCF-0xD2, four mutations caught; he joins the tournament's proved list on his plate (`BN4_PLATE_JUNKMAN`); game/tournament.md and GUIDE.md, the pool's nine BN4 Navis; rom/bn4.md, JunkMan derived; re/ledger.json; the symbol files written again.
 * **Update**: game/team-protoman.md and world/bn5-town.md, the owner's answers: DarkProto in the Undernet, the town as designed.

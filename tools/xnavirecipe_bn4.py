@@ -262,40 +262,8 @@ def panel_fields(f):
                     break
 
 
-# A side's player read inline from the battle state ([eToolkit +0x18], both games'): BN4's players a word each from +0x44
-# (BN4_BATTLE_PLAYERS: MegaMan's side's first, the other's next, as BN4's getter 0x0800C456 reads them), BN6's a word every
-# 0x10 bytes from +0xD0 by side (BN6_BATTLE_PLAYERS, BN6_BATTLE_PLAYER_STEP; its getter 0x080103BC). An index made by
-# lsls #2 and adds #0x44 is given BN6's shift and base: BN4's index (its side ^ MegaMan's ^ 1) is the side wanted where
-# MegaMan's side is 0, as in every battle a BN4 Navi is fought in (none a NetBattle's)
-PLAYERS4, PLAYERS6 = (0x44, 2), (0xD0, 4)
-
-
-def battle_players(f):
-    """a side's player read from the battle state by an index (PLAYERS4): its shift and base BN6's (PLAYERS6)"""
-    for e, w in sorted(f.walks.items()):
-        addrs = sorted(w.insns)
-        state = {}   # (a register holding eToolkit, then the battle state)
-        for k, a in enumerate(addrs):
-            i = w.insns[a]
-            if i.form == 'hi_mov' and i.f[1] == 10 and i.f[0] < 8:
-                state[i.f[0]] = 'toolkit'
-                continue
-            if i.form == 'ldr' and state.get(i.f[1]) == 'toolkit' and i.f[2] == 0x18:
-                state[i.f[0]] = 'battle'
-                continue
-            if i.form == 'ldr_r' and state.get(i.f[1]) == 'battle' and k >= 2:
-                sh, base = w.insns[addrs[k - 2]], w.insns[addrs[k - 1]]
-                ro = i.f[2]
-                if sh.form == 'lsls' and sh.f[:2] == (ro, ro) and base.form == 'adds8' and base.f[0] == ro and \
-                        (base.f[1], sh.f[2]) == PLAYERS4:
-                    why = 'a side\'s player read from the battle state: BN4 +0x44 a word each, BN6 +0xD0 0x10 bytes each'
-                    f.imms.append(dict(at=sh.at, form='THUMB_LSLS', rd=ro, rn=ro, was=PLAYERS4[1], now=PLAYERS6[1], why=why))
-                    f.imms.append(dict(at=base.at, form='THUMB_ADDS', rd=ro, rn=0, was=PLAYERS4[0], now=PLAYERS6[0], why=why))
-                else:
-                    f.decide('battle', f'{a:08X}: a word of the battle state read by an index BN4\'s players\' form does not make')
-            for r in range(8):
-                if T.writes(i, r):
-                    state.pop(r, None)
+# A side's player read inline from the battle state: the families' generator's port (xrecipe_bn4.battle_players), his too
+PLAYERS4, PLAYERS6, battle_players = X4.PLAYERS4, X4.PLAYERS6, X4.battle_players
 
 
 def set_action_imms(f):
@@ -798,7 +766,8 @@ def families_alloc(b4, b6, pairs):
     for k, (ty, name, first) in enumerate(X4.FAMILIES):
         fam = X4.derive(b4, b6, pairs, ty, name, first, k, alloc)
         alloc.families.append(fam)
-        for sp in getattr(fam, 'attack_sprites', []):
+        # (a late family's, moved after the Navis took their numbers, none of theirs: their own copies kept, X4.LATE_FROM)
+        for sp in [] if fam.late else getattr(fam, 'attack_sprites', []):
             alloc.family_sprites.setdefault((sp['list'], sp['index']), dict(sp, shared=fam.name))
     return alloc
 
