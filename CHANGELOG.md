@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.20.0 (2026-11-08)
+## 0.20.0 (2026-11-09)
 
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
   Red Sun (USA)** beside BN6's (on the ROMs screen it has a third
