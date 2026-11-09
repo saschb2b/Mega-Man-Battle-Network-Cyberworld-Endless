@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "A BN5 town on the way"
-description: "A town from BN5 Team Colonel's ROM as a stop on the way into an act, designed with the game-design skill and not yet built: where it stands and how often, how Lan gets there, what it holds and pays, what BN5's ROM has of its towns (read on 9 November 2026), Oran Isle first, the build units, the checks, its pace cost against the core loop and the owner's questions."
+description: "A town from BN5 Team Colonel's ROM as a stop on the way into an act, designed with the game-design skill and built in part behind a dev switch: where it stands and how often, how Lan gets there, what it holds and pays, what BN5's ROM has of its towns (read on 9 November 2026), Oran Isle first, the build units, the checks, its pace cost against the core loop and the owner's questions."
 tags: [world, design, bn5, town]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T14:45:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -169,6 +169,46 @@ and its measure is decisions a minute, not minutes:
   core loop's count of choices. If people take it and its median runs
   past 90 seconds, the walk shortens (the jack-in point nearer the dock)
   before anything is added.
+
+## As built (9 November 2026, behind `--dev stop`)
+
+The first build, units 1 to 5 of the order below, in part:
+
+- **Oran Isle read** ([BN5's maps, songs, text and objects](../rom/bn5-world.md), Oran Isle):
+  the island is map 13 of BN5's real world as the engine reads it, 128 x
+  96 tiles; one jack-in point (0x40, round the signal post on the plaza,
+  height 32), ten checks, the pier where the boat lies; its names in
+  `src/emu/bn5_world.h`.
+- **In BN6's real world**: `town.c`'s fifth style, Oran Isle copied whole
+  with its own walls and heights as Seaside Town is, in Seaside Town's
+  map; its tile set and 256 colours (60 KB) copied from the player's ROM
+  into a range of their own (`xtown.c`, the free space's `FREE_XTOWN`,
+  added the old way, before the free space's plan), BN6's interface
+  colours 208-255 kept, Seaside Town's own put back when a BN6 town is
+  installed; its jack-in point the act's first layer's.
+- **The question**: on the pink pad, BN6's own warp held off, MegaMan's
+  two boxes and "Go by Oran Isle?", the cursor on No; No is the pad's warp.
+  Seen in captures (`.build/oran/`).
+- **Not yet**: the trip. Yes installs the island and starts BN6's
+  jack-out with the internet-to-real-world transition and the saved place
+  set to the pier, but the warp lands in the act's first layer (map
+  `0x88:06` in the capture), so the stop is offered only with `--dev
+  stop` (`STOP_OPEN` 0 in `director_stop.c`); the flow is unbroken either
+  way. The checkpoint at the pier (`D.home_save_due` once the arrival
+  words are said), its CONTINUE (`home_rebuild` installs the island after
+  home while `run.stop` holds `STOP_HERE`), the three people's talk
+  (`oran.c`: the word by `guardian_rumor`, the stall by BN5's pool at the
+  act's tier at `chip_price`, the job a JOB_CLEAN of two battles) and the
+  pace's count (frames and decisions, `stop:` in the debug log) are
+  written and untested in the game until the trip lands.
+- **The job's pay** is settled as the man from the lab's request (the
+  asker `JOB_LAB`), which the courier names; a pay by the courier itself
+  needs an asker of its own.
+- **Its song**: Beach Day copied by `xsong.c` after the other songs, so
+  theirs keep their slots; played as the island's map's.
+- **The share**: `run_stop.c`'s coin and the acts it fits, held over 300
+  seeds by `test_stop` (half the runs: 120 to 180; one act at most, from
+  act 2, never the Nest's).
 
 ## The build, in order
 

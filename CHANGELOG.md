@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Oran Isle, on the way (in progress, a dev switch only).** With BN5
+  Team Colonel's ROM, Oran Isle stands in BN6's real world, copied
+  whole from the player's cartridge: the beach, the seawall, the pier
+  with its boat, the signal post's port, Beach Day playing. MegaMan asks
+  on the act's pink pad whether to go in from there, the cursor on No.
+  The trip itself does not land on the island yet, so runs do not offer
+  it; `--dev stop` shows the question.
+
 ## 0.20.0 (2026-11-09)
 
 - **Battle Network 4 Red Sun joins.** Put **Mega Man Battle Network 4:
