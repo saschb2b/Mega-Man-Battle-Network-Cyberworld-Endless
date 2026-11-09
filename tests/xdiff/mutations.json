@@ -893,7 +893,7 @@
    "name": "a computed power's routine",
    "spec": "chip_cusvolt1",
    "poke": [
-    "08E02324:08E00C01:4"
+    "08E02724:08E00C01:4"
    ],
    "what": "BN6's grown table of computed powers' entry 0xC9 (CusVolt1's 1073 as 1201, XC_POWERS + 4 x 0xC9) aimed at the stub (power 0, returning by mov pc, lr as the reader's mov lr, pc needs) where the install gives it the PowerCusVolt helper's copy: its damage 0"
   },

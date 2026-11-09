@@ -140,6 +140,10 @@ HELPERS = (
                               "form, through the image object's spawner; one copy, so that BN5's own buster's calls are no unit's"),
     ((0x080D3286,), 'Shake', "the shake's spawner (the third kind's 0x68: SpShake's, and the misc family's ShakPar's), the shake's "
                              "code with it: the dispatch moves a type once, so one copy for both units"),
+    ((0x080C5FCE, 0x080C5FE8), 'Bubbles', "the bubbles' spawner, its two entries (the third kind's 0x0B: SideBub's, and the Navi chip "
+                                          "CloudMan's clouds, its kinds 2-5), the object's code and its kinds' table with it: one copy "
+                                          "for both units (CloudMan's unit copied the block again and Marina's bubbles, the families', "
+                                          "ran the later copy: marina_v1_keys FAILed at t408)"),
     # (the computed powers, POWERS: each a routine BN5's table of computed powers names, 0x0800E728 by the record's power - 1000)
     ((0x0800EA18,), 'PowerCustSwrd', "CustSwrd's power (1045): by the Custom gauge (BN5 0x0801A8D0)"),
     ((0x0800EB06, 0x0800EB0C, 0x0800EB12), 'PowerCusVolt', "CusVolt1-3's powers (1073-1075): by the Custom gauge, from 10, 30, 50"),
@@ -192,7 +196,7 @@ UNIT_STUBS = {
                                     "(r2 side, r3 flip, as 0x0800C6CE): BN5's numbers")},
 }
 # The object types a helper moves, for every unit (the units spawn them through the dispatch, the helper's copy run)
-HELPER_TYPES = {(3, 0x68): 'Shake'}
+HELPER_TYPES = {(3, 0x68): 'Shake', (3, 0x0B): 'Bubbles'}
 # Raw data whose extent no walk tells (a table read by a number made elsewhere): its bytes
 # Routines a unit hands a table of routines to, in a register (its number): the table's every entry walked and moved or
 # aimed at its twin, as a jump table's (the family deriver stops a table at its first entry far from it)
@@ -349,9 +353,9 @@ XC_AT = FREE_CHIP_CODE + 0x400            # FREE_CHIP_MOVED
 XC_STUBS = XC_AT + 0x800                  # the stubs (STUBS), then
 XC_SP_TIMES = XC_STUBS + 0x30             # ... the SP powers' deletion times, none (WORDS_TO), then
 XC_HELPERS = XC_STUBS + 0x90              # ... the helpers' code (HELPERS), to
-XC_POWERS = XC_AT + 0x1C00                # BN6's computed powers grown (256 words), then
-XC_HOMES = XC_AT + 0x2000                 # a unit's veneers, XC_HOME_SIZE each
-XC_HOME_SIZE, XC_UNITS = 0x400, 64
+XC_POWERS = XC_AT + 0x2000                # BN6's computed powers grown (256 words), then
+XC_HOMES = XC_AT + 0x2400                 # a unit's veneers, XC_HOME_SIZE each
+XC_HOME_SIZE, XC_UNITS = 0x400, 80
 XC_CODE = XC_HOMES + XC_HOME_SIZE * XC_UNITS
 XC_ART = FREE_CHIP_CODE + 0xA0000
 XC_END = FREE_CHIP_CODE + 0x100000

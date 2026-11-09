@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:38:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:54:19Z }
 ---
 
 # The chips' code
@@ -281,7 +281,14 @@ of. The registry's ids, records and art stay C1's (above).
   (`STACK_LOADS`). Django[SP]'s power is its own routine, by the battle's
   turn (150 at the first, 10 more a turn to 250), moved as a helper
   (`PowerDjangoSP`); the SP and DS powers' table is copied to row 21. The
-  chips' units' install passed 512 writes (`TX_WRITES` 1024). Twenty
+  chips' units' install passed 512 writes (`TX_WRITES` 1024). CloudMan's
+  clouds are the bubbles' object (the third kind's 0x0B, SideBub's, its
+  kinds 2-5), spawned by its own spawner: his unit first copied that
+  object's block again, and Marina's bubbles, the families', ran the later
+  copy (`marina_v1_keys` FAIL at t408, found by the whole suite, not his
+  specs); the spawner, the object and its kinds' table are a helper now
+  (`Bubbles`, `HELPER_TYPES`), one copy for both units, and the helpers'
+  room, the powers and the homes moved 0x400 up for it (80 homes). Twenty
   `chip_*` specs PASS (each Navi's V1, SP, DS and DS dark), twenty
   mutations caught. Not reached by a spec: an obstacle beside CosmoMan,
   and the identity of a sprite BN5 keeps LZ77 (the comparison has no
