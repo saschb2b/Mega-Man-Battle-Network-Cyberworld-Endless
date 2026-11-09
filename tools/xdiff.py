@@ -630,7 +630,8 @@ def folder_chips(spec):
     code << 9 | its id), where they differ: MegaMan's held chip and the chip his attack uses, read in BN6's numbers"""
     out = {}
     for e5, e6 in zip(spec.get('folder5', []), spec.get('folder6', [])):
-        i5, i6 = int(e5, 16) & 0x1FF, int(e6, 16) & 0x1FF
+        # (BN6's a chip past nine bits as chip:code, src/dev/xdiff.h)
+        i5, i6 = int(e5, 16) & 0x1FF, int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
         if i5 != i6:
             out[i5] = i6
     return out
@@ -731,7 +732,7 @@ def run_all(items, a, legit, canon, head):
     """items as job() takes them, each printed whole as it ends (head(item) first), on a.jobs workers; their verdicts and
     kinds in the items' order. Where a boot state is missing, the first runs alone, so that one run writes it"""
     JOB.update(a=a, legit=legit, canon=canon)
-    done = [None] * len(items)
+    done = {}
 
     def show(item, text, verdict, kind):
         print(head(item) + text, end='', flush=True)
@@ -749,7 +750,7 @@ def run_all(items, a, legit, canon, head):
             futures = {pool.submit(job, item): item for item in rest}
             for f in as_completed(futures):
                 show(futures[f], *f.result()[1:])
-    return done
+    return [done[item[0]] for item in items]
 
 
 def main():
@@ -763,7 +764,7 @@ def main():
     ap.add_argument('--show', type=int, default=12, help='differences shown at the first unexplained frame')
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--survey', action='store_true', help='every difference over every frame, counted by where (masks applied), no stop')
-    ap.add_argument('--mutations', action='store_true', help='tests/xdiff/mutations.json: each must FAIL its spec')
+    ap.add_argument('--mutations', action='store_true', help='tests/xdiff/mutations.json: each must FAIL its spec (with specs named, theirs alone)')
     ap.add_argument('-j', '--jobs', type=int, default=max(1, (os.cpu_count() or 2) - 2),
                     help='specs run side by side (default: the CPUs but two; 1 one at a time)')
     a = ap.parse_args()
@@ -778,17 +779,19 @@ def main():
             muts = json.load(f)['mutations']
         items = [(k, m['spec'], m.get('poke', []), m.get('call', []), f'mutation{k + 1}',
                   {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None) for k, m in enumerate(muts)]
+        # (with specs named, their mutations alone, by their numbers in the file)
+        items = [it for it in items if not a.specs or it[1] in a.specs]
 
         def head(item):
             m = muts[item[0]]
             return f'== mutation {item[0] + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}\n'
 
         verdicts = run_all(items, a, legit, canon, head)
-        for k, (verdict, _) in enumerate(verdicts):
-            print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
+        for item, (verdict, _) in zip(items, verdicts):
+            print(f'mutation {item[0] + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
         caught = sum(v == 'FAIL' for v, _ in verdicts)
-        print(f'{caught} of {len(muts)} mutations caught')
-        sys.exit(0 if caught == len(muts) else 1)
+        print(f'{caught} of {len(items)} mutations caught')
+        sys.exit(0 if caught == len(items) else 1)
     names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n not in ('legit.json', 'mutations.json', 'families.json'))
     def head(item):
         with open(os.path.join(SPECS, f'{item[1]}.json')) as f:

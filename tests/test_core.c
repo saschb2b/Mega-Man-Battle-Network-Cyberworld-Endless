@@ -5183,9 +5183,16 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 263 && own == 144 && plays == 8 && dark == 7 && pas == 15, "registry: 263 chips, 144 of ids of their own, 8 playing now, "
+	CHECK(xreg_count == 278 && own == 159 && plays == 8 && dark == 7 && pas == 15, "registry: 278 chips, 159 of ids of their own, 8 playing now, "
 		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
-	CHECK(high == 15 + 100, "registry: the Program Advances and 100 chips past 319, in the pack's extension (%d)", high);
+	CHECK(high == 15 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
+	/* (the Navi chips past nine bits: CloudMan's to Django's at 512-526, each with a pack entry, docs/rom/chips-code.md, The
+	 * pack past 511) */
+	const XChipReg *cloud = xreg_of_bn5(266), *django_ds = xreg_of_bn5(280);
+	bool wide_rows = cloud && cloud->bn6 == 512 && cloud->how == XREG_MOVED && django_ds && django_ds->bn6 == 526 && xreg_at(526) == django_ds;
+	for (int i = 0; i < xreg_count; ++i)
+		if (xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 512 && xreg_rows[i].how != XREG_PA) wide_rows = wide_rows && bn6_pack_entry(0x02002230u, xreg_rows[i].bn6) != 0;
+	CHECK(wide_rows, "registry: CloudMan's V1 at 512, DjangoDS at 526, every chip past 511 a folder can hold with a pack entry");
 	/* (the Darkloids' first batch in the free ids, 511 held for the wide
 	 * rewards: docs/multirom/bn4-chips.md, Past 511) */
 	const XChipReg *shade = xreg_of_bn5(260), *bliz_ds = xreg_of_bn5(265);
@@ -5201,7 +5208,7 @@ static void test_chip_registry(void) {
 	const XChipReg *drill = xreg_of_bn5(72);
 	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
 		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
-	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
+	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(313), "registry: Otenko, BugCharg and Phoenix out");
 	CHECK(xreg_free_id(203) && xreg_free_id(510) && xreg_free_id(512) && xreg_free_id(1023) && !xreg_free_id(XREG_HELD) &&
 		!xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(1024),
 		"registry: the free ids, to 1023 (ten bits), BN6's own, its pseudo-chips' and the wide rewards' 511 not");

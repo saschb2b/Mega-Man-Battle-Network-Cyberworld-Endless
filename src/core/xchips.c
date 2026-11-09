@@ -133,7 +133,8 @@ int xchips_kind(int kind, uint16_t *out, int max) {
 int xchips_darkloid_chip(int ai, int version) {
 	/* (BN5's V1 chip of each Darkloid the registry holds, its SP and DS
 	 * after it: its records, family 0x41 by the Navi's subfamily) */
-	static const struct { uint8_t ai; uint16_t v1; } V1[] = { { BN5_NAVI_SHADEMAN, 260 }, { BN5_NAVI_BLIZZARDMAN, 263 } };
+	static const struct { uint8_t ai; uint16_t v1; } V1[] = { { BN5_NAVI_SHADEMAN, 260 }, { BN5_NAVI_BLIZZARDMAN, 263 }, { BN5_NAVI_CLOUDMAN, 266 },
+		{ BN5_NAVI_COSMOMAN, 269 } };
 	int step = version == XCHIPS_VERSION_SP ? 1 : version == XCHIPS_VERSION_DS ? 2 : version ? -1 : 0;
 	for (size_t i = 0; i < sizeof V1 / sizeof *V1 && step >= 0; ++i)
 		if (V1[i].ai == ai) return xchips_run_chip(V1[i].v1 + step);
