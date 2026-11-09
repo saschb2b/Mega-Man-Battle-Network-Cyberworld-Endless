@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "The 3DS's memory"
-description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and one extra ROM, BN5's first (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, measured by `tools/heap3ds.py`, BN4's beside them too."
+description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and one extra ROM, BN5's first (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, its maps' mirror images and raised views made in place, measured by `tools/heap3ds.py`: the budget per part and the margin a new feature is checked against."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:35:00Z }
 ---
 
 # The 3DS's memory
@@ -39,8 +39,10 @@ What play takes was measured on a computer (`tools/heap3ds.py`,
 holds them, the core's copy kept, one past 96 MB refused). The installs
 keep little of the heap (BN5's code and data, some 2 MB of its file read,
 go into the core's copy, past the game's 8 MB). A layer's area learned
-from its original maps takes up to 50 MB at once (a map, its mirror image
-and its raised views, each a whole map's pixels twice), and what it
+from its original maps took up to 50 MB at once (a map, its mirror image
+and its raised views, each a whole map's pixels twice; since 9 November
+2026 the views are made in place, and the learning holds one map: [The
+learning made in place](#the-learning-made-in-place)), and what it
 learned stays, 2 to 7 MB an area. Kept for every area a run had passed
 through, those filled the heap in long runs: with the 3DS as it was, 20
 of 24 long runs (seeds 1-24, the test autopilot kept alive, 120000
@@ -118,3 +120,134 @@ room. Both together leave a long run's play 8 MB short, and what is
 refused then is not a cache but a layer's own look. A New 3DS with
 BN5's and BN4's ROMs plays with BN5's; BN4's comes in where BN5's is not
 there.
+
+## The learning made in place
+
+Measured on 9 November 2026, as the next version's content came in fast
+(ten-bit chip ids, PR #318; BN5's Navis; Oran Isle, PR #321): every case
+of `tools/heap3ds.py` over seeds 1-12 (120000 frames a run), dev as it
+was and each branch beside it, seeds 1-6 where marked. Peak in MB;
+allocations refused, in how many runs:
+
+| Before the change | BN6 alone | With BN5 | With BN4 | With BN5 and BN4 |
+| --- | --- | --- | --- | --- |
+| dev (c3d14c50) | 87.4; none | 95.9; 24 in 9 | 94.8; 6 in 4 | 96.0; 137 in 11 |
+| Ten-bit chip ids (PR #318) | 87.6; none (seeds 1-8) | 95.8; 36 in 6 (seeds 1-6) | - | 96.0; 71 in 6 (seeds 1-6) |
+| BN5's Navis (their branch) | 87.4; none (seeds 1-8) | 95.7; 36 in 6 (seeds 1-6) | - | 96.0; 54 in 5 (seeds 1-6) |
+| Oran Isle (PR #321) | 87.4; none (seeds 1-8) | 95.9; 10 in 5 (seeds 1-6) | - | 95.9; 71 in 6 (seeds 1-6) |
+
+(-: not measured in the round's time box; 0.20.0's one run measured,
+BN6 alone on seed 2, peaked at 75.7 MB as dev's did.) No run crashed. A
+long run with BN5 refused something in 9 of 12 on dev itself, and in
+every run of the branches: the heap stood within 1.2 MB of full in every
+case but BN6 alone.
+
+What was live at a long run's peak (dev with BN5, seed 1, 94.96 MB:
+each block of 32 KB and more named where it was asked for, a scratch
+copy of `tools/heap3ds.c`):
+
+| What | MB |
+| --- | --- |
+| The core's ROM copy (kept for the core's life) | 16.0 |
+| BN6's ROM and BN5's (`R.data`, `XR`) | 16.0 |
+| Home's source, kept for the town's next visit (`townsrc_learn`: Central Town's map, its mirror image, their entries) | 13.8 |
+| The layer's area's own map being learned (`decode_tiles`: its pixels as shown, its first layer, its front and colour planes) | 11.8 |
+| A raised view of it (`area_src_raise`'s copy) | 11.8 |
+| That view's mirror image (`area_src_mirror`'s copy) | 11.8 |
+| The tiles' learning of the view (`tiles_learn`: its candidates, looks, kept pixels and seams) | 8.8 |
+| The installs' log (`xlog_write`) | 2.1 |
+| The rest: SDL's, mGBA's, the game's tables, every block under 32 KB | 3.1 |
+
+Three of those were the same pixels: the map, a view of it moved down a
+floor's height, and that view flipped. `learn_view` and `learn_map`
+(`src/map/netmap_learn.c`) now make both views in place
+(`area_src_mirror_in`, `area_src_raise_in` in `src/map/area_src.c`): the
+map's own tiles and pixels are flipped or moved and put back after, the
+view sharing them, a raised view keeping only the rows it moves past the
+map's foot (its height times the map's width, 80 KB for a floor 8 pixels
+up on a map 1024 wide), a mirror only its heights and rings (some tens of
+KB). The towns' sources, which keep a map and its mirror at once, and the
+atlas keep the copies. The learning holds one map now, not three; what it
+learns is the same, byte for byte (`tests/test_core.c`'s
+`test_area_views`, and the pictures below).
+
+| After it | BN6 alone | With BN5 | With BN4 | With BN5 and BN4 |
+| --- | --- | --- | --- | --- |
+| dev with the change | 67.4; none | 75.8; none | 76.3; none | 85.8; none |
+| BN5's Navis with the change | - | 77.8; none (seeds 1-6) | - | 85.8; none (seeds 1-6) |
+
+Every case some 20 MB lower, nothing refused, no crash, and the areas
+learned again as often as before (42 with BN5 over the 12 runs, 16 with
+BN4).
+
+### What a refusal costs
+
+Every allocation refused in the runs above, before the change, was asked
+for by the learning (the first eight of each run named, 245 in all): 134
+by the mirror images' and raised views' copies (`copy_parts`), 94 by the
+tiles' kept pixels and the pick's memo (`tiles_keep_begin`), 17 by
+`tiles_learn`'s own candidates and panel states, whose refusal leaves a
+book of nothing. On dev with BN5 alone, its 24 were the kept pixels' and
+`tiles_learn`'s; the branches' and the `all` case's were mostly the
+copies'. Forced to fail with `heap3ds.py --refuse`
+(BN5, seed 1, 40000 frames to depth 12, a picture every 1000 frames, 39
+in all, set beside the same run without the refusal; the first two rows
+the change against dev, nothing refused):
+
+| Refused | Refusals | Pictures the same | Crashes |
+| --- | --- | --- | --- |
+| Nothing: dev's build with the 3DS's rules against the change's (its peak 84.2 MB, then 60.8) | 0 | 39 of 39 | 0 |
+| Nothing: the host build, every area kept, dev's against the change's (91.6 MB, then 70.9) | 0 | 39 of 39 | 0 |
+| `tiles_keep_begin`: the tiles' kept pixels and the pick's memo | 106 | 39 of 39 | 0 |
+| `area_src_mirror_in`: a mirror image's heights and rings | 15 | 0 of 39 | 0 |
+
+The tiles' kept pixels and the pick's memo are caches of answers worked
+out again without them: refused, the layer is the same and only slower,
+benign. A mirror image or a raised view refused is not, nor a book's
+candidates in `tiles_learn`: the area learns
+from fewer of its original maps' views, and the layer drawn from them
+differs from the first picture on (the run itself takes another course
+from there). It also breaks a layer's being made again the same from its
+seed: learned again with more room (a checkpoint's CONTINUE, or the area
+learned again later), the same layer would be drawn otherwise. So the
+"speed cache" refusals of 5 November were benign; the mirror images'
+and the books' refusals were not, and are what the change removes: with
+it, no run of any case refused anything.
+Neither crashed: the one place a refusal in the learning still wrote
+through its allocation unchecked, the counter's mirror's walls
+(`props_mirror_walls`), now checks it.
+
+## The budget and the margin rule
+
+What a long run holds on the New 3DS, by part, since the change: the
+budget a new feature is counted against.
+
+| Part | MB | When |
+| --- | --- | --- |
+| The core's ROM copy | 16.0 | the whole session |
+| BN6's ROM | 8.0 | the whole session |
+| An extra ROM (BN5's, else BN4's) | 8.0 | the whole session, where read |
+| Home's source (Central Town's map, its mirror image, their entries) | 13.8 | from the first visit home, the whole run |
+| The layer's area's learned books | 2 to 7 | while its layers last |
+| An area's learning: one of its maps at a time | up to 11.8 | while it learns (a layer's first making) |
+| The tiles' learning of that map | up to 9 | the same |
+| The installs' log, SDL, mGBA, the game's tables | about 5 | the whole session |
+
+The margin rule: `python3 tools/heap3ds.py --cases bn6,bn5,bn4 --cap 86`
+over seeds 1-12 refuses nothing, and no crash, so a long run's peak stays
+10 MB under the heap: 6 MB for what the 3DS's fragmentation may take (the
+`--cap 90` test above) and 4 MB for what the model does not count (the
+device's `log.txt` "at most" against the model's peak). The `all` case,
+both extra ROMs at once, is measured but not held to it: a 3DS reads one
+(A third ROM, above). A run whose peak at 96 MB stays under 86 with
+nothing refused makes the same allocations at 86, so the tables above
+answer the rule as well. After the change the cases a 3DS plays peak at
+about 76 to 78 MB: some 8 MB of room under the rule for what is still to
+come (BN4's chips, Team ProtoMan's Navis, more families), each counted
+in the table above as it lands. A
+feature that keeps memory for a whole run (a ROM's table, a cache, a
+source kept for its next use) adds its row to the table above in the
+same change. Where it would break the rule, the next room is, in order:
+home's source let go on the jack-in and learned again at the next visit
+(13.8 MB, as the Oran Isle stop does for its own town, PR #321), and BN5's
+ROM read in windows from the SD card (6 MB, above).

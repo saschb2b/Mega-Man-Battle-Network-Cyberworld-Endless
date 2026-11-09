@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--no-build]: the
+"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--refuse FUNC,...] [--shots N] [--no-build]: the
 New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
 docs/engine/emulation/3ds-memory.md).
 
@@ -23,7 +23,10 @@ the 3DS's malloc does. Each case is a 3DS:
 
 Per case and seed: the heap's peak, the allocations refused (the first's
 place named), a crash's place, how deep the run went and how often an area
-was learned again. Needs the ROMs (local only), copied into
+was learned again. --refuse FUNC refuses every allocation those functions
+ask for, and --shots N keeps a picture every N frames in each run's
+folder: a refusal's cost seen beside a run without it (the same pictures:
+it cost time alone). Needs the ROMs (local only), copied into
 .build/heap3ds/rom. Exits 0 once every run is reported."""
 import argparse
 import hashlib
@@ -102,8 +105,10 @@ def frames_after(text, marker, binary):
     return re.findall(r'heap3ds:   at \S*' + re.escape(os.path.basename(binary)) + r'\+(0x[0-9a-f]+)', text.split(marker, 1)[1].split('heap3ds: refused', 1)[0])
 
 
-def one(bp, rom, case, seed, frames, cap):
-    """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes"""
+def one(bp, rom, case, seed, frames, cap, refuse='', shots=0):
+    """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes; the
+    allocations asked for in the game's ranges `refuse` refused, and a
+    picture every `shots` frames"""
     extras, fixed, binary = CASES[case]
     data = os.path.join(WORK, case, f's{seed}')
     shutil.rmtree(data, ignore_errors=True)
@@ -112,11 +117,12 @@ def one(bp, rom, case, seed, frames, cap):
     mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
     dev = 'god,onehit'
     env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
-           ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')]
+           ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')] + ([('HEAP3DS_REFUSE', refuse)] if refuse else [])
     rel = os.path.relpath(data, ROOT)
+    pictures = ['--shot', ','.join(f'{f}:/src/{rel}/f{f:06d}.bmp' for f in range(shots, frames + 1, shots)[:64])] if shots else []
     r = docker_run(bp, f'3ds-heap3ds-{case}-s{seed}-{os.getpid()}',
                    [binary, '--headless', '--size', '400x240', '--rom-dir', '/rom', '--data-dir', f'/src/{rel}',
-                    '--scene', 'emu', '--seed', str(seed), '--dev', dev, '--frames', str(frames)], mounts, env)
+                    '--scene', 'emu', '--seed', str(seed), '--dev', dev, '--frames', str(frames)] + pictures, mounts, env)
     out = r.stdout + r.stderr
     with open(data + '.out', 'w') as f:
         f.write(out)
@@ -141,6 +147,21 @@ def names(bp, binary, addrs):
     return {a: f'{lines[2 * i]} ({lines[2 * i + 1]})' for i, a in enumerate(addrs) if 2 * i + 1 < len(lines)}
 
 
+def ranges(bp, binary, funcs):
+    """The game's functions `funcs` as HEAP3DS_REFUSE's ranges (nm's
+    offsets and sizes)"""
+    if not funcs:
+        return ''
+    r = docker_run(bp, f'3ds-heap3ds-nm-{os.getpid()}', ['nm', '-S', '--defined-only', binary])
+    out = []
+    for f in funcs:
+        m = re.search(r'^([0-9a-f]+) ([0-9a-f]+) [tT] ' + re.escape(f) + r'$', r.stdout, re.M)
+        if not m:
+            sys.exit(f'no function {f} in {binary} (inlined, or misspelt?)')
+        out.append(f'0x{m.group(1)}-0x{int(m.group(1), 16) + int(m.group(2), 16):x}')
+    return ','.join(out)
+
+
 def build(bp):
     """The host build, and the host built with the 3DS's rules (CW_HEAP_3DS)"""
     subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
@@ -159,6 +180,8 @@ def main():
     ap.add_argument('--no-build', action='store_true', help='the host binaries as they are')
     ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
     ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
+    ap.add_argument('--refuse', default='', help='functions whose allocations are all refused, as FUNC,FUNC: what a refusal there does')
+    ap.add_argument('--shots', type=int, default=0, help="a picture every N frames, into each run's folder (64 at most), to set beside another run's")
     a = ap.parse_args()
     for case in ('bn6', 'bn5', 'bn4', 'all'):
         CASES[case] = CASES[case][:2] + (a.as_3ds,)
@@ -173,8 +196,9 @@ def main():
     if r.returncode:
         sys.exit('heap3ds.c did not build\n' + r.stderr)
     jobs = [(c, s) for c in cases for s in seeds_of(a.seeds)]
+    refuse = {b: ranges(bp, b, [f for f in a.refuse.split(',') if f]) for b in {CASES[c][2] for c in cases}}
     with ThreadPoolExecutor(a.jobs) as pool:
-        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB), jobs)))
+        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB, refuse[CASES[j[0]][2]], a.shots), jobs)))
     places = {}
     for binary in {res['binary'] for res in results.values()}:
         places.update({(binary, k): v for k, v in names(bp, binary, sorted({f for res in results.values() if res['binary'] == binary
