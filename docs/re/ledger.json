@@ -1,8 +1,8 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-08",
-  "previous": "2026-11-05",
+  "updated": "2026-11-09",
+  "previous": "2026-11-08",
   "features": [
     {
       "name": "Net Square",
@@ -131,6 +131,14 @@
       "left": "Not in a run yet: the tournament's design calls xbracket_open; the return to the map after the screen written as BN6's screens return but not run past the fade; the song not listened to; a script's wait and return (the host's stub); the Free Tournament's own list and its menu sprite types 0x3C and 0x3D stubbed; why BN4's HBlank DMA shows the frame before's values (reproduced by a copy at the mode's start, not read in BN4's handler). Plates 0x01-0x02, 0x05-0x08, 0x0A-0x10 and 0x14-0x15 unnamed; the stage's cutscenes undecoded; main modes 0x10, 0x28, 0x2C and 0x3C of BN4's unidentified. What chooses a plate's lighter variant (1) not found; the head windows and ElecMan's halving chosen by eye.",
       "updated": "2026-11-05",
       "link": "../multirom/bn4-tournament.md"
+    },
+    {
+      "name": "BN5's areas' kit and win music",
+      "state": "works",
+      "now": "BN5's net maps' coordinate data read for set pieces (an atlas survey, not kept): arrow panels carry BN6's section-3 values 0x48-0x4F (SciLab 4, End Area 1-3, Oran Area 2, the Undernet 1-3, Nebula Area 2 and 4), learned as BN6's and laid as lanes on BN5's areas' layers (LAYER_MAKE 113); ramps are cells of BN6's types 0x13 and 0x14, every one four panels long, under a panel wide and 64 high. BN5's battle win (0x080074D2, its song at 0x08007530) decoded beside BN6's (0x080081A4): the same pick of 0x19 or 0x1F, so a battle won on BN5's areas plays BN5's song of BN6's number (src/director/win_song.c, BN6_WIN_SONG; copies at slots 0x41 and 0x42).",
+      "left": "Raised rooms on BN5's areas (the generator laying a four-panel ramp, not BN6's two by two); BN5's warp lists read for in-map teleports and its maps for a counter; BN4's win songs traced.",
+      "link": "../multirom/status.md",
+      "updated": "2026-11-09"
     }
   ],
   "decisions": [],

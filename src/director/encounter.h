@@ -20,6 +20,9 @@ void emu_encounter_set(const Encounter *e);
 #define ENCOUNTER_SONG_BATTLE 0x15
 #define ENCOUNTER_SONG_BOSS   0x16
 extern int encounter_song[2];
+/* The game whose areas the layer is drawn in (XRomId; -1 BN6's), as the
+ * layer sets it: a won battle plays its win songs (win_song.c). */
+extern int encounter_game;
 /* The background a battle's record names: -1 for its area's own, as BN6
  * rolls them, or another game's (xbackdrop_install), as the layer sets it. */
 extern int encounter_backdrop;

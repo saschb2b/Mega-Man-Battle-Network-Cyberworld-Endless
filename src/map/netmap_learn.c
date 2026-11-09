@@ -135,10 +135,13 @@ static void learn_report(int area, const Learned *L) {
 	for (int d = 0; d < 4; ++d) fprintf(stderr, "arrow panel area %d way %d ok %d tiles %d\n", area, d, L->arrow[d].ok, L->arrow[d].ntiles);
 }
 
-/* Map a's arrow panels, the ways not learned yet (BN6's maps alone: another
- * game's sections are its own). */
-static void learn_arrows(const AreaSrc *a, const NetAreaDef *na, Learned *L) {
-	for (int d = 0; d < 4 && !na->xrom; ++d) props_learn_arrow(a, d, &L->arrow[d]);
+/* Map a's arrow panels, the ways not learned yet: BN6's, and BN5's, whose
+ * maps mark theirs with the same section-3 values 0x48-0x4F (SciLab 4, End
+ * Area 1-3, Oran Area 2, the Undernet 1-3 and Nebula Area 2 and 4:
+ * docs/rom/bn5-world.md, Its arrow panels and ramps); the lane on a layer
+ * is BN6's own ride either way, its art the area's. */
+static void learn_arrows(const AreaSrc *a, Learned *L) {
+	for (int d = 0; d < 4; ++d) props_learn_arrow(a, d, &L->arrow[d]);
 }
 
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
@@ -157,14 +160,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		/* (its emblem, where its own map draws none: BN4's Undernet's
 		 * plain plates, crossed in another of its maps) */
 		if (na->emblem && !L->emblem.ok && aligned(grid, &b)) props_learn_floor_emblem(&b, na->emblem, &L->emblem);
-		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		if (aligned(grid, &b)) learn_arrows(&b, L);
 		area_src_free(&b);
 	}
 	/* (and the arrow panels of its maps listed for them alone) */
 	for (int k = 0; k < 2 && na->arrow_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
-		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		if (aligned(grid, &b)) learn_arrows(&b, L);
 		area_src_free(&b);
 	}
 }
@@ -189,7 +192,7 @@ bool nm_learn(int area, Learned *L) {
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, nm_ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
 	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
-	learn_arrows(&a, na, L);
+	learn_arrows(&a, L);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
 	rebank_seen(&a, na->rebank[1], L);

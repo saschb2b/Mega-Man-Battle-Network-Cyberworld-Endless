@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-08",
-  "previous": "2026-11-05",
+  "updated": "2026-11-09",
+  "previous": "2026-11-08",
   "features": [
     {
       "name": "Net Square",
@@ -148,63 +148,19 @@
       "updated": "2026-11-05",
       "link": "../multirom/bn4-tournament.md",
       "state_text": "Being built"
+    },
+    {
+      "name": "BN5's areas' kit and win music",
+      "state": "works",
+      "now": "BN5's net maps' coordinate data read for set pieces (an atlas survey, not kept): arrow panels carry BN6's section-3 values 0x48-0x4F (SciLab 4, End Area 1-3, Oran Area 2, the Undernet 1-3, Nebula Area 2 and 4), learned as BN6's and laid as lanes on BN5's areas' layers (LAYER_MAKE 113); ramps are cells of BN6's types 0x13 and 0x14, every one four panels long, under a panel wide and 64 high. BN5's battle win (0x080074D2, its song at 0x08007530) decoded beside BN6's (0x080081A4): the same pick of 0x19 or 0x1F, so a battle won on BN5's areas plays BN5's song of BN6's number (src/director/win_song.c, BN6_WIN_SONG; copies at slots 0x41 and 0x42).",
+      "left": "Raised rooms on BN5's areas (the generator laying a four-panel ramp, not BN6's two by two); BN5's warp lists read for in-map teleports and its maps for a counter; BN4's win songs traced.",
+      "link": "../multirom/status.md",
+      "updated": "2026-11-09",
+      "state_text": "Works"
     }
   ],
   "decisions": [],
-  "since": [
-    {
-      "date": "2026-11-08",
-      "what": "ThunderMan proved: his companion's and cloud's gates on the battle's flags aimed at the dispatch's XV_FIGHT_FLAGS (src/emu/xvirus_dispatch.c; tools/xnavirecipe_bn4_objects.py FIGHT_GATED); the BN4 trace lays out a frame of hits by element (src/dev/xdiff_bn4_trace.c); the comparator's opening_animation (tools/xdiff_bn4_opening.py), Navi-scoped sound rows, spawn leftovers by pointer or bytes, sparks out of the renderer's ranks; thunderman_v1 PASS, four mutations. Not in the tournament's proved list: his plate on BN4's bracket unnamed"
-    },
-    {
-      "date": "2026-11-08",
-      "what": "WindMan proved: windman_v1 PASSES (1200 fight frames, its recorded verdict removed), four mutations of his port caught (tests/xdiff/mutations.json). His wind and its gust located in both engines and named (docs/rom/bn4.md, WindMan's wind and its gust in both engines): BN4_WIND_TYPE 0x080E6820, BN4_GUST_SPAWN 0x080D68AC, BN4_GUST_INIT 0x080D6748, BN4_STEP_BEGIN 0x0801393E in src/emu/bn4_navis.h; BN6_WIND_TYPE 0x080E6584, BN6_WIND_HOLD 0x080E65BA, BN6_GUST_SPAWN 0x080CECF8, BN6_GUST_INIT 0x080CEB80, BN6_STEP_BEGIN 0x0801AD12 in src/emu/bn6_navis.h. The comparator (tools/xdiff_snap.py state_off; tools/xdiff_bn4.py spawner_kept, own_art, arts_set, allowed_engine, slide_direction, let_go, occupants, is_native and ranks_into, the spark out of the ranks) and legit.json's bn4 (battle_state; the wind's spawner, his second wind's r3, the gust's sprite flag, a native's own art, MegaMan's step's kind, his blocked slide's step, a slide's direction; sounds 0xB2, 0x133 and 0x121). Not yet in the tournament's proved[]: his bracket plate (BN4_ENTRANT_ID) is not named."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "FireMan proved: fireman_v1 PASSes over its 1200 frames, its recorded verdict removed. His companion's opening count read by the fight's frames (its mode 0's tail 0x080CC5D0 runs the after-step 0x080143FC, BN6's twin 0x0801BBAC: legit.json's bn4 companion_opening_count); his flame's palette (the third kind's 0x09, BN4's +0xE, its spawner's store 0x080CE4BC) moved to BN6's +0xF so its element stays at BN6's +0xE (tools/xrecipe_bn4.py palette_imms, BN4_T3_PALETTE, BN6_T3_PALETTE); his pool sounds (0xA8, 0x8F, 0xA9, 0xC0) paired; the family's renderer ranks read without a hit's spark (spark_ranks). Six mutations of his port caught (193 of 193). Held from the tournament's pool: his plate on BN4's bracket is not named."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "BN4's bracket plates tied to their Navis (src/emu/bn4_tournament.h: BN4_PLATE_GUTSMAN to BN4_PLATE_HEALNAVI; BN4_OPPONENT_PROGRESS 0x0802C2DD, BN4_CS_BATTLE 0x51, BN4_STORY_BATTLE 0x08007BEC, BN4_STORY_BATTLES 0x080FA900, BN4_START_BATTLE 0x08005490, BN4_START_CUTSCENE 0x0802BD10, BN4_CS_IF_BATTLE 0x23; docs/rom/bn4.md, Each plate's Navi)."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "SearchMan derived, built and proved (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 51, ids 0x38C-0x38F; bn4_navis.h BN4_SEARCHMAN, BN4_COLL_INVISIBLE 0x1A, BN4_INVISIBLE_STEP 0x0800C0DA, BN4_INVISIBLE_HIT 0x0800C110, BN4_HIDE 0x0800C126, BN4_SHOW 0x0800C13C, BN4_HIDE_STEP 0x0800C0A6, BN4_COLL_HIDE_MARKER 0x7C, BN4_T4_SCOPE 0x2E, BN4_SCOPE_SPAWN 0x080E5728; bn6_panels.h BN6_COLL_INVISIBLE 0x26, BN6_INVISIBLE_STEP 0x08010162, BN6_HIDE 0x080101AE, BN6_SHOW 0x080101C4, BN6_HIDE_STEP 0x0801012C, BN6_COLL_HIDE_MARKER 0x50; docs/rom/bn4.md, SearchMan derived): his hide and show paired with BN6's twins (LAYOUT), BN4's hide step copied with its marker (the fourth kind's 0x3E) moved and run before each of his states by stubs of his home (XNavi.hide_step, xnavi_init.c), his scope (0x2E) and trails (0x31) moved (a moved fourth kind, the generator's moved4), his effects' ids (an ORed flip, an id passed to 0x0801457E), four sounds past a byte through the shim; BN4's Navis' art room from +0x748000 (an interim)."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "AquaMan derived, built and proved (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 58, ids 0x3A8-0x3AB; BN4_AQUAMAN 0x080B820C, BN4_AQUAMAN_STATES 0x080B82A8, BN4_AQUAMAN_TABLES 0x080B81F8, BN4_AQUAMAN_PANEL +6, BN4_AQUAMAN_COMPANION +0x74, BN4_COMPANION_UPDATE 0x080CCD3C, BN4_COMPANION_MODE8 0x080CCE8C, BN4_COMPANION_KIND1 0x080CCECC, BN4_EFFECT_PATTERN 0x0801457E and BN4_EFFECT_PATTERNS 0x080125B0, BN6_EFFECT_PATTERN 0x0801BD3C; the spawn word 0x04050201; docs/rom/bn4.md, AquaMan derived): aquaman_v1 PASS, six mutations caught; in the tournament's proved list on BN4_PLATE_AQUAMAN."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "BN4's Roll derived and built (src/emu/bn4_navis.h: BN4_ROLL to BN4_T3_02_KINDS; docs/rom/bn4.md, Roll derived): her summon's shim (src/emu/xnavi_init.c, xvirus_shim_summon), her flash moved, her player-22 sounds on BN6's player 9."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "BN4's Mettaur moved for Roll's summon (src/emu/bn4_battle.h BN4_QUEUE_*, bn6_families.h BN6_QUEUE_*; docs/rom/bn4.md, Mettaur moved for Roll's summon): mettaur4_v1 PASSes, Roll's summon map points at its ids, roll_v1 still FAIL at t1008 on the summoned appear."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "Roll proved: roll_v1 PASSes (her summoned Mettaur's appear moved: bn6_families.h BN6_VIRUS_INIT, bn4_navis.h BN4_SPAWN_ENEMY_DRAW; docs/rom/bn4.md, Mettaur moved for Roll's summon); she joins the tournament's proved Navis."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "BN4's Navis' attacks' art and pool songs by battle (src/emu/xnavi_bn4_art.c; src/emu/xnavi_recipe.h XN_BN4_ARTS; src/emu/free_space.h FREE_BN4_NAVI_ART at +0x750000 again; tools/xnavirecipe_bn4_art.py; docs/multirom/bn4-navis.md, Art and songs by battle): one room filled for the coming battle's Navi as its record is written, his sprites' list entries pointed at his places; the mutation of his seat's art byte (another Navi's art loaded) caught by searchman_v1 at t216."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "Mettaur's sound 0x8B moved from slot 0x46 into Roll's per-battle pool (0xE0): XV_BN4_SONG_SLOT_MORE dropped, 0x41-0x4B BN5's (docs/multirom/bn4.md, call 8)."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "BN4's Melody (type 0x11, ids 0x37-0x3C) moved as a summoned family for Roll V3's 0x39 (bn4_navis.h BN4_MELODY_*, bn4_battle.h BN4_COLL_REGION_SET, bn6_families.h BN6_COLL_REGION_SET, BN6_COLL_REGION_CLEAR, BN6_SPAWN_ENEMY_2E; docs/rom/bn4.md, Melody moved for Roll's summon)."
-    },
-    {
-      "date": "2026-11-08",
-      "what": "Roll's versions (docs/multirom/bn4-navis.md, Roll's versions; docs/rom/bn4.md, Roll's versions: BN4_SUMMON_MARK in bn4_navis.h, BN6_VIRUS_STATE_CALL and BN6_T1_SPAWN_KIND in bn6_families.h, BN6_AI_VERSION in bn6_ai.h): a summoned visitor (Billy) arrives by BN4's summoned appear; her pool's songs apart; the BN4 Navis' SP palettes; roll_v2, roll_v3, roll_sp and roll_v2_summons PASS."
-    }
-  ],
+  "since": [],
   "experiments": [
     {
       "feature": "BN4's Navis in BN6's engine",
