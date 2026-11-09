@@ -37,8 +37,9 @@ typedef struct {
 	XVirusFamily code;     /* its code alone: blocks, data, calls, words, immediates, numbers, the objects it spawns, what it draws */
 	const XcSong *songs;   /* its sounds copied in (NULL none) */
 	int nsongs;
-	uint8_t navis;         /* the Navis whose battle sprites its code draws, bit n - 7 BN5's Navi of AI n (xnavi_sprites.h: list 2's
-	                          0x20 + n - 7, installed before its step) */
+	uint16_t navis;        /* the Navis whose battle sprites its code draws, bit XN_SEAT(n) BN5's Navi of AI n (xnavi_recipe.h: Team
+	                          Colonel's six n - 7, the Darkloids n - 6; xnavi_sprites.h: list 2's 0x20 + its seat, installed before
+	                          its step) */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];

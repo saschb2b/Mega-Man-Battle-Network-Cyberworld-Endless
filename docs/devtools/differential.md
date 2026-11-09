@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -708,6 +708,21 @@ code at BN6's own place and as its moved copy alike), and
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
 
+## Holds
+
+Through a hold (the battle's timer at one value for many frames: a Navi
+chip's, a turn's change) the two games run a frame each in turn, the
+reference up to eight frames ahead (`src/dev/xdiff.c`, `fight`'s `LEAD`;
+each side's frames at its timer counted from its seed, `still`), so the
+reference's draws are made before the subject's replay asks for them. In
+lockstep a frame the reference spends without its game's loop left the
+subject a frame ahead for the rest of the hold: BN5 queues ShadeMan's and
+BlizzardMan's LZ77 sprites as their Navi chips come and loses three
+frames, so 609 of BN6's 936 per-frame draws in `chip_shademan`'s hold
+went unmatched though their numbers were BN5's, a FAIL of the
+comparator's own. With the lead the suite PASSes as before (every spec
+of `tests/xdiff`, the four held verdicts held, the mutations caught; [The
+chips' code](../multirom/chips-code.md), the Darkloids' first batch).
 ## A spawn's leftovers (BN5)
 
 A word of a moved object that its spawn took from a register its caller
