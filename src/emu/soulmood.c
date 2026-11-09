@@ -1,6 +1,8 @@
 /* BN5's mood and its DarkChip rule in BN6's battles (soulmood.h). */
 #include "soulmood.h"
 
+#include "chip_entry.h"
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -282,7 +284,7 @@ static void worried_rule(uint16_t deck[BN6_DECK_SIZE], int side) {
 	const XChipReg *rec = xreg_of_bn5(BN5_DRKRECOV);
 	int recov = rec && rec->how == XREG_DARK ? rec->bn6 : -1, chosen = -1, first = -1;
 	for (int i = 0; i < BN6_DECK_SIZE; ++i) {
-		int id = deck[i] & 0x1FF;
+		int id = (int)chip_entry_id(deck[i]);
 		if (!bn5_dark_chip(id)) continue;
 		if (chosen < 0) {
 			chosen = first = i;
@@ -292,7 +294,7 @@ static void worried_rule(uint16_t deck[BN6_DECK_SIZE], int side) {
 			chosen = i;
 			continue;
 		}
-		if (low && (deck[chosen] & 0x1FF) == recov) continue;
+		if (low && (int)chip_entry_id(deck[chosen]) == recov) continue;
 		if (rng_secondary() & 1) chosen = i;
 	}
 	int hand = hook_read8(BN6_CUSTOM_HAND);
@@ -320,7 +322,7 @@ static HookAct compact(HookRegs *r, void *user) {
 	bool any = false;
 	for (int i = 0; i < BN6_DECK_SIZE; ++i) {
 		deck[i] = hook_read16(BN6_BATTLE_DECK + 2u * (uint32_t)i);
-		any = any || (deck[i] != 0xFFFF && bn5_dark_chip(deck[i] & 0x1FF));
+		any = any || (deck[i] != 0xFFFF && bn5_dark_chip((int)chip_entry_id(deck[i])));
 	}
 	if (!any) return HOOK_CONTINUE;
 	int emo = emotion(side);
@@ -331,7 +333,7 @@ static HookAct compact(HookRegs *r, void *user) {
 	uint16_t out[BN6_DECK_SIZE], shelf[SHELF];
 	for (int i = 0; i < BN6_DECK_SIZE; ++i) {
 		if (deck[i] == 0xFFFF) continue;
-		if (bn5_dark_chip(deck[i] & 0x1FF) && nshelf < SHELF && !(i < hand ? later : i == hand ? rule : false)) {
+		if (bn5_dark_chip((int)chip_entry_id(deck[i])) && nshelf < SHELF && !(i < hand ? later : i == hand ? rule : false)) {
 			shelf[nshelf++] = deck[i];
 			continue;
 		}

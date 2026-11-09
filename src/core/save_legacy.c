@@ -13,6 +13,7 @@
 #include "game.h"
 #include "run.h"
 #include "save_blob.h"
+#include "save_format.h"
 #include "save_queue.h"
 
 #define RUN_MAGIC_V1 0x43574531u /* "CWE1" */
@@ -140,11 +141,13 @@ static bool load_v9(void) {
 	return true;
 }
 
-/* (every extra on, as runs were) */
-static bool load_va(void) {
+/* (a Run as it lies today under `magic`: "CWEA" every extra on, as runs
+ * were; "CWEB" and "CWEC" where this build's folders are ten bits, their
+ * state's nine-bit, save_format.h) */
+static bool load_today(uint32_t magic, bool extras_on) {
 	Run v;
-	if (!save_read_blob_upto("run.sav", RUN_MAGIC_VA, &v, sizeof v) || !v.active) return false;
-	v.extras_off = 0;
+	if (!save_read_blob_upto("run.sav", magic, &v, sizeof v) || !v.active) return false;
+	if (extras_on) v.extras_off = 0;
 	run = v;
 	return true;
 }
@@ -187,7 +190,8 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if (load_va() || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
+	if ((RUN_MAGIC != RUN_MAGIC_NINE_STOP && load_today(RUN_MAGIC_NINE_STOP, false)) || (RUN_MAGIC != RUN_MAGIC_NINE && load_today(RUN_MAGIC_NINE, false)) ||
+	    load_today(RUN_MAGIC_VA, true) || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

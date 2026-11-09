@@ -231,7 +231,7 @@ static void lean_row(int id) {
 	for (uint32_t k = 0; k < 20; ++k) {
 		uint16_t v = enemy_drop(id, (int)k);
 		if (v == 0xFFFF || v >> 14) continue;
-		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+		int chip = (int)chip9_id(v), code = (int)(chip9_code(v) & 0x1F);
 		bool navi = chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip);   /* (BN5's Navi chips by the registry: their families BN5's) */
 		if (boss_on && navi) {
 			hook_write16(row + 2 * k, boss_zenny());

@@ -1,10 +1,10 @@
-# Net Square protocol v15
+# Net Square protocol v16
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v15`. The server also
+`/presence` with subprotocol `cyberworld.presence.v16`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -117,6 +117,15 @@ or full rules outside a mixed pair's common ground, protocols v4 to v8)
 is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v16 (docs/multirom/bn4-chips.md, Past 511): **chip ids to
+1023** (`chip_last`), for ten-bit chip ids, BN4's chips and BN5's yet
+unregistered beyond BN6's 512. A chip on the wire was always its own
+u16, so no message changed size or shape; what changed is what the
+server and the game take for a chip (a trade, an offer on the board, the
+stands' last chip), so two builds that differ never pair. The game's
+folders keep their entries in their own form inside it
+(`src/core/chip_entry.h`); nothing of that crosses the wire.
 
 Protocol v15 (issue #181; docs/online/arena/two-a-side/overview.md,
 Over the server). **A team challenge's format**: ARENA's last byte names

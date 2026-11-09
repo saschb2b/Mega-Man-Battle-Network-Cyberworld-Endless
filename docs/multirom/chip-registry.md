@@ -139,6 +139,22 @@ its one other chip, and a run saved with BN5's chips continued without BN5's ROM
 words); the autopilot's seeds 1-12 the same, run log for run log, as
 before the tables moved.
 
+Past 511: the registry's ids end at BN6's nine bits, every free one
+taken but ten; [BN4's chips in a run](bn4-chips.md) answers both older
+games' remaining chips with ten-bit ids. Where it stands: the census of
+BN6's code that takes an id in nine bits (`tools/chip_ids.py`, [The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip ids),
+every C reader and writer of a folder entry through
+`src/core/chip_entry.h`, the profile's Library to 1023 and the wire's
+chips to 1023 (protocol v16), and BN6's code patched (`src/emu/xchips_wide.c`):
+ten bits are live. The image holds 1024 records and four archives of
+names and of descriptions (`CHIPS_TABLES` their words), ids 512-1023
+free for the registry, blank records until a row takes one (`--dev
+alias=ID` makes one a copy of Cannon, the proof of an id past 511). Not
+yet past 511: the pack (its extension ends at 511), the Library's flags
+(`0x1E20` + id ends at 511), the other name readers, the folder editor's
+items, the wide rewards.
+
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood
 traps (BN6's traps trigger by chip id and it has no elemental kinds);

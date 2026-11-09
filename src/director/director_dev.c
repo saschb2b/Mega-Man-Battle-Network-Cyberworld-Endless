@@ -2,6 +2,8 @@
  * gifts, MegaMan placed or moved on, and where the test autopilot heads. */
 #include "director_dev.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -287,19 +289,20 @@ int director_dev_chip(const char *spec) {
 	int got = sscanf(spec, "%i %3s %d", &id, code, &n);
 	int c = code[0] == '*' ? CHIP_CODE_STAR : code[0] >= 'A' && code[0] <= 'Z' ? code[0] - 'A' : -1;
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	if (got < 2 || id <= 0 || id >= PACK_CHIPS || c < 0 || n < 1 || n > BN6_FOLDER_ENTRIES || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
-		printf("chip: %s is none (an id 1-511, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec);
+	if (got < 2 || id <= 0 || id > (int)CHIP_ID_MASK || c < 0 || n < 1 || n > BN6_FOLDER_ENTRIES || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
+		printf("chip: %s is none (an id 1-%d, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec, (int)CHIP_ID_MASK);
 		return 0;
 	}
-	uint16_t e = (uint16_t)(id | c << 9);
+	uint16_t e = chip_entry((unsigned)id, (unsigned)c);
 	uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
 	for (uint32_t i = 0; i < (uint32_t)n; ++i) emu_write(data + 2 * i, b, sizeof b);
 	own_folder_chips();
 	/* (the pack's counts hold the folder's copies too, outside the folder
 	 * editor, which takes them out as it opens: n for the folder, one more
-	 * the pack's own; the chips written over stay counted, as spares) */
+	 * the pack's own; the chips written over stay counted, as spares; past
+	 * the pack's extension, to 511, the folder alone) */
 	uint32_t out[2] = { 0, 0 };
-	bool given = game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, (uint32_t)c, (uint32_t)n + 1, out);
+	bool given = id < PACK_CHIPS && game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, (uint32_t)c, (uint32_t)n + 1, out);
 	ChipInfo ci;
 	chip_info(id, &ci);
 	uint32_t at = pack_entry(id);

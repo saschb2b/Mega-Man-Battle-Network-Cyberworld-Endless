@@ -8,6 +8,8 @@
  * have used: docs/multirom/). In text it taps A. Testing only. */
 #include "autopilot.h"
 
+#include "chip_entry.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -356,7 +358,7 @@ static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(
 
 static int hand_chip(int i) {
 	int c = B->r16(B->deck + 2 * (uint32_t)i);
-	return c == 0xFFFF || dark_chip(c & 0x1FF) ? 0xFFFF : c;
+	return c == 0xFFFF || dark_chip((int)chip_entry_id(c)) ? 0xFFFF : c;
 }
 
 static int plan_picks(int *slots) {
@@ -366,9 +368,9 @@ static int plan_picks(int *slots) {
 	if (me) hurt = B->r16(me + BN6_T1_MAX_HP) - B->r16(me + BN6_T1_HP);
 	for (int g = 0; g < 26 + n; ++g) {
 		int bucket[5][5], k[5] = { 0 }, value = 0, plus = 0, lo, hi, rows;
-		int name = g < 26 ? -1 : hand_chip(g - 26) & 0x1FF;
+		int name = g < 26 ? -1 : (int)chip_entry_id(hand_chip(g - 26));
 		for (int i = 0; i < n; ++i) {
-			int c = hand_chip(i), id = c & 0x1FF, code = c >> 9, kind = chip_kind(id), at;
+			int c = hand_chip(i), id = (int)chip_entry_id((uint16_t)c), code = (int)chip_entry_code((uint16_t)c), kind = chip_kind(id), at;
 			if (c == 0xFFFF || (g < 26 ? code != g && code != 26 : id != name)) continue;
 			if (kind == CK_ATKPLUS) { plus += chip_def(id)->param; at = 3; }
 			else if (kind == CK_AREAGRAB) at = 0;

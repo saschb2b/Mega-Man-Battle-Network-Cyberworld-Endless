@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Online: protocol v16.** The Net Square, Trade Central and the Arena
+  now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
+  last ones, which need ids past BN6's 511. Games of this version meet
+  only games of this version and a server that speaks v16; an older game
+  hears that it is behind, as with every new protocol. Someone hosting
+  their own Square updates the server with the game.
+- **Chip ids past 511.** BN6's chip ids grew from nine bits to ten inside
+  the game, ground for BN4 Red Sun's chips. Nothing plays differently.
+  A run saved by an earlier version goes on as before (its folders are
+  converted once as it loads); a save from this version moved to an
+  earlier one is refused there as a newer version's.
 - **ShadeMan's and BlizzardMan's chips.** With BN5 Team Colonel's ROM,
   the two Darkloids' Navi chips are in the game: ShadeMan, ShadeMan SP
   and DS, BlizMan, BlizMan SP and DS, each moved from BN5 and checked

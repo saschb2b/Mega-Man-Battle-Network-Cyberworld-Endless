@@ -272,6 +272,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-09",
       "what": "BN5's ShadeMan and BlizzardMan Navi chips moved (docs/multirom/chips-code.md; docs/rom/chips-code.md, the Darkloids' Navi chips): BN5's LZ77 sprite queue 0x080029B8 stubbed, the struck setter 0x0800D7B8 copied, the SP and DS powers' table 0x0801D27A copied to row 14; BN4's chips paired by three rules (docs/multirom/bn4-chips.md, Where things stand), its names' punctuation 0x40, 0x46, 0x4E read as BN6's."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids, unit 1's first part (docs/multirom/bn4-chips.md): the census of BN6's nine-bit sites read and kept by tools/chip_ids.py (docs/rom/chips-code.md, Ten-bit chip ids: BN6_ENTRY_SPLIT, BN6_ENTRY_SPLIT_MASK, BN6_ENTRY_CHEAT, BN6_REWARD_SPLIT, BN6_LINK_CHIP_BOUND, BN6_EDITOR_LIST_OUT, BN6_EDITOR_LIST_IN in bn6_chips.h; BN6_FLAG_LIBRARY_IDS in bn6.h); src/core/chip_entry.h; the profile's Library to 1023; protocol v16."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids' installer (src/emu/xchips_wide.c: the census's 116 halfwords and the preset folders, BN6_PRESET_FOLDERS and BN6_PRESET_FOLDERS2 in bn6_chips.h), inert at nine bits; tried at ten bits: the autopilot, the folder editor and the differential as at nine."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids and the saves (docs/engine/saves.md): RUN_MAGIC \"CWEC\" at ten bits, a run saved with nine-bit folders converted once after its state loads (BN6_FOLDERS in bn6_chips.h)."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "Ten-bit chip ids live (docs/rom/chips-code.md, Ten-bit chip ids: BN6_CHIP_NAME_OF, BN6_CHIP_DESC_OF, BN6_PACK_MARK_STORE, BN6_PACK_MARK_TEST in bn6_chips.h; docs/engine/saves.md: RUN_MAGIC CWED)."
     }
   ],
   "experiments": [
@@ -297,6 +313,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
       "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
       "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-09",
+      "name": "Ten bits against nine",
+      "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
+      "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
+      "link": "../multirom/bn4-chips.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",

@@ -17,7 +17,7 @@
 #include "xchips_moved.h"
 
 #define BUS 0x08000000u
-#define CHIP_IDS 512   /* (BN6's chip ids: nine bits, the registry's XREG_IDS) */
+#define CHIP_IDS CHIPS_IDS   /* (BN6's chip ids, ten bits) */
 
 static unsigned ran, base_ran;   /* the battle's DarkChips: those that ran (dark_ran_add's bits); BN6's whose base chip ran, by DarkChipID */
 static int powered = -1;         /* the records' power as last written: 1 their own, 0 their base chips', -1 not yet */

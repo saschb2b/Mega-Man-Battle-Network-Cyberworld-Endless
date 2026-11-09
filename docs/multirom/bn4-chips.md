@@ -1,6 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, unit 1 (ten-bit chip ids) live, ids past 511 in part: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips the first batch in the 10 free ids), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+tags: [multirom, bn4, chips, design]
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T11:30:00Z }
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0) and BN5's first batch built: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:40:00Z }
@@ -29,6 +32,59 @@ and [the chips' code](chips-code.md).
 
 ## Where things stand
 
+**Unit 1, ten-bit chip ids, live; ids past 511 in part** (below, The build plan): the
+census of BN6's code is read and kept by `tools/chip_ids.py` ([The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip
+ids): of 625 shapes 128 are code, 77 of them to patch (116 halfwords,
+`--table`), 2 a reward's, 6 the link battle's, 37 no chip, the folder
+editor's 5 item-key shifts kept (its items, id << 7 | code, hold ids to
+511 whatever an entry's form) and 1 the link battle's real-time chip
+open. Built: every reader and writer of a folder entry in the engine's
+C through `src/core/chip_entry.h` (nine bits still, one number to
+change), its converter from nine bits unit-tested, the installer of the
+census's table and the preset folders (`src/emu/xchips_wide.c`, inert at
+nine bits), the profile's Library to 1023, the wire's chips to 1023
+(protocol v16). Tried at ten bits, not shipped: the autopilot's seeds 1-3
+the same run log and pictures as at nine, the folder editor the same
+picture for picture, every differential spec its nine-bit verdict.
+
+**Ten bits are live** since: `CHIP_ID_BITS` 10, `RUN_MAGIC` "CWED" (a
+run of "CWEB" or "CWEC" converted once, [Portable saves](../engine/saves.md)),
+the image of 1024 records and four archives each of names and
+descriptions, the engine's tables sized by `CHIPS_IDS` and `XREG_IDS`
+(1024), the names' and descriptions' routines over four archives, the
+ownership marks hooked for ids from 512 (owned without a mark), the link
+battle's real-time chip settled (capped at 0x139 before its mask). An id
+past 511 plays: `--dev alias=600` makes chip 600 a copy of Cannon's
+record, name and description, and the chip step `chip 600 A 30` puts it
+in the folder; the Custom screen deals and draws it (Cannon A 40),
+picked and fired it deletes a Mettaur; the run saved so (`run.sav`
+"CWED") and CONTINUEd deals it again. Proved against nine bits: the
+autopilot's seeds 1-12 from fresh data folders the same run log (66
+battles) and the same pictures at frames 5000, 10000 and 14990; every
+differential spec its nine-bit verdict (421 PASS on dev merged, the two
+recorded FAILs and two smoke INCONCLUSIVEs as before), 246 of 246
+mutations caught; the server's contract tests take a trade and an offer
+of 600 and 1023. The New 3DS's heap modelled (`tools/heap3ds.py`, seeds
+1-3): BN6 alone 85.9 MB, none refused; with BN4 94.7 MB, none refused;
+with BN5 95.8 MB, a few of the tiles' learning caches refused as on 4
+November (docs/engine/emulation/3ds-memory.md), the image 64 KB larger.
+
+Not yet past 511: the pack (its extension in EWRAM ends at 511, and no
+RAM BN6 leaves alone is known for 6 KB more: a chip from 512 is not given
+to the pack, `GiveChips` would write past it), the Library's flags
+(`0x1E20` + id ends at 511), the 21 other name readers (an id from 512
+named as id - 256 there), the folder editor's items as id << 6 | code
+(about 30 shifts by 7 and 0x7F masks), the wide rewards at 511 and their
+table, and BN5's chips' and Souls' moved code read for entries it splits
+itself (the differential passes at ten bits).
+
+A BN4 virus's reward chip that BN6 has by name and kind pays as BN6's
+own; one BN6 lacks pays 200 zenny (`xchips_reward_bn4`, the owner's call
+9 of [Battle Network 4 in a run](bn4.md)). A tournament round against a
+BN4 Navi pays a BN6 Navi chip of the round's band as a stand-in
+([the tournament](../game/tournament.md), call 7). No BN4 chip has an id
+in BN6's tables.
 A BN4 virus's reward chip pays the run's chip it is (`xchips_bn4_paid`,
 unit 0, built 9 November 2026), by three rules in turn, each one chip per
 name as the registry's:
@@ -224,10 +280,17 @@ The three ways, measured:
   rule kept, every row of either game from 512 at an id fixed once.
   Its cost is one audit, done once for both games.
 
-What ten bits take. Located, not yet read: in BN6's code (to
-`0x08150000`) 47 places take the low nine bits by a shift pair (`lsls
-#23`, `lsrs #23`), 18 load 0x1FF as a literal, 119 shift right by 9 (a
-code from an entry, among other uses).
+What ten bits take. Located, then read (unit 1's census, [The chip
+registry and BN5's chips' code](../rom/chips-code.md), Ten-bit chip
+ids): in BN6's code (to `0x08150000`) 47 places take the low nine bits
+by a shift pair (`lsls #23`, `lsrs #23`), 26 load a literal whose low
+half is 0x1FF (18 plain), 119 shift right by 9 and 402 left by 9; of all
+of them 128 are code the game reaches, the rest data read as Thumb. The
+census's verdicts below stand: the hand past the Custom screen holds id
+and code apart, so a chip's attack takes an id, never an entry; the
+reward splits its own entry at `BN6_REWARD_SPLIT`; the folder editor
+keeps its items as id << 7 | code in a halfword, ten bits id << 6 | code
+(the codes to 28 fit six bits).
 
 - **Folders:** an entry becomes the id in its low 10 bits and the code
   from bit 10 (the code needs 5 of the 6 left; bit 15 spare). Every
