@@ -280,7 +280,7 @@ proposed").
 11. **BN5's win song on its areas** (**S**). A small cue a BN5 player
     hears after every battle there.
 12. **Team ProtoMan's Navis** (**L**), then their Souls (**L**): the
-    largest pool left, waiting on the owner's call below.
+    largest pool left; the owner wants them as enemies with their Souls (below).
 
 ## The owner's calls
 
