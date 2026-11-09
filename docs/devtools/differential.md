@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T14:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T14:50:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1674,7 +1674,15 @@ format, its game 4: the trace's header names it):
   given BN4's (k + N)-th (`src/dev/xdiff_events.c` `replay_setup`), BN4's
   first N without a twin, and holds BN6's count the same in both runs
   (else INCONCLUSIVE); the run prints `xdiff: the opening's draws paired
-  from its end`. Shrimpy's and Spikey's one init draw each, the same count
+  from its end`. N is bounded, never the gap of the counts alone: it must
+  equal BN4's draws of the key in the two unpaused frames BN6's opening has
+  no twin of, read from BN4's trace by frame (`twinless_draws`: the family
+  object's spawn frame, and the frame before the appear's bit 0, the frame
+  before `BN4_APPEAR`'s step 0 plays its sound); any other gap, a draw of
+  BN6's dropped or added, pairs nothing (`not paired from its end`) and
+  the spec fails where the family's state parts. Its mutation, MagTect's
+  opening one shake short (BN6's opening fade begun with 0x12, its copy
+  shaking 15 times), is caught at t1 with the pairing refused. Shrimpy's and Spikey's one init draw each, the same count
   in both, keep the k-th pairing. Then FAIL at t143 to t239 on its sounds
   until `legit.json`'s `bn4` `sounds` named the pool's 0x32 and 0x33 for
   its ids, and INCONCLUSIVE at t177 to t273 on MegaMan's collision word
