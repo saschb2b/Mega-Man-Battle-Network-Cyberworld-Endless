@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:04:45Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:27:28Z }
 ---
 
 # The chips' code
@@ -298,6 +298,10 @@ of. The registry's ids, records and art stay C1's (above).
   battle is the engine's own (`RAM_PA_WIDE`). Each forms on BN6's Custom
   screen as on BN5's but PileDrvr, whose GunDelS3 is BN6's chip, in
   other codes than Django: it forms only with every chip in \*.
+  WildBird spawns LarkMan's Navi object: its unit shares LarkMan's four
+  types (`UNIT_SHARES`, `XV_TYPE_SHARED`) and is its entry alone, since
+  the dispatch moves a type once (a second copy of LarkMan's blocks ran
+  for LarkMan's own chips, unwatched: three of his specs FAILed).
   `pa_bignoise`, `pa_csmopris`, `pa_wildbird`, `pa_football` and
   `pa_piledrvr` PASS, six mutations caught. Twenty
   `chip_*` specs PASS (each Navi's V1, SP, DS and DS dark), twenty

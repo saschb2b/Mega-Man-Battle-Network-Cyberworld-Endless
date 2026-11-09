@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-09
+* **Update**: multirom/chips-code.md (Moved): WildBird's unit shares LarkMan's object types (`UNIT_SHARES`), one copy of their code.
 * **Update**: rom/chips-code.md (BN5's last Program Advances, new row), multirom/chips-code.md, multirom/chip-registry.md (283 chips; 365-367, 603, 604), multirom/gaps.md (the Program Advances built), engine/emulation/memory.md (`RAM_PA_WIDE`): BigNoise, CsmoPris, WildBird, Football and PileDrvr moved as units, five `pa_*` specs PASS; a Program Advance past nine bits its per-battle bit the engine's (`BN6_PA_BATTLE_BIT`, `BN6_PA_FORMED_FLAG`); PileDrvr formed only with every chip in *.
 * **Update**: multirom/chips-code.md and engine/emulation/memory.md (`FREE_CHIP_CODE`): the bubbles' object a helper of the chips' (`Bubbles`: SideBub's and CloudMan's one copy, after `marina_v1_keys` FAILed on a second), the helpers' room to `+0x602400`, the powers and 80 homes after it.
 * **Update**: rom/chips-code.md (BN5's Navi chips past nine bits, new row), multirom/chips-code.md (Moved), multirom/chip-registry.md (278 chips, 512-526), multirom/gaps.md (Chips: the Navi chips none left, the Program Advances a unit each), game/liberation/building/par-prize.md (CosmoMan's board pays his own) and devtools/differential.md (a spec's chip:code form, `--mutations` for named specs): CloudMan's, CosmoMan's, LarkMan's, GridMan's and Django's Navi chips moved, 20 specs PASS, 20 mutations caught; Django[SP]'s power by the battle's turn (`PowerDjangoSP`), CosmoMan's gate and its obstacles, `STACK_LOADS`.
