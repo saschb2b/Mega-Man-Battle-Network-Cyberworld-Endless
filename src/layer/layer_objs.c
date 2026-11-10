@@ -306,6 +306,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	} else if (mystery_content(o, m->content)) {
 		m->type = MYSTERY_BLUE;
 	}
+	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
 		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
@@ -552,7 +553,7 @@ static void install_begin(Install *in) {
 	in->nstock = shop_dealer_stock(run.depth, weakless ? -1 : in->counter, weakless ? in->counter : 0, in->stock);
 	if (emu_debug_on()) {
 		fprintf(stderr, "dealer:");
-		for (int i = 0; i < in->nstock; ++i) fprintf(stderr, " %d/%d%s", in->stock[i].kind, in->stock[i].id, in->stock[i].kind == 2 && chip_pool_older(in->stock[i].id) ? "(BN5's)" : "");
+		for (int i = 0; i < in->nstock; ++i) fprintf(stderr, " %d/%d%s", in->stock[i].kind, in->stock[i].id, in->stock[i].kind == 2 && chip_pool_older(in->stock[i].id) ? in->stock[i].id >= 512 ? "(BN4's)" : "(BN5's)" : "");
 		fprintf(stderr, "\n");
 	}
 	in->plan.stock = in->stock;

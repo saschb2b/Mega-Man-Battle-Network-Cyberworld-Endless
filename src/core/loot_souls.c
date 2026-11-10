@@ -63,9 +63,9 @@ static bool of_kind(int id) { return soulkinds_of(id) == want && !soulkinds_dark
  * the older net's its share of the time (loot_pool_pick), the other where
  * one has none; -1 none */
 static int kind_pick(int tier) {
-	int first = loot_older_share > 0 && rng_range(0, 99) < loot_older_share ? CHIP_NET_BN5 : CHIP_NET_BN6;
+	int first = loot_older_share > 0 && rng_range(0, 99) < loot_older_share ? loot_older_net : CHIP_NET_BN6;
 	int id = chip_pool_pick_if(tier, first, of_kind);
-	if (id < 0 && loot_older_share > 0) id = chip_pool_pick_if(tier, first == CHIP_NET_BN5 ? CHIP_NET_BN6 : CHIP_NET_BN5, of_kind);
+	if (id < 0 && loot_older_share > 0) id = chip_pool_pick_if(tier, first == CHIP_NET_BN6 ? loot_older_net : CHIP_NET_BN6, of_kind);
 	return id;
 }
 
