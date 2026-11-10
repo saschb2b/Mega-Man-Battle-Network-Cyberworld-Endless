@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:00:00Z }
 ---
 
 # The chip recipe generator
@@ -187,6 +187,13 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   the third kind's from a list of numbers no BN5 track names (`TYPES3`;
   the range past BN5's 204 is nearly spent). No other recipe may name a
   number it takes (`numbers_clear`).
+- **Its copies.** A kinds' table an object reads out of its region
+  (`TABLES`: the star's) is a block of the unit, each spawned kind's
+  sprite BN6's of the same bytes or copied (list 3 from 0x70 up), its
+  byte in the copy set. An effect BN6 draws otherwise is moved to an id
+  of the chips' (0xCF down to 0xB0) with its sprite (list 5's 0xEF down,
+  list 4's 0x9F down). A type spawned through a wrapper of its code is
+  moved as one spawned outright (`moved3`).
 - **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
   collision data's offsets, a panel's type and side after `getPanel`, a
   sprite load given BN6's number of the same bytes (one BN6 lacks is a
@@ -212,4 +219,5 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
 Proved by a chip's specs against BN4's own battle ([The
 differential](differential.md), A BN4 chip's spec); a mutation of a
 unit's code names BN4's address, which the runner pokes at its copy.
-`UNITS` holds PanlSht (support 0x26); ShotStar is next.
+`UNITS` holds PanlSht (support 0x26) and ShotStar (0x19); the misc
+family's units are next, a second kind of unit.
