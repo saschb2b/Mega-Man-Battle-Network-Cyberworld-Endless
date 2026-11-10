@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:37:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T22:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,98 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**Unit 7, into runs, built: BN4's chips are in the finds** (12 November
+2026; The build plan). On BN4's areas the older Net's half of the finds
+and the stock is BN4's catalogue, and in the deep it is every game's
+read. The catalogue is made as BN5's is ([One net](one-net.md), the older
+net's half): the run's chip of each of BN4's (`xchips_bn4_paid`: BN6's of
+its name, the registry's of BN5's where that plays, its own row's where
+its code plays, BN4's ROM read and the pack has its entry), no DarkChip,
+no dark chip of its own (`xreg4_dark`) and no Program Advance;
+`src/core/chip_pool.c`'s `CHIP_NET_BN4`, and `CHIP_NET_OLDER` the whole,
+BN5's and then BN4's others, a chip once. `loot_layer_nets` names the
+layer's catalogue (`loot_older_net`) by the area's game, the deep's the
+whole, and every find goes through it: the Net Dealers' stock, Mystery
+Data, the vaults', Servers' and gift's picks (`loot_pool_pick`), a held
+Soul's kind (`loot_souls.c`), a Chip or BugFrag Trader's list, half each
+rarity's (`trader.c`). Nothing names a chip: a unit that comes to play
+joins the catalogue the next time the game starts (Boomer1-3 did, merged
+while this was built). With all three ROMs the catalogue holds 130 chips,
+15 of them BN4's own; with BN6 and BN4, 93 and the same 15.
+
+Two decisions the design left open, taken with the game-design skill.
+**The catalogue holds the chips BN6 names too**, as BN5's does: fifteen
+chips of BN4's own taking half of an area's finds would be the same
+dozen in every dealer's list and every Mystery Data (each some ten times
+as likely as a chip of BN6's), where the pattern asked for is identity by
+net, not a short list; BN4's own come more often as they are proved.
+**The deep draws on the whole, one chip one weight**, not a coin between
+the games: one older Net (call 5 of [Battle Network 4 in a
+run](bn4.md)), no roll added, and nothing changes there while BN4's ROM
+is not read.
+
+**A run without BN4's ROM is what it was, roll for roll.** BN5's catalogue
+keeps its chips and their order, the deep's whole is BN5's alone without
+BN4, and no pick draws another number. Proved by the autopilot's seeds
+1-12 over 15,000 frames with BN6 alone and with BN6 and BN5, this build
+against `dev`'s: 24 run logs the same, and their debug logs (every
+dealer's stock, every layer's lines) line for line. With BN4 read the same
+seeds ran with BN6 and BN4 and with all three, and again on BN4's five
+areas (`--net-biome x15` to `x19`, 30,000 frames), each run ended by its
+act's guardian as the autopilot's runs end, none by a fault (152
+battles begun, 141 won); on BN4's ground dealers stocked Invis,
+PanlSht1, Counter1 and 3, WhitWeb1 and 2, Boomer1 and 3, Mystery Data
+held Repair, PanlSht2, WhitWeb1, Boomer1 and 3, a gift Counter1 to 3.
+`LAYER_MAKE` 115: with BN4's ROM read a layer's stock rolls otherwise on
+BN4's areas and in the deep.
+
+**What it measured** (`build.py economy`, its new table The older Net's
+half; [Measuring it](../game/economy/measuring.md)). The tier is rolled
+before the catalogue is asked, so the chips an act gives, their good
+share, the Mystery Data and the zenny cannot move, and did not: with all
+three ROMs the report is `dev`'s number for number to its new table (a
+held Soul's kind counts BN4's chips of TomahawkMan's kind beside BN5's).
+A run as its seed dresses it holds 0 numbers outside the plan's bands,
+with all three ROMs and with BN6 and BN4, and finds 0.3 and 0.9 of BN4's
+own chips. One number does move on BN4's ground, the codes held: BN4's
+chips carry \* more often (38 of its 100 standard chips; 13 of its 15
+that play), so a run with BN6 and BN4 holds one chip more in its best
+letter from the third act on (9, 12, 16, 19 against 8, 11, 15, 18),
+inside the band, and a run made wholly on BN4's ground, which no seed
+makes, three more by the fourth act (13, 17, 22 at the Nest), outside it.
+Left as BN4's records have it, the design's rule, and the report counts
+the seed's run from now on, so the day BN4's \*s push a real run out it
+says so (the owner's call 8, below).
+
+**The Library keeps a BN4 chip held.** A chip of BN4's own given to
+MegaMan never reached the profile's Library (`chip_pool_older` knew
+BN5's rows alone): its page counted the chips both games name and no
+more. Seen: PanlSht1 and WhitWeb1 given, BN4's page 9/129 to 11/129,
+`dev`'s build 9/126 before and after. The second screen's Library panel
+counts the same page.
+
+**Found on the way, and fixed: BN6's menus on BN4's areas.** On a layer
+in BN4's tiles the PET's folder screens, a dealer's shop and the Chip
+Trader drew as garbled tiles, in 0.20.0 too. BN4's net maps are
+256-colour, and `netmap_colours` set that bit each frame wherever BG1
+and BG2 held the net's controls, which those menus set too (the folder's
+as it opens) or leave as the map had them (a shop, the trader). It now
+sets the bit only in the game's own main mode and takes it off in the
+menus' ([Net maps](../rom/net-maps.md), The map's BG controls). Seen on
+seed 5 with BN6 and BN4 (Town Area's first layer): the folder, FOLDER
+EDIT and back to the map; a dealer's shop on Town Area and the countries;
+the Chip Trader on ACDC Area, which gave "WhitWeb2 Y" from a list of
+BN4's chips alone (a scratch build), an id past 511 through BN6's own
+trader.
+
+**Not built here:** the flame's five DarkChips (none plays); a round's
+and Guardian Data's Navi chips (unit 6's); the visitors' rewards, which
+pay a chip of BN4's that plays since unit 0. A chip of BN4's whose id has
+no pack entry yet (from 603) stays out of the catalogue until it has
+one; `xchips_reward_bn4` does not ask that, so a visitor's reward of
+such a chip would be lost once one plays: for the session that gives
+those ids their entries.
 
 **The first unit of BN4's code is moved: PanlSht1-3** (10 November 2026;
 [The chip recipe generator](../devtools/chip-recipe-generator.md), The
@@ -690,7 +782,9 @@ the tier as BN5's chips are priced.
 
 ### The economy's bands
 
-No band moves. Act by act a run finds as many chips as now; what changes
+(As built, Where things stand: the four bands of what a run is handed
+hold, and the codes held rise by one on BN4's ground, inside their band
+for a run a seed makes.) No band moves. Act by act a run finds as many chips as now; what changes
 is whose: on BN4's areas the older Net's half is BN4's, whose rarity is
 BN6's within a few points (above), so the good chips' share stays inside
 its fifth. The visitors' rewards shift a little from zenny to chips (a
@@ -798,7 +892,9 @@ of one agent.
    powers (`chip_gutsman` and on). Then call 7's stand-in steps aside for
    a round whose Navi's chip plays. The other ten Navis' chips follow
    their Navis (Phase 2).
-7. **Into runs (1 to 2 days, after 2; each chip as it plays).** BN4's
+7. **Into runs: built** (Where things stand), but the flame's DarkChips
+   and the Navi chips, which wait for their units. As planned: **(1 to 2
+   days, after 2; each chip as it plays).** BN4's
    catalogue in the older Net's half on BN4's areas and the deep, the
    flame's DarkChips, the rounds' and Guardian Data's Navi chips, the
    Library, the second screen; `LAYER_MAKE` bumped (the stock's rolls
@@ -904,6 +1000,28 @@ Open:
    proved against BN4's battle with no Hole on the field and play at
    their floor, which (b) would make final. Until answered Hole, DrkLine
    and DrkStage sit out.
+
+8. **BN4's \*s on BN4's ground: left as its records have them, or
+   held to BN6's share?** Asked 12 November 2026 (unit 7). BN4 gives \*
+   to 38 of its 100 standard chips, and to 13 of the 15 that play today;
+   a find's code is the record's. Measured, a run with BN6 and BN4 holds
+   one chip more in its best letter from the third act on, inside the
+   band; a run wholly on BN4's ground would hold three more by the fourth
+   act, outside it, but no seed makes one. Recommended: leave them. It is
+   what BN4's ground gives, a folder that comes together a little sooner
+   there, and `build.py economy` now fails the plan the day a seed's run
+   leaves the band. The other way: a find on BN4's ground rolls its code
+   among the record's letters first, the \* as often as BN6's chips have
+   it.
+9. **BN4's dark chips in the finds?** Asked 12 November 2026 (unit 7).
+   The design keeps the five DarkChips to the flame; BN4's other 23 dark
+   rows (Hole, DrkLine, the DS Navi chips) cost 20 max HP a battle one is
+   used in (call 4, built), and a dealer or a Mystery Data tells no price.
+   Built so: none enters the catalogue (`xreg4_dark`), as none plays yet.
+   Recommended: keep it, and let them come by the ways that can say the
+   price (a flame's words; a DS by a Navi beaten with dark power, Phase
+   2's rule). The other way: as any chip, its card's description the only
+   warning.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
