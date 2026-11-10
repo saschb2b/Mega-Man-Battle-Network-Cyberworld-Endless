@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T08:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -104,12 +104,25 @@ passes over 300 frames: the cube set, struck by the Mettaur's wave to
 spec with two chips in one hand gives BN6 its deck (`deck6`) and picks
 BN4's in the order its own shuffle dealt them.
 
-**Next: Counter1-3**, the last unit under 300 bytes that BN4's Library
-lists. Its routine lies in its object's code (the third kind's 0x17),
-which moves with it, and walks the other side's players: its spec has to
-meet the foe's swing. Marking and the four Plus chips wait on the
-owner's call 7 (no Library number, no picture: chips BN4 never lists).
-Then the 21 units of 300 to 600 bytes, in the table's order.
+**Counter1-3 are moved** (12 November 2026: ids 567-569, misc 0). The
+routine lies in the code of the hit it spawns (the third kind's 0x17),
+which moves with it, 276 bytes: it walks the other side's players and
+strikes each whose counter byte is set, so it only lands while a foe
+readies its attack. Three numbers are BN6's (the players' place in the
+battle state, twice, and the counter byte's in the collision data), its
+hit's sprite is copied (list 5) and its sound takes the grown table's
+0x1DD. `bn4_chip_counter1`, `2` and `3` pass to the frame of the hit (a
+140 HP Mettaur in its window left 70, 30 and 0 in both) and
+`bn4_chip_counter1_idle` outside the window (untouched), six mutations
+caught. The comparison took MegaMan's lock-out after a chip (BN4 keeps
+it at another place of his AI data) and a chip unit's objects ranked
+with the natives for the renderer's places. **Not compared:** what a
+counter starts after the hit, each engine's own Full Synchro object; the
+specs end at the hit.
+
+**Next: the 21 units of 300 to 600 bytes**, in the table's order
+(SidBmbo1-3 first). Marking and the four Plus chips wait on the owner's
+call 7 (no Library number, no picture: chips BN4 never lists).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its

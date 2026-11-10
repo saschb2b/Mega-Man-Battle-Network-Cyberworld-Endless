@@ -88,5 +88,14 @@
 #define BN4_OBSTACLE_ADD      0x0800B230u /* BN6_OBSTACLE_ADD's twin but for that offset */
 #define BN4_REPAIR            0x0800C720u /* Repair's routine (its chip 115, misc subfamily 0x0B): each of its side's obstacles with HP left given
                                            * its full HP (+0x26 into +0x24), effect 7 over it, sound 0x9A */
+/* Counter1-3 (its chips 60-62, misc subfamily 0), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_COUNTER           0x080CFE02u /* its routine, in its hit's code: each of the other side's players (the battle state's +0x44 on, by
+                                           * its side ^ 1 ^ MegaMan's) whose collision data's counter byte (BN4_COLL_COUNTER) is set is struck
+                                           * on its panel through 0x080CFDE4 */
+#define BN4_T3_COUNTER_HIT    0x17        /* the hit, the third kind's (0x080CFD48 to 0x080CFE5C): sprite list 5's 0x10, sound 0xBE, the hit
+                                           * area spawned (0x080CD7E2) with its damage, gone after 0x25 frames */
+#define BN4_AI_LOCKOUT        0x3A        /* MegaMan's AI data: u16 the frames he cannot act after a chip, its record's +0x14, stored as the
+                                           * attack ends (BN4_CHIP_ATTACK_END; BN6's +0x19, a byte) */
+#define BN4_CHIP_ATTACK_END   0x0800C9FCu /* a chip's attack ended: the lock-out kept, his action back to 6 (BN6_CHIP_ATTACK_END) */
 
 #endif

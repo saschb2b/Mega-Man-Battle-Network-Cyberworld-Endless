@@ -285,9 +285,72 @@ static const XcSong repair_songs[] = { { 0x9A, 0x39 } };
 	.types = repair_types, .ntypes = (int)(sizeof repair_types / sizeof *repair_types), \
 	.sprites = repair_sprites, .nsprites = (int)(sizeof repair_sprites / sizeof *repair_sprites), \
 	.effects = repair_effects, .neffects = (int)(sizeof repair_effects / sizeof *repair_effects) }
+/* ---- Counter: BN4's misc 0x0 (080CFE03) as BN6's 0x80; its chips 60 (567), 61 (568), 62 (569) ---- */
+/* its routine (080CFE02) lies in the third-kind 0x17's code (080CFD48-080CFE5C), which it spawns: moved */
+/* its sprite 5:0x10 (080CFD74): BN6's 5:0xee, copied */
+/* its sound 0xbe (080CFD96): BN4's song copied into the grown song table's slot 0x1dd, on BN4's player 9 */
+
+static const XvBlock counter_blocks[] = {
+	{ 0x080CFD48, 0x080CFE5C, XC4_CODE + 0x8F0, 0x52937DA2u },
+};
+static const XvData counter_data[] = {
+	{ 0x080CFD5A, 0x080CFD5C, XV_RAW },
+	{ 0x080CFD5C, 0x080CFD60, XV_POOL },
+	{ 0x080CFD60, 0x080CFD6C, XV_TABLE },
+	{ 0x080CFDB8, 0x080CFDBC, XV_POOL },
+	{ 0x080CFDE0, 0x080CFDE4, XV_RAW },
+};
+static const XvPair counter_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+};
+static const XvPair counter_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm counter_imms[] = {
+	{ 0x080CFD70, THUMB_MOVS, 2, 0, 0x10, 0xEE },   /* its object's sprite: list 5 0x10 in BN4, 0xee in BN6 (copied) */
+	{ 0x080CFD9E, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CFDE8, THUMB_MOVS, 0, 0, 0x17, 0xC8 },   /* its object's type 0x17: moved, the dispatch's 0xc8 */
+	{ 0x080CFDF4, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CFE26, THUMB_LSLS, 0, 0, 0x2, 0x4 },   /* a side's players in the battle state: BN4 a word a side's first from +0x44, BN6 0x10 bytes a side from +0xD0 */
+	{ 0x080CFE28, THUMB_ADDS, 0, 0, 0x44, 0xD0 },   /* a side's players in the battle state: BN4 +0x44, BN6 +0xD0 */
+	{ 0x080CFE38, THUMB_LDRB, 1, 1, 0xB, 0xD },   /* a player's collision data's counter byte: BN4 +0xB (BN4_COLL_COUNTER), BN6 +0xD (BN6_COLL_COUNTER) */
+};
+static const XvNumber counter_numbers[] = {
+	{ 0x080CFDB8, 0x04050601, 0x04050601 },   /* a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same (five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606) */
+};
+static const XvType counter_types[] = {
+	{ 3, 0xC8, XV_TYPE_MOVED, 0x17 },   /* BN4's third-kind 0x17, moved, the dispatch's 0xc8 */
+};
+static const XvSprite counter_sprites[] = {
+	{ 5, 0x10, 5, 0xEE, XC4_ART + 0x2300, 0xB00 },   /* BN4's 5:0x10 copied */
+};
+static const XvSoundCall counter_sound_calls[] = {
+	{ 0x080CFD96, 0x1DD },   /* its sound 0xbe: BN4's song at the grown table's slot 0x1dd */
+};
+static const XcSong counter_songs[] = { { 0xBE, 0x1DD } };
+
+#define COUNTER_CODE { .name = "Counter (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0xC00), \
+	.blocks = counter_blocks, .nblocks = (int)(sizeof counter_blocks / sizeof *counter_blocks), \
+	.data = counter_data, .ndata = (int)(sizeof counter_data / sizeof *counter_data), \
+	.calls = counter_calls, .ncalls = (int)(sizeof counter_calls / sizeof *counter_calls), \
+	.words = counter_words, .nwords = (int)(sizeof counter_words / sizeof *counter_words), \
+	.imms = counter_imms, .nimms = (int)(sizeof counter_imms / sizeof *counter_imms), \
+	.numbers = counter_numbers, .nnumbers = (int)(sizeof counter_numbers / sizeof *counter_numbers), \
+	.types = counter_types, .ntypes = (int)(sizeof counter_types / sizeof *counter_types), \
+	.sound_calls = counter_sound_calls, .nsound_calls = (int)(sizeof counter_sound_calls / sizeof *counter_sound_calls), \
+	.sprites = counter_sprites, .nsprites = (int)(sizeof counter_sprites / sizeof *counter_sprites) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0 },
 	{ XCHIP_MISC, 0x0B, 0x8B, 0x0800C721, XC4_HOMES + 0x800, REPAIR_CODE, repair_songs, (int)(sizeof repair_songs / sizeof *repair_songs), 0 },
+	{ XCHIP_MISC, 0x00, 0x80, 0x080CFE03, XC4_HOMES + 0xC00, COUNTER_CODE, counter_songs, (int)(sizeof counter_songs / sizeof *counter_songs), 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
