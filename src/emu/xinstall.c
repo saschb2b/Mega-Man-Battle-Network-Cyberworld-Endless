@@ -27,6 +27,8 @@ void xinstall_core(int families, int navis) {
 	/* (BN5's chips' code where its ROM is read, before the families that spawn its copies; again, from the chip registry's
 	 * install, it does nothing) */
 	if (bn5) xchips_code_install();
+	/* (BN4's chips' code where its ROM is read: its own region and numbers, after BN5's so both find the grown tables) */
+	if (emu_ready() && XR[XROM_BN4_RED_SUN_US].data) xchips_bn4_code_install();
 	xvirus_install(families);
 	/* (BN4's Navis where its ROM is read, after its families: their art's and the dispatch's numbers past theirs; each
 	 * installed once a core, xnavi_install's own) */

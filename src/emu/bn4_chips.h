@@ -42,4 +42,30 @@
 #define BN4_COLL_BARRIER_AURA  0x22        /* ... u16 the damage that breaks an aura (BN6's +0x17, a u8) */
 #define BN4_COLL_BARRIER_FRAMES 0x24       /* ... u16 its frames (BN6's +0x1A) */
 
+/* Its support chips' code (docs/rom/bn4.md, Its support chips' code; docs/multirom/bn4-chips.md): MegaMan's support state
+ * runs the chip's routine from one table by its attack's subfamily, support chips and Navi chips alike, where BN6 has a
+ * table each; a routine spawns a fourth-kind object of BN6's support routines' shape, the element at BN4's place */
+#define BN4_CHIP_SUPPORT_FAMILY 0x0C      /* a support or Navi chip's family (its record's +0xB): MegaMan's state BN4_SUPPORT_RUN */
+#define BN4_SUPPORT_RUN       0x080EB9EAu /* that state (BN4_PLAYER_STATES' entry 0x0C): the chip's routine, then the attack's end in the same
+                                           * frame (BN6_SUPPORT_RUN ends it a frame later) */
+#define BN4_CHIP_ROUTINES     0x080220E0u /* its routines by subfamily, BN4_CHIP_ROUTINE_COUNT words (BN6_CHIP_ROUTINES' twin) */
+#define BN4_CHIP_ROUTINE_COUNT 0x4E
+/* A support chip's object's generic states, which every such type's tables name (BN6's the same places of its own types'
+ * tables, BN6_SUPPORT_OBJECT_*: tools/xchiprecipe_bn4.py TWINS, each pair read in both ROMs) */
+#define BN4_SUPPORT_OBJECT_BEGIN 0x08008BD8u /* its state 0 (+8): its side's turn of the time freeze asked for */
+#define BN4_SUPPORT_OBJECT_WAIT 0x08008BF8u /* its step 0 (+9): the other side's turn waited out */
+#define BN4_SUPPORT_OBJECT_NAME 0x08008C2Au /* its step 4: the chip's name shown (BN6's plays sound 0x173 there, BN4's none) */
+#define BN4_SUPPORT_OBJECT_DONE 0x08008EB8u /* its step 12: its own work done, its state 8 */
+#define BN4_SUPPORT_OBJECT_END 0x08008EEEu /* its state 8: its turn given back, the object freed */
+#define BN4_PANEL_BREAK_FREE  0x08009BACu /* r0, r1 a panel: broken (type 1) where it is a floor (0x10) no occupant's flag (0x0F8A0080) is on, sound
+                                           * 0x95, r0 1; else r0 0. BN6_PANEL_BREAK_FREE's twin but for its test of flag 0x20000, BN4's type 5's */
+/* PanlSht1-3 (its chips 178-180, support subfamily 0x26), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_PANLSHT           0x080E7A58u /* its routine: the fourth kind's BN4_T4_PANLSHT spawned */
+#define BN4_T4_PANLSHT        0x4F        /* its object, its routine 0x080E79B8 (to 0x080E7BF0): by its +4 (the record's first parameter) the panel
+                                           * ahead, the panels of the row, or the four around MegaMan, each a shot (0x080E7A9C, 0x080E7AD2, 0x080E7B3C) */
+#define BN4_PANLSHT_SHOT      0x080DCC2Au /* a shot spawned (r0, r1 its panel, r2 its element, r4 its wait, r6 its damage, r7 its flag's byte) */
+#define BN4_T3_PANLSHT_SHOT   0x7B        /* the shot, the third kind's (0x080DCAA4 to 0x080DCC5C): its panel broken (BN4_PANEL_BREAK_FREE), it rises 16
+                                           * pixels, waits, flies off down its row at 10 pixels a frame, ending on its first hit or off the screen;
+                                           * sounds 0x1C6 as it is made and 0xBF as it flies, sprite list 3's 0x38 (BN6's 0x33 the same bytes) */
+
 #endif

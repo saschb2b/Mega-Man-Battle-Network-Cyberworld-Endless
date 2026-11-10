@@ -45,6 +45,13 @@ ALIGN, ALIGN_DARK = 0x15, 2   # (a BN4 record's alignment, src/emu/bn4_chips.h B
 ON_BN6 = {
     133: (177, None),   # Invis: BN4's support 0x31, BN6's subfamily 1 (Invisibl's), the same frames in its parameters (chip_invis)
 }
+# BN4's chips whose code is moved into BN6's engine as a unit (tools/xchiprecipe_bn4.py UNITS, src/emu/xchips_bn4.c), each
+# proved by its bn4_chip_* spec against BN4's own battle before it is listed: BN4's id -> the unit's number in BN6's grown
+# support routines (XC_SUPPORT: 0x80 + BN4's subfamily), which its record takes under BN6's support family; the generator
+# refuses to write a unit whose chips are not here
+MOVED = {
+    178: 0xA6, 179: 0xA6, 180: 0xA6,   # PanlSht1-3: BN4's support 0x26 (bn4_chip_panlsht1-3)
+}
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
 # BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)
@@ -137,7 +144,7 @@ def rows(r):
             continue
         if rx[BN4_CLASS] > 2:
             continue
-        if x in ON_BN6 and rx[ALIGN] == ALIGN_DARK:
+        if (x in ON_BN6 or x in MOVED) and rx[ALIGN] == ALIGN_DARK:
             # (the owner's call, 10 November 2026: a dark chip of BN4's costs what every dark chip does, 20 max HP a battle
             # it ran in, docs/game/meta/darkchips.md; none is listed as playing until its use counts as a dark power's)
             sys.exit(f'xreg_bn4: {x} is a dark chip of BN4\'s: wire its cost (docs/game/meta/darkchips.md) before it plays')
@@ -178,7 +185,7 @@ def rows(r):
     for k, x in enumerate(order):
         if x in ALIAS:   # (its id retired: the ids after it stay)
             continue
-        out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_PENDING'))
+        out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_MOVED' if x in MOVED else 'XREG_PENDING'))
     for k, x in enumerate(pas):
         out.append((x, PA_FIRST + k, 'XREG_PA'))
     if len(pas) > REST_FIRST - PA_FIRST or out[len(order) - 1][1] > 1023:
@@ -202,7 +209,7 @@ def text(rws):
     L = [HEAD]
     for x, to, how, rec, nm in rws:
         codes = ', '.join(f'0x{c:02X}' for c in rec[0:4])
-        twin, sub = ON_BN6.get(x, (0, None))
+        twin, sub = ON_BN6.get(x, (0, MOVED.get(x)))
         L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
     L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
     L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')

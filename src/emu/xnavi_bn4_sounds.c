@@ -10,6 +10,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "song_table.h"
 #include "xnavi_bn4_room.h"
 #include "xnavi_room.h"
 #include "xsong.h"
@@ -46,7 +47,7 @@ void xnavi_bn4_songs_set(const XVirusFamily *f, int versions) {
 	pending = (Navi){ f->first_id, versions, 0, { 0 }, { { 0 } } };
 	for (int i = 0; i < f->nsongs && i < XNAVI_BN4_POOL_SLOTS && !xv_failed(); ++i) {
 		const XvSong *s = &f->songs[i];
-		uint32_t slot = R.layout->song_table + 8u * s->slot, empty = slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0, now = emu_read32(BUS + slot);
+		uint32_t slot = R.layout->song_table + 8u * s->slot, empty = slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0, now = emu_read32(song_entry_bus(s->slot));
 		/* (a pool slot whose entry, in the player's ROM, is BN6's empty song, a header of no tracks; in the core's copy still
 		 * that, or another BN4 Navi's song of the pool) */
 		if (!xv_bn4_pool_slot(s->slot) || empty < BUS || empty - BUS >= ROM_SIZE || R.data[empty - BUS] != 0 ||
@@ -62,8 +63,8 @@ void xnavi_bn4_songs_set(const XVirusFamily *f, int versions) {
 		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
 		uint32_t player = get32(x->data + x->layout->song_table + 8u * s->from + 4);
 		if (s->player) player = s->player | (uint32_t)s->player << 16;   /* (BN6's player for it: its ms and me, tools/xnavirecipe_bn4.py song_player) */
-		xv_word(BUS + slot, now, header);
-		xv_word(BUS + slot + 4, emu_read32(BUS + slot + 4), player);
+		xv_word(song_entry_bus(s->slot), now, header);
+		xv_word(song_entry_bus(s->slot) + 4, emu_read32(song_entry_bus(s->slot) + 4), player);
 		pending.slot[pending.n] = s->slot;
 		pending.entry[pending.n][0] = header;
 		pending.entry[pending.n][1] = player;
@@ -104,7 +105,7 @@ static void point(int which) {
 	/* (the battle holds another BN4 Navi than the pool's: his songs at its slots, the core's copy of the song table only) */
 	claims_begin(XN_CLAIMS);
 	for (int k = 0; k < navis[which].n; ++k) {
-		uint32_t slot = BUS + R.layout->song_table + 8u * navis[which].slot[k];
+		uint32_t slot = song_entry_bus(navis[which].slot[k]);
 		emu_write32(slot, navis[which].entry[k][0]);
 		emu_write32(slot + 4, navis[which].entry[k][1]);
 	}

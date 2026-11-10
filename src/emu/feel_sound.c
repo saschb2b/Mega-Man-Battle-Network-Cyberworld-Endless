@@ -8,6 +8,7 @@
 #include "hook.h"
 #include "platform.h"
 #include "rom.h"
+#include "song_table.h"
 
 /* the sounds started, and whether MegaMan's side started each, kept two
  * frames: BN6 queues a sound, its player begins it at the next frame */
@@ -48,7 +49,8 @@ static void hook_once(void) {
 /* a song's header, as the song table has it */
 static uint32_t header_of(uint16_t song) {
 	if (!R.layout || !R.layout->song_table) return 0;
-	return emu_read32(0x08000000u + R.layout->song_table + (uint32_t)song * BN6_SONG_ROW + BN6_SONG_HEADER);
+	uint32_t at = song_entry_bus(song);
+	return at ? emu_read32(at + BN6_SONG_HEADER) : 0;
 }
 
 static int player_of_track(uint32_t t) {

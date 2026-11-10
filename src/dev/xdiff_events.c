@@ -744,6 +744,8 @@ void xd_control_frame(const char *how) {
 	done = true;
 }
 
+int xd_song_slot(uint32_t header) { return xsong_slot_holding(header); }
+
 int xd_song_copy(int slot) {
 	int xrom = -1, song = xsong_copy_of(slot, &xrom);
 	return xrom == XROM_BN5_COLONEL_US ? song : -1;

@@ -346,10 +346,11 @@ static void sits_make(void) {
 		bool plays = (r->how == XREG_RECORD || (r->how == XREG_MOVED && xchips_moved_of(r->bn6))) && M.rom5;
 		if (xreg_own(r) && !plays) M.sits[r->bn6 >> 3] |= (uint8_t)(1u << (r->bn6 & 7));
 	}
-	/* (BN4's rows: one plays where its record runs on BN6's own code, XREG_RECORD, and BN4's ROM is read; the rest sit out,
-	 * their code not in BN6's engine; --dev alias's id, a copy of BN6's chip, plays) */
+	/* (BN4's rows: one plays where its record runs on BN6's own code, XREG_RECORD, or its code is moved, XREG_MOVED
+	 * (src/emu/xchips_bn4.h's units, installed where BN4's ROM is read), and BN4's ROM is read; the rest sit out, their code
+	 * not in BN6's engine; --dev alias's id, a copy of BN6's chip, plays) */
 	for (int i = 0; i < xreg4_count; ++i) {
-		bool plays = (xreg4_rows[i].how == XREG_RECORD && M.rom4) || M.alias == xreg4_rows[i].bn6;
+		bool plays = ((xreg4_rows[i].how == XREG_RECORD || xreg4_rows[i].how == XREG_MOVED) && M.rom4) || M.alias == xreg4_rows[i].bn6;
 		if (!plays) M.sits[xreg4_rows[i].bn6 >> 3] |= (uint8_t)(1u << (xreg4_rows[i].bn6 & 7));
 	}
 }

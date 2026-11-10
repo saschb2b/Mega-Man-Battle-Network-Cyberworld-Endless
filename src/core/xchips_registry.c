@@ -408,6 +408,13 @@ const XChipReg4 *xreg4_at(int bn6) {
 	return bn6 > 0 && bn6 < XREG_IDS && idx4.at[bn6] ? &xreg4_rows[idx4.at[bn6] - 1] : NULL;
 }
 
+/* a moved chip's subfamily is its unit's number in BN6's grown support routines, BN4's from 0x80 (src/emu/xchips_bn4.h); a
+ * row whose code did not move names none (a row on BN6's code may name its twin's) */
+static bool moved4_ok(const XChipReg4 *r) {
+	if (r->how == XREG_MOVED) return r->sub >= 0x80 && r->sub != 0xFF;
+	return r->how == XREG_RECORD || r->sub == 0xFF;
+}
+
 int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, char *why, size_t len) {
 	static uint8_t bn4_seen[BN4_IDS], id_seen[XREG_IDS];
 	memset(bn4_seen, 0, sizeof bn4_seen);
@@ -419,10 +426,11 @@ int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, cha
 		if (!r->bn4 || r->bn4 >= BN4_IDS || bn4_seen[r->bn4]++) return bad(i, why, len, "BN4's id is none, past its records, or twice");
 		if (r->bn6 < XREG4_PACK_FIRST || !xreg_free_id(r->bn6) || id_seen[r->bn6]++) return bad(i, why, len, "its id is not free, BN5's, or taken twice");
 		bool pa = r->bn6 >= XREG4_PA_FIRST && r->bn6 < XREG4_REST_FIRST;
-		bool folder = r->how == XREG_PENDING || r->how == XREG_RECORD;
+		bool folder = r->how == XREG_PENDING || r->how == XREG_RECORD || r->how == XREG_MOVED;
 		if (r->how == XREG_PA ? !pa || r->type != 4 : !folder || pa || r->type > 2 || (r->bn6 >= BN6_PACK_WIDE_END && r->bn6 < XREG4_REST_FIRST))
 			return bad(i, why, len, "a folder chip's id is a Program Advance's, or the other way, or its class is neither's");
 		if ((r->how == XREG_RECORD) != (r->twin != 0) || r->twin >= 411) return bad(i, why, len, "a twin where its record takes none, none where it takes one, or none of BN6's records");
+		if (!moved4_ok(r)) return bad(i, why, len, "a moved chip without its unit's number, or a number where no code moved");
 	}
 	return 0;
 }

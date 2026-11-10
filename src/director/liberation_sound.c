@@ -13,6 +13,7 @@
 #include "emu.h"
 #include "gamecall.h"
 #include "rom.h"
+#include "song_table.h"
 #include "xsong.h"
 
 int lib_board_song(int song) {
@@ -27,7 +28,7 @@ void lib_song(int bn5_song) {
 	/* (the BGM's player read back: its song's header the slot's) */
 	if (emu_debug_on() && slot >= 0)
 		fprintf(stderr, "liberation: BN5's song 0x%02X as BN6's 0x%02X, the music player's song until now %08x, the slot's %08x\n", bn5_song, slot,
-			emu_read32(BN6_MUSIC_PLAYER), emu_read32(0x08000000u + R.layout->song_table + 8u * (uint32_t)slot));
+			emu_read32(BN6_MUSIC_PLAYER), emu_read32(song_entry_bus(slot)));
 }
 
 void lib_sound(int bn5_sound) {

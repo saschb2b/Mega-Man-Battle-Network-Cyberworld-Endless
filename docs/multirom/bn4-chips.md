@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T01:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,59 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**The first unit of BN4's code is moved: PanlSht1-3** (10 November 2026;
+[The chip recipe generator](../devtools/chip-recipe-generator.md), The
+BN4 path). `tools/xchiprecipe_bn4.py` derives a unit from both ROMs: one
+routine of BN4's support state's table (`BN4_CHIP_ROUTINES`, support and
+Navi chips alike), which is a spawner of a fourth-kind object in BN6's
+support routines' own shape, with that object's type and everything it
+reaches. PanlSht's (support 0x26) is the fourth kind's 0x4F and its
+shot, the third kind's 0x7B, 1008 bytes in two blocks: 28 calls paired
+with BN6's twins, the five generic states of a support chip's object
+BN6's own at the same places of its types' tables, the element's place
+and a panel's side at BN6's offsets, its sprite BN6's of the same bytes
+(list 3's 0x38 as 0x33), no decision open but its sounds (below). It
+installs where BN4's ROM is read (`src/emu/xchips_code.c`, its room
+`FREE_BN4_CHIPS`) at BN6's grown support routines' 0x80 + BN4's
+subfamily, 0xA6, which the three rows' records take under BN6's support
+family: `XREG_MOVED`, ids 559-561. Against BN4's own battle each passes
+over 300 frames, MegaMan the subject, a BN4 MettaurSP of 140 HP the foe:
+`bn4_chip_panlsht1` (the panel ahead thrown: 40 HP left),
+`bn4_chip_panlsht1_miss` (the foe a row up: 140), `bn4_chip_panlsht2`
+(the row's two panels: 20) and `bn4_chip_panlsht3` (the four around
+MegaMan, one down the foe's row: 60), the broken panels and the sounds
+the same; ten mutations caught. The chip's whole flight runs inside its
+time freeze, between two fight frames, so the traces meet at what it
+leaves. A shot that deletes its foe parts at the deletion's own effect
+(effect 0, each engine's art: the families' known difference), so the
+specs' foe survives. What the comparator took: a moved row's subfamily
+read as its unit's number, BN6's second wheel's flag in the attack's
+element (PanlSht's kind is the Cursor's, as BN5's chips' icons give
+theirs), the object's chip and spawn leftovers by its type, the two
+copied sounds (`tests/xdiff/legit.json`'s `bn4` section).
+
+**Its sounds, and every BN4 chip's after it, go into BN6's song table
+grown** (the owner's call 6, 11 November 2026). PanlSht plays two sounds
+BN6 has no song of (0x1C6 as a shot is made, 0xBF as it flies), and
+nearly every unit to come has its own (ShotStar's star 0x146, FirePlus's
+three): some sixty over the 48 units, where BN6 had eight empty song
+slots left, kept for BN5's. So the table is copied into the free space
+with 550 more slots and the sound engine's five words that name it are
+pointed at the copy (`src/emu/song_table.c`, where BN4's ROM is read;
+[Sound](../rom/sound.md), The song table grown). A unit's sound takes
+the next slot from 0x1DA (`tools/xchiprecipe_bn4.py` `SOUND_SLOTS`,
+`src/audio/xsong.c`'s the same): PanlSht's are 0x1DA and 0x1DB, each
+call through a shim that names the slot, a number past a byte.
+
+**Next: ShotStar** (support 0x19, one chip, a Mega). Its object, the
+fourth kind's 0x34, derives whole (424 bytes); the star it drops is the
+third kind's 0x56, whose spawner BN6 has by body while the type's states
+differ (the generator's guard on a twin found by the search alone: its
+type compared to its depth first, or moved, 518 bytes). FirePlus's four
+write a timer of BN4's battle NaviStats that only BN4's damage code
+reads: not a small unit. The misc family's (Repair, Counter1-3, Marking:
+BN4's state 0x20) need its table grown as the support routines' is.
 
 **Unit 3, under way** (10 November 2026; [The differential](../devtools/differential.md),
 A BN4 chip's spec): BN4's own battle takes a folder and plays a chip
@@ -635,7 +688,8 @@ of one agent.
    BN4's picture and description; a run saved with BN4's chips continued
    without BN4's ROM (placeholders, sitting out, MegaMan's line).
 3. **The chips' differential against BN4 and the generator's BN4 path (2
-   to 3 days, beside 1).** A chip spec whose reference is BN4's battle
+   to 3 days, beside 1). Built** (Where things stand: the specs' MegaMan
+   mode, then `tools/xchiprecipe_bn4.py` and its first unit). As planned: A chip spec whose reference is BN4's battle
    (`tools/bn4_lab.py`'s, the chip given in BN4's folder and its key byte
    written for BN4's chip gate, `BN4_CHIP_GATE`, as the Souls' were);
    `tools/xchiprecipe.py` reading BN4 (its families as MegaMan's states,
@@ -716,6 +770,15 @@ Asked and answered on 10 November 2026:
    tables agree: BN4's kind 6 and BN6's kind 9 are both 1 HP behind a 200
    aura for 3000 frames (docs/rom/bn4.md, Barriers and auras). The rows are 193 since:
    174 folder chips and 19 Program Advances.
+
+Asked and answered on 11 November 2026:
+
+6. **BN4's chips' sounds go into BN6's song table grown:** "Grow song
+   table". Chosen over the last eight empty slots, 0x43-0x4A, taken from
+   BN5's reserve (call 8 of [Battle Network 4 in a run](bn4.md); Team
+   ProtoMan's Navis want them), and over the Navis' pool by battle shared
+   with the chips a folder holds. A slot for every sound of another game
+   from then on (Where things stand).
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's

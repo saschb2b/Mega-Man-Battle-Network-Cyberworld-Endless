@@ -33,6 +33,16 @@
 #define BN6_MPLAY_CLOCK       0x0C /* u32: its clock, 0 as a song starts on it */
 /* a song's entry in the song table (RomLayout.song_table), 8 bytes */
 #define BN6_SONG_ROW          8
+#define BN6_SONGS_EMPTY_SLOT  0x26 /* the first of BN6's own empty slots (bn6_families.h BN6_SONGS_EMPTY_FIRST): the shared header of no tracks, player 0 */
+#define BN6_SONG_COUNT        0x1DA /* its entries (474): the shared empty header (0x0815AE18) and the sounds' data follow it */
+/* the five words that name the table, one a routine of the sound engine's that takes a song's number (m4aSongNumStart,
+ * StartOrChange, StartOrContinue, Stop and Continue, in the library's order: each ldr r1,=table; lsls r0,#16; lsrs r0,#13;
+ * adds r0,r1, no bound on the number): song_table.h points them at the grown copy */
+#define BN6_SONG_TABLE_REF_START 0x0815049Cu
+#define BN6_SONG_TABLE_REF_CHANGE 0x081504D0u
+#define BN6_SONG_TABLE_REF_CONTINUE 0x0815051Cu
+#define BN6_SONG_TABLE_REF_STOP 0x08150570u
+#define BN6_SONG_TABLE_REF_RESUME 0x081505A4u
 #define BN6_SONG_HEADER       0x00 /* u32: its header's address */
 #define BN6_SONG_PLAYER       0x04 /* u16: the player it plays on */
 #define BN6_MPLAY_TRACK_COUNT 0x08 /* u8: how many */
