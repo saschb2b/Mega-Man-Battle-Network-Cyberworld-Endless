@@ -1,0 +1,51 @@
+{
+ "about": "The BN4 chip control broken on purpose: its second run is given no folder, so BN4 deals its own and the first chip picked is another, and the traces must part as it is used (t32): the check that a spec's folder4 reaches BN4's battle through the runner (as merged first, tools/xdiff_bn4.py passed neither folder4 nor cust4 and bn4_chip_cannon_control fought BN4's own folder twice, the same).",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 200,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "folder4": [
+  "0001"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "again": {
+  "folder4": null
+ }
+}
