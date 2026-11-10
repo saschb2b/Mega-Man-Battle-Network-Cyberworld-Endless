@@ -477,6 +477,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	/* BN4's chips' (tools/xchiprecipe_bn4.py's SOUND_SLOTS), in the grown table's slots (song_table.h, from SONG_GROWN_FIRST up,
 	 * the owner's call 6 of docs/multirom/bn4-chips.md): PanlSht's shot's */
 	{ XROM_BN4_RED_SUN_US, 0x1C6, SONG_GROWN_FIRST + 0 }, { XROM_BN4_RED_SUN_US, 0xBF, SONG_GROWN_FIRST + 1 },
+	/* ... ShotStar's star's fall (its burst, 0x70, the families' slot 0x3A above) */
+	{ XROM_BN4_RED_SUN_US, 0x146, SONG_GROWN_FIRST + 2 },
 };
 
 int xsong_sound_slot(int xrom, int song) {

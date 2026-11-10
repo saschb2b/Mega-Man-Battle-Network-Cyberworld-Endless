@@ -118,7 +118,136 @@ static const XcSong panlsht_songs[] = { { 0xBF, 0x1DB }, { 0x1C6, 0x1DA } };
 	.imms = panlsht_imms, .nimms = (int)(sizeof panlsht_imms / sizeof *panlsht_imms), \
 	.types = panlsht_types, .ntypes = (int)(sizeof panlsht_types / sizeof *panlsht_types), \
 	.sound_calls = panlsht_sound_calls, .nsound_calls = (int)(sizeof panlsht_sound_calls / sizeof *panlsht_sound_calls) }
+/* ---- ShotStar: BN4's support 0x19 (080E5D79) as BN6's 0x99; its chips 210 (570) ---- */
+/* its fourth-kind 0x34 (080E5C90-080E5E38), which its routine (080E5D78) spawns: moved */
+/* its third-kind 0x56 (080D85AA-080D87B0), spawned through 080D879A: no BN6 type proved its twin, moved */
+/* its fourth-kind 0x35 (080E5E38-080E5EF4): no BN6 type of its body, moved with him */
+/* its table 080D8580's kind 1: sprite 3:0x31 in BN4, 0x70 in BN6 (copied) */
+/* its effect 0x6: BN6's 0xcf, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
+/* its sound 0x146 (080D86CE): BN4's song copied into the grown song table's slot 0x1dc, on BN4's player 6 */
+
+static const XvBlock shotstar_blocks[] = {
+	{ 0x080E5C90, 0x080E5E38, XC4_CODE + 0x400, 0xD23F0E2Bu },
+	{ 0x080D85AA, 0x080D87B0, XC4_CODE + 0x5B2, 0x52072B37u },
+	{ 0x080E5E38, 0x080E5EF4, XC4_CODE + 0x7C0, 0x0A0D54D6u },
+	{ 0x080D8580, 0x080D85AA, XC4_CODE + 0x880, 0x6C5C9366u },
+};
+static const XvData shotstar_data[] = {
+	{ 0x080E5C9E, 0x080E5CA0, XV_RAW },
+	{ 0x080E5CA0, 0x080E5CA4, XV_POOL },
+	{ 0x080E5CA4, 0x080E5CB0, XV_TABLE },
+	{ 0x080E5CBE, 0x080E5CC0, XV_RAW },
+	{ 0x080E5CC0, 0x080E5CC4, XV_POOL },
+	{ 0x080E5CC4, 0x080E5CD4, XV_TABLE },
+	{ 0x080E5CE2, 0x080E5CE4, XV_RAW },
+	{ 0x080E5CE4, 0x080E5CE8, XV_POOL },
+	{ 0x080E5CE8, 0x080E5CF8, XV_TABLE },
+	{ 0x080E5E0A, 0x080E5E0C, XV_RAW },
+	{ 0x080E5E0C, 0x080E5E10, XV_POOL },
+	{ 0x080E5E10, 0x080E5E20, XV_RAW },
+	{ 0x080E5E20, 0x080E5E24, XV_POOL },
+	{ 0x080E5E24, 0x080E5E38, XV_RAW },
+	{ 0x080D85B8, 0x080D85BC, XV_POOL },
+	{ 0x080D85BC, 0x080D85C8, XV_TABLE },
+	{ 0x080D866E, 0x080D8670, XV_RAW },
+	{ 0x080D8670, 0x080D867C, XV_POOL },
+	{ 0x080D869A, 0x080D86AC, XV_RAW },
+	{ 0x080D86AC, 0x080D86B0, XV_POOL },
+	{ 0x080D86B0, 0x080D86BC, XV_TABLE },
+	{ 0x080D8764, 0x080D8768, XV_POOL },
+	{ 0x080D87AE, 0x080D87B0, XV_RAW },
+	{ 0x080E5E46, 0x080E5E48, XV_RAW },
+	{ 0x080E5E48, 0x080E5E4C, XV_POOL },
+	{ 0x080E5E4C, 0x080E5E58, XV_TABLE },
+	{ 0x080E5E94, 0x080E5E98, XV_POOL },
+	{ 0x080D8580, 0x080D85AA, XV_RAW },
+};
+static const XvPair shotstar_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009AEC, 0x0800C938 },   /* project:gutsman, DIFF (audited) */
+	{ 0x08009BAC, 0x0800C9F8 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08009DA0, 0x0800CBD8 },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800AB8A, 0x0800E2C2 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F7A, 0x0801A146 },   /* project:fireman, DIFF (audited) */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x0802608C, 0x080302A8 },   /* project:research, SAME */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair shotstar_words[] = {
+	{ 0x08008BD9, 0x0800B917 },   /* project:project:chips, DIFF */
+	{ 0x08008BF9, 0x0800B94D },   /* project:project:chips, SAME */
+	{ 0x08008C2B, 0x0800B9B1 },   /* project:project:chips, DIFF */
+	{ 0x08008EB9, 0x0800BC89 },   /* project:project:chips, SAME */
+	{ 0x08008EEF, 0x0800BD35 },   /* project:project:chips, DIFF */
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm shotstar_imms[] = {
+	{ 0x080D8702, THUMB_MOVS, 4, 0, 0x6, 0xCF },   /* its effect: 0x6 in BN4, 0xcf in BN6 (moved) */
+	{ 0x080D8708, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's slot 0x3a, a BN4 family's too */
+	{ 0x080D8780, THUMB_MOVS, 0, 0, 0x56, 0xC9 },   /* its object's type 0x56: moved, the dispatch's 0xc9 */
+	{ 0x080D8790, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E5D3C, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E5D7C, THUMB_MOVS, 0, 0, 0x34, 0x92 },   /* its object's type 0x34: moved, the dispatch's 0x92 */
+	{ 0x080E5D8C, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E5EEC, THUMB_MOVS, 0, 0, 0x35, 0x93 },   /* its object's type 0x35: moved, the dispatch's 0x93 */
+};
+static const XvType shotstar_types[] = {
+	{ 3, 0xC9, XV_TYPE_MOVED, 0x56 },   /* BN4's third-kind 0x56, moved, the dispatch's 0xc9 */
+	{ 4, 0x92, XV_TYPE_MOVED, 0x34 },   /* BN4's fourth-kind 0x34, moved, the dispatch's 0x92 */
+	{ 4, 0x93, XV_TYPE_MOVED, 0x35 },   /* BN4's fourth-kind 0x35, moved, the dispatch's 0x93 */
+};
+static const XvSprite shotstar_sprites[] = {
+	{ 3, 0x31, 3, 0x70, XC4_ART + 0x0, 0x300 },   /* BN4's 3:0x31 copied */
+	{ 5, 0x0A, 5, 0xEF, XC4_ART + 0x300, 0xD00 },   /* BN4's 5:0xa copied */
+};
+static const XvId shotstar_effects[] = { { 0x06, 0xCF } };
+static const XvByte shotstar_bytes[] = {
+	{ 0x080D8586, 0x31, 0x70 },   /* its table's kind 1: list 3 0x31 in BN4, 0x70 in BN6 (copied) */
+};
+static const XvSoundCall shotstar_sound_calls[] = {
+	{ 0x080D86CE, 0x1DC },   /* its sound 0x146: BN4's song at the grown table's slot 0x1dc */
+};
+static const XcSong shotstar_songs[] = { { 0x70, 0x3A }, { 0x146, 0x1DC } };
+
+#define SHOTSTAR_CODE { .name = "ShotStar (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x400), \
+	.blocks = shotstar_blocks, .nblocks = (int)(sizeof shotstar_blocks / sizeof *shotstar_blocks), \
+	.data = shotstar_data, .ndata = (int)(sizeof shotstar_data / sizeof *shotstar_data), \
+	.calls = shotstar_calls, .ncalls = (int)(sizeof shotstar_calls / sizeof *shotstar_calls), \
+	.words = shotstar_words, .nwords = (int)(sizeof shotstar_words / sizeof *shotstar_words), \
+	.imms = shotstar_imms, .nimms = (int)(sizeof shotstar_imms / sizeof *shotstar_imms), \
+	.types = shotstar_types, .ntypes = (int)(sizeof shotstar_types / sizeof *shotstar_types), \
+	.sound_calls = shotstar_sound_calls, .nsound_calls = (int)(sizeof shotstar_sound_calls / sizeof *shotstar_sound_calls), \
+	.sprites = shotstar_sprites, .nsprites = (int)(sizeof shotstar_sprites / sizeof *shotstar_sprites), \
+	.effects = shotstar_effects, .neffects = (int)(sizeof shotstar_effects / sizeof *shotstar_effects), \
+	.bytes = shotstar_bytes, .nbytes = (int)(sizeof shotstar_bytes / sizeof *shotstar_bytes) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0 },
+	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

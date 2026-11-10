@@ -51,6 +51,7 @@ ON_BN6 = {
 # refuses to write a unit whose chips are not here
 MOVED = {
     178: 0xA6, 179: 0xA6, 180: 0xA6,   # PanlSht1-3: BN4's support 0x26 (bn4_chip_panlsht1-3)
+    210: 0x99,                         # ShotStar: BN4's support 0x19 (bn4_chip_shotstar)
 }
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 

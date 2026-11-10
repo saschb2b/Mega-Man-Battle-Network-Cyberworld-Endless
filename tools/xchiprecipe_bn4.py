@@ -88,14 +88,32 @@ AUDITS = {
 TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
-UNITS = (('support', 0x26, 'PanlSht'),)
+UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
 # the order the units took them; src/audio/xsong.c XSOUNDS, the same numbers; xsong_install_at as the unit installs), one
 # slot a sound whichever unit plays it. A sound not here is a decision: the next slot
 SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
-SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB}   # (PanlSht's shot's)
+SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
+               0x146: 0x1DC}                # (ShotStar's star's fall)
+# ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
+# one slot a sound whichever track copies it), a byte a movs names
+FAMILY_SLOTS = {0x70: 0x3A}                 # (ShotStar's star's burst: Walla's)
+# The kinds' tables a moved object reads (as tools/bn4_twins.py TABLES: its size, a row's size, the kinds the unit spawns,
+# where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
+# kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set)
+TABLES = {
+    0x080D8580: dict(size=42, entry=6, kinds=(1,), sprite=(None, 0), list=3, loads={0x080D85E4},
+                     why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
+                         "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
+                         "(0x080E5D3E: movs r4,#1)"),
+}
+# The numbers the chips' copies take, each from the top of its range down (the late families' way, tools/xrecipe_bn4.py):
+# effect ids 0xCF-0xB0 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xB0, list 4's 0x9F-0x70,
+# and list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on)
+CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3 = (0xCF, 0xB0), (0xEF, 0xB0), (0x9F, 0x70), (0x70, 0xE0)
+ROOM_SPRITE = 0x100
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
 # "on BN6's code" are not): BN4's routine -> why BN6's twin serves. One not here is a decision
@@ -120,6 +138,8 @@ class Alloc(X4.Alloc):
         self.code, self.code_end, self.art, self.art_end, self.room = X4C_CODE, X4C_ART, X4C_ART, X4C_END, 'BN4\'s chips'
         self.types = {1: 0x100, 3: 0x100, 4: TYPES4[0]}
         self.types3 = list(TYPES3)
+        self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
+        self.list3_sprites = {}   # (BN4's list 3 number copied: the copy)
 
 
 def install(pairs):
@@ -172,6 +192,7 @@ def type_number(f, alloc, kind):
 
 def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f = X4.Family(0, name, 0)
+    f.late = True   # (its copies' numbers from the top of the chips' ranges down: CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4)
     f.kind, f.sub, f.number, f.slot = kind, sub, NUMBER0 + sub, slot
     f.b4, f.b6, f.home = b4, b6, X4C_HOMES + X4C_HOME_SIZE * slot
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
@@ -192,7 +213,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     roots = list(f.roots)
     while roots:
         X4.walk_code(b4, f, roots, set(), pairs)
-        roots = sorted(C.moved4(b4, f, pairs) - set(f.walks))
+        roots = sorted((C.moved4(b4, f, pairs) | moved3(b4, f, pairs)) - set(f.walks))
     X4.side_sites(f)
     X4.scan(f)
     X4.battle_players(f)
@@ -207,13 +228,23 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     shallow_twins(b4, f)
     panel_fields(f)
     X4.queued_sites(f)
-    X4.blocks_of(b4, f, alloc)
-    X4.words_of(f, pairs)
-    sprites_of(b4, b6, f, alloc)
-    X4.effects_of(b4, b6, f, alloc)
+    saved_tables = dict(bn4_twins.TABLES)
+    saved_late = X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4
+    bn4_twins.TABLES.update(TABLES)
+    X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4
+    try:
+        X4.blocks_of(b4, f, alloc)
+        X4.words_of(f, pairs)
+        sprites_of(b4, b6, f, alloc)
+        table_sprites(b4, b6, f, alloc)
+        X4.effects_of(b4, b6, f, alloc)
+    finally:
+        bn4_twins.TABLES.clear()
+        bn4_twins.TABLES.update(saved_tables)
+        X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = saved_late
     sounds_of(b4, b6, f)
-    if f.attack_sprites or f.effects or f.sides or f.ranges or f.bytes:
-        f.decide('unit', 'it copies a sprite or an effect, or needs a shim: the chips\' emitter writes none of those yet')
+    if f.sides or f.ranges:
+        f.decide('unit', 'it needs a shim the chips\' emitter writes none of yet (a side, a NameID range)')
     rows_check(b4, f)
     f.imms.sort(key=lambda x: x['at'])
     seen, out = set(), []
@@ -223,6 +254,35 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             out.append(i)
     f.imms = out
     return f
+
+
+def moved3(b4, f, pairs):
+    """its calls into a third-kind type's code that reach that type's spawn through a wrapper (tools/xrecipe_bn4.py's moved3_of
+    reads the spawner alone), where no pair of the project's nor TYPE_TWINS answers for BN6's: the type moved with the unit,
+    its region one of its blocks; the new roots"""
+    roots = set()
+    for t in sorted(f.calls):
+        hit = None if t in X4.SPAWNERS4 or t in pairs.twins or t in TYPE_TWINS else X4.t3_of(b4, t)
+        if hit is None or hit[0] is None or hit[0] in f.moved3:
+            continue
+        ty, lo, hi = hit
+        seen, todo, spawns = set(), [t], False
+        while todo and not spawns:   # (the routine called and what it calls in the type's region: a spawn of the type)
+            e = todo.pop()
+            if e in seen:
+                continue
+            seen.add(e)
+            w = T.walk(b4, e, region=(lo, hi))
+            spawns = any(s in X4.SPAWNERS4 and T.back_value(w, a, 0)[0] == ty for a, s in w.bls.items())
+            todo += [s for s in w.bls.values() if lo <= s < hi]
+        if not spawns:
+            continue
+        f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
+        f.regions.append((lo, hi, ty))
+        f.notes.append(f'its third-kind {ty:#x} ({lo:08X}-{hi:08X}), spawned through {t:08X}: no BN6 type proved its twin, moved')
+        del f.calls[t]
+        roots |= {t, lo}
+    return roots
 
 
 def shallow_twins(b4, f):
@@ -272,6 +332,21 @@ def sounds_of(b4, b6, f):
         f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
     f.sounds = []
     for v in odd:
+        if v in FAMILY_SLOTS:
+            slot = FAMILY_SLOTS[v]
+            f.sounds.append((v, slot))
+            for e, w in sorted(f.walks.items()):
+                for site, t in sorted(w.bls.items()):
+                    chain = T.back_value(w, site, 0)[1] if t == X4.BN4['sound'] and site in ids[v] else None
+                    if chain is None:
+                        continue
+                    if len(chain) != 1 or chain[0][1] != 'movs':
+                        f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
+                        continue
+                    f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=slot,
+                                       why=f'its sound {v:#x}: BN4\'s copied into BN6\'s slot {slot:#x}, a BN4 family\'s too'))
+            f.notes.append(f'its sound {v:#x}: BN4\'s song at slot {slot:#x}, the families\' slot for it (FAMILY_SLOTS)')
+            continue
         slot = SOUND_SLOTS.get(v)
         if slot is None:
             f.decide('sound', f'its sound {v:#x} is no song of BN6\'s and has no slot (SOUND_SLOTS: the next of the grown table\'s)')
@@ -319,7 +394,7 @@ def sprites_of(b4, b6, f, alloc):
     same bytes in the same list where it has one (the movs given its number), else a decision"""
     for e, w in sorted(f.walks.items()):
         for site, t in sorted(w.bls.items()):
-            if t != X4.BN4['sprite_load']:
+            if t != X4.BN4['sprite_load'] or any(site in x['loads'] for x in TABLES.values()):
                 continue
             lst, _ = T.back_value(w, site, 1)
             num, chain = T.back_value(w, site, 2)
@@ -334,6 +409,49 @@ def sprites_of(b4, b6, f, alloc):
             if tw != num:
                 f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=tw,
                                    why=f'its object\'s sprite: list {lst // 4} {num:#x} in BN4, {tw:#x} in BN6 (the same bytes)'))
+
+
+def list3_copy(b4, f, alloc, num):
+    """BN4's list 3 sprite `num` copied at a list 3 number of the chips', once for every unit: the copy, None unread or spent"""
+    if num in alloc.list3_sprites:
+        s, who = alloc.list3_sprites[num]
+        if who != f.name:
+            f.notes.append(f'its sprite 3:{num:#x}: list 3 {s["to_index"]:#x}, as {who} copied it')
+        return s
+    p, raw = X4.sprite(b4, X4.BN4['sprites'], 3, num)
+    if raw is None or alloc.list3 >= CHIP_LIST3[1]:
+        return None
+    s = dict(list=3, index=num, to_list=3, to_index=alloc.list3, at=alloc.art, room=X4.rounded(len(raw), ROOM_SPRITE), lz=bool(p & 0x80000000))
+    alloc.list3 += 1
+    alloc.art += s['room']
+    alloc.list3_sprites[num] = (s, f.name)
+    f.attack_sprites.append(s)
+    if alloc.art > alloc.art_end:
+        f.decide('room', f'its sprite 3:{num:#x} ends at {alloc.art:08X}, past the chips\' art')
+    return s
+
+
+def table_sprites(b4, b6, f, alloc):
+    """the sprites of the kinds' tables its objects read (TABLES): each spawned kind's BN6's of the same bytes, else copied
+    (list 3 alone yet), the row's byte in the table's copy set to BN6's number"""
+    named = {v for w in f.walks.values() for v in w.lits.values() if v in TABLES}
+    for v in sorted(named):
+        t = TABLES[v]
+        for k in t['kinds']:
+            at = v + t['entry'] * k + t['sprite'][1]
+            num = b4.u8(at)
+            tw = X4.bn6_sprite_twin(b4, b6, t['list'], num)
+            if tw is None and t['list'] == 3:
+                s = list3_copy(b4, f, alloc, num)
+                tw, how = (s['to_index'], 'copied') if s else (None, '')
+            else:
+                how = 'the same bytes'
+            if tw is None:
+                f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws {t["list"]}:{num:#x}, which BN6 has none of and the generator copies none of')
+                continue
+            f.notes.append(f'its table {v:08X}\'s kind {k}: sprite {t["list"]}:{num:#x} in BN4, {tw:#x} in BN6 ({how})')
+            if tw != num:
+                f.bytes.append((at, num, tw, f'its table\'s kind {k}: list {t["list"]} {num:#x} in BN4, {tw:#x} in BN6 ({how})'))
 
 
 def report_unit(f):
@@ -396,6 +514,17 @@ def c_unit(f):
     L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, moved, the dispatch\'s {a:#x} */'
           for k, a, t in f.types]
     L.append('};')
+    if f.attack_sprites:
+        L.append(f'static const XvSprite {n}_sprites[] = {{')
+        L += [f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {place(x["at"], X4C_ART, "XC4_ART")}, 0x{x["room"]:X} }},'
+              f'   /* BN4\'s {x["list"]}:{x["index"]:#x} copied{" (LZ77 in BN4)" if x["lz"] else ""} */' for x in f.attack_sprites]
+        L.append('};')
+    if f.effects:
+        L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
+    if f.bytes:
+        L.append(f'static const XvByte {n}_bytes[] = {{')
+        L += [f'\t{{ 0x{at:08X}, 0x{was:02X}, 0x{now:02X} }},   /* {why} */' for at, was, now, why in f.bytes]
+        L.append('};')
     if f.queue_calls:
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
         L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.queue_calls]
@@ -405,7 +534,8 @@ def c_unit(f):
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
                                                                    ('imms', True), ('numbers', f.numbers), ('types', True),
-                                                                   ('sound_calls', f.queue_calls)) if have]
+                                                                   ('sound_calls', f.queue_calls), ('sprites', f.attack_sprites),
+                                                                   ('effects', f.effects), ('bytes', f.bytes)) if have]
     L += ['', f'#define {n.upper()}_CODE {{ .name = "{f.name} (BN4\'s)", .game = XROM_BN4_RED_SUN_US, \\',
           f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
