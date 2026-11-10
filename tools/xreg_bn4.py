@@ -38,6 +38,9 @@ OUT_OF = {310: 'BugCharg'}   # (no row: the owner's rule)
 # One chip under two spellings (the owner's call, 10 November 2026: docs/multirom/bn4-chips.md, The owner's calls): BN4's id ->
 # BN6's chip, the run's; it takes no row, and where FIRST gave it an id that id is retired (ids are fixed)
 ALIAS = {201: 182}   # LifeAura: BN6's LifeAur; id 530 retired
+# Chips cut (the owner's call 7, 10 November 2026: docs/multirom/bn4-chips.md, The owner's calls): records BN4 never lists nor
+# gives (no Library number, the blank picture), taking no row; their ids, which FIRST gave them, retired (ids are fixed)
+CUT = {281: 'Marking', 285: 'FirePlus', 286: 'ThunPlus', 287: 'AquaPowr', 288: 'WoodPowr', 289: 'BlakWeap'}   # ids 556, 563-566, 602
 # A dark chip of BN4's (the owner's call, 10 November 2026: docs/game/meta/darkchips.md): its record's alignment dark (BN4 plays it only
 # for a dark MegaMan, src/emu/bn4_chips.h BN4_CHIP_ALIGN) or a DarkChip by its effect flags (src/emu/bn4.h BN4_CHIP_DARK). A row of
 # one is listed in xreg4_dark, which the price's hook reads: a battle it is used in costs 20 max HP, as every dark chip's
@@ -183,13 +186,16 @@ def rows(r):
                 new.remove(x)
                 out_by_navi.add(x)
     new = [x for x in new if x not in OUT_OF]
+    for x in CUT:
+        if spell(names['bn4'][x]) != CUT[x] or x in MOVED or x in ON_BN6:
+            sys.exit(f'xreg_bn4: CUT {x} is not {CUT[x]} by name, or is listed as playing')
     missing = [x for x in FIRST if x not in new and x not in ALIAS]
     if missing or len(set(FIRST)) != len(FIRST) or len(FIRST) != PACK_END - PACK_FIRST:
         sys.exit(f'xreg_bn4: FIRST does not hold {PACK_END - PACK_FIRST} of the new chips once each (not new: {missing})')
     order = list(FIRST) + [x for x in new if x not in FIRST]
     out = []
     for k, x in enumerate(order):
-        if x in ALIAS:   # (its id retired: the ids after it stay)
+        if x in ALIAS or x in CUT:   # (its id retired: the ids after it stay)
             continue
         out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_MOVED' if x in MOVED else 'XREG_PENDING'))
     for k, x in enumerate(pas):

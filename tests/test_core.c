@@ -5409,9 +5409,12 @@ static void test_chip_records(void) {
 		packed4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) != 0;
 	}
 	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
-	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
-	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
-		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias; 556, 563-566 and 602 retired: Marking,
+	 * the four Plus chips and BlakWeap cut, the owner's call 7) */
+	CHECK(xreg4_count == 187 && folder4 == 168 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 7, "registry: BN4's 187 rows, 168 folder chips "
+		"(69 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	CHECK(!xreg4_of(281) && !xreg4_of(285) && !xreg4_of(288) && !xreg4_of(289) && !xreg4_at(556) && !xreg4_at(563) && !xreg4_at(566) && !xreg4_at(602) &&
+		xreg4_at(557) && xreg4_at(601), "registry: Marking, the Plus chips and BlakWeap cut, their ids no chip's, their neighbours kept");
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
@@ -5673,7 +5676,7 @@ static void test_darkchips(void) {
 	CHECK(dark_ran_add(dark_ran_add(0, 220, 0xFF), 214, 0xFF) == DARK_RAN_BN5 && (dark_ran_add(DARK_RAN_BN5, 286, 0) & DARK_RAN_BN6) == 1u,
 		"dark: two of BN5's in a battle one bit (one price), BN6's beside them its own");
 	/* (BN4's dark chips, the owner's call of 10 November 2026: the rows BN4's records mark dark, by alignment or as a DarkChip,
-	 * 28 of the 193; one used is a dark power run, whatever its DarkChipID, two in a battle one price; no kind of the twelve,
+	 * 28 of the 187; one used is a dark power run, whatever its DarkChipID, two in a battle one price; no kind of the twelve,
 	 * so no flame's and no mood's; a light chip of BN4's and its neighbours none) */
 	int darks4 = 0, rows4 = 0;
 	for (int id = 0; id < XREG_IDS; ++id) {
