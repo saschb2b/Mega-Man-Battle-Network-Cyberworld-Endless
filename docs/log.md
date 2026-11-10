@@ -1,20 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
-* **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
-* **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
-* **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
-* **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
-* **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
-* **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).
-* **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
-
-## 2026-11-11
-* **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
-* **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
-* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
-
-## 2026-11-10
+* **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
 * **Update**: rom/bn4.md (The panel changer and the Hole panel, new row; `BN4_PANEL_HOLE` named) and multirom/bn4-chips.md (the dark units read, why each waits; call 7 with BlakWeap; call 8, the Hole panel, which a DS Navi chip's power counts), code/emu.md (`bn4_panels.h`).
@@ -34,6 +21,18 @@
 * **Update**: multirom/bn4-chips.md (unit 2 built: BN4's 194 registry rows, ids 527-733), multirom/chip-registry.md, multirom/gaps.md (Phase 4), rom/bn4.md (Its chips' texts and art, new row), code/core.md, code/emu.md, code/tools.md (`xchips_registry_bn4.c`, `bn4_chips.h`, `tools/xreg_bn4.py`).
 * **Update**: rom/navicust.md (BN6's program numbers, new row) and multirom/gaps.md (SoulT+1): BN6's program 47 is the NaviCust's RUN item, seen in play; SoulT+1 takes a number of its own.
 * **Update**: code/platforms.md (`vita/pad.c`: the Vita's ELF linked again with a pad where `vita-elf-create` finds no room after the code).
+* **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
+* **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
+* **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
+* **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
+* **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
+* **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).
+* **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
+
+## 2026-11-11
+* **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
+* **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
+* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-09
 * **Update**: engine/emulation/memory.md and game/team-protoman.md (The build, unit 1): Team ProtoMan's room moved into `code-low` (`FREE_TEAM_NAVIS` `+0x090000`-`+0x0EF000`, its parts `FREE_TEAM_HOMES`, `FREE_TEAM_NAVI_CODE`, `FREE_TEAM_NAVI_ART`, `FREE_TEAM_SHARED`, `FREE_TEAM_SPRITES` in `src/emu/free_space.plan`), out of `+0x4D0000`, which BN4's late families took, and `FREE_TEAM_SPRITES_MORE` (`+0x710800`) gone: the six's sprites in one room sized for all of them; NapalmMan's mutations poked at his code's new place.
