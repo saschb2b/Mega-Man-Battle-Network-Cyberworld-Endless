@@ -232,12 +232,23 @@ whether or not BN6 has one of its bytes: an object in play in a fight's
 frame is compared by its sprite's frames, which the differential names
 by the recipe's rows.
 
-**Next:** MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite
-of list 1, the viruses' list, which needs a range of the chips' there;
-BN4's misc run waits 0x28 frames for subfamily 5, which BN6's run does
-not for a grown routine), BugChain (support 0x1F: two calls of BN4's
-with no twin found). Marking and the four Plus chips wait on the
-owner's call 7.
+**MokoRus1-3 are moved** (10 November 2026: ids 577-579, misc 1): the
+Moko (the third kind's 0x2C), 524 bytes, three of them on the rows the
+chip's shuffle draws, set off 10 frames apart; its sprite is the first
+of list 1, the viruses' list, the chips copy (their range there 0x7F
+down to 0x40), its sound at the grown table's 0x1E0. Its hit strikes
+and pushes back, which the two engines ask for by different bits of the
+hit (BN4's 0x01 with a push bit, BN6's 0x40 with one): the copy passes
+BN6's, 0x61 for BN4's 0x21. `bn4_chip_mokorus1`, `2` and `3` pass over
+300 frames, the Mokos in play from t33 to t147 (a 140 HP Mettaur in the
+middle row left 80, 50 and 20, struck out of its attack and pushed back
+a column in both), five mutations caught.
+
+**Next:** SidBmbo1-3 (misc 5: a sprite of list 1 too; BN4's misc run
+waits 0x28 frames for subfamily 5, which BN6's run does not for a grown
+routine), BugChain (support 0x1F: two calls of BN4's with no twin
+found), then Binder, SandRing and the spread chips. Marking and the
+four Plus chips wait on the owner's call 7.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its

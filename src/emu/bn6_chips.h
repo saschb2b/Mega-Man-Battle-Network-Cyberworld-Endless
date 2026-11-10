@@ -264,5 +264,7 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_OBSTACLE_ADD      0x0800F614u /* r0 an object, r1 its side, r2 which list: entered there, the oldest's HP zeroed where it is full */
 #define BN6_CHIP_ATTACK_END   0x08011714u /* a chip's attack ended (BN4_CHIP_ATTACK_END's twin by its work): an attack of kind 2 keeps its lock-out, */
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
+#define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
+                                           * (bn4_chips.h BN4_SHUFFLE, the same instructions) */
 
 #endif

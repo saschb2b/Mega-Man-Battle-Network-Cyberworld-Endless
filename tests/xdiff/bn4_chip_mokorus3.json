@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's MokoRus3 O (132) against the registry's row 579 (the unit of BN4's misc 1, power 120): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2). Three Mokos, the third kind's 0x2C, one a row in the order the chip's shuffle draws (rows 2, 1, 3 here, BN6's draws BN4's), set off 10 frames apart (t34, t44, t54, each with its sound) and in play from t33 to t147; the middle row's strikes the Mettaur at t93 in both: 20 HP left, struck out of its attack and pushed back to (6,2).",
+ "folder4": [
+  "1C84"
+ ],
+ "folder6": [
+  "243:0E"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
