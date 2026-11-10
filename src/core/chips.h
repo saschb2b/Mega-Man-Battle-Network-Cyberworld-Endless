@@ -65,6 +65,8 @@ bool chips_sits_out(int id);
 const uint8_t *chips_sit_bits(void);
 /* Whether chip `id` is one of BN5's (the registry's own ids) */
 bool chips_bn5(int id);
+/* ... or one of BN4's (its rows' ids: docs/multirom/bn4-chips.md), which sits out until its code plays */
+bool chips_bn4(int id);
 /* Whether the registry's chips are BN5's own (its ROM read), not placeholders */
 bool chips_from_bn5(void);
 

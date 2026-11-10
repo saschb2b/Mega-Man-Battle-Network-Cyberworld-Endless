@@ -16,6 +16,12 @@ finer calls' subset ([One net](one-net.md)). Those that play in BN6's battles
 come into runs' finds, shops, traders and rewards since D1 (One net); the
 chip step gives any one ([Dev tools](../devtools/overview.md)).
 
+- **BN4's rows** (`src/core/xchips_registry_bn4.c`, written by
+  `tools/xreg_bn4.py`; [BN4's chips in a run](bn4-chips.md), unit 2): 194
+  chips of BN4 Red Sun's a run has none of, a table of their own
+  (`XChipReg4`) at ids 527-733, each sitting out until its code plays,
+  its record, name, description and art made from BN4's ROM as BN5's are
+  below, a placeholder without it.
 - **The registry** (`src/core/xchips_registry.c`, numbers only): 283 of
   BN5's chips, each with its id in BN6's tables and how it comes in. One
   chip per name: the 116 BN6 has by name are BN6's own (its id, record

@@ -3,9 +3,12 @@
 ## Unreleased
 
 - **The Library, a page per game.** PET > Library now opens the run's own
-  Library: a tab each for BN6, BN5 and BN4 (**L** and **R**), and under it
-  that game's StdChip, MegaChip and GigaChip pages (Left and Right), the
-  chip's card beside the list as before. Each page is the game's own
+  Library: a tab each for BN6, BN5 and BN4, and under it that game's
+  StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left
+  and Right turn the pages, through a game's three and on to the next
+  game's, **L** and **R** move the list a screenful, B or START leaves; the
+  chip's card stands beside the list as before, a Mega's cyan and a
+  Giga's pink. Each page is the game's own
   Library in its own numbers (BN5's 005 is Vulcan1, its 009 MrkCan1), and
   counts only chips a run can hand out today; a chip two games share,
   Cannon or Sword, fills its place on each. A class whole turns its count

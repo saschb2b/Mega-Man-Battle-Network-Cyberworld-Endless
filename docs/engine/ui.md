@@ -131,10 +131,12 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   screen's one content.
 - The Library ([The Library, a page per entry](../game/meta/library.md))
   is BN6's Library's frame under a tab row: the entries (BN6, BN5, BN4)
-  as Options' tabs between L and R, the chip's card on the left, the
-  list's window on the right with BN6's own class names between the page
-  arrows where Left and Right turn them (BN6's keys for its tabs), the
-  count in its pill, light green on navy as FOLDER EDIT's and gold where
+  as pills, the one shown lit, with no key's letter (the pages turn by
+  BN6's keys: Left and Right through an entry's classes and on to the
+  next entry's, L and R the list a screenful, START leaving as B), the
+  chip's card on the left with its hole and grip, a Mega's cyan and a
+  Giga's pink, the list's window on the right with BN6's own class names
+  between the page arrows, the count in its pill, light green on navy as FOLDER EDIT's and gold where
   the class is whole, a row as BN6's (number, icon, name, the rarity's
   stars; `??` for a number never filled), the entry's whole count at the
   band's right end. The one screen of ours that stands where BN6 has one.

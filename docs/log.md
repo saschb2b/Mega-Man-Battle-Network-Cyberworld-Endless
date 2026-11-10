@@ -2,6 +2,7 @@
 
 ## 2026-11-10
 * **Creation**: game/meta/library.md, The Library, a page per entry: the PET's Library row opens a screen of ours with a tab each for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's four calls, the pages measured (BN6 249 slots, BN5 241, BN4 113), the order verified in the ROMs' records (+0x1C) and against MMKB's lists. With it: game/pet.md (Library), game/meta/phase-two.md, title-marks.md, multirom/one-net.md and chip-registry.md (the Library call amended), engine/ui.md (Ours), game/fidelity.md, rom/chips-code.md and bn4.md (the Library order's rows), rom/pet-and-second-screen.md (the Library's row of the PET's menu), research/sources.md (BN5's and BN4's Library order), code/core.md, screens.md and tools.md, devtools/dev-menu.md (`library=N`) and agents-tools.md, GUIDE.md.
+* **Update**: multirom/bn4-chips.md (unit 2 built: BN4's 194 registry rows, ids 527-733), multirom/chip-registry.md, multirom/gaps.md (Phase 4), rom/bn4.md (Its chips' texts and art, new row), code/core.md, code/emu.md, code/tools.md (`xchips_registry_bn4.c`, `bn4_chips.h`, `tools/xreg_bn4.py`).
 * **Update**: rom/navicust.md (BN6's program numbers, new row) and multirom/gaps.md (SoulT+1): BN6's program 47 is the NaviCust's RUN item, seen in play; SoulT+1 takes a number of its own.
 * **Update**: code/platforms.md (`vita/pad.c`: the Vita's ELF linked again with a pad where `vita-elf-create` finds no room after the code).
 

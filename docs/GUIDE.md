@@ -925,8 +925,9 @@ each Rare virus deleted in any run, BN6's "You got new Virus Data") are
 yours in every run, for the Virus Battlers alone.
 
 Every chip MegaMan holds joins the Library, which every run's PET shows
-whole, a page per game: **L** and **R** turn from BN6's chips to BN5's and
-BN4's, Left and Right from StdChip to MegaChip and GigaChip. Each page is
+whole, a page per game: Left and Right turn from StdChip to MegaChip and
+GigaChip and on to BN5's pages and BN4's, **L** and **R** move the list a
+screenful, as in BN6's own Library. Each page is
 that game's own Library in its own numbers, counted against the chips a
 run can hand out today, and a chip two games share fills its place on
 both. A class whole turns its count gold. A Chip Trader's prize is new to

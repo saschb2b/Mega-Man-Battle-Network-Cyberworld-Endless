@@ -11,5 +11,8 @@ void xchips_text_name(int bn5, char *out, size_t n);
 /* Its description, three lines as the folder's box shows them (nine
  * letters at most, as BN6's own) */
 extern const char *const xchips_text_desc[3];
+/* ... and one of Battle Network 4's (docs/multirom/bn4-chips.md): "BN4-82", its lines */
+void xchips_text_name4(int bn4, char *out, size_t n);
+extern const char *const xchips_text_desc4[3];
 
 #endif

@@ -209,18 +209,15 @@ static int bn5_code(uint8_t c) {
 	}
 }
 
-/* ... and of BN4 Red Sun's (its chips' names read against BN6's: M-Cannon,
- * Heat-V, Bub-V and H-Burst's dash 0x40, Atk+10, Navi+20, Atk+30 and
- * TimeBom+'s plus 0x46, P.Driver's dot 0x4E; docs/multirom/bn4-chips.md,
- * The census): the same to 0x3F, those three as BN6's, the rest as they are */
-static int bn4_code(uint8_t c) {
-	switch (c) {
-	case 0x40: return 0x98;   /* - */
-	case 0x46: return 0x9E;   /* + */
-	case 0x4E: return 0xA6;   /* . */
-	default: return c;
-	}
-}
+/* ... and of BN4 Red Sun's: the same to 0x3F; its punctuation, 0x40 to
+ * 0x57, BN6's 0x58 on (BN6 put its version marks and more before them:
+ * BN4's dash 0x40 is BN6's 0x98, its plus 0x46 the 0x9E, its dot 0x4E the
+ * 0xA6). Measured over its chips' names and the 64 descriptions it shares
+ * word for word with BN6's or BN5's chip of the name: ten codes there
+ * (0x40, 0x42, 0x43, 0x46, 0x4A, 0x4B, 0x4C, 0x4E, 0x51, 0x54), each 0x58
+ * below BN6's every time; the rest of the run assumed (docs/multirom/
+ * bn4-chips.md, The census). Past it, as they are */
+static int bn4_code(uint8_t c) { return c >= 0x40 && c <= 0x57 ? c + 0x58 : c; }
 
 size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
 	size_t k = 0;

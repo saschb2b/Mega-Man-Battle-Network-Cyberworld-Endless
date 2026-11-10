@@ -50,10 +50,24 @@ static void entry_to(int entry) {
 	audio_sfx(SFX_SELECT);
 }
 
-static void class_turn(int by) {
-	L.v.cls = (L.v.cls + by + LIB_CLASSES) % LIB_CLASSES;
+/* the page before or after, as BN6's Left and Right turn its tabs: an entry's three classes, then the next entry's */
+static void page_turn(int by) {
+	int pages = LIB_ENTRIES * LIB_CLASSES, at = (L.v.entry * LIB_CLASSES + L.v.cls + by + pages) % pages;
+	L.v.entry = at / LIB_CLASSES;
+	L.v.cls = at % LIB_CLASSES;
 	page_make();
 	audio_sfx(SFX_SELECT);
+}
+
+/* a screenful up or down, as BN6's L and R: the list moves, the cursor keeps its row on the screen */
+static void list_page(int by) {
+	LibraryView *v = &L.v;
+	int most = v->n > LIBRARY_ROWS ? v->n - LIBRARY_ROWS : 0, top = v->top + by * LIBRARY_ROWS;
+	top = top < 0 ? 0 : top > most ? most : top;
+	if (top == v->top) return;
+	v->at += top - v->top;
+	v->top = top;
+	audio_sfx(SFX_CURSOR);
 }
 
 static void close_it(void) {
@@ -65,7 +79,7 @@ static void close_it(void) {
 
 static bool inside(SDL_Rect r, int x, int y) { return x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h; }
 
-/* a tap on the picture: a row takes the cursor, a tab its entry, the arrows turn the class */
+/* a tap on the picture: a row takes the cursor, a tab its entry, the arrows turn the page */
 static void taps(void) {
 	int x, y;
 	if (!platform_tap(&x, &y)) return;
@@ -76,18 +90,19 @@ static void taps(void) {
 	for (int e = 0; e < LIB_ENTRIES; ++e)
 		if (inside(library_tab_rect(e), x, y)) { if (e != L.v.entry) entry_to(e); return; }
 	for (int r = 0; r < 2; ++r)
-		if (inside(library_turn_rect(r), x, y)) { class_turn(r ? 1 : -1); return; }
+		if (inside(library_turn_rect(r), x, y)) { page_turn(r ? 1 : -1); return; }
 }
 
 static void keys(void) {
 	LibraryView *v = &L.v;
 	if (btn_repeat(BTN_UP) && v->at > 0) { cursor_to(v->at - 1); audio_sfx(SFX_CURSOR); }
 	else if (btn_repeat(BTN_DOWN) && v->at < v->n - 1) { cursor_to(v->at + 1); audio_sfx(SFX_CURSOR); }
-	if (btn_pressed(BTN_L)) entry_to(v->entry - 1);
-	else if (btn_pressed(BTN_R)) entry_to(v->entry + 1);
-	else if (btn_pressed(BTN_LEFT)) class_turn(-1);
-	else if (btn_pressed(BTN_RIGHT)) class_turn(1);
-	if (btn_pressed(BTN_B)) close_it();
+	if (btn_repeat(BTN_L)) list_page(-1);
+	else if (btn_repeat(BTN_R)) list_page(1);
+	else if (btn_pressed(BTN_LEFT)) page_turn(-1);
+	else if (btn_pressed(BTN_RIGHT)) page_turn(1);
+	/* (B leaves, and START as it leaves BN6's own) */
+	if (btn_pressed(BTN_B | BTN_START)) close_it();
 }
 
 void library_open(void) {
@@ -112,7 +127,7 @@ void library_shut(void) {
 
 bool library_update(void) {
 	if (!L.shown) {
-		if (L.letting_go && btn_held(BTN_A | BTN_B)) return true;
+		if (L.letting_go && btn_held(BTN_A | BTN_B | BTN_START)) return true;
 		L.letting_go = false;
 		return false;
 	}

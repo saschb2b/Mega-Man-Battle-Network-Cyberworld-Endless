@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:06:58Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:03:14Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,44 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
+194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
+`src/core/xchips_registry_bn4.c`, a table of their own beside BN5's
+(`XChipReg4`, `xreg4_of`, `xreg4_at`), so that what walks BN5's rows meets
+none of them. The tool mirrors the engine's pairing (`pair_bn4`) on the
+names in BN6's codes: 175 folder chips have no chip of the run's (the
+census's 172 less ShadeMan's SP and DS, which BN5's rows pay since, plus
+SerchMan V1, CannMode, SwrdMode, FinalGun and BugCurse, the names BN5 has
+unregistered; BugCharg none, ProtoMan's DS none) and 19 Program Advances.
+The ids, fixed for good: **527-602**, the 76 with a pack entry today, go
+to the chips that play first in this plan's order (Hole, DrkLine,
+TimeBomb, LifeAura, BlakBarr, Ball, RollSP and RollDS; the Navi chips of
+GutsMan, ThunMan, WindMan, FireMan, SerchMan, AquaMan and WoodMan; the
+fifteen of the units under 300 bytes; then SidBmbo, WhitWeb, MokoRus,
+Binder, SandRing, Boomer, BugChain, the spread chips, FlmLine, SeekBom,
+DrkVulcn and BlakWeap); **605-623** to the Program Advances (the engine
+keeps the bit of one formed from 603, 32 of them); **635-733** to the
+other 99 folder chips, in BN4's order. Every row is `XREG_PENDING` (it
+sits out: its code is not in BN6's engine) or `XREG_PA`. Each record is
+made from BN4's in BN6's layout (`xrec_from_bn4`: its MB, kind and class
+from +6 to +8; its kind as BN6's icon element, BN4 numbering its kinds as
+BN5 its icon elements; a computed power unshown; inert until its code
+plays), its name and description from BN4's archives in BN6's codes
+(BN4's punctuation, 0x40 to 0x57, is BN6's 0x58 on, measured over the 64
+descriptions it shares word for word with a chip of the run; its box's
+lines set in BN6's), its icon in BN6's icons' palette, its picture and
+palette copied, 123 KB of art in all. Without BN4's ROM each is a
+placeholder that keeps its codes, class and MB ("BN4-82", "Needs BN4 ROM
+back to battle"). Seen: BN4's GutsMan and Hole in BN6's folder editor
+with BN4's pictures, descriptions and codes (the chip step, `chip 535 G
+15`), and Hole's placeholder with BN4's ROM away. Unit tests hold the
+rows' rules, a record made from a made-up BN4 record, the placeholder and
+the text codes. A reward of one still pays the stand-in's zenny, as it
+sits out. Not in this unit: an id past 602 has no pack entry (RAM to be
+found: a second survey with canaries found the folder editor, the Library
+and the NaviCust writing most of the stretches that looked free, two left
+unproved), so a chip from 635 cannot be held yet.
 
 **Unit 1, ten-bit chip ids, live; ids past 511 in part** (below, The build plan): the
 census of BN6's code is read and kept by `tools/chip_ids.py` ([The chip
@@ -134,8 +172,8 @@ Roll's summon alone, no visitor: the six visitors' rows name only BN4's
 own chips, so a player meets the pairings as BN4's chips come (unit 2 on)
 and as more of its families visit. A tournament round
 against a BN4 Navi pays a BN6 Navi chip of the round's band as a
-stand-in ([the tournament](../game/tournament.md), call 7). No chip of
-BN4's own has an id in BN6's tables yet.
+stand-in ([the tournament](../game/tournament.md), call 7). BN4's own
+chips have their ids since unit 2 (above); none plays yet.
 
 ## The census
 

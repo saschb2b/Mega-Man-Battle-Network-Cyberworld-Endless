@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "bn4.h"
 #include "bn6.h"
 #include "xchips_moved.h"
 #include "xchips_registry.h"
@@ -63,6 +64,27 @@ void xrec_same_moved(const uint8_t bn5[XREC_SIZE], const XChipMoved *moved, uint
  * MB, a DarkChip's class, no power, Null, inert, BN6's blank art
  * (`blank`: icon, picture, palette). */
 void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3], uint8_t out[XREC_SIZE]);
+
+/* BN4's record as BN6's (docs/multirom/bn4-chips.md, Their rarity, codes
+ * and MB): BN4's layout is BN6's but for +6 to +8, its MB, its kind and
+ * its class, which go to BN6's +8, +6 (the kind as BN6's icon element:
+ * BN4 numbers its kinds as BN5 its icon elements, a Program Advance's 14
+ * where BN5's is 13) and +7. BN4's codes, attack element, rarity, effect
+ * flags but the Library's, lockout and gate; its power, but one BN4
+ * computes (1000 and up, BN4's own table): 0, unshown. Out of BN6's
+ * Library screen, its own id its ID sort key, no DarkChipID. Its code is
+ * not in BN6's engine (XREG_PENDING: it sits out): the inert family, no
+ * lock-on and no parameters. */
+typedef struct {
+	const uint8_t *bn4;    /* BN4's record */
+	const XChipReg4 *reg;
+	uint16_t abc;          /* its place in the folder editor's ABC order */
+	uint32_t art[3];       /* its icon's, picture's and picture palette's bus addresses in the core's copy */
+} XRecordFrom4;
+void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]);
+/* ... and its placeholder where BN4's ROM is not read, as BN5's: the row's
+ * codes, class and MB, no power, Null, inert, BN6's blank art. */
+void xrec_placeholder4(const XChipReg4 *reg, uint16_t abc, const uint32_t blank[3], uint8_t out[XREC_SIZE]);
 
 /* The folder editor's ABC place for a chip named `name`: the place of the
  * chip of `n` whose name comes last before it (case aside; a tie the editor

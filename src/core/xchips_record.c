@@ -98,6 +98,46 @@ void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3]
 	art_put(out, blank);
 }
 
+#define BN4_KIND_PA 14   /* BN4's kind of a Program Advance: BN5's icon element 13 */
+
+void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
+	memcpy(out, in->bn4, XREC_SIZE);
+	int kind = in->bn4[BN4_CHIP_KIND];
+	out[BN6_CHIP_ELEMENT] = (uint8_t)xrec_icon_element(kind == BN4_KIND_PA ? 13 : kind);
+	out[BN6_CHIP_LIBRARY_TYPE] = in->bn4[BN4_CHIP_CLASS];
+	out[BN6_CHIP_MB] = in->bn4[BN4_CHIP_MB];
+	uint8_t fx = in->bn4[BN6_CHIP_EFFECT_FLAGS] & (uint8_t)~BN6_CHIP_IN_LIBRARY;
+	if (get16(in->bn4 + BN6_CHIP_ATTACK_POWER) >= 1000) {
+		put16(out + BN6_CHIP_ATTACK_POWER, 0);
+		fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
+	}
+	out[BN6_CHIP_EFFECT_FLAGS] = fx;
+	out[BN6_CHIP_FAMILY] = XREC_INERT_FAMILY;
+	out[BN6_CHIP_SUBFAMILY] = XREC_INERT_SUB;
+	out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
+	memset(out + BN6_CHIP_PARAMS, 0, 4);
+	out[BN6_CHIP_LIBRARY_NUMBER] = out[BN6_CHIP_LIBRARY_FLAGS] = 0;
+	put16(out + BN6_CHIP_ALPHA_SORT, in->abc);
+	put16(out + BN6_CHIP_ID_SORT, in->reg->bn6);
+	out[BN6_CHIP_DARK_ID] = 0xFF;
+	art_put(out, in->art);
+}
+
+void xrec_placeholder4(const XChipReg4 *reg, uint16_t abc, const uint32_t blank[3], uint8_t out[XREC_SIZE]) {
+	memset(out, 0, XREC_SIZE);
+	memcpy(out + BN6_CHIP_CODES, reg->codes, 4);
+	out[BN6_CHIP_ELEMENT] = 10;   /* (Null) */
+	out[BN6_CHIP_LIBRARY_TYPE] = reg->type;
+	out[BN6_CHIP_MB] = reg->mb;
+	out[BN6_CHIP_FAMILY] = XREC_INERT_FAMILY;
+	out[BN6_CHIP_SUBFAMILY] = XREC_INERT_SUB;
+	put16(out + BN6_CHIP_ALPHA_SORT, abc);
+	put16(out + BN6_CHIP_ID_SORT, reg->bn6);
+	out[BN6_CHIP_GATE] = 1;
+	out[BN6_CHIP_DARK_ID] = 0xFF;
+	art_put(out, blank);
+}
+
 /* names compared as the editor's ABC sort reads them, case aside */
 static int name_cmp(const char *a, const char *b) {
 	for (;; ++a, ++b) {

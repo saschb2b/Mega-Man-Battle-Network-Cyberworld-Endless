@@ -44,6 +44,9 @@ int library_rows_check(const LibSlot *rows, int n) {
 bool library_plays(int chip) {
 	const XChipReg *r = xreg_at(chip);
 	if (r) return r->type <= XCHIPS_GIGA && (r->how == XREG_RECORD || r->how == XREG_MOVED);
+	/* (BN4's own rows: each sits out until its code is moved) */
+	const XChipReg4 *r4 = xreg4_at(chip);
+	if (r4) return r4->type <= XCHIPS_GIGA && (r4->how == XREG_RECORD || r4->how == XREG_MOVED);
 	return chip > 0 && chip < XCHIPS_BN6 && chip_pool_tier(chip) >= 0;
 }
 

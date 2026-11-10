@@ -44,7 +44,8 @@ BN5 and BN4, each that game's own Library in its own order and numbers,
 counted against what a run can hand out
 ([The Library, a page per entry](meta/library.md)). `pet.c`'s hook on the
 PET's input takes A on the row (`BN6_PET_ENTRY_LIBRARY`) as on Comm's and
-Save's; the game holds under the screen as under the Jukebox, and B gives the PET back with its cursor on Library.
+Save's; the game holds under the screen as under the Jukebox, and B or START gives the PET back
+with its cursor on Library, as BN6's Library leaves.
 The one screen of BN6's the run redraws: its P.A. Memo tab went with it.
 
 ## Options

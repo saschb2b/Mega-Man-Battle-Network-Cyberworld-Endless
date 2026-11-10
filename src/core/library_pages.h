@@ -41,8 +41,9 @@ int library_rows_check(const LibSlot *rows, int n);
 
 /* Whether a run can hand out chip `chip` once its game's ROM is read: one
  * of BN6's the pool holds (chip_pool.h), or one of the registry's own
- * that plays (xchips_registry.h: over BN6's code or moved); a chip that
- * sits out until its code is moved, a DarkChip and a Program Advance not */
+ * that plays (xchips_registry.h: over BN6's code or moved, BN5's rows and
+ * BN4's alike); a chip that sits out until its code is moved, a DarkChip
+ * and a Program Advance not */
 bool library_plays(int chip);
 /* Entry `entry`'s page of class `cls`: its slots a run can hand out, in
  * the game's order, into `out` (`most` at most; NULL to count): how many */

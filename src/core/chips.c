@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bytes.h"
 #include "rom.h"
@@ -24,7 +25,7 @@
 
 static struct {
 	int alias, alias_from;        /* chips_alias's */
-	const uint8_t *rom6, *rom5;   /* the ROMs it was made from */
+	const uint8_t *rom6, *rom5, *rom4;   /* the ROMs it was made from */
 	bool made, installed;
 	uint8_t *img;                 /* the place's bytes from CHIPS_FREE */
 	uint32_t len;
@@ -36,13 +37,15 @@ static struct {
 
 /* An archive's entry `i` in `rom` (ROM offsets): its bytes to its end (its
  * TEXT_END too), ENTRY_MAX at most; its length, 0 where none is there */
-static uint32_t entry_at(const uint8_t *rom, uint32_t archive, uint32_t i, const uint8_t **out) {
+static uint32_t entry_to(const uint8_t *rom, uint32_t archive, uint32_t i, uint8_t end, const uint8_t **out) {
 	if (!rom || archive + 2 * i + 2 > ROM_SIZE) return 0;
 	uint32_t p = archive + get16(rom + archive + 2 * i), n = 0;
-	while (p + n < ROM_SIZE && n < ENTRY_MAX && rom[p + n] != TEXT_END) ++n;
+	while (p + n < ROM_SIZE && n < ENTRY_MAX && rom[p + n] != end) ++n;
 	*out = rom + p;
 	return p + n < ROM_SIZE && n < ENTRY_MAX ? n + 1 : 0;
 }
+
+static uint32_t entry_at(const uint8_t *rom, uint32_t archive, uint32_t i, const uint8_t **out) { return entry_to(rom, archive, i, TEXT_END, out); }
 
 /* A row whose art is BN5's: an own row's, and (after them all, so that
  * theirs keep their places) BN6's own chip of a name whose record BN5's
@@ -56,43 +59,68 @@ static bool art_row(const XChipReg *r, int pass) {
  * where BN5's record has none (a picture and palette at one word), a
  * picture or palette two of BN5's chips share copied once; the art's
  * bytes, 0 without BN5's ROM */
+static const uint8_t *bn4_record(int bn4) { return M.rom4 + (BN4_CHIP_RECORDS - BUS) + XREC_SIZE * (uint32_t)bn4; }
+
+/* the shared pictures and palettes planned so far: where each is from (a game's address, BN4's told from BN5's of the
+ * same number by bit 31) and its place */
+static struct { uint32_t from[XREG_IDS * 4], to[XREG_IDS * 4]; int n; } shared;
+
+/* one record's art planned from `at` on: its icon, then its picture and palette where it has the pair, one two chips
+ * share copied once; `a` its three places, BN6's blank's where the record has none; the next free place */
+static uint32_t art_take(uint32_t a[3], const uint8_t *rec, uint32_t game, uint32_t at) {
+	uint32_t icon = get32(rec + BN6_CHIP_ICON_PTR), pic = get32(rec + BN6_CHIP_IMAGE_PTR), pal = get32(rec + BN6_CHIP_PALETTE_PTR);
+	if (rom_is_ptr(icon) && rom_off(icon) + ICON_BYTES <= ROM_SIZE) { a[0] = at; at += ICON_BYTES; }
+	if (pic == pal || !rom_is_ptr(pic) || !rom_is_ptr(pal) || rom_off(pic) + PICTURE_BYTES > ROM_SIZE || rom_off(pal) + PALETTE_BYTES > ROM_SIZE)
+		return at;
+	const uint32_t src[2] = { pic | game, pal | game }, size[2] = { PICTURE_BYTES, PALETTE_BYTES };
+	for (int k = 0; k < 2; ++k) {
+		int s = 0;
+		while (s < shared.n && shared.from[s] != src[k]) ++s;
+		if (s == shared.n) { shared.from[shared.n] = src[k]; shared.to[shared.n++] = at; at += size[k]; }
+		a[1 + k] = shared.to[s];
+	}
+	return at;
+}
+
 static uint32_t art_plan(const uint32_t blank[3]) {
 	uint32_t at = CHIPS_ART;
-	static uint32_t from[XREG_IDS * 2], to[XREG_IDS * 2];
-	int nshared = 0;
+	shared.n = 0;
 	memset(M.art, 0, sizeof M.art);
 	for (int n = 0; n < 2 * xreg_count; ++n) {
 		const XChipReg *r = &xreg_rows[n % xreg_count];
 		if (!art_row(r, n / xreg_count)) continue;
-		uint32_t *a = M.art[r->bn6];
-		memcpy(a, blank, sizeof M.art[0]);
-		if (!M.rom5) continue;
-		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5;
-		uint32_t icon = get32(rec + BN6_CHIP_ICON_PTR), pic = get32(rec + BN6_CHIP_IMAGE_PTR), pal = get32(rec + BN6_CHIP_PALETTE_PTR);
-		if (rom_is_ptr(icon) && rom_off(icon) + ICON_BYTES <= ROM_SIZE) { a[0] = at; at += ICON_BYTES; }
-		if (pic == pal || !rom_is_ptr(pic) || !rom_is_ptr(pal) || rom_off(pic) + PICTURE_BYTES > ROM_SIZE || rom_off(pal) + PALETTE_BYTES > ROM_SIZE)
-			continue;
-		const uint32_t src[2] = { pic, pal }, size[2] = { PICTURE_BYTES, PALETTE_BYTES };
-		for (int k = 0; k < 2; ++k) {
-			int s = 0;
-			while (s < nshared && from[s] != src[k]) ++s;
-			if (s == nshared) { from[nshared] = src[k]; to[nshared++] = at; at += size[k]; }
-			a[1 + k] = to[s];
-		}
+		memcpy(M.art[r->bn6], blank, sizeof M.art[0]);
+		if (M.rom5) at = art_take(M.art[r->bn6], M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, 0, at);
+	}
+	/* (BN4's rows after them, so that BN5's keep their places) */
+	for (int n = 0; n < xreg4_count; ++n) {
+		const XChipReg4 *r = &xreg4_rows[n];
+		memcpy(M.art[r->bn6], blank, sizeof M.art[0]);
+		if (M.rom4) at = art_take(M.art[r->bn6], bn4_record(r->bn4), 0x80000000u, at);
 	}
 	return at - CHIPS_ART;
 }
 
 /* ... and copied into the image, the icons in BN6's icons' palette */
 static void art_copy(void) {
-	if (!M.rom5) return;
+	static const uint32_t size[3] = { ICON_BYTES, PICTURE_BYTES, PALETTE_BYTES };
 	uint8_t map[16];
+	if (M.rom4) xrec_icon_colours(M.rom4 + (BN4_CHIP_ICON_PAL - BUS), R.data + R.layout->chip_icon_pal, map);
+	for (int n = 0; M.rom4 && n < xreg4_count; ++n) {
+		const uint8_t *rec = bn4_record(xreg4_rows[n].bn4);
+		for (int k = 0; k < 3; ++k) {
+			uint32_t to = M.art[xreg4_rows[n].bn6][k];
+			if (to < CHIPS_ART || to - CHIPS_FREE + size[k] > M.len) continue;
+			memcpy(M.img + (to - CHIPS_FREE), M.rom4 + rom_off(get32(rec + BN6_CHIP_ICON_PTR + 4 * k)), size[k]);
+			if (!k) xrec_icon_recolour(M.img + (to - CHIPS_FREE), map);
+		}
+	}
+	if (!M.rom5) return;
 	xrec_icon_colours(M.rom5 + BN5_CHIP_ICON_PAL, R.data + R.layout->chip_icon_pal, map);
 	for (int n = 0; n < 2 * xreg_count; ++n) {
 		const XChipReg *r = &xreg_rows[n % xreg_count];
 		if (!art_row(r, n / xreg_count)) continue;
 		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5;
-		static const uint32_t size[3] = { ICON_BYTES, PICTURE_BYTES, PALETTE_BYTES };
 		for (int k = 0; k < 3; ++k) {
 			uint32_t to = M.art[r->bn6][k];
 			if (to < CHIPS_ART || to - CHIPS_FREE + size[k] > M.len) continue;
@@ -157,6 +185,55 @@ static void own_text(const XChipReg *r, bool desc, Entries *e) {
 	entry_add(e, b, n);
 }
 
+/* a box as BN6's descriptions are (E8 06 01 01, F1 00 00, its lines by E9, E7 01) of `lines` lines, each `len` bytes
+ * of BN6's codes; its bytes */
+static uint32_t box_make(uint8_t *b, uint32_t room, const uint8_t *const *lines, const uint32_t *len, int n) {
+	static const uint8_t open[7] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00 }, close[2] = { 0xE7, 0x01 };
+	uint32_t k = sizeof open;
+	memcpy(b, open, sizeof open);
+	for (int l = 0; l < n; ++l) {
+		if (l) b[k++] = 0xE9;
+		uint32_t take = len[l] < room - k - 4 ? len[l] : room - k - 4;
+		memcpy(b + k, lines[l], take);
+		k += take;
+	}
+	memcpy(b + k, close, sizeof close);
+	return k + (uint32_t)sizeof close;
+}
+
+/* a chip of BN4's: its name (`desc` false) or description in BN6's text codes, the description's lines (BN4's box is
+ * E7 02, F0 00 00, lines by BN4_TEXT_LINE, E6 01) set in BN6's box; without its ROM the placeholder's */
+static void own_text4(const XChipReg4 *r, bool desc, Entries *e) {
+	uint8_t b[ENTRY_MAX], line[3][24];
+	const uint8_t *lines[3] = { line[0], line[1], line[2] }, *s = NULL;
+	uint32_t n = 0, len[3] = { 0 }, got = 0;
+	int nlines = 0;
+	if (M.rom4 && (!desc || r->bn4 <= BN4_CHIP_DESC_LAST))
+		got = entry_to(M.rom4, (desc ? (r->bn4 < 256 ? BN4_CHIP_DESCS : BN4_CHIP_DESCS_HI) : (r->bn4 < 256 ? BN4_CHIP_NAMES : BN4_CHIP_NAMES_HI)) - BUS,
+			r->bn4 & 0xFFu, BN4_TEXT_END, &s);
+	if (M.rom4 && !desc) {
+		n = (uint32_t)xrom_text_bn6(XROM_BN4_RED_SUN_US, s, got, b, sizeof b);
+	} else if (!desc) {
+		char name[16];
+		xchips_text_name4(r->bn4, name, sizeof name);
+		n = (uint32_t)ta_encode(name, b, (int)sizeof b);
+	} else if (M.rom4) {
+		/* (past its box's five bytes, to the command that closes it) */
+		for (uint32_t i = 5, from = 5; got > 5 && i <= got && nlines < 3; ++i)
+			if (i == got || s[i] >= 0xE5) {
+				len[nlines] = (uint32_t)xrom_text_bn6(XROM_BN4_RED_SUN_US, s + from, i - from, line[nlines], sizeof line[0]);
+				++nlines;
+				if (i == got || s[i] != BN4_TEXT_LINE) break;
+				from = i + 1;
+			}
+		n = box_make(b, sizeof b, lines, len, nlines);
+	} else {
+		for (int l = 0; l < 3; ++l) len[l] = (uint32_t)ta_encode(xchips_text_desc4[l], line[l], (int)sizeof line[0]);
+		n = box_make(b, sizeof b, lines, len, 3);
+	}
+	entry_add(e, b, n);
+}
+
 /* the names' (`desc` false) or descriptions' archive of ids 256 * half on */
 static uint32_t archive_of(bool desc, int half) {
 	static const uint32_t names[4] = { CHIPS_NAMES0, CHIPS_NAMES1, CHIPS_NAMES2, CHIPS_NAMES3 };
@@ -183,6 +260,8 @@ static bool texts_make(bool desc, int half) {
 			entry_add(&e, s, entry_at(R.data, from, (uint32_t)M.alias_from & 0xFFu, &s));
 			continue;
 		}
+		const XChipReg4 *r4 = xreg4_at(256 * half + i);
+		if (r4) { own_text4(r4, desc, &e); continue; }
 		if ((uint32_t)i < count) len = entry_at(R.data, arch, (uint32_t)i, &s);
 		entry_add(&e, s, len);
 	}
@@ -220,6 +299,12 @@ static void abc_make(void) {
 		chips_name(r->bn6, me, sizeof me);
 		put16(M.img + XREC_SIZE * r->bn6 + BN6_CHIP_ALPHA_SORT, xrec_abc_place(me, refs, places, n));
 	}
+	for (int i = 0; i < xreg4_count; ++i) {
+		char me[24];
+		if (M.alias == xreg4_rows[i].bn6) continue;
+		chips_name(xreg4_rows[i].bn6, me, sizeof me);
+		put16(M.img + XREC_SIZE * xreg4_rows[i].bn6 + BN6_CHIP_ALPHA_SORT, xrec_abc_place(me, refs, places, n));
+	}
 }
 
 static void records_make(const uint32_t blank[3]) {
@@ -228,6 +313,14 @@ static void records_make(const uint32_t blank[3]) {
 		uint8_t *out = M.img + XREC_SIZE * (uint32_t)id;
 		const XChipReg *r = xreg_at(id);
 		if (!r && M.alias && id == M.alias) { memcpy(out, table + XREC_SIZE * (uint32_t)M.alias_from, XREC_SIZE); continue; }
+		const XChipReg4 *r4 = r ? NULL : xreg4_at(id);
+		if (r4 && M.rom4) {
+			XRecordFrom4 in = { bn4_record(r4->bn4), r4, 0, { 0 } };
+			memcpy(in.art, M.art[id], sizeof in.art);
+			xrec_from_bn4(&in, out);
+			continue;
+		}
+		if (r4) { xrec_placeholder4(r4, 0, blank, out); continue; }
 		if (!r) {
 			memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
 			/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
@@ -253,6 +346,9 @@ static void sits_make(void) {
 		bool plays = (r->how == XREG_RECORD || (r->how == XREG_MOVED && xchips_moved_of(r->bn6))) && M.rom5;
 		if (xreg_own(r) && !plays) M.sits[r->bn6 >> 3] |= (uint8_t)(1u << (r->bn6 & 7));
 	}
+	/* (BN4's rows: none plays yet, its code not in BN6's engine; --dev alias's id, a copy of BN6's chip, does) */
+	for (int i = 0; i < xreg4_count; ++i)
+		if (M.alias != xreg4_rows[i].bn6) M.sits[xreg4_rows[i].bn6 >> 3] |= (uint8_t)(1u << (xreg4_rows[i].bn6 & 7));
 }
 
 /* ---- made at need ---- */
@@ -282,11 +378,12 @@ static bool make(void) {
 }
 
 static bool ready(void) {
-	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
+	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data, *rom4 = XR[XROM_BN4_RED_SUN_US].data;
 	if (!R.data || !R.layout || !R.layout->chip_data) return false;
-	if (M.made && M.rom6 == R.data && M.rom5 == rom5) return M.img != NULL;
+	if (M.made && M.rom6 == R.data && M.rom5 == rom5 && M.rom4 == rom4) return M.img != NULL;
 	M.rom6 = R.data;
 	M.rom5 = rom5;
+	M.rom4 = rom4;
 	M.made = true;
 	if (!make()) { free(M.img); M.img = NULL; }
 	return M.img != NULL;
@@ -319,6 +416,8 @@ const uint8_t *chips_bytes(uint32_t bus, uint32_t n) {
 const uint8_t *chips_offset_bytes(uint32_t off, uint32_t n) { return off < 0x01000000u ? chips_bytes(BUS + off, n) : NULL; }
 
 bool chips_bn5(int id) { return xreg_at(id) != NULL; }
+
+bool chips_bn4(int id) { return xreg4_at(id) != NULL; }
 
 bool chips_sits_out(int id) { return id > 0 && id < CHIPS_IDS && ready() && (M.sits[id >> 3] & (1u << (id & 7))); }
 

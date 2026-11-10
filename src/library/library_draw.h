@@ -1,6 +1,7 @@
 /* The Library's picture (library.h), in BN6's PET screens' look
  * (pet_look.h), laid out as BN6's own Library: the entries as tabs under
- * the band, the chip under the cursor as its card on the left, the page's
+ * the band, the chip under the cursor as its card on the left (its face
+ * in its class's colour, as BN6 tints a Mega's and a Giga's), the page's
  * slots in the screen's one window on the right, its class between the
  * page arrows and its count in a pill; and where each part a tap takes
  * lies. */

@@ -31,8 +31,28 @@
 
 /* ---- the card: the chip under the cursor, as BN6's Library shows it ---- */
 
+/* BN6's Library's card over look_card's: its face in the class's colour (a Mega's cyan, a Giga's pink), the hole at
+ * its top left and the recessed grip down its left edge, measured from Gregar's */
+static void card_face(int x, int y, SDL_Rect f, int cls) {
+	static const SDL_Color face[LIB_CLASSES] = { { 222, 222, 239, 255 }, { 173, 239, 239, 255 }, { 247, 206, 231, 255 } };
+	static const SDL_Color line = { 173, 181, 198, 255 }, lit = { 247, 247, 247, 255 };
+	fill_rect(x + 4, y + 2, CARD_W - 5, 2, face[cls]);
+	fill_rect(x + 2, y + 4, CARD_W - 3, f.y + f.h - y - 4, face[cls]);
+	fill_rect(x + 1, y + 4, 1, f.y + f.h - y - 4, lit);
+	fill_rect(x + 2, y + 9, 4, 4, LOOK_CARD_DARK);
+	const SDL_Rect corners[4] = { { x + 2, y + 9, 1, 1 }, { x + 5, y + 9, 1, 1 }, { x + 2, y + 12, 1, 1 }, { x + 5, y + 12, 1, 1 } };
+	fill_rects(corners, 4, line);
+	fill_rect(x + 3, y + 8, 2, 1, line);
+	fill_rect(x + 2, y + 13, 4, 1, lit);
+	const SDL_Rect grip[3] = { { x + 1, y + 23, 4, 1 }, { x + 4, y + 24, 1, 22 }, { x + 1, y + 46, 4, 1 } };
+	fill_rects(grip, 3, line);
+	fill_rect(x + 5, y + 23, 1, 24, lit);
+	fill_rect(x + 1, y + 47, 4, 1, lit);
+}
+
 static void card(int x, int y, const LibraryView *v) {
 	SDL_Rect f = look_card(x, y, CARD_W, BODY_H);
+	card_face(x, y, f, v->cls);
 	int px = f.x + (f.w - 58) / 2;
 	/* (the picture's dark frame, empty where the slot is: BN6's card of a number never seen) */
 	fill_rect(px, f.y + 1, 58, 50, LOOK_CARD_DARK);
@@ -66,8 +86,8 @@ SDL_Rect library_row_rect(int i) {
 SDL_Rect library_turn_rect(int right) { return (SDL_Rect){ right ? LIST_X + LIST_W - 22 : LIST_X, BODY_Y, 22, LOOK_FRAME + LIST_TOP }; }
 
 SDL_Rect library_tab_rect(int entry) {
-	int l = TABS_X + LOOK_TABS_IN, r = TABS_X + TABS_W - LOOK_TABS_IN, tw = (r - l - (LIB_ENTRIES - 1) * LOOK_TAB_GAP) / LIB_ENTRIES;
-	return (SDL_Rect){ l + entry * (tw + LOOK_TAB_GAP), TABS_Y, tw, LOOK_PILL_H };
+	int tw = (TABS_W - (LIB_ENTRIES - 1) * LOOK_TAB_GAP) / LIB_ENTRIES;
+	return (SDL_Rect){ TABS_X + entry * (tw + LOOK_TAB_GAP), TABS_Y, tw, LOOK_PILL_H };
 }
 
 /* a chip's rarity as BN6's list shows it: its stars in gold, the rest of the five as dots, 21 x 5 from (x, y) */
@@ -94,10 +114,10 @@ static void row(int x, int y, int w, const LibSlot *s, bool seen, bool lit) {
 	second_chip_icon(s->chip, x + 23, y);
 	char name[24];
 	chips_name(s->chip, name, sizeof name);
-	text_draw(x + 39, y + 2, name, LOOK_TEXT, TEXT_LEFT);
+	text_draw(x + 38, y + 2, name, LOOK_TEXT, TEXT_LEFT);
 	const uint8_t *rec = chips_record(s->chip);
 	/* (a name past BN6's eight letters and a mark leaves the stars no room) */
-	if (rec && text_width(name) <= 64) stars(x + w - 21, y + 5, rec[BN6_CHIP_RARITY] > 4 ? 4 : rec[BN6_CHIP_RARITY]);
+	if (rec && text_width(name) <= 64) stars(x + w - 20, y + 5, rec[BN6_CHIP_RARITY] > 4 ? 4 : rec[BN6_CHIP_RARITY]);
 }
 
 /* the page's count in its pill, right-ended at x: light green on navy, gold where the class is whole */
@@ -114,7 +134,7 @@ static void count_pill(int right, int y, const LibraryView *v) {
 
 static void list_panel(int x, int y, const LibraryView *v) {
 	look_window(x + LIST_X, y + BODY_Y, LIST_W, BODY_H, LIST_TOP, true);
-	/* (the class in the band over its slots, between the page arrows where LEFT and RIGHT turn, its count before the right one) */
+	/* (the class in the band over its slots, between the page arrows where Left and Right turn to the page before and after, its count before the right one) */
 	look_arrow(x + LIST_X + 4, y + BODY_Y + 5, false);
 	look_arrow(x + LIST_X + LIST_W - 12, y + BODY_Y + 5, true);
 	text_draw(x + LIST_X + 15, y + BODY_Y + 4, library_class_names[v->cls], LOOK_TEXT, TEXT_LEFT);
@@ -132,7 +152,14 @@ void library_draw_view(int x, int y, const LibraryView *v) {
 	char all[24];
 	library_entry_words(all, sizeof all, v->entry, v->entry_held, v->entry_of);
 	look_band_note(x, y, W, all, v->entry_of > 0 && v->entry_held >= v->entry_of ? LOOK_GOLD : LOOK_PAGE);
-	look_tabs(x + TABS_X, y + TABS_Y, TABS_W, LIB_ENTRIES, v->entry, library_entry_names);
+	/* (the entries over the pages: STATUS's pills, the one shown lit as NaviCust's RUN!; no key's letter, the pages turn as BN6's) */
+	for (int e = 0; e < LIB_ENTRIES; ++e) {
+		SDL_Rect t = library_tab_rect(e);
+		const char *name = library_entry_names[e];
+		if (e == v->entry) look_button(x + t.x, y + t.y, t.w - 1, LOOK_PILL_H - 1);
+		else look_pill(x + t.x, y + t.y, t.w);
+		look_title(x + t.x + (t.w - look_title_width(name)) / 2, y + t.y + 4, name, e == v->entry ? LOOK_PAGE : LOOK_TEXT);
+	}
 	card(x + CARD_X, y + BODY_Y, v);
 	list_panel(x, y, v);
 }

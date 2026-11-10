@@ -1,9 +1,10 @@
 /* The Library (docs/game/meta/library.md): the PET's Library row opens it
  * over the held game, where BN6's own Library opened: a page per entry
  * (BN6, BN5, BN4), each its game's standard chips, Megas and Gigas a run
- * can hand out, filled from the profile's Library. L and R turn the
- * entries, Left and Right the classes, Up and Down pick, B closes; a tap
- * does each. */
+ * can hand out, filled from the profile's Library. Its keys are BN6's
+ * Library's: Left and Right turn the pages (an entry's three classes,
+ * then the next entry's), L and R move the list a screenful, Up and Down
+ * pick, B or START leaves; a tap takes a row, a tab or an arrow. */
 #ifndef CW_LIBRARY_H
 #define CW_LIBRARY_H
 

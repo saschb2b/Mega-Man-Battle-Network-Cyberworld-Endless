@@ -5296,6 +5296,51 @@ static void test_chip_records(void) {
 	CHECK(out[0] == 0x11 && out[1] == 0xFF && out[BN6_CHIP_MB] == 99 && out[BN6_CHIP_EFFECT_FLAGS] == BN6_CHIP_DARK_CLASS && !get16(out + BN6_CHIP_ATTACK_POWER) &&
 		out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 214 &&
 		out[BN6_CHIP_ELEMENT] == 10, "records: a DarkChip's placeholder keeps its codes, MB and class, BN6's blank art");
+	/* (BN4's rows, docs/multirom/bn4-chips.md's unit 2: 194 of them, the chips that play first where the pack has an entry,
+	 * its Program Advances where the engine keeps their bits, none of BN5's ids) */
+	char why[96] = "";
+	int bad4 = xreg4_check(xreg4_rows, xreg4_count, xreg_rows, xreg_count, why, sizeof why);
+	CHECK(!bad4, "registry: BN4's rows hold their rules (%s)", why);
+	int folder4 = 0, pas4 = 0, packed4 = 0;
+	for (int i = 0; i < xreg4_count; ++i) {
+		folder4 += xreg4_rows[i].how == XREG_PENDING;
+		pas4 += xreg4_rows[i].how == XREG_PA;
+		packed4 += xreg4_rows[i].how == XREG_PENDING && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) != 0;
+	}
+	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
+	CHECK(xreg4_count == 194 && folder4 == 175 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST, "registry: BN4's 194 rows, 175 folder chips "
+		"(76 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
+		driver->bn6 - BN6_PA_WIDE_FIRST < BN6_PA_WIDE_COUNT && !bn6_pack_entry(0x02002230u, driver->bn6),
+		"registry: BN4's Hole at 527, BugCharg no row, P.Driver a Program Advance whose bit is the engine's");
+	const XChipReg4 twice4[] = { { 82, 527, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 }, { 82, 528, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
+	const XChipReg4 bn5s[] = { { 82, 512, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, as_pa[] = { { 82, 605, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
+	const XChipReg4 no_entry[] = { { 82, 603, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, pa_low[] = { { 345, 527, XREG_PA, { 0, 1, 2, 26 }, 4, 5 } };
+	CHECK(xreg4_check(twice4, 2, xreg_rows, xreg_count, why, sizeof why) == 2 && xreg4_check(bn5s, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
+		xreg4_check(as_pa, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(no_entry, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
+		xreg4_check(pa_low, 1, xreg_rows, xreg_count, why, sizeof why) == 1, "registry: a BN4 id twice, an id of BN5's rows, a folder chip among the "
+		"Program Advances' ids or past the pack's without being the rest's, a Program Advance among the folder chips' refused");
+	/* (BN4's record as BN6's: its MB, kind and class from +6, +7 and +8; a computed power unshown; inert until its code plays) */
+	uint8_t rec4[XREC_SIZE] = { 0x11, 0xFF, 0xFF, 0xFF, 1, 4, 90, 6, 2, BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER | BN6_CHIP_IN_LIBRARY | 1, 0, 0x0C, 0x2D };
+	rec4[BN6_CHIP_PARAMS] = 7;
+	put16(rec4 + BN6_CHIP_ATTACK_POWER, 1047);
+	const XChipReg4 sun = { 304, 731, XREG_PENDING, { 0x11, 0xFF, 0xFF, 0xFF }, 2, 90 };
+	XRecordFrom4 in4 = { rec4, &sun, 77, { 0x08C21000u, 0x08C21080u, 0x08C215C0u } };
+	xrec_from_bn4(&in4, out);
+	CHECK(out[0] == 0x11 && out[BN6_CHIP_ATTACK_ELEMENT] == 1 && out[BN6_CHIP_RARITY] == 4 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 &&
+		out[BN6_CHIP_ELEMENT] == 5 && out[BN6_CHIP_EFFECT_FLAGS] == 1 && !get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
+		out[BN6_CHIP_SUBFAMILY] == XREC_INERT_SUB && !out[BN6_CHIP_PARAMS] && get16(out + BN6_CHIP_ID_SORT) == 731 && get16(out + BN6_CHIP_ALPHA_SORT) == 77 &&
+		get32(out + BN6_CHIP_IMAGE_PTR) == 0x08C21080u && out[BN6_CHIP_DARK_ID] == 0xFF,
+		"records: a BN4 record as BN6's: its MB, class and kind in BN6's places, a computed power unshown, inert (%d %d %d %02X)",
+		out[BN6_CHIP_MB], out[BN6_CHIP_LIBRARY_TYPE], out[BN6_CHIP_ELEMENT], out[BN6_CHIP_EFFECT_FLAGS]);
+	rec4[BN4_CHIP_KIND] = 14;
+	put16(rec4 + BN6_CHIP_ATTACK_POWER, 300);
+	xrec_from_bn4(&in4, out);
+	CHECK(out[BN6_CHIP_ELEMENT] == 11 && get16(out + BN6_CHIP_ATTACK_POWER) == 300 && (out[BN6_CHIP_EFFECT_FLAGS] & BN6_CHIP_SHOWS_POWER),
+		"records: BN4's kind of a Program Advance BN6's icon element of one, a plain power kept");
+	xrec_placeholder4(&sun, 9, blank, out);
+	CHECK(out[0] == 0x11 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
+		get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 731, "records: a BN4 chip's placeholder keeps its codes, class and MB");
 	const char *names[] = { "Cannon", "AirShot", "WideSwrd", "", "Zeta" };
 	const uint16_t places[] = { 52, 5, 509, 7, 0 };
 	CHECK(xrec_abc_place("WideSht1", names, places, 5) == 52 && xrec_abc_place("WideSwrd2", names, places, 5) == 509 &&
@@ -5351,6 +5396,12 @@ static void test_chips_image(void) {
 	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
 	CHECK(chips_record(511) && chips_record(1023) && !chips_record(1024) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204,
 		"chips: 1024 records, the registry's its id's sort place");
+	/* (BN4's Hole without its ROM: the placeholder of its row) */
+	chip_info(527, &ci);
+	chip_desc(527, desc, sizeof desc);
+	CHECK(!strcmp(ci.name, "BN4-82") && !strcmp(ci.codes, "*") && ci.mb == 23 && chips_sits_out(527) && chips_bn4(527) && !chips_bn5(527) && !chips_bn4(204) &&
+		!strcmp(desc, "Needs BN4 ROM back to battle") && get16(chips_record(527) + BN6_CHIP_ID_SORT) == 527,
+		"chips: BN4's Hole without its ROM a placeholder of its code and MB, sitting out (%s %s %d: %s)", ci.name, ci.codes, ci.mb, desc);
 	/* (--dev alias=600: chip 600 a copy of Cannon, its record, name and description: ten-bit ids' proof) */
 	chips_alias(600, 1);
 	ChipInfo al;
@@ -5374,6 +5425,11 @@ static void test_chips_image(void) {
 	size_t n = xrom_script_bn6(XROM_BN5_COLONEL_US, script, sizeof script, out, sizeof out);
 	static const uint8_t want[] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00, 0x17, 0x98, 0x0D, 0xE9, 0x0B, 0x43, 0xE7, 0x01, 0xE6 };
 	CHECK(n == sizeof want && !memcmp(out, want, sizeof want), "chips: a BN5 description's script in BN6's codes, its commands kept, to its end (%d)", (int)n);
+	/* (BN4's text in BN6's codes: its punctuation, 0x40 to 0x57, BN6's 0x58 on) */
+	static const uint8_t bn4s[] = { 0x1A, 0x4E, 0x0E, 0x40, 0x46, 0x4A, 0x57, 0x58, 0x3F };
+	static const uint8_t bn4w[] = { 0x1A, 0xA6, 0x0E, 0x98, 0x9E, 0xA2, 0xAF, 0x58, 0x3F };
+	n = xrom_text_bn6(XROM_BN4_RED_SUN_US, bn4s, sizeof bn4s, out, sizeof out);
+	CHECK(n == sizeof bn4w && !memcmp(out, bn4w, sizeof bn4w), "chips: BN4's punctuation in BN6's codes (%d)", (int)n);
 	char text[32];
 	rom_desc_bytes(want, sizeof want, text, sizeof text);
 	CHECK(!strcmp(text, "M-C A\x04"), "chips: the description read past its box's commands (%s)", text);
@@ -5593,7 +5649,7 @@ static bool lib_has_low(int chip) { return chip < 10; }
 static void test_library_pages(void) {
 	int bad5 = library_rows_check(library_bn5_rows, library_bn5_count), bad4 = library_rows_check(library_bn4_rows, library_bn4_count);
 	CHECK(!bad5 && !bad4, "library: the tables' rules (BN5's row %d, BN4's row %d)", bad5, bad4);
-	int per[LIB_CLASSES] = { 0 }, shared = 0;
+	int per[LIB_CLASSES] = { 0 }, shared = 0, hidden4 = 0;
 	for (int i = 0; i < library_bn5_count; ++i) {
 		const LibSlot *s = &library_bn5_rows[i];
 		const XChipReg *r = xreg_of_bn5(s->own);
@@ -5614,8 +5670,13 @@ static void test_library_pages(void) {
 	for (int i = 0; i < library_bn4_count; ++i) {
 		const LibSlot *s = &library_bn4_rows[i];
 		const XChipReg *r = xreg_at(s->chip);
-		CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
+		const XChipReg4 *own = xreg4_of(s->own);
+		/* (its own row's id where it has one, sitting out until its code is moved; else the run's chip of its name: BN6's or BN5's) */
+		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && !library_plays(s->chip), "library: BN4's chip %d fills its slot with its own row's id, hidden until it plays", s->own);
+		else CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
+		hidden4 += own != NULL;
 	}
+	CHECK(library_bn4_count == 274 && hidden4 == 161, "library: BN4's page holds %d slots, %d of them its own chips'", library_bn4_count, hidden4);
 	/* (made-up rows: the odd chips sit out) */
 	static const LibSlot rows[] = { { 1, 2, 1, 0 }, { 2, 3, 2, 0 }, { 5, 4, 4, 0 }, { 9, 12, 1, 1 }, { 7, 8, 2, 2 } };
 	LibSlot out[8];

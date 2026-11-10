@@ -40,12 +40,20 @@ Library that has a Cannon.
 
 - **One Library, a page per entry.** PET > Library opens the LIBRARY, a
   screen of ours in [the PET's look](../../engine/ui.md): the entries as a
-  tab row under the band (BN6, BN5, BN4, the one shown lit; L and R turn
-  them), and under it BN6's Library's frame, the chip under the cursor as
-  its card on the left, the page's list on the right with its class in the
-  window's band between the page arrows (StdChip, MegaChip, GigaChip; Left
-  and Right turn them) and its count in a pill. B closes it; a tap takes
-  each part.
+  tab row under the band (BN6, BN5, BN4, the one shown lit), and under it
+  BN6's Library's frame, the chip under the cursor as its card on the left
+  (a Mega's cyan, a Giga's pink, as BN6 tints them), the page's list on
+  the right with its class in the window's band between the page arrows
+  (StdChip, MegaChip, GigaChip) and its count in a pill.
+- **BN6's Library's keys, all of them** (the owner's word, 10 November:
+  the original's quality and what it offered). Measured on BN6's own
+  screen: Left and Right turn its tabs, L and R move the list a screenful
+  with the cursor on its row, START leaves as B does, SELECT and A do
+  nothing; it has no sort and no filter. Ours keeps each: Left and Right
+  turn the pages, an entry's three classes and then the next entry's (nine
+  pages in a ring, as the Jukebox runs both games' sections in one row),
+  L and R page the list, B or START leaves. A tap takes a row, a tab or an
+  arrow.
 - **A page is its game's own Library**: its standard chips, Megas and
   Gigas in that game's order, each with the number its game's Library
   gives it. A StdChip page lists every slot, a number never filled as
@@ -83,7 +91,8 @@ Library that has a Cannon.
 3. A completion mark on the page (over: a mark per entry on the title,
    new art of ours that would drop whenever a page grows).
 4. The PET's Library row opens it, replacing BN6's own Library screen
-   whole, as Options took Comm's row (over: BN6's screen kept with ours
+   whole (and made as near BN6's as ours can be: its keys, its card, its
+   rows), as Options took Comm's row (over: BN6's screen kept with ours
    behind its last tab, or behind KeyItem's LibCard). BN6's page is then
    our drawing in BN6's look, counted against what a run can hold: BN6's
    own screen counted 12/200 against chips no run gives. AGENTS.md's rule
@@ -103,9 +112,11 @@ Measured from the three ROMs and the registry by `tools/library_pages.py
 | BN4 (Red Sun) | 87 of its 186 | 22: 16 of its 60, 6 of Blue Moon's | 4: 2 of its 5, 2 of Blue Moon's | 113 | 77 (61, 13, 3) |
 
 BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other
-36 are BN5's own of its name (26, 9, 1): none of BN4's own chips plays
-yet, so none is listed; they join the page as their code is moved
-([BN4's chips in a run](../../multirom/bn4-chips.md)). The slots the
+36 are BN5's own of its name (26, 9, 1). BN4's own 161 chips (99, 57, 5)
+have their slots in the table by the registry's rows (ids 527 on), and
+none is listed: each sits out until its code is moved, and joins the page
+as it comes to play ([BN4's chips in a run](../../multirom/bn4-chips.md)),
+towards 186, 79 and 9. The slots the
 pages lack are the chips no run has an id for (Team ProtoMan's Navi chips,
 the Gigas the registry leaves out) and those that sit out.
 
@@ -148,7 +159,8 @@ secret chips sit out today.
 The run's chip in a BN4 slot is the chip the engine pays for it
 (`xchips_bn4_paid`: BN6's own of its name, else the registry's of BN5's,
 else by its Navi's V1 and version); the table was checked against the
-engine with the three ROMs read, 113 of 113 the same.
+engine with the three ROMs read, 113 of 113 the same (before BN4's own
+rows joined it, which the engine pays as the stand-in until they play).
 
 ## Where it lives
 
@@ -186,10 +198,8 @@ engine with the three ROMs read, 113 of 113 the same.
   keeps a formed Advance's bit, ids 320 on) with its recipe is the next
   piece.
 - **DarkChips**, which BN5 and BN4 list on a tab of their own.
-- **BN4's own chips** (PR #333's rows): they join the table when the
-  registry holds them (`tools/library_pages.py` reads
-  `xchips_registry_bn4.c` where the tree has it) and are listed as they
-  come to play.
-- **A page's own card colours** (BN6 tints a Mega's and a Giga's card),
-  BN6's L and R paging a list by a screenful (L and R turn the entries
-  here), and the title's second screen.
+- **BN4's own chips on the page**: their slots are in the table, and
+  each is listed as its code is moved (`library_plays` reads its row).
+- **BN6's card's letters** (its description stands in larger letters,
+  three lines of 16; ours are the chat font's, under the tab row), its
+  scroll bar's thumb, and the title's second screen.
