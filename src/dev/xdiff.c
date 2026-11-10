@@ -50,7 +50,7 @@
 #include "thumb_reloc.h"
 #include "xchips_install.h"
 #include "xdiff_bn4.h"
-#include "xdiff_spec.h"   /* (and xdiff_events.h, its twins') */
+#include "xdiff_spec.h"   /* (and xdiff_events.h, its twins'; xdiff_ncp.h, its ncp items') */
 #include "xfields.h"
 #include "xinstall.h"
 #include "xvirus_bn5.h"
@@ -726,6 +726,7 @@ static bool subject(Side *g, const Spec *s) {
 	emu_encounters_install();
 	emu_boot();
 	pokes_put(s, true);
+	if (!xd_ncp_subject(s->ncp[1].variant, s->ncp[1].col, s->ncp[1].row)) return false;
 	const uint8_t hp[4] = { (uint8_t)s->hp, (uint8_t)(s->hp >> 8), (uint8_t)s->hp, (uint8_t)(s->hp >> 8) };
 	emu_write(BN6_NAVI_BASE_MAX_HP, hp, 2);
 	emu_write(BN6_NAVI_HP, hp, 4);
@@ -804,6 +805,7 @@ static bool reference(Side *g, const Spec *s) {
 		memcpy(rec + len, f, 4);
 	}
 	rec[len++] = 0xF0;
+	if (!xd_ncp_reference(s->ncp[0].variant, s->ncp[0].col, s->ncp[0].row)) return false;
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
 	/* (a spec's change in both games: BN5's copy at its own address, or at BN5's own place) */
 	for (int i = 0; i < s->npokes; ++i) {

@@ -236,6 +236,13 @@ static void describe_pos(FILE *f) {
 	}
 }
 
+/* the turns the NaviCust adds to a Soul's three, where a program gives
+ * any: SoulT+1 (docs/rom/navicust.md, Program 48) */
+static void describe_turns(FILE *f) {
+	int turns = (int8_t)emu_read8(BN6_NAVI_STATS + BN6_NAVI_TURN_EXTRA);
+	if (turns) fprintf(f, "soulturns %+d\n", turns);
+}
+
 void director_describe(FILE *f) {
 	/* (off the run's maps, the Net Square's visit: where MegaMan stands, for a tour's walk) */
 	if (!D.active) { fprintf(f, "where none\npos %d %d %d\n", bn6_player_x(), bn6_player_y(), bn6_player_z()); return; }
@@ -247,6 +254,7 @@ void director_describe(FILE *f) {
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
+	describe_turns(f);
 	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);

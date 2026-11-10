@@ -4,6 +4,7 @@
 #include "game.h"
 #include "pacing.h"
 #include "rom.h"
+#include "xprograms.h"
 
 /* What a program sets, as bn6f's compile runs it (applyNavicustPrograms_813C684
  * calls each placed program's own function): a flag or a value, which a
@@ -16,6 +17,7 @@ enum {
 	SETS_SHIELD = 1 << 5, SETS_REFLECT = 1 << 6, SETS_ANTIDMG = 1 << 7, SETS_SHUFFLE = 1 << 8, SETS_COLLECT = 1 << 9,
 	SETS_SLIP = 1 << 10, SETS_HEAL = 1 << 11, SETS_BUGSTOP = 1 << 12, SETS_ATTACK = 1 << 13, SETS_SPEED = 1 << 14, SETS_CHARGE = 1 << 15,
 	SETS_BODY = SETS_ARMOR | SETS_FLOAT | SETS_AIR | SETS_UNDER,
+	SETS_SOULT = 1 << 16,
 };
 
 /* The pool: BN6's programs a run can be offered, the act (0-5 of the first
@@ -32,7 +34,7 @@ enum {
  * guardian's ExpMemry, 5x4 until the act 4 guardian's, then 5x5. */
 static const struct {
 	uint8_t program, tier, build;
-	uint16_t sets, spent;
+	uint32_t sets, spent;
 } POOL[] = {
 	{ 1, 0, BUILD_GUARD, SETS_ARMOR, SETS_ARMOR },
 	{ 2, 0, BUILD_HAND, 0, 0 },
@@ -68,6 +70,9 @@ static const struct {
 	{ 44, 7, BUILD_HP, 0, 0 },
 	{ 45, 7, BUILD_HP, 0, 0 },
 	{ 46, 7, BUILD_HP, 0, 0 },
+	/* (the older Net's: SoulT+1, a Soul's turns one more for a chip of the hand given up; open only while the run holds a
+	 * Soul, soult_open; a second copy is not offered: a battle seldom outlasts four turns of one) */
+	{ XPROGRAM_SOULT, 0, BUILD_HAND, SETS_SOULT, SETS_SOULT },
 };
 #define POOL_N ((int)(sizeof POOL / sizeof *POOL))
 
@@ -80,7 +85,14 @@ static int find(int program) {
 	return -1;
 }
 
-bool navicust_in_pool(int program) { return find(program) >= 0; }
+/* SoulT+1 (navicust.h, navicust_set_soul): in the pool where BN5's ROM is
+ * read, open to an offer while the run holds a Soul */
+static bool soul_held, soul_lead;
+void navicust_set_soul(bool held, bool lead) { soul_held = held; soul_lead = held && lead; }
+static bool soult_open(void) { return soul_held && xprogram_soult(); }
+static bool open_now(int i) { return POOL[i].program != XPROGRAM_SOULT || soult_open(); }
+
+bool navicust_in_pool(int program) { return find(program) >= 0 && (program != XPROGRAM_SOULT || xprogram_soult()); }
 int navicust_build(int program) { int i = find(program); return i < 0 ? -1 : POOL[i].build; }
 int navicust_tier(int program) { int i = find(program); return i < 0 ? -1 : POOL[i].tier; }
 
@@ -89,7 +101,7 @@ static int reached(int depth) { return pacing_loop(depth) > 0 ? 7 : pacing_act(d
 
 bool navicust_offerable(int program, int depth) {
 	int i = find(program);
-	return i >= 0 && POOL[i].tier <= reached(depth);
+	return i >= 0 && open_now(i) && POOL[i].tier <= reached(depth);
 }
 
 int navicust_held(int program, const uint8_t *have, int nhave) {
@@ -101,7 +113,7 @@ int navicust_held(int program, const uint8_t *have, int nhave) {
 bool navicust_adds_nothing(int program, const uint8_t *have, int nhave) {
 	int p = find(program);
 	if (p < 0 || !POOL[p].spent) return false;
-	unsigned set = 0;
+	uint32_t set = 0;
 	for (int i = 0; i < nhave; ++i) {
 		int h = find(have[i] / 4);
 		if (h >= 0) set |= POOL[h].sets;
@@ -127,7 +139,7 @@ static void shuffle_builds(int builds[BUILD_COUNT]) {
 static int candidates(int build, int top, const uint8_t *have, int nhave, int fit[POOL_N]) {
 	int n = 0;
 	for (int i = 0; i < POOL_N; ++i)
-		if (POOL[i].build == build && POOL[i].tier <= top && !navicust_adds_nothing(POOL[i].program, have, nhave)) fit[n++] = i;
+		if (POOL[i].build == build && POOL[i].tier <= top && open_now(i) && !navicust_adds_nothing(POOL[i].program, have, nhave)) fit[n++] = i;
 	return n;
 }
 
@@ -185,17 +197,27 @@ int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uin
 			break;
 		}
 	}
+	/* (a guardian who gives a Soul the run has none of: SoulT+1 with it where it fits and is not held, in its build's
+	 * pick's place, else the last's, else one more) */
+	if (soul_lead && soult_open() && !navicust_adds_nothing(XPROGRAM_SOULT, have, nhave)) {
+		int c = fitting_color(XPROGRAM_SOULT, have, nhave, w, h), at = -1;
+		for (int k = 0; k < n; ++k)
+			if (out[k].program == XPROGRAM_SOULT) c = 0;
+		for (int k = 0; k < n && c; ++k)
+			if (navicust_build(out[k].program) == BUILD_HAND) at = k;
+		if (c && at < 0) at = n < NAVICUST_DRAFT ? n++ : n - 1;
+		if (c) out[at] = (NaviProgram){ XPROGRAM_SOULT, (uint8_t)c };
+	}
 	return n;
 }
 
 int navicust_color(int program) {
 	/* the program records: 16 bytes per colour variant (program * 4 + v),
 	 * the colour at +3, 0 where the variant is absent */
-	if (!R.data || !R.layout || !R.layout->navicust_programs) return 0;
 	int colors[4], n = 0;
 	for (int v = 0; v < 4; ++v) {
-		int c = R.data[R.layout->navicust_programs + (uint32_t)(program * 4 + v) * 16 + 3];
-		if (c >= 1 && c <= 6) colors[n++] = c;
+		int kind, c;
+		if (navicust_part(program * 4 + v, &kind, &c) && c >= 1 && c <= 6) colors[n++] = c;
 	}
 	return n ? colors[rng_range(0, n - 1)] : 0;
 }
@@ -221,10 +243,40 @@ bool navicust_code(int program, char out[12]) {
 
 bool navicust_shape(int variant, NaviShape *out) { return navicust_shape_as(variant, false, out); }
 
+/* program 48, BN5's SoulT+1: its variant `v` as BN5's ROM draws it, set in
+ * BN6's grid (xprograms.h); false where the ROM is not read or the
+ * variant has no colour */
+static bool soult_shape(int v, bool compressed, NaviShape *out) {
+	const XProgram *p = xprogram_soult();
+	if (!p || !p->head[v][3]) return false;
+	const uint8_t *g = compressed ? p->small : p->shape;
+	for (int y = 0; y < 7; ++y)
+		for (int x = 0; x < 7; ++x) out->cell[y][x] = g[y * 7 + x] != 0;
+	out->kind = p->head[v][1] <= 2 ? p->head[v][1] : NAVI_EITHER;
+	out->color = p->head[v][3];
+	return true;
+}
+
+bool navicust_part(int variant, int *kind, int *color) {
+	if (variant / 4 == XPROGRAM_SOULT) {
+		const XProgram *p = xprogram_soult();
+		if (!p || !p->head[variant & 3][3]) return false;
+		*kind = p->head[variant & 3][1];
+		*color = p->head[variant & 3][3];
+		return true;
+	}
+	if (!R.data || !R.layout || !R.layout->navicust_programs || variant <= 0 || variant >= 47 * 4) return false;
+	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16;
+	*kind = rec[1];
+	*color = rec[3];
+	return true;
+}
+
 bool navicust_shape_as(int variant, bool compressed, NaviShape *out) {
 	/* the record's +1 the kind, +3 the colour, +8 a pointer to the shape:
 	 * 49 bytes, a row of seven after another, +0xC to the compressed one
 	 * (docs/rom/) */
+	if (variant / 4 == XPROGRAM_SOULT) return soult_shape(variant & 3, compressed, out);
 	if (!R.data || !R.layout || !R.layout->navicust_programs || variant <= 0 || variant >= 47 * 4) return false;
 	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16, *p = rec + (compressed ? 12 : 8);
 	uint32_t at = (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;

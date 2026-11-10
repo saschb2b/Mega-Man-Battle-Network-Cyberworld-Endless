@@ -3,7 +3,7 @@ type: Feature
 title: "Souls"
 description: "BN5's Souls (issue #69): a beaten BN5 Navi's Soul serves every battle of the run, UNITE on BN6's Custom screen giving up a chip of its kind, Chaos Unison with a DarkChip, kept in `run.souls`."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # Souls (4 October 2026, issue #69; in every battle since issue #82)
@@ -65,7 +65,9 @@ points first marked as proposals among them.
   each Soul unites once a battle, for the turns BN5 gives it (three for
   every Soul, one for a Chaos Unison: BN5's OK, `0x08024FFA`, writes 3
   plus its battle NaviStats' +0x32, 0 in BN5's boot state, as the
-  differential's KnightSoul and the game's NumberMan's show), its Chaos
+  differential's KnightSoul and the game's NumberMan's show; one more with
+  BN5's NaviCust program SoulT+1 on the board, [The NaviCust](../navicust.md),
+  11), its Chaos
   Unison once besides (BN5 keeps a bit for each).
 - **Chaos Unison**, BN5's own: a DarkChip of the Soul's kind given up in
   the chip's place, where BN5's chaos flag is set, which the run sets

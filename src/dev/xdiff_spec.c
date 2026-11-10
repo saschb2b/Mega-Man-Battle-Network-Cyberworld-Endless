@@ -131,6 +131,18 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 	return -1;
 }
 
+/* ncp5=VARIANT:COL:ROW, ncp6=: hex, a NaviCust program on each game's own board (xdiff_ncp.h); -1 another item */
+static int ncp_parse(Spec *s, const char *name, const char *v) {
+	if (!item_of(name, "ncp", false)) return -1;
+	int k = name[strlen(name) - 1] == '5' ? 0 : 1;
+	unsigned a, b, c;
+	if (sscanf(v, "%x:%x:%x", &a, &b, &c) != 3 || !a || a > 0xFF || b > 6 || c > 6) return 0;
+	s->ncp[k].variant = (int)a;
+	s->ncp[k].col = (int)b;
+	s->ncp[k].row = (int)c;
+	return 1;
+}
+
 /* film=FROM:TO:STEP:PREFIX: 1 taken, 0 refused, -1 another item */
 static int film_parse(Spec *s, const char *name, const char *v) {
 	if (strcmp(name, "film")) return -1;
@@ -240,10 +252,16 @@ static bool game_parse(Spec *s, const char *v) {
 	return s->bn5 || s->bn6 || s->bn4;
 }
 
+/* MegaMan's setup, then his NaviCust's */
+static int subject_parse(Spec *s, const char *name, char *v) {
+	int r = megaman_parse(s, name, v);
+	return r < 0 ? ncp_parse(s, name, v) : r;
+}
+
 static bool item_parse(Spec *s, const char *name, char *v) {
 	int r = numbers_parse(s, name, v);
 	if (r < 0) r = breaks_parse(s, name, v);
-	if (r < 0) r = megaman_parse(s, name, v);
+	if (r < 0) r = subject_parse(s, name, v);
 	if (r < 0) r = dark_parse(s, name, v);
 	if (r < 0) r = souls_parse(s, name, v);
 	if (r < 0) r = film_parse(s, name, v);

@@ -1,0 +1,313 @@
+{
+ "about": "BN5's NaviCust program SoulT+1 in both engines (docs/rom/navicust.md, Program 48): soul_knight's battle with the program placed on each game's own NaviCust board and each game's own compile run before the battle is asked (ncp5: BN5's program 38's first colour at column 1, row 1 of its 5 x 5 board, by BN5's 0x0813FAF8; ncp6: BN6's program 48's, the engine's, at column 2, row 2 of BN6's 7 x 7 grid, by BN6's 0x0813E18C), so that the NaviStats' extra turns are what each game's routine set, 1 in both. KnightSoul united as the first turn starts then lasts four turns where it lasts three: the Custom screens opened by L count them down, and it ends as the turn after its last starts, a screen later than soul_knight's. The lifetime is compared every frame; his look and abilities are the proxy's while united.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 2800,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "12D8"
+ ],
+ "deck5": [
+  "12D8"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "ncp5": "98:1:1",
+ "ncp6": "C0:2:2",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ],
+  [
+   1560,
+   "L",
+   3
+  ],
+  [
+   2080,
+   "L",
+   3
+  ],
+  [
+   2600,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     2083,
+     "0x0B"
+    ],
+    [
+     2084,
+     "0x00"
+    ],
+    [
+     2800,
+     "0x00"
+    ]
+   ],
+   "chaos": [
+    [
+     1,
+     "0x00"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x04"
+    ],
+    [
+     523,
+     "0x04"
+    ],
+    [
+     524,
+     "0x03"
+    ],
+    [
+     1043,
+     "0x03"
+    ],
+    [
+     1044,
+     "0x02"
+    ],
+    [
+     1563,
+     "0x02"
+    ],
+    [
+     1564,
+     "0x01"
+    ],
+    [
+     2083,
+     "0x01"
+    ],
+    [
+     2084,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x800"
+    ],
+    [
+     2800,
+     "0x800"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     524,
+     "0x01"
+    ]
+   ],
+   "hp": [
+    [
+     2800,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course with its SoulT+1 compiled (BN5 0x08140038: NaviStats +0x32 one more; 0x08024FFA: a Soul's turns 3 + it): KnightSoul's turns 4, one less as each Custom screen opens (t524, t1044, t1564), its end as the turn after the screen that took the last starts (t2084, where soul_knight's ends at t1564); BN6's the same frames by the timer, its turns from soulunite.c's TURNS_SOUL and the same byte, which program 48's routine set. MegaMan never hit (safe=1)."
+}

@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:32:02Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -138,14 +138,15 @@ Two things bound this work:
 Traced on 9 November 2026 ([The NaviCust](../rom/navicust.md), BN5's
 NaviCust programs: the records, the names, the effects' table, each
 program's routine and what reads the byte it sets; `bn5_navicust.h`'s
-`BN5_NCP_*`), read in the ROM, none run. Seven programs are BN5's alone
+`BN5_NCP_*`), read in the ROM; SoulT+1's run since, by BN5's own compile
+on the differential's guest core. Seven programs are BN5's alone
 (BN6's alone: ChpShufl, NumbrOpn, Poem, SlipRunr, FldrPak1-2), and BN5's
 shapes are 5 x 5 where BN6's are 7 x 7. What each does, and where it
 stands:
 
 | Program | What it does in BN5 (verified in its code) | In a run |
 | --- | --- | --- |
-| SoulT+1 (38, a plus part of four cells) | NaviStats +0x32 one more, 6 at most; a Soul's turns are 3 + it | **To build** (**M** to **L**): the one effect BN6's code lacks that a run can use. BN6 keeps the byte and reads it as BN5 does (`BN6_NAVI_TURN_EXTRA`: a Beast Out's turns too), and the engine's Souls with it (`src/emu/soulunite.c`). It takes a program number of its own, 48: BN6's 48 numbers are all taken, 47 being the NaviCust's list's own RUN item (seen in play: a name written for 47 names RUN), so BN6's records, effects' table, names and descriptions grow by one ([The NaviCust](../rom/navicust.md), BN6's program numbers). A plus part that costs board space for a longer Soul is the NaviCust's own tension ([The NaviCust](../game/navicust.md), fit it, or force it); in the workshop's stock only while the run holds a Soul, as the pool leaves out the inert |
+| SoulT+1 (38, a plus part of four cells) | NaviStats +0x32 one more, 6 at most; a Soul's turns are 3 + it | **Built** (10 November 2026): BN6's program 48 where BN5's ROM is read, every table a program's number indexes grown by one in the core's copy (47 is the NaviCust's list's own RUN item; [The NaviCust](../rom/navicust.md), Program 48), its effect the engine's own routine on the byte BN6 keeps (`BN6_NAVI_TURN_EXTRA`), which the engine's Souls read (`src/emu/soulunite.c`); a Beast Out lasts its three turns all the same (the owner's call, Souls only; BN6 times it by another counter, `beast_soult`). On BN6's own NaviCust screen with BN5's name and lines; in a Soul's guardian's draft, and while the run holds a Soul in the drafts and the workshop's list after it ([The NaviCust](../game/navicust.md), 11). Proved by each game's own compile and battle: `soul_soult` and `beast_soult` PASS, five mutations caught |
 | MegaVirs (33), GigaVirs (34) | Every enemy of a battle one version higher, or two (a virus two ids a tier to its family's last, a Navi one to its third), as BN5's own later levels do | **Cut, the owner's to reverse**: a harder battle for a better chip is the run's own tension already, chosen battle by battle at a Server challenge and run by run on the threat's rungs ([The meta layer](../game/meta/design.md)); a program that raises every battle while it sits on the board is a third lever on the same curve, and the pacing's and the economy's bands are measured without it |
 | HubBatc (27, thirteen cells) | The routines of SprArmr, Custom1, MegFldr1, FstBarr, Shield, FlotShoe, AirShoes and UnderSht in turn, and a flag of its own | **Cut**: eight of the pool's programs, of three of its four builds, in thirteen cells: the board stops being a budget, and it would be the pick whenever it is offered. BN6 dropped the program and kept the name as a Giga chip, which a run hands out |
 | SoulClen (29) | The dark meter's change at a battle's end 1 or 3 up in place of its plain rule | **Cut**: no run has BN5's dark meter (a DarkChip's price in a run is max HP, the owner's call) |
@@ -273,11 +274,10 @@ proposed").
    to the walk's measure (lack 1).
 6. **BN5's comps** (**M**, with BN5's comp theme 0x10). Variety where a
    run's comps repeat. Depends on the tile learning per look.
-7. **BN5's NaviCust program SoulT+1** (**M** to build; all seven
-   traced, the other six cut, NaviCust programs above). A pick for the
-   draft and the BugFrag workshop that makes the run's Souls a build
-   choice. Depends on BN6's program tables grown by a number (47 is its
-   RUN item); its tier and price through the game-design skill.
+7. ~~**BN5's NaviCust program SoulT+1**~~ **Built** (10 November 2026;
+   NaviCust programs above): BN6's program 48, in a Soul's guardian's
+   draft and the workshop's list while the run holds a Soul. All seven
+   traced, the other six cut.
 8. **The teammates' own chips on a dark board** (**M**), with Colonel's
    Save traced (**S**). A teammate's battle as BN5's, his Soul and his
    chip. Depends on tracing the pseudo-chips and on ids.
