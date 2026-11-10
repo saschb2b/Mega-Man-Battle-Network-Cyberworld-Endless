@@ -378,7 +378,8 @@ def direction_as_bn6(role, raw, old, new, side):
 # init writes them from BN4's own type and side; a side by its column (BN6's per-column table, 0x0800C8C2, read for every
 # panel: 0xFF on columns 0 and 7, a column's side on the border rows too), where BN4's border holds 0 (its side table
 # BN4_PANEL_SIDES, 0x08009218: 0 off the 18): BN4's ring read so while it holds its start's 0, the column's side that of
-# BN4's own panel of the column's row 1; the timers idle in both read alike (BN4's +0xE 0x3C0 and +0x12 0x80BE at its
+# BN4's own panel of the column's row 1 at the field's start (a grab changes the 18's side and leaves the border's and
+# every +4: BN6's field update, 0x0800C7E8 on, copies +3 to +7 for rows 1-3 and columns 1-6 alone); the timers idle in both read alike (BN4's +0xE 0x3C0 and +0x12 0x80BE at its
 # start, BN6's +0x10 0 and +0x12 BN6_PANEL_TIMER_IDLE 0x708), any count compared as it is. Never a mask: BN6's own
 # record must hold what its init writes, and BN4's own type and side are what it is held to
 PANEL_TYPE, PANEL_SIDE, PANEL_IN_FIELD, PANEL_SIDE_COPY, PANEL_ANIM, PANEL_SIDE_DRAWN = 0x02, 0x03, 0x00, 0x04, 0x06, 0x07
@@ -395,14 +396,19 @@ def panel_tables(rom4, rom6):
     return dict(in_field=at(rom6, BN6_IN_FIELD_TABLE), spot=at(rom6, BN6_SPOT_TABLE), sides4=at(rom4, BN4_SIDES))
 
 
-def panel_as_bn6(i, p, tabs, panels):
-    """BN4's panel i (in BN6's layout, xdiff_bn4_trace.c) as BN6's field init would hold it (the comment above)"""
+def panel_as_bn6(i, p, tabs, panels, start=None):
+    """BN4's panel i (in BN6's layout, xdiff_bn4_trace.c) as BN6's field init would hold it (the comment above); start: the
+    trace's first frame's panels, the field's start"""
     out, col, row = bytearray(p), i % 8, i // 8
     if out[PANEL_SIDE] == tabs['sides4'][i] and (col in (0, 7) or row in (0, 4)):
-        out[PANEL_SIDE] = 0xFF if col in (0, 7) else panels[8 + col][PANEL_SIDE]
+        out[PANEL_SIDE] = 0xFF if col in (0, 7) else (start or panels)[8 + col][PANEL_SIDE]
     out[PANEL_IN_FIELD], out[PANEL_SPOT] = tabs['in_field'][i], tabs['spot'][i]
     out[PANEL_COLUMN], out[PANEL_ROW] = col, row
-    out[PANEL_ANIM], out[PANEL_SIDE_COPY], out[PANEL_SIDE_DRAWN] = out[PANEL_TYPE], out[PANEL_SIDE], out[PANEL_SIDE]
+    # (+7 the side as drawn, the field's update's copy of +3 each frame for the 18 in the field, 0x0800C7F4-0x0800C7F6; +4
+    # the side of the field's start, which a grab leaves: bn4_chip_areagrab, BN6's column 4 with +3 0 and +4 1 from t35 on)
+    border = col in (0, 7) or row in (0, 4)
+    out[PANEL_ANIM], out[PANEL_SIDE_DRAWN] = out[PANEL_TYPE], out[PANEL_SIDE]
+    out[PANEL_SIDE_COPY] = out[PANEL_SIDE] if border or start is None else start[i][PANEL_SIDE]
     timers = u16(out, PANEL_SIDE_TIMER), u16(out, PANEL_TIMER)
     if timers == BN4_TIMERS_IDLE:
         out[PANEL_SIDE_TIMER:PANEL_SIDE_TIMER + 2] = BN6_TIMERS_IDLE[0].to_bytes(2, 'little')
@@ -659,15 +665,25 @@ def allowed_world(d, fb):
 SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its "foes", holds in their battles alone; compare sets it)
 
 
+SPEC_SUBJECT = set()   # (the spec's subject, where it names one: bn6_sounds_alone)
+
+
 def bn4_sounds():
     """legit.json's bn4 sounds: {BN4's sound: (BN6's, its clock)}, each pair by the routines that play them in both games;
     a BN4 sound not there is compared as its own number, by the state's clock. A row naming "foes" (a moved Navi's copy of
     a number another row pairs otherwise: ThunderMan's 0xAD, the thunder's launch's in BN4's own code) holds only in a battle
     of one of them, over the other"""
-    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', [])
+    rows = [r for r in json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', []) if 'bn4' in r]
     mine = lambda r: bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
     return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
             for r in sorted(rows, key=lambda r: 'foes' in r) if 'foes' not in r or mine(r)}
+
+
+def bn6_sounds_alone():
+    """legit.json's bn4 sounds, the rows of BN6's alone (no "bn4"): a sound BN6's engine plays where BN4's twin routine plays
+    none, each for the specs of its subject alone ("subject": "megaman", a chip's spec: SPEC_SUBJECT)"""
+    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', [])
+    return {int(r['bn6'], 0) for r in rows if 'bn4' not in r and r.get('subject') in SPEC_SUBJECT}
 
 
 def sounds_diff(fa, fb, fbt, t):
@@ -681,7 +697,8 @@ def sounds_diff(fa, fb, fbt, t):
     timer6 = {b for b, c in m.values() if c == 'timer'}
     state_a = sorted(m.get(s, (s, 'state'))[0] for s in sa if m.get(s, (s, 'state'))[1] == 'state')
     timer_a = sorted(m[s][0] for s in sa if s in m and m[s][1] == 'timer')
-    state_b = sorted(s for _, s in fb.fr['sounds'] if s not in timer6)
+    alone = bn6_sounds_alone()
+    state_b = sorted(s for _, s in fb.fr['sounds'] if s not in timer6 and s not in alone)
     timer_b = sorted(s for _, s in (fbt.fr['sounds'] if fbt else ()) if s in timer6)
     return None if (state_a, timer_a) == (state_b, timer_b) else (state_a + timer_a, state_b + timer_b)
 
@@ -885,7 +902,7 @@ def frame_diffs(fa, fb, fbt=None):
         out.append(Diff(t, 'player', 'pending form', 0, pa[PLAYER_PENDING], pb[PLAYER_PENDING]))
     tabs = getattr(fa.canon, 'panels', None) if fb.game == 6 else None
     for i, (pa, pb) in enumerate(zip(fa.fr['panels'], fb.fr['panels'])):
-        pa = panel_as_bn6(i, pa, tabs, fa.fr['panels']) if tabs else pa
+        pa = panel_as_bn6(i, pa, tabs, fa.fr['panels'], fa.trace['frames'][0]['panels']) if tabs else pa
         out += [Diff(t, f'panel {i % 8},{i // 8}', part, off, a, b) for part, off, a, b in cells(fa, fb, 'panel', pa, pb)]
     return out
 
@@ -1082,6 +1099,9 @@ def spawn_leftover(d):
 
 
 SUPPORT_FAMILY, AI_ATTACK_PHASE = 0x15, 0xA1
+SUPPORT_END = "BN6's support attack's end, a frame after its routine"
+CLOCK_REJOIN = "MegaMan's clock rejoining the battle's at a state the world gives him"
+GENERIC_STATES = 6   # (the engine's states both games number alike, 0-5: tools/bn4_twins.py GENERIC4)
 
 
 def support_end(d, fb):
@@ -1236,6 +1256,8 @@ def compare(spec, ta, tb, canon, show=6):
         sounds_played(tb)
     # (allowed_lag: BN6's whole battle, every record of it, against BN4's of `lag` fight frames before)
     lag = allowed_lag(spec) if against else 0
+    SPEC_SUBJECT.clear()
+    SPEC_SUBJECT.update({spec['subject']} if spec.get('subject') else ())
     SPEC_FOES.clear()
     SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
     stop, lines, ranks, before = None, [], {}, None
@@ -1245,10 +1267,16 @@ def compare(spec, ta, tb, canon, show=6):
     # (legit.json's bn4 opening_animation: a moved object's animation run through the paused opening, by the openings' lengths)
     opening = Opening(ta, tb, getattr(canon, 'sprites', []), getattr(canon, 'roms', {}).get(4, b'')) if against else None
     clock = CompanionClock() if against else None   # (legit.json's bn4 companion_clock)
-    for fra in ta['frames']:
+    held = 0   # (legit.json's bn4 megaman_clock: the frames BN6's support runs have held MegaMan so far)
+    megaman = lambda fr: next((o for o in fr['objs'] if isinstance(o.role, tuple) and o.role[:2] == ('T1', MEGAMAN_ID)), None)
+    for k, fra in enumerate(ta['frames']):
         frb = bt.get(fra['t'] + lag)
         if frb is None:
             continue
+        later = bt.get(fra['t'] + lag + held) if held else None
+        if later:   # (MegaMan's own record of BN6's as his own clock has it: the frame `held` later)
+            his = {o.role: o for o in later['objs'] if isinstance(o.role, tuple) and o.role[:2] == ('T1', MEGAMAN_ID)}
+            frb = dict(frb, objs=[his.get(o.role, o) for o in frb['objs']])
         n += 1
         fa = Frame(ta, fra, canon)
         fb = Frame(tb, frb, canon)
@@ -1274,10 +1302,22 @@ def compare(spec, ta, tb, canon, show=6):
         for d in world:   # (legit.json's bn4 allowed of the world's: MegaMan's own sprite, BN6's companion of his, an engine's own)
             d.mask = allowed_world(d, fb) or allowed_engine(d) or ("a native's own art, the same bytes" if own_art(d, fa, fb) else None) or \
                 ("a slide's direction, each engine's clock" if slide_direction(d) else None) or \
-                ((spawn_leftover(d) or ("BN6's support attack's end, a frame after its routine" if support_end(d, fb) else None))
+                ((spawn_leftover(d) or (SUPPORT_END if support_end(d, fb) else None))
                  if spec.get('subject') == 'megaman' else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
+        held += any(d.mask == SUPPORT_END for d in world if d.part == 'obj')
+        if held and later and k + 1 < len(ta['frames']):
+            # (his clock rejoins the battle's where the world gives him a state, a hit: BN6's record of his own clock holds it
+            # `held` frames before BN4's does, each at the battle's frame; BN4's frames between have no twin of his)
+            m4, m6, n4 = megaman(fra), megaman(later), megaman(ta['frames'][k + 1])
+            act = m6.rec[NODE + OBJ_ACTION] if m6 else None
+            if m4 and n4 and act is not None and act < GENERIC_STATES and m4.rec[NODE + OBJ_ACTION] != act and n4.rec[NODE + OBJ_ACTION] == act:
+                for d in world:
+                    if not d.mask and isinstance(d.role, tuple) and d.role[:2] == ('T1', MEGAMAN_ID):
+                        d.mask = CLOCK_REJOIN
+                        used[d.mask] = used.get(d.mask, 0) + 1
+                held = 0
         world = [d for d in world if not d.mask]
         mine = [d for d in open_ if d.role in fam] if against else open_
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)

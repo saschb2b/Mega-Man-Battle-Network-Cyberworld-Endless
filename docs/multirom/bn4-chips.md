@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -41,13 +41,18 @@ games pair, the chip's id by the registry's rows and the spec's folders,
 his attack's subfamily by the two records, and what BN6 alone keeps (its
 count of chips held, its attack's entry number, the frame its support
 run holds him after the chip's routine) each explained in
-`tests/xdiff/legit.json`'s `bn4` section from both games' code. Three
-specs record where a chip parts today: `bn4_chip_cannon` (t33: BN6's
-Cannon is its own code), `bn4_chip_timebomb` (t32: the records apart;
-on BN6's code its placement at t34) and `bn4_chip_areagrab` (t34: open
-work). **No BN4 chip passes against BN6 yet.** Open: MegaMan's clock
-after a support attack (BN6's a frame longer), the chips' sounds, the
-panels' marks an area grab leaves, then the generator's BN4 path.
+`tests/xdiff/legit.json`'s `bn4` section from both games' code. **The first
+chip passes:** `bn4_chip_areagrab`, BN4's AreaGrab against BN6's over
+300 frames, three mutations caught (the pairing by name, unit 0's,
+proved for it). It took MegaMan's own clock (BN6's support run holds
+him a frame longer, until a hit puts him back on the battle's), the
+grab's sounds paired, BN6's sound as a support chip's name shows, and
+BN6's panel's side copies read as its code writes them (+4 the field's
+start's, +7 the side each frame). Two specs record where a chip parts:
+`bn4_chip_cannon` (t33: BN6's Cannon is its own code) and
+`bn4_chip_timebomb` (t32: the records apart; on BN6's code its placement
+at t34). Open: the generator's BN4 path (`tools/xchiprecipe.py` reading
+BN4), which the moved units need.
 
 **The six "on BN6's code" are not** (10 November 2026, read in both ROMs
 and run): the census compared each routine's body and stopped at a twin,

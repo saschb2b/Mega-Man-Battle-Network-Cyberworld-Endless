@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -64,11 +64,16 @@ name), and his attack's subfamily by the two chips' records. What BN6
 alone has is allowed by name, each from both games' code: its count of
 chips held, its attack's entry number, the frame its support run holds
 him after the chip's routine (BN4 ends the attack in the routine's
-frame), a support object's spawn's leftover r3. Three specs record
-where a chip parts today, each with its verdict and why:
-`bn4_chip_cannon` (t33), `bn4_chip_timebomb` (t32) and
-`bn4_chip_areagrab` (t34). None passes yet, so no chip rests on these
-rules; a rule added here is tried again by the first that does.
+frame), a support object's spawn's leftover r3. `bn4_chip_areagrab` is the
+first to pass, BN4's AreaGrab against BN6's: after BN6's support run has
+held MegaMan a frame his own record is read that frame later
+(`megaman_clock`), until the world gives him a state (a hit lands at the
+battle's frame in both) and he is read with the battle's offset again;
+a panel's +4 is the side of the field's start and its +7 the side each
+frame, as BN6's field update writes them. Its three mutations break
+BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
+specs record where a chip parts, each with its verdict and why:
+`bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
