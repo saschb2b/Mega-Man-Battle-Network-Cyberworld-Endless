@@ -123,15 +123,14 @@ static void card_contacts(int x, int y) {
 		}
 }
 
-/* the dark block at its head: the picture's frame, and under the picture the element's icon and the power */
-static void card_head(int x, int y, const LibraryView *v) {
+/* the dark block at its head: the picture's frame, and under the picture the element's icon and the power (chip 0: the frame alone) */
+static void card_head(int x, int y, int id) {
 	static const SDL_Color top = { 206, 206, 222, 255 }, glint = { 231, 247, 247, 255 };
 	fill_rect(x + 7, y + 1, 66, 1, card_shade);
 	fill_rect(x + 16, y + 1, 8, 1, top);
 	fill_rect(x + 18, y + 1, 4, 1, glint);
 	fill_rect(x + 7, y + 2, 66, 66, LOOK_CARD_DARK);
-	if (!v->n || !v->seen[v->at]) return;
-	int id = v->rows[v->at].chip;
+	if (!id) return;
 	second_chip_art(id, x + 12, y + 4, 1);
 	int el = second_chip_element(id);
 	if (el >= 0) second_element_icon(el, x + 24, y + 52);
@@ -143,12 +142,10 @@ static void card_head(int x, int y, const LibraryView *v) {
 	if (ci.power > 0 && ci.power <= 1000) text_draw_cells(x + 72 - 8 * digits, y + 53, power, rgba(231, 231, 231, 255), LOOK_CARD_DARK);
 }
 
-/* its description in the game's own three lines, each letter in a cell of 8, 16 apart */
-static void card_words(int x, int y, const LibraryView *v) {
+void library_card_lines(int x, int y, const char *lines) {
 	static const SDL_Color ink = { 66, 57, 57, 255 }, under = { 189, 189, 189, 255 };
-	if (!v->n || !v->seen[v->at]) return;
 	char desc[160];
-	chips_desc_lines(v->rows[v->at].chip, desc, sizeof desc);
+	snprintf(desc, sizeof desc, "%s", lines);
 	int line = 0;
 	for (char *s = desc; s && *s && line < 3; ++line) {
 		char *end = strchr(s, '\n');
@@ -160,13 +157,26 @@ static void card_words(int x, int y, const LibraryView *v) {
 	}
 }
 
-static void card(int x, int y, const LibraryView *v) {
-	SDL_Color face = card_face(v->cls);
+void library_card_blank(int x, int y, int cls) {
+	SDL_Color face = card_face(cls);
 	card_body(x, y, face);
 	card_marks(x, y, face);
-	card_head(x, y, v);
-	card_words(x, y, v);
+	card_head(x, y, 0);
 	card_contacts(x, y);
+}
+
+void library_card_face(int x, int y, int chip, int cls) {
+	library_card_blank(x, y, cls);
+	if (chip) card_head(x, y, chip);
+}
+
+void library_card(int x, int y, int chip, int cls) {
+	library_card_face(x, y, chip, cls);
+	if (!chip) return;
+	/* its description in the game's own three lines, each letter in a cell of 8, 16 apart */
+	char desc[160];
+	chips_desc_lines(chip, desc, sizeof desc);
+	library_card_lines(x, y, desc);
 }
 
 /* ---- the band: the entries ---- */
@@ -353,5 +363,5 @@ void library_draw_view(int x, int y, const LibraryView *v) {
 	frame(x, y);
 	tags(x, y, v);
 	list_panel(x, y, v);
-	card(x + CARD_X, y + CARD_Y, v);
+	library_card(x + CARD_X, y + CARD_Y, v->n && v->seen[v->at] ? v->rows[v->at].chip : 0, v->cls);
 }

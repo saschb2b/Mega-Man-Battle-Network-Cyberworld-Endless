@@ -4,6 +4,7 @@
 #include "screen_name.h"
 
 #include "devtools.h"
+#include "director.h"
 #include "game.h"
 #include "jukebox.h"
 #include "library.h"
@@ -17,6 +18,7 @@ const char *screen_name(void) {
 	if (o) return o;
 	/* (SAVES and the ROMs screen are scenes of their own: their names) */
 	if (scene_current() != &scene_emu) return scene_current() ? scene_current()->name : "none";
+	if (director_pick_shown()) return "reward-pick";
 	if (jukebox_shown()) return "jukebox";
 	if (library_shown()) return "library";
 	if (netpass_screen_shown()) return "netpass";

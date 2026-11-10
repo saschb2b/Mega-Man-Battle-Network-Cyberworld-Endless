@@ -2785,7 +2785,47 @@
    "poke": [
     "088F0F04:01DA"
    ],
-   "what": "the shim of Boomer's unit's home that plays the boomerang's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DF"
+   "what": "the shim of Boomer's unit's home that plays the boomerang's sound (its first, at XC4_HOMES + 0x1C00 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DF"
+  },
+  {
+   "name": "MokoRus1's row's power another",
+   "spec": "bn4_chip_mokorus1",
+   "poke": [
+    "08C06346:001E"
+   ],
+   "what": "the registry's record of BN4's MokoRus1 (577 at CHIPS_RECORDS) with power 30 where BN4's record holds 60: the Mettaur in the middle Moko's way left 110 HP where BN4's leaves it 80"
+  },
+  {
+   "name": "MokoRus3's row's subfamily another",
+   "spec": "bn4_chip_mokorus3",
+   "poke": [
+    "08C06390:83:1"
+   ],
+   "what": "the registry's record of BN4's MokoRus3 (579) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x81: no Moko"
+  },
+  {
+   "name": "the Moko's hit's bits BN4's",
+   "spec": "bn4_chip_mokorus2",
+   "poke": [
+    "080D23E0:2321"
+   ],
+   "what": "the Moko's init's copy (its movs r3 before the collision setup at BN4 0x080D23E0) with BN4's own bits 0x21 where the recipe gives BN6's 0x61: BN6's struck pass pushes the Mettaur back without striking it, which goes on with its attack where BN4's is struck out of it"
+  },
+  {
+   "name": "the Mokos' delay another",
+   "spec": "bn4_chip_mokorus2",
+   "poke": [
+    "080D2554:2205"
+   ],
+   "what": "the chip's routine's copy (its movs r2,#0xa at BN4 0x080D2554, the frames between one Moko and the next) with 5: the second and third Mokos set off 5 and 10 frames after the first where BN4's set off 10 and 20 after"
+  },
+  {
+   "name": "the Moko's sound another",
+   "spec": "bn4_chip_mokorus3",
+   "poke": [
+    "088F1304:01DA"
+   ],
+   "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
   },
   {
    "name": "GutsMan's chip's row's power another",
@@ -2820,12 +2860,13 @@
    "what": "BN6's grown Navi routines' entry 0x85 (XC_NAVI + 4 x 0x85) the table's stub again, as before his unit's install: BN6's Navi chip object calls nothing, the Mettaur untouched"
   },
   {
-   "name": "the chip's GutsMan's sound another",
+   "name": "the chip's GutsMan's sound not played",
    "spec": "bn4_chip_gutsman",
    "poke": [
-    "088F1300:01DA"
+    "080B9A3E:46C0",
+    "080B9A40:46C0"
    ],
-   "what": "the shim of his unit's home that plays his sound as he appears (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x300"
+   "what": "his first state's call of his sound's shim (BN4 0x080B9A3E, the bl that plays 0xB0 at the grown table's slot 0x2C0), both halves a nop: no sound as he appears, BN4's 0xB0 begun alone"
   },
   {
    "name": "the chip's GutsMan's shockwave not spawned",

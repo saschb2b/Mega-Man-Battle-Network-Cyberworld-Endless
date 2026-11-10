@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
+* **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
+* **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
 * **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
 * **Update**: multirom/bn4-chips.md (the first Navi chip plays, GutsMan's; The Navi chips, new section; BN4's ground kind is Null, not the Cursor), multirom/bn4-navis.md (the battle's art room halved for the chips' rooms), rom/bn4.md (Its Navi chips, new row), rom/chips-code.md (BN6's Navi chip object, new row), devtools/chip-recipe-generator.md (a Navi chip's unit), devtools/differential.md (a Navi chip read as BN6 runs it), engine/emulation/memory.md and free-space.md (`FREE_BN4_CHIP_SPRITE`, `FREE_BN4_CHIP_ART`), code/emu.md and code/tools.md (`xnavi_bn4_chip.c`, `tools/xchiprecipe_bn4_navi.py`).
 * **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
@@ -13,6 +16,8 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
+* **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
 * **Update**: rom/bn4.md (The panel changer and the Hole panel, new row; `BN4_PANEL_HOLE` named) and multirom/bn4-chips.md (the dark units read, why each waits; call 7 with BlakWeap; call 8, the Hole panel, which a DS Navi chip's power counts), code/emu.md (`bn4_panels.h`).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
 * **Update**: game/navicust.md (11: the owner's call, Souls only; a Beast Out is not lengthened and needs no hook, the first write-up's claim corrected), rom/navicust.md (BN6's one read of the turn byte and what times a Beast Out), multirom/gaps.md, devtools/differential.md (`beast_out`, `beast_soult`; an engine spec takes a mutation's poke).

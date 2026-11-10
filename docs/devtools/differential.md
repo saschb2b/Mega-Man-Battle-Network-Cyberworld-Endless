@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -85,7 +85,7 @@ attack objects he runs (`xd_log_units`), in both games, so a draw his
 attack makes is keyed by BN4's place and replayed: GutsMan's shockwave
 cracks the same three panels in both. A sound row that names
 `navi_chips` holds in such a spec alone, over another row of its number
-(BN4's 0xB0 is the chip's Navi appearing there, the grown table's 0x300,
+(BN4's 0xB0 is the chip's Navi appearing there, the grown table's 0x2C0,
 and an invisibility's end elsewhere). A Navi's pool sounds are his rows,
 whichever Navi the battle holds: the engine points the pool at his songs
 while his chip runs. What the freeze draws and how long it lasts is not
@@ -1208,6 +1208,9 @@ format, its game 4: the trace's header names it):
   comparator: the camera's shake's two draws a frame paired as BN5's are
   (legit.json's bn4 rng_twins take a `word`: BN4's draws there from its
   first RNG word, BN6's from its second, `tools/xdiff_bn4.py` rng_twins);
+  the bytes' shuffle is a twin there too (BN4 `0x08000AAA`, BN6
+  `0x08000C72`: a chip unit's draws have no family's key, so MokoRus's
+  rows were each engine's own order until its six draws were paired);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

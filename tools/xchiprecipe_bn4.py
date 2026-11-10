@@ -98,26 +98,46 @@ AUDITS = {
 # own are 0-0xCB, the families' and Navis' 0xCC on, 11 left between them: tools/xrecipe_bn4.py TYPE_MORE, LATE_TYPES),
 # each checked against every other recipe (numbers_clear)
 TYPES4 = (0x91, 0xE0)
-TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
-# The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
-UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'),
-         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'), ('misc', 0x02, 'Boomer'),
-         # (the Navi chips' units, tools/xchiprecipe_bn4_navi.py: after BN4's Navis' install, src/emu/xchips_code.c)
-         ('navi', 0x05, 'GutsManChip'))
+TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0,
+          # ... and, those spent, every number below them that no recipe's XvType row named on 10 November 2026 (a scan of
+          # src/emu/*.c: BN5's own numbers no BN5 track moved or paired; 0xD3-0xDD stay the Navis' track's), top down.
+          # Append-only: a number is a unit's by UNITS' order, and numbers_clear refuses one another recipe names since
+          0xAF, 0xAE, 0xAD, 0xAB, 0xAA, 0xA9, 0xA3, 0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C, 0x96, 0x94, 0x91,
+          0x8E, 0x82, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73, 0x72, 0x6E, 0x6B, 0x67, 0x66, 0x65, 0x64,
+          0x63, 0x62, 0x60, 0x5F, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4F, 0x4E, 0x4C, 0x4B, 0x49, 0x48,
+          0x47, 0x46, 0x44, 0x41, 0x40, 0x3F, 0x3D, 0x37, 0x36, 0x32, 0x30, 0x2E, 0x2D, 0x2C, 0x28, 0x1E,
+          0x1C, 0x1B, 0x1A, 0x19, 0x13, 0x11, 0x0F, 0x0D, 0x0C, 0x0A, 0x09, 0x08, 0x06, 0x03, 0x01)
+# The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone. Append-only, one
+# unit a line: a unit's home, its dispatch numbers, its effects' ids and its sprites' list numbers follow its place here,
+# so a unit put before another renumbers every one after it. Where two branches add units, the one merged first keeps
+# its place and the other's go after, then the file is written again (never joined by hand)
+UNITS = (
+    ('support', 0x26, 'PanlSht'),
+    ('support', 0x19, 'ShotStar'),
+    ('misc', 0x0B, 'Repair'),
+    ('misc', 0x00, 'Counter'),
+    ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'),
+    ('misc', 0x02, 'Boomer'),
+    ('misc', 0x01, 'MokoRus'),
+    # (a Navi chip's unit, tools/xchiprecipe_bn4_navi.py: installed after BN4's Navis, src/emu/xchips_code.c)
+    ('navi', 0x05, 'GutsManChip'),
+)
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
 # the order the units took them; src/audio/xsong.c XSOUNDS, the same numbers; xsong_install_at as the unit installs), one
 # slot a sound whichever unit plays it. A sound not here is a decision: the next slot
 SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
+# (the sessions moving units side by side each take theirs from a range of their own, so no two give out one slot:
+# 0x1DA-0x1FF the generator's units, 0x200-0x23F the spreads' and lines', 0x240-0x27F the larger units', 0x280-0x2BF the
+# dark chips', 0x2C0-0x2FF the Navi chips')
 SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC,                # (ShotStar's star's fall)
                0xBE: 0x1DD,                 # (Counter's hit)
                0xF7: 0x1DE,                 # (WhitWeb's web)
                0xAB: 0x1DF,                 # (Boomer's boomerang)
-               # (the Navi chips' sounds, tools/xchiprecipe_bn4_navi.py's units, from 0x300 up: a range of their own, so the
-               # units made side by side renumber no slot of each other's)
-               0xB0: 0x300}                 # (a chip's Navi as he appears: GutsMan's, 0x080B9A3E)
+               0xC7: 0x1E0,                 # (MokoRus's Moko)
+               0xB0: 0x2C0}                 # (a Navi chip's Navi as he appears: GutsMan's, 0x080B9A3E; the Navi chips' range)                 # (a chip's Navi as he appears: GutsMan's, 0x080B9A3E)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -136,8 +156,9 @@ TABLES = {
 }
 # The numbers the chips' copies take, each from the top of its range down (the late families' way, tools/xrecipe_bn4.py):
 # effect ids 0xCF-0xB0 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xB0, list 4's 0x9F-0x70,
-# and list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on)
-CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3 = (0xCF, 0xB0), (0xEF, 0xB0), (0x9F, 0x70), (0x70, 0xE0)
+# list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on), and list 1's 0x7F-0x40 (past BN5's
+# families' 0x20-0x36, below BN4's families' 0xC0 on and BN5's chips' from 0xFF down)
+CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3, CHIP_LIST1 = (0xCF, 0xB0), (0xEF, 0xB0), (0x9F, 0x70), (0x70, 0xE0), (0x7F, 0x40)
 ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
@@ -154,6 +175,12 @@ IMMS = {
                      why="a side's players in the battle state: BN4 +0x44, BN6 +0xD0"),
     0x080CFE38: dict(form='THUMB_LDRB', rd=1, rn=1, was=0x0B, now=0x0D,
                      why="a player's collision data's counter byte: BN4 +0xB (BN4_COLL_COUNTER), BN6 +0xD (BN6_COLL_COUNTER)"),
+    # The Moko's hit, struck and pushed back: BN4's struck pass makes it of the hit's bit 0x01 with a push bit (0xFC:
+    # 0x0801360C-0x08013622, status 0x100 set and the flinch's 0x4 cleared), BN6's of bit 0x40 with a push bit (0x3C:
+    # 0x0801AC06-0x0801AC2E, the same two stores); with BN4's 0x21 BN6 pushes and does not strike (status 0x10)
+    0x080D23E0: dict(form='THUMB_MOVS', rd=3, rn=0, was=0x21, now=0x61,
+                     why="its hit's bits (the collision setup's r3): struck and pushed is bit 0x01 with a push bit in BN4 "
+                         "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED)"),
 }
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
@@ -180,6 +207,7 @@ class Alloc(X4.Alloc):
         self.types = {1: 0x100, 3: 0x100, 4: TYPES4[0]}
         self.types3 = list(TYPES3)
         self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
+        self.late_list1 = CHIP_LIST1[0]
         self.list3_sprites = {}   # (BN4's list 3 number copied: the copy)
         self.types1 = NV.TYPES1[0]   # (the chips' Navis' first-kind dispatch numbers)
 
@@ -534,7 +562,7 @@ def sprites_of(b4, b6, f, alloc):
 
 
 def list_number(alloc, lst):
-    """the chips' next number of a list (3 up from CHIP_LIST3, 4 and 5 down their ranges), None spent"""
+    """the chips' next number of a list (3 up from CHIP_LIST3, 1, 4 and 5 down their ranges), None spent"""
     if lst == 3:
         n, ok = alloc.list3, alloc.list3 < CHIP_LIST3[1]
         alloc.list3 += ok
@@ -544,13 +572,16 @@ def list_number(alloc, lst):
     elif lst == 4:
         n, ok = alloc.late_list4, alloc.late_list4 >= CHIP_LIST4[1]
         alloc.late_list4 -= ok
+    elif lst == 1:
+        n, ok = alloc.late_list1, alloc.late_list1 >= CHIP_LIST1[1]
+        alloc.late_list1 -= ok
     else:
         return None
     return n if ok else None
 
 
 def list3_copy(b4, f, alloc, num, lst=3):
-    """BN4's sprite `num` of list 3 (or `lst`: 4, 5) copied at a number of the chips' in that list, once for every unit: the
+    """BN4's sprite `num` of list 3 (or `lst`: 1, 4, 5) copied at a number of the chips' in that list, once for every unit: the
     copy, None unread or spent"""
     if (lst, num) in alloc.list3_sprites:
         s, who = alloc.list3_sprites[lst, num]
