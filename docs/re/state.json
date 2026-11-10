@@ -222,6 +222,10 @@
     },
     {
       "date": "2026-11-10",
+      "what": "BN4's panel changer and its Hole panel located and read (bn4_panels.h BN4_PANEL_CHANGER 0x080E4354, BN4_PANEL_CHANGER_KINDS 0x080E423C, BN4_PANEL_HOLE 0x0B and its six readers, BN4_PANEL_STEP 0x08009740, BN4_PANEL_BLINK_SET 0x08009E38; docs/rom/bn4.md). The Hole panel is what a DS Navi chip's power counts (BN4_DS_POWER 0x08019518, BN4_DS_POWERS 0x08018B48, BN4_PANEL_COUNT 0x08009F40). BN4's dark chips' price is in code (xreg4_dark_ids, the hook's test); the dark units derived, none moved yet."
+    },
+    {
+      "date": "2026-11-10",
       "what": "MokoRus's code located and moved (bn4_chips.h BN4_MOKORUS 0x080D252A, BN4_T3_MOKO 0x2C, BN4_MOKO_HIT_BITS 0x080D23E0), the bytes' shuffle paired (BN4_SHUFFLE 0x08000AAA, BN6_SHUFFLE 0x08000C72) and the struck pass's push read in both (BN4_STRUCK_PUSHED 0x0801360C: bit 0x01 with a push bit; BN6_STRUCK_PUSHED 0x0801AC06: bit 0x40 with one; docs/rom/bn4.md)."
     }
   ],
