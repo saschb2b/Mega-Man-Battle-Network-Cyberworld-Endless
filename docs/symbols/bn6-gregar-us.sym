@@ -468,6 +468,7 @@
 0800ED80 BN6_AI_LET_GO
 0800ED90 chip_object_uses
 0800EDB4 bn5_navi_companion
+0800EE82 bn5_overlay_spawner_with_kind_4
 0800EEB6 _END_REF_2
 0800EECC bn5_chips_code_3
 0800EF34 soul_passives
@@ -506,6 +507,7 @@
 0800FCA4 BN6_FORM_SPRITE_READ
 0800FCA6 BN6_FORM_SPRITE_BACK
 0800FCBC BN6_FORM_SPRITES
+0800FE6A written_by
 0800FF3E BN6_FORM_LOADOUT_READ
 0800FFE4 set_by_0x0801596e_through
 08010018 BN6_HAND_ADDR
@@ -704,6 +706,7 @@
 080182C0 BN6_ENEMY_IDS_REF
 080182C4 BN6_OBJECT_IDS
 08018810 BN6_ARM_POINTS
+08018838 team_protoman_napalmman.0x4b_handed_to
 08018842 bn5_chips_code.0x08018810
 08018886 record_word
 0801889C soul_look.literal
@@ -1145,6 +1148,7 @@
 080C4214 numberman_object
 080C4216 before_code
 080C4800 third_kind_0x00_kinds
+080C4ABC team_protoman_napalmman.spawner
 080C5B44 navis_moved_into_3
 080C5B90 navis_moved_into_4
 080C5C2C BN6_OVERLAY_SPRITES_REF
@@ -1165,6 +1169,10 @@
 080CAC3C BN6_THUNDER
 080CACD6 BN6_THUNDER_ARG
 080CADBC BN6_SPAWN_THUNDER
+080CB4FC team_protoman_napalmman
+080CB500 spawner_0x080c4abc
+080CC2A2 team_protoman_napalmman_2
+080CC2AA team_protoman_napalmman_3
 080CCCCE navis_engine_twins.colonel_third_kind_0x3c_0x59
 080CEB80 BN6_GUST_INIT
 080CECF8 BN6_GUST_SPAWN
@@ -1265,6 +1273,8 @@
 080F3E71 his_states
 080F3FAB control_navi.hooks
 080F3FB9 hooks_0x080f3fab
+080F5F22 chip_he_holds_next_by
+080F5F2E team_protoman_napalmman_4
 080FCFB2 BN6_NAVI_DYING_PROTO
 080FDCF0 protoman_cross
 080FDE8C cross_strokes

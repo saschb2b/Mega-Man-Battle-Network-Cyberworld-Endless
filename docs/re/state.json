@@ -243,6 +243,10 @@
     {
       "date": "2026-11-09",
       "what": "BN5's Navi chips past nine bits (docs/rom/chips-code.md, new row: 23 addresses of BN5's, BN6's turn read 0x0800A84E and its obstacle refusal 0x0800F486); tools/xchiprecipe.py's STACK_LOADS and PowerDjangoSP."
+    },
+    {
+      "date": "2026-11-09",
+      "what": "NapalmMan moved, Team ProtoMan's first (docs/multirom/navis.md, NapalmMan; docs/rom/navis.md, Team ProtoMan's NapalmMan: src/emu/bn5_team_protoman.h's BN5_NAPALM_COMPANION, _COMPANION_END, _HALF_HP_CHIP, _FLAME_SPAWN, _PANEL_FLAMES): napalmman_v1, napalmman_v1_keys and napalmman_sp PASS, five mutations caught; the third kind's 0x00 the Navis' one copy (TYPES), its kinds' rows fixed by the Navis' generator; the comparator reads Team ProtoMan's code room and keys no Navi's code to an object no family spawned."
     }
   ],
   "experiments": [

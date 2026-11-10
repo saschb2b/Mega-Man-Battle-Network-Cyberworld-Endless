@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (in runs where BN4's ROM is read, for a profile that has reached the Nest; BN6's and BN5's Navis and BN4's seven proved ones its entrants)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:20:00Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -530,10 +530,10 @@ from that round's band as a round's Navi is (the owner's call 7, below):
 the pool marks him `stand_in`, and `run_bracket_draw` draws the chip's
 Navi and version (`RunBracket.prize`) from the seed apart from the rounds,
 which are drawn as without it (`tests/test_core.c`, the stand-in's test).
-His meetings are kept: `rivals.sav`'s third version ("CWR3") holds every
-navi number to BN4's last seat (`RIVAL_NAVIS` 59), a second version's 32
-records read whole into it, so the card names him once MegaMan has
-battled him.
+His meetings are kept: `rivals.sav`'s fourth version ("CWR4") holds every
+navi number to Team ProtoMan's last (`RIVAL_NAVIS` 65; BN4's seats 34-58),
+a third version's 59 records and a second's 32 read whole into it, so the
+card names him once MegaMan has battled him.
 
 **Measured.** `build.py pacing`: 0 past their band, the rounds included
 (each round's Navis over 500 drawn runs, the short net's act 3 and the

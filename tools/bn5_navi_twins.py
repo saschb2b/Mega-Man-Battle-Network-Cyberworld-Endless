@@ -43,7 +43,12 @@ STUBS = {0x080EA08C: 'XN_STUB_ZERO', 0x080EA0BA: 'XN_STUB_ZERO', 0x0802C10A: 'XN
          # +0xD the kind of approach, +0xE bits 0-1, +0x17 the region it aims from; BN6's +0x17 its lock-on type), its attack
          # (0x0802C098) BN6's own (+4, +0xA-+0xC, +0x10, +0x14: BN6's action for the chip): the Dark Soul's records, BN6's
          # with BN5's four bytes, by BN6's id (src/emu/xnavi_dark.c)
-         0x0801DF0C: 'XN_STUB_CHIPDATA'}
+         0x0801DF0C: 'XN_STUB_CHIPDATA',
+         # CloudMan's search for his clouds (BN5_CLOUD_FIND_37, 0x080CBFBC: the third kind's objects of type 0x37 on side r1 but
+         # slot r2 into the list r0, each its address less 0x10, their count returned), whose literal 0x0203CA30 is BN5's
+         # third kind's objects less 0x10: a moved type's object holds the dispatch's type and BN5's number in the dispatch's
+         # side table, which the stub reads (docs/multirom/navis.md, CloudMan), never a wider literal
+         0x080CBFBC: 'XN_STUB_CLOUDS'}
 # The one number each stub serves where the stubbed routine takes one (r0 at every call): the generator's check
 STUB_ARGS = {0x0800F350: 0x3E}
 
@@ -75,8 +80,9 @@ IMAGE6 = dict(kinds=0x080BA444, count=52)
 # BN5's companion routines (BN5_NAVI_COMPANION's and BN5_NAVI_COMPANION_END's words) that spawn or end what BN6 runs
 # otherwise, copied with their Navi: an overlay of a kind BN6 lacks, Colonel's start (kind 3) and end, KnightMan's (kind
 # 1); NumberMan's companion, the first kind's 0x54 (its spawner below, SPAWNS_OTHER), and its end (BN6's twin of the
-# end, 0x080111DD, ends BN6's 0x55)
-COMPANIONS = (0x0800EE56, 0x0800EFE4, 0x0800EE72, 0x0800F000, 0x0800EE66, 0x0800EFF2)
+# end, 0x080111DD, ends BN6's 0x55); NapalmMan's start (kind 4: movs r4,#4 at 0x0800EE84) and end (0x0800F00E, the
+# body of KnightMan's)
+COMPANIONS = (0x0800EE56, 0x0800EFE4, 0x0800EE72, 0x0800F000, 0x0800EE66, 0x0800EFF2, 0x0800EE82, 0x0800F00E)
 
 # BN5's routines whose twin in BN6 (the same bytes) spawns an object of the same type number that BN6 runs otherwise:
 # copied with the Navi, so that its spawn goes through the dispatch with BN5's type moved (tools/xnavirecipe.py)

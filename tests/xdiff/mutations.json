@@ -691,7 +691,7 @@
    "name": "the image object's kind left at BN5's sprite",
    "spec": "colonel_v1",
    "poke": [
-    "08D90110:00:1"
+    "08D90210:00:1"
    ],
    "what": "the moved image object's kind 3 (BN5's kinds table 0x080B9A5C + 0x10, its copy at XN_OBJECTS + 0x0 + 0x10) left naming list 4's number 0, BN6's another sprite, where tools/bn5_objects.py's copy makes it 0xB5 (BN5's sprite 3:0x00, Colonel's image at t254): the sprite's bytes compared, never its number"
   },
@@ -699,7 +699,7 @@
    "name": "the image object's twin kind at another sprite",
    "spec": "colonel_v1",
    "poke": [
-    "08D901BA:09:1"
+    "08D902BA:09:1"
    ],
    "what": "the moved image object's kind 0x25 (its copy's entry at XN_OBJECTS + 0x0 + 0xBA) naming BN6's list 3 number 9 where tools/bn5_objects.py's twin is number 8, the same bytes as BN5's 3:0x08: the sprite's bytes compared"
   },
@@ -715,8 +715,8 @@
    "name": "the submerged hit by any attack",
    "spec": "toadman_sea",
    "poke": [
-    "08D9008E:2400",
-    "08D900C2:2400"
+    "08D900CE:2400",
+    "08D90102:2400"
    ],
    "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
   },
@@ -724,8 +724,8 @@
    "name": "Elec stopped by the submerged",
    "spec": "toadman_sea_elec",
    "poke": [
-    "08D90084:2C07",
-    "08D900B6:2C07"
+    "08D900C4:2C07",
+    "08D900F6:2C07"
    ],
    "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
   },
@@ -733,7 +733,7 @@
    "name": "the sea's marker not kept",
    "spec": "toadman_sp",
    "poke": [
-    "08D9006A:46C0"
+    "08D900AA:46C0"
    ],
    "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
   },
@@ -741,7 +741,7 @@
    "name": "the sea's splash another effect",
    "spec": "tomahawkman_sea",
    "poke": [
-    "08D900DA:2414"
+    "08D9011A:2414"
    ],
    "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
   },
@@ -2332,6 +2332,46 @@
     "080E19F4:2112:2"
    ],
    "what": "BN6's opening fade begun with 0x12 where it begins with 0x10 (BN6 0x080E19F4: movs r1,#0x10 before bl 0x08006270, the fade the appear's bit 0 waits on): BN6's wait before bit 0 a frame shorter for its family, so MagTect's copy shakes, and draws, 15 times in the opening (frames 72-86) where it shakes 16, BN4's 18. The gap of the counts is then 3, not the 2 draws BN4's trace makes in the frames BN6's opening has no twin of (its init's frame and the frame before bit 0): no pairing from the opening's end holds (legit.json's bn4 opening_draws), where a pairing by the gap alone would pair BN6's 15 with BN4's last 15 and pass (caught at t1: the run prints the pairing refused, BN4's 18 against BN6's 15 with 2 in the twinless frames, then its +0x36 and +0x64, its last shake BN6's own, and +0x91, the opening a frame shorter)"
+  },
+  {
+   "name": "NapalmMan's object's effect not renumbered",
+   "spec": "napalmman_v1",
+   "poke": [
+    "0889B6EE:244C"
+   ],
+   "what": "the third kind's 0x33's effect (BN5 0x080CB4A6: movs r4,#0x4C, its copy at XN_TEAM_CODE + 0x8500 + 0x1EE) left at BN5's 0x4C where the recipe makes it the Navis' 0xAE (caught at t32)"
+  },
+  {
+   "name": "NapalmMan's object's collision offset not moved",
+   "spec": "napalmman_v1_keys",
+   "poke": [
+    "0889B5DC:6EB8"
+   ],
+   "what": "the third kind's 0x33's read of its hit flags (BN5 0x080CB394: ldr r0,[r7,#0x68], its copy at XN_TEAM_CODE + 0x8500 + 0xDC) left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "NapalmMan's object's sprite not renumbered",
+   "spec": "napalmman_v1",
+   "poke": [
+    "0889B54C:221A"
+   ],
+   "what": "the third kind's 0x33's sprite (BN5 0x080CB304: movs r2,#0x1A, list 4's 0x1A, its copy at XN_TEAM_CODE + 0x8500 + 0x4C) left at BN5's number where the recipe makes it list 4's 0xB6, BN5's copied there"
+  },
+  {
+   "name": "NapalmMan's flames' effect not renumbered",
+   "spec": "napalmman_v1",
+   "poke": [
+    "0889BA16:224B"
+   ],
+   "what": "the effect the third kind's 0x38 spawns over a pattern of panels (BN5 0x080CC2A2: movs r2,#0x4B, handed to 0x08018838 in r2, its copy at XN_TEAM_CODE + 0x8800 + 0x216) left at BN5's 0x4B where the recipe makes it the Navis' 0xAD"
+  },
+  {
+   "name": "NapalmMan's overlay's kind not moved",
+   "spec": "napalmman_v1",
+   "poke": [
+    "0889AF04:2404"
+   ],
+   "what": "his companion's overlay kind (BN5 0x0800EE84: movs r4,#4, its copy at XN_TEAM_CODE + 0x7F02 + 2) left at BN5's 4, BN6's another kind, where the recipe makes it his own 33 (XN_KIND_OF)"
   }
  ]
 }

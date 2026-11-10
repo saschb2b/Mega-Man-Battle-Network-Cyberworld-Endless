@@ -44,6 +44,13 @@
   He stands on the board in his own sprite and speaks with his own face,
   at the version the act's band takes. CloudMan is not in yet. A run
   saved on a layer starts that layer again.
+- **NapalmMan, the first of Team ProtoMan.** With BN5 Team Colonel's
+  ROM beside BN6's, Team ProtoMan's NapalmMan now fights in BN6's
+  battle, moved from BN5's own and checked against it frame by frame
+  like Team Colonel's six before him. He doesn't guard a run yet; he
+  joins the guardians once more of his team are in. Their records and
+  Souls already have their room in the saves, and older saves read as
+  before.
 - **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
   battle engine and checked against BN4's own battle frame by frame, now
   enters the tournament's first two rounds on his own plate of BN4's

@@ -43,11 +43,11 @@ SEA_MARKER = dict(
 # The modules, in the order they are laid out at XN_OBJECTS (src/emu/xnavi_recipe.h), each a block of its own
 MODULES = (IMAGE, SEA_MARKER)
 
-# Where the moved copies stand in BN6: XN_OBJECTS (the Navis' code's room, FREE_NAVI_CODE, + 0x100) to XN_OBJECTS_END
+# Where the moved copies stand in BN6: XN_OBJECTS (the Navis' code's room, FREE_NAVI_CODE, + 0x200) to XN_OBJECTS_END
 # (+ 0x2000), each module one block in MODULES' order, each from a 0x100 boundary the same distance from a word's as in
 # BN5. tools/xnavirecipe.py copies them there; a family's or a Navi's code that calls into one is aimed at its copy there
 # (tools/xrecipe.py, tools/xnavirecipe.py), and installed after it (src/emu/xinstall.c, xinstall_core)
-OBJECTS_AT, OBJECTS_END, OBJECTS_STEP = 0x08800000 + 0x590000 + 0x100, 0x08800000 + 0x590000 + 0x2000, 0x100
+OBJECTS_AT, OBJECTS_END, OBJECTS_STEP = 0x08800000 + 0x590000 + 0x200, 0x08800000 + 0x590000 + 0x2000, 0x100
 
 
 def module_places():

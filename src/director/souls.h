@@ -10,6 +10,8 @@
 #include <stdint.h>
 
 #define SOULS 6   /* Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan: BN5's Souls 7-12 */
+#define SOULS_TEAM 6   /* ... and Team ProtoMan's, the other version's: ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy,
+                          BN5's Souls 1-6 (docs/game/team-protoman.md), none held until each is earned from its guardian */
 
 /* A new run's: none, or the dev flag's (--dev souls=MASK, a bit a Soul) */
 void souls_new_run(uint32_t seed);
@@ -28,8 +30,10 @@ unsigned souls_held(void);
  * Soul won on the layer counted from the next */
 void souls_note_layer(void);
 unsigned souls_layer(void);
-/* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older),
- * and his given */
+/* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older,
+ * or guardian_team: Team ProtoMan's, BN5's Souls 1-6, kept apart from Team
+ * Colonel's, so what is handed to BN6's engine and what the finds lean to
+ * stay the six's until their Souls are moved), and his given */
 bool soul_held(int navi);
 void soul_give(int navi);
 /* The dev flag's mask, for a new run's first Souls (devtools) */

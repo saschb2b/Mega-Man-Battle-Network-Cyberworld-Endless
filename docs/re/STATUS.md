@@ -49,6 +49,7 @@ Updated 9 Nov 2026. Written by `tools/re_status.py` from [ledger.json](ledger.js
 - 9 Nov 2026: Ten-bit chip ids live (docs/rom/chips-code.md, Ten-bit chip ids: BN6_CHIP_NAME_OF, BN6_CHIP_DESC_OF, BN6_PACK_MARK_STORE, BN6_PACK_MARK_TEST in bn6_chips.h; docs/engine/saves.md: RUN_MAGIC CWED).
 - 9 Nov 2026: An id from 512 whole to 602 (docs/rom/chips-code.md, The pack past 511: BN6_PACK_EXT_FIRST, BN6_PACK_WIDE_FIRST, BN6_PACK_WIDE_END, BN6_CHIP_NAMES_REF_RESULTS and its five fellows, BN6_CHIP_NAMES_NONE, BN6_CHIP_DESC_READ, BN6_CHAT_NAME_ARCHIVE, BN6_GIVE_CHIPS_LIBRARY, BN6_GIVE_FOLDER_LIBRARY, BN6_REWARD_SPLIT_HP in bn6_chips.h); tools/ram_survey.py (docs/devtools/ram-survey.md).
 - 9 Nov 2026: BN5's Navi chips past nine bits (docs/rom/chips-code.md, new row: 23 addresses of BN5's, BN6's turn read 0x0800A84E and its obstacle refusal 0x0800F486); tools/xchiprecipe.py's STACK_LOADS and PowerDjangoSP.
+- 9 Nov 2026: NapalmMan moved, Team ProtoMan's first (docs/multirom/navis.md, NapalmMan; docs/rom/navis.md, Team ProtoMan's NapalmMan: src/emu/bn5_team_protoman.h's BN5_NAPALM_COMPANION, _COMPANION_END, _HALF_HP_CHIP, _FLAME_SPAWN, _PANEL_FLAMES): napalmman_v1, napalmman_v1_keys and napalmman_sp PASS, five mutations caught; the third kind's 0x00 the Navis' one copy (TYPES), its kinds' rows fixed by the Navis' generator; the comparator reads Team ProtoMan's code room and keys no Navi's code to an object no family spawned.
 
 ## Experiments
 

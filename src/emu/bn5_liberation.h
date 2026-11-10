@@ -373,5 +373,6 @@
 #include "bn5_liberation_cmds.h"    /* the commands: each Navi's, their routines, shapes and rules, both teams' */
 #include "bn5_liberation_rules.h"   /* a liberation battle, the battle a panel's dark chooses, a BonusPanel */
 #include "bn5_darkloids.h"          /* the Darkloids moved into BN6's engine: what their proof and decisions rest on */
+#include "bn5_team_protoman.h"      /* Team ProtoMan moved into BN6's engine: what their proof rests on */
 
 #endif

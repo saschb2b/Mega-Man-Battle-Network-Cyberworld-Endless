@@ -106,6 +106,14 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         _, _, _, top, last = await self.board(c)
         self.assertEqual((top, [e[0] for e in last]), ([], ["Beta", "Alpha"]))
 
+    async def test_a_logs_lines_stand_in_the_order_appended(self):
+        # (each append has a thread of its own: without a turn, any order)
+        for at in range(40):
+            self.server.append("order.jsonl", dict(at=at))
+        await asyncio.gather(*self.server.writes)
+        lines = (Path(self.dir.name) / "order.jsonl").read_text().splitlines()
+        self.assertEqual([json.loads(line)["at"] for line in lines], list(range(40)))
+
     async def test_implausible_dives_are_refused(self):
         a, seed, number = await self.connect("Alpha")
         await self.board(a)

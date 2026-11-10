@@ -17,7 +17,8 @@
 
 /* CloudMan (AI 15, ids 0x155-0x158): his decisions (docs/multirom/navis.md, The Darkloids) */
 #define BN5_CLOUD_FIND_37    0x080CBFBCu /* the third kind's objects of type 0x37 (his clouds) on side r1 but slot r2: r0 the list (each
-                                            object's address less 0x10), returned their count; reads BN5_T3_OBJECTS - 0x10 (0x0203CA30) */
+                                            object's address less 0x10), returned their count; reads BN5_T3_OBJECTS - 0x10 (0x0203CA30): in
+                                            BN6's engine the Navis' stub XN_STUB_CLOUDS (src/emu/xnavi_room.c) */
 #define BN5_CLOUD_PANEL      0x080CBEF6u /* a new cloud's panel, away from his others' (BN5_CLOUD_FIND_37's list) */
 #define BN5_CLOUD_KINDS_0B   0x080CBD78u /* the kinds of the third kind's 0x0B his code spawns by his object's +4: 2, 3, 4, 5 (the
                                             records at 0x080C5DF4, whose rows xchiprecipe.py's TABLE_SPRITES gives BN6's sprites) */

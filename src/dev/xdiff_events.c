@@ -74,6 +74,8 @@ typedef struct { uint32_t t, key, word, which; bool setup; } Draw;
 /* a key's draws in the frame replayed so far */
 typedef struct { uint32_t key, which; int n; } Keyed;
 
+#define ENGINE_OBJS_MAX 64   /* (the battle's objects at once: T1, T3 and T4 slots past what a fight holds) */
+
 struct XdLog {
 	const Game *g;
 	int game;
@@ -102,6 +104,8 @@ struct XdLog {
 	                                replayed (the subject's), the k-th of a key in the whole setup the reference's k-th */
 	Keyed setup_keys[KEYS_MAX];  /* ... the subject's setup draws of each key met so far */
 	int nsetup_keys;
+	uint32_t engines[ENGINE_OBJS_MAX];   /* objects whose spawn was none of the family's (megamans_objects), their places */
+	int nengines;
 	Keyed setup_skips[XD_SETUP_SKIPS];   /* (xd_replay_setup_skip) each key's reference's first n setup draws, without a twin */
 	int nsetup_skips;
 };
@@ -129,6 +133,15 @@ static uint32_t family_of(const XdLog *log, uint32_t a) {
 	return 0;
 }
 
+/* whether a family address (its BN5 address) lies in a moved Navi's code the log watches (xn_code_at), not a family's or a
+ * chip's */
+static bool navi_key(const XdLog *log, uint32_t a) {
+	a &= ~1u;
+	for (int i = 0; i < log->nfam; ++i)
+		if (a >= log->fam[i].from && a < log->fam[i].from + log->fam[i].len) return xn_code_at(log->fam[i].to);
+	return false;
+}
+
 /* a word that is a return address: after a BL (bit 0 set), or after
  * mov lr,pc; bx rN (bit 0 clear) */
 static bool return_address(uint32_t w) {
@@ -154,8 +167,26 @@ static void callers(const XdLog *log, XdEvent *e, uint32_t ret, uint32_t sp) {
 
 /* MegaMan, the first kind's first object, runs no family's or Navi's own code: an event while he runs that an engine
  * routine a Navi's copy holds led to (BN5's engine runs it for him too: the buster's arm, 0x080EBBA6) is not the family's */
+/* ... nor where an object no family's code spawned runs a type a Navi's copy holds that both engines run of their own (his
+ * buster's hit, the third kind's 0x00, which NapalmMan's copy holds and BN6's engine runs as its own type 0: navi_key), its
+ * draws too */
+static void megamans_objects(const XdLog *log, XdEvent *e, uint32_t running_now) {
+	if (!running_now || running_now == log->g->t1 || !e->family || !navi_key(log, e->family)) return;
+	for (int i = 0; i < log->nengines; ++i)
+		if (log->engines[i] == running_now) { e->family = 0; return; }
+}
+
+/* an object spawned: kept among the engine's where no family's code spawned it (megamans_objects) */
+static void spawned_by(XdLog *log, uint32_t object, bool family) {
+	int i = 0;
+	while (i < log->nengines && log->engines[i] != object) ++i;
+	if (i < log->nengines && family) log->engines[i] = log->engines[--log->nengines];
+	else if (i == log->nengines && !family && log->nengines < ENGINE_OBJS_MAX) log->engines[log->nengines++] = object;
+}
+
 static void megamans(const XdLog *log, XdEvent *e, uint32_t running_now) {
 	if (running_now == log->g->t1) e->family = 0;
+	megamans_objects(log, e, running_now);
 }
 
 /* the object the runner runs now (0 none) */
@@ -290,6 +321,7 @@ static HookAct on_draw(HookRegs *r, void *user) {
 	uint32_t which = (uint32_t)sub >> 1;
 	callers(log, e, r->lr, r->sp);
 	e->object = running(log);
+	megamans_objects(log, e, e->object);
 	e->a = e->b = hook_read32(log->g->rng[which]);
 	if (log->seeded && log->ref) replay(log, e, which);
 	else if (log->seeded) keep(log, e, which);
@@ -325,6 +357,7 @@ static HookAct on_spawned(HookRegs *r, void *user) {
 	XdLog *log = user;
 	if (!log->pending) return HOOK_CONTINUE;
 	log->pending = false;
+	spawned_by(log, r->r[5], log->spawning.family != 0 || log->spawning.sub == 1);   /* (the first kind's: Navis, his own) */
 	XdEvent *e = add(log, XD_SPAWN, 0);
 	if (e) {
 		uint16_t flags = e->flags;

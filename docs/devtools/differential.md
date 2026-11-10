@@ -762,6 +762,22 @@ families pushed the count past it, the last ranges installed (in that run
 moved) dropped out of the traces with only a line on stderr, which
 `--quiet` hides. `test_xvirus_moved` in `tests/test_core.c` holds 3000.
 
+A BN5 address is read as moved code by the rooms the comparator knows
+(`tools/xdiff_snap.py`: `XV_CODE`, `XN_ROOM`, `XC_CODE`, `XN_BN4_ROOM`,
+and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
+`FREE_TEAM_NAVI_ART`): a word of BN5's naming its own copied code (the
+fourth kind's 0x12's +0x34, NapalmMan's data) is read as BN6's word naming
+the copy only where the copy's room is one of them.
+
+A Navi's copy of a type both engines also run of their own (the third
+kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed
+as his code in BN5's trace by its BN5 addresses, so the hit's draws and
+spawns there would read as his where BN6's own type 0 runs them. An
+object no family's code spawned (its spawn's family none, the first kind's
+aside) runs no Navi's code as the family's (`src/dev/xdiff_events.c`,
+`megamans_objects`, its draws too): both games then key those events by
+their callers, through the twins (`napalmman_v1_keys` at t217).
+
 ## The BN4 trace
 
 ```bash
