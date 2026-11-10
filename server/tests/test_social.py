@@ -33,6 +33,13 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         self.clients.append(client)
         return client, await client.open(self.port, name, **options)
 
+    async def peers(self, client, count):
+        """A SNAPSHOT that shows `count` others in the client's channel. One
+        sent at a tick before the last change may still be on its way, so
+        they are read until one does (receive() gives up after two seconds)."""
+        while (await client.message(protocol.SPEC["snapshot"]))[1] != count:
+            pass
+
     async def test_stable_private_identity_across_reconnects(self):
         key = bytes(range(16))
         first, welcome = await self.connect(key=key)
@@ -54,15 +61,14 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         third, third_welcome = await self.connect("Three")
         self.assertEqual(struct.unpack("!H", welcome[12:14])[0], 1)
         self.assertEqual(struct.unpack("!H", third_welcome[12:14])[0], 2)
-        self.assertEqual((await first.message(protocol.SPEC["snapshot"]))[1], 1)
-        self.assertEqual((await third.message(protocol.SPEC["snapshot"]))[1], 0)
+        await self.peers(first, 1)
+        await self.peers(third, 0)
         await third.send(struct.pack("!BH", protocol.SPEC["channel"], 1))
         self.assertEqual((await third.message(protocol.SPEC["notice"]))[1:3], b"\x00\x0a")
         await second.send(struct.pack("!BH", protocol.SPEC["channel"], 2))
         changed = await second.message(protocol.SPEC["welcome"])
         self.assertEqual(struct.unpack("!H", changed[12:14])[0], 2)
-        await asyncio.sleep(0.06)
-        self.assertEqual((await third.message(protocol.SPEC["snapshot"]))[1], 1)
+        await self.peers(third, 1)
 
     async def test_inspect_only_public_profile_in_same_channel(self):
         first, welcome = await self.connect()

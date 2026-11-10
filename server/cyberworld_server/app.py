@@ -82,6 +82,7 @@ class Server:
         self.roster_task = None
         self.roster_failed = False
         self.writes = set()         # the logs' appends in threads (trades, the Board), for shutdown
+        self.write_turn = asyncio.Lock()    # one append at a time, in the order they were made
         self.listener = self.ticker = None
         self.trading, self.arena_on = trading, arena
         self.trades, self.arena = Trades(self), Arena(self)
@@ -442,10 +443,17 @@ class Server:
 
     def append(self, name, entry):
         """An entry appended to a log of the state directory, in a thread;
-        close() waits for it."""
-        task = asyncio.create_task(asyncio.to_thread(append_log, self.store.directory, name, entry))
+        close() waits for it. A log's lines stand in the order they were
+        appended, whichever thread takes each."""
+        task = asyncio.create_task(self.write(name, entry))
         self.writes.add(task)
         task.add_done_callback(self.appended)
+
+    async def write(self, name, entry):
+        # (tasks start in the order they were made and the lock is taken in
+        # the order it was asked for: two threads at once wrote in either order)
+        async with self.write_turn:
+            await asyncio.to_thread(append_log, self.store.directory, name, entry)
 
     def appended(self, task):
         self.writes.discard(task)
