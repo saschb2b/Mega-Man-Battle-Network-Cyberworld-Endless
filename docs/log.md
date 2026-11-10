@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-11
+* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
+
 ## 2026-11-10
 * **Update**: rom/bn4.md (Barriers and auras, new row: the setters and kinds' tables of BN4 and BN6; LifeAura's kind is LifeAur's by their rows) and multirom/bn4-chips.md (call 5).
 * **Update**: game/meta/darkchips.md (the owner's call: BN4's dark chips at the same 20 max HP), multirom/bn4-chips.md (calls 4 and 5: the dark chips' cost, LifeAura one chip with LifeAur, id 530 retired), game/meta/library.md (BN4's page's counts), multirom/chip-registry.md and multirom/gaps.md (193 rows).
