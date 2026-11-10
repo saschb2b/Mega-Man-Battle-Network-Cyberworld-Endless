@@ -90,6 +90,9 @@
 #define BN6_COLL_PANEL_X      0x0A        /* the panel it stands on: its column, */
 #define BN6_COLL_PANEL_Y      0x0B        /* ... and its row */
 #define BN6_COLL_HIT          0x0F        /* the hit's bits (3: struck): BN5 ORs them into its +0x18 and +0x19 too, which it ORs here, BN6 here alone */
+#define BN6_STRUCK_PUSHED     0x0801AC06u /* ... the struck pass of the first kind, r4 those bits: a push bit (0x3C) with bit 0x40 gives the status
+                                           * 0x100 and clears the flinch's 4 (to 0x0801AC2E), one without it the push alone's 0x10 (0x0801AC32-0x0801AC44);
+                                           * each stores the step's kind 1 at the object's +0x0F. BN4_STRUCK_PUSHED: bit 0x01 where BN6 reads 0x40 */
 #define BN6_COLL_DAMAGE       0x2E        /* u16, an attack's damage, what each of its hits deals (BN5's +0x2E too) */
 /* (BN6_COLL_FLAGS, bn6.h's, its object's flags as bn6f's object_getFlag reads them, 0x0801A166: poison spares 0x08000028,
  * lava 0x20 and 0x88000206, its damage 9) */

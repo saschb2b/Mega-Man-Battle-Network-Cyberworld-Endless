@@ -98,6 +98,7 @@ DOMAINS = {
     'online_text': ('Net Square', 'Screen', 'screen'),
     'netpass_text': ('The NetPass', 'Screen', 'screen'),
     'liberation_pick_text': ('Other', 'Screen', 'screen'),
+    'reward_pick_text': ('Layers: rewards', 'Screen', 'screen'),
     'trade_words': ('Trade Central', 'MegaMan', 'speech'),
     'trade_screen_text': ('Trade Central', 'Screen', 'screen'),
     'reconnect_text': ('Net Square', 'Screen', 'screen'),
