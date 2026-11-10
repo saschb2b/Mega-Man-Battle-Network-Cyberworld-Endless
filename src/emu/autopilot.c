@@ -571,6 +571,9 @@ static bool route_wanted(void) {
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	/* (a liberation's board, docs/game/liberation/: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
+	/* (a reward pick's screen: its first row taken, as the chat box's
+	 * options were, A after a rest, as its keys want: reward_pick_state.h) */
+	if (director_pick_shown()) { *keys = frame % 32 < 2 ? KEY_A : 0; return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
 		if (k < 0 && route_wanted()) k = director_route_portal();

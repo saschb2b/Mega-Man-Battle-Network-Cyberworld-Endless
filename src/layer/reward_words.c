@@ -7,9 +7,21 @@
 
 #include "data.h"
 #include "navicust.h"
+#include "reward_pick.h"
 #include "script_kit.h"
 
-static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
+static int pick_three(TextArchive *t, int kind, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words);
+
+/* The pick's screen asked for (reward_pick.h): its kind's flags, then the
+ * one that asks, and the script's end, the chat box closed before it
+ * opens over the game; `o` the offer it shows */
+static void pick_open(TextArchive *t, int kind, const PickOffer *o) {
+	reward_pick_offer(kind, o);
+	for (int b = 0; b < REWARD_KIND_BITS; ++b)
+		if (kind & 1 << b) ta_flag_set(t, REWARD_KIND_FLAG + b);
+	ta_flag_set(t, REWARD_PICK_FLAG);
+	ta_end(t);
+}
 
 /* the draft's branches: a program given, or BugFrags for none; each sets
  * `taken_flag` and ends, or goes on to the way on (`next`). What was got
@@ -33,46 +45,25 @@ static int draft_take(TextArchive *t, int program, int color, int taken_flag, in
 	return s;
 }
 
-/* The draft: one box, the BugFrags of none in it, then the programs in a
- * column with their colours and the copies held (ts_option: its number
- * and those above and below it), each to its branch (`take`), B to
- * `skip`. Its script. A box each said what BN6's programs do: seventeen
- * boxes from the data to the pick, which the owner found far too many
- * (6 October 2026). */
-static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
-	int s = ta_script(t), n = draft->n;
-	char lead[96];
+/* The draft: MegaMan's line, then its screen (reward_pick.h): the
+ * programs, a row each, and the BugFrags of none under them, each to its
+ * branch (`take`, `skip`). Its script. A box each said what BN6's
+ * programs do: seventeen boxes from the data to the pick, which the owner
+ * found far too many (6 October 2026); then a name a line in the chat
+ * box, with its colour and the copies held, until the screen (the
+ * owner's call, 10 November 2026: room for each program's shape and what
+ * it does). */
+static int draft_open(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
+	int s = ta_script(t);
 	/* (the install said here, every draft: a returning playtester, told
 	 * once runs before, left one off the board for two acts; L names one
 	 * still off it after, briefing_words.c; which Spin turns it, and L and
 	 * R, are BN6's own, unsaid: the voice sweep, docs/voice/sweep/net.md) */
-	snprintf(lead, sizeof lead, "Program data! Let's\ninstall one! Or B\nfor %d BugFrags!", draft->skip_frags);
-	ta_page(t, FACE_MEGAMAN, lead, false);
-	ta_mugshot(t, FACE_MEGAMAN);
-	ta_clear(t);
-	static const uint8_t around[3][3] = { { 0x00 }, { 0x11, 0x00 }, { 0x21, 0x02, 0x10 } };
-	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	for (int k = 0; k < n; ++k) {
-		uint8_t opt[] = { 0xEB, 0x00, (uint8_t)(k * 0x11), around[n - 1][k] };
-		ta_bytes(t, opt, sizeof opt);
-		ta_bytes(t, space, sizeof space);
-		ta_program_name(t, draft->program[k]);
-		/* (its colour beside it: a program comes in more than one, and a
-		 * playtester read the draft's pink HP+100 and the vendor's blue one
-		 * as a contradiction) */
-		const char *c = navicust_color_name(draft->color[k]);
-		if (*c) { ta_text(t, " ("); ta_text(t, c); ta_text(t, ")"); }
-		/* (and how many MegaMan holds of it, where he does: a player
-		 * picked an UnderSht beside the one they had, more than once; one
-		 * that would add nothing is not offered, navicust.c) */
-		if (draft->held[k]) {
-			char held[16];
-			snprintf(held, sizeof held, " Held %d", draft->held[k]);
-			ta_text(t, held);
-		}
-		if (k + 1 < n) ta_text(t, "\n");
-	}
-	ta_choose(t, take, n, skip);
+	ta_page(t, FACE_MEGAMAN, "Program data! Let's\ninstall one!", false);
+	PickOffer o = { .n = (uint8_t)draft->n, .skip = (int16_t)skip, .frags = (int16_t)draft->skip_frags };
+	for (int k = 0; k < draft->n && k < PICK_MOST; ++k)
+		o.c[k] = (PickChoice){ .what = PICK_PROGRAM, .id = (uint16_t)(draft->program[k] / 4), .code = draft->color[k], .held = draft->held[k], .script = (int16_t)take[k] };
+	pick_open(t, PICK_DRAFT, &o);
 	return s;
 }
 
@@ -82,7 +73,8 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	ta_bytes(t, give, sizeof give);
 	char line[96];
 	snprintf(line, sizeof line, "Traveling light!\nThe data broke into\n%d BugFrags!", frags);
-	ta_page(t, FACE_MEGAMAN, line, false);
+	/* (the box opened again: the pick's screen closed it) */
+	ta_page(t, FACE_MEGAMAN, line, true);
 	ta_flag_set(t, taken_flag);
 	ta_end_or(t, next);
 	return s;
@@ -149,7 +141,7 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	int take[3] = { 0 }, n = r->draft ? r->draft->n : 0, menu = -1;
 	for (int k = 0; k < n; ++k)
 		take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->taken_flag, next);
-	if (n) menu = draft_menu(t, r->draft, take, draft_skip(t, r->draft->skip_frags, r->taken_flag, next));
+	if (n) menu = draft_open(t, r->draft, take, draft_skip(t, r->draft->skip_frags, r->taken_flag, next));
 	int i = ta_script(t);
 	bool first = true;
 	/* (BN6's own "MegaMan got:" boxes lead, and its own rules go unsaid:
@@ -224,66 +216,42 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 		return ta_say(t, FACE_MEGAMAN, s);
 	}
 	snprintf(s, sizeof s, "Our Library of %d opens the lock!|Three rare chips inside!|We can take one,Lan.", have);
-	return pick_three(t, flag, v, s, "Take", "The vault's open,Lan.|We took our pick.", "Let's leave them for now.|The vault will keep.");
+	return pick_three(t, PICK_VAULT, flag, v, s, "The vault's open,Lan.|We took our pick.", "Let's leave them for now.|The vault will keep.");
 }
 
 int ta_server_pick(TextArchive *t, int taken_flag, const ScriptsVault *v) {
-	return pick_three(t, taken_flag, v, "Look,Lan! The signal left chips!|We can take one!", "Take", "The signal's quiet now,Lan.",
+	return pick_three(t, PICK_SERVER, taken_flag, v, "Look,Lan! The signal left chips!|We can take one!", "The signal's quiet now,Lan.",
 		"Let's leave them for now.|We can come back!");
 }
 
 int ta_copy_pick(TextArchive *t, int taken_flag, const ScriptsVault *v) {
-	return pick_three(t, taken_flag, v, "It's gone... The layer's back to normal.|And it left its data! We can take one!", "Take",
+	return pick_three(t, PICK_COPY, taken_flag, v, "It's gone... The layer's back to normal.|And it left its data! We can take one!",
 		"It's quiet here now,Lan.", "Let's leave them for now.|We can come back!");
 }
 
 /* Three chips, one to take (event flag `flag` set as it is, after which
- * `empty` is said instead); B leaves them (`leave`): a vault's, an official
- * gate's. A pick is asked once more, "`verb` TrplShot J?", on No, which
- * comes back to the three: a playtester's A pressed through the words
- * before them took the first, for good (session 55). */
-static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words) {
-	char s[240];
+ * `empty` is said instead), on the pick's screen (reward_pick.h), which
+ * shows each one's card; B leaves them (`leave`). A pick on the chat box
+ * asked once more ("Take TrplShot J?") on a playtester's A pressed
+ * through the words before it, which took the first for good (session
+ * 55): the screen's keys rest as it opens instead (reward_pick_state.h). */
+static int pick_three(TextArchive *t, int kind, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words) {
 	int empty = ta_say(t, FACE_MEGAMAN, empty_words);
-	int leave = ta_say(t, FACE_MEGAMAN, leave_words);
-	int take[3], menu = t->n + 3;   /* (the three's script, after the picks') */
+	PickOffer o = { .n = 3, .skip = (int16_t)ta_say(t, FACE_MEGAMAN, leave_words) };
 	for (int k = 0; k < 3; ++k) {
-		take[k] = ta_script(t);
-		/* (what it does first, in BN6's own words: R showed nothing in the
-		 * list, and two playtesters picked by the names alone) */
-		chip_desc_line(s, sizeof s, v->name[k], v->code[k], v->desc[k]);
-		if (s[0]) ta_page(t, FACE_MEGAMAN, s, false);
-		snprintf(s, sizeof s, "%s %s %c?\nWe only get one!\n", verb, v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
-		ta_ask_in(t, FACE_MEGAMAN, s, menu, true, true);
-		bool first = false;
+		o.c[k] = (PickChoice){ .what = PICK_CHIP, .id = (uint16_t)v->chip[k], .code = (uint8_t)v->code[k], .script = (int16_t)ta_script(t) };
+		bool first = true;
 		ta_give_chip(t, v->chip[k], v->code[k], 1);
 		ta_got_chip(t, v->name[k], v->code[k], &first);
 		ta_flag_set(t, flag);
 		ta_end(t);
 	}
-	ta_script(t);
-	ta_mugshot(t, FACE_MEGAMAN);
-	ta_clear(t);
-	/* three in a column, as the draft's; B leaves them */
-	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
-	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	/* (each with what it hits for, as BN6's chip lists show it: a
-	 * playtester picked his official Chip Order by the names alone) */
-	for (int k = 0; k < 3; ++k) {
-		ta_bytes(t, opt[k], 4);
-		ta_bytes(t, space, sizeof space);
-		int n = snprintf(s, sizeof s, "%s %c", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
-		if (v->power[k] > 0) n += snprintf(s + n, sizeof s - (size_t)n, " %d", v->power[k]);
-		snprintf(s + n, sizeof s - (size_t)n, "%s", k < 2 ? "\n" : "");
-		ta_text(t, s);
-	}
-	ta_choose(t, take, 3, leave);
 	int i = ta_script(t);
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)empty, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, done, sizeof done);
 	bool first = true;
 	ta_pages(t, open, FACE_MEGAMAN, &first);
-	ta_jump(t, menu);
+	pick_open(t, kind, &o);
 	return i;
 }
 
@@ -291,7 +259,7 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, boo
 	char s[300];
 	snprintf(s, sizeof s, level >= 2 ? "Chaud's full clearance opens it!|The official vault,Lan!|Three Mega chips. We can take one."
 		: "Chaud's first clearance opens it!|An official Chip Order,Lan!|Chips we've held,delivered!|We can order one.");
-	int open = pick_three(t, flag, v, s, level >= 2 ? "Take" : "Order", "The gate's open,Lan.|We took our pick.", "Let's leave them for now.|The gate will keep.");
+	int open = pick_three(t, level >= 2 ? PICK_OFFICIAL : PICK_ORDER, flag, v, s, "The gate's open,Lan.|We took our pick.", "Let's leave them for now.|The gate will keep.");
 	/* sealed until `open_flag`, which the director sets where Chaud's
 	 * clearance reaches the gate's level, as the layer begins or as a duel
 	 * on it is won (a gate beside the duel opens at once): the telegraph
@@ -316,7 +284,6 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, boo
 
 int ta_gift(TextArchive *t, const ScriptsGift *g) {
 	/* what each choice gives, then the flag that it was chosen */
-	char line[64];
 	int thanks = ta_say(t, FACE_PROG, "GOOD LUCK,MEGAMAN!|DIVE AS DEEP AS YOU CAN!");
 	int hp = ta_script(t);
 	bool first = true;
@@ -369,40 +336,16 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 		ta_give_hp_memory(t, 1);
 		ta_got_hp(t, 1, &first);
 	}
-	if (!g->brief) ta_page(t, FACE_PROG, "NOW PICK ONE!\nHPMEMORY,A CHIP,OR\nA NAVICUST PROGRAM!", false);
+	if (!g->brief) ta_page(t, FACE_PROG, "NOW PICK ONE!", false);
 	else if (extras) ta_page(t, FACE_PROG, "NOW,PICK YOUR GIFT!", false);
-	/* what the chip and the program do, before the choice */
-	{
-		char said[160];
-		if (g->power > 0 && chip_def(g->chip)->kind == CK_RECOVER) snprintf(said, sizeof said, "THE CHIP'S %s! IT HEALS %d HP!", g->chip_name, g->power);
-		else if (g->power > 0) snprintf(said, sizeof said, "THE CHIP'S %s! IT HITS FOR %d!", g->chip_name, g->power);
-		else snprintf(said, sizeof said, "THE CHIP'S %s!", g->chip_name);
-		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
-		ta_page(t, FACE_PROG, said, false);
-		if (g->about) ta_page(t, FACE_PROG, g->about, false);
-	}
-	ta_mugshot(t, FACE_PROG);
-	ta_clear(t);
-	/* half a second before the options (an A pressed through the last page
-	 * chose the first of them, unread) */
-	static const uint8_t pause[] = { 0xEE, 0x00, 30, 0 };   /* ts_wait */
-	ta_bytes(t, pause, sizeof pause);
-	/* three options in a column (ts_option: left/right stay, up/down move) */
-	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
-	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	ta_bytes(t, opt[0], 4);
-	ta_bytes(t, space, sizeof space);
-	ta_text(t, "HPMemory x2\n");
-	ta_bytes(t, opt[1], 4);
-	ta_bytes(t, space, sizeof space);
-	snprintf(line, sizeof line, "%s %c\n", g->chip_name, g->code == 26 ? '*' : 'A' + g->code);
-	ta_text(t, line);
-	ta_bytes(t, opt[2], 4);
-	ta_bytes(t, space, sizeof space);
-	ta_program_name(t, g->program);
-	/* ts_select: clear, B does nothing, a script per option */
-	uint8_t select[] = { 0xED, 0x07, 0xC0, (uint8_t)hp, (uint8_t)chipped, (uint8_t)programmed, 0xFF };
-	ta_bytes(t, select, sizeof select);
-	ta_end(t);
+	/* the three on the pick's screen (reward_pick.h), each one's card
+	 * saying what the chip hits for and what the program does, where two
+	 * of Mr.Prog's boxes said them before the chat box's options; B waits
+	 * for a pick */
+	PickOffer o = { .n = 3, .skip = PICK_B_NOTHING };
+	o.c[0] = (PickChoice){ .what = PICK_HP, .id = 2, .script = (int16_t)hp };
+	o.c[1] = (PickChoice){ .what = PICK_CHIP, .id = (uint16_t)g->chip, .code = (uint8_t)g->code, .script = (int16_t)chipped };
+	o.c[2] = (PickChoice){ .what = PICK_PROGRAM, .id = (uint16_t)(g->program / 4), .code = (uint8_t)g->color, .script = (int16_t)programmed };
+	pick_open(t, PICK_GIFT, &o);
 	return i;
 }
