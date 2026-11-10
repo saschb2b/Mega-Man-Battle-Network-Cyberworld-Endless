@@ -169,5 +169,15 @@ void look_text_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade, 
  * (6), LOOK_LINE apart: the y under them */
 #define LOOK_LINE 13
 int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade);
+/* ... how many lines `s` takes so, none drawn and none left off */
+int look_wrapped_lines(const char *s, int w);
+/* ... `most` of them from line `skip` on, the first at (x, y), `w` wide,
+ * in `c` with `shade` under them: a text longer than its box, scrolled
+ * as BN6's chat box scrolls its lines */
+typedef struct {
+	int x, y, w, skip, most;
+	SDL_Color c, shade;
+} LookLines;
+void look_wrapped_from(const char *s, const LookLines *at);
 
 #endif

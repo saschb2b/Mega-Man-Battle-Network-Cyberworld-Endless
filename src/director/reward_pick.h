@@ -13,6 +13,7 @@
 #define CW_REWARD_PICK_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* the picks: the screen each opens takes its name (reward_pick_text.c) */
@@ -52,5 +53,13 @@ typedef struct {
  * screen's course, picture and keys go through director.h
  * (director_pick_*), which the game's scene calls */
 void reward_pick_offer(int kind, const PickOffer *o);
+/* What the information box says of a chip (its description, BN6's or its
+ * own game's) or a program (what it does, MegaMan's words of the NaviCust)
+ * of id `id` (PICK_CHIP, PICK_PROGRAM), into `out`; the lines it takes in
+ * the box; the lines the box holds whole (reward_pick_draw.c; the dev
+ * tool --pick-fit holds every text to them, docs/game/reward-pick.md) */
+void reward_pick_info_text(int what, int id, char *out, size_t n);
+int reward_pick_info_lines(const char *s);
+int reward_pick_info_room(void);
 
 #endif
