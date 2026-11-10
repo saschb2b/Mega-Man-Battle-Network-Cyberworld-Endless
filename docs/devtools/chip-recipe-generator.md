@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
 ---
 
 # The chip recipe generator
@@ -195,15 +195,17 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   no twin of is moved with it, its region a block, its spawn through the
   second-level dispatch at a number of the chips' own: the fourth kind's
   from 0x91 (past BN5's 145 types, below the families' and Navis' 0xE0),
-  the third kind's from a list of numbers no BN5 track names (`TYPES3`;
-  the range past BN5's 204 is nearly spent). No other recipe may name a
+  the third kind's from a list of numbers no recipe names (`TYPES3`: the
+  few past BN5's 204 first, then 79 of BN5's own numbers that no BN5
+  track moved or paired, found by a scan of every recipe's rows). No other recipe may name a
   number it takes (`numbers_clear`).
 - **Its copies.** A kinds' table an object reads out of its region
   (`TABLES`: the star's) is a block of the unit, each spawned kind's
   sprite copied (list 3 from 0x70 up), its
   byte in the copy set. An effect BN6 draws otherwise is moved to an id
   of the chips' (0xCF down to 0xB0) with its sprite (list 5's 0xEF down,
-  list 4's 0x9F down). A type spawned through a wrapper of its code is
+  list 4's 0x9F down). A sprite of list 1, the viruses' list, takes a
+  number from 0x7F down to 0x40 (MokoRus's Moko the first). A type spawned through a wrapper of its code is
   moved as one spawned outright (`moved3`).
 - **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
   collision data's offsets, a panel's type and side after `getPanel`, a
@@ -236,5 +238,22 @@ other a row of the units' table that shares its code (`XChipUnit.share`),
 its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
-0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA) and Boomer (misc 2); MokoRus
-and SidBmbo are next.
+0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
+MokoRus (misc 1); SidBmbo is next.
+
+Several sessions add units side by side, so what a unit is given follows
+one rule. `UNITS` is append-only, one unit a line: a unit's home, its
+dispatch numbers, its effects' ids and its sprites' list numbers follow
+its place there, so the branch merged first keeps its places, the
+other's units go after and the file is written again, never joined by
+hand. A sound's slot is the one number given out by name (`SOUND_SLOTS`,
+`XSOUNDS`, the differential's sound rows), so each session takes its
+slots from a range of its own, listed above `SOUND_SLOTS`. A mutation
+pokes BN4's address or a registry record, never a home's address, which
+moves with the units before it.
+
+An immediate that names a meaning the engines keep in different bits is
+an `IMMS` row like an offset's: MokoRus's hit's bits, struck and pushed
+back, are 0x21 in BN4 and 0x61 in BN6 (`BN4_STRUCK_PUSHED`,
+`BN6_STRUCK_PUSHED`), found by the differential at the hit's frame, the
+struck virus going on with its attack in BN6's.
