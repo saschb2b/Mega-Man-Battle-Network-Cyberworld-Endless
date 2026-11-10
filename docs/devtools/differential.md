@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T01:40:19Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -46,9 +46,29 @@ picture for a BN4 reference until this). `bn4_chip_cannon_broken` is
 its check: the second run is given no folder and must part as the chip
 is used (t32). It was added after the control had first been merged with
 `tools/xdiff_bn4.py` passing neither `folder4` nor `cust4`: the control
-then fought BN4's own folder twice and passed all the same. Against BN6's Cannon the two
-battles part at t32, MegaMan's action and his attack's variables numbered
-otherwise in BN4: his maps are the comparator's next piece.
+then fought BN4's own folder twice and passed all the same. `karma4=` sets MegaMan's
+karma in his NaviStats before the battle copies them (`BN4_NAVI_KARMA`):
+BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
+[BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
+chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
+same, and `bn4_chip_hole_light` is its check, the second battle at 600,
+where the dud plays. A BN4 spec takes `film` as BN5's do.
+
+Against BN6 a chip's spec says `"subject": "megaman"`: a difference of
+MegaMan's or the world's no rule explains fails it, as in the BN5
+differential. `tools/xdiff_bn4.py` reads his numbers as BN6's: his
+CurAction by the families both games pair (`PLAYER_FAMILY`), the chip's
+id where his attack and a support chip's object keep it (`legit.json`'s
+`bn4` `chip_id`: the registry's rows, then the pairs the spec's folders
+name), and his attack's subfamily by the two chips' records. What BN6
+alone has is allowed by name, each from both games' code: its count of
+chips held, its attack's entry number, the frame its support run holds
+him after the chip's routine (BN4 ends the attack in the routine's
+frame), a support object's spawn's leftover r3. Three specs record
+where a chip parts today, each with its verdict and why:
+`bn4_chip_cannon` (t33), `bn4_chip_timebomb` (t32) and
+`bn4_chip_areagrab` (t34). None passes yet, so no chip rests on these
+rules; a rule added here is tried again by the first that does.
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and

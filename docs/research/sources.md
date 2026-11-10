@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T01:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
 ---
 
 # Sources
@@ -346,6 +346,13 @@ Advance list), against the ROM:
   and SearchMan; Blue Moon's six are fought in Red Sun's tournaments
   too*: partly verified, all eighteen Navis and twelve Souls are named in
   Red Sun's enemy and chip names; who fights where is assumed.
+- *Evil chips work only for a dark MegaMan, and a dark MegaMan cannot
+  use the light ones*: verified in the ROM (docs/rom/bn4.md, A chip's
+  alignment and MegaMan's karma: the record's +0x15 against the karma at
+  470, the dud otherwise; 63 light records, 31 dark) and by play
+  (`bn4_chip_hole_control`, `bn4_chip_hole_light`). *A DS Navi chip needs
+  a Hole panel on the field*: assumed, not yet read (Hole's panel is
+  made, seen by film; what reads it is unit 6's to find).
 - *22 virus families, 17 of them in neither BN5 nor BN6*: verified by
   name against the three ROMs' enemy names.
 - *Net areas ACDC 3, Town 4, Park 3, four countries 1 each, Undernet 6,
