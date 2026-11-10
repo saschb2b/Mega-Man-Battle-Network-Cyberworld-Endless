@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T02:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -86,6 +86,23 @@ frame, as BN6's field update writes them. Its three mutations break
 BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
 specs record where a chip parts, each with its verdict and why:
 `bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
+
+A support chip's object is read by one rule (`legit.json`'s `bn4`
+`support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
+support subfamily's routine is a spawner of one shape in both games,
+reached by `bx r3`, so the object's +4, +0x2C, +0x30 and +0x3C hold the
+attack's parameters, its power word, the chip and the spawner's own
+address. The tool finds the type's spawner in each game's table and
+walks the type's routines for a load of +0x3C at every run, and only
+then reads BN4's copies as BN6's; a type it cannot show so is compared
+as it is. For a chip both games name, which a run plays as BN6's, the
+copies of its record are read as BN6's record's (`chip_id`'s `record`):
+the two records hold other parameters for one chip. `bn4_chip_panlgrab`
+and `bn4_chip_antinavi` are the controls (AntiNavi's trap is set and
+never sprung there). `bn4_chip_lifeaura` records where the aura stands
+(t34): the harness places BN4's barrier fields in BN6's layout
+(`xdiff_bn4_trace.c`), and the kind's number, where MegaMan keeps the
+aura's object, and that object, each game's own code, are open.
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and

@@ -278,6 +278,7 @@ XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-
 XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
+XC4_FIRST_SUPPORT = 0x80   # (src/emu/xchips_bn4.h: a moved BN4 unit's number in BN6's grown support routines, less BN4's subfamily)
 
 
 def chip_ids(spec):
@@ -318,8 +319,89 @@ def megaman_chip_as_bn6(ai, canon):
         for sat in rule['subfamily'] if sub is not None else ():
             if ai[sat] == own:
                 ai[sat] = sub
+        # (a chip both games name, BN6's own in a run: what the use copies of its record, where BN4's is its record's, as BN6's)
+        r4, r6 = CHIP_RECORDS[4] + chip * CHIP_RECORD_SIZE, CHIP_RECORDS[6] + to * CHIP_RECORD_SIZE
+        for aat, rat, n in rule.get('record', ()) if to < BN6_CHIPS else ():
+            if ai[aat:aat + n] == roms[4][r4 + rat:r4 + rat + n]:
+                ai[aat:aat + n] = roms[6][r6 + rat:r6 + rat + n]
         ai[at:at + 2] = to.to_bytes(2, 'little')
     return ai
+
+
+# A support chip's object read in BN6's terms (legit.json's bn4 support_objects): what its spawn copies of the caller's
+# registers, each checked in both ROMs before it is read so (support_spawners), never assumed
+SUPPORT_TABLES = {4: (0x080220E0, 0x4D, 0x08003344, 0x08003F78), 6: (0x0802CCB4, 0x27, 0x080033AC, 0x080042C8)}
+SUPPORT_SPAWNERS = {}
+OBJ_SPAWN_R4, OBJ_SPAWN_R6, OBJ_SPAWN_CHIP, OBJ_SPAWN_R3 = 0x04, 0x2C, 0x30, 0x3C
+
+
+def support_spawners(roms, game, kind):
+    """{subfamily: its routine} of `game`'s support subfamilies whose routine is the spawner of the fourth kind's type
+    `kind` (push {lr}; push {r0,r1,r2,r5}; movs r0,#kind; bl the spawn; ...; str r6,[r0,#0x2c]; str r7,[r0,#0x30]) where no
+    routine of the type, down its jump tables, loads the object's +0x3C; {} where one does (tools/xrecipe_thumb.py walks)"""
+    if (game, kind) in SUPPORT_SPAWNERS:
+        return SUPPORT_SPAWNERS[game, kind]
+    import xrecipe_thumb as T
+    rom = T.Rom(roms[game], f'bn{game}')
+    table, count, spawn, types = SUPPORT_TABLES[game]
+    w32 = lambda a: int.from_bytes(roms[game][a - 0x08000000:a - 0x08000000 + 4], 'little')
+    out = {}
+    for sub in range(count):
+        a = w32(table + 4 * sub) & ~1
+        text = [i.text for _, i in sorted(T.walk(rom, a, 0x40).insns.items())][:16]
+        calls = [i.target for _, i in sorted(T.walk(rom, a, 0x40).insns.items()) if i.form == 'bl']
+        if text[:3] == ['push {lr}', 'push {r0, r1, r2, r5}', f'movs r0, #{kind:#x}'] and calls[:1] == [spawn] and \
+                'str r6, [r0, #0x2c]' in text and 'str r7, [r0, #0x30]' in text:
+            out[sub] = a
+    seen, todo = set(), [w32(types + 4 * kind)] if out else []
+    while todo:   # (the type's routines: its own, then each its literals' tables name)
+        a = todo.pop() & ~1
+        if a in seen or len(seen) > 48:
+            continue
+        seen.add(a)
+        wk = T.walk(rom, a)
+        if any(i.text.startswith('ldr') and '#0x3c]' in i.text for i in wk.insns.values()):
+            out = {}
+            break
+        for lit in wk.lits.values():
+            for k in range(12 if rom.has(lit, 4) and not lit & 1 else 0):
+                v = w32(lit + 4 * k)
+                if not (v & 1 and 0x08000000 < v < 0x08200000):
+                    break
+                todo.append(v)
+    SUPPORT_SPAWNERS[game, kind] = out
+    return out
+
+
+def support_object_as_bn6(rec, canon):
+    """a BN4 fourth-kind object's record with its spawn's copies as BN6's engine would hold them, where its type is a support
+    chip's object in both games (support_spawners) and its +0x3C is BN4's spawner's own address: the chip (+0x30) as the
+    run's id, +0x3C as BN6's spawner's address (the run's chip's subfamily's), and for a chip both games name the record's
+    copies (+4 the parameters, +0x2C the power and the record's +0x0A above it) as BN6's record's"""
+    roms, kind = canon.roms, rec[NODE + OBJ_TYPE]
+    s4, s6 = support_spawners(roms, 4, kind), support_spawners(roms, 6, kind)
+    r3 = int.from_bytes(rec[NODE + OBJ_SPAWN_R3:NODE + OBJ_SPAWN_R3 + 4], 'little')
+    chip = rec[NODE + OBJ_SPAWN_CHIP] | rec[NODE + OBJ_SPAWN_CHIP + 1] << 8
+    if s4 and r3 - 1 in s4.values() and TWINS.get(canon.chips.get(chip), (0, None)) == (None, XC4_FIRST_SUPPORT + next(k for k, v in s4.items() if v == r3 - 1)):
+        # (a chip whose code is BN4's moved, XREG_MOVED: BN4's spawner of the shape, BN6's its copy, no spawner of BN6's ROM;
+        # its chip as the run's id, the rest of its record as it is)
+        rec[NODE + OBJ_SPAWN_CHIP:NODE + OBJ_SPAWN_CHIP + 2] = canon.chips[chip].to_bytes(2, 'little')
+        return
+    if not s4 or not s6 or r3 - 1 not in s4.values() or chip not in canon.chips:
+        return
+    to = canon.chips[chip]
+    twin, sub = TWINS.get(to, (to if to < BN6_CHIPS else None, None))
+    if sub is None and twin is not None:
+        sub = roms[6][CHIP_RECORDS[6] + twin * CHIP_RECORD_SIZE + CHIP_SUBFAMILY]
+    if sub not in s6:
+        return
+    rec[NODE + OBJ_SPAWN_R3:NODE + OBJ_SPAWN_R3 + 4] = (s6[sub] | 1).to_bytes(4, 'little')
+    canon.spawner_read.add(s6[sub] | 1)   # (BN6's address in BN4's record: a number, whatever BN4's ROM holds there)
+    rec[NODE + OBJ_SPAWN_CHIP:NODE + OBJ_SPAWN_CHIP + 2] = to.to_bytes(2, 'little')
+    r4, r6 = CHIP_RECORDS[4] + chip * CHIP_RECORD_SIZE, CHIP_RECORDS[6] + to * CHIP_RECORD_SIZE
+    for at, rat, n in ((OBJ_SPAWN_R4, 0x10, 4), (OBJ_SPAWN_R6, 0x1A, 2), (OBJ_SPAWN_R6 + 2, 0x0A, 1)) if to < BN6_CHIPS else ():
+        if rec[NODE + at:NODE + at + n] == roms[4][r4 + rat:r4 + rat + n]:
+            rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
 
 
 # A collision data's alliance words (+0x30 and +0x34 in BN6's layout, BN4's +0x58 and +0x5C), each read by the same
@@ -527,10 +609,8 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
     moved = getattr(canon, 'moved_types', None)
     if game == 6 and moved and o.moved:   # (a dispatched object's type, its side-table number, as BN4's own: bn4_moved_types)
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
-    if game == 4 and fams is not None and o.kind == 'T4':   # (a support object's chip in the run's numbers: legit.json's bn4 chip_id)
-        for at in (getattr(canon, 'chip_rule', None) or {}).get('t4', {}).get(rec[NODE + OBJ_TYPE], ()):
-            chip = rec[NODE + at] | rec[NODE + at + 1] << 8
-            rec[NODE + at:NODE + at + 2] = canon.chips.get(chip, chip).to_bytes(2, 'little')
+    if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
+        support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
         rec[NODE + OBJ_EFFECT] = canon.fx(game, rec[NODE + OBJ_EFFECT])
     if fams is not None or game == 6:
@@ -878,7 +958,10 @@ def frame_diffs(fa, fb, fbt=None):
                           'no sprite set up' if ob.leftover else 'its sprite set up'))
         if getattr(oa, 'leftover', False) or getattr(ob, 'leftover', False):
             na, nb = na[:SPRITE[oa.kind] + NODE], nb[:SPRITE[oa.kind] + NODE]
-        found += [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', na, nb, 8)]
+        found += [(p, off - NODE, a, b) for p, off, a, b in cells(fa, fb, 'obj', na, nb, 8)
+                  # (a support object's +0x3C read as BN6's spawner's address, support_object_as_bn6: the same number)
+                  if not (off - NODE == OBJ_SPAWN_R3 and oa.kind == 'T4' and isinstance(a, tuple) and isinstance(b, tuple)
+                          and a[1:] == b[1:] and a[1] in getattr(fa.canon, 'spawner_read', ()))]
         alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
         before = getattr(fa, 'before', {}).get(role)   # (its record at the frame before: a move's old panel)
         ca = coll_as_bn6(oa.coll, alliance, role, before.coll if before else None) if alliance and oa.coll is not None else oa.coll
@@ -1559,11 +1642,12 @@ def one(name, spec, a, canon, run_xdiff, work):
         canon.panels = panel_tables(rom4b, rom6b)
         canon.roms = {4: rom4b, 6: rom6b}
         canon.chips = chip_ids(spec)   # (legit.json's bn4 chip_id: megaman_chip_as_bn6)
+        canon.spawner_read = set()
         canon.chip_rule = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('chip_id')
         if canon.chip_rule:
             rule = canon.chip_rule
             canon.chip_rule = dict({k: [int(x, 0) for x in rule[k]] for k in ('places', 'subfamily')},
-                                   t4={int(k, 0): [int(x, 0) for x in v] for k, v in rule.get('t4', {}).items()})   # (each game's own art read where a record follows it: own_animation)
+                                   record=[(int(a, 0), int(r, 0), n) for a, r, n in rule.get('record', [])])   # (each game's own art read where a record follows it: own_animation)
     for tr in (ta, tb):
         assign_roles(tr, canon)
     if not control:

@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T02:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -103,6 +103,20 @@ start's, +7 the side each frame). Two specs record where a chip parts:
 `bn4_chip_timebomb` (t32: the records apart; on BN6's code its placement
 at t34). Open: the generator's BN4 path (`tools/xchiprecipe.py` reading
 BN4), which the moved units need.
+
+**The pairings by name, asked of the differential** (11 November 2026):
+a chip both games name plays as BN6's, on the claim that it is one chip.
+Proved so far: AreaGrab, PanlGrab, and AntiNavi's set-up
+(`bn4_chip_areagrab`, `bn4_chip_panlgrab`, `bn4_chip_antinavi`). Their
+records are not one (HolyPanl's first parameter 6 and 4, AntiNavi's 5
+and 2: BN4 maps its own through tables), so the comparator reads a
+paired chip's record copies as BN6's. LifeAura against LifeAur
+(`bn4_chip_lifeaura`) agrees on the aura's numbers and parts at t34 on
+how each game keeps its aura's object. Scratch runs of the others, each
+a lead, not a verdict: the panel chips part on the panels' sounds and
+timers, the barriers as LifeAura does, the Recov chips on the
+recovery's effect, RockCube on its cube, CopyDmg and AntiSwrd on a byte
+BN6 ORs into the attack's element.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its

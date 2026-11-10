@@ -1,0 +1,86 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's LifeAura D (its chip 201) against BN6's LifeAur (182), one chip under two spellings by the owner's call (docs/multirom/bn4-chips.md, call 5): the alias asked of the differential, each used at fight frame 30 against a Mettaur at (5,2), whose waves the aura takes.",
+ "folder4": [
+  "06C9"
+ ],
+ "folder6": [
+  "28B6"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "verdict": {
+  "is": "FAIL",
+  "at": 34,
+  "why": "Alike through t33, the use and the aura's set-up. At t34 the aura is set, the same aura by each game's table (BN4's kind 6 and BN6's 9: 1 HP behind 200 for 3000 frames, docs/rom/bn4.md, Barriers and auras), and the collision data's HP, aura and frames agree; what parts is the kind's number (6 and 9), where MegaMan keeps the aura's object (BN4 his object's +0x50, BN6 his AI data's +0x60) and the aura's object itself, the fourth kind's type 7, whose every routine is each game's own (BN4 0x080E2418, 0x080E243C, 0x080E24A4; BN6 0x080E1E10, 0x080E1E44, 0x080E1EC8). Open: those three read into the comparator, then a hit of 200 that breaks it."
+ }
+}
