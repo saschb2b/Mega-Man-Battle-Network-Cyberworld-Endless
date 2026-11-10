@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # The differential: a moved family against its own game
@@ -753,6 +753,30 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## A program on each game's NaviCust
+
+`ncp5=VARIANT:COL:ROW` and `ncp6=` (hex; `src/dev/xdiff_ncp.c`) place one
+NaviCust program on each game's own board, alone, and run each game's own
+compile before the battle is asked, so that what the program sets in the
+NaviStats is what each game's own routine set, not a byte the spec wrote.
+The variant is program x 4 + colour; its shape's cells go onto the board
+from its record (BN5's 5 x 5 two left of and above the column and row,
+BN6's 7 x 7 three), its entry into the placed list. BN6's compile is
+`BN6_NAVICUST_RELOAD` by `game_call`, whose two hooks the differential's
+core takes only for such a spec; BN5's is `BN5_NAVICUST_COMPILE` by
+`guest_call` (`src/emu/guest.c`): a hook on its main loop's `bx r0` into
+the mode's routine (`BN5_MAIN_CALL`) goes to the routine once, which
+returns to the same instruction, where the loop's own r0 and lr are put
+back. Each prints what its game made of it (`xdiff: BN5's NaviCust:
+variant 0x98 at column 1, row 1, compiled by BN5: its extra turns 1`).
+
+`soul_soult` is `soul_knight` with BN5's SoulT+1 so placed in both (BN5's
+program 38, BN6's 48, [The NaviCust's addresses](../rom/navicust.md),
+Program 48): KnightSoul lasts four turns in both where it lasts three, its
+end a Custom screen later (t2084), every frame compared. Its three
+mutations: the engine's routine adding none, adding two, and the grown
+effects' table's entry naming a routine that sets nothing.
 
 ## Holds
 

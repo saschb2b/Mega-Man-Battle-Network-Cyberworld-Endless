@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The NaviCust"
-description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs, readable bugs, and what is built (`src/layer/navicust.c`)."
+description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs and BN5's SoulT+1 while the run holds a Soul, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # The NaviCust
@@ -260,6 +260,61 @@ and the choice taken up again after it, is a larger hook than the
 question needs, and with the dead options gone and the count beside the
 rest the box answers what the look would have.
 
+### 11. The older Net's program: SoulT+1
+
+BN5 has seven programs BN6 lacks; six are cut with their reasons
+([What is missing](../multirom/gaps.md), NaviCust programs) and one is
+built: SoulT+1, a plus part of four cells in white, pink or yellow, which
+gives a Soul one more turn (three to four). It is BN6's program 48 where
+BN5's ROM is read ([The NaviCust's addresses](../rom/navicust.md), Program
+48), and no program at all without it. Reasoned with the game-design
+skill (10 November 2026):
+
+- **The dialectic** is the board's own, fit it or force it, met by the
+  meta layer's, what you bring against what you find: the Soul is found
+  ([Souls](meta/souls.md)), and the board brought decides how long it
+  stays. Four cells are a quarter of the starting board for one turn.
+- **The loop layers:** the battle (the fourth turn of a Soul: its
+  abilities, its charge shot, the chips its kind boosts) and the run (the
+  board says "this run leans on its Soul"). None reaches the meta loop
+  but the profile's memory of programs found (7), which is variety.
+- **The patterns:** loadout as budget (cells for turns), costed power
+  (each unison still gives up a chip and comes once a battle),
+  card-draft-with-skip (it takes one of the draft's three places).
+- **No dead option.** A SoulT+1 with no Soul does nothing, and a menu that
+  offers it is a lying signifier, as the pool leaves out Humor and Rush.
+  So it is in the pool only while the run holds a Soul as the layer is
+  made, or the layer's guardian gives one. The layer-1 gift never has it,
+  nor BN6's own shop lists.
+- **Where it comes from: the Soul's own guardian.** A guardian of the
+  older Net who gives a Soul the run has none of puts SoulT+1 among his
+  draft's three, where it fits the board and is not held, in the place of
+  its build's pick (the Hand's: the Soul is paid for from the hand). The
+  moment the Soul arrives is the moment the question is real: a turn more
+  of it, or one of the two beside it, or the BugFrags. After that, while
+  the run holds a Soul and no SoulT+1, any guardian's draft may roll it
+  as a Hand program of the first tier, and the workshop's vendor lists it
+  among the programs MegaMan has had in earlier runs (7), at the first
+  tier's price (7 BugFrags, 2 more an act).
+- **One copy.** BN5 lets copies add up, to six; a battle seldom outlasts
+  four turns of a Soul, so a second copy is a dead option here and is
+  not offered beside the one held (`navicust_adds_nothing`). A player who
+  finds two by other means gets BN6's own sum.
+- **What it costs the game.** Nothing carries across runs: the program is
+  the run's, as every program. BN6's own code reads the byte SoulT+1 sets
+  for a Beast Out's turns too (`0x0802A118`), so a run with both has a
+  Beast Out of four turns; left as BN6 reads it, **the owner's to
+  reverse** (a hook on that read would keep it to Souls). It has no
+  compression code, as BN5's record gives it one shape.
+
+Built (10 November 2026): `src/emu/xncp.c` (the program in BN6's tables),
+`src/core/xprograms.c` (BN5's record, name and lines), `navicust.c`'s pool
+entry behind `navicust_set_soul`, which `director_board.c`'s `soult_sync`
+sets as each layer is made from the Souls held then (`souls_layer`, the
+same on a CONTINUE's rebuild) and the layer's guardian. MegaMan's word for
+it: "SoulT+1: a Soul stays one more turn." Proved in both games by each
+game's own compile and battle (`build.py xdiff soul_soult`).
+
 ## Teaching it
 
 Introduce, develop, twist, test (the skill's onboarding shape), each at
@@ -389,6 +444,13 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   about half a program an act, a light bug most of one. Act 1's vendor is a
   window most runs can't buy from yet: he shows what BugFrags buy before
   the first draft asks whether to skip.
+
+- The older Net's program (11, 10 November 2026): BN5's SoulT+1 as BN6's
+  program 48 where BN5's ROM is read, on BN6's own NaviCust screen (its
+  name, its 2 x 2, BN5's three lines; RUN answers OK), in a Soul's
+  guardian's draft and, while the run holds a Soul, in the drafts and the
+  vendor's list after it. KnightSoul's counter reads 4, 3, 2, 1 with it
+  placed, where it read 3, 2, 1.
 
 Next: the vendor's compression (above, 4), the vendor's stock from this
 pool, then blue Mystery Data programs, the next act's answer in the

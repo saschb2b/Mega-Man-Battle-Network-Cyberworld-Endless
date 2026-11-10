@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-10
+* **Update**: rom/navicust.md (Program 48 and BN5's board and compile, two new rows; its description and index line), game/navicust.md (11, The older Net's program: the decision and what is built; its description and index line), multirom/gaps.md (SoulT+1 built), game/meta/souls.md (a Soul's turns with it), devtools/differential.md (A program on each game's NaviCust: `ncp5`, `ncp6`, `soul_soult`), devtools/dev-menu.md (`program=48`), devtools/agents-tools.md (the state's `soulturns`), code/emu.md, code/core.md, code/dev.md (`xncp.c`, `bn6_navicust.h`, `xprograms.c`, `xdiff_ncp.c`), engine/emulation/memory.md and free-space.md (`FREE_NCP`, `FREE_NCP_TEXT`): BN5's SoulT+1 is BN6's program 48 where BN5's ROM is read, proved by each game's own compile and battle.
 * **Update**: rom/bn4.md (Barriers and auras, new row: the setters and kinds' tables of BN4 and BN6; LifeAura's kind is LifeAur's by their rows) and multirom/bn4-chips.md (call 5).
 * **Update**: game/meta/darkchips.md (the owner's call: BN4's dark chips at the same 20 max HP), multirom/bn4-chips.md (calls 4 and 5: the dark chips' cost, LifeAura one chip with LifeAur, id 530 retired), game/meta/library.md (BN4's page's counts), multirom/chip-registry.md and multirom/gaps.md (193 rows).
 * **Update**: multirom/bn4-chips.md (the first chip of BN4's own plays: Invis, a row on BN6's code), multirom/chip-registry.md (a BN4 row's twin), multirom/gaps.md (Phase 4).

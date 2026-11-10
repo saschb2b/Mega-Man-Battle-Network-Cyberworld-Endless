@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
+  guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
+  his draft: a plus part of four cells that keeps a Soul united for four
+  turns in place of three. It sits in BN6's own NaviCust list with BN5's
+  name, shape and text, and while the run holds a Soul the later drafts
+  and the workshop can bring it too. A Beast Out lasts the turn longer as
+  well, as BN6's own code reads it.
 - **The Library, a page per game.** PET > Library now opens the run's own
   Library, drawn as BN6's own to the pixel, with BN6, BN5 and BN4 named on
   its band: each game has its StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left

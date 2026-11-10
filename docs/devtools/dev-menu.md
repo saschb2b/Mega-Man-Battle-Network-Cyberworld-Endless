@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # Dev menu: shorter test runs
@@ -141,7 +141,8 @@ N NaviCust programs, in the first of its colours the ROM draws, with the
 check BN6 lists them by (the NaviCustomizer on the second screen, issue
 #76), and `program=P` one of program P besides (a guardian's draft beside
 a program held: `program=41` and `--seed 11 --run-depth 3` offer HP+50
-again, "Held 1", [The NaviCust](../game/navicust.md) 10); `codes=N` has the profile know the compression codes of the first N
+again, "Held 1", [The NaviCust](../game/navicust.md) 10; `program=48`
+BN5's SoulT+1 where its ROM is read, 11); `codes=N` has the profile know the compression codes of the first N
 programs that have one (SuperArmor, then Custom1), as if entered in a run
 before, kept in its file: the run begins with them compressed and Dad's
 Compression mail lists them ([The meta layer](../game/meta/overview.md); `codes=2,programs=2` for a
