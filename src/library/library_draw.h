@@ -29,6 +29,19 @@ typedef struct {
 
 void library_draw_view(int x, int y, const LibraryView *v);
 
+/* BN6's Library card, 80 x 134 from (x, y), its face in class `cls`'s
+ * colour (LIB_STD ..): chip `chip`'s picture, element, power and
+ * description, or (0) a blank one, its head dark (the reward pick's,
+ * reward_pick_draw.c, holds a program or an item there) */
+#define LIBRARY_CARD_W 80
+#define LIBRARY_CARD_H 134
+void library_card(int x, int y, int chip, int cls);
+void library_card_blank(int x, int y, int cls);
+/* ... its head alone, chip `chip`'s picture, element and power over the blank card */
+void library_card_face(int x, int y, int chip, int cls);
+/* ... up to three lines (apart by newlines) where the card's description stands */
+void library_card_lines(int x, int y, const char *lines);
+
 /* where a tap takes each part, from the picture's top left */
 SDL_Rect library_row_rect(int i);         /* row i shown */
 SDL_Rect library_turn_rect(int right);    /* the class's arrows */
