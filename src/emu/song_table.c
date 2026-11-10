@@ -7,6 +7,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "xvirus_moved.h"
 
 #define BUS 0x08000000u
 
@@ -17,7 +18,8 @@ static const uint32_t refs[] = { BN6_SONG_TABLE_REF_START, BN6_SONG_TABLE_REF_CH
 /* (a core not started reads 0: BN6's own table) */
 static bool grown(void) { return emu_read32(refs[0]) == FREE_SONG_TABLE; }
 
-uint32_t song_table_bus(void) {
+/* the live table's bus address: the grown copy once the engine's words name it, else BN6's own; 0 where no ROM is read */
+static uint32_t song_table_bus(void) {
 	if (!R.layout || !R.layout->song_table) return 0;
 	return grown() ? FREE_SONG_TABLE : BUS + R.layout->song_table;
 }
@@ -53,6 +55,8 @@ bool song_table_grow(void) {
 	claims_begin(SONG_TABLE_CLAIMS);
 	for (unsigned k = 0; k < NREFS; ++k) emu_write32(refs[k], FREE_SONG_TABLE);
 	claims_end();
+	/* (for a trace's reader, and the differential's pokes of BN6's table: at its copy) */
+	xv_moved_add(table, FREE_SONG_TABLE, BN6_SONG_COUNT * BN6_SONG_ROW);
 	printf("song_table: BN6's song table grown to %u songs\n", (unsigned)SONG_GROWN_END);
 	return true;
 }

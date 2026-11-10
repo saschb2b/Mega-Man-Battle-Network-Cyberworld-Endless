@@ -22,10 +22,9 @@
 #define SONG_GROWN_END   (SONG_GROWN_FIRST + SONG_GROWN_SLOTS)
 #define SONG_TABLE_CLAIMS "BN6's song table grown (song_table.c)"
 
-/* The live table's bus address: the grown copy once the engine's words
- * name it, else BN6's own; 0 where no ROM is read */
-uint32_t song_table_bus(void);
-/* Song `slot`'s entry there (BN6_SONG_ROW bytes: its header, its player) */
+/* Song `slot`'s entry in the live table (the grown copy once the engine's
+ * words name it, else BN6's own), BN6_SONG_ROW bytes: its header, its
+ * player; 0 for a slot it does not hold */
 uint32_t song_entry_bus(int slot);
 /* Whether `slot` is one the live table holds */
 bool song_slot_ok(int slot);
