@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -139,6 +139,26 @@ it every sprite a unit draws is BN4's copied, as the families' are,
 whether or not BN6 has one of its bytes: an object in play in a fight's
 frame is compared by its sprite's frames, which the differential names
 by the recipe's rows.
+
+**Meteors1-3 are moved** (10 November 2026: ids 674-676, misc 0x11), the
+first unit of the parallel sweep's third line and the first whose chips
+sit past id 602. Its routine lies after its controller, the fourth
+kind's last type (0x81), which moves with it, 178 bytes: the chip aims
+at a panel of MegaMan's row on the other side and the controller lets
+five meteors fall there, one every twenty frames. The aim is a routine
+BN6 holds too, instruction for instruction with the same words of panel
+flags, though nothing in BN6 calls it. The meteors are ShotStar's star,
+which ShotStar's unit moved already: Meteors' call to the star's
+spawner is aimed at that copy, so the star is in the engine once and
+takes one of the third kind's few dispatch numbers
+(`tools/xchiprecipe_bn4.py` `UNIT_SHARES`). `bn4_chip_meteors1`, `2`
+and `3` pass with a 140 HP Mettaur on the aimed panel (90 then 40 HP
+left, 80 then 20, and 70; each ends before the meteor that deletes it)
+and `bn4_chip_meteors1_miss` over 300 frames with the Mettaur off it,
+the five meteors bursting on the empty panel; seven mutations caught.
+**Not seen in play yet:** ids from 603 have no pack entry, so the chip
+step cannot hand one out until the pack's RAM for them lands; the
+differential fights with a folder alone.
 
 **Next:** MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite
 of list 1, the viruses' list, which needs a range of the chips' there;

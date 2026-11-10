@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
 ---
 
 # The chip recipe generator
@@ -235,6 +235,17 @@ is one block with a routine each: the first is the unit's entry, each
 other a row of the units' table that shares its code (`XChipUnit.share`),
 its entry alone.
 
+A misc routine that lies after a fourth-kind type's code moves that type
+with it as Counter's moves its third-kind one (`t4_with`: the table's
+last type, 0x81, has no next type to end its region, which ends with the
+routine). A unit that runs a type an earlier unit moved names the call
+in `UNIT_SHARES` (Meteors' controller's to the star's spawner,
+ShotStar's): the call is aimed at that unit's copy, nothing of the type
+is copied again and no dispatch number is taken, and the kind it spawns
+joins the kinds' table's `kinds`. The installer lets a unit's call go to
+code of a unit staged before it (`XvRegion.shared`,
+`src/emu/xchips_code.c`).
+
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
-0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA) and Boomer (misc 2); MokoRus
-and SidBmbo are next.
+0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
+Meteors (misc 0x11); MokoRus and SidBmbo are next.

@@ -538,6 +538,10 @@
     {
       "date": "2026-11-12",
       "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
+    },
+    {
+      "date": "2026-11-10",
+      "what": "Meteors' code located and moved (bn4_chips.h BN4_METEORS 0x080EAE92, BN4_T4_METEORS 0x81, BN4_ROW_PANEL_ACROSS 0x0800FC48; bn6_chips.h BN6_ROW_PANEL_ACROSS 0x08016168, a routine BN6 never calls; docs/rom/bn4.md). Its meteors are ShotStar's unit's star, shared, not moved twice."
     }
   ],
   "experiments": [
@@ -1236,6 +1240,13 @@
       "name": "bn4_chip_boomer1 to 3: BN4's Boomer moved",
       "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the boomerang in play from t33 to t96, a 140 HP Mettaur at (6,3) left 80, 60 and 40 in both at t61. Five mutations caught (a row's power and subfamily, the flights' speeds, the dispatch number, the sound). PanlSht's, ShotStar's, WhitWeb's, Counter's and Repair's specs PASS again with their sprites copied.",
       "meaning": "A unit with a data table of its object's moves by the generator; copied sprites keep an in-play object comparable."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-10",
+      "name": "bn4_chip_meteors1 to 3 and _miss: BN4's Meteors moved",
+      "result": "python3 build.py xdiff with the four specs: each PASS; a 140 HP Mettaur on the aimed panel (4,2) left 90 at t81 and 40 at t102 (Meteors1), 80 and 20 (Meteors2), 70 (Meteors3) in both, BN6's a frame later; off the panel, 300 frames with the five meteors on the empty panel and the Mettaur untouched. Seven mutations caught (the count, the pace, the star's kind, the controller's dispatch number, a row's power and subfamily, the aim's row).",
+      "meaning": "A unit can run a type an earlier unit moved by a call aimed at that unit's copy; the third kind's dispatch numbers, eleven left for some forty units, need a wider answer before the larger units."
     }
   ],
   "method": {

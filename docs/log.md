@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (Meteors1-3 moved, its meteors ShotStar's star; ids past 602 not seen in play yet), rom/bn4.md (Meteors' code, new row), devtools/chip-recipe-generator.md (a misc routine after a fourth-kind type's code, `UNIT_SHARES`), devtools/differential.md (a chip unit's own object's element, a pointer into a chip unit's blocks).
 * **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
 * **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
 * **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).

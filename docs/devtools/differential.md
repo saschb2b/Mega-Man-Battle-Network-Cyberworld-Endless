@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -110,6 +110,17 @@ never sprung there). `bn4_chip_lifeaura` records where the aura stands
 (t34): the harness places BN4's barrier fields in BN6's layout
 (`xdiff_bn4_trace.c`), and the kind's number, where MegaMan keeps the
 aura's object, and that object, each game's own code, are open.
+
+A chip unit's own fourth-kind object (no support chip's: Meteors'
+controller) keeps its element where its own spawner stores it, BN4's
++0x17 and BN6's +0x0E by the recipe's immediates; the trace writes a
+fourth-kind object raw, so the comparison reads BN4's at BN6's place for
+the types `legit.json`'s `bn4` `object_element` names, each with the two
+instructions. A pointer a BN4 object keeps into a chip unit's moved
+blocks (the star's kind's row at its +0x60, seen in the fight's frames
+since Meteors) reads as moved data in both traces: a BN4 reference takes
+BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it
+names, a BN5 reference none of it.
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and

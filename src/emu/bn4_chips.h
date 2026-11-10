@@ -108,5 +108,13 @@
                                            * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
 #define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
                                            * the rows, its speed across them (16.16) */
+/* Meteors1-3 (its chips 163-165, misc subfamily 0x11), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_METEORS           0x080EAE92u /* its routine, after its controller's code: a panel aimed at (BN4_ROW_PANEL_ACROSS) and, where one
+                                           * is found, the controller spawned on it (0x080EAE6C: its panel, element and damage) */
+#define BN4_T4_METEORS        0x81        /* its controller, the fourth kind's last type (0x080EADF4 to 0x080EAE6C): five meteors (+0x22), one
+                                           * every 0x14 frames (+0x20), each BN4_T3_STAR's kind 6 through 0x080D877C on its own panel */
+#define BN4_ROW_PANEL_ACROSS  0x0800FC48u /* r5 an object: a panel of its row on the side across found by BN4's 0x0800A1AE with a required and a
+                                           * refused word of panel flags by its side (0x0800FC84, then 0x0800FC94, eight bytes a side); r0 0
+                                           * none (BN6_ROW_PANEL_ACROSS the same instruction for instruction, the same words) */
 
 #endif
