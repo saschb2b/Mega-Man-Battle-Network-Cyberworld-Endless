@@ -474,7 +474,7 @@ static void shots_take(const Side *g, const Spec *s) {
 		const Shot *h = &s->shots[i];
 		if (h->game != g->v.game || h->screen != g->screen || h->frame != g->custom) continue;
 		static uint32_t px[EMU_W * EMU_H];
-		const uint32_t *v = g->v.game == 5 ? guest_video() : emu_video();
+		const uint32_t *v = g->v.game == 6 ? emu_video() : guest_video();   /* (the reference, BN5 or BN4, is the guest) */
 		for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
 		SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
 		if (!f || SDL_SaveBMP(f, h->path) != 0) fprintf(stderr, "xdiff: %s not saved\n", h->path);
@@ -488,7 +488,7 @@ static void film_take(Side *g, const Spec *s, uint32_t t) {
 	if (!m->step || t < (uint32_t)m->from || t > (uint32_t)m->to || (t - (uint32_t)m->from) % (uint32_t)m->step || g->filmed == t + 1) return;
 	g->filmed = t + 1;
 	static uint32_t px[EMU_W * EMU_H];
-	const uint32_t *v = g->v.game == 5 ? guest_video() : emu_video();
+	const uint32_t *v = g->v.game == 6 ? emu_video() : guest_video();   /* (the reference, BN5 or BN4, is the guest) */
 	for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
 	char path[200];
 	snprintf(path, sizeof path, "%s_bn%d_t%04u.bmp", m->prefix, g->v.game, (unsigned)t);
@@ -838,6 +838,7 @@ static bool reference4(Side *g, const Spec *s) {
 	uint8_t rec[0x80];
 	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
+	xd4_folder_put(s);   /* (a chip spec's folder4, and its chips through BN4's gate: xdiff_bn4.h; after the battle is asked, which sets its own) */
 	const Xd4Places *p = &xd4_places;
 	g->v = (View){ .game = 4, .state = p->state, .window = p->window, .rng = { p->rng[0], p->rng[1] }, .t1 = p->t1, .t3 = p->t3,
 		.t4 = p->t4, .nt1 = (int)p->nt1, .panels = p->panels, .panel_size = BN6_PANEL_SIZE, .list = p->list, .list_end = p->list_end,

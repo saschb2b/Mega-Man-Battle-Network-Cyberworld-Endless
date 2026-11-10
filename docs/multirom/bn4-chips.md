@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:03:14Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:39:06Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,14 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**Unit 3, begun** (10 November 2026; [The differential](../devtools/differential.md),
+A BN4 chip's spec): BN4's own battle takes a folder and plays a chip
+from it (`folder4`, each chip through `BN4_CHIP_GATE`; `cust4`, its
+Custom screens' keys), proved by `bn4_chip_cannon_control`. Not yet:
+MegaMan's maps in `tools/xdiff_bn4.py` (BN4's Cannon against BN6's parts
+at t32, his action and attack variables numbered otherwise), the
+generator's BN4 path.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into

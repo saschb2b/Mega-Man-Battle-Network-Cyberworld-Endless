@@ -39,6 +39,9 @@ int xd4_bn6_id(int id);
 /* BN4's Navis' sound pool pointed at the spec's foes' (xnavi_bn4_sounds_for), as their battle's first frame points it: before
  * BN6's run's pokes, so a poke of a pool slot's entry holds in the battle whichever Navi was installed last */
 void xd4_pool_point(const Spec *s);
+/* The spec's folder4 as the guest's first folder, before its battle is asked: the entries, and each chip's byte of the
+ * save's copy that BN4's gate reads against its key (BN4_CHIP_GATE); nothing where the spec gives none */
+void xd4_folder_put(const Spec *s);
 /* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
  * mutation's call= aims their veneers as BN5's */
 int xd4_family_count(void);

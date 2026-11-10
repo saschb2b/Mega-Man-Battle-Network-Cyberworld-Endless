@@ -153,6 +153,18 @@ void xd4_pool_point(const Spec *s) {
 	for (int i = 0; i < s->nfoes; ++i) xnavi_bn4_sounds_for((uint32_t)xd4_bn6_id(s->foes[i].id));
 }
 
+/* (a byte into the guest's RAM, by its halfword) */
+static void guest_wr8(uint32_t a, uint8_t v) {
+	uint16_t w = guest_read16(a & ~1u);
+	guest_write16(a & ~1u, a & 1 ? (uint16_t)((w & 0x00FF) | v << 8) : (uint16_t)((w & 0xFF00) | v));
+}
+
+void xd4_folder_put(const Spec *s) {
+	static const FolderPlaces places = { BN4_TOOLKIT, BN4_TOOLKIT_FOLDERS, BN4_TOOLKIT_CHIP_COPY, BN4_CHIP_KEYS, BN4_CHIP_KEY_XOR, 0, 0, CHIP9_MASK,
+		guest_read8, guest_read32, guest_wr8, guest_write16 };
+	if (s->nfolder[0]) xd_folder_put(&places, s->folder[0]);
+}
+
 int xdiff_bn4_run(const Spec *s) {
 	if (!guest_start(XROM_BN4_RED_SUN_US)) {
 		fprintf(stderr, "xdiff: BN4 Red Sun's ROM is not beside BN6's, or its guest did not reach Lan's room\n");
@@ -163,6 +175,7 @@ int xdiff_bn4_run(const Spec *s) {
 	uint8_t rec[0x80];
 	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) { fprintf(stderr, "xdiff: BN4's battle could not be asked\n"); return 1; }
+	xd4_folder_put(s);
 	foes_say(s);
 	int f = 0, result = 0, hp_end = -1, begun = -1;
 	for (; guest_battling() && f < BUDGET; ++f) {
