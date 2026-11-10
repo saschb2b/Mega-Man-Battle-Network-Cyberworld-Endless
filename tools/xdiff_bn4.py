@@ -1266,6 +1266,18 @@ def rng_twins():
     return items
 
 
+def megaman_items(spec, game):
+    """a chip spec's folders and Custom screens' keys as src/dev/xdiff_spec.c takes them: BN4's (folder4, cust4: xd4_folder_put),
+    and BN6's where it is fought against (folder6, cust6)"""
+    parts = []
+    for g in ('4', '6') if game == 'bn4:bn6' else ('4',):
+        if spec.get(f'folder{g}'):
+            parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
+        for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
+            parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    return parts
+
+
 def spec_text(spec, out, game):
     """the spec's items as src/dev/xdiff_spec.c takes them, its battle BN4's (game: bn4:trace, bn4:bn6)"""
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
@@ -1278,7 +1290,7 @@ def spec_text(spec, out, game):
         (rng_twins() if spec.get('rng') == 'replay' and game == 'bn4:bn6' else []) + \
         [f'poke={p}' for p in (alignments(spec) if game == 'bn4:bn6' else []) + spec.get('poke', [])] + \
         [f'call={c}' for c in spec.get('call', [])]
-    return ';'.join(parts + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
+    return ';'.join(parts + megaman_items(spec, game) + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
 
 def opening_draws(ta, tb):

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:39:06Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T01:40:19Z }
 ---
 
 # The differential: a moved family against its own game
@@ -42,7 +42,11 @@ as `cust5` does BN5's. BN4's cursor slides to OK, so its keys are spaced:
 the screen. `bn4_chip_cannon_control` is that battle fought twice, the
 same: MegaMan holds BN4's Cannon, fires it at fight frame 30 and deletes
 the Mettaur (seen by `film=`, which in the trace's mode took BN6's core's
-picture for a BN4 reference until this). Against BN6's Cannon the two
+picture for a BN4 reference until this). `bn4_chip_cannon_broken` is
+its check: the second run is given no folder and must part as the chip
+is used (t32). It was added after the control had first been merged with
+`tools/xdiff_bn4.py` passing neither `folder4` nor `cust4`: the control
+then fought BN4's own folder twice and passed all the same. Against BN6's Cannon the two
 battles part at t32, MegaMan's action and his attack's variables numbered
 otherwise in BN4: his maps are the comparator's next piece.
 
