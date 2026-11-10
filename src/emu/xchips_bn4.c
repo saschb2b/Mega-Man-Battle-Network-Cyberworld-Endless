@@ -347,10 +347,98 @@ static const XcSong counter_songs[] = { { 0xBE, 0x1DD } };
 	.types = counter_types, .ntypes = (int)(sizeof counter_types / sizeof *counter_types), \
 	.sound_calls = counter_sound_calls, .nsound_calls = (int)(sizeof counter_sound_calls / sizeof *counter_sound_calls), \
 	.sprites = counter_sprites, .nsprites = (int)(sizeof counter_sprites / sizeof *counter_sprites) }
+/* ---- WhitWeb: BN4's misc 0x8 (080D4F21) as BN6's 0x88; its chips 72 (574), 73 (575), 74 (576) ---- */
+/* its routine (080D4F20) lies in the third-kind 0x3d's code (080D4D30-080D4F40), which it spawns: moved */
+/* its sprite 4:0x1c (080D4D74): BN6's 4:0x9e, copied */
+/* its effect 0xf: BN6's 0xcd, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
+/* its sound 0xf7 (080D4DF0): BN4's song copied into the grown song table's slot 0x1de, on BN4's player 22 */
+
+static const XvBlock whitweb_blocks[] = {
+	{ 0x080D4D30, 0x080D4F40, XC4_CODE + 0xA10, 0x86F46E82u },
+};
+static const XvData whitweb_data[] = {
+	{ 0x080D4D42, 0x080D4D44, XV_RAW },
+	{ 0x080D4D44, 0x080D4D48, XV_POOL },
+	{ 0x080D4D48, 0x080D4D54, XV_TABLE },
+	{ 0x080D4E5E, 0x080D4E60, XV_RAW },
+	{ 0x080D4E60, 0x080D4E68, XV_POOL },
+	{ 0x080D4E68, 0x080D4E6C, XV_TABLE },
+	{ 0x080D4E6C, 0x080D4E74, XV_RAW },
+	{ 0x080D4F0C, 0x080D4F10, XV_POOL },
+	{ 0x080D4F10, 0x080D4F20, XV_RAW },
+	{ 0x080D4F3E, 0x080D4F40, XV_RAW },
+};
+static const XvPair whitweb_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x0800A10E, 0x0800D012 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x08010560, 0x080D0B94 },   /* project:spikey, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08013212, 0x0801A258 },   /* project:gutsman, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080CDCE4, 0x0801156A },   /* project:families-2, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair whitweb_words[] = {
+};
+static const XvImm whitweb_imms[] = {
+	{ 0x080D4D70, THUMB_MOVS, 2, 0, 0x1C, 0x9E },   /* its object's sprite: list 4 0x1c in BN4, 0x9e in BN6 (copied) */
+	{ 0x080D4E18, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D4E48, THUMB_MOVS, 4, 0, 0xF, 0xCD },   /* its effect: 0xf in BN4, 0xcd in BN6 (moved) */
+	{ 0x080D4E4E, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's slot 0x3a, a BN4 family's too */
+	{ 0x080D4EA0, THUMB_MOVS, 0, 0, 0x3D, 0xC6 },   /* its object's type 0x3d: moved, the dispatch's 0xc6 */
+	{ 0x080D4EB0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType whitweb_types[] = {
+	{ 3, 0xC6, XV_TYPE_MOVED, 0x3D },   /* BN4's third-kind 0x3d, moved, the dispatch's 0xc6 */
+};
+static const XvSprite whitweb_sprites[] = {
+	{ 4, 0x1C, 4, 0x9E, XC4_ART + 0x2E00, 0x600 },   /* BN4's 4:0x1c copied */
+	{ 5, 0x01, 5, 0xED, XC4_ART + 0x3400, 0x1800 },   /* BN4's 5:0x1 copied */
+};
+static const XvId whitweb_effects[] = { { 0x0F, 0xCD } };
+static const XvSoundCall whitweb_sound_calls[] = {
+	{ 0x080D4DF0, 0x1DE },   /* its sound 0xf7: BN4's song at the grown table's slot 0x1de */
+};
+static const XcSong whitweb_songs[] = { { 0x70, 0x3A }, { 0xF7, 0x1DE } };
+
+#define WHITWEB_CODE { .name = "WhitWeb (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x1000), \
+	.blocks = whitweb_blocks, .nblocks = (int)(sizeof whitweb_blocks / sizeof *whitweb_blocks), \
+	.data = whitweb_data, .ndata = (int)(sizeof whitweb_data / sizeof *whitweb_data), \
+	.calls = whitweb_calls, .ncalls = (int)(sizeof whitweb_calls / sizeof *whitweb_calls), \
+	.words = whitweb_words, .nwords = (int)(sizeof whitweb_words / sizeof *whitweb_words), \
+	.imms = whitweb_imms, .nimms = (int)(sizeof whitweb_imms / sizeof *whitweb_imms), \
+	.types = whitweb_types, .ntypes = (int)(sizeof whitweb_types / sizeof *whitweb_types), \
+	.sound_calls = whitweb_sound_calls, .nsound_calls = (int)(sizeof whitweb_sound_calls / sizeof *whitweb_sound_calls), \
+	.sprites = whitweb_sprites, .nsprites = (int)(sizeof whitweb_sprites / sizeof *whitweb_sprites), \
+	.effects = whitweb_effects, .neffects = (int)(sizeof whitweb_effects / sizeof *whitweb_effects) }
 const XChipUnit xchips_bn4[] = {
-	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0 },
-	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0 },
-	{ XCHIP_MISC, 0x0B, 0x8B, 0x0800C721, XC4_HOMES + 0x800, REPAIR_CODE, repair_songs, (int)(sizeof repair_songs / sizeof *repair_songs), 0 },
-	{ XCHIP_MISC, 0x00, 0x80, 0x080CFE03, XC4_HOMES + 0xC00, COUNTER_CODE, counter_songs, (int)(sizeof counter_songs / sizeof *counter_songs), 0 },
+	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
+	{ XCHIP_MISC, 0x0B, 0x8B, 0x0800C721, XC4_HOMES + 0x800, REPAIR_CODE, repair_songs, (int)(sizeof repair_songs / sizeof *repair_songs), 0, 0 },
+	{ XCHIP_MISC, 0x00, 0x80, 0x080CFE03, XC4_HOMES + 0xC00, COUNTER_CODE, counter_songs, (int)(sizeof counter_songs / sizeof *counter_songs), 0, 0 },
+	{ XCHIP_MISC, 0x08, 0x88, 0x080D4F21, XC4_HOMES + 0x1000, WHITWEB_CODE, whitweb_songs, (int)(sizeof whitweb_songs / sizeof *whitweb_songs), 0, 0 },
+	{ XCHIP_MISC, 0x09, 0x89, 0x080D4F2B, XC4_HOMES + 0x1400, { .name = "WhitWeb (BN4's), its subfamily 0x9", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
+	{ XCHIP_MISC, 0x0A, 0x8A, 0x080D4F35, XC4_HOMES + 0x1800, { .name = "WhitWeb (BN4's), its subfamily 0xa", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

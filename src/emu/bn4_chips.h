@@ -97,5 +97,10 @@
 #define BN4_AI_LOCKOUT        0x3A        /* MegaMan's AI data: u16 the frames he cannot act after a chip, its record's +0x14, stored as the
                                            * attack ends (BN4_CHIP_ATTACK_END; BN6's +0x19, a byte) */
 #define BN4_CHIP_ATTACK_END   0x0800C9FCu /* a chip's attack ended: the lock-out kept, his action back to 6 (BN6_CHIP_ATTACK_END) */
+/* WhitWeb1-3 (its chips 72-74, misc subfamilies 8, 9 and 0xA), moved as one unit (src/emu/xchips_bn4.c) */
+#define BN4_WHITWEB           0x080D4F20u /* WhitWeb1's routine, WhitWeb2's 0x080D4F2A and WhitWeb3's 0x080D4F34 after it: each hands a row
+                                           * (1, 2, 3) to 0x080D4EC4, which lays a web on each of the other side's panels of that row */
+#define BN4_T3_WEB            0x3D        /* the web, the third kind's (0x080D4D30 to 0x080D4F40, the three routines in its code): on its
+                                           * panel it strikes what stands there; sound 0xF7 */
 
 #endif

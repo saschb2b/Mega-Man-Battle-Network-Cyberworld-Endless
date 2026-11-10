@@ -55,6 +55,7 @@ MOVED = {
     210: 0x99,                         # ShotStar: BN4's support 0x19 (bn4_chip_shotstar)
     115: 0x8B,                         # Repair: BN4's misc 0x0B, BN6's grown misc routine 0x8B (bn4_chip_repair)
     60: 0x80, 61: 0x80, 62: 0x80,      # Counter1-3: BN4's misc 0, BN6's grown misc routine 0x80 (bn4_chip_counter1-3)
+    72: 0x88, 73: 0x89, 74: 0x8A,      # WhitWeb1-3: BN4's misc 8, 9 and 0xA, one unit's three routines (bn4_chip_whitweb1-3)
 }
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
