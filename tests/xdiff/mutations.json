@@ -2372,6 +2372,30 @@
     "0889AF04:2404"
    ],
    "what": "his companion's overlay kind (BN5 0x0800EE84: movs r4,#4, its copy at XN_TEAM_CODE + 0x7F02 + 2) left at BN5's 4, BN6's another kind, where the recipe makes it his own 33 (XN_KIND_OF)"
+  },
+  {
+   "name": "an area grab that takes a panel",
+   "spec": "bn4_chip_areagrab",
+   "poke": [
+    "080239BC:00:1"
+   ],
+   "what": "BN6's AreaGrab's record (163) with its first parameter 0, PanlGrab's, where it holds 1: one panel stolen where BN4's AreaGrab steals the column"
+  },
+  {
+   "name": "the grab's fall's sound another",
+   "spec": "bn4_chip_areagrab",
+   "poke": [
+    "080C7CDC:20A2"
+   ],
+   "what": "BN6's grab object's first state (0x080C7CA8) playing 0xA2 where it plays 0xA1 (movs r0,#0xa1 at 0x080C7CDC), BN4's 0x93's pair (legit.json's bn4 sounds)"
+  },
+  {
+   "name": "an area grab of two rows",
+   "spec": "bn4_chip_areagrab",
+   "poke": [
+    "080E1AE8:2902"
+   ],
+   "what": "BN6's area grab's support object's loop over the column's rows (0x080E1AD2 to 0x080E1AEA: cmp r1,#3 at 0x080E1AE8) ended at row 2: two of the column's panels stolen where BN4's AreaGrab steals three"
   }
  ]
 }
