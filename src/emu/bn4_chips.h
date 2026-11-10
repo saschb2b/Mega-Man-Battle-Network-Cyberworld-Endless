@@ -32,4 +32,10 @@
                                            * battle's copy the one the test reads */
 #define BN4_KARMA_DARK         0x1D6       /* dark under it: 470, BN5's dark meter's number; the steps of 0x0800F5BC at 480 and 500 too */
 
+/* A barrier or aura set on an object, BN6_BARRIER_SET's twin (r0 its kind; its collision data's +4 the kind, and from
+ * BN4_BARRIER_KINDS' row +0x20 its HP, +0x22 its aura and +0x24 its frames): BN4's kinds are numbered otherwise, its 6
+ * (1, 200, 3000) BN6's 9, LifeAura and LifeAur one chip by their rows; its 7 (1, 300, 3000), BlakBarr's, no kind of BN6's */
+#define BN4_BARRIER_SET       0x08012DCEu
+#define BN4_BARRIER_KINDS     0x080185E0u /* three u16 a kind, as BN6_BARRIER_KINDS: 1 Barrier's 10, 2 100, 3 200, 4 150, 6 LifeAura's, 7 BlakBarr's */
+
 #endif

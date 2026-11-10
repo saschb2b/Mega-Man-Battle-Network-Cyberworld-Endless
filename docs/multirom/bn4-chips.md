@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T23:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -698,7 +698,9 @@ Asked and answered on 10 November 2026:
 5. **LifeAura is one chip with BN6's LifeAur:** "One chip". BN4's 201
    pairs with BN6's 182 by alias (`xreg4_alias`, written by
    `tools/xreg_bn4.py`'s `ALIAS`), takes no row, and its id 530 is
-   retired (no release holds an id past 511). The rows are 193 since:
+   retired (no release holds an id past 511). The two games' barrier
+   tables agree: BN4's kind 6 and BN6's kind 9 are both 1 HP behind a 200
+   aura for 3000 frames (docs/rom/bn4.md, Barriers and auras). The rows are 193 since:
    174 folder chips and 19 Program Advances.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
