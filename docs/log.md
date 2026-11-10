@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-10
+* **Update**: devtools/chip-recipe-generator.md (The BN4 path: `tools/xchiprecipe_bn4.py`, its units, numbers and room; its description and index line), multirom/bn4-chips.md (the first unit of BN4's code moved, PanlSht1-3; the owner's call 6 open, the sounds' slots; ShotStar next), rom/bn4.md (Its support chips' code, new row) and rom/chips-code.md (BN4's chips' code in BN6's engine, new row), devtools/differential.md (a moved BN4 chip's spec), code/tools.md and code/emu.md (the new files).
 * **Update**: rom/bn4.md (Barriers and auras, new row: the setters and kinds' tables of BN4 and BN6; LifeAura's kind is LifeAur's by their rows) and multirom/bn4-chips.md (call 5).
 * **Update**: game/meta/darkchips.md (the owner's call: BN4's dark chips at the same 20 max HP), multirom/bn4-chips.md (calls 4 and 5: the dark chips' cost, LifeAura one chip with LifeAur, id 530 retired), game/meta/library.md (BN4's page's counts), multirom/chip-registry.md and multirom/gaps.md (193 rows).
 * **Update**: multirom/bn4-chips.md (the first chip of BN4's own plays: Invis, a row on BN6's code), multirom/chip-registry.md (a BN4 row's twin), multirom/gaps.md (Phase 4).

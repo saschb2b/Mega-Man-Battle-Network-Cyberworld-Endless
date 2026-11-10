@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T02:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -53,6 +53,18 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
 where the dud plays. A BN4 spec takes `film` as BN5's do.
+A chip whose code is BN4's moved (a unit of `tools/xchiprecipe_bn4.py`,
+its rows `XREG_MOVED`: `bn4_chip_panlsht1` to `3`) is compared the same
+way, with what `legit.json`'s `bn4` section adds for it: his attack's
+subfamily read as the unit's number in BN6's grown support routines,
+BN6's second wheel's flag in the attack's element (by the record's icon,
+as BN5's chips have it), its support object's chip and spawn leftovers by
+its type, and each copied sound paired with its slot. A support chip runs
+inside its time freeze, between two fight frames, so the traces meet at
+what it leaves: the foe's HP, the panels, the frame's sounds. Give the
+spec a foe the chip does not delete (`04@52`, BN4's MettaurSP, 140 HP):
+a deletion parts at its own effect, each engine's art. A mutation of a
+unit's code names BN4's address, which the runner pokes at its copy.
 
 Against BN6 a chip's spec says `"subject": "megaman"`: a difference of
 MegaMan's or the world's no rule explains fails it, as in the BN5

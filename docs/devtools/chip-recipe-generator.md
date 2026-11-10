@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "The chip recipe generator"
-description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit."
+description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-12T23:50:43Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T02:30:00Z }
 ---
 
 # The chip recipe generator
@@ -142,3 +142,72 @@ SP and DS play);
 `FORCE_TWIN` a routine aimed at its BN6 twin though their tables differ
 (the bomb's update, whose BN6 twin runs BN6's actions table, its status
 states numbered as BN6's generic states write them).
+
+## The BN4 path
+
+```bash
+python3 tools/xchiprecipe_bn4.py           # write src/emu/xchips_bn4.c (its UNITS, each whole) and .build/xchiprecipe/bn4_report.md
+python3 tools/xchiprecipe_bn4.py --check   # write nothing: fail where src/emu/xchips_bn4.c is not what it would write
+python3 tools/xchiprecipe_bn4.py --report --unit support:0x19:ShotStar   # derive more units for the report alone
+```
+
+BN4's chips are derived by a tool of their own, `tools/xchiprecipe_bn4.py`,
+beside this one rather than inside it: `tools/xchiprecipe.py` rests on
+BN5's symbol map, its twins and its numbering throughout, and BN4 has
+none of those, so BN5's three files stay what they were byte for byte
+(`--check`). The BN4 tool stands on the parts that moved BN4's families
+and Navis ([The recipe generator](recipe-generator.md);
+`tools/xrecipe_bn4.py`'s walk, pairs and blocks,
+`tools/xnavirecipe_bn4_objects.py`'s moved fourth kind,
+`tools/bn4_twins.py`'s pairs and audits), and writes what the same
+installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
+
+- **A unit.** BN4 runs a chip by a state of MegaMan's. Its support state
+  (family 0x0C, `BN4_SUPPORT_RUN`) runs support chips and Navi chips
+  from one table by subfamily (`BN4_CHIP_ROUTINES`, 0x4E routines). A
+  unit is one of them: a spawner of a fourth-kind object, held to the
+  sixteen instructions of BN6's support routines (`0x080E8886` the
+  control, read each run), in the region of the type it spawns. That
+  region is the unit's first block, walked from the type's routine and
+  from the spawner. A routine of another shape, or of another family, is
+  a decision: the misc family (BN4's state 0x20) is not read yet.
+- **Its calls.** Each call out is paired with BN6's twin: the project's
+  pairs (the families', the Navis' and the tool's own `TWINS`, each with
+  its audit where the bodies differ), else a BN6 routine of the same
+  body. The five generic states of a support chip's object, which every
+  such type's tables name, are BN6's own at the same places of its
+  types' tables. A call into another object type's code whose twin the
+  search found by its body alone is a decision until its type is
+  compared to its depth (`TYPE_TWINS`), the census's lesson ([BN4's chips
+  in a run](../multirom/bn4-chips.md), The six "on BN6's code" are not).
+- **Its objects.** A third- or fourth-kind type it spawns that BN6 has
+  no twin of is moved with it, its region a block, its spawn through the
+  second-level dispatch at a number of the chips' own: the fourth kind's
+  from 0x91 (past BN5's 145 types, below the families' and Navis' 0xE0),
+  the third kind's from a list of numbers no BN5 track names (`TYPES3`;
+  the range past BN5's 204 is nearly spent). No other recipe may name a
+  number it takes (`numbers_clear`).
+- **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
+  collision data's offsets, a panel's type and side after `getPanel`, a
+  sprite load given BN6's number of the same bytes (one BN6 lacks is a
+  decision: the emitter copies none yet), an effect's id by its look, a
+  sound BN6 has no song of given its slot (`SOUND_SLOTS`, the same
+  numbers as `src/audio/xsong.c`'s; one without a slot is a decision,
+  the slots being the owner's to give).
+- **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
+  of veneers, then code, then art. Its entry is the spawner's copy at
+  BN6's grown support routines' 0x80 + BN4's subfamily (BN6's own are
+  0-0x29, BN5's from 0x2A). `xchips_bn4_code_install` stages it where
+  BN4's ROM is read; the stubs and the two grown tables are staged by
+  whichever game's units install first.
+- **Its chips.** The registry's rows of the unit's chips must be
+  `XREG_MOVED` with the unit's number their subfamily
+  (`tools/xreg_bn4.py` `MOVED`), and none a dark chip: the generator
+  refuses to write otherwise. Such a row's record takes BN6's support
+  family and that subfamily, its parameters, lock-out and power BN4's
+  own (`xrec_from_bn4`).
+
+Proved by a chip's specs against BN4's own battle ([The
+differential](differential.md), A BN4 chip's spec); a mutation of a
+unit's code names BN4's address, which the runner pokes at its copy.
+`UNITS` holds PanlSht (support 0x26); ShotStar is next.
