@@ -13,7 +13,7 @@
 
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
 /* its fourth-kind 0x4f (080E79B8-080E7BF0), which its routine (080E7A58) spawns: moved */
-/* its sprite 3:0x38 (080DCAD0): BN6's 3:0x33, the same bytes */
+/* its sprite 3:0x38 (080DCAD0): BN6's 3:0x70, copied */
 /* its sound 0xbf (080DCBEC): BN4's song copied into the grown song table's slot 0x1db, on BN4's player 9 */
 /* its sound 0x1c6 (080DCB58): BN4's song copied into the grown song table's slot 0x1da, on BN4's player 17 */
 
@@ -88,7 +88,7 @@ static const XvPair panlsht_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvImm panlsht_imms[] = {
-	{ 0x080DCACE, THUMB_MOVS, 2, 0, 0x38, 0x33 },   /* its object's sprite: list 3 0x38 in BN4, 0x33 in BN6 (the same bytes) */
+	{ 0x080DCACE, THUMB_MOVS, 2, 0, 0x38, 0x70 },   /* its object's sprite: list 3 0x38 in BN4, 0x70 in BN6 (copied) */
 	{ 0x080DCB24, THUMB_LDRB, 0, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
 	{ 0x080DCB72, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DCC2E, THUMB_MOVS, 0, 0, 0x7B, 0xCA },   /* its object's type 0x7b: moved, the dispatch's 0xca */
@@ -102,6 +102,9 @@ static const XvImm panlsht_imms[] = {
 static const XvType panlsht_types[] = {
 	{ 3, 0xCA, XV_TYPE_MOVED, 0x7B },   /* BN4's third-kind 0x7b, moved, the dispatch's 0xca */
 	{ 4, 0x91, XV_TYPE_MOVED, 0x4F },   /* BN4's fourth-kind 0x4f, moved, the dispatch's 0x91 */
+};
+static const XvSprite panlsht_sprites[] = {
+	{ 3, 0x38, 3, 0x70, XC4_ART + 0x0, 0x400 },   /* BN4's 3:0x38 copied */
 };
 static const XvSoundCall panlsht_sound_calls[] = {
 	{ 0x080DCBEC, 0x1DB },   /* its sound 0xbf: BN4's song at the grown table's slot 0x1db */
@@ -117,12 +120,13 @@ static const XcSong panlsht_songs[] = { { 0xBF, 0x1DB }, { 0x1C6, 0x1DA } };
 	.words = panlsht_words, .nwords = (int)(sizeof panlsht_words / sizeof *panlsht_words), \
 	.imms = panlsht_imms, .nimms = (int)(sizeof panlsht_imms / sizeof *panlsht_imms), \
 	.types = panlsht_types, .ntypes = (int)(sizeof panlsht_types / sizeof *panlsht_types), \
-	.sound_calls = panlsht_sound_calls, .nsound_calls = (int)(sizeof panlsht_sound_calls / sizeof *panlsht_sound_calls) }
+	.sound_calls = panlsht_sound_calls, .nsound_calls = (int)(sizeof panlsht_sound_calls / sizeof *panlsht_sound_calls), \
+	.sprites = panlsht_sprites, .nsprites = (int)(sizeof panlsht_sprites / sizeof *panlsht_sprites) }
 /* ---- ShotStar: BN4's support 0x19 (080E5D79) as BN6's 0x99; its chips 210 (570) ---- */
 /* its fourth-kind 0x34 (080E5C90-080E5E38), which its routine (080E5D78) spawns: moved */
 /* its third-kind 0x56 (080D85AA-080D87B0), spawned through 080D879A: no BN6 type proved its twin, moved */
 /* its fourth-kind 0x35 (080E5E38-080E5EF4): no BN6 type of its body, moved with him */
-/* its table 080D8580's kind 1: sprite 3:0x31 in BN4, 0x70 in BN6 (copied) */
+/* its table 080D8580's kind 1: sprite 3:0x31 in BN4, 0x71 in BN6 (copied) */
 /* its effect 0x6: BN6's 0xcf, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
 /* its sound 0x146 (080D86CE): BN4's song copied into the grown song table's slot 0x1dc, on BN4's player 6 */
@@ -222,12 +226,12 @@ static const XvType shotstar_types[] = {
 	{ 4, 0x93, XV_TYPE_MOVED, 0x35 },   /* BN4's fourth-kind 0x35, moved, the dispatch's 0x93 */
 };
 static const XvSprite shotstar_sprites[] = {
-	{ 3, 0x31, 3, 0x70, XC4_ART + 0x0, 0x300 },   /* BN4's 3:0x31 copied */
-	{ 5, 0x0A, 5, 0xEF, XC4_ART + 0x300, 0xD00 },   /* BN4's 5:0xa copied */
+	{ 3, 0x31, 3, 0x71, XC4_ART + 0x400, 0x300 },   /* BN4's 3:0x31 copied */
+	{ 5, 0x0A, 5, 0xEF, XC4_ART + 0x700, 0xD00 },   /* BN4's 5:0xa copied */
 };
 static const XvId shotstar_effects[] = { { 0x06, 0xCF } };
 static const XvByte shotstar_bytes[] = {
-	{ 0x080D8586, 0x31, 0x70 },   /* its table's kind 1: list 3 0x31 in BN4, 0x70 in BN6 (copied) */
+	{ 0x080D8586, 0x31, 0x71 },   /* its table's kind 1: list 3 0x31 in BN4, 0x71 in BN6 (copied) */
 };
 static const XvSoundCall shotstar_sound_calls[] = {
 	{ 0x080D86CE, 0x1DC },   /* its sound 0x146: BN4's song at the grown table's slot 0x1dc */
@@ -270,7 +274,7 @@ static const XvImm repair_imms[] = {
 static const XvType repair_types[] = {
 };
 static const XvSprite repair_sprites[] = {
-	{ 3, 0x12, 4, 0x9F, XC4_ART + 0x1000, 0x1300 },   /* BN4's 3:0x12 copied */
+	{ 3, 0x12, 4, 0x9F, XC4_ART + 0x1400, 0x1300 },   /* BN4's 3:0x12 copied */
 };
 static const XvId repair_effects[] = { { 0x07, 0xCE } };
 static const XcSong repair_songs[] = { { 0x9A, 0x39 } };
@@ -329,7 +333,7 @@ static const XvType counter_types[] = {
 	{ 3, 0xC8, XV_TYPE_MOVED, 0x17 },   /* BN4's third-kind 0x17, moved, the dispatch's 0xc8 */
 };
 static const XvSprite counter_sprites[] = {
-	{ 5, 0x10, 5, 0xEE, XC4_ART + 0x2300, 0xB00 },   /* BN4's 5:0x10 copied */
+	{ 5, 0x10, 5, 0xEE, XC4_ART + 0x2700, 0xB00 },   /* BN4's 5:0x10 copied */
 };
 static const XvSoundCall counter_sound_calls[] = {
 	{ 0x080CFD96, 0x1DD },   /* its sound 0xbe: BN4's song at the grown table's slot 0x1dd */
@@ -412,8 +416,8 @@ static const XvType whitweb_types[] = {
 	{ 3, 0xC6, XV_TYPE_MOVED, 0x3D },   /* BN4's third-kind 0x3d, moved, the dispatch's 0xc6 */
 };
 static const XvSprite whitweb_sprites[] = {
-	{ 4, 0x1C, 4, 0x9E, XC4_ART + 0x2E00, 0x600 },   /* BN4's 4:0x1c copied */
-	{ 5, 0x01, 5, 0xED, XC4_ART + 0x3400, 0x1800 },   /* BN4's 5:0x1 copied */
+	{ 4, 0x1C, 4, 0x9E, XC4_ART + 0x3200, 0x600 },   /* BN4's 4:0x1c copied */
+	{ 5, 0x01, 5, 0xED, XC4_ART + 0x3800, 0x1800 },   /* BN4's 5:0x1 copied */
 };
 static const XvId whitweb_effects[] = { { 0x0F, 0xCD } };
 static const XvSoundCall whitweb_sound_calls[] = {
@@ -432,6 +436,91 @@ static const XcSong whitweb_songs[] = { { 0x70, 0x3A }, { 0xF7, 0x1DE } };
 	.sound_calls = whitweb_sound_calls, .nsound_calls = (int)(sizeof whitweb_sound_calls / sizeof *whitweb_sound_calls), \
 	.sprites = whitweb_sprites, .nsprites = (int)(sizeof whitweb_sprites / sizeof *whitweb_sprites), \
 	.effects = whitweb_effects, .neffects = (int)(sizeof whitweb_effects / sizeof *whitweb_effects) }
+/* ---- Boomer: BN4's misc 0x2 (080D344F) as BN6's 0x82; its chips 75 (584), 76 (585), 77 (586) ---- */
+/* its routine (080D344E) lies in the third-kind 0x32's code (080D3234-080D3468), which it spawns: moved */
+/* its sprite 4:0x14 (080D3268): BN6's 4:0x9d, copied */
+/* its sound 0xab (080D32F4): BN4's song copied into the grown song table's slot 0x1df, on BN4's player 28 */
+
+static const XvBlock boomer_blocks[] = {
+	{ 0x080D3234, 0x080D3468, XC4_CODE + 0xC20, 0x5EBC617Fu },
+	{ 0x080D31EC, 0x080D3234, XC4_CODE + 0xE60, 0x9FE81DFDu },
+};
+static const XvData boomer_data[] = {
+	{ 0x080D3246, 0x080D3248, XV_RAW },
+	{ 0x080D3248, 0x080D324C, XV_POOL },
+	{ 0x080D324C, 0x080D3258, XV_TABLE },
+	{ 0x080D32FE, 0x080D3300, XV_RAW },
+	{ 0x080D3300, 0x080D3304, XV_POOL },
+	{ 0x080D3364, 0x080D3368, XV_POOL },
+	{ 0x080D3368, 0x080D336C, XV_TABLE },
+	{ 0x080D3406, 0x080D3408, XV_RAW },
+	{ 0x080D3408, 0x080D340C, XV_POOL },
+	{ 0x080D340C, 0x080D3418, XV_RAW },
+	{ 0x080D3418, 0x080D341C, XV_POOL },
+	{ 0x080D341C, 0x080D3428, XV_RAW },
+	{ 0x080D3428, 0x080D3430, XV_POOL },
+	{ 0x080D3464, 0x080D3468, XV_POOL },
+	{ 0x080D31EC, 0x080D3234, XV_RAW },
+};
+static const XvPair boomer_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800AB8A, 0x0800E2C2 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x08010560, 0x080D0B94 },   /* project:spikey, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+};
+static const XvPair boomer_words[] = {
+};
+static const XvImm boomer_imms[] = {
+	{ 0x080D3264, THUMB_MOVS, 2, 0, 0x14, 0x9D },   /* its object's sprite: list 4 0x14 in BN4, 0x9d in BN6 (copied) */
+	{ 0x080D3318, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D3434, THUMB_MOVS, 0, 0, 0x32, 0xC5 },   /* its object's type 0x32: moved, the dispatch's 0xc5 */
+	{ 0x080D3444, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType boomer_types[] = {
+	{ 3, 0xC5, XV_TYPE_MOVED, 0x32 },   /* BN4's third-kind 0x32, moved, the dispatch's 0xc5 */
+};
+static const XvSprite boomer_sprites[] = {
+	{ 4, 0x14, 4, 0x9D, XC4_ART + 0x5000, 0xF00 },   /* BN4's 4:0x14 copied */
+};
+static const XvSoundCall boomer_sound_calls[] = {
+	{ 0x080D32F4, 0x1DF },   /* its sound 0xab: BN4's song at the grown table's slot 0x1df */
+};
+static const XcSong boomer_songs[] = { { 0xAB, 0x1DF } };
+
+#define BOOMER_CODE { .name = "Boomer (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x1C00), \
+	.blocks = boomer_blocks, .nblocks = (int)(sizeof boomer_blocks / sizeof *boomer_blocks), \
+	.data = boomer_data, .ndata = (int)(sizeof boomer_data / sizeof *boomer_data), \
+	.calls = boomer_calls, .ncalls = (int)(sizeof boomer_calls / sizeof *boomer_calls), \
+	.words = boomer_words, .nwords = (int)(sizeof boomer_words / sizeof *boomer_words), \
+	.imms = boomer_imms, .nimms = (int)(sizeof boomer_imms / sizeof *boomer_imms), \
+	.types = boomer_types, .ntypes = (int)(sizeof boomer_types / sizeof *boomer_types), \
+	.sound_calls = boomer_sound_calls, .nsound_calls = (int)(sizeof boomer_sound_calls / sizeof *boomer_sound_calls), \
+	.sprites = boomer_sprites, .nsprites = (int)(sizeof boomer_sprites / sizeof *boomer_sprites) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -440,5 +529,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x08, 0x88, 0x080D4F21, XC4_HOMES + 0x1000, WHITWEB_CODE, whitweb_songs, (int)(sizeof whitweb_songs / sizeof *whitweb_songs), 0, 0 },
 	{ XCHIP_MISC, 0x09, 0x89, 0x080D4F2B, XC4_HOMES + 0x1400, { .name = "WhitWeb (BN4's), its subfamily 0x9", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 	{ XCHIP_MISC, 0x0A, 0x8A, 0x080D4F35, XC4_HOMES + 0x1800, { .name = "WhitWeb (BN4's), its subfamily 0xa", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
+	{ XCHIP_MISC, 0x02, 0x82, 0x080D344F, XC4_HOMES + 0x1C00, BOOMER_CODE, boomer_songs, (int)(sizeof boomer_songs / sizeof *boomer_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
