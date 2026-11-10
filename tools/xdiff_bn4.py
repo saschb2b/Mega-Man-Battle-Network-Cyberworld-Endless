@@ -21,6 +21,7 @@ sounds, effects and alliance words are its own still. The fields BN4 has none of
 and only where BN4's trace holds nothing there. Against BN6's, the family's own records (family_roles) fail the spec at
 their first unexplained difference; one in the world's alone makes it INCONCLUSIVE from there, never PASS (the BN5
 differential's stop rule), the family compared on. A control fails at its first difference of any kind."""
+import copy
 import json
 import os
 import re
@@ -273,6 +274,9 @@ def bn4_as_bn6(rec, fams):
 # subfamily where it is the chip's record's. Not a mask: each read as BN6's engine has it, by the registry's row
 CHIP_RECORDS, CHIP_RECORD_SIZE, CHIP_SUBFAMILY, BN6_CHIPS = {4: 0x197EC, 6: 0x21DA8}, 0x2C, 0x0C, 411
 XREG4_ROW = re.compile(r'\{\s*(\d+),\s*(\d+),\s*XREG_\w+,')
+XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-Fa-f]{2}),')
+
+TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
 
 
 def chip_ids(spec):
@@ -281,7 +285,11 @@ def chip_ids(spec):
     rule = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('chip_id')
     if not rule:
         return {}
-    ids = {int(x): int(to) for x, to in XREG4_ROW.findall(open(os.path.join(ROOT, rule['registry'])).read())}
+    rows = open(os.path.join(ROOT, rule['registry'])).read()
+    ids = {int(x): int(to) for x, to in XREG4_ROW.findall(rows)}
+    # (a row on BN6's code, XREG_RECORD: the BN6 chip whose family and subfamily its record takes, or the row's own subfamily)
+    TWINS.clear()
+    TWINS.update({int(to): (int(twin), None if sub.upper() == 'FF' else int(sub, 16)) for to, twin, sub in XREG4_TWIN.findall(rows)})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
@@ -289,7 +297,8 @@ def chip_ids(spec):
 
 def megaman_chip_as_bn6(ai, canon):
     """MegaMan's AI data of BN4's with the chip his attack uses as the run's id (the places of legit.json's bn4 chip_id) and,
-    where the run's chip is one of BN6's own and his attack's subfamily is the chip's record's in BN4, as BN6's record's"""
+    where his attack's subfamily is the chip's record's in BN4, as the record's BN6's engine runs the chip by: the chip's own
+    where it is one of BN6's, a registry row's twin's where the row is on BN6's code (XREG_RECORD)"""
     rule = getattr(canon, 'chip_rule', None)
     if not rule or ai is None:
         return ai
@@ -300,9 +309,12 @@ def megaman_chip_as_bn6(ai, canon):
             continue
         to = ids[chip]
         own = roms[4][CHIP_RECORDS[4] + chip * CHIP_RECORD_SIZE + CHIP_SUBFAMILY]
-        for sat in rule['subfamily'] if to < BN6_CHIPS else ():
+        twin, sub = TWINS.get(to, (to if to < BN6_CHIPS else None, None))
+        if sub is None and twin is not None:
+            sub = roms[6][CHIP_RECORDS[6] + twin * CHIP_RECORD_SIZE + CHIP_SUBFAMILY]
+        for sat in rule['subfamily'] if sub is not None else ():
             if ai[sat] == own:
-                ai[sat] = roms[6][CHIP_RECORDS[6] + to * CHIP_RECORD_SIZE + CHIP_SUBFAMILY]
+                ai[sat] = sub
         ai[at:at + 2] = to.to_bytes(2, 'little')
     return ai
 
@@ -1274,9 +1286,21 @@ def compare(spec, ta, tb, canon, show=6):
         if frb is None:
             continue
         later = bt.get(fra['t'] + lag + held) if held else None
-        if later:   # (MegaMan's own record of BN6's as his own clock has it: the frame `held` later)
+        if later:
+            # (MegaMan's own record of BN6's as his own clock has it, the frame `held` later: his object and AI data, what his
+            # state runner drives; his collision data stays the battle's frame's, its timers the status routines')
             his = {o.role: o for o in later['objs'] if isinstance(o.role, tuple) and o.role[:2] == ('T1', MEGAMAN_ID)}
-            frb = dict(frb, objs=[his.get(o.role, o) for o in frb['objs']])
+            objs = []
+            for o in frb['objs']:
+                if o.role in his:
+                    own = copy.copy(his[o.role])
+                    own.coll = o.coll
+                    # (his visible bit, the blink's: the status routines' by the collision data's timer, the battle's frame's)
+                    own.rec = bytearray(own.rec)
+                    own.rec[NODE] = (own.rec[NODE] & ~OBJ_VISIBLE) | (o.rec[NODE] & OBJ_VISIBLE)
+                    o = own
+                objs.append(o)
+            frb = dict(frb, objs=objs)
         n += 1
         fa = Frame(ta, fra, canon)
         fb = Frame(tb, frb, canon)

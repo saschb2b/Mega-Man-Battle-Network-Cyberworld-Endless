@@ -315,7 +315,7 @@ static void records_make(const uint32_t blank[3]) {
 		if (!r && M.alias && id == M.alias) { memcpy(out, table + XREC_SIZE * (uint32_t)M.alias_from, XREC_SIZE); continue; }
 		const XChipReg4 *r4 = r ? NULL : xreg4_at(id);
 		if (r4 && M.rom4) {
-			XRecordFrom4 in = { bn4_record(r4->bn4), r4, 0, { 0 } };
+			XRecordFrom4 in = { bn4_record(r4->bn4), r4->how == XREG_RECORD && r4->twin ? table + XREC_SIZE * r4->twin : NULL, r4, 0, { 0 } };
 			memcpy(in.art, M.art[id], sizeof in.art);
 			xrec_from_bn4(&in, out);
 			continue;
@@ -346,9 +346,12 @@ static void sits_make(void) {
 		bool plays = (r->how == XREG_RECORD || (r->how == XREG_MOVED && xchips_moved_of(r->bn6))) && M.rom5;
 		if (xreg_own(r) && !plays) M.sits[r->bn6 >> 3] |= (uint8_t)(1u << (r->bn6 & 7));
 	}
-	/* (BN4's rows: none plays yet, its code not in BN6's engine; --dev alias's id, a copy of BN6's chip, does) */
-	for (int i = 0; i < xreg4_count; ++i)
-		if (M.alias != xreg4_rows[i].bn6) M.sits[xreg4_rows[i].bn6 >> 3] |= (uint8_t)(1u << (xreg4_rows[i].bn6 & 7));
+	/* (BN4's rows: one plays where its record runs on BN6's own code, XREG_RECORD, and BN4's ROM is read; the rest sit out,
+	 * their code not in BN6's engine; --dev alias's id, a copy of BN6's chip, plays) */
+	for (int i = 0; i < xreg4_count; ++i) {
+		bool plays = (xreg4_rows[i].how == XREG_RECORD && M.rom4) || M.alias == xreg4_rows[i].bn6;
+		if (!plays) M.sits[xreg4_rows[i].bn6 >> 3] |= (uint8_t)(1u << (xreg4_rows[i].bn6 & 7));
+	}
 }
 
 /* ---- made at need ---- */

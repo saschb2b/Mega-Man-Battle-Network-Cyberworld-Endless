@@ -112,10 +112,17 @@ void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
 		fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
 	}
 	out[BN6_CHIP_EFFECT_FLAGS] = fx;
-	out[BN6_CHIP_FAMILY] = XREC_INERT_FAMILY;
-	out[BN6_CHIP_SUBFAMILY] = XREC_INERT_SUB;
-	out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
-	memset(out + BN6_CHIP_PARAMS, 0, 4);
+	if (in->twin) {
+		out[BN6_CHIP_FAMILY] = in->twin[BN6_CHIP_FAMILY];
+		out[BN6_CHIP_SUBFAMILY] = in->reg->sub != 0xFF ? in->reg->sub : in->twin[BN6_CHIP_SUBFAMILY];
+		out[BN6_CHIP_LOCK_ON] = in->twin[BN6_CHIP_LOCK_ON];
+		out[BN6_CHIP_LOCK_ON_TYPE] = in->twin[BN6_CHIP_LOCK_ON_TYPE];
+	} else {
+		out[BN6_CHIP_FAMILY] = XREC_INERT_FAMILY;
+		out[BN6_CHIP_SUBFAMILY] = XREC_INERT_SUB;
+		out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
+		memset(out + BN6_CHIP_PARAMS, 0, 4);
+	}
 	out[BN6_CHIP_LIBRARY_NUMBER] = out[BN6_CHIP_LIBRARY_FLAGS] = 0;
 	put16(out + BN6_CHIP_ALPHA_SORT, in->abc);
 	put16(out + BN6_CHIP_ID_SORT, in->reg->bn6);

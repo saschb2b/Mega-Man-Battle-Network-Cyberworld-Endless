@@ -419,8 +419,10 @@ int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, cha
 		if (!r->bn4 || r->bn4 >= BN4_IDS || bn4_seen[r->bn4]++) return bad(i, why, len, "BN4's id is none, past its records, or twice");
 		if (r->bn6 < XREG4_PACK_FIRST || !xreg_free_id(r->bn6) || id_seen[r->bn6]++) return bad(i, why, len, "its id is not free, BN5's, or taken twice");
 		bool pa = r->bn6 >= XREG4_PA_FIRST && r->bn6 < XREG4_REST_FIRST;
-		if (r->how == XREG_PA ? !pa || r->type != 4 : r->how != XREG_PENDING || pa || r->type > 2 || (r->bn6 >= BN6_PACK_WIDE_END && r->bn6 < XREG4_REST_FIRST))
+		bool folder = r->how == XREG_PENDING || r->how == XREG_RECORD;
+		if (r->how == XREG_PA ? !pa || r->type != 4 : !folder || pa || r->type > 2 || (r->bn6 >= BN6_PACK_WIDE_END && r->bn6 < XREG4_REST_FIRST))
 			return bad(i, why, len, "a folder chip's id is a Program Advance's, or the other way, or its class is neither's");
+		if ((r->how == XREG_RECORD) != (r->twin != 0) || r->twin >= 411) return bad(i, why, len, "a twin where its record takes none, none where it takes one, or none of BN6's records");
 	}
 	return 0;
 }

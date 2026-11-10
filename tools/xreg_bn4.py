@@ -35,6 +35,12 @@ REC = 0x2C
 BN4_MB, BN4_CLASS, FAMILY, SUB, PARAMS = 6, 8, 0x0B, 0x0C, 0x10
 SP, DS = 3, 4          # a Navi chip's version, its record's first parameter
 OUT_OF = {310: 'BugCharg'}   # (no row: the owner's rule)
+# BN4's chips that run on BN6's own code (docs/multirom/bn4-chips.md, Their code: BN4's family and subfamily a routine BN6 has
+# by its body), each proved by its chip_* spec against BN4's own battle before it is listed: BN4's id -> (the BN6 chip whose
+# family, lock-on and lock-on type its record takes, the subfamily or None for the twin's)
+ON_BN6 = {
+    133: (177, None),   # Invis: BN4's support 0x31, BN6's subfamily 1 (Invisibl's), the same frames in its parameters (chip_invis)
+}
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
 # BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)
@@ -156,7 +162,7 @@ def rows(r):
     order = list(FIRST) + [x for x in new if x not in FIRST]
     out = []
     for k, x in enumerate(order):
-        out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_PENDING'))
+        out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_PENDING'))
     for k, x in enumerate(pas):
         out.append((x, PA_FIRST + k, 'XREG_PA'))
     if len(pas) > REST_FIRST - PA_FIRST or out[len(order) - 1][1] > 1023:
@@ -166,7 +172,8 @@ def rows(r):
 
 HEAD = '''/* BN4 Red Sun's rows of the chip registry (xchips_registry.h; docs/multirom/bn4-chips.md, The build plan's unit 2):
  * the chips a run has none of by name or by Navi, each with its id in BN6's tables, fixed here. Written by
- * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its codes, class and MB,
+ * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its twin and subfamily where its
+ * record runs on BN6's code, its codes, class and MB,
  * which its placeholder keeps where BN4's ROM is not read). 527-602 the chips that play first, 605-623 its Program
  * Advances, 635 on the rest. */
 #include "xchips_registry.h"
@@ -179,7 +186,8 @@ def text(rws):
     L = [HEAD]
     for x, to, how, rec, nm in rws:
         codes = ', '.join(f'0x{c:02X}' for c in rec[0:4])
-        L.append(f'\t{{ {x:3}, {to:4}, {how}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
+        twin, sub = ON_BN6.get(x, (0, None))
+        L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
     L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
     return ''.join(L)
 
@@ -198,7 +206,7 @@ def main():
         return
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(t)
-    folder = sum(1 for r in rws if r[2] == 'XREG_PENDING')
+    folder = sum(1 for r in rws if r[2] != 'XREG_PA')
     print(f'xreg_bn4: {len(rws)} rows ({folder} folder chips, {len(rws) - folder} Program Advances), ids to {max(r[1] for r in rws)}')
 
 
