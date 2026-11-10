@@ -102,5 +102,11 @@
                                            * (1, 2, 3) to 0x080D4EC4, which lays a web on each of the other side's panels of that row */
 #define BN4_T3_WEB            0x3D        /* the web, the third kind's (0x080D4D30 to 0x080D4F40, the three routines in its code): on its
                                            * panel it strikes what stands there; sound 0xF7 */
+/* Boomer1-3 (its chips 75-77, misc subfamily 2), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_BOOMER            0x080D344Eu /* its routine, in the boomerang's code: the boomerang spawned (0x080D3430) */
+#define BN4_T3_BOOMERANG      0x32        /* the boomerang, the third kind's (0x080D3234 to 0x080D3468): it flies round the field's edge by its
+                                           * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
+#define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
+                                           * the rows, its speed across them (16.16) */
 
 #endif

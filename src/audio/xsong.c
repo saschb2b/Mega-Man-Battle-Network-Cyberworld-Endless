@@ -483,6 +483,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xBE, SONG_GROWN_FIRST + 3 },
 	/* ... WhitWeb's web */
 	{ XROM_BN4_RED_SUN_US, 0xF7, SONG_GROWN_FIRST + 4 },
+	/* ... Boomer's boomerang */
+	{ XROM_BN4_RED_SUN_US, 0xAB, SONG_GROWN_FIRST + 5 },
 };
 
 int xsong_sound_slot(int xrom, int song) {
