@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-11
+* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
+
 ## 2026-11-10
 * **Update**: rom/navicust.md (Program 48 and BN5's board and compile, two new rows; its description and index line), game/navicust.md (11, The older Net's program: the decision and what is built; its description and index line), multirom/gaps.md (SoulT+1 built), game/meta/souls.md (a Soul's turns with it), devtools/differential.md (A program on each game's NaviCust: `ncp5`, `ncp6`, `soul_soult`), devtools/dev-menu.md (`program=48`), devtools/agents-tools.md (the state's `soulturns`), code/emu.md, code/core.md, code/dev.md (`xncp.c`, `bn6_navicust.h`, `xprograms.c`, `xdiff_ncp.c`), engine/emulation/memory.md and free-space.md (`FREE_NCP`, `FREE_NCP_TEXT`): BN5's SoulT+1 is BN6's program 48 where BN5's ROM is read, proved by each game's own compile and battle.
 * **Update**: rom/bn4.md (Barriers and auras, new row: the setters and kinds' tables of BN4 and BN6; LifeAura's kind is LifeAur's by their rows) and multirom/bn4-chips.md (call 5).

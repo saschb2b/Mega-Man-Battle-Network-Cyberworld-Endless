@@ -235,5 +235,10 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_BARRIER_SET       0x0801A7CCu
 #define BN6_BARRIER_KINDS     0x08020B2Cu /* three u16 a kind, 14 kinds: its HP, the damage a hit must reach to break an aura (0 none), its frames (0xFFFF for good); 9 LifeAur's (1, 200, 3000) */
 #define BN6_BARRIER_MARKS     0x08020B8Cu /* a byte a kind, the collision data's +0x14 */
+#define BN6_COLL_BARRIER_KIND  0x06        /* collision data: u8 its barrier's kind, 0 none (BN4's +4) */
+#define BN6_COLL_BARRIER_MARK  0x14        /* ... u8 from BN6_BARRIER_MARKS (no field of BN4's) */
+#define BN6_COLL_BARRIER_HP    0x16        /* ... u8 its HP (BN4's +0x20, a u16) */
+#define BN6_COLL_BARRIER_AURA  0x17        /* ... u8 the damage that breaks an aura (BN4's +0x22, a u16) */
+#define BN6_COLL_BARRIER_FRAMES 0x1A       /* ... u16 its frames (BN4's +0x24) */
 
 #endif

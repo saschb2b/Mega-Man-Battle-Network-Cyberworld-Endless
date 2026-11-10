@@ -2422,6 +2422,22 @@
    "what": "the registry's record of BN4's Invis naming BN6's recovery family 0x20 where the twin gives it the support family 0x15: no invisibility"
   },
   {
+   "name": "a panel grab that takes the column",
+   "spec": "bn4_chip_panlgrab",
+   "poke": [
+    "08023990:01:1"
+   ],
+   "what": "BN6's PanlGrab's record (162) with its first parameter 1, AreaGrab's, where it holds 0: a column stolen where BN4's PanlGrab steals a panel"
+  },
+  {
+   "name": "AntiNavi's record's parameter another",
+   "spec": "bn4_chip_antinavi",
+   "poke": [
+    "08023DB0:03:1"
+   ],
+   "what": "BN6's AntiNavi's record (186) with its first parameter 3 where it holds 2: MegaMan's attack's copy of it and the trap's object's are no longer BN6's record's, which BN4's are read as (legit.json's bn4 chip_id, record)"
+  },
+  {
    "name": "SoulT+1's routine adds none",
    "spec": "soul_soult",
    "poke": [
