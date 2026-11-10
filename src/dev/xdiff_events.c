@@ -15,24 +15,19 @@
 #include <string.h>
 
 #include "bn5.h"
-#include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
-#include "emu.h"
 #include "guest.h"
 #include "rom.h"
 #include "soulcode.h"
-#include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
-#include "xchips_registry.h"
-#include "xnavi_bn4_art.h"
-#include "xnavi_recipe.h"
 #include "xvirus.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
+#include "xdiff_navi4.h"
 #include "xdiff_sprite.h"
 #include "xnavi_bn5.h"
 #include "xsong.h"
@@ -492,32 +487,6 @@ static void units_of(int id) {
 	}
 }
 
-/* ... and BN4's Navi chips' units the folder plays (src/emu/xchips_bn4.c's XCHIP_NAVI rows, a registry row of BN4's whose
- * record takes the unit's number under BN6's Navi family): the chip's own Navi's code, and the moved Navi's whose attack
- * objects he runs (xnavi_bn4.c, his seat's), the family's in both logs, so a draw his attack makes (GutsMan's shockwave's
- * cracks) is keyed by BN4's place and replayed */
-static bool unit4_used[XC4_UNITS];
-
-static void units4_of(int id) {
-	const XChipReg4 *r = xreg4_at(id);
-	for (int u = 0; r && r->how == XREG_MOVED && r->twin && u < xchips_bn4_count && u < XC4_UNITS; ++u)
-		if (xchips_bn4[u].kind == XCHIP_NAVI && xchips_bn4[u].number == r->sub) unit4_used[u] = true;
-}
-
-/* whether a moved range is a used BN4 Navi chip's unit's block, or a block of the Navi's its chip runs */
-static bool navi4_chip_code(const XvMoved *m) {
-	for (int u = 0; u < xchips_bn4_count && u < XC4_UNITS; ++u) {
-		if (!unit4_used[u]) continue;
-		const XVirusFamily *f = &xchips_bn4[u].code;
-		const XNavi *n = xchips_bn4[u].navis ? xnavi_bn4_seat(xchips_bn4[u].navis - 1) : NULL;
-		for (int i = 0; i < f->nblocks; ++i)
-			if (f->blocks[i].start == m->from && f->blocks[i].at == m->to) return true;
-		for (int i = 0; n && i < n->code.nblocks; ++i)
-			if (n->code.blocks[i].start == m->from && n->code.blocks[i].at == m->to) return true;
-	}
-	return false;
-}
-
 static bool in_folder(const uint16_t *folder, int n, int id) {
 	for (int i = 0; i < n; ++i)
 		if ((int)chip_entry_id(folder[i]) == id) return true;   /* (a spec's folder, BN6's: this build's form) */
@@ -526,9 +495,8 @@ static bool in_folder(const uint16_t *folder, int n, int id) {
 
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
-	memset(unit4_used, 0, sizeof unit4_used);
 	for (int i = 0; i < n; ++i) units_of((int)chip_entry_id(folder[i]));
-	for (int i = 0; i < n; ++i) units4_of((int)chip_entry_id(folder[i]));
+	xd_navi4_units(folder, n);   /* (BN4's Navi chips' units too: xdiff_navi4.h) */
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;
@@ -619,6 +587,16 @@ static bool navi_code(const XvMoved *m) {
 	return false;
 }
 
+/* whether a log watches a moved range (log_make's list) */
+static bool watched(const XvMoved *m, const XVirusFamily *const *fams, int nfams, bool navis) {
+	if (((m->to >= XV_CODE && m->to < XV_ART) || (m->to >= XV_LATE_CODE && m->to < XV_LATE_CODE_END) ||
+	     (m->to >= XN_BN4_CODE && m->to < XN_BN4_ART)) && spec_code(m, fams, nfams, navis))
+		return true;
+	if (navis && xn_code_at(m->to) && navi_code(m)) return true;
+	if (xd_navi4_code(m)) return true;   /* (a played BN4 Navi chip's unit and its Navi's code: xdiff_navi4.h) */
+	return m->to >= FREE_CHIP_MOVED && m->to < FREE_TAIL && !(m->to >= XC_HELPERS && m->to < XC_HOMES) && chip_used(m->to);
+}
+
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {
 	int n;
 	const XvMoved *m = xvirus_moved(&n);   /* (every range moved, or no log: xvirus_moved.h) */
@@ -634,11 +612,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
 	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XV_LATE_CODE && m[i].to < XV_LATE_CODE_END) ||
-		      (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
-		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
-		    (((m[i].to >= XC4_CODE && m[i].to < XC4_ART) || (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && navi4_chip_code(&m[i])) ||
-		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to)))
+		if (watched(&m[i], fams, nfams, navis))
 			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */

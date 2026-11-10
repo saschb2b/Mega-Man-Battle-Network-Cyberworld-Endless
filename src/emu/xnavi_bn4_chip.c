@@ -73,29 +73,49 @@ static void entry_set(int list, int number, uint32_t to) {
 	claims_end();
 }
 
+/* whether sprite `s` of his art is one the chips' art room holds: a row of the battle's art room the battle's Navi `other`
+ * (NULL none) does not list too */
+static bool art_row(const XvSprite *s, const XNavi *other) {
+	return s->at >= XN_BN4_ART && s->at < XN_BN4_END && !listed(other, s);
+}
+
+/* his art's sprites copied into the chips' art room, at their places there */
+static bool art_in(const XVirusFamily *f, const XNavi *other) {
+	bool ok = true;
+	for (int i = 1; i < f->nsprites && ok; ++i) {
+		const XvSprite *s = &f->sprites[i];
+		if (art_row(s, other)) ok = s->room <= XN_BN4_CHIP_ART_END - (s->at + SHIFT) && sprite_at(s->list, s->index, s->at + SHIFT, s->room);
+	}
+	return ok;
+}
+
+/* his pool's songs packed at their places in the chips' art room (written where `write`), their headers into `headers` */
+static bool songs_in(const XVirusFamily *f, bool write, uint32_t headers[XNAVI_BN4_POOL_SLOTS]) {
+	bool ok = true;
+	for (int i = 0; i < f->nsongs && i < XNAVI_BN4_POOL_SLOTS && ok; ++i) {
+		const XvSong *s = &f->songs[i];
+		bool fits = s->at >= XN_BN4_ART && s->at < XN_BN4_END && s->room <= XN_BN4_CHIP_ART_END - (s->at + SHIFT);
+		uint8_t *p = fits ? malloc(s->room) : NULL;
+		headers[i] = p ? xsong_pack(f->game, s->from, s->at + SHIFT, p, s->room) : 0;
+		if (headers[i] && write) emu_write(s->at + SHIFT, p, s->room);
+		ok = headers[i] != 0;
+		free(p);
+	}
+	return ok;
+}
+
 /* the chips' rooms made Navi `n`'s (seat `seat`), the battle's rooms holding seat `foe`'s (NONE: nobody's): his battle
- * sprite, each sprite of his art the battle's Navi does not list, his pool's songs; `headers` their headers there */
+ * sprite, each sprite of his art the battle's Navi does not list, his pool's songs; `headers` their headers there; his
+ * entries pointed at them */
 static bool fill(const XNavi *n, int seat, int foe, uint32_t headers[XNAVI_BN4_POOL_SLOTS]) {
 	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
 	const XVirusFamily *f = &n->code;
 	const XNavi *other = foe == NONE ? NULL : xnavi_bn4_seat(foe);
 	if (!x->data || !x->layout || !x->layout->sprite_lists || !f->nsprites) return false;
-	bool held = emu_read8(XN_BN4_HELD + XN_BN4_HELD_CHIP) == seat && emu_read8(XN_BN4_HELD + XN_BN4_HELD_WITH) == foe, ok = true;
+	bool held = emu_read8(XN_BN4_HELD + XN_BN4_HELD_CHIP) == seat && emu_read8(XN_BN4_HELD + XN_BN4_HELD_WITH) == foe;
 	claims_begin(XN_BN4_CHIP_CLAIMS);
-	if (!held) ok = sprite_at(f->sprites[0].list, f->sprites[0].index, XN_BN4_CHIP_SPRITE, XN_BN4_CHIP_SPRITE_SIZE);
-	for (int i = 1; i < f->nsprites && ok; ++i) {
-		const XvSprite *s = &f->sprites[i];
-		if (s->at < XN_BN4_ART || s->at >= XN_BN4_END || listed(other, s)) continue;
-		if (!held) ok = s->room <= XN_BN4_CHIP_ART_END - (s->at + SHIFT) && sprite_at(s->list, s->index, s->at + SHIFT, s->room);
-	}
-	for (int i = 0; i < f->nsongs && i < XNAVI_BN4_POOL_SLOTS && ok; ++i) {
-		const XvSong *s = &f->songs[i];
-		uint8_t *p = s->at >= XN_BN4_ART && s->at < XN_BN4_END && s->room <= XN_BN4_CHIP_ART_END - (s->at + SHIFT) ? malloc(s->room) : NULL;
-		headers[i] = p ? xsong_pack(f->game, s->from, s->at + SHIFT, p, s->room) : 0;
-		if (headers[i] && !held) emu_write(s->at + SHIFT, p, s->room);
-		ok = headers[i] != 0;
-		free(p);
-	}
+	bool ok = held || (sprite_at(f->sprites[0].list, f->sprites[0].index, XN_BN4_CHIP_SPRITE, XN_BN4_CHIP_SPRITE_SIZE) && art_in(f, other));
+	ok = ok && songs_in(f, !held, headers);
 	if (ok && !held) {
 		uint8_t now[2] = { (uint8_t)seat, (uint8_t)foe };
 		emu_write(XN_BN4_HELD + XN_BN4_HELD_CHIP, now, 2);
@@ -105,8 +125,7 @@ static bool fill(const XNavi *n, int seat, int foe, uint32_t headers[XNAVI_BN4_P
 	if (ok) {
 		entry_set(f->sprites[0].to_list, f->sprites[0].to_index, XN_BN4_CHIP_SPRITE);
 		for (int i = 1; i < f->nsprites; ++i)
-			if (f->sprites[i].at >= XN_BN4_ART && f->sprites[i].at < XN_BN4_END && !listed(other, &f->sprites[i]))
-				entry_set(f->sprites[i].to_list, f->sprites[i].to_index, f->sprites[i].at + SHIFT);
+			if (art_row(&f->sprites[i], other)) entry_set(f->sprites[i].to_list, f->sprites[i].to_index, f->sprites[i].at + SHIFT);
 	}
 	if (!ok) fprintf(stderr, "xnavi: %s's sprite, art and songs not all put in the chips' rooms\n", f->name);
 	else if (emu_debug_on() && !held) fprintf(stderr, "xnavi: the chips' rooms hold %s's\n", f->name);

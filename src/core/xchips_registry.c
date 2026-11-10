@@ -422,6 +422,14 @@ static bool moved4_ok(const XChipReg4 *r) {
 	return r->how == XREG_RECORD || r->sub == 0xFF;
 }
 
+/* a row on BN6's code names its twin; a moved one may, for its family alone (a Navi chip's, BN6's Navi family); no other row
+ * names one, and a twin is one of BN6's records */
+static bool twin4_ok(const XChipReg4 *r) {
+	if (r->how == XREG_RECORD && !r->twin) return false;
+	if (r->twin && r->how != XREG_RECORD && r->how != XREG_MOVED) return false;
+	return r->twin < 411;
+}
+
 int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, char *why, size_t len) {
 	static uint8_t bn4_seen[BN4_IDS], id_seen[XREG_IDS];
 	memset(bn4_seen, 0, sizeof bn4_seen);
@@ -436,8 +444,7 @@ int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, cha
 		bool folder = r->how == XREG_PENDING || r->how == XREG_RECORD || r->how == XREG_MOVED;
 		if (r->how == XREG_PA ? !pa || r->type != 4 : !folder || pa || r->type > 2 || (r->bn6 >= BN6_PACK_WIDE_END && r->bn6 < XREG4_REST_FIRST))
 			return bad(i, why, len, "a folder chip's id is a Program Advance's, or the other way, or its class is neither's");
-		/* (a row on BN6's code names its twin; a moved one may, for its family alone: a Navi chip's, BN6's Navi family) */
-		if ((r->how == XREG_RECORD && !r->twin) || (r->twin && r->how != XREG_RECORD && r->how != XREG_MOVED) || r->twin >= 411)
+		if (!twin4_ok(r))
 			return bad(i, why, len, "a twin where its record takes none, none where it takes one, or none of BN6's records");
 		if (!moved4_ok(r)) return bad(i, why, len, "a moved chip without its unit's number, or a number where no code moved");
 	}
