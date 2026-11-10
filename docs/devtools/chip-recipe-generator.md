@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T02:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
 ---
 
 # The chip recipe generator
@@ -191,11 +191,13 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   collision data's offsets, a panel's type and side after `getPanel`, a
   sprite load given BN6's number of the same bytes (one BN6 lacks is a
   decision: the emitter copies none yet), an effect's id by its look, a
-  sound BN6 has no song of given its slot (`SOUND_SLOTS`, the same
-  numbers as `src/audio/xsong.c`'s; one without a slot is a decision,
-  the slots being the owner's to give).
+  sound BN6 has no song of given its slot of BN6's grown song table
+  (`SOUND_SLOTS`, from 0x1DA up, the same numbers as
+  `src/audio/xsong.c`'s; `src/emu/song_table.h`) and played through a
+  shim of the unit's home that names it, a number past a byte; one
+  without a slot is a decision, the next slot its answer.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
-  of veneers, then code, then art. Its entry is the spawner's copy at
+  (veneers, then shims), then code, then art. Its entry is the spawner's copy at
   BN6's grown support routines' 0x80 + BN4's subfamily (BN6's own are
   0-0x29, BN5's from 0x2A). `xchips_bn4_code_install` stages it where
   BN4's ROM is read; the stubs and the two grown tables are staged by

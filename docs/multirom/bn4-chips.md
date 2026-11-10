@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -60,15 +60,18 @@ element (PanlSht's kind is the Cursor's, as BN5's chips' icons give
 theirs), the object's chip and spawn leftovers by its type, the two
 copied sounds (`tests/xdiff/legit.json`'s `bn4` section).
 
-**Open, the owner's call 6: where BN4's chips' sounds go.** PanlSht
-plays two sounds BN6 has no song of (0xBF as a shot flies, 0x1C6 as it
-is made), and nearly every unit to come has its own (ShotStar's star
-0x146, FirePlus's three): some sixty over the 48 units. BN6 has eight
-empty song slots left, 0x43-0x4A, kept for BN5's (call 8 of [Battle
-Network 4 in a run](bn4.md)); the families' twelve are spent and the
-Navis' pool is a battle's Navi's. PanlSht's two sit in 0x4A and 0x49
-until the call is made (`tools/xchiprecipe_bn4.py` `SOUND_SLOTS`,
-`src/audio/xsong.c`), which is why its PR waits.
+**Its sounds, and every BN4 chip's after it, go into BN6's song table
+grown** (the owner's call 6, 11 November 2026). PanlSht plays two sounds
+BN6 has no song of (0x1C6 as a shot is made, 0xBF as it flies), and
+nearly every unit to come has its own (ShotStar's star 0x146, FirePlus's
+three): some sixty over the 48 units, where BN6 had eight empty song
+slots left, kept for BN5's. So the table is copied into the free space
+with 550 more slots and the sound engine's five words that name it are
+pointed at the copy (`src/emu/song_table.c`, where BN4's ROM is read;
+[Sound](../rom/sound.md), The song table grown). A unit's sound takes
+the next slot from 0x1DA (`tools/xchiprecipe_bn4.py` `SOUND_SLOTS`,
+`src/audio/xsong.c`'s the same): PanlSht's are 0x1DA and 0x1DB, each
+call through a shim that names the slot, a number past a byte.
 
 **Next: ShotStar** (support 0x19, one chip, a Mega). Its object, the
 fourth kind's 0x34, derives whole (424 bytes); the star it drops is the
@@ -768,17 +771,14 @@ Asked and answered on 10 November 2026:
    aura for 3000 frames (docs/rom/bn4.md, Barriers and auras). The rows are 193 since:
    174 folder chips and 19 Program Advances.
 
-Open:
+Asked and answered on 11 November 2026:
 
-6. **Where BN4's chips' sounds go** (asked 10 November 2026, Where
-   things stand). The ways: BN6's song table grown past its end, a slot
-   for every sound of every game from then on (recommended: the one that
-   lasts, at the cost of the sound engine's literals and the engine's
-   own MP2K reading the grown table); the last eight empty slots,
-   0x43-0x4A, taken from BN5's reserve (four units' worth, and Team
-   ProtoMan's Navis want them); or the pool by battle, pointed at the
-   sounds of the BN4 chips a battle's folder holds, shared with a BN4
-   Navi's (16 slots, a chip's sound silent where they run out).
+6. **BN4's chips' sounds go into BN6's song table grown:** "Grow song
+   table". Chosen over the last eight empty slots, 0x43-0x4A, taken from
+   BN5's reserve (call 8 of [Battle Network 4 in a run](bn4.md); Team
+   ProtoMan's Navis want them), and over the Navis' pool by battle shared
+   with the chips a folder holds. A slot for every sound of another game
+   from then on (Where things stand).
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
