@@ -644,6 +644,10 @@ static bool another_navis(const Spec *s, uint32_t to) {
  * BlizzardMan's and CloudMan's chips' spawns' addresses); and never a BN5 Navi's copy but the spec's own foes'
  * (another_navis) */
 static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
+	/* (a BN4 spec's poke of an address one of BN4's chips' units moved: that unit's copy, whatever block of BN5's holds the
+	 * same number, the two games' addresses overlapping: the bolt's 0x080DF050 lies in a BN5 family's block too) */
+	for (int k = n - 1; s->bn4 && !p->bn5 && k >= 0; --k)
+		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) return k;
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
