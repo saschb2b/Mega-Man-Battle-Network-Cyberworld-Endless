@@ -32,6 +32,8 @@
 #define FREE_CHIP_AI_END     (EMU_FREE + 0x001740u)
 #define FREE_SWAP_RETURN     (EMU_FREE + 0x001740u)  /* where the swap's spawn returns mid-battle: a hook (battle_swap.c) */
 #define FREE_SWAP_RETURN_END (EMU_FREE + 0x001760u)
+#define FREE_NCP             (EMU_FREE + 0x001800u)  /* BN6's NaviCust programs' tables grown for program 48, BN5's SoulT+1: its routine and shapes, the list's stub, the effects, codes and records (xncp.c) */
+#define FREE_NCP_END         (EMU_FREE + 0x002800u)
 
 /* ---- layers: +0x002F00-+0x090000, layers and the town: their maps, rewritten as a layer or the town is entered; home's other places ---- */
 #define FREE_WARP_LIST       (EMU_FREE + 0x002F00u)  /* the layer map's warp list (mapslot.c) */
@@ -73,6 +75,8 @@
 #define FREE_PET_OPTIONS_END (EMU_FREE + 0x16A000u)
 #define FREE_BBS             (EMU_FREE + 0x16A000u)  /* the visit's requests on BN6's Request BBS: their titles and posts, LZ77 (request_bbs.c) */
 #define FREE_BBS_END         (EMU_FREE + 0x16B000u)
+#define FREE_NCP_TEXT        (EMU_FREE + 0x16B000u)  /* the NaviCust programs' names with program 48's, then their descriptions with its own, LZ77 (xncp.c) */
+#define FREE_NCP_TEXT_END    (EMU_FREE + 0x16BC00u)
 
 /* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds ---- */
 #define FREE_XAREA           (EMU_FREE + 0x170000u)  /* another game's net area (netmap.c) */
@@ -165,6 +169,7 @@
 	X("FREE_CHIP_PAS", (EMU_FREE + 0x001300u), (EMU_FREE + 0x001700u), "", "engine") \
 	X("FREE_CHIP_AI", (EMU_FREE + 0x001700u), (EMU_FREE + 0x001740u), "", "engine") \
 	X("FREE_SWAP_RETURN", (EMU_FREE + 0x001740u), (EMU_FREE + 0x001760u), "", "engine") \
+	X("FREE_NCP", (EMU_FREE + 0x001800u), (EMU_FREE + 0x002800u), "", "engine") \
 	X("FREE_WARP_LIST", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x003000u), "", "layers") \
 	X("FREE_LAYER", (EMU_FREE + 0x003000u), (EMU_FREE + 0x010000u), "", "layers") \
 	X("FREE_TILE_MAP", (EMU_FREE + 0x010000u), (EMU_FREE + 0x028000u), "", "layers") \
@@ -191,6 +196,7 @@
 	X("FREE_TRADER_LIST", (EMU_FREE + 0x168000u), (EMU_FREE + 0x169000u), "", "words") \
 	X("FREE_PET_OPTIONS", (EMU_FREE + 0x169000u), (EMU_FREE + 0x16A000u), "", "words") \
 	X("FREE_BBS", (EMU_FREE + 0x16A000u), (EMU_FREE + 0x16B000u), "", "words") \
+	X("FREE_NCP_TEXT", (EMU_FREE + 0x16B000u), (EMU_FREE + 0x16BC00u), "", "words") \
 	X("FREE_XAREA", (EMU_FREE + 0x170000u), (EMU_FREE + 0x1A0000u), "", "world") \
 	X("FREE_SONGS", (EMU_FREE + 0x1A0000u), (EMU_FREE + 0x260000u), "", "world") \
 	X("FREE_XNAVIS", (EMU_FREE + 0x260000u), (EMU_FREE + 0x2A0000u), "", "world") \

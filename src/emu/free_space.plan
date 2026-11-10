@@ -27,6 +27,7 @@ FREE_BLOCKERS          +0x000700  +0x0012E0  end  blockers.c                engi
 FREE_CHIP_PAS          +0x001300  +0x001700  end  xchips_code.c             rom/chips-code.md           BN6's Program Advances' list grown with BN5's: their recipes, then the list
 FREE_CHIP_AI           +0x001700  +0x001740  end  darkinvs.c                engine/emulation/memory.md  the player's chip AI's stub
 FREE_SWAP_RETURN       +0x001740  +0x001760  end  battle_swap.c             rom/navis.md                where the swap's spawn returns mid-battle: a hook
+FREE_NCP               +0x001800  +0x002800  end  xncp.c                    rom/navicust.md             BN6's NaviCust programs' tables grown for program 48, BN5's SoulT+1: its routine and shapes, the list's stub, the effects, codes and records
 
 # (the layers' regions sized by their largest, November 2026: the tile
 # maps by BN6's buffer, BN6_TILEMAP_MAX as literal blocks, the layers'
@@ -69,6 +70,7 @@ FREE_PORTRAITS         +0x166000  +0x167900  end  portrait.c                game
 FREE_TRADER_LIST       +0x168000  +0x169000  end  trader.c                  multirom/one-net.md         a layer's Chip Trader's prizes of both nets
 FREE_PET_OPTIONS       +0x169000  +0x16A000  end  pet_options.c             game/pet.md                 the PET menu's labels with Comm's made Options
 FREE_BBS               +0x16A000  +0x16B000  end  request_bbs.c             world/home/jobs.md          the visit's requests on BN6's Request BBS: their titles and posts, LZ77
+FREE_NCP_TEXT          +0x16B000  +0x16BC00  end  xncp.c                    rom/navicust.md             the NaviCust programs' names with program 48's, then their descriptions with its own, LZ77
 
 zone world  rom  +0x170000  +0x330000  -  other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds
 FREE_XAREA             +0x170000  +0x1A0000  -    netmap.c                  multirom/overview.md        another game's net area

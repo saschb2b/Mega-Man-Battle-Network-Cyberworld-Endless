@@ -126,4 +126,6 @@
 #define BN6_MAIL_ID           0x18   /* a mail's entry: its mail, u16 */
 #define BN6_MAIL_MAX          128    /* the mails a list holds: BN6_MAIL_LIST's bytes, BN6_MAIL_ENTRIES' entries */
 
+#include "bn6_navicust.h"   /* the NaviCust programs' tables and the words that name them, for a program of another game */
+
 #endif

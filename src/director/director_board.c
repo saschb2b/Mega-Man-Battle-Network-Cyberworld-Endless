@@ -17,10 +17,13 @@
 #include "director_state.h"
 #include "emu.h"
 #include "gamecall.h"
+#include "guardians.h"
 #include "meta.h"
 #include "save.h"
 #include "save_blob.h"
+#include "souls.h"
 #include "talk.h"
+#include "xncp.h"
 
 static bool free_to_speak(void);
 
@@ -32,8 +35,8 @@ static bool free_to_speak(void);
  * stands (another heard the same five boxes on HP+100, which needed a
  * Spin, five times in two layers, after the PET, in L's words and after
  * each battle). A new run forgets both; a CONTINUE takes them back. */
-static uint8_t placed_seen[47 * 4 / 8 + 1];
-static uint8_t off_explained[47 * 4 / 8 + 1];
+static uint8_t placed_seen[NAVICUST_VARIANTS / 8 + 1];
+static uint8_t off_explained[NAVICUST_VARIANTS / 8 + 1];
 
 static bool bit_of(const uint8_t *set, int v) { return set[v >> 3] >> (v & 7) & 1; }
 static void bit_set(uint8_t *set, int v) { set[v >> 3] |= (uint8_t)(1 << (v & 7)); }
@@ -46,7 +49,7 @@ static void placed_note(void) {
 	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
 		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
 		if (!id) break;
-		if (id > 0 && id < 47 * 4) bit_set(placed_seen, id);
+		if (id > 0 && id < NAVICUST_VARIANTS) bit_set(placed_seen, id);
 	}
 }
 
@@ -58,13 +61,15 @@ void off_board_forget(void) {
 /* ... kept beside the checkpoint, for the run whose seed it names: a
  * CONTINUE had forgotten both, and a playtester heard a program's whole
  * reminder again after each one (session 65) */
-#define BOARD_NOTE_MAGIC 0x42524431u   /* "BRD1" */
+#define BOARD_NOTE_MAGIC 0x42524432u   /* "BRD2": a bit a variant to program 48's (BRD1's ended at 46's; one of those is forgotten, a reminder heard once more) */
 typedef struct { uint32_t seed; uint8_t placed[sizeof placed_seen], explained[sizeof off_explained]; } BoardNote;
-_Static_assert(sizeof(BoardNote) == 52 && offsetof(BoardNote, seed) == 0 && offsetof(BoardNote, placed) == 4 &&
-	offsetof(BoardNote, explained) == 28, "Board save layout changed");
+_Static_assert(sizeof(BoardNote) == 56 && offsetof(BoardNote, seed) == 0 && offsetof(BoardNote, placed) == 4 &&
+	offsetof(BoardNote, explained) == 29, "Board save layout changed");
 
 void off_board_save(void) {
-	BoardNote b = { run.seed, { 0 }, { 0 } };
+	BoardNote b;
+	memset(&b, 0, sizeof b);   /* (its padding too: the blob is written whole) */
+	b.seed = run.seed;
 	memcpy(b.placed, placed_seen, sizeof b.placed);
 	memcpy(b.explained, off_explained, sizeof b.explained);
 	save_write_blob("run.board", BOARD_NOTE_MAGIC, &b, sizeof b);
@@ -87,7 +92,7 @@ const char *program_off_board(int *variant) {
 	static char name[16];
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
 	*variant = 0;
-	for (int v = 4; v < 47 * 4; ++v) {
+	for (int v = 4; v < NAVICUST_VARIANTS; ++v) {
 		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
 		if (!owned || bit_of(placed_seen, v)) continue;
 		for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
@@ -117,12 +122,12 @@ int board_programs(uint8_t *out, int max) {
 	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX && n < max; ++e) {
 		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
 		if (!id) break;
-		if (id >= 47 * 4) continue;
+		if (id >= NAVICUST_VARIANTS) continue;
 		out[n++] = (uint8_t)id;
 		if (ns < 10 && navicust_shape(id, &s[ns])) ++ns;
 	}
 	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return n;
-	for (int v = 4; v < 47 * 4 && n < max && ns < 10; ++v) {
+	for (int v = 4; v < NAVICUST_VARIANTS && n < max && ns < 10; ++v) {
 		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
 		for (int i = 0; i < n; ++i) placed += out[i] == v;
 		for (int k = placed; k < owned && n < max && ns < 10; ++k) {
@@ -156,7 +161,7 @@ void dev_programs(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
 	if ((dev.programs <= 0 && dev.program <= 0) || items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
 	for (int p = 1, given = 0; p < 47 && given < dev.programs; ++p) given += dev_give_program(p, items, check);
-	if (dev.program > 0 && dev.program < 47) dev_give_program(dev.program, items, check);
+	if (dev.program > 0 && dev.program < NAVICUST_VARIANTS / 4) dev_give_program(dev.program, items, check);
 }
 
 /* A program variant's shape as the PET has it: compressed where its code
@@ -220,6 +225,20 @@ void grant_spins(void) {
 void spins_sync(void) {
 	navicust_set_spins(meta_spins());
 	grant_spins();
+}
+
+/* SoulT+1's place in the layer about to be offered (docs/game/navicust.md,
+ * 11; navicust_set_soul): open while the run held a Soul as the layer was
+ * made (souls_layer: the same on a CONTINUE's rebuild) or its guardian,
+ * one of BN5's Team Colonel, gives one it held none of, whose draft it
+ * leads; never where the core has no program 48 (BN5's ROM not read). */
+void soult_sync(void) {
+	bool gives = false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		int navi = layer.obj[i].param;
+		if (layer.obj[i].type == OBJ_BOSS && guardian_older(navi)) gives = !(souls_layer() >> (navi - GUARDIAN_OLDER_FIRST) & 1);
+	}
+	navicust_set_soul(xncp_installed() && (souls_layer() || gives), gives);
 }
 
 /* A key item the game gave (EV_ITEM_GIVEN): a ScrtData, which MegaMan
@@ -321,12 +340,12 @@ static int read_board(void) {
 	int n = 0;
 	for (int i = 0; i < BN6_NAVICUST_SLOTS; ++i) {
 		int v = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)i * 8);
-		const char *about = v > 0 && v < 47 * 4 ? navicust_about(v / 4) : NULL, *colon = about ? strchr(about, ':') : NULL;
+		const char *about = v > 0 && v < NAVICUST_VARIANTS ? navicust_about(v / 4) : NULL, *colon = about ? strchr(about, ':') : NULL;
+		int kind, color;
 		board_parts[i] = (NaviPart){ NULL, -1, 0 };
-		if (v <= 0 || v >= 47 * 4) continue;
-		const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)v * 16;
+		if (!navicust_part(v, &kind, &color)) continue;
 		snprintf(names[i], sizeof names[0], "%.*s", colon ? (int)(colon - about) : 0, colon ? about : "");
-		board_parts[i] = (NaviPart){ colon ? names[i] : NULL, rec[1], rec[3] };
+		board_parts[i] = (NaviPart){ colon ? names[i] : NULL, kind, color };
 		n = i + 1;
 	}
 	for (int i = 0; i < NAVICUST_GRID * NAVICUST_GRID; ++i) board_grid[i] = emu_read8(BN6_NAVICUST_GRID + (uint32_t)i);

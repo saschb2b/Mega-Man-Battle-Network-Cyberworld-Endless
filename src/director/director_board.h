@@ -16,6 +16,8 @@ bool fits_beside_as(int v, bool compressed);
 bool fits_beside_placed(int v);
 void grant_spins(void);
 void spins_sync(void);
+/* SoulT+1 open to the layer's draft and vendor, or not (navicust_set_soul): once its objects are known, before their scripts */
+void soult_sync(void);
 void item_given(int item);
 void spin_watch(void);
 void reg_watch(void);

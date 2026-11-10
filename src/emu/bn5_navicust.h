@@ -16,7 +16,19 @@
                                       /* ... part, +3 its colour, +4 its bug's kind, +8 and +0xC its shape and compressed shape, 5 x 5 cells (BN6's 7 x 7) */
 #define BN5_NCP_RECORD    0x0813EFC4u /* ... a record's address by its number (r0 x 16) */
 #define BN5_NCP_NAMES     0x0875A6BCu /* its programs' names, a text archive by program (49 entries) */
+#define BN5_NCP_DESCS     0x0875A8A0u /* its programs' descriptions: LZ77, a word (its length << 8), then an archive by program (49 entries), each in the frame BN6's have */
 #define BN5_NCP_EFFECTS   0x0813FC2Cu /* the placed programs' effects, a routine a program (48): each sets bytes of MegaMan's NaviStats */
+#define BN5_NAVICUST_COMPILE 0x0813FAF8u /* MegaMan's stats made again from the NaviCust's board (BN6's applyNaviStats, 0x0813E238): the board read, his */
+                                      /* ... NaviStats put back to his own, each placed program's routine run over them (0x0813FB64); no arguments */
+#define BN5_TOOLKIT_NC_GRID   0x58    /* eToolkit +0x58: the NaviCust's board, 5 x 5 cells, a byte each: its placed program's index + 1 (0x0813F1F4) */
+#define BN5_TOOLKIT_NC_PLACED 0x5C    /* eToolkit +0x5C: the placed programs, 8 bytes each, 25 at most: +0 u8 program x 4 + variant (0 none), */
+                                      /* ... +2 its column, +3 its row, +4 its turns (0x0813F23C, written at 0x0813F248) */
+#define BN5_NC_SIDE           5       /* ... the board's side, and a shape's: the shape lands two left of and above its column and row */
+#define BN5_NC_PLACED_MAX     25      /* ... the placed programs' entries */
+#define BN5_NC_PLACED_COLUMN  2       /* a placed program's entry: its column, */
+#define BN5_NC_PLACED_ROW     3       /* ... its row */
+#define BN5_MAIN_CALL     0x0800031Au /* the main loop's `bx r0` into the mode's routine, once a frame (BN6's at the same address), r1-r3 dead there */
+#define BN5_NAVI_TURN_EXTRA (BN5_NAVI_STATS + 0x32) /* s8: the turns SoulT+1 adds to a Soul's three (BN6_NAVI_TURN_EXTRA's) */
 #define BN5_NAVI_STAT_SET 0x08010E18u /* a NaviStats byte set: r0 the Navi, r1 its offset, r2 the value */
 #define BN5_NAVI_STAT_GET 0x08010E30u /* ... read */
 #define BN5_NCP_CHIVALRY  22          /* Chivalry: NaviStats +0x34 = 1, which picks the L button's talk (0x080A1E0E: the archive 0x08756BC4, as Humor's +0x25 picks 0x08755630) */

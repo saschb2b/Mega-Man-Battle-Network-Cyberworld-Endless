@@ -404,6 +404,7 @@ static bool build_layer(void) {
 	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
 	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
 	navicust_set_spins(meta_spins());   /* (the draft fits what turns) */
+	soult_sync();   /* (... and offers the older Net's program while the run holds a Soul) */
 	D.duel_call_due = false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_DUEL) duel_roll();
