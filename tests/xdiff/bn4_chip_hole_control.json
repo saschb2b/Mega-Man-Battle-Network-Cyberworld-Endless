@@ -1,0 +1,49 @@
+{
+ "about": "BN4's Hole * (its chip 82, a dark chip: its record's +0x15 2, bn4_chips.h BN4_CHIP_ALIGN) from a dark MegaMan's folder (karma4 0: his NaviStats' karma, BN4_NAVI_KARMA, under BN4_KARMA_DARK), fought twice, the same frame for frame: the chip plays, a Hole panel in front of him (seen by film). The harness's karma item's control.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "05@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 120,
+ "seed": "12345678:9ABCDEF0",
+ "folder4": [
+  "3452"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "karma4": 0
+}
