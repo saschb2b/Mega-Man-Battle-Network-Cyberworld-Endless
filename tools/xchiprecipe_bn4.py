@@ -481,13 +481,20 @@ def registry_rows():
 
 
 def rows_check(b4, f):
-    """its chips' rows: each XREG_MOVED with the unit's number its subfamily (tools/xreg_bn4.py MOVED), none a dark chip
-    (docs/game/meta/darkchips.md: BN4's dark chips sit out until their price is wired)"""
+    """its chips' rows: each XREG_MOVED with the unit's number its subfamily (tools/xreg_bn4.py MOVED); a dark chip's
+    (its record's alignment dark, or a DarkChip by its effect flags) among the registry's dark rows, which the price's
+    hook reads (docs/game/meta/darkchips.md: 20 max HP a battle one is used in)"""
     rows = registry_rows()
+    with open(REGISTRY, encoding='utf-8') as fh:
+        m = re.search(r'xreg4_dark_ids\[\] = \{([^}]*)\}', fh.read())
+    dark = {int(x) for x in re.findall(r'\d+', m.group(1))} if m else set()
     f.rows = []
     for i, r in f.chips:
-        if r[0x15] == 2:
-            f.decide('row', f'its chip {i} is a dark chip (its record\'s +0x15 is 2): not to play before its 20 max HP is wired')
+        if (r[0x15] == 2 or r[9] & 0x20) and i in rows:
+            if rows[i][0] not in dark:
+                f.decide('row', f'its chip {i} is a dark chip and its row {rows[i][0]} is not among xreg4_dark_ids: no price (tools/xreg_bn4.py)')
+            else:
+                f.notes.append(f'its chip {i} is a dark chip of BN4\'s (row {rows[i][0]}): a battle it is used in costs 20 max HP')
         if i not in rows:
             f.notes.append(f'its chip {i} has no row of the registry (the run\'s by name, or none)')
             continue
