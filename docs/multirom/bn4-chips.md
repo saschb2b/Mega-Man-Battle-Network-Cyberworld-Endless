@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T14:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -39,8 +39,8 @@ reaches. PanlSht's (support 0x26) is the fourth kind's 0x4F and its
 shot, the third kind's 0x7B, 1008 bytes in two blocks: 28 calls paired
 with BN6's twins, the five generic states of a support chip's object
 BN6's own at the same places of its types' tables, the element's place
-and a panel's side at BN6's offsets, its sprite BN6's of the same bytes
-(list 3's 0x38 as 0x33), no decision open but its sounds (below). It
+and a panel's side at BN6's offsets, its sprite copied (list 3), no
+decision open but its sounds (below). It
 installs where BN4's ROM is read (`src/emu/xchips_code.c`, its room
 `FREE_BN4_CHIPS`) at BN6's grown support routines' 0x80 + BN4's
 subfamily, 0xA6, which the three rows' records take under BN6's support
@@ -130,12 +130,22 @@ sound takes the grown table's 0x1DE. `bn4_chip_whitweb1`, `2` and `3`
 pass over 300 frames, the webs in play in the fight's frames throughout
 (a 140 HP Mettaur on each row left 100), five mutations caught.
 
-**Next:** Boomer1-3 (misc 2: a kinds' table of its object's, a sound),
-MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite of list 1,
-the viruses' list, which needs a range of the chips' there; BN4's misc
-run waits 0x28 frames for subfamily 5, which BN6's run does not for a
-grown routine), BugChain (support 0x1F: two calls of BN4's with no twin
-found). Marking and the four Plus chips wait on the owner's call 7.
+**Boomer1-3 are moved** (12 November 2026: ids 584-586, misc 2): the
+boomerang (the third kind's 0x32) with the table of its flights, 636
+bytes, its sound at the grown table's 0x1DF. `bn4_chip_boomer1`, `2` and
+`3` pass over 300 frames, the boomerang in play from t33 to t96 (a 140
+HP Mettaur in its way left 80, 60 and 40), five mutations caught. With
+it every sprite a unit draws is BN4's copied, as the families' are,
+whether or not BN6 has one of its bytes: an object in play in a fight's
+frame is compared by its sprite's frames, which the differential names
+by the recipe's rows.
+
+**Next:** MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite
+of list 1, the viruses' list, which needs a range of the chips' there;
+BN4's misc run waits 0x28 frames for subfamily 5, which BN6's run does
+not for a grown routine), BugChain (support 0x1F: two calls of BN4's
+with no twin found). Marking and the four Plus chips wait on the
+owner's call 7.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
