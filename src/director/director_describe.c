@@ -236,8 +236,8 @@ static void describe_pos(FILE *f) {
 	}
 }
 
-/* the turns the NaviCust adds to a Soul's or a Beast Out's three, where a
- * program gives any: SoulT+1 (docs/rom/navicust.md, Program 48) */
+/* the turns the NaviCust adds to a Soul's three, where a program gives
+ * any: SoulT+1 (docs/rom/navicust.md, Program 48) */
 static void describe_turns(FILE *f) {
 	int turns = (int8_t)emu_read8(BN6_NAVI_STATS + BN6_NAVI_TURN_EXTRA);
 	if (turns) fprintf(f, "soulturns %+d\n", turns);

@@ -10,8 +10,12 @@
  * BN6's codes and frame) and the names (its own in a filler's entry),
  * each word of BN6's code that names a moved table repointed, and the
  * NaviCust's list made to go on past RUN's key item and list RUN last.
- * BN6 reads the byte as BN5 does (0x0802A118: a Beast Out's turns) and
- * the engine's Souls with it (soulunite.c).
+ * The engine's Souls read the byte (soulunite.c). BN6's own read of it
+ * (0x0802A118) only fills a Cross's and a Beast Out's record's turns,
+ * which no code of Gregar's reads: a Beast Out is timed by its own counter
+ * (battle NaviStats +0x21) and lasts its three turns with the program
+ * placed, to the frame (tests/xdiff/beast_soult.json; the owner's call:
+ * Souls only).
  * All or nothing: every word changed is read first and must be BN6's own.
  * Not in a state: every boot writes the same. */
 #ifndef CW_XNCP_H

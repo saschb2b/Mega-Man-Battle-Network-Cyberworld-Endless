@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T01:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:32:02Z }
 ---
 
 # The differential: a moved family against its own game
@@ -794,6 +794,15 @@ Program 48): KnightSoul lasts four turns in both where it lasts three, its
 end a Custom screen later (t2084), every frame compared. Its three
 mutations: the engine's routine adding none, adding two, and the grown
 effects' table's entry naming a routine that sets nothing.
+
+`beast_out` and `beast_soult` (kind `engine`: BN6's battle alone) hold a
+Beast Out to its three turns, without the program and with it placed and
+compiled (`ncp6`): its form 0x0B to fight frame 1563, MegaMan's own from
+1564, in both. Their mutations are pokes, which an engine spec takes
+since them (`tools/xdiff.py` engine_only passed none before, so a poke on
+one was a mutation that could not be caught): the program's routine
+aimed at the Beast Out counter (NaviStats +0x21), which gives a fourth
+turn, and BN6's count-down held.
 
 ## Holds
 

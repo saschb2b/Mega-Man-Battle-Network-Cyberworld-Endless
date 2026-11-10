@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs and BN5's SoulT+1 while the run holds a Soul, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:32:02Z }
 ---
 
 # The NaviCust
@@ -301,11 +301,19 @@ skill (10 November 2026):
   not offered beside the one held (`navicust_adds_nothing`). A player who
   finds two by other means gets BN6's own sum.
 - **What it costs the game.** Nothing carries across runs: the program is
-  the run's, as every program. BN6's own code reads the byte SoulT+1 sets
-  for a Beast Out's turns too (`0x0802A118`), so a run with both has a
-  Beast Out of four turns; left as BN6 reads it, **the owner's to
-  reverse** (a hook on that read would keep it to Souls). It has no
-  compression code, as BN5's record gives it one shape.
+  the run's, as every program. It has no compression code, as BN5's
+  record gives it one shape.
+- **Souls only** (the owner's call, 10 November 2026: "Souls only"). The
+  extra turn is a Soul's alone, as the program's is in BN5, and a Beast
+  Out lasts its three turns with SoulT+1 on the board. BN6 needs no hook
+  for it: it times a Beast Out by a counter of its own (battle NaviStats
+  +0x21), and its one read of the byte SoulT+1 sets (`0x0802A118`) fills
+  a turns field of the Cross record that no code of Gregar's reads. The
+  first write-up of this section said a Beast Out would last four turns;
+  that was read off a header's comment and never run, and it was wrong:
+  run, a Beast Out ends on the same frame with the program placed as
+  without (`beast_out` and `beast_soult`, [The differential](../devtools/differential.md),
+  A program on each game's NaviCust).
 
 Built (10 November 2026): `src/emu/xncp.c` (the program in BN6's tables),
 `src/core/xprograms.c` (BN5's record, name and lines), `navicust.c`'s pool
@@ -450,7 +458,8 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   name, its 2 x 2, BN5's three lines; RUN answers OK), in a Soul's
   guardian's draft and, while the run holds a Soul, in the drafts and the
   vendor's list after it. KnightSoul's counter reads 4, 3, 2, 1 with it
-  placed, where it read 3, 2, 1.
+  placed, where it read 3, 2, 1; a Beast Out lasts three turns either
+  way.
 
 Next: the vendor's compression (above, 4), the vendor's stock from this
 pool, then blue Mystery Data programs, the next act's answer in the
