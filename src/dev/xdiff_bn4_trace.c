@@ -11,6 +11,8 @@
 #include "bn6_ai.h"
 #include "bn6_forms.h"
 #include "bn6_link.h"
+#include "bn4_chips.h"
+#include "bn6_chips.h"
 #include "bn6_panels.h"
 #include "guest.h"
 
@@ -69,6 +71,12 @@ static const Seg coll_segs[] = {
 	/* (the poison panel's step, twins: BN4 0x0801301E-0x08013034 at its +6, BN6 0x0801A1B8-0x0801A1D0 at its +8; Elmperor's
 	 * pre-step holds it 0xFF, BN4 0x080C2870-0x080C2872, its copy's store at +8 by the recipe) */
 	{ BN4_COLL_POISON_TIMER, BN6_COLL_POISON_TIMER, 1 },
+	/* (a barrier's or an aura's: the setters' stores, twins, BN4_BARRIER_SET and BN6_BARRIER_SET; its HP and aura a u16
+	 * each in BN4 and a u8 in BN6, their low bytes) */
+	{ BN4_COLL_BARRIER_KIND, BN6_COLL_BARRIER_KIND, 1 },
+	{ BN4_COLL_BARRIER_HP, BN6_COLL_BARRIER_HP, 1 },
+	{ BN4_COLL_BARRIER_AURA, BN6_COLL_BARRIER_AURA, 1 },
+	{ BN4_COLL_BARRIER_FRAMES, BN6_COLL_BARRIER_FRAMES, 2 },
 };
 /* an AI's data: a Soul Navi's own block at BN6's +0x80 and its attack's variables at BN6's +0xA0 (the Navi's port moves both
  * so: tools/xnavirecipe_bn4.py AI_BLOCKS); MegaMan's power attacks, keys, flags, HP bug's count, damage taken and frames
@@ -105,12 +113,12 @@ typedef struct { const Seg *segs; int nsegs; uint32_t in, out, spare; } Layout;
 
 static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
-	[XD4_COLL] = { coll_segs, 36, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
+	[XD4_COLL] = { coll_segs, 40, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
 	[XD4_AI] = { ai_segs, 14, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
 	[XD4_PANEL] = { panel_segs, 8, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
 	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
-_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 36 &&
+_Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 40 &&
 	sizeof ai_segs / sizeof *ai_segs == 14 && sizeof panel_segs / sizeof *panel_segs == 8, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */

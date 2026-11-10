@@ -37,5 +37,9 @@
  * (1, 200, 3000) BN6's 9, LifeAura and LifeAur one chip by their rows; its 7 (1, 300, 3000), BlakBarr's, no kind of BN6's */
 #define BN4_BARRIER_SET       0x08012DCEu
 #define BN4_BARRIER_KINDS     0x080185E0u /* three u16 a kind, as BN6_BARRIER_KINDS: 1 Barrier's 10, 2 100, 3 200, 4 150, 6 LifeAura's, 7 BlakBarr's */
+#define BN4_COLL_BARRIER_KIND  0x04        /* collision data: u8 its barrier's kind (BN6's +6) */
+#define BN4_COLL_BARRIER_HP    0x20        /* ... u16 its HP (BN6's +0x16, a u8) */
+#define BN4_COLL_BARRIER_AURA  0x22        /* ... u16 the damage that breaks an aura (BN6's +0x17, a u8) */
+#define BN4_COLL_BARRIER_FRAMES 0x24       /* ... u16 its frames (BN6's +0x1A) */
 
 #endif
