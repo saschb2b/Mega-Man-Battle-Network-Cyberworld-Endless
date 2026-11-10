@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-10
+* **Update**: game/meta/darkchips.md (the owner's call: BN4's dark chips at the same 20 max HP), multirom/bn4-chips.md (calls 4 and 5: the dark chips' cost, LifeAura one chip with LifeAur, id 530 retired), game/meta/library.md (BN4's page's counts), multirom/chip-registry.md and multirom/gaps.md (193 rows).
 * **Update**: multirom/bn4-chips.md (the first chip of BN4's own plays: Invis, a row on BN6's code), multirom/chip-registry.md (a BN4 row's twin), multirom/gaps.md (Phase 4).
 * **Update**: multirom/bn4-chips.md and devtools/differential.md: `bn4_chip_areagrab` passes, the first BN4 chip against BN6 (MegaMan's own clock, the grab's sounds, a panel's side copies).
 * **Update**: multirom/bn4-chips.md (unit 3 under way: the comparator's MegaMan mode for BN4; the six "on BN6's code" are not; BN4's light and dark chips), devtools/differential.md (`karma4`, a chip against BN6), rom/bn4.md (a chip's alignment and MegaMan's karma, new row), research/sources.md (BN4's alignment rule).

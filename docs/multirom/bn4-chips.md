@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -89,9 +89,10 @@ a dark chip plays only where MegaMan's karma (`BN4_NAVI_KARMA`) is under
 puff, family 0x20's subfamily 4). 63 records are light (the SP Navi
 chips, HolyPanl, Snctuary, the barriers) and 31 dark (Static, Hole,
 DrkLine, Muramasa, Anubis, ElemDark, BlakWing, the DS Navi chips, four
-past 300). A run takes no karma (The DarkChips, below), so each plays
-for any MegaMan; the differential's BN4 battle is given the karma its
-chip asks (`karma4`). What Hole's panel is for is not yet read (the
+past 300). A run takes no karma (The DarkChips, below), so a light chip
+plays for any MegaMan, and a dark chip at the dark chips' price, 20 max
+HP for a battle it is used in (the owner's call 4); the differential's
+BN4 battle is given the karma its chip asks (`karma4`). What Hole's panel is for is not yet read (the
 players' account, that a DS Navi chip needs one on the field, is a lead
 for unit 6).
 
@@ -686,6 +687,19 @@ Asked and answered on 9 November 2026:
    chips take the free ids meanwhile.
 3. **All of BN4's chips, as each is proved**, as recommended, with a cut
    list kept open for what the statistics show unused.
+
+Asked and answered on 10 November 2026:
+
+4. **BN4's dark chips cost what every dark chip does:** "Same 20 max HP".
+   A battle one of BN4's 31 dark chips is used in is a battle a dark
+   power ran in, 20 max HP once a battle
+   ([DarkChips](../game/meta/darkchips.md), the owner's call of 10
+   November 2026). The light chips play for any MegaMan at no price.
+5. **LifeAura is one chip with BN6's LifeAur:** "One chip". BN4's 201
+   pairs with BN6's 182 by alias (`xreg4_alias`, written by
+   `tools/xreg_bn4.py`'s `ALIAS`), takes no row, and its id 530 is
+   retired (no release holds an id past 511). The rows are 193 since:
+   174 folder chips and 19 Program Advances.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
