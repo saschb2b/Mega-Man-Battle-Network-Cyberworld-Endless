@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T08:00:00Z }
 ---
 
 # The chip recipe generator
@@ -177,7 +177,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   kind `misc` is one of BN4's routines there: copied as a block of its
   own where it is a routine by itself (Repair's), its number 0x80 + the
   subfamily in BN6's misc routines grown (`XC4_MISC`). One that lies in
-  an object type's code is a decision yet (Counter's). `IMMS` holds the
+  a third-kind type's code moves that type with it (Counter's, in its
+  hit's). `IMMS` holds the
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
@@ -229,5 +230,5 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
 Proved by a chip's specs against BN4's own battle ([The
 differential](differential.md), A BN4 chip's spec); a mutation of a
 unit's code names BN4's address, which the runner pokes at its copy.
-`UNITS` holds PanlSht (support 0x26), ShotStar (0x19) and Repair (misc
-0x0B); Counter and Marking are next.
+`UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
+0x0B) and Counter (misc 0); the units of 300 to 600 bytes are next.

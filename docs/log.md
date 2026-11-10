@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
