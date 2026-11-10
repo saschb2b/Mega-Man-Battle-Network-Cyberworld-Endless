@@ -2489,9 +2489,9 @@
    "name": "the panel shot's launch's sound another",
    "spec": "bn4_chip_panlsht1",
    "poke": [
-    "080DCBEA:2049"
+    "088EF304:01DA"
    ],
-   "what": "the shot's copy playing slot 0x49, its lift's sound, as it flies off (movs r0,#0xbf at BN4 0x080DCBEA, the recipe's slot 0x4A): BN4's 0x1C6 twice where it plays 0x1C6 and 0xBF"
+   "what": "the shim of the unit's home that plays the shot's launch (its first, at XC4_HOMES + 0x300: its slot's word) naming the grown table's slot 0x1DA, its lift's sound, where the recipe gives 0x1DB: BN4's 0x1C6 twice where it plays 0x1C6 and 0xBF"
   },
   {
    "name": "PanlSht2's row's pattern another",
