@@ -46,6 +46,12 @@ static inline bool guardian_darkloid(int navi) { return navi >= GUARDIAN_DARKLOI
 #define GUARDIAN_BN4_FIRST 34
 #define GUARDIAN_BN4_LAST  58
 static inline bool guardian_bn4(int navi) { return navi >= GUARDIAN_BN4_FIRST && navi <= GUARDIAN_BN4_LAST; }
+/* BN5's Team ProtoMan (docs/game/team-protoman.md): BN5's AI 1-6 (bn5.h BN5_NAVI_PROTOMAN .. BN5_NAVI_MEDDY) as navis 59-64
+ * here, a rival record each (rivals.sav's fourth version), each Soul held by its form (souls.h, souls_team_held); none met
+ * until each is moved and wired as a guardian */
+#define GUARDIAN_TEAM_FIRST 59
+#define GUARDIAN_TEAM_LAST  64
+static inline bool guardian_team(int navi) { return navi >= GUARDIAN_TEAM_FIRST && navi <= GUARDIAN_TEAM_LAST; }
 /* ... BN5's AI index of one of its Navis here (the six or a Darkloid), -1 another's */
 static inline int guardian_bn5_ai(int navi) {
 	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN : -1;

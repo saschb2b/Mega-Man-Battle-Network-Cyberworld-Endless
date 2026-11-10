@@ -4,7 +4,8 @@
  * Navi's battle sprite): BN5's Navi AI n (Team Colonel's: 7 Colonel, 8
  * ShadowMan, 9 NumberMan, 10 TomahawkMan, 11 KnightMan, 12 ToadMan) at
  * BN6's sprite list 2 number 0x20 + (n - 7), the Dark Soul (BN5's AI 0x16)
- * at 0x26; others from 0x27 as they come. Each copied whole (BN6's battle
+ * at 0x26; the Darkloids from 0x27, Team ProtoMan's (AI 1-6) 0x2B-0x30
+ * (0x20 + their seat, xnavi_recipe.h XN_SEAT). Each copied whole (BN6's battle
  * reads list 2 as it is) to a fixed place of its own in FREE_NAVI_SPRITES,
  * the same at every boot with the same ROMs, with its arm points' record:
  * BN6 finds an object's arm points by its struct1's list and number

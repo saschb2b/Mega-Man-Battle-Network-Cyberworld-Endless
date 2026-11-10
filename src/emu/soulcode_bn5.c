@@ -169,11 +169,11 @@ static const XvNumber calls[] = {
 	{ 0x0800F7A4, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F7D6, 0x0800FE70u, 0x080126EAu },   /* soul:the chip writer's second entry: push {r4, DIFF (the Souls' audit) */
 	{ 0x0800F7E2, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
-	{ 0x0800F7F0, 0x080BA634u, XC_CODE + 0xA6BD },   /* the chips' copy of a type's module (TYPES) */
+	{ 0x0800F7F0, 0x080BA634u, XC_CODE + 0xA3FD },   /* the chips' copy of a type's module (TYPES) */
 	{ 0x0800F832, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F876, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F9F8, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
-	{ 0x0800FA0A, 0x080BCA14u, XC_CODE + 0xB1A5 },   /* the chips' copy of a type's module (TYPES) */
+	{ 0x0800FA0A, 0x080BCA14u, XC_CODE + 0xAEE5 },   /* the chips' copy of a type's module (TYPES) */
 	{ 0x08011C42, 0x080CAD06u, SOUL_STUB_STRIKE },   /* answered by the Souls' C */
 	{ 0x08011C4E, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x08011C5E, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
@@ -232,7 +232,7 @@ static const XvNumber calls[] = {
 	{ 0x080CAAE2, 0x080EA0BAu, SOUL_STUB_NONE },   /* answered by the Souls' C */
 	{ 0x080CAB24, 0x080014A6u, 0x08001532u },   /* project:handi, SAME */
 	{ 0x080CAB34, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
-	{ 0x080CAB44, 0x080C6E0Eu, XC_CODE + 0x8F77 },   /* the chips' copy of a type's module (TYPES) */
+	{ 0x080CAB44, 0x080C6E0Eu, XC_CODE + 0x8CB7 },   /* the chips' copy of a type's module (TYPES) */
 	{ 0x080CAB4A, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
 	{ 0x080CAB56, 0x08016B88u, 0x0801A074u },   /* project:cangard, SAME */
 	{ 0x080CAB96, 0x0800CDECu, 0x0800EB6Cu },   /* map:bytes, SAME */
@@ -358,13 +358,13 @@ static const SoulType types[] = {
 static const SoulRoute routes[] = {
 	{ 0x080B9CAEu, XN_OBJECTS + 0x252 },
 	{ 0x080B9CE0u, XN_OBJECTS + 0x284 },
-	{ 0x080BA634u, XC_CODE + 0xA6BC },
-	{ 0x080BCA14u, XC_CODE + 0xB1A4 },
+	{ 0x080BA634u, XC_CODE + 0xA3FC },
+	{ 0x080BCA14u, XC_CODE + 0xAEE4 },
 	{ 0x080C34A6u, XN_CODE + 0x87FE },
 	{ 0x080C34D2u, XN_CODE + 0x882A },
 	{ 0x080C5346u, XN_CODE + 0x8C32 },
 	{ 0x080C5386u, XN_CODE + 0x8C72 },
-	{ 0x080C6E0Eu, XC_CODE + 0x8F76 },
+	{ 0x080C6E0Eu, XC_CODE + 0x8CB6 },
 	{ 0x080C7772u, XN_CODE + 0x10522 },
 	{ 0x080D688Eu, XN_CODE + 0x14206 },
 	{ 0x080E36DCu, XC_CODE + 0x3394 },

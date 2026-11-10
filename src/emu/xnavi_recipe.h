@@ -22,14 +22,24 @@
  * Navis' names are the Navi archive's (BN6_NAME_OF, an id's low byte),
  * rebuilt (xnavi_room.h). BN5's Navi n (Team Colonel's 7-12, the Dark
  * Soul's 0x16, the Darkloids 13-16: ShadeMan, BlizzardMan, CloudMan,
- * CosmoMan) has its seat XN_SEAT(n) (0-5, 6, 7-10): AI XN_AI_OF(n), its
- * V1 id XN_ID_OF(n), its versions' after it */
-#define XN_SEAT(n)    ((n) == 0x16 ? 6 : (n) >= 13 ? (n) - 6 : (n) - 7)
+ * CosmoMan; Team ProtoMan's 1-6: ProtoMan, GyroMan, SearchMan, NapalmMan,
+ * MagnetMan, Meddy) has its seat XN_SEAT(n) (0-5, 6, 7-10, 11-16): AI
+ * XN_AI_OF(n), its V1 id XN_ID_OF(n), its versions' after it */
+#define XN_SEAT(n)    ((n) == 0x16 ? 6 : (n) >= 13 ? (n) - 6 : (n) >= 7 ? (n) - 7 : (n) + 10)
 #define XN_FIRST_AI   25                  /* the first AI index past BN6's (the control's) */
-#define XN_AI_OF(n)   (32 + XN_SEAT(n))
+/* Team ProtoMan's AI indexes the control's 25 + n, 26-31, between it and
+ * Team Colonel's 32 (no track's: BN5's from 32, BN4's from XN_BN4_FIRST_AI,
+ * the families' a namespace of their own); every other's 32 + its seat */
+#define XN_AI_OF(n)   ((n) >= 1 && (n) <= 6 ? XN_FIRST_AI + (n) : 32 + XN_SEAT(n))
 #define XN_FIRST_ID   0x1C4               /* the Navis' ids, from here (the control's first), */
-#define XN_IDS_END    XV_FIRST_ID         /* ... to here */
-#define XN_ID_OF(n)   (XN_FIRST_ID + 4 * XN_SEAT(n))
+#define XN_IDS_END    XV_FIRST_ID         /* ... to here: seats 0-14, */
+/* ... and seats 15-16 (MagnetMan, Meddy) past BN4's 25 seats, named by the
+ * families' archive as BN4's are (xnavi_install.c ids_set): the formula's
+ * ids for Team ProtoMan, 0x1B0-0x1C3, are BN6's player's forms (its ids
+ * table's type 2, 0x1A0-0x1C3), and 0x1F0-0x1FF hold four seats */
+#define XN_MORE_IDS     (XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS)
+#define XN_MORE_IDS_END XV_IDS
+#define XN_ID_OF(n)   (XN_SEAT(n) < 15 ? XN_FIRST_ID + 4 * XN_SEAT(n) : XN_MORE_IDS + 4 * (XN_SEAT(n) - 15))
 /* ... and its companion's overlay, where its game's kind is one BN6
  * lacks, BN6's kind XN_KIND_OF(n), past BN6's own (the grown overlay
  * tables, xnavi_room.h) */
@@ -45,9 +55,11 @@
                                              its buster's level + 1, +0xA 0, r0 its family XN_FAMILY_OF(0x16)), 0x20 bytes */
 #define XN_STUB_SIDES (XN_STUBS + 0x40u)  /* ... BattleState +0x5C's bits r0 ORed into the moved Colonel's own (BN6_COLONEL_SIDES) */
 #define XN_STUB_CHIPDATA (XN_STUBS + 0x50u) /* ... the Dark Soul's chip AI's record of BN6's chip r0 (BN5's 0x0801DF0C): XN_DARK_RECORDS' */
-#define XN_STUBS_END  (XN_STUBS + 0x60u)
+#define XN_STUB_CLOUDS (XN_STUBS + 0x60u) /* ... CloudMan's search for his clouds (BN5_CLOUD_FIND_37) over BN6's third kind's objects, a
+                                             moved type's number read in the dispatch's side table, 0x40 bytes */
+#define XN_STUBS_END  (XN_STUBS + 0xA0u)
 #define XN_SEA        XN_STUBS_END        /* BN5's sea's submerge's code (xsea.c), to: */
-#define XN_SEA_END    (XN_STUBS + 0x100u)
+#define XN_SEA_END    (XN_STUBS + 0x200u)
 #define XN_OBJECTS    XN_SEA_END          /* BN5's engine objects moved once for every track (xnavi_objects.h), to: */
 #define XN_OBJECTS_END (FREE_NAVI_CODE + 0x2000u)
 #define XN_OBJECTS_HOME (XN_HOMES + (XN_HOMES_MAX - 1) * XV_HOME_SIZE)   /* ... their home (their veneers), the last of the homes */
@@ -61,6 +73,16 @@
 #define XN_MORE_END   (XN_MORE_ART + 0x1000u)   /* (before XN_DARK_RECORDS) */
 #define XN_SLOT_CODE  0x3C00u             /* a Navi's code room */
 #define XN_SLOT_ART   0x400u              /* ... and its art's */
+/* Team ProtoMan's (seats 11-16, slots 12-17 past the Darkloids') in a room of their own in code-low (FREE_TEAM_NAVIS): a home, a code
+ * room (XN_TEAM_SLOT_CODE: their largest walk, ProtoMan's, 8648 bytes) and an art room each, the shared art's second room
+ * (a sprite of any Navi's once XN_SHARED_ART's is full: NapalmMan's first), then their battle sprites (xnavi_sprites.c) */
+#define XN_TEAM_SEATS   6
+#define XN_TEAM_SLOT_CODE 0x2800u
+#define XN_TEAM_HOMES   FREE_TEAM_HOMES
+#define XN_TEAM_CODE    FREE_TEAM_NAVI_CODE
+#define XN_TEAM_ART     FREE_TEAM_NAVI_ART
+#define XN_TEAM_SHARED  FREE_TEAM_SHARED
+#define XN_TEAM_END     FREE_TEAM_SPRITES
 #define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
@@ -72,7 +94,7 @@
 #define XN_BN4_SEATS     25
 #define XN_BN4_FIRST_AI  48
 #define XN_BN4_FIRST_ID  0x380
-#define XN_BN4_IDS_END   XV_IDS
+#define XN_BN4_IDS_END   XN_MORE_IDS   /* (past them Team ProtoMan's seats 15-16, XN_MORE_IDS) */
 #define XN_BN4_HOMES     FREE_BN4_NAVIS
 #define XN_BN4_CODE      FREE_BN4_NAVI_CODE
 #define XN_BN4_ART       FREE_BN4_NAVI_ART
@@ -87,14 +109,15 @@
  * (xnavi_bn4_art.h); whose each seat's battle fills it with, a byte a seat (his own seat, 0xFF none), past the sprites' */
 #define XN_BN4_ARTS        (XN_BN4_SPRITES + XN_BN4_SEATS)
 
-/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's or BN4's Navis') */
+/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's, XN_TEAM_CODE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {
-	return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART) || (a >= XN_BN4_CODE && a < XN_BN4_ART);
+	return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART) || (a >= XN_TEAM_CODE && a < XN_TEAM_ART) ||
+		(a >= XN_BN4_CODE && a < XN_BN4_ART);
 }
-/* ... or in one of their art's rooms (XN_ART's or XN_MORE_ART's) */
+/* ... or in one of their art's rooms (XN_ART's, XN_MORE_ART's or XN_TEAM_ART's) */
 static inline bool xn_art_room(uint32_t a, uint32_t n) {
 	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a) ||
-		(a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
+		(a >= XN_TEAM_ART && a <= XN_TEAM_SHARED && n <= XN_TEAM_SHARED - a) || (a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
 }
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at

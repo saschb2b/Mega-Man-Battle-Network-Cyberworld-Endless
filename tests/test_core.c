@@ -4065,13 +4065,27 @@ static int navi_clashes(const XVirusFamily *f, const XVirusFamily *g, bool navis
 static void test_xnavi_static(void) {
 	char why[160] = "";
 	const XVirusFamily *o = &xnavi_objects_bn5;
-	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
+	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUB_CLOUDS && XN_STUB_CLOUDS < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
 		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_MORE && XN_MORE + 4 * XN_SLOT_CODE <= XN_MORE_ART &&
 		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XN_DARK_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
+	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
+		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites)");
+	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
+	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
+	for (int n = 1; n <= 6; ++n) {
+		int id = XN_ID_OF(n), seat = XN_SEAT(n);
+		CHECK(seat == 10 + n && XN_AI_OF(n) == XN_FIRST_AI + n && XN_AI_OF(n) < XN_AI_OF(BN5_NAVI_COLONEL) && XN_KIND_OF(n) < 64,
+			"xnavi: Team ProtoMan's AI %d off its seat", n);
+		CHECK(id >= BN6_ENEMY_IDS_COUNT && ((id >= XN_FIRST_ID && id + 4 <= XN_IDS_END) ||
+			(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END)), "xnavi: Team ProtoMan's AI %d's ids from %#x", n, id);
+		for (int m = 1; m <= 16; ++m)
+			CHECK(m == n || (XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m)), "xnavi: AI %d's ids meet AI %d's", n, m);
+	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 10, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan and CosmoMan)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 11, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan and NapalmMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;

@@ -50,6 +50,12 @@ FREE_INDOORS           +0x068000  +0x078000  -    mapslot.c,indoors.c,aster_land
 # Navis' or chips'; a call further goes through a veneer,
 # src/emu/thumb_reloc.h)
 zone code-low  rom  +0x090000  +0x150000  -  other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs
+FREE_TEAM_NAVIS        +0x090000  +0x0EF000  -    xnavi_install.c,xnavi_sprites.c  multirom/navis.md  BN5's Team ProtoMan in BN6's engine (xnavi_recipe.h XN_TEAM_*, seats 11-16): homes, code, art and sprites in a room of their own
+FREE_TEAM_HOMES        +0x090000  +0x093000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   their homes, XV_HOME_SIZE each
+FREE_TEAM_NAVI_CODE    +0x093000  +0x0A2000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   their code, a room of XN_TEAM_SLOT_CODE each (the largest walk, ProtoMan's, 8648 bytes)
+FREE_TEAM_NAVI_ART     +0x0A2000  +0x0A3800  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   what their attacks draw, a room each
+FREE_TEAM_SHARED       +0x0A3800  +0x0AB000  in=FREE_TEAM_NAVIS  xnavi_install.c  multirom/navis.md   the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full)
+FREE_TEAM_SPRITES      +0x0AB000  +0x0EF000  end,in=FREE_TEAM_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes)
 
 zone words  rom  +0x150000  +0x170000  -  the director's and the PET's words: text archives, labels, lists
 FREE_TALK              +0x150000  +0x152000  -    talk.c                    engine/emulation/layer.md   the director's conversations

@@ -228,9 +228,9 @@
 #define BN5_UNITE_ART_SIZE  0x540
 #define BN5_SOUL_PICTURES 0x08023358u /* mode 0x24's word naming the Souls' pictures: 0x0874B2BC, 0x80 bytes by Soul 1-12, 0xD Chaos Unison */
 #define BN5_SOUL_PICTURE_PAL 0x08023350u /* ... and their palette: 0x0874BDBC, 0x20 bytes */
-/* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan unites with (BN5_SOUL_FLAGS); then the Darkloids
- * its Liberation Missions end in (docs/game/liberation/building/stage-4-darkloids.md: V1 ids ShadeMan 0x149, BlizzardMan 0x14F, CloudMan 0x155, CosmoMan 0x15B) */
-enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN, BN5_NAVI_SHADEMAN, BN5_NAVI_BLIZZARDMAN, BN5_NAVI_CLOUDMAN, BN5_NAVI_COSMOMAN };
+/* The Navis by AI index: Team ProtoMan's 1-6, the other version's (docs/game/team-protoman.md: V1 ids 0x101 + 6 (ai - 1)); Team Colonel's 7-12, their Souls the six its
+ * MegaMan unites with (BN5_SOUL_FLAGS); then the Darkloids its Liberation Missions end in (docs/game/liberation/building/stage-4-darkloids.md: V1 ids ShadeMan 0x149, BlizzardMan 0x14F, CloudMan 0x155, CosmoMan 0x15B) */
+enum { BN5_NAVI_PROTOMAN = 1, BN5_NAVI_GYROMAN, BN5_NAVI_SEARCHMAN, BN5_NAVI_NAPALMMAN, BN5_NAVI_MAGNETMAN, BN5_NAVI_MEDDY, BN5_NAVI_COLONEL, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN, BN5_NAVI_SHADEMAN, BN5_NAVI_BLIZZARDMAN, BN5_NAVI_CLOUDMAN, BN5_NAVI_COSMOMAN };
 #define BN5_COLONEL_ID    0x125       /* Colonel's enemy ids, V1, V2, V3 and SP, from here (the differential's colonel_v1: 0x125) */
 
 #define BN5_MODE_GAME      0x04   /* BN5_TOOLKIT: the game (the main mode, the index eToolkit +0 points at) */

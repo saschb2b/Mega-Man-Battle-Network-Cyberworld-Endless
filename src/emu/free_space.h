@@ -49,6 +49,13 @@
 #define FREE_INDOORS         (EMU_FREE + 0x068000u)  /* home's other places (mapslot.c, indoors.c, aster_land.c, ...) */
 
 /* ---- code-low: +0x090000-+0x150000, other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs ---- */
+#define FREE_TEAM_NAVIS      (EMU_FREE + 0x090000u)  /* BN5's Team ProtoMan in BN6's engine (xnavi_recipe.h XN_TEAM_*, seats 11-16): homes, code, art and sprites in a room of their own (xnavi_install.c, xnavi_sprites.c) */
+#define FREE_TEAM_HOMES      (EMU_FREE + 0x090000u)  /* their homes, XV_HOME_SIZE each (xnavi_install.c) */
+#define FREE_TEAM_NAVI_CODE  (EMU_FREE + 0x093000u)  /* their code, a room of XN_TEAM_SLOT_CODE each (the largest walk, ProtoMan's, 8648 bytes) (xnavi_install.c) */
+#define FREE_TEAM_NAVI_ART   (EMU_FREE + 0x0A2000u)  /* what their attacks draw, a room each (xnavi_install.c) */
+#define FREE_TEAM_SHARED     (EMU_FREE + 0x0A3800u)  /* the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full) (xnavi_install.c) */
+#define FREE_TEAM_SPRITES    (EMU_FREE + 0x0AB000u)  /* their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes) (xnavi_sprites.c) */
+#define FREE_TEAM_SPRITES_END (EMU_FREE + 0x0EF000u)
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -167,6 +174,12 @@
 	X("FREE_TOWN", (EMU_FREE + 0x058000u), (EMU_FREE + 0x060000u), "", "layers") \
 	X("FREE_LAN_HP", (EMU_FREE + 0x060000u), (EMU_FREE + 0x068000u), "", "layers") \
 	X("FREE_INDOORS", (EMU_FREE + 0x068000u), (EMU_FREE + 0x078000u), "", "layers") \
+	X("FREE_TEAM_NAVIS", (EMU_FREE + 0x090000u), (EMU_FREE + 0x0EF000u), "", "code-low") \
+	X("FREE_TEAM_HOMES", (EMU_FREE + 0x090000u), (EMU_FREE + 0x093000u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_NAVI_CODE", (EMU_FREE + 0x093000u), (EMU_FREE + 0x0A2000u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_NAVI_ART", (EMU_FREE + 0x0A2000u), (EMU_FREE + 0x0A3800u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_SHARED", (EMU_FREE + 0x0A3800u), (EMU_FREE + 0x0AB000u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
