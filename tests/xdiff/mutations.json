@@ -2785,7 +2785,60 @@
    "poke": [
     "088F0F04:01DA"
    ],
-   "what": "the shim of Boomer's unit's home that plays the boomerang's sound (its first, at XC4_HOMES + 0x1C00 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DF"
+   "what": "the shim of Boomer's unit's home that plays the boomerang's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DF"
+  },
+  {
+   "name": "GutsMan's chip's row's power another",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "08C05C0E:0028"
+   ],
+   "what": "the registry's record of BN4's GutsMan chip (535 at CHIPS_RECORDS) with power 40 where BN4's record holds 80: the Mettaur left 100 HP where BN4's shockwave leaves it 60"
+  },
+  {
+   "name": "GutsMan's chip's row's family the support family's",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "08C05BFF:15:1"
+   ],
+   "what": "the registry's record of BN4's GutsMan chip (535) with BN6's support family 0x15 where its row's twin gives it the Navi family 0x1B: MegaMan in another state, the support routines' entry 0x85 a stub, no GutsMan"
+  },
+  {
+   "name": "the chip's GutsMan's type another",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "080B9B20:20BF"
+   ],
+   "what": "his spawner's copy (its movs r0,#0x14 at BN4 0x080B9B20, the recipe's dispatch number 0xA0) naming the dispatch's first-kind 0xBF, a number no recipe moved a type to: no GutsMan, the Mettaur untouched"
+  },
+  {
+   "name": "the chip's GutsMan's entry the Navi routines' stub",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "08E00A14:08E00C05"
+   ],
+   "what": "BN6's grown Navi routines' entry 0x85 (XC_NAVI + 4 x 0x85) the table's stub again, as before his unit's install: BN6's Navi chip object calls nothing, the Mettaur untouched"
+  },
+  {
+   "name": "the chip's GutsMan's sound another",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "088F1300:01DA"
+   ],
+   "what": "the shim of his unit's home that plays his sound as he appears (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x300"
+  },
+  {
+   "name": "the chip's GutsMan's shockwave not spawned",
+   "spec": "bn4_chip_gutsman",
+   "poke": [
+    "080B9AC0:46C0",
+    "080B9AC2:46C0",
+    "080B9AC4:46C0",
+    "080B9AC6:46C0",
+    "080B9AC8:46C0",
+    "080B9ACA:46C0"
+   ],
+   "what": "his strike's call to the Navi's copy of the shockwave's spawner (BN4 0x080B9AC0, the bl to 0x080D0894) and the four instructions that set its +0 bit, each a nop: no shockwave, the Mettaur left 140 HP and no panel cracked"
   }
  ]
 }
