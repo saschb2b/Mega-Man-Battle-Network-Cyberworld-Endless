@@ -30,6 +30,7 @@ EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a m
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
 XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
 XN_TEAM_ROOM = (0x08893000, 0x088A2000)           # ... and Team ProtoMan's code (src/emu/free_space.plan, FREE_TEAM_NAVI_CODE to FREE_TEAM_NAVI_ART)
+XC4_ROOM = (0x088EF000, 0x0893F000)               # ... and BN4's chips' units' (src/emu/free_space.plan, FREE_BN4_CHIPS: a BN4 reference's alone)
 XV_CODE_BN4 = (0x08B79000, 0x08B80000)            # ... BN4's families' code in the families' (tools/xrecipe_bn4.py CODE2 to XV_ART: BN5's end
                                                   # before it, its bn5_ranges_clear): a BN5 reference reads none of it, nor BN4's Navis'
 XV_LATE_CODE = (0x08F11000, 0x08F20000)           # ... BN4's late families' code past the families' (src/emu/free_space.plan FREE_LATE_CODE,
@@ -815,6 +816,8 @@ class Frame:
                                                                                         or XV_LATE_CODE[0] <= m[1] < XV_LATE_CODE[1]
                                                                                         or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]))
                                                             and (XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1] or XN_TEAM_ROOM[0] <= m[1] < XN_TEAM_ROOM[1]
+                                                                 # (a BN4 chip unit's blocks: a pointer its object keeps into them, the star's kind's row)
+                                                                 or (self.game == 4 and XC4_ROOM[0] <= m[1] < XC4_ROOM[1])
                                                                  or XV_LATE_CODE[0] <= m[1] < XV_LATE_CODE[1]
                                                                  or XC_CODE[0] <= m[1] < XC_CODE[1] or m[1] < EMU_FREE
                                                                  or XN_BN4_ROOM[0] <= m[1] < XN_BN4_ROOM[1]

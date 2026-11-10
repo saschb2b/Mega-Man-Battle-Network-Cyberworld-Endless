@@ -426,6 +426,20 @@ def support_object_as_bn6(rec, canon):
             rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
 
 
+ELEMENT_OBJECTS = {}
+
+
+def object_element_as_bn6(rec):
+    """a BN4 fourth-kind object's element read at BN6's place (+0x17 as +0x0E), for the types legit.json's bn4 object_element
+    names, each a chip unit's object whose own spawner stores it and whose recipe gives the store BN6's offset; where BN4's
+    +0x0E holds 0 (the trace lays a first- and a third-kind object's out so itself, src/dev/xdiff_bn4_trace.c obj_segs; a
+    support chip's object's is support_object_as_bn6's)"""
+    if not ELEMENT_OBJECTS:
+        ELEMENT_OBJECTS.update({int(k, 0): v for k, v in bn4_rule('object_element').get('T4', {}).items()} or {-1: None})
+    if rec[NODE + OBJ_TYPE] in ELEMENT_OBJECTS and rec[NODE + OBJ_ELEMENT6] == 0:
+        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
+
+
 OBJ_DAMAGE, OBJ_DAMAGE_KIND, COLL_DAMAGE_KIND, CHIP_POWER, CHIP_DAMAGE_KIND = 0x2C, 0x2E, 0x07, 0x1A, 0x0A
 ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's from 8, tools/bn4_twins.py GENERIC4)
 
@@ -664,6 +678,8 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
         support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
+    if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
+        object_element_as_bn6(rec)   # (a chip unit's own object's element at BN6's place: legit.json's bn4 object_element)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
