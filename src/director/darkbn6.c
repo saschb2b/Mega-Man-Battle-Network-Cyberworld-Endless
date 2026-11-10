@@ -144,6 +144,7 @@ void darkbn6_event(const HookEvent *e) {
 		unsigned bit = dark_ran_add(0, id, rec ? rec[BN6_CHIP_DARK_ID] : 0xFF);
 		ran |= bit;
 		if (bit == DARK_RAN_BN5 && emu_debug_on()) fprintf(stderr, "dark: DarkChip %d ran by BN5's rule, no BugFrag\n", id);
+		if (bit == DARK_RAN_BN4 && emu_debug_on()) fprintf(stderr, "dark: chip %d, a dark chip of BN4's, ran\n", id);
 		if (!(bit & DARK_RAN_BN6)) return;
 		uint32_t left = emu_read32(BN6_BATTLE_BUGFRAGS);
 		if (emu_debug_on()) fprintf(stderr, "dark: DarkChip %#x's dark power ran, a BugFrag paid, %u left in the battle\n", (unsigned)e->r[0], (unsigned)left);
@@ -170,13 +171,13 @@ unsigned darkbn6_base_take(void) {
 
 /* ---- the hooks: MegaMan's side's chip uses only ---- */
 
-/* every DarkChip of the registry, either net's (dark_chip_is), a bit an id: what the hook below tests, made once; and the chips
+/* every DarkChip of the registry, either net's (dark_chip_is), and BN4's dark chips (dark_bn4_is), a bit an id: what the hook below tests, made once; and the chips
  * the starting folders' milestones watch (meta_chip_watched), which the same hook reports, one hook an address */
 static uint32_t dark_ids[CHIP_IDS / 32], watched_ids[CHIP_IDS / 32];
 
 /* a chip's after-effects as it runs (BN6_DARK_AFTER, from every chip use, 0x080128EA: r0 the chip that ran): a DarkChip of
  * either net's, BN5's own seven and BN6's five (a BN6 one's id reaches it only where its dark power ran, a BugFrag paid; its
- * base chip's where it fell back). A Chaos Unison's DarkChip attack runs through the chip writer alone, never here. */
+ * base chip's where it fell back), or a dark chip of BN4's, which runs like any chip of its unit. A Chaos Unison's DarkChip attack runs through the chip writer alone, never here. */
 static HookAct after(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t id = r->r[0];
@@ -199,7 +200,7 @@ void darkbn6_install(void) {
 	if (done) return;
 	done = true;
 	for (int id = 1; id < CHIP_IDS; ++id) {
-		if (dark_chip_is(id)) dark_ids[id / 32] |= 1u << (id % 32);
+		if (dark_chip_is(id) || dark_bn4_is(id)) dark_ids[id / 32] |= 1u << (id % 32);
 		if (meta_chip_watched(id)) watched_ids[id / 32] |= 1u << (id % 32);
 	}
 	emu_hook(BN6_DARK_AFTER, after, NULL);

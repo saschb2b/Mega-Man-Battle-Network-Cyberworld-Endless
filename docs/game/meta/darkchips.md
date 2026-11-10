@@ -3,7 +3,7 @@ type: Feature
 title: "DarkChips"
 description: "DarkChips (issue #82): twelve kinds, each played by its own net's rule, offered by a flame of darkness on each act's middle layer, priced at 20 max HP per battle a dark power ran in."
 tags: [game, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
 ---
 
 # DarkChips (3 October 2026; in every battle since issue #82)
@@ -108,10 +108,30 @@ engine's, and all twelve kinds play there, each by its own net's rule
   takes no karma, so the owner's answer, asked what such a chip costs:
   "Same 20 max HP". One rule for every dark chip: a battle a dark chip
   of BN4's is used in is a battle a dark power ran in, 20 max HP for the
-  rest of the run, once a battle, whichever net's chip it was. None of
-  the 31 plays yet; `tools/xreg_bn4.py` refuses to list one as playing
-  until its use counts so (its light chips, 63, play for any MegaMan at
-  no price).
+  rest of the run, once a battle, whichever net's chip it was.
+  **Built** (12 November 2026): the registry lists BN4's dark rows
+  (`xreg4_dark_ids`, written by `tools/xreg_bn4.py` from BN4's records:
+  an alignment of dark, or a DarkChip by its effect flags), 28 of its
+  193: Hole, DrkLine, ElemDark, BugCurse, BlakBarr, the DS Navi chips'
+  17, the Program Advance DarkNeo and BN4's five DarkChips of names the
+  run lacks (DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage). The
+  price's hook on every chip MegaMan runs (`darkbn6.c`, BN6's
+  `BN6_DARK_AFTER`) tests them with the twelve kinds
+  (`dark_bn4_is`, `DARK_RAN_BN4`), and the battle's end takes the 20 max
+  HP as for any dark power, MegaMan's words the same. Nothing else of a
+  dark chip's rules is theirs: no kind of the twelve, no BugFrag, no
+  mood; one plays from the hand like any chip of its unit, and the price
+  is the whole of its darkness. What a dark MegaMan of BN4's has beyond
+  the chip (his look, his dark power's other limits, his karma) is not
+  taken. Seen in play (`tools/cw.py play`, `--dev alias=601`: DrkVulcn's
+  row, a dark one, given Cannon's record so that it plays before its unit
+  is moved): one used on a Mettaur, 140 max HP to 120 after the battle
+  and MegaMan's line; two used in one battle on two Mettaurs, 140 to 120
+  once; a battle won with BN6's own Cannon, 140 still. `tools/xreg_bn4.py`
+  lists a dark chip as playing since. The autopilot never picks one, as
+  it picks no DarkChip. BN4's dark chips BN6 has by name (Static,
+  Muramasa, Anubis, BlakWing) stay BN6's own chips, one chip a name, at
+  no price; its light chips, 63, play for any MegaMan at no price.
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
   a battle a DarkChip was used in, the darkness fighting with his body
   a while (session 68), and MegaMan said so; BN6's engine has its own

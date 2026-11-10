@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T14:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -178,6 +178,26 @@ HP for a battle it is used in (the owner's call 4); the differential's
 BN4 battle is given the karma its chip asks (`karma4`). What Hole's panel is for is not yet read (the
 players' account, that a DS Navi chip needs one on the field, is a lead
 for unit 6).
+
+**The dark chips' price is in code** (12 November 2026;
+[DarkChips](../game/meta/darkchips.md), the owner's call of 10 November
+2026, Built). `tools/xreg_bn4.py` writes which rows are dark
+(`xreg4_dark_ids`: a record's alignment dark, or BN4's DarkChip mark in
+its effect flags, `BN4_CHIP_DARK`): 28 of the 193, the 23 dark-aligned
+with a row (Hole, DrkLine, ElemDark, BugCurse, BlakBarr, 17 DS Navi
+chips, the Program Advance DarkNeo) and the five DarkChips (DrkCanon,
+DarkBomb, DrkVulcn, DrkSpred, DrkStage, whose alignment is 0: BN4 plays
+them by its worry, not its karma). One used by MegaMan in BN6's engine
+is seen where every DarkChip's use is (`BN6_DARK_AFTER`'s hook, by the
+row's id) and the battle costs 20 max HP once. The tool's guard is
+lifted: a dark chip may be listed in `MOVED` or `ON_BN6`. The other
+eight dark-aligned records have no row: Static, Muramasa, Anubis and
+BlakWing are BN6's own chips by name (BN6's code, no price), NumberMan's
+and ShadeMan's DS the registry's rows of BN5's, ProtoMan's DS and
+BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
+object's +0x94, his dark sprite, what else his karma changes); a dark
+chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
+and the comparison explains his look from both games' code.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
@@ -779,6 +799,8 @@ Asked and answered on 10 November 2026:
    power ran in, 20 max HP once a battle
    ([DarkChips](../game/meta/darkchips.md), the owner's call of 10
    November 2026). The light chips play for any MegaMan at no price.
+   Built 12 November 2026 (Where things stand, The dark chips' price is
+   in code).
 5. **LifeAura is one chip with BN6's LifeAur:** "One chip". BN4's 201
    pairs with BN6's 182 by alias (`xreg4_alias`, written by
    `tools/xreg_bn4.py`'s `ALIAS`), takes no row, and its id 530 is

@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T14:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
 ---
 
 # The chip recipe generator
@@ -222,8 +222,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   whichever game's units install first.
 - **Its chips.** The registry's rows of the unit's chips must be
   `XREG_MOVED` with the unit's number their subfamily
-  (`tools/xreg_bn4.py` `MOVED`), and none a dark chip: the generator
-  refuses to write otherwise. Such a row's record takes BN6's support
+  (`tools/xreg_bn4.py` `MOVED`), and a dark chip's row among the
+  registry's dark rows (`xreg4_dark_ids`, which the price's hook reads:
+  [DarkChips](../game/meta/darkchips.md)): the generator refuses to
+  write otherwise. Such a row's record takes BN6's support
   family and that subfamily, its parameters, lock-out and power BN4's
   own (`xrec_from_bn4`).
 
