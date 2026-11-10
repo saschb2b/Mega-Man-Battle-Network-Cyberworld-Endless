@@ -687,6 +687,29 @@ static void build_font(void) {
 	font_texture();
 }
 
+void text_draw_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade) {
+	SDL_Rect r[2][256];
+	int n[2] = { 0, 0 };
+	for (; R.data && *s; ++s, x += 8) {
+		unsigned char ch = (unsigned char)*s;
+		int code = ch < 128 ? text_code(ch) : -1;
+		if (code <= 0) continue;
+		const uint8_t *g = R.data + FONT_BASE + code * 64;
+		for (int i = 0; i < 128; ++i) {
+			int row = i / 8 - FONT_TOP, ci = (i & 1) ? g[i / 2] >> 4 : g[i / 2] & 15, k = ci == 1 ? 0 : 1;
+			if (ci && row >= 0 && n[k] < 256) r[k][n[k]++] = (SDL_Rect){ x + i % 8, y + row, 1, 1 };
+		}
+		/* (a long line: what is gathered drawn, and on) */
+		if (n[0] > 192 || n[1] > 192) {
+			fill_rects(r[1], n[1], shade);
+			fill_rects(r[0], n[0], c);
+			n[0] = n[1] = 0;
+		}
+	}
+	fill_rects(r[1], n[1], shade);
+	fill_rects(r[0], n[0], c);
+}
+
 int text_width(const char *s) {
 	int w = 0;
 	for (; *s; ++s) {

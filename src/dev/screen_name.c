@@ -6,6 +6,7 @@
 #include "devtools.h"
 #include "game.h"
 #include "jukebox.h"
+#include "library.h"
 #include "netpass_screen.h"
 #include "options.h"
 #include "second.h"
@@ -17,6 +18,7 @@ const char *screen_name(void) {
 	/* (SAVES and the ROMs screen are scenes of their own: their names) */
 	if (scene_current() != &scene_emu) return scene_current() ? scene_current()->name : "none";
 	if (jukebox_shown()) return "jukebox";
+	if (library_shown()) return "library";
 	if (netpass_screen_shown()) return "netpass";
 	return second_screen_word();
 }

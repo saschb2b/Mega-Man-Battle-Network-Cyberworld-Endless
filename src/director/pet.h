@@ -25,9 +25,12 @@ int pet_key_item(void);
  * Jukebox while it is up */
 void pet_draw(void);
 /* The frame's course of a PET screen that holds the game still under it
- * (the Jukebox, its music with it): true while it does, the core's frame
- * not run */
+ * (the Jukebox, its music with it; the Library): true while it does, the
+ * core's frame not run */
 bool pet_holds(void);
+/* ... and whether the second screen follows it meanwhile (the Library's
+ * chip under the cursor) */
+bool pet_second_follows(void);
 /* The game's scene left: such a screen put away */
 void pet_leave(void);
 

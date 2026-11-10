@@ -3,7 +3,7 @@ type: Feature
 title: "The title's marks"
 description: "The title's marks: BN6's own title sprites at their places, standing for a profile's milestones (a short net won, the endless Nest, the Secret Area, the top threat rung, Library comps); trophies, never keys."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T09:52:44Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # The title's marks
@@ -25,6 +25,10 @@ blinks in on the title after it, with a chime.
 | The green disc (top right) | Event 0x370 | A win on the top threat rung |
 | STD, MEGA, GIGA COMP | The Library | Every chip of the class a run can hold, in the profile's Library |
 | P.A. COMP | The P.A. memo | Not yet earned here |
+
+The Library's pages per entry mark a class whole on the page itself, in
+gold ([The Library, a page per entry](library.md)); the title's three stay
+BN6's classes, so no mark needs another game's ROM.
 
 The version and the best depth moved from the top corners to a line above
 the copyright, where the marks leave room.

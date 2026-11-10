@@ -107,12 +107,6 @@ int chip_pool_class_count(int cls) {
 	return n[cls];
 }
 
-int chip_pool_older_count(void) {
-	int n = 0;
-	for (int id = 1; id < CHIPS_IDS; ++id) n += chips_bn5(id) && older_tier(id) >= 0;
-	return n;
-}
-
 int chip_pool_pick(int tier) {
 	if (!R.data) return -1;
 	ready();

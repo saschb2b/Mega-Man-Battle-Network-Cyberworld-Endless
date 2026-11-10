@@ -48,6 +48,8 @@ const uint8_t *chips_record(int id);
 void chips_name(int id, char *out, size_t n);
 /* ... its description, its lines joined by spaces */
 void chips_desc(int id, char *out, size_t n);
+/* ... its lines as the game breaks them, a '\n' between them */
+void chips_desc_lines(int id, char *out, size_t n);
 /* The bytes the core's copy holds at bus address `bus` (`n` of them): the
  * player's ROM below 8 MB, the chips' place past EMU_FREE (their art);
  * NULL elsewhere */

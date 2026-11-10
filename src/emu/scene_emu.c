@@ -151,8 +151,15 @@ static void update(void) {
 	if (online_visit_held()) { online_visit_held_frame(keys_from_buttons()); return; }
 	/* (the link to the Square dropped: the game's core holds still under the wait) */
 	if (online_visit_waiting()) { online_visit_wait_frame(); return; }
-	/* (the PET's Jukebox up: the game's core, its music with it, holds still under it) */
-	if (pet_holds()) return;
+	/* (the PET's Jukebox or Library up: the game's core, its music with it, holds still under it) */
+	if (pet_holds()) {
+		/* (the Library's chip under the cursor on the second screen: read again while the game holds) */
+		if (pet_second_follows()) {
+			second_update();
+			platform_second_screen_draw();
+		}
+		return;
+	}
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();

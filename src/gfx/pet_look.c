@@ -494,9 +494,8 @@ int look_text_width(const char *s) {
 	return w;
 }
 
-void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int align) {
-	if (align == TEXT_CENTER) x -= look_text_width(s) / 2;
-	else if (align == TEXT_RIGHT) x -= look_text_width(s);
+/* `s` in the chat font from (x, y), each letter its own width on, or `cell` where it is given */
+static void chat_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int cell) {
 	if (!have_font()) { minifont_draw(x, y + 4, s, c, 1); return; }
 	if (!runs_built) build_runs();
 	SDL_Rect r[2][384];
@@ -508,11 +507,19 @@ void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int al
 			const Run *u = &runs[k];
 			if (n[u->shade] < 384) r[u->shade][n[u->shade]++] = (SDL_Rect){ x + u->x, y + u->y, u->len, 1 };
 		}
-		x += run_w[ch];
+		x += cell ? cell : run_w[ch];
 	}
 	if (shade.a) fill_rects(r[1], n[1], shade);
 	fill_rects(r[0], n[0], c);
 }
+
+void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int align) {
+	if (align == TEXT_CENTER) x -= look_text_width(s) / 2;
+	else if (align == TEXT_RIGHT) x -= look_text_width(s);
+	chat_text(x, y, s, c, shade, 0);
+}
+
+void look_text_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int cell) { chat_text(x, y, s, c, shade, cell); }
 
 int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade) {
 	const int line = LOOK_LINE;

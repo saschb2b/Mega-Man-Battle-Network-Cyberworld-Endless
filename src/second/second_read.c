@@ -15,6 +15,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "home_places.h"
+#include "library.h"
 #include "navicust.h"
 #include "pet_text.h"
 #include "powers.h"
@@ -297,15 +298,21 @@ static int pack_copies(int chip, bool fresh) {
  * P.A. Memo, whose entries are Program Advances), or a StdChip number
  * never seen; and the chip's copies in the folder and the pack, in any
  * code (the pack read as the Library opens: it does not change there) */
+bool second_library_up(void) { return library_shown(); }
+
 void second_read_library(void) {
-	uint32_t m = pet_screen();
-	int tab = emu_read8(m + BN6_LIBRARY_TAB);
-	uint32_t t = m + (uint32_t)tab * BN6_LIBRARY_TAB_SIZE;
-	int at = emu_read16(t + BN6_LIBRARY_ROW) + emu_read16(t + BN6_LIBRARY_SCROLL);
-	bool listed = S2.pet_ready && tab < BN6_LIBRARY_TABS && at < emu_read16(t + BN6_LIBRARY_COUNT);
-	int chip = listed ? emu_read16(BN6_LIBRARY_LISTS + (uint32_t)tab * BN6_LIBRARY_LIST_SIZE + 4u * (uint32_t)at) : 0;
-	S2.lib_chip = chip < BN6_LIBRARY_PA ? chip : 0;
-	S2.lib_unseen = listed && tab == 0 && !chip;
+	/* (the run's Library over the PET's menu, src/library/: its cursor's slot) */
+	if (library_cursor(&S2.lib_chip, &S2.lib_unseen)) S2.pet_ready = true;
+	else {
+		uint32_t m = pet_screen();
+		int tab = emu_read8(m + BN6_LIBRARY_TAB);
+		uint32_t t = m + (uint32_t)tab * BN6_LIBRARY_TAB_SIZE;
+		int at = emu_read16(t + BN6_LIBRARY_ROW) + emu_read16(t + BN6_LIBRARY_SCROLL);
+		bool listed = S2.pet_ready && tab < BN6_LIBRARY_TABS && at < emu_read16(t + BN6_LIBRARY_COUNT);
+		int chip = listed ? emu_read16(BN6_LIBRARY_LISTS + (uint32_t)tab * BN6_LIBRARY_LIST_SIZE + 4u * (uint32_t)at) : 0;
+		S2.lib_chip = chip < BN6_LIBRARY_PA ? chip : 0;
+		S2.lib_unseen = listed && tab == 0 && !chip;
+	}
 	S2.lib_pack = pack_copies(S2.lib_chip, S2.since < 2);
 	S2.lib_folder = 0;
 	if (!S2.lib_chip) return;

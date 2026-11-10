@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
@@ -61,9 +61,9 @@ by `|` (`layer>=2`, `screen=battle|doing~battle`), at most `limit` frames
 
 **The state** names the screen: `screen` is ours over the game first
 (`devmenu`, `options-display`, `options-audio`, `options-game`, `controls`,
-`statistics-question`, `jukebox`, `netpass`), then the scene's name off the
+`statistics-question`, `jukebox`, `netpass`, `library`), then the scene's name off the
 run (`title`, `saves`, `launcher`), and in it BN6's (`map`, `town`,
-`battle`, `pet`, `folders`, `folder-edit`, `navicust`, `status`, `library`,
+`battle`, `pet`, `folders`, `folder-edit`, `navicust`, `status`,
 `mail`, `keyitem`, `subchip`, `comm`, `save`, `shop`, `trader`, `square`,
 `game` for its own cut scenes and fades, `other`), from the second screen's
 reading of BN6's modes (`src/dev/screen_name.c`). Ask for no picture

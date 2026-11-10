@@ -9,6 +9,7 @@
 #include "director_gate.h"
 #include "emu.h"
 #include "jukebox.h"
+#include "library.h"
 #include "netpass_screen.h"
 #include "pet_options.h"
 #include "pet_text.h"
@@ -20,14 +21,15 @@ static int saving;
 
 /* The PET's input handler (its state 4, run each frame the menu takes
  * input), hooked: A on Save, disabled in a run, and on Comm, the run's
- * Options (pet_options.h), is taken from the game (its bit in the keys
- * just pressed cleared) and left in the menu's spare byte for the engine,
- * so the handler sees no A there. */
+ * Options (pet_options.h), and on Library, the run's own over the entries
+ * (library.h), is taken from the game (its bit in the keys just pressed
+ * cleared) and left in the menu's spare byte for the engine, so the
+ * handler sees no A there. */
 static HookAct pet_input(HookRegs *r, void *user) {
 	(void)r;
 	(void)user;
 	uint8_t at = hook_read8(BN6_PET_CURSOR);
-	if (at != BN6_PET_ENTRY_SAVE && !(at == BN6_PET_ENTRY_COMM && pet_options_here())) return HOOK_CONTINUE;
+	if (at != BN6_PET_ENTRY_SAVE && at != BN6_PET_ENTRY_LIBRARY && !(at == BN6_PET_ENTRY_COMM && pet_options_here())) return HOOK_CONTINUE;
 	if (hook_read8(BN6_PET_HOLD)) return HOOK_CONTINUE;
 	uint16_t keys = hook_read16(BN6_KEYS_PRESSED);
 	if (!(keys & KEY_A)) return HOOK_CONTINUE;
@@ -64,6 +66,11 @@ void pet_update(void) {
 	if ((director_in_town() || director_in_hp()) && emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME && !pet_text_items_held())
 		pet_text_items();
 	pet_options_update();
+	/* (A on Library: the Library opens over the PET's menu, the game held under it) */
+	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_LIBRARY) {
+		emu_write8(BN6_PET_MENU_TAKEN, 0);
+		library_open();
+	}
 	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_SAVE) {
 		emu_write8(BN6_PET_MENU_TAKEN, 0);
 		saving = 1;
@@ -87,14 +94,23 @@ int pet_key_item(void) {
 	return emu_read8(BN6_KEYITEM_LIST + 2 * at);
 }
 
-bool pet_holds(void) { return jukebox_update(); }
+bool pet_holds(void) {
+	bool juke = jukebox_update(), lib = library_update();
+	return juke || lib;
+}
 
-void pet_leave(void) { jukebox_shut(); }
+bool pet_second_follows(void) { return library_shown(); }
+
+void pet_leave(void) {
+	jukebox_shut();
+	library_shut();
+}
 
 void pet_draw(void) {
 	if (home_gate_asking()) netpass_screen_strip();
 	netpass_screen_draw();
 	jukebox_draw();
+	library_draw();
 }
 
 uint32_t pet_keys(uint32_t keys) {

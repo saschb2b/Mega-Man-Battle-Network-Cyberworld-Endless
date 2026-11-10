@@ -75,10 +75,9 @@ enum {
 bool meta_library_has(int id);
 /* Adds chip `id`; whether it was new. */
 bool meta_library_add(int id);
-/* The Library's chips of a class (0 standard, 1 Mega, 2 Giga, BN6's;
- * META_OLDER the older net's own a run can find now, chip_pool.h; -1 all
- * a run can hold, both nets'), and how many the current run added. */
-#define META_OLDER 3
+/* The Library's chips of a class (0 standard, 1 Mega, 2 Giga, BN6's; -1
+ * all a run can hold, both nets', each once: a vault's count), and how
+ * many the current run added. Its pages by entry: library_pages.h. */
 int meta_library_count(int cls);
 int meta_library_new(void);
 /* Whether the short net's dark way into the Undernet is open: the Secret
