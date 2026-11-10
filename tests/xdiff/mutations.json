@@ -3732,6 +3732,54 @@
     "080D44BA:2033"
    ],
    "what": "his flame's sound 0xA8 (BN4 0x080D44BA: movs r0,#0xa8, the recipe's pool slot 0x32) made the pool's second slot, 0x33: his 0x14C where BN4 plays 0xA8 (caught at t123, the family's sounds)"
+  },
+  {
+   "name": "Ligtnin's sweep's wait another",
+   "spec": "bn4_chip_ligtnin1",
+   "poke": [
+    "080DF7F6:14:1"
+   ],
+   "what": "the sweep's waits by kind (three bytes at BN4 0x080DF7F4, in the unit's blocks) holding 20 frames for kind 2, Ligtnin's, where BN4's holds 10: the bolt on the cube ten frames late"
+  },
+  {
+   "name": "Ligtnin's obstacle mask none",
+   "spec": "bn4_chip_ligtnin1",
+   "poke": [
+    "080DF9AC:00000000:4"
+   ],
+   "what": "the sweep's copy's word of panel flags for kind 2 (0x03800000 at BN4 0x080DF9AC, what holds an obstacle) made 0: no panel answers, no bolt on the cube"
+  },
+  {
+   "name": "the bolt's reach another",
+   "spec": "bn4_chip_ligtnin2",
+   "poke": [
+    "080DF050:2000"
+   ],
+   "what": "the bolt's copy (BN4's third-kind 0x8E) giving its collision no region where BN4's gives 0x10, the panels around its own (movs r0,#0x10 at BN4 0x080DF050, handed to BN4's 0x08012DC8, BN6's 0x0801A07C): the Mettaur beside the cube out of its reach"
+  },
+  {
+   "name": "the bolt's type another",
+   "spec": "bn4_chip_ligtnin1",
+   "poke": [
+    "080DF10C:20CB"
+   ],
+   "what": "the bolt's spawner's copy (its movs r0,#0x8e at BN4 0x080DF10C, BN4's own number on the chips' page) naming 0xCB, a type no unit moved: no bolt"
+  },
+  {
+   "name": "Ligtnin2's row's power another",
+   "spec": "bn4_chip_ligtnin2",
+   "poke": [
+    "08C074A2:0064"
+   ],
+   "what": "the registry's record of BN4's Ligtnin2 (678 at CHIPS_RECORDS) with power 100, Ligtnin1's, where BN4's record holds 130: the Mettaur beside the cube left 40 HP where BN4's bolt leaves it 10"
+  },
+  {
+   "name": "Ligtnin3's row's kind AquaUp's",
+   "spec": "bn4_chip_ligtnin3",
+   "poke": [
+    "08C074C4:00:1"
+   ],
+   "what": "the registry's record of BN4's Ligtnin3 (679) with its first parameter 0, AquaUp's kind of the sweep, where BN4's record holds 2: the sweep looks for cracked panels under a foe, finds none, and no bolt falls on the cube"
   }
  ]
 }
