@@ -138,10 +138,10 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
  * chip into the Pack, in BN6's own "MegaMan got:" box, and no word more */
 int ta_round_prize(TextArchive *t, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/game/meta/phase-two.md, gates): its three chips (`code`
- * A=0 .. *=26), named, and what each hits for (0: none to say). */
+ * A=0 .. *=26), named; the pick's screen shows the rest (reward_pick.h). */
 typedef struct {
-	int chip[3], code[3], power[3];
-	char name[3][20], desc[3][64];   /* desc: its description (chip_desc) */
+	int chip[3], code[3];
+	char name[3][20];
 } ScriptsVault;
 /* The vault's talk: while the Library's `have` is short of `need`, its
  * words say so; else the three chips, one to take (event flag `flag` set

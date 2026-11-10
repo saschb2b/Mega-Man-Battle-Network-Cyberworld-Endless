@@ -24,7 +24,6 @@ void ta_jump(TextArchive *t, int to);
 void ta_options(TextArchive *t, const char *const *labels, int n);
 void ta_choose(TextArchive *t, const int *scripts, int n, int b);
 void ta_end_or(TextArchive *t, int next);
-void chip_desc_line(char *out, size_t n, const char *name, int code, const char *desc);
 void ta_program_name(TextArchive *t, int program);
 void ta_flag_clear(TextArchive *t, int flag);
 
