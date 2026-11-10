@@ -58,6 +58,8 @@ typedef struct {
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	bool dark;                                 /* MegaMan dark as the battle begins: BN5's dark meter under 470, BN6's engine the same
 	                                              (soulmood.h's soulmood_dev_dark; the Souls installed, souls6) */
+	int karma4;                                /* (a BN4 spec) MegaMan's karma as BN4's battle begins (BN4_NAVI_KARMA: under BN4_KARMA_DARK a dark
+	                                              chip plays, bn4_chips.h); -1 the guest's own */
 	bool dslist;                               /* BN6's chip AI's lists written from BN5's as its fight begins (xnavi_dark.h) */
 	uint16_t dschips[BN6_FOLDER_ENTRIES];      /* MegaMan's side's chip AI list in BN5, BN5's chip ids, written as its fight begins (dslist too) */
 	int ndschips;

@@ -163,6 +163,7 @@ void xd4_folder_put(const Spec *s) {
 	static const FolderPlaces places = { BN4_TOOLKIT, BN4_TOOLKIT_FOLDERS, BN4_TOOLKIT_CHIP_COPY, BN4_CHIP_KEYS, BN4_CHIP_KEY_XOR, 0, 0, CHIP9_MASK,
 		guest_read8, guest_read32, guest_wr8, guest_write16 };
 	if (s->nfolder[0]) xd_folder_put(&places, s->folder[0]);
+	if (s->karma4 >= 0) guest_write16(guest_read32(BN4_TOOLKIT + BN4_TOOLKIT_NAVI_STATS) + BN4_NAVI_KARMA, (uint16_t)s->karma4);
 }
 
 int xdiff_bn4_run(const Spec *s) {
