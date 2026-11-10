@@ -5303,9 +5303,9 @@ static void test_chip_records(void) {
 	CHECK(!bad4, "registry: BN4's rows hold their rules (%s)", why);
 	int folder4 = 0, pas4 = 0, packed4 = 0;
 	for (int i = 0; i < xreg4_count; ++i) {
-		folder4 += xreg4_rows[i].how == XREG_PENDING;
+		folder4 += xreg4_rows[i].how != XREG_PA;
 		pas4 += xreg4_rows[i].how == XREG_PA;
-		packed4 += xreg4_rows[i].how == XREG_PENDING && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) != 0;
+		packed4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) != 0;
 	}
 	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
 	CHECK(xreg4_count == 194 && folder4 == 175 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST, "registry: BN4's 194 rows, 175 folder chips "
@@ -5313,9 +5313,9 @@ static void test_chip_records(void) {
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
 		driver->bn6 - BN6_PA_WIDE_FIRST < BN6_PA_WIDE_COUNT && !bn6_pack_entry(0x02002230u, driver->bn6),
 		"registry: BN4's Hole at 527, BugCharg no row, P.Driver a Program Advance whose bit is the engine's");
-	const XChipReg4 twice4[] = { { 82, 527, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 }, { 82, 528, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
-	const XChipReg4 bn5s[] = { { 82, 512, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, as_pa[] = { { 82, 605, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
-	const XChipReg4 no_entry[] = { { 82, 603, XREG_PENDING, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, pa_low[] = { { 345, 527, XREG_PA, { 0, 1, 2, 26 }, 4, 5 } };
+	const XChipReg4 twice4[] = { { 82, 527, XREG_PENDING, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 }, { 82, 528, XREG_PENDING, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
+	const XChipReg4 bn5s[] = { { 82, 512, XREG_PENDING, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, as_pa[] = { { 82, 605, XREG_PENDING, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
+	const XChipReg4 no_entry[] = { { 82, 603, XREG_PENDING, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, pa_low[] = { { 345, 527, XREG_PA, 0, 0xFF, { 0, 1, 2, 26 }, 4, 5 } };
 	CHECK(xreg4_check(twice4, 2, xreg_rows, xreg_count, why, sizeof why) == 2 && xreg4_check(bn5s, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		xreg4_check(as_pa, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(no_entry, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		xreg4_check(pa_low, 1, xreg_rows, xreg_count, why, sizeof why) == 1, "registry: a BN4 id twice, an id of BN5's rows, a folder chip among the "
@@ -5324,8 +5324,8 @@ static void test_chip_records(void) {
 	uint8_t rec4[XREC_SIZE] = { 0x11, 0xFF, 0xFF, 0xFF, 1, 4, 90, 6, 2, BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER | BN6_CHIP_IN_LIBRARY | 1, 0, 0x0C, 0x2D };
 	rec4[BN6_CHIP_PARAMS] = 7;
 	put16(rec4 + BN6_CHIP_ATTACK_POWER, 1047);
-	const XChipReg4 sun = { 304, 731, XREG_PENDING, { 0x11, 0xFF, 0xFF, 0xFF }, 2, 90 };
-	XRecordFrom4 in4 = { rec4, &sun, 77, { 0x08C21000u, 0x08C21080u, 0x08C215C0u } };
+	const XChipReg4 sun = { 304, 731, XREG_PENDING, 0, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 2, 90 };
+	XRecordFrom4 in4 = { rec4, NULL, &sun, 77, { 0x08C21000u, 0x08C21080u, 0x08C215C0u } };
 	xrec_from_bn4(&in4, out);
 	CHECK(out[0] == 0x11 && out[BN6_CHIP_ATTACK_ELEMENT] == 1 && out[BN6_CHIP_RARITY] == 4 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 &&
 		out[BN6_CHIP_ELEMENT] == 5 && out[BN6_CHIP_EFFECT_FLAGS] == 1 && !get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
@@ -5338,6 +5338,17 @@ static void test_chip_records(void) {
 	xrec_from_bn4(&in4, out);
 	CHECK(out[BN6_CHIP_ELEMENT] == 11 && get16(out + BN6_CHIP_ATTACK_POWER) == 300 && (out[BN6_CHIP_EFFECT_FLAGS] & BN6_CHIP_SHOWS_POWER),
 		"records: BN4's kind of a Program Advance BN6's icon element of one, a plain power kept");
+	/* (one that runs on BN6's own code, XREG_RECORD: its twin's family, lock-on and lock-on type, BN4's parameters kept) */
+	const XChipReg4 invis4 = { 133, 558, XREG_RECORD, 177, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 };
+	uint8_t twin6[XREC_SIZE] = { 0 };
+	twin6[BN6_CHIP_FAMILY] = 0x15; twin6[BN6_CHIP_SUBFAMILY] = 5; twin6[BN6_CHIP_LOCK_ON] = 1; twin6[BN6_CHIP_LOCK_ON_TYPE] = 2;
+	XRecordFrom4 on6 = { rec4, twin6, &invis4, 0, { 0 } };
+	xrec_from_bn4(&on6, out);
+	CHECK(out[BN6_CHIP_FAMILY] == 0x15 && out[BN6_CHIP_SUBFAMILY] == 5 && out[BN6_CHIP_LOCK_ON] == 1 && out[BN6_CHIP_LOCK_ON_TYPE] == 2 && out[BN6_CHIP_PARAMS] == 7,
+		"records: a BN4 chip on BN6's code takes its twin's family, subfamily and lock-on, its own parameters");
+	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
+	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
+		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");
 	xrec_placeholder4(&sun, 9, blank, out);
 	CHECK(out[0] == 0x11 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
 		get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 731, "records: a BN4 chip's placeholder keeps its codes, class and MB");
@@ -5671,8 +5682,9 @@ static void test_library_pages(void) {
 		const LibSlot *s = &library_bn4_rows[i];
 		const XChipReg *r = xreg_at(s->chip);
 		const XChipReg4 *own = xreg4_of(s->own);
-		/* (its own row's id where it has one, sitting out until its code is moved; else the run's chip of its name: BN6's or BN5's) */
-		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && !library_plays(s->chip), "library: BN4's chip %d fills its slot with its own row's id, hidden until it plays", s->own);
+		/* (its own row's id where it has one, sitting out until its code plays, on BN6's or moved; else the run's chip of its name: BN6's or BN5's) */
+		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && library_plays(s->chip) == (own->how == XREG_RECORD || own->how == XREG_MOVED),
+			"library: BN4's chip %d fills its slot with its own row's id, hidden until it plays", s->own);
 		else CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
 		hidden4 += own != NULL;
 	}

@@ -74,9 +74,12 @@ void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3]
  * computes (1000 and up, BN4's own table): 0, unshown. Out of BN6's
  * Library screen, its own id its ID sort key, no DarkChipID. Its code is
  * not in BN6's engine (XREG_PENDING: it sits out): the inert family, no
- * lock-on and no parameters. */
+ * lock-on and no parameters. One that runs on BN6's own code (XREG_RECORD,
+ * its twin given): the twin's family, lock-on and lock-on type (and its
+ * subfamily, but the row's), BN4's parameters, which that code reads. */
 typedef struct {
 	const uint8_t *bn4;    /* BN4's record */
+	const uint8_t *twin;   /* (XREG_RECORD) BN6's record of the chip whose family it runs as, else NULL */
 	const XChipReg4 *reg;
 	uint16_t abc;          /* its place in the folder editor's ABC order */
 	uint32_t art[3];       /* its icon's, picture's and picture palette's bus addresses in the core's copy */
