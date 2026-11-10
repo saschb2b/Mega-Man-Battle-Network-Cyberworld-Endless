@@ -167,11 +167,12 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		const XvPair *c = &f->calls[i];
 		if (xvirus_is_code(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
 		/* (one of BN6's routines, of the moved objects' or its region's stubs, or the second-level dispatch's spawner where it
-		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
+		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs, or of an earlier unit
+		 * of its region's that moved a type it runs, XvRegion.shared: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
 		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
-			!(r != &families && navis_routine(c->to | 1))))
+			!(r != &families && navis_routine(c->to | 1)) && !(r->shared && r->shared(c->to | 1))))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
 			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);

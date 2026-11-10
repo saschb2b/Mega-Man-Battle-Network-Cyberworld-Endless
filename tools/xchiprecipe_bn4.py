@@ -68,6 +68,7 @@ TWINS = {
     0x08008C2A: (0x0800B9B0, 'chips'),   # its step 4 (+9): the chip's name shown
     0x08008EB8: (0x0800BC88, 'chips'),   # its step 12 (+9): its own work done, its state 8
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
+    0x0800FC48: (0x08016168, 'chips'),   # a panel of the other side's found in the object's row (Meteors' aim)
 }
 AUDITS = {
     (0x08008BD8, 0x0800B916): ('ok', "a support chip's object's state 0: its side's turn of the time freeze asked for and the state "
@@ -86,6 +87,12 @@ AUDITS = {
                                      "type +2 and its drawn type +6) and its own sound, but BN4's test of flag 0x20000 first, "
                                      "which only BN4's type 5 gives (BN4_PANEL_FLAGS_OF 0x30010; BN6's occupants' mask lacks that "
                                      "bit likewise): no BN6 panel type's word has it, so the test never holds in BN6"),
+    (0x0800FC48, 0x08016168): ('ok', "a panel found in the object's row for the side across (its side ^ 1, its row, a required and a "
+                                     "refused word of panel flags by its side, eight bytes a side, handed to BN4's 0x0800A1AE, BN6's "
+                                     "0x0800D086; where none, again with a second pair of words): BN6's the same instruction for "
+                                     "instruction, a routine no code of BN6's calls, and its two tables (0x080161A4, 0x080161B4) the "
+                                     "same eight words as BN4's (0x0800FC84, 0x0800FC94), read in both ROMs; the search pairs only "
+                                     "routines BN6 calls"),
 }
 # The dispatch's numbers the chips' moved types take, by kind: the fourth kind's from 0x91 up, past BN5's 145 types (its own
 # numbers in the tables) and below BN4's families' and Navis' (0xE0 on); the third kind's numbers no BN5 track names (BN5's
@@ -95,7 +102,7 @@ TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
 UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'),
-         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'))
+         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'), ('misc', 0x11, 'Meteors'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -114,10 +121,10 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
 # where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
 # kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set)
 TABLES = {
-    0x080D8580: dict(size=42, entry=6, kinds=(1,), sprite=(None, 0), list=3, loads={0x080D85E4},
+    0x080D8580: dict(size=42, entry=6, kinds=(1, 6), sprite=(None, 0), list=3, loads={0x080D85E4},
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
                          "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
-                         "(0x080E5D3E: movs r4,#1)"),
+                         "(0x080E5D3E: movs r4,#1), Meteors' controller kind 6 (0x080EAE56: movs r4,#6; UNIT_SHARES)"),
 }
 # The numbers the chips' copies take, each from the top of its range down (the late families' way, tools/xrecipe_bn4.py):
 # effect ids 0xCF-0xB0 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xB0, list 4's 0x9F-0x70,
@@ -144,6 +151,14 @@ IMMS = {
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
 # "on BN6's code" are not): BN4's routine -> why BN6's twin serves. One not here is a decision
 TYPE_TWINS = {}
+# A call of a unit's into the code of a type an earlier unit moved: aimed at that unit's copy, the type run by its number of
+# the dispatch, none of its code copied again (the third kind's numbers are few). The unit's name -> {BN4's routine: (the unit
+# that moved its type, why)}; a kind of that type's kinds' table the later unit spawns is added to the table's kinds (TABLES)
+UNIT_SHARES = {
+    'Meteors': {0x080D877C: ('ShotStar', "the star's spawner with its panel, element and power handed on (the third kind's 0x56, "
+                                         "which ShotStar's unit moved): Meteors' controller spawns kind 6 of the star's kinds "
+                                         "(movs r4,#6 at 0x080EAE56), the same row as ShotStar's kind 1")},
+}
 # A panel's fields a moved object reads after BN4's getPanel (bn4.h BN4_PANEL_*): BN4's offset -> BN6's
 PANEL4TO6_FIELDS = {0x01: 0x03}
 
@@ -216,7 +231,7 @@ def type_number(f, alloc, kind):
     return n
 
 
-def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
+def derive(b4, b6, pairs, kind, sub, name, alloc, slot, done=()):
     f = X4.Family(0, name, 0)
     f.late = True   # (its copies' numbers from the top of the chips' ranges down: CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4)
     # (a unit of several subfamilies: their routines in one block, the first's the unit's entry, the rest rows that share it)
@@ -255,6 +270,13 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.regions, f.roots = [(lo, hi, ty)], f.entries + [lo]
             f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its routine ({f.entry:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
+        elif t4_with(b4, f.entry) is not None and t4_with(b4, f.entry)[0] is not None:
+            # (a routine in a fourth-kind type's code, Meteors' after its controller's spawner: the type moved, its region to
+            # the routine's end the unit's block)
+            ty, lo, hi = t4_with(b4, f.entry)
+            f.regions, f.roots = [(lo, hi, ('4', ty))], [f.entry, lo]
+            f.moved4 = {ty: dict(lo=lo, hi=hi, routine=lo)}
+            f.notes.append(f'its routine ({f.entry:08X}) lies in the fourth-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
         elif hit is not None or C.t4_of(b4, f.entry) is not None:
             f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code this tool does not move with a misc unit yet')
             return f
@@ -263,7 +285,10 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
             f.roots = [f.entry]
             f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+    shares = shared_calls(f, name, done)
     try:
+        # (a shared call is none of the walk's to move: named as a pair's for the walk, aimed at the other unit's copy)
+        pairs.twins.update({t: 0 for t in shares})
         roots = list(f.roots)
         while roots:
             X4.walk_code(b4, f, roots, set(), pairs)
@@ -271,6 +296,9 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     finally:
         bn4_twins.COPIED.clear()
         bn4_twins.COPIED.update(saved_copied)
+        for t in shares:
+            del pairs.twins[t]
+    f.aim.update(shares)
     site_imms(f)
     X4.side_sites(f)
     X4.scan(f)
@@ -312,6 +340,36 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             out.append(i)
     f.imms = out
     return f
+
+
+def t4_with(b4, t):
+    """the fourth-kind type whose code holds `t`, as tools/xnavirecipe_bn4_objects.py's t4_of, and for the table's last type,
+    whose region no next type ends: (type, its routine, the end of the routine at `t`), `t` within 0x100 bytes of the type's"""
+    hit = C.t4_of(b4, t)
+    if hit is not None:
+        return hit
+    types = [b4.u32(C.T4_TYPES + 4 * i) & ~1 for i in range(C.NT4)]
+    lo = max(a for a in types if T.is_code_ptr(a | 1, b4))
+    if not lo <= t < lo + 0x100:
+        return None
+    w = T.walk(b4, t)
+    hi = max(max(a + i.size for a, i in w.insns.items()), max((x + 4 for x in w.lits), default=0))
+    tys = [k for k, a in enumerate(types) if a == lo]
+    return (tys[0] if len(tys) == 1 else None), lo, hi
+
+
+def shared_calls(f, name, done):
+    """its calls into a type an earlier unit moved (UNIT_SHARES): BN4's routine -> (its place in that unit's copy, why), each
+    held to lie in a block of that unit's"""
+    out = {}
+    for t, (other, why) in sorted(UNIT_SHARES.get(name, {}).items()):
+        g = next((x for x in done if x.name == other), None)
+        blk = next(((lo, hi, at) for lo, hi, at, _ in getattr(g, 'blocks', ()) if lo <= t < hi), None) if g else None
+        if blk is None or g.decisions:
+            f.decide('share', f'{t:08X}: UNIT_SHARES names {other}\'s copy of it, a unit not derived whole before this one, or none of its blocks')
+            continue
+        out[t] = (place(blk[2] + t - blk[0], X4C_CODE, 'XC4_CODE'), f'{other}\'s copy of it (UNIT_SHARES): {why}')
+    return out
 
 
 def moved3(b4, f, pairs):
@@ -684,7 +742,7 @@ def main():
     more = tuple((k, int(s, 0), n) for k, s, n in (u.split(':') for u in a.unit))
     units, slot = [], 0
     for k, s, n in UNITS + CANDIDATES + more:
-        units.append(derive(b4, b6, pairs, k, s, n, alloc, slot))
+        units.append(derive(b4, b6, pairs, k, s, n, alloc, slot, units))
         slot += len(s) if isinstance(s, (tuple, list)) else 1   # (a row a subfamily: each its home's slot)
     os.makedirs(WORK, exist_ok=True)
     with open(os.path.join(WORK, 'bn4_report.md'), 'w', encoding='utf-8') as fh:

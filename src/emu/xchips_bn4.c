@@ -123,6 +123,7 @@ static const XcSong panlsht_songs[] = { { 0xBF, 0x1DB }, { 0x1C6, 0x1DA } };
 /* its third-kind 0x56 (080D85AA-080D87B0), spawned through 080D879A: no BN6 type proved its twin, moved */
 /* its fourth-kind 0x35 (080E5E38-080E5EF4): no BN6 type of its body, moved with him */
 /* its table 080D8580's kind 1: sprite 3:0x31 in BN4, 0x70 in BN6 (copied) */
+/* its table 080D8580's kind 6: sprite 3:0x31 in BN4, 0x70 in BN6 (copied) */
 /* its effect 0x6: BN6's 0xcf, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
 /* its sound 0x146 (080D86CE): BN4's song copied into the grown song table's slot 0x1dc, on BN4's player 6 */
@@ -228,6 +229,7 @@ static const XvSprite shotstar_sprites[] = {
 static const XvId shotstar_effects[] = { { 0x06, 0xCF } };
 static const XvByte shotstar_bytes[] = {
 	{ 0x080D8586, 0x31, 0x70 },   /* its table's kind 1: list 3 0x31 in BN4, 0x70 in BN6 (copied) */
+	{ 0x080D85A4, 0x31, 0x70 },   /* its table's kind 6: list 3 0x31 in BN4, 0x70 in BN6 (copied) */
 };
 static const XvSoundCall shotstar_sound_calls[] = {
 	{ 0x080D86CE, 0x1DC },   /* its sound 0x146: BN4's song at the grown table's slot 0x1dc */
@@ -432,6 +434,44 @@ static const XcSong whitweb_songs[] = { { 0x70, 0x3A }, { 0xF7, 0x1DE } };
 	.sound_calls = whitweb_sound_calls, .nsound_calls = (int)(sizeof whitweb_sound_calls / sizeof *whitweb_sound_calls), \
 	.sprites = whitweb_sprites, .nsprites = (int)(sizeof whitweb_sprites / sizeof *whitweb_sprites), \
 	.effects = whitweb_effects, .neffects = (int)(sizeof whitweb_effects / sizeof *whitweb_effects) }
+/* ---- Meteors: BN4's misc 0x11 (080EAE93) as BN6's 0x91; its chips 163 (674), 164 (675), 165 (676) ---- */
+/* its routine (080EAE92) lies in the fourth-kind 0x81's code (080EADF4-080EAEA6), which it spawns: moved */
+
+static const XvBlock meteors_blocks[] = {
+	{ 0x080EADF4, 0x080EAEA6, XC4_CODE + 0xC20, 0x8C47ED0Fu },
+};
+static const XvData meteors_data[] = {
+	{ 0x080EAE02, 0x080EAE04, XV_RAW },
+	{ 0x080EAE04, 0x080EAE08, XV_POOL },
+	{ 0x080EAE08, 0x080EAE14, XV_TABLE },
+	{ 0x080EAE28, 0x080EAE2C, XV_POOL },
+	{ 0x080EAE2C, 0x080EAE34, XV_TABLE },
+};
+static const XvPair meteors_calls[] = {
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x0800FC48, 0x08016168 },   /* project:project:chips, SAME (audited) */
+	{ 0x080D877C, XC4_CODE + 0x784 },   /* ShotStar's copy of it (UNIT_SHARES): the star's spawner with its panel, element and power handed on (the third kind's 0x56, which ShotStar's unit moved): Meteors' controller spawns kind 6 of the star's kinds (movs r4,#6 at 0x080EAE56), the same row as ShotStar's kind 1 */
+};
+static const XvPair meteors_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+};
+static const XvImm meteors_imms[] = {
+	{ 0x080EAE54, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080EAE70, THUMB_MOVS, 0, 0, 0x81, 0x94 },   /* its object's type 0x81: moved, the dispatch's 0x94 */
+	{ 0x080EAE80, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType meteors_types[] = {
+	{ 4, 0x94, XV_TYPE_MOVED, 0x81 },   /* BN4's fourth-kind 0x81, moved, the dispatch's 0x94 */
+};
+
+#define METEORS_CODE { .name = "Meteors (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x1C00), \
+	.blocks = meteors_blocks, .nblocks = (int)(sizeof meteors_blocks / sizeof *meteors_blocks), \
+	.data = meteors_data, .ndata = (int)(sizeof meteors_data / sizeof *meteors_data), \
+	.calls = meteors_calls, .ncalls = (int)(sizeof meteors_calls / sizeof *meteors_calls), \
+	.words = meteors_words, .nwords = (int)(sizeof meteors_words / sizeof *meteors_words), \
+	.imms = meteors_imms, .nimms = (int)(sizeof meteors_imms / sizeof *meteors_imms), \
+	.types = meteors_types, .ntypes = (int)(sizeof meteors_types / sizeof *meteors_types) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -440,5 +480,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x08, 0x88, 0x080D4F21, XC4_HOMES + 0x1000, WHITWEB_CODE, whitweb_songs, (int)(sizeof whitweb_songs / sizeof *whitweb_songs), 0, 0 },
 	{ XCHIP_MISC, 0x09, 0x89, 0x080D4F2B, XC4_HOMES + 0x1400, { .name = "WhitWeb (BN4's), its subfamily 0x9", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 	{ XCHIP_MISC, 0x0A, 0x8A, 0x080D4F35, XC4_HOMES + 0x1800, { .name = "WhitWeb (BN4's), its subfamily 0xa", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
+	{ XCHIP_MISC, 0x11, 0x91, 0x080EAE93, XC4_HOMES + 0x1C00, METEORS_CODE, NULL, 0, 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

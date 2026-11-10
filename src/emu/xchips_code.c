@@ -310,7 +310,21 @@ bool xchips_code_install(void) {
 
 /* ---- BN4's units (xchips_bn4.h): support routines alone, each in its own region ---- */
 
-static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
+/* a routine (Thumb) of a unit staged before the one being staged, at its copy: a later unit's call may go there, where it
+ * runs a type that unit moved (tools/xchiprecipe_bn4.py UNIT_SHARES: Meteors' controller spawns ShotStar's star) */
+static int staging4;
+static bool unit4_routine(uint32_t a) {
+	for (int i = 0; (a & 1) && i < staging4 && i < xchips_bn4_count; ++i) {
+		const XVirusFamily *f = &xchips_bn4[i].code;
+		for (int k = 0; k < f->nblocks; ++k) {
+			const XvBlock *b = &f->blocks[k];
+			uint32_t at = a & ~1u;
+			if (at >= b->at && at < b->at + (b->end - b->start)) return xvirus_is_code(f, at - b->at + b->start);
+		}
+	}
+	return false;
+}
+static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .shared = unit4_routine };
 
 /* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
  * that shares an earlier unit's code (XChipUnit.share), its entry alone */
@@ -325,6 +339,7 @@ static void unit4_stage(int i, bool fresh) {
 	} else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
 	else {
 		songs_in(u);
+		staging4 = i;
 		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, &u->code, fresh);
 	}
 }
