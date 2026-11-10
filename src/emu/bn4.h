@@ -394,5 +394,6 @@
 #include "bn4_navis.h"   /* BN4's Navis: their types, routines and the engine's they share (docs/rom/bn4.md) */
 #include "bn4_battle.h"  /* BN4's battle structures past these: its panels' fields, its rewards (docs/rom/bn4.md) */
 #include "bn4_tournament.h" /* BN4's tournaments: its main modes, the bracket screen, the entrants in RAM (docs/rom/bn4.md) */
+#include "bn4_chips.h"    /* its chips' descriptions and icons' palette */
 
 #endif

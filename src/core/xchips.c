@@ -254,6 +254,10 @@ static void pair_bn4(void) {
 		int v = from_bn4[x] ? 0 : xchips_v1_of(version, navi, cls, BN4_CHIP_COUNT, x);
 		if (v && from_bn4[v]) from_bn4[x] = (uint16_t)run_version(from_bn4[v], version[x]);
 	}
+	/* (and the registry's row of its own, unit 2: its id there, which pays once its code plays; until then it sits out
+	 * and a reward of it is the stand-in's, reward_as) */
+	for (int x = 1; x < BN4_CHIP_COUNT; ++x)
+		if (!from_bn4[x] && xreg4_of(x) && xreg4_of(x)->how != XREG_PA) from_bn4[x] = xreg4_of(x)->bn6;
 	bn4_paired = true;
 }
 

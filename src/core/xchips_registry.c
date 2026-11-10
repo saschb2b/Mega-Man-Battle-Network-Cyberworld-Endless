@@ -382,3 +382,45 @@ int xreg_check(const XChipReg *rows, int n, char *why, size_t len) {
 	}
 	return 0;
 }
+
+/* ---- BN4's rows (xchips_registry_bn4.c) ---- */
+
+#define BN4_IDS 389   /* BN4's chip records */
+
+static struct { bool made; int16_t of[BN4_IDS], at[XREG_IDS]; } idx4;
+
+static void index4_make(void) {
+	if (idx4.made) return;
+	idx4.made = true;
+	for (int i = 0; i < xreg4_count; ++i) {
+		if (xreg4_rows[i].bn4 < BN4_IDS) idx4.of[xreg4_rows[i].bn4] = (int16_t)(i + 1);
+		if (xreg4_rows[i].bn6 < XREG_IDS) idx4.at[xreg4_rows[i].bn6] = (int16_t)(i + 1);
+	}
+}
+
+const XChipReg4 *xreg4_of(int bn4) {
+	index4_make();
+	return bn4 > 0 && bn4 < BN4_IDS && idx4.of[bn4] ? &xreg4_rows[idx4.of[bn4] - 1] : NULL;
+}
+
+const XChipReg4 *xreg4_at(int bn6) {
+	index4_make();
+	return bn6 > 0 && bn6 < XREG_IDS && idx4.at[bn6] ? &xreg4_rows[idx4.at[bn6] - 1] : NULL;
+}
+
+int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, char *why, size_t len) {
+	static uint8_t bn4_seen[BN4_IDS], id_seen[XREG_IDS];
+	memset(bn4_seen, 0, sizeof bn4_seen);
+	memset(id_seen, 0, sizeof id_seen);
+	for (int i = 0; i < n5; ++i)
+		if (xreg_own(&rows5[i]) && rows5[i].bn6 < XREG_IDS) id_seen[rows5[i].bn6] = 1;
+	for (int i = 0; i < n; ++i) {
+		const XChipReg4 *r = &rows[i];
+		if (!r->bn4 || r->bn4 >= BN4_IDS || bn4_seen[r->bn4]++) return bad(i, why, len, "BN4's id is none, past its records, or twice");
+		if (r->bn6 < XREG4_PACK_FIRST || !xreg_free_id(r->bn6) || id_seen[r->bn6]++) return bad(i, why, len, "its id is not free, BN5's, or taken twice");
+		bool pa = r->bn6 >= XREG4_PA_FIRST && r->bn6 < XREG4_REST_FIRST;
+		if (r->how == XREG_PA ? !pa || r->type != 4 : r->how != XREG_PENDING || pa || r->type > 2 || (r->bn6 >= BN6_PACK_WIDE_END && r->bn6 < XREG4_REST_FIRST))
+			return bad(i, why, len, "a folder chip's id is a Program Advance's, or the other way, or its class is neither's");
+	}
+	return 0;
+}

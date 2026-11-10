@@ -2049,6 +2049,9 @@
   "xchips_text:xchips_text_desc": {
    "header": "Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)",
    "line": 8
+  },
+  "xchips_text:xchips_text_desc4": {
+   "line": 12
   }
  },
  "files": {
@@ -2094,7 +2097,7 @@
    "comment": "The PET's words for a chip of BN5's without its ROM (xchips_text.h).",
    "domain": "The PET",
    "kind": "screen",
-   "lines": 3,
+   "lines": 6,
    "shows": [],
    "speaker": "Screen",
    "stem": "xchips_text"
@@ -2916,7 +2919,7 @@
      "src/director/pet_text.c"
     ],
     "flagged": 1,
-    "lines": 58,
+    "lines": 61,
     "speech": 20
    },
    "The ROMs screen": {
@@ -3114,7 +3117,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2006,
+  "lines": 2009,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3803,6 +3806,7 @@
   {"container":"pet_text:mail_body","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:mail_body","line":435,"lines":["pet_text:mail_body:0"],"speakers":["Dad"],"title":"A guardian's mail","when":"A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled)."},
   {"container":"pet_text:install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_mails.subjects","line":466,"lines":["pet_text:install_mails.subjects:0","pet_text:install_mails.subjects:3"],"speakers":["Screen"],"title":"Install mails: subjects","when":""},
   {"container":"xchips_text:xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc","line":8,"lines":["xchips_text:xchips_text_desc:0","xchips_text:xchips_text_desc:1","xchips_text:xchips_text_desc:2"],"speakers":["Screen"],"title":"Xchips text desc: its description, three lines as the folder's box shows them","when":"Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)"},
+  {"container":"xchips_text:xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc4","line":12,"lines":["xchips_text:xchips_text_desc4:0","xchips_text:xchips_text_desc4:1","xchips_text:xchips_text_desc4:2"],"speakers":["Screen"],"title":"Xchips text desc4","when":""},
   {"container":"square_words:square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_options","line":6,"lines":["square_words:square_keeper_options:0","square_words:square_keeper_options:1"],"speakers":["MegaMan"],"title":"Square keeper options","when":""},
   {"container":"square_words:square_look_option","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_look_option","line":8,"lines":["square_words:square_look_option:0"],"speakers":["MegaMan"],"title":"Square look option","when":"L: look around (square_look_words) or the quiet's option; the first time, MegaMan naming SELECT's emotes and phrases (emote_strip.h)."},
   {"container":"square_words:square_strip_hint","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_strip_hint","line":10,"lines":["square_words:square_strip_hint:0"],"speakers":["MegaMan"],"title":"Square strip hint","when":""},
@@ -4430,6 +4434,9 @@
   {"boxes":[{"pages":[["Needs BN5"]],"speaker":"Screen","text":"Needs BN5"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Needs BN5","text_hash":"e7ada24c886e"},
   {"boxes":[{"pages":[["ROM back"]],"speaker":"Screen","text":"ROM back"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:1","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"ROM back","text_hash":"e4fe73de06f9"},
   {"boxes":[{"pages":[["to battle"]],"speaker":"Screen","text":"to battle"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"fragment":true,"id":"xchips_text:xchips_text_desc:2","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"to battle","text_hash":"932684ca3df2"},
+  {"boxes":[{"pages":[["Needs BN4"]],"speaker":"Screen","text":"Needs BN4"}],"container":"xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc4:0","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Needs BN4","text_hash":"a784f7c10b92"},
+  {"boxes":[{"pages":[["ROM back"]],"speaker":"Screen","text":"ROM back"}],"container":"xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc4:1","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"ROM back","text_hash":"e4fe73de06f9"},
+  {"boxes":[{"pages":[["to battle"]],"speaker":"Screen","text":"to battle"}],"container":"xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"fragment":true,"id":"xchips_text:xchips_text_desc4:2","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"to battle","text_hash":"932684ca3df2"},
   {"boxes":[{"pages":[["Lan,{off} isn't","on our board!"]],"speaker":"MegaMan","text":"Lan,{off} isn't on our board!"}],"container":"off_board_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:off_board_words:0","kind":"speech","line":23,"placeholders":[{"name":"off","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Lan,{off} isn't on our board!","text_hash":"3edd5c32995d"},
   {"boxes":[{"pages":[["A RegUp,Lan! Our Reg","memory's {reg} MB now!"]],"speaker":"MegaMan","text":"A RegUp,Lan! Our Reg memory's {reg} MB now!"}],"container":"reg_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:reg_words:0","kind":"speech","line":34,"placeholders":[{"name":"reg","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A RegUp,Lan! Our Reg memory's {reg} MB now!","text_hash":"fbefd1c61377"},
   {"boxes":[{"pages":[["Reg memory up! It's","{reg} MB now,Lan!"]],"speaker":"MegaMan","text":"Reg memory up! It's {reg} MB now,Lan!"}],"container":"reg_words","domain":"NaviCust","file":"src/director/board_words.c","flags":[],"id":"board_words:reg_words:1","kind":"speech","line":35,"placeholders":[{"name":"reg","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Reg memory up! It's {reg} MB now,Lan!","text_hash":"04019d8ad4c1"},
