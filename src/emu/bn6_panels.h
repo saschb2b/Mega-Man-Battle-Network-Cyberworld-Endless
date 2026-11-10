@@ -45,6 +45,8 @@
 #define BN6_HIT_COOL_SPAN     0x30        /* ... last pop (0x03007770): their bytes, the image's at 0x081D7C42 */
 #define BN6_SET_PANEL_TYPE_IW 0x030079A0u /* bn6f object_setPanelType in IWRAM (r0 column, r1 row, r2 type): a panel of type 0 refused, 9-12 given 0x708 */
 #define BN6_SET_PANEL_TYPE    0x0800CC0Au /* ... its ROM entry, every chip's and attack's: push {r4,r5,r6,lr}, then BN6_SET_PANEL_TYPE_IW */
+#define BN6_PANEL_BLINK_SET   0x0800CC52u /* a panel (r0 column, r1 row) drawn as type r2 on side r3 while a chip's panels blink: its +8, +9 and +0xD 1
+                                           * (seven calls from BN6's own panel changer's code, 0x080E31DC on); BN4_PANEL_BLINK_SET's twin by reading */
 #define BN6_WEAKNESS          0x03007440u /* IWRAM: a byte by element x 5 + the attacker's element (0-4), the damage's shift: 1 where it is weak (0x0300742E) */
 /* What a hit adds for the panel its victim stands on (IWRAM 0x03007668,
  * from the hit pass at 0x03007416 and 0x030076F6, each result added to the
