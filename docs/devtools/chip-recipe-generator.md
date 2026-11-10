@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T22:00:00Z }
 ---
 
 # The chip recipe generator
@@ -182,6 +182,26 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
+- **A Navi chip's unit.** A Navi chip's routine of that table spawns an
+  object of the Navi's own, which is BN6's one Navi chip object state
+  for state, so a unit of kind `navi` moves the chip's Navi alone
+  (`tools/xchiprecipe_bn4_navi.py`; [BN4's chips in a run](../multirom/bn4-chips.md),
+  The Navi chips). The tool finds the spawner the object calls (a routine
+  in a first-kind type's region that spawns that type; where one object
+  serves several Navis, the entry of its table at the chips' third
+  parameter), holds BN4's object to an entry of `OBJECTS` (read by hand
+  against BN6's, with why) and to BN6's object's waits (the frames each
+  stores to its +0x20, read from both ROMs each run), and the spawner to
+  the registers BN6's object hands a Navi routine. The unit's block is
+  the first-kind type's region, its entry the spawner, at BN6's grown
+  Navi routines' 0x80 + BN4's subfamily (`XC_NAVI`), its type at a
+  first-kind number of the chips' in the dispatch (0xA0 on). A call into
+  a block a BN4 Navi's recipe moved (`src/emu/xnavi_bn4.c`) goes to the
+  Navi's copy and moves no type again; the load of his battle sprite
+  takes the Navi's list 2 number, and the unit's row carries his seat,
+  whose rooms the engine fills as the chip is used. A chip of the unit
+  whose row still waits (an SP's computed power, a DS's cost) is a note,
+  not a decision.
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -222,7 +242,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   whichever game's units install first.
 - **Its chips.** The registry's rows of the unit's chips must be
   `XREG_MOVED` with the unit's number their subfamily
-  (`tools/xreg_bn4.py` `MOVED`), and a dark chip's row among the
+  (`tools/xreg_bn4.py` `MOVED`; a Navi chip's in `NAVI`, which names the
+  BN6 chip whose family the record takes), and a dark chip's row among the
   registry's dark rows (`xreg4_dark_ids`, which the price's hook reads:
   [DarkChips](../game/meta/darkchips.md)): the generator refuses to
   write otherwise. Such a row's record takes BN6's support
@@ -238,5 +259,5 @@ other a row of the units' table that shares its code (`XChipUnit.share`),
 its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
-0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA) and Boomer (misc 2); MokoRus
-and SidBmbo are next.
+0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
+GutsMan's chip (navi 5); MokoRus and SidBmbo are next.
