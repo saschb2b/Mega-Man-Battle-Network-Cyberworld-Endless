@@ -35,6 +35,10 @@ REC = 0x2C
 BN4_MB, BN4_CLASS, FAMILY, SUB, PARAMS = 6, 8, 0x0B, 0x0C, 0x10
 SP, DS = 3, 4          # a Navi chip's version, its record's first parameter
 OUT_OF = {310: 'BugCharg'}   # (no row: the owner's rule)
+# One chip under two spellings (the owner's call, 10 November 2026: docs/multirom/bn4-chips.md, The owner's calls): BN4's id ->
+# BN6's chip, the run's; it takes no row, and where FIRST gave it an id that id is retired (ids are fixed)
+ALIAS = {201: 182}   # LifeAura: BN6's LifeAur; id 530 retired
+ALIGN, ALIGN_DARK = 0x15, 2   # (a BN4 record's alignment, src/emu/bn4_chips.h BN4_CHIP_ALIGN)
 # BN4's chips that run on BN6's own code (docs/multirom/bn4-chips.md, Their code: BN4's family and subfamily a routine BN6 has
 # by its body), each proved by its chip_* spec against BN4's own battle before it is listed: BN4's id -> (the BN6 chip whose
 # family, lock-on and lock-on type its record takes, the subfamily or None for the twin's)
@@ -133,6 +137,16 @@ def rows(r):
             continue
         if rx[BN4_CLASS] > 2:
             continue
+        if x in ON_BN6 and rx[ALIGN] == ALIGN_DARK:
+            # (the owner's call, 10 November 2026: a dark chip of BN4's costs what every dark chip does, 20 max HP a battle
+            # it ran in, docs/game/meta/darkchips.md; none is listed as playing until its use counts as a dark power's)
+            sys.exit(f'xreg_bn4: {x} is a dark chip of BN4\'s: wire its cost (docs/game/meta/darkchips.md) before it plays')
+        if x in ALIAS:
+            # (held to the two names being one cut short: BN6's the start of BN4's)
+            if not spell(names['bn4'][x]).startswith(spell(name(r['bn6'], 'bn6', ALIAS[x]))):
+                sys.exit(f'xreg_bn4: ALIAS {x} is not BN6\'s {ALIAS[x]} by name')
+            paid[x] = ALIAS[x]
+            continue
         # (BN6's own folder chip of its name; else the registry's own id of BN5's, no Program Advance)
         hit = by6 if by6 and by6 < COUNT['bn6'] else reg[by5][0] if by5 and reg[by5][1] != 'PA' else 0
         if hit:
@@ -156,12 +170,14 @@ def rows(r):
                 new.remove(x)
                 out_by_navi.add(x)
     new = [x for x in new if x not in OUT_OF]
-    missing = [x for x in FIRST if x not in new]
+    missing = [x for x in FIRST if x not in new and x not in ALIAS]
     if missing or len(set(FIRST)) != len(FIRST) or len(FIRST) != PACK_END - PACK_FIRST:
         sys.exit(f'xreg_bn4: FIRST does not hold {PACK_END - PACK_FIRST} of the new chips once each (not new: {missing})')
     order = list(FIRST) + [x for x in new if x not in FIRST]
     out = []
     for k, x in enumerate(order):
+        if x in ALIAS:   # (its id retired: the ids after it stay)
+            continue
         out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_PENDING'))
     for k, x in enumerate(pas):
         out.append((x, PA_FIRST + k, 'XREG_PA'))
@@ -189,6 +205,9 @@ def text(rws):
         twin, sub = ON_BN6.get(x, (0, None))
         L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
     L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
+    L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')
+    L.append('const uint16_t xreg4_alias[][2] = { ' + ', '.join(f'{{ {a}, {b} }}' for a, b in sorted(ALIAS.items())) + ' };\n')
+    L.append('const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);\n')
     return ''.join(L)
 
 

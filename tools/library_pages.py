@@ -162,6 +162,11 @@ def pages(r):
             paid[x] = (by6, 'bn6')
         elif by5:
             paid[x] = (reg5[by5][0], 'bn5')
+    # (one chip under two spellings, the registry's xreg4_alias: BN6's)
+    with open(os.path.join(ROOT, 'src', 'core', 'xchips_registry_bn4.c')) as f:
+        alias = re.search(r'xreg4_alias\[\]\[2\] = \{(.*?)\};', f.read(), re.S)
+    for a, b in re.findall(r'\{\s*(\d+),\s*(\d+)\s*\}', alias.group(1) if alias else ''):
+        paid[int(a)] = (int(b), 'bn6')
     for x in range(1, COUNT['bn4']):
         rx = rec('bn4', x)
         if x in paid or not names['bn4'][x] or rx[CLASS['bn4']] != 1 or rx[PARAMS] not in (SP, DS):
@@ -197,7 +202,7 @@ def pages(r):
 
 HEAD = '''/* The Library's pages of the other entries (library_pages.h; docs/game/meta/library.md): each game's standard chips,
  * Megas and Gigas a run has a chip for, in the game's own Library order, with the run's chip that fills the slot.
- * Written by tools/library_pages.py from the three ROMs and the chip registry: numbers only (the game's chip id, the
+ * A table written by tools/library_pages.py from the three ROMs and the chip registry: numbers only (the game's chip id, the
  * run's, its number in its class, its class); the names are comments. */
 #include "library_pages.h"
 

@@ -1,6 +1,6 @@
 /* The Library's pages of the other entries (library_pages.h; docs/game/meta/library.md): each game's standard chips,
  * Megas and Gigas a run has a chip for, in the game's own Library order, with the run's chip that fills the slot.
- * Written by tools/library_pages.py from the three ROMs and the chip registry: numbers only (the game's chip id, the
+ * A table written by tools/library_pages.py from the three ROMs and the chip registry: numbers only (the game's chip id, the
  * run's, its number in its class, its class); the names are comments. */
 #include "library_pages.h"
 
@@ -445,7 +445,7 @@ const LibSlot library_bn4_rows[] = {
 	{ 211,  587,   7, 1 },   /* BugChain */
 	{ 206,  176,   8, 1 },   /* BugFix */
 	{ 209,  174,   9, 1 },   /* FullCust */
-	{ 201,  530,  10, 1 },   /* LifeAura */
+	{ 201,  182,  10, 1 },   /* LifeAura */
 	{ 208,  169,  11, 1 },   /* Snctuary */
 	{ 205,  195,  12, 1 },   /* Atk+30 */
 	{ 207,  196,  13, 1 },   /* DblPoint */

@@ -5308,8 +5308,11 @@ static void test_chip_records(void) {
 		packed4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) != 0;
 	}
 	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
-	CHECK(xreg4_count == 194 && folder4 == 175 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST, "registry: BN4's 194 rows, 175 folder chips "
-		"(76 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
+	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
+		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
+		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
 		driver->bn6 - BN6_PA_WIDE_FIRST < BN6_PA_WIDE_COUNT && !bn6_pack_entry(0x02002230u, driver->bn6),
 		"registry: BN4's Hole at 527, BugCharg no row, P.Driver a Program Advance whose bit is the engine's");
@@ -5688,7 +5691,7 @@ static void test_library_pages(void) {
 		else CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
 		hidden4 += own != NULL;
 	}
-	CHECK(library_bn4_count == 274 && hidden4 == 161, "library: BN4's page holds %d slots, %d of them its own chips'", library_bn4_count, hidden4);
+	CHECK(library_bn4_count == 274 && hidden4 == 160, "library: BN4's page holds %d slots, %d of them its own chips'", library_bn4_count, hidden4);
 	/* (made-up rows: the odd chips sit out) */
 	static const LibSlot rows[] = { { 1, 2, 1, 0 }, { 2, 3, 2, 0 }, { 5, 4, 4, 0 }, { 9, 12, 1, 1 }, { 7, 8, 2, 2 } };
 	LibSlot out[8];

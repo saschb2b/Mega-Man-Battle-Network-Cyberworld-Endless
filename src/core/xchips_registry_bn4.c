@@ -111,7 +111,6 @@ const XChipReg4 xreg4_rows[] = {
 	{ 190,  601, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 99 },   /* DrkVulcn */
 	{ 192,  594, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 99 },   /* DrkSpred */
 	{ 193,  562, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 99 },   /* DrkStage */
-	{ 201,  530, XREG_PENDING,   0, 0xFF, { 0x03, 0xFF, 0xFF, 0xFF }, 1, 70 },   /* LifeAura */
 	{ 210,  570, XREG_PENDING,   0, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 1, 73 },   /* ShotStar */
 	{ 211,  587, XREG_PENDING,   0, 0xFF, { 0x02, 0x1A, 0xFF, 0xFF }, 1, 59 },   /* BugChain */
 	{ 213,  697, XREG_PENDING,   0, 0xFF, { 0x04, 0xFF, 0xFF, 0xFF }, 1, 38 },   /* ElemDark */
@@ -203,3 +202,6 @@ const XChipReg4 xreg4_rows[] = {
 	{ 345,  623, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* P.Driver */
 };
 const int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);
+/* BN4's chips that are a chip of BN6's under another spelling: BN4's id, BN6's (pair_bn4) */
+const uint16_t xreg4_alias[][2] = { { 201, 182 } };
+const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);

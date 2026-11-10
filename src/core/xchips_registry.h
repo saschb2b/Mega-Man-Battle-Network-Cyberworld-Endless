@@ -86,6 +86,9 @@ typedef struct {
 #define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips */
 extern const XChipReg4 xreg4_rows[];
 extern const int xreg4_count;
+/* BN4's chips that are a chip of BN6's under another spelling (LifeAura, BN6's LifeAur): BN4's id and BN6's, no row */
+extern const uint16_t xreg4_alias[][2];
+extern const int xreg4_alias_count;
 
 /* The row of BN4's chip `bn4`, NULL where it has none (the run's chip by
  * name or Navi: xchips_bn4_paid; or none at all) */
