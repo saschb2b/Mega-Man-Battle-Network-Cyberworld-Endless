@@ -83,16 +83,23 @@ void dark_price_hp(int base, int max, int hp, int out[3]);
  * of every kind); the test the price's hook makes of every chip MegaMan
  * runs (darkbn6.c). */
 bool dark_chip_is(int id);
+/* Chip `id` a dark chip of BN4's (the registry's xreg4_dark: a record BN4
+ * marks dark, or one of its DarkChips): no kind of the twelve, no flame's
+ * rule, no BugFrag and no mood; played from the hand like any chip of its
+ * unit, and its price a dark power's (the owner's call of 10 November
+ * 2026: "Same 20 max HP") */
+bool dark_bn4_is(int id);
 /* A battle's DarkChips that ran, a bit each: BN6's rule's by their
  * DarkChipID (1 << 0-4, a BugFrag paid), and DARK_RAN_BN5 for one by
  * BN5's (its record's DarkChipID 0xFF: BN5's own seven, and DarkPlus
  * where BN5's plays in BN6's record of its name) */
 #define DARK_RAN_BN6 0x1Fu
 #define DARK_RAN_BN5 0x20u
+#define DARK_RAN_BN4 0x40u         /* ... and one of BN4's dark chips (dark_bn4_is), whatever its record's DarkChipID */
 /* ... `ran` with chip `id` run for MegaMan (BN6_DARK_AFTER's chip: a
  * DarkChip of BN6's only where its dark power ran, its base chip's id
  * where it fell back) and `dark_id` its record's DarkChipID: unchanged
- * for any chip but a DarkChip. A DarkChip given up for a Chaos Unison
+ * for any chip but a DarkChip or a dark chip of BN4's. A DarkChip given up for a Chaos Unison
  * never runs so (its attack goes through the chip writer alone): none. */
 unsigned dark_ran_add(unsigned ran, int id, int dark_id);
 

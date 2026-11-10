@@ -108,7 +108,10 @@ void dark_price_hp(int base, int max, int hp, int out[3]) {
 
 bool dark_chip_is(int id) { return dark_chip_kind(id) >= 0; }
 
+bool dark_bn4_is(int id) { return xreg4_dark(id); }
+
 unsigned dark_ran_add(unsigned ran, int id, int dark_id) {
+	if (dark_bn4_is(id)) return ran | DARK_RAN_BN4;
 	if (!dark_chip_is(id)) return ran;
 	return ran | (dark_id >= 0 && dark_id < DARK_BN6_COUNT ? 1u << dark_id : DARK_RAN_BN5);
 }

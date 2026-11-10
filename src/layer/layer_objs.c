@@ -136,9 +136,7 @@ static void vault_chip(ScriptsVault *v, int k, int id, char code) {
 	code = loot_fit_code(id, code, true);
 	v->chip[k] = id;
 	v->code[k] = code == '*' ? 26 : code - 'A';
-	v->power[k] = ci.power;
 	snprintf(v->name[k], sizeof v->name[k], "%s", ci.name);
-	chip_desc(id, v->desc[k], sizeof v->desc[k]);
 }
 
 /* An official gate's three chips (docs/game/rival.md): at level 1 an official

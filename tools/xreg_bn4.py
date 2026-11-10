@@ -38,7 +38,10 @@ OUT_OF = {310: 'BugCharg'}   # (no row: the owner's rule)
 # One chip under two spellings (the owner's call, 10 November 2026: docs/multirom/bn4-chips.md, The owner's calls): BN4's id ->
 # BN6's chip, the run's; it takes no row, and where FIRST gave it an id that id is retired (ids are fixed)
 ALIAS = {201: 182}   # LifeAura: BN6's LifeAur; id 530 retired
-ALIGN, ALIGN_DARK = 0x15, 2   # (a BN4 record's alignment, src/emu/bn4_chips.h BN4_CHIP_ALIGN)
+# A dark chip of BN4's (the owner's call, 10 November 2026: docs/game/meta/darkchips.md): its record's alignment dark (BN4 plays it only
+# for a dark MegaMan, src/emu/bn4_chips.h BN4_CHIP_ALIGN) or a DarkChip by its effect flags (src/emu/bn4.h BN4_CHIP_DARK). A row of
+# one is listed in xreg4_dark, which the price's hook reads: a battle it is used in costs 20 max HP, as every dark chip's
+ALIGN, ALIGN_DARK, FLAGS, FLAG_DARK = 0x15, 2, 9, 0x20
 # BN4's chips that run on BN6's own code (docs/multirom/bn4-chips.md, Their code: BN4's family and subfamily a routine BN6 has
 # by its body), each proved by its chip_* spec against BN4's own battle before it is listed: BN4's id -> (the BN6 chip whose
 # family, lock-on and lock-on type its record takes, the subfamily or None for the twin's)
@@ -57,6 +60,7 @@ MOVED = {
     60: 0x80, 61: 0x80, 62: 0x80,      # Counter1-3: BN4's misc 0, BN6's grown misc routine 0x80 (bn4_chip_counter1-3)
     72: 0x88, 73: 0x89, 74: 0x8A,      # WhitWeb1-3: BN4's misc 8, 9 and 0xA, one unit's three routines (bn4_chip_whitweb1-3)
     75: 0x82, 76: 0x82, 77: 0x82,      # Boomer1-3: BN4's misc 2 (bn4_chip_boomer1-3)
+    130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
 }
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
@@ -150,10 +154,6 @@ def rows(r):
             continue
         if rx[BN4_CLASS] > 2:
             continue
-        if (x in ON_BN6 or x in MOVED) and rx[ALIGN] == ALIGN_DARK:
-            # (the owner's call, 10 November 2026: a dark chip of BN4's costs what every dark chip does, 20 max HP a battle
-            # it ran in, docs/game/meta/darkchips.md; none is listed as playing until its use counts as a dark power's)
-            sys.exit(f'xreg_bn4: {x} is a dark chip of BN4\'s: wire its cost (docs/game/meta/darkchips.md) before it plays')
         if x in ALIAS:
             # (held to the two names being one cut short: BN6's the start of BN4's)
             if not spell(names['bn4'][x]).startswith(spell(name(r['bn6'], 'bn6', ALIAS[x]))):
@@ -203,7 +203,7 @@ HEAD = '''/* BN4 Red Sun's rows of the chip registry (xchips_registry.h; docs/mu
  * the chips a run has none of by name or by Navi, each with its id in BN6's tables, fixed here. Written by
  * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its twin and subfamily where its
  * record runs on BN6's code, its codes, class and MB,
- * which its placeholder keeps where BN4's ROM is not read). 527-602 the chips that play first, 605-623 its Program
+ * which its placeholder keeps where BN4's ROM is not read; and which rows are BN4's dark chips). 527-602 the chips that play first, 605-623 its Program
  * Advances, 635 on the rest. */
 #include "xchips_registry.h"
 
@@ -221,6 +221,10 @@ def text(rws):
     L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')
     L.append('const uint16_t xreg4_alias[][2] = { ' + ', '.join(f'{{ {a}, {b} }}' for a, b in sorted(ALIAS.items())) + ' };\n')
     L.append('const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);\n')
+    L.append('/* BN4\'s dark chips among the rows, by their id in BN6\'s tables: a record whose alignment is dark or a DarkChip\'s (xreg4_dark) */\n')
+    dark = [to for x, to, how, rec, nm in rws if rec[ALIGN] == ALIGN_DARK or rec[FLAGS] & FLAG_DARK]
+    L.append('const uint16_t xreg4_dark_ids[] = {\n' + ''.join('\t' + ', '.join(str(d) for d in dark[i:i + 16]) + ',\n' for i in range(0, len(dark), 16)) + '};\n')
+    L.append('const int xreg4_dark_count = (int)(sizeof xreg4_dark_ids / sizeof *xreg4_dark_ids);\n')
     return ''.join(L)
 
 

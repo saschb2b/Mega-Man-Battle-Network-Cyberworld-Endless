@@ -179,18 +179,6 @@ void ta_end_or(TextArchive *t, int next) {
 	else ta_end(t);
 }
 
-/* A chip's description as a sentence after its name: BN6's own, with a
- * period where it ends without one ("A piercng thunder attack!" had gone
- * on into "!.", session 64); "" where it is blank (a DarkChip's is, in
- * Gregar). Its spaces are the wrap's to tidy. */
-void chip_desc_line(char *out, size_t n, const char *name, int code, const char *desc) {
-	size_t len = strlen(desc);
-	while (len && desc[len - 1] == ' ') --len;
-	if (!len) { if (n) out[0] = 0; return; }
-	bool ends = strchr(".!?", desc[len - 1]) != NULL;
-	snprintf(out, n, "%s %c: %.*s%s", name, code == 26 ? '*' : 'A' + code, (int)len, desc, ends ? "" : ".");
-}
-
 /* ts_print_navi_cust_program5: the program's name, printed by the game */
 /* A NaviCust program's name: the shop data's (and EF 1B's) program id
  * counts in fours (the game adds 0x90 to make an item id), its name

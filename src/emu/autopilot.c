@@ -353,8 +353,9 @@ static int chip_worth(int id, int hurt) {
  * column), the Atk+ after them, a recovery last */
 /* The hand's chip i (chip | code << 9), 0xFFFF for none, and for a
  * DarkChip of either net's (BN6's own, the registry's of BN5's: every kind,
- * darkchips.h), never picked, as it costs the run max HP (docs/game/meta/) */
-static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0; }
+ * darkchips.h) or a dark chip of BN4's, never picked, as it costs the run
+ * max HP (docs/game/meta/) */
+static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0 || dark_bn4_is(id); }
 
 static int hand_chip(int i) {
 	int c = B->r16(B->deck + 2 * (uint32_t)i);
@@ -571,6 +572,9 @@ static bool route_wanted(void) {
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	/* (a liberation's board, docs/game/liberation/: its own play) */
 	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
+	/* (a reward pick's screen: its first row taken, as the chat box's
+	 * options were, A after a rest, as its keys want: reward_pick_state.h) */
+	if (director_pick_shown()) { *keys = frame % 32 < 2 ? KEY_A : 0; return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
 		if (k < 0 && route_wanted()) k = director_route_portal();

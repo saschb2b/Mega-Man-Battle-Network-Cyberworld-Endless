@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T03:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T22:30:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -146,6 +146,21 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   the class is whole, a row as BN6's (number, icon, name, the rarity's
   stars; `??` for a number never filled), the entry's whole count at the
   band's right end. The one screen of ours that stands where BN6 has one.
+- The run's reward picks ([the reward pick's screen](../game/reward-pick.md))
+  are the Library's layout, BN6 having no screen for a pick of one among
+  several: the row under the cursor on the Library's card at the left
+  (`library_card_face`, a chip's code at its head's foot as the folder
+  editor's card sets it; a program's shape in its colour where the
+  picture stands), the choices in the window at the right, a chip's
+  code in its own column, the draft's BugFrags a row under them,
+  KeyItem's INFORMATION box under the window with the description (a
+  program's part on its tag), the pick's name on the band. What MegaMan
+  holds of a choice is BN6's shops' ITEMS box, measured from the chip
+  shop's and the NaviCust shop's (navy 41, 99, 140 edge, white frame,
+  slate 90, 148, 173 strip, cells 189, 231, 239 and 214, 247, 255 by
+  turns, codes orange 239, 148, 0, a count in a navy cell under each),
+  on the card where the Library's words stand. A and B unnamed; the
+  orange arrow on the window's edge.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - One key's hint on the band where the key does something unguessed:
