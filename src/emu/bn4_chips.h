@@ -23,8 +23,8 @@
  * 0x0800D608 the same test at 480 for a chip held (r0 its id), 1 where it may be used. A run takes no karma
  * (docs/multirom/bn4-chips.md, The DarkChips): the differential's reference is given it (karma4) */
 #define BN4_CHIP_ALIGN        0x15        /* record +0x15: 0 any, 1 light, 2 dark */
-#define BN4_CHIP_ALIGN_LIGHT  1
-#define BN4_CHIP_ALIGN_DARK   2
+#define BN4_CHIP_ALIGN_LIGHT  1           /* ... light: played at a karma of BN4_KARMA_DARK or over */
+#define BN4_CHIP_ALIGN_DARK   2           /* ... dark: played under it */
 #define BN4_CHIP_USE_TEST     0x0800D5D6u /* the test as a chip is used, in its family's choice (to 0x0800D606) */
 #define BN4_CHIP_HELD_TEST    0x0800D608u /* ... of a chip held (r0), at 480 */
 #define BN4_CHIP_DUD_FAMILY   0x20        /* the dud's family, its subfamily 4 */
