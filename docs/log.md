@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (Ligtnin1-3 moved; AquaUp and GreenWd wait in its unit), rom/bn4.md (the sweep's code, new row), devtools/chip-recipe-generator.md (a table's sound, `ROWS_WAIT`), devtools/differential.md (a BN4 spec's poke goes to a BN4 chip unit's copy first), devtools/differential.md (a BN4 spec's poke).
 * **Update**: devtools/differential.md (a poke into BN4's chips' code reaches every unit's copy that holds it: mutation 353 caught beside Meteors' copy of the star's spawner).
 * **Update**: multirom/bn4-chips.md (Meteors1-3 moved, its meteors ShotStar's star; ids past 602 not seen in play yet), rom/bn4.md (Meteors' code, new row), devtools/chip-recipe-generator.md (a misc routine after a fourth-kind type's code; `SHARED3` for a unit of any kind: Meteors' star ShotStar's copy), devtools/differential.md (a chip unit's own object's element, a pointer into a chip unit's blocks).
 * **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).
@@ -42,6 +43,7 @@
 * **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
 * **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
+* **Update**: multirom/bn4-chips.md (Meteors1-3 moved, its meteors ShotStar's star; ids past 602 not seen in play yet), rom/bn4.md (Meteors' code, new row), devtools/chip-recipe-generator.md (a misc routine after a fourth-kind type's code, `UNIT_SHARES`), devtools/differential.md (a chip unit's own object's element, a pointer into a chip unit's blocks).
 * **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
 * **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
 * **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).

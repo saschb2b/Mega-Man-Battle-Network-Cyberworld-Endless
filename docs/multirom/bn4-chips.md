@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T17:02:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T17:50:43Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -487,6 +487,26 @@ the five meteors bursting on the empty panel; seven mutations caught.
 **Not seen in play yet:** ids from 603 have no pack entry, so the chip
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
+
+**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
+unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
+one routine, a sweep (the third kind's 0x93) that goes column by column
+from the user's edge and does one of three things by the record's first
+parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
+from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
+striking the eight panels around it (Ligtnin). The unit is the sweep,
+the strike both panel chips share (0x92) and the bolt (0x8E), each at
+BN4's own number on the chips' page of the dispatch, 1144 bytes
+with the strike's rows, its sprites copied, its three sounds at the
+grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
+so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
+pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
+Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
+no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
+rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
+moved but has never run in a spec, as the differential's BN4 battle
+cannot yet be given a cracked or a grass panel (BN5's `field=` has no
+BN4 twin). They play once a spec proves them.
 
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,

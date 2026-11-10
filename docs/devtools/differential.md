@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:16:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T17:50:43Z }
 ---
 
 # The differential: a moved family against its own game
@@ -185,7 +185,10 @@ instructions. A pointer a BN4 object keeps into a chip unit's moved
 blocks (the star's kind's row at its +0x60, seen in the fight's frames
 since Meteors) reads as moved data in both traces: a BN4 reference takes
 BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it
-names, a BN5 reference none of it.
+names, a BN5 reference none of it. A mutation's poke in a BN4 spec
+looks in BN4's chips' room first: the two games' addresses overlap, and
+Ligtnin's bolt's `0x080DF050` lies in a block a BN5 family moved too
+(`src/dev/xdiff.c` `poke_range`).
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
