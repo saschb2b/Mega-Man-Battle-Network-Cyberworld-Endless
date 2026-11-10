@@ -247,6 +247,8 @@ static void pair_bn4(void) {
 	}
 	bn6_names();
 	xchips_pair((const char (*)[XCHIP_NAME])names6, XCHIPS_BN6, (const char (*)[XCHIP_NAME])names4, BN4_CHIP_COUNT, to_bn4, from_bn4);
+	/* (one chip under two spellings, xreg4_alias: BN6's) */
+	for (int k = 0; k < xreg4_alias_count; ++k) from_bn4[xreg4_alias[k][0]] = xreg4_alias[k][1];
 	for (int x = 1; x < BN4_CHIP_COUNT; ++x)
 		if (cls[x] > XCHIPS_GIGA) from_bn4[x] = 0;
 		else if (!from_bn4[x]) from_bn4[x] = (uint16_t)registry_named(names4[x]);

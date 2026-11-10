@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 283 chips in BN6's chip tables grown to 1024 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
 ---
 
 # The chip registry
@@ -17,7 +17,7 @@ come into runs' finds, shops, traders and rewards since D1 (One net); the
 chip step gives any one ([Dev tools](../devtools/overview.md)).
 
 - **BN4's rows** (`src/core/xchips_registry_bn4.c`, written by
-  `tools/xreg_bn4.py`; [BN4's chips in a run](bn4-chips.md), unit 2): 194
+  `tools/xreg_bn4.py`; [BN4's chips in a run](bn4-chips.md), unit 2): 193
   chips of BN4 Red Sun's a run has none of, a table of their own
   (`XChipReg4`) at ids 527-733, each sitting out until its code plays,
   its record, name, description and art made from BN4's ROM as BN5's are

@@ -229,4 +229,11 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_NAVI_POWERS       0x08020E54u /* u16 by step, BN6_NAVI_POWER_STEPS a Navi */
 #define BN6_NAVI_POWER_STEPS  11          /* ... a step a time and one past the last */
 
+/* A barrier or aura set on an object (r0 its kind; its collision data's +6 the kind, +0x14 a byte by kind from
+ * BN6_BARRIER_MARKS, and from BN6_BARRIER_KINDS' row +0x16 its HP, +0x17 its aura and +0x1A its frames): the barrier
+ * chips' support subfamily 4 calls it (0x080E4E3C). BN4's twin is BN4_BARRIER_SET (bn4_chips.h) */
+#define BN6_BARRIER_SET       0x0801A7CCu
+#define BN6_BARRIER_KINDS     0x08020B2Cu /* three u16 a kind, 14 kinds: its HP, the damage a hit must reach to break an aura (0 none), its frames (0xFFFF for good); 9 LifeAur's (1, 200, 3000) */
+#define BN6_BARRIER_MARKS     0x08020B8Cu /* a byte a kind, the collision data's +0x14 */
+
 #endif

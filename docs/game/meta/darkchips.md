@@ -3,7 +3,7 @@ type: Feature
 title: "DarkChips"
 description: "DarkChips (issue #82): twelve kinds, each played by its own net's rule, offered by a flame of darkness on each act's middle layer, priced at 20 max HP per battle a dark power ran in."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T09:50:43Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
 ---
 
 # DarkChips (3 October 2026; in every battle since issue #82)
@@ -100,6 +100,18 @@ engine's, and all twelve kinds play there, each by its own net's rule
      DarkPlus taken to the Pack and swapped into the folder, dealt by
      BN5's worried rule, the next Cannon "40+50", 100 max HP to 80 after
      the battle, once.
+- **The owner's call of 10 November 2026, BN4's dark chips:** BN4 Red
+  Sun marks 31 of its chips dark (its record's alignment: Static, Hole,
+  DrkLine, Muramasa, Anubis, ElemDark, BlakWing, the DS Navi chips) and
+  plays them only for a dark MegaMan, by its karma
+  ([BN4's chips in a run](../../multirom/bn4-chips.md), BN4's light and dark chips). A run
+  takes no karma, so the owner's answer, asked what such a chip costs:
+  "Same 20 max HP". One rule for every dark chip: a battle a dark chip
+  of BN4's is used in is a battle a dark power ran in, 20 max HP for the
+  rest of the run, once a battle, whichever net's chip it was. None of
+  the 31 plays yet; `tools/xreg_bn4.py` refuses to list one as playing
+  until its use counts so (its light chips, 63, play for any MegaMan at
+  no price).
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
   a battle a DarkChip was used in, the darkness fighting with his body
   a while (session 68), and MegaMan said so; BN6's engine has its own
