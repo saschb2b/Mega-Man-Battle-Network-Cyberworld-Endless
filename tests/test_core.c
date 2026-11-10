@@ -4278,6 +4278,11 @@ static void test_free_space(void) {
 		"free space: the plan's regions in the ROM copy not whole");
 	CHECK(!plan_problems("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), ramz, (int)(sizeof ramz / sizeof *ramz), 0x02010CDCu, 0x02040000u, false),
 		"free space: the plan's regions in BN6's RAM not whole");
+	/* (the cart's save RAM: between BN6's save and its three small blocks, bn6_chips.h's BN6_SAVE_*) */
+	static const PlanRegion save[] = { FREE_SPACE_SAVE(PLAN_REGION) };
+	static const PlanZone savez[] = { FREE_SPACE_SAVE_ZONES(PLAN_ZONE) };
+	CHECK(!plan_problems("the save RAM", save, (int)(sizeof save / sizeof *save), savez, (int)(sizeof savez / sizeof *savez),
+		BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE, BN6_SAVE_BLOCK_1, false), "free space: the plan's regions in the cart's save RAM not whole");
 	/* (the check sees a region over the one before it, one outside its zone and a part outside its parent) */
 	const PlanRegion wrong[] = { { "a", 0x100, 0x200, "", "z" }, { "b", 0x1F0, 0x300, "", "z" }, { "c", 0x300, 0x500, "", "z" },
 		{ "d", 0x380, 0x480, "c", "z" }, { "e", 0x480, 0x600, "c", "z" } };
@@ -5275,15 +5280,23 @@ static void test_chip_entry(void) {
 		}
 	CHECK(wide && reward_chip(600, 0) == 0xA058, "reward: a chip past 511 in the wide form and back, 600 A as 0xA058");
 	/* (the pack's entries: BN6's own to 319, none for 320-410, the extension's in place from 411, the ids from 512 in
-	 * the entries of 320 on, none past them; no two ids one entry) */
+	 * the entries of 320 on, none for the 32 Program Advances' ids past them, the cart's save RAM's from 635 to the ids'
+	 * end, between BN6's own save and its small blocks; no two ids one entry) */
 	const uint32_t pack = 0x02002230u;
 	bool entries = bn6_pack_entry(pack, 1) == pack + 12 && bn6_pack_entry(pack, 319) == pack + 12 * 319 && !bn6_pack_entry(pack, 320) &&
 		!bn6_pack_entry(pack, 410) && bn6_pack_entry(pack, 411) == BN6_PACK_EXT + 12 * 91 && bn6_pack_entry(pack, 511) == BN6_PACK_EXT + 12 * 191 &&
 		bn6_pack_entry(pack, 512) == BN6_PACK_EXT && bn6_pack_entry(pack, 602) == BN6_PACK_EXT + 12 * 90 && !bn6_pack_entry(pack, 603) &&
-		!bn6_pack_entry(pack, 1023);
+		!bn6_pack_entry(pack, 634) && bn6_pack_entry(pack, 635) == BN6_PACK_SAVE && bn6_pack_entry(pack, 700) == 0x0E006D1Cu &&
+		bn6_pack_entry(pack, 733) == BN6_PACK_SAVE + 12 * 98 && bn6_pack_entry(pack, 1023) == BN6_PACK_SAVE + 12 * 388 && !bn6_pack_entry(pack, 1024);
 	for (unsigned a = 0; a < 1024 && entries; ++a)
 		for (unsigned b = a + 1; b < 1024; ++b)
 			if (bn6_pack_entry(pack, a) && bn6_pack_entry(pack, a) == bn6_pack_entry(pack, b)) entries = false;
+	CHECK(BN6_PACK_SAVE_FIRST == 635 && BN6_PACK_SAVE_FIRST == XREG4_REST_FIRST && BN6_PACK_SAVE_END == CHIPS_IDS && BN6_PACK_SAVE_BYTES == 4668 &&
+		BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE <= SRAM_PACK && BN6_PACK_SAVE_MARK == SRAM_PACK && BN6_PACK_SAVE + BN6_PACK_SAVE_BYTES <= SRAM_PACK_END &&
+		SRAM_PACK_END <= BN6_SAVE_BLOCK_1 && BN6_SAVE_BLOCK_1 + 0x28 <= BN6_SAVE_BLOCK_2 && BN6_SAVE_BLOCK_2 + 0x78 <= BN6_SAVE_BLOCK_3 &&
+		BN6_SAVE_BLOCK_3 + 0x80 == BN6_SAVE_RAM + BN6_SAVE_RAM_SIZE,
+		"pack: the save RAM's entries, ids 635-1023, between BN6's save (to %08x) and its small blocks (from %08x)",
+		(unsigned)(BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE), (unsigned)BN6_SAVE_BLOCK_1);
 	CHECK(entries && BN6_PACK_EXT + 12 * 192 == RAM_PACK_EXT_END, "pack: every id's entry its own, the ids from 512 in the entries no pack counted");
 }
 
@@ -5410,8 +5423,11 @@ static void test_chip_records(void) {
 	}
 	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
 	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
-	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
-		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == folder4, "registry: BN4's 193 rows, 174 folder chips "
+		"(each with a pack entry, 99 of them in the save RAM) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	int saved4 = 0;
+	for (int i = 0; i < xreg4_count; ++i) saved4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) >= BN6_PACK_SAVE;
+	CHECK(saved4 == 99, "registry: BN4's folder chips from 635, 99, in the save RAM's entries (%d)", saved4);
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&

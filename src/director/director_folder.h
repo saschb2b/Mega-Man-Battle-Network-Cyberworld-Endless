@@ -25,9 +25,11 @@ void folder_milestone_guardian(void);
 /* The pack's ids: BN6's pack holds 0-319 (eToolkit +0x4C, 12 bytes an id;
  * past it lie the key items' counts: a BblStar2 bought once read as no
  * change), its extension 411-511 and, in the entries of 320-410, which no
- * pack counts, the ids from 512 (BN6_PACK_EXT, which the engine points
- * BN6's pack routines at: bn6_pack_entry, src/emu/xchips_install.c). */
-#define PACK_CHIPS BN6_PACK_WIDE_END
+ * pack counts, the ids 512-602 (BN6_PACK_EXT), and the cart's save RAM
+ * the ids from 635 (BN6_PACK_SAVE), which the engine points BN6's pack
+ * routines at: bn6_pack_entry, src/emu/xchips_pack.c. Every id is asked;
+ * one without an entry (a Program Advance's, a pseudo-chip's) has none. */
+#define PACK_CHIPS BN6_PACK_SAVE_END
 /* Chip `id`'s pack entry, a bus address (12 bytes: a count per code of its
  * record's four, then four u16 order stamps), 0 where the pack cannot be
  * read or counts none of the id (a Program Advance, a pseudo-chip) */
