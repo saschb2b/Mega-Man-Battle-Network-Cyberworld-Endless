@@ -244,6 +244,7 @@ static bool install(void) {
 	if (!emu_ready() || !R.data || !R.layout) return false;
 	/* (BN5's chips' moved code where its ROM is read: the families its moved chips' records name; again it does nothing) */
 	xchips_code_install();
+	xchips_bn4_code_install();   /* (BN4's likewise, where its ROM is read) */
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
 	if (installed_len && installed_rom5 == rom5) return true;
 	/* (--dev alias=ID: chip ID a copy of Cannon, past BN6's records: chips_alias) */

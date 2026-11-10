@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "xattack_grow.h"
+#include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_flash.h"
 #include "xchips_moved.h"
@@ -23,7 +24,8 @@
 
 #define BUS 0x08000000u
 
-static bool installed;
+static bool installed, installed4;
+static bool tables_grown;   /* (the stubs and BN6's two routines' tables grown: by whichever game's units install first) */
 
 /* ---- BN6's support and Navi chips' routines grown ---- */
 
@@ -85,6 +87,15 @@ static void routines_stage(const Routines *t) {
 		else xv_fail("the word at %08x names %08x, not BN6's %08x", (unsigned)t->refs[k], (unsigned)rom_u32(t->refs[k] - BUS), (unsigned)t->at);
 }
 
+/* the stubs and the two tables staged in this step, where no earlier one grew them: whether it did (a unit's entry is then
+ * put into the staged table, else changed in the grown one: entry_stage) */
+static bool tables_stage(void) {
+	if (tables_grown) return false;
+	stubs_stage();
+	for (int k = 0; k < 2 && !xv_failed(); ++k) routines_stage(&tables[k]);
+	return true;
+}
+
 /* ---- a unit ---- */
 
 /* (a unit's code past the homes, a helper's before the computed powers; the calls of either to the stubs or the helpers'
@@ -110,8 +121,9 @@ static void helper_calls_check(const XChipUnit *u, int at) {
 }
 
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
- * its stub first */
-static void entry_stage(const XChipUnit *u) {
+ * its stub first; `fresh` where the routines' tables are staged in this step (their stub there already), else grown by an
+ * earlier one (the other game's units') */
+static void entry_stage(const XChipUnit *u, bool fresh) {
 	uint32_t at = 0, stub = 0, to = xvirus_code_at(&u->code, u->entry | 1u);
 	if (u->kind == XCHIP_ATTACK && u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) {
 		at = xattack_entry(u->number);
@@ -126,7 +138,7 @@ static void entry_stage(const XChipUnit *u) {
 		return;
 	}
 	/* (the grown routines are staged in this step: their stub there already; the attack families' grown before it) */
-	if (u->kind == XCHIP_ATTACK) xv_word(at, stub, to);
+	if (u->kind == XCHIP_ATTACK || !fresh) xv_word(at, stub, to);
 	else {
 		uint8_t *p = xv_put(at, 4, false);
 		if (p) put32(p, to);
@@ -239,8 +251,7 @@ bool xchips_code_install(void) {
 	}
 	if (!navi_sprites()) return false;
 	xv_tx_begin();
-	stubs_stage();
-	for (int k = 0; k < 2 && !xv_failed(); ++k) routines_stage(&tables[k]);
+	bool fresh = tables_stage();
 	const char *at = "BN6's routines' tables";
 	for (int i = 0; i < xchips_bn5_count && !xv_failed(); ++i) {
 		const XChipUnit *u = &xchips_bn5[i];
@@ -252,7 +263,7 @@ bool xchips_code_install(void) {
 		} else {
 			helper_calls_check(u, i);
 			songs_in(u);
-			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u);
+			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u, fresh);
 		}
 	}
 	if (!xv_failed()) {
@@ -280,8 +291,53 @@ bool xchips_code_install(void) {
 			const XvBlock *b = &xchips_bn5[i].code.blocks[k];
 			xv_moved_add(b->start, b->at, b->end - b->start);
 		}
-	installed = true;
+	installed = tables_grown = true;
 	printf("xchips_code: %d units of BN5's chips' code (%u bytes written)\n", xchips_bn5_count, (unsigned)used);
 	xchips_flash_install();
+	return true;
+}
+
+/* ---- BN4's units (xchips_bn4.h): support routines alone, each in its own region ---- */
+
+static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
+
+bool xchips_bn4_code_install(void) {
+	if (installed4) return true;
+	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
+	claims_begin(XV_CLAIMS);
+	bool room = xg_grow();
+	claims_end();
+	if (!room) {
+		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
+		return false;
+	}
+	xv_tx_begin();
+	bool fresh = tables_stage();
+	const char *at = "BN6's routines' tables";
+	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		at = u->code.name;
+		if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
+		else if (u->kind != XCHIP_SUPPORT || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+		else {
+			songs_in(u);
+			if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_SIZE / 12))) entry_stage(u, fresh);
+		}
+	}
+	if (xv_failed()) {
+		fprintf(stderr, "xchips_code: BN4's chips' code not installed (%s): %s\n", at, xv_why());
+		xv_tx_end();
+		return false;
+	}
+	uint32_t used = xv_used();
+	commit();
+	xv_tx_end();
+	for (int i = 0; i < xchips_bn4_count; ++i)
+		for (int k = 0; k < xchips_bn4[i].code.nblocks; ++k) {
+			const XvBlock *b = &xchips_bn4[i].code.blocks[k];
+			xv_moved_add(b->start, b->at, b->end - b->start);
+		}
+	installed4 = tables_grown = true;
+	printf("xchips_code: %d units of BN4's chips' code (%u bytes written)\n", xchips_bn4_count, (unsigned)used);
 	return true;
 }

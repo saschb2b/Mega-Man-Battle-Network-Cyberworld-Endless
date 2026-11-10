@@ -236,4 +236,17 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_BARRIER_KINDS     0x08020B2Cu /* three u16 a kind, 14 kinds: its HP, the damage a hit must reach to break an aura (0 none), its frames (0xFFFF for good); 9 LifeAur's (1, 200, 3000) */
 #define BN6_BARRIER_MARKS     0x08020B8Cu /* a byte a kind, the collision data's +0x14 */
 
+/* A support chip's object's generic states, the places every such type's tables name (Invisibl's fourth-kind 0x5D:
+ * 0x080E8828, 0x080E8848), BN4's twins BN4_SUPPORT_OBJECT_* (src/emu/bn4_chips.h); a moved BN4 unit's tables' words */
+#define BN6_SUPPORT_OBJECT_BEGIN 0x0800B916u /* its state 0 (+8): its side's turn of the time freeze asked for */
+#define BN6_SUPPORT_OBJECT_WAIT 0x0800B94Cu /* its step 0 (+9): the other side's turn waited out */
+#define BN6_SUPPORT_OBJECT_NAME 0x0800B9B0u /* its step 4: the chip's name shown, sound 0x173 */
+#define BN6_SUPPORT_OBJECT_DONE 0x0800BC88u /* its step 12: its own work done, its state 8 */
+#define BN6_SUPPORT_OBJECT_END 0x0800BD34u /* its state 8: its turn given back, the object freed */
+#define BN6_PANEL_BREAK_FREE  0x0800C9F8u /* r0, r1 a panel: broken (type 1) where it is a floor (0x10) no occupant's flag (0x0F880080) is on, sound
+                                           * 0x97, r0 1; else r0 0 (BN4_PANEL_BREAK_FREE's twin) */
+#define BN6_CHIP_WHEEL_FLAGS  0x080129E4u /* a chip's second wheel's hit flag by its record's icon element (BN6_CHIP_ELEMENT), 12 bytes: Sword 0x80,
+                                           * Cursor 0x40, Wind 0x20, Break 0x10, the rest 0; ORed into the attack's element as a chip is used
+                                           * (0x0801271E-0x08012728) */
+
 #endif

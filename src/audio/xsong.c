@@ -454,6 +454,8 @@ static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
 	{ XROM_BN4_RED_SUN_US, 0xC9, 0x3C }, { XROM_BN4_RED_SUN_US, 0xCA, 0x3B }, { XROM_BN4_RED_SUN_US, 0x70, 0x3A },
 	{ XROM_BN4_RED_SUN_US, 0x9A, 0x39 }, { XROM_BN4_RED_SUN_US, 0xA6, 0x38 }, { XROM_BN4_RED_SUN_US, 0xB7, 0x37 },
 	{ XROM_BN4_RED_SUN_US, 0x9D, 0x36 }, { XROM_BN4_RED_SUN_US, 0xFC, 0x35 }, { XROM_BN4_RED_SUN_US, 0xF9, 0x34 },
+	/* BN4's chips' (tools/xchiprecipe_bn4.py's SOUND_SLOTS): PanlSht's shot's */
+	{ XROM_BN4_RED_SUN_US, 0xBF, 0x4A }, { XROM_BN4_RED_SUN_US, 0x1C6, 0x49 },
 };
 
 int xsong_sound_slot(int xrom, int song) {
