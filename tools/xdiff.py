@@ -183,6 +183,9 @@ def megaman_items(spec):
         parts.append(f'cust4={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
     if spec.get('souls6'):
         parts.append(f'souls6={spec["souls6"]}')
+    for k in ('ncp5', 'ncp6'):   # (a NaviCust program on each game's own board, compiled by the game: src/dev/xdiff_ncp.h)
+        if spec.get(k):
+            parts.append(f'{k}={spec[k]}')
     if spec.get('unitebreak'):
         parts.append(f'unitebreak={spec["unitebreak"]}')
     if spec.get('soulbreak'):

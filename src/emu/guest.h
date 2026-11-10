@@ -37,6 +37,11 @@ void guest_write32(uint32_t addr, uint32_t v);
  * begins (battle_rng_word). From the next guest frame it runs. False where
  * it cannot be. */
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed);
+/* A routine of BN5's that takes no arguments, run once on its map before a
+ * battle is asked: from its main loop's next pass (BN5_MAIN_CALL), which
+ * goes on as it was once the routine has returned; its frames run here.
+ * False where it is not BN5 on its map, or the routine never returned. */
+bool guest_call(uint32_t fn);
 /* True from guest_dev_battle until its battle is over (back on its map, or
  * a GAME OVER) or never began */
 bool guest_battling(void);
