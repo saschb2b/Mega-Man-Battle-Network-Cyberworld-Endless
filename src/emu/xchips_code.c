@@ -128,9 +128,9 @@ static void helper_calls_check(const XChipUnit *u, int at) {
 
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
  * its stub first; `fresh` where the routines' tables are staged in this step (their stub there already), else grown by an
- * earlier one (the other game's units') */
-static void entry_stage(const XChipUnit *u, bool fresh) {
-	uint32_t at = 0, stub = 0, to = xvirus_code_at(&u->code, u->entry | 1u);
+ * earlier one (the other game's units'); `code` the unit's own, or the unit's whose block holds its routine (XChipUnit.share) */
+static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh) {
+	uint32_t at = 0, stub = 0, to = xvirus_code_at(code, u->entry | 1u);
 	if (u->kind == XCHIP_ATTACK && u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) {
 		at = xattack_entry(u->number);
 		stub = XATTACK_STUB | 1u;
@@ -274,7 +274,7 @@ bool xchips_code_install(void) {
 		} else {
 			helper_calls_check(u, i);
 			songs_in(u);
-			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u, fresh);
+			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u, &u->code, fresh);
 		}
 	}
 	if (!xv_failed()) {
@@ -312,6 +312,23 @@ bool xchips_code_install(void) {
 
 static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
 
+/* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
+ * that shares an earlier unit's code (XChipUnit.share), its entry alone */
+static void unit4_stage(int i, bool fresh) {
+	const XChipUnit *u = &xchips_bn4[i];
+	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
+	else if ((u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+	else if (u->share) {
+		/* (a routine of an earlier unit's block: its entry alone) */
+		if (u->share > i || xchips_bn4[u->share - 1].share || u->code.nblocks) xv_fail("its code's unit %d", u->share - 1);
+		else entry_stage(u, &xchips_bn4[u->share - 1].code, fresh);
+	} else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
+	else {
+		songs_in(u);
+		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, &u->code, fresh);
+	}
+}
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
@@ -332,15 +349,8 @@ bool xchips_bn4_code_install(void) {
 	if (!xv_failed()) routines_stage(&misc_table);
 	const char *at = "BN6's routines' tables";
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
-		const XChipUnit *u = &xchips_bn4[i];
-		at = u->code.name;
-		if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
-		else if ((u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
-		else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
-		else {
-			songs_in(u);
-			if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, fresh);
-		}
+		at = xchips_bn4[i].code.name;
+		unit4_stage(i, fresh);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed (%s): %s\n", at, xv_why());

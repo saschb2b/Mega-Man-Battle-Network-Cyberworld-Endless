@@ -42,6 +42,8 @@ typedef struct {
 	uint16_t navis;        /* the Navis whose battle sprites its code draws, bit XN_SEAT(n) BN5's Navi of AI n (xnavi_recipe.h: Team
 	                          Colonel's six n - 7, the Darkloids n - 6; xnavi_sprites.h: list 2's 0x20 + its seat, installed before
 	                          its step) */
+	uint8_t share;         /* (BN4's units) where not 0, its routine is one of unit `share` - 1's code, a block that unit moved: no code
+	                          of its own, its entry alone (WhitWeb2 and 3 in WhitWeb1's object's code) */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];
