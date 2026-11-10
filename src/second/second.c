@@ -69,7 +69,7 @@ static SecondContext context_now(void) {
 	default: return SECOND_OTHER;
 	}
 	int sub = emu_read8(BN6_GAMESTATE);
-	if (sub == BN6_SUB_PET) return SECOND_PET;
+	if (sub == BN6_SUB_PET) return second_library_up() ? SECOND_LIBRARY : SECOND_PET;
 	if (sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT) return SECOND_BATTLE;
 	/* (a trader talks on the map, from BN6's trader archive: a BugFrag
 	 * Trader's whole trade, a Chip Trader's before its screen) */

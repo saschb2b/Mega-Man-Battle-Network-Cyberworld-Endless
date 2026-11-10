@@ -49,7 +49,7 @@ statistics, troubleshooting and building the game yourself.
   Soul, which MegaMan can UNITE with in every battle after. From the
   second act BN5's viruses and BN6's meet in battles, the Undernet's and
   the Graveyard's acts draw on both, half the chips their shops and
-  Mystery Data hold are BN5's, which the Library counts apart, and its
+  Mystery Data hold are BN5's, which the Library lists on BN5's page, and its
   flames of darkness hold BN5's DarkChips. Its songs join the
   [Jukebox](#the-jukebox). Online, it completes the
   [NetPass](#the-netpass): NetBattles, trades and the week's DeepNet. A note in
@@ -924,9 +924,13 @@ The BtlrCard carries over too: the viruses on it (Mettaur and Gunner, and
 each Rare virus deleted in any run, BN6's "You got new Virus Data") are
 yours in every run, for the Virus Battlers alone.
 
-Every chip MegaMan holds joins the Library, BN6's own, which every run's
-PET shows whole: a Chip Trader's prize is new to it first, and the summary
-counts what a run added. The NaviCust programs MegaMan has run with come
+Every chip MegaMan holds joins the Library, which every run's PET shows
+whole, a page per game: **L** and **R** turn from BN6's chips to BN5's and
+BN4's, Left and Right from StdChip to MegaChip and GigaChip. Each page is
+that game's own Library in its own numbers, counted against the chips a
+run can hand out today, and a chip two games share fills its place on
+both. A class whole turns its count gold. A Chip Trader's prize is new to
+the Library first, and the summary counts what a run added. The NaviCust programs MegaMan has run with come
 back too: a later run's program vendor lists two of them first, and the
 Spins found, one a run, turn their colour's programs in every run after. The run's
 summary, two PET screens as BN6's RESULT (A turns from RESULT to RECORDS,

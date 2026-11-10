@@ -14,7 +14,7 @@
 #define BN6_PET_CURSOR        (BN6_PET_MENU + 0x04) /* the cursor: 6 Comm, 7 Save */
 #define BN6_PET_MENU_OPEN     (BN6_PET_MENU + 0x05) /* bit 0 open */
 #define BN6_PET_HOLD          (BN6_PET_MENU + 0x09) /* a count that holds its input off */
-#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F) /* the entry the engine's hook on its input took (6 Options, 7 Save) */
+#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F) /* the entry the engine's hook on its input took (2 Library, 6 Options, 7 Save) */
 #define BN6_KEYS_PRESSED      0x0200A272u           /* eJoypad +2: the keys just pressed (u16, the GBA's bits) */
 #define BN6_PET_INPUT_PTR     0x08120B1Cu /* the state table's pointer to its input handler */
 #define BN6_PET_INPUT         0x08120B91u /* that handler (Thumb) */
@@ -40,6 +40,7 @@
 #define BN6_PET_LABEL_INK     5           /* a label's letters' colour, + its entry (palette 15, 0x03001B40) */
 #define BN6_PET_LABEL_SHADE   3           /* ... their shade's */
 #define BN6_PET_LABEL_BACK    2           /* ... the box's under them */
+#define BN6_PET_ENTRY_LIBRARY 2           /* the menu's entries as BN6_PET_CURSOR counts them: Library, the run's own (src/library/) */
 #define BN6_PET_ENTRY_COMM    6           /* the menu's entries as BN6_PET_CURSOR counts them: Comm, the run's Options */
 #define BN6_PET_ENTRY_SAVE    7           /* ... Save */
 #define BN6_PET_ENTRY_STATUS  8           /* ... BN6_PET_LABEL_MAPS' ninth, Status: MegaMan's row for another Navi */

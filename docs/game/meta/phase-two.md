@@ -3,7 +3,7 @@ type: Design
 title: "Phase two, reasoned"
 description: "Meta phase two: rewards leaned to the folder's codes, Cross starts, the Library, programs found joining later runs; and phase three begun: route choices in Lan's HP and Navi gates sealed with a guardian's code."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # Phase two, reasoned (29 September 2026)
@@ -58,9 +58,11 @@ against what you find**; each piece restates it.
    counts a run's new entries; STD, MEGA and GIGA COMP mark a class
    complete, counted over the chips the net can give. Entries grant
    nothing in battle. Where BN5's ROM is read, its chips that come into
-   runs ([One net: the design](../../multirom/one-net.md)) join the collection too, ids to 511:
-   counted apart ("Older Net" on the second screen's Library, which lists
-   them), so the class marks stay BN6's and no mark needs BN5's ROM.
+   runs ([One net: the design](../../multirom/one-net.md)) join the collection too, and BN4's
+   after them: since 10 November 2026 the PET's Library is a screen of
+   ours with a page per entry, each game's own Library with its own count
+   ([The Library, a page per entry](library.md)); the class marks stay
+   BN6's and no mark needs another game's ROM.
 4. **Programs found join later runs** ([The NaviCust](../navicust.md), 7): the
    NaviCust vendor lists first two of the programs earlier runs ran with,
    and names them. Not the gift: it is the first layer's lesson, picked for

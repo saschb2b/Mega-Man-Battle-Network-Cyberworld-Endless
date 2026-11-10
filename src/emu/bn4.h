@@ -267,6 +267,8 @@
 #define BN4_CHIP_MB       0x06        /* its MB (Cannon 8, the DarkChips 99): BN6's +8 */
 #define BN4_CHIP_KIND     0x07        /* its kind, the icon's and the one a Soul unites by (0 Fire .. 11 Break, 12 none, 15 a Soul) */
 #define BN4_CHIP_CLASS    0x08        /* 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance: BN6's +7 */
+#define BN4_CHIP_LIBRARY_ORDER 0x1C /* its +0x1C, u16: its place in BN4's Library (1 Cannon to 150 ColorPt, its secret standard chips to 186, the
+                                    * Megas 201-280, the Gigas 281-290), as BN5's (tools/library_pages.py) */
 #define BN4_CHIP_DARK     0x20        /* its +9 (BN6's effect flags): a DarkChip, ids 187-194 (DrkCanon to DrkRecov), as BN6's mark */
 #define BN4_NAVI_CHIPS    221         /* the Navi chips: 20 Navis from Roll to VideoMan, three each (his own, SP, DS) */
 #define BN4_SOUL_CHIPS    0x160       /* the Souls' pseudo-chips, kind 15: 0x160 + the Soul (1-12), MegaSoul 0x160, DarkSoul 0x16F */

@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:07:38Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -130,7 +130,8 @@ BN6's battles; `folder=218`, DarkDril in D: BN6 draws a chip in a code its
 record lacks blank, no picture, no code and no effect, its own JustcOne and
 FireBrn2 in * too, and the `chip` step says so where it is given one),
 `folder=ID/N` its first N
-entries alone; `alias=ID` makes chip ID a copy of Cannon (an id past
+entries alone; `library=N` puts every Nth chip id in the profile's Library
+as the PET's Library opens (1: every chip), for its pictures; `alias=ID` makes chip ID a copy of Cannon (an id past
 BN6's records, the proof of chip ids past 511) and `reward=ID` makes every
 battle's reward chip ID in its first code (a chip on the results screen;
 past 511 a reward's wide form); `pack=N` puts a copy of each of the first N chips in the

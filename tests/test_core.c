@@ -43,6 +43,7 @@
 #include "economy.h"
 #include "jobs.h"
 #include "jukebox_text.h"
+#include "library_pages.h"
 #include "loot.h"
 #include "meta.h"
 #include "npc_lines.h"
@@ -5582,6 +5583,67 @@ static double db(double r) { return 20.0 * log10(r); }
 /* The Jukebox's songs (docs/game/pet.md, The Jukebox): every song of each
  * game's music player once (BN6's 0x01-0x25; BN5's 0x01-0x24 but its
  * empty 0x0A: docs/rom/), each in a section, each name a row's */
+/* The Library's pages (library_pages.h, docs/game/meta/library.md): the
+ * other entries' tables hold their rules and the registry's chips, a page
+ * lists and counts only what plays, a number kept where a slot is not
+ * listed */
+static bool lib_plays_even(int chip) { return chip % 2 == 0; }
+static bool lib_has_low(int chip) { return chip < 10; }
+
+static void test_library_pages(void) {
+	int bad5 = library_rows_check(library_bn5_rows, library_bn5_count), bad4 = library_rows_check(library_bn4_rows, library_bn4_count);
+	CHECK(!bad5 && !bad4, "library: the tables' rules (BN5's row %d, BN4's row %d)", bad5, bad4);
+	int per[LIB_CLASSES] = { 0 }, shared = 0;
+	for (int i = 0; i < library_bn5_count; ++i) {
+		const LibSlot *s = &library_bn5_rows[i];
+		const XChipReg *r = xreg_of_bn5(s->own);
+		CHECK(r && r->bn6 == s->chip && r->how != XREG_DARK && r->how != XREG_PA, "library: BN5's chip %d fills its slot with the registry's chip", s->own);
+		++per[s->cls < LIB_CLASSES ? s->cls : 0];
+		shared += r && !xreg_own(r);
+	}
+	CHECK(per[LIB_STD] == 180 && per[LIB_MEGA] == 57 && per[LIB_GIGA] == 4 && shared == 104, "library: BN5's page holds %d, %d and %d slots, %d of them BN6's by name",
+		per[LIB_STD], per[LIB_MEGA], per[LIB_GIGA], shared);
+	/* (every folder chip of the registry's own has its slot: none of BN5's that plays is left off its page) */
+	for (int i = 0; i < xreg_count; ++i) {
+		const XChipReg *r = &xreg_rows[i];
+		if (!xreg_own(r) || r->type > XCHIPS_GIGA || (r->how != XREG_RECORD && r->how != XREG_MOVED)) continue;
+		bool found = false;
+		for (int k = 0; k < library_bn5_count && !found; ++k) found = library_bn5_rows[k].own == r->bn5;
+		CHECK(found, "library: the registry's chip %d (BN5's %d) has no slot on BN5's page", r->bn6, r->bn5);
+	}
+	for (int i = 0; i < library_bn4_count; ++i) {
+		const LibSlot *s = &library_bn4_rows[i];
+		const XChipReg *r = xreg_at(s->chip);
+		CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
+	}
+	/* (made-up rows: the odd chips sit out) */
+	static const LibSlot rows[] = { { 1, 2, 1, 0 }, { 2, 3, 2, 0 }, { 5, 4, 4, 0 }, { 9, 12, 1, 1 }, { 7, 8, 2, 2 } };
+	LibSlot out[8];
+	int held, of;
+	CHECK(library_page_of(rows, 5, LIB_STD, lib_plays_even, out, 8) == 2 && out[0].number == 1 && out[1].number == 4 && out[1].chip == 4,
+		"library: a page lists what plays, each with its own number");
+	CHECK(library_page_of(rows, 5, -1, lib_plays_even, NULL, 0) == 4 && library_page_of(rows, 5, -1, lib_plays_even, out, 3) == 3, "library: counted without room, cut at its room");
+	library_tally(rows, 5, -1, lib_plays_even, lib_has_low, &held, &of);
+	CHECK(held == 3 && of == 4, "library: %d of %d held over the classes", held, of);
+	library_tally(rows, 5, LIB_MEGA, lib_plays_even, lib_has_low, &held, &of);
+	CHECK(held == 0 && of == 1, "library: %d of %d held of the Megas", held, of);
+	static const LibSlot back[] = { { 1, 2, 2, 0 }, { 2, 3, 1, 0 } }, twice[] = { { 1, 2, 1, 0 }, { 1, 3, 2, 0 } }, cls[] = { { 1, 2, 1, 3 } }, none[] = { { 1, 0, 1, 0 } };
+	CHECK(library_rows_check(back, 2) == 2 && library_rows_check(twice, 2) == 2 && library_rows_check(cls, 1) == 1 && library_rows_check(none, 1) == 1 && !library_rows_check(rows, 5),
+		"library: a number out of order, a chip twice, a fourth class and no chip refused");
+	/* (what plays: the registry's own over BN6's code or moved, no DarkChip, no Program Advance; BN6's by its pool, none without its ROM) */
+	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(600), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");
+	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
+	Profile kept = profile;
+	library_count(LIB_BN5, LIB_STD, &held, &of);
+	CHECK(of == 95 && !library_whole(LIB_BN5, LIB_STD), "library: BN5's own standard chips, %d slots", of);
+	meta_library_add(411);
+	library_count(LIB_BN5, -1, &held, &of);
+	CHECK(held == 1 && of == 95 + 41 + 1, "library: %d of %d of BN5's own held", held, of);
+	for (int i = 0; i < library_bn5_count; ++i) meta_library_add(library_bn5_rows[i].chip);
+	CHECK(library_whole(LIB_BN5, LIB_STD) && library_whole(LIB_BN5, LIB_GIGA) && !library_whole(LIB_BN6, LIB_STD) && !library_entry_read(LIB_BN4), "library: a class whole once each slot is filled, none without slots");
+	profile = kept;
+}
+
 static void test_jukebox_songs(void) {
 	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
 	for (int i = 0; i < jukebox_song_count; ++i) {
@@ -7102,6 +7164,7 @@ int main(void) {
 	test_sound_output();
 	test_sound_levels();
 	test_jukebox_songs();
+	test_library_pages();
 	test_settings_line();
 	test_lcd_frame();
 	test_letters();

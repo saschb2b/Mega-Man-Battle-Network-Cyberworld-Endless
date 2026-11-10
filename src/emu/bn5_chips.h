@@ -68,4 +68,7 @@
 #define BN5_CHAOS_LEVEL_TOP   4           /* the chaos level's most (0x080F0446) */
 #define BN5_DARK_SOUL_TIMER   0x88        /* the Dark Soul's AIData +0x88: 0 ends it (BN5_CHAOS_OUT) */
 
+#define BN5_CHIP_LIBRARY_ORDER 0x1C /* a chip record's +0x1C, u16: its place in BN5's Library, one run of numbers over the classes (1 Cannon to 180
+                                    * ColorPt, the Megas 181-261, the Gigas 262-274, then the DarkChips); BN6's IDSortPos (tools/library_pages.py; docs/rom/chips-code.md) */
+
 #endif
