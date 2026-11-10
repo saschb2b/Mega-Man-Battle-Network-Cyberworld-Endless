@@ -37,7 +37,7 @@ XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids 
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
 XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what the battle's BN4 Navi draws, xnavi_bn4_art.h)
 XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE = 0x08800000 + 0x77C000, 0x10000   # (FREE_BN4_NAVI_SPRITE: the battle's Navi's battle sprite, xnavi_bn4_room.h)
-RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c')   # (src/emu: BN4's families' recipes, its Navis')
+RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c', 'xchips_bn4.c')   # (src/emu: BN4's families' recipes, its Navis', its chips' units)
 
 
 def recipes_text():
@@ -275,6 +275,7 @@ def bn4_as_bn6(rec, fams):
 CHIP_RECORDS, CHIP_RECORD_SIZE, CHIP_SUBFAMILY, BN6_CHIPS = {4: 0x197EC, 6: 0x21DA8}, 0x2C, 0x0C, 411
 XREG4_ROW = re.compile(r'\{\s*(\d+),\s*(\d+),\s*XREG_\w+,')
 XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-Fa-f]{2}),')
+XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
 
@@ -290,6 +291,8 @@ def chip_ids(spec):
     # (a row on BN6's code, XREG_RECORD: the BN6 chip whose family and subfamily its record takes, or the row's own subfamily)
     TWINS.clear()
     TWINS.update({int(to): (int(twin), None if sub.upper() == 'FF' else int(sub, 16)) for to, twin, sub in XREG4_TWIN.findall(rows)})
+    # (a row whose code is moved, XREG_MOVED: no twin, its subfamily its unit's number in BN6's grown support routines)
+    TWINS.update({int(to): (None, int(sub, 16)) for to, sub in XREG4_MOVED.findall(rows)})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
