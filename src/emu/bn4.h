@@ -194,7 +194,7 @@
                                        * generic move, 0x0801033E) and its can-move check refused while it stands there (0x0800AD42,
                                        * 0x0800AD6C, 0x0800AD96), floating its object flags' 0x20; set by the third kind's type 0x6D
                                        * (0x080DB08A); its word 0x10210 BN6's conveyors' (9-12), which push instead: none in BN6 */
-#define BN4_PANEL_PLAIN_B 0x0B        /* its type 0xB: plain's word (0x10010), set by four objects (0x080CB4F4 and others); its meaning unread */
+#include "bn4_panels.h"              /* the Hole panel (its type 0xB), a panel's step, the panel changer and a DS Navi chip's power */
 #define BN4_CAN_MOVE      0x0800AD2Au /* an object's can-move check (r5): none of its flags 0x5040, and not on BN4_PANEL_HOLDING unless
                                        * floating; BN6's 0x0800E5E2 the flags test alone (BN6 has no holding panel) */
 #define BN4_PANEL_TIMER   0x12        /* u16: the frames a panel set by BN4_SET_PANEL_TYPE keeps its type (0xBE there; BN6's +0x12 counts
