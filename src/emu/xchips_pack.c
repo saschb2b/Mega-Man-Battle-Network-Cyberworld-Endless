@@ -74,7 +74,7 @@ _Static_assert(sizeof code + sizeof pool == XPACK_SIZE, "the block's size");
 _Static_assert(BN6_PACK_WIDE_FIRST - BN6_PACK_IDS == 192, "the routine's subs r0,#192 (+0x7A)");
 _Static_assert(BN6_PACK_ENTRY == 12, "the routine's movs r1,#12 (+0x92), and an entry's stamps from its +4");
 _Static_assert(BN6_PACK_SAVE_BYTES % 4 == 0 && BN6_PACK_SAVE_BYTES > 0, "the clear's hook zeroes the entries by words; its loop wants a byte at least");
-_Static_assert(BN6_PACK_SAVE_MARK + 16 == BN6_PACK_SAVE && BN6_PACK_SAVE_MARK == SRAM_PACK &&
+_Static_assert(BN6_PACK_SAVE - BN6_PACK_SAVE_MARK == BN6_PACK_SAVE_MARKED && BN6_PACK_SAVE_MARK == SRAM_PACK &&
 	BN6_PACK_SAVE + BN6_PACK_SAVE_BYTES <= SRAM_PACK_END, "the entries in their region of the save RAM (free_space.plan)");
 _Static_assert(BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE <= SRAM_PACK && SRAM_PACK_END <= BN6_SAVE_BLOCK_1, "the entries between BN6's own blocks");
 
@@ -96,7 +96,7 @@ HookAct xchips_pack_cleared(HookRegs *r, void *user) {
 
 /* ---- the save RAM's entries, from outside the game ---- */
 
-static const uint8_t mark[16] = { 'C', 'W', ' ', 'p', 'a', 'c', 'k', ' ', 'i', 'd', 's', ' ', '6', '3', '5', 1 };
+static const uint8_t mark[BN6_PACK_SAVE_MARKED] = { 'C', 'W', ' ', 'p', 'a', 'c', 'k', ' ', 'i', 'd', 's', ' ', '6', '3', '5', 1 };
 
 /* the mark's place in the core's save RAM, NULL where its save is no SRAM */
 static uint8_t *kept_at(struct mCore *core) {

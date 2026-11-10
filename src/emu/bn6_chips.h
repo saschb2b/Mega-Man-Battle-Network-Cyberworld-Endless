@@ -169,13 +169,14 @@
  * state the engine writes carries */
 #define BN6_PACK_SAVE_FIRST   (BN6_PA_WIDE_FIRST + BN6_PA_WIDE_COUNT) /* the first id held there, 635, */
 #define BN6_PACK_SAVE_END     1024        /* ... to the ids' end (CHIPS_IDS): 389 entries */
-#define BN6_PACK_SAVE_MARK    0x0E006A00u /* 16 bytes that say the entries are made (xchips_pack.c: a state from before them holds 0xFF here), */
+#define BN6_PACK_SAVE_MARK    0x0E006A00u /* BN6_PACK_SAVE_MARKED bytes that say the entries are made (xchips_pack.c: a state from before them holds 0xFF here), */
+#define BN6_PACK_SAVE_MARKED  16          /* ... that many, */
 #define BN6_PACK_SAVE         0x0E006A10u /* ... then the entries, 12 bytes an id, to 0x0E007C4C */
 #define BN6_PACK_SAVE_BYTES   ((BN6_PACK_SAVE_END - BN6_PACK_SAVE_FIRST) * BN6_PACK_ENTRY) /* ... their bytes, 4668 */
 #define BN6_SAVE_RAM          0x0E000000u /* the cart's save RAM (SRAM, 0x8000 bytes, mirrored to 0x0FFFFFFF), which BN6 reaches through its
                                              save library alone, a byte at a time (BN6_SAVE_READ and the two below), each call's address and
                                              size a literal: four blocks, */
-#define BN6_SAVE_RAM_SIZE     0x8000u
+#define BN6_SAVE_RAM_SIZE     0x8000u     /* ... its bytes, 32 KB */
 #define BN6_SAVE_MAIN         0x0E000100u /* ... the game's save, BN6_SAVE_MAIN_SIZE bytes of 0x02000000 on (its literals 0x0803F860 and
                                              0x0803F864; written at 0x0803F7B8, read at 0x0803F816), */
 #define BN6_SAVE_MAIN_SIZE    0x6710u

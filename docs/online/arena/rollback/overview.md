@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Rollback"
 description: "Rollback in every NetBattle (issue #128): the other player's missing keys guessed as his last held, the pair's snapshot kept, frames run again after a wrong guess, the input delay down to 2 frames."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T00:21:12Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
 ---
 
 # Rollback
@@ -14,7 +14,10 @@ weakest first, its window and delay tuned per system; the pair made
 cheaper first, then measured again on the Nova, then turned on. It runs
 in every NetBattle now. Each frame of the pair runs at its tick; the
 other player's keys not yet come are guessed (his last held), the pair's
-snapshot kept before each frame that runs on a guess, and a key that
+snapshot kept before each frame that runs on a guess (each core's raw
+state, the cable's, what the hooks keep, and the chip pack's entries in
+the cart's save RAM, which a raw state leaves out: `xchips_pack_keep`,
+[Memory the engine writes](../../../engine/emulation/memory.md)), and a key that
 comes otherwise than guessed puts the pair back before the first frame
 that read it and runs the frames since again, unheard, to where they
 were. On a link the window covers, the input delay is 2 frames (the

@@ -131,6 +131,20 @@ static void survey_write(void) {
 	if (ncanaries) fprintf(stderr, "ram canary: %d changed bytes over %lu frames\n", strays, frames);
 }
 
+/* CYBERWORLD_RAM_WATCH's stretches */
+static void watch_open(const char *c) {
+	while (c && *c && nwatches < WATCHES) {
+		char *end;
+		uint32_t at = (uint32_t)strtoul(c, &end, 0), len = *end == ':' ? (uint32_t)strtoul(end + 1, &end, 0) : 0;
+		if (len && unmirrored(at) == at && at + len > at) {
+			watches[nwatches].at = at; watches[nwatches++].len = len;
+			if (at < watch_lo) watch_lo = at;
+			if (at + len > watch_hi) watch_hi = at + len;
+		} else fprintf(stderr, "ram watch: %08x:%x is no stretch (a mirror's address, or no length)\n", (unsigned)at, (unsigned)len);
+		c = *end == ',' ? end + 1 : end + strlen(end);
+	}
+}
+
 bool ram_survey_open(void) {
 	seen_path = getenv("CYBERWORLD_RAM_SURVEY");
 	const char *c = getenv("CYBERWORLD_RAM_CANARY");
@@ -151,17 +165,7 @@ bool ram_survey_open(void) {
 		else fprintf(stderr, "ram canary: %08x:%x is no stretch of the work RAM\n", (unsigned)at, (unsigned)len);
 		c = *end == ',' ? end + 1 : end + strlen(end);
 	}
-	c = getenv("CYBERWORLD_RAM_WATCH");
-	while (c && *c && nwatches < WATCHES) {
-		char *end;
-		uint32_t at = (uint32_t)strtoul(c, &end, 0), len = *end == ':' ? (uint32_t)strtoul(end + 1, &end, 0) : 0;
-		if (len && unmirrored(at) == at && at + len > at) {
-			watches[nwatches].at = at; watches[nwatches++].len = len;
-			if (at < watch_lo) watch_lo = at;
-			if (at + len > watch_hi) watch_hi = at + len;
-		} else fprintf(stderr, "ram watch: %08x:%x is no stretch (a mirror's address, or no length)\n", (unsigned)at, (unsigned)len);
-		c = *end == ',' ? end + 1 : end + strlen(end);
-	}
+	watch_open(getenv("CYBERWORLD_RAM_WATCH"));
 	if (seen_path || ncanaries || nwatches) atexit(survey_write);
 	return seen_path || ncanaries || nwatches;
 }

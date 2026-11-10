@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: rom/chips-code.md (The pack in the save RAM, new row: ids 635-1023's pack entries in the cart's save RAM, BN6's save blocks and library, the order stamps' routines; its description and index line), multirom/bn4-chips.md (every BN4 folder chip has a pack entry; its description and index line), engine/emulation/memory.md (the save RAM's table), engine/emulation/free-space.md (the `save` zone), devtools/ram-survey.md (`--watch`, `CYBERWORLD_RAM_WATCH`; its description and index line), devtools/battle-on-demand.md (`chip ID` alone), engine/saves.md, online/arena/rollback/overview.md, code/emu.md, code/tests.md, code/tools.md.
 * **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
 * **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
 * **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).

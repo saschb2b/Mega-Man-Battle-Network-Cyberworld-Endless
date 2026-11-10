@@ -61,7 +61,7 @@ bool xchips_pack_ready(struct mCore *core);
 
 /* The mark and the entries, for a snapshot that keeps the core's raw state
  * alone: copied out, and back (nothing where the core's save is no SRAM) */
-#define XPACK_KEPT (16u + BN6_PACK_SAVE_BYTES)
+#define XPACK_KEPT (BN6_PACK_SAVE_MARKED + BN6_PACK_SAVE_BYTES)
 void xchips_pack_keep(struct mCore *core, uint8_t out[XPACK_KEPT]);
 void xchips_pack_put(struct mCore *core, const uint8_t in[XPACK_KEPT]);
 

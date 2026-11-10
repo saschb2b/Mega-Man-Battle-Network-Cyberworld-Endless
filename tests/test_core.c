@@ -5298,6 +5298,18 @@ static void test_chip_entry(void) {
 		"pack: the save RAM's entries, ids 635-1023, between BN6's save (to %08x) and its small blocks (from %08x)",
 		(unsigned)(BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE), (unsigned)BN6_SAVE_BLOCK_1);
 	CHECK(entries && BN6_PACK_EXT + 12 * 192 == RAM_PACK_EXT_END, "pack: every id's entry its own, the ids from 512 in the entries no pack counted");
+	/* (a chip of the save RAM's entries whole, id 700: a folder's entry of it and back, a reward of it, its place in the profile's
+	 * Library, its pack entry; the game's side of it, given, counted, saved in a state and loaded, runs on mGBA in
+	 * tests/test_emu_pack.c) */
+	uint16_t e700 = chip_entry(700, 3), r700 = reward_chip(700, 3);
+	Profile keep700 = profile;
+	memset(&profile, 0, sizeof profile);
+	bool held700 = chip_entry_id(e700) == 700 && chip_entry_code(e700) == 3 && reward_is_chip(r700) && reward_chip_id(r700) == 700 &&
+		reward_chip_code(r700) == 3 && meta_library_add(700) && meta_library_has(700) && !meta_library_has(699) && !meta_library_has(701) &&
+		profile.library_w[(700 - 512) / 8] == 1u << (700 % 8) && bn6_pack_entry(pack, 700) == BN6_PACK_SAVE + 12 * (700 - BN6_PACK_SAVE_FIRST);
+	profile = keep700;
+	CHECK(held700, "chip 700: a folder's entry %04x, a reward %04x, the Library's bit and the pack's entry %08x", e700, r700,
+		(unsigned)bn6_pack_entry(pack, 700));
 }
 
 static void test_chip_registry(void) {

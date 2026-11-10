@@ -21,7 +21,6 @@
 #include "emu.h"
 #include "encounter.h"
 #include "gamecall.h"
-#include "meta.h"
 #include "netmap.h"
 #include "rumor_lines.h"
 #include "save.h"
@@ -291,19 +290,7 @@ int director_dev_chip(const char *spec) {
 	int c = code[0] == '*' ? CHIP_CODE_STAR : code[0] >= 'A' && code[0] <= 'Z' ? code[0] - 'A' : -1;
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	/* ("chip ID" alone: what the game holds of it, nothing changed) */
-	if (got == 1 && id > 0 && id <= (int)CHIP_ID_MASK && data >= BN6_EWRAM && data < BN6_EWRAM_END) {
-		ChipInfo held;
-		chip_info(id, &held);
-		uint32_t entry = pack_entry(id);
-		int in_folder = 0;
-		for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) in_folder += (int)chip_entry_id(emu_read16(data + 2 * i)) == id;
-		printf("chip: %s (%d) held: the pack's counts %d %d %d %d, its stamps %04x %04x %04x %04x, %d in the folder, %s the Library\n", held.name, id,
-			entry ? emu_read8(entry) : -1, entry ? emu_read8(entry + 1) : -1, entry ? emu_read8(entry + 2) : -1, entry ? emu_read8(entry + 3) : -1,
-			entry ? emu_read16(entry + 4) : 0, entry ? emu_read16(entry + 6) : 0, entry ? emu_read16(entry + 8) : 0, entry ? emu_read16(entry + 10) : 0,
-			in_folder, meta_library_has(id) ? "in" : "not in");
-		fflush(stdout);   /* (a play session's log is read while the game runs) */
-		return 0;
-	}
+	if (got == 1) return pack_report(id), 0;
 	if (got < 2 || id <= 0 || id > (int)CHIP_ID_MASK || c < 0 || n < 1 || n > BN6_FOLDER_ENTRIES || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
 		printf("chip: %s is none (an id 1-%d, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec, (int)CHIP_ID_MASK);
 		return 0;

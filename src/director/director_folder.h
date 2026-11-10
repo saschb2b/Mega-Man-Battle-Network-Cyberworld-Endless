@@ -34,6 +34,10 @@ void folder_milestone_guardian(void);
  * record's four, then four u16 order stamps), 0 where the pack cannot be
  * read or counts none of the id (a Program Advance, a pseudo-chip) */
 uint32_t pack_entry(int id);
+/* The dev step "chip ID" alone: what the game holds of chip `id` (the
+ * pack's counts and order stamps, the folder's copies, the Library),
+ * printed; nothing changed */
+void pack_report(int id);
 /* Whether the pack lists chip `id`: BN6's 1-314, as its list does (0x13A,
  * BN6_PACK_LIST_END), and the registry's of BN5's */
 bool pack_listed(int id);
