@@ -14,8 +14,8 @@
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
 /* its fourth-kind 0x4f (080E79B8-080E7BF0), which its routine (080E7A58) spawns: moved */
 /* its sprite 3:0x38 (080DCAD0): BN6's 3:0x33, the same bytes */
-/* its sound 0xbf (080DCBEC): BN4's song copied into BN6's empty slot 0x4a, on BN4's player 9 (1 track; BN6's player 9 has 2) */
-/* its sound 0x1c6 (080DCB58): BN4's song copied into BN6's empty slot 0x49, on BN4's player 17 (1 track; BN6's player 17 has 1) */
+/* its sound 0xbf (080DCBEC): BN4's song copied into the grown song table's slot 0x1db, on BN4's player 9 */
+/* its sound 0x1c6 (080DCB58): BN4's song copied into the grown song table's slot 0x1da, on BN4's player 17 */
 
 static const XvBlock panlsht_blocks[] = {
 	{ 0x080E79B8, 0x080E7BF0, XC4_CODE + 0x0, 0x4F07EE8Bu },
@@ -90,10 +90,7 @@ static const XvPair panlsht_words[] = {
 static const XvImm panlsht_imms[] = {
 	{ 0x080DCACE, THUMB_MOVS, 2, 0, 0x38, 0x33 },   /* its object's sprite: list 3 0x38 in BN4, 0x33 in BN6 (the same bytes) */
 	{ 0x080DCB24, THUMB_LDRB, 0, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
-	{ 0x080DCB54, THUMB_MOVS, 0, 0, 0xC7, 0x49 },   /* its sound 0x1c6 (a movs and an adds): BN4's copied into BN6's empty slot 0x49 */
-	{ 0x080DCB56, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x1c6 (a movs and an adds): BN4's copied into BN6's empty slot 0x49 */
 	{ 0x080DCB72, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
-	{ 0x080DCBEA, THUMB_MOVS, 0, 0, 0xBF, 0x4A },   /* its sound 0xbf: BN4's copied into BN6's empty slot 0x4a, on its player 9 */
 	{ 0x080DCC2E, THUMB_MOVS, 0, 0, 0x7B, 0xCA },   /* its object's type 0x7b: moved, the dispatch's 0xca */
 	{ 0x080DCC3E, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080E7A5C, THUMB_MOVS, 0, 0, 0x4F, 0x91 },   /* its object's type 0x4f: moved, the dispatch's 0x91 */
@@ -106,15 +103,21 @@ static const XvType panlsht_types[] = {
 	{ 3, 0xCA, XV_TYPE_MOVED, 0x7B },   /* BN4's third-kind 0x7b, moved, the dispatch's 0xca */
 	{ 4, 0x91, XV_TYPE_MOVED, 0x4F },   /* BN4's fourth-kind 0x4f, moved, the dispatch's 0x91 */
 };
-static const XcSong panlsht_songs[] = { { 0xBF, 0x4A }, { 0x1C6, 0x49 } };
+static const XvSoundCall panlsht_sound_calls[] = {
+	{ 0x080DCBEC, 0x1DB },   /* its sound 0xbf: BN4's song at the grown table's slot 0x1db */
+	{ 0x080DCB58, 0x1DA },   /* its sound 0x1c6: BN4's song at the grown table's slot 0x1da */
+};
+static const XcSong panlsht_songs[] = { { 0xBF, 0x1DB }, { 0x1C6, 0x1DA } };
 
 #define PANLSHT_CODE { .name = "PanlSht (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x0), \
 	.blocks = panlsht_blocks, .nblocks = (int)(sizeof panlsht_blocks / sizeof *panlsht_blocks), \
 	.data = panlsht_data, .ndata = (int)(sizeof panlsht_data / sizeof *panlsht_data), \
 	.calls = panlsht_calls, .ncalls = (int)(sizeof panlsht_calls / sizeof *panlsht_calls), \
 	.words = panlsht_words, .nwords = (int)(sizeof panlsht_words / sizeof *panlsht_words), \
 	.imms = panlsht_imms, .nimms = (int)(sizeof panlsht_imms / sizeof *panlsht_imms), \
-	.types = panlsht_types, .ntypes = (int)(sizeof panlsht_types / sizeof *panlsht_types) }
+	.types = panlsht_types, .ntypes = (int)(sizeof panlsht_types / sizeof *panlsht_types), \
+	.sound_calls = panlsht_sound_calls, .nsound_calls = (int)(sizeof panlsht_sound_calls / sizeof *panlsht_sound_calls) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0 },
 };

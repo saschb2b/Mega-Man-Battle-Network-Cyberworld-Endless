@@ -90,11 +90,12 @@ TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
 UNITS = (('support', 0x26, 'PanlSht'),)
 CANDIDATES = ()
-# BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into the slot of BN6's empty songs fixed
-# for it (src/audio/xsong.c XSOUNDS, the same numbers; xsong_install_at as the unit installs), one slot a sound whichever
-# unit plays it; a family's sound of the same number (tools/xrecipe_bn4.py SOUND_SLOTS) is that copy. A sound not here is a
-# decision: the slots are the owner's to give (docs/multirom/bn4-chips.md, The owner's calls)
-SOUND_SLOTS = {0xBF: 0x4A, 0x1C6: 0x49}   # (PanlSht's shot's: in BN5's reserve until the owner's call 6, docs/multirom/bn4-chips.md)
+# BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
+# fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
+# the order the units took them; src/audio/xsong.c XSOUNDS, the same numbers; xsong_install_at as the unit installs), one
+# slot a sound whichever unit plays it. A sound not here is a decision: the next slot
+SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
+SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB}   # (PanlSht's shot's)
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
 # "on BN6's code" are not): BN4's routine -> why BN6's twin serves. One not here is a decision
@@ -210,15 +211,8 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     X4.words_of(f, pairs)
     sprites_of(b4, b6, f, alloc)
     X4.effects_of(b4, b6, f, alloc)
-    saved = dict(X4.SOUND_SLOTS)
-    X4.SOUND_SLOTS.update(SOUND_SLOTS)
-    try:
-        X4.sounds_of(b4, b6, f)
-    finally:
-        X4.SOUND_SLOTS.clear()
-        X4.SOUND_SLOTS.update(saved)
-    wide_sounds(f)
-    if f.attack_sprites or f.effects or f.sides or f.queue_calls or f.ranges or f.bytes:
+    sounds_of(b4, b6, f)
+    if f.attack_sprites or f.effects or f.sides or f.ranges or f.bytes:
         f.decide('unit', 'it copies a sprite or an effect, or needs a shim: the chips\' emitter writes none of those yet')
     rows_check(b4, f)
     f.imms.sort(key=lambda x: x['at'])
@@ -260,23 +254,37 @@ def panel_fields(f):
                     break
 
 
-def wide_sounds(f):
-    """a sound past a byte, named by a movs and an adds #0xFF, whose slot is a byte: the movs given the slot, the adds 0; the
-    decision the families' sounds_of left at it answered"""
-    for e, w in sorted(f.walks.items()):
-        for site, t in sorted(w.bls.items()):
-            if t != X4.BN4['sound']:
-                continue
-            v, chain = T.back_value(w, site, 0)
-            slot = SOUND_SLOTS.get(v)
-            if slot is None or len(chain) != 2 or chain[0][1] != 'adds8' or chain[1][1] != 'movs':
-                continue
-            d = ('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
-            if d in f.decisions:
-                f.decisions.remove(d)
-            why = f'its sound {v:#x} (a movs and an adds): BN4\'s copied into BN6\'s empty slot {slot:#x}'
-            f.imms.append(dict(at=chain[1][0], form='THUMB_MOVS', rd=0, rn=0, was=chain[1][2], now=slot, why=why))
-            f.imms.append(dict(at=chain[0][0], form='THUMB_ADDS', rd=0, rn=0, was=chain[0][2], now=0, why=why))
+def sounds_of(b4, b6, f):
+    """the sounds its code plays (BN4_PLAY_SOUND, r0 the sound): each BN6's of the same number where it is the same song (how
+    it sounds, xrecipe.song_sig); else BN4's song copied into its slot of BN6's grown song table (SOUND_SLOTS) and the call
+    made through a shim of the unit's home that makes r0 the slot, a number past what a movs names (XvSoundCall), the
+    instructions that made BN4's number left as they are"""
+    ids = {}
+    for e, w in f.walks.items():
+        for site, t in w.bls.items():
+            if t == X4.BN4['sound']:
+                ids.setdefault(T.back_value(w, site, 0)[0], []).append(site)
+    if None in ids:
+        f.decide('sound', f'a sound played at {", ".join(f"{s:08X}" for s in ids[None])} made otherwise')
+    odd = sorted(v for v in ids if v is not None and X4.song_sig(b4, X4.BN4['songs'], v) != X4.song_sig(b6, X4.SONGS6, v))
+    same = sorted(v for v in ids if v is not None and v not in odd)
+    if same:
+        f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
+    f.sounds = []
+    for v in odd:
+        slot = SOUND_SLOTS.get(v)
+        if slot is None:
+            f.decide('sound', f'its sound {v:#x} is no song of BN6\'s and has no slot (SOUND_SLOTS: the next of the grown table\'s)')
+            continue
+        if not SOUND_SLOT0 <= slot < SOUND_SLOT_END:
+            f.decide('sound', f'its sound {v:#x}\'s slot {slot:#x} is none of the grown table\'s')
+            continue
+        f.sounds.append((v, slot))
+        player = b4.u16(X4.BN4['songs'] + 8 * v + 4)
+        for site in sorted(ids[v]):
+            f.queue_calls.append(dict(at=site, slot=slot, why=f'its sound {v:#x}: BN4\'s song at the grown table\'s slot {slot:#x}'))
+        f.notes.append(f'its sound {v:#x} ({", ".join(f"{s:08X}" for s in sorted(ids[v]))}): BN4\'s song copied into the grown song table\'s '
+                       f'slot {slot:#x}, on BN4\'s player {player}')
 
 
 def registry_rows():
@@ -388,12 +396,18 @@ def c_unit(f):
     L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, moved, the dispatch\'s {a:#x} */'
           for k, a, t in f.types]
     L.append('};')
+    if f.queue_calls:
+        L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.queue_calls]
+        L.append('};')
     if f.sounds:
         L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
-                                                                   ('imms', True), ('numbers', f.numbers), ('types', True)) if have]
-    L += ['', f'#define {n.upper()}_CODE {{ .name = "{f.name} (BN4\'s)", .game = XROM_BN4_RED_SUN_US, \\']
+                                                                   ('imms', True), ('numbers', f.numbers), ('types', True),
+                                                                   ('sound_calls', f.queue_calls)) if have]
+    L += ['', f'#define {n.upper()}_CODE {{ .name = "{f.name} (BN4\'s)", .game = XROM_BN4_RED_SUN_US, \\',
+          f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
     return '\n'.join(L), (f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '

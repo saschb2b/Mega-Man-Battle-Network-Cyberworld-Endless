@@ -7,6 +7,7 @@
 #include "bytes.h"
 #include "emu.h"
 #include "rom.h"
+#include "song_table.h"
 #include "xnavi_bn4_sounds.h"
 #include "xsong.h"
 #include "xvirus_tx.h"
@@ -76,7 +77,7 @@ void xvirus_songs_set(const XVirusFamily *f) {
 			xv_fail("its sound %#x's slot %#x is not the one every track copies it to", s->from, s->slot);
 			return;
 		}
-		uint32_t now = emu_read32(BUS + slot);
+		uint32_t now = emu_read32(song_entry_bus(s->slot));
 		if (now != empty) {
 			/* (its game's same song there: a family's packed copy before it, or xsong.c's copy of another track's install, the
 			 * Navis' or the chips', made before the families') */
@@ -88,8 +89,8 @@ void xvirus_songs_set(const XVirusFamily *f) {
 		uint8_t *p = xv_put(s->at, s->room, true);
 		uint32_t header = p ? xsong_pack(f->game, s->from, s->at, p, s->room) : 0;
 		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
-		xv_word(BUS + slot, empty, header);
-		xv_word(BUS + slot + 4, get32(R.data + slot + 4), get32(x->data + x->layout->song_table + 8u * s->from + 4));
+		xv_word(song_entry_bus(s->slot), empty, header);
+		xv_word(song_entry_bus(s->slot) + 4, get32(R.data + slot + 4), get32(x->data + x->layout->song_table + 8u * s->from + 4));
 	}
 }
 

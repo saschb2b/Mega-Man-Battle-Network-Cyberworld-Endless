@@ -16,8 +16,11 @@
 #include "xchips_bn5.h"
 
 /* Their places, FREE_BN4_CHIPS (free_space.plan): */
-#define XC4_HOMES     FREE_BN4_CHIPS       /* each unit's veneers, XC4_HOME_SIZE apart, */
+#define XC4_HOMES     FREE_BN4_CHIPS       /* each unit's home, XC4_HOME_SIZE apart: its veneers (XC4_HOME_VENEERS bytes), then */
 #define XC4_HOME_SIZE 0x400u
+#define XC4_HOME_VENEERS 0x300u            /* ... its shims (xvirus_shim.h: a sound past a byte played through one), which the installer
+                                              puts at its code's `home` + XV_HOME_SHIMS: */
+#define XC4_SHIMS_HOME(home) ((home) + XC4_HOME_VENEERS - XV_HOME_SHIMS)
 #define XC4_UNITS     96                   /* ... this many units (BN4's 48 of its chips and 18 of its Navi chips) */
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
 #define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* what they draw, to: */

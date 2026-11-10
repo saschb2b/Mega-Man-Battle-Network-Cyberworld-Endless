@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "emu.h"
 #include "rom.h"
+#include "song_table.h"
 
 #define XSONG_AT    FREE_SONGS              /* (docs/engine/emulation/) */
 #define XSONG_END   FREE_XNAVIS
@@ -28,6 +29,7 @@
                                fits below them) */
 #define SOUND_FIRST 0x34                     /* the tracks' sounds' fixed slots: from, */
 #define SOUND_LAST  BN6_SONGS_EMPTY_LAST     /* ... to */
+#define XSONG_GROWN 128                      /* the sounds copied into the grown table's slots (song_table.h) kept track of, at most */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
 #define TRACKS_MAX  8
 #define SEQ_MAX     0x8000  /* a song's sequence: its tracks and header */
@@ -149,7 +151,7 @@ static struct {
 	uint32_t buf_at, room;
 	bool full;
 	int nsongs;
-	struct { int rom, song, slot; uint32_t header; } song[SOUND_LAST - SLOT_FIRST + 1];
+	struct { int rom, song, slot; uint32_t header; } song[SOUND_LAST - SLOT_FIRST + 1 + XSONG_GROWN];   /* (and the grown table's) */
 	int nmoved;
 	struct { int rom; uint32_t from, to; } moved[PTRS_MAX];
 } X;
@@ -329,6 +331,18 @@ static uint32_t copy_song(uint32_t header) {
 	return put(seq, hi - lo) == at ? at + (ho - lo) : 0;
 }
 
+/* a sound's slot: one of the tracks' fixed ones among BN6's empty songs, or one of the grown table's */
+static bool sound_slot(int slot) {
+	return (slot >= SOUND_FIRST && slot <= SOUND_LAST) || (slot >= (int)SONG_GROWN_FIRST && song_slot_ok(slot));
+}
+
+/* whether a slot still holds what nothing copied into: BN6's entry of the player's ROM, a grown slot's the empty song */
+static bool slot_empty(int slot) {
+	uint32_t e[2], at = song_entry_bus(slot);
+	song_entry_empty(slot, e);
+	return at && emu_read32(at) == e[0] && emu_read32(at + 4) == e[1];
+}
+
 /* Song `song` of extra ROM `xrom` copied in after those before it, and
  * entered in slot `slot` (a theme's, SLOT_FIRST to SLOT_LAST), played by
  * BN6's music player, or (`own`: a sound's, SOUND_FIRST to SOUND_LAST) by
@@ -336,7 +350,7 @@ static uint32_t copy_song(uint32_t header) {
  * same 32); false where it cannot be (the slot then stays BN6's empty
  * one). */
 static bool copy_in(int xrom, int song, bool own, int slot) {
-	if (slot < (own ? SOUND_FIRST : SLOT_FIRST) || slot > (own ? SOUND_LAST : SLOT_LAST) || X.nsongs >= (int)(sizeof X.song / sizeof *X.song) ||
+	if ((own ? !sound_slot(slot) : slot < SLOT_FIRST || slot > SLOT_LAST) || X.nsongs >= (int)(sizeof X.song / sizeof *X.song) ||
 		xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
 		(uint32_t)song * 8 + 8 > ROM_SIZE - XR[xrom].layout->song_table)
 		return false;
@@ -349,7 +363,7 @@ static bool copy_in(int xrom, int song, bool own, int slot) {
 	put32(entry, header);
 	put16(entry + 4, own ? get16(was + 4) : BGM_PLAYER);
 	put16(entry + 6, own ? get16(was + 6) : BGM_PLAYER);
-	emu_write(BUS + R.layout->song_table + (uint32_t)slot * 8, entry, sizeof entry);
+	emu_write(song_entry_bus(slot), entry, sizeof entry);
 	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, header };
 	if (emu_debug_on())
 		fprintf(stderr, "xsong: song %#x of %s in slot %#x, %u bytes of songs so far\n", song, XR[xrom].layout->name, slot, X.next - XSONG_AT);
@@ -365,7 +379,7 @@ static int slot_of(int xrom, int song) {
 int xsong_install(int xrom, int song, int fallback) {
 	if (!R.layout || !R.layout->song_table) return fallback;
 	/* (the core's ROM copy made anew: the songs went with the old) */
-	if (X.nsongs && emu_read32(BUS + R.layout->song_table + (uint32_t)X.song[0].slot * 8) != X.song[0].header) memset(&X, 0, sizeof X);
+	if (X.nsongs && emu_read32(song_entry_bus(X.song[0].slot)) != X.song[0].header) memset(&X, 0, sizeof X);
 	/* every song the other games' areas play, the first time, in their
 	 * order: each lands where it did in the session a checkpoint's state
 	 * was saved in, whose music player points into it, whichever area the
@@ -422,6 +436,12 @@ uint32_t xsong_pack(int xrom, int song, uint32_t at, uint8_t *out, uint32_t room
 	return fit ? header : 0;
 }
 
+int xsong_slot_holding(uint32_t header) {
+	for (int n = 0; song_slot_ok(n); ++n)
+		if (emu_read32(song_entry_bus(n)) == header) return n;
+	return -1;
+}
+
 int xsong_copy_of(int slot, int *xrom) {
 	for (int i = 0; i < X.nsongs; ++i)
 		if (X.song[i].slot == slot) {
@@ -435,7 +455,7 @@ int xsong_copy_of(int slot, int *xrom) {
  * whichever track's code plays it (issue #82's plan for its tracks and its
  * amendments; docs/rom/sound.md, BN6's empty song slots): copied by the
  * first install that needs it, found there by the others */
-static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
+static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = {
 	{ XROM_BN5_COLONEL_US, 0xC0, 0x62 }, { XROM_BN5_COLONEL_US, 0xB7, 0x61 }, { XROM_BN5_COLONEL_US, 0xBA, 0x60 },
 	{ XROM_BN5_COLONEL_US, 0x70, 0x5F }, { XROM_BN5_COLONEL_US, 0x117, 0x5E }, { XROM_BN5_COLONEL_US, 0x129, 0x5D },
 	{ XROM_BN5_COLONEL_US, 0x16B, 0x5C }, { XROM_BN5_COLONEL_US, 0xE1, 0x5B }, { XROM_BN5_COLONEL_US, 0x115, 0x5A },
@@ -454,8 +474,9 @@ static const struct { uint8_t xrom; uint16_t song; uint8_t slot; } XSOUNDS[] = {
 	{ XROM_BN4_RED_SUN_US, 0xC9, 0x3C }, { XROM_BN4_RED_SUN_US, 0xCA, 0x3B }, { XROM_BN4_RED_SUN_US, 0x70, 0x3A },
 	{ XROM_BN4_RED_SUN_US, 0x9A, 0x39 }, { XROM_BN4_RED_SUN_US, 0xA6, 0x38 }, { XROM_BN4_RED_SUN_US, 0xB7, 0x37 },
 	{ XROM_BN4_RED_SUN_US, 0x9D, 0x36 }, { XROM_BN4_RED_SUN_US, 0xFC, 0x35 }, { XROM_BN4_RED_SUN_US, 0xF9, 0x34 },
-	/* BN4's chips' (tools/xchiprecipe_bn4.py's SOUND_SLOTS): PanlSht's shot's */
-	{ XROM_BN4_RED_SUN_US, 0xBF, 0x4A }, { XROM_BN4_RED_SUN_US, 0x1C6, 0x49 },
+	/* BN4's chips' (tools/xchiprecipe_bn4.py's SOUND_SLOTS), in the grown table's slots (song_table.h, from SONG_GROWN_FIRST up,
+	 * the owner's call 6 of docs/multirom/bn4-chips.md): PanlSht's shot's */
+	{ XROM_BN4_RED_SUN_US, 0x1C6, SONG_GROWN_FIRST + 0 }, { XROM_BN4_RED_SUN_US, 0xBF, SONG_GROWN_FIRST + 1 },
 };
 
 int xsong_sound_slot(int xrom, int song) {
@@ -471,8 +492,7 @@ int xsong_install_sound(int xrom, int song, int fallback) {
 	int slot = xsong_sound_slot(xrom, song);
 	if (slot < 0 || slot_of(xrom, song) == slot) return slot < 0 ? fallback : slot;
 	/* (copied only where the slot is still BN6's empty one, the player's ROM's entry; else another's install put it there) */
-	uint32_t entry = R.layout->song_table + (uint32_t)slot * 8;
-	if (emu_read32(BUS + entry) != get32(R.data + entry) || emu_read32(BUS + entry + 4) != get32(R.data + entry + 4)) return slot;
+	if (!slot_empty(slot)) return slot;
 	return copy_in(xrom, song, true, slot) ? slot : fallback;
 }
 
@@ -483,7 +503,7 @@ bool xsong_found(int xrom, int song, int slot) {
 		return false;
 	if (slot_of(xrom, song) == slot) return true;
 	if (X.nsongs >= (int)(sizeof X.song / sizeof *X.song)) return false;
-	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, emu_read32(BUS + R.layout->song_table + (uint32_t)slot * 8) };
+	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, emu_read32(song_entry_bus(slot)) };
 	return true;
 }
 
@@ -495,13 +515,12 @@ static bool slot_taken(int slot) {
 
 int xsong_install_at(int xrom, int song, int slot) {
 	xsong_install(xrom, -1, -1);
-	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || slot < SOUND_FIRST || slot > SOUND_LAST || xsong_sound_slot(xrom, song) != slot)
+	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || !sound_slot(slot) || xsong_sound_slot(xrom, song) != slot)
 		return -1;
 	/* (copied before, or noted where another track's install copied it: at its slot alone, one BN5 sound one slot) */
 	int at = slot_of(xrom, song);
 	if (at >= 0) return at == slot ? slot : -1;
 	/* (the slot still BN6's empty one, as the player's ROM has it: no copy of anything there yet) */
-	uint32_t entry = BUS + R.layout->song_table + (uint32_t)slot * 8;
-	if (slot_taken(slot) || emu_read32(entry) != get32(R.data + (entry - BUS)) || emu_read32(entry + 4) != get32(R.data + (entry - BUS) + 4)) return -1;
+	if (slot_taken(slot) || !slot_empty(slot)) return -1;
 	return copy_in(xrom, song, true, slot) ? slot : -1;
 }

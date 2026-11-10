@@ -45,6 +45,9 @@ int xsong_sound_slot(int xrom, int song);
  * game in *xrom where not NULL), -1 for a slot of BN6's own. For a reader
  * comparing the two games' sounds (the differential). */
 int xsong_copy_of(int slot, int *xrom);
+/* The slot of BN6's live song table (grown or not, src/emu/song_table.h) whose entry's header is `header`, -1 none
+ * (the differential's trace: a song a player began, by its number) */
+int xsong_slot_holding(uint32_t header);
 
 /* Song `song` of extra ROM `xrom` laid out in `out` (`room` bytes, zeroed
  * first) as it would stand from bus address `at` (word-aligned): its

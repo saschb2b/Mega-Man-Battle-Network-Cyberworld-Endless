@@ -9,6 +9,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "song_table.h"
 #include "xattack_grow.h"
 #include "xchips_bn4.h"
 #include "xchips_bn5.h"
@@ -311,6 +312,11 @@ bool xchips_bn4_code_install(void) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
 		return false;
 	}
+	/* (their sounds BN6 has no song of go into the grown song table's slots, song_table.h: grown before the step) */
+	if (!song_table_grow()) {
+		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's song table not grown\n");
+		return false;
+	}
 	xv_tx_begin();
 	bool fresh = tables_stage();
 	const char *at = "BN6's routines' tables";
@@ -319,9 +325,10 @@ bool xchips_bn4_code_install(void) {
 		at = u->code.name;
 		if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
 		else if (u->kind != XCHIP_SUPPORT || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+		else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
 		else {
 			songs_in(u);
-			if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_SIZE / 12))) entry_stage(u, fresh);
+			if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, fresh);
 		}
 	}
 	if (xv_failed()) {
