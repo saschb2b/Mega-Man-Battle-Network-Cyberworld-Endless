@@ -47,11 +47,13 @@ ON_BN6 = {
 }
 # BN4's chips whose code is moved into BN6's engine as a unit (tools/xchiprecipe_bn4.py UNITS, src/emu/xchips_bn4.c), each
 # proved by its bn4_chip_* spec against BN4's own battle before it is listed: BN4's id -> the unit's number in BN6's grown
-# support routines (XC_SUPPORT: 0x80 + BN4's subfamily), which its record takes under BN6's support family; the generator
+# support routines (XC_SUPPORT: 0x80 + BN4's subfamily), which its record takes under BN6's support family, or for a chip
+# of BN4's misc family (its record's +0xB 0x20) in BN6's grown misc routines (XC4_MISC), under BN6's misc family; the generator
 # refuses to write a unit whose chips are not here
 MOVED = {
     178: 0xA6, 179: 0xA6, 180: 0xA6,   # PanlSht1-3: BN4's support 0x26 (bn4_chip_panlsht1-3)
     210: 0x99,                         # ShotStar: BN4's support 0x19 (bn4_chip_shotstar)
+    115: 0x8B,                         # Repair: BN4's misc 0x0B, BN6's grown misc routine 0x8B (bn4_chip_repair)
 }
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 

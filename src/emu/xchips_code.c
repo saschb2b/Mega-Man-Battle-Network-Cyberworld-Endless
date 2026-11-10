@@ -34,6 +34,10 @@ static bool tables_grown;   /* (the stubs and BN6's two routines' tables grown: 
  * entries in BN6 and its copy */
 typedef struct { uint32_t at, refs[2], count, to, stub; } Routines;
 
+/* BN6's misc family's routines by subfamily (family 0x1C: BN6_MISC_RUN's one literal), grown for BN4's units at
+ * XC4_MISC, a routine that does nothing the rest */
+static const Routines misc_table = { BN6_MISC_ROUTINES, { BN6_MISC_ROUTINES_REF, 0 }, BN6_MISC_ROUTINE_COUNT, XC4_MISC, XC_STUBS + 4 };
+
 static const Routines tables[2] = {
 	{ BN6_CHIP_ROUTINES, { BN6_CHIP_ROUTINES_REF, BN6_CHIP_ROUTINES_REF2 }, BN6_CHIP_ROUTINE_COUNT, XC_SUPPORT, XC_STUBS },
 	{ BN6_NAVI_ROUTINES, { BN6_NAVI_ROUTINES_REF, BN6_NAVI_ROUTINES_REF2 }, BN6_NAVI_ROUTINE_COUNT, XC_NAVI, XC_STUBS + 4 },
@@ -84,7 +88,8 @@ static void routines_stage(const Routines *t) {
 		put32(p + 4 * i, v);
 	}
 	for (int k = 0; k < 2 && !xv_failed(); ++k)
-		if (rom_u32(t->refs[k] - BUS) == t->at) xv_word(t->refs[k], t->at, t->to);
+		if (!t->refs[k]) continue;   /* (a table one word names: the misc family's) */
+		else if (rom_u32(t->refs[k] - BUS) == t->at) xv_word(t->refs[k], t->at, t->to);
 		else xv_fail("the word at %08x names %08x, not BN6's %08x", (unsigned)t->refs[k], (unsigned)rom_u32(t->refs[k] - BUS), (unsigned)t->at);
 }
 
@@ -129,7 +134,12 @@ static void entry_stage(const XChipUnit *u, bool fresh) {
 	if (u->kind == XCHIP_ATTACK && u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) {
 		at = xattack_entry(u->number);
 		stub = XATTACK_STUB | 1u;
-	} else if (u->kind != XCHIP_ATTACK && u->number >= (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI)) {
+	} else if (u->kind == XCHIP_MISC && u->number >= XC4_FIRST_SUPPORT) {
+		/* (BN4's misc routines: their table staged in their own step, the entry put) */
+		at = misc_table.to + 4u * u->number;
+		stub = misc_table.stub | 1u;
+		fresh = true;
+	} else if (u->kind != XCHIP_ATTACK && u->kind != XCHIP_MISC && u->number >= (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI)) {
 		const Routines *t = &tables[u->kind == XCHIP_NAVI];
 		at = t->to + 4u * u->number;
 		stub = t->stub | 1u;
@@ -319,12 +329,13 @@ bool xchips_bn4_code_install(void) {
 	}
 	xv_tx_begin();
 	bool fresh = tables_stage();
+	if (!xv_failed()) routines_stage(&misc_table);
 	const char *at = "BN6's routines' tables";
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
 		const XChipUnit *u = &xchips_bn4[i];
 		at = u->code.name;
 		if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
-		else if (u->kind != XCHIP_SUPPORT || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+		else if ((u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
 		else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
 		else {
 			songs_in(u);

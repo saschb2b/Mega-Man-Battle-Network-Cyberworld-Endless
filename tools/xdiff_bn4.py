@@ -106,6 +106,7 @@ def bn4_moved_types():
 
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
 XV_LATE_ART = 0x08800000 + 0x4D0000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
+XC4_ART = 0x08800000 + 0x0EF000 + 0x30000   # (src/emu/xchips_bn4.h XC4_ART: BN4's chips' units' art, FREE_BN4_CHIPS + 0x30000)
 
 
 def bn4_sprites(rom4, foes=None):
@@ -128,7 +129,7 @@ def bn4_sprites(rom4, foes=None):
         # (a raw one's room in BN4's ROM its own bytes, not the copy's rounded room, which may reach into the next sprite: the
         # wind's gust's list 3 0x2E past SearchMan's marker's 0x2D)
         own = X.sprite_len(rom4[base - 0x08000000:base - 0x08000000 + 0x40000], 0x40000) if not lz else 0
-        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE, 'XV_LATE_ART': XV_LATE_ART}.get(room_base, XV_ART) + int(off, 16),
+        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE, 'XV_LATE_ART': XV_LATE_ART, 'XC4_ART': XC4_ART}.get(room_base, XV_ART) + int(off, 16),
                     int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
     return out
 
@@ -143,7 +144,7 @@ def sprite_rows(foes=None):
     text = recipes_text()
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
-    row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XV_LATE_ART|XN_BN4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
+    row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XV_LATE_ART|XN_BN4_ART|XC4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
                      r'(XN_BN4_SPRITE), XN_BN4_SPRITE_SIZE) \}')
     rows = []
     for arr in re.finditer(r'static const XvSprite (\w+)\[\] = \{(.*?)\n\};', text, re.S):
@@ -175,14 +176,16 @@ def sprite_ptr(sprites, game, v, cache=None):
     rounded up past the sprite's own end, so in BN4's ROM it may reach into the next sprite's (list 4's 0x0D, 0x520 bytes
     in a room of 0x800, runs into 0x0E, GutsMan's rocks'): the pointer is the sprite's whose start is nearest below it"""
     best = None
+    first = {}   # (one BN4 sprite one name, whichever recipe's copy BN6 draws: Walla's and a chip unit's of the same effect's)
     for i, (b4, b6, room, key, room4) in enumerate(sprites):
+        first.setdefault(key, i)
         if game == 4 and b4 is None:
             b4 = (cache or {}).get(key)
         if game == 4:
             room = room4   # (BN4's own sprite's bytes: bn4_sprites)
         base = b4 if game == 4 else b6 if game == 6 else None
         if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
-            best = ('sprite', i, v - base)
+            best = ('sprite', first[key], v - base)
     return best
 
 
@@ -196,6 +199,10 @@ class Bn4Canon:
         own = [f for f in fams if set(f['ids']) & set(foes)] or fams
         self.effects = {k: v for f in own for k, v in f['effects'].items()}
         self.moved_types = bn4_moved_types()
+        # (the effects BN4's chips' units moved, src/emu/xchips_bn4.c's XvId rows: BN6's id of the copy -> BN4's own)
+        chips = os.path.join(ROOT, 'src', 'emu', 'xchips_bn4.c')
+        self.chip_effects = {int(b, 16): int(a, 16) for row in re.findall(r'XvId \w+_effects\[\] = \{(.*?)\};', open(chips).read() if os.path.exists(chips) else '', flags=re.S)
+                             for a, b in re.findall(r'\{ 0x([0-9A-F]{2}), 0x([0-9A-F]{2}) \}', row)}
         self.moved1_sprites = sprite_numbers_of([os.path.join('src', 'emu', 'xnavi_bn4.c')])
 
     def nid(self, game, v):
@@ -205,7 +212,12 @@ class Bn4Canon:
         """an effect's id as BN6's: the spec's families' BN4 effects as their recipe moved them (xvirus_bn4.c's XvId rows:
         Billy's 0x15 and 0x16 BN6's 0x90 and 0x91, its move's flashes, from BN4's effects table 0x080E1698). Any BN4 effect
         of that number is read so; one the engine spawned would then meet BN6's own of its number and differ, never hide one"""
-        return self.effects.get(v, v) if game == 4 else self.canon.fx(game, v)
+        if game == 4:
+            return self.effects.get(v, v)
+        # (BN6's: a chip unit's copy of a BN4 effect, at an id of the chips' own, read back as BN4's and then as BN4's is read:
+        # one BN4 effect one number in the comparison, whichever track's copy draws it: Walla's 7 at 0x96, Repair's at 0xCE)
+        back = self.chip_effects.get(v)
+        return self.effects.get(back, back) if back is not None else self.canon.fx(game, v)
 
     def t3(self, game, v):
         """a third-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where the
@@ -407,6 +419,37 @@ def support_object_as_bn6(rec, canon):
     for at, rat, n in ((OBJ_SPAWN_R4, 0x10, 4), (OBJ_SPAWN_R6, 0x1A, 2), (OBJ_SPAWN_R6 + 2, 0x0A, 1)) if to < BN6_CHIPS else ():
         if rec[NODE + at:NODE + at + n] == roms[4][r4 + rat:r4 + rat + n]:
             rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
+
+
+OBJ_DAMAGE, OBJ_DAMAGE_KIND, COLL_DAMAGE_KIND, CHIP_POWER, CHIP_DAMAGE_KIND = 0x2C, 0x2E, 0x07, 0x1A, 0x0A
+ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's from 8, tools/bn4_twins.py GENERIC4)
+
+
+def bn4_rule(name):
+    return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get(name) or {}
+
+
+ACTOR_OBJECTS = {}
+
+
+def attack_object_as_bn6(rec, canon):
+    """a BN4 third-kind object's record in BN6's terms where a chip's attack made it: its damage word's byte above the power
+    (+0x2E), the chip's record's +0x0A as the support run handed it on, read as BN6's record's for a chip both games name
+    (legit.json's bn4 chip_id, record); and, for a type both engines run by the actors' state runner (legit.json's bn4
+    actor_objects), its CurAction's own states as BN6 numbers them"""
+    roms = canon.roms
+    for chip, to in canon.chips.items():
+        if to >= BN6_CHIPS:
+            continue
+        r4, r6 = CHIP_RECORDS[4] + chip * CHIP_RECORD_SIZE, CHIP_RECORDS[6] + to * CHIP_RECORD_SIZE
+        if rec[NODE + OBJ_DAMAGE:NODE + OBJ_DAMAGE + 2] == roms[4][r4 + CHIP_POWER:r4 + CHIP_POWER + 2] and \
+                rec[NODE + OBJ_DAMAGE_KIND] == roms[4][r4 + CHIP_DAMAGE_KIND] and roms[4][r4 + CHIP_DAMAGE_KIND] != roms[6][r6 + CHIP_DAMAGE_KIND]:
+            rec[NODE + OBJ_DAMAGE_KIND] = roms[6][r6 + CHIP_DAMAGE_KIND]
+            break
+    if not ACTOR_OBJECTS:
+        ACTOR_OBJECTS.update({int(k, 0): v for k, v in bn4_rule('actor_objects').get('T3', {}).items()} or {-1: None})
+    if rec[NODE + OBJ_TYPE] in ACTOR_OBJECTS and rec[NODE + OBJ_ACTION] >= ACTOR_OWN4:
+        rec[NODE + OBJ_ACTION] += ACTOR_OWN6 - ACTOR_OWN4
 
 
 # A collision data's alliance words (+0x30 and +0x34 in BN6's layout, BN4's +0x58 and +0x5C), each read by the same
@@ -616,8 +659,12 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
         support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
+    if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
+        attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
         rec[NODE + OBJ_EFFECT] = canon.fx(game, rec[NODE + OBJ_EFFECT])
+    if game == 6 and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0 and rec[NODE + OBJ_EFFECT] in getattr(canon, 'chip_effects', ()):
+        rec[NODE + OBJ_EFFECT] = canon.fx(game, rec[NODE + OBJ_EFFECT])   # (a chip unit's copy of a BN4 effect: Bn4Canon.fx)
     if fams is not None or game == 6:
         rec[NODE + OBJ_SLOT] = (rec[NODE + OBJ_SLOT] - o.slot) & 0xFF
     return rec
@@ -970,6 +1017,11 @@ def frame_diffs(fa, fb, fbt=None):
         alliance = getattr(fa.canon, 'alliance', None) if fb.game == 6 else None
         before = getattr(fa, 'before', {}).get(role)   # (its record at the frame before: a move's old panel)
         ca = coll_as_bn6(oa.coll, alliance, role, before.coll if before else None) if alliance and oa.coll is not None else oa.coll
+        if fb.game == 6 and oa.kind == 'T3' and ca is not None and na[NODE + OBJ_DAMAGE_KIND] != oa.rec[NODE + OBJ_DAMAGE_KIND] and \
+                ca[COLL_DAMAGE_KIND] == oa.rec[NODE + OBJ_DAMAGE_KIND]:
+            # (its collision data's copy of the object's +0x2E, the set-up's: BN6 0x08019FD8-0x08019FDA, BN4 0x080129C6-0x080129C8)
+            ca = bytearray(ca)
+            ca[COLL_DAMAGE_KIND] = na[NODE + OBJ_DAMAGE_KIND]
         aa = megaman_chip_as_bn6(oa.ai, fa.canon) if fb.game == 6 and isinstance(role, tuple) and role[:2] == ('T1', MEGAMAN_ID) else oa.ai
         for part, xa, xb in (('ai', aa, ob.ai), ('coll', ca, ob.coll)):
             if (xa is None) != (xb is None):
@@ -1326,7 +1378,13 @@ def own_art(d, fa, fb):
 def allowed_engine(d):
     """legit.json's bn4 allowed bits of an engine's own object in the world (whose "engine", its kind and type, a bit of
     one byte one game sets and the other not, in its direction): the allowance d is, None where none"""
-    if not isinstance(d.role, tuple) or len(d.role) < 2 or not isinstance(d.a, int) or not isinstance(d.b, int) or isinstance(d.a, bool):
+    if not isinstance(d.role, tuple) or len(d.role) < 2:
+        return None
+    for a in bn4_allowed():   # (a range of an engine's own object: each engine's own field or art there)
+        if a.get('whose') == 'engine' and 'offsets' in a and d.part == a.get('part') and d.role[0] == a['kind'] and \
+                d.role[1] == int(a['type'], 0) and int(a['offsets'][0], 0) <= d.off <= int(a['offsets'][1], 0) and holds_nothing(a, d):
+            return a['name']
+    if not isinstance(d.a, int) or not isinstance(d.b, int) or isinstance(d.a, bool):
         return None
     for a in bn4_allowed():
         if a.get('whose') != 'engine' or 'bit' not in a or d.part != a.get('part') or d.role[0] != a['kind'] or \
@@ -1504,13 +1562,15 @@ def rng_twins():
 
 def megaman_items(spec, game):
     """a chip spec's folders and Custom screens' keys as src/dev/xdiff_spec.c takes them: BN4's (folder4, cust4: xd4_folder_put),
-    and BN6's where it is fought against (folder6, cust6)"""
+    and BN6's where it is fought against (folder6, cust6, deck6)"""
     parts = []
     for g in ('4', '6') if game == 'bn4:bn6' else ('4',):
         if spec.get(f'folder{g}'):
             parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
         for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    if game == 'bn4:bn6' and spec.get('deck6'):   # (BN6's battle deck in the spec's order, as a BN5 spec's: two chips in one hand)
+        parts.append('deck6=' + ','.join(spec['deck6']))
     if spec.get('karma4') is not None:   # (MegaMan's karma in BN4's battle: a dark chip's spec, bn4_chips.h's BN4_CHIP_ALIGN)
         parts.append(f'karma4={spec["karma4"]}')
     return parts

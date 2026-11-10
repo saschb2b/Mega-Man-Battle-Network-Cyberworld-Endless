@@ -78,5 +78,15 @@
 #define BN4_STAR_KINDS        0x080D8580u /* ... its kinds, 6 bytes each, 7 of them: its sprite's number in list 3, its animation, its collision's
                                            * two arguments; ShotStar's is kind 1 (list 3's 0x31) */
 #define BN4_T4_STAR_MARK      0x35        /* the star's mark on its panel, the fourth kind's (0x080E5E38 to 0x080E5EF4), its spawner 0x080E5EEA */
+/* Its misc chips' code: MegaMan's state 0x20 runs the chip's routine by its subfamily and ends the attack in the same frame
+ * (subfamily 5 after 0x28 frames), BN6_MISC_RUN's twin instruction for instruction */
+#define BN4_CHIP_MISC_FAMILY  0x20
+#define BN4_MISC_RUN          0x080EC972u
+#define BN4_MISC_ROUTINES     0x080EC9CCu /* its routines by subfamily, BN4_MISC_ROUTINE_COUNT words */
+#define BN4_MISC_ROUTINE_COUNT 0x12
+#define BN4_BATTLE_OBSTACLES  0x68        /* the battle state's obstacles by side, three words a side (BN6's +0xA0) */
+#define BN4_OBSTACLE_ADD      0x0800B230u /* BN6_OBSTACLE_ADD's twin but for that offset */
+#define BN4_REPAIR            0x0800C720u /* Repair's routine (its chip 115, misc subfamily 0x0B): each of its side's obstacles with HP left given
+                                           * its full HP (+0x26 into +0x24), effect 7 over it, sound 0x9A */
 
 #endif

@@ -1,0 +1,132 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Repair * (its chip 115) against the registry's row for it (id 557), BN4's routine moved by tools/xchiprecipe_bn4.py as a misc unit (misc 0x0B as BN6's grown misc routine 0x8B; docs/multirom/bn4-chips.md): RockCube and Repair picked on the first Custom screen (BN4's hand holds Repair first, so its keys pick the second chip first; BN6's deck is given), the cube set at fight frame 30, struck by the Mettaur's wave at t99 (190 HP), Repair used at t150: 200 HP again at t154 in both, its effect over the cube and its sound, the cube struck again at t237.",
+ "folder4": [
+  "3463",
+  "3473"
+ ],
+ "folder6": [
+  "348F",
+  "22D:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "LEFT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   150,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "348F",
+  "22D:1A"
+ ]
+}

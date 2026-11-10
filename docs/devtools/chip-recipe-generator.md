@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
 ---
 
 # The chip recipe generator
@@ -171,6 +171,16 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   region is the unit's first block, walked from the type's routine and
   from the spawner. A routine of another shape, or of another family, is
   a decision: the misc family (BN4's state 0x20) is not read yet.
+- **A misc unit.** BN4's misc state (family 0x20, `BN4_MISC_RUN`) is
+  BN6's family 0x1C instruction for instruction, each with a table of
+  routines by subfamily (`BN4_MISC_ROUTINES` 0x12, BN6's 7). A unit of
+  kind `misc` is one of BN4's routines there: copied as a block of its
+  own where it is a routine by itself (Repair's), its number 0x80 + the
+  subfamily in BN6's misc routines grown (`XC4_MISC`). One that lies in
+  an object type's code is a decision yet (Counter's). `IMMS` holds the
+  immediates of a unit that name a place of BN4's engine BN6 keeps
+  elsewhere, each read by hand in both games and checked against the
+  instruction (the battle state's obstacles, +0x68 and +0xA0).
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -219,5 +229,5 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
 Proved by a chip's specs against BN4's own battle ([The
 differential](differential.md), A BN4 chip's spec); a mutation of a
 unit's code names BN4's address, which the runner pokes at its copy.
-`UNITS` holds PanlSht (support 0x26) and ShotStar (0x19); the misc
-family's units are next, a second kind of unit.
+`UNITS` holds PanlSht (support 0x26), ShotStar (0x19) and Repair (misc
+0x0B); Counter and Marking are next.
