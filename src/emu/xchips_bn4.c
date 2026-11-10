@@ -521,6 +521,95 @@ static const XcSong boomer_songs[] = { { 0xAB, 0x1DF } };
 	.types = boomer_types, .ntypes = (int)(sizeof boomer_types / sizeof *boomer_types), \
 	.sound_calls = boomer_sound_calls, .nsound_calls = (int)(sizeof boomer_sound_calls / sizeof *boomer_sound_calls), \
 	.sprites = boomer_sprites, .nsprites = (int)(sizeof boomer_sprites / sizeof *boomer_sprites) }
+/* ---- MokoRus: BN4's misc 0x1 (080D252B) as BN6's 0x81; its chips 130 (577), 131 (578), 132 (579) ---- */
+/* its routine (080D252A) lies in the third-kind 0x2c's code (080D235C-080D2568), which it spawns: moved */
+/* its sprite 1:0x11 (080D2388): BN6's 1:0x7f, copied */
+/* its effect 0x1: BN6's 0xcc, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0xc7 (080D245E): BN4's song copied into the grown song table's slot 0x1e0, on BN4's player 9 */
+
+static const XvBlock mokorus_blocks[] = {
+	{ 0x080D235C, 0x080D2568, XC4_CODE + 0xEB0, 0xAAEAC10Du },
+};
+static const XvData mokorus_data[] = {
+	{ 0x080D236E, 0x080D2370, XV_RAW },
+	{ 0x080D2370, 0x080D2374, XV_POOL },
+	{ 0x080D2374, 0x080D2380, XV_TABLE },
+	{ 0x080D243E, 0x080D2440, XV_RAW },
+	{ 0x080D2440, 0x080D2444, XV_POOL },
+	{ 0x080D2444, 0x080D244C, XV_TABLE },
+	{ 0x080D2500, 0x080D2504, XV_POOL },
+	{ 0x080D2504, 0x080D250C, XV_RAW },
+	{ 0x080D2564, 0x080D2568, XV_POOL },
+};
+static const XvPair mokorus_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08000AAA, 0x08000C72 },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x08014620, 0x0801BDDE },   /* search, SAME */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair mokorus_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm mokorus_imms[] = {
+	{ 0x080D2384, THUMB_MOVS, 2, 0, 0x11, 0x7F },   /* its object's sprite: list 1 0x11 in BN4, 0x7f in BN6 (copied) */
+	{ 0x080D23E0, THUMB_MOVS, 3, 0, 0x21, 0x61 },   /* its hit's bits (the collision setup's r3): struck and pushed is bit 0x01 with a push bit in BN4 (BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED) */
+	{ 0x080D2412, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D242E, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
+	{ 0x080D24B0, THUMB_MOVS, 4, 0, 0x1, 0xCC },   /* its effect: 0x1 in BN4, 0xcc in BN6 (moved) */
+	{ 0x080D24F0, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
+	{ 0x080D2510, THUMB_MOVS, 0, 0, 0x2C, 0xC4 },   /* its object's type 0x2c: moved, the dispatch's 0xc4 */
+	{ 0x080D2520, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType mokorus_types[] = {
+	{ 3, 0xC4, XV_TYPE_MOVED, 0x2C },   /* BN4's third-kind 0x2c, moved, the dispatch's 0xc4 */
+};
+static const XvSprite mokorus_sprites[] = {
+	{ 1, 0x11, 1, 0x7F, XC4_ART + 0x5F00, 0x3900 },   /* BN4's 1:0x11 copied */
+	{ 5, 0x02, 5, 0xEC, XC4_ART + 0x9800, 0x1300 },   /* BN4's 5:0x2 copied */
+	{ 5, 0x0D, 5, 0xEB, XC4_ART + 0xAB00, 0x2300 },   /* BN4's 5:0xd copied */
+};
+static const XvId mokorus_effects[] = { { 0x01, 0xCC }, { 0x15, 0xCB } };
+static const XvSoundCall mokorus_sound_calls[] = {
+	{ 0x080D245E, 0x1E0 },   /* its sound 0xc7: BN4's song at the grown table's slot 0x1e0 */
+};
+static const XcSong mokorus_songs[] = { { 0xC7, 0x1E0 } };
+
+#define MOKORUS_CODE { .name = "MokoRus (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2000), \
+	.blocks = mokorus_blocks, .nblocks = (int)(sizeof mokorus_blocks / sizeof *mokorus_blocks), \
+	.data = mokorus_data, .ndata = (int)(sizeof mokorus_data / sizeof *mokorus_data), \
+	.calls = mokorus_calls, .ncalls = (int)(sizeof mokorus_calls / sizeof *mokorus_calls), \
+	.words = mokorus_words, .nwords = (int)(sizeof mokorus_words / sizeof *mokorus_words), \
+	.imms = mokorus_imms, .nimms = (int)(sizeof mokorus_imms / sizeof *mokorus_imms), \
+	.types = mokorus_types, .ntypes = (int)(sizeof mokorus_types / sizeof *mokorus_types), \
+	.sound_calls = mokorus_sound_calls, .nsound_calls = (int)(sizeof mokorus_sound_calls / sizeof *mokorus_sound_calls), \
+	.sprites = mokorus_sprites, .nsprites = (int)(sizeof mokorus_sprites / sizeof *mokorus_sprites), \
+	.effects = mokorus_effects, .neffects = (int)(sizeof mokorus_effects / sizeof *mokorus_effects) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -530,5 +619,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x09, 0x89, 0x080D4F2B, XC4_HOMES + 0x1400, { .name = "WhitWeb (BN4's), its subfamily 0x9", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 	{ XCHIP_MISC, 0x0A, 0x8A, 0x080D4F35, XC4_HOMES + 0x1800, { .name = "WhitWeb (BN4's), its subfamily 0xa", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 	{ XCHIP_MISC, 0x02, 0x82, 0x080D344F, XC4_HOMES + 0x1C00, BOOMER_CODE, boomer_songs, (int)(sizeof boomer_songs / sizeof *boomer_songs), 0, 0 },
+	{ XCHIP_MISC, 0x01, 0x81, 0x080D252B, XC4_HOMES + 0x2000, MOKORUS_CODE, mokorus_songs, (int)(sizeof mokorus_songs / sizeof *mokorus_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
