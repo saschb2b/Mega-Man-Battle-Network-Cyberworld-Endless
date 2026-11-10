@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-10
+* **Update**: multirom/bn4-chips.md and devtools/differential.md: `bn4_chip_areagrab` passes, the first BN4 chip against BN6 (MegaMan's own clock, the grab's sounds, a panel's side copies).
 * **Update**: multirom/bn4-chips.md (unit 3 under way: the comparator's MegaMan mode for BN4; the six "on BN6's code" are not; BN4's light and dark chips), devtools/differential.md (`karma4`, a chip against BN6), rom/bn4.md (a chip's alignment and MegaMan's karma, new row), research/sources.md (BN4's alignment rule).
 * **Update**: devtools/differential.md (A BN4 chip's spec): the runner passes `folder4` and `cust4` now; `bn4_chip_cannon_broken`, the folder's check.
 * **Update**: game/meta/library.md (its description and index line too), engine/ui.md, game/pet.md, game/fidelity.md and code/screens.md: the Library redrawn as BN6's own to the pixel on the owner's word (the card, the panel and field of seven rows, the list's letters in the ROM's font's cells, stars, cursor, scroll bar, no side rails), the entries as tags on the band, BN6's keys kept (Left and Right the pages, L and R a screenful, START leaving), BN4's own 161 slots in the table and hidden.
