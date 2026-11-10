@@ -444,6 +444,7 @@
 0800CA8C BN6_PANEL_BREAK
 0800CC0A BN6_SET_PANEL_TYPE
 0800CC32 bn5_chips_code.blindness_counted_down
+0800CC52 BN6_PANEL_BLINK_SET
 0800CCBE collision_panels_highlighted
 0800D730 BN6_FIELDS
 0800DDCC dark_2_by_meter

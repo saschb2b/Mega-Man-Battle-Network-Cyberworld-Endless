@@ -3,7 +3,7 @@ type: Feature
 title: "DarkChips"
 description: "DarkChips (issue #82): twelve kinds, each played by its own net's rule, offered by a flame of darkness on each act's middle layer, priced at 20 max HP per battle a dark power ran in."
 tags: [game, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:28:56Z }
 ---
 
 # DarkChips (3 October 2026; in every battle since issue #82)
@@ -109,7 +109,7 @@ engine's, and all twelve kinds play there, each by its own net's rule
   "Same 20 max HP". One rule for every dark chip: a battle a dark chip
   of BN4's is used in is a battle a dark power ran in, 20 max HP for the
   rest of the run, once a battle, whichever net's chip it was.
-  **Built** (12 November 2026): the registry lists BN4's dark rows
+  **Built** (10 November 2026): the registry lists BN4's dark rows
   (`xreg4_dark_ids`, written by `tools/xreg_bn4.py` from BN4's records:
   an alignment of dark, or a DarkChip by its effect flags), 28 of its
   193: Hole, DrkLine, ElemDark, BugCurse, BlakBarr, the DS Navi chips'

@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, release, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:28:56Z }
 ---
 
 # Tools and skills

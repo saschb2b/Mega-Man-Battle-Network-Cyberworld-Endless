@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T22:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -224,7 +224,7 @@ BN4 battle is given the karma its chip asks (`karma4`). What Hole's panel is for
 players' account, that a DS Navi chip needs one on the field, is a lead
 for unit 6).
 
-**The dark chips' price is in code** (12 November 2026;
+**The dark chips' price is in code** (10 November 2026;
 [DarkChips](../game/meta/darkchips.md), the owner's call of 10 November
 2026, Built). `tools/xreg_bn4.py` writes which rows are dark
 (`xreg4_dark_ids`: a record's alignment dark, or BN4's DarkChip mark in
@@ -243,6 +243,43 @@ BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
 object's +0x94, his dark sprite, what else his karma changes); a dark
 chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
 and the comparison explains his look from both games' code.
+
+**The dark units, read** (10 November 2026; [BN4 Red Sun's
+tables](../rom/bn4.md), The panel changer and the Hole panel). With the
+price in code, each unit of the dark line was derived
+(`tools/xchiprecipe_bn4.py --report`) and read in the ROM. None is
+moved yet; why each waits:
+
+| Chips | What they are in BN4's code | Waits on |
+| --- | --- | --- |
+| Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
+| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other; 708 and 728 bytes with their own objects, one call unpaired (the blink's mark, BN6's `0x0800CC52` by reading), three sounds | the owner's call 8 (the Hole panel in BN6's engine); then the generator's kinds' tables, which copy bytes as they are where the changer's rows hold BN4's panel types (asked of its session) |
+| BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | the owner's call 7: its record is Marking's kind (no Library number, the blank picture), and not dark |
+| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | a unit kind for those families: the generator moves support and misc routines only; DrkCanon also BN4's computed powers (unit 6) |
+| ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | the same: a unit kind for a family BN6 has none of |
+| DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
+
+BN4's Hole panel (its type 0xB) is a plain panel by its flags: nothing
+of BN4's damage, movement or panel code treats it otherwise, and a
+panel's step never turns it back. **What it is for is a DS Navi chip's
+power** (verified in the ROM): `BN4_DS_POWER` counts the Holes on the
+whole field, ten at most, and reads the chip's power from its row of
+`BN4_DS_POWERS`, a step a Hole: RollDS 30 with none and 80 with ten,
+GutsMnDS 100 and 200, FireMnDS 150 and 250, MetlMnDS 200 and 300. Hole
+adds one, DrkLine a row, DrkStage MegaMan's whole side (and poisons the
+other). Seen in BN4's own battle (scratch runs of the differential's
+harness with `karma4` 0, filmed): DrkStage leaves MegaMan's nine panels
+Holes and the other side's nine poison, the foe's HP falling; DrkLine
+turns his row's six panels Holes, the three on the other side too; and
+RollDS used on a field with no Hole plays and takes 90 of a foe's 180
+HP, three hits of 30, the table's last column. So no DS chip is refused
+for want of a Hole: the players' account that it needs one is the floor
+a field with none gives. Six more places test for a Hole (the map's row): a light Navi
+standing on one cleanses it, two random pickers ask whether a row has
+one, one leaves it out, one attack turns a column of them plain. So the
+panel chips and the DS Navi chips are one design: a dark MegaMan gives
+turns and max HP to dig Holes, and his DS chips hit up to twice as hard
+for them.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
@@ -920,7 +957,7 @@ Asked and answered on 10 November 2026:
    power ran in, 20 max HP once a battle
    ([DarkChips](../game/meta/darkchips.md), the owner's call of 10
    November 2026). The light chips play for any MegaMan at no price.
-   Built 12 November 2026 (Where things stand, The dark chips' price is
+   Built 10 November 2026 (Where things stand, The dark chips' price is
    in code).
 5. **LifeAura is one chip with BN6's LifeAur:** "One chip". BN4's 201
    pairs with BN6's 182 by alias (`xreg4_alias`, written by
@@ -954,6 +991,30 @@ Open:
    them. Recommended: cut all five (their rows left out of play, ids 556
    and 563-566 kept retired), as chips BN4's own players never held.
    Until answered they sit out and the work goes on past them.
+   **BlakWeap joins the question** (10 November 2026): its record (289,
+   row 602) is of the same kind, no Library number and the blank picture,
+   its description's first bytes no text; it is not dark by its record
+   (alignment 0, no DarkChip mark), so it would cost nothing. Its code is
+   small (156 bytes and a third-kind object). Recommended: cut with the
+   five.
+8. **BN4's Hole panel: moved into BN6's engine, or left out?** Asked 12
+   November 2026. Hole, DrkLine and DrkStage make it, and a DS Navi
+   chip's power counts it (Where things stand, The dark units, read):
+   from its floor with no Hole to up to double with ten. BN6 has no
+   such panel. (a) **Moved**: a panel type of the engine's own at BN6's
+   free 15, plain's flags, BN4's tiles and colours copied as BN5's lava
+   and sea were, counted by BN4's own routine moved with the DS chips'
+   powers. Several days (every background palette is in use), and the
+   three panel chips and the DS chips then play as BN4 made them: a
+   battle's 20 max HP buys Holes, the Holes buy power. (b) **Left out**:
+   a DS chip always hits at its floor (the no-Hole column), Hole and
+   DrkLine are cut (they would only make panels plain at 20 max HP), and
+   DrkStage is BN4's without its Holes: poison on the other side.
+   Recommended: (a), as the DS chips are 17 of the 28 dark rows and
+   their powers hinge on it; until it is built the DS chips can be
+   proved against BN4's battle with no Hole on the field and play at
+   their floor, which (b) would make final. Until answered Hole, DrkLine
+   and DrkStage sit out.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
