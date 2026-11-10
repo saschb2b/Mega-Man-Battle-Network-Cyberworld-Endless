@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T03:10:00Z }
 ---
 
 # The PET
@@ -39,7 +39,7 @@ BN6's Library lists BN6's chips by BN6's numbers and counts them against
 its own 200, with chips no run gives; it has no room for another game's
 (its standard tab is a list of 200 and a byte). So the row opens the
 run's own Library over the PET, as Options took Comm's (the owner's call,
-10 November 2026): a screen in the PET's look with a tab each for BN6,
+10 November 2026): BN6's own Library redrawn to the pixel, with pages for BN6,
 BN5 and BN4, each that game's own Library in its own order and numbers,
 counted against what a run can hand out
 ([The Library, a page per entry](meta/library.md)). `pet.c`'s hook on the

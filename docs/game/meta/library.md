@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The Library, a page per entry"
-description: "The chip Library as a dex over the entries: the PET's Library row opens a screen of ours with a tab each for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's calls, what each page lists today, what the vaults and the title's marks count, and what is left out."
+description: "The chip Library as a dex over the entries: the PET's Library row opens a screen of ours, BN6's own Library to the pixel, with pages for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's calls, what each page lists today, what the vaults and the title's marks count, and what is left out."
 tags: [game, meta, pet, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:52:40Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T03:10:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"
@@ -39,12 +39,20 @@ than adding one: Cannon is one chip, and it has a place in each game's
 Library that has a Cannon.
 
 - **One Library, a page per entry.** PET > Library opens the LIBRARY, a
-  screen of ours in [the PET's look](../../engine/ui.md): the entries as a
-  tab row under the band (BN6, BN5, BN4, the one shown lit), and under it
-  BN6's Library's frame, the chip under the cursor as its card on the left
-  (a Mega's cyan, a Giga's pink, as BN6 tints them), the page's list on
-  the right with its class in the window's band between the page arrows
-  (StdChip, MegaChip, GigaChip) and its count in a pill.
+  screen of ours that is BN6's own Library to the pixel wherever BN6's
+  has the part: its card at its place and size (the cut corner, the hole,
+  the grip, the contacts; a Mega's cyan, a Giga's pink), the picture, the
+  element and the power on the dark, the description in the game's own
+  three lines; the cyan panel and the navy field of seven rows; a row's
+  number, icon, name and stars in BN6's own letters and cells; the class
+  between the page arrows, the count's pill, the scroll bar's capsule, the
+  cursor. Measured against a capture of BN6's screen on the same save,
+  pixel for pixel: of the body's 32,640 pixels 435 differ, the
+  count's digits and the band's letters (ours: BN6's are fonts of its ROM
+  we have not located), the left arrow BN6's first tab lacks and the
+  cursor's step.
+- **The entries stand on the band**, where BN6's has nothing: a tag each
+  (BN6, BN5, BN4), the one shown lit with its whole count.
 - **BN6's Library's keys, all of them** (the owner's word, 10 November:
   the original's quality and what it offered). Measured on BN6's own
   screen: Left and Right turn its tabs, L and R move the list a screenful
@@ -71,7 +79,7 @@ Library that has a Cannon.
   slots are numbers in the tree, not read from the ROM. A chip that game
   alone has reads as its placeholder (`BN5-12`) until the ROM is back.
 - **A class whole lights its count** (call 3): the pill turns gold, and an
-  entry whose three classes are whole turns its count on the band gold.
+  entry whose three classes are whole turns its tag's count gold.
   The title keeps BN6's own STD, MEGA and GIGA COMP for BN6's classes
   ([The title's marks](title-marks.md)): no mark needs another game's ROM,
   and none goes out when a release adds chips to a page. Trophies, never
@@ -200,6 +208,6 @@ rows joined it, which the engine pays as the stand-in until they play).
 - **DarkChips**, which BN5 and BN4 list on a tab of their own.
 - **BN4's own chips on the page**: their slots are in the table, and
   each is listed as its code is moved (`library_plays` reads its row).
-- **BN6's card's letters** (its description stands in larger letters,
-  three lines of 16; ours are the chat font's, under the tab row), its
-  scroll bar's thumb, and the title's second screen.
+- **The count's digits and the band's letters as BN6's** (two fonts of
+  its ROM not located yet; ours are the engine's heavy capitals), and the
+  title's second screen.

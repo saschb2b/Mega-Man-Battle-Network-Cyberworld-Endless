@@ -88,7 +88,7 @@ static void taps(void) {
 	for (int i = 0; i < LIBRARY_ROWS && L.v.top + i < L.v.n; ++i)
 		if (inside(library_row_rect(i), x, y)) { cursor_to(L.v.top + i); return; }
 	for (int e = 0; e < LIB_ENTRIES; ++e)
-		if (inside(library_tab_rect(e), x, y)) { if (e != L.v.entry) entry_to(e); return; }
+		if (inside(library_tab_rect(&L.v, e), x, y)) { if (e != L.v.entry) entry_to(e); return; }
 	for (int r = 0; r < 2; ++r)
 		if (inside(library_turn_rect(r), x, y)) { page_turn(r ? 1 : -1); return; }
 }

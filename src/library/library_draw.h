@@ -1,10 +1,11 @@
 /* The Library's picture (library.h), in BN6's PET screens' look
- * (pet_look.h), laid out as BN6's own Library: the entries as tabs under
- * the band, the chip under the cursor as its card on the left (its face
- * in its class's colour, as BN6 tints a Mega's and a Giga's), the page's
- * slots in the screen's one window on the right, its class between the
- * page arrows and its count in a pill; and where each part a tap takes
- * lies. */
+ * (pet_look.h), laid out as BN6's own Library to the pixel: the chip
+ * under the cursor as BN6's card on the left (its face in its class's
+ * colour, a Mega's cyan and a Giga's pink, its description in the game's
+ * own three lines), the page's slots in the window on the right, seven
+ * rows, its class between the page arrows and its count in a pill; the
+ * entries as tags on the band, the one shown lit with its count; and
+ * where each part a tap takes lies. */
 #ifndef CW_LIBRARY_DRAW_H
 #define CW_LIBRARY_DRAW_H
 
@@ -13,7 +14,7 @@
 
 #include "library_pages.h"
 
-#define LIBRARY_ROWS 6   /* slots shown at once */
+#define LIBRARY_ROWS 7   /* slots shown at once, as BN6's */
 
 /* what the picture shows, made as the page turns */
 typedef struct {
@@ -31,6 +32,6 @@ void library_draw_view(int x, int y, const LibraryView *v);
 /* where a tap takes each part, from the picture's top left */
 SDL_Rect library_row_rect(int i);         /* row i shown */
 SDL_Rect library_turn_rect(int right);    /* the class's arrows */
-SDL_Rect library_tab_rect(int entry);     /* an entry's tab */
+SDL_Rect library_tab_rect(const LibraryView *v, int entry);   /* an entry's tag on the band */
 
 #endif

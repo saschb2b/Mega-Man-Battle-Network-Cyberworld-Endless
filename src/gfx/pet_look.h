@@ -163,6 +163,8 @@ void look_title(int x, int y, const char *s, SDL_Color c);
 #define LOOK_TEXT_H 12
 int look_text_width(const char *s);
 void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int align);
+/* ... each letter in a cell `cell` wide, as BN6 sets a chip's description on its card (8) */
+void look_text_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int cell);
 /* ... in lines no wider than `w` (a '|' breaks one too), at most `most`
  * (6), LOOK_LINE apart: the y under them */
 #define LOOK_LINE 13

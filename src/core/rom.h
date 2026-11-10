@@ -237,6 +237,8 @@ size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, siz
 /* A description's text (a chip's): the script at `s` (`n` bytes at most)
  * past its box commands, its lines joined by spaces. */
 void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
+/* ... its lines kept as the game breaks them, `line` between them (a chip's card in the Library) */
+void rom_desc_lines(const uint8_t *s, size_t n, char *out, size_t outlen, char line);
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]);
 

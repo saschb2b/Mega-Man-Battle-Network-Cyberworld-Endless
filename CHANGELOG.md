@@ -3,8 +3,8 @@
 ## Unreleased
 
 - **The Library, a page per game.** PET > Library now opens the run's own
-  Library: a tab each for BN6, BN5 and BN4, and under it that game's
-  StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left
+  Library, drawn as BN6's own to the pixel, with BN6, BN5 and BN4 named on
+  its band: each game has its StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left
   and Right turn the pages, through a game's three and on to the next
   game's, **L** and **R** move the list a screenful, B or START leaves; the
   chip's card stands beside the list as before, a Mega's cyan and a
