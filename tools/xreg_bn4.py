@@ -61,6 +61,15 @@ MOVED = {
     72: 0x88, 73: 0x89, 74: 0x8A,      # WhitWeb1-3: BN4's misc 8, 9 and 0xA, one unit's three routines (bn4_chip_whitweb1-3)
     75: 0x82, 76: 0x82, 77: 0x82,      # Boomer1-3: BN4's misc 2 (bn4_chip_boomer1-3)
 }
+# BN4's Navi chips whose Navi is moved into BN6's engine as a unit of kind 'navi' (tools/xchiprecipe_bn4_navi.py: the chip's own
+# first-kind Navi, run by BN6's Navi object), each proved by its bn4_chip_* spec: BN4's id -> the unit's number in BN6's grown
+# Navi routines (XC_NAVI: 0x80 + BN4's subfamily), its record's subfamily under BN6's Navi family, which the row takes from
+# NAVI_TWIN (XREG_MOVED with a twin: the twin's family alone)
+NAVI = {
+    224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
+}
+NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
+MOVED.update(NAVI)
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
 # BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)
@@ -214,7 +223,7 @@ def text(rws):
     L = [HEAD]
     for x, to, how, rec, nm in rws:
         codes = ', '.join(f'0x{c:02X}' for c in rec[0:4])
-        twin, sub = ON_BN6.get(x, (0, MOVED.get(x)))
+        twin, sub = ON_BN6.get(x, (NAVI_TWIN if x in NAVI else 0, MOVED.get(x)))
         L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
     L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
     L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')

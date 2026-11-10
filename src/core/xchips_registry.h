@@ -76,9 +76,11 @@ typedef struct {
 	uint8_t how;         /* XREG_PENDING: its code is not in BN6's engine yet, it sits out; XREG_PA: a Program Advance, unformed until its recipe
 	                        is listed; XREG_RECORD: its record over a BN6 chip's family (`twin`), BN6's own code: it plays where BN4's ROM is read;
 	                        XREG_MOVED: its code moved into BN6's engine (src/emu/xchips_bn4.h's units): it plays where BN4's ROM is read */
-	uint16_t twin;       /* (XREG_RECORD) the BN6 chip whose family, lock-on and lock-on type its record takes; 0 none */
+	uint16_t twin;       /* (XREG_RECORD) the BN6 chip whose family, lock-on and lock-on type its record takes; 0 none; (XREG_MOVED) the BN6
+	                        chip whose family alone its record takes, 0 BN6's support or misc family (a Navi chip's: BN6's Roll, the Navi family) */
 	uint8_t sub;         /* ... and the subfamily, 0xFF the twin's; (XREG_MOVED) its unit's routine in BN6's grown support routines,
-	                        XC4_FIRST_SUPPORT + BN4's subfamily, its record's subfamily under BN6's support family */
+	                        XC4_FIRST_SUPPORT + BN4's subfamily, its record's subfamily under BN6's support family (a Navi chip's: in BN6's
+	                        grown Navi routines, under its Navi family) */
 	uint8_t codes[4];    /* its codes as BN4's record has them */
 	uint8_t type, mb;    /* its class (BN6's library type: 0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
 } XChipReg4;

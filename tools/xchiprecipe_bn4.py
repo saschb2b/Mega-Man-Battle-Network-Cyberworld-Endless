@@ -28,6 +28,7 @@ import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_twins  # noqa: E402
+import xchiprecipe_bn4_navi as NV  # noqa: E402
 import xnavirecipe_bn4_objects as C  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
@@ -48,7 +49,9 @@ FAMILY4_SUPPORT, FAMILY6_SUPPORT = 0x0C, 0x15
 # its shape, at BN6's grown misc routines' NUMBER0 + its subfamily (src/emu/xchips_bn4.h XC4_MISC)
 MISC4, NMISC4, MISC6, NMISC6 = 0x080EC9CC, 0x12, 0x080ED730, 7   # BN4_MISC_ROUTINES, BN6_MISC_ROUTINES
 FAMILY4_MISC, FAMILY6_MISC = 0x20, 0x1C
-FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
+# ... and its Navi chips, the support state's too: a 'navi' unit is the chip's Navi alone, run by BN6's Navi object at BN6's
+# grown Navi routines' NUMBER0 + its subfamily (tools/xchiprecipe_bn4_navi.py)
+FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC, 'navi': FAMILY4_SUPPORT}
 SPAWN4_4, SPAWN6_4 = 0x08003344, 0x080033AC   # BN4_SPAWN_4, BN6's fourth-kind spawner (r0 the type)
 # BN6's support routines' shape, Invisibl's (0x080E8886): the object spawned and its panel, element, parent, side, r6 and r7
 # written; BN4's the same instruction for instruction but for the element's place (ELEMENT4, ELEMENT6: the scan's immediate)
@@ -68,6 +71,9 @@ TWINS = {
     0x08008C2A: (0x0800B9B0, 'chips'),   # its step 4 (+9): the chip's name shown
     0x08008EB8: (0x0800BC88, 'chips'),   # its step 12 (+9): its own work done, its state 8
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
+    # a collision region spawned (BN4's 0x080CD7E2, BN6's 0x080C6BDA: the families' pair, audited) and its +0 given bit 0x10,
+    # which runs it inside a chip's time freeze: BN6's the same twenty bytes after its own spawner (a Navi chip's hit's)
+    0x080CD81E: (0x080C6C16, 'chips'),
 }
 AUDITS = {
     (0x08008BD8, 0x0800B916): ('ok', "a support chip's object's state 0: its side's turn of the time freeze asked for and the state "
@@ -95,7 +101,9 @@ TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
 UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'),
-         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'), ('misc', 0x02, 'Boomer'))
+         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'), ('misc', 0x02, 'Boomer'),
+         # (the Navi chips' units, tools/xchiprecipe_bn4_navi.py: after BN4's Navis' install, src/emu/xchips_code.c)
+         ('navi', 0x05, 'GutsManChip'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -106,7 +114,10 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC,                # (ShotStar's star's fall)
                0xBE: 0x1DD,                 # (Counter's hit)
                0xF7: 0x1DE,                 # (WhitWeb's web)
-               0xAB: 0x1DF}                 # (Boomer's boomerang)
+               0xAB: 0x1DF,                 # (Boomer's boomerang)
+               # (the Navi chips' sounds, tools/xchiprecipe_bn4_navi.py's units, from 0x300 up: a range of their own, so the
+               # units made side by side renumber no slot of each other's)
+               0xB0: 0x300}                 # (a chip's Navi as he appears: GutsMan's, 0x080B9A3E)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -170,6 +181,7 @@ class Alloc(X4.Alloc):
         self.types3 = list(TYPES3)
         self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
         self.list3_sprites = {}   # (BN4's list 3 number copied: the copy)
+        self.types1 = NV.TYPES1[0]   # (the chips' Navis' first-kind dispatch numbers)
 
 
 def install(pairs):
@@ -231,7 +243,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f.b4, f.b6, f.home = b4, b6, X4C_HOMES + X4C_HOME_SIZE * slot
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
     f.chips = [c for x in subs for c in chips_of(b4, kind, x)] if kind in FAMILY4 else []
-    if kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
+    if kind not in FAMILY4 or not 0 <= sub < (NMISC4 if kind == 'misc' else NROUTINES4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines alone are read')
         return f
     f.regions, f.regions_roots, f.moved4 = [], [], {}
@@ -247,6 +259,13 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         f.regions, f.roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo]
         f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
         f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
+    elif kind == 'navi':
+        # (a Navi chip: its routine the common spawner of its object, which BN6's Navi object stands in for; the unit the chip's
+        # Navi's first-kind type, its entry his spawner)
+        f.object_entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
+        ty = shape_of(b4, b6, f, f.object_entry)
+        if ty is None or not NV.begin(b4, b6, f, ty):
+            return f
     else:
         f.entry = b4.u32(MISC4 + 4 * sub) & ~1
         hit = X4.t3_of(b4, f.entry)
@@ -267,12 +286,17 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
             f.roots = [f.entry]
             f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+    # (a call into code a BN4 Navi's recipe moved goes to that copy: no type moved again for it, NV.aim_calls)
+    saved_moved3 = X4.moved3_of
+    X4.moved3_of = lambda b, g, t, p: None if NV.navi_block(g, t) else saved_moved3(b, g, t, p)
     try:
         roots = list(f.roots)
         while roots:
             X4.walk_code(b4, f, roots, set(), pairs)
+            NV.aim_calls(f)
             roots = sorted((C.moved4(b4, f, pairs) | moved3(b4, f, pairs)) - set(f.walks))
     finally:
+        X4.moved3_of = saved_moved3
         bn4_twins.COPIED.clear()
         bn4_twins.COPIED.update(saved_copied)
     site_imms(f)
@@ -284,6 +308,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     try:
         X4.spawns_of(f, alloc)
         C.spawns4(f, alloc)
+        NV.spawns1(f, alloc)
     finally:
         X4.type_number = saved
     X4.pair_calls(f, pairs)
@@ -324,7 +349,7 @@ def moved3(b4, f, pairs):
     its region one of its blocks; the new roots"""
     roots = set()
     for t in sorted(f.calls):
-        hit = None if t in X4.SPAWNERS4 or t in pairs.twins or t in TYPE_TWINS else X4.t3_of(b4, t)
+        hit = None if t in X4.SPAWNERS4 or t in pairs.twins or t in TYPE_TWINS or t in f.aim else X4.t3_of(b4, t)
         if hit is None or hit[0] is None or hit[0] in f.moved3:
             continue
         ty, lo, hi = hit
@@ -460,7 +485,8 @@ def rows_check(b4, f):
     dark = {int(x) for x in re.findall(r'\d+', m.group(1))} if m else set()
     f.rows = []
     for i, r in f.chips:
-        if (r[0x15] == 2 or r[9] & 0x20) and i in rows:
+        # (a Navi's DS whose row waits, XREG_PENDING: no price asked yet, the unit serves his V1)
+        if (r[0x15] == 2 or r[9] & 0x20) and i in rows and rows[i][1] != 'PENDING':
             if rows[i][0] not in dark:
                 f.decide('row', f'its chip {i} is a dark chip and its row {rows[i][0]} is not among xreg4_dark_ids: no price (tools/xreg_bn4.py)')
             else:
@@ -471,6 +497,10 @@ def rows_check(b4, f):
         bn6, how, sub = rows[i]
         f.rows.append((i, bn6))
         want = NUMBER0 + r[0xC]   # (its own subfamily's routine: the unit's, or one of the rows that share its code)
+        if f.kind == 'navi' and how == 'PENDING':
+            # (a Navi's SP waits for BN4's computed powers, his DS for the dark chips' cost: the unit serves the V1 meanwhile)
+            f.notes.append(f'its chip {i} (id {bn6}) waits: its row is XREG_PENDING')
+            continue
         if how != 'MOVED' or sub != want:
             f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {want:#x}: '
                             f'tools/xreg_bn4.py MOVED')
@@ -487,6 +517,8 @@ def sprites_of(b4, b6, f, alloc):
             num, chain = T.back_value(w, site, 2)
             if lst is None or lst & 3 or num is None or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sprite', f'{site:08X}: a sprite loaded by numbers made otherwise ({lst}, {num})')
+                continue
+            if f.kind == 'navi' and lst // 4 == 2 and NV.battle_sprite(f, site, chain, num):
                 continue
             # (BN4's sprite copied, as the families' are, whether or not BN6 has one of its bytes: the differential names a
             # sprite by the recipe's rows, and an object in play in a fight's frame is compared by its sprite's frames)
@@ -585,8 +617,9 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn4.h"
 #include "bn6.h"
 #include "rom.h"
+#include "xnavi_recipe.h"
 '''
-KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC'}
+KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC', 'navi': 'XCHIP_NAVI'}
 
 
 def place(at, base, name):
@@ -644,7 +677,7 @@ def c_unit(f):
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, 0, 0 }},']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0 }},']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

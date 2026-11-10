@@ -317,6 +317,7 @@ static void records_make(const uint32_t blank[3]) {
 		if (r4 && M.rom4) {
 			XRecordFrom4 in = { bn4_record(r4->bn4), r4->how == XREG_RECORD && r4->twin ? table + XREC_SIZE * r4->twin : NULL, r4, 0, { 0 } };
 			memcpy(in.art, M.art[id], sizeof in.art);
+			if (r4->how == XREG_MOVED && r4->twin) in.family = table[XREC_SIZE * r4->twin + BN6_CHIP_FAMILY];
 			xrec_from_bn4(&in, out);
 			continue;
 		}

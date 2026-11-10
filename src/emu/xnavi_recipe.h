@@ -98,7 +98,7 @@
 #define XN_BN4_HOMES     FREE_BN4_NAVIS
 #define XN_BN4_CODE      FREE_BN4_NAVI_CODE
 #define XN_BN4_ART       FREE_BN4_NAVI_ART
-#define XN_BN4_END       XN_BN4_SPRITE
+#define XN_BN4_END       FREE_BN4_CHIP_ART   /* (the battle's art room's end: the chips' room after it) */
 /* ... their battle sprites in one room, the coming battle's Navi's copied in from the player's BN4 ROM (xnavi_bn4_room.h), each
  * Navi's list 2 entry pointed at it; the room holds the largest (Duo's, 61040 bytes unpacked) */
 #define XN_BN4_SPRITE      FREE_BN4_NAVI_SPRITE
@@ -108,6 +108,20 @@
 /* ... their attacks' art and pool songs (XN_BN4_ART to XN_BN4_END) one room too, the coming battle's Navi's filled in
  * (xnavi_bn4_art.h); whose each seat's battle fills it with, a byte a seat (his own seat, 0xFF none), past the sprites' */
 #define XN_BN4_ARTS        (XN_BN4_SPRITES + XN_BN4_SEATS)
+/* ... and a Navi chip's Navi's own rooms (xnavi_bn4_chip.h): his battle sprite's, and his attacks' art's and songs', laid out
+ * as the battle's room (a place of XN_BN4_ART's at the same offset there), each filled as his chip is used */
+#define XN_BN4_CHIP_SPRITE      FREE_BN4_CHIP_SPRITE
+#define XN_BN4_CHIP_SPRITE_SIZE (FREE_BN4_CHIP_SPRITE_END - FREE_BN4_CHIP_SPRITE)
+#define XN_BN4_CHIP_ART         FREE_BN4_CHIP_ART
+#define XN_BN4_CHIP_ART_END     FREE_BN4_CHIP_ART_END
+#define XN_BN4_CHIP_CLAIMS      "a BN4 Navi chip's Navi's rooms (xnavi_bn4_chip.c)"
+/* ... and what the rooms hold, three bytes past the seats' (0xFF nobody's): the seat whose battle the battle's rooms were
+ * last filled for, the seat the chips' rooms hold, and the battle's seat they were filled beside (a sprite number both
+ * Navis list stays the battle's) */
+#define XN_BN4_HELD        (XN_BN4_ARTS + XN_BN4_SEATS)
+#define XN_BN4_HELD_BATTLE 0
+#define XN_BN4_HELD_CHIP   1
+#define XN_BN4_HELD_WITH   2
 
 /* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's, XN_TEAM_CODE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {

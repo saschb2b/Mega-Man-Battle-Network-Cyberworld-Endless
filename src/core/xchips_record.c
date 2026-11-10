@@ -99,11 +99,14 @@ void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3]
 }
 
 #define BN4_KIND_PA 14   /* BN4's kind of a Program Advance: BN5's icon element 13 */
+#define BN4_KIND_GROUND 8   /* BN4's kind of its ground chips (CrakOut, DublCrak, TripCrak, Magnum, Geddon1 and 2, PanlSht1-3, GutsMan's
+                             * three: the chips its GutsSoul takes): BN5 has no such icon, its 8 the Cursor's, and holds Null (12) for five
+                             * of the six names it shares, as BN6 has none: Null */
 
 void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
 	memcpy(out, in->bn4, XREC_SIZE);
 	int kind = in->bn4[BN4_CHIP_KIND];
-	out[BN6_CHIP_ELEMENT] = (uint8_t)xrec_icon_element(kind == BN4_KIND_PA ? 13 : kind);
+	out[BN6_CHIP_ELEMENT] = (uint8_t)(kind == BN4_KIND_GROUND ? 10 : xrec_icon_element(kind == BN4_KIND_PA ? 13 : kind));
 	out[BN6_CHIP_LIBRARY_TYPE] = in->bn4[BN4_CHIP_CLASS];
 	out[BN6_CHIP_MB] = in->bn4[BN4_CHIP_MB];
 	uint8_t fx = in->bn4[BN6_CHIP_EFFECT_FLAGS] & (uint8_t)~BN6_CHIP_IN_LIBRARY;
@@ -120,7 +123,7 @@ void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
 	} else if (in->reg->how == XREG_MOVED) {
 		/* (its code moved, src/emu/xchips_bn4.h: BN6's support family, or its misc family for a chip of BN4's, the unit's routine its subfamily; its parameters,
 		 * lock-out and power BN4's own, no lock-on of BN6's) */
-		out[BN6_CHIP_FAMILY] = in->bn4[BN6_CHIP_FAMILY] == BN4_CHIP_MISC_FAMILY ? BN6_CHIP_MISC_FAMILY : BN6_CHIP_SUPPORT_FAMILY;
+		out[BN6_CHIP_FAMILY] = in->family ? in->family : in->bn4[BN6_CHIP_FAMILY] == BN4_CHIP_MISC_FAMILY ? BN6_CHIP_MISC_FAMILY : BN6_CHIP_SUPPORT_FAMILY;
 		out[BN6_CHIP_SUBFAMILY] = in->reg->sub;
 		out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
 	} else {

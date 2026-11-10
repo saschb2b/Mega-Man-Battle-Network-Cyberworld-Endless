@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "bn4_navis.h"
+#include "bn6_families.h"
 #include "bytes.h"
 #include "claims.h"
 #include "debug.h"
@@ -15,6 +16,7 @@
 #include "xnavi_bn4_art.h"
 #include "xnavi_recipe.h"
 #include "xnavi_room.h"
+#include "xnavi_sprites.h"
 #include "xvirus_grow.h"
 #include "xvirus_bn4.h"
 #include "xvirus_tx.h"
@@ -121,5 +123,17 @@ bool xnavi_bn4_room_for(const uint8_t *entities, size_t len) {
 	if (seat < 0) return false;
 	/* (his attacks' art and songs in theirs: xnavi_bn4_art.h) */
 	bool art = xnavi_bn4_art_for(seat);
-	return fill(emu_read8(XN_BN4_SPRITES + (uint32_t)seat)) && art;
+	bool ok = fill(emu_read8(XN_BN4_SPRITES + (uint32_t)seat)) && art;
+	/* (his list 2 entry the battle's room's again, where his chip's run pointed it at the chips' (xnavi_bn4_chip.h), and whose
+	 * battle the rooms hold now, which that run reads) */
+	uint32_t entry = xvirus_list_entry(BN6_SPRITES_NAVIS, (uint32_t)(XNAVI_SPRITE_BN4 + seat));
+	if (entry && emu_read32(entry) != XN_BN4_SPRITE) {
+		claims_begin(xn_writer(entry));
+		emu_write32(entry, XN_BN4_SPRITE);
+		claims_end();
+	}
+	claims_begin(XN_CLAIMS);
+	emu_write8(XN_BN4_HELD + XN_BN4_HELD_BATTLE, (uint8_t)(ok ? seat : NONE));
+	claims_end();
+	return ok;
 }

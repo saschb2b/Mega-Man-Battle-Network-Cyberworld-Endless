@@ -59,6 +59,7 @@ FREE_TEAM_SHARED       +0x0A3800  +0x0AB000  in=FREE_TEAM_NAVIS  xnavi_install.c
 FREE_TEAM_SPRITES      +0x0AB000  +0x0EF000  end,in=FREE_TEAM_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes)
 FREE_BN4_CHIPS         +0x0EF000  +0x13F000  end  xchips_code.c,xchips_bn4.c  multirom/bn4-chips.md  the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes, code and what they draw
 FREE_SONG_TABLE        +0x13F000  +0x141000  end  song_table.c            rom/sound.md                BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds
+FREE_BN4_CHIP_SPRITE   +0x141000  +0x150000  end  xnavi_bn4_chip.c        multirom/bn4-chips.md       a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes)
 
 zone words  rom  +0x150000  +0x170000  -  the director's and the PET's words: text archives, labels, lists
 FREE_TALK              +0x150000  +0x152000  -    talk.c                    engine/emulation/layer.md   the director's conversations
@@ -103,7 +104,8 @@ FREE_TAIL              +0x710000  +0x711000  free  -                        engi
 FREE_LATE_CODE         +0x711000  +0x720000  end  xvirus.c                  multirom/families.md        the late families' code, block by block, past the families' own room
 FREE_BN4_NAVIS         +0x720000  +0x730000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes
 FREE_BN4_NAVI_CODE     +0x730000  +0x750000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis' code and their objects', block by block
-FREE_BN4_NAVI_ART      +0x750000  +0x77C000  -    xnavi_bn4_art.c           multirom/bn4-navis.md       the coming battle's BN4 Navi's attacks' art and songs, one room
+FREE_BN4_NAVI_ART      +0x750000  +0x766000  -    xnavi_bn4_art.c           multirom/bn4-navis.md       the coming battle's BN4 Navi's attacks' art and songs, one room
+FREE_BN4_CHIP_ART      +0x766000  +0x77C000  end  xnavi_bn4_chip.c          multirom/bn4-chips.md       a BN4 Navi chip's Navi's attacks' art and songs as the chip is used, one room, laid out as the battle's Navi's
 FREE_BN4_NAVI_SPRITE   +0x77C000  +0x78C000  -    xnavi_bn4_room.c          multirom/bn4-navis.md       the coming battle's BN4 Navi's battle sprite, one room
 FREE_BRACKET_FACES     +0x78C000  +0x790000  -    xbracket_faces.c          multirom/bn4-tournament.md  BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets
 FREE_BRACKET           +0x790000  +0x7A0000  end  xbracket.c                multirom/bn4-tournament.md  BN4's bracket screen moved: its stubs, veneers, code and art

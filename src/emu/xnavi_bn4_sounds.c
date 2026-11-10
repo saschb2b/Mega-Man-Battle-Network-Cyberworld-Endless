@@ -28,6 +28,10 @@ typedef struct {
 } Navi;
 static Navi navis[NAVIS_MAX], pending;
 static int nnavis, pointed = -1;
+/* a Navi chip's Navi's songs at the pool while his chip runs (xnavi_bn4_sounds_chip): which Navi (-1 none), and his songs'
+ * headers where the chips' room holds them (0: where his install named them, the battle's room) */
+static int chip = -1;
+static uint32_t chip_headers[XNAVI_BN4_POOL_SLOTS];
 
 /* whether `header` is one of the pool's Navis' songs at `slot` */
 static bool pool_song(uint32_t slot, uint32_t header) {
@@ -113,8 +117,30 @@ static void point(int which) {
 	pointed = which;
 }
 
+void xnavi_bn4_sounds_chip(int first_id, const uint32_t *headers) {
+	int which = first_id < 0 ? -1 : navi_of((uint32_t)first_id);
+	if (which < 0 && chip < 0) return;
+	chip = which;
+	for (int k = 0; k < XNAVI_BN4_POOL_SLOTS; ++k) chip_headers[k] = which >= 0 && headers ? headers[k] : 0;
+	/* (the pool is pointed afresh by the next frame's step: at his songs, or after him at the battle's own) */
+	pointed = -1;
+}
+
+/* the pool pointed at the chip's Navi's songs, each slot where it names another (the core's copy of the song table only) */
+static void point_chip(void) {
+	claims_begin(XN_CLAIMS);
+	for (int k = 0; k < navis[chip].n; ++k) {
+		uint32_t slot = song_entry_bus(navis[chip].slot[k]), header = chip_headers[k] ? chip_headers[k] : navis[chip].entry[k][0];
+		if (emu_read32(slot) != header) emu_write32(slot, header);
+		if (emu_read32(slot + 4) != navis[chip].entry[k][1]) emu_write32(slot + 4, navis[chip].entry[k][1]);
+	}
+	claims_end();
+	pointed = -1;
+}
+
 void xnavi_bn4_sounds_frame(void) {
 	if (!nnavis || !R.layout || !R.layout->song_table) return;
+	if (chip >= 0) { point_chip(); return; }
 	int which = -1, summoner = -1;
 	for (uint32_t k = 0; k < BN6_T1_COUNT && which < 0; ++k) {
 		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE, id = emu_read16(o + BN6_T1_NAME_ID);

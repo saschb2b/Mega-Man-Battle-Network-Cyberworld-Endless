@@ -62,6 +62,8 @@
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
+#define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x141000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes) (xnavi_bn4_chip.c) */
+#define FREE_BN4_CHIP_SPRITE_END (EMU_FREE + 0x150000u)
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -120,6 +122,8 @@
 #define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_CODE   (EMU_FREE + 0x730000u)  /* BN4's Navis' code and their objects', block by block (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_ART    (EMU_FREE + 0x750000u)  /* the coming battle's BN4 Navi's attacks' art and songs, one room (xnavi_bn4_art.c) */
+#define FREE_BN4_CHIP_ART    (EMU_FREE + 0x766000u)  /* a BN4 Navi chip's Navi's attacks' art and songs as the chip is used, one room, laid out as the battle's Navi's (xnavi_bn4_chip.c) */
+#define FREE_BN4_CHIP_ART_END (EMU_FREE + 0x77C000u)
 #define FREE_BN4_NAVI_SPRITE (EMU_FREE + 0x77C000u)  /* the coming battle's BN4 Navi's battle sprite, one room (xnavi_bn4_room.c) */
 #define FREE_BRACKET_FACES   (EMU_FREE + 0x78C000u)  /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c) */
 #define FREE_BRACKET         (EMU_FREE + 0x790000u)  /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c) */
@@ -191,6 +195,7 @@
 	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_BN4_CHIPS", (EMU_FREE + 0x0EF000u), (EMU_FREE + 0x13F000u), "", "code-low") \
 	X("FREE_SONG_TABLE", (EMU_FREE + 0x13F000u), (EMU_FREE + 0x141000u), "", "code-low") \
+	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
@@ -229,7 +234,8 @@
 	X("FREE_LATE_CODE", (EMU_FREE + 0x711000u), (EMU_FREE + 0x720000u), "", "code") \
 	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
 	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \
-	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x77C000u), "", "code") \
+	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x766000u), "", "code") \
+	X("FREE_BN4_CHIP_ART", (EMU_FREE + 0x766000u), (EMU_FREE + 0x77C000u), "", "code") \
 	X("FREE_BN4_NAVI_SPRITE", (EMU_FREE + 0x77C000u), (EMU_FREE + 0x78C000u), "", "code") \
 	X("FREE_BRACKET_FACES", (EMU_FREE + 0x78C000u), (EMU_FREE + 0x790000u), "", "code") \
 	X("FREE_BRACKET", (EMU_FREE + 0x790000u), (EMU_FREE + 0x7A0000u), "", "code") \
