@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T23:13:17Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T23:44:31Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -170,11 +170,12 @@ effects it moves itself: one an earlier unit moved is that unit's row,
 which the installer could otherwise resolve only where a family
 happened to hold the same sprite.
 
-**Next:** BugChain (support 0x1F: it reads BN4's records of a side's
-bugs, 0x40 bytes a side at 0x0203BEC0, through 0x0800D742; the unit
-kind for attack families pairs one of its calls), then Binder,
-SandRing, Ball, TimeBomb and BlakBarr. Marking and the four Plus chips
-wait on the owner's call 7.
+**Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
+types, a placement that draws), then BlakBarr's barrier; Binder,
+SandRing and Ball wait on the unit kind for attack families. BugChain
+waits on the owner's call 9 (it copies a side's NaviCust bugs to the
+other's record, a NetBattle chip), Marking and the four Plus chips on
+call 7.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -933,6 +934,22 @@ Open:
    proved against BN4's battle with no Hole on the field and play at
    their floor, which (b) would make final. Until answered Hole, DrkLine
    and DrkStage sit out.
+9. **BugChain: cut, or its bugs mapped onto BN6's?** Asked 11 November
+   2026. By its code (read in the ROM: its object's routine `0x080E668E`)
+   BugChain copies seven bytes from one side's battle Navi stats to the
+   other's, the NaviCust bugs a side fights under (BN4's record, 0x40
+   bytes a side at `0x0203BEC0`, through `0x0800D742`): one side's bugs
+   become both sides'. Only a Navi a player steers reads that record, so
+   against viruses and the run's guardians the chip changes nothing that
+   was found (their code reads none of it: assumed from the readers met,
+   not searched to the end); it is a NetBattle chip. BN6 keeps the same
+   record in another layout (0x64 bytes a side at `0x0203CE00`,
+   `0x08013682`) and its own set of bugs, so moving it means pairing
+   each of the seven fields with BN6's by its reader in both games, and
+   deciding what a bug BN6 has none of becomes. Recommended: cut it from
+   runs' pools and rewards (its row left out of play, id 587 kept
+   retired) and take it up with the Arena, where a second player's
+   record exists. Until answered it sits out.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's

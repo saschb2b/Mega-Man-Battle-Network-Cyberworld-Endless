@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (the owner's call 9 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
