@@ -257,6 +257,10 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_CHIP_MISC_FAMILY  0x1C
 #define BN6_MISC_RUN          0x080ED6DCu /* its routine: phase 0 the chip's routine by its subfamily, the attack's end in the same frame (subfamily
                                            * 0x14 after 8 frames) */
+#define BN6_MISC_END          0x080ED722u /* ... where it ends the attack (bl BN6_CHIP_ATTACK_END), once its count-down from 0x080ED71A is
+                                           * below 0 (bge at 0x080ED720; BN4's run ends at 0, bgt at 0x080EC9BA), then: */
+#define BN6_MISC_EXIT         0x080ED726u /* ... its way out (pop {r0}; mov r8,r0; pop {r4,r6,pc}). A waiting BN4 unit's wrapper goes on into
+                                           * the run at one of the two (xchips_code.c wait_stage) */
 #define BN6_MISC_ROUTINES     0x080ED730u /* its routines by subfamily, BN6_MISC_ROUTINE_COUNT words */
 #define BN6_MISC_ROUTINE_COUNT 7
 #define BN6_MISC_ROUTINES_REF 0x080ED72Cu /* the one word that names them (BN6_MISC_RUN's literal) */
