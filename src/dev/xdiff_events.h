@@ -166,5 +166,7 @@ void xd_control_frame(const char *how);
  * tests/xdiff/legit.json's bn4 sounds, and so tells it from BN6's own song
  * of BN4's number): a sound read in BN5's numbers. */
 int xd_song_copy(int slot);
+/* The slot of BN6's live song table (grown or not: xsong.h) whose header is `header`, -1 none */
+int xd_song_slot(uint32_t header);
 
 #endif
