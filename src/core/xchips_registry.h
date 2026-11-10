@@ -79,7 +79,7 @@ typedef struct {
 } XChipReg4;
 
 #define XREG4_PACK_FIRST 527   /* its first id: 527-602, the ids with a pack entry (bn6_pack_entry), its chips that play first; */
-#define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (BN6_PA_WIDE_FIRST + 2 on); */
+#define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
 #define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips */
 extern const XChipReg4 xreg4_rows[];
 extern const int xreg4_count;

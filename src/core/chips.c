@@ -61,49 +61,42 @@ static bool art_row(const XChipReg *r, int pass) {
  * bytes, 0 without BN5's ROM */
 static const uint8_t *bn4_record(int bn4) { return M.rom4 + (BN4_CHIP_RECORDS - BUS) + XREC_SIZE * (uint32_t)bn4; }
 
+/* the shared pictures and palettes planned so far: where each is from (a game's address, BN4's told from BN5's of the
+ * same number by bit 31) and its place */
+static struct { uint32_t from[XREG_IDS * 4], to[XREG_IDS * 4]; int n; } shared;
+
+/* one record's art planned from `at` on: its icon, then its picture and palette where it has the pair, one two chips
+ * share copied once; `a` its three places, BN6's blank's where the record has none; the next free place */
+static uint32_t art_take(uint32_t a[3], const uint8_t *rec, uint32_t game, uint32_t at) {
+	uint32_t icon = get32(rec + BN6_CHIP_ICON_PTR), pic = get32(rec + BN6_CHIP_IMAGE_PTR), pal = get32(rec + BN6_CHIP_PALETTE_PTR);
+	if (rom_is_ptr(icon) && rom_off(icon) + ICON_BYTES <= ROM_SIZE) { a[0] = at; at += ICON_BYTES; }
+	if (pic == pal || !rom_is_ptr(pic) || !rom_is_ptr(pal) || rom_off(pic) + PICTURE_BYTES > ROM_SIZE || rom_off(pal) + PALETTE_BYTES > ROM_SIZE)
+		return at;
+	const uint32_t src[2] = { pic | game, pal | game }, size[2] = { PICTURE_BYTES, PALETTE_BYTES };
+	for (int k = 0; k < 2; ++k) {
+		int s = 0;
+		while (s < shared.n && shared.from[s] != src[k]) ++s;
+		if (s == shared.n) { shared.from[shared.n] = src[k]; shared.to[shared.n++] = at; at += size[k]; }
+		a[1 + k] = shared.to[s];
+	}
+	return at;
+}
+
 static uint32_t art_plan(const uint32_t blank[3]) {
 	uint32_t at = CHIPS_ART;
-	static uint32_t from[XREG_IDS * 4], to[XREG_IDS * 4];
-	int nshared = 0;
+	shared.n = 0;
 	memset(M.art, 0, sizeof M.art);
 	for (int n = 0; n < 2 * xreg_count; ++n) {
 		const XChipReg *r = &xreg_rows[n % xreg_count];
 		if (!art_row(r, n / xreg_count)) continue;
-		uint32_t *a = M.art[r->bn6];
-		memcpy(a, blank, sizeof M.art[0]);
-		if (!M.rom5) continue;
-		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5;
-		uint32_t icon = get32(rec + BN6_CHIP_ICON_PTR), pic = get32(rec + BN6_CHIP_IMAGE_PTR), pal = get32(rec + BN6_CHIP_PALETTE_PTR);
-		if (rom_is_ptr(icon) && rom_off(icon) + ICON_BYTES <= ROM_SIZE) { a[0] = at; at += ICON_BYTES; }
-		if (pic == pal || !rom_is_ptr(pic) || !rom_is_ptr(pal) || rom_off(pic) + PICTURE_BYTES > ROM_SIZE || rom_off(pal) + PALETTE_BYTES > ROM_SIZE)
-			continue;
-		const uint32_t src[2] = { pic, pal }, size[2] = { PICTURE_BYTES, PALETTE_BYTES };
-		for (int k = 0; k < 2; ++k) {
-			int s = 0;
-			while (s < nshared && from[s] != src[k]) ++s;
-			if (s == nshared) { from[nshared] = src[k]; to[nshared++] = at; at += size[k]; }
-			a[1 + k] = to[s];
-		}
+		memcpy(M.art[r->bn6], blank, sizeof M.art[0]);
+		if (M.rom5) at = art_take(M.art[r->bn6], M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, 0, at);
 	}
-	/* (BN4's rows after them: its records' art, a picture or palette shared copied once; its addresses told from BN5's
-	 * of the same number by bit 31) */
+	/* (BN4's rows after them, so that BN5's keep their places) */
 	for (int n = 0; n < xreg4_count; ++n) {
 		const XChipReg4 *r = &xreg4_rows[n];
-		uint32_t *a = M.art[r->bn6];
-		memcpy(a, blank, sizeof M.art[0]);
-		if (!M.rom4) continue;
-		const uint8_t *rec = bn4_record(r->bn4);
-		uint32_t icon = get32(rec + BN6_CHIP_ICON_PTR), pic = get32(rec + BN6_CHIP_IMAGE_PTR), pal = get32(rec + BN6_CHIP_PALETTE_PTR);
-		if (rom_is_ptr(icon) && rom_off(icon) + ICON_BYTES <= ROM_SIZE) { a[0] = at; at += ICON_BYTES; }
-		if (pic == pal || !rom_is_ptr(pic) || !rom_is_ptr(pal) || rom_off(pic) + PICTURE_BYTES > ROM_SIZE || rom_off(pal) + PALETTE_BYTES > ROM_SIZE)
-			continue;
-		const uint32_t src[2] = { pic | 0x80000000u, pal | 0x80000000u }, size[2] = { PICTURE_BYTES, PALETTE_BYTES };
-		for (int k = 0; k < 2; ++k) {
-			int s = 0;
-			while (s < nshared && from[s] != src[k]) ++s;
-			if (s == nshared) { from[nshared] = src[k]; to[nshared++] = at; at += size[k]; }
-			a[1 + k] = to[s];
-		}
+		memcpy(M.art[r->bn6], blank, sizeof M.art[0]);
+		if (M.rom4) at = art_take(M.art[r->bn6], bn4_record(r->bn4), 0x80000000u, at);
 	}
 	return at - CHIPS_ART;
 }
