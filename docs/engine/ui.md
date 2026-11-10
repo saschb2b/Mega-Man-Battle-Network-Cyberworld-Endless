@@ -149,12 +149,18 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
 - The run's reward picks ([the reward pick's screen](../game/reward-pick.md))
   are the Library's layout, BN6 having no screen for a pick of one among
   several: the row under the cursor on the Library's card at the left
-  (`library_card`, a chip's code at its head's foot as the folder
+  (`library_card_face`, a chip's code at its head's foot as the folder
   editor's card sets it; a program's shape in its colour where the
-  picture stands), the choices in the window at the right, the draft's
-  BugFrags a row under them, KeyItem's INFORMATION box under the window
-  with what the row adds, the pick's name on the band. A and B unnamed;
-  the orange arrow on the window's edge.
+  picture stands), the choices in the window at the right, a chip's
+  code in its own column, the draft's BugFrags a row under them,
+  KeyItem's INFORMATION box under the window with the description (a
+  program's part on its tag), the pick's name on the band. What MegaMan
+  holds of a choice is BN6's shops' ITEMS box, measured from the chip
+  shop's and the NaviCust shop's (navy 41, 99, 140 edge, white frame,
+  slate 90, 148, 173 strip, cells 189, 231, 239 and 214, 247, 255 by
+  turns, codes orange 239, 148, 0, a count in a navy cell under each),
+  on the card where the Library's words stand. A and B unnamed; the
+  orange arrow on the window's edge.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - One key's hint on the band where the key does something unguessed:

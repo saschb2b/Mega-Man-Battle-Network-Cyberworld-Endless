@@ -37,6 +37,8 @@ void library_draw_view(int x, int y, const LibraryView *v);
 #define LIBRARY_CARD_H 134
 void library_card(int x, int y, int chip, int cls);
 void library_card_blank(int x, int y, int cls);
+/* ... its head alone, chip `chip`'s picture, element and power over the blank card */
+void library_card_face(int x, int y, int chip, int cls);
 /* ... up to three lines (apart by newlines) where the card's description stands */
 void library_card_lines(int x, int y, const char *lines);
 

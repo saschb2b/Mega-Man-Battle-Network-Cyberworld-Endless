@@ -10,14 +10,18 @@
 const char *reward_pick_title(int kind);
 /* The information box's label */
 const char *reward_pick_label(void);
-/* A program's part on its card: a program part or a plus part (NAVI_*) */
+/* A program's part, on the information box's tag as KeyItem's: a
+ * program part, a plus part or either (NAVI_*) */
 const char *reward_pick_part(int part);
-/* What the information box says: a program does `does` (navicust's
- * words); a chip the Library has or has not; HPMemory's `count`; the
- * draft's skip for `frags` BugFrags; into `out` */
-void reward_pick_program_info(char *out, size_t n, const char *does, int held);
-void reward_pick_chip_info(char *out, size_t n, bool in_library);
-void reward_pick_hp_info(char *out, size_t n, int count);
+/* The box of what MegaMan holds of a choice, BN6's shops' label for it */
+const char *reward_pick_items(void);
+/* A chip new to the Library, marked on its row as E-Mail marks a new mail */
+const char *reward_pick_new(void);
+/* What the information box says of HPMemory (`count` against his max HP
+ * now) and of the draft's skip (`frags` BugFrags), into `out`; a chip's is
+ * its description, BN6's, a program's what it does, MegaMan's words of
+ * the NaviCust */
+void reward_pick_hp_info(char *out, size_t n, int count, int max_hp);
 void reward_pick_skip_info(char *out, size_t n, int frags);
 /* The skip's row and HPMemory's row */
 const char *reward_pick_skip_name(void);

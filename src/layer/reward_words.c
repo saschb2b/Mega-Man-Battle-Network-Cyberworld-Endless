@@ -62,7 +62,7 @@ static int draft_open(TextArchive *t, const ScriptsDraft *draft, const int *take
 	ta_page(t, FACE_MEGAMAN, "Program data! Let's\ninstall one!", false);
 	PickOffer o = { .n = (uint8_t)draft->n, .skip = (int16_t)skip, .frags = (int16_t)draft->skip_frags };
 	for (int k = 0; k < draft->n && k < PICK_MOST; ++k)
-		o.c[k] = (PickChoice){ .what = PICK_PROGRAM, .id = (uint16_t)(draft->program[k] / 4), .code = draft->color[k], .held = draft->held[k], .script = (int16_t)take[k] };
+		o.c[k] = (PickChoice){ .what = PICK_PROGRAM, .id = (uint16_t)(draft->program[k] / 4), .code = draft->color[k], .script = (int16_t)take[k] };
 	pick_open(t, PICK_DRAFT, &o);
 	return s;
 }

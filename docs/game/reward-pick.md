@@ -3,7 +3,7 @@ type: Design
 title: "The reward pick's screen"
 description: "The run's picks of one reward among several (a guardian's NaviCust draft, a vault's, a Server's and a Glitch copy's three chips, an official gate's, Mr.Prog's first gift) on a screen of ours in BN6's PET look: each choice on the Library's card with its picture and details, the skip a row of its own, and how a pick's script opens it (`src/director/reward_pick.c`)."
 tags: [game, ui, navicust, rewards]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T22:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T23:40:00Z }
 ---
 
 # The reward pick's screen
@@ -58,14 +58,26 @@ is ours to draw, and it composes BN6's own pieces rather than new art.
 
 Laid out as BN6's Library, whose card a hardcore player reads at a
 glance: the card at the left, the list in the window at the right, the
-information box under the window (`reward_pick_draw.c`).
+information box under the window (`reward_pick_draw.c`). What MegaMan
+already holds is shown as BN6's shops show it, read from captures of
+the Net Dealer's chip shop and the NaviCust vendor's program shop (10
+November 2026): their ITEMS box beside the list holds each code the chip
+comes in (an orange letter), or the program's colour (its square), and
+under each in a navy cell how many he holds of it; the code stands after
+the name in the list, nothing else beside it.
 
 | Choice | Its row | The card | The information box |
 | --- | --- | --- | --- |
-| A chip | its icon, its name, its code in yellow | the Library's card: BN6's picture, its code at the head's foot as the folder editor's card sets it, element, power and BN6's description; a Mega's cyan, a Giga's pink | New to the Library, or in it (the vaults count it) |
-| A program | its colour's square, its name | its shape in its colour where a chip's picture stands; the colour and the part (program or plus) | what it does in MegaMan's words of the NaviCust, and the copies held |
-| HPMemory | HPMemory x2 | the max HP it adds | the same |
-| The draft's skip | BugFrags and their count | the count | the data breaks into them |
+| A chip | its icon, its name, its code in yellow in a column of its own, E-Mail's NEW where the Library lacks it | the Library's card: BN6's picture, its code at the head's foot as the folder editor's card sets it, element, power; under the head the shops' ITEMS box, each of its codes and the Folder's and Pack's copies in it | BN6's description, as the shops show it on R |
+| A program | its colour's square, its name | its shape in its colour where a chip's picture stands; the ITEMS box, each colour it comes in and its copies on the board | what it does in MegaMan's words of the NaviCust; its part (program, plus) on the box's tag as KeyItem's box carries its tag |
+| HPMemory | HPMemory | the max HP it adds | MegaMan's max HP now and with it |
+| The draft's skip | BugFrags | their count | the data breaks into them |
+
+The code in the row and on the card is set in heavy capitals: the list's
+and the chat font's O is a zero's oval, and an O read as a zero beside
+HPMemory's x2 in the first build (the owner's catch, 10 November 2026);
+the heavy capitals' zero is slashed. The holdings are counted as the
+screen opens.
 
 Everything is read from the player's ROM as it is drawn (the chip's
 picture, icon and description, the program's name and shape); nothing of

@@ -14,6 +14,8 @@
  * the screen past its fade */
 #define PICK_LOCK 30
 #define PICK_REST 20
+/* a chip's codes (BN6's records hold four), a program's colour variants */
+#define PICK_VARIANTS 4
 
 typedef struct {
 	bool up;
@@ -23,6 +25,14 @@ typedef struct {
 	int t;               /* frames since it opened */
 	uint32_t was;        /* the keys of the frame before */
 	int rest;            /* frames since A was last held on it */
+	/* what MegaMan holds of each choice, counted as it opens, as BN6's
+	 * shops count it in their ITEMS box: each code a chip comes in (the
+	 * Folder's and the Pack's copies) or each colour a program comes in
+	 * (those on his board); and his max HP for HPMemory's */
+	uint8_t nvar[PICK_MOST];
+	uint8_t var[PICK_MOST][PICK_VARIANTS];        /* a chip's codes (0-25, 26 '*'), a program's colours (1-6) */
+	uint8_t var_held[PICK_MOST][PICK_VARIANTS];   /* ... how many he holds in each */
+	int max_hp;
 } PickState;
 
 extern PickState RP;

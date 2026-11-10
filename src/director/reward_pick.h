@@ -37,7 +37,6 @@ typedef struct {
 	uint8_t what;       /* PICK_CHIP, PICK_PROGRAM, PICK_HP */
 	uint16_t id;        /* the chip's id, the program's number, the HPMemory given */
 	uint8_t code;       /* a chip's code (0-25, 26 '*'), a program's colour (1-6) */
-	uint8_t held;       /* a program's copies MegaMan holds, any colour */
 	int16_t script;     /* what gives it, a script of the layer's text archive */
 } PickChoice;
 

@@ -1247,22 +1247,16 @@
   "reconnect_text:reconnect_text_trying.words": {
    "line": 13
   },
-  "reward_pick_text:reward_pick_chip_info": {
-   "line": 26
-  },
   "reward_pick_text:reward_pick_hp_info": {
-   "line": 28
+   "header": "What the information box says of HPMemory (`count` against his max HP now) and of the draft's skip (`frags` BugFrags), into `out`; a chip's is its description, BN6's, a program's what it does, MegaMan's words of the NaviCust",
+   "line": 25
   },
   "reward_pick_text:reward_pick_part": {
-   "header": "A program's part on its card: a program part or a plus part (NAVI_*)",
+   "header": "A program's part, on the information box's tag as KeyItem's: a program part, a plus part or either (NAVI_*)",
    "line": 19
   },
-  "reward_pick_text:reward_pick_program_info": {
-   "header": "What the information box says: a program does `does` (navicust's words); a chip the Library has or has not; HPMemory's `count`; the draft's skip for `frags` BugFrags; into `out`",
-   "line": 21
-  },
   "reward_pick_text:reward_pick_skip_info": {
-   "line": 30
+   "line": 27
   },
   "reward_pick_text:reward_pick_title.titles": {
    "line": 13
@@ -2262,7 +2256,7 @@
    "comment": "reward_pick_text.h. The screen speaks as the PET's own screens do: a name on the band, and the information box in KeyItem's voice, a fact a line (docs/voice/rules.md); what a program does is MegaMan's words of the NaviCust (navicust_words.c), a chip's its card's, BN6's own.",
    "domain": "Layers: rewards",
    "kind": "screen",
-   "lines": 13,
+   "lines": 10,
    "shows": [],
    "speaker": "Screen",
    "stem": "reward_pick_text"
@@ -2831,7 +2825,7 @@
      "src/layer/reward_words.c"
     ],
     "flagged": 5,
-    "lines": 55,
+    "lines": 52,
     "speech": 42
    },
    "Layers: services": {
@@ -3148,7 +3142,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2015,
+  "lines": 2012,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3745,11 +3739,9 @@
   {"container":"reward_words:ta_official","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:ta_official","line":260,"lines":["reward_words:ta_official:0","reward_words:ta_official:1","reward_words:ta_official:2","reward_words:ta_official:3","reward_words:ta_official:4","reward_words:ta_official:5","reward_words:ta_official:6","reward_words:ta_official:7","reward_words:ta_official:8"],"speakers":["MegaMan"],"title":"Official","when":""},
   {"container":"reward_words:ta_gift","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:ta_gift","line":287,"lines":["reward_words:ta_gift:0","reward_words:ta_gift:1","reward_words:ta_gift:2","reward_words:ta_gift:3","reward_words:ta_gift:4","reward_words:ta_gift:5","reward_words:ta_gift:6","reward_words:ta_gift:7","reward_words:ta_gift:8"],"speakers":["Mr.Prog","Narration"],"title":"Gift","when":""},
   {"container":"reward_pick_text:reward_pick_title.titles","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_title.titles","line":13,"lines":["reward_pick_text:reward_pick_title.titles:0","reward_pick_text:reward_pick_title.titles:2","reward_pick_text:reward_pick_title.titles:3","reward_pick_text:reward_pick_title.titles:4","reward_pick_text:reward_pick_title.titles:5"],"speakers":["Screen"],"title":"Reward pick title: titles","when":""},
-  {"container":"reward_pick_text:reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_part","line":19,"lines":["reward_pick_text:reward_pick_part:0","reward_pick_text:reward_pick_part:1","reward_pick_text:reward_pick_part:2"],"speakers":["Screen"],"title":"A program's part on its card","when":"A program's part on its card: a program part or a plus part (NAVI_*)"},
-  {"container":"reward_pick_text:reward_pick_program_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_program_info","line":22,"lines":["reward_pick_text:reward_pick_program_info:0"],"speakers":["Screen"],"title":"What the information box says","when":"What the information box says: a program does `does` (navicust's words); a chip the Library has or has not; HPMemory's `count`; the draft's skip for `frags` BugFrags; into `out`"},
-  {"container":"reward_pick_text:reward_pick_chip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_chip_info","line":26,"lines":["reward_pick_text:reward_pick_chip_info:0","reward_pick_text:reward_pick_chip_info:1"],"speakers":["Screen"],"title":"Reward pick chip info","when":""},
-  {"container":"reward_pick_text:reward_pick_hp_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_hp_info","line":28,"lines":["reward_pick_text:reward_pick_hp_info:0"],"speakers":["Screen"],"title":"Reward pick hp info","when":""},
-  {"container":"reward_pick_text:reward_pick_skip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_skip_info","line":30,"lines":["reward_pick_text:reward_pick_skip_info:0"],"speakers":["Screen"],"title":"Reward pick skip info","when":""},
+  {"container":"reward_pick_text:reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_part","line":19,"lines":["reward_pick_text:reward_pick_part:0","reward_pick_text:reward_pick_part:1","reward_pick_text:reward_pick_part:2"],"speakers":["Screen"],"title":"A program's part, on the information box's tag as KeyItem's","when":"A program's part, on the information box's tag as KeyItem's: a program part, a plus part or either (NAVI_*)"},
+  {"container":"reward_pick_text:reward_pick_hp_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_hp_info","line":25,"lines":["reward_pick_text:reward_pick_hp_info:0"],"speakers":["Screen"],"title":"What the information box says of HPMemory","when":"What the information box says of HPMemory (`count` against his max HP now) and of the draft's skip (`frags` BugFrags), into `out`; a chip's is its description, BN6's, a program's what it does, MegaMan's words of the NaviCust"},
+  {"container":"reward_pick_text:reward_pick_skip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","id":"reward_pick_text:reward_pick_skip_info","line":27,"lines":["reward_pick_text:reward_pick_skip_info:0"],"speakers":["Screen"],"title":"Reward pick skip info","when":""},
   {"container":"lock_words:ta_cube_pcode","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_pcode","line":25,"lines":["lock_words:ta_cube_pcode:0","lock_words:ta_cube_pcode:1","lock_words:ta_cube_pcode:2"],"speakers":["MegaMan","Narration"],"title":"Cube pcode","when":""},
   {"container":"lock_words:ta_cube_toll","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_toll","line":42,"lines":["lock_words:ta_cube_toll:0","lock_words:ta_cube_toll:1","lock_words:ta_cube_toll:2"],"speakers":["Narration","MegaMan"],"title":"Cube toll","when":""},
   {"container":"lock_words:ta_cube_skull","domain":"Layers: locks","file":"src/layer/lock_words.c","id":"lock_words:ta_cube_skull","line":62,"lines":["lock_words:ta_cube_skull:0","lock_words:ta_cube_skull:1","lock_words:ta_cube_skull:2"],"speakers":["Narration","MegaMan"],"title":"Cube skull","when":""},
@@ -4960,14 +4952,11 @@
   {"boxes":[{"pages":[["OFFICIAL VAULT"]],"speaker":"Screen","text":"OFFICIAL VAULT"}],"container":"reward_pick_title.titles","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_title.titles:3","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"OFFICIAL VAULT","text_hash":"693d7c8f3d6c"},
   {"boxes":[{"pages":[["SERVER DATA"]],"speaker":"Screen","text":"SERVER DATA"}],"container":"reward_pick_title.titles","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_title.titles:4","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"SERVER DATA","text_hash":"a4ce11e1d31c"},
   {"boxes":[{"pages":[["GLITCH DATA"]],"speaker":"Screen","text":"GLITCH DATA"}],"container":"reward_pick_title.titles","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_title.titles:5","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"GLITCH DATA","text_hash":"b56b0cda547b"},
-  {"boxes":[{"pages":[["Plus part"]],"speaker":"Screen","text":"Plus part"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"Plus part","text_hash":"e4605ba2cafd"},
-  {"boxes":[{"pages":[["Any part"]],"speaker":"Screen","text":"Any part"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:1","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"Any part","text_hash":"b34092090c23"},
-  {"boxes":[{"pages":[["Prog part"]],"speaker":"Screen","text":"Prog part"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:2","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"Prog part","text_hash":"57e7ff2283e3"},
-  {"boxes":[{"pages":[["{does}"]],"speaker":"Screen","text":"{does}"},{"pages":[["Held {held}"]],"speaker":"Screen","text":"Held {held}"}],"container":"reward_pick_program_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_program_info:0","kind":"screen","line":22,"placeholders":[{"name":"does","spec":"%s"},{"name":"held","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"{does}|Held {held}","text_hash":"9c9917d9a5bd"},
-  {"boxes":[{"pages":[["In the Library."]],"speaker":"Screen","text":"In the Library."}],"container":"reward_pick_chip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_chip_info:0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"In the Library.","text_hash":"4041b7b46f7a"},
-  {"boxes":[{"pages":[["New to the Library!"]],"speaker":"Screen","text":"New to the Library!"}],"container":"reward_pick_chip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_chip_info:1","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"New to the Library!","text_hash":"8b0f0755a89b"},
-  {"boxes":[{"pages":[["Max HP +{count}."]],"speaker":"Screen","text":"Max HP +{count}."}],"container":"reward_pick_hp_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_hp_info:0","kind":"screen","line":28,"placeholders":[{"name":"count","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"Max HP +{count}.","text_hash":"e1e15b2e1dd1"},
-  {"boxes":[{"pages":[["The data breaks into","{frags} BugFrags."]],"speaker":"Screen","text":"The data breaks into {frags} BugFrags."}],"container":"reward_pick_skip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_skip_info:0","kind":"screen","line":30,"placeholders":[{"name":"frags","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"The data breaks into {frags} BugFrags.","text_hash":"642a1cc4f7c4"},
+  {"boxes":[{"pages":[["PLUS PART"]],"speaker":"Screen","text":"PLUS PART"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"PLUS PART","text_hash":"38221c49c0a4"},
+  {"boxes":[{"pages":[["ANY PART"]],"speaker":"Screen","text":"ANY PART"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:1","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"ANY PART","text_hash":"982528bc8eb6"},
+  {"boxes":[{"pages":[["PROG PART"]],"speaker":"Screen","text":"PROG PART"}],"container":"reward_pick_part","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_part:2","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"PROG PART","text_hash":"3076009d5f0c"},
+  {"boxes":[{"pages":[["Max HP {max_hp} now."]],"speaker":"Screen","text":"Max HP {max_hp} now."},{"pages":[["{count} with these."]],"speaker":"Screen","text":"{count} with these."}],"container":"reward_pick_hp_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_hp_info:0","kind":"screen","line":25,"placeholders":[{"name":"max_hp","spec":"%d"},{"name":"count","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"Max HP {max_hp} now.|{count} with these.","text_hash":"40f5f6ee5079"},
+  {"boxes":[{"pages":[["The data breaks into","{frags} BugFrags."]],"speaker":"Screen","text":"The data breaks into {frags} BugFrags."}],"container":"reward_pick_skip_info","domain":"Layers: rewards","file":"src/director/reward_pick_text.c","flags":[],"id":"reward_pick_text:reward_pick_skip_info:0","kind":"screen","line":27,"placeholders":[{"name":"frags","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"The data breaks into {frags} BugFrags.","text_hash":"642a1cc4f7c4"},
   {"boxes":[{"pages":[["The bottom","again,Lan..."]],"speaker":"MegaMan","text":"The bottom again,Lan..."},{"pages":[["GRRRRR..."]],"speaker":"MegaMan","text":"GRRRRR..."},{"pages":[["The Cybeast's back.","I can feel it."]],"speaker":"MegaMan","text":"The Cybeast's back. I can feel it."},{"pages":[["Then we beat it","again!"]],"speaker":"Lan","text":"Then we beat it again!"}],"container":"super_arrival","domain":"The story","file":"src/director/story_words.c","flags":[],"id":"story_words:super_arrival:0","kind":"speech","line":51,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M The bottom again,Lan...|@B GRRRRR...|@M The Cybeast's back. I can feel it.|@L Then we beat it again!","text_hash":"5c26d40581e4"},
   {"boxes":[{"pages":[["Lan... This is the","bottom of the Net."]],"speaker":"MegaMan","text":"Lan... This is the bottom of the Net."},{"pages":[["Grrrr..."]],"speaker":"MegaMan","text":"Grrrr..."},{"pages":[["That growl... The","beast in me is","answering!"]],"speaker":"MegaMan","text":"That growl... The beast in me is answering!"},{"pages":[["Whatever's down","here,we're ready!"]],"speaker":"Lan","text":"Whatever's down here,we're ready!"}],"container":"super_arrival","domain":"The story","file":"src/director/story_words.c","flags":[],"id":"story_words:super_arrival:1","kind":"speech","line":52,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan... This is the bottom of the Net.|@B Grrrr...|@M That growl... The beast in me is answering!|@L Whatever's down here,we're ready!","text_hash":"760935ebd3a6"},
   {"boxes":[{"pages":[["Whoa... So this is","the Secret Area."]],"speaker":"MegaMan","text":"Whoa... So this is the Secret Area."},{"pages":[["There's a signal in","here... Pure","darkness."]],"speaker":"MegaMan","text":"There's a signal in here... Pure darkness."},{"pages":[["I've felt it","before... But where?"]],"speaker":"MegaMan","text":"I've felt it before... But where?"},{"pages":[["*gulp* Stay","sharp,MegaMan!"]],"speaker":"Lan","text":"*gulp* Stay sharp,MegaMan!"}],"container":"super_arrival","domain":"The story","file":"src/director/story_words.c","flags":[],"id":"story_words:super_arrival:2","kind":"speech","line":55,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Whoa... So this is the Secret Area.|@M There's a signal in here... Pure darkness.|@M I've felt it before... But where?|@L *gulp* Stay sharp,MegaMan!","text_hash":"4a7b6e87663d"},

@@ -165,10 +165,14 @@ void library_card_blank(int x, int y, int cls) {
 	card_contacts(x, y);
 }
 
-void library_card(int x, int y, int chip, int cls) {
+void library_card_face(int x, int y, int chip, int cls) {
 	library_card_blank(x, y, cls);
+	if (chip) card_head(x, y, chip);
+}
+
+void library_card(int x, int y, int chip, int cls) {
+	library_card_face(x, y, chip, cls);
 	if (!chip) return;
-	card_head(x, y, chip);
 	/* its description in the game's own three lines, each letter in a cell of 8, 16 apart */
 	char desc[160];
 	chips_desc_lines(chip, desc, sizeof desc);
