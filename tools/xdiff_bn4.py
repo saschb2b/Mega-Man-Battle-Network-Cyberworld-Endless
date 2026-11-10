@@ -809,6 +809,11 @@ def allowed_world(d, fb):
                 bit = bit0 if k == 0 and max(va, vb) > 0xFF else (bit0 >> (8 * k)) & 0xFF
                 if bit and va ^ vb == bit and vb & bit:
                     return a['name']
+        elif 'cells' in a:
+            # (a pair of numbers at an offset, BN4's and BN6's, exactly: MegaMan's dark palette)
+            va, vb = raw_int(d.a), raw_int(d.b)
+            if d.part == a['part'] and any(int(o, 0) == d.off and (va, vb) == (int(x, 0), int(y, 0)) for o, x, y in a['cells']):
+                return a['name']
         elif role_name(d.role) in companions(fb) and d.part == 'in play' and d.a is False and d.b is True:
             return a['name']
     return None
