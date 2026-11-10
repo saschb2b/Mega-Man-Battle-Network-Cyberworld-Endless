@@ -503,6 +503,9 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x133, SONG_GROWN_FIRST + 0x2A }, { XROM_BN4_RED_SUN_US, 0xC8, SONG_GROWN_FIRST + 0x2B },   /* (0x204, 0x205) */
 	/* ... the bombs' state's throw (SeekBom's unit) */
 	{ XROM_BN4_RED_SUN_US, 0x90, SONG_GROWN_FIRST + 0x2C },   /* (0x206) */
+	/* ... the sweep's third line's units, from 0x240 up: AquaUp's geyser, GreenWd's tower, Ligtnin's bolt */
+	{ XROM_BN4_RED_SUN_US, 0x120, SONG_GROWN_FIRST + 0x66 }, { XROM_BN4_RED_SUN_US, 0x13E, SONG_GROWN_FIRST + 0x67 },   /* (0x240, 0x241) */
+	{ XROM_BN4_RED_SUN_US, 0x143, SONG_GROWN_FIRST + 0x68 },   /* (0x242) */
 	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
 	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
 };

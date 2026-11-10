@@ -79,9 +79,14 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
                               "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
 # A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
+_PANELS = ('the same routine as Ligtnin\'s by its record\'s first parameter, its strike (the third kind\'s 0x92) moved with the unit '
+           'but never run in a spec: it rises only from a {} panel of the other side\'s with a foe on it, and the differential\'s '
+           'BN4 battle sets no panel\'s type yet')
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
-                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
+                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)',
+             **{i: 'AquaUp, ' + _PANELS.format('cracked') for i in (181, 182, 183)},
+             **{i: 'GreenWd, ' + _PANELS.format('grass') for i in (184, 185, 186)}}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
 # returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
@@ -163,6 +168,13 @@ AUDITS = {
     (0x0801288C, 0x08019F8C): ('ok', "an object's element set (r0): BN4 writes it to the object's +0x17 and its collision data's +2; BN6 "
                                      "to the object's +0xE, its low four bits to the collision data's +2 and its high four (BN6's second "
                                      "wheel's flags, none in a BN4 chip's element byte but the icon's the comparison names) to its +0x19"),
+    (0x08014446, 0x0801BBF4): ('ok', "a third-kind object's sprite each frame (none while the battle is paused, 0x080078EC and BN6's "
+                                     "0x0800A03C, or the object is hidden or held: its +0 without 1 or with 8; its animation set where "
+                                     "its +0x10 is not its +0x11, 0x08002E10 and the sprite's step 0x0800283C, else the sprite's update "
+                                     "0x0800285C): BN6's the same steps with BN6's twins, its pause's test a call that sets the flags "
+                                     "where BN4's returns r0, and the update run after the animation's set too, which BN4's skips for "
+                                     "that frame (the pair tools/bn4_twins.py audits for the first kind, 0x080143FC and 0x0801BBAC, "
+                                     "differs the same way)"),
 }
 # The dispatch's numbers the chips' moved types take, by kind. The fourth kind's from 0x91 up, past BN5's 145 types (its own
 # numbers in the tables) and below BN4's families' and Navis' (0xE0 on), each checked against every other recipe
@@ -203,6 +215,7 @@ UNITS = (
     ('attack', 0x47, 'ThunSoul'),
     ('attack', 0x09, 'SeekBom'),
     ('misc', 0x11, 'Meteors'),
+    ('misc', 0x0C, 'Ligtnin'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -227,6 +240,9 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xF8: 0x202, 0xB9: 0x203,    # (MagBolt's bolt and its hum)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
                0x90: 0x206,                 # (the bombs' state's throw)
+               # (the sweep's third line, units-c's, its slots from 0x240 up)
+               0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
+               0x143: 0x242,                # (Ligtnin's bolt)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
@@ -254,6 +270,11 @@ TABLES = {
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068)"),
+    0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
+                     why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
+                         "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "
+                         "+0xA the sound it plays, a u16), read by its init (0x080DF6B8, by +4); the sweep spawns kind 0 on a "
+                         "cracked panel and kind 1 on grass (0x080DF8DC, 0x080DF940)"),
 }
 # A kinds' table of a moved object whose rows name an effect and a sound by a byte each (no sprite): copied with the unit as
 # TABLES' are, each kind's effect BN6's of the same look or moved (its byte the id), its sound a byte BN6 plays the same song
@@ -790,7 +811,7 @@ def sounds_of(b4, b6, f):
     ids = {}
     for e, w in f.walks.items():
         for site, t in w.bls.items():
-            if t == X4.BN4['sound']:
+            if t == X4.BN4['sound'] and not any(site in x.get('sound', (0, ()))[1] for x in TABLES.values()):
                 ids.setdefault(T.back_value(w, site, 0)[0], []).append(site)
     by_row = {s for t in ROW_TABLES.values() for s in t['sound_sites']}
     odd_sites = [s for s in ids.pop(None, []) if s not in by_row]
@@ -801,6 +822,7 @@ def sounds_of(b4, b6, f):
     if same:
         f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
     f.sounds = getattr(f, 'sounds', [])
+    table_sounds(b4, b6, f)
     for v in odd:
         if v in FAMILY_SLOTS:
             slot = FAMILY_SLOTS[v]
@@ -832,6 +854,34 @@ def sounds_of(b4, b6, f):
                        f'slot {slot:#x}, on BN4\'s player {player}')
 
 
+def table_sounds(b4, b6, f):
+    """the sounds its objects play by a row of a kinds' table (TABLES' sound: the row's u16, loaded and handed to BN4's
+    PlaySoundEffect at the sites named, a number of any size): BN6's of the same number where it is the same song, else BN4's
+    song at its slot of the grown table (SOUND_SLOTS), the row's two bytes in the table's copy set to it"""
+    named = {v for w in f.walks.values() for v in w.lits.values() if v in TABLES and TABLES[v].get('sound')}
+    sites = {s for w in f.walks.values() for s, t in w.bls.items() if t == X4.BN4['sound']}
+    for v in sorted(named):
+        t = TABLES[v]
+        if not t['sound'][1] <= sites:
+            f.decide('sound', f'its table {v:08X}\'s sound is played at a site its code does not hold ({t["sound"][1] - sites})')
+        for k in t['kinds']:
+            at = v + t['entry'] * k + t['sound'][0]
+            snd = b4.u16(at)
+            if X4.song_sig(b4, X4.BN4['songs'], snd) == X4.song_sig(b6, X4.SONGS6, snd):
+                f.notes.append(f'its table {v:08X}\'s kind {k}: its sound {snd:#x}, BN6\'s of the same number, the same song')
+                continue
+            slot = SOUND_SLOTS.get(snd)
+            if slot is None or not SOUND_SLOT0 <= slot < SOUND_SLOT_END:
+                f.decide('sound', f'{at:08X}: its table\'s kind {k} plays {snd:#x}, no song of BN6\'s, which has no slot (SOUND_SLOTS)')
+                continue
+            if (snd, slot) not in f.sounds:
+                f.sounds.append((snd, slot))
+            f.bytes += [(at + j, snd >> 8 * j & 0xFF, slot >> 8 * j & 0xFF,
+                         f'its table\'s kind {k}: its sound {snd:#x} in BN4, the grown table\'s slot {slot:#x} in BN6 (byte {j})')
+                        for j in range(2) if snd >> 8 * j & 0xFF != slot >> 8 * j & 0xFF]
+            f.notes.append(f'its table {v:08X}\'s kind {k}: its sound {snd:#x}, BN4\'s song copied into the grown song table\'s slot {slot:#x}')
+
+
 def registry_rows():
     """BN4's rows of the chip registry: BN4's id -> (BN6's id, how, sub)"""
     rows = {}
@@ -860,6 +910,11 @@ def rows_check(b4, f):
             f.notes.append(f'its chip {i} has no row of the registry (the run\'s by name, or none)')
             continue
         bn6, how, sub = rows[i]
+        if i in ROWS_WAIT:
+            if how != 'PENDING':
+                f.decide('row', f'its chip {i} waits (ROWS_WAIT) but its row (id {bn6}) is XREG_{how}')
+            f.notes.append(f'its chip {i} (id {bn6}) sits out: {ROWS_WAIT[i]}')
+            continue
         f.rows.append((i, bn6))
         want = NUMBER0 + r[0xC]   # (its own subfamily's routine: the unit's, or one of the rows that share its code)
         if f.kind == 'attack':
