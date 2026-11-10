@@ -1,0 +1,164 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "BN6's Beast Out's length, BN6's engine alone (the control of beast_soult): Beast Out's flag (E0) set, the Souls installed and KnightSoul held as a run with BN5's ROM has them, a deck of Cannon, which lights no Soul, so the slot under OK is BN6's emblem; no chip picked on the first Custom screen, the emblem chosen and OK. MegaMan beasts out as the first turn starts (form 0x0B) and the Custom screens opened by L count his turns down; he is himself again as the turn after his third starts.",
+ "kind": "engine",
+ "frames": 2300,
+ "flags6": [
+  "00E0"
+ ],
+ "folder6": [
+  "0001"
+ ],
+ "deck6": [
+  "0001"
+ ],
+ "souls6": "10",
+ "cust6": {
+  "1": [
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ],
+  [
+   1560,
+   "L",
+   3
+  ],
+  [
+   2080,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "form": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     523,
+     "0x0B"
+    ],
+    [
+     1043,
+     "0x0B"
+    ],
+    [
+     1563,
+     "0x0B"
+    ],
+    [
+     1564,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "soul": [
+    [
+     1,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "hp": [
+    [
+     2300,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN6's own course: Beast Out's commit (0x08029344) as the first turn starts, its three turns from his battle NaviStats' Beast Out counter (+0x21, 3 as the battle copies them, one less a turn: 0x08015A38), its end as the fourth turn starts (0x080159C6, t1564); no Soul united (the emblem's own rule, no pick of KnightSoul's kind); MegaMan never hit (safe)."
+}

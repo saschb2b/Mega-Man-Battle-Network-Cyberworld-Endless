@@ -294,12 +294,13 @@ def reference_only(name, spec, a, legit, canon):
     return verdict, 'reference'
 
 
-def engine_only(name, spec, a, legit, canon):
+def engine_only(name, spec, a, legit, canon, pokes=(), calls=()):
     """A spec of what BN6's engine does that BN5's has no twin of (kind "engine": a Cross or Beast Out beside a Soul):
-    BN6's battle alone, MegaMan's timeline reported and checked against what it is to do, in BN6's numbers"""
+    BN6's battle alone, MegaMan's timeline reported and checked against what it is to do, in BN6's numbers; a mutation's
+    or --poke's and --call's breaks written into its copy as a differential's are (beast_soult's)"""
     path = os.path.join(WORK, 'runs', f'{name}.bn6')
     if not a.no_run:
-        run(name, spec, [], [], a.quiet, ())
+        run(name, spec, list(pokes), list(calls), a.quiet, ())
     tb = read_trace(path)
     assign_roles(tb, canon)
     attribute(tb, canon)
@@ -673,7 +674,7 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
     if spec.get('kind') == 'engine':
-        return engine_only(run_name or name, spec, a, legit, canon)
+        return engine_only(run_name or name, spec, a, legit, canon, pokes, calls)
     run_name = run_name or name
     # (a spec's own poke= items first, as a BN4 spec's: a record's byte the run stands on, pa_piledrvr's)
     paths = [os.path.join(WORK, 'runs', f'{run_name}.{g}') for g in ('bn5', 'bn6')] if a.no_run else \

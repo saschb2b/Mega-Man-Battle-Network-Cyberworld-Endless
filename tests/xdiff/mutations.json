@@ -2460,6 +2460,23 @@
     "088019A0:0813E5E9:4"
    ],
    "what": "the grown effects' table's entry 48 (FREE_NCP + 0xE0 + 4 x 48) naming program 0's routine, which sets nothing: SoulT+1 placed and compiled to no effect, KnightSoul's turns 3"
+  },
+  {
+   "name": "Beast Out's count-down held",
+   "spec": "beast_soult",
+   "poke": [
+    "08015A72:3800"
+   ],
+   "what": "BN6's Beast Out counter's step (0x08015A72 in 0x08015A38: subs r0,#1 on his battle NaviStats' +0x21) made subs r0,#0: the counter never falls and Beast Out outlasts its three turns, form 0x0B still at t1564, which the spec holds to MegaMan's own: a Beast Out a turn longer, as a SoulT+1 that reached it would make it, fails"
+  },
+  {
+   "name": "SoulT+1's routine on Beast Out's counter",
+   "spec": "beast_soult",
+   "poke": [
+    "08801804:2121",
+    "08801816:2121"
+   ],
+   "what": "program 48's effect (FREE_NCP + 0x04 and + 0x16, src/emu/xncp.c: movs r1,#0x32, the read's and the write's) made movs r1,#0x21, BN6's Beast Out counter: a SoulT+1 that reached Beast Out; the compile leaves the counter 4 and Beast Out lasts a fourth turn, form 0x0B still at t1564"
   }
  ]
 }
