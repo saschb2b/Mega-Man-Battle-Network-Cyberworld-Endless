@@ -785,6 +785,39 @@ code at BN6's own place and as its moved copy alike), and
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
 
+## A program on each game's NaviCust
+
+`ncp5=VARIANT:COL:ROW` and `ncp6=` (hex; `src/dev/xdiff_ncp.c`) place one
+NaviCust program on each game's own board, alone, and run each game's own
+compile before the battle is asked, so that what the program sets in the
+NaviStats is what each game's own routine set, not a byte the spec wrote.
+The variant is program x 4 + colour; its shape's cells go onto the board
+from its record (BN5's 5 x 5 two left of and above the column and row,
+BN6's 7 x 7 three), its entry into the placed list. BN6's compile is
+`BN6_NAVICUST_RELOAD` by `game_call`, whose two hooks the differential's
+core takes only for such a spec; BN5's is `BN5_NAVICUST_COMPILE` by
+`guest_call` (`src/emu/guest.c`): a hook on its main loop's `bx r0` into
+the mode's routine (`BN5_MAIN_CALL`) goes to the routine once, which
+returns to the same instruction, where the loop's own r0 and lr are put
+back. Each prints what its game made of it (`xdiff: BN5's NaviCust:
+variant 0x98 at column 1, row 1, compiled by BN5: its extra turns 1`).
+
+`soul_soult` is `soul_knight` with BN5's SoulT+1 so placed in both (BN5's
+program 38, BN6's 48, [The NaviCust's addresses](../rom/navicust.md),
+Program 48): KnightSoul lasts four turns in both where it lasts three, its
+end a Custom screen later (t2084), every frame compared. Its three
+mutations: the engine's routine adding none, adding two, and the grown
+effects' table's entry naming a routine that sets nothing.
+
+`beast_out` and `beast_soult` (kind `engine`: BN6's battle alone) hold a
+Beast Out to its three turns, without the program and with it placed and
+compiled (`ncp6`): its form 0x0B to fight frame 1563, MegaMan's own from
+1564, in both. Their mutations are pokes, which an engine spec takes
+since them (`tools/xdiff.py` engine_only passed none before, so a poke on
+one was a mutation that could not be caught): the program's routine
+aimed at the Beast Out counter (NaviStats +0x21), which gives a fourth
+turn, and BN6's count-down held.
+
 ## Holds
 
 Through a hold (the battle's timer at one value for many frames: a Navi

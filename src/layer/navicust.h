@@ -16,7 +16,7 @@ enum { BUILD_BUSTER, BUILD_HAND, BUILD_GUARD, BUILD_FIELD, BUILD_HP, BUILD_COUNT
 #define NAVICUST_BUGS  16     /* bug types the game counts */
 
 typedef struct {
-	uint8_t program;   /* BN6's program number, 1-46 (given as program * 4) */
+	uint8_t program;   /* BN6's program number, 1-46, or 48, BN5's SoulT+1 (given as program * 4) */
 	uint8_t color;     /* 1-6; 0 until navicust_color picks one */
 } NaviProgram;
 
@@ -65,11 +65,16 @@ int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uin
  * shape (issue #54); navicust_shape, as it comes. */
 bool navicust_shape_as(int variant, bool compressed, NaviShape *out);
 bool navicust_shape(int variant, NaviShape *out);
+/* Variant `variant`'s part and colour as its record has them (0 a program
+ * part, 1 a plus part, 2 either; 1-6): false for none, or one of no
+ * colour. Program 48's from BN5's ROM (xprograms.h). */
+bool navicust_part(int variant, int *kind, int *color);
 /* Program `program`'s compression code, its ten buttons as the NaviCust
  * takes them (held RIGHT on it), five and five: "LBBRB AALRR" (issue #50);
  * false where it has none. navicust_code_text spells the table's ten bytes
  * so (ROM-free). */
 #define NAVICUST_PROGRAMS 48   /* the code table's rows: programs 0-47 */
+#define NAVICUST_VARIANTS (49 * 4)   /* the colour variants a board or the PET can hold: BN6's programs 1-46, and 48, BN5's SoulT+1 where its ROM is read (xprograms.h) */
 bool navicust_code(int program, char out[12]);
 bool navicust_code_text(const uint8_t raw[10], char out[12]);
 /* Whether `n` shapes fit a `w` x `h` board together without a bug: all on
@@ -84,6 +89,13 @@ bool navicust_pack(const NaviShape *shapes, int n, int w, int h);
 void navicust_set_spins(unsigned mask);
 /* ... and the Spins set so (navicust_words.c, what turns) */
 unsigned navicust_spins(void);
+/* The older Net's program (docs/game/navicust.md, 11): SoulT+1, program 48,
+ * which BN5's ROM brings (xprograms.h). In the pool only while `held`: the
+ * run holds a Soul as its layer is made, or the layer's guardian gives
+ * his, and the core has the program; `lead`: the layer's guardian gives a
+ * Soul the run has none of yet, and his draft offers SoulT+1 where it fits
+ * and is not held, in the place of its build's pick. Neither until set. */
+void navicust_set_soul(bool held, bool lead);
 /* The board's size after `expmemry` ExpMemry (0-2): 4x4, 5x4, 5x5. */
 void navicust_board(int expmemry, int *w, int *h);
 /* BugFrags a guardian's draft pays when none is taken, at `depth`. */

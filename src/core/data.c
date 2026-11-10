@@ -10,6 +10,7 @@
 #include "chips.h"
 #include "rom.h"
 #include "run.h"
+#include "xprograms.h"
 
 /* rom id, behaviour, parameter, tier (0 common - 4 legendary), price (x100 z) */
 const ChipDef chip_defs[] = {
@@ -236,7 +237,10 @@ void item_name(int id, char *out, size_t outlen) {
 }
 
 void program_name(int program, char *out, size_t outlen) {
-	if (R.layout->navicust_names) rom_text(R.layout->navicust_names, program, out, outlen);
+	/* (program 48 is BN5's SoulT+1 where its ROM is read, its name BN5's: xprograms.h) */
+	const XProgram *x = program == XPROGRAM_SOULT ? xprogram_soult() : NULL;
+	if (x) rom_text_bytes(x->name, x->name_len, out, outlen);
+	else if (R.layout->navicust_names) rom_text(R.layout->navicust_names, program, out, outlen);
 	else if (outlen) *out = 0;
 }
 

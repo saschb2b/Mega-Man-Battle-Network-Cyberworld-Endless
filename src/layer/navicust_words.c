@@ -44,6 +44,7 @@ static const char *const abouts[] = {
 	[44] = "HP+300: three hundred more max HP.",
 	[45] = "HP+400: four hundred more max HP.",
 	[46] = "HP+500: five hundred more max HP.",
+	[48] = "SoulT+1: a Soul stays one more turn.",
 };
 
 const char *navicust_about(int program) {

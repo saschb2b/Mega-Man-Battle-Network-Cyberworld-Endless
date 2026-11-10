@@ -91,6 +91,8 @@
 #include "thumb_reloc.h"
 #include "battle_rng.h"
 #include "bn5.h"
+#include "lz.h"
+#include "xprograms.h"
 #include "bn6.h"
 #include "darkinvs_room.h"
 #include "xpanels.h"
@@ -1312,6 +1314,104 @@ static void test_stairs(void) {
 	/* an area without stairs keeps its layers flat */
 	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, &flat);
 	CHECK(!layer.nstairs && !layer.rise, "flat area got a stair");
+}
+
+/* BN5's NaviCust program SoulT+1 as BN6's program 48 (docs/rom/navicust.md,
+ * Program 48; src/core/xprograms.c, src/emu/xncp.c): how BN6's tables
+ * grow for it, on made-up archives, and what a made-up BN5 ROM gives; then
+ * the draft, which offers it only while the run holds a Soul and leads
+ * with it where the layer's guardian gives one (docs/game/navicust.md, 11). */
+static void test_xprograms(void) {
+	/* a shape of five by five in seven by seven: a row down, a column right */
+	static const uint8_t five[XPROGRAM_SHAPE5] = { 0, 0, 0, 0, 0,  0, 0, 1, 1, 0,  0, 0, 1, 1, 0 };
+	uint8_t seven[XPROGRAM_SHAPE];
+	xprogram_shape7(five, seven);
+	int cells = 0;
+	for (int i = 0; i < XPROGRAM_SHAPE; ++i) cells += seven[i];
+	CHECK(cells == 4 && seven[2 * 7 + 3] && seven[2 * 7 + 4] && seven[3 * 7 + 3] && seven[3 * 7 + 4], "program 48: a 2x2 of BN5's grid lands at rows 2-3, columns 3-4 of BN6's");
+	/* the names: five entries, the third and fourth one filler with the fifth, a label; a name in the third's place */
+	static const uint8_t names[] = { 10, 0, 12, 0, 14, 0, 14, 0, 14, 0,  0x0B, 0xE6,  0x0C, 0xE6,  0x12, 0x1A, 0xE6, 0, 0, 0 };
+	static const uint8_t name[] = { 0x1D, 0x34, 0x3A, 0x31 };
+	uint8_t out[64];
+	const XArchive arc = { names, sizeof names, 5 };
+	size_t n = xprogram_name_add(&arc, 2, name, sizeof name, out, sizeof out);
+	CHECK(n == 22 && !memcmp(out + 17, name, 4) && out[21] == 0xE6 && out[4] == 17 && out[6] == 14 && out[8] == 14 && !memcmp(out + 10, names + 10, 7),
+		"program 48: a name after the archive's last entry, its entry's offset on it, the rest as they were (%u bytes)", (unsigned)n);
+	CHECK(!xprogram_name_add(&arc, 0, name, sizeof name, out, sizeof out), "program 48: an entry with a text of its own is no filler");
+	CHECK(!xprogram_name_add(&arc, 2, name, sizeof name, out, 21), "program 48: an archive that does not fit is refused");
+	static const uint8_t command[] = { 0x1D, 0xE9 };
+	CHECK(!xprogram_name_add(&arc, 2, command, sizeof command, out, sizeof out), "program 48: a name with a command in it is refused");
+	/* the descriptions: a word (the length << 8), three entries, the second framed (five bytes, its lines, five bytes) */
+	static const uint8_t descs[] = { 0, 25, 0, 0,  6, 0, 7, 0, 19, 0,  0xE6,  0xE8, 2, 0xF1, 0, 0, 0x0B, 0xE9, 0x0C, 0xEE, 0xFF, 0, 0, 0xE6,  0x1C, 0xE6 };
+	static const uint8_t lines[] = { 0x0E, 0xE9, 0x9E, 0x02 };
+	_Static_assert(sizeof descs == 25 + 1, "the made-up descriptions' length is their word's (and a byte past it)");
+	uint8_t grown[64];
+	const XArchive block = { descs, 25, 3 }, cut = { descs, 24, 3 };
+	size_t g = xprogram_descs_grow(&block, 1, lines, sizeof lines, grown, sizeof grown);
+	static const uint8_t entry[] = { 0xE8, 2, 0xF1, 0, 0, 0x0E, 0xE9, 0x9E, 0x02, 0xEE, 0xFF, 0, 0, 0xE6 };
+	CHECK(g == 25 + 2 + sizeof entry && grown[1] == g && grown[4] == 8 && grown[6] == 9 && grown[8] == 21 && grown[10] == 23 &&
+		!memcmp(grown + 12, descs + 10, 15) && !memcmp(grown + 27, entry, sizeof entry),
+		"program 48: the descriptions with one more entry, in the second's frame, every offset two on (%u bytes)", (unsigned)g);
+	CHECK(!xprogram_descs_grow(&cut, 1, lines, sizeof lines, grown, sizeof grown), "program 48: descriptions whose length is not their word's are refused");
+	CHECK(!xprogram_descs_grow(&block, 1, lines, sizeof lines, grown, 30), "program 48: descriptions that do not fit are refused");
+	/* without BN5's ROM: no program 48 anywhere */
+	NaviShape shape;
+	CHECK(!xprogram_soult() && !navicust_in_pool(XPROGRAM_SOULT) && !navicust_shape(XPROGRAM_SOULT * 4, &shape) && !navicust_color(XPROGRAM_SOULT),
+		"program 48: none without BN5's ROM");
+	/* a made-up BN5 ROM: SoulT+1's four records (white, pink, yellow, none), its 2x2, its name and its description */
+	uint8_t *rom5 = calloc(ROM_SIZE, 1), *rom6 = calloc(ROM_SIZE, 1);
+	if (!rom5 || !rom6) { CHECK(false, "program 48: no memory for the made-up ROMs"); free(rom5); free(rom6); return; }
+	const uint32_t bus = 0x08000000u, at_shape = 0x00100000u, at_rec = BN5_NCP_RECORDS - bus + 16u * 4 * BN5_NCP_SOULT;
+	static const uint8_t colors[4] = { 1, 3, 2, 0 };
+	for (uint32_t v = 0; v < 4; ++v) {
+		const uint8_t rec[16] = { 0, 1, 1, colors[v], 2, 0xFF, 0xFF, 0xFF, (uint8_t)at_shape, (uint8_t)(at_shape >> 8), (uint8_t)(at_shape >> 16), 8,
+			(uint8_t)at_shape, (uint8_t)(at_shape >> 8), (uint8_t)(at_shape >> 16), 8 };
+		memcpy(rom5 + at_rec + 16 * v, rec, sizeof rec);
+	}
+	memcpy(rom5 + at_shape, five, sizeof five);
+	/* (its name "SoulT+1" in BN5's codes, the plus 0x99, which BN6 spells 0x9E) */
+	static const uint8_t name5[] = { 0x1D, 0x34, 0x3A, 0x31, 0x1E, 0x99, 0x02, 0xE6 };
+	uint8_t *names5 = rom5 + (BN5_NCP_NAMES - bus);
+	names5[2 * BN5_NCP_SOULT] = 200;
+	memcpy(names5 + 200, name5, sizeof name5);
+	/* (its description: the frame, two lines, the frame) */
+	uint8_t raw5[4 + 2 * (BN5_NCP_SOULT + 1) + 16] = { 0 }, lz5[4 + 9 * ((sizeof raw5 + 7) / 8) + 3];   /* (lz_literal's room: whole blocks of eight, then its padding) */
+	static const uint8_t about5[] = { 0xE8, 2, 0xF1, 0, 0, 0x0E, 0xE9, 0x99, 0x02, 0xEE, 0xFF, 0, 0, 0xE6 };
+	raw5[4 + 2 * BN5_NCP_SOULT] = 2 * (BN5_NCP_SOULT + 1);
+	memcpy(raw5 + 4 + 2 * (BN5_NCP_SOULT + 1), about5, sizeof about5);
+	memcpy(rom5 + (BN5_NCP_DESCS - bus), lz5, lz_literal(raw5, sizeof raw5, lz5));
+	XProgram x;
+	static const uint8_t name6[] = { 0x1D, 0x34, 0x3A, 0x31, 0x1E, 0x9E, 0x02 }, about6[] = { 0x0E, 0xE9, 0x9E, 0x02 };
+	CHECK(xprogram_read(rom5, BN5_NCP_SOULT, &x) && x.name_len == sizeof name6 && !memcmp(x.name, name6, sizeof name6) && x.about_len == sizeof about6 &&
+		!memcmp(x.about, about6, sizeof about6) && x.head[1][3] == 3 && x.head[0][1] == 1 && !memcmp(x.shape, seven, sizeof seven) && !memcmp(x.small, seven, sizeof seven),
+		"program 48: BN5's record read: its name and lines in BN6's codes, its colours, its shape in seven by seven");
+	CHECK(!xprogram_read(rom5, BN5_NCP_SOULT + 1, &x), "program 48: a record of no colour and no shape is refused");
+	/* the draft with BN5's ROM read and a made-up BN6 ROM of no records: nothing of BN6's fits, so the draft is what SoulT+1's rule adds */
+	static RomLayout layout;
+	layout.navicust_programs = 0x13B22C;
+	uint8_t *was5 = XR[XROM_BN5_COLONEL_US].data;
+	XR[XROM_BN5_COLONEL_US].data = rom5;
+	R.data = rom6;
+	R.layout = &layout;
+	NaviProgram p[NAVICUST_DRAFT];
+	CHECK(xprogram_soult() && navicust_in_pool(XPROGRAM_SOULT) && navicust_shape(XPROGRAM_SOULT * 4 + 1, &shape) && shape.color == 3 && shape.kind == NAVI_PLUS &&
+		!navicust_shape(XPROGRAM_SOULT * 4 + 3, &shape), "program 48: its variants' shapes with BN5's ROM read, none for the colourless");
+	rng_seed(7);
+	CHECK(!navicust_offerable(XPROGRAM_SOULT, 18) && navicust_draft_fitting(9, p, NULL, 0, 4, 4) == 0, "program 48: not offered while the run holds no Soul");
+	navicust_set_soul(true, false);
+	CHECK(navicust_offerable(XPROGRAM_SOULT, 3), "program 48: offerable from the first act while the run holds a Soul");
+	navicust_set_soul(true, true);
+	int got = navicust_draft_fitting(3, p, NULL, 0, 4, 4);
+	CHECK(got == 1 && p[0].program == XPROGRAM_SOULT && (p[0].color == 1 || p[0].color == 2 || p[0].color == 3), "program 48: a Soul's guardian's draft leads with it (%d picks)", got);
+	static const uint8_t held[1] = { XPROGRAM_SOULT * 4 };
+	CHECK(navicust_adds_nothing(XPROGRAM_SOULT, held, 1) && navicust_draft_fitting(3, p, held, 1, 4, 4) == 0, "program 48: not offered beside the one held");
+	navicust_set_soul(false, false);
+	R.data = NULL;
+	R.layout = NULL;
+	XR[XROM_BN5_COLONEL_US].data = was5;
+	CHECK(!xprogram_soult(), "program 48: gone with BN5's ROM");
+	free(rom5);
+	free(rom6);
 }
 
 static void test_depth_plan(void) {
@@ -2537,6 +2637,7 @@ static void test_navicust(void) {
 				p[k].program == 13 || p[k].program == 25 || (p[k].program >= 35 && p[k].program <= 37) ||
 				p[k].program == 41 || p[k].program == 42, "act 1's guardian offered program %d", p[k].program);
 			if (depth <= 18) CHECK(p[k].program < 44, "the first cycle offered HP+%d00", p[k].program - 41);
+			CHECK(p[k].program <= 46, "depth %d: program %d offered with no Soul held", depth, p[k].program);
 			if (p[k].program <= 46) ++offered[p[k].program];
 		}
 	}
@@ -7225,6 +7326,7 @@ int main(void) {
 	test_walks();
 	test_way_links();
 	test_navicust();
+	test_xprograms();
 	test_depth_plan();
 	test_pacing();
 	test_town_moves();

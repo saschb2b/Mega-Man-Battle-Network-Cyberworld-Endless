@@ -151,7 +151,7 @@
 #define BN6_AI_POWER_CHAOS    0x11       /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */
 #define BN6_AI_CHARGE         0x1D        /* u8 his charge: 0 none, 1 charging, 2 full (both games' 0x08012F30 / 0x080105B0) */
 #define BN6_AI_CHARGE_BUTTON  0x1E        /* u8 ... its button: 1 A, 2 B (0x08012EEC, 0x08012F02) */
-#define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */
+#define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: the turns BN5's SoulT+1 adds to a Soul's three, 1-9 in all (BN5's OK; the engine's Souls); BN6's 0x0802A118 adds it to a Cross's or a Beast Out's record's turns (BN6_RECORD_TURNS), which no code of Gregar's reads */
 /* The hooks (soulunite.c, soullife.c; docs/engine/emulation/hooks.md) */
 #define BN6_UNITE_STAND       0x08027EC6u /* tst r0,r0 after Beast Out's test (0x08029FB0, r0) in the Custom screen's set-up: element 0xB stands */
 #define BN6_EMBLEM_LIT        0x0802A57Au /* the emblem's lit test (push {r4,lr}; r0 1 lit): the set-up's (0x08027ECC) and the picks' (0x08028F64) */

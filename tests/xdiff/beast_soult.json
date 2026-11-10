@@ -1,0 +1,165 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "SoulT+1 lengthens no Beast Out (the owner's call of 10 November 2026: Souls only, docs/game/navicust.md, 11): beast_out's battle with BN5's SoulT+1, BN6's program 48, placed on BN6's own NaviCust board and compiled by BN6 before the battle (ncp6: his NaviStats' extra turns 1, as soul_soult has them). Beast Out lasts its three turns all the same, to the frame.",
+ "kind": "engine",
+ "frames": 2300,
+ "flags6": [
+  "00E0"
+ ],
+ "folder6": [
+  "0001"
+ ],
+ "deck6": [
+  "0001"
+ ],
+ "souls6": "10",
+ "ncp6": "C0:2:2",
+ "cust6": {
+  "1": [
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ],
+  [
+   1560,
+   "L",
+   3
+  ],
+  [
+   2080,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "form": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     523,
+     "0x0B"
+    ],
+    [
+     1043,
+     "0x0B"
+    ],
+    [
+     1563,
+     "0x0B"
+    ],
+    [
+     1564,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "soul": [
+    [
+     1,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "hp": [
+    [
+     2300,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "beast_out's own course, unchanged: BN6 times a Beast Out by its counter (battle NaviStats +0x21), which program 48's routine does not touch; the byte it sets (+0x32) reaches only the Cross record's turns through 0x0802A118 (0x08015952's third argument, +3), which no code of Gregar's reads, and the engine's Souls (soulunite.c). So the form is 0x0B to t1563 and MegaMan's own from t1564, as without the program."
+}

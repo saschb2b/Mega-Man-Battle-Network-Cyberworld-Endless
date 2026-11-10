@@ -257,12 +257,12 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "name": "BN5's NaviCust programs",
-      "state": "designed",
-      "now": "The seven programs BN5 has alone are located and read in its ROM: the records (5 x 5 shapes), the names, the effects' table, each program's routine and what reads the NaviStats byte it sets. SoulT+1 adds to a Soul's turns; MegaVirs and GigaVirs raise a battle's enemies a version or two; SoulClen changes the dark meter's rise; Chivalry the L button's talk; AutoRun the run on the net; HubBatc calls eight programs' routines.",
-      "left": "SoulT+1 to build as a program number of its own in BN6's tables, 48 (47 is the NaviCust's RUN item, seen in play): the records, the effects' table (47 routines), the names' archive (entries past 46 are other labels) and the descriptions' (compressed, 48 entries) each grown by one; BN6 keeps the byte it sets and the engine's Souls read it. The other six cut (docs/multirom/gaps.md). BN5's side was read as code, none run in romlab.",
+      "state": "proven",
+      "now": "BN5's SoulT+1 is BN6's NaviCust program 48 where BN5's ROM is read (src/emu/xncp.c): BN6's records, effects, compression codes, descriptions and names each grown by one in the core's copy, the words of BN6's code that name them repointed, the NaviCust's list made to go on past RUN's key item and list RUN last. It shows on BN6's own NaviCust screen with BN5's name, shape and lines, RUN answers OK, and a run hands it out in a Soul's guardian's draft and, while it holds a Soul, in the drafts and the workshop's list. Proved by the differential: each game's own compile gives its NaviStats one extra turn (ncp5, ncp6: BN5's on the guest's core by a call from its main loop), and KnightSoul lasts four turns in both, every frame (soul_soult PASS, three mutations caught). A Beast Out is not lengthened (the owner's call: Souls only): BN6 times it by its own counter, NaviStats +0x21, and reads the byte only into a record's field nothing reads; it ends on the same frame with the program placed as without (beast_out, beast_soult PASS, two mutations caught). The other six programs BN5 has alone are located, read and cut (docs/multirom/gaps.md).",
+      "left": "The link's program trade's screen and check stop before RUN's item and list no program 48 (no run reaches them). BN5's NaviCust screen itself was not driven: its compile was run on its board, written from the spec. Not seen on a device.",
       "updated": "2026-11-10",
       "link": "../rom/navicust.md",
-      "state_text": "Designed, not built"
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],

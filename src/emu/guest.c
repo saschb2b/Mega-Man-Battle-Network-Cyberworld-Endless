@@ -277,6 +277,47 @@ bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed
 
 bool guest_battling(void) { return active; }
 
+/* guest_call's hook on the main loop's `bx r0`: the first pass saves where
+ * the loop was going and goes to the routine, which returns to this same
+ * instruction; the second puts the loop's own r0 and lr back and lets it
+ * run. r1-r3 and r12 are the routine's to change: the mode's routine takes
+ * no arguments. */
+static struct { uint32_t fn, r0, lr; int step; } gcall;   /* (step: 0 none, 1 asked, 2 running, 3 returned) */
+
+static HookAct call_hook(HookRegs *regs, void *user) {
+	(void)user;
+	if (gcall.step == 1) {
+		gcall.r0 = regs->r[0];
+		gcall.lr = regs->lr;
+		regs->lr = regs->pc | 1u;
+		regs->r[12] = gcall.fn | 1u;
+		gcall.step = 2;
+		return HOOK_JUMP;
+	}
+	if (gcall.step == 2) {
+		regs->r[0] = gcall.r0;
+		regs->lr = gcall.lr;
+		gcall.step = 3;
+	}
+	return HOOK_CONTINUE;
+}
+
+bool guest_call(uint32_t fn) {
+	static bool hooked;
+	if (!ready || active || G != &bn5 || !G->on_map()) return false;
+	if (!hooked && !(hooked = hook_on(hook_core(core), BN5_MAIN_CALL, call_hook, NULL))) return false;
+	gcall.fn = fn;
+	gcall.step = 1;
+	for (int f = 0; f < 30 && gcall.step != 3; ++f) {
+		core->setKeys(core, 0);
+		core->runFrame(core);
+		emu_audio_drop_from(core);
+	}
+	bool done = gcall.step == 3;
+	gcall.step = 0;
+	return done;
+}
+
 bool guest_hook(uint32_t addr, EmuHook fn, void *user) { return ready && hook_on(hook_core(core), addr, fn, user); }
 
 static void finish(void) {
@@ -311,6 +352,7 @@ void guest_write16(uint32_t a, uint16_t v) { (void)a; (void)v; }
 void guest_write32(uint32_t a, uint32_t v) { (void)a; (void)v; }
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed) { (void)record; (void)len; (void)hp; (void)seed; return false; }
 bool guest_battling(void) { return false; }
+bool guest_call(uint32_t fn) { (void)fn; return false; }
 bool guest_hook(uint32_t addr, EmuHook fn, void *user) { (void)addr; (void)fn; (void)user; return false; }
 void guest_frame_quiet(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }

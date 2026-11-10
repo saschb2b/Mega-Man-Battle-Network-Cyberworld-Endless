@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
@@ -69,7 +69,9 @@ run (`title`, `saves`, `launcher`), and in it BN6's (`map`, `town`,
 reading of BN6's modes (`src/dev/screen_name.c`). Ask for no picture
 (`picture: false`, `--no-picture`) when the screen and the state's other
 lines answer the question: a call of words only costs a tenth of one with
-a picture. A `play` call says only what changed (`doing battle (was
+a picture. Among the state's lines, `soulturns +1` stands while
+MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
+run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
 
 **Pictures** are the game's 240x160 cut from the canvas, at 2x for one

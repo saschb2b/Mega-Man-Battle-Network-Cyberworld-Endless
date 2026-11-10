@@ -10,6 +10,7 @@
 #include "bn6.h"
 #include "foes.h"
 #include "xdiff_events.h"
+#include "xdiff_ncp.h"
 
 #define MAX_KEYS  128
 #define MAX_POKES 8
@@ -55,6 +56,8 @@ typedef struct {
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
 	int soulbreak;                             /* ... a Soul's look, abilities or passives broken (soulunite.h's SOULBREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
+	struct { int variant, col, row; } ncp[2];  /* a NaviCust program placed on each game's own board ([0] BN5's, [1] BN6's: its variant, program x 4
+	                                              + colour, and where), and each game's own compile run before the battle; variant 0 none */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	bool dark;                                 /* MegaMan dark as the battle begins: BN5's dark meter under 470, BN6's engine the same
 	                                              (soulmood.h's soulmood_dev_dark; the Souls installed, souls6) */
