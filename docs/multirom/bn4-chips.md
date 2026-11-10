@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:37:36Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:57:10Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -207,7 +207,9 @@ and ShadeMan's DS the registry's rows of BN5's, ProtoMan's DS and
 BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
 object's +0x94, his dark sprite, what else his karma changes); a dark
 chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
-and the comparison explains his look from both games' code.
+and the comparison explains his look from both games' code: his
+palette, BN4's dark 2 against BN6's 0, the one difference of him
+(`bn4_chip_invis_dark`, [The differential](../devtools/differential.md)).
 
 **The dark units, read** (10 November 2026; [BN4 Red Sun's
 tables](../rom/bn4.md), The panel changer and the Hole panel). With the

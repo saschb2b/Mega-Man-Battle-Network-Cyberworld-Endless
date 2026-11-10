@@ -12,6 +12,7 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: devtools/differential.md and multirom/bn4-chips.md (a dark MegaMan's palette, BN4's own, the comparator's one allowance for a dark karma; `bn4_chip_invis_dark`).
 * **Update**: rom/bn4.md (The panel changer and the Hole panel, new row; `BN4_PANEL_HOLE` named) and multirom/bn4-chips.md (the dark units read, why each waits; call 7 with BlakWeap; call 8, the Hole panel, which a DS Navi chip's power counts), code/emu.md (`bn4_panels.h`).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
 * **Update**: game/navicust.md (11: the owner's call, Souls only; a Beast Out is not lengthened and needs no hook, the first write-up's claim corrected), rom/navicust.md (BN6's one read of the turn byte and what times a Beast Out), multirom/gaps.md, devtools/differential.md (`beast_out`, `beast_soult`; an engine spec takes a mutation's poke).
