@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:28:56Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:37:36Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -232,9 +232,14 @@ whole field, ten at most, and reads the chip's power from its row of
 `BN4_DS_POWERS`, a step a Hole: RollDS 30 with none and 80 with ten,
 GutsMnDS 100 and 200, FireMnDS 150 and 250, MetlMnDS 200 and 300. Hole
 adds one, DrkLine a row, DrkStage MegaMan's whole side (and poisons the
-other). No test that refuses a DS chip without a Hole was found; the
-players' account that it needs one is the floor a field with none
-gives. Six more places test for a Hole (the map's row): a light Navi
+other). Seen in BN4's own battle (scratch runs of the differential's
+harness with `karma4` 0, filmed): DrkStage leaves MegaMan's nine panels
+Holes and the other side's nine poison, the foe's HP falling; DrkLine
+turns his row's six panels Holes, the three on the other side too; and
+RollDS used on a field with no Hole plays and takes 90 of a foe's 180
+HP, three hits of 30, the table's last column. So no DS chip is refused
+for want of a Hole: the players' account that it needs one is the floor
+a field with none gives. Six more places test for a Hole (the map's row): a light Navi
 standing on one cleanses it, two random pickers ask whether a row has
 one, one leaves it out, one attack turns a column of them plain. So the
 panel chips and the DS Navi chips are one design: a dark MegaMan gives
