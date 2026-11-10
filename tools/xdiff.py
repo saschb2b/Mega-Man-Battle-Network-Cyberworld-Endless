@@ -176,6 +176,11 @@ def megaman_items(spec):
             parts.append(f'deck{g}=' + ','.join(spec[f'deck{g}']))
         for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    # (a BN4 spec's reference: its folder and its Custom screens' keys, src/dev/xdiff_bn4.c's xd4_folder_put)
+    if spec.get('folder4'):
+        parts.append('folder4=' + ','.join(spec['folder4']))
+    for screen, steps in sorted(spec.get('cust4', {}).items(), key=lambda x: int(x[0])):
+        parts.append(f'cust4={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
     if spec.get('souls6'):
         parts.append(f'souls6={spec["souls6"]}')
     if spec.get('unitebreak'):

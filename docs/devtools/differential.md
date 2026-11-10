@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:38:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:39:06Z }
 ---
 
 # The differential: a moved family against its own game
@@ -31,6 +31,20 @@ keys are its own (each Custom screen START, then A; the buster while it
 fights; A through the results); `--dev god` and `onehit` hold MegaMan's HP
 and the enemies' at 1 in its battle; `film=` keeps its frames by the
 guest's frame.
+
+A BN4 chip's spec (unit 3 of [BN4's chips in a run](../multirom/bn4-chips.md)):
+`folder4=` gives the guest's first folder (hex entries, chip | code << 9,
+as `folder5`), written after its battle is asked, which sets its own, with
+each chip's byte of the save's copy that BN4's gate reads against its key
+(`BN4_CHIP_GATE`, `xd4_folder_put`); `cust4=` scripts its Custom screens
+as `cust5` does BN5's. BN4's cursor slides to OK, so its keys are spaced:
+`cust4=1:-.10/A.2/-.18/START.2/-.18/A.2` picks the first chip and ends
+the screen. `bn4_chip_cannon_control` is that battle fought twice, the
+same: MegaMan holds BN4's Cannon, fires it at fight frame 30 and deletes
+the Mettaur (seen by `film=`, which in the trace's mode took BN6's core's
+picture for a BN4 reference until this). Against BN6's Cannon the two
+battles part at t32, MegaMan's action and his attack's variables numbered
+otherwise in BN4: his maps are the comparator's next piece.
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and

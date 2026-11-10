@@ -106,15 +106,15 @@ how to verify it.
 | Fields of structures | 179 | 42 | 3 |
 | Event flags | 35 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
-| Constants, sizes and counts | 541 | 289 | 287 |
-| All | 2181 | 1378 | 745 |
+| Constants, sizes and counts | 541 | 289 | 288 |
+| All | 2181 | 1378 | 746 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | PET, mail and key items | 72 | 1 | 1 |
 | Shops and traders | 39 | 0 | 0 |
 | NaviCust | 22 | 1 | 0 |
-| Chips and folders | 346 | 265 | 25 |
+| Chips and folders | 346 | 265 | 26 |
 | Battle | 584 | 392 | 217 |
 | Text and fonts | 43 | 8 | 4 |
 | Sound | 19 | 30 | 14 |
