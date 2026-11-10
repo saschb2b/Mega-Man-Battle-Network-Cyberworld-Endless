@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
 * **Update**: multirom/bn4-chips.md (Boomer1-3 moved; every sprite a unit draws copied), rom/bn4.md (Boomer's code, new row), devtools/chip-recipe-generator.md (a sprite's copy).
 * **Update**: multirom/bn4-chips.md (WhitWeb1-3 moved, three chips on one block; what is next), rom/bn4.md (WhitWeb's code, new row), devtools/chip-recipe-generator.md (a unit of several subfamilies).
 * **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).

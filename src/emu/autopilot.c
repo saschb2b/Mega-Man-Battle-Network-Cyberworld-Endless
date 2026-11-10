@@ -353,8 +353,9 @@ static int chip_worth(int id, int hurt) {
  * column), the Atk+ after them, a recovery last */
 /* The hand's chip i (chip | code << 9), 0xFFFF for none, and for a
  * DarkChip of either net's (BN6's own, the registry's of BN5's: every kind,
- * darkchips.h), never picked, as it costs the run max HP (docs/game/meta/) */
-static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0; }
+ * darkchips.h) or a dark chip of BN4's, never picked, as it costs the run
+ * max HP (docs/game/meta/) */
+static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0 || dark_bn4_is(id); }
 
 static int hand_chip(int i) {
 	int c = B->r16(B->deck + 2 * (uint32_t)i);

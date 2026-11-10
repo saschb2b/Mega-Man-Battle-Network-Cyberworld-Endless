@@ -2,7 +2,7 @@
  * the chips a run has none of by name or by Navi, each with its id in BN6's tables, fixed here. Written by
  * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its twin and subfamily where its
  * record runs on BN6's code, its codes, class and MB,
- * which its placeholder keeps where BN4's ROM is not read). 527-602 the chips that play first, 605-623 its Program
+ * which its placeholder keeps where BN4's ROM is not read; and which rows are BN4's dark chips). 527-602 the chips that play first, 605-623 its Program
  * Advances, 635 on the rest. */
 #include "xchips_registry.h"
 
@@ -205,3 +205,9 @@ const int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);
 /* BN4's chips that are a chip of BN6's under another spelling: BN4's id, BN6's (pair_bn4) */
 const uint16_t xreg4_alias[][2] = { { 201, 182 } };
 const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);
+/* BN4's dark chips among the rows, by their id in BN6's tables: a record whose alignment is dark or a DarkChip's (xreg4_dark) */
+const uint16_t xreg4_dark_ids[] = {
+	527, 695, 696, 601, 594, 562, 697, 528, 534, 537, 543, 549, 546, 540, 702, 705,
+	552, 555, 708, 711, 714, 717, 720, 723, 726, 730, 531, 605,
+};
+const int xreg4_dark_count = (int)(sizeof xreg4_dark_ids / sizeof *xreg4_dark_ids);
