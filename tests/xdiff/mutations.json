@@ -2741,6 +2741,62 @@
     "088F0304:01DA"
    ],
    "what": "the shim of WhitWeb's unit's home that plays the web's sound (its first, at XC4_HOMES + 0x1000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DE"
+  },
+  {
+   "name": "Meteors' count another",
+   "spec": "bn4_chip_meteors1_miss",
+   "poke": [
+    "080EAE34:2003"
+   ],
+   "what": "Meteors' controller's copy (BN4's fourth-kind 0x81, moved with the unit) counting three meteors where BN4's counts five (movs r0,#5 at BN4 0x080EAE34, stored at its +0x22): the last two never fall"
+  },
+  {
+   "name": "Meteors' pace another",
+   "spec": "bn4_chip_meteors1",
+   "poke": [
+    "080EAE4C:200A"
+   ],
+   "what": "Meteors' controller's copy waiting 10 frames between meteors where BN4's waits 20 (movs r0,#0x14 at BN4 0x080EAE4C, its timer at +0x20): the second meteor on the Mettaur ten frames early"
+  },
+  {
+   "name": "Meteors' star's kind another",
+   "spec": "bn4_chip_meteors1_miss",
+   "poke": [
+    "080EAE56:2402"
+   ],
+   "what": "Meteors' controller's copy asking ShotStar's star's spawner for kind 2 of the star's kinds (movs r4,#6 at BN4 0x080EAE56 made #2: another sprite's row of the table) where BN4's asks for kind 6"
+  },
+  {
+   "name": "Meteors' controller's type another",
+   "spec": "bn4_chip_meteors1",
+   "poke": [
+    "080EAE70:20DF"
+   ],
+   "what": "Meteors' controller's spawner's copy (its movs r0,#0x81 at BN4 0x080EAE70, the recipe's dispatch number) naming the dispatch's fourth-kind 0xDF, a number no recipe moved a type to: no controller, no meteor"
+  },
+  {
+   "name": "Meteors2's row's power another",
+   "spec": "bn4_chip_meteors2",
+   "poke": [
+    "08C0741E:0032"
+   ],
+   "what": "the registry's record of BN4's Meteors2 (675 at CHIPS_RECORDS) with power 50, Meteors1's, where BN4's record holds 60: the Mettaur left 90 and 40 HP where BN4's meteors leave it 80 and 20"
+  },
+  {
+   "name": "Meteors3's row's subfamily another",
+   "spec": "bn4_chip_meteors3",
+   "poke": [
+    "08C0743C:8B:1"
+   ],
+   "what": "the registry's record of BN4's Meteors3 (676) naming BN6's grown misc routine 0x8B, Repair's, where its row gives it 0x91: no meteor falls, the Mettaur untouched"
+  },
+  {
+   "name": "Meteors' aim in the top row",
+   "spec": "bn4_chip_meteors1_miss",
+   "poke": [
+    "0801617A:2101"
+   ],
+   "what": "BN6's 0x08016168, the routine Meteors' unit's call to BN4's 0x0800FC48 is aimed at (its twin instruction for instruction, tools/xchiprecipe_bn4.py TWINS), searching row 1 (its ldrb r1,[r5,#0x13] at 0x0801617A, the object's row, made movs r1,#1) where MegaMan stands in row 2: the meteors on another panel"
   }
  ]
 }
