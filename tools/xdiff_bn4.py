@@ -320,6 +320,11 @@ def megaman_chip_as_bn6(ai, canon):
     if not rule or ai is None:
         return ai
     ai, ids, roms = bytearray(ai), canon.chips, canon.roms
+    lock = bn4_rule('megaman_lockout')
+    if lock:   # (his lock-out after a chip, the attack's end's store: BN4's place read at BN6's, legit.json's bn4 megaman_lockout)
+        b4, b6 = int(lock['bn4'], 0), int(lock['bn6'], 0)
+        if not ai[b6] and not ai[b4 + 1]:
+            ai[b6], ai[b4] = ai[b4], 0
     for at in rule['places']:
         chip = ai[at] | ai[at + 1] << 8
         if chip not in ids:
@@ -1116,11 +1121,18 @@ def bn4_renderer(fa, fb, fam, last):
             ranks_into(f, group, last)
 
 
+def chip_spec():
+    """whether the spec's subject is MegaMan (a chip's spec): there a moved object that is not the foe's family's is a chip
+    unit's (src/emu/xchips_bn4.c), which BN4's own battle runs as its own object of that type, a native there: ranked with
+    the natives in both games, so its renderer places meet"""
+    return 'megaman' in SPEC_SUBJECT
+
+
 def is_native(o, fam):
     """an object of the world each engine runs as its own and draws from its own art, ranked among its kind by bn4_renderer:
-    the third or fourth kind, not moved, not the family's, not a hit's spark (its life its own art's), not BN6's
-    MegaMan's companion (BN6's alone)"""
-    return o.role not in fam and o.kind in ('T3', 'T4') and not o.moved and not is_spark(o.role) and \
+    the third or fourth kind, not moved (but a chip unit's in a chip's spec: chip_spec), not the family's, not a hit's spark
+    (its life its own art's), not BN6's MegaMan's companion (BN6's alone)"""
+    return o.role not in fam and o.kind in ('T3', 'T4') and (not o.moved or chip_spec()) and not is_spark(o.role) and \
         not (o.kind == 'T4' and o.o8(OBJ_TYPE) == 8)
 
 
