@@ -67,4 +67,34 @@ bool xreg_free_id(int bn6);
  * what. */
 int xreg_check(const XChipReg *rows, int n, char *why, size_t len);
 
+/* ---- BN4 Red Sun's rows (docs/multirom/bn4-chips.md, The build plan's unit 2; written by tools/xreg_bn4.py) ----
+ * The chips of Battle Network 4 a run has none of, by name or by Navi and
+ * version: each with its id in BN6's tables, fixed as BN5's are. A table of
+ * their own, so that what walks BN5's rows meets none of them. */
+typedef struct {
+	uint16_t bn4, bn6;   /* BN4's chip id; its id in BN6's tables */
+	uint8_t how;         /* XREG_PENDING: its code is not in BN6's engine yet, it sits out; XREG_PA: a Program Advance, unformed until its recipe is listed */
+	uint8_t codes[4];    /* its codes as BN4's record has them */
+	uint8_t type, mb;    /* its class (BN6's library type: 0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
+} XChipReg4;
+
+#define XREG4_PACK_FIRST 527   /* its first id: 527-602, the ids with a pack entry (bn6_pack_entry), its chips that play first; */
+#define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
+#define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips */
+extern const XChipReg4 xreg4_rows[];
+extern const int xreg4_count;
+
+/* The row of BN4's chip `bn4`, NULL where it has none (the run's chip by
+ * name or Navi: xchips_bn4_paid; or none at all) */
+const XChipReg4 *xreg4_of(int bn4);
+/* The row whose id is `bn6`, NULL where that id is none of BN4's */
+const XChipReg4 *xreg4_at(int bn6);
+/* `n` rows checked against BN5's rows `rows5` (`n5`): every BN4 id once,
+ * every id once, free (xreg_free_id), none of BN5's rows' and from
+ * XREG4_PACK_FIRST; a folder chip's with a pack entry or from
+ * XREG4_REST_FIRST, a Program Advance's in XREG4_PA_FIRST to
+ * XREG4_REST_FIRST - 1. 0 where they hold, else the first row's index + 1
+ * that does not, `why` saying what. */
+int xreg4_check(const XChipReg4 *rows, int n, const XChipReg *rows5, int n5, char *why, size_t len);
+
 #endif

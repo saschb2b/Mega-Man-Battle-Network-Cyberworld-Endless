@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T23:08:32Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:03:14Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -231,7 +231,7 @@ The plan; [BN4's Navis](bn4-navis.md); [BN4's Souls](bn4-souls.md)):
 
 | Gap | State | Size |
 | --- | --- | --- |
-| Phase 4, its chips (about 225 names neither game has, Navi chips, Program Advances, Gigas, DarkChips; the registry past 512) | Being designed by another agent | **L** |
+| Phase 4, its chips (175 folder chips and 19 Program Advances a run has none of; [BN4's chips in a run](bn4-chips.md)) | Registered (unit 2, 10 November 2026): ids 527-733, records, names, descriptions and art from BN4's ROM, each sitting out until its code plays; the differential's BN4 path and the moved units next; only 527-602 have a pack entry | **L** |
 | Its remaining Navis: LaserMan (opens the second build), MetalMan, JunkMan, SparkMan, TopMan, ColdMan, BurnerMan, VideoMan, KendoMan, Duo | 8 of 18 moved (GutsMan, ThunderMan, WindMan, FireMan, SearchMan, AquaMan, WoodMan, Roll) | **M** each, LaserMan and Duo more; **L** together |
 | Its moved Navis as guardians of its own areas | The eight fight only in the tournament (past the Nest, act 3 in half the runs); a BN4-dressed act ends at a BN6 guardian ([Status](status.md): no `xguard`) | **S-M**: where its records set each, the band's HP, a BN6 Navi chip as his Guardian Data until Phase 4 |
 | Its remaining families: VolGear, Gaia, Boomer, MagTect, Dharma, Kilby, Weather, Spidy, Moloko, and Black Earth's NavBlack and NavShado | 7 moved (Billy, Spikey, Shrimpy, Walla, Elmperor, CirKill visiting; Melody and Mettaur for Roll's summon) | **M** each; its areas' own random battles wait on them (call 10) |

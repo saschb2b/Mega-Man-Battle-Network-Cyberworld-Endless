@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-10
+* **Update**: multirom/bn4-chips.md (unit 2 built: BN4's 194 registry rows, ids 527-733), multirom/chip-registry.md, multirom/gaps.md (Phase 4), rom/bn4.md (Its chips' texts and art, new row), code/core.md, code/emu.md, code/tools.md (`xchips_registry_bn4.c`, `bn4_chips.h`, `tools/xreg_bn4.py`).
 * **Update**: rom/navicust.md (BN6's program numbers, new row) and multirom/gaps.md (SoulT+1): BN6's program 47 is the NaviCust's RUN item, seen in play; SoulT+1 takes a number of its own.
 * **Update**: code/platforms.md (`vita/pad.c`: the Vita's ELF linked again with a pad where `vita-elf-create` finds no room after the code).
 

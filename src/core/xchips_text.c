@@ -6,3 +6,7 @@
 void xchips_text_name(int bn5, char *out, size_t n) { snprintf(out, n, "BN5-%d", bn5); }
 
 const char *const xchips_text_desc[3] = { "Needs BN5", "ROM back", "to battle" };
+
+void xchips_text_name4(int bn4, char *out, size_t n) { snprintf(out, n, "BN4-%d", bn4); }
+
+const char *const xchips_text_desc4[3] = { "Needs BN4", "ROM back", "to battle" };
