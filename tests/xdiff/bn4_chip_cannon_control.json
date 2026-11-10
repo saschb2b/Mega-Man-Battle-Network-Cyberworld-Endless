@@ -1,0 +1,48 @@
+{
+ "about": "BN4 Red Sun's Cannon (its chip 1, code A) from MegaMan's folder against its Mettaur at (5,2), MegaMan at (2,2) with 200 HP: BN4's own battle on the guest core fought twice, each in a process of its own, the same frame for frame. A chip spec's control: the folder given after the battle is asked (folder4), each chip through BN4's gate (BN4_CHIP_GATE: its byte of the save's copy its key XOR 0x64), the first chip picked on the first Custom screen by keys timed for BN4's cursor (A, then START and A 18 frames apart: its cursor slides to OK) and used at fight frame 30: MegaMan holds Cannon, fires it and deletes the Mettaur on a counter hit (seen by film).",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 200,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "folder4": [
+  "0001"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ]
+}

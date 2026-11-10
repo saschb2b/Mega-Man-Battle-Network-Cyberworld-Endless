@@ -103,9 +103,10 @@ static int entry_list(char *v, int *out, int max, bool bn6) {
 /* MegaMan's setup in each game: event flags, a folder, his buster, kept from harm, the Custom screens' keys; -1 where
  * `name` is none of them */
 static int megaman_parse(Spec *s, const char *name, char *v) {
-	int k = name[strlen(name) - 1] == '5' ? 0 : 1, got[BN6_FOLDER_ENTRIES];
+	/* (the reference's is BN5's or, a BN4 spec's, BN4's: one place, as a spec has one reference) */
+	int last = name[strlen(name) - 1], k = last == '5' || last == '4' ? 0 : 1, got[BN6_FOLDER_ENTRIES];
 	if (!strcmp(name, "flags5") || !strcmp(name, "flags6")) return (s->nflags[k] = hex_list(v, s->flags[k], MAX_FLAGS)) > 0;
-	if (!strcmp(name, "folder5") || !strcmp(name, "folder6")) {
+	if (!strcmp(name, "folder5") || !strcmp(name, "folder6") || !strcmp(name, "folder4")) {
 		int n = entry_list(v, got, BN6_FOLDER_ENTRIES, k == 1);
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->folder[k][i] = (uint16_t)got[i % n];
 		return (s->nfolder[k] = n) > 0;
@@ -116,6 +117,7 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;
 	}
 	if (!strcmp(name, "cust5") || !strcmp(name, "cust6")) return script_parse(s, 5 + k, v);
+	if (!strcmp(name, "cust4")) return script_parse(s, 4, v);
 	if (!strcmp(name, "buster"))
 		return sscanf(v, "%d:%d:%d", &s->buster[0], &s->buster[1], &s->buster[2]) == 3 && s->buster[0] >= 0 && s->buster[0] <= BN5_BUSTER_MAX &&
 			s->buster[1] >= 0 && s->buster[1] <= BN5_BUSTER_MAX && s->buster[2] >= 0 && s->buster[2] <= BN5_BUSTER_MAX;
@@ -288,7 +290,7 @@ void xd_folder_put(const FolderPlaces *p, const uint16_t *folder) {
 		p->wr16(folders + 2 * i, folder[i]);
 		p->wr8(marks + id, (uint8_t)(p->rd8(p->keys + id) ^ p->key_xor));
 	}
-	p->wr8(p->regular, 0xFF);
+	if (p->regular) p->wr8(p->regular, 0xFF);
 	for (uint32_t i = 0; p->tags && i < 2; ++i) p->wr8(p->tags + i, 0xFF);
 }
 
