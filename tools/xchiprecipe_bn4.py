@@ -94,7 +94,7 @@ AUDITS = {
 TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
-UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'))
+UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -102,7 +102,8 @@ CANDIDATES = ()
 # slot a sound whichever unit plays it. A sound not here is a decision: the next slot
 SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
 SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
-               0x146: 0x1DC}                # (ShotStar's star's fall)
+               0x146: 0x1DC,                # (ShotStar's star's fall)
+               0xBE: 0x1DD}                 # (Counter's hit)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -124,9 +125,18 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
-    0x0800C728: ('THUMB_ADDS', 0, 0x68, 0xA0,
-                 "the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD "
-                 "0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both)"),
+    0x0800C728: dict(form='THUMB_ADDS', rd=0, rn=0, was=0x68, now=0xA0,
+                     why="the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD "
+                         "0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both)"),
+    # Counter's walk of the other side's players (0x080CFE1A-0x080CFE2C: its side ^ 1 ^ MegaMan's, lsls #2, adds #0x44, then a
+    # word each): BN6's players a word every 0x10 bytes a side from +0xD0 (tools/xrecipe_bn4.py PLAYERS4, PLAYERS6), the side's
+    # own four 4 apart as BN4's three
+    0x080CFE26: dict(form='THUMB_LSLS', rd=0, rn=0, was=2, now=4,
+                     why="a side's players in the battle state: BN4 a word a side's first from +0x44, BN6 0x10 bytes a side from +0xD0"),
+    0x080CFE28: dict(form='THUMB_ADDS', rd=0, rn=0, was=0x44, now=0xD0,
+                     why="a side's players in the battle state: BN4 +0x44, BN6 +0xD0"),
+    0x080CFE38: dict(form='THUMB_LDRB', rd=1, rn=1, was=0x0B, now=0x0D,
+                     why="a player's collision data's counter byte: BN4 +0xB (BN4_COLL_COUNTER), BN6 +0xD (BN6_COLL_COUNTER)"),
 }
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
@@ -229,15 +239,21 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
     else:
         f.entry = b4.u32(MISC4 + 4 * sub) & ~1
-        hit = X4.t3_of(b4, f.entry) or C.t4_of(b4, f.entry)
-        if hit is not None:
-            f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code ({hit[1]:08X}-{hit[2]:08X}): that type\'s move with a '
-                              f'misc unit is not read yet')
+        hit = X4.t3_of(b4, f.entry)
+        if hit is not None and hit[0] is not None:
+            # (a routine in a third-kind type's code, Counter's in its hit's: the type moved, its region the unit's block)
+            ty, lo, hi = hit
+            f.regions, f.roots = [(lo, hi, ty)], [f.entry, lo]
+            f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
+            f.notes.append(f'its routine ({f.entry:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
+        elif hit is not None or C.t4_of(b4, f.entry) is not None:
+            f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code this tool does not move with a misc unit yet')
             return f
-        # (a routine of BN4's engine by itself: copied, a block of its own)
-        bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
-        f.roots = [f.entry]
-        f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+        else:
+            # (a routine of BN4's engine by itself: copied, a block of its own)
+            bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
+            f.roots = [f.entry]
+            f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
     try:
         roots = list(f.roots)
         while roots:
@@ -320,15 +336,19 @@ def moved3(b4, f, pairs):
 
 def site_imms(f):
     """the immediates of its code IMMS names, each checked against the instruction there"""
+    forms = {'THUMB_ADDS': ('adds8', lambda i: (i.f[0], i.f[0], i.f[1])), 'THUMB_MOVS': ('movs', lambda i: (i.f[0], 0, i.f[1])),
+             'THUMB_LSLS': ('lsls', lambda i: (i.f[0], i.f[1], i.f[2])), 'THUMB_LDRB': ('ldrb', lambda i: (i.f[0], i.f[1], i.f[2]))}
     for e, w in sorted(f.walks.items()):
         for a, i in sorted(w.insns.items()):
-            if a not in IMMS:
+            m = IMMS.get(a)
+            if m is None or any(x['at'] == a for x in f.imms):
                 continue
-            form, rd, was, now, why = IMMS[a]
-            if i.form != {'THUMB_ADDS': 'adds8', 'THUMB_MOVS': 'movs'}.get(form) or i.f[0] != rd or i.f[1] != was:
-                f.decide('immediate', f'{a:08X}: IMMS names {form} r{rd}, #{was:#x} there, the code holds {i.text}')
+            form, read = forms[m['form']]
+            want = (m['rd'], m['rd'] if m['form'] == 'THUMB_ADDS' else 0 if m['form'] == 'THUMB_MOVS' else m['rn'], m['was'])
+            if i.form != form or read(i) != want:
+                f.decide('immediate', f'{a:08X}: IMMS names {m["form"]} r{m["rd"]}, #{m["was"]:#x} there, the code holds {i.text}')
                 continue
-            f.imms.append(dict(at=a, form=form, rd=rd, rn=0, was=was, now=now, why=why))
+            f.imms.append(dict(at=a, form=m['form'], rd=m['rd'], rn=m['rn'], was=m['was'], now=m['now'], why=m['why']))
 
 
 def shallow_twins(b4, f):
@@ -447,30 +467,50 @@ def sprites_of(b4, b6, f, alloc):
             if lst is None or lst & 3 or num is None or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sprite', f'{site:08X}: a sprite loaded by numbers made otherwise ({lst}, {num})')
                 continue
-            tw = X4.bn6_sprite_twin(b4, b6, lst // 4, num)
+            tw, how = X4.bn6_sprite_twin(b4, b6, lst // 4, num), 'the same bytes'
             if tw is None:
-                f.decide('sprite', f'{site:08X}: its sprite {lst // 4}:{num:#x} is no sprite of BN6\'s list {lst // 4}: to be copied')
+                c = list3_copy(b4, f, alloc, num, lst // 4)
+                tw, how = (c['to_index'], 'copied') if c else (None, '')
+            if tw is None:
+                f.decide('sprite', f'{site:08X}: its sprite {lst // 4}:{num:#x} is no sprite of BN6\'s list {lst // 4}, and no number of the chips\' is left for a copy')
                 continue
-            f.notes.append(f'its sprite {lst // 4}:{num:#x} ({site:08X}): BN6\'s {lst // 4}:{tw:#x}, the same bytes')
+            f.notes.append(f'its sprite {lst // 4}:{num:#x} ({site:08X}): BN6\'s {lst // 4}:{tw:#x}, {how}')
             if tw != num:
                 f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=tw,
-                                   why=f'its object\'s sprite: list {lst // 4} {num:#x} in BN4, {tw:#x} in BN6 (the same bytes)'))
+                                   why=f'its object\'s sprite: list {lst // 4} {num:#x} in BN4, {tw:#x} in BN6 ({how})'))
 
 
-def list3_copy(b4, f, alloc, num):
-    """BN4's list 3 sprite `num` copied at a list 3 number of the chips', once for every unit: the copy, None unread or spent"""
-    if num in alloc.list3_sprites:
-        s, who = alloc.list3_sprites[num]
-        if who != f.name:
-            f.notes.append(f'its sprite 3:{num:#x}: list 3 {s["to_index"]:#x}, as {who} copied it')
-        return s
-    p, raw = X4.sprite(b4, X4.BN4['sprites'], 3, num)
-    if raw is None or alloc.list3 >= CHIP_LIST3[1]:
+def list_number(alloc, lst):
+    """the chips' next number of a list (3 up from CHIP_LIST3, 4 and 5 down their ranges), None spent"""
+    if lst == 3:
+        n, ok = alloc.list3, alloc.list3 < CHIP_LIST3[1]
+        alloc.list3 += ok
+    elif lst == 5:
+        n, ok = alloc.late_list5, alloc.late_list5 >= CHIP_LIST5[1]
+        alloc.late_list5 -= ok
+    elif lst == 4:
+        n, ok = alloc.late_list4, alloc.late_list4 >= CHIP_LIST4[1]
+        alloc.late_list4 -= ok
+    else:
         return None
-    s = dict(list=3, index=num, to_list=3, to_index=alloc.list3, at=alloc.art, room=X4.rounded(len(raw), ROOM_SPRITE), lz=bool(p & 0x80000000))
-    alloc.list3 += 1
+    return n if ok else None
+
+
+def list3_copy(b4, f, alloc, num, lst=3):
+    """BN4's sprite `num` of list 3 (or `lst`: 4, 5) copied at a number of the chips' in that list, once for every unit: the
+    copy, None unread or spent"""
+    if (lst, num) in alloc.list3_sprites:
+        s, who = alloc.list3_sprites[lst, num]
+        if who != f.name:
+            f.notes.append(f'its sprite {lst}:{num:#x}: list {lst} {s["to_index"]:#x}, as {who} copied it')
+        return s
+    p, raw = X4.sprite(b4, X4.BN4['sprites'], lst, num)
+    to = list_number(alloc, lst) if raw is not None else None
+    if to is None:
+        return None
+    s = dict(list=lst, index=num, to_list=lst, to_index=to, at=alloc.art, room=X4.rounded(len(raw), ROOM_SPRITE), lz=bool(p & 0x80000000))
     alloc.art += s['room']
-    alloc.list3_sprites[num] = (s, f.name)
+    alloc.list3_sprites[lst, num] = (s, f.name)
     f.attack_sprites.append(s)
     if alloc.art > alloc.art_end:
         f.decide('room', f'its sprite 3:{num:#x} ends at {alloc.art:08X}, past the chips\' art')
