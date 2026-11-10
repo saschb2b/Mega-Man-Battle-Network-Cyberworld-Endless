@@ -94,7 +94,8 @@ AUDITS = {
 TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
-UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'))
+UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'),
+         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -103,7 +104,8 @@ CANDIDATES = ()
 SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
 SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC,                # (ShotStar's star's fall)
-               0xBE: 0x1DD}                 # (Counter's hit)
+               0xBE: 0x1DD,                 # (Counter's hit)
+               0xF7: 0x1DE}                 # (WhitWeb's web)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -217,10 +219,14 @@ def type_number(f, alloc, kind):
 def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f = X4.Family(0, name, 0)
     f.late = True   # (its copies' numbers from the top of the chips' ranges down: CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4)
+    # (a unit of several subfamilies: their routines in one block, the first's the unit's entry, the rest rows that share it)
+    subs = tuple(sub) if isinstance(sub, (tuple, list)) else (sub,)
+    sub = subs[0]
+    f.subs = subs
     f.kind, f.sub, f.number, f.slot = kind, sub, NUMBER0 + sub, slot
     f.b4, f.b6, f.home = b4, b6, X4C_HOMES + X4C_HOME_SIZE * slot
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
-    f.chips = chips_of(b4, kind, sub) if kind in FAMILY4 else []
+    f.chips = [c for x in subs for c in chips_of(b4, kind, x)] if kind in FAMILY4 else []
     if kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines alone are read')
         return f
@@ -243,7 +249,10 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         if hit is not None and hit[0] is not None:
             # (a routine in a third-kind type's code, Counter's in its hit's: the type moved, its region the unit's block)
             ty, lo, hi = hit
-            f.regions, f.roots = [(lo, hi, ty)], [f.entry, lo]
+            f.entries = [b4.u32(MISC4 + 4 * x) & ~1 for x in subs]
+            if any(not lo <= e < hi for e in f.entries):
+                f.decide('entry', f'its subfamilies\' routines do not all lie in the third-kind {ty:#x}\'s code')
+            f.regions, f.roots = [(lo, hi, ty)], f.entries + [lo]
             f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its routine ({f.entry:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
         elif hit is not None or C.t4_of(b4, f.entry) is not None:
@@ -450,8 +459,9 @@ def rows_check(b4, f):
             continue
         bn6, how, sub = rows[i]
         f.rows.append((i, bn6))
-        if how != 'MOVED' or sub != f.number:
-            f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {f.number:#x}: '
+        want = NUMBER0 + r[0xC]   # (its own subfamily's routine: the unit's, or one of the rows that share its code)
+        if how != 'MOVED' or sub != want:
+            f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {want:#x}: '
                             f'tools/xreg_bn4.py MOVED')
 
 
@@ -626,16 +636,22 @@ def c_unit(f):
           f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
-    return '\n'.join(L), (f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-                           f'{n.upper()}_CODE, {songs}, 0 }},')
+    rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
+            f'{n.upper()}_CODE, {songs}, 0, 0 }},']
+    # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
+    for k, x in enumerate(f.subs[1:], 1):
+        rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '
+                    f'{place(f.home + X4C_HOME_SIZE * k, X4C_HOMES, "XC4_HOMES")}, {{ .name = "{f.name} (BN4\'s), its subfamily {x:#x}", '
+                    f'.game = XROM_BN4_RED_SUN_US }}, NULL, 0, 0, SHARE }},')
+    return '\n'.join(L), rows
 
 
 def c_file(units):
     parts, rows = [HEADER], []
     for f in units:
-        t, row = c_unit(f)
+        t, own = c_unit(f)
         parts.append(t)
-        rows.append(row)
+        rows += [x.replace('SHARE', str(len(rows) + 1)) for x in own]   # (a sharing row names its unit's row, 1-based)
     parts.append('const XChipUnit xchips_bn4[] = {\n' + '\n'.join(rows) + '\n};\n'
                  'const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);\n')
     return '\n'.join(parts)
@@ -666,7 +682,10 @@ def main():
     install(pairs)
     alloc = Alloc()
     more = tuple((k, int(s, 0), n) for k, s, n in (u.split(':') for u in a.unit))
-    units = [derive(b4, b6, pairs, k, s, n, alloc, slot) for slot, (k, s, n) in enumerate(UNITS + CANDIDATES + more)]
+    units, slot = [], 0
+    for k, s, n in UNITS + CANDIDATES + more:
+        units.append(derive(b4, b6, pairs, k, s, n, alloc, slot))
+        slot += len(s) if isinstance(s, (tuple, list)) else 1   # (a row a subfamily: each its home's slot)
     os.makedirs(WORK, exist_ok=True)
     with open(os.path.join(WORK, 'bn4_report.md'), 'w', encoding='utf-8') as fh:
         fh.write('# BN4\'s chips\' units (tools/xchiprecipe_bn4.py)\n\n' + '\n'.join(report_unit(f) for f in units))
@@ -675,7 +694,7 @@ def main():
     whole = units[:len(UNITS)]
     if any(f.decisions for f in whole):
         sys.exit('xchiprecipe_bn4: a unit of UNITS has decisions open (.build/xchiprecipe/bn4_report.md): nothing written')
-    if len(whole) > X4C_UNITS:
+    if sum(len(f.subs) for f in whole) > X4C_UNITS:
         sys.exit('xchiprecipe_bn4: more units than homes')
     numbers_clear(whole)
     text = c_file(whole)

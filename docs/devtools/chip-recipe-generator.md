@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T08:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T14:00:00Z }
 ---
 
 # The chip recipe generator
@@ -230,5 +230,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
 Proved by a chip's specs against BN4's own battle ([The
 differential](differential.md), A BN4 chip's spec); a mutation of a
 unit's code names BN4's address, which the runner pokes at its copy.
+A unit of several subfamilies (`UNITS`' tuple: WhitWeb's 8, 9 and 0xA)
+is one block with a routine each: the first is the unit's entry, each
+other a row of the units' table that shares its code (`XChipUnit.share`),
+its entry alone.
+
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
-0x0B) and Counter (misc 0); the units of 300 to 600 bytes are next.
+0x0B), Counter (misc 0) and WhitWeb (misc 8, 9, 0xA); Boomer is next.

@@ -481,6 +481,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x146, SONG_GROWN_FIRST + 2 },
 	/* ... Counter's hit (Repair's 0x9A the families' slot 0x39 above) */
 	{ XROM_BN4_RED_SUN_US, 0xBE, SONG_GROWN_FIRST + 3 },
+	/* ... WhitWeb's web */
+	{ XROM_BN4_RED_SUN_US, 0xF7, SONG_GROWN_FIRST + 4 },
 };
 
 int xsong_sound_slot(int xrom, int song) {
