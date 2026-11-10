@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T08:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T14:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -120,9 +120,22 @@ with the natives for the renderer's places. **Not compared:** what a
 counter starts after the hit, each engine's own Full Synchro object; the
 specs end at the hit.
 
-**Next: the 21 units of 300 to 600 bytes**, in the table's order
-(SidBmbo1-3 first). Marking and the four Plus chips wait on the owner's
-call 7 (no Library number, no picture: chips BN4 never lists).
+**WhitWeb1-3 are moved** (12 November 2026: ids 574-576, misc 8, 9 and
+0xA), the first of the units of 300 to 600 bytes. Their three routines
+are four instructions each, one after another in the web's code (the
+third kind's 0x3D), each handing a row to one common routine: one unit
+moves the block (528 bytes) and the second and third chips' rows of the
+units' table share its code. The web's sprite and effect are copied, its
+sound takes the grown table's 0x1DE. `bn4_chip_whitweb1`, `2` and `3`
+pass over 300 frames, the webs in play in the fight's frames throughout
+(a 140 HP Mettaur on each row left 100), five mutations caught.
+
+**Next:** Boomer1-3 (misc 2: a kinds' table of its object's, a sound),
+MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite of list 1,
+the viruses' list, which needs a range of the chips' there; BN4's misc
+run waits 0x28 frames for subfamily 5, which BN6's run does not for a
+grown routine), BugChain (support 0x1F: two calls of BN4's with no twin
+found). Marking and the four Plus chips wait on the owner's call 7.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
