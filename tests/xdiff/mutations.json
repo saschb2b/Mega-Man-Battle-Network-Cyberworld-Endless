@@ -2701,6 +2701,46 @@
     "08C061BA:0046"
    ],
    "what": "the registry's record of BN4's Counter2 (568) with power 70, Counter1's, where BN4's record holds 110: the Mettaur left 70 HP where BN4's hit leaves it 30"
+  },
+  {
+   "name": "WhitWeb1's row's power another",
+   "spec": "bn4_chip_whitweb1",
+   "poke": [
+    "08C062C2:0014"
+   ],
+   "what": "the registry's record of BN4's WhitWeb1 (574 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur on its row left 120 HP where BN4's web leaves it 100"
+  },
+  {
+   "name": "WhitWeb2's row's subfamily WhitWeb1's",
+   "spec": "bn4_chip_whitweb2",
+   "poke": [
+    "08C062E0:88:1"
+   ],
+   "what": "the registry's record of BN4's WhitWeb2 (575) naming BN6's grown misc routine 0x88, WhitWeb1's entry of the unit's block, where its row gives it 0x89, its own: the webs on the top row, the Mettaur in the middle untouched"
+  },
+  {
+   "name": "WhitWeb3's entry's row another",
+   "spec": "bn4_chip_whitweb3",
+   "poke": [
+    "080D4F36:2101"
+   ],
+   "what": "WhitWeb3's entry's copy (BN4 0x080D4F34, a routine of the unit's block that shares WhitWeb1's code) handing row 1 on (movs r1,#3 at 0x080D4F36 made #1): the webs on the top row, the Mettaur on the bottom untouched"
+  },
+  {
+   "name": "the web's type another",
+   "spec": "bn4_chip_whitweb2",
+   "poke": [
+    "080D4EA0:20CB"
+   ],
+   "what": "the web's spawner's copy (its movs r0,#0x3d at BN4 0x080D4EA0, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no web"
+  },
+  {
+   "name": "the web's sound another",
+   "spec": "bn4_chip_whitweb2",
+   "poke": [
+    "088F0304:01DA"
+   ],
+   "what": "the shim of WhitWeb's unit's home that plays the web's sound (its first, at XC4_HOMES + 0x1000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DE"
   }
  ]
 }
