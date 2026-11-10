@@ -1,0 +1,86 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "05@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "A chip of BN4's as the subject (docs/multirom/bn4-chips.md, unit 3), the comparator's MegaMan mode's first spec: BN4's Cannon A from MegaMan's folder against its Mettaur3 at (5,2), BN4's own battle on the guest core against BN6's engine with BN6's own Cannon A, the chip picked on the first Custom screen in each and used at fight frame 30 (\"subject\": \"megaman\": a difference of MegaMan's or the world's fails it).",
+ "folder4": [
+  "0001"
+ ],
+ "folder6": [
+  "0001"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "verdict": {
+  "is": "FAIL",
+  "at": 33,
+  "why": "BN6's Cannon is its own code: through t32 the two differ only where legit.json's bn4 section explains (BN6's count of the chips held, its attack's entry number, the counter hit's sound, the paralysis's flash, the chip's id); at t33 BN4's cannon is a third-kind object (type 2) MegaMan's +0x4C points at and BN6's a first-kind object of type 0, the run order with it. No chip of a run rests on this spec: a chip both games name plays as BN6's."
+ }
+}

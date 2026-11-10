@@ -1,0 +1,52 @@
+{
+ "about": "The Hole control broken on purpose: its second battle with MegaMan's karma 600, not dark, where BN4 plays the dud for a dark chip (family 0x20, subfamily 4, from the use's test at 0x0800D5D6; seen by film: a puff, no panel). The two must part, and do from the first frame: a dark MegaMan's object's +0x94 is 2.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "05@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 120,
+ "seed": "12345678:9ABCDEF0",
+ "folder4": [
+  "3452"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "karma4": 0,
+ "again": {
+  "karma4": 600
+ }
+}

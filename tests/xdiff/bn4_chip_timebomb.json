@@ -1,0 +1,86 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "05@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 420,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's TimeBomb J (its chip 97) against BN6's TimeBom1 F (144) by the comparator's MegaMan mode (docs/multirom/bn4-chips.md, unit 3): each picked on the first Custom screen and used at fight frame 30 against a Mettaur3 at (5,2). The census's question, whether BN4's support 0x11 is BN6's subfamily 10: the spawner and the object's states are the same by body, its placement is not (BN4 0x080E4DE4, BN6 0x080E45D0).",
+ "folder4": [
+  "1261"
+ ],
+ "folder6": [
+  "0A90"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "verdict": {
+  "is": "FAIL",
+  "at": 32,
+  "why": "The two records are apart before the code is: at t32, the use, MegaMan's AttackVars +5 (the record's +0x14, its lock-out frames: BN4's 0, BN6's 0x1E) and +0xA (the record's +0x0A: BN4's 0x9E, BN6's 0x94) differ. With BN4's record on BN6's TimeBom1's code (tried through a registry row, not kept) the two ran alike to t33 and parted at t34 on the bomb's panel: BN4's placement (0x080E4DE4, 55 instructions) is not BN6's (0x080E45D0, 14), so TimeBomb is BN4's code to move, not a chip on BN6's (docs/multirom/bn4-chips.md, Their code)."
+ }
+}

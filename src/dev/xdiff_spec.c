@@ -138,9 +138,10 @@ static int film_parse(Spec *s, const char *name, const char *v) {
 	return sscanf(v, "%d:%d:%d:%159s", &m->from, &m->to, &m->step, m->prefix) == 4 && m->step > 0 && m->to >= m->from;
 }
 
-/* the Souls BN6's MegaMan holds, and the rule or parts of them broken (the comparator's own test); -1 where `name` is
+/* the Souls BN6's MegaMan holds, the rule or parts of them broken (the comparator's own test), and BN4's karma; -1 where `name` is
  * none of them */
 static int souls_parse(Spec *s, const char *name, const char *v) {
+	if (!strcmp(name, "karma4")) return (s->karma4 = atoi(v)) >= 0 && s->karma4 <= 0xFFFF;
 	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
 	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
@@ -269,7 +270,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 }
 
 bool xd_spec_parse(const char *text, Spec *s) {
-	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .field6 = -1, .mm_element = -1, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true,
+	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .field6 = -1, .karma4 = -1, .mm_element = -1, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true,
 		.buster = { -1, -1, -1 } };
 	snprintf(s->out, sizeof s->out, "xdiff");
 	char buf[4096];

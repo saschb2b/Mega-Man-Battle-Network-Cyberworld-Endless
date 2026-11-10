@@ -1,0 +1,86 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "05@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's AreaGrab (its chip 117) against BN6's AreaGrab (163), a chip both games name and a run plays as BN6's, by the comparator's MegaMan mode (docs/multirom/bn4-chips.md, unit 3): the pairing by name asked of the differential.",
+ "folder4": [
+  "0875"
+ ],
+ "folder6": [
+  "02A3"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "verdict": {
+  "is": "FAIL",
+  "at": 34,
+  "why": "Through t33 the two differ only where legit.json's bn4 section explains (the chip's id in MegaMan's AttackVars and the grab's object, the object's spawn's r3, BN6's support attack ending a frame after its routine). At t34 MegaMan's own state is a frame apart (his +0x0B 4 and +0x20 9 in BN4's, a frame into the state BN6's enters then: BN6's support run holds him a frame longer, 0x080ED12A), and the grab's sounds (BN4's 0x93 and 0x94, BN6's 0xA1, 0xA2 and 0x173) and its panels' marks (+3, +4, +7) are not yet read in both games' code. Open work of unit 3: MegaMan's clock after a support attack, the chips' sounds, the panels' marks."
+ }
+}

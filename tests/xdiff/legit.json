@@ -2398,6 +2398,32 @@
         "why": "Billy's thunder is BN6's own third-kind 0x2A run for Billy's parameters (the recipe's audit, tools/bn4_twins.py AUDITS (0x080D2156, 0x080CADBC): BN6's object, not BN4's moved), so it draws BN6's own art: its init sets up sprite list 0x10, number 0x11 in BN4 (0x080D2044, its sprite_load 0x0800287C) and number 0x16 in BN6 (0x080CAC80, sprite_load 0x080026E4), two sprites of other bytes (the hooks' CRC32s 0x030B3B0A and 0xAF2AFC99). What the sprite state holds of it is its own: +0xA8 to +0xB7 its frames' pointers into it (sprite_load's +0x18 on, its state at the object's +0x90) and +0xB8's word (its top byte 0x80 in BN4, 0xC0 in BN6) copied from the sprite's own data (BN6 0x0800210E-0x08002120, byte by byte as the art has it): Billy's sprite, a copy of BN4's bytes, holds the same there in both games (+0xBB 0xFC), MegaMan's too (0xF0). The thunder's place, timing, damage and hit are compared as ever"
       },
       {
+        "name": "MegaMan's attack's entry, BN6's own number",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "ai",
+        "offsets": [
+          "0xBC",
+          "0xBC"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6's setAttack has six entries (0x08011680 to 0x08011694, each movs r2,#n for n 0 to 5) that fall into one body (0x08011698), which sets the object's CurAction and phase word, zeroes the attack variables' first halfword and stores the entry's number at their +0x1C (strb r2,[r1,#0x1c] at 0x080116A6, r1 the AI data + 0xA0: AI data +0xBC). BN4's is one entry (0x0800C9AC: the same stores at the object's +9 and +0xA and the variables' first halfword, its AI data + 0x70, then mov pc,lr) and keeps no number. A chip's attack is BN6's entry 2 (0x08011688): 2 in BN6 from t33 as Cannon begins, 0 in BN4 (bn4_chip_cannon; the other 35 bytes of the variables the same in both through the chip). BN6's own; where BN4's byte there held anything it is compared as ever."
+      },
+      {
+        "name": "MegaMan's chips held, BN6's own count",
+        "whose": "megaman",
+        "kind": "T1",
+        "type": "0x1A0",
+        "part": "obj",
+        "offsets": [
+          "0x1A",
+          "0x1A"
+        ],
+        "direction": "BN6 has, BN4 not",
+        "why": "BN6 counts the chips its MegaMan holds in his object's +0x1A (bn6f's ChipsHeld): set as the hand is given him (the store at 0x0800FE0C, in the routine at 0x0800FDEA, with the next chip at +0x2A) and one less as a chip is used (0x0800F322 to 0x0800F32A); two more routines write it (0x080165F8, 0x08016EE0). None of the four is located in BN4 by its bytes (tools/bn6f_match.py's map of bn6f's functions in BN4), and BN4's MegaMan's +0x1A reads 0 through a battle in which he holds and uses a chip (bn4_chip_cannon's trace: 1 in BN6 from the first frame, 0 from t33 as Cannon is used, 0 in BN4 throughout): BN4 keeps its hand's count elsewhere. BN6's own; where BN4's byte there held anything it is compared as ever."
+      },
+      {
         "name": "MegaMan's own sprite",
         "whose": "megaman",
         "kind": "T1",
@@ -2680,6 +2706,8 @@
       {"name": "ThunderMan's 0x70's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T3", "type": "0x70", "word": "0x04", "bn4": ["raw", 19], "bn6": ["T1:0x394#0", "ai", 0]}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4, as BN6's twin through the dispatch's spawner does; ThunderMan's spawner of his 0x70 (0x080DB524: push {r0,r1,r2,r5}; movs r0,#0x70; the spawn) sets r0 alone, and its one caller, his state 87 (MegaMan's in BN4, copied with him: 0x080F23DC, its bl at 0x080F23EE) sets r0 to r2 before it, so +4 holds what r4 held as each game's state runner called the state: in BN4 0x13, in BN6 his AI data's address. No code 0x70 runs reads its +4 to +7: its type routine (0x080DB3F8), init (0x080DB41C), update (0x080DB464) and dying (0x08010560) and the 21 routines they call, walked (tools/xrecipe_thumb.py) for a load of +4 to +7 from any register, find one alone, the object free's (0x080033FA), which reads its list node's link (r0 its record less 0x10). thunderman_v1 at t277 (BN4) and t278 (BN6)"},
       {"name": "ThunderMan's 0x71's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T3", "type": "0x71", "bytes": {"0x05": ["0x00", "0x41"], "0x06": ["0x00", "0x03"]}}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4 as a word; ThunderMan's spawner of his 0x71 (0x080DB6CE: push {r4,lr}; push {r0-r3,r5}; movs r0,#0x71; the spawn) then writes +4's byte alone from the caller's r3 (0x080DB6E0, strb r4,[r0,#4] after pop {r1-r5}), and its one caller, his state 85 (MegaMan's in BN4, copied with him: its bl at 0x080F22B2, r3 0 at 0x080F22B0) leaves r4 what the state runner held (its pop {r4} at 0x080F22A6), so +5 to +7 hold its upper bytes: in BN4 0 (0x13), in BN6 his AI data's address's (0x41, 0x03 at +5 and +6). No code 0x71 runs reads its +5 to +7: its type routine (0x080DB540), init (0x080DB564), update (0x080DB5CE) and dying (0x08010560) and the 61 routines they call, walked (tools/xrecipe_thumb.py) for a load of +4 to +7 from any register, find only other records' (its collision data's +5 and +7, a panel's +4, a list node's +4, the spawn's descriptor's +4). thunderman_v1 from t740 (BN4) and t741 (BN6)"},
       {"name": "JunkMan's junk's spawn's r4, each game's leftover", "spawn_leftover": {"kind": "T3", "type": "0x96", "bytes": {"0x04": ["0x13", "0xE4"]}}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4 as a word, as BN6's twin through the dispatch's spawner does; JunkMan's spawner of his junk, the third kind's 0x96 (0x080DFF60: push {r4,lr}; push {r0-r3,r5}; movs r0,#0x96; the spawn), sets r0 alone, and its one caller, his update's call before his state runner (0x080C94AE, its bl at 0x080C9562), leaves r4 as his update was entered: in BN4 his +0 byte as BN4's object runner read it (0x13), in BN6 his AI index times four as BN6's Navi frame keeps it across his hook A (0x080F3682: lsls r4,r0,#2; AI 57, 0xE4; his hook A's shim pushes and pops r4, src/emu/xnavi_init.c pre_set). +5 to +7 hold r4's upper bytes, 0 in both. No code 0x96 runs reads its +4 to +7: its block (0x080DFD54-0x080DFF8C: its type routine 0x080DFD54, init 0x080DFD74, update 0x080DFDF2, the hits test and the spawner past them), read for a load or store of +4 to +7 through r5, has none, and its dying is the families' (0x08010560, ThunderMan's 0x70's walk). This byte pair alone, on that object; junkman_v1 at t1 (BN4) and t2 (BN6)"},
+      {"name": "the area grab's object's spawn's r3, each game's own support routine", "spawn_leftover": {"kind": "T4", "type": "0x03", "word": "0x3C", "bn4": ["raw", 135143533], "bn6": "0x080E1B1D"}, "why": "As the time bomb's object's (below): the area grab's spawner (BN4 0x080E206C, BN6 0x080E1B1C, the support subfamily 0's: push {lr}; push {r0,r1,r2,r5}; movs r0,#3; the fourth kind's spawn) is reached by bx r3 from each game's support run, so the spawn's store of r3 at the object's +0x3C holds each game's address of that routine, BN4's 0x080E206D and BN6's 0x080E1B1D. No code of the object loads its +0x3C: its routines (BN4 0x080E1F64, 0x080E1F84, 0x080E1FA8; BN6 0x080E1A4C, 0x080E1A6C, 0x080E1A90) and the generic states they share with the time bomb's, walked (tools/xrecipe_thumb.py), have none. bn4_chip_areagrab at t33"},
+      {"name": "the time bomb's object's spawn's r3, each game's own support routine", "spawn_leftover": {"kind": "T4", "type": "0x27", "word": "0x3C", "bn4": ["rom", 135154855], "bn6": "0x080E4583"}, "why": "The fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC) stores the caller's r1 to r3 at the object's +0x34 to +0x3C. The time bomb's spawner (BN4 0x080E4CA6, BN6 0x080E4582: push {lr}; push {r0,r1,r2,r5}; movs r0,#0x27; the spawn) sets r0 alone, and its caller, each game's support run, reaches it by bx r3 with r3 the spawner's own address from the subfamilies' table (BN4 0x080EB9FC from 0x080220E0, BN6 0x080ED0F0 from 0x0802CCB4), r1 and r2 MegaMan's panel: so +0x3C holds each game's address of the same routine, BN4's 0x080E4CA7 and BN6's 0x080E4583. No code of the object reads its +0x3C: its routine, the same by body in both games (BN4 0x080E4C3C, 0x080E4C5C and 0x080E4C80; BN6 0x080E4518, 0x080E4538 and 0x080E455C, tools/xrecipe_thumb.py compare: SAME), and the engine's generic states it shares (BN4 0x08008BD8, 0x08008BF8, 0x08008C2A, 0x08008EB8, 0x08008EEE; BN6 0x0800B916, 0x0800B94C, 0x0800B9B0, 0x0800BC88, 0x0800BD34), walked for a load of +0x3C, have none. bn4_chip_timebomb at t33"},
       {"name": "SearchMan's trail's 'begun', each game's PlaySound's leftover r0", "spawn_leftover": {"kind": "T4", "type": "0x31", "bytes": {"0x09": ["0x28", "0x48"]}}, "why": "His shots' trail, the fourth kind's 0x31 moved with him, runs its kind 0 (0x080E5960) by a 'begun' byte at its +9: where it reads 0 (0x080E5968-0x080E596C) it plays its sound (movs r0,#0x29; adds r0,#0xff; bl PlaySoundEffect at 0x080E5976) and stores the r0 that call leaves at +9 (strb r0,[r5,#9] at 0x080E597A), then never reads +9 but for that test. PlaySoundEffect (BN4 0x08000560, BN6 0x080005CC: push {r1-r7,lr}, the song's start, pop) restores every register but r0, which holds what each game's own MP2K song start left (BN4's through 0x08112849, BN6's through 0x08150475; BN6's call through his home's sound shim, XvSoundCall, to the same routine): 0x28 in BN4, 0x48 in BN6, both not 0, so the trail's kind 0 runs alike. This byte pair alone, on that object; searchman_v1 at t740 (BN4) and t741 (BN6)"},
       {"name": "WoodMan's 0x94's spawn's r2, each game's camera", "spawn_leftover": {"kind": "T3", "type": "0x94", "word": "0x38", "bn4": ["raw", 33596288], "bn6": ["raw", 33593728]}, "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r1, r2 and r3 at the object's +0x34, +0x38 and +0x3C, as BN6's twin through the dispatch's spawner does; WoodMan's spawner of his 0x94 (0x080DFA38: push {lr}; push {r5}; movs r0,#0x94; the spawn) sets r0 alone, and its one caller, his state 106 (MegaMan's in BN4, copied with him: its bl at 0x080F4D3C), calls the camera's shake set just before it (0x080F4D2A, BN4_CAMERA_SHAKE_SET 0x0802608C, BN6's 0x080302A8 the same body: mov r2,r10; ldr r2,[r2,#0xc], its stores), so +0x38 holds each game's camera, [r10 +0xC]: 0x02009B80 in BN4, 0x02009180 in BN6. No code 0x94 runs reads its +0x34 to +0x3F: its block (0x080DF9B0-0x080DFA78, its type routine, states and spawner of 0x95) walked for a load of them finds none, and its calls (GetRNG 0x08001B16, the pause test 0x08007A12, the after-step 0x080143FC, 0x080DFA64 and the 0x95 spawner 0x080DFCA4) read its +4, +0x16, +0x17, +0x2C and +0x4C alone (the loads of +0x34 and +0x38 at 0x080DFBC6-0x080DFD18 are 0x95's own states', on a 0x95). This word alone, on that object; woodman_v1 at t43"},
       {"name": "BN6's Elec tally of a hit, its freeze's", "whose": "megaman", "kind": "T1", "type": "0x1A0", "part": "coll", "offsets": ["0x78", "0x79"], "direction": "BN6 has, BN4 not", "why": "BN6's own bookkeeping for its freeze, which BN4 has none of: BN6's hit pass (its image 0x081D78F6-0x081D7904) adds the attack's damage (+0x2E) to the struck's +0x78 where the attack's element (+2) is 3, Elec, before its damage by element (BN6_COLL_HIT_DAMAGES, +0x82 + 2 * element: 0x081D7906-0x081D7910), and the frame's step adds +0x78 to the Elec hit damage (+0x88) while the struck's +6 is 8 (0x0801A8E0-0x0801A8F6: an Elec hit on a frozen one counts twice). BN4's hit pass (0x08012C74-0x08012C82) has the damage by element alone (BN4_COLL_HIT_DAMAGES, +0x2A + 2 * element), no test of the element 3 and no store of a tally. thunderman_v1 at t278 (BN4) and t279 (BN6): his 0x70's Elec hit, 0x32 at BN6's +0x78 alone, the damage by element the same in both (+0x88 and +0x9A, BN4's +0x30 and +0x42); MegaMan's HP the same in all 1200 fight frames. Guarded: those two bytes, BN6's side holding something and BN4's 0, every other field compared"},
@@ -2863,7 +2891,36 @@
         "why": "His attack's variables are BN4's +0x70 (BN4_AI_ATTACK_VARS) and BN6's +0xA0 (BN6_AI_ATTACK_VARS), moved and laid out as his own block is (tools/xnavirecipe_bn4.py AI_BLOCKS, src/dev/xdiff_bn4_trace.c ai_segs): a pointer into them is read as BN6's of the same byte"
       }
     ],
+    "chip_id": {
+      "why": "A chip id where MegaMan's AI data keeps one, BN4's read as the run's: the chip registry's rows for BN4 (a chip of a name of BN4's own takes an id of its own, docs/multirom/chip-registry.md), then the pairs the spec's folders name in the same place (folder4[i], folder6[i]: a chip both games name is BN6's own, paired by name as pair_bn4 pairs it). The place: his AttackVars +0x14, the chip used, written by the chip's use in both (BN4 0x0800D4D2 and BN6 0x08012824 / 0x080126F6: strh r0,[r7,#0x14], r7 the AI data + 0xA0). And his attack's subfamily (AttackVars +3), which each game's use copies from the chip's record +0x0C (BN4 0x0800D510-0x0800D512 and BN6 0x0801271A-0x0801271C: ldrb r1,[rec,#0xc]; strb r1,[r7,#3]): the two games number their support family's subfamilies apart (BN4's 0x0C/0x11 the time bomb's, BN6's 0x15/0x0A; BN4's table 0x080220E0, BN6's 0x0802CCB4), so where the run's chip is one of BN6's own and BN4's byte is its chip's record's, it is read as BN6's record's. And where a support chip's object keeps the chip (t4, by its type: the spawner's str r7,[r0,#0x30], r7 the chip used and the attack's +6 above it from each game's support run, BN4 0x080EBA04-0x080EBA06 and BN6 0x080ED0F8-0x080ED0FA; the time bomb's 0x27, its spawner BN4 0x080E4CA6 and BN6 0x080E4582, the store at 0x080E4CC4 and 0x080E45A0; the area grab's 0x03, BN4 0x080E206C and BN6 0x080E1B1C). Not a mask: a subfamily that is not the record's, or a chip no row and no folder pairs, is compared as it is.",
+      "registry": "src/core/xchips_registry_bn4.c",
+      "places": [
+        "0xB4"
+      ],
+      "subfamily": [
+        "0xA3"
+      ],
+      "t4": {
+        "0x27": [
+          "0x30"
+        ],
+        "0x03": [
+          "0x30"
+        ]
+      },
+      "evidence": [
+        "bn4_chip_timebomb t32: MegaMan's AttackVars +0x14 0x61 in BN4's (its TimeBomb, 97) and 0x90 in BN6's (TimeBom1, 144, the spec's folders' pair); +3 0x11 in BN4's (record 97's +0x0C) and 0x0A in BN6's (record 144's +0x0C)",
+        "bn4_chip_areagrab t33: the area grab's object's +0x30 0x75 in BN4's (AreaGrab, 117) and 0xA3 in BN6's (163)"
+      ]
+    },
     "sounds": [
+      {
+        "bn4": "0x10A",
+        "bn6": "0x86",
+        "clock": "state",
+        "what": "a counter hit's",
+        "why": "Played as a hit counters, by each engine's collision code where it zeroes the struck object's collision data's counter byte (BN4_COLL_COUNTER, BN6_COLL_COUNTER: BN4's strb r0,[r4,#0xb] at 0x0801341E, BN6's strb r0,[r4,#0xd] at 0x0801A48C): BN4's routine at 0x08013410 plays 0x10A (movs r0,#0xb and adds r0,#0xff at 0x08013426, its bl at 0x0801342A), BN6's plays 0x86 (movs r0,#0x86 at 0x0801A49C, its bl at 0x0801A49E). Each is the one place its game loads that number before a call of its sound's routine (a scan of both ROMs' code: BN4 0x08000560 with 0x10A once, BN6 0x080005CC with 0x86 once). Seen in bn4_chip_cannon: MegaMan's Cannon counters the Mettaur's swing at t53."
+      },
       {
         "bn4": "0xAD",
         "bn6": "0xBA",

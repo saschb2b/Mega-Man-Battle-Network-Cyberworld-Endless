@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:39:06Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -29,13 +29,53 @@ and [the chips' code](chips-code.md).
 
 ## Where things stand
 
-**Unit 3, begun** (10 November 2026; [The differential](../devtools/differential.md),
+**Unit 3, under way** (10 November 2026; [The differential](../devtools/differential.md),
 A BN4 chip's spec): BN4's own battle takes a folder and plays a chip
 from it (`folder4`, each chip through `BN4_CHIP_GATE`; `cust4`, its
-Custom screens' keys), proved by `bn4_chip_cannon_control`. Not yet:
-MegaMan's maps in `tools/xdiff_bn4.py` (BN4's Cannon against BN6's parts
-at t32, his action and attack variables numbered otherwise), the
-generator's BN4 path.
+Custom screens' keys; `karma4`, MegaMan's karma), proved by
+`bn4_chip_cannon_control` and `bn4_chip_hole_control`, each with a twin
+broken on purpose. The comparator has a MegaMan mode for BN4
+(`"subject": "megaman"`: a difference of his or the world's fails the
+spec), with his numbers read as BN6's: his action by the families both
+games pair, the chip's id by the registry's rows and the spec's folders,
+his attack's subfamily by the two records, and what BN6 alone keeps (its
+count of chips held, its attack's entry number, the frame its support
+run holds him after the chip's routine) each explained in
+`tests/xdiff/legit.json`'s `bn4` section from both games' code. Three
+specs record where a chip parts today: `bn4_chip_cannon` (t33: BN6's
+Cannon is its own code), `bn4_chip_timebomb` (t32: the records apart;
+on BN6's code its placement at t34) and `bn4_chip_areagrab` (t34: open
+work). **No BN4 chip passes against BN6 yet.** Open: MegaMan's clock
+after a support attack (BN6's a frame longer), the chips' sounds, the
+panels' marks an area grab leaves, then the generator's BN4 path.
+
+**The six "on BN6's code" are not** (10 November 2026, read in both ROMs
+and run): the census compared each routine's body and stopped at a twin,
+without its callees. Hole and DrkLine make BN4's Hole panel, a panel
+BN6 has none of, and are dark chips (below); TimeBomb's object is BN6's
+by body but places its bomb by BN4's own routine (`0x080E4DE4`, 55
+instructions, against BN6's `0x080E45D0`, 14); LifeAura's and BlakBarr's
+barrier reads its kind through a table of BN4's where BN6 takes the
+record's parameter (BN4 `0x080E5784`, BN6 `0x080E4E3C`), as every
+barrier and panel chip both games name holds another parameter in each
+(HolyPanl 6 and 4, Barrier 0 and 1, Barr100 1 and 5). Unit 4 as planned
+falls away: each of the six is a unit of unit 5, its code BN4's moved,
+or a record on BN6's code with its parameters mapped, whichever its
+spec proves. Ball, RollSP and RollDS are not yet read this deep.
+
+**BN4's light and dark chips** (verified in the ROM, 10 November 2026):
+a chip's record holds its alignment at +0x15 (`BN4_CHIP_ALIGN`: 0 any,
+1 light, 2 dark). As a chip is used (`BN4_CHIP_USE_TEST`, `0x0800D5D6`)
+a dark chip plays only where MegaMan's karma (`BN4_NAVI_KARMA`) is under
+470 and a light chip only at 470 or over; otherwise the dud plays (a
+puff, family 0x20's subfamily 4). 63 records are light (the SP Navi
+chips, HolyPanl, Snctuary, the barriers) and 31 dark (Static, Hole,
+DrkLine, Muramasa, Anubis, ElemDark, BlakWing, the DS Navi chips, four
+past 300). A run takes no karma (The DarkChips, below), so each plays
+for any MegaMan; the differential's BN4 battle is given the karma its
+chip asks (`karma4`). What Hole's panel is for is not yet read (the
+players' account, that a DS Navi chip needs one on the field, is a lead
+for unit 6).
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
@@ -264,7 +304,9 @@ spawns (`BN4_SPAWN_1`, `_3`, `_4` with the type in r0) was looked up by
 body in the pairs' index of BN6's routines (`tools/xrecipe_pairs.py`),
 the walk stopped at a twin.
 
-- **On BN6's code, 6 chips:** Hole and DrkLine (BN4's 0x0C/0x0B is
+- **On BN6's code, 6 chips by the census, none by the differential**
+  (Where things stand: the walk compared bodies and not callees; kept as
+  the census wrote it): Hole and DrkLine (BN4's 0x0C/0x0B is
   BN6's panel changer, support subfamily 5, HolyPanl's and Snctuary's,
   the panel by the record's parameters); TimeBomb (0x0C/0x11,
   TimeBom+'s, BN6's subfamily 10); LifeAura and BlakBarr (0x0C/0x15,
@@ -568,7 +610,8 @@ of one agent.
    or ported once, `tools/bn4_twins.py`'s audits); the census written
    out by the tool into `.build/` (numbers and names, never committed).
    Until 1 lands a spec may give its chip one of the 10 free ids.
-4. **The six on BN6's code (1 day, after 2 and 3).** `XREG_RECORD` over
+4. **The six on BN6's code: fallen away** (Where things stand; each
+   joins unit 5). As planned: **(1 day, after 2 and 3).** `XREG_RECORD` over
    their twins: `chip_hole`, `chip_drkline`, `chip_timebomb`,
    `chip_lifeaura`, `chip_blakbarr`, `chip_ball` PASS against BN4's own;
    RollSP and RollDS with BN4's computed powers (`chip_rollsp`,
