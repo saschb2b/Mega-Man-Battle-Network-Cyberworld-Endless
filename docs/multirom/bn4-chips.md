@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -73,53 +73,24 @@ the next slot from 0x1DA (`tools/xchiprecipe_bn4.py` `SOUND_SLOTS`,
 `src/audio/xsong.c`'s the same): PanlSht's are 0x1DA and 0x1DB, each
 call through a shim that names the slot, a number past a byte.
 
-**Next: ShotStar** (support 0x19, one chip, a Mega). Its object, the
-fourth kind's 0x34, derives whole (424 bytes); the star it drops is the
-third kind's 0x56, whose spawner BN6 has by body while the type's states
-differ (the generator's guard on a twin found by the search alone: its
-type compared to its depth first, or moved, 518 bytes). FirePlus's four
-write a timer of BN4's battle NaviStats that only BN4's damage code
-reads: not a small unit. The misc family's (Repair, Counter1-3, Marking:
-BN4's state 0x20) need its table grown as the support routines' is.
+**ShotStar is moved too** (11 November 2026: support 0x19, id 570, one
+chip, a Mega). Its unit is three types and a table, 1172 bytes: its
+object (the fourth kind's 0x34), the star (the third kind's 0x56, moved:
+its spawner is BN6's by body but the types differ below it, the
+generator's guard), the star's kinds' table and its mark (the fourth
+kind's 0x35). The star's sprite is no sprite of BN6's and is copied to a
+list 3 number of the chips' (0x70), its burst's effect to an id of the
+chips' (0xCF); its fall's sound takes the grown table's 0x1DC and its
+burst's the slot a BN4 family already has for it. `bn4_chip_shotstar`
+passes over 400 frames: thirty stars inside the freeze, three on a 140 HP
+Mettaur, 20 left, six mutations caught. The trace keeps 128 songs begun
+between two fight frames since (a freeze's sixty-three ran past its 32).
 
-**Unit 3, under way** (10 November 2026; [The differential](../devtools/differential.md),
-A BN4 chip's spec): BN4's own battle takes a folder and plays a chip
-from it (`folder4`, each chip through `BN4_CHIP_GATE`; `cust4`, its
-Custom screens' keys; `karma4`, MegaMan's karma), proved by
-`bn4_chip_cannon_control` and `bn4_chip_hole_control`, each with a twin
-broken on purpose. The comparator has a MegaMan mode for BN4
-(`"subject": "megaman"`: a difference of his or the world's fails the
-spec), with his numbers read as BN6's: his action by the families both
-games pair, the chip's id by the registry's rows and the spec's folders,
-his attack's subfamily by the two records, and what BN6 alone keeps (its
-count of chips held, its attack's entry number, the frame its support
-run holds him after the chip's routine) each explained in
-`tests/xdiff/legit.json`'s `bn4` section from both games' code. **The first
-chip passes:** `bn4_chip_areagrab`, BN4's AreaGrab against BN6's over
-300 frames, three mutations caught (the pairing by name, unit 0's,
-proved for it). It took MegaMan's own clock (BN6's support run holds
-him a frame longer, until a hit puts him back on the battle's), the
-grab's sounds paired, BN6's sound as a support chip's name shows, and
-BN6's panel's side copies read as its code writes them (+4 the field's
-start's, +7 the side each frame). Two specs record where a chip parts:
-`bn4_chip_cannon` (t33: BN6's Cannon is its own code) and
-`bn4_chip_timebomb` (t32: the records apart; on BN6's code its placement
-at t34). Open: the generator's BN4 path (`tools/xchiprecipe.py` reading
-BN4), which the moved units need.
-
-**The pairings by name, asked of the differential** (11 November 2026):
-a chip both games name plays as BN6's, on the claim that it is one chip.
-Proved so far: AreaGrab, PanlGrab, and AntiNavi's set-up
-(`bn4_chip_areagrab`, `bn4_chip_panlgrab`, `bn4_chip_antinavi`). Their
-records are not one (HolyPanl's first parameter 6 and 4, AntiNavi's 5
-and 2: BN4 maps its own through tables), so the comparator reads a
-paired chip's record copies as BN6's. LifeAura against LifeAur
-(`bn4_chip_lifeaura`) agrees on the aura's numbers and parts at t34 on
-how each game keeps its aura's object. Scratch runs of the others, each
-a lead, not a verdict: the panel chips part on the panels' sounds and
-timers, the barriers as LifeAura does, the Recov chips on the
-recovery's effect, RockCube on its cube, CopyDmg and AntiSwrd on a byte
-BN6 ORs into the attack's element.
+**Next: the misc family's units** (Repair, Counter1-3, Marking: BN4's
+state 0x20, its routines' table at `0x080EC9CC`), which are no support
+routines: BN6's misc family's table grown and a second kind of unit.
+FirePlus's four write a timer of BN4's battle NaviStats that only BN4's
+damage code reads, so their unit is that reader too.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its

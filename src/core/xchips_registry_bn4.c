@@ -111,7 +111,7 @@ const XChipReg4 xreg4_rows[] = {
 	{ 190,  601, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 99 },   /* DrkVulcn */
 	{ 192,  594, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 99 },   /* DrkSpred */
 	{ 193,  562, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 99 },   /* DrkStage */
-	{ 210,  570, XREG_PENDING,   0, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 1, 73 },   /* ShotStar */
+	{ 210,  570, XREG_MOVED,   0, 0x99, { 0x11, 0xFF, 0xFF, 0xFF }, 1, 73 },   /* ShotStar */
 	{ 211,  587, XREG_PENDING,   0, 0xFF, { 0x02, 0x1A, 0xFF, 0xFF }, 1, 59 },   /* BugChain */
 	{ 213,  697, XREG_PENDING,   0, 0xFF, { 0x04, 0xFF, 0xFF, 0xFF }, 1, 38 },   /* ElemDark */
 	{ 215,  698, XREG_PENDING,   0, 0xFF, { 0x06, 0xFF, 0xFF, 0xFF }, 1, 68 },   /* GodHammr */

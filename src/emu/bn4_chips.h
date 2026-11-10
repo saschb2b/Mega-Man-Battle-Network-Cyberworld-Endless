@@ -67,5 +67,16 @@
 #define BN4_T3_PANLSHT_SHOT   0x7B        /* the shot, the third kind's (0x080DCAA4 to 0x080DCC5C): its panel broken (BN4_PANEL_BREAK_FREE), it rises 16
                                            * pixels, waits, flies off down its row at 10 pixels a frame, ending on its first hit or off the screen;
                                            * sounds 0x1C6 as it is made and 0xBF as it flies, sprite list 3's 0x38 (BN6's 0x33 the same bytes) */
+/* ShotStar (its chip 210, support subfamily 0x19), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_SHOTSTAR          0x080E5D78u /* its routine: the fourth kind's BN4_T4_SHOTSTAR spawned */
+#define BN4_T4_SHOTSTAR       0x34        /* its object (0x080E5C90 to 0x080E5E38): thirty stars, one every ten frames, each on the next panel
+                                           * of the other side's that holds something (0x080E5D9A, its masks by side at 0x080E5E10) */
+#define BN4_STAR_SPAWN        0x080D879Au /* a star spawned (r0, r1 its panel, r2 its element, r4 its kind, r6 its damage): through 0x080D877C */
+#define BN4_T3_STAR           0x56        /* the star, the third kind's (0x080D85AA to 0x080D87B0): it falls from 16 pixels a frame up and right
+                                           * of its panel, strikes there, and bursts (effect 6, sound 0x70) where it struck nothing; sound
+                                           * 0x146 as it is made */
+#define BN4_STAR_KINDS        0x080D8580u /* ... its kinds, 6 bytes each, 7 of them: its sprite's number in list 3, its animation, its collision's
+                                           * two arguments; ShotStar's is kind 1 (list 3's 0x31) */
+#define BN4_T4_STAR_MARK      0x35        /* the star's mark on its panel, the fourth kind's (0x080E5E38 to 0x080E5EF4), its spawner 0x080E5EEA */
 
 #endif

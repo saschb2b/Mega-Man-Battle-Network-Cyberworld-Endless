@@ -278,6 +278,7 @@ XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-
 XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
+OBJ_ELEMENT4, OBJ_ELEMENT6 = 0x17, 0x0E   # (a fourth-kind object's element: bn4.h BN4_T1_ELEMENT, BN6's BN6_T1_ELEMENT)
 XC4_FIRST_SUPPORT = 0x80   # (src/emu/xchips_bn4.h: a moved BN4 unit's number in BN6's grown support routines, less BN4's subfamily)
 
 
@@ -386,6 +387,10 @@ def support_object_as_bn6(rec, canon):
         # (a chip whose code is BN4's moved, XREG_MOVED: BN4's spawner of the shape, BN6's its copy, no spawner of BN6's ROM;
         # its chip as the run's id, the rest of its record as it is)
         rec[NODE + OBJ_SPAWN_CHIP:NODE + OBJ_SPAWN_CHIP + 2] = canon.chips[chip].to_bytes(2, 'little')
+        canon.spawner_read.add(r3)   # (+0x3C the same routine in both, BN6's its copy, read back as BN4's address: a number)
+        # (its element, the spawner's store of r3: BN4's +0x17, the recipe's immediate BN6's +0x0E, where BN4's +0x0E holds 0)
+        if rec[NODE + OBJ_ELEMENT6] == 0:
+            rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
         return
     if not s4 or not s6 or r3 - 1 not in s4.values() or chip not in canon.chips:
         return

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-11
+* **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
