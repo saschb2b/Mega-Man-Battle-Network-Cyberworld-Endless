@@ -2741,6 +2741,51 @@
     "088F0304:01DA"
    ],
    "what": "the shim of WhitWeb's unit's home that plays the web's sound (its first, at XC4_HOMES + 0x1000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DE"
+  },
+  {
+   "name": "Boomer1's row's power another",
+   "spec": "bn4_chip_boomer1",
+   "poke": [
+    "08C0647A:001E"
+   ],
+   "what": "the registry's record of BN4's Boomer1 (584 at CHIPS_RECORDS) with power 30 where BN4's record holds 60: the Mettaur in the boomerang's way left 110 HP where BN4's leaves it 80"
+  },
+  {
+   "name": "Boomer2's row's subfamily another",
+   "spec": "bn4_chip_boomer2",
+   "poke": [
+    "08C06498:83:1"
+   ],
+   "what": "the registry's record of BN4's Boomer2 (585) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x82: no boomerang"
+  },
+  {
+   "name": "the boomerang's speed another",
+   "spec": "bn4_chip_boomer3",
+   "poke": [
+    "080D31F2:0002",
+    "080D31FE:0002",
+    "080D320A:0002",
+    "080D3216:0002",
+    "080D3222:0002",
+    "080D322E:0002"
+   ],
+   "what": "the boomerang's flights' table's copy (BN4 0x080D31EC, six rows of three words) with every row's speed 2 (the high half of its +4) where BN4's hold 4, 4.5 and 5: the boomerang slower, its hit later"
+  },
+  {
+   "name": "the boomerang's type another",
+   "spec": "bn4_chip_boomer3",
+   "poke": [
+    "080D3434:20CB"
+   ],
+   "what": "the boomerang's spawner's copy (its movs r0,#0x32 at BN4 0x080D3434, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no boomerang"
+  },
+  {
+   "name": "the boomerang's sound another",
+   "spec": "bn4_chip_boomer3",
+   "poke": [
+    "088F0F04:01DA"
+   ],
+   "what": "the shim of Boomer's unit's home that plays the boomerang's sound (its first, at XC4_HOMES + 0x1C00 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DF"
   }
  ]
 }

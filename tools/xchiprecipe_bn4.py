@@ -95,7 +95,7 @@ TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
 UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'), ('misc', 0x00, 'Counter'),
-         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'))
+         ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'), ('misc', 0x02, 'Boomer'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -105,7 +105,8 @@ SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_
 SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC,                # (ShotStar's star's fall)
                0xBE: 0x1DD,                 # (Counter's hit)
-               0xF7: 0x1DE}                 # (WhitWeb's web)
+               0xF7: 0x1DE,                 # (WhitWeb's web)
+               0xAB: 0x1DF}                 # (Boomer's boomerang)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -118,6 +119,9 @@ TABLES = {
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
                          "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
                          "(0x080E5D3E: movs r4,#1)"),
+    0x080D31EC: dict(size=0x48, entry=12, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     why="the boomerang's flights (the third kind's 0x32: six rows of three words, numbers alone, no sprite), in the "
+                         "bytes before its routine"),
 }
 # The numbers the chips' copies take, each from the top of its range down (the late families' way, tools/xrecipe_bn4.py):
 # effect ids 0xCF-0xB0 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xB0, list 4's 0x9F-0x70,
@@ -466,8 +470,8 @@ def rows_check(b4, f):
 
 
 def sprites_of(b4, b6, f, alloc):
-    """the sprites its moved objects load (BN4's sprite load, r1 the list's offset, r2 the number, each a movs): BN6's of the
-    same bytes in the same list where it has one (the movs given its number), else a decision"""
+    """the sprites its moved objects load (BN4's sprite load, r1 the list's offset, r2 the number, each a movs): BN4's copied
+    at a number of the chips' in that list (the movs given it), one copy a sprite whichever unit draws it"""
     for e, w in sorted(f.walks.items()):
         for site, t in sorted(w.bls.items()):
             if t != X4.BN4['sprite_load'] or any(site in x['loads'] for x in TABLES.values()):
@@ -477,10 +481,10 @@ def sprites_of(b4, b6, f, alloc):
             if lst is None or lst & 3 or num is None or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sprite', f'{site:08X}: a sprite loaded by numbers made otherwise ({lst}, {num})')
                 continue
-            tw, how = X4.bn6_sprite_twin(b4, b6, lst // 4, num), 'the same bytes'
-            if tw is None:
-                c = list3_copy(b4, f, alloc, num, lst // 4)
-                tw, how = (c['to_index'], 'copied') if c else (None, '')
+            # (BN4's sprite copied, as the families' are, whether or not BN6 has one of its bytes: the differential names a
+            # sprite by the recipe's rows, and an object in play in a fight's frame is compared by its sprite's frames)
+            c = list3_copy(b4, f, alloc, num, lst // 4)
+            tw, how = (c['to_index'], 'copied') if c else (None, '')
             if tw is None:
                 f.decide('sprite', f'{site:08X}: its sprite {lst // 4}:{num:#x} is no sprite of BN6\'s list {lst // 4}, and no number of the chips\' is left for a copy')
                 continue
@@ -536,12 +540,8 @@ def table_sprites(b4, b6, f, alloc):
         for k in t['kinds']:
             at = v + t['entry'] * k + t['sprite'][1]
             num = b4.u8(at)
-            tw = X4.bn6_sprite_twin(b4, b6, t['list'], num)
-            if tw is None and t['list'] == 3:
-                s = list3_copy(b4, f, alloc, num)
-                tw, how = (s['to_index'], 'copied') if s else (None, '')
-            else:
-                how = 'the same bytes'
+            c = list3_copy(b4, f, alloc, num, t['list'])
+            tw, how = (c['to_index'], 'copied') if c else (None, '')
             if tw is None:
                 f.decide('sprite', f'{at:08X}: its table\'s kind {k} draws {t["list"]}:{num:#x}, which BN6 has none of and the generator copies none of')
                 continue
