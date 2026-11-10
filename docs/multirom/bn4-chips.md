@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -86,11 +86,30 @@ passes over 400 frames: thirty stars inside the freeze, three on a 140 HP
 Mettaur, 20 left, six mutations caught. The trace keeps 128 songs begun
 between two fight frames since (a freeze's sixty-three ran past its 32).
 
-**Next: the misc family's units** (Repair, Counter1-3, Marking: BN4's
-state 0x20, its routines' table at `0x080EC9CC`), which are no support
-routines: BN6's misc family's table grown and a second kind of unit.
-FirePlus's four write a timer of BN4's battle NaviStats that only BN4's
-damage code reads, so their unit is that reader too.
+**Repair is moved, the first misc unit** (12 November 2026: id 557).
+BN4's misc chips run by MegaMan's state 0x20, which BN6's family 0x1C
+is instruction for instruction: a routine by subfamily, the attack ended
+in the same frame. BN6's table of them (7) is grown for BN4's units
+(`XC4_MISC`), and the generator has a second kind of unit for a routine
+there, whatever its shape. Repair's is 60 bytes: each of its side's
+obstacles with HP left is given its full HP, an effect over it and a
+sound. One number is BN6's: the battle state keeps the side's obstacles
+at +0xA0 where BN4 keeps them at +0x68 (the two games' routine that
+enters one differs in that alone). Its proof needs an obstacle, so
+RockCube, a chip both games name, became a control first
+(`bn4_chip_rockcube`: the cube is each engine's own object, nearly the
+same code; BN6's holds a name and reads an 8-byte row). `bn4_chip_repair`
+passes over 300 frames: the cube set, struck by the Mettaur's wave to
+190 HP, repaired to 200 in both, struck again; six mutations caught. A
+spec with two chips in one hand gives BN6 its deck (`deck6`) and picks
+BN4's in the order its own shuffle dealt them.
+
+**Next: Counter1-3**, the last unit under 300 bytes that BN4's Library
+lists. Its routine lies in its object's code (the third kind's 0x17),
+which moves with it, and walks the other side's players: its spec has to
+meet the foe's swing. Marking and the four Plus chips wait on the
+owner's call 7 (no Library number, no picture: chips BN4 never lists).
+Then the 21 units of 300 to 600 bytes, in the table's order.
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -750,6 +769,22 @@ Asked and answered on 11 November 2026:
    ProtoMan's Navis want them), and over the Navis' pool by battle shared
    with the chips a folder holds. A slot for every sound of another game
    from then on (Where things stand).
+
+Open:
+
+7. **Marking and the four Plus chips (FirePlus, ThunPlus, AquaPowr,
+   WoodPowr): cut, or moved?** Asked 12 November 2026. BN4's records 281
+   and 285-288 hold no Library number (+0x1C is 0, where every chip its
+   Library lists holds its place) and one address for icon and picture,
+   a blank: BN4 never lists them and, as far as its records say, never
+   gives them (verified in the ROM's records; that no shop, trader or
+   reward names them is not searched yet). Their code is real: Marking
+   sets 600 frames on a per-side record of BN4's (`0x020374B0`), the
+   Plus chips a 480-frame timer by element in BN4's battle NaviStats,
+   each read by BN4's own battle code, which would have to move with
+   them. Recommended: cut all five (their rows left out of play, ids 556
+   and 563-566 kept retired), as chips BN4's own players never held.
+   Until answered they sit out and the work goes on past them.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -66,7 +66,12 @@ spec a foe the chip does not delete (`04@52`, BN4's MettaurSP, 140 HP):
 a deletion parts at its own effect, each engine's art. A mutation of a
 unit's code names BN4's address, which the runner pokes at its copy. The
 trace keeps up to 128 songs begun between two fight frames (ShotStar's
-freeze begins sixty-three).
+freeze begins sixty-three). A chip that needs another on the field first
+takes both in one hand: `deck6` gives BN6's deck its order, BN4's keys
+pick its own shuffle's (`bn4_chip_repair`, after RockCube); and a chip
+both games name is a control spec of its own first (`bn4_chip_rockcube`:
+its object each engine's own, by `actor_objects`, the record's copies
+and the cube's entries).
 
 Against BN6 a chip's spec says `"subject": "megaman"`: a difference of
 MegaMan's or the world's no rule explains fails it, as in the BN5
