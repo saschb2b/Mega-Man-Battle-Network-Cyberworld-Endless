@@ -108,5 +108,19 @@
                                            * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
 #define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
                                            * the rows, its speed across them (16.16) */
+/* MokoRus1-3 (its chips 130-132, misc subfamily 1), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_MOKORUS           0x080D252Au /* its routine, in the Moko's code: the three rows shuffled (BN4_SHUFFLE), a Moko spawned on each
+                                           * (0x080D250C), the k-th to set off 10 x k frames on (+0x20) */
+#define BN4_T3_MOKO           0x2C        /* the Moko, the third kind's (0x080D235C to 0x080D2568): it runs down its row from the field's edge,
+                                           * striking what it meets, struck and pushed back (its collision set up with the hit's bits 0x21 at
+                                           * BN4_MOKO_HIT_BITS); sprite list 1's 0x11, sound 0xC7 as it sets off */
+#define BN4_MOKO_HIT_BITS     0x080D23E0u /* ... its init's movs r3,#0x21 before its collision set up (BN4_COLL_SETUP_ARG): BN4_STRUCK_PUSHED's
+                                           * bits, 0x61 in its copy (BN6_STRUCK_PUSHED's) */
+#define BN4_SHUFFLE           0x08000AAAu /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN4_RNG_DRAW_POSITIVE twice a swap, each
+                                           * modulo the count, the two bytes swapped (BN6_SHUFFLE, the same instructions); MokoRus's rows' */
+#define BN4_STRUCK_PUSHED     0x0801360Cu /* the struck pass of the first kind (from 0x080135E6, r4 the struck's hit bits, BN4_COLL_HIT_BITS):
+                                           * a push bit (0xFC) with bit 0x01 gives the status 0x100 and clears the flinch's 4 (to 0x08013622),
+                                           * one without it the push alone's 0x10 (0x08013628-0x08013634). BN6_STRUCK_PUSHED: bit 0x40 where
+                                           * BN4 reads bit 0x01 */
 
 #endif
