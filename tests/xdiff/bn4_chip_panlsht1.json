@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's PanlSht1 A (its chip 178) against the registry's row for it (id 559), BN4's code moved by tools/xchiprecipe_bn4.py (support 0x26 as BN6's grown support routine 0xA6: the fourth kind's 0x4F and its shot, the third kind's 0x7B; docs/multirom/bn4-chips.md): each picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2), MegaMan's row. Its whole flight runs inside the chip's time freeze, between two fight frames: the traces meet at what it leaves (docs/devtools/differential.md, A BN4 chip's spec). The panel ahead of him broken and thrown, the Mettaur left 40 HP at t34 in both.",
+ "folder4": [
+  "00B2"
+ ],
+ "folder6": [
+  "22F:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
