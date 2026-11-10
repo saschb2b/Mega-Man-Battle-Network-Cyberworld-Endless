@@ -21,6 +21,8 @@ enum {
 	XCHIP_HELPER,    /* a helper: BN5's code several units call whose object one copy alone may move (the shake), or a
 	                    routine of theirs (the buster arm, a computed power), at XC_HELPERS, installed before the units; no
 	                    entry of a table, its `entry` the routine they call */
+	XCHIP_MISC,      /* a routine of the misc family's (BN4's units, xchips_bn4.h): its entry of the grown misc routines, a chip's
+	                    subfamily under BN6's family 0x1C */
 };
 
 /* A sound its code starts that BN6 has another song at: BN5's song copied

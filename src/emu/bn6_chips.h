@@ -253,5 +253,14 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_CHIP_WHEEL_FLAGS  0x080129E4u /* a chip's second wheel's hit flag by its record's icon element (BN6_CHIP_ELEMENT), 12 bytes: Sword 0x80,
                                            * Cursor 0x40, Wind 0x20, Break 0x10, the rest 0; ORed into the attack's element as a chip is used
                                            * (0x0801271E-0x08012728) */
+/* The misc family (0x1C: chips that do one thing at once and end), BN4's state 0x20's twin (bn4_chips.h BN4_MISC_RUN) */
+#define BN6_CHIP_MISC_FAMILY  0x1C
+#define BN6_MISC_RUN          0x080ED6DCu /* its routine: phase 0 the chip's routine by its subfamily, the attack's end in the same frame (subfamily
+                                           * 0x14 after 8 frames) */
+#define BN6_MISC_ROUTINES     0x080ED730u /* its routines by subfamily, BN6_MISC_ROUTINE_COUNT words */
+#define BN6_MISC_ROUTINE_COUNT 7
+#define BN6_MISC_ROUTINES_REF 0x080ED72Cu /* the one word that names them (BN6_MISC_RUN's literal) */
+#define BN6_BATTLE_OBSTACLES  0xA0        /* the battle state's obstacles by side, three words a side (two, then one): BN6_OBSTACLE_ADD's */
+#define BN6_OBSTACLE_ADD      0x0800F614u /* r0 an object, r1 its side, r2 which list: entered there, the oldest's HP zeroed where it is full */
 
 #endif

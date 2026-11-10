@@ -246,8 +246,48 @@ static const XcSong shotstar_songs[] = { { 0x70, 0x3A }, { 0x146, 0x1DC } };
 	.sprites = shotstar_sprites, .nsprites = (int)(sizeof shotstar_sprites / sizeof *shotstar_sprites), \
 	.effects = shotstar_effects, .neffects = (int)(sizeof shotstar_effects / sizeof *shotstar_effects), \
 	.bytes = shotstar_bytes, .nbytes = (int)(sizeof shotstar_bytes / sizeof *shotstar_bytes) }
+/* ---- Repair: BN4's misc 0xb (0800C721) as BN6's 0x8b; its chips 115 (557) ---- */
+/* its routine (0800C720), a routine of BN4's by itself: copied */
+/* its effect 0x7: BN6's 0xce, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x9a: BN4's song at slot 0x39, the families' slot for it (FAMILY_SLOTS) */
+
+static const XvBlock repair_blocks[] = {
+	{ 0x0800C720, 0x0800C75C, XC4_CODE + 0x8B0, 0x61E08481u },
+};
+static const XvData repair_data[] = {
+};
+static const XvPair repair_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair repair_words[] = {
+};
+static const XvImm repair_imms[] = {
+	{ 0x0800C728, THUMB_ADDS, 0, 0, 0x68, 0xA0 },   /* the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD 0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both) */
+	{ 0x0800C746, THUMB_MOVS, 4, 0, 0x7, 0xCE },   /* its effect: 0x7 in BN4, 0xce in BN6 (moved) */
+	{ 0x0800C74C, THUMB_MOVS, 0, 0, 0x9A, 0x39 },   /* its sound 0x9a: BN4's copied into BN6's slot 0x39, a BN4 family's too */
+};
+static const XvType repair_types[] = {
+};
+static const XvSprite repair_sprites[] = {
+	{ 3, 0x12, 4, 0x9F, XC4_ART + 0x1000, 0x1300 },   /* BN4's 3:0x12 copied */
+};
+static const XvId repair_effects[] = { { 0x07, 0xCE } };
+static const XcSong repair_songs[] = { { 0x9A, 0x39 } };
+
+#define REPAIR_CODE { .name = "Repair (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x800), \
+	.blocks = repair_blocks, .nblocks = (int)(sizeof repair_blocks / sizeof *repair_blocks), \
+	.data = repair_data, .ndata = (int)(sizeof repair_data / sizeof *repair_data), \
+	.calls = repair_calls, .ncalls = (int)(sizeof repair_calls / sizeof *repair_calls), \
+	.words = repair_words, .nwords = (int)(sizeof repair_words / sizeof *repair_words), \
+	.imms = repair_imms, .nimms = (int)(sizeof repair_imms / sizeof *repair_imms), \
+	.types = repair_types, .ntypes = (int)(sizeof repair_types / sizeof *repair_types), \
+	.sprites = repair_sprites, .nsprites = (int)(sizeof repair_sprites / sizeof *repair_sprites), \
+	.effects = repair_effects, .neffects = (int)(sizeof repair_effects / sizeof *repair_effects) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0 },
+	{ XCHIP_MISC, 0x0B, 0x8B, 0x0800C721, XC4_HOMES + 0x800, REPAIR_CODE, repair_songs, (int)(sizeof repair_songs / sizeof *repair_songs), 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

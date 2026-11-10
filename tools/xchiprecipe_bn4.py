@@ -43,6 +43,12 @@ ROUTINES4, NROUTINES4 = 0x080220E0, 0x4E   # BN4_CHIP_ROUTINES: its support stat
 ROUTINES6, NROUTINES6 = 0x0802CCB4, 0x2A   # BN6_CHIP_ROUTINES, BN6_CHIP_ROUTINE_COUNT
 RECORDS4, NRECORDS4, RECORD = 0x080197EC, 389, 0x2C   # BN4_CHIP_RECORDS: +0xB its family, +0xC its subfamily
 FAMILY4_SUPPORT, FAMILY6_SUPPORT = 0x0C, 0x15
+# ... and its misc chips: MegaMan's state 0x20 (BN4_MISC_RUN) runs a routine by subfamily and ends the attack at once, BN6's
+# family 0x1C (BN6_MISC_RUN) the same instruction for instruction; a 'misc' unit is one of BN4's routines there, whatever
+# its shape, at BN6's grown misc routines' NUMBER0 + its subfamily (src/emu/xchips_bn4.h XC4_MISC)
+MISC4, NMISC4, MISC6, NMISC6 = 0x080EC9CC, 0x12, 0x080ED730, 7   # BN4_MISC_ROUTINES, BN6_MISC_ROUTINES
+FAMILY4_MISC, FAMILY6_MISC = 0x20, 0x1C
+FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
 SPAWN4_4, SPAWN6_4 = 0x08003344, 0x080033AC   # BN4_SPAWN_4, BN6's fourth-kind spawner (r0 the type)
 # BN6's support routines' shape, Invisibl's (0x080E8886): the object spawned and its panel, element, parent, side, r6 and r7
 # written; BN4's the same instruction for instruction but for the element's place (ELEMENT4, ELEMENT6: the scan's immediate)
@@ -88,7 +94,7 @@ AUDITS = {
 TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone
-UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'))
+UNITS = (('support', 0x26, 'PanlSht'), ('support', 0x19, 'ShotStar'), ('misc', 0x0B, 'Repair'))
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
 # fixed for it (the owner's call 6, docs/multirom/bn4-chips.md: src/emu/song_table.h, slots from SONG_GROWN_FIRST up in
@@ -99,7 +105,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC}                # (ShotStar's star's fall)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
-FAMILY_SLOTS = {0x70: 0x3A}                 # (ShotStar's star's burst: Walla's)
+FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
+                0x9A: 0x39}                 # (Repair's: Walla's)
 # The kinds' tables a moved object reads (as tools/bn4_twins.py TABLES: its size, a row's size, the kinds the unit spawns,
 # where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
 # kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set)
@@ -114,6 +121,13 @@ TABLES = {
 # and list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on)
 CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3 = (0xCF, 0xB0), (0xEF, 0xB0), (0x9F, 0x70), (0x70, 0xE0)
 ROOM_SPRITE = 0x100
+# An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
+# BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
+IMMS = {
+    0x0800C728: ('THUMB_ADDS', 0, 0x68, 0xA0,
+                 "the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD "
+                 "0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both)"),
+}
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
 # "on BN6's code" are not): BN4's routine -> why BN6's twin serves. One not here is a decision
@@ -153,7 +167,7 @@ def chips_of(b4, kind, sub):
     out = []
     for i in range(1, NRECORDS4):
         r = b4.bytes(RECORDS4 + RECORD * i, RECORD)
-        if r[0xB] == FAMILY4_SUPPORT and r[0xC] == sub and any(c != 0xFF for c in r[0:4]):
+        if r[0xB] == FAMILY4[kind] and r[0xC] == sub and any(c != 0xFF for c in r[0:4]):
             out.append((i, r))
     return out
 
@@ -196,24 +210,43 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f.kind, f.sub, f.number, f.slot = kind, sub, NUMBER0 + sub, slot
     f.b4, f.b6, f.home = b4, b6, X4C_HOMES + X4C_HOME_SIZE * slot
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
-    f.chips = chips_of(b4, kind, sub)
-    if kind != 'support' or not 0 <= sub < NROUTINES4:
-        f.decide('unit', f'a {kind} unit {sub:#x}: the support state\'s routines alone are read yet')
+    f.chips = chips_of(b4, kind, sub) if kind in FAMILY4 else []
+    if kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
+        f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines alone are read')
         return f
-    f.entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
-    hit = C.t4_of(b4, f.entry)
-    ty = shape_of(b4, b6, f, f.entry)
-    if ty is None or hit is None or hit[0] != ty:
-        f.decide('entry', f'its routine ({f.entry:08X}) does not lie in the region of the type it spawns')
-        return f
-    f.ty, (f.lo, f.hi) = ty, hit[1:]
-    f.regions, f.roots, f.regions_roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo], []
-    f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
-    f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
-    roots = list(f.roots)
-    while roots:
-        X4.walk_code(b4, f, roots, set(), pairs)
-        roots = sorted((C.moved4(b4, f, pairs) | moved3(b4, f, pairs)) - set(f.walks))
+    f.regions, f.regions_roots, f.moved4 = [], [], {}
+    saved_copied = dict(bn4_twins.COPIED)
+    if kind == 'support':
+        f.entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
+        hit = C.t4_of(b4, f.entry)
+        ty = shape_of(b4, b6, f, f.entry)
+        if ty is None or hit is None or hit[0] != ty:
+            f.decide('entry', f'its routine ({f.entry:08X}) does not lie in the region of the type it spawns')
+            return f
+        f.ty, (f.lo, f.hi) = ty, hit[1:]
+        f.regions, f.roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo]
+        f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
+        f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
+    else:
+        f.entry = b4.u32(MISC4 + 4 * sub) & ~1
+        hit = X4.t3_of(b4, f.entry) or C.t4_of(b4, f.entry)
+        if hit is not None:
+            f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code ({hit[1]:08X}-{hit[2]:08X}): that type\'s move with a '
+                              f'misc unit is not read yet')
+            return f
+        # (a routine of BN4's engine by itself: copied, a block of its own)
+        bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
+        f.roots = [f.entry]
+        f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+    try:
+        roots = list(f.roots)
+        while roots:
+            X4.walk_code(b4, f, roots, set(), pairs)
+            roots = sorted((C.moved4(b4, f, pairs) | moved3(b4, f, pairs)) - set(f.walks))
+    finally:
+        bn4_twins.COPIED.clear()
+        bn4_twins.COPIED.update(saved_copied)
+    site_imms(f)
     X4.side_sites(f)
     X4.scan(f)
     X4.battle_players(f)
@@ -283,6 +316,19 @@ def moved3(b4, f, pairs):
         del f.calls[t]
         roots |= {t, lo}
     return roots
+
+
+def site_imms(f):
+    """the immediates of its code IMMS names, each checked against the instruction there"""
+    for e, w in sorted(f.walks.items()):
+        for a, i in sorted(w.insns.items()):
+            if a not in IMMS:
+                continue
+            form, rd, was, now, why = IMMS[a]
+            if i.form != {'THUMB_ADDS': 'adds8', 'THUMB_MOVS': 'movs'}.get(form) or i.f[0] != rd or i.f[1] != was:
+                f.decide('immediate', f'{a:08X}: IMMS names {form} r{rd}, #{was:#x} there, the code holds {i.text}')
+                continue
+            f.imms.append(dict(at=a, form=form, rd=rd, rn=0, was=was, now=now, why=why))
 
 
 def shallow_twins(b4, f):
@@ -455,7 +501,7 @@ def table_sprites(b4, b6, f, alloc):
 
 
 def report_unit(f):
-    L = [f'## {f.name} ({f.kind} {f.sub:#x}, BN6\'s support routine {f.number:#x})', '']
+    L = [f'## {f.name} ({f.kind} {f.sub:#x}, BN6\'s {f.kind} routine {f.number:#x})', '']
     L.append('chips: ' + ', '.join(str(i) for i, _ in f.chips))
     if getattr(f, 'blocks', None):
         L.append(f'blocks: ' + ', '.join(f'{lo:08X}-{hi:08X}' for lo, hi, _, _ in f.blocks) + f' ({sum(hi - lo for lo, hi, _, _ in f.blocks)} bytes)')
@@ -483,7 +529,7 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn6.h"
 #include "rom.h"
 '''
-KIND_C = {'support': 'XCHIP_SUPPORT'}
+KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC'}
 
 
 def place(at, base, name):

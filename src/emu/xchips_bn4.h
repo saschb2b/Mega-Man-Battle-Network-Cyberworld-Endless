@@ -7,7 +7,8 @@
  * no twin of. Numbers alone, written by tools/xchiprecipe_bn4.py from the
  * two ROMs into xchips_bn4.c; src/emu/xchips_code.c installs them where
  * BN4's ROM is read, each at BN6's grown support routines' XC4_FIRST_SUPPORT
- * + BN4's subfamily, which its chips' records take under BN6's support
+ * + BN4's subfamily (a routine of BN4's misc state's table, BN4_MISC_ROUTINES,
+ * likewise in BN6's misc routines grown, XC4_MISC), which its chips' records take under BN6's support
  * family (the registry's XREG_MOVED rows, src/core/xchips_registry_bn4.c). */
 #ifndef CW_XCHIPS_BN4_H
 #define CW_XCHIPS_BN4_H
@@ -24,7 +25,8 @@
 #define XC4_UNITS     96                   /* ... this many units (BN4's 48 of its chips and 18 of its Navi chips) */
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
 #define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* what they draw, to: */
-#define XC4_END       FREE_BN4_CHIPS_END
+#define XC4_END       (FREE_BN4_CHIPS_END - 0x400u)
+#define XC4_MISC      XC4_END              /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 
 /* The units (XChipUnit, xchips_bn5.h: `bn5` BN4's subfamily, `navis` 0) */
