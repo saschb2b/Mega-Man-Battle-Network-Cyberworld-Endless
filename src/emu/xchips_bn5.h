@@ -26,7 +26,7 @@ enum {
 /* A sound its code starts that BN6 has another song at: BN5's song copied
  * into BN6's slot fixed for it (xsong.h, xsong_install_at), the immediates
  * that name it given the slot */
-typedef struct { uint16_t song; uint8_t slot; } XcSong;
+typedef struct { uint16_t song; uint16_t slot; } XcSong;   /* (a slot past a byte: the grown song table's, song_table.h) */
 
 typedef struct {
 	uint8_t kind;          /* XCHIP_* */

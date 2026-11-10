@@ -179,11 +179,12 @@ static int song_of(const View *v, uint32_t header) {
 	for (uint32_t n = 0; n < SONGS; ++n)
 		if (get32(v->rom + v->songs + 8 * n) == header) return (int)n;
 	/* (a copy of another game's song in one of BN6's slots, xsong.h: by the slot's own number there) */
-	for (uint32_t n = 0; v->game == 6 && n < SONGS; ++n)
-		if (v->rd32(0x08000000u + v->songs + 8 * n) == header) {
-			int copy = xd_song_copy((int)n);
-			return copy >= 0 ? copy : (int)n;
-		}
+	/* (... in BN6's live table, grown or not, its new slots among them: song_table.h) */
+	int n = v->game == 6 ? xd_song_slot(header) : -1;
+	if (n >= 0) {
+		int copy = xd_song_copy(n);
+		return copy >= 0 ? copy : n;
+	}
 	return -1;
 }
 
@@ -629,11 +630,13 @@ static void call_aim(uint32_t at, uint32_t v) {
 /* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
  * among the ranges too); the chips' moved code for a poke5 alone, its BN5 addresses lying among BN6's own attack families'
  * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
- * FireMan's, moved after it) */
+ * FireMan's, moved after it), nor BN4's chips' units' (PanlSht's shot's block, 0x080DCAA4-0x080DCC5C, holds BN5's
+ * BlizzardMan's and CloudMan's chips' spawns' addresses) */
 static int poke_range(const XvMoved *m, int n, const Poke *p) {
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
-		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE))
+		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
+		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END))
 			return k;
 	return -1;
 }

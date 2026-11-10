@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's PanlSht2 * (179) against the registry's row 560 (the same unit, its record's first parameter 1: the panels of MegaMan's row): each picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2). Its whole flight runs inside the chip's time freeze, between two fight frames: the traces meet at what it leaves (docs/devtools/differential.md, A BN4 chip's spec). Two shots of 60, the Mettaur left 20 HP.",
+ "folder4": [
+  "34B3"
+ ],
+ "folder6": [
+  "230:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

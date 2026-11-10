@@ -61,5 +61,10 @@
  * are, now or before; false where BN5's ROM is not read yet, or a check
  * failed (nothing of them written, the log says which). */
 bool xchips_code_install(void);
+/* BN4's units (xchips_bn4.h) likewise, where BN4's ROM is read: each a
+ * support routine at XC4_FIRST_SUPPORT + BN4's subfamily, its code in
+ * FREE_BN4_CHIPS; the stubs and the grown tables staged by whichever of the
+ * two installs first. */
+bool xchips_bn4_code_install(void);
 
 #endif
