@@ -33,10 +33,8 @@ int chip_pool_class(int rom_id);
 int chip_pool_class_count(int cls);
 /* Whether chip `rom_id` is one of the older net's own a run can hold (an
  * id of the registry's own, a standard, Mega or Giga chip, no DarkChip and
- * no Program Advance), whether it plays now or sits out; and how many of
- * them play now, which a run can find (0 without BN5's ROM). The profile's
- * Library counts them apart, under the older net. */
+ * no Program Advance), whether it plays now or sits out. The Library
+ * lists them on BN5's page (library_pages.h). */
 bool chip_pool_older(int rom_id);
-int chip_pool_older_count(void);
 
 #endif

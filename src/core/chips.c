@@ -407,6 +407,13 @@ void chips_desc(int id, char *out, size_t n) {
 	rom_desc_bytes(s, len, out, n);
 }
 
+void chips_desc_lines(int id, char *out, size_t n) {
+	uint32_t len;
+	if (id < 0 || id >= CHIPS_IDS || !ready()) { if (n) out[0] = 0; return; }
+	const uint8_t *s = text_of(id, true, &len);
+	rom_desc_lines(s, len, out, n, '\n');
+}
+
 const uint8_t *chips_bytes(uint32_t bus, uint32_t n) {
 	if (bus >= BUS && bus - BUS + n <= ROM_SIZE && n <= ROM_SIZE) return R.data ? R.data + (bus - BUS) : NULL;
 	if (bus >= CHIPS_FREE && ready() && bus - CHIPS_FREE + n <= M.len && n <= M.len) return M.img + (bus - CHIPS_FREE);

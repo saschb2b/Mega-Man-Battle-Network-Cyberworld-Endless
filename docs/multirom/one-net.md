@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -145,7 +145,9 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   where a tab has room by its own numbers (Mega, Giga, PA), and the run's
   collection counts every registered chip, the second screen's Library
   listing BN5's under the older net. (This amends call 4's "numbered on"
-  where BN6's screen cannot.)
+  where BN6's screen cannot.) Amended again on 10 November 2026: the
+  PET's Library is a screen of ours with a page per entry, BN5's its own
+  Library in its own numbers ([The Library, a page per entry](../game/meta/library.md)).
 - **UNITE and the Beast Out emblem share one place** on the Custom screen
   (BN6's emblem is BN5's UNITE button, the same slot): it is UNITE while
   the last chip picked lights a held Soul, and the Beast Out emblem
@@ -220,7 +222,9 @@ run, meta as variety):
   ("Older Net": those held of those a run can find now) and listed on the
   second screen's Library, under its counts where it has room (a tab
   with no card, a larger display); the collection (a vault's count, new
-  this run) counts every chip a run can hold of either net.
+  this run) counts every chip a run can hold of either net. (Since 10
+  November 2026 BN5's page of the Library is that count and that list:
+  [The Library, a page per entry](../game/meta/library.md).)
 - **BN5's viruses' rewards and green Mystery Data** come through the
   registry: its id for the chip where it plays, the stand-in's 200 zenny
   where it sits out.

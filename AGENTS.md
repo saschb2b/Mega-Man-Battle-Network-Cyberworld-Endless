@@ -47,6 +47,7 @@ commits, issues and old notes) are mapped section by section in
 | Guardians and super bosses | [docs/game/bosses/](docs/game/bosses/index.md) |
 | The NaviCust | [docs/game/navicust.md](docs/game/navicust.md) |
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem, the Jukebox | [docs/game/pet.md](docs/game/pet.md) |
+| The chip Library, a page per entry (BN6, BN5, BN4): what each page lists and counts, its order and numbers, what the vaults and marks count | [docs/game/meta/library.md](docs/game/meta/library.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/game/rival.md](docs/game/rival.md) |
 | What is original, generated or adapted | [docs/game/fidelity.md](docs/game/fidelity.md) |
 | BN5's Liberation Missions dissected, how they join the run, and the generator that makes them afresh (its prototype in `tools/liberation.py`, BN5's own nine measured by `tools/liberation_bn5.py`) | [docs/game/liberation/](docs/game/liberation/index.md) |
@@ -101,7 +102,7 @@ part of the tree; a new file gets its line there.
 | `src/layer/` | [docs/code/layer.md](docs/code/layer.md): what stands on a layer |
 | `src/world/` | [docs/code/world.md](docs/code/world.md): the real world |
 | `src/gfx/`, `src/audio/`, `src/jukebox/` | [docs/code/gfx-and-audio.md](docs/code/gfx-and-audio.md): graphics, the engine's MP2K, the Jukebox |
-| `src/launcher/`, `src/saves/`, `src/scenes/`, `src/second/` | [docs/code/screens.md](docs/code/screens.md): the ROMs screen, SAVES, the start and title, the second screen |
+| `src/launcher/`, `src/library/`, `src/saves/`, `src/scenes/`, `src/second/` | [docs/code/screens.md](docs/code/screens.md): the ROMs screen, the Library, SAVES, the start and title, the second screen |
 | `src/analytics/` | [docs/code/analytics.md](docs/code/analytics.md): the anonymous statistics |
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
@@ -128,7 +129,9 @@ part of the tree; a new file gets its line there.
 - Where BN6 has a screen for something (the Custom screen, chip select,
   menus, chat boxes), drive BN6's own code to show it (a spare core
   outside a battle's determinism if need be); never redraw a copy. Our
-  own drawing is for what BN6 has no screen for.
+  own drawing is for what BN6 has no screen for. The one exception is the
+  PET's Library, a screen of ours over the entries where BN6's holds BN6's
+  chips alone (the owner's call, docs/game/meta/library.md).
 - Patch only the core's in-memory ROM copy, and put new data in the free
   space map in `docs/engine/emulation/memory.md`, its place a region of
   `src/emu/free_space.h` (RAM BN6 leaves alone too), which

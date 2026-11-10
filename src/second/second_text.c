@@ -12,10 +12,10 @@
 #include <string.h>
 
 #include "bn6.h"
-#include "chip_pool.h"
 #include "data.h"
 #include "guardians.h"
 #include "jobs.h"
+#include "library_pages.h"
 #include "meta.h"
 #include "navicust.h"
 #include "net.h"
@@ -224,18 +224,15 @@ int second_status(SecondRow *out, int most, int max_hp, int base_hp) {
 }
 
 int second_library(SecondRow *out, int most) {
-	/* (BN6's own tabs' names: two to a line beside the Library's card) */
-	static const char *const cls[] = { "StdChip", "MegaChip", "GigaChip" };
+	/* (a page each, src/library/: its slots filled of those a run can hand out; then what this run added) */
+	static const char *const entries[LIB_ENTRIES] = { "BN6", "BN5", "BN4" };
 	int k = 0;
-	for (int c = 0; c < 3 && k < most; ++c) {
-		out[k].name = cls[c];
-		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", meta_library_count(c), chip_pool_class_count(c));
-	}
-	/* (the older net's own, where its ROM is read: those a run can find) */
-	int older = chip_pool_older_count();
-	if (older && k < most) {
-		out[k].name = "Older Net";
-		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", meta_library_count(META_OLDER), older);
+	for (int e = 0; e < LIB_ENTRIES && k < most; ++e) {
+		int held, of;
+		library_count(e, -1, &held, &of);
+		if (!of) continue;
+		out[k].name = entries[e];
+		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", held, of);
 	}
 	if (k < most) {
 		out[k].name = "New this run";
@@ -245,20 +242,6 @@ int second_library(SecondRow *out, int most) {
 }
 
 const char *second_library_line(void) { return "Every chip MegaMan held in any run stays in the Library, and each run begins with it"; }
-
-void second_library_older(char *out, size_t n) {
-	size_t k = 0;
-	out[0] = 0;
-	for (int id = 1; id < META_LIBRARY_IDS && k + 2 < n; ++id) {
-		if (!chip_pool_older(id) || !meta_library_has(id)) continue;
-		ChipInfo ci;
-		chip_info(id, &ci);
-		if (!ci.name[0]) continue;
-		int w = snprintf(out + k, n - k, "%s%s", k ? ", " : "From the older Net: ", ci.name);
-		if (w < 0 || (size_t)w >= n - k) { out[k] = 0; break; }
-		k += (size_t)w;
-	}
-}
 
 int second_mail_rows(SecondRow *out, int most, const char *subject, int unread, int shown) {
 	int k = 0;

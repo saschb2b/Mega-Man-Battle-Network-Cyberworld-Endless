@@ -259,7 +259,6 @@ bool meta_library_add(int id) {
 
 /* (a chip of class `cls` as meta_library_count counts it) */
 static bool of_class(int id, int cls) {
-	if (cls == META_OLDER) return chip_pool_older(id) && chip_pool_tier(id) >= 0;
 	if (cls < 0) return chip_pool_class(id) >= 0 || chip_pool_older(id);
 	return chip_pool_class(id) == cls;
 }

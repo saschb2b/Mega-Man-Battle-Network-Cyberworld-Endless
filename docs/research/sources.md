@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:38:57Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T01:10:00Z }
 ---
 
 # Sources
@@ -211,6 +211,29 @@ records, as `tools/liberation_bn5.py` reads them. A sealed region's route
 to another way is ours, from the player's request the design began with
 ([Liberation Missions](../game/liberation/overview.md)); BN5's own detours are its BarrierPanels and their
 keys, which ours keep.
+
+## BN5's and BN4's Library order (10 November 2026)
+
+For [The Library, a page per entry](../game/meta/library.md): what order
+and numbers each game's own Library gives its chips.
+
+- **Verified in the ROMs**: both games' chip records carry one order key
+  at +0x1C over all their folder chips, class after class without a gap
+  ([The chip registry and BN5's chips' code](../rom/chips-code.md), BN5's
+  Library order; [BN4 Red Sun's tables](../rom/bn4.md), Its Library
+  order), and no number at +0x15, where BN6 keeps its own.
+- **Verified against a list**: MMKB's chip lists
+  (<https://megaman.miraheze.org/wiki/List_of_Mega_Man_Battle_Network_5_Battle_Chips>,
+  <https://megaman.miraheze.org/wiki/List_of_Mega_Man_Battle_Network_4_Battle_Chips>,
+  their text read on 10 November 2026) number BN5's standard chips 5
+  Vulcan1, 8 Spreader, 9 MrkCan1, 12 Pulsar1, 15 TankCan1, 18 WideSht1, 21
+  ElcReel1, 70 AirHoc and BN4's 5 Vulcan1, 9 HeatShot, 12 Bubbler: the
+  records' keys, none of them the chip's id.
+- **Assumed**: that each version's Library numbers its Megas and Gigas by
+  their place among that version's own (the pages' Megas and Gigas were
+  read through a summary of the page, not its text; the mega man fandom
+  wiki and The Rockman EXE Zone refused the fetch), and that BN4's secret
+  standard chips continue its standard chips' numbers.
 
 ## BN5's version Gigas and its seven NaviCust programs
 

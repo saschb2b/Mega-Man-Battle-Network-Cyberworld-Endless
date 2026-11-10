@@ -270,13 +270,15 @@ size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, siz
 	return k;
 }
 
-void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
+void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) { rom_desc_lines(s, n, out, outlen, ' '); }
+
+void rom_desc_lines(const uint8_t *s, size_t n, char *out, size_t outlen, char line) {
 	size_t o = 0;
 	for (size_t i = 0; i < n && o + 1 < outlen;) {
 		uint8_t c = s[i];
 		if (c == 0xE8) { i += 4; continue; }   /* ts_msg_open_quick_ext */
 		if (c == 0xF1) { i += 3; continue; }   /* ts_text_speed */
-		if (c == 0xE9) { out[o++] = ' '; ++i; continue; }   /* a new line */
+		if (c == 0xE9) { out[o++] = line; ++i; continue; }   /* a new line */
 		if (c >= 0xE5) break;                  /* ts_key_wait, ts_end */
 		for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
 		++i;

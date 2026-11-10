@@ -86,6 +86,9 @@ int text_code(unsigned char ch);
 enum { TEXT_LEFT = 0, TEXT_CENTER = 1, TEXT_RIGHT = 2 };
 int text_width(const char *s);
 void text_draw(int x, int y, const char *s, SDL_Color c, int align);
+/* ... as BN6 sets its lists: each letter in its own 8-pixel cell from (x, y), where the font's tile has it (a narrow
+ * letter in its middle), `shade` under it. Its letters are read from the ROM as they are drawn. */
+void text_draw_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade);
 void text_drawf(int x, int y, SDL_Color c, int align, const char *fmt, ...) __attribute__((format(printf, 5, 6)));
 /* The same font `scale` times as large, for title cards. */
 void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int scale);

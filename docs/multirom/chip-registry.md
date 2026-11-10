@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 283 chips in BN6's chip tables grown to 1024 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:03:14Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
 ---
 
 # The chip registry
@@ -185,9 +185,9 @@ the battle's Program Advance bits at `0x0203CA48` hold ids to 383 on
 side 0, the link list, side 1's, BN6's own: [The chip registry and BN5's chips' code](../rom/chips-code.md), BN5's
 Program Advances in BN6's lists); its Navi chips (M7: AntiNavi's
 range, 221-280, and the battle's record of the last Navi chip at
-`0x0203C960`); the Library (M9: BN6's Mega, Giga and P.A. tabs by their
-own numbers; the profile's Library of 512 ids and the second screen's
-came with D1, One net); the folder editor's pack list, 0xA000 bytes, holds
+`0x0203C960`); the Library came as a screen of ours with a page per
+entry, BN5's its own Library in its own numbers
+([The Library, a page per entry](../game/meta/library.md), 10 November 2026); the folder editor's pack list, 0xA000 bytes, holds
 1280 chip-codes where ids to 511 could make 2044 (no run comes near); the
 order stamps' clear at a NEW GAME covers BN6's 320 ids (the extension's
 start at 0 from the power-on clear); the link battle's copy of the pack

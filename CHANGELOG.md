@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **The Library, a page per game.** PET > Library now opens the run's own
+  Library, drawn as BN6's own to the pixel, with BN6, BN5 and BN4 named on
+  its band: each game has its StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left
+  and Right turn the pages, through a game's three and on to the next
+  game's, **L** and **R** move the list a screenful, B or START leaves; the
+  chip's card stands beside the list as before, a Mega's cyan and a
+  Giga's pink. Each page is the game's own
+  Library in its own numbers (BN5's 005 is Vulcan1, its 009 MrkCan1), and
+  counts only chips a run can hand out today; a chip two games share,
+  Cannon or Sword, fills its place on each. A class whole turns its count
+  gold. The pages keep their counts without the other games' ROMs, and
+  nothing in your profile changes: the chips you held are where they
+  belong. BN6's P.A. Memo is gone with its old screen for now; a page for
+  Program Advances follows. On a second screen the Library's panel counts
+  each game's page.
 - **Online: protocol v16.** The Net Square, Trade Central and the Arena
   now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
   last ones, which need ids past BN6's 511. Games of this version meet

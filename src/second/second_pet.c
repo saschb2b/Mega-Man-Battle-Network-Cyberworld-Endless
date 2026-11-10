@@ -5,8 +5,9 @@
  * board, the Cross the run brought; the Library's chip as a card the size
  * of the Custom screen's (issue #83), with the codes it comes in, which
  * BN6's leaves out, and its copies in the folder and the pack; the
- * profile's Library class by class against what a run can hold, and what
- * this run added to it. */
+ * profile's Library entry by entry (the run's own Library's pages,
+ * src/library/) against what a run can hand out, and what this run added
+ * to it. */
 #include "second_pet.h"
 
 #include "second_card.h"
@@ -50,16 +51,7 @@ void second_library_draw(SDL_Rect b) {
 	SecondRow r[5];
 	y = rows_two(r, second_library(r, 5), x, y, half) + 6;
 	char lines[4][SECOND_WRAP];
-	/* (the older net's own chips it holds, listed under it in the lines
-	 * left, their first at least: issue #82; else what the Library is to a
-	 * run, where the whole of it fits) */
-	static char older[560];
-	second_library_older(older, sizeof older);
-	int room = (b.y + b.h - 4 - y) / SECOND_LINE_H;
-	if (*older && room > 0) {
-		second_wrapped(older, x, y, w, room < 4 ? room : 4, PET_WHITE);
-		return;
-	}
+	/* (what the Library is to a run, where the whole of it fits) */
 	int k = second_wrap(second_library_line(), w, lines, 4);
 	if (y + k * SECOND_LINE_H <= b.y + b.h - 4) second_wrapped(second_library_line(), x, y, w, k, PET_CYAN_HI);
 }

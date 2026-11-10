@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T03:10:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -129,6 +129,23 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   gate's buttons as pills, the one under the cursor as RUN!; the gate's
   field a slot. The second screen's body stays one window: it is that
   screen's one content.
+- The Library ([The Library, a page per entry](../game/meta/library.md))
+  is BN6's Library itself, measured pixel for pixel from a capture of
+  it (`library_draw.c`): no rails but the foot's, the card 80 x 134 from
+  (7, 17) with its cut corner, hole, grip and contacts, a Mega's cyan and
+  a Giga's pink, its description in the game's own three lines, each
+  letter in a cell of 8, 16 apart, shaded a pixel right and below; the
+  cyan panel from the card to the screen's edge, the navy field 130 x 114
+  of seven rows, the list's letters in 8-pixel cells from the ROM's font
+  with the shade (33, 115, 140) (`text_draw_cells`), the stars with
+  their shadows, the scroll bar's capsule. The entries (BN6, BN5, BN4)
+  are tags on the band, the one shown lit with its count; the pages turn
+  by BN6's keys (Left and Right through an entry's classes and on to the
+  next entry's, L and R the list a screenful, START leaving as B). The
+  count in its pill, light green on navy as FOLDER EDIT's and gold where
+  the class is whole, a row as BN6's (number, icon, name, the rarity's
+  stars; `??` for a number never filled), the entry's whole count at the
+  band's right end. The one screen of ours that stands where BN6 has one.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - One key's hint on the band where the key does something unguessed:

@@ -5,11 +5,15 @@
 #ifndef CW_SECOND_READ_H
 #define CW_SECOND_READ_H
 
+#include <stdbool.h>
+
 void second_read_folder(void);
 void second_read_battle(void);
 void second_read_navicust(void);
 void second_read_home(void);
 void second_read_status(void);
+/* (whether the run's Library is up over the PET's menu, src/library/: its panel then) */
+bool second_library_up(void);
 void second_read_library(void);
 void second_read_mail(void);
 void second_read_shop(void);
