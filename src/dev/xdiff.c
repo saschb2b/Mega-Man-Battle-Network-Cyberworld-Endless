@@ -106,7 +106,7 @@ static bool in_ewram(uint32_t a) { return a >= BN6_EWRAM && a < BN6_EWRAM_END; }
 /* ---- a game's battle as it runs: its view, its trace, the sounds its music players began ---- */
 
 typedef struct { uint32_t info, header, clock; } Player;
-#define BEGUN_MAX 32
+#define BEGUN_MAX 128   /* (a frame's songs begun kept: a support chip's time freeze begins many between two fight frames, ShotStar's 63; the record's count is a byte) */
 
 typedef struct Side_ {
 	View v;
