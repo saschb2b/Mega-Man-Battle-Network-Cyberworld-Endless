@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T22:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -90,7 +90,7 @@ inside the band, and a run made wholly on BN4's ground, which no seed
 makes, three more by the fourth act (13, 17, 22 at the Nest), outside it.
 Left as BN4's records have it, the design's rule, and the report counts
 the seed's run from now on, so the day BN4's \*s push a real run out it
-says so (the owner's call 8, below).
+says so (the owner's call 9, below: kept).
 
 **The Library keeps a BN4 chip held.** A chip of BN4's own given to
 MegaMan never reached the profile's Library (`chip_pool_older` knew
@@ -972,6 +972,28 @@ Asked and answered on 11 November 2026:
    with the chips a folder holds. A slot for every sound of another game
    from then on (Where things stand).
 
+Asked and answered on 12 November 2026 (unit 7, Where things stand):
+
+9. **BN4's \*s on BN4's ground: kept as its records have them:** "Keep
+   BN4's codes". BN4 gives \* to 38 of its 100 standard chips, and to 13
+   of the 15 that play today; a find's code is the record's. Measured, a
+   run with BN6 and BN4 holds one chip more in its best letter from the
+   third act on, inside the band; a run wholly on BN4's ground would hold
+   three more by the fourth act, outside it, but no seed makes one. It is
+   what BN4's ground gives, a folder that comes together a little sooner
+   there, and `build.py economy` fails the plan the day a seed's run
+   leaves the band. Chosen over a find on BN4's ground rolling its code
+   among the record's letters first, the \* as often as BN6's chips have
+   it.
+10. **BN4's dark chips stay out of the finds:** "Keep them out". The
+    design keeps the five DarkChips to the flame; BN4's other 23 dark rows
+    (Hole, DrkLine, the DS Navi chips) cost 20 max HP a battle one is used
+    in (call 4, built), and a dealer or a Mystery Data tells no price. None
+    enters the catalogue (`xreg4_dark`); they come by the ways that can say
+    the price (a flame's words; a DS by a Navi beaten with dark power,
+    Phase 2's rule). Chosen over letting them in as any chip, the card's
+    description the only warning.
+
 Open:
 
 7. **Marking and the four Plus chips (FirePlus, ThunPlus, AquaPowr,
@@ -1011,28 +1033,6 @@ Open:
    proved against BN4's battle with no Hole on the field and play at
    their floor, which (b) would make final. Until answered Hole, DrkLine
    and DrkStage sit out.
-
-8. **BN4's \*s on BN4's ground: left as its records have them, or
-   held to BN6's share?** Asked 12 November 2026 (unit 7). BN4 gives \*
-   to 38 of its 100 standard chips, and to 13 of the 15 that play today;
-   a find's code is the record's. Measured, a run with BN6 and BN4 holds
-   one chip more in its best letter from the third act on, inside the
-   band; a run wholly on BN4's ground would hold three more by the fourth
-   act, outside it, but no seed makes one. Recommended: leave them. It is
-   what BN4's ground gives, a folder that comes together a little sooner
-   there, and `build.py economy` now fails the plan the day a seed's run
-   leaves the band. The other way: a find on BN4's ground rolls its code
-   among the record's letters first, the \* as often as BN6's chips have
-   it.
-9. **BN4's dark chips in the finds?** Asked 12 November 2026 (unit 7).
-   The design keeps the five DarkChips to the flame; BN4's other 23 dark
-   rows (Hole, DrkLine, the DS Navi chips) cost 20 max HP a battle one is
-   used in (call 4, built), and a dealer or a Mystery Data tells no price.
-   Built so: none enters the catalogue (`xreg4_dark`), as none plays yet.
-   Recommended: keep it, and let them come by the ways that can say the
-   price (a flame's words; a DS by a Navi beaten with dark power, Phase
-   2's rule). The other way: as any chip, its card's description the only
-   warning.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's
