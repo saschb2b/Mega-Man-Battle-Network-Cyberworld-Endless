@@ -5672,6 +5672,26 @@ static void test_darkchips(void) {
 	CHECK(dark_ran_add(0, 0x47, 0xFF) == 0 && dark_ran_add(DARK_RAN_BN5, 0x47, 0xFF) == DARK_RAN_BN5, "dark: any other chip leaves it");
 	CHECK(dark_ran_add(dark_ran_add(0, 220, 0xFF), 214, 0xFF) == DARK_RAN_BN5 && (dark_ran_add(DARK_RAN_BN5, 286, 0) & DARK_RAN_BN6) == 1u,
 		"dark: two of BN5's in a battle one bit (one price), BN6's beside them its own");
+	/* (BN4's dark chips, the owner's call of 10 November 2026: the rows BN4's records mark dark, by alignment or as a DarkChip,
+	 * 28 of the 193; one used is a dark power run, whatever its DarkChipID, two in a battle one price; no kind of the twelve,
+	 * so no flame's and no mood's; a light chip of BN4's and its neighbours none) */
+	int darks4 = 0, rows4 = 0;
+	for (int id = 0; id < XREG_IDS; ++id) {
+		darks4 += dark_bn4_is(id);
+		rows4 += dark_bn4_is(id) && xreg4_at(id) != NULL;
+	}
+	CHECK(darks4 == xreg4_dark_count && rows4 == darks4 && darks4 == 28, "dark: BN4's dark chips 28, each a row of BN4's (%d %d %d)", darks4, rows4, xreg4_dark_count);
+	CHECK(dark_bn4_is(527) && dark_bn4_is(528) && dark_bn4_is(697) && dark_bn4_is(534) && dark_bn4_is(562) && dark_bn4_is(601) && dark_bn4_is(605),
+		"dark: Hole, DrkLine, ElemDark, RollDS, DrkStage, DrkVulcn and DarkNeo dark chips of BN4's");
+	CHECK(!dark_bn4_is(558) && !dark_bn4_is(559) && !dark_bn4_is(533) && !dark_bn4_is(637) && !dark_bn4_is(602) && !dark_bn4_is(530) && !dark_bn4_is(220) &&
+		!dark_bn4_is(286) && !dark_bn4_is(0) && !dark_bn4_is(1023), "dark: Invis, PanlSht1, RollSP, ElemFlar, BlakWeap, the retired id and the other nets' DarkChips none of BN4's");
+	CHECK(!dark_chip_is(527) && dark_chip_kind(562) < 0 && dark_bn6_kind(601) < 0, "dark: a dark chip of BN4's no kind of the twelve");
+	CHECK(dark_ran_add(0, 527, 0xFF) == DARK_RAN_BN4 && dark_ran_add(0, 562, 0xFF) == DARK_RAN_BN4 && dark_ran_add(0, 562, 2) == DARK_RAN_BN4,
+		"dark: Hole and DrkStage run, a dark chip of BN4's whatever its DarkChipID (%#x)", dark_ran_add(0, 527, 0xFF));
+	CHECK(dark_ran_add(dark_ran_add(0, 527, 0xFF), 697, 0xFF) == DARK_RAN_BN4 && dark_ran_add(DARK_RAN_BN4, 0x47, 0xFF) == DARK_RAN_BN4 &&
+		dark_ran_add(0, 559, 0xFF) == 0 && dark_ran_add(0, 558, 0xFF) == 0, "dark: two of BN4's in a battle one bit (one price), a light chip of BN4's none");
+	CHECK(!(DARK_RAN_BN4 & DARK_RAN_BN6) && !(DARK_RAN_BN4 & DARK_RAN_BN5) && dark_ran_add(DARK_RAN_BN4, 220, 0xFF) == (DARK_RAN_BN4 | DARK_RAN_BN5),
+		"dark: BN4's bit none of BN6's by DarkChipID nor BN5's");
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,

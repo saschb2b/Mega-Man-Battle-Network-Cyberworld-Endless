@@ -387,7 +387,7 @@ int xreg_check(const XChipReg *rows, int n, char *why, size_t len) {
 
 #define BN4_IDS 389   /* BN4's chip records */
 
-static struct { bool made; int16_t of[BN4_IDS], at[XREG_IDS]; } idx4;
+static struct { bool made; int16_t of[BN4_IDS], at[XREG_IDS]; uint8_t dark[XREG_IDS / 8]; } idx4;
 
 static void index4_make(void) {
 	if (idx4.made) return;
@@ -396,6 +396,13 @@ static void index4_make(void) {
 		if (xreg4_rows[i].bn4 < BN4_IDS) idx4.of[xreg4_rows[i].bn4] = (int16_t)(i + 1);
 		if (xreg4_rows[i].bn6 < XREG_IDS) idx4.at[xreg4_rows[i].bn6] = (int16_t)(i + 1);
 	}
+	for (int i = 0; i < xreg4_dark_count; ++i)
+		if (xreg4_dark_ids[i] < XREG_IDS) idx4.dark[xreg4_dark_ids[i] >> 3] |= (uint8_t)(1u << (xreg4_dark_ids[i] & 7));
+}
+
+bool xreg4_dark(int bn6) {
+	index4_make();
+	return bn6 > 0 && bn6 < XREG_IDS && (idx4.dark[bn6 >> 3] >> (bn6 & 7) & 1);
 }
 
 const XChipReg4 *xreg4_of(int bn4) {
