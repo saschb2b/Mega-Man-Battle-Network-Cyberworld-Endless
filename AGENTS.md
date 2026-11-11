@@ -383,7 +383,16 @@ The desktop and browser builds' differences are
 [docs/devtools/romlab.md](docs/devtools/romlab.md).
 
 CI runs without a ROM: it builds every target with `-Werror`
-(`WERROR=1`, set when `CI` is), runs `build.py lint` and
+(`WERROR=1`, set when `CI` is) on each push to `dev` and `main`; a pull
+request builds the Linux desktop, PortMaster, Windows and the 3DS, and
+the other eight (Switch, Vita, PS4, PS5, Android, macOS, iOS, the
+browser) only where its change can reach them: their own folder, the
+Makefile, `build.py`, `docker/`, `.github/`, `shared/`, or a source file
+that holds a system's own code (`tools/ci_changes.py`;
+docs/code/platforms.md, CI on a pull request). So `dev`'s CI on the
+merge is where a pull request's left-out targets are built: a red there
+is the merging session's to fix at once. To build them all on a branch
+before merging, `gh workflow run CI --ref BRANCH`. CI runs `build.py lint` and
 `tests/test_core.c`, `tests/test_backup.c`, `tests/test_saves.c`,
 `tests/test_transfer.c`, `tests/test_discovery.c` and `tests/test_mapslot.c` under the
 sanitizers, then `tests/test_add_to_steam.py`; its android job runs
