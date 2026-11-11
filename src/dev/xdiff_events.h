@@ -103,6 +103,9 @@ bool xd_log_key(XdLog *log, uint32_t from, uint32_t to, uint32_t len);
  * (another Navi's copy of BN5's engine code is its engine's there) */
 #define XD_NAVI_IDS_MAX 8
 void xd_log_navis(const int *ids5, int n);
+/* Whether `to`, a moved range's copy, is in the code of a BN5 Navi none of the BN5 ids `ids5` (`n` of them, a spec's foes)
+ * names: a poke goes to no other Navi's copy (src/dev/xdiff.c, poke_range) */
+bool xd_navi_copy_apart(const int *ids5, int n, uint32_t to);
 /* The chips' units whose moved code is the family's in the logs started after: those BN6's folder `folder` (its `n`
  * chips, as the spec gives them: code << 9 | id) plays */
 void xd_log_units(const uint16_t *folder, int n);
