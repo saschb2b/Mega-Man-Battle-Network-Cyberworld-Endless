@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
 * **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
 * **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).

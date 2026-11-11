@@ -207,7 +207,7 @@ static void layer_battles(LayerTally *t, int depth, int biome) {
  * Growth) */
 static void layer_guardian(LayerTally *t, int depth, int biome) {
 	int navi = run_guardian(biome);
-	if (navi <= 0 || guardian_older(navi)) return;
+	if (navi <= 0 || guardian_moved(navi)) return;
 	Encounter e = make_boss(depth, biome, navi);
 	gain_reward(t, reward_pick(&e, bust_roll(), true, depth), FROM_GUARDIAN);
 	int chip = e.nfoes ? navi_chip(navi, e.foes[0].version) : 0;

@@ -289,11 +289,13 @@ static void elements_report(FILE *out) {
 		}
 	}
 	fprintf(out, "\n\nGuardians' elements and weaknesses:");
-	/* (BN5's by their own stats: guardian_element, its first wheel) */
-	for (int n = 1; n < 32; ++n) {
-		if ((!guardian_older(n) && enemy_id(1, n, 0) < 0) || (guardian_older(n) && xguardian_hp(n, 0) < 0) || guardian(n)->name[0] == '?') continue;
+	/* (BN5's and BN4's by their own stats: guardian_element, its first wheel) */
+	for (int n = 1; n <= GUARDIAN_BN4_LAST; ++n) {
+		if (guardian_darkloid(n) || (!guardian_moved(n) && n >= 32)) continue;
+		if ((!guardian_moved(n) && enemy_id(1, n, 0) < 0) || (guardian_moved(n) && xguardian_hp(n, 0) < 0) || guardian(n)->name[0] == '?') continue;
 		int e = guardian_element(n), w = guardian_weakness(n);
-		fprintf(out, " %s%s %s/%s", guardian(n)->name, guardian_older(n) ? " (BN5)" : "", e > 0 ? elem_name(e) : "-", w > 0 ? elem_name(w) : "-");
+		fprintf(out, " %s%s %s/%s", guardian(n)->name, guardian_older(n) ? " (BN5)" : guardian_bn4(n) ? " (BN4)" : "", e > 0 ? elem_name(e) : "-",
+			w > 0 ? elem_name(w) : "-");
 	}
 	fprintf(out, "\n");
 }
@@ -499,7 +501,7 @@ static unsigned area_acts(int biome) {
 	return acts | (unsigned)(biome == BIOME_UNDERNET) << 4 | (unsigned)(biome == BIOME_GRAVEYARD) << 5;
 }
 
-/* One of BN5's guardians in act `act` (`where` the area or the deep): his
+/* One of BN5's or BN4's guardians in act `act` (`where` the area or the deep): his
  * version, his own HP there and the HP he is fought at, against BN6's
  * guardians' band (threat 4's version beside it); 1 where fought outside */
 static int older_guardian_act(FILE *out, int navi, int act, const char *where) {
@@ -509,16 +511,38 @@ static int older_guardian_act(FILE *out, int navi, int act, const char *where) {
 	pacing_guardian_band(act, &lo, &hi);
 	int fought = pacing_xguardian_hp(hp[v], act, 0), fought4 = pacing_xguardian_hp(hp[v4], act, 0);
 	bool outside = fought < lo || fought > hi || fought4 < lo || fought4 > hi;
-	fprintf(out, "  %-12s %-11s act %d (%4d-%4d): V%d %4d, fought at %4d; threat 4 V%d %4d, at %4d%s%s\n", where, guardian(navi)->name, act + 1, lo,
-		hi, v + 1, hp[v], fought, v4 + 1, hp[v4], fought4, xguardian_fightable(navi) ? "" : "  (not moved in: not fought)", outside ? "  OUTSIDE" : "");
+	/* (his Guardian Data's Navi chip there: his own, or BN4's stand-in, xguardian_chip) */
+	int code, chip = xguardian_chip(navi, act * 3 + 3, &code);
+	ChipInfo ci = { .name = "none" };
+	if (chip > 0) chip_info(chip, &ci);
+	fprintf(out, "  %-12s %-11s act %d (%4d-%4d): V%d %4d, fought at %4d; threat 4 V%d %4d, at %4d; data %s%s%s\n", where, guardian(navi)->name,
+		act + 1, lo, hi, v + 1, hp[v], fought, v4 + 1, hp[v4], fought4, ci.name, xguardian_fightable(navi) ? "" : "  (not moved in: not fought)",
+		outside ? "  OUTSIDE" : "");
 	return outside;
 }
 
-/* BN5's guardians (docs/game/bosses/bn5-navis.md), fought in BN6's engine:
- * each in every act his area's BN6 area can come in, and every one in the
- * deep's acts, where both nets' Navis share a pool by band (those whose
- * HP falls short of an act's band are not in its pool: none past it, by
- * the rule); how many fought outside their band */
+/* (one of the older net's in the deep's acts 5 and 6, where both nets'
+ * Navis share a pool by band: one whose HP falls short of an act's band is
+ * not in its pool, none past it by the rule; 1 a time fought outside) */
+static int deep_guardian(FILE *out, int navi) {
+	int flagged = 0;
+	for (int act = 4; act <= 5; ++act) {
+		int hp[4], lo, hi;
+		for (int v = 0; v < 4; ++v) hp[v] = xguardian_hp(navi, v);
+		pacing_guardian_band(act, &lo, &hi);
+		if (pacing_xguardian_hp(hp[pacing_xguardian_version(hp, act, 0, false)], act, 0) < lo) {
+			fprintf(out, "  %-12s %-11s act %d: short of its band, not in its pool\n", "the deep", guardian(navi)->name, act + 1);
+			continue;
+		}
+		flagged += older_guardian_act(out, navi, act, "the deep");
+	}
+	return flagged;
+}
+
+/* BN5's guardians (docs/game/bosses/bn5-navis.md) and BN4's
+ * (bn4-navis.md), fought in BN6's engine: each in every act his area's
+ * BN6 area can come in, and in the deep's acts BN5's every one and BN4's
+ * its Undernet names; how many fought outside their band */
 static int older_guardians(FILE *out) {
 	int flagged = 0;
 	fprintf(out, "\nGuardians of the older net in BN6's engine, where its ROM is beside BN6's (half the runs its areas dress; the deep's\n"
@@ -528,24 +552,19 @@ static int older_guardians(FILE *out) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
 		if (!x || x->held || x->xrom <= 0) continue;
 		for (int j = 0; j < 2 && x->xguard[j]; ++j) {
-			int navi = guardian_of_older(x->xguard[j]);
+			int navi = xguardian_named(x->xrom - 1, x->xguard[j]);
+			/* (BN4's Undernet's in the deep's pool alone: dressed_xguardian leaves the deep's acts to it) */
+			if (x->xrom - 1 == XROM_BN4_RED_SUN_US && x->like == BIOME_UNDERNET) {
+				flagged += deep_guardian(out, navi);
+				continue;
+			}
 			unsigned acts = area_acts(x->like);
 			for (int act = 0; act < 6; ++act)
 				if (acts >> act & 1) flagged += older_guardian_act(out, navi, act, x->name);
 			fprintf(out, "  %-12s %-11s later cycles: SP %d\n", x->name, guardian(navi)->name, xguardian_hp(navi, 3));
 		}
 	}
-	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
-		for (int act = 4; act <= 5; ++act) {
-			int hp[4], lo, hi;
-			for (int v = 0; v < 4; ++v) hp[v] = xguardian_hp(navi, v);
-			pacing_guardian_band(act, &lo, &hi);
-			if (pacing_xguardian_hp(hp[pacing_xguardian_version(hp, act, 0, false)], act, 0) < lo) {
-				fprintf(out, "  %-12s %-11s act %d: short of its band, not in its pool\n", "the deep", guardian(navi)->name, act + 1);
-				continue;
-			}
-			flagged += older_guardian_act(out, navi, act, "the deep");
-		}
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi) flagged += deep_guardian(out, navi);
 	return flagged;
 }
 
@@ -554,7 +573,7 @@ int pacing_report_run(const char *path) {
 	 * engine's objects they run before them, installed as it starts, where
 	 * their ROM is read: the territories' records fought in BN6's engine,
 	 * issue #82) */
-	if (XR[XROM_BN5_COLONEL_US].data) {
+	if (XR[XROM_BN5_COLONEL_US].data || XR[XROM_BN4_RED_SUN_US].data) {
 		if (!emu_init(R.data, ROM_SIZE)) return 1;
 		xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	}
