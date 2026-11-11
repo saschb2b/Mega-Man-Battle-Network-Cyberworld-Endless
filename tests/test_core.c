@@ -1535,6 +1535,16 @@ static void test_pacing(void) {
 		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 held to 1300 in act 4");
 	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
 	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
+	/* BN4's by the same rule where its areas' records set them (docs/game/bosses/bn4-navis.md; BN4's own HP: GutsMan
+	 * 500/900/1300/1700, WoodMan 1000/1500/2000/2500, JunkMan 800/1100/1500/1800), each an older net's moved Navi */
+	const int guts[4] = { 500, 900, 1300, 1700 }, wood[4] = { 1000, 1500, 2000, 2500 }, junk[4] = { 800, 1100, 1500, 1800 };
+	CHECK(pacing_xguardian_version(guts, 0, 0, false) == 0 && pacing_xguardian_version(guts, 1, 0, false) == 1 &&
+		pacing_xguardian_hp(900, 1, 0) == 700, "GutsMan V1 in act 1, V2 held to 700 in act 2");
+	CHECK(pacing_xguardian_version(wood, 1, 0, false) == 0 && pacing_xguardian_hp(1000, 1, 0) == 700 && pacing_xguardian_hp(1000, 2, 0) == 1000,
+		"WoodMan V1 in acts 2 and 3, held to 700 in act 2");
+	CHECK(pacing_xguardian_version(junk, 4, 0, false) == 1 && pacing_xguardian_version(junk, 5, 0, false) == 2, "JunkMan V2 then V3 in the deep");
+	CHECK(guardian_moved(GUARDIAN_OLDER_FIRST) && guardian_moved(GUARDIAN_BN4_FIRST + 1) && !guardian_moved(1) && !guardian_moved(GUARDIAN_DARKLOID_FIRST),
+		"BN5's six and BN4's Navis the older net's moved guardians, BN6's and the Darkloids not");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&

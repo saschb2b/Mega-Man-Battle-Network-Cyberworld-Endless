@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
+* **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
 * **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).
