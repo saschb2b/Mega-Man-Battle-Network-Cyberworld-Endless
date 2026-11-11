@@ -309,11 +309,11 @@ static const char *const replies[] = {
 static bool friendly(int navi) { return (navi >= 1 && navi <= 3) || navi == 5 || navi == 11; }
 
 /* How MegaMan and Lan take guardian `navi`, `name`, at the first meeting:
- * a friend's copy, a foe's, or a Navi of the older net (BN5's, copied with
- * it) */
+ * a friend's copy, a foe's, or a Navi of the older net (BN5's or BN4's,
+ * copied with it) */
 static const char *first_sight(int navi, const char *name) {
 	static char s[128];
-	if (guardian_older(navi)) snprintf(s, sizeof s, "@L No way! That's %s!|@M The Nest copied the older Net's Navis too!|", name);
+	if (guardian_moved(navi)) snprintf(s, sizeof s, "@L No way! That's %s!|@M The Nest copied the older Net's Navis too!|", name);
 	else if (friendly(navi)) snprintf(s, sizeof s, "@M %s!? ...No,wait.|@M You're one of the Nest's copies!|", name);
 	else snprintf(s, sizeof s, "@L That's %s!|@M Or a copy the Nest made of him...|", name);
 	return s;

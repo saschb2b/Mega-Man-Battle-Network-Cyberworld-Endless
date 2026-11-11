@@ -112,6 +112,7 @@ FREE_BRACKET           +0x790000  +0x7A0000  end  xbracket.c                mult
 
 zone art  rom  +0x7A0000  +0x800000  -  art copied whole, a place each
 FREE_LIB_TEAM          +0x7A0000  +0x7FA000  end  xnavi.c                   game/liberation/index.md    a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each
+FREE_NAVI_SHARED_FOUR  +0x7FA000  +0x800000  end  xnavi_install.c           multirom/navis.md           the Navis' shared art's fourth room (a sprite of any Navi's once FREE_TEAM_SHARED_MORE is full: Meddy's last two first, CloudMan's before hers)
 
 zone persistent  ram  0x02010CE0  0x02011800  end=RAM_PERSISTENT_END  persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end)
 RAM_PACK_EXT           0x02010CE0  0x020115E0  end  xchips_install.c        multirom/chip-registry.md   the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry)
