@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 * **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
+* **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).
 * **Update**: multirom/bn4-chips.md (unit 7 built: BN4's catalogue the older Net's half of the finds on BN4's areas, the deep's every game's, what the economy measured, the Library's BN4 chips held, the menus' colours on BN4's areas fixed; the owner's calls 9 and 10, asked and answered), multirom/one-net.md (the half the area's own game's), game/economy/measuring.md (the report's older Net's table), game/meta/library.md (a BN4 chip held reaches the profile's Library), rom/net-maps.md and rom/bn4.md (the 256-colour bit on the map alone, BN6's menus their 16 colours).
@@ -24,6 +25,7 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: devtools/differential.md and multirom/bn4-chips.md (a dark MegaMan's palette, BN4's own, the comparator's one allowance for a dark karma; `bn4_chip_invis_dark`).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
 * **Update**: rom/bn4.md (The panel changer and the Hole panel, new row; `BN4_PANEL_HOLE` named) and multirom/bn4-chips.md (the dark units read, why each waits; call 7 with BlakWeap; call 8, the Hole panel, which a DS Navi chip's power counts), code/emu.md (`bn4_panels.h`).
