@@ -39,6 +39,7 @@
 ## 2026-11-11
 * **Update**: multirom/bn4-chips.md (Hole, DrkLine and DrkStage moved, one unit, the panel changer once), rom/bn4.md (the changer's blink read to depth, its sounds), devtools/differential.md (BN4's panel types in BN6's numbers, its blink and set type's timer), devtools/chip-recipe-generator.md (a table's bytes, a support unit of several subfamilies, a call several sounds reach), game/meta/darkchips.md (the first dark units moved).
 * **Update**: multirom/bn4-chips.md (BN4's Hole panel in BN6's engine built, type 15, the owner's call 8), rom/bn4.md (the Hole panel's look, colours and count, new row), code/emu.md (`xpanels.c` brings BN4's Hole too), devtools/battle-on-demand.md (the `status panel` step).
+* **Update**: multirom/bn6-gaps.md (Music: Showdown at ProtoMan's netbattle, Sorrow on a lost run's summary), game/rival.md (the netbattle's music).
 * **Update**: game/pet.md (the Jukebox: BN4's 34 songs, how each name is known, the coverage test), rom/bn4.md (Where BN4 plays its songs, new row), multirom/bn4.md (its music in the Jukebox), research/sources.md (The Jukebox's songs: BN4's music player, names and never-started songs), code/tools.md (`tools/bn4_songs.py`), code/emu.md (`bn4_music.h`).
 * **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).
