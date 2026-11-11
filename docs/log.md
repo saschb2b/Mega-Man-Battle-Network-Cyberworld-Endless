@@ -1,7 +1,6 @@
 # The knowledge base's log
 
 ## 2026-11-12
-* **Update**: code/platforms.md (CI on a pull request, new section: what a run cost and where it failed, the eight platform jobs run only where a change reaches them, every push to dev checked to its end), code/tools.md (tools/ci_changes.py).
 * **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).
 * **Update**: game/battle-lab.md (the name asked again and kept, over EchoComp, CopyComp and TraceComp), research/sources.md (The Battle Lab: the names checked against the series).
 * **Create**: game/progression/encounter-groups.md (the encounter rework as approved on 11 November 2026: the pool, the templates, the arc, the rewards, what it replaces, the engine's room, the build's phases and open calls), game/progression/encounter-groups-measured.md (the families' tags, each ROM set's pool and fill counts, the danger sampled), devtools/encounter-tags.md (`tools/encounter_tags.py`, `tools/encounter_danger.py`, `--encounter-tags`, `CYBERWORLD_BATTLE_PROBE`); **Update**: game/economy/decided.md (4 revised for a group's reward), game/progression/structure.md (the visitors and the deep's coin to be replaced), code/tools.md and code/dev.md (the new files).
