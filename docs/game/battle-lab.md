@@ -26,7 +26,7 @@ sources:
     resource: "1150 local runs that reached layer 9 with ten battles or more, from the run logs under .build/ of the main checkout (autopilot, persona and dev runs; not players')"
     title: "Deletions per run, counted from local run logs"
   - id: groups
-    resource: "docs/game/progression/encounter-groups.md as its session had written it on 11 November 2026 (not yet merged): The engine's room"
+    resource: "The Encounter groups concept (game/progression, The engine's room) as its session had written it on 11 November 2026, not yet merged"
     title: "The encounter groups' measured limits"
 ---
 
