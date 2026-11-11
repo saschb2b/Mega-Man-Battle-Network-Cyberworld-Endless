@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's Navis as guardians"
-description: "BN4 Red Sun's nine proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
+description: "BN4 Red Sun's ten proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
 tags: [game, bosses, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:42:55Z }
 sources:
   - id: records
     resource: "BN4 Red Sun's net battle records, tallied by tools/bn4_lab.py (docs/rom/bn4.md, Battle records): which Navis each net group's lists hold"
@@ -50,7 +50,7 @@ him in (`NetAreaDef.xguard`, `src/core/rom.c`):
 | BN4's area (it dresses) | Its records hold | Guardian (by a coin of the seed where two) |
 | --- | --- | --- |
 | ACDC Area (Central Area) | AquaMan, GutsMan, SparkMan | GutsMan or AquaMan |
-| Town Area (Seaside Area) | FireMan, NumberMan, Roll, TopMan | FireMan or Roll |
+| Town Area (Seaside Area) | FireMan, NumberMan, Roll, TopMan | FireMan, Roll or TopMan |
 | Park Area (Green Area) | BurnerMan, VideoMan, WoodMan | WoodMan |
 | The countries (Sky Area) | ColdMan, KendoMan, ThunderMan, WindMan | ThunderMan or WindMan |
 | The Undernet (Undernet) | JunkMan, SearchMan, and others not moved | SearchMan or JunkMan, in the deep's pool |
@@ -117,6 +117,7 @@ as EX, SP):
 | JunkMan | DustMan | scrap |
 | SearchMan | EraseMan | the unseen hunter's aim |
 | Roll | CircusMan | a summoner |
+| TopMan | ChargeMan | no element: a charge down the row, his top's |
 
 On 12 November 2026 every one of BN4's Navi chips is still `XREG_PENDING`
 (another session moves them, [BN4's chips in a run](../../multirom/bn4-chips.md)):

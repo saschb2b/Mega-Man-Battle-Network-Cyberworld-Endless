@@ -34,6 +34,7 @@
 #define BN4_OW_THUNDERMAN 0x58
 #define BN4_OW_SEARCHMAN  0x59
 #define BN4_OW_JUNKMAN    0x5A
+#define BN4_OW_TOPMAN     0x53 /* (named as he joined the proved; the others the row names wait for theirs) */
 #define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
 #define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
 #define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
@@ -292,5 +293,19 @@
 #define BN4_JUNK_SPAWN2   0x080E0170u /* the third kind's 0x97's spawner, from his copied MegaMan state 110 (0x080F41B4) */
 /* (his records name list 1's 0x0A, raw, where his init loads list 2's: BN4_SPRITE_PRELOAD, their sprite's one reader (0x08002B0E),
  * unpacks an LZ77'd one alone, its bit 31 tested at 0x08002B44, and passes a raw one over) */
+
+/* TopMan, derived after JunkMan, the first of the other build (no AI data, every state his own; tools/xnavirecipe_bn4.py;
+ * docs/multirom/bn4-navis.md, TopMan built): found by his type, each checked by the generator against his ROM */
+#define BN4_TOPMAN        0x080B68B0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_TOPMAN]): jump table 0x080B68C8 (init
+                                       * 0x080B68D5, update 0x080B6935, dying BN4_NAVI_DYING), then the after-step; his block to 0x080B73C8 */
+#define BN4_TOPMAN_STATES 0x080B694Cu /* his state table: BN4's generic Navi 0-2, 4 and 5, his own 3 (0x080B697D: his flinch, ending in
+                                       * BN4's generic 3, 0x08010E88), his own 6-11 (0x080B6995 his decision, 0x080B6D33 to 0x080B71F9) */
+#define BN4_TOPMAN_PALETTE 0x080B68F2u /* his init's palette: movs r0,#0, his version (+4) compared with 3, movs r0,#3, then BN4's
+                                        * palette set (0x08002DEC): 0 for V1-V3, 3 for his SP (the other build's form, as SparkMan's
+                                        * 0x080B7776 and BurnerMan's 0x080BDA02, which gives 2) */
+#define BN4_TOP           0x080D02F8u /* the third kind's 0x1B's block (his top) to 0x080D055C: its init loads list 2's 0x12, his own
+                                       * battle sprite (movs r1,#8; movs r2,#0x12 at 0x080D031E) */
+#define BN4_TOPMAN_DAMAGE 0x080B69BCu /* his decision's first step: his +0x2C (his attack's damage) against his collision data's +0x1E
+                                       * (BN4_COLL_DAMAGE), copied there with his +0x2E into its +5 (BN4_COLL_OBJ_2E) where they differ */
 
 #endif
