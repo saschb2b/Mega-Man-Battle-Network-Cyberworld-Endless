@@ -1077,10 +1077,12 @@ def c_file(units):
 
 
 def numbers_reserved():
-    """no number of TYPES3_NAVIS is one a track of BN5's moves or a Navi of BN5's not yet moved will
+    """no number of TYPES3_NAVIS, and none of TYPES4's run, is one a track of BN5's moves or a Navi of BN5's not yet moved will
     (tools/bn5_twins.py dispatch_reserved); the same check as build.py lint's, which needs no ROM"""
     held = bn5_twins.dispatch_reserved(3)
     bad = [f'TYPES3_NAVIS\'s {n:#04x} is {held[n]}' for n in TYPES3_NAVIS if n in held]
+    held = bn5_twins.dispatch_reserved(4)
+    bad += [f'TYPES4\'s {n:#04x} is {held[n]}' for n in range(*TYPES4) if n in held]
     if bad:
         sys.exit('xchiprecipe_bn4: a dispatch number of BN4\'s is BN5\'s own: ' + '; '.join(bad) +
                  ' (take it out of the tuple; a Navi that held it takes another and runs again)')

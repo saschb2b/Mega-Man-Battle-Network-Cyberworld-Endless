@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:18:21Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:40:00Z }
 ---
 
 # The chip recipe generator
@@ -360,7 +360,9 @@ DarkMegaMan is no Navi of the table). 144 of the third kind's 204
 numbers are in it. The generator stops before it reads a ROM where the
 tuple names one (`numbers_reserved`), and `build.py lint` makes the
 same check without a ROM, so a BN5 change that moves a type BN4 lists
-fails CI and says which.
+fails CI and says which. The fourth kind's run (`TYPES4`, 0x91 to 0xDF)
+is held to `dispatch_reserved(4)` the same way: 55 numbers on
+11 November, GridMan's 0x58 among them, the highest 0x90.
 
 **How it came about.** The chips' first fourteen units took numbers of
 the tables: those no BN5 recipe named on 10 November. A day later five
