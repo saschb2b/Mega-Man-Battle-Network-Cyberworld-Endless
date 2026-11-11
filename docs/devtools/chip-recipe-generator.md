@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:40:46Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:18:21Z }
 ---
 
 # The chip recipe generator
@@ -212,7 +212,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
   table's kinds are every unit's. A routine the families pair with BN6's
   own that a chip's unit moves instead, with its type, is named in
-  `UNIT_MOVES` (the thunder's spawner); a literal that is a number, not
+  `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
+  unit copies where the pair's answers differ, for that unit alone, in
+  `UNIT_COPIED` (MagBolt's collision panels' update, with BN4's rule for
+  a move's direction); an effect its code hands the engine's routine for
+  effects over a pattern of panels gets the id its own spawn of that
+  effect was given (`pattern_effects`: PropBom's blast); a literal that is a number, not
   an address, in `NUMBERS`; and a call noted before its target's type
   was moved with the unit is walked as its own code (FlmCros's cross, in
   the flame's code).
@@ -284,8 +289,8 @@ its entry alone.
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
-(0x22), Thunder (0x26) and TwnFng (0x34); MagBolt is next of the attack
-families.
+(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59) and PropBom
+(0x62); SeekBom is next of the attack families.
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
@@ -340,7 +345,7 @@ third-kind types and the page 256 entries. The differential reads a
 page object's type as it reads a dispatched one's, from the side table
 (`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
 own. The fourth kind stays in the tables (BN5's own end at 0x90, the
-chips' run from 0x91; three taken by twelve units).
+chips' run from 0x91; three taken by fourteen units).
 
 **BN5's numbers are still guarded for BN4's Navis.** Their track takes
 third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF
@@ -357,7 +362,7 @@ tuple names one (`numbers_reserved`), and `build.py lint` makes the
 same check without a ROM, so a BN5 change that moves a type BN4 lists
 fails CI and says which.
 
-**How it came about.** The chips' first twelve units took numbers of
+**How it came about.** The chips' first fourteen units took numbers of
 the tables: those no BN5 recipe named on 10 November. A day later five
 of them were GridMan's, LarkMan's and Nebula Grey's, and were replaced
 in their places (Counter 0xC8 to 0xB4, WhitWeb 0xC6 to 0xAE, the spread

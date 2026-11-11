@@ -1082,8 +1082,10 @@ def own_animation(d, fa, fb):
     ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
     pa = art_place(oa, roms.get(4, b'')) if oa else None
     pb = art_place(ob, roms.get(6, b'')) if ob else None
-    # (the same animation: the same number, or the two a moved family's state gives it, megaman_animations)
-    same = pa is not None and pb is not None and (pa[0] == pb[0] or megaman_animations(ob.o8(OBJ_ACTION)).get(pa[0]) == pb[0])
+    # (the same animation: the same number, or, where his state is a moved family's and BN4's number is one of its rows, the
+    # number the row gives BN6's, megaman_animations: there BN4's own number in BN6's art is another animation)
+    rows = megaman_animations(ob.o8(OBJ_ACTION)) if ob else {}
+    same = pa is not None and pb is not None and (rows[pa[0]] == pb[0] if pa[0] in rows else pa[0] == pb[0])
     if not same or pa[1] != pb[1]:
         return False
     if d.off == SPRITE_COUNT:
@@ -1421,12 +1423,12 @@ def support_end(d, fb):
         (d.part == 'ai' and d.off == AI_ATTACK_PHASE and (d.a, d.b) == (0, 1))
 
 
-def slide_direction(d):
+def slide_direction(d, foe=False):
     """legit.json's bn4 allowed, a slide's direction by each engine's clock: MegaMan's collision data's last move's direction
     (+0x0C, BN4's read as BN6's) where one game holds 0 and the other the direction of his last move read as BN6's
     (MOVES, the BN4 trace's own moves): BN4's collision panels' update writes it on the frame his panel changes and 0 on
     the next, BN6's slide once at its end, kept; True where so"""
-    if d.part != 'coll' or d.off != COLL_DIRECTION or not isinstance(d.role, tuple) or d.role[:2] != ('T1', 0x1A0):
+    if d.part != 'coll' or d.off != COLL_DIRECTION or not isinstance(d.role, tuple) or (d.role[0] != 'T1' if foe else d.role[:2] != ('T1', 0x1A0)):
         return False
     a, b = d.a, d.b
     if isinstance(a, tuple) and isinstance(b, tuple) and len(a) == len(b) == 2 and a[0] == b[0] == 'raw':
@@ -1437,6 +1439,39 @@ def slide_direction(d):
         a, b = a[1] & 0xFF, b[1] & 0xFF
     last = MOVES.get(d.role, (None, None, None))[2]
     return bool(last) and sorted((a, b)) == sorted((0, last))
+
+
+FOE_SLIDE_STEP = "a slid foe's blocked slide's step, BN4's"
+FOE_SLIDE_DIRECTION = "a slid foe's slide's direction, each engine's clock"
+FOE_STRUCK_STEP = "a struck foe's blocked push's step, BN4's"
+FOE_SLIDE_CUT = "a foe struck on its slide's last step, each runner's order"
+STRUCK_PUSHED = 5   # (the engine's state of an object struck and pushed, both games': tools/bn4_twins.py GENERIC4)
+OBJ_STEP, OBJ_SLIDE, OBJ_SLIDE_LEFT, OBJ_SLIDE_FRAMES = 0x0B, 0x1B, 0x1E, 0x1F
+
+
+def foe_slide(d, fam, fa, fb):
+    """legit.json's bn4 allowed, a chip's foe under a slide the chip's hit gave it (a pull or a push), a first-kind object
+    of the family's in a chip's spec; the allowance's name, None where none or its entry is not in legit.json:
+    - the two differences of the engines' slides that MegaMan's entries name ("MegaMan's blocked slide's step, BN4's" and
+      "a slide's direction, each engine's clock"): its blocked slide's step (+0x1B to +0x1D) where BN6's holds 0, and its
+      collision data's direction where one game holds 0 and the other its last move's;
+    - the same blocked step in its struck-and-pushed state, kept at +0x0B: both in that state, BN6's 0;
+    - its slide cut on its last step by a struck-and-pushed hit: BN4's record a slide ended (+0x1B 5, +0x1E and +0x1F 0),
+      BN6's the slide with one step left (+0x1B 6, +0x1E 1), those three bytes"""
+    if d.role not in fam or not isinstance(d.role, tuple) or d.role[0] != 'T1':
+        return None
+    names = {a['name'] for a in bn4_allowed()}
+    if FOE_SLIDE_STEP in names and d.part == 'obj' and 0x1B <= d.off <= 0x1D and d.b in (0, ('raw', 0)):
+        return FOE_SLIDE_STEP
+    oa, ob = (next((o for o in f.fr['objs'] if o.role == d.role), None) for f in (fa, fb))
+    if d.part == 'obj' and oa is not None and ob is not None:
+        a8, b8 = (lambda off: oa.rec[NODE + off]), (lambda off: ob.rec[NODE + off])
+        if FOE_STRUCK_STEP in names and d.off == OBJ_STEP and a8(OBJ_ACTION) == b8(OBJ_ACTION) == STRUCK_PUSHED and d.b == 0:
+            return FOE_STRUCK_STEP
+        if FOE_SLIDE_CUT in names and d.off in (OBJ_SLIDE, OBJ_SLIDE_LEFT, OBJ_SLIDE_FRAMES) and \
+                (a8(OBJ_SLIDE), a8(OBJ_SLIDE_LEFT), a8(OBJ_SLIDE_FRAMES)) == (5, 0, 0) and (b8(OBJ_SLIDE), b8(OBJ_SLIDE_LEFT)) == (6, 1):
+            return FOE_SLIDE_CUT
+    return FOE_SLIDE_DIRECTION if FOE_SLIDE_DIRECTION in names and slide_direction(d, foe=True) else None
 
 
 def spawner_kept(d):
@@ -1649,7 +1684,7 @@ def compare(spec, ta, tb, canon, show=6):
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or spawner_kept(d) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
+            d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or spawner_kept(d) or (foe_slide(d, fam, fa, fb) if spec.get('subject') == 'megaman' else None) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the paralysis's flash, its gate a state's and its phase the timer's" if against and paralysis_flash(d, fa, fb) else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
                 ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None) or \
