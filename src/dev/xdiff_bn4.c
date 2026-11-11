@@ -166,6 +166,38 @@ void xd4_folder_put(const Spec *s) {
 	if (s->karma4 >= 0) guest_write16(guest_read32(BN4_TOOLKIT + BN4_TOOLKIT_NAVI_STATS) + BN4_NAVI_KARMA, (uint16_t)s->karma4);
 }
 
+/* (a flag of BN4's event flags set, eToolkit +0x48's: flag f in byte f >> 3, bit 0x80 >> (f & 7)) */
+static void flag_set4(int f) {
+	uint32_t at = guest_read32(BN4_TOOLKIT + BN4_TOOLKIT_FLAGS) + (uint32_t)(f >> 3);
+	guest_wr8(at, (uint8_t)(guest_read8(at) | 0x80 >> (f & 7)));
+}
+
+static bool souls_given;    /* (a Soul's spec: its form watched, xd4_form_watch) */
+static int form_was, frames_run;
+
+void xd4_form_watch(void) {
+	++frames_run;
+	int now = souls_given ? guest_read8(BN4_BATTLE_NAVI + BN4_NAVI_FORM) : 0;
+	if (now != form_was) printf("xdiff: BN4's MegaMan in form %d at its frame %d\n", now, frames_run);
+	form_was = now;
+}
+
+void xd4_souls_put(const Spec *s) {
+	souls_given = s->souls4 != 0;
+	form_was = frames_run = 0;
+	for (int n = 1; n <= 12; ++n) {
+		if (!(s->souls4 >> (n - 1) & 1)) continue;
+		/* (its flag from BN4's own table: Blue Moon's six refused, 0xFF, docs/multirom/bn4-souls.md) */
+		int flag = guest_read8(BN4_SOUL_FLAGS + (uint32_t)(n - 1));
+		if (flag == 0xFF) { fprintf(stderr, "xdiff: BN4's Soul %d has no flag in Red Sun\n", n); continue; }
+		flag_set4(flag);
+		/* (its pseudo-chip's byte as the game writes it when it gives the Soul, else BN4_CHIP_GATE drops it at OK) */
+		uint32_t id = BN4_SOUL_CHIPS + (uint32_t)n;
+		guest_wr8(guest_read32(BN4_TOOLKIT + BN4_TOOLKIT_CHIP_COPY) + id, (uint8_t)(guest_read8(BN4_CHIP_KEYS + id) ^ BN4_CHIP_KEY_XOR));
+	}
+	if (s->souls4) flag_set4(BN4_FLAG_DOUBLE_SOUL);
+}
+
 int xdiff_bn4_run(const Spec *s) {
 	if (!guest_start(XROM_BN4_RED_SUN_US)) {
 		fprintf(stderr, "xdiff: BN4 Red Sun's ROM is not beside BN6's, or its guest did not reach Lan's room\n");
@@ -177,10 +209,12 @@ int xdiff_bn4_run(const Spec *s) {
 	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) { fprintf(stderr, "xdiff: BN4's battle could not be asked\n"); return 1; }
 	xd4_folder_put(s);
+	xd4_souls_put(s);
 	foes_say(s);
 	int f = 0, result = 0, hp_end = -1, begun = -1;
 	for (; guest_battling() && f < BUDGET; ++f) {
 		guest_frame_quiet(keys_of(f));
+		xd4_form_watch();
 		dev_hold(s);
 		film_take(s, f);
 		if (begun < 0 && mode() == BN4_MODE_BATTLE) begun = f;

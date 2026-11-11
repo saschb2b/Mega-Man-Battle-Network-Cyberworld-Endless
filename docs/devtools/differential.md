@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -52,7 +52,17 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+where the dud plays. `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
+its Soul n): each one's event flag read from BN4's own table
+(`BN4_SOUL_FLAGS`; Blue Moon's six have none in Red Sun), Double Soul's,
+and its pseudo-chip's byte written past the chip gate as the game writes
+it giving the Soul (`xd4_souls_put`), and his form is said as it changes
+(`xd4_form_watch`, the battle NaviStats' `BN4_NAVI_FORM`). BN4's UNITE
+is keyed as BN5's: the chip picked, five right and down to UNITE, A,
+then up and A on the Soul (four other paths tried, none united).
+`bn4_soul_thun_control` is ThunSoul so, form 6 at the same frame in both
+runs, its charged shot held and the Custom screens that count its turns
+opened. A BN4 spec takes `film` as BN5's do. Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark

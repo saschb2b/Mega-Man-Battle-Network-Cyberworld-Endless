@@ -153,6 +153,7 @@ static int film_parse(Spec *s, const char *name, const char *v) {
 /* the Souls BN6's MegaMan holds, the rule or parts of them broken (the comparator's own test), and BN4's karma; -1 where `name` is
  * none of them */
 static int souls_parse(Spec *s, const char *name, const char *v) {
+	if (!strcmp(name, "souls4")) return (s->souls4 = (unsigned)strtoul(v, NULL, 16)) != 0 && s->souls4 < 1u << 12;
 	if (!strcmp(name, "karma4")) return (s->karma4 = atoi(v)) >= 0 && s->karma4 <= 0xFFFF;
 	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
 	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
