@@ -30,7 +30,9 @@
 #include "platform.h"
 #include "screen_name.h"
 #include "soulproxy.h"
+#include "square_words.h"
 #include "swap_dev.h"
+#include "talk.h"
 #include "xbracket.h"
 
 /* ---- scripted input and captures for headless tests ---- */
@@ -80,6 +82,9 @@ static bool text_step(const char *tok, InputStep *s) {
 	/* (the NetPass opened over the game, or its stamp moment: netpass_screen.h) */
 	else if (!strcmp(tok, "netpass")) s->netpass = 1;
 	else if (!strcmp(tok, "netpass stamp")) s->netpass = 2;
+	/* (the set grown: the greeter's word, then the pass as it stands: netpass_grew_begin) */
+	else if (!strcmp(tok, "netpass grew")) s->netpass = 3;
+	else if (!strcmp(tok, "netpass grown")) s->netpass = 4;
 	/* (Trade Central's screens in a run: trade_preview.h) */
 	else if (!strncmp(tok, "trade ", 6)) snprintf(s->trade, sizeof s->trade, "%s", tok + 6);
 	/* (the wait for a dropped link over the game: reconnect_preview.c) */
@@ -215,6 +220,8 @@ static void emu_steps(const InputStep *s) {
 	if (s->onehit) devtools_parse("onehit");
 	if (s->netpass == 1) netpass_screen_open();
 	if (s->netpass == 2) netpass_stamp_begin();
+	if (s->netpass == 3) talk_start(square_greeter_grew_words(), FACE_PROG);
+	if (s->netpass == 4) netpass_grew_begin();
 	if (s->trade[0]) trade_preview(s->trade);
 	if (s->reconnect[0]) reconnect_preview(s->reconnect);
 	if (s->emote) online_chat_emote(s->emote - 1);

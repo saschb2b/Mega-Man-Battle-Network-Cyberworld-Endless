@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "online_chips.h"
 #include "protocol.h"
 
 #define CHIP_ID(e)   chip_entry_id(e)   /* a folder entry (chip_entry.h) */
@@ -18,17 +19,17 @@
 /* false, the reason said in `why` */
 #define REFUSE(...) ((why && n ? (void)snprintf(why, n, __VA_ARGS__) : (void)0), false)
 
-/* a chip id the cores hold: every id of the chip registry (BN5's chips
- * in BN6's tables, its blanks and the pack's extension among them: the
- * same in every game with BN5's ROM, docs/multirom/chip-registry.md, The chip
- * registry) */
-static bool chip_held(unsigned id) { return id < ONLINE_PACK_IDS; }
+/* a chip id the cores hold: one this game has a record of, BN6's own or
+ * the chip registry's (BN5's chips and BN4's from protocol v17, the same
+ * in every game of the NetPass's full set, docs/multirom/chip-registry.md;
+ * online_chips.h), a pending one sitting out of the deck on both cores */
+static bool chip_held(unsigned id) { return online_chip_known(id); }
 
 bool arena_loadout_check(const OnlineLoadout *l, char *why, size_t n) {
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folder[i];
 		if (e == 0xFFFF || !CHIP_ID(e)) continue;
-		if (!chip_held(CHIP_ID(e))) return REFUSE("the folder holds chip %u, past the chip registry", CHIP_ID(e));
+		if (!chip_held(CHIP_ID(e))) return REFUSE("the folder holds chip %u, which this game has no record of", CHIP_ID(e));
 		if (CHIP_CODE(e) > CODE_STAR) return REFUSE("the folder holds a chip of code %u, which BN6 has not", CHIP_CODE(e));
 	}
 	if (!l->max_hp || l->max_hp > HP_MOST) return REFUSE("MegaMan's max HP (%u) is not one BN6 holds", l->max_hp);
