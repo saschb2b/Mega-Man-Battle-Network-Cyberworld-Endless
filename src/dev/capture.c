@@ -36,7 +36,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -69,6 +69,8 @@ static void parse_buttons(const char *s, InputStep *step) {
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
 	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
+	/* (the foes as the Battle Lab's test battle: lab_battle.h) */
+	else if (!strncmp(tok, "lab ", 4)) { snprintf(s->foes, sizeof s->foes, "%s", tok + 4); s->lab = true; }
 	else if (!strncmp(tok, "swap ", 5)) snprintf(s->swap, sizeof s->swap, "%s", tok + 5);
 	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
 	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
@@ -200,7 +202,8 @@ static void write_state(const char *path) {
  * #23), its enemies held at 1 HP */
 static void emu_steps(const InputStep *s) {
 	if (s->battle) director_dev_battle();
-	if (s->foes[0]) director_dev_foes(s->foes);
+	if (s->foes[0] && s->lab) director_dev_lab(s->foes);
+	else if (s->foes[0]) director_dev_foes(s->foes);
 	if (s->swap[0]) swap_dev_step(s->swap);
 	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
 	if (s->bracket[0]) xbracket_dev_step(s->bracket);
