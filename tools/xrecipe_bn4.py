@@ -803,9 +803,9 @@ def scan(f):
     f.imms = out
 
 
-def type_number(f, alloc, kind):
+def type_number(f, alloc, kind, ty=None):
     """the dispatch's next number of a kind, taken (alloc.types: TYPE_0 to 0xFF, a byte, then TYPE_MORE's); a decision past
-    them"""
+    them (`ty` its game's own number, which the chips' page runs it by: tools/xchiprecipe_bn4.py's)"""
     if getattr(f, 'late', False) and kind in LATE_TYPES:
         n, floor = alloc.late_types[kind], LATE_TYPES[kind][1]
         if n < floor:
@@ -848,10 +848,11 @@ def spawns_of(f, alloc):
                 continue
             m = moved[ty]
             if 'as' not in m:
-                m['as'] = type_number(f, alloc, kind)
+                m['as'] = type_number(f, alloc, kind, ty)
                 f.types.append((kind, m['as'], ty))
-            f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
-                               why=f'its object\'s type {ty:#x}: moved, the dispatch\'s {m["as"]:#x}'))
+            if m['as'] != ty:   # (a type run by its own number names it already: the chips' page)
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=ty, now=m['as'],
+                                   why=f'its object\'s type {ty:#x}: moved, the dispatch\'s {m["as"]:#x}'))
             f.spawn_calls[t] = name
 
 
