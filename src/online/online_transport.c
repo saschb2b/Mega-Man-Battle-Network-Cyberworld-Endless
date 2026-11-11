@@ -18,6 +18,8 @@
  * who came late catches up (the server's 2 KB a tick, the game's frame held up a few
  * ticks by the way in) */
 #define RING 65536
+#define HELLO_KEY 81       /* HELLO: the guest key, after the three games' identities (v17: BN4's at 57) */
+#define HELLO_CHANNEL 97   /* ... the channel asked for, then the name's length */
 typedef struct { uint8_t b[RING]; unsigned head, tail; } Ring;
 
 static bool ring_put(Ring *r, const uint8_t *data, size_t size) {
@@ -88,7 +90,7 @@ static uint32_t retry_wait(unsigned tries) {
 /* HELLO as a resume: the channel MegaMan stood in, the resume bit set, so
  * the server gives back the place it held (protocol v10) */
 static void hello_resume(uint16_t channel) {
-	online_put16(transport.hello + 73, (uint16_t)(channel | ONLINE_HELLO_RESUME));
+	online_put16(transport.hello + HELLO_CHANNEL, (uint16_t)(channel | ONLINE_HELLO_RESUME));
 }
 
 /* the link ended without a word from the server (no ERROR, nothing
@@ -111,7 +113,9 @@ static void sha1_bytes(const char *hex, uint8_t *out) {
 	}
 }
 
-uint8_t online_transport_roms(void) { return XR[XROM_BN5_COLONEL_US].data ? ONLINE_ROMS_BN5 : 0; }
+uint8_t online_transport_roms(void) {
+	return (uint8_t)((XR[XROM_BN5_COLONEL_US].data ? ONLINE_ROMS_BN5 : 0) | (XR[XROM_BN4_RED_SUN_US].data ? ONLINE_ROMS_BN4 : 0));
+}
 
 /* PING: the clock the server echoes, and (v13) the round trip measured so
  * far, for the Square's link bars over this MegaMan on the others' screens */
@@ -122,8 +126,9 @@ static void ping(uint8_t out[ONLINE_PING_BYTES], uint32_t now, uint32_t round_tr
 	online_put16(out + 5, (uint16_t)(round_trip < 1u ? 1u : round_trip < 0xFFFFu ? round_trip : 0xFFFFu));
 }
 
-/* HELLO (shared/online/README.md): BN6's identity, and BN5's where its ROM
- * is read (zeros where not), the server's to check and to tell the others */
+/* HELLO (shared/online/README.md): BN6's identity, and BN5's and BN4's
+ * where their ROMs are read (zeros where not; BN4's from v17), the
+ * server's to check and to tell the others */
 static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
 	if (!R.layout || !R.layout->code || !R.layout->sha1 || !online_wire_name(name)) return false;
 	uint8_t *out = transport.hello;
@@ -134,15 +139,19 @@ static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY
 	online_put32(out + 5, SQUARE_HASH);
 	memcpy(out + 9, R.layout->code, 4);
 	sha1_bytes(R.layout->sha1, out + 13);
-	const XRom *bn5 = &XR[XROM_BN5_COLONEL_US];
+	const XRom *bn5 = &XR[XROM_BN5_COLONEL_US], *bn4 = &XR[XROM_BN4_RED_SUN_US];
 	if (online_transport_roms() & ONLINE_ROMS_BN5) {
 		memcpy(out + 33, bn5->layout->code, 4);
 		sha1_bytes(bn5->layout->sha1, out + 37);
 	}
+	if (online_transport_roms() & ONLINE_ROMS_BN4) {
+		memcpy(out + 57, bn4->layout->code, 4);
+		sha1_bytes(bn4->layout->sha1, out + 61);
+	}
 	size_t length = strlen(name);
-	memcpy(out + 57, identity, ONLINE_IDENTITY_BYTES);
-	online_put16(out + 73, 0);
-	out[75] = (uint8_t)length;
+	memcpy(out + HELLO_KEY, identity, ONLINE_IDENTITY_BYTES);
+	online_put16(out + HELLO_CHANNEL, 0);
+	out[HELLO_CHANNEL + 2] = (uint8_t)length;
 	memcpy(out + ONLINE_HELLO_BYTES, name, length);
 	transport.hello_size = ONLINE_HELLO_BYTES + length;
 	return true;

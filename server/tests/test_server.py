@@ -129,7 +129,8 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
                                (dict(square_make=protocol.SPEC["square_make"] + 1), 17), (dict(square_make=0), 3),
                                (dict(square_hash=protocol.SPEC["square_hash"] ^ 1), 3), (dict(rom_code="BAD!"), 4),
                                (dict(rom_sha1="00" * 20), 4), (dict(bn5=True, bn5_code="BRKP"), 15),
-                               (dict(bn5=True, bn5_sha1="00" * 20), 15)):
+                               (dict(bn5=True, bn5_sha1="00" * 20), 15), (dict(bn5=True, bn4_code="B4BE"), 15),
+                               (dict(bn5=True, bn4_sha1="00" * 20), 15)):
             client, response = await self.connect(**identity)
             self.assertEqual(response[:3], struct.pack("!BH", protocol.SPEC["error"], code))
             await client.close()
@@ -198,7 +199,7 @@ class ContractTests(unittest.TestCase):
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
                      "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
                      "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
-                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_full", "notice_pass",
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_bn4", "roms_full", "bn4_chip_first", "notice_pass",
                      "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
                      "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
                      "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes",
@@ -237,12 +238,21 @@ class ContractTests(unittest.TestCase):
             self.assertNotIn(gone, protocol.SPEC)
             self.assertNotIn("ONLINE_" + gone.upper(), header)
         # (every bit of the full set one a HELLO can carry: read_hello learns a new game's before roms_full names it)
-        self.assertEqual(protocol.SPEC["roms_full"] & ~protocol.SPEC["roms_bn5"], 0)
+        self.assertEqual(protocol.SPEC["roms_full"] & ~(protocol.SPEC["roms_bn5"] | protocol.SPEC["roms_bn4"]), 0)
         self.assertTrue(protocol.full_set(protocol.SPEC["roms_full"]))
+        # (v17: BN4 Red Sun's in the set, its bit clear of SNAPSHOT's others: busy's and link's, bits 1-4)
+        self.assertEqual(protocol.SPEC["roms_full"], protocol.SPEC["roms_bn5"] | protocol.SPEC["roms_bn4"])
+        self.assertFalse(protocol.full_set(protocol.SPEC["roms_bn5"]) or protocol.full_set(protocol.SPEC["roms_bn4"]))
+        self.assertGreaterEqual(protocol.SPEC["roms_bn4"], 1 << (protocol.SPEC["link_shift"] + 2))
+        self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
         self.assertFalse(protocol.full_set(0))
         # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
         rom = (ROOT / "src/core/rom.c").read_text()
         self.assertIn(f'"{protocol.SPEC["bn5_sha1"]}", "{protocol.SPEC["bn5_code"]}"', rom)
+        self.assertIn(f'.sha1 = "{protocol.SPEC["bn4_sha1"]}", .code = "{protocol.SPEC["bn4_code"]}"', rom)
+        # (BN4's first own id, as src/core/xchips_registry.h names it)
+        registry = (ROOT / "src/core/xchips_registry.h").read_text()
+        self.assertEqual(int(re.search(r"#define XREG4_PACK_FIRST (\d+)", registry)[1]), protocol.SPEC["bn4_chip_first"])
         # (BN6's blank records, where BN5's chips are installed, as src/emu/bn6_chips.h names them)
         chips = (ROOT / "src/emu/bn6_chips.h").read_text()
         blank = re.search(r"#define BN6_CHIP_BLANK\(id\)\s+(.*)", chips)[1]
@@ -257,6 +267,9 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(protocol.read_trade(trade), (3, 7, (600, 2), (1023, 26)))
         self.assertEqual(protocol.read_offer(protocol.OFFER.pack(protocol.SPEC["offer"], 600, 2, 0)), ((600, 2), 0))
         self.assertTrue(protocol.chip_bn5(600))
+        # (v17: BN4's own ids, from bn4_chip_first; BN5's below it)
+        self.assertTrue(protocol.chip_bn4(700) and protocol.chip_bn4(protocol.SPEC["bn4_chip_first"]))
+        self.assertFalse(protocol.chip_bn4(protocol.SPEC["bn4_chip_first"] - 1) or protocol.chip_bn4(411) or protocol.chip_bn4(5))
         for bad in (protocol.TRADE.pack(protocol.SPEC["trade"], 3, 7, 1024, 0, 1, 0), protocol.OFFER.pack(protocol.SPEC["offer"], 1024, 0, 0)):
             with self.assertRaises(protocol.ProtocolError):
                 (protocol.read_trade if bad[0] == protocol.SPEC["trade"] else protocol.read_offer)(bad)
@@ -267,6 +280,10 @@ class ContractTests(unittest.TestCase):
                 protocol.read_state(data)
         with self.assertRaises(protocol.ProtocolError):
             protocol.read_hello(protocol.hello("Lan") + b"trailing")
+        # (v17: each game's bit as its identity came)
+        bn5, bn4 = protocol.SPEC["roms_bn5"], protocol.SPEC["roms_bn4"]
+        for kw, roms in ((dict(), 0), (dict(bn5=True), bn5 | bn4), (dict(bn5=True, bn4=False), bn5), (dict(bn4=True), bn4)):
+            self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
 
 
 if __name__ == "__main__":

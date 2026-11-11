@@ -26,10 +26,16 @@ void netpass_screen_draw(void);
 void netpass_screen_strip(void);
 
 /* The stamp moment: due where the pass is full and fewer of its stamps
- * have been seen in the Square (netpass.ini); begun, the pass opens with
+ * have been seen in the Square (netpass.ini), or seen for a smaller set; begun, the pass opens with
  * the new ones landing and the file says all of them seen */
 bool netpass_stamp_due(void);
 void netpass_stamp_begin(void);
+/* The set grown (a game joined it, protocol v17's BN4): due once where the
+ * pass was full before and is not now; begun, the pass opens as it stands,
+ * its new open slot naming the game, and the file says the Square's stamp
+ * alone, so the stamp moment comes again once the pass is full */
+bool netpass_grew_due(void);
+void netpass_grew_begin(void);
 
 /* The PET menu's key hint in the Net Square, at its band's right end, which BN6 leaves empty: R:NETPASS, as
  * E-Mail names START:SORT (square_pet.h; docs/engine/ui.md, Keys) */

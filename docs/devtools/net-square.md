@@ -3,7 +3,7 @@ type: Tool
 title: "The Net Square: two games at once"
 description: "Testing the Net Square on a local server: `python3 build.py server-run`, a data folder's `network.ini` or `--dev online=URL`, two `tools/play.py` games, dev steps (`emote`, `netpass`, `trade`, `reconnect`) and `tools/link_relay.py` for dropped links."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:07:12Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # The Net Square: two games at once
@@ -51,8 +51,14 @@ stamp among it. Never point a test at the official server.
 The NetPass ([The NetPass](../online/netpass.md)) opens over any screen with the
 dev step `netpass` (`0:netpass` in a shot's `--input`, `netpass` in
 `tools/play.py`), and its stamp moment with `netpass stamp`, which also
-writes the data folder's `netpass.ini` as the greeter does. A folder of
-BN6's ROM alone (`CYBERWORLD_ROM_DIR` naming one) gives the Square pass:
+writes the data folder's `netpass.ini` as the greeter does. A set grown
+([A game joins the set](../online/netpass.md#a-game-joins-the-set)) has
+two: `netpass grew` the greeter's line, in BN6's chat box once no other
+box is open (page it with B where a Navi stands in front: A talks to
+him), and `netpass grown` the pass as it then opens, writing
+`netpass.ini`'s `stamps=1` and `games=`. A folder of BN6's ROM alone
+(`CYBERWORLD_ROM_DIR` naming one) gives the Square pass, and one of
+BN6's and BN5's the pass with BN4's slot open:
 
 ```bash
 python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "300:,0:netpass" --shot "360:/src/.build/np/full.bmp"

@@ -3,7 +3,7 @@ type: Process
 title: "Reverse-engineering work"
 description: "How the reverse-engineering work is tracked: `ledger.json` written out by `tools/re_status.py` as STATUS.md and the dashboard, where ROM facts and claims live instead, the BN6 Gregar target's SHA-1, and the skill's provenance."
 tags: [re]
-generated: { by: claude-code/unrecorded, at: 2026-10-18T12:08:07Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
 ---
 # Reverse-engineering work
 
@@ -16,17 +16,19 @@ experiment with what it means.
 
 ## Updating the status
 
-[ledger.json](ledger.json) is the one source: edit it, then run
-
-```sh
-python3 tools/re_status.py
-```
-
-which checks it and writes [state.json](state.json) (what the dashboard
-reads), STATUS.md, and the dashboard itself: the skill's page
+[ledger.json](ledger.json) is the one source: a branch edits it and
+nothing else here. `tools/re_status.py` checks it and writes
+[state.json](state.json) (what the dashboard reads), STATUS.md, and the
+dashboard itself: the skill's page
 (`.claude/skills/reverse-engineering/assets/dashboard.html`) with the
-state embedded, so it shows when opened as a file too. `build.py test`
-fails while any of them is out of step with the ledger. Dates are written
+state embedded, so it shows when opened as a file too. `dev`'s workflow
+runs it after each merge and commits what it wrote
+([Merging](../project/merging.md): every branch that moved a feature
+changed these three files, so any two conflicted there). `build.py test`
+fails while the ledger is not sound (`tools/re_status.py --lint`), and
+`build.py lint` where a branch changes a written file; to look at the
+status here, run `python3 tools/re_status.py`, then
+`python3 tools/generated.py restore` before committing. Dates are written
 `YYYY-MM-DD`, or `null` where unknown; the page shows those as a dash.
 
 ## Where the facts live

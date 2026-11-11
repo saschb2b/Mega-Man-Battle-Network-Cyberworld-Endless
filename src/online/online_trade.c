@@ -11,6 +11,7 @@
 #include "emu.h"
 #include "game.h"
 #include "gamecall.h"
+#include "online_chips.h"
 #include "online_transport.h"
 #include "trade_list.h"
 #include "trade_words.h"
@@ -37,17 +38,12 @@ const TradeView *online_trade_view(void) { return &T; }
 
 static bool send(int action, uint32_t ref, TradeChip give, TradeChip get);
 
-/* a chip only a game with BN5's ROM holds: past BN6's 319, or on one of
- * its blank records, where BN5's are installed (the server's rule too,
- * protocol.json's bn6_blank) */
-static bool online_trade_bn5(unsigned id) { return id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id); }
-
-/* a chip this game holds: one of BN6's own, or one of BN5's (on BN6's blank
- * records and past its 319) the registry has; in a code of its record's,
- * where the core has them */
+/* a chip this game holds and plays: one of BN6's own, or one of the
+ * registry's (BN5's, BN4's) whose code is in BN6's engine (online_chips.h:
+ * a pending one stays out); in a code of its record's, where the core has
+ * them */
 static bool chip_ok(TradeChip c) {
-	if (c.id < 1 || c.id > ONLINE_CHIP_LAST || c.code > ONLINE_CODE_LAST) return false;
-	if (online_trade_bn5(c.id) && !chips_bn5(c.id)) return false;
+	if (c.code > ONLINE_CODE_LAST || !online_chip_plays(c.id)) return false;
 	const uint8_t *rec = chips_record(c.id);
 	for (unsigned s = 0; rec && s < 4; ++s)
 		if (rec[BN6_CHIP_CODES + s] == c.code) return true;
@@ -148,7 +144,7 @@ int online_trade_spares(TradeChip *out, uint8_t *count, int cap) {
 	for (unsigned id = 1; id <= ONLINE_CHIP_LAST && n < cap; ++id) {
 		const uint8_t *rec = chips_record((int)id);
 		uint32_t at = pack_entry(id);
-		if (!rec || !at || (online_trade_bn5(id) && !chips_bn5((int)id))) continue;
+		if (!rec || !at || !online_chip_plays(id)) continue;
 		for (unsigned s = 0; s < 4 && n < cap; ++s) {
 			uint8_t code = rec[BN6_CHIP_CODES + s], have = emu_read8(at + s);
 			if (code > ONLINE_CODE_LAST || !have) continue;

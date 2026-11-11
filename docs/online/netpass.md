@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The NetPass"
-description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's and BN5's, that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment and protocol v9's NOTICE 28."
+description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's, BN5's and BN4's (protocol v17), that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment, a game joining the set and protocol v9's NOTICE 28."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:06:16Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # The NetPass
@@ -17,10 +17,12 @@ read and the week's ranking. Three things need **the full set**, every
 ROM this build supports for online play: the Arena (a NetBattle, and
 watching one), Trade Central (a trade, and posting or answering a trade
 board offer) and the week's DeepNet dive (the greeter's offer and the
-dive's post to the Board). The set is BN6's ROM and BN5 Team Colonel's
-today, defined once in a table (`src/online/netpass.c`). A future game is
-one entry there: the stamps that need it go back to open until a player
-has it in, which the release notes and the site announce ahead.
+dive's post to the Board). The set is BN6's ROM, BN5 Team Colonel's and,
+from protocol v17, BN4 Red Sun's, defined once in a table
+(`src/online/netpass.c`). A future game is one entry there: the stamps
+that need it go back to open until a player has it in, which the release
+notes and the site announce ahead ([A game joins the set](#a-game-joins-the-set),
+below, as BN4 did).
 
 The **NetPass** shows it, and is the one place that names which game
 earns which stamp: a key item in Lan's PET (R on the PET's menu in the Square), a strip
@@ -148,6 +150,43 @@ own in the data folder, `netpass.ini` (`stamps=4`), never in the run's
 save: the pass follows the player's ROMs, not a run. A game with BN6's
 ROM alone has no moment (its one stamp is every game's).
 
+## A game joins the set
+
+The owner's call of 9 November 2026 ([BN4's chips in a run](../multirom/bn4-chips.md),
+the owner's call 1): **BN4 Red Sun joins the full set now**, over the
+recommendation to wait for its share of sessions. Its chips go into
+NetBattles and trades as each is proved, and a game without BN4's ROM
+keeps the Square and loses the Arena, Trade and DeepNet stamps until it
+adds it. Through the game-design skill:
+
+- **Dialectic and loop layer** as the pass's own: one crowd against each
+  player's collection, read at the gate as a visit begins.
+- **Patterns:** honest feedforward (the pass shows a third slot, open and
+  marching, naming the game: "Red Sun's ROM stamps Arena, Trade and
+  DeepNet"); a ceremony per completion (the stamp moment comes again when
+  the larger set is filled); and an announcement said once, only to the
+  player it changes things for.
+- **Who says it, and when:** the greeter, who stamps the pass, on the
+  first visit after the set grew, to a game whose pass was full and is not
+  now; then the pass opens as it stands, its new slot naming the game. Its
+  words speak of stamps, never of ROMs, as every character's do: "OH! YOUR
+  NETPASS GOT A NEW SLOT!", "ARENA,TRADE AND DEEPNET STAY SHUT TILL IT'S
+  FILLED!", "HAVE A LOOK!" (`square_greeter_grew_words`). A game that
+  never held the full pass hears nothing new: its pass was saying what it
+  lacks already. A game with all three ROMs never hears it either: the
+  stamp moment comes in its place, its stamps landing again.
+- **What it does not do:** take a stamp from anyone without saying why,
+  or say it twice.
+
+`netpass.ini` keeps the set's size beside the stamps (`games=3`); a file
+from before v17 has none and counts as the two-game set's. The greeter's
+line is due where the file says every stamp for a smaller set and the pass
+is not full (`netpass_grew_due`); said, the file says the Square's stamp
+alone, so it is said once and the stamp moment comes when the pass fills
+(`netpass_stamp_due`: full, and fewer stamps seen or for a smaller set).
+Ahead of the release, the notes and the site say it too: the CHANGELOG's
+entry for v17, and the site's line on the NetPass.
+
 ## Every system, and the New 3DS
 
 The owner's aim (20 October 2026): every stamp earnable on every system.
@@ -167,6 +206,23 @@ letters being a texture's, which a picture drawn into memory (the 3DS's
 bottom screen) cannot use.
 
 ## On the wire
+
+Protocol v17 adds BN4 Red Sun: HELLO carries its game code and SHA-1
+after BN5's (all zeros without it, ERROR 15 for another), the server
+keeps it as `roms_bn4` (bit 5 of SNAPSHOT's byte, clear of its busy and
+link bits) and `roms_full` is both bits. A chip of BN4's own (from
+`bn4_chip_first`, 527) is left out of the BOARD of a game without BN4's
+ROM, as BN5's is of a game without BN5's.
+
+Which chips cross ([BN4's chips in a run](../multirom/bn4-chips.md),
+Online): a NetBattle's folder may hold any chip the game has a record of,
+BN6's own and the registry's, to id 1023 (`online_chips.h`,
+`arena_loadout_check` on both games); a chip of BN4's whose code is not
+moved yet sits out of the deck on both cores, as in a run. A trade, its
+answer, a board offer and the spares list take only a chip that plays
+(`online_chip_plays`): a pending one never shows. Two games of the set
+build the same installs, BN4's among them, which the installs' record's
+hash checks before a battle begins.
 
 Protocol v9 holds the rule on the server. HELLO has carried BN5's
 identity since v4 (its game code and SHA-1, zeros without it, checked

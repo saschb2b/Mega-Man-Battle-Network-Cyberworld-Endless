@@ -3,7 +3,7 @@ type: Process
 title: "The voice review"
 description: "The voice review (issue #135): `tools/voice_catalog.py` reads every line of the words files into `docs/voice/catalog.json`, the owner judges them on the review dashboard, whose db keeps verdicts and directions, and a voice pass applies them."
 tags: [voice]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T17:34:11Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
 ---
 # The voice review
 
@@ -101,9 +101,15 @@ Two lists put the lines in the order the review reads them:
 
 ### In step
 
-`build.py lint` runs `tools/voice_catalog.py --check` and fails while the
-catalog differs from what the words files make: a changed line is
-committed with its catalog. `build.py test` runs the extractor's own test.
+The catalog is written on `dev`, by its workflow after each merge
+([Merging](../project/merging.md)): every branch that changed a line
+changed the catalog's counts, so any two conflicted there. A branch
+commits its words files alone; `build.py lint` reads them through
+(`tools/voice_catalog.py --lint`) and fails where the branch changes the
+catalog. To read a line's flags before that, run
+`python3 tools/voice_catalog.py` here and
+`python3 tools/generated.py restore` before committing. `build.py test`
+runs the extractor's own test.
 
 ### What it does not read
 
@@ -233,10 +239,12 @@ When the owner asks for one, or before a release that changed lines:
    the log has it, or as the mark's note asks, and its row leaves the
    log's Cut table (a note under the table says it came back, and when).
    Look at it in the game (`--talk`, [Dev tools](../devtools/overview.md)).
-4. **Regenerate**: `python3 tools/voice_catalog.py`, then `build.py lint`
-   and `build.py test`; the flags of the lines touched read over.
+4. **Regenerate**: `python3 tools/voice_catalog.py`, the flags of the
+   lines touched read over; `build.py test`.
 5. **Republish** the dashboard to its link with the new catalog
-   (Publishing it, above).
+   (Publishing it, above); then `python3 tools/generated.py restore`
+   and `build.py lint`, as the catalog is committed by `dev`'s workflow
+   (In step, above).
 6. **Mark applied**: each review acted on gets `status: "applied"`,
    `applied_at` and an `applied_note` (what changed, or why not), with
    ArtifactData's `update` (`batch` for many); each direction acted on

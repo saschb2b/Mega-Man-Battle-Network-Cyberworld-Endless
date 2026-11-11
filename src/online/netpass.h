@@ -1,8 +1,8 @@
 /* netpass.h. The NetPass (issue #131, docs/online/netpass.md): what a
  * game's ROMs open online, as stamps. The Net Square is every game's; the
  * Arena, Trade Central and the week's DeepNet dive need the full set, every
- * game this build supports for online play: netpass.c's table, BN6's and
- * BN5 Team Colonel's today, a future game one entry more. The server holds
+ * game this build supports for online play: netpass.c's table, BN6's,
+ * BN5 Team Colonel's and BN4 Red Sun's (v17), a future game one entry more. The server holds
  * the same rule (protocol.json's `roms_full`, NOTICE `notice_pass`). */
 #ifndef CW_NETPASS_H
 #define CW_NETPASS_H
