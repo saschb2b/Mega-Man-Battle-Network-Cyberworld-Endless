@@ -29,7 +29,8 @@
 #define XC4_HOME_WAIT (XC4_HOME_SIZE - XC4_WAIT_SIZE)
 #define XC4_UNITS     96                   /* ... this many units (BN4's 48 of its chips and 18 of its Navi chips) */
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
-#define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* what they draw, to: */
+#define XC4_ART       (FREE_BN4_CHIPS + 0x24000u)                /* what they draw (the code's room 48 KB, twelve units' 8 KB of
+                                                                   * it in November 2026; the art the scarce one), to: */
 #define XC4_END       (FREE_BN4_CHIPS_END - 0x400u)
 #define XC4_MISC      XC4_END              /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
