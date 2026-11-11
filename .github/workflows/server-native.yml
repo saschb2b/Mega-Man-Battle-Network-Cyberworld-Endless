@@ -32,10 +32,10 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13.16'
           architecture: ${{ matrix.architecture }}
@@ -52,7 +52,7 @@ jobs:
       - name: Python source bundle and real process smoke
         if: matrix.target == 'linux-x86_64'
         run: python server/release.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: server-${{ matrix.target }}
           path: build/release/cyberworld-server-*.zip
