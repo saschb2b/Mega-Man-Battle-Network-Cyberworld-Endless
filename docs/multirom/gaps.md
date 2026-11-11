@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:40:00Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -32,6 +32,9 @@ or more (several M, or a system). Each candidate is checked against [the
 core loop](../game/core-loop.md): its lacks (pace, a climax that bites,
 variety a veteran feels), what it froze (power meta, any change to BN6's
 battle) and the owner's calls.
+
+BN6 Gregar's own content a run leaves out is audited apart, in [BN6
+Gregar's own gaps](bn6-gaps.md).
 
 BN5 is the main path: 147 of 166 release runs carried it in October (the
 core loop's statistics), so a gap on its areas reaches nine runs in ten.
