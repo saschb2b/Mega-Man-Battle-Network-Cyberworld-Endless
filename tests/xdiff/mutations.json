@@ -3173,6 +3173,111 @@
    "what": "his top's load of his own battle sprite (BN4 0x080D0320: movs r2,#0x12, list 2, the recipe's BN6 0x4C, XNAVI_SPRITE_BN4 + his seat) left at BN4's 0x12: another Navi's sprite in BN6's list 2 (caught at t497)"
   },
   {
+   "name": "FlmLine's flames' column another",
+   "spec": "bn4_chip_flmline1",
+   "poke": [
+    "080ECB1E:46C0"
+   ],
+   "what": "FlmLine's state's copy's doubling of his facing (BN4 0x080ECB1E: adds r0,r0,r0, the flames two columns ahead) made a nop: the flames on the column next to him, the Mettaur two columns ahead untouched"
+  },
+  {
+   "name": "FlmLine's flames' frame another",
+   "spec": "bn4_chip_flmline2",
+   "poke": [
+    "080ECB08:2810"
+   ],
+   "what": "FlmLine's state's copy's count compared (BN4 0x080ECB08: cmp r0,#0x1b, the frame the flames are made) made cmp r0,#0x10: the flames made eleven frames later"
+  },
+  {
+   "name": "FlmLine2's row's flame frames another",
+   "spec": "bn4_chip_flmline2",
+   "poke": [
+    "08C06681:0A:1"
+   ],
+   "what": "the registry's record of BN4's FlmLine2 (596 at CHIPS_RECORDS) with its second parameter 10 where BN4's record holds 0x28, a flame's frames: the flames gone thirty frames sooner"
+  },
+  {
+   "name": "the flame's type another",
+   "spec": "bn4_chip_flmline1_miss",
+   "poke": [
+    "080D00BC:20CB"
+   ],
+   "what": "the flame's spawner's copy (its movs r0,#0x19 at BN4 0x080D00BC, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no flames"
+  },
+  {
+   "name": "FlmLine3's row's family another",
+   "spec": "bn4_chip_flmline3",
+   "poke": [
+    "08C066A7:D7:1"
+   ],
+   "what": "the registry's record of BN4's FlmLine3 (597) naming BN6's grown attack family 0xD7, which holds the grown table's stub, where the row gives it the unit's 0xD1: his attack ended at once, no flames"
+  },
+  {
+   "name": "the thunder's height another",
+   "spec": "bn4_chip_thunder1",
+   "poke": [
+    "080ECE76:2305"
+   ],
+   "what": "Thunder's state's copy's movs r3,#0xa (BN4 0x080ECE76, the ball's height as it is made) made movs r3,#5: the ball made five lower"
+  },
+  {
+   "name": "the thunder's type another",
+   "spec": "bn4_chip_thunder3",
+   "poke": [
+    "080D215A:20CB"
+   ],
+   "what": "the thunder's spawner's copy (its movs r0,#0x2a at BN4 0x080D215A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no ball"
+  },
+  {
+   "name": "the thunder's sound not played",
+   "spec": "bn4_chip_thunder1",
+   "poke": [
+    "080D20B0:46C0",
+    "080D20B2:46C0"
+   ],
+   "what": "the thunder's init's copy's call that plays its launch (BN4 0x080D20B0, the recipe's call to its shim for the grown table's slot 0x201) made two nops: the ball made without its sound"
+  },
+  {
+   "name": "Thunder2's row's power another",
+   "spec": "bn4_chip_thunder2",
+   "poke": [
+    "08C06F7A:0028"
+   ],
+   "what": "the registry's record of BN4's Thunder2 (648) with power 40 where BN4's record holds 60: the Mettaur left 100 HP where BN4's leaves it 80"
+  },
+  {
+   "name": "the second fang's kind another",
+   "spec": "bn4_chip_twnfng1",
+   "poke": [
+    "080ED540:46C0"
+   ],
+   "what": "TwnFng's state's copy's adds r4,#1 (BN4 0x080ED540, the second fang's kind, the one to the row above) made a nop: both fangs to the row below, the Mettaur on the row above untouched"
+  },
+  {
+   "name": "the fang's type another",
+   "spec": "bn4_chip_twnfng3",
+   "poke": [
+    "080D7B3E:20CB"
+   ],
+   "what": "the fang's spawner's copy (its movs r0,#0x51 at BN4 0x080D7B3E, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no fangs"
+  },
+  {
+   "name": "the fang's speed across another",
+   "spec": "bn4_chip_twnfng1_miss",
+   "poke": [
+    "080D7B62:0002"
+   ],
+   "what": "the fang's copy's speed across the rows (the word at BN4 0x080D7B60, 0x00040000) made 0x00020000: each fang reaches its row later"
+  },
+  {
+   "name": "TwnFng2's row's power another",
+   "spec": "bn4_chip_twnfng2",
+   "poke": [
+    "08C07106:0032"
+   ],
+   "what": "the registry's record of BN4's TwnFng2 (657) with power 50 where BN4's record holds 100: the Mettaur left 90 HP where BN4's leaves it 40"
+  },
+  {
    "name": "ThunSoul's charge 10 frames longer",
    "spec": "soul_thun",
    "soulbreak": 16,

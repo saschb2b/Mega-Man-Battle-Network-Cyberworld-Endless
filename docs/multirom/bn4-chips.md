@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602 and every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -116,10 +116,26 @@ trader.
 **Not built here:** the flame's five DarkChips (none plays); a round's
 and Guardian Data's Navi chips (unit 6's); the visitors' rewards, which
 pay a chip of BN4's that plays since unit 0. A chip of BN4's whose id has
-no pack entry yet (from 603) stays out of the catalogue until it has
-one; `xchips_reward_bn4` does not ask that, so a visitor's reward of
-such a chip would be lost once one plays: for the session that gives
-those ids their entries.
+no pack entry (603-634, the Program Advances') stays out of the
+catalogue, and a visitor's reward of one pays the stand-in's zenny
+(`reward_as` asks `bn6_pack_holds`, since the pack's entries from 635:
+the next paragraph).
+
+**Every BN4 folder chip has a pack entry** (10 November 2026; [The chip
+registry and BN5's chips' code](../rom/chips-code.md), The pack in the
+save RAM). Ids 635-1023 count in the cart's save RAM, 5,616 bytes of
+which BN6's save library never addresses (its four calls' addresses and
+sizes are literals, read; the battery, the PET's screens, a shop, a Chip
+Trader and a NetBattle rolled back 872 times watched it for every read
+and write: the pack's routines alone touch it). Every state the engine
+writes carries it, so a checkpoint, a `.cwsave` and the boot's state
+keep the counts with no change to `Run`; a rollback snapshot takes it
+beside the core's raw state. mGBA serves that RAM a byte at a time, so
+BN6's three routines that reach an order stamp by a halfword go on to
+the engine's, which use two bytes. Chip 700 given, listed in the folder
+editor's Pack, swapped, through a battle, saved and continued keeps its
+counts; a run saved by the build before continues with none of them;
+the autopilot's seeds 1-12 are the build before's run log for run log.
 
 **The first unit of BN4's code is moved: PanlSht1-3** (10 November 2026;
 [The chip recipe generator](../devtools/chip-recipe-generator.md), The
@@ -306,10 +322,51 @@ Advances, play once BN4's recipes are listed (BN4's list read into BN6's
 grown one, as BN5's were: not built). Every attack unit to come that
 draws the arm shares this copy of it (not built: the second unit's work).
 
+**FlmLine1-3, Thunder1-3 and TwnFng1-3 are moved** (10 November 2026:
+ids 595-597, 647-649 and 656-658; BN4's families 0x22, 0x26 and 0x34 at
+BN6's grown attack families 0xD1, 0xD6 and 0xD3). Each is its state with
+the object it spawns: FlmLine's flame (the third kind's 0x19, three on
+the column two ahead), TwnFng's fang (the third kind's 0x51, one to the
+row above and one to the row below, then along them), and for Thunder
+BN4's own thunder (the third kind's 0x2A): Billy's recipe runs BN6's
+object for it, drawn from BN6's art, which a family's rule allows by its
+foe, so the chip's unit moves BN4's and its ball is BN4's in every
+battle. **The arm is shared:** the Spreads unit's copy of the third
+kind's 0x02 serves FlmLine too, which copies the arm's spawner alone (40
+bytes) and spawns the owner's number of the dispatch; the kinds every
+unit draws are rows of the owner's copy of the table. BN6 has none of
+the three states, so MegaMan's animations are given BN6's numbers by the
+art: the animations of the same frames' durations in each game's sprite
+of him. Eleven specs pass, each object in play in the fight's frames (a
+140 HP Mettaur left 70, 20 and 0 by FlmLine1-3, the third compared to
+the hit; 100, 80 and 60 by Thunder1-3, the ball creeping 90 frames while
+MegaMan is struck; 70, 40 and 10 by TwnFng1-3, used before the Mettaur
+leaves its row; a miss each for FlmLine and TwnFng), thirteen mutations
+caught. A sound row can now hold in the specs of a chip unit's chips
+alone (`chips`: Thunder's ball's 0xAD, which Billy's thunder and
+ThunderMan pair otherwise). **Waiting:** FlmCros1-3 and BstFang1-3, the
+families' Program Advances (their subfamily 1, in the moved states
+already), on BN4's recipes; Thunder's and TwnFng's ids are past 602 and
+have no pack entry yet, so a run cannot hold them until the pack's RAM
+for those ids lands.
+
+**The units' art room is the scarce one** (11 November 2026). A unit's
+sprites are copied whole at the core's start, and an arm's kind is a
+sprite of its own, 9 to 14 KB each: the spread unit's five take 49 KB,
+and the twelve units to TwnFng 130 KB, against 8 KB of code. The room
+(`XC4_ART` to `XC4_END`) was 127 KB of the region; its start is moved
+down inside the region (`FREE_BN4_CHIPS` + 0x24000, the code's room 48 KB
+of which the twelve take 8), which makes it 176 KB and holds these
+units. It does not hold the list: the plan has some 260 KB free in all
+(`tools/free_space.py`). What follows is the generator's line's: a
+unit's art copied per battle into a fixed room, for the chips of the
+battle's folder alone, as BN4's Navis' art is ([how a region is
+placed](../engine/emulation/free-space.md)).
+
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
-chips brought; of those FlmLine, Thunder and TwnFng are next. BugChain
+chips brought; of those MagBolt, PropBom and SeekBom are next. BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
 other's record, a NetBattle chip). Marking and the four Plus chips are
 cut (call 7, answered).
@@ -424,7 +481,7 @@ names in BN6's codes: 175 folder chips have no chip of the run's (the
 census's 172 less ShadeMan's SP and DS, which BN5's rows pay since, plus
 SerchMan V1, CannMode, SwrdMode, FinalGun and BugCurse, the names BN5 has
 unregistered; BugCharg none, ProtoMan's DS none) and 19 Program Advances.
-The ids, fixed for good: **527-602**, the 76 with a pack entry today, go
+The ids, fixed for good: **527-602**, the 76 with a pack entry in the work RAM, go
 to the chips that play first in this plan's order (Hole, DrkLine,
 TimeBomb, LifeAura, BlakBarr, Ball, RollSP and RollDS; the Navi chips of
 GutsMan, ThunMan, WindMan, FireMan, SerchMan, AquaMan and WoodMan; the
@@ -448,10 +505,10 @@ with BN4's pictures, descriptions and codes (the chip step, `chip 535 G
 15`), and Hole's placeholder with BN4's ROM away. Unit tests hold the
 rows' rules, a record made from a made-up BN4 record, the placeholder and
 the text codes. A reward of one still pays the stand-in's zenny, as it
-sits out. Not in this unit: an id past 602 has no pack entry (RAM to be
-found: a second survey with canaries found the folder editor, the Library
-and the NaviCust writing most of the stretches that looked free, two left
-unproved), so a chip from 635 cannot be held yet.
+sits out. Not in this unit: an id past 602 had no pack entry (a second
+survey with canaries found the folder editor, the Library and the
+NaviCust writing most of the work RAM's stretches that looked free); the
+ids from 635 count in the cart's save RAM since (Where things stand).
 
 **Unit 1, ten-bit chip ids, live; ids past 511 in part** (below, The build plan): the
 census of BN6's code is read and kept by `tools/chip_ids.py` ([The chip
@@ -512,8 +569,9 @@ named on the results screen and in a Mystery Data's chat (another
 archive's text with the chat's hook out), the autopilot's seeds 1-12 the
 base build's run logs and pictures.
 
-Not yet: a pack entry for the ids from 603 (BN4's later units: RAM to be
-found, or its single-code chips, Navi chips and Gigas, packed closer), a
+Since: the ids from 635 to 1023 have their pack entries in the cart's
+save RAM (Where things stand); 603-634 are Program Advances', which need
+none. Not yet: a
 NetBattle's loadout past 511 (unit 8), and BN5's chips' and Souls' moved
 code read for entries it splits itself (the differential passes at ten
 bits).
@@ -745,8 +803,8 @@ keeps its items as id << 7 | code in a halfword, ten bits id << 6 | code
   Library's flags (moved past `0x2020`'s block to flags BN6 leaves
   alone), the per-side use counts and the Program Advance bits sized for
   1024; the pack's extension 12 bytes an id from 512 (2.4 KB for BN4's,
-  more for BN5's) in RAM BN6 leaves alone, to be found as issue #82's
-  survey found the first.
+  more for BN5's) in RAM BN6 leaves alone: 512-602 in the work RAM's
+  extension, 635-1023 in the cart's save RAM (Where things stand).
 - **Saves:** `run.state` holds BN6's RAM, its folders in the old form: a
   run saved before is converted once as it loads (its folders' entries
   rewritten, `RUN_MAGIC` bumped with the converter, so no run is lost);

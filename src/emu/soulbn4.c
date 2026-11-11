@@ -36,7 +36,7 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	out->kind = b4[BN4_SOUL_KINDS - BUS + (uint32_t)(form - 1)];
 	out->element = b4[BN4_FORM_ELEMENTS - BUS + (uint32_t)form];
 	out->power = row[ROW4_CHARGED];
-	out->routine = xchips_bn4_moved(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * out->power));
+	out->routine = xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * out->power));
 	memcpy(out->charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->power, CHARGE_ROW);
 	return out->routine != 0;
 }

@@ -24,7 +24,7 @@ typedef struct {
 	uint8_t kind;      /* the chip kind it unites by (BN4_SOUL_KINDS: BN5's numbering, soulkinds.h) */
 	uint8_t element;   /* MegaMan's element in it (BN4_FORM_ELEMENTS: BN6's numbering) */
 	uint8_t power;     /* its charged shot's power attack, BN4's id (BN4_FORM_LOADOUTS +3) */
-	uint32_t routine;  /* ... its routine moved with its family's unit (xchips_bn4_moved), 0 none */
+	uint32_t routine;  /* ... its routine moved with its family's unit (xchips_bn4_moved_at), 0 none */
 	uint8_t charge[10];/* ... its charge times by his Charge (BN4_CHARGE_TIMES, BN6_CHARGE_ROW's shape) */
 } SoulBn4;
 

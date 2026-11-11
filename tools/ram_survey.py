@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""ram_survey.py [--canary ADDR:LEN[,...]] [--min N] [--frames N] [--keep]: which of the GBA's work RAM BN6 leaves
-alone, measured over a battery of headless autopilot runs (docs/devtools/ram-survey.md).
+"""ram_survey.py [--canary ADDR:LEN[,...] | --watch ADDR:LEN[,...]] [--min N] [--frames N] [--keep]: which of the GBA's
+work RAM BN6 leaves alone, measured over a battery of headless autopilot runs (docs/devtools/ram-survey.md).
 
 Each run marks every byte of EWRAM and IWRAM that a frame ended with not zero (CYBERWORLD_RAM_SURVEY, src/emu/
 ram_survey.c); the maps are merged and the stretches that stayed zero in every run printed, longest first, each with
@@ -8,7 +8,9 @@ the symbols of bn6f's ewram.s inside it and the last one before it where a check
 a stretch with a symbol inside is a buffer the runs did not use, not free RAM). A stretch that stays zero is a lead:
 a write of zeros does not show. --canary fills the stretches named with a pattern instead and tells every byte of them a
 frame changed (CYBERWORLD_RAM_CANARY), which a write of zeros does change; the power-on clear's is expected, at the
-boot's frames 14 and 15.
+boot's frames 14 and 15. --watch changes nothing and tells every read and write the game's code makes of the stretches
+named (CYBERWORLD_RAM_WATCH: the work RAM's, or the cart's save RAM's from 0x0E000000), each place once, with the
+instruction's address and the access's size, and the runs' sums.
 
 The battery: the autopilot's seeds 1-16, every area of BN6's and BN5's at one seed, deep runs, the town and home,
 BN5's guardians, and the dark layer, the tournament, the Glitch layer, visitors and a route (--dev). It reaches no
@@ -45,16 +47,50 @@ def battery(frames):
     return runs
 
 
-def run(job, canary):
+def run(job, canary, watch=None):
     name, args, frames = job
     env = dict(os.environ, CYBERWORLD_AUTOPILOT='1')
-    if canary:
+    if watch:
+        env['CYBERWORLD_RAM_WATCH'] = watch
+    elif canary:
         env['CYBERWORLD_RAM_CANARY'] = canary
     else:
         env['CYBERWORLD_RAM_SURVEY'] = os.path.join(WORK, 'm-%s.bin' % name)
     out = subprocess.run([BIN, '--headless', '--rom-dir', ROM_DIR, '--data-dir', os.path.join(WORK, 'd-' + name)] + args + ['--frames', str(frames)],
                          env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
-    return name, [line for line in out.stderr.splitlines() if line.startswith('ram canary')]
+    return name, [line for line in out.stderr.splitlines() if line.startswith('ram canary') or line.startswith('ram watch')]
+
+
+def watched(done, watch, runs):
+    """the runs' watch lines as one: each place (a stretch, read or written, the access's size, the instruction) with
+    the runs that met it and the bytes it touched, then each stretch's sums"""
+    places, sums = {}, {}
+    for name, lines in done:
+        for line in lines:
+            m = re.match(r'ram watch: (\w+\+\w+) (read|written) (\w+), (\d+) bytes?, at (\w+) lr (\w+) frame (\d+)', line)
+            if m:
+                key = (m.group(1), m.group(2), int(m.group(4)), m.group(5))
+                p = places.setdefault(key, {'runs': set(), 'lo': m.group(3), 'frame': int(m.group(7)), 'lr': m.group(6)})
+                p['runs'].add(name)
+                continue
+            m = re.match(r'ram watch: (\w+\+\w+) in all: (\d+) reads(?: \((\w+)-(\w+)\))?, (\d+) writes(?: \((\w+)-(\w+)\))?, (\d+) wider', line)
+            if m:
+                t = sums.setdefault(m.group(1), {'reads': 0, 'writes': 0, 'wide': 0, 'r': [], 'w': [], 'runs': 0})
+                t['reads'] += int(m.group(2)); t['writes'] += int(m.group(5)); t['wide'] += int(m.group(8)); t['runs'] += 1
+                if m.group(3):
+                    t['r'] += [int(m.group(3), 16), int(m.group(4), 16)]
+                if m.group(6):
+                    t['w'] += [int(m.group(6), 16), int(m.group(7), 16)]
+    print('%d runs under a watch of %s' % (runs, watch))
+    for stretch, t in sorted(sums.items()):
+        span = lambda v: ' (%08x-%08x)' % (min(v), max(v)) if v else ''
+        print('  %s: %d reads%s, %d writes%s, %d wider than a byte, over %d runs' % (
+            stretch, t['reads'], span(t['r']), t['writes'], span(t['w']), t['wide'], t['runs']))
+    for (stretch, how, size, pc), p in sorted(places.items()):
+        print('  %s %s by %d byte%s at %s (lr %s; first %s, frame %d): %d runs' % (
+            stretch, how, size, '' if size == 1 else 's', pc, p['lr'], p['lo'], p['frame'], len(p['runs'])))
+    if not places:
+        print('  no read and no write of them')
 
 
 def symbols():
@@ -82,6 +118,7 @@ def stretches(seen, base, lo, hi, least):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--canary', help='ADDR:LEN[,ADDR:LEN...]: these stretches filled with a pattern, every changed byte told')
+    ap.add_argument('--watch', help='ADDR:LEN[,ADDR:LEN...]: every read and write of these stretches told, nothing changed')
     ap.add_argument('--min', type=lambda v: int(v, 0), default=0x300, help='the shortest stretch printed (0x300)')
     ap.add_argument('--frames', type=int, default=20000, help="a seed's frames (20000); the other runs a share of them")
     ap.add_argument('--keep', action='store_true', help="keep the runs' data folders and maps in .build/ram-survey")
@@ -92,8 +129,10 @@ def main():
     os.makedirs(WORK)
     jobs = battery(a.frames)
     with ThreadPoolExecutor(os.cpu_count() or 4) as pool:
-        done = list(pool.map(lambda j: run(j, a.canary), jobs))
-    if a.canary:
+        done = list(pool.map(lambda j: run(j, a.canary, a.watch), jobs))
+    if a.watch:
+        watched(done, a.watch, len(jobs))
+    elif a.canary:
         told = {}
         for name, lines in done:
             for line in lines:
