@@ -127,5 +127,59 @@
 /* SidBmbo1-3 (its chips 78-80, misc subfamily 5), moved as a unit (src/emu/xchips_bn4.c), the one BN4's misc run waits for */
 #define BN4_SIDBMBO           0x080D5DDAu /* its routine, in the bamboo's code: the bamboo spawned (0x080D5DBA) */
 #define BN4_T3_SIDBMBO        0x44        /* the bamboo, the third kind's (0x080D5C50 to 0x080D5DF4); sprite list 1's 0xC, sound 0x8E */
+/* Its attack families: a chip's family (its record's +0xB) is a state of MegaMan's (BN4_PLAYER_STATES by the number), run with
+ * his object in r5; the state makes r7 the attack's variables itself (his AI data's +0x70: BN6's RunAIAttack hands a family
+ * its own, his AI data's +0xA0). One moved whole is an attack unit (src/emu/xchips_bn4.h XC4_FIRST_ATTACK) */
+#define BN4_COUNTER_WINDOW    0x0800BA66u /* MegaMan's counter window opened as a chip's attack begins: 0x10 to his collision data's counter byte
+                                           * (BN4_COLL_COUNTER, through 0x0800AFBC) where the battle's kind (the battle state's +0xF) is 0x46 or
+                                           * over (BN6_COUNTER_WINDOW) */
+#define BN4_ELEMENT_SET       0x0801288Cu /* r0 an element: the object's +0x17 and its collision data's BN4_COLL_ELEMENT (BN6_ELEMENT_SET) */
+#define BN4_COLL_ELEMENT      0x02        /* collision data: u8 its element (BN6_COLL_ELEMENT, the same place) */
+#define BN4_T3_ARM            0x02        /* MegaMan's arm while he uses a chip, the third kind's (0x080CD5F8 to 0x080CD728): its kind (+4) a
+                                           * row of BN4_T3_02_KINDS, its animation +5, drawn at its parent's place (+0x4C) until the slot it
+                                           * was given (+0x60: its parent's +0x4C) reads 0. BN6's is a first-kind object (BN6_ARM_SPAWN) */
+#define BN4_ARM_SPAWN         0x080CD6E0u /* ... its spawner (r4 the animation << 8 | the kind, r7 the slot), in its code */
+/* The spread chips (Spreader 18, HeatShot 19 to BublSide 24, DrkSpred 192; HeatSprd 321 and BubSprd 322: family 0x1E, subfamily 0
+ * plain, 1 heat, 2 bubble, 3 dark), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_CHIP_SPREAD_FAMILY 0x1E
+#define BN4_SPREAD_STATE      0x080EC760u /* the state (0x080EC760 to 0x080EC842): phase 0 his animation 0x0E, the counter window, the arm, then
+                                           * after BN4_SPREAD_WAITS' frames the shot's sound 0x8D and the shot; phase 4 0x14 frames, then the
+                                           * attack's end. BN6's family 0x25 (BN6_SPREAD_FAMILY) is its twin but for the arm */
+#define BN4_SPREAD_ARMS       0x080EC814u /* ... its arm's kind by subfamily: 0x0A, 0x06, 0x0E, 0x32 */
+#define BN4_SPREAD_WAITS      0x080EC818u /* ... the frames before the shot by subfamily: 1, 10, 10, 1 */
+#define BN4_SPREAD_HEIGHTS    0x080EC81Cu /* ... the shot's height by subfamily (<< 16): 0x10, 0x10, 0, 0x10 */
+#define BN4_T3_SPREAD_SHOT    0x12        /* the shot, the third kind's (0x080CF420 to 0x080CF5B8; BN6's 0x12 too, BN6_T3_SPREAD_SHOT): unseen,
+                                           * a panel a frame along its row; where it strikes, its damage, then BN4_EFFECT_PATTERN on the panels
+                                           * of its kind's shape with its kind's effect and sound */
+#define BN4_SPREAD_SHOT_SPAWN 0x080CF596u /* ... its spawner, in its code (r0, r1 its panel, r2 its element, r3 its height, r4 its kind, the
+                                           * chip's first parameter, r6 its damage) */
+#define BN4_SPREAD_SHOT_KINDS 0x080CF3DCu /* ... its kinds, 17 rows of 4 bytes before its routine: the burst's shape (2 the panel behind, 0x0D
+                                           * the two behind a row up and down, 4 above and below, 0x0F all round), its collision's argument,
+                                           * the burst's effect, its sound; 0-3 plain, 4-7 bubbles, 8-0xB fire, 0xF DrkSpred's */
+/* FlmLine1-3 (its chips 12-14) and FlmCros1-3 (329-331: family 0x22, subfamily 0 the line, 1 the cross), moved as a unit */
+#define BN4_CHIP_FLMLINE_FAMILY 0x22
+#define BN4_FLMLINE_STATE     0x080ECAAEu /* the state (0x080ECAAE to 0x080ECB74): phase 0 his animation 0x0D, the counter window, 0x20 frames
+                                           * counted, the arm (kind 0x0C); at 0x1B left his animation 0x11 and the flames two columns ahead
+                                           * (BN4_FLAME_LINE, or BN4_FLAME_CROSS for subfamily 1); phase 4 10 frames, then the attack's end */
+#define BN4_T3_FLAME          0x19        /* a flame, the third kind's (0x080CFF80 to 0x080D014E): on its panel, where there is one, for its
+                                           * +5 frames (the chip's second parameter, 0x28), striking what stands there; sprite list 4's 0x0A,
+                                           * sound 0x9D */
+#define BN4_FLAME_LINE        0x080D00D8u /* ... three of them, on (r0, r1) and the panels above and below it, in its code */
+#define BN4_FLAME_CROSS       0x080D00F8u /* ... five: those three and the panels before and behind (FlmCros's) */
+/* Thunder1-3 (its chips 57-59: family 0x26), moved as a unit with BN4's own thunder (bn4.h BN4_THUNDER, the third kind's 0x2A,
+ * which Billy's recipe runs BN6's object for: tools/xchiprecipe_bn4.py UNIT_MOVES) */
+#define BN4_CHIP_THUNDER_FAMILY 0x26
+#define BN4_THUNDER_STATE     0x080ECE14u /* the state (0x080ECE14 to 0x080ECEAE): his animation 0x12, the counter window; on its second frame
+                                           * the thunder a column ahead (BN4_SPAWN_THUNDER: r4 the chip's parameters, r3 its height 0xA << 16);
+                                           * after five frames phase 4, 0x1E frames, then the attack's end. No arm */
+/* TwnFng1-3 (its chips 69-71) and BstFang1-3 (335-337: family 0x34, subfamily 0 one volley, 1 eight), moved as a unit */
+#define BN4_CHIP_TWNFNG_FAMILY 0x34
+#define BN4_TWNFNG_STATE      0x080ED4C6u /* the state (0x080ED4C6 to 0x080ED572): phase 0 his animation 0x12, the counter window, its volleys
+                                           * counted (7 x its subfamily + 1); phase 4 a volley every 10 frames, two fangs from his panel
+                                           * (BN4_FANG_SPAWN, kinds 0 and 1); phase 8 0x1E frames, then the attack's end. No arm */
+#define BN4_T3_FANG           0x51        /* a fang, the third kind's (0x080D79B8 to 0x080D7B64): from his panel to the row below (kind 0) or
+                                           * above (kind 1), 0x40000 a frame, then along it, 0xA0000 a frame, striking what it meets; sprite
+                                           * list 4's 0x27, sound 0xA6; let go in effect 0x15 as the battle ends (0x08007A12, BN6's 0x0800A18E) */
+#define BN4_FANG_SPAWN        0x080D7B3Au /* ... its spawner, in its code (r0, r1 its panel, r2 its element, r4 its kind, r6 its damage) */
 
 #endif

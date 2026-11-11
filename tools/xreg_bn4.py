@@ -63,6 +63,15 @@ MOVED = {
     130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
     78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
 }
+# ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
+# unit's number in BN6's grown attack families (tools/xchiprecipe_bn4.py ATTACK_NUMBERS, 0xD0 on: past every support and misc
+# number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
+MOVED.update({
+    19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+    12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
+    57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26
+    69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
+})
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
 # BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)

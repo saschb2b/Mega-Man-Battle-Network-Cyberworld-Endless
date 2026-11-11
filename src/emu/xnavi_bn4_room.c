@@ -12,6 +12,7 @@
 #include "rom.h"
 #include "xnavi.h"
 #include "xnavi_bn4.h"
+#include "xchips_bn4_art.h"
 #include "xnavi_bn4_art.h"
 #include "xnavi_recipe.h"
 #include "xnavi_room.h"
@@ -81,6 +82,8 @@ static bool fill(int number) {
 }
 
 bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists) {
+	/* (a chip unit's: the chips' art's room, filled as an object loads a sprite, xchips_bn4_art.h) */
+	if (xchips_bn4_art_row(s, rom, lists)) return true;
 	if (s->at != XN_BN4_SPRITE) return xnavi_bn4_art_row(s, rom, lists);
 	xg_set_word(XG_LIST + xvirus_list_slot(s->to_list), s->to_index, s->at);
 	return true;

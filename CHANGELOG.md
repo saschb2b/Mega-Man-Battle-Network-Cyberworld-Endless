@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
+  Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
+  fights him: his spinning top, his dashes and his sounds, each proved
+  frame by frame against BN4's own battle.
 - **CloudMan joins the dark boards.** With BN5's ROM beside BN6's, BN5's
   CloudMan now fights in BN6's own engine, proven against BN5's battle
   frame by frame, and is act 4's own Darkloid on a dark layer, as BN5's

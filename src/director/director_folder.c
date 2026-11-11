@@ -6,6 +6,7 @@
 
 #include "chip_entry.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "bytes.h"
@@ -39,6 +40,27 @@ uint32_t pack_entry(int id) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (id < 0 || id >= PACK_CHIPS || pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * BN6_PACK_IDS > BN6_EWRAM_END) return 0;
 	return bn6_pack_entry(pack, (unsigned)id);
+}
+
+void pack_report(int id) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), entry = pack_entry(id);
+	if (id <= 0 || id > (int)CHIP_ID_MASK || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
+		printf("chip: %d is no id (1-%d), or the folder is not there\n", id, (int)CHIP_ID_MASK);
+		return;
+	}
+	ChipInfo held;
+	chip_info(id, &held);
+	int in_folder = 0, n[4] = { -1, -1, -1, -1 };
+	unsigned stamp[4] = { 0, 0, 0, 0 };
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) in_folder += (int)chip_entry_id(emu_read16(data + 2 * i)) == id;
+	/* (the stamps by bytes: an entry in the save RAM reads a halfword as one byte twice, xchips_pack.h) */
+	for (uint32_t k = 0; entry && k < 4; ++k) {
+		n[k] = emu_read8(entry + k);
+		stamp[k] = emu_read8(entry + 4 + 2 * k) | (unsigned)emu_read8(entry + 5 + 2 * k) << 8;
+	}
+	printf("chip: %s (%d) held: the pack's counts %d %d %d %d, its stamps %04x %04x %04x %04x, %d in the folder, %s the Library\n", held.name, id,
+		n[0], n[1], n[2], n[3], stamp[0], stamp[1], stamp[2], stamp[3], in_folder, meta_library_has(id) ? "in" : "not in");
+	fflush(stdout);   /* (a play session's log is read while the game runs) */
 }
 
 bool pack_listed(int id) { return (id > 0 && id <= 314) || chips_bn5(id); }
