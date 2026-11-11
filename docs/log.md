@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (SeekBom1-3 moved; a family's unit by subfamily), rom/bn4.md (the bombs' family, SeekBom's bomb and the explosions' maker, new row), devtools/chip-recipe-generator.md (a unit by subfamily).
 * **Create**: game/battle-lab.md (the Battle Lab designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls of 11 November 2026); **Update**: research/sources.md (The Battle Lab: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine built: its numbers, the family SandRing's too and so an attack unit, the proof, what is left; its description and index line), rom/bn4.md (SandRing's family and ThunSoul's charged shot, new row), devtools/differential.md (`soul_thun` and `bn4_soul_thun`; an engine spec's `foe_hp`), code/emu.md (`soulbn4.c`).
 * **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).

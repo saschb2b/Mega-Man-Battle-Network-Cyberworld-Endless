@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602 and every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:18:21Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:52:49Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -390,6 +390,43 @@ the Mettaur a row away: the blast at t102, 140 HP to 20),
 steps onto its panel at t66: the burst, no blast); eleven mutations
 caught.
 
+**SeekBom1-3 are moved, a family's unit by subfamily** (11 November
+2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
+BN4's bombs are one family: its state throws by the record's subfamily
+through a jump table of ten spawners (MiniBomb's three, Binder's 3,
+Ball's 4, Geyser's 5, BlkBomb's 6, BugBomb's 7, VDoll's 8, SeekBom's 9;
+DarkBomb is subfamily 2), the chips of three lines of work. A unit of it
+copies the state (288 bytes), moves the entries of the subfamilies it
+names, each a spawner in a third-kind type's code, and takes those chips
+alone; the other entries of its copy are BN6's null routine. Another
+subfamily's unit copies the state again at a number of its own
+(`ATTACK_SUBS`, `ATTACK_NUMBERS` by the family and the unit's name), so
+no unit writes another's table and `UNITS` stays append-only. SeekBom's
+bomb (the third kind's 0x8D) seeks the nearest foe ahead and lands on
+its panel; a hit spawns the explosions' maker (the fourth kind's 0x11),
+which spawns the effect a byte of its own names: no immediate holds the
+id, so its call goes through a shim that gives r4 BN4's explosion's copy
+(`XvEffectCall`, its pair read from the bomb's two spawns of the maker).
+`bn4_chip_seekbom1` (a 140 HP Mettaur in his row, left 60),
+`bn4_chip_seekbom2` (a row away: the bomb finds it, 30 left) and
+`bn4_chip_seekbom3` (250 HP to 110) pass over 300 frames, ten mutations
+caught, the dropped pair among them. Binder, Ball and DarkBomb take
+units of their own the same way; the comparison reads BN4's family as
+one number, so a second unit of family 9 needs it by the spec's chip.
+
+**What of the attack families' line waits** (11 November 2026).
+GutPnch1-3 (support 0x36, ids 668-670): its object spawns a first-kind
+object (type 0x42, spawner `0x080C85C2`), which no chip unit moves yet,
+and a second body of the user drawn from his own battle sprite by his
+Navi and Soul (`0x0800B90A`, a table at `0x08017F98`), for which BN6's
+own routine is not found; two routines that run a handler per bit of a
+mask over a global at `0x020363F0` (`0x08015B9E`, `0x08015E78`) are not
+read. HeatSprd, BubSprd, FlmCros1-3, BstFang1-3 and MagShok1-3 are
+Program Advances of the moved families, a subfamily of each state, in
+the units already; PitRng1-3 is one too, its routine (misc 0x0D) in
+Boomer's object's code, not checked against Boomer's unit. They form
+once BN4's recipes are in BN6's grown list, which is not built.
+
 **The units' art room was the scarce one** (11 November 2026). A unit's
 sprites were copied whole at the core's start, and an arm's kind is a
 sprite of its own, 9 to 14 KB each: the spread unit's five take 49 KB,
@@ -417,7 +454,7 @@ mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
-chips brought; of those SeekBom is next. BugChain
+chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
 other's record, a NetBattle chip). Marking, the four Plus chips and
 BlakWeap are units to move like the rest (call 7, reversed: not cut).
