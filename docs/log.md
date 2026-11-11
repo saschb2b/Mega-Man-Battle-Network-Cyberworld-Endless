@@ -38,6 +38,7 @@
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
+* **Update**: multirom/bn6-gaps.md (Music: Showdown at ProtoMan's netbattle, Sorrow on a lost run's summary), game/rival.md (the netbattle's music).
 * **Update**: game/pet.md (the Jukebox: BN4's 34 songs, how each name is known, the coverage test), rom/bn4.md (Where BN4 plays its songs, new row), multirom/bn4.md (its music in the Jukebox), research/sources.md (The Jukebox's songs: BN4's music player, names and never-started songs), code/tools.md (`tools/bn4_songs.py`), code/emu.md (`bn4_music.h`).
 * **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).

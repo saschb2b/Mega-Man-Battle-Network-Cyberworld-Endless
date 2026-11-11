@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:02:17Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:00Z }
 ---
 
 # The rival: Chaud and ProtoMan
@@ -122,7 +122,10 @@ clearance opens), which only matter to a player who plays on.
 ## The netbattle
 
 The third rung, after two duels won: "Enough racing, MegaMan." No time to
-beat: ProtoMan in battle, his own AI and his attacks.
+beat: ProtoMan in battle, his own AI and his attacks, to BN6's Showdown
+(song 0x22, `BN6_SONG_SHOWDOWN`), a battle theme no other battle of a run
+plays: the rivalry's top rung sounds like none of its races or guardians
+([BN6 Gregar's own gaps](../multirom/bn6-gaps.md), Music).
 
 - **From the third act.** His attacks are his 1800 HP version's: his first
   slash deleted a 100 HP MegaMan. Before the third act (a later run's
