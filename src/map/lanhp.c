@@ -64,12 +64,27 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define KEEPER_SPRITE 61
 #define KEEPER_TEXT 1536
 
-/* The Battle Lab's keeper (docs/game/battle-lab.md): a Mr.Prog of Dad's lab
- * across the room's front from the gate's, facing the room, his words an
- * archive of their own, which the director writes */
-#define LAB_X 68
-#define LAB_Y 76
-#define LAB_FACE 7
+/* The Battle Lab (docs/game/battle-lab.md, Where it lives): the lab's
+ * station in the room's back left corner, the first thing in sight on the
+ * way in from the blue pad and across the walk from the courier, clear of
+ * every link square (the nearest, entry 3's, 57 units along the back).
+ * Its keeper, a Mr.Prog of Dad's lab in a colour of his own (mint, by
+ * BN6's own palette command), stands at its front, facing the room; behind him BN6's own glass capsule (list 7's 61), where the copies
+ * are made, and its orange monitor of green bars (149), the gauge. Each
+ * talks as he does, his words an archive of their own, which the director
+ * writes */
+#define LAB_X (-76)
+#define LAB_Y (-52)
+#define LAB_FACE 3         /* +y: towards the room and whoever walks up to him */
+#define LAB_PALETTE 2      /* the Mr.Prog sprite's palette 2, mint: BN6's variations give him green (0), gold (1) and the Virus
+                            * Battlers' red, blue, yellow and orange (5, 7, 9, 0xB), and none this one; seen in the room, a row
+                            * of twelve Mr.Progs a palette each (3 and 4 a paler yellow and orange, 8 and others black) */
+#define LAB_CAPSULE 61
+#define LAB_CAPSULE_X (-98)
+#define LAB_CAPSULE_Y (-56)
+#define LAB_MONITOR 149
+#define LAB_MONITOR_X (-66)
+#define LAB_MONITOR_Y (-78)
 #define LAB_TEXT 768
 
 /* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
@@ -179,13 +194,19 @@ static void gate(NpcList *npcs) {
 	if (keeper) npcs->script[npcs->n++] = keeper;
 }
 
-/* the Battle Lab's keeper into `npcs`, his words' room cleared */
+/* the Battle Lab's station into `npcs`: its keeper, capsule and monitor, his words' room cleared */
 static void lab(NpcList *npcs) {
 	static const uint8_t empty[LAB_TEXT] = { 2, 0, 0xE6 };
 	H.lab_text = mapslot_alloc(empty, sizeof empty);
-	if (!H.lab_text || !npc_need_sprite(npcs, 6, KEEPER_SPRITE)) return;
-	uint32_t prog = npc_talker(6, KEEPER_SPRITE, LAB_X, LAB_Y, 0, LAB_FACE, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false);
-	if (prog) npcs->script[npcs->n++] = prog;
+	if (!H.lab_text || !npc_need_sprite(npcs, 6, KEEPER_SPRITE) || !npc_need_sprite(npcs, 7, LAB_CAPSULE) || !npc_need_sprite(npcs, 7, LAB_MONITOR)) return;
+	uint32_t part[3] = {
+		npc_talker(7, LAB_CAPSULE, LAB_CAPSULE_X, LAB_CAPSULE_Y, 0, 0, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false),
+		npc_talker(7, LAB_MONITOR, LAB_MONITOR_X, LAB_MONITOR_Y, 0, 0, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false),
+	};
+	npc_next_palette(LAB_PALETTE);
+	part[2] = npc_talker(6, KEEPER_SPRITE, LAB_X, LAB_Y, 0, LAB_FACE, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false);
+	for (int i = 0; i < 3; ++i)
+		if (part[i]) npcs->script[npcs->n++] = part[i];
 }
 
 /* the ways back's marks into `npcs` */

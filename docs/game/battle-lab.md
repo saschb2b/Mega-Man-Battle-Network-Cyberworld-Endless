@@ -395,8 +395,8 @@ is used.
 
 - **The keeper and the LabPass** (step 4), behind `--dev lab`
   (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
-  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands across the front of
-  Lan's HP from the gate's keeper. His first talk is three boxes, once a
+  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
+  across the room's front from the gate's keeper; moved since, below). His first talk is three boxes, once a
   profile (`Profile.lab_met`); every later one a single box. As the chat
   box closes the builder opens over the held game, and its battle is
   fought there, in Lan's HP: seen headless from the town's jack-in, a
@@ -431,6 +431,20 @@ is used.
     won (the result in the information box, the set's best in the
     profile), the SETS page, and Dad's mail in BN6's E-Mail on the first
     layer.
+  - *The lab's station* (the owner, 12 November 2026: the keeper stood
+    behind a link square that becomes a portal, hard to reach once it is
+    one, and looked like any Mr.Prog). It stands in the room's back left
+    corner now, the first thing in sight on the way in from the blue pad,
+    across the walk from the courier and clear of every link square: the
+    keeper at its front, facing the room, behind him BN6's own glass
+    capsule (list 7's 61) and its orange monitor of green bars (149).
+    Each of the three talks as he does. He wears mint, the Mr.Prog
+    sprite's palette 2, set by BN6's own palette command: BN6's
+    variations dress Mr.Progs green, gold and the Virus Battlers' red,
+    blue, yellow and orange, and none in this one
+    ([BN6's Virus Battler](../rom/virus-battler.md), each Battler's own
+    Mr.Prog). His mugshot stays the green Mr.Prog's: BN6 has none in
+    mint.
   - A run started by a dev scene named no seed for its tally, so its
     data was lost to the next run; the tally now follows the run's seed
     on every path.

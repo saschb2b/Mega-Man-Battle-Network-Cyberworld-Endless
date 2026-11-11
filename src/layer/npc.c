@@ -207,15 +207,21 @@ uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32
 /* (behind: a navi behind a counter, drawn under the second layer that
  * draws the counter, its talk centre shifted by (sx, sy) towards the
  * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */
+/* The palette the next talker wears (npc_next_palette), -1 its sprite's own */
+static int next_palette = -1;
+
+void npc_next_palette(int palette) { next_palette = palette; }
+
 static uint32_t talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor,
                        bool behind, int sx, int sy) {
-	uint8_t s[56] = {
-		0x08,
-		0x25, (uint8_t)index, (uint8_t)(category * 4),
-		0x16, (uint8_t)anim,
-		0x44, (uint8_t)script, (uint8_t)archive, (uint8_t)(archive >> 8), (uint8_t)(archive >> 16), (uint8_t)(archive >> 24),
-	};
-	int n = 12;
+	uint8_t s[56] = { 0x08, 0x25, (uint8_t)index, (uint8_t)(category * 4) };
+	int n = 4;
+	/* (BN6's own command for it, bn6f NPCCommand_set_npc_palette_index: the object's palette index, which its sprite draws in) */
+	if (next_palette >= 0) { s[n++] = 0x0F; s[n++] = (uint8_t)next_palette; }
+	next_palette = -1;
+	const uint8_t talk[8] = { 0x16, (uint8_t)anim, 0x44, (uint8_t)script, (uint8_t)archive, (uint8_t)(archive >> 8), (uint8_t)(archive >> 16), (uint8_t)(archive >> 24) };
+	memcpy(s + n, talk, sizeof talk);
+	n += (int)sizeof talk;
 	if (floor) n += floor_place(s + n, x, y, z);   /* a pad: under MegaMan */
 	else {
 		uint8_t c[] = { 0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), (uint8_t)z, (uint8_t)(z >> 8) };
