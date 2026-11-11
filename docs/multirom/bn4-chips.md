@@ -406,6 +406,33 @@ the Mettaur a row away: the blast at t102, 140 HP to 20),
 steps onto its panel at t66: the burst, no blast); eleven mutations
 caught.
 
+**TimeBomb is moved** (11 November 2026: id 529, BN4's support 0x11 at
+BN6's grown support routine 0x91). Its routine spawns a placer (the
+fourth kind's 0x27), which takes a column of the foe's side and draws
+one of its free rows; the bomb (the third kind's 0x4B) is set there with
+50 HP, in its side's obstacle slot. The bomb is an actor, the first
+among the chips' objects: its update runs the engine's status step and
+the actors' runner with a state table of its own. BN4's runner numbers
+an object's own states from 6 and BN6's from 8, so the unit brings the
+table in BN6's layout (the engine's eight states BN6's, the bomb's count
+the ninth), written in its home, and the copy's one store of state 6
+writes 8 ([the chip recipe generator](../devtools/chip-recipe-generator.md),
+A moved actor). It counts three steps (60, 60 and 30 frames, a tick
+each), then strikes the foe's whole area for its record's power under
+BN4's explosions (the blasts' object, the fourth kind's 0x24, moved with
+it); a hit taken first ends it in a burst. Three specs pass:
+`bn4_chip_timebomb` (420 frames: set on (4,3) at t34, the blast at t242,
+a Mettaur's 250 HP to 100), `bn4_chip_timebomb_struck` (another seed
+draws (4,2), where the Mettaur's wave ends it at t73) and
+`bn4_chip_timebomb_top` (a third seed, (4,1)); eleven mutations caught.
+Not reached by a spec: a bomb pushed, which slides by BN6's rule (its
+state 5 is the engine's, 0x60000 a frame against BN4's 0x80000), and the
+placer's way on with no free panel, which in BN4 itself reads an address
+of no memory (`BN4_T4_TIMEBOMB`'s note, `src/emu/bn4_chips.h`). A virus
+the blast deletes is not compared yet: each engine's deletion draws its
+own explosions (the fourth kind's 0x11), which the differential has no
+rule for, so the specs' Mettaur outlives the blast.
+
 **SeekBom1-3 are moved, a family's unit by subfamily** (11 November
 2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
 BN4's bombs are one family: its state throws by the record's subfamily
@@ -488,13 +515,12 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
-types, a placement that draws), then BlakBarr's barrier; Binder,
+**Next:** Marking, the four Plus chips and BlakWeap (call 7,
+reversed), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
-other's record, a NetBattle chip). Marking, the four Plus chips and
-BlakWeap are units to move like the rest (call 7, reversed: not cut).
+other's record, a NetBattle chip).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its

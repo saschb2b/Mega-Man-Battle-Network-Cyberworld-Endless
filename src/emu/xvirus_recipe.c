@@ -349,6 +349,10 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 
 bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (!f->name) return no(why, n, "no name");
-	if (f->nstates || f->held || f->held_chips || f->traits.laid) return no(why, n, "states, records or held chips: a family's, not code alone");
+	if (f->held || f->held_chips || f->traits.laid) return no(why, n, "records or held chips: a family's, not code alone");
+	/* (states: a moved object's the actors' runner runs, BN6's layout, at least one of its own past the engine's eight) */
+	if (f->nstates && (f->nstates <= 8 || f->nstates > XV_STATES_MAX)) return no(why, n, "%d states", f->nstates);
+	for (int i = 0; i < f->nstates; ++i)
+		if (!ref_ok(f, f->states[i]) || f->states[i].entered || f->states[i].clone) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
 	return code_ok(f, r, why, n) && art_ok(f, r, why, n);
 }
