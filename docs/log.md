@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
 * **Update**: devtools/differential.md (a poke redirects only to the spec's own Navi's copy: toadman_sea_elec PASS again, mutation 92 caught).
 * **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
