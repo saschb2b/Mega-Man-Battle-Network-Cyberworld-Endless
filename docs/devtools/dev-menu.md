@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T22:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
 ---
 
 # Dev menu: shorter test runs

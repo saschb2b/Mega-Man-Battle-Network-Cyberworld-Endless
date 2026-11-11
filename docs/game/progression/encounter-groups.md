@@ -3,7 +3,7 @@ type: Design
 title: "Encounter groups"
 description: "The encounter rework, approved 11 November 2026: one pool of virus families across every ROM tagged by what they do, authored constellations beside each area's own battles, an arc per act around a signature family, rewards from the group fought; what replaces the visitors and the deep's coin, what was measured, and the phases."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T22:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:00:00Z }
 sources:
   - id: owner
     resource: "The owner's calls of 11 November 2026, given in the project's sessions and written down here"

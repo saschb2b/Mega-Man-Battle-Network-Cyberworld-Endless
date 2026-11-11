@@ -1,0 +1,34 @@
+[
+ {
+  "name": "MagnetMan's magnet panels laid as BN5's type",
+  "spec": "magnetman_v1",
+  "poke": [
+   "0889F1A2:2205"
+  ],
+  "what": "the panel type his fourth kind's 0x19 lays (BN5 0x080E24EE: movs r2,#5, its copy at XN_TEAM_CODE + 0xC100 + 0xA2) left at BN5's 5, BN6's holy panel, where the recipe makes it 15, the magnet panel"
+ },
+ {
+  "name": "MagnetMan's state number not moved",
+  "spec": "magnetman_v1",
+  "poke": [
+   "0889D0E2:2008"
+  ],
+  "what": "his attack's state (BN5 0x080F65CE: movs r0,#8, CurAction 8, its copy at XN_TEAM_CODE + 0xA000 + 0xE2) left at BN5's 8, BN6's another status state, where the recipe makes it 10 (his count of his magnet panels, 0x080F67C8, is reached by no spec where it decides)"
+ },
+ {
+  "name": "MagnetMan's object's sprite not renumbered",
+  "spec": "magnetman_v1",
+  "poke": [
+   "0889E33E:222D"
+  ],
+  "what": "his third kind's 0x60's sprite (BN5 0x080D204E: movs r2,#0x2D, list 4's 0x2D, its copy at XN_TEAM_CODE + 0xB300 + 0x3E) left at BN5's number where the recipe makes it list 2's 0x8E"
+ },
+ {
+  "name": "MagnetMan's child's sprite not renumbered",
+  "spec": "magnetman_v1",
+  "poke": [
+   "0889E028:223C"
+  ],
+  "what": "his child's sprite, the first kind's 0x55 moved (BN5 0x080C3508: movs r2,#0x3C, list 4's 0x3C, its copy at XN_TEAM_CODE + 0xB000 + 0x28) left at BN5's number where the recipe makes it list 2's 0x95, BN5's copied there (the pull's own breaks show in MegaMan's state alone, where the comparator stops without a verdict; his check of a magnet panel, 0x080F6838, and his count, 0x080F67C8, decide in no spec)"
+ }
+]
