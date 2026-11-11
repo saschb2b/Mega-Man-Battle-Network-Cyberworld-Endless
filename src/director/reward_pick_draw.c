@@ -36,12 +36,17 @@
 #define WIN_X 92
 #define WIN_Y 17
 #define WIN_W (CORE_W - WIN_X - 7)
-/* (rows a pixel closer than the Library's 16, and the box to the body's
- * foot: four lines of what a program does, SlipRunr's the longest) */
-#define ROW_H 15
-#define WIN_H (2 * LOOK_FRAME + 4 + 4 * ROW_H)
-#define INFO_Y (WIN_Y + WIN_H + 2)
-#define INFO_H (CORE_H - LOOK_RAIL - 1 - INFO_Y)
+/* The window fitted to its rows, the information box under it to the
+ * body's foot: a row with a chip's icon the Library's 16 tall, the rest
+ * the chat font's 13, as the Liberation pick's (a draft's four, its
+ * programs and the BugFrags). Every pick then leaves the box four lines
+ * whole; a longer text scrolls (info()), and --pick-fit lists them. */
+#define ROW_CHIP_H 16
+#define ROW_TEXT_H 13
+#define WIN_H(rows, row_h) (2 * LOOK_FRAME + 4 + (rows) * (row_h))
+#define INFO_Y(win_h) (WIN_Y + (win_h) + 2)
+#define INFO_H(win_h) (CORE_H - LOOK_RAIL - 1 - INFO_Y(win_h))
+static int row_h(void);
 #define CODE_INK rgba(255, 231, 0, 255)   /* a chip's code, yellow as BN6 sets it */
 
 /* ---- the card ---- */
@@ -153,7 +158,7 @@ static void card(int x, int y) {
 #define NAME_X 26
 #define CODE_X (NAME_X + 8 * 9)
 static void row(SDL_Rect f, int r) {
-	int y = f.y + 2 + r * ROW_H;
+	int y = f.y + 2 + r * row_h();
 	char name[24] = "";
 	if (r >= RP.o.n) snprintf(name, sizeof name, "%s", reward_pick_skip_name());
 	else {
@@ -177,24 +182,68 @@ static void row(SDL_Rect f, int r) {
 
 /* ---- the information box ---- */
 
-static void info(int x, int y) {
-	SDL_Rect r = look_info(x, y, WIN_W, INFO_H, reward_pick_label());
+/* the box's words: in from its sides, as look_info's room and the page's
+ * margins leave them; the lines a box `info_h` tall holds whole */
+#define INFO_TEXT_W (WIN_W - 4 - 9)
+static int room_of(int info_h) { return (info_h - 2 - LOOK_CAPS_H - 1 - 2 - 1 - LOOK_TEXT_H) / LOOK_LINE + 1; }
+
+/* the shown pick's rows' height and its window's */
+static int row_h(void) {
+	for (int k = 0; k < RP.o.n; ++k)
+		if (RP.o.c[k].what == PICK_CHIP) return ROW_CHIP_H;
+	return ROW_TEXT_H;
+}
+static int win_h(void) { return WIN_H(reward_pick_rows(), row_h()); }
+
+void reward_pick_info_text(int what, int id, char *s, size_t n) {
+	if (!n) return;
+	s[0] = 0;
+	if (what == PICK_CHIP) {
+		/* (BN6's own description, as its shops show it on R; its three
+		 * lines run on) */
+		chips_desc_lines(id, s, n);
+		for (char *ch = s; *ch; ++ch) if (*ch == '\n') *ch = ' ';
+	} else if (what == PICK_PROGRAM) {
+		/* (MegaMan's words of what it does, its name left off) */
+		const char *about = navicust_about(id), *colon = about ? strchr(about, ':') : NULL;
+		snprintf(s, n, "%s", colon ? colon + 1 + (colon[1] == ' ') : about ? about : "");
+		if (s[0] >= 'a' && s[0] <= 'z') s[0] = (char)(s[0] - 'a' + 'A');
+	}
+}
+
+int reward_pick_info_lines(const char *s) { return look_wrapped_lines(s, INFO_TEXT_W); }
+
+/* (the least a pick leaves: a draft's four rows of text, three of chips) */
+int reward_pick_info_room(void) {
+	int draft = room_of(INFO_H(WIN_H(PICK_MOST + 1, ROW_TEXT_H))), chips = room_of(INFO_H(WIN_H(PICK_MOST, ROW_CHIP_H)));
+	return draft < chips ? draft : chips;
+}
+
+/* A text longer than the box, scrolled as BN6's chat box scrolls: the
+ * first lines held, then a line up every second, the last held, and round
+ * from the top again; from the cursor's last move */
+#define SCROLL_HOLD 90
+#define SCROLL_STEP 60
+#define SCROLL_END 120
+static int scrolled(int lines, int room) {
+	int extra = lines - room;
+	if (extra <= 0) return 0;
+	int round = SCROLL_HOLD + extra * SCROLL_STEP + SCROLL_END, t = (RP.t - RP.moved) % round;
+	int k = t < SCROLL_HOLD ? 0 : 1 + (t - SCROLL_HOLD) / SCROLL_STEP;
+	return k < extra ? k : extra;
+}
+
+static void info(int x, int y, int h) {
+	SDL_Rect r = look_info(x, y, WIN_W, h, reward_pick_label());
 	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 1, LOOK_PAGE);
 	char s[200] = "";
 	if (RP.cursor >= RP.o.n) reward_pick_skip_info(s, sizeof s, RP.o.frags);
 	else {
 		const PickChoice *c = &RP.o.c[RP.cursor];
-		if (c->what == PICK_CHIP) {
-			/* (BN6's own description, as its shops show it on R; its
-			 * three lines run on) */
-			chips_desc_lines(c->id, s, sizeof s);
-			for (char *ch = s; *ch; ++ch) if (*ch == '\n') *ch = ' ';
-		} else if (c->what == PICK_PROGRAM) {
-			/* (MegaMan's words of what it does, its name left off; its
-			 * part on the box's tag, as KeyItem's box carries KEYITEM) */
-			const char *about = navicust_about(c->id), *colon = about ? strchr(about, ':') : NULL;
-			snprintf(s, sizeof s, "%s", colon ? colon + 1 + (colon[1] == ' ') : about ? about : "");
-			if (s[0] >= 'a' && s[0] <= 'z') s[0] = (char)(s[0] - 'a' + 'A');
+		if (c->what == PICK_CHIP) reward_pick_info_text(PICK_CHIP, c->id, s, sizeof s);
+		else if (c->what == PICK_PROGRAM) {
+			/* (its part on the box's tag, as KeyItem's box carries KEYITEM) */
+			reward_pick_info_text(PICK_PROGRAM, c->id, s, sizeof s);
 			int part = NAVI_PART, color;
 			navicust_part(variant_of(c->id, c->code), &part, &color);
 			const char *tag = reward_pick_part(part);
@@ -202,7 +251,9 @@ static void info(int x, int y) {
 			look_tag(x + WIN_W - tw - 3, y + 1, tw, 7, tag, LOOK_BAND);
 		} else reward_pick_hp_info(s, sizeof s, c->id, RP.max_hp);
 	}
-	look_wrapped(s, r.x + 5, r.y + 1, r.w - 9, 4, LOOK_INK, LOOK_INK_SHADE);
+	int room = room_of(h), lines = reward_pick_info_lines(s);
+	LookLines at = { r.x + 5, r.y + 1, INFO_TEXT_W, scrolled(lines, room), room, LOOK_INK, LOOK_INK_SHADE };
+	look_wrapped_from(s, &at);
 }
 
 void director_draw_pick(void) {
@@ -210,8 +261,9 @@ void director_draw_pick(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	look_screen(x0, y0, CORE_W, CORE_H, reward_pick_title(RP.kind));
 	card(x0 + CARD_X, y0 + CARD_Y);
-	SDL_Rect f = look_window(x0 + WIN_X, y0 + WIN_Y, WIN_W, WIN_H, 0, false);
+	int wh = win_h();
+	SDL_Rect f = look_window(x0 + WIN_X, y0 + WIN_Y, WIN_W, wh, 0, false);
 	for (int r = 0; r < reward_pick_rows(); ++r) row(f, r);
-	info(x0 + WIN_X, y0 + INFO_Y);
+	info(x0 + WIN_X, y0 + INFO_Y(wh), INFO_H(wh));
 	look_fade_in(x0, y0, CORE_W, CORE_H, RP.t);
 }
