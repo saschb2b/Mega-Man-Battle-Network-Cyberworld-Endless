@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's DrkVulcn A (190, a dark chip) (a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan; a dark one's own turn effects are BN4's, not taken) against the registry's row 601 (BN4's vulcan state, its family 0x1F, moved as BN6's grown attack family 0xFF; its shot the spread chips' copy, shared): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the shots, their sound 0xBB at slot 0x283, the Mettaur's HP compared each frame.",
+ "folder4": [
+  "00BE"
+ ],
+ "folder6": [
+  "259:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

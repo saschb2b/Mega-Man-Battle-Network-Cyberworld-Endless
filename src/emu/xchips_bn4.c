@@ -1993,6 +1993,62 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 	.types = hole_types, .ntypes = (int)(sizeof hole_types / sizeof *hole_types), \
 	.sound_calls = hole_sound_calls, .nsound_calls = (int)(sizeof hole_sound_calls / sizeof *hole_sound_calls), \
 	.bytes = hole_bytes, .nbytes = (int)(sizeof hole_bytes / sizeof *hole_bytes) }
+/* ---- DrkVulcn: BN4's attack 0x1f (080EC843) as BN6's 0xff; its chips 190 (601) ---- */
+/* MegaMan's state 0x1f (080EC842-080EC972), the family of its chips' records: moved */
+/* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
+/* its third-kind 0x12: Spreads's copy, the dispatch's 0x12, shared (its spawner copied) */
+/* its sound 0xbb (080EC918): BN4's song copied into the grown song table's slot 0x283, on BN4's player 14 */
+/* its chip 15 has no row of the registry (the run's by name, or none) */
+/* its chip 16 has no row of the registry (the run's by name, or none) */
+/* its chip 17 has no row of the registry (the run's by name, or none) */
+/* its chip 190 is a dark chip of BN4's (row 601): a battle it is used in costs 20 max HP */
+/* its chip 220 has no row of the registry (the run's by name, or none) */
+
+static const XvBlock drkvulcn_blocks[] = {
+	{ 0x080EC842, 0x080EC972, XC4_CODE + 0x3D62, 0x6C6AADB3u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x3EA0, 0x6FFE1431u },
+	{ 0x080CF596, 0x080CF5B4, XC4_CODE + 0x3ED2, 0x70AA170Eu },
+};
+static const XvData drkvulcn_data[] = {
+	{ 0x080EC854, 0x080EC858, XV_POOL },
+	{ 0x080EC858, 0x080EC864, XV_TABLE },
+	{ 0x080EC92C, 0x080EC934, XV_POOL },
+	{ 0x080EC934, 0x080EC940, XV_RAW },
+};
+static const XvPair drkvulcn_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08001B16, 0x08001532 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D7CA, 0x08013774 },   /* project:project:chips, SAME */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+};
+static const XvPair drkvulcn_words[] = {
+};
+static const XvImm drkvulcn_imms[] = {
+	{ 0x080CF5A6, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080EC846, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+};
+static const XvType drkvulcn_types[] = {
+	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
+	{ 3, 0x12, XV_TYPE_SHARED4, 0x12 },   /* BN4's third-kind 0x12, Spreads's copy */
+};
+static const XvSoundCall drkvulcn_sound_calls[] = {
+	{ 0x080EC918, 0x283 },   /* its sound 0xbb: BN4's song at the grown table's slot 0x283 */
+};
+static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
+
+#define DRKVULCN_CODE { .name = "DrkVulcn (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5C00), \
+	.blocks = drkvulcn_blocks, .nblocks = (int)(sizeof drkvulcn_blocks / sizeof *drkvulcn_blocks), \
+	.data = drkvulcn_data, .ndata = (int)(sizeof drkvulcn_data / sizeof *drkvulcn_data), \
+	.calls = drkvulcn_calls, .ncalls = (int)(sizeof drkvulcn_calls / sizeof *drkvulcn_calls), \
+	.words = drkvulcn_words, .nwords = (int)(sizeof drkvulcn_words / sizeof *drkvulcn_words), \
+	.imms = drkvulcn_imms, .nimms = (int)(sizeof drkvulcn_imms / sizeof *drkvulcn_imms), \
+	.types = drkvulcn_types, .ntypes = (int)(sizeof drkvulcn_types / sizeof *drkvulcn_types), \
+	.sound_calls = drkvulcn_sound_calls, .nsound_calls = (int)(sizeof drkvulcn_sound_calls / sizeof *drkvulcn_sound_calls) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -2017,5 +2073,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x0C, 0x8C, 0x080DF98D, XC4_HOMES + 0x5000, LIGTNIN_CODE, ligtnin_songs, (int)(sizeof ligtnin_songs / sizeof *ligtnin_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x5400, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x5800, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 22 },
+	{ XCHIP_ATTACK, 0x1F, 0xFF, 0x080EC843, XC4_HOMES + 0x5C00, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

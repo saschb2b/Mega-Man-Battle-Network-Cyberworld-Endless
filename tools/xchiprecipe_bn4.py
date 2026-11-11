@@ -60,7 +60,9 @@ FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
 STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUNT
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
-ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2}
+ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
+                  # (the dark chips' units from the top down, 0xFF on, so the lines climbing from 0xD0 never meet them)
+                  0x1F: 0xFF}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -76,6 +78,8 @@ ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
 # of the table (TABLES' kinds: every unit's): BN4's type -> (its spawner, why)
 SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm itself, the third kind's 0x02, is the first attack "
                               "unit's copy, shared"),
+           0x12: (0x080CF596, "the spread shot's spawner (r0 0x12 to BN4's spawn, then its side, panel and power handed on): "
+                              "Spreads moved the shot; DrkVulcn's vulcan state spawns it (bl at 0x080EC912)"),
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
                               "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
 # A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
@@ -253,6 +257,7 @@ UNITS = (
     ('support', 0x11, 'TimeBomb'),
     ('misc', 0x0C, 'Ligtnin'),
     ('support', (0x0B, 0x3B), 'Hole'),
+    ('attack', 0x1F, 'DrkVulcn'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -283,6 +288,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                # (the sweep's third line, units-c's, its slots from 0x240 up)
                0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
                0x143: 0x242,                # (Ligtnin's bolt)
+               # (the dark chips' from 0x283 up, after the panel changer's 0x280-0x282: docs/project/claims/bn4-dark-units.json)
+               0xBB: 0x283,                 # (DrkVulcn's shots)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
