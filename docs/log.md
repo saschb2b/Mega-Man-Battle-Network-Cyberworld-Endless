@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: rom/chips-code.md (The pack in the save RAM, new row: ids 635-1023's pack entries in the cart's save RAM, BN6's save blocks and library, the order stamps' routines; its description and index line), multirom/bn4-chips.md (every BN4 folder chip has a pack entry; its description and index line), engine/emulation/memory.md (the save RAM's table), engine/emulation/free-space.md (the `save` zone), devtools/ram-survey.md (`--watch`, `CYBERWORLD_RAM_WATCH`; its description and index line), devtools/battle-on-demand.md (`chip ID` alone), engine/saves.md, online/arena/rollback/overview.md, code/emu.md, code/tests.md, code/tools.md.
 * **Update**: multirom/bn4-chips.md (FlmLine1-3, Thunder1-3 and TwnFng1-3 moved; the arm shared; the units' art room, its start moved, and what it does not hold), rom/bn4.md (their code, new row), devtools/chip-recipe-generator.md (a shared type, a unit's own move of a paired type), devtools/differential.md (a sound row by a spec's chips; BN4's chip units' code keyed in the specs that play a moved chip of BN4's alone).
 * **Update**: devtools/agents-tools.md (the `darkloid/NAME` routes: a BN5 Darkloid's battle in BN6's engine, for a look at each).
 * **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
