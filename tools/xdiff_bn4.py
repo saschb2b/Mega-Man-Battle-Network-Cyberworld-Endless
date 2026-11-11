@@ -107,6 +107,10 @@ def bn4_moved_types():
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
 XV_LATE_ART = 0x08800000 + 0x4D0000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
 XC4_ART = 0x08800000 + 0x0EF000 + 0x30000   # (src/emu/xchips_bn4.h XC4_ART: BN4's chips' units' art, FREE_BN4_CHIPS + 0x30000)
+# (src/emu/xchips_bn4_art.h: the art's room, its slots after their tags; row k of the units' sprites sits at a slot's start +
+# 4 x k, wherever an object's load put it, so a frame's objects tell where each row is: room_rows)
+XC4_ROOM_SLOT0, XC4_ROOM_END, XC4_SLOT = XC4_ART + 0x100, 0x08800000 + 0x0EF000 + 0x50000 - 0x400, 0x800
+SPRITE_BLOCK, SPRITE_DATA = 0x02, 0x18   # (an object's +2's high four bits x 16 its sprite state; its sprite's data's pointer)
 
 
 def bn4_sprites(rom4, foes=None):
@@ -129,8 +133,10 @@ def bn4_sprites(rom4, foes=None):
         # (a raw one's room in BN4's ROM its own bytes, not the copy's rounded room, which may reach into the next sprite: the
         # wind's gust's list 3 0x2E past SearchMan's marker's 0x2D)
         own = X.sprite_len(rom4[base - 0x08000000:base - 0x08000000 + 0x40000], 0x40000) if not lz else 0
-        out.append((None if lz else base, {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE, 'XV_LATE_ART': XV_LATE_ART, 'XC4_ART': XC4_ART}.get(room_base, XV_ART) + int(off, 16),
-                    int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
+        # (a chip unit's: a row of the art's room, ('room', its row), placed by the frame's objects: room_rows)
+        b6 = ('room', int(off)) if room_base == 'XC4_ROOM_ROW' else \
+            {'XN_BN4_ART': XN_BN4_ART, 'XN_BN4_SPRITE': XN_BN4_SPRITE, 'XV_LATE_ART': XV_LATE_ART, 'XC4_ART': XC4_ART}.get(room_base, XV_ART) + int(off, 16)
+        out.append((None if lz else base, b6, int(room, 16), key, (u32(rom4, base - 0x08000000) >> 8) - 4 if lz else (own or int(room, 16))))
     return out
 
 
@@ -145,13 +151,16 @@ def sprite_rows(foes=None):
     rom_c = open(os.path.join(ROOT, 'src', 'core', 'rom.c')).read()
     m = re.search(r'\[XROM_BN4_RED_SUN_US\].*?\.sprite_lists = (0x[0-9A-Fa-f]+)', rom_c, re.S)
     row = re.compile(r'\{ (\d+), 0x([0-9A-Fa-f]+), \d+, 0x[0-9A-Fa-f]+, (?:(XV_ART|XV_LATE_ART|XN_BN4_ART|XC4_ART) \+ 0x([0-9A-Fa-f]+), 0x([0-9A-Fa-f]+)|'
-                     r'(XN_BN4_SPRITE), XN_BN4_SPRITE_SIZE) \}')
+                     r'(XN_BN4_SPRITE), XN_BN4_SPRITE_SIZE|(XC4_ROOM_ROW)\((\d+)\), 0x([0-9A-Fa-f]+)) \}')
     rows = []
     for arr in re.finditer(r'static const XvSprite (\w+)\[\] = \{(.*?)\n\};', text, re.S):
         names = re.search(r'\.names = \{ ([^}]*) \},[^;]*?\.sprites = ' + arr.group(1) + r',', text, re.S)
         ids = {int(x, 0) for x in names.group(1).split(',')} if names else set()
         for r in row.finditer(arr.group(2)):
             if (r.group(6) or r.group(3) == 'XN_BN4_ART') and foes is not None and not ids & set(foes):
+                continue
+            if r.group(7):   # (a chip unit's row of the art's room: its row's number in the offset's place)
+                rows.append((r.group(1), r.group(2), 'XC4_ROOM_ROW', r.group(8), r.group(9)))
                 continue
             rows.append(r.groups()[:5] if not r.group(6) else (r.group(1), r.group(2), 'XN_BN4_SPRITE', '0', f'{XN_BN4_SPRITE_SIZE:X}'))
     return (0x08000000 + int(m.group(1).rstrip('uU'), 0) if m else None), rows
@@ -183,10 +192,27 @@ def sprite_ptr(sprites, game, v, cache=None):
             b4 = (cache or {}).get(key)
         if game == 4:
             room = room4   # (BN4's own sprite's bytes: bn4_sprites)
+        if game == 6 and isinstance(b6, tuple):
+            b6 = (cache or {}).get(b6)   # (a row of the chips' art's room: where this frame's objects hold it, room_rows)
         base = b4 if game == 4 else b6 if game == 6 else None
         if base is not None and base <= v < base + room and (best is None or v - base < best[2]):
             best = ('sprite', first[key], v - base)
     return best
+
+
+def room_rows(f):
+    """the rows of BN4's chips' art's room this frame's objects hold, {('room', row): its sprite's address}: each object's
+    sprite's data pointer (its sprite state's +0x18, the sprite's address + 4) in the room names its row by its place in its
+    slot (src/emu/xchips_bn4_art.h)"""
+    if 'room_rows' not in f.fr:
+        rows = {}
+        for o in f.fr['objs']:
+            st = NODE + ((o.rec[NODE + SPRITE_BLOCK] >> 4) << 4) + SPRITE_DATA
+            at = u32(o.rec, st) - 4 if st + 4 <= len(o.rec) else 0
+            if XC4_ROOM_SLOT0 <= at < XC4_ROOM_END:
+                rows[('room', (at - XC4_ROOM_SLOT0) % XC4_SLOT // 4)] = at
+        f.fr['room_rows'] = rows
+    return f.fr['room_rows']
 
 
 class Bn4Canon:
@@ -743,8 +769,8 @@ def cells(fa, fb, part, ba, bb, start=0):
             wa, wb = u32(ba, k), u32(bb, k)
             if is_ptr(wa) or is_ptr(wb):
                 sprites = getattr(fa.canon, 'sprites', ())   # (a moved family's sprite by its offset in it: bn4_sprites)
-                view = (sprite_ptr(sprites, fa.game, wa, bn4_cache(fa.fr)) or let_go(fa, fa.ptr(wa)),
-                        sprite_ptr(sprites, fb.game, wb, bn4_cache(fb.fr)) or let_go(fb, fb.ptr(wb)))
+                view = (sprite_ptr(sprites, fa.game, wa, bn4_cache(fa.fr) if fa.game == 4 else room_rows(fa)) or let_go(fa, fa.ptr(wa)),
+                        sprite_ptr(sprites, fb.game, wb, bn4_cache(fb.fr) if fb.game == 4 else room_rows(fb)) or let_go(fb, fb.ptr(wb)))
                 if view[0] != view[1]:
                     out.append((part, k, view[0], view[1]))
                 k += 4
