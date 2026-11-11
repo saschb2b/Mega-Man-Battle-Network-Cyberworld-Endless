@@ -154,8 +154,8 @@ TABLES = {
 # list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on), and list 1's 0x7F-0x40 (past BN5's
 # families' 0x20-0x36, below BN4's families' 0xC0 on and BN5's chips' from 0xFF down). The bottoms of three of them are
 # BN4's Navis' track's since 11 November 2026 (its own ranges spent at MetalMan; tools/xrecipe_bn4.py EFFECT_MORE,
-# LIST5_MORE, LIST4_MORE): effect ids 0xB0-0xB1 (with 0xE0-0xEC, which no recipe named), list 5's 0xB0-0xBF, list 4's
-# 0x70-0x7F
+# LIST5_MORE, LIST4_MORE): effect id 0xB1 (with 0xE0-0xEC, which no recipe named; 0xB0 is BN5's Meddy's, xnavi_bn5.c), list 5's
+# 0xB0-0xBF, list 4's 0x70-0x7F
 CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3, CHIP_LIST1 = (0xCF, 0xB2), (0xEF, 0xC0), (0x9F, 0x80), (0x70, 0xE0), (0x7F, 0x40)
 ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:

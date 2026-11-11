@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:18:22Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:19:41Z }
 ---
 
 # The chip recipe generator
@@ -211,7 +211,7 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   and the art's room holds it only while an object draws it
   ([BN4's chips](../multirom/bn4-chips.md), The art's room). The bottoms
   of the effects', list 5's and list 4's ranges are BN4's Navis'
-  (0xB0-0xB1, 0xB0-0xBF, 0x70-0x7F). A type spawned through a wrapper of its code is
+  (0xB1, with 0xB0 BN5's Meddy's; 0xB0-0xBF; 0x70-0x7F). A type spawned through a wrapper of its code is
   moved as one spawned outright (`moved3`).
 - **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
   collision data's offsets, a panel's type and side after `getPanel`, a
