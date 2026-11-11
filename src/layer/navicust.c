@@ -18,6 +18,7 @@ enum {
 	SETS_SLIP = 1 << 10, SETS_HEAL = 1 << 11, SETS_BUGSTOP = 1 << 12, SETS_ATTACK = 1 << 13, SETS_SPEED = 1 << 14, SETS_CHARGE = 1 << 15,
 	SETS_BODY = SETS_ARMOR | SETS_FLOAT | SETS_AIR | SETS_UNDER,
 	SETS_SOULT = 1 << 16,
+	SETS_HAND10 = 1 << 17,   /* (NumbrOpn: the hand made ten chips, which Custom1 and Custom2 no longer add to) */
 };
 
 /* The pool: BN6's programs a run can be offered, the act (0-5 of the first
@@ -28,17 +29,20 @@ enum {
  * button, which the engine takes), Rush, Beat and Tango (VS battles only),
  * OilBody, Fish, Battery and Jungle (they steer the game's encounter roll,
  * which the engine replaces), Millions (its Mystery Data rule loops
- * forever on the engine's single-entry Mystery Data), SneakRun (it judges
- * the game's rolled battle, not the engine's) and NumbrOpn (its condition
- * is not yet known). The tiers follow the board: 4x4 until the act 2
+ * forever on the engine's single-entry Mystery Data) and SneakRun (it judges
+ * BN6's rolled battle before the engine's takes its place, and would call
+ * off a layer's every battle, the battle floor's owed one too:
+ * docs/multirom/bn6-gaps.md). NumbrOpn makes the Custom screen's hand ten
+ * chips (BN6_NUMBROPN_CHECK), a 5x5 block: the whole of the act 4 guardian's
+ * board, offered where it fits. The tiers follow the board: 4x4 until the act 2
  * guardian's ExpMemry, 5x4 until the act 4 guardian's, then 5x5. */
 static const struct {
 	uint8_t program, tier, build;
 	uint32_t sets, spent;
 } POOL[] = {
 	{ 1, 0, BUILD_GUARD, SETS_ARMOR, SETS_ARMOR },
-	{ 2, 0, BUILD_HAND, 0, 0 },
-	{ 3, 4, BUILD_HAND, 0, 0 },
+	{ 2, 0, BUILD_HAND, 0, SETS_HAND10 },
+	{ 3, 4, BUILD_HAND, 0, SETS_HAND10 },
 	{ 4, 0, BUILD_HAND, 0, 0 },
 	{ 5, 2, BUILD_HAND, 0, 0 },
 	{ 6, 4, BUILD_HAND, 0, 0 },
@@ -50,6 +54,7 @@ static const struct {
 	{ 12, 2, BUILD_FIELD, SETS_AIR, SETS_AIR },
 	{ 13, 0, BUILD_GUARD, SETS_UNDER, SETS_UNDER },
 	{ 14, 4, BUILD_HAND, SETS_SHUFFLE, SETS_SHUFFLE },
+	{ 15, 4, BUILD_HAND, SETS_HAND10, SETS_HAND10 },
 	{ 21, 2, BUILD_FIELD, SETS_COLLECT, SETS_COLLECT },
 	{ 25, 0, BUILD_FIELD, SETS_SLIP, SETS_SLIP },
 	{ 26, 2, BUILD_FIELD, SETS_HEAL, SETS_HEAL },
