@@ -22,5 +22,13 @@
    "0800CC60:7203"
   ],
   "what": "BN6's blink mark (BN6_PANEL_BLINK_SET) storing the side at the panel's +8 (strb r3,[r0,#8]) where it stores the type (strb r2): the Hole's blink kept as 0, where BN4's table keeps 0xB, read as 16"
+ },
+ {
+  "name": "the Hole's flags BN6's hole's",
+  "spec": "bn4_chip_hole",
+  "poke": [
+   "08CC0040:00014000:4"
+  ],
+  "what": "the Hole's word in BN6's grown flags table (xpanels.c, EMU_FREE + 0x4C0000 + 16 x 4, its 17th entry) BN6's hole's 0x14000 where BN4's Hole gives plain's 0x10010: the panel ahead of MegaMan a pit no one stands on"
  }
 ]
