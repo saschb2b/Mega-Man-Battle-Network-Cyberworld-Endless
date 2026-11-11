@@ -1,0 +1,10 @@
+[
+ {
+  "name": "GreenWd3's row's power another",
+  "spec": "bn4_chip_greenwd3",
+  "poke": [
+   "08C07762:0064"
+  ],
+  "what": "the registry's record of BN4's GreenWd3 (694) with power 100 where BN4's record holds 160: the 250 HP Mettaur left 150 where BN4's tower leaves it 90"
+ }
+]
