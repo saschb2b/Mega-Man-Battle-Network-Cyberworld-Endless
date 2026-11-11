@@ -247,7 +247,7 @@ static int run_order(const View *v, uint32_t *order, int max) {
  * its game's number in its kind's side table, where its type is the
  * kind's dispatch type; 0 else (and in BN5's battle, which has none) */
 static uint8_t dispatched(const View *v, int kind, uint32_t o) {
-	if (v->game != 6 || v->rd8(o + BN6_T1_TYPE) != xvirus_dispatch_type(kind)) return 0;
+	if (v->game != 6 || !xvirus_dispatch_runs(kind, v->rd8(o + BN6_T1_TYPE))) return 0;
 	return v->rd8(xvirus_dispatch_side(kind) + v->rd8(o + BN6_T1_SLOT));
 }
 
