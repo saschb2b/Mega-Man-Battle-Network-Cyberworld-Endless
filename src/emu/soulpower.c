@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "soul_room.h"
+#include "soulbn4.h"
 #include "soulchaos.h"
 #include "soulcode.h"
 #include "soullife.h"
@@ -36,12 +37,19 @@ static const uint8_t chaos_powers[] = { 0x3A, 0x31, 0x32, 0x33, 0x38, 0x34 };
 static int breaks;
 static int nmoved;   /* the recipe's power attacks */
 static int nchaos;   /* the chaos power attacks in the table (none where Chaos Unison is not installed) */
+static SoulBn4 bn4s[SOULS_BN4];   /* BN4's Souls (soulbn4.h), their power attacks after the chaos ones, */
+static int nbn4;                  /* ... how many are placed (none where BN4's ROM is not read or their code is not moved) */
 
-/* the Soul MegaMan `obj` is united with: his own (a side's partner's in his block, soul_id_of) */
+/* the Soul MegaMan `obj` is united with: his own (a side's partner's in his block, soul_id_of), BN5's or a placed BN4's */
 static int soul_on(uint32_t obj) {
-	int soul = soul_id_of(obj);
-	return soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS ? soul : 0;
+	int soul = soul_id_of(obj), k = soulbn4_k(soul);
+	return (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) || (k >= 0 && k < nbn4) ? soul : 0;
 }
+
+/* its row of the Souls' loadouts: BN5's six by number, then BN4's */
+static int row_of(int soul) { return soulbn4_k(soul) >= 0 ? SOULS + soulbn4_k(soul) : soul - SOUL_FIRST; }
+
+bool soulpower_bn4(int k) { return k >= 0 && k < nbn4; }
 
 /* BN6's id of BN5's power attack `id5` in the grown table, NONE where it is none of the Souls' */
 static int power6(int id5) {
@@ -56,6 +64,7 @@ static int power6(int id5) {
 
 /* BN5's id and the routine of the grown table's Souls' entry i (the moved, the empty, the chaos ones), 0 where none */
 static uint32_t routine_of(int i, int *id5) {
+	/* (BN5's id -1 for a BN4 Soul's) */
 	const SoulCode *c = &soulcode_bn5;
 	int empty = (int)sizeof empty_powers;
 	if (i < nmoved) {
@@ -66,8 +75,12 @@ static uint32_t routine_of(int i, int *id5) {
 		*id5 = empty_powers[i - nmoved];
 		return BN6_POWER_EMPTY | 1;
 	}
-	*id5 = chaos_powers[i - nmoved - empty];
-	return soulchaos_power(*id5);
+	if (i < nmoved + empty + nchaos) {
+		*id5 = chaos_powers[i - nmoved - empty];
+		return soulchaos_power(*id5);
+	}
+	*id5 = -1;   /* (BN4's: its charge times its own row, not BN5's) */
+	return bn4s[i - nmoved - empty - nchaos].routine | 1;
 }
 
 /* ---- the hooks: MegaMan's loadout, element, weakness and buster bonus in a Soul ---- */
@@ -77,7 +90,7 @@ static HookAct loadout(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_on(r->r[5]);
 	if (!soul || r->r[0] != BN6_FORM_LOADOUTS + BN6_FORM_LOADOUT_SIZE * BN6_FORM_PROXY) return HOOK_CONTINUE;
-	r->r[0] = SOULS_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * (soul - SOUL_FIRST));
+	r->r[0] = SOULS_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * row_of(soul));
 	return HOOK_CONTINUE;
 }
 
@@ -85,7 +98,8 @@ static HookAct loadout(HookRegs *r, void *user) {
 static HookAct element(HookRegs *r, void *user) {
 	int soul = soul_on(r->r[5]);
 	if (!soul || r->r[0] != BN6_FORM_PROXY) return HOOK_CONTINUE;
-	r->r[0] = (breaks & SOULPOWER_BREAK_ELEMENT) ? 0 : XR[XROM_BN5_COLONEL_US].data[BN5_SOUL_ELEMENTS - BUS + (uint32_t)soul];
+	int k = soulbn4_k(soul);
+	r->r[0] = (breaks & SOULPOWER_BREAK_ELEMENT) ? 0 : k >= 0 ? bn4s[k].element : XR[XROM_BN5_COLONEL_US].data[BN5_SOUL_ELEMENTS - BUS + (uint32_t)soul];
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
 }
@@ -113,9 +127,12 @@ static bool tables(void) {
 	const SoulCode *c = &soulcode_bn5;
 	nmoved = c->npowers;
 	nchaos = soulchaos_power(chaos_powers[0]) ? (int)sizeof chaos_powers : 0;
-	int n = BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos;
+	/* (BN4's Souls where BN4's ROM is read and their code moved, in their order: each one's whole or none from it on) */
+	for (nbn4 = 0; nbn4 < SOULS_BN4 && soulbn4_read(nbn4, &bn4s[nbn4]); ++nbn4) {}
+	int n = BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + nbn4;
 	if (SOUL_POWER_FIRST != BN6_POWER_ATTACK_COUNT || SOULS_POWERS + 4u * (uint32_t)n > SOULS_POWERS_END ||
-		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE)
+		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE ||
+		SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + SOULS_BN4) > SOULS_LOADOUTS_END)
 		return false;
 	uint8_t powers[4 * 0x100], charges[BN6_CHARGE_ROW * 0x100];
 	memcpy(powers, R.data + (BN6_POWER_ATTACKS - BUS), 4 * BN6_POWER_ATTACK_COUNT);
@@ -126,11 +143,13 @@ static bool tables(void) {
 		if (!routine) return false;
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
-		memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
+		if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
+		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);
 	}
 	/* (each Soul's loadout: BN5's row in BN6's ids, BN5's plain shot BN6's own 1, the same charge times) */
-	uint8_t rows[BN6_FORM_LOADOUT_SIZE * SOULS];
+	uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)];
+	memset(rows, NONE, sizeof rows);
 	for (int k = 0; k < SOULS; ++k) {
 		const uint8_t *r5 = b5 + (BN5_SOUL_LOADOUTS - BUS) + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOUL_FIRST + k);
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * k;
@@ -143,9 +162,16 @@ static bool tables(void) {
 		if (r6[ROW_B] == NONE || (r5[ROW_LEFT] != NONE && r6[ROW_LEFT] == NONE)) return false;
 		if (breaks & SOULPOWER_BREAK_FAMILY) r6[ROW_B] = (uint8_t)(SOUL_POWER_FIRST + (r6[ROW_B] - SOUL_POWER_FIRST + 1) % nmoved);
 	}
+	/* (each BN4 Soul's: no chip charge, BN6's plain shot (+6 0, as every form's), its charged shot after the chaos ones, no
+	 * B-left ability, no Chaos Unison: BN4_FORM_LOADOUTS' four bytes as BN6's six) */
+	for (int k = 0; k < nbn4; ++k) {
+		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
+		r6[ROW_6] = 0;
+		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
+	}
 	emu_write(SOULS_POWERS, powers, 4u * (uint32_t)n);
 	emu_write(SOULS_CHARGES, charges, BN6_CHARGE_ROW * (uint32_t)n);
-	emu_write(SOULS_LOADOUTS, rows, sizeof rows);
+	emu_write(SOULS_LOADOUTS, rows, BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + nbn4));
 	emu_write32(BN6_POWER_ATTACKS_REF, SOULS_POWERS);
 	emu_write32(BN6_CHARGE_TIMES_REF, SOULS_CHARGES);
 	return true;
@@ -191,7 +217,7 @@ bool soulpower_install(int brk) {
 		emu_hook(BN6_FORM_WEAKNESS_READ, none_for_soul, (void *)&weakness) && emu_hook(BN6_FORM_BONUS_READ, none_for_soul, (void *)&bonus);
 	claims_end();
 	done = ok;
-	printf("soulpower: the Souls' abilities%s%s\n", ok ? ": their power attacks, charge times, loadouts, elements and sounds" : " NOT placed whole",
+	printf("soulpower: the Souls' abilities%s (BN4's: %d)%s\n", ok ? ": their power attacks, charge times, loadouts, elements and sounds" : " NOT placed whole", ok ? nbn4 : 0,
 		brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
 	return ok;
 }

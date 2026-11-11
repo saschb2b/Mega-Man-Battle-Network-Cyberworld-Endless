@@ -12,15 +12,11 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
-#include "soulchaos.h"
-#include "soulchips.h"
-#include "soulcolonel.h"
-#include "soulcode.h"
+#include "soulbn4.h"
 #include "soulkinds.h"
 #include "soullife.h"
-#include "soullook.h"
 #include "soulmood.h"
-#include "soulpassive.h"
+#include "soulown.h"
 #include "soulpower.h"
 #include "soulproxy.h"
 #include "thumb_reloc.h"
@@ -42,6 +38,7 @@
 #define PALETTE_SIZE  0x20
 #define SOULS_BN5     12    /* BN5_SOUL_KINDS' and BN5_SOUL_FLAGS' entries: Souls 1-12 */
 #define TEAM_SOULS    6     /* the run's Souls (souls.h): bit k BN5's Soul 7 + k, its flag BN5_FLAG_SOUL + k */
+#define HELD_MASK     ((1u << (SOULS_HELD_BN4 + SOULS_BN4)) - 1)   /* ... then BN4's (soulbn4.h), the differential's alone yet */
 #define STATE_LIT     0     /* BN6_ELEMENT_STATE */
 #define STATE_GREY    1
 #define STATE_CHOSEN  2
@@ -59,16 +56,17 @@ static int breaks;
 static unsigned helds[HOOK_CORES];
 static bool linked[HOOK_CORES];
 static uint8_t kinds5[SOULS_BN5], flags5[SOULS_BN5];   /* BN5_SOUL_KINDS, BN5_SOUL_FLAGS, read from BN5's ROM */
+static uint8_t kinds4[SOULS_BN4];   /* BN4's Souls' kinds (soulbn4.h), 0xFF where BN4's ROM is not read */
 static uint32_t emblem_tiles, emblem_pals;   /* the emblem's art, as Gregar's words name it */
 
 static unsigned held_now(void) { return helds[hook_slot()]; }
 
-void soulunite_held(unsigned souls) { helds[hook_slot()] = souls & ((1u << TEAM_SOULS) - 1); }
+void soulunite_held(unsigned souls) { helds[hook_slot()] = souls & HELD_MASK; }
 
 bool soulunite_held_core(struct mCore *core, unsigned souls) {
 	int slot = hook_slot_of(core);
 	if (slot < 0) return false;
-	helds[slot] = souls & ((1u << TEAM_SOULS) - 1);
+	helds[slot] = souls & HELD_MASK;
 	linked[slot] = helds[slot] != 0;   /* (none: the core let go, its entry as any other core's) */
 	return true;
 }
@@ -133,12 +131,23 @@ static int lights(int side, int *chaos) {
 	/* (the chip as the deck has it: BN6 shows a Mega or Giga as "?" in link battles alone, 0x0802A54A, where UNITE stands not) */
 	int chip = (int)chip_entry_id(hook_read16(hook_read32(el + BN6_ELEMENT_DECK))), kind = soulkinds_of(chip);
 	bool dark = soulkinds_dark(chip);
+	int shift = (breaks & SOULUNITE_BREAK_KIND) ? 1 : 0;
+	uint32_t used = hook_read32(soul_field(side, BN6_SOUL_USED));
 	for (int s = 1; s <= SOULS_BN5; ++s) {
-		if (kinds5[s - 1] + ((breaks & SOULUNITE_BREAK_KIND) ? 1 : 0) != kind) continue;
+		if (kinds5[s - 1] + shift != kind) continue;
 		int k = flags5[s - 1] - BN5_FLAG_SOUL;
-		uint32_t bit = (1u << s) << (dark ? 16 : 0);
-		if (k < 0 || k >= TEAM_SOULS || !(held_now() >> k & 1) || (hook_read32(soul_field(side, BN6_SOUL_USED)) & bit)) return 0;
+		/* (a kind whose BN5 Soul is the other version's: a BN4 Soul of it, below) */
+		if (k < 0 || k >= TEAM_SOULS) break;
+		if (!(held_now() >> k & 1) || (used & (1u << s) << (dark ? 16 : 0))) return 0;
 		*chaos = dark;
+		return s;
+	}
+	/* (BN4's Souls, BN5's rule: held, not used this battle; no Chaos Unison of theirs, so a DarkChip of the kind lights none) */
+	for (int k = 0; k < SOULS_BN4; ++k) {
+		if (kinds4[k] + shift != kind) continue;
+		int s = SOUL_BN4_FIRST + k;
+		if (dark || !soulpower_bn4(k) || !(held_now() >> (SOULS_HELD_BN4 + k) & 1) || (used & 1u << s)) return 0;
+		*chaos = 0;
 		return s;
 	}
 	return 0;
@@ -327,14 +336,6 @@ static bool expected(const uint8_t *b5) {
 	return words6 && words5;
 }
 
-/* each Soul's own: its code moved, its look, abilities and passives (the Souls track's S3-S5), all or none of each */
-static bool souls_own(int soulbreak) {
-	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) &&
-		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
-		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
-		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak));
-}
-
 static bool done;
 
 bool soulunite_ready(void) { return done; }
@@ -356,6 +357,10 @@ bool soulunite_install(int brk, int soulbreak) {
 	breaks = brk;
 	memcpy(kinds5, b5 + (BN5_SOUL_KINDS - BUS), sizeof kinds5);
 	memcpy(flags5, b5 + (BN5_SOUL_FLAGS - BUS), sizeof flags5);
+	for (int k = 0; k < SOULS_BN4; ++k) {
+		SoulBn4 r;
+		kinds4[k] = (uint8_t)(soulbn4_read(k, &r) ? r.kind : 0xFF);
+	}
 	emblem_tiles = rom6(BN6_EMBLEM_ART_TILES);
 	emblem_pals = rom6(BN6_EMBLEM_ART_PALS);
 	claims_begin(SOULS_CLAIMS);
@@ -367,7 +372,7 @@ bool soulunite_install(int brk, int soulbreak) {
 	claims_end();
 	printf("soulunite: UNITE on the Custom screen%s%s\n", ok ? ", the Souls' life on the proxy form" : ": NOT placed whole",
 		brk ? " (with parts broken: unitebreak)" : "");
-	if (ok && !souls_own(soulbreak)) fprintf(stderr, "soulunite: the Souls' own code, look and abilities NOT placed whole: they unite as the proxy\n");
+	if (ok && !soulown_install(soulbreak)) fprintf(stderr, "soulunite: the Souls' own code, look and abilities NOT placed whole: they unite as the proxy\n");
 	if (brk) printf("soulunite: unitebreak=%d\n", brk);
 	return ok;
 }
