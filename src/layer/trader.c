@@ -98,20 +98,16 @@ static uint32_t list_of(uint32_t from, uint32_t *end) {
 	return start;
 }
 
-/* The older net's catalogue of rarity `rarity` (chip_pool.h: the chips of
- * the registry that play, no DarkChip; a chip both nets have by name in
- * both halves, as each net has it), `want` of them at random, their
- * records into `out`; how many */
+/* The layer's older Net's catalogue of rarity `rarity` (chip_pool.h,
+ * loot_older_net: the chips of its game that play, no DarkChip; a chip
+ * both nets have by name in both halves, as each net has it), `want` of
+ * them at random, their records into `out`; how many */
 static int older_of(int rarity, int want, uint8_t *out) {
-	static short ids[XREG_IDS];
-	int n = 0;
-	for (int i = 0; i < xreg_count; ++i) {
-		int id = xreg_rows[i].bn6;
-		const uint8_t *c = chips_record(id);
-		if (xreg_rows[i].how == XREG_DARK || xreg_rows[i].how == XREG_PA || !c || c[5] != rarity || chip_pool_tier(id) < 0) continue;
-		bool again = false;
-		for (int k = 0; k < n && !again; ++k) again = ids[k] == id;
-		if (!again) ids[n++] = (short)id;
+	static short all[XREG_IDS], ids[XREG_IDS];
+	int n = 0, listed = chip_pool_list(loot_older_net, all, XREG_IDS);
+	for (int i = 0; i < listed; ++i) {
+		const uint8_t *c = chips_record(all[i]);
+		if (c && c[5] == rarity) ids[n++] = all[i];
 	}
 	int m = 0;
 	for (; m < want && m < n; ++m) {
@@ -126,7 +122,7 @@ static int older_of(int rarity, int want, uint8_t *out) {
 static bool both_nets(uint32_t from) {
 	uint32_t end;
 	uint32_t start = list_of(from, &end);
-	if (!start || !chips_from_bn5()) return false;
+	if (!start || !chip_pool_count(loot_older_net, -1)) return false;
 	static uint8_t list[(LIST_MAX + 1) * REC];
 	int n = 0, by[5] = { 0 };
 	/* (BN6's pool's records first) */

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (unit 7 built: BN4's catalogue the older Net's half of the finds on BN4's areas, the deep's every game's, what the economy measured, the Library's BN4 chips held, the menus' colours on BN4's areas fixed; the owner's calls 9 and 10, asked and answered), multirom/one-net.md (the half the area's own game's), game/economy/measuring.md (the report's older Net's table), game/meta/library.md (a BN4 chip held reaches the profile's Library), rom/net-maps.md and rom/bn4.md (the 256-colour bit on the map alone, BN6's menus their 16 colours).
 * **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
 * **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).

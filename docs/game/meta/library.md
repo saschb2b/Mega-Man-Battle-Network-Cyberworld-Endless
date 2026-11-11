@@ -3,7 +3,7 @@ type: Design
 title: "The Library, a page per entry"
 description: "The chip Library as a dex over the entries: the PET's Library row opens a screen of ours, BN6's own Library to the pixel, with pages for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's calls, what each page lists today, what the vaults and the title's marks count, and what is left out."
 tags: [game, meta, pet, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"
@@ -123,7 +123,10 @@ BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other
 36 are BN5's own of its name (26, 9, 1). BN4's own 160 chips (99, 56, 5)
 have their slots in the table by the registry's rows (ids 527 on), and
 one is listed, Invis, the first that plays: each other sits out until its
-code is moved, and joins the page as it comes to play; LifeAura's slot is
+code is moved, and joins the page as it comes to play (since 12 November
+2026 one held reaches the profile's Library, as BN5's own always did:
+`chip_pool_older` takes BN4's rows; [BN4's chips in a
+run](../../multirom/bn4-chips.md), unit 7); LifeAura's slot is
 BN6's LifeAur's, one chip under two spellings (the owner's call) ([BN4's chips in a run](../../multirom/bn4-chips.md)),
 towards 186, 79 and 9. The slots the
 pages lack are the chips no run has an id for (Team ProtoMan's Navi chips,

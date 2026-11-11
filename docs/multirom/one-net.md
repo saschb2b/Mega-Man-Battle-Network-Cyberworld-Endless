@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -215,7 +215,11 @@ run, meta as variety):
   rarity's, BN6's pool's records fitted as before and as many of BN5's
   catalogue's of each rarity. Home's requests pay in BN6's chips. As
   BN5's chips' code moves in (Not yet, The chip registry), its own come
-  more often: today a dozen of its own play.
+  more often: today a dozen of its own play. Since 12 November 2026 the
+  half is the area's own game's catalogue: BN4's on BN4's areas, made the
+  same way from its chips that play, and in the deep every game's read,
+  one chip one weight ([BN4's chips in a run](bn4-chips.md), Where things
+  stand, unit 7).
 - **The Library**: the profile keeps ids to 511 (Profile.library_x past
   BN6's 320); the classes' marks (STD, MEGA, GIGA COMP) stay BN6's, so no
   mark needs BN5's ROM; the older net's own chips are counted apart
