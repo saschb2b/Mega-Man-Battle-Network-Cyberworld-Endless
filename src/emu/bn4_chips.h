@@ -110,6 +110,18 @@
                                            * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
 #define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
                                            * the rows, its speed across them (16.16) */
+#define BN4_BOOMER_SPAWN      0x080D3430u /* ... its spawner (r0 the column, r1 the row, r2 the element, r3 the height, r4 its parameters: the
+                                           * flight's row in the low byte, r6 the power word): Boomer's routine's call, and PitRng's launcher's,
+                                           * whose unit copies it alone and spawns Boomer's copy of the type (tools/xchiprecipe_bn4.py SHARED3) */
+/* PitRng1-3 (its Program Advances 332-334, misc subfamily 0x0D: three Boomer1, 2 or 3 of codes in a row), moved as a unit */
+#define BN4_PITRNG            0x080E9A36u /* its routine, in its launcher's code: the launcher spawned (movs r0,#0x6c; BN4_SPAWN_4), its element
+                                           * from r2 at +0x17, the power word from r6 at +0x2C, its side its user's; shorter than the support
+                                           * routines' common spawner, as the launcher takes no panel */
+#define BN4_T4_PITRNG         0x6C        /* the launcher, the fourth kind's (0x080E999C to 0x080E9A50), drawn by nothing: BN4_PITRNG_COUNT
+                                           * boomerangs (BN4_BOOMER_SPAWN), one each BN4_PITRNG_EVERY + 1 frames from its side's first column,
+                                           * the bottom row and the top row in turn, each on its own flight (its count less one), then gone */
+#define BN4_PITRNG_COUNT      0x080E99E4u /* ... movs r0,#3 into its +0x22: three boomerangs */
+#define BN4_PITRNG_EVERY      0x080E99F8u /* ... movs r0,#0xf into its +0x20, counted down a frame each: sixteen frames apart */
 /* MokoRus1-3 (its chips 130-132, misc subfamily 1), moved as a unit (src/emu/xchips_bn4.c) */
 #define BN4_MOKORUS           0x080D252Au /* its routine, in the Moko's code: the three rows shuffled (BN4_SHUFFLE), a Moko spawned on each
                                            * (0x080D250C), the k-th to set off 10 x k frames on (+0x20) */

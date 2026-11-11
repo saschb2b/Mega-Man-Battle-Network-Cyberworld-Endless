@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T09:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -360,9 +360,9 @@ MegaMan is struck; 70, 40 and 10 by TwnFng1-3, used before the Mettaur
 leaves its row; a miss each for FlmLine and TwnFng), thirteen mutations
 caught. A sound row can now hold in the specs of a chip unit's chips
 alone (`chips`: Thunder's ball's 0xAD, which Billy's thunder and
-ThunderMan pair otherwise). **Waiting:** FlmCros1-3 and BstFang1-3, the
-families' Program Advances (their subfamily 1, in the moved states
-already), on BN4's recipes. Thunder's and TwnFng's ids are past 602:
+ThunderMan pair otherwise). FlmCros1-3 and BstFang1-3, the families'
+Program Advances (their subfamily 1, in the moved states already), are
+formed since (The Program Advances are formed, below). Thunder's and TwnFng's ids are past 602:
 their pack entries are the save RAM's (ids 635 on), in dev since.
 
 **MagBolt1-3 are moved** (11 November 2026: ids 642-644, BN4's family
@@ -386,8 +386,9 @@ the hit first. `bn4_chip_magbolt1` (a 140 HP Mettaur pulled from (5,2)
 to (4,2), not beside MegaMan: no hit), `2` (beside him already: hit for
 110, the pull blocked) and `3` (pulled beside him and hit for 130,
 struck for 0x18 frames in both) pass over 300 frames, eleven mutations
-caught. **Waiting:** MagShok1-3, the family's Program Advances (its
-subfamilies 3 to 5, in the moved state already), on BN4's recipes.
+caught. MagShok1-3, the family's Program Advances (its subfamily 3, in
+the moved state already), are formed since (The Program Advances are
+formed, below).
 
 **PropBom1-3 are moved** (11 November 2026: ids 671-673, BN4's family
 0x62 at BN6's grown attack family 0xD4). The state throws the bomb (the
@@ -437,11 +438,65 @@ and a second body of the user drawn from his own battle sprite by his
 Navi and Soul (`0x0800B90A`, a table at `0x08017F98`), for which BN6's
 own routine is not found; two routines that run a handler per bit of a
 mask over a global at `0x020363F0` (`0x08015B9E`, `0x08015E78`) are not
-read. HeatSprd, BubSprd, FlmCros1-3, BstFang1-3 and MagShok1-3 are
-Program Advances of the moved families, a subfamily of each state, in
-the units already; PitRng1-3 is one too, its routine (misc 0x0D) in
-Boomer's object's code, not checked against Boomer's unit. They form
-once BN4's recipes are in BN6's grown list, which is not built.
+read.
+
+**The Program Advances are formed** (12 November 2026: fourteen of the
+nineteen). BN4's recipes are in BN6's grown list after BN6's and BN5's:
+`tools/xreg_bn4.py` reads BN4's list (`BN4_PA_LIST`) and writes the
+recipes of the Program Advances whose code is moved (its `PAS`) and
+whose parts all play, in BN6's ids (`src/core/xchips_pas_bn4.c`, 19
+recipes), and the chips' install lists them where BN4's code is in
+(`src/emu/xchips_code.c` pas_stage: one place for both games' recipes,
+each game's install writing the whole). BN4's checker was read for it
+(`BN4_PA_CHECK`, [BN4 Red Sun](../rom/bn4.md), Its Program Advances): a
+recipe's kind is 0, n of one chip with codes in a row, or anything else,
+its ids listed in order, where BN6 reads a routine by the kind as an
+offset, so BN4's kind 1 is BN6's 4 and nothing of BN6's checker changes.
+A Program Advance's row stays `XREG_PA` (no folder chip, no pack entry)
+and names its unit as a moved chip's does: its record takes the unit's
+attack family with BN4's own subfamily and parameters, or the unit's
+routine under BN6's misc family. HeatSprd and BubSprd are the spread
+state's subfamilies 1 and 2 with the shot's kinds 0xB and 7 (the burst
+over the nine panels round the hit), FlmCros1-3 FlmLine's subfamily 1
+(five flames in a cross), BstFang1-3 TwnFng's subfamily 1 (eight
+volleys), MagShok1-3 MagBolt's subfamily 3 (three bolts): all in the
+units already, no code moved for them. PitRng1-3 is BN4's misc routine
+0x0D, a unit of its own (`BN4_PITRNG`): a launcher, the fourth kind's
+0x6C, that throws three of Boomer's boomerangs sixteen frames apart, so
+a misc unit may now move a fourth-kind type, and a unit named for it
+shares a type an earlier unit moved (the boomerang, Boomer's copy:
+`SHARED3`). Twenty specs pass (`bn4_pa_*`), each Program Advance formed
+by BN4's checker on BN4's Custom screen and by BN6's on its own from the
+same three picks, dealt in order by `deck4` (`BN4_BATTLE_DECK`, found
+for it), then used: HeatSprd by its listed recipe and by each of its
+three rows of codes (a Spikey's 330 HP left 30), BubSprd by each of its
+three, FlmCros1 (30 left), MagShok1-3 (50, 80 and 30 left), PitRng1 and
+2 (50 left), BstFang1's eight volleys flown past a foe between them.
+Twenty-six mutations are caught: the list's word, a recipe's Program
+Advance, part and kind, each family's record (power, subfamily, the
+shot's kind) and the code under each (the shot's row, the cross's third
+flame, the volleys' count, MagShok's pull, the launcher's count and
+wait). What no spec reaches: a Program Advance of 300 or more deletes
+every moved virus it is not weak against, and a deletion parts at each
+engine's own effect, so BubSprd, FlmCros2 and 3, PitRng3 and BstFang1-3
+against a foe in their way are compared to the frame of the hit that
+deletes (HP 0 in both), not past it; BubSprd's burst is HeatSprd's code
+with another row, FlmCros2 and 3 are FlmCros1's with another power.
+The comparison reads a Program Advance's row as a moved chip's, and a
+moved misc routine's object's element at BN6's place (legit.json's bn4
+support_objects). **Waiting on their parts:** PitHoky1-3 (AirHoc1-3,
+family 0x27), P.Driver (GunSol1-3) and DarkNeo (DrkLine, BugChain and
+Bass; a dark Program Advance, the dark chips' price its own question):
+`tools/xreg_bn4.py` says so for each as it writes. Seen on the way,
+none of it this unit's: the spread shot's collision data differs at the
+frame it strikes an Elmperor (BN4's is struck back by the Elmperor's
+body, flags and a tally at its +0x0C and +0x6C on, BN6's is not), a
+Wood attack on a Fire virus sets BN6's own multiplier byte (collision
+data +0x74) on the attack's object, a counter hit's Full Synchro is an
+object of each engine's own, a foe held by `hold=` parts at t1 for a
+moved BN4 family, and a struck Navi's AI data counts the damage in BN6
+alone (+0x20): each kept out of these specs by the foe chosen, none
+masked.
 
 **The units' art room was the scarce one** (11 November 2026). A unit's
 sprites were copied whole at the core's start, and an arm's kind is a
@@ -1170,7 +1225,9 @@ of one agent.
    by family: several agents at once, each a family, the shared base
    first. The Program Advances with their parts (BN4's recipes after
    BN6's and BN5's in the grown list, BN6's recipe first where two are
-   the same; `pa_*` specs; the per-battle bits past id 383 grown in 1).
+   the same; `bn4_pa_*` specs; the per-battle bits past id 383 grown in
+   1): **built for fourteen** (Where things stand, The Program Advances
+   are formed), five waiting on their parts.
 6. **The Navi chips of the eight moved Navis (4 to 6 days, after 3).**
    Their 23 chips on the Navis' copies, SP and DS by BN4's computed
    powers (`chip_gutsman` and on). Then call 7's stand-in steps aside for

@@ -174,6 +174,12 @@
 #define BN4_PA_COUNT      37          /* ... how many recipes: 30 Program Advances, LifeSrd, DarkNeo and HeatSprd by two or more */
 #define BN4_PA_RECIPES    0x080211B0u /* the recipes: n, kind, the PA's id (u16), its chips (u16 id | code << 9) */
 #define BN4_PA_KIND_LISTED 1          /* a recipe of n chips listed, each its own (BN6's kind 4); kind 0 one chip n times, codes in a row */
+#define BN4_PA_CHECK      0x0801F390u /* the Custom screen's check of the chips picked (BN6's 0x08029520): each entry split into its id and its
+                                       * code, then every recipe of the list tried from each place of the hand; a recipe's kind 0 runs
+                                       * BN4_PA_CHECK_ROW, any other BN4_PA_CHECK_LISTED (cmp r0,#0; bne at 0x0801F3CA), where BN6 reads a
+                                       * routine by the kind as an offset (0 and 4, 0x080295C0): BN4's 1 is BN6's 4 */
+#define BN4_PA_CHECK_ROW  0x0801F46Au /* ... n of the recipe's chip, their codes in a row, a * standing in once (BN6's 0x080295C8) */
+#define BN4_PA_CHECK_LISTED 0x0801F4B2u /* ... the recipe's n ids in its order, their codes not read (BN6's 0x0802961A) */
 
 /* Kilby, the second late family (BN4's type 0x1E, enemy ids 0x43-0x48; docs/rom/bn4.md, Kilby moved): found by its type, each
  * checked by the generator against the ROM */

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:48:40Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T09:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -39,7 +39,18 @@ each chip's byte of the save's copy that BN4's gate reads against its key
 (`BN4_CHIP_GATE`, `xd4_folder_put`); `cust4=` scripts its Custom screens
 as `cust5` does BN5's. BN4's cursor slides to OK, so its keys are spaced:
 `cust4=1:-.10/A.2/-.18/START.2/-.18/A.2` picks the first chip and ends
-the screen. `bn4_chip_cannon_control` is that battle fought twice, the
+the screen. `deck4=` writes BN4's battle deck in the spec's order before
+its first Custom screen (`BN4_BATTLE_DECK`, [BN4 Red Sun](../rom/bn4.md),
+The battle's deck), as `deck5` and `deck6` do the others': a Program
+Advance's three parts dealt side by side, picked left to right by
+`-.10/A.2/-.10/RIGHT.2` twice more before START. The `bn4_pa_*` specs
+are BN4's Program Advances so ([BN4's chips in a run](../multirom/bn4-chips.md),
+The Program Advances): each formed by BN4's own checker on its screen and
+by BN6's from the same picks, then used. Their foes are chosen to stand
+still or to be where the attack lands: Elmperor (300 HP, no element)
+never moves, a Spikey (330 HP) stands in MegaMan's row from t96 to t202,
+and a PA of 300 or more that no moved virus outlives is compared to the
+frame of its hit, as a chip that deletes its target is. `bn4_chip_cannon_control` is that battle fought twice, the
 same: MegaMan holds BN4's Cannon, fires it at fight frame 30 and deletes
 the Mettaur (seen by `film=`, which in the trace's mode took BN6's core's
 picture for a BN4 reference until this). `bn4_chip_cannon_broken` is
@@ -1010,9 +1021,9 @@ format, its game 4: the trace's header names it):
   frames (BN4 takes A only after its cursor's slide to OK: BN5's 4-8-4
   left its first screen open), the spec's `keys=` by the timer, and both
   RNG words written after the fight's first frame, as BN5's specs seed
-  theirs. `safe=1` and `hold=` take BN4's collision data's offsets;
-  `mm_element=` and `deck6=` do not yet (BN4's collision element and
-  deck unmapped).
+  theirs. `safe=1` and `hold=` take BN4's collision data's offsets, and
+  `deck4=` writes BN4's deck (`BN4_BATTLE_DECK`) as `deck5=` does BN5's;
+  `mm_element=` does not yet (BN4's collision element unmapped).
 - **Its events** (`src/dev/xdiff_events.c` on the guest core, BN4's
   routines given by `xdiff_bn4_trace.c`'s `xd4_routines`: [BN4 Red Sun](../rom/bn4.md),
   The differential's hooks): its four RNG draws, every spawn (its

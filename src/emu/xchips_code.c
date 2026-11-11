@@ -225,31 +225,44 @@ static void dark_after_stage(void) {
 	xv_word(BN6_DARK_AFTERS + 4u * (BN6_DARKPLUS - BN6_DARK_FIRST_ID), BN6_DARK_AFTER_HPBUG | 1u, (XC_STUBS + 4u) | 1u);
 }
 
+/* a game's recipes (`rows`) written into the recipes' room `e` from *at on, their addresses into the list `l` from entry *k
+ * on; false where one does not fit */
+static bool recipes_put(const XChipPa *rows, int n, uint8_t *e, uint32_t room, uint32_t *at, uint8_t *l, uint32_t *k) {
+	for (int i = 0; i < n; ++i) {
+		const XChipPa *r = &rows[i];
+		uint32_t parts = r->kind == 4 ? r->n : 1;
+		if (parts > XCHIP_PA_PARTS || *at + 4 + 2 * parts > room) return xv_fail("a Program Advance's recipe, %u", r->pa);
+		e[*at] = r->n;
+		e[*at + 1] = r->kind;
+		put16(e + *at + 2, r->pa);
+		for (uint32_t j = 0; j < parts; ++j) put16(e + *at + 4 + 2 * j, r->parts[j]);
+		put32(l + 4u * (*k)++, FREE_CHIP_PAS + *at);
+		*at += 4 + 2 * parts;
+	}
+	return true;
+}
+
 /* BN6's list of Program Advances grown (FREE_CHIP_PAS): BN6's 43 recipes, then BN5's of the registry's (src/core/xchips_pas.c,
- * BN6's first where two are the same), then 0; its word pointed at it (the link battles' list, 0x0802BC60, BN6's own); the
- * P.A. screen's code letters drawn for every registered part (BN5's 0x08027BCE draws them below 0x160 as BN6's; BN6's own parts
- * are all below it, the registry's SpShake and CactBal past it) */
-static void pas_stage(void) {
+ * BN6's first where two are the same) where BN5's chips' code is in (`bn5`), then BN4's (src/core/xchips_pas_bn4.c) where
+ * BN4's is (`bn4`), then 0; its word pointed at it (the link battles' list, 0x0802BC60, BN6's own); the P.A. screen's code
+ * letters drawn for every registered part (BN5's 0x08027BCE draws them below 0x160 as BN6's; BN6's own parts are all below
+ * it, the registry's SpShake and CactBal past it). The list's place is one for both games' recipes, so each game's step
+ * writes the whole anew: the second finds the word at it already */
+static void pas_stage(bool bn5, bool bn4) {
+	uint32_t list = FREE_CHIP_PAS_END - 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count + (uint32_t)xchips_pas4_count + 1u), at = 0;
+	bool grown = emu_read32(BN6_PA_LIST_REF) == list;
 	if (rom_u32(BN6_PA_LIST_REF - BUS) != BN6_PA_LIST || rom_u32(BN6_PA_LIST - BUS + 4u * BN6_PA_COUNT) != 0) {
 		xv_fail("BN6's Program Advances' list is not at %08x", (unsigned)BN6_PA_LIST);
 		return;
 	}
-	uint32_t list = FREE_CHIP_PAS_END - 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count + 1u), at = 0;
-	uint8_t *e = xv_put(FREE_CHIP_PAS, list - FREE_CHIP_PAS, true), *l = xv_put(list, FREE_CHIP_PAS_END - list, true);
+	uint8_t *e = xv_put(FREE_CHIP_PAS, list - FREE_CHIP_PAS, !grown), *l = xv_put(list, FREE_CHIP_PAS_END - list, !grown);
 	if (!e || !l) return;
+	uint32_t k = BN6_PA_COUNT;
 	for (uint32_t i = 0; i < BN6_PA_COUNT; ++i) put32(l + 4 * i, rom_u32(BN6_PA_LIST - BUS + 4 * i));
-	for (int k = 0; k < xchips_pas_count; ++k) {
-		const XChipPa *r = &xchips_pas[k];
-		uint32_t parts = r->kind == 4 ? r->n : 1;
-		if (parts > XCHIP_PA_PARTS || at + 4 + 2 * parts > list - FREE_CHIP_PAS) { xv_fail("a Program Advance's recipe, %u", r->pa); return; }
-		e[at] = r->n;
-		e[at + 1] = r->kind;
-		put16(e + at + 2, r->pa);
-		for (uint32_t j = 0; j < parts; ++j) put16(e + at + 4 + 2 * j, r->parts[j]);
-		put32(l + 4u * (BN6_PA_COUNT + (uint32_t)k), FREE_CHIP_PAS + at);
-		at += 4 + 2 * parts;
-	}
-	put32(l + 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count), 0);
+	if (bn5 && !recipes_put(xchips_pas, xchips_pas_count, e, list - FREE_CHIP_PAS, &at, l, &k)) return;
+	if (bn4 && !recipes_put(xchips_pas4, xchips_pas4_count, e, list - FREE_CHIP_PAS, &at, l, &k)) return;
+	put32(l + 4u * k, 0);
+	if (grown) return;
 	xv_word(BN6_PA_LIST_REF, BN6_PA_LIST, list);
 	xv_word(BN6_PA_LETTERS, 0x160, CHIP_ID_MASK + 1u);   /* (a part of any id its letter: a Navi chip past nine bits too) */
 }
@@ -322,7 +335,7 @@ bool xchips_code_install(void) {
 	}
 	if (!xv_failed()) {
 		at = "BN6's Program Advances";
-		pas_stage();
+		pas_stage(true, installed4);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN5's chips' code not installed (%s): %s\n", at, xv_why());
@@ -404,6 +417,10 @@ bool xchips_bn4_code_install(void) {
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
 		at = xchips_bn4[i].code.name;
 		unit4_stage(i, fresh);
+	}
+	if (!xv_failed()) {
+		at = "BN6's Program Advances";
+		pas_stage(installed, true);
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed (%s): %s\n", at, xv_why());

@@ -81,6 +81,7 @@
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
+#include "xchips_pas.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
@@ -5663,6 +5664,41 @@ static void test_chip_records(void) {
 	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
 	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");
+	/* (a Program Advance of BN4's whose code is moved names its unit as a moved chip does, its row XREG_PA still; one that names
+	 * none is inert) */
+	const XChipReg4 sprd4 = { 321, 606, XREG_PA, 0, 0xD0, { 0, 1, 2, 26 }, 4, 5 }, ring4 = { 332, 611, XREG_PA, 0, 0x8D, { 0, 1, 2, 26 }, 4, 5 },
+		hoky4 = { 338, 617, XREG_PA, 0, 0xFF, { 0, 1, 2, 26 }, 4, 5 };
+	rec4[BN6_CHIP_FAMILY] = 0x1E; rec4[BN6_CHIP_SUBFAMILY] = 1;
+	moved4.reg = &sprd4;
+	xrec_from_bn4(&moved4, out);
+	bool pa_attack = out[BN6_CHIP_FAMILY] == 0xD0 && out[BN6_CHIP_SUBFAMILY] == 1 && out[BN6_CHIP_PARAMS] == 7;
+	rec4[BN6_CHIP_FAMILY] = BN4_CHIP_MISC_FAMILY; rec4[BN6_CHIP_SUBFAMILY] = 0x0D;
+	moved4.reg = &ring4;
+	xrec_from_bn4(&moved4, out);
+	bool pa_misc = out[BN6_CHIP_FAMILY] == BN6_CHIP_MISC_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0x8D;
+	moved4.reg = &hoky4;
+	xrec_from_bn4(&moved4, out);
+	CHECK(pa_attack && pa_misc && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && !xreg4_check(&sprd4, 1, xreg_rows, xreg_count, why, sizeof why) &&
+		!xreg4_check(&hoky4, 1, xreg_rows, xreg_count, why, sizeof why), "records: a BN4 Program Advance whose row names its unit takes the "
+		"unit's family or routine, one that names none is inert");
+	rec4[BN6_CHIP_FAMILY] = 0x0C; rec4[BN6_CHIP_SUBFAMILY] = 0x2D;
+	/* (BN4's recipes in BN6's grown list, xchips_pas_bn4.c: each a Program Advance of the rows that names its unit, every part
+	 * a row that plays, BN6's kinds; with BN5's they fit the list's room, a word each for BN6's 43, theirs and the 0) */
+	uint32_t pa_bytes = 0;
+	bool pas4_ok = true;
+	for (int i = 0; i < xchips_pas_count; ++i) pa_bytes += 4u + 2u * (xchips_pas[i].kind == 4 ? xchips_pas[i].n : 1u);
+	for (int i = 0; i < xchips_pas4_count; ++i) {
+		const XChipPa *q = &xchips_pas4[i];
+		const XChipReg4 *pa = xreg4_at(q->pa);
+		pa_bytes += 4u + 2u * (q->kind == 4 ? q->n : 1u);
+		pas4_ok = pas4_ok && pa && pa->how == XREG_PA && pa->sub != 0xFF && (q->kind == 0 || q->kind == 4) && q->n <= XCHIP_PA_PARTS;
+		for (int j = 0; pas4_ok && j < (q->kind == 4 ? q->n : 1); ++j) {
+			const XChipReg4 *part = xreg4_at(q->parts[j]);
+			pas4_ok = part && (part->how == XREG_MOVED || part->how == XREG_RECORD);
+		}
+	}
+	CHECK(pas4_ok && xchips_pas4_count > 0 && pa_bytes + 4u * (BN6_PA_COUNT + (uint32_t)(xchips_pas_count + xchips_pas4_count) + 1u) <= FREE_CHIP_PAS_END - FREE_CHIP_PAS,
+		"Program Advances: BN4's recipes are of rows that name their unit, their parts rows that play, and fit the list's room with BN5's (%u bytes)", (unsigned)pa_bytes);
 	xrec_placeholder4(&sun, 9, blank, out);
 	CHECK(out[0] == 0x11 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
 		get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 731, "records: a BN4 chip's placeholder keeps its codes, class and MB");

@@ -419,6 +419,7 @@ const XChipReg4 *xreg4_at(int bn6) {
  * row whose code did not move names none (a row on BN6's code may name its twin's) */
 static bool moved4_ok(const XChipReg4 *r) {
 	if (r->how == XREG_MOVED) return r->sub >= 0x80 && r->sub != 0xFF;
+	if (r->how == XREG_PA) return r->sub >= 0x80;   /* (a Program Advance: its unit's number once its code is moved, 0xFF until) */
 	return r->how == XREG_RECORD || r->sub == 0xFF;
 }
 

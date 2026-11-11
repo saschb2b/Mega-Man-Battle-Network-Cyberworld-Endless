@@ -74,7 +74,11 @@ ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
 # shared (XV_TYPE_SHARED: the dispatch runs the owner's copy for it too); the kinds it spawns are rows of the owner's copy
 # of the table (TABLES' kinds: every unit's): BN4's type -> (its spawner, why)
 SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm itself, the third kind's 0x02, is the first attack "
-                              "unit's copy, shared")}
+                              "unit's copy, shared", None),
+           # (... and one a named unit alone shares with its owner: PitRng's launcher throws Boomer's boomerangs, the third
+           # kind's 0x32, by the boomerang's own spawner)
+           0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): the boomerang itself, the third kind's 0x32, is Boomer's "
+                              "copy, shared", ('PitRng',))}
 # A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
@@ -192,6 +196,7 @@ UNITS = (
     ('attack', 0x62, 'PropBom'),
     ('attack', 0x47, 'ThunSoul'),
     ('attack', 0x09, 'SeekBom'),
+    ('misc', 0x0D, 'PitRng'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -454,6 +459,31 @@ def shape_of(b4, b6, f, entry):
     return ty
 
 
+def spawned4_of(b4, f, entry):
+    """the fourth-kind type a misc routine spawns, its one call BN4's spawner with the type an immediate (PitRng's: the
+    object places itself, so its routine is shorter than the support routines' common spawner)"""
+    w = T.walk(b4, entry)
+    if [t for _, t in sorted(w.bls.items())] != [SPAWN4_4]:
+        f.decide('entry', f'its routine ({entry:08X}) is not one call of the fourth kind\'s spawner: another kind of unit')
+        return None
+    ty, chain = T.back_value(w, next(iter(w.bls)), 0)
+    if ty is None or len(chain) != 1 or chain[0][1] != 'movs':
+        f.decide('entry', f'its routine ({entry:08X}) spawns a type made otherwise')
+        return None
+    return ty
+
+
+def share3(b4, f, alloc):
+    """a type an earlier unit moved that this one spawns too (SHARED3: every attack unit's, or the units' it names): its
+    spawner copied, its spawn the owner's number"""
+    for ty, (spawner, why, users) in sorted(SHARED3.items()):
+        if ty in alloc.shared3 and (f.kind == 'attack' if users is None else f.name in users):
+            bn4_twins.COPIED[spawner] = why
+            lo, hi = X4.t3_of(b4, spawner)[1:]
+            f.moved3[ty] = {'lo': lo, 'hi': hi, 'routine': lo, 'as': alloc.shared3[ty][0]}
+            f.shared.append((3, alloc.shared3[ty][0], ty, alloc.shared3[ty][1]))
+
+
 def type_number(f, alloc, kind, ty=None):
     """the dispatch's number of a kind for a chip's moved type: the third kind's BN4's own, on the chips' page (one unit's:
     a second unit that moves it a decision, SHARED3 its answer); the fourth kind's next"""
@@ -529,13 +559,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
                 f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
                 f.notes.append(f'its subfamily {x:#x}\'s entry ({entries[x]:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}): moved')
             f.unreached = {e: x for x, e in enumerate(entries) if e not in [entries[y] for y in mine]}
-        # (a type an earlier unit moved for every attack unit, SHARED3: its spawner copied, its spawn the owner's number)
-        for ty, (spawner, why) in sorted(SHARED3.items()):
-            if ty in alloc.shared3:
-                bn4_twins.COPIED[spawner] = why
-                lo, hi = X4.t3_of(b4, spawner)[1:]
-                f.moved3[ty] = {'lo': lo, 'hi': hi, 'routine': lo, 'as': alloc.shared3[ty][0]}
-                f.shared.append((3, alloc.shared3[ty][0], ty, alloc.shared3[ty][1]))
+        share3(b4, f, alloc)
         for pid, soul in SOUL_POWERS.get(sub, ()):
             p = b4.u32(POWERS4 + 4 * pid) & ~1 if pid < NPOWERS4 else 0
             bn4_twins.COPIED[p] = f'{soul}\'s power attack {pid:#x}, which returns the family'
@@ -565,7 +589,20 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.regions, f.roots = [(lo, hi, ty)], f.entries + [lo]
             f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its routine ({f.entry:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
-        elif hit is not None or C.t4_of(b4, f.entry) is not None:
+        elif hit is None and C.t4_of(b4, f.entry) is not None:
+            # (a routine in a fourth-kind type's code, the support routines' common spawner reached by the misc run, PitRng's:
+            # the type moved as a support unit's is, the entry the spawner's copy in BN6's grown misc routines)
+            hit4 = C.t4_of(b4, f.entry)
+            ty = spawned4_of(b4, f, f.entry)
+            if ty is None or hit4[0] != ty:
+                f.decide('entry', f'its routine ({f.entry:08X}) does not lie in the region of the fourth-kind type it spawns')
+                return f
+            f.ty, (f.lo, f.hi) = ty, hit4[1:]
+            f.regions, f.roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo]
+            f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
+            f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
+            share3(b4, f, alloc)
+        elif hit is not None:
             f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code this tool does not move with a misc unit yet')
             return f
         else:
@@ -831,10 +868,14 @@ def rows_check(b4, f):
             # (an attack family's chips: the unit's number, its family; a Program Advance of it is formed, never dealt, its
             # row XREG_PA until BN4's recipes are listed; a chip of it another session moves waits, ROWS_WAIT)
             want = f.number
-            if how == 'PA' or i in ROWS_WAIT:
+            if (how == 'PA' and sub == 0xFF) or i in ROWS_WAIT:
                 f.notes.append(f'its chip {i} (id {bn6}) sits out: ' + ('a Program Advance, unformed until BN4\'s recipes are listed' if how == 'PA' else ROWS_WAIT[i]))
                 f.rows.pop()
                 continue
+        if how == 'PA' and sub == want:
+            # (a Program Advance whose row names the unit, tools/xreg_bn4.py PAS: formed by BN4's recipes in BN6's grown list)
+            f.notes.append(f'its chip {i} (id {bn6}) is a Program Advance, formed by BN4\'s recipes (src/core/xchips_pas_bn4.c)')
+            continue
         if how != 'MOVED' or sub != want:
             f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {want:#x}: '
                             f'tools/xreg_bn4.py MOVED')
