@@ -432,7 +432,10 @@ binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
 panel and HP, the frames, the seed, the keys, `rng`, `natives` with
 their `native_attacks` and `native_effects`, `"sprites": "bytes"` (every
 moved family's spec: a sprite no pair of the registry names compared by
-its bytes, as the generator's twins are), and what BN5's battle is known
+its bytes, as the generator's twins are), `shared_effects` (BN5's effect
+ids as BN6's where the spec's chips run a Navi's copy of a type their
+unit shares: pa_football's ball, GridMan's, draws BN5's 0x5F as his 0xB1),
+and what BN5's battle is known
 to do) and compares the two traces (`tools/xdiff_snap.py` the
 snapshot and its differences, `tools/xdiff_masks.py` whose each is and
 the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
@@ -670,7 +673,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   copy of a type the spec's families run as theirs (`xd_log_shared`:
   Marina's water, MetFire's fire column, BomBoy's bomb, the chips' copies
   since the chips' code installs first), as a family's that moved a type
-  another shares is; the hits' spark (the
+  another shares is, and a moved Navi's copy of a type a used unit runs as
+  shared (`navi_shared`: since GridMan's move, Football's ball is his
+  copy, its burst's effect the Program Advance's call); the hits' spark (the
   fourth kind's 4) the engine's hit area spawns is the engine's. A
   Program Advance or a DarkChip waiting for its rule is dealt straight
   into the deck (`deck5`, `deck6`: a code it has, else BN5's custom
