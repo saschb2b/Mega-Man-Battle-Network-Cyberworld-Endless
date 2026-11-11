@@ -487,6 +487,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.mm_bytes = sum(i.size for e, w in f.walks.items() if N.PLAYER <= e < N.PLAYER_END for i in w.insns.values())
     X4.side_sites(f)
     X4.scan(f)
+    X4.saved_actions(f)
     far_loads(f)
     # (the state set's own store of r0 is its callers' CurAction: set_action_imms gives each call's)
     f.decisions = [d for d in f.decisions if not (d[0] == 'curaction' and d[1].startswith(f'{NAVI4["set_action"]:08X}:'))]

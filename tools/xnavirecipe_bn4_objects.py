@@ -109,6 +109,13 @@ FLIPPED_EFFECTS = {
     0x080D8840: (0x080D8830, 0x080D8832, "his shot's hit (the third kind's 0x57): r4 8 ORed with the RNG's bit 1 shifted to bit 9, "
                                          "BN4_SPAWN_EFFECT's flip, the id its low byte"),
 }
+# effects his code spawns by an id read from a table by his version (ldr r2,=table; ldrb r4,[r2,version]; then the other
+# side ORed into r4's second byte, BN4_SPAWN_EFFECT's flags): the effect's site -> (the table, in a block he moves, its
+# entries, why); each entry's effect given BN6's as a movs's is, the copy's bytes rewritten (XvByte)
+EFFECT_TABLES = {
+    0x080D18CE: (0x080D191C, 4, "SparkMan's object's effect by his version (0x080D18B4-0x080D18C0: 0x19, 0x17, 0x18, 0x18), the "
+                                "other side ORed into r4's second byte"),
+}
 # the battle's flags (BN4's 0x08007A8C, BN6's 0x0800A2F0 the same body) where a moved object no state runs gates its update on
 # their bit 0, the fight's: BN4's state runner runs the Navi's states through the paused opening, so his first own state and
 # that object's first gated frame are the fight's first in BN4; BN6's runs none there (0x0801B1C4's pause test), his first
@@ -425,6 +432,7 @@ def effects_of(b4, b6, f, alloc, navis):
     X4.effects_of(b4, b6, f, alloc)
     facing_effects(b4, b6, f, alloc)
     flipped_effects(b4, b6, f, alloc)
+    table_effects(b4, b6, f, alloc)
     pattern_effects(b4, b6, f, alloc)
     navi_effect_sprites(b4, f, alloc, navis)
     f.effects = list(dict.fromkeys(f.effects))
@@ -503,6 +511,31 @@ def navi_effect_sprites(b4, f, alloc, navis):
         f.attack_sprites.append(dict(have[0]))
         f.notes.append(f'its effect {e4:#x}\'s sprite {key[0]}:{key[1]:#x} is {have[1]}\'s copy ({have[0]["to_list"]}:'
                        f'{have[0]["to_index"]:#x}): listed by him too, at its place')
+
+
+def table_effects(b4, b6, f, alloc):
+    """his effects whose ids a table by his version holds (EFFECT_TABLES): each entry BN6's of the same look or moved, the
+    table's copied bytes given BN6's ids; effects_of's decision for the site answered"""
+    for site, (table, n, why) in sorted(EFFECT_TABLES.items()):
+        w = next((w for w in f.walks.values() if site in w.bls), None)
+        if w is None:
+            continue
+        if not any(m['lo'] <= table < m['hi'] for m in getattr(f, 'moved3', {}).values()) and not f.lo <= table < f.hi:
+            f.decide('effect', f'{site:08X}: its effects\' table {table:08X} is in no block it moves')
+            continue
+        done = True
+        for v in range(n):
+            e4 = b4.u8(table + v)
+            got = effect_of(b4, b6, f, alloc, e4)
+            if got is None:
+                done = False
+                continue
+            e6, how = got
+            if e6 != e4 and all(b[0] != table + v for b in f.bytes):
+                f.bytes.append((table + v, e4, e6, f'its effect by version {v}: {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+        if done:
+            f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and d[1].startswith(f'an effect spawned at {site:08X} '))]
+            f.notes.append(f'{site:08X}: its effect by its version from {table:08X} ({why})')
 
 
 def facing_effects(b4, b6, f, alloc):

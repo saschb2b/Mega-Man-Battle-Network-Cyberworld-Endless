@@ -157,10 +157,10 @@ SONG_ART_END, SONG_STEP = ART0, 0x40
 # take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
 # a list BN6 has not grown for them (3) listed in list 4, as BN5's are (tools/xrecipe.py, BN6_EFFECT_LIST)
 EFFECT0, EFFECT_END, LIST5_0, LIST5_END, ROOM_EFFECT, EFFECT_LIST = 0x90, 0xA0, 0x98, 0xA0, 0x100, 4
-# ... and once 0x90-0x9F are spent (at MetalMan, the eleventh BN4 Navi), BN4's Navis' effects from 0xB1 up to 0xBF: past BN5's
-# Navis' 0xA0-0xB0 (xnavi_bn5.c), the low half of the BN4 chips' range (tools/xchiprecipe_bn4.py CHIP_EFFECTS, 0xCF down), split
-# with the chips' generator as the third kind's numbers are (TYPES3_NAVIS): (first, past the last)
-EFFECT_MORE = (0xB1, 0xC0)
+# ... and once 0x90-0x9F are spent (at SparkMan, the eleventh BN4 Navi), BN4's Navis' effects in the ids the chips' generator
+# leaves them (split on 11 November 2026, tools/xchiprecipe_bn4.py CHIP_EFFECTS 0xCF down to 0xB2): 0xE0-0xEC, which no
+# recipe names, then 0xB1 (0xB0 is BN5's Navis', xnavi_bn5.c), in that order
+EFFECT_MORE = tuple(range(0xE0, 0xED)) + (0xB1,)
 # ... and their lists' numbers past their own ranges likewise (list 5's 0x98-0x9F, list 4's from LIST4_0 up to BN5's chips'
 # 0xEF): the bottom of the chips' descending ranges (tools/xchiprecipe_bn4.py CHIP_LIST5 0xEF down, CHIP_LIST4 0x9F down)
 LIST4_END, LIST4_MORE, LIST5_MORE = 0xEF, (0x70, 0x80), (0xB0, 0xC0)
@@ -547,6 +547,8 @@ def curaction(f, w, addrs, k, i):
         v, chain = T.back_value(w, addrs[k], i.f[0])
         if v is not None and 6 <= v <= 0xF and len(chain) == 1 and chain[0][1] == 'movs':
             f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=i.f[0], rn=0, was=v, now=v + 2, why=f'CurAction {v} written'))
+        elif v is None and saved_action(f, w, chain):
+            pass
         elif v is None or v >= 6:
             f.decide('curaction', f'{addrs[k]:08X}: CurAction written from {chain}')
     prev = w.insns.get(addrs[k - 1]) if k else None
@@ -561,6 +563,48 @@ def curaction(f, w, addrs, k, i):
                 f.imms.append(dict(at=b, form='THUMB_CMP', rd=j.f[0], rn=0, was=j.f[1], now=j.f[1] + 2, why=f'{who} CurAction {j.f[1]} compared'))
             elif j.form in ('b', 'bx', 'bl') or T.is_return(j) or T.writes(j, i.f[0]):
                 break
+
+
+def saved_action(f, w, chain):
+    """a CurAction written from a word of its own object (`ldr rX,[r5,#off]`: SparkMan's +0x60, 0x080B7A62), noted for
+    saved_actions, which takes it where every store of that word is a CurAction of a movs"""
+    i = w.insns.get(chain[0][0]) if len(chain) == 1 else None
+    if i is None or i.form not in ('ldr', 'ldrb') or len(i.f) != 3 or i.f[1] != 5:
+        return False
+    f.saved = getattr(f, 'saved', {})
+    f.saved.setdefault(i.f[2], []).append(chain[0][0])
+    return True
+
+
+def saved_actions(f):
+    """each word of its object a CurAction is written from (saved_action): every store of it in its code a movs of a
+    CurAction (BN4's own states from 6, BN6's from 8: the movs given BN6's), else a decision"""
+    for off, loads in sorted(getattr(f, 'saved', {}).items()):
+        stores, bad = [], []
+        for e, w in f.walks.items():
+            # (its own block alone: in a moved object's code r5 is that object)
+            if not f.lo <= e < f.hi:
+                continue
+            for a, i in w.insns.items():
+                if i.form in ('str', 'strb') and len(i.f) == 3 and i.f[1:] == (5, off):
+                    v, chain = T.back_value(w, a, i.f[0])
+                    (stores if v is not None and v <= 0xF and len(chain) == 1 and chain[0][1] == 'movs' else bad).append((a, v, chain))
+        if bad or not stores:
+            f.decide('curaction', f'its +{off:#x}, a CurAction written from it at {", ".join(f"{x:08X}" for x in loads)}: stored '
+                                  f'otherwise than by a movs at {", ".join(f"{a:08X}" for a, _, _ in bad) or "no place"}')
+            continue
+        for a, v, chain in stores:
+            if v >= 6:
+                f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=w_reg(f, a), rn=0, was=v, now=v + 2,
+                                   why=f'CurAction {v} kept at its +{off:#x}, its CurAction later'))
+        f.notes.append(f'its +{off:#x}: a CurAction kept and written back ({", ".join(f"{x:08X}" for x in loads)}), each store a movs '
+                       f'given BN6\'s number')
+
+
+def w_reg(f, a):
+    """the register a store at a writes"""
+    w = next(w for w in f.walks.values() if a in w.insns)
+    return w.insns[a].f[0]
 
 
 def panel_type(f, w, addrs, k, i):
@@ -1017,7 +1061,11 @@ def move_effect(b4, f, alloc, e4):
     copied once (a family after the one that copied it finds it installed)"""
     row = b4.bytes(BN4['effects'] + 4 * e4, 4)
     lst, idx = row[0] // 4, row[1]
-    if row[0] & 3 or lst not in (3, 4, 5):
+    s1 = getattr(f, 's1', None) or {}
+    # (a Navi's effect drawn with his own battle sprite, list 2 at his init's number: SparkMan's 0x24; the installer finds it
+    # among his sprites, his battle sprite's row its first, xvirus.c sprite_of: list 2 at his seat's number)
+    own = not row[0] & 3 and lst == 2 and s1.get('list') == 2 and idx == s1.get('index') and hasattr(f, 'slot')
+    if (row[0] & 3 or lst not in (3, 4, 5)) and not own:
         f.decide('effect', f'its effect {e4:#x}\'s sprite {row[0]:#x}:{idx:#x}: the generator moves lists 3, 4 and 5\'s alone')
         return None
     e6 = alloc.effects.get(e4)
@@ -1034,16 +1082,18 @@ def move_effect(b4, f, alloc, e4):
         alloc.effect_owner[e4] = f.name
         alloc.late_effect -= 1
     if e6 is None:
-        if alloc.effect == EFFECT_END:
-            alloc.effect = EFFECT_MORE[0]
-        if alloc.effect >= EFFECT_MORE[1]:
-            f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}, {EFFECT_MORE[0]:#x}-'
-                               f'{EFFECT_MORE[1] - 1:#x}) all taken')
+        # (past EFFECT_END, the alloc counts on from it: its k-th id past it EFFECT_MORE's k-th)
+        k = alloc.effect - EFFECT_END
+        if k >= len(EFFECT_MORE):
+            f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}, EFFECT_MORE) all taken')
             return None
-        e6 = alloc.effects[e4] = alloc.effect
+        e6 = alloc.effects[e4] = alloc.effect if k < 0 else EFFECT_MORE[k]
         alloc.effect_owner[e4] = f.name
         alloc.effect += 1
     f.effects.append((e4, e6))
+    if own:
+        f.notes.append(f'its effect {e4:#x} draws his own battle sprite (list 2 {idx:#x}): no copy, its row his list 2 number')
+        return e6
     have = alloc.effect_sprites.get((lst, idx))
     if have is not None:
         if have[1] != f.name:
@@ -1366,9 +1416,20 @@ def table_art(b4, f, alloc, v):
             f.bytes.append((at + t['sprite'][1], num, s['to_index'], f'its table\'s kind {k}: list 4 {num:#x} in BN4, {s["to_index"]:#x} copied'))
 
 
+# A moved object's sprite that each engine holds at the same list and number for the same thing, loaded as it is (each
+# engine's own art, as the rocks' debris is): (list offset, number) -> why
+ENGINE_SPRITES = {
+    (0, 0): "MegaMan's battle sprite, list 0's first in both games (BN4's 0x08214000, BN6's its own MegaMan): SparkMan's object "
+            "(0x080D1760) drawn as MegaMan in its palette 1, BN6's MegaMan in BN6",
+}
+
+
 def attack_sprite(b4, f, alloc, w, site):
     lst, _ = T.back_value(w, site, 1)
     num, chain = T.back_value(w, site, 2)
+    if (lst, num) in ENGINE_SPRITES:
+        f.notes.append(f'{site:08X}: its object\'s sprite {lst // 4}:{num:#x} loaded as it is: {ENGINE_SPRITES[(lst, num)]}')
+        return
     if lst != 0x10 or num is None or len(chain) != 1 or chain[0][1] != 'movs':
         f.decide('sprite', f'{site:08X}: a moved object\'s sprite {lst}:{num}, which the generator moves none of (list 4 alone, by a movs)')
         return

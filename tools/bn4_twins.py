@@ -351,6 +351,8 @@ NUMBERS = {
     0x04050401: "a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, "
                 "whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word "
                 "too (0x080E4A4C)",
+    0x08000000: "the flags its hits left it, tested for one bit (SparkMan's object, 0x080D16E8-0x080D16EC: its collision data's "
+                "+0x54, BN6's +0x70): a bit of 0x0A800000 below, a word of both games' collision masks' tables alike",
     0x0A800000: "the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), "
                 "where the thunder's update tests the same mask, 0xFF800000, in both games",
 }

@@ -284,4 +284,15 @@
 #define BN4_TOPMAN_DAMAGE 0x080B69BCu /* his decision's first step: his +0x2C (his attack's damage) against his collision data's +0x1E
                                        * (BN4_COLL_DAMAGE), copied there with his +0x2E into its +5 (BN4_COLL_OBJ_2E) where they differ */
 
+/* SparkMan, derived after TopMan, the second of the other build (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, SparkMan
+ * built): found by his type, each checked by the generator against his ROM */
+#define BN4_SPARKMAN      0x080B7734u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_SPARKMAN]): jump table 0x080B774C (init
+                                       * 0x080B7759, update 0x080B77AF, dying BN4_NAVI_DYING), then the after-step; his block to 0x080B7DB4 */
+#define BN4_SPARKMAN_STATES 0x080B77C4u /* his state table: BN4's generic Navi 0-5, his own 6-11 (0x080B77F5 his decision by his +0x78
+                                         * sub-state, 0x080B7A29 to 0x080B7CC1) */
+#define BN4_SPARKMAN_KEPT 0x080B7A62u /* his state 7's end: ldr r0,[r5,#0x60]; strb r0,[r5,#9], the CurAction he kept at his +0x60,
+                                       * which only movs of his own CurActions store (tools/xrecipe_bn4.py saved_actions) */
+#define BN4_SPARK_EFFECTS 0x080D191Cu /* his object's effects by his version (0x19, 0x17, 0x18, 0x18), read at 0x080D18B6 and spawned
+                                       * with the other side in r4's second byte at 0x080D18CE */
+
 #endif

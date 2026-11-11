@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:01:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:16:46Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1685,6 +1685,52 @@ top took 0xD7, and about seven are left of the range the Navis take
 (`TYPE_MORE`, below the late families' lowest), where the seven still to
 move need about thirty. The chips' generator lists BN5's numbers no recipe
 names (`tools/xchiprecipe_bn4.py` `TYPES3`); a share of them is asked for.
+
+## SparkMan built
+
+The eleventh proved, the second of the other build, by `sparkman_v1` on 11
+November 2026: his type 0x0B, Navi AI 64, ids 0x3C0-0x3C3 (`foes C0@52`),
+his seat 16 by his BN4 id (192), in the tournament's pool on his plate
+0x0C (`BN4_PLATE_SPARKMAN`). His five third-kind objects run at the
+dispatch's 0xD4-0xD8, and the Navis' effects past BN4's 0x90-0x9F take
+0xE0-0xEC, then 0xB1 (`EFFECT_MORE`), their lists 4 and 5 past their ranges 0x70 and
+0xB0 up (`LIST4_MORE`, `LIST5_MORE`), each split with the chips'
+generator as the third kind's numbers were. What he asked:
+
+- **A CurAction kept in his object** (`saved_actions`): his state 7 ends by
+  writing his +0x60 back to his CurAction (`0x080B7A62`), and every store
+  of +0x60 in his own block is a `movs` of one of his own states (seven of
+  them), each given BN6's number. The comparator reads that word in BN6's
+  numbering (legit.json's bn4 `navi_kept_actions`).
+- **His palette by version**, TopMan's form (`navi_palette_set`).
+- **A mask, not an address**: his object's test of the flags its hits left
+  it against `0x08000000` (`0x080D16EA`), a bit of the collision masks'
+  words both games share (`bn4_twins.NUMBERS`).
+- **His object drawn as MegaMan** (`0x080D1760`: list 0's first, MegaMan's
+  battle sprite, in its palette 1): each engine's own MegaMan, the load as
+  it is (`xrecipe_bn4.ENGINE_SPRITES`).
+- **An effect by his version**, its id a byte of a table his object's block
+  holds (`0x080D191C`), the other side ORed into r4's second byte: each
+  entry moved, the copy's bytes BN6's ids (`EFFECT_TABLES`, `XvByte`). And
+  one effect drawn with his own battle sprite (0x24), whose row the
+  installer gives his list 2 number.
+- **The comparator**: his animation from his init runs on through his state
+  7, which sets the same 0 again, so his sprite counts by the fight's
+  frames and is compared at the same fight frame while it is that one
+  (legit.json's bn4 `navi_opening_art`, as `opening_count`'s count); his
+  0x22's +0x4C, his state's r7, BN4's 0 (no AI data) and BN6's his pool
+  AI data's attack block: the counter its kind 4 keeps there writes the
+  BIOS in BN4 and a word of his AI data no code of his reads in BN6
+  (a spawn leftover); his pool sounds (0x8C at 0x32, 0x8E at 0x33, 0xB8
+  at 0x63, 0xB9 at 0xD0, 0xBA at 0xE0) in his battles alone.
+
+`bn4_sparkman_control` PASSes. **`sparkman_v1` PASSes** over its 1200
+fight frames. Three mutations break his port and
+each is caught: a kept CurAction off by one (t226), his 0x22 spawned at his
+0x20's number (t727) and his sound 0x8C at the pool's fourth slot (t55).
+Not reached by `sparkman_v1`, MegaMan idle: his object's effect by his
+version (0xE2-0xE4, its table's bytes) and his object drawn as MegaMan, so
+a mutation of either is not seen; his SP's palette (3).
 
 ## What tools/xnavirecipe.py needs for BN4
 
