@@ -82,7 +82,9 @@ FLASH = 5         # the first kind's type of a muzzle flash, its +4 the flash's 
 # each game, its numbers each its own: tools/xdiff.py's folder_chips) is compared by what its use added to its own record's
 CHIP_NUMBERS = {0xA3: 0x0C, 0xA5: 0x14, 0xA8: 0x1A, 0xA9: 0x1B, 0xAC: 0x10, 0xAD: 0x11, 0xAE: 0x12, 0xAF: 0x13}
 CHIP_FAMILY = 0x0B   # a chip record's attack family: his CurAction as he uses it (+3 its sub-family, AttackVars +3)
-DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
+# each kind's second-level dispatch types (src/emu/xvirus_recipe.h, XV_T*_DISPATCH; the third kind's 0xD1 BN4's chips' page's,
+# XV_T3_DISPATCH4, whose number is BN4's own)
+DISPATCH = {'T1': (0x5C,), 'T3': (0xD2, 0xD1), 'T4': (0x91,)}
 AI_INDEX = 0x01
 
 
@@ -155,7 +157,7 @@ def dispatched(rec, kind, side, game, version, seen):
 
 
 def is_dispatched(rec, kind, game, version):
-    return version >= TRACE_VERSION and game == 6 and rec[NODE + OBJ_TYPE] == DISPATCH[kind]
+    return version >= TRACE_VERSION and game == 6 and rec[NODE + OBJ_TYPE] in DISPATCH[kind]
 
 
 def read_trace(path):

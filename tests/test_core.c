@@ -4605,6 +4605,35 @@ static void test_xvirus_dispatch(void) {
 			stub_literal(code, s + 0x1E) == xvirus_dispatch_side(spawners[i].kind) && get16(code + (s + 0x2A - XV_STUBS)) == 0xBD00,
 			"dispatch: the spawner at %08x", (unsigned)s);
 	}
+	/* BN4's chips' page (xvirus_dispatch.h): the third kind's other dead type, a MOVED table and spawners of its own in the
+	 * chips' region, clear of the art's room and of the misc routines' table */
+	static uint8_t page[XC4_PAGE_CODE_SIZE];
+	uint32_t psize = 0, pat = xvirus_dispatch4_code_at(&psize);
+	xvirus_dispatch4_code(page);
+	CHECK(pat == XC4_PAGE_CODE && psize == sizeof page && XC4_ROOM_SLOT(XC4_SLOTS) <= XC4_PAGE && XC4_PAGE_CODE + psize <= XC4_MISC &&
+		xvirus_dispatch4_moved_at(0) == XC4_PAGE_MOVED && xvirus_dispatch4_moved_at(0xFF) + 4 == XC4_PAGE_CODE && !xvirus_dispatch4_moved_at(0x100),
+		"dispatch: the page's room");
+	CHECK(xvirus_dispatch_runs(3, XV_T3_DISPATCH) && xvirus_dispatch_runs(3, XV_T3_DISPATCH4) && !xvirus_dispatch_runs(1, XV_T3_DISPATCH4) &&
+		!xvirus_dispatch_runs(4, XV_T3_DISPATCH4) && xvirus_dispatch_runs(4, XV_T4_DISPATCH) && !xvirus_dispatch_runs(3, 0x25) &&
+		xvirus_dispatch_code_at(XV_STUBS) && xvirus_dispatch_code_at(XV_SPAWN4_3_FIRST + 2) && !xvirus_dispatch_code_at(XC4_PAGE_MOVED),
+		"dispatch: the types that run by the side table, and its code's places");
+	CHECK(get16(page) == 0x78E8 && get32(page + 0x10) == xvirus_dispatch_side(3) && get32(page + 0x14) == XC4_PAGE_MOVED &&
+		get16(page + 0xC) == 0x4700, "dispatch: the page's routine");
+	const struct { uint32_t at, bn4, bn6; } page_spawners[3] = {
+		{ XV_SPAWN4_3, BN4_SPAWN_3, BN6_SPAWN_3 }, { XV_SPAWN4_3_LAST, BN4_SPAWN_3_LAST, BN6_SPAWN_3_LAST },
+		{ XV_SPAWN4_3_FIRST, BN4_SPAWN_3_FIRST, BN6_SPAWN_3_FIRST },
+	};
+	for (int i = 0; i < 3; ++i) {
+		const uint8_t *c = page + (page_spawners[i].at - XC4_PAGE_CODE);
+		int kind = 0;
+		uint32_t bn6 = 0;
+		CHECK(xvirus_dispatch4_spawner(page_spawners[i].bn4) == page_spawners[i].at && xvirus_dispatch_is_spawner(page_spawners[i].at | 1, &kind, &bn6) &&
+			kind == 3 && bn6 == page_spawners[i].bn6, "dispatch: the page's spawner for BN4's %08x", (unsigned)page_spawners[i].bn4);
+		CHECK(get16(c) == 0xB501 && get16(c + 2) == (0x2000 | XV_T3_DISPATCH4) && get16(c + 6) == 0x46FE && get32(c + 0x20) == (page_spawners[i].bn6 | 1) &&
+			get32(c + 0x24) == xvirus_dispatch_side(3) && get16(c + 0x1E) == 0xBD00, "dispatch: the page's spawner at %08x", (unsigned)page_spawners[i].at);
+	}
+	CHECK(!xvirus_dispatch4_spawner(BN4_SPAWN_4) && !xvirus_dispatch4_spawner(BN4_SPAWN_1) && !xvirus_dispatch4_spawner(BN6_SPAWN_3),
+		"dispatch: the page's spawner for a routine of no third-kind spawn of BN4's");
 }
 
 /* The recipes tools/xrecipe.py writes (src/emu/xvirus_bn5.c, from the two
