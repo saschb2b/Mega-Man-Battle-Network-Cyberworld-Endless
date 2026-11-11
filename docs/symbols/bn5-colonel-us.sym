@@ -252,6 +252,8 @@
 0800ED20 bn5_last_chips
 0800ED24 bn5_last_chips.0x0800ed20
 0800EDB4 BN5_NAVI_COMPANION
+0800EE46 BN5_GYRO_COMPANION
+0800EE48 team_protoman_gyroman.0
 0800EE56 navis_engine_twins.companions
 0800EE66 navis_engine_twins.companions_2
 0800EE72 navis_engine_twins.companions_3
@@ -260,6 +262,7 @@
 0800EED0 bn5_last_chips.0x0800ed20_2
 0800EED4 bn5_last_chips.0x0800eed0
 0800EF64 BN5_NAVI_COMPANION_END
+0800EFD6 BN5_GYRO_COMPANION_END
 0800EFE4 navis_engine_twins.companions_4
 0800EFF2 navis_engine_twins.companions_5
 0800F000 navis_engine_twins.companions_6
@@ -901,7 +904,8 @@
 080F2374 BN5_NAVI_TABLES
 080F2488 navis_stats
 080F2748 BN5_NAVI_NULLSUB
-080F5D6C his_code
+080F4044 team_protoman_gyroman.his_code
+080F5D6C team_protoman_napalmman.his_code
 080F5F22 BN5_NAPALM_HALF_HP_CHIP
 080F7FF8 bn5_navis.at_080f7ff8
 080F913C bn5_navis

@@ -169,7 +169,7 @@ bool town_after_abandon;
 /* (the nets' meeting, issue #82: no ROMs, so the families the visitors
  * come from are the tests' own, test_visitors; the older net's chips'
  * share, home's requests' rolls; BN6's stages by depth) */
-int loot_older_share;
+int loot_older_share, loot_older_net;
 bool loot_visitors_always;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
 static VisitorKin test_kin[VISIT_NETS][4];
@@ -4172,8 +4172,9 @@ static void test_xnavi_static(void) {
 		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XN_DARK_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
-		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES,
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites)");
+		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES),
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third room apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4187,7 +4188,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 11, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan and NapalmMan)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 12, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, NapalmMan and GyroMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5412,6 +5413,12 @@ static void test_chip_records(void) {
 	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
 	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
 		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	/* (its DarkChips by their MB, docs/multirom/bn4-chips.md's unit 7: the five a run's finds never hold, a flame's) */
+	int dark4 = 0;
+	static const uint16_t darks4[] = { 187, 189, 190, 192, 193 };   /* DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage */
+	for (int i = 0; i < xreg4_count; ++i) dark4 += xreg4_rows[i].mb == XREG4_DARKCHIP_MB;
+	for (unsigned i = 0; i < sizeof darks4 / sizeof *darks4; ++i) dark4 -= xreg4_of(darks4[i]) && xreg4_of(darks4[i])->mb == XREG4_DARKCHIP_MB;
+	CHECK(!dark4, "registry: BN4's five DarkChips, and no other row, hold the DarkChips' MB (%d off)", dark4);
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T23:13:17Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
 ---
 
 # The differential: a moved family against its own game
@@ -877,9 +877,10 @@ moved) dropped out of the traces with only a line on stderr, which
 A BN5 address is read as moved code by the rooms the comparator knows
 (`tools/xdiff_snap.py`: `XV_CODE`, `XN_ROOM`, `XC_CODE`, `XN_BN4_ROOM`,
 and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
-`FREE_TEAM_NAVI_ART`): a word of BN5's naming its own copied code (the
-fourth kind's 0x12's +0x34, NapalmMan's data) is read as BN6's word naming
-the copy only where the copy's room is one of them.
+`FREE_TEAM_SHARED`, their code and art rooms): a word of BN5's naming its
+own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
+(GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
+copy only where the copy's room is one of them.
 
 A Navi's copy of a type both engines also run of their own (the third
 kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed

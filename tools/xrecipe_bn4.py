@@ -100,13 +100,13 @@ TYPE_MORE = {3: (0xCC, TYPE_0)}
 # The families past the first eight (VolGear on: LATE_FROM), moved after BN4's Navis had taken their numbers past the first
 # eight's: theirs from the top of a range down, so the Navis' (from the first eight's last, up) stay what they were: the third
 # kind's dispatch numbers from 0xDF down (the Navis' from 0xCC up, TYPE_MORE, to below the lowest a late family took), list
-# 4's from 0xBF down to 0xB6 (below the first eight's 0xC0, past BN5's Navis' 0xA0-0xB5, tools/xnavirecipe.py
+# 4's from 0xBF down to 0xBB (below the first eight's 0xC0, past BN5's Navis' 0xA0-0xBA, tools/xnavirecipe.py
 # NAVI_LIST_NUMBERS); their effects' ids from 0x8F down to 0x78 (the families' effects' range 0x6C-0x9F, tools/xnavirecipe.py:
 # below BN4's 0x90-0x9F, which its Navis continue, above BN5's families' 0x6C-0x77) and their list 5 numbers from 0x97 down to
 # 0x83 (below BN4's 0x98-0x9F, above BN5's families' 0x80-0x82; bn5_ranges_clear checks both): kind or list -> (the first
 # taken, the last)
 LATE_FROM = 8
-LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xB6)
+LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xBB)
 LATE_EFFECTS, LATE_LIST5 = (0x8F, 0x78), (0x97, 0x83)
 # ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): the
 # free space plan's (src/emu/free_space.plan FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART) past BN5's lava and
