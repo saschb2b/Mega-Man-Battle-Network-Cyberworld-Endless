@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:53:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:25:16Z }
 ---
 
 # The differential: a moved family against its own game
@@ -134,6 +134,20 @@ ids: it holds in the specs whose `folder4` holds one of them alone, over
 the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
 where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
 ThunderMan's battles with the pool's slot).
+
+A chip's foe under a slide (a pull or a push the chip's hit gave it, in a
+spec whose subject is MegaMan) differs between the engines in four
+leftovers of its record, each an entry of `legit.json`'s `bn4` allowed
+with both games' code (`tools/xdiff_bn4.py` `foe_slide`): its blocked
+slide's step (+0x1B to +0x1D, only where BN6's holds 0) and its
+collision data's direction (only where one game holds 0 and the other
+its last move's), the two MegaMan's own entries name; the same blocked
+step kept at +0x0B in the struck-and-pushed state (both in that state,
+BN6's 0); and a slide cut on its last step by a struck-and-pushed hit
+(+0x1B, +0x1E, +0x1F, only where BN4's are a slide ended and BN6's the
+slide with one step left: BN4's runner runs the slide before the hit's
+state, BN6's the state first). The foe's panels, HP, states and timers
+are compared as ever (`bn4_chip_magbolt1` to `3`).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every

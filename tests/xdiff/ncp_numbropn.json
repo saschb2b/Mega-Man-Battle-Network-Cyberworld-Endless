@@ -1,0 +1,120 @@
+{
+ "about": "BN6's NaviCust program NumbrOpn (15, its pink variant 0x3C) placed at column 3, row 2 of BN6's own board and compiled by BN6 (ncp6): the Custom screen's hand is ten chips (BN6_NUMBROPN_CHECK, 0x0802A59C; the hand's count set to 10 at 0x0802A466), so the first Custom screen's second row holds the deck's sixth to tenth. A folder of ten chips (Cannon to Spreadr2, ids 1-10) dealt in that order; DOWN, RIGHT four times, A picks the tenth, START and A: MegaMan's next chip Spreadr2 (0xA) from the first fight frame (docs/multirom/bn6-gaps.md, NaviCust programs). Its control, ncp_numbropn_control, takes the same keys without the program.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 40,
+ "folder6": [
+  "0001",
+  "1602",
+  "2203",
+  "3404",
+  "0205",
+  "0606",
+  "0007",
+  "2A08",
+  "1609",
+  "000A"
+ ],
+ "deck6": [
+  "0001",
+  "1602",
+  "2203",
+  "3404",
+  "0205",
+  "0606",
+  "0007",
+  "2A08",
+  "1609",
+  "000A"
+ ],
+ "cust6": {
+  "1": [
+   [
+    "DOWN",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "chip": [
+    [
+     1,
+     "0xA"
+    ]
+   ]
+  }
+ },
+ "ncp6": "3C:3:2",
+ "expect_why": "The hand's tenth chip is on the screen only with NumbrOpn compiled; without it the same keys pick the fifth (Vulcan1, 0x5)."
+}

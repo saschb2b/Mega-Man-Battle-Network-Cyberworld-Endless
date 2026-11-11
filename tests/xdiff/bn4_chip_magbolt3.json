@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's MagBolt3 A (37) against the registry's row 644 (power 130): used at fight frame 30 from (3,2) against BN4's MettaurSP at (5,2). The pull slides it from (5,2) to (4,2), beside MegaMan, and the bolt's hit lands with the pull's on the slide's last frame, t44: 10 HP left and the Mettaur struck and pushed (the engine's state 5, its push blocked, 0x18 frames to t68) in both, the bolt's bits BN6's for it in the copy (0x43). What its record keeps of the slide differs by each runner's order (legit.json's bn4 allowed).",
+ "folder4": [
+  "0025"
+ ],
+ "folder6": [
+  "284:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

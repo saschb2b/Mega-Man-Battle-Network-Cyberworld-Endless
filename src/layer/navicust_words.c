@@ -24,6 +24,7 @@ static const char *const abouts[] = {
 	[12] = "AirShoes: I can stand over holes.",
 	[13] = "UnderSht: a hit that would delete me leaves me at 1 HP!",
 	[14] = "ChpShufl: one reshuffle in the Custom screen.",
+	[15] = "NumbrOpn: ten chips each turn,but it fills the board!",
 	[21] = "Collect: viruses drop their chips more often.",
 	[25] = "SlipRunr: with B,I slide! Faster,but I keep going till something stops me.",
 	[26] = "AutoHeal: a little HP back after every battle.",
