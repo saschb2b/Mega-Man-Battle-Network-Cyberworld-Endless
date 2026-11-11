@@ -7754,6 +7754,26 @@ static void test_groups(void) {
 	for (int act = 1; act < 6; ++act) CHECK(group_pressure_cap(act) > group_pressure_cap(act - 1), "groups: the pressure cap rises by act (%d)", act);
 	CHECK(group_tags_count > 0 && group_tag(group_tags[0].net, group_tags[0].family) == &group_tags[0] && !group_tag(2, 1), "groups: the measured tags by net and family");
 	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
+
+	/* (the pairs' pass: two families that press harder together are predicted that much harder, by the larger of their
+	 * hits over their V1's; the table's first pair, made a wall and its artillery here) */
+	CHECK(group_pairs_count > 0, "groups: the pairs' pass has its pairs");
+	const GroupPair *gp = &group_pairs[0];
+	int extra = group_pair_extra(gp->net_a, gp->family_a, gp->net_b, gp->family_b);
+	CHECK(extra == gp->extra && extra > 0 && group_pair_extra(gp->net_b, gp->family_b, gp->net_a, gp->family_a) == extra &&
+		!group_pair_extra(gp->net_a, gp->family_a, gp->net_a, gp->family_a), "groups: a pair's excess either way round, none with itself");
+	GroupFam two[2] = {
+		{ gp->family_a, gp->net_a, GROUP_FRONT, 0, 0, 20, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none } },
+		{ gp->family_b, gp->net_b, GROUP_BACK, 0, 0, 30, { { 20, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	GroupLimits wide = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000 };
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 20 * 2 + 30 + extra * 2,
+		"groups: a tagged pair's pressure with its excess (%d, the excess %d)", f.g[0].pressure, extra);
+	wide.pressure = 20 * 2 + 30 + extra * 2 - 1;
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 100 && f.g[0].pressure == 50 + extra,
+		"groups: ... which the cap holds a version down for (%d)", f.g[0].pressure);
 }
 
 int main(int argc, char **argv) {

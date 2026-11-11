@@ -72,3 +72,36 @@ const GroupTag group_tags[] = {
 	{ 2, 74, 120, 0 },
 };
 const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);
+
+/* The pairs that press harder together than their own pressures add up to (the pairs' pass: tools/encounter_danger.py
+ * pairs), 40 HP in 20 seconds or more at V1: each family's net and BN6's AI index, and that excess. */
+const GroupPair group_pairs[] = {
+	{ 0, 1, 0, 21, 60 },
+	{ 0, 2, 0, 12, 40 },
+	{ 0, 2, 0, 21, 120 },
+	{ 0, 5, 0, 21, 120 },
+	{ 0, 6, 0, 21, 40 },
+	{ 0, 12, 0, 21, 80 },
+	{ 0, 15, 0, 18, 60 },
+	{ 0, 16, 0, 18, 40 },
+	{ 0, 16, 0, 21, 40 },
+	{ 0, 17, 0, 21, 120 },
+	{ 0, 18, 0, 25, 100 },
+	{ 0, 19, 0, 20, 60 },
+	{ 0, 19, 0, 21, 60 },
+	{ 0, 19, 0, 25, 90 },
+	{ 0, 20, 0, 21, 60 },
+	{ 0, 21, 0, 28, 80 },
+	{ 1, 34, 0, 2, 40 },
+	{ 1, 35, 0, 9, 60 },
+	{ 1, 35, 0, 13, 60 },
+	{ 1, 35, 0, 22, 60 },
+	{ 1, 36, 0, 5, 60 },
+	{ 1, 38, 0, 15, 60 },
+	{ 1, 43, 0, 19, 90 },
+	{ 1, 49, 0, 15, 70 },
+	{ 1, 49, 0, 25, 90 },
+	{ 1, 53, 0, 21, 60 },
+	{ 1, 54, 0, 18, 40 },
+};
+const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);

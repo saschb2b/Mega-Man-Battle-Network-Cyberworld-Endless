@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T02:30:00Z
+* **Update**: game/progression/encounter-groups.md (the pairs' pass done: 1,830 pairs, 27 tagged with their excess, the caps unmoved; the limits are an act's, not a layer's: a group on a first layer deleted the autopilot), game/progression/encounter-groups-measured.md (The pairs' pass; the fill counts with the tagged pairs), devtools/encounter-tags.md (`pairs`, the engine's pairs), code/tools.md (`pairs.tsv`).

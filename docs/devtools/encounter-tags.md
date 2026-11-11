@@ -17,6 +17,7 @@ Neither changes what a player's run holds.
 ```bash
 python3 tools/encounter_tags.py dump      # the ROMs' families into tools/encounter_data/tags.tsv (every ROM beside BN6's)
 python3 tools/encounter_danger.py families --out tools/encounter_data/families.tsv   # each family alone: pressure and tricks
+python3 tools/encounter_danger.py pairs --out tools/encounter_data/pairs.tsv   # every two families together at V1 (1,830 runs; --most N a portion, a run stopped goes on)
 python3 tools/encounter_tags.py sample    # .build/encounter/battles.tsv: each act's own battles and the templates' fillings
 python3 tools/encounter_danger.py battles .build/encounter/battles.tsv --out tools/encounter_data/danger.tsv
 python3 tools/encounter_tags.py report [--write]   # the tables (--write: into the measured concept, after its mark)
@@ -90,6 +91,10 @@ the measured concept after its mark.
 `families.tsv`: a row a family measured, its net, BN6's AI index, its
 pressure and its tricks as the engine's bits (`GROUP_BREAKS`,
 `GROUP_SHAPES`, `GROUP_SUMMONS`, `GROUP_TOUGH`, `src/core/groups.h`);
+and from `pairs.tsv` the pairs that press a standing MegaMan 40 HP or
+more past the sum of their own pressures (`PAIR_EXTRA`), each with that
+excess (`group_pairs`), which both the tool's and the engine's
+prediction add for a group that holds the pair;
 `--check` fails where the file is not what it would write. After a
 family is moved in: `dump`, `encounter_danger.py families` for the new
 one, `engine`, `report --write`.
@@ -100,4 +105,4 @@ reading: the tool from the dump, the engine from the ROMs. `build.py
 pacing` prints the engine's counts ([the pacing
 report](pacing-report.md), the encounter groups), and they are compared
 by hand with `fillings` here, per ROM set, act and template: all 308
-agreed on 11 November 2026.
+agreed on 11 November 2026, before the pairs' pass and after it.

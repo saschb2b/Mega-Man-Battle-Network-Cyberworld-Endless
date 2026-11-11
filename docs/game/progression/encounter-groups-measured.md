@@ -320,15 +320,49 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 5 | wall and artillery | 2 | 800 / 1275 / 1750 | 255% | 1.27 | 0 of 2 | 1220 | 1300 | 2 | 1 |
 | 6 | own | 5 | 0 / 320 / 780 | 53% | 0.62 | 0 of 5 | 500 | 680 | 1 | - |
 
+### The pairs' pass
+
+1830 pairs, every two families of the pool once, each at V1 where its lean puts it, MegaMan standing: the HP he loses in 20 seconds against the sum of the two families' own pressures. The median pair presses 0.71 of its sum (-60 HP); 27 press past 1.25 of it, and the most any presses past it is 120 HP. A pair 40 HP or more past its sum is tagged (27 pairs): a group that holds it is predicted that much harder, by the larger of the two families' hits at the version fought over their V1's.
+
+| Pair | Together | Their own, added | Past the sum |
+| --- | --- | --- | --- |
+| 6:17 + 6:21 | 210 | 90 | +120 |
+| 6:05 + 6:21 | 220 | 100 | +120 |
+| 6:02 + 6:21 | 140 | 20 | +120 |
+| 6:18 + 6:25 | 660 | 560 | +100 |
+| 6:25 + 5:49 | 620 | 530 | +90 |
+| 6:19 + 6:25 | 530 | 440 | +90 |
+| 6:19 + 5:43 | 240 | 150 | +90 |
+| 6:21 + 6:28 | 230 | 150 | +80 |
+| 6:12 + 6:21 | 280 | 200 | +80 |
+| 6:15 + 5:49 | 480 | 410 | +70 |
+| 6:22 + 5:35 | 210 | 150 | +60 |
+| 6:21 + 5:53 | 90 | 30 | +60 |
+| 6:20 + 6:21 | 240 | 180 | +60 |
+| 6:19 + 6:21 | 60 | 0 | +60 |
+| 6:19 + 6:20 | 240 | 180 | +60 |
+| 6:15 + 6:18 | 500 | 440 | +60 |
+| 6:15 + 5:38 | 580 | 520 | +60 |
+| 6:13 + 5:35 | 210 | 150 | +60 |
+| 6:09 + 5:35 | 210 | 150 | +60 |
+| 6:05 + 5:36 | 700 | 640 | +60 |
+| 6:01 + 6:21 | 130 | 70 | +60 |
+| 6:18 + 5:54 | 280 | 240 | +40 |
+| 6:16 + 6:21 | 340 | 300 | +40 |
+| 6:16 + 6:18 | 460 | 420 | +40 |
+| 6:06 + 6:21 | 160 | 120 | +40 |
+| 6:02 + 6:12 | 260 | 220 | +40 |
+| 6:02 + 5:34 | 100 | 60 | +40 |
+
 ### A cap on pressure
 
 | Act | Own battles of the act's areas | Predicted pressure: least | Median | Three-quarter mark (the cap) | Most | MegaMan's max HP there |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 74 | 40 | 160 | 220 | 390 | 100 |
 | 2 | 220 | 60 | 240 | 360 | 960 | 200 |
-| 3 | 243 | 80 | 400 | 620 | 1920 | 300 |
+| 3 | 243 | 80 | 420 | 620 | 1920 | 300 |
 | 4 | 84 | 120 | 480 | 720 | 1420 | 400 |
-| 5 | 37 | 120 | 680 | 880 | 1720 | 500 |
+| 5 | 37 | 120 | 700 | 880 | 1720 | 500 |
 | 6 | 47 | 0 | 712 | 1040 | 3680 | 600 |
 | Nest | 18 | 535 | 840 | 945 | 1560 | 700 |
 
@@ -336,12 +370,12 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | **none** | 3 | 21 | 16 | 24 | 20 | 8 |
+| wall and artillery | **none** | 3 | 21 | 16 | 24 | 19 | 8 |
 | panel war | **none** | **none** | **none** | **none** | 11 | 7 | 2 |
 | summoner and guard | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
 | clashing answers | 1 | 10 | 32 | 18 | 43 | 26 | 7 |
 | one element | **none** | 2 | 11 | 7 | 20 | 11 | 3 |
-| pincer | **none** | 8 | 185 | 252 | 721 | 719 | 621 |
+| pincer | **none** | 8 | 180 | 244 | 716 | 714 | 611 |
 | swarm | 1 | 5 | 12 | 16 | 19 | 15 | 15 |
 | held ground | **none** | 7 | 13 | 9 | 18 | 12 | 1 |
 | glass cannons | **none** | 1 | 6 | **none** | 7 | **none** | **none** |
@@ -352,12 +386,12 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 11 | 114 | 272 | 222 | 253 | 232 | 122 |
+| wall and artillery | 11 | 114 | 272 | 222 | 252 | 230 | 121 |
 | panel war | 13 | 49 | 87 | 87 | 120 | 114 | 88 |
 | summoner and guard | **none** | **none** | 14 | 14 | 17 | 17 | 11 |
 | clashing answers | 19 | 69 | 171 | 147 | 197 | 170 | 100 |
 | one element | 8 | 26 | 76 | 62 | 89 | 77 | 43 |
-| pincer | 1 | 817 | 6420 | 7706 | 12238 | 12222 | 10243 |
+| pincer | 1 | 816 | 6407 | 7678 | 12215 | 12195 | 10174 |
 | swarm | 2 | 17 | 32 | 40 | 38 | 28 | 28 |
 | held ground | 1 | 30 | 53 | 35 | 51 | 39 | 14 |
 | glass cannons | **none** | 5 | 22 | 27 | 31 | 15 | **none** |
