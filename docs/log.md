@@ -1,7 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
-* **Create**: game/test-battles.md (test battles designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls open); **Update**: research/sources.md (Test battles: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).
+* **Create**: game/battle-lab.md (the Battle Lab designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls of 11 November 2026); **Update**: research/sources.md (The Battle Lab: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-chips.md (PropBom1-3 moved), rom/bn4.md (PropBom's code and the obstacle slots given up, new row), devtools/chip-recipe-generator.md (an effect over a pattern of panels).
 * **Update**: multirom/bn4-chips.md (MagBolt1-3 moved; what differs under a pulled foe), rom/bn4.md (MagBolt's code and a pushed object in a virus's runner, new row), devtools/chip-recipe-generator.md (a unit's own copy of an engine routine), devtools/differential.md (a chip's foe under a slide).

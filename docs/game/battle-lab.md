@@ -1,13 +1,17 @@
 ---
 type: Design
-title: "Test battles"
-description: "A place to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs, a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill, with the owner's calls still open."
+title: "The Battle Lab"
+description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T15:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:10:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
     title: "The owner's request for a test-battle builder"
+    author: human:saschb2b
+  - id: calls
+    resource: "The owner's answers of 11 November 2026 to this page's eight questions, given in the project's session"
+    title: "The owner's calls"
     author: human:saschb2b
   - id: rom
     resource: "docs/rom/virus-families.md (BN6_DELETE_COUNTS 0x02000070, BN6_DELETE_COUNT 0x0802D644, the rare check at 0x080ABFA6), docs/rom/battle.md (Random battles, byte 7), docs/rom/virus-battler.md"
@@ -26,7 +30,7 @@ sources:
     title: "The encounter groups' measured limits"
 ---
 
-# Test battles
+# The Battle Lab
 
 The owner's request (11 November 2026): with 29 families of BN6's, 25 of
 BN5's and BN4's growing share in one battle engine, a place to set up any
@@ -37,9 +41,9 @@ Inside, a test only: no real death, no rewards. Access earned in the
 fiction, and a name of the game's own in place of the working one,
 Warframe's "Simulacrum".
 
-Nothing here is built. The owner's calls are at the end, each with this
-page's recommendation; until they are answered the text says "the lab"
-for the place.
+Nothing here is built yet. The owner decided its eight calls on 11
+November 2026, each as recommended below; they are at the end. Its name
+is the **Battle Lab**.
 
 ## What the games have
 
@@ -337,25 +341,26 @@ A sandbox folder from the Library (every chip a profile has held, in
 BN6's own folder editor) is the step after, not this build's: it is a
 second screen and a second kind of state.
 
-## The owner's calls
+## The owner's calls (11 November 2026)
 
-Open, each with the recommendation above:
-
-1. **The name.** Battle Lab (recommended: Dad's lab built it, and the
-   key item is the LabPass), Test Comp, Copy Lab, or another.
-2. **Where and when it opens.** In Lan's HP at every visit
-   (recommended), before the first portal alone, or from the PET.
-3. **Who gives it.** Dad's lab by mail at three complete families
-   (recommended), Chaud, or the NetBattle club.
-4. **The gauge.** A family's, complete at 8, the versions those met
-   (recommended); BN6's own 16; or a gauge per version.
-5. **Navis.** By the NaviCode and the wins on record (recommended), a
-   count of their own, or viruses alone at first.
-6. **The folder.** The one MegaMan holds, a sandbox folder later
-   (recommended); the sandbox from the start; or the held folder for
-   good.
-7. **Records.** Four saved sets with their best (recommended), the last
-   result alone, or none.
-8. **The field.** Panels painted one by one with the games' own fields
-   as a start (recommended), the games' own fields alone, or painting
-   alone.
+1. **The name: Battle Lab**, its key item the LabPass (chosen over Test
+   Comp, Copy Lab and Mirror Net).
+2. **In Lan's HP, open at every visit**: before the first portal and
+   after each act (over before a run alone, the PET anywhere, and the
+   Academy's blackboard).
+3. **Dad's lab gives it by mail**, once battle data on three families is
+   complete (over Chaud and the NetBattle club).
+4. **A gauge per family, complete at 8 deletions**, the versions those
+   MegaMan has deleted at least once (over BN6's own 16, a gauge per
+   version, and marks by version).
+5. **Navis by the records the profile keeps**: the NaviCode and the
+   versions beaten, the super bosses and ProtoMan after a first win; one
+   Navi a battle, alone, until the build has measured more (over a gauge
+   of their own, and viruses first).
+6. **The folder MegaMan holds**, a sandbox folder from the Library the
+   step after this build (over the sandbox from the start, and the held
+   folder for good).
+7. **Four saved sets, each with its best** time, busting level and HP
+   lost; no online board (over the last result alone, and none).
+8. **Panels painted one by one, the games' own fields as a start** (over
+   the games' fields alone, and painting alone).

@@ -373,9 +373,9 @@ Advance list), against the ROM:
   Moon as B4WE, a copy of Red Sun's; no other source found); Europe's
   not found.
 
-## Test battles (11 November 2026)
+## The Battle Lab (11 November 2026)
 
-For [Test battles](../game/test-battles.md):
+For [the Battle Lab](../game/battle-lab.md):
 
 - **BN6 opens content by a family's deletions.** Verified in the ROM
   ([Virus families](../rom/virus-families.md), the delete count; [BN6's
