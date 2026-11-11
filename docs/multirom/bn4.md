@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -32,7 +32,7 @@ Colonel has, by name, with the community's lists as the check
 | Pool | In BN4 Red Sun | New to a run | Cost, as [Data, not code](data-not-code.md) counts it |
 | --- | --- | --- | --- |
 | Net areas | 22 large maps in five groups: ACDC Area 1-3 (lime), Town Area 1-4 (teal), Park Area 1-3 (lavender), Netfrica, Netopia, Sharo and YumLand (one each), the Undernet 1-6 and Black Earth 1-2 (dark green circuits) | All five looks; each map draws whole through the engine's own map reader as it is | moderate, BN5's road |
-| Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: ready, every song copied into BN6 and proved against BN4's own playing (Its music, below) |
+| Music | 34 songs, 0x00-0x21 | All: its net theme (0x12), Undernet (0x13), battle (0x14), boss (0x15), Duo's (0x16) and the tournament's (0x17); its battle and boss themes are what players rate best | low: ready, every song copied into BN6 and proved against BN4's own playing (Its music, below); all 34 in the PET's Jukebox where BN4's ROM is read |
 | Viruses | 22 families, six versions each | 17: VolGear, Billy, Gaia, Spikey, Shrimpy, Boomer, MagTect, Melody, Dharma, Kilby, Weather, Spidy, CirKill, Moloko, Walla, Elemperor, and Black Earth's sword-only NavBlack and NavShado | a recipe each, as [Transplanted families](families.md) |
 | Navis | 25 bosses with Duo and Bass | 18: Red Sun's Soul Navis GutsMan, FireMan, Roll, WindMan, ThunderMan and SearchMan; Blue Moon's AquaMan, WoodMan, MetalMan and JunkMan, whom Red Sun's tournaments fight too; TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan, VideoMan; Duo | a recipe each, as [Transplanted Navis](navis.md), by a BN4 path of its own: each an object type of its own, the Soul Navis' attacks MegaMan's own states, 64 objects to move ([BN4's Navis in BN6's engine](bn4-navis.md)) |
 | Souls | Red Sun's six (Guts, Fire, Roll, Wind, Thunder, Search), by BN5's rule (a chip of the Soul's kind) | All twelve: Red Sun's six, and Blue Moon's six, refused only by their flags, whose forms run in Red Sun's ROM when given one (each seen united and its charged shot fired in romlab) | high, as [Transplanted Souls](souls.md); measured Soul by Soul in [BN4's Souls on BN6's proxy form](bn4-souls.md) |
@@ -496,6 +496,13 @@ swell kept or not, BN4's level matched or BN6's kept. `--render-song
 x1/0x12:60:PATH` (0x14, 0x15) renders one through the engine's own sound
 engine for listening, its envelope following BN4's own recording (r 0.92
 to 0.97).
+
+The PET's Jukebox plays all 34 where BN4's ROM is read (11 November
+2026), each named for where BN4 starts it: its map-music lists, its
+battles' records, its code and every script's music command, read from
+the ROM by `tools/bn4_songs.py` ([BN4 Red Sun's tables](../rom/bn4.md), Where BN4 plays its songs; the
+names and how each is known in [The PET](../game/pet.md), The Jukebox). Its 0x00 is
+its title, not silence; nothing in Red Sun starts 0x10, 0x11 or 0x20.
 
 ## Its sounds
 

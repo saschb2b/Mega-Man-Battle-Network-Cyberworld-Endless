@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Create**: game/battle-lab.md (the Battle Lab designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls of 11 November 2026); **Update**: research/sources.md (The Battle Lab: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine built: its numbers, the family SandRing's too and so an attack unit, the proof, what is left; its description and index line), rom/bn4.md (SandRing's family and ThunSoul's charged shot, new row), devtools/differential.md (`soul_thun` and `bn4_soul_thun`; an engine spec's `foe_hp`), code/emu.md (`soulbn4.c`).
 * **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
@@ -35,6 +36,7 @@
 
 ## 2026-11-11
 * **Update**: multirom/bn6-gaps.md (Music: Showdown at ProtoMan's netbattle, Sorrow on a lost run's summary), game/rival.md (the netbattle's music).
+* **Update**: game/pet.md (the Jukebox: BN4's 34 songs, how each name is known, the coverage test), rom/bn4.md (Where BN4 plays its songs, new row), multirom/bn4.md (its music in the Jukebox), research/sources.md (The Jukebox's songs: BN4's music player, names and never-started songs), code/tools.md (`tools/bn4_songs.py`), code/emu.md (`bn4_music.h`).
 * **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).
 * **Create**: multirom/bn6-gaps.md (BN6 Gregar's own gaps: its Program Advances proved in a run's engine, the chips the pool leaves out, its post-game fights, SneakRun and NumbrOpn traced, its songs against a run's, the net's looks and boards, requests and traders; what is built without a call and what waits on the owner); **Update**: multirom/index.md, multirom/gaps.md (the link), rom/navicust.md (SneakRun and NumbrOpn, new row), rom/battle.md (BN6's post-game fights, new row; Bass's unused versions), rom/chips.md (BN6's Program Advances formed in a run's engine, new row), rom/net-maps.md (the map-music lists, all of them; the run's themes against BN6's), world/home/jobs.md (BN6's 35 requests), devtools/differential.md (an engine spec's `chip`).
