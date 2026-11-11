@@ -62,6 +62,7 @@ MOVED = {
     75: 0x82, 76: 0x82, 77: 0x82,      # Boomer1-3: BN4's misc 2 (bn4_chip_boomer1-3)
     130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
     78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
+    97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
 }
 # ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
 # unit's number in BN6's grown attack families (tools/xchiprecipe_bn4.py ATTACK_NUMBERS, 0xD0 on: past every support and misc

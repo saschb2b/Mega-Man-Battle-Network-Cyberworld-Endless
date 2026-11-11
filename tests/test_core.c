@@ -5326,6 +5326,32 @@ static void test_chip_art_room(void) {
 	CHECK(rows > 0 && rows <= (int)XC4_ROWS, "art's room: %d rows", rows);
 }
 
+/* A BN4 chip unit whose moved object is an actor (its code's `states`, the object the actors' runner runs: TimeBomb's
+ * bomb): its table in BN6's layout, the engine's eight then its own, at its home's XC4_HOME_STATES clear of its shims and
+ * of a wait's wrapper, and named by a number row of its code; a table with none of its own past the engine's is refused */
+static void test_chip_actor_states(void) {
+	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	char why[160] = "";
+	int actors = 0;
+	CHECK(XC4_HOME_VENEERS <= XC4_HOME_STATES && XC4_HOME_STATES + 4u * XV_STATES_MAX <= XC4_HOME_WAIT, "chips' actors: the table's place in a unit's home");
+	for (int u = 0; u < xchips_bn4_count; ++u) {
+		const XChipUnit *c = &xchips_bn4[u];
+		const XVirusFamily *f = &c->code;
+		if (!f->nstates) continue;
+		++actors;
+		bool own = f->nstates > 8 && f->nstates <= XV_STATES_MAX, named = false;
+		for (int i = 8; i < f->nstates; ++i) own = own && f->states[i].own;
+		for (int i = 0; i < f->nnumbers; ++i) named = named || f->numbers[i].now == c->home + XC4_HOME_STATES;
+		CHECK(own && named, "chips' actors: %s's %d states, its own from 8, its table named by a number row", f->name, f->nstates);
+		CHECK(XC4_HOME_VENEERS + xvirus_shims_room(f) <= XC4_HOME_STATES, "chips' actors: %s's shims end before its table", f->name);
+		XVirusFamily bad = *f;
+		bad.nstates = 8;
+		CHECK(xvirus_code_ok(f, &region, why, sizeof why) && !xvirus_code_ok(&bad, &region, why, sizeof why),
+			"chips' actors: %s's table taken, and refused with the engine's eight alone", f->name);
+	}
+	CHECK(actors >= 1, "chips' actors: %d units", actors);
+}
+
 static void test_chip_entry(void) {
 	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
 	 * gives it, id 511 *, none, empty) */
@@ -7544,6 +7570,7 @@ int main(void) {
 	test_xtext();
 	test_chip_code();
 	test_chip_art_room();
+	test_chip_actor_states();
 	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();
