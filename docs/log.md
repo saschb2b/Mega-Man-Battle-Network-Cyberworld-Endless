@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 * **Update**: online/netpass.md (A game joins the set, a new section: BN4 Red Sun in the full set, the greeter's line once, the stamp moment again, `netpass.ini`'s `games=`; protocol v17 on the wire; its description and index line), online/server-and-wire.md (v17; its description and index line), multirom/bn4-chips.md (unit 8 built: BN4 in the NetPass, its chips past 511 in a NetBattle's folder, only proved ones traded; its description and index line), code/online.md (`online_chips.c`), devtools/net-square.md (`netpass grew`, `netpass grown`).
+* **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-chips.md (PropBom1-3 moved), rom/bn4.md (PropBom's code and the obstacle slots given up, new row), devtools/chip-recipe-generator.md (an effect over a pattern of panels).
 * **Update**: multirom/bn4-chips.md (MagBolt1-3 moved; what differs under a pulled foe), rom/bn4.md (MagBolt's code and a pushed object in a virus's runner, new row), devtools/chip-recipe-generator.md (a unit's own copy of an engine routine), devtools/differential.md (a chip's foe under a slide).
