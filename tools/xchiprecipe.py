@@ -140,10 +140,6 @@ HELPERS = (
                               "form, through the image object's spawner; one copy, so that BN5's own buster's calls are no unit's"),
     ((0x080D3286,), 'Shake', "the shake's spawner (the third kind's 0x68: SpShake's, and the misc family's ShakPar's), the shake's "
                              "code with it: the dispatch moves a type once, so one copy for both units"),
-    ((0x080C5FCE, 0x080C5FE8), 'Bubbles', "the bubbles' spawner, its two entries (the third kind's 0x0B: SideBub's, and the Navi chip "
-                                          "CloudMan's clouds, its kinds 2-5), the object's code and its kinds' table with it: one copy "
-                                          "for both units (CloudMan's unit copied the block again and Marina's bubbles, the families', "
-                                          "ran the later copy: marina_v1_keys FAILed at t408)"),
     # (the computed powers, POWERS: each a routine BN5's table of computed powers names, 0x0800E728 by the record's power - 1000)
     ((0x0800EA18,), 'PowerCustSwrd', "CustSwrd's power (1045): by the Custom gauge (BN5 0x0801A8D0)"),
     ((0x0800EB06, 0x0800EB0C, 0x0800EB12), 'PowerCusVolt', "CusVolt1-3's powers (1073-1075): by the Custom gauge, from 10, 30, 50"),
@@ -195,8 +191,14 @@ UNIT_STUBS = {
     'HolyDrem': {0x08015140: (0x18, "MegaMan's point 0x1D, (40, 20) in each of BN5's rows (0x080151C4 on), x by the facing "
                                     "(r2 side, r3 flip, as 0x0800C6CE): BN5's numbers")},
 }
+# A moved type's spawners in a Navi's copied block, outside the type's own code, that the units call: aimed at that copy as
+# the type's code is (one copy, as the helper that copied them once did before the Navi installed first: BN5's routine: why)
+NAVI_SPAWNERS = {
+    0x080C5FCE: "the bubbles' spawner (the third kind's 0x0B, SideBub's), in CloudMan's copy of the type (tools/bn5_twins.py, TYPES)",
+    0x080C5FE8: "its second entry (the Navi chip CloudMan's clouds, kinds 2-5), the same",
+}
 # The object types a helper moves, for every unit (the units spawn them through the dispatch, the helper's copy run)
-HELPER_TYPES = {(3, 0x68): 'Shake', (3, 0x0B): 'Bubbles'}
+HELPER_TYPES = {(3, 0x68): 'Shake'}
 
 # A unit that plays the object types of a unit derived before it (a Program Advance of a Navi chip's attack: WildBird spawns
 # LarkMan's Navi object, the first kind's 0x1E, and that one its three): those types that unit's copy, shared
@@ -492,10 +494,12 @@ class ChipDeriver(Deriver):
         t &= ~1
         if t in f.own:
             return 'own', None
-        mod = next((x for key, x in self.navi_modules.items() if key in self.navi_routing and t in x[3]), None)
+        mod = next((x for key, x in self.navi_modules.items() if key in self.navi_routing and
+                    (t in x[3] or (t in NAVI_SPAWNERS and x[0] <= t < x[1]))), None)
         if mod is not None:
             # (a routine of the code of a type it spawns as a Navi's copy, XV_TYPE_SHARED: that copy's, in the Navi's recipe; a
-            # unit's direct call to it, as the type's own code calls it, one copy for both)
+            # unit's direct call to it, as the type's own code calls it, one copy for both; so too the type's spawner the Navi's
+            # block holds beside its code, NAVI_SPAWNERS)
             return 'engine', (mod[2] + t - mod[0], 'the Navis\' copy', 'SAME', None)
         m = OB.module_of(t)
         if m is not None:
@@ -851,8 +855,12 @@ def moved_before_chips():
     return {key: rec[2] for key, rec in bn5_twins.TYPES.items() if rec[0] == 'moved' and rec[2] in BEFORE_CHIPS}
 
 
-# The Navis' code room (src/emu/xnavi_recipe.h: XN_CODE, from XN_OBJECTS_END, to XN_ART)
+# The Navis' code rooms (src/emu/xnavi_recipe.h: XN_CODE, from XN_OBJECTS_END, to XN_ART; the Darkloids' XN_MORE, past the
+# shared art, to XN_MORE_ART; Team ProtoMan's XN_TEAM_CODE), each a Navi's blocks' base in xnavi_bn5.c
 XN_CODE, XN_ART = OB.OBJECTS_END, EMU_FREE + 0x5B0000
+XN_MORE, XN_MORE_ART = XN_ART + 0x38000, XN_ART + 0x38000 + 0xF000
+XN_TEAM_CODE, XN_TEAM_END = EMU_FREE + 0x093000, EMU_FREE + 0x093000 + 6 * 0x2800
+NAVI_ROOMS = (('XN_CODE', XN_CODE, XN_ART), ('XN_MORE', XN_MORE, XN_MORE_ART), ('XN_TEAM_CODE', XN_TEAM_CODE, XN_TEAM_END))
 _navi_modules = None
 
 
@@ -881,8 +889,9 @@ def navi_modules(b5, pairs):
             text = f.read()
         _navi_modules = {}
         for name in re.findall(r'static const XvType (\w+)_types\[\]', text):
-            blocks = [(int(a, 16), int(b, 16), XN_CODE + int(o, 16)) for a, b, o in
-                      re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), XN_CODE \+ 0x([0-9A-F]+), 0x[0-9A-F]+u \}',
+            bases = {n: at for n, at, _ in NAVI_ROOMS}
+            blocks = [(int(a, 16), int(b, 16), bases[room] + int(o, 16)) for a, b, room, o in
+                      re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), (XN_CODE|XN_MORE|XN_TEAM_CODE) \+ 0x([0-9A-F]+), 0x[0-9A-F]+u \}',
                                  text[text.index(f'static const XvBlock {name}_blocks[]'):text.index(f'static const XvType {name}_types[]')])]
             body = re.search(r'static const XvType ' + name + r'_types\[\] = \{(.*?)\};', text).group(1)
             for k, t5 in re.findall(r'\{ (\d), 0x([0-9A-F]{2}), XV_TYPE_MOVED \}', body):
@@ -1878,8 +1887,9 @@ KIND_C = {'attack': 'XCHIP_ATTACK', 'support': 'XCHIP_SUPPORT', 'navi': 'XCHIP_N
 
 def addr_text(a):
     """an address the C file writes: the moved objects' or a Navi's copy by its place, else the number"""
-    if XN_CODE <= (a & ~1) < XN_ART:
-        return f'XN_CODE + 0x{a - XN_CODE:X}'
+    for name, lo, hi in NAVI_ROOMS:
+        if lo <= (a & ~1) < hi:
+            return f'{name} + 0x{a - lo:X}'
     return X.addr_text(a)
 
 

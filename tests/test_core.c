@@ -75,6 +75,7 @@
 #include "xattack_grow.h"
 #include "xchips.h"
 #include "chip_entry.h"
+#include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -4183,8 +4184,9 @@ static void test_xnavi_static(void) {
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
 		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
-		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES),
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third room apart)");
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES) &&
+		XN_SHARED_FOUR < XN_SHARED_FOUR_END,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third and fourth rooms apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4198,7 +4200,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 14, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -4362,8 +4364,27 @@ static void test_free_space(void) {
 	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
 	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
 	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
-		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= 0x100,
-		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls' apart");
+		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= XATTACK_BN4 && XATTACK_BN4_END == 0x100,
+		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls', BN4's chips' apart");
+	/* (BN4's chips' units, xchips_bn4.h: an attack family's number one of BN4's own, each once; a registry row's `sub` from
+	 * XREG4_FIRST_ATTACK names one, past every support and misc routine's number) */
+	CHECK(XREG4_FIRST_ATTACK == XATTACK_BN4 && XC4_FIRST_ATTACK == XATTACK_BN4 && XC4_FIRST_SUPPORT + BN4_CHIP_ROUTINE_COUNT <= XREG4_FIRST_ATTACK &&
+		XC4_FIRST_SUPPORT + BN4_MISC_ROUTINE_COUNT <= XREG4_FIRST_ATTACK, "chips' code: BN4's attack families' numbers past its support and misc routines'");
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (u->kind != XCHIP_ATTACK) continue;
+		int twice = 0;
+		for (int k = 0; k < xchips_bn4_count; ++k) twice += xchips_bn4[k].kind == XCHIP_ATTACK && (xchips_bn4[k].number == u->number || xchips_bn4[k].bn5 == u->bn5);
+		CHECK(u->number >= XATTACK_BN4 && twice == 1 && !u->share && u->bn5 >= 6, "chips' code: %s a family of BN4's chips' own numbers, once (%#x)",
+			u->code.name, u->number);
+	}
+	for (int i = 0; i < xreg4_count; ++i) {
+		const XChipReg4 *r = &xreg4_rows[i];
+		if (r->how != XREG_MOVED || r->sub < XREG4_FIRST_ATTACK) continue;
+		int units = 0;
+		for (int k = 0; k < xchips_bn4_count; ++k) units += xchips_bn4[k].kind == XCHIP_ATTACK && xchips_bn4[k].number == r->sub;
+		CHECK(units == 1, "registry: BN4's chip %d's family %#x a unit's", r->bn4, r->sub);
+	}
 	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
 		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
 	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
@@ -5467,6 +5488,18 @@ static void test_chip_records(void) {
 	xrec_from_bn4(&on6, out);
 	CHECK(out[BN6_CHIP_FAMILY] == 0x15 && out[BN6_CHIP_SUBFAMILY] == 5 && out[BN6_CHIP_LOCK_ON] == 1 && out[BN6_CHIP_LOCK_ON_TYPE] == 2 && out[BN6_CHIP_PARAMS] == 7,
 		"records: a BN4 chip on BN6's code takes its twin's family, subfamily and lock-on, its own parameters");
+	/* (one whose code is moved, XREG_MOVED: a support routine's number its subfamily under BN6's support family; an attack
+	 * family's, from XREG4_FIRST_ATTACK, its family, BN4's own subfamily kept; BN4's parameters either way, no lock-on) */
+	const XChipReg4 shot4 = { 178, 559, XREG_MOVED, 0, 0xA6, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 }, heat4 = { 19, 588, XREG_MOVED, 0, 0xD0, { 1, 2, 3, 26 }, 0, 8 };
+	XRecordFrom4 moved4 = { rec4, NULL, &shot4, 0, { 0 } };
+	xrec_from_bn4(&moved4, out);
+	bool support4 = out[BN6_CHIP_FAMILY] == BN6_CHIP_SUPPORT_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0xA6 && out[BN6_CHIP_PARAMS] == 7 && !out[BN6_CHIP_LOCK_ON];
+	rec4[BN6_CHIP_FAMILY] = 0x1E; rec4[BN6_CHIP_SUBFAMILY] = 1;
+	moved4.reg = &heat4;
+	xrec_from_bn4(&moved4, out);
+	CHECK(support4 && out[BN6_CHIP_FAMILY] == 0xD0 && out[BN6_CHIP_SUBFAMILY] == 1 && out[BN6_CHIP_PARAMS] == 7 && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_LOCK_ON_TYPE],
+		"records: a BN4 chip whose code is moved takes its unit's routine under BN6's support family, or its unit's attack family with its own subfamily");
+	rec4[BN6_CHIP_FAMILY] = 0x0C; rec4[BN6_CHIP_SUBFAMILY] = 0x2D;
 	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
 	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");

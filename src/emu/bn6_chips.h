@@ -270,5 +270,18 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
                                            * (bn4_chips.h BN4_SHUFFLE, the same instructions) */
+/* What an attack family of BN4's moved calls of BN6's (bn4_chips.h, Its attack families; tools/xchiprecipe_bn4.py TWINS) */
+#define BN6_COUNTER_WINDOW    0x0800FDB6u /* MegaMan's counter window opened as a chip's attack begins: 0x10 to his collision data's counter byte
+                                           * (BN6_COLL_COUNTER, through 0x0800E9DC) unless his AI data's kind is 2 and the link's bit 8 is clear */
+#define BN6_ELEMENT_SET       0x08019F8Cu /* r0 an element: the object's +0xE, its low four bits to its collision data's BN6_COLL_ELEMENT and its
+                                           * high four to its +0x19 */
+#define BN6_ARM_SPAWN         0x080BA6A0u /* MegaMan's arm, the first kind's type 5, spawned (r4 the animation << 8 | the kind, r7 the slot: his
+                                           * AI data's +0x68, where BN4's arm, a third-kind object, is given his object's +0x4C) */
+#define BN6_CHIP_SPREAD_FAMILY 0x25       /* Spreadr1-3's family, */
+#define BN6_SPREAD_FAMILY     0x080EDEF0u /* ... its routine, BN4_SPREAD_STATE's twin: the same phases, waits (0x080EDF98) and heights (0x080EDF9C)
+                                           * by subfamily, BN6's own arm (kinds 0x15, 0x15, 0x2F, 0x15 at 0x080EDF94), animation 0x0B and sound 0xAF */
+#define BN6_T3_SPREAD_SHOT    0x12        /* ... its shot, the third kind's (0x080C81B6 to 0x080C83B0), BN4_T3_SPREAD_SHOT's twin with rows of 6 bytes */
+#define BN6_SPREAD_SHOT_KINDS 0x080C8144u /* ... its kinds, 19 rows of 6 bytes: the shape, the argument, the effect, a status, the sound (u16);
+                                           * BN4's 17 kinds' shapes at the same numbers, BN6's own effects and sounds */
 
 #endif

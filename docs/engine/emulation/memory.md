@@ -110,7 +110,7 @@ offers NetBattles; not in a New 3DS's runs, which offer none (there for
 | `+0x78C000`-`+0x790000` | `FREE_BRACKET_FACES` | BN6's and BN5's Navis' plates on BN4's moved bracket (`FREE_BRACKET_FACES`; [BN4's tournament screens](../../multirom/bn4-tournament.md), Faces for every entrant), written with the bracket where BN4's ROM is read: `+0x78C000` its id tables grown to 0x40 (frames, palettes, sheets, 0x40 apart), `+0x78C0C0` `BN4_PLATE_SPRITES` grown, `+0x78C0E0` `BN4_MENU_SPRITE_PTRS` grown to 8; `+0x78C128` the first sheet's copy (BN6's 16 faces), `+0x78E530` the second's (BN5's 6), each the same distance from 0x40 as BN4's | `xbracket_faces.c` |
 | `+0x790000`-`+0x7A0000` | `FREE_BRACKET` | BN4's bracket screen moved (`FREE_BRACKET`, its layout in `xbracket.h`) | `xbracket.c` |
 | `+0x7A0000`-`+0x7FA000` | `FREE_LIB_TEAM` | A liberation's teammates' overworld sprites and mugshots (`FREE_LIB_TEAM`) | `xnavi.c` |
-| `+0x7FA000`-`+0x800000` | | Free (24,576 bytes; zone art) | |
+| `+0x7FA000`-`+0x800000` | `FREE_NAVI_SHARED_FOUR` | The Navis' shared art's fourth room (a sprite of any Navi's once FREE_TEAM_SHARED_MORE is full: Meddy's last two first, CloudMan's before hers) | `xnavi_install.c` |
 
 `+0x300`-`+0x400` held the PET's input step until a hook on the game's own
 handler took its place (issue #33).
