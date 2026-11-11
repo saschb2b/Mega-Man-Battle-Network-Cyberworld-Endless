@@ -42,4 +42,16 @@
 #define BN6_NAVI_STAT_SET      0x0801379Eu /* a NaviStats byte set: r0 the Navi (0 MegaMan), r1 its offset, r2 the value (bn6f SetCurPETNaviStatsByte) */
 #define BN6_NAVI_STAT_GET      0x080137B6u /* ... read, into r0 */
 
+/* Two programs the run's pool left out until traced (docs/rom/navicust.md, SneakRun and NumbrOpn; docs/multirom/bn6-gaps.md) */
+#define BN6_NCP_NUMBROPN       15          /* NumbrOpn: its effect (0x0813E708) sets NaviStats BN6_NAVI_NUMBROPN to 1 */
+#define BN6_NCP_SNEAKRUN       16          /* SneakRun: its effect (0x0813E718) sets NaviStats BN6_NAVI_SNEAKRUN to 1 */
+#define BN6_NAVI_NUMBROPN      0x61        /* NaviStats +0x61: the Custom screen's hand ten chips where BN6_NUMBROPN_CHECK holds */
+#define BN6_NAVI_SNEAKRUN      0x1E        /* NaviStats +0x1E: BN6's random-battle roll calls a weak battle off (BN6_SNEAKRUN_CHECK) */
+#define BN6_NUMBROPN_CHECK     0x0802A59Cu /* the check (push {r4,lr}): 1 where a battle's NaviStats +0x61 is 1, not in battle modes 1, 6, 7, 9 and
+                                              the active chips' ninth entry's first byte not 8; its caller sets the hand's count to 10 (0x0802A466) where
+                                              MegaMan's emotion code is neither 0x0A nor 0x16 */
+#define BN6_SNEAKRUN_CHECK     0x080ABE1Eu /* the roll's read of +0x1E: where set, its rolled record's byte 1 (0x0802D266; BN6's own table's, before
+                                              BN6_ENCOUNTER_ROLLED) against (NaviStats hword +0x3E + 4) / 5, the battle called off (the walk's counters
+                                              +0x12 and +0x14 zeroed) where that is greater (0x080ABE40) */
+
 #endif
