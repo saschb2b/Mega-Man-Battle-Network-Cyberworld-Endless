@@ -29,3 +29,4 @@ What each part of the tree holds, file by file, as AGENTS.md's Layout table had 
 - [The platforms and their packaging](platforms.md)
 - [The site, screenshots and clips](site-and-media.md)
 - [The builds: desktop and browser](builds.md)
+- [The code's layers](layers.md): which of these parts may include which, and the rule `build.py lint` holds
