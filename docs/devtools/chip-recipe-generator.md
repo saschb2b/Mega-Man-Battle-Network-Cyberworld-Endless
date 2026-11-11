@@ -215,7 +215,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
   unit copies where the pair's answers differ, for that unit alone, in
   `UNIT_COPIED` (MagBolt's collision panels' update, with BN4's rule for
-  a move's direction); an effect its code hands the engine's routine for
+  a move's direction); a family whose state throws by its subfamily
+  through a jump table of spawners is a unit by subfamily (`ATTACK_SUBS`:
+  the state copied, the named subfamilies' entries moved with their
+  types, the rest BN6's null routine, the unit's chips those subfamilies'
+  alone; another subfamily's unit copies the state again at a number of
+  its own, SeekBom's of the bombs' family 9); an effect its code hands the engine's routine for
   effects over a pattern of panels gets the id its own spawn of that
   effect was given (`pattern_effects`: PropBom's blast); a literal that is a number, not
   an address, in `NUMBERS`; and a call noted before its target's type
@@ -261,6 +266,18 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `src/audio/xsong.c`'s; `src/emu/song_table.h`) and played through a
   shim of the unit's home that names it, a number past a byte; one
   without a slot is a decision, the next slot its answer.
+  An effect an object spawns by a byte of its own (`ldrb r4,[r5,#4 to 7]`
+  before BN4's effect spawn: a byte of the word its spawn kept of its
+  caller's r4) has no immediate to change: `effect_calls` reads the ids
+  that reach the load where they are made, that byte of r4 at each call
+  of the type's spawner in the unit's own code, each an immediate, and
+  where BN6 has another id for one (its twin of the same look, else the
+  copy a unit moved) the call goes through a shim of the unit's home that
+  gives r4 BN6's id (`XvEffectCall`, `src/emu/xvirus_shim.h`: `cmp r4,#from;
+  bne; movs r4,#to` a pair, four at most, then on to BN6's spawn). A spawn
+  whose r4 is no immediate, or a type no call of the unit spawns, stays a
+  decision: an id nobody read never passes to BN6's own effect of that
+  number.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
   (veneers, then shims), then code (96 KB), then the art's room (from
   + 0x30000, 126 KB: [BN4's chips](../multirom/bn4-chips.md), The art's
@@ -298,8 +315,8 @@ number, and the kind it spawns joins the kinds' table's `kinds`.
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2),
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
-(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom (0x62)
-and Meteors (misc 0x11); SeekBom is next of the attack families.
+(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
+(0x62), SeekBom (0x09, its subfamily 9) and Meteors (misc 0x11).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
