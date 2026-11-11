@@ -124,6 +124,9 @@ def base():
         return git('rev-parse', '--verify', '--quiet', 'HEAD^1', check=False)   # (the checkout is the merge, two commits deep)
     if os.environ.get('GITHUB_ACTIONS'):
         return None   # a push: dev's own commits, the workflow's among them
+    merging = git('rev-parse', '--verify', '--quiet', 'MERGE_HEAD', check=False)
+    if merging:   # (a merge of dev under way: its commit is where the branch will have left dev)
+        return merging.strip()
     found = git('merge-base', 'HEAD', DEV, check=False)
     return found.strip() if found else None
 
