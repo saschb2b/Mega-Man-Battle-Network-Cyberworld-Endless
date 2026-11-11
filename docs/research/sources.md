@@ -372,6 +372,21 @@ Advance list), against the ROM:
   (USA) `B4BE` assumed by the pattern (the same page lists the USA Blue
   Moon as B4WE, a copy of Red Sun's; no other source found); Europe's
   not found.
+- *BN4's element chips AquaPowr, WoodPowr and ThunPlus raise no chip's
+  damage; FirePlus lays grass* (11 November 2026): **verified** in Red
+  Sun (USA) `B4WE`, by experiment and by the code. BN4's own battle run
+  alone by the differential: each chip used at fight frame 30, a chip of
+  its element at frame 200, inside its 480 frames, against a Mettaur of
+  250 HP, and the same chip alone. Bubbler 50 and 50, Boomer1 60 and 60,
+  Thunder1 40 and 40; HeatShot 80 after FirePlus and 40 alone, by the
+  grass FirePlus lays (BN4's rule for fire on grass at `0x08012CF2`).
+  The four timers in the user's battle data (+0x3C to +0x42) have one
+  reader found, the HUD's icon (`0x08014CC0`); what was searched, and
+  what was not tried (the buster, a foe's attack, a NetBattle), is in
+  [BN4's chips in a run](../multirom/bn4-chips.md), the owner's call 12,
+  which leaves the three out of a run for it.
+  These chips have no Library number in BN4 (their records' +0x1C is 0);
+  where BN4 hands them out was not searched: **assumed** unlisted.
 
 ## The Battle Lab (11 November 2026)
 
