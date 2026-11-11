@@ -1,12 +1,13 @@
 /* The Jukebox's words (docs/game/pet.md, The Jukebox): every song of the music
- * player of the games in use (BN6's, BN5's where its ROM is beside it),
- * by game and section, in our own names for where each plays, and the
- * screen's labels. */
+ * player of the games in use (BN6's, BN5's and BN4's where their ROMs are
+ * beside it), by game and section, in our own names for where each plays,
+ * and the screen's labels. */
 #ifndef CW_JUKEBOX_TEXT_H
 #define CW_JUKEBOX_TEXT_H
 
 #include <stdint.h>
 
+#define JUKE_GAMES 3           /* BN6, then each other ROM (1 + XRomId: BN5, BN4) */
 #define JUKE_SECTION_MOST 40   /* songs in a section at most */
 #define JUKE_TITLE_MOST 15     /* a name's letters at most: a row of the list holds as many */
 
@@ -24,7 +25,7 @@ extern const JukeSong jukebox_songs[];
 extern const int jukebox_song_count;
 /* the sections' names, and each game's short name on its cartridge */
 extern const char *const jukebox_kind_names[JUKE_KINDS];
-extern const char *const jukebox_game_tags[2];
+extern const char *const jukebox_game_tags[JUKE_GAMES];
 
 /* the play modes' names (jukebox.h's JukeMode order) */
 extern const char *const jukebox_mode_names[3];
