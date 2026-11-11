@@ -259,8 +259,9 @@ static void bonus_make(uint8_t out[BN6_PANEL_BONUS_SPAN]) {
 }
 
 /* ---- a magnet panel pushes what comes onto it (BN5_MAGNET_ARRIVED) ----
- * BN5's rules at BN6's twin of its arrival test, its fields at the same
- * places in both games: none where the AI data's countdown (+0x38, which
+ * BN5's rules at BN6's twin of its arrival test (BN6's own twin of the routine,
+ * 0x0801A400, runs for its conveyors alone), its fields at the same places in
+ * both games: none where the AI data's countdown (+0x38, which
  * the arrival counts down before) is not 0 or the object floats or flies,
  * else a push along the panel (BN6_STRUCK_SLIDE, its kind 3 at +0x0F).
  * BN5 spares the player in its Soul form 5 (NaviStats byte 0x2C), MagnetSoul,
@@ -276,6 +277,96 @@ void xpanels_magnet_arrived(uint32_t obj, uint32_t coll) {
 	if (hook_read32(coll + BN6_COLL_FLAGS) & MAGNET_SPARED) return;
 	hook_write32(coll + BN6_COLL_STRUCK, hook_read32(coll + BN6_COLL_STRUCK) | BN6_STRUCK_SLIDE);
 	hook_write8(obj + PUSH_KIND, PUSH_MAGNET);
+}
+
+/* ---- the magnet's pull (BN5_STEP_PULL) ----
+ * BN6's movement step lacks BN5's branch for a push of kind 3, which the
+ * magnet panel asks for: at its read of the kind (BN6_STEP_KIND_READ), that
+ * kind jumps to BN5's branch made again in Thumb, its two calls BN6's twins
+ * through veneers (which keep the flags the second's answer is), its table of
+ * directions copied from the player's BN5 ROM; it ends the step as both
+ * games' do (add sp,#16; pop {r4,pc}) */
+#define PULL_KIND   3
+#define DIRECTIONS  4             /* a direction's numbers, 1-4 (0 none) */
+#define PULL_CODE   0x44
+#define PULL_LIT    PULL_CODE
+#define PULL_VENEER (PULL_LIT + 4)
+#define PULL_TABLE  (PULL_VENEER + 2 * THUMB_VENEER_SIZE)
+#define PULL_SIZE   (PULL_TABLE + 16)
+_Static_assert(XP_TILES + XP_TILES_SIZE + 0x100u <= XP_PULL && XP_PULL + PULL_SIZE <= XP_END, "the pull past its room (xpanels_look.h)");
+
+static bool pull_make(uint8_t out[PULL_SIZE]) {
+	const uint16_t code[PULL_CODE / 2] = {
+		0x6D68,         /* +00 ldr r0,[r5,#0x54]: its collision data */
+		0x7B00,         /* +02 ldrb r0,[r0,#0xc] */
+		0x0080,         /* +04 lsls r0,r0,#2 */
+		0x490F,         /* +06 ldr r1,[pc,#0x3c]: the directions' table (PULL_LIT) */
+		0x5808,         /* +08 ldr r0,[r1,r0]: its row, four directions */
+		0x9000,         /* +0A str r0,[sp,#0] */
+		0x2400,         /* +0C movs r4,#0 */
+		0xA800,         /* +0E loop: add r0,sp,#0 */
+		0x5D00,         /* +10 ldrb r0,[r0,r4] */
+		0, 0,           /* +12 bl the direction's step */
+		0x9001,         /* +16 str r0,[sp,#4] */
+		0x9102,         /* +18 str r1,[sp,#8] */
+		0x9203,         /* +1A str r2,[sp,#0xc] */
+		0x7CAB,         /* +1C ldrb r3,[r5,#0x12] */
+		0x18C0,         /* +1E adds r0,r0,r3 */
+		0x7CEB,         /* +20 ldrb r3,[r5,#0x13] */
+		0x18C9,         /* +22 adds r1,r1,r3 */
+		0, 0,           /* +24 bl whether the panel takes it */
+		0xD106,         /* +28 bne found (+38) */
+		0x3401,         /* +2A adds r4,#1 */
+		0x2C04,         /* +2C cmp r4,#4 */
+		0xDBEE,         /* +2E blt loop (+0E) */
+		0x2000,         /* +30 movs r0,#0: none */
+		0x2100,         /* +32 movs r1,#0 */
+		0x2200,         /* +34 movs r2,#0 */
+		0xE002,         /* +36 b end (+3E) */
+		0x9801,         /* +38 found: ldr r0,[sp,#4] */
+		0x9902,         /* +3A ldr r1,[sp,#8] */
+		0x9A03,         /* +3C ldr r2,[sp,#0xc] */
+		0xB004,         /* +3E end: add sp,#16 */
+		0xBD10,         /* +40 pop {r4,pc} */
+		0x46C0,         /* +42 nop */
+	};
+	const uint8_t *bn5 = XR[XROM_BN5_COLONEL_US].data;
+	memset(out, 0, PULL_SIZE);
+	for (int i = 0; i < PULL_CODE / 2; ++i) put16(out + 2 * i, code[i]);
+	put32(out + PULL_LIT, XP_PULL + PULL_TABLE);
+	/* (its directions in BN5's numbers, each made BN6's of the same step: the two games' tables of a direction's column and
+	 * row matched, BN5_DIRECTION_STEPS and BN6_DIRECTION_STEPS) */
+	for (int i = 0; i < 16; ++i) {
+		int d5 = bn5[(BN5_PULL_DIRECTIONS - BUS) + (uint32_t)i], d6 = -1;
+		for (int k = 0; d5 <= DIRECTIONS && k <= DIRECTIONS && d6 < 0; ++k)
+			if (get16(bn5 + (BN5_DIRECTION_STEPS - BUS) + 4u * (uint32_t)d5) == rom16(BN6_DIRECTION_STEPS + 4u * (uint32_t)k)) d6 = k;
+		if (d6 < 0) return false;
+		out[PULL_TABLE + i] = (uint8_t)d6;
+	}
+	return thumb_veneer(out + PULL_VENEER, XP_PULL + PULL_VENEER, BN6_STEP_DIRECTION) &&
+		thumb_veneer(out + PULL_VENEER + THUMB_VENEER_SIZE, XP_PULL + PULL_VENEER + THUMB_VENEER_SIZE, BN6_STEP_PANEL_TAKES) &&
+		thumb_bl_write(out, 0x12, XP_PULL, XP_PULL + PULL_VENEER) && thumb_bl_write(out, 0x24, XP_PULL, XP_PULL + PULL_VENEER + THUMB_VENEER_SIZE);
+}
+
+/* BN5's branch as this makes it again: its kind's test and its first and last instructions */
+static bool pull_bn5_ok(void) {
+	const uint8_t *bn5 = XR[XROM_BN5_COLONEL_US].data;
+	return get16(bn5 + (BN5_STEP_PULL - BUS)) == 0x6D68 && get16(bn5 + (BN5_STEP_PULL - BUS) + 0x40) == 0xBD10 &&
+		get16(bn5 + (BN5_STEP_PULL - BUS) - 0x2C) == 0x2803;
+}
+
+/* (BN6's kind 3 is its conveyors' push: its own magnet-like routine, 0x0801A400, the twin of BN5_MAGNET_ARRIVED, asks for
+ * it on its conveyors, 9-12, and its step's table moves it by the conveyor's way. BN5 has no conveyors: its kind 3 is the
+ * magnet's alone. So the pull is BN5's where the object stands on a magnet panel, BN6's own elsewhere.) */
+static HookAct step_pull(HookRegs *r, void *user) {
+	(void)user;
+	if (hook_read8(r->r[5] + PUSH_KIND) != PULL_KIND) return HOOK_CONTINUE;
+	uint32_t coll = hook_read32(r->r[5] + BN6_T1_COLLISION);
+	if (coll < BN6_EWRAM || coll >= BN6_EWRAM_END) return HOOK_CONTINUE;
+	uint32_t p = panel_at(hook_read8(coll + BN6_COLL_PANEL_X), hook_read8(coll + BN6_COLL_PANEL_Y));
+	if (!p || hook_read8(p + BN6_PANEL_TYPE) != XPANEL_MAGNET) return HOOK_CONTINUE;
+	r->r[12] = XP_PULL | 1;
+	return HOOK_JUMP;
 }
 
 /* ---- the install ---- */
@@ -297,6 +388,7 @@ static const Site sites[] = {
 	{ BN6_PANEL_STEP_POISON, 0x2804, 0, sea_step },        /* cmp r0,#4 */
 	{ BN6_PANEL_UPDATE_CONVEYOR, 0x2809, 0, panel_ages },  /* cmp r0,#9 */
 	{ BN6_SET_PANEL_TYPE, 0xB570, 0, panel_made },         /* push {r4,r5,r6,lr} */
+	{ BN6_STEP_KIND_READ, 0x7BE8, 0, step_pull },          /* ldrb r0,[r5,#0xf] */
 };
 #define NSITES (sizeof sites / sizeof *sites)
 
@@ -360,13 +452,14 @@ void xpanels_install(int xrom) {
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;
 	uint8_t flags[16 * 4], stub[STUB_SIZE], cool[BN6_HIT_COOL_SPAN], cool_was[BN6_HIT_COOL_SPAN], ref_was[4];
-	uint8_t bonus[BN6_PANEL_BONUS_SPAN], bonus_was[BN6_PANEL_BONUS_SPAN];
+	uint8_t bonus[BN6_PANEL_BONUS_SPAN], bonus_was[BN6_PANEL_BONUS_SPAN], pull[PULL_SIZE];
 	put32(ref_was, BN6_PANEL_FLAGS_IW);
 	bool cool_own = image_own(COOL_IMAGE, cool_was, sizeof cool_was, COOL_CRC);
 	bool bonus_own = image_own(BONUS_IMAGE, bonus_was, sizeof bonus_was, BONUS_CRC);
 	bonus_make(bonus);
 	const char *why = !sites_ok() ? "a hook's site" : !flags_make(flags) ? "the flags' literal" : !cool_own ? "the element hit's tests"
-		: !bonus_own ? "the panel bonus's tests" : !free_at(XP_AT, XP_END) ? "its free space" : !stub_make(stub) || !cool_make(cool) ? "its code"
+		: !bonus_own ? "the panel bonus's tests" : !free_at(XP_AT, XP_END) ? "its free space" : !pull_bn5_ok() ? "BN5's pull"
+		: !stub_make(stub) || !cool_make(cool) || !pull_make(pull) ? "its code"
 		: !xpanels_look_stage() ? "their look" : NULL;
 	if (why) {
 		fprintf(stderr, "xpanels: BN5's lava and sea not in BN6's engine: %s is not as expected\n", why);
@@ -375,6 +468,7 @@ void xpanels_install(int xrom) {
 	claims_begin("lava and sea (xpanels.c)");
 	emu_write(XP_FLAGS, flags, sizeof flags);
 	emu_write(XP_STUB, stub, sizeof stub);
+	emu_write(XP_PULL, pull, sizeof pull);
 	uint8_t ref_now[4];
 	put32(ref_now, XP_FLAGS);
 	iwram_patch(BN6_PANEL_FLAGS_REF, ref_was, ref_now, sizeof ref_now);
