@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T23:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:20:48Z }
 ---
 
 # The differential: a moved family against its own game
@@ -951,6 +951,17 @@ and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
 own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
+
+BN5's sprite state's +5 on its object's first frame is read as BN6's
+animation set writes it (`xdiff_snap.set_nibble`): BN6's set, in its IWRAM
+code (image `0x081D6C30`-`0x081D6C90`), ends by storing its frame's byte 4,
+its upper nibble, there, where BN5's (`0x081C8698`-`0x081C86E0`) waits for
+its first advance, which writes it alike in both (MagnetMan's child,
+`magnetman_v1` at t4). And an object spawned this frame is a new role though
+it takes the slot one of its kind left the frame before
+(`assign_roles`): an engine spark BN6 ends a frame sooner than BN5, whose
+next spark took its slot in BN6 and another in BN5 (`magnetman_v1_keys` at
+t272).
 
 A poke's address redirects to a moved range's copy only where that copy is
 the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
