@@ -32,6 +32,7 @@
 #include "online_visit.h"
 #include "area_src.h"
 #include "backup.h"
+#include "battle_data.h"
 #include "test_backup.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -149,8 +150,20 @@ static bool flag_was_set(int flag) {
 }
 bool flag_get(int flag) { (void)flag; return false; }
 void flag_clear(int flag) { (void)flag; }
-bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
-bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
+/* (no saves here but the run's battle data, kept in memory: its tally read back as a checkpoint's) */
+static struct { uint8_t bytes[1024]; size_t n; uint32_t magic; } data_blob;
+bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
+	if (strcmp(name, "run.data") || n > sizeof data_blob.bytes) return false;
+	memcpy(data_blob.bytes, data, n);
+	data_blob.n = n;
+	data_blob.magic = magic;
+	return true;
+}
+bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
+	if (strcmp(name, "run.data") || !data_blob.n || data_blob.magic != magic || data_blob.n != n) return false;
+	memcpy(data, data_blob.bytes, n);
+	return true;
+}
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 /* (another game's songs: no core to copy them into) */
@@ -6749,7 +6762,7 @@ static void test_analytics(void) {
 	analytics_count_zenny(&econ, 1200, false);
 	analytics_count_zenny(&econ, -5, false);
 	analytics_run_end(false, "HeatMan", &econ);
-	CHECK(strstr(stats_sent[4], "\"chips\":2,\"good\":1,\"md\":1,\"zenny\":1700,\"chips1\":1,\"good1\":1,\"md1\":1,\"zenny1\":500"),
+	CHECK(strstr(stats_sent[4], "\"chips\":2,\"good\":1,\"md\":1,\"zenny\":1700,\"chips1\":1,\"good1\":1,\"md1\":1,\"zenny1\":500,\"data\":"),
 		"statistics: run-end counts the run's economy, its first act's beside it (%s)", stats_sent[4]);
 	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"run-end\",\"data\":{\"won\":false,\"layer\":7,\"area\":\"") &&
 		strstr(stats_sent[4], "\"by\":\"HeatMan\"") && strstr(stats_sent[4], "\"minutes\":42") && strstr(stats_sent[4], "\"net\":\"short\""),
@@ -7477,8 +7490,61 @@ static void test_area_views(void) {
 	}
 }
 
+/* The battle data on virus families (docs/game/battle-lab.md, The gauge):
+ * a run's deletions wait in its tally and join the profile at its end, a
+ * family complete at DATA_COMPLETE of any version, its versions those
+ * deleted; a checkpoint's tally read back counts no battle twice, and a
+ * run left without its end is counted as the next begins. */
+static void test_battle_data(void) {
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	battle_data_begin(11);
+	for (int i = 0; i < DATA_COMPLETE - 1; ++i) battle_data_deleted(1, 0);
+	battle_data_deleted(40, 4);
+	CHECK(battle_data_count(1) == DATA_COMPLETE - 1 && !battle_data_complete(1) && battle_data_versions(1) == 1 && battle_data_versions(40) == 0x10 &&
+		!battle_data_families_complete() && !profile.data_count[1], "battle data: a run's deletions wait in its tally, %d of family 1", battle_data_count(1));
+	battle_data_deleted(1, 2);
+	CHECK(battle_data_complete(1) && battle_data_versions(1) == 5 && battle_data_families_complete() == 1, "battle data: complete at %d of any version, its versions those deleted (%02x)",
+		DATA_COMPLETE, battle_data_versions(1));
+	battle_data_deleted(0, 0);
+	battle_data_deleted(DATA_FAMILIES, 0);
+	battle_data_deleted(2, DATA_VERSIONS);
+	CHECK(!battle_data_count(0) && !battle_data_count(DATA_FAMILIES) && !battle_data_count(2), "battle data: no family 0, none past the last, no version past the Rares");
+	/* (a checkpoint, two battles more, then the checkpoint again: the two are gone) */
+	battle_data_save();
+	battle_data_deleted(1, 1);
+	battle_data_deleted(1, 1);
+	battle_data_load(11);
+	CHECK(battle_data_count(1) == DATA_COMPLETE && battle_data_versions(1) == 5, "battle data: a CONTINUE counts from its checkpoint (%d)", battle_data_count(1));
+	int completed = battle_data_run_end();
+	CHECK(completed == 1 && profile.data_count[1] == DATA_COMPLETE && profile.data_versions[1] == 5 && profile.data_count[40] == 1 && profile.data_versions[40] == 0x10,
+		"battle data: the run's end puts its tally in the profile, %d families completed", completed);
+	CHECK(battle_data_count(1) == DATA_COMPLETE && !battle_data_run_end() && profile.data_count[1] == DATA_COMPLETE, "battle data: counted once, the tally gone with the run");
+	/* (a run left without its end: its checkpoint's tally joins the profile as the next run begins, once) */
+	battle_data_begin(12);
+	for (int i = 0; i < 3; ++i) battle_data_deleted(40, 0);
+	battle_data_save();
+	battle_data_deleted(40, 0);
+	battle_data_begin(13);
+	CHECK(profile.data_count[40] == 4 && profile.data_versions[40] == 0x11 && battle_data_count(40) == 4, "battle data: a run left without its end, counted to its checkpoint (%d)", profile.data_count[40]);
+	battle_data_begin(14);
+	CHECK(profile.data_count[40] == 4, "battle data: and once (%d)", profile.data_count[40]);
+	/* (a tally of another run is no CONTINUE's) */
+	battle_data_deleted(40, 0);
+	battle_data_save();
+	battle_data_load(15);
+	CHECK(battle_data_count(40) == 4, "battle data: another run's tally is not this one's (%d)", battle_data_count(40));
+	profile.data_count[7] = 250;
+	battle_data_begin(16);
+	for (int i = 0; i < 10; ++i) battle_data_deleted(7, 3);
+	CHECK(battle_data_count(7) == 255 && !battle_data_run_end() && profile.data_count[7] == 255, "battle data: a count stops at 255");
+	memset(&data_blob, 0, sizeof data_blob);
+	profile = keep;
+}
+
 int main(void) {
 	test_sha1();
+	test_battle_data();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();

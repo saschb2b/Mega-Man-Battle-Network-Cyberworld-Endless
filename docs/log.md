@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built: the deletions counted, step 1), rom/virus-families.md (`BN6_FOE_DYING`, new row), engine/emulation/hooks.md (its hook), engine/saves.md (`run.data`), code/core.md (`battle_data.c`), code/director.md and code/analytics.md (the event, the run-end's count), GUIDE.md (what a run's end sends), re/ledger.json.
 * **Create**: game/battle-lab.md (the Battle Lab designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls of 11 November 2026); **Update**: research/sources.md (The Battle Lab: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).
 * **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).

@@ -594,6 +594,10 @@
     {
       "date": "2026-11-11",
       "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
     }
   ],
   "experiments": [
