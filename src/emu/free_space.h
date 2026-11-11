@@ -58,7 +58,7 @@
 #define FREE_TEAM_SHARED     (EMU_FREE + 0x0A3800u)  /* the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full) (xnavi_install.c) */
 #define FREE_TEAM_SPRITES    (EMU_FREE + 0x0AB000u)  /* their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes) (xnavi_sprites.c) */
 #define FREE_TEAM_SPRITES_END (EMU_FREE + 0x0EF000u)
-#define FREE_BN4_CHIPS       (EMU_FREE + 0x0EF000u)  /* the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes, code and what they draw (xchips_code.c, xchips_bn4.c) */
+#define FREE_BN4_CHIPS       (EMU_FREE + 0x0EF000u)  /* the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes and code, and the room their art is put into as an object loads a sprite (xchips_bn4_art.h) (xchips_code.c, xchips_bn4.c, xchips_bn4_art.c) */
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
