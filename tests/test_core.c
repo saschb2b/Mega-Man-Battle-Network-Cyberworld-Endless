@@ -4249,7 +4249,9 @@ static void test_xnavi_static(void) {
 		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 17, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy, GridMan and MagnetMan)", xnavi_bn5_count);
+	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
+	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
+	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5502,8 +5504,8 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays == 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, 8 playing now, "
-		"7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
