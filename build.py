@@ -2675,6 +2675,34 @@ def lint_free_space():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'free_space.py'), '--check']) == 0
 
 
+def lint_dispatch_numbers():
+    """The dispatch's third-kind numbers BN4's chips and Navis take
+    (tools/xchiprecipe_bn4.py TYPES3, TYPES3_NAVIS) clear of every number a
+    track of BN5's moves and every one a Navi of BN5's not yet moved will
+    (tools/bn5_twins.py dispatch_reserved): the MOVED table is one for
+    every game (docs/devtools/chip-recipe-generator.md, The dispatch's
+    numbers). Needs no ROM."""
+    import ast
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    try:
+        import bn5_twins
+    finally:
+        sys.path.pop(0)
+    held = bn5_twins.dispatch_reserved(3)
+    with open(os.path.join(ROOT, 'tools', 'xchiprecipe_bn4.py'), encoding='utf-8') as f:
+        tree = ast.parse(f.read())
+    bad = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') in ('TYPES3', 'TYPES3_NAVIS'):
+            for n in ast.literal_eval(node.value):
+                if n in held:
+                    bad.append(f"{node.targets[0].id}'s {n:#04x} is {held[n]}")
+    for b in bad:
+        print(f'lint: tools/xchiprecipe_bn4.py: {b}')
+    print(f"lint: the dispatch's numbers of BN4's: {len(bad)} of BN5's own")
+    return not bad
+
+
 def lint_voice():
     """docs/voice/catalog.json as tools/voice_catalog.py writes it from the
     words files: every line the voice review's dashboard shows, in step
@@ -2905,6 +2933,7 @@ def lint(update=False):
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
     ok = lint_free_space() and ok
+    ok = lint_dispatch_numbers() and ok
     ok = lint_voice() and ok
     ok = lint_docs() and ok
     ok = lint_itch() and ok
