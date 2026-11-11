@@ -4,12 +4,16 @@
 #include "events.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
+#include "battle_data.h"
 #include "bn6.h"
 #include "bn6_bbs.h"
+#include "debug.h"
 #include "emu.h"
 #include "job_words.h"
 #include "layer_objs.h"
+#include "weekly.h"
 #include "xchips_wide.h"
 
 /* SetEventFlag runs for every flag the game sets, many a frame: an event
@@ -25,6 +29,29 @@ static HookAct flag_set(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* BN6's dying state, for every battle object that dies with its triple
+ * read: an event for a virus (actor type 0), by its AI index and version,
+ * with the side it fought on */
+static HookAct foe_dying(HookRegs *r, void *user) {
+	(void)user;
+	if (hook_read8(r->r[0] + 1)) return HOOK_CONTINUE;
+	HookRegs ev = *r;
+	ev.r[0] = hook_read8(r->r[0] + 2);
+	ev.r[1] = hook_read8(r->r[0]);
+	ev.r[2] = hook_read8(r->r[5] + BN6_T1_ALLIANCE);
+	hook_post(&ev, EV_FOE_DELETED);
+	return HOOK_CONTINUE;
+}
+
+void events_foe_deleted(const uint32_t r[3], bool counted) {
+	if (!counted || !r[2] || weekly_on()) return;
+	battle_data_deleted((int)r[0], (int)r[1]);
+	if (emu_debug_on())
+		fprintf(stderr, "battle data: family %u version %u deleted, %d of %d held, versions %02x%s, %d families complete\n", (unsigned)r[0], (unsigned)r[1],
+			battle_data_count((int)r[0]), DATA_COMPLETE, battle_data_versions((int)r[0]), battle_data_complete((int)r[0]) ? ", complete" : "",
+			battle_data_families_complete());
+}
+
 void events_install(void) {
 	static bool done;
 	if (done) return;
@@ -33,4 +60,7 @@ void events_install(void) {
 	emu_hook(BN6_SET_EVENT_FLAG, flag_set, NULL);
 	emu_hook_event(BN6_GIVE_ITEM, EV_ITEM_GIVEN);
 	xchips_wide_given(EV_CHIP_GIVEN_WIDE);
+	/* (the instruction checked first: a ROM that reads otherwise there keeps its battles, and the battle data stays as it is) */
+	if (emu_read16(BN6_FOE_DYING) != BN6_FOE_DYING_OP || !emu_hook(BN6_FOE_DYING, foe_dying, NULL))
+		fprintf(stderr, "events: no hook at %08x: no battle data counted\n", (unsigned)BN6_FOE_DYING);
 }

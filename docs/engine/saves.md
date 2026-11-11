@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
 ---
 
 # Portable saves
@@ -83,7 +83,7 @@ The file holds only the progress files under `savedata/`:
 | `profile.sav` | Runs, records, unlocks and the Library |
 | `rivals.sav`, `battle.sav` | The rival's and the guardians' records |
 | `run.sav`, `run.state` | The current run and its emulator checkpoint |
-| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md)) |
+| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally`, `run.data` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md); `run.data`: the viruses it deleted by family, which join the profile's battle data as it ends, [the Battle Lab](../game/battle-lab.md)) |
 | `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
 
