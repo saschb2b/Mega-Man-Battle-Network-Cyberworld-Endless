@@ -844,6 +844,129 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 	.sprites = spreads_sprites, .nsprites = (int)(sizeof spreads_sprites / sizeof *spreads_sprites), \
 	.effects = spreads_effects, .neffects = (int)(sizeof spreads_effects / sizeof *spreads_effects), \
 	.bytes = spreads_bytes, .nbytes = (int)(sizeof spreads_bytes / sizeof *spreads_bytes) }
+/* ---- ThunSoul: BN4's attack 0x47 (080EDC5B) as BN6's 0xd7; its chips  ---- */
+/* MegaMan's state 0x47 (080EDC5A-080EDD2E), the family of its chips' records: moved */
+/* ThunSoul's power attack 0x58 (0800D298), which returns the family: copied with it */
+/* its sprite 3:0x3a (080DAFF4): BN6's 3:0x75, copied */
+/* its sprite 3:0x19: list 3 0x72, as Spreads copied it */
+/* its table 080CD524's kind 10: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
+/* its sprite 3:0xd: list 3 0x73, as Spreads copied it */
+/* its table 080CD524's kind 6: sprite 3:0xd in BN4, 0x73 in BN6 (copied) */
+/* its sprite 3:0x1c: list 3 0x74, as Spreads copied it */
+/* its table 080CD524's kind 14: sprite 3:0x1c in BN4, 0x74 in BN6 (copied) */
+/* its sprite 3:0x19: list 3 0x72, as Spreads copied it */
+/* its table 080CD524's kind 50: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
+/* its sound 0x8d (its table 080DAFB0's kind 0x3): BN4's song at the grown table's slot 0x200, played through the unit's shim */
+/* its chip 47 (id 583) sits out: SandRing, its ring's kinds 0-2 (the table 080DAFB0: their sound 0x91, their sprite 3:0x37), the generator line's: the family is moved for ThunSoul's charged shot, its kind 3 alone */
+
+static const XvBlock thunsoul_blocks[] = {
+	{ 0x080EDC5A, 0x080EDD2E, XC4_CODE + 0x1762, 0xD47325F6u },
+	{ 0x080CD5F8, 0x080CD728, XC4_CODE + 0x1840, 0x0069BF7Du },
+	{ 0x080DAFBC, 0x080DB0EC, XC4_CODE + 0x1970, 0x351F2B25u },
+	{ 0x080CD524, 0x080CD5F8, XC4_CODE + 0x1AA0, 0x40F51A6Du },
+	{ 0x080DAFB0, 0x080DAFBC, XC4_CODE + 0x1B80, 0xEF4D0545u },
+	{ 0x0800D298, 0x0800D2B4, XC4_CODE + 0x1B90, 0x92FC0667u },
+};
+static const XvData thunsoul_data[] = {
+	{ 0x080EDC6C, 0x080EDC70, XV_POOL },
+	{ 0x080EDC70, 0x080EDC78, XV_TABLE },
+	{ 0x080CD606, 0x080CD608, XV_RAW },
+	{ 0x080CD608, 0x080CD60C, XV_POOL },
+	{ 0x080CD60C, 0x080CD618, XV_TABLE },
+	{ 0x080CD708, 0x080CD720, XV_RAW },
+	{ 0x080CD720, 0x080CD728, XV_POOL },
+	{ 0x080DAFCA, 0x080DAFCC, XV_RAW },
+	{ 0x080DAFCC, 0x080DAFD0, XV_POOL },
+	{ 0x080DAFD0, 0x080DAFDC, XV_TABLE },
+	{ 0x080DB066, 0x080DB068, XV_RAW },
+	{ 0x080DB068, 0x080DB06C, XV_POOL },
+	{ 0x080DB0EA, 0x080DB0EC, XV_RAW },
+	{ 0x080CD524, 0x080CD5F8, XV_RAW },
+	{ 0x080DAFB0, 0x080DAFBC, XV_RAW },
+};
+static const XvPair thunsoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002CEA, 0x08002C7E },   /* search, SAME */
+	{ 0x08002D4C, 0x08002CE0 },   /* search, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E20, 0x08002DB4 },   /* project:fireman, SAME */
+	{ 0x08002E34, 0x08002DC8 },   /* search, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
+	{ 0x08002F2E, 0x08002EDC },   /* search, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FD0, 0x08002F7E },   /* search, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007948, 0x0800A098 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009DC4, 0x0800CC0A },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D7CA, 0x08013774 },   /* project:project:chips, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F7A, 0x0801A146 },   /* project:fireman, DIFF (audited) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08013212, 0x0801A258 },   /* project:gutsman, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+};
+static const XvPair thunsoul_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm thunsoul_imms[] = {
+	{ 0x0800D2B0, THUMB_MOVS, 0, 0, 0x47, 0xD7 },   /* ThunSoul's power attack 0x58: the family it returns, BN4's 0x47, BN6's grown 0xd7 */
+	{ 0x080CD6E4, THUMB_MOVS, 0, 0, 0x2, 0xBD },   /* its object's type 0x2: moved, the dispatch's 0xbd */
+	{ 0x080DAFEE, THUMB_MOVS, 2, 0, 0x3A, 0x75 },   /* its object's sprite: list 3 0x3a in BN4, 0x75 in BN6 (copied) */
+	{ 0x080DB078, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080DB0D0, THUMB_MOVS, 0, 0, 0x6D, 0xBB },   /* its object's type 0x6d: moved, the dispatch's 0xbb */
+	{ 0x080DB0E0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080EDC5E, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+};
+static const XvType thunsoul_types[] = {
+	{ 3, 0xBD, XV_TYPE_MOVED, 0x02 },   /* BN4's third-kind 0x2, moved, the dispatch's 0xbd */
+	{ 3, 0xBB, XV_TYPE_MOVED, 0x6D },   /* BN4's third-kind 0x6d, moved, the dispatch's 0xbb */
+};
+static const XvSprite thunsoul_sprites[] = {
+	{ 3, 0x3A, 3, 0x75, XC4_ART + 0x1C200, 0x500 },   /* BN4's 3:0x3a copied */
+};
+static const XvByte thunsoul_bytes[] = {
+	{ 0x080CD54D, 0x19, 0x72 },   /* its table's kind 10: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
+	{ 0x080CD53D, 0x0D, 0x73 },   /* its table's kind 6: list 3 0xd in BN4, 0x73 in BN6 (copied) */
+	{ 0x080CD55D, 0x1C, 0x74 },   /* its table's kind 14: list 3 0x1c in BN4, 0x74 in BN6 (copied) */
+	{ 0x080CD5ED, 0x19, 0x72 },   /* its table's kind 50: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
+};
+static const XvSoundCall thunsoul_sound_calls[] = {
+	{ 0x080DB05C, 0x200 },   /* its table 080DAFB0's kind 0x3's sound 0x8d: BN4's song at the grown table's slot 0x200 */
+};
+static const XcSong thunsoul_songs[] = { { 0x8D, 0x200 } };
+
+#define THUNSOUL_CODE { .name = "ThunSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2C00), \
+	.blocks = thunsoul_blocks, .nblocks = (int)(sizeof thunsoul_blocks / sizeof *thunsoul_blocks), \
+	.data = thunsoul_data, .ndata = (int)(sizeof thunsoul_data / sizeof *thunsoul_data), \
+	.calls = thunsoul_calls, .ncalls = (int)(sizeof thunsoul_calls / sizeof *thunsoul_calls), \
+	.words = thunsoul_words, .nwords = (int)(sizeof thunsoul_words / sizeof *thunsoul_words), \
+	.imms = thunsoul_imms, .nimms = (int)(sizeof thunsoul_imms / sizeof *thunsoul_imms), \
+	.types = thunsoul_types, .ntypes = (int)(sizeof thunsoul_types / sizeof *thunsoul_types), \
+	.sound_calls = thunsoul_sound_calls, .nsound_calls = (int)(sizeof thunsoul_sound_calls / sizeof *thunsoul_sound_calls), \
+	.sprites = thunsoul_sprites, .nsprites = (int)(sizeof thunsoul_sprites / sizeof *thunsoul_sprites), \
+	.bytes = thunsoul_bytes, .nbytes = (int)(sizeof thunsoul_bytes / sizeof *thunsoul_bytes) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -856,5 +979,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x01, 0x81, 0x080D252B, XC4_HOMES + 0x2000, MOKORUS_CODE, mokorus_songs, (int)(sizeof mokorus_songs / sizeof *mokorus_songs), 0, 0 },
 	{ XCHIP_MISC, 0x05, 0x85, 0x080D5DDB, XC4_HOMES + 0x2400, SIDBMBO_CODE, sidbmbo_songs, (int)(sizeof sidbmbo_songs / sizeof *sidbmbo_songs), 0, 0, 0x28 },
 	{ XCHIP_ATTACK, 0x1E, 0xD0, 0x080EC761, XC4_HOMES + 0x2800, SPREADS_CODE, spreads_songs, (int)(sizeof spreads_songs / sizeof *spreads_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x47, 0xD7, 0x080EDC5B, XC4_HOMES + 0x2C00, THUNSOUL_CODE, thunsoul_songs, (int)(sizeof thunsoul_songs / sizeof *thunsoul_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

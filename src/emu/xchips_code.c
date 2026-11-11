@@ -367,6 +367,20 @@ static void unit4_stage(int i, bool fresh) {
 
 bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
 
+uint32_t xchips_bn4_moved(uint32_t bn4) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i) {
+		uint32_t at = xchips_bn4[i].share ? 0 : xvirus_code_at(&xchips_bn4[i].code, bn4);
+		if (at) return at;
+	}
+	return 0;
+}
+
+int xchips_bn4_family(int family) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i)
+		if (xchips_bn4[i].kind == XCHIP_ATTACK && xchips_bn4[i].bn5 == family) return xchips_bn4[i].number;
+	return -1;
+}
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
