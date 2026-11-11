@@ -38,7 +38,7 @@
    "080B9A3E:46C0",
    "080B9A40:46C0"
   ],
-  "what": "his first state's call of his sound's shim (BN4 0x080B9A3E, the bl that plays 0xB0 at the grown table's slot 0x2C0), both halves a nop: no sound as he appears, BN4's 0xB0 begun alone"
+  "what": "his first state's call of his sound's shim (BN4 0x080B9A3E, the bl that plays 0xB0 at the grown table's slot 0x1E2), both halves a nop: no sound as he appears, BN4's 0xB0 begun alone"
  },
  {
   "name": "the chip's GutsMan's shockwave not spawned",
