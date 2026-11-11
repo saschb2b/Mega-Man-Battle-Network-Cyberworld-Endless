@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -757,7 +757,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   from UNITE to its end, became the two-game `soul_knight` with S2.)
 - **Engine specs** (`"kind": "engine"`): what BN6's engine does that
   BN5's has no twin of, fought in BN6 alone (`game=bn6`), MegaMan's
-  timeline held to the spec's `expect` in BN6's numbers (and `sounds`, a
+  timeline held to the spec's `expect` in BN6's numbers (its `chip` the
+  chip he uses next, the first kind's +0x2A: a Program Advance's id once
+  formed, BN6's own `pa_bn6_*`; and `sounds`, a
   song each that must begin): PASS or FAIL. `soul_cross` (HeatCross chosen
   on CROSSSELECT while KnightSoul is united: HeatCross from the next turn,
   the Soul gone, its used bit kept) and `soul_beast` (Beast Out's flag
