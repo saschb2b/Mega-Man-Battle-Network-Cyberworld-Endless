@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan and SearchMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:00:00Z }
 ---
 
 # Transplanted Navis
@@ -262,6 +262,19 @@ into the battle engine).
   third's with kind 4). Five mutations break his copy and FAIL (a
   sprite's number, a sprite's list, a parent's state, a hit's offset, a
   state's number); his effect 0x14's two sites are reached by no spec.
+- **Meddy** (AI 6, Navi AI 31, ids 0x3E8-0x3EB; `meddy_v1`,
+  `meddy_v1_keys`, `meddy_sp`: PASS): her seven object types moved (the
+  third kind's 0x09, 0x0C, 0x0D, the fourth's 0x0B, 0x0E, 0x0F, 0x3C), no
+  companion of her own. One rule the generator learned from her: an effect
+  whose id is put beside a parameter (`movs r4,#id; orrs r4,rX`, rX shifted
+  up past the id's byte: her 0x0C's and 0x0D's spawn of the fourth kind's
+  0x00, the parameter a byte of `BN5_MEDDY_EFFECT_KINDS` by its kind) is
+  read by the movs's id, effect 0, BN6's own. Her sprites take list 2's
+  spill (0x8B-0x8D) and the third room, her effect 0x44 the Navis' 0xB0,
+  her sound BN5's 0xE0 BN6's empty slot 0x46. Five mutations break her
+  copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
+  state's number); her effect 0x44's site and one object's compare of
+  its parent's state are reached by no spec.
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
   his three decisions are built, one left. *His object types* (the third
   kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES

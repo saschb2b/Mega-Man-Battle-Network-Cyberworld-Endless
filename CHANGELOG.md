@@ -77,9 +77,9 @@
   He stands on the board in his own sprite and speaks with his own face,
   at the version the act's band takes. CloudMan is not in yet. A run
   saved on a layer starts that layer again.
-- **GyroMan and SearchMan join NapalmMan.** The second and third of Team
-  ProtoMan, BN5's GyroMan and SearchMan, now fight in BN6's battle too,
-  moved from BN5's own and checked against it frame by frame. Like
+- **GyroMan, SearchMan and Meddy join NapalmMan.** Three more of Team
+  ProtoMan, BN5's GyroMan, SearchMan and Meddy, now fight in BN6's battle
+  too, moved from BN5's own and checked against it frame by frame. Like
   NapalmMan they don't guard a run yet.
 - **NapalmMan, the first of Team ProtoMan.** With BN5 Team Colonel's
   ROM beside BN6's, Team ProtoMan's NapalmMan now fights in BN6's

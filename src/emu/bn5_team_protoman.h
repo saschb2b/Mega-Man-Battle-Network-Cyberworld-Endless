@@ -29,4 +29,10 @@
 #define BN5_SEARCH_PARENT_STATE  0x080E7014u /* his fourth kind's 0x5A compares its parent's CurAction with 10 (movs r1,#0xA),
                                                 BN6's 12; and with 11 at 0x080E70E0, BN6's 13 */
 
+/* Meddy (AI 6, ids 0x11F-0x122; BN6's Navi AI 31, ids 0x3E8-0x3EB): no companion of her own; her code from */
+#define BN5_MEDDY_CODE           0x080F73E8u /* her state table, struct2 and code, to 0x080F7FF8 */
+#define BN5_MEDDY_EFFECT_KINDS   0x080C63ACu /* her object's spawn of the fourth kind's 0x00 (0x080DFFD2 at 0x080C6358): r4 its effect 0
+                                                (movs r4,#0 at 0x080C6354) with this table's byte by its kind (+4) in bits 16-23
+                                                (lsls #16; orrs r4,r0), a byte a kind: 0, 4, 1, 2, 3, 3, 0, 0 */
+
 #endif
