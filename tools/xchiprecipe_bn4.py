@@ -150,10 +150,13 @@ TABLES = {
                          "bytes before its routine"),
 }
 # The numbers the chips' copies take, each from the top of its range down (the late families' way, tools/xrecipe_bn4.py):
-# effect ids 0xCF-0xB0 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xB0, list 4's 0x9F-0x70,
+# effect ids 0xCF-0xB2 (below BN5's chips' 0xD0 on, above BN4's Navis' from 0xA0 up), list 5's 0xEF-0xC0, list 4's 0x9F-0x80,
 # list 3's from 0x70 up to 0xDF (past BN6's own 105, below BN5's chips' 0xE4 on), and list 1's 0x7F-0x40 (past BN5's
-# families' 0x20-0x36, below BN4's families' 0xC0 on and BN5's chips' from 0xFF down)
-CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3, CHIP_LIST1 = (0xCF, 0xB0), (0xEF, 0xB0), (0x9F, 0x70), (0x70, 0xE0), (0x7F, 0x40)
+# families' 0x20-0x36, below BN4's families' 0xC0 on and BN5's chips' from 0xFF down). The bottoms of three of them are
+# BN4's Navis' track's since 11 November 2026 (its own ranges spent at MetalMan; tools/xrecipe_bn4.py EFFECT_MORE,
+# LIST5_MORE, LIST4_MORE): effect ids 0xB0-0xB1 (with 0xE0-0xEC, which no recipe named), list 5's 0xB0-0xBF, list 4's
+# 0x70-0x7F
+CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3, CHIP_LIST1 = (0xCF, 0xB2), (0xEF, 0xC0), (0x9F, 0x80), (0x70, 0xE0), (0x7F, 0x40)
 ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
@@ -212,7 +215,8 @@ class Alloc(X4.Alloc):
 
     def __init__(self):
         super().__init__()
-        self.code, self.code_end, self.art, self.art_end, self.room = X4C_CODE, X4C_ART, X4C_ART, X4C_END, 'BN4\'s chips'
+        # (the art has no place of its own: the room's rows, c_unit; `art` only counts what the units draw)
+        self.code, self.code_end, self.art, self.art_end, self.room = X4C_CODE, X4C_ART, X4C_ART, X4C_ART + 0x10000000, 'BN4\'s chips'
         self.types = {1: 0x100, 3: 0x100, 4: TYPES4[0]}
         self.types3 = list(TYPES3)
         self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
@@ -643,7 +647,10 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn4.h"
 #include "bn6.h"
 #include "rom.h"
+#include "xchips_bn4_art.h"
 '''
+ROWS = [0]        # (the next row of the art's room, counted over the units as their rows are written: c_file)
+ROWS_MAX = 512    # (XC4_ROWS: the rows a slot's start can tell apart)
 KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC'}
 
 
@@ -677,8 +684,12 @@ def c_unit(f):
     L.append('};')
     if f.attack_sprites:
         L.append(f'static const XvSprite {n}_sprites[] = {{')
-        L += [f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {place(x["at"], X4C_ART, "XC4_ART")}, 0x{x["room"]:X} }},'
-              f'   /* BN4\'s {x["list"]}:{x["index"]:#x} copied{" (LZ77 in BN4)" if x["lz"] else ""} */' for x in f.attack_sprites]
+        # (its art's rows: none installed, each a row of the room the sprites are put into as an object loads one, its number
+        # over every unit's rows in UNITS' order: src/emu/xchips_bn4_art.h)
+        for x in f.attack_sprites:
+            L.append(f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, XC4_ROOM_ROW({ROWS[0]}), 0x{x["room"]:X} }},'
+                     f'   /* BN4\'s {x["list"]}:{x["index"]:#x}, the room\'s row {ROWS[0]}{" (LZ77 in BN4)" if x["lz"] else ""} */')
+            ROWS[0] += 1
         L.append('};')
     if f.effects:
         L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in f.effects) + ' };')
@@ -713,10 +724,13 @@ def c_unit(f):
 
 def c_file(units):
     parts, rows = [HEADER], []
+    ROWS[0] = 0
     for f in units:
         t, own = c_unit(f)
         parts.append(t)
         rows += [x.replace('SHARE', str(len(rows) + 1)) for x in own]   # (a sharing row names its unit's row, 1-based)
+    if ROWS[0] > ROWS_MAX:
+        sys.exit(f'xchiprecipe_bn4: {ROWS[0]} rows of art, past the room\'s {ROWS_MAX}')
     parts.append('const XChipUnit xchips_bn4[] = {\n' + '\n'.join(rows) + '\n};\n'
                  'const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);\n')
     return '\n'.join(parts)

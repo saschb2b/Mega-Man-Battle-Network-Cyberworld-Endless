@@ -10,6 +10,7 @@
 #include "bn4.h"
 #include "bn6.h"
 #include "rom.h"
+#include "xchips_bn4_art.h"
 
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
 /* its fourth-kind 0x4f (080E79B8-080E7BF0), which its routine (080E7A58) spawns: moved */
@@ -104,7 +105,7 @@ static const XvType panlsht_types[] = {
 	{ 4, 0x91, XV_TYPE_MOVED, 0x4F },   /* BN4's fourth-kind 0x4f, moved, the dispatch's 0x91 */
 };
 static const XvSprite panlsht_sprites[] = {
-	{ 3, 0x38, 3, 0x70, XC4_ART + 0x0, 0x400 },   /* BN4's 3:0x38 copied */
+	{ 3, 0x38, 3, 0x70, XC4_ROOM_ROW(0), 0x400 },   /* BN4's 3:0x38, the room's row 0 */
 };
 static const XvSoundCall panlsht_sound_calls[] = {
 	{ 0x080DCBEC, 0x1DB },   /* its sound 0xbf: BN4's song at the grown table's slot 0x1db */
@@ -226,8 +227,8 @@ static const XvType shotstar_types[] = {
 	{ 4, 0x93, XV_TYPE_MOVED, 0x35 },   /* BN4's fourth-kind 0x35, moved, the dispatch's 0x93 */
 };
 static const XvSprite shotstar_sprites[] = {
-	{ 3, 0x31, 3, 0x71, XC4_ART + 0x400, 0x300 },   /* BN4's 3:0x31 copied */
-	{ 5, 0x0A, 5, 0xEF, XC4_ART + 0x700, 0xD00 },   /* BN4's 5:0xa copied */
+	{ 3, 0x31, 3, 0x71, XC4_ROOM_ROW(1), 0x300 },   /* BN4's 3:0x31, the room's row 1 */
+	{ 5, 0x0A, 5, 0xEF, XC4_ROOM_ROW(2), 0xD00 },   /* BN4's 5:0xa, the room's row 2 */
 };
 static const XvId shotstar_effects[] = { { 0x06, 0xCF } };
 static const XvByte shotstar_bytes[] = {
@@ -274,7 +275,7 @@ static const XvImm repair_imms[] = {
 static const XvType repair_types[] = {
 };
 static const XvSprite repair_sprites[] = {
-	{ 3, 0x12, 4, 0x9F, XC4_ART + 0x1400, 0x1300 },   /* BN4's 3:0x12 copied */
+	{ 3, 0x12, 4, 0x9F, XC4_ROOM_ROW(3), 0x1300 },   /* BN4's 3:0x12, the room's row 3 */
 };
 static const XvId repair_effects[] = { { 0x07, 0xCE } };
 static const XcSong repair_songs[] = { { 0x9A, 0x39 } };
@@ -333,7 +334,7 @@ static const XvType counter_types[] = {
 	{ 3, 0xC8, XV_TYPE_MOVED, 0x17 },   /* BN4's third-kind 0x17, moved, the dispatch's 0xc8 */
 };
 static const XvSprite counter_sprites[] = {
-	{ 5, 0x10, 5, 0xEE, XC4_ART + 0x2700, 0xB00 },   /* BN4's 5:0x10 copied */
+	{ 5, 0x10, 5, 0xEE, XC4_ROOM_ROW(4), 0xB00 },   /* BN4's 5:0x10, the room's row 4 */
 };
 static const XvSoundCall counter_sound_calls[] = {
 	{ 0x080CFD96, 0x1DD },   /* its sound 0xbe: BN4's song at the grown table's slot 0x1dd */
@@ -416,8 +417,8 @@ static const XvType whitweb_types[] = {
 	{ 3, 0xC6, XV_TYPE_MOVED, 0x3D },   /* BN4's third-kind 0x3d, moved, the dispatch's 0xc6 */
 };
 static const XvSprite whitweb_sprites[] = {
-	{ 4, 0x1C, 4, 0x9E, XC4_ART + 0x3200, 0x600 },   /* BN4's 4:0x1c copied */
-	{ 5, 0x01, 5, 0xED, XC4_ART + 0x3800, 0x1800 },   /* BN4's 5:0x1 copied */
+	{ 4, 0x1C, 4, 0x9E, XC4_ROOM_ROW(5), 0x600 },   /* BN4's 4:0x1c, the room's row 5 */
+	{ 5, 0x01, 5, 0xED, XC4_ROOM_ROW(6), 0x1800 },   /* BN4's 5:0x1, the room's row 6 */
 };
 static const XvId whitweb_effects[] = { { 0x0F, 0xCD } };
 static const XvSoundCall whitweb_sound_calls[] = {
@@ -504,7 +505,7 @@ static const XvType boomer_types[] = {
 	{ 3, 0xC5, XV_TYPE_MOVED, 0x32 },   /* BN4's third-kind 0x32, moved, the dispatch's 0xc5 */
 };
 static const XvSprite boomer_sprites[] = {
-	{ 4, 0x14, 4, 0x9D, XC4_ART + 0x5000, 0xF00 },   /* BN4's 4:0x14 copied */
+	{ 4, 0x14, 4, 0x9D, XC4_ROOM_ROW(7), 0xF00 },   /* BN4's 4:0x14, the room's row 7 */
 };
 static const XvSoundCall boomer_sound_calls[] = {
 	{ 0x080D32F4, 0x1DF },   /* its sound 0xab: BN4's song at the grown table's slot 0x1df */
@@ -589,9 +590,9 @@ static const XvType mokorus_types[] = {
 	{ 3, 0xC4, XV_TYPE_MOVED, 0x2C },   /* BN4's third-kind 0x2c, moved, the dispatch's 0xc4 */
 };
 static const XvSprite mokorus_sprites[] = {
-	{ 1, 0x11, 1, 0x7F, XC4_ART + 0x5F00, 0x3900 },   /* BN4's 1:0x11 copied */
-	{ 5, 0x02, 5, 0xEC, XC4_ART + 0x9800, 0x1300 },   /* BN4's 5:0x2 copied */
-	{ 5, 0x0D, 5, 0xEB, XC4_ART + 0xAB00, 0x2300 },   /* BN4's 5:0xd copied */
+	{ 1, 0x11, 1, 0x7F, XC4_ROOM_ROW(8), 0x3900 },   /* BN4's 1:0x11, the room's row 8 */
+	{ 5, 0x02, 5, 0xEC, XC4_ROOM_ROW(9), 0x1300 },   /* BN4's 5:0x2, the room's row 9 */
+	{ 5, 0x0D, 5, 0xEB, XC4_ROOM_ROW(10), 0x2300 },   /* BN4's 5:0xd, the room's row 10 */
 };
 static const XvId mokorus_effects[] = { { 0x01, 0xCC }, { 0x15, 0xCB } };
 static const XvSoundCall mokorus_sound_calls[] = {
@@ -671,7 +672,7 @@ static const XvType sidbmbo_types[] = {
 	{ 3, 0xC3, XV_TYPE_MOVED, 0x44 },   /* BN4's third-kind 0x44, moved, the dispatch's 0xc3 */
 };
 static const XvSprite sidbmbo_sprites[] = {
-	{ 1, 0x0C, 1, 0x7E, XC4_ART + 0xCE00, 0x3300 },   /* BN4's 1:0xc copied */
+	{ 1, 0x0C, 1, 0x7E, XC4_ROOM_ROW(11), 0x3300 },   /* BN4's 1:0xc, the room's row 11 */
 };
 static const XvSoundCall sidbmbo_sound_calls[] = {
 	{ 0x080D5D36, 0x1E1 },   /* its sound 0x8e: BN4's song at the grown table's slot 0x1e1 */
