@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T22:30:00Z }
 ---
 
 # One net: the design (issue #82)

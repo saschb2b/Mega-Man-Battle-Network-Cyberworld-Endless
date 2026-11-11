@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T15:10:00Z
-* **Update**: game/battle-lab.md (Built: the keeper in Lan's HP and the LabPass, step 4), game/pet.md (KeyItem's LabPass), code/director.md (`lab_keeper.c`, `lab_words.c`), devtools/dev-menu.md (`--dev lab`).
