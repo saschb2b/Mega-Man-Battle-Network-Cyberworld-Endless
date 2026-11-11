@@ -29,6 +29,8 @@ static const struct {
 	{ 0xAC, BN4_PLATE_WOODMAN, BN4_OW_WOODMAN, 7, { "WoodMan", "The Towering Timber", GUARDIAN_NO_MUGSHOT, -1, 112, 192, 64 } },   /* tests/xdiff/woodman_v1.json */
 	{ 0xA4, BN4_PLATE_JUNKMAN, BN4_OW_JUNKMAN, 10, { "JunkMan", "The Scrapheap Storm", GUARDIAN_NO_MUGSHOT, -1, 184, 136, 80 } },   /* tests/xdiff/junkman_v1.json */
 	{ 0xB0, BN4_PLATE_TOPMAN, BN4_OW_TOPMAN, 5, { "TopMan", "The Whirling Top", GUARDIAN_NO_MUGSHOT, -1, 224, 72, 64 } },   /* tests/xdiff/topman_v1.json */
+	{ 0xC0, BN4_PLATE_SPARKMAN, BN4_OW_SPARKMAN, 2, { "SparkMan", "The Crackling Spark", GUARDIAN_NO_MUGSHOT, -1, 248, 216, 64 } },   /* tests/xdiff/sparkman_v1.json */
+	{ 0xB8, BN4_PLATE_BURNERMAN, BN4_OW_BURNERMAN, 1, { "BurnerMan", "The Roaring Burner", GUARDIAN_NO_MUGSHOT, -1, 240, 112, 40 } },   /* tests/xdiff/burnerman_v1.json */
 };
 #define NPROVED ((int)(sizeof proved / sizeof *proved))
 
