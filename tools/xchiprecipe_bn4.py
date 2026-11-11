@@ -29,6 +29,7 @@ import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_twins  # noqa: E402
+import bn5_twins  # noqa: E402
 import xnavirecipe_bn4 as N  # noqa: E402
 import xnavirecipe_bn4_objects as C  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
@@ -139,21 +140,22 @@ AUDITS = {
                                      "wheel's flags, none in a BN4 chip's element byte but the icon's the comparison names) to its +0x19"),
 }
 # The dispatch's numbers the chips' moved types take, by kind: the fourth kind's from 0x91 up, past BN5's 145 types (its own
-# numbers in the tables) and below BN4's families' and Navis' (0xE0 on); the third kind's numbers no BN5 track names (BN5's
-# own are 0-0xCB, the families' and Navis' 0xCC on, 11 left between them: tools/xrecipe_bn4.py TYPE_MORE, LATE_TYPES),
-# each checked against every other recipe (numbers_clear)
+# numbers in the tables) and below BN4's families' and Navis' (0xE0 on); the third kind's are BN5's own numbers (0-0xCB; the
+# families' and Navis' 0xCC on are spent: tools/xrecipe_bn4.py TYPE_MORE, LATE_TYPES) that no track of BN5's moves and no
+# Navi of BN5's not yet moved will: the dispatch's MOVED table is one for every game, so a type of BN5's moved later takes
+# its own number there. tools/bn5_twins.py dispatch_reserved names them all, and numbers_reserved (here and in build.py
+# lint) refuses a number of TYPES3 or TYPES3_NAVIS among them; numbers_clear checks each taken against every recipe.
 TYPES4 = (0x91, 0xE0)
-TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0,
-          # ... and, those spent, the numbers below them that no recipe's XvType row named on 10 November 2026 (a scan of
-          # src/emu/*.c: BN5's own numbers no BN5 track moved or paired; 0xD3-0xDD stay the Navis' track's), top down.
-          # Append-only: a number is a unit's by UNITS' order, and numbers_clear refuses one another recipe names since.
-          # The 32 lowest of that scan (0x48 down to 0x01: TYPES3_NAVIS below) are BN4's Navis' track's, taken from 0x01
-          # up by tools/xnavirecipe_bn4.py: the chips' units end at 0x49
-          0xAF, 0xAE, 0xAD, 0xAB, 0xAA, 0xA9, 0xA3, 0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C, 0x96, 0x94, 0x91,
-          0x8E, 0x82, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73, 0x72, 0x6E, 0x6B, 0x67, 0x66, 0x65, 0x64,
-          0x63, 0x62, 0x60, 0x5F, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4F, 0x4E, 0x4C, 0x4B, 0x49)
-TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x44, 0x41, 0x40, 0x3F, 0x3D, 0x37, 0x36, 0x32, 0x30, 0x2E, 0x2D, 0x2C, 0x28,
-                0x1E, 0x1C, 0x1B, 0x1A, 0x19, 0x13, 0x11, 0x0F, 0x0D, 0x0C, 0x0A, 0x09, 0x08, 0x06, 0x03, 0x01)
+# A number is a unit's by UNITS' order, so the tuple only grows at its end, and a number a BN5 track comes to need is
+# replaced in its place (the unit that held it moves alone, its specs run again): 11 November 2026, Counter's 0xC8 and
+# WhitWeb's 0xC6 (GridMan's), the spread shot's 0xBE and FlmLine's 0xBD (Nebula Grey's) and Thunder's 0xBB (LarkMan's)
+# became 0xB4, 0xAE, 0xAD, 0xA9 and 0xA3. Past the taken ones, top down
+TYPES3 = (0xCA, 0xC9, 0xB4, 0xAE, 0xC5, 0xC4, 0xC3, 0xC2, 0xAD, 0xA9, 0xA3, 0xB9,
+          0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C, 0x96, 0x91, 0x8E, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73,
+          0x6E, 0x67, 0x65, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4E, 0x4C, 0x4B, 0x49)
+# ... and BN4's Navis' track's, the lowest of the same numbers, taken from 0x01 up (tools/xnavirecipe_bn4.py, once its own
+# 0xCC-0xFF are spent)
+TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x3F, 0x32, 0x2E, 0x2D, 0x2C, 0x28, 0x1A, 0x13, 0x11, 0x0F, 0x0A, 0x08, 0x06, 0x03, 0x01)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone. Append-only, one
 # unit a line: a unit's home, its dispatch numbers, its effects' ids and its sprites' list numbers follow its place here,
 # so a unit put before another renumbers every one after it. Where two branches add units, the one merged first keeps
@@ -1062,6 +1064,17 @@ def c_file(units):
     return '\n'.join(parts)
 
 
+def numbers_reserved():
+    """no number of TYPES3 or TYPES3_NAVIS is one a track of BN5's moves or a Navi of BN5's not yet moved will
+    (tools/bn5_twins.py dispatch_reserved); the same check as build.py lint's, which needs no ROM"""
+    held = bn5_twins.dispatch_reserved(3)
+    bad = [f'{name}\'s {n:#04x} is {held[n]}' for name, ns in (('TYPES3', TYPES3), ('TYPES3_NAVIS', TYPES3_NAVIS)) for n in ns
+           if n in held]
+    if bad:
+        sys.exit('xchiprecipe_bn4: a dispatch number of BN4\'s is BN5\'s own: ' + '; '.join(bad) +
+                 ' (replace it in its place by a number of the tuple\'s end, and run the unit that held it again)')
+
+
 def numbers_clear(units):
     """no other recipe names a dispatch number the chips' moved types take (an XvType row of its kind)"""
     for n in sorted(os.listdir(EMU)):
@@ -1105,6 +1118,7 @@ def main():
     ap.add_argument('--report', action='store_true')
     ap.add_argument('--unit', nargs='*', default=[])
     a = ap.parse_args()
+    numbers_reserved()
     b4, b6 = X4.find_roms()
     pairs = X4.Pairs4(b4, b6)
     C.install(pairs)
