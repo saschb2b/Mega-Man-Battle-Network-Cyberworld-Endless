@@ -400,6 +400,14 @@ units. It could not hold the list: the plan has some 260 KB free in all
 (`tools/free_space.py`). The art's room, below, ended it, and the
 split is back at + 0x30000 (the code's room 96 KB).
 
+**The units' third-kind objects run on a page of the dispatch that is
+the chips' alone** (11 November 2026: [the generator](../devtools/chip-recipe-generator.md),
+The dispatch's numbers). The dispatch's tables are one for every game
+and BN5's own numbers were all they had left, 29 for a hundred units; a
+type now runs at BN4's own number, nothing is allocated, and no BN5
+Navi or chip moved later can meet a chip of BN4's there. The page takes
+1.5 KB from the art's room's end (62 slots where it had 63).
+
 **The units' art is no longer installed** (11 November 2026: The art's
 room, below): a sprite is put into one room as an object loads it, so
 the room holds what is alive at a moment and the remaining units need

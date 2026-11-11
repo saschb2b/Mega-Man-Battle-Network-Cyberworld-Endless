@@ -109,7 +109,7 @@ XV_LATE_ART = 0x08800000 + 0x4D0000   # (src/emu/free_space.h FREE_LATE_FAMILIES
 XC4_ART = 0x08800000 + 0x0EF000 + 0x30000   # (src/emu/xchips_bn4.h XC4_ART: BN4's chips' units' art, FREE_BN4_CHIPS + 0x30000)
 # (src/emu/xchips_bn4_art.h: the art's room, its slots after their tags; row k of the units' sprites sits at a slot's start +
 # 4 x k, wherever an object's load put it, so a frame's objects tell where each row is: room_rows)
-XC4_ROOM_SLOT0, XC4_ROOM_END, XC4_SLOT = XC4_ART + 0x100, 0x08800000 + 0x0EF000 + 0x50000 - 0x400, 0x800
+XC4_ROOM_SLOT0, XC4_ROOM_END, XC4_SLOT = XC4_ART + 0x100, 0x08800000 + 0x0EF000 + 0x50000 - 0xA00, 0x800   # (to XC4_PAGE)
 SPRITE_BLOCK, SPRITE_DATA = 0x02, 0x18   # (an object's +2's high four bits x 16 its sprite state; its sprite's data's pointer)
 
 

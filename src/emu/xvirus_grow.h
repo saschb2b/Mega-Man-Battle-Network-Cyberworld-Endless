@@ -62,6 +62,12 @@ void xg_set_word(int t, uint32_t i, uint32_t v);
  * address). Each entry must be blank in the core's copy, or set to the same
  * by a family before (a type two families' code spawns). */
 void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine);
+/* ... a type moved by BN4's chips' page (to XV_TYPE_MOVED4: the page's entry for `from`, blank or the same) goes through
+ * xg_type too. Whether a type named shared (XV_TYPE_SHARED, XV_TYPE_SHARED4) is moved already, as the step would leave it. */
+bool xg_type_shared(int kind, uint8_t from, uint8_t to);
+/* BN4's chips' page of the dispatch (xvirus_dispatch.h), staged once: its code, its MOVED table blank, and its type's
+ * entry in BN6's grown third kind's types, which must still be BN6's empty one. */
+void xg_page4_stage(void);
 /* Whether entry i of grown table t holds another install's entry in the
  * core's copy (neither BN6's own nor the table's fill): a later install
  * that shares it finds it so. */
