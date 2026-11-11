@@ -1,7 +1,10 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
 * **Update**: multirom/bn4-navis.md (TopMan built, the first of the other build: his palette by version, two collision fields, his top drawn with his own sprite, the comparator's no-AI-data masks for him; the third kind's dispatch numbers nearly spent), rom/bn4.md (TopMan derived, new row), re/ledger.json.
+* **Update**: multirom/navis.md (CloudMan moved and proved; the 0x0B the Navis' copy; three generator rules), game/liberation/building/stage-4-darkloids.md and par-prize.md (CloudMan on the board, his chips at par), rom/liberation.md (CloudMan's clouds' row facts), multirom/gaps.md, multirom/chips-code.md (the Bubbles helper gone), game/bosses/bn5-navis.md, devtools/navi-recipe-generator.md (LOW_BYTE_KEPT, every parent compare, the type's track), engine/emulation/free-space.md (the Navis' shared art's fourth room, FREE_NAVI_SHARED_FOUR).
+* **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
 * **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).

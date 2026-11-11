@@ -1534,6 +1534,16 @@ static void test_pacing(void) {
 		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 held to 1300 in act 4");
 	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
 	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
+	/* BN4's by the same rule where its areas' records set them (docs/game/bosses/bn4-navis.md; BN4's own HP: GutsMan
+	 * 500/900/1300/1700, WoodMan 1000/1500/2000/2500, JunkMan 800/1100/1500/1800), each an older net's moved Navi */
+	const int guts[4] = { 500, 900, 1300, 1700 }, wood[4] = { 1000, 1500, 2000, 2500 }, junk[4] = { 800, 1100, 1500, 1800 };
+	CHECK(pacing_xguardian_version(guts, 0, 0, false) == 0 && pacing_xguardian_version(guts, 1, 0, false) == 1 &&
+		pacing_xguardian_hp(900, 1, 0) == 700, "GutsMan V1 in act 1, V2 held to 700 in act 2");
+	CHECK(pacing_xguardian_version(wood, 1, 0, false) == 0 && pacing_xguardian_hp(1000, 1, 0) == 700 && pacing_xguardian_hp(1000, 2, 0) == 1000,
+		"WoodMan V1 in acts 2 and 3, held to 700 in act 2");
+	CHECK(pacing_xguardian_version(junk, 4, 0, false) == 1 && pacing_xguardian_version(junk, 5, 0, false) == 2, "JunkMan V2 then V3 in the deep");
+	CHECK(guardian_moved(GUARDIAN_OLDER_FIRST) && guardian_moved(GUARDIAN_BN4_FIRST + 1) && !guardian_moved(1) && !guardian_moved(GUARDIAN_DARKLOID_FIRST),
+		"BN5's six and BN4's Navis the older net's moved guardians, BN6's and the Darkloids not");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
@@ -4173,8 +4183,9 @@ static void test_xnavi_static(void) {
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
 		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
-		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES),
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third room apart)");
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES) &&
+		XN_SHARED_FOUR < XN_SHARED_FOUR_END,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third and fourth rooms apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4188,7 +4199,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 14, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;

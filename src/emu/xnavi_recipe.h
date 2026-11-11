@@ -87,6 +87,10 @@
  * overlay first; tools/xnavirecipe.py XN_TEAM_MORE) */
 #define XN_TEAM_MORE     FREE_TEAM_SHARED_MORE
 #define XN_TEAM_MORE_END FREE_TEAM_SHARED_MORE_END
+/* ... and its fourth, the art zone's tail (once the third is full: Meddy's last two, CloudMan's sprites before hers;
+ * tools/xnavirecipe.py XN_SHARED_FOUR) */
+#define XN_SHARED_FOUR     FREE_NAVI_SHARED_FOUR
+#define XN_SHARED_FOUR_END FREE_NAVI_SHARED_FOUR_END
 #define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
