@@ -28,11 +28,13 @@
 #define LIGHT_SEGS 8
 #define LIGHT_SEG_H 3
 
-/* a game's tag colours, the ROMs screen's cartridges' (launcher_art.c): BN6 green, BN5 blue */
+/* a game's tag colours, the ROMs screen's cartridges' labels' feet (launcher_art.c): BN6 green, BN5 blue, BN4 red */
 static SDL_Color game_color(int game) {
-	static const SDL_Color c[2] = { { 0, 140, 82, 255 }, { 16, 99, 165, 255 } };
-	return c[game ? 1 : 0];
+	static const SDL_Color c[JUKE_GAMES] = { { 0, 140, 82, 255 }, { 16, 99, 165, 255 }, { 165, 24, 16, 255 } };
+	return c[game >= 0 && game < JUKE_GAMES ? game : 0];
 }
+
+static const char *game_tag(int game) { return jukebox_game_tags[game >= 0 && game < JUKE_GAMES ? game : 0]; }
 
 /* a note, 6 x 8 from (x, y) */
 static void note(int x, int y, SDL_Color c) {
@@ -81,7 +83,7 @@ static void card(int x, int y, const JukeView *v) {
 	const JukeSong *s = on ? &jukebox_songs[v->playing] : NULL;
 	look_caps(fx, f.y + 3, on ? jukebox_now_label : jukebox_idle_label, on ? LOOK_PAGE : LOOK_DIM, NONE);
 	int game = on ? s->game : v->game;
-	const char *tag = jukebox_game_tags[game ? 1 : 0];
+	const char *tag = game_tag(game);
 	int ly = f.y + 42;
 	if (!on) {
 		lights(fx, ly + 12, fw, v);
@@ -127,7 +129,7 @@ static void list_panel(int x, int y, const JukeView *v) {
 	look_window(x + LIST_X, y + BODY_Y, LIST_W, BODY_H, LIST_TOP, true);
 	/* (the section in the band over its songs, between its arrows: its game's tag and its name) */
 	char name[40];
-	snprintf(name, sizeof name, "%s %s", jukebox_game_tags[v->game ? 1 : 0], v->section ? v->section : "");
+	snprintf(name, sizeof name, "%s %s", game_tag(v->game), v->section ? v->section : "");
 	look_text(x + LIST_X + LIST_W / 2, y + BODY_Y + 3, name, LOOK_TEXT, LOOK_EDGE_LO, TEXT_CENTER);
 	/* (the Library's page arrows, where L and R turn to another section) */
 	if (v->sections > 1) {
