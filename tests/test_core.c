@@ -102,6 +102,7 @@
 #include "xpanels.h"
 #include "visitor_families.h"
 #include "visitors.h"
+#include "groups.h"
 #include "xpanels_look.h"
 #include "xsea.h"
 #include "xvirus_bn4.h"
@@ -7102,7 +7103,7 @@ static void test_visitors(void) {
 	rng_seed(7);
 	Encounter e = test_battle(3, 4);
 	CHECK(visitor_apply(&e, 5) && e.visitor >= 1 && e.foes[e.visitor - 1].family == 40 && e.foes[e.visitor - 1].id == 0x311 &&
-		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && (e.from_families >> 40 & 1),
+		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && family_mask_has(e.from_families, 40),
 		"visitors: one of the older net's, at its highest version under the band, on the replaced one's panel");
 	CHECK(!visitor_apply(&e, 5), "visitors: one a battle");
 	/* (the band's top: three of 90 HP, 270, where V1EX's 60 for one of
@@ -7163,8 +7164,8 @@ static void test_visitors(void) {
 	for (int v = 0; v < 6; ++v) test_id[VISIT_BN4][64][v] = 0x310 + v;
 	CHECK(visitors_here(8, BIOME_CENTRAL), "visitors: BN4's families alone bring them");
 	e = test_battle(3, 4);
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && !e.from_families,
-		"visitors: one of BN4's in a battle of BN6's, by tier, no bit for its family");
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && family_mask_has(e.from_families, 64),
+		"visitors: one of BN4's in a battle of BN6's, by tier, its family's bit past the 64th");
 	e = test_battle(3, 4);
 	e.xrecord = 0x08100000u;
 	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64, "visitors: one of BN4's in a battle of BN5's");
@@ -7641,6 +7642,123 @@ static void test_battle_data(void) {
 	profile = keep;
 }
 
+/* The encounter groups' templates and their filling (groups.h;
+ * docs/game/progression/encounter-groups.md): a pool of five families
+ * made up here, no ROM */
+typedef struct { int n; GroupFill g[8]; } Fills;
+static void fills_keep(const GroupFill *g, void *ctx) {
+	Fills *f = ctx;
+	if (f->n < 8) f->g[f->n] = *g;
+	++f->n;
+}
+
+static void test_groups(void) {
+	CHECK(group_lean(0, 0, 0) == GROUP_FREE && group_lean(1, 0, 4) == GROUP_BACK && group_lean(3, 1, 1) == GROUP_FRONT &&
+		group_lean(1, 3, 1) == GROUP_FREE && group_lean(2, 0, 2) == GROUP_BACK && group_lean(2, 2, 1) == GROUP_FRONT,
+		"groups: a family's lean from its placements");
+	FamilyMask m = FAMILY_MASK_NONE, o = FAMILY_MASK_NONE;
+	family_mask_add(&m, 0);
+	family_mask_add(&m, 128);
+	CHECK(!family_mask_any(m), "groups: no family 0 nor one past the mask");
+	family_mask_add(&m, 5);
+	family_mask_add(&m, 64);
+	family_mask_add(&o, 127);
+	CHECK(family_mask_has(m, 5) && family_mask_has(m, 64) && !family_mask_has(m, 63) && !family_mask_meet(m, o), "groups: a family's bit past the 64th");
+	family_mask_add(&o, 64);
+	family_mask_join(&m, o);
+	CHECK(family_mask_meet(m, o) && family_mask_has(m, 127), "groups: masks that meet, and joined");
+
+	/* (a front-row fire one, a back-row aqua one, a roamer of BN5's that breaks panels, one of BN4's never measured, a late one) */
+	const GroupVer none = { -1, 0, 0, 0 };
+	GroupFam pool[5] = {
+		{ 1, 0, GROUP_FRONT, 0, 0, 60, { { 10, 40, 10, ELEM_FIRE }, { 11, 80, 20, ELEM_FIRE }, none, none, none, none } },
+		{ 2, 0, GROUP_BACK, 0, 0, 40, { { 20, 50, 10, ELEM_AQUA }, { 21, 90, 30, ELEM_AQUA }, none, none, none, none } },
+		{ 33, 1, GROUP_FREE, 0, GROUP_BREAKS, 100, { { 0x230, 60, 30, 0 }, { 0x231, 70, 40, 0 }, none, none, none, none } },
+		{ 64, 2, GROUP_FREE, 0, 0, -1, { { 0x310, 50, 10, 0 }, none, none, none, none, none } },
+		{ 3, 0, GROUP_FREE, 2, 0, 10, { { 30, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	GroupLimits l = { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220 };
+	CHECK(group_in_pool(&pool[0], &l) && group_in_pool(&pool[2], &l) && group_in_pool(&pool[3], &l) && !group_in_pool(&pool[4], &l),
+		"groups: the pool keeps to the stage reached");
+	l.nets = 1;
+	CHECK(group_in_pool(&pool[0], &l) && !group_in_pool(&pool[2], &l) && !group_in_pool(&pool[3], &l), "groups: ... and to the nets present");
+	l.nets = GROUP_NETS_ALL;
+
+	Fills f = { 0, { { 0 } } };
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.n == 1 && f.g[0].n == 2 && f.g[0].fam[0] == 0 && f.g[0].fam[1] == 1 &&
+		f.g[0].ver[0] == 0 && f.g[0].ver[1] == 0 && f.g[0].hp == 90 && f.g[0].pressure == 100,
+		"groups: the wall and its artillery at the act's version (HP %d, pressure %d)", f.g[0].hp, f.g[0].pressure);
+	/* (a version higher: the most HP inside the band, 130 two ways, the first kept; its pressure by its hit) */
+	l.top[0] = 1;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].ver[0] == 0 && f.g[0].ver[1] == 1 && f.g[0].hp == 130 && f.g[0].pressure == 180,
+		"groups: the versions that fill the band (versions %d %d, HP %d, pressure %d)", f.g[0].ver[0], f.g[0].ver[1], f.g[0].hp, f.g[0].pressure);
+	/* (the third limit: under a cap of 150 both ways to 130 press too hard, the group falls back to 90) */
+	l.pressure = 150;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 90 && f.g[0].pressure == 100,
+		"groups: the pressure cap holds a group under the band's top (HP %d, pressure %d)", f.g[0].hp, f.g[0].pressure);
+	l.pressure = 90;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, NULL, NULL) == 0, "groups: ... and leaves none where every version presses past it");
+	l.pressure = 220;
+	l.top[0] = 0;
+
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_CLASH, fills_keep, &f) == 1 && f.g[0].fam[0] == 0 && f.g[0].fam[1] == 1,
+		"groups: fire beside aqua clash, the pair once");
+	CHECK(group_fillings(pool, 5, &l, GROUP_ONE_ELEMENT, NULL, NULL) == 0 && group_fillings(pool, 5, &l, GROUP_SUMMONER, NULL, NULL) == 0,
+		"groups: no two of one element here, and no summoner");
+	/* (three of one: 120 and 150 in the band, the roamer's 180 past it) */
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_SWARM, fills_keep, &f) == 2 && f.g[0].n == 3 && f.g[0].fam[2] == 0 && f.g[0].hp == 120 && f.g[0].pressure == 180 &&
+		f.g[1].fam[0] == 1 && f.g[1].hp == 150, "groups: a swarm is three of one family");
+	/* (a family never measured stands in no group: the nets meet once it is) */
+	CHECK(group_fillings(pool, 5, &l, GROUP_NETS_MEET, NULL, NULL) == 0, "groups: an unmeasured family fills nothing");
+	pool[3].pressure = 20;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_NETS_MEET, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 120 &&
+		pool[f.g[0].fam[0]].net != pool[f.g[0].fam[1]].net, "groups: a roamer of each of two nets");
+	CHECK(group_fillings(pool, 5, &l, GROUP_PANEL_WAR, NULL, NULL) == 1, "groups: the panel breaker and a roamer");
+	/* (the front, the back and a roamer: 40 + 50 + 50 with BN4's roamer, 150 with BN5's) */
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_PINCER, fills_keep, &f) == 2 && f.g[0].n == 3 && f.g[0].hp == 150 && f.g[1].hp == 140, "groups: a pincer's three roles");
+
+	GroupFill a, b;
+	CHECK(group_pick(pool, 5, &l, GROUP_SWARM, 7, &a) && group_pick(pool, 5, &l, GROUP_SWARM, 7, &b) && a.fam[0] == b.fam[0] && a.hp == b.hp &&
+		!group_pick(pool, 5, &l, GROUP_SUMMONER, 7, &a), "groups: one roll, one group; none of a template nothing fills");
+	int seen = 0;
+	for (uint32_t roll = 0; roll < 64; ++roll) {
+		CHECK(group_pick(pool, 5, &l, GROUP_SWARM, roll, &a), "groups: a swarm picked on roll %u", (unsigned)roll);
+		seen |= 1 << a.fam[0];
+	}
+	CHECK(seen == (1 | 2 | 8), "groups: every filling is picked by some roll (%d)", seen);   /* (BN4's roamer too, since measured) */
+	seen = 0;
+	for (uint32_t roll = 0; roll < 256; ++roll)
+		if (group_pick_any(pool, 5, &l, roll, &a)) seen |= 1 << a.template;
+	CHECK(seen == (1 << GROUP_WALL | 1 << GROUP_PANEL_WAR | 1 << GROUP_CLASH | 1 << GROUP_PINCER | 1 << GROUP_SWARM | 1 << GROUP_NETS_MEET),
+		"groups: any template the pool fills, and no other (%#x)", (unsigned)seen);
+
+	Encounter e = { 0 };
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &(Fills){ 0, { { 0 } } }) == 1 && group_pick(pool, 5, &l, GROUP_WALL, 1, &a), "groups: the wall again");
+	group_place(pool, &a, &e);
+	CHECK(e.nfoes == 2 && e.foes[0].col == 3 && e.foes[0].row == 1 && e.foes[0].id == 10 && e.foes[1].col == 5 && e.foes[1].row == 0 && e.foes[1].id == 20 &&
+		family_mask_has(e.from_families, 1) && family_mask_has(e.from_families, 2), "groups: the front in the first column, the back in the last");
+	CHECK(group_pick(pool, 5, &l, GROUP_SWARM, 0, &a), "groups: a swarm to place");
+	group_place(pool, &a, &e);
+	CHECK(e.nfoes == 3 && e.foes[0].col == 3 && e.foes[1].col == 4 && e.foes[2].col == 5 && e.foes[0].row != e.foes[1].row && e.foes[1].row != e.foes[2].row,
+		"groups: a swarm one a column");
+
+	/* (the limits of an act: its band, the older nets a tier up, the pressure cap; a later cycle's by the band's growth) */
+	GroupLimits first = group_limits(2, 0, GROUP_NETS_ALL), later = group_limits(CYCLE_LAYERS + 2, 0, GROUP_NETS_ALL);
+	PacingBand band = pacing_band(2, false, false);
+	CHECK(first.band.lo == band.lo && first.band.hi == band.hi && first.band.cap == band.cap && first.pressure == group_pressure_cap(0) &&
+		first.top[1] == 2 * first.top[0] + 1 && first.top[2] == first.top[1], "groups: an act's limits");
+	CHECK(later.pressure == first.pressure * later.band.cap / first.band.cap && later.pressure >= first.pressure, "groups: a later cycle's pressure cap by its band's");
+	for (int act = 1; act < 6; ++act) CHECK(group_pressure_cap(act) > group_pressure_cap(act - 1), "groups: the pressure cap rises by act (%d)", act);
+	CHECK(group_tags_count > 0 && group_tag(group_tags[0].net, group_tags[0].family) == &group_tags[0] && !group_tag(2, 1), "groups: the measured tags by net and family");
+	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
+}
+
 int main(void) {
 	test_sha1();
 	test_battle_data();
@@ -7736,6 +7854,7 @@ int main(void) {
 	test_analytics();
 	test_analytics_online();
 	test_visitors();
+	test_groups();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

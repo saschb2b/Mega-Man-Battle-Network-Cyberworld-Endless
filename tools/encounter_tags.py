@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""encounter_tags.py dump|sample|report [--write]: the encounter groups' tags
+"""encounter_tags.py dump|sample|report|engine [--write|--check]: the encounter groups' tags
 (docs/game/progression/encounter-groups.md; docs/devtools/encounter-tags.md).
 
 Every virus family a run's engine holds, of every ROM read (BN6's own, BN5's
@@ -15,6 +15,9 @@ and BN4's moved in), tagged by what it does, and what the tags can build:
   report  the families' tags, each ROM set's pool by act, the templates and
           how many ways each fills, and the danger measured, as Markdown
           (--write: into docs/game/progression/encounter-groups-measured.md).
+  engine  src/core/group_tags.c, the measured tags the engine's groups read
+          (src/core/groups.h): each family's pressure and tricks, numbers
+          alone (--check: fail where the file is not what it would write).
 
 Numbers and our own tags alone: a family is its net and BN6's AI index
 (6:01, 5:33, 4:64), never a name, text or picture of the games'."""
@@ -41,9 +44,9 @@ WHEEL2 = {0x80: 'sword', 0x40: 'cursor', 0x20: 'wind', 0x10: 'breaker'}
 ROLES = ['free', 'back', 'front']
 PANELS = {'b': 'hole', 'c': 'plain', 'd': 'cracked', 'e': 'poison', 'f': 'holy', 'g': 'grass', 'h': 'ice', 'i': 'volcano'}
 ACTS = ['1', '2', '3', '4', '5', '6', 'Nest']
-# (the engine's room, docs/game/progression/encounter-groups.md: the families whose sounds share one pool a battle,
-# src/emu/xnavi_bn4_sounds.c: one of them a battle until their sounds have slots of their own)
-POOLED = {'4:73', '4:74'}
+# (the engine's room, docs/game/progression/encounter-groups.md: BN4's late families' sounds shared one pool a battle
+# until 11 November 2026, one of them a battle; they have slots of their own since, so no family is held apart)
+POOLED = set()
 SAMPLE_SEED = 20261111
 
 
@@ -250,7 +253,8 @@ def fillings(template, fams_in, band, cap=None):
     if name == 'swarm':
         for f in fams_in:
             for v in reversed(versions(f, band)):
-                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (pressure_of((f, f, f), (v, v, v)) or cap + 1) <= cap):
+                p = pressure_of((f, f, f), (v, v, v))
+                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (p is not None and p <= cap)):
                     out.append(((f, f, f), (v, v, v), 3 * f.ver[v]['hp']))
                     break
         return out
@@ -554,14 +558,51 @@ def cmd_report(a):
     return 0
 
 
+ENGINE = os.path.join(ROOT, 'src', 'core', 'group_tags.c')
+TRICK_BITS = (('GROUP_BREAKS', lambda f: any(t.startswith('panels:') for t in f.tricks)),
+              ('GROUP_SHAPES', lambda f: 'area' in f.tricks or any(t.startswith('field:') for t in f.tricks)),
+              ('GROUP_SUMMONS', lambda f: 'summons' in f.tricks), ('GROUP_TOUGH', lambda f: 'tough' in f.tricks))
+
+
+def cmd_engine(a):
+    """The measured tags as the engine reads them: a row a family measured, its net, BN6's AI index, its pressure and
+    its tricks."""
+    fams = load()[0]
+    if not measured(fams):
+        sys.exit('no tools/encounter_data/families.tsv: tools/encounter_danger.py families first')
+    rows = []
+    for f in sorted(fams.values(), key=lambda f: (f.net, f.ai)):
+        if f.pressure is None:
+            continue
+        tricks = ' | '.join(name for name, has in TRICK_BITS if has(f)) or '0'
+        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks} }},')
+    text = '\n'.join([
+        '/* groups.h: the families\' measured tags, a row each: its net (0 BN6\'s, 1 BN5\'s, 2 BN4\'s), BN6\'s AI index, its',
+        ' * pressure (the HP a standing MegaMan loses in 20 seconds to its V1 alone) and its tricks.',
+        ' * Written by tools/encounter_tags.py engine from tools/encounter_data/ (docs/devtools/encounter-tags.md); do not',
+        ' * edit: measure again and write it again (--check says whether this is what it writes). */',
+        '#include "groups.h"', '',
+        'const GroupTag group_tags[] = {'] + rows + ['};', 'const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);', ''])
+    if a.check:
+        if not os.path.exists(ENGINE) or open(ENGINE).read() != text:
+            sys.exit(f'{os.path.relpath(ENGINE, ROOT)} is not what tools/encounter_tags.py engine writes')
+        print(f'{os.path.relpath(ENGINE, ROOT)} is what the tool writes ({len(rows)} families)')
+        return 0
+    with open(ENGINE, 'w') as f:
+        f.write(text)
+    print(f'written: {os.path.relpath(ENGINE, ROOT)} ({len(rows)} families)')
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('what', choices=['dump', 'sample', 'report'])
+    ap.add_argument('what', choices=['dump', 'sample', 'report', 'engine'])
     ap.add_argument('--write', action='store_true', help='report: into the concept, after its mark')
+    ap.add_argument('--check', action='store_true', help='engine: write nothing, fail where the file differs')
     ap.add_argument('--natives', type=int, default=8, help="sample: each act's own battles")
     ap.add_argument('--fillings', type=int, default=2, help="sample: each template's fillings an act")
     a = ap.parse_args()
-    return {'dump': cmd_dump, 'sample': cmd_sample, 'report': cmd_report}[a.what](a)
+    return {'dump': cmd_dump, 'sample': cmd_sample, 'report': cmd_report, 'engine': cmd_engine}[a.what](a)
 
 
 if __name__ == '__main__':

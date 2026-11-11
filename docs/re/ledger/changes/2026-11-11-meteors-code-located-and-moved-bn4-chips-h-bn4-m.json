@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "Meteors' code located and moved (bn4_chips.h BN4_METEORS 0x080EAE92, BN4_T4_METEORS 0x81, BN4_ROW_PANEL_ACROSS 0x0800FC48; bn6_chips.h BN6_ROW_PANEL_ACROSS 0x08016168, a routine BN6 never calls; docs/rom/bn4.md). Its meteors are ShotStar's unit's star, shared, not moved twice."
+}

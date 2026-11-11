@@ -227,12 +227,12 @@ static void make(void) {
 	memset(K.net, 0, sizeof K.net);
 	memset(K.type_ai, 0, sizeof K.type_ai);
 	memset(K.role, 0, sizeof K.role);
-	if (!R.data || (!XR[XROM].data && !XR[XROM4].data)) return;
+	if (!R.data) return;
 	int bn5 = installed(VISIT_BN5), bn4 = installed(VISIT_BN4);
-	if (!bn5 && !bn4) return;
 	static Tally t;
+	/* (BN6's with BN6's ROM alone too: the encounter groups' pool takes its families' places from it, group_pool.h) */
 	for (int net = 0; net < VISIT_NETS; ++net) {
-		if (net == VISIT_BN4 && !bn4) continue;
+		if ((net == VISIT_BN5 && !bn5) || (net == VISIT_BN4 && !bn4)) continue;
 		memset(&t, 0, sizeof t);
 		memset(t.stage, 3, sizeof t.stage);
 		if (net == VISIT_BN6) tally_bn6(&t);

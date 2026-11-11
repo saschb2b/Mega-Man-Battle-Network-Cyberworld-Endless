@@ -3,7 +3,7 @@ type: Research
 title: "Encounter groups, measured"
 description: "The encounter groups' measured numbers of 11 November 2026: every virus family in the engine tagged (versions, element, weakness, role, pressure, tricks, reward row), each ROM set's pool by act, how many ways each template fills, and what sampled battles cost a standing MegaMan and the autopilot."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: tools
     resource: "tools/encounter_tags.py report --write, from tools/encounter_data/ (tags.tsv, families.tsv, danger.tsv)"
@@ -16,7 +16,12 @@ The numbers [encounter groups](encounter-groups.md) rest on, written by
 `tools/encounter_tags.py report --write` ([Encounter tags and
 danger](../../devtools/encounter-tags.md)) from the three files of
 `tools/encounter_data/`. Everything under the mark is the tool's; run it
-again after a family is moved or a band changes.
+again after a family is moved or a band changes. The families were read
+on `dev` at b04cdad6; the fill counts are since 11 November 2026 without
+the limit of one pooled BN4 family a battle, which their fixed sound
+slots lifted, and the engine's own pool gives the same counts
+(`build.py pacing`, [Encounter groups](encounter-groups.md), Step 1,
+built).
 
 How to read it:
 
@@ -224,12 +229,12 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 11 (6) [5-8] | 47 (28) [5-25] | 81 (44) [7-54] | 76 (44) [7-50] | 108 (59) | 93 (54) | 77 (48) |
+| wall and artillery | 11 (6) [5-8] | 48 (28) [5-25] | 82 (44) [7-54] | 77 (44) [7-50] | 109 (59) | 94 (54) | 78 (48) |
 | panel war | **none** | **none** | **none** | **none** | 17 (3) | 11 (3) | 7 (3) |
 | summoner and guard | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
-| clashing answers | 17 (9) [3-10] | 44 (26) [0-28] | 76 (34) [0-65] | 61 (34) [4-50] | 107 (48) | 84 (47) | 61 (46) |
+| clashing answers | 17 (9) [3-10] | 45 (26) [0-28] | 77 (34) [0-65] | 62 (34) [4-50] | 108 (48) | 85 (47) | 62 (46) |
 | one element | 7 (4) [2-4] | 15 (11) [0-9] | 34 (19) [0-27] | 28 (19) [3-21] | 53 (26) | 40 (24) | 30 (24) |
-| pincer | 2 (2) [2-2] | 329 (279) [34-258] | 1107 (853) [159-951] | 1252 (933) [253-1096] | 2270 (1483) | 2272 (1483) | 2249 (1483) |
+| pincer | 2 (2) [2-2] | 338 (286) [34-263] | 1123 (866) [159-961] | 1268 (946) [255-1106] | 2289 (1499) | 2291 (1499) | 2268 (1499) |
 | swarm | 2 [1-1] | 14 [0-6] | 23 [0-9] | 28 [2-14] | 32 | 29 | 32 |
 | held ground | 2 [1-2] | 19 (8) [2-14] | 23 (8) [2-23] | 19 (8) [11-19] | 35 (12) | 27 (12) | 13 (11) |
 | glass cannons | **none** | 1 [0-1] | 16 (9) [0-14] | 19 (19) [0-19] | 28 (18) | 15 (13) | **none** |
@@ -240,12 +245,12 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 25 (18) [8-12] | 138 (96) [10-46] | 282 (189) [15-116] | 277 (189) [15-112] | 376 (255) | 356 (245) | 328 (227) |
+| wall and artillery | 25 (18) [8-12] | 139 (96) [10-46] | 283 (189) [15-116] | 278 (189) [15-112] | 377 (255) | 357 (245) | 329 (227) |
 | panel war | 14 (7) [4-4] | 49 (25) [0-15] | 87 (47) [0-29] | 87 (47) [5-29] | 128 (74) | 122 (74) | 115 (71) |
 | summoner and guard | **none** | **none** | 14 (7) [0-2] | 14 (7) [0-2] | 17 (9) | 17 (9) | 16 (8) |
-| clashing answers | 26 (18) [4-11] | 75 (54) [0-35] | 179 (117) [0-110] | 164 (117) [9-95] | 241 (157) | 214 (152) | 189 (149) |
+| clashing answers | 26 (18) [4-11] | 76 (54) [0-35] | 180 (117) [0-110] | 165 (117) [9-95] | 242 (157) | 215 (152) | 190 (149) |
 | one element | 12 (9) [2-5] | 29 (24) [0-15] | 79 (58) [0-49] | 73 (58) [5-43] | 117 (82) | 102 (78) | 89 (75) |
-| pincer | 3 (3) [3-3] | 1444 (1318) [53-795] | 6797 (5956) [534-3972] | 8022 (6989) [931-4856] | 12690 (10951) | 12712 (10971) | 12688 (10970) |
+| pincer | 3 (3) [3-3] | 1460 (1332) [53-800] | 6826 (5982) [534-3982] | 8052 (7016) [933-4866] | 12723 (10981) | 12745 (11001) | 12721 (11000) |
 | swarm | 2 [1-1] | 23 [0-6] | 40 [0-9] | 48 [2-14] | 55 | 52 | 56 |
 | held ground | 3 (1) [1-3] | 44 (28) [3-24] | 56 (34) [3-43] | 52 (34) [19-39] | 81 (50) | 71 (48) | 54 (44) |
 | glass cannons | **none** | 5 (4) [0-4] | 33 (26) [0-28] | 52 (49) [0-42] | 77 (60) | 54 (41) | 3 (2) |
@@ -337,7 +342,7 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | clashing answers | 1 | 10 | 32 | 18 | 43 | 26 | 7 |
 | one element | **none** | 2 | 11 | 7 | 20 | 11 | 3 |
 | pincer | **none** | 8 | 185 | 252 | 721 | 719 | 621 |
-| swarm | 1 | 5 | 10 | 13 | 15 | 12 | 12 |
+| swarm | 1 | 5 | 12 | 16 | 19 | 15 | 15 |
 | held ground | **none** | 7 | 13 | 9 | 18 | 12 | 1 |
 | glass cannons | **none** | 1 | 6 | **none** | 7 | **none** | **none** |
 | bulwark | **none** | 3 | 16 | 8 | 5 | **none** | **none** |
@@ -347,13 +352,13 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 11 | 113 | 271 | 221 | 253 | 232 | 122 |
+| wall and artillery | 11 | 114 | 272 | 222 | 253 | 232 | 122 |
 | panel war | 13 | 49 | 87 | 87 | 120 | 114 | 88 |
 | summoner and guard | **none** | **none** | 14 | 14 | 17 | 17 | 11 |
-| clashing answers | 19 | 68 | 170 | 146 | 197 | 170 | 100 |
+| clashing answers | 19 | 69 | 171 | 147 | 197 | 170 | 100 |
 | one element | 8 | 26 | 76 | 62 | 89 | 77 | 43 |
-| pincer | 1 | 805 | 6392 | 7676 | 12205 | 12189 | 10225 |
-| swarm | 2 | 17 | 30 | 37 | 34 | 25 | 25 |
+| pincer | 1 | 817 | 6420 | 7706 | 12238 | 12222 | 10243 |
+| swarm | 2 | 17 | 32 | 40 | 38 | 28 | 28 |
 | held ground | 1 | 30 | 53 | 35 | 51 | 39 | 14 |
 | glass cannons | **none** | 5 | 22 | 27 | 31 | 15 | **none** |
 | bulwark | **none** | 12 | 50 | 27 | 11 | 4 | **none** |

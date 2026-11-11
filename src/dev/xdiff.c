@@ -652,6 +652,11 @@ static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	return -1;
 }
 
+/* whether `to`, a moved range's copy, is in BN4's chips' code (FREE_BN4_CHIPS) */
+static bool bn4_chips_code(uint32_t to) {
+	return to >= FREE_BN4_CHIPS && to < FREE_BN4_CHIPS_END;
+}
+
 /* the comparator's own test: bytes written into BN6's copy after the
  * install (an address of BN5's moved, to its copy; each copy of a block more than one family copies), or a call's veneer
  * aimed at another routine; those in RAM (`ram`) once the game has booted,
@@ -677,9 +682,12 @@ static void pokes_put(const Spec *s, bool ram) {
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
-		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's) */
+		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's; and each BN4 chip
+		 * unit's copy holding the address, a block of one unit inside another's: ShotStar's star's spawner, which
+		 * Meteors' unit copies alone, in ShotStar's own) */
 		for (int j = 0; k >= 0 && j < k; ++j)
-			if (m[j].from == m[k].from && m[j].len == m[k].len && m[j].to != m[k].to) {
+			if (((m[j].from == m[k].from && m[j].len == m[k].len) || (bn4_chips_code(m[j].to) && bn4_chips_code(m[k].to) &&
+			     p->at >= m[j].from && p->at < m[j].from + m[j].len)) && m[j].to != m[k].to) {
 				emu_write(p->at - m[j].from + m[j].to, b, (size_t)p->size);
 				printf("xdiff: poke %08x (%08x, a copy) = %0*x\n", (unsigned)p->at, (unsigned)(p->at - m[j].from + m[j].to), 2 * p->size, (unsigned)p->v);
 			}

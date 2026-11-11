@@ -120,7 +120,8 @@ bool save_exists(void) {
 	return old;
 }
 
-#define BATTLE_MAGIC 0x43574233u   /* "CWB3": the last two battles, loot.h (their families 64 bits a battle, issue #82) */
+#define BATTLE_MAGIC 0x43574234u   /* "CWB4": the last two battles, loot.h (their families 128 bits a battle: BN4's from 64, the
+                                    * encounter groups' step 1; an older file's memory is forgotten, as a first battle's) */
 
 bool save_run(void) {
 	if (!run.active) return false;
@@ -149,8 +150,8 @@ static void upgrade_run(void) {
 
 /* the last battle as the run's save left it (none: forgotten) */
 static void load_battle(void) {
-	LootMemory m = { -1, -1, 0, 0, 0 };
-	if (!save_read_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m)) m = (LootMemory){ -1, -1, 0, 0, 0 };
+	LootMemory m = LOOT_MEMORY_NONE;
+	if (!save_read_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m)) m = LOOT_MEMORY_NONE;
 	loot_memory_set(&m);
 }
 
