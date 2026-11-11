@@ -187,7 +187,7 @@ static void kin_make(int net, const Tally *t) {
 		if (!placed || K.n[net] >= VISITOR_KIN_MAX) continue;
 		bool own = net == VISIT_BN6 ? f <= 29 && !xbattle_shared(XROM, f) : K.net[f] == net && K.first_id[f] > 0;
 		VisitorKin *v = &K.kin[net][K.n[net]++];
-		*v = (VisitorKin){ f, K.role[net][f], t->stage[f], t->plain[f] == 0, false, (int16_t)placed };
+		*v = (VisitorKin){ f, K.role[net][f], t->stage[f], t->plain[f] == 0, false, (int16_t)placed, { c[0], c[1], c[2] } };
 		v->visits = own && !v->bound;
 	}
 }
