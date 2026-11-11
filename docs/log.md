@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
 * **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).

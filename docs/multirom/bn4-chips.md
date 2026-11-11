@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:18:22Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -262,6 +262,12 @@ effects it moves itself: one an earlier unit moved is that unit's row,
 which the installer could otherwise resolve only where a family
 happened to hold the same sprite.
 
+**The units' art is no longer installed** (11 November 2026: The art's
+room, below): a sprite is put into one room as an object loads it, so
+the room holds what is alive at a moment and the remaining units need
+no art's room of their own. Every chip spec passes with it, their
+mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
+
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball wait on the unit kind for attack families. BugChain
@@ -515,6 +521,48 @@ and as more of its families visit. A tournament round
 against a BN4 Navi pays a BN6 Navi chip of the round's band as a
 stand-in ([the tournament](../game/tournament.md), call 7). BN4's own
 chips have their ids since unit 2 (above); none plays yet.
+
+## The art's room
+
+No chip unit's art is installed (11 November 2026). A unit's sprites
+are about 13 KB (nine units took 115 KB), BN4 has some 110 units, and
+the core's copy holds 127 KB for them (`XC4_ART` to `XC4_END`); its
+free space is full and the per-battle RAM has no byte left
+([Memory](../engine/emulation/memory.md)). A folder's units cannot be
+laid out for a battle either, as BN4's Navis' art is: thirty chips can
+be thirty units, about 400 KB, and a NetBattle holds two folders.
+
+So a sprite is put into the room when BN6 loads it for an object
+(`src/emu/xchips_bn4_art.h`). BN6 loads every object's sprite through
+one routine (`BN6_SPRITE_LOAD`), and a hook on it (`BN6_SPRITE_LOAD_IN`)
+sees a row of the units' sprites, copies it from the player's BN4 ROM
+(unpacked where BN4 keeps it LZ77'd) and points its list's entry at it
+before the routine reads the entry.
+
+The room keeps no record that a state would have to save. It is cut in
+slots of 0x800 bytes, and row k (its number over every unit's rows, in
+`UNITS`' order: `XC4_ROOM_ROW(k)`) sits at a slot's start + 4 x k, so a
+sprite's address names it. The sprites in use are read from the objects
+in play, each one's sprite state's pointer (`BN6_SPRITE_DATA`): the
+same on both cores of a NetBattle. A sprite an object in play holds is
+found at its place; a new one takes the lowest run of slots none in
+play lies in, over whatever no object draws any more. Where every slot
+is in play the entry stays BN6's placeholder, as BN6 leaves an unloaded
+sprite, and the debug log says so. What the slots hold is noted in the
+room itself (a u16 a slot), and before the run list's objects run
+(`BN6_OBJECT_RUNNER_IN`) a sprite an object in play points at is copied
+again where its slots hold another's: after a rollback or a loaded
+state the objects are another moment's and the room's bytes are not.
+
+The room needs the sprites alive at one moment, not a folder's: nine of
+the largest (14 KB) fit at once. `bn4_chips_thirty` fights eight turns
+with thirty of BN4's chips in the folder, every unit's, and never has
+more than three rows in play. For a unit nothing changes: the generator
+writes each sprite as a row of the room, its `room` the sprite's size.
+Not proved yet: a battle on a 3DS, where the Arena's two cores share
+one copy of the ROM and so one room (each core puts its own objects'
+sprites right before they run; a sprite one core's objects hold and the
+other's have dropped is copied twice).
 
 ## The census
 
