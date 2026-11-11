@@ -24,6 +24,7 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: devtools/differential.md and multirom/bn4-chips.md (a dark MegaMan's palette, BN4's own, the comparator's one allowance for a dark karma; `bn4_chip_invis_dark`).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
 * **Update**: rom/bn4.md (The panel changer and the Hole panel, new row; `BN4_PANEL_HOLE` named) and multirom/bn4-chips.md (the dark units read, why each waits; call 7 with BlakWeap; call 8, the Hole panel, which a DS Navi chip's power counts), code/emu.md (`bn4_panels.h`).
