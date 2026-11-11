@@ -1,0 +1,133 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Hole * then PanlSht1 A by a dark MegaMan (karma4 0): the Hole made at (3,2) at t34, then PanlSht used at t90 on the panel ahead of him, the Hole: what BN4's panel shot does to a Hole (BN4's 0xB, BN6's 16: src/emu/xpanels.h) against BN6's engine running the same moved units, the panel, its flags and the throw compared each frame (docs/rom/battle.md, BN6's panel types and who holds each).",
+ "folder4": [
+  "3452",
+  "00B2"
+ ],
+ "folder6": [
+  "20F:1A",
+  "22F:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "LEFT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   120,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "karma4": 0,
+ "deck6": [
+  "20F:1A",
+  "22F:00"
+ ]
+}
