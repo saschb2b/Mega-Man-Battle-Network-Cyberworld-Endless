@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Memory the engine writes"
 description: "The free space plan for the core's ROM copy past BN6's 8 MB, region by region from `EMU_FREE` (`src/emu/free_space.h`, `claims.c`), BN6's tables patched in place, and the EWRAM BN6 leaves alone (`RAM_*`)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T21:54:19Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
 ---
 
 # Memory the engine writes
@@ -286,6 +286,14 @@ every track follows (its numbers `RAM_*` in the same plan, `src/emu/free_space.h
 | `0x0203FFF4`-`0x0203FFF7` | `RAM_CHIP_AI_ROOMS` | Per battle: the entries of BN6's AI data's pool BN5's chip AI took for its rooms (`RAM_CHIP_AI_ROOMS`, a u32 of `BN6_AI_POOL_USED`'s bits, zero as each battle is set up; issue #182, below) | `darkinvs.c` |
 | `0x0203FFF8`-`0x0203FFFB` | `RAM_TEAM_CLOCK` | Per battle: two MegaMen a side's turn's clock (`RAM_TEAM_CLOCK`: a u16 of frames since the first OK of the turn the core has seen, then a byte 1 once seen; zero outside the Custom screen and with the battle's RAM), each core's own ([The leads wait for their partners](../../online/arena/two-a-side/leads-wait.md)) | `arena_team_custom.c` |
 | `0x0203FFFC`-`0x0203FFFF` | `RAM_PA_WIDE` | Per battle: the Program Advances past nine bits formed this battle (`RAM_PA_WIDE`: a u32, a bit an id from `BN6_PA_WIDE_FIRST`, side 0's; BN6's own per-battle bits at `0x0203CA48` end at id 383: [The chip registry and BN5's chips' code](../../rom/chips-code.md), BN5's last Program Advances) | `xchips_wide.c` |
+
+The same plan names what the engine keeps in the cart's save RAM (`0x0E000000`, 32 KB; `SRAM_*`, the plan's `save` zone). BN6 reaches that RAM through its save library alone, each call's address and size a literal: the game's save (`0x0E000100`, 0x6710 bytes) and three small blocks from `0x0E007E00` (`BN6_SAVE_MAIN`, `BN6_SAVE_BLOCK_1`-`3`, `src/emu/bn6_chips.h`). A run reads them as the game boots and writes them only where BN6's own save still runs, at a Chip Trader's trade (the PET's Save takes a checkpoint instead, [The PET in a run](../../game/pet.md)). Between the save and the blocks lie 5,616 bytes no call addresses, and every state the engine writes holds the save RAM whole, so what is kept there travels with a checkpoint, a `.cwsave` and the boot's state as the work RAM does; a NetBattle's rollback snapshot, the core's raw state, takes it beside ([The chip registry and BN5's chips' code](../../rom/chips-code.md), The pack in the save RAM: who sits around it, every run that watched it, what would show a collision):
+
+| Save RAM | Region | Contents | Code |
+| --- | --- | --- | --- |
+| `0x0E006810`-`0x0E0069FF` | | Free (496 bytes; zone save) | |
+| `0x0E006A00`-`0x0E007C4F` | `SRAM_PACK` | The chip pack's entries of ids 635-1023 (`BN6_PACK_SAVE_FIRST`, `bn6_pack_entry`): 16 bytes that say they are made (`BN6_PACK_SAVE_MARK`; a state from before them holds 0xFF there, and `xchips_pack_ready` zeroes the entries as a core is made or a state loaded), then 12 bytes an id from `0x0E006A10` (`BN6_PACK_SAVE`: four counts, then four order stamps of two bytes), read and written a byte at a time by BN6's own pack code through the routines at `CHIPS_CODE`, zeroed by the pack's clear, and kept beside a NetBattle's rollback snapshots (`xchips_pack_keep`) | `xchips_pack.c` |
+| `0x0E007C50`-`0x0E007DFF` | | Free (432 bytes; zone save) | |
 
 BN5's chip AI's rooms (issue #182; `src/emu/darkinvs_room.h`): in a
 NetBattle a MegaMan other than side 0's player whom BN5's chip AI takes

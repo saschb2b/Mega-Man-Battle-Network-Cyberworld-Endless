@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Thunder1 B (its chip 57) against the registry's row for it (id 647), its family 0x26, a state of BN4's MegaMan's, moved by tools/xchiprecipe_bn4.py as an attack unit (BN6's grown attack family 0xD6) with BN4's own thunder, the third kind's 0x2A (Billy's recipe runs BN6's object for it; the chip's unit moves BN4's, its sprite copied; docs/multirom/bn4-chips.md): each picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2). The ball made at t34 with its sound (BN4's 0xAD, the grown table's slot 0x201), creeping after the Mettaur while MegaMan is struck by its wave (t97), striking it at t123 (100 HP left in both), gone at t129.",
+ "folder4": [
+  "0239"
+ ],
+ "folder6": [
+  "287:01"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

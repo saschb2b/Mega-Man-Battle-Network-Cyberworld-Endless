@@ -36,6 +36,8 @@ HEADER = 'src/emu/free_space.h'
 DOC = 'docs/engine/emulation/memory.md'
 EMU_FREE = 0x08800000
 FREE_SIZE = 0x800000
+# a zone's space and its bounds: the ROM copy's free space, BN6's work RAM, the cart's save RAM
+SPACES = {'rom': (EMU_FREE, EMU_FREE + FREE_SIZE), 'ram': (0x02000000, 0x02040000), 'save': (0x0E000000, 0x0E008000)}
 FLAGS = ('end', 'free')
 
 
@@ -84,8 +86,8 @@ def parse(path=None):
                 continue
             if text.startswith('zone '):
                 parts = text.split(None, 6)
-                if len(parts) < 7 or parts[2] not in ('rom', 'ram'):
-                    raise SystemExit(f'{PLAN}:{n}: zone KEY rom|ram START END NAMES title')
+                if len(parts) < 7 or parts[2] not in SPACES:
+                    raise SystemExit(f'{PLAN}:{n}: zone KEY rom|ram|save START END NAMES title')
                 _, key, space, at, end, names, title = parts
                 names = dict(x.split('=', 1) for x in ([] if names == '-' else names.split(',')))
                 zones.append(Zone(key, space, number(at, space, n), number(end, space, n), names, title, n))
@@ -127,7 +129,7 @@ def problems(zones, regions, files=True):
                 bad.append(f'{k}: named twice')
     last = {}
     for z in zones:
-        lo, hi = (EMU_FREE, EMU_FREE + FREE_SIZE) if z.space == 'rom' else (0x02000000, 0x02040000)
+        lo, hi = SPACES[z.space]
         if not lo <= z.at < z.end <= hi:
             bad.append(f'zone {z.key}: {z.at:08x}-{z.end:08x} outside {lo:08x}-{hi:08x}')
         if z.space in last and z.at < last[z.space].end:
@@ -224,7 +226,7 @@ def header(zones, regions):
             out.append(define(name, place(z, z.at if k == 'start' else z.end)))
     out += ['', '/* The plan as tables: X(name, start, end, parent, zone), in address order,',
             ' * a part after its parent ("" none); X(key, start, end) the zones */']
-    for space, macro in (('rom', 'FREE_SPACE_ROM'), ('ram', 'FREE_SPACE_RAM')):
+    for space, macro in (('rom', 'FREE_SPACE_ROM'), ('ram', 'FREE_SPACE_RAM'), ('save', 'FREE_SPACE_SAVE')):
         rows = [f'\tX("{r.name}", {place(z, r.at)}, {place(z, r.end)}, "{r.parent or ""}", "{z.key}")'
                 for z in zones if z.space == space for r in z.regions]
         out.append(f'#define {macro}(X) \\')
@@ -257,7 +259,8 @@ def doc_tables(zones, text):
         m = ROW.match(line)
         if m:
             words[m.group(2).strip('`')] = m.group(3)
-    for space, head in (('rom', '| Offset | Region | Contents | Code |'), ('ram', '| Range | Region | Contents | Code |')):
+    for space, head in (('rom', '| Offset | Region | Contents | Code |'), ('ram', '| Range | Region | Contents | Code |'),
+                        ('save', '| Save RAM | Region | Contents | Code |')):
         if head not in lines:
             raise SystemExit(f'{DOC}: no table starting "{head}"')
         i = lines.index(head)

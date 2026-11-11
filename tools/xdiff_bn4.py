@@ -894,6 +894,7 @@ SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its 
 
 
 SPEC_SUBJECT = set()   # (the spec's subject, where it names one: bn6_sounds_alone)
+SPEC_CHIPS = set()     # (the spec's chips, BN4's ids of its folder4: a sound row of a chip unit's, its "chips", holds in their specs alone)
 
 
 def bn4_sounds():
@@ -902,9 +903,12 @@ def bn4_sounds():
     a number another row pairs otherwise: ThunderMan's 0xAD, the thunder's launch's in BN4's own code) holds only in a battle
     of one of them, over the other"""
     rows = [r for r in json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', []) if 'bn4' in r]
-    mine = lambda r: bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
+    # (... and a row naming "chips", BN4's ids: a chip unit's copy of a number another row pairs otherwise, Thunder's ball's
+    # 0xAD, in the specs whose folder holds one of them alone, over the others)
+    scoped = lambda r: 2 if 'chips' in r else 1 if 'foes' in r else 0
+    mine = lambda r: bool(SPEC_CHIPS & {int(x, 0) for x in r['chips']}) if 'chips' in r else bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
     return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
-            for r in sorted(rows, key=lambda r: 'foes' in r) if 'foes' not in r or mine(r)}
+            for r in sorted(rows, key=scoped) if not scoped(r) or mine(r)}
 
 
 def bn6_sounds_alone():
@@ -1566,6 +1570,8 @@ def compare(spec, ta, tb, canon, show=6):
     SPEC_SUBJECT.update({spec['subject']} if spec.get('subject') else ())
     SPEC_FOES.clear()
     SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
+    SPEC_CHIPS.clear()
+    SPEC_CHIPS.update(int(x, 16) & 0x1FF for x in spec.get('folder4', []))
     stop, lines, ranks, before = None, [], {}, None
     left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()

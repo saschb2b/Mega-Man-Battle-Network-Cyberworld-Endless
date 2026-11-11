@@ -694,3 +694,35 @@ TYPES = {
     (4, 0x83): ('unreachable', None, 'families', "the panel claim the fire column's spark asks for (BN5 0x080EA08C, behind 0x080090E8's "
                                                  "test of BattleState+0x32 bit 0x40): BN6's twin 0x080E5736 left to it"),
 }
+
+# The types a Navi of BN5's not yet moved will move, ahead of its rows above: read by tools/xnavirecipe.py --report --ai 1 5 17
+# 18 19 20 21 (11 November 2026, dev 6795cf9e; each Navi's code walked from its state table and hooks, the types its spawns
+# name with no BN6 type running the same code). The dispatch's MOVED table is one for every game, indexed by the number
+# (src/emu/xvirus_dispatch.h): a type of BN5's moved takes BN5's own number, so no other game's moved type may hold it
+# (dispatch_reserved). A Navi moved gets its rows in TYPES; its entries here may stay.
+# (kind, BN5's type): the Navi (its AI index in BN5)
+NAVI_TYPES_AHEAD = {
+    (1, 0x10): 'ProtoMan (1)', (3, 0x2B): 'ProtoMan (1)', (3, 0x69): 'ProtoMan (1)', (3, 0x6B): 'ProtoMan (1)',
+    (3, 0x60): 'MagnetMan (5)', (3, 0x62): 'MagnetMan (5)', (3, 0x63): 'MagnetMan (5)', (3, 0x64): 'MagnetMan (5)',
+    (3, 0x66): 'MagnetMan (5)', (4, 0x19): 'MagnetMan (5)',
+    (3, 0xB0): 'LarkMan (17)', (3, 0xBB): 'LarkMan (17)', (3, 0xBA): 'LarkMan (17)', (3, 0xC7): 'LarkMan (17)',
+    (3, 0xCB): 'LarkMan (17)',
+    (1, 0x18): 'GridMan (18)', (3, 0x94): 'GridMan (18)', (3, 0x95): 'GridMan (18)', (3, 0xC6): 'GridMan (18)',
+    (3, 0xC8): 'GridMan (18)', (4, 0x58): 'GridMan (18)',
+    (1, 0x57): 'Bass (19)', (3, 0x72): 'Bass (19)', (3, 0x82): 'Bass (19)', (4, 0x0A): 'Bass (19)',
+    (1, 0x1A): 'Nebula Grey (20)', (1, 0x23): 'Nebula Grey (20)', (3, 0x4F): 'Nebula Grey (20)', (3, 0x56): 'Nebula Grey (20)',
+    (3, 0xB5): 'Nebula Grey (20)', (3, 0xB6): 'Nebula Grey (20)', (3, 0xBD): 'Nebula Grey (20)', (3, 0xBE): 'Nebula Grey (20)',
+    (4, 0x4B): 'Nebula Grey (20)', (4, 0x63): 'Nebula Grey (20)', (4, 0x68): 'Nebula Grey (20)', (4, 0x71): 'Nebula Grey (20)',
+    (4, 0x7A): 'Nebula Grey (20)',
+    (3, 0x04): "ShadeMan's last form (21)", (3, 0x0E): "ShadeMan's last form (21)", (3, 0x10): "ShadeMan's last form (21)",
+    (4, 0x28): 'ProtoMan (1), LarkMan (17), Bass (19)',
+}
+
+
+def dispatch_reserved(kind):
+    """BN5's numbers of a kind the dispatch's MOVED table holds or will, each with whose it is: every type a track of BN5's
+    moves (TYPES) and every one a Navi not yet moved will (NAVI_TYPES_AHEAD). No other game's moved type takes one
+    (tools/xchiprecipe_bn4.py numbers_reserved; build.py lint)"""
+    out = {t: who for (k, t), who in NAVI_TYPES_AHEAD.items() if k == kind}
+    out.update({t: f"the {d[2]}' ({d[3].split(':')[0]})" for (k, t), d in TYPES.items() if k == kind and d[0] == 'moved'})
+    return out

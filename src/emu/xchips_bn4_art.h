@@ -29,6 +29,7 @@
 #define XC4_SLOT        0x800u
 #define XC4_SLOTS       ((XC4_END - XC4_ROOM - XC4_ROOM_TAGS) / XC4_SLOT)
 #define XC4_ROOM_SLOT(i) (XC4_ROOM + XC4_ROOM_TAGS + XC4_SLOT * (uint32_t)(i))
+_Static_assert(XC4_SLOTS <= 63 && 2u * XC4_SLOTS <= XC4_ROOM_TAGS, "the art's room: its slots a bit each of 64, a tag each");
 #define XC4_ROWS        (XC4_SLOT / 4u)               /* the rows a slot's start can tell apart */
 /* a row's place in a recipe (XvSprite.at): row k's address in the first slot, which names it whichever slot it is in */
 #define XC4_ROOM_ROW(k) (XC4_ROOM_SLOT(0) + 4u * (uint32_t)(k))

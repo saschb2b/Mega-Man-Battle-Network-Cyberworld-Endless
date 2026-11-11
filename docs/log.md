@@ -2,6 +2,9 @@
 
 ## 2026-11-12
 * **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
+* **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers, a new section: BN5's numbers reserved in one place, the guard in the generator and lint, five units renumbered; the numbers run short).
+* **Update**: rom/chips-code.md (The pack in the save RAM, new row: ids 635-1023's pack entries in the cart's save RAM, BN6's save blocks and library, the order stamps' routines; its description and index line), multirom/bn4-chips.md (every BN4 folder chip has a pack entry; its description and index line), engine/emulation/memory.md (the save RAM's table), engine/emulation/free-space.md (the `save` zone), devtools/ram-survey.md (`--watch`, `CYBERWORLD_RAM_WATCH`; its description and index line), devtools/battle-on-demand.md (`chip ID` alone), engine/saves.md, online/arena/rollback/overview.md, code/emu.md, code/tests.md, code/tools.md.
+* **Update**: multirom/bn4-chips.md (FlmLine1-3, Thunder1-3 and TwnFng1-3 moved; the arm shared; the units' art room, its start moved, and what it does not hold), rom/bn4.md (their code, new row), devtools/chip-recipe-generator.md (a shared type, a unit's own move of a paired type), devtools/differential.md (a sound row by a spec's chips; BN4's chip units' code keyed in the specs that play a moved chip of BN4's alone).
 * **Update**: devtools/agents-tools.md (the `darkloid/NAME` routes: a BN5 Darkloid's battle in BN6's engine, for a look at each).
 * **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
 * **Update**: multirom/bn4-navis.md (TopMan built, the first of the other build: his palette by version, two collision fields, his top drawn with his own sprite, the comparator's no-AI-data masks for him; the third kind's dispatch numbers nearly spent), rom/bn4.md (TopMan derived, new row), re/ledger.json.
@@ -31,6 +34,7 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
 * **Update**: devtools/differential.md and multirom/bn4-chips.md (a dark MegaMan's palette, BN4's own, the comparator's one allowance for a dark karma; `bn4_chip_invis_dark`).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
