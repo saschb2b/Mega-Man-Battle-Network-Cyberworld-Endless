@@ -1,0 +1,1 @@
+a Server pays a pick of one chip from three, each the best of four rolls, docs/game/core-loop.md Phase 2
