@@ -332,8 +332,7 @@ So the build adds a third limit, and `build.py pacing` holds it:
   pass stays local, as everything that needs the game does.
 - **Pressure is measured at V1 and scaled by the hit.** That a family's
   pressure grows with its hit alone is assumed, not measured: a later
-  version may also act faster. The pairs' pass measures the versions the
-  acts take for the families it flags.
+  version may also act faster. The pairs' pass was fought at V1 too.
 
 ## The build phase
 
@@ -424,11 +423,22 @@ November 2026, behind a dev switch: no run of a player's holds a group.
 
 Left of step 1, each measured before step 2 rests on it:
 
-- **The pairs' pass** (`tools/encounter_danger.py`): every pair of the
-  pool fought once, and the pairs whose pressure runs past 1.25 of the
-  sum their families predict into the tags. Twelve of 115 sampled did
-  (Danger, above), so until then a group of step 2 could press harder
-  than its cap says.
+- **The pairs' pass, done** (`tools/encounter_danger.py pairs`, 11
+  November 2026): every two families of the pool fought once at V1,
+  1,830 pairs ([measured](encounter-groups-measured.md), The pairs'
+  pass). Pressure adds up to less than its parts: the median pair presses
+  0.72 of the sum of its two families' own. 28 pairs press past 1.25 of
+  it, most where the sum is small, and the most any pair presses past its
+  sum is 120 HP in 20 seconds. The 27 pairs 40 HP or more past their sum
+  are in the tags (`group_pairs`, `src/core/group_tags.c`): a group that
+  holds one is predicted that much harder, by the larger of the two
+  families' hits at the version fought over their V1's, in the engine
+  and in the tool alike. That holds back 165 of 54,617 fillings with
+  every ROM, and the caps stay as they are (the acts' own battles'
+  three-quarter marks did not move). One family, BN6's 21, is in 11 of
+  the 27: alone it presses a standing MegaMan little, beside another it
+  does. The pairs were fought at V1; that a pair's excess grows with its
+  hit as a family's own pressure does is assumed.
 - **Seven of BN5's families roam from the first act** with no role: no
   record of the areas BN5 lends sets them, and BN5's other maps' battle
   tables are not read yet. The band still holds their HP and hit.

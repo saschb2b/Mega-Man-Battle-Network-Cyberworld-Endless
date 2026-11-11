@@ -68,6 +68,14 @@ extern const GroupTag group_tags[];
 extern const int group_tags_count;
 /* ... of net `net`'s family `family`, NULL where it was not measured */
 const GroupTag *group_tag(int net, int family);
+/* Two families that press harder together than their own pressures add
+ * up to (the pairs' pass, tools/encounter_danger.py pairs: every two of
+ * the pool fought once at V1), and by how much in 20 seconds */
+typedef struct { int8_t net_a; int16_t family_a; int8_t net_b; int16_t family_b; int16_t extra; } GroupPair;
+extern const GroupPair group_pairs[];
+extern const int group_pairs_count;
+/* ... of the two families (either way round), 0 where they do not */
+int group_pair_extra(int net_a, int family_a, int net_b, int family_b);
 
 /* The templates */
 enum {
@@ -111,7 +119,9 @@ int group_pressure_cap(int act);
 /* A template filled: the pool's families (their indexes, a swarm's the
  * same three times), the version of each, the group's HP together and its
  * pressure as its families' own predict it (each one's measured alone at
- * V1, by its hit at the version fought over its V1's) */
+ * V1, by its hit at the version fought over its V1's; and for two the
+ * pairs' pass found pressing harder together, that excess by the larger
+ * of their hits over their V1's) */
 typedef struct {
 	int8_t template, n;
 	int16_t fam[GROUP_SIZE];
