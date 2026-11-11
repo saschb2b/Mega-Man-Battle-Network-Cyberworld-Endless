@@ -306,10 +306,51 @@ Advances, play once BN4's recipes are listed (BN4's list read into BN6's
 grown one, as BN5's were: not built). Every attack unit to come that
 draws the arm shares this copy of it (not built: the second unit's work).
 
+**FlmLine1-3, Thunder1-3 and TwnFng1-3 are moved** (10 November 2026:
+ids 595-597, 647-649 and 656-658; BN4's families 0x22, 0x26 and 0x34 at
+BN6's grown attack families 0xD1, 0xD6 and 0xD3). Each is its state with
+the object it spawns: FlmLine's flame (the third kind's 0x19, three on
+the column two ahead), TwnFng's fang (the third kind's 0x51, one to the
+row above and one to the row below, then along them), and for Thunder
+BN4's own thunder (the third kind's 0x2A): Billy's recipe runs BN6's
+object for it, drawn from BN6's art, which a family's rule allows by its
+foe, so the chip's unit moves BN4's and its ball is BN4's in every
+battle. **The arm is shared:** the Spreads unit's copy of the third
+kind's 0x02 serves FlmLine too, which copies the arm's spawner alone (40
+bytes) and spawns the owner's number of the dispatch; the kinds every
+unit draws are rows of the owner's copy of the table. BN6 has none of
+the three states, so MegaMan's animations are given BN6's numbers by the
+art: the animations of the same frames' durations in each game's sprite
+of him. Eleven specs pass, each object in play in the fight's frames (a
+140 HP Mettaur left 70, 20 and 0 by FlmLine1-3, the third compared to
+the hit; 100, 80 and 60 by Thunder1-3, the ball creeping 90 frames while
+MegaMan is struck; 70, 40 and 10 by TwnFng1-3, used before the Mettaur
+leaves its row; a miss each for FlmLine and TwnFng), thirteen mutations
+caught. A sound row can now hold in the specs of a chip unit's chips
+alone (`chips`: Thunder's ball's 0xAD, which Billy's thunder and
+ThunderMan pair otherwise). **Waiting:** FlmCros1-3 and BstFang1-3, the
+families' Program Advances (their subfamily 1, in the moved states
+already), on BN4's recipes; Thunder's and TwnFng's ids are past 602 and
+have no pack entry yet, so a run cannot hold them until the pack's RAM
+for those ids lands.
+
+**The units' art room is the scarce one** (11 November 2026). A unit's
+sprites are copied whole at the core's start, and an arm's kind is a
+sprite of its own, 9 to 14 KB each: the spread unit's five take 49 KB,
+and the twelve units to TwnFng 130 KB, against 8 KB of code. The room
+(`XC4_ART` to `XC4_END`) was 127 KB of the region; its start is moved
+down inside the region (`FREE_BN4_CHIPS` + 0x24000, the code's room 48 KB
+of which the twelve take 8), which makes it 176 KB and holds these
+units. It does not hold the list: the plan has some 260 KB free in all
+(`tools/free_space.py`). What follows is the generator's line's: a
+unit's art copied per battle into a fixed room, for the chips of the
+battle's folder alone, as BN4's Navis' art is ([how a region is
+placed](../engine/emulation/free-space.md)).
+
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
-chips brought; of those FlmLine, Thunder and TwnFng are next. BugChain
+chips brought; of those MagBolt, PropBom and SeekBom are next. BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
 other's record, a NetBattle chip). Marking and the four Plus chips are
 cut (call 7, answered).

@@ -695,6 +695,7 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 /* its table 080CD524's kind 6: sprite 3:0xd in BN4, 0x73 in BN6 (copied) */
 /* its table 080CD524's kind 14: sprite 3:0x1c in BN4, 0x74 in BN6 (copied) */
 /* its table 080CD524's kind 50: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
+/* its table 080CD524's kind 12: sprite 3:0x1e in BN4, 0x75 in BN6 (copied) */
 /* its effect 0x25 (its table 080CF3DC's): BN6's 0xca, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0x9f (its table 080CF3DC's): BN4's song at slot 0x3d, the families' slot for it (FAMILY_SLOTS) */
 /* its effect 0x29 (its table 080CF3DC's): BN6's 0xc9, moved (no effect of BN6's draws its sprite's bytes) */
@@ -801,8 +802,9 @@ static const XvSprite spreads_sprites[] = {
 	{ 3, 0x19, 3, 0x72, XC4_ART + 0x10100, 0x3600 },   /* BN4's 3:0x19 copied */
 	{ 3, 0x0D, 3, 0x73, XC4_ART + 0x13700, 0x2400 },   /* BN4's 3:0xd copied */
 	{ 3, 0x1C, 3, 0x74, XC4_ART + 0x15B00, 0x2700 },   /* BN4's 3:0x1c copied */
-	{ 3, 0x1A, 4, 0x9C, XC4_ART + 0x18200, 0x1100 },   /* BN4's 3:0x1a copied */
-	{ 5, 0x11, 5, 0xEA, XC4_ART + 0x19300, 0x2F00 },   /* BN4's 5:0x11 copied */
+	{ 3, 0x1E, 3, 0x75, XC4_ART + 0x18200, 0x1900 },   /* BN4's 3:0x1e copied */
+	{ 3, 0x1A, 4, 0x9C, XC4_ART + 0x19B00, 0x1100 },   /* BN4's 3:0x1a copied */
+	{ 5, 0x11, 5, 0xEA, XC4_ART + 0x1AC00, 0x2F00 },   /* BN4's 5:0x11 copied */
 };
 static const XvId spreads_effects[] = { { 0x25, 0xCA }, { 0x29, 0xC9 } };
 static const XvByte spreads_bytes[] = {
@@ -810,6 +812,7 @@ static const XvByte spreads_bytes[] = {
 	{ 0x080CD53D, 0x0D, 0x73 },   /* its table's kind 6: list 3 0xd in BN4, 0x73 in BN6 (copied) */
 	{ 0x080CD55D, 0x1C, 0x74 },   /* its table's kind 14: list 3 0x1c in BN4, 0x74 in BN6 (copied) */
 	{ 0x080CD5ED, 0x19, 0x72 },   /* its table's kind 50: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
+	{ 0x080CD555, 0x1E, 0x75 },   /* its table's kind 12: list 3 0x1e in BN4, 0x75 in BN6 (copied) */
 	{ 0x080CF3EE, 0x25, 0xCA },   /* its table's kind 0x4's effect: 0x25 in BN4, 0xca in BN6 (moved) */
 	{ 0x080CF3EF, 0x9F, 0x3D },   /* its table's kind 0x4's sound: BN4's 0x9f at BN6's slot 0x3d */
 	{ 0x080CF3F2, 0x25, 0xCA },   /* its table's kind 0x5's effect: 0x25 in BN4, 0xca in BN6 (moved) */
@@ -844,6 +847,268 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 	.sprites = spreads_sprites, .nsprites = (int)(sizeof spreads_sprites / sizeof *spreads_sprites), \
 	.effects = spreads_effects, .neffects = (int)(sizeof spreads_effects / sizeof *spreads_effects), \
 	.bytes = spreads_bytes, .nbytes = (int)(sizeof spreads_bytes / sizeof *spreads_bytes) }
+/* ---- FlmLine: BN4's attack 0x22 (080ECAAF) as BN6's 0xd1; its chips 12 (595), 13 (596), 14 (597) ---- */
+/* MegaMan's state 0x22 (080ECAAE-080ECB74), the family of its chips' records: moved */
+/* its third-kind 0x19 (080CFF80-080D014E), spawned through 080D00D8: no BN6 type proved its twin, moved */
+/* its third-kind 0x2: Spreads's copy, the dispatch's 0xc2, shared (its spawner copied) */
+/* its sprite 4:0xa (080CFFB2): BN6's 4:0x9b, copied */
+/* its sound 0x9d: BN4's song at slot 0x36, the families' slot for it (FAMILY_SLOTS) */
+/* its chip 329 (id 608) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 330 (id 609) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 331 (id 610) sits out: a Program Advance, unformed until BN4's recipes are listed */
+
+static const XvBlock flmline_blocks[] = {
+	{ 0x080ECAAE, 0x080ECB74, XC4_CODE + 0x1762, 0xACD55EB9u },
+	{ 0x080CFF80, 0x080D014E, XC4_CODE + 0x1830, 0x12544EF6u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x1A00, 0x6FFE1431u },
+};
+static const XvData flmline_data[] = {
+	{ 0x080ECAC0, 0x080ECAC4, XV_POOL },
+	{ 0x080ECAC4, 0x080ECACC, XV_TABLE },
+	{ 0x080CFF92, 0x080CFF94, XV_RAW },
+	{ 0x080CFF94, 0x080CFF98, XV_POOL },
+	{ 0x080CFF98, 0x080CFFA4, XV_TABLE },
+	{ 0x080D002E, 0x080D0030, XV_RAW },
+	{ 0x080D0030, 0x080D0034, XV_POOL },
+	{ 0x080D0034, 0x080D0040, XV_TABLE },
+	{ 0x080D013A, 0x080D014E, XV_RAW },
+};
+static const XvPair flmline_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D7CA, 0x08013774 },   /* project:project:chips, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+};
+static const XvPair flmline_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm flmline_imms[] = {
+	{ 0x080CD6E4, THUMB_MOVS, 0, 0, 0x2, 0xC2 },   /* its object's type 0x2: moved, the dispatch's 0xc2 */
+	{ 0x080CFFAE, THUMB_MOVS, 2, 0, 0xA, 0x9B },   /* its object's sprite: list 4 0xa in BN4, 0x9b in BN6 (copied) */
+	{ 0x080CFFF8, THUMB_MOVS, 0, 0, 0x9D, 0x36 },   /* its sound 0x9d: BN4's copied into BN6's slot 0x36, a BN4 family's too */
+	{ 0x080D0014, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D00BC, THUMB_MOVS, 0, 0, 0x19, 0xBD },   /* its object's type 0x19: moved, the dispatch's 0xbd */
+	{ 0x080D00CC, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080ECAB2, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+	{ 0x080ECAD4, THUMB_MOVS, 0, 0, 0xD, 0xA },   /* MegaMan's animation as he readies FlmLine: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of 2 in each art) */
+	{ 0x080ECAEA, THUMB_MOVS, 1, 0, 0x23, 0x29 },   /* the battle NaviStats' Navi, 0 MegaMan (his arm's animation by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI) */
+	{ 0x080ECB14, THUMB_MOVS, 0, 0, 0x11, 0xD },   /* MegaMan's animation as he fires FlmLine: BN4's 0x11, BN6's 0x0D of its own sprite of him (frames of 3 and 2 in each art) */
+};
+static const XvType flmline_types[] = {
+	{ 3, 0xBD, XV_TYPE_MOVED, 0x19 },   /* BN4's third-kind 0x19, moved, the dispatch's 0xbd */
+	{ 3, 0xC2, XV_TYPE_SHARED, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy: the dispatch's 0xc2 */
+};
+static const XvSprite flmline_sprites[] = {
+	{ 4, 0x0A, 4, 0x9B, XC4_ART + 0x1DB00, 0x1F00 },   /* BN4's 4:0xa copied */
+};
+static const XcSong flmline_songs[] = { { 0x9D, 0x36 } };
+
+#define FLMLINE_CODE { .name = "FlmLine (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2C00), \
+	.blocks = flmline_blocks, .nblocks = (int)(sizeof flmline_blocks / sizeof *flmline_blocks), \
+	.data = flmline_data, .ndata = (int)(sizeof flmline_data / sizeof *flmline_data), \
+	.calls = flmline_calls, .ncalls = (int)(sizeof flmline_calls / sizeof *flmline_calls), \
+	.words = flmline_words, .nwords = (int)(sizeof flmline_words / sizeof *flmline_words), \
+	.imms = flmline_imms, .nimms = (int)(sizeof flmline_imms / sizeof *flmline_imms), \
+	.types = flmline_types, .ntypes = (int)(sizeof flmline_types / sizeof *flmline_types), \
+	.sprites = flmline_sprites, .nsprites = (int)(sizeof flmline_sprites / sizeof *flmline_sprites) }
+/* ---- Thunder: BN4's attack 0x26 (080ECE15) as BN6's 0xd6; its chips 57 (647), 58 (648), 59 (649) ---- */
+/* MegaMan's state 0x26 (080ECE14-080ECEAE), the family of its chips' records: moved */
+/* its sprite 4:0x11 (080D2048): BN6's 4:0x9a, copied */
+/* its sound 0xad (080D20B0): BN4's song copied into the grown song table's slot 0x201, on BN4's player 26 */
+
+static const XvBlock thunder_blocks[] = {
+	{ 0x080ECE14, 0x080ECEAE, XC4_CODE + 0x1A30, 0x9EFCA62Au },
+	{ 0x080D2000, 0x080D2224, XC4_CODE + 0x1AD0, 0xC7652602u },
+};
+static const XvData thunder_data[] = {
+	{ 0x080ECE26, 0x080ECE28, XV_RAW },
+	{ 0x080ECE28, 0x080ECE2C, XV_POOL },
+	{ 0x080ECE2C, 0x080ECE34, XV_TABLE },
+	{ 0x080D2012, 0x080D2014, XV_RAW },
+	{ 0x080D2014, 0x080D2018, XV_POOL },
+	{ 0x080D2018, 0x080D2024, XV_TABLE },
+	{ 0x080D210A, 0x080D210C, XV_RAW },
+	{ 0x080D210C, 0x080D2110, XV_POOL },
+	{ 0x080D2110, 0x080D2114, XV_TABLE },
+	{ 0x080D2114, 0x080D2118, XV_POOL },
+	{ 0x080D21CC, 0x080D21D4, XV_POOL },
+	{ 0x080D221C, 0x080D2224, XV_POOL },
+};
+static const XvPair thunder_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E56, 0x08002DEA },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08010560, 0x080D0B94 },   /* project:spikey, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08013212, 0x0801A258 },   /* project:gutsman, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+};
+static const XvPair thunder_words[] = {
+};
+static const XvImm thunder_imms[] = {
+	{ 0x080D2044, THUMB_MOVS, 2, 0, 0x11, 0x9A },   /* its object's sprite: list 4 0x11 in BN4, 0x9a in BN6 (copied) */
+	{ 0x080D20DE, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D215A, THUMB_MOVS, 0, 0, 0x2A, 0xBB },   /* its object's type 0x2a: moved, the dispatch's 0xbb */
+	{ 0x080D216A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080ECE18, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+	{ 0x080ECE3C, THUMB_MOVS, 0, 0, 0x12, 0xE },   /* MegaMan's animation as he throws Thunder: BN4's 0x12, BN6's 0x0E of its own sprite of him (frames of 1, 2, 2 and 3 in each art) */
+};
+static const XvNumber thunder_numbers[] = {
+	{ 0x080D221C, 0x04000000, 0x04000000 },   /* a panel's flag, the thunder's search for its target by its side (BN4 0x080D21E8 after its panel's flags, 0x08009A86; BN6's own thunder tests the same bit, 0x080CAE60) */
+	{ 0x080D2220, 0x08000000, 0x08000000 },   /* ... the other side's (BN4 0x080D2208; BN6's 0x080CAE66) */
+};
+static const XvType thunder_types[] = {
+	{ 3, 0xBB, XV_TYPE_MOVED, 0x2A },   /* BN4's third-kind 0x2a, moved, the dispatch's 0xbb */
+};
+static const XvSprite thunder_sprites[] = {
+	{ 4, 0x11, 4, 0x9A, XC4_ART + 0x1FA00, 0xB00 },   /* BN4's 4:0x11 copied */
+};
+static const XvSoundCall thunder_sound_calls[] = {
+	{ 0x080D20B0, 0x201 },   /* its sound 0xad: BN4's song at the grown table's slot 0x201 */
+};
+static const XcSong thunder_songs[] = { { 0xAD, 0x201 } };
+
+#define THUNDER_CODE { .name = "Thunder (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x3000), \
+	.blocks = thunder_blocks, .nblocks = (int)(sizeof thunder_blocks / sizeof *thunder_blocks), \
+	.data = thunder_data, .ndata = (int)(sizeof thunder_data / sizeof *thunder_data), \
+	.calls = thunder_calls, .ncalls = (int)(sizeof thunder_calls / sizeof *thunder_calls), \
+	.words = thunder_words, .nwords = (int)(sizeof thunder_words / sizeof *thunder_words), \
+	.imms = thunder_imms, .nimms = (int)(sizeof thunder_imms / sizeof *thunder_imms), \
+	.numbers = thunder_numbers, .nnumbers = (int)(sizeof thunder_numbers / sizeof *thunder_numbers), \
+	.types = thunder_types, .ntypes = (int)(sizeof thunder_types / sizeof *thunder_types), \
+	.sound_calls = thunder_sound_calls, .nsound_calls = (int)(sizeof thunder_sound_calls / sizeof *thunder_sound_calls), \
+	.sprites = thunder_sprites, .nsprites = (int)(sizeof thunder_sprites / sizeof *thunder_sprites) }
+/* ---- TwnFng: BN4's attack 0x34 (080ED4C7) as BN6's 0xd3; its chips 69 (656), 70 (657), 71 (658) ---- */
+/* MegaMan's state 0x34 (080ED4C6-080ED572), the family of its chips' records: moved */
+/* its sprite 4:0x27 (080D79EC): BN6's 4:0x99, copied */
+/* its effect 0x15: 0xcb, as MokoRus moved it */
+/* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
+/* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0xa6: BN4's song at slot 0x38, the families' slot for it (FAMILY_SLOTS) */
+/* its chip 335 (id 614) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 336 (id 615) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 337 (id 616) sits out: a Program Advance, unformed until BN4's recipes are listed */
+
+static const XvBlock twnfng_blocks[] = {
+	{ 0x080ED4C6, 0x080ED572, XC4_CODE + 0x1D02, 0x5BDE5F2Cu },
+	{ 0x080D79B8, 0x080D7B64, XC4_CODE + 0x1DB0, 0x709BC9C5u },
+};
+static const XvData twnfng_data[] = {
+	{ 0x080ED4D8, 0x080ED4DC, XV_POOL },
+	{ 0x080ED4DC, 0x080ED4E8, XV_TABLE },
+	{ 0x080D79CA, 0x080D79CC, XV_RAW },
+	{ 0x080D79CC, 0x080D79D0, XV_POOL },
+	{ 0x080D79D0, 0x080D79DC, XV_TABLE },
+	{ 0x080D7AA0, 0x080D7AA4, XV_POOL },
+	{ 0x080D7AA4, 0x080D7AAC, XV_TABLE },
+	{ 0x080D7B5A, 0x080D7B5C, XV_RAW },
+	{ 0x080D7B5C, 0x080D7B64, XV_POOL },
+};
+static const XvPair twnfng_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012DC8, 0x0801A07C },   /* project:research, SAME */
+	{ 0x08012ED0, 0x0801A082 },   /* project:melody, DIFF (audited) */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair twnfng_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm twnfng_imms[] = {
+	{ 0x080D79E8, THUMB_MOVS, 2, 0, 0x27, 0x99 },   /* its object's sprite: list 4 0x27 in BN4, 0x99 in BN6 (copied) */
+	{ 0x080D7A54, THUMB_MOVS, 0, 0, 0xA6, 0x38 },   /* its sound 0xa6: BN4's copied into BN6's slot 0x38, a BN4 family's too */
+	{ 0x080D7A8C, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
+	{ 0x080D7AB0, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D7B0C, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080D7B3E, THUMB_MOVS, 0, 0, 0x51, 0xB9 },   /* its object's type 0x51: moved, the dispatch's 0xb9 */
+	{ 0x080D7B50, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080ED4CA, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+	{ 0x080ED4EA, THUMB_MOVS, 0, 0, 0x12, 0xE },   /* MegaMan's animation as he throws TwnFng: BN4's 0x12, BN6's 0x0E of its own sprite of him (frames of 1, 2, 2 and 3 in each art) */
+};
+static const XvType twnfng_types[] = {
+	{ 3, 0xB9, XV_TYPE_MOVED, 0x51 },   /* BN4's third-kind 0x51, moved, the dispatch's 0xb9 */
+};
+static const XvSprite twnfng_sprites[] = {
+	{ 4, 0x27, 4, 0x99, XC4_ART + 0x20500, 0x300 },   /* BN4's 4:0x27 copied */
+};
+static const XcSong twnfng_songs[] = { { 0xA6, 0x38 } };
+
+#define TWNFNG_CODE { .name = "TwnFng (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x3400), \
+	.blocks = twnfng_blocks, .nblocks = (int)(sizeof twnfng_blocks / sizeof *twnfng_blocks), \
+	.data = twnfng_data, .ndata = (int)(sizeof twnfng_data / sizeof *twnfng_data), \
+	.calls = twnfng_calls, .ncalls = (int)(sizeof twnfng_calls / sizeof *twnfng_calls), \
+	.words = twnfng_words, .nwords = (int)(sizeof twnfng_words / sizeof *twnfng_words), \
+	.imms = twnfng_imms, .nimms = (int)(sizeof twnfng_imms / sizeof *twnfng_imms), \
+	.types = twnfng_types, .ntypes = (int)(sizeof twnfng_types / sizeof *twnfng_types), \
+	.sprites = twnfng_sprites, .nsprites = (int)(sizeof twnfng_sprites / sizeof *twnfng_sprites) }
 /* ---- Hole: BN4's support 0xb (080E45F7) as BN6's 0x8b; its chips 82 (527), 216 (528), 193 (562) ---- */
 /* its fourth-kind 0x20 (080E4584-080E4618), which its routine (080E45F6) spawns: moved */
 /* its fourth-kind 0x6a (080E9838-080E98E0), which its routine (080E98BC) spawns: moved */
@@ -863,10 +1128,10 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 /* its chip 193 is a dark chip of BN4's (row 562): a battle it is used in costs 20 max HP */
 
 static const XvBlock hole_blocks[] = {
-	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x1760, 0x4B619B7Eu },
-	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x1800, 0xD3ADC8B1u },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x18B0, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x1AE0, 0x77CB1EA6u },
+	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x1F60, 0x4B619B7Eu },
+	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x2000, 0xD3ADC8B1u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x20B0, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x22E0, 0x77CB1EA6u },
 };
 static const XvData hole_data[] = {
 	{ 0x080E4592, 0x080E4594, XV_RAW },
@@ -935,7 +1200,7 @@ static const XvSoundCall hole_sound_calls[] = {
 static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F } };
 
 #define HOLE_CODE { .name = "Hole (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2C00), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x3800), \
 	.blocks = hole_blocks, .nblocks = (int)(sizeof hole_blocks / sizeof *hole_blocks), \
 	.data = hole_data, .ndata = (int)(sizeof hole_data / sizeof *hole_data), \
 	.calls = hole_calls, .ncalls = (int)(sizeof hole_calls / sizeof *hole_calls), \
@@ -956,7 +1221,10 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x01, 0x81, 0x080D252B, XC4_HOMES + 0x2000, MOKORUS_CODE, mokorus_songs, (int)(sizeof mokorus_songs / sizeof *mokorus_songs), 0, 0 },
 	{ XCHIP_MISC, 0x05, 0x85, 0x080D5DDB, XC4_HOMES + 0x2400, SIDBMBO_CODE, sidbmbo_songs, (int)(sizeof sidbmbo_songs / sizeof *sidbmbo_songs), 0, 0, 0x28 },
 	{ XCHIP_ATTACK, 0x1E, 0xD0, 0x080EC761, XC4_HOMES + 0x2800, SPREADS_CODE, spreads_songs, (int)(sizeof spreads_songs / sizeof *spreads_songs), 0, 0 },
-	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x2C00, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
-	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x3000, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 12 },
+	{ XCHIP_ATTACK, 0x22, 0xD1, 0x080ECAAF, XC4_HOMES + 0x2C00, FLMLINE_CODE, flmline_songs, (int)(sizeof flmline_songs / sizeof *flmline_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x26, 0xD6, 0x080ECE15, XC4_HOMES + 0x3000, THUNDER_CODE, thunder_songs, (int)(sizeof thunder_songs / sizeof *thunder_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x34, 0xD3, 0x080ED4C7, XC4_HOMES + 0x3400, TWNFNG_CODE, twnfng_songs, (int)(sizeof twnfng_songs / sizeof *twnfng_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x3800, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x3C00, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 15 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
