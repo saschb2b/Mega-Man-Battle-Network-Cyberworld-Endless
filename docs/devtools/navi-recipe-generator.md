@@ -3,7 +3,7 @@ type: Tool
 title: "The Navis' recipe generator"
 description: "`tools/xnavirecipe.py` derives the Navis' recipes as `tools/xrecipe.py` derives a family's, writing the control HeatMan's, the moved objects' and BN5's Navis' into `src/emu/xnavi_bn5.c`, with `--check` and a `--report`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:00:00Z }
 ---
 
 # The Navis' recipe generator
@@ -37,7 +37,10 @@ ranges for the Navis; a moved object's every compare of its parent's
 CurAction with one of the Navi's own states made BN6's number; a block
 whose code stores a byte of its own routines' addresses placed at its BN5
 address's low byte (`LOW_BYTE_KEPT`: CloudMan's clouds, [Transplanted
-Navis](../multirom/navis.md), CloudMan); the image object's kinds it spawns each one
+Navis](../multirom/navis.md), CloudMan); an effect of a Navi's that draws
+his own battle sprite given that sprite at its place (`NAVI_SPRITE_PLACES`:
+GridMan's afterimage); Nebula's two (`NEBULA`) installed after Team
+ProtoMan's, in a room of their own; the image object's kinds it spawns each one
 `tools/bn5_objects.py` fixes, and the moved objects' recipe itself
 (`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
 that table, each twin checked by its bytes). A recipe with a decision

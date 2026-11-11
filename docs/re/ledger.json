@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-11",
+  "updated": "2026-11-12",
   "previous": "2026-11-09",
   "features": [
     {
@@ -606,6 +606,10 @@
     {
       "date": "2026-11-11",
       "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
+    },
+    {
+      "date": "2026-11-12",
+      "what": "GridMan moved (docs/multirom/navis.md, GridMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_GRID_SPAWN_C6, BN5_GRID_ATTACK_POOL, BN5_GRID_EFFECT_5F): seats 17-18 for Nebula's two (AI 43-44, ids 0x3EC-0x3F3, FREE_NEBULA_NAVIS in code-low's new front); gridman_v1, gridman_v1_keys and gridman_sp PASS, five mutations caught; the third kind's 0x95 and the fourth's 0x58 his copy (his 0xC6 and 0xC8 freed of BN4's chips by their reservation, PR #376); an effect drawing its Navi's own battle sprite named at its place (own_sprite); the comparator knows the new room (XN_NEBULA_ROOM) and the 0xC6's Z leftover."
     }
   ],
   "experiments": [
