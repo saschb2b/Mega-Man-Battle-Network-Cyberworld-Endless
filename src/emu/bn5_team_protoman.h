@@ -45,7 +45,10 @@
                                        * pull, which BN6's twin (0x0800E468) dropped: the four directions of BN5_PULL_DIRECTIONS' row by
                                        * the collision data's +0xC, each its step by 0x0800C998 (BN6's twin 0x0800E4C8), the first whose
                                        * panel 0x0800CA2C (BN6's 0x0800E5AC) takes, else none; to 0x0800C912 */
-#define BN5_PULL_DIRECTIONS 0x0800C918u /* ... four words, a row of four directions' bytes each, in BN5's numbers: */
+#define BN5_PULL_ROWS     0x08013630u /* the kind-3 slide's step a frame down a row (0x00080000: 8 pixels; its move at 0x08013612, from
+                                       * the literal here), where BN6's (BN6_SLIDE_ROWS) moves its conveyors 6; across a column 10 in both */
+#define BN5_PULL_DIRECTIONS 0x0800C918u /* ... six words (the collision data's +0xC, 0-5), a row of four directions' bytes each, in BN5's
+                                       * numbers: */
 #define BN5_DIRECTION_STEPS 0x0800C9B8u /* ... a direction's step (column, row, a byte; 0x0800C998's table): 1 forward, 2 back, 3 up, 4 down,
                                        * where BN6's (BN6_DIRECTION_STEPS) are 1 up, 2 down, 3 back, 4 forward */
 #define BN5_MAGNET_LAID   0x080E24CEu /* MagnetMan's state that lays them: sound 0xFC, then type 5 (movs r2,#5 at 0x080E24EE) by

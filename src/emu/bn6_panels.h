@@ -172,6 +172,9 @@
 #define BN6_STEP_DIRECTION    0x0800E4C8u /* ... a direction's step (BN5's 0x0800C998): r0 the direction, back r0 and r1 its columns and rows,
                                              r2 its third byte */
 #define BN6_STEP_PANEL_TAKES  0x0800E5ACu /* ... whether the object may step onto (r0, r1): its flags as the answer (BN5's 0x0800CA2C) */
+#define BN6_SLIDE_ROW_MUL     0x08016822u /* the kind-3 slide's move a frame down a row: muls r2,r0 (r2 BN6_SLIDE_ROWS, r0 the step's row, r5 the
+                                             object), then added to its +0x38 */
+#define BN6_SLIDE_ROWS        0x08016838u /* ... the literal it reads: 0x00060000, 6 pixels (BN5's 8 for its magnet, BN5_PULL_ROWS) */
 #define BN6_DIRECTION_STEPS   0x0800E4E8u /* ... BN6_STEP_DIRECTION's table: a direction's column and row (signed) and a byte, 4 bytes a
                                              direction 0-4 (1 up, 2 down, 3 back, 4 forward; BN5's numbered otherwise, BN5_DIRECTION_STEPS) */
 #define BN6_PANEL_ARRIVED     0x0801A36Au /* what the panel an object comes to does (BN5's 0x08017156): the conveyors, ice's slide; */

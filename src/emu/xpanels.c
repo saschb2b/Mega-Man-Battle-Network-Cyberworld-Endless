@@ -292,7 +292,9 @@ void xpanels_magnet_arrived(uint32_t obj, uint32_t coll) {
 #define PULL_LIT    PULL_CODE
 #define PULL_VENEER (PULL_LIT + 4)
 #define PULL_TABLE  (PULL_VENEER + 2 * THUMB_VENEER_SIZE)
-#define PULL_SIZE   (PULL_TABLE + 16)
+#define PULL_ROWS   6             /* BN5_PULL_DIRECTIONS' rows, by the collision data's +0xC (0-5; its code from 0x0800C930) */
+#define PULL_SIZE   (PULL_TABLE + 4 * PULL_ROWS)
+static uint32_t pull_rows;   /* (the kind-3 slide's step a frame down a row, BN5's: BN5_PULL_ROWS, read as the core starts) */
 _Static_assert(XP_TILES + XP_TILES_SIZE + 0x100u <= XP_PULL && XP_PULL + PULL_SIZE <= XP_END, "the pull past its room (xpanels_look.h)");
 
 static bool pull_make(uint8_t out[PULL_SIZE]) {
@@ -336,7 +338,7 @@ static bool pull_make(uint8_t out[PULL_SIZE]) {
 	put32(out + PULL_LIT, XP_PULL + PULL_TABLE);
 	/* (its directions in BN5's numbers, each made BN6's of the same step: the two games' tables of a direction's column and
 	 * row matched, BN5_DIRECTION_STEPS and BN6_DIRECTION_STEPS) */
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 4 * PULL_ROWS; ++i) {
 		int d5 = bn5[(BN5_PULL_DIRECTIONS - BUS) + (uint32_t)i], d6 = -1;
 		for (int k = 0; d5 <= DIRECTIONS && k <= DIRECTIONS && d6 < 0; ++k)
 			if (get16(bn5 + (BN5_DIRECTION_STEPS - BUS) + 4u * (uint32_t)d5) == rom16(BN6_DIRECTION_STEPS + 4u * (uint32_t)k)) d6 = k;
@@ -351,8 +353,10 @@ static bool pull_make(uint8_t out[PULL_SIZE]) {
 /* BN5's branch as this makes it again: its kind's test and its first and last instructions */
 static bool pull_bn5_ok(void) {
 	const uint8_t *bn5 = XR[XROM_BN5_COLONEL_US].data;
+	pull_rows = get32(bn5 + (BN5_PULL_ROWS - BUS));
 	return get16(bn5 + (BN5_STEP_PULL - BUS)) == 0x6D68 && get16(bn5 + (BN5_STEP_PULL - BUS) + 0x40) == 0xBD10 &&
-		get16(bn5 + (BN5_STEP_PULL - BUS) - 0x2C) == 0x2803;
+		get16(bn5 + (BN5_STEP_PULL - BUS) - 0x2C) == 0x2803 && pull_rows && pull_rows < 0x00100000u &&
+		rom32(BN6_SLIDE_ROWS) == 0x00060000u;
 }
 
 /* (BN6's kind 3 is its conveyors' push: its own magnet-like routine, 0x0801A400, the twin of BN5_MAGNET_ARRIVED, asks for
@@ -367,6 +371,21 @@ static HookAct step_pull(HookRegs *r, void *user) {
 	if (!p || hook_read8(p + BN6_PANEL_TYPE) != XPANEL_MAGNET) return HOOK_CONTINUE;
 	r->r[12] = XP_PULL | 1;
 	return HOOK_JUMP;
+}
+
+/* ... and its frames' move down a row BN5's (BN5_PULL_ROWS, 8 pixels; BN6's slide moves its conveyors 6), where the slide
+ * began on a magnet panel: the panel it goes to (+0x14, +0x15) less its step (+0x1C, +0x1D) */
+#define SLIDE_TO_X   0x14
+#define SLIDE_STEP_X 0x1C
+static HookAct slide_rows(HookRegs *r, void *user) {
+	(void)user;
+	uint32_t obj = r->r[5];
+	if (hook_read8(obj + PUSH_KIND) != PULL_KIND) return HOOK_CONTINUE;
+	uint32_t x = (uint32_t)(hook_read8(obj + SLIDE_TO_X) - (int8_t)hook_read8(obj + SLIDE_STEP_X));
+	uint32_t y = (uint32_t)(hook_read8(obj + SLIDE_TO_X + 1) - (int8_t)hook_read8(obj + SLIDE_STEP_X + 1));
+	uint32_t p = panel_at(x & 0xFF, y & 0xFF);
+	if (p && hook_read8(p + BN6_PANEL_TYPE) == XPANEL_MAGNET) r->r[2] = pull_rows;
+	return HOOK_CONTINUE;
 }
 
 /* ---- the install ---- */
@@ -389,6 +408,7 @@ static const Site sites[] = {
 	{ BN6_PANEL_UPDATE_CONVEYOR, 0x2809, 0, panel_ages },  /* cmp r0,#9 */
 	{ BN6_SET_PANEL_TYPE, 0xB570, 0, panel_made },         /* push {r4,r5,r6,lr} */
 	{ BN6_STEP_KIND_READ, 0x7BE8, 0, step_pull },          /* ldrb r0,[r5,#0xf] */
+	{ BN6_SLIDE_ROW_MUL, 0x4342, 0, slide_rows },          /* muls r2,r0 */
 };
 #define NSITES (sizeof sites / sizeof *sites)
 
