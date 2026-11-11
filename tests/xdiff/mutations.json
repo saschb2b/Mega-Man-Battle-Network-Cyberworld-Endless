@@ -3017,7 +3017,7 @@
    "poke": [
     "080D052C:20D0"
    ],
-   "what": "the spawn of his top, the third kind's 0x1B (BN4 0x080D052C: movs r0,#0x1b, the recipe's dispatch number 0xD7) made 0xD0, JunkMan's 0x97's: the dispatch runs another object for it (caught at t497)"
+   "what": "the spawn of his top, the third kind's 0x1B (BN4 0x080D052C: movs r0,#0x1b, the recipe's dispatch number 0xD3) made 0xD0, JunkMan's 0x97's: the dispatch runs another object for it (caught at t497)"
   },
   {
    "name": "TopMan's sound 0xAC at the pool's first slot",
