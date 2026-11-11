@@ -26,6 +26,7 @@ typedef struct {
 	bool copy_due;         /* a Glitch layer's copy deleted: the glitch settles, and its pick is told once a talk can start */
 	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/game/meta/phase-two.md, gates) */
 	bool battler;          /* ... a Virus Battler's round (director_battler.c), battle mode 6: no MegaMan on its field */
+	bool lab;              /* a test battle under way (lab_battle.h): nothing of it counted, the game put back after it */
 	bool battler_series;   /* a Virus Battler's series under way, its pot at stake: no save */
 	/* the rival's duel (docs/game/rival.md): the layer's squad, the duel under
 	 * way (a hit taken, the DeleteTime), and Chaud's words due: his call

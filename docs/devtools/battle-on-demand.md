@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "A battle on demand"
-description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
+description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T19:00:00Z }
 ---
 
 # A battle on demand
@@ -64,6 +64,20 @@ python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
 python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
 python3 tools/xfamily.py --spec families --family zomon   # every family's (or some): its record, statuses, deletions
 ```
+
+The `lab` step (`--input`'s `0:lab 01@52/01@62`, play.py's `lab 01@52
+01@62`) fights the `foes` step's battle as the Battle Lab's test
+(`src/director/lab_battle.c`; [the Battle Lab](../game/battle-lab.md), The
+battle): the game's whole state is kept as it begins and put back when
+BN6 is on its map again, the blow that would delete MegaMan ends it, L on
+the Custom screen leaves at the first try, and nothing of it is counted.
+With `CYBERWORLD_EMU_DEBUG` it prints how it ended, its time, busting
+level and HP lost, the frames of the game it took and the work RAM's hash
+before and after ("lab: won in 96 frames, busting level 9, 0 HP lost;
+... (RAM 6b3927d7, then 6b3927d7), the run untouched"). The proof that
+nothing is left of it: the same run without the step, stopped that many
+frames earlier, ends with the same picture and the same save files (the
+Battle Lab's page, Built).
 
 The `swap` step (`--input`'s `0:swap 101:300/107:300/10D:300`, play.py's
 `swap 101:300 107:300 10D:300`; `src/dev/swap_dev.c`) fights one Navi

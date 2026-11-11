@@ -149,6 +149,8 @@ void director_dev_battle(void);
  * plain field with nothing else on it (the families moved into the engine,
  * xvirus.h, beside BN6's own); false, nothing due, where it names none. */
 bool director_dev_foes(const char *spec);
+/* ... the same battle as the Battle Lab's test, inside a snapshot of the game (lab_battle.h): its result printed */
+bool director_dev_lab(const char *spec);
 /* Dev (the xrecord step, issue #82): a battle record of BN5's, "ADDR" its
  * address in BN5's ROM in hex (its battle tables' BattleSettings: build.py
  * xrecords lists them), fought at once in BN6's engine as a territory's
