@@ -59,6 +59,9 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
 typedef struct { uint8_t kind, from, to, of; } XvType;
 #define XV_TYPE_MOVED 0xFF
 #define XV_TYPE_SHARED 0xFE   /* moved by a family installed before it: its MOVED entry that family's copy, run for this one too */
+#define XV_TYPE_MOVED4 0xFD   /* a third-kind type of a BN4 chip unit's, moved: run by BN4's chips' page of the dispatch (xvirus_dispatch.h)
+                                 at BN4's own number `from`, which no other game's number shares */
+#define XV_TYPE_SHARED4 0xFC  /* ... moved by a unit installed before it: the page's entry that unit's copy, run for this one too */
 /* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
  * game's `was`, BN6's `now` (the same where it is kept), each checked first */
 typedef struct { uint32_t at, was, now; } XvNumber;
@@ -181,6 +184,7 @@ typedef struct {
 #define XV_T1_DISPATCH 0x5C
 #define XV_T3_DISPATCH 0xD2
 #define XV_T4_DISPATCH 0x91
+#define XV_T3_DISPATCH4 0xD1  /* ... and BN4's chips' page's, the third kind's other dead type (BN6_T3_FREE) */
 #define XV_MODE_PAST 0   /* BN6_TRAITS_MODE given a family whose game's mode is past BN6's table: its byte 0, as most of BN6's families' */
 
 /* Where it all goes, at fixed addresses (pointers into them stay good in

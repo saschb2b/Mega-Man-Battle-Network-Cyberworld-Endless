@@ -233,7 +233,30 @@ void xg_set_word(int t, uint32_t i, uint32_t v) {
 	entry_set(t, i, w, sizeof w);
 }
 
+bool xg_type_shared(int kind, uint8_t from, uint8_t to) {
+	uint32_t page = xvirus_dispatch4_moved_at(from), moved = xvirus_dispatch_moved_at(kind, from), twin = xvirus_dispatch_twin_at(kind, from);
+	if (to == XV_TYPE_SHARED4) return kind == 3 && page && xv_read32(page) != (XV_STUB_NONE | 1);
+	return moved && xv_read32(moved) != (XV_STUB_NONE | 1) && xv_read8(twin) == XV_TYPE_MOVED;
+}
+
+void xg_page4_stage(void) {
+	uint32_t size = 0, at = xvirus_dispatch4_code_at(&size);
+	uint8_t *code = xv_put(at, size, true);
+	if (code) xvirus_dispatch4_code(code);
+	uint8_t *moved = xv_put(xvirus_dispatch4_moved_at(0), 4u * XV_TYPES_MAX, true);
+	for (uint32_t i = 0; moved && i < XV_TYPES_MAX; ++i) put32(moved + 4 * i, XV_STUB_NONE | 1);
+	if (!xv_failed()) xg_set_word(XG_T3, XV_T3_DISPATCH4, at | 1);
+}
+
 void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine) {
+	if (to == XV_TYPE_MOVED4) {
+		/* (the page's entry blank, or what a unit before it in the step set there: the same) */
+		uint32_t at = kind == 3 && grown && routine ? xvirus_dispatch4_moved_at(from) : 0, r = at ? xv_read32(at) : 0;
+		uint8_t *p = at && (r == (XV_STUB_NONE | 1) || r == (routine | 1)) ? xv_put(at, 4, false) : NULL;
+		if (p) put32(p, routine | 1);
+		else xv_fail("the type %d:%#x for BN4's chips' page (%08x there)", kind, from, (unsigned)r);
+		return;
+	}
 	uint32_t twin = xvirus_dispatch_twin_at(kind, from), moved = xvirus_dispatch_moved_at(kind, from);
 	if (!grown || !twin || !moved || (to == XV_TYPE_MOVED) != (routine != 0)) { xv_fail("the type %d:%#x for the dispatch", kind, from); return; }
 	/* (each entry blank, or what another family set there already: the same) */
