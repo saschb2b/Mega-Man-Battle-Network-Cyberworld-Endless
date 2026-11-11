@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-21",
+  "what": "--dev arena2v2: each partner's own battle NaviStats and hand (src/online/arena_team_navi.c), answered by object, kept in two effect slots taken in BN6's own pool; teamhp=N and arenaother for their proof."
+}

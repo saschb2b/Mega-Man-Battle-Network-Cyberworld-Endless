@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a Program Advance's moved routine's entry",
+  "spec": "pa_csmopris",
+  "poke": [
+   "08E008CC:08E00C05:4"
+  ],
+  "what": "the grown Navi routines' entry 0X33 (XC_NAVI + 0xcc) left at their stub (XC_STUBS + 4) where the install points it at CsmoPris's moved routine (BN5's Navi routine 0X16): the Program Advance formed, nothing played"
+ }
+]

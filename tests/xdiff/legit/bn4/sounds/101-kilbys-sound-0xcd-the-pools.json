@@ -1,0 +1,15 @@
+{
+ "bn4": "0xCD",
+ "bn6": "0x32",
+ "clock": "state",
+ "foes": [
+  "0x43",
+  "0x44",
+  "0x45",
+  "0x46",
+  "0x47",
+  "0x48"
+ ],
+ "what": "Kilby's sound 0xCD, the pool's",
+ "why": "Played by Kilby's code (BN4: movs r0,#0xcd at 0x080BC90C, its bl to PlaySoundEffect at 0x080BC90E; BN6: its copy's movs r0,#0x32 at 0x08F11510 in the late families' code room, the recipe's immediate, its bl after it through its veneer to BN6's), a state's. Kilby is a late family (tools/xrecipe_bn4.py LATE_FROM), whose sounds BN6 has no song of take the per-battle pool's slots in order as a BN4 Navi's do (the owner's call 13, 9 November 2026; tools/xrecipe_bn4.py pool_song): its first, 0x32, BN4's song 0xCD copied into its art at install on BN4's player 9 and the pool pointed at it in its battles (src/emu/xvirus_songs.c, src/emu/xnavi_bn4_sounds.c). In its battles alone (foes): BN4's first at t163, BN6's at the battle's offset, in kilby_v1; BN6's own song 0xCD is another, and the pool's slots are told by their numbers (docs/multirom/bn4.md, Its sounds)"
+}

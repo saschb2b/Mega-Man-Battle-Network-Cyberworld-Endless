@@ -1,0 +1,7 @@
+{
+ "bn4": "0x148",
+ "bn6": "0xD0",
+ "clock": "state",
+ "what": "ThunderMan's cloud's bolt's sound 0x148, its copy",
+ "why": "Played by his cloud's bolt (BN4's third-kind 0x6F, spawned by his cloud's update) as its strike begins (movs r0,#0x49; adds r0,#0xff at 0x080DB39C, its bl to PlaySoundEffect at 0x080DB3A0; BN6: its copy's movs r0,#0xd0 and adds r0,#0, the recipe's immediates, its bl through its veneer to BN6's): BN4's song 0x148 copied into BN6's empty slot 0xD0 on BN4's player 19 (src/emu/xnavi_bn4_sounds.c). The battle's offset: his cloud's update begins with his first own state in both games (its gate XV_FIGHT_FLAGS in BN6, docs/multirom/bn4-navis.md, ThunderMan built)"
+}

@@ -1,0 +1,18 @@
+{
+ "name": "BurnerMan's 0x37's spawn's r4, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T3",
+  "type": "0x37",
+  "word": "0x04",
+  "bn4": [
+   "raw",
+   19
+  ],
+  "bn6": [
+   "T1:0x3b8#0",
+   "ai",
+   0
+  ]
+ },
+ "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4, as BN6's twin through the dispatch's spawner does; BurnerMan's spawner of his third kind 0x37 (0x080D3FA8: push {r0,r1,r2,r5}; movs r0,#0x37; the spawn) sets r0 alone, and its caller, his own state (its bl at 0x080BDF40), leaves r4 as his state runner called the state: in BN4 his +0 byte as BN4's object runner read it (0x13, 0x08003166), in BN6 his AI data's address (BN6's state caller 0x0801B9E6). No code of the 0x37 object reads its +4 to +7 (its block 0x080D3EF0-0x080D4050 searched: no ldr, ldrh or ldrb of [r5,#4] to [r5,#7]), as ThunderMan's 0x70's"
+}

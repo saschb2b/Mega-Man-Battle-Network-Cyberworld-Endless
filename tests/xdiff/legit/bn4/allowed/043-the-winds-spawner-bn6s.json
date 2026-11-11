@@ -1,0 +1,12 @@
+{
+ "name": "the wind's spawner, BN6's",
+ "whose": "family",
+ "spawner": {
+  "kind": "T4",
+  "type": "0x41",
+  "word": "0x4C"
+ },
+ "direction": "BN6 has it, BN4 not",
+ "fields": "the wind's (the fourth kind's 0x41) +0x4C alone, only where BN4's is 0 and BN6's names the moved Navi whose decision spawned it (tools/xdiff_bn4.py spawner_kept); every other byte of the wind compared as ever",
+ "why": "A Navi's wind is each engine's own fourth-kind 0x41, spawned by twin routines (BN4_WIND_SPAWN 0x080E68F8, BN6_WIND_SPAWN 0x080E666C: the side's slot read, the spawn, the side copied, +0's 0x10 cleared, the slot set) but for one store: BN6's keeps its spawner at the wind's +0x4C (0x080E6692: str r5,[r0,#0x4c]), BN4's has none (0x080E690C-0x080E6930), so BN4's +0x4C is the 0 its spawn's clear left. BN6's wind reads it in its state 4 (0x080E65BA: its step 0x080E65D6 skipped while the spawner's CurAction is 4, ldr r0,[r5,#0x4c]; ldrb r0,[r0,#9], or its collision data's +0x3C holds 0x80010000, the literal at 0x080E67AC), and BN4's wind runs its step unasked (0x080E6858 to 0x080E6860); the port calls BN6's spawn (WindMan's decision's call of BN4_WIND_SPAWN aimed at its twin), so BN6's wind has the owner its own state 4 dereferences. Both of WindMan's states 4 (his paralysis) and 3 end the wind first (BN4_WIND_END, +8 8), so the hold differs only in a frame where his CurAction is 4 before his state 4 has run, or his collision holds those flags: no spec reaches either yet (windman_v1's MegaMan idle)"
+}

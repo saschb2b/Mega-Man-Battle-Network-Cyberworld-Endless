@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "WindMan derived whole (tools/xnavirecipe_bn4.py and xnavirecipe_bn4_init.py) and held from the install (xnavi_bn4_held): located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, WindMan derived): BN4_WINDMAN 0x080C3234, BN4_WINDMAN_STATES 0x080C32F4, BN4_WINDMAN_WIND +0x60, BN4_T1_COMPANION 0x5C, BN4_COMPANION 0x080CCC9C, BN4_COMPANION_SPAWN 0x080CCF34, BN4_COMPANION_KINDS 0x080CCC94, BN4_COMPANION_AURA 0x080CCDC8, BN4_SET_FLAG 0x08012F82, BN4_WIND_SPAWN 0x080E68F8, BN4_WIND_END 0x080E69BC, BN4_WIND_SLOTS +0x88; BN6_WIND_SPAWN 0x080E666C and BN6_WIND_SLOTS +0xC0 in bn6_navis.h; five pairs in tools/bn4_twins.py (his flinch's and paralysis' tails, the wind's spawn, two sprite steps), three audited; bn4_windman_control PASS; windman_v1 not yet runnable (BN6's battle stops before its fight with his companions set out)."
+}

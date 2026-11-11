@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-10",
+  "what": "FlmLine's, Thunder's and TwnFng's code located and moved (bn4_chips.h BN4_FLMLINE_STATE 0x080ECAAE with BN4_T3_FLAME 0x19, BN4_THUNDER_STATE 0x080ECE14, BN4_TWNFNG_STATE 0x080ED4C6 with BN4_T3_FANG 0x51; docs/rom/bn4.md). MegaMan's animations numbered by each game's art (BN4's 0x0D, 0x11, 0x12 are BN6's 0x0A, 0x0D, 0x0E)."
+}

@@ -1,0 +1,21 @@
+{
+ "name": "MegaMan's status effect's place",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x06"
+ ],
+ "offsets": [
+  "0x3C-0x3F"
+ ],
+ "why": "A status a hit leaves on MegaMan (confusion, its time at his collision data's BN5 +0x20 / BN6 +0x1E) shows the fourth kind's type 6 over him: each frame its place is his plus an offset each game takes from its own table by his NameID (the routine of the weakness effect's place, above), BN5's 2 pixels higher. His presentation, not the family's code: the family's own records stay compared.",
+ "evidence": [
+  "its step BN5 0x080E0A7E-0x080E0A9E / BN6 0x080E1CCA-0x080E1CEA: its owner's (+0x4C) place plus 0x08015140's / 0x08018810's answer for the owner's NameID (r1 5), the same instructions",
+  "batty_v2 t340 and batty_ex t594: the confusion's effect over MegaMan, its +0x3E 0x32 in BN5's, 0x30 in BN6's, its kind (+4) 0 in both"
+ ]
+}

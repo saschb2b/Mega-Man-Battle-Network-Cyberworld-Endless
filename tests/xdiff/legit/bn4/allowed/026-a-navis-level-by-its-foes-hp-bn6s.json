@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's level by its foe's HP, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x0C",
+  "0x0C"
+ ],
+ "why": "BN6's actor init writes AI data +0xC the other side's 0x080136E4(side ^ 1, 0x3E) / 100, 1 to 10 (0x08017068-0x08017088): MegaMan's 2000 HP gives 10 in gutsman_v1. BN4's AI data +0xC is a player's loadout (BN4_AI_LOADOUT), 0 on a Navi's side, never read by GutsMan's code (his AI tracker's reads): BN6's own"
+}

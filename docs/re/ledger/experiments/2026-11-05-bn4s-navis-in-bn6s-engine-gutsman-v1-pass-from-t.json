@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "gutsman_v1 PASS from the sprite room",
+  "result": "python3 tools/xdiff.py gutsman_v1 with GutsMan's battle sprite in the shared room (filled at emu_battle_force's record): PASS over 1200 fight frames; --poke 08F2C801:03:1 (his seat's byte of XN_BN4_SPRITES made BN4's list 2 number 3, another Navi's sprite) FAIL at t1 (his sprite's frame pointers +0xB0, +0xB4 and +0x92), kept as a mutation. The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS.",
+  "meaning": "A BN4 Navi's battle sprite need not be resident: the room filled from the battle's record serves his whole battle frame for frame, and the comparator catches the wrong sprite in it.",
+  "link": "../multirom/bn4-navis.md"
+}

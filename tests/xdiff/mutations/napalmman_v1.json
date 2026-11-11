@@ -1,0 +1,34 @@
+[
+ {
+  "name": "NapalmMan's object's effect not renumbered",
+  "spec": "napalmman_v1",
+  "poke": [
+   "0889B6EE:244C"
+  ],
+  "what": "the third kind's 0x33's effect (BN5 0x080CB4A6: movs r4,#0x4C, its copy at XN_TEAM_CODE + 0x8500 + 0x1EE) left at BN5's 0x4C where the recipe makes it the Navis' 0xAE (caught at t32)"
+ },
+ {
+  "name": "NapalmMan's object's sprite not renumbered",
+  "spec": "napalmman_v1",
+  "poke": [
+   "0889B54C:221A"
+  ],
+  "what": "the third kind's 0x33's sprite (BN5 0x080CB304: movs r2,#0x1A, list 4's 0x1A, its copy at XN_TEAM_CODE + 0x8500 + 0x4C) left at BN5's number where the recipe makes it list 4's 0xB6, BN5's copied there"
+ },
+ {
+  "name": "NapalmMan's flames' effect not renumbered",
+  "spec": "napalmman_v1",
+  "poke": [
+   "0889BA16:224B"
+  ],
+  "what": "the effect the third kind's 0x38 spawns over a pattern of panels (BN5 0x080CC2A2: movs r2,#0x4B, handed to 0x08018838 in r2, its copy at XN_TEAM_CODE + 0x8800 + 0x216) left at BN5's 0x4B where the recipe makes it the Navis' 0xAD"
+ },
+ {
+  "name": "NapalmMan's overlay's kind not moved",
+  "spec": "napalmman_v1",
+  "poke": [
+   "0889AF04:2404"
+  ],
+  "what": "his companion's overlay kind (BN5 0x0800EE84: movs r4,#4, its copy at XN_TEAM_CODE + 0x7F02 + 2) left at BN5's 4, BN6's another kind, where the recipe makes it his own 33 (XN_KIND_OF)"
+ }
+]

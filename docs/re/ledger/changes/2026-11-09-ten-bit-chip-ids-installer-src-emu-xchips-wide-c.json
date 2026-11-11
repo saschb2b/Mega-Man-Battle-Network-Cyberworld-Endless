@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "Ten-bit chip ids' installer (src/emu/xchips_wide.c: the census's 116 halfwords and the preset folders, BN6_PRESET_FOLDERS and BN6_PRESET_FOLDERS2 in bn6_chips.h), inert at nine bits; tried at ten bits: the autopilot, the folder editor and the differential as at nine."
+}

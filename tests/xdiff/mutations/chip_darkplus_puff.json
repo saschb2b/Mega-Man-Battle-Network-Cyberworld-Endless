@@ -1,0 +1,10 @@
+[
+ {
+  "name": "DarkPlus's puff's sound",
+  "spec": "chip_darkplus_puff",
+  "poke5": [
+   "0800E202:2091"
+  ],
+  "what": "the moved subfamily 3's puff's sound (movs r0,#0x90 at BN5 0x0800E202) 0x91 at its copy: another song started at t104"
+ }
+]

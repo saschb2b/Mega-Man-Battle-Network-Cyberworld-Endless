@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the bubbles' burst's effect another",
+  "spec": "bn4_chip_bubbler",
+  "poke": [
+   "080CF3EE:CB:1"
+  ],
+  "what": "the spread shot's kinds' table's copy with kind 4's effect 0xCB, the fire's burst's id of the chips', where the recipe gives the bubbles' 0xCC (BN4's 0x25): the burst drawn as fire"
+ }
+]

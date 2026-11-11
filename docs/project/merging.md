@@ -1,9 +1,9 @@
 ---
 type: Process
 title: "Merging in parallel"
-description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); what a branch does when it meets one."
+description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); what a branch does when it meets either."
 tags: [project, process, git, ci]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 sources:
   - { id: merges, title: "origin/dev's last 600 merge commits (6 October to 11 November 2026), each merge of dev into a branch redone with git merge-tree", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/commits/dev" }
   - { id: pr387, title: "Pull request #387 at 62c907ac against dev at dbecd569: GitHub's CONFLICTING, docs/log.md the only file", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/387" }
@@ -66,7 +66,7 @@ did anything to the other. These are therefore **written on `dev` alone**:
 
 | File | Written by | From |
 | --- | --- | --- |
-| `docs/re/state.json`, `docs/re/STATUS.md`, `docs/re/dashboard.html` | `tools/re_status.py` | `docs/re/ledger.json` |
+| `docs/re/state.json`, `docs/re/STATUS.md`, `docs/re/dashboard.html` | `tools/re_status.py` | `docs/re/ledger/` |
 | `docs/symbols/*` | `tools/symbols.py` | `src/emu/bn6.h`, `bn5.h`, `bn4.h`, `src/core/rom.c`, `docs/rom/` |
 | [Symbols](../rom/symbols.md)' numbers under What is mapped | `tools/symbols.py` | the same |
 | `docs/voice/catalog.json` | `tools/voice_catalog.py` | the words files, `docs/voice/sweep/` |
@@ -84,7 +84,7 @@ What `build.py lint` held before is still held:
 | --- | --- |
 | Every name in `bn6.h`, `bn5.h` and `bn4.h` described; the ledger's shape; the words files readable | `build.py lint` and `build.py test` on every branch (`--lint` of each tool) |
 | The written files in step with their sources | The workflow, right after writing (`tools/generated.py check --strict`); `build.py lint` on `main`, on a tag and on a pull request to anything but `dev` (a release's) |
-| No branch changes a written file | `build.py lint` on every branch, new: against the commit the branch left `dev` at (in CI, against `dev`'s tip under the pull request's merge) |
+| No branch changes a written file | `build.py lint` on every branch, new: against the commit the branch left `dev` at (in CI, against `dev`'s tip under the pull request's merge). A branch that changes a tool itself (`tools/re_status.py`, `tools/symbols.py`, `tools/voice_catalog.py`) writes that tool's files, and is held to their being in step instead |
 
 The counts of bn6f's functions on the Symbols page (its second marked
 part) are not among them: only `tools/symbols.py --full` writes them, from
@@ -103,3 +103,51 @@ tables outside git.
   written file, merges the Symbols page with its numbers set to `dev`'s,
   and stages them; resolve what is left by hand and commit. After that the
   branch conflicts there no more.
+
+## Registries
+
+Three files held an entry for every feature, spec or family, and every
+branch added its own at the same place, their end:
+`docs/re/ledger.json`, `tests/xdiff/mutations.json` and
+`tests/xdiff/legit.json`. Each is now a folder with a file an entry, which
+`tools/shards.py` reads as the one value the file held (its `LAYOUTS` say
+how each folder is laid out), so every tool reads what it read before:
+
+| Folder | A file is | Read by |
+| --- | --- | --- |
+| `docs/re/ledger/` | A feature, a change or an experiment ([the research status](../re/README.md)); `ledger.json` the rest | `tools/re_status.py` |
+| `tests/xdiff/mutations/` | A spec's mutations, a list; `about.json` what they are | `tools/xdiff.py --mutations` |
+| `tests/xdiff/legit/` | A map, a layout, a mask, an allowed difference of BN4's, a sound of BN4's; `rng.json` and `about.json` | `tools/xdiff.py`, `tools/xdiff_bn4.py`, the recipe generators |
+
+Two branches that each add an entry add two files, and merge in either
+order to the same tree. A list's files are read in the order of their
+names: a ledger's change or experiment is named by its date and its
+words, the rest by a number and their words (`012-name.json`). Two
+branches may take the same number; they differ in their words, and are
+read in the words' order. What still conflicts is an entry two branches
+change, in that entry's file alone, and the two places of `legit` where
+branches add to one map (`maps/name_id.json`, `maps/effect.json`, a line
+per moved Navi).
+
+The ledger's two dates, `updated` and `previous`, were written by every
+branch and are no longer held: `tools/re_status.py` reads them off the
+entries (the newest date, and the one before it).
+
+`build.py lint` runs `python3 tools/shards.py check`: each folder reads
+whole, is written as the tool writes it, and none of the old single files
+is back.
+
+### A branch that still changed an old file
+
+In its merge of `dev`, git reports the old file "deleted by them":
+
+```sh
+git merge origin/dev
+python3 tools/generated.py restore
+python3 tools/shards.py absorb    # the branch's entries carried into the folders, the old files removed, staged
+```
+
+`absorb` merges by entry, not by line: what the branch added or changed
+since the commit it left `dev` at, put onto `dev`'s folder. An entry or a
+value both changed keeps `dev`'s and is printed with the branch's, to
+merge by hand.

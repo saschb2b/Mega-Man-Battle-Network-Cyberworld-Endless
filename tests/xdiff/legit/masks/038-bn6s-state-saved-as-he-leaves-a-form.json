@@ -1,0 +1,16 @@
+{
+ "name": "BN6's state saved as he leaves a form",
+ "part": "obj",
+ "whose": [
+  "megaman"
+ ],
+ "when": "form left",
+ "offsets": [
+  "0x5C-0x5F"
+ ],
+ "why": "As MegaMan is asked to leave a form (his AI data +0x44 bit 0x40), BN6's player update clears his object's +0x5C and saves his state word (+8) there before the change's action (0x1C); BN5's twin asks the same change (0x1A) and saves nothing. The word stays after the change in BN6, unread by the rest of his battle (a Cross's end the same). The engine's, not the Soul's.",
+ "evidence": [
+  "BN6 0x08017C40-0x08017C4C (in 0x08017BC0): str 0 to +0x5C, then +8's word stored there where it reads 0; BN5 0x0801467A-0x08014686 (in its twin 0x08014604): the request's bit cleared, 0x100 set, setAttack0(0x1A), nothing more",
+  "soul_knight: BN6's +0x5C 0x00040804 from t1564, the turn his Soul ended, BN5's 0"
+ ]
+}

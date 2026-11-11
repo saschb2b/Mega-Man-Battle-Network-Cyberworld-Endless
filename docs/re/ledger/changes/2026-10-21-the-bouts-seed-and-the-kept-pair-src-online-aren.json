@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-21",
+  "what": "The bout's seed and the kept pair (src/online/arena_boot.c's BOUT_STEP, arena_keep, arena_new_bout; --dev arena's arenaseed=N and arenaagain=N); protocol v13 keeps a pair of players' sides for their rematch."
+}

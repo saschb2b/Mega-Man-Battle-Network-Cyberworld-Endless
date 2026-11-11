@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "Team ProtoMan's commands on Team Colonel's board",
+  "result": "Mission 1's board in romlab (the plain ROM; MegaMan walked to panel 0x7B,0x80 facing 0x7B,0x7F; a unit's Navi id, +1, poked; panels made dark in the RAM list, kept sorted): the window's mask each Navi id's from 0x08050048 (ProtoMan 0xD001, GyroMan 0x8011, SearchMan 0x8041, NapalmMan 0x8101, MagnetMan 0x8401, Meddy 0xC003); each command's panels as predicted from its shape (Napalm six: four ahead, the third's two sides; WideSwrd three across, as ScrenDiv; PanelSearch a line of four dark panels); GyroMan on a dark panel bombed it clean with no battle; MagnetBarrier put 0x40 in both teammates' flags, kept through the Darkloids' phase and cleared at the next PLAYER PHASE; PanelSearch over an item panel cut its line to it and went into a battle, over none ended with no battle; Napalm went into one battle on a dark panel. Each Navi's confirming line came from his own archive.",
+  "meaning": "BN5 runs both teams' commands from one code and table set; Team Colonel's ROM can lend Team ProtoMan's commands as they are. Static reading, not played: the harm MagnetBarrier makes 0 (0x08053D32) and the panels a won battle frees (0x0804C57C).",
+  "link": "../game/liberation/bn5/navis.md"
+}

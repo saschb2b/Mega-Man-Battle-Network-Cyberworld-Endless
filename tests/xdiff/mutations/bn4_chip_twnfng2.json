@@ -1,0 +1,10 @@
+[
+ {
+  "name": "TwnFng2's row's power another",
+  "spec": "bn4_chip_twnfng2",
+  "poke": [
+   "08C07106:0032"
+  ],
+  "what": "the registry's record of BN4's TwnFng2 (657) with power 50 where BN4's record holds 100: the Mettaur left 90 HP where BN4's leaves it 40"
+ }
+]

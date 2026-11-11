@@ -1,0 +1,34 @@
+{
+ "name": "BN6's TagChips",
+ "part": "player",
+ "whose": [
+  "megaman"
+ ],
+ "cells": [
+  [
+   "0x56",
+   "0x00",
+   "0xFF"
+  ],
+  [
+   "0x57",
+   "0x00",
+   "0xFF"
+  ],
+  [
+   "0x58",
+   "0x00",
+   "0xFF"
+  ],
+  [
+   "0x59",
+   "0x00",
+   "0xFF"
+  ]
+ ],
+ "why": "BN6's NaviStats keep each folder's two TagChips at +0x56-0x59 (0xFF none, BN6_NAVI_FOLDER1_TAG); BN5 has no TagChips and holds 0 there. The spec's folders set none (src/dev/xdiff.c writes BN6's 0xFF where a spec names a folder).",
+ "evidence": [
+  "BN6: each folder's two TagChips at +0x56 + 2 x its number (BN6_NAVI_FOLDER1_TAG), the NaviStats getter 0x080137B6 called with r1 0x56 + 2 x the folder at 0x08125876 and with 0x56 at 0x08138A76",
+  "BN5: no NaviStats getter is called with r1 0x56-0x59 (searched as for +0x3A)"
+ ]
+}

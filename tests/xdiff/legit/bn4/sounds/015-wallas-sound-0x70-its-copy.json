@@ -1,0 +1,7 @@
+{
+ "bn4": "0x70",
+ "bn6": "0x3A",
+ "clock": "state",
+ "what": "Walla's sound 0x70, its copy",
+ "why": "Played by Walla's code (BN4: movs r0,#0x70 at 0x080D4C3A, its bl to PlaySoundEffect at 0x080D4C3C; BN6: its copy's movs r0,#0x3a at 0x08B7E646, the recipe's immediate, its bl at 0x08B7E648 through its veneer to BN6's), a state's: BN4's song 0x70 copied into BN6's empty slot 0x3A on BN4's player 9 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0x70 is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+}

@@ -1,0 +1,66 @@
+[
+ {
+  "name": "SearchMan's hide step's marker at BN4's place",
+  "spec": "searchman_v1",
+  "poke": [
+   "0800C0BC:6FE0"
+  ],
+  "what": "his copy of BN4's hide step's read of the marker it keeps (BN4_HIDE_STEP, 0x0800C0BC: ldr r0,[r4,#0x7c], the recipe's BN6's +0x50, BN6_COLL_HIDE_MARKER) left at BN4's +0x7C: the collision data's layout undone, a marker spawned every frame he hides (caught at t217, his collision data's marker)"
+ },
+ {
+  "name": "SearchMan seen while hidden",
+  "spec": "searchman_v1",
+  "poke": [
+   "0800C0B8:4308"
+  ],
+  "what": "his copy of BN4's hide step's clear of his object's drawn bit (BN4_HIDE_STEP, 0x0800C0B8: bics r0,r1, r1 2) made orrs: the step run before each of his states that BN6's status step lacks, undone (caught at t216, his object's +0)"
+ },
+ {
+  "name": "SearchMan's invisibility read at BN4's place",
+  "spec": "searchman_v1",
+  "poke": [
+   "080F166C:8B41"
+  ],
+  "what": "the test of his invisibility's frames in a helper of MegaMan's states 59 and 61 he runs (0x080F1664, copied: 0x080F166C ldrh r1,[r0,#0x1a], the recipe's BN6's +0x26, BN6_COLL_INVISIBLE) left at BN4's +0x1A (caught at t218, his state)"
+ },
+ {
+  "name": "SearchMan's trail spawned as another kind",
+  "spec": "searchman_v1",
+  "poke": [
+   "080F13C4:2401"
+  ],
+  "what": "his state 60's spawn of his shots' trail (MegaMan's in BN4, copied: 0x080F13C4 movs r4,#0 before its spawner 0x080E5B34, the fourth kind's 0x31 moved with him) given kind 1: the trail of another kind's table entry and routine (caught at t741, the trail)"
+ },
+ {
+  "name": "SearchMan's sound at another pool slot",
+  "spec": "searchman_v1",
+  "poke": [
+   "080F1152:2033"
+  ],
+  "what": "his state 59's sound 0x90 (MegaMan's in BN4, copied: 0x080F1152 movs r0,#0x90, the recipe's pool slot 0x32) made the pool's second slot, 0x33: his 0xBB where BN4 plays 0x90 (caught at t250, the family's sounds)"
+ },
+ {
+  "name": "SearchMan's shot's burst at BN4's effect id",
+  "spec": "searchman_v1",
+  "poke": [
+   "080D7D3E:2200"
+  ],
+  "what": "his shot's burst (the third kind's 0x52, 0x080D7D3E: movs r2,#0, the effect 0x0801457E spawns about a panel, the recipe's BN6's 0x9B, BN4's look moved) left at BN4's id 0, BN6's own effect 0 of another art (caught at t384, the burst's sprite)"
+ },
+ {
+  "name": "SearchMan's CurAction off by one",
+  "spec": "searchman_v1",
+  "poke": [
+   "080C1370:200B"
+  ],
+  "what": "his decision's set of CurAction 8 (BN4 0x080C1370: movs r0,#8 before BN4_SET_ACTION, the recipe's BN6's 0xA) written 0xB: his state left for another (caught at t211, his CurAction)"
+ },
+ {
+  "name": "SearchMan's art's room filled with another's",
+  "spec": "searchman_v1",
+  "poke": [
+   "08F2C81C:0A:1"
+  ],
+  "what": "the room BN4's Navis' attacks' art and pool songs share (XN_BN4_ART, src/emu/xnavi_bn4_art.c), filled as his battle's record is written with the art of the seat his seat's byte of its table names (XN_BN4_ARTS + 3: his own, 0x03), that byte made 0x0A: AquaMan's sprites and songs loaded and his list entries pointed at them, SearchMan's entries left on another's bytes (caught at t216, his marker's sprite's frames)"
+ }
+]

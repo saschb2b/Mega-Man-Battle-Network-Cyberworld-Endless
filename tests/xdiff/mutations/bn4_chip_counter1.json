@@ -1,0 +1,34 @@
+[
+ {
+  "name": "Counter1's row's power another",
+  "spec": "bn4_chip_counter1",
+  "poke": [
+   "08C0618E:0023"
+  ],
+  "what": "the registry's record of BN4's Counter1 (567 at CHIPS_RECORDS) with power 35 where BN4's record holds 70: the countered Mettaur left 105 HP where BN4's hit leaves it 70"
+ },
+ {
+  "name": "Counter1's row's subfamily another",
+  "spec": "bn4_chip_counter1",
+  "poke": [
+   "08C06180:81:1"
+  ],
+  "what": "the registry's record of BN4's Counter1 naming BN6's grown misc routine 0x81, a routine that does nothing, where the row gives it the unit's 0x80: no hit"
+ },
+ {
+  "name": "Counter's players read at BN4's place",
+  "spec": "bn4_chip_counter1",
+  "poke": [
+   "080CFE28:3044"
+  ],
+  "what": "Counter's routine's copy reading the other side's players at the battle state's +0x44, BN4's place (adds r0,#0x44 at BN4 0x080CFE28), where the recipe gives BN6's +0xD0: no player found, no hit"
+ },
+ {
+  "name": "Counter's hit's type another",
+  "spec": "bn4_chip_counter1",
+  "poke": [
+   "080CFDE8:20CB"
+  ],
+  "what": "Counter's hit's spawner's copy (BN4 0x080CFDE4; its movs r0,#0x17 at 0x080CFDE8, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no hit"
+ }
+]

@@ -1,0 +1,11 @@
+{
+ "name": "BN6's second wheel in the panel shot's object's spawn's r2",
+ "whose": "engine",
+ "kind": "T4",
+ "type": "0x4F",
+ "part": "obj",
+ "offset": "0x38",
+ "bit": "0x40",
+ "direction": "BN6 has it, BN4 not",
+ "why": "The fourth kind's spawn stores r2 at the object's +0x38 (as r3 at +0x3C, above): the spawner's r2 is the attack's element as the support run handed it, with BN6's Cursor flag (\"BN6's second wheel in MegaMan's chip's attack, the Cursor's\"). No code of the object loads its +0x38 (the walk of +0x3C's entry). That bit alone. bn4_chip_panlsht1 at t33"
+}

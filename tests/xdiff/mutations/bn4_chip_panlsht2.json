@@ -1,0 +1,10 @@
+[
+ {
+  "name": "PanlSht2's row's pattern another",
+  "spec": "bn4_chip_panlsht2",
+  "poke": [
+   "08C06050:00:1"
+  ],
+  "what": "the registry's record of BN4's PanlSht2 (560) with its first parameter 0, PanlSht1's one panel, where BN4's record holds 1: one shot of 60 where BN4's PanlSht2 fires two"
+ }
+]

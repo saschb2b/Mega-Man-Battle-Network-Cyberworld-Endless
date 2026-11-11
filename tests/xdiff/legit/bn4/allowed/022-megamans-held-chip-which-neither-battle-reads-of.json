@@ -1,0 +1,13 @@
+{
+ "name": "MegaMan's held chip, which neither battle reads of his",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "offsets": [
+  "0x2A",
+  "0x2B"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "His object's u16 +0x2A, the chip an object uses next (0xFFFF none). Its writers: BN6's state of his at 0x0801741C (its table word 0x0801740C) stores 0xFFFF at 0x08017438 in the opening; BN4's state 2 (0x08010890) stores 0xFFFF at 0x080108AA, run in no frame of these specs, so his reads 0 all battle (BN4's other stores 0x0801017A, 0x0801020A, 0x08010D82, 0x08013256, 0x08013268, 0x08015134). Its readers, searched in both ROMs (every ldr, ldrh or ldrb at #0x2a in the battle engines, BN4 0x08008000-0x08020000 and BN6 0x08008000-0x08020000, and in MegaMan's own code, BN4 0x080EA000-0x080F2000 and BN6 0x080EB000-0x080F3000; every ldrh [r5,#0x2a] in the first 2 MB attributed to its type): BN6's four, 0x0800EDC6, 0x0800EE1A, 0x0800EE8E and 0x0800EF2A (in 0x0800ED90, 0x0800EDD0, 0x0800EE26, 0x0800EF02), each read it only for an object whose name's class (0x0800F29C) is not 2, a MegaMan's chip read from his side's battle hand instead (0x08010018, 0x0802E070); BN4's one, 0x08014AFE (0x08014AE8), reads it of the objects in its list at 0x0203BE40, which 0x080167C0 fills for an enemy, called only from the enemies' types' inits (13 calls, 0x080B3550 to 0x080C4024, none in MegaMan's type 0 0x080B34D8 or his init 0x0801079C); the other loads at +0x2A in those spans are a collision data's, an AI data's or eToolkit's (BN4 0x0800F6FC, 0x08012C8C; BN6 0x0800E7AE, 0x08012E50), and the first 2 MB's ldrh [r5,#0x2a] in BN4 are the viruses' types' own (2, 5, 8, 0x13 and on). Nothing of either battle consumes MegaMan's, so the value each game left there is its own; where BN4's side ever holds one (a chip of his), it is compared as ever"
+}

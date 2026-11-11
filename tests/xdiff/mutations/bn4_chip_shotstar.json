@@ -1,0 +1,50 @@
+[
+ {
+  "name": "ShotStar's row's power another",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "08C06212:0014"
+  ],
+  "what": "the registry's record of BN4's ShotStar (570 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur left 80 HP after its three stars where BN4's leave it 20"
+ },
+ {
+  "name": "ShotStar's row's subfamily another",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "08C06204:9A:1"
+  ],
+  "what": "the registry's record of BN4's ShotStar naming BN6's grown support routine 0x9A, a stub, where the row gives it the unit's 0x99: no object, no star"
+ },
+ {
+  "name": "the star's type another",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "080D8780:20CB"
+  ],
+  "what": "the star's spawner's copy (BN4 0x080D877C; its movs r0,#0x56 at 0x080D8780, the recipe's 0xC9) naming the dispatch's 0xCB, a number no recipe moved a type to: no star falls, no hit, no sound"
+ },
+ {
+  "name": "the star's collision's region another",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "080D8588:00:1"
+  ],
+  "what": "the star's kinds' table's copy (BN4 0x080D8580, 6 bytes a kind) with kind 1's first collision argument 0 where BN4's row holds 0x0A (its +2, the set-up's r1): the star strikes nothing"
+ },
+ {
+  "name": "ShotStar's stars fifteen",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "080E5D0E:200F"
+  ],
+  "what": "ShotStar's object's copy counting 15 stars (movs r0,#0x1e at BN4 0x080E5D0E made #0x0f) where BN4's drops 30: half the falls and bursts"
+ },
+ {
+  "name": "the star's fall's sound another",
+  "spec": "bn4_chip_shotstar",
+  "poke": [
+   "088EF704:01DA"
+  ],
+  "what": "the shim of ShotStar's unit's home that plays the star's fall (its first, at XC4_HOMES + 0x400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DC"
+ }
+]

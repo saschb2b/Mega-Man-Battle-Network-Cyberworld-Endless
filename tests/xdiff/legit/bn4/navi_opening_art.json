@@ -1,0 +1,11 @@
+{
+ "name": "a Navi's opening animation, by the fight's frames",
+ "why": "A moved Navi's sprite state (+0x90 to +0xBB: his animation, its count, flags, art and frame) while his animation is the one his init set in the battle's set-up (his +0x90 and +0x11 as at his first fight frame): his after-step runs the sprite update at every fight frame and none of the paused opening's in both games (BN4 0x080143FC, BN6 0x0801BBAC, each with its pause test), so its frames count by the fight's frames, compared at the same fight frame, as opening_count's count is (tools/xdiff_bn4.py navi_opening_art). SparkMan's state 7 sets his animation 0 again, the one his init set (0x080B7A2C; his init 0x080B776A), so it does not restart, and BN6's state, a fight frame behind (the battle's lag), meets a sprite a frame further on: sparkman_v1's t2 his frame record 3 against BN4's 2, his last frame's flag (+0x92 0x80) set. An animation set in the fight starts with its state, and with it the battle's offset (opening_count) A moved object of a Navi's whose sprite runs so too is held to it by its kind and BN4's type (its objects)",
+ "objects": [
+  {
+   "kind": "T3",
+   "type": "0x39",
+   "what": "BurnerMan's flames: their animation set in their init in the battle's set-up (0x080D41AE), their sprite updated by the third kind's after-state (0x080D4164: 0x080144FE, BN6's 0x0801BCA6) from the fight's first frame in both games, while their own update waits on the time-stop test (BN6's XV_FIGHT_STOP a frame longer): their sprite by the fight's frames, burnerman_v1's t1 their count 1 in BN4 and at BN6's same fight frame"
+  }
+ ]
+}

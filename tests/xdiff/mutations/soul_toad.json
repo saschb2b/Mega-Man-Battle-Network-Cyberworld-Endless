@@ -1,0 +1,16 @@
+[
+ {
+  "name": "a Soul's element",
+  "spec": "soul_toad",
+  "soulbreak": 64,
+  "what": "the element's hook gives a Soul none where BN5's table 0x0800E62C gives ToadSoul Aqua: his object's +0x0E and collision data's +2 0"
+ },
+ {
+  "name": "a Soul's song not copied",
+  "spec": "soul_toad",
+  "poke": [
+   "0815A238:0815AE18:4"
+  ],
+  "what": "BN6's song slot 0x5E (the song table 0x08159F48 + 8 x 0x5E) its empty header again where src/emu/soulpower.c entered BN5's 0x117 (ToadSoul's waves): BN6 plays the empty song"
+ }
+]

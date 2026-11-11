@@ -1,0 +1,8 @@
+[
+ {
+  "name": "Chaos Unison's phases a frame longer",
+  "spec": "chaos_number_90",
+  "soulbreak": 128,
+  "what": "the chaos phase's step (src/emu/soulchaos.c, SOULCHAOS_BREAK_PHASE) cycles 43 frames where BN5's row 0 (0x08010648) has 42: the cycle's frame (BN6_SOUL_CYCLE) 42 against BN5's AIData +0x1C 0 as the charge's second cycle begins"
+ }
+]

@@ -1,0 +1,14 @@
+{
+ "name": "SearchMan's trail's 'begun', each game's PlaySound's leftover r0",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x31",
+  "bytes": {
+   "0x09": [
+    "0x28",
+    "0x48"
+   ]
+  }
+ },
+ "why": "His shots' trail, the fourth kind's 0x31 moved with him, runs its kind 0 (0x080E5960) by a 'begun' byte at its +9: where it reads 0 (0x080E5968-0x080E596C) it plays its sound (movs r0,#0x29; adds r0,#0xff; bl PlaySoundEffect at 0x080E5976) and stores the r0 that call leaves at +9 (strb r0,[r5,#9] at 0x080E597A), then never reads +9 but for that test. PlaySoundEffect (BN4 0x08000560, BN6 0x080005CC: push {r1-r7,lr}, the song's start, pop) restores every register but r0, which holds what each game's own MP2K song start left (BN4's through 0x08112849, BN6's through 0x08150475; BN6's call through his home's sound shim, XvSoundCall, to the same routine): 0x28 in BN4, 0x48 in BN6, both not 0, so the trail's kind 0 runs alike. This byte pair alone, on that object; searchman_v1 at t740 (BN4) and t741 (BN6)"
+}

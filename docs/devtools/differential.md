@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:48:40Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -442,7 +442,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   Navis' code is the foe's and no family's is (the families' copies of
   BN5's engine code are its engine there); the engine's objects moved
   once (`XN_OBJECTS`) are the engine's in every spec.
-- **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
+- **In BN6's numbers** (`tests/xdiff/legit/`, a folder read as the one
+  `legit.json` this page calls it, [a file an entry](../project/merging.md#registries);
+  its maps, each with why):
   the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
   0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), an
   object of a dispatch type by the number its side table names (BN6's
@@ -803,8 +805,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
 `--story` prints each game's battle, `--survey` every difference over
 every frame by whose and where, `--no-run` compares the last traces,
 `--poke` and `--call` break the subject for one run, and `--mutations`
-runs `tests/xdiff/mutations.json` (with specs named, their mutations
-alone, by their numbers in the file), the breaks a transplant bug would make
+runs `tests/xdiff/mutations/` (a file a spec, read as the one
+`mutations.json` this page calls it, [Merging in parallel](../project/merging.md#registries);
+with specs named, their mutations alone, numbered in the files' order), the breaks a transplant bug would make
 (CanGard's: an immediate, a state number and an offset left as BN5's, a
 call aimed at nothing or at the wrong twin, a table's entry, a number in
 its data, an effect id left as BN5's alone and beside a native, a

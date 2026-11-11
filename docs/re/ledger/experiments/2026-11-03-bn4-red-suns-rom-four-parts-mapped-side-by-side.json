@@ -1,0 +1,8 @@
+{
+  "feature": "BN4 Red Sun's ROM",
+  "date": "2026-11-03",
+  "name": "Four parts mapped side by side",
+  "result": "Four research agents in parallel, each in romlab on bn4_lab's battles: a background record's three table entries pointed at another's drew that one's frame byte for byte; a record's +3 set to 0x10 played song 0x10 (its +2 changed nothing); UNITE lit after AirShot with flags 0x14 and 0x19 set, WindSoul's icon in the column; a battle ended at 37 HP and the next began at 37 (NaviStats +0x30), while the game state's address changed between the room and the battle.",
+  "meaning": "BN4's backgrounds, music and Souls follow BN5's and BN6's patterns with formats of their own (9-word backgrounds, a song byte in the record); a guest core must read BN4's save block through eToolkit.",
+  "link": "../rom/bn4.md"
+}

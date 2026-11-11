@@ -1,0 +1,8 @@
+[
+ {
+  "name": "BN5's DarkChip after-effect left out",
+  "spec": "chip_darkcirc",
+  "soulbreak": 536870912,
+  "what": "the chip's use (src/emu/soulmood.c's after_effect) leaves his battle NaviStats as they were where BN5's 0x0802C938 adds 100 to its +0x54 for DarkCirc: BN6's player block's +0x54 0 against BN5's 0x64 from t32"
+ }
+]

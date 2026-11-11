@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-18",
+  "what": "The Arena research was trimmed to what the production Arena builds on: the linked pair, the input wire, the Practice script and the pair's snapshot. `build.py online-pair` runs them."
+}

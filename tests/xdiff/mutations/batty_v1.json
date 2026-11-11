@@ -1,0 +1,18 @@
+[
+ {
+  "name": "an immediate, Batty's",
+  "spec": "batty_v1",
+  "poke": [
+   "08109F7C:2008"
+  ],
+  "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+ },
+ {
+  "name": "a rebased call, Batty's",
+  "spec": "batty_v1",
+  "call": [
+   "08011680:0810A953"
+  ],
+  "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+ }
+]

@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Elmperor's poison timer left at BN4's offset",
+  "spec": "elmperor_v1",
+  "poke": [
+   "080C2872:7198"
+  ],
+  "what": "Elmperor's pre-step's hold of its collision data's poison timer at 0xFF (BN4 0x080C2872: strb r0,[r3,#6], the recipe's immediate writing BN6's +8) written at BN4's +6 again: BN6's timer (BN6_COLL_POISON_TIMER, the poison panel's step 0x0801A1B8) reads 0 against BN4's 0xFF, mapped by the trace's layout (src/dev/xdiff_bn4_trace.c coll_segs, BN4_COLL_POISON_TIMER), where unmutated they read alike (caught at t1, coll +0x06 and +0x08; the spec fails at t1 without it on its sprite fields alone, so the lines it adds are the check: python3 tools/xdiff.py elmperor_v1 --poke 080C2872:7198)"
+ }
+]

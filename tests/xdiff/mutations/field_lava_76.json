@@ -1,0 +1,10 @@
+[
+ {
+  "name": "lava underfoot not hooked",
+  "spec": "field_lava_76",
+  "poke": [
+   "0801A802:B550"
+  ],
+  "what": "BN6's own push {r4,r6,lr} back over the hook at the actors' status step (BN6_OBJECT_STATUS), where BN5 steps an object on lava first: CanGard unhurt on lava, the lava not cooled"
+ }
+]

@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-15",
+  "name": "Practice on one pair of cores",
+  "result": "BN6's Practice unpatched: 18,855 serial transfers, 100 to 0, both back at the menu, all 1,433 battle frames agreeing.",
+  "meaning": "BN6's own NetBattle runs on two linked cores without help.",
+  "link": "../online/link.md"
+}

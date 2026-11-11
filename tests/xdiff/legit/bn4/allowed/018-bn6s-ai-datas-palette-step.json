@@ -1,0 +1,13 @@
+{
+ "name": "BN6's AI data's palette step",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x03",
+  "0x03"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's battle actors' setup (0x0800768C) writes the enemy record 1's +2 into the AI data's +3 (MegaMan's 1); it is read only by the actor init's palette (0x0800F334, its one caller 0x08016F90 in the virus and Navi init 0x08016F56, not his player init 0x080172F0: palette = 0x0800F354[version] x step) and by a virus's version change (0x0810A90A), neither run for MegaMan. BN4's viruses keep no AI data and its MegaMan's has no such step; BN4's own +3, the HP bug's count (0x0800C164), is BN6's +9 (0x08010230), mapped"
+}

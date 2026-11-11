@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-10",
+  "name": "bn4_chip_flmline1 to 3, thunder1 to 3, twnfng1 to 3 and two misses: three more attack families",
+  "result": "python3 build.py xdiff with the eleven specs: each PASS (FlmLine3 to the frame of the hit, t41), a 140 HP Mettaur left 70, 20 and 0 by the flames, 100, 80 and 60 by the thunder at t123, 70, 40 and 10 by a fang at t28. With BN6's own thunder (Billy's pair) Thunder parted at t34 on the ball's art; with BN4's moved it passes, billy_v1 and thunderman_v1 as before. Thirteen mutations caught.",
+  "meaning": "The arm moves once and is shared; a state BN6 has no twin of takes MegaMan's animation numbers from the two arts' frames."
+}
