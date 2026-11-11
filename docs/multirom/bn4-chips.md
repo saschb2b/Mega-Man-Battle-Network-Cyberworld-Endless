@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602 and every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T11:48:35Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -368,8 +368,8 @@ types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought; of those MagBolt, PropBom and SeekBom are next. BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
-other's record, a NetBattle chip). Marking and the four Plus chips are
-cut (call 7, answered).
+other's record, a NetBattle chip). Marking, the four Plus chips and
+BlakWeap are units to move like the rest (call 7, reversed: not cut).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -445,7 +445,7 @@ moved yet; why each waits:
 | --- | --- | --- |
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
 | DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other; 708 and 728 bytes with their own objects, one call unpaired (the blink's mark, BN6's `0x0800CC52` by reading), three sounds | the owner's call 8 (the Hole panel in BN6's engine); then the generator's kinds' tables, which copy bytes as they are where the changer's rows hold BN4's panel types (asked of its session) |
-| BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | the owner's call 7: its record is Marking's kind (no Library number, the blank picture), and not dark |
+| BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
 | DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | a unit kind for those families: the generator moves support and misc routines only; DrkCanon also BN4's computed powers (unit 6) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | the same: a unit kind for a family BN6 has none of |
 | DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
@@ -1118,27 +1118,30 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     Phase 2's rule). Chosen over letting them in as any chip, the card's
     description the only warning.
 
+7. **Marking, the four Plus chips and BlakWeap are moved, not cut:**
+   "they are just temporary buffs for elements in battle", "we need
+   them" (the owner, 11 November 2026, reversing a "cut" of the same
+   day). The question had recommended cutting the six (Marking 556,
+   FirePlus, ThunPlus, AquaPowr and WoodPowr 563-566, BlakWeap 602) as
+   chips BN4's own players never held. **What was misread:** their
+   records (281, 285-288, 289) hold no Library number (+0x1C is 0) and
+   one address for the picture, BN4's blank; that says BN4's Library
+   does not list them, not that nobody plays them. Their icon is the
+   one seventy of BN4's chips share, the blank picture stands in some
+   ninety records, and their code is whole: Marking sets 600 frames on
+   a per-side record of BN4's (`0x020374B0`), a Plus chip a 480-frame
+   timer of its element in the user's battle data and clears the other
+   three's (support 0x4C, the element its record's +0x10). Whether a
+   shop, trader or reward of BN4's names them was never searched, so
+   "never handed out" was an assumption, and the goal is every chip of
+   every game ([what a run lacks](gaps.md)). So their ids and rows stay
+   (193 rows), and they are moved as every unit is: what reads the
+   timers moved with them, a spec where the buff shows, its mutations.
+   How they show where BN4 gives them no number and no picture (the
+   Library's page, a reward's card) is the one thing left to choose.
+
 Open:
 
-7. **Marking and the four Plus chips (FirePlus, ThunPlus, AquaPowr,
-   WoodPowr): cut, or moved?** Asked 12 November 2026. BN4's records 281
-   and 285-288 hold no Library number (+0x1C is 0, where every chip its
-   Library lists holds its place) and one address for icon and picture,
-   a blank: BN4 never lists them and, as far as its records say, never
-   gives them (verified in the ROM's records; that no shop, trader or
-   reward names them is not searched yet). Their code is real: Marking
-   sets 600 frames on a per-side record of BN4's (`0x020374B0`), the
-   Plus chips a 480-frame timer by element in BN4's battle NaviStats,
-   each read by BN4's own battle code, which would have to move with
-   them. Recommended: cut all five (their rows left out of play, ids 556
-   and 563-566 kept retired), as chips BN4's own players never held.
-   Until answered they sit out and the work goes on past them.
-   **BlakWeap joins the question** (10 November 2026): its record (289,
-   row 602) is of the same kind, no Library number and the blank picture,
-   its description's first bytes no text; it is not dark by its record
-   (alignment 0, no DarkChip mark), so it would cost nothing. Its code is
-   small (156 bytes and a third-kind object). Recommended: cut with the
-   five.
 8. **BN4's Hole panel: moved into BN6's engine, or left out?** Asked 12
    November 2026. Hole, DrkLine and DrkStage make it, and a DS Navi
    chip's power counts it (Where things stand, The dark units, read):

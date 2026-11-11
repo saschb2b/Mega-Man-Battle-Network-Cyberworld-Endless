@@ -106,7 +106,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, SPRITE, PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING,  # noqa: E402
-                        PLAYER_UNITE, NAVI_FORM, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom, soul_view)
+                        PLAYER_UNITE, NAVI_FORM, OBJ_CHIP, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom, soul_view)
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 import xdiff_bn4  # noqa: E402
@@ -347,6 +347,7 @@ def story(trace, canon, upto=None):
 MEGAMAN_READS = {
     'action': lambda o, ai, p: o.o8(OBJ_ACTION),
     'hp': lambda o, ai, p: o.o16(0x24),
+    'chip': lambda o, ai, p: o.o16(OBJ_CHIP),   # (the chip he uses next: a Program Advance's id once formed)
     'form': lambda o, ai, p: p[PLAYER_NAVI + NAVI_FORM] if p else None,
     'mood': lambda o, ai, p: p[PLAYER_NAVI + 0x0E] if p else None,
     'used': lambda o, ai, p: int.from_bytes(p[PLAYER_USED:PLAYER_USED + 4], 'little') if p else None,
@@ -378,7 +379,7 @@ def megaman_frames(trace, canon):
 
 
 def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'soul', 'chaos', 'soul turns', 'souls used', 'unite', 'loadout', 'sprite',
-                                        'palette', 'mood', 'soul mood', 'soul chip', 'soul next chip', 'hp')):
+                                        'palette', 'mood', 'soul mood', 'soul chip', 'soul next chip', 'chip', 'hp')):
     """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
     lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
     for t, v in megaman_frames(trace, canon):

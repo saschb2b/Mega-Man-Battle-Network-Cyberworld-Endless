@@ -777,7 +777,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   from UNITE to its end, became the two-game `soul_knight` with S2.)
 - **Engine specs** (`"kind": "engine"`): what BN6's engine does that
   BN5's has no twin of, fought in BN6 alone (`game=bn6`), MegaMan's
-  timeline held to the spec's `expect` in BN6's numbers (and `sounds`, a
+  timeline held to the spec's `expect` in BN6's numbers (its `chip` the
+  chip he uses next, the first kind's +0x2A: a Program Advance's id once
+  formed, BN6's own `pa_bn6_*`; and `sounds`, a
   song each that must begin): PASS or FAIL. `soul_cross` (HeatCross chosen
   on CROSSSELECT while KnightSoul is united: HeatCross from the next turn,
   the Soul gone, its used bit kept) and `soul_beast` (Beast Out's flag
