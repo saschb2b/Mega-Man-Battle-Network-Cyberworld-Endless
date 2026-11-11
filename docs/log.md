@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: code/platforms.md (CI on a pull request, new section: what a run cost and where it failed, the eight platform jobs run only where a change reaches them, every push to dev checked to its end), code/tools.md (tools/ci_changes.py).
+* **Update**: project/merging.md (The log, new section: a change logs itself as a file in docs/log.d/, which dev's workflow folds into log.md and stamps the concepts it names with; the union attribute gone; its description and index line), code/tools.md (tools/log_fold.py).
 * **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).
 * **Update**: game/battle-lab.md (the name asked again and kept, over EchoComp, CopyComp and TraceComp), research/sources.md (The Battle Lab: the names checked against the series).
 * **Create**: game/progression/encounter-groups.md (the encounter rework as approved on 11 November 2026: the pool, the templates, the arc, the rewards, what it replaces, the engine's room, the build's phases and open calls), game/progression/encounter-groups-measured.md (the families' tags, each ROM set's pool and fill counts, the danger sampled), devtools/encounter-tags.md (`tools/encounter_tags.py`, `tools/encounter_danger.py`, `--encounter-tags`, `CYBERWORLD_BATTLE_PROBE`); **Update**: game/economy/decided.md (4 revised for a group's reward), game/progression/structure.md (the visitors and the deep's coin to be replaced), code/tools.md and code/dev.md (the new files).
@@ -60,6 +62,9 @@
 * **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
 * **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
+* **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
+* **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
+* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
@@ -91,11 +96,6 @@
 * **Update**: multirom/bn4-chips.md (Counter1-3 moved; the units of 300 to 600 bytes next), rom/bn4.md (Counter's code and MegaMan's lock-out, new row), devtools/chip-recipe-generator.md (a misc routine in a type's code).
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
-## 2026-11-11
-* **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
-* **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
-* **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
-
 ## 2026-11-09
 * **Update**: engine/emulation/memory.md and game/team-protoman.md (The build, unit 1): Team ProtoMan's room moved into `code-low` (`FREE_TEAM_NAVIS` `+0x090000`-`+0x0EF000`, its parts `FREE_TEAM_HOMES`, `FREE_TEAM_NAVI_CODE`, `FREE_TEAM_NAVI_ART`, `FREE_TEAM_SHARED`, `FREE_TEAM_SPRITES` in `src/emu/free_space.plan`), out of `+0x4D0000`, which BN4's late families took, and `FREE_TEAM_SPRITES_MORE` (`+0x710800`) gone: the six's sprites in one room sized for all of them; NapalmMan's mutations poked at his code's new place.
 * **Update**: multirom/navis.md, CloudMan: the 0x0B's copy to the Navis' track tried, the chips' and families' specs PASS with it and his own FAIL at t9 (a cloud's state), so it waits; the next traces named.
@@ -104,8 +104,6 @@
 * **Update**: game/team-protoman.md, The build, unit 1 built (its description and index line too): Team ProtoMan's seats 11-16 (Navi AI 26-31; ids 0x1F0-0x1FF and 0x3E4-0x3EB, the formula's 0x1B0-0x1C3 being BN6's player's forms), their room `FREE_TEAM_NAVIS` and their battle sprites' places, `rivals.sav`'s fourth version (65 navis), their Souls' bits in `run.souls`. engine/emulation/memory.md: `+0x4D0000`-`+0x500000` theirs, `+0x710800`-`+0x71C800` GyroMan's sprite. multirom/navis.md: their room's line. game/tournament.md: `rivals.sav`'s fourth version.
 * **Update**: multirom/chips-code.md (Moved): WildBird's unit shares LarkMan's object types (`UNIT_SHARES`), one copy of their code.
 * **Update**: rom/chips-code.md (BN5's last Program Advances, new row), multirom/chips-code.md, multirom/chip-registry.md (283 chips; 365-367, 603, 604), multirom/gaps.md (the Program Advances built), engine/emulation/memory.md (`RAM_PA_WIDE`): BigNoise, CsmoPris, WildBird, Football and PileDrvr moved as units, five `pa_*` specs PASS; a Program Advance past nine bits its per-battle bit the engine's (`BN6_PA_BATTLE_BIT`, `BN6_PA_FORMED_FLAG`); PileDrvr formed only with every chip in *.
-
-## 2026-11-09
 * **Update**: rom/navicust.md (BN5's NaviCust programs, two new rows), rom/chips.md (The Gigas' version marks, new row), research/sources.md (BN5's version Gigas and its seven NaviCust programs), multirom/gaps.md (the Gigas' cut list; the programs traced, SoulT+1 to build, six cut): traced in BN5's ROM. code/emu.md (`bn5_navicust.h`).
 * **Creation**: world/step-out.md, a proposal for the real world in a run (discussion #323), designed with the game-design skill, nothing built: MegaMan leaves a layer through a CopyBot link into its area's own town and goes back in through one of its devices; BN6's CopyBot walker (event flag `0x1729`, `owPlayer_toggleUsingCopybot_809e4bc`) and the 43 jack-in destinations read in bn6f. world/bn5-town.md: held back, with a link to it.
 * **Update**: multirom/chips-code.md and engine/emulation/memory.md (`FREE_CHIP_CODE`): the bubbles' object a helper of the chips' (`Bubbles`: SideBub's and CloudMan's one copy, after `marina_v1_keys` FAILed on a second), the helpers' room to `+0x602400`, the powers and 80 homes after it.

@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-11T17:46:02Z
-* **Update**: project/merging.md (The log, new section: a change logs itself as a file in docs/log.d/, which dev's workflow folds into log.md and stamps the concepts it names with; the union attribute gone; its description and index line), code/tools.md (tools/log_fold.py).
