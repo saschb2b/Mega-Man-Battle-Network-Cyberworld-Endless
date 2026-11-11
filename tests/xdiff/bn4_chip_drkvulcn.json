@@ -11,7 +11,7 @@
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
- "about": "BN4's DrkVulcn A (190, a dark chip) (a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan; a dark one's own turn effects are BN4's, not taken) against the registry's row 601 (BN4's vulcan state, its family 0x1F, moved as BN6's grown attack family 0xFF; its shot the spread chips' copy, shared): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the shots, their sound 0xBB at slot 0x283, the Mettaur's HP compared each frame.",
+ "about": "BN4's DrkVulcn A (190, a dark chip) (a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan; a dark one's own turn effects are BN4's, not taken) against the registry's row 601 (BN4's vulcan state, its family 0x1F, moved as BN6's grown attack family 0xFF; its shot the spread chips' copy, shared): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the shots, their sound 0xBB at slot 0x283, the Mettaur's HP compared each frame. calm4: BN4's MegaMan's confusion at the fight's start, which BN4 gives once an attack DarkChip is chosen, ended by BN4's own step (the owner's call of 12 November 2026: the run gives none; its source not yet traced, docs/game/meta/darkchips.md).",
  "folder4": [
   "00BE"
  ],
@@ -77,5 +77,6 @@
    2
   ]
  ],
- "subject": "megaman"
+ "subject": "megaman",
+ "calm4": 1
 }
