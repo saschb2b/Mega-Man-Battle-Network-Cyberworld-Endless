@@ -1,7 +1,7 @@
 ---
 type: Process
 title: "Merging in parallel"
-description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); what a branch does when it meets either."
+description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them."
 tags: [project, process, git, ci]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 sources:
@@ -55,7 +55,8 @@ also conflicted in a file a person writes, 82 of them only in pages of
 GitHub does not read `.gitattributes`' `merge=union`: pull request #387
 [^pr387] differed from `dev` in `docs/log.md` alone, merged cleanly here
 with the union driver, and GitHub called it conflicting. So the line
-`docs/log.md merge=union` helps a merge made on a machine and nothing else.
+`docs/log.md merge=union` helped a merge made on a machine and nothing else
+([The log](#the-log)).
 
 ## Files a tool writes
 
@@ -70,6 +71,7 @@ did anything to the other. These are therefore **written on `dev` alone**:
 | `docs/symbols/*` | `tools/symbols.py` | `src/emu/bn6.h`, `bn5.h`, `bn4.h`, `src/core/rom.c`, `docs/rom/` |
 | [Symbols](../rom/symbols.md)' numbers under What is mapped | `tools/symbols.py` | the same |
 | `docs/voice/catalog.json` | `tools/voice_catalog.py` | the words files, `docs/voice/sweep/` |
+| `docs/log.md`, and each concept's `generated` line | `tools/log_fold.py` | the entries' files in `docs/log.d/` ([The log](#the-log)) |
 
 All three tools need no ROM and nothing outside git, so a workflow can run
 them: `.github/workflows/generated.yml` runs `python3 tools/generated.py
@@ -103,6 +105,64 @@ tables outside git.
   written file, merges the Symbols page with its numbers set to `dev`'s,
   and stages them; resolve what is left by hand and commit. After that the
   branch conflicts there no more.
+
+## The log
+
+`docs/log.md` took a line per change at its top, under the day's heading,
+so it conflicted in 158 of the 261 merges, in 47 of them alone. The
+`merge=union` attribute joined both sides' lines on a machine, and GitHub
+ignores it (above), so the attribute is gone and the log is a file a tool
+writes:
+
+- A branch logs a change as a file of its own,
+  `docs/log.d/DATE-WORDS.txt` (`2026-11-12-merging-in-parallel.txt`): the
+  day it is logged under and a few words that name it, holding `by:` and
+  `at:` (who writes, and when), then the log's line as it is to stand
+  (`* **Update**: ...`; more than one line where one change has more than
+  one entry).
+- `dev`'s workflow runs `tools/log_fold.py` with the other tools: each
+  file's lines go into `docs/log.md` under its day's heading, above the
+  lines the day has, a new day's heading where the days stay newest first,
+  and the file is removed.
+- `build.py lint` holds the files well formed (`tools/log_fold.py --lint`)
+  and fails a branch that changes `docs/log.md` itself; on `main` it fails
+  while an entry waits unfolded.
+
+### A concept's `generated` line
+
+Every concept opens with `generated: { by, at }`, and every branch that
+changed a concept rewrote that line. So two branches that changed one
+page conflicted there whatever else they changed: of 235 conflicts in
+pages of `docs/` among the 261 merges, 114 were that line and nothing
+else (`docs/devtools/differential.md` in 27 of its 30, `docs/rom/bn4.md`
+in 25 of 35), and 45 of the merges had no other conflict left once the
+log, the written files and the registries were out of the way. A coarser
+time would not have helped: no two sides stamped the same day as the
+same writer.
+
+The fold therefore writes the line too. An entry's log lines name the
+concepts changed, each by its path before what changed in parentheses
+(`project/merging.md (what changed), code/tools.md (its row)`); the fold
+writes the entry's `by` and `at` into the `generated` line of each (the
+later time where the line holds one: a concept's time never goes back)
+and drops a `verified` line there.
+A path inside parentheses or code is a mention and stamps nothing;
+`python3 tools/log_fold.py --lint` prints what each waiting entry will
+stamp. A branch leaves the line of a concept that exists alone, and
+`build.py lint` fails one that changes it; a new concept is written with
+its own line.
+
+This is the okf skill's rule (refresh `generated`, append a `log.md`
+entry, never edit a past one) by another road: the skill's own files are signed and stay as they
+came, and `AGENTS.md` says what this bundle does instead.
+
+A branch that still added its lines to `docs/log.md` and stamped its
+concepts loses nothing: `python3 tools/generated.py restore`, in its merge
+of `dev` or outside one, writes the lines the branch had added as a file
+in `docs/log.d/`, with the `by` and `at` the branch had stamped, before it
+puts the log and the concepts' `generated` lines back as `dev` has them
+(in a merge, a page whose only conflict was that line comes out
+resolved).
 
 ## Registries
 

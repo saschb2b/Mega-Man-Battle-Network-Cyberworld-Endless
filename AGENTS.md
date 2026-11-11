@@ -76,11 +76,27 @@ Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
   is `human:<id>`; never `human:` for what an agent wrote), its line in the
   folder's `index.md`, and at least one link to a related concept, the prose
   around it saying what the link means.
-- A change to what a concept says refreshes its `generated` (both `by` and
-  `at`) and drops any `verified` it carried; `verified` records only a check
-  that happened. A changed `description` changes its index line too.
-- Each change adds one line to [docs/log.md](docs/log.md) under today's date,
-  newest first; past entries are never edited.
+- A change to what a concept says is stamped on `dev`, not in the branch:
+  the change's log entry (below) says who and when, and `dev`'s workflow
+  writes that into the `generated` line of each concept the entry names
+  and drops any `verified` there; `verified` records only a check that
+  happened. A branch leaves the `generated` line of a concept that exists
+  alone (every branch rewrote it, so two that changed one page conflicted
+  in that line alone); a new concept is written with its own. A changed
+  `description` changes its index line too.
+- Each change logs itself as a file of its own, `docs/log.d/DATE-WORDS.txt`
+  (today's date and a few words that name it): a line `by: <agent>/<model>`,
+  a line `at: <ISO time>`, then its line as it is to stand in
+  [docs/log.md](docs/log.md), each concept changed named by its path
+  before what changed in parentheses: `* **Update**: project/merging.md
+  (what changed), code/tools.md (its row).` `dev`'s workflow folds the
+  file into the log under its date, newest first, stamps those concepts,
+  and removes it; `python3 tools/log_fold.py --lint` says which concepts
+  an entry will stamp. No branch edits `docs/log.md`: two
+  branches' lines met at its top in 158 of 261 merges, and GitHub joins
+  none of them (docs/project/merging.md, The log). This is the okf
+  skill's "append a `log.md` entry", by another road; past entries are
+  never edited.
 - Code, tools and comments cite a concept by its path
   (`docs/engine/emulation/hooks.md`, a section after a comma); a concept
   links another relatively (`../engine/emulation/hooks.md`).
@@ -320,7 +336,7 @@ python3 build.py            # host + aarch64 binaries (Docker)
 python3 build.py test       # ROM-free unit tests
 python3 build.py lint       # the code's checks against tests/lint (--update after fixing one)
 python3 tools/voice_catalog.py   # docs/voice/catalog.json from the words files, to read a line's flags here; dev's workflow commits it, a branch does not
-python3 tools/generated.py [write|check|restore]   # the files tools write (docs/re's status, docs/symbols, the voice catalog): dev's workflow's, restore puts a branch's back (docs/project/merging.md)
+python3 tools/generated.py [write|check|restore]   # the files tools write (docs/re's status, docs/symbols, the voice catalog, docs/log.md): dev's workflow's, restore puts a branch's back (docs/project/merging.md)
 python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.build/a.bmp"
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/cyberworld (PortMaster-New's layout) and the port's zip
@@ -401,7 +417,7 @@ pacing) stays local.
 
 | Change | Checks |
 | --- | --- |
-| The knowledge base (`docs/`) | The okf skill's bookkeeping (frontmatter, the folder's `index.md`, a line in `docs/log.md`, a link); `build.py lint` (the bundle validated, every `docs/` path named exists) |
+| The knowledge base (`docs/`) | The okf skill's bookkeeping (a new concept's frontmatter, the folder's `index.md`, the change's entry in `docs/log.d/` with its `by` and `at`, a link; no `generated` line of a concept that exists, no line in `docs/log.md`); `build.py lint` (the bundle validated, every `docs/` path named exists) |
 | Engine code | `build.py test`, `build.py lint`, a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before), an autopilot run (`shot` from `CYBERWORLD_AUTOPILOT=1 layer` until `layer>=2`) |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in; where Lan's HP changes, MegaMan walked onto the pink pad from the corridor, its last frame in layer 1 (BN6's trigger stops short of the pad's art, session 74): `build.py shot --scene town --seed 2 --frames 1420 --input "$(python3 -c "print('40:,' + '4:A,6:,' * 46 + '30:,0:place -40 -8 7,10:,6:R,500:,' + '4:A,16:,' * 8 + '0:place 171 0 1,10:,25:UP+RIGHT,250:')")" --shot 1410:/src/.build/pad.bmp` (a fresh `--data-dir`), and again with `0:place 171 -5 1,10:,12:RIGHT,250:` for its last walk, MegaMan on the pad's left rim (session 75); where a pad's zone changes (`pad_art.c`), a layer's exit pad from its left rim too, docs/rom/net-maps.md's Warp pads |
