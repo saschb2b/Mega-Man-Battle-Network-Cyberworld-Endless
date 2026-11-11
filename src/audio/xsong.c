@@ -497,6 +497,10 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x8D, SONG_GROWN_FIRST + 0x26 },   /* (0x200) */
 	/* ... Thunder's ball's launch (its own copy: Billy's thunder is BN6's object, with BN6's sound) */
 	{ XROM_BN4_RED_SUN_US, 0xAD, SONG_GROWN_FIRST + 0x27 },   /* (0x201) */
+	/* ... MagBolt's bolt and its hum */
+	{ XROM_BN4_RED_SUN_US, 0xF8, SONG_GROWN_FIRST + 0x28 }, { XROM_BN4_RED_SUN_US, 0xB9, SONG_GROWN_FIRST + 0x29 },   /* (0x202, 0x203) */
+	/* ... PropBom's bomb's propeller and its burst as it is struck */
+	{ XROM_BN4_RED_SUN_US, 0x133, SONG_GROWN_FIRST + 0x2A }, { XROM_BN4_RED_SUN_US, 0xC8, SONG_GROWN_FIRST + 0x2B },   /* (0x204, 0x205) */
 	/* ... BN4's Navi chips' (their range from 0x2C0): a chip's Navi as he appears */
 	{ XROM_BN4_RED_SUN_US, 0xB0, 0x2C0 },
 };

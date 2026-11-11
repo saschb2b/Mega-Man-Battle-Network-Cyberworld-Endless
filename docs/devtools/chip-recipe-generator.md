@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:21Z }
 ---
 
 # The chip recipe generator
@@ -212,7 +212,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
   table's kinds are every unit's. A routine the families pair with BN6's
   own that a chip's unit moves instead, with its type, is named in
-  `UNIT_MOVES` (the thunder's spawner); a literal that is a number, not
+  `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
+  unit copies where the pair's answers differ, for that unit alone, in
+  `UNIT_COPIED` (MagBolt's collision panels' update, with BN4's rule for
+  a move's direction); an effect its code hands the engine's routine for
+  effects over a pattern of panels gets the id its own spawn of that
+  effect was given (`pattern_effects`: PropBom's blast); a literal that is a number, not
   an address, in `NUMBERS`; and a call noted before its target's type
   was moved with the unit is walked as its own code (FlmCros's cross, in
   the flame's code).
@@ -303,8 +308,8 @@ its entry alone.
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
-(0x22), Thunder (0x26) and TwnFng (0x34), with GutsMan's chip (navi 5);
-MagBolt is next of the attack
+(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59) and PropBom
+(0x62), with GutsMan's chip (navi 5); SeekBom is next of the attack
 families.
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads

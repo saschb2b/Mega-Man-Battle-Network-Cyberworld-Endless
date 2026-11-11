@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:21Z }
 ---
 
 # The differential: a moved family against its own game
@@ -152,6 +152,20 @@ ids: it holds in the specs whose `folder4` holds one of them alone, over
 the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
 where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
 ThunderMan's battles with the pool's slot).
+
+A chip's foe under a slide (a pull or a push the chip's hit gave it, in a
+spec whose subject is MegaMan) differs between the engines in four
+leftovers of its record, each an entry of `legit.json`'s `bn4` allowed
+with both games' code (`tools/xdiff_bn4.py` `foe_slide`): its blocked
+slide's step (+0x1B to +0x1D, only where BN6's holds 0) and its
+collision data's direction (only where one game holds 0 and the other
+its last move's), the two MegaMan's own entries name; the same blocked
+step kept at +0x0B in the struck-and-pushed state (both in that state,
+BN6's 0); and a slide cut on its last step by a struck-and-pushed hit
+(+0x1B, +0x1E, +0x1F, only where BN4's are a slide ended and BN6's the
+slide with one step left: BN4's runner runs the slide before the hit's
+state, BN6's the state first). The foe's panels, HP, states and timers
+are compared as ever (`bn4_chip_magbolt1` to `3`).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
@@ -942,6 +956,14 @@ and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
 own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
+
+A poke's address redirects to a moved range's copy only where that copy is
+the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
+code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
+so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
+`0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
+took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
+uncaught, until this).
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
