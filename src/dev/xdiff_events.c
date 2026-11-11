@@ -22,7 +22,6 @@
 #include "guest.h"
 #include "rom.h"
 #include "soulcode.h"
-#include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -538,6 +537,14 @@ static bool chip_used(uint32_t to) {
 	return false;
 }
 
+/* whether BN6's copy at `to` is a chip unit's code the log keys: a used unit's of BN5's (not the chips' helpers'), or any
+ * of BN4's (only the unit of the chip the spec plays runs, and its own draws are keyed by BN4's places as a family's are:
+ * TimeBomb's placement, the fourth kind's 0x27's, 0x080E4D4C) */
+static bool chip_code(uint32_t to) {
+	if (xchips_bn4_code_at(to)) return true;
+	return to >= FREE_CHIP_MOVED && to < FREE_TAIL && !(to >= XC_HELPERS && to < XC_HOMES) && chip_used(to);
+}
+
 /* a family that moved a type `of` runs as shared (XV_TYPE_SHARED): its copy is the one `of` runs */
 static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
 	for (int i = 0; i < of->ntypes; ++i)
@@ -606,10 +613,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XV_LATE_CODE && m[i].to < XV_LATE_CODE_END) ||
 		      (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
 		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
-		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to)) ||
-		    /* (BN4's chips' units' code, every unit's: only the unit of the chip the spec plays runs, and its own draws are
-		     * keyed by BN4's places as a family's are: TimeBomb's placement, the fourth kind's 0x27's, 0x080E4D4C) */
-		    (m[i].to >= XC4_CODE && m[i].to < XC4_ART))
+		    chip_code(m[i].to))
 			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */
