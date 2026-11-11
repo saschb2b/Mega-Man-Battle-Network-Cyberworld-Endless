@@ -22,12 +22,15 @@
 #define XATTACK_COUNT  240                              /* ... to 0xFF */
 #define XATTACK_STUB   (FREE_ATTACK_FAMILIES + 0x3C0u)  /* the stub every entry no family holds names (8 bytes, the project's own Thumb) */
 /* The families' numbers by track: BN6's own, then the chips' moved from
- * BN5 (xchips_code.c), then the Souls', the rest spare */
+ * BN5 (xchips_code.c), then the Souls', then BN4's chips' (xchips_bn4.h:
+ * a state of BN4's MegaMan's each, numbered in its units' order) */
 #define XATTACK_BN6_END   0x5F
 #define XATTACK_CHIPS     0x60   /* ... to 0xBF */
 #define XATTACK_CHIPS_END 0xC0
 #define XATTACK_SOULS     0xC0   /* ... to 0xCF */
 #define XATTACK_SOULS_END 0xD0
+#define XATTACK_BN4       0xD0   /* ... to 0xFF */
+#define XATTACK_BN4_END   0x100
 
 /* Who the growth's bytes are (claims.h) */
 #define XATTACK_CLAIMS "the attack families grown (xattack_grow.c)"
