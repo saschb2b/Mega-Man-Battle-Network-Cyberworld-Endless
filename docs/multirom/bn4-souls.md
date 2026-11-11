@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T18:10:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -219,3 +219,34 @@ MetlSoul and JunkSoul follow the BN4 tracks they lean on: the objects, the
 chips, the sword families. Which Souls a run gives, and how Blue Moon's
 six reach a Red Sun player, is the owner's call; the ROM no longer decides
 it.
+
+## ThunSoul in BN6's engine: the plan (12 November 2026)
+
+Its reference stands: `bn4_soul_thun_control` unites it in BN4's own
+battle on the guest core, the same twice ([the differential](../devtools/differential.md),
+BN4). Its code is small and every call out paired (5 routines, 262 bytes:
+4 SAME, 2 LAYOUT, 2 DIFF audited, `tools/bn4_souls.py --calls`), but
+BN6's Soul engine is built for BN5's six alone, so the move is mostly
+that engine taught a second game's Souls. Measured on dev at 2ec1a4b2,
+each place a BN4 Soul needs and the number it would take:
+
+| Part | Where, today | ThunSoul's |
+| --- | --- | --- |
+| The run's Souls held | `src/director/souls.h` `SOULS` 6, a `uint8_t` mask bit k BN5's Soul 7 + k | a bit past BN5's six (two spare in the byte; all twelve of BN4's widen it, `RUN_MAGIC`) |
+| UNITE's held mask and kind | `soulunite_held`, `soulkinds.c`: BN5's kinds | BN4's kind 2 (Elec), the same numbering as BN5's |
+| Its charged shot's family | `XATTACK_SOULS` 0xC0-0xCF: BN5's 0xC0-0xC6, Chaos Unison's failure 0xC7 | 0xC8: BN4's state 0x47 moved whole, as `tools/xchiprecipe_bn4.py`'s attack units are |
+| Its power attack | `SOUL_POWER_FIRST` 0x94: BN5's 8 moved, 3 empty, 6 Chaos Unison's (`soulpower.c`) | 0xA5: BN4's 0x58 (`0x0800D298`), its return the family's new number |
+| Its charge time | `SOULS_CHARGES`, 14 rows spare | one row, 90 frames at every Charge (BN4's `0x080180B8`) |
+| Its loadout | `SOULS_LOADOUTS`, 6 bytes by BN5's number, 4 rows spare | the seventh row: no plain shot, no chip charge, the charged shot 0xA5 |
+| Its element | the form's element on unison (`soulpower.c`) | Elec |
+| MegaMan's look | list 0's 0x45-0x4A BN5's six, the art from 0x4B; `SOULS_SPRITES` full (168 KB) | BN4's list 0 number 6 (about 36 KB) at a number past the art, in room of its own (`FREE_TAIL`) |
+| The unison's picture | BN5's phase 1, the Soul Navi's image | BN4's list 8 number 6, its family 0x0D's picture |
+| The emotion window's face | `SOUL_FACE_FIRST` 0x17 + BN5's six, 3 spare | the seventh |
+
+The order, each its own proof: the family and the power attack moved
+(a generator's BN4 path, `tools/xsoul.py` beside `tools/xchiprecipe_bn4.py`'s
+attack units), then the held bit, kind and loadout so it unites in BN6's
+battle, then a spec of BN4's battle against BN6's (`souls4` and `souls6`
+together) with mutations on the charge time, the family's damage and the
+element; the look, picture and face last, each held to BN4's frames.
+What a run gives stays the owner's call (above).

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
 * **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
 * **Update**: multirom/navis.md (CloudMan moved and proved; the 0x0B the Navis' copy; three generator rules), game/liberation/building/stage-4-darkloids.md and par-prize.md (CloudMan on the board, his chips at par), rom/liberation.md (CloudMan's clouds' row facts), multirom/gaps.md, multirom/chips-code.md (the Bubbles helper gone), game/bosses/bn5-navis.md, devtools/navi-recipe-generator.md (LOW_BYTE_KEPT, every parent compare, the type's track), engine/emulation/free-space.md (the Navis' shared art's fourth room, FREE_NAVI_SHARED_FOUR).
