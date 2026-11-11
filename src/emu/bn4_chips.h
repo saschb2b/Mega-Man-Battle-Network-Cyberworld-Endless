@@ -158,14 +158,15 @@
                                            * the burst's effect, its sound; 0-3 plain, 4-7 bubbles, 8-0xB fire, 0xF DrkSpred's */
 /* SandRing's family (its chip 47) and ThunSoul's charged shot (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine), moved as
  * one unit for ThunSoul's kind alone (src/emu/xchips_bn4.c's ThunSoul) */
-#define BN4_CHIP_RING_FAMILY  0x47        /* MegaMan's state 0x47 (BN4_PLAYER_STATES): the arm, then the ring by the attack's kind (+2) */
+#define BN4_CHIP_RING_FAMILY  0x47        /* MegaMan's state 0x47 (BN4_PLAYER_STATES): the arm (none for kind 3), then the ring of the
+                                           * attack's +0xC's kind (0x080EDCE2) */
 #define BN4_RING_STATE        0x080EDC5Au /* the state (0x080EDC5A to 0x080EDD2E), its variables AI data +0x70 as every attack state's */
 #define BN4_POWER_THUN        0x0800D298u /* power attack 0x58 (BN4_POWER_ATTACKS), ThunSoul's charged shot (BN4_FORM_LOADOUTS' form 6
-                                           * +3): the attack's +2 and +3 kind 3, its damage 20 at +8, its +0xA 0x8A, back
-                                           * BN4_CHIP_RING_FAMILY; no call, BN6's power attacks' shape */
+                                           * +3): the attack's +2 and +3 3, +0xC 0 (the ring's kind 0), its damage 20 at +8, its
+                                           * +0xA 0x8A, back BN4_CHIP_RING_FAMILY; no call, BN6's power attacks' shape */
 #define BN4_T3_RING           0x6D        /* the ring, the third kind's (0x080DAFBC to 0x080DB0EC): its sprite 3:0x37, kind 3's 3:0x3A */
 #define BN4_RING_KINDS        0x080DAFB0u /* ... its kinds, 4 rows of 3 bytes before its routine, read by its init by +4: its speed, a
-                                           * flag (0x08013212 called where set), its sound (0x080DB05C plays it); 0-2 SandRing1-3's
-                                           * (sound 0x91), 3 ThunSoul's (sound 0x8D, the spread shot's) */
+                                           * flag (0x08013212 called where set), its sound (0x080DB05C plays it); kinds 0-2 sound
+                                           * 0x91, 3 sound 0x8D; ThunSoul's ring kind 0 (seen in both traces) */
 
 #endif

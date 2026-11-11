@@ -243,19 +243,25 @@ Each place a BN4 Soul needs, and what ThunSoul took:
 The plan had put the family at 0xC8, in the Souls' range. Family 0x47 is
 BN4's SandRing's too (chip 47), so it is one attack unit among the
 chips', which also lets the differential read it as it reads every BN4
-attack unit. Only the ring's kind 3, ThunSoul's, is moved: SandRing's
-kinds 0-2 (their sound 0x91, their sprite 3:0x37) and its row stay with
-the chips' generator line. The ring's kinds' table names a sound by a
-byte, and kind 3's (0x8D, the spread shot's) lives in a slot past a byte
-(0x200), so the unit plays it through its shim
+attack unit. The state gives its ring the attack's +0xC as its kind, and
+ThunSoul's power attack zeroes it, so ThunSoul's ring is kind 0, SandRing1's
+row: sprite 3:0x37 and sound 0x91. The unit moves that row alone.
+SandRing's records, its other rows and its spec stay with the chips'
+generator line. The ring's sprite is chosen on two paths (3:0x37, or kind
+3's 3:0x3A), and both are copied. Its sound is a byte of the row, and BN6
+plays another song at 0x91, so the unit plays it from the grown song
+table's slot 0x300 through its shim
 ([BN4 Red Sun's tables](../rom/bn4.md), SandRing's family and ThunSoul's
-charged shot).
+charged shot). A first take moved kind 3's row instead: BN6 drew none of
+the ring and played the spread shot's sound, though the damage and frames
+held. Filming both battles showed it.
 
 The proof ([the differential](../devtools/differential.md), BN4):
 `soul_thun` is BN6's battle alone with ThunSoul united, B held two frames
 past its charge, held to BN4's own course in `bn4_soul_thun`'s BN4
 trace. The charged shot's state runs from t154 to t177, and a 40 HP
-Mettaur is left at 20 at t167, as in BN4. Its three mutations fail it: the
+Mettaur is left at 20 at t167, as in BN4, and the ring's sound plays
+from slot 0x300. Its three mutations fail it: the
 charge 10 frames longer, the shot's damage changed, the element none.
 B held 88 frames gives the plain buster in both games, so the charge is
 90 in both. `bn4_soul_thun` fights the two battles side by side. The shot
