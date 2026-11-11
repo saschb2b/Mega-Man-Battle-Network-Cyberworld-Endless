@@ -983,7 +983,7 @@ so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
 `0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
 took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
 uncaught, until this). Nor does a BN5 virus family's copy take a poke of a
-BN4 spec (`bn5_familys`): BN5's families' blocks lie at the same numbers as
+BN4 spec (`xd_bn5_family_copy`, `src/dev/xdiff_events.c`): BN5's families' blocks lie at the same numbers as
 BN4's code, and one of them, `0x080D6C90`-`0x080D6EB0`, lay over BN4's
 TimeBomb's bomb's (`0x080D6BF8`-`0x080D6ED4`), so six mutations of the
 bomb's copy broke a BN5 virus instead and passed.

@@ -637,30 +637,18 @@ static bool another_navis(const Spec *s, uint32_t to) {
 	return xd_navi_copy_apart(ids, n, to);
 }
 
-/* whether `to`, a moved range's copy, is in a BN5 virus family's code while the spec's game is BN4: its poke's address is
- * BN4's, and BN5's families' blocks lie at the same numbers as BN4's code (a BN5 family's 0x080D6C90-0x080D6EB0 over BN4's
- * TimeBomb's bomb's, 0x080D6BF8-0x080D6ED4, whose pokes it took: six mutations of the bomb's copy passed unbroken) */
-static bool bn5_familys(const Spec *s, uint32_t to) {
-	for (int k = 0; s->bn4 && k < xvirus_bn5_count; ++k)
-		for (int i = 0; i < xvirus_bn5[k]->nblocks; ++i) {
-			const XvBlock *b = &xvirus_bn5[k]->blocks[i];
-			if (to >= b->at && to < b->at + (b->end - b->start)) return true;
-		}
-	return false;
-}
-
 /* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
  * among the ranges too); the chips' moved code for a poke5 alone, its BN5 addresses lying among BN6's own attack families'
  * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
  * FireMan's, moved after it), nor BN4's chips' units' (PanlSht's shot's block, 0x080DCAA4-0x080DCC5C, holds BN5's
  * BlizzardMan's and CloudMan's chips' spawns' addresses); and never a BN5 Navi's copy but the spec's own foes'
- * (another_navis), nor a BN5 virus family's in a spec of BN4's (bn5_familys) */
+ * (another_navis), nor a BN5 virus family's in a spec of BN4's (xd_bn5_family_copy) */
 static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !another_navis(s, m[k].to) &&
-		    !bn5_familys(s, m[k].to))
+		    !(s->bn4 && xd_bn5_family_copy(m[k].to)))
 			return k;
 	return -1;
 }
