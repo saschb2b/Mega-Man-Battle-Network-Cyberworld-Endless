@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:40:46Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # Transplanted families
@@ -560,19 +560,24 @@ rooms filled:
   held-chip calls are dead while it holds none, as Billy's, Mettaur's and
   Walla's are. `volgear_v1`-`v3` PASS ([the differential](../devtools/differential.md),
   VolGear's readings), four mutations caught; it visits as the others do.
-- **Their sounds in the per-battle pool** (the owner's call 13, 9
-  November 2026, [Battle Network 4 in a run](bn4.md)): a late family's
-  sounds BN6 has no song of take the pool BN4's Navis share by battle, the
-  k-th such sound the pool's k-th slot from 0x32 (`tools/xrecipe_bn4.py`
-  `SOUND_POOL` and `pool_song`; `src/emu/xvirus_recipe.h` `xv_bn4_pool`,
-  one list for the Navis and the families), its song packed into the
-  family's art as it installs (`src/emu/xvirus_songs.c`) and the pool's
-  slots pointed at its songs before each frame of a battle it is in, as a
-  Navi's are (`src/emu/xnavi_bn4_sounds.c`): one BN4 family a visited
-  battle holds, and no BN4 Navi a random battle. The first eight keep
-  their fixed slots 0x34-0x3F. A sound whose pool slot would be past 0xFF
-  (the sixth on) is a decision in the generator's report, its shim built
-  for the Navis alone; no late family measured plays more than five.
+- **Their sounds at fixed slots of the grown song table** (the owner's
+  call 13 as revised on 11 November 2026, [Battle Network 4 in a
+  run](bn4.md); until then the per-battle pool BN4's Navis share, which
+  let one late family into a battle): a late family's sound BN6 has no
+  song of takes a slot of its own in BN6's grown song table, the next of
+  0x380-0x3FF in the order the families are moved, or the slot a BN4
+  chip's unit already has for the same sound (`tools/xrecipe_bn4.py`
+  `LATE_SOUND_SLOTS` and `late_song`; `src/emu/xvirus_recipe.h`
+  `XV_BN4_GROWN_SLOT_FIRST`; `src/audio/xsong.c` `XSOUNDS`, the same
+  numbers; [Sound](../rom/sound.md), The song table grown). Its song is
+  packed into the art of the first late family that plays it as that
+  installs, and listed there once (`src/emu/xvirus_songs.c`); the slot is
+  past a byte, so each call that plays it goes through a shim of the
+  family's home that makes r0 the slot (`XvSoundCall`), the `movs` left
+  as BN4 has it. Nothing is pointed by battle, so any two late families
+  share one, which the encounter groups need
+  ([Encounter groups](../game/progression/encounter-groups.md)). The
+  first eight keep their fixed slots 0x34-0x3F, and the Navis their pool.
 - **Kilby** ([BN4 Red Sun's tables](../rom/bn4.md), Kilby moved): AI 73,
   ids 0x2F6-0x2FB, its code the first in the late code room, its sound
   0xCD the pool's 0x32, its effect's id made by arithmetic (`lsls r4,r0,#16;

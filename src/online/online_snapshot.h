@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "online_types.h"
 
 #define ONLINE_PACK_IDS 512
 #define ONLINE_BOARD_BYTES (BN6_NAVICUST_SLOTS * 8)
@@ -39,5 +40,11 @@ typedef struct {
 	void *context;
 } OnlineMemory;
 bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsigned souls);
+
+/* The public card of the MegaMan carried, as the others read it: his HP
+ * and buster, his Crosses and Souls, the NaviCust's colours, and the run's
+ * layer `depth` and its act (`short_net`: the short net's), with the
+ * profile's best layer and marks */
+void online_snapshot_card(const OnlineLoadout *navi, int depth, bool short_net, int best_depth, unsigned marks, OnlineProfile *out);
 
 #endif

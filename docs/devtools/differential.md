@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:21:32Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -970,6 +970,17 @@ own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
 
+BN5's sprite state's +5 on its object's first frame is read as BN6's
+animation set writes it (`xdiff_snap.set_nibble`): BN6's set, in its IWRAM
+code (image `0x081D6C30`-`0x081D6C90`), ends by storing its frame's byte 4,
+its upper nibble, there, where BN5's (`0x081C8698`-`0x081C86E0`) waits for
+its first advance, which writes it alike in both (MagnetMan's child,
+`magnetman_v1` at t4). And an object spawned this frame is a new role though
+it takes the slot one of its kind left the frame before
+(`assign_roles`): an engine spark BN6 ends a frame sooner than BN5, whose
+next spark took its slot in BN6 and another in BN5 (`magnetman_v1_keys` at
+t272).
+
 A poke's address redirects to a moved range's copy only where that copy is
 the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
 code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
@@ -1918,6 +1929,17 @@ format, its game 4: the trace's header names it):
   (t163), its effect's id left at BN4's 0x2D (t129, the objects in play),
   a CurAction left at BN4's (t42) and its list 1 entry aimed at VolGear's
   copy (t1).
+  Since 11 November 2026 a late family's sounds have fixed slots of BN6's
+  grown song table in place of the pool ([Transplanted
+  families](../multirom/families.md), BN4's late families): Kilby's row
+  names 0x380, MagTect's 0x381 and, for its 0xF8, the chips' 0x202, each
+  played through a shim of its home that names the slot. `kilby_v1`-`v3`
+  and `magtect_v1`-`v3` PASS as before, with `volgear_v1`, `walla_v1`,
+  `billy_v1`, `bn4_chip_magbolt1` (the slot MagTect shares), and
+  `thunderman_v1`, `sparkman_v1`, `roll_v1` and `roll_v2_summons` (the
+  Navis' pool, unchanged); the two sound mutations now poke the shim
+  (Kilby's made to name 0x381, caught at t163; MagTect's 0xF8 made to
+  name its 0xB8's slot, t239), nine of nine caught.
 - **MagTect's readings** (`magtect_v1`-`magtect_v3`: MagTect V1-V3, BN4's
   0x31, 0x33 and 0x35, BN6's 0x2FC, 0x2FE and 0x300, 9 November 2026;
   [Transplanted families](../multirom/families.md), BN4's late families):

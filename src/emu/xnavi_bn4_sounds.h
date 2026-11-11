@@ -8,11 +8,11 @@
  * the songs of the BN4 Navi the battle holds (one a battle: a tournament's
  * three rounds are three battles), BN6's song table's entries rewritten in
  * the core's copy only where they point elsewhere. BN4's first eight
- * families keep their fixed slots (0x34-0x3F, xsong.c's XSOUNDS); a late
- * family's sounds take the pool's slots as a Navi's do (the owner's call
- * 13, 9 November 2026), its songs resident in its art from its install,
- * the pool pointed at them in the battles it visits (one BN4 family a
- * visited battle holds). */
+ * families keep their fixed slots (0x34-0x3F, xsong.c's XSOUNDS), and a
+ * late family's sounds have fixed slots of the grown song table (the
+ * encounter groups' call 3, 11 November 2026: xvirus_recipe.h
+ * XV_BN4_GROWN_SLOT_FIRST), so the pool is the Navis' alone but for a
+ * family a Navi summons alone, whose sounds are his pool's. */
 #ifndef CW_XNAVI_BN4_SOUNDS_H
 #define CW_XNAVI_BN4_SOUNDS_H
 
@@ -31,9 +31,6 @@
 void xnavi_bn4_songs_set(const XVirusFamily *f, int versions);
 /* Its songs as its install made them, kept for the pool's pointing (once the install is done) */
 void xnavi_bn4_songs_noted(void);
-/* A late family's songs in the pool (its slots, each its packed song's header and its player's word, as its install wrote
- * them in its art: xvirus_songs.h), kept for the pool's pointing in the battles it is in, as a Navi's; once a family */
-void xnavi_bn4_family_songs(int first_id, int versions, int n, const uint16_t *slots, const uint32_t (*entries)[2]);
 /* Before each frame of BN6's core (emu_frame): the pool pointed at the songs of the BN4 Navi among the battle's first-kind
  * objects, or where none is, of the Navi a family among them is summoned by alone (xnavi_bn4_summoner: Roll's Mettaur's
  * 0x8B at her 0xE0), where it points at another's */

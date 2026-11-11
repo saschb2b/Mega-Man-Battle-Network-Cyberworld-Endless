@@ -7,6 +7,7 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "rom.h"
+#include "song_table.h"
 #include "xnavi_recipe.h"
 #include "xvirus_bn4_copy.h"
 #include "xvirus_dispatch.h"
@@ -287,13 +288,14 @@ bool xv_bn4_pool_slot(int slot) {
 	return false;
 }
 
-/* its songs in BN6's empty slots the families take (a BN4 family's fixed one, or the pool's for a late one) and in the art's
- * room or the late families', apart from its sprites and each other */
+/* its songs in BN6's empty slots the families take (a BN4 family's fixed one, or for a late one a slot of the grown song
+ * table: the late families' or a BN4 chip's unit's) and in the art's room or the late families', apart from its sprites and
+ * each other */
 static bool songs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nsongs; ++i) {
 		const XvSong *g = &f->songs[i];
 		bool bn4 = f->game == XROM_BN4_RED_SUN_US;
-		bool slot = bn4 ? (g->slot >= XV_BN4_SONG_SLOT_FIRST && g->slot <= XV_BN4_SONG_SLOT_LAST) || xv_bn4_pool_slot(g->slot) :
+		bool slot = bn4 ? (g->slot >= XV_BN4_SONG_SLOT_FIRST && g->slot <= XV_BN4_SONG_SLOT_LAST) || (g->slot >= SONG_GROWN_FIRST && g->slot <= XV_BN4_GROWN_SLOT_LAST) :
 		                  g->slot >= XV_SONG_SLOT_FIRST && g->slot <= BN6_SONGS_EMPTY_LAST;
 		bool room = span_in(g->at, g->room, XV_ART, XV_ART_END) || span_in(g->at, g->room, XV_LATE_ART, XV_LATE_ART_END);
 		if (!slot || !room || (g->at & 3) || !g->room)

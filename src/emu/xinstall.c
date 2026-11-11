@@ -44,7 +44,7 @@ void xinstall_core(int families, int navis) {
 	/* (BN4's Navi chips' units after the Navis whose attack objects they run, xchips_code.h; without the Navis their entries
 	 * stay the grown table's stub, a Navi chip that brings nobody) */
 	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) xchips_bn4_navi_install();
-	/* (their sounds' pool pointed at the battle's Navi's, or its late family's, before each frame, xnavi_bn4_sounds.h; a Navi
+	/* (their sounds' pool pointed at the battle's Navi's before each frame, xnavi_bn4_sounds.h; a Navi
 	 * chip's Navi's rooms filled before it, xnavi_bn4_chip.h) */
 	if (families == XVIRUS_FAMILIES && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) emu_before_frame(bn4_frame);
 	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */

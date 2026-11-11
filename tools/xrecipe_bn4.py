@@ -141,12 +141,20 @@ SOUND_SLOTS = {0xBC: 0x3F, 0xC4: 0x3E, 0x9F: 0x3D, 0xC9: 0x3C, 0xCA: 0x3B, 0x70:
 # songs and pointed in her battles alone, which are the only ones the family is in (SUMMONED)
 # (a slot past a byte, the pool's sixth on, played through a shim that makes r0 the slot: XvSoundCall, the owner's call 11)
 SUMMONER_POOL = {0x8B: (0xE0, 'Roll'), 0xC2: (0x104, 'Roll'), 0xC3: (0x117, 'Roll')}
-# The pool of BN6's empty song slots BN4's sounds share by battle (src/emu/xvirus_recipe.h xv_bn4_pool, the same list; the
-# Navis' by the owner's call 11, tools/xnavirecipe_bn4_sounds.py): a late family's sounds BN6 has no song of and no family's
-# slot holds take it in order too (the owner's call 13, 9 November 2026: one BN4 family a visited battle holds), each song
-# packed into its art at install (pool_songs) and the pool pointed at its songs in its battles (src/emu/xnavi_bn4_sounds.c);
-# one past a byte a decision (its shim is built for the Navis)
+# The pool of BN6's empty song slots BN4's Navis' sounds share by battle (src/emu/xvirus_recipe.h xv_bn4_pool, the same list;
+# the owner's call 11, tools/xnavirecipe_bn4_sounds.py), and a summoned family's with its summoner's (SUMMONER_POOL)
 SOUND_POOL = (0x32, 0x33, 0x63, 0xD0, 0xE0, 0x104, 0x117, 0x148, 0x150, 0x155, 0x159, 0x15D, 0x167, 0x16B, 0x16E, 0x172)
+# A late family's sounds BN6 has no song of and no family's slot holds (SOUND_SLOTS): each a slot of BN6's grown song table
+# fixed for it (src/emu/song_table.h; docs/rom/sound.md, The song table grown: 0x380-0x3FF the late families', the next in
+# the order the families are moved; src/audio/xsong.c XSOUNDS, the same numbers), so any two share a battle (the encounter
+# groups' call 3, 11 November 2026, over the per-battle pool of call 13). A sound a chip's unit has a slot for plays there
+# (tools/xchiprecipe_bn4.py SOUND_SLOTS: one slot a sound whichever track copies it). Its song is packed into the first
+# such family's art at install; the slot is past a byte, so its call goes through a shim that makes r0 the slot (XvSoundCall)
+LATE_SLOT0, LATE_SLOT_END = 0x380, 0x400
+LATE_SOUND_SLOTS = {0xCD: 0x380,   # (Kilby's)
+                    0xB8: 0x381,   # (MagTect's)
+                    0xF8: 0x202}   # (MagTect's: the chips' slot for it, MagBolt's bolt)
+LATE_LISTED = {}   # (a late family's sound -> the family whose recipe lists its song, the first moved that plays it)
 # their copies' rooms: in the families' second room past its families' art (ART2 on), below the first six's sprites
 # (ART0), as their sprites leave no room past theirs (ART_END); each its bytes rounded up to SONG_STEP (song_bytes, an upper
 # bound)
@@ -1209,13 +1217,12 @@ def sounds_of(b4, b6, f):
     same = sorted(v for v in ids if v is not None and v not in odd)
     if same:
         f.notes.append(f'its sounds {", ".join(f"{v:#x}" for v in same)}: BN6\'s of the same numbers, the same songs')
-    f.sounds, f.pool_songs = [], []
+    f.sounds, f.late_songs = [], []
     for v in odd:
         slot = SOUND_SLOTS.get(v)
         if slot is None and getattr(f, 'late', False):
-            slot = pool_song(b4, f, v)
-            if slot is None:
-                continue
+            late_song(b4, b6, f, v, ids[v])
+            continue
         if slot is None and f.name in SUMMONED and v in SUMMONER_POOL:
             slot, who = SUMMONER_POOL[v]
             for site, chain in sorted(ids[v]):
@@ -1235,8 +1242,7 @@ def sounds_of(b4, b6, f):
         hp = b4.u32(BN4['songs'] + 8 * v)
         player = b4.u16(BN4['songs'] + 8 * v + 4)
         tracks, room6 = b4.u8(hp), b6.u8(MPLAYS6 + 12 * player + 8)
-        if slot not in SOUND_POOL:
-            f.sounds.append((v, slot))
+        f.sounds.append((v, slot))
         for site, chain in sorted(ids[v]):
             if len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
@@ -1251,21 +1257,43 @@ def sounds_of(b4, b6, f):
                              f'starts no more tracks than its player has')
 
 
-def pool_song(b4, f, v):
-    """a late family's sound v at the pool's next slot (SOUND_POOL), its song packed into its art (the late families' room) at
-    install: the slot, None where it is past a byte or the pool"""
-    k = len(f.pool_songs)
-    if k >= len(SOUND_POOL) or SOUND_POOL[k] > 0xFF:
-        f.decide('sound', f'its sound {v:#x}: the pool\'s slot {k} past a byte or the pool (its shim built for the Navis alone)')
-        return None
+def late_song(b4, b6, f, v, sites):
+    """a late family's sound v at its fixed slot of BN6's grown song table (LATE_SOUND_SLOTS), its song packed into its art (the
+    late families' room) at install where no late family before it lists it, each call made through a shim that makes r0 the
+    slot (past what its movs names, which is left as it is)"""
+    slot = LATE_SOUND_SLOTS.get(v)
+    if slot is None or not xchip_slot(slot) and not LATE_SLOT0 <= slot < LATE_SLOT_END:
+        f.decide('sound', f'its sound {v:#x} is no song of BN6\'s and has no slot of the grown table (LATE_SOUND_SLOTS: the next of '
+                          f'{LATE_SLOT0:#x}-{LATE_SLOT_END - 1:#x}, docs/rom/sound.md)')
+        return
+    for site, chain in sorted(sites):
+        if len(chain) != 1 or chain[0][1] != 'movs':
+            f.decide('sound', f'its sound {v:#x} at {site:08X} named otherwise than by a movs ({chain})')
+            continue
+        f.queue_calls.append(dict(at=site, slot=slot, why=f'its sound {v:#x} at the grown song table\'s slot {slot:#x}, past a byte'))
+    hp, player = b4.u32(BN4['songs'] + 8 * v), b4.u16(BN4['songs'] + 8 * v + 4)
+    tracks, room6 = b4.u8(hp), b6.u8(MPLAYS6 + 12 * player + 8)
+    if tracks > room6:
+        f.interim.append(f'its sound {v:#x} plays {room6} of its {tracks} tracks: BN6\'s player {player} has {room6} where BN4\'s has '
+                         f'{b4.u8(MPLAYS4 + 12 * player + 8)} (BN6_MPLAYS against BN4_MPLAYS), the rest let go as BN6\'s MPlayStart '
+                         f'starts no more tracks than its player has')
+    if LATE_LISTED.setdefault(v, f.name) != f.name:
+        f.notes.append(f'its sound {v:#x}: the grown song table\'s slot {slot:#x}, {LATE_LISTED[v]}\'s song (installed before it)')
+        return
     alloc = f.alloc
     room = rounded(song_bytes(b4, v, BN4['songs']), SONG_STEP)
-    f.pool_songs.append(dict(song=v, slot=SOUND_POOL[k], at=alloc.art, room=room))
+    f.late_songs.append(dict(song=v, slot=slot, at=alloc.art, room=room))
     alloc.art += room
     if alloc.art > alloc.art_end:
         f.decide('room', f'its sound {v:#x}\'s song ends at {alloc.art:08X}, past {alloc.room}\'s art ({alloc.art_end:08X})')
-    f.notes.append(f'its sound {v:#x}: the pool\'s slot {SOUND_POOL[k]:#x} (its {k}th), its song in its art, pointed in its battles')
-    return SOUND_POOL[k]
+    f.notes.append(f'its sound {v:#x} ({", ".join(f"{s:08X}" for s, _ in sorted(sites))}): BN4\'s song copied into its art, at the grown '
+                   f'song table\'s slot {slot:#x} (LATE_SOUND_SLOTS), on BN4\'s player {player}')
+
+
+def xchip_slot(slot):
+    """whether `slot` is one of the grown table's that BN4's chips' units take (tools/xchiprecipe_bn4.py SOUND_SLOT0 up to the
+    late families')"""
+    return 0x1DA <= slot < 0x310
 
 
 def songs_room(b4, whole, alloc):
@@ -1273,7 +1301,7 @@ def songs_room(b4, whole, alloc):
     another in install order, a sound once whichever family plays it (the next finds it installed: xvirus_songs.c xvirus_songs_set)"""
     done, at = set(), rounded(alloc.art if alloc.room != 'the families' else ART2, SONG_STEP)
     for f in whole:
-        f.songs = list(getattr(f, 'pool_songs', []))
+        f.songs = list(getattr(f, 'late_songs', []))
         for v, slot in getattr(f, 'sounds', []):
             if v in done:
                 continue
@@ -1598,7 +1626,7 @@ def c_recipe(f):
         L.append(f'static const XvSong {n}_songs[] = {{')
         L += [f'\t{{ 0x{x["song"]:X}, 0x{x["slot"]:02X}, {art_place(x["at"])}, 0x{x["room"]:X}'
               f'{f", {x["player"]}" if x.get("player") else ""} }},   /* its sound {x["song"]:#x}, BN4\'s song copied'
-              f'{" (the pool\'s, by battle)" if x["slot"] in SOUND_POOL and getattr(f, "family", False) and f.name not in SUMMONED else ""}'
+              f'{" (the grown song table\'s slot)" if x["slot"] >= 0x1DA else ""}'
               f'{f", on BN6\'s player {x["player"]}" if x.get("player") else ""} */' for x in f.songs]
         L.append('};')
     L += c_family(f, n)

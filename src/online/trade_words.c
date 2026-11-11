@@ -10,7 +10,7 @@ const char *const trade_wait_options[2] = { "Keep waiting", "Call it off" };
 const char *trade_hello(void) { return "WELCOME TO\nTRADE CENTRAL!|ONE CHIP FOR ONE CHIP!\nWHAT'LL IT BE?"; }
 
 const char *trade_how(void) {
-	return "PICK A NAVI HERE,\nAND A SPARE CHIP!|THEY PICK ONE BACK.\nYOU BOTH SAY DEAL...|AND THE CHIPS SWAP\nWHEN YOU'RE HOME!|OR PUT A SPARE UP ON\nTHE TRADE BOARD,AND\nSAY WHAT YOU WANT!|ONE TRADE A VISIT!";
+	return "PICK A NAVI HERE,\nAND A SPARE CHIP!|THEY PICK ONE BACK.\nYOU BOTH SAY DEAL...|AND THE CHIPS SWAP\nON THE SPOT!|OR PUT A SPARE UP ON\nTHE TRADE BOARD,AND\nSAY WHAT YOU WANT!|ONE TRADE A VISIT!";
 }
 
 const char *trade_bye(void) { return "COME AGAIN!"; }
@@ -65,9 +65,11 @@ const char *trade_board_taken(const char *name) {
 
 const char *trade_done(const char *chip) {
 	static char s[96];
-	snprintf(s, sizeof s, "Deal! %s\nis ours once we're home!", chip);
+	snprintf(s, sizeof s, "Deal! %s\nis in our Pack now!", chip);
 	return s;
 }
+
+const char *trade_post_foldered(void) { return "Lan,that chip's in\nour folder now!|I took our offer\ndown."; }
 
 const char *trade_off(void) { return "Aw... The trade's off."; }
 
