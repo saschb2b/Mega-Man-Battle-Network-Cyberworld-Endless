@@ -584,6 +584,14 @@ Encounter loot_challenge_battle(int depth, int biome) {
 	return e;
 }
 
+int loot_arc_signature(int depth, int biome) {
+	const GroupFam *pool;
+	GroupArc arc;
+	if (!loot_arc || (run.helpers & HELP_GENTLE) || !group_arc_at(run.seed, depth, biome, &arc)) return -1;
+	group_pool(&pool);
+	return pool[arc.signature].ver[0].id;
+}
+
 int loot_paying_id(const Encounter *e) {
 	if (e->signature <= 0 || e->signature > e->nfoes) return 0;
 	int best = 0, most = 0;

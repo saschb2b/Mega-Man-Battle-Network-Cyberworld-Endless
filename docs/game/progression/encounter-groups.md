@@ -461,8 +461,7 @@ Left of step 1, each measured before step 2 rests on it:
 ### Step 2, the arc and the rewards, built
 
 In the engine since 12 November 2026, behind `--dev arc`: no run of a
-player's has an arc. The card's line and the statistics' event are the
-rest of the step.
+player's has an arc. The statistics' event is the rest of the step.
 
 - **The arc** (`src/core/group_arc.c`, no ROM; its rules by act in
   `src/core/group_pool.c`): an act's signature by the run's seed and the
@@ -502,6 +501,15 @@ rest of the step.
   (the fifth call). Played on three seeds: in four of six group battles
   the reward was in the signature's row and not the partner's, in two in
   both.
+- **The act card names the signature** (`src/director/story_words.c`):
+  "Act 2 - BombCorn signal", in the place "Nets meet" has, a label as
+  "Guardian:" is one, the family's name the ROM's own. A signal is what
+  MegaMan senses of what waits ("a strong virus signal" is the Server's
+  word). It names the family whether or not MegaMan has met it, where the
+  guardian's line keeps "???" until he has: the owner's to confirm
+  ([What MegaMan knows](../meta/what-megaman-knows.md)). With the arc on
+  it also stands where the deep's "Both Nets" and a territory's "Older
+  Net" do.
 - **What the rows pay** (`build.py pacing`, the acts' arcs: each beat's
   paying row against the rows of the area's own battles, their healthy
   halves): about as many chip entries (3.8 of ten against 3.2 in act 1,
