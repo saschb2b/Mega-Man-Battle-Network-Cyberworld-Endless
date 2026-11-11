@@ -443,9 +443,12 @@
 0800C5E6 BN6_PANEL_DRAW_ANIMATED
 0800C8D4 named_by_one_literal
 0800C90A bn5_chips_code.panel_data_2
+0800C918 six_rows_by_collision_data_0xc
 0800C938 engine_differing_twins.panel_cracked
 0800C998 bn5_chips_code.panel_cracked_2
+0800C9B8 bn5_magnet_panel.1_forward
 0800C9F8 BN6_PANEL_BREAK_FREE
+0800CA2C bn5_magnet_panel.takes
 0800CA8C BN6_PANEL_BREAK
 0800CC0A BN6_SET_PANEL_TYPE
 0800CC32 bn5_chips_code.blindness_counted_down
@@ -459,6 +462,12 @@
 0800E2CE point_x_sign
 0800E2D8 BN6_SUBTRACT_HP
 0800E3BE hit_damage_summed
+0800E468 bn5_magnet_panel.dropped
+0800E46C BN6_STEP_KIND_READ
+0800E4AC bn5_magnet_panel
+0800E4C8 BN6_STEP_DIRECTION
+0800E4E8 BN6_DIRECTION_STEPS
+0800E5AC BN6_STEP_PANEL_TAKES
 0800E728 routines_tables
 0800E730 virus_families_moved
 0800E894 other_statuses_timers_cleared
@@ -626,6 +635,7 @@
 080131D4 BN6_CHAOS_RELEASE
 08013236 BN6_CHARGE_TEST
 0801336C called_through
+0801362C bn5_magnet_panel_2
 08013682 BN6_NAVI_STATS_ADDR
 08013754 BN6_NAVI_BY_OBJECT
 08013764 partners_own_battle
@@ -697,6 +707,9 @@
 0801659C BN6_NAVI_PLATE_END
 080165B8 on_to_decide_state
 08016620 BN6_FOE_DYING
+08016822 BN6_SLIDE_ROW_MUL
+08016834 bn5_magnet_panel_3
+08016838 BN6_SLIDE_ROWS
 08016954 BN6_BLINK_FLASHING
 08016C4E BN6_NAVI_DESTROY
 08016C8A object_end
@@ -765,8 +778,10 @@
 0801A284 navis_engine_twins_4
 0801A2B0 puts_it_his_z_after_flinching
 0801A36A BN6_PANEL_ARRIVED
+0801A3A6 bn5_magnet_panel.from
 0801A3CE BN6_ARRIVED_TYPE
 0801A3D8 BN6_ARRIVED_END
+0801A400 for_conveyors_alone
 0801A7CC BN6_BARRIER_SET
 0801A802 BN6_OBJECT_STATUS
 0801A916 BN6_ELEM_DAMAGES_SUM
@@ -1198,12 +1213,15 @@
 080C1E66 BN6_SOUL_IMAGE_UNDECO
 080C1E6A BN6_SOUL_IMAGE_UNDECO_NEXT
 080C34A6 numberman_companion_first_kind_0x54
+080C34E0 team_protoman_magnetman.routine
+080C35E2 team_protoman_magnetman.from
 080C4214 numberman_object
 080C4216 before_code
 080C4800 third_kind_0x00_kinds
 080C4ABC team_protoman_napalmman.spawner
 080C5386 team_protoman_searchman.with
 080C57E4 team_protoman_meddy
+080C5948 same_code_on_list_4_0x3c
 080C5B44 navis_moved_into_3
 080C5B90 navis_moved_into_4
 080C5C2C BN6_OVERLAY_SPRITES_REF
@@ -1242,6 +1260,9 @@
 080CF4EC spawner_bn5_0x080cf37e_bn6
 080D11A4 bn5_last_chips_2
 080D12D6 navis_engine_twins.colonel_third_kind_0x3c_0x59_2
+080D2010 team_protoman_magnetman
+080D236C team_protoman_magnetman_2
+080D2CD0 team_protoman_magnetman_3
 080DA27C dead_code
 080DA5FA BN6_STEP_OBJECT
 080DAE74 bn5_chips_code.effect_tables
@@ -1270,6 +1291,7 @@
 080E22C4 fourth_kind_type_0x16_through
 080E230A BN6_DEBRIS_SPRITE
 080E23C0 BN6_SPAWN_DEBRIS
+080E244C team_protoman_magnetman_4
 080E2728 BN6_SHOW_AFTER_HIDDEN
 080E2CF0 BN6_NAVI_ROUTINES_REF
 080E48BC fourth_kind_0x38_colonel_strike
@@ -1351,6 +1373,7 @@
 080F3FB9 hooks_0x080f3fab
 080F5F22 chip_he_holds_next_by
 080F5F2E team_protoman_napalmman_4
+080F6A5C spawned_0x080c35e2_from
 080FCFB2 BN6_NAVI_DYING_PROTO
 080FDCF0 protoman_cross
 080FDE8C cross_strokes

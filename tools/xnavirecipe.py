@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (18, 'GridMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (18, 'GridMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -197,7 +197,7 @@ NAVI_SPRITE_PLACES = {18: (NEBULA_SPRITES, 0x8800)}   # GridMan: FREE_NEBULA_SPR
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1, 5: 2}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
@@ -983,6 +983,10 @@ def panel_types(r):
                 v, chain = T.back_value(w, a, 2)
                 if v in NT.PANEL_TYPES:
                     X.imm_for(r, chain, 2, v, NT.PANEL_TYPES[v], f'a panel set to BN5\'s type {v:#x}: BN6\'s {NT.PANEL_TYPES[v]:#x}')
+            if i.target in NT.PANEL_COUNTERS:
+                v, chain = T.back_value(w, a, 0)
+                if v in NT.PANEL_TYPES:
+                    X.imm_for(r, chain, 0, v, NT.PANEL_TYPES[v], f'the panels of BN5\'s type {v:#x} counted: BN6\'s {NT.PANEL_TYPES[v]:#x}')
             if i.target not in NT.PANEL_GETTERS:
                 continue
             for n, b in enumerate(addrs[k + 1:k + 6]):
@@ -990,9 +994,16 @@ def panel_types(r):
                 if j.form == 'ldrb' and j.f[1:] == (0, 2):
                     for c in addrs[k + 2 + n:k + 5 + n]:
                         x = w.insns[c]
-                        if x.form == 'cmp' and x.f[0] == j.f[0] and x.f[1] in NT.PANEL_TYPES:
+                        if x.form == 'cmp' and x.f[0] == j.f[0] and '#' in (x.text or '') and x.f[1] in NT.PANEL_TYPES:
                             r.more_imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=NT.PANEL_TYPES[x.f[1]],
                                                     why=f'a panel\'s type compared with BN5\'s {x.f[1]:#x}: BN6\'s {NT.PANEL_TYPES[x.f[1]]:#x}'))
+                        elif x.form == 'cmp' and '#' not in (x.text or '') and j.f[0] in x.f:
+                            # (compared with a register a panel type was put in: movs r2,#5; cmp r1,r2, MagnetMan's 0x080F6838)
+                            other = x.f[1] if x.f[0] == j.f[0] else x.f[0]
+                            v, chain = T.back_value(w, c, other)
+                            if v in NT.PANEL_TYPES:
+                                X.imm_for(r, chain, other, v, NT.PANEL_TYPES[v],
+                                          f'a panel\'s type compared with BN5\'s {v:#x}, in a register: BN6\'s {NT.PANEL_TYPES[v]:#x}')
                     break
                 if T.writes(j, 0):
                     break
