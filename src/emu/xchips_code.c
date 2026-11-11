@@ -375,12 +375,6 @@ uint32_t xchips_bn4_moved(uint32_t bn4) {
 	return 0;
 }
 
-int xchips_bn4_family(int family) {
-	for (int i = 0; installed4 && i < xchips_bn4_count; ++i)
-		if (xchips_bn4[i].kind == XCHIP_ATTACK && xchips_bn4[i].bn5 == family) return xchips_bn4[i].number;
-	return -1;
-}
-
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;

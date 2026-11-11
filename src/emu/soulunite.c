@@ -13,15 +13,10 @@
 #include "emu.h"
 #include "rom.h"
 #include "soulbn4.h"
-#include "soulchaos.h"
-#include "soulchips.h"
-#include "soulcolonel.h"
-#include "soulcode.h"
 #include "soulkinds.h"
 #include "soullife.h"
-#include "soullook.h"
 #include "soulmood.h"
-#include "soulpassive.h"
+#include "soulown.h"
 #include "soulpower.h"
 #include "soulproxy.h"
 #include "thumb_reloc.h"
@@ -341,14 +336,6 @@ static bool expected(const uint8_t *b5) {
 	return words6 && words5;
 }
 
-/* each Soul's own: its code moved, its look, abilities and passives (the Souls track's S3-S5), all or none of each */
-static bool souls_own(int soulbreak) {
-	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) &&
-		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
-		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
-		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak));
-}
-
 static bool done;
 
 bool soulunite_ready(void) { return done; }
@@ -385,7 +372,7 @@ bool soulunite_install(int brk, int soulbreak) {
 	claims_end();
 	printf("soulunite: UNITE on the Custom screen%s%s\n", ok ? ", the Souls' life on the proxy form" : ": NOT placed whole",
 		brk ? " (with parts broken: unitebreak)" : "");
-	if (ok && !souls_own(soulbreak)) fprintf(stderr, "soulunite: the Souls' own code, look and abilities NOT placed whole: they unite as the proxy\n");
+	if (ok && !soulown_install(soulbreak)) fprintf(stderr, "soulunite: the Souls' own code, look and abilities NOT placed whole: they unite as the proxy\n");
 	if (brk) printf("soulunite: unitebreak=%d\n", brk);
 	return ok;
 }

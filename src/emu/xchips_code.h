@@ -69,9 +69,7 @@ bool xchips_bn4_code_install(void);
 /* Whether `to` lies in BN4's units' code (XC4_CODE to XC4_ART: xchips_bn4.h), for a tool that tells whose a copy is. */
 bool xchips_bn4_code_at(uint32_t to);
 /* (after xchips_bn4_code_install) Where BN4's address `bn4` is in its units' moved code (its Thumb bit kept), 0 where none
- * moved it; and BN6's grown attack family BN4's family `family` was moved as (an XCHIP_ATTACK unit's number), -1 none: a BN4
- * Soul's charged shot (its power attack copied with its family's unit: tools/xchiprecipe_bn4.py SOUL_POWERS) */
+ * moved it: a BN4 Soul's charged shot (its power attack copied with its family's unit: tools/xchiprecipe_bn4.py SOUL_POWERS) */
 uint32_t xchips_bn4_moved(uint32_t bn4);
-int xchips_bn4_family(int family);
 
 #endif
