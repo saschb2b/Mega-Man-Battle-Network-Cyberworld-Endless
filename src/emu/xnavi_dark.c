@@ -96,6 +96,8 @@ static const uint8_t ds_bytes[] = { BN5_CHIP_DS_FLAGS, BN5_CHIP_DS_USAGE, BN5_CH
 #define DARK_IDS XN_DARK_IDS
 #define RECORDS_SIZE (DARK_IDS * BN6_CHIP_RECORD_SIZE)
 _Static_assert(XN_DARK_RECORDS + RECORDS_SIZE <= FREE_CHIP_CODE, "the Dark Soul's records past their room (xnavi_recipe.h)");
+_Static_assert(XN_MORE >= FREE_NAVI_ART && XN_MORE_END <= XN_DARK_RECORDS, "the Darkloids' rooms between the Navis' art and the Dark Soul's records, "
+	"where the code mover takes a call into a Navi's copy (xvirus.c navi_room)");
 
 /* The records XN_STUB_CHIPDATA hands its chip AI, by BN6's id: BN6's own as the core's copy holds them now (the chips'
  * 512 where their tables are grown, xchips_install.h, else BN6's 411 and the rest zero), each chip of BN5's (the

@@ -66,5 +66,7 @@ bool xchips_code_install(void);
  * FREE_BN4_CHIPS; the stubs and the grown tables staged by whichever of the
  * two installs first. */
 bool xchips_bn4_code_install(void);
+/* Whether `to` lies in BN4's units' code (XC4_CODE to XC4_ART: xchips_bn4.h), for a tool that tells whose a copy is. */
+bool xchips_bn4_code_at(uint32_t to);
 
 #endif

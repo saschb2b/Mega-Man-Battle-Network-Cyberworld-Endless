@@ -1680,11 +1680,12 @@ spawned at JunkMan's 0x97's number (t497), his sound 0xAC at the pool's
 first slot (t298) and his top's sprite left at BN4's number (t497). His
 SP's palette (3) is not reached by `topman_v1`, a V1.
 
-**The third kind's dispatch numbers** are nearly spent for the Navis: his
-top took 0xD7, and about seven are left of the range the Navis take
-(`TYPE_MORE`, below the late families' lowest), where the seven still to
-move need about thirty. The chips' generator lists BN5's numbers no recipe
-names (`tools/xchiprecipe_bn4.py` `TYPES3`); a share of them is asked for.
+**The third kind's dispatch numbers**: his top took 0xD3, the Navis'
+range (`TYPE_MORE`, below the late families' lowest) running out with the
+next. Past it the Navis take the 32 numbers the chips' generator leaves
+them from its scan of BN5's numbers no recipe names (`TYPES3_NAVIS`, in
+both generators: 0x01 up), a split the two tracks settled on 11 November
+2026.
 
 ## SparkMan built
 
