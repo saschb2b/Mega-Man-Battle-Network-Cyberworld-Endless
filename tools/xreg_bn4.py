@@ -75,6 +75,7 @@ MOVED.update({
     69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
     35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
+    160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
 })
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 

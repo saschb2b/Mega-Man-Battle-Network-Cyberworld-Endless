@@ -337,6 +337,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-11-11",
+      "what": "The bombs' family read and SeekBom's code moved (bn4_chips.h BN4_BOMBS_STATE 0x080EB3FE with BN4_BOMBS_SPAWNERS 0x080EB4C4 and BN4_BOMBS_ARMS 0x080EB4EC, BN4_T3_SEEKBOM 0x8D with BN4_SEEKBOM_THROW 0x080DEEF2, BN4_T4_EXPLOSIONS 0x11 with BN4_EXPLOSIONS_SPAWN 0x080E33D4 and BN4_EXPLOSIONS_EFFECT 0x080E33B4; docs/rom/bn4.md)."
+    },
+    {
+      "date": "2026-11-11",
       "what": "BN4's Hole panel in BN6's engine at type 15 (XPANEL_HOLE; docs/rom/bn4.md, The Hole panel in BN6's engine: src/emu/bn4_panels.h's BN4_PANEL_TILES, BN4_PANEL_TILESET, BN4_PANEL_PALETTES, BN4_PANEL_ANIMATE, BN4_PANEL_ANIM_1 and _5; src/emu/bn6_panels.h's BN6_PANEL_COUNT, BN4_PANEL_COUNT's twin): BN4's tiles and pulsing colours drawn, plain's flags, installed with BN5's lava and sea or without; seen by the new `status panel` dev step."
     },
     {
@@ -445,6 +449,13 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "the chips' page of the dispatch: every chip spec again",
       "result": "With every unit regenerated onto the page (twelve units, their third-kind types at BN4's own numbers, 13 immediates fewer): the 55 bn4_chip* specs at their verdicts (52 PASS, the three recorded FAILs), bn4_chips_thirty among them; the whole differential and every mutation run again (the installer's type and call checks are every recipe's).",
       "meaning": "A chip unit's objects need no number of the tables': BN5's Navis and chips moved later cannot meet them, and the count of units is no limit."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_seekbom1 to 3: BN4's SeekBom moved, a family's unit by subfamily",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (the bomb's hit at t82: a 140 HP Mettaur left 60 and 30, 250 left 110), ten mutations caught. On the way: with the explosions' maker's id left BN4's 0, BN6's own explosion was drawn (the effects' sprite state at t84); a byte row on its load was refused by the installer (raw data alone); the effect call's shim gives r4 the copy's id.",
+      "meaning": "One family's subfamilies move as units of their own, each with a copy of the state; an id an object loads from a byte of its own is given BN6's number by a shim at the call, its values read from the object's spawns."
     },
     {
       "feature": "BN4's chips in BN6's tables",

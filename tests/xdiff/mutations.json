@@ -3501,6 +3501,87 @@
    "what": "the element's hook gives ThunSoul none where BN4_FORM_ELEMENTS gives form 6 Elec (3): his object's +0x0E 0"
   },
   {
+   "name": "the explosions' pair dropped",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "088F370C:2400"
+   ],
+   "what": "SeekBom's unit's effect call's shim (its home's second, XC4_HOMES + 0x4400 + 0x308: cmp r4,#0; bne; movs r4,#0xC8) with its movs made movs r4,#0: the explosions' maker spawns BN6's own effect 0 where BN4's explosion's copy is due"
+  },
+  {
+   "name": "the explosions' maker's frames another",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080E336A:10:1"
+   ],
+   "what": "the explosions' maker's copy's frames by its kind (BN4 0x080E3368, three bytes) with 0x10 for kind 2 where BN4's holds 0x20: the maker gone 16 frames before BN4's"
+  },
+  {
+   "name": "SeekBom1's row's power another",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "08C066E2:0014"
+   ],
+   "what": "the registry's record of BN4's SeekBom1 (598) with power 20 where BN4's record holds 80: the Mettaur left 120 HP where BN4's leaves it 60"
+  },
+  {
+   "name": "SeekBom2's row's family another",
+   "spec": "bn4_chip_seekbom2",
+   "poke": [
+    "08C066FF:D0:1"
+   ],
+   "what": "the registry's record of BN4's SeekBom2 (599) with family 0xD0, the spread chips' unit, where the row gives SeekBom's 0xD2: another attack"
+  },
+  {
+   "name": "SeekBom3's row's subfamily another",
+   "spec": "bn4_chip_seekbom3",
+   "poke": [
+    "08C0672C:03:1"
+   ],
+   "what": "the registry's record of BN4's SeekBom3 (600) with subfamily 3, Binder's, whose entry of the unit's copy of the bombs' table is BN6's null routine: no bomb thrown"
+  },
+  {
+   "name": "the bombs' arm's kind another",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080EB4FE:2A:1"
+   ],
+   "what": "the state's copy's table of the arm's kind by subfamily (BN4 0x080EB4EC, u16 each) with 0x2A for subfamily 9 where BN4's holds 0x2F: another arm"
+  },
+  {
+   "name": "the throw's sound not played",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080EB454:46C0",
+    "080EB456:46C0"
+   ],
+   "what": "the state's copy's call that plays the throw's sound (BN4 0x080EB454, sound 0x90 through its shim) made two nops: no sound 0x206 as he throws"
+  },
+  {
+   "name": "the throw's frame later",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080EB46A:280C"
+   ],
+   "what": "the state's copy's count at which the bomb is thrown (cmp r0,#9 at BN4 0x080EB46A) made 12: the bomb three frames late"
+  },
+  {
+   "name": "the bombs' state longer",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080EB4AC:281C"
+   ],
+   "what": "the state's copy's count at which its first phase ends (cmp r0,#0x15 at BN4 0x080EB4AC) made 0x1C: MegaMan's attack ends seven frames after BN4's"
+  },
+  {
+   "name": "the bombs' variables at BN4's place",
+   "spec": "bn4_chip_seekbom1",
+   "poke": [
+    "080EB402:3770"
+   ],
+   "what": "the state's copy's adds r7,#0x70 (BN4 0x080EB402), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
    "name": "the Hole's panel type another",
    "spec": "bn4_chip_hole",
    "poke": [
