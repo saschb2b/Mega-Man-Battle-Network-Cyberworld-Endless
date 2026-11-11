@@ -202,6 +202,7 @@ void roll_encounter(void) {
 	bool visitors = dev.visitors;
 	glitch_battle(&depth, &visitors);
 	loot_visitors_always = visitors;
+	loot_groups_always = dev.group > 0 ? 1 + dev.group : dev.groups;
 	Encounter e = loot_random_battle(depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
 	if (dev.gem) loot_add_gem(&e);
 	set_encounter(&e, false);
@@ -217,7 +218,7 @@ static void server_roll(void) {
 	layer_objs_server_navi = "";
 	D.server_rolled = false;
 	uint32_t saved = rng_state();
-	LootMemory fought, none = { -1, -1, 0, 0, 0 };
+	LootMemory fought, none = LOOT_MEMORY_NONE;
 	loot_memory(&fought);
 	loot_memory_set(&none);
 	rng_seed(run.layer_seed ^ 0x5E4FE4C5u);

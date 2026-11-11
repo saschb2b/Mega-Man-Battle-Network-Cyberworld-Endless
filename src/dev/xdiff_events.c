@@ -618,6 +618,15 @@ bool xd_navi_copy_apart(const int *ids5, int n, uint32_t to) {
 	return false;
 }
 
+bool xd_bn5_family_copy(uint32_t to) {
+	for (int k = 0; k < xvirus_bn5_count; ++k)
+		for (int i = 0; i < xvirus_bn5[k]->nblocks; ++i) {
+			const XvBlock *b = &xvirus_bn5[k]->blocks[i];
+			if (to >= b->at && to < b->at + (b->end - b->start)) return true;
+		}
+	return false;
+}
+
 /* whether a moved range is a block or clone of a Navi among the spec's foes (another Navi's copy of BN5's engine code, the
  * Dark Soul's of its chip AI's region, is its engine's there, as the families' are in spec_code) */
 static bool navi_code(const XvMoved *m) {

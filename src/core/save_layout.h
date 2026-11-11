@@ -136,12 +136,12 @@ _Static_assert(offsetof(Rival, run) == 18, "Rival.run save offset changed");
 
 /* (its families 64 bits a battle for issue #82, with BATTLE_MAGIC's "CWB3": an
  * older battle.sav is forgotten, as loot.h says) */
-_Static_assert(sizeof(LootMemory) == 32, "LootMemory save size changed");
+_Static_assert(sizeof(LootMemory) == 48, "LootMemory save size changed");
 _Static_assert(offsetof(LootMemory, biome) == 0, "LootMemory.biome save offset changed");
 _Static_assert(offsetof(LootMemory, pick) == 4, "LootMemory.pick save offset changed");
 _Static_assert(offsetof(LootMemory, families) == 8, "LootMemory.families save offset changed");
-_Static_assert(offsetof(LootMemory, viruses) == 16, "LootMemory.viruses save offset changed");
-_Static_assert(offsetof(LootMemory, families_before) == 24, "LootMemory.families_before save offset changed");
+_Static_assert(offsetof(LootMemory, viruses) == 24, "LootMemory.viruses save offset changed");
+_Static_assert(offsetof(LootMemory, families_before) == 32, "LootMemory.families_before save offset changed");
 
 _Static_assert(sizeof(Job) == 12, "Job save size changed");
 _Static_assert(offsetof(Job, kind) == 0, "Job.kind save offset changed");

@@ -1,0 +1,10 @@
+{
+ "bn4": "0xB0",
+ "bn6": "0x1E2",
+ "clock": "state",
+ "chips": [
+  "0x61"
+ ],
+ "what": "TimeBomb's bomb set down 0xB0, its copy",
+ "why": "Played by the bomb's init (BN4's third-kind 0x4B, moved with TimeBomb's unit: movs r0,#0xb0 at 0x080D6C50, its bl to PlaySoundEffect at 0x080D6C52; BN6: the copy's bl aimed at a shim of the unit's home that makes r0 0x1E2 and goes on to BN6's): BN4's song 0xB0 copied into slot 0x1E2 of BN6's grown song table (src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). In this chip's specs alone: BN4's engine plays 0xB0 as an invisibility ends too, where BN6's plays its own 0x94 (the first row); BN6's own bomb plays 0x94 here (0x080CE954), another song by xrecipe.song_sig"
+}

@@ -102,7 +102,7 @@ static int encounter_hp(const Encounter *e) {
  * after one (issue #20). */
 void duel_roll(void) {
 	uint32_t saved = rng_state();
-	LootMemory fought, none = { -1, -1, 0, 0, 0 };
+	LootMemory fought, none = LOOT_MEMORY_NONE;
 	loot_memory(&fought);
 	loot_memory_set(&none);
 	rng_seed(run.layer_seed ^ 0xD0E15EEDu);

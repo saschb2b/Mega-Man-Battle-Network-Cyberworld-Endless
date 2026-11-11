@@ -60,14 +60,14 @@ static int version_fit(int net, int family, int top, int hp, PacingBand b, int *
 
 /* The battle's viruses' HP together (into *hp), and its families (a bit
  * each) */
-static uint64_t held_of(const Encounter *e, int *hp) {
-	uint64_t held = 0;
+static FamilyMask held_of(const Encounter *e, int *hp) {
+	FamilyMask held = FAMILY_MASK_NONE;
 	*hp = 0;
 	for (int i = 0; i < e->nfoes; ++i) {
 		int h, d;
 		if (e->foes[i].kind == FOE_ROCK || !enemy_stats(e->foes[i].id, &h, &d)) continue;
 		*hp += h;
-		if (e->foes[i].family > 0 && e->foes[i].family < 64) held |= (uint64_t)1 << e->foes[i].family;
+		family_mask_add(&held, e->foes[i].family);
 	}
 	return held;
 }
@@ -86,7 +86,7 @@ static int fits_for(const Encounter *e, int i, int depth, Fit fit[FITS_MAX]) {
 	const Foe *f = &e->foes[i];
 	int role = visitor_role_in(home, f->family), panel = visitor_panel(e, f->col, f->row);
 	if (f->kind != FOE_VIRUS || (panel != 2 && panel != 3) || !stands(role, f->col) || !enemy_stats(f->id, &h, &d)) return 0;
-	uint64_t held = held_of(e, &hp);
+	FamilyMask held = held_of(e, &hp);
 	PacingBand b = pacing_band(depth, false, false);
 	int vlo, vhi;
 	pacing_virus_versions(depth, false, &vlo, &vhi);
@@ -100,7 +100,7 @@ static int fits_for(const Encounter *e, int i, int depth, Fit fit[FITS_MAX]) {
 		int nk = visitor_kin(from, &kin);
 		for (int k = 0; k < nk && m < FITS_MAX; ++k) {
 			int id;
-			if (!kin[k].visits || kin[k].role != role || kin[k].stage > allowed || (kin[k].family < 64 && (held >> kin[k].family & 1))) continue;
+			if (!kin[k].visits || kin[k].role != role || kin[k].stage > allowed || family_mask_has(held, kin[k].family)) continue;
 			int v = version_fit(from, kin[k].family, top, hp - h, b, &id);
 			if (v >= 0) fit[m++] = (Fit){ from, k, v };
 		}
@@ -131,9 +131,7 @@ bool visitor_apply(Encounter *e, int depth) {
 		o->version = tr ? tr[0] : p->ver;
 		o->id = id;
 		e->visitor = i + 1;
-		/* (BN4's families, from 64, have no bit: no battle of a run's own
-		 * holds one, so the repeat rule's memory needs none) */
-		if (k->family < 64) e->from_families |= (uint64_t)1 << k->family;
+		family_mask_add(&e->from_families, k->family);
 		return true;
 	}
 	return false;
