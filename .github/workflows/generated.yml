@@ -1,0 +1,50 @@
+# After each push to dev: the files tools write from the tree (docs/re's
+# status, docs/symbols and docs/rom/symbols.md's numbers, the voice catalog;
+# tools/generated.py) written anew and committed, so no pull request carries
+# them and no two conflict there (docs/project/merging.md). Needs no ROM. Its
+# own push starts no workflow, as GitHub's token's pushes never do.
+name: Generated files
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generated-dev
+  cancel-in-progress: false
+
+jobs:
+  write:
+    name: Write and commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { ref: dev }
+      - name: Write, commit, push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # (dev may move while this runs: start again from its new tip)
+          for attempt in 1 2 3 4 5; do
+            echo "attempt $attempt"
+            git fetch --quiet origin dev
+            git reset --quiet --hard FETCH_HEAD
+            python3 tools/generated.py write
+            python3 tools/generated.py check --strict
+            git add -A docs/re docs/symbols docs/rom/symbols.md docs/voice/catalog.json
+            if git diff --cached --quiet; then
+              echo "in step already"
+              exit 0
+            fi
+            git commit --quiet -m "Generated files, written from $(git rev-parse --short HEAD)"
+            if git push --quiet origin HEAD:dev; then
+              git show --stat --format=%H HEAD
+              exit 0
+            fi
+          done
+          echo "dev kept moving: five attempts" >&2
+          exit 1

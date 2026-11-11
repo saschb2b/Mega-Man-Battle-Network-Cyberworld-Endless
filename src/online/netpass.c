@@ -10,6 +10,7 @@
 static const NetPassGame set[] = {
 	{ "BN6", "Cybeast Gregar", 0, -1 },
 	{ "BN5", "Team Colonel", ONLINE_ROMS_BN5, XROM_BN5_COLONEL_US },
+	{ "BN4", "Red Sun", ONLINE_ROMS_BN4, XROM_BN4_RED_SUN_US },   /* (protocol v17, the owner's call of 9 November 2026) */
 };
 #define SET_GAMES ((int)(sizeof set / sizeof *set))
 
