@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "What BN6's PET writes of its kept data, measured in the Net Square by RAM dumps before and after each screen (docs/online/square/pet.md): the folder editor the folder's entries and the Pack's order stamps; a NaviCust RUN the grid, the placed list, a key item's count with its check, NaviStats and the command line's list, named BN6_NAVICUST_LINE 0x02000090 (bn6_navicust.h, bn6f unk_2000090: sub_813676C and sub_813677C copy its 8 bytes to and from the screen's list at 0x02022B70, sub_813C324 clears them; SuprArmr run on the line wrote 4; docs/rom/navicust.md); the PET's close clears the no-encounters flag 0x1700 through EnterMap."
+}

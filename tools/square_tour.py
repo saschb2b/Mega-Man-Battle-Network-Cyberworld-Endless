@@ -53,7 +53,8 @@ class Game:
         data = os.path.join(dir_, 'data')
         os.makedirs(data)
         with open(os.path.join(data, 'netpass.ini'), 'w') as f:
-            f.write('stamps=4\n')
+            # (stamped with the set's three games, BN4 among them: no stamp moment holds Kei on arrival)
+            f.write('stamps=4\ngames=3\n')
         self.log = os.path.join(dir_, 'log.txt')
         env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy', CYBERWORLD_EMU_DEBUG='1')
         args = [online.BINARY, '--headless', '--remote', dir_, '--rom-dir', roms[0], '--data-dir', data, *online.HOME,

@@ -37,8 +37,10 @@
 #include "online_board.h"
 #include "online_square.h"
 #include "online_trade.h"
+#include "online_visit.h"
 #include "online_transport.h"
 #include "script_kit.h"
+#include "square_pet.h"
 #include "talk.h"
 #include "trade_list.h"
 #include "trade_screen.h"
@@ -85,6 +87,7 @@ static struct {
 	uint32_t took;              /* its poster, once the take is sent: this game the taker */
 	uint32_t hushed;            /* a trade called off unheard of: an answer to MegaMan's offer not its want */
 	TradeChip post;             /* the spare picked to put up */
+	bool foldered;              /* MegaMan's board offer taken down, its chip gone into a folder: his word due */
 } C;
 
 /* the last player this game traded with, for the Square's talk */
@@ -404,10 +407,25 @@ static void settled(void) {
 	C.kept = v->id;
 	snprintf(last_partner, sizeof last_partner, "%s", name_of(v->other));
 	if (!online_trade_keep(v)) fprintf(stderr, "online: the trade could not be kept; it is lost\n");
+	else {
+		/* (the swap in the Square's own game, noted with the PET's changes for home) */
+		square_pet_noting();
+		square_pet_noted(online_trade_here(v));
+		online_visit_carried_again();
+	}
 	analytics_trade(v->taken);
 	C.traded = true;
 	C.took = 0;
 	trade_screen_swap();
+}
+
+void trade_central_folders_changed(void) {
+	/* (the chip up on the board, or promised in a trade under way, put in a folder: no spare to give; MegaMan's
+	 * word on the board's once the map is back, trade_central_frame) */
+	const BoardOffer *mine = online_board_of(C.s.player_id);
+	if (mine && !online_trade_spare(mine->have) && online_board_clear()) C.foldered = true;
+	const TradeView *v = online_trade_view();
+	if ((v->stage == TRADE_OFFERED || v->stage == TRADE_ANSWERED) && v->mine.id && !online_trade_spare(v->mine)) online_trade_cancel();
 }
 
 /* what was chosen on Trade Central's screens */
@@ -456,6 +474,7 @@ void trade_central_frame(const OnlineSnapshot *s) {
 	screens();
 	if (talk_busy() || emu_read8(BN6_CHATBOX) || trade_screen_shown()) return;
 	if (C.wanting) { wanted(); return; }
+	if (C.foldered && square_pet_calm()) { C.foldered = !talk_start(trade_post_foldered(), FACE_MEGAMAN); return; }
 	chosen();
 	if (C.choosing) { C.choosing = false; who(); return; }
 	if (C.boarding) { C.boarding = false; board(); return; }
