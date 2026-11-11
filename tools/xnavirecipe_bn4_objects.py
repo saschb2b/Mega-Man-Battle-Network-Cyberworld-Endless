@@ -83,6 +83,11 @@ AUDITS = {
 }
 # the engine's routines his code calls with no BN6 twin, copied with him (tools/xnavirecipe_bn4.py NAVI_COPIED's way)
 COPIED = {
+    0x080D4002: "BurnerMan's flame's collision region spawned (r4 its word 0x04050101, r6 its damage, r7 3, then the third kind "
+                "0x7C's spawner 0x080DCD3A) and its +0x20, +0x17 and +0's bit 0x10 set from its spawner: a leaf of another type's "
+                "block (0x080D3xxx), no BN6 routine of its body; copied",
+    0x080DCD84: "an object's +0x20 made 1 where r0 holds one (a leaf in the third kind 0x7C's block, its region's end): no BN6 "
+                "routine of its body; copied",
     0x0800AD54: "the can-move check's kin (its flags against 0x1040, then its panel's type): BN4_CAN_MOVE's body (0x0800AD2A, "
                 "0x5040) with another mask, no BN6 routine of its body; copied, its panel's type read at BN6's +2 (BN4's +0)",
     0x080D97F8: "an object's x moved by r0 toward its side's front (its +0x36 by +0x16): a leaf in the third kind's 0x69's block, "
@@ -109,6 +114,13 @@ FLIPPED_EFFECTS = {
     0x080D8840: (0x080D8830, 0x080D8832, "his shot's hit (the third kind's 0x57): r4 8 ORed with the RNG's bit 1 shifted to bit 9, "
                                          "BN4_SPAWN_EFFECT's flip, the id its low byte"),
 }
+# effects his code spawns by an id read from a table by his version (ldr r2,=table; ldrb r4,[r2,version]; then the other
+# side ORed into r4's second byte, BN4_SPAWN_EFFECT's flags): the effect's site -> (the table, in a block he moves, its
+# entries, why); each entry's effect given BN6's as a movs's is, the copy's bytes rewritten (XvByte)
+EFFECT_TABLES = {
+    0x080D18CE: (0x080D191C, 4, "SparkMan's object's effect by his version (0x080D18B4-0x080D18C0: 0x19, 0x17, 0x18, 0x18), the "
+                                "other side ORed into r4's second byte"),
+}
 # the battle's flags (BN4's 0x08007A8C, BN6's 0x0800A2F0 the same body) where a moved object no state runs gates its update on
 # their bit 0, the fight's: BN4's state runner runs the Navi's states through the paused opening, so his first own state and
 # that object's first gated frame are the fight's first in BN4; BN6's runs none there (0x0801B1C4's pause test), his first
@@ -118,6 +130,17 @@ FIGHT_FLAGS4 = 0x08007A8C
 FIGHT_GATED = {
     0x32: "ThunderMan's companion's update (0x080C3B42) and his cloud's (0x080DAB26): each gated on bit 0, else the paused "
           "blink alone; thunderman_v1's cloud a step ahead at the battle's offset before (+7 2 against 1 at t1)",
+}
+# ... and where they wait on the battle's time-stop test instead (BN4's 0x08007948: the flags' bit 4, set through the paused
+# opening; BN6's 0x0800A098 the same body), every call of it in his recipe aimed at XV_FIGHT_STOP (bit 4 through the fight's
+# first frame too, src/emu/xvirus_dispatch.c): his objects and his update's calls start with his first own state; his states'
+# calls of it see nothing new, BN6's state runner running none at the fight's first frame. By the Navi's BN4 type, its sites
+STOP4 = 0x08007948
+STOP_GATED = {
+    0x22: "BurnerMan's flames' update (0x080D4280) and his update's two calls before his runner (0x080BDD60): each waits while "
+          "bit 4 is set, so in BN4 they begin at the fight's first frame with his first own state; burnerman_v1's flames' timer "
+          "and his +0x60 a frame ahead in BN6 at the battle's offset before (their +0x20 0x3B against 0x3A at t1, his flames' "
+          "region spawned at BN4's t121 and BN6's)",
 }
 
 # its pools' words that look like addresses and are numbers (bn4_twins.NUMBERS' way)
@@ -314,7 +337,8 @@ def list5_sprites(b4, b6, f, alloc):
                 s = alloc.effect_sprites.get((5, num), (None,))[0]
                 if s is None:
                     p, raw = X4.sprite(b4, X4.BN4['sprites'], 5, num)
-                    if raw is None or alloc.list5 >= X4.LIST5_END:
+                    X4.lists_room(alloc)
+                    if raw is None or X4.list5_spent(alloc.list5):
                         continue
                     s = dict(list=5, index=num, to_list=5, to_index=alloc.list5, at=alloc.art,
                              room=X4.rounded(len(raw), X4.ROOM_EFFECT), lz=bool(p & 0x80000000))
@@ -408,8 +432,11 @@ def runner_r4(f):
 
 
 def fight_gates(f):
-    """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type): a fight frame later in
-    BN6, with his first own state"""
+    """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type), and on its time-stop
+    bit at XV_FIGHT_STOP (STOP_GATED): a fight frame later in BN6, with his first own state"""
+    if f.ty in STOP_GATED and STOP4 in f.calls:
+        f.aim[STOP4] = ('XV_FIGHT_STOP', 'the battle\'s time-stop test, set through the fight\'s first frame too: his objects no '
+                                         'state runs begin with his first own state, a frame into BN6\'s fight (STOP_GATED)')
     if f.ty in FIGHT_GATED and FIGHT_FLAGS4 in f.calls:
         f.aim[FIGHT_FLAGS4] = ('XV_FIGHT_FLAGS', 'the battle\'s flags, bit 0 from the fight\'s second frame: his objects no state '
                                                  'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')
@@ -424,6 +451,7 @@ def effects_of(b4, b6, f, alloc, navis):
     X4.effects_of(b4, b6, f, alloc)
     facing_effects(b4, b6, f, alloc)
     flipped_effects(b4, b6, f, alloc)
+    table_effects(b4, b6, f, alloc)
     pattern_effects(b4, b6, f, alloc)
     navi_effect_sprites(b4, f, alloc, navis)
     f.effects = list(dict.fromkeys(f.effects))
@@ -504,6 +532,31 @@ def navi_effect_sprites(b4, f, alloc, navis):
                        f'{have[0]["to_index"]:#x}): listed by him too, at its place')
 
 
+def table_effects(b4, b6, f, alloc):
+    """his effects whose ids a table by his version holds (EFFECT_TABLES): each entry BN6's of the same look or moved, the
+    table's copied bytes given BN6's ids; effects_of's decision for the site answered"""
+    for site, (table, n, why) in sorted(EFFECT_TABLES.items()):
+        w = next((w for w in f.walks.values() if site in w.bls), None)
+        if w is None:
+            continue
+        if not any(m['lo'] <= table < m['hi'] for m in getattr(f, 'moved3', {}).values()) and not f.lo <= table < f.hi:
+            f.decide('effect', f'{site:08X}: its effects\' table {table:08X} is in no block it moves')
+            continue
+        done = True
+        for v in range(n):
+            e4 = b4.u8(table + v)
+            got = effect_of(b4, b6, f, alloc, e4)
+            if got is None:
+                done = False
+                continue
+            e6, how = got
+            if e6 != e4 and all(b[0] != table + v for b in f.bytes):
+                f.bytes.append((table + v, e4, e6, f'its effect by version {v}: {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+        if done:
+            f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and d[1].startswith(f'an effect spawned at {site:08X} '))]
+            f.notes.append(f'{site:08X}: its effect by its version from {table:08X} ({why})')
+
+
 def facing_effects(b4, b6, f, alloc):
     """his effects spawned with his side in r4's second byte (lsls r4,r0,#8 of 0x0800ACA6's, then adds r4,#id: AquaMan's
     0x080F459E): the id the adds's, BN6's of the same look or moved as xrecipe_bn4.effects_of gives a movs's, the adds given
@@ -545,6 +598,7 @@ def list_tables(b4, f, alloc, kinds):
                 continue
             sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None)
             if sp is None:
+                X4.lists_room(alloc)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art,
                           room=X4.rounded(len(raw), X4.ROOM_ATTACK), lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)
