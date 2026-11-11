@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:33:37Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:50:28Z }
 ---
 
 # The differential: a moved family against its own game
@@ -52,7 +52,17 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+where the dud plays. `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
+its Soul n): each one's event flag read from BN4's own table
+(`BN4_SOUL_FLAGS`; Blue Moon's six have none in Red Sun), Double Soul's,
+and its pseudo-chip's byte written past the chip gate as the game writes
+it giving the Soul (`xd4_souls_put`), and his form is said as it changes
+(`xd4_form_watch`, the battle NaviStats' `BN4_NAVI_FORM`). BN4's UNITE
+is keyed as BN5's: the chip picked, five right and down to UNITE, A,
+then up and A on the Soul (four other paths tried, none united).
+`bn4_soul_thun_control` is ThunSoul so, form 6 at the same frame in both
+runs, its charged shot held and the Custom screens that count its turns
+opened. A BN4 spec takes `film` as BN5's do. Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
@@ -119,7 +129,11 @@ while his CurAction is a generic state's in both
 foe (the opening's alignment is the appear queue's first object's), so a
 burst's reach is seen by its effects' panels, and a chip used after a
 support chip follows BN6's support run's held frame, its objects with
-it: such a spec is not written yet.
+it: such a spec is not written yet. A sound row may name `chips`, BN4's
+ids: it holds in the specs whose `folder4` holds one of them alone, over
+the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
+where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
+ThunderMan's battles with the pool's slot).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
@@ -764,7 +778,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   from UNITE to its end, became the two-game `soul_knight` with S2.)
 - **Engine specs** (`"kind": "engine"`): what BN6's engine does that
   BN5's has no twin of, fought in BN6 alone (`game=bn6`), MegaMan's
-  timeline held to the spec's `expect` in BN6's numbers (and `sounds`, a
+  timeline held to the spec's `expect` in BN6's numbers (its `chip` the
+  chip he uses next, the first kind's +0x2A: a Program Advance's id once
+  formed, BN6's own `pa_bn6_*`; and `sounds`, a
   song each that must begin): PASS or FAIL. `soul_cross` (HeatCross chosen
   on CROSSSELECT while KnightSoul is united: HeatCross from the next turn,
   the Soul gone, its used bit kept) and `soul_beast` (Beast Out's flag
@@ -1242,9 +1258,15 @@ format, its game 4: the trace's header names it):
   in BN4's misc state and for a waiting unit's subfamily alone; the
   count beside it is compared as ever);
   a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
-  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  every block of `FREE_BN4_CHIPS`' code, in a spec whose folder holds a
+  moved chip of BN4's; in any other spec none of it, since a unit may
+  copy code a family's own battle runs as BN4's: Thunder's unit BN4's
+  thunder, which Billy's battle runs where BN6's runs its own), so a draw one of its objects
   makes from the unit's own code is given BN4's of that place; a draw
   made while MegaMan runs stays the engine's (the shuffle's twin above);
+  a pointer into a chip unit's sprite is named by its row of the art's
+  room, read from the frame's objects (`room_rows`: the place a row is
+  at changes from one load to the next);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

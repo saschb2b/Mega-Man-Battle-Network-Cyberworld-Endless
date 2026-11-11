@@ -167,12 +167,11 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		const XvPair *c = &f->calls[i];
 		if (xvirus_is_code(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
 		/* (one of BN6's routines, of the moved objects' or its region's stubs, or the second-level dispatch's spawner where it
-		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs, or of an earlier unit
-		 * of its region's that moved a type it runs, XvRegion.shared: never another) */
+		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
 		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
-			!(r != &families && navis_routine(c->to | 1)) && !(r->shared && r->shared(c->to | 1))))
+			!(r != &families && navis_routine(c->to | 1))))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
 			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);
@@ -211,9 +210,12 @@ static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
 		bool placed = span_in(s->at, s->room, r->art, r->art_end) || (r->art2 && span_in(s->at, s->room, r->art2, r->art2_end));
 		if ((s->at & 3) || !s->room || !placed) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		/* (a row of a room filled on demand: its place its name, apart from every other's; its room no place of its own) */
+		bool row = r->rows && s->at >= r->rows && s->at < r->rows_end;
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
-			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
+			bool meet = row ? s->at == o->at : s->at < o->at + o->room && o->at < s->at + s->room;
+			if (meet || (s->to_list == o->to_list && s->to_index == o->to_index))
 				return no(why, n, "sprites %d and %d in one place", k, i);
 		}
 	}

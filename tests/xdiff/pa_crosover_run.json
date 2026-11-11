@@ -1,0 +1,96 @@
+{
+ "about": "BN6's own Program Advance CrosOver (349, 0x15D) from a run's Django chips: BN6's recipe names its Django, Django2 and Django3 (278-280), which have no art of their own (cut from the US version) and no run hands out; a run's Django chips are BN5's V1, SP and DS (the registry's 524-526, in D), and BN6's list grown with BN5's rows takes BN6's recipe with them (src/core/xchips_pas.c, tools/xchiprecipe.py BN6_PA_BORROWED; docs/multirom/bn6-gaps.md). The three picked in that order on the first Custom screen and OK: MegaMan's next chip is CrosOver's id from the first fight frame, and he uses it at t30. Without the row the same folder forms nothing (his next chip Django, 0x20C).",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 40,
+ "folder6": [
+  "20C:3",
+  "20D:3",
+  "20E:3"
+ ],
+ "deck6": [
+  "20C:3",
+  "20D:3",
+  "20E:3"
+ ],
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "chip": [
+    [
+     1,
+     "0x15D"
+    ]
+   ]
+  }
+ }
+}

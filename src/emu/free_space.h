@@ -58,7 +58,7 @@
 #define FREE_TEAM_SHARED     (EMU_FREE + 0x0A3800u)  /* the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full) (xnavi_install.c) */
 #define FREE_TEAM_SPRITES    (EMU_FREE + 0x0AB000u)  /* their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes) (xnavi_sprites.c) */
 #define FREE_TEAM_SPRITES_END (EMU_FREE + 0x0EF000u)
-#define FREE_BN4_CHIPS       (EMU_FREE + 0x0EF000u)  /* the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes, code and what they draw (xchips_code.c, xchips_bn4.c) */
+#define FREE_BN4_CHIPS       (EMU_FREE + 0x0EF000u)  /* the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes and code, and the room their art is put into as an object loads a sprite (xchips_bn4_art.h) (xchips_code.c, xchips_bn4.c, xchips_bn4_art.c) */
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
@@ -164,6 +164,10 @@
 #define RAM_TEAM_CLOCK       0x0203FFF8u             /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h) (arena_team_custom.c) */
 #define RAM_PA_WIDE          0x0203FFFCu             /* u32 the Program Advances past nine bits formed this battle, a bit an id from BN6_PA_WIDE_FIRST (side 0's: BN6's own bits end at id 383) (xchips_wide.c) */
 #define RAM_BATTLE_END       0x02040000u
+
+/* ---- save: 0x0E006810-0x0E007E00, the cart's save RAM between BN6's save (0x0E000100-0x0E00680F) and its three small blocks (from 0x0E007E00): BN6's save library addresses none of it, and every state the engine writes holds it ---- */
+#define SRAM_PACK            0x0E006A00u             /* the chip pack's entries of ids 635-1023: 16 bytes that say they are made, then 12 bytes an id (BN6_PACK_SAVE, bn6_pack_entry) (xchips_pack.c) */
+#define SRAM_PACK_END        0x0E007C50u
 
 /* The plan as tables: X(name, start, end, parent, zone), in address order,
  * a part after its parent ("" none); X(key, start, end) the zones */
@@ -271,5 +275,9 @@
 	X("persistent", 0x02010CE0u, 0x02011800u) \
 	X("mode", 0x02029A00u, 0x0202DA00u) \
 	X("battle", 0x0203FB50u, 0x02040000u)
+#define FREE_SPACE_SAVE(X) \
+	X("SRAM_PACK", 0x0E006A00u, 0x0E007C50u, "", "save")
+#define FREE_SPACE_SAVE_ZONES(X) \
+	X("save", 0x0E006810u, 0x0E007E00u)
 
 #endif

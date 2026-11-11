@@ -9,6 +9,8 @@
 #ifndef CW_BN6_CHIPS_H
 #define CW_BN6_CHIPS_H
 
+#include <stdbool.h>
+
 #include "chip_entry.h"   /* a folder entry's form: its id's bits */
 
 #define BN6_CHIP_TABLE_REF    0x08021AB0u /* getChip8021DA8's literal: the chip records (0x08021DA8, 411 of them), the one word that names them */
@@ -163,16 +165,51 @@
                                              pack counts, their entries the wide ids' */
 #define BN6_PACK_WIDE_FIRST   512         /* the ids past nine bits a pack counts: these, in the entries of ids BN6_PACK_IDS on, */
 #define BN6_PACK_WIDE_END     (BN6_PACK_WIDE_FIRST + BN6_PACK_EXT_FIRST - BN6_PACK_IDS) /* ... to here, 603 (docs/rom/chips-code.md, The
-                                             pack past 511); an id past them has no entry: counted 0, a chip given lost */
+                                             pack past 511); the 32 ids from it are Program Advances', which need no entry */
+/* ... and the ids past those in the cart's save RAM (docs/rom/chips-code.md, The pack in the save RAM): BN6's code
+ * addresses four blocks of its 32 KB (BN6_SAVE_*, below) and nothing between the first and the rest, which every
+ * state the engine writes carries */
+#define BN6_PACK_SAVE_FIRST   (BN6_PA_WIDE_FIRST + BN6_PA_WIDE_COUNT) /* the first id held there, 635, */
+#define BN6_PACK_SAVE_END     1024        /* ... to the ids' end (CHIPS_IDS): 389 entries */
+#define BN6_PACK_SAVE_MARK    0x0E006A00u /* BN6_PACK_SAVE_MARKED bytes that say the entries are made (xchips_pack.c: a state from before them holds 0xFF here), */
+#define BN6_PACK_SAVE_MARKED  16          /* ... that many, */
+#define BN6_PACK_SAVE         0x0E006A10u /* ... then the entries, 12 bytes an id, to 0x0E007C4C */
+#define BN6_PACK_SAVE_BYTES   ((BN6_PACK_SAVE_END - BN6_PACK_SAVE_FIRST) * BN6_PACK_ENTRY) /* ... their bytes, 4668 */
+#define BN6_SAVE_RAM          0x0E000000u /* the cart's save RAM (SRAM, 0x8000 bytes, mirrored to 0x0FFFFFFF), which BN6 reaches through its
+                                             save library alone, a byte at a time (BN6_SAVE_READ and the two below), each call's address and
+                                             size a literal: four blocks, */
+#define BN6_SAVE_RAM_SIZE     0x8000u     /* ... its bytes, 32 KB */
+#define BN6_SAVE_MAIN         0x0E000100u /* ... the game's save, BN6_SAVE_MAIN_SIZE bytes of 0x02000000 on (its literals 0x0803F860 and
+                                             0x0803F864; written at 0x0803F7B8, read at 0x0803F816), */
+#define BN6_SAVE_MAIN_SIZE    0x6710u
+#define BN6_SAVE_BLOCK_1      0x0E007E00u /* ... 0x28 bytes of 0x02006710 (0x0803F9AC; written 0x0803F918, read 0x0803F954), */
+#define BN6_SAVE_BLOCK_2      0x0E007E80u /* ... 0x78 bytes of 0x02006740 (0x0803FA7C; written 0x0803F9E4, read 0x0803FA20), */
+#define BN6_SAVE_BLOCK_3      0x0E007F80u /* ... and 0x80 bytes of 0x020067C0 (0x0803FAF4; written 0x0803FA9A and 0x0803FAE4, never read back
+                                             but by the verify: a save's try of the RAM) */
+#define BN6_SAVE_READ         0x0814F440u /* the save library's read (r0 the save RAM's address, r1 to, r2 the bytes; its loop run from the
+                                             stack, 0x03007Dxx): three callers, the first three blocks', */
+#define BN6_SAVE_WRITE        0x0814F4A4u /* ... its write (r0 from, r1 the save RAM's address, r2 the bytes): five, the four blocks', */
+#define BN6_SAVE_VERIFY       0x0814F514u /* ... and its verify: four; its write-and-verify (0x0814F578) has no caller */
+#define BN6_PACK_STAMP_SET    0x08139494u /* a pack entry's order stamp set (bn6f setUnkFieldOfChipCodeInChipPack; r0 the count's address,
+                                             r1 the code's place: strh of the counter BN6_PACK_STAMP_NEXT at the entry's +4 + 2 x place,
+                                             the counter one less; GiveChips' one call, 0x08021B20), */
+#define BN6_PACK_STAMP_GET    0x081394A8u /* ... read (ldrh into r0; the folder editor's list's one call, 0x08121CAC), */
+#define BN6_PACK_STAMP_CLEAR  0x081394B8u /* ... and zeroed (no caller found): the three by halfwords, the engine's by bytes */
+#define BN6_PACK_STAMP_NEXT   0x020065B4u /* the next stamp, u16, counted down from 0x7FFF (0x081394DC sets it) */
 
 /* Chip `id`'s entry of the pack at `pack` (eToolkit +0x4C's address), 0 where it has none: as the engine's routine at
- * CHIPS_CODE answers BN6's own (xchips_install.c) */
+ * CHIPS_CODE answers BN6's own (xchips_pack.c) */
 static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 	if (id < BN6_PACK_IDS) return pack + BN6_PACK_ENTRY * id;
 	if (id >= BN6_PACK_EXT_FIRST && id < BN6_PACK_EXT_IDS) return BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
 	if (id >= BN6_PACK_WIDE_FIRST && id < BN6_PACK_WIDE_END) return BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_WIDE_FIRST);
+	if (id >= BN6_PACK_SAVE_FIRST && id < BN6_PACK_SAVE_END) return BN6_PACK_SAVE + BN6_PACK_ENTRY * (id - BN6_PACK_SAVE_FIRST);
 	return 0;
 }
+
+/* Whether a chip `id` has a pack entry at all: a chip given, rewarded or bought of an id without one is lost (counted 0,
+ * a write into the ROM's zeros), so nothing hands one out (xchips.c's reward_as) */
+static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry(BN6_PACK_EXT, id) != 0; }
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */
@@ -273,6 +310,15 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
                                            * (bn4_chips.h BN4_SHUFFLE, the same instructions) */
+#define BN6_OBJECT_RUNNER     0x080031ACu /* RunBattleObjectLogic: each object of the run list called in turn (BN6_OBJECT_RUNNER_RET its
+                                           * calls' return address; BN4_OBJECT_RUNNER) */
+#define BN6_OBJECT_RUNNER_IN  0x080031AEu /* ... its second instruction (add sp,#-16), before any object runs: where the chips' art's room
+                                           * is put right each time (xchips_bn4_art.c) */
+#define BN6_SPRITE_LOAD_IN    0x080026E6u /* BN6_SPRITE_LOAD's second instruction (ldrb r3,[r5]): r1 the list's offset (the list x 4) and
+                                           * r2 the number as its caller gave them, r5 the object, before the list's entry is read
+                                           * (0x0800270A-0x0800270E). Its first is the differential's hook's */
+#define BN6_SPRITE_DATA       0x18        /* an object's sprite state's +0x18: its sprite's address + 4, stored as the sprite is loaded
+                                           * (0x0800272C: adds r0,#4; str r0,[r5,#0x18]) */
 /* What an attack family of BN4's moved calls of BN6's (bn4_chips.h, Its attack families; tools/xchiprecipe_bn4.py TWINS) */
 #define BN6_COUNTER_WINDOW    0x0800FDB6u /* MegaMan's counter window opened as a chip's attack begins: 0x10 to his collision data's counter byte
                                            * (BN6_COLL_COUNTER, through 0x0800E9DC) unless his AI data's kind is 2 and the link's bit 8 is clear */

@@ -43,6 +43,14 @@ void xd4_pool_point(const Spec *s);
  * save's copy that BN4's gate reads against its key (BN4_CHIP_GATE); nothing where the spec gives none. And its karma4,
  * MegaMan's karma in his NaviStats, which the battle copies as it begins */
 void xd4_folder_put(const Spec *s);
+/* The spec's souls4 given to BN4's MegaMan before its battle: each Soul's event flag (BN4_SOUL_FLAGS; Blue Moon's six have none in
+ * Red Sun, said and skipped), Double Soul's (BN4_FLAG_DOUBLE_SOUL), and its pseudo-chip's byte (BN4_SOUL_CHIPS + n) written as
+ * the game writes it giving the Soul, so BN4_CHIP_GATE lets UNITE's pick through at OK (docs/multirom/bn4-souls.md, How BN4
+ * takes a form) */
+void xd4_souls_put(const Spec *s);
+/* ... and BN4's MegaMan's form (its battle NaviStats' BN4_NAVI_FORM) said as it changes, once a frame where souls4 gave a Soul:
+ * a Soul's unison and its turns' end, as the trace's numbers have them */
+void xd4_form_watch(void);
 /* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
  * mutation's call= aims their veneers as BN5's */
 int xd4_family_count(void);
