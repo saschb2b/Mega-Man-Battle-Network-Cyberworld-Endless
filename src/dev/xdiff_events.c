@@ -585,6 +585,20 @@ void xd_log_navis(const int *ids5, int n) {
 	memcpy(spec_ids, ids5, (size_t)nspec_ids * sizeof *spec_ids);
 }
 
+bool xd_navi_copy_apart(const int *ids5, int n, uint32_t to) {
+	for (int k = 0; k < xnavi_bn5_count; ++k) {
+		const XVirusFamily *f = &xnavi_bn5[k]->code;
+		bool in = false;
+		for (int b = 0; b < f->nblocks && !in; ++b) in = to >= f->blocks[b].at && to < f->blocks[b].at + (f->blocks[b].end - f->blocks[b].start);
+		if (!in) continue;
+		for (int v = 0; v < xnavi_bn5[k]->versions; ++v)
+			for (int i = 0; i < n; ++i)
+				if (f->names[v] == ids5[i]) return false;
+		return true;
+	}
+	return false;
+}
+
 /* whether a moved range is a block or clone of a Navi among the spec's foes (another Navi's copy of BN5's engine code, the
  * Dark Soul's of its chip AI's region, is its engine's there, as the families' are in spec_code) */
 static bool navi_code(const XvMoved *m) {

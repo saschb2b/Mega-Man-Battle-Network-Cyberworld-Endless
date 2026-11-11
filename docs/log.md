@@ -4,6 +4,7 @@
 * **Update**: game/bosses/bn4-navis.md (SparkMan among the ACDC Area's guardians, BurnerMan among the Park Area's; their kins ElecMan and HeatMan), rom/bn4.md (`BN4_OW_SPARKMAN`, `BN4_OW_BURNERMAN` named).
 * **Update**: multirom/bn4-navis.md (BurnerMan built: his init's tail at his spawn's end, a gate a frame longer, his object asking his CurAction, a pattern table BN6's), rom/bn4.md (BurnerMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-navis.md (SparkMan built: a CurAction kept in his object, an effect by version from a table, his object drawn as each engine's MegaMan; the Navis' effects and lists past their ranges), rom/bn4.md (SparkMan derived, new row), re/ledger.json.
+* **Update**: devtools/differential.md (a poke redirects only to the spec's own Navi's copy: toadman_sea_elec PASS again, mutation 92 caught).
 * **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
 * **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
@@ -30,6 +31,7 @@
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
+* **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).
 * **Create**: multirom/bn6-gaps.md (BN6 Gregar's own gaps: its Program Advances proved in a run's engine, the chips the pool leaves out, its post-game fights, SneakRun and NumbrOpn traced, its songs against a run's, the net's looks and boards, requests and traders; what is built without a call and what waits on the owner); **Update**: multirom/index.md, multirom/gaps.md (the link), rom/navicust.md (SneakRun and NumbrOpn, new row), rom/battle.md (BN6's post-game fights, new row; Bass's unused versions), rom/chips.md (BN6's Program Advances formed in a run's engine, new row), rom/net-maps.md (the map-music lists, all of them; the run's themes against BN6's), world/home/jobs.md (BN6's 35 requests), devtools/differential.md (an engine spec's `chip`).
 * **Update**: code/platforms.md (Dependabot's PRs target `dev`).

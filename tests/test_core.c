@@ -2628,8 +2628,13 @@ static void test_way_links(void) {
  * each of a tier its act has reached, none of the left-out ones; and
  * MegaMan's words for the bugs. */
 static void test_navicust(void) {
-	static const int left_out[] = { 15, 16, 17, 18, 19, 20, 22, 23, 24, 32, 33, 34 };
+	static const int left_out[] = { 16, 17, 18, 19, 20, 22, 23, 24, 32, 33, 34 };
 	int offered[47] = { 0 };
+	/* (NumbrOpn sets the hand to ten: Custom1 and Custom2 add nothing beside it, FldrPak1 its MegFldr1 still) */
+	const uint8_t numbropn[1] = { 15 * 4 };
+	CHECK(navicust_in_pool(15) && navicust_tier(15) == 4, "NumbrOpn in the pool from act 5");
+	CHECK(navicust_adds_nothing(2, numbropn, 1) && navicust_adds_nothing(3, numbropn, 1) && !navicust_adds_nothing(29, numbropn, 1) &&
+	      navicust_adds_nothing(15, numbropn, 1), "Custom1 and Custom2 spent beside NumbrOpn");
 	for (uint32_t seed = 1; seed <= 400; ++seed) {
 		rng_seed(seed * 2654435761u);
 		int depth = 3 * (1 + (int)(seed % 7));   /* every guardian of a cycle, and the second cycle's first */
