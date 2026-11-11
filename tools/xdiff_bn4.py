@@ -992,6 +992,37 @@ def opening_count(d, fa, fbt):
     return ob is not None and ob.o8(SPRITE_COUNT) == d.a
 
 
+NAVI_ANIM_FIRST = {}   # (each moved Navi's animation, +0x90 and +0x11, at his first fight frame: compare clears it)
+NAVI_ART_SAME = {}     # (the fight frame's roles' sprite differences at BN4's same fight frame, by frame_diffs: compare clears it)
+
+
+def same_frame(d, fa, fbt):
+    """whether BN6's record of BN4's same fight frame holds d's field as BN4's (frame_diffs of that pair, cached by frame)"""
+    key = fa.fr['t']
+    if key not in NAVI_ART_SAME:
+        NAVI_ART_SAME.clear()
+        NAVI_ART_SAME[key] = {(x.role, x.part, x.off) for x in frame_diffs(fa, fbt)}
+    return (d.role, d.part, d.off) not in NAVI_ART_SAME[key]
+
+
+def navi_opening_art(d, fa, fbt):
+    """legit.json's bn4 navi_opening_art: a moved Navi's sprite state (+0x90 to +0xBB, as xdiff_bn4_opening.SPRITE_STATE) while his animation is the one his
+    init set before the fight (SparkMan's state 7 writes the same 0 again, 0x080B7A2C): its frames run by the fight's frames,
+    as opening_count's count, so compared at the same fight frame: True where BN6's of BN4's t differs from BN4's there in
+    none of those bytes of his"""
+    held = {(o['kind'], int(o['type'], 0)) for o in bn4_rule('navi_opening_art').get('objects', [])}
+    other = isinstance(d.role, tuple) and len(d.role) > 1 and (d.role[0], d.role[1]) in held
+    if not (fbt and d.part == 'obj' and 0x90 <= d.off < 0x90 + 0x2C and (navi_role(d.role) or other)):
+        return False
+    oa = fa.by_role.get(d.role)
+    if oa is None:
+        return False
+    now = (oa.o8(ANIM), oa.o8(0x11))
+    if NAVI_ANIM_FIRST.setdefault(d.role, now) != now:
+        return False
+    return same_frame(d, fa, fbt)
+
+
 def companion_count(d, fa, fbt):
     """legit.json's bn4 companion_opening_count: a Navi's companion (a first-kind object of a type his recipe moves, its role
     T1_MOVED | its type: FireMan's 0x57) counts the animation its init set up in the paused opening by the fight's frames,
@@ -1504,6 +1535,19 @@ def spawner_kept(d):
     return None
 
 
+def kept_action(d):
+    """legit.json's bn4 navi_kept_actions: a word of a moved Navi's object that keeps a CurAction he writes back to +9 later
+    (SparkMan's +0x60, 0x080B7A62), BN4's own states from 6 and BN6's from 8 as his recipe gives each store: its name where
+    BN6's is BN4's + 2, None else"""
+    if d.part != 'obj' or not navi_role(d.role) or not isinstance(d.a, int) or not isinstance(d.b, int):
+        return None
+    nid = d.role[1] if isinstance(d.role, tuple) else int(re.match(r'T1:0x([0-9a-fA-F]+)#', d.role).group(1), 16)
+    for k in bn4_rule('navi_kept_actions').get('kept', []):
+        if nid in {int(x, 0) for x in k['names']} and d.off == int(k['offset'], 0) and 6 <= d.a <= 0xF and d.b == d.a + 2:
+            return k['what']
+    return None
+
+
 def navi_ai(d):
     """legit.json's bn4 allowed of a Navi's AI data (navi_ai: a range of its offsets, BN6's bookkeeping or BN4's, each with both
     games' code): the allowance d is, on a moved Navi's AI data alone (NAVI_NAMES), None where none"""
@@ -1627,6 +1671,8 @@ def compare(spec, ta, tb, canon, show=6):
     left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()
     MOVES.clear()
+    NAVI_ANIM_FIRST.clear()
+    NAVI_ART_SAME.clear()
     # (legit.json's bn4 opening_animation: a moved object's animation run through the paused opening, by the openings' lengths)
     opening = Opening(ta, tb, getattr(canon, 'sprites', []), getattr(canon, 'roms', {}).get(4, b'')) if against else None
     clock = CompanionClock() if against else None   # (legit.json's bn4 companion_clock)
@@ -1700,10 +1746,11 @@ def compare(spec, ta, tb, canon, show=6):
         for d in mine:   # (legit.json's bn4 allowed bits of the family's own, each counted)
             # (a hit's spark the family's code spawned through the engine's hit routine is the engine's effect still: its
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
-            d.mask = allowed_bit(d, fam) or navi_ai(d) or spawn_leftover(d) or spawner_kept(d) or (foe_slide(d, fam, fa, fb) if spec.get('subject') == 'megaman' else None) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
+            d.mask = allowed_bit(d, fam) or navi_ai(d) or kept_action(d) or spawn_leftover(d) or spawner_kept(d) or (foe_slide(d, fam, fa, fb) if spec.get('subject') == 'megaman' else None) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the paralysis's flash, its gate a state's and its phase the timer's" if against and paralysis_flash(d, fa, fb) else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
                 ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None) or \
+                ("a Navi's opening animation, by the fight's frames" if navi_opening_art(d, fa, ft) else None) or \
                 (clock.holds(d, fa, ft) if clock else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1

@@ -242,7 +242,10 @@ typedef struct {
 #define XV_FIGHT_FLAGS (XV_STUBS + 0x240u)   /* ... the battle's flags (BN4's 0x08007A8C) with bit 0 from the fight's second frame on: a moved
                                                 Navi's object no state runs gated a frame later, with his first own state (BN6's
                                                 engine runs none in the paused opening; docs/multirom/bn4-navis.md, ThunderMan built) */
-#define XV_STUBS_END (XV_STUBS + 0x260u)
+#define XV_FIGHT_STOP (XV_STUBS + 0x260u)    /* ... the battle's time-stop test (BN4's 0x08007948: the flags' bit 4) also held through the
+                                                fight's first frame: a moved Navi's object whose update waits on it begins with his
+                                                first own state (docs/multirom/bn4-navis.md, BurnerMan built) */
+#define XV_STUBS_END (XV_STUBS + 0x280u)
 #define XV_PRESTEP  (XV_DISPATCH + 0x1200u) /* the families' pre-steps by AI index, XV_AIS words (0 none): the hook on BN6's dispatcher
                                               (BN6_VIRUS_NAMEID_CASES) runs one before the family's state each frame (xvirus_shim.h);
                                               past the dispatch's code, sprite list 3 at its old place */
