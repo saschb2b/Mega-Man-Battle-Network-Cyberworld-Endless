@@ -39,6 +39,8 @@ static uint32_t ram_hash(void) {
 void lab_battle_ask(const Encounter *e, int backdrop) {
 	if (D.lab) return;
 	L.e = *e;
+	L.e.held = false;
+	L.e.leave = true;
 	L.ask_backdrop = backdrop;
 	L.due = true;
 }
@@ -112,5 +114,3 @@ bool lab_battle_frame(void) {
 	if (L.fought && on_map()) { over(false); return false; }
 	return true;
 }
-
-const LabResult *lab_battle_result(void) { return &L.result; }

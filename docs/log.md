@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).
 * **Update**: game/battle-lab.md (the name asked again and kept, over EchoComp, CopyComp and TraceComp), research/sources.md (The Battle Lab: the names checked against the series).
 * **Update**: game/battle-lab.md (Built: the deletions counted, step 1), rom/virus-families.md (`BN6_FOE_DYING`, new row), engine/emulation/hooks.md (its hook), engine/saves.md (`run.data`), code/core.md (`battle_data.c`), code/director.md and code/analytics.md (the event, the run-end's count), GUIDE.md (what a run's end sends), re/ledger.json.
 * **Update**: multirom/bn4-chips.md (SeekBom1-3 moved; a family's unit by subfamily), rom/bn4.md (the bombs' family, SeekBom's bomb and the explosions' maker, new row), devtools/chip-recipe-generator.md (a unit by subfamily).

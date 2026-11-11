@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:50:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -338,6 +338,38 @@ is used.
   families complete (`data`). No player sees it yet. An autopilot run
   (seed 3, 15000 frames) counted the eight viruses its run log names,
   BN5's moved families among them.
+
+- **The test battle** (step 2), behind the dev step `lab`
+  ([A battle on demand](../devtools/battle-on-demand.md);
+  `src/director/lab_battle.c`). Asked for, it begins with the next
+  frame's update: the core's whole state with the cart's flash save in
+  it (`emu_snapshot`: the pack's entries for chips past 634 live there),
+  the director's state and the run are kept, then BN6 fights the battle.
+  Its frames are its own: nothing of the director's runs in them, so no
+  count, log, record or save sees it. `battle_spare.c`'s blow ends it
+  where MegaMan would be deleted, and a GAME OVER that began anyway ends
+  it the same way. L on the Custom screen leaves at the first try: BN6's
+  escape roll weighs the record's byte 1 against a fifth of MegaMan's max
+  HP, and the test's record has 0 there ([BN6's battles](../rom/battle.md),
+  Running from a battle). When BN6 is on its map again everything is put
+  back, and the update the battle took the place of runs.
+  - *Proved headless* (seed 15, Central Area, `--dev quiet`): a battle
+    won by the autopilot (96 frames, level 9), one lost to two Mettaurs
+    by standing still (deleted at 1966 frames, 99 HP lost, no GAME OVER,
+    the run going on) and one left by L. In each the work RAM's hash is
+    the same before and after. Against the same run without the step,
+    stopped the test's 2652 frames earlier: the same last picture, and
+    14 of the 15 save files byte for byte the same (`profile.sav`,
+    `run.sav`, `run.data`, `run.tally` among them). `run.state` differs
+    in 18 bytes of the emulator's own header (mGBA's PSG channels' event
+    timing at 0x130-0x163 and 0x390-0x39F, which any state load derives
+    again, a CONTINUE's too); its work RAM, IO, video RAM, palette, OAM
+    and flash save are the same.
+  - *Not a proof*: an autopilot run with a test battle in it rolls the
+    same battles in the same order, but fights them otherwise, since the
+    autopilot presses by the real frame's count.
+  - The reward's box on BN6's RESULT is not emptied yet: what it shows
+    is given and then put back with the rest.
 
 ## Build order
 

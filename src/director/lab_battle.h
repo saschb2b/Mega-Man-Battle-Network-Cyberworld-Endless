@@ -33,6 +33,5 @@ void lab_battle_ask(const Encounter *e, int backdrop);
  * frame (it began, is fought, or is not yet back on the map); false where
  * none is on, and on the frame it ended, the game put back. */
 bool lab_battle_frame(void);
-const LabResult *lab_battle_result(void);
 
 #endif
