@@ -1586,7 +1586,7 @@ static const XvType meteors_types[] = {
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x2's sprite 5:0x2, which MokoRus lists: listed by it too, the same number (5:0xec), as its effect's row needs its sprite among its own */
 /* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
-/* its sound 0xb0 (080D6C52): BN4's song copied into the grown song table's slot 0x2c0, on BN4's player 23 */
+/* its sound 0xb0 (080D6C52): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
 /* its sound 0xbc: BN4's song at slot 0x3f, the families' slot for it (FAMILY_SLOTS) */
 /* its sound 0xe3 (080D6D92, 080D6DB6): BN4's song copied into the grown song table's slot 0x1e3, on BN4's player 8 */
 /* its sound 0xe4 (080D6DDA): BN4's song copied into the grown song table's slot 0x1e4, on BN4's player 28 */
@@ -1730,12 +1730,12 @@ static const XvByte timebomb_bytes[] = {
 	{ 0x080E4A02, 0x00, 0xC8 },   /* its table's kind 0x1's effect: 0x0 in BN4, 0xc8 in BN6 (moved) */
 };
 static const XvSoundCall timebomb_sound_calls[] = {
-	{ 0x080D6C52, 0x2C0 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x2c0 */
+	{ 0x080D6C52, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
 	{ 0x080D6D92, 0x1E3 },   /* its sound 0xe3: BN4's song at the grown table's slot 0x1e3 */
 	{ 0x080D6DB6, 0x1E3 },   /* its sound 0xe3: BN4's song at the grown table's slot 0x1e3 */
 	{ 0x080D6DDA, 0x1E4 },   /* its sound 0xe4: BN4's song at the grown table's slot 0x1e4 */
 };
-static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x2C0 }, { 0xBC, 0x3F }, { 0xE3, 0x1E3 }, { 0xE4, 0x1E4 } };
+static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC, 0x3F }, { 0xE3, 0x1E3 }, { 0xE4, 0x1E4 } };
 
 #define TIMEBOMB_CODE { .name = "TimeBomb (BN4's)", .game = XROM_BN4_RED_SUN_US, \
 	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x4C00), \
@@ -1755,7 +1755,7 @@ static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x2C0 }, { 0xBC
 /* its object, the fourth kind's 0x10 (080E31E8-080E3328), not moved: BN6's Navi object in its place */
 /* the chip's Navi, the first kind's 0x14 (080B999C-080B9B44), which his spawner (080B9B1C) spawns: moved */
 /* his battle sprite 2:0x2 (080B99C8): gutsman's, list 2's 0x41 (seat 1) */
-/* its sound 0xb0 (080B9A3E): BN4's song copied into the grown song table's slot 0x2c0, on BN4's player 23 */
+/* its sound 0xb0 (080B9A3E): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
 /* its chip 225 (id 536) waits: its row is XREG_PENDING */
 /* its chip 226 is a dark chip of BN4's (row 537): a battle it is used in costs 20 max HP */
 /* its chip 226 (id 537) waits: its row is XREG_PENDING */
@@ -1809,9 +1809,9 @@ static const XvType gutsmanchip_types[] = {
 	{ 1, 0xA0, XV_TYPE_MOVED, 0x14 },   /* BN4's first-kind 0x14, moved, the dispatch's 0xa0 */
 };
 static const XvSoundCall gutsmanchip_sound_calls[] = {
-	{ 0x080B9A3E, 0x2C0 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x2c0 */
+	{ 0x080B9A3E, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
 };
-static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x2C0 } };
+static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x1E2 } };
 
 #define GUTSMANCHIP_CODE { .name = "GutsManChip (BN4's)", .game = XROM_BN4_RED_SUN_US, \
 	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5000), \

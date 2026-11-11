@@ -266,8 +266,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
                0x90: 0x206,                 # (the bombs' state's throw)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
-               0x91: 0x300,
-               0xB0: 0x2C0}                 # (a Navi chip's Navi as he appears: GutsMan's, 0x080B9A3E; the Navi chips' range)
+               0x91: 0x300}
+# (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
