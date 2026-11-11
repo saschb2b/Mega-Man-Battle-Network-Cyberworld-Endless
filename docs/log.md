@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/differential.md (a poke redirects only to the spec's own Navi's copy: toadman_sea_elec PASS again, mutation 92 caught).
 * **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
 * **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
@@ -29,6 +30,7 @@
 ## 2026-11-11
 * **Update**: multirom/bn4-chips.md (Hole, DrkLine and DrkStage moved, one unit, the panel changer once), rom/bn4.md (the changer's blink read to depth, its sounds), devtools/differential.md (BN4's panel types in BN6's numbers, its blink and set type's timer), devtools/chip-recipe-generator.md (a table's bytes, a support unit of several subfamilies, a call several sounds reach), game/meta/darkchips.md (the first dark units moved).
 * **Update**: multirom/bn4-chips.md (BN4's Hole panel in BN6's engine built, type 15, the owner's call 8), rom/bn4.md (the Hole panel's look, colours and count, new row), code/emu.md (`xpanels.c` brings BN4's Hole too), devtools/battle-on-demand.md (the `status panel` step).
+* **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).
 * **Create**: multirom/bn6-gaps.md (BN6 Gregar's own gaps: its Program Advances proved in a run's engine, the chips the pool leaves out, its post-game fights, SneakRun and NumbrOpn traced, its songs against a run's, the net's looks and boards, requests and traders; what is built without a call and what waits on the owner); **Update**: multirom/index.md, multirom/gaps.md (the link), rom/navicust.md (SneakRun and NumbrOpn, new row), rom/battle.md (BN6's post-game fights, new row; Bass's unused versions), rom/chips.md (BN6's Program Advances formed in a run's engine, new row), rom/net-maps.md (the map-music lists, all of them; the run's themes against BN6's), world/home/jobs.md (BN6's 35 requests), devtools/differential.md (an engine spec's `chip`).
 * **Update**: code/platforms.md (Dependabot's PRs target `dev`).
