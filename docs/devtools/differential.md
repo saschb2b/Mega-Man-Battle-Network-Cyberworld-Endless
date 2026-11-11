@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:48:40Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:20:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -945,7 +945,11 @@ code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
 so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
 `0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
 took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
-uncaught, until this).
+uncaught, until this). Nor does a BN5 virus family's copy take a poke of a
+BN4 spec (`bn5_familys`): BN5's families' blocks lie at the same numbers as
+BN4's code, and one of them, `0x080D6C90`-`0x080D6EB0`, lay over BN4's
+TimeBomb's bomb's (`0x080D6BF8`-`0x080D6ED4`), so six mutations of the
+bomb's copy broke a BN5 virus instead and passed.
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
