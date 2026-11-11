@@ -436,6 +436,8 @@ const uint8_t *chips_sit_bits(void) { return ready() ? M.sits : NULL; }
 
 bool chips_from_bn5(void) { return ready() && M.rom5; }
 
+bool chips_from_bn4(void) { return ready() && M.rom4; }
+
 const uint8_t *chips_image(uint32_t *len) {
 	*len = ready() ? M.len : 0;
 	return *len ? M.img : NULL;

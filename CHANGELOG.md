@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **BN4 Red Sun's chips in the finds.** With BN4's ROM beside BN6's, half
+  of what a layer of BN4's areas hands out comes from BN4's own
+  catalogue: the Net Dealer's stock, Mystery Data, the vaults', Servers'
+  and gift's picks, and a Chip Trader's list. Its chips that play today
+  come among them (PanlSht, ShotStar, Repair, Counter, WhitWeb, Boomer and
+  Invis), more as each is proved; never a dark chip, which only a flame
+  of darkness offers. In the deep the half draws on every game's chips you
+  have. A run without BN4's ROM finds what it always did. A BN4 chip you
+  hold now counts on the Library's BN4 page.
+- **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
+  Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
+  they look as on any other layer again.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
