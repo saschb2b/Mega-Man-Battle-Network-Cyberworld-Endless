@@ -31,8 +31,15 @@
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
 #define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* the room what they draw is put into as an object loads it
                                                                    * (xchips_bn4_art.h; the code's room 96 KB), to: */
-#define XC4_END       (FREE_BN4_CHIPS_END - 0x400u)
-#define XC4_MISC      XC4_END              /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
+#define XC4_END       XC4_PAGE
+#define XC4_PAGE      (FREE_BN4_CHIPS_END - 0xA00u)   /* BN4's chips' page of the second-level dispatch (xvirus_dispatch.h): */
+#define XC4_PAGE_MOVED XC4_PAGE            /* ... its MOVED table, 256 words by BN4's own third-kind type, */
+#define XC4_PAGE_CODE (XC4_PAGE + 0x400u)  /* ... its code, the project's own Thumb: its dispatch type's routine, */
+#define XC4_PAGE_CODE_SIZE 0x100u
+#define XV_SPAWN4_3   (XC4_PAGE_CODE + 0x20u)   /* ... its spawners, as XV_SPAWN_3, XV_SPAWN_3_LAST and XV_SPAWN_3_FIRST (BN4's 0x080032F0, */
+#define XV_SPAWN4_3_LAST (XC4_PAGE_CODE + 0x60u)   /* ... 0x0800330C, */
+#define XV_SPAWN4_3_FIRST (XC4_PAGE_CODE + 0xA0u)  /* ... 0x08003328) */
+#define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)
  * is a unit too, XCHIP_ATTACK: the state's code whole, every subfamily of it, at a number of BN6's grown attack families
