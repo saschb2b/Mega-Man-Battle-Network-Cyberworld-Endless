@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T17:55:06Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T05:00:00Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
@@ -50,6 +50,7 @@ missed its screen:
 | `title`, `options` (its Display page), `controls`, `options/display`, `options/audio`, `options/game`, `setup`, `saves`, `launcher` | the title and the engine's own screens over it |
 | `room`, `pet`, `pet/folder`, `pet/subchip`, `pet/library`, `pet/megaman`, `pet/mail`, `pet/keyitem`, `pet/options`, `jukebox` | a new run in Lan's room (seed 2), Dad's call paged, and the PET's screens |
 | `layer`, `battle` | a run's first layer, its arrival's words paged (`--dev quiet`); its first battle's Custom screen |
+| `darkloid/shademan`, `darkloid/blizzardman`, `darkloid/cloudman`, `darkloid/cosmoman` | BN5's Darkloid at V1 in BN6's engine, the Custom screen of his battle, the run's opening gift picked first (the `foes` step, [A battle on demand](battle-on-demand.md); BN5's ROM beside BN6's) |
 | `hp` | Lan's HP after act 2 (seed 3), its words paged |
 
 **Do** is `play.py`'s commands (`press A; wait 60; hold UP+RIGHT 30; mash A

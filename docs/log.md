@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 * **Update**: multirom/bn4-chips.md (FlmLine1-3, Thunder1-3 and TwnFng1-3 moved; the arm shared; the units' art room, its start moved, and what it does not hold), rom/bn4.md (their code, new row), devtools/chip-recipe-generator.md (a shared type, a unit's own move of a paired type), devtools/differential.md (a sound row by a spec's chips; BN4's chip units' code keyed in the specs that play a moved chip of BN4's alone).
+* **Update**: devtools/agents-tools.md (the `darkloid/NAME` routes: a BN5 Darkloid's battle in BN6's engine, for a look at each).
 * **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
 * **Update**: multirom/bn4-navis.md (TopMan built, the first of the other build: his palette by version, two collision fields, his top drawn with his own sprite, the comparator's no-AI-data masks for him; the third kind's dispatch numbers nearly spent), rom/bn4.md (TopMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
