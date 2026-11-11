@@ -475,6 +475,7 @@ static HookAct on_mood_calm(HookRegs *r, void *user) {
  * family's. Another unit's copy of BN5's code, which BN5's own code calls too (BoyBomb's explosion spawner, which a
  * Handi's bomb calls in BN5), is BN5's own there and BN6's twin's in BN6, so it is no family's in either. */
 static bool unit_used[XC_UNITS];
+static bool bn4_played;   /* ... and whether it holds a chip of BN4's whose code is a unit's (xchips_bn4_moved) */
 
 /* the units chip `id`'s moved code runs */
 static void units_of(int id) {
@@ -496,7 +497,9 @@ static bool in_folder(const uint16_t *folder, int n, int id) {
 
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
+	bn4_played = false;
 	for (int i = 0; i < n; ++i) units_of((int)chip_entry_id(folder[i]));
+	for (int i = 0; i < n && !bn4_played; ++i) bn4_played = xchips_bn4_moved((int)chip_entry_id(folder[i]));
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;
@@ -538,10 +541,13 @@ static bool chip_used(uint32_t to) {
 }
 
 /* whether BN6's copy at `to` is a chip unit's code the log keys: a used unit's of BN5's (not the chips' helpers'), or any
- * of BN4's (only the unit of the chip the spec plays runs, and its own draws are keyed by BN4's places as a family's are:
- * TimeBomb's placement, the fourth kind's 0x27's, 0x080E4D4C) */
+ * of BN4's where the spec's folder holds a moved chip of BN4's (only the unit of the chip the spec plays runs, and its own
+ * draws are keyed by BN4's places as a family's are: TimeBomb's placement, the fourth kind's 0x27's, 0x080E4D4C). In any
+ * other spec BN4's units' code is no one's: a unit may copy code a family's own battle runs as BN4's (Thunder's unit
+ * BN4's thunder, which Billy's battle runs where BN6's runs its own: keyed as the unit's, Billy's draws there found no
+ * twin) */
 static bool chip_code(uint32_t to) {
-	if (xchips_bn4_code_at(to)) return true;
+	if (xchips_bn4_code_at(to)) return bn4_played;
 	return to >= FREE_CHIP_MOVED && to < FREE_TAIL && !(to >= XC_HELPERS && to < XC_HOMES) && chip_used(to);
 }
 
@@ -577,6 +583,20 @@ static int spec_ids[XD_NAVI_IDS_MAX], nspec_ids;
 void xd_log_navis(const int *ids5, int n) {
 	nspec_ids = n < XD_NAVI_IDS_MAX ? n : XD_NAVI_IDS_MAX;
 	memcpy(spec_ids, ids5, (size_t)nspec_ids * sizeof *spec_ids);
+}
+
+bool xd_navi_copy_apart(const int *ids5, int n, uint32_t to) {
+	for (int k = 0; k < xnavi_bn5_count; ++k) {
+		const XVirusFamily *f = &xnavi_bn5[k]->code;
+		bool in = false;
+		for (int b = 0; b < f->nblocks && !in; ++b) in = to >= f->blocks[b].at && to < f->blocks[b].at + (f->blocks[b].end - f->blocks[b].start);
+		if (!in) continue;
+		for (int v = 0; v < xnavi_bn5[k]->versions; ++v)
+			for (int i = 0; i < n; ++i)
+				if (f->names[v] == ids5[i]) return false;
+		return true;
+	}
+	return false;
 }
 
 /* whether a moved range is a block or clone of a Navi among the spec's foes (another Navi's copy of BN5's engine code, the

@@ -627,16 +627,27 @@ static void call_aim(uint32_t at, uint32_t v) {
 	}
 }
 
+/* whether `to`, a moved range's copy, is in the code of a BN5 Navi none of the spec's foes is: each Navi's copy of BN5's
+ * code is his own, no relocation of a routine, and its BN5 addresses lie among BN6's own code and BN4's, so a poke there is
+ * not his unless the spec fights him (toadman_sea_elec's BN6 0x080C64EB lies in Meddy's copy of BN5's 0x080C6000-0x080C665C,
+ * which took the poke from ToadMan's battle once Meddy was moved; BN4's WoodMan's 0x080F50E4 in SearchMan's) */
+static bool another_navis(const Spec *s, uint32_t to) {
+	int ids[MAX_FOES], n = 0;
+	for (int k = 0; !s->bn4 && k < s->nfoes; ++k) ids[n++] = s->foes[k].id;
+	return xd_navi_copy_apart(ids, n, to);
+}
+
 /* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
  * among the ranges too); the chips' moved code for a poke5 alone, its BN5 addresses lying among BN6's own attack families'
  * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
  * FireMan's, moved after it), nor BN4's chips' units' (PanlSht's shot's block, 0x080DCAA4-0x080DCC5C, holds BN5's
- * BlizzardMan's and CloudMan's chips' spawns' addresses) */
-static int poke_range(const XvMoved *m, int n, const Poke *p) {
+ * BlizzardMan's and CloudMan's chips' spawns' addresses); and never a BN5 Navi's copy but the spec's own foes'
+ * (another_navis) */
+static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
-		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END))
+		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !another_navis(s, m[k].to))
 			return k;
 	return -1;
 }
@@ -657,7 +668,7 @@ static void pokes_put(const Spec *s, bool ram) {
 			call_aim(p->at, p->v);
 			continue;
 		}
-		int k = poke_range(m, n, p);
+		int k = poke_range(s, m, n, p);
 		if (k >= 0) at = at - m[k].from + m[k].to;
 		if (p->bn5 && at == p->at) {
 			fprintf(stderr, "xdiff: poke5 %08x is in no moved range\n", (unsigned)p->at);
@@ -833,6 +844,7 @@ static bool reference(Side *g, const Spec *s) {
 static void bn4_frame(uint32_t keys) {
 	guest_frame_quiet(keys);
 	xd4_watch();
+	xd4_form_watch();
 }
 
 /* BN4 Red Sun's own battle on the guest core (xdiff_bn4.h's record), traced in BN6's units (xdiff_bn4_trace.h): its
@@ -844,6 +856,7 @@ static bool reference4(Side *g, const Spec *s) {
 	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
 	xd4_folder_put(s);   /* (a chip spec's folder4, and its chips through BN4's gate: xdiff_bn4.h; after the battle is asked, which sets its own) */
+	xd4_souls_put(s);    /* (a Soul spec's souls4, its flags and pseudo-chips past the gate) */
 	const Xd4Places *p = &xd4_places;
 	g->v = (View){ .game = 4, .state = p->state, .window = p->window, .rng = { p->rng[0], p->rng[1] }, .t1 = p->t1, .t3 = p->t3,
 		.t4 = p->t4, .nt1 = (int)p->nt1, .panels = p->panels, .panel_size = BN6_PANEL_SIZE, .list = p->list, .list_end = p->list_end,

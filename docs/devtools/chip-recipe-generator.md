@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:27:42Z }
 ---
 
 # The chip recipe generator
@@ -205,7 +205,17 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   spread shot's) is copied with the unit, each row of a kind its chips
   play given BN6's id of the effect (of the same look, or moved) and a
   slot a byte can name for the sound (`FAMILY_SLOTS`); the arm's kinds'
-  table keeps a row's sprite list beside its number.
+  table keeps a row's sprite list beside its number. A third-kind type
+  several attack units spawn is moved once, by the first of them in
+  `UNITS` (`SHARED3`: MegaMan's arm, the Spreads unit's): a unit after
+  it copies the type's spawner alone, a block of its own, its spawn the
+  owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
+  table's kinds are every unit's. A routine the families pair with BN6's
+  own that a chip's unit moves instead, with its type, is named in
+  `UNIT_MOVES` (the thunder's spawner); a literal that is a number, not
+  an address, in `NUMBERS`; and a call noted before its target's type
+  was moved with the unit is walked as its own code (FlmCros's cross, in
+  the flame's code).
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -216,20 +226,24 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   compared to its depth (`TYPE_TWINS`), the census's lesson ([BN4's chips
   in a run](../multirom/bn4-chips.md), The six "on BN6's code" are not).
 - **Its objects.** A third- or fourth-kind type it spawns that BN6 has
-  no twin of is moved with it, its region a block, its spawn through the
-  second-level dispatch at a number of the chips' own: the fourth kind's
-  from 0x91 (past BN5's 145 types, below the families' and Navis' 0xE0),
-  the third kind's from a list of numbers no recipe names (`TYPES3`: the
-  few past BN5's 204 first, then 79 of BN5's own numbers that no BN5
-  track moved or paired, found by a scan of every recipe's rows). No other recipe may name a
-  number it takes (`numbers_clear`).
+  no twin of is moved with it, at a number of the second-level
+  dispatch's: the fourth kind's from 0x91 up, the third kind's from
+  `TYPES3` in the units' order (The dispatch's numbers, below). The
+  generator refuses a unit while any other recipe names a number it
+  takes (`numbers_clear`).
 - **Its copies.** A kinds' table an object reads out of its region
   (`TABLES`: the star's) is a block of the unit, each spawned kind's
   sprite copied (list 3 from 0x70 up), its
   byte in the copy set. An effect BN6 draws otherwise is moved to an id
   of the chips' (0xCF down to 0xB0) with its sprite (list 5's 0xEF down,
   list 4's 0x9F down). A sprite of list 1, the viruses' list, takes a
-  number from 0x7F down to 0x40 (MokoRus's Moko the first). A type spawned through a wrapper of its code is
+  number from 0x7F down to 0x40 (MokoRus's Moko the first). A sprite
+  has no place of its own: its row is written as `XC4_ROOM_ROW(k)`, k
+  counted over every unit's sprites in `UNITS`' order (512 at most),
+  and the art's room holds it only while an object draws it
+  ([BN4's chips](../multirom/bn4-chips.md), The art's room). The bottoms
+  of the effects', list 5's and list 4's ranges are BN4's Navis'
+  (0xB1, with 0xB0 BN5's Meddy's; 0xB0-0xBF; 0x70-0x7F). A type spawned through a wrapper of its code is
   moved as one spawned outright (`moved3`).
 - **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
   collision data's offsets, a panel's type and side after `getPanel`, a
@@ -241,7 +255,9 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   shim of the unit's home that names it, a number past a byte; one
   without a slot is a decision, the next slot its answer.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
-  (veneers, then shims), then code, then art. Its entry is the spawner's copy at
+  (veneers, then shims), then code (96 KB), then the art's room (from
+  + 0x30000, 126 KB: [BN4's chips](../multirom/bn4-chips.md), The art's
+  room). Its entry is the spawner's copy at
   BN6's grown support routines' 0x80 + BN4's subfamily (BN6's own are
   0-0x29, BN5's from 0x2A). `xchips_bn4_code_install` stages it where
   BN4's ROM is read; the stubs and the two grown tables are staged by
@@ -265,8 +281,9 @@ its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
-MokoRus (misc 1), SidBmbo (misc 5) and Spreads (attack 0x1E); FlmLine
-is next of the attack families.
+MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
+(0x22), Thunder (0x26) and TwnFng (0x34); MagBolt is next of the attack
+families.
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
@@ -295,3 +312,41 @@ an `IMMS` row like an offset's: MokoRus's hit's bits, struck and pushed
 back, are 0x21 in BN4 and 0x61 in BN6 (`BN4_STRUCK_PUSHED`,
 `BN6_STRUCK_PUSHED`), found by the differential at the hit's frame, the
 struck virus going on with its attack in BN6's.
+## The dispatch's numbers
+
+The second-level dispatch's MOVED table is one for every game, indexed
+by the number an object was spawned as
+([Virus families moved into BN6's battle engine](../multirom/families.md)).
+A type of BN5's moved takes BN5's own number there (0 to 0xCB for the
+third kind), and BN4's families and Navis have spent what lies above
+(0xCC to 0xFF). So BN4's chips take numbers of BN5's range, and the
+only safe ones are those no track of BN5's will ever need.
+
+`tools/bn5_twins.py` holds that in one place, `dispatch_reserved`:
+every type a BN5 track moves (`TYPES`, the one decision a type that
+every BN5 generator already requires) and every type a BN5 Navi not
+yet moved will (`NAVI_TYPES_AHEAD`: ProtoMan, MagnetMan, LarkMan,
+GridMan, Bass, Nebula Grey and ShadeMan's last form, read by
+`tools/xnavirecipe.py --report --ai 1 5 17 18 19 20 21` on 11 November
+2026, each Navi's code walked from its state table; DarkMegaMan is no
+Navi of the table). 144 of the third kind's 204 numbers are in it.
+
+`TYPES3` (the chips') and `TYPES3_NAVIS` (BN4's Navis', the lowest of
+the same numbers) may name none of them: the generator stops before it
+reads a ROM (`numbers_reserved`), and `build.py lint` makes the same
+check without one, so a BN5 change that moves a type whose number BN4
+lists fails CI and says which. The mend is in `TYPES3`: the number is
+replaced in its place by one from the tuple's end, so the unit that
+held it moves alone and every other keeps its number; that unit's specs
+and mutations run again. It was done once, on 11 November 2026: the
+first list had taken the numbers no BN5 recipe named that day, and five
+units held numbers of GridMan's, LarkMan's and Nebula Grey's (Counter
+0xC8 to 0xB4, WhitWeb 0xC6 to 0xAE, the spread shot 0xBE to 0xAD,
+FlmLine's flame 0xBD to 0xA9, Thunder 0xBB to 0xA3).
+
+**The numbers run short.** 29 are left for the chips and 18 for BN4's
+Navis, with about a hundred units to move, and BN5's chips not yet
+moved will ask for more of the same range. Not built: a dispatch type
+of BN4's own (a second dead type of BN6's third kind with a MOVED table
+of its own, 1 KB), after which BN4 shares no number with BN5.
+
