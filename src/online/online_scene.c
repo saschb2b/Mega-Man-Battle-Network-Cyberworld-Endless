@@ -16,10 +16,10 @@
 #include "online_square.h"
 #include "online_trade.h"
 #include "online_transport.h"
-#include "netpass_screen.h"
 #include "platform.h"
 #include "reconnect_draw.h"
 #include "square_arena.h"
+#include "square_pet.h"
 #include "square_watch.h"
 #include "trade_screen.h"
 #include "square_week.h"
@@ -53,6 +53,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	built_seed = seed;
 	session = player;
 	carried_card = *card;
+	square_pet_begin();
 	online_motion_reset(); online_labels_reset(); online_chat_reset(); online_people_load();
 	square_arena_reset();
 	square_watch_reset();
@@ -66,8 +67,14 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	return built;
 }
 
+void online_scene_card(const OnlineProfile *card) {
+	carried_card = *card;
+	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
+}
+
 void online_scene_end(void) {
 	emote_strip_close();
+	square_pet_leave();
 	square_arena_end();
 	square_watch_end();
 	if (trace) { fclose(trace); trace = NULL; }
@@ -77,6 +84,8 @@ void online_scene_end(void) {
 uint32_t online_scene_keys(uint32_t keys) {
 	/* (Trade Central's screens up over the Square: the game held under them) */
 	if (trade_screen_update()) return 0;
+	/* (BN6's PET up: its keys, the Square's own at rest) */
+	if (built && square_pet_open()) return square_pet_keys(keys);
 	return online_chat_keys(keys);
 }
 
@@ -157,6 +166,8 @@ VisitEnd online_scene_update(void) {
 		if (why != VISIT_END_NONE) return why;
 	}
 	online_mail_frame();
+	/* (BN6's PET: what it changed noted as it closes, square_pet.h) */
+	square_pet_frame();
 	/* (the director rests here: the cinema told when a screen of BN6's,
 	 * a shop, takes MegaMan off the map, so its keys reach it) */
 	cinema_on_map(emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME);
@@ -208,14 +219,15 @@ void online_scene_draw(void) {
 		reconnect_draw(x, y, &v);
 		return;
 	}
-	if (!arrived) return;
+	/* (BN6's PET up, the engine's own screens over it) */
+	if (!arrived) { square_pet_draw(); return; }
 	/* (the names and marks over heads, an open challenge's strip and the link beside a card: online_labels.h) */
 	online_labels_draw();
 	/* (SELECT's emote strip: online_chat.c) */
 	emote_strip_draw();
-	/* (Trade Central's screens, and the NetPass over it all, START's: online_chat.c) */
+	/* (Trade Central's screens, and the NetPass over it all: square_pet.h) */
 	trade_screen_draw();
-	netpass_screen_draw();
+	square_pet_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));
 		text_drawf(x + 4, y + 113, WHITE, TEXT_LEFT, "%.32s", snapshot.notice);

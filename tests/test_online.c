@@ -12,6 +12,7 @@
 #include "online_transport.h"
 #include "online_week.h"
 #include "online_wire.h"
+#include "pet_carry.h"
 #include "platform.h"
 #include "rom.h"
 #include "square_life_words.h"
@@ -419,11 +420,52 @@ static void week(void) {
 	assert(sent[0] == ONLINE_WEEK_POST && sent[1] == 0x0B && sent[2] == 0x93 && sent[8] == 5 && sent[9] == 2 && sent[10] == 0 && sent[12] == 12);
 }
 
+/* What BN6's PET changed in the Square, carried home (pet_carry.h): a folder's bytes whole and only where home
+ * stands as the PET found it; a flag a bit at a time, the Square's own bits in its byte left alone; a change
+ * changed back is none; a later session's bytes over an earlier one's; a record that lies refused */
+static void pet_carried(void) {
+	static PetCarry c;
+	static uint8_t open[PET_CARRY_BYTES], shut[PET_CARRY_BYTES], home[PET_CARRY_BYTES];
+	const unsigned bits = 0x4F0, folder = bits + 6, flag = 0x40;
+	for (unsigned k = 0; k < PET_CARRY_BYTES; ++k) open[k] = home[k] = (uint8_t)(k * 7);
+	assert(pet_carry_regions[0].at == BN6_EVENT_FLAGS && pet_carry_regions[0].bytes == PET_CARRY_MAIN && bits < PET_CARRY_MAIN);
+	unsigned total = 0;
+	for (int r = 0; r < PET_CARRY_REGIONS; ++r) total += pet_carry_regions[r].bytes;
+	assert(total == PET_CARRY_BYTES);
+	pet_carry_clear(&c, 77, 7, bits);
+	/* (a session: a folder's entry, and a flag set in a byte where the Square holds another of its own) */
+	memcpy(shut, open, sizeof shut);
+	shut[folder] = 0x14; shut[folder + 1] = 0x14;
+	open[flag] = 0x02; shut[flag] = 0x42;
+	assert(pet_carry_note(&c, open, shut) == 3 && c.count == 3 && pet_carry_sound(&c));
+	/* (home: the Square's own bit not set there, another set; the PET's bit alone comes) */
+	home[flag] = 0x01;
+	assert(pet_carry_fits(&c, home));
+	uint8_t was = home[folder + 2];
+	pet_carry_apply(&c, home);
+	assert(home[folder] == 0x14 && home[folder + 1] == 0x14 && home[folder + 2] == was && home[flag] == 0x41);
+	/* (a checkpoint whose folder is another: nothing fits) */
+	home[folder] = 0x99;
+	assert(!pet_carry_fits(&c, home));
+	/* (a second session over the first: the entry again, as the first session found it; then changed back) */
+	memcpy(open, shut, sizeof open);
+	shut[folder] = 0x15;
+	uint8_t first = (uint8_t)(folder * 7);
+	assert(pet_carry_note(&c, open, shut) == 1 && c.count == 3 && c.old[folder] == first && c.now[folder] == 0x15);
+	memcpy(open, shut, sizeof open);
+	shut[folder] = first;
+	assert(pet_carry_note(&c, open, shut) == 1 && c.count == 2 && !c.mask[folder]);
+	/* (a file's record: its count as its bytes say, a kept byte whole or not at all) */
+	c.count = 9; assert(!pet_carry_sound(&c)); c.count = 2;
+	c.mask[folder + 1] = 0x0F; assert(!pet_carry_sound(&c)); c.mask[folder + 1] = 0xFF;
+	c.traded = 1; assert(pet_carry_sound(&c));
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass and Trade Central's spares list passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list and the PET's changes carried home passed");
 	return 0;
 }

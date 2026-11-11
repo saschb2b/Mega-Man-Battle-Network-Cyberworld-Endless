@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-11T17:47:49Z
+* **Update**: project/merging.md (When a branch brings dev in, and What it saves and what is left, new sections: the merges not needed any more, the files that still conflict and what would end each; its description and index line).

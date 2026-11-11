@@ -48,7 +48,7 @@ static bool dev_switch(const char *t) {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors }, { "dark", &dev.dark }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "tourney", &dev.tourney },
-		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
+		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
 		{ "feel", &dev.feel }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
 	};
