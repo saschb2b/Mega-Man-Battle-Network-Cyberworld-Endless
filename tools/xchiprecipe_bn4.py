@@ -574,6 +574,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         row_tables(b4, b6, f, alloc)
         X4.effects_of(b4, b6, f, alloc)
         pattern_effects(f)
+        effect_calls(b4, b6, f, alloc)
         # (an effect by a row's byte of a kinds' table: the row's byte is BN6's id, row_tables)
         by_row = [f'spawned at {s:08X} ' for t in ROW_TABLES.values() for s in t['effect_sites']]
         f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and any(x in d[1] for x in by_row))]
@@ -877,6 +878,53 @@ def pattern_effects(f):
                                    why=f'its effect over a pattern of panels: {v:#x} in BN4, {given[v]:#x} in BN6 (as its own spawn of it)'))
 
 
+EFFECT_PAIRS = 4   # (src/emu/xvirus_recipe.h XV_EFFECT_PAIRS: the pairs an effect call's shim holds)
+
+
+def effect_calls(b4, b6, f, alloc):
+    """the effects its code spawns by a byte of the object's own: BN4_SPAWN_EFFECT after ldrb r4,[r5,#4 to 7], a byte of the
+    word the object's spawn kept of its caller's r4. No immediate names the id, so the ids that reach the load are read
+    where they are made: that byte of r4 at each call of the type's spawner in the unit's own code, each an immediate (one
+    that is not, or a type no call of the unit spawns, stays effects_of's decision, so that an id nobody read cannot
+    pass to BN6's own effect of that number). Where BN6 has another id for one (its twin of the same look, else the copy
+    a unit moved), the call goes through a shim of the unit's home that gives r4 BN6's id (XvEffectCall: a row)"""
+    f.effect_calls = []
+    types = [(4, ty, x) for ty, x in f.moved4.items()] + [(3, ty, x) for ty, x in f.moved3.items() if 'lo' in x]
+    for w in f.walks.values():
+        for site, t in sorted(w.bls.items()):
+            v, chain = T.back_value(w, site, 4) if t == X4.BN4['effect'] else (0, [])
+            if v is not None or len(chain) != 1 or chain[0][1] != 'ldrb':
+                continue
+            load = b4.u16(chain[0][0])   # (ldrb rd,[rn,#imm]: 0x7800 | imm << 6 | rn << 3 | rd)
+            at = load >> 6 & 0x1F
+            own = [(k, ty) for k, ty, x in types if x['lo'] <= site < x['hi']]
+            if load & 0xF800 != 0x7800 or load & 7 != 4 or load >> 3 & 7 != 5 or not 4 <= at <= 7 or len(own) != 1:
+                continue
+            kind, ty = own[0]
+            # (the type's spawners: the unit's routines that hand BN4's spawn of the kind this type's number; their callers)
+            spawners = {e for e, x in f.walks.items() for s, to in x.bls.items()
+                        if X4.SPAWNERS4.get(to, (0,))[0] == kind and T.back_value(x, s, 0)[0] == ty}
+            made = [T.back_value(x, s, 4)[0] for x in f.walks.values() for s, to in sorted(x.bls.items()) if to in spawners]
+            if not made or any(m is None for m in made):
+                continue
+            ids, pairs = sorted({m >> 8 * (at - 4) & 0xFF for m in made}), []
+            for e4 in ids:
+                e6 = X4.effect_twin(b4, b6, e4)
+                if e6 is None:
+                    e6 = X4.move_effect(b4, f, alloc, e4)
+                if e6 is not None and e6 != e4:
+                    pairs.append((e4, e6))
+            if len(pairs) > EFFECT_PAIRS or any(b in ids for _, b in pairs):
+                continue
+            f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and f'spawned at {site:08X} ' in d[1])]
+            why = (f'its {X4.KIND_NAMES[kind]}-kind {ty:#x}\'s effect, its +{at:#x}: ' +
+                   ', '.join(f'{a:#x}' for a in ids) + f' from its spawns ({len(made)} in the unit\'s code)')
+            if pairs:
+                f.effect_calls.append(dict(at=site, pairs=pairs, why=why + ': ' + ', '.join(f'{a:#x} BN6\'s {b:#x}' for a, b in pairs)))
+            f.notes.append(why + (': through a shim that gives r4 ' + ', '.join(f'{b:#x} for {a:#x}' for a, b in pairs) if pairs
+                                  else ': BN6\'s ids the same'))
+
+
 def row_tables(b4, b6, f, alloc):
     """the effects and sounds its moved objects' kinds' tables name by a byte (ROW_TABLES), for the kinds its chips play: an
     effect BN6's of the same look or moved (X4.move_effect), a sound BN6's own of its number where it is the same song, else
@@ -1036,12 +1084,18 @@ def c_unit(f):
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
         L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.queue_calls]
         L.append('};')
+    if getattr(f, 'effect_calls', None):
+        L.append(f'static const XvEffectCall {n}_effect_calls[] = {{')
+        L += [f'\t{{ 0x{x["at"]:08X}, {len(x["pairs"])}, {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in x['pairs']) +
+              f' }} }},   /* {x["why"]} */' for x in f.effect_calls]
+        L.append('};')
     if f.sounds:
         L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
                                                                    ('imms', True), ('numbers', f.numbers), ('types', True), ('sides', f.sides),
-                                                                   ('sound_calls', f.queue_calls), ('sprites', f.attack_sprites),
+                                                                   ('sound_calls', f.queue_calls), ('effect_calls', getattr(f, 'effect_calls', None)),
+                                                                   ('sprites', f.attack_sprites),
                                                                    ('effects', f.effects), ('bytes', f.bytes)) if have]
     L += ['', f'#define {n.upper()}_CODE {{ .name = "{f.name} (BN4\'s)", .game = XROM_BN4_RED_SUN_US, \\',
           f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
