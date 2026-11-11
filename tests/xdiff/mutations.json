@@ -2994,6 +2994,95 @@
     "088F1704:01DA"
    ],
    "what": "the shim of SidBmbo's unit's home that plays the bamboo's sound (its first, at XC4_HOMES + 0x2400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E1"
+  },
+  {
+   "name": "the fire's burst's shape another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "080CF3FC:0D:1"
+   ],
+   "what": "the spread shot's kinds' table's copy (BN4 0x080CF3DC) with kind 8's shape 0x0D, Heat-V's, where BN4's holds 2: the burst on the two panels behind a row up and down, not the one behind"
+  },
+  {
+   "name": "the bubbles' burst's effect another",
+   "spec": "bn4_chip_bubbler",
+   "poke": [
+    "080CF3EE:CB:1"
+   ],
+   "what": "the spread shot's kinds' table's copy with kind 4's effect 0xCB, the fire's burst's id of the chips', where the recipe gives the bubbles' 0xCC (BN4's 0x25): the burst drawn as fire"
+  },
+  {
+   "name": "the heat shot's wait another",
+   "spec": "bn4_chip_heatv",
+   "poke": [
+    "080EC819:14:1"
+   ],
+   "what": "the spread state's copy's waits by subfamily (BN4 0x080EC818) with subfamily 1's 20 frames where BN4's holds 10: the shot made ten frames later"
+  },
+  {
+   "name": "the bubble shot's height another",
+   "spec": "bn4_chip_bubv",
+   "poke": [
+    "080EC81E:10:1"
+   ],
+   "what": "the spread state's copy's shot heights by subfamily (BN4 0x080EC81C) with subfamily 2's 0x10 where BN4's holds 0: the bubble shot made 16 higher"
+  },
+  {
+   "name": "the heat arm's kind another",
+   "spec": "bn4_chip_heatside",
+   "poke": [
+    "080EC815:0E:1"
+   ],
+   "what": "the spread state's copy's arm kinds by subfamily (BN4 0x080EC814) with subfamily 1's 0x0E, the bubble arm, where BN4's holds 6: his arm another kind's"
+  },
+  {
+   "name": "the spread shot's type another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "080CF59A:20CB"
+   ],
+   "what": "the spread shot's spawner's copy (its movs r0,#0x12 at BN4 0x080CF59A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no shot"
+  },
+  {
+   "name": "the spread shot's sound not played",
+   "spec": "bn4_chip_bublside",
+   "poke": [
+    "080EC7DE:46C0",
+    "080EC7E0:46C0"
+   ],
+   "what": "the spread state's copy's call that plays the shot's sound (BN4 0x080EC7DE, the recipe's call to its shim for the grown table's slot 0x200) made two nops: the shot leaves without its sound"
+  },
+  {
+   "name": "HeatShot's row's power another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "08C0652A:0014"
+   ],
+   "what": "the registry's record of BN4's HeatShot (588 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur left 120 HP where BN4's leaves it 100"
+  },
+  {
+   "name": "Heat-V's row's family another",
+   "spec": "bn4_chip_heatv",
+   "poke": [
+    "08C06547:D1:1"
+   ],
+   "what": "the registry's record of BN4's Heat-V (589) naming BN6's grown attack family 0xD1, which holds the grown table's stub, where the row gives it the unit's 0xD0: his attack ended at once, no shot"
+  },
+  {
+   "name": "the spread state's attack variables another",
+   "spec": "bn4_chip_bublside",
+   "poke": [
+    "080EC764:3770"
+   ],
+   "what": "the spread state's copy's adds r7,#0xA0 (BN4 0x080EC764, the recipe's immediate: BN6's attack's variables in his AI data) made BN4's own adds r7,#0x70: the state reads another part of BN6's AI data as its variables"
+  },
+  {
+   "name": "the struck arm's slot another",
+   "spec": "bn4_chip_heatshot_struck",
+   "poke": [
+    "080CD6B8:6DE8"
+   ],
+   "what": "the arm's copy's read of its slot (BN4 0x080CD6B8: ldr r0,[r5,#0x60], the place of MegaMan's +0x4C it was given) made ldr r0,[r5,#0x5c]: the arm does not see its slot cleared as he is struck"
   }
  ]
 }
