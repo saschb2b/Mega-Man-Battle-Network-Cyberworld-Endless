@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602 and every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:27:42Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:48:40Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -346,9 +346,49 @@ caught. A sound row can now hold in the specs of a chip unit's chips
 alone (`chips`: Thunder's ball's 0xAD, which Billy's thunder and
 ThunderMan pair otherwise). **Waiting:** FlmCros1-3 and BstFang1-3, the
 families' Program Advances (their subfamily 1, in the moved states
-already), on BN4's recipes; Thunder's and TwnFng's ids are past 602 and
-have no pack entry yet, so a run cannot hold them until the pack's RAM
-for those ids lands.
+already), on BN4's recipes. Thunder's and TwnFng's ids are past 602:
+their pack entries are the save RAM's (ids 635 on), in dev since.
+
+**MagBolt1-3 are moved** (11 November 2026: ids 642-644, BN4's family
+0x59 at BN6's grown attack family 0xD5). The state draws the arm (its
+kinds 0x23 to 0x25), puts the bolt (the third kind's 0x75) on the panel
+ahead after six frames and for 0x1E frames strikes the row ahead with a
+hit that only pulls (its bits 0x08); the bolt strikes what stands on its
+panel. Three things of the engines differ under it, each read from both
+games' code. BN4's rule for the direction an object moved by answers
+every panel where BN6's answers a neighbour alone, so the unit copies
+BN4's collision panels' update with its rule (`UNIT_COPIED`). A hit that
+lands with a push is struck and pushed by bit 0x01 in BN4 and bit 0x40
+in BN6 (MokoRus's finding): the bolt's bits are 0x43 in its copy. And a
+foe under a slide differs in four leftovers the comparison now reads for
+a chip's foe: a blocked slide's step, which BN4 keeps and BN6 zeroes; the
+direction byte, which BN4 writes as the panel changes and BN6 at the
+slide's end; the same blocked step in the struck-and-pushed state; and a
+slide cut on its last step, since BN4's virus runner runs a pushed
+object's slide before it takes a struck-and-pushed hit and BN6's takes
+the hit first. `bn4_chip_magbolt1` (a 140 HP Mettaur pulled from (5,2)
+to (4,2), not beside MegaMan: no hit), `2` (beside him already: hit for
+110, the pull blocked) and `3` (pulled beside him and hit for 130,
+struck for 0x18 frames in both) pass over 300 frames, eleven mutations
+caught. **Waiting:** MagShok1-3, the family's Program Advances (its
+subfamilies 3 to 5, in the moved state already), on BN4's recipes.
+
+**PropBom1-3 are moved** (11 November 2026: ids 671-673, BN4's family
+0x62 at BN6's grown attack family 0xD4). The state throws the bomb (the
+third kind's 0x8C) onto the panel ahead; it has 10 HP, takes its side's
+obstacle slot (the engines' own routines, twins but for the slots' place
+in each battle state) and crawls along the row, a panel in 32 frames.
+Whatever strikes it, a virus stepping onto its panel too, ends it in a
+burst that harms nothing; past the far column it blasts the two back
+columns for its record's power. BN6's routine for effects over a pattern
+of panels spawns the id it is handed, so the copy hands it BN4's
+explosion's copy and the blast looks as BN4's does. Four specs pass over
+300 frames: `bn4_chip_propbom1` (thrown at fight frame 8 from column 3,
+the Mettaur a row away: the blast at t102, 140 HP to 20),
+`bn4_chip_propbom1_struck` (the Mettaur's wave ends it at t73),
+`bn4_chip_propbom2` (250 HP to 90) and `bn4_chip_propbom3` (the Mettaur
+steps onto its panel at t66: the burst, no blast); eleven mutations
+caught.
 
 **The units' art room was the scarce one** (11 November 2026). A unit's
 sprites were copied whole at the core's start, and an arm's kind is a
@@ -369,7 +409,7 @@ mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
-chips brought; of those MagBolt, PropBom and SeekBom are next. BugChain
+chips brought; of those SeekBom is next. BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
 other's record, a NetBattle chip). Marking, the four Plus chips and
 BlakWeap are units to move like the rest (call 7, reversed: not cut).

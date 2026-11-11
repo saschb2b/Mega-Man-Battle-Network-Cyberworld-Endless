@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs and BN5's SoulT+1 while the run holds a Soul, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T18:32:02Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:40:00Z }
 ---
 
 # The NaviCust
@@ -150,16 +150,18 @@ comes late and rarely.
 
 ### 6. The pool, and the builds it makes
 
-The pool holds 34 of BN6's 46 programs, by tier (the act they can appear
+The pool holds 35 of BN6's 46 programs, by tier (the act they can appear
 from), and leaves out the inert and the harmful: Humor, Poem, Rush, Beat,
-Tango, OilBody, Fish, Battery, Jungle, Millions, SneakRun until its effect
-on the engine's battles is known, and NumbrOpn until its condition is. Four builds come out of BN6's own
+Tango, OilBody, Fish, Battery, Jungle, Millions, and SneakRun, which judges
+BN6's rolled battle before the engine's takes its place and would call off
+a layer's every battle, the battle floor's owed one too ([BN6 Gregar's own
+gaps](../multirom/bn6-gaps.md), NaviCust programs: the owner's call). Four builds come out of BN6's own
 programs, each needing more space than a 4x4 board has:
 
 | Build | Programs | It changes |
 | --- | --- | --- |
 | Buster | Attack+1, Speed+1, Charge+1, BustPack, AttckMAX, SpeedMAX, ChargMAX | The buster between chips, and a charge shot worth holding |
-| Hand | Custom1, Custom2, MegFldr1, MegFldr2, GigFldr1, FldrPak1, FldrPak2, ChpShufl | More chips a turn, more Megas and a Giga in the folder |
+| Hand | Custom1, Custom2, MegFldr1, MegFldr2, GigFldr1, FldrPak1, FldrPak2, ChpShufl, NumbrOpn | More chips a turn, more Megas and a Giga in the folder, a hand of ten |
 | Guard | SuprArmr, FstBarr, Shield, Reflect, AntiDmg, UnderSht, BodyPack | Defense verbs on B+Left, no flinching, a barrier, surviving a lethal hit |
 | Field | FlotShoe, AirShoes, AutoHeal, SlipRunr, Collect, BugStop | The panels, the map, the drops, the bugs |
 
@@ -172,8 +174,20 @@ HP+50, HP+100, UnderSht, FstBarr, Shield, SlipRunr, Custom1, MegFldr1,
 SuprArmr); acts 3 and 4 add the middle ones (Reflect, AntiDmg, FlotShoe,
 AirShoes, AutoHeal, HP+200, Collect, FldrPak1, BustPack, MegFldr2,
 ChargMAX, SpeedMAX); from act 5 the large ones (Custom2, GigFldr1,
-AttckMAX, BodyPack, FldrPak2, ChpShufl, BugStop, HP+300 and up
+AttckMAX, BodyPack, FldrPak2, ChpShufl, BugStop, NumbrOpn, HP+300 and up
 in later cycles).
+
+NumbrOpn (11 November 2026) is the Hand build's all-in: the Custom
+screen's hand of ten chips (BN6's own check, `BN6_NUMBROPN_CHECK`;
+`ncp_numbropn` and its control PASS), for a 5x5 block of cells, the whole
+of the act 4 guardian's board. The dialectic is the board's budget, a
+wider hand against everything else it could hold; the pattern costed
+power, its cost every other program. A draft offers it only where it fits
+beside what MegaMan holds, so a run that skipped its drafts for BugFrags
+meets it; once found, the vendor sells it in later runs (7), a purchase
+made knowingly. Beside it Custom1 and Custom2 add nothing (BN6 sets the
+hand to ten, not ten and more), so a draft no longer offers them while it
+is held.
 
 ### 7. Programs found join later runs
 

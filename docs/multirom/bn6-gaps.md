@@ -3,7 +3,7 @@ type: Status
 title: "BN6 Gregar's own gaps"
 description: "The audit of 11 November 2026: what BN6 Cybeast Gregar's own ROM holds that a run does not use, kind by kind (Program Advances, chips, fights, NaviCust programs, music, the net's looks and boards, requests and traders), each verified by a ROM read, the code or a capture, or marked assumed, sized, and split into what is built without a call and what waits on the owner."
 tags: [multirom, bn6, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:40:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read by scratch scripts (not in git) and fought in BN6's engine by `build.py xdiff`'s engine specs"
@@ -134,7 +134,7 @@ and NumbrOpn):
 
 | Program | What it does (verified in Gregar's code) | In a run | Size |
 | --- | --- | --- | --- |
-| NumbrOpn (15) | NaviStats +0x61; the Custom screen's hand becomes 10 chips (`0x0802A466`) where its check holds (`0x0802A59C`: not in a link mode, battle modes 1, 6, 7, 9; not in a form whose emotion code is 0x0A or 0x16) | Left out "until its condition is known": now it is. A run's battles are BN6's mode 0, so it works in every one | **S**, through the game-design skill: the Hand build's top program |
+| NumbrOpn (15) | NaviStats +0x61; the Custom screen's hand becomes 10 chips (`0x0802A466`) where its check holds (`0x0802A59C`: not in a link mode, battle modes 1, 6, 7, 9; not in a form whose emotion code is 0x0A or 0x16) | **Built** (11 November 2026): in the pool from act 5, the Hand build's all-in ([The NaviCust](../game/navicust.md), 6); `ncp_numbropn` PASS (compiled on BN6's own board, the deck's tenth chip on the first Custom screen) and its control (the fifth without it) | **S** |
 | SneakRun (16) | NaviStats +0x1E; BN6's random-battle roll (`0x080ABE1E`) calls the battle off where its rolled record's byte 1 is less than MegaMan's HP plus 4, over 5 | Left out "until its effect is known". It judges BN6's own rolled record, before the engine puts its battle in its place (`BN6_ENCOUNTER_ROLLED`): byte 1 is 20 on the comps and homepages, 40 in Central Area, 48 Seaside, 74 Green, 120 Sky, the Underground, the Undernet and the Graveyard (the random tables read), so from 97 HP it calls off every comp's battle and from 597 every area's; the battle floor's owed battle is the same roll, and a layer's shut exit pad would never open ([The structure](../game/progression/structure.md), The battle floor) | **S-M**, and the owner's call: the floor's owed battle exempt and a measure of the run's battle in place of BN6's byte; recommended out, as a run's battles are its loot |
 
 ## Music
@@ -198,7 +198,7 @@ Built without a call, one pull request each, cheapest first:
 1. **The Program Advances' proof** (this audit's PR): the thirteen specs
    above.
 2. **CrosOver from a run's Django chips** (**S**): built.
-3. **NumbrOpn** in the pool (**S**), through the game-design skill.
+3. **NumbrOpn** in the pool (**S**): built.
 4. **Songs where BN6 plays them** (**S** each), through the
    game-design skill.
 5. **GBeast SP before Bass BX** (**M**), as the super bosses' plan has it.

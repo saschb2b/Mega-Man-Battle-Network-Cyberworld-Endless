@@ -181,6 +181,35 @@
                                            * above (kind 1), 0x40000 a frame, then along it, 0xA0000 a frame, striking what it meets; sprite
                                            * list 4's 0x27, sound 0xA6; let go in effect 0x15 as the battle ends (0x08007A12, BN6's 0x0800A18E) */
 #define BN4_FANG_SPAWN        0x080D7B3Au /* ... its spawner, in its code (r0, r1 its panel, r2 its element, r4 its kind, r6 its damage) */
+/* MagBolt1-3 and MagShok1-3 (its chips 35-37 and 341-343, family 0x59), moved as an attack unit */
+#define BN4_MAGBOLT_STATE     0x080EE012u /* MegaMan's state 0x59 (to 0x080EE1A2): phase 0 the arm (kind 0x23 + the subfamily, less 3 from 3 on)
+                                           * and after 6 frames the bolt on the panel ahead (three from subfamily 3 on), sounds 0xF8 and 0xB9;
+                                           * phase 4 the pull, 0x1E frames; phase 8 ten frames, then the attack's end */
+#define BN4_MAGBOLT_PULL      0x080EE140u /* ... its pull's hit word, 0x1E05FF08: a hit area a frame over the row ahead (0x080CD7E2), its bits
+                                           * 0x08, a push bit alone (BN4_STRUCK_PUSHED), toward him; MagShok's by his side at 0x080EE148 */
+#define BN4_T3_BOLT           0x75        /* the bolt, the third kind's (0x080DBCA0 to 0x080DBD94): 0x1E frames at its parent's panel and its
+                                           * offset, striking what stands there; sprite list 4's, let go as the battle ends */
+#define BN4_BOLT_SPAWN        0x080DBD72u /* ... its spawner, in its code */
+#define BN4_BOLT_HIT_BITS     0x080DBCD2u /* ... its init's movs r3,#3 before its collision set up: with the pull's push bit BN4_STRUCK_PUSHED's
+                                           * bits, 0x43 in its copy (BN6_STRUCK_PUSHED's bit 0x40) */
+#define BN4_STRUCK_STEP       0x08010610u /* strb r2,[r5,#0xb] in the struck-and-pushed state's first phase (the engine's state 5, 0x080105DC):
+                                           * its step's panels to go, BN4's step routine's (0x0800ACAA) whatever the panel; the state waits
+                                           * 0x18 frames where the panel cannot be entered (0x0801064E) */
+#define BN4_RUNNER_SLIDE      0x08013E3Cu /* a virus's runner: a pushed object's slide run (status 0x10, or the slide's flag 0x1000: bl
+                                           * 0x08010F00 at 0x08013E4C and 0x08013E5E), before: */
+#define BN4_RUNNER_STRUCK     0x08013E68u /* ... status 0x100 made its state 5. BN6's runner the other way round (BN6_RUNNER_STRUCK) */
+/* PropBom1-3 (its chips 157-159, family 0x62), moved as an attack unit */
+#define BN4_PROPBOM_STATE     0x080EE532u /* MegaMan's state 0x62 (to 0x080EE5EA): 4 frames in his throw, then sound 0x8D and the bomb on the
+                                           * panel ahead with its record's power; 0x1E frames more, then the attack's end */
+#define BN4_PROPBOM_SPEEDS    0x080EE5BCu /* ... the bomb's speed by the battle NaviStats' Navi, 13 bytes of 0x14: 0x14000 a frame */
+#define BN4_T3_PROPBOM        0x8C        /* the bomb, the third kind's (0x080DEB70 to 0x080DED60): 10 HP, its side's obstacle slot
+                                           * (BN4_OBSTACLE_ADD with r2 1), sound 0x133; a hit taken ends it in effect 0 and sound 0xC8, past
+                                           * the far column it blasts the two back columns; sprite list 4's 0x2B */
+#define BN4_PROPBOM_SPAWN     0x080DED30u /* ... its spawner, in its code */
+#define BN4_PROPBOM_BLAST     0x080DED2Cu /* ... its blast's hit word, 0x0405FF11 (a hit area over a pattern, 0x080CD7E2 with r7 3, centred
+                                           * on column 5 by its side), with effect 0 over the same panels (BN4_EFFECT_PATTERN, pattern 0x11) */
+#define BN4_OBSTACLE_REMOVE   0x0800B272u /* the object in r5 taken out of the battle state's six obstacle words (+0x68; BN6_OBSTACLE_REMOVE,
+                                           * the same instructions at +0xA0) */
 /* SandRing's family (its chip 47) and ThunSoul's charged shot (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine), moved as
  * one unit for ThunSoul's kind alone (src/emu/xchips_bn4.c's ThunSoul) */
 #define BN4_CHIP_RING_FAMILY  0x47        /* MegaMan's state 0x47 (BN4_PLAYER_STATES): the arm (none for kind 3), then the ring of the
