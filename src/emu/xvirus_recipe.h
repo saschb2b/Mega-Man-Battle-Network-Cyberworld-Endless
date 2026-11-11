@@ -88,10 +88,12 @@ typedef struct { uint32_t at; uint8_t n; uint8_t pairs[XV_EFFECT_PAIRS][2]; } Xv
 typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
 /* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
  * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
- * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST), on the music player its own game's entry names */
+ * on, a BN4 family's XV_BN4_SONG_SLOT_FIRST to XV_BN4_SONG_SLOT_LAST, a late one's a slot of the grown song table), on the
+ * music player its own game's entry names */
 typedef struct { uint16_t from, slot; uint32_t at, room; uint8_t player; } XvSong;   /* (slot past a byte: a BN4 Navi's pool,
-                                                                     * xnavi_bn4_sounds.c; player, where not 0, BN6's music player
-                                                                     * for it in place of its game's) */
+                                                                     * xnavi_bn4_sounds.c, or the grown song table's; player,
+                                                                     * where not 0, BN6's music player for it in place of its
+                                                                     * game's) */
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
  * (imm.at 0: none): a status wrapper of its own given for BN6's states BN5 has no twin of (frozen, bubbled) */
@@ -276,9 +278,15 @@ typedef struct {
 #define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
 #define XV_BN4_SONG_SLOT_FIRST 0x34       /* BN4's families' sounds' slots (xsong.c's XSOUNDS, one a sound): the per-run themes' top */
 #define XV_BN4_SONG_SLOT_LAST  0x3F       /* ... to (src/audio/xsong.c's SLOT_LAST below them) */
-/* The pool of BN6's empty song slots BN4's sounds share by battle (the owner's calls 11 and 13, docs/multirom/bn4.md): a
- * BN4 Navi's sounds and a late family's, each its k-th sound at the k-th slot, the five a movs or a byte names first; pointed
- * at the battle's BN4 Navi's or family's songs before each frame (xnavi_bn4_sounds.h) */
+/* BN4's late families' sounds' slots (the families past the first eight, tools/xrecipe_bn4.py LATE_SOUND_SLOTS): a range of
+ * BN6's grown song table (song_table.h; docs/rom/sound.md, The song table grown), one slot a sound, so any two late families
+ * share a battle (the encounter groups' call 3, 11 November 2026, over the per-battle pool of docs/multirom/bn4.md's call
+ * 13); a sound a BN4 chip's unit has a slot for plays there, below this range */
+#define XV_BN4_GROWN_SLOT_FIRST 0x380
+#define XV_BN4_GROWN_SLOT_LAST  0x3FF
+/* The pool of BN6's empty song slots BN4's Navis' sounds share by battle (the owner's call 11, docs/multirom/bn4.md): a
+ * BN4 Navi's k-th sound at the k-th slot, the five a movs or a byte names first; pointed at the battle's BN4 Navi's songs
+ * before each frame (xnavi_bn4_sounds.h) */
 #define XV_BN4_POOL_SLOTS 16
 extern const uint16_t xv_bn4_pool[XV_BN4_POOL_SLOTS];
 /* Whether `slot` is one of the pool's */

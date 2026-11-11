@@ -3,7 +3,7 @@ type: Design
 title: "Battle Network 4 in a run"
 description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -285,9 +285,10 @@ stage from BN4's records by the same count, the first family moved past
 the first eight's rooms and numbers ([Transplanted families](families.md),
 BN4's late families). Kilby, the eighth, and MagTect, the ninth, joined
 the same day the same way (`kilby_v1`-`v3`, `magtect_v1`-`v3` PASS),
-their sounds BN6 has no song of in the per-battle pool (call 13). The
-other seven wait on their own work, their sounds' place decided (the
-same, measured there).
+their sounds BN6 has no song of in the per-battle pool (call 13), since
+moved to fixed slots of BN6's grown song table (call 13's revision).
+The other seven wait on their own work, their sounds' place decided
+(a fixed slot each, the next of the late families' range).
 
 Before BN4's visitors reached players (the owner's call 6: once the six
 families moved are proved): Billy, Spikey, Shrimpy, Walla, Elmperor and
@@ -552,14 +553,16 @@ sounds take from the themes' range are the owner's to confirm.
 
 The families moved after the first eight (BN4's late families, VolGear
 on) find those twelve slots spent, so their sounds BN6 has no song of take
-the per-battle pool BN4's Navis share (call 13): the k-th such sound of a
-family the pool's k-th slot from 0x32, its song copied from the player's
-ROM into the family's art as it installs, and the pool pointed at its
-songs in the battles it is in, as at a Navi's (one BN4 family a visited
-battle holds; [Transplanted families](families.md), BN4's late families).
-Kilby's 0xCD plays at 0x32; MagTect's 0xB8 and 0xF8 at 0x32 and 0x33,
-its 0xB8 the song ThunderMan plays at 0x33 in his battles, each battle
-pointing the pool at its own owner's songs.
+fixed slots of BN6's grown song table, the late families' range from
+0x380 ([Sound](../rom/sound.md), The song table grown; call 13 as
+revised on 11 November 2026, below): one slot a sound, its song copied
+from the player's ROM into the first such family's art as it installs,
+its call made through a shim that names the slot, a number past a byte
+([Transplanted families](families.md), BN4's late families). Kilby's
+0xCD plays at 0x380; MagTect's 0xB8 at 0x381 and its 0xF8 at 0x202, the
+slot BN4's chips' MagBolt already plays that sound at. ThunderMan still
+plays 0xB8 at his pool's 0x33 in his battles, a Navi's pool as before.
+So any two late families fight in one battle, each with its sounds.
 
 ## The owner's calls
 
@@ -677,3 +680,14 @@ pointing the pool at its own owner's songs.
     owner's songs. Built the same day: Kilby's 0xCD at 0x32, MagTect's 0xB8
     and 0xF8 at 0x32 and 0x33 (`kilby_v1`-`v3`, `magtect_v1`-`v3` PASS;
     [Transplanted families](families.md), BN4's late families).
+    **Revised, 11 November 2026: fixed slots of the grown song table.**
+    The pool let one late family into a battle, and the encounter
+    groups put several families of every ROM into one
+    ([Encounter groups](../game/progression/encounter-groups.md), the
+    third of the five calls). BN6's song table has since been grown to
+    1024 songs (BN4's chips' call 6), which gives the slots call 13 found
+    spent: a late family's sound takes the next slot of 0x380-0x3FF, or
+    the slot a chip's unit already has for it, through a shim that names
+    it. The Navis keep the pool, one a battle as before. Built the same
+    day: Kilby's 0xCD at 0x380, MagTect's 0xB8 at 0x381 and 0xF8 at
+    0x202 (`kilby_v1`-`v3`, `magtect_v1`-`v3` PASS again).
