@@ -3,7 +3,7 @@ type: Status
 title: "BN6 Gregar's own gaps"
 description: "The audit of 11 November 2026: what BN6 Cybeast Gregar's own ROM holds that a run does not use, kind by kind (Program Advances, chips, fights, NaviCust programs, music, the net's looks and boards, requests and traders), each verified by a ROM read, the code or a capture, or marked assumed, sized, and split into what is built without a call and what waits on the owner."
 tags: [multirom, bn6, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:10:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read by scratch scripts (not in git) and fought in BN6's engine by `build.py xdiff`'s engine specs"
@@ -75,7 +75,8 @@ BN5's V1, SP and DS (524-526, [The chip registry](chip-registry.md)).
 
 | Gap | Verified how | Size | Who decides |
 | --- | --- | --- | --- |
-| CrosOver from a run's Django chips (V1, SP and DS in D, where BN5's ROM is read), a row beside BN5's in BN6's grown list | The spec above; the grown list's rows (`src/core/xchips_pas.c`) | **S** | Built without a call (below) |
+| CrosOver from a run's Django chips (V1, SP and DS in D, where BN5's ROM is read), a row beside BN5's in BN6's grown list | **Built** (11 November 2026): `tools/xchiprecipe.py`'s `BN6_PA_BORROWED`, BN6's own recipe with the registry's Django chips of BN5's same ids (524-526); `pa_crosover_run` PASS (CrosOver's id from the first fight frame, used at t30), and FAIL without the row (MegaMan keeps Django) | **S** | Built without a call: BN6's recipe as it is, its three versions the run's three |
+| A DS chip folded into a Program Advance pays no dark price | The price is charged for the chip MegaMan runs (`src/director/director_dark.c`, darkbn6.c's hook), and a Program Advance is not dark: CrosOver's DjangoDS as BigNoise's, CsmoPris's, WildBird's and Football's DS rows today | **S** | The owner: the price on a Program Advance made with a dark part, or as now |
 | The BattleChip Gate's 20 recipes in single-player battles | ROM read (`0x0802BB98`-`0x0802BC5F`); BN6's check walks `0x0802BCB0` alone outside a link battle (`0x08029556`) | **S** | The owner: more ways to the same 20 results (two GigaCan1 and a TankCan1 for a GigaCan1) makes Program Advances easier; recommended no, as BN6 USA's single player never had them |
 | The P.A. Memo | Out of scope by design ([The Library](../game/meta/library.md)) | | Decided |
 
@@ -196,7 +197,7 @@ Built without a call, one pull request each, cheapest first:
 
 1. **The Program Advances' proof** (this audit's PR): the thirteen specs
    above.
-2. **CrosOver from a run's Django chips** (**S**).
+2. **CrosOver from a run's Django chips** (**S**): built.
 3. **NumbrOpn** in the pool (**S**), through the game-design skill.
 4. **Songs where BN6 plays them** (**S** each), through the
    game-design skill.
