@@ -64,7 +64,7 @@ static void parse_buttons(const char *s, InputStep *step) {
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
- * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]", "cross F", "folder K", "onehit"), into its step;
+ * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit"), into its step;
  * false where `tok` is none */
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;

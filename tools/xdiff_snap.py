@@ -31,7 +31,7 @@ XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved cod
 XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
 XN_TEAM_ROOM = (0x08893000, 0x088A3800)           # ... and Team ProtoMan's code and art rooms, their overlays' masks (src/emu/free_space.plan, FREE_TEAM_NAVI_CODE to FREE_TEAM_SHARED)
 XN_NEBULA_ROOM = (0x08881000, 0x08887800)         # ... and LarkMan's and GridMan's code and art rooms (src/emu/free_space.plan, FREE_NEBULA_NAVI_CODE to FREE_NEBULA_SPRITES)
-XC4_CODE = (0x088EF000, 0x0891F000)               # ... and BN4's chips' homes and code (src/emu/xchips_bn4.h, XC4_HOMES to XC4_ART): a pointer a
+XC4_CODE = (0x088EF000, 0x08913000)               # ... and BN4's chips' homes and code (src/emu/xchips_bn4.h, XC4_HOMES to XC4_ART): a pointer a
                                                   # moved object keeps into its unit's copied table (the spread shot's kinds' row, its +0x60)
 XV_CODE_BN4 = (0x08B79000, 0x08B80000)            # ... BN4's families' code in the families' (tools/xrecipe_bn4.py CODE2 to XV_ART: BN5's end
                                                   # before it, its bn5_ranges_clear): a BN5 reference reads none of it, nor BN4's Navis'

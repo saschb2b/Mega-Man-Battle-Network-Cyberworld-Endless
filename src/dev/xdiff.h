@@ -48,6 +48,10 @@
  *   deck6=128C,...     code << 9, the list repeated to 30), written once its
  *                      battle runs and before its first Custom screen: each
  *                      hand its spec's
+ *   souls4=20          (a BN4 spec) the Souls BN4's MegaMan holds (hex, bit
+ *                      n - 1 its Soul n: ThunSoul 20), each one's flag,
+ *                      Double Soul's and its pseudo-chip past BN4's chip
+ *                      gate, his form said as it changes (xdiff_bn4.h)
  *   souls6=10          the Souls in BN6's engine (soulunite.h, over the
  *                      proxy form), MegaMan holding these (hex, bit k BN5's
  *                      Soul 7 + k)

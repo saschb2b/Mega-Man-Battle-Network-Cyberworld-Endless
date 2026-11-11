@@ -3171,6 +3171,330 @@
     "080CD6B8:6DE8"
    ],
    "what": "the arm's copy's read of its slot (BN4 0x080CD6B8: ldr r0,[r5,#0x60], the place of MegaMan's +0x4C it was given) made ldr r0,[r5,#0x5c]: the arm does not see its slot cleared as he is struck"
+  },
+  {
+   "name": "TopMan's decision's CurAction off by one",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69E0:200C"
+   ],
+   "what": "his decision's movs r0,#9 (BN4 0x080B69E0, the recipe's CurAction 11, his own state 9 as BN6's 11) made 12: his state 10 run where BN4 runs his 9 (caught at t273)"
+  },
+  {
+   "name": "TopMan's damage kept at BN4's +0x1E",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69C8:83D8"
+   ],
+   "what": "his decision's store of his +0x2C into his collision data (BN4 0x080B69C8: strh r0,[r3,#0x1e], the recipe's BN6 +0x2E, BN4_COLL_DAMAGE) left at +0x1E: BN6's confusion's frames written, his damage not (caught at t828)"
+  },
+  {
+   "name": "TopMan's top spawned as JunkMan's 0x97",
+   "spec": "topman_v1",
+   "poke": [
+    "080D052C:20D0"
+   ],
+   "what": "the spawn of his top, the third kind's 0x1B (BN4 0x080D052C: movs r0,#0x1b, the recipe's dispatch number 0xD3) made 0xD0, JunkMan's 0x97's: the dispatch runs another object for it (caught at t497)"
+  },
+  {
+   "name": "TopMan's sound 0xAC at the pool's first slot",
+   "spec": "topman_v1",
+   "poke": [
+    "080B6F26:2032"
+   ],
+   "what": "his state's sound 0xAC (BN4 0x080B6F26: movs r0,#0xac, the recipe's pool slot 0xD0) made the pool's first slot, 0x32: his top's 0xA0 where BN4 plays 0xAC (caught at t298, the family's sounds)"
+  },
+  {
+   "name": "TopMan's top drawn with BN4's number of his sprite",
+   "spec": "topman_v1",
+   "poke": [
+    "080D0320:2212"
+   ],
+   "what": "his top's load of his own battle sprite (BN4 0x080D0320: movs r2,#0x12, list 2, the recipe's BN6 0x4C, XNAVI_SPRITE_BN4 + his seat) left at BN4's 0x12: another Navi's sprite in BN6's list 2 (caught at t497)"
+  },
+  {
+   "name": "FlmLine's flames' column another",
+   "spec": "bn4_chip_flmline1",
+   "poke": [
+    "080ECB1E:46C0"
+   ],
+   "what": "FlmLine's state's copy's doubling of his facing (BN4 0x080ECB1E: adds r0,r0,r0, the flames two columns ahead) made a nop: the flames on the column next to him, the Mettaur two columns ahead untouched"
+  },
+  {
+   "name": "FlmLine's flames' frame another",
+   "spec": "bn4_chip_flmline2",
+   "poke": [
+    "080ECB08:2810"
+   ],
+   "what": "FlmLine's state's copy's count compared (BN4 0x080ECB08: cmp r0,#0x1b, the frame the flames are made) made cmp r0,#0x10: the flames made eleven frames later"
+  },
+  {
+   "name": "FlmLine2's row's flame frames another",
+   "spec": "bn4_chip_flmline2",
+   "poke": [
+    "08C06681:0A:1"
+   ],
+   "what": "the registry's record of BN4's FlmLine2 (596 at CHIPS_RECORDS) with its second parameter 10 where BN4's record holds 0x28, a flame's frames: the flames gone thirty frames sooner"
+  },
+  {
+   "name": "the flame's type another",
+   "spec": "bn4_chip_flmline1_miss",
+   "poke": [
+    "080D00BC:20CB"
+   ],
+   "what": "the flame's spawner's copy (its movs r0,#0x19 at BN4 0x080D00BC, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no flames"
+  },
+  {
+   "name": "FlmLine3's row's family another",
+   "spec": "bn4_chip_flmline3",
+   "poke": [
+    "08C066A7:D7:1"
+   ],
+   "what": "the registry's record of BN4's FlmLine3 (597) naming BN6's grown attack family 0xD7, which holds the grown table's stub, where the row gives it the unit's 0xD1: his attack ended at once, no flames"
+  },
+  {
+   "name": "the thunder's height another",
+   "spec": "bn4_chip_thunder1",
+   "poke": [
+    "080ECE76:2305"
+   ],
+   "what": "Thunder's state's copy's movs r3,#0xa (BN4 0x080ECE76, the ball's height as it is made) made movs r3,#5: the ball made five lower"
+  },
+  {
+   "name": "the thunder's type another",
+   "spec": "bn4_chip_thunder3",
+   "poke": [
+    "080D215A:20CB"
+   ],
+   "what": "the thunder's spawner's copy (its movs r0,#0x2a at BN4 0x080D215A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no ball"
+  },
+  {
+   "name": "the thunder's sound not played",
+   "spec": "bn4_chip_thunder1",
+   "poke": [
+    "080D20B0:46C0",
+    "080D20B2:46C0"
+   ],
+   "what": "the thunder's init's copy's call that plays its launch (BN4 0x080D20B0, the recipe's call to its shim for the grown table's slot 0x201) made two nops: the ball made without its sound"
+  },
+  {
+   "name": "Thunder2's row's power another",
+   "spec": "bn4_chip_thunder2",
+   "poke": [
+    "08C06F7A:0028"
+   ],
+   "what": "the registry's record of BN4's Thunder2 (648) with power 40 where BN4's record holds 60: the Mettaur left 100 HP where BN4's leaves it 80"
+  },
+  {
+   "name": "the second fang's kind another",
+   "spec": "bn4_chip_twnfng1",
+   "poke": [
+    "080ED540:46C0"
+   ],
+   "what": "TwnFng's state's copy's adds r4,#1 (BN4 0x080ED540, the second fang's kind, the one to the row above) made a nop: both fangs to the row below, the Mettaur on the row above untouched"
+  },
+  {
+   "name": "the fang's type another",
+   "spec": "bn4_chip_twnfng3",
+   "poke": [
+    "080D7B3E:20CB"
+   ],
+   "what": "the fang's spawner's copy (its movs r0,#0x51 at BN4 0x080D7B3E, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no fangs"
+  },
+  {
+   "name": "the fang's speed across another",
+   "spec": "bn4_chip_twnfng1_miss",
+   "poke": [
+    "080D7B62:0002"
+   ],
+   "what": "the fang's copy's speed across the rows (the word at BN4 0x080D7B60, 0x00040000) made 0x00020000: each fang reaches its row later"
+  },
+  {
+   "name": "TwnFng2's row's power another",
+   "spec": "bn4_chip_twnfng2",
+   "poke": [
+    "08C07106:0032"
+   ],
+   "what": "the registry's record of BN4's TwnFng2 (657) with power 50 where BN4's record holds 100: the Mettaur left 90 HP where BN4's leaves it 40"
+  },
+  {
+   "name": "the bolt's hit's bits BN4's own",
+   "spec": "bn4_chip_magbolt3",
+   "poke": [
+    "080DBCD2:2303"
+   ],
+   "what": "the bolt's copy's collision set up with r3 3, BN4's bits, where the recipe gives 0x43: with the pull's push bit BN6's struck pass pushes alone, so the Mettaur pulled beside MegaMan and hit goes on with its own state where BN4's is struck"
+  },
+  {
+   "name": "the pull's bits another",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE140:04:1"
+   ],
+   "what": "the state's copy's hit word (BN4 0x080EE140, 0x1E05FF08) with bits 0x04 where BN4's holds 0x08: another push bit, the Mettaur not pulled toward MegaMan"
+  },
+  {
+   "name": "the bolt's life shorter",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080DBD3C:2010"
+   ],
+   "what": "the bolt's copy's count (movs r0,#0x1e at BN4 0x080DBD3C) made 0x10: the bolt leaves the field 14 frames before BN4's"
+  },
+  {
+   "name": "the wait before the bolt longer",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE076:200A"
+   ],
+   "what": "the state's copy's wait before the bolt (movs r0,#6 at BN4 0x080EE076) made 10: the bolt, its sounds and the pull four frames late"
+  },
+  {
+   "name": "the pull shorter",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE088:200A"
+   ],
+   "what": "the state's copy's count of the pull's frames (movs r0,#0x1e at BN4 0x080EE088) made 10: MegaMan's attack ends 20 frames before BN4's"
+  },
+  {
+   "name": "the bolt's sound not played",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE0DA:46C0",
+    "080EE0DC:46C0"
+   ],
+   "what": "the state's copy's call that plays the bolt's sound (BN4 0x080EE0DA, sound 0xF8 through its shim) made two nops: no sound 0x202 as the bolt appears"
+  },
+  {
+   "name": "the arm's kind another",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE05E:2424"
+   ],
+   "what": "the state's copy's arm kind (movs r4,#0x23 at BN4 0x080EE05E) made 0x24, MagBolt2's: another row of the arm's kinds, another sprite on MegaMan's arm"
+  },
+  {
+   "name": "MegaMan's animation BN4's number",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE044:200D"
+   ],
+   "what": "the state's copy's animation of MegaMan (BN4 0x080EE044) given BN4's number 0x0D where the recipe gives BN6's 0x0A: another animation of BN6's art"
+  },
+  {
+   "name": "the attack's variables at BN4's place",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE016:3770"
+   ],
+   "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE016), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
+   "name": "MagBolt3's row's power another",
+   "spec": "bn4_chip_magbolt3",
+   "poke": [
+    "08C06ECA:0028"
+   ],
+   "what": "the registry's record of BN4's MagBolt3 (644) with power 40 where BN4's record holds 130: the Mettaur left 100 HP where BN4's leaves it 10"
+  },
+  {
+   "name": "MagBolt2's row's family another",
+   "spec": "bn4_chip_magbolt2",
+   "poke": [
+    "08C06E8F:D0:1"
+   ],
+   "what": "the registry's record of BN4's MagBolt2 (643) with family 0xD0, the spread chips' unit, where the row gives MagBolt's 0xD5: another attack"
+  },
+  {
+   "name": "the bomb's HP another",
+   "spec": "bn4_chip_propbom1_struck",
+   "poke": [
+    "080DEBBC:2064"
+   ],
+   "what": "the bomb's copy's HP (movs r0,#0xa at BN4 0x080DEBBC) made 100: the Mettaur's wave does not end it at t73"
+  },
+  {
+   "name": "the bomb's speed another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE5BC:28:1"
+   ],
+   "what": "the state's copy's table of the bomb's speed by the Navi (BN4 0x080EE5BC, 0x14 for MegaMan) with 0x28: the bomb crosses the field in half the frames"
+  },
+  {
+   "name": "the blast's column another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DED00:3004"
+   ],
+   "what": "the bomb's copy's blast's column (adds r0,#5 at BN4 0x080DED00, 5 less three times its side) made 4: the hit area and its explosions a column nearer MegaMan"
+  },
+  {
+   "name": "the blast's explosions BN6's own",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DED16:2200"
+   ],
+   "what": "the bomb's copy's blast handed effect 0, BN4's number, where the recipe gives 0xC8, BN4's explosion's copy: BN6's own effect 0 over the six panels"
+  },
+  {
+   "name": "the wait before the bomb longer",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE56C:2008"
+   ],
+   "what": "the state's copy's wait before the bomb (movs r0,#4 at BN4 0x080EE56C) made 8: the bomb and its sounds four frames late"
+  },
+  {
+   "name": "the propeller's sound not played",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DEC08:46C0",
+    "080DEC0A:46C0"
+   ],
+   "what": "the bomb's copy's call that plays the propeller's sound (BN4 0x080DEC08, sound 0x133 through its shim) made two nops: no sound 0x204 as the bomb appears"
+  },
+  {
+   "name": "the struck bomb's sound not played",
+   "spec": "bn4_chip_propbom1_struck",
+   "poke": [
+    "080DEC6E:46C0",
+    "080DEC70:46C0"
+   ],
+   "what": "the bomb's copy's call that plays its burst's sound as it is struck (BN4 0x080DEC6E, sound 0xC8 through its shim) made two nops: no sound 0x205 as the wave ends it"
+  },
+  {
+   "name": "MegaMan's throw BN4's number",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE55C:2012"
+   ],
+   "what": "the state's copy's animation of MegaMan (BN4 0x080EE55C) given BN4's number 0x12 where the recipe gives BN6's 0x0E: another animation of BN6's art"
+  },
+  {
+   "name": "PropBom's variables at BN4's place",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE536:3770"
+   ],
+   "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE536), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
+   "name": "PropBom1's row's power another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "08C0736E:0032"
+   ],
+   "what": "the registry's record of BN4's PropBom1 (671) with power 50 where BN4's record holds 120: the Mettaur left 90 HP where BN4's leaves it 20"
+  },
+  {
+   "name": "PropBom2's row's family another",
+   "spec": "bn4_chip_propbom2",
+   "poke": [
+    "08C0738B:D0:1"
+   ],
+   "what": "the registry's record of BN4's PropBom2 (672) with family 0xD0, the spread chips' unit, where the row gives PropBom's 0xD4: another attack"
   }
  ]
 }

@@ -22,7 +22,8 @@
 void xnavi_bn4_room_list(const XVirusFamily *f, const uint8_t *rom, uint32_t lists);
 /* A row of a BN4 Navi's sprites in one of the rooms the battles share, staged at his install (xvirus.c sprites_set): his
  * battle sprite's (XN_BN4_SPRITE) its list 2 entry pointed at the room, one of the art's room's as xnavi_bn4_art_row
- * takes it; true. False for any other row. */
+ * takes it, or a chip unit's of the chips' art's room (xchips_bn4_art.h: no byte copied, its entry BN6's placeholder until an
+ * object loads it); true. False for any other row. */
 bool xnavi_bn4_room_row(const XvSprite *s, const uint8_t *rom, uint32_t lists);
 /* A raw sprite's bytes in the player's BN4 ROM (its list word's bit 31 clear), *len of them; NULL where it is LZ77'd or
  * unread */

@@ -2034,6 +2034,13 @@ PA_UNFORMED = {
 }
 
 
+# BN6's own recipes whose parts a run never hands out, their parts the registry's chips of BN5's of the same ids (docs/multirom/
+# bn6-gaps.md, Program Advances): CrosOver (BN6's 349) from Django, Django2 and Django3 (BN6's 278-280, no art of their own, cut from
+# the US version), which BN5's ids 278-280 are too, Django's V1, SP and DS: (BN6's entry, n, kind, BN6's PA id, BN5's part ids)
+BN6_PA_BORROWED = [(0x0802BAD0, 3, PA_KIND_IDS, 349, [278, 279, 280])]
+BN6_PA_NAMES = {349: 'CrosOver'}
+
+
 def pa_rows(b5):
     """BN5's recipes whose Program Advance the registry gives an id of its own (XREG_PA) and whose parts it registers: (BN5's
     entry, n, kind, BN6's PA id, BN6's part ids, the PA's name, the parts' names), in BN5's order, the kind-4 first as both
@@ -2050,12 +2057,15 @@ def pa_rows(b5):
         if pa in reg and reg[pa][1] == 'PA' and all(x in reg for x in parts):
             rows.append((p, n, kind, reg[pa][0], [reg[x][0] for x in parts], names.get(pa, '?'), [names.get(x, '?') for x in parts], pa))
         k += 1
+    for p, n, kind, pa, parts in BN6_PA_BORROWED:
+        if all(x in reg for x in parts):
+            rows.append((p, n, kind, pa, [reg[x][0] for x in parts], BN6_PA_NAMES[pa], [names.get(x, '?') for x in parts], None))
     return sorted(rows, key=lambda r: r[2] != PA_KIND_IDS)
 
 
 HEADER_PAS = '''/* xchips_pas.c: BN5's Program Advances of the chip registry (XREG_PA), their recipes as BN5's list has them (0x08028020),
- * in BN6's chip ids, written by tools/xchiprecipe.py from BN5's ROM and the registry (src/core/xchips_registry.c), for BN6's
- * list grown with them (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
+ * and BN6's own CrosOver from the registry's Django chips (BN6_PA_BORROWED), in BN6's chip ids, written by
+ * tools/xchiprecipe.py from BN5's ROM and the registry (src/core/xchips_registry.c), for BN6's list grown with them (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
 #include "xchips_pas.h"
 
 const XChipPa xchips_pas[] = {
@@ -2067,7 +2077,8 @@ def pas_file(rows):
     for p, n, kind, pa, parts, name, part_names, pa5 in rows:
         ids = ', '.join(str(x) for x in parts + [0] * (4 - len(parts)))
         how = f'{n} {part_names[0]} of codes in a row' if kind == PA_KIND_SAME else ' + '.join(part_names)
-        note = f'; never formed: {PA_UNFORMED[pa5]}' if pa5 in PA_UNFORMED else ''
+        note = f'; never formed: {PA_UNFORMED[pa5]}' if pa5 in PA_UNFORMED else \
+            "; BN6's own recipe, its parts a run's (BN6's Django 1-3 cut)" if pa5 is None else ''
         body.append(f'\t{{ 0x{p:08X}, {n}, {kind}, {pa}, {{ {ids} }} }},   /* {name}: {how}{note} */')
     return HEADER_PAS + '\n'.join(body) + '\n};\nconst int xchips_pas_count = (int)(sizeof xchips_pas / sizeof *xchips_pas);\n'
 

@@ -18,17 +18,19 @@ sources:
 
 # Free space: zones, headroom and placing a region
 
-Every region the engine writes past BN6's 8 MB in the core's ROM copy, and
-in the RAM BN6 leaves alone, is a row of one file,
+Every region the engine writes past BN6's 8 MB in the core's ROM copy, in
+the work RAM BN6 leaves alone and in the cart's save RAM between BN6's own
+blocks, is a row of one file,
 `src/emu/free_space.plan`: its name, its start and end, its zone, the files
 that write it and the concept that explains it. Nothing else places a
 region. `python3 tools/free_space.py --write` makes from it:
 
-- `src/emu/free_space.h`: the `FREE_*` and `RAM_*` names the code uses (each
-  region's start, and `NAME_END` where its row says `end`), and the plan as
-  tables, `FREE_SPACE_ROM` and `FREE_SPACE_RAM` (X-macros), which
+- `src/emu/free_space.h`: the `FREE_*`, `RAM_*` and `SRAM_*` names the code
+  uses (each region's start, and `NAME_END` where its row says `end`), and
+  the plan as tables, `FREE_SPACE_ROM`, `FREE_SPACE_RAM` and
+  `FREE_SPACE_SAVE` (X-macros), which
   `tests/test_core.c` and `src/emu/free_space_watch.c` read;
-- the offsets, names and writers of the two tables of
+- the offsets, names and writers of the three tables of
   [Memory the engine writes](memory.md), a row a region and a row a gap,
   whose words stay that page's own (a new region's row starts with the
   plan's line);
@@ -45,7 +47,10 @@ a header edited by hand that still compiles is caught twice.
 
 A zone is a span of one kind, so that a new region goes where its kind
 lives: what is rewritten as a layer is entered beside the layers, the code
-moved from another game beside the other moved code. The plan's numbers:
+moved from another game beside the other moved code. A zone's space is the
+ROM copy (`rom`), the work RAM (`ram`) or the cart's save RAM (`save`:
+what must travel with every state and is reached a byte at a time,
+[Memory the engine writes](memory.md)). The plan's numbers:
 
 <!-- tools/free_space.py writes this table from src/emu/free_space.plan -->
 | Zone | Span | Holds | Regions | Headroom | Largest gap |
@@ -60,6 +65,7 @@ moved from another game beside the other moved code. The plan's numbers:
 | `persistent` | `0x02010CE0`-`0x02011800` (2.8 KB) | persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) | 5 | 0 B (0%) | 0 B |
 | `mode` | `0x02029A00`-`0x0202DA00` (16.0 KB) | a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map | 1 | 0 B (0%) | 0 B |
 | `battle` | `0x0203FB50`-`0x02040000` (1.2 KB) | per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing else of BN6's reads or writes 0x0203FB50 on | 12 | 0 B (0%) | 0 B |
+| `save` | `0x0E006810`-`0x0E007E00` (5.5 KB) | the cart's save RAM between BN6's save (0x0E000100-0x0E00680F) and its three small blocks (from 0x0E007E00): BN6's save library addresses none of it, and every state the engine writes holds it | 1 | 928 B (16%) | 496 B |
 <!-- end of the table tools/free_space.py writes -->
 
 Headroom is the zone's spans no region holds and its regions marked `free`

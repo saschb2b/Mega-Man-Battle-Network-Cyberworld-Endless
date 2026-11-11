@@ -1,0 +1,116 @@
+{
+ "about": "BN4 Red Sun's ThunSoul (Soul 6, form 6: Elec, its charged shot power attack 0x58 and family 0x47, 90 frames) in BN4's own battle on the guest core, fought twice, each in a process of its own, the same frame for frame: the ThunSoul's control. MegaMan holds the Soul (souls4: its flag 0x1C from BN4_SOUL_FLAGS, Double Soul's, and its pseudo-chip 0x166 written past BN4's chip gate), a folder of BN4's chip 35 B (kind 2, Elec); the first Custom screen picks it, moves to UNITE (five right, down), takes it and the Soul (up, A): the unison makes form 6 (said by the form watch). B held from fight frame 60 to 200, its release the charged shot; L at 400 and 700 opens the Custom screens that count the Soul's turns. A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1100,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "20",
+ "folder4": [
+  "0223"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   140
+  ],
+  [
+   400,
+   "L",
+   3
+  ],
+  [
+   700,
+   "L",
+   3
+  ]
+ ]
+}

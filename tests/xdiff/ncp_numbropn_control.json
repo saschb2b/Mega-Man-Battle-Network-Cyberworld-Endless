@@ -1,0 +1,118 @@
+{
+ "about": "The control of ncp_numbropn: the same folder, deck and keys with no program on BN6's board, the hand BN6's five: DOWN, RIGHT four times and A pick the fifth chip, Vulcan1 (0x5), not the tenth.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 40,
+ "folder6": [
+  "0001",
+  "1602",
+  "2203",
+  "3404",
+  "0205",
+  "0606",
+  "0007",
+  "2A08",
+  "1609",
+  "000A"
+ ],
+ "deck6": [
+  "0001",
+  "1602",
+  "2203",
+  "3404",
+  "0205",
+  "0606",
+  "0007",
+  "2A08",
+  "1609",
+  "000A"
+ ],
+ "cust6": {
+  "1": [
+   [
+    "DOWN",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "chip": [
+    [
+     1,
+     "0x5"
+    ]
+   ]
+  }
+ }
+}

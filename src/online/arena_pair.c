@@ -42,7 +42,9 @@
 #include "emu.h"
 #include "hook.h"
 #include "idle.h"
+#include "ram_survey.h"
 #include "soulunite.h"
+#include "xchips_pack.h"
 #include "xinstall_log.h"
 
 /* run loops a frame of the pair may take, both cores' together: far past
@@ -151,6 +153,8 @@ struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, b
 	blip_set_rates(c->getAudioChannel(c, 0), c->frequency(c), emu_audio_out_rate());
 	blip_set_rates(c->getAudioChannel(c, 1), c->frequency(c), emu_audio_out_rate());
 	c->reset(c);
+	xchips_pack_ready(c);   /* (the chip pack's entries in the save RAM, the same in every core made: xchips_pack.h) */
+	ram_survey_watch(c);    /* (a dev tool's watch, off without its variable) */
 	return c;
 }
 
@@ -180,6 +184,7 @@ bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size) {
 	if (!vf) return false;
 	bool ok = mCoreLoadStateNamed(core, vf, STATE_FLAGS);
 	vf->close(vf);
+	if (ok) xchips_pack_ready(core);   /* (a state from before the pack's entries: zeroed, as on every game) */
 	return ok;
 }
 
@@ -460,6 +465,7 @@ typedef struct {
 	bool tainted[16];
 	uint16_t io[512];          /* the registers as they read: a state keeps what a read gives and loads it through a write */
 	uint16_t sio_rcnt, sio_siocnt;
+	uint8_t pack[XPACK_KEPT];  /* the chip pack's entries in the save RAM, which a raw state leaves out (xchips_pack.h) */
 } GbaSnap;
 
 static void gba_save(const struct GBA *g, GbaSnap *s) {
@@ -541,6 +547,7 @@ bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
 			n->normalSO, n->transferFinished, scheduled };
 		if (s->kept_size) hook_kept_save(hook_slot_of(c), s->kept[side]);
 		gba_save(c->board, &s->gba[side]);
+		xchips_pack_keep(c, s->gba[side].pack);
 	}
 	s->attached = p->cable.d.attached;
 	s->active = p->cable.d.transferActive;
@@ -570,6 +577,7 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 		if (c->stateSize(c) != s->core_size || !c->loadState(c, s->core[side])) return false;
 		if (s->kept_size) hook_kept_load(hook_slot_of(c), s->kept[side]);
 		gba_load(c->board, &s->gba[side]);
+		xchips_pack_put(c, s->gba[side].pack);
 	}
 	p->cable.d.attached = s->attached;
 	p->cable.d.transferActive = s->active;

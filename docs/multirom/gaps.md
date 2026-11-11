@@ -33,6 +33,9 @@ core loop](../game/core-loop.md): its lacks (pace, a climax that bites,
 variety a veteran feels), what it froze (power meta, any change to BN6's
 battle) and the owner's calls.
 
+BN6 Gregar's own content a run leaves out is audited apart, in [BN6
+Gregar's own gaps](bn6-gaps.md).
+
 BN5 is the main path: 147 of 166 release runs carried it in October (the
 core loop's statistics), so a gap on its areas reaches nine runs in ten.
 
