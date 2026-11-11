@@ -320,7 +320,7 @@ static const XvPair counter_words[] = {
 static const XvImm counter_imms[] = {
 	{ 0x080CFD70, THUMB_MOVS, 2, 0, 0x10, 0xEE },   /* its object's sprite: list 5 0x10 in BN4, 0xee in BN6 (copied) */
 	{ 0x080CFD9E, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080CFDE8, THUMB_MOVS, 0, 0, 0x17, 0xC8 },   /* its object's type 0x17: moved, the dispatch's 0xc8 */
+	{ 0x080CFDE8, THUMB_MOVS, 0, 0, 0x17, 0xB4 },   /* its object's type 0x17: moved, the dispatch's 0xb4 */
 	{ 0x080CFDF4, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080CFE26, THUMB_LSLS, 0, 0, 0x2, 0x4 },   /* a side's players in the battle state: BN4 a word a side's first from +0x44, BN6 0x10 bytes a side from +0xD0 */
 	{ 0x080CFE28, THUMB_ADDS, 0, 0, 0x44, 0xD0 },   /* a side's players in the battle state: BN4 +0x44, BN6 +0xD0 */
@@ -330,7 +330,7 @@ static const XvNumber counter_numbers[] = {
 	{ 0x080CFDB8, 0x04050601, 0x04050601 },   /* a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same (five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606) */
 };
 static const XvType counter_types[] = {
-	{ 3, 0xC8, XV_TYPE_MOVED, 0x17 },   /* BN4's third-kind 0x17, moved, the dispatch's 0xc8 */
+	{ 3, 0xB4, XV_TYPE_MOVED, 0x17 },   /* BN4's third-kind 0x17, moved, the dispatch's 0xb4 */
 };
 static const XvSprite counter_sprites[] = {
 	{ 5, 0x10, 5, 0xEE, XC4_ART + 0x2700, 0xB00 },   /* BN4's 5:0x10 copied */
@@ -409,11 +409,11 @@ static const XvImm whitweb_imms[] = {
 	{ 0x080D4E18, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080D4E48, THUMB_MOVS, 4, 0, 0xF, 0xCD },   /* its effect: 0xf in BN4, 0xcd in BN6 (moved) */
 	{ 0x080D4E4E, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's slot 0x3a, a BN4 family's too */
-	{ 0x080D4EA0, THUMB_MOVS, 0, 0, 0x3D, 0xC6 },   /* its object's type 0x3d: moved, the dispatch's 0xc6 */
+	{ 0x080D4EA0, THUMB_MOVS, 0, 0, 0x3D, 0xAE },   /* its object's type 0x3d: moved, the dispatch's 0xae */
 	{ 0x080D4EB0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 };
 static const XvType whitweb_types[] = {
-	{ 3, 0xC6, XV_TYPE_MOVED, 0x3D },   /* BN4's third-kind 0x3d, moved, the dispatch's 0xc6 */
+	{ 3, 0xAE, XV_TYPE_MOVED, 0x3D },   /* BN4's third-kind 0x3d, moved, the dispatch's 0xae */
 };
 static const XvSprite whitweb_sprites[] = {
 	{ 4, 0x1C, 4, 0x9E, XC4_ART + 0x3200, 0x600 },   /* BN4's 4:0x1c copied */
@@ -788,7 +788,7 @@ static const XvImm spreads_imms[] = {
 	{ 0x080CF546, THUMB_LDRB, 0, 7, 0x8, 0xA },   /* collision data +0x8 in BN4, +0xa in BN6 */
 	{ 0x080CF548, THUMB_LDRB, 1, 7, 0x9, 0xB },   /* collision data +0x9 in BN4, +0xb in BN6 */
 	{ 0x080CF58E, THUMB_LDRB, 0, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080CF59A, THUMB_MOVS, 0, 0, 0x12, 0xBE },   /* its object's type 0x12: moved, the dispatch's 0xbe */
+	{ 0x080CF59A, THUMB_MOVS, 0, 0, 0x12, 0xAD },   /* its object's type 0x12: moved, the dispatch's 0xad */
 	{ 0x080CF5A6, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080EC764, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 	{ 0x080EC788, THUMB_MOVS, 0, 0, 0xE, 0xB },   /* MegaMan's animation as he fires a spread chip: BN4's 0x0E, BN6's 0x0B of its own sprite of him (BN6's twin family 0x25 sets it at 0x080EDF14, through 0x0800F2B6, which stores it and 0xFF as BN4's state does) */
@@ -796,7 +796,7 @@ static const XvImm spreads_imms[] = {
 };
 static const XvType spreads_types[] = {
 	{ 3, 0xC2, XV_TYPE_MOVED, 0x02 },   /* BN4's third-kind 0x2, moved, the dispatch's 0xc2 */
-	{ 3, 0xBE, XV_TYPE_MOVED, 0x12 },   /* BN4's third-kind 0x12, moved, the dispatch's 0xbe */
+	{ 3, 0xAD, XV_TYPE_MOVED, 0x12 },   /* BN4's third-kind 0x12, moved, the dispatch's 0xad */
 };
 static const XvSprite spreads_sprites[] = {
 	{ 3, 0x19, 3, 0x72, XC4_ART + 0x10100, 0x3600 },   /* BN4's 3:0x19 copied */
@@ -905,7 +905,7 @@ static const XvImm flmline_imms[] = {
 	{ 0x080CFFAE, THUMB_MOVS, 2, 0, 0xA, 0x9B },   /* its object's sprite: list 4 0xa in BN4, 0x9b in BN6 (copied) */
 	{ 0x080CFFF8, THUMB_MOVS, 0, 0, 0x9D, 0x36 },   /* its sound 0x9d: BN4's copied into BN6's slot 0x36, a BN4 family's too */
 	{ 0x080D0014, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
-	{ 0x080D00BC, THUMB_MOVS, 0, 0, 0x19, 0xBD },   /* its object's type 0x19: moved, the dispatch's 0xbd */
+	{ 0x080D00BC, THUMB_MOVS, 0, 0, 0x19, 0xA9 },   /* its object's type 0x19: moved, the dispatch's 0xa9 */
 	{ 0x080D00CC, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080ECAB2, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 	{ 0x080ECAD4, THUMB_MOVS, 0, 0, 0xD, 0xA },   /* MegaMan's animation as he readies FlmLine: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of 2 in each art) */
@@ -913,7 +913,7 @@ static const XvImm flmline_imms[] = {
 	{ 0x080ECB14, THUMB_MOVS, 0, 0, 0x11, 0xD },   /* MegaMan's animation as he fires FlmLine: BN4's 0x11, BN6's 0x0D of its own sprite of him (frames of 3 and 2 in each art) */
 };
 static const XvType flmline_types[] = {
-	{ 3, 0xBD, XV_TYPE_MOVED, 0x19 },   /* BN4's third-kind 0x19, moved, the dispatch's 0xbd */
+	{ 3, 0xA9, XV_TYPE_MOVED, 0x19 },   /* BN4's third-kind 0x19, moved, the dispatch's 0xa9 */
 	{ 3, 0xC2, XV_TYPE_SHARED, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy: the dispatch's 0xc2 */
 };
 static const XvSprite flmline_sprites[] = {
@@ -992,7 +992,7 @@ static const XvPair thunder_words[] = {
 static const XvImm thunder_imms[] = {
 	{ 0x080D2044, THUMB_MOVS, 2, 0, 0x11, 0x9A },   /* its object's sprite: list 4 0x11 in BN4, 0x9a in BN6 (copied) */
 	{ 0x080D20DE, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
-	{ 0x080D215A, THUMB_MOVS, 0, 0, 0x2A, 0xBB },   /* its object's type 0x2a: moved, the dispatch's 0xbb */
+	{ 0x080D215A, THUMB_MOVS, 0, 0, 0x2A, 0xA3 },   /* its object's type 0x2a: moved, the dispatch's 0xa3 */
 	{ 0x080D216A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080ECE18, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 	{ 0x080ECE3C, THUMB_MOVS, 0, 0, 0x12, 0xE },   /* MegaMan's animation as he throws Thunder: BN4's 0x12, BN6's 0x0E of its own sprite of him (frames of 1, 2, 2 and 3 in each art) */
@@ -1002,7 +1002,7 @@ static const XvNumber thunder_numbers[] = {
 	{ 0x080D2220, 0x08000000, 0x08000000 },   /* ... the other side's (BN4 0x080D2208; BN6's 0x080CAE66) */
 };
 static const XvType thunder_types[] = {
-	{ 3, 0xBB, XV_TYPE_MOVED, 0x2A },   /* BN4's third-kind 0x2a, moved, the dispatch's 0xbb */
+	{ 3, 0xA3, XV_TYPE_MOVED, 0x2A },   /* BN4's third-kind 0x2a, moved, the dispatch's 0xa3 */
 };
 static const XvSprite thunder_sprites[] = {
 	{ 4, 0x11, 4, 0x9A, XC4_ART + 0x1FA00, 0xB00 },   /* BN4's 4:0x11 copied */

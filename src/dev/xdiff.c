@@ -834,6 +834,7 @@ static bool reference(Side *g, const Spec *s) {
 static void bn4_frame(uint32_t keys) {
 	guest_frame_quiet(keys);
 	xd4_watch();
+	xd4_form_watch();
 }
 
 /* BN4 Red Sun's own battle on the guest core (xdiff_bn4.h's record), traced in BN6's units (xdiff_bn4_trace.h): its
@@ -845,6 +846,7 @@ static bool reference4(Side *g, const Spec *s) {
 	uint32_t len = xd4_record(s, rec);
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
 	xd4_folder_put(s);   /* (a chip spec's folder4, and its chips through BN4's gate: xdiff_bn4.h; after the battle is asked, which sets its own) */
+	xd4_souls_put(s);    /* (a Soul spec's souls4, its flags and pseudo-chips past the gate) */
 	const Xd4Places *p = &xd4_places;
 	g->v = (View){ .game = 4, .state = p->state, .window = p->window, .rng = { p->rng[0], p->rng[1] }, .t1 = p->t1, .t3 = p->t3,
 		.t4 = p->t4, .nt1 = (int)p->nt1, .panels = p->panels, .panel_size = BN6_PANEL_SIZE, .list = p->list, .list_end = p->list_end,
