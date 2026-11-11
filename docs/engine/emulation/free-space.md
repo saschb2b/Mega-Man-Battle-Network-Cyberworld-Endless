@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Free space: zones, headroom and placing a region"
 description: "The free space's one plan (`src/emu/free_space.plan`): its zones by kind and their headroom, `tools/free_space.py`'s header, tables and report, how a new region is placed, how an overrun is told, and the move that sized the layers' regions by their largest and freed `code-low`."
 tags: [engine, emulation, free-space]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:00:00Z }
 sources:
   - id: plan
     resource: "src/emu/free_space.plan"
@@ -56,8 +56,8 @@ what must travel with every state and is reached a byte at a time,
 | Zone | Span | Holds | Regions | Headroom | Largest gap |
 | --- | --- | --- | --- | --- | --- |
 | `engine` | `+0x000000`-`+0x002F00` (11.8 KB) | the engine's own records, hooks and stubs, and BN6's small tables grown | 10 | 2.4 KB (20%) | 1.8 KB |
-| `layers` | `+0x002F00`-`+0x090000` (564.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered; home's other places | 9 | 96.0 KB (17%) | 96.0 KB |
-| `code-low` | `+0x090000`-`+0x150000` (768.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 9 | 0 B (0%) | 0 B |
+| `layers` | `+0x002F00`-`+0x080000` (500.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered; home's other places | 9 | 32.0 KB (6%) | 32.0 KB |
+| `code-low` | `+0x080000`-`+0x150000` (832.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 14 | 0 B (0%) | 0 B |
 | `words` | `+0x150000`-`+0x170000` (128.0 KB) | the director's and the PET's words: text archives, labels, lists | 12 | 18.8 KB (14%) | 17.0 KB |
 | `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds | 6 | 124.0 KB (6%) | 64.0 KB |
 | `code` | `+0x330000`-`+0x7A0000` (4544.0 KB) | other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs | 24 | 4.0 KB (0%) | 4.0 KB |
@@ -218,3 +218,14 @@ the `code` zone's gaps, not their own regions' tails. `FREE_FAMILIES`,
 `FREE_RUSH` 97-99% (a region with a table at its end reads full however
 much is free before it, so these are upper bounds); `FREE_CHIPS` used a
 third, `FREE_SONGS` 42% and `FREE_XNAVIS` a third.
+
+**12 November 2026: `code-low` takes the layers' headroom's back.** BN5's
+LarkMan and GridMan, the Navis' seats 17-18, needed a home, a code room and
+an art room each and a place for GridMan's battle sprite, and no zone of the
+`code` kind had room (`--fit`: `code-low`'s 768 KB taken by Team ProtoMan's,
+BN4's chips' and the shared art's third room). The zone boundary moved:
+`layers` ends at `+0x80000`, its headroom 32 KB (`+0x78000`-`+0x80000`, of
+the 96 KB no layer, town or home place used: the largest measured above
+leave it whole), and `code-low` begins there, its front `FREE_NEBULA_NAVIS`
+(`+0x80000`-`+0x90000`, [Transplanted Navis](../../multirom/navis.md),
+GridMan). No region moved: a row's numbers alone, lint holding the rest.
