@@ -305,6 +305,8 @@ typedef struct {
 	bool screen;   /* code of a screen's, no battle object's: its r5 a state of its own, whose +1 no object type */
 	uint32_t art2, art2_end;   /* a second room its sprites may go to besides art to art_end (the families': the late ones'; 0 none) */
 	uint32_t code2, code2_end; /* ... and its code besides code to code_end (the families': the late ones'; 0 none) */
+	uint32_t rows, rows_end;   /* places that name a row of a room filled on demand (BN4's chips' art's, xchips_bn4_art.h; 0 none): a
+	                              sprite's `at` there is its row's own, and the rows' rooms lie over each other */
 } XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
