@@ -12,6 +12,7 @@
 
 ## 2026-11-11
 * **Update**: multirom/navis.md (GyroMan moved, Team ProtoMan's second; the shared art's third room and list 2's spill), rom/navis.md (Team ProtoMan's GyroMan, new row), game/team-protoman.md (unit 3 built; its description and index line), multirom/index.md (navis.md's line), devtools/differential.md (Team ProtoMan's art rooms read as moved), engine/emulation/memory.md and free-space.md (`FREE_TEAM_SHARED_MORE`).
+* **Update**: game/reward-pick.md (The information box: the window fitted to its rows, four lines whole, a longer text scrolled; every text measured with `--pick-fit`), code/dev.md (`pick_fit.c`).
 * **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
 * **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
