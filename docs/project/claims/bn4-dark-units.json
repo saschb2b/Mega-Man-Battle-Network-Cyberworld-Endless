@@ -11,6 +11,12 @@
         "0x2A0",
         "0x2BF"
       ]
+    ],
+    "attack_families": [
+      [
+        "0xFB",
+        "0xFF"
+      ]
     ]
   },
   "units": [
