@@ -200,11 +200,16 @@
 0800B050 navis_engine_twins.panel_cracked
 0800B2A6 BN5_SET_PANEL_TYPE
 0800B380 collision_panels_highlighted
+0800B3E4 bn5_panel_count_panels_type_r0
 0800BCE8 BN5_PANEL_FLAGS_OF
 0800BD64 BN5_FIELDS
 0800C6CE has_it
 0800C6D8 object_hp_lowered
 0800C7CC BN5_LIB_DOUBLE_HIT
+0800C8A6 bn5_magnet_panel.3
+0800C8D2 BN5_STEP_PULL
+0800C918 BN5_PULL_DIRECTIONS
+0800C9B8 BN5_DIRECTION_STEPS
 0800CCD2 object_counter_time
 0800CD1E BN5_PRESTEP_TAKE
 0800CD44 BN5_PRESTEP_TAKE_MIN
@@ -346,6 +351,8 @@
 080133C4 on_to_decide_state
 080133CE generic_state_2
 080134A0 generic_state_3
+08013612 bn5_magnet_panel.from
+08013630 BN5_PULL_ROWS
 080136B0 bn5_darkplus_green.drawn_by_2
 080136D0 colour_shader_by_table_eight
 08013738 bn6_own_subfamily_3
@@ -921,6 +928,9 @@
 080F50FD his_status_hooks
 080F5D6C team_protoman_napalmman.his_code
 080F5F22 BN5_NAPALM_HALF_HP_CHIP
+080F64EC team_protoman_magnetman.his_code
+080F67C6 his_check_one
+080F6838 his_count_his_magnet_panels_0x080f67c6
 080F73E8 BN5_MEDDY_CODE
 080F7575 team_protoman_meddy
 080F7FF8 bn5_navis.at_080f7ff8

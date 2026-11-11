@@ -11,6 +11,7 @@
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
+* **Update**: multirom/navis.md (MagnetMan moved, Team ProtoMan's fifth), multirom/one-net.md (The magnet panel in BN6's engine), rom/bn5-world.md (BN5's magnet panel, in BN6's engine now), rom/navis.md (Team ProtoMan's MagnetMan, new row), game/team-protoman.md (unit 6 built; its description and index line), multirom/index.md (navis.md's line), devtools/differential.md (a sprite state's +5 on its first frame; a spawn a new role).
 * **Update**: rom/bn5-world.md (BN5's magnet panel, new row), multirom/navis.md (MagnetMan derived, not moved: his one decision the magnet panel), game/team-protoman.md (unit 6 mapped).
 * **Update**: multirom/navis.md (Meddy moved, Team ProtoMan's fourth; an effect's id beside a parameter), rom/navis.md (Team ProtoMan's Meddy, new row), game/team-protoman.md (unit 5 built; its description and index line), multirom/index.md (navis.md's line).
 * **Update**: multirom/navis.md (SearchMan moved, Team ProtoMan's third; his battle sprite's place), devtools/differential.md (a fourth-kind spawn's leftover), rom/navis.md (Team ProtoMan's SearchMan, new row), game/team-protoman.md (unit 4 built; its description and index line), multirom/index.md (navis.md's line).

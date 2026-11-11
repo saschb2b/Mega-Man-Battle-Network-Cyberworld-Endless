@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:30:00Z }
 ---
 
 # Transplanted Navis
@@ -275,13 +275,22 @@ into the battle engine).
   copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
   state's number); her effect 0x44's site and one object's compare of
   its parent's state are reached by no spec.
-- **MagnetMan** (AI 5) is derived (`--report --ai 5`), not moved: his
-  object types (the third kind's 0x60, 0x62, 0x63, 0x64, 0x66, the
-  fourth's 0x19) are recorded in TYPES; his one decision is the panel he
-  lays, BN5's magnet panel (type 5, which BN6 lacks: its 5 is holy),
-  read in BN5's code ([BN5's maps, songs, text and objects](../rom/bn5-world.md),
-  BN5's magnet panel). It comes into BN6's engine as panel 15 before him,
-  as the lava and sea did (One net, above).
+- **MagnetMan** (AI 5, Navi AI 30, ids 0x3E4-0x3E7; `magnetman_v1`,
+  `magnetman_v1_keys`, `magnetman_sp`: PASS): his object types (the third
+  kind's 0x60, 0x62, 0x63, 0x64, 0x66, the fourth's 0x19) moved, and his
+  child at his place, the first kind's 0x55, through `SPAWNS_OTHER` (BN6's
+  0x55 runs the same code on its own list 4's 0x3C, another sprite). The
+  panels he lays are BN5's magnet panel, BN6's 15 (One net, The magnet
+  panel): the generator makes his type 5 15 where he sets it, counts it
+  (BN5's panel counter, `PANEL_COUNTERS`) or compares it through a
+  register, the rule that also made the Dark Soul's counts of lava and sea
+  BN6's 13 and 14. His battle sprite at `FREE_TEAM_SPRITES` + 0x2A000, his
+  sound 0x100 at BN6's slot 0x47, his child's sprite in the shared art's
+  fourth room. Five mutations break his copy and FAIL (the panel he lays,
+  a state's number, a sprite's number, his child's sprite, a hit's
+  offset); the pull's own breaks show in MegaMan's state alone, where the
+  comparator stops without a verdict, and his count and check of his
+  magnet panels decide in no spec.
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
   his three decisions are built, one left. *His object types* (the third
   kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES

@@ -482,7 +482,7 @@ void xpanels_install(int xrom) {
 		: !stub_make(stub) || !cool_make(cool) || !pull_make(pull) ? "its code"
 		: !xpanels_look_stage() ? "their look" : NULL;
 	if (why) {
-		fprintf(stderr, "xpanels: BN5's lava and sea not in BN6's engine: %s is not as expected\n", why);
+		fprintf(stderr, "xpanels: BN5's lava, sea and magnet panel not in BN6's engine: %s is not as expected\n", why);
 		return;
 	}
 	claims_begin("lava and sea (xpanels.c)");
@@ -497,5 +497,6 @@ void xpanels_install(int xrom) {
 	xpanels_look_write();
 	ready = hooks_set();
 	claims_end();
-	printf("xpanels: BN5's lava and sea %s BN6's engine, as its panel types %d and %d\n", ready ? "in" : "NOT in", XPANEL_LAVA, XPANEL_SEA);
+	printf("xpanels: BN5's lava, sea and magnet panel %s BN6's engine, as its panel types %d, %d and %d\n", ready ? "in" : "NOT in", XPANEL_LAVA,
+		XPANEL_SEA, XPANEL_MAGNET);
 }

@@ -16,8 +16,8 @@
 #define XP_AT        FREE_PANELS
 #define XP_FLAGS     XP_AT                 /* BN6's panel flags table grown to 16 words (xpanels.c) */
 #define XP_STUB      (XP_AT + 0x40u)       /* the lava's cooling, Thumb, and its veneers on to BN6's routines (xpanels.c) */
-#define XP_TILES     (XP_AT + 0x100u)      /* BN6's panel tile table grown to 15 types, */
-#define XP_TILES_SIZE 0xB40u               /* ... 6 entries of 32 bytes a type */
+#define XP_TILES     (XP_AT + 0x100u)      /* BN6's panel tile table grown to 16 types (lava, sea, the magnet panel), */
+#define XP_TILES_SIZE 0xC00u               /* ... 6 entries of 32 bytes a type */
 #define XP_PULL      (XP_AT + 0xE00u)      /* the magnet panel's pull, BN5's step for it (xpanels.c, pull_make): Thumb, its veneers and
                                               BN5's directions' table after it */
 #define XP_END       FREE_PANELS_END
