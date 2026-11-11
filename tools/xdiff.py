@@ -305,6 +305,7 @@ def engine_only(name, spec, a, legit, canon, pokes=(), calls=()):
     assign_roles(tb, canon)
     attribute(tb, canon)
     lines, bad = player_timeline(tb, canon), check_player(tb, canon, spec.get('expect', {}))
+    bad += check_expect(name, 'BN6', tb, canon, spec.get('expect', {}))[0]   # (the foe's HP and the rest, as a differential's)
     print('\n'.join(lines))
     sounds = {int(x, 0) for x in spec.get('expect', {}).get('sounds', [])}
     heard = {snd for fr in tb['frames'] for _, snd in fr['sounds']}
@@ -354,6 +355,7 @@ MEGAMAN_READS = {
     'loadout': lambda o, ai, p: ai[4:9].hex() + ai[0x11:0x12].hex() if ai else None,
     'sprite': lambda o, ai, p: o.o32(SPRITE['T1'] + 0x18) - 4 if o.o32(SPRITE['T1'] + 0x18) else 0,
     'palette': lambda o, ai, p: o.o8(SPRITE['T1'] + 4),
+    'element': lambda o, ai, p: o.o8(0x0E),   # (his object's element, BN6's +0x0E: a Soul's, soulpower.c)
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
     'unite stands': lambda o, ai, p: p[PLAYER_UNITE] if p and len(p) > PLAYER_UNITE else None,
 }
