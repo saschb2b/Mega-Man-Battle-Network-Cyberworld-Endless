@@ -3,7 +3,7 @@ type: Design
 title: "Encounter groups"
 description: "The encounter rework, approved 11 November 2026: one pool of virus families across every ROM tagged by what they do, authored constellations beside each area's own battles, an arc per act around a signature family, rewards from the group fought; what replaces the visitors and the deep's coin, what was measured, and the phases."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:45:00Z }
 sources:
   - id: owner
     resource: "The owner's calls of 11 November 2026, given in the project's sessions and written down here"
@@ -331,7 +331,7 @@ So the build adds a third limit, and `build.py pacing` holds it:
   version may also act faster. The pairs' pass measures the versions the
   acts take for the families it flags.
 
-## The build phase, proposed
+## The build phase
 
 In three steps, each behind a dev switch until the last, measured before
 the next.
@@ -350,7 +350,7 @@ the next.
    words that named them gone, the report's bands at zero, an autopilot
    tally over seeds 1 to 12 against today's.
 
-Where each beat goes (proposed; the shares are the owner's to set):
+Where each beat goes (the shares as the owner set them, below):
 
 - **One group battle a layer**, its first random battle that is not one of
   the run's two openers: on an act's first layer the signature alone (one
@@ -368,28 +368,32 @@ Where each beat goes (proposed; the shares are the owner's to set):
   act, a layer's group battle from its layer seed and the battle's index,
   as the visitors' gate is, so a checkpoint rebuilds the same.
 
-## Open calls
+## The five calls, decided
 
-Each is the owner's, with this page's recommendation.
+The measuring phase left five calls to the owner, each with this page's
+recommendation. The owner took all five as recommended on 11 November
+2026 ("Yes, all five"):
 
-1. **The shares by act** (above): three quarters, half, a third and a
-   quarter of acts with a signature of the area's own, the deep free.
-   Recommended as written; the statistics' event then says whether act 1
-   should open further.
-2. **A constellation on the field of the area's own records**, or on a
-   plain field. Recommended: the area's own field where the group's
-   panels are plain or cracked there (the visitors' rule), else plain,
-   so an area's panels stay part of its battles.
-3. **The pooled BN4 families' sounds**: fixed slots in the grown song
-   table before the build (so any two share a battle), or the limit of
-   one a battle kept. Recommended: the fixed slots, with the families
-   still to move, since each new one is pooled.
-4. **BN6 alone**: the rework with the templates it fills, or left as today
-   without another ROM. Recommended: the rework; BN6's own 29 families in
-   new groups is the same variety, and one in ten release runs has no
-   BN5.
-5. **The reward where a signature's row pays less than the battle's
-   own** (a moved family whose chips are not in the engine yet pays the
-   stand-in's zenny). Recommended: the signature pays wherever its row
-   holds a chip that plays, else the group's best row, so the rule never
-   costs a player a chip.
+1. **The shares by act** (above): the signature is one of the area's own
+   families in three quarters of act 1's runs, half of act 2's, a third of
+   act 3's and a quarter of act 4's, the deep free; one group battle a
+   layer. The statistics' event then says whether act 1 should open
+   further.
+2. **A constellation's field**: the area's own records' field where the
+   group's panels are plain or cracked there (the visitors' rule), else a
+   plain field, so an area's panels stay part of its battles.
+3. **The pooled BN4 families' sounds** go onto fixed slots of the grown
+   song table before the build, so any two share a battle; the families
+   still to move take theirs there too, since each new one is pooled.
+4. **BN6 alone** gets the rework with the templates it fills: BN6's own 29
+   families in new groups is the same variety, and one in ten release
+   runs has no BN5.
+5. **The reward where a signature's row holds no chip that plays** (a
+   moved family whose chips are not in the engine yet pays the stand-in's
+   zenny): the group's best row pays instead, so the rule never costs a
+   player a chip.
+
+The build's order, the owner's too: call 3 first, then the build phase's
+step 1, each a change of its own; steps 2 and 3 wait for a report after
+step 1, since the reward rows are still filling with BN4's chips, and go
+through the game-design skill and `build.py economy` first.
