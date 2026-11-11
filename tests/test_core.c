@@ -5992,7 +5992,7 @@ static void test_library_pages(void) {
 	CHECK(library_rows_check(back, 2) == 2 && library_rows_check(twice, 2) == 2 && library_rows_check(cls, 1) == 1 && library_rows_check(none, 1) == 1 && !library_rows_check(rows, 5),
 		"library: a number out of order, a chip twice, a fourth class and no chip refused");
 	/* (what plays: the registry's own over BN6's code or moved, no DarkChip, no Program Advance; BN6's by its pool, none without its ROM) */
-	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(600), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");
+	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
 	library_count(LIB_BN5, LIB_STD, &held, &of);
