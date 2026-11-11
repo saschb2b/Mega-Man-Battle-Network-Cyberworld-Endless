@@ -23,7 +23,12 @@ tar xzf mgba.tar.gz
 OPTS="-DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON -DBUILD_SHARED=OFF -DBUILD_QT=OFF -DBUILD_SDL=OFF \
  -DBUILD_GL=OFF -DBUILD_GLES2=OFF -DBUILD_GLES3=OFF -DUSE_EPOXY=OFF -DDISABLE_DEPS=ON -DUSE_DEBUGGERS=OFF \
  -DUSE_GDB_STUB=OFF -DUSE_EDITLINE=OFF -DENABLE_SCRIPTING=OFF -DUSE_LUA=OFF -DM_CORE_GB=OFF -DM_CORE_GBA=ON \
- -DUSE_DISCORD_RPC=OFF -DBUILD_LTO=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+ -DUSE_DISCORD_RPC=OFF -DBUILD_LTO=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+ -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+# (mGBA 0.10 asks for CMake 3.1 at least, which CMake 4 no longer takes: it
+# stops at "Compatibility with CMake < 3.5 has been removed" (Ubuntu 26.04's
+# CMake, docker/Dockerfile.ps5). The policy floor lets it configure; an older
+# CMake does not know the variable and leaves it unused)
 build() { # $1 name, $2 extra cmake args
 	cmake -S mgba-$VER -B "build-$1" $OPTS -DCMAKE_INSTALL_PREFIX="/opt/mgba/$1" $2
 	cmake --build "build-$1" -j"$(nproc)"

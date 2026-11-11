@@ -1,0 +1,22 @@
+{
+  "branch": "bn4-pas",
+  "what": "BN4's Program Advances in BN6's grown list: the 14 whose parts play",
+  "takes": {},
+  "units": [
+    "BN4 PA HeatSprd",
+    "BN4 PA BubSprd",
+    "BN4 PA FlmCros1",
+    "BN4 PA FlmCros2",
+    "BN4 PA FlmCros3",
+    "BN4 PA PitRng1",
+    "BN4 PA PitRng2",
+    "BN4 PA PitRng3",
+    "BN4 PA BstFang1",
+    "BN4 PA BstFang2",
+    "BN4 PA BstFang3",
+    "BN4 PA MagShok1",
+    "BN4 PA MagShok2",
+    "BN4 PA MagShok3"
+  ],
+  "run": false
+}

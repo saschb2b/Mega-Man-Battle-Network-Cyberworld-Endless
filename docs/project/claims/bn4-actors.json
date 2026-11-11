@@ -1,0 +1,29 @@
+{
+  "branch": "bn4-actors",
+  "what": "BN4's chips on actors and obstacles (TimeBomb's actor runner), and a BN4 spec's cracked and grass panels for AquaUp and GreenWd (units-c)",
+  "takes": {
+    "song_slots": [
+      [
+        "0x243",
+        "0x27F"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip AquaUp1",
+    "BN4 chip AquaUp2",
+    "BN4 chip AquaUp3",
+    "BN4 chip GreenWd1",
+    "BN4 chip GreenWd2",
+    "BN4 chip GreenWd3",
+    "BN4 chip SignlRed",
+    "BN4 chip BigHamr1",
+    "BN4 chip BigHamr2",
+    "BN4 chip BigHamr3",
+    "BN4 chip GodHammr",
+    "BN4 chip MetlGer1",
+    "BN4 chip MetlGer2",
+    "BN4 chip MetlGer3"
+  ],
+  "run": false
+}
