@@ -3,7 +3,7 @@ type: Tool
 title: "tools/play.py: a game kept for a playtest"
 description: "`tools/play.py`: one game kept per NAME under `.build/play` for a playtest, replayed from its seed and history, a pinned build, and the dev steps (place, flags, stuck, foes, xrecord, status, battle, sig, second, dump)."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:07:12Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-12T21:51:29Z }
 ---
 
 # tools/play.py: a game kept for a playtest

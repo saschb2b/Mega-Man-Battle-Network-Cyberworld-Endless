@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:06:16Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T22:30:00Z }
 ---
 
 # The PET's screens: Battle Network's rules

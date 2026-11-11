@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:57Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:20:00Z }
 ---
 
 # The PET

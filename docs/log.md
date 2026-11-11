@@ -1,7 +1,6 @@
 # The knowledge base's log
 
 ## 2026-11-12
-* **Create**: online/square/pet.md (BN6's PET in the Net Square: why it was shut, what each screen writes, the carry home, Save, R:NETPASS, a NetBattle and a trade after an edit); **Update**: game/pet.md and online/netpass.md (the pass in the Square: KeyItem and R on the PET's menu, START the PET's), online/square/overview.md (what comes home), online/trade-central.md (the swap made in the Square at once, a promised chip stays a spare), engine/ui.md (the PET menu's one hint of ours), rom/navicust.md (the command line's list, new row), devtools/play.md and devtools/net-square.md (`dump`'s RAM, `nocarry`), code/online.md, online/shown.md, GUIDE.md.
 * **Update**: code/platforms.md (CI on a pull request, new section: what a run cost and where it failed, the eight platform jobs run only where a change reaches them, every push to dev checked to its end), code/tools.md (tools/ci_changes.py).
 * **Update**: project/merging.md (The log, new section: a change logs itself as a file in docs/log.d/, which dev's workflow folds into log.md and stamps the concepts it names with; the union attribute gone; its description and index line), code/tools.md (tools/log_fold.py).
 * **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).

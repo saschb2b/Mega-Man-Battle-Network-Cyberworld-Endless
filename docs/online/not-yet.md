@@ -3,7 +3,7 @@ type: Status
 title: "Not yet"
 description: "What online play has not yet done or tried: emotes, the strip and palette, a dropped link, the week's net, the NetPass, Trade Central's screens, the Arena on the New 3DS, rollback, the stands, hardware."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:06:16Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-22T12:28:49Z }
 ---
 
 # Not yet
