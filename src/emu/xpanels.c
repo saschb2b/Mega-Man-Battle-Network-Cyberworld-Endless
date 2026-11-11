@@ -1,4 +1,4 @@
-/* xpanels.h: BN5's lava and sea as BN6's engine runs them. Each of BN5's
+/* xpanels.h: BN5's lava and sea, and BN4's Hole, as BN6's engine runs them. Each of BN5's
  * routines for them (bn5.h: BN5_LAVA_STEP, BN5_PANEL_STEP, BN5_PANEL_HIT,
  * BN5_PANEL_UPDATE, BN5_SET_PANEL_TYPE) has a twin in BN6 that knows
  * neither: the twins are hooked where BN5's test or call for them, BN5's
@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -43,8 +44,9 @@
 #define BONUS_IMAGE   (BN6_IWRAM_IMAGE + (BN6_PANEL_BONUS_TESTS - BN6_IWRAM_CODE))
 #define BONUS_CRC     0xA63E1015u
 
-static bool ready;
+static bool ready, hole_ready;
 bool xpanels_ready(void) { return ready; }
+bool xpanels_hole_ready(void) { return hole_ready; }
 
 static uint32_t rom32(uint32_t a) { return get32(R.data + (a - BUS)); }
 static uint16_t rom16(uint32_t a) { return get16(R.data + (a - BUS)); }
@@ -299,15 +301,39 @@ static bool free_at(uint32_t at, uint32_t end) {
 	return true;
 }
 
-/* The flags table grown (BN6's 13 words, BN5's lava's and sea's, BN6's
- * type 0's for 15), and the IWRAM literal checked to be BN6's */
-static bool flags_make(uint8_t out[16 * 4]) {
+/* The flags table grown: BN6's 13 words, then BN5's lava's and sea's and
+ * BN4's Hole's where their games have come in, BN6's type 0's where not */
+static uint8_t flags[16 * 4];
+static bool flags_based, flags_pointed;
+
+static void flags_base(void) {
+	if (flags_based) return;
+	for (int t = 0; t < 16; ++t) put32(flags + 4 * t, rom32(BN6_PANEL_FLAGS_OF + 4u * (uint32_t)(t < BN6_PANEL_TYPES ? t : 0)));
+	flags_based = true;
+}
+
+/* the IWRAM literal BN6's, or already the grown table */
+static bool flags_ref_ok(void) {
+	if (rom32(FLAGS_IMAGE) != BN6_PANEL_FLAGS_IW) return false;
+	return flags_pointed ? emu_read32(FLAGS_IMAGE) == XP_FLAGS : emu_read32(FLAGS_IMAGE) == BN6_PANEL_FLAGS_IW;
+}
+
+/* BN5's lava's and sea's words */
+static void flags_bn5(void) {
 	const uint8_t *bn5 = XR[XROM_BN5_COLONEL_US].data;
-	for (int t = 0; t < BN6_PANEL_TYPES; ++t) put32(out + 4 * t, rom32(BN6_PANEL_FLAGS_OF + 4u * (uint32_t)t));
-	put32(out + 4 * XPANEL_LAVA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_LAVA));
-	put32(out + 4 * XPANEL_SEA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_SEA));
-	put32(out + 4 * 15, rom32(BN6_PANEL_FLAGS_OF));
-	return rom32(FLAGS_IMAGE) == BN6_PANEL_FLAGS_IW && emu_read32(FLAGS_IMAGE) == BN6_PANEL_FLAGS_IW;
+	flags_base();
+	put32(flags + 4 * XPANEL_LAVA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_LAVA));
+	put32(flags + 4 * XPANEL_SEA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_SEA));
+}
+
+/* BN4's Hole's, plain's word in both games (checked) */
+static bool flags_bn4(void) {
+	const uint8_t *bn4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint32_t hole = get32(bn4 + (BN4_PANEL_FLAGS_OF - BUS) + 4 * BN4_PANEL_HOLE);
+	if (hole != get32(bn4 + (BN4_PANEL_FLAGS_OF - BUS) + 4 * BN6_PANEL_PLAIN) || hole != rom32(BN6_PANEL_FLAGS_OF + 4u * BN6_PANEL_PLAIN)) return false;
+	flags_base();
+	put32(flags + 4 * XPANEL_HOLE, hole);
+	return true;
 }
 
 /* IWRAM's routines patched: in their image, and kept so in RAM */
@@ -325,6 +351,23 @@ static bool hooks_set(void) {
 	return false;
 }
 
+/* the grown tables' room free, or theirs already */
+static bool tables_free(void) { return flags_pointed || (free_at(XP_FLAGS, XP_FLAGS + sizeof flags) && free_at(XP_TILES, XP_TILES + XP_TILES_SIZE)); }
+
+/* The grown tables written, with every game's kinds staged so far: the
+ * flags (the IWRAM literal pointed at them once) and the look */
+static void tables_write(void) {
+	emu_write(XP_FLAGS, flags, sizeof flags);
+	if (!flags_pointed) {
+		uint8_t ref_was[4], ref_now[4];
+		put32(ref_was, BN6_PANEL_FLAGS_IW);
+		put32(ref_now, XP_FLAGS);
+		iwram_patch(BN6_PANEL_FLAGS_REF, ref_was, ref_now, sizeof ref_now);
+		flags_pointed = true;
+	}
+	xpanels_look_write();
+}
+
 /* an IWRAM routine's bytes in its image, BN6's own (their CRC32) in the ROM and the core's copy: into `was` */
 static bool image_own(uint32_t image, uint8_t *was, uint32_t len, uint32_t crc) {
 	memcpy(was, R.data + (image - BUS), len);
@@ -333,34 +376,51 @@ static bool image_own(uint32_t image, uint8_t *was, uint32_t len, uint32_t crc) 
 	return own;
 }
 
-void xpanels_install(int xrom) {
-	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/online/arena/) */
-	static bool done;
-	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
-	done = true;
-	uint8_t flags[16 * 4], stub[STUB_SIZE], cool[BN6_HIT_COOL_SPAN], cool_was[BN6_HIT_COOL_SPAN], ref_was[4];
+/* BN5's lava and sea: their flags, their rules (the hooks, the cooling's
+ * stub, the element hit's and the bonus's tests) and their look */
+static void install_bn5(void) {
+	uint8_t stub[STUB_SIZE], cool[BN6_HIT_COOL_SPAN], cool_was[BN6_HIT_COOL_SPAN];
 	uint8_t bonus[BN6_PANEL_BONUS_SPAN], bonus_was[BN6_PANEL_BONUS_SPAN];
-	put32(ref_was, BN6_PANEL_FLAGS_IW);
 	bool cool_own = image_own(COOL_IMAGE, cool_was, sizeof cool_was, COOL_CRC);
 	bool bonus_own = image_own(BONUS_IMAGE, bonus_was, sizeof bonus_was, BONUS_CRC);
 	bonus_make(bonus);
-	const char *why = !sites_ok() ? "a hook's site" : !flags_make(flags) ? "the flags' literal" : !cool_own ? "the element hit's tests"
-		: !bonus_own ? "the panel bonus's tests" : !free_at(XP_AT, XP_END) ? "its free space" : !stub_make(stub) || !cool_make(cool) ? "its code"
-		: !xpanels_look_stage() ? "their look" : NULL;
+	const char *why = !sites_ok() ? "a hook's site" : !flags_ref_ok() ? "the flags' literal" : !cool_own ? "the element hit's tests"
+		: !bonus_own ? "the panel bonus's tests" : !tables_free() || !free_at(XP_STUB, XP_STUB + STUB_SIZE) ? "its free space" : !stub_make(stub) || !cool_make(cool) ? "its code"
+		: !xpanels_look_stage(XROM_BN5_COLONEL_US) ? "their look" : NULL;
 	if (why) {
 		fprintf(stderr, "xpanels: BN5's lava and sea not in BN6's engine: %s is not as expected\n", why);
 		return;
 	}
 	claims_begin("lava and sea (xpanels.c)");
-	emu_write(XP_FLAGS, flags, sizeof flags);
+	flags_bn5();
+	tables_write();
 	emu_write(XP_STUB, stub, sizeof stub);
-	uint8_t ref_now[4];
-	put32(ref_now, XP_FLAGS);
-	iwram_patch(BN6_PANEL_FLAGS_REF, ref_was, ref_now, sizeof ref_now);
 	iwram_patch(BN6_PANEL_HIT_COOL, cool_was, cool, sizeof cool);
 	iwram_patch(BN6_PANEL_BONUS_TESTS, bonus_was, bonus, sizeof bonus);
-	xpanels_look_write();
 	ready = hooks_set();
 	claims_end();
 	printf("xpanels: BN5's lava and sea %s BN6's engine, as its panel types %d and %d\n", ready ? "in" : "NOT in", XPANEL_LAVA, XPANEL_SEA);
+}
+
+/* BN4's Hole: its flags and its look, nothing it does (xpanels.h) */
+static void install_bn4(void) {
+	const char *why = !flags_ref_ok() ? "the flags' literal" : !flags_bn4() ? "its flags" : !tables_free() ? "its free space" : !xpanels_look_stage(XROM_BN4_RED_SUN_US) ? "its look" : NULL;
+	if (why) {
+		fprintf(stderr, "xpanels: BN4's Hole not in BN6's engine: %s is not as expected\n", why);
+		return;
+	}
+	claims_begin("the Hole (xpanels.c)");
+	tables_write();
+	hole_ready = xpanels_look_hook();
+	claims_end();
+	printf("xpanels: BN4's Hole %s BN6's engine, as its panel type %d\n", hole_ready ? "in" : "NOT in", XPANEL_HOLE);
+}
+
+void xpanels_install(int xrom) {
+	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/online/arena/) */
+	static bool done[XROM_COUNT];
+	if (xrom < 0 || xrom >= XROM_COUNT || done[xrom] || !XR[xrom].data || !R.data || !emu_ready()) return;
+	done[xrom] = true;
+	if (xrom == XROM_BN5_COLONEL_US) install_bn5();
+	else if (xrom == XROM_BN4_RED_SUN_US) install_bn4();
 }

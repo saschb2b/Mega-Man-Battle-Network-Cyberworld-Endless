@@ -256,7 +256,24 @@ static const DevStatus dev_statuses[] = {
 	{ "confuse", BN6_STRUCK_CONFUSE, BN6_COLL_CONFUSE }, { "blind", BN6_STRUCK_BLIND, BN6_COLL_BLIND },
 };
 
+/* "panel C R TYPE": the field's panel at column C, row R made BN6's TYPE
+ * (its type and the type it is drawn as; the engine's types past 12
+ * among them, xpanels.h) */
+static int dev_panel(const char *spec) {
+	int c = 0, r = 0, t = -1;
+	if (sscanf(spec, "panel %d %d %i", &c, &r, &t) != 3 || c < 1 || c > 6 || r < 1 || r > 3 || t < 1 || t > 15 || !D.in_battle) {
+		printf("status: %s is no panel (panel C R TYPE: column 1-6, row 1-3, a type 1-15), or no battle is on\n", spec);
+		return 0;
+	}
+	uint32_t p = BN6_FIELD_PANELS + (uint32_t)(r * 8 + c) * BN6_PANEL_SIZE;
+	emu_write8(p + BN6_PANEL_TYPE, (uint8_t)t);
+	emu_write8(p + BN6_PANEL_ANIM, (uint8_t)t);
+	printf("status: panel %d %d made type %d at battle frame %u\n", c, r, t, (unsigned)emu_read32(BN6_BATTLE_TIMER));
+	return 1;
+}
+
 int director_dev_status(const char *spec) {
+	if (!strncmp(spec, "panel ", 6)) return dev_panel(spec);
 	char kind[16] = "";
 	int frames = 60;
 	unsigned id = 0;

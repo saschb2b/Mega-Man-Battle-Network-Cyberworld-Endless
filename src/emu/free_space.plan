@@ -88,7 +88,7 @@ FREE_VIRUS_ROOM        +0x330000  +0x348000  -    xvirus_grow.c             mult
 FREE_FAMILIES          +0x348000  +0x400000  -    xvirus.c,xvirus_families.c  multirom/families.md  the families: their homes, code and art
 FREE_CHIPS             +0x400000  +0x480000  -    chips.c,xchips_install.c  multirom/chip-registry.md   the chip registry: records, names, routines, art
 FREE_SOULS             +0x480000  +0x4C0000  -    soulproxy.c,soulunite.c,soullife.c,soulcode.c,soullook.c,soulpower.c,soulpassive.c,soulchips.c,soulcolonel.c,xstrike.c,soulchaos.c  multirom/souls.md  BN5's Souls in BN6's engine (soul_room.h lays it out)
-FREE_PANELS            +0x4C0000  +0x4D0000  end  xpanels.c,xpanels_look.c  multirom/one-net.md         BN5's lava and sea as BN6's panels
+FREE_PANELS            +0x4C0000  +0x4D0000  end  xpanels.c,xpanels_look.c  multirom/one-net.md         BN5's lava and sea and BN4's Hole as BN6's panels
 FREE_LATE_FAMILIES     +0x4D0000  +0x500000  end  xvirus.c                  multirom/families.md        the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds
 FREE_NAVIS             +0x500000  +0x600000  -    xnavi_sprites.c,xnavi_room.c,xnavi_install.c,xnavi_objects.c,xsea.c,xnavi_dark.c  multirom/navis.md  BN5's Navis in BN6's engine
 FREE_NAVI_SPRITES      +0x500000  +0x580000  end,in=FREE_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a fixed place each, and the arm points grown (the Navi chips' and the Souls' one copy of each Navi's sprite there too)

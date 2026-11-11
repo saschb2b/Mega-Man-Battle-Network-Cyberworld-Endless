@@ -225,6 +225,10 @@
       "what": "Meddy moved, Team ProtoMan's fourth (docs/multirom/navis.md, Meddy; docs/rom/navis.md, Team ProtoMan's Meddy: src/emu/bn5_team_protoman.h's BN5_MEDDY_CODE, BN5_MEDDY_EFFECT_KINDS): meddy_v1, meddy_v1_keys and meddy_sp PASS, five mutations caught; her seven object types moved (TYPES); an effect's id put beside a parameter (movs r4,#id; orrs r4,rX) read by the generator; her sound 0xE0 at BN6's slot 0x46."
     },
     {
+      "date": "2026-11-11",
+      "what": "BN4's Hole panel in BN6's engine at type 15 (XPANEL_HOLE; docs/rom/bn4.md, The Hole panel in BN6's engine: src/emu/bn4_panels.h's BN4_PANEL_TILES, BN4_PANEL_TILESET, BN4_PANEL_PALETTES, BN4_PANEL_ANIMATE, BN4_PANEL_ANIM_1 and _5; src/emu/bn6_panels.h's BN6_PANEL_COUNT, BN4_PANEL_COUNT's twin): BN4's tiles and pulsing colours drawn, plain's flags, installed with BN5's lava and sea or without; seen by the new `status panel` dev step."
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },

@@ -11,6 +11,7 @@
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
+* **Update**: multirom/bn4-chips.md (BN4's Hole panel in BN6's engine built, type 15, the owner's call 8), rom/bn4.md (the Hole panel's look, colours and count, new row), code/emu.md (`xpanels.c` brings BN4's Hole too), devtools/battle-on-demand.md (the `status panel` step).
 * **Update**: code/platforms.md (Dependabot's PRs target `dev`).
 * **Update**: multirom/navis.md (Meddy moved, Team ProtoMan's fourth; an effect's id beside a parameter), rom/navis.md (Team ProtoMan's Meddy, new row), game/team-protoman.md (unit 5 built; its description and index line), multirom/index.md (navis.md's line).
 * **Update**: multirom/navis.md (SearchMan moved, Team ProtoMan's third; his battle sprite's place), devtools/differential.md (a fourth-kind spawn's leftover), rom/navis.md (Team ProtoMan's SearchMan, new row), game/team-protoman.md (unit 4 built; its description and index line), multirom/index.md (navis.md's line).

@@ -392,6 +392,7 @@
 0800847C BN6_TURN_COUNT_1
 08009338 sees_it_0
 080093A2 anti_chips_trap_sprung
+0800944C panels_tile_table_literal
 0800961C BN6_VB_LOOP
 0800A03C BN6_PAUSE_TEST
 0800A098 BN6_BATTLE_PAUSED
@@ -447,6 +448,7 @@
 0800CC32 bn5_chips_code.blindness_counted_down
 0800CC52 BN6_PANEL_BLINK_SET
 0800CCBE collision_panels_highlighted
+0800CDB4 BN6_PANEL_COUNT
 0800D730 BN6_FIELDS
 0800DDCC dark_2_by_meter
 0800DDDC bn5_mood_bn6_2

@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T09:45:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -348,6 +348,22 @@ one, one leaves it out, one attack turns a column of them plain. So the
 panel chips and the DS Navi chips are one design: a dark MegaMan gives
 turns and max HP to dig Holes, and his DS chips hit up to twice as hard
 for them.
+
+**The Hole panel in BN6's engine, built** (11 November 2026; the
+owner's call 8): BN6's type 15, `XPANEL_HOLE`, beside BN5's lava and sea
+([one Net](one-net.md); `src/emu/xpanels.h`), installed wherever BN4's
+ROM is read, with BN5's or without. Its flags are plain's (BN4's word for
+it, checked to be BN6's plain one), its tiles BN4's 54, its colours BN4's
+plain panel's rims and its hole's three dark colours, which pulse as
+BN4's palettes 1 and 5 pulse them, written over grass's in a battle that
+shows a Hole and no grass ([BN4's ROM](../rom/bn4.md), The Hole panel
+in BN6's engine). It does nothing to what stands on it, as in BN4; BN4's
+one rule for it, a light Navi cleansing it, has no karma to read in BN6
+and is not taken. BN4's count of a type's panels is BN6's own routine
+(`BN6_PANEL_COUNT`), so a DS Navi chip's moved power counts Holes by
+calling it with 15. Seen by the `status panel` dev step: four panels
+made Holes draw as BN4's on both sides. The three chips that make them
+come next, through the generator.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into

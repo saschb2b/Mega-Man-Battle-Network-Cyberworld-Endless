@@ -988,6 +988,8 @@ void xvirus_install(int which) {
 		/* (BN4 Red Sun's, where its ROM is read, after BN5's: the visitors, docs/multirom/bn4.md) */
 		if (bn4 && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
+		/* (BN4's Hole, after BN5's lava and sea where they came in: xpanels.h) */
+		if (bn4) xfields_install(XROM_BN4_RED_SUN_US);
 	}
 	claims_end();
 	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */

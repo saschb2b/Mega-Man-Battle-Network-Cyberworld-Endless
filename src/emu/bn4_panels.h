@@ -48,4 +48,22 @@
 #define BN4_T4_BLAKWEAP   0x7E        /* BlakWeap's object (0x080EABFC, support subfamily 0x4B's routine 0x080EAC76): one third-kind 0x5A
                                        * spawned by 0x080CCA9C; its record (289) has no Library number and BN4's blank picture */
 
+/* How a panel looks (BN6_PANEL_TILES' and BN6_PANEL_TILESET's formats; xpanels_look.c draws the Hole from them) */
+#define BN4_PANEL_TILES   0x08706640u /* the tile table: 32 bytes per type x 6 + side x 3 + row - 1 (5x3 BG map entries), 14 types (0-0xD);
+                                       * the Hole's (0xB) tiles 0x3CA-0x3FF in palette 1 (its side 0) and 5 (side 1) */
+#define BN4_PANEL_TILES_REF 0x0800944Cu /* ... its literal (0x0800942E's ldr r6, BN6_PANEL_TILES_REF's twin) */
+#define BN4_PANEL_TILESET 0x08704660u /* the panels' tiles (LZ77), BN4_PANEL_TILES_N of them to VRAM from tile 0xA3, as BN6's */
+#define BN4_PANEL_TILESET_REF 0x08006A94u /* ... its literal in the loader's list (0x08006A60, BN6's 0x080075F0) */
+#define BN4_PANEL_TILES_N 861
+#define BN4_PANEL_PALETTES 0x087073C0u /* the panels' palettes 1-8 (to BN4_BG_PALETTE_RAM + 0x20, the loader's list) */
+#define BN4_PANEL_ANIM_1  0x08009648u /* palette 1's animation: BN4_PANEL_ANIM_FRAMES palettes' addresses, each shown BN4_PANEL_ANIM_DELAY
+                                       * frames (BN4_PANEL_ANIMATE's first step: a counter of 0xE, a frame mod 10); its colours 13 and
+                                       * 14, the Hole's, pulse (0x4051 to 0x28A9 and back), the rest stay; after the step's two literals for it,
+                                       * its destination (BN4_BG_PALETTE_RAM + 0x20) and the list's address */
+#define BN4_PANEL_ANIM_5  0x08009678u /* ... palette 5's, the same colours 11-15 */
+#define BN4_PANEL_ANIM_FRAMES 10
+#define BN4_PANEL_ANIMATE 0x08009556u /* the panel palettes' step (r0 their counters, a delay and a frame a palette: 1, 5, 3 (mod 6), 7 (6),
+                                       * 4, 8), each frame's 32 bytes copied by 0x080009A8 */
+#define BN4_PANEL_ANIM_DELAY 14
+
 #endif
