@@ -2291,7 +2291,7 @@
    "poke": [
     "08DF0126:11:1"
    ],
-   "what": "the third kind's 0x0B's row 2 (BN5 0x080C5E1A, his kinds 2-5, BN5_CLOUD_KINDS_0B; its copy at XN_MORE + 0x8126), the list 4 sprite 0x11 the recipe copies at list 5's 0xA8 (the Navis' list 4 full, NAVI_LIST_SPILL), its number left at BN5's 0x11: list 5's 0x11 another sprite"
+   "what": "the third kind's 0x0B's row 2 (BN5 0x080C5E1A, his kinds 2-5, BN5_CLOUD_KINDS_0B; its copy at XN_MORE + 0x8126), the list 4 sprite 0x11 the recipe copies at a number of the Navis', its number left at BN5's 0x11: another sprite in BN6"
   },
   {
    "name": "CloudMan's search for his clouds finding none",

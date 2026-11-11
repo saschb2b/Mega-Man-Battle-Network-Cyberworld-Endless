@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (15, 'CloudMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -130,6 +130,15 @@ def home_at(slot):
 XN_OBJECTS_HOME = FREE_NAVI_HOMES + 15 * XN_HOME_SIZE
 CONTROL_SLOT = 7
 CODE_STEP = 0x100
+# Blocks placed at their BN5 address's low byte (their place less BN5's a multiple of 0x100, past CODE_STEP's): code that
+# stores a byte of one of its own routines' addresses, a register its state machine left (bx r1) and it never set, as data
+# a battle reads (BN5's start of the block: why)
+LOW_BYTE_KEPT = {
+    0x080CB8E0: "CloudMan's clouds (the third kind's 0x37): two of their sub-states (0x080CBD9A, 0x080CBDE4) write r1 as the "
+                "cloud's panel row (+0x13), r1 the sub-state's own address its state machine branched through (0x080CBC54: "
+                "ldr r1,[r1,r0]; bx r1), so its low byte: an off-field row the cloud is parked on, the same only where the "
+                "copy's low bytes are BN5's (cloudman_v1_keys at t51: BN5 0x7D, a copy at another low byte 0x9D)",
+}
 # the numbers the Navis' attacks' art takes in the grown lists and effects, issue #82's plan for its tracks (each its own
 # range, so their branches merge: the families' effects 0x6C-0x9F, the Navis' 0xA0-0xBF, the Souls' 0xC0-0xCF, the
 # chips' 0xD0-0xFF; lists 4 and 5 the families' upward from BN6's end, the Navis' 0xA0-0xBF and 0xA0-0xAF, the chips'
@@ -461,7 +470,7 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     room = code_at(slot)[0]
     r.blocks, at = [], room
     for lo, hi in blocks:
-        at = X.rounded(at, CODE_STEP) + (lo & 3)
+        at = X.rounded(at, CODE_STEP) + (lo & (0xFF if lo in LOW_BYTE_KEPT else 3))
         r.blocks.append((lo, hi, at, zlib.crc32(src.bytes(lo, hi - lo)) & 0xFFFFFFFF))
         at += hi - lo
     if at > room + slot_code(slot):
@@ -763,6 +772,11 @@ def types_decided(r):
         if d is None or d[0] != want or (want == 'twin' and d[1] != t6):
             r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: {want}{"" if t6 is None else f" {t6:#x}"} here ({why}), '
                                f'{d[0] + (f" {d[1]:#x}" if d[1] is not None else "") if d else "undecided"} in tools/bn5_twins.py')
+        elif want == 'moved' and d[2] != 'navis':
+            # (the Navis install first of the tracks that copy code: a type their code moves is their copy, the track named
+            # the Navis', which every later track spawns; another track's copy as well would leave the dispatch running one)
+            r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: moved here, its copy the {d[2]}\' in tools/bn5_twins.py '
+                               f'(the Navis install first: their copy the type\'s)')
 
 
 def needs_of(r):
@@ -909,7 +923,9 @@ def parent_curactions(r):
                     if v is not None and 6 <= v <= 0xF:
                         r.more_imms.append(dict(at=at, form='THUMB_CMP' if at == b else 'THUMB_MOVS', rd=rd, rn=0, was=v, now=v + 2,
                                                 why=f'its parent\'s CurAction {v} compared: BN6\'s {v + 2}'))
-                    break
+                    # (and every compare of the same read after it, while the register holds it: CloudMan's 0x5F compares
+                    # it with 8 and then 9, 0x080D1EEA-0x080D1EF2)
+                    continue
                 if j.form in ('b', 'bx', 'bl', 'hi_mov') or T.is_return(j) or T.writes(j, i.f[0]):
                     break
 

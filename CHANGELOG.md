@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **CloudMan joins the dark boards.** With BN5's ROM beside BN6's, BN5's
+  CloudMan now fights in BN6's own engine, proven against BN5's battle
+  frame by frame, and is act 4's own Darkloid on a dark layer, as BN5's
+  third mission has him, and a fourth choice in the other acts. His
+  board pays his own Navi chips at par as the other Darkloids' do: his SP
+  two under par, his V1 at par.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
