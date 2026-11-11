@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:35:17Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1261,6 +1261,9 @@ format, its game 4: the trace's header names it):
   thunder, which Billy's battle runs where BN6's runs its own), so a draw one of its objects
   makes from the unit's own code is given BN4's of that place; a draw
   made while MegaMan runs stays the engine's (the shuffle's twin above);
+  a pointer into a chip unit's sprite is named by its row of the art's
+  room, read from the frame's objects (`room_rows`: the place a row is
+  at changes from one load to the next);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's
