@@ -129,7 +129,8 @@ def steps(commands):
             elif op == 'xrecord':
                 out.append(('xrecord', ' '.join([args[0]] + args[1:2])))
             elif op == 'chip':
-                out.append(('chip', ' '.join([args[0], args[1].upper()] + args[2:3])))
+                # ("chip ID" alone: what the game holds of it, printed)
+                out.append(('chip', ' '.join([args[0]] + [a.upper() for a in args[1:2]] + args[2:3])))
             elif op == 'cross':
                 out.append(('cross', str(int(args[0], 0))))
             elif op == 'sig':
