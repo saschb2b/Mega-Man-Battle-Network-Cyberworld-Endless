@@ -101,6 +101,7 @@
 #include "xpanels.h"
 #include "visitor_families.h"
 #include "visitors.h"
+#include "group_arc.h"
 #include "groups.h"
 #include "xpanels_look.h"
 #include "xsea.h"
@@ -7737,6 +7738,58 @@ static void test_groups(void) {
 		"groups: ... which the cap holds a version down for (%d)", f.g[0].pressure);
 }
 
+/* An act's arc (group_arc.h): the signature by the share of the area's
+ * own, its three beats and the Server's challenge, on the made-up pool */
+static void test_group_arc(void) {
+	const GroupVer none = { -1, 0, 0, 0 };
+	GroupFam pool[5] = {
+		{ 1, 0, GROUP_FRONT, 0, 0, 60, { { 10, 40, 10, ELEM_FIRE }, { 11, 80, 20, ELEM_FIRE }, none, none, none, none } },
+		{ 2, 0, GROUP_BACK, 0, 0, 40, { { 20, 50, 10, ELEM_AQUA }, { 21, 90, 30, ELEM_AQUA }, none, none, none, none } },
+		{ 33, 1, GROUP_FREE, 0, GROUP_BREAKS, 100, { { 0x230, 60, 30, 0 }, { 0x231, 70, 40, 0 }, none, none, none, none } },
+		{ 64, 2, GROUP_FREE, 0, 0, 20, { { 0x310, 50, 10, 0 }, none, none, none, none, none } },
+		{ 3, 0, GROUP_FREE, 2, 0, 10, { { 30, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	ArcRules r = {
+		{ { 90, 125, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 146 }, { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220 },
+		{ { 130, 220, 40 }, { 1, 2, 2 }, 0, GROUP_NETS_ALL, 330 }, FAMILY_MASK_NONE, ARC_SHARE_OF, true,
+	};
+	family_mask_add(&r.home, 1);
+	GroupArc a, b;
+	CHECK(arc_home_share(0) == 9 && arc_home_share(1) == 6 && arc_home_share(2) == 4 && arc_home_share(3) == 3 && arc_home_share(4) < 0 && arc_home_share(6) < 0,
+		"arc: the share of the area's own by act");
+	/* (every run of the area's own: the one family of it; alone, two of it under the eased top; its pair the back-row one;
+	 * its constellation the pincer with both) */
+	CHECK(group_arc_make(pool, 5, &r, 1, &a) && a.signature == 0 && a.home && a.beat[ARC_ALONE].template == GROUP_ALONE && a.beat[ARC_ALONE].n == 2 &&
+		a.beat[ARC_ALONE].fam[0] == 0 && a.beat[ARC_ALONE].hp == 80 && a.beat[ARC_ALONE].pressure == 120, "arc: the signature alone, two of it eased (HP %d, pressure %d)",
+		a.beat[ARC_ALONE].hp, a.beat[ARC_ALONE].pressure);
+	CHECK(a.partner == 1 && a.beat[ARC_PAIR].n == 2 && a.beat[ARC_PAIR].hp == 90, "arc: its pair, and the partner (%d)", a.partner);
+	CHECK(a.beat[ARC_CONSTELLATION].n == 3 && a.beat[ARC_CONSTELLATION].template == GROUP_PINCER && a.beat[ARC_CONSTELLATION].fam[0] == 0 &&
+		a.beat[ARC_CONSTELLATION].fam[1] == 1, "arc: its constellation holds the partner too");
+	CHECK(a.has_challenge && a.challenge.pressure >= a.beat[ARC_PAIR].pressure && a.challenge.pressure <= 330 && a.challenge.hp >= 130,
+		"arc: the Server's is the hardest it stands in (HP %d, pressure %d)", a.challenge.hp, a.challenge.pressure);
+	CHECK(group_arc_make(pool, 5, &r, 1, &b) && !memcmp(&a, &b, sizeof a), "arc: one roll, one arc");
+	/* (no run of the area's own: another family; and where the area has none of the pool's, another all the same) */
+	r.home_share = 0;
+	CHECK(group_arc_make(pool, 5, &r, 1, &a) && a.signature != 0 && !a.home && a.beat[ARC_ALONE].fam[0] == a.signature, "arc: a signature from outside the area");
+	r.home_share = ARC_SHARE_OF;
+	r.home = FAMILY_MASK_NONE;
+	CHECK(group_arc_make(pool, 5, &r, 1, &a) && !a.home, "arc: an area with none of the pool's takes another");
+	/* (the deep: any family that can carry the act, each by some roll; the late one and none else left out) */
+	r.home_share = -1;
+	int seen = 0;
+	for (uint32_t roll = 0; roll < 200; ++roll)
+		if (group_arc_make(pool, 5, &r, roll, &a)) seen |= 1 << a.signature;
+	CHECK(seen == 15, "arc: every family that can carry the act is a signature by some roll (%d)", seen);
+	/* (a too-pressing family alone takes one of it: BN5's roamer, 100 a virus under a cap of 146) */
+	for (uint32_t roll = 0; roll < 200; ++roll)
+		if (group_arc_make(pool, 5, &r, roll, &a) && a.signature == 2) {
+			CHECK(a.beat[ARC_ALONE].n == 1 && a.beat[ARC_ALONE].pressure == 100, "arc: one alone where two press past the eased cap");
+			break;
+		}
+	/* (a family with no pair carries no act) */
+	CHECK(!group_arc_make(pool, 1, &r, 1, &a), "arc: no signature where nothing pairs");
+}
+
 int main(void) {
 	test_sha1();
 	test_battle_data();
@@ -7833,6 +7886,7 @@ int main(void) {
 	test_analytics_online();
 	test_visitors();
 	test_groups();
+	test_group_arc();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

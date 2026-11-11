@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T06:00:00Z
+* **Update**: game/progression/encounter-groups.md (Step 2, the arc and the rewards, built: the signature by seed, the three beats, the Server's challenge, the reward pick's one enemy, what the rows pay), devtools/dev-menu.md (`arc`), devtools/pacing-report.md (the acts' arcs), code/core.md (`group_arc.c`).

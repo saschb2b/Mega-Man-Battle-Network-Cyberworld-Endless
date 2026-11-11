@@ -47,6 +47,13 @@ each one's HP, hit and predicted pressure read again from the ROM's
 records: lowest, median and highest HP, the hardest hit, the most
 pressure, the share standing on a field of the area's own, each
 template's count, OVER past a limit or on a shared or special panel.
+Then the acts' arcs (behind `--dev arc`): 200 runs' arcs for every act's
+area by their seeds, how many acts have one, the share whose signature
+is one of the area's own, how many families were a signature, the most
+pressure of each beat and of the Server's challenge against its cap,
+OVER past a limit; and under each line what the beats' paying rows hold
+against the rows of the area's own battles (chip entries of ten, zenny
+a row, kinds of chip).
 
 Before them, the visitors: each net's families as their own records set them
 (their role, stage and placements; `*` those that may visit, `!` those

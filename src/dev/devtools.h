@@ -17,6 +17,8 @@ typedef struct {
 	bool gem;       /* every random battle with a Mystery Data on the field */
 	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool groups;    /* every plain random battle an encounter group's (group_pool.h; docs/game/progression/encounter-groups.md) */
+	bool arc;       /* the acts' arcs: a layer's first random battle its act's beat (the signature alone, a pair, its constellation), the
+	                 * Server's challenge its hardest constellation (group_arc.h; the encounter groups' step 2) */
 	int group;      /* group=N: ... of template N alone (groups.h's GROUP_* from 1: 1 wall and artillery ... 11 nets meet) */
 	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/game/liberation/) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
