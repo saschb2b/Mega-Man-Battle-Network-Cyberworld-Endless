@@ -30,6 +30,7 @@ typedef struct {
 	bool bound;          /* its game sets it on special panels alone (none plain or cracked): a sea's, lava's */
 	bool visits;         /* one of its net's own the other has none of by name, not bound: it may visit */
 	int16_t placed;      /* its placements in its game's records, which the role is of */
+	int16_t cols[3];     /* ... by the enemy's column: the first, the middle, the last */
 } VisitorKin;
 
 /* A net's families at most, and the families' numbers below it (BN6's

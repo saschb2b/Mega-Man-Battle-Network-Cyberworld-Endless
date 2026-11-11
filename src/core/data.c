@@ -378,6 +378,14 @@ int chip_hits_with(int rom_id) {
 	}
 }
 
+bool enemy_raw(int id, uint8_t s[6], uint8_t t[8]) {
+	const uint8_t *r = enemy_record(id), *x = enemy_traits(id);
+	if (!r || !x) return false;
+	memcpy(s, r, 6);
+	memcpy(t, x, 8);
+	return true;
+}
+
 bool enemy_stats(int id, int *hp, int *damage) {
 	const uint8_t *r = enemy_record(id);
 	if (!r) return false;

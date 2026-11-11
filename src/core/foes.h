@@ -27,6 +27,7 @@ typedef struct {
 	int biome;
 	bool boss;
 	bool held;       /* no running from it: a guardian's, as BN6's story bosses */
+	bool leave;      /* running from it never fails: a test battle's (lab_battle.h) */
 	int song;        /* its music where BN6's own record names one (a super boss's), 0 the battle's or boss's theme */
 	bool map_backdrop;   /* the background of the map it is fought on, as BN6's story records ask (0xFF), not its area's roll */
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
