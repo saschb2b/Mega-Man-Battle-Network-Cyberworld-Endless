@@ -301,8 +301,9 @@ static void enter(void) {
 	else if (S.saved_depth) show_area(saved.biome);
 	else show_next();
 	/* (a won run's summary to BN6's staff roll theme, the title's after:
-	 * the Nest's fall went from the exit pad to the title's own tune) */
-	audio_music(S.summary && title_won ? MUS_CREDITS : MUS_TITLE);
+	 * the Nest's fall went from the exit pad to the title's own tune; a
+	 * lost run's to BN6's Sorrow, its sad scenes' theme) */
+	audio_music(!S.summary ? MUS_TITLE : title_won ? MUS_CREDITS : MUS_SORROW);
 	if (title_setup) {
 		title_setup = false;
 		S.menu = 1;

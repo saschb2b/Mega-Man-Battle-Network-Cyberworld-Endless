@@ -39,6 +39,7 @@
 ## 2026-11-11
 * **Update**: multirom/navis.md (MagnetMan moved, Team ProtoMan's fifth), multirom/one-net.md (The magnet panel in BN6's engine), rom/bn5-world.md (BN5's magnet panel, in BN6's engine now), rom/navis.md (Team ProtoMan's MagnetMan, new row), game/team-protoman.md (unit 6 built; its description and index line), multirom/index.md (navis.md's line), devtools/differential.md (a sprite state's +5 on its first frame; a spawn a new role).
 * **Update**: rom/bn5-world.md (BN5's magnet panel, new row), multirom/navis.md (MagnetMan derived, not moved: his one decision the magnet panel), game/team-protoman.md (unit 6 mapped).
+* **Update**: multirom/bn6-gaps.md (Music: Showdown at ProtoMan's netbattle, Sorrow on a lost run's summary), game/rival.md (the netbattle's music).
 * **Update**: game/pet.md (the Jukebox: BN4's 34 songs, how each name is known, the coverage test), rom/bn4.md (Where BN4 plays its songs, new row), multirom/bn4.md (its music in the Jukebox), research/sources.md (The Jukebox's songs: BN4's music player, names and never-started songs), code/tools.md (`tools/bn4_songs.py`), code/emu.md (`bn4_music.h`).
 * **Update**: game/navicust.md (6: NumbrOpn in the pool from act 5, the Hand build's all-in; SneakRun's reason), multirom/bn6-gaps.md (NumbrOpn built).
 * **Update**: multirom/bn6-gaps.md (CrosOver built from a run's Django chips; a DS part in a Program Advance pays no price, for the owner), devtools/chip-recipe-generator.md (`BN6_PA_BORROWED`).
