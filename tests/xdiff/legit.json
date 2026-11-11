@@ -2,7 +2,7 @@
   "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and replays BN6's draws from BN5's by the twins of its rng, the engine's own draws one game alone makes named there too (rng), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/multirom/families.md; docs/devtools/differential.md). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF and GyroMan's 0x107-0x10A as 0x1F4-0x1F7; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF GyroMan's 0x107-0x10A as 0x1F4-0x1F7, SearchMan's 0x10D-0x110 as 0x1F8-0x1FB and Meddy's 0x11F-0x122 as 0x3E8-0x3EB; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
         "0x4F": "0x200",
         "0x50": "0x201",
@@ -61,7 +61,15 @@
         "0x107": "0x1F4",
         "0x108": "0x1F5",
         "0x109": "0x1F6",
-        "0x10A": "0x1F7"
+        "0x10A": "0x1F7",
+        "0x10D": "0x1F8",
+        "0x10E": "0x1F9",
+        "0x10F": "0x1FA",
+        "0x110": "0x1FB",
+        "0x11F": "0x3E8",
+        "0x120": "0x3E9",
+        "0x121": "0x3EA",
+        "0x122": "0x3EB"
       },
       "megaman": {
         "0x180": "0x1A0"
@@ -328,6 +336,30 @@
             "0x4B": "0xAD",
             "0x4C": "0xAE",
             "0x08": "0xAF"
+          }
+        },
+        {
+          "ids": [
+            "0x10D",
+            "0x10E",
+            "0x10F",
+            "0x110"
+          ],
+          "name": "SearchMan",
+          "bn5_to_bn6": {
+            "0x14": "0xA0"
+          }
+        },
+        {
+          "ids": [
+            "0x11F",
+            "0x120",
+            "0x121",
+            "0x122"
+          ],
+          "name": "Meddy",
+          "bn5_to_bn6": {
+            "0x44": "0xB0"
           }
         }
       ],
@@ -815,7 +847,7 @@
       ]
     },
     "navi_ai_index": {
-      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29 and GyroMan's 2 as 27.",
+      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27, SearchMan's 3 as 28 and Meddy's 6 as 31.",
       "bn5_to_bn6": {
         "12": "37",
         "11": "36",
@@ -828,7 +860,9 @@
         "13": "39",
         "16": "42",
         "4": "29",
-        "2": "27"
+        "2": "27",
+        "3": "28",
+        "6": "31"
       }
     },
     "overlay_kind": {
@@ -1140,6 +1174,13 @@
           "word": "0x3C",
           "compares": [2, 3],
           "evidence": "CosmoMan's (the third kind's 0x6C, moved): his routine at BN5 0x080FFE30-0x080FFE86 hands its spawner (0x080D3828: push {r0-r2,r5}; movs r0,#0x6C; bl 0x08003178) an r3 it never sets, the last writer an engine routine it calls (0x080090E8 at 0x080FFE44, or 0x08016C56 at 0x080FFE54; then 0x0800C6CA, his own 0x081002E0 and 0x0800C676, none writing r3), so the spawn's Z (+0x3C) is that leftover; the spawner then writes Z's upper half itself (movs r2,#0x10; strh r2,[r0,#0x3E]), 16 in both, and its low half stays each engine's (BN5 0x41D0, BN6 3: cosmoman_v1 at t438). Its code (0x080D3648-0x080D3962, its states 0x080D366C, 0x080D36EA and 0x080D3820 from its table 0x080D3660) reads no +0x3C-0x3F, and the engine's it calls read Z only at 0x0800C6B4 (0x0800C6AC: its place from X, Y and Z, whose panel routine 0x0800C658 reads X and Y alone, r2 unread), walked four calls deep. Z's upper half (bytes 2 and 3, the height a draw takes) is compared; its low half is each engine's leftover."
+        },
+        {
+          "kind": "T4",
+          "type": "0x5A",
+          "word": "0x3C",
+          "compares": [2, 3],
+          "evidence": "SearchMan's (the fourth kind's 0x5A, moved): his state at BN5 0x080F5748-0x080F5752 loads r3 with his AI data's +0x2C (ldr r3,[r7,#0x2C], an object's address in each game's RAM) to read its row and column (+0x12, +0x13), then calls the 0x5A's spawner (0x080E7020: push {r0-r2,r5}; movs r0,#0x5A; bl 0x080031CC), the fourth kind's spawner, the third's (0x08003178) with kind 4: r1-r3 kept as +0x34, +0x38, +0x3C. So the 0x5A's Z (+0x3C) is that address; its init (0x080E6FA8) writes its upper half 0x10 (strh r0,[r5,#0x3E] at 0x080E6FB0) and its code counts it down (0x080E6FB4-0x080E6FB8), reading no +0x3C or its low half (its states 0x080E6FA9, 0x080E6FF9 from its table 0x080E6F98; the engine's routines it runs draw by Z's upper half). Its low half is each game's address's: seen in bn5_searchman_v1, _v1_keys and _sp at the 0x5A's first frame, BN5 0xB200, BN6 0xA9B0, its upper half 0x10 in both."
         },
         {
           "kind": "T3",
@@ -2935,6 +2976,7 @@
         "bn4_chip_areagrab t33: the area grab's object's +0x30 0x75 in BN4's (AreaGrab, 117) and 0xA3 in BN6's (163)"
       ]
     },
+    "megaman_misc_wait": {"action4": "0x20", "phase": "0xA0", "subfamily": "0xA3", "bn4": "0x04", "bn6": "0x0100", "why": "BN4's misc run waits after one subfamily's routine before it ends the attack (BN4_MISC_WAIT 0x080EC9AC: cmp r0,#5; movs r0,#0x28; strh r0,[r7,#0x10], counted down a frame each, bgt at 0x080EC9BA): SidBmbo's 0x28 frames. BN6's run waits for its own subfamily 0x14 alone (0x080ED712), so the unit's entry in BN6's grown misc routines is a wrapper of the installer's (src/emu/xchips_code.c wait_stage, XChipUnit.wait) that is the run's routine every frame of the wait: it calls the unit's routine once, sets the count to BN4's and counts it as BN4's run does, ending the attack through BN6's run (BN6_MISC_END 0x080ED722) at 0. The count (the state's +0x10) holds BN4's numbers each frame and is compared as ever. The state's phase halfword is each run's own bookkeeping while it waits: BN4's run marks its phase 4 (movs r0,#4; strb r0,[r7] at 0x080EC982-0x080EC984) and comes back to its count-down by it (bne at 0x080EC980); BN6's run marks 1 (0x080ED6E8-0x080ED6EA), which the wrapper clears each frame it goes on waiting so that the run calls it again (its strb at +0x2C), keeping a mark of its own in the halfword's second byte (its strb at +0x16: the routine called once), a byte an attack's set clears with the phase (BN6 0x080116A4: strh r0,[r1]). So BN4's 0x0004 there is read as BN6's 0x0100, only in BN4's misc state (his CurAction 0x20), only with BN4's phase 4 and a second byte of 0, and only where his attack's subfamily is a unit's that waits (src/emu/xchips_bn4.c's rows with a wait). bn4_chip_sidbmbo1: t33 to t71 in BN4's, the attack ended at t72 in BN4's and t73 in BN6's (the battle's offset), the count 0x27 down to 1 in both"},
     "megaman_lockout": {"why": "As a chip's attack ends each game keeps the chip's lock-out (the record's +0x14, MegaMan's AttackVars +5) in his AI data, the frames he cannot act: BN4's end stores it as a halfword at +0x3A (0x0800C9FC: ldrb r0,[r7,#5]; strh r0,[r1,#0x3a] at 0x0800CA0A-0x0800CA0C), BN6's as a byte at +0x19 (0x08011714: ldrb r0,[r7,#5]; strb r0,[r1,#0x19] at 0x08011732-0x08011734, for an attack of kind 2), each counted down a frame at a time. BN4's is read at BN6's place where BN6's place holds 0 in BN4's AI data and the halfword's high byte is 0. bn4_chip_counter1 t58: 0x1D at BN4's +0x3A and at BN6's +0x19 (Counter1's 30 frames, one counted).", "bn4": "0x3A", "bn6": "0x19"},
     "actor_objects": {"why": "A third-kind object both engines run by the actors' state runner (BN4 0x08013F3E, BN6 0x0801B394, each with the object's own state table): its CurAction (+9) numbers its own states from 6 in BN4 and from 8 in BN6, as a first-kind object's does (BN4's generic states 0-5, BN6's 0-7: tools/bn4_twins.py GENERIC4), so BN4's from 6 are read two higher. By type, each with its two state tables.", "T3": {"0x59": "RockCube's cube: its update calls the runner with its table (BN4 0x080D8AA6: ldr r0,=0x080D8ABC, seven states, its own the first, the third and the seventh; BN6 0x080D12A2: ldr r0,=0x080D12B8, nine, its own the first, the third and the ninth). bn4_chip_rockcube t34: +9 6 in BN4's and 8 in BN6's, the cube standing"}},
     "support_objects": {
@@ -3066,13 +3108,14 @@
           "0x02",
           "0x03",
           "0x04",
+          "0x06",
           "0x80",
           "0x81",
           "0x82",
           "0x83"
         ],
         "what": "Mettaur's sound 0x8B, Roll's pool's",
-        "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0xe0 at 0x08B798CC, the recipe's immediate, its bl at 0x08B798CE through its veneer to BN6's), its init's. Mettaur is moved for Roll's summon alone (XVirusFamily.summoned), so his sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her fifth, 0xE0, her recipe listing BN4's song 0x8B there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In his battles and hers alone (foes); BN4's first at t73 in mettaur4_v1, a battle of his alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds)"
+        "why": "Played by its shockwave's code (the third kind's 0x16, moved with Mettaur; BN4: movs r0,#0x8b at 0x080CFC6C, its bl to PlaySoundEffect at 0x080CFC6E; BN6: its copy's movs r0,#0xe0 at 0x08B798CC, the recipe's immediate, its bl at 0x08B798CE through its veneer to BN6's), its init's. Mettaur is moved for Roll's summon alone (XVirusFamily.summoned), so his sound BN6 has no song of takes a slot of her per-battle pool (tools/xrecipe_bn4.py SUMMONER_POOL; the owner's call 8 keeps 0x41-0x4B for BN5): her fifth, 0xE0, her recipe listing BN4's song 0x8B there (src/emu/xnavi_bn4.c, roll_songs), packed into her art's room and pointed in her battles (src/emu/xnavi_bn4_sounds.c). In his battles and hers alone (foes); BN4's first at t73 in mettaur4_v1, a battle of his alone, which takes her art's room and pool (src/emu/xnavi_bn4_room.c xnavi_bn4_summoner): the sound is told by its number, as the pool's are (docs/multirom/bn4.md, Its sounds). The family's sixth (0x06, 250 HP: BN6's 0x2E9) plays it by the same code, BN4's at t73 and BN6's at t74 in bn4_chip_sidbmbo3, where it is the foe a 140 damage chip leaves standing"
       },
       {
         "bn4": "0xC2",
@@ -3467,6 +3510,7 @@
       {"bn4": "0xF7", "bn6": "0x1DE", "clock": "state", "what": "WhitWeb's web's sound 0xF7, its copy", "why": "Played by WhitWeb's web's code (BN4's third-kind 0x3D, moved with WhitWeb's unit: its bl to PlaySoundEffect at 0x080D4DF0 with r0 0xF7; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DE and goes on to BN6's), a state's: BN4's song 0xF7 copied into slot 0x1DE of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xF7 is another (xrecipe.song_sig). bn4_chip_whitweb1 at t34 in BN4's and t35 in BN6's"},
       {"bn4": "0xAB", "bn6": "0x1DF", "clock": "state", "what": "Boomer's boomerang's sound 0xAB, its copy", "why": "Played by the boomerang's init (BN4's third-kind 0x32, moved with Boomer's unit: movs r0,#0xab at 0x080D32F2, its bl to PlaySoundEffect at 0x080D32F4; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DF and goes on to BN6's), a state's: BN4's song 0xAB copied into slot 0x1DF of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xAB is another (xrecipe.song_sig). bn4_chip_boomer3 at t34 in BN4's and t35 in BN6's"},
       {"bn4": "0xC7", "bn6": "0x1E0", "clock": "state", "what": "MokoRus's Moko's sound 0xC7, its copy", "why": "Played by the Moko's code as it sets off (BN4's third-kind 0x2C, moved with MokoRus's unit: movs r0,#0xc7 at 0x080D245C, its bl to PlaySoundEffect at 0x080D245E; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1E0 and goes on to BN6's), a state's: BN4's song 0xC7 copied into slot 0x1E0 of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xC7 is another (xrecipe.song_sig). bn4_chip_mokorus1 at t34 in BN4's and t35 in BN6's, and again at t44 and t54 as the second and third set off"},
+      {"bn4": "0x8E", "bn6": "0x1E1", "clock": "state", "what": "SidBmbo's bamboo's sound 0x8E, its copy", "why": "Played by the bamboo's code as it comes up (BN4's third-kind 0x44, moved with SidBmbo's unit: movs r0,#0x8e at 0x080D5D34, its bl to PlaySoundEffect at 0x080D5D36; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1E1 and goes on to BN6's), a state's: BN4's song 0x8E copied into slot 0x1E1 of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0x8E is another (xrecipe.song_sig). bn4_chip_sidbmbo1 at t35 in BN4's and t36 in BN6's"},
       {"bn4": "0x146", "bn6": "0x1DC", "clock": "state", "what": "ShotStar's star's fall's sound 0x146, its copy", "why": "Played by the star as it is made (BN4's third-kind 0x56, moved with ShotStar's unit: movs r0,#0x47; adds r0,#0xff at 0x080D86CA, its bl to PlaySoundEffect at 0x080D86CE; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DC and goes on to BN6's), a state's: BN4's song 0x146 copied into slot 0x1DC of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS), on BN4's player 6. BN6's own song 0x146 is another (xrecipe.song_sig). Its burst's 0x70 is Walla's row above (BN4's song at the families' slot 0x3A, the same copy). bn4_chip_shotstar: thirty of each inside the chip's freeze, at t34 in BN4's and t35 in BN6's"},
       {
         "bn4": "0x96",

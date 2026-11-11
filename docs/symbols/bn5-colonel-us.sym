@@ -807,6 +807,8 @@
 080C3A2A bn5_last_chips_3
 080C4782 bn5_sea_submerge_4
 080C4EAE bn5_darkloids_navi.to
+080C6358 team_protoman_meddy.0x080dffd2
+080C63AC BN5_MEDDY_EFFECT_KINDS
 080C643C bn5_sea_submerge.bn6_child_hidden
 080C6C08 souls_code_bn6.6_bytes_entry
 080C9518 reticle_code
@@ -862,6 +864,7 @@
 080E4C4C bn5_engine_objects.module
 080E4D1E BN5_SEA_MARKER_SPAWN
 080E6EBC gridman_chip_effect_spawned
+080E7014 BN5_SEARCH_PARENT_STATE
 080E8994 piledrvr_routine
 080E89B2 piledrvr_object_given_chip
 080E8DC3 bn5_last_chips_5
@@ -905,8 +908,14 @@
 080F2488 navis_stats
 080F2748 BN5_NAVI_NULLSUB
 080F4044 team_protoman_gyroman.his_code
+080F4EC0 BN5_SEARCH_CODE
+080F50D7 team_protoman_searchman
+080F50E3 his_pre_step
+080F50FD his_status_hooks
 080F5D6C team_protoman_napalmman.his_code
 080F5F22 BN5_NAPALM_HALF_HP_CHIP
+080F73E8 BN5_MEDDY_CODE
+080F7575 team_protoman_meddy
 080F7FF8 bn5_navis.at_080f7ff8
 080F913C bn5_navis
 080F9D80 bn5_navis_2

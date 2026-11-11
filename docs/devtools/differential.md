@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:15:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
 ---
 
 # The differential: a moved family against its own game
@@ -882,6 +882,11 @@ own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
 
+A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
+its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
+kept as +0x34, +0x38 and +0x3C alike (SearchMan's 0x5A, its Z an
+object's address in its low half, `bn5_searchman_v1` at t894).
+
 A Navi's copy of a type both engines also run of their own (the third
 kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed
 as his code in BN5's trace by its BN5 addresses, so the hit's draws and
@@ -1194,6 +1199,10 @@ format, its game 4: the trace's header names it):
   the bytes' shuffle is a twin there too (BN4 `0x08000AAA`, BN6
   `0x08000C72`: a chip unit's draws have no family's key, so MokoRus's
   rows were each engine's own order until its six draws were paired);
+  MegaMan's misc state's phase is read as BN6's while a unit's wrapper
+  waits (`megaman_misc_wait`: BN4's run's mark 4 against the wrapper's,
+  in BN4's misc state and for a waiting unit's subfamily alone; the
+  count beside it is compared as ever);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

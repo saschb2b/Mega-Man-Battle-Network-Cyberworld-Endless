@@ -2414,6 +2414,86 @@
    "what": "his attack's state (BN5 0x080F414C: movs r0,#8, CurAction 8, its copy at XN_TEAM_CODE + 0x2800 + 0x108) left at BN5's 8, BN6's another status state, where the recipe makes it 10 (BN6's two status states before his own)"
   },
   {
+   "name": "SearchMan's object's sprite not renumbered",
+   "spec": "bn5_searchman_v1",
+   "poke": [
+    "08898F34:2233"
+   ],
+   "what": "the fourth kind's sprite at BN5 0x080DB6F0 (movs r2,#0x33, list 4's 0x33, its copy at XN_TEAM_CODE + 0x5F00 + 0x34) left at BN5's number where the recipe makes it list 2's 0x87, BN5's copied there"
+  },
+  {
+   "name": "SearchMan's 0x5A's sprite's list not moved",
+   "spec": "bn5_searchman_v1",
+   "poke": [
+    "0889963C:2110"
+   ],
+   "what": "the fourth kind's 0x5A's sprite's list (BN5 0x080E6FC0: movs r1,#0x10, list 4's offset, its copy at XN_TEAM_CODE + 0x6600 + 0x3C) left at list 4 where the recipe makes it list 2's (0x08), its number 0x86 then list 4's 0x86, another sprite (his effect 0x14's sites, 0x080DB7CA and 0x080DB90C, are reached by no spec)"
+  },
+  {
+   "name": "SearchMan's object's parent's state not moved",
+   "spec": "bn5_searchman_v1",
+   "poke": [
+    "08899690:210A"
+   ],
+   "what": "a moved object's compare of its parent's CurAction (BN5 0x080E7014: movs r1,#0xA, its copy at XN_TEAM_CODE + 0x6600 + 0x90) left at BN5's 10 where the recipe makes it BN6's 12"
+  },
+  {
+   "name": "SearchMan's object's collision offset not moved",
+   "spec": "bn5_searchman_v1_keys",
+   "poke": [
+    "08898FEA:6E80"
+   ],
+   "what": "a moved object's read of its hit flags (BN5 0x080DB7A6: ldr r0,[r0,#0x68], its copy at XN_TEAM_CODE + 0x5F00 + 0xEA) left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "SearchMan's state number not moved",
+   "spec": "bn5_searchman_v1",
+   "poke": [
+    "08898294:2009"
+   ],
+   "what": "his attack's state (BN5 0x080F5154: movs r0,#9, CurAction 9, its copy at XN_TEAM_CODE + 0x5000 + 0x294) left at BN5's 9, BN6's another state, where the recipe makes it 11"
+  },
+  {
+   "name": "Meddy's object's sprite not renumbered",
+   "spec": "meddy_v1",
+   "poke": [
+    "088A063C:2215"
+   ],
+   "what": "her object's sprite (BN5 0x080C5820: movs r2,#0x15, list 4's 0x15, its copy at XN_TEAM_CODE + 0xD600 + 0x3C) left at BN5's number where the recipe makes it list 2's 0x8D, BN5's copied there"
+  },
+  {
+   "name": "Meddy's first object's sprite's list not moved",
+   "spec": "meddy_v1",
+   "poke": [
+    "088A063A:2110"
+   ],
+   "what": "her object's sprite's list (BN5 0x080C581E: movs r1,#0x10, list 4's offset, its copy at XN_TEAM_CODE + 0xD600 + 0x3A) left at list 4 where the recipe makes it list 2's (0x08), its number 0x8D then list 4's 0x8D, another sprite (her effect 0x44's site, 0x080C5B3E, and her object's compare of its parent's state, 0x080C64DE, are reached by no spec)"
+  },
+  {
+   "name": "Meddy's object's sprite's list not moved",
+   "spec": "meddy_v1",
+   "poke": [
+    "088A0C3E:2110"
+   ],
+   "what": "her object's sprite's list (BN5 0x080C603E: movs r1,#0x10, list 4's offset, its copy at XN_TEAM_CODE + 0xDC00 + 0x3E) left at list 4 where the recipe makes it list 2's (0x08), its number 0x8C then list 4's 0x8C, another sprite"
+  },
+  {
+   "name": "Meddy's object's collision offset not moved",
+   "spec": "meddy_v1_keys",
+   "poke": [
+    "088A0D36:6E80"
+   ],
+   "what": "her object's read of its hit flags (BN5 0x080C6136: ldr r0,[r0,#0x68], its copy at XN_TEAM_CODE + 0xDC00 + 0x136) left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "Meddy's state number not moved",
+   "spec": "meddy_v1",
+   "poke": [
+    "0889F910:2008"
+   ],
+   "what": "her attack's state (BN5 0x080F74F8: movs r0,#8, CurAction 8, its copy at XN_TEAM_CODE + 0xC800 + 0x110) left at BN5's 8, BN6's another status state, where the recipe makes it 10"
+  },
+  {
    "name": "an area grab that takes a panel",
    "spec": "bn4_chip_areagrab",
    "poke": [
@@ -2866,6 +2946,54 @@
     "088F1304:01DA"
    ],
    "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
+  },
+  {
+   "name": "SidBmbo1's row's power another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "08C0623E:0028"
+   ],
+   "what": "the registry's record of BN4's SidBmbo1 (571 at CHIPS_RECORDS) with power 40 where BN4's record holds 80: the Mettaur over the bamboo left 100 HP where BN4's leaves it 60"
+  },
+  {
+   "name": "SidBmbo2's row's subfamily another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "08C0625C:83:1"
+   ],
+   "what": "the registry's record of BN4's SidBmbo2 (572) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x85: no bamboo, and no wait"
+  },
+  {
+   "name": "SidBmbo's wait another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "088F17D8:2014"
+   ],
+   "what": "the wrapper of SidBmbo's unit's home (XC4_HOMES + 0x2400 + XC4_HOME_WAIT: its movs r0,#0x28 at +0x18, the frames BN4's misc run waits) with 0x14: MegaMan out of his misc state 20 frames before BN4's"
+  },
+  {
+   "name": "SidBmbo's wait counted as BN6's run counts",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F17E4:DA01"
+   ],
+   "what": "the wrapper's count-down (its bgt at +0x24, BN4's run's test, ending the attack at 0) made bge, BN6's run's test, which ends it below 0: the attack a frame longer than BN4's"
+  },
+  {
+   "name": "the bamboo's type another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "080D5DBE:20CB"
+   ],
+   "what": "the bamboo's spawner's copy (its movs r0,#0x44 at BN4 0x080D5DBE, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no bamboo"
+  },
+  {
+   "name": "the bamboo's sound another",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F1704:01DA"
+   ],
+   "what": "the shim of SidBmbo's unit's home that plays the bamboo's sound (its first, at XC4_HOMES + 0x2400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E1"
   },
   {
    "name": "TopMan's decision's CurAction off by one",
