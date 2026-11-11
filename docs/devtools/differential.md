@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:40:16Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T11:04:51Z }
 ---
 
 # The differential: a moved family against its own game
@@ -1235,7 +1235,10 @@ format, its game 4: the trace's header names it):
   in BN4's misc state and for a waiting unit's subfamily alone; the
   count beside it is compared as ever);
   a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
-  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  every block of `FREE_BN4_CHIPS`' code, in a spec whose folder holds a
+  moved chip of BN4's; in any other spec none of it, since a unit may
+  copy code a family's own battle runs as BN4's: Thunder's unit BN4's
+  thunder, which Billy's battle runs where BN6's runs its own), so a draw one of its objects
   makes from the unit's own code is given BN4's of that place; a draw
   made while MegaMan runs stays the engine's (the shuffle's twin above);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
