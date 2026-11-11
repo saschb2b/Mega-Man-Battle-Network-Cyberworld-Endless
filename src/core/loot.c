@@ -379,7 +379,7 @@ static int fielded(int depth, int biome, int target, const Formation **list, int
 
 int loot_territory = -1;
 int loot_deep[2] = { -1, -1 };
-int loot_older_share;
+int loot_older_share, loot_older_net = CHIP_NET_BN5;
 bool loot_visitors_always;
 
 /* What each virus family the area's plain random battles can hold at
@@ -551,7 +551,13 @@ bool loot_layer_nets(int biome, int tiles) {
 	if (biome == BIOME_GRAVEYARD || biome == BIOME_NEST) loot_deep[loot_deep[0] >= 0] = xterritory_like(BIOME_GRAVEYARD);
 	const NetAreaDef *a = tiles >= NET_AREAS ? net_area_def(tiles) : NULL;
 	if (loot_deep[0] < 0 && a && a->xrom > 0 && xterritory_native(tiles)) loot_territory = tiles;
-	if (chips_from_bn5() && (loot_deep[0] >= 0 || (a && a->xrom > 0))) loot_older_share = LOOT_OLDER_SHARE;
+	/* (the older Net's half of the finds: the area's own game's catalogue, in the deep every game's read:
+	 * docs/multirom/one-net.md, the older net's half; docs/multirom/bn4-chips.md, unit 7) */
+	int net = loot_deep[0] >= 0 ? CHIP_NET_OLDER : a && a->xrom > 0 ? chip_pool_net_of(a->xrom - 1) : -1;
+	if (net >= 0 && chip_pool_net_read(net)) {
+		loot_older_share = LOOT_OLDER_SHARE;
+		loot_older_net = net;
+	}
 	return loot_deep[0] >= 0 || loot_territory >= 0;
 }
 
@@ -634,7 +640,7 @@ Encounter make_boss(int depth, int biome, int navi) {
 int loot_pool_pick(int tier) {
 	/* (the older net's catalogue its share of the time, of the same tier:
 	 * BN6's where it has none of it) */
-	int id = loot_older_share > 0 && rng_range(0, 99) < loot_older_share ? chip_pool_pick_net(tier, CHIP_NET_BN5) : -1;
+	int id = loot_older_share > 0 && rng_range(0, 99) < loot_older_share ? chip_pool_pick_net(tier, loot_older_net) : -1;
 	return id > 0 ? id : chip_pool_pick(tier);
 }
 

@@ -33,16 +33,18 @@ extern int loot_territory;
  * Area, the Nest's with both. */
 extern int loot_deep[2];
 /* The share (percent) of the chips the run finds and buys that come from
- * the older net's catalogue (roll_chip; chip_pool.h's CHIP_NET_BN5): half
- * on its areas' layers and in the deep where its ROM is read, else 0 */
-extern int loot_older_share;
+ * the older Net's catalogue (roll_chip), and whose (chip_pool.h's
+ * CHIP_NET_*): half on another game's areas' layers, that game's (BN5's on
+ * BN5's ground, BN4's on BN4's), and in the deep, every game's read
+ * (CHIP_NET_OLDER); 0 elsewhere and where the catalogue's ROM is not read */
+extern int loot_older_share, loot_older_net;
 #define LOOT_OLDER_SHARE 50
 /* The layer's nets, for a layer of BN6 area `biome` drawn in area `tiles`
  * (another game's where it dresses it, run_dress; -1 none: home): sets
  * loot_territory where every record of the area can be fought in BN6's
  * engine, loot_deep in the deep (taking the place of a territory), and
- * loot_older_share on the older net's areas and in the deep where BN5's
- * ROM is read; true where the layer's battles take the older net's
+ * loot_older_share and loot_older_net on the older Net's areas and in the
+ * deep where the catalogue's ROM is read; true where the layer's battles take the older net's
  * records so */
 bool loot_layer_nets(int biome, int tiles);
 /* When BN6's virus family `family` first meets MegaMan on the net: 0 the

@@ -83,6 +83,10 @@
 #define XN_TEAM_ART     FREE_TEAM_NAVI_ART
 #define XN_TEAM_SHARED  FREE_TEAM_SHARED
 #define XN_TEAM_END     FREE_TEAM_SPRITES
+/* ... and the shared art's third room, code-low's tail (a sprite of any Navi's once XN_TEAM_SHARED's is full: GyroMan's
+ * overlay first; tools/xnavirecipe.py XN_TEAM_MORE) */
+#define XN_TEAM_MORE     FREE_TEAM_SHARED_MORE
+#define XN_TEAM_MORE_END FREE_TEAM_SHARED_MORE_END
 #define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */

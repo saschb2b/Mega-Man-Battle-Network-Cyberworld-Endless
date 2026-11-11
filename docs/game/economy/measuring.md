@@ -3,7 +3,7 @@ type: Design
 title: "Measuring it"
 description: "How `build.py economy` and `src/dev/economy_report.c` measure a run's handouts without running the game: layers and Mystery Data simulated by the engine's code, battle rewards from BN6's ROM rows, the assumptions, definitions and autopilot check."
 tags: [game, economy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # Measuring it
@@ -47,7 +47,18 @@ Assumptions, each a number in the code and said in the report's header:
 | A battle's own Mystery Data still there at its end | 50% | assumed |
 | Every Mystery Data opened, every battle won | | the most a run can take |
 | The folder | BN6's starting one, codes S, A and B (`loot_folder_codes`) | the standard setup |
-| The areas | BN6's alone, threat 0, no helpers | where BN5's dress an area, half the chips are BN5's of the same tiers |
+| The areas | BN6's alone, threat 0, no helpers | where BN5's or BN4's dress an area, half the chips are that game's of the same tiers: the table below |
+
+**The older Net's half** (since 12 November 2026, [BN4's chips in a
+run](../../multirom/bn4-chips.md), unit 7). The report's last table lists
+each catalogue's chips by tier (BN6's areas, BN5's ground, BN4's ground,
+the deep's whole; the registry's own among them) for the ROMs read, then
+measures the plan in play twice more: a run as its seed dresses it
+(`run_dress`, each layer's half as `loot_layer_nets` sets it) and a run
+made wholly on each ground, which no seed makes. The seed's run is held
+to the bands and counted in the report's total; the wholly-one-ground
+runs are shown for their direction, their ! marks not counted. With BN6
+alone the table holds BN6's areas and nothing else to measure.
 
 Definitions:
 

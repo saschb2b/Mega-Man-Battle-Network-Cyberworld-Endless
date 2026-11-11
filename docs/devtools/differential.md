@@ -895,9 +895,15 @@ moved) dropped out of the traces with only a line on stderr, which
 A BN5 address is read as moved code by the rooms the comparator knows
 (`tools/xdiff_snap.py`: `XV_CODE`, `XN_ROOM`, `XC_CODE`, `XN_BN4_ROOM`,
 and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
-`FREE_TEAM_NAVI_ART`): a word of BN5's naming its own copied code (the
-fourth kind's 0x12's +0x34, NapalmMan's data) is read as BN6's word naming
-the copy only where the copy's room is one of them.
+`FREE_TEAM_SHARED`, their code and art rooms): a word of BN5's naming its
+own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
+(GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
+copy only where the copy's room is one of them.
+
+A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
+its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
+kept as +0x34, +0x38 and +0x3C alike (SearchMan's 0x5A, its Z an
+object's address in its low half, `bn5_searchman_v1` at t894).
 
 A Navi's copy of a type both engines also run of their own (the third
 kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed

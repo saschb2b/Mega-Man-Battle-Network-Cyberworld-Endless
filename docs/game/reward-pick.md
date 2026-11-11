@@ -3,7 +3,7 @@ type: Design
 title: "The reward pick's screen"
 description: "The run's picks of one reward among several (a guardian's NaviCust draft, a vault's, a Server's and a Glitch copy's three chips, an official gate's, Mr.Prog's first gift) on a screen of ours in BN6's PET look: each choice on the Library's card with its picture and details, the skip a row of its own, and how a pick's script opens it (`src/director/reward_pick.c`)."
 tags: [game, ui, navicust, rewards]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T23:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:30:00Z }
 ---
 
 # The reward pick's screen
@@ -82,6 +82,25 @@ screen opens.
 Everything is read from the player's ROM as it is drawn (the chip's
 picture, icon and description, the program's name and shape); nothing of
 it is kept in the repository.
+
+## The information box
+
+The window is fitted to its rows: a row with a chip's icon is the
+Library's 16 pixels tall, the rest the chat font's 13 (as the Liberation
+pick's), so a draft's four rows of programs and BugFrags and a vault's
+three chips alike leave the box under them four lines whole. A text
+longer than that scrolls as BN6's chat box scrolls its lines: the first
+four held a second and a half, then a line up each second, the last held
+two, and round from the top, from the cursor's last move.
+
+Measured with `--pick-fit` (`src/dev/pick_fit.c`, the box's own text and
+wrap) over every text the box can show, with BN6's, BN5's and BN4's ROMs
+read (11 November 2026): 716, each program MegaMan has words for and each
+chip of the ten-bit ids. Before this, the box held three lines whole and
+cut the rest: SlipRunr's words took five, BustPack's and BodyPack's four,
+and no chip's description more than three. Now 715 fit whole and
+SlipRunr's alone scrolls, a line. `--pick-fit over` lists those that
+scroll, `--pick-fit all` every text's lines (no text is printed).
 
 ## Keys
 

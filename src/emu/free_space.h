@@ -62,8 +62,8 @@
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
-#define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x141000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes) (xnavi_bn4_chip.c) */
-#define FREE_BN4_CHIP_SPRITE_END (EMU_FREE + 0x150000u)
+#define FREE_TEAM_SHARED_MORE (EMU_FREE + 0x141000u) /* the Navis' shared art's third room (a sprite of any Navi's once FREE_TEAM_SHARED is full: GyroMan's overlay first) (xnavi_install.c) */
+#define FREE_TEAM_SHARED_MORE_END (EMU_FREE + 0x150000u)
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -93,6 +93,8 @@
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
 #define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
+#define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x320000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left (xnavi_bn4_chip.c) */
+#define FREE_BN4_CHIP_SPRITE_END (EMU_FREE + 0x32F000u)
 
 /* ---- code: +0x330000-+0x7A0000, other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs ---- */
 #define FREE_VIRUS_ROOM      (EMU_FREE + 0x330000u)  /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c) */
@@ -195,7 +197,7 @@
 	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_BN4_CHIPS", (EMU_FREE + 0x0EF000u), (EMU_FREE + 0x13F000u), "", "code-low") \
 	X("FREE_SONG_TABLE", (EMU_FREE + 0x13F000u), (EMU_FREE + 0x141000u), "", "code-low") \
-	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
+	X("FREE_TEAM_SHARED_MORE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
@@ -214,6 +216,7 @@
 	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
 	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
 	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
+	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x320000u), (EMU_FREE + 0x32F000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \
 	X("FREE_FAMILIES", (EMU_FREE + 0x348000u), (EMU_FREE + 0x400000u), "", "code") \
 	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
