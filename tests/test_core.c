@@ -18,6 +18,7 @@
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "layer_make.h"
+#include "layer_make_record.h"   /* LAYER_MAKE_RECORD and its hash, from the build (tests/layer_make_hash.txt) */
 #include "letters.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -1019,9 +1020,10 @@ static void test_mouths(void) {
 }
 
 /* The golden hash (issue #19): layer_generate's output over fixed seeds,
- * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
- * (layer_make.h). The determinism check above builds a seed twice in one
- * build; this one fails when a build makes a seed's layer otherwise. */
+ * in every area and kind, against the hash dev recorded with the make it
+ * was taken at (tests/layer_make_hash.txt, layer_make.h). The determinism
+ * check above builds a seed twice in one build; this one fails when a
+ * build makes a seed's layer otherwise and no bump's file says so. */
 static uint32_t fnv(uint32_t h, const void *p, size_t n) {
 	const uint8_t *b = p;
 	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
@@ -1264,7 +1266,7 @@ static void test_extras(void) {
 	run = before;
 }
 
-static void test_layer_make(void) {
+static uint32_t layer_make_hash(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
 	run.seed = 0x5EED;
@@ -1301,9 +1303,18 @@ static void test_layer_make(void) {
 		}
 		h = set_pieces_hash(h);
 	}
-	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
-		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
 	run = before;
+	return h;
+}
+
+/* (generation as dev recorded it; or changed with a bump's file beside it, the record dev's workflow's to set after the merge) */
+static void test_layer_make(void) {
+	uint32_t h = layer_make_hash();
+	CHECK(h == LAYER_MAKE_RECORD_HASH || LAYER_MAKE > LAYER_MAKE_RECORD,
+		"layer generation changed (hash 0x%08x, recorded 0x%08x at make %d): add a bump's file to src/net/layer_make.d/, "
+		"%d-WORDS.txt, saying what changed (layer_make.h)", h, LAYER_MAKE_RECORD_HASH, LAYER_MAKE_RECORD, LAYER_MAKE + 1);
+	if (h != LAYER_MAKE_RECORD_HASH && LAYER_MAKE > LAYER_MAKE_RECORD)
+		printf("layer generation changed with its bump (make %d, hash 0x%08x): dev's workflow records it after the merge\n", LAYER_MAKE, h);
 }
 
 
@@ -7743,7 +7754,11 @@ static void test_groups(void) {
 	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+	if (argc == 2 && !strcmp(argv[1], "--layer-make-hash")) {   /* (tools/layer_make.py: the record dev's workflow writes) */
+		printf("%d 0x%08x\n", LAYER_MAKE, layer_make_hash());
+		return 0;
+	}
 	test_sha1();
 	test_battle_data();
 	test_area_views();

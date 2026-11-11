@@ -9,6 +9,7 @@ tools write from other files of the tree, kept out of pull requests' way
   docs/voice/catalog.json                         tools/voice_catalog.py, from the words files
   docs/log.md                                     tools/log_fold.py, from the entries' files in docs/log.d/
   each concept's `generated: { by, at }` line     the same, from the entry that names the concept
+  tests/layer_make_hash.txt                       tools/layer_make.py, from the unit tests, where a bump was added
 
 Every pull request that names a ROM fact, moves a feature's status or
 changes a line changes what these hold, so two of them always conflicted
@@ -32,7 +33,8 @@ them as its base has them.
                                         which resolves every conflict in them. Lines
                                         the branch had added to docs/log.md are kept,
                                         as an entry's file in docs/log.d/
-Standard library only; needs no ROM and nothing outside git.
+Standard library only; needs no ROM and nothing outside git (the layers'
+make's record needs the build image, and only where a bump was added).
 """
 import glob
 import os
@@ -40,8 +42,9 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TOOLS = ('re_status.py', 'symbols.py', 'voice_catalog.py', 'log_fold.py')
-FILES = ('docs/re/state.json', 'docs/re/STATUS.md', 'docs/re/dashboard.html', 'docs/voice/catalog.json', 'docs/log.md')
+TOOLS = ('re_status.py', 'symbols.py', 'voice_catalog.py', 'log_fold.py', 'layer_make.py')
+FILES = ('docs/re/state.json', 'docs/re/STATUS.md', 'docs/re/dashboard.html', 'docs/voice/catalog.json', 'docs/log.md',
+         'tests/layer_make_hash.txt')
 FOLDERS = ('docs/symbols/',)
 # Each tool: its own files (a branch that changes one changes what the tool writes, and so
 # writes it), and where what it writes lies.
@@ -50,6 +53,7 @@ OWN = {
     'symbols.py': (('tools/symbols.py',), ('docs/symbols/', 'docs/rom/symbols.md')),
     'voice_catalog.py': (('tools/voice_catalog.py',), ('docs/voice/',)),
     'log_fold.py': ((), ('docs/log.md',)),   # (it folds entries in and never writes the log anew: no branch's to write)
+    'layer_make.py': (('tools/layer_make.py',), ('tests/layer_make_hash.txt',)),
 }
 LOG = 'docs/log.md'
 # A page a person writes with parts a tool writes: the page, the marks around each part.
