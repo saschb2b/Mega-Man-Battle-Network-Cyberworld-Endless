@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, release, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
 ---
 
 # Tools and skills
@@ -11,6 +11,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:30:00Z }
 | Path | Contents |
 | --- | --- |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM): scripted input, peeks and pokes, states, recordings, probes on the code and watches on stores ([tools/romlab](../devtools/romlab.md)) |
+| `tools/encounter_tags.py`, `tools/encounter_danger.py`, `tools/encounter_data/` | The encounter groups' measuring ([Encounter tags and danger](../devtools/encounter-tags.md)): every family of every ROM tagged from the host build's `--encounter-tags` dump (`tags.tsv`: versions, elements, roles, reward rows, the acts' bands, the areas' battles, numbers alone), the templates' fillings counted per ROM set and act, and battles fought headless for their pressure, tricks and the autopilot's losses (`families.tsv`, `danger.tsv`); the report in [Encounter groups, measured](../game/progression/encounter-groups-measured.md) |
 | `tools/bn4_lab.py` | BN4 Red Sun in romlab: its tables checked against [BN4 Red Sun's tables](../rom/bn4.md) (report), the plain ROM played from power-on to Lan's room (boot) and a battle started there from a record of its own or one written with the enemies given (battle); BN4 read as the game reads it beside BN6's ([Battle Network 4 in a run](../multirom/bn4.md)) |
 | `tools/bn4_faces.py` | Faces for BN4 Red Sun's tournament bracket: BN4's plates read as its bracket draws them and checked (report, with every BN6 and BN5 entrant's source face), and a Navi's face converted from the player's ROMs into BN4's plate format in memory, written over an entrant's plate in romlab's copy of BN4's ROM and the bracket opened with it (show), the frames in `.build/bn4faces/`; the oracle of its port to C, `src/emu/xbracket_faces.c` (check: the host build's installed plates read back and compared byte for byte, `--mutation facepal` must FAIL) ([BN4's tournament screens](../multirom/bn4-tournament.md), Faces for every entrant) |
 | `tools/library_pages.py` | The Library's pages of BN5 and BN4, `src/core/library_pages_data.c`, from the three ROMs and the chip registry: each game's standard chips, Megas and Gigas in its Library's order (the record's +0x1C), numbered as the version read counts them, with the run's chip that fills each slot (the registry's for BN5's; for BN4's the engine's pairing mirrored). `--report` each page's slots by class and source, `--check` whether the file is what the ROMs give ([The Library, a page per entry](../game/meta/library.md)) |

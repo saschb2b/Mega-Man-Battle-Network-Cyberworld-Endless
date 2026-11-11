@@ -3,7 +3,7 @@ type: Decision Record
 title: "Decided"
 description: "The owner's yes (21 October 2026) to every economy decision: the opening plan's floors, traders picking codes as BN6 does, BN6's drops untouched, statistics' counts, bands a fifth either side, and the checks at switch-on."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T22:52:50Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
@@ -25,7 +25,11 @@ The owner said yes to every decision as proposed:
    them, [Chips, folders and the Library](../../rom/chips.md)'s Chip Traders, verified in Gregar,
    [Sources](../../research/sources.md)).
 4. **BN6's battle drops** stay as BN6 has them: the busting levels'
-   rewards uncapped.
+   rewards uncapped. Revised by the owner on 11 November 2026 for
+   [encounter groups](../progression/encounter-groups.md), once they are
+   built: the rows and the levels stay each game's own, and a group's
+   battle reads its signature family's row at the version fought, where
+   BN6 picks one of the enemies spawned.
 5. **The statistics** carry the economy's counts (above).
 6. **The bands** a fifth either side.
 
