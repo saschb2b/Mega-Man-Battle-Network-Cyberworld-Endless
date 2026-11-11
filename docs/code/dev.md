@@ -3,7 +3,7 @@ type: Code Map
 title: "Developer tools inside the game"
 description: "What `src/dev/` holds: `--dev` and its switches, the atlas, tour and pacing report, headless input and pictures (`capture.c`), and the tools run in the game's place (`--economy`, `--xdiff`, `--xrecords`)."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # Developer tools inside the game

@@ -3,7 +3,7 @@ type: Code Map
 title: "The core: entry, platform, Options, ROM access, run state and saves"
 description: "What `src/core/` holds, file by file: main and startup, platform and input, Options, ROM access and RomLayout, chips and loot, BN5's records, the chip registry, run state, the .cwsave carrier, jobs, the economy's plans."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # The core: entry, platform, Options, ROM access, run state and saves

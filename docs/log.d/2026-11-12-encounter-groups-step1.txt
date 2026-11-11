@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:00:00Z
-* **Update**: game/progression/encounter-groups.md (Step 1, built: the pool, the templates and their filling in the engine behind `--dev groups`, the pressure cap, the 128-bit family mask, what is left of the step), game/progression/encounter-groups-measured.md (the fill counts without the one-pooled-family limit; the engine's pool gives the same), devtools/encounter-tags.md (`engine`, the engine's table and its check), devtools/pacing-report.md (the encounter groups' part), devtools/dev-menu.md (`groups`, `group=N`), code/core.md, code/dev.md, engine/emulation/layer.md (`battle.sav`'s families).

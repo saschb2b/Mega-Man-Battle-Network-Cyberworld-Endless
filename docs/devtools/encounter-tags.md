@@ -3,7 +3,7 @@ type: Tool
 title: "Encounter tags and danger"
 description: "`tools/encounter_tags.py` tags every virus family in the engine from the ROMs (versions, element, weakness, role, reward row) and counts how each battle template fills per ROM set and act; `tools/encounter_danger.py` fights battles headless for their pressure, tricks and the autopilot's losses."
 tags: [devtools, progression]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # Encounter tags and danger
