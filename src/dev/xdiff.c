@@ -145,6 +145,7 @@ static void bytes_out(Side *g, uint32_t at, uint32_t len, uint32_t room) {
 static void part_out(Side *g, int part, uint32_t at, uint32_t room) {
 	uint8_t raw[0x100] = { 0 }, buf[0x100] = { 0 };
 	for (uint32_t i = 0, n = xd4_size(part); at && i < n; i += 4) put32(raw + i, g->v.rd32(at + i));
+	if (at && part == XD4_PANEL) xd4_panel_blinks(at, raw);
 	if (at) xd4_translate(part, raw, buf);
 	fwrite(buf, 1, room, g->out);
 }

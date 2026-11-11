@@ -27,7 +27,10 @@
 #define BN4_PANEL_BLINK_SET 0x08009E38u /* a panel (r0 column, r1 row) drawn as type r2 on side r3 this frame, a changer's blink before the type
                                        * is set: BN4_PANEL_BLINKS' byte's low nibble the type | 0x80, the byte 0x28 on the side | 0x80; BN6
                                        * keeps both in the panel (BN6_PANEL_BLINK_SET: its +8 the type, +9 the side, +0xD 1) */
-#define BN4_PANEL_BLINKS  0x02037B36u /* ... a byte a panel (row * 8 + column), the sides' 0x28 after */
+#define BN4_PANEL_BLINKS  0x02037B36u /* ... a byte a panel (row * 8 + column): 0x40 from the field's start (0x08009186), the blink's type in
+                                       * its low nibble and 0x80 while it is to be drawn; the panels' draw (0x080092AC) draws that type, then
+                                       * clears every 0x80 (0x080093C2), the type kept: BN6_PANEL_BLINK_TYPE's and BN6_PANEL_BLINKING's */
+#define BN4_PANEL_BLINK_SIDES 0x02037B5Eu /* ... the side's byte a panel, the same way (BN6_PANEL_BLINK_SIDE's) */
 /* The panel changer (docs/rom/bn4.md, The panel changer and the Hole panel): one fourth-kind object behind every chip that
  * sets panels, its kind (+4) a row of BN4_PANEL_CHANGER_KINDS: the panels found by the row's shape, blinked while its
  * frames run (BN4_PANEL_BLINK_SET every fourth frame), then set (BN4_SET_PANEL_TYPE) */

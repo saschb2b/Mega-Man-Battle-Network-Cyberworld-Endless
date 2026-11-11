@@ -3521,6 +3521,34 @@
         "why": "Played by her copied MegaMan states 46 and 47 as each spawns her flash (BN4: movs r0,#0x96 at 0x080EFC7E and 0x080EFDD6, their bls to PlaySoundEffect at 0x080EFC80 and 0x080EFDD8; BN6: their copies' movs r0,#0x32, the recipe's immediates, their bls through her veneer to BN6's), a state's: BN4's song 0x96 copied into the pool's first slot, BN6's empty 0x32 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); roll_v1's first at t67 in BN4 and t68 in BN6. In her battles alone (foes): another Navi's copies name 0x32 otherwise"
       },
       {
+       "bn4": "0x105",
+       "bn6": "0x280",
+       "clock": "state",
+       "what": "the panel changer's sound 0x105, its copy",
+       "why": "Played by the panel changer as it begins (BN4's fourth-kind 0x1F, moved once with the dark panels' unit, Hole's, DrkLine's and DrkStage's: movs r0,#6; adds r0,#0xff at 0x080E4390, its bl to PlaySoundEffect at 0x080E4394; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x280 and goes on to BN6's), a state's: BN4's song 0x105 copied into slot 0x280 of BN6's grown song table (tools/xchiprecipe_bn4.py SOUND_SLOTS, the dark chips' range). bn4_chip_hole at t34"
+      },
+      {
+       "bn4": "0x106",
+       "bn6": "0x281",
+       "clock": "state",
+       "what": "the panel changer's blink's sound 0x106, its copy",
+       "why": "Played by the panel changer for each panel it finds (the same object: movs r0,#7; adds r0,#0xff at 0x080E43E4, its bl at 0x080E43E8; BN6: the copy's shim makes r0 0x281), a state's: BN4's song 0x106 copied into slot 0x281. bn4_chip_drkline at t34, one a panel"
+      },
+      {
+       "bn4": "0x107",
+       "bn6": "0x282",
+       "clock": "state",
+       "what": "the panel changer's sound 0x107, its copy",
+       "why": "Played by the panel changer as it sets its panels when its kind is none of 8, 9, 0xA and 0xD (the same object: movs r0,#8; adds r0,#0xff at 0x080E446A, its bl to PlaySoundEffect at 0x080E447A; BN6: the copy's bl aimed at a shim of the unit's home that adds 0x17B to r0, XvSoundCall's add, as the call plays 0x124 too), a state's: BN4's song 0x107 copied into slot 0x282 of BN6's grown song table (BN6's own 0x107 another song, of two tracks). bn4_chip_drkstage at t34, its Holes' changer (kind 0xC)"
+      },
+      {
+       "bn4": "0x124",
+       "bn6": "0x29F",
+       "clock": "state",
+       "what": "the panel changer's poison's sound 0x124, its copy",
+       "why": "Played by the panel changer as it sets its panels when its kind is 8 or 0xD, poison (the same call: cmp r1,#0xd, then movs r0,#0x25; adds r0,#0xff at 0x080E4476, its bl at 0x080E447A; BN6: the shim adds 0x17B), a state's: BN4's song 0x124 copied into slot 0x29F. bn4_chip_drkstage at t34, the other side's poison (kind 0xD)"
+      },
+      {
         "bn4": "0xCE",
         "bn6": "0x33",
         "clock": "state",
