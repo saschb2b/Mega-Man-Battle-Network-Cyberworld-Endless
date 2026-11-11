@@ -4768,6 +4768,22 @@ static void test_xvirus_shims(void) {
 		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
 	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
 		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
+	/* (an effect's id no immediate names: cmp r4,#0; bne; movs r4,#0xC8; b the veneer, for one pair; two pairs pad to 16
+	 * bytes with a nop after the branch) */
+	uint8_t fx[XV_SHIM_EFFECT_MAX];
+	const uint8_t one[][2] = { { 0x00, 0xC8 } }, two[][2] = { { 0x00, 0xC8 }, { 0x15, 0xCB } }, loop[][2] = { { 0x00, 0xC8 }, { 0xC8, 0xC9 } };
+	CHECK(xvirus_shim_effect_size(1) == 8 && xvirus_shim_effect_size(2) == 16 && xvirus_shim_effect_size(3) == 20 && xvirus_shim_effect_size(4) == 28 &&
+		!xvirus_shim_effect_size(0) && !xvirus_shim_effect_size(5), "shims: an effect call's sizes");
+	CHECK(xvirus_shim_effect(fx, home, one, 1, veneer) == 8 && get16(fx) == 0x2C00 && get16(fx + 2) == 0xD100 && get16(fx + 4) == 0x24C8 &&
+		(get16(fx + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(fx + 6) & 0x7FFu) == veneer,
+		"shims: an effect call %04x %04x %04x %04x", get16(fx), get16(fx + 2), get16(fx + 4), get16(fx + 6));
+	CHECK(xvirus_shim_effect(fx, home, two, 2, veneer) == 16 && get16(fx + 6) == 0x2C15 && get16(fx + 8) == 0xD100 && get16(fx + 10) == 0x24CB &&
+		(get16(fx + 12) & 0xF800) == 0xE000 && home + 16 + 2 * (get16(fx + 12) & 0x7FFu) == veneer && get16(fx + 14) == 0x46C0,
+		"shims: an effect call of two pairs %04x %04x %04x", get16(fx + 6), get16(fx + 12), get16(fx + 14));
+	CHECK(!xvirus_shim_effect(fx, home + 1, one, 1, veneer) && !xvirus_shim_effect(fx, home, one, 1, home + 0x1000) && !xvirus_shim_effect(fx, home, one, 0, veneer) &&
+		!xvirus_shim_effect(fx, home, loop, 2, veneer),
+		"shims: an effect call off its halfword, its veneer out of reach, with no pair, or making an id it looks for, taken");
+	CHECK(xvirus_shim_r4_to(BN4_SPAWN_EFFECT) == BN6_SPAWN_EFFECT && !xvirus_shim_r4_to(BN4_PLAY_SOUND), "shims: an effect call's twin");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;
 	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");
