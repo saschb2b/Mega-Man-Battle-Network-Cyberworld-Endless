@@ -3,7 +3,7 @@ type: Feature
 title: "A visit"
 description: "A visit to the Net Square: the gate in Lan's HP and its first questions (`director_gate.c`, `online_field.c`), the checkpoint at the gate, the Square built on the game's own core (`online_visit.c`), how visits end."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:06:16Z }
 ---
 
 # A visit
@@ -36,7 +36,10 @@ B calls it off.
 **One core.** The visit runs on the game's own core
 (`online_visit.c`): the Square is built into the running BN6, the run's
 state (its `Run`, profile, RNG and loot) put aside, and the Square's RAM
-thrown away on the way home. Coming home puts the state back and
+thrown away on the way home, but for what BN6's PET changed there (a
+folder, the NaviCust, a SubChip used) and a trade's swap, noted byte by
+byte and written onto the checkpoint at home
+([The PET in the Square](pet.md)). Coming home puts the state back and
 `director_resume()` re-enters Lan's HP on the live core, MegaMan on the
 gate as he left it; nothing is booted again. A game closed in the Square
 continues from the gate's checkpoint, as any CONTINUE does. Every end has
@@ -49,6 +52,7 @@ after a dropped link came back (a server restarted with another seed).
 
 ## Contents
 
+- [The PET in the Square](pet.md)
 - [A dropped link](dropped-link.md)
 - [The Square's design](design.md)
 - [A hub and its parts](hub.md)

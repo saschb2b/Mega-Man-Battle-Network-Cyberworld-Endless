@@ -3,7 +3,7 @@ type: Tool
 title: "tools/play.py: a game kept for a playtest"
 description: "`tools/play.py`: one game kept per NAME under `.build/play` for a playtest, replayed from its seed and history, a pinned build, and the dev steps (place, flags, stuck, foes, xrecord, status, battle, sig, second, dump)."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-12T21:51:29Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:07:12Z }
 ---
 
 # tools/play.py: a game kept for a playtest
@@ -21,5 +21,5 @@ sets a block of event flags and `flags FROM TO 0` puts them back,
 recovery tested, issue #23), `foes 200@52 01@43` a battle of the foes named, `xrecord 811DE10` one of BN5's records in BN6's engine and `status freeze 90` a status on its enemies ([Dev tools](overview.md)), `battle` starts the layer's next random battle once he is free on its
 map (on BN5 territory one of its records, in BN6's engine), `sig` puts MegaMan in the layer's signature (the state
 names it and where it lies), `second` saves the second screen's picture beside the
-top one's, and `dump NAME` the video memory in romlab's format for
+top one's, and `dump NAME` the video memory in romlab's format (and the work RAM and the save RAM beside it, `NAMEe.bin`, `NAMEw.bin` and `NAMEs.bin`, for two dumps compared: what a screen of BN6's wrote) for
 `tools/romlab/labtrace.py`.

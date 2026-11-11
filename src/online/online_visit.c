@@ -10,7 +10,6 @@
 #include "emu.h"
 #include "game.h"
 #include "loot.h"
-#include "navicust.h"
 #include "netpass.h"
 #include "online_field.h"
 #include "online_scene.h"
@@ -19,6 +18,7 @@
 #include "platform.h"
 #include "save.h"
 #include "souls.h"
+#include "square_pet.h"
 #include "square_arena.h"
 #include "square_watch.h"
 #include "square_week.h"
@@ -37,6 +37,7 @@ static struct {
 	LootMemory battle;
 	OnlineLoadout loadout;
 	bool carried;
+	unsigned souls;       /* the Souls held at the gate, a run's record (the carried MegaMan read again) */
 	const char *news;     /* MegaMan's word on a trade settled, till said */
 	char name[ONLINE_NAME_BYTES + 1];          /* the name this game goes by in the Square */
 	char note[ONLINE_MAINTENANCE_BYTES + 1];   /* the server's line with the end (maintenance) */
@@ -46,11 +47,15 @@ static struct {
  * loaded, then saved there: the file kept till then goes first, so a crash
  * between costs this side the trade, never makes a chip twice */
 static void settle(void) {
-	const char *words = online_trade_settle();
-	if (!words) return;
-	online_trade_settled();
-	if (!home_gate_save()) fprintf(stderr, "online: the checkpoint after the trade was not written\n");
-	V.news = words;
+	/* (first what BN6's PET changed in the Square, square_pet.h, written onto the checkpoint: a folder made there
+	 * is the run's; a trade the Square made in its own game comes with it, and is not made again) */
+	bool traded = false, pet = square_pet_home(&traded);
+	const char *words;
+	bool trade = online_trade_settle(traded, &words);
+	if (trade) online_trade_settled();
+	if (!pet && !trade) return;
+	if (!home_gate_save()) fprintf(stderr, "online: the checkpoint after the visit's changes was not written\n");
+	if (words) V.news = words;
 }
 
 void online_visit_resumed(void) { settle(); }
@@ -139,6 +144,7 @@ static void come_home(VisitEnd why) {
 	/* (the week's net: the gate's checkpoint stays the normal run's, and
 	 * the dive begins, or goes on, in its own slot; weekly.h) */
 	if (why == VISIT_END_DIVE) {
+		/* (what BN6's PET changed in the Square waits in its file for the run's next CONTINUE: square_pet.h) */
 		director_stop();
 		V.ended = VISIT_END_NONE;
 		if (square_week_dive()) return;
@@ -164,7 +170,8 @@ static void come_home(VisitEnd why) {
  * the Square built into the running game and MegaMan warped there */
 static void go_away(const OnlineSnapshot *s) {
 	emu_sync();
-	V.carried = online_snapshot_read(&V.loadout, souls_held());
+	V.souls = souls_held();
+	V.carried = online_snapshot_read(&V.loadout, V.souls);
 	director_stop();
 	cinema_reset();
 	V.stage = VISIT_AWAY;
@@ -244,33 +251,19 @@ void online_visit_shutdown(void) {
 
 const char *online_visit_name(void) { return V.name; }
 
-const OnlineLoadout *online_visit_loadout(void) { return V.stage == VISIT_AWAY && V.carried ? &V.loadout : NULL; }
+void online_visit_carried_again(void) {
+	if (V.stage != VISIT_AWAY) return;
+	V.carried = online_snapshot_read(&V.loadout, V.souls);
+	OnlineProfile card;
+	online_visit_profile(&card);
+	online_scene_card(&card);
+}
 
-static uint16_t bounded_depth(int depth) { return (uint16_t)(depth < 0 ? 0 : depth > UINT16_MAX ? UINT16_MAX : depth); }
+const OnlineLoadout *online_visit_loadout(void) { return V.stage == VISIT_AWAY && V.carried ? &V.loadout : NULL; }
 
 void online_visit_profile(OnlineProfile *out) {
 	memset(out, 0, sizeof *out);
-	if (!V.carried) return;
-	const OnlineLoadout *navi = &V.loadout;
-	out->hp = navi->hp; out->max_hp = navi->max_hp;
-	/* NaviStats stores each level less one; the public card shows 1-5. */
-	out->attack = navi->attack < 5 ? (uint8_t)(navi->attack + 1u) : 5;
-	out->speed = navi->speed < 5 ? (uint8_t)(navi->speed + 1u) : 5;
-	out->charge = navi->charge < 5 ? (uint8_t)(navi->charge + 1u) : 5;
-	out->souls = navi->souls; out->crosses = navi->crosses;
-	out->depth = bounded_depth(V.run.depth);
-	unsigned act = out->depth ? ((out->depth - 1u) % CYCLE_LAYERS) / 3u + 1u : 0;
-	/* The short net's second Nest at threat ten remains its fourth act. */
-	if (V.run.mode == RUN_SHORT && out->depth >= SHORT_LAYERS) act = (SHORT_LAYERS - 1u) / 3u + 1u;
-	out->act = (uint8_t)act;
-	out->best_depth = bounded_depth(V.profile.best_depth);
-	out->marks = V.profile.marks;
-	for (unsigned i = 0; i < ONLINE_BOARD_CELLS; ++i) {
-		unsigned slot = navi->grid[i];
-		if (!slot || slot > BN6_NAVICUST_SLOTS) continue;
-		const uint8_t *record = navi->board + (slot - 1u) * 8u;
-		unsigned variant = record[0] | (unsigned)record[1] << 8;
-		NaviShape shape;
-		if (variant && variant < 47 * 4 && navicust_shape((int)variant, &shape)) out->board[i] = shape.color;
-	}
+	if (V.carried) online_snapshot_card(&V.loadout, V.run.depth, V.run.mode == RUN_SHORT, V.profile.best_depth, V.profile.marks, out);
 }
+
+bool online_visit_square(void) { return V.stage == VISIT_AWAY && !square_pet_open(); }

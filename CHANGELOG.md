@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The PET in the Net Square.** START opens the PET in the Net Square as
+  anywhere: edit a folder before a NetBattle, run the NaviCust, use a
+  SubChip, play the Jukebox. What you change there comes home with you,
+  also if you close the game in the Square. The NetPass, which START
+  used to open there, is on R in the PET's menu (it says so) and in
+  KeyItem as everywhere. A chip you trade is in your Pack on the spot,
+  ready for a folder.
 - **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
   Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
   fights him: his spinning top, his dashes and his sounds, each proved

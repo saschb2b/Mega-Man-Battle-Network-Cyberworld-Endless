@@ -3,7 +3,7 @@ type: Status
 title: "What has been shown"
 description: "The dated record of what online play has been shown doing: visits, trades, the trade board, NetBattles across networks and systems, full rules and Souls, rematches, the stands, the NetPass, dropped links, emotes, crowds."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:25:12Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:07:12Z }
 ---
 
 # What has been shown
@@ -498,3 +498,23 @@ are in the history before 433865a8):
   sources in CI against the public server; the Android APK in an
   emulator; an untrusted certificate refused on each, with no plaintext
   fallback.
+
+**The PET in the Square**, 11 November 2026, the Linux build headless on
+a local server ([The PET in the Square](square/pet.md)):
+
+- **START** opened BN6's PET in the Square (PLACE "Net Square"), and
+  ChipFolder's editor, SubChip, MegaMan's status and the NaviCust, the
+  Library, E-Mail, KeyItem, Options and the Jukebox each opened there, Save's note
+  showed ("Run saved at the gate"); R
+  on the menu and A on KeyItem's NetPass both opened the pass.
+- **A folder edit came home:** MrkCan1 M changed for FireBrn1 F in the
+  Square, R and Yes, and the folder editor in Lan's HP showed FireBrn1 F
+  first; with `--dev nocarry` it showed MrkCan1 M again. SuprArmr placed
+  and run in the Square's NaviCust was on the board at home.
+- **Closed in the Square:** the game ended there after the edit, and
+  CONTINUE from the title wrote the two bytes onto the gate's checkpoint.
+- **A NetBattle after it:** Kei's edited folder was the one both games
+  dealt his side, 20 of 20 hashes agreed.
+- **A trade and the PET:** Cannon A for FireBrn2 S, in the Pack in the
+  Square at once, put first in the folder there, and at home in the
+  folder with one Cannon A less in the Pack.

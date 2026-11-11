@@ -3,7 +3,7 @@ type: Tool
 title: "The Net Square: two games at once"
 description: "Testing the Net Square on a local server: `python3 build.py server-run`, a data folder's `network.ini` or `--dev online=URL`, two `tools/play.py` games, dev steps (`emote`, `netpass`, `trade`, `reconnect`) and `tools/link_relay.py` for dropped links."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:07:12Z }
 ---
 
 # The Net Square: two games at once
@@ -94,6 +94,13 @@ sent:
 python3 build.py shot --scene emu --run-depth 2 --frames 700 --input "300:,0:reconnect 12,300:" --shot "560:/src/.build/rc/240.bmp"
 python3 build.py shot --scene emu --run-depth 2 --frames 700 --touch --size 1080x1920 --dpi 420 --input "300:,0:reconnect 12,300:" --screen-shot "560:/src/.build/rc/phone.bmp"
 ```
+
+BN6's PET in the Square ([The PET in the Square](../online/square/pet.md)) is tried with one game on a local server:
+START, an edit, R and Yes for home, the PET again there. `--dev nocarry`
+leaves what the PET changed behind on the way home, as before it was
+carried (a mutation: the edit must then be gone), and with
+`CYBERWORLD_EMU_DEBUG=1` the log names each byte a PET session changed
+("square pet: 02002178 9b to 14").
 
 The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
 data folder whose `network.ini` names a server and its consent (above),

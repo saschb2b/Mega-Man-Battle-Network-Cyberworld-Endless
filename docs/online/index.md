@@ -9,7 +9,7 @@
 * [The week's net](weekly-net.md) - The week's net (issue #127): each server's weekly seed (`week.py`), a dive in a save slot of its own from a standard profile (`src/core/weekly.c`), the greeter's offer, WEEK_POST and the Board's reported depths.
 * [What has been shown](shown.md) - The dated record of what online play has been shown doing: visits, trades, the trade board, NetBattles across networks and systems, full rules and Souls, rematches, the stands, the NetPass, dropped links, emotes, crowds.
 * [The Arena, in brief](arena-in-brief.md) - The Arena, the stands and Team NetBattles in brief: a challenge, BN6's Practice NetBattle on two linked cores per game by full rules, rematches, the referee, watching for real, relay teams and side by side.
-* [Trade Central](trade-central.md) - Trade Central (`trade_central.c`): one spare chip for another player's, kept in `trade.pending` and settled at home, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board.
+* [Trade Central](trade-central.md) - Trade Central (`trade_central.c`): one spare chip for another player's, swapped in the Square at once and kept in `trade.pending` until home has it, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board.
 * [The NetPass](netpass.md) - The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's and BN5's, that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment and protocol v9's NOTICE 28.
 
 # Subdirectories

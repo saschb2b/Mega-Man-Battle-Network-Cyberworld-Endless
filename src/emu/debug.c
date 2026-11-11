@@ -71,6 +71,10 @@ bool emu_debug_dump(const char *prefix) {
 	bool ok = dump_part(prefix, 'v', 0x06000000, 0x18000);
 	ok = dump_part(prefix, 'p', 0x05000000, 0x400) && ok;
 	ok = dump_part(prefix, 'i', 0x04000000, 0x60) && ok;
+	/* (the work RAM and the cart's save RAM too: what a screen of BN6's wrote, two dumps compared) */
+	ok = dump_part(prefix, 'e', 0x02000000, 0x40000) && ok;
+	ok = dump_part(prefix, 'w', 0x03000000, 0x8000) && ok;
+	ok = dump_part(prefix, 's', 0x0E000000, 0x10000) && ok;
 	return dump_part(prefix, 'o', 0x07000000, 0x400) && ok;
 }
 

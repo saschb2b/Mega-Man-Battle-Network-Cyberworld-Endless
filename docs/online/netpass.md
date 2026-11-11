@@ -3,7 +3,7 @@ type: Feature
 title: "The NetPass"
 description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's and BN5's, that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment and protocol v9's NOTICE 28."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T18:18:06Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:06:16Z }
 ---
 
 # The NetPass
@@ -23,7 +23,7 @@ one entry there: the stamps that need it go back to open until a player
 has it in, which the release notes and the site announce ahead.
 
 The **NetPass** shows it, and is the one place that names which game
-earns which stamp: a key item in Lan's PET (START in the Square), a strip
+earns which stamp: a key item in Lan's PET (R on the PET's menu in the Square), a strip
 at the gate and a panel on the second screen. Characters speak only of
 stamps, never of ROMs.
 
@@ -102,11 +102,12 @@ It shows in three places:
   nameless that the run's own items use), always shown. In a run A on it
   opens the pass over the KeyItem screen; A or B closes it, the game's
   keys held meanwhile and its closing button kept from BN6 until it is let
-  go ([The NetPass](../game/pet.md#the-netpass)). **In the Square, START** opens it:
-  BN6's PET stays shut there (`online_chat.c` takes START, as before),
-  since what its screens change is the Square's RAM, thrown away on the
-  way home, so START, the PET's own button, is the nearest clean way to
-  the same screen (`netpass_screen.c`).
+  go ([The NetPass](../game/pet.md#the-netpass)). **In the Square** BN6's PET
+  opens as everywhere ([The PET in the Square](square/pet.md)), so the
+  key item is there too, and **R on the PET's menu** opens the same
+  screen (`netpass_screen.c`), named at its band's end, `R:NETPASS`.
+  START opened it there until 11 November 2026, while the PET stayed
+  shut in the Square.
 - **At the gate** in Lan's HP: while MegaMan asks "To the Net
   Square,Lan?", a strip over the top of the screen shows the pass's level
   and its four stamps, so the player sees what the visit opens before

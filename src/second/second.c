@@ -56,10 +56,11 @@ static SecondContext pet_screen(int screen) {
 }
 
 static SecondContext context_now(void) {
-	/* (the Net Square: its pass, the run put aside meanwhile) */
-	if (online_visit_away()) return SECOND_SQUARE;
+	/* (the Net Square: its pass, the run put aside meanwhile; BN6's PET up there reads as anywhere) */
+	bool away = online_visit_away();
+	if (online_visit_square()) return SECOND_SQUARE;
 	bool home = director_in_town() || director_in_hp();
-	if (!director_on_layer() && !home) return SECOND_DARK;
+	if (!away && !director_on_layer() && !home) return SECOND_DARK;
 	switch (emu_read8(emu_read32(BN6_TOOLKIT))) {
 	case BN6_MODE_SUBMENU: return pet_screen(emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU)));
 	case BN6_MODE_SHOP: return SECOND_SHOP;

@@ -10,6 +10,7 @@
 #include "game.h"
 #include "netpass.h"
 #include "netpass_draw.h"
+#include "netpass_text.h"
 #include "pet_look.h"
 #include "platform.h"
 
@@ -122,6 +123,10 @@ void netpass_screen_draw(void) {
 	if (!N.shown) return;
 	netpass_draw(P.core_x, P.core_y, &N.view);
 	look_fade_in(P.core_x, P.core_y, NETPASS_W, NETPASS_H, N.view.t);
+}
+
+void netpass_screen_key_hint(void) {
+	look_hint(P.core_x + NETPASS_W - 20 - look_hint_width("R", netpass_key_hint), P.core_y + 4, "R", netpass_key_hint);
 }
 
 void netpass_screen_strip(void) {

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Create**: online/square/pet.md (BN6's PET in the Net Square: why it was shut, what each screen writes, the carry home, Save, R:NETPASS, a NetBattle and a trade after an edit); **Update**: game/pet.md and online/netpass.md (the pass in the Square: KeyItem and R on the PET's menu, START the PET's), online/square/overview.md (what comes home), online/trade-central.md (the swap made in the Square at once, a promised chip stays a spare), engine/ui.md (the PET menu's one hint of ours), rom/navicust.md (the command line's list, new row), devtools/play.md and devtools/net-square.md (`dump`'s RAM, `nocarry`), code/online.md, online/shown.md, GUIDE.md.
 * **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-chips.md (PropBom1-3 moved), rom/bn4.md (PropBom's code and the obstacle slots given up, new row), devtools/chip-recipe-generator.md (an effect over a pattern of panels).

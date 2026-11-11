@@ -332,6 +332,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
     },
     {
+      "date": "2026-11-11",
+      "what": "What BN6's PET writes of its kept data, measured in the Net Square by RAM dumps before and after each screen (docs/online/square/pet.md): the folder editor the folder's entries and the Pack's order stamps; a NaviCust RUN the grid, the placed list, a key item's count with its check, NaviStats and the command line's list, named BN6_NAVICUST_LINE 0x02000090 (bn6_navicust.h, bn6f unk_2000090: sub_813676C and sub_813677C copy its 8 bytes to and from the screen's list at 0x02022B70, sub_813C324 clears them; SuprArmr run on the line wrote 4; docs/rom/navicust.md); the PET's close clears the no-encounters flag 0x1700 through EnterMap."
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },
