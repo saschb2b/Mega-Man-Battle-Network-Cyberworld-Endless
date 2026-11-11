@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
+  Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
+  fights him: his spinning top, his dashes and his sounds, each proved
+  frame by frame against BN4's own battle.
+- **CloudMan joins the dark boards.** With BN5's ROM beside BN6's, BN5's
+  CloudMan now fights in BN6's own engine, proven against BN5's battle
+  frame by frame, and is act 4's own Darkloid on a dark layer, as BN5's
+  third mission has him, and a fourth choice in the other acts. His
+  board pays his own Navi chips at par as the other Darkloids' do: his SP
+  two under par, his V1 at par.
+- **BN4 Red Sun's chips in the finds.** With BN4's ROM beside BN6's, half
+  of what a layer of BN4's areas hands out comes from BN4's own
+  catalogue: the Net Dealer's stock, Mystery Data, the vaults', Servers'
+  and gift's picks, and a Chip Trader's list. Its chips that play today
+  come among them (PanlSht, ShotStar, Repair, Counter, WhitWeb, Boomer and
+  Invis), more as each is proved; never a dark chip, which only a flame
+  of darkness offers. In the deep the half draws on every game's chips you
+  have. A run without BN4's ROM finds what it always did. A BN4 chip you
+  hold now counts on the Library's BN4 page.
+- **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
+  Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
+  they look as on any other layer again.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
@@ -65,6 +87,10 @@
   He stands on the board in his own sprite and speaks with his own face,
   at the version the act's band takes. CloudMan is not in yet. A run
   saved on a layer starts that layer again.
+- **GyroMan, SearchMan and Meddy join NapalmMan.** Three more of Team
+  ProtoMan, BN5's GyroMan, SearchMan and Meddy, now fight in BN6's battle
+  too, moved from BN5's own and checked against it frame by frame. Like
+  NapalmMan they don't guard a run yet.
 - **NapalmMan, the first of Team ProtoMan.** With BN5 Team Colonel's
   ROM beside BN6's, Team ProtoMan's NapalmMan now fights in BN6's
   battle, moved from BN5's own and checked against it frame by frame

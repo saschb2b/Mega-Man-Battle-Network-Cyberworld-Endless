@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's SidBmbo2 H (79) against the registry's row 572 (the unit of BN4's misc 5, power 110): picked on the first Custom screen and used at fight frame 30 against BN4's Mettaur (140 HP) at (5,2). The bamboo, the third kind's 0x44, comes up three columns ahead of MegaMan from t33 to t95 and strikes the Mettaur at t41 in both: 30 HP left. BN4's misc run waits 0x28 frames after this subfamily's routine before it ends the attack, which BN6's does for a grown routine by the unit's wrapper: MegaMan in his misc state from t32 to t71 in BN4's (t33 to t72 in BN6's), its count 0x27 down to 1 in both.",
+ "folder4": [
+  "0E4F"
+ ],
+ "folder6": [
+  "23C:07"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

@@ -75,6 +75,7 @@
 #include "xattack_grow.h"
 #include "xchips.h"
 #include "chip_entry.h"
+#include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -169,7 +170,7 @@ bool town_after_abandon;
 /* (the nets' meeting, issue #82: no ROMs, so the families the visitors
  * come from are the tests' own, test_visitors; the older net's chips'
  * share, home's requests' rolls; BN6's stages by depth) */
-int loot_older_share;
+int loot_older_share, loot_older_net;
 bool loot_visitors_always;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
 static VisitorKin test_kin[VISIT_NETS][4];
@@ -1534,6 +1535,16 @@ static void test_pacing(void) {
 		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 held to 1300 in act 4");
 	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
 	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
+	/* BN4's by the same rule where its areas' records set them (docs/game/bosses/bn4-navis.md; BN4's own HP: GutsMan
+	 * 500/900/1300/1700, WoodMan 1000/1500/2000/2500, JunkMan 800/1100/1500/1800), each an older net's moved Navi */
+	const int guts[4] = { 500, 900, 1300, 1700 }, wood[4] = { 1000, 1500, 2000, 2500 }, junk[4] = { 800, 1100, 1500, 1800 };
+	CHECK(pacing_xguardian_version(guts, 0, 0, false) == 0 && pacing_xguardian_version(guts, 1, 0, false) == 1 &&
+		pacing_xguardian_hp(900, 1, 0) == 700, "GutsMan V1 in act 1, V2 held to 700 in act 2");
+	CHECK(pacing_xguardian_version(wood, 1, 0, false) == 0 && pacing_xguardian_hp(1000, 1, 0) == 700 && pacing_xguardian_hp(1000, 2, 0) == 1000,
+		"WoodMan V1 in acts 2 and 3, held to 700 in act 2");
+	CHECK(pacing_xguardian_version(junk, 4, 0, false) == 1 && pacing_xguardian_version(junk, 5, 0, false) == 2, "JunkMan V2 then V3 in the deep");
+	CHECK(guardian_moved(GUARDIAN_OLDER_FIRST) && guardian_moved(GUARDIAN_BN4_FIRST + 1) && !guardian_moved(1) && !guardian_moved(GUARDIAN_DARKLOID_FIRST),
+		"BN5's six and BN4's Navis the older net's moved guardians, BN6's and the Darkloids not");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
@@ -4172,8 +4183,10 @@ static void test_xnavi_static(void) {
 		XN_MORE_ART + 4 * XN_SLOT_ART <= XN_MORE_END && XN_MORE_END <= XN_DARK_RECORDS && XN_DARK_RECORDS + XN_DARK_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
-		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES,
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites)");
+		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES) &&
+		XN_SHARED_FOUR < XN_SHARED_FOUR_END,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third and fourth rooms apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4187,7 +4200,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 11, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan and NapalmMan)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -4351,8 +4364,27 @@ static void test_free_space(void) {
 	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
 	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
 	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
-		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= 0x100,
-		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls' apart");
+		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= XATTACK_BN4 && XATTACK_BN4_END == 0x100,
+		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls', BN4's chips' apart");
+	/* (BN4's chips' units, xchips_bn4.h: an attack family's number one of BN4's own, each once; a registry row's `sub` from
+	 * XREG4_FIRST_ATTACK names one, past every support and misc routine's number) */
+	CHECK(XREG4_FIRST_ATTACK == XATTACK_BN4 && XC4_FIRST_ATTACK == XATTACK_BN4 && XC4_FIRST_SUPPORT + BN4_CHIP_ROUTINE_COUNT <= XREG4_FIRST_ATTACK &&
+		XC4_FIRST_SUPPORT + BN4_MISC_ROUTINE_COUNT <= XREG4_FIRST_ATTACK, "chips' code: BN4's attack families' numbers past its support and misc routines'");
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (u->kind != XCHIP_ATTACK) continue;
+		int twice = 0;
+		for (int k = 0; k < xchips_bn4_count; ++k) twice += xchips_bn4[k].kind == XCHIP_ATTACK && (xchips_bn4[k].number == u->number || xchips_bn4[k].bn5 == u->bn5);
+		CHECK(u->number >= XATTACK_BN4 && twice == 1 && !u->share && u->bn5 >= 6, "chips' code: %s a family of BN4's chips' own numbers, once (%#x)",
+			u->code.name, u->number);
+	}
+	for (int i = 0; i < xreg4_count; ++i) {
+		const XChipReg4 *r = &xreg4_rows[i];
+		if (r->how != XREG_MOVED || r->sub < XREG4_FIRST_ATTACK) continue;
+		int units = 0;
+		for (int k = 0; k < xchips_bn4_count; ++k) units += xchips_bn4[k].kind == XCHIP_ATTACK && xchips_bn4[k].number == r->sub;
+		CHECK(units == 1, "registry: BN4's chip %d's family %#x a unit's", r->bn4, r->sub);
+	}
 	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
 		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
 	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
@@ -5412,6 +5444,12 @@ static void test_chip_records(void) {
 	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
 	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
 		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	/* (its DarkChips by their MB, docs/multirom/bn4-chips.md's unit 7: the five a run's finds never hold, a flame's) */
+	int dark4 = 0;
+	static const uint16_t darks4[] = { 187, 189, 190, 192, 193 };   /* DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage */
+	for (int i = 0; i < xreg4_count; ++i) dark4 += xreg4_rows[i].mb == XREG4_DARKCHIP_MB;
+	for (unsigned i = 0; i < sizeof darks4 / sizeof *darks4; ++i) dark4 -= xreg4_of(darks4[i]) && xreg4_of(darks4[i])->mb == XREG4_DARKCHIP_MB;
+	CHECK(!dark4, "registry: BN4's five DarkChips, and no other row, hold the DarkChips' MB (%d off)", dark4);
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
@@ -5450,6 +5488,18 @@ static void test_chip_records(void) {
 	xrec_from_bn4(&on6, out);
 	CHECK(out[BN6_CHIP_FAMILY] == 0x15 && out[BN6_CHIP_SUBFAMILY] == 5 && out[BN6_CHIP_LOCK_ON] == 1 && out[BN6_CHIP_LOCK_ON_TYPE] == 2 && out[BN6_CHIP_PARAMS] == 7,
 		"records: a BN4 chip on BN6's code takes its twin's family, subfamily and lock-on, its own parameters");
+	/* (one whose code is moved, XREG_MOVED: a support routine's number its subfamily under BN6's support family; an attack
+	 * family's, from XREG4_FIRST_ATTACK, its family, BN4's own subfamily kept; BN4's parameters either way, no lock-on) */
+	const XChipReg4 shot4 = { 178, 559, XREG_MOVED, 0, 0xA6, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 }, heat4 = { 19, 588, XREG_MOVED, 0, 0xD0, { 1, 2, 3, 26 }, 0, 8 };
+	XRecordFrom4 moved4 = { rec4, NULL, &shot4, 0, { 0 } };
+	xrec_from_bn4(&moved4, out);
+	bool support4 = out[BN6_CHIP_FAMILY] == BN6_CHIP_SUPPORT_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0xA6 && out[BN6_CHIP_PARAMS] == 7 && !out[BN6_CHIP_LOCK_ON];
+	rec4[BN6_CHIP_FAMILY] = 0x1E; rec4[BN6_CHIP_SUBFAMILY] = 1;
+	moved4.reg = &heat4;
+	xrec_from_bn4(&moved4, out);
+	CHECK(support4 && out[BN6_CHIP_FAMILY] == 0xD0 && out[BN6_CHIP_SUBFAMILY] == 1 && out[BN6_CHIP_PARAMS] == 7 && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_LOCK_ON_TYPE],
+		"records: a BN4 chip whose code is moved takes its unit's routine under BN6's support family, or its unit's attack family with its own subfamily");
+	rec4[BN6_CHIP_FAMILY] = 0x0C; rec4[BN6_CHIP_SUBFAMILY] = 0x2D;
 	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
 	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");
@@ -5672,6 +5722,26 @@ static void test_darkchips(void) {
 	CHECK(dark_ran_add(0, 0x47, 0xFF) == 0 && dark_ran_add(DARK_RAN_BN5, 0x47, 0xFF) == DARK_RAN_BN5, "dark: any other chip leaves it");
 	CHECK(dark_ran_add(dark_ran_add(0, 220, 0xFF), 214, 0xFF) == DARK_RAN_BN5 && (dark_ran_add(DARK_RAN_BN5, 286, 0) & DARK_RAN_BN6) == 1u,
 		"dark: two of BN5's in a battle one bit (one price), BN6's beside them its own");
+	/* (BN4's dark chips, the owner's call of 10 November 2026: the rows BN4's records mark dark, by alignment or as a DarkChip,
+	 * 28 of the 193; one used is a dark power run, whatever its DarkChipID, two in a battle one price; no kind of the twelve,
+	 * so no flame's and no mood's; a light chip of BN4's and its neighbours none) */
+	int darks4 = 0, rows4 = 0;
+	for (int id = 0; id < XREG_IDS; ++id) {
+		darks4 += dark_bn4_is(id);
+		rows4 += dark_bn4_is(id) && xreg4_at(id) != NULL;
+	}
+	CHECK(darks4 == xreg4_dark_count && rows4 == darks4 && darks4 == 28, "dark: BN4's dark chips 28, each a row of BN4's (%d %d %d)", darks4, rows4, xreg4_dark_count);
+	CHECK(dark_bn4_is(527) && dark_bn4_is(528) && dark_bn4_is(697) && dark_bn4_is(534) && dark_bn4_is(562) && dark_bn4_is(601) && dark_bn4_is(605),
+		"dark: Hole, DrkLine, ElemDark, RollDS, DrkStage, DrkVulcn and DarkNeo dark chips of BN4's");
+	CHECK(!dark_bn4_is(558) && !dark_bn4_is(559) && !dark_bn4_is(533) && !dark_bn4_is(637) && !dark_bn4_is(602) && !dark_bn4_is(530) && !dark_bn4_is(220) &&
+		!dark_bn4_is(286) && !dark_bn4_is(0) && !dark_bn4_is(1023), "dark: Invis, PanlSht1, RollSP, ElemFlar, BlakWeap, the retired id and the other nets' DarkChips none of BN4's");
+	CHECK(!dark_chip_is(527) && dark_chip_kind(562) < 0 && dark_bn6_kind(601) < 0, "dark: a dark chip of BN4's no kind of the twelve");
+	CHECK(dark_ran_add(0, 527, 0xFF) == DARK_RAN_BN4 && dark_ran_add(0, 562, 0xFF) == DARK_RAN_BN4 && dark_ran_add(0, 562, 2) == DARK_RAN_BN4,
+		"dark: Hole and DrkStage run, a dark chip of BN4's whatever its DarkChipID (%#x)", dark_ran_add(0, 527, 0xFF));
+	CHECK(dark_ran_add(dark_ran_add(0, 527, 0xFF), 697, 0xFF) == DARK_RAN_BN4 && dark_ran_add(DARK_RAN_BN4, 0x47, 0xFF) == DARK_RAN_BN4 &&
+		dark_ran_add(0, 559, 0xFF) == 0 && dark_ran_add(0, 558, 0xFF) == 0, "dark: two of BN4's in a battle one bit (one price), a light chip of BN4's none");
+	CHECK(!(DARK_RAN_BN4 & DARK_RAN_BN6) && !(DARK_RAN_BN4 & DARK_RAN_BN5) && dark_ran_add(DARK_RAN_BN4, 220, 0xFF) == (DARK_RAN_BN4 | DARK_RAN_BN5),
+		"dark: BN4's bit none of BN6's by DarkChipID nor BN5's");
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,

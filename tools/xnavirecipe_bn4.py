@@ -54,7 +54,8 @@ NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 13
          (0x0D, 'AquaMan', 168),
          (0x1D, 'Roll', 128),
          (0x46, 'WoodMan', 172),
-         (0x47, 'JunkMan', 164))
+         (0x47, 'JunkMan', 164),
+         (0x09, 'TopMan', 176))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -310,6 +311,8 @@ def navi_palette(f, w):
     version: xnavi_init.c; docs/multirom/bn4-navis.md, Roll's versions)"""
     f.palettes = 0
     sites = [s for s, t in w.bls.items() if t == NAVI4['palette']]
+    if not sites:
+        return navi_palette_set(f, w)
     if len(sites) != 1:
         return
     k, _ = T.back_value(w, sites[0], 0)
@@ -325,6 +328,33 @@ def navi_palette(f, w):
     f.palettes = sum(p << 8 * v for v, p in enumerate(pal)) if max(pal) <= 0xFF else 0
     odd = ', '.join(f'version {v} {p}' for v, p in enumerate(pal) if p)
     f.notes.append(f'its palette: BN4_NAVI_PALETTE\'s {k}, V1\'s 0, BN6\'s step 0' +
+                   (f' (BN4 gives {odd}: set at its spawn\'s end, XNavi.palettes)' if odd else ' for every version'))
+
+
+# The other build's palette (TopMan's 0x080B68F2, SparkMan's, BurnerMan's): movs r0,#a; ldrb r1,[r5,#4] (its version); cmp
+# r1,#v; bne; movs r0,#b; then BN4's palette set (0x08002DEC) itself: palette a for every version but v's, b
+PALETTE_BY_ONE = ('movs', 'ldrb', 'cmp', 'bcc', 'movs')
+
+
+def navi_palette_set(f, w):
+    """its palette set by BN4's palette set with r0 a for every version but one (PALETTE_BY_ONE: the other build's, no
+    BN4_NAVI_PALETTE): V1's 0 as BN6's step 0, the one's at its spawn's end (XNavi.palettes), as navi_palette's"""
+    sites = [s for s, t in w.bls.items() if t == X4.BN4['palette']]
+    if len(sites) != 1:
+        return
+    prev = [w.insns[a] for a in sorted(w.insns) if a < sites[0]][-5:]
+    if tuple(i.form for i in prev) != PALETTE_BY_ONE or prev[0].f[0] != 0 or tuple(prev[1].f) != (1, 5, 4) or \
+            prev[2].f[0] != 1 or prev[4].f[0] != 0:
+        return
+    a, v, b = prev[0].f[1], prev[2].f[1], prev[4].f[1]
+    pal = [b if k == v else a for k in range(VERSIONS)]
+    if pal[0]:
+        f.decide('struct1', f'{sites[0]:08X}: its V1\'s palette {pal[0]}, BN6\'s step 0 gives 0')
+        return
+    f.s1['palette'] = 0
+    f.palettes = sum(p << 8 * k for k, p in enumerate(pal))
+    odd = ', '.join(f'version {k} {p}' for k, p in enumerate(pal) if p)
+    f.notes.append(f'{sites[0]:08X}: its palette set by version (PALETTE_BY_ONE), V1\'s 0, BN6\'s step 0' +
                    (f' (BN4 gives {odd}: set at its spawn\'s end, XNavi.palettes)' if odd else ' for every version'))
 
 
@@ -617,6 +647,21 @@ def far_loads(f):
 LIST_MOVES = C.LIST_MOVES
 
 
+def own_sprite(f, lst, num, c1, c2):
+    """a moved object's load of the Navi's own battle sprite (list 2, its init's number: TopMan's top 0x080D031E, drawn as
+    he is): BN6's list 2 at his seat's number (NAVI_SPRITE0, XNAVI_SPRITE_BN4), where his battle's room holds it, the
+    number's movs BN6's; True where it is one"""
+    if lst != 4 * 2 or f.s1['list'] != 2 or num != f.s1['index'] or len(c1) != 1 or len(c2) != 1 \
+            or c1[0][1] != 'movs' or c2[0][1] != 'movs':
+        return False
+    to = NAVI_SPRITE0 + f.slot
+    if to != num:
+        f.imms.append(dict(at=c2[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=to,
+                           why=f'its object\'s sprite: his own battle sprite, list 2 {num:#x} in BN4, {to:#x} in BN6 (XNAVI_SPRITE_BN4)'))
+    f.notes.append(f'{c2[0][0]:08X}: its object draws his own battle sprite: BN6\'s list 2 {to:#x}')
+    return True
+
+
 def list_moves(b4, f, alloc):
     """its moved objects' loads of a sprite of LIST_MOVES' lists (r1 the list's offset, r2 its number, each a movs): the
     sprite copied into the list it moves to at a number of its own, both immediates BN6's"""
@@ -627,6 +672,9 @@ def list_moves(b4, f, alloc):
                 continue
             lst, c1 = T.back_value(w, site, 1)
             num, c2 = T.back_value(w, site, 2)
+            if own_sprite(f, lst, num, c1, c2):
+                done.add(site)
+                continue
             if lst is None or lst & 3 or lst // 4 not in LIST_MOVES or num is None or len(c1) != 1 or len(c2) != 1 \
                     or c1[0][1] != 'movs' or c2[0][1] != 'movs':
                 continue

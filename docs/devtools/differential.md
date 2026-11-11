@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:33:37Z }
 ---
 
 # The differential: a moved family against its own game
@@ -52,7 +52,14 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do.
+where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+a dark karma parts the two from the first frame on one byte: MegaMan's
+palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
+0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
+palette, BN4's, names that pair alone (an entry's `cells`).
+`bn4_chip_invis_dark` is the control: Invis, which plays for any karma,
+used by a dark MegaMan, nothing else of him apart; its mutation (BN6's
+init handing him palette 3) is caught.
 A chip whose code is BN4's moved (a unit of `tools/xchiprecipe_bn4.py`,
 its rows `XREG_MOVED`: `bn4_chip_panlsht1` to `3`) is compared the same
 way, with what `legit.json`'s `bn4` section adds for it: his attack's
@@ -93,6 +100,26 @@ frame, as BN6's field update writes them. Its three mutations break
 BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
 specs record where a chip parts, each with its verdict and why:
 `bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
+
+A chip of an attack family of BN4's moved (an `attack` unit of
+`tools/xchiprecipe_bn4.py`: the spread chips', `bn4_chip_heatshot` and
+its seven kin) is compared as MegaMan's own state, its arm and its shot
+in play in the fight's frames. What `legit.json`'s `bn4` section adds:
+BN4's family in his CurAction read as the unit's number in BN6's grown
+attack families (`attack_families`, by the units' rows), his subfamily
+left as it is; his animation's number while he is in that state, each
+art's own, by the pairs listed with both games' sites
+(`megaman_animations`: the frames run of it compared as ever); BN4's
+chips' code room among the rooms a reference's pointer into moved code
+is read by (`tools/xdiff_snap.py` `XC4_CODE`: the shot keeps a pointer
+to its kinds' row); and the flag an attack sets, 0x400000, where a hit
+ended the attack, which BN4's struck state leaves and BN6's clears, only
+while his CurAction is a generic state's in both
+(`interrupted_attack`, `bn4_chip_heatshot_struck`). A BN4 spec holds one
+foe (the opening's alignment is the appear queue's first object's), so a
+burst's reach is seen by its effects' panels, and a chip used after a
+support chip follows BN6's support run's held frame, its objects with
+it: such a spec is not written yet.
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
@@ -888,9 +915,15 @@ moved) dropped out of the traces with only a line on stderr, which
 A BN5 address is read as moved code by the rooms the comparator knows
 (`tools/xdiff_snap.py`: `XV_CODE`, `XN_ROOM`, `XC_CODE`, `XN_BN4_ROOM`,
 and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
-`FREE_TEAM_NAVI_ART`): a word of BN5's naming its own copied code (the
-fourth kind's 0x12's +0x34, NapalmMan's data) is read as BN6's word naming
-the copy only where the copy's room is one of them.
+`FREE_TEAM_SHARED`, their code and art rooms): a word of BN5's naming its
+own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
+(GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
+copy only where the copy's room is one of them.
+
+A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
+its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
+kept as +0x34, +0x38 and +0x3C alike (SearchMan's 0x5A, its Z an
+object's address in its low half, `bn5_searchman_v1` at t894).
 
 A Navi's copy of a type both engines also run of their own (the third
 kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed
@@ -1201,6 +1234,17 @@ format, its game 4: the trace's header names it):
   comparator: the camera's shake's two draws a frame paired as BN5's are
   (legit.json's bn4 rng_twins take a `word`: BN4's draws there from its
   first RNG word, BN6's from its second, `tools/xdiff_bn4.py` rng_twins);
+  the bytes' shuffle is a twin there too (BN4 `0x08000AAA`, BN6
+  `0x08000C72`: a chip unit's draws have no family's key, so MokoRus's
+  rows were each engine's own order until its six draws were paired);
+  MegaMan's misc state's phase is read as BN6's while a unit's wrapper
+  waits (`megaman_misc_wait`: BN4's run's mark 4 against the wrapper's,
+  in BN4's misc state and for a waiting unit's subfamily alone; the
+  count beside it is compared as ever);
+  a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
+  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  makes from the unit's own code is given BN4's of that place; a draw
+  made while MegaMan runs stays the engine's (the shuffle's twin above);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@51",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's HeatShot B (its chip 19) against the registry's row for it (id 588), its family 0x1E, a state of BN4's MegaMan's, moved whole by tools/xchiprecipe_bn4.py as an attack unit (BN6's grown attack family 0xD0: the state, its arm, the third kind's 0x02, and its shot, the third kind's 0x12, with the shot's kinds' table; docs/multirom/bn4-chips.md): each picked on the first Custom screen and used at fight frame 30 with BN4's MettaurSP a row up, at (5,1): the shot flies MegaMan's row to the field's end and is let go, no burst, the Mettaur's 140 HP whole in both.",
+ "folder4": [
+  "0213"
+ ],
+ "folder6": [
+  "24C:01"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

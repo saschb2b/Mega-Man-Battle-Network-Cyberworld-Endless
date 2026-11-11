@@ -265,6 +265,20 @@ OBJ_SAVED_ACTION = 0x5D
 PLAYER_FAMILY = {0x09: 0x12, 0x0A: 0x13, 0x0B: 0x14, 0x0C: 0x15, 0x1D: 0x20, 0x1F: 0x17, 0x20: 0x1C, 0x23: 0x21, 0x28: 0x2F,
                  0x2B: 0x23, 0x32: 0x3F, 0x36: 0x53, 0x5A: 0x54}
 MEGAMAN_ID = 0x1A0
+# ... and a family of BN4's whose state is moved into BN6's engine as a unit of BN4's chips' code (tools/xchiprecipe_bn4.py's
+# 'attack' units, legit.json's bn4 attack_families): BN4's family read as the unit's number in BN6's grown attack families,
+# by the rows of src/emu/xchips_bn4.c (XCHIP_ATTACK, BN4's family, the number)
+XCHIP_ATTACK_ROW = re.compile(r'\{ XCHIP_ATTACK, 0x([0-9A-Fa-f]{2}), 0x([0-9A-Fa-f]{2}), ')
+MOVED_FAMILIES = {}
+
+
+def moved_families():
+    """{BN4's attack family: its number in BN6's grown attack families}, where legit.json's bn4 attack_families names the
+    units' file"""
+    rule = bn4_rule('attack_families')
+    if rule and not MOVED_FAMILIES:
+        MOVED_FAMILIES.update({int(a, 16): int(b, 16) for a, b in XCHIP_ATTACK_ROW.findall(open(os.path.join(ROOT, rule['units'])).read())})
+    return MOVED_FAMILIES
 
 
 def bn4_as_bn6(rec, fams):
@@ -274,8 +288,11 @@ def bn4_as_bn6(rec, fams):
     if rec[NODE + OBJ_TYPE] in types:
         rec[NODE + OBJ_TYPE] = 0
     megaman = rec[NODE + OBJ_NAME_ID] | rec[NODE + OBJ_NAME_ID + 1] << 8 == MEGAMAN_ID
+    moved = moved_families()
     for at in (OBJ_ACTION, OBJ_SAVED_ACTION):
-        if megaman and rec[NODE + at] in PLAYER_FAMILY:
+        if megaman and rec[NODE + at] in moved:
+            rec[NODE + at] = moved[rec[NODE + at]]
+        elif megaman and rec[NODE + at] in PLAYER_FAMILY:
             rec[NODE + at] = PLAYER_FAMILY[rec[NODE + at]]
         elif rec[NODE + at] >= 6:
             rec[NODE + at] += 2
@@ -292,6 +309,7 @@ XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
 OBJ_ELEMENT4, OBJ_ELEMENT6 = 0x17, 0x0E   # (a fourth-kind object's element: bn4.h BN4_T1_ELEMENT, BN6's BN6_T1_ELEMENT)
 XC4_FIRST_SUPPORT = 0x80   # (src/emu/xchips_bn4.h: a moved BN4 unit's number in BN6's grown support routines, less BN4's subfamily)
+XC4_FIRST_ATTACK = 0xD0    # (... and XC4_FIRST_ATTACK: a moved row's `sub` from here its family's number in BN6's grown attack families)
 
 
 def chip_ids(spec):
@@ -306,7 +324,8 @@ def chip_ids(spec):
     TWINS.clear()
     TWINS.update({int(to): (int(twin), None if sub.upper() == 'FF' else int(sub, 16)) for to, twin, sub in XREG4_TWIN.findall(rows)})
     # (a row whose code is moved, XREG_MOVED: no twin, its subfamily its unit's number in BN6's grown support routines)
-    TWINS.update({int(to): (None, int(sub, 16)) for to, sub in XREG4_MOVED.findall(rows)})
+    # (... or, from XC4_FIRST_ATTACK, its family's number in BN6's grown attack families: its subfamily BN4's own, attack_families)
+    TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
@@ -446,6 +465,24 @@ ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's fr
 
 def bn4_rule(name):
     return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get(name) or {}
+
+
+WAIT_UNIT = re.compile(r'\{ XCHIP_MISC, 0x[0-9A-Fa-f]{2}, 0x([0-9A-Fa-f]{2}), .*, 0, 0, 0x[0-9A-Fa-f]{2} \},')
+
+
+def megaman_wait_as_bn6(ai, rec):
+    """MegaMan's AI data of BN4's with his misc state's phase as BN6's while a waiting unit's wrapper counts (legit.json's bn4
+    megaman_misc_wait): BN4's own state alone (its CurAction), the phase BN4's run's own mark, and his attack's subfamily a
+    unit's that waits (src/emu/xchips_bn4.c's rows with a wait, as megaman_chip_as_bn6 left it); every other byte as it is"""
+    rule = bn4_rule('megaman_misc_wait')
+    if not rule or ai is None or rec is None:
+        return ai
+    at, sub = int(rule['phase'], 0), int(rule['subfamily'], 0)
+    waits = {int(n, 16) for n in WAIT_UNIT.findall(open(os.path.join(ROOT, 'src', 'emu', 'xchips_bn4.c')).read())}
+    if rec[NODE + OBJ_ACTION] == int(rule['action4'], 0) and ai[at] == int(rule['bn4'], 0) and not ai[at + 1] and ai[sub] in waits:
+        ai = bytearray(ai)
+        ai[at:at + 2] = int(rule['bn6'], 0).to_bytes(2, 'little')
+    return ai
 
 
 ACTOR_OBJECTS = {}
@@ -621,6 +658,8 @@ BN4_LACKS = [
 # too (his side's, BN4_AI_DATA), so the virus masks of BN4_LACKS, which explain a virus's AI data BN4 has none of, never
 # hold for his
 NAVI_NAMES = set()
+# ... and the BN4_LACKS masks that may explain a Navi's: his AI data whole and its pointer, BN4 holding none (lacks)
+NAVI_NO_AI = ('bn4 no ai data', 'bn4 no ai data pointer')
 
 
 def navi_role(role):
@@ -636,9 +675,15 @@ def lacks(d, ta, tb):
     """the BN4_LACKS mask that explains d (BN4's side a, BN6's b), None where none does"""
     if ta['game'] != 4 or tb['game'] != 6:
         return None
-    if navi_role(d.role) and (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
-        return None
+    navi = navi_role(d.role)
+    if navi and not (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
+        navi = False
     for m in BN4_LACKS:
+        # (a Navi of the other build, TopMan's on: his BN4 object holds no AI data at all, +0x58 0, as a virus's, where BN6's
+        # Navi object gives every Navi one of its pool. Only the whole AI data and its pointer may be explained so, which hold
+        # only where BN4's has none: a Soul Navi's is BN4's own, BN4_AI_DATA, and never masked)
+        if navi and m['name'] not in NAVI_NO_AI:
+            continue
         if d.part != m['part']:
             continue
         if m.get('present') and d.off == 0 and d.a is False and d.b is True:
@@ -825,6 +870,11 @@ def allowed_world(d, fb):
                 bit = bit0 if k == 0 and max(va, vb) > 0xFF else (bit0 >> (8 * k)) & 0xFF
                 if bit and va ^ vb == bit and vb & bit:
                     return a['name']
+        elif 'cells' in a:
+            # (a pair of numbers at an offset, BN4's and BN6's, exactly: MegaMan's dark palette)
+            va, vb = raw_int(d.a), raw_int(d.b)
+            if d.part == a['part'] and any(int(o, 0) == d.off and (va, vb) == (int(x, 0), int(y, 0)) for o, x, y in a['cells']):
+                return a['name']
         elif role_name(d.role) in companions(fb) and d.part == 'in play' and d.a is False and d.b is True:
             return a['name']
     return None
@@ -953,6 +1003,59 @@ def art_place(o, rom):
     return None
 
 
+ANIM_SET, ANIM_SET_NOW = 0x10, 0x11   # (a first-kind object's animation asked for and the one its sprite runs; +0x90 its sprite state's)
+MEGAMAN_ANIMATION = "MegaMan's animation, each art's own number for a moved family's state"
+
+
+def megaman_animations(family):
+    """legit.json's bn4 megaman_animations: {BN4's animation of MegaMan: BN6's} for a moved attack family (its number in BN6's
+    grown attack families), the numbers its recipe's immediates give his state's stores"""
+    return {int(r['bn4'], 0): int(r['bn6'], 0) for r in bn4_rule('megaman_animations').get('rows', []) if int(r['family'], 0) == family}
+
+
+def megaman_animation(d, fa, fb):
+    """legit.json's bn4 megaman_animations: MegaMan's animation's number (his object's +0x10 and +0x11, his sprite state's
+    +0x90) where his CurAction is a moved attack family's in both and BN4's number is the one the family's rows give BN6's
+    for: each art's own number of one animation. True where the difference is that alone (the word at +0x10 holds his panel
+    above: compared as ever)"""
+    if not (d.part == 'obj' and isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.off in (ANIM_SET, ANIM_SET_NOW, ANIM)):
+        return False
+    oa = next((o for o in fa.fr['objs'] if o.role == d.role), None)
+    ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
+    # (BN4's record as traced: its CurAction BN4's family, BN6's the unit's number)
+    if oa is None or ob is None or moved_families().get(oa.o8(OBJ_ACTION)) != ob.o8(OBJ_ACTION):
+        return False
+    rows = megaman_animations(ob.o8(OBJ_ACTION))
+    va, vb = raw_int(d.a), raw_int(d.b)
+    if not rows or not isinstance(va, int) or not isinstance(vb, int):
+        return False
+    if d.off == ANIM_SET and max(va, vb) > 0xFF:   # (the word read whole: the animation asked for, the one run, his panel)
+        if va >> 16 != vb >> 16:
+            return False
+        a0, b0, a1, b1 = va & 0xFF, vb & 0xFF, va >> 8 & 0xFF, vb >> 8 & 0xFF
+        return rows.get(a0) == b0 and (a1 == b1 or rows.get(a1) == b1)
+    return rows.get(va) == vb
+
+
+INTERRUPTED_ATTACK = "MegaMan's attack's flag 0x400000 after a hit ended his attack, which BN4's struck state leaves"
+
+
+def interrupted_attack(d, fa, fb):
+    """legit.json's bn4 interrupted_attack: his collision flags' 0x400000, which an attack's state sets as it begins and its end
+    clears, where a hit ended the attack instead: BN4's struck state's end clears 0x400 alone and leaves it, BN6's clears both.
+    True where the difference is that bit alone, BN4's holding it and BN6's not, while his CurAction is a generic state's in
+    both (BN4's 6 or under, BN6's 8 or under): in an attack's state the flag is compared as ever"""
+    rule = bn4_rule('interrupted_attack')
+    if not (rule and d.part == 'coll' and isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.off == COLL_FLAGS6):
+        return False
+    va, vb, bit = raw_int(d.a), raw_int(d.b), int(rule['bit'], 0)
+    if not isinstance(va, int) or not isinstance(vb, int) or va ^ vb != bit or not va & bit:
+        return False
+    oa = next((o for o in fa.fr['objs'] if o.role == d.role), None)
+    ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
+    return oa is not None and ob is not None and oa.o8(OBJ_ACTION) <= 6 and ob.o8(OBJ_ACTION) <= 8
+
+
 def own_animation(d, fa, fb):
     """legit.json's bn4 allowed, MegaMan's own art's animation: his sprite's count (+0x91) and its last frame's bit (+0x92's
     0x80) where each game's are what its own art gives at the same place in the same animation (the frames run of it the
@@ -965,7 +1068,9 @@ def own_animation(d, fa, fb):
     ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
     pa = art_place(oa, roms.get(4, b'')) if oa else None
     pb = art_place(ob, roms.get(6, b'')) if ob else None
-    if pa is None or pb is None or pa[:2] != pb[:2]:
+    # (the same animation: the same number, or the two a moved family's state gives it, megaman_animations)
+    same = pa is not None and pb is not None and (pa[0] == pb[0] or megaman_animations(ob.o8(OBJ_ACTION)).get(pa[0]) == pb[0])
+    if not same or pa[1] != pb[1]:
         return False
     if d.off == SPRITE_COUNT:
         return True
@@ -1044,6 +1149,8 @@ def frame_diffs(fa, fb, fbt=None):
             ca = bytearray(ca)
             ca[COLL_DAMAGE_KIND] = na[NODE + OBJ_DAMAGE_KIND]
         aa = megaman_chip_as_bn6(oa.ai, fa.canon) if fb.game == 6 and isinstance(role, tuple) and role[:2] == ('T1', MEGAMAN_ID) else oa.ai
+        if aa is not oa.ai:   # (his misc state's phase while a unit's wrapper waits)
+            aa = megaman_wait_as_bn6(aa, oa.rec)
         for part, xa, xb in (('ai', aa, ob.ai), ('coll', ca, ob.coll)):
             if (xa is None) != (xb is None):
                 found.append((part, 0, xa is not None, xb is not None))
@@ -1496,7 +1603,9 @@ def compare(spec, ta, tb, canon, show=6):
             d.mask = ("the opening's animation count, by the fight's frames" if opening_count(d, fa, ft) else
                       "the hit's spark, each engine's own" if spark_own(d) else
                       "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else
-                      "MegaMan's own art's animation" if own_animation(d, fa, fb) else None)
+                      "MegaMan's own art's animation" if own_animation(d, fa, fb) else
+                      MEGAMAN_ANIMATION if megaman_animation(d, fa, fb) else
+                      INTERRUPTED_ATTACK if interrupted_attack(d, fa, fb) else None)
             if d.mask:
                 used[d.mask] = used.get(d.mask, 0) + 1
         world = [d for d in world if not d.mask]

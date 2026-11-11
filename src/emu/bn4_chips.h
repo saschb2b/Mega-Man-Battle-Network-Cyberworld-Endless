@@ -82,6 +82,8 @@
  * (subfamily 5 after 0x28 frames), BN6_MISC_RUN's twin instruction for instruction */
 #define BN4_CHIP_MISC_FAMILY  0x20
 #define BN4_MISC_RUN          0x080EC972u
+#define BN4_MISC_WAIT         0x080EC9ACu /* ... its wait: cmp r0,#5 on the subfamily, then movs r0,#0x28 into the misc state's +0x10
+                                           * (0x080EC9B0), counted down a frame each to 0 before the attack's end (SidBmbo's alone) */
 #define BN4_MISC_ROUTINES     0x080EC9CCu /* its routines by subfamily, BN4_MISC_ROUTINE_COUNT words */
 #define BN4_MISC_ROUTINE_COUNT 0x12
 #define BN4_BATTLE_OBSTACLES  0x68        /* the battle state's obstacles by side, three words a side (BN6's +0xA0) */
@@ -116,5 +118,51 @@
 #define BN4_ROW_PANEL_ACROSS  0x0800FC48u /* r5 an object: a panel of its row on the side across found by BN4's 0x0800A1AE with a required and a
                                            * refused word of panel flags by its side (0x0800FC84, then 0x0800FC94, eight bytes a side); r0 0
                                            * none (BN6_ROW_PANEL_ACROSS the same instruction for instruction, the same words) */
+/* MokoRus1-3 (its chips 130-132, misc subfamily 1), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_MOKORUS           0x080D252Au /* its routine, in the Moko's code: the three rows shuffled (BN4_SHUFFLE), a Moko spawned on each
+                                           * (0x080D250C), the k-th to set off 10 x k frames on (+0x20) */
+#define BN4_T3_MOKO           0x2C        /* the Moko, the third kind's (0x080D235C to 0x080D2568): it runs down its row from the field's edge,
+                                           * striking what it meets, struck and pushed back (its collision set up with the hit's bits 0x21 at
+                                           * BN4_MOKO_HIT_BITS); sprite list 1's 0x11, sound 0xC7 as it sets off */
+#define BN4_MOKO_HIT_BITS     0x080D23E0u /* ... its init's movs r3,#0x21 before its collision set up (BN4_COLL_SETUP_ARG): BN4_STRUCK_PUSHED's
+                                           * bits, 0x61 in its copy (BN6_STRUCK_PUSHED's) */
+#define BN4_SHUFFLE           0x08000AAAu /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN4_RNG_DRAW_POSITIVE twice a swap, each
+                                           * modulo the count, the two bytes swapped (BN6_SHUFFLE, the same instructions); MokoRus's rows' */
+#define BN4_STRUCK_PUSHED     0x0801360Cu /* the struck pass of the first kind (from 0x080135E6, r4 the struck's hit bits, BN4_COLL_HIT_BITS):
+                                           * a push bit (0xFC) with bit 0x01 gives the status 0x100 and clears the flinch's 4 (to 0x08013622),
+                                           * one without it the push alone's 0x10 (0x08013628-0x08013634). BN6_STRUCK_PUSHED: bit 0x40 where
+                                           * BN4 reads bit 0x01 */
+/* SidBmbo1-3 (its chips 78-80, misc subfamily 5), moved as a unit (src/emu/xchips_bn4.c), the one BN4's misc run waits for */
+#define BN4_SIDBMBO           0x080D5DDAu /* its routine, in the bamboo's code: the bamboo spawned (0x080D5DBA) */
+#define BN4_T3_SIDBMBO        0x44        /* the bamboo, the third kind's (0x080D5C50 to 0x080D5DF4); sprite list 1's 0xC, sound 0x8E */
+/* Its attack families: a chip's family (its record's +0xB) is a state of MegaMan's (BN4_PLAYER_STATES by the number), run with
+ * his object in r5; the state makes r7 the attack's variables itself (his AI data's +0x70: BN6's RunAIAttack hands a family
+ * its own, his AI data's +0xA0). One moved whole is an attack unit (src/emu/xchips_bn4.h XC4_FIRST_ATTACK) */
+#define BN4_COUNTER_WINDOW    0x0800BA66u /* MegaMan's counter window opened as a chip's attack begins: 0x10 to his collision data's counter byte
+                                           * (BN4_COLL_COUNTER, through 0x0800AFBC) where the battle's kind (the battle state's +0xF) is 0x46 or
+                                           * over (BN6_COUNTER_WINDOW) */
+#define BN4_ELEMENT_SET       0x0801288Cu /* r0 an element: the object's +0x17 and its collision data's BN4_COLL_ELEMENT (BN6_ELEMENT_SET) */
+#define BN4_COLL_ELEMENT      0x02        /* collision data: u8 its element (BN6_COLL_ELEMENT, the same place) */
+#define BN4_T3_ARM            0x02        /* MegaMan's arm while he uses a chip, the third kind's (0x080CD5F8 to 0x080CD728): its kind (+4) a
+                                           * row of BN4_T3_02_KINDS, its animation +5, drawn at its parent's place (+0x4C) until the slot it
+                                           * was given (+0x60: its parent's +0x4C) reads 0. BN6's is a first-kind object (BN6_ARM_SPAWN) */
+#define BN4_ARM_SPAWN         0x080CD6E0u /* ... its spawner (r4 the animation << 8 | the kind, r7 the slot), in its code */
+/* The spread chips (Spreader 18, HeatShot 19 to BublSide 24, DrkSpred 192; HeatSprd 321 and BubSprd 322: family 0x1E, subfamily 0
+ * plain, 1 heat, 2 bubble, 3 dark), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_CHIP_SPREAD_FAMILY 0x1E
+#define BN4_SPREAD_STATE      0x080EC760u /* the state (0x080EC760 to 0x080EC842): phase 0 his animation 0x0E, the counter window, the arm, then
+                                           * after BN4_SPREAD_WAITS' frames the shot's sound 0x8D and the shot; phase 4 0x14 frames, then the
+                                           * attack's end. BN6's family 0x25 (BN6_SPREAD_FAMILY) is its twin but for the arm */
+#define BN4_SPREAD_ARMS       0x080EC814u /* ... its arm's kind by subfamily: 0x0A, 0x06, 0x0E, 0x32 */
+#define BN4_SPREAD_WAITS      0x080EC818u /* ... the frames before the shot by subfamily: 1, 10, 10, 1 */
+#define BN4_SPREAD_HEIGHTS    0x080EC81Cu /* ... the shot's height by subfamily (<< 16): 0x10, 0x10, 0, 0x10 */
+#define BN4_T3_SPREAD_SHOT    0x12        /* the shot, the third kind's (0x080CF420 to 0x080CF5B8; BN6's 0x12 too, BN6_T3_SPREAD_SHOT): unseen,
+                                           * a panel a frame along its row; where it strikes, its damage, then BN4_EFFECT_PATTERN on the panels
+                                           * of its kind's shape with its kind's effect and sound */
+#define BN4_SPREAD_SHOT_SPAWN 0x080CF596u /* ... its spawner, in its code (r0, r1 its panel, r2 its element, r3 its height, r4 its kind, the
+                                           * chip's first parameter, r6 its damage) */
+#define BN4_SPREAD_SHOT_KINDS 0x080CF3DCu /* ... its kinds, 17 rows of 4 bytes before its routine: the burst's shape (2 the panel behind, 0x0D
+                                           * the two behind a row up and down, 4 above and below, 0x0F all round), its collision's argument,
+                                           * the burst's effect, its sound; 0-3 plain, 4-7 bubbles, 8-0xB fire, 0xF DrkSpred's */
 
 #endif

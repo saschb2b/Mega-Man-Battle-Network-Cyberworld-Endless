@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -100,6 +100,12 @@ TEAM_SLOT = 12
 XN_TEAM_HOMES, XN_TEAM_CODE, XN_TEAM_ART = EMU_FREE + 0x090000, EMU_FREE + 0x093000, EMU_FREE + 0x0A2000
 XN_TEAM_SLOT_CODE = 0x2800
 XN_TEAM_SHARED, XN_TEAM_END = XN_TEAM_ART + 6 * XN_SLOT_ART, EMU_FREE + 0x0AB000
+# ... and its third room, code-low's tail (src/emu/free_space.plan FREE_TEAM_SHARED_MORE, xnavi_recipe.h XN_TEAM_MORE: GyroMan's
+# overlay first), where a sprite goes once the second is full
+XN_TEAM_MORE, XN_TEAM_MORE_END = EMU_FREE + 0x141000, EMU_FREE + 0x150000
+# ... and its fourth, the art zone's tail (src/emu/free_space.plan FREE_NAVI_SHARED_FOUR, xnavi_recipe.h XN_SHARED_FOUR: Meddy's
+# last two sprites first, CloudMan's 16 KB before hers in the rooms before it)
+XN_SHARED_FOUR, XN_SHARED_FOUR_END = EMU_FREE + 0x7FA000, EMU_FREE + 0x800000
 
 
 def slot_code(slot):
@@ -130,13 +136,26 @@ def home_at(slot):
 XN_OBJECTS_HOME = FREE_NAVI_HOMES + 15 * XN_HOME_SIZE
 CONTROL_SLOT = 7
 CODE_STEP = 0x100
+# Blocks placed at their BN5 address's low byte (their place less BN5's a multiple of 0x100, past CODE_STEP's): code that
+# stores a byte of one of its own routines' addresses, a register its state machine left (bx r1) and it never set, as data
+# a battle reads (BN5's start of the block: why)
+LOW_BYTE_KEPT = {
+    0x080CB8E0: "CloudMan's clouds (the third kind's 0x37): two of their sub-states (0x080CBD9A, 0x080CBDE4) write r1 as the "
+                "cloud's panel row (+0x13), r1 the sub-state's own address its state machine branched through (0x080CBC54: "
+                "ldr r1,[r1,r0]; bx r1), so its low byte: an off-field row the cloud is parked on, the same only where the "
+                "copy's low bytes are BN5's (cloudman_v1_keys at t51: BN5 0x7D, a copy at another low byte 0x9D)",
+}
 # the numbers the Navis' attacks' art takes in the grown lists and effects, issue #82's plan for its tracks (each its own
 # range, so their branches merge: the families' effects 0x6C-0x9F, the Navis' 0xA0-0xBF, the Souls' 0xC0-0xCF, the
 # chips' 0xD0-0xFF; lists 4 and 5 the families' upward from BN6's end, the Navis' 0xA0-0xBF and 0xA0-0xAF, the chips'
 # downward from 0xFF). A sprite takes one number and one place whichever Navi draws it (the shared art). (Grown for Team
 # ProtoMan's NapalmMan from 0xA0-0xB5 and 0xA0-0xA6, which Team Colonel's and the Darkloids filled: list 4 to BN4's
-# families' 0xC0, tools/xrecipe_bn4.py; list 5 short of BN4's 0x98-0x9E below and the chips' 0xFB-0xFF above)
-NAVI_LIST_NUMBERS = {4: list(range(0xA0, 0xC0)), 5: list(range(0xA0, 0xB0))}
+# families' 0xC0, tools/xrecipe_bn4.py; list 5 short of BN4's 0x98-0x9E below and the chips' 0xFB-0xFF above). List 4's
+# end at 0xBA, where NapalmMan stopped: BN4's late families take 0xBF down to 0xBB (tools/xrecipe_bn4.py, LATE_LIST4); a sprite past the Navis' numbers of its list goes
+# to list 2's 0x80-0x9F (NAVI_LIST_SPILL: between the families' from 0x30 up, past BN4's Navis' 0x40-0x58, and the chips'
+# from 0xFF down; tools/xrecipe.py, LIST_NUMBERS), its load's list offset made list 2's
+NAVI_LIST_NUMBERS = {4: list(range(0xA0, 0xBB)), 5: list(range(0xA0, 0xB0)), 2: list(range(0x80, 0xA0))}
+NAVI_LIST_SPILL = 2
 NAVI_FIRST_EFFECT, NAVI_LAST_EFFECT = 0xA0, 0xBF
 # BN5's attack family F in BN6's grown table (src/emu/xnavi_recipe.h, XN_FAMILY_OF): 0x50 + F, as the chips' are
 XN_FAMILY_FIRST = 0x50
@@ -161,7 +180,7 @@ NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
@@ -461,7 +480,7 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     room = code_at(slot)[0]
     r.blocks, at = [], room
     for lo, hi in blocks:
-        at = X.rounded(at, CODE_STEP) + (lo & 3)
+        at = X.rounded(at, CODE_STEP) + (lo & (0xFF if lo in LOW_BYTE_KEPT else 3))
         r.blocks.append((lo, hi, at, zlib.crc32(src.bytes(lo, hi - lo)) & 0xFFFFFFFF))
         at += hi - lo
     if at > room + slot_code(slot):
@@ -688,8 +707,8 @@ def shifted_up(w, a):
 
 def low_byte_effects(f):
     """the effects its code spawns with r4 made as a parameter shifted up and the effect id added (lsls r4,rX,#8; adds
-    r4,#id), straight or with the adds reached by a branch past another way's: the id the adds' immediate, BN6's made by
-    it"""
+    r4,#id), straight or with the adds reached by a branch past another way's, or put in beside it (movs r4,#id; orrs
+    r4,rX): the id the adds' or the movs's immediate, BN6's made by it"""
     f.effect_rd, f.effect_ranges = {}, []
     for site, chain in f.effects.pop(None, []):
         w = next(w for w in f.walks.values() if site in w.insns)
@@ -710,6 +729,17 @@ def low_byte_effects(f):
             if i.f[:2] == (4, 4) and movs and shifts and shifts[-1] < movs[-1]:
                 k = w.insns[movs[-1]].f[1]
                 f.effect_rd[site] = i.f[2]
+                f.effects.setdefault(k, []).append((site, [(movs[-1], 'movs', k)]))
+                continue
+        if len(chain) == 1 and chain[0][1] == 'orrs':
+            # (movs r4,#id then orrs r4,rX with rX a parameter shifted up past the id's byte, by 8 or 16: Meddy's 0x0C and
+            # 0x0D, BN5 0x080C6350-0x080C6356, a byte of a table by its kind in bits 16-23; the id the movs's immediate)
+            a = chain[0][0]
+            i, before = w.insns[a], sorted(x for x in w.insns if x < a)[-4:]
+            movs = [x for x in before if w.insns[x].form == 'movs' and w.insns[x].f[0] == 4]
+            shifts = [x for x in before if w.insns[x].form == 'lsls' and w.insns[x].f[0] == i.f[1] and w.insns[x].f[2] in (8, 16)]
+            if i.f[0] == 4 and movs and shifts and shifts[-1] < movs[-1] < a:
+                k = w.insns[movs[-1]].f[1]
                 f.effects.setdefault(k, []).append((site, [(movs[-1], 'movs', k)]))
                 continue
         if len(chain) == 1 and chain[0][1] == 'adds8':
@@ -763,6 +793,11 @@ def types_decided(r):
         if d is None or d[0] != want or (want == 'twin' and d[1] != t6):
             r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: {want}{"" if t6 is None else f" {t6:#x}"} here ({why}), '
                                f'{d[0] + (f" {d[1]:#x}" if d[1] is not None else "") if d else "undecided"} in tools/bn5_twins.py')
+        elif want == 'moved' and d[2] != 'navis':
+            # (the Navis install first of the tracks that copy code: a type their code moves is their copy, the track named
+            # the Navis', which every later track spawns; another track's copy as well would leave the dispatch running one)
+            r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: moved here, its copy the {d[2]}\' in tools/bn5_twins.py '
+                               f'(the Navis install first: their copy the type\'s)')
 
 
 def needs_of(r):
@@ -909,7 +944,9 @@ def parent_curactions(r):
                     if v is not None and 6 <= v <= 0xF:
                         r.more_imms.append(dict(at=at, form='THUMB_CMP' if at == b else 'THUMB_MOVS', rd=rd, rn=0, was=v, now=v + 2,
                                                 why=f'its parent\'s CurAction {v} compared: BN6\'s {v + 2}'))
-                    break
+                    # (and every compare of the same read after it, while the register holds it: CloudMan's 0x5F compares
+                    # it with 8 and then 9, 0x080D1EEA-0x080D1EF2)
+                    continue
                 if j.form in ('b', 'bx', 'bl', 'hi_mov') or T.is_return(j) or T.writes(j, i.f[0]):
                     break
 
@@ -1403,7 +1440,7 @@ class Alloc(X.Alloc):
         for lst, num, track in OB.IMAGE_COPIED.values():
             if track == 'navis' and num in self.lists.get(lst, ()):
                 self.lists[lst].remove(num)
-        self.shared_at, self.team_at = XN_SHARED_ART, XN_TEAM_SHARED
+        self.shared_at, self.team_at, self.more_at, self.four_at = XN_SHARED_ART, XN_TEAM_SHARED, XN_TEAM_MORE, XN_SHARED_FOUR
         self.effect = NAVI_FIRST_EFFECT
 
     def shared(self, b5, lst, idx, fixed=None):
@@ -1414,14 +1451,22 @@ class Alloc(X.Alloc):
         if key not in self.memo:
             p, b = X.sprite(b5, 0x0803272C, lst, idx)
             to_list = fixed[0] if fixed else lst if lst in self.lists else NAVI_LIST_MOVES.get(lst)
+            # (a list whose Navis' numbers are spent: the spill's, list 2's)
+            if not fixed and to_list is not None and not self.lists.get(to_list):
+                to_list = NAVI_LIST_SPILL
             if not b or to_list is None or (not fixed and not self.lists.get(to_list)):
                 return None, None
             room = X.rounded(len(b), X.ROOM['load'])
-            # (the first room while it holds the sprite, else the second, Team ProtoMan's: XN_TEAM_SHARED)
+            # (the first room while it holds the sprite, else the second, Team ProtoMan's: XN_TEAM_SHARED, else the third,
+            # XN_TEAM_MORE, else the fourth, XN_SHARED_FOUR)
             if self.shared_at + room <= XN_END:
                 at, self.shared_at = self.shared_at, self.shared_at + room
             elif self.team_at + room <= XN_TEAM_END:
                 at, self.team_at = self.team_at, self.team_at + room
+            elif self.more_at + room <= XN_TEAM_MORE_END:
+                at, self.more_at = self.more_at, self.more_at + room
+            elif self.four_at + room <= XN_SHARED_FOUR_END:
+                at, self.four_at = self.four_at, self.four_at + room
             else:
                 return None, None
             self.memo[key] = dict(list=lst, index=idx, to_list=to_list, to_index=fixed[1] if fixed else self.lists[to_list].pop(0),
@@ -1498,7 +1543,9 @@ def c_art(r, n):
     if r.sprites:
         L.append(f'static const XvSprite {n}_sprites[] = {{')
         for x in r.sprites:
-            base, name = (XN_TEAM_SHARED, 'XN_TEAM_SHARED') if XN_TEAM_SHARED <= x['at'] < XN_TEAM_END else (XN_SHARED_ART, 'XN_SHARED_ART')
+            base, name = (XN_TEAM_SHARED, 'XN_TEAM_SHARED') if XN_TEAM_SHARED <= x['at'] < XN_TEAM_END else \
+                (XN_TEAM_MORE, 'XN_TEAM_MORE') if XN_TEAM_MORE <= x['at'] < XN_TEAM_MORE_END else \
+                (XN_SHARED_FOUR, 'XN_SHARED_FOUR') if XN_SHARED_FOUR <= x['at'] < XN_SHARED_FOUR_END else (XN_SHARED_ART, 'XN_SHARED_ART')
             L.append(f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {name} + 0x{x["at"] - base:X}, '
                      f'0x{x["room"]:X} }},' + ('   /* (LZ77 in BN5) */' if x['lz'] else ''))
         L.append('};')

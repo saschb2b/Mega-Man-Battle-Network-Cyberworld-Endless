@@ -477,7 +477,7 @@ static void shots_take(const Side *g, const Spec *s) {
 		static uint32_t px[EMU_W * EMU_H];
 		const uint32_t *v = g->v.game == 6 ? emu_video() : guest_video();   /* (the reference, BN5 or BN4, is the guest) */
 		for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
-		SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+		SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ABGR8888);   /* (the core's pixels' order: emu_picture.c) */
 		if (!f || SDL_SaveBMP(f, h->path) != 0) fprintf(stderr, "xdiff: %s not saved\n", h->path);
 		SDL_FreeSurface(f);
 	}
@@ -493,7 +493,7 @@ static void film_take(Side *g, const Spec *s, uint32_t t) {
 	for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
 	char path[200];
 	snprintf(path, sizeof path, "%s_bn%d_t%04u.bmp", m->prefix, g->v.game, (unsigned)t);
-	SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+	SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ABGR8888);   /* (the core's pixels' order: emu_picture.c) */
 	if (!f || SDL_SaveBMP(f, path) != 0) fprintf(stderr, "xdiff: %s not saved\n", path);
 	SDL_FreeSurface(f);
 }

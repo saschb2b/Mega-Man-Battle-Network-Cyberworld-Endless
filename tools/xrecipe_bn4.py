@@ -78,8 +78,11 @@ NULLSUB6 = 0x0810A953   # BN6_FAMILY_NULLSUB
 BN6_PRESENT = 0x08016E64   # BN6_VIRUS_PRESENT, BN4's after-state's twin but for its pause test
 BX_R0, STATE_STEP6 = 0x08148864, 0x0810A349   # BN6_BX_R0 (its routine's address), BN6_VIRUS_STATE_STEP (Thumb)
 # The collision data's offsets BN4's code may name, as BN6's (bn4.h BN4_COLL_*; docs/rom/bn4.md, The battle's objects)
-COLL4TO6 = {0x01: 0x01, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
-            0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40}
+COLL4TO6 = {0x01: 0x01, 0x02: 0x02, 0x03: 0x04, 0x06: 0x08, 0x07: 0x09, 0x08: 0x0A, 0x09: 0x0B, 0x0A: 0x0C, 0x10: 0x1C, 0x18: 0x24,
+            0x1C: 0x28, 0x28: 0x80, 0x54: 0x70, 0x64: 0x3C, 0x68: 0x40,
+            # (TopMan's: his object's +0x2E and an attack's damage, kept again where his +0x2C changes: BN4_COLL_OBJ_2E and
+            # BN4_COLL_DAMAGE, the setup's stores at 0x080129C8 and 0x080129CC, BN6's at 0x08019FDA and 0x08019FDE)
+            0x05: 0x07, 0x1E: 0x2E}
 ELEMENT4, ELEMENT6 = 0x17, 0x0E   # an object's element (BN4_T1_ELEMENT), BN6's (BN6_T1_ELEMENT)
 T3_PALETTE4, T3_PALETTE6 = 0x0E, 0x0F   # a third-kind object's palette (BN4_T3_PALETTE), BN6's place for it (BN6_T3_PALETTE)
 KIND_NAMES = {1: 'first', 3: 'third', 4: 'fourth'}   # (a moved type's kind, as the C file's comments name it)
@@ -100,13 +103,13 @@ TYPE_MORE = {3: (0xCC, TYPE_0)}
 # The families past the first eight (VolGear on: LATE_FROM), moved after BN4's Navis had taken their numbers past the first
 # eight's: theirs from the top of a range down, so the Navis' (from the first eight's last, up) stay what they were: the third
 # kind's dispatch numbers from 0xDF down (the Navis' from 0xCC up, TYPE_MORE, to below the lowest a late family took), list
-# 4's from 0xBF down to 0xB6 (below the first eight's 0xC0, past BN5's Navis' 0xA0-0xB5, tools/xnavirecipe.py
+# 4's from 0xBF down to 0xBB (below the first eight's 0xC0, past BN5's Navis' 0xA0-0xBA, tools/xnavirecipe.py
 # NAVI_LIST_NUMBERS); their effects' ids from 0x8F down to 0x78 (the families' effects' range 0x6C-0x9F, tools/xnavirecipe.py:
 # below BN4's 0x90-0x9F, which its Navis continue, above BN5's families' 0x6C-0x77) and their list 5 numbers from 0x97 down to
 # 0x83 (below BN4's 0x98-0x9F, above BN5's families' 0x80-0x82; bn5_ranges_clear checks both): kind or list -> (the first
 # taken, the last)
 LATE_FROM = 8
-LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xB6)
+LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xBB)
 LATE_EFFECTS, LATE_LIST5 = (0x8F, 0x78), (0x97, 0x83)
 # ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): the
 # free space plan's (src/emu/free_space.plan FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART) past BN5's lava and

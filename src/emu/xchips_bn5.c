@@ -100,86 +100,10 @@ static const XvType shake_types[] = { { 3, 0x68, XV_TYPE_MOVED } };
 	.imms = shake_imms, .nimms = (int)(sizeof shake_imms / sizeof *shake_imms), \
 	.sprites = shake_sprites, .nsprites = (int)(sizeof shake_sprites / sizeof *shake_sprites), \
 	.types = shake_types, .ntypes = (int)(sizeof shake_types / sizeof *shake_types) }
-/* ---- Bubbles: BN5's 080C5FCF, a helper (installed once, before the units) ---- */
-
-static const XvBlock bubbles_blocks[] = {
-	{ 0x080C5DF4, 0x080C6000, XC_HELPERS + 0x2D0, 0xEDB80F1Au },
-};
-static const XvData bubbles_data[] = {
-	{ 0x080C5DF4, 0x080C5EB4, XV_RAW },
-	{ 0x080C5EC6, 0x080C5EC8, XV_RAW },
-	{ 0x080C5EC8, 0x080C5ECC, XV_POOL },
-	{ 0x080C5ECC, 0x080C5ED8, XV_TABLE },
-	{ 0x080C5FFC, 0x080C6000, XV_POOL },
-};
-static const XvPair bubbles_calls[] = {
-	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
-	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
-	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
-	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
-	{ 0x08017054, 0x0801A258 },   /* map:bytes, SAME */
-	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
-	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
-	{ 0x0800CB00, 0x0800E6E8 },   /* map:bytes, SAME */
-	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
-	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
-	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
-	{ 0x0800B380, 0x0800CCBE },   /* project:research, DIFF (audited) */
-	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
-};
-static const XvPair bubbles_words[] = {
-	{ 0x080138EB, 0x08016C8B },
-};
-static const XvImm bubbles_imms[] = {
-	{ 0x080C5F74, THUMB_LDR, 1, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-};
-static const XvSprite bubbles_sprites[] = {
-	{ 3, 0x3E, 3, 0xFF, XC_ART + 0x1000, 0x800 },
-	{ 3, 0x43, 3, 0xFE, XC_ART + 0x1800, 0x1000 },
-	{ 4, 0x11, 4, 0xFF, XC_ART + 0x2800, 0x1000 },
-	{ 4, 0x2D, 4, 0xFE, XC_ART + 0x3800, 0x800 },
-	{ 4, 0x41, 4, 0xFD, XC_ART + 0x4000, 0x1000 },
-};
-static const XvByte bubbles_bytes[] = {
-	{ 0x080C5DFA, 0x3E, 0xFF },   /* 080C5DF4's row 0: its sprite list 3 0x3e in BN5, 0xff in BN6 (BN5's copied there) */
-	{ 0x080C5E0A, 0x43, 0xFE },   /* 080C5DF4's row 1: its sprite list 3 0x43 in BN5, 0xfe in BN6 (BN5's copied there) */
-	{ 0x080C5E1A, 0x11, 0xFF },   /* 080C5DF4's row 2: its sprite list 4 0x11 in BN5, 0xff in BN6 (BN5's copied there) */
-	{ 0x080C5E2A, 0x11, 0xFF },   /* 080C5DF4's row 3: its sprite list 4 0x11 in BN5, 0xff in BN6 (BN5's copied there) */
-	{ 0x080C5E3A, 0x11, 0xFF },   /* 080C5DF4's row 4: its sprite list 4 0x11 in BN5, 0xff in BN6 (BN5's copied there) */
-	{ 0x080C5E4A, 0x11, 0xFF },   /* 080C5DF4's row 5: its sprite list 4 0x11 in BN5, 0xff in BN6 (BN5's copied there) */
-	{ 0x080C5E5A, 0x2D, 0xFE },   /* 080C5DF4's row 6: its sprite list 4 0x2d in BN5, 0xfe in BN6 (BN5's copied there) */
-	{ 0x080C5E6A, 0x41, 0xFD },   /* 080C5DF4's row 7: its sprite list 4 0x41 in BN5, 0xfd in BN6 (BN5's copied there) */
-	{ 0x080C5E7A, 0x41, 0xFD },   /* 080C5DF4's row 8: its sprite list 4 0x41 in BN5, 0xfd in BN6 (BN5's copied there) */
-	{ 0x080C5E8A, 0x41, 0xFD },   /* 080C5DF4's row 9: its sprite list 4 0x41 in BN5, 0xfd in BN6 (BN5's copied there) */
-	{ 0x080C5E9A, 0x41, 0xFD },   /* 080C5DF4's row 10: its sprite list 4 0x41 in BN5, 0xfd in BN6 (BN5's copied there) */
-	{ 0x080C5EAA, 0x11, 0xFF },   /* 080C5DF4's row 11: its sprite list 4 0x11 in BN5, 0xff in BN6 (BN5's copied there) */
-};
-static const XvType bubbles_types[] = { { 3, 0x0B, XV_TYPE_MOVED } };
-
-#define BUBBLES_CODE { .name = "Bubbles (BN5's)", .game = XROM_BN5_COLONEL_US, \
-	.blocks = bubbles_blocks, .nblocks = (int)(sizeof bubbles_blocks / sizeof *bubbles_blocks), \
-	.data = bubbles_data, .ndata = (int)(sizeof bubbles_data / sizeof *bubbles_data), \
-	.calls = bubbles_calls, .ncalls = (int)(sizeof bubbles_calls / sizeof *bubbles_calls), \
-	.words = bubbles_words, .nwords = (int)(sizeof bubbles_words / sizeof *bubbles_words), \
-	.imms = bubbles_imms, .nimms = (int)(sizeof bubbles_imms / sizeof *bubbles_imms), \
-	.sprites = bubbles_sprites, .nsprites = (int)(sizeof bubbles_sprites / sizeof *bubbles_sprites), \
-	.types = bubbles_types, .ntypes = (int)(sizeof bubbles_types / sizeof *bubbles_types), \
-	.bytes = bubbles_bytes, .nbytes = (int)(sizeof bubbles_bytes / sizeof *bubbles_bytes) }
 /* ---- PowerCustSwrd: BN5's 0800EA19, a helper (installed once, before the units) ---- */
 
 static const XvBlock powercustswrd_blocks[] = {
-	{ 0x0800EA18, 0x0800EC48, XC_HELPERS + 0x4E0, 0xC1592C94u },
+	{ 0x0800EA18, 0x0800EC48, XC_HELPERS + 0x2D0, 0xC1592C94u },
 };
 static const XvData powercustswrd_data[] = {
 	{ 0x0800EA70, 0x0800EB90, XV_RAW },
@@ -200,7 +124,7 @@ static const XvPair powercustswrd_calls[] = {
 /* ---- PowerCusVolt: BN5's 0800EB07, a helper (installed once, before the units) ---- */
 
 static const XvBlock powercusvolt_blocks[] = {
-	{ 0x0800EB06, 0x0800EB50, XC_HELPERS + 0x712, 0x1210F73Au },
+	{ 0x0800EB06, 0x0800EB50, XC_HELPERS + 0x502, 0x1210F73Au },
 };
 static const XvPair powercusvolt_calls[] = {
 	{ 0x080090E8, 0x0800A8F8 },   /* map:bytes, SAME */
@@ -214,8 +138,8 @@ static const XvPair powercusvolt_calls[] = {
 /* ---- PowerSP: BN5's 0800E8D7, a helper (installed once, before the units) ---- */
 
 static const XvBlock powersp_blocks[] = {
-	{ 0x0800E8D6, 0x0800EC38, XC_HELPERS + 0x762, 0xB626432Bu },
-	{ 0x0801D27A, 0x0801D45E, XC_HELPERS + 0xAD2, 0x106F3F92u },
+	{ 0x0800E8D6, 0x0800EC38, XC_HELPERS + 0x552, 0xB626432Bu },
+	{ 0x0801D27A, 0x0801D45E, XC_HELPERS + 0x8C2, 0x106F3F92u },
 };
 static const XvData powersp_data[] = {
 	{ 0x0800E92A, 0x0800E92C, XV_RAW },
@@ -250,8 +174,8 @@ static const XvNumber powersp_numbers[] = {
 /* ---- PowerDS: BN5's 0800E9A9, a helper (installed once, before the units) ---- */
 
 static const XvBlock powerds_blocks[] = {
-	{ 0x0800E9A8, 0x0800EC44, XC_HELPERS + 0xCC0, 0xF5055B73u },
-	{ 0x0801D27A, 0x0801D45E, XC_HELPERS + 0xF62, 0x106F3F92u },
+	{ 0x0800E9A8, 0x0800EC44, XC_HELPERS + 0xAB0, 0xF5055B73u },
+	{ 0x0801D27A, 0x0801D45E, XC_HELPERS + 0xD52, 0x106F3F92u },
 };
 static const XvData powerds_data[] = {
 	{ 0x0800E9E6, 0x0800E9E8, XV_RAW },
@@ -282,8 +206,8 @@ static const XvNumber powerds_numbers[] = {
 /* ---- PowerDjangoSP: BN5's 0800E983, a helper (installed once, before the units) ---- */
 
 static const XvBlock powerdjangosp_blocks[] = {
-	{ 0x0800E982, 0x0800EC3C, XC_HELPERS + 0x1152, 0x883F619Eu },
-	{ 0x0801D448, 0x0801D45E, XC_HELPERS + 0x1410, 0x4852B008u },
+	{ 0x0800E982, 0x0800EC3C, XC_HELPERS + 0xF42, 0x883F619Eu },
+	{ 0x0801D448, 0x0801D45E, XC_HELPERS + 0x1200, 0x4852B008u },
 };
 static const XvData powerdjangosp_data[] = {
 	{ 0x0800E9A8, 0x0800E9E8, XV_RAW },
@@ -350,7 +274,7 @@ static const XvImm crakout_imms[] = {
 	{ 0x080C7814, THUMB_MOVS, 2, 0, 0xE, 0xFF },   /* its sprite: list 5 0xe in BN5, 0xff in BN6 (BN5's copied there) */
 };
 static const XvSprite crakout_sprites[] = {
-	{ 5, 0x0E, 5, 0xFF, XC_ART + 0x5000, 0x1000 },
+	{ 5, 0x0E, 5, 0xFF, XC_ART + 0x1000, 0x1000 },
 };
 static const XvType crakout_types[] = { { 3, 0x18, XV_TYPE_MOVED } };
 
@@ -419,11 +343,11 @@ static const XvImm hotbody_imms[] = {
 	{ 0x080DA4CE, THUMB_LDR, 0, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvNumber hotbody_numbers[] = {
-	{ 0x080DA5F4, 0x00001040, 0x000010FC },
+	{ 0x080DA5F4, 0x00001040, 0x000010FF },
 	{ 0x080DA5F8, 0x04050300, 0x04050300 },
 };
 static const XvSprite hotbody_sprites[] = {
-	{ 4, 0x40, 4, 0xFC, XC_ART + 0x6000, 0x2000 },
+	{ 4, 0x40, 4, 0xFF, XC_ART + 0x2000, 0x2000 },
 };
 static const XvType hotbody_types[] = { { 3, 0x9D, XV_TYPE_MOVED }, { 4, 0x57, XV_TYPE_MOVED } };
 
@@ -563,12 +487,12 @@ static const XvPair metagel_words[] = {
 	{ 0x080E2F75, 0x080E3FB1 },
 };
 static const XvImm metagel_imms[] = {
-	{ 0x080CE142, THUMB_MOVS, 2, 0, 0x26, 0xFD },   /* its sprite: list 3 0x26 in BN5, 0xfd in BN6 (BN5's copied there) */
+	{ 0x080CE142, THUMB_MOVS, 2, 0, 0x26, 0xFF },   /* its sprite: list 3 0x26 in BN5, 0xff in BN6 (BN5's copied there) */
 	{ 0x080CE170, THUMB_MOVS, 0, 0, 0x6, 0x59 },   /* its sound 0x105: BN5's copied to BN6's slot 0x59 */
 	{ 0x080CE172, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x105: BN5's copied to BN6's slot 0x59 (its high part) */
 };
 static const XvSprite metagel_sprites[] = {
-	{ 3, 0x26, 3, 0xFD, XC_ART + 0x8000, 0x1800 },
+	{ 3, 0x26, 3, 0xFF, XC_ART + 0x4000, 0x1800 },
 };
 static const XvType metagel_types[] = { { 3, 0x45, XV_TYPE_MOVED }, { 4, 0x21, XV_TYPE_MOVED } };
 static const XcSong metagel_songs[] = { { 0x105, 0x59 } };
@@ -694,11 +618,11 @@ static const XvImm skully_imms[] = {
 	{ 0x080EFD4A, THUMB_MOVS, 0, 0, 0xB7, 0x61 },   /* its sound 0xb7: BN5's copied to BN6's slot 0x61 */
 };
 static const XvNumber skully_numbers[] = {
-	{ 0x080D7504, 0x01001050, 0x010010FB },
+	{ 0x080D7504, 0x01001050, 0x010010FE },
 	{ 0x080D7508, 0x04050300, 0x04050300 },
 };
 static const XvSprite skully_sprites[] = {
-	{ 4, 0x50, 4, 0xFB, XC_ART + 0x9800, 0x800 },
+	{ 4, 0x50, 4, 0xFE, XC_ART + 0x5800, 0x800 },
 };
 static const XvType skully_types[] = { { 3, 0x88, XV_TYPE_MOVED } };
 static const XcSong skully_songs[] = { { 0xB7, 0x61 } };
@@ -819,12 +743,12 @@ static const XvImm rainyday_imms[] = {
 	{ 0x080D9A88, THUMB_CMP, 1, 0, 0xA, 0xE },   /* a panel's type compared with BN5's 0xa: BN6's 0xe */
 };
 static const XvNumber rainyday_numbers[] = {
-	{ 0x080D9AB8, 0x01000C36, 0x01000CFC },
+	{ 0x080D9AB8, 0x01000C36, 0x01000CFE },
 	{ 0x080D9ABC, 0x04050201, 0x04050201 },
 };
 static const XvSprite rainyday_sprites[] = {
-	{ 3, 0x36, 3, 0xFC, XC_ART + 0xA000, 0x1000 },
-	{ 3, 0x37, 3, 0xFB, XC_ART + 0xB000, 0x1000 },
+	{ 3, 0x36, 3, 0xFE, XC_ART + 0x6000, 0x1000 },
+	{ 3, 0x37, 3, 0xFD, XC_ART + 0x7000, 0x1000 },
 };
 static const XvId rainyday_effects[] = { { 0x61, 0xFF } };
 static const XvType rainyday_types[] = { { 3, 0x97, XV_TYPE_MOVED }, { 4, 0x75, XV_TYPE_MOVED } };
@@ -898,13 +822,13 @@ static const XvImm woodnos_imms[] = {
 	{ 0x080DB134, THUMB_LDR, 0, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvNumber woodnos_numbers[] = {
-	{ 0x080DB200, 0x01000C54, 0x01000CFA },
+	{ 0x080DB200, 0x01000C54, 0x01000CFC },
 	{ 0x080DB204, 0x04050100, 0x04050100 },
 	{ 0x080DB338, 0x00001021, 0x0000106C },
 	{ 0x080DB33C, 0x04050401, 0x04050401 },
 };
 static const XvSprite woodnos_sprites[] = {
-	{ 3, 0x54, 3, 0xFA, XC_ART + 0xC000, 0x800 },
+	{ 3, 0x54, 3, 0xFC, XC_ART + 0x8000, 0x800 },
 };
 static const XvType woodnos_types[] = { { 3, 0xA6, XV_TYPE_MOVED }, { 3, 0xA7, XV_TYPE_MOVED } };
 
@@ -970,11 +894,11 @@ static const XvImm cactbal_imms[] = {
 	{ 0x080D1D9C, THUMB_LDR, 0, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvNumber cactbal_numbers[] = {
-	{ 0x080D1E58, 0x00041030, 0x000410FA },
+	{ 0x080D1E58, 0x00041030, 0x000410FD },
 	{ 0x080D1E5C, 0x04050100, 0x04050100 },
 };
 static const XvSprite cactbal_sprites[] = {
-	{ 4, 0x30, 4, 0xFA, XC_ART + 0xC800, 0x1800 },
+	{ 4, 0x30, 4, 0xFD, XC_ART + 0x8800, 0x1800 },
 };
 static const XvType cactbal_types[] = { { 3, 0x5E, XV_TYPE_MOVED } };
 
@@ -1068,7 +992,7 @@ static const XvPair pulsar_words[] = {
 	{ 0x080138EB, 0x08016C8B },
 };
 static const XvImm pulsar_imms[] = {
-	{ 0x080D33E4, THUMB_MOVS, 2, 0, 0x3A, 0xF9 },   /* its sprite: list 4 0x3a in BN5, 0xf9 in BN6 (BN5's copied there) */
+	{ 0x080D33E4, THUMB_MOVS, 2, 0, 0x3A, 0xFC },   /* its sprite: list 4 0x3a in BN5, 0xfc in BN6 (BN5's copied there) */
 	{ 0x080D3476, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x080D3514, THUMB_ADDS, 4, 0, 0x56, 0xFE },   /* its effect: 0x56 in BN5, 0xfe in BN6 */
 };
@@ -1077,8 +1001,8 @@ static const XvNumber pulsar_numbers[] = {
 	{ 0x080D356C, 0x03800000, 0x03800000 },
 };
 static const XvSprite pulsar_sprites[] = {
-	{ 4, 0x3A, 4, 0xF9, XC_ART + 0xE000, 0x800 },
-	{ 4, 0x3B, 4, 0xF8, XC_ART + 0xE800, 0x1000 },
+	{ 4, 0x3A, 4, 0xFC, XC_ART + 0xA000, 0x800 },
+	{ 4, 0x3B, 4, 0xFB, XC_ART + 0xA800, 0x1000 },
 };
 static const XvId pulsar_effects[] = { { 0x56, 0xFE } };
 static const XvType pulsar_types[] = { { 3, 0x6A, XV_TYPE_MOVED } };
@@ -1146,12 +1070,12 @@ static const XvImm mrkcan_imms[] = {
 	{ 0x080E56FE, THUMB_MOVS, 0, 0, 0xBD, 0x4F },   /* its sound 0xbd: BN5's copied to BN6's slot 0x4f */
 };
 static const XvNumber mrkcan_numbers[] = {
-	{ 0x080E5794, 0x00001024, 0x000010F7 },
+	{ 0x080E5794, 0x00001024, 0x000010FA },
 	{ 0x080E57AC, 0x0405FF01, 0x0405FF01 },
 	{ 0x080EF518, 0x04050701, 0x04050701 },
 };
 static const XvSprite mrkcan_sprites[] = {
-	{ 4, 0x24, 4, 0xF7, XC_ART + 0xF800, 0x800 },
+	{ 4, 0x24, 4, 0xFA, XC_ART + 0xB800, 0x800 },
 };
 static const XvType mrkcan_types[] = { { 1, 0x05, XV_TYPE_SHARED }, { 4, 0x44, XV_TYPE_MOVED } };
 static const XcSong mrkcan_songs[] = { { 0xBD, 0x4F } };
@@ -1220,7 +1144,7 @@ static const XvPair sidebub_calls[] = {
 	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
 	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
 	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
-	{ 0x080C5FCE, 0x08E0113A },   /* a helper, HELPER */
+	{ 0x080C5FCE, XN_MORE + 0x82DA },   /* the Navis' copy, SAME */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x0800D1D2, 0x0800F2B6 },   /* map:bytes, SAME */
 	{ 0x080EBB96, 0x08E00C92 },   /* a helper, HELPER */
@@ -1229,7 +1153,7 @@ static const XvPair sidebub_calls[] = {
 	{ 0x0800F29E, 0x08011714 },   /* project:cangard, DIFF (audited) */
 };
 static const XvImm sidebub_imms[] = {
-	{ 0x080D85AA, THUMB_MOVS, 2, 0, 0x41, 0xFD },   /* its sprite: list 4 0x41 in BN5, 0xfd in BN6 (BN5's copied there) */
+	{ 0x080D85AA, THUMB_MOVS, 2, 0, 0x41, 0xBA },   /* its sprite: list 4 0x41 in BN5, 0xba in BN6 (BN5's copied there) */
 	{ 0x080D869A, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvType sidebub_types[] = { { 3, 0x8F, XV_TYPE_MOVED } };
@@ -1344,17 +1268,17 @@ static const XvImm aqwhirl_imms[] = {
 	{ 0x080DEC40, THUMB_MOVS, 0, 0, 0xC, 0xE },   /* CurAction 12 written */
 };
 static const XvNumber aqwhirl_numbers[] = {
-	{ 0x080D1B68, 0x01001008, 0x010010F5 },
+	{ 0x080D1B68, 0x01001008, 0x010010F8 },
 	{ 0x080D1B6C, 0x04050300, 0x04050300 },
-	{ 0x080DA2B0, 0x00000C29, 0x00000CF9 },
+	{ 0x080DA2B0, 0x00000C29, 0x00000CFB },
 	{ 0x080DA2C0, 0x0405FF10, 0x0405FF10 },
-	{ 0x080DEDC8, 0x0000104F, 0x000010F6 },
+	{ 0x080DEDC8, 0x0000104F, 0x000010F9 },
 	{ 0x080DEDCC, 0x04050100, 0x04050100 },
 };
 static const XvSprite aqwhirl_sprites[] = {
-	{ 3, 0x29, 3, 0xF9, XC_ART + 0x10000, 0x1000 },
-	{ 4, 0x4F, 4, 0xF6, XC_ART + 0x11000, 0x1800 },
-	{ 4, 0x08, 4, 0xF5, XC_ART + 0x12800, 0x1000 },
+	{ 3, 0x29, 3, 0xFB, XC_ART + 0xC000, 0x1000 },
+	{ 4, 0x4F, 4, 0xF9, XC_ART + 0xD000, 0x1800 },
+	{ 4, 0x08, 4, 0xF8, XC_ART + 0xE800, 0x1000 },
 };
 static const XvType aqwhirl_types[] = { { 3, 0x5D, XV_TYPE_MOVED }, { 3, 0x9B, XV_TYPE_MOVED }, { 3, 0xC0, XV_TYPE_MOVED } };
 static const XcSong aqwhirl_songs[] = { { 0x70, 0x5F } };
@@ -1471,11 +1395,11 @@ static const XvPair zsaver_words[] = {
 };
 static const XvImm zsaver_imms[] = {
 	{ 0x0801261C, THUMB_CMP, 1, 0, 0x8, 0xD },   /* a panel's type compared with BN5's 0x8: BN6's 0xd */
-	{ 0x080D0F62, THUMB_MOVS, 2, 0, 0x14, 0xF8 },   /* its sprite: list 3 0x14 in BN5, 0xf8 in BN6 (BN5's copied there) */
+	{ 0x080D0F62, THUMB_MOVS, 2, 0, 0x14, 0xFA },   /* its sprite: list 3 0x14 in BN5, 0xfa in BN6 (BN5's copied there) */
 	{ 0x080D0FF4, THUMB_LDR, 0, 2, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvSprite zsaver_sprites[] = {
-	{ 3, 0x14, 3, 0xF8, XC_ART + 0x13800, 0x2800 },
+	{ 3, 0x14, 3, 0xFA, XC_ART + 0xF800, 0x2800 },
 };
 static const XvId zsaver_effects[] = { { 0x39, 0xFD }, { 0x3A, 0xFC }, { 0x3B, 0xFB } };
 static const XvByte zsaver_bytes[] = {
@@ -1643,12 +1567,12 @@ static const XvImm elcreel_imms[] = {
 	{ 0x080ECF78, THUMB_MOVS, 0, 0, 0xBA, 0x60 },   /* its sound 0xba: BN5's copied to BN6's slot 0x60 */
 };
 static const XvNumber elcreel_numbers[] = {
-	{ 0x080DAE94, 0x0002103E, 0x000210F4 },
+	{ 0x080DAE94, 0x0002103E, 0x000210F7 },
 	{ 0x080DAE98, 0x0A050100, 0x0A050100 },
 	{ 0x080DAEA0, 0x0A050301, 0x0A050301 },
 };
 static const XvSprite elcreel_sprites[] = {
-	{ 4, 0x3E, 4, 0xF4, XC_ART + 0x16000, 0x1000 },
+	{ 4, 0x3E, 4, 0xF7, XC_ART + 0x12000, 0x1000 },
 };
 static const XvId elcreel_effects[] = { { 0x64, 0xFA }, { 0x65, 0xF9 } };
 static const XvByte elcreel_bytes[] = {
@@ -1725,10 +1649,10 @@ static const XvPair boybomb_words[] = {
 	{ 0x080CCFD1, 0x080CD4A9 },
 };
 static const XvImm boybomb_imms[] = {
-	{ 0x080CCF16, THUMB_MOVS, 2, 0, 0x36, 0xF3 },   /* its sprite: list 4 0x36 in BN5, 0xf3 in BN6 (BN5's copied there) */
+	{ 0x080CCF16, THUMB_MOVS, 2, 0, 0x36, 0xF6 },   /* its sprite: list 4 0x36 in BN5, 0xf6 in BN6 (BN5's copied there) */
 };
 static const XvSprite boybomb_sprites[] = {
-	{ 4, 0x36, 4, 0xF3, XC_ART + 0x17000, 0x800 },
+	{ 4, 0x36, 4, 0xF6, XC_ART + 0x13000, 0x800 },
 };
 static const XvType boybomb_types[] = { { 3, 0x3E, XV_TYPE_MOVED }, { 4, 0x67, XV_TYPE_MOVED } };
 
@@ -1840,26 +1764,26 @@ static const XvNumber guard_numbers[] = {
 	{ 0x080DB498, 0x01010405, 0x010104FE },
 };
 static const XvSprite guard_sprites[] = {
-	{ 4, 0x04, 4, 0xF2, XC_ART + 0x17800, 0x1800 },
-	{ 1, 0x05, 1, 0xFE, XC_ART + 0x19000, 0x1800 },
-	{ 2, 0x01, 2, 0xFF, XC_ART + 0x1A800, 0x9800 },
+	{ 4, 0x04, 4, 0xF5, XC_ART + 0x13800, 0x1800 },
+	{ 1, 0x05, 1, 0xFE, XC_ART + 0x15000, 0x1800 },
+	{ 2, 0x01, 2, 0xFF, XC_ART + 0x16800, 0x9800 },
 };
 static const XvByte guard_bytes[] = {
-	{ 0x080C7448, 0x04, 0xF2 },   /* 080C7448's row 0: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C744C, 0x04, 0xF2 },   /* 080C7448's row 1: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7450, 0x04, 0xF2 },   /* 080C7448's row 2: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7454, 0x04, 0xF2 },   /* 080C7448's row 3: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7458, 0x04, 0xF2 },   /* 080C7448's row 4: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C745C, 0x04, 0xF2 },   /* 080C7448's row 5: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7460, 0x04, 0xF2 },   /* 080C7448's row 6: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7464, 0x04, 0xF2 },   /* 080C7448's row 7: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7468, 0x04, 0xF2 },   /* 080C7448's row 8: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C746C, 0x04, 0xF2 },   /* 080C7448's row 9: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7470, 0x04, 0xF2 },   /* 080C7448's row 10: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7474, 0x04, 0xF2 },   /* 080C7448's row 11: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7478, 0x04, 0xF2 },   /* 080C7448's row 12: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C747C, 0x04, 0xF2 },   /* 080C7448's row 13: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
-	{ 0x080C7480, 0x04, 0xF2 },   /* 080C7448's row 14: its sprite list 4 0x4 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080C7448, 0x04, 0xF5 },   /* 080C7448's row 0: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C744C, 0x04, 0xF5 },   /* 080C7448's row 1: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7450, 0x04, 0xF5 },   /* 080C7448's row 2: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7454, 0x04, 0xF5 },   /* 080C7448's row 3: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7458, 0x04, 0xF5 },   /* 080C7448's row 4: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C745C, 0x04, 0xF5 },   /* 080C7448's row 5: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7460, 0x04, 0xF5 },   /* 080C7448's row 6: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7464, 0x04, 0xF5 },   /* 080C7448's row 7: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7468, 0x04, 0xF5 },   /* 080C7448's row 8: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C746C, 0x04, 0xF5 },   /* 080C7448's row 9: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7470, 0x04, 0xF5 },   /* 080C7448's row 10: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7474, 0x04, 0xF5 },   /* 080C7448's row 11: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7478, 0x04, 0xF5 },   /* 080C7448's row 12: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C747C, 0x04, 0xF5 },   /* 080C7448's row 13: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080C7480, 0x04, 0xF5 },   /* 080C7448's row 14: its sprite list 4 0x4 in BN5, 0xf5 in BN6 (BN5's copied there) */
 	{ 0x080CA2EB, 0x01, 0xFF },   /* 080CA2D8's row 3: its sprite list 2 0x1 in BN5, 0xff in BN6 (BN5's copied there) */
 	{ 0x080CA2F1, 0x05, 0xFE },   /* 080CA2D8's row 4: its sprite list 1 0x5 in BN5, 0xfe in BN6 (BN5's copied there) */
 	{ 0x080CA2F7, 0x05, 0xFE },   /* 080CA2D8's row 5: its sprite list 1 0x5 in BN5, 0xfe in BN6 (BN5's copied there) */
@@ -1966,14 +1890,14 @@ static const XvPair moonbld_words[] = {
 };
 static const XvImm moonbld_imms[] = {
 	{ 0x0801261C, THUMB_CMP, 1, 0, 0x8, 0xD },   /* a panel's type compared with BN5's 0x8: BN6's 0xd */
-	{ 0x080D32D6, THUMB_MOVS, 2, 0, 0x38, 0xF1 },   /* its sprite: list 4 0x38 in BN5, 0xf1 in BN6 (BN5's copied there) */
+	{ 0x080D32D6, THUMB_MOVS, 2, 0, 0x38, 0xF4 },   /* its sprite: list 4 0x38 in BN5, 0xf4 in BN6 (BN5's copied there) */
 };
 static const XvNumber moonbld_numbers[] = {
 	{ 0x080D33B0, 0x0705FF01, 0x0705FF01 },
 	{ 0x080D33B4, 0x01180003, 0x00180003 },
 };
 static const XvSprite moonbld_sprites[] = {
-	{ 4, 0x38, 4, 0xF1, XC_ART + 0x24000, 0x2000 },
+	{ 4, 0x38, 4, 0xF4, XC_ART + 0x20000, 0x2000 },
 };
 static const XvType moonbld_types[] = { { 3, 0x69, XV_TYPE_MOVED }, { 4, 0x28, XV_TYPE_MOVED } };
 
@@ -2036,11 +1960,11 @@ static const XvImm cusvolt_imms[] = {
 	{ 0x080ED2F2, THUMB_MOVS, 0, 0, 0xC6, 0x50 },   /* its sound 0xc6: BN5's copied to BN6's slot 0x50 */
 };
 static const XvNumber cusvolt_numbers[] = {
-	{ 0x080DD5AC, 0x00000C40, 0x00000CF7 },
+	{ 0x080DD5AC, 0x00000C40, 0x00000CF9 },
 	{ 0x080DD5B0, 0x0A050300, 0x0A050300 },
 };
 static const XvSprite cusvolt_sprites[] = {
-	{ 3, 0x40, 3, 0xF7, XC_ART + 0x26000, 0x1000 },
+	{ 3, 0x40, 3, 0xF9, XC_ART + 0x22000, 0x1000 },
 };
 static const XvType cusvolt_types[] = { { 1, 0x05, XV_TYPE_SHARED }, { 3, 0xB8, XV_TYPE_MOVED } };
 static const XcSong cusvolt_songs[] = { { 0xC6, 0x50 } };
@@ -2145,7 +2069,7 @@ static const XvNumber custswrd_numbers[] = {
 	{ 0x080EC064, 0x0705FF01, 0x0705FF01 },
 };
 static const XvSprite custswrd_sprites[] = {
-	{ 3, 0x15, 3, 0xF6, XC_ART + 0x27000, 0x1800 },
+	{ 3, 0x15, 3, 0xF8, XC_ART + 0x23000, 0x1800 },
 };
 static const XvId custswrd_effects[] = { { 0x28, 0xF8 } };
 static const XvByte custswrd_bytes[] = {
@@ -2248,7 +2172,7 @@ static const XvImm anti_imms[] = {
 	{ 0x080E3920, THUMB_LDR, 1, 0, 0x18, 0x14 },   /* a panel's +0x18 in BN5, +0x14 in BN6 (legit.json, layouts, panel) */
 };
 static const XvSprite anti_sprites[] = {
-	{ 5, 0x05, 5, 0xFE, XC_ART + 0x28800, 0x5800 },
+	{ 5, 0x05, 5, 0xFE, XC_ART + 0x24800, 0x5800 },
 };
 static const XvId anti_effects[] = { { 0x2B, 0xF7 } };
 static const XvByte anti_bytes[] = {
@@ -2453,11 +2377,11 @@ static const XvPair elemrage_words[] = {
 	{ 0x080EFEE5, 0x080EF5B5 },
 };
 static const XvImm elemrage_imms[] = {
-	{ 0x080D9B06, THUMB_MOVS, 2, 0, 0xE, 0xF5 },   /* its sprite: list 3 0xe in BN5, 0xf5 in BN6 (BN5's copied there) */
+	{ 0x080D9B06, THUMB_MOVS, 2, 0, 0xE, 0xF7 },   /* its sprite: list 3 0xe in BN5, 0xf7 in BN6 (BN5's copied there) */
 	{ 0x080D9BBC, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvSprite elemrage_sprites[] = {
-	{ 3, 0x0E, 3, 0xF5, XC_ART + 0x2E000, 0x800 },
+	{ 3, 0x0E, 3, 0xF7, XC_ART + 0x2A000, 0x800 },
 };
 static const XvByte elemrage_bytes[] = {
 	{ 0x080E2A48, 0x08, 0x0D },   /* 080E2A34's row 1: a panel set to BN5's type 0x8: BN6's 0xd */
@@ -2654,9 +2578,9 @@ static const XvNumber bombs_numbers[] = {
 	{ 0x080CEFB8, 0x04050000, 0x04050000 },
 };
 static const XvSprite bombs_sprites[] = {
-	{ 1, 0x02, 1, 0xFD, XC_ART + 0x2E800, 0x2000 },
-	{ 5, 0x18, 5, 0xFD, XC_ART + 0x30800, 0x1000 },
-	{ 3, 0x13, 3, 0xF4, XC_ART + 0x31800, 0x1000 },
+	{ 1, 0x02, 1, 0xFD, XC_ART + 0x2A800, 0x2000 },
+	{ 5, 0x18, 5, 0xFD, XC_ART + 0x2C800, 0x1000 },
+	{ 3, 0x13, 3, 0xF6, XC_ART + 0x2D800, 0x1000 },
 };
 static const XvId bombs_effects[] = { { 0x50, 0xF6 }, { 0x51, 0xF5 }, { 0x52, 0xF4 }, { 0x53, 0xF3 }, { 0x55, 0xF2 } };
 static const XvByte bombs_bytes[] = {
@@ -2926,29 +2850,29 @@ static const XvImm misc_imms[] = {
 	{ 0x080E1F22, THUMB_MOVS, 2, 0, 0x2, 0xA2 },   /* its sprite: list 5 0x2 in BN5, 0xa2 in BN6 (BN5's copied there) */
 };
 static const XvNumber misc_numbers[] = {
-	{ 0x080D8418, 0x00000C4E, 0x00000CF1 },
+	{ 0x080D8418, 0x00000C4E, 0x00000CF4 },
 	{ 0x080D8A38, 0x01000417, 0x010004FC },
 	{ 0x080D8A3C, 0x0A050300, 0x0A050300 },
-	{ 0x080D8CD0, 0x00001011, 0x000010FF },
+	{ 0x080D8CD0, 0x00001011, 0x000010B8 },
 	{ 0x080D8CD4, 0x0A050300, 0x0A050300 },
-	{ 0x080DB0A0, 0x00000C3A, 0x00000CF2 },
+	{ 0x080DB0A0, 0x00000C3A, 0x00000CF5 },
 	{ 0x080DB0A4, 0x04050300, 0x04050300 },
-	{ 0x080DC958, 0x01041030, 0x010410FA },
+	{ 0x080DC958, 0x01041030, 0x010410FD },
 	{ 0x080DC95C, 0x0A050100, 0x0A050100 },
 };
 static const XvSprite misc_sprites[] = {
-	{ 3, 0x3A, 3, 0xF2, XC_ART + 0x32800, 0x1000 },
-	{ 3, 0x4E, 3, 0xF1, XC_ART + 0x33800, 0x800 },
-	{ 3, 0x31, 3, 0xF0, XC_ART + 0x34000, 0x800 },
-	{ 1, 0x17, 1, 0xFC, XC_ART + 0x34800, 0x1000 },
+	{ 3, 0x3A, 3, 0xF5, XC_ART + 0x2E800, 0x1000 },
+	{ 3, 0x4E, 3, 0xF4, XC_ART + 0x2F800, 0x800 },
+	{ 3, 0x31, 3, 0xF2, XC_ART + 0x30000, 0x800 },
+	{ 1, 0x17, 1, 0xFC, XC_ART + 0x30800, 0x1000 },
 };
 static const XvByte misc_bytes[] = {
-	{ 0x080D0C0C, 0x31, 0xF0 },   /* 080D0C0C's row 0: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
-	{ 0x080D0C12, 0x31, 0xF0 },   /* 080D0C0C's row 1: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
-	{ 0x080D0C18, 0x31, 0xF0 },   /* 080D0C0C's row 2: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
-	{ 0x080D0C1E, 0x31, 0xF0 },   /* 080D0C0C's row 3: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
-	{ 0x080D0C24, 0x31, 0xF0 },   /* 080D0C0C's row 4: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
-	{ 0x080D0C2A, 0x31, 0xF0 },   /* 080D0C0C's row 5: its sprite list 3 0x31 in BN5, 0xf0 in BN6 (BN5's copied there) */
+	{ 0x080D0C0C, 0x31, 0xF2 },   /* 080D0C0C's row 0: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080D0C12, 0x31, 0xF2 },   /* 080D0C0C's row 1: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080D0C18, 0x31, 0xF2 },   /* 080D0C0C's row 2: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080D0C1E, 0x31, 0xF2 },   /* 080D0C0C's row 3: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080D0C24, 0x31, 0xF2 },   /* 080D0C0C's row 4: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
+	{ 0x080D0C2A, 0x31, 0xF2 },   /* 080D0C0C's row 5: its sprite list 3 0x31 in BN5, 0xf2 in BN6 (BN5's copied there) */
 };
 static const XvType misc_types[] = { { 3, 0x56, XV_TYPE_MOVED }, { 3, 0x5B, XV_TYPE_MOVED }, { 3, 0x8D, XV_TYPE_MOVED }, { 3, 0x90, XV_TYPE_MOVED }, { 3, 0x92, XV_TYPE_MOVED }, { 3, 0xA5, XV_TYPE_MOVED }, { 3, 0xB1, XV_TYPE_MOVED }, { 4, 0x14, XV_TYPE_MOVED }, { 4, 0x46, XV_TYPE_MOVED }, { 4, 0x64, XV_TYPE_MOVED }, { 4, 0x65, XV_TYPE_MOVED }, { 4, 0x66, XV_TYPE_MOVED } };
 static const XcSong misc_songs[] = { { 0x70, 0x5F }, { 0xBA, 0x60 }, { 0x105, 0x59 } };
@@ -3026,8 +2950,8 @@ static const XvImm vulcan_imms[] = {
 	{ 0x080C6CF4, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvSprite vulcan_sprites[] = {
-	{ 5, 0x0F, 5, 0xFC, XC_ART + 0x35800, 0x1800 },
-	{ 5, 0x04, 5, 0xFB, XC_ART + 0x37000, 0x1000 },
+	{ 5, 0x0F, 5, 0xFC, XC_ART + 0x31800, 0x1800 },
+	{ 5, 0x04, 5, 0xFB, XC_ART + 0x33000, 0x1000 },
 };
 static const XvId vulcan_effects[] = { { 0x3E, 0xF1 }, { 0x38, 0xF0 }, { 0x3D, 0xEF }, { 0x58, 0xEE } };
 static const XvByte vulcan_bytes[] = {
@@ -3123,14 +3047,14 @@ static const XvPair spreads_words[] = {
 	{ 0x080CCA05, 0x080CCE99 },
 };
 static const XvImm spreads_imms[] = {
-	{ 0x080CC8B4, THUMB_MOVS, 2, 0, 0x1D, 0xF0 },   /* its sprite: list 4 0x1d in BN5, 0xf0 in BN6 (BN5's copied there) */
+	{ 0x080CC8B4, THUMB_MOVS, 2, 0, 0x1D, 0xF3 },   /* its sprite: list 4 0x1d in BN5, 0xf3 in BN6 (BN5's copied there) */
 	{ 0x080CC9A4, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvNumber spreads_numbers[] = {
-	{ 0x080CCAC4, 0x00011D10, 0x0001F010 },
+	{ 0x080CCAC4, 0x00011D10, 0x0001F310 },
 };
 static const XvSprite spreads_sprites[] = {
-	{ 4, 0x1D, 4, 0xF0, XC_ART + 0x38000, 0x1000 },
+	{ 4, 0x1D, 4, 0xF3, XC_ART + 0x34000, 0x1000 },
 };
 static const XvType spreads_types[] = { { 1, 0x05, XV_TYPE_SHARED }, { 3, 0x3B, XV_TYPE_MOVED }, { 4, 0x28, XV_TYPE_MOVED } };
 
@@ -3206,14 +3130,14 @@ static const XvPair darkcirc_words[] = {
 	{ 0x080D77FB, 0x080D80CB },
 };
 static const XvImm darkcirc_imms[] = {
-	{ 0x080D7534, THUMB_MOVS, 2, 0, 0x22, 0xEF },   /* its sprite: list 4 0x22 in BN5, 0xef in BN6 (BN5's copied there) */
+	{ 0x080D7534, THUMB_MOVS, 2, 0, 0x22, 0xF2 },   /* its sprite: list 4 0x22 in BN5, 0xf2 in BN6 (BN5's copied there) */
 	{ 0x080D75EC, THUMB_MOVS, 0, 0, 0xF, 0x4E },   /* its sound 0x10e: BN5's copied to BN6's slot 0x4e */
 	{ 0x080D75EE, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x10e: BN5's copied to BN6's slot 0x4e (its high part) */
-	{ 0x080D77B0, THUMB_MOVS, 2, 0, 0x22, 0xEF },   /* its sprite: list 4 0x22 in BN5, 0xef in BN6 (BN5's copied there) */
+	{ 0x080D77B0, THUMB_MOVS, 2, 0, 0x22, 0xF2 },   /* its sprite: list 4 0x22 in BN5, 0xf2 in BN6 (BN5's copied there) */
 	{ 0x080D77EA, THUMB_MOVS, 0, 0, 0xBD, 0x4F },   /* its sound 0xbd: BN5's copied to BN6's slot 0x4f */
 };
 static const XvSprite darkcirc_sprites[] = {
-	{ 4, 0x22, 4, 0xEF, XC_ART + 0x39000, 0x800 },
+	{ 4, 0x22, 4, 0xF2, XC_ART + 0x35000, 0x800 },
 };
 static const XvType darkcirc_types[] = { { 3, 0x89, XV_TYPE_MOVED }, { 3, 0x8A, XV_TYPE_MOVED }, { 4, 0x5E, XV_TYPE_MOVED } };
 static const XcSong darkcirc_songs[] = { { 0xBD, 0x4F }, { 0x10E, 0x4E } };
@@ -3334,7 +3258,7 @@ static const XvNumber drksonic_numbers[] = {
 	{ 0x080D562C, 0x0605FF01, 0x0605FF01 },
 };
 static const XvSprite drksonic_sprites[] = {
-	{ 1, 0x08, 1, 0xFB, XC_ART + 0x39800, 0x2000 },
+	{ 1, 0x08, 1, 0xFB, XC_ART + 0x35800, 0x2000 },
 };
 static const XvType drksonic_types[] = { { 3, 0x78, XV_TYPE_MOVED }, { 4, 0x4A, XV_TYPE_MOVED } };
 static const XcSong drksonic_songs[] = { { 0x70, 0x5F } };
@@ -3849,12 +3773,12 @@ static const XvPair blakwing_words[] = {
 	{ 0x080E6A93, 0x080E4095 },
 };
 static const XvImm blakwing_imms[] = {
-	{ 0x080D6506, THUMB_MOVS, 2, 0, 0x42, 0xEF },   /* its sprite: list 3 0x42 in BN5, 0xef in BN6 (BN5's copied there) */
+	{ 0x080D6506, THUMB_MOVS, 2, 0, 0x42, 0xF1 },   /* its sprite: list 3 0x42 in BN5, 0xf1 in BN6 (BN5's copied there) */
 	{ 0x080D6578, THUMB_LDR, 1, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-	{ 0x080E6B06, THUMB_MOVS, 2, 0, 0x42, 0xEF },   /* its sprite: list 3 0x42 in BN5, 0xef in BN6 (BN5's copied there) */
+	{ 0x080E6B06, THUMB_MOVS, 2, 0, 0x42, 0xF1 },   /* its sprite: list 3 0x42 in BN5, 0xf1 in BN6 (BN5's copied there) */
 };
 static const XvSprite blakwing_sprites[] = {
-	{ 3, 0x42, 3, 0xEF, XC_ART + 0x3B800, 0x1000 },
+	{ 3, 0x42, 3, 0xF1, XC_ART + 0x37800, 0x1000 },
 };
 static const XvType blakwing_types[] = { { 3, 0x7E, XV_TYPE_MOVED }, { 3, 0x7F, XV_TYPE_MOVED }, { 4, 0x54, XV_TYPE_MOVED }, { 4, 0x55, XV_TYPE_MOVED } };
 
@@ -4038,8 +3962,11 @@ static const XvPair holydrem_words[] = {
 static const XvImm holydrem_imms[] = {
 	{ 0x080BD994, THUMB_MOVS, 4, 0, 0x29, 0x3B },   /* its effect: 0x29 in BN5, 0x3b in BN6 */
 	{ 0x080BDA6C, THUMB_CMP, 0, 0, 0x9, 0x5 },   /* a panel's type compared with BN5's 0x9: BN6's 0x5 */
-	{ 0x080D6B70, THUMB_MOVS, 2, 0, 0x3E, 0xFF },   /* its sprite: list 3 0x3e in BN5, 0xff in BN6 (BN5's copied there) */
+	{ 0x080D6B70, THUMB_MOVS, 2, 0, 0x3E, 0xF0 },   /* its sprite: list 3 0x3e in BN5, 0xf0 in BN6 (BN5's copied there) */
 	{ 0x080D6BE8, THUMB_LDR, 1, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+};
+static const XvSprite holydrem_sprites[] = {
+	{ 3, 0x3E, 3, 0xF0, XC_ART + 0x38800, 0x800 },
 };
 static const XvType holydrem_types[] = { { 1, 0x1C, XV_TYPE_MOVED }, { 3, 0x83, XV_TYPE_MOVED }, { 4, 0x59, XV_TYPE_MOVED } };
 
@@ -4049,6 +3976,7 @@ static const XvType holydrem_types[] = { { 1, 0x1C, XV_TYPE_MOVED }, { 3, 0x83, 
 	.calls = holydrem_calls, .ncalls = (int)(sizeof holydrem_calls / sizeof *holydrem_calls), \
 	.words = holydrem_words, .nwords = (int)(sizeof holydrem_words / sizeof *holydrem_words), \
 	.imms = holydrem_imms, .nimms = (int)(sizeof holydrem_imms / sizeof *holydrem_imms), \
+	.sprites = holydrem_sprites, .nsprites = (int)(sizeof holydrem_sprites / sizeof *holydrem_sprites), \
 	.types = holydrem_types, .ntypes = (int)(sizeof holydrem_types / sizeof *holydrem_types) }
 /* ---- Poltrgst: BN5's support 0x31 (080E8DC3) as BN6's 0x5b ---- */
 
@@ -4430,7 +4358,7 @@ static const XvImm gridman_imms[] = {
 	{ 0x080E6E62, THUMB_MOVS, 2, 0, 0x12, 0xFE },   /* its sprite: list 2 0x12 in BN5, 0xfe in BN6 (BN5's copied there) */
 };
 static const XvSprite gridman_sprites[] = {
-	{ 2, 0x12, 2, 0xFE, XC_ART + 0x3C800, 0x7800 },
+	{ 2, 0x12, 2, 0xFE, XC_ART + 0x39000, 0x7800 },
 };
 static const XvId gridman_effects[] = { { 0x5F, 0xED } };
 static const XvType gridman_types[] = { { 1, 0x1F, XV_TYPE_MOVED }, { 4, 0x58, XV_TYPE_MOVED } };
@@ -4491,7 +4419,7 @@ static const XvPair cloudman_calls[] = {
 	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
 	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
 	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x080C5FE8, 0x08E01154 },   /* a helper, HELPER */
+	{ 0x080C5FE8, XN_MORE + 0x82F4 },   /* the Navis' copy, SAME */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 };
 static const XvPair cloudman_words[] = {
@@ -4504,7 +4432,7 @@ static const XvImm cloudman_imms[] = {
 	{ 0x080DCBF2, THUMB_MOVS, 0, 0, 0xBA, 0x60 },   /* its sound 0xba: BN5's copied to BN6's slot 0x60 */
 };
 static const XvSprite cloudman_sprites[] = {
-	{ 2, 0x0F, 2, 0xFD, XC_ART + 0x44000, 0xC800 },
+	{ 2, 0x0F, 2, 0xFD, XC_ART + 0x40800, 0xC800 },
 };
 static const XvType cloudman_types[] = { { 1, 0x15, XV_TYPE_MOVED }, { 3, 0xB3, XV_TYPE_MOVED } };
 static const XcSong cloudman_songs[] = { { 0xBA, 0x60 } };
@@ -4632,7 +4560,7 @@ static const XvImm larkman_imms[] = {
 	{ 0x080DFCEC, THUMB_LDR, 0, 4, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };
 static const XvSprite larkman_sprites[] = {
-	{ 2, 0x11, 2, 0xFC, XC_ART + 0x50800, 0x5000 },
+	{ 2, 0x11, 2, 0xFC, XC_ART + 0x4D000, 0x5000 },
 };
 static const XvType larkman_types[] = { { 1, 0x1E, XV_TYPE_MOVED }, { 3, 0xBA, XV_TYPE_MOVED }, { 3, 0xC7, XV_TYPE_MOVED }, { 3, 0xCB, XV_TYPE_MOVED } };
 
@@ -4728,16 +4656,16 @@ static const XvPair django_words[] = {
 	{ 0x08005D50, 0x08006660 },
 };
 static const XvNumber django_numbers[] = {
-	{ 0x080BF6F8, 0x01010C41, 0x01010CE8 },
-	{ 0x080DE1C4, 0x00000C45, 0x00000CE6 },
-	{ 0x080E99A4, 0x00000C44, 0x00000CE7 },
-	{ 0x080E9BA0, 0x00020C44, 0x00020CE7 },
+	{ 0x080BF6F8, 0x01010C41, 0x01010CEF },
+	{ 0x080DE1C4, 0x00000C45, 0x00000CE7 },
+	{ 0x080E99A4, 0x00000C44, 0x00000CE8 },
+	{ 0x080E9BA0, 0x00020C44, 0x00020CE8 },
 	{ 0x080EA1CC, 0x0101100E, 0x010110A4 },
 };
 static const XvSprite django_sprites[] = {
-	{ 3, 0x41, 3, 0xE8, XC_ART + 0x55800, 0x2000 },
-	{ 3, 0x44, 3, 0xE7, XC_ART + 0x57800, 0x1000 },
-	{ 3, 0x45, 3, 0xE6, XC_ART + 0x58800, 0x800 },
+	{ 3, 0x41, 3, 0xEF, XC_ART + 0x52000, 0x2000 },
+	{ 3, 0x44, 3, 0xE8, XC_ART + 0x54000, 0x1000 },
+	{ 3, 0x45, 3, 0xE7, XC_ART + 0x55000, 0x800 },
 };
 static const XvType django_types[] = { { 1, 0x24, XV_TYPE_MOVED }, { 3, 0xBC, XV_TYPE_MOVED }, { 4, 0x7B, XV_TYPE_MOVED }, { 4, 0x7D, XV_TYPE_MOVED }, { 4, 0x84, XV_TYPE_MOVED } };
 
@@ -5128,14 +5056,14 @@ static const XvPair piledrvr_words[] = {
 	{ 0x080D9F09, 0x080DA08D },
 };
 static const XvImm piledrvr_imms[] = {
-	{ 0x080D9D2C, THUMB_MOVS, 2, 0, 0x46, 0xE5 },   /* its sprite: list 3 0x46 in BN5, 0xe5 in BN6 (BN5's copied there) */
+	{ 0x080D9D2C, THUMB_MOVS, 2, 0, 0x46, 0xE6 },   /* its sprite: list 3 0x46 in BN5, 0xe6 in BN6 (BN5's copied there) */
 	{ 0x080D9DA0, THUMB_MOVS, 0, 0, 0x49, 0x4B },   /* its sound 0x148: BN5's copied to BN6's slot 0x4b */
 	{ 0x080D9DA2, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* its sound 0x148: BN5's copied to BN6's slot 0x4b (its high part) */
-	{ 0x080D9EB0, THUMB_MOVS, 2, 0, 0x4A, 0xE4 },   /* its sprite: list 3 0x4a in BN5, 0xe4 in BN6 (BN5's copied there) */
+	{ 0x080D9EB0, THUMB_MOVS, 2, 0, 0x4A, 0xE5 },   /* its sprite: list 3 0x4a in BN5, 0xe5 in BN6 (BN5's copied there) */
 };
 static const XvSprite piledrvr_sprites[] = {
-	{ 3, 0x46, 3, 0xE5, XC_ART + 0x59000, 0x800 },
-	{ 3, 0x4A, 3, 0xE4, XC_ART + 0x59800, 0x1000 },
+	{ 3, 0x46, 3, 0xE6, XC_ART + 0x55800, 0x800 },
+	{ 3, 0x4A, 3, 0xE5, XC_ART + 0x56000, 0x1000 },
 };
 static const XvType piledrvr_types[] = { { 3, 0x99, XV_TYPE_MOVED }, { 3, 0x9A, XV_TYPE_MOVED }, { 4, 0x6F, XV_TYPE_MOVED } };
 static const XcSong piledrvr_songs[] = { { 0x148, 0x4B } };
@@ -5151,68 +5079,67 @@ static const XcSong piledrvr_songs[] = { { 0x148, 0x4B } };
 const XChipUnit xchips_bn5[] = {
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080EBB97, XC_HOMES + 0x0, BUSTERARM_CODE, NULL, 0, 0x00 },
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080D3287, XC_HOMES + 0x400, SHAKE_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x080C5FCF, XC_HOMES + 0x800, BUBBLES_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x0800EA19, XC_HOMES + 0xC00, POWERCUSTSWRD_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x0800EB07, XC_HOMES + 0x1000, POWERCUSVOLT_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E8D7, XC_HOMES + 0x1400, POWERSP_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E9A9, XC_HOMES + 0x1800, POWERDS_CODE, NULL, 0, 0x00 },
-	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E983, XC_HOMES + 0x1C00, POWERDJANGOSP_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x1B, 0x6B, 0x080EC885, XC_HOMES + 0x2000, CRAKOUT_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x58, 0xA8, 0x080F0223, XC_HOMES + 0x2400, HOTBODY_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x13, 0x3D, 0x080E4629, XC_HOMES + 0x2800, JEALOUSY_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x15, 0x3F, 0x080E493D, XC_HOMES + 0x2C00, NRTHWIND_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x06, 0x30, 0x080E2F85, XC_HOMES + 0x3000, METAGEL_CODE, metagel_songs, (int)(sizeof metagel_songs / sizeof *metagel_songs), 0x00 },
-	{ XCHIP_SUPPORT, 0x08, 0x32, 0x080E3229, XC_HOMES + 0x3400, BLINDER_CODE, blinder_songs, (int)(sizeof blinder_songs / sizeof *blinder_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x55, 0xA5, 0x080EFD19, XC_HOMES + 0x3800, SKULLY_CODE, skully_songs, (int)(sizeof skully_songs / sizeof *skully_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x4F, 0x9F, 0x080EF579, XC_HOMES + 0x3C00, DRILARM_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x3D, 0x67, 0x080E91EF, XC_HOMES + 0x4000, RAINYDAY_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x28, 0x78, 0x080ED36F, XC_HOMES + 0x4400, WOODNOS_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x48, 0x98, 0x080EF1DD, XC_HOMES + 0x4800, CACTBAL_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x51, 0xA1, 0x080EF733, XC_HOMES + 0x4C00, SPSHAKE_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x52, 0xA2, 0x080EF7CB, XC_HOMES + 0x5000, PULSAR_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x4E, 0x9E, 0x080EF441, XC_HOMES + 0x5400, MRKCAN_CODE, mrkcan_songs, (int)(sizeof mrkcan_songs / sizeof *mrkcan_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x1C, 0x6C, 0x080EC91B, XC_HOMES + 0x5800, SIDEBUB_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x47, 0x97, 0x080EF119, XC_HOMES + 0x5C00, AQWHIRL_CODE, aqwhirl_songs, (int)(sizeof aqwhirl_songs / sizeof *aqwhirl_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x34, 0x84, 0x080EE113, XC_HOMES + 0x6000, ZSAVER_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x54, 0xA4, 0x080EFA73, XC_HOMES + 0x6400, KATANA_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x23, 0x73, 0x080ECF35, XC_HOMES + 0x6800, ELCREEL_CODE, elcreel_songs, (int)(sizeof elcreel_songs / sizeof *elcreel_songs), 0x00 },
-	{ XCHIP_SUPPORT, 0x3A, 0x64, 0x080E816F, XC_HOMES + 0x6C00, BOYBOMB_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x1F, 0x6F, 0x080ECBCF, XC_HOMES + 0x7000, GUARD_CODE, guard_songs, (int)(sizeof guard_songs / sizeof *guard_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x53, 0xA3, 0x080EF873, XC_HOMES + 0x7400, MOONBLD_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x27, 0x77, 0x080ED28B, XC_HOMES + 0x7800, CUSVOLT_CODE, cusvolt_songs, (int)(sizeof cusvolt_songs / sizeof *cusvolt_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x13, 0x63, 0x080EBDC7, XC_HOMES + 0x7C00, CUSTSWRD_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x0C, 0x36, 0x080E380B, XC_HOMES + 0x8000, ANTI_CODE, anti_songs, (int)(sizeof anti_songs / sizeof *anti_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x49, 0x99, 0x080EF271, XC_HOMES + 0x8400, REACTION49_CODE, reaction49_songs, (int)(sizeof reaction49_songs / sizeof *reaction49_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x29, 0x79, 0x080ED411, XC_HOMES + 0x8800, SLASHER_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x56, 0xA6, 0x080EFDB9, XC_HOMES + 0x8C00, ELEMRAGE_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x12, 0x62, 0x080EBC91, XC_HOMES + 0x9000, BOMBS_CODE, bombs_songs, (int)(sizeof bombs_songs / sizeof *bombs_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x1A, 0x6A, 0x080EC7DF, XC_HOMES + 0x9400, MISC_CODE, misc_songs, (int)(sizeof misc_songs / sizeof *misc_songs), 0x00 },
-	{ XCHIP_ATTACK, 0x19, 0x69, 0x080EC6B9, XC_HOMES + 0x9800, VULCAN_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x25, 0x75, 0x080ED093, XC_HOMES + 0x9C00, SPREADS_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x2A, 0x54, 0x080E75DD, XC_HOMES + 0xA000, DARKCIRC_CODE, darkcirc_songs, (int)(sizeof darkcirc_songs / sizeof *darkcirc_songs), 0x00 },
-	{ XCHIP_SUPPORT, 0x1B, 0x45, 0x080E5F31, XC_HOMES + 0xA400, DRKSONIC_CODE, drksonic_songs, (int)(sizeof drksonic_songs / sizeof *drksonic_songs), 0x00 },
-	{ XCHIP_NAVI, 0x00, 0x1D, 0x080BB629, XC_HOMES + 0xA800, NUMBRMAN_CODE, NULL, 0, 0x04 },
-	{ XCHIP_NAVI, 0x05, 0x22, 0x080B9F4D, XC_HOMES + 0xAC00, KNIGHTMAN_CODE, knightman_songs, (int)(sizeof knightman_songs / sizeof *knightman_songs), 0x10 },
-	{ XCHIP_NAVI, 0x0A, 0x27, 0x080BA5F1, XC_HOMES + 0xB000, COLONEL_CODE, NULL, 0, 0x01 },
-	{ XCHIP_NAVI, 0x0B, 0x28, 0x080BA343, XC_HOMES + 0xB400, SHADOWMAN_CODE, shadowman_songs, (int)(sizeof shadowman_songs / sizeof *shadowman_songs), 0x02 },
-	{ XCHIP_NAVI, 0x0C, 0x29, 0x080BC199, XC_HOMES + 0xB800, TOMAHAWKMAN_CODE, NULL, 0, 0x08 },
-	{ XCHIP_NAVI, 0x0D, 0x2A, 0x080BC9EF, XC_HOMES + 0xBC00, TOADMAN_CODE, toadman_songs, (int)(sizeof toadman_songs / sizeof *toadman_songs), 0x20 },
-	{ XCHIP_SUPPORT, 0x20, 0x4A, 0x080E6AB5, XC_HOMES + 0xC000, BLAKWING_CODE, NULL, 0, 0x00 },
-	{ XCHIP_ATTACK, 0x22, 0x72, 0x080ECE2F, XC_HOMES + 0xC400, TORNADO_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x23, 0x4D, 0x080E6F61, XC_HOMES + 0xC800, HOLYDREM_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x31, 0x5B, 0x080E8DC3, XC_HOMES + 0xCC00, POLTRGST_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x3B, 0x65, 0x080E2421, XC_HOMES + 0xD000, DARKINVS_CODE, NULL, 0, 0x00 },
-	{ XCHIP_NAVI, 0x01, 0x1E, 0x080BD371, XC_HOMES + 0xD400, SHADEMAN_CODE, NULL, 0, 0x80 },
-	{ XCHIP_NAVI, 0x0E, 0x2B, 0x080BC39F, XC_HOMES + 0xD800, BLIZZARDMAN_CODE, NULL, 0, 0x100 },
-	{ XCHIP_NAVI, 0x12, 0x2F, 0x080BE23D, XC_HOMES + 0xDC00, GRIDMAN_CODE, gridman_songs, (int)(sizeof gridman_songs / sizeof *gridman_songs), 0x00 },
-	{ XCHIP_NAVI, 0x0F, 0x2C, 0x080BC58F, XC_HOMES + 0xE000, CLOUDMAN_CODE, cloudman_songs, (int)(sizeof cloudman_songs / sizeof *cloudman_songs), 0x00 },
-	{ XCHIP_NAVI, 0x11, 0x2E, 0x080BDE89, XC_HOMES + 0xE400, LARKMAN_CODE, NULL, 0, 0x00 },
-	{ XCHIP_NAVI, 0x13, 0x30, 0x080BF605, XC_HOMES + 0xE800, DJANGO_CODE, NULL, 0, 0x00 },
-	{ XCHIP_NAVI, 0x10, 0x2D, 0x080BDC5F, XC_HOMES + 0xEC00, COSMOMAN_CODE, cosmoman_songs, (int)(sizeof cosmoman_songs / sizeof *cosmoman_songs), 0x400 },
-	{ XCHIP_NAVI, 0x14, 0x31, 0x080BD7EB, XC_HOMES + 0xF000, BIGNOISE_CODE, NULL, 0, 0x80 },
-	{ XCHIP_NAVI, 0x16, 0x33, 0x080BFB33, XC_HOMES + 0xF400, CSMOPRIS_CODE, NULL, 0, 0x400 },
-	{ XCHIP_NAVI, 0x17, 0x34, 0x080BDEB3, XC_HOMES + 0xF800, WILDBIRD_CODE, NULL, 0, 0x00 },
-	{ XCHIP_NAVI, 0x18, 0x35, 0x080BF8D5, XC_HOMES + 0xFC00, FOOTBALL_CODE, NULL, 0, 0x00 },
-	{ XCHIP_SUPPORT, 0x2F, 0x59, 0x080E8995, XC_HOMES + 0x10000, PILEDRVR_CODE, piledrvr_songs, (int)(sizeof piledrvr_songs / sizeof *piledrvr_songs), 0x00 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0800EA19, XC_HOMES + 0x800, POWERCUSTSWRD_CODE, NULL, 0, 0x00 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0800EB07, XC_HOMES + 0xC00, POWERCUSVOLT_CODE, NULL, 0, 0x00 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E8D7, XC_HOMES + 0x1000, POWERSP_CODE, NULL, 0, 0x00 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E9A9, XC_HOMES + 0x1400, POWERDS_CODE, NULL, 0, 0x00 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0800E983, XC_HOMES + 0x1800, POWERDJANGOSP_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x1B, 0x6B, 0x080EC885, XC_HOMES + 0x1C00, CRAKOUT_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x58, 0xA8, 0x080F0223, XC_HOMES + 0x2000, HOTBODY_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x13, 0x3D, 0x080E4629, XC_HOMES + 0x2400, JEALOUSY_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x15, 0x3F, 0x080E493D, XC_HOMES + 0x2800, NRTHWIND_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x06, 0x30, 0x080E2F85, XC_HOMES + 0x2C00, METAGEL_CODE, metagel_songs, (int)(sizeof metagel_songs / sizeof *metagel_songs), 0x00 },
+	{ XCHIP_SUPPORT, 0x08, 0x32, 0x080E3229, XC_HOMES + 0x3000, BLINDER_CODE, blinder_songs, (int)(sizeof blinder_songs / sizeof *blinder_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x55, 0xA5, 0x080EFD19, XC_HOMES + 0x3400, SKULLY_CODE, skully_songs, (int)(sizeof skully_songs / sizeof *skully_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x4F, 0x9F, 0x080EF579, XC_HOMES + 0x3800, DRILARM_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x3D, 0x67, 0x080E91EF, XC_HOMES + 0x3C00, RAINYDAY_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x28, 0x78, 0x080ED36F, XC_HOMES + 0x4000, WOODNOS_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x48, 0x98, 0x080EF1DD, XC_HOMES + 0x4400, CACTBAL_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x51, 0xA1, 0x080EF733, XC_HOMES + 0x4800, SPSHAKE_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x52, 0xA2, 0x080EF7CB, XC_HOMES + 0x4C00, PULSAR_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x4E, 0x9E, 0x080EF441, XC_HOMES + 0x5000, MRKCAN_CODE, mrkcan_songs, (int)(sizeof mrkcan_songs / sizeof *mrkcan_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x1C, 0x6C, 0x080EC91B, XC_HOMES + 0x5400, SIDEBUB_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x47, 0x97, 0x080EF119, XC_HOMES + 0x5800, AQWHIRL_CODE, aqwhirl_songs, (int)(sizeof aqwhirl_songs / sizeof *aqwhirl_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x34, 0x84, 0x080EE113, XC_HOMES + 0x5C00, ZSAVER_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x54, 0xA4, 0x080EFA73, XC_HOMES + 0x6000, KATANA_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x23, 0x73, 0x080ECF35, XC_HOMES + 0x6400, ELCREEL_CODE, elcreel_songs, (int)(sizeof elcreel_songs / sizeof *elcreel_songs), 0x00 },
+	{ XCHIP_SUPPORT, 0x3A, 0x64, 0x080E816F, XC_HOMES + 0x6800, BOYBOMB_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x1F, 0x6F, 0x080ECBCF, XC_HOMES + 0x6C00, GUARD_CODE, guard_songs, (int)(sizeof guard_songs / sizeof *guard_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x53, 0xA3, 0x080EF873, XC_HOMES + 0x7000, MOONBLD_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x27, 0x77, 0x080ED28B, XC_HOMES + 0x7400, CUSVOLT_CODE, cusvolt_songs, (int)(sizeof cusvolt_songs / sizeof *cusvolt_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x13, 0x63, 0x080EBDC7, XC_HOMES + 0x7800, CUSTSWRD_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x0C, 0x36, 0x080E380B, XC_HOMES + 0x7C00, ANTI_CODE, anti_songs, (int)(sizeof anti_songs / sizeof *anti_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x49, 0x99, 0x080EF271, XC_HOMES + 0x8000, REACTION49_CODE, reaction49_songs, (int)(sizeof reaction49_songs / sizeof *reaction49_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x29, 0x79, 0x080ED411, XC_HOMES + 0x8400, SLASHER_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x56, 0xA6, 0x080EFDB9, XC_HOMES + 0x8800, ELEMRAGE_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x12, 0x62, 0x080EBC91, XC_HOMES + 0x8C00, BOMBS_CODE, bombs_songs, (int)(sizeof bombs_songs / sizeof *bombs_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x1A, 0x6A, 0x080EC7DF, XC_HOMES + 0x9000, MISC_CODE, misc_songs, (int)(sizeof misc_songs / sizeof *misc_songs), 0x00 },
+	{ XCHIP_ATTACK, 0x19, 0x69, 0x080EC6B9, XC_HOMES + 0x9400, VULCAN_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x25, 0x75, 0x080ED093, XC_HOMES + 0x9800, SPREADS_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x2A, 0x54, 0x080E75DD, XC_HOMES + 0x9C00, DARKCIRC_CODE, darkcirc_songs, (int)(sizeof darkcirc_songs / sizeof *darkcirc_songs), 0x00 },
+	{ XCHIP_SUPPORT, 0x1B, 0x45, 0x080E5F31, XC_HOMES + 0xA000, DRKSONIC_CODE, drksonic_songs, (int)(sizeof drksonic_songs / sizeof *drksonic_songs), 0x00 },
+	{ XCHIP_NAVI, 0x00, 0x1D, 0x080BB629, XC_HOMES + 0xA400, NUMBRMAN_CODE, NULL, 0, 0x04 },
+	{ XCHIP_NAVI, 0x05, 0x22, 0x080B9F4D, XC_HOMES + 0xA800, KNIGHTMAN_CODE, knightman_songs, (int)(sizeof knightman_songs / sizeof *knightman_songs), 0x10 },
+	{ XCHIP_NAVI, 0x0A, 0x27, 0x080BA5F1, XC_HOMES + 0xAC00, COLONEL_CODE, NULL, 0, 0x01 },
+	{ XCHIP_NAVI, 0x0B, 0x28, 0x080BA343, XC_HOMES + 0xB000, SHADOWMAN_CODE, shadowman_songs, (int)(sizeof shadowman_songs / sizeof *shadowman_songs), 0x02 },
+	{ XCHIP_NAVI, 0x0C, 0x29, 0x080BC199, XC_HOMES + 0xB400, TOMAHAWKMAN_CODE, NULL, 0, 0x08 },
+	{ XCHIP_NAVI, 0x0D, 0x2A, 0x080BC9EF, XC_HOMES + 0xB800, TOADMAN_CODE, toadman_songs, (int)(sizeof toadman_songs / sizeof *toadman_songs), 0x20 },
+	{ XCHIP_SUPPORT, 0x20, 0x4A, 0x080E6AB5, XC_HOMES + 0xBC00, BLAKWING_CODE, NULL, 0, 0x00 },
+	{ XCHIP_ATTACK, 0x22, 0x72, 0x080ECE2F, XC_HOMES + 0xC000, TORNADO_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x23, 0x4D, 0x080E6F61, XC_HOMES + 0xC400, HOLYDREM_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x31, 0x5B, 0x080E8DC3, XC_HOMES + 0xC800, POLTRGST_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x3B, 0x65, 0x080E2421, XC_HOMES + 0xCC00, DARKINVS_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x01, 0x1E, 0x080BD371, XC_HOMES + 0xD000, SHADEMAN_CODE, NULL, 0, 0x80 },
+	{ XCHIP_NAVI, 0x0E, 0x2B, 0x080BC39F, XC_HOMES + 0xD400, BLIZZARDMAN_CODE, NULL, 0, 0x100 },
+	{ XCHIP_NAVI, 0x12, 0x2F, 0x080BE23D, XC_HOMES + 0xD800, GRIDMAN_CODE, gridman_songs, (int)(sizeof gridman_songs / sizeof *gridman_songs), 0x00 },
+	{ XCHIP_NAVI, 0x0F, 0x2C, 0x080BC58F, XC_HOMES + 0xDC00, CLOUDMAN_CODE, cloudman_songs, (int)(sizeof cloudman_songs / sizeof *cloudman_songs), 0x00 },
+	{ XCHIP_NAVI, 0x11, 0x2E, 0x080BDE89, XC_HOMES + 0xE000, LARKMAN_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x13, 0x30, 0x080BF605, XC_HOMES + 0xE400, DJANGO_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x10, 0x2D, 0x080BDC5F, XC_HOMES + 0xE800, COSMOMAN_CODE, cosmoman_songs, (int)(sizeof cosmoman_songs / sizeof *cosmoman_songs), 0x400 },
+	{ XCHIP_NAVI, 0x14, 0x31, 0x080BD7EB, XC_HOMES + 0xEC00, BIGNOISE_CODE, NULL, 0, 0x80 },
+	{ XCHIP_NAVI, 0x16, 0x33, 0x080BFB33, XC_HOMES + 0xF000, CSMOPRIS_CODE, NULL, 0, 0x400 },
+	{ XCHIP_NAVI, 0x17, 0x34, 0x080BDEB3, XC_HOMES + 0xF400, WILDBIRD_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x18, 0x35, 0x080BF8D5, XC_HOMES + 0xF800, FOOTBALL_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x2F, 0x59, 0x080E8995, XC_HOMES + 0xFC00, PILEDRVR_CODE, piledrvr_songs, (int)(sizeof piledrvr_songs / sizeof *piledrvr_songs), 0x00 },
 };
 const int xchips_bn5_count = (int)(sizeof xchips_bn5 / sizeof *xchips_bn5);

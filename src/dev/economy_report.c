@@ -72,7 +72,9 @@ typedef struct {
 	double job_zenny, job_frags, job_chips, job_hpmem;
 	double tier[CHIP_TIERS], cls[3], chips, good, strong, fit;
 	double kind[SOULS_TEAM], kind_offer[SOULS_TEAM];   /* chips of each Soul's kind gained, and on the dealers' lists */
-	double md_id[512];   /* the layers' Mystery Data's chips by id: how widely the finds spread */
+	double older;        /* 1 a run where the layer's finds have an older half */
+	double own[2];       /* chips gained that are no chip of BN6's: the registry's own of BN5's, of BN4's */
+	double md_id[CHIPS_IDS];   /* the layers' Mystery Data's chips by id: how widely the finds spread */
 } LayerTally;
 
 /* Where a reward lands in the tally */
@@ -93,6 +95,8 @@ static int codes_held[CODES];
 static int zenny_run, wanted_run;
 static int bust_fixed;   /* a busting level for every battle (the skill table), 0: the mix */
 static int net_layers = LAYERS;   /* the net measured: the endless net's first cycle, or the short net (SHORT_LAYERS) */
+#define GROUND_BY_SEED CHIP_NETS   /* ... each layer's as the run's seed dresses its area (run_dress) */
+static int ground_net;             /* the older Net's catalogue every measured layer's half draws on (chip_pool.h's CHIP_NET_*), 0: BN6's areas alone */
 static unsigned souls_held;        /* the Souls a measured run holds from its first layer (souls.h's bits) */
 
 static int cmp_int(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
@@ -112,6 +116,8 @@ static void gain_chip(LayerTally *t, int id, char code) {
 	t->tier[tier] += 1;
 	if (cls >= 0) t->cls[cls] += 1;
 	t->good += econ_chip_good(tier);
+	t->own[0] += chips_bn5(id);
+	t->own[1] += chips_bn4(id);
 	ChipInfo ci;
 	chip_info(id, &ci);
 	t->strong += chip_direct(id) && ci.power >= ECON_STRONG_POWER;
@@ -207,7 +213,7 @@ static void layer_battles(LayerTally *t, int depth, int biome) {
  * Growth) */
 static void layer_guardian(LayerTally *t, int depth, int biome) {
 	int navi = run_guardian(biome);
-	if (navi <= 0 || guardian_older(navi)) return;
+	if (navi <= 0 || guardian_moved(navi)) return;
 	Encounter e = make_boss(depth, biome, navi);
 	gain_reward(t, reward_pick(&e, bust_roll(), true, depth), FROM_GUARDIAN);
 	int chip = e.nfoes ? navi_chip(navi, e.foes[0].version) : 0;
@@ -360,6 +366,19 @@ static void one_layer(Measure *m, int r, int depth, int *fragments) {
 	run.side_kind = LAYER_NORMAL;
 	run.layer_seed = run.seed ^ (uint32_t)(depth * 2654435761u);
 	loot_layer_nets(-1, -1);
+	/* (the older Net's ground: the layer's half of the finds from its catalogue, as loot_layer_nets sets it there) */
+	if (ground_net == GROUND_BY_SEED) {
+		/* (as the run's seed dresses the layer's area, run_dress: its share and catalogue alone, the battles the report's own) */
+		loot_layer_nets(biome, run_dress(biome));
+		int share = loot_older_share, net = loot_older_net;
+		loot_layer_nets(-1, -1);
+		loot_older_share = share;
+		loot_older_net = net;
+	} else if (ground_net > CHIP_NET_BN6 && chip_pool_net_read(ground_net)) {
+		loot_older_share = LOOT_OLDER_SHARE;
+		loot_older_net = ground_net;
+	}
+	t->older += loot_older_share > 0;
 	LayerKit kit;
 	netmap_kit(biome, &kit);
 	layer_generate(run.layer_seed, depth, biome, LAYER_NORMAL, &kit);
@@ -507,8 +526,8 @@ static void bugfrag_table(FILE *out, const Measure *m) {
  * (docs/game/economy/measuring.md, Variety) */
 static double md_kinds(const LayerTally *s) {
 	double n = 0, h = 0;
-	for (int i = 0; i < 512; ++i) n += s->md_id[i];
-	for (int i = 0; i < 512; ++i) if (s->md_id[i] > 0) h -= s->md_id[i] / n * log(s->md_id[i] / n);
+	for (int i = 0; i < CHIPS_IDS; ++i) n += s->md_id[i];
+	for (int i = 0; i < CHIPS_IDS; ++i) if (s->md_id[i] > 0) h -= s->md_id[i] / n * log(s->md_id[i] / n);
 	return n > 0 ? exp(h) : 0;
 }
 
@@ -690,19 +709,79 @@ static void souls_table(FILE *out) {
 		for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %4.2f", act_sum(&probe, a).kind_offer[k]);
 		fprintf(out, "   %5.1f->%5.1f\n", all[0], all[1]);
 	}
-	/* (the chips a run can hold of each kind, BN6's and BN5's own, by
+	/* (the chips a run can hold of each kind, BN6's and the older Net's own, by
 	 * tier: where a find's tier has none, it stays as it rolled) */
-	fprintf(out, "Chips of each kind a run can hold (chip_pool.h), by tier 0-4: BN6's + BN5's own\n");
+	fprintf(out, "Chips of each kind a run can hold (chip_pool.h), by tier 0-4: BN6's + the older Net's own (BN5's and BN4's)\n");
 	for (int k = 0; k < SOULS_TEAM; ++k) {
 		int by[2][CHIP_TIERS] = { { 0 } };
 		for (int id = 1; id < CHIPS_IDS; ++id) {
 			int t = chip_pool_tier(id);
-			if (t >= 0 && loot_soul_chip(id, k)) ++by[chips_bn5(id)][t];
+			if (t >= 0 && loot_soul_chip(id, k)) ++by[chips_bn5(id) || chips_bn4(id)][t];
 		}
 		fprintf(out, "%-12s", names[k]);
 		for (int t = 0; t < CHIP_TIERS; ++t) fprintf(out, "  %2d+%-2d", by[0][t], by[1][t]);
 		fprintf(out, "\n");
 	}
+}
+
+/* The older Net's half (docs/multirom/one-net.md; docs/multirom/bn4-chips.md,
+ * unit 7): each catalogue's chips by tier, and a run made wholly on its
+ * ground (every layer's finds and stock half its catalogue's, more than
+ * any run has: a run's areas are BN6's and the older Net's by turns) under
+ * the plan in play, against the same bands; how many are outside */
+static int nets_table(FILE *out) {
+	static const char *const names[CHIP_NETS] = { "BN6's areas", "BN5's ground", "BN4's ground", "the deep" };
+	static const char *const metrics[ECON_METRICS] = { "chips", "good%", "MD", "zenny", "codes" };
+	static const int acts[] = { 0, 1, 2, 3, 4, 5, ECON_ACTS - 1 };
+	static short all[CHIPS_IDS];
+	static Measure probe;
+	int flagged = 0;
+	fprintf(out, "\nThe older Net's half (%d%% of a layer's finds and stock on another game's ground and in the deep, of the tier rolled, BN6's\n"
+		"where the catalogue has none of it; chip_pool.h): each catalogue's chips by tier 0-4, of them the registry's own (BN5's + BN4's)\n",
+		LOOT_OLDER_SHARE);
+	for (int net = 0; net < CHIP_NETS; ++net) {
+		int by[CHIP_TIERS] = { 0 }, own[2][CHIP_TIERS] = { { 0 } }, n = chip_pool_list(net, all, CHIPS_IDS);
+		for (int i = 0; i < n; ++i) {
+			int t = chip_pool_tier(all[i]);
+			if (t < 0) continue;
+			++by[t];
+			own[0][t] += chips_bn5(all[i]);
+			own[1][t] += chips_bn4(all[i]);
+		}
+		fprintf(out, "%-13s", names[net]);
+		for (int t = 0; t < CHIP_TIERS; ++t) fprintf(out, "  %3d (%2d+%-2d)", by[t], own[0][t], own[1][t]);
+		fprintf(out, "  %s\n", chip_pool_net_read(net) ? "" : "its ROM not read");
+	}
+	fprintf(out, "A run as its seed dresses it (run_dress: the older Net's areas of the ROMs read, each in its runs; the deep's acts where\n"
+		"BN5's ROM is read), then a run wholly on each ground (more than any run has), the plan in play, by act (! outside the plan's\n"
+		"band; the seed's run's counted); older%% = the layers with an older half; own = the registry's own chips gained, BN5's + BN4's\n"
+		"ground        act  ");
+	for (int k = 0; k < ECON_METRICS; ++k) fprintf(out, " %8s", metrics[k]);
+	fprintf(out, "   fit%%  kinds  older%%   own\n");
+	for (int g = 0; g <= CHIP_NETS; ++g) {
+		int net = g ? g - 1 : GROUND_BY_SEED;
+		if (net == CHIP_NET_BN6 || (net < CHIP_NETS && !chip_pool_net_read(net))) continue;
+		ground_net = net;
+		measure(&probe, econ_plan, LAYERS);
+		ground_net = 0;
+		for (unsigned i = 0; i < sizeof acts / sizeof *acts; ++i) {
+			double v[ECON_METRICS];
+			act_metrics(&probe, acts[i], v);
+			LayerTally sum = act_sum(&probe, acts[i]);
+			int first, last;
+			act_range(acts[i], &first, &last);
+			fprintf(out, "%-13s %-4s ", net == GROUND_BY_SEED ? "by the seed" : names[net], act_names[acts[i]]);
+			for (int k = 0; k < ECON_METRICS; ++k) {
+				EconBand band = econ_band(econ_plan, false, k, acts[i]);
+				bool outside = v[k] < band.lo || v[k] > band.hi;
+				flagged += outside && net == GROUND_BY_SEED;
+				fprintf(out, " %7.1f%s", v[k], outside ? "!" : " ");
+			}
+			fprintf(out, "   %3.0f  %5.1f   %4.0f   %4.2f+%4.2f\n", sum.chips ? 100 * sum.fit / sum.chips : 0, md_kinds(&sum),
+				100 * sum.older / (last - first + 1), sum.own[0], sum.own[1]);
+		}
+	}
+	return flagged;
 }
 
 int economy_report_run(const char *spec) {
@@ -734,6 +813,7 @@ int economy_report_run(const char *spec) {
 	skill_table(out);
 	flagged += dark_table(out);
 	souls_table(out);
+	flagged += nets_table(out);
 	fclose(out);
 	printf("economy report in %s: %d numbers of the plan in play (%s) outside their band\n", path, flagged, econ_plan->name);
 	return 0;

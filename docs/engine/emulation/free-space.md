@@ -52,11 +52,11 @@ moved from another game beside the other moved code. The plan's numbers:
 | --- | --- | --- | --- | --- | --- |
 | `engine` | `+0x000000`-`+0x002F00` (11.8 KB) | the engine's own records, hooks and stubs, and BN6's small tables grown | 10 | 2.4 KB (20%) | 1.8 KB |
 | `layers` | `+0x002F00`-`+0x090000` (564.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered; home's other places | 9 | 96.0 KB (17%) | 96.0 KB |
-| `code-low` | `+0x090000`-`+0x150000` (768.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 8 | 60.0 KB (7%) | 60.0 KB |
+| `code-low` | `+0x090000`-`+0x150000` (768.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 9 | 0 B (0%) | 0 B |
 | `words` | `+0x150000`-`+0x170000` (128.0 KB) | the director's and the PET's words: text archives, labels, lists | 12 | 18.8 KB (14%) | 17.0 KB |
 | `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds | 6 | 124.0 KB (6%) | 64.0 KB |
 | `code` | `+0x330000`-`+0x7A0000` (4544.0 KB) | other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs | 24 | 4.0 KB (0%) | 4.0 KB |
-| `art` | `+0x7A0000`-`+0x800000` (384.0 KB) | art copied whole, a place each | 1 | 24.0 KB (6%) | 24.0 KB |
+| `art` | `+0x7A0000`-`+0x800000` (384.0 KB) | art copied whole, a place each | 2 | 0 B (0%) | 0 B |
 | `persistent` | `0x02010CE0`-`0x02011800` (2.8 KB) | persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) | 5 | 0 B (0%) | 0 B |
 | `mode` | `0x02029A00`-`0x0202DA00` (16.0 KB) | a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map | 1 | 0 B (0%) | 0 B |
 | `battle` | `0x0203FB50`-`0x02040000` (1.2 KB) | per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing else of BN6's reads or writes 0x0203FB50 on | 12 | 0 B (0%) | 0 B |

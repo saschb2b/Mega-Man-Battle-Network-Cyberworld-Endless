@@ -62,6 +62,8 @@
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
+#define FREE_TEAM_SHARED_MORE (EMU_FREE + 0x141000u) /* the Navis' shared art's third room (a sprite of any Navi's once FREE_TEAM_SHARED is full: GyroMan's overlay first) (xnavi_install.c) */
+#define FREE_TEAM_SHARED_MORE_END (EMU_FREE + 0x150000u)
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -128,6 +130,8 @@
 /* ---- art: +0x7A0000-+0x800000, art copied whole, a place each ---- */
 #define FREE_LIB_TEAM        (EMU_FREE + 0x7A0000u)  /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c) */
 #define FREE_LIB_TEAM_END    (EMU_FREE + 0x7FA000u)
+#define FREE_NAVI_SHARED_FOUR (EMU_FREE + 0x7FA000u) /* the Navis' shared art's fourth room (a sprite of any Navi's once FREE_TEAM_SHARED_MORE is full: Meddy's last two first, CloudMan's before hers) (xnavi_install.c) */
+#define FREE_NAVI_SHARED_FOUR_END (EMU_FREE + 0x800000u)
 
 /* ---- persistent: 0x02010CE0-0x02011800, persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) ---- */
 #define RAM_PACK_EXT         0x02010CE0u             /* the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry) (xchips_install.c) */
@@ -191,6 +195,7 @@
 	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_BN4_CHIPS", (EMU_FREE + 0x0EF000u), (EMU_FREE + 0x13F000u), "", "code-low") \
 	X("FREE_SONG_TABLE", (EMU_FREE + 0x13F000u), (EMU_FREE + 0x141000u), "", "code-low") \
+	X("FREE_TEAM_SHARED_MORE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \
@@ -233,7 +238,8 @@
 	X("FREE_BN4_NAVI_SPRITE", (EMU_FREE + 0x77C000u), (EMU_FREE + 0x78C000u), "", "code") \
 	X("FREE_BRACKET_FACES", (EMU_FREE + 0x78C000u), (EMU_FREE + 0x790000u), "", "code") \
 	X("FREE_BRACKET", (EMU_FREE + 0x790000u), (EMU_FREE + 0x7A0000u), "", "code") \
-	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art")
+	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art") \
+	X("FREE_NAVI_SHARED_FOUR", (EMU_FREE + 0x7FA000u), (EMU_FREE + 0x800000u), "", "art")
 #define FREE_SPACE_ROM_ZONES(X) \
 	X("engine", (EMU_FREE + 0x000000u), (EMU_FREE + 0x002F00u)) \
 	X("layers", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x090000u)) \

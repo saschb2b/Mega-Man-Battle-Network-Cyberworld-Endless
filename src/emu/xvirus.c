@@ -112,6 +112,12 @@ static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
 	return d && (d->kind == XV_RAW || d->start == v);
 }
 
+/* (the Navis' code rooms: BN5's, the Darkloids' past their art before the chips' (XN_MORE), Team ProtoMan's, BN4's) */
+static bool navi_room(uint32_t to) {
+	return (to >= FREE_NAVI_CODE && to < FREE_CHIP_CODE) || (to >= FREE_TEAM_NAVI_CODE && to < FREE_TEAM_NAVI_ART) ||
+		(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART);
+}
+
 static uint32_t resolve(uint32_t target, void *user) {
 	Ctx *c = user;
 	if (c->clone && target == c->clone->call) return in_rom(c->clone->to, 2) ? thumb_veneer_get(&c->pool, c->clone->to) : 0;
@@ -125,8 +131,7 @@ static uint32_t resolve(uint32_t target, void *user) {
 			 * chips', xchips_code.h, or a routine of an earlier recipe of that region's, XvRegion.shared) */
 			bool own = c->region && ((to >= c->region->stubs && to < c->region->stubs_end) || (c->region->shared && c->region->shared(to | 1)));
 			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && to != XV_FIGHT_FLAGS &&
-				!(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) && !(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART) &&
-				!own && !xvirus_bn4_copy_routine(to | 1)) break;
+				!navi_room(to) && !own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;

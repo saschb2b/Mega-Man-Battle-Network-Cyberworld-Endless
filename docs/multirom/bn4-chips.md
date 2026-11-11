@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:33:37Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -28,6 +28,98 @@ What BN5's chips took is the road: [the chip registry](chip-registry.md)
 and [the chips' code](chips-code.md).
 
 ## Where things stand
+
+**Unit 7, into runs, built: BN4's chips are in the finds** (12 November
+2026; The build plan). On BN4's areas the older Net's half of the finds
+and the stock is BN4's catalogue, and in the deep it is every game's
+read. The catalogue is made as BN5's is ([One net](one-net.md), the older
+net's half): the run's chip of each of BN4's (`xchips_bn4_paid`: BN6's of
+its name, the registry's of BN5's where that plays, its own row's where
+its code plays, BN4's ROM read and the pack has its entry), no DarkChip,
+no dark chip of its own (`xreg4_dark`) and no Program Advance;
+`src/core/chip_pool.c`'s `CHIP_NET_BN4`, and `CHIP_NET_OLDER` the whole,
+BN5's and then BN4's others, a chip once. `loot_layer_nets` names the
+layer's catalogue (`loot_older_net`) by the area's game, the deep's the
+whole, and every find goes through it: the Net Dealers' stock, Mystery
+Data, the vaults', Servers' and gift's picks (`loot_pool_pick`), a held
+Soul's kind (`loot_souls.c`), a Chip or BugFrag Trader's list, half each
+rarity's (`trader.c`). Nothing names a chip: a unit that comes to play
+joins the catalogue the next time the game starts (Boomer1-3 did, merged
+while this was built). With all three ROMs the catalogue holds 130 chips,
+15 of them BN4's own; with BN6 and BN4, 93 and the same 15.
+
+Two decisions the design left open, taken with the game-design skill.
+**The catalogue holds the chips BN6 names too**, as BN5's does: fifteen
+chips of BN4's own taking half of an area's finds would be the same
+dozen in every dealer's list and every Mystery Data (each some ten times
+as likely as a chip of BN6's), where the pattern asked for is identity by
+net, not a short list; BN4's own come more often as they are proved.
+**The deep draws on the whole, one chip one weight**, not a coin between
+the games: one older Net (call 5 of [Battle Network 4 in a
+run](bn4.md)), no roll added, and nothing changes there while BN4's ROM
+is not read.
+
+**A run without BN4's ROM is what it was, roll for roll.** BN5's catalogue
+keeps its chips and their order, the deep's whole is BN5's alone without
+BN4, and no pick draws another number. Proved by the autopilot's seeds
+1-12 over 15,000 frames with BN6 alone and with BN6 and BN5, this build
+against `dev`'s: 24 run logs the same, and their debug logs (every
+dealer's stock, every layer's lines) line for line. With BN4 read the same
+seeds ran with BN6 and BN4 and with all three, and again on BN4's five
+areas (`--net-biome x15` to `x19`, 30,000 frames), each run ended by its
+act's guardian as the autopilot's runs end, none by a fault (152
+battles begun, 141 won); on BN4's ground dealers stocked Invis,
+PanlSht1, Counter1 and 3, WhitWeb1 and 2, Boomer1 and 3, Mystery Data
+held Repair, PanlSht2, WhitWeb1, Boomer1 and 3, a gift Counter1 to 3.
+`LAYER_MAKE` 115: with BN4's ROM read a layer's stock rolls otherwise on
+BN4's areas and in the deep.
+
+**What it measured** (`build.py economy`, its new table The older Net's
+half; [Measuring it](../game/economy/measuring.md)). The tier is rolled
+before the catalogue is asked, so the chips an act gives, their good
+share, the Mystery Data and the zenny cannot move, and did not: with all
+three ROMs the report is `dev`'s number for number to its new table (a
+held Soul's kind counts BN4's chips of TomahawkMan's kind beside BN5's).
+A run as its seed dresses it holds 0 numbers outside the plan's bands,
+with all three ROMs and with BN6 and BN4, and finds 0.3 and 0.9 of BN4's
+own chips. One number does move on BN4's ground, the codes held: BN4's
+chips carry \* more often (38 of its 100 standard chips; 13 of its 15
+that play), so a run with BN6 and BN4 holds one chip more in its best
+letter from the third act on (9, 12, 16, 19 against 8, 11, 15, 18),
+inside the band, and a run made wholly on BN4's ground, which no seed
+makes, three more by the fourth act (13, 17, 22 at the Nest), outside it.
+Left as BN4's records have it, the design's rule, and the report counts
+the seed's run from now on, so the day BN4's \*s push a real run out it
+says so (the owner's call 9, below: kept).
+
+**The Library keeps a BN4 chip held.** A chip of BN4's own given to
+MegaMan never reached the profile's Library (`chip_pool_older` knew
+BN5's rows alone): its page counted the chips both games name and no
+more. Seen: PanlSht1 and WhitWeb1 given, BN4's page 9/129 to 11/129,
+`dev`'s build 9/126 before and after. The second screen's Library panel
+counts the same page.
+
+**Found on the way, and fixed: BN6's menus on BN4's areas.** On a layer
+in BN4's tiles the PET's folder screens, a dealer's shop and the Chip
+Trader drew as garbled tiles, in 0.20.0 too. BN4's net maps are
+256-colour, and `netmap_colours` set that bit each frame wherever BG1
+and BG2 held the net's controls, which those menus set too (the folder's
+as it opens) or leave as the map had them (a shop, the trader). It now
+sets the bit only in the game's own main mode and takes it off in the
+menus' ([Net maps](../rom/net-maps.md), The map's BG controls). Seen on
+seed 5 with BN6 and BN4 (Town Area's first layer): the folder, FOLDER
+EDIT and back to the map; a dealer's shop on Town Area and the countries;
+the Chip Trader on ACDC Area, which gave "WhitWeb2 Y" from a list of
+BN4's chips alone (a scratch build), an id past 511 through BN6's own
+trader.
+
+**Not built here:** the flame's five DarkChips (none plays); a round's
+and Guardian Data's Navi chips (unit 6's); the visitors' rewards, which
+pay a chip of BN4's that plays since unit 0. A chip of BN4's whose id has
+no pack entry yet (from 603) stays out of the catalogue until it has
+one; `xchips_reward_bn4` does not ask that, so a visitor's reward of
+such a chip would be lost once one plays: for the session that gives
+those ids their entries.
 
 **The first unit of BN4's code is moved: PanlSht1-3** (10 November 2026;
 [The chip recipe generator](../devtools/chip-recipe-generator.md), The
@@ -140,6 +232,80 @@ whether or not BN6 has one of its bytes: an object in play in a fight's
 frame is compared by its sprite's frames, which the differential names
 by the recipe's rows.
 
+**MokoRus1-3 are moved** (10 November 2026: ids 577-579, misc 1): the
+Moko (the third kind's 0x2C), 524 bytes, three of them on the rows the
+chip's shuffle draws, set off 10 frames apart; its sprite is the first
+of list 1, the viruses' list, the chips copy (their range there 0x7F
+down to 0x40), its sound at the grown table's 0x1E0. Its hit strikes
+and pushes back, which the two engines ask for by different bits of the
+hit (BN4's 0x01 with a push bit, BN6's 0x40 with one): the copy passes
+BN6's, 0x61 for BN4's 0x21. `bn4_chip_mokorus1`, `2` and `3` pass over
+300 frames, the Mokos in play from t33 to t147 (a 140 HP Mettaur in the
+middle row left 80, 50 and 20, struck out of its attack and pushed back
+a column in both), five mutations caught.
+
+**SidBmbo1-3 are moved** (11 November 2026: ids 571-573, misc 5): the
+bamboo (the third kind's 0x44), 420 bytes, that comes up three columns
+ahead; its sprite of list 1 copied, its sound at the grown table's
+0x1E1. It is the one misc chip BN4's run waits for, 0x28 frames after
+its routine before the attack ends, where BN6's run ends a grown
+routine's attack in the same frame: the unit carries the wait
+(`XChipUnit.wait`, read from BN4's run by the generator) and its entry
+in BN6's grown misc routines is a wrapper the installer writes at the
+end of its home, which calls the routine once and counts as BN4's run
+does. `bn4_chip_sidbmbo1`, `2` and `3` pass over 300 frames, the bamboo
+in play from t33 to t95, MegaMan held in his misc state the same frames
+in both (a 140 HP Mettaur left 60 and 30; SidBmbo3's 140 against the
+family's 250 HP rank, left 110, since a deletion's effect is each
+engine's own art), six mutations caught. With it a unit names only the
+effects it moves itself: one an earlier unit moved is that unit's row,
+which the installer could otherwise resolve only where a family
+happened to hold the same sprite.
+
+**The spread chips are moved, the first attack family** (10 November
+2026: HeatShot, Heat-V, HeatSide, Bubbler, Bub-V and BublSide, ids
+588-593, BN4's family 0x1E). Most of BN4's chips are neither support nor
+misc chips: their record's family is a state of MegaMan's of its own, and
+the generator has a third kind of unit for one, `attack`: the state
+whole, every subfamily of it, at a number of BN6's grown attack families
+the chips of BN4 have for their own (0xD0 on, in the units' order), which
+its chips' records take as their family with BN4's own subfamily. BN6
+still has the spread family as its Spreadr1-3's (0x25, the same phases,
+waits and shapes by subfamily and kind), but with its own arm, a
+first-kind object where BN4's is a third-kind one, so BN4's records on
+BN6's family part from BN4's battle as the arm appears (tried first: t33,
+where Cannon's recorded verdict parts). So the state moves with its arm
+(the third kind's 0x02) and its shot (the third kind's 0x12, unseen, a
+panel a frame), 1218 bytes with the arm's and the shot's kinds' tables:
+38 calls paired, four of them new pairs read in both games (the counter
+window, the attack's end, a NaviStats byte, the element's set), the
+attack's variables' place and MegaMan's animation's number BN6's, three
+arm sprites and the bubbles' and fire's burst effects copied, the shot's
+sound at the grown table's 0x200 (the attack units' slots are a block
+from there, as units are moved side by side) and the bursts' at the
+families' slots for them. Eight specs pass over 300 frames, the arm and
+the shot in play in the fight's frames: each chip against a 140 HP
+Mettaur (left 100, 70, 40, 90, 60 and 30, the burst's effects on the
+panels of its shape), `bn4_chip_heatshot_miss` (the shot flown off the
+field) and `bn4_chip_heatshot_struck` (MegaMan struck by the Mettaur's
+wave with his arm out: the arm let go in both); eleven mutations caught.
+The comparison took a moved family's number, MegaMan's animation by each
+art's number, the chips' code room for a pointer a moved object keeps
+into its copied table, and one difference of the engines': BN4's struck
+state leaves the flag an interrupted attack had set, BN6's clears it
+(`tests/xdiff/legit.json`'s `bn4` `attack_families`,
+`megaman_animations`, `interrupted_attack`). **Not compared:** the
+burst's damage to a second foe (a BN4 spec holds one foe: the burst is
+seen by its effects' panels), and a spread chip after a support chip in
+one battle (BN6's support run holds MegaMan a frame, and his arm with
+him: a RockCube ahead of the shot parted there). **Waiting:** Spreader
+(18) is the run's by BN6's own and stays so; DrkSpred (192) is the dark
+chips' session's, its kind 0xF of the shot's table and its sound a byte
+cannot name among its work; HeatSprd and BubSprd, the family's Program
+Advances, play once BN4's recipes are listed (BN4's list read into BN6's
+grown one, as BN5's were: not built). Every attack unit to come that
+draws the arm shares this copy of it (not built: the second unit's work).
+
 **Meteors1-3 are moved** (10 November 2026: ids 674-676, misc 0x11), the
 first unit of the parallel sweep's third line and the first whose chips
 sit past id 602. Its routine lies after its controller, the fourth
@@ -160,12 +326,13 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Next:** MokoRus1-3 and SidBmbo1-3 (misc 1 and 5: each draws a sprite
-of list 1, the viruses' list, which needs a range of the chips' there;
-BN4's misc run waits 0x28 frames for subfamily 5, which BN6's run does
-not for a grown routine), BugChain (support 0x1F: two calls of BN4's
-with no twin found). Marking and the four Plus chips wait on the
-owner's call 7.
+**Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
+types, a placement that draws), then BlakBarr's barrier; Binder,
+SandRing and Ball are attack families, whose unit kind the spread
+chips brought; of those FlmLine, Thunder and TwnFng are next. BugChain
+waits on the owner's call 11 (it copies a side's NaviCust bugs to the
+other's record, a NetBattle chip). Marking and the four Plus chips are
+cut (call 7, answered).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -208,6 +375,65 @@ HP for a battle it is used in (the owner's call 4); the differential's
 BN4 battle is given the karma its chip asks (`karma4`). What Hole's panel is for is not yet read (the
 players' account, that a DS Navi chip needs one on the field, is a lead
 for unit 6).
+
+**The dark chips' price is in code** (10 November 2026;
+[DarkChips](../game/meta/darkchips.md), the owner's call of 10 November
+2026, Built). `tools/xreg_bn4.py` writes which rows are dark
+(`xreg4_dark_ids`: a record's alignment dark, or BN4's DarkChip mark in
+its effect flags, `BN4_CHIP_DARK`): 28 of the 193, the 23 dark-aligned
+with a row (Hole, DrkLine, ElemDark, BugCurse, BlakBarr, 17 DS Navi
+chips, the Program Advance DarkNeo) and the five DarkChips (DrkCanon,
+DarkBomb, DrkVulcn, DrkSpred, DrkStage, whose alignment is 0: BN4 plays
+them by its worry, not its karma). One used by MegaMan in BN6's engine
+is seen where every DarkChip's use is (`BN6_DARK_AFTER`'s hook, by the
+row's id) and the battle costs 20 max HP once. The tool's guard is
+lifted: a dark chip may be listed in `MOVED` or `ON_BN6`. The other
+eight dark-aligned records have no row: Static, Muramasa, Anubis and
+BlakWing are BN6's own chips by name (BN6's code, no price), NumberMan's
+and ShadeMan's DS the registry's rows of BN5's, ProtoMan's DS and
+BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
+object's +0x94, his dark sprite, what else his karma changes); a dark
+chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
+and the comparison explains his look from both games' code: his
+palette, BN4's dark 2 against BN6's 0, the one difference of him
+(`bn4_chip_invis_dark`, [The differential](../devtools/differential.md)).
+
+**The dark units, read** (10 November 2026; [BN4 Red Sun's
+tables](../rom/bn4.md), The panel changer and the Hole panel). With the
+price in code, each unit of the dark line was derived
+(`tools/xchiprecipe_bn4.py --report`) and read in the ROM. None is
+moved yet; why each waits:
+
+| Chips | What they are in BN4's code | Waits on |
+| --- | --- | --- |
+| Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
+| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other; 708 and 728 bytes with their own objects, one call unpaired (the blink's mark, BN6's `0x0800CC52` by reading), three sounds | the owner's call 8 (the Hole panel in BN6's engine); then the generator's kinds' tables, which copy bytes as they are where the changer's rows hold BN4's panel types (asked of its session) |
+| BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | the owner's call 7: its record is Marking's kind (no Library number, the blank picture), and not dark |
+| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | a unit kind for those families: the generator moves support and misc routines only; DrkCanon also BN4's computed powers (unit 6) |
+| ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | the same: a unit kind for a family BN6 has none of |
+| DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
+
+BN4's Hole panel (its type 0xB) is a plain panel by its flags: nothing
+of BN4's damage, movement or panel code treats it otherwise, and a
+panel's step never turns it back. **What it is for is a DS Navi chip's
+power** (verified in the ROM): `BN4_DS_POWER` counts the Holes on the
+whole field, ten at most, and reads the chip's power from its row of
+`BN4_DS_POWERS`, a step a Hole: RollDS 30 with none and 80 with ten,
+GutsMnDS 100 and 200, FireMnDS 150 and 250, MetlMnDS 200 and 300. Hole
+adds one, DrkLine a row, DrkStage MegaMan's whole side (and poisons the
+other). Seen in BN4's own battle (scratch runs of the differential's
+harness with `karma4` 0, filmed): DrkStage leaves MegaMan's nine panels
+Holes and the other side's nine poison, the foe's HP falling; DrkLine
+turns his row's six panels Holes, the three on the other side too; and
+RollDS used on a field with no Hole plays and takes 90 of a foe's 180
+HP, three hits of 30, the table's last column. So no DS chip is refused
+for want of a Hole: the players' account that it needs one is the floor
+a field with none gives. Six more places test for a Hole (the map's row): a light Navi
+standing on one cleanses it, two random pickers ask whether a row has
+one, one leaves it out, one attack turns a column of them plain. So the
+panel chips and the DS Navi chips are one design: a dark MegaMan gives
+turns and max HP to dig Holes, and his DS chips hit up to twice as hard
+for them.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
@@ -653,7 +879,9 @@ the tier as BN5's chips are priced.
 
 ### The economy's bands
 
-No band moves. Act by act a run finds as many chips as now; what changes
+(As built, Where things stand: the four bands of what a run is handed
+hold, and the codes held rise by one on BN4's ground, inside their band
+for a run a seed makes.) No band moves. Act by act a run finds as many chips as now; what changes
 is whose: on BN4's areas the older Net's half is BN4's, whose rarity is
 BN6's within a few points (above), so the good chips' share stays inside
 its fifth. The visitors' rewards shift a little from zenny to chips (a
@@ -761,7 +989,9 @@ of one agent.
    powers (`chip_gutsman` and on). Then call 7's stand-in steps aside for
    a round whose Navi's chip plays. The other ten Navis' chips follow
    their Navis (Phase 2).
-7. **Into runs (1 to 2 days, after 2; each chip as it plays).** BN4's
+7. **Into runs: built** (Where things stand), but the flame's DarkChips
+   and the Navi chips, which wait for their units. As planned: **(1 to 2
+   days, after 2; each chip as it plays).** BN4's
    catalogue in the older Net's half on BN4's areas and the deep, the
    flame's DarkChips, the rounds' and Guardian Data's Navi chips, the
    Library, the second screen; `LAYER_MAKE` bumped (the stock's rolls
@@ -809,6 +1039,8 @@ Asked and answered on 10 November 2026:
    power ran in, 20 max HP once a battle
    ([DarkChips](../game/meta/darkchips.md), the owner's call of 10
    November 2026). The light chips play for any MegaMan at no price.
+   Built 10 November 2026 (Where things stand, The dark chips' price is
+   in code).
 5. **LifeAura is one chip with BN6's LifeAur:** "One chip". BN4's 201
    pairs with BN6's 182 by alias (`xreg4_alias`, written by
    `tools/xreg_bn4.py`'s `ALIAS`), takes no row, and its id 530 is
@@ -826,6 +1058,28 @@ Asked and answered on 11 November 2026:
    with the chips a folder holds. A slot for every sound of another game
    from then on (Where things stand).
 
+Asked and answered on 12 November 2026 (unit 7, Where things stand):
+
+9. **BN4's \*s on BN4's ground: kept as its records have them:** "Keep
+   BN4's codes". BN4 gives \* to 38 of its 100 standard chips, and to 13
+   of the 15 that play today; a find's code is the record's. Measured, a
+   run with BN6 and BN4 holds one chip more in its best letter from the
+   third act on, inside the band; a run wholly on BN4's ground would hold
+   three more by the fourth act, outside it, but no seed makes one. It is
+   what BN4's ground gives, a folder that comes together a little sooner
+   there, and `build.py economy` fails the plan the day a seed's run
+   leaves the band. Chosen over a find on BN4's ground rolling its code
+   among the record's letters first, the \* as often as BN6's chips have
+   it.
+10. **BN4's dark chips stay out of the finds:** "Keep them out". The
+    design keeps the five DarkChips to the flame; BN4's other 23 dark rows
+    (Hole, DrkLine, the DS Navi chips) cost 20 max HP a battle one is used
+    in (call 4, built), and a dealer or a Mystery Data tells no price. None
+    enters the catalogue (`xreg4_dark`); they come by the ways that can say
+    the price (a flame's words; a DS by a Navi beaten with dark power,
+    Phase 2's rule). Chosen over letting them in as any chip, the card's
+    description the only warning.
+
 Open:
 
 7. **Marking and the four Plus chips (FirePlus, ThunPlus, AquaPowr,
@@ -841,6 +1095,46 @@ Open:
    them. Recommended: cut all five (their rows left out of play, ids 556
    and 563-566 kept retired), as chips BN4's own players never held.
    Until answered they sit out and the work goes on past them.
+   **BlakWeap joins the question** (10 November 2026): its record (289,
+   row 602) is of the same kind, no Library number and the blank picture,
+   its description's first bytes no text; it is not dark by its record
+   (alignment 0, no DarkChip mark), so it would cost nothing. Its code is
+   small (156 bytes and a third-kind object). Recommended: cut with the
+   five.
+8. **BN4's Hole panel: moved into BN6's engine, or left out?** Asked 12
+   November 2026. Hole, DrkLine and DrkStage make it, and a DS Navi
+   chip's power counts it (Where things stand, The dark units, read):
+   from its floor with no Hole to up to double with ten. BN6 has no
+   such panel. (a) **Moved**: a panel type of the engine's own at BN6's
+   free 15, plain's flags, BN4's tiles and colours copied as BN5's lava
+   and sea were, counted by BN4's own routine moved with the DS chips'
+   powers. Several days (every background palette is in use), and the
+   three panel chips and the DS chips then play as BN4 made them: a
+   battle's 20 max HP buys Holes, the Holes buy power. (b) **Left out**:
+   a DS chip always hits at its floor (the no-Hole column), Hole and
+   DrkLine are cut (they would only make panels plain at 20 max HP), and
+   DrkStage is BN4's without its Holes: poison on the other side.
+   Recommended: (a), as the DS chips are 17 of the 28 dark rows and
+   their powers hinge on it; until it is built the DS chips can be
+   proved against BN4's battle with no Hole on the field and play at
+   their floor, which (b) would make final. Until answered Hole, DrkLine
+   and DrkStage sit out.
+11. **BugChain: cut, or its bugs mapped onto BN6's?** Asked 11 November
+    2026. By its code (read in the ROM: its object's routine `0x080E668E`)
+    BugChain copies seven bytes from one side's battle Navi stats to the
+    other's, the NaviCust bugs a side fights under (BN4's record, 0x40
+    bytes a side at `0x0203BEC0`, through `0x0800D742`): one side's bugs
+    become both sides'. Only a Navi a player steers reads that record, so
+    against viruses and the run's guardians the chip changes nothing that
+    was found (their code reads none of it: assumed from the readers met,
+    not searched to the end); it is a NetBattle chip. BN6 keeps the same
+    record in another layout (0x64 bytes a side at `0x0203CE00`,
+    `0x08013682`) and its own set of bugs, so moving it means pairing
+    each of the seven fields with BN6's by its reader in both games, and
+    deciding what a bug BN6 has none of becomes. Recommended: cut it from
+    runs' pools and rewards (its row left out of play, id 587 kept
+    retired) and take it up with the Arena, where a second player's
+    record exists. Until answered it sits out.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's

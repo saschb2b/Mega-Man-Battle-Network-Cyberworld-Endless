@@ -65,6 +65,16 @@ void director_draw_map(void);
 void director_draw_counts(void);
 /* ... the picture's row under them while they show, else 0 */
 int director_counts_bottom(void);
+/* The run's reward pick (reward_pick.h): after each frame, a pick its
+ * script asked for opens, and the script its choice runs starts once the
+ * game takes it; while it is up, a frame of its keys (the GBA's, the
+ * autopilot's), the game held under it; its picture over the game's;
+ * put away as the game's scene is left. */
+void director_pick_watch(void);
+bool director_pick_shown(void);
+void director_pick_keys(uint32_t keys);
+void director_draw_pick(void);
+void director_pick_shut(void);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
 /* The layer's map in w x h from (x, y), for the second screen (issue #73),

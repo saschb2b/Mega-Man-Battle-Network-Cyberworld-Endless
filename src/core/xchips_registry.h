@@ -78,11 +78,16 @@ typedef struct {
 	                        XREG_MOVED: its code moved into BN6's engine (src/emu/xchips_bn4.h's units): it plays where BN4's ROM is read */
 	uint16_t twin;       /* (XREG_RECORD) the BN6 chip whose family, lock-on and lock-on type its record takes; 0 none */
 	uint8_t sub;         /* ... and the subfamily, 0xFF the twin's; (XREG_MOVED) its unit's routine in BN6's grown support routines,
-	                        XC4_FIRST_SUPPORT + BN4's subfamily, its record's subfamily under BN6's support family */
+	                        XC4_FIRST_SUPPORT + BN4's subfamily, its record's subfamily under BN6's support family; or, from
+	                        XREG4_FIRST_ATTACK, its unit's number in BN6's grown attack families (a state of BN4's MegaMan's moved),
+	                        its record's family, the subfamily BN4's own */
 	uint8_t codes[4];    /* its codes as BN4's record has them */
 	uint8_t type, mb;    /* its class (BN6's library type: 0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
 } XChipReg4;
 
+#define XREG4_DARKCHIP_MB 99   /* a DarkChip of BN4's (DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage): its record's MB, no other row's;
+                                * BN4's Library lists none (its +0x1C is 0), a run's finds hold none (chip_pool.h): a flame's */
+#define XREG4_FIRST_ATTACK 0xD0 /* a moved row's `sub` from here: an attack family's number (src/emu/xattack_grow.h XATTACK_BN4; test_core holds the two alike) */
 #define XREG4_PACK_FIRST 527   /* its first id: 527-602, the ids with a pack entry (bn6_pack_entry), its chips that play first; */
 #define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
 #define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips */
@@ -91,12 +96,19 @@ extern const int xreg4_count;
 /* BN4's chips that are a chip of BN6's under another spelling (LifeAura, BN6's LifeAur): BN4's id and BN6's, no row */
 extern const uint16_t xreg4_alias[][2];
 extern const int xreg4_alias_count;
+/* BN4's dark chips among the rows, by their id in BN6's tables (docs/game/meta/darkchips.md, the owner's call of 10 November
+ * 2026): a record BN4 marks dark (its alignment, BN4_CHIP_ALIGN: played only for a dark MegaMan there) or a DarkChip
+ * (BN4_CHIP_DARK); a battle one is used in costs what every dark chip's does */
+extern const uint16_t xreg4_dark_ids[];
+extern const int xreg4_dark_count;
 
 /* The row of BN4's chip `bn4`, NULL where it has none (the run's chip by
  * name or Navi: xchips_bn4_paid; or none at all) */
 const XChipReg4 *xreg4_of(int bn4);
 /* The row whose id is `bn6`, NULL where that id is none of BN4's */
 const XChipReg4 *xreg4_at(int bn6);
+/* Whether id `bn6` is a dark chip of BN4's (xreg4_dark_ids) */
+bool xreg4_dark(int bn6);
 /* `n` rows checked against BN5's rows `rows5` (`n5`): every BN4 id once,
  * every id once, free (xreg_free_id), none of BN5's rows' and from
  * XREG4_PACK_FIRST; a folder chip's with a pack entry or from

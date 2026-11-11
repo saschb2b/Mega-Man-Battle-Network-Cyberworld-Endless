@@ -408,6 +408,10 @@ TYPES = {
     (3, 0x85): ('moved', None, 'navis', "CosmoMan's: " + NO_TWIN),
     (3, 0x86): ('moved', None, 'navis', "CosmoMan's: " + NO_TWIN),
     (4, 0x45): ('moved', None, 'navis', "CosmoMan's: " + NO_TWIN),
+    (3, 0x0B): ('moved', None, 'navis', "CloudMan's clouds' bubbles (his kinds 2-5): no BN6 type runs its code (BN6's 0x0B "
+                                        "another object's); the Navis' copy, the first installed of those that spawn it (the "
+                                        "Navi chips CloudMan's and SideBub's, Marina's water's records, ID_TABLES), fixes every "
+                                        "kind's row by xchiprecipe.py's TABLE_SPRITES, so the chips and the families spawn it"),
     (3, 0x36): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x37): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x3D): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
@@ -420,6 +424,24 @@ TYPES = {
     (3, 0x39): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
     (3, 0x3A): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
     (4, 0x12): ('moved', None, 'navis', "NapalmMan's: " + NO_TWIN),
+    (3, 0x19): ('moved', None, 'navis', "GyroMan's: " + NO_TWIN),
+    (3, 0x1B): ('moved', None, 'navis', "GyroMan's: " + NO_TWIN),
+    (3, 0x1C): ('moved', None, 'navis', "GyroMan's: " + NO_TWIN),
+    (3, 0x1E): ('moved', None, 'navis', "GyroMan's: " + NO_TWIN),
+    (3, 0xAA): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (3, 0xAB): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (3, 0xAF): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (4, 0x5A): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (4, 0x5B): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (4, 0x61): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (4, 0x62): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (3, 0x09): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (3, 0x0C): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (3, 0x0D): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0B): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0E): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0F): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x3C): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
     (3, 0x00): ('moved', None, 'navis', "Guard's: no BN6 type runs its code; NapalmMan's 0x33 spawns it too (kind 0x11, BN5 "
                                         "0x080CB4FC): the Navis' copy, installed before the chips', fixes its kinds' rows (its "
                                         "sprites by xchiprecipe.py's TABLE_SPRITES, its panels by TABLE_PANELS), so the chips "
@@ -439,9 +461,6 @@ TYPES = {
     (1, 0x11): ('moved', None, 'families', "Cactikil's: BN6's 0x11 another object's code"),
     (1, 0x16): ('moved', None, 'families', "WuNote's: BN6's 0x16 another object's code"),
     (1, 0x2F): ('moved', None, 'families', "Appley's: BN6's 0x2F another object's code"),
-    (3, 0x0B): ('moved', None, 'chips', "SideBub's: no BN6 type runs its code; Marina's water's records (ID_TABLES): BN6's "
-                                        "0x0B another object's code (the chips' copy, installed before the families', "
-                                        "fixes every kind's row, so the families spawn it)"),
     (3, 0x24): ('moved', None, 'chips', "the crack bombs' bomb (CrakBom's, ParaBom's, ResetBom's): BN6's 0x24 (0x080CA09D) "
                                         "other code, no BN6 type runs BN5's; Bugtank's thrown bomb: BN6's 0x24 another "
                                         "object's code (the chips' copy, installed before the families', fixes every "

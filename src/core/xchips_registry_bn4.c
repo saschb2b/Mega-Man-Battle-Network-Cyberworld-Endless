@@ -2,7 +2,7 @@
  * the chips a run has none of by name or by Navi, each with its id in BN6's tables, fixed here. Written by
  * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its twin and subfamily where its
  * record runs on BN6's code, its codes, class and MB,
- * which its placeholder keeps where BN4's ROM is not read). 527-602 the chips that play first, 605-623 its Program
+ * which its placeholder keeps where BN4's ROM is not read; and which rows are BN4's dark chips). 527-602 the chips that play first, 605-623 its Program
  * Advances, 635 on the rest. */
 #include "xchips_registry.h"
 
@@ -12,12 +12,12 @@ const XChipReg4 xreg4_rows[] = {
 	{  12,  595, XREG_PENDING,   0, 0xFF, { 0x05, 0x06, 0x07, 0x1A }, 0, 18 },   /* FlmLine1 */
 	{  13,  596, XREG_PENDING,   0, 0xFF, { 0x03, 0x04, 0x05, 0xFF }, 0, 26 },   /* FlmLine2 */
 	{  14,  597, XREG_PENDING,   0, 0xFF, { 0x09, 0x0A, 0x0B, 0xFF }, 0, 54 },   /* FlmLine3 */
-	{  19,  588, XREG_PENDING,   0, 0xFF, { 0x01, 0x02, 0x03, 0x1A }, 0,  8 },   /* HeatShot */
-	{  20,  589, XREG_PENDING,   0, 0xFF, { 0x02, 0x03, 0x04, 0xFF }, 0, 22 },   /* Heat-V */
-	{  21,  590, XREG_PENDING,   0, 0xFF, { 0x03, 0x04, 0x05, 0xFF }, 0, 44 },   /* HeatSide */
-	{  22,  591, XREG_PENDING,   0, 0xFF, { 0x0F, 0x10, 0x11, 0x1A }, 0, 12 },   /* Bubbler */
-	{  23,  592, XREG_PENDING,   0, 0xFF, { 0x02, 0x03, 0x04, 0xFF }, 0, 22 },   /* Bub-V */
-	{  24,  593, XREG_PENDING,   0, 0xFF, { 0x03, 0x04, 0x05, 0xFF }, 0, 44 },   /* BublSide */
+	{  19,  588, XREG_MOVED,   0, 0xD0, { 0x01, 0x02, 0x03, 0x1A }, 0,  8 },   /* HeatShot */
+	{  20,  589, XREG_MOVED,   0, 0xD0, { 0x02, 0x03, 0x04, 0xFF }, 0, 22 },   /* Heat-V */
+	{  21,  590, XREG_MOVED,   0, 0xD0, { 0x03, 0x04, 0x05, 0xFF }, 0, 44 },   /* HeatSide */
+	{  22,  591, XREG_MOVED,   0, 0xD0, { 0x0F, 0x10, 0x11, 0x1A }, 0, 12 },   /* Bubbler */
+	{  23,  592, XREG_MOVED,   0, 0xD0, { 0x02, 0x03, 0x04, 0xFF }, 0, 22 },   /* Bub-V */
+	{  24,  593, XREG_MOVED,   0, 0xD0, { 0x03, 0x04, 0x05, 0xFF }, 0, 44 },   /* BublSide */
 	{  25,  637, XREG_PENDING,   0, 0xFF, { 0x0A, 0x0D, 0x0F, 0xFF }, 0, 24 },   /* ElemFlar */
 	{  26,  638, XREG_PENDING,   0, 0xFF, { 0x07, 0x10, 0x15, 0xFF }, 0, 24 },   /* ElemIce */
 	{  32,  639, XREG_PENDING,   0, 0xFF, { 0x00, 0x06, 0x0C, 0x1A }, 0, 15 },   /* GunSol1 */
@@ -54,9 +54,9 @@ const XChipReg4 xreg4_rows[] = {
 	{  75,  584, XREG_MOVED,   0, 0x82, { 0x0B, 0x0C, 0x0D, 0x1A }, 0, 16 },   /* Boomer1 */
 	{  76,  585, XREG_MOVED,   0, 0x82, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 28 },   /* Boomer2 */
 	{  77,  586, XREG_MOVED,   0, 0x82, { 0x12, 0x13, 0x14, 0xFF }, 0, 40 },   /* Boomer3 */
-	{  78,  571, XREG_PENDING,   0, 0xFF, { 0x01, 0x08, 0x11, 0x1A }, 0, 14 },   /* SidBmbo1 */
-	{  79,  572, XREG_PENDING,   0, 0xFF, { 0x07, 0x0E, 0x12, 0xFF }, 0, 22 },   /* SidBmbo2 */
-	{  80,  573, XREG_PENDING,   0, 0xFF, { 0x00, 0x05, 0x14, 0xFF }, 0, 30 },   /* SidBmbo3 */
+	{  78,  571, XREG_MOVED,   0, 0x85, { 0x01, 0x08, 0x11, 0x1A }, 0, 14 },   /* SidBmbo1 */
+	{  79,  572, XREG_MOVED,   0, 0x85, { 0x07, 0x0E, 0x12, 0xFF }, 0, 22 },   /* SidBmbo2 */
+	{  80,  573, XREG_MOVED,   0, 0x85, { 0x00, 0x05, 0x14, 0xFF }, 0, 30 },   /* SidBmbo3 */
 	{  82,  527, XREG_PENDING,   0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 23 },   /* Hole */
 	{  97,  529, XREG_PENDING,   0, 0xFF, { 0x09, 0x0A, 0x0B, 0xFF }, 0, 55 },   /* TimeBomb */
 	{ 104,  659, XREG_PENDING,   0, 0xFF, { 0x01, 0x11, 0x0E, 0xFF }, 0, 22 },   /* BigHamr1 */
@@ -65,9 +65,9 @@ const XChipReg4 xreg4_rows[] = {
 	{ 115,  557, XREG_MOVED,   0, 0x8B, { 0x08, 0x0F, 0x11, 0x1A }, 0,  5 },   /* Repair */
 	{ 126,  662, XREG_PENDING,   0, 0xFF, { 0x02, 0x03, 0x08, 0xFF }, 0, 24 },   /* ElemLeaf */
 	{ 128,  663, XREG_PENDING,   0, 0xFF, { 0x00, 0x0B, 0x12, 0x1A }, 0, 24 },   /* ElemSand */
-	{ 130,  577, XREG_PENDING,   0, 0xFF, { 0x02, 0x08, 0x0C, 0xFF }, 0, 14 },   /* MokoRus1 */
-	{ 131,  578, XREG_PENDING,   0, 0xFF, { 0x06, 0x0A, 0x14, 0xFF }, 0, 28 },   /* MokoRus2 */
-	{ 132,  579, XREG_PENDING,   0, 0xFF, { 0x0E, 0x13, 0x18, 0xFF }, 0, 42 },   /* MokoRus3 */
+	{ 130,  577, XREG_MOVED,   0, 0x81, { 0x02, 0x08, 0x0C, 0xFF }, 0, 14 },   /* MokoRus1 */
+	{ 131,  578, XREG_MOVED,   0, 0x81, { 0x06, 0x0A, 0x14, 0xFF }, 0, 28 },   /* MokoRus2 */
+	{ 132,  579, XREG_MOVED,   0, 0x81, { 0x0E, 0x13, 0x18, 0xFF }, 0, 42 },   /* MokoRus3 */
 	{ 133,  558, XREG_RECORD, 177, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 12 },   /* Invis */
 	{ 134,  664, XREG_PENDING,   0, 0xFF, { 0x09, 0x0F, 0x18, 0x1A }, 0, 21 },   /* PopUp */
 	{ 151,  665, XREG_PENDING,   0, 0xFF, { 0x00, 0x05, 0x13, 0xFF }, 0, 32 },   /* RollAro1 */
@@ -205,3 +205,9 @@ const int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);
 /* BN4's chips that are a chip of BN6's under another spelling: BN4's id, BN6's (pair_bn4) */
 const uint16_t xreg4_alias[][2] = { { 201, 182 } };
 const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);
+/* BN4's dark chips among the rows, by their id in BN6's tables: a record whose alignment is dark or a DarkChip's (xreg4_dark) */
+const uint16_t xreg4_dark_ids[] = {
+	527, 695, 696, 601, 594, 562, 697, 528, 534, 537, 543, 549, 546, 540, 702, 705,
+	552, 555, 708, 711, 714, 717, 720, 723, 726, 730, 531, 605,
+};
+const int xreg4_dark_count = (int)(sizeof xreg4_dark_ids / sizeof *xreg4_dark_ids);

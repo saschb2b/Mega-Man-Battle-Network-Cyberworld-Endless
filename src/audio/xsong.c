@@ -466,6 +466,9 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN5_COLONEL_US, 0x119, 0x4D }, { XROM_BN5_COLONEL_US, 0x8E, 0x4C }, { XROM_BN5_COLONEL_US, 0x148, 0x4B },
 	/* (the Darkloids', from the first slot up: the chips' own go down, PileDrvr's 0x148 at 0x4B, from 0x4A) */
 	{ XROM_BN5_COLONEL_US, 0xE3, 0x40 },
+	/* (Team ProtoMan's from 0x43 up, the Darkloids needing none past 0xE3: GyroMan's three, Meddy's; docs/game/team-protoman.md) */
+	{ XROM_BN5_COLONEL_US, 0x103, 0x43 }, { XROM_BN5_COLONEL_US, 0x104, 0x44 }, { XROM_BN5_COLONEL_US, 0x14C, 0x45 },
+	{ XROM_BN5_COLONEL_US, 0xE0, 0x46 },
 	/* (BN5's battles' win songs, its Victory and Fanfare, on its areas' layers: src/director/win_song.c; the Darkloids' next from 0x43) */
 	{ XROM_BN5_COLONEL_US, BN5_SONG_VICTORY, 0x41 }, { XROM_BN5_COLONEL_US, BN5_SONG_FANFARE, 0x42 },
 	/* BN4's families' (tools/xrecipe_bn4.py's SOUND_SLOTS, by install order from the themes' top down: Spikey's, Shrimpy's,
@@ -485,6 +488,13 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xF7, SONG_GROWN_FIRST + 4 },
 	/* ... Boomer's boomerang */
 	{ XROM_BN4_RED_SUN_US, 0xAB, SONG_GROWN_FIRST + 5 },
+	/* ... MokoRus's Moko */
+	{ XROM_BN4_RED_SUN_US, 0xC7, SONG_GROWN_FIRST + 6 },
+	/* ... SidBmbo's bamboo */
+	{ XROM_BN4_RED_SUN_US, 0x8E, SONG_GROWN_FIRST + 7 },
+	/* ... the attack families' units', from 0x200 up (a block of their own, as several units are moved side by side): the
+	 * spread chips' shot (its bursts' 0x9F and 0xBC the families' slots 0x3D and 0x3F above) */
+	{ XROM_BN4_RED_SUN_US, 0x8D, SONG_GROWN_FIRST + 0x26 },   /* (0x200) */
 };
 
 int xsong_sound_slot(int xrom, int song) {
