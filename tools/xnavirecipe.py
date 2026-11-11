@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -168,7 +168,7 @@ NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
@@ -695,8 +695,8 @@ def shifted_up(w, a):
 
 def low_byte_effects(f):
     """the effects its code spawns with r4 made as a parameter shifted up and the effect id added (lsls r4,rX,#8; adds
-    r4,#id), straight or with the adds reached by a branch past another way's: the id the adds' immediate, BN6's made by
-    it"""
+    r4,#id), straight or with the adds reached by a branch past another way's, or put in beside it (movs r4,#id; orrs
+    r4,rX): the id the adds' or the movs's immediate, BN6's made by it"""
     f.effect_rd, f.effect_ranges = {}, []
     for site, chain in f.effects.pop(None, []):
         w = next(w for w in f.walks.values() if site in w.insns)
@@ -717,6 +717,17 @@ def low_byte_effects(f):
             if i.f[:2] == (4, 4) and movs and shifts and shifts[-1] < movs[-1]:
                 k = w.insns[movs[-1]].f[1]
                 f.effect_rd[site] = i.f[2]
+                f.effects.setdefault(k, []).append((site, [(movs[-1], 'movs', k)]))
+                continue
+        if len(chain) == 1 and chain[0][1] == 'orrs':
+            # (movs r4,#id then orrs r4,rX with rX a parameter shifted up past the id's byte, by 8 or 16: Meddy's 0x0C and
+            # 0x0D, BN5 0x080C6350-0x080C6356, a byte of a table by its kind in bits 16-23; the id the movs's immediate)
+            a = chain[0][0]
+            i, before = w.insns[a], sorted(x for x in w.insns if x < a)[-4:]
+            movs = [x for x in before if w.insns[x].form == 'movs' and w.insns[x].f[0] == 4]
+            shifts = [x for x in before if w.insns[x].form == 'lsls' and w.insns[x].f[0] == i.f[1] and w.insns[x].f[2] in (8, 16)]
+            if i.f[0] == 4 and movs and shifts and shifts[-1] < movs[-1] < a:
+                k = w.insns[movs[-1]].f[1]
                 f.effects.setdefault(k, []).append((site, [(movs[-1], 'movs', k)]))
                 continue
         if len(chain) == 1 and chain[0][1] == 'adds8':

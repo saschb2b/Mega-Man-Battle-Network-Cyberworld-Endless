@@ -882,6 +882,11 @@ own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
 
+A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
+its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
+kept as +0x34, +0x38 and +0x3C alike (SearchMan's 0x5A, its Z an
+object's address in its low half, `bn5_searchman_v1` at t894).
+
 A Navi's copy of a type both engines also run of their own (the third
 kind's 0x00, NapalmMan's flames and MegaMan's buster's hit alike) is keyed
 as his code in BN5's trace by its BN5 addresses, so the hit's draws and

@@ -553,6 +553,14 @@
     },
     {
       "date": "2026-11-11",
+      "what": "SearchMan moved, Team ProtoMan's third (docs/multirom/navis.md, SearchMan; docs/rom/navis.md, Team ProtoMan's SearchMan: src/emu/bn5_team_protoman.h's BN5_SEARCH_CODE, BN5_SEARCH_PARENT_STATE): bn5_searchman_v1, bn5_searchman_v1_keys and bn5_searchman_sp PASS, five mutations caught; his seven object types moved (TYPES), his sprites in list 2's spill (0x85-0x8A)."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "Meddy moved, Team ProtoMan's fourth (docs/multirom/navis.md, Meddy; docs/rom/navis.md, Team ProtoMan's Meddy: src/emu/bn5_team_protoman.h's BN5_MEDDY_CODE, BN5_MEDDY_EFFECT_KINDS): meddy_v1, meddy_v1_keys and meddy_sp PASS, five mutations caught; her seven object types moved (TYPES); an effect's id put beside a parameter (movs r4,#id; orrs r4,rX) read by the generator; her sound 0xE0 at BN6's slot 0x46."
+    },
+    {
+      "date": "2026-11-11",
       "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
     }
   ],

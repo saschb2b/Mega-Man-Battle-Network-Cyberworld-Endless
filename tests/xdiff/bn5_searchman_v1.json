@@ -1,0 +1,11 @@
+{
+ "about": "SearchMan V1 (BN5's 0x10D, BN6's 0x1F8) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): Team ProtoMan's SearchMan in BN6's engine (BN5's; BN4's is searchman_v1), his own states (BN6's from 8), his hooks his own, and his objects (the third kind's 0xAA, 0xAB, 0xAF and the fourth kind's 0x5A, 0x5B, 0x61, 0x62) through the dispatch",
+ "kind": "differential",
+ "foes": "10D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

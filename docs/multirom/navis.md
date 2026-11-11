@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan and GyroMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-10T23:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:00:00Z }
 ---
 
 # Transplanted Navis
@@ -247,6 +247,34 @@ into the battle engine).
   0x43-0x45 (`xsong.c`, Team ProtoMan's from 0x43 up). Five mutations
   break his copy and FAIL (his overlay's kind, a sprite's number, a
   sprite's list, a hit's offset, a state's number).
+- **SearchMan** (AI 3, Navi AI 28, ids 0x1F8-0x1FB; `bn5_searchman_v1`,
+  `bn5_searchman_v1_keys`, `bn5_searchman_sp`: PASS): his seven object types moved
+  (the third kind's 0xAA, 0xAB, 0xAF, the fourth's 0x5A, 0x5B, 0x61,
+  0x62), no companion of his own, his status hooks his own code; two of
+  his objects compare their parent's CurAction with his states (10 and 11,
+  BN6's 12 and 13: `BN5_SEARCH_PARENT_STATE`). His sprites take list 2's
+  spill (0x85-0x8A), his effect 0x14 the Navis' 0xA0 (NapalmMan's too); his
+  sounds were all copied before him; his battle sprite at list 2's 0x2D,
+  `FREE_TEAM_SPRITES` + 0x1F000. His fourth kind's 0x5A takes its Z from
+  the r3 his state sets to an object's address (his AI data's +0x2C) and
+  writes Z's upper half itself: the low half, each game's address's, is a
+  `spawn_leftovers` rule of the fourth kind (its spawner `0x080031CC` the
+  third's with kind 4). Five mutations break his copy and FAIL (a
+  sprite's number, a sprite's list, a parent's state, a hit's offset, a
+  state's number); his effect 0x14's two sites are reached by no spec.
+- **Meddy** (AI 6, Navi AI 31, ids 0x3E8-0x3EB; `meddy_v1`,
+  `meddy_v1_keys`, `meddy_sp`: PASS): her seven object types moved (the
+  third kind's 0x09, 0x0C, 0x0D, the fourth's 0x0B, 0x0E, 0x0F, 0x3C), no
+  companion of her own. One rule the generator learned from her: an effect
+  whose id is put beside a parameter (`movs r4,#id; orrs r4,rX`, rX shifted
+  up past the id's byte: her 0x0C's and 0x0D's spawn of the fourth kind's
+  0x00, the parameter a byte of `BN5_MEDDY_EFFECT_KINDS` by its kind) is
+  read by the movs's id, effect 0, BN6's own. Her sprites take list 2's
+  spill (0x8B-0x8D) and the third room, her effect 0x44 the Navis' 0xB0,
+  her sound BN5's 0xE0 BN6's empty slot 0x46. Five mutations break her
+  copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
+  state's number); her effect 0x44's site and one object's compare of
+  its parent's state are reached by no spec.
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
   his three decisions are built, one left. *His object types* (the third
   kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES
