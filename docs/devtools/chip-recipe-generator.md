@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:10:00Z }
 ---
 
 # The chip recipe generator
@@ -63,7 +63,10 @@ sitting out (none since issue #82's final engine round). It writes
 `src/core/xchips_pas.c` too: BN5's recipes of the registry's Program
 Advances (BN5's list `0x08028020`) in BN6's ids, for BN6's list grown
 with them (`pa_rows`; `PA_UNFORMED` the recipes BN6's codes or a recipe
-of BN6's before them never let form, each its reason). A twin is also held to read the same data:
+of BN6's before them never let form, each its reason), and BN6's own
+recipes whose parts a run never hands out, their parts the registry's
+chips of BN5's same ids (`BN6_PA_BORROWED`: CrosOver from Django's V1,
+SP and DS, [BN6 Gregar's own gaps](../multirom/bn6-gaps.md)). A twin is also held to read the same data:
 the tables its literals name, where they are plain bytes in both ROMs,
 must be the same (`same_data`: DrkSonic's sonic's times by kind its BN6
 twin keeps otherwise).
