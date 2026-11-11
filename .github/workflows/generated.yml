@@ -30,6 +30,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           # (dev may move while this runs: start again from its new tip)
           for attempt in 1 2 3 4 5; do
+            echo "attempt $attempt"
             git fetch --quiet origin dev
             git reset --quiet --hard FETCH_HEAD
             python3 tools/generated.py write
