@@ -283,6 +283,10 @@ static void fight_stop(uint8_t *out) {
 	op(&a, 0x46F7u);   /* mov pc,lr */
 }
 
+bool xvirus_dispatch_is_gate(uint32_t to) {
+	return to == XV_FIGHT_FLAGS || to == XV_FIGHT_STOP;
+}
+
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	memset(out, 0, XV_STUBS_SIZE);
 	none(out);

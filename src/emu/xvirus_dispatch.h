@@ -57,6 +57,9 @@ uint32_t xvirus_dispatch_spawner(int game, uint32_t from);
 /* Whether `to` is one of the dispatch's spawners (XV_SPAWN_*), and its kind
  * and BN6's spawner it calls (where not NULL). */
 bool xvirus_dispatch_is_spawner(uint32_t to, int *kind, uint32_t *bn6);
+/* Whether `to` is one of the dispatch's gates a moved Navi's objects are
+ * aimed at (XV_FIGHT_FLAGS, XV_FIGHT_STOP). */
+bool xvirus_dispatch_is_gate(uint32_t to);
 /* The dispatch's code as it stands at XV_STUBS, XV_STUBS_SIZE bytes: the
  * project's own Thumb (its literals the addresses above). */
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]);
