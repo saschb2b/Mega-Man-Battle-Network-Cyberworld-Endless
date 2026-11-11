@@ -610,6 +610,85 @@ static const XcSong mokorus_songs[] = { { 0xC7, 0x1E0 } };
 	.sound_calls = mokorus_sound_calls, .nsound_calls = (int)(sizeof mokorus_sound_calls / sizeof *mokorus_sound_calls), \
 	.sprites = mokorus_sprites, .nsprites = (int)(sizeof mokorus_sprites / sizeof *mokorus_sprites), \
 	.effects = mokorus_effects, .neffects = (int)(sizeof mokorus_effects / sizeof *mokorus_effects) }
+/* ---- SidBmbo: BN4's misc 0x5 (080D5DDB) as BN6's 0x85; its chips 78 (571), 79 (572), 80 (573) ---- */
+/* BN4's misc run waits 0x28 frames after its routine (080EC9AC): its entry the installer's wrapper */
+/* its routine (080D5DDA) lies in the third-kind 0x44's code (080D5C50-080D5DF4), which it spawns: moved */
+/* its sprite 1:0xc (080D5C7C): BN6's 1:0x7e, copied */
+/* its effect 0x15: 0xcb, as MokoRus moved it */
+/* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
+/* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x8e (080D5D36): BN4's song copied into the grown song table's slot 0x1e1, on BN4's player 9 */
+
+static const XvBlock sidbmbo_blocks[] = {
+	{ 0x080D5C50, 0x080D5DF4, XC4_CODE + 0x10C0, 0x957B533Eu },
+};
+static const XvData sidbmbo_data[] = {
+	{ 0x080D5C62, 0x080D5C64, XV_RAW },
+	{ 0x080D5C64, 0x080D5C68, XV_POOL },
+	{ 0x080D5C68, 0x080D5C74, XV_TABLE },
+	{ 0x080D5CEE, 0x080D5CF0, XV_RAW },
+	{ 0x080D5CF0, 0x080D5CF4, XV_POOL },
+	{ 0x080D5CF4, 0x080D5CFC, XV_TABLE },
+	{ 0x080D5D1E, 0x080D5D20, XV_RAW },
+	{ 0x080D5D20, 0x080D5D24, XV_POOL },
+	{ 0x080D5D24, 0x080D5D2C, XV_TABLE },
+	{ 0x080D5D82, 0x080D5D84, XV_RAW },
+	{ 0x080D5D84, 0x080D5D88, XV_POOL },
+	{ 0x080D5DF2, 0x080D5DF4, XV_RAW },
+};
+static const XvPair sidbmbo_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair sidbmbo_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm sidbmbo_imms[] = {
+	{ 0x080D5C78, THUMB_MOVS, 2, 0, 0xC, 0x7E },   /* its object's sprite: list 1 0xc in BN4, 0x7e in BN6 (copied) */
+	{ 0x080D5CE2, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
+	{ 0x080D5D60, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080D5DAA, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
+	{ 0x080D5DBE, THUMB_MOVS, 0, 0, 0x44, 0xC3 },   /* its object's type 0x44: moved, the dispatch's 0xc3 */
+	{ 0x080D5DD0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvNumber sidbmbo_numbers[] = {
+	{ 0x080D5D84, 0x04050401, 0x04050401 },   /* a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word too (0x080E4A4C) */
+};
+static const XvType sidbmbo_types[] = {
+	{ 3, 0xC3, XV_TYPE_MOVED, 0x44 },   /* BN4's third-kind 0x44, moved, the dispatch's 0xc3 */
+};
+static const XvSprite sidbmbo_sprites[] = {
+	{ 1, 0x0C, 1, 0x7E, XC4_ART + 0xCE00, 0x3300 },   /* BN4's 1:0xc copied */
+};
+static const XvSoundCall sidbmbo_sound_calls[] = {
+	{ 0x080D5D36, 0x1E1 },   /* its sound 0x8e: BN4's song at the grown table's slot 0x1e1 */
+};
+static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
+
+#define SIDBMBO_CODE { .name = "SidBmbo (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2400), \
+	.blocks = sidbmbo_blocks, .nblocks = (int)(sizeof sidbmbo_blocks / sizeof *sidbmbo_blocks), \
+	.data = sidbmbo_data, .ndata = (int)(sizeof sidbmbo_data / sizeof *sidbmbo_data), \
+	.calls = sidbmbo_calls, .ncalls = (int)(sizeof sidbmbo_calls / sizeof *sidbmbo_calls), \
+	.words = sidbmbo_words, .nwords = (int)(sizeof sidbmbo_words / sizeof *sidbmbo_words), \
+	.imms = sidbmbo_imms, .nimms = (int)(sizeof sidbmbo_imms / sizeof *sidbmbo_imms), \
+	.numbers = sidbmbo_numbers, .nnumbers = (int)(sizeof sidbmbo_numbers / sizeof *sidbmbo_numbers), \
+	.types = sidbmbo_types, .ntypes = (int)(sizeof sidbmbo_types / sizeof *sidbmbo_types), \
+	.sound_calls = sidbmbo_sound_calls, .nsound_calls = (int)(sizeof sidbmbo_sound_calls / sizeof *sidbmbo_sound_calls), \
+	.sprites = sidbmbo_sprites, .nsprites = (int)(sizeof sidbmbo_sprites / sizeof *sidbmbo_sprites) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -620,5 +699,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x0A, 0x8A, 0x080D4F35, XC4_HOMES + 0x1800, { .name = "WhitWeb (BN4's), its subfamily 0xa", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 5 },
 	{ XCHIP_MISC, 0x02, 0x82, 0x080D344F, XC4_HOMES + 0x1C00, BOOMER_CODE, boomer_songs, (int)(sizeof boomer_songs / sizeof *boomer_songs), 0, 0 },
 	{ XCHIP_MISC, 0x01, 0x81, 0x080D252B, XC4_HOMES + 0x2000, MOKORUS_CODE, mokorus_songs, (int)(sizeof mokorus_songs / sizeof *mokorus_songs), 0, 0 },
+	{ XCHIP_MISC, 0x05, 0x85, 0x080D5DDB, XC4_HOMES + 0x2400, SIDBMBO_CODE, sidbmbo_songs, (int)(sizeof sidbmbo_songs / sizeof *sidbmbo_songs), 0, 0, 0x28 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

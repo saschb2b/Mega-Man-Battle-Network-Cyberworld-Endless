@@ -93,14 +93,16 @@ AUDITS = {
 # each checked against every other recipe (numbers_clear)
 TYPES4 = (0x91, 0xE0)
 TYPES3 = (0xCA, 0xC9, 0xC8, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xBE, 0xBD, 0xBB, 0xB9, 0xB6, 0xB5, 0xB4, 0xB0,
-          # ... and, those spent, every number below them that no recipe's XvType row named on 10 November 2026 (a scan of
+          # ... and, those spent, the numbers below them that no recipe's XvType row named on 10 November 2026 (a scan of
           # src/emu/*.c: BN5's own numbers no BN5 track moved or paired; 0xD3-0xDD stay the Navis' track's), top down.
-          # Append-only: a number is a unit's by UNITS' order, and numbers_clear refuses one another recipe names since
+          # Append-only: a number is a unit's by UNITS' order, and numbers_clear refuses one another recipe names since.
+          # The 32 lowest of that scan (0x48 down to 0x01: TYPES3_NAVIS below) are BN4's Navis' track's, taken from 0x01
+          # up by tools/xnavirecipe_bn4.py: the chips' units end at 0x49
           0xAF, 0xAE, 0xAD, 0xAB, 0xAA, 0xA9, 0xA3, 0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C, 0x96, 0x94, 0x91,
           0x8E, 0x82, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73, 0x72, 0x6E, 0x6B, 0x67, 0x66, 0x65, 0x64,
-          0x63, 0x62, 0x60, 0x5F, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4F, 0x4E, 0x4C, 0x4B, 0x49, 0x48,
-          0x47, 0x46, 0x44, 0x41, 0x40, 0x3F, 0x3D, 0x37, 0x36, 0x32, 0x30, 0x2E, 0x2D, 0x2C, 0x28, 0x1E,
-          0x1C, 0x1B, 0x1A, 0x19, 0x13, 0x11, 0x0F, 0x0D, 0x0C, 0x0A, 0x09, 0x08, 0x06, 0x03, 0x01)
+          0x63, 0x62, 0x60, 0x5F, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4F, 0x4E, 0x4C, 0x4B, 0x49)
+TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x44, 0x41, 0x40, 0x3F, 0x3D, 0x37, 0x36, 0x32, 0x30, 0x2E, 0x2D, 0x2C, 0x28,
+                0x1E, 0x1C, 0x1B, 0x1A, 0x19, 0x13, 0x11, 0x0F, 0x0D, 0x0C, 0x0A, 0x09, 0x08, 0x06, 0x03, 0x01)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone. Append-only, one
 # unit a line: a unit's home, its dispatch numbers, its effects' ids and its sprites' list numbers follow its place here,
 # so a unit put before another renumbers every one after it. Where two branches add units, the one merged first keeps
@@ -113,6 +115,7 @@ UNITS = (
     ('misc', (0x08, 0x09, 0x0A), 'WhitWeb'),
     ('misc', 0x02, 'Boomer'),
     ('misc', 0x01, 'MokoRus'),
+    ('misc', 0x05, 'SidBmbo'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -128,7 +131,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xBE: 0x1DD,                 # (Counter's hit)
                0xF7: 0x1DE,                 # (WhitWeb's web)
                0xAB: 0x1DF,                 # (Boomer's boomerang)
-               0xC7: 0x1E0}                 # (MokoRus's Moko)
+               0xC7: 0x1E0,                 # (MokoRus's Moko)
+               0x8E: 0x1E1}                 # (SidBmbo's bamboo)
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -175,6 +179,20 @@ IMMS = {
                      why="its hit's bits (the collision setup's r3): struck and pushed is bit 0x01 with a push bit in BN4 "
                          "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED)"),
 }
+# BN4's misc run's wait (bn4_chips.h BN4_MISC_WAIT): after a subfamily's routine, cmp r0,#SUB; bne; movs r0,#FRAMES; strh into
+# the misc state's count, where every other subfamily's attack ends at once. BN6's run waits for its own 0x14 alone, so a unit
+# of that subfamily is given the frames (XChipUnit.wait: the installer's wrapper)
+MISC_WAIT4 = 0x080EC9AC
+
+
+def misc_wait(b4, sub):
+    """the frames BN4's misc run waits after subfamily `sub`'s routine, read from its code: 0 none"""
+    cmp_, bne, movs, strh = (b4.u16(MISC_WAIT4 + 2 * k) for k in range(4))
+    if cmp_ & 0xFF00 != 0x2800 or bne & 0xFF00 != 0xD100 or movs & 0xFF00 != 0x2000 or strh != 0x8238:
+        sys.exit('xchiprecipe_bn4: BN4\'s misc run\'s wait is not at MISC_WAIT4 as it was read')
+    return movs & 0xFF if cmp_ & 0xFF == sub else 0
+
+
 # A call into another object type's code whose BN6 twin the search found by its body alone: the two types compared to their
 # depth by the differential or by hand before the pair is trusted (the census's lesson: docs/multirom/bn4-chips.md, The six
 # "on BN6's code" are not): BN4's routine -> why BN6's twin serves. One not here is a decision
@@ -263,6 +281,9 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f.b4, f.b6, f.home = b4, b6, X4C_HOMES + X4C_HOME_SIZE * slot
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
     f.chips = [c for x in subs for c in chips_of(b4, kind, x)] if kind in FAMILY4 else []
+    f.wait = misc_wait(b4, sub) if kind == 'misc' else 0
+    if f.wait:
+        f.notes.append(f'BN4\'s misc run waits {f.wait:#x} frames after its routine ({MISC_WAIT4:08X}): its entry the installer\'s wrapper')
     if kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines alone are read')
         return f
@@ -337,6 +358,10 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         bn4_twins.TABLES.clear()
         bn4_twins.TABLES.update(saved_tables)
         X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = saved_late
+    # (an effect a unit before it moved is that unit's row alone: the units install in one step in UNITS' order, the effect's
+    # entry written by the first, and the installer finds a row's sprite in the unit's own rows or a family's, never in
+    # another unit's (xvirus.c sprite_of); its code's immediate names the id all the same)
+    f.effects = [(e4, e6) for e4, e6 in f.effects if alloc.effect_owner.get(e4) == f.name]
     sounds_of(b4, b6, f)
     if f.sides or f.ranges:
         f.decide('unit', 'it needs a shim the chips\' emitter writes none of yet (a side, a NameID range)')
@@ -697,7 +722,7 @@ def c_unit(f):
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, 0, 0 }},']
+            f'{n.upper()}_CODE, {songs}, 0, 0' + (f', 0x{f.wait:02X}' if f.wait else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

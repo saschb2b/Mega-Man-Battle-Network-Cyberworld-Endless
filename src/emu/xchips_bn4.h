@@ -22,6 +22,10 @@
 #define XC4_HOME_VENEERS 0x300u            /* ... its shims (xvirus_shim.h: a sound past a byte played through one), which the installer
                                               puts at its code's `home` + XV_HOME_SHIMS: */
 #define XC4_SHIMS_HOME(home) ((home) + XC4_HOME_VENEERS - XV_HOME_SHIMS)
+#define XC4_WAIT_SIZE 0x40u               /* ... and, where the unit waits (XChipUnit.wait), its wrapper at its home's end, the
+                                              project's own Thumb (xchips_code.c wait_stage): the misc run's routine each frame
+                                              of the wait, which calls the unit's routine once and counts as BN4's run does */
+#define XC4_HOME_WAIT (XC4_HOME_SIZE - XC4_WAIT_SIZE)
 #define XC4_UNITS     96                   /* ... this many units (BN4's 48 of its chips and 18 of its Navi chips) */
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
 #define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* what they draw, to: */
