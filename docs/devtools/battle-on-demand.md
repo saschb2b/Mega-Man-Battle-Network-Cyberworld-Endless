@@ -207,6 +207,10 @@ its four counts in the pack (an id from 320 counts in the pack's
 extension: `0:chip 411 M 1`, MrkCan1, reads "its counts 2 0 0 0"). A
 battle then deals the folder as BN6 does, with the chips that sit out
 taken out of the deck (`CYBERWORLD_EMU_DEBUG=1` prints how many).
+`chip ID` alone changes nothing and prints what the game holds of it:
+the pack's four counts and order stamps, the folder's copies and whether
+the profile's Library has it (`chip 700`: "held: the pack's counts 6 0 0
+0, its stamps 7fff 0000 0000 0000, 5 in the folder"), an id to 1023.
 
 ```bash
 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1700 --dev quiet \
