@@ -62,6 +62,8 @@
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
 #define FREE_SONG_TABLE_END  (EMU_FREE + 0x141000u)
+#define FREE_TEAM_SHARED_MORE (EMU_FREE + 0x141000u) /* the Navis' shared art's third room (a sprite of any Navi's once FREE_TEAM_SHARED is full: GyroMan's overlay first) (xnavi_install.c) */
+#define FREE_TEAM_SHARED_MORE_END (EMU_FREE + 0x150000u)
 
 /* ---- words: +0x150000-+0x170000, the director's and the PET's words: text archives, labels, lists ---- */
 #define FREE_TALK            (EMU_FREE + 0x150000u)  /* the director's conversations (talk.c) */
@@ -195,6 +197,7 @@
 	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_BN4_CHIPS", (EMU_FREE + 0x0EF000u), (EMU_FREE + 0x13F000u), "", "code-low") \
 	X("FREE_SONG_TABLE", (EMU_FREE + 0x13F000u), (EMU_FREE + 0x141000u), "", "code-low") \
+	X("FREE_TEAM_SHARED_MORE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
 	X("FREE_TALK", (EMU_FREE + 0x150000u), (EMU_FREE + 0x152000u), "", "words") \
 	X("FREE_LABEL", (EMU_FREE + 0x152000u), (EMU_FREE + 0x153000u), "", "words") \
 	X("FREE_PET_LABEL", (EMU_FREE + 0x153000u), (EMU_FREE + 0x154000u), "", "words") \

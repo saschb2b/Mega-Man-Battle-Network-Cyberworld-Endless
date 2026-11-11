@@ -1,0 +1,11 @@
+{
+ "about": "Meddy V1 (BN5's 0x11F, BN6's 0x3E8) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): Team ProtoMan's Meddy in BN6's engine, her own states (BN6's from 8), and her objects (the third kind's 0x09, 0x0C, 0x0D and the fourth kind's 0x0B, 0x0E, 0x0F, 0x3C) through the dispatch",
+ "kind": "differential",
+ "foes": "11F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

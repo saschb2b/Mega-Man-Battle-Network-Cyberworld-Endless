@@ -1,0 +1,11 @@
+{
+ "about": "GyroMan V1 (BN5's 0x107, BN6's 0x1F4) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): Team ProtoMan's GyroMan in BN6's engine, his own states (BN6's from 8), his companion's overlay (BN5's kind 0, his own past BN6's) and his objects (the third kind's 0x19, 0x1B, 0x1C and 0x1E) through the dispatch",
+ "kind": "differential",
+ "foes": "107@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

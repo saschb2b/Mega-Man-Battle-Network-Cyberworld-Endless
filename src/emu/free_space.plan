@@ -60,6 +60,7 @@ FREE_TEAM_SHARED       +0x0A3800  +0x0AB000  in=FREE_TEAM_NAVIS  xnavi_install.c
 FREE_TEAM_SPRITES      +0x0AB000  +0x0EF000  end,in=FREE_TEAM_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes)
 FREE_BN4_CHIPS         +0x0EF000  +0x13F000  end  xchips_code.c,xchips_bn4.c  multirom/bn4-chips.md  the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes, code and what they draw
 FREE_SONG_TABLE        +0x13F000  +0x141000  end  song_table.c            rom/sound.md                BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds
+FREE_TEAM_SHARED_MORE  +0x141000  +0x150000  end  xnavi_install.c           multirom/navis.md           the Navis' shared art's third room (a sprite of any Navi's once FREE_TEAM_SHARED is full: GyroMan's overlay first)
 
 zone words  rom  +0x150000  +0x170000  -  the director's and the PET's words: text archives, labels, lists
 FREE_TALK              +0x150000  +0x152000  -    talk.c                    engine/emulation/layer.md   the director's conversations
