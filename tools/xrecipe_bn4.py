@@ -100,6 +100,10 @@ SLOT0, CODE0, ART0, LIST1_0, LIST4_0, TYPE_0 = 32, XV_CODE + 0x14000, XV_ART + 0
 # BN5 track can name, BN5 having no type of them (its third kind's 204, bn5.h BN5_TYPES_T3_COUNT: 0xCC-0xDF; the most a BN5
 # track names is 0xC1): kind -> (first, past the last)
 TYPE_MORE = {3: (0xCC, TYPE_0)}
+# ... and past those, the third kind's 32 numbers the chips' generator leaves to BN4's Navis' track (tools/xchiprecipe_bn4.py
+# TYPES3_NAVIS, the same list: BN5's numbers no recipe names, split by the two tracks on 11 November 2026), from 0x01 up
+TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x44, 0x41, 0x40, 0x3F, 0x3D, 0x37, 0x36, 0x32, 0x30, 0x2E, 0x2D, 0x2C, 0x28,
+                0x1E, 0x1C, 0x1B, 0x1A, 0x19, 0x13, 0x11, 0x0F, 0x0D, 0x0C, 0x0A, 0x09, 0x08, 0x06, 0x03, 0x01)
 # The families past the first eight (VolGear on: LATE_FROM), moved after BN4's Navis had taken their numbers past the first
 # eight's: theirs from the top of a range down, so the Navis' (from the first eight's last, up) stay what they were: the third
 # kind's dispatch numbers from 0xDF down (the Navis' from 0xCC up, TYPE_MORE, to below the lowest a late family took), list
@@ -732,10 +736,15 @@ def type_number(f, alloc, kind):
     lo, hi = TYPE_MORE.get(kind, (0, 0))
     # (below the lowest a late family took)
     hi = min(hi, getattr(alloc, 'late_types', {}).get(kind, hi - 1) + 1)
-    if lo + n - 0x100 >= hi:
+    if lo + n - 0x100 < hi:
+        return lo + n - 0x100
+    # (then the Navis' share of the chips' scan, from 0x01 up: TYPES3_NAVIS)
+    k = lo + n - 0x100 - hi
+    more = sorted(TYPES3_NAVIS) if kind == 3 else []
+    if k >= len(more):
         f.decide('type', f'the dispatch\'s numbers of the {kind} kind are spent ({n:#x} wanted)')
         return 0
-    return lo + n - 0x100
+    return more[k]
 
 
 def spawns_of(f, alloc):

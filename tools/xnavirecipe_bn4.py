@@ -56,7 +56,7 @@ NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 13
          (0x46, 'WoodMan', 172),
          (0x47, 'JunkMan', 164),
          (0x09, 'TopMan', 176),
-         (0x3F, 'MetalMan', 160))
+         (0x0B, 'SparkMan', 192))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
