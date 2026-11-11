@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A layer"
 description: "How a layer is built into the game (`net_gen.c`, `netmap.c`, `layer_objs.c`, `mapslot.c`), its exit pad's warp, what `director.c` watches, checkpoints and CONTINUE, the engine's event flags and `talk.c`'s conversations."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # A layer

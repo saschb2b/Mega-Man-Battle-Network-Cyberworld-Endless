@@ -27,6 +27,10 @@
                                               project's own Thumb (xchips_code.c wait_stage): the misc run's routine each frame
                                               of the wait, which calls the unit's routine once and counts as BN4's run does */
 #define XC4_HOME_WAIT (XC4_HOME_SIZE - XC4_WAIT_SIZE)
+#define XC4_HOME_STATES (XC4_HOME_WAIT - 0x40u)   /* ... and, where its moved object is an actor (its code's `states`: an
+                                                     object the actors' runner runs, TimeBomb's bomb), its state table in
+                                                     BN6's layout, XV_STATES_MAX entries at most, which the object's update's
+                                                     pool word names (a number row of its code) */
 #define XC4_UNITS     96                   /* ... this many units (BN4's 48 of its chips and 18 of its Navi chips) */
 #define XC4_CODE      (XC4_HOMES + XC4_HOME_SIZE * XC4_UNITS)   /* the units' code, block by block, to: */
 #define XC4_ART       (FREE_BN4_CHIPS + 0x30000u)                /* the room what they draw is put into as an object loads it

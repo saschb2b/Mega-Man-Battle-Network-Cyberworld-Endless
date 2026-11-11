@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -406,6 +406,33 @@ the Mettaur a row away: the blast at t102, 140 HP to 20),
 steps onto its panel at t66: the burst, no blast); eleven mutations
 caught.
 
+**TimeBomb is moved** (11 November 2026: id 529, BN4's support 0x11 at
+BN6's grown support routine 0x91). Its routine spawns a placer (the
+fourth kind's 0x27), which takes a column of the foe's side and draws
+one of its free rows; the bomb (the third kind's 0x4B) is set there with
+50 HP, in its side's obstacle slot. The bomb is an actor, the first
+among the chips' objects: its update runs the engine's status step and
+the actors' runner with a state table of its own. BN4's runner numbers
+an object's own states from 6 and BN6's from 8, so the unit brings the
+table in BN6's layout (the engine's eight states BN6's, the bomb's count
+the ninth), written in its home, and the copy's one store of state 6
+writes 8 ([the chip recipe generator](../devtools/chip-recipe-generator.md),
+A moved actor). It counts three steps (60, 60 and 30 frames, a tick
+each), then strikes the foe's whole area for its record's power under
+BN4's explosions (the blasts' object, the fourth kind's 0x24, moved with
+it); a hit taken first ends it in a burst. Three specs pass:
+`bn4_chip_timebomb` (420 frames: set on (4,3) at t34, the blast at t242,
+a Mettaur's 250 HP to 100), `bn4_chip_timebomb_struck` (another seed
+draws (4,2), where the Mettaur's wave ends it at t73) and
+`bn4_chip_timebomb_top` (a third seed, (4,1)); eleven mutations caught.
+Not reached by a spec: a bomb pushed, which slides by BN6's rule (its
+state 5 is the engine's, 0x60000 a frame against BN4's 0x80000), and the
+placer's way on with no free panel, which in BN4 itself reads an address
+of no memory (`BN4_T4_TIMEBOMB`'s note, `src/emu/bn4_chips.h`). A virus
+the blast deletes is not compared yet: each engine's deletion draws its
+own explosions (the fourth kind's 0x11), which the differential has no
+rule for, so the specs' Mettaur outlives the blast.
+
 **SeekBom1-3 are moved, a family's unit by subfamily** (11 November
 2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
 BN4's bombs are one family: its state throws by the record's subfamily
@@ -467,13 +494,33 @@ the room holds what is alive at a moment and the remaining units need
 no art's room of their own. Every chip spec passes with it, their
 mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
 
-**Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
-types, a placement that draws), then BlakBarr's barrier; Binder,
+**Meteors1-3 are moved** (10 November 2026: ids 674-676, misc 0x11), the
+first unit of the parallel sweep's third line and the first whose chips
+sit past id 602. Its routine lies after its controller, the fourth
+kind's last type (0x81), which moves with it, 178 bytes: the chip aims
+at a panel of MegaMan's row on the other side and the controller lets
+five meteors fall there, one every twenty frames. The aim is a routine
+BN6 holds too, instruction for instruction with the same words of panel
+flags, though nothing in BN6 calls it. The meteors are ShotStar's star,
+which ShotStar's unit moved already: the star is shared as the spread
+chips' arm is (`tools/xchiprecipe_bn4.py` `SHARED3`), its spawner
+copied with Meteors' unit and spawning ShotStar's copy by its number,
+so the star's code is in the engine once and Meteors takes no
+third-kind dispatch number of its own. `bn4_chip_meteors1`, `2`
+and `3` pass with a 140 HP Mettaur on the aimed panel (90 then 40 HP
+left, 80 then 20, and 70; each ends before the meteor that deletes it)
+and `bn4_chip_meteors1_miss` over 300 frames with the Mettaur off it,
+the five meteors bursting on the empty panel; seven mutations caught.
+**Not seen in play yet:** ids from 603 have no pack entry, so the chip
+step cannot hand one out until the pack's RAM for them lands; the
+differential fights with a folder alone.
+
+**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
+three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
-other's record, a NetBattle chip). Marking, the four Plus chips and
-BlakWeap are units to move like the rest (call 7, reversed: not cut).
+other's record, a NetBattle chip).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -1288,6 +1335,42 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
    timers moved with them, a spec where the buff shows, its mutations.
    How they show where BN4 gives them no number and no picture (the
    Library's page, a reward's card) is the one thing left to choose.
+12. **AquaPowr, WoodPowr and ThunPlus are left out; FirePlus is moved:**
+    "Leave them out" (the owner, 11 November 2026, to the session that
+    measured them). Asked because the three do less than call 7 took
+    them for. **Verified** in BN4 Red Sun
+    (USA, `B4WE`), two ways. By experiment, BN4's own battle run alone
+    by the differential (control specs, the guest core): the Plus chip
+    used at fight frame 30, a chip of its element at frame 200, inside
+    its 480 frames, against a Mettaur of 250 HP, and the same chip with
+    no Plus chip before it. AquaPowr then Bubbler takes 50 and Bubbler
+    alone 50; WoodPowr then Boomer1 60 and 60; ThunPlus then Thunder1 40
+    and 40. FirePlus then HeatShot takes 80 where HeatShot alone takes
+    40, and that is the grass FirePlus lays (every panel of the field;
+    fire on grass adds its damage again, `0x08012CF2`), no rule of the
+    timer. By the code: the chips' object (the fourth kind's 0x7F,
+    `0x080EACDC`) sets its element's word of four in the user's battle
+    data (+0x3C to +0x42) to 480 and clears the other three; the
+    player's tick (`0x08022E3C`) counts them down; and the one reader
+    found is the HUD's (`0x08014CC0`: the first word not 0 picks an
+    icon's tiles for OBJ VRAM `0x06017480`). Searched: every caller of
+    the routine that finds that data by side (`0x0800BFF4`, 26), every
+    halfword read or written at those offsets after a load of the
+    object's +0x58, every indexed access from 0x3C in
+    `0x08007000`-`0x08030000`. Not tried: the buster and the charge shot
+    under a timer, a foe's attack against MegaMan under one, a
+    NetBattle. So the three are not moved: no unit, their rows left
+    out of play and their ids (564 to 566) kept retired, as BugChain's
+    is until its call, and nothing of a run hands them out or lists
+    them. FirePlus (563) is moved as BN4 has it, the grass and its
+    timer. Call 7 stands for the other three of its six: FirePlus,
+    Marking and BlakWeap. **Two answers were given the same evening.**
+    Through the coordinating session the owner was first quoted with
+    "Move as BN4 has them", on a recommendation to move the three and
+    keep them out of the reward pools; asked directly afterwards, with
+    the measurement before him, he answered "Leave them out", and
+    confirmed it the same day (11 November 2026) when asked which of
+    the two stands.
 
 Open:
 

@@ -110,6 +110,14 @@
                                            * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
 #define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
                                            * the rows, its speed across them (16.16) */
+/* Meteors1-3 (its chips 163-165, misc subfamily 0x11), moved as a unit (src/emu/xchips_bn4.c) */
+#define BN4_METEORS           0x080EAE92u /* its routine, after its controller's code: a panel aimed at (BN4_ROW_PANEL_ACROSS) and, where one
+                                           * is found, the controller spawned on it (0x080EAE6C: its panel, element and damage) */
+#define BN4_T4_METEORS        0x81        /* its controller, the fourth kind's last type (0x080EADF4 to 0x080EAE6C): five meteors (+0x22), one
+                                           * every 0x14 frames (+0x20), each BN4_T3_STAR's kind 6 through 0x080D877C on its own panel */
+#define BN4_ROW_PANEL_ACROSS  0x0800FC48u /* r5 an object: a panel of its row on the side across found by BN4's 0x0800A1AE with a required and a
+                                           * refused word of panel flags by its side (0x0800FC84, then 0x0800FC94, eight bytes a side); r0 0
+                                           * none (BN6_ROW_PANEL_ACROSS the same instruction for instruction, the same words) */
 /* MokoRus1-3 (its chips 130-132, misc subfamily 1), moved as a unit (src/emu/xchips_bn4.c) */
 #define BN4_MOKORUS           0x080D252Au /* its routine, in the Moko's code: the three rows shuffled (BN4_SHUFFLE), a Moko spawned on each
                                            * (0x080D250C), the k-th to set off 10 x k frames on (+0x20) */
@@ -222,6 +230,35 @@
 #define BN4_RING_KINDS        0x080DAFB0u /* ... its kinds, 4 rows of 3 bytes before its routine, read by its init by +4: its speed, a
                                            * flag (0x08013212 called where set), its sound (0x080DB05C plays it); kinds 0-2 sound
                                            * 0x91, 3 sound 0x8D; ThunSoul's ring kind 0 (seen in both traces) */
+/* ... and TimeBomb (support 0x11, the chip 97): its placer, its bomb and the blasts */
+#define BN4_T4_TIMEBOMB       0x27        /* its placer, the fourth kind's (0x080E4C3C to 0x080E4F5C; spawned by the subfamily's routine
+                                           * 0x080E4CA6): a column of the foe's side (0x080E4D94 by the side's masks, their front
+                                           * column in the specs), a row of it drawn among its free panels (0x080E4CC8: rows 3 to 1
+                                           * listed, BN4_RNG_DRAW_POSITIVE at 0x080E4D4C, BN4_REMAINDER by their count), the bomb
+                                           * spawned there with the chip's parameter as its HP (0x080E4E38). With no free panel its
+                                           * way on (0x080E4DF2) reads two words at 0x00010010 + 8 x the side, no address of the
+                                           * cartridge's or the RAM's (the literal at 0x080E4E60, a panel mask where 0x080E4E26
+                                           * reads it): BN4's own, moved as it is, reached by no spec */
+#define BN4_REMAINDER         0x08111888u /* swi 6; adds r0,r1,#0; bx lr: r0 mod r1 (BN6 has the three only inline, 0x08010C00) */
+#define BN4_T3_TIMEBOMB       0x4B        /* the bomb, the third kind's (0x080D6BF8 to 0x080D6ED4): an actor, its update (0x080D6CA0)
+                                           * BN4_STEP_BEGIN then BN4_ACTOR_RUN with its states; 50 HP, its side's obstacle slot, sound
+                                           * 0xB0; its count 3 steps (60, 60 and 30 frames, sounds 0xE3, 0xE3, 0xE4), then a hit area
+                                           * over the foe's area and the blasts (BN4_T4_BLASTS, sound 0xBC); a hit taken ends it in
+                                           * effect 0 and sound 0x70; sprite list 3's 0x23 */
+#define BN4_TIMEBOMB_STATES   0x080D6CCCu /* ... its seven states: its own the first, the third and the seventh (0x080D6CE8,
+                                           * 0x080D6E6C, 0x080D6D58), the engine's generic 1, 3 and 4 and BN4_OBSTACLE_PUSHED the rest */
+#define BN4_TIMEBOMB_SPAWN    0x080D6EA4u /* ... its spawner, in its code: r4 its HP */
+#define BN4_ACTOR_RUN         0x08013F3Eu /* an actor's state run from the table in r0 by its CurAction (+9), after the engine's tests of
+                                           * a time freeze and its statuses: the engine's states 0-5, an object's own from 6
+                                           * (BN6_ACTOR_RUN: 0-7 and from 8) */
+#define BN4_OBSTACLE_PUSHED   0x080112C4u /* an obstacle's state 5, pushed: three steps on +0xA, its slide 0x80000 a frame
+                                           * (BN6_OBSTACLE_PUSHED: 0x60000, and its moves counted) */
+#define BN4_T4_BLASTS         0x24        /* blasts over a list of panels, the fourth kind's (0x080E4A0A to 0x080E4AD4): one every +0x22
+                                           * frames from the list at its +0x60, each an effect and a sound by its kind (+4) */
+#define BN4_BLASTS_KINDS      0x080E4A00u /* ... its kinds, five of 2 bytes: the effect, the sound (0 none); TimeBomb's kind 1: 0x00, none */
+#define BN4_BLASTS_SPAWN      0x080E4A9Cu /* ... its spawner: r0 the pattern (its low seven bits a row of BN4_PANEL_MASKS, bit 7 set
+                                           * for any), r1 the frames between two, r4 the kind */
+#define BN4_PANEL_MASKS       0x08012618u /* masks of the field's panels, rows of two words (BN6_PANEL_MASKS, the same 0x50 bytes) */
 
 /* The bombs (its chips of family 9: MiniBomb, EnergBom, MegEnBom, Binder1-3, BugBomb, Ball, Geyser, BlkBomb, VDoll,
  * SeekBom1-3, DarkBomb): one state, a subfamily's spawner each. SeekBom1-3 (160-162, subfamily 9) moved as an attack unit

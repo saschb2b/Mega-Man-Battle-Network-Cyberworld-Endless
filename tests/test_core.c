@@ -18,6 +18,7 @@
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "layer_make.h"
+#include "layer_make_record.h"   /* LAYER_MAKE_RECORD and its hash, from the build (tests/layer_make_hash.txt) */
 #include "letters.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -1020,9 +1021,10 @@ static void test_mouths(void) {
 }
 
 /* The golden hash (issue #19): layer_generate's output over fixed seeds,
- * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
- * (layer_make.h). The determinism check above builds a seed twice in one
- * build; this one fails when a build makes a seed's layer otherwise. */
+ * in every area and kind, against the hash dev recorded with the make it
+ * was taken at (tests/layer_make_hash.txt, layer_make.h). The determinism
+ * check above builds a seed twice in one build; this one fails when a
+ * build makes a seed's layer otherwise and no bump's file says so. */
 static uint32_t fnv(uint32_t h, const void *p, size_t n) {
 	const uint8_t *b = p;
 	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
@@ -1265,7 +1267,7 @@ static void test_extras(void) {
 	run = before;
 }
 
-static void test_layer_make(void) {
+static uint32_t layer_make_hash(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
 	run.seed = 0x5EED;
@@ -1302,9 +1304,18 @@ static void test_layer_make(void) {
 		}
 		h = set_pieces_hash(h);
 	}
-	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
-		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
 	run = before;
+	return h;
+}
+
+/* (generation as dev recorded it; or changed with a bump's file beside it, the record dev's workflow's to set after the merge) */
+static void test_layer_make(void) {
+	uint32_t h = layer_make_hash();
+	CHECK(h == LAYER_MAKE_RECORD_HASH || LAYER_MAKE > LAYER_MAKE_RECORD,
+		"layer generation changed (hash 0x%08x, recorded 0x%08x at make %d): add a bump's file to src/net/layer_make.d/, "
+		"%d-WORDS.txt, saying what changed (layer_make.h)", h, LAYER_MAKE_RECORD_HASH, LAYER_MAKE_RECORD, LAYER_MAKE + 1);
+	if (h != LAYER_MAKE_RECORD_HASH && LAYER_MAKE > LAYER_MAKE_RECORD)
+		printf("layer generation changed with its bump (make %d, hash 0x%08x): dev's workflow records it after the merge\n", LAYER_MAKE, h);
 }
 
 
@@ -4250,7 +4261,9 @@ static void test_xnavi_static(void) {
 		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 17, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy, GridMan and MagnetMan)", xnavi_bn5_count);
+	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
+	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
+	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5386,6 +5399,32 @@ static void test_chip_art_room(void) {
 	CHECK(rows > 0 && rows <= (int)XC4_ROWS, "art's room: %d rows", rows);
 }
 
+/* A BN4 chip unit whose moved object is an actor (its code's `states`, the object the actors' runner runs: TimeBomb's
+ * bomb): its table in BN6's layout, the engine's eight then its own, at its home's XC4_HOME_STATES clear of its shims and
+ * of a wait's wrapper, and named by a number row of its code; a table with none of its own past the engine's is refused */
+static void test_chip_actor_states(void) {
+	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	char why[160] = "";
+	int actors = 0;
+	CHECK(XC4_HOME_VENEERS <= XC4_HOME_STATES && XC4_HOME_STATES + 4u * XV_STATES_MAX <= XC4_HOME_WAIT, "chips' actors: the table's place in a unit's home");
+	for (int u = 0; u < xchips_bn4_count; ++u) {
+		const XChipUnit *c = &xchips_bn4[u];
+		const XVirusFamily *f = &c->code;
+		if (!f->nstates) continue;
+		++actors;
+		bool own = f->nstates > 8 && f->nstates <= XV_STATES_MAX, named = false;
+		for (int i = 8; i < f->nstates; ++i) own = own && f->states[i].own;
+		for (int i = 0; i < f->nnumbers; ++i) named = named || f->numbers[i].now == c->home + XC4_HOME_STATES;
+		CHECK(own && named, "chips' actors: %s's %d states, its own from 8, its table named by a number row", f->name, f->nstates);
+		CHECK(XC4_HOME_VENEERS + xvirus_shims_room(f) <= XC4_HOME_STATES, "chips' actors: %s's shims end before its table", f->name);
+		XVirusFamily bad = *f;
+		bad.nstates = 8;
+		CHECK(xvirus_code_ok(f, &region, why, sizeof why) && !xvirus_code_ok(&bad, &region, why, sizeof why),
+			"chips' actors: %s's table taken, and refused with the engine's eight alone", f->name);
+	}
+	CHECK(actors >= 1, "chips' actors: %d units", actors);
+}
+
 static void test_chip_entry(void) {
 	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
 	 * gives it, id 511 *, none, empty) */
@@ -5477,8 +5516,8 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays == 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, 8 playing now, "
-		"7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
@@ -7790,7 +7829,11 @@ static void test_group_arc(void) {
 	CHECK(!group_arc_make(pool, 1, &r, 1, &a), "arc: no signature where nothing pairs");
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+	if (argc == 2 && !strcmp(argv[1], "--layer-make-hash")) {   /* (tools/layer_make.py: the record dev's workflow writes) */
+		printf("%d 0x%08x\n", LAYER_MAKE, layer_make_hash());
+		return 0;
+	}
 	test_sha1();
 	test_battle_data();
 	test_area_views();
@@ -7874,6 +7917,7 @@ int main(void) {
 	test_xtext();
 	test_chip_code();
 	test_chip_art_room();
+	test_chip_actor_states();
 	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();

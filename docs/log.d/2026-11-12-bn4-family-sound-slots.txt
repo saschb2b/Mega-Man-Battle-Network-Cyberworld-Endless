@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:00:00Z
-* **Update**: rom/sound.md (the grown song table's slots by range: 0x380-0x3FF BN4's late families'), multirom/families.md (BN4's late families: their sounds at fixed slots of the grown table, through a shim), multirom/bn4.md (Its sounds; call 13 revised by the encounter groups' third call), rom/bn4.md (Kilby's and MagTect's rows), devtools/differential.md (their rows and mutations), code/emu.md, game/progression/encounter-groups.md (the one-pooled-family limit lifted).

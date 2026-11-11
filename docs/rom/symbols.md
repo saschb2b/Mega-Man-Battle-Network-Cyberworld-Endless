@@ -98,29 +98,29 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Code (routines, hooks, instructions) | 378 | 46 | 127 |
-| ROM data (tables, text, literals) | 333 | 284 | 184 |
-| ROM, code or data not told | 587 | 682 | 233 |
+| Code (routines, hooks, instructions) | 378 | 46 | 132 |
+| ROM data (tables, text, literals) | 337 | 284 | 187 |
+| ROM, code or data not told | 587 | 682 | 242 |
 | RAM (variables, structures) | 140 | 66 | 39 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 180 | 46 | 3 |
 | Event flags | 35 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
-| Constants, sizes and counts | 599 | 295 | 356 |
-| All | 2368 | 1438 | 947 |
+| Constants, sizes and counts | 599 | 295 | 360 |
+| All | 2372 | 1438 | 968 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | PET, mail and key items | 72 | 1 | 1 |
 | Shops and traders | 40 | 0 | 0 |
 | NaviCust | 23 | 2 | 1 |
-| Chips and folders | 372 | 265 | 48 |
-| Battle | 598 | 400 | 271 |
+| Chips and folders | 371 | 265 | 48 |
+| Battle | 600 | 400 | 276 |
 | Text and fonts | 44 | 8 | 4 |
 | Sound | 28 | 30 | 14 |
 | Maps and the overworld | 136 | 42 | 26 |
 | Events and progress | 65 | 19 | 13 |
-| Engine core | 990 | 671 | 569 |
+| Engine core | 993 | 671 | 585 |
 
 <!-- end of what tools/symbols.py writes -->
 

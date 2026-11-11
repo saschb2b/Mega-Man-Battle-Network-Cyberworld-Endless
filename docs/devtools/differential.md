@@ -176,6 +176,17 @@ never sprung there). `bn4_chip_lifeaura` records where the aura stands
 (`xdiff_bn4_trace.c`), and the kind's number, where MegaMan keeps the
 aura's object, and that object, each game's own code, are open.
 
+A chip unit's own fourth-kind object (no support chip's: Meteors'
+controller) keeps its element where its own spawner stores it, BN4's
++0x17 and BN6's +0x0E by the recipe's immediates; the trace writes a
+fourth-kind object raw, so the comparison reads BN4's at BN6's place for
+the types `legit.json`'s `bn4` `object_element` names, each with the two
+instructions. A pointer a BN4 object keeps into a chip unit's moved
+blocks (the star's kind's row at its +0x60, seen in the fight's frames
+since Meteors) reads as moved data in both traces: a BN4 reference takes
+BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it
+names, a BN5 reference none of it.
+
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
 `game=bn4:bn6` traces it against BN6's (`OUT.bn4` and `OUT.bn6`), and a
@@ -357,7 +368,9 @@ and traces both:
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy, to each copy where more than one family copies the block, as
-  Mettaur and Melody both copy BN4's summoned appear; one in RAM once the
+  Mettaur and Melody both copy BN4's summoned appear, and to each BN4
+  chip unit's copy that holds the address, as Meteors' unit copies the
+  star's spawner alone from inside ShotStar's block; one in RAM once the
   game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
@@ -969,7 +982,11 @@ code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
 so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
 `0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
 took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
-uncaught, until this).
+uncaught, until this). Nor does a BN5 virus family's copy take a poke of a
+BN4 spec (`xd_bn5_family_copy`, `src/dev/xdiff_events.c`): BN5's families' blocks lie at the same numbers as
+BN4's code, and one of them, `0x080D6C90`-`0x080D6EB0`, lay over BN4's
+TimeBomb's bomb's (`0x080D6BF8`-`0x080D6ED4`), so six mutations of the
+bomb's copy broke a BN5 virus instead and passed.
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3

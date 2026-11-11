@@ -1,0 +1,26 @@
+[
+ {
+  "name": "Meteors' count another",
+  "spec": "bn4_chip_meteors1_miss",
+  "poke": [
+   "080EAE34:2003"
+  ],
+  "what": "Meteors' controller's copy (BN4's fourth-kind 0x81, moved with the unit) counting three meteors where BN4's counts five (movs r0,#5 at BN4 0x080EAE34, stored at its +0x22): the last two never fall"
+ },
+ {
+  "name": "Meteors' star's kind another",
+  "spec": "bn4_chip_meteors1_miss",
+  "poke": [
+   "080EAE56:2402"
+  ],
+  "what": "Meteors' controller's copy asking ShotStar's star's spawner for kind 2 of the star's kinds (movs r4,#6 at BN4 0x080EAE56 made #2: another sprite's row of the table) where BN4's asks for kind 6"
+ },
+ {
+  "name": "Meteors' aim in the top row",
+  "spec": "bn4_chip_meteors1_miss",
+  "poke": [
+   "0801617A:2101"
+  ],
+  "what": "BN6's 0x08016168, the routine Meteors' unit's call to BN4's 0x0800FC48 is aimed at (its twin instruction for instruction, tools/xchiprecipe_bn4.py TWINS), searching row 1 (its ldrb r1,[r5,#0x13] at 0x0801617A, the object's row, made movs r1,#1) where MegaMan stands in row 2: the meteors on another panel"
+ }
+]
