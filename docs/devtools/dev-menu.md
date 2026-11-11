@@ -31,7 +31,7 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Ten more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Eleven more have no menu entry: `lab` (the Battle Lab's keeper stands in Lan's HP and lists every family the engine holds, whatever the profile's battle data: [the Battle Lab](../game/battle-lab.md)), `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: 0.3.0's trailer,
 `tools/trailers/v0_3_0.py`, plays one),

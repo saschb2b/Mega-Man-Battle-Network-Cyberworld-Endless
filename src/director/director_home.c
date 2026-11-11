@@ -194,6 +194,7 @@ static bool home_install(void) {
 		home_jobs_flags();
 		home_courier_visit();
 		home_gate_visit();
+		home_lab_visit();
 	}
 	return ok;
 }
