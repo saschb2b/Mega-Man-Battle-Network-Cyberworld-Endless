@@ -1,0 +1,159 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 41,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Program Advance FlmCros3 (its 331, the registry's 610: FlmLine's state moved as BN6's grown attack family 0xD1, its subfamily 1, the flames in a cross), from three FlmLine3 of codes in a row (J, K, L), formed on each game's first Custom screen from the three dealt side by side (deck4, deck6) and picked left to right: BN4's own checker forms it there (BN4_PA_CHECK), BN6's from its list grown with BN4's recipes (src/core/xchips_pas_bn4.c, src/emu/xchips_code.c pas_stage), the P.A. shown in both; used at fight frame 30 against BN4's Mettaur of 250 HP at (4,2), compared to the frame of the hit, t41 (0 HP in both): its 500 deletes every virus moved so far.",
+ "folder4": [
+  "120E",
+  "140E",
+  "160E"
+ ],
+ "folder6": [
+  "255:09",
+  "255:0A",
+  "255:0B"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck4": [
+  "120E",
+  "140E",
+  "160E"
+ ],
+ "deck6": [
+  "255:09",
+  "255:0A",
+  "255:0B"
+ ]
+}
