@@ -49,6 +49,7 @@ commits, issues and old notes) are mapped section by section in
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem, the Jukebox | [docs/game/pet.md](docs/game/pet.md) |
 | The chip Library, a page per entry (BN6, BN5, BN4): what each page lists and counts, its order and numbers, what the vaults and marks count | [docs/game/meta/library.md](docs/game/meta/library.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/game/rival.md](docs/game/rival.md) |
+| The Battle Lab: test battles set up in Lan's HP from the foes a profile's battle data has opened, fought without risk or reward; the owner's calls | [docs/game/battle-lab.md](docs/game/battle-lab.md) |
 | What is original, generated or adapted | [docs/game/fidelity.md](docs/game/fidelity.md) |
 | BN5's Liberation Missions dissected, how they join the run, and the generator that makes them afresh (its prototype in `tools/liberation.py`, BN5's own nine measured by `tools/liberation_bn5.py`) | [docs/game/liberation/](docs/game/liberation/index.md) |
 | The net's generated layers: the generator, identity, arrivals, props, set pieces | [docs/world/level-design/](docs/world/level-design/index.md) |

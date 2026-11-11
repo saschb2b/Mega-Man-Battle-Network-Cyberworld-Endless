@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:05:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:45:00Z }
 ---
 
 # The chip recipe generator
@@ -215,7 +215,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
   unit copies where the pair's answers differ, for that unit alone, in
   `UNIT_COPIED` (MagBolt's collision panels' update, with BN4's rule for
-  a move's direction); an effect its code hands the engine's routine for
+  a move's direction); a family whose state throws by its subfamily
+  through a jump table of spawners is a unit by subfamily (`ATTACK_SUBS`:
+  the state copied, the named subfamilies' entries moved with their
+  types, the rest BN6's null routine, the unit's chips those subfamilies'
+  alone; another subfamily's unit copies the state again at a number of
+  its own, SeekBom's of the bombs' family 9); an effect its code hands the engine's routine for
   effects over a pattern of panels gets the id its own spawn of that
   effect was given (`pattern_effects`: PropBom's blast); a literal that is a number, not
   an address, in `NUMBERS`; and a call noted before its target's type
@@ -316,8 +321,8 @@ its entry alone.
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
-(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59) and PropBom
-(0x62); SeekBom is next of the attack families.
+(0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
+(0x62) and SeekBom (0x09, its subfamily 9).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
@@ -372,7 +377,7 @@ third-kind types and the page 256 entries. The differential reads a
 page object's type as it reads a dispatched one's, from the side table
 (`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
 own. The fourth kind stays in the tables (BN5's own end at 0x90, the
-chips' run from 0x91; five taken by sixteen units).
+chips' run from 0x91; six taken by seventeen units).
 
 **BN5's numbers are still guarded for BN4's Navis.** Their track takes
 third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF

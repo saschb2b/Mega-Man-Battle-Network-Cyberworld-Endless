@@ -136,6 +136,14 @@ typedef struct {
 	 * chip ids' (docs/multirom/bn4-chips.md, Past 511); a profile saved
 	 * before reads them 0 */
 	uint8_t library_w[64];
+	/* the battle data on virus families (docs/game/battle-lab.md, The gauge;
+	 * battle_data.h): how often each was deleted in any run (to 255) and
+	 * which of its versions (a bit each), by the engine's AI index; a
+	 * profile saved before reads them 0 (the two bytes before them were
+	 * that profile's padding, and stay unread) */
+	uint8_t data_pad[2];
+	uint8_t data_count[256];
+	uint8_t data_versions[256];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

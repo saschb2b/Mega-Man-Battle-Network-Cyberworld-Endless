@@ -60,7 +60,14 @@ FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
 STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUNT
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
-ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7}   # (0xD2 and 0xD4 kept for the bombs' 0x09 and PropBom's 0x62)
+ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2}
+# An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
+# subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
+# names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
+# the unit names returns (BN6's null routine). Another subfamily's unit copies the state again, at a number of its own
+# (ATTACK_NUMBERS by the family and the unit's name): 288 bytes, and no unit's table is another's to write.
+# The unit's name -> (the state's table, its entries, the subfamilies)
+ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
 # A third-kind type several attack units spawn, moved once, by the first of them in UNITS: MegaMan's arm (BN4_T3_ARM, the
 # third kind's 0x02, with its kinds' table, TABLES). A unit after its owner copies the type's spawner alone (a routine of
 # 0x26 bytes in the type's code, a block of its own), its spawn given the owner's number of the dispatch and listed as
@@ -212,6 +219,7 @@ UNITS = (
     ('attack', 0x59, 'MagBolt'),
     ('attack', 0x62, 'PropBom'),
     ('attack', 0x47, 'ThunSoul'),
+    ('attack', 0x09, 'SeekBom'),
     ('support', 0x11, 'TimeBomb'),
 )
 CANDIDATES = ()
@@ -236,7 +244,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x8D: 0x200,                 # (the spread chips' shot)
                0xAD: 0x201,                 # (Thunder's ball's launch)
                0xF8: 0x202, 0xB9: 0x203,    # (MagBolt's bolt and its hum)
-               0x133: 0x204, 0xC8: 0x205,  # (PropBom's bomb's propeller and its burst as it is struck)
+               0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
+               0x90: 0x206,                 # (the bombs' state's throw)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
@@ -264,7 +273,7 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
@@ -520,6 +529,8 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f.update, f.type_table, f.st, f.own, f.dead, f.copied = None, 0, 0, [], [], []
     f.shared = []   # (the types it spawns as an earlier unit's copy: kind, the dispatch's number, BN4's type, the owner)
     f.chips = [c for x in subs for c in chips_of(b4, kind, x)] if kind in FAMILY4 else family_chips(b4, sub) if kind == 'attack' else []
+    if kind == 'attack' and name in ATTACK_SUBS:
+        f.chips = [(i, r) for i, r in f.chips if r[0xC] in ATTACK_SUBS[name][2]]
     f.wait = misc_wait(b4, sub) if kind == 'misc' else 0
     if f.wait:
         f.notes.append(f'BN4\'s misc run waits {f.wait:#x} frames after its routine ({MISC_WAIT4:08X}): its entry the installer\'s wrapper')
@@ -527,7 +538,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         if not 6 <= sub < NSTATES4 or sub in FAMILY4.values():
             f.decide('unit', f'an attack unit {sub:#x}: no state of MegaMan\'s a chip\'s family names')
             return f
-        f.number = ATTACK_NUMBERS.get(sub, 0)
+        f.number = ATTACK_NUMBERS.get((sub, name), ATTACK_NUMBERS.get(sub, 0))
         if not ATTACK_FIRST <= f.number < ATTACK_END:
             f.decide('unit', f'its family {sub:#x} has no number of BN6\'s grown attack families (ATTACK_NUMBERS: the next from {ATTACK_FIRST:#x})')
     elif kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
@@ -546,6 +557,21 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             return f
         f.regions, f.roots = [(f.lo, f.hi, 'state')], [f.entry]
         f.notes.append(f'MegaMan\'s state {sub:#x} ({f.lo:08X}-{f.hi:08X}), the family of its chips\' records: moved')
+        f.unreached = {}
+        if name in ATTACK_SUBS:
+            table, n, mine = ATTACK_SUBS[name]
+            entries = [b4.u32(table + 4 * x) & ~1 for x in range(n)]
+            for x in mine:
+                hit = X4.t3_of(b4, entries[x])
+                if hit is None or hit[0] is None:
+                    f.decide('entry', f'its subfamily {x:#x}\'s entry ({entries[x]:08X}) lies in no third-kind type\'s code')
+                    continue
+                ty, lo, hi = hit
+                f.regions.append((lo, hi, ty))
+                f.roots += [entries[x], lo]
+                f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
+                f.notes.append(f'its subfamily {x:#x}\'s entry ({entries[x]:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}): moved')
+            f.unreached = {e: x for x, e in enumerate(entries) if e not in [entries[y] for y in mine]}
         # (a type an earlier unit moved for every attack unit, SHARED3: its spawner copied, its spawn the owner's number)
         for ty, (spawner, why) in sorted(SHARED3.items()):
             if ty in alloc.shared3:
@@ -638,6 +664,10 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     try:
         X4.blocks_of(b4, f, alloc)
         X4.words_of(f, pairs)
+        # (a jump table's entry no chip of the unit names, ATTACK_SUBS: BN6's null routine)
+        for e, x in sorted(getattr(f, 'unreached', {}).items()):
+            f.decisions = [d for d in f.decisions if not (d[0] == 'table' and d[1].startswith(f'{e | 1:08X} '))]
+            f.words.append((e | 1, X4.NULLSUB6, f'its subfamily {x:#x}\'s entry, which no chip of the unit names: BN6\'s null routine'))
         sprites_of(b4, b6, f, alloc)
         table_sprites(b4, b6, f, alloc)
         f.sounds = []
