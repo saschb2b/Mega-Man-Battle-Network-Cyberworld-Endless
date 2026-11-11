@@ -52,7 +52,14 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do.
+where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+a dark karma parts the two from the first frame on one byte: MegaMan's
+palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
+0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
+palette, BN4's, names that pair alone (an entry's `cells`).
+`bn4_chip_invis_dark` is the control: Invis, which plays for any karma,
+used by a dark MegaMan, nothing else of him apart; its mutation (BN6's
+init handing him palette 3) is caught.
 A chip whose code is BN4's moved (a unit of `tools/xchiprecipe_bn4.py`,
 its rows `XREG_MOVED`: `bn4_chip_panlsht1` to `3`) is compared the same
 way, with what `legit.json`'s `bn4` section adds for it: his attack's
