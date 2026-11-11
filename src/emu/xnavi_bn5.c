@@ -2160,6 +2160,10 @@ static const XvImm thedarksoul_imms[] = {
 	{ 0x0802A1C8, THUMB_CMP, 1, 0, 0x8, 0xD },   /* a panel's type compared with BN5's 0x8: BN6's 0xd */
 	{ 0x0802A7E6, THUMB_CMP, 1, 0, 0x9, 0x5 },   /* a panel's type compared with BN5's 0x9: BN6's 0x5 */
 	{ 0x0802A984, THUMB_CMP, 1, 0, 0x9, 0x5 },   /* a panel's type compared with BN5's 0x9: BN6's 0x5 */
+	{ 0x0802A9FE, THUMB_MOVS, 0, 0, 0xA, 0xE },   /* the panels of BN5's type 0xa counted: BN6's 0xe */
+	{ 0x0802AA0A, THUMB_MOVS, 0, 0, 0xA, 0xE },   /* the panels of BN5's type 0xa counted: BN6's 0xe */
+	{ 0x0802AA3E, THUMB_MOVS, 0, 0, 0x8, 0xD },   /* the panels of BN5's type 0x8 counted: BN6's 0xd */
+	{ 0x0802AA4A, THUMB_MOVS, 0, 0, 0x8, 0xD },   /* the panels of BN5's type 0x8 counted: BN6's 0xd */
 	{ 0x080EBC3C, THUMB_CMP, 0, 0, 0x16, 0x26 },   /* the buster's arm: the Dark Soul's: BN5's AI index 0x16, BN6's 0x26 */
 	{ 0x0810430E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 };
@@ -4524,6 +4528,10 @@ static const XvImm magnetman_imms[] = {
 	{ 0x080F672C, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x080F675E, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 (setAttack0): BN6's two status states before the family's own */
 	{ 0x080F678C, THUMB_MOVS, 0, 0, 0xB, 0xD },   /* CurAction 11 (setAttack0): BN6's two status states before the family's own */
+	{ 0x080F67C8, THUMB_MOVS, 0, 0, 0x5, 0xF },   /* the panels of BN5's type 0x5 counted: BN6's 0xf */
+	{ 0x080F67D2, THUMB_MOVS, 0, 0, 0x5, 0xF },   /* the panels of BN5's type 0x5 counted: BN6's 0xf */
+	{ 0x080F6838, THUMB_MOVS, 2, 0, 0x5, 0xF },   /* a panel's type compared with BN5's 0x5, in a register: BN6's 0xf */
+	{ 0x080F6AB8, THUMB_MOVS, 2, 0, 0x5, 0xF },   /* a panel's type compared with BN5's 0x5, in a register: BN6's 0xf */
 	{ 0x080F6F4E, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x080F6FCC, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 };

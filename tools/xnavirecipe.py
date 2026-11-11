@@ -950,6 +950,10 @@ def panel_types(r):
                 v, chain = T.back_value(w, a, 2)
                 if v in NT.PANEL_TYPES:
                     X.imm_for(r, chain, 2, v, NT.PANEL_TYPES[v], f'a panel set to BN5\'s type {v:#x}: BN6\'s {NT.PANEL_TYPES[v]:#x}')
+            if i.target in NT.PANEL_COUNTERS:
+                v, chain = T.back_value(w, a, 0)
+                if v in NT.PANEL_TYPES:
+                    X.imm_for(r, chain, 0, v, NT.PANEL_TYPES[v], f'the panels of BN5\'s type {v:#x} counted: BN6\'s {NT.PANEL_TYPES[v]:#x}')
             if i.target not in NT.PANEL_GETTERS:
                 continue
             for n, b in enumerate(addrs[k + 1:k + 6]):
@@ -957,9 +961,16 @@ def panel_types(r):
                 if j.form == 'ldrb' and j.f[1:] == (0, 2):
                     for c in addrs[k + 2 + n:k + 5 + n]:
                         x = w.insns[c]
-                        if x.form == 'cmp' and x.f[0] == j.f[0] and x.f[1] in NT.PANEL_TYPES:
+                        if x.form == 'cmp' and x.f[0] == j.f[0] and '#' in (x.text or '') and x.f[1] in NT.PANEL_TYPES:
                             r.more_imms.append(dict(at=c, form='THUMB_CMP', rd=x.f[0], rn=0, was=x.f[1], now=NT.PANEL_TYPES[x.f[1]],
                                                     why=f'a panel\'s type compared with BN5\'s {x.f[1]:#x}: BN6\'s {NT.PANEL_TYPES[x.f[1]]:#x}'))
+                        elif x.form == 'cmp' and '#' not in (x.text or '') and j.f[0] in x.f:
+                            # (compared with a register a panel type was put in: movs r2,#5; cmp r1,r2, MagnetMan's 0x080F6838)
+                            other = x.f[1] if x.f[0] == j.f[0] else x.f[0]
+                            v, chain = T.back_value(w, c, other)
+                            if v in NT.PANEL_TYPES:
+                                X.imm_for(r, chain, other, v, NT.PANEL_TYPES[v],
+                                          f'a panel\'s type compared with BN5\'s {v:#x}, in a register: BN6\'s {NT.PANEL_TYPES[v]:#x}')
                     break
                 if T.writes(j, 0):
                     break

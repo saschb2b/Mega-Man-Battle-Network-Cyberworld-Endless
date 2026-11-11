@@ -63,6 +63,9 @@ PANEL_SITES = {
 }
 # BN5's routines that give a panel's data (r0), whose +2 is its type: object_getPanelDataOffset
 PANEL_GETTERS = (0x0800AFC2,)
+# BN5's routines that take a panel type in r0: the panels of type r0 on side r1 counted (BN5_PANEL_COUNT: each panel's +3
+# its side, +2 its type; MagnetMan's count of his magnet panels at 0x080F67C6)
+PANEL_COUNTERS = (0x0800B3E4,)
 SET_PANEL_TYPE = 0x0800B2A6
 # BN5's companion overlay, the first kind's type 0x56 (BN6's BN6_OVERLAY_*: its init 0x080C5BD8, BN5's 0x080C36F0), and
 # BN6's: each its spawner and end, its kinds' masks (a word a kind, naming a byte an animation: 0 drawn behind its Navi)

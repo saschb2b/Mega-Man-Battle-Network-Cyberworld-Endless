@@ -686,10 +686,14 @@ def assign_roles(trace, canon):
     trace['first'] = {}   # (each role's first frame, its timer: a pointer to an object newer than its holder is a stale one's)
     for fr in trace['frames']:
         now = {}
+        # (an object spawned this frame is a new one, though it takes the slot one of its kind left the frame before: an
+        # engine spark whose life each game draws its own, BN6's one frame shorter, so the next spark takes its slot in
+        # BN6 and another in BN5, magnetman_v1_keys at t272)
+        born = {e.object for e in fr.get('events', ()) if e.kind == SPAWN and e.object}
         for o in fr['objs']:
             ident = identity(trace['game'], o, canon)
             p = prev.get((o.kind, o.slot))
-            if p and p[0] == ident:
+            if p and p[0] == ident and not born & {o.addr, o.addr + NODE, o.addr - NODE}:
                 o.role = p[1]
             else:
                 key = (o.kind, ident)
@@ -1094,6 +1098,31 @@ def struck_leftovers(f, o):
     return {OBJ_Z: rules[OBJ_Z]} if isinstance(rules.get(OBJ_Z), tuple) else {}
 
 
+def set_nibble(rec, sp):
+    """BN5's sprite state (its record `rec`, the state at `sp`) with its +5 as BN6's animation set writes it: BN6's set
+    (IWRAM image 0x081D6C30-0x081D6C90) ends by storing its frame's byte 4, its upper nibble, at +5 (0x081D6C78-0x081D6C8E),
+    where BN5's (0x081C8698-0x081C86E0) stores nothing there, its first advance writing it (BN5 0x081C8748-0x081C875E, BN6
+    0x081D6CF8-0x081D6D0E, the same). So on its object's first frame, which set its animation and advanced none, BN5's +5
+    is read as its frame's nibble, which an advance writes in both games after. A sprite whose data is not in BN5's ROM
+    (decompressed into RAM) is read as it is."""
+    data = rom(5)
+
+    def at(a, n=1):
+        return ROM[0] <= a and a + n <= ROM[0] + len(data)
+    base, anim, cur = u32(rec, sp + 0x18), u32(rec, sp + 0x1C), u32(rec, sp + 0x20)
+    if not (at(base, 4) and at(anim + 0xC, 4) and at(cur, 2)):
+        return rec
+    table = base + u32(data, anim + 0xC - ROM[0])
+    if not at(table + 4 * data[cur - ROM[0]], 4):
+        return rec
+    frame = table + u32(data, table + 4 * data[cur - ROM[0]] - ROM[0])
+    if not at(frame + 4) or rec[sp + 5] == data[frame + 4 - ROM[0]] >> 4:
+        return rec
+    out = bytearray(rec)
+    out[sp + 5] = data[frame + 4 - ROM[0]] >> 4
+    return bytes(out)
+
+
 def obj_cells(fa, fb, oa, ob):
     """(part, offset as BN6 has it, BN5's value, BN6's) for each place they differ, their numbers BN6's"""
     out = []
@@ -1102,6 +1131,9 @@ def obj_cells(fa, fb, oa, ob):
     own = mm or (kind == 'T1' and canon.is_navi(5, oa.o16(OBJ_NAME_ID)))   # (a support chip in BN6's own family: MegaMan's, a Navi's)
     sp = SPRITE[kind] + NODE
     ra, rb = oa.canonical(), ob.canonical()
+    # (BN5's sprite state's +5 on its object's first frame, as BN6's animation set writes it: set_nibble)
+    if fa.game == 5 and not oa.leftover and fa.trace['first'].get(oa.role) == fa.fr['t']:
+        ra = set_nibble(ra, sp)
     base_a, base_b = u32(ra, sp + 0x18), u32(rb, sp + 0x18)
     # (a sprite state is no state of the object's before it sets one up: its spawn clears its record to there, kinds 1
     # and 3 0x8C bytes from +4, kind 4 0x7C, BN5 0x080030CC / BN6 0x080032AC, and the slot's last occupant's is left)
