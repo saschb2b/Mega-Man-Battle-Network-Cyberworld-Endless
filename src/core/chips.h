@@ -71,6 +71,8 @@ bool chips_bn5(int id);
 bool chips_bn4(int id);
 /* Whether the registry's chips are BN5's own (its ROM read), not placeholders */
 bool chips_from_bn5(void);
+/* ... and whether BN4's rows are BN4's own (its ROM read) */
+bool chips_from_bn4(void);
 
 /* What the core's copy takes (xchips_install.c): the region's bytes from
  * CHIPS_FREE, `*len` of them, made now where the ROMs read changed since */

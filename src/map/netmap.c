@@ -330,13 +330,21 @@ static bool in_256;   /* (the layer's tiles 256-colour: BN4's) */
 
 void netmap_colours(void) {
 	if (!in_256) return;
+	/* (the map's alone: BN6's menus, main modes of their own, set BG1 and BG2 to the net's very controls for their
+	 * 16-colour tiles, the folder's screens as they open, or leave them as the map had them, a shop's and the Chip
+	 * Trader's: there the bit comes off again) */
+	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
+	bool map = mode == BN6_MODE_GAME, menu = mode == BN6_MODE_SUBMENU || mode == BN6_MODE_SHOP || mode == BN6_MODE_TRADER || mode == BN6_MODE_MAIL;
+	if (!map && !menu) return;
 	uint32_t render = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_RENDER) + BN6_RENDER_BGCNT;
 	static const uint16_t net[2] = { BN6_BGCNT_NET_BG1, BN6_BGCNT_NET_BG2 };
-	for (uint32_t bg = 1; bg <= 2; ++bg)
-		if (emu_read16(render + 2 * bg) == net[bg - 1]) {
-			uint8_t v[2] = { (uint8_t)(net[bg - 1] | BN6_BGCNT_256), (uint8_t)(net[bg - 1] >> 8) };
+	for (uint32_t bg = 1; bg <= 2; ++bg) {
+		uint16_t from = (uint16_t)(net[bg - 1] | (map ? 0 : BN6_BGCNT_256)), to = (uint16_t)(net[bg - 1] | (map ? BN6_BGCNT_256 : 0));
+		if (emu_read16(render + 2 * bg) == from) {
+			uint8_t v[2] = { (uint8_t)to, (uint8_t)(to >> 8) };
 			emu_write(render + 2 * bg, v, sizeof v);
 		}
+	}
 }
 
 /* Where the layer's tiles lie in VRAM, [tiles_lo, tiles_hi) bus addresses:

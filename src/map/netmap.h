@@ -108,7 +108,9 @@ int netmap_rise(void);
 /* Each frame: a layer in another game's 256-colour tiles (BN4's) has BG1
  * and BG2 shown in 256 colours while BN6 shows the net's map, which sets
  * them 16-colour as it enters one (docs/rom/bn4.md, Net maps in 256
- * colours); nothing on any other. */
+ * colours), and in 16 again in BN6's menus (the PET's screens, a shop,
+ * the Chip Trader, E-Mail), which keep or set the map's own controls for
+ * their 16-colour tiles; nothing on any other. */
 void netmap_colours(void);
 /* Whether the backdrop of the map area `area`'s layers take over, as set
  * now (xbackdrop_map), loads its tiles over those of the layer last built,

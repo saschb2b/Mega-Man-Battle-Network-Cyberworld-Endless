@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (unit 7 built: BN4's catalogue the older Net's half of the finds on BN4's areas, the deep's every game's, what the economy measured, the Library's BN4 chips held, the menus' colours on BN4's areas fixed; the owner's calls 9 and 10, asked and answered), multirom/one-net.md (the half the area's own game's), game/economy/measuring.md (the report's older Net's table), game/meta/library.md (a BN4 chip held reaches the profile's Library), rom/net-maps.md and rom/bn4.md (the 256-colour bit on the map alone, BN6's menus their 16 colours).
 * **Update**: devtools/chip-recipe-generator.md (TYPES3's 79 more numbers; UNITS append-only and the sound slots' ranges, for sessions side by side).
 * **Update**: multirom/bn4-chips.md (MokoRus1-3 moved; a list 1 range of the chips'; a hit's bits each engine's), rom/bn4.md (MokoRus's code, the shuffle and the struck pass's push, new row), devtools/chip-recipe-generator.md (list 1's range; an immediate of a meaning), devtools/differential.md (the shuffle's draws paired).
 * **Update**: game/meta/darkchips.md (BN4's dark chips' price built: the registry's dark rows, the hook's test, the proof in play) and multirom/bn4-chips.md (the dark chips' price in code, which rows are dark and which dark records have none; call 4 built), code/tools.md (`tools/xreg_bn4.py` writes the dark rows), devtools/chip-recipe-generator.md (a dark chip's row among the dark rows).
@@ -12,6 +13,7 @@
 ## 2026-11-11
 * **Update**: multirom/navis.md (SearchMan moved, Team ProtoMan's third; his battle sprite's place), devtools/differential.md (a fourth-kind spawn's leftover), rom/navis.md (Team ProtoMan's SearchMan, new row), game/team-protoman.md (unit 4 built; its description and index line), multirom/index.md (navis.md's line).
 * **Update**: multirom/navis.md (GyroMan moved, Team ProtoMan's second; the shared art's third room and list 2's spill), rom/navis.md (Team ProtoMan's GyroMan, new row), game/team-protoman.md (unit 3 built; its description and index line), multirom/index.md (navis.md's line), devtools/differential.md (Team ProtoMan's art rooms read as moved), engine/emulation/memory.md and free-space.md (`FREE_TEAM_SHARED_MORE`).
+* **Update**: game/reward-pick.md (The information box: the window fitted to its rows, four lines whole, a longer text scrolled; every text measured with `--pick-fit`), code/dev.md (`pick_fit.c`).
 * **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
 * **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
