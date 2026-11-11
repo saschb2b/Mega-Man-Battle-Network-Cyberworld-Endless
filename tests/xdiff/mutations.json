@@ -2262,6 +2262,46 @@
    "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   },
   {
+   "name": "CloudMan's object's parent's second CurAction compare not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF1888:2109"
+   ],
+   "what": "the third kind's 0x5F's second compare of its parent's CurAction (BN5 0x080D1EF0: movs r1,#9, its copy at XN_MORE + 0x9888, BN6's 11) left at BN5's 9: it skips its countdown in BN6's state 9 and runs it in 11 (the generator's rule took the first compare alone before CloudMan; caught at t9)"
+  },
+  {
+   "name": "CloudMan's cloud spawned as another of his",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0AB8:2036"
+   ],
+   "what": "the clouds' spawner (BN5 0x080CBEB8: movs r0,#0x37, its copy at XN_MORE + 0x8AB8) made 0x36: the dispatch runs the 0x36's copy for each cloud"
+  },
+  {
+   "name": "CloudMan's cloud's sprite not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF07A4:220F"
+   ],
+   "what": "the cloud's sprite (BN5 0x080CBBA4: movs r2,#0xF, list 2's 0x0F, its copy at XN_MORE + 0x87A4) left at BN5's number where the recipe makes it list 2's 0x29, his battle sprite in BN6"
+  },
+  {
+   "name": "CloudMan's bubbles' kind row's sprite left at BN5's",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0126:11:1"
+   ],
+   "what": "the third kind's 0x0B's row 2 (BN5 0x080C5E1A, his kinds 2-5, BN5_CLOUD_KINDS_0B; its copy at XN_MORE + 0x8126), the list 4 sprite 0x11 the recipe copies at list 5's 0xA8 (the Navis' list 4 full, NAVI_LIST_SPILL), its number left at BN5's 0x11: list 5's 0x11 another sprite"
+  },
+  {
+   "name": "CloudMan's search for his clouds finding none",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08D90074:2F36"
+   ],
+   "what": "the Navis' stub for BN5_CLOUD_FIND_37 (XN_STUB_CLOUDS + 0x14: cmp r7,#0x37 against the dispatch's side table) made 0x36: no cloud found, a new cloud's panel chosen as if he had none (BN5_CLOUD_PANEL)"
+  },
+  {
    "name": "Kilby's sound at the pool's second slot",
    "spec": "kilby_v1",
    "poke": [

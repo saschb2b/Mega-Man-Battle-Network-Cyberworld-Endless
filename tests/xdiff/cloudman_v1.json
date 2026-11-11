@@ -1,0 +1,11 @@
+{
+ "about": "CloudMan V1 (BN5's 0x155, BN6's 0x1E8) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Darkloid in BN6's engine, his own states (BN6's from 8) and his objects (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44 and 0x5F) through the dispatch, his search for his clouds the Navis' stub",
+ "kind": "differential",
+ "foes": "155@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}
