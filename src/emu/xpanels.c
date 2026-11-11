@@ -44,9 +44,8 @@
 #define BONUS_IMAGE   (BN6_IWRAM_IMAGE + (BN6_PANEL_BONUS_TESTS - BN6_IWRAM_CODE))
 #define BONUS_CRC     0xA63E1015u
 
-static bool ready, hole_ready;
+static bool ready;
 bool xpanels_ready(void) { return ready; }
-bool xpanels_hole_ready(void) { return hole_ready; }
 
 static uint32_t rom32(uint32_t a) { return get32(R.data + (a - BUS)); }
 static uint16_t rom16(uint32_t a) { return get16(R.data + (a - BUS)); }
@@ -411,7 +410,7 @@ static void install_bn4(void) {
 	}
 	claims_begin("the Hole (xpanels.c)");
 	tables_write();
-	hole_ready = xpanels_look_hook();
+	bool hole_ready = xpanels_look_hook();
 	claims_end();
 	printf("xpanels: BN4's Hole %s BN6's engine, as its panel type %d\n", hole_ready ? "in" : "NOT in", XPANEL_HOLE);
 }

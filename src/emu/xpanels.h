@@ -35,7 +35,5 @@
 void xpanels_install(int xrom);
 /* Whether BN6's engine has lava and sea now */
 bool xpanels_ready(void);
-/* ... and BN4's Hole */
-bool xpanels_hole_ready(void);
 
 #endif

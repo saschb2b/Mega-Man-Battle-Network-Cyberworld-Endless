@@ -332,16 +332,14 @@ static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
 	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its direction's call at %08x aimed at its shim", (unsigned)site);
 }
 
-/* A call that takes r0 BN6's way (XvSoundCall: a sound past a byte, the owner's call of 5 November 2026, docs/multirom/bn4.md
- * call 11; the appear queue's number): its game's call aimed at a shim that makes r0 the slot (or adds it, XvSoundCall.add) and goes on to BN6's twin
- * (xvirus_shim_r0_to) through the family's veneer for it, the call's own target after the rebase */
+/* A call that takes r0 BN6's way (XvSoundCall: a sound past a byte, docs/multirom/bn4.md call 11; the appear queue's number): its
+ * call aimed at a shim that makes r0 the slot (or adds it) and goes on to BN6's twin (xvirus_shim_r0_to) through the family's veneer */
 static void sound_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvSoundCall *k) {
 	uint32_t was = 0, t = 0, at = 0, to = 0;
 	const uint8_t *orig = c->rom + (k->at - BUS);
 	uint8_t shim[XV_SHIM_SOUND_SIZE];
 	if (!thumb_bl_decode(k->at, get16(orig), get16(orig + 2), &was) || !(to = xvirus_shim_r0_to(was)) || !thumb_bl_read(code, k->at - b->start, b->at, &t) ||
-		t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, sizeof shim)) ||
-		!(k->add ? xvirus_shim_sound_add(shim, at, k->slot, t) : xvirus_shim_sound(shim, at, k->slot, t))) {
+		t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, sizeof shim)) || !(k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t)) {
 		xv_fail("its sound's call at %08x", (unsigned)k->at);
 		return;
 	}
@@ -994,8 +992,7 @@ void xvirus_install(int which) {
 		/* (BN4 Red Sun's, where its ROM is read, after BN5's: the visitors, docs/multirom/bn4.md) */
 		if (bn4 && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
-		/* (BN4's Hole, after BN5's lava and sea where they came in: xpanels.h) */
-		if (bn4) xfields_install(XROM_BN4_RED_SUN_US);
+		if (bn4) xfields_install(XROM_BN4_RED_SUN_US);   /* (BN4's Hole, after BN5's lava and sea: xpanels.h) */
 	}
 	claims_end();
 	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */
