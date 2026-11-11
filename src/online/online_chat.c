@@ -57,7 +57,7 @@ static struct {
 	OnlinePeer peer;          /* the one being talked to */
 	int waiting;              /* frames a peer's talk has waited for his card */
 	bool home, open;          /* the question home asked; a chat of ours open */
-	int stamp;                /* the stamp moment: 1 the greeter's word open, 2 the pass up (netpass_screen.h) */
+	int stamp;                /* the stamp moment: 1 the greeter's word open, 2 the pass up; the set grown: 3, 4 (netpass_screen.h) */
 	unsigned keeper_said;     /* channel, channels and navis the keeper's words name, packed */
 	bool on_exit;
 	bool card_open;           /* a peer's card open in the chat box (online_chat_card_open) */
@@ -283,6 +283,9 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	/* (the stamp moment, once MegaMan is free: the greeter's word, then the pass with its new stamps landing) */
 	if (C.stamp == 1) { C.stamp = 2; netpass_stamp_begin(); return false; }
 	if (!C.stamp && netpass_stamp_due() && talk_start(square_greeter_stamp_words(), FACE_PROG)) { C.stamp = 1; return false; }
+	/* (the set grown since the pass was full: the greeter's word once, then the pass with its new open slot) */
+	if (C.stamp == 3) { C.stamp = 4; netpass_grew_begin(); return false; }
+	if (!C.stamp && netpass_grew_due() && talk_start(square_greeter_grew_words(), FACE_PROG)) { C.stamp = 3; return false; }
 	if (C.waiting && (card_of(C.peer.id) || --C.waiting <= 0)) { C.waiting = 0; peer_talk(); return false; }
 	bool on = online_square_on_exit(bn6_player_x(), bn6_player_y());
 	if (on && !C.on_exit && talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;

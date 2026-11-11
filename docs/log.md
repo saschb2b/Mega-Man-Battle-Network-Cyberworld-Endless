@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: online/netpass.md (A game joins the set, a new section: BN4 Red Sun in the full set, the greeter's line once, the stamp moment again, `netpass.ini`'s `games=`; protocol v17 on the wire; its description and index line), online/server-and-wire.md (v17; its description and index line), multirom/bn4-chips.md (unit 8 built: BN4 in the NetPass, its chips past 511 in a NetBattle's folder, only proved ones traded; its description and index line), code/online.md (`online_chips.c`), devtools/net-square.md (`netpass grew`, `netpass grown`).
 * **Update**: game/bosses/bn4-navis.md (SparkMan among the ACDC Area's guardians, BurnerMan among the Park Area's; their kins ElecMan and HeatMan), rom/bn4.md (`BN4_OW_SPARKMAN`, `BN4_OW_BURNERMAN` named).
 * **Update**: multirom/bn4-navis.md (BurnerMan built: his init's tail at his spawn's end, a gate a frame longer, his object asking his CurAction, a pattern table BN6's), rom/bn4.md (BurnerMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-navis.md (SparkMan built: a CurAction kept in his object, an effect by version from a table, his object drawn as each engine's MegaMan; the Navis' effects and lists past their ranges), rom/bn4.md (SparkMan derived, new row), re/ledger.json.
