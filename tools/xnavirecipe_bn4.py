@@ -55,7 +55,9 @@ NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 13
          (0x1D, 'Roll', 128),
          (0x46, 'WoodMan', 172),
          (0x47, 'JunkMan', 164),
-         (0x09, 'TopMan', 176))
+         (0x09, 'TopMan', 176),
+         (0x0B, 'SparkMan', 192),
+         (0x22, 'BurnerMan', 184))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -89,6 +91,11 @@ NAVI_COPIED = {
                 'else the sprite updated): BN6\'s nearest (0x0801BBF4) updates the sprite in the frame its animation is set up too, '
                 'a frame ahead of BN4\'s; copied, its pause test BN6\'s',
     # (WoodMan's: docs/multirom/bn4-navis.md, WoodMan built)
+    # (BurnerMan's: docs/multirom/bn4-navis.md, BurnerMan built)
+    0x08009EF6: 'a pattern of panels highlighted (r0, r1 its panel, r2 the pattern, r3 its side: 0 forward, else back; the '
+                'pattern\'s offsets from its table 0x080125B0, each panel through 0x08009DA0): BN6\'s 0x0800CCD4 takes its side '
+                'packed with a direction routine (0x0800E2CE) where BN4\'s passes it plain; copied, its table BN6\'s of the same '
+                'patterns (bn4_twins.DATA_TWINS)',
     0x0800CA4A: 'a Soul Navi\'s attack\'s end with its CurAction alone (BN4_ATTACK_END_BARE: +0x10 0, CurAction 6, the attack\'s '
                 'variables\' first u16 0; none of BN4_ATTACK_END\'s requests, clear or flag): no BN6 routine of its body; copied, its '
                 'CurAction BN6\'s 8, its AI data\'s +0x70 BN6\'s +0xA0',
@@ -289,12 +296,13 @@ def navi_init(f):
     setup = [s for s, t in w.bls.items() if t == X4.BN4['setup_coll']]
     args = [T.back_value(w, setup[0], r)[0] for r in (1, 2, 3)] if len(setup) == 1 else None
     done = I.init_calls(f.b4, f, w, args, setup)
+    tail = I.init_tail(f, w, done, std)
     for site, t in sorted(w.bls.items()):
         if site in done:
             continue
         if t == NAVI4['take']:
             f.notes.append(f'{site:08X}: its init takes its side\'s AI data (BN4_AI_TAKE): dropped, BN6\'s Navi init takes one from the pool')
-        elif t not in std:
+        elif t not in std and not (tail and site >= tail):
             f.decide('init', f'{site:08X}: its init calls {t:08X}, which BN6\'s Navi init makes nothing of')
     navi_palette(f, w)
     f.coll_arg = args[2] if args and args[2] is not None and args[2] != COLL_ARG6 else 0
@@ -375,7 +383,7 @@ def navi_update(f, tw, uw):
     calls = [t for _, t in sorted(uw.bls.items())]
     if tcalls == [NAVI4['after']] and calls == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']]:
         return
-    if tcalls == [NAVI4['after']] and len(calls) > 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
+    if tcalls == [NAVI4['after']] and len(calls) >= 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
             and all(f.lo <= t < f.hi for t in calls[1:-2]):
         I.navi_pres(f, uw)
         return
@@ -460,7 +468,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     if f.s1['palette'] is not None:
         f.decisions = [d for d in f.decisions if not (d[0] == 'struct1' and d[1].endswith('gives no palette the generator reads'))]
     del f.walks[f.init]
-    f.roots += [r for r in (f.post, f.pre) if r] + [t for t, _ in f.pres]
+    f.roots += [r for r in (f.post, f.pre, getattr(f, 'init_tail', 0)) if r] + [t for t, _ in f.pres]
     S.split_regions(f)
     f.dead = [(f.lo, tw), (f.init, T.walk(b4, f.init, region=(f.lo, f.hi))), (f.update, uw)]
     saved = dict(bn4_twins.COPIED)
@@ -486,6 +494,7 @@ def derive(b4, b6, pairs, ty, name, first, alloc):
     f.mm_bytes = sum(i.size for e, w in f.walks.items() if N.PLAYER <= e < N.PLAYER_END for i in w.insns.values())
     X4.side_sites(f)
     X4.scan(f)
+    X4.saved_actions(f)
     far_loads(f)
     # (the state set's own store of r0 is its callers' CurAction: set_action_imms gives each call's)
     f.decisions = [d for d in f.decisions if not (d[0] == 'curaction' and d[1].startswith(f'{NAVI4["set_action"]:08X}:'))]
@@ -619,6 +628,14 @@ MM_TABLE_SIZES = {
 REACH = {'THUMB_LDR': 0x7C, 'THUMB_STR': 0x7C, 'THUMB_LDRH': 0x3E, 'THUMB_STRH': 0x3E, 'THUMB_LDRB': 0x1F, 'THUMB_STRB': 0x1F}
 
 
+# A byte stored to a collision field BN6 keeps past a strb's reach whose high byte BN4's code never sets, made a halfword store at
+# BN6's place (strh, which reaches 0x3E): the instruction's two bytes rewritten in the copy (XvByte): BN4's address -> why
+STRB_WIDENS = {
+    0x080BE034: "BurnerMan's state's strb r0,[r3,#0x18] of 0 into his collision data's flashing after a hit (BN4_COLL_FLASH, a u16 "
+                "from 0x78 counted down, its high byte always 0; BN6's +0x24): strh r0,[r3,#0x24] writes the same",
+}
+
+
 def far_loads(f):
     """its loads of a field BN6 keeps past the immediate's reach (xrecipe_bn4.field_imms' offsets: BN4's collision data's final
     damage +0x28, BN6's +0x80; WoodMan's third kind 0x95 at 0x080DFB8E): an ldrh the instruction after compares with 0, in a
@@ -627,6 +644,12 @@ def far_loads(f):
     for i in f.imms:
         if i['now'] <= REACH.get(i['form'], 0xFFFF):
             keep.append(i)
+            continue
+        if i['form'] == 'THUMB_STRB' and i['at'] in STRB_WIDENS and not i['now'] & 1 and i['now'] <= REACH['THUMB_STRH']:
+            was = 0x7000 | i['was'] << 6 | i['rn'] << 3 | i['rd']
+            now = 0x8000 | (i['now'] // 2) << 6 | i['rn'] << 3 | i['rd']
+            f.bytes += [(i['at'], was & 0xFF, now & 0xFF, f'{STRB_WIDENS[i["at"]]} (its low byte)'),
+                        (i['at'] + 1, was >> 8, now >> 8, f'{STRB_WIDENS[i["at"]]} (its high byte)')]
             continue
         w = next((w for w in f.walks.values() if i['at'] in w.insns), None)
         nxt, first = (w.insns.get(i['at'] + 2), w.insns.get(w.entry)) if w else (None, None)
@@ -686,6 +709,7 @@ def list_moves(b4, f, alloc):
             sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None) or C.navi_sprite(f, alloc, lst // 4, num)
             if sp is None:
                 room = X4.rounded(len(raw), X4.ROOM_ATTACK)
+                X4.lists_room(alloc)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)
                 alloc.list4 += 1

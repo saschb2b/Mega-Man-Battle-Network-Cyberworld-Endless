@@ -312,6 +312,37 @@ COMPANION_MODES = ((0x080CC464, 2, 4, 0), (0x080CCD2E, 2, 4, 0))   # (the movs, 
 # place: FireMan's companion's, WindMan's companions' (the first kind's 0x5C, its state 4 CUT))
 
 
+def init_tail(f, w, done, std):
+    """its init's own work past BN6's actor init's, where its init calls routines of its own block (BurnerMan's flames,
+    0x080BDA30; MetalMan's gears): the instructions from the one past its last call BN6's actor init makes for it (its
+    collision's set-up or flags) to its end, run at its spawn's end entered there (XnInit.tail: the spawn's end's shim
+    pushes what its prologue pushed and a return, which its own pop takes); walked as one of its roots, its call of its
+    update aimed at BN6's nullsub as the families' are (BN6's Navi frame at its spawn's end runs it). The address, 0 none"""
+    f.init_tail, f.tail_push = 0, 0
+    sites = sorted(w.bls)
+    own = [a for a in sites if f.lo <= w.bls[a] < f.hi and w.bls[a] != f.update and a not in done]
+    if not own:
+        return 0
+    engine = [a for a in sites if a < own[0] and (a in done or w.bls[a] in std)]
+    if not engine:
+        f.decide('init', f'{own[0]:08X}: its init\'s own calls before any of BN6\'s actor init\'s work')
+        return 0
+    tail = engine[-1] + 4
+    late = [a for a in sites if a > tail and a not in done and w.bls[a] in std]
+    first = w.insns[min(w.insns)]
+    if late or first.form != 'push' or not first.text.startswith('push {') or 'lr' not in first.text:
+        f.decide('init', f'{tail:08X}: its init\'s tail calls BN6\'s actor init\'s work again ({late}) or its prologue is not a push of lr')
+        return 0
+    regs = [r.strip() for r in first.text[first.text.index('{') + 1:first.text.index('}')].split(',')]
+    f.tail_push = sum(1 << int(r[1:]) for r in regs if r.startswith('r'))
+    f.init_tail = tail
+    f.init4 = getattr(f, 'init4', None) or dict(at_end=False, anim=False, sprite=False, frame=False, home=False)
+    f.init4['tail'] = tail
+    f.notes.append(f'{tail:08X}: its init\'s own work past BN6\'s actor init\'s (its calls {", ".join(f"{w.bls[a]:08X}" for a in own)}) run at '
+                   f'its spawn\'s end, entered there (XnInit.tail, its prologue\'s {regs} pushed by the shim)')
+    return tail
+
+
 def cut_before(b4, f):
     """the routines CUT, walked aside so that the walk of its code passes them by"""
     f.cut = {a: T.walk(b4, a, limit=0x80) for a in CUT if any(m['lo'] <= a < m['hi'] for m in f.moved1.values())}
@@ -351,9 +382,12 @@ def c_init(f, n):
         f'{s["ty"]:#x}{f", BN4 r4 {s["r4"]:#x}" if s["r4"] not in (None, s["r4_6"]) else ""} */\n' for s in f.spawns)
     spawns = f'{n}_spawns' if f.spawns else 'NULL'
     text = f'static const XnSpawn {n}_spawns[] = {{\n{rows}}};\n' if f.spawns else ''
-    flags = ', '.join('true' if i[k] else 'false' for k in ('at_end', 'anim', 'sprite', 'frame') + (('home',) if i['home'] else ()))
+    tail = i.get('tail')
+    flags = ', '.join('true' if i[k] else 'false' for k in ('at_end', 'anim', 'sprite', 'frame') + (('home',) if i['home'] or tail else ()))
+    if tail:
+        flags += f', OWN(0x{tail | 1:08X}), 0x{f.tail_push:02X}'
     text += (f'static const XnInit {n}_init = {{ {spawns}, {len(f.spawns)}, {flags} }};   /* (at its spawn\'s end, its +0x11, its '
-             f'sprite, its update{", its panel at its +6" if i["home"] else ""}) */\n')
+             f'sprite, its update{", its panel at its +6" if i["home"] else ""}{", its init\'s tail and its pushes" if tail else ""}) */\n')
     return text, f'\t.init = &{n}_init,   /* (its init\'s work past BN6\'s actor init: xnavi_init.c) */'
 
 
@@ -373,10 +407,10 @@ def navi_pres(f, uw):
         if v is not None:
             w = T.walk(f.b4, t, region=(f.lo, f.hi))
             cur = {i.f[0] for i in w.insns.values() if i.form == 'ldrb' and tuple(i.f[1:]) == (5, 9)}
-            if not any(i.form == 'cmp' and len(i.f) == 2 and 0 in i.f and set(i.f) & cur for i in w.insns.values()):
-                f.decide('pre-step', f'{site:08X}: its call of {t:08X} with r0 {v:#x}, which it reads as no CurAction')
-                continue
-            v = v + 2 if v >= 6 else v
+            if any(i.form == 'cmp' and len(i.f) == 2 and 0 in i.f and set(i.f) & cur for i in w.insns.values()):
+                v = v + 2 if v >= 6 else v
+            # (else a number of its own, as it is: BurnerMan's 0x60 and 0x68, the words of his flames' slots, 0x080BDD5E's
+            # adds r4,r0,r5)
         f.pres.append((t, v))
     f.notes.append('its update calls ' + ', '.join(f'{t:08X}' + ('' if v is None else f' (r0 BN6\'s CurAction {v})') for t, v in f.pres) +
                    ' between its pre-step and its runner: BN6\'s hook A (table 2, which BN6\'s Navi frame runs after its pre-step, '

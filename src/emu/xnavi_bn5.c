@@ -4580,5 +4580,342 @@ static const XNavi bn5_meddy = {
 	.sprite_of = 6,
 	.sounds = meddy_sounds, .nsounds = (int)(sizeof meddy_sounds / sizeof *meddy_sounds),
 };
-const XNavi *const xnavi_bn5[] = { &bn5_toadman, &bn5_knightman, &bn5_shadowman, &bn5_numberman, &bn5_tomahawkman, &bn5_colonel, &bn5_thedarksoul, &bn5_blizzardman, &bn5_shademan, &bn5_cosmoman, &bn5_cloudman, &bn5_napalmman, &bn5_gyroman, &bn5_searchman, &bn5_meddy };
+/* ---- GridMan (BN5's: AI 18 there, its ids 0x167, 0x168, 0x169, 0x16a), as Navi AI 44 with ids 0x3f0-0x3f3 ---- */
+
+static const XvBlock gridman_blocks[] = {
+	{ 0x08100EC0, 0x08101DB4, XN_NEBULA_CODE + 0x3000, 0xDAD129B2u },
+	{ 0x08016B96, 0x08016BBC, XN_NEBULA_CODE + 0x3F02, 0xA53A3BEFu },
+	{ 0x080BCAC4, 0x080BD1D0, XN_NEBULA_CODE + 0x4000, 0xDC63A647u },
+	{ 0x080C5386, 0x080C53DE, XN_NEBULA_CODE + 0x4802, 0x4A1B50AFu },
+	{ 0x080D8F1C, 0x080D976C, XN_NEBULA_CODE + 0x4900, 0x2D99FC1Fu },
+	{ 0x080DF714, 0x080DF81C, XN_NEBULA_CODE + 0x5200, 0xF62378E1u },
+	{ 0x080DF900, 0x080DFA00, XN_NEBULA_CODE + 0x5400, 0x21E9D2AEu },
+	{ 0x080E6E24, 0x080E6EDC, XN_NEBULA_CODE + 0x5500, 0xE6B7F0C0u },
+};
+static const XvData gridman_data[] = {
+	{ 0x08100EC0, 0x08100EF0, XV_ZERO },
+	{ 0x08100F06, 0x08100F08, XV_RAW },
+	{ 0x08100F08, 0x08100F0C, XV_POOL },
+	{ 0x08100F0C, 0x08100F14, XV_TABLE },
+	{ 0x08101004, 0x0810100C, XV_POOL },
+	{ 0x0810100C, 0x08101010, XV_RAW },
+	{ 0x08101090, 0x08101094, XV_POOL },
+	{ 0x08101094, 0x08101098, XV_RAW },
+	{ 0x08101098, 0x0810109C, XV_POOL },
+	{ 0x0810111A, 0x0810111C, XV_RAW },
+	{ 0x0810111C, 0x08101120, XV_POOL },
+	{ 0x08101120, 0x08101128, XV_RAW },
+	{ 0x0810119C, 0x081011A0, XV_POOL },
+	{ 0x081011A0, 0x081011A4, XV_RAW },
+	{ 0x081011AE, 0x081011B0, XV_RAW },
+	{ 0x081011B0, 0x081011B4, XV_POOL },
+	{ 0x081011B4, 0x081011B8, XV_RAW },
+	{ 0x081011C2, 0x081011C4, XV_RAW },
+	{ 0x081011C4, 0x081011C8, XV_POOL },
+	{ 0x081011C8, 0x081011CC, XV_RAW },
+	{ 0x081011D6, 0x081011D8, XV_RAW },
+	{ 0x081011D8, 0x081011DC, XV_POOL },
+	{ 0x081011DC, 0x081011E0, XV_RAW },
+	{ 0x081011EA, 0x081011EC, XV_RAW },
+	{ 0x081011EC, 0x081011F0, XV_POOL },
+	{ 0x081011F0, 0x081011F4, XV_RAW },
+	{ 0x08101216, 0x08101218, XV_RAW },
+	{ 0x08101218, 0x08101228, XV_POOL },
+	{ 0x08101228, 0x08101230, XV_RAW },
+	{ 0x08101230, 0x08101238, XV_RAW },
+	{ 0x08101238, 0x08101240, XV_RAW },
+	{ 0x08101240, 0x08101248, XV_RAW },
+	{ 0x08101248, 0x0810124C, XV_POOL },
+	{ 0x0810124C, 0x08101250, XV_RAW },
+	{ 0x0810129A, 0x0810129C, XV_RAW },
+	{ 0x0810129C, 0x081012B0, XV_POOL },
+	{ 0x081012BE, 0x081012C0, XV_RAW },
+	{ 0x081012C0, 0x081012C4, XV_POOL },
+	{ 0x081012C4, 0x081012D0, XV_TABLE },
+	{ 0x0810131A, 0x0810131C, XV_RAW },
+	{ 0x0810131C, 0x08101320, XV_POOL },
+	{ 0x08101320, 0x08101330, XV_RAW },
+	{ 0x081013A4, 0x081013A8, XV_POOL },
+	{ 0x081013A8, 0x081013B8, XV_TABLE },
+	{ 0x081014C4, 0x081014C8, XV_POOL },
+	{ 0x081014C8, 0x081014D8, XV_RAW },
+	{ 0x081014D8, 0x081014E0, XV_POOL },
+	{ 0x08101558, 0x0810155C, XV_POOL },
+	{ 0x0810155C, 0x08101574, XV_TABLE },
+	{ 0x081015B4, 0x081015B8, XV_POOL },
+	{ 0x081015B8, 0x081015C8, XV_RAW },
+	{ 0x081016B6, 0x081016B8, XV_RAW },
+	{ 0x081016B8, 0x081016BC, XV_POOL },
+	{ 0x081016BC, 0x081016D4, XV_TABLE },
+	{ 0x08101714, 0x08101718, XV_POOL },
+	{ 0x08101718, 0x08101728, XV_RAW },
+	{ 0x0810181E, 0x08101820, XV_RAW },
+	{ 0x08101820, 0x08101824, XV_POOL },
+	{ 0x08101824, 0x08101844, XV_TABLE },
+	{ 0x0810188C, 0x08101890, XV_POOL },
+	{ 0x08101890, 0x081018A0, XV_RAW },
+	{ 0x08101A72, 0x08101A74, XV_RAW },
+	{ 0x08101A74, 0x08101A7C, XV_POOL },
+	{ 0x08101A7C, 0x08101A84, XV_RAW },
+	{ 0x08101A84, 0x08101A88, XV_POOL },
+	{ 0x08101ADC, 0x08101AE0, XV_POOL },
+	{ 0x08101AE0, 0x08101AE8, XV_RAW },
+	{ 0x08101AE8, 0x08101AEC, XV_POOL },
+	{ 0x08101AEC, 0x08101AF4, XV_RAW },
+	{ 0x08101C08, 0x08101C0C, XV_POOL },
+	{ 0x08101C0C, 0x08101C14, XV_RAW },
+	{ 0x08101C14, 0x08101C18, XV_POOL },
+	{ 0x08101C18, 0x08101C1C, XV_RAW },
+	{ 0x08101C3A, 0x08101C3C, XV_RAW },
+	{ 0x08101C3C, 0x08101C40, XV_POOL },
+	{ 0x08101C40, 0x08101C44, XV_RAW },
+	{ 0x08101CBE, 0x08101CC0, XV_RAW },
+	{ 0x08101CC0, 0x08101CC4, XV_POOL },
+	{ 0x08101CC4, 0x08101D34, XV_RAW },
+	{ 0x08101D34, 0x08101D38, XV_POOL },
+	{ 0x08101D38, 0x08101D48, XV_RAW },
+	{ 0x08101D48, 0x08101D4C, XV_POOL },
+	{ 0x08101D4C, 0x08101D5C, XV_RAW },
+	{ 0x08101DB2, 0x08101DB4, XV_RAW },
+	{ 0x080BCAD6, 0x080BCAD8, XV_RAW },
+	{ 0x080BCAD8, 0x080BCADC, XV_POOL },
+	{ 0x080BCADC, 0x080BCAEC, XV_TABLE },
+	{ 0x080BCB6E, 0x080BCB70, XV_RAW },
+	{ 0x080BCB70, 0x080BCB74, XV_POOL },
+	{ 0x080BCB74, 0x080BCB7C, XV_RAW },
+	{ 0x080BCC00, 0x080BCC04, XV_POOL },
+	{ 0x080BCC04, 0x080BCC18, XV_TABLE },
+	{ 0x080BCC18, 0x080BCC1C, XV_POOL },
+	{ 0x080BCC54, 0x080BCC58, XV_POOL },
+	{ 0x080BCC58, 0x080BCC70, XV_TABLE },
+	{ 0x080BCCFC, 0x080BCD00, XV_POOL },
+	{ 0x080BCD00, 0x080BCD04, XV_RAW },
+	{ 0x080BCD80, 0x080BCD84, XV_POOL },
+	{ 0x080BCD84, 0x080BCD94, XV_TABLE },
+	{ 0x080BCE78, 0x080BCE7C, XV_POOL },
+	{ 0x080BCE7C, 0x080BCE8C, XV_RAW },
+	{ 0x080BCE8C, 0x080BCE90, XV_POOL },
+	{ 0x080BCFB4, 0x080BCFB8, XV_POOL },
+	{ 0x080BCFB8, 0x080BCFC0, XV_RAW },
+	{ 0x080BCFFA, 0x080BCFFC, XV_RAW },
+	{ 0x080BCFFC, 0x080BD000, XV_POOL },
+	{ 0x080BD000, 0x080BD008, XV_TABLE },
+	{ 0x080BD0AC, 0x080BD100, XV_RAW },
+	{ 0x080BD100, 0x080BD104, XV_POOL },
+	{ 0x080BD104, 0x080BD114, XV_RAW },
+	{ 0x080BD190, 0x080BD194, XV_POOL },
+	{ 0x080BD194, 0x080BD1C0, XV_RAW },
+	{ 0x080BD1C0, 0x080BD1C4, XV_POOL },
+	{ 0x080BD1C4, 0x080BD1CC, XV_RAW },
+	{ 0x080BD1CC, 0x080BD1D0, XV_POOL },
+	{ 0x080D8F2E, 0x080D8F30, XV_RAW },
+	{ 0x080D8F30, 0x080D8F34, XV_POOL },
+	{ 0x080D8F34, 0x080D8F40, XV_TABLE },
+	{ 0x080D8FE4, 0x080D8FE8, XV_POOL },
+	{ 0x080D8FE8, 0x080D8FF4, XV_TABLE },
+	{ 0x080D9192, 0x080D9194, XV_RAW },
+	{ 0x080D9194, 0x080D9198, XV_POOL },
+	{ 0x080D9198, 0x080D91B8, XV_RAW },
+	{ 0x080D92F4, 0x080D92F8, XV_POOL },
+	{ 0x080D92F8, 0x080D9300, XV_RAW },
+	{ 0x080D9300, 0x080D9304, XV_POOL },
+	{ 0x080D9304, 0x080D9314, XV_RAW },
+	{ 0x080D9314, 0x080D9318, XV_POOL },
+	{ 0x080D9318, 0x080D9328, XV_RAW },
+	{ 0x080D9328, 0x080D932C, XV_POOL },
+	{ 0x080D932C, 0x080D9334, XV_RAW },
+	{ 0x080D9334, 0x080D9340, XV_POOL },
+	{ 0x080D9352, 0x080D9354, XV_RAW },
+	{ 0x080D9354, 0x080D9358, XV_POOL },
+	{ 0x080D9358, 0x080D9364, XV_TABLE },
+	{ 0x080D93E6, 0x080D93E8, XV_RAW },
+	{ 0x080D93E8, 0x080D93EC, XV_POOL },
+	{ 0x080D93EC, 0x080D93FC, XV_TABLE },
+	{ 0x080D9458, 0x080D945C, XV_POOL },
+	{ 0x080D95A0, 0x080D95A4, XV_POOL },
+	{ 0x080D95A4, 0x080D95AC, XV_RAW },
+	{ 0x080D95AC, 0x080D95B4, XV_POOL },
+	{ 0x080D9656, 0x080D9658, XV_RAW },
+	{ 0x080D9658, 0x080D965C, XV_POOL },
+	{ 0x080D965C, 0x080D9664, XV_RAW },
+	{ 0x080D969A, 0x080D969C, XV_RAW },
+	{ 0x080D969C, 0x080D96A0, XV_POOL },
+	{ 0x080D96A0, 0x080D96B0, XV_RAW },
+	{ 0x080D96E2, 0x080D96E4, XV_RAW },
+	{ 0x080D96E4, 0x080D96E8, XV_POOL },
+	{ 0x080D96E8, 0x080D96F0, XV_RAW },
+	{ 0x080D974A, 0x080D974C, XV_RAW },
+	{ 0x080D974C, 0x080D9750, XV_POOL },
+	{ 0x080D9750, 0x080D9758, XV_RAW },
+	{ 0x080D9758, 0x080D976C, XV_POOL },
+	{ 0x080DF726, 0x080DF728, XV_RAW },
+	{ 0x080DF728, 0x080DF72C, XV_POOL },
+	{ 0x080DF72C, 0x080DF738, XV_TABLE },
+	{ 0x080DF814, 0x080DF81C, XV_POOL },
+	{ 0x080DF912, 0x080DF914, XV_RAW },
+	{ 0x080DF914, 0x080DF918, XV_POOL },
+	{ 0x080DF918, 0x080DF924, XV_TABLE },
+	{ 0x080E6E36, 0x080E6E38, XV_RAW },
+	{ 0x080E6E38, 0x080E6E3C, XV_POOL },
+	{ 0x080E6E3C, 0x080E6E48, XV_TABLE },
+};
+static const XvPair gridman_calls[] = {
+	{ 0x08016BBC, 0x0801A0BA },   /* search, SAME */
+	{ 0x080165E4, 0x08019F44 },   /* project:families, DIFF (audited) */
+	{ 0x080187A2, 0x0801BCA6 },   /* map:bytes, SAME */
+	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
+	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
+	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
+	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
+	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
+	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
+	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
+	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
+	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
+	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
+	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
+	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
+	{ 0x08008A78, 0x0800A098 },   /* project:cangard, SAME */
+	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
+	{ 0x08018654, 0x0801BB1C },   /* map:calls, DIFF (audited) */
+	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
+	{ 0x08018676, 0x0801BB46 },   /* map:calls, LAYOUT */
+	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
+	{ 0x08016C4C, 0x0801A15C },   /* project:cangard, SAME */
+	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
+	{ 0x0800AFB0, 0x0800C8F8 },   /* map:calls, LAYOUT */
+	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
+	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
+	{ 0x08016B90, 0x0801A07C },   /* project:cangard, SAME */
+	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
+	{ 0x080DFFD2, 0x080E1932 },   /* project:cangard, SAME */
+	{ 0x0800C758, 0x0800E2EC },   /* map:bytes, SAME */
+	{ 0x080138AE, 0x08016C4E },   /* map:calls, DIFF (audited) */
+	{ BN5_SPAWN_1, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x0800CA62, 0x0800E5E2 },   /* map:bytes, SAME */
+	{ 0x0800B5DE, 0x0800CFDC },   /* map:bytes, SAME */
+	{ 0x0800C6C0, 0x0800E2C0 },   /* map:calls+bytes, SAME */
+	{ 0x0800CE1E, 0x0800EB9E },   /* map:calls, LAYOUT */
+	{ 0x0800C7CC, 0x0800E3BE },   /* map:calls, DIFF (audited) */
+	{ 0x08002C44, 0x08002DD8 },   /* map:bytes, SAME */
+	{ 0x08002C1C, 0x08002DB0 },   /* map:bytes, SAME */
+	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
+	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
+	{ 0x0800B290, 0x0800CBD8 },   /* map:bytes, SAME */
+	{ 0x080090E8, 0x0800A8F8 },   /* map:bytes, SAME */
+	{ 0x080EA08C, XN_STUB_ZERO },   /* a stub: what BN6's engine lacks */
+	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
+	{ 0x080012CC, 0x08001330 },   /* map:bytes, SAME */
+	{ 0x080138EA, 0x08016C8A },   /* project:cangard, DIFF (audited) */
+	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x0800B334, 0x0800CC72 },   /* map:bytes, SAME */
+	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
+	{ 0x0800B494, 0x0800CE64 },   /* map:bytes, SAME */
+	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
+	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
+	{ 0x08030E1C, 0x080302A8 },   /* map:calls, SAME */
+	{ 0x080C4EAE, 0x080C6C16 },   /* map:calls+bytes, SAME */
+	{ BN5_SPAWN_4, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x0800DBBC, 0x0800FE36 },   /* map:bytes, SAME */
+	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
+	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
+	{ 0x0800F210, 0x08011690 },   /* map:calls+bytes, DIFF (audited) */
+	{ 0x0801A5BC, 0x0801DC7C },   /* map:calls, DIFF (audited) */
+	{ 0x0800DBAE, 0x0800FE28 },   /* map:bytes, SAME */
+	{ 0x0800DB98, 0x0800FE12 },   /* map:bytes, SAME */
+	{ 0x0800F29E, 0x08011714 },   /* project:cangard, DIFF (audited) */
+	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
+	{ 0x0800CB20, 0x0800E708 },   /* map:bytes, SAME */
+	{ 0x080C4E72, 0x080C6BDA },   /* map:bytes, SAME */
+	{ 0x08018838, 0x0801BD3C },   /* map:bytes, SAME */
+};
+static const XvPair gridman_words[] = {
+	{ 0x0800325D, 0x08003459 },
+	{ 0x080138EB, 0x08016C8B },
+};
+static const XvImm gridman_imms[] = {
+	{ 0x080BCAF8, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* its sprite: list 2 0x12 in BN5, list 2 0x32 in BN6 */
+	{ 0x080BCBA4, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080BCBBA, THUMB_MOVS, 1, 0, 0xB, 0xD },   /* its parent's CurAction 11 compared: BN6's 13 */
+	{ 0x080BCDCC, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080BCE70, THUMB_MOVS, 4, 0, 0x2, 0xA2 },   /* its effect: 0x2 in BN5, 0xa2 in BN6 */
+	{ 0x080BD05E, THUMB_MOVS, 1, 0, 0xB, 0xD },   /* its parent's CurAction 11 compared: BN6's 13 */
+	{ 0x080D8F4C, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* its sprite: list 2 0x12 in BN5, list 2 0x32 in BN6 */
+	{ 0x080D936C, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* its sprite: list 2 0x12 in BN5, list 2 0x32 in BN6 */
+	{ 0x080D951C, THUMB_MOVS, 0, 0, 0x5F, 0xB1 },   /* its effect: 0x5f in BN5, 0xb1 in BN6 */
+	{ 0x080D9594, THUMB_MOVS, 4, 0, 0x14, 0xA0 },   /* its effect: 0x14 in BN5, 0xa0 in BN6 */
+	{ 0x080DF7F8, THUMB_MOVS, 1, 0, 0x8, 0xA },   /* its parent's CurAction 8 compared: BN6's 10 */
+	{ 0x080DF9C8, THUMB_MOVS, 1, 0, 0xB, 0xD },   /* its parent's CurAction 11 compared: BN6's 13 */
+	{ 0x080E6E62, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* its sprite: list 2 0x12 in BN5, list 2 0x32 in BN6 */
+	{ 0x080E6EAC, THUMB_MOVS, 1, 0, 0xB, 0xD },   /* its parent's CurAction 11 compared: BN6's 13 */
+	{ 0x08100F58, THUMB_MOVS, 0, 0, 0xB, 0xD },   /* CurAction 11 (setAttack0): BN6's two status states before the family's own */
+	{ 0x08100F92, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 (setAttack0): BN6's two status states before the family's own */
+	{ 0x08100FDE, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
+	{ 0x08100FFC, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack4): BN6's two status states before the family's own */
+	{ 0x08101076, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
+	{ 0x081013F6, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x081014BC, THUMB_MOVS, 4, 0, 0x2, 0xA2 },   /* its effect: 0x2 in BN5, 0xa2 in BN6 */
+	{ 0x08101944, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x08101DAA, THUMB_MOVS, 4, 0, 0x2, 0xA2 },   /* its effect: 0x2 in BN5, 0xa2 in BN6 */
+};
+static const XvNumber gridman_numbers[] = {
+	{ 0x080BCC18, 0x0C800000, 0x0C800000 },
+	{ 0x080BCE8C, 0x0C800000, 0x0C800000 },
+	{ 0x080D95AC, 0x0A050001, 0x0A050001 },
+	{ 0x081014DC, 0x0C800000, 0x0C800000 },
+	{ 0x08101A84, 0x0C800000, 0x0C800000 },
+};
+static const XvRef gridman_states[] = {
+	BN6(0x08016381), BN6(0x08017889), BN6(0x080170C5), BN6(0x080174FF), BN6(0x080175B9), BN6(0x080178B7), BN6(0x08017689), BN6(0x08017769), OWN(0x08100EF1), OWN(0x081012B1), OWN(0x08101397), OWN(0x0810154B), OWN(0x081016A9), OWN(0x08101811),
+};
+static const XvSprite gridman_sprites[] = {
+	{ 5, 0x02, 5, 0xA2, XN_SHARED_ART + 0x7000, 0x1800 },
+	{ 5, 0x0D, 5, 0xA0, XN_SHARED_ART + 0x2000, 0x1800 },
+	{ 2, 0x12, 2, 0x32, FREE_NEBULA_SPRITES + 0x0, 0x8800 },
+};
+static const XvId gridman_effects[] = { { 0x02, 0xA2 }, { 0x14, 0xA0 }, { 0x5F, 0xB1 } };
+static const XvType gridman_types[] = { { 1, 0x18, XV_TYPE_MOVED }, { 3, 0x94, XV_TYPE_MOVED }, { 3, 0x95, XV_TYPE_MOVED }, { 3, 0xC6, XV_TYPE_MOVED }, { 3, 0xC8, XV_TYPE_MOVED }, { 4, 0x58, XV_TYPE_MOVED } };
+static const XnSound gridman_sounds[] = {
+	{ 0x080BCDFE, 0x00000000, 0x0E3 },   /* BN6's song 0xe3 another */
+	{ 0x0810144E, 0x00000000, 0x0E3 },   /* BN6's song 0xe3 another */
+	{ 0x08101A5A, 0x00000000, 0x0E4 },   /* BN6's song 0xe4 another */
+	{ 0x08101AD0, 0x00000000, 0x070 },   /* BN6's song 0x70 another */
+};
+
+static const XNavi bn5_gridman = {
+	.code = {
+		.name = "GridMan (BN5's)",
+		.game = XROM_BN5_COLONEL_US,
+		.src_ai = 18,
+		.ai = 44,
+		.first_id = XN_MORE_IDS + 0xC,
+		.home = XN_NEBULA_HOMES + 0x800,
+		.blocks = gridman_blocks, .nblocks = (int)(sizeof gridman_blocks / sizeof *gridman_blocks),
+		.data = gridman_data, .ndata = (int)(sizeof gridman_data / sizeof *gridman_data),
+		.calls = gridman_calls, .ncalls = (int)(sizeof gridman_calls / sizeof *gridman_calls),
+		.words = gridman_words, .nwords = (int)(sizeof gridman_words / sizeof *gridman_words),
+		.imms = gridman_imms, .nimms = (int)(sizeof gridman_imms / sizeof *gridman_imms),
+		.numbers = gridman_numbers, .nnumbers = (int)(sizeof gridman_numbers / sizeof *gridman_numbers),
+		.states = gridman_states, .nstates = (int)(sizeof gridman_states / sizeof *gridman_states),
+		.hooks = { OWN(0x08101129), BN6(0x080F3BE9), OWN(0x0810109D), OWN(0x08101151), OWN(0x08101151), OWN(0x08101151), OWN(0x08101151), OWN(0x08101151) },
+		.struct1 = 0x08100DD4, .struct2 = 0x08100DDC,
+		.names = { 0x167, 0x168, 0x169, 0x16A, 0x16B, 0x16C },
+		.ice = 1,
+		.traits = { .laid = true, .mode = 0x12, .element = 0, .weakness = 0, .shadow = false },
+		.sprites = gridman_sprites, .nsprites = (int)(sizeof gridman_sprites / sizeof *gridman_sprites),
+		.effects = gridman_effects, .neffects = (int)(sizeof gridman_effects / sizeof *gridman_effects),
+		.types = gridman_types, .ntypes = (int)(sizeof gridman_types / sizeof *gridman_types),
+	},
+	.versions = 4,
+	.prestep = BN6(0x0801AAC1), .hook_a = BN6(0x080F3BE9),
+	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
+	.sprite_of = 18,
+	.sounds = gridman_sounds, .nsounds = (int)(sizeof gridman_sounds / sizeof *gridman_sounds),
+};
+const XNavi *const xnavi_bn5[] = { &bn5_toadman, &bn5_knightman, &bn5_shadowman, &bn5_numberman, &bn5_tomahawkman, &bn5_colonel, &bn5_thedarksoul, &bn5_blizzardman, &bn5_shademan, &bn5_cosmoman, &bn5_cloudman, &bn5_napalmman, &bn5_gyroman, &bn5_searchman, &bn5_meddy, &bn5_gridman };
 const int xnavi_bn5_count = (int)(sizeof xnavi_bn5 / sizeof *xnavi_bn5);

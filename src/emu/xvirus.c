@@ -112,10 +112,10 @@ static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
 	return d && (d->kind == XV_RAW || d->start == v);
 }
 
-/* (the Navis' code rooms: BN5's, the Darkloids' past their art before the chips' (XN_MORE), Team ProtoMan's, BN4's) */
+/* (the Navis' code rooms: BN5's, the Darkloids' past their art before the chips' (XN_MORE), Team ProtoMan's, BN4's, Nebula's) */
 static bool navi_room(uint32_t to) {
 	return (to >= FREE_NAVI_CODE && to < FREE_CHIP_CODE) || (to >= FREE_TEAM_NAVI_CODE && to < FREE_TEAM_NAVI_ART) ||
-		(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART);
+		(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART) || (to >= FREE_NEBULA_NAVI_CODE && to < FREE_NEBULA_NAVI_ART);
 }
 
 static uint32_t resolve(uint32_t target, void *user) {
@@ -130,7 +130,7 @@ static uint32_t resolve(uint32_t target, void *user) {
 			 * xnavi_install.c, or the moved objects'; a BN4 Navi's shim in its code's room, its summon's (xnavi_init.c); or a stub or a helper of the installer's region, xvirus_code_stage's: the
 			 * chips', xchips_code.h) */
 			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
-			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && to != XV_FIGHT_FLAGS &&
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && !xvirus_dispatch_is_gate(to) &&
 				!navi_room(to) && !own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
