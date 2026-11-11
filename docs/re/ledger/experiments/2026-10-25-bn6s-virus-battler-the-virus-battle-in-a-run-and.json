@@ -1,0 +1,8 @@
+{
+  "feature": "BN6's Virus Battler",
+  "date": "2026-10-25",
+  "name": "The Virus Battle in a run, and a run's rare on the card",
+  "result": "In the engine (a local change: the forced battle's record replaced by 0x080B0880): the VIRUS LIST, ErthDrgn + Mettaur placed, YOU WIN!, back on the layer with MegaMan's 140 HP. With flag 0x1D8 set, a forced PiranhaRare (id 0x0B) deleted by the autopilot ended in \"You got new Virus Data:\\\"Piranha\\\"!\" and the next VIRUS LIST showed Mettaur, Piranha and dashes; without the flag, no chat.",
+  "meaning": "A run can host BN6's own Virus Battler through the engine's forced battle, and its rares register as BN6's do once the card's flag is set.",
+  "link": "../world/level-design/overview.md"
+}

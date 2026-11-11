@@ -1,0 +1,58 @@
+[
+ {
+  "name": "PanlSht1's row's power another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "08C0602E:0032"
+  ],
+  "what": "the registry's record of BN4's PanlSht1 (559 at CHIPS_RECORDS) with power 50 where BN4's record holds 100: the Mettaur left 90 HP where BN4's shot leaves it 40"
+ },
+ {
+  "name": "PanlSht1's row's subfamily another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "08C06020:A7:1"
+  ],
+  "what": "the registry's record of BN4's PanlSht1 naming BN6's grown support routine 0xA7, a stub, where the row gives it the unit's 0xA6: no object, no shot"
+ },
+ {
+  "name": "PanlSht1's row's pattern another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "08C06024:01:1"
+  ],
+  "what": "the registry's record of BN4's PanlSht1 with its first parameter 1, PanlSht2's row of panels, where BN4's record holds 0: two shots where BN4's PanlSht1 fires one"
+ },
+ {
+  "name": "the panel shot's type another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "080DCC2E:20CB"
+  ],
+  "what": "the shot's spawner's copy (BN4 0x080DCC2A; its movs r0,#0x7b at 0x080DCC2E, the recipe's 0xCA) naming the dispatch's 0xCB, a number no recipe moved a type to: the object freed as it first runs, no shot, no hit"
+ },
+ {
+  "name": "the panel shot's hit read at BN4's place",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "080DCB72:6D41"
+  ],
+  "what": "the shot's update's copy (BN4 0x080DCB66) reading what its collision data struck at BN4's +0x54 (ldr r1,[r0,#0x54] at 0x080DCB72) where the recipe gives BN6's +0x70: the shot does not end on its hit"
+ },
+ {
+  "name": "the panel shot's panel another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "080DCB12:7CA9"
+  ],
+  "what": "the shot's init's copy breaking the panel at its column and its column again (ldrb r1,[r5,#0x13] at BN4 0x080DCB12 made ldrb r1,[r5,#0x12]: panel 3,3) where BN4's breaks the panel it is made of, 3,2"
+ },
+ {
+  "name": "the panel shot's launch's sound another",
+  "spec": "bn4_chip_panlsht1",
+  "poke": [
+   "088EF304:01DA"
+  ],
+  "what": "the shim of the unit's home that plays the shot's launch (its first, at XC4_HOMES + 0x300: its slot's word) naming the grown table's slot 0x1DA, its lift's sound, where the recipe gives 0x1DB: BN4's 0x1C6 twice where it plays 0x1C6 and 0xBF"
+ }
+]

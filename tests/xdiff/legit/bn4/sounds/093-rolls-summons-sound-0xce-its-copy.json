@@ -1,0 +1,13 @@
+{
+ "bn4": "0xCE",
+ "bn6": "0x33",
+ "clock": "state",
+ "foes": [
+  "0x80",
+  "0x81",
+  "0x82",
+  "0x83"
+ ],
+ "what": "Roll's summon's sound 0xCE, its copy",
+ "why": "Played by her summon (BN4: BN4_SPAWN_ENEMY's movs r0,#0xce at 0x080F0196, its bl to PlaySoundEffect at 0x080F0198, where an enemy was spawned; BN6: her summon's shim, src/emu/xnavi_init.c and xvirus_shim_summon, movs r0,#0x33 and its call of BN6's PlaySoundEffect where BN6_SPAWN_ENEMY_1 spawned one), a state's: BN4's song 0xCE copied into the pool's second slot, BN6's empty 0x33 (the owner's call 11). In her battles alone (foes)"
+}

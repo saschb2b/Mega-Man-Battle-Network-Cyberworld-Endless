@@ -1,0 +1,10 @@
+[
+ {
+  "name": "BlakWing's object type",
+  "spec": "chip_blakwing",
+  "poke5": [
+   "080E6AB8:2053"
+  ],
+  "what": "BlakWing's object spawned as BN5's fourth kind's 0x53 (movs r0,#0x54 at BN5's 0x080E6AB8, written at its copy) where its own moved 0x54 runs: no wing, the foe keeps its 280"
+ }
+]

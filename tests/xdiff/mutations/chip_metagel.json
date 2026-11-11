@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a moved chip's sound's slot",
+  "spec": "chip_metagel",
+  "poke5": [
+   "080CE170:2053"
+  ],
+  "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x59, movs r0,#0x59 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one (0xE4's, which no chip copies): a song missing"
+ }
+]

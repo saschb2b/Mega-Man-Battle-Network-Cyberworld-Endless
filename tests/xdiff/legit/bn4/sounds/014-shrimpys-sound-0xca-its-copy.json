@@ -1,0 +1,7 @@
+{
+ "bn4": "0xCA",
+ "bn6": "0x3B",
+ "clock": "state",
+ "what": "Shrimpy's sound 0xCA, its copy",
+ "why": "Played by Shrimpy's code (BN4: movs r0,#0xca at 0x080D2D24, its bl to PlaySoundEffect at 0x080D2D26; BN6: its copy's movs r0,#0x3b at 0x08B7DD5C, the recipe's immediate, its bl at 0x08B7DD5E through its veneer to BN6's), a state's: BN4's song 0xCA copied into BN6's empty slot 0x3B on BN4's player 8 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); BN4's first at t86, BN6's at t87 in shrimpy_v3, each on player 8. BN6's own song 0xCA is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+}

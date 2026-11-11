@@ -1,0 +1,18 @@
+[
+ {
+  "name": "WhitWeb1's row's power another",
+  "spec": "bn4_chip_whitweb1",
+  "poke": [
+   "08C062C2:0014"
+  ],
+  "what": "the registry's record of BN4's WhitWeb1 (574 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur on its row left 120 HP where BN4's web leaves it 100"
+ },
+ {
+  "name": "The chips' page's entry of WhitWeb's web blank",
+  "spec": "bn4_chip_whitweb1",
+  "poke": [
+   "0893E6F4:08B45F01"
+  ],
+  "what": "the page's entry for the third kind's 0x3D the stray's routine where WhitWeb's unit set its copy: the web is let go as it first runs, no web lies on the row and the Mettaur keeps its 140 HP"
+ }
+]

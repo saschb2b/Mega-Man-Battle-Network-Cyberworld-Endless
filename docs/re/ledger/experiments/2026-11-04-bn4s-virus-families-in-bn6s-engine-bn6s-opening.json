@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's virus families in BN6's engine",
+  "date": "2026-11-04",
+  "name": "BN6's opening a frame longer, the allowance gone",
+  "result": "python3 tools/xdiff.py over billy, spikey, shrimpy, walla, elmperor and cirkill v1-v3, cangard_v1, handi_v1, bn4_mettaur_control and bn4_mettaur_broken, with legit.json's bn4 align (each BN4-against-BN6 run printing xdiff: poke 080163fc (080163fc) = 2003, unrelocated) and no opening allowance: all 22 PASS, bn4_mettaur_broken at t202. Without the alignment (--poke 080163FC:2002:2) spikey_v1 and shrimpy_v3 FAIL at t1 (+0x91 BN4 5 | BN6 6); with it two frames (the new mutation, 2004) shrimpy_v3 FAILS at t1 (+0x91 BN4 5 | BN6 4). python3 tools/xdiff.py --mutations: 181 of 181 caught, the two the allowance's checks caught before caught still (the idle animation's first frame from the next one's data at t12 on its +0xB0, the paused after-state's sprite update aimed elsewhere at t1).",
+  "meaning": "The one paused update the openings left apart was the whole of the opening's difference: with BN6's opening a frame longer a moved BN4 family's sprite place is BN4's at every frame and no allowance is needed there; the alignment is exactly one frame (none and two both fail at t1). Its limit, unreached by any spec: a battle of two or more foes, where BN6's queue would put the frame on each foe's blink in turn.",
+  "link": "../devtools/differential.md"
+}

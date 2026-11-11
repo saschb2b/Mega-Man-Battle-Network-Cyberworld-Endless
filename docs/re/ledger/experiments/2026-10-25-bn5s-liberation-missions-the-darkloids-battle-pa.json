@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "The Darkloid's battle past three turns",
+  "result": "In romlab, record 40 (BlizzardMan's, mission 1) handed out by the patched getter, MegaMan held at 9999 HP (0x0203B224 each 20 frames): turns 1 and 2 opened their Custom screens, the gauge full in turn 3 ended the battle (loop phase 0x14), the board said \"Oh, no! Liberation failed!\". The battle reads the board only through 0x08053B9E and 0x08053BF4 (a unit's HP in and out).",
+  "meaning": "Every liberation battle runs three turns, the Darkloid's included; the stage 2 assumption (untimed, hits doubled from turn 11) is refuted: that double is a type 1 battle's, and liberation records are type 6.",
+  "link": "../game/liberation/building/battle-field.md"
+}

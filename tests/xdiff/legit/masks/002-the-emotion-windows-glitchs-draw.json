@@ -1,0 +1,10 @@
+{
+ "name": "the emotion window's glitch's draw",
+ "part": "rng",
+ "when": "glitch draw",
+ "why": "With rng=follow (BN6's words written from BN5's after each frame both traced, src/dev/xdiff.c), the emotion window's glitch, which a BN5 DarkChip's after-effect starts in both games (its NaviCust bug, BN5 0x0802C938, src/emu/soulmood.c), draws its length from the second word at its own frames, a frame apart in the two engines (legit.json, rng, only: BN5 0x080197AC, BN6 0x0801CCC8): on the frame one game draws, its second word is the other's stepped once, the first the same, and the follow writes them alike again after it. A picture of the HUD's alone; nothing of the battle reads the second word but the cosmetic draws.",
+ "evidence": [
+  "chip_darkinvs: at t58 BN6's second word is BN5's stepped once (2757799397 against 2444100095), the first the same, both sides bugged by DarkInvs's after-effect (NaviStats +0x31 1)",
+  "the mask holds only where the first words are the same and one game's second is the other's stepped once (x rotl 1 + 1, XOR 0x873CA9E5: BN5 0x080014C0 / BN6 0x0800154C, the same routine), MegaMan's side bugged in both"
+ ]
+}

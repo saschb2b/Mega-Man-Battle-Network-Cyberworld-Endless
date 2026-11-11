@@ -1,0 +1,30 @@
+{
+ "name": "BN5's panel restore timers",
+ "part": "panel bn5 only",
+ "cells": [
+  [
+   "0x10",
+   "0xC0",
+   null
+  ],
+  [
+   "0x11",
+   "0x03",
+   null
+  ],
+  [
+   "0x14",
+   "0xC0",
+   null
+  ],
+  [
+   "0x15",
+   "0x03",
+   null
+  ]
+ ],
+ "why": "BN5's panel update writes a plain panel's two restore timers every frame, 0x3C0 at +0x10 and +0x14, bytes BN6's panel has no place for (BN6 keeps one timer, at its +0x12). Exact: those bytes, that value. The family's code reads and writes no panel (its own routines touch only its object, its AI's data and its attack's variables; the reticle reaches the panels only through the engine's collision routines).",
+ "evidence": [
+  "BN5's update of a plain panel: 0x0800A9DE-0x0800A9E8 writes 0x258 to +0x0E, 0x3C0 to +0x10 and +0x14"
+ ]
+}

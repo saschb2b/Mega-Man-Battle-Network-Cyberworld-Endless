@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "All nine missions' boards opened in romlab",
+  "result": "Each mission set (poke8 020022F4 n) and BN5's warp 0x0800552E into map 0x86:n-1 from a state after the intro, A tapped until BN5_LIB_STATE +0 read 8: all nine boards in the same framed panels and looks; five backdrops (ACDC 3's purple diamonds, Oran 3's with green specks, SciLab's purple binary digits, End's magenta diamonds for 4 and 5, the Undernet's and Nebula's purple static for 6-9); the BGM's song header 0x08175178 (song 0x22) at 0x02011470 on missions 2, 3, 5, 7 and 9, 0x1C (0x0816EB50) during the openings.",
+  "meaning": "A mission's look is its map, its backdrop and its board's colours; the overlay, the looks and the music are the same in all nine, so a dark layer takes its mission's map as one of BN5's net areas and nothing else changes (liberation_look.c, lib_look_mission).",
+  "link": "../game/liberation/building/mission-look.md"
+}

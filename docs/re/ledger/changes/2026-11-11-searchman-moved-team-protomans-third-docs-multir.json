@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "SearchMan moved, Team ProtoMan's third (docs/multirom/navis.md, SearchMan; docs/rom/navis.md, Team ProtoMan's SearchMan: src/emu/bn5_team_protoman.h's BN5_SEARCH_CODE, BN5_SEARCH_PARENT_STATE): bn5_searchman_v1, bn5_searchman_v1_keys and bn5_searchman_sp PASS, five mutations caught; his seven object types moved (TYPES), his sprites in list 2's spill (0x85-0x8A)."
+}

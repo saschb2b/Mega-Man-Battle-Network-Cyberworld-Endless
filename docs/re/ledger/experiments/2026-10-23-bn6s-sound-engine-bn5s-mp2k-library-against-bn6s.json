@@ -1,0 +1,8 @@
+{
+  "feature": "BN6's sound engine",
+  "date": "2026-10-23",
+  "name": "BN5's MP2K library against BN6's",
+  "result": "From SoundMain (BN5 0x0814C9FC, BN6 0x0814F754) the next 0x2104 bytes differ in 24 literal words (the seven tables', the jump template's, the player and song tables', one RAM address) and 35 pointers moved by the block's move, 0x2D58; the tables (BN5 0x081BC74C-0x081BC930) equal BN6's; the m4aSoundMode word is 0x0093040D in both (BN5 0x08000568). BN5's title through the engine against the plain BN5 ROM in romlab, 20 s: envelopes at 0.90, octave bands within 0.7 dB to 12 kHz; BN6's title against it, 0.42 and 2.9 dB. BN6's 0x01, 0x13 and 0x66 still byte for byte the game's after the engine read songs per ROM.",
+  "meaning": "BN5's songs play as BN5 plays them on BN6's code and tables, their data from BN5's ROM.",
+  "link": "../research/sources.md#the-jukeboxs-songs"
+}

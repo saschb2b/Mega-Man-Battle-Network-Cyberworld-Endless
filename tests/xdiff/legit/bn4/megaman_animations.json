@@ -1,0 +1,47 @@
+{
+ "why": "MegaMan's sprite is each game's own art (\"MegaMan's own sprite\"), and the two number his animations otherwise. A state of BN4's sets the one it runs by a store to his object's +0x10 (and 0xFF to +0x11, which the sprite update makes the animation run; his sprite state keeps it at +0x90); BN6's twin family sets BN6's number of the same animation through 0x0800F2B6, which stores it and 0xFF likewise. A moved state's store is given BN6's number by its recipe's immediate (tools/xchiprecipe_bn4.py IMMS, each from the two twin families' code), so BN4's number and BN6's differ where the two battles run one animation. Read as the same only while his CurAction is the moved family's in both, only for the pairs listed, each with both games' sites; the frames run of the animation are compared as ever (\"MegaMan's own art's animation\")",
+ "rows": [
+  {
+   "family": "0xD0",
+   "bn4": "0x0E",
+   "bn6": "0x0B",
+   "what": "the spread family's shot: BN4's state 0x1E stores 0x0E (0x080EC788-0x080EC78A), BN6's family 0x25 gives 0x0B to 0x0800F2B6 (0x080EDF14-0x080EDF16)"
+  },
+  {
+   "family": "0xD1",
+   "bn4": "0x0D",
+   "bn6": "0x0A",
+   "what": "FlmLine's ready: BN4's state 0x22 stores 0x0D (0x080ECAD4-0x080ECAD6); BN6 has no twin family, so the number is the art's: BN4's animation 0x0D of his sprite (0x08214000) is one frame of 2, BN6's 0x0A of his (0x081D8000) the same, each art's ready pose before its two-frame shot (BN4's 0x0E and 0x11, BN6's 0x0B and 0x0D after it)"
+  },
+  {
+   "family": "0xD1",
+   "bn4": "0x11",
+   "bn6": "0x0D",
+   "what": "FlmLine's fire: BN4's state 0x22 stores 0x11 (0x080ECB14-0x080ECB16); BN4's animation 0x11 is frames of 3 and 2, BN6's 0x0D the same (BN4's 0x10 and 0x12, of 2,2,2,10 and 1,2,2,3, are BN6's 0x0C and 0x0E around it)"
+  },
+  {
+   "family": "0xD6",
+   "bn4": "0x12",
+   "bn6": "0x0E",
+   "what": "Thunder's throw: BN4's state 0x26 stores 0x12 (0x080ECE3C-0x080ECE3E); BN4's animation 0x12 of his sprite is frames of 1, 2, 2 and 3, BN6's 0x0E the same (BN6's own Thunder's family 0x1F gives 0x0E to 0x0800F2B6)"
+  },
+  {
+   "family": "0xD3",
+   "bn4": "0x12",
+   "bn6": "0x0E",
+   "what": "TwnFng's throw: BN4's state 0x34 stores 0x12 (0x080ED4EA-0x080ED4EC), the animation Thunder's state runs, BN6's 0x0E"
+  },
+  {
+   "family": "0xD5",
+   "bn4": "0x0D",
+   "bn6": "0x0A",
+   "what": "MagBolt's hold: BN4's state 0x59 stores 0x0D (0x080EE044-0x080EE046), the pose FlmLine's state readies in, BN6's 0x0A (one frame of 2 in each art)"
+  },
+  {
+   "family": "0xD4",
+   "bn4": "0x12",
+   "bn6": "0x0E",
+   "what": "PropBom's throw: BN4's state 0x62 stores 0x12 (0x080EE55C-0x080EE55E), the animation Thunder's state runs, BN6's 0x0E"
+  }
+ ]
+}

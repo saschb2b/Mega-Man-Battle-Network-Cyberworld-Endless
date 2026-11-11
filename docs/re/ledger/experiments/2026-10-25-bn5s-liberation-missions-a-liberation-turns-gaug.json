@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "A liberation turn's gauge left to fill",
+  "result": "In romlab, mission 1's first liberation battle, OK on the Custom screen and no key after: the gauge rose 0x3C0 a 30-frame step to 0x4000 and the next frame the Custom screen's phase (BattleState +1 8), +7 from 1 to 2.",
+  "meaning": "BN5 opens a liberation turn's Custom screen by itself as the gauge fills (its ask 0x08008BD2 tests the gauge-full flag 2, the other battles' 0x08008BB0 the L or R request 0x10); ours does the same through BN6's own way to the screen (liberation_battle.c).",
+  "link": "../game/liberation/building/battle-field.md"
+}

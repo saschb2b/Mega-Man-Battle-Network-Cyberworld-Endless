@@ -1,0 +1,19 @@
+[
+ {
+  "name": "the spread shot's sound not played",
+  "spec": "bn4_chip_bublside",
+  "poke": [
+   "080EC7DE:46C0",
+   "080EC7E0:46C0"
+  ],
+  "what": "the spread state's copy's call that plays the shot's sound (BN4 0x080EC7DE, the recipe's call to its shim for the grown table's slot 0x200) made two nops: the shot leaves without its sound"
+ },
+ {
+  "name": "the spread state's attack variables another",
+  "spec": "bn4_chip_bublside",
+  "poke": [
+   "080EC764:3770"
+  ],
+  "what": "the spread state's copy's adds r7,#0xA0 (BN4 0x080EC764, the recipe's immediate: BN6's attack's variables in his AI data) made BN4's own adds r7,#0x70: the state reads another part of BN6's AI data as its variables"
+ }
+]

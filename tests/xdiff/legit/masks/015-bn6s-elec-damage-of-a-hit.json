@@ -1,0 +1,20 @@
+{
+ "name": "BN6's Elec damage of a hit",
+ "part": "coll",
+ "whose": [
+  "megaman",
+  "megaman's"
+ ],
+ "offsets": [
+  "0x78-0x79"
+ ],
+ "why": "BN6's hit pass adds an Elec hitter's damage into the struck object's collision data +0x78 (BN6's own field, for the bubble's extra damage an Elec hit deals), which the present step clears with the rest of what a hit leaves; BN5's hit pass has no such field nor store. MegaMan's collision data, where the family's Elec attacks strike him, and his shots' where they meet one: what he took is compared by his HP and the damage by element (+0x82 on, in both games' layouts).",
+ "evidence": [
+  "BN6's hit pass (its IWRAM routine's ROM copy): 0x081D78F6-0x081D7904, ldrh r0,[r7,#0x2E]; ldrb r1,[r7,#2]; cmp r1,#3 (Elec); bne; mov r2,#0x78; ldrh; add; strh. Its reader: 0x0801A8EC, a bubbled object's Elec damage adds +0x78 to its +0x88",
+  "BN5's twin 0x08016AB8-0x08016AD0: the hitter's damage shifted by the weakness into +0x7A + 2 x its element, no store at another offset; BN5's +0x60-0x6B and +0x74-0x9F are BN6's +0x68-0x73 and +0x7C-0xA7 (layouts, collision), BN6's +0x74-0x7B has no twin",
+  "eleogre_v1 t239 and flashy_v1 t322: MegaMan's +0x78 0x1E in BN6's the frame each family's Elec attack strikes him for 30; eleogre_v1_keys t139: his buster shot's +0x78 0x14 in BN6's where Eleogre's Elec attack meets it",
+  "BN6's hit pass in IWRAM 0x030073F6-0x03007404 (its image at ROM 0x081D78F6): ldrb r1,[r7,#2]; cmp r1,#3; bne; movs r2,#0x78; ldrh r3,[r6,r2]; adds r3,r3,r0; strh r3,[r6,r2] (r7 the hitter's collision data, r6 the struck's, r0 the damage)",
+  "BN5's collision data (0xA0 bytes) lays out no such field (legit.json's layouts, collision: BN6's +0x74-0x7B outside the segments)",
+  "in toadman_v1 at t222: BN6's +0x78 0x1E, the note's 30"
+ ]
+}

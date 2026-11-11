@@ -1,0 +1,10 @@
+[
+ {
+  "name": "HolyDrem's object type",
+  "spec": "chip_holydrem",
+  "poke5": [
+   "080E6F64:205A"
+  ],
+  "what": "the moved HolyDrem's support routine spawns BN5's fourth kind's 0x5A (movs r0,#0x59 at BN5's 0x080E6F64, written at its copy) where its own moved 0x59 runs: no 0x59 in play at t33, the foe not struck as BN5's"
+ }
+]

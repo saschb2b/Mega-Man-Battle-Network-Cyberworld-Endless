@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "The pool for BN4's late families (the owner's call 13): a late family's sounds BN6 has no song of take the per-battle pool's slots in order as a BN4 Navi's do (src/emu/xvirus_recipe.h xv_bn4_pool, the Navis' and the families' one list; src/emu/xvirus_songs.c packs them into its art at install, src/emu/xnavi_bn4_sounds.c points the pool at them in its battles); their code past the families' second room in a room of their own (free_space.plan FREE_LATE_CODE, xvirus_recipe.h XV_LATE_CODE). BN4's Kilby (type 0x1E, ids 0x43-0x48) moved, the second late family (AI 73, ids 0x2F6-0x2FB): its code the first in the late code room, its sound 0xCD the pool's 0x32, its effect 0x2D the late families' 0x8F; bn4_battle.h BN4_KILBY_* (docs/rom/bn4.md, Kilby moved)."
+}

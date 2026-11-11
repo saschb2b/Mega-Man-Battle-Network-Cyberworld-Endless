@@ -1,0 +1,28 @@
+{
+ "name": "AirHocky's wait's bookkeeping",
+ "part": "ai",
+ "whose": [
+  "megaman"
+ ],
+ "families": [
+  "0x26"
+ ],
+ "cells": [
+  [
+   "0xA1",
+   "0x04",
+   "0x00"
+  ],
+  [
+   "0xB0",
+   "0x00",
+   "0x0F"
+  ]
+ ],
+ "why": "After the puck BN5's AirHoc (its family 0x21) and BN6's AirHocky (0x26, whose code the registry's AirHoc plays) wait 15 frames before the attack ends, at the same frame: BN6's sets its timer (AttackVars +0x10, 15) as its first phase ends (0x080EE05E) where BN5's sets it at its second phase's start with that phase's mark (AttackVars +1, 4: 0x080ECE18-0x080ECE1E): for one frame BN6's timer reads 15 where BN5's still 0, and through the wait BN5's +1 reads 4 where BN6's 0. The same timer and the same end (CurAction 8 at t63 in both).",
+ "evidence": [
+  "BN5 0x080ECE02-0x080ECE0C (phase 0's end: strh 4 to AttackVars +0); 0x080ECE10-0x080ECE2A (phase 1: +1 0 sets +0x10 15 and +1 4, counts down, ends the attack)",
+  "BN6 0x080EE056-0x080EE064 (phase 0's end: +0x10 15, strh 4 to +0); its phase 1 counts it down",
+  "chip_airhoc: AttackVars +0x10 15 at t47 in BN6's, 14 at t48 in both, the attack's end at t63 in both"
+ ]
+}

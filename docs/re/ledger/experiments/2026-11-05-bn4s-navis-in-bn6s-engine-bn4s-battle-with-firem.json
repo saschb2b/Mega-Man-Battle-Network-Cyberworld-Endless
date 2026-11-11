@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "BN4's battle with FireMan V1 fought twice",
+  "result": "python3 tools/xdiff.py bn4_fireman_control: FireMan V1 (BN4's enemy 0x90) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS (masks none). His companion (the first kind's 0x57, slot 2) is in play from t1, its +9 (its mode) 8 throughout; his flames (third-kind 0x09) from t300.",
+  "meaning": "The BN4 pipeline holds for FireMan and his companion; and BN4's battle as the differential sets it up starts his companion in its mode 8, so the mode 4 the port runs otherwise is not reached.",
+  "link": "../multirom/bn4-navis.md"
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-22",
+  "name": "Two MegaMen a side: a partner's NaviCust compiled by BN6",
+  "result": "BN6's reload of MegaMan's stats from the NaviCust's board (bn6f reloadCurNaviStatBoosts_813c3ac, Gregar 0x0813E18C) called once through the game's update on a plain core loaded from the checkpoint, the partner's loadout written in: a board of Custom1, UnderShirt and HP+100 (base 360) gives HP 460, Custom 6, UnderShirt 1, as the run's own menus made them. His record takes it whole (but for the start form and the BeastOutCounter a link battle's start sets; each GBA's own menu NaviStats and its side's battle record measured the same, all 0x64 bytes): side 1's partner set up with 460 HP beside his lead's 100, his own screen dealing six chips where his lead's deals five. 2,686 iterations 0 apart, 56 hashes the same with 289 rollbacks and with none; arenaroll=8 440 of 440 the same, its 58 hashes the delay alone's; the records their sides' copies on the second GBA alone part them from iteration 1.",
+  "meaning": "A partner's NaviCust needs no rules of ours: BN6's own compile runs for him on his client, and only its result crosses.",
+  "link": "../online/arena/two-a-side/navicust.md"
+}

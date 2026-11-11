@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "BN4's battle with AquaMan V1 fought twice",
+  "result": "python3 build.py xdiff bn4_aquaman_control: AquaMan V1 (BN4's enemy 0xA8) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS (masks none).",
+  "meaning": "The BN4 pipeline holds for AquaMan and his companion before his move is compared.",
+  "link": "../multirom/bn4-navis.md#aquaman-built"
+}

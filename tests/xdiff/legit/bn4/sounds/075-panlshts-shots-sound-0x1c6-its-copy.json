@@ -1,0 +1,7 @@
+{
+ "bn4": "0x1C6",
+ "bn6": "0x1DA",
+ "clock": "state",
+ "what": "PanlSht's shot's sound 0x1C6, its copy",
+ "why": "Played by the panel shot's object's init (BN4's third-kind 0x7B, moved with PanlSht's unit: movs r0,#0xc7; adds r0,#0xff at 0x080DCB54, its bl to PlaySoundEffect at 0x080DCB58; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DA and goes on to BN6's, the recipe's XvSoundCall), a state's: BN4's song 0x1C6 copied into slot 0x1DA of BN6's grown song table, the first past its own 474 (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4-chips.md, the owner's call 6), on BN4's player 17. The slot holds no song of BN6's, so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy). bn4_chip_panlsht1 at t34 in BN4's and t35 in BN6's, the frame after the chip's freeze"
+}

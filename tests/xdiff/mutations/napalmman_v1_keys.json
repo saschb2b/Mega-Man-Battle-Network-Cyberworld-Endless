@@ -1,0 +1,10 @@
+[
+ {
+  "name": "NapalmMan's object's collision offset not moved",
+  "spec": "napalmman_v1_keys",
+  "poke": [
+   "0889B5DC:6EB8"
+  ],
+  "what": "the third kind's 0x33's read of its hit flags (BN5 0x080CB394: ldr r0,[r7,#0x68], its copy at XN_TEAM_CODE + 0x8500 + 0xDC) left at BN5's +0x68 where BN6 keeps them at +0x70"
+ }
+]

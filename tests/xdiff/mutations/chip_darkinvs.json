@@ -1,0 +1,10 @@
+[
+ {
+  "name": "DarkInvs's time a frame short",
+  "spec": "chip_darkinvs",
+  "poke5": [
+   "080E2444:0257"
+  ],
+  "what": "the time BN5's DarkInvs hands its chip AI (the literal 600 at BN5's 0x080E2444) 599 at its moved copy: MegaMan's AI data +0x36 a frame apart from BN5's from the machine's entry (src/emu/darkinvs.c)"
+ }
+]

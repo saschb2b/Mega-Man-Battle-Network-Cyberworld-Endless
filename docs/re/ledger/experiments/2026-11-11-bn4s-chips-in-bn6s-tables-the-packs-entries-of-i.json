@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "The pack's entries of ids 635-1023 in the cart's save RAM",
+  "result": "Gregar's save library has three readers, five writers and four verifies, each address and size a literal: BN6's blocks are 0x0E000100-0x0E00680F and 0x0E007E00-0x0E007FFF; 0x0E006810-0x0E007DFF is addressed by none. Under CYBERWORLD_RAM_WATCH (every load, store, DMA and BIOS copy into the stretch): the survey's 54 runs read the save RAM 1,431,216 times, all the library's boot read, and touched the free span only by the pack's clear; the PET's seven screens, a shop bought from, a Chip Trader fed (BN6's own save ran four times, inside its blocks) and a NetBattle rolled back 872 times (the state the same after each) the same; no access wider than a byte. tests/test_emu_pack.c runs the routines on mGBA (every id's entry, a chip given in all three ranges, the stamps by bytes, the clear with and without its hook, states). Chip 700 (--dev alias=700, chip 700 A 5): its counts 6, listed in the folder editor's Pack, swapped, through a battle, the PET's Save, CONTINUE and the files moved to a fresh folder all kept 6; a run dev's build saved read 0 there. The autopilot's seeds 1-12: dev's run logs (78 lines) and pictures at 5000, 10000, 14990. The differential: 494 PASS, the 5 recorded FAILs held, 363 of 363 mutations caught.",
+  "meaning": "Every BN4 folder chip, and any id to 1023, can be held in the Pack; no chip waits for RAM again."
+}

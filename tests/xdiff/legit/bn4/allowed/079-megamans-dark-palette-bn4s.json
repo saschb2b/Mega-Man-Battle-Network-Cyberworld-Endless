@@ -1,0 +1,21 @@
+{
+ "name": "MegaMan's dark palette, BN4's",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "cells": [
+  [
+   "0x94",
+   "0x02",
+   "0x00"
+  ]
+ ],
+ "why": "MegaMan's palette (his object's +0x94, his sprite state's +4) while his karma is dark: BN4 gives his look by his karma as his battle begins and again as his state calls for it (0x0800BFFE, from his init 0x080107DE and seven more callers, into BN4_SPRITE_PALETTE_SET 0x08002DEC), 2, his own sprite's dark colours, where the karma is under 470 (0x0800C052: 4 from 1000, 0 from 500, 3 from 470, 2 under it; a spec's karma4 of 480 shows 0 there all battle, which the karma's own steps at 480 and 500, 0x0800F5BC, may explain: not read further, and no pair but 2 against 0 is allowed). BN6's MegaMan has no karma and no dark palette (0x0801002C, the twin, gives 1 under the chip AI, 4 at Full Synchro, else 0): a run takes no karma, and his dark look is not taken (docs/game/meta/darkchips.md, BN4's dark chips: the price is the whole of their darkness). It arises only where a spec gives BN4's battle a dark karma (karma4 under 470: a dark chip played in BN4's own battle). That pair alone; everything else of him compared as ever.",
+ "evidence": [
+  "BN4 0x0800C052 (r0 the karma, 0x0800F5A6's): movs r4,#4 at 1000 (0x0800C054-0x0800C05C), 0 at 500, 3 at 470 (0xEB + 0xEB at 0x0800C06A), else 2 (0x0800C072)",
+  "BN4 0x080107DE bl 0x0800BFFE, then 0x080107E2 bl BN4_SPRITE_PALETTE_SET (strb r0 at the sprite state's +4, 0x08002DF4)",
+  "BN6 0x0801002C: 1 where AIData +0x48's 0x200 (0x0801004C), 4 where his mood is 0xFF (0x08010070), 0 else (0x08010076); no karma read",
+  "bn4_chip_invis_dark: Invis by a dark MegaMan (karma4 0), his +0x94 2 in BN4 from the first frame, 0 in BN6, nothing else of the battle apart"
+ ]
+}

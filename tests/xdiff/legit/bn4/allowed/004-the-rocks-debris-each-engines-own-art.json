@@ -1,0 +1,12 @@
+{
+ "name": "the rock's debris, each engine's own art",
+ "whose": "family",
+ "kind": "T4",
+ "type": "0x09",
+ "part": "obj",
+ "offsets": [
+  "0x80",
+  "0xBB"
+ ],
+ "why": "A falling rock's debris (GutsMan's rocks, BN4's third-kind 0x1D, moved: their code at BN4 0x080D09E8 spawns four on landing) is each engine's own fourth-kind 0x09, spawned by twin spawners (BN4 0x080E29F8, BN6 0x080E23C0: the same bytes but the spawn's bl, the symbol map's pair; its +0x40 and +0x48 the speeds of BN4's table 0x080D0A20, copied with the rock's code), its init the same instructions but for its sprite's number (BN4 0x080E2934, its jump table 0x080E2924; BN6 0x080E22FC): sprite_load of list 0x10 (4) with number 0x0E in BN4 (0x080E2942, its bl to 0x0800287C), BN4's rocks' own sprite, which GutsMan's recipe copies as list 4 0xCA for his rocks, and number 5 in BN6 (0x080E230A, its bl to 0x080026E4), BN6's own rock art (0x08353D1C). Its sprite state (+0x80 to +0xBB: its frames' pointers into its art, the frame's count and flags read from it) is its art's: gutsman_v1's at t361 (BN4) and t362 (BN6), the hooks' sprite events from 0x080E2949 and 0x080E2311. Its place, speeds, spawn, life and every other byte compared as ever"
+}

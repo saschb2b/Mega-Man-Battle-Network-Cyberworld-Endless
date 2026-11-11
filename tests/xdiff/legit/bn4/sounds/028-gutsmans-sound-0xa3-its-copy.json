@@ -1,0 +1,7 @@
+{
+ "bn4": "0xA3",
+ "bn6": "0x33",
+ "clock": "state",
+ "what": "GutsMan's sound 0xA3, its copy",
+ "why": "Played by his rocks' code as one lands (BN4's third-kind 0x1D: movs r0,#0xa3 at 0x080D0A14, its bl to PlaySoundEffect at 0x080D0A16; BN6: its copy's movs r0,#0x33, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F30ADF), a state's: BN4's song 0xA3 copied into the pool's second slot, BN6's empty 0x33 (src/emu/xnavi_bn4_sounds.c); gutsman_v1's at t361 in BN4 and t362 in BN6 (begun a frame after each). BN6's own song 0x33 is empty, so the copy is told by its slot"
+}

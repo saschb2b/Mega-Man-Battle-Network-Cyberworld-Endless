@@ -1,0 +1,7 @@
+{
+ "bn4": "0xC8",
+ "bn6": "0x85",
+ "clock": "state",
+ "what": "an obstacle struck",
+ "why": "Played by the objects' state runner as the object it runs has damage waiting, twins (BN4 0x08013F3E, BN6 0x0801B394: the collision data's damage read, BN4's +0x28 and BN6's +0x80, the flash by 0x08002E1C and 0x08002DB0, then movs r0,#0xc8 at 0x08013F54 with its bl to 0x08000560, and movs r0,#0x85 at 0x0801B3AC with its bl to 0x080005CC). The cube's update calls it in both (BN4 0x080D8AA8, BN6 0x080D12A4). Paired by the routines that play them, not by their samples. bn4_chip_rockcube: the Mettaur's wave on the cube at t99"
+}
