@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -93,6 +93,26 @@ frame, as BN6's field update writes them. Its three mutations break
 BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
 specs record where a chip parts, each with its verdict and why:
 `bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
+
+A chip of an attack family of BN4's moved (an `attack` unit of
+`tools/xchiprecipe_bn4.py`: the spread chips', `bn4_chip_heatshot` and
+its seven kin) is compared as MegaMan's own state, its arm and its shot
+in play in the fight's frames. What `legit.json`'s `bn4` section adds:
+BN4's family in his CurAction read as the unit's number in BN6's grown
+attack families (`attack_families`, by the units' rows), his subfamily
+left as it is; his animation's number while he is in that state, each
+art's own, by the pairs listed with both games' sites
+(`megaman_animations`: the frames run of it compared as ever); BN4's
+chips' code room among the rooms a reference's pointer into moved code
+is read by (`tools/xdiff_snap.py` `XC4_CODE`: the shot keeps a pointer
+to its kinds' row); and the flag an attack sets, 0x400000, where a hit
+ended the attack, which BN4's struck state leaves and BN6's clears, only
+while his CurAction is a generic state's in both
+(`interrupted_attack`, `bn4_chip_heatshot_struck`). A BN4 spec holds one
+foe (the opening's alignment is the appear queue's first object's), so a
+burst's reach is seen by its effects' panels, and a chip used after a
+support chip follows BN6's support run's held frame, its objects with
+it: such a spec is not written yet.
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
