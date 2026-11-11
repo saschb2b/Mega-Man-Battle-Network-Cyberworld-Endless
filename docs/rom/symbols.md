@@ -99,7 +99,7 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | Code (routines, hooks, instructions) | 377 | 46 | 122 |
-| ROM data (tables, text, literals) | 333 | 283 | 165 |
+| ROM data (tables, text, literals) | 333 | 283 | 178 |
 | ROM, code or data not told | 587 | 674 | 225 |
 | RAM (variables, structures) | 139 | 66 | 39 |
 | I/O registers | 3 | 0 | 0 |
@@ -107,15 +107,15 @@ how to verify it.
 | Event flags | 35 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
 | Constants, sizes and counts | 594 | 293 | 352 |
-| All | 2361 | 1427 | 911 |
+| All | 2361 | 1427 | 924 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | PET, mail and key items | 72 | 1 | 1 |
 | Shops and traders | 40 | 0 | 0 |
-| NaviCust | 21 | 2 | 0 |
+| NaviCust | 21 | 2 | 1 |
 | Chips and folders | 372 | 265 | 48 |
-| Battle | 598 | 398 | 254 |
+| Battle | 598 | 398 | 266 |
 | Text and fonts | 44 | 8 | 4 |
 | Sound | 26 | 30 | 14 |
 | Maps and the overworld | 136 | 42 | 26 |

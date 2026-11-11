@@ -17,7 +17,7 @@
 /* what the picture shows, read from the Jukebox's state each frame */
 typedef struct {
 	int t;
-	int game;                         /* the section's game: 0 BN6, 1 BN5 */
+	int game;                         /* the section's game: 0 BN6, 1 BN5, 2 BN4 */
 	const char *section;              /* its name */
 	int section_at, sections;         /* its place among the sections */
 	int rows[JUKE_SECTION_MOST];      /* its songs, indexes of jukebox_songs */
