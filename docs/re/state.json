@@ -291,6 +291,13 @@
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-11",
+      "name": "bn4_chip_timebomb, its struck and its top: BN4's TimeBomb moved, a chip's object that is an actor",
+      "result": "python3 build.py xdiff with the three specs: each PASS (420 and 300 frames: the bomb set on (4,3), (4,2) and (4,1) by three seeds' draws, BN6's draws BN4's; its ticks at t93, t153 and t213 and the blast at t242, a Mettaur's 250 HP to 100; or the Mettaur's wave ending it at t73), eleven mutations caught. On the way: six of the eleven first passed unbroken, their pokes taken by a BN5 virus family's copy at the same addresses (src/dev/xdiff.c poke_range, mended); four of eight seeds tried part at t1 in the Mettaur's own record (+0x2A), before any chip is used: the foe's, left open; a virus the blast deletes shows each engine's own explosions (the fourth kind's 0x11), which the comparator has no rule for.",
+      "meaning": "A chip unit can bring an object the actors' runner runs: its state table rebuilt in BN6's layout in the unit's home, its own states two higher. The engine's status step, runner and generic states are BN6's, as for a moved family."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
       "name": "the art's room: every chip spec, and a folder of thirty",
       "result": "With no unit's art installed (72 KB of install become 8 KB): the 34 bn4_chip_* specs at their verdicts, their 57 mutations caught; bn4_chips_thirty (BN6's engine alone, thirty of BN4's chips over eight turns) PASS, every unit's own sound begun, three rows of the room in play at most.",
       "meaning": "The units' art needs the room for what is alive at a moment, not for what is installed or in a folder: the remaining units add no art to the core's copy."

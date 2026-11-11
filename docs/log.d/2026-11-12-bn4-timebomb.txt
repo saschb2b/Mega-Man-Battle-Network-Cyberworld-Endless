@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:00:00Z
-* **Update**: multirom/bn4-chips.md (TimeBomb moved: its bomb an actor, the first among the chips' objects; what no spec reaches), devtools/chip-recipe-generator.md (A moved actor: the unit's state table in BN6's layout, in its home), devtools/differential.md (a BN4 spec's poke never goes to a BN5 virus family's copy), rom/bn4.md (TimeBomb's code, the actors' runner, the blasts and the panels' patterns: a new row).
