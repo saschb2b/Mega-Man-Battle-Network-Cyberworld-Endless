@@ -1,7 +1,8 @@
 /* jukebox_text.h. Each song is named for where it plays: its maps' music
  * lists, its battles' records, the scripts and code that start it
- * (docs/game/pet.md, The Jukebox, says which are verified and how); BN5's songs
- * that nothing in its game starts carry their number. */
+ * (docs/game/pet.md, The Jukebox, says which are verified and how; BN5's
+ * read by tools/bn5_songs.py, BN4's by tools/bn4_songs.py); a song that
+ * nothing in its game starts carries its number. */
 #include "jukebox_text.h"
 
 #include <stdio.h>
@@ -81,11 +82,46 @@ const JukeSong jukebox_songs[] = {
 	{ 1, 0x12, JUKE_MORE, "Song 12" },
 	{ 1, 0x20, JUKE_MORE, "Song 20" },
 	{ 1, 0x21, JUKE_MORE, "Song 21" },
+	/* Battle Network 4 Red Sun */
+	{ 2, 0x02, JUKE_TOWNS, "ACDC Town" },
+	{ 2, 0x03, JUKE_TOWNS, "Indoors" },
+	{ 2, 0x04, JUKE_TOWNS, "Den City" },
+	{ 2, 0x05, JUKE_TOWNS, "Den Dome" },
+	{ 2, 0x08, JUKE_TOWNS, "Space Center" },
+	{ 2, 0x12, JUKE_NET, "The Net" },
+	{ 2, 0x0F, JUKE_NET, "Rusted Comp" },
+	{ 2, 0x13, JUKE_NET, "Undernet" },
+	{ 2, 0x21, JUKE_BATTLES, "Tutorial" },
+	{ 2, 0x14, JUKE_BATTLES, "Virus Busting" },
+	{ 2, 0x1B, JUKE_BATTLES, "Before the Boss" },
+	{ 2, 0x15, JUKE_BATTLES, "Boss Battle" },
+	{ 2, 0x17, JUKE_BATTLES, "Tournament Bout" },
+	{ 2, 0x16, JUKE_BATTLES, "Final Battle" },
+	{ 2, 0x01, JUKE_STORY, "Nebula" },
+	{ 2, 0x0A, JUKE_STORY, "Something's Up" },
+	{ 2, 0x0B, JUKE_STORY, "Emergency" },
+	{ 2, 0x0C, JUKE_STORY, "Sorrow" },
+	{ 2, 0x0D, JUKE_STORY, "Hope" },
+	{ 2, 0x06, JUKE_STORY, "Homeward" },
+	{ 2, 0x07, JUKE_STORY, "Abroad" },
+	{ 2, 0x09, JUKE_STORY, "Tournament" },
+	{ 2, 0x1F, JUKE_STORY, "Champion" },
+	{ 2, 0x00, JUKE_SCREENS, "Title" },
+	{ 2, 0x0E, JUKE_SCREENS, "Jack In" },
+	{ 2, 0x1D, JUKE_SCREENS, "NaviCust" },
+	{ 2, 0x18, JUKE_SCREENS, "Victory" },
+	{ 2, 0x1E, JUKE_SCREENS, "Fanfare" },
+	{ 2, 0x19, JUKE_SCREENS, "Defeat" },
+	{ 2, 0x1A, JUKE_SCREENS, "Game Over" },
+	{ 2, 0x1C, JUKE_SCREENS, "Credits" },
+	{ 2, 0x10, JUKE_MORE, "Song 10" },
+	{ 2, 0x11, JUKE_MORE, "Song 11" },
+	{ 2, 0x20, JUKE_MORE, "Song 20" },
 };
 const int jukebox_song_count = (int)(sizeof jukebox_songs / sizeof *jukebox_songs);
 
 const char *const jukebox_kind_names[JUKE_KINDS] = { "Towns", "The Net", "Battles", "Story", "Screens", "More" };
-const char *const jukebox_game_tags[2] = { "BN6", "BN5" };
+const char *const jukebox_game_tags[JUKE_GAMES] = { "BN6", "BN5", "BN4" };
 const char *const jukebox_mode_names[3] = { "Repeat", "In order", "Shuffle" };
 
 const char jukebox_title[] = "Jukebox";
