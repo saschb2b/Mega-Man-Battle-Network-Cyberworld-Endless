@@ -26,7 +26,8 @@
  * 36000; Team ProtoMan's in their own room, FREE_TEAM_SPRITES, sized
  * for all six: NapalmMan 43918, Meddy 30937, GyroMan 47829, SearchMan
  * 44022, the other two's places to come: MagnetMan 49776, ProtoMan
- * 38370) */
+ * 38370; Nebula's LarkMan 19368 in this room's tail, GridMan 29632 in
+ * his own room's, FREE_NEBULA_SPRITES) */
 static const struct { uint8_t navi, number; uint32_t at, room; } PLACES[] = {
 	{ BN5_NAVI_COLONEL, XNAVI_SPRITE_FIRST + 0, FREE_NAVI_SPRITES + 0x00000u, 0xC000u },
 	{ BN5_NAVI_SHADOWMAN, XNAVI_SPRITE_FIRST + 1, FREE_NAVI_SPRITES + 0x0C000u, 0x9000u },
@@ -43,9 +44,12 @@ static const struct { uint8_t navi, number; uint32_t at, room; } PLACES[] = {
 	{ BN5_NAVI_MEDDY, XNAVI_SPRITE_FIRST + 16, FREE_TEAM_SPRITES + 0xB000u, 0x8000u },
 	{ BN5_NAVI_GYROMAN, XNAVI_SPRITE_FIRST + 12, FREE_TEAM_SPRITES + 0x13000u, 0xC000u },
 	{ BN5_NAVI_SEARCHMAN, XNAVI_SPRITE_FIRST + 13, FREE_TEAM_SPRITES + 0x1F000u, 0xB000u },
+	{ BN5_NAVI_LARKMAN, XNAVI_SPRITE_FIRST + 17, FREE_NAVI_SPRITES + 0x76000u, 0x5000u },
+	{ BN5_NAVI_GRIDMAN, XNAVI_SPRITE_FIRST + 18, FREE_NEBULA_SPRITES, 0x8800u },
 };
 #define NPLACES ((int)(sizeof PLACES / sizeof *PLACES))
-_Static_assert(FREE_NAVI_SPRITES + 0x76000u <= XNAVI_ARMS, "the sprites' places end before the arm points'");
+_Static_assert(FREE_NAVI_SPRITES + 0x7B000u <= XNAVI_ARMS, "the sprites' places end before the arm points'");
+_Static_assert(FREE_NEBULA_SPRITES + 0x8800u <= FREE_NEBULA_SPRITES_END, "GridMan's sprite's place within his room");
 _Static_assert(FREE_TEAM_SPRITES + 0x2A000u <= FREE_TEAM_SPRITES_END, "Team ProtoMan's sprites' places within their room");
 _Static_assert(XNAVI_ARMS + XNAVI_ARMS_COUNT * BN6_ARM_RECORD <= XNAVI_SPRITES_END, "the arm points' records within the sprites' room");
 
