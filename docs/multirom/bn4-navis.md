@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:01:32Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:03:51Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1686,6 +1686,104 @@ next. Past it the Navis take the 32 numbers the chips' generator leaves
 them from its scan of BN5's numbers no recipe names (`TYPES3_NAVIS`, in
 both generators: 0x01 up), a split the two tracks settled on 11 November
 2026.
+
+## SparkMan built
+
+The eleventh proved, the second of the other build, by `sparkman_v1` on 11
+November 2026: his type 0x0B, Navi AI 64, ids 0x3C0-0x3C3 (`foes C0@52`),
+his seat 16 by his BN4 id (192), in the tournament's pool on his plate
+0x0C (`BN4_PLATE_SPARKMAN`). His five third-kind objects run at the
+dispatch's 0xD4-0xD8, and the Navis' effects past BN4's 0x90-0x9F take
+0xE0-0xEC, then 0xB1 (`EFFECT_MORE`), their lists 4 and 5 past their ranges 0x70 and
+0xB0 up (`LIST4_MORE`, `LIST5_MORE`), each split with the chips'
+generator as the third kind's numbers were. What he asked:
+
+- **A CurAction kept in his object** (`saved_actions`): his state 7 ends by
+  writing his +0x60 back to his CurAction (`0x080B7A62`), and every store
+  of +0x60 in his own block is a `movs` of one of his own states (seven of
+  them), each given BN6's number. The comparator reads that word in BN6's
+  numbering (legit.json's bn4 `navi_kept_actions`).
+- **His palette by version**, TopMan's form (`navi_palette_set`).
+- **A mask, not an address**: his object's test of the flags its hits left
+  it against `0x08000000` (`0x080D16EA`), a bit of the collision masks'
+  words both games share (`bn4_twins.NUMBERS`).
+- **His object drawn as MegaMan** (`0x080D1760`: list 0's first, MegaMan's
+  battle sprite, in its palette 1): each engine's own MegaMan, the load as
+  it is (`xrecipe_bn4.ENGINE_SPRITES`).
+- **An effect by his version**, its id a byte of a table his object's block
+  holds (`0x080D191C`), the other side ORed into r4's second byte: each
+  entry moved, the copy's bytes BN6's ids (`EFFECT_TABLES`, `XvByte`). And
+  one effect drawn with his own battle sprite (0x24), whose row the
+  installer gives his list 2 number.
+- **The comparator**: his animation from his init runs on through his state
+  7, which sets the same 0 again, so his sprite counts by the fight's
+  frames and is compared at the same fight frame while it is that one
+  (legit.json's bn4 `navi_opening_art`, as `opening_count`'s count); his
+  0x22's +0x4C, his state's r7, BN4's 0 (no AI data) and BN6's his pool
+  AI data's attack block: the counter its kind 4 keeps there writes the
+  BIOS in BN4 and a word of his AI data no code of his reads in BN6
+  (a spawn leftover); his pool sounds (0x8C at 0x32, 0x8E at 0x33, 0xB8
+  at 0x63, 0xB9 at 0xD0, 0xBA at 0xE0) in his battles alone.
+
+`bn4_sparkman_control` PASSes. **`sparkman_v1` PASSes** over its 1200
+fight frames. Three mutations break his port and
+each is caught: a kept CurAction off by one (t226), his 0x22 spawned at his
+0x20's number (t727) and his sound 0x8C at the pool's fourth slot (t55).
+Not reached by `sparkman_v1`, MegaMan idle: his object's effect by his
+version (0xE2-0xE4, its table's bytes) and his object drawn as MegaMan, so
+a mutation of either is not seen; his SP's palette (3).
+
+## BurnerMan built
+
+The twelfth proved, the third of the other build, by `burnerman_v1` on 11
+November 2026: his type 0x22, Navi AI 62, ids 0x3B8-0x3BB (`foes B8@52`),
+his seat 14 by his BN4 id (184). His addresses and how each was read are in
+[BN4 Red Sun's tables](../rom/bn4.md) (BurnerMan derived). He brought four
+mechanisms the next Navis will use too:
+
+- **His init's tail** (`XnInit.tail`, `init_tail`): past his collision's
+  set-up his init sets out his two flames itself (`0x080BDA30`: two calls of
+  `0x080BDA5A`, each word of his +0x60 and +0x68 ORed with 8 after), which
+  BN6's actor init knows nothing of. The tail is walked as his own code and
+  entered at his spawn's end: the shim pushes what his init's prologue
+  pushed and a return its own `pop {..., pc}` takes, its call of his update
+  BN6's nullsub (BN6's Navi frame runs it). MetalMan's gears are set out
+  the same way.
+- **His update's calls with a number in r0** (`navi_pres`): `0x080BDD5C`
+  with r0 0x60 and 0x68, the words of his flames' slots, kept as numbers
+  where the callee reads r0 as no CurAction.
+- **A gate a frame longer** (`XV_FIGHT_STOP`, `STOP_GATED`): his flames'
+  update and his update's calls wait on the battle's time-stop test (BN4's
+  `0x08007948`, the flags' bit 4), which both games clear at the fight's
+  first frame, where his own states begin a frame later in BN6 (BN6's
+  state runner runs none then). The dispatch's stub holds bit 4 at the
+  fight's first frame too, so they begin with his first own state, as
+  `XV_FIGHT_FLAGS` does for ThunderMan's cloud; through the paused opening,
+  where the battle timer reads 0, it is BN6's own flag.
+- **His 0x38 asks his CurAction** (`NAVI_WORDS`): its spawner keeps him at
+  its +0x4C and its update runs while his CurAction reads 10, BN6's 12.
+
+And what was his alone: a pattern of panels highlighted by BN4's routine
+copied (`0x08009EF6`: its side passed plain, BN6's packed), its table BN6's
+of the same 24 patterns (`bn4_twins.DATA_TWINS`); his flames' collision
+region's spawner (`0x080D4002`) and a leaf of 0x7C's copied, the object it
+hands back in r0 known as spawned (`SPAWN_WRAPPERS`), so its element goes to
+BN6's +0x0E; a hit's push word paired (`0x08013444`, BN6's `0x0801A4D0`);
+a byte stored to his collision's flashing past a `strb`'s reach made a
+`strh` at BN6's +0x24 (`STRB_WIDENS`); the region's spawn word `0x04050101`
+a number. The comparator: his flames' sprite counts by the fight's frames
+while their own update keeps the battle's offset (legit.json's bn4
+`navi_opening_art`, its objects), his 0x37's and 0x38's spawn's r4 each
+game's leftover, his pool sounds (0xA8 at 0x32, 0x14C at 0x33, 0x14D at
+0x63) in his battles alone.
+
+`bn4_burnerman_control` PASSes. **`burnerman_v1` PASSes** over its 1200
+fight frames. Four mutations break his port and each is caught: his second
+flame in his first's slot (t1), his 0x38's test of his CurAction left at
+BN4's 10 (t1154), his flames' region's element at BN4's +0x17 (t121) and
+his sound 0xA8 at the pool's second slot (t123). Not reached by
+`burnerman_v1`, MegaMan idle: the state that stores his flashing
+(`0x080BE034`), and his SP's palette (2).
 
 ## What tools/xnavirecipe.py needs for BN4
 

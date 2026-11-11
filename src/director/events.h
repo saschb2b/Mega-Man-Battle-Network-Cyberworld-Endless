@@ -4,6 +4,9 @@
 #ifndef CW_EVENTS_H
 #define CW_EVENTS_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 enum {
 	EV_BATTLE_START = 1,   /* StartBattle, as any battle begins: r0 its record */
 	EV_MEGAMAN_HIT,        /* MegaMan's HP lowered, in a watched battle (emu_battle_watch) */
@@ -15,10 +18,16 @@ enum {
 	EV_JOB,                /* SetEventFlag on one of the jobs' flags at home (job_words.h): r0 the flag */
 	EV_CHIP_GIVEN_WIDE,    /* a chip past 511 given (xchips_wide.h: no flag of BN6's Library holds it): r0 the chip */
 	EV_CHIP_WATCHED,       /* a chip the folders' milestones watch ran for MegaMan (meta_chip_watched: a Program Advance, a Recovery chip): r0 the chip */
+	EV_FOE_DELETED,        /* a virus deleted (BN6's dying state, BN6_FOE_DYING): r0 its AI index, r1 its version, r2 its side */
 };
 
 /* The hooks for the map, flag and key item events, once the core is up
  * (the battle's: emu_encounters_install). */
 void events_install(void);
+/* EV_FOE_DELETED taken up: a virus of the enemies' deleted in a run's own
+ * battle (`counted`: none of a Virus Battler's round) joins the run's
+ * battle data (battle_data.h; docs/game/battle-lab.md, The gauge); never a
+ * dive of the week's net's. */
+void events_foe_deleted(const uint32_t r[3], bool counted);
 
 #endif

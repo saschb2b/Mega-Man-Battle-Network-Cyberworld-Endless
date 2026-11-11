@@ -107,8 +107,9 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 complexity, the ROM offsets docs/rom/
                                 names, the files git tracks, each against its
                                 baseline in tests/lint (--update writes them
-                                anew), and docs/symbols as tools/symbols.py
-                                writes it; a new finding fails
+                                anew), and the generated files' sources and
+                                that a branch leaves those files to dev
+                                (tools/generated.py); a new finding fails
   python3 build.py package      build/port/cyberworld (for PortMaster-New) and the port's zip
 """
 import argparse
@@ -2659,12 +2660,15 @@ def lint_offsets(update):
                         'this list only shrinks: build.py lint --update after naming one', Counter(found), update)
 
 
-def lint_symbols():
-    """docs/symbols and docs/rom/symbols.md's numbers as tools/symbols.py writes them from
-    the headers, rom.c and docs/rom/, and every name in bn6.h and bn5.h
-    described (docs/rom/symbols.md); needs no bn6f."""
+def lint_generated():
+    """The files tools write from the tree (tools/generated.py: docs/symbols and
+    docs/rom/symbols.md's numbers, docs/re's status, the voice catalog): their
+    sources sound (every name in bn6.h and bn5.h described, the ledger's shape,
+    the words files read through), and the files themselves left as dev has
+    them, where its workflow writes them after each push
+    (docs/project/merging.md). On main and a tag, in step with their sources."""
     sys.stdout.flush()
-    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'generated.py'), 'check']) == 0
 
 
 def lint_free_space():
@@ -2708,14 +2712,6 @@ def lint_dispatch_numbers():
         print(f'lint: tools/xchiprecipe_bn4.py: {b}')
     print(f"lint: the dispatch's numbers of BN4's: {len(bad)} of BN5's own")
     return not bad
-
-
-def lint_voice():
-    """docs/voice/catalog.json as tools/voice_catalog.py writes it from the
-    words files: every line the voice review's dashboard shows, in step
-    with the code (docs/voice/README.md)."""
-    sys.stdout.flush()
-    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'voice_catalog.py'), '--check']) == 0
 
 
 def lint_itch():
@@ -2938,10 +2934,9 @@ def lint(update=False):
     ok = lint_files()
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
-    ok = lint_symbols() and ok
+    ok = lint_generated() and ok
     ok = lint_free_space() and ok
     ok = lint_dispatch_numbers() and ok
-    ok = lint_voice() and ok
     ok = lint_docs() and ok
     ok = lint_itch() and ok
     ok = lint_ps5_param() and ok
@@ -3001,8 +2996,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
-        if code == 0:   # docs/re's status in step with its ledger
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
+        if code == 0:   # docs/re's ledger sound (its written files are dev's workflow's: tools/generated.py)
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--lint'])
         if code == 0:   # the voice catalog's reading of C (tools/voice_catalog.py)
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_voice_catalog.py')])
         if code == 0:   # the agents' tools (tools/cw.py and its MCP server)

@@ -32,6 +32,7 @@
 #include "online_visit.h"
 #include "area_src.h"
 #include "backup.h"
+#include "battle_data.h"
 #include "test_backup.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -149,8 +150,20 @@ static bool flag_was_set(int flag) {
 }
 bool flag_get(int flag) { (void)flag; return false; }
 void flag_clear(int flag) { (void)flag; }
-bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
-bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
+/* (no saves here but the run's battle data, kept in memory: its tally read back as a checkpoint's) */
+static struct { uint8_t bytes[1024]; size_t n; uint32_t magic; } data_blob;
+bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
+	if (strcmp(name, "run.data") || n > sizeof data_blob.bytes) return false;
+	memcpy(data_blob.bytes, data, n);
+	data_blob.n = n;
+	data_blob.magic = magic;
+	return true;
+}
+bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
+	if (strcmp(name, "run.data") || !data_blob.n || data_blob.magic != magic || data_blob.n != n) return false;
+	memcpy(data, data_blob.bytes, n);
+	return true;
+}
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 /* (another game's songs: no core to copy them into) */
@@ -1225,6 +1238,27 @@ static void test_extras(void) {
 	}
 	CHECK(brackets * 100 >= shorts * 30 && brackets * 100 <= shorts * 55, "brackets in %d short nets of %d, not about five in twelve", brackets, shorts);
 	CHECK(glitches > 0 && dropped == 12, "%d Glitch layers, %d Battlers' layers made without him", glitches, dropped);
+	/* (Older nets off with BN4's ROM read: no visitor of BN4's, whose rewards are BN4's chips; on, they come,
+	 * docs/multirom/bn4-chips.md, EXTRAS; BN4's kin alone, as a game with BN6's and BN4's ROMs has them) */
+	memset(&run, 0, sizeof run);
+	run.seed = 0xB4;
+	int kin5 = test_nkin[VISIT_BN5], kin4 = test_nkin[VISIT_BN4], here = 0;
+	test_nkin[VISIT_BN5] = 0;
+	test_nkin[VISIT_BN4] = 1;
+	for (int off = 0; off < 2; ++off) {
+		run.extras_off = off ? 1 << EXTRA_OLDER : 0;
+		for (int d = 4; d <= 13; ++d)
+			for (int b = 0; b < BIOME_COUNT; ++b) {
+				bool deep = b == BIOME_UNDERNET || b == BIOME_GRAVEYARD || b == BIOME_NEST;
+				here += !off && visitors_here(d, b);
+				CHECK(!off || !visitors_here(d, b), "a BN4 visitor on layer %d, area %d, with Older nets off", d, b);
+				for (int i = 0; off && !deep && i < 8; ++i)
+					CHECK(!visitor_due((uint32_t)(d * 31 + b), i, d, b, ENC_NORMAL), "a BN4 visitor due on layer %d with Older nets off", d);
+			}
+	}
+	CHECK(here > 0, "no BN4 visitor anywhere with Older nets on and BN4's kin");
+	test_nkin[VISIT_BN5] = kin5;
+	test_nkin[VISIT_BN4] = kin4;
 	profile.best_depth = best;
 	run = before;
 }
@@ -4201,12 +4235,24 @@ static void test_xnavi_static(void) {
 			"xnavi: Team ProtoMan's AI %d off its seat", n);
 		CHECK(id >= BN6_ENEMY_IDS_COUNT && ((id >= XN_FIRST_ID && id + 4 <= XN_IDS_END) ||
 			(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END)), "xnavi: Team ProtoMan's AI %d's ids from %#x", n, id);
-		for (int m = 1; m <= 16; ++m)
+		for (int m = 1; m <= 18; ++m)
 			CHECK(m == n || (XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m)), "xnavi: AI %d's ids meet AI %d's", n, m);
 	}
+	/* (LarkMan's and GridMan's seats, BN5's AI 17-18: seats 17-18, AI 43-44 between the Darkloids' and BN4's, ids past
+	 * Team ProtoMan's last two, apart from every other seat's) */
+	for (int n = 17; n <= 18; ++n) {
+		int id = XN_ID_OF(n);
+		CHECK(XN_SEAT(n) == n && XN_AI_OF(n) == XN_NEBULA_FIRST_AI + n - 17 && XN_AI_OF(n) > XN_AI_OF(BN5_NAVI_COSMOMAN) &&
+			XN_AI_OF(n) < XN_BN4_FIRST_AI && XN_KIND_OF(n) < 64, "xnavi: AI %d off its seat", n);
+		CHECK(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END, "xnavi: AI %d's ids from %#x", n, id);
+		for (int m = 1; m <= 16; ++m)
+			CHECK(XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m), "xnavi: AI %d's ids meet AI %d's", n, m);
+	}
+	CHECK(XN_NEBULA_HOMES + XN_NEBULA_SEATS * XV_HOME_SIZE <= XN_NEBULA_CODE && XN_NEBULA_CODE + XN_NEBULA_SEATS * XN_NEBULA_SLOT_CODE <= XN_NEBULA_ART &&
+		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 16, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy and GridMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5992,7 +6038,7 @@ static void test_library_pages(void) {
 	CHECK(library_rows_check(back, 2) == 2 && library_rows_check(twice, 2) == 2 && library_rows_check(cls, 1) == 1 && library_rows_check(none, 1) == 1 && !library_rows_check(rows, 5),
 		"library: a number out of order, a chip twice, a fourth class and no chip refused");
 	/* (what plays: the registry's own over BN6's code or moved, no DarkChip, no Program Advance; BN6's by its pool, none without its ROM) */
-	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(600), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");
+	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
 	library_count(LIB_BN5, LIB_STD, &held, &of);
@@ -6005,22 +6051,50 @@ static void test_library_pages(void) {
 	profile = kept;
 }
 
+/* Every song of every game's music player is in the Jukebox, once
+ * (docs/game/pet.md, The Jukebox): each game's songs on its music player
+ * (player 31), read from its song table (docs/research/sources.md, The
+ * Jukebox's songs), and the ones left out on purpose, each with why. A
+ * game the engine reads (1 + XRomId) without its range here fails, so the
+ * next ROM's songs cannot be forgotten. */
+static const struct { const char *name; int first, last; } juke_music[] = {
+	{ "BN6", 0x01, 0x25 },   /* (its 0x00 no song) */
+	{ "BN5", 0x01, 0x24 },   /* (its 0x00 no song) */
+	{ "BN4", 0x00, 0x21 },   /* its title is 0x00 */
+};
+static const struct { int game, song; const char *why; } juke_left_out[] = {
+	{ 1, 0x0A, "an empty header on player 0, no music" },
+};
+
 static void test_jukebox_songs(void) {
-	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
+	enum { SONGS = 0x40 };
+	_Static_assert(sizeof juke_music / sizeof *juke_music == JUKE_GAMES, "a music range for each of the Jukebox's games");
+	_Static_assert(JUKE_GAMES == 1 + XROM_COUNT, "the Jukebox takes BN6's songs and every other ROM's: a new ROM's songs go in jukebox_songs[]");
+	int seen[JUKE_GAMES][SONGS] = { { 0 } }, per[JUKE_GAMES][JUKE_KINDS] = { { 0 } }, want = 0;
 	for (int i = 0; i < jukebox_song_count; ++i) {
 		const JukeSong *s = &jukebox_songs[i];
-		CHECK(s->game < 2 && s->song < 0x26 && s->kind < JUKE_KINDS, "jukebox: song %d is game %d, song %#x, kind %d", i, s->game, s->song, s->kind);
-		if (s->game >= 2 || s->song >= 0x26 || s->kind >= JUKE_KINDS) continue;
+		bool ok = s->game < JUKE_GAMES && s->song < SONGS && s->kind < JUKE_KINDS;
+		CHECK(ok, "jukebox: song %d is game %d, song %#x, kind %d", i, s->game, s->song, s->kind);
+		if (!ok) continue;
+		CHECK(s->song >= juke_music[s->game].first && s->song <= juke_music[s->game].last, "jukebox: %s's song %#x is past its music player's %#x-%#x",
+			juke_music[s->game].name, s->song, juke_music[s->game].first, juke_music[s->game].last);
 		++seen[s->game][s->song];
 		++per[s->game][s->kind];
 		CHECK(s->title && strlen(s->title) > 0 && strlen(s->title) <= JUKE_TITLE_MOST, "jukebox: song %d's name \"%s\" past a row", i, s->title ? s->title : "");
 	}
-	for (int song = 0x01; song <= 0x25; ++song) CHECK(seen[0][song] == 1, "jukebox: BN6's song %#x listed %d times", song, seen[0][song]);
-	for (int song = 0x01; song <= 0x24; ++song) CHECK(seen[1][song] == (song == 0x0A ? 0 : 1), "jukebox: BN5's song %#x listed %d times", song, seen[1][song]);
-	CHECK(seen[1][0x25] == 0 && seen[0][0] == 0 && seen[1][0] == 0, "jukebox: a song past the music player's");
-	for (int g = 0; g < 2; ++g)
-		for (int k = 0; k < JUKE_KINDS; ++k) CHECK(per[g][k] <= JUKE_SECTION_MOST, "jukebox: section %d of game %d holds %d", k, g, per[g][k]);
-	CHECK(jukebox_song_count == 37 + 35, "jukebox: %d songs", jukebox_song_count);
+	for (int g = 0; g < JUKE_GAMES; ++g) {
+		CHECK(jukebox_game_tags[g] && strlen(jukebox_game_tags[g]) > 0, "jukebox: game %d has no tag", g);
+		for (int song = juke_music[g].first; song <= juke_music[g].last && song < SONGS; ++song) {
+			const char *why = NULL;
+			for (size_t k = 0; k < sizeof juke_left_out / sizeof *juke_left_out; ++k)
+				if (juke_left_out[k].game == g && juke_left_out[k].song == song) why = juke_left_out[k].why;
+			want += why ? 0 : 1;
+			CHECK(seen[g][song] == (why ? 0 : 1), "jukebox: %s's song %#x listed %d times%s%s", juke_music[g].name, song, seen[g][song],
+				why ? ", left out: " : "", why ? why : "");
+		}
+		for (int k = 0; k < JUKE_KINDS; ++k) CHECK(per[g][k] <= JUKE_SECTION_MOST, "jukebox: section %d of %s holds %d", k, juke_music[g].name, per[g][k]);
+	}
+	CHECK(jukebox_song_count == want && want == 37 + 35 + 34, "jukebox: %d songs, %d wanted", jukebox_song_count, want);
 }
 
 static void test_sound_filter(void) {
@@ -6749,7 +6823,7 @@ static void test_analytics(void) {
 	analytics_count_zenny(&econ, 1200, false);
 	analytics_count_zenny(&econ, -5, false);
 	analytics_run_end(false, "HeatMan", &econ);
-	CHECK(strstr(stats_sent[4], "\"chips\":2,\"good\":1,\"md\":1,\"zenny\":1700,\"chips1\":1,\"good1\":1,\"md1\":1,\"zenny1\":500"),
+	CHECK(strstr(stats_sent[4], "\"chips\":2,\"good\":1,\"md\":1,\"zenny\":1700,\"chips1\":1,\"good1\":1,\"md1\":1,\"zenny1\":500,\"data\":"),
 		"statistics: run-end counts the run's economy, its first act's beside it (%s)", stats_sent[4]);
 	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"run-end\",\"data\":{\"won\":false,\"layer\":7,\"area\":\"") &&
 		strstr(stats_sent[4], "\"by\":\"HeatMan\"") && strstr(stats_sent[4], "\"minutes\":42") && strstr(stats_sent[4], "\"net\":\"short\""),
@@ -7477,8 +7551,61 @@ static void test_area_views(void) {
 	}
 }
 
+/* The battle data on virus families (docs/game/battle-lab.md, The gauge):
+ * a run's deletions wait in its tally and join the profile at its end, a
+ * family complete at DATA_COMPLETE of any version, its versions those
+ * deleted; a checkpoint's tally read back counts no battle twice, and a
+ * run left without its end is counted as the next begins. */
+static void test_battle_data(void) {
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	battle_data_begin(11);
+	for (int i = 0; i < DATA_COMPLETE - 1; ++i) battle_data_deleted(1, 0);
+	battle_data_deleted(40, 4);
+	CHECK(battle_data_count(1) == DATA_COMPLETE - 1 && !battle_data_complete(1) && battle_data_versions(1) == 1 && battle_data_versions(40) == 0x10 &&
+		!battle_data_families_complete() && !profile.data_count[1], "battle data: a run's deletions wait in its tally, %d of family 1", battle_data_count(1));
+	battle_data_deleted(1, 2);
+	CHECK(battle_data_complete(1) && battle_data_versions(1) == 5 && battle_data_families_complete() == 1, "battle data: complete at %d of any version, its versions those deleted (%02x)",
+		DATA_COMPLETE, battle_data_versions(1));
+	battle_data_deleted(0, 0);
+	battle_data_deleted(DATA_FAMILIES, 0);
+	battle_data_deleted(2, DATA_VERSIONS);
+	CHECK(!battle_data_count(0) && !battle_data_count(DATA_FAMILIES) && !battle_data_count(2), "battle data: no family 0, none past the last, no version past the Rares");
+	/* (a checkpoint, two battles more, then the checkpoint again: the two are gone) */
+	battle_data_save();
+	battle_data_deleted(1, 1);
+	battle_data_deleted(1, 1);
+	battle_data_load(11);
+	CHECK(battle_data_count(1) == DATA_COMPLETE && battle_data_versions(1) == 5, "battle data: a CONTINUE counts from its checkpoint (%d)", battle_data_count(1));
+	int completed = battle_data_run_end();
+	CHECK(completed == 1 && profile.data_count[1] == DATA_COMPLETE && profile.data_versions[1] == 5 && profile.data_count[40] == 1 && profile.data_versions[40] == 0x10,
+		"battle data: the run's end puts its tally in the profile, %d families completed", completed);
+	CHECK(battle_data_count(1) == DATA_COMPLETE && !battle_data_run_end() && profile.data_count[1] == DATA_COMPLETE, "battle data: counted once, the tally gone with the run");
+	/* (a run left without its end: its checkpoint's tally joins the profile as the next run begins, once) */
+	battle_data_begin(12);
+	for (int i = 0; i < 3; ++i) battle_data_deleted(40, 0);
+	battle_data_save();
+	battle_data_deleted(40, 0);
+	battle_data_begin(13);
+	CHECK(profile.data_count[40] == 4 && profile.data_versions[40] == 0x11 && battle_data_count(40) == 4, "battle data: a run left without its end, counted to its checkpoint (%d)", profile.data_count[40]);
+	battle_data_begin(14);
+	CHECK(profile.data_count[40] == 4, "battle data: and once (%d)", profile.data_count[40]);
+	/* (a tally of another run is no CONTINUE's) */
+	battle_data_deleted(40, 0);
+	battle_data_save();
+	battle_data_load(15);
+	CHECK(battle_data_count(40) == 4, "battle data: another run's tally is not this one's (%d)", battle_data_count(40));
+	profile.data_count[7] = 250;
+	battle_data_begin(16);
+	for (int i = 0; i < 10; ++i) battle_data_deleted(7, 3);
+	CHECK(battle_data_count(7) == 255 && !battle_data_run_end() && profile.data_count[7] == 255, "battle data: a count stops at 255");
+	memset(&data_blob, 0, sizeof data_blob);
+	profile = keep;
+}
+
 int main(void) {
 	test_sha1();
+	test_battle_data();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();

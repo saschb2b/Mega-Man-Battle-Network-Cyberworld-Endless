@@ -263,6 +263,7 @@ static void take_events(void) {
 		/* (a Program Advance or a Recovery chip in a run's battle: the
 		 * Z-Canon and Busting folders' milestones, docs/game/meta/) */
 		case EV_CHIP_WATCHED: folder_milestone_chip((int)ev[i].r[0]); break;
+		case EV_FOE_DELETED: events_foe_deleted(ev[i].r, !D.battler); break;
 		/* (a chip past 511 into the pack: the Library's, which BN6's flags hold to 511) */
 		case EV_CHIP_GIVEN_WIDE: library_chip_given((int)ev[i].r[0]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at

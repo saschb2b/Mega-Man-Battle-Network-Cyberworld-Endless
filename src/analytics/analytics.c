@@ -14,6 +14,7 @@
 
 #include "analytics_payload.h"
 #include "analytics_text.h"
+#include "battle_data.h"
 #include "extras.h"
 #include "guardians.h"
 #include "meta.h"
@@ -351,6 +352,8 @@ void analytics_run_end(bool won, const char *by, const AnalyticsEconomy *e) {
 	json_int(&j, "good1", e->good1);
 	json_int(&j, "md1", e->md1);
 	json_int(&j, "zenny1", (int)e->zenny1);
+	/* (the virus families whose battle data is complete: battle_data.h) */
+	json_int(&j, "data", battle_data_families_complete());
 	payload_send(&j, true, false);
 }
 

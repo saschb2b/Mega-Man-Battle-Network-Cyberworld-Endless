@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **BN4 Red Sun joins the NetPass's full set.** NetBattles, trades and
+  the week's DeepNet now need BN4 Red Sun (USA) beside BN6 and BN5 Team
+  Colonel. The Square stays open to every game. A pass that was full
+  shows a new open slot, the greeter tells you once, and the stamps land
+  again when you add BN4's ROM. BN4's chips go into NetBattles and trades
+  as each is proved; one not yet proved stays out. Online play speaks
+  protocol v17: an older build and this one no longer meet.
+- **BurnerMan in the tournament.** With BN4's ROM beside BN6's, BurnerMan
+  of Red Sun joins BN4's tournament as a round, his flames burning in
+  BN6's battle as in BN4's, proved frame by frame against BN4's own battle.
+- **SparkMan in the tournament.** With BN4's ROM beside BN6's, SparkMan
+  of Red Sun joins BN4's tournament as a round, fought in BN6's battle as
+  BN4 fights him, proved frame by frame against BN4's own battle.
 - **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
   Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
   fights him: his spinning top, his dashes and his sounds, each proved

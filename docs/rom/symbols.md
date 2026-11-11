@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:55:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -98,29 +98,29 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
-| Code (routines, hooks, instructions) | 371 | 43 | 122 |
-| ROM data (tables, text, literals) | 331 | 279 | 163 |
-| ROM, code or data not told | 572 | 665 | 222 |
+| Code (routines, hooks, instructions) | 372 | 43 | 127 |
+| ROM data (tables, text, literals) | 331 | 280 | 184 |
+| ROM, code or data not told | 572 | 673 | 233 |
 | RAM (variables, structures) | 139 | 66 | 39 |
 | I/O registers | 3 | 0 | 0 |
 | Fields of structures | 180 | 45 | 3 |
 | Event flags | 35 | 3 | 2 |
 | Values of fields | 113 | 16 | 3 |
-| Constants, sizes and counts | 594 | 293 | 350 |
-| All | 2338 | 1410 | 904 |
+| Constants, sizes and counts | 597 | 295 | 356 |
+| All | 2342 | 1421 | 947 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | PET, mail and key items | 72 | 1 | 1 |
 | Shops and traders | 40 | 0 | 0 |
-| NaviCust | 21 | 2 | 0 |
-| Chips and folders | 372 | 265 | 47 |
-| Battle | 597 | 394 | 251 |
+| NaviCust | 21 | 2 | 1 |
+| Chips and folders | 372 | 265 | 48 |
+| Battle | 597 | 396 | 271 |
 | Text and fonts | 44 | 8 | 4 |
-| Sound | 26 | 30 | 14 |
+| Sound | 28 | 30 | 14 |
 | Maps and the overworld | 136 | 42 | 26 |
 | Events and progress | 65 | 19 | 13 |
-| Engine core | 965 | 649 | 548 |
+| Engine core | 967 | 658 | 569 |
 
 <!-- end of what tools/symbols.py writes -->
 
@@ -342,9 +342,15 @@ about the games is looked up first.
 ## Keeping them in step
 
 `python3 build.py symbols` (or `python3 tools/symbols.py`) writes the files
-and this page's numbers of them. `python3 build.py lint`, in CI too, fails
-where a name in bn6.h or bn5.h has no description, or where a file in
-`docs/symbols` differs from what the generator writes; it needs no bn6f.
+and this page's numbers of them. `dev`'s workflow runs it after each merge
+and commits what it wrote ([Merging](../project/merging.md)): every branch
+that named an address changed these files, so any two conflicted there. A
+branch changes the headers and `docs/rom/` alone;
+`python3 build.py lint`, in CI too, fails where a name in bn6.h or bn5.h
+has no description (`tools/symbols.py --lint`), or where a branch changes a
+file in `docs/symbols` or the numbers under What is mapped
+(`python3 tools/generated.py restore` puts them back); on `main` it fails
+where a file differs from what the generator writes. It needs no bn6f.
 A new define needs its comment: its own, or a "..." that continues the one
 above, or a define above it in the same group whose comment names it
 (`BN6_PLAYER_X`'s "X, Y and Z"). The counts of bn6f's functions are written

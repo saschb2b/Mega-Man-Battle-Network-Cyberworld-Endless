@@ -80,6 +80,9 @@
 #define BN6_AI_HOOKS2         0x08011068u /* per AI index (BN6_HELD_AIS words), the routine it ends by (0x080114D5 each) */
 #define BN6_AI_HOOKS2_REF     0x0801105Cu /* ... its triple's virus word (read by 0x0801102A and 0x08011044, through 0x08011058) */
 #define BN6_DELETE_COUNTS     0x02000070u /* a virus deleted, per AI index (32 bytes, to 255): the rare versions' check reads them */
+#define BN6_FOE_DYING        0x08016620u /* the dying state (bn6f sub_80165F8) with the object's triple in r0 (version, actor type, AI index: its
+                                           * NameID's, from 0x080182B4), the object in r5: ldrb r1,[r0,#1], before the counts below are called */
+#define BN6_FOE_DYING_OP     0x7841u     /* ... that instruction */
 #define BN6_DELETE_COUNT      0x0802D644u /* the count raised as a virus of version 0-3 is deleted: r0 its AI index (bn6f's dying state, 0x0801662E) */
 #define BN6_DELETE_COUNT_READ 0x0802D652u /* ... read: r0 the AI index (the rare versions' check, 0x080ABFA6), the count back in r0 */
 #define BN6_DELETE_RARE       0x0802D65Eu /* a version 4-5 deleted (0x08016636): r0 the AI index; with event flag 0x1D8 set and 0x196 + it clear

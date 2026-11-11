@@ -49,6 +49,7 @@ commits, issues and old notes) are mapped section by section in
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem, the Jukebox | [docs/game/pet.md](docs/game/pet.md) |
 | The chip Library, a page per entry (BN6, BN5, BN4): what each page lists and counts, its order and numbers, what the vaults and marks count | [docs/game/meta/library.md](docs/game/meta/library.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/game/rival.md](docs/game/rival.md) |
+| The Battle Lab: test battles set up in Lan's HP from the foes a profile's battle data has opened, fought without risk or reward; the owner's calls | [docs/game/battle-lab.md](docs/game/battle-lab.md) |
 | What is original, generated or adapted | [docs/game/fidelity.md](docs/game/fidelity.md) |
 | BN5's Liberation Missions dissected, how they join the run, and the generator that makes them afresh (its prototype in `tools/liberation.py`, BN5's own nine measured by `tools/liberation_bn5.py`) | [docs/game/liberation/](docs/game/liberation/index.md) |
 | The net's generated layers: the generator, identity, arrivals, props, set pieces | [docs/world/level-design/](docs/world/level-design/index.md) |
@@ -64,6 +65,7 @@ commits, issues and old notes) are mapped section by section in
 | Moving saves between systems: the `.cwsave` file, import, Undo, the automatic copy | [docs/engine/saves.md](docs/engine/saves.md) |
 | Online play (epic #120): the gate in Lan's HP, the Net Square, Trade Central, the Arena, the server and the wire | [docs/online/](docs/online/index.md); the gate in [docs/world/home/square-gate.md](docs/world/home/square-gate.md); hosting in [server/README.md](server/README.md); the wire in [shared/online/README.md](shared/online/README.md); the link cable and the Arena's engine in [docs/online/link.md](docs/online/link.md) and [docs/online/arena/](docs/online/arena/index.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md); the players' notes in [docs/releases/](docs/releases/index.md) |
+| How parallel PRs stay out of each other's way: the files `dev`'s workflow writes, what a branch does when it meets one, what conflicted and how often | [docs/project/merging.md](docs/project/merging.md) |
 | The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
@@ -216,8 +218,10 @@ Addresses stay in `docs/rom/` and claims in `docs/research/sources.md`;
 `tools/re_status.py` as `STATUS.md` and the dashboard), not a second
 address map. Every ROM fact a piece of work finds, research included, ends
 in the project's map: a name in a `src/emu/bn6*.h` header, its
-`docs/rom/` row, `tools/symbols.py` run, a ledger entry; notes in
-`.build/` alone are lost to it.
+`docs/rom/` row, a ledger entry; notes in `.build/` alone are lost to it.
+The files written from those (`docs/symbols/`, `docs/re/STATUS.md` and
+its dashboard) are `dev`'s workflow's to write, not a branch's
+(docs/project/merging.md).
 
 ## Game design
 
@@ -289,12 +293,15 @@ least is done twice:
    statistics measure first.
 3. **Merge the first** as soon as its checks are green. For each next
    one: bring `dev` in where git reports a conflict or the PRs share a
-   generated or counted file (`docs/voice/catalog.json`,
-   `docs/symbols/`, `LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`,
-   `tests/lint/` baselines, the economy's bands), regenerate those
-   rather than merging them by hand (`tools/voice_catalog.py`,
-   `tools/symbols.py`, the hash the unit tests name; two `LAYER_MAKE`
-   bumps become one), and reuse step 1's resolution for the rest. A PR
+   counted file (`LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`,
+   `tests/lint/` baselines, the economy's bands), set those anew
+   rather than merging them by hand (the hash the unit tests name; two
+   `LAYER_MAKE` bumps become one), and reuse step 1's resolution for the
+   rest. The generated files (`docs/symbols/`, `docs/re/STATUS.md`,
+   `docs/voice/catalog.json` and the rest of `tools/generated.py`'s) are
+   in no PR: `dev`'s workflow writes them after each merge, and a
+   conflict in one is `python3 tools/generated.py restore`
+   (docs/project/merging.md). A PR
    whose only change since its green checks is `dev` brought in, its
    resolution step 1 tested, merges at once without waiting on CI again;
    any other change waits for green.
@@ -312,7 +319,8 @@ each release, sweep what is left: every branch and worktree already in
 python3 build.py            # host + aarch64 binaries (Docker)
 python3 build.py test       # ROM-free unit tests
 python3 build.py lint       # the code's checks against tests/lint (--update after fixing one)
-python3 tools/voice_catalog.py   # docs/voice/catalog.json from the words files (--check: is it in step; build.py lint runs it)
+python3 tools/voice_catalog.py   # docs/voice/catalog.json from the words files, to read a line's flags here; dev's workflow commits it, a branch does not
+python3 tools/generated.py [write|check|restore]   # the files tools write (docs/re's status, docs/symbols, the voice catalog): dev's workflow's, restore puts a branch's back (docs/project/merging.md)
 python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.build/a.bmp"
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/cyberworld (PortMaster-New's layout) and the port's zip
@@ -389,7 +397,7 @@ pacing) stays local.
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in; where Lan's HP changes, MegaMan walked onto the pink pad from the corridor, its last frame in layer 1 (BN6's trigger stops short of the pad's art, session 74): `build.py shot --scene town --seed 2 --frames 1420 --input "$(python3 -c "print('40:,' + '4:A,6:,' * 46 + '30:,0:place -40 -8 7,10:,6:R,500:,' + '4:A,16:,' * 8 + '0:place 171 0 1,10:,25:UP+RIGHT,250:')")" --shot 1410:/src/.build/pad.bmp` (a fresh `--data-dir`), and again with `0:place 171 -5 1,10:,12:RIGHT,250:` for its last walk, MegaMan on the pad's left rim (session 75); where a pad's zone changes (`pad_art.c`), a layer's exit pad from its left rim too, docs/rom/net-maps.md's Warp pads |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input (`shot` from `layer --talk shop:430`) |
-| Lines (a words file: `*_words.c`, `*_lines.c`, `*_text.c`) | docs/voice/rules.md's checks; `python3 tools/voice_catalog.py` (the catalog regenerated and committed with the line, the flags of the lines touched read over), `build.py lint` (fails while it is stale), `build.py test`; a capture of the talk (`--talk`); the dashboard republished with the new catalog, and the reviews and directions acted on marked applied (docs/voice/README.md, A voice pass) |
+| Lines (a words file: `*_words.c`, `*_lines.c`, `*_text.c`) | docs/voice/rules.md's checks; `python3 tools/voice_catalog.py` (the flags of the lines touched read over, then `python3 tools/generated.py restore`: the catalog is `dev`'s workflow's to commit, docs/project/merging.md), `build.py lint`, `build.py test`; a capture of the talk (`--talk`); the dashboard republished with the new catalog, and the reviews and directions acted on marked applied (docs/voice/README.md, A voice pass) |
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band, BN5's guardians among them), an autopilot run; where BN5's content changes, over `--net-biome x0`-`x5` and with `--guardian 24`-`29` too, fresh data folders, the run logs looked over |
 | Drops, prices, Mystery Data, dealers' stock, the economy's curves (`loot.c`'s rolls, `net_gen.c`'s data, `shop.c`, `economy.c`) | The game-design skill first; `build.py economy` (0 of the plan in play outside its bands; a number moved on purpose sets its band's centre in `economy.c`, the report's before and after in the commit), `build.py test` (`test_economy`, `LAYER_MAKE_HASH`), `build.py pacing` where a battle's reward changes |
 | Audio | `--render-song ID:SECONDS:PATH` (`x0/ID:...` BN5's song) and a listen on a device; where the engine's MP2K changes (`src/audio/mp2k*.c`, `gba_sound.c`), `python3 tools/mp2k_verify.py` (every song PASS against the game in romlab) |
