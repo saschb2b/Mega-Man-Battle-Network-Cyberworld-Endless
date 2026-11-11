@@ -3,7 +3,7 @@ type: Status
 title: "BN6 Gregar's own gaps"
 description: "The audit of 11 November 2026: what BN6 Cybeast Gregar's own ROM holds that a run does not use, kind by kind (Program Advances, chips, fights, NaviCust programs, music, the net's looks and boards, requests and traders), each verified by a ROM read, the code or a capture, or marked assumed, sized, and split into what is built without a call and what waits on the owner."
 tags: [multirom, bn6, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read by scratch scripts (not in git) and fought in BN6's engine by `build.py xdiff`'s engine specs"
@@ -152,10 +152,10 @@ play outside the Jukebox:
 | 0x02 Villains | Cutscenes of the WWW (Seaside Town, the Expo Site, Sky Town), 7+ text scripts | Before a guardian, or before the Undernet's Server |
 | 0x06 Seaside Town, 0x07 Sky Town, 0x08 Green Town, 0x24 ACDC Town | Their towns' maps (lists from 0x10, 0x40, 0x30; ACDC Town's in every list) | Home's town styles (`town.c` has Seaside, Green and ACDC behind a dev variable; no Sky): towns are the owner's (below) |
 | 0x0B Something's Up, 0x0C Crisis | The alarm lists (0x21-0x23, 0x31-0x32, 0x41-0x44, 0x52, 0x54) on the towns, Lan's house and the Academy; Crisis in eight cutscenes | Something's Up in town when an act brings news; Crisis on a layer's alarm (the Glitch layer, a dark layer's last phase) |
-| 0x0D Sorrow | The opening in ACDC Town, 7 text scripts | After a lost run |
+| 0x0D Sorrow | The opening in ACDC Town, 7 text scripts | **Played** (11 November 2026): a lost run's summary on the title, as BN6's staff roll plays a won one's (`MUS_SORROW`) |
 | 0x0E Good Times | Academy and Expo cutscenes, 7 text scripts | Home after an act won |
 | 0x18 Pavilion, 0x25 Expo | The Expo Site's maps (lists 0x60, 0x62; 0x61) | The Net Square's halls, Trade Central |
-| 0x22 Showdown | Story record 0's music byte, the one record naming it; no script found starts it | Chaud's duel ([The rival](../game/rival.md)) |
+| 0x22 Showdown | Story record 0's music byte, the one record naming it; no script found starts it | **Played** (11 November 2026): ProtoMan's netbattle, the rivalry's top rung ([The rival](../game/rival.md)) |
 | 0x23 The Chase | Not found (no code immediate, decoded script or record names it; assumed a scene bn6f has not decoded) | A timed escape |
 
 Each is **S** to place; where it plays changes what a moment says, so
@@ -200,7 +200,9 @@ Built without a call, one pull request each, cheapest first:
 2. **CrosOver from a run's Django chips** (**S**): built.
 3. **NumbrOpn** in the pool (**S**): built.
 4. **Songs where BN6 plays them** (**S** each), through the
-   game-design skill.
+   game-design skill: Showdown and Sorrow placed; the rest wait on a
+   moment of the run that is theirs (Crisis: the Glitch layer already
+   flips its own theme), or on the towns.
 5. **GBeast SP before Bass BX** (**M**), as the super bosses' plan has it.
 6. **The RV six** on the Graveyard after Bass SP (**M**), the trigger now
    traced.

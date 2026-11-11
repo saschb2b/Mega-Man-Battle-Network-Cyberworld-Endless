@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "analytics.h"
+#include "battle_data.h"
 #include "bn6.h"
 #include "chip_pool.h"
 #include "meta_text.h"
@@ -325,6 +326,7 @@ bool meta_run_was_open(void) { return was_open; }
 void meta_run_begun(void) {
 	was_open = profile.run_open == RUN_OPEN;
 	profile.run_open = RUN_OPEN;
+	battle_data_begin(run.seed);
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
 	for (int n = 1; n <= 5; ++n)
@@ -413,6 +415,8 @@ static void earn_marks(bool won) {
 void meta_run_over(bool won) {
 	nsaid = 0;
 	marks_new = 0;
+	/* (the run's battle data on the families it deleted: battle_data.h) */
+	battle_data_run_end();
 	/* the endless net, once a short one is won */
 	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
 	if (won) profile.short_wins += run.mode == RUN_SHORT;
