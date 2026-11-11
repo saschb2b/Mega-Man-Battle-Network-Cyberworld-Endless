@@ -139,23 +139,23 @@ AUDITS = {
                                      "to the object's +0xE, its low four bits to the collision data's +2 and its high four (BN6's second "
                                      "wheel's flags, none in a BN4 chip's element byte but the icon's the comparison names) to its +0x19"),
 }
-# The dispatch's numbers the chips' moved types take, by kind: the fourth kind's from 0x91 up, past BN5's 145 types (its own
-# numbers in the tables) and below BN4's families' and Navis' (0xE0 on); the third kind's are BN5's own numbers (0-0xCB; the
-# families' and Navis' 0xCC on are spent: tools/xrecipe_bn4.py TYPE_MORE, LATE_TYPES) that no track of BN5's moves and no
-# Navi of BN5's not yet moved will: the dispatch's MOVED table is one for every game, so a type of BN5's moved later takes
-# its own number there. tools/bn5_twins.py dispatch_reserved names them all, and numbers_reserved (here and in build.py
-# lint) refuses a number of TYPES3 or TYPES3_NAVIS among them; numbers_clear checks each taken against every recipe.
+# The dispatch's numbers the chips' moved types take, by kind. The fourth kind's from 0x91 up, past BN5's 145 types (its own
+# numbers in the tables) and below BN4's families' and Navis' (0xE0 on), each checked against every other recipe
+# (numbers_clear). The third kind's are BN4's own type numbers: the chips' units have a page of the dispatch to themselves
+# (src/emu/xvirus_dispatch.h, BN4's chips' page; XV_TYPE_MOVED4), since the tables' MOVED is one for every game and BN5's
+# own numbers, which its Navis and chips come to need, are all that was left there (the first twelve units took such
+# numbers until 11 November 2026). So a type is one unit's (PAGE3) unless every unit of a kind shares it (SHARED3), a
+# call to BN4's third-kind spawner goes to the page's (PAGE_SPAWNERS), and no immediate changes.
 TYPES4 = (0x91, 0xE0)
-# A number is a unit's by UNITS' order, so the tuple only grows at its end, and a number a BN5 track comes to need is
-# replaced in its place (the unit that held it moves alone, its specs run again): 11 November 2026, Counter's 0xC8 and
-# WhitWeb's 0xC6 (GridMan's), the spread shot's 0xBE and FlmLine's 0xBD (Nebula Grey's) and Thunder's 0xBB (LarkMan's)
-# became 0xB4, 0xAE, 0xAD, 0xA9 and 0xA3. Past the taken ones, top down
-TYPES3 = (0xCA, 0xC9, 0xB4, 0xAE, 0xC5, 0xC4, 0xC3, 0xC2, 0xAD, 0xA9, 0xA3, 0xB9,
-          0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C, 0x96, 0x91, 0x8E, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73,
-          0x6E, 0x67, 0x65, 0x57, 0x55, 0x54, 0x53, 0x52, 0x50, 0x4E, 0x4C, 0x4B, 0x49)
-# ... and BN4's Navis' track's, the lowest of the same numbers, taken from 0x01 up (tools/xnavirecipe_bn4.py, once its own
-# 0xCC-0xFF are spent)
-TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x3F, 0x32, 0x2E, 0x2D, 0x2C, 0x28, 0x1A, 0x13, 0x11, 0x0F, 0x0A, 0x08, 0x06, 0x03, 0x01)
+PAGE_SPAWNERS = {'XV_SPAWN_3': 'XV_SPAWN4_3', 'XV_SPAWN_3_LAST': 'XV_SPAWN4_3_LAST', 'XV_SPAWN_3_FIRST': 'XV_SPAWN4_3_FIRST'}
+# BN4's Navis' track's third-kind numbers of the tables once its own 0xCC-0xFF are spent (tools/xrecipe_bn4.py type_number
+# reads this tuple at the take, from the lowest up): BN5's own numbers that no track of BN5's moves and no Navi of BN5's
+# not yet moved will (tools/bn5_twins.py dispatch_reserved names those; numbers_reserved here and build.py lint refuse one
+# of them in this tuple). Its second half is the 41 numbers the chips' units held or had ahead before their page.
+TYPES3_NAVIS = (0x48, 0x47, 0x46, 0x3F, 0x32, 0x2E, 0x2D, 0x2C, 0x28, 0x1A, 0x13, 0x11, 0x0F, 0x0A, 0x08, 0x06, 0x03, 0x01,
+                0xCA, 0xC9, 0xC5, 0xC4, 0xC3, 0xC2, 0xB9, 0xB4, 0xAE, 0xAD, 0xA9, 0xA3, 0xA2, 0xA1, 0xA0, 0x9F, 0x9E, 0x9C,
+                0x96, 0x91, 0x8E, 0x80, 0x7D, 0x7A, 0x77, 0x76, 0x75, 0x73, 0x6E, 0x67, 0x65, 0x57, 0x55, 0x54, 0x53, 0x52,
+                0x50, 0x4E, 0x4C, 0x4B, 0x49)
 # The units written, in install order: (kind, BN4's subfamily, a name); CANDIDATES for the report alone. Append-only, one
 # unit a line: a unit's home, its dispatch numbers, its effects' ids and its sprites' list numbers follow its place here,
 # so a unit put before another renumbers every one after it. Where two branches add units, the one merged first keeps
@@ -367,7 +367,7 @@ class Alloc(X4.Alloc):
         # (the art has no place of its own: the room's rows, c_unit; `art` only counts what the units draw)
         self.code, self.code_end, self.art, self.art_end, self.room = X4C_CODE, X4C_ART, X4C_ART, X4C_ART + 0x10000000, 'BN4\'s chips'
         self.types = {1: 0x100, 3: 0x100, 4: TYPES4[0]}
-        self.types3 = list(TYPES3)
+        self.page3 = {}           # (a third-kind type of the chips' page: the unit that moves it)
         self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
         self.late_list1 = CHIP_LIST1[0]
         self.list3_sprites = {}   # (BN4's list 3 number copied: the copy)
@@ -428,13 +428,14 @@ def shape_of(b4, b6, f, entry):
     return ty
 
 
-def type_number(f, alloc, kind):
-    """the dispatch's next number of a kind for a chip's moved type"""
+def type_number(f, alloc, kind, ty=None):
+    """the dispatch's number of a kind for a chip's moved type: the third kind's BN4's own, on the chips' page (one unit's:
+    a second unit that moves it a decision, SHARED3 its answer); the fourth kind's next"""
     if kind == 3:
-        if not alloc.types3:
-            f.decide('type', 'the chips\' third-kind dispatch numbers (TYPES3) are spent')
-            return 0
-        return alloc.types3.pop(0)
+        who = alloc.page3.setdefault(ty, f.name)
+        if who != f.name:
+            f.decide('type', f'its third-kind type {ty:#x} is {who}\'s on the chips\' page: one copy a type (SHARED3)')
+        return ty
     n = alloc.types[kind]
     alloc.types[kind] += 1
     if kind != 4 or n >= TYPES4[1]:
@@ -553,6 +554,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         C.spawns4(f, alloc)
     finally:
         X4.type_number = saved
+    f.spawn_calls = {t: PAGE_SPAWNERS.get(name, name) for t, name in f.spawn_calls.items()}
     for k, a, t in f.types:   # (the first unit to move a shared type owns it)
         if k == 3 and t in SHARED3 and t not in alloc.shared3:
             alloc.shared3[t] = (a, f.name)
@@ -1055,10 +1057,13 @@ def c_unit(f):
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
         L.append('};')
     L.append(f'static const XvType {n}_types[] = {{')
-    L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, moved, the dispatch\'s {a:#x} */'
-          for k, a, t in f.types]
-    L += [f'\t{{ {k}, 0x{a:02X}, XV_TYPE_SHARED, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, {who}\'s copy: the dispatch\'s {a:#x} */'
-          for k, a, t, who in f.shared]
+    # (the third kind's by BN4's own number on the chips' page, XV_TYPE_MOVED4; the fourth kind's at a number of the tables)
+    for k, a, t in f.types:
+        where = "the chips' page" if k == 3 else f"the dispatch's {a:#x}"
+        L.append(f'\t{{ {k}, 0x{a:02X}, XV_TYPE_MOVED{4 if k == 3 else ""}, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, moved, {where} */')
+    for k, a, t, who in f.shared:
+        where = '' if k == 3 else f": the dispatch's {a:#x}"
+        L.append(f'\t{{ {k}, 0x{a:02X}, XV_TYPE_SHARED{4 if k == 3 else ""}, 0x{t:02X} }},   /* BN4\'s {X4.KIND_NAMES[k]}-kind {t:#x}, {who}\'s copy{where} */')
     L.append('};')
     if f.attack_sprites:
         L.append(f'static const XvSprite {n}_sprites[] = {{')
@@ -1126,14 +1131,15 @@ def c_file(units):
 
 
 def numbers_reserved():
-    """no number of TYPES3 or TYPES3_NAVIS is one a track of BN5's moves or a Navi of BN5's not yet moved will
+    """no number of TYPES3_NAVIS, and none of TYPES4's run, is one a track of BN5's moves or a Navi of BN5's not yet moved will
     (tools/bn5_twins.py dispatch_reserved); the same check as build.py lint's, which needs no ROM"""
     held = bn5_twins.dispatch_reserved(3)
-    bad = [f'{name}\'s {n:#04x} is {held[n]}' for name, ns in (('TYPES3', TYPES3), ('TYPES3_NAVIS', TYPES3_NAVIS)) for n in ns
-           if n in held]
+    bad = [f'TYPES3_NAVIS\'s {n:#04x} is {held[n]}' for n in TYPES3_NAVIS if n in held]
+    held = bn5_twins.dispatch_reserved(4)
+    bad += [f'TYPES4\'s {n:#04x} is {held[n]}' for n in range(*TYPES4) if n in held]
     if bad:
         sys.exit('xchiprecipe_bn4: a dispatch number of BN4\'s is BN5\'s own: ' + '; '.join(bad) +
-                 ' (replace it in its place by a number of the tuple\'s end, and run the unit that held it again)')
+                 ' (take it out of the tuple; a Navi that held it takes another and runs again)')
 
 
 def numbers_clear(units):
@@ -1145,7 +1151,7 @@ def numbers_clear(units):
             text = fh.read()
         for f in units:
             for k, a, t in f.types:
-                if re.search(rf'\{{ {k}, 0x{a:02X}, ', text, re.I):
+                if k != 3 and re.search(rf'\{{ {k}, 0x{a:02X}, ', text, re.I):
                     sys.exit(f'xchiprecipe_bn4: {n} names the dispatch\'s {k}:{a:#x}, which {f.name}\'s moved type takes: another number')
 
 

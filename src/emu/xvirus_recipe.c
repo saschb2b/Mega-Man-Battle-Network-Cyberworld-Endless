@@ -170,7 +170,9 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
-		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
+		/* (a chip unit of BN4's: the page's spawner for a third-kind one, xvirus_dispatch.h) */
+		bool page = spawner && f->game == XROM_BN4_RED_SUN_US && c->to == xvirus_dispatch4_spawner(c->from);
+		if ((c->to & 1) || (spawner ? c->to != spawner && !page : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
 			!(r != &families && navis_routine(c->to | 1))))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
@@ -316,6 +318,8 @@ static bool art_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n
 		const XvType *t = &f->types[i];
 		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
 		if (t->to == xvirus_dispatch_type(t->kind) && t->to != XV_TYPE_SHARED) return no(why, n, "object type %#x as the dispatch's own", t->from);
+		if ((t->to == XV_TYPE_MOVED4 || t->to == XV_TYPE_SHARED4) && (t->kind != 3 || f->game != XROM_BN4_RED_SUN_US))
+			return no(why, n, "object type %d:%#x for BN4's chips' page, which runs BN4's third kind alone", t->kind, t->from);
 		for (int k = 0; k < i; ++k)
 			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}
