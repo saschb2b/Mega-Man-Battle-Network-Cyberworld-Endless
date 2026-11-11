@@ -68,6 +68,7 @@ TWINS = {
     0x08008C2A: (0x0800B9B0, 'chips'),   # its step 4 (+9): the chip's name shown
     0x08008EB8: (0x0800BC88, 'chips'),   # its step 12 (+9): its own work done, its state 8
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
+    0x08009E38: (0x0800CC52, 'chips'),   # a panel drawn as another type and side this frame (the panel changer's blink)
 }
 AUDITS = {
     (0x08008BD8, 0x0800B916): ('ok', "a support chip's object's state 0: its side's turn of the time freeze asked for and the state "
@@ -86,6 +87,12 @@ AUDITS = {
                                      "type +2 and its drawn type +6) and its own sound, but BN4's test of flag 0x20000 first, "
                                      "which only BN4's type 5 gives (BN4_PANEL_FLAGS_OF 0x30010; BN6's occupants' mask lacks that "
                                      "bit likewise): no BN6 panel type's word has it, so the test never holds in BN6"),
+    (0x08009E38, 0x0800CC52): ('ok', "a panel (r0 column, r1 row) marked to be drawn this frame as type r2 on side r3, the panel "
+                                     "changer's blink before it sets the type: BN4's in a byte table of its own (0x02037B36, row * 8 + "
+                                     "column: the type | 0x80 in the low bits, the side | 0x80 0x28 further), BN6's in the panel "
+                                     "itself (its +8 the type, +9 the side, +0xD 1); each game's panel draw reads its own and shows "
+                                     "the type for the frame, the type BN6's number where the changer's kinds' table is read in BN6's "
+                                     "terms (TABLES), BN4's Hole BN6's 15 (src/emu/xpanels.h)"),
 }
 # The dispatch's numbers the chips' moved types take, by kind: the fourth kind's from 0x91 up, past BN5's 145 types (its own
 # numbers in the tables) and below BN4's families' and Navis' (0xE0 on); the third kind's numbers no BN5 track names (BN5's
@@ -116,6 +123,7 @@ UNITS = (
     ('misc', 0x02, 'Boomer'),
     ('misc', 0x01, 'MokoRus'),
     ('misc', 0x05, 'SidBmbo'),
+    ('support', (0x0B, 0x3B), 'Hole'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -132,7 +140,18 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xF7: 0x1DE,                 # (WhitWeb's web)
                0xAB: 0x1DF,                 # (Boomer's boomerang)
                0xC7: 0x1E0,                 # (MokoRus's Moko)
-               0x8E: 0x1E1}                 # (SidBmbo's bamboo)
+               0x8E: 0x1E1,                 # (SidBmbo's bamboo)
+               0x105: 0x280, 0x106: 0x281,  # (the panel changer's: DrkStage's, Hole's and DrkLine's)
+               0x107: 0x282, 0x124: 0x29F}  # (the changer's as it sets its panels: SOUND_ADDS)
+# A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
+# each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
+# each that number
+SOUND_ADDS = {
+    0x080E447A: dict(sounds=(0x107, 0x124), add=0x17B,
+                     why="the panel changer's sound as it sets its panels (0x080E4460-0x080E447A): none for its kinds 9 and 0xA "
+                         "(Hole's, DrkLine's: beq past the call), 0x124 for 8 and 0xD (poison: movs r0,#0x25; adds r0,#0xff at "
+                         "0x080E4476), 0x107 for the rest (movs r0,#8; adds r0,#0xff at 0x080E446A), DrkStage's Holes 0xC"),
+}
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -147,6 +166,16 @@ TABLES = {
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
                          "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
                          "(0x080E5D3E: movs r4,#1)"),
+    0x080E423C: dict(size=14 * 0x14, entry=0x14, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     bytes={0: {2: 2, 4: 4, 6: 6, 7: 7, 9: 5, 0xB: 15}},
+                     bytes_why="+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 "
+                               "BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 15 (XPANEL_HOLE); its 5, 8 and "
+                               "0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The "
+                               "panel changer and the Hole panel)",
+                     why="the panel changer's kinds (BN4_PANEL_CHANGER_KINDS: 14 rows of 0x14 bytes, the panel type, the shape, "
+                         "the blink, the frames and the panel search's flags by side, the same words in both games), read by its "
+                         "init (0x080E43B0's literal), the row the chip's first parameter (Hole 9, DrkLine 0xA) or DrkStage's "
+                         "object's two (0xC and 0xD)"),
     0x080D31EC: dict(size=0x48, entry=12, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the boomerang's flights (the third kind's 0x32: six rows of three words, numbers alone, no sprite), in the "
                          "bytes before its routine"),
@@ -463,10 +492,12 @@ def sounds_of(b4, b6, f):
     it sounds, xrecipe.song_sig); else BN4's song copied into its slot of BN6's grown song table (SOUND_SLOTS) and the call
     made through a shim of the unit's home that makes r0 the slot, a number past what a movs names (XvSoundCall), the
     instructions that made BN4's number left as they are"""
-    ids = {}
+    ids, added = {}, set()
     for e, w in f.walks.items():
         for site, t in w.bls.items():
-            if t == X4.BN4['sound']:
+            if t == X4.BN4['sound'] and site in SOUND_ADDS:
+                added.add(site)
+            elif t == X4.BN4['sound']:
                 ids.setdefault(T.back_value(w, site, 0)[0], []).append(site)
     if None in ids:
         f.decide('sound', f'a sound played at {", ".join(f"{s:08X}" for s in ids[None])} made otherwise')
@@ -504,6 +535,22 @@ def sounds_of(b4, b6, f):
             f.queue_calls.append(dict(at=site, slot=slot, why=f'its sound {v:#x}: BN4\'s song at the grown table\'s slot {slot:#x}'))
         f.notes.append(f'its sound {v:#x} ({", ".join(f"{s:08X}" for s in sorted(ids[v]))}): BN4\'s song copied into the grown song table\'s '
                        f'slot {slot:#x}, on BN4\'s player {player}')
+    for site in sorted(added):
+        x = SOUND_ADDS[site]
+        for v in x['sounds']:
+            slot = SOUND_SLOTS.get(v)
+            if slot != v + x['add'] or not SOUND_SLOT0 <= slot < SOUND_SLOT_END:
+                f.decide('sound', f'its sound {v:#x} at {site:08X} (SOUND_ADDS) needs its slot {v + x["add"]:#x}, SOUND_SLOTS gives {slot}')
+                continue
+            if X4.song_sig(b4, X4.BN4['songs'], v) == X4.song_sig(b6, X4.SONGS6, v):
+                f.notes.append(f'its sound {v:#x} at {site:08X}: BN6\'s of the same number the same song, copied all the same (SOUND_ADDS)')
+            f.sounds.append((v, slot))
+            player = b4.u16(X4.BN4['songs'] + 8 * v + 4)
+            f.notes.append(f'its sound {v:#x} ({site:08X}, one of the call\'s: SOUND_ADDS): BN4\'s song copied into the grown song table\'s '
+                           f'slot {slot:#x}, on BN4\'s player {player}')
+        f.queue_calls.append(dict(at=site, slot=x['add'], add=True,
+                                  why=f'its sounds {", ".join(f"{v:#x}" for v in x["sounds"])}: BN4\'s numbers plus {x["add"]:#x}, '
+                                      f'their slots of the grown table ({x["why"]})'))
 
 
 def registry_rows():
@@ -715,7 +762,7 @@ def c_unit(f):
         L.append('};')
     if f.queue_calls:
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
-        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X} }},   /* {x["why"]} */' for x in f.queue_calls]
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X}{", true" if x.get("add") else ""} }},   /* {x["why"]} */' for x in f.queue_calls]
         L.append('};')
     if f.sounds:
         L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')

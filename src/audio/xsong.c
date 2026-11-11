@@ -492,6 +492,10 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xC7, SONG_GROWN_FIRST + 6 },
 	/* ... SidBmbo's bamboo */
 	{ XROM_BN4_RED_SUN_US, 0x8E, SONG_GROWN_FIRST + 7 },
+	/* ... the dark chips' from 0x280 (the range tools/xchiprecipe_bn4.py gives them): the panel changer's, its last two its
+	 * numbers plus 0x17B, as one call plays both (SOUND_ADDS) */
+	{ XROM_BN4_RED_SUN_US, 0x105, 0x280 }, { XROM_BN4_RED_SUN_US, 0x106, 0x281 }, { XROM_BN4_RED_SUN_US, 0x107, 0x282 },
+	{ XROM_BN4_RED_SUN_US, 0x124, 0x29F },
 };
 
 int xsong_sound_slot(int xrom, int song) {
