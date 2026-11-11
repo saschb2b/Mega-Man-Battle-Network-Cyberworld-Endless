@@ -289,6 +289,8 @@ int director_dev_chip(const char *spec) {
 	int got = sscanf(spec, "%i %3s %d", &id, code, &n);
 	int c = code[0] == '*' ? CHIP_CODE_STAR : code[0] >= 'A' && code[0] <= 'Z' ? code[0] - 'A' : -1;
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	/* ("chip ID" alone: what the game holds of it, nothing changed) */
+	if (got == 1) return pack_report(id), 0;
 	if (got < 2 || id <= 0 || id > (int)CHIP_ID_MASK || c < 0 || n < 1 || n > BN6_FOLDER_ENTRIES || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
 		printf("chip: %s is none (an id 1-%d, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec, (int)CHIP_ID_MASK);
 		return 0;
@@ -312,6 +314,7 @@ int director_dev_chip(const char *spec) {
 		at ? emu_read8(at + 2) : -1, at ? emu_read8(at + 3) : -1,
 		/* (BN6 draws a chip in a code its record lacks blank in battle: no picture, no code, no effect) */
 		ci.ncodes && !strchr(ci.codes, letter) ? ": a code its record lacks, blank in battle" : "");
+	fflush(stdout);
 	return n;
 }
 

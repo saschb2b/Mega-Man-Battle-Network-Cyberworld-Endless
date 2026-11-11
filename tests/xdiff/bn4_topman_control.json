@@ -1,0 +1,10 @@
+{
+  "about": "BN4 Red Sun's TopMan V1 (BN4's enemy 0xB0, of the other build: no AI data, every state his own) alone at (5,2), MegaMan idle at (2,2) with 2000 HP: BN4's own battle on the guest core fought twice, each in a process of its own, its traces in BN6's units the same at every frame (the BN4 pipeline's control for him, before topman_v1 compares his move into BN6's engine: tools/xdiff_bn4.py; docs/multirom/bn4-navis.md, TopMan built)",
+  "game": "bn4",
+  "kind": "control",
+  "foes": "B0@52",
+  "mm": "22",
+  "hp": 2000,
+  "frames": 1200,
+  "seed": "12345678:9ABCDEF0"
+}

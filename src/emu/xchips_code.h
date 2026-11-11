@@ -73,5 +73,7 @@ bool xchips_bn4_navi_install(void);
 
 /* Whether `to` lies in BN4's units' code (XC4_CODE to XC4_ART: xchips_bn4.h), for a tool that tells whose a copy is. */
 bool xchips_bn4_code_at(uint32_t to);
+/* Whether chip `id` (BN6's tables') is one of BN4's whose code is a unit's (the registry's XREG_MOVED row) */
+bool xchips_bn4_moved(int id);
 
 #endif

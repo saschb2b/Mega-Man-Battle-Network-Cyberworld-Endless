@@ -169,6 +169,10 @@
 #define RAM_PA_WIDE          0x0203FFFCu             /* u32 the Program Advances past nine bits formed this battle, a bit an id from BN6_PA_WIDE_FIRST (side 0's: BN6's own bits end at id 383) (xchips_wide.c) */
 #define RAM_BATTLE_END       0x02040000u
 
+/* ---- save: 0x0E006810-0x0E007E00, the cart's save RAM between BN6's save (0x0E000100-0x0E00680F) and its three small blocks (from 0x0E007E00): BN6's save library addresses none of it, and every state the engine writes holds it ---- */
+#define SRAM_PACK            0x0E006A00u             /* the chip pack's entries of ids 635-1023: 16 bytes that say they are made, then 12 bytes an id (BN6_PACK_SAVE, bn6_pack_entry) (xchips_pack.c) */
+#define SRAM_PACK_END        0x0E007C50u
+
 /* The plan as tables: X(name, start, end, parent, zone), in address order,
  * a part after its parent ("" none); X(key, start, end) the zones */
 #define FREE_SPACE_ROM(X) \
@@ -277,5 +281,9 @@
 	X("persistent", 0x02010CE0u, 0x02011800u) \
 	X("mode", 0x02029A00u, 0x0202DA00u) \
 	X("battle", 0x0203FB50u, 0x02040000u)
+#define FREE_SPACE_SAVE(X) \
+	X("SRAM_PACK", 0x0E006A00u, 0x0E007C50u, "", "save")
+#define FREE_SPACE_SAVE_ZONES(X) \
+	X("save", 0x0E006810u, 0x0E007E00u)
 
 #endif

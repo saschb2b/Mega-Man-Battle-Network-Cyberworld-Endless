@@ -106,7 +106,7 @@ def bn4_moved_types():
 
 XV_ART = 0x08B80000   # (src/emu/xvirus_recipe.h: the families' art in BN6's free space, xdiff_snap.XV_CODE's end)
 XV_LATE_ART = 0x08800000 + 0x4D0000   # (src/emu/free_space.h FREE_LATE_FAMILIES: the late families' art, xvirus_recipe.h XV_LATE_ART)
-XC4_ART = 0x08800000 + 0x0EF000 + 0x30000   # (src/emu/xchips_bn4.h XC4_ART: BN4's chips' units' art, FREE_BN4_CHIPS + 0x30000)
+XC4_ART = 0x08800000 + 0x0EF000 + 0x24000   # (src/emu/xchips_bn4.h XC4_ART: BN4's chips' units' art, FREE_BN4_CHIPS + 0x24000)
 
 
 def bn4_sprites(rom4, foes=None):
@@ -729,6 +729,8 @@ BN4_LACKS = [
 # too (his side's, BN4_AI_DATA), so the virus masks of BN4_LACKS, which explain a virus's AI data BN4 has none of, never
 # hold for his
 NAVI_NAMES = set()
+# ... and the BN4_LACKS masks that may explain a Navi's: his AI data whole and its pointer, BN4 holding none (lacks)
+NAVI_NO_AI = ('bn4 no ai data', 'bn4 no ai data pointer')
 
 
 def navi_role(role):
@@ -744,9 +746,15 @@ def lacks(d, ta, tb):
     """the BN4_LACKS mask that explains d (BN4's side a, BN6's b), None where none does"""
     if ta['game'] != 4 or tb['game'] != 6:
         return None
-    if navi_role(d.role) and (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
-        return None
+    navi = navi_role(d.role)
+    if navi and not (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
+        navi = False
     for m in BN4_LACKS:
+        # (a Navi of the other build, TopMan's on: his BN4 object holds no AI data at all, +0x58 0, as a virus's, where BN6's
+        # Navi object gives every Navi one of its pool. Only the whole AI data and its pointer may be explained so, which hold
+        # only where BN4's has none: a Soul Navi's is BN4's own, BN4_AI_DATA, and never masked)
+        if navi and m['name'] not in NAVI_NO_AI:
+            continue
         if d.part != m['part']:
             continue
         if m.get('present') and d.off == 0 and d.a is False and d.b is True:
@@ -948,6 +956,7 @@ SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its 
 
 
 SPEC_SUBJECT = set()   # (the spec's subject, where it names one: bn6_sounds_alone)
+SPEC_CHIPS = set()     # (the spec's chips, BN4's ids of its folder4: a sound row of a chip unit's, its "chips", holds in their specs alone)
 SPEC_NAVI_CHIPS = set()   # (the run's ids of the moved Navi chips the spec's folder plays, MOVED_FAMILY's: bn4_sounds; compare sets it)
 
 
@@ -957,11 +966,13 @@ def bn4_sounds():
     a number another row pairs otherwise: ThunderMan's 0xAD, the thunder's launch's in BN4's own code) holds only in a battle
     of one of them, over the other"""
     rows = [r for r in json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', []) if 'bn4' in r]
-    mine = lambda r: bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
+    # (... and a row naming "chips", BN4's ids: a chip unit's copy of a number another row pairs otherwise, Thunder's ball's
+    # 0xAD, in the specs whose folder holds one of them alone, over the others)
     # (a row naming "navi_chips", a moved Navi chip's own Navi's sound: in a spec whose folder plays such a chip, over the rest)
-    held = lambda r: ('foes' not in r or mine(r)) and (not r.get('navi_chips') or bool(SPEC_NAVI_CHIPS))
+    scoped = lambda r: 4 if r.get('navi_chips') else 2 if 'chips' in r else 1 if 'foes' in r else 0
+    mine = lambda r: bool(SPEC_CHIPS & {int(x, 0) for x in r['chips']}) if 'chips' in r else bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
     return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
-            for r in sorted(rows, key=lambda r: ('foes' in r) + 2 * bool(r.get('navi_chips'))) if held(r)}
+            for r in sorted(rows, key=scoped) if (bool(SPEC_NAVI_CHIPS) if r.get('navi_chips') else not scoped(r) or mine(r))}
 
 
 def bn6_sounds_alone():
@@ -1626,6 +1637,8 @@ def compare(spec, ta, tb, canon, show=6):
                            any((int(e.split(':')[0], 16) if ':' in e else int(e, 16) & 0x1FF) == v for e in spec.get('folder6', [])))
     SPEC_FOES.clear()
     SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
+    SPEC_CHIPS.clear()
+    SPEC_CHIPS.update(int(x, 16) & 0x1FF for x in spec.get('folder4', []))
     stop, lines, ranks, before = None, [], {}, None
     left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()

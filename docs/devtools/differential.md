@@ -137,7 +137,11 @@ while his CurAction is a generic state's in both
 foe (the opening's alignment is the appear queue's first object's), so a
 burst's reach is seen by its effects' panels, and a chip used after a
 support chip follows BN6's support run's held frame, its objects with
-it: such a spec is not written yet.
+it: such a spec is not written yet. A sound row may name `chips`, BN4's
+ids: it holds in the specs whose `folder4` holds one of them alone, over
+the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
+where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
+ThunderMan's battles with the pool's slot).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every
@@ -771,7 +775,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   from UNITE to its end, became the two-game `soul_knight` with S2.)
 - **Engine specs** (`"kind": "engine"`): what BN6's engine does that
   BN5's has no twin of, fought in BN6 alone (`game=bn6`), MegaMan's
-  timeline held to the spec's `expect` in BN6's numbers (and `sounds`, a
+  timeline held to the spec's `expect` in BN6's numbers (its `chip` the
+  chip he uses next, the first kind's +0x2A: a Program Advance's id once
+  formed, BN6's own `pa_bn6_*`; and `sounds`, a
   song each that must begin): PASS or FAIL. `soul_cross` (HeatCross chosen
   on CROSSSELECT while KnightSoul is united: HeatCross from the next turn,
   the Soul gone, its used bit kept) and `soul_beast` (Beast Out's flag
@@ -1249,7 +1255,10 @@ format, its game 4: the trace's header names it):
   in BN4's misc state and for a waiting unit's subfamily alone; the
   count beside it is compared as ever);
   a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
-  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  every block of `FREE_BN4_CHIPS`' code, in a spec whose folder holds a
+  moved chip of BN4's; in any other spec none of it, since a unit may
+  copy code a family's own battle runs as BN4's: Thunder's unit BN4's
+  thunder, which Billy's battle runs where BN6's runs its own), so a draw one of its objects
   makes from the unit's own code is given BN4's of that place; a draw
   made while MegaMan runs stays the engine's (the shuffle's twin above);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's

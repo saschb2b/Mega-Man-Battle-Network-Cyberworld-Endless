@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T12:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
 ---
 
 # Portable saves
@@ -91,7 +91,10 @@ The profile's Library holds chip ids to 1023 (`library_w` after the
 rest: a profile saved before reads them 0, and a build before it reads
 a newer profile's `.cwsave` as made by a newer version), for [ten-bit
 chip ids](../multirom/bn4-chips.md). `run.state` holds BN6's RAM and so
-its folders' entries, in ten bits since ten-bit chip ids (`chip_entry.h`):
+its folders' entries, in ten bits since ten-bit chip ids (`chip_entry.h`),
+and the cart's save RAM, where the pack counts the chips of ids from 635
+([Memory the engine writes](emulation/memory.md), the save RAM's table: a
+state from before them is read as holding none):
 `RUN_MAGIC` is "CWED" (`save_format.h`; "CWEC" is Oran Isle's run.stop,
 nine-bit too); a run saved before ("CWEC", "CWEB", or an older format)
 is read as ever, and its folders go through the converter

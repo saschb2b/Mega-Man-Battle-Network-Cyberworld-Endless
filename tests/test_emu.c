@@ -13,7 +13,9 @@
  * dispatch's code (src/emu/xvirus_dispatch.c) run against spawners and
  * routines of the test's own. Then RAM the engine keeps patched, the
  * game's own bytes in the states it saves (emu.c, emu_keep); last, the
- * installers' claims through emu.c's writes and hooks (claims.h).
+ * installers' claims through emu.c's writes and hooks (claims.h), and the
+ * chip pack's routines with its entries in the cart's save RAM
+ * (tests/test_emu_pack.c).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -52,6 +54,7 @@
 #include "thumb_reloc.h"
 #include "xinstall_log.h"
 #include "xvirus_dispatch.h"
+#include "test_emu_pack.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
 Platform P;
@@ -1174,8 +1177,10 @@ int main(void) {
 	kept_ram();
 	claimed_writes();
 	kept_slots();
+	make_rom(rom);
+	failures += pack_checks(rom, ROM_SIZE, video);
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
 	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
-		"the second-level dispatch's code, the music and the effects silenced apart, RAM kept patched but in its states, the installers' writes claimed, what hooks keep a core put back\n");
+		"the second-level dispatch's code, the music and the effects silenced apart, RAM kept patched but in its states, the installers' writes claimed, what hooks keep a core put back, the chip pack's routines and its entries in the save RAM\n");
 	return 0;
 }

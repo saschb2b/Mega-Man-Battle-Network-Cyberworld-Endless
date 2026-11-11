@@ -4292,6 +4292,11 @@ static void test_free_space(void) {
 		"free space: the plan's regions in the ROM copy not whole");
 	CHECK(!plan_problems("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), ramz, (int)(sizeof ramz / sizeof *ramz), 0x02010CDCu, 0x02040000u, false),
 		"free space: the plan's regions in BN6's RAM not whole");
+	/* (the cart's save RAM: between BN6's save and its three small blocks, bn6_chips.h's BN6_SAVE_*) */
+	static const PlanRegion save[] = { FREE_SPACE_SAVE(PLAN_REGION) };
+	static const PlanZone savez[] = { FREE_SPACE_SAVE_ZONES(PLAN_ZONE) };
+	CHECK(!plan_problems("the save RAM", save, (int)(sizeof save / sizeof *save), savez, (int)(sizeof savez / sizeof *savez),
+		BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE, BN6_SAVE_BLOCK_1, false), "free space: the plan's regions in the cart's save RAM not whole");
 	/* (the check sees a region over the one before it, one outside its zone and a part outside its parent) */
 	const PlanRegion wrong[] = { { "a", 0x100, 0x200, "", "z" }, { "b", 0x1F0, 0x300, "", "z" }, { "c", 0x300, 0x500, "", "z" },
 		{ "d", 0x380, 0x480, "c", "z" }, { "e", 0x480, 0x600, "c", "z" } };
@@ -5337,16 +5342,36 @@ static void test_chip_entry(void) {
 		}
 	CHECK(wide && reward_chip(600, 0) == 0xA058, "reward: a chip past 511 in the wide form and back, 600 A as 0xA058");
 	/* (the pack's entries: BN6's own to 319, none for 320-410, the extension's in place from 411, the ids from 512 in
-	 * the entries of 320 on, none past them; no two ids one entry) */
+	 * the entries of 320 on, none for the 32 Program Advances' ids past them, the cart's save RAM's from 635 to the ids'
+	 * end, between BN6's own save and its small blocks; no two ids one entry) */
 	const uint32_t pack = 0x02002230u;
 	bool entries = bn6_pack_entry(pack, 1) == pack + 12 && bn6_pack_entry(pack, 319) == pack + 12 * 319 && !bn6_pack_entry(pack, 320) &&
 		!bn6_pack_entry(pack, 410) && bn6_pack_entry(pack, 411) == BN6_PACK_EXT + 12 * 91 && bn6_pack_entry(pack, 511) == BN6_PACK_EXT + 12 * 191 &&
 		bn6_pack_entry(pack, 512) == BN6_PACK_EXT && bn6_pack_entry(pack, 602) == BN6_PACK_EXT + 12 * 90 && !bn6_pack_entry(pack, 603) &&
-		!bn6_pack_entry(pack, 1023);
+		!bn6_pack_entry(pack, 634) && bn6_pack_entry(pack, 635) == BN6_PACK_SAVE && bn6_pack_entry(pack, 700) == 0x0E006D1Cu &&
+		bn6_pack_entry(pack, 733) == BN6_PACK_SAVE + 12 * 98 && bn6_pack_entry(pack, 1023) == BN6_PACK_SAVE + 12 * 388 && !bn6_pack_entry(pack, 1024);
 	for (unsigned a = 0; a < 1024 && entries; ++a)
 		for (unsigned b = a + 1; b < 1024; ++b)
 			if (bn6_pack_entry(pack, a) && bn6_pack_entry(pack, a) == bn6_pack_entry(pack, b)) entries = false;
+	CHECK(BN6_PACK_SAVE_FIRST == 635 && BN6_PACK_SAVE_FIRST == XREG4_REST_FIRST && BN6_PACK_SAVE_END == CHIPS_IDS && BN6_PACK_SAVE_BYTES == 4668 &&
+		BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE <= SRAM_PACK && BN6_PACK_SAVE_MARK == SRAM_PACK && BN6_PACK_SAVE + BN6_PACK_SAVE_BYTES <= SRAM_PACK_END &&
+		SRAM_PACK_END <= BN6_SAVE_BLOCK_1 && BN6_SAVE_BLOCK_1 + 0x28 <= BN6_SAVE_BLOCK_2 && BN6_SAVE_BLOCK_2 + 0x78 <= BN6_SAVE_BLOCK_3 &&
+		BN6_SAVE_BLOCK_3 + 0x80 == BN6_SAVE_RAM + BN6_SAVE_RAM_SIZE,
+		"pack: the save RAM's entries, ids 635-1023, between BN6's save (to %08x) and its small blocks (from %08x)",
+		(unsigned)(BN6_SAVE_MAIN + BN6_SAVE_MAIN_SIZE), (unsigned)BN6_SAVE_BLOCK_1);
 	CHECK(entries && BN6_PACK_EXT + 12 * 192 == RAM_PACK_EXT_END, "pack: every id's entry its own, the ids from 512 in the entries no pack counted");
+	/* (a chip of the save RAM's entries whole, id 700: a folder's entry of it and back, a reward of it, its place in the profile's
+	 * Library, its pack entry; the game's side of it, given, counted, saved in a state and loaded, runs on mGBA in
+	 * tests/test_emu_pack.c) */
+	uint16_t e700 = chip_entry(700, 3), r700 = reward_chip(700, 3);
+	Profile keep700 = profile;
+	memset(&profile, 0, sizeof profile);
+	bool held700 = chip_entry_id(e700) == 700 && chip_entry_code(e700) == 3 && reward_is_chip(r700) && reward_chip_id(r700) == 700 &&
+		reward_chip_code(r700) == 3 && meta_library_add(700) && meta_library_has(700) && !meta_library_has(699) && !meta_library_has(701) &&
+		profile.library_w[(700 - 512) / 8] == 1u << (700 % 8) && bn6_pack_entry(pack, 700) == BN6_PACK_SAVE + 12 * (700 - BN6_PACK_SAVE_FIRST);
+	profile = keep700;
+	CHECK(held700, "chip 700: a folder's entry %04x, a reward %04x, the Library's bit and the pack's entry %08x", e700, r700,
+		(unsigned)bn6_pack_entry(pack, 700));
 }
 
 static void test_chip_registry(void) {
@@ -5472,8 +5497,20 @@ static void test_chip_records(void) {
 	}
 	const XChipReg4 *hole = xreg4_of(82), *driver = xreg4_of(345);
 	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
-	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
-		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == folder4, "registry: BN4's 193 rows, 174 folder chips "
+		"(each with a pack entry, 99 of them in the save RAM) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	int saved4 = 0;
+	for (int i = 0; i < xreg4_count; ++i) saved4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) >= BN6_PACK_SAVE;
+	CHECK(saved4 == 99, "registry: BN4's folder chips from 635, 99, in the save RAM's entries (%d)", saved4);
+	/* (what a reward may name: an id with a pack entry, never 603-634, the Program Advances' and the gap's, which
+	 * xchips.c's reward_as pays as the stand-in's zenny; every BN4 row there a Program Advance, which no reward names) */
+	bool holds = !bn6_pack_holds(0) && bn6_pack_holds(1) && bn6_pack_holds(602) && bn6_pack_holds(635) && bn6_pack_holds(733) &&
+		bn6_pack_holds(1023) && !bn6_pack_holds(1024) && !bn6_pack_holds(320) && !bn6_pack_holds(410);
+	for (unsigned id = BN6_PACK_WIDE_END; id < BN6_PACK_SAVE_FIRST; ++id) holds = holds && !bn6_pack_holds(id);
+	for (int i = 0; i < xreg4_count; ++i)
+		if (xreg4_rows[i].bn6 >= BN6_PACK_WIDE_END && xreg4_rows[i].bn6 < BN6_PACK_SAVE_FIRST) holds = holds && xreg4_rows[i].how == XREG_PA;
+		else if (xreg4_rows[i].how != XREG_PA) holds = holds && bn6_pack_holds(xreg4_rows[i].bn6);
+	CHECK(holds, "pack: an entry for 1-319, 411-602 and 635-1023 alone; BN4's rows at 603-634 Program Advances, every folder row held");
 	/* (its DarkChips by their MB, docs/multirom/bn4-chips.md's unit 7: the five a run's finds never hold, a flame's) */
 	int dark4 = 0;
 	static const uint16_t darks4[] = { 187, 189, 190, 192, 193 };   /* DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage */
