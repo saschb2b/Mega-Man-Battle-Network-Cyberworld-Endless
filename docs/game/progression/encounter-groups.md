@@ -461,7 +461,7 @@ Left of step 1, each measured before step 2 rests on it:
 ### Step 2, the arc and the rewards, built
 
 In the engine since 12 November 2026, behind `--dev arc`: no run of a
-player's has an arc. The statistics' event is the rest of the step.
+player's has an arc.
 
 - **The arc** (`src/core/group_arc.c`, no ROM; its rules by act in
   `src/core/group_pool.c`): an act's signature by the run's seed and the
@@ -510,6 +510,19 @@ player's has an arc. The statistics' event is the rest of the step.
   ([What MegaMan knows](../meta/what-megaman-knows.md)). With the arc on
   it also stands where the deep's "Both Nets" and a territory's "Older
   Net" do.
+- **The statistics' event** (`act-battles`, `src/analytics/analytics.c`;
+  counted in `src/director/runlog.c`, kept with the run's other counts
+  in `run.tally`): as an act ends, its random battles on the main path,
+  the area's own and the groups' apart: how many were fought, won and
+  run from, the HP each cost on average in percent of MegaMan's max, the
+  mean busting level of those won; and of the act's arc its signature
+  family's number, whether it is one of the area's own, the beats fought
+  and the templates. It is sent today too, with the area's own battles
+  alone: the measure the groups are held against once they are on
+  ([The player's guide](../../GUIDE.md#anonymous-statistics) lists it).
+  Checked against a local stand-in for the statistics' server: an act
+  played with `--dev arc` sent 2 own battles and 2 group battles, the
+  signature and its two beats.
 - **What the rows pay** (`build.py pacing`, the acts' arcs: each beat's
   paying row against the rows of the area's own battles, their healthy
   halves): about as many chip entries (3.8 of ten against 3.2 in act 1,

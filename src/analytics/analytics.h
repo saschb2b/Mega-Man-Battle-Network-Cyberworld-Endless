@@ -112,6 +112,24 @@ enum {
 	CHOICE_DUEL, CHOICE_DUEL_WON, CHOICE_NETBATTLE, CHOICE_NETBATTLE_WON, CHOICE_FOLDER_EDIT,
 	CHOICE_BATTLER, CHOICE_BATTLER_ON, CHOICE_BATTLER_CASH, CHOICES
 };
+/* ... and an act's random battles (docs/game/progression/encounter-groups.md,
+ * the statistics' event): the area's own and an encounter group's apart,
+ * each how many were begun, won and run from, MegaMan's HP lost in them
+ * (percent of his max, added up) and the busting levels of those won
+ * (added up); of the act's arc, where it has one, its signature family
+ * (BN6's AI index: BN5's from 32, BN4's from 64; 0 none), whether that is
+ * one of the area's own, the beats fought (a bit each: alone, the pair,
+ * the constellation, the Server's) and the templates (a bit each) */
+typedef struct { uint16_t fought, won, left, bust; uint32_t hp_lost; } AnalyticsBattles;
+typedef struct {
+	int16_t act;          /* the act counted: the cycle's seven times over, plus the act (0-6); -1 none yet */
+	uint8_t whole;        /* counted from the act's first layer on */
+	uint8_t beats;
+	uint16_t templates;
+	int16_t signature;
+	uint8_t home;
+	AnalyticsBattles own, group;
+} AnalyticsAct;
 typedef struct {
 	uint32_t seed;
 	uint16_t chips, good, md, chips1, good1, md1;
@@ -120,6 +138,7 @@ typedef struct {
 	uint32_t map_frames, battle_frames;
 	uint32_t folder;    /* (the folder as last noted, a hash: its edits counted against it) */
 	uint32_t entered;   /* (the last layer whose kind was counted: a CONTINUE's rebuild counts it once) */
+	AnalyticsAct act;   /* (the act being fought: sent as it ends, analytics_act) */
 } AnalyticsEconomy;
 /* A chip found (`good` one), a Mystery Data opened, zenny earned, on the
  * run's first act (`act1`) or past it */
@@ -134,6 +153,9 @@ void analytics_count_choice(AnalyticsEconomy *e, int choice);
 /* ... and what the run chose, as it ends (`trips` back home: the Net's
  * clock), beside run-end: an event of its own, the payload's room */
 void analytics_run_choices(bool won, int trips, const AnalyticsEconomy *e);
+/* An act over, its guardian fallen (`cleared`) or the run ended in it:
+ * its random battles' counts (`a`), where any was fought */
+void analytics_act(const AnalyticsAct *a, bool cleared);
 
 /* A payload's most bytes, and the system's queue of them (its lock held
  * round each call): ANALYTICS_QUEUE at most wait, more are dropped, never
