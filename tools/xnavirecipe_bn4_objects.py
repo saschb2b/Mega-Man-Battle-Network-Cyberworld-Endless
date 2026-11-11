@@ -314,7 +314,8 @@ def list5_sprites(b4, b6, f, alloc):
                 s = alloc.effect_sprites.get((5, num), (None,))[0]
                 if s is None:
                     p, raw = X4.sprite(b4, X4.BN4['sprites'], 5, num)
-                    if raw is None or alloc.list5 >= X4.LIST5_END:
+                    X4.lists_room(alloc)
+                    if raw is None or X4.list5_spent(alloc.list5):
                         continue
                     s = dict(list=5, index=num, to_list=5, to_index=alloc.list5, at=alloc.art,
                              room=X4.rounded(len(raw), X4.ROOM_EFFECT), lz=bool(p & 0x80000000))
@@ -545,6 +546,7 @@ def list_tables(b4, f, alloc, kinds):
                 continue
             sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None)
             if sp is None:
+                X4.lists_room(alloc)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art,
                           room=X4.rounded(len(raw), X4.ROOM_ATTACK), lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)

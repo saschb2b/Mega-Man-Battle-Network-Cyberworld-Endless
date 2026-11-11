@@ -153,6 +153,30 @@ SONG_ART_END, SONG_STEP = ART0, 0x40
 # take theirs from the bottom (tools/xrecipe.py: effects from 0x6C, list 5 from 0x80; bn5_ranges_clear checks); a sprite of
 # a list BN6 has not grown for them (3) listed in list 4, as BN5's are (tools/xrecipe.py, BN6_EFFECT_LIST)
 EFFECT0, EFFECT_END, LIST5_0, LIST5_END, ROOM_EFFECT, EFFECT_LIST = 0x90, 0xA0, 0x98, 0xA0, 0x100, 4
+# ... and once 0x90-0x9F are spent (at MetalMan, the eleventh BN4 Navi), BN4's Navis' effects from 0xB1 up to 0xBF: past BN5's
+# Navis' 0xA0-0xB0 (xnavi_bn5.c), the low half of the BN4 chips' range (tools/xchiprecipe_bn4.py CHIP_EFFECTS, 0xCF down), split
+# with the chips' generator as the third kind's numbers are (TYPES3_NAVIS): (first, past the last)
+EFFECT_MORE = (0xB1, 0xC0)
+# ... and their lists' numbers past their own ranges likewise (list 5's 0x98-0x9F, list 4's from LIST4_0 up to BN5's chips'
+# 0xEF): the bottom of the chips' descending ranges (tools/xchiprecipe_bn4.py CHIP_LIST5 0xEF down, CHIP_LIST4 0x9F down)
+LIST4_END, LIST4_MORE, LIST5_MORE = 0xEF, (0x70, 0x80), (0xB0, 0xC0)
+
+
+def lists_room(alloc):
+    """the families' and Navis' next list 4 and list 5 numbers moved on into LIST4_MORE and LIST5_MORE where their own ranges
+    end (a number past both ranges is spent: list5_spent, list4_spent)"""
+    if alloc.list5 == LIST5_END:
+        alloc.list5 = LIST5_MORE[0]
+    if alloc.list4 == LIST4_END:
+        alloc.list4 = LIST4_MORE[0]
+
+
+def list5_spent(n):
+    return n >= LIST5_END and not LIST5_MORE[0] <= n < LIST5_MORE[1]
+
+
+def list4_spent(n):
+    return n >= LIST4_END or LIST4_MORE[1] <= n < LIST4_0
 BN5_RECIPES = os.path.join(ROOT, 'src', 'emu', 'xvirus_bn5.c')
 
 
@@ -1001,8 +1025,11 @@ def move_effect(b4, f, alloc, e4):
         alloc.effect_owner[e4] = f.name
         alloc.late_effect -= 1
     if e6 is None:
-        if alloc.effect >= EFFECT_END:
-            f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}) all taken')
+        if alloc.effect == EFFECT_END:
+            alloc.effect = EFFECT_MORE[0]
+        if alloc.effect >= EFFECT_MORE[1]:
+            f.decide('effect', f'its effect {e4:#x}: BN4\'s effect ids ({EFFECT0:#x}-{EFFECT_END - 1:#x}, {EFFECT_MORE[0]:#x}-'
+                               f'{EFFECT_MORE[1] - 1:#x}) all taken')
             return None
         e6 = alloc.effects[e4] = alloc.effect
         alloc.effect_owner[e4] = f.name
@@ -1017,8 +1044,10 @@ def move_effect(b4, f, alloc, e4):
     p, raw = sprite(b4, BN4['sprites'], lst, idx)
     to_list = 5 if lst == 5 else EFFECT_LIST
     late = getattr(f, 'late', False)
+    lists_room(alloc)
     num = (alloc.late_list5 if late else alloc.list5) if to_list == 5 else (alloc.late_list4 if late else alloc.list4)
-    if raw is None or (to_list == 5 and (num < LATE_LIST5[1] if late else num >= LIST5_END)) or (late and to_list != 5 and num < LATE_LIST4[1]):
+    if raw is None or (to_list == 5 and (num < LATE_LIST5[1] if late else list5_spent(num))) or (late and to_list != 5 and num < LATE_LIST4[1]) \
+            or (not late and to_list != 5 and list4_spent(num)):
         f.decide('effect', f'its effect {e4:#x}\'s sprite {lst}:{idx:#x} could not be read or numbered')
         return e6
     s = dict(list=lst, index=idx, to_list=to_list, to_index=num, at=alloc.art, room=rounded(len(raw), ROOM_EFFECT), lz=bool(p & 0x80000000))
@@ -1290,6 +1319,9 @@ def list4_number(f, alloc):
             f.decide('sprite', f'the late families\' list 4 numbers are spent ({n:#x} wanted)')
         alloc.late_list4 -= 1
         return n
+    lists_room(alloc)
+    if list4_spent(alloc.list4):
+        f.decide('sprite', f'the families\' and Navis\' list 4 numbers are spent ({alloc.list4:#x} wanted)')
     alloc.list4 += 1
     return alloc.list4 - 1
 

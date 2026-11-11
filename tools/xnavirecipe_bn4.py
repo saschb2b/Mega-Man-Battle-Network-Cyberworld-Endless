@@ -55,7 +55,8 @@ NAVIS = ((0x0A, 'GutsMan', 132), (0x32, 'ThunderMan', 148), (0x30, 'WindMan', 13
          (0x1D, 'Roll', 128),
          (0x46, 'WoodMan', 172),
          (0x47, 'JunkMan', 164),
-         (0x09, 'TopMan', 176))
+         (0x09, 'TopMan', 176),
+         (0x3F, 'MetalMan', 160))
 
 # BN4's Navi machinery (src/emu/bn4_navis.h): the pre-step, the state runner, the present (BN4_VIRUS_PRESENT, the
 # families' too), the dying, the type routine's after-step, the AI data's take: BN6's Navi object does their work
@@ -375,7 +376,7 @@ def navi_update(f, tw, uw):
     calls = [t for _, t in sorted(uw.bls.items())]
     if tcalls == [NAVI4['after']] and calls == [NAVI4['prestep'], NAVI4['runner'], NAVI4['present']]:
         return
-    if tcalls == [NAVI4['after']] and len(calls) > 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
+    if tcalls == [NAVI4['after']] and len(calls) >= 4 and calls[0] == NAVI4['prestep'] and calls[-2:] == [NAVI4['runner'], NAVI4['present']] \
             and all(f.lo <= t < f.hi for t in calls[1:-2]):
         I.navi_pres(f, uw)
         return
@@ -686,6 +687,7 @@ def list_moves(b4, f, alloc):
             sp = next((x for x in f.attack_sprites if (x['list'], x['index']) == (lst // 4, num)), None) or C.navi_sprite(f, alloc, lst // 4, num)
             if sp is None:
                 room = X4.rounded(len(raw), X4.ROOM_ATTACK)
+                X4.lists_room(alloc)
                 sp = dict(list=lst // 4, index=num, to_list=to, to_index=alloc.list4, at=alloc.art, room=room, lz=bool(p & 0x80000000))
                 f.attack_sprites.append(sp)
                 alloc.list4 += 1

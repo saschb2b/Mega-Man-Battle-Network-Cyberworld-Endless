@@ -77,6 +77,10 @@ TWINS = (
     # VolGear's (each body read): its held chips' attacks, each behind its held chip's test (0x080B52E4 at 0x080B6362 and
     # 0x080B6384; its +0x2A against 0xFFFF at 0x080B63BE), dead while it holds none
     (0x080E50AE, 0x0810A952, 'volgear'), (0x080B9704, 0x0810A952, 'volgear'), (0x080B3C1A, 0x0810A952, 'volgear'),
+    # MetalMan's (docs/multirom/bn4-navis.md, MetalMan built; each body read): a panel broken where it stands free (the chips'
+    # generator's pair, tools/xchiprecipe_bn4.py TWINS), his MetalGears' obstacle bookkeeping (added, removed, their lifetime)
+    (0x08009BAC, 0x0800C9F8, 'metalman'), (0x0800B230, 0x0800F614, 'metalman'), (0x0800B272, 0x0800F656, 'metalman'),
+    (0x0800B28E, 0x0800F672, 'metalman'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -223,6 +227,20 @@ AUDITS = {
     (0x080B9704, 0x0810A952): ('ok', "VolGear's held chip used, by Billy's routine (0x080B54D0's numbers, then 0x080E514E's "
                                      "attack: from 0x080B638C behind 0x080B52E4's test): dead while its +0x2A stays 0xFFFF: BN6's "
                                      "family nullsub"),
+    # (MetalMan's, read from both games' code)
+    (0x08009BAC, 0x0800C9F8): ('ok', "a panel (r0, r1) of a floor (0x10) with none of its occupants' flags broken (type 1, its flags' "
+                                     "low bits 1, the crack's sound), 1 back, else 0; BN6's the same at its offsets (flags +0x14, "
+                                     "type +2 and its drawn type +6) and its own sound, but BN4's test of flag 0x20000 first, "
+                                     "which only BN4's type 5 gives: no BN6 panel type's word has it (the chips' generator's "
+                                     "audit of the same pair, tools/xchiprecipe_bn4.py AUDITS)"),
+    (0x0800B230, 0x0800F614): ('ok', "an obstacle added to its side's list in the battle state (six words from BN4's +0x68, BN6's "
+                                     "+0xA0, the first free one taken): the same steps but for that adds, each game's own list"),
+    (0x0800B272, 0x0800F656): ('ok', "an obstacle taken out of that list (its word cleared where it is the object): the same steps "
+                                     "but for the list's place, BN4's +0x68, BN6's +0xA0"),
+    (0x0800B28E, 0x0800F672): ('ok', "an obstacle's lifetime (+0x20) counted down, at 0 its collision's region cleared and its HP "
+                                     "(+0x24) 0, its last 0xB4 frames blinking: BN6's the same steps with the battle's pause tested "
+                                     "(0x0800A03C) after the time stop both test, so its count stands while the battle is paused, "
+                                     "where BN4's counts on (BN4's states never run while paused: the families' lag, legit.json)"),
     (0x080B3C1A, 0x0810A952): ('ok', "VolGear's held chip 0x85 used, by Mettaur's routine (its other attack, 0x080E8ADA: from "
                                      "0x080B63F0, past its +0x2A compared with 0xFFFF at 0x080B63BE): dead while it holds none: "
                                      "BN6's family nullsub"),
