@@ -44,7 +44,11 @@ the catalog stale as a words file does.
   python3 tools/voice_catalog.py          write docs/voice/catalog.json
   python3 tools/voice_catalog.py --check  write nothing: fail when the file
                                           differs from what it would write
-                                          (build.py lint)
+  python3 tools/voice_catalog.py --lint   write and compare nothing: the words
+                                          files read through (build.py lint).
+                                          dev's workflow writes the file after
+                                          each push (tools/generated.py;
+                                          docs/project/merging.md)
 """
 import glob
 import hashlib
@@ -1353,6 +1357,10 @@ def main():
     check = '--check' in sys.argv[1:]
     text = render(catalog())
     path = os.path.join(ROOT, OUT)
+    if '--lint' in sys.argv[1:]:   # the words files read through; dev's workflow writes the file (tools/generated.py)
+        cat = json.loads(text)
+        print(f'voice: {cat["summary"]["lines"]} lines in {len(cat["files"])} words files, {cat["summary"]["flagged"]} flagged')
+        return 0
     if check:
         try:
             with open(path, encoding='utf-8') as f:

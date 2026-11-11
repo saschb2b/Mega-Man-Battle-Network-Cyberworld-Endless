@@ -13,7 +13,7 @@ try:
 except FileNotFoundError:
     _spec_text = (Path(__file__).resolve().parents[2] / "shared/online/protocol.json").read_text()
 SPEC = json.loads(_spec_text)
-HELLO = struct.Struct("!BHHI4s20s4s20s16sHB")
+HELLO = struct.Struct("!BHHI4s20s4s20s4s20s16sHB")
 STATE = struct.Struct("!BiiiB")
 PEER = struct.Struct("!I16siiiB16sB")
 PROFILE = struct.Struct("!HHBBBHHHBHI49s")
@@ -49,7 +49,8 @@ class ProtocolError(Exception):
 
 def read_hello(data):
     """HELLO checked: its name, guest key, channel, the ROMs its game has
-    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came)
+    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came,
+    roms_bn4 where BN4 Red Sun's did, v17)
     and whether it takes back a place held (the channel's hello_resume bit,
     protocol v10: a game come back after its link dropped, holds.py)."""
     # (which side is behind, so the game can say where the newer one is: the
@@ -61,7 +62,7 @@ def read_hello(data):
         raise ProtocolError("Protocol version mismatch", 2)
     if len(data) < HELLO.size:
         raise ProtocolError("Expected HELLO")
-    kind, version, make, square_hash, rom, digest, rom5, digest5, key, channel, length = HELLO.unpack_from(data)
+    kind, version, make, square_hash, rom, digest, rom5, digest5, rom4, digest4, key, channel, length = HELLO.unpack_from(data)
     if kind != SPEC["hello"] or len(data) != HELLO.size + length:
         raise ProtocolError("Malformed HELLO")
     if make > SPEC["square_make"]:
@@ -76,13 +77,18 @@ def read_hello(data):
     bn5 = any(rom5) or any(digest5)
     if bn5 and (rom5 != SPEC["bn5_code"].encode() or digest5.hex() != SPEC["bn5_sha1"]):
         raise ProtocolError("BN5 identity mismatch", 15)
+    # (BN4's, v17: the same, Red Sun's or none)
+    bn4 = any(rom4) or any(digest4)
+    if bn4 and (rom4 != SPEC["bn4_code"].encode() or digest4.hex() != SPEC["bn4_sha1"]):
+        raise ProtocolError("BN4 identity mismatch", 15)
     if not any(key):
         raise ProtocolError("A random guest key is required", 9)
     name = data[HELLO.size:]
     if not re.fullmatch(rb"[A-Za-z0-9][A-Za-z0-9 _-]{0,15}", name):
         raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
     resume = bool(channel & SPEC["hello_resume"])
-    return name.decode("ascii").rstrip(), key, channel & ~SPEC["hello_resume"], SPEC["roms_bn5"] if bn5 else 0, resume
+    roms = (SPEC["roms_bn5"] if bn5 else 0) | (SPEC["roms_bn4"] if bn4 else 0)
+    return name.decode("ascii").rstrip(), key, channel & ~SPEC["hello_resume"], roms, resume
 
 
 def hello_version(data):
@@ -96,21 +102,24 @@ def hello_version(data):
 def full_set(roms):
     """Whether a session's ROMs (HELLO's bits, as read_hello keeps them) are
     the full set: every bit of protocol.json's roms_full, BN5 Team Colonel's
-    today (BN6's identity every session has). The Square is every game's;
+    and BN4 Red Sun's (v17; BN6's identity every session has). The Square is every game's;
     the Arena, Trade Central and the week's posts take the full set, and
     refuse a session without it with NOTICE notice_pass (docs/online/netpass.md,
     The NetPass)."""
     return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
 
 
-def hello(name, key=None, channel=0, bn5=False, resume=False, **overrides):
+def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
     rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
+    # (BN4's with BN5's unless said: the full set, as a game with every ROM sends it)
+    bn4 = bn5 if bn4 is None else bn4
+    rom4 = (spec["bn4_code"].encode(), bytes.fromhex(spec["bn4_sha1"])) if bn4 else (bytes(4), bytes(20))
     channel |= spec["hello_resume"] if resume else 0
     return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
                       spec["square_hash"], spec["rom_code"].encode(),
-                      bytes.fromhex(spec["rom_sha1"]), *rom5, key or secrets.token_bytes(16), channel, len(name)) + name
+                      bytes.fromhex(spec["rom_sha1"]), *rom5, *rom4, key or secrets.token_bytes(16), channel, len(name)) + name
 
 
 def maintenance_line(text):
@@ -211,6 +220,13 @@ def chip_bn5(chip):
     """A chip only a game with BN5's ROM holds: past BN6's own ids, or one of
     BN6's blank records, where BN5's chips are installed (src/emu/bn6_chips.h)."""
     return chip > SPEC["bn6_chip_last"] or any(low <= chip <= high for low, high in SPEC["bn6_blank"])
+
+
+def chip_bn4(chip):
+    """A chip only a game with BN4's ROM holds (v17): BN4 Red Sun's own ids,
+    from protocol.json's bn4_chip_first (src/core/xchips_registry.h's
+    XREG4_PACK_FIRST); BN4's chips of a name BN6 or BN5 has are theirs."""
+    return chip >= SPEC["bn4_chip_first"]
 
 
 def read_trade(data):
