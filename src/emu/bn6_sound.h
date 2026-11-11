@@ -35,6 +35,9 @@
 #define BN6_SONG_ROW          8
 #define BN6_SONGS_EMPTY_SLOT  0x26 /* the first of BN6's own empty slots (bn6_families.h BN6_SONGS_EMPTY_FIRST): the shared header of no tracks, player 0 */
 #define BN6_SONG_COUNT        0x1DA /* its entries (474): the shared empty header (0x0815AE18) and the sounds' data follow it */
+/* Two of BN6's songs a run gives a place of its own (docs/multirom/bn6-gaps.md, Music) */
+#define BN6_SONG_SORROW       0x0D        /* bn6f's SONG_SAD: BN6's sad scenes (its opening in ACDC Town): a lost run's summary on the title */
+#define BN6_SONG_SHOWDOWN     0x22        /* bn6f's SONG_CROSSOVER_BATTLE: the music byte of BN6's story record 0, no other battle's: Chaud's netbattle */
 /* the five words that name the table, one a routine of the sound engine's that takes a song's number (m4aSongNumStart,
  * StartOrChange, StartOrContinue, Stop and Continue, in the library's order: each ldr r1,=table; lsls r0,#16; lsrs r0,#13;
  * adds r0,r1, no bound on the number): song_table.h points them at the grown copy */
