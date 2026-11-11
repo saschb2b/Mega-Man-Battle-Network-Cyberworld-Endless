@@ -223,4 +223,24 @@
                                            * flag (0x08013212 called where set), its sound (0x080DB05C plays it); kinds 0-2 sound
                                            * 0x91, 3 sound 0x8D; ThunSoul's ring kind 0 (seen in both traces) */
 
+/* The bombs (its chips of family 9: MiniBomb, EnergBom, MegEnBom, Binder1-3, BugBomb, Ball, Geyser, BlkBomb, VDoll,
+ * SeekBom1-3, DarkBomb): one state, a subfamily's spawner each. SeekBom1-3 (160-162, subfamily 9) moved as an attack unit
+ * of its own with a copy of the state (tools/xchiprecipe_bn4.py ATTACK_SUBS) */
+#define BN4_BOMBS_STATE       0x080EB3FEu /* MegaMan's state 9 (to 0x080EB51E): his animation 6, the arm (BN4_BOMBS_ARMS; none for Navis 5
+                                           * and 0xA), sound 0x90; at its count's 9 the subfamily's entry of BN4_BOMBS_SPAWNERS called with
+                                           * his place, the power and the element; 0x15 counts, then five more and the attack's end */
+#define BN4_BOMBS_SPAWNERS    0x080EB4C4u /* ... its spawners by subfamily, ten words: 0-2 0x080CE2B8, 3 0x080D2748, 4 0x080D3A58,
+                                           * 5 0x080D5B62, 6 0x080D645E, 7 0x080DC30C, 8 0x080DCA7C, 9 BN4_SEEKBOM_THROW */
+#define BN4_BOMBS_ARMS        0x080EB4ECu /* ... its arm's word by subfamily (u16: the animation << 8 | the kind; 0x2F subfamily 9's) */
+#define BN4_T3_SEEKBOM        0x8D        /* SeekBom's bomb, the third kind's (0x080DED60 to 0x080DEFEC): thrown onto the panel its throw
+                                           * found, it strikes what stands there and spawns the explosions' maker; sprite list 4's 0x24 */
+#define BN4_SEEKBOM_THROW     0x080DEEF2u /* ... subfamily 9's entry, in its code: the nearest foe's panel ahead looked for (0x080DEF1A),
+                                           * the bomb spawned for it (0x080DEED6) */
+#define BN4_T4_EXPLOSIONS     0x11        /* the explosions' maker, the fourth kind's (0x080E3328 to 0x080E33E8): its +4 its kind (its
+                                           * frames by 0x080E3368: 0x20, 0x5A, 0x20), its +5 the effect it spawns every four frames around
+                                           * its parent's place, its +6 whether it stays silent (sound 0x70) */
+#define BN4_EXPLOSIONS_SPAWN  0x080E33D4u /* ... its spawner, in its code (r4 its +4 to +7: SeekBom's bomb's movs r4,#2) */
+#define BN4_EXPLOSIONS_EFFECT 0x080E33B4u /* ... its ldrb r4,[r5,#5] before BN4_SPAWN_EFFECT (0x080E33B6): no immediate names the id; the
+                                           * copy's call goes through a shim that gives r4 BN6's (XvEffectCall, xvirus_shim.h) */
+
 #endif
