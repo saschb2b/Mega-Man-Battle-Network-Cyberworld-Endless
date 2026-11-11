@@ -633,6 +633,14 @@ def panel_type(f, w, addrs, k, i):
             return
 
 
+# Spawners' wrappers that hand back the object spawned in r0 (push {r0-r2,r5}; movs r0,#type; the spawn; adds r0,r5,#0; pop):
+# after their call r0 holds an object it spawned, its element to be written at BN6's place: address -> why
+SPAWN_WRAPPERS = {
+    0x080DCD3A: "the third kind 0x7C's spawner (BurnerMan's flames' collision region, from 0x080D4002): the object back in r0, "
+                "its element stored at +0x17 after (0x080D401E)",
+}
+
+
 def bases(i, coll, objs, spawned):
     """the registers that hold its collision data or an object it spawned, as the instruction leaves them"""
     if i.form == 'bl':
@@ -640,6 +648,8 @@ def bases(i, coll, objs, spawned):
         objs -= {0, 1, 2, 3}
         if i.target == BN4['create_coll']:
             coll.add(0)
+        if i.target in SPAWN_WRAPPERS:
+            objs.add(0)
         if i.target in SPAWNERS4:
             spawned[0] = True
         return
@@ -737,17 +747,48 @@ def battle_players(f):
                         index[r] = (made[0], i)
 
 
+# A moved object's word that holds the Navi who spawned it (his spawner's str r5,[r0,#off], called from his own states): by
+# its BN4 type, the word's offset -> why. His CurAction read through it (ldr rY,[r5,#off]; ldrb rX,[rY,#9]) and compared
+# with one of his own states is given BN6's number, as his own compares are
+NAVI_WORDS = {
+    0x38: (0x4C, "BurnerMan's 0x38: its spawner (0x080D4132, from his states at 0x080BE000 and 0x080BE0C4) keeps him at its "
+                 "+0x4C (0x080D4150), and its update runs while his CurAction reads 10 (0x080D40BA-0x080D40BE)"),
+}
+
+
+def navi_word_actions(f, w, addrs, k, i, regs, off):
+    """its Navi's CurAction read through its word at `off` (NAVI_WORDS) and compared with one of his own states: the compare
+    BN6's number; regs the registers holding him, as the instruction leaves them"""
+    if i.form == 'ldr' and len(i.f) == 3 and i.f[1:] == (5, off):
+        regs.add(i.f[0])
+        return
+    if i.form == 'ldrb' and len(i.f) == 3 and i.f[1] in regs and i.f[2] == 9:
+        for b in addrs[k + 1:k + 9]:
+            j = w.insns[b]
+            if j.form == 'cmp' and j.f[0] == i.f[0] and '#' in j.text and 6 <= j.f[1] <= 0xF:
+                f.imms.append(dict(at=b, form='THUMB_CMP', rd=j.f[0], rn=0, was=j.f[1], now=j.f[1] + 2,
+                                   why=f'its Navi\'s CurAction {j.f[1]} compared (through its +{off:#x}: NAVI_WORDS)'))
+            elif j.form in ('b', 'bx', 'bl') or T.is_return(j) or T.writes(j, i.f[0]):
+                break
+    for r in list(regs):
+        if r != 5 and T.writes(i, r) and not (i.form == 'ldr' and len(i.f) == 3 and i.f[1:] == (5, off) and i.f[0] == r):
+            regs.discard(r)
+
+
 def scan(f):
     """CurAction (in its own code: an attack's states are its own), a copied routine's panel type, the element's place, its
     collision data's offsets"""
     for e, w in sorted(f.walks.items()):
         addrs = sorted(w.insns)
-        coll, objs, spawned = set(), set(), [False]
+        coll, objs, spawned, navi = set(), set(), [False], set()
         reg = own_region(f, e)
+        word = NAVI_WORDS.get(reg[2]) if reg and isinstance(reg[2], int) else None
         for k, a in enumerate(addrs):
             i = w.insns[a]
             if not reg or reg[2] is None:
                 curaction(f, w, addrs, k, i)
+            if word:
+                navi_word_actions(f, w, addrs, k, i, navi, word[0])
             panel_type(f, w, addrs, k, i)
             field_imms(f, a, i, coll, objs)
             palette_imms(f, a, i, objs)
@@ -894,6 +935,10 @@ def words_of(f, pairs):
             if v in bn4_twins.NUMBERS:
                 if lit not in [x[0] for x in f.numbers]:
                     f.numbers.append((lit, v, v, bn4_twins.NUMBERS[v]))
+                continue
+            if v in getattr(bn4_twins, 'DATA_TWINS', {}):
+                if all(x[0] != v for x in f.words):
+                    f.words.append((v, bn4_twins.DATA_TWINS[v][0], bn4_twins.DATA_TWINS[v][1]))
                 continue
             kind = 'RAM' if v < 0x04000000 else 'I/O' if v < 0x05000000 else 'video' if v < 0x08000000 else 'ROM'
             f.decide('literal', f'{v:08X} ({kind}) at {lit:08X}: no twin known')

@@ -83,6 +83,11 @@ AUDITS = {
 }
 # the engine's routines his code calls with no BN6 twin, copied with him (tools/xnavirecipe_bn4.py NAVI_COPIED's way)
 COPIED = {
+    0x080D4002: "BurnerMan's flame's collision region spawned (r4 its word 0x04050101, r6 its damage, r7 3, then the third kind "
+                "0x7C's spawner 0x080DCD3A) and its +0x20, +0x17 and +0's bit 0x10 set from its spawner: a leaf of another type's "
+                "block (0x080D3xxx), no BN6 routine of its body; copied",
+    0x080DCD84: "an object's +0x20 made 1 where r0 holds one (a leaf in the third kind 0x7C's block, its region's end): no BN6 "
+                "routine of its body; copied",
     0x0800AD54: "the can-move check's kin (its flags against 0x1040, then its panel's type): BN4_CAN_MOVE's body (0x0800AD2A, "
                 "0x5040) with another mask, no BN6 routine of its body; copied, its panel's type read at BN6's +2 (BN4's +0)",
     0x080D97F8: "an object's x moved by r0 toward its side's front (its +0x36 by +0x16): a leaf in the third kind's 0x69's block, "
@@ -125,6 +130,17 @@ FIGHT_FLAGS4 = 0x08007A8C
 FIGHT_GATED = {
     0x32: "ThunderMan's companion's update (0x080C3B42) and his cloud's (0x080DAB26): each gated on bit 0, else the paused "
           "blink alone; thunderman_v1's cloud a step ahead at the battle's offset before (+7 2 against 1 at t1)",
+}
+# ... and where they wait on the battle's time-stop test instead (BN4's 0x08007948: the flags' bit 4, set through the paused
+# opening; BN6's 0x0800A098 the same body), every call of it in his recipe aimed at XV_FIGHT_STOP (bit 4 through the fight's
+# first frame too, src/emu/xvirus_dispatch.c): his objects and his update's calls start with his first own state; his states'
+# calls of it see nothing new, BN6's state runner running none at the fight's first frame. By the Navi's BN4 type, its sites
+STOP4 = 0x08007948
+STOP_GATED = {
+    0x22: "BurnerMan's flames' update (0x080D4280) and his update's two calls before his runner (0x080BDD60): each waits while "
+          "bit 4 is set, so in BN4 they begin at the fight's first frame with his first own state; burnerman_v1's flames' timer "
+          "and his +0x60 a frame ahead in BN6 at the battle's offset before (their +0x20 0x3B against 0x3A at t1, his flames' "
+          "region spawned at BN4's t121 and BN6's)",
 }
 
 # its pools' words that look like addresses and are numbers (bn4_twins.NUMBERS' way)
@@ -416,8 +432,11 @@ def runner_r4(f):
 
 
 def fight_gates(f):
-    """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type): a fight frame later in
-    BN6, with his first own state"""
+    """his objects' gates on the battle's flags aimed at XV_FIGHT_FLAGS (FIGHT_GATED, by his BN4 type), and on its time-stop
+    bit at XV_FIGHT_STOP (STOP_GATED): a fight frame later in BN6, with his first own state"""
+    if f.ty in STOP_GATED and STOP4 in f.calls:
+        f.aim[STOP4] = ('XV_FIGHT_STOP', 'the battle\'s time-stop test, set through the fight\'s first frame too: his objects no '
+                                         'state runs begin with his first own state, a frame into BN6\'s fight (STOP_GATED)')
     if f.ty in FIGHT_GATED and FIGHT_FLAGS4 in f.calls:
         f.aim[FIGHT_FLAGS4] = ('XV_FIGHT_FLAGS', 'the battle\'s flags, bit 0 from the fight\'s second frame: his objects no state '
                                                  'runs begin with his first own state, a frame into BN6\'s fight (FIGHT_GATED)')

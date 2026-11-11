@@ -295,4 +295,20 @@
 #define BN4_SPARK_EFFECTS 0x080D191Cu /* his object's effects by his version (0x19, 0x17, 0x18, 0x18), read at 0x080D18B6 and spawned
                                        * with the other side in r4's second byte at 0x080D18CE */
 
+/* BurnerMan, derived after SparkMan, the third of the other build (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md,
+ * BurnerMan built): found by his type, each checked by the generator against his ROM */
+#define BN4_BURNERMAN     0x080BD9C0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_BURNERMAN]): jump table 0x080BD9D8 (init
+                                       * 0x080BD9E5, update 0x080BDA99, dying BN4_NAVI_DYING), then the after-step; his block to 0x080BE168 */
+#define BN4_BURNERMAN_STATES 0x080BDABCu /* his state table: BN4's generic Navi 1, 2, 4 and 5, his own 0 and 3, his own 6-10 */
+#define BN4_BURNERMAN_TAIL 0x080BDA30u /* his init past his collision's set-up: his two flames set out (0x080BDA5A, r0 0 and 1, r1 his
+                                        * +0x60 and +0x68), each word ORed with 8, +8 4, his update (XnInit.tail) */
+#define BN4_BURNERMAN_FLAMES 0x080BDD5Cu /* his update's keeper of a flame's word (r0 its offset in him): counted up while 0 and time
+                                          * runs, a flame set out again at 0x5A0, its bit 4 by his statuses */
+#define BN4_FLAME         0x080D4158u /* the third kind's 0x39 (his flame): its init 0x080D418A (+0x20 its version * 0x50 + 0x3C),
+                                       * its update 0x080D4264, which waits on the time-stop test (0x08007948) */
+#define BN4_PANEL_PATTERN 0x08009EF6u /* a pattern of panels highlighted: r0, r1 a panel, r2 its pattern, r3 its side (0 forward);
+                                       * each by 0x08009DA0. BN6's 0x0800CCD4 takes its side packed with a direction routine */
+#define BN4_PANEL_PATTERNS 0x080125B0u /* its 24 patterns: pointers to signed (column, row) offsets, 0x7F ending each (BN6's
+                                        * 0x08019B78 the same 24) */
+
 #endif

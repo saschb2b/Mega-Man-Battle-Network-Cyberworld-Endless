@@ -926,12 +926,23 @@ NAVI_ANIM_FIRST = {}   # (each moved Navi's animation, +0x90 and +0x11, at his f
 NAVI_ART_SAME = {}     # (the fight frame's roles' sprite differences at BN4's same fight frame, by frame_diffs: compare clears it)
 
 
+def same_frame(d, fa, fbt):
+    """whether BN6's record of BN4's same fight frame holds d's field as BN4's (frame_diffs of that pair, cached by frame)"""
+    key = fa.fr['t']
+    if key not in NAVI_ART_SAME:
+        NAVI_ART_SAME.clear()
+        NAVI_ART_SAME[key] = {(x.role, x.part, x.off) for x in frame_diffs(fa, fbt)}
+    return (d.role, d.part, d.off) not in NAVI_ART_SAME[key]
+
+
 def navi_opening_art(d, fa, fbt):
-    """legit.json's bn4 navi_opening_art: a moved Navi's sprite state (+0x90 to +0xB3) while his animation is the one his
+    """legit.json's bn4 navi_opening_art: a moved Navi's sprite state (+0x90 to +0xBB, as xdiff_bn4_opening.SPRITE_STATE) while his animation is the one his
     init set before the fight (SparkMan's state 7 writes the same 0 again, 0x080B7A2C): its frames run by the fight's frames,
     as opening_count's count, so compared at the same fight frame: True where BN6's of BN4's t differs from BN4's there in
     none of those bytes of his"""
-    if not (fbt and d.part == 'obj' and 0x90 <= d.off < 0xB4 and navi_role(d.role)):
+    held = {(o['kind'], int(o['type'], 0)) for o in bn4_rule('navi_opening_art').get('objects', [])}
+    other = isinstance(d.role, tuple) and len(d.role) > 1 and (d.role[0], d.role[1]) in held
+    if not (fbt and d.part == 'obj' and 0x90 <= d.off < 0x90 + 0x2C and (navi_role(d.role) or other)):
         return False
     oa = fa.by_role.get(d.role)
     if oa is None:
@@ -939,11 +950,7 @@ def navi_opening_art(d, fa, fbt):
     now = (oa.o8(ANIM), oa.o8(0x11))
     if NAVI_ANIM_FIRST.setdefault(d.role, now) != now:
         return False
-    key = fa.fr['t']
-    if key not in NAVI_ART_SAME:
-        NAVI_ART_SAME.clear()
-        NAVI_ART_SAME[key] = {(x.role, x.part, x.off) for x in frame_diffs(fa, fbt)}
-    return (d.role, d.part, d.off) not in NAVI_ART_SAME[key]
+    return same_frame(d, fa, fbt)
 
 
 def companion_count(d, fa, fbt):

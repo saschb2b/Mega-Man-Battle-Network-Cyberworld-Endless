@@ -162,7 +162,13 @@ typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_
  * init's 0 where BN6's actor init writes 0xFF), then its spawns where `at_end`, its sprite updated (`sprite`, BN6's
  * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order; its panel (+0x12) kept at its +6
  * before its spawns (`home`: AquaMan's, his decision's last panel, which BN6's spawn leaves 0) */
-typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home; } XnInit;
+typedef struct {
+	const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home;
+	XvRef tail;         /* its init's own work past BN6's actor init's (BN4's BurnerMan's flames, from 0x080BDA30), entered at its
+	                       spawn's end after its spawns: the shim pushes `tail_push`'s registers and a return its own pop takes
+	                       (tools/xnavirecipe_bn4_init.py init_tail); addr 0 none */
+	uint8_t tail_push;  /* the low registers its init's prologue pushes with lr (BurnerMan's none, MetalMan's r4 and r7) */
+} XnInit;
 
 /* A summon its game's code makes (BN4's Roll: her MegaMan's state 47 calls BN4_SPAWN_ENEMY, an enemy by its id on a free panel
  * of her side; docs/multirom/bn4-navis.md, Roll built): that call aimed at a shim at `at` (its code room) that picks the panel

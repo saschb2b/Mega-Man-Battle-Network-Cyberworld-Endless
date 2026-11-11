@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-navis.md (BurnerMan built: his init's tail at his spawn's end, a gate a frame longer, his object asking his CurAction, a pattern table BN6's), rom/bn4.md (BurnerMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-navis.md (SparkMan built: a CurAction kept in his object, an effect by version from a table, his object drawn as each engine's MegaMan; the Navis' effects and lists past their ranges), rom/bn4.md (SparkMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-navis.md (TopMan built, the first of the other build: his palette by version, two collision fields, his top drawn with his own sprite, the comparator's no-AI-data masks for him; the third kind's dispatch numbers nearly spent), rom/bn4.md (TopMan derived, new row), re/ledger.json.
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).

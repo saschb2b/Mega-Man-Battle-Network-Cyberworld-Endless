@@ -81,6 +81,8 @@ TWINS = (
     # generator's pair, tools/xchiprecipe_bn4.py TWINS), his MetalGears' obstacle bookkeeping (added, removed, their lifetime)
     (0x08009BAC, 0x0800C9F8, 'metalman'), (0x0800B230, 0x0800F614, 'metalman'), (0x0800B272, 0x0800F656, 'metalman'),
     (0x0800B28E, 0x0800F672, 'metalman'),
+    # BurnerMan's (each body read): a hit's push word set
+    (0x08013444, 0x0801A4D0, 'burnerman'),
 )
 
 # The generic states BN4's families' state tables open with (0-5, as BN5's: tools/xrecipe_family.py GENERIC5), each by
@@ -241,6 +243,8 @@ AUDITS = {
                                      "(+0x24) 0, its last 0xB4 frames blinking: BN6's the same steps with the battle's pause tested "
                                      "(0x0800A03C) after the time stop both test, so its count stands while the battle is paused, "
                                      "where BN4's counts on (BN4's states never run while paused: the families' lag, legit.json)"),
+    (0x08013444, 0x0801A4D0): ('ok', "a hit's push word (r0 | r1 << 8) set in its collision data: the same steps at each layout's "
+                                     "place (BN4_COLL_PUSH +0x74, BN6_COLL_PUSH +0x12)"),
     (0x080B3C1A, 0x0810A952): ('ok', "VolGear's held chip 0x85 used, by Mettaur's routine (its other attack, 0x080E8ADA: from "
                                      "0x080B63F0, past its +0x2A compared with 0xFFFF at 0x080B63BE): dead while it holds none: "
                                      "BN6's family nullsub"),
@@ -351,10 +355,18 @@ NUMBERS = {
     0x04050401: "a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, "
                 "whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word "
                 "too (0x080E4A4C)",
+    0x04050101: "a collision region's spawn word (BurnerMan's flame's: its ldr r4 at 0x080D4006, then its spawner of the third "
+                "kind 0x7C), the form of 0x04050601 and 0x04050301",
     0x08000000: "the flags its hits left it, tested for one bit (SparkMan's object, 0x080D16E8-0x080D16EC: its collision data's "
                 "+0x54, BN6's +0x70): a bit of 0x0A800000 below, a word of both games' collision masks' tables alike",
     0x0A800000: "the flags its hits left it, tested (BN4_COLL_FROM_COLLISION): BN6's bits at FlagsFromCollision (+0x70), "
                 "where the thunder's update tests the same mask, 0xFF800000, in both games",
+}
+# Tables of BN4's ROM a copied routine names whose BN6 twin holds the same entries, its literal given BN6's: address -> (BN6's,
+# why), each compared entry by entry
+DATA_TWINS = {
+    0x080125B0: (0x08019B78, "the panels' patterns (24 pointers to lists of signed column and row offsets, 0x7F ending each), "
+                             "0x08009EF6's and BN6's 0x0800CCD4's: every pattern the same, compared list by list"),
 }
 GET_PANEL = 0x08009ABC   # BN4's getPanel (BN6's 0x0800C90A): back r0 the panel, its type at +0 (BN6's +2)
 # BN4's panel types as BN6's, where a copied routine compares one (bn4.h BN4_PANEL_*; docs/rom/bn4.md, Panel types): a
