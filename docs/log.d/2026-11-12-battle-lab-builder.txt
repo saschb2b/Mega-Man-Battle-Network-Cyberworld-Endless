@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T12:30:00Z
+* **Update**: game/battle-lab.md (Built: the builder's screen, step 3; the encounter groups' page linked), devtools/battle-on-demand.md (`lab open` and `lab all`), engine/ui.md (the builder among ours), code/director.md (`lab.c`, `lab_draw.c`, `lab_text.c`), rom/battle.md (conveyors 9 and 10 push up and down).

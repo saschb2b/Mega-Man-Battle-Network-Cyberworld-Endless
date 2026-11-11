@@ -161,6 +161,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   turns, codes orange 239, 148, 0, a count in a navy cell under each),
   on the card where the Library's words stand. A and B unnamed; the
   orange arrow on the window's edge.
+- The Battle Lab's builder ([the Battle Lab](../game/battle-lab.md), The
+  builder's screen) is Options' kin: its pages FOES, FIELD and STAGE as
+  Options' tabs, the count of foes set in the band's pill's place, the
+  field's panels in STATUS's slot with EQUIP's orange corners on the
+  panel under the cursor, KeyItem's INFORMATION box beside it, the
+  page's list in the window, a value Left and Right turn between Options'
+  small orange arrows, and BATTLE! as NaviCust's RUN! with the green
+  triangle. It takes BN6's Virus Battler's flow: a family picked from
+  the list, then set down on a panel by a cursor.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - BN6's own PET menu in the Net Square carries the one hint of ours on a

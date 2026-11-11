@@ -26,8 +26,13 @@ static struct {
 	Run run;             /* ... the run's, */
 	int backdrop;        /* ... and the layer's battle background */
 	int hp;
+	bool painted;        /* its field is ours: BN6's last field's bytes in the core's copy, */
+	uint8_t field[BN6_FIELD_SIZE], was[BN6_FIELD_SIZE];   /* ... ours and BN6's */
 	LabResult result;
 } L;
+
+#define LAB_FIELD (BN6_FIELD_COUNT - 1)   /* the field of BN6's a painted one takes the place of while its battle is on */
+#define LAB_FIELD_AT (BN6_FIELDS + LAB_FIELD * BN6_FIELD_SIZE)
 
 /* the game's work RAM, hashed (FNV-1a): the proof that it came back */
 static uint32_t ram_hash(void) {
@@ -45,6 +50,21 @@ void lab_battle_ask(const Encounter *e, int backdrop) {
 	L.due = true;
 }
 
+void lab_battle_panels(const uint8_t *panels) {
+	L.painted = panels != NULL;
+	if (!panels) return;
+	/* (a field's bytes: a u32 a row, a nibble a column from the left) */
+	for (int row = 0; row < 3; ++row) {
+		uint32_t w = 0;
+		for (int col = 0; col < 6; ++col) w |= (uint32_t)(panels[row * 6 + col] & 15) << (4 * col);
+		for (int k = 0; k < 4; ++k) L.field[row * 4 + k] = (uint8_t)(w >> (8 * k));
+	}
+}
+
+bool lab_battle_on(void) { return L.due || D.lab; }
+
+const LabResult *lab_battle_result(void) { return &L.result; }
+
 /* The battle begun: the game and the director kept first */
 static bool begin(void) {
 	free(L.state);
@@ -60,7 +80,12 @@ static bool begin(void) {
 	L.fought = false;
 	L.result = (LabResult){ .before = emu_debug_on() ? ram_hash() : 0 };
 	D.lab = true;
-	if (L.ask_backdrop >= 0) encounter_backdrop = L.ask_backdrop;
+	encounter_backdrop = L.ask_backdrop;
+	if (L.painted) {
+		for (uint32_t k = 0; k < BN6_FIELD_SIZE; ++k) L.was[k] = emu_read8(LAB_FIELD_AT + k);
+		emu_write(LAB_FIELD_AT, L.field, sizeof L.field);
+		L.e.field = LAB_FIELD;
+	}
 	emu_battle_watch(0, true);
 	set_encounter(&L.e, true);
 	return true;
@@ -83,13 +108,20 @@ static void over(bool deleted) {
 	run = L.run;
 	D = L.d;
 	encounter_backdrop = L.backdrop;
+	bool field_back = true;
+	if (L.painted) {
+		emu_write(LAB_FIELD_AT, L.was, sizeof L.was);
+		for (uint32_t k = 0; k < BN6_FIELD_SIZE; ++k) field_back &= emu_read8(LAB_FIELD_AT + k) == L.was[k];
+	}
+	L.painted = false;
 	/* (the battle the map was owed is the engine's record again: the test's took its place) */
 	if (D.active && !D.town) set_encounter(&D.next, false);
 	if (emu_debug_on()) L.result.after = ram_hash();
-	if (emu_debug_on() || !back || !run_same)
-		fprintf(stderr, "lab: %s in %d frames, busting level %d, %d HP lost; %d frames of the game %s (RAM %08x, then %08x), the run %s\n",
+	if (emu_debug_on() || !back || !run_same || !field_back)
+		fprintf(stderr, "lab: %s in %d frames, busting level %d, %d HP lost; %d frames of the game %s (RAM %08x, then %08x), the run %s, BN6's field %s\n",
 			L.result.end == LAB_WON ? "won" : L.result.end == LAB_DELETED ? "deleted" : "left", L.result.frames, L.result.bust, L.result.hp_lost,
-			L.result.took, back ? "put back" : "NOT put back", (unsigned)L.result.before, (unsigned)L.result.after, run_same ? "untouched" : "CHANGED, put back");
+			L.result.took, back ? "put back" : "NOT put back", (unsigned)L.result.before, (unsigned)L.result.after, run_same ? "untouched" : "CHANGED, put back",
+			field_back ? "as it was" : "NOT put back");
 }
 
 bool lab_battle_frame(void) {

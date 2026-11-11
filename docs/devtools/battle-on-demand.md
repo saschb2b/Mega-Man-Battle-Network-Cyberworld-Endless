@@ -79,6 +79,12 @@ nothing is left of it: the same run without the step, stopped that many
 frames earlier, ends with the same picture and the same save files (the
 Battle Lab's page, Built).
 
+`0:lab open` opens the Battle Lab's builder instead (its screen over the
+held game: FOES, FIELD, STAGE and BATTLE!), listing the families the
+profile has battle data on; `0:lab all` lists every family the engine
+holds, each in every version, for a look at the screen without a
+profile's history.
+
 The `swap` step (`--input`'s `0:swap 101:300/107:300/10D:300`, play.py's
 `swap 101:300 107:300 10D:300`; `src/dev/swap_dev.c`) fights one Navi
 swapped mid-battle for the next, the Glitch layer's copy
