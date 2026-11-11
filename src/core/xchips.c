@@ -150,9 +150,10 @@ static void codes_of(int id, uint8_t out[4]) {
 }
 
 /* A chip entry as BN6's chip `id` in its code (the stand-in's zenny where
- * there is none, or where it sits out of BN6's battles) */
+ * there is none, where it sits out of BN6's battles, or where the pack has
+ * no entry to count it in: a Program Advance's id, 603-634) */
 static uint16_t reward_as(int id, uint16_t v) {
-	if (!id || chips_sits_out(id)) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);
+	if (!id || chips_sits_out(id) || !bn6_pack_holds((unsigned)id)) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);
 	uint8_t codes[4];
 	codes_of(id, codes);
 	return reward_chip((unsigned)id, (unsigned)xchips_code(codes, (int)(chip9_code(v) & 0x1F)));
