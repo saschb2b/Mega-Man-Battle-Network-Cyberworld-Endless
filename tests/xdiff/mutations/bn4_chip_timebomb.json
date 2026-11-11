@@ -1,0 +1,76 @@
+[
+ {
+  "name": "the bomb's count state BN6's generic 7",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "088F3FA0:08016B73"
+  ],
+  "what": "the state table of TimeBomb's unit's home (XC4_HOMES + 0x4C00 + XC4_HOME_STATES, BN6's layout) with BN6's generic state 7 at its entry 8, where the unit puts the bomb's own count state (BN4 0x080D6D58): the bomb set down never counts nor blasts"
+ },
+ {
+  "name": "the bomb's own state numbered as BN4's",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080D6D46:2006"
+  ],
+  "what": "the bomb's copy's movs r0,#6 (BN4 0x080D6D46), BN4's number of its count state, where the recipe gives BN6's 8: BN6's runner runs its generic state 6 for the bomb"
+ },
+ {
+  "name": "the count's first second shorter",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080D6D8C:2030"
+  ],
+  "what": "the bomb's copy's frames of its count's step (movs r0,#0x3c at BN4 0x080D6D8C) made 0x30: the next tick and the blast 12 frames before BN4's"
+ },
+ {
+  "name": "the placer's draw always the second panel",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "0811188A:2001"
+  ],
+  "what": "the remainder's copy's adds r0,r1,#0 (BN4 0x0811188A, BN4_REMAINDER: the placer's draw modulo the count of its free panels) made movs r0,#1: the second panel of its list always, (4,2), where BN4's draw gives the first, (4,3)"
+ },
+ {
+  "name": "the blasts' effect BN4's number",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080E4A02:00:1"
+  ],
+  "what": "the blasts' kinds' table's copy's kind 1's effect (BN4 0x080E4A02) left 0x00, BN4's number, where the recipe's byte gives 0xC8, BN4's explosion's copy: BN6's own effect 0 over the foe's area"
+ },
+ {
+  "name": "the bomb's set-down sound not played",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080D6C52:46C0",
+   "080D6C54:46C0"
+  ],
+  "what": "the bomb's copy's call that plays its sound as it is set down (BN4 0x080D6C52, sound 0xB0 through its shim) made two nops: no sound 0x1E2 at t34"
+ },
+ {
+  "name": "the count's tick not played",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080D6D92:46C0",
+   "080D6D94:46C0"
+  ],
+  "what": "the bomb's copy's call that plays its count's tick (BN4 0x080D6D92, sound 0xE3 through its shim) made two nops: no sound 0x1E3 at t93"
+ },
+ {
+  "name": "the blasts slower",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "080D6E2A:2108"
+  ],
+  "what": "the bomb's copy's movs r1,#2 (BN4 0x080D6E2A, the frames between two blasts handed to the blasts' object's spawner) made 8: the explosions over the foe's area come four times slower"
+ },
+ {
+  "name": "TimeBomb's row's power another",
+  "spec": "bn4_chip_timebomb",
+  "poke": [
+   "08C05B06:0064"
+  ],
+  "what": "the registry's record of BN4's TimeBomb (529 at CHIPS_RECORDS) with power 100 where BN4's record holds 150: the Mettaur left 150 HP where BN4's leaves it 100"
+ }
+]

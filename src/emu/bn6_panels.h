@@ -172,6 +172,16 @@
 #define BN6_OBJ_VISIBLE       0x02        /* an object's +0: drawn this frame */
 /* ... and what BN5's sea does to a non-Aqua object stepping onto it, which
  * BN6's twin of the step (BN5_PANEL_ARRIVED) lacks: holds it */
+#define BN6_STEP_KIND_READ    0x0800E46Cu /* BN6's movement step (0x0800E468) reading the push's kind (ldrb r0,[r5,#0xf]) after its push
+                                             {r4,lr} and sub sp,#16, where BN5's tests kind 3 (BN5_STEP_PULL), */
+#define BN6_STEP_DIRECTION    0x0800E4C8u /* ... a direction's step (BN5's 0x0800C998): r0 the direction, back r0 and r1 its columns and rows,
+                                             r2 its third byte */
+#define BN6_STEP_PANEL_TAKES  0x0800E5ACu /* ... whether the object may step onto (r0, r1): its flags as the answer (BN5's 0x0800CA2C) */
+#define BN6_SLIDE_ROW_MUL     0x08016822u /* the kind-3 slide's move a frame down a row: muls r2,r0 (r2 BN6_SLIDE_ROWS, r0 the step's row, r5 the
+                                             object), then added to its +0x38 */
+#define BN6_SLIDE_ROWS        0x08016838u /* ... the literal it reads: 0x00060000, 6 pixels (BN5's 8 for its magnet, BN5_PULL_ROWS) */
+#define BN6_DIRECTION_STEPS   0x0800E4E8u /* ... BN6_STEP_DIRECTION's table: a direction's column and row (signed) and a byte, 4 bytes a
+                                             direction 0-4 (1 up, 2 down, 3 back, 4 forward; BN5's numbered otherwise, BN5_DIRECTION_STEPS) */
 #define BN6_PANEL_ARRIVED     0x0801A36Au /* what the panel an object comes to does (BN5's 0x08017156): the conveyors, ice's slide; */
 #define BN6_ARRIVED_TYPE      0x0801A3CEu /* ... cmp r1,#7, the ice's test (r1 the panel's type, r5 the object, r7 its collision data; r0 and
                                              r4 free): where BN5 tests its sea (0xA) too, */

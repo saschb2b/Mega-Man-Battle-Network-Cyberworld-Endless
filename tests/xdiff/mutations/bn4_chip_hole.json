@@ -13,6 +13,6 @@
   "poke": [
    "0800CC60:7203"
   ],
-  "what": "BN6's blink mark (BN6_PANEL_BLINK_SET) storing the side at the panel's +8 (strb r3,[r0,#8]) where it stores the type (strb r2): the Hole's blink kept as 0, where BN4's table keeps 0xB, read as 15"
+  "what": "BN6's blink mark (BN6_PANEL_BLINK_SET) storing the side at the panel's +8 (strb r3,[r0,#8]) where it stores the type (strb r2): the Hole's blink kept as 0, where BN4's table keeps 0xB, read as 16"
  }
 ]

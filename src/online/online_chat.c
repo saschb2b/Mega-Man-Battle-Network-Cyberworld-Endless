@@ -5,7 +5,7 @@
  * which holds the phrases and emotes themselves; A facing
  * another player's MegaMan reads his card, and waves, mutes or blocks him;
  * R, or the pad home, asks to head home; the channel keeper moves MegaMan
- * to the next or last channel. Each option's script sets an event flag of
+ * to the next or last channel. START is BN6's own, its PET (square_pet.h). Each option's script sets an event flag of
  * the Square's (its RAM is thrown away on the way home), acted on as the
  * chat closes. */
 #include "online_chat.h"
@@ -345,11 +345,12 @@ uint32_t online_chat_keys(uint32_t keys) {
 		return 0;
 	}
 	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) { C.l_held = false; return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT); }
-	keys &= ~(uint32_t)(KEY_START | KEY_SELECT);
-	/* (START, the PET's button: the NetPass, BN6's PET staying shut in the Square, whose RAM goes) */
-	if (btn_pressed(BTN_START)) { netpass_screen_open(); return 0; }
+	/* (START is the PET's, BN6's own, square_pet.h; it waits while a NetBattle is asked or a team match is on: the
+	 * MegaMan challenged is the one who fights, and the others are not kept waiting on a folder) */
+	keys &= ~(uint32_t)KEY_SELECT;
+	if (!square_arena_idle() || square_team_on()) keys &= ~(uint32_t)KEY_START;
 	if (btn_pressed(BTN_L)) { C.l_held = true; C.l_used = false; }
-	if (C.l_held) return held_l(keys);
+	if (C.l_held) return held_l(keys) & ~(uint32_t)KEY_START;   /* (the PET waits for L let go) */
 	if (btn_pressed(BTN_R)) {
 		flag_clear(HOME_FLAG);
 		if (talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;

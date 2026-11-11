@@ -472,6 +472,20 @@ def support_object_as_bn6(rec, canon):
             rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
 
 
+ELEMENT_OBJECTS = {}
+
+
+def object_element_as_bn6(rec):
+    """a BN4 fourth-kind object's element read at BN6's place (+0x17 as +0x0E), for the types legit.json's bn4 object_element
+    names, each a chip unit's object whose own spawner stores it and whose recipe gives the store BN6's offset; where BN4's
+    +0x0E holds 0 (the trace lays a first- and a third-kind object's out so itself, src/dev/xdiff_bn4_trace.c obj_segs; a
+    support chip's object's is support_object_as_bn6's)"""
+    if not ELEMENT_OBJECTS:
+        ELEMENT_OBJECTS.update({int(k, 0): v for k, v in bn4_rule('object_element').get('T4', {}).items()} or {-1: None})
+    if rec[NODE + OBJ_TYPE] in ELEMENT_OBJECTS and rec[NODE + OBJ_ELEMENT6] == 0:
+        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
+
+
 OBJ_DAMAGE, OBJ_DAMAGE_KIND, COLL_DAMAGE_KIND, CHIP_POWER, CHIP_DAMAGE_KIND = 0x2C, 0x2E, 0x07, 0x1A, 0x0A
 ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's from 8, tools/bn4_twins.py GENERIC4)
 
@@ -602,11 +616,12 @@ BN6_IN_FIELD_TABLE, BN6_SPOT_TABLE, BN4_SIDES = 0x0800C590, 0x0800C5B8, 0x080092
 BN4_TIMERS_IDLE, BN6_TIMERS_IDLE = (0x3C0, 0x80BE), (0, 0x708)
 # BN4's panel types BN6 numbers otherwise (its type byte, the flags' low nibble, which BN4's flags update ORs the type into,
 # 0x0800A376, as BN6's does, and its blink's type, xd4_panel_blinks): BN4's holy 9 BN6's 5 (BN4_PANEL_HOLY, the same word
-# 0x12010) and its Hole 0xB the engine's 15 (src/emu/xpanels.h XPANEL_HOLE: plain's word in both); a moved chip's kinds' table
+# 0x12010) and its Hole 0xB the engine's 16 (src/emu/xpanels.h XPANEL_HOLE: plain's word in both, its flags' low byte 0x10 in BN6, the type's
+# bit 4 plain's own); a moved chip's kinds' table
 # holds BN6's numbers for them (tools/xchiprecipe_bn4.py TABLES' bytes). And BN4's set type's timer: BN4_SET_PANEL_TYPE gives
 # +0x12 0xBE, which BN4's panel step (BN4_PANEL_STEP) counts on a holding panel (0xA) alone, as it counts 0x80BE nowhere: on
 # any other type both are BN4's idle, BN6's 0x708 (BN6_PANEL_TIMER, written every frame on most types)
-PANEL_TYPES4 = {9: 5, 0xB: 15}
+PANEL_TYPES4 = {9: 5, 0xB: 16}
 PANEL_FLAGS, PANEL_BLINK_TYPE, BN4_PANEL_HOLDING, BN4_SET_TIMER = 0x14, 0x08, 0x0A, 0xBE
 
 
@@ -752,6 +767,8 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
         support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
+    if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
+        object_element_as_bn6(rec)   # (a chip unit's own object's element at BN6's place: legit.json's bn4 object_element)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)

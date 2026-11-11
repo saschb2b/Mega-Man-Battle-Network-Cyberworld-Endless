@@ -35,4 +35,24 @@
                                                 (movs r4,#0 at 0x080C6354) with this table's byte by its kind (+4) in bits 16-23
                                                 (lsls #16; orrs r4,r0), a byte a kind: 0, 4, 1, 2, 3, 3, 0, 0 */
 
+/* MagnetMan (AI 5, ids 0x119-0x11C): his magnet panel, BN5's own (none in BN6; docs/rom/bn5-world.md, BN5's magnet panel) */
+#define BN5_PANEL_MAGNET  5           /* its panel type: magnet (its flags 0x10210, BN5_PANEL_FLAGS_OF's, BN6's conveyors' word; BN6's 5 its holy) */
+#define BN5_MAGNET_ARRIVED 0x0801720Eu /* what a magnet panel does to an object coming onto it (from BN5_PANEL_ARRIVED at 0x080171AC): none
+                                       * where its collision data's +0x38 is not 0, its flags (+0x3C) hold 0x24, or it is the player (+0 2) whose
+                                       * NaviStats byte 0x2C (0x08010DEE) is 5; else its +0x40 ORed with 0x10 (0x08016C5C; BN6's BN6_STRUCK_SLIDE)
+                                       * and the object's +0x0F made 3 (the push's kind) */
+#define BN5_STEP_PULL     0x0800C8D2u /* BN5's movement step (0x0800C8A0) for a push of kind 3 (+0x0F: cmp #3 at 0x0800C8A6), the magnet's
+                                       * pull, which BN6's twin (0x0800E468) dropped: the four directions of BN5_PULL_DIRECTIONS' row by
+                                       * the collision data's +0xC, each its step by 0x0800C998 (BN6's twin 0x0800E4C8), the first whose
+                                       * panel 0x0800CA2C (BN6's 0x0800E5AC) takes, else none; to 0x0800C912 */
+#define BN5_PULL_ROWS     0x08013630u /* the kind-3 slide's step a frame down a row (0x00080000: 8 pixels; its move at 0x08013612, from
+                                       * the literal here), where BN6's (BN6_SLIDE_ROWS) moves its conveyors 6; across a column 10 in both */
+#define BN5_PULL_DIRECTIONS 0x0800C918u /* ... six words (the collision data's +0xC, 0-5), a row of four directions' bytes each, in BN5's
+                                       * numbers: */
+#define BN5_DIRECTION_STEPS 0x0800C9B8u /* ... a direction's step (column, row, a byte; 0x0800C998's table): 1 forward, 2 back, 3 up, 4 down,
+                                       * where BN6's (BN6_DIRECTION_STEPS) are 1 up, 2 down, 3 back, 4 forward */
+#define BN5_MAGNET_LAID   0x080E24CEu /* MagnetMan's state that lays them: sound 0xFC, then type 5 (movs r2,#5 at 0x080E24EE) by
+                                       * setPanelType (0x080E24F0) on each of eight panels, */
+#define BN5_MAGNET_PANELS 0x080E2518u /* ... a byte pair (column, row) each: columns 1, 3, 4, 6 of rows 1 and 3 */
+
 #endif

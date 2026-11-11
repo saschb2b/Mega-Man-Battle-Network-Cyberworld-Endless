@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-11T17:47:07Z
-* **Update**: code/platforms.md (CI on a pull request, new section: what a run cost and where it failed, the eight platform jobs run only where a change reaches them, every push to dev checked to its end), code/tools.md (tools/ci_changes.py).

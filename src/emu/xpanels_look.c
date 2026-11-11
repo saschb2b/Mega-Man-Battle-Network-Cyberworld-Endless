@@ -29,6 +29,7 @@
 
 #include "bn4.h"
 #include "bn5.h"
+#include "bn5_team_protoman.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "lz.h"
@@ -41,7 +42,7 @@
 #define ENTRIES    6                      /* a type's entries: the two sides' three rows */
 #define BN6_TILES_N 498                   /* BN6's panel tiles (BN6_PANEL_TILESET) */
 #define BN5_TILES_N 842                   /* BN5's (BN5_PANEL_TILESET) */
-#define TYPES      16                     /* the grown table's types */
+#define TYPES      XPANEL_TYPES           /* the grown table's types */
 #define TILES_MAX  90                     /* a kind's tiles at most: 15 a panel, its three rows on its two sides */
 #define LZ77_HEAD(n) (0x10u | (uint32_t)(n) << 8)   /* an LZ77 stream's first word: its type, its length */
 #define FRAMES_MAX 16                     /* an animation's frames */
@@ -67,7 +68,7 @@ typedef struct {
 	bool staged;
 } Kind;
 
-enum { KIND_LAVA, KIND_SEA, KIND_HOLE, KINDS };
+enum { KIND_LAVA, KIND_SEA, KIND_MAGNET, KIND_HOLE, KINDS };
 
 static Kind kinds[KINDS] = {
 	{ XROM_BN5_COLONEL_US, BN5_PANEL_LAVA, XPANEL_LAVA, BN5_PANEL_TILES, BN5_PANEL_TILESET, BN5_TILES_N, { 2, 6 }, 6, 7, 5,
@@ -75,6 +76,11 @@ static Kind kinds[KINDS] = {
 		0, 0, { 0 }, { { { 0 } } }, 0, false },
 	{ XROM_BN5_COLONEL_US, BN5_PANEL_SEA, XPANEL_SEA, BN5_PANEL_TILES, BN5_PANEL_TILESET, BN5_TILES_N, { 3, 7 }, 11, 12, 4,
 		BN6_PANEL_CONVEYOR, BN6_PANEL_CONVEYOR_END, 90, { 0, 1, 2, 3, 4, 5, 0xFF, 7, 8, 9, 0xFF, 12, 13, 14, 15, 0xFF },
+		0, 0, { 0 }, { { { 0 } } }, 0, false },
+	/* (the magnet panel, MagnetMan's, in its holy's palettes 4 and 8 as in BN5, its own colours 10-13 at BN6's 10-13: BN6's
+	 * holy draws 1-10, 14 and 15 of them, BN5's magnet 1-5 and 10-13, so its four over BN6's where no holy panel is shown) */
+	{ XROM_BN5_COLONEL_US, BN5_PANEL_MAGNET, XPANEL_MAGNET, BN5_PANEL_TILES, BN5_PANEL_TILESET, BN5_TILES_N, { 4, 8 }, 10, 10, 4,
+		BN6_PANEL_HOLY, BN6_PANEL_HOLY, 54, { 0, 1, 2, 3, 4, 5, 0xFF, 0xFF, 0xFF, 0xFF, 10, 11, 12, 13, 0xFF, 0xFF },
 		0, 0, { 0 }, { { { 0 } } }, 0, false },
 	/* (BN4's 1-5 its plain panel's rim, BN6's 1-5; its 6-10 the face, BN6's 7-11; its 13-15 the hole's dark) */
 	{ XROM_BN4_RED_SUN_US, BN4_PANEL_HOLE, XPANEL_HOLE, BN4_PANEL_TILES, BN4_PANEL_TILESET, BN4_PANEL_TILES_N, { 1, 5 }, 13, 13, 3,
@@ -84,6 +90,7 @@ static Kind kinds[KINDS] = {
 
 _Static_assert(TYPES * ENTRIES * ENTRY == XP_TILES_SIZE && XP_TILES + XP_TILES_SIZE <= XP_END, "the grown tile table past its room");
 _Static_assert(XPANEL_HOLE < TYPES, "the Hole past the grown table");
+_Static_assert(BN6_TILE_PANELS + BN6_TILES_N + 90 + 90 + 54 + 54 <= 0x400, "the kinds' tiles past a battle's free ones (0x295-0x3FF)");
 
 static struct {
 	uint8_t table[TYPES * ENTRIES * ENTRY];

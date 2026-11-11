@@ -11,7 +11,7 @@
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
- "about": "BN4's DrkLine * (216, a dark chip) by a dark MegaMan (karma4 0) against the registry's row 528 (the same unit, the changer's kind 0xA): used at fight frame 30, at t34 his row's six panels, both sides', Holes in both (BN4's 0xB, BN6's 15), each blinked first (the changer's 0x106 a panel, at slot 0x281).",
+ "about": "BN4's DrkLine * (216, a dark chip) by a dark MegaMan (karma4 0) against the registry's row 528 (the same unit, the changer's kind 0xA): used at fight frame 30, at t34 his row's six panels, both sides', Holes in both (BN4's 0xB, BN6's 16), each blinked first (the changer's 0x106 a panel, at slot 0x281).",
  "folder4": [
   "34D8"
  ],

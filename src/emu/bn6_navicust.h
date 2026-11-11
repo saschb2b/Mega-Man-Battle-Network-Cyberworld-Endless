@@ -36,6 +36,10 @@
 #define BN6_NCMENU_LIST_NEXT   0x08137C3Eu /* ... `cmp r4, r0` after `adds r4, #1` and the bound's load: on to BN6_NCMENU_LIST_LOOP while r4 <= BN6_NCMENU_RUN */
 #define BN6_NCMENU_LIST_DONE   0x08137C42u /* ... the loop's end */
 #define BN6_NCMENU_LIST_BOUND  0x08137CACu /* ... the word that holds its bound, BN6_NCMENU_RUN: this loop's alone */
+#define BN6_NAVICUST_LINE      0x02000090u /* the programs on the command line as the last RUN found them, a byte each (program * 4 + colour),
+                                              8 used (bn6f unk_2000090: sub_813676C copies them to the screen's list at 0x02022B70, sub_813677C
+                                              back, sub_813C324 clears them): SuprArmr run on the line wrote 4 (docs/rom/navicust.md) */
+#define BN6_NAVICUST_LINE_BYTES 16          /* ... the block's bytes */
 #define BN6_TOOLKIT_NC_GRID    0x58        /* eToolkit +0x58: the NaviCust's board (BN6_NAVICUST_GRID) */
 #define BN6_NCP_PLACED_COLUMN  3           /* a placed program's entry (BN6_NAVICUST_PLACED, 8 bytes): +0 u16 its variant, its column, */
 #define BN6_NCP_PLACED_ROW     4           /* ... its row: its shape's seven by seven lands three left of and above them */

@@ -12,8 +12,8 @@
  * - an Aqua hit cools lava, an Elec hit on what stands on sea deals its
  *   damage twice, and a chip's lava or sea runs out after BN5's frames;
  * - how they look (xpanels_look.c): BN5's tiles and colours.
- * BN4's Hole (BN4_PANEL_HOLE; docs/multirom/bn4-chips.md, call 8) at the
- * type after them: plain's flags, BN4's tiles and colours, and nothing it
+ * BN5's magnet panel (MagnetMan's) at 15, and BN4's Hole (BN4_PANEL_HOLE;
+ * docs/multirom/bn4-chips.md, call 8) at the type after it: plain's flags, BN4's tiles and colours, and nothing it
  * does to what stands on it (BN4's one rule for it, an object of a side
  * whose karma is light making it plain, has no karma to read in BN6).
  * Whichever of the two ROMs comes first grows the tables; the other adds
@@ -23,10 +23,16 @@
 #define CW_XPANELS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define XPANEL_LAVA 13   /* BN6_PANEL_TYPE: BN5's lava (BN5_PANEL_LAVA), at BN6's first free type (BN6_PANEL_TYPES) */
 #define XPANEL_SEA  14   /* ... BN5's sea (BN5_PANEL_SEA) */
-#define XPANEL_HOLE 15   /* ... BN4's Hole (BN4_PANEL_HOLE), which a DS Navi chip's power counts (BN6_PANEL_COUNT with it) */
+#define XPANEL_MAGNET 15 /* ... BN5's magnet panel (BN5_PANEL_MAGNET), MagnetMan's: its flags, its push and its look (no field
+                          * of BN5's is translated with it, xfields.c) */
+#define XPANEL_HOLE 16   /* ... BN4's Hole (BN4_PANEL_HOLE), which a DS Navi chip's power counts (BN6_PANEL_COUNT with it): past
+                          * BN6's 0-15, its flags update ORing the type into bits 0-4, so 16-31 always give bit 4, which plain's
+                          * word, the Hole's, holds anyway (docs/rom/battle.md, BN6's panel types and who holds each) */
+#define XPANEL_TYPES 17  /* the grown tables' types (flags, tiles): BN6's 13 and the four after */
 
 /* Into the core's copy as it starts, where BN5's ROM is read (xfields.c
  * calls it before it translates a field) and where BN4's is (xvirus.c):
@@ -35,5 +41,8 @@
 void xpanels_install(int xrom);
 /* Whether BN6's engine has lava and sea now */
 bool xpanels_ready(void);
+/* An object coming onto a magnet panel (BN5_MAGNET_ARRIVED), from BN6's arrival test (BN6_ARRIVED_TYPE, xsea.c's hook): `obj`
+ * the object, `coll` its collision data; pushed as BN5 pushes it */
+void xpanels_magnet_arrived(uint32_t obj, uint32_t coll);
 
 #endif

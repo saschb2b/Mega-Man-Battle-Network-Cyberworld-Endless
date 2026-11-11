@@ -1,6 +1,7 @@
 # After each push to dev: the files tools write from the tree (docs/re's
-# status, docs/symbols and docs/rom/symbols.md's numbers, the voice catalog;
-# tools/generated.py) written anew and committed, so no pull request carries
+# status, docs/symbols and docs/rom/symbols.md's numbers, the voice catalog,
+# the knowledge base's log folded from its entries; tools/generated.py)
+# written anew and committed, so no pull request carries
 # them and no two conflict there (docs/project/merging.md). Needs no ROM. Its
 # own push starts no workflow, as GitHub's token's pushes never do.
 name: Generated files
@@ -35,7 +36,7 @@ jobs:
             git reset --quiet --hard FETCH_HEAD
             python3 tools/generated.py write
             python3 tools/generated.py check --strict
-            git add -A docs/re docs/symbols docs/rom/symbols.md docs/voice/catalog.json
+            git add -A docs   # (all the tools write lies there)
             if git diff --cached --quiet; then
               echo "in step already"
               exit 0

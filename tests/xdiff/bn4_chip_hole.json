@@ -11,7 +11,7 @@
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
- "about": "BN4's Hole * (82, a dark chip) by a dark MegaMan (karma4 0, his dark palette BN4's own) against the registry's row 527 (the dark panels' unit, BN4's support 0x0B with 0x3B, the panel changer moved once): picked on the first Custom screen and used at fight frame 30. At t34 the panel ahead of him (3,2) is a Hole in both, BN4's type 0xB and BN6's 15 (XPANEL_HOLE: the changer's kinds' table copied with its types in BN6's numbers), its flags, blink and timers alike read in BN6's terms; the changer's sound 0x105 at slot 0x280 (legit.json's bn4 sounds).",
+ "about": "BN4's Hole * (82, a dark chip) by a dark MegaMan (karma4 0, his dark palette BN4's own) against the registry's row 527 (the dark panels' unit, BN4's support 0x0B with 0x3B, the panel changer moved once): picked on the first Custom screen and used at fight frame 30. At t34 the panel ahead of him (3,2) is a Hole in both, BN4's type 0xB and BN6's 16 (XPANEL_HOLE: the changer's kinds' table copied with its types in BN6's numbers), its flags, blink and timers alike read in BN6's terms; the changer's sound 0x105 at slot 0x280 (legit.json's bn4 sounds).",
  "folder4": [
   "3452"
  ],

@@ -1,6 +1,7 @@
 {
  "why": "A third-kind object both engines run by the actors' state runner (BN4 0x08013F3E, BN6 0x0801B394, each with the object's own state table): its CurAction (+9) numbers its own states from 6 in BN4 and from 8 in BN6, as a first-kind object's does (BN4's generic states 0-5, BN6's 0-7: tools/bn4_twins.py GENERIC4), so BN4's from 6 are read two higher. By type, each with its two state tables.",
  "T3": {
-  "0x59": "RockCube's cube: its update calls the runner with its table (BN4 0x080D8AA6: ldr r0,=0x080D8ABC, seven states, its own the first, the third and the seventh; BN6 0x080D12A2: ldr r0,=0x080D12B8, nine, its own the first, the third and the ninth). bn4_chip_rockcube t34: +9 6 in BN4's and 8 in BN6's, the cube standing"
+  "0x59": "RockCube's cube: its update calls the runner with its table (BN4 0x080D8AA6: ldr r0,=0x080D8ABC, seven states, its own the first, the third and the seventh; BN6 0x080D12A2: ldr r0,=0x080D12B8, nine, its own the first, the third and the ninth). bn4_chip_rockcube t34: +9 6 in BN4's and 8 in BN6's, the cube standing",
+  "0x4B": "TimeBomb's bomb, moved with its unit: its update calls the runner with its table (BN4 0x080D6CB6: ldr r0,=0x080D6CCC, seven states, its own the first, the third and the seventh; BN6: the unit's table in BN6's layout at its home's XC4_HOME_STATES, nine, its own the first, the third and the ninth, the copy's movs r0,#6 at 0x080D6D46 made 8 by the recipe's immediate). bn4_chip_timebomb t34: +9 6 in BN4's and 8 in BN6's, the bomb counting"
  }
 }

@@ -81,11 +81,10 @@ int xterritory_like(int biome);
  * from_pick the record's offset in its ROM. False where none can be
  * (*out unchanged). */
 bool xterritory_encounter(int depth, int area, int kind, Encounter *out);
-/* The virus families (a bit each, by BN6's AI index: the families moved
- * into the engine from 32) territory `area`'s plain random battles can
+/* The virus families (foes.h's FamilyMask) territory `area`'s plain random battles can
  * hold at `depth`, as xterritory_encounter picks them; and into weak[f]
  * (NULL: none) a bit per ELEM_* each family is weak to as they field it.
  * No random numbers drawn. */
-uint64_t xterritory_families(int depth, int area, uint16_t weak[64]);
+FamilyMask xterritory_families(int depth, int area, uint16_t weak[64]);
 
 #endif
