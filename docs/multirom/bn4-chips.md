@@ -1368,8 +1368,9 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     Through the coordinating session the owner was first quoted with
     "Move as BN4 has them", on a recommendation to move the three and
     keep them out of the reward pools; asked directly afterwards, with
-    the measurement before him, he answered "Leave them out". The later,
-    direct answer is the one recorded here.
+    the measurement before him, he answered "Leave them out", and
+    confirmed it the same day (11 November 2026) when asked which of
+    the two stands.
 
 Open:
 
