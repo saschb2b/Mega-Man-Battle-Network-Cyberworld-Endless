@@ -1,4 +1,4 @@
 {
   "date": "2026-11-11",
-  "what": "The sweep's code located and moved (bn4_chips.h BN4_SWEEP 0x080DF98C, BN4_T3_SWEEP 0x93, BN4_T3_GEYSER 0x92 with BN4_GEYSER_KINDS 0x080DF674, BN4_T3_BOLT 0x8E; docs/rom/bn4.md): Ligtnin1-3 play, AquaUp1-3 and GreenWd1-3 wait for a spec with a cracked or a grass panel."
+  "what": "The sweep's code located and moved (bn4_chips.h BN4_SWEEP 0x080DF98C, BN4_T3_SWEEP 0x93, BN4_T3_GEYSER 0x92 with BN4_GEYSER_KINDS 0x080DF674, BN4_T3_LIGTNIN_BOLT 0x8E; docs/rom/bn4.md): Ligtnin1-3 play, AquaUp1-3 and GreenWd1-3 wait for a spec with a cracked or a grass panel."
 }

@@ -291,7 +291,7 @@
                                            * 0x080DF7D0): its kind's row of BN4_GEYSER_KINDS, three animations by its frames */
 #define BN4_GEYSER_KINDS      0x080DF674u /* ... its two kinds, 12 bytes each: its sprite's list's offset and number (list 3's 0x25, 0x0B), its
                                            * animations and their frames, its collision's argument, and its sound, a u16 (0x120, 0x13E) */
-#define BN4_T3_BOLT           0x8E        /* Ligtnin's bolt, the third kind's (0x080DEFEC to 0x080DF128, its spawner 0x080DF108): it strikes
+#define BN4_T3_LIGTNIN_BOLT   0x8E        /* Ligtnin's bolt, the third kind's (0x080DEFEC to 0x080DF128, its spawner 0x080DF108): it strikes
                                            * its panel and the eight around it in its first frame (its collision's +1 0x10), a spark (effect
                                            * 0x6B) on each of the eight in turn; sprite list 5's 0x14, sound 0x143 */
 #define BN4_T3_SPRITE_STEP    0x08014446u /* a third-kind object's sprite each frame (BN6's 0x0801BBF4; the first kind's 0x080143FC) */
