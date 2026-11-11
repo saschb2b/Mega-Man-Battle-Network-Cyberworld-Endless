@@ -1700,6 +1700,10 @@ def megaman_items(spec, game):
         parts.append('deck6=' + ','.join(spec['deck6']))
     if spec.get('karma4') is not None:   # (MegaMan's karma in BN4's battle: a dark chip's spec, bn4_chips.h's BN4_CHIP_ALIGN)
         parts.append(f'karma4={spec["karma4"]}')
+    if spec.get('souls4'):   # (the Souls BN4's MegaMan holds, each past BN4's gate: xd4_souls_put; a Soul's spec)
+        parts.append(f'souls4={spec["souls4"]}')
+    if game == 'bn4:bn6' and spec.get('souls6'):   # (... and BN6's, its Souls installed over the proxy form: soulunite.h)
+        parts.append(f'souls6={spec["souls6"]}')
     return parts
 
 
